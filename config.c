@@ -26,9 +26,6 @@ static unsigned int get_numlockmask(Display *);
 /** Main configuration object for parsing*/
 config_t jdwmlibconf;
 
-/** Current bar position */
-int bpos;
-
 /** Link a name to a function */
 typedef struct
 {
@@ -281,7 +278,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
     else if(!strncmp(tmp, "BarOff", 6))
         jdwmconf->bpos = BarOff;
 
-    bpos = jdwmconf->bpos;
+    jdwmconf->current_bpos = jdwmconf->bpos;
 
     /* borderpx */
     jdwmconf->borderpx = config_lookup_int(&jdwmlibconf, "jdwm.borderpx");

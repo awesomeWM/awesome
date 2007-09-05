@@ -20,7 +20,6 @@
 #include "tag.h"
 
 /* extern */
-extern int bpos;                /* bar position */
 extern void (*handler[LASTEvent]) (XEvent *, jdwm_config *);   /* event handler */
 
 int screen, sx, sy, sw, sh, wax, way, waw, wah;
@@ -201,7 +200,7 @@ setup(Display *disp, jdwm_config *jdwmconf)
                            DefaultVisual(disp, screen),
                            CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, barwin, cursor[CurNormal]);
-    updatebarpos(disp);
+    updatebarpos(disp, jdwmconf->current_bpos);
     XMapRaised(disp, barwin);
     /* pixmap for everything */
     dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), sw, bh, DefaultDepth(disp, screen));
@@ -236,7 +235,7 @@ uicb_quit(Display *disp __attribute__ ((unused)),
 }
 
 void
-updatebarpos(Display *disp)
+updatebarpos(Display *disp, int bpos)
 {
     XEvent ev;
 

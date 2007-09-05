@@ -20,7 +20,6 @@ static char prop[128];
 /* extern */
 extern Layout ** taglayouts;
 extern int wax, way, wah, waw;  /* windowarea geometry */
-extern int bpos;                /* bar position */
 extern Window barwin;
 extern Client *clients, *sel;   /* global client list */
 extern Bool *seltags;
@@ -201,11 +200,11 @@ uicb_togglebar(Display *disp,
                jdwm_config *jdwmconf,
                const char *arg __attribute__ ((unused)))
 {
-    if(bpos == BarOff)
-        bpos = (jdwmconf->bpos == BarOff) ? BarTop : jdwmconf->bpos;
+    if(jdwmconf->current_bpos == BarOff)
+        jdwmconf->current_bpos = (jdwmconf->bpos == BarOff) ? BarTop : jdwmconf->bpos;
     else
-        bpos = BarOff;
-    updatebarpos(disp);
+        jdwmconf->current_bpos = BarOff;
+    updatebarpos(disp, jdwmconf->current_bpos);
     arrange(disp, jdwmconf);
 }
 

@@ -244,7 +244,7 @@ configurenotify(XEvent * e, jdwm_config *jdwmconf)
         XFreePixmap(e->xany.display, dc.drawable);
         dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), sw, bh, DefaultDepth(e->xany.display, screen));
         XResizeWindow(e->xany.display, barwin, sw, bh);
-        updatebarpos(e->xany.display);
+        updatebarpos(e->xany.display, jdwmconf->current_bpos);
         arrange(e->xany.display, jdwmconf);
     }
 }

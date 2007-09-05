@@ -79,6 +79,8 @@ struct jdwm_config
     unsigned int numlockmask;
     /** Bar position */
     int bpos;
+    /** Current bar position */
+    int current_bpos;
     /** Border size */
     int borderpx;
     /** Master width factor */
