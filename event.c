@@ -123,7 +123,7 @@ resizemouse(Client * c, jdwm_config *jdwmconf)
 }
 
 static void
-buttonpress(XEvent * e, jdwm_config *jdwmconf)
+handle_event_buttonpress(XEvent * e, jdwm_config *jdwmconf)
 {
     int i, x;
     Client *c;
@@ -185,7 +185,7 @@ buttonpress(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((unused)))
+handle_event_configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((unused)))
 {
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
@@ -233,7 +233,7 @@ configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((unused)))
 }
 
 static void
-configurenotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
 {
     XConfigureEvent *ev = &e->xconfigure;
 
@@ -250,7 +250,7 @@ configurenotify(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-destroynotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_destroynotify(XEvent * e, jdwm_config *jdwmconf)
 {
     Client *c;
     XDestroyWindowEvent *ev = &e->xdestroywindow;
@@ -260,7 +260,7 @@ destroynotify(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-enternotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_enternotify(XEvent * e, jdwm_config *jdwmconf)
 {
     Client *c;
     XCrossingEvent *ev = &e->xcrossing;
@@ -277,7 +277,7 @@ enternotify(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-expose(XEvent * e, jdwm_config *jdwmconf)
+handle_event_expose(XEvent * e, jdwm_config *jdwmconf)
 {
     XExposeEvent *ev = &e->xexpose;
 
@@ -286,7 +286,7 @@ expose(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-keypress(XEvent * e, jdwm_config *jdwmconf)
+handle_event_keypress(XEvent * e, jdwm_config *jdwmconf)
 {
     int i;
     KeySym keysym;
@@ -300,7 +300,7 @@ keypress(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-leavenotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_leavenotify(XEvent * e, jdwm_config *jdwmconf)
 {
     XCrossingEvent *ev = &e->xcrossing;
 
@@ -312,7 +312,7 @@ leavenotify(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-mappingnotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_mappingnotify(XEvent * e, jdwm_config *jdwmconf)
 {
     XMappingEvent *ev = &e->xmapping;
 
@@ -322,7 +322,7 @@ mappingnotify(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-maprequest(XEvent * e, jdwm_config *jdwmconf)
+handle_event_maprequest(XEvent * e, jdwm_config *jdwmconf)
 {
     static XWindowAttributes wa;
     XMapRequestEvent *ev = &e->xmaprequest;
@@ -336,7 +336,7 @@ maprequest(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-propertynotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_propertynotify(XEvent * e, jdwm_config *jdwmconf)
 {
     Client *c;
     Window trans;
@@ -369,7 +369,7 @@ propertynotify(XEvent * e, jdwm_config *jdwmconf)
 }
 
 static void
-unmapnotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_unmapnotify(XEvent * e, jdwm_config *jdwmconf)
 {
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
@@ -382,16 +382,19 @@ unmapnotify(XEvent * e, jdwm_config *jdwmconf)
 
 void (*handler[LASTEvent]) (XEvent *, jdwm_config *) =
 {
-[ButtonPress] = buttonpress,
-        [ConfigureRequest] = configurerequest,
-        [ConfigureNotify] = configurenotify,
-        [DestroyNotify] = destroynotify,
-        [EnterNotify] = enternotify,
-        [LeaveNotify] = leavenotify,
-        [Expose] = expose,
-        [KeyPress] = keypress,
-        [MappingNotify] = mappingnotify,
-        [MapRequest] = maprequest,[PropertyNotify] = propertynotify,[UnmapNotify] = unmapnotify};
+    [ButtonPress] = handle_event_buttonpress,
+    [ConfigureRequest] = handle_event_configurerequest,
+    [ConfigureNotify] = handle_event_configurenotify,
+    [DestroyNotify] = handle_event_destroynotify,
+    [EnterNotify] = handle_event_enternotify,
+    [LeaveNotify] = handle_event_leavenotify,
+    [Expose] = handle_event_expose,
+    [KeyPress] = handle_event_keypress,
+    [MappingNotify] = handle_event_mappingnotify,
+    [MapRequest] = handle_event_maprequest,
+    [PropertyNotify] = handle_event_propertynotify,
+    [UnmapNotify] = handle_event_unmapnotify
+};
 
 void
 grabkeys(Display *disp, jdwm_config *jdwmconf)
