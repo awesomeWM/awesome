@@ -1,0 +1,111 @@
+# Configuration file for jdwm
+
+jdwm:
+{
+    barpos = "BarTop";
+    borderpx = 1;
+    snap = 8;
+    mwfact = 0.6;
+    font = "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*";
+    tags = ( "1", "2", "3", "4", "5", "6", "7", "8", "9" );
+    normal_border_color = "#dddddd";
+    normal_bg_color = "#000000";
+    normal_fg_color = "#ffffff";
+    focus_border_color = "#008b8b";
+    focus_bg_color = "#008b8b";
+    focus_fg_color = "#ffffff";
+
+    layouts = (("[]=", "tile"),
+             ("=[]", "tileleft"),
+             ("+++", "grid"),
+#             ("(@)", "spiral"),
+             ("[\]", "dwindle"),
+             ("><>", "floating"),
+             ("TTT", "bstack"),
+             ("===", "bstackportrait")
+            );
+
+    nmaster = 2;
+
+    rules = ({ name = "Gimp";
+               tags = "";
+               float = true;
+             },
+             { name = "MPlayer";
+               tags = "";
+               float = true;
+             },
+             { name = "Acroread";
+               tags = "";
+               float = true;
+             },
+             { name = "VLC";
+               tags = "";
+               float = true;
+             },
+             { name = "pinentry";
+               tags = "";
+               float = true;
+             });
+    
+    modkey = "Mod4";
+
+    keys = ((("Mod4"), "Return", "spawn", "exec urxvt"),
+            (("Mod4"), "space", "setlayout"),
+            (("Mod4"), "b", "togglebar"),
+            (("Mod4"), "j", "focusnext"),
+            (("Mod4"), "k", "focusprev"),
+            (("Mod4"), "h", "setmwfact", "-0.05"),
+            (("Mod4"), "l", "setmwfact", "+0.05"),
+            (("Mod4", "Shift"), "h", "incnmaster", "1"),
+            (("Mod4", "Shift"), "l", "incnmaster", "-1"),
+            (("Mod4"), "m", "togglemax"),
+            (("Mod4"), "Escape", "viewprevtags"),
+            (("Mod4", "Control"), "Return", "zoom"),
+            (("Mod4", "Control"), "space", "togglefloating"),
+            (("Mod4", "Shift"), "c", "killclient"),
+            (("Mod4", "Shift"), "q", "quit"),
+            (("Mod4", "Shift"), "r", "reload"),
+            (("Mod4"), "0", "view"),
+            (("Mod4"), "1", "view", "1"),
+            (("Mod4"), "2", "view", "2"),
+            (("Mod4"), "3", "view", "3"),
+            (("Mod4"), "4", "view", "4"),
+            (("Mod4"), "5", "view", "5"),
+            (("Mod4"), "6", "view", "6"),
+            (("Mod4"), "7", "view", "7"),
+            (("Mod4"), "8", "view", "8"),
+            (("Mod4"), "9", "view", "9"),
+            (("Mod4", "Control"), "0", "toggleview"),
+            (("Mod4", "Control"), "1", "toggleview", "1"),
+            (("Mod4", "Control"), "2", "toggleview", "2"),
+            (("Mod4", "Control"), "3", "toggleview", "3"),
+            (("Mod4", "Control"), "4", "toggleview", "4"),
+            (("Mod4", "Control"), "5", "toggleview", "5"),
+            (("Mod4", "Control"), "6", "toggleview", "6"),
+            (("Mod4", "Control"), "7", "toggleview", "7"),
+            (("Mod4", "Control"), "8", "toggleview", "8"),
+            (("Mod4", "Control"), "9", "toggleview", "9"),
+            (("Mod4", "Control"), "0", "toggleview"),
+            (("Mod4", "Shift"), "0", "tag"),
+            (("Mod4", "Shift"), "1", "tag", "1"),
+            (("Mod4", "Shift"), "2", "tag", "2"),
+            (("Mod4", "Shift"), "3", "tag", "3"),
+            (("Mod4", "Shift"), "4", "tag", "4"),
+            (("Mod4", "Shift"), "5", "tag", "5"),
+            (("Mod4", "Shift"), "6", "tag", "6"),
+            (("Mod4", "Shift"), "7", "tag", "7"),
+            (("Mod4", "Shift"), "8", "tag", "8"),
+            (("Mod4", "Shift"), "9", "tag", "9"),
+            (("Mod4", "Shift", "Control"), "0", "toggletag"),
+            (("Mod4", "Shift", "Control"), "1", "toggletag", "1"),
+            (("Mod4", "Shift", "Control"), "2", "toggletag", "2"),
+            (("Mod4", "Shift", "Control"), "3", "toggletag", "3"),
+            (("Mod4", "Shift", "Control"), "4", "toggletag", "4"),
+            (("Mod4", "Shift", "Control"), "5", "toggletag", "5"),
+            (("Mod4", "Shift", "Control"), "6", "toggletag", "6"),
+            (("Mod4", "Shift", "Control"), "7", "toggletag", "7"),
+            (("Mod4", "Shift", "Control"), "8", "toggletag", "8"),
+            (("Mod4", "Shift", "Control"), "9", "toggletag", "9")
+           );
+};
