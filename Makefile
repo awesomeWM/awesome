@@ -29,6 +29,7 @@ jdwm: ${OBJ}
 clean:
 	@echo cleaning
 	@rm -f jdwm ${OBJ} jdwm-${VERSION}.tar.gz
+	@rm -rf doc
 
 dist: clean
 	@echo creating dist tarball
