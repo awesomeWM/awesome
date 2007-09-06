@@ -227,8 +227,8 @@ void
 focus(Display *disp, DC *drawcontext, Client * c, jdwm_config *jdwmconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
-    if((!c && selscreen) || (c && !isvisible(c, jdwmconf->ntags)))
-        for(c = stack; c && !isvisible(c, jdwmconf->ntags); c = c->snext);
+    if((!c && selscreen) || (c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags)))
+        for(c = stack; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->snext);
     
     /* if a client was selected but it's not the current client, unfocus it */
     if(sel && sel != c)

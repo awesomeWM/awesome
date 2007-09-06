@@ -212,7 +212,7 @@ handle_event_configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((
                 c->y = sh / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 configure(c);
-            if(isvisible(c, jdwmconf->ntags))
+            if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
                 XMoveResizeWindow(e->xany.display, c->win, c->x, c->y, c->w, c->h);
         }
         else

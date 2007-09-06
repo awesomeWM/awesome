@@ -12,7 +12,7 @@ floating(Display *disp __attribute__ ((unused)), jdwm_config *jdwmconf)
     Client *c;
 
     for(c = clients; c; c = c->next)
-        if(isvisible(c, jdwmconf->ntags))
+        if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
         {
             if(c->ftview)
             {

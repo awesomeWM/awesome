@@ -10,7 +10,7 @@
 #include "tag.h"
 
 extern Client *sel;             /* global client list */
-extern Bool *seltags, *prevtags;
+extern Bool *prevtags;
 extern Layout ** taglayouts;
 
 static Regs *regs = NULL;
@@ -65,7 +65,7 @@ applyrules(Client * c, jdwm_config *jdwmconf)
         XFree(ch.res_name);
     if(!matched)
         for(i = 0; i < jdwmconf->ntags; i++)
-            c->tags[i] = seltags[i];
+            c->tags[i] = jdwmconf->selected_tags[i];
 }
 
 void
@@ -99,18 +99,20 @@ compileregs(jdwm_config * jdwmconf)
 }
 
 
-/** Returns True if a client is visible on
- * one of the currently selected tag, false otherwise.
+/** Returns True if a client is tagged
+ * with one of the tags
  * \param c Client
+ * \param tags tag to check
+ * \param ntags number of tags in *tags
  * \return True or False
  */
 Bool
-isvisible(Client * c, int ntags)
+isvisible(Client * c, Bool * tags, int ntags)
 {
     int i;
 
     for(i = 0; i < ntags; i++)
-        if(c->tags[i] && seltags[i])
+        if(c->tags[i] && tags[i])
             return True;
     return False;
 }
@@ -203,10 +205,10 @@ uicb_toggleview(Display *disp,
     int j;
 
     i = idxoftag(arg, jdwmconf->tags, jdwmconf->ntags);
-    seltags[i] = !seltags[i];
-    for(j = 0; j < jdwmconf->ntags && !seltags[j]; j++);
+    jdwmconf->selected_tags[i] = !jdwmconf->selected_tags[i];
+    for(j = 0; j < jdwmconf->ntags && !jdwmconf->selected_tags[j]; j++);
     if(j == jdwmconf->ntags)
-        seltags[i] = True;      /* cannot toggle last view */
+        jdwmconf->selected_tags[i] = True;      /* cannot toggle last view */
     savejdwmprops(disp, jdwmconf);
     arrange(disp, jdwmconf);
 }
@@ -225,13 +227,13 @@ uicb_view(Display *disp,
 
     for(i = 0; i < jdwmconf->ntags; i++)
     {
-        prevtags[i] = seltags[i];
-        seltags[i] = arg == NULL;
+        prevtags[i] = jdwmconf->selected_tags[i];
+        jdwmconf->selected_tags[i] = arg == NULL;
     }
     i = idxoftag(arg, jdwmconf->tags, jdwmconf->ntags);
     if(i >= 0 && i < jdwmconf->ntags)
     {
-        seltags[i] = True;
+        jdwmconf->selected_tags[i] = True;
         jdwmconf->current_layout = taglayouts[i];
     }
     savejdwmprops(disp, jdwmconf);
@@ -253,8 +255,8 @@ uicb_viewprevtags(Display * disp,
 
     for(i = 0; i < jdwmconf->ntags; i++)
     {
-        t = seltags[i];
-        seltags[i] = prevtags[i];
+        t = jdwmconf->selected_tags[i];
+        jdwmconf->selected_tags[i] = prevtags[i];
         prevtags[i] = t;
     }
     arrange(disp, jdwmconf);
@@ -275,13 +277,13 @@ uicb_tag_viewnext(Display *disp,
 
     for(i = 0; i < jdwmconf->ntags; i++)
     {
-        if(firsttag < 0 && seltags[i])
+        if(firsttag < 0 && jdwmconf->selected_tags[i])
             firsttag = i;
-        seltags[i] = False;
+        jdwmconf->selected_tags[i] = False;
     }
     if(++firsttag >= jdwmconf->ntags)
         firsttag = 0;
-    seltags[firsttag] = True;
+    jdwmconf->selected_tags[firsttag] = True;
     savejdwmprops(disp, jdwmconf);
     arrange(disp, jdwmconf);
 }
@@ -301,13 +303,13 @@ uicb_tag_viewprev(Display *disp,
 
     for(i = jdwmconf->ntags - 1; i >= 0; i--)
     {
-        if(firsttag < 0 && seltags[i])
+        if(firsttag < 0 && jdwmconf->selected_tags[i])
             firsttag = i;
-        seltags[i] = False;
+        jdwmconf->selected_tags[i] = False;
     }
     if(--firsttag < 0)
         firsttag = jdwmconf->ntags - 1;
-    seltags[firsttag] = True;
+    jdwmconf->selected_tags[firsttag] = True;
     savejdwmprops(disp, jdwmconf);
     arrange(disp, jdwmconf);
 }

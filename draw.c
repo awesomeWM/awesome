@@ -9,7 +9,6 @@ extern int bh, blw;             /* bar height, bar layout label width */
 extern Window barwin;
 extern DC dc;                   /* global draw context */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
-extern Bool *seltags;
 
 /* static */
 
@@ -118,7 +117,7 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
     for(i = 0; i < jdwmconf->ntags; i++)
     {
         dc.w = textw(jdwmconf->tags[i]);
-        if(seltags[i])
+        if(jdwmconf->selected_tags[i])
         {
             drawtext(disp, jdwmconf->tags[i], dc.sel);
             drawsquare(sel && sel->tags[i], isoccupied(i), dc.sel, disp);

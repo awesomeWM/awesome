@@ -15,7 +15,7 @@ grid(Display *disp, jdwm_config *jdwmconf)
     unsigned int i, n, cx, cy, cw, ch, aw, ah, cols, rows;
     Client *c;
 
-    for(n = 0, c = nexttiled(clients, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->ntags))
+    for(n = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))
         n++;
 
     /* grid dimensions */
@@ -29,7 +29,7 @@ grid(Display *disp, jdwm_config *jdwmconf)
     cw = waw / (cols ? cols : 1);
 
     for(i = 0, c = clients; c; c = c->next)
-        if(isvisible(c, jdwmconf->ntags))
+        if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
         {
             unban(c);
             if(c->isfloating)

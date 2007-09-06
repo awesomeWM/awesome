@@ -7,7 +7,7 @@
 #include "client.h"
 
 void compileregs(jdwm_config *);         /* initialize regexps of rules defined in config.h */
-Bool isvisible(Client *, int);       /* returns True if client is visible */
+Bool isvisible(Client *, Bool *, int);
 void applyrules(Client * c, jdwm_config *);    /* applies rules to c */
 void uicb_tag(Display *, jdwm_config *, const char *);         /* tags sel with arg's index */
 void uicb_togglefloating(Display *, jdwm_config *, const char *);      /* toggles sel between floating/tiled state */

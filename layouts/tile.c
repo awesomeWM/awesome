@@ -76,7 +76,7 @@ _tile(jdwm_config *jdwmconf, const Bool right)
     int n, th, i, mh;
     Client *c;
 
-    for(n = 0, c = nexttiled(clients, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->ntags))
+    for(n = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))
         n++;
 
     /* window geoms */
@@ -88,7 +88,7 @@ _tile(jdwm_config *jdwmconf, const Bool right)
 
     nx = wax;
     ny = way;
-    for(i = 0, c = nexttiled(clients, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->ntags), i++)
+    for(i = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags), i++)
     {
         c->ismax = False;
         if(i < nmaster)
@@ -143,7 +143,7 @@ _bstack(jdwm_config *jdwmconf, Bool portrait)
     int i, n, nx, ny, nw, nh, mw, mh, tw, th;
     Client *c;
 
-    for(n = 0, c = nexttiled(clients, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->ntags))
+    for(n = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))
         n++;
 
     /* window geoms */
@@ -152,7 +152,7 @@ _bstack(jdwm_config *jdwmconf, Bool portrait)
     th = (n > nmaster) ? (wah * (1 - mwfact)) / (portrait ? 1 : n - nmaster) : 0;
     tw = (n > nmaster) ? waw / (portrait ? n - nmaster : 1) : 0;
 
-    for(i = 0, c = nexttiled(clients, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->ntags), i++)
+    for(i = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags), i++)
     {
         c->ismax = False;
         nx = wax;

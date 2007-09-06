@@ -22,7 +22,6 @@ extern Layout ** taglayouts;
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Window barwin;
 extern Client *clients, *sel;   /* global client list */
-extern Bool *seltags;
 extern Atom jdwmprops;
 extern DC dc;
 
@@ -32,7 +31,7 @@ arrange(Display * disp, jdwm_config *jdwmconf)
     Client *c;
 
     for(c = clients; c; c = c->next)
-        if(isvisible(c, jdwmconf->ntags))
+        if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
             unban(c);
         else
             ban(c);
@@ -50,9 +49,9 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
 
     if(!sel)
         return;
-    for(c = sel->next; c && !isvisible(c, jdwmconf->ntags); c = c->next);
+    for(c = sel->next; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->next);
     if(!c)
-        for(c = clients; c && !isvisible(c, jdwmconf->ntags); c = c->next);
+        for(c = clients; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->next);
     if(c)
     {
         focus(c->display, &dc, c, jdwmconf);
@@ -69,11 +68,11 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
 
     if(!sel)
         return;
-    for(c = sel->prev; c && !isvisible(c, jdwmconf->ntags); c = c->prev);
+    for(c = sel->prev; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->prev);
     if(!c)
     {
         for(c = clients; c && c->next; c = c->next);
-        for(; c && !isvisible(c, jdwmconf->ntags); c = c->prev);
+        for(; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->prev);
     }
     if(c)
     {
@@ -107,14 +106,14 @@ loadjdwmprops(Display *disp, jdwm_config * jdwmconf)
     if(gettextprop(disp, DefaultRootWindow(disp), jdwmprops, prop, sizeof(prop)))
     {
         for(i = 0; i < jdwmconf->ntags && i < ssizeof(prop) - 1 && prop[i] != '\0'; i++)
-            seltags[i] = prop[i] == '1';
+            jdwmconf->selected_tags[i] = prop[i] == '1';
     }
 }
 
 inline Client *
-nexttiled(Client * c, int ntags)
+nexttiled(Client * c, Bool * tags, int ntags)
 {
-    for(; c && (c->isfloating || !isvisible(c, ntags)); c = c->next);
+    for(; c && (c->isfloating || !isvisible(c, tags, ntags)); c = c->next);
     return c;
 }
 
@@ -139,7 +138,7 @@ restack(Display * disp, jdwm_config *jdwmconf)
             XConfigureWindow(disp, sel->win, CWSibling | CWStackMode, &wc);
             wc.sibling = sel->win;
         }
-        for(c = nexttiled(clients, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->ntags))
+        for(c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))
         {
             if(c == sel)
                 continue;
@@ -156,7 +155,7 @@ savejdwmprops(Display *disp, jdwm_config *jdwmconf)
 {
     int i;
     for(i = 0; i < jdwmconf->ntags && i < ssizeof(prop) - 1; i++)
-        prop[i] = seltags[i] ? '1' : '0';
+        prop[i] = jdwmconf->selected_tags[i] ? '1' : '0';
     prop[i] = '\0';
     XChangeProperty(disp, DefaultRootWindow(disp), jdwmprops, XA_STRING, 8, PropModeReplace, (unsigned char *) prop, i);
 }
@@ -191,7 +190,7 @@ uicb_setlayout(Display *disp, jdwm_config * jdwmconf, const char *arg)
     savejdwmprops(disp, jdwmconf);
 
     for(j = 0; j < jdwmconf->ntags; j++)
-        if (seltags[j])
+        if (jdwmconf->selected_tags[j])
             taglayouts[j] = jdwmconf->current_layout;
 }
 
@@ -269,7 +268,7 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
           const char *arg __attribute__ ((unused))) 
 { 
     Client *c;
-    if(!sel || ((c = sel) == nexttiled(clients, jdwmconf->ntags) && !(c = nexttiled(c->next, jdwmconf->ntags))))
+    if(!sel || ((c = sel) == nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags) && !(c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))))
         return;
     detach(c);
     attach(c);
