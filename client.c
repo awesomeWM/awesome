@@ -314,7 +314,7 @@ loadprops(Client * c, int ntags)
 
     prop = p_new(char, ntags + 2);
 
-    if(gettextprop(c->display, c->win, jdwmprops, prop, sizeof(prop)))
+    if(gettextprop(c->display, c->win, jdwmprops, prop, ntags + 2))
     {
         for(i = 0; i < ntags && prop[i]; i++)
             if((c->tags[i] = prop[i] == '1'))
