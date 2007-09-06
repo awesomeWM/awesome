@@ -201,15 +201,18 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
     jdwmconf->ntags = config_setting_length(conftags);
     jdwmconf->tags = p_new(const char *, jdwmconf->ntags);
     jdwmconf->selected_tags = p_new(Bool, jdwmconf->ntags);
+    jdwmconf->prev_selected_tags = p_new(Bool, jdwmconf->ntags);
 
     for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
     {
         jdwmconf->tags[i] = tmp;
         jdwmconf->selected_tags[i] = False;
+        jdwmconf->prev_selected_tags[i] = False;
     }
 
     /* select first tag by default */
     jdwmconf->selected_tags[0] = True;
+    jdwmconf->prev_selected_tags[0] = True;
 
     /* layouts */
     conflayouts = config_lookup(&jdwmlibconf, "jdwm.layouts");

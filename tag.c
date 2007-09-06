@@ -10,7 +10,6 @@
 #include "tag.h"
 
 extern Client *sel;             /* global client list */
-extern Bool *prevtags;
 extern Layout ** taglayouts;
 
 static Regs *regs = NULL;
@@ -227,7 +226,7 @@ uicb_view(Display *disp,
 
     for(i = 0; i < jdwmconf->ntags; i++)
     {
-        prevtags[i] = jdwmconf->selected_tags[i];
+        jdwmconf->prev_selected_tags[i] = jdwmconf->selected_tags[i];
         jdwmconf->selected_tags[i] = arg == NULL;
     }
     i = idxoftag(arg, jdwmconf->tags, jdwmconf->ntags);
@@ -242,6 +241,7 @@ uicb_view(Display *disp,
 
 /** View previously selected tags
  * \param disp Display ref
+ * \param jdwmconf jdwm config ref
  * \param arg unused
  * \ingroup ui_callback
  */
@@ -256,8 +256,8 @@ uicb_viewprevtags(Display * disp,
     for(i = 0; i < jdwmconf->ntags; i++)
     {
         t = jdwmconf->selected_tags[i];
-        jdwmconf->selected_tags[i] = prevtags[i];
-        prevtags[i] = t;
+        jdwmconf->selected_tags[i] = jdwmconf->prev_selected_tags[i];
+        jdwmconf->prev_selected_tags[i] = t;
     }
     arrange(disp, jdwmconf);
 }

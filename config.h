@@ -61,6 +61,8 @@ struct jdwm_config
     const char **tags;
     /** Selected tags */
     Bool *selected_tags;
+    /* Previously selected tags */
+    Bool *prev_selected_tags;
     /** Number of tags in **tags */
     int ntags;
     /** Layout list */

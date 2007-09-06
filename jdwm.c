@@ -25,7 +25,6 @@ extern void (*handler[LASTEvent]) (XEvent *, jdwm_config *);   /* event handler 
 int screen, sx, sy, sw, sh, wax, way, waw, wah;
 int bh;
 Atom jdwmprops, wmatom[WMLast], netatom[NetLast];
-Bool *prevtags;;
 Bool selscreen = True;
 Client *clients = NULL;
 Client *sel = NULL;
@@ -98,7 +97,6 @@ cleanup(Display *disp, jdwm_config *jdwmconf)
     XFreeCursor(disp, cursor[CurMove]);
     XSetInputFocus(disp, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(disp, False);
-    p_delete(&prevtags);
     p_delete(&taglayouts);
 }
 
@@ -180,8 +178,6 @@ setup(Display *disp, jdwm_config *jdwmconf)
     XSelectInput(disp, DefaultRootWindow(disp), wa.event_mask);
     grabkeys(disp, jdwmconf);
     compileregs(jdwmconf);
-    prevtags = p_new(Bool, jdwmconf->ntags);
-    prevtags[0] = True;
     /* geometry */
     sx = sy = 0;
     sw = DisplayWidth(disp, screen);
