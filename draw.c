@@ -92,6 +92,10 @@ drawsquare(Bool filled, Bool empty, unsigned long col[ColLast], Display *disp)
     }
 }
 
+/** Check if at least a client is tagged with tag number t
+ * \param t tag number
+ * \return True or False
+ */
 static Bool
 isoccupied(unsigned int t)
 {
