@@ -13,10 +13,6 @@
 
 int blw = 0;
 
-/* static */
-
-static char prop[128];
-
 /* extern */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Window barwin;
@@ -97,6 +93,7 @@ void
 loadjdwmprops(Display *disp, jdwm_config * jdwmconf)
 {
     int i;
+    char prop[128];
 
     if(gettextprop(disp, DefaultRootWindow(disp), jdwmprops, prop, sizeof(prop)))
     {
@@ -150,6 +147,8 @@ void
 savejdwmprops(Display *disp, jdwm_config *jdwmconf)
 {
     int i;
+    char prop[128];
+
     for(i = 0; i < jdwmconf->ntags && i < ssizeof(prop) - 1; i++)
         prop[i] = jdwmconf->selected_tags[i] ? '1' : '0';
     prop[i] = '\0';
