@@ -3,9 +3,12 @@
 #ifndef JDWM_DRAW_H
 #define JDWM_DRAW_H
 
+#include <string.h>
 #include "config.h"
 
+#define textw(text)         (textnw(text, strlen(text)) + dc.font.height)
+
 void drawstatus(Display *, jdwm_config *);          /* draw the bar */
-inline unsigned int textw(const char *text);   /* return the width of text in px */
+unsigned int textnw(const char *, unsigned int);
 
 #endif

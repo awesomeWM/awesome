@@ -12,19 +12,6 @@ extern Client *clients, *sel, *stack;   /* global client list and stack */
 
 /* static */
 
-static unsigned int
-textnw(const char *text, unsigned int len)
-{
-    XRectangle r;
-
-    if(dc.font.set)
-    {
-        XmbTextExtents(dc.font.set, text, len, NULL, &r);
-        return r.width;
-    }
-    return XTextWidth(dc.font.xfont, text, len);
-}
-
 static void
 drawtext(Display *disp, const char *text, unsigned long col[ColLast])
 {
@@ -109,6 +96,19 @@ isoccupied(unsigned int t)
 
 /* extern */
 
+unsigned int
+textnw(const char *text, unsigned int len)
+{
+    XRectangle r;
+
+    if(dc.font.set)
+    {
+        XmbTextExtents(dc.font.set, text, len, NULL, &r);
+        return r.width;
+    }
+    return XTextWidth(dc.font.xfont, text, len);
+}
+
 void
 drawstatus(Display *disp, jdwm_config * jdwmconf)
 {
@@ -153,11 +153,4 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
     }
     XCopyArea(disp, dc.drawable, barwin, dc.gc, 0, 0, sw, bh, 0, 0);
     XSync(disp, False);
-}
-
-
-inline unsigned int
-textw(const char *text)
-{
-    return textnw(text, strlen(text)) + dc.font.height;
 }
