@@ -71,9 +71,6 @@ gettextprop(Display *disp, Window w, Atom atom, char *text, unsigned int size)
     return True;
 }
 
-
-
-
 static void
 cleanup(Display *disp, jdwm_config *jdwmconf)
 {
