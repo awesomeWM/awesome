@@ -6,6 +6,9 @@
 #include <regex.h> 
 #include "client.h"
 
+/** Check if a client is tiled */ 
+#define IS_TILED(client, tags, ntags)            (client && !client->isfloating && isvisible(client, tags, ntags))
+
 void compileregs(jdwm_config *);         /* initialize regexps of rules defined in config.h */
 Bool isvisible(Client *, Bool *, int);
 void applyrules(Client * c, jdwm_config *);    /* applies rules to c */

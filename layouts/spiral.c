@@ -18,8 +18,9 @@ fibonacci(Display *disp, jdwm_config *jdwmconf, int shape)
     ny = 0;
     nw = waw;
     nh = wah;
-    for(n = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))
-        n++;
+    for(n = 0, c = clients; c; c = c->next)
+        if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+            n++;
     for(i = 0, c = clients; c; c = c->next)
     {
         c->ismax = False;

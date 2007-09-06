@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "layout.h"
 #include "layouts/tile.h"
+#include "layout.h"
+#include "tag.h"
 
 /* extern */
 extern int wax, way, wah, waw;  /* windowarea geometry */
@@ -76,8 +77,9 @@ _tile(jdwm_config *jdwmconf, const Bool right)
     int n, th, i, mh;
     Client *c;
 
-    for(n = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))
-        n++;
+    for(n = 0, c = clients; c; c = c->next)
+        if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+            n++;
 
     /* window geoms */
     mh = (n <= nmaster) ? wah / (n > 0 ? n : 1) : wah / nmaster;
@@ -88,8 +90,11 @@ _tile(jdwm_config *jdwmconf, const Bool right)
 
     nx = wax;
     ny = way;
-    for(i = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags), i++)
+    for(i = 0, c = clients; c; c = c->next)
     {
+        if(!IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+            continue;
+        
         c->ismax = False;
         if(i < nmaster)
         {                       /* master */
@@ -121,6 +126,7 @@ _tile(jdwm_config *jdwmconf, const Bool right)
         resize(c, nx, ny, nw, nh, False);
         if(n > nmaster && th != wah)
             ny += nh + 2 * c->border;
+        i++;
     }
 }
 
@@ -143,8 +149,9 @@ _bstack(jdwm_config *jdwmconf, Bool portrait)
     int i, n, nx, ny, nw, nh, mw, mh, tw, th;
     Client *c;
 
-    for(n = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))
-        n++;
+    for(n = 0, c = clients; c; c = c->next)
+        if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+            n++;
 
     /* window geoms */
     mh = (n > nmaster) ? (wah * mwfact) / nmaster : wah / (n > 0 ? n : 1);
@@ -152,8 +159,11 @@ _bstack(jdwm_config *jdwmconf, Bool portrait)
     th = (n > nmaster) ? (wah * (1 - mwfact)) / (portrait ? 1 : n - nmaster) : 0;
     tw = (n > nmaster) ? waw / (portrait ? n - nmaster : 1) : 0;
 
-    for(i = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags), i++)
+    for(i = 0, c = clients; c; c = c->next)
     {
+        if(!IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+            continue;
+
         c->ismax = False;
         nx = wax;
         ny = way;
@@ -185,6 +195,7 @@ _bstack(jdwm_config *jdwmconf, Bool portrait)
                 nh = wah - 2 * c->border;
         }
         resize(c, nx, ny, nw, nh, False);
+        i++;
     }
 }
 

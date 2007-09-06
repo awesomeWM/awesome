@@ -15,8 +15,9 @@ grid(Display *disp, jdwm_config *jdwmconf)
     unsigned int i, n, cx, cy, cw, ch, aw, ah, cols, rows;
     Client *c;
 
-    for(n = 0, c = nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags); c; c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))
-        n++;
+    for(n = 0, c = clients; c; c = c->next)
+        if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+            n++;
 
     /* grid dimensions */
     for(rows = 0; rows <= n / 2; rows++)
