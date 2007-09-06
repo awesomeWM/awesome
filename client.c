@@ -20,10 +20,6 @@ extern Client *clients, *sel, *stack;   /* global client list and stack */
 extern Bool selscreen;
 extern Atom jdwmprops, wmatom[WMLast], netatom[NetLast];
 
-/* static */
-
-static char prop[128];
-
 /** Attach client stack to clients stacks
  * \param c the client
  */ 
@@ -293,6 +289,7 @@ static Bool
 loadprops(Client * c, int ntags)
 {
     int i;
+    char prop[128];
     Bool result = False;
 
     if(gettextprop(c->display, c->win, jdwmprops, prop, sizeof(prop)))
@@ -478,6 +475,8 @@ void
 saveprops(Client * c, int ntags)
 {
     int i;
+    char prop[128];
+
     for(i = 0; i < ntags && i < ssizeof(prop) - 1; i++)
         prop[i] = c->tags[i] ? '1' : '0';
     if(i < ssizeof(prop) - 1)
