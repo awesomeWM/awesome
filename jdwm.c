@@ -32,7 +32,6 @@ Client *stack = NULL;
 Cursor cursor[CurLast];
 DC dc;
 Window barwin;
-Layout ** taglayouts;
 
 /* static */
 
@@ -97,7 +96,6 @@ cleanup(Display *disp, jdwm_config *jdwmconf)
     XFreeCursor(disp, cursor[CurMove]);
     XSetInputFocus(disp, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(disp, False);
-    p_delete(&taglayouts);
 }
 
 static long

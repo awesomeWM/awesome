@@ -10,7 +10,6 @@
 #include "tag.h"
 
 extern Client *sel;             /* global client list */
-extern Layout ** taglayouts;
 
 static Regs *regs = NULL;
 static char prop[512];
@@ -233,7 +232,7 @@ uicb_view(Display *disp,
     if(i >= 0 && i < jdwmconf->ntags)
     {
         jdwmconf->selected_tags[i] = True;
-        jdwmconf->current_layout = taglayouts[i];
+        jdwmconf->current_layout = jdwmconf->tag_layouts[i];
     }
     savejdwmprops(disp, jdwmconf);
     arrange(disp, jdwmconf);

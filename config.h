@@ -69,6 +69,8 @@ struct jdwm_config
     Layout *layouts;
     /** Number of layouts in *layouts */
     int nlayouts;
+    /** Store layout for eatch tag */
+    Layout **tag_layouts;
     /** Rules list */
     Rule *rules;
     /** Number of rules in *rules */

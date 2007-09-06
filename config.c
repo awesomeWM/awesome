@@ -153,6 +153,7 @@ uicb_reload(Display *disp, jdwm_config *jdwmconf, const char *arg __attribute__ 
     p_delete(&jdwmconf->tags);
     p_delete(&jdwmconf->selected_tags);
     p_delete(&jdwmconf->layouts);
+    p_delete(&jdwmconf->tag_layouts);
     parse_config(disp, screen, &dc, jdwmconf);
 }
 
@@ -192,28 +193,6 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
         eprint("error parsing configuration file at line %d: %s\n",
                config_error_line(&jdwmlibconf), config_error_text(&jdwmlibconf));
 
-    /* tags */
-    conftags = config_lookup(&jdwmlibconf, "jdwm.tags");
-
-    if(!conftags)
-        eprint("tags not found in configuration file\n");
-
-    jdwmconf->ntags = config_setting_length(conftags);
-    jdwmconf->tags = p_new(const char *, jdwmconf->ntags);
-    jdwmconf->selected_tags = p_new(Bool, jdwmconf->ntags);
-    jdwmconf->prev_selected_tags = p_new(Bool, jdwmconf->ntags);
-
-    for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
-    {
-        jdwmconf->tags[i] = tmp;
-        jdwmconf->selected_tags[i] = False;
-        jdwmconf->prev_selected_tags[i] = False;
-    }
-
-    /* select first tag by default */
-    jdwmconf->selected_tags[0] = True;
-    jdwmconf->prev_selected_tags[0] = True;
-
     /* layouts */
     conflayouts = config_lookup(&jdwmlibconf, "jdwm.layouts");
 
@@ -228,13 +207,38 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
         jdwmconf->layouts[i].arrange =
             name_func_lookup(config_setting_get_string_elem(confsublayouts, 1), LayoutsList);
         if(!jdwmconf->layouts[i].arrange)
-            eprint("unknown layout in configuration file: %s", tmp);
+            eprint("unknown layout in configuration file\n");
     }
+
     jdwmconf->layouts[i].symbol = NULL;
     jdwmconf->layouts[i].arrange = NULL;
 
     /** \todo put this in set_default_layout */
     jdwmconf->current_layout = jdwmconf->layouts;
+    /* tags */
+    conftags = config_lookup(&jdwmlibconf, "jdwm.tags");
+
+    if(!conftags)
+        eprint("tags not found in configuration file\n");
+
+    jdwmconf->ntags = config_setting_length(conftags);
+    jdwmconf->tags = p_new(const char *, jdwmconf->ntags);
+    jdwmconf->selected_tags = p_new(Bool, jdwmconf->ntags);
+    jdwmconf->prev_selected_tags = p_new(Bool, jdwmconf->ntags);
+    jdwmconf->tag_layouts = p_new(Layout *, jdwmconf->ntags);
+
+    for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
+    {
+        jdwmconf->tags[i] = tmp;
+        jdwmconf->selected_tags[i] = False;
+        jdwmconf->prev_selected_tags[i] = False;
+        /** \todo add support for default tag/layout in configuration file */
+        jdwmconf->tag_layouts[i] = jdwmconf->layouts;
+    }
+
+    /* select first tag by default */
+    jdwmconf->selected_tags[0] = True;
+    jdwmconf->prev_selected_tags[0] = True;
 
     /* rules */
     confrules = config_lookup(&jdwmlibconf, "jdwm.rules");

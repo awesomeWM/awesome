@@ -18,7 +18,6 @@ int blw = 0;
 static char prop[128];
 
 /* extern */
-extern Layout ** taglayouts;
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Window barwin;
 extern Client *clients, *sel;   /* global client list */
@@ -92,10 +91,6 @@ initlayouts(jdwm_config * jdwmconf)
         if(w > blw)
             blw = w;
     }
-
-    taglayouts = p_new(Layout *, jdwmconf->ntags);
-    for(i = 0; i < jdwmconf->ntags; i++)
-        taglayouts[i] = jdwmconf->layouts;
 }
 
 void
@@ -192,7 +187,7 @@ uicb_setlayout(Display *disp, jdwm_config * jdwmconf, const char *arg)
 
     for(j = 0; j < jdwmconf->ntags; j++)
         if (jdwmconf->selected_tags[j])
-            taglayouts[j] = jdwmconf->current_layout;
+            jdwmconf->tag_layouts[j] = jdwmconf->current_layout;
 }
 
 void
