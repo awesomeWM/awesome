@@ -44,6 +44,5 @@ void saveprops(Client * c, int);     /* saves client properties */
 void uicb_killclient(Display *, jdwm_config *, const char *); /* kill client */
 void uicb_moveresize(Display *, jdwm_config *, const char *);  /* move and resize window */
 void uicb_settrans(Display *, jdwm_config *, const char *);
-void setclienttrans(Client *c, double, unsigned int);
 
 #endif

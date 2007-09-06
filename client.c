@@ -143,6 +143,27 @@ setclientstate(Client * c, long state)
                     PropModeReplace, (unsigned char *) data, 2);
 }
 
+/** Set client transparency using composite
+ * \param c client
+ * \param opacity opacity percentage
+ */
+static void
+setclienttrans(Client *c, double opacity)
+{
+    unsigned int real_opacity = 0xffffffff;
+
+    if(opacity >= 0 && opacity <= 100)
+    {
+        real_opacity = ((opacity / 100.0) * 0xffffffff);
+        XChangeProperty(c->display, c->win,
+                        XInternAtom(c->display, "_NET_WM_WINDOW_OPACITY", False),
+                        XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &real_opacity, 1L);
+    }
+    else
+        XDeleteProperty(c->display, c->win, XInternAtom(c->display, "_NET_WM_WINDOW_OPACITY", False));
+
+    XSync(c->display, False);
+}
 /* extern */
 
 /** Attach client to the beginning of the clients stack
@@ -231,7 +252,7 @@ focus(Display *disp, DC *drawcontext, Client * c, jdwm_config *jdwmconf)
     {
         grabbuttons(sel, False, jdwmconf->modkey, jdwmconf->numlockmask);
         XSetWindowBorder(sel->display, sel->win, drawcontext->norm[ColBorder]);
-        setclienttrans(sel, jdwmconf->opacity_unfocused, 0);
+        setclienttrans(sel, jdwmconf->opacity_unfocused);
     }
     if(c)
     {
@@ -249,8 +270,8 @@ focus(Display *disp, DC *drawcontext, Client * c, jdwm_config *jdwmconf)
         XSetInputFocus(sel->display, sel->win, RevertToPointerRoot, CurrentTime);
         for(c = stack; c; c = c->snext)
             if(c != sel)
-                setclienttrans(c, jdwmconf->opacity_unfocused, 0);
-        setclienttrans(sel, -1, 0);
+                setclienttrans(c, jdwmconf->opacity_unfocused);
+        setclienttrans(sel, -1);
     }
     else
         XSetInputFocus(disp, DefaultRootWindow(disp), RevertToPointerRoot, CurrentTime);
@@ -586,29 +607,10 @@ updatesizehints(Client * c)
 }
 
 void
-setclienttrans(Client *c, double opacity, unsigned int current_opacity)
-{
-    unsigned int real_opacity = 0xffffffff;
-
-    if(opacity >= 0 && opacity <= 100)
-    {
-        real_opacity = ((opacity / 100.0) * 0xffffffff) + current_opacity;
-        XChangeProperty(c->display, c->win,
-                        XInternAtom(c->display, "_NET_WM_WINDOW_OPACITY", False),
-                        XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &real_opacity, 1L);
-    }
-    else
-        XDeleteProperty(c->display, c->win, XInternAtom(c->display, "_NET_WM_WINDOW_OPACITY", False));
-
-    XSync(c->display, False);
-}
-
-void
 uicb_settrans(Display *disp __attribute__ ((unused)),
               jdwm_config *jdwmconf __attribute__ ((unused)),
               const char *arg)
 {
-    unsigned int current_opacity = 0;
     double delta = 100.0;
     unsigned char *data;
     Atom actual;
@@ -628,6 +630,7 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
                                (unsigned char **) &data);
             if(data)
             {
+                unsigned int current_opacity = 0;
                 memcpy(&current_opacity, data, sizeof(unsigned int));
                 XFree((void *) data);
                 delta += ((current_opacity * 100.0) / 0xffffffff);
@@ -650,7 +653,7 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
     }
 
     if(delta == 100.0 && !set_prop)
-        setclienttrans(sel, -1, 0);
+        setclienttrans(sel, -1);
     else
-        setclienttrans(sel, delta, current_opacity);
+        setclienttrans(sel, delta);
 }
