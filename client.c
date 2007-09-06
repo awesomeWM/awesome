@@ -199,7 +199,6 @@ ban(Client * c)
     c->unmapped++;
 }
 
-
 /** Configure client
  * \param c the client
  */
@@ -310,17 +309,22 @@ static Bool
 loadprops(Client * c, int ntags)
 {
     int i;
-    char prop[128];
+    char *prop;
     Bool result = False;
+
+    prop = p_new(char, ntags + 2);
 
     if(gettextprop(c->display, c->win, jdwmprops, prop, sizeof(prop)))
     {
-        for(i = 0; i < ntags && i < ssizeof(prop) - 1 && prop[i] != '\0'; i++)
+        for(i = 0; i < ntags && prop[i]; i++)
             if((c->tags[i] = prop[i] == '1'))
                 result = True;
-        if(i < ssizeof(prop) - 1 && prop[i] != '\0')
+        if(i <= ntags && prop[i])
             c->isfloating = prop[i] == '1';
     }
+
+    p_delete(&prop);
+
     return result;
 }
 
