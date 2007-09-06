@@ -628,7 +628,7 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
                                (unsigned char **) &data);
             if(data)
             {
-                memcpy(&current_opacity, data, sizeof(double));
+                memcpy(&current_opacity, data, sizeof(unsigned int));
                 XFree((void *) data);
                 delta += ((current_opacity * 100.0) / 0xffffffff);
             }
