@@ -102,13 +102,6 @@ loadjdwmprops(Display *disp, jdwm_config * jdwmconf)
     }
 }
 
-inline Client *
-nexttiled(Client * c, Bool * tags, int ntags)
-{
-    for(; c && (c->isfloating || !isvisible(c, tags, ntags)); c = c->next);
-    return c;
-}
-
 void
 restack(Display * disp, jdwm_config *jdwmconf)
 {
@@ -262,12 +255,11 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
           jdwm_config *jdwmconf,
           const char *arg __attribute__ ((unused))) 
 { 
-    Client *c;
-    if(!sel || ((c = sel) == nexttiled(clients, jdwmconf->selected_tags, jdwmconf->ntags) && !(c = nexttiled(c->next, jdwmconf->selected_tags, jdwmconf->ntags))))
+    if(!sel)
         return;
-    detach(c);
-    attach(c);
-    focus(c->display, &dc, c, jdwmconf);
-    arrange(c->display, jdwmconf);
+    detach(sel);
+    attach(sel);
+    focus(sel->display, &dc, sel, jdwmconf);
+    arrange(sel->display, jdwmconf);
 } 
 

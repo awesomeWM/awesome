@@ -10,7 +10,6 @@
 
 void arrange(Display *, jdwm_config *);             /* arranges all windows depending on the layout in use */
 void initlayouts(jdwm_config *);         /* initialize layout array */
-Client *nexttiled(Client *, Bool *, int) __attribute__ ((deprecated));
 void restack(Display *, jdwm_config *);        /* restores z layers of all clients */
 void uicb_focusnext(Display *, jdwm_config *, const char *);   /* focuses next visible client */
 void uicb_focusprev(Display *, jdwm_config *, const char *);   /* focuses prev visible client */
