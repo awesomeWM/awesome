@@ -113,7 +113,7 @@ key_mask_lookup(const char *keyname)
                 return KeyModList[i].keysym;
 
     return 0;
-};
+}
 
 /** Lookup for a function pointer from its name
  * in the given NameFuncLink list
