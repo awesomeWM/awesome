@@ -22,7 +22,6 @@ extern Cursor cursor[CurLast];
 extern Client *clients, *sel;   /* global client list */
 extern Bool selscreen;
 extern Atom netatom[NetLast];
-void (*handler[LASTEvent]) (XEvent *, jdwm_config *);   /* event handler */
 
 #define CLEANMASK(mask)		(mask & ~(jdwmconf->numlockmask | LockMask))
 #define MOUSEMASK		(BUTTONMASK | PointerMotionMask)
@@ -61,7 +60,7 @@ movemouse(Client * c, jdwm_config *jdwmconf)
         case ConfigureRequest:
         case Expose:
         case MapRequest:
-            handler[ev.type] (&ev, jdwmconf);
+            handle_event_maprequest(&ev, jdwmconf);
             break;
         case MotionNotify:
             XSync(c->display, False);
@@ -108,7 +107,7 @@ resizemouse(Client * c, jdwm_config *jdwmconf)
         case ConfigureRequest:
         case Expose:
         case MapRequest:
-            handler[ev.type] (&ev, jdwmconf);
+            handle_event_maprequest(&ev, jdwmconf);
             break;
         case MotionNotify:
             XSync(c->display, False);
@@ -122,7 +121,7 @@ resizemouse(Client * c, jdwm_config *jdwmconf)
     }
 }
 
-static void
+void
 handle_event_buttonpress(XEvent * e, jdwm_config *jdwmconf)
 {
     int i, x;
@@ -184,7 +183,7 @@ handle_event_buttonpress(XEvent * e, jdwm_config *jdwmconf)
     }
 }
 
-static void
+void
 handle_event_configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((unused)))
 {
     Client *c;
@@ -232,7 +231,7 @@ handle_event_configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((
     XSync(e->xany.display, False);
 }
 
-static void
+void
 handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
 {
     XConfigureEvent *ev = &e->xconfigure;
@@ -249,7 +248,7 @@ handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
     }
 }
 
-static void
+void
 handle_event_destroynotify(XEvent * e, jdwm_config *jdwmconf)
 {
     Client *c;
@@ -259,7 +258,7 @@ handle_event_destroynotify(XEvent * e, jdwm_config *jdwmconf)
         unmanage(c, &dc, WithdrawnState, jdwmconf);
 }
 
-static void
+void
 handle_event_enternotify(XEvent * e, jdwm_config *jdwmconf)
 {
     Client *c;
@@ -276,7 +275,7 @@ handle_event_enternotify(XEvent * e, jdwm_config *jdwmconf)
     }
 }
 
-static void
+void
 handle_event_expose(XEvent * e, jdwm_config *jdwmconf)
 {
     XExposeEvent *ev = &e->xexpose;
@@ -285,7 +284,7 @@ handle_event_expose(XEvent * e, jdwm_config *jdwmconf)
         drawstatus(e->xany.display, jdwmconf);
 }
 
-static void
+void
 handle_event_keypress(XEvent * e, jdwm_config *jdwmconf)
 {
     int i;
@@ -299,7 +298,7 @@ handle_event_keypress(XEvent * e, jdwm_config *jdwmconf)
             jdwmconf->keys[i].func(e->xany.display, jdwmconf, jdwmconf->keys[i].arg);
 }
 
-static void
+void
 handle_event_leavenotify(XEvent * e, jdwm_config *jdwmconf)
 {
     XCrossingEvent *ev = &e->xcrossing;
@@ -311,7 +310,7 @@ handle_event_leavenotify(XEvent * e, jdwm_config *jdwmconf)
     }
 }
 
-static void
+void
 handle_event_mappingnotify(XEvent * e, jdwm_config *jdwmconf)
 {
     XMappingEvent *ev = &e->xmapping;
@@ -321,7 +320,7 @@ handle_event_mappingnotify(XEvent * e, jdwm_config *jdwmconf)
         grabkeys(e->xany.display, jdwmconf);
 }
 
-static void
+void
 handle_event_maprequest(XEvent * e, jdwm_config *jdwmconf)
 {
     static XWindowAttributes wa;
@@ -335,7 +334,7 @@ handle_event_maprequest(XEvent * e, jdwm_config *jdwmconf)
         manage(e->xany.display, &dc, ev->window, &wa, jdwmconf);
 }
 
-static void
+void
 handle_event_propertynotify(XEvent * e, jdwm_config *jdwmconf)
 {
     Client *c;
@@ -368,7 +367,7 @@ handle_event_propertynotify(XEvent * e, jdwm_config *jdwmconf)
     }
 }
 
-static void
+void
 handle_event_unmapnotify(XEvent * e, jdwm_config *jdwmconf)
 {
     Client *c;
@@ -377,24 +376,6 @@ handle_event_unmapnotify(XEvent * e, jdwm_config *jdwmconf)
     if((c = getclient(ev->window)) && ev->event == DefaultRootWindow(e->xany.display) && (ev->send_event || !c->unmapped--))
         unmanage(c, &dc, WithdrawnState, jdwmconf);
 }
-
-/* extern */
-
-void (*handler[LASTEvent]) (XEvent *, jdwm_config *) =
-{
-    [ButtonPress] = handle_event_buttonpress,
-    [ConfigureRequest] = handle_event_configurerequest,
-    [ConfigureNotify] = handle_event_configurenotify,
-    [DestroyNotify] = handle_event_destroynotify,
-    [EnterNotify] = handle_event_enternotify,
-    [LeaveNotify] = handle_event_leavenotify,
-    [Expose] = handle_event_expose,
-    [KeyPress] = handle_event_keypress,
-    [MappingNotify] = handle_event_mappingnotify,
-    [MapRequest] = handle_event_maprequest,
-    [PropertyNotify] = handle_event_propertynotify,
-    [UnmapNotify] = handle_event_unmapnotify
-};
 
 void
 grabkeys(Display *disp, jdwm_config *jdwmconf)

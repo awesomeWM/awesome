@@ -18,9 +18,6 @@
 #include "layout.h"
 #include "tag.h"
 
-/* extern */
-extern void (*handler[LASTEvent]) (XEvent *, jdwm_config *);   /* event handler */
-
 int screen, sx, sy, sw, sh, wax, way, waw, wah;
 int bh;
 Atom jdwmprops, wmatom[WMLast], netatom[NetLast];
@@ -319,6 +316,23 @@ main(int argc, char *argv[])
     drawstatus(dpy, &jdwmconf);
     scan(dpy, &jdwmconf);
     XSync(dpy, False);
+
+    void (*handler[LASTEvent]) (XEvent *, jdwm_config *) = 
+    {
+        [ButtonPress] = handle_event_buttonpress,
+        [ConfigureRequest] = handle_event_configurerequest,
+        [ConfigureNotify] = handle_event_configurenotify,
+        [DestroyNotify] = handle_event_destroynotify,
+        [EnterNotify] = handle_event_enternotify,
+        [LeaveNotify] = handle_event_leavenotify,
+        [Expose] = handle_event_expose,
+        [KeyPress] = handle_event_keypress,
+        [MappingNotify] = handle_event_mappingnotify,
+        [MapRequest] = handle_event_maprequest,
+        [PropertyNotify] = handle_event_propertynotify,
+        [UnmapNotify] = handle_event_unmapnotify
+    };
+
 
     /* main event loop, also reads status text from stdin */
     while(running)
