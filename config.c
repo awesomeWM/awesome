@@ -156,6 +156,9 @@ uicb_reload(Display *disp, jdwm_config *jdwmconf, const char *arg __attribute__ 
     parse_config(disp, screen, &dc, jdwmconf);
 }
 
+/** Set default configuration
+ * \param jdwmconf jdwm config ref
+ */
 static void
 set_default_config(jdwm_config *jdwmconf)
 {
