@@ -30,7 +30,7 @@ arrange(Display * disp, jdwm_config *jdwmconf)
         else
             ban(c);
     jdwmconf->current_layout->arrange(disp, jdwmconf);
-    focus(disp, &dc, NULL, jdwmconf);
+    focus(disp, &dc, NULL, True, jdwmconf);
     restack(disp, jdwmconf);
 }
 
@@ -48,7 +48,7 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
         for(c = clients; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->next);
     if(c)
     {
-        focus(c->display, &dc, c, jdwmconf);
+        focus(c->display, &dc, c, True, jdwmconf);
         restack(c->display, jdwmconf);
     }
 }
@@ -70,7 +70,7 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
     }
     if(c)
     {
-        focus(c->display, &dc, c, jdwmconf);
+        focus(c->display, &dc, c, True, jdwmconf);
         restack(c->display, jdwmconf);
     }
 }
@@ -262,7 +262,7 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
         return;
     detach(sel);
     attach(sel);
-    focus(sel->display, &dc, sel, jdwmconf);
+    focus(sel->display, &dc, sel, True, jdwmconf);
     arrange(sel->display, jdwmconf);
 } 
 

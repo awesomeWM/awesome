@@ -21,7 +21,6 @@
 int screen, sx, sy, sw, sh, wax, way, waw, wah;
 int bh;
 Atom jdwmprops, wmatom[WMLast], netatom[NetLast];
-Bool selscreen = True;
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
@@ -147,9 +146,6 @@ scan(Display *disp, jdwm_config *jdwmconf)
 static void
 setup(Display *disp, jdwm_config *jdwmconf)
 {
-    int i;
-    unsigned int mask;
-    Window w;
     XSetWindowAttributes wa;
 
     /* init atoms */
@@ -197,8 +193,6 @@ setup(Display *disp, jdwm_config *jdwmconf)
     XSetLineAttributes(disp, dc.gc, 1, LineSolid, CapButt, JoinMiter);
     if(!dc.font.set)
         XSetFont(disp, dc.gc, dc.font.xfont->fid);
-    /* multihead support */
-    selscreen = XQueryPointer(disp, DefaultRootWindow(disp), &w, &w, &i, &i, &i, &i, &mask);
     loadjdwmprops(disp, jdwmconf);
 }
 

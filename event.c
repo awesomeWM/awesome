@@ -20,7 +20,6 @@ extern Window barwin;
 extern DC dc;                   /* global draw context */
 extern Cursor cursor[CurLast];
 extern Client *clients, *sel;   /* global client list */
-extern Bool selscreen;
 extern Atom netatom[NetLast];
 
 #define CLEANMASK(mask)		(mask & ~(jdwmconf->numlockmask | LockMask))
@@ -158,7 +157,7 @@ handle_event_buttonpress(XEvent * e, jdwm_config *jdwmconf)
     }
     else if((c = getclient(ev->window)))
     {
-        focus(c->display, &dc, c, jdwmconf);
+        focus(c->display, &dc, c, ev->same_screen, jdwmconf);
         if(CLEANMASK(ev->state) != jdwmconf->modkey)
             return;
         if(ev->button == Button1 && (IS_ARRANGE(floating) || c->isfloating))
@@ -267,12 +266,9 @@ handle_event_enternotify(XEvent * e, jdwm_config *jdwmconf)
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
     if((c = getclient(ev->window)))
-        focus(c->display, &dc, c, jdwmconf);
+        focus(c->display, &dc, c, ev->same_screen, jdwmconf);
     else if(ev->window == DefaultRootWindow(e->xany.display))
-    {
-        selscreen = True;
-        focus(e->xany.display, &dc, NULL, jdwmconf);
-    }
+        focus(e->xany.display, &dc, NULL, True, jdwmconf);
 }
 
 void
@@ -304,10 +300,7 @@ handle_event_leavenotify(XEvent * e, jdwm_config *jdwmconf)
     XCrossingEvent *ev = &e->xcrossing;
 
     if((ev->window == DefaultRootWindow(e->xany.display)) && !ev->same_screen)
-    {
-        selscreen = False;
-        focus(e->xany.display, &dc, NULL, jdwmconf);
-    }
+        focus(e->xany.display, &dc, NULL, ev->same_screen, jdwmconf);
 }
 
 void

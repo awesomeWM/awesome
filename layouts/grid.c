@@ -46,6 +46,6 @@ grid(Display *disp, jdwm_config *jdwmconf)
         }
         else
             ban(c);
-    focus(disp, &dc, NULL, jdwmconf);
+    focus(disp, &dc, NULL, True, jdwmconf);
     restack(disp, jdwmconf);
 }

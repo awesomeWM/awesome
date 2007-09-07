@@ -16,7 +16,6 @@
 extern int sx, sy, sw, sh;      /* screen geometry */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
-extern Bool selscreen;
 extern Atom jdwmprops, wmatom[WMLast], netatom[NetLast];
 
 /** Attach client stack to clients stacks
@@ -236,10 +235,11 @@ detach(Client * c)
  * \param disp Display ref
  * \param drawcontext drawcontext ref
  * \param c client
+ * \param selscreen True if current screen is selected
  * \param jdwmconf jdwm config
  */
 void
-focus(Display *disp, DC *drawcontext, Client * c, jdwm_config *jdwmconf)
+focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, jdwm_config *jdwmconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags)))
@@ -539,7 +539,7 @@ unmanage(Client * c, DC *drawcontext, long state, jdwm_config *jdwmconf)
     detach(c);
     detachstack(c);
     if(sel == c)
-        focus(c->display, drawcontext, NULL, jdwmconf);
+        focus(c->display, drawcontext, NULL, True, jdwmconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     setclientstate(c, state);
     XSync(c->display, False);

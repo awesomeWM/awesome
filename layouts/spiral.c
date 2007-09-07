@@ -60,7 +60,7 @@ fibonacci(Display *disp, jdwm_config *jdwmconf, int shape)
         }
         resize(c, nx, ny, nw - 2 * c->border, nh - 2 * c->border, False);
     }
-    focus(disp, &dc, NULL, jdwmconf);
+    focus(disp, &dc, NULL, True, jdwmconf);
     restack(disp, jdwmconf);
 }
 
