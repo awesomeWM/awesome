@@ -13,7 +13,7 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern int sx, sy, sw, sh;      /* screen geometry */
+extern int sx, sy;      /* screen geometry */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 extern Atom  wmatom[WMLast], netatom[NetLast];
@@ -346,7 +346,8 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, jdwm_c
     c->h = c->rh = wa->height;
     c->oldborder = wa->border_width;
     c->display = disp;
-    if(c->w == sw && c->h == sh)
+    if(c->w == DisplayWidth(disp, DefaultScreen(disp))
+       && c->h == DisplayHeight(disp, DefaultScreen(disp)))
     {
         c->x = sx;
         c->y = sy;
@@ -438,10 +439,10 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
     if(w <= 0 || h <= 0)
         return;
     /* offscreen appearance fixes */
-    if(x > sw)
-        x = sw - w - 2 * c->border;
-    if(y > sh)
-        y = sh - h - 2 * c->border;
+    if(x > DisplayWidth(c->display, DefaultScreen(c->display)))
+        x = DisplayWidth(c->display, DefaultScreen(c->display)) - w - 2 * c->border;
+    if(y > DisplayHeight(c->display, DefaultScreen(c->display)))
+        y = DisplayHeight(c->display, DefaultScreen(c->display)) - h - 2 * c->border;
     if(x + w + 2 * c->border < sx)
         x = sx;
     if(y + h + 2 * c->border < sy)

@@ -18,7 +18,7 @@
 #include "layout.h"
 #include "tag.h"
 
-int screen, sx, sy, sw, sh, wax, way, waw, wah;
+int screen, sx, sy, wax, way, waw, wah;
 Atom wmatom[WMLast], netatom[NetLast];
 Client *clients = NULL;
 Client *sel = NULL;
@@ -170,14 +170,12 @@ setup(Display *disp, jdwm_config *jdwmconf)
     compileregs(jdwmconf);
     /* geometry */
     sx = sy = 0;
-    sw = DisplayWidth(disp, screen);
-    sh = DisplayHeight(disp, screen);
     /* bar */
     dc.h = jdwmconf->statusbar.height = dc.font.height + 2;
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    barwin = XCreateWindow(disp, DefaultRootWindow(disp), sx, sy, sw, jdwmconf->statusbar.height, 0,
+    barwin = XCreateWindow(disp, DefaultRootWindow(disp), sx, sy, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0,
                            DefaultDepth(disp, screen), CopyFromParent,
                            DefaultVisual(disp, screen),
                            CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
@@ -185,7 +183,7 @@ setup(Display *disp, jdwm_config *jdwmconf)
     updatebarpos(disp, jdwmconf->statusbar);
     XMapRaised(disp, barwin);
     /* pixmap for everything */
-    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), sw, jdwmconf->statusbar.height, DefaultDepth(disp, screen));
+    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, DefaultDepth(disp, screen));
     dc.gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
     XSetLineAttributes(disp, dc.gc, 1, LineSolid, CapButt, JoinMiter);
     if(!dc.font.set)
@@ -221,8 +219,8 @@ updatebarpos(Display *disp, Statusbar statusbar)
 
     wax = sx;
     way = sy;
-    wah = sh;
-    waw = sw;
+    wah = DisplayHeight(disp, DefaultScreen(disp));
+    waw = DisplayWidth(disp, DefaultScreen(disp));
     switch (statusbar.position)
     {
     default:

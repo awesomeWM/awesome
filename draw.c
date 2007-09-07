@@ -2,7 +2,6 @@
 
 #include "layout.h"
 
-extern int sw;                  /* screen geometry */
 extern Window barwin;
 extern DC dc;                   /* global draw context */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
@@ -130,11 +129,11 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
     drawtext(disp, jdwmconf->current_layout->symbol, dc.norm);
     x = dc.x + dc.w;
     dc.w = textw(jdwmconf->statustext);
-    dc.x = sw - dc.w;
+    dc.x = DisplayWidth(disp, DefaultScreen(disp)) - dc.w;
     if(dc.x < x)
     {
         dc.x = x;
-        dc.w = sw - x;
+        dc.w = DisplayWidth(disp, DefaultScreen(disp)) - x;
     }
     drawtext(disp, jdwmconf->statustext, dc.norm);
     if((dc.w = dc.x - x) > jdwmconf->statusbar.height)
@@ -148,6 +147,6 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
         else
             drawtext(disp, NULL, dc.norm);
     }
-    XCopyArea(disp, dc.drawable, barwin, dc.gc, 0, 0, sw, jdwmconf->statusbar.height, 0, 0);
+    XCopyArea(disp, dc.drawable, barwin, dc.gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0, 0);
     XSync(disp, False);
 }

@@ -13,7 +13,7 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern int screen, sw, sh;      /* screen geometry */
+extern int screen;      /* screen geometry */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Window barwin;
 extern DC dc;                   /* global draw context */
@@ -203,10 +203,10 @@ handle_event_configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((
                 c->w = ev->width;
             if(ev->value_mask & CWHeight)
                 c->h = ev->height;
-            if((c->x + c->w) > sw && c->isfloating)
-                c->x = sw / 2 - c->w / 2;       /* center in x direction */
-            if((c->y + c->h) > sh && c->isfloating)
-                c->y = sh / 2 - c->h / 2;       /* center in y direction */
+            if((c->x + c->w) > DisplayWidth(c->display, DefaultScreen(c->display)) && c->isfloating)
+                c->x = DisplayWidth(c->display, DefaultScreen(c->display)) / 2 - c->w / 2;       /* center in x direction */
+            if((c->y + c->h) > DisplayHeight(c->display, DefaultScreen(c->display)) && c->isfloating)
+                c->y = DisplayHeight(c->display, DefaultScreen(c->display)) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 configure(c);
             if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
@@ -234,13 +234,13 @@ handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
 {
     XConfigureEvent *ev = &e->xconfigure;
 
-    if(ev->window == DefaultRootWindow(e->xany.display) && (ev->width != sw || ev->height != sh))
+    if(ev->window == DefaultRootWindow(e->xany.display) && (ev->width != DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)) || ev->height != DisplayHeight(e->xany.display, DefaultScreen(e->xany.display))))
     {
-        sw = ev->width;
-        sh = ev->height;
+        DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)) = ev->width;
+        DisplayHeight(e->xany.display, DefaultScreen(e->xany.display)) = ev->height;
         XFreePixmap(e->xany.display, dc.drawable);
-        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), sw, jdwmconf->statusbar.height, DefaultDepth(e->xany.display, screen));
-        XResizeWindow(e->xany.display, barwin, sw, jdwmconf->statusbar.height);
+        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height, DefaultDepth(e->xany.display, screen));
+        XResizeWindow(e->xany.display, barwin, DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height);
         updatebarpos(e->xany.display, jdwmconf->statusbar);
         arrange(e->xany.display, jdwmconf);
     }
