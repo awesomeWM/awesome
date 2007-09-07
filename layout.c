@@ -142,12 +142,14 @@ void
 savejdwmprops(Display *disp, jdwm_config *jdwmconf)
 {
     int i;
-    char prop[128];
+    char *prop;
 
-    for(i = 0; i < jdwmconf->ntags && i < ssizeof(prop) - 1; i++)
+    prop = p_new(char, jdwmconf->ntags + 1);
+    for(i = 0; i < jdwmconf->ntags; i++)
         prop[i] = jdwmconf->selected_tags[i] ? '1' : '0';
     prop[i] = '\0';
     XChangeProperty(disp, DefaultRootWindow(disp), jdwmprops, XA_STRING, 8, PropModeReplace, (unsigned char *) prop, i);
+    p_delete(&prop);
 }
 
 void
