@@ -143,6 +143,11 @@ scan(Display *disp, jdwm_config *jdwmconf)
         XFree(wins);
 }
 
+/** Setup everything before running
+ * \param disp Display ref
+ * \param jdwmconf jdwm config ref
+ * \todo clean things...
+ */
 static void
 setup(Display *disp, jdwm_config *jdwmconf)
 {
