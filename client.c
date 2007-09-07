@@ -13,7 +13,6 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern int sx, sy;      /* screen geometry */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 extern Atom  wmatom[WMLast], netatom[NetLast];
@@ -349,8 +348,8 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, jdwm_c
     if(c->w == DisplayWidth(disp, DefaultScreen(disp))
        && c->h == DisplayHeight(disp, DefaultScreen(disp)))
     {
-        c->x = sx;
-        c->y = sy;
+        c->x = 0;
+        c->y = 0;
         c->border = wa->border_width;
     }
     else
@@ -443,10 +442,10 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
         x = DisplayWidth(c->display, DefaultScreen(c->display)) - w - 2 * c->border;
     if(y > DisplayHeight(c->display, DefaultScreen(c->display)))
         y = DisplayHeight(c->display, DefaultScreen(c->display)) - h - 2 * c->border;
-    if(x + w + 2 * c->border < sx)
-        x = sx;
-    if(y + h + 2 * c->border < sy)
-        y = sy;
+    if(x + w + 2 * c->border < 0)
+        x = 0;
+    if(y + h + 2 * c->border < 0)
+        y = 0;
     if(c->x != x || c->y != y || c->w != w || c->h != h)
     {
         c->x = wc.x = x;

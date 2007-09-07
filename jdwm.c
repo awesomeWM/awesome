@@ -18,7 +18,7 @@
 #include "layout.h"
 #include "tag.h"
 
-int sx, sy, wax, way, waw, wah;
+int wax, way, waw, wah;
 Atom wmatom[WMLast], netatom[NetLast];
 Client *clients = NULL;
 Client *sel = NULL;
@@ -167,14 +167,12 @@ setup(Display *disp, jdwm_config *jdwmconf)
     XSelectInput(disp, DefaultRootWindow(disp), wa.event_mask);
     grabkeys(disp, jdwmconf);
     compileregs(jdwmconf);
-    /* geometry */
-    sx = sy = 0;
     /* bar */
     dc.h = jdwmconf->statusbar.height = dc.font.height + 2;
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    jdwmconf->statusbar.window = XCreateWindow(disp, DefaultRootWindow(disp), sx, sy, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0,
+    jdwmconf->statusbar.window = XCreateWindow(disp, DefaultRootWindow(disp), 0, 0, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0,
                                                DefaultDepth(disp, DefaultScreen(disp)), CopyFromParent,
                                                DefaultVisual(disp, DefaultScreen(disp)),
                                                CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
@@ -216,8 +214,8 @@ updatebarpos(Display *disp, Statusbar statusbar)
 {
     XEvent ev;
 
-    wax = sx;
-    way = sy;
+    wax = 0;
+    way = 0;
     wah = DisplayHeight(disp, DefaultScreen(disp));
     waw = DisplayWidth(disp, DefaultScreen(disp));
     switch (statusbar.position)
@@ -225,14 +223,14 @@ updatebarpos(Display *disp, Statusbar statusbar)
     default:
         wah -= statusbar.height;
         way += statusbar.height;
-        XMoveWindow(disp, statusbar.window, sx, sy);
+        XMoveWindow(disp, statusbar.window, 0, 0);
         break;
     case BarBot:
         wah -= statusbar.height;
-        XMoveWindow(disp, statusbar.window, sx, sy + wah);
+        XMoveWindow(disp, statusbar.window, 0, wah);
         break;
     case BarOff:
-        XMoveWindow(disp, statusbar.window, sx, sy - statusbar.height);
+        XMoveWindow(disp, statusbar.window, 0, 0 - statusbar.height);
         break;
     }
     XSync(disp, False);
