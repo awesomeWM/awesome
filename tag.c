@@ -12,7 +12,6 @@
 extern Client *sel;             /* global client list */
 
 static Regs *regs = NULL;
-static char prop[512];
 
 /** This function returns the index of
  * the tag given un argument in *tags
@@ -37,14 +36,23 @@ idxoftag(const char *tag_to_find, const char **tags, int ntags)
 void
 applyrules(Client * c, jdwm_config *jdwmconf)
 {
-    int i, j;
+    int i, j, len = 0;
     regmatch_t tmp;
     Bool matched = False;
     XClassHint ch = { 0, 0 };
+    char *prop;
+
+    if(ch.res_class)
+        len += strlen(ch.res_class);
+    if(ch.res_name)
+        len += strlen(ch.res_name);
+    len += strlen(c->name);
+
+    prop = p_new(char, len + 1);
 
     /* rule matching */
     XGetClassHint(c->display, c->win, &ch);
-    snprintf(prop, sizeof(prop), "%s:%s:%s",
+    snprintf(prop, len + 1, "%s:%s:%s",
              ch.res_class ? ch.res_class : "", ch.res_name ? ch.res_name : "", c->name);
     for(i = 0; i < jdwmconf->nrules; i++)
         if(regs[i].propregex && !regexec(regs[i].propregex, prop, 1, &tmp, 0))
@@ -57,6 +65,7 @@ applyrules(Client * c, jdwm_config *jdwmconf)
                     c->tags[j] = True;
                 }
         }
+    p_delete(&prop);
     if(ch.res_class)
         XFree(ch.res_class);
     if(ch.res_name)
