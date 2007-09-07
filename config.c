@@ -17,6 +17,8 @@
 #include "layouts/spiral.h"
 #include "layouts/floating.h"
 
+int blw = 0;
+
 /* static */
 static void initfont(const char *, Display *, DC *);
 static unsigned long initcolor(const char *colstr, Display *, int);
@@ -195,6 +197,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
         eprint("error parsing configuration file at line %d: %s\n",
                config_error_line(&jdwmlibconf), config_error_text(&jdwmlibconf));
 
+    /* font */
+    initfont(config_lookup_string(&jdwmlibconf, "jdwm.font"), disp, drawcontext);
+
     /* layouts */
     conflayouts = config_lookup(&jdwmlibconf, "jdwm.layouts");
 
@@ -210,6 +215,10 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
             name_func_lookup(config_setting_get_string_elem(confsublayouts, 1), LayoutsList);
         if(!jdwmconf->layouts[i].arrange)
             eprint("unknown layout in configuration file\n");
+
+        j = textw(jdwmconf->layouts[i].symbol);
+        if(j > blw)
+            blw = j;
     }
 
     jdwmconf->layouts[i].symbol = NULL;
@@ -314,9 +323,6 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
 
     /* mwfact */
     jdwmconf->mwfact = config_lookup_float(&jdwmlibconf, "jdwm.mwfact");
-
-    /* font */
-    initfont(config_lookup_string(&jdwmlibconf, "jdwm.font"), disp, drawcontext);
 
     /* colors */
     dc.norm[ColBorder] = initcolor(config_lookup_string(&jdwmlibconf, "jdwm.normal_border_color"),

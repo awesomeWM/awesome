@@ -10,8 +10,6 @@
 #include "layouts/floating.h"
 #include "util.h"
 
-int blw = 0;
-
 /* extern */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Window barwin;
@@ -72,19 +70,6 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
     {
         focus(c->display, &dc, c, True, jdwmconf);
         restack(c->display, jdwmconf);
-    }
-}
-
-void
-initlayouts(jdwm_config * jdwmconf)
-{
-    int w, i;
-
-    for(blw = i = 0; i < jdwmconf->nlayouts; i++)
-    {
-        w = textw(jdwmconf->layouts[i].symbol);
-        if(w > blw)
-            blw = w;
     }
 }
 

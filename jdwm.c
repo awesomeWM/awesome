@@ -174,7 +174,6 @@ setup(Display *disp, jdwm_config *jdwmconf)
     sx = sy = 0;
     sw = DisplayWidth(disp, screen);
     sh = DisplayHeight(disp, screen);
-    initlayouts(jdwmconf);
     /* bar */
     dc.h = bh = dc.font.height + 2;
     wa.override_redirect = 1;
