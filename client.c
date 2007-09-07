@@ -500,16 +500,22 @@ void
 saveprops(Client * c, int ntags)
 {
     int i;
-    char prop[128];
+    char *prop;
 
-    for(i = 0; i < ntags && i < ssizeof(prop) - 1; i++)
+    prop = p_new(char, ntags + 2);
+
+    for(i = 0; i < ntags; i++)
         prop[i] = c->tags[i] ? '1' : '0';
-    if(i < ssizeof(prop) - 1)
-        prop[i++] = c->isfloating ? '1' : '0';
 
-    prop[i] = '\0';
+    if(i <= ntags)
+        prop[i] = c->isfloating ? '1' : '0';
+
+    prop[++i] = '\0';
+
     XChangeProperty(c->display, c->win, jdwmprops, XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
+
+    p_delete(&prop);
 }
 
 void
