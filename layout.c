@@ -125,13 +125,12 @@ restack(Display * disp, jdwm_config *jdwmconf)
             wc.sibling = sel->win;
         }
         for(c = clients; c; c = c->next)
-            if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
-            {
-                if(c == sel)
-                    continue;
-                XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
-                wc.sibling = c->win;
-            }
+        {
+            if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags) || c == sel)
+                continue;
+            XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
+            wc.sibling = c->win;
+        }
     }
     XSync(disp, False);
     while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
