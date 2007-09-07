@@ -133,8 +133,6 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
     return NULL;
 }
 
-/** \todo remove screen */
-extern int screen;
 /** \todo remove dc */
 extern DC dc;
 
@@ -153,7 +151,7 @@ uicb_reload(Display *disp, jdwm_config *jdwmconf, const char *arg __attribute__ 
     p_delete(&jdwmconf->selected_tags);
     p_delete(&jdwmconf->layouts);
     p_delete(&jdwmconf->tag_layouts);
-    parse_config(disp, screen, &dc, jdwmconf);
+    parse_config(disp, DefaultScreen(disp), &dc, jdwmconf);
 }
 
 /** Set default configuration

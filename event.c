@@ -13,7 +13,6 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern int screen;      /* screen geometry */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Window barwin;
 extern DC dc;                   /* global draw context */
@@ -239,7 +238,7 @@ handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
         DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)) = ev->width;
         DisplayHeight(e->xany.display, DefaultScreen(e->xany.display)) = ev->height;
         XFreePixmap(e->xany.display, dc.drawable);
-        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height, DefaultDepth(e->xany.display, screen));
+        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height, DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
         XResizeWindow(e->xany.display, barwin, DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height);
         updatebarpos(e->xany.display, jdwmconf->statusbar);
         arrange(e->xany.display, jdwmconf);

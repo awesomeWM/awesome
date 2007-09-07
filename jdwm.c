@@ -18,7 +18,7 @@
 #include "layout.h"
 #include "tag.h"
 
-int screen, sx, sy, wax, way, waw, wah;
+int sx, sy, wax, way, waw, wah;
 Atom wmatom[WMLast], netatom[NetLast];
 Client *clients = NULL;
 Client *sel = NULL;
@@ -176,14 +176,14 @@ setup(Display *disp, jdwm_config *jdwmconf)
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
     barwin = XCreateWindow(disp, DefaultRootWindow(disp), sx, sy, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0,
-                           DefaultDepth(disp, screen), CopyFromParent,
-                           DefaultVisual(disp, screen),
+                           DefaultDepth(disp, DefaultScreen(disp)), CopyFromParent,
+                           DefaultVisual(disp, DefaultScreen(disp)),
                            CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, barwin, cursor[CurNormal]);
     updatebarpos(disp, jdwmconf->statusbar);
     XMapRaised(disp, barwin);
     /* pixmap for everything */
-    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, DefaultDepth(disp, screen));
+    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
     dc.gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
     XSetLineAttributes(disp, dc.gc, 1, LineSolid, CapButt, JoinMiter);
     if(!dc.font.set)
@@ -285,8 +285,7 @@ main(int argc, char *argv[])
     if(!(dpy = XOpenDisplay(NULL)))
         eprint("jdwm: cannot open display\n");
     xfd = ConnectionNumber(dpy);
-    screen = DefaultScreen(dpy);
-    root = RootWindow(dpy, screen);
+    root = RootWindow(dpy, DefaultScreen(dpy));
     XSetErrorHandler(xerrorstart);
 
     /* this causes an error if some other window manager is running */
@@ -300,7 +299,7 @@ main(int argc, char *argv[])
     XSetErrorHandler(NULL);
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
-    parse_config(dpy, screen, &dc, &jdwmconf);
+    parse_config(dpy, DefaultScreen(dpy), &dc, &jdwmconf);
     setup(dpy, &jdwmconf);
     drawstatus(dpy, &jdwmconf);
     scan(dpy, &jdwmconf);
