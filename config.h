@@ -63,6 +63,8 @@ typedef struct
     int height;
     /** Bar position */
     int position;
+    /** Window */
+    Window window;
 } Statusbar;
 
 /** Main configuration structure */

@@ -2,7 +2,6 @@
 
 #include "layout.h"
 
-extern Window barwin;
 extern DC dc;                   /* global draw context */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 
@@ -147,6 +146,6 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
         else
             drawtext(disp, NULL, dc.norm);
     }
-    XCopyArea(disp, dc.drawable, barwin, dc.gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0, 0);
+    XCopyArea(disp, dc.drawable, jdwmconf->statusbar.window, dc.gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0, 0);
     XSync(disp, False);
 }

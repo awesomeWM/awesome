@@ -14,7 +14,6 @@
 
 /* extern */
 extern int wax, way, wah, waw;  /* windowarea geometry */
-extern Window barwin;
 extern DC dc;                   /* global draw context */
 extern Cursor cursor[CurLast];
 extern Client *clients, *sel;   /* global client list */
@@ -125,7 +124,7 @@ handle_event_buttonpress(XEvent * e, jdwm_config *jdwmconf)
     Client *c;
     XButtonPressedEvent *ev = &e->xbutton;
 
-    if(barwin == ev->window)
+    if(jdwmconf->statusbar.window == ev->window)
     {
         x = 0;
         for(i = 0; i < jdwmconf->ntags; i++)
@@ -239,7 +238,7 @@ handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
         DisplayHeight(e->xany.display, DefaultScreen(e->xany.display)) = ev->height;
         XFreePixmap(e->xany.display, dc.drawable);
         dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height, DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
-        XResizeWindow(e->xany.display, barwin, DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height);
+        XResizeWindow(e->xany.display, jdwmconf->statusbar.window, DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height);
         updatebarpos(e->xany.display, jdwmconf->statusbar);
         arrange(e->xany.display, jdwmconf);
     }
@@ -274,7 +273,7 @@ handle_event_expose(XEvent * e, jdwm_config *jdwmconf)
 {
     XExposeEvent *ev = &e->xexpose;
 
-    if(!ev->count && barwin == ev->window)
+    if(!ev->count && jdwmconf->statusbar.window == ev->window)
         drawstatus(e->xany.display, jdwmconf);
 }
 

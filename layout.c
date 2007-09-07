@@ -12,7 +12,6 @@
 
 /* extern */
 extern int wax, way, wah, waw;  /* windowarea geometry */
-extern Window barwin;
 extern Client *clients, *sel;   /* global client list */
 extern DC dc;
 
@@ -102,7 +101,7 @@ restack(Display * disp, jdwm_config *jdwmconf)
     if(!IS_ARRANGE(floating))
     {
         wc.stack_mode = Below;
-        wc.sibling = barwin;
+        wc.sibling = jdwmconf->statusbar.window;
         if(!sel->isfloating)
         {
             XConfigureWindow(disp, sel->win, CWSibling | CWStackMode, &wc);

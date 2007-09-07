@@ -25,7 +25,6 @@ Client *sel = NULL;
 Client *stack = NULL;
 Cursor cursor[CurLast];
 DC dc;
-Window barwin;
 
 /* static */
 
@@ -81,7 +80,7 @@ cleanup(Display *disp, jdwm_config *jdwmconf)
     XUngrabKey(disp, AnyKey, AnyModifier, DefaultRootWindow(disp));
     XFreePixmap(disp, dc.drawable);
     XFreeGC(disp, dc.gc);
-    XDestroyWindow(disp, barwin);
+    XDestroyWindow(disp, jdwmconf->statusbar.window);
     XFreeCursor(disp, cursor[CurNormal]);
     XFreeCursor(disp, cursor[CurResize]);
     XFreeCursor(disp, cursor[CurMove]);
@@ -175,13 +174,13 @@ setup(Display *disp, jdwm_config *jdwmconf)
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    barwin = XCreateWindow(disp, DefaultRootWindow(disp), sx, sy, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0,
-                           DefaultDepth(disp, DefaultScreen(disp)), CopyFromParent,
-                           DefaultVisual(disp, DefaultScreen(disp)),
-                           CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-    XDefineCursor(disp, barwin, cursor[CurNormal]);
+    jdwmconf->statusbar.window = XCreateWindow(disp, DefaultRootWindow(disp), sx, sy, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0,
+                                               DefaultDepth(disp, DefaultScreen(disp)), CopyFromParent,
+                                               DefaultVisual(disp, DefaultScreen(disp)),
+                                               CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+    XDefineCursor(disp, jdwmconf->statusbar.window, cursor[CurNormal]);
     updatebarpos(disp, jdwmconf->statusbar);
-    XMapRaised(disp, barwin);
+    XMapRaised(disp, jdwmconf->statusbar.window);
     /* pixmap for everything */
     dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
     dc.gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
@@ -226,14 +225,14 @@ updatebarpos(Display *disp, Statusbar statusbar)
     default:
         wah -= statusbar.height;
         way += statusbar.height;
-        XMoveWindow(disp, barwin, sx, sy);
+        XMoveWindow(disp, statusbar.window, sx, sy);
         break;
     case BarBot:
         wah -= statusbar.height;
-        XMoveWindow(disp, barwin, sx, sy + wah);
+        XMoveWindow(disp, statusbar.window, sx, sy + wah);
         break;
     case BarOff:
-        XMoveWindow(disp, barwin, sx, sy - statusbar.height);
+        XMoveWindow(disp, statusbar.window, sx, sy - statusbar.height);
         break;
     }
     XSync(disp, False);
