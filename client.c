@@ -16,7 +16,7 @@
 extern int sx, sy, sw, sh;      /* screen geometry */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
-extern Atom jdwmprops, wmatom[WMLast], netatom[NetLast];
+extern Atom  wmatom[WMLast], netatom[NetLast];
 
 /** Attach client stack to clients stacks
  * \param c the client
@@ -313,7 +313,7 @@ loadprops(Client * c, int ntags)
 
     prop = p_new(char, ntags + 2);
 
-    if(gettextprop(c->display, c->win, jdwmprops, prop, ntags + 2))
+    if(gettextprop(c->display, c->win, JDWMPROPS_ATOM(c->display), prop, ntags + 2))
     {
         for(i = 0; i < ntags && prop[i]; i++)
             if((c->tags[i] = prop[i] == '1'))
@@ -511,7 +511,7 @@ saveprops(Client * c, int ntags)
 
     prop[++i] = '\0';
 
-    XChangeProperty(c->display, c->win, jdwmprops, XA_STRING, 8,
+    XChangeProperty(c->display, c->win, JDWMPROPS_ATOM(c->display), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
 
     p_delete(&prop);

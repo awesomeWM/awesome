@@ -8,6 +8,8 @@
 /** Check if current layout is arranged with a layout */
 #define IS_ARRANGE(layout)          (layout == jdwmconf->current_layout->arrange)
 
+#define JDWMPROPS_ATOM(disp)                    XInternAtom(disp, "_JDWM_PROPERTIES", False)
+
 void arrange(Display *, jdwm_config *);             /* arranges all windows depending on the layout in use */
 void restack(Display *, jdwm_config *);        /* restores z layers of all clients */
 void uicb_focusnext(Display *, jdwm_config *, const char *);   /* focuses next visible client */

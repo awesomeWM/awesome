@@ -19,7 +19,7 @@
 #include "tag.h"
 
 int screen, sx, sy, sw, sh, wax, way, waw, wah;
-Atom jdwmprops, wmatom[WMLast], netatom[NetLast];
+Atom wmatom[WMLast], netatom[NetLast];
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
@@ -148,7 +148,6 @@ setup(Display *disp, jdwm_config *jdwmconf)
     XSetWindowAttributes wa;
 
     /* init atoms */
-    jdwmprops = XInternAtom(disp, "_JDWM_PROPERTIES", False);
     wmatom[WMProtocols] = XInternAtom(disp, "WM_PROTOCOLS", False);
     wmatom[WMDelete] = XInternAtom(disp, "WM_DELETE_WINDOW", False);
     wmatom[WMName] = XInternAtom(disp, "WM_NAME", False);

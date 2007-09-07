@@ -14,7 +14,6 @@
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Window barwin;
 extern Client *clients, *sel;   /* global client list */
-extern Atom jdwmprops;
 extern DC dc;
 
 void
@@ -81,7 +80,7 @@ loadjdwmprops(Display *disp, jdwm_config * jdwmconf)
 
     prop = p_new(char, jdwmconf->ntags + 1);
 
-    if(gettextprop(disp, DefaultRootWindow(disp), jdwmprops, prop, jdwmconf->ntags + 1))
+    if(gettextprop(disp, DefaultRootWindow(disp), JDWMPROPS_ATOM(disp), prop, jdwmconf->ntags + 1))
         for(i = 0; i < jdwmconf->ntags && prop[i]; i++)
             jdwmconf->selected_tags[i] = prop[i] == '1';
 
@@ -131,7 +130,9 @@ savejdwmprops(Display *disp, jdwm_config *jdwmconf)
     for(i = 0; i < jdwmconf->ntags; i++)
         prop[i] = jdwmconf->selected_tags[i] ? '1' : '0';
     prop[i] = '\0';
-    XChangeProperty(disp, DefaultRootWindow(disp), jdwmprops, XA_STRING, 8, PropModeReplace, (unsigned char *) prop, i);
+    XChangeProperty(disp, DefaultRootWindow(disp),
+                    JDWMPROPS_ATOM(disp), XA_STRING, 8,
+                    PropModeReplace, (unsigned char *) prop, i);
     p_delete(&prop);
 }
 
