@@ -93,13 +93,15 @@ void
 loadjdwmprops(Display *disp, jdwm_config * jdwmconf)
 {
     int i;
-    char prop[128];
+    char *prop;
 
-    if(gettextprop(disp, DefaultRootWindow(disp), jdwmprops, prop, sizeof(prop)))
-    {
-        for(i = 0; i < jdwmconf->ntags && i < ssizeof(prop) - 1 && prop[i] != '\0'; i++)
+    prop = p_new(char, jdwmconf->ntags + 1);
+
+    if(gettextprop(disp, DefaultRootWindow(disp), jdwmprops, prop, jdwmconf->ntags + 1))
+        for(i = 0; i < jdwmconf->ntags && prop[i]; i++)
             jdwmconf->selected_tags[i] = prop[i] == '1';
-    }
+
+    p_delete(&prop);
 }
 
 void
