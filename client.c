@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 

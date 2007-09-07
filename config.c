@@ -5,7 +5,6 @@
  */
 
 #include <stdlib.h>
-#include <string.h>
 #include <libconfig.h>
 #include <X11/keysym.h>
 

@@ -1,7 +1,5 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <string.h>
-
 #include "layout.h"
 
 extern int sw;                  /* screen geometry */
