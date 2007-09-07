@@ -220,9 +220,10 @@ uicb_toggleview(Display *disp,
     arrange(disp, jdwmconf);
 }
 
-/**
+/** View tag
  * \param disp Display ref
- * \param arg
+ * \param jdwmconf jdwm config ref
+ * \param arg tag to view
  * \ingroup ui_callback
  */
 void
