@@ -15,7 +15,6 @@
 /* extern */
 extern int screen, sw, sh;      /* screen geometry */
 extern int wax, way, wah, waw;  /* windowarea geometry */
-extern int bh, blw;             /* bar height, bar layout label width */
 extern Window barwin;
 extern DC dc;                   /* global draw context */
 extern Cursor cursor[CurLast];
@@ -152,7 +151,7 @@ handle_event_buttonpress(XEvent * e, jdwm_config *jdwmconf)
                 return;
             }
         }
-        if((ev->x < x + blw) && ev->button == Button1)
+        if((ev->x < x + jdwmconf->statusbar.width) && ev->button == Button1)
             uicb_setlayout(e->xany.display, jdwmconf, NULL);
     }
     else if((c = getclient(ev->window)))
@@ -240,9 +239,9 @@ handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
         sw = ev->width;
         sh = ev->height;
         XFreePixmap(e->xany.display, dc.drawable);
-        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), sw, bh, DefaultDepth(e->xany.display, screen));
-        XResizeWindow(e->xany.display, barwin, sw, bh);
-        updatebarpos(e->xany.display, jdwmconf->current_bpos);
+        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), sw, jdwmconf->statusbar.height, DefaultDepth(e->xany.display, screen));
+        XResizeWindow(e->xany.display, barwin, sw, jdwmconf->statusbar.height);
+        updatebarpos(e->xany.display, jdwmconf->statusbar, jdwmconf->current_bpos);
         arrange(e->xany.display, jdwmconf);
     }
 }

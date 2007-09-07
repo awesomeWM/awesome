@@ -9,7 +9,6 @@
 
 /* extern */
 extern int wax, way, wah, waw;  /* windowarea geometry */
-extern int bh;                  /* bar height */
 extern Client *sel, *clients;
 
 /* static */
@@ -85,7 +84,7 @@ _tile(jdwm_config *jdwmconf, const Bool right)
     mh = (n <= nmaster) ? wah / (n > 0 ? n : 1) : wah / nmaster;
     mw = (n <= nmaster) ? waw : mwfact * waw;
     th = (n > nmaster) ? wah / (n - nmaster) : 0;
-    if(n > nmaster && th < bh)
+    if(n > nmaster && th < jdwmconf->statusbar.height)
         th = wah;
 
     nx = wax;

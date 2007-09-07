@@ -5,7 +5,6 @@
 #include "tag.h"
 
 extern int wah, waw;            /* windowarea geometry */
-extern int bh, bpos;            /* bar height, bar position */
 extern Client *clients;         /* global client list and stack */
 extern DC dc;
 
@@ -37,7 +36,7 @@ grid(Display *disp, jdwm_config *jdwmconf)
                 continue;
             c->ismax = False;
             cx = (i / rows) * cw;
-            cy = (i % rows) * ch + (jdwmconf->current_bpos == BarTop ? bh : 0);   // bh? adjust
+            cy = (i % rows) * ch + (jdwmconf->current_bpos == BarTop ? jdwmconf->statusbar.height : 0);   // bh? adjust
             /* adjust height/width of last row/column's windows */
             ah = ((i + 1) % rows == 0) ? wah - ch * rows : 0;
             aw = (i >= rows * (cols - 1)) ? waw - cw * cols : 0;

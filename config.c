@@ -17,8 +17,6 @@
 #include "layouts/spiral.h"
 #include "layouts/floating.h"
 
-int blw = 0;
-
 /* static */
 static void initfont(const char *, Display *, DC *);
 static unsigned long initcolor(const char *colstr, Display *, int);
@@ -165,6 +163,8 @@ static void
 set_default_config(jdwm_config *jdwmconf)
 {
     strcpy(jdwmconf->statustext, "jdwm-" VERSION);
+    jdwmconf->statusbar.width = 0;
+    jdwmconf->statusbar.height = 0;
 }
 
 /** Parse configuration file and initialize some stuff
@@ -217,8 +217,8 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
             eprint("unknown layout in configuration file\n");
 
         j = textw(jdwmconf->layouts[i].symbol);
-        if(j > blw)
-            blw = j;
+        if(j > jdwmconf->statusbar.width)
+            jdwmconf->statusbar.width = j;
     }
 
     jdwmconf->layouts[i].symbol = NULL;

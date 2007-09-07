@@ -54,6 +54,13 @@ typedef struct
     const char *arg;
 } Key;
 
+/** Status bar */
+typedef struct
+{
+    int width;
+    int height;
+} Statusbar;
+
 /** Main configuration structure */
 struct jdwm_config
 {
@@ -101,6 +108,8 @@ struct jdwm_config
     char statustext[256];
     /** Current layout */
     Layout * current_layout;
+    /** Status bar */
+    Statusbar statusbar;
 };
 
 void parse_config(Display *, int, DC *, jdwm_config *);        /* parse configuration file */

@@ -178,7 +178,7 @@ uicb_togglebar(Display *disp,
         jdwmconf->current_bpos = (jdwmconf->bpos == BarOff) ? BarTop : jdwmconf->bpos;
     else
         jdwmconf->current_bpos = BarOff;
-    updatebarpos(disp, jdwmconf->current_bpos);
+    updatebarpos(disp, jdwmconf->statusbar, jdwmconf->current_bpos);
     arrange(disp, jdwmconf);
 }
 

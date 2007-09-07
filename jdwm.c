@@ -19,7 +19,6 @@
 #include "tag.h"
 
 int screen, sx, sy, sw, sh, wax, way, waw, wah;
-int bh;
 Atom jdwmprops, wmatom[WMLast], netatom[NetLast];
 Client *clients = NULL;
 Client *sel = NULL;
@@ -175,19 +174,19 @@ setup(Display *disp, jdwm_config *jdwmconf)
     sw = DisplayWidth(disp, screen);
     sh = DisplayHeight(disp, screen);
     /* bar */
-    dc.h = bh = dc.font.height + 2;
+    dc.h = jdwmconf->statusbar.height = dc.font.height + 2;
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    barwin = XCreateWindow(disp, DefaultRootWindow(disp), sx, sy, sw, bh, 0,
+    barwin = XCreateWindow(disp, DefaultRootWindow(disp), sx, sy, sw, jdwmconf->statusbar.height, 0,
                            DefaultDepth(disp, screen), CopyFromParent,
                            DefaultVisual(disp, screen),
                            CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, barwin, cursor[CurNormal]);
-    updatebarpos(disp, jdwmconf->current_bpos);
+    updatebarpos(disp, jdwmconf->statusbar, jdwmconf->current_bpos);
     XMapRaised(disp, barwin);
     /* pixmap for everything */
-    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), sw, bh, DefaultDepth(disp, screen));
+    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), sw, jdwmconf->statusbar.height, DefaultDepth(disp, screen));
     dc.gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
     XSetLineAttributes(disp, dc.gc, 1, LineSolid, CapButt, JoinMiter);
     if(!dc.font.set)
@@ -217,7 +216,7 @@ uicb_quit(Display *disp __attribute__ ((unused)),
 }
 
 void
-updatebarpos(Display *disp, int bpos)
+updatebarpos(Display *disp, Statusbar statusbar, int bpos)
 {
     XEvent ev;
 
@@ -228,16 +227,16 @@ updatebarpos(Display *disp, int bpos)
     switch (bpos)
     {
     default:
-        wah -= bh;
-        way += bh;
+        wah -= statusbar.height;
+        way += statusbar.height;
         XMoveWindow(disp, barwin, sx, sy);
         break;
     case BarBot:
-        wah -= bh;
+        wah -= statusbar.height;
         XMoveWindow(disp, barwin, sx, sy + wah);
         break;
     case BarOff:
-        XMoveWindow(disp, barwin, sx, sy - bh);
+        XMoveWindow(disp, barwin, sx, sy - statusbar.height);
         break;
     }
     XSync(disp, False);

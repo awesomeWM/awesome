@@ -3,7 +3,6 @@
 #include "layout.h"
 
 extern int sw;                  /* screen geometry */
-extern int bh, blw;             /* bar height, bar layout label width */
 extern Window barwin;
 extern DC dc;                   /* global draw context */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
@@ -127,7 +126,7 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
         }
         dc.x += dc.w;
     }
-    dc.w = blw;
+    dc.w = jdwmconf->statusbar.width;
     drawtext(disp, jdwmconf->current_layout->symbol, dc.norm);
     x = dc.x + dc.w;
     dc.w = textw(jdwmconf->statustext);
@@ -138,7 +137,7 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
         dc.w = sw - x;
     }
     drawtext(disp, jdwmconf->statustext, dc.norm);
-    if((dc.w = dc.x - x) > bh)
+    if((dc.w = dc.x - x) > jdwmconf->statusbar.height)
     {
         dc.x = x;
         if(sel)
@@ -149,6 +148,6 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
         else
             drawtext(disp, NULL, dc.norm);
     }
-    XCopyArea(disp, dc.drawable, barwin, dc.gc, 0, 0, sw, bh, 0, 0);
+    XCopyArea(disp, dc.drawable, barwin, dc.gc, 0, 0, sw, jdwmconf->statusbar.height, 0, 0);
     XSync(disp, False);
 }

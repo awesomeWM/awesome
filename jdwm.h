@@ -42,7 +42,7 @@ enum
 { WMProtocols, WMDelete, WMName, WMState, WMLast };     /* default atoms */
 
 Bool gettextprop(Display *, Window, Atom, char *, unsigned int);   /* return text property, UTF-8 compliant */
-void updatebarpos(Display *, int);        /* updates the bar position */
+void updatebarpos(Display *, Statusbar, int);        /* updates the bar position */
 void uicb_quit(Display *, jdwm_config *, const char *);        /* quit jdwm nicely */
 int xerror(Display *, XErrorEvent *);   /* jdwm's X error handler */
 
