@@ -174,11 +174,11 @@ uicb_togglebar(Display *disp,
                jdwm_config *jdwmconf,
                const char *arg __attribute__ ((unused)))
 {
-    if(jdwmconf->current_bpos == BarOff)
-        jdwmconf->current_bpos = (jdwmconf->bpos == BarOff) ? BarTop : jdwmconf->bpos;
+    if(jdwmconf->statusbar.position == BarOff)
+        jdwmconf->statusbar.position = (jdwmconf->statusbar.position == BarOff) ? BarTop : jdwmconf->statusbar_default_position;
     else
-        jdwmconf->current_bpos = BarOff;
-    updatebarpos(disp, jdwmconf->statusbar, jdwmconf->current_bpos);
+        jdwmconf->statusbar.position = BarOff;
+    updatebarpos(disp, jdwmconf->statusbar);
     arrange(disp, jdwmconf);
 }
 

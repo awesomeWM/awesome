@@ -57,8 +57,12 @@ typedef struct
 /** Status bar */
 typedef struct
 {
+    /** Bar width */
     int width;
+    /** Bar height */
     int height;
+    /** Bar position */
+    int position;
 } Statusbar;
 
 /** Main configuration structure */
@@ -90,10 +94,8 @@ struct jdwm_config
     KeySym modkey; 
     /** Numlock mask */
     unsigned int numlockmask;
-    /** Bar position */
-    int bpos;
-    /** Current bar position */
-    int current_bpos;
+    /** Default status bar position */
+    int statusbar_default_position;
     /** Border size */
     int borderpx;
     /** Master width factor */

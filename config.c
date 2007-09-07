@@ -299,13 +299,13 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
     tmp = config_lookup_string(&jdwmlibconf, "jdwm.barpos");
 
     if(!strncmp(tmp, "BarTop", 6))
-        jdwmconf->bpos = BarTop;
+        jdwmconf->statusbar_default_position = BarTop;
     else if(!strncmp(tmp, "BarBot", 6))
-        jdwmconf->bpos = BarBot;
+        jdwmconf->statusbar_default_position = BarBot;
     else if(!strncmp(tmp, "BarOff", 6))
-        jdwmconf->bpos = BarOff;
+        jdwmconf->statusbar_default_position = BarOff;
 
-    jdwmconf->current_bpos = jdwmconf->bpos;
+    jdwmconf->statusbar.position = jdwmconf->statusbar_default_position;
 
     /* borderpx */
     jdwmconf->borderpx = config_lookup_int(&jdwmlibconf, "jdwm.borderpx");

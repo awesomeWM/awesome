@@ -183,7 +183,7 @@ setup(Display *disp, jdwm_config *jdwmconf)
                            DefaultVisual(disp, screen),
                            CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, barwin, cursor[CurNormal]);
-    updatebarpos(disp, jdwmconf->statusbar, jdwmconf->current_bpos);
+    updatebarpos(disp, jdwmconf->statusbar);
     XMapRaised(disp, barwin);
     /* pixmap for everything */
     dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), sw, jdwmconf->statusbar.height, DefaultDepth(disp, screen));
@@ -216,7 +216,7 @@ uicb_quit(Display *disp __attribute__ ((unused)),
 }
 
 void
-updatebarpos(Display *disp, Statusbar statusbar, int bpos)
+updatebarpos(Display *disp, Statusbar statusbar)
 {
     XEvent ev;
 
@@ -224,7 +224,7 @@ updatebarpos(Display *disp, Statusbar statusbar, int bpos)
     way = sy;
     wah = sh;
     waw = sw;
-    switch (bpos)
+    switch (statusbar.position)
     {
     default:
         wah -= statusbar.height;
