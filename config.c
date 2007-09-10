@@ -40,27 +40,31 @@ typedef struct
 } KeyMod;
 
 /** List of keyname and corresponding X11 mask codes */
-static const KeyMod KeyModList[] = { {"Shift", ShiftMask},
-{"Lock", LockMask},
-{"Control", ControlMask},
-{"Mod1", Mod1Mask},
-{"Mod2", Mod2Mask},
-{"Mod3", Mod3Mask},
-{"Mod4", Mod4Mask},
-{"Mod5", Mod5Mask},
-{"None", 0}
+static const KeyMod KeyModList[] =
+{
+    {"Shift", ShiftMask},
+    {"Lock", LockMask},
+    {"Control", ControlMask},
+    {"Mod1", Mod1Mask},
+    {"Mod2", Mod2Mask},
+    {"Mod3", Mod3Mask},
+    {"Mod4", Mod4Mask},
+    {"Mod5", Mod5Mask},
+    {"None", 0}
 };
 
 /** List of available layouts and link between name and functions */
-static const NameFuncLink LayoutsList[] = { {"tile", tile},
-{"tileleft", tileleft},
-{"floating", floating},
-{"grid", grid},
-{"spiral", spiral},
-{"dwindle", dwindle},
-{"bstack", bstack},
-{"bstackportrait", bstackportrait},
-{NULL, NULL}
+static const NameFuncLink LayoutsList[] =
+{
+    {"tile", tile},
+    {"tileleft", tileleft},
+    {"floating", floating},
+    {"grid", grid},
+    {"spiral", spiral},
+    {"dwindle", dwindle},
+    {"bstack", bstack},
+    {"bstackportrait", bstackportrait},
+    {NULL, NULL}
 };
 
 /** List of available UI bindable callbacks and functions */
