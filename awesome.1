@@ -1,11 +1,11 @@
-.TH DWM 1 dwm\-VERSION
+.TH AWESOME 1 awesome\-VERSION
 .SH NAME
-dwm \- dynamic window manager
+awesome \- awesome window manager
 .SH SYNOPSIS
-.B dwm
+.B awesome
 .RB [ \-v ]
 .SH DESCRIPTION
-dwm is a dynamic window manager for X. It manages windows in tiled and
+awesome is a dynamic window manager for X. It manages windows in tiled and
 floating layouts. Either layout can be applied dynamically, optimizing the
 environment for the application in use and the task performed.
 .P
@@ -18,7 +18,7 @@ regardless of the layout applied.
 Windows are grouped by tags. Each window can be tagged with one or multiple
 tags. Selecting certain tags displays all windows with these tags.
 .P
-dwm contains a small status bar which displays all available tags, the layout,
+awesome contains a small status bar which displays all available tags, the layout,
 the title of the focused window, and the text read from standard input. A
 floating window is indicated with an empty square and a maximized
 floating window is indicated with a filled square before the windows
@@ -27,7 +27,7 @@ the focused window are indicated with a filled square in the top left
 corner.  The tags which are applied to one or more windows are indicated
 with an empty square in the top left corner.
 .P
-dwm draws a small border around windows to indicate the focus state.
+awesome draws a small border around windows to indicate the focus state.
 .SH OPTIONS
 .TP
 .B \-v
@@ -113,7 +113,7 @@ Add/remove all windows with
 tag to/from the view.
 .TP
 .B Mod1\-Shift\-q
-Quit dwm.
+Quit awesome.
 .SS Mouse commands
 .TP
 .B Mod1\-Button1
@@ -125,16 +125,15 @@ Zooms/cycles current window to/from master area (tiled layout only).
 .B Mod1\-Button3
 Resize current window while dragging (floating layout only).
 .SH CUSTOMIZATION
-dwm is customized by creating a custom config.h and (re)compiling the source
-code. This keeps it fast, secure and simple.
+awesome is customized by creating a custom ~/.awesomerc
 .SH SEE ALSO
 .BR dmenu (1)
 .SH BUGS
 The status bar may display
 .BR "EOF"
-when dwm has been started by an X session manager like
+when awesome has been started by an X session manager like
 .BR xdm (1),
-because those close standard output before executing dwm.
+because those close standard output before executing awesome.
 .P
 Java applications which use the XToolkit/XAWT backend may draw grey windows
 only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and early
