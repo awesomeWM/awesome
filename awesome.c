@@ -19,7 +19,7 @@
 #include "tag.h"
 
 int wax, way, waw, wah;
-Atom wmatom[WMLast], netatom[NetLast];
+Atom netatom[NetLast];
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
