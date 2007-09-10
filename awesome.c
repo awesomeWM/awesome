@@ -143,16 +143,16 @@ scan(Display *disp, awesome_config *awesomeconf)
  * \param awesomeconf awesome config ref
  * \todo clean things...
  */
+enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
+static Atom netatom[NetWMName];
 static void
 setup(Display *disp, awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
-    enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
-    Atom netatom[NetWMName];
 
     netatom[NetSupported] = XInternAtom(disp, "_NET_SUPPORTED", False);
     netatom[NetWMName] = XInternAtom(disp, "_NET_WM_NAME", False);
-    XChangeProperty(disp, DefaultRootWindow(disp), XInternAtom(disp, "_NET_SUPPORTED", False),
+    XChangeProperty(disp, DefaultRootWindow(disp), netatom[NetSupported],
                     XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
     /* init cursors */
     cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);
