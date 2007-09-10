@@ -1,14 +1,14 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_LAYOUT_H
-#define JDWM_LAYOUT_H
+#ifndef AWESOME_LAYOUT_H
+#define AWESOME_LAYOUT_H
 
 #include "client.h"
 
 /** Check if current layout is arranged with a layout */
 #define IS_ARRANGE(layout)          (layout == awesomeconf->current_layout->arrange)
 
-#define JDWMPROPS_ATOM(disp)                    XInternAtom(disp, "_JDWM_PROPERTIES", False)
+#define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 
 void arrange(Display *, awesome_config *);             /* arranges all windows depending on the layout in use */
 void restack(Display *, awesome_config *);        /* restores z layers of all clients */

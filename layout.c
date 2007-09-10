@@ -79,7 +79,7 @@ loadawesomeprops(Display *disp, awesome_config * awesomeconf)
 
     prop = p_new(char, awesomeconf->ntags + 1);
 
-    if(gettextprop(disp, DefaultRootWindow(disp), JDWMPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
+    if(gettextprop(disp, DefaultRootWindow(disp), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
         for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
             awesomeconf->selected_tags[i] = prop[i] == '1';
 
@@ -130,7 +130,7 @@ saveawesomeprops(Display *disp, awesome_config *awesomeconf)
         prop[i] = awesomeconf->selected_tags[i] ? '1' : '0';
     prop[i] = '\0';
     XChangeProperty(disp, DefaultRootWindow(disp),
-                    JDWMPROPS_ATOM(disp), XA_STRING, 8,
+                    AWESOMEPROPS_ATOM(disp), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
     p_delete(&prop);
 }

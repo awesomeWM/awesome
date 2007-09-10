@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_DRAW_H
-#define JDWM_DRAW_H
+#ifndef AWESOME_DRAW_H
+#define AWESOME_DRAW_H
 
 #include <string.h>
 #include "config.h"

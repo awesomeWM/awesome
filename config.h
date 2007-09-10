@@ -1,9 +1,9 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_CONFIG_H
-#define JDWM_CONFIG_H
+#ifndef AWESOME_CONFIG_H
+#define AWESOME_CONFIG_H
 
-#define JDWM_CONFIG_FILE ".awesomerc"
+#define AWESOME_CONFIG_FILE ".awesomerc"
 
 #include <X11/Xlib.h>
 

@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_TAG_H
-#define JDWM_TAG_H
+#ifndef AWESOME_TAG_H
+#define AWESOME_TAG_H
 
 #include <regex.h> 
 #include "client.h"

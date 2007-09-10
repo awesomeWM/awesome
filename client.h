@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_CLIENT_H
-#define JDWM_CLIENT_H
+#ifndef AWESOME_CLIENT_H
+#define AWESOME_CLIENT_H
 
 /* mask shorthands, used in event.c and client.c */
 #define BUTTONMASK              (ButtonPressMask | ButtonReleaseMask)

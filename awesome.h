@@ -29,8 +29,8 @@
  * To understand everything else, start reading main.c:main().
  */
 
-#ifndef JDWM_JDWM_H
-#define JDWM_JDWM_H
+#ifndef AWESOME_AWESOME_H
+#define AWESOME_AWESOME_H
 
 #include "config.h"
 

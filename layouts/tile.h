@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_TILE_H
-#define JDWM_TILE_H
+#ifndef AWESOME_TILE_H
+#define AWESOME_TILE_H
 
 #include <config.h>
 

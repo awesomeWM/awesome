@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_FLOATING_H
-#define JDWM_FLOATING_H
+#ifndef AWESOME_FLOATING_H
+#define AWESOME_FLOATING_H
 
 void floating(Display *, awesome_config *);            /* floating layout */
 

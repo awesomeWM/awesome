@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_GRID_H
-#define JDWM_GRID_H
+#ifndef AWESOME_GRID_H
+#define AWESOME_GRID_H
 
 #include "config.h"
 

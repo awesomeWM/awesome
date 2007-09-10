@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef JDWM_MEM_H
-#define JDWM_MEM_H
+#ifndef AWESOME_MEM_H
+#define AWESOME_MEM_H
 
 #include "config.h"
 

@@ -312,7 +312,7 @@ loadprops(Client * c, int ntags)
 
     prop = p_new(char, ntags + 2);
 
-    if(gettextprop(c->display, c->win, JDWMPROPS_ATOM(c->display), prop, ntags + 2))
+    if(gettextprop(c->display, c->win, AWESOMEPROPS_ATOM(c->display), prop, ntags + 2))
     {
         for(i = 0; i < ntags && prop[i]; i++)
             if((c->tags[i] = prop[i] == '1'))
@@ -511,7 +511,7 @@ saveprops(Client * c, int ntags)
 
     prop[++i] = '\0';
 
-    XChangeProperty(c->display, c->win, JDWMPROPS_ATOM(c->display), XA_STRING, 8,
+    XChangeProperty(c->display, c->win, AWESOMEPROPS_ATOM(c->display), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
 
     p_delete(&prop);
