@@ -149,7 +149,6 @@ setup(Display *disp, awesome_config *awesomeconf)
 
     /* init atoms */
     netatom[NetSupported] = XInternAtom(disp, "_NET_SUPPORTED", False);
-    netatom[NetWMName] = XInternAtom(disp, "_NET_WM_NAME", False);
     XChangeProperty(disp, DefaultRootWindow(disp), netatom[NetSupported], XA_ATOM, 32,
                     PropModeReplace, (unsigned char *) netatom, NetLast);
     /* init cursors */

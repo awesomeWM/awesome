@@ -348,7 +348,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
             updatesizehints(c);
             break;
         }
-        if(ev->atom == XA_WM_NAME || ev->atom == netatom[NetWMName])
+        if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(c->display, "_NET_WM_NAME", False))
         {
             updatetitle(c);
             if(c == sel)
