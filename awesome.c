@@ -165,7 +165,7 @@ setup(Display *disp, awesome_config *awesomeconf)
     XChangeWindowAttributes(disp, DefaultRootWindow(disp), CWEventMask | CWCursor, &wa);
     XSelectInput(disp, DefaultRootWindow(disp), wa.event_mask);
     grabkeys(disp, awesomeconf);
-    compileregs(awesomeconf);
+    compileregs(awesomeconf->rules, awesomeconf->nrules);
     /* bar */
     dc.h = awesomeconf->statusbar.height = dc.font.height + 2;
     wa.override_redirect = 1;
