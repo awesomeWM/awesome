@@ -147,7 +147,6 @@ setup(Display *disp, awesome_config *awesomeconf)
     XSetWindowAttributes wa;
 
     /* init atoms */
-    wmatom[WMProtocols] = XInternAtom(disp, "WM_PROTOCOLS", False);
     wmatom[WMName] = XInternAtom(disp, "WM_NAME", False);
     wmatom[WMState] = XInternAtom(disp, "WM_STATE", False);
     netatom[NetSupported] = XInternAtom(disp, "_NET_SUPPORTED", False);

@@ -293,7 +293,7 @@ uicb_killclient(Display *disp __attribute__ ((unused)),
     {
         ev.type = ClientMessage;
         ev.xclient.window = sel->win;
-        ev.xclient.message_type = wmatom[WMProtocols];
+        ev.xclient.message_type = XInternAtom(disp, "WM_PROTOCOLS", False);
         ev.xclient.format = 32;
         ev.xclient.data.l[0] = XInternAtom(disp, "WM_DELETE_WINDOW", False);
         ev.xclient.data.l[1] = CurrentTime;
