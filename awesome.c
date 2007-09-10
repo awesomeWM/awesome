@@ -96,7 +96,8 @@ getstate(Display *disp, Window w)
     unsigned char *p = NULL;
     unsigned long n, extra;
     Atom real;
-    status = XGetWindowProperty(disp, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
+    status = XGetWindowProperty(disp, w, XInternAtom(disp, "WM_STATE", False),
+                                0L, 2L, False, XInternAtom(disp, "WM_STATE", False),
                                 &real, &format, &n, &extra, (unsigned char **) &p);
     if(status != Success)
         return -1;
@@ -147,7 +148,6 @@ setup(Display *disp, awesome_config *awesomeconf)
     XSetWindowAttributes wa;
 
     /* init atoms */
-    wmatom[WMState] = XInternAtom(disp, "WM_STATE", False);
     netatom[NetSupported] = XInternAtom(disp, "_NET_SUPPORTED", False);
     netatom[NetWMName] = XInternAtom(disp, "_NET_WM_NAME", False);
     XChangeProperty(disp, DefaultRootWindow(disp), netatom[NetSupported], XA_ATOM, 32,

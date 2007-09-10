@@ -136,7 +136,8 @@ setclientstate(Client * c, long state)
 {
     long data[] = { state, None };
 
-    XChangeProperty(c->display, c->win, wmatom[WMState], wmatom[WMState], 32,
+    XChangeProperty(c->display, c->win, XInternAtom(c->display, "WM_STATE", False),
+                    XInternAtom(c->display, "WM_STATE", False),  32,
                     PropModeReplace, (unsigned char *) data, 2);
 }
 
