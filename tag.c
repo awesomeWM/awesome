@@ -75,28 +75,28 @@ applyrules(Client * c, awesome_config *awesomeconf)
 }
 
 void
-compileregs(awesome_config * awesomeconf)
+compileregs(Rule * rules, int nrules)
 {
     int i;
     regex_t *reg;
 
     if(regs)
         return;
-    regs = p_new(Regs, awesomeconf->nrules);
-    for(i = 0; i < awesomeconf->nrules; i++)
+    regs = p_new(Regs, nrules);
+    for(i = 0; i < nrules; i++)
     {
-        if(awesomeconf->rules[i].prop)
+        if(rules[i].prop)
         {
             reg = p_new(regex_t, 1);
-            if(regcomp(reg, awesomeconf->rules[i].prop, REG_EXTENDED))
+            if(regcomp(reg, rules[i].prop, REG_EXTENDED))
                 p_delete(&reg);
             else
                 regs[i].propregex = reg;
         }
-        if(awesomeconf->rules[i].tags)
+        if(rules[i].tags)
         {
             reg = p_new(regex_t, 1);
-            if(regcomp(reg, awesomeconf->rules[i].tags, REG_EXTENDED))
+            if(regcomp(reg, rules[i].tags, REG_EXTENDED))
                 p_delete(&reg);
             else
                 regs[i].tagregex = reg;

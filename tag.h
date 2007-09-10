@@ -9,7 +9,7 @@
 /** Check if a client is tiled */ 
 #define IS_TILED(client, tags, ntags)            (client && !client->isfloating && isvisible(client, tags, ntags))
 
-void compileregs(awesome_config *);         /* initialize regexps of rules defined in config.h */
+void compileregs(Rule *, int);         /* initialize regexps of rules defined in config.h */
 Bool isvisible(Client *, Bool *, int);
 void applyrules(Client * c, awesome_config *);    /* applies rules to c */
 void uicb_tag(Display *, awesome_config *, const char *);         /* tags sel with arg's index */
