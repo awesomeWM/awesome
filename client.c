@@ -108,7 +108,7 @@ grabbuttons(Client * c, Bool focused, KeySym modkey, unsigned int numlockmask)
 
 /** XXX: No idea
  * \param c the client
- * \return True if atom has WMDelete
+ * \return True if atom has WM_DELETE_WINDOW
  */
 static Bool
 isprotodel(Client * c)
@@ -120,7 +120,7 @@ isprotodel(Client * c)
     if(XGetWMProtocols(c->display, c->win, &protocols, &n))
     {
         for(i = 0; !ret && i < n; i++)
-            if(protocols[i] == wmatom[WMDelete])
+            if(protocols[i] == XInternAtom(c->display, "WM_DELETE_WINDOW", False))
                 ret = True;
         XFree(protocols);
     }
@@ -295,7 +295,7 @@ uicb_killclient(Display *disp __attribute__ ((unused)),
         ev.xclient.window = sel->win;
         ev.xclient.message_type = wmatom[WMProtocols];
         ev.xclient.format = 32;
-        ev.xclient.data.l[0] = wmatom[WMDelete];
+        ev.xclient.data.l[0] = XInternAtom(disp, "WM_DELETE_WINDOW", False);
         ev.xclient.data.l[1] = CurrentTime;
         XSendEvent(sel->display, sel->win, False, NoEventMask, &ev);
     }
