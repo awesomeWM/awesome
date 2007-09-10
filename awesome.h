@@ -36,8 +36,6 @@
 
 enum
 { CurNormal, CurResize, CurMove, CurLast };     /* cursor */
-enum
-{ NetSupported, NetLast };   /* EWMH atoms */
 
 Bool gettextprop(Display *, Window, Atom, char *, unsigned int);   /* return text property, UTF-8 compliant */
 void updatebarpos(Display *, Statusbar);        /* updates the bar position */

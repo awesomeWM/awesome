@@ -17,7 +17,6 @@ extern int wax, way, wah, waw;  /* windowarea geometry */
 extern DC dc;                   /* global draw context */
 extern Cursor cursor[CurLast];
 extern Client *clients, *sel;   /* global client list */
-extern Atom netatom[NetLast];
 
 #define CLEANMASK(mask)		(mask & ~(awesomeconf->numlockmask | LockMask))
 #define MOUSEMASK		(BUTTONMASK | PointerMotionMask)

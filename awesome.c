@@ -19,7 +19,6 @@
 #include "tag.h"
 
 int wax, way, waw, wah;
-Atom netatom[NetLast];
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
@@ -137,6 +136,8 @@ scan(Display *disp, awesome_config *awesomeconf)
         XFree(wins);
 }
 
+
+
 /** Setup everything before running
  * \param disp Display ref
  * \param awesomeconf awesome config ref
@@ -146,11 +147,13 @@ static void
 setup(Display *disp, awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
+    enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
+    Atom netatom[NetWMName];
 
-    /* init atoms */
     netatom[NetSupported] = XInternAtom(disp, "_NET_SUPPORTED", False);
-    XChangeProperty(disp, DefaultRootWindow(disp), netatom[NetSupported], XA_ATOM, 32,
-                    PropModeReplace, (unsigned char *) netatom, NetLast);
+    netatom[NetWMName] = XInternAtom(disp, "_NET_WM_NAME", False);
+    XChangeProperty(disp, DefaultRootWindow(disp), XInternAtom(disp, "_NET_SUPPORTED", False),
+                    XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
     /* init cursors */
     cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);
     cursor[CurResize] = XCreateFontCursor(disp, XC_sizing);

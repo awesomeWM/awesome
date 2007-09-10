@@ -15,7 +15,6 @@
 /* extern */
 extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
-extern Atom netatom[NetLast];
 
 /** Attach client stack to clients stacks
  * \param c the client
