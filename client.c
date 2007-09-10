@@ -179,7 +179,7 @@ inline void
 updatetitle(Client * c)
 {
     if(!gettextprop(c->display, c->win, netatom[NetWMName], c->name, sizeof c->name))
-        gettextprop(c->display, c->win, wmatom[WMName], c->name, sizeof c->name);
+        gettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof c->name);
 }
 
 /** Ban client
