@@ -14,13 +14,13 @@ extern Client *sel, *clients;
 /* static */
 
 static double mwfact = 0.6;
-static void _tile(jdwm_config *, const Bool);    /* arranges all windows tiled */
+static void _tile(awesome_config *, const Bool);    /* arranges all windows tiled */
 
 static int nmaster = 2;
 
 void
 uicb_incnmaster(Display *disp,
-           jdwm_config *jdwmconf,
+           awesome_config *awesomeconf,
            const char * arg)
 {
     int i;
@@ -28,23 +28,23 @@ uicb_incnmaster(Display *disp,
     if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft) && !IS_ARRANGE(bstack) && !IS_ARRANGE(bstackportrait))
         return;
     if(!arg)
-        nmaster = jdwmconf->nmaster;
+        nmaster = awesomeconf->nmaster;
     else
     {
         i = strtol(arg, (char **) NULL, 10);
-        if((nmaster + i) < 1 || wah / (nmaster + i) <= 2 * jdwmconf->borderpx)
+        if((nmaster + i) < 1 || wah / (nmaster + i) <= 2 * awesomeconf->borderpx)
             return;
         nmaster += i;
     }
     if(sel)
-        arrange(disp, jdwmconf);
+        arrange(disp, awesomeconf);
     else
-        drawstatus(disp, jdwmconf);
+        drawstatus(disp, awesomeconf);
 }
 
 void
 uicb_setmwfact(Display *disp,
-          jdwm_config * jdwmconf,
+          awesome_config * awesomeconf,
           const char *arg)
 {
     double delta;
@@ -54,7 +54,7 @@ uicb_setmwfact(Display *disp,
 
     /* arg handling, manipulate mwfact */
     if(!arg)
-        mwfact = jdwmconf->mwfact;
+        mwfact = awesomeconf->mwfact;
     else if(1 == sscanf(arg, "%lf", &delta))
     {
         if(arg[0] != '+' && arg[0] != '-')
@@ -66,32 +66,32 @@ uicb_setmwfact(Display *disp,
         else if(mwfact > 0.9)
             mwfact = 0.9;
     }
-    arrange(disp, jdwmconf);
+    arrange(disp, awesomeconf);
 }
 
 static void
-_tile(jdwm_config *jdwmconf, const Bool right)
+_tile(awesome_config *awesomeconf, const Bool right)
 {
     unsigned int nx, ny, nw, nh, mw;
     int n, th, i, mh;
     Client *c;
 
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;
 
     /* window geoms */
     mh = (n <= nmaster) ? wah / (n > 0 ? n : 1) : wah / nmaster;
     mw = (n <= nmaster) ? waw : mwfact * waw;
     th = (n > nmaster) ? wah / (n - nmaster) : 0;
-    if(n > nmaster && th < jdwmconf->statusbar.height)
+    if(n > nmaster && th < awesomeconf->statusbar.height)
         th = wah;
 
     nx = wax;
     ny = way;
     for(i = 0, c = clients; c; c = c->next)
     {
-        if(!IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             continue;
         
         c->ismax = False;
@@ -122,7 +122,7 @@ _tile(jdwm_config *jdwmconf, const Bool right)
             else
                 nh = th - 2 * c->border;
         }
-        resize(c, nx, ny, nw, nh, jdwmconf->resize_hints);
+        resize(c, nx, ny, nw, nh, awesomeconf->resize_hints);
         if(n > nmaster && th != wah)
             ny += nh + 2 * c->border;
         i++;
@@ -130,26 +130,26 @@ _tile(jdwm_config *jdwmconf, const Bool right)
 }
 
 void
-tile(Display *disp __attribute__ ((unused)), jdwm_config *jdwmconf)
+tile(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
 {
-    _tile(jdwmconf, True);
+    _tile(awesomeconf, True);
 }
 
 void
-tileleft(Display *disp __attribute__ ((unused)), jdwm_config *jdwmconf)
+tileleft(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
 {
-    _tile(jdwmconf, False);
+    _tile(awesomeconf, False);
 }
 
 
 static void
-_bstack(jdwm_config *jdwmconf, Bool portrait)
+_bstack(awesome_config *awesomeconf, Bool portrait)
 {
     int i, n, nx, ny, nw, nh, mw, mh, tw, th;
     Client *c;
 
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;
 
     /* window geoms */
@@ -160,7 +160,7 @@ _bstack(jdwm_config *jdwmconf, Bool portrait)
 
     for(i = 0, c = clients; c; c = c->next)
     {
-        if(!IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             continue;
 
         c->ismax = False;
@@ -199,13 +199,13 @@ _bstack(jdwm_config *jdwmconf, Bool portrait)
 }
 
 void
-bstack(Display *disp __attribute__ ((unused)), jdwm_config *jdwmconf)
+bstack(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
 {
-    _bstack(jdwmconf, False);
+    _bstack(awesomeconf, False);
 }
 
 void
-bstackportrait(Display *disp __attribute__ ((unused)), jdwm_config *jdwmconf)
+bstackportrait(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
 {
-    _bstack(jdwmconf, True);
+    _bstack(awesomeconf, True);
 }

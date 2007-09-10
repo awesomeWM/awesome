@@ -3,7 +3,7 @@
 #ifndef JDWM_CONFIG_H
 #define JDWM_CONFIG_H
 
-#define JDWM_CONFIG_FILE ".jdwmrc"
+#define JDWM_CONFIG_FILE ".awesomerc"
 
 #include <X11/Xlib.h>
 
@@ -38,19 +38,19 @@ typedef struct
     Bool isfloating;
 } Rule;
 
-typedef struct jdwm_config jdwm_config;
+typedef struct awesome_config awesome_config;
 
 typedef struct
 {
     const char *symbol;
-    void (*arrange) (Display *, jdwm_config *);
+    void (*arrange) (Display *, awesome_config *);
 } Layout;
 
 typedef struct
 {
     unsigned long mod;
     KeySym keysym;
-    void (*func) (Display *, jdwm_config *, const char *);
+    void (*func) (Display *, awesome_config *, const char *);
     const char *arg;
 } Key;
 
@@ -68,7 +68,7 @@ typedef struct
 } Statusbar;
 
 /** Main configuration structure */
-struct jdwm_config
+struct awesome_config
 {
     /** Tag list */
     const char **tags;
@@ -118,7 +118,7 @@ struct jdwm_config
     Statusbar statusbar;
 };
 
-void parse_config(Display *, int, DC *, jdwm_config *);        /* parse configuration file */
-void uicb_reload(Display *, jdwm_config *, const char *);              /* reload configuration file */
+void parse_config(Display *, int, DC *, awesome_config *);        /* parse configuration file */
+void uicb_reload(Display *, awesome_config *, const char *);              /* reload configuration file */
 
 #endif

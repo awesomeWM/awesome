@@ -7,12 +7,12 @@
 extern Client *clients;         /* global client */
 
 void
-floating(Display *disp __attribute__ ((unused)), jdwm_config *jdwmconf)
+floating(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
 {                               /* default floating layout */
     Client *c;
 
     for(c = clients; c; c = c->next)
-        if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags))
         {
             if(c->ftview)
             {

@@ -9,13 +9,13 @@ extern Client *clients;         /* global client list and stack */
 extern DC dc;
 
 void
-grid(Display *disp, jdwm_config *jdwmconf)
+grid(Display *disp, awesome_config *awesomeconf)
 {
     unsigned int i, n, cx, cy, cw, ch, aw, ah, cols, rows;
     Client *c;
 
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;
 
     /* grid dimensions */
@@ -29,14 +29,14 @@ grid(Display *disp, jdwm_config *jdwmconf)
     cw = waw / (cols ? cols : 1);
 
     for(i = 0, c = clients; c; c = c->next)
-        if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags))
         {
             unban(c);
             if(c->isfloating)
                 continue;
             c->ismax = False;
             cx = (i / rows) * cw;
-            cy = (i % rows) * ch + (jdwmconf->statusbar.position == BarTop ? jdwmconf->statusbar.height : 0);   // bh? adjust
+            cy = (i % rows) * ch + (awesomeconf->statusbar.position == BarTop ? awesomeconf->statusbar.height : 0);   // bh? adjust
             /* adjust height/width of last row/column's windows */
             ah = ((i + 1) % rows == 0) ? wah - ch * rows : 0;
             aw = (i >= rows * (cols - 1)) ? waw - cw * cols : 0;
@@ -45,6 +45,6 @@ grid(Display *disp, jdwm_config *jdwmconf)
         }
         else
             ban(c);
-    focus(disp, &dc, NULL, True, jdwmconf);
-    restack(disp, jdwmconf);
+    focus(disp, &dc, NULL, True, awesomeconf);
+    restack(disp, awesomeconf);
 }

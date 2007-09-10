@@ -8,7 +8,7 @@
 #include <libconfig.h>
 #include <X11/keysym.h>
 
-#include "jdwm.h"
+#include "awesome.h"
 #include "util.h"
 #include "layout.h"
 #include "tag.h"
@@ -23,7 +23,7 @@ static unsigned long initcolor(const char *colstr, Display *, int);
 static unsigned int get_numlockmask(Display *);
 
 /** Main configuration object for parsing*/
-config_t jdwmlibconf;
+config_t awesomelibconf;
 
 /** Link a name to a function */
 typedef struct
@@ -96,7 +96,7 @@ static const NameFuncLink KeyfuncList[] = {
     /* layouts/tile.c */
     {"setmwfact", uicb_setmwfact},
     {"incnmaster", uicb_incnmaster},
-    /* jdwm.c */
+    /* awesome.c */
     {"quit", uicb_quit},
     {NULL, NULL}
 };
@@ -147,26 +147,26 @@ extern DC dc;
  * \todo not really working nor safe I guess
  */
 void
-uicb_reload(Display *disp, jdwm_config *jdwmconf, const char *arg __attribute__ ((unused)))
+uicb_reload(Display *disp, awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
 {
-    config_destroy(&jdwmlibconf);
-    p_delete(&jdwmconf->rules);
-    p_delete(&jdwmconf->tags);
-    p_delete(&jdwmconf->selected_tags);
-    p_delete(&jdwmconf->layouts);
-    p_delete(&jdwmconf->tag_layouts);
-    parse_config(disp, DefaultScreen(disp), &dc, jdwmconf);
+    config_destroy(&awesomelibconf);
+    p_delete(&awesomeconf->rules);
+    p_delete(&awesomeconf->tags);
+    p_delete(&awesomeconf->selected_tags);
+    p_delete(&awesomeconf->layouts);
+    p_delete(&awesomeconf->tag_layouts);
+    parse_config(disp, DefaultScreen(disp), &dc, awesomeconf);
 }
 
 /** Set default configuration
- * \param jdwmconf jdwm config ref
+ * \param awesomeconf awesome config ref
  */
 static void
-set_default_config(jdwm_config *jdwmconf)
+set_default_config(awesome_config *awesomeconf)
 {
-    strcpy(jdwmconf->statustext, "jdwm-" VERSION);
-    jdwmconf->statusbar.width = 0;
-    jdwmconf->statusbar.height = 0;
+    strcpy(awesomeconf->statustext, "awesome-" VERSION);
+    awesomeconf->statusbar.width = 0;
+    awesomeconf->statusbar.height = 0;
 }
 
 /** Parse configuration file and initialize some stuff
@@ -175,7 +175,7 @@ set_default_config(jdwm_config *jdwmconf)
  * \param drawcontext Draw context
  */
 void
-parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
+parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomeconf)
 {
     config_setting_t *conftags;
     config_setting_t *conflayouts, *confsublayouts;
@@ -185,7 +185,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
     const char *tmp, *homedir;
     char *confpath;
 
-    set_default_config(jdwmconf);
+    set_default_config(awesomeconf);
 
     homedir = getenv("HOME");
     confpath = p_new(char, strlen(homedir) + strlen(JDWM_CONFIG_FILE) + 2);
@@ -193,151 +193,151 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
     strcat(confpath, "/");
     strcat(confpath, JDWM_CONFIG_FILE);
 
-    config_init(&jdwmlibconf);
+    config_init(&awesomelibconf);
 
-    if(config_read_file(&jdwmlibconf, confpath) == CONFIG_FALSE)
+    if(config_read_file(&awesomelibconf, confpath) == CONFIG_FALSE)
         eprint("error parsing configuration file at line %d: %s\n",
-               config_error_line(&jdwmlibconf), config_error_text(&jdwmlibconf));
+               config_error_line(&awesomelibconf), config_error_text(&awesomelibconf));
 
     /* font */
-    initfont(config_lookup_string(&jdwmlibconf, "jdwm.font"), disp, drawcontext);
+    initfont(config_lookup_string(&awesomelibconf, "awesome.font"), disp, drawcontext);
 
     /* layouts */
-    conflayouts = config_lookup(&jdwmlibconf, "jdwm.layouts");
+    conflayouts = config_lookup(&awesomelibconf, "awesome.layouts");
 
     if(!conflayouts)
         eprint("layouts not found in configuration file\n");
 
-    jdwmconf->nlayouts = config_setting_length(conflayouts);
-    jdwmconf->layouts = p_new(Layout, jdwmconf->nlayouts + 1);
+    awesomeconf->nlayouts = config_setting_length(conflayouts);
+    awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts + 1);
     for(i = 0; (confsublayouts = config_setting_get_elem(conflayouts, i)); i++)
     {
-        jdwmconf->layouts[i].symbol = config_setting_get_string_elem(confsublayouts, 0);
-        jdwmconf->layouts[i].arrange =
+        awesomeconf->layouts[i].symbol = config_setting_get_string_elem(confsublayouts, 0);
+        awesomeconf->layouts[i].arrange =
             name_func_lookup(config_setting_get_string_elem(confsublayouts, 1), LayoutsList);
-        if(!jdwmconf->layouts[i].arrange)
+        if(!awesomeconf->layouts[i].arrange)
             eprint("unknown layout in configuration file\n");
 
-        j = textw(jdwmconf->layouts[i].symbol);
-        if(j > jdwmconf->statusbar.width)
-            jdwmconf->statusbar.width = j;
+        j = textw(awesomeconf->layouts[i].symbol);
+        if(j > awesomeconf->statusbar.width)
+            awesomeconf->statusbar.width = j;
     }
 
-    jdwmconf->layouts[i].symbol = NULL;
-    jdwmconf->layouts[i].arrange = NULL;
+    awesomeconf->layouts[i].symbol = NULL;
+    awesomeconf->layouts[i].arrange = NULL;
 
     /** \todo put this in set_default_layout */
-    jdwmconf->current_layout = jdwmconf->layouts;
+    awesomeconf->current_layout = awesomeconf->layouts;
     /* tags */
-    conftags = config_lookup(&jdwmlibconf, "jdwm.tags");
+    conftags = config_lookup(&awesomelibconf, "awesome.tags");
 
     if(!conftags)
         eprint("tags not found in configuration file\n");
 
-    jdwmconf->ntags = config_setting_length(conftags);
-    jdwmconf->tags = p_new(const char *, jdwmconf->ntags);
-    jdwmconf->selected_tags = p_new(Bool, jdwmconf->ntags);
-    jdwmconf->prev_selected_tags = p_new(Bool, jdwmconf->ntags);
-    jdwmconf->tag_layouts = p_new(Layout *, jdwmconf->ntags);
+    awesomeconf->ntags = config_setting_length(conftags);
+    awesomeconf->tags = p_new(const char *, awesomeconf->ntags);
+    awesomeconf->selected_tags = p_new(Bool, awesomeconf->ntags);
+    awesomeconf->prev_selected_tags = p_new(Bool, awesomeconf->ntags);
+    awesomeconf->tag_layouts = p_new(Layout *, awesomeconf->ntags);
 
     for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
     {
-        jdwmconf->tags[i] = tmp;
-        jdwmconf->selected_tags[i] = False;
-        jdwmconf->prev_selected_tags[i] = False;
+        awesomeconf->tags[i] = tmp;
+        awesomeconf->selected_tags[i] = False;
+        awesomeconf->prev_selected_tags[i] = False;
         /** \todo add support for default tag/layout in configuration file */
-        jdwmconf->tag_layouts[i] = jdwmconf->layouts;
+        awesomeconf->tag_layouts[i] = awesomeconf->layouts;
     }
 
     /* select first tag by default */
-    jdwmconf->selected_tags[0] = True;
-    jdwmconf->prev_selected_tags[0] = True;
+    awesomeconf->selected_tags[0] = True;
+    awesomeconf->prev_selected_tags[0] = True;
 
     /* rules */
-    confrules = config_lookup(&jdwmlibconf, "jdwm.rules");
+    confrules = config_lookup(&awesomelibconf, "awesome.rules");
 
     if(!confrules)
         eprint("rules not found in configuration file\n");
 
-    jdwmconf->nrules = config_setting_length(confrules);
-    jdwmconf->rules = p_new(Rule, jdwmconf->nrules);
+    awesomeconf->nrules = config_setting_length(confrules);
+    awesomeconf->rules = p_new(Rule, awesomeconf->nrules);
     for(i = 0; (confsubrules = config_setting_get_elem(confrules, i)); i++)
     {
-        jdwmconf->rules[i].prop = config_setting_get_string(config_setting_get_member(confsubrules, "name"));
-        jdwmconf->rules[i].tags = config_setting_get_string(config_setting_get_member(confsubrules, "tags"));
-        if(jdwmconf->rules[i].tags && !strlen(jdwmconf->rules[i].tags))
-            jdwmconf->rules[i].tags = NULL;
-        jdwmconf->rules[i].isfloating =
+        awesomeconf->rules[i].prop = config_setting_get_string(config_setting_get_member(confsubrules, "name"));
+        awesomeconf->rules[i].tags = config_setting_get_string(config_setting_get_member(confsubrules, "tags"));
+        if(awesomeconf->rules[i].tags && !strlen(awesomeconf->rules[i].tags))
+            awesomeconf->rules[i].tags = NULL;
+        awesomeconf->rules[i].isfloating =
             config_setting_get_bool(config_setting_get_member(confsubrules, "float"));
     }
 
     /* modkey */
-    jdwmconf->modkey = key_mask_lookup(config_lookup_string(&jdwmlibconf, "jdwm.modkey"));
+    awesomeconf->modkey = key_mask_lookup(config_lookup_string(&awesomelibconf, "awesome.modkey"));
 
     /* find numlock mask */
-    jdwmconf->numlockmask = get_numlockmask(disp);
+    awesomeconf->numlockmask = get_numlockmask(disp);
 
     /* keys */
-    confkeys = config_lookup(&jdwmlibconf, "jdwm.keys");
+    confkeys = config_lookup(&awesomelibconf, "awesome.keys");
 
     if(!confkeys)
         eprint("keys not found in configuration file\n");
 
-    jdwmconf->nkeys = config_setting_length(confkeys);
-    jdwmconf->keys = p_new(Key, jdwmconf->nkeys);
+    awesomeconf->nkeys = config_setting_length(confkeys);
+    awesomeconf->keys = p_new(Key, awesomeconf->nkeys);
 
     for(i = 0; (confsubkeys = config_setting_get_elem(confkeys, i)); i++)
     {
         confkeysmasks = config_setting_get_elem(confsubkeys, 0);
         for(j = 0; (confkeymaskelem = config_setting_get_elem(confkeysmasks, j)); j++)
-            jdwmconf->keys[i].mod |= key_mask_lookup(config_setting_get_string(confkeymaskelem));
-        jdwmconf->keys[i].keysym = XStringToKeysym(config_setting_get_string_elem(confsubkeys, 1));
-        jdwmconf->keys[i].func =
+            awesomeconf->keys[i].mod |= key_mask_lookup(config_setting_get_string(confkeymaskelem));
+        awesomeconf->keys[i].keysym = XStringToKeysym(config_setting_get_string_elem(confsubkeys, 1));
+        awesomeconf->keys[i].func =
             name_func_lookup(config_setting_get_string_elem(confsubkeys, 2), KeyfuncList);
-        jdwmconf->keys[i].arg = config_setting_get_string_elem(confsubkeys, 3);
+        awesomeconf->keys[i].arg = config_setting_get_string_elem(confsubkeys, 3);
     }
 
     /* barpos */
-    tmp = config_lookup_string(&jdwmlibconf, "jdwm.barpos");
+    tmp = config_lookup_string(&awesomelibconf, "awesome.barpos");
 
     if(!strncmp(tmp, "BarTop", 6))
-        jdwmconf->statusbar_default_position = BarTop;
+        awesomeconf->statusbar_default_position = BarTop;
     else if(!strncmp(tmp, "BarBot", 6))
-        jdwmconf->statusbar_default_position = BarBot;
+        awesomeconf->statusbar_default_position = BarBot;
     else if(!strncmp(tmp, "BarOff", 6))
-        jdwmconf->statusbar_default_position = BarOff;
+        awesomeconf->statusbar_default_position = BarOff;
 
-    jdwmconf->statusbar.position = jdwmconf->statusbar_default_position;
+    awesomeconf->statusbar.position = awesomeconf->statusbar_default_position;
 
     /* borderpx */
-    jdwmconf->borderpx = config_lookup_int(&jdwmlibconf, "jdwm.borderpx");
+    awesomeconf->borderpx = config_lookup_int(&awesomelibconf, "awesome.borderpx");
 
     /* opacity */
-    jdwmconf->opacity_unfocused = config_lookup_int(&jdwmlibconf, "jdwm.opacity_unfocused");
-    if(jdwmconf->opacity_unfocused >= 100)
-        jdwmconf->opacity_unfocused = -1;
+    awesomeconf->opacity_unfocused = config_lookup_int(&awesomelibconf, "awesome.opacity_unfocused");
+    if(awesomeconf->opacity_unfocused >= 100)
+        awesomeconf->opacity_unfocused = -1;
 
     /* snap */
-    jdwmconf->snap = config_lookup_int(&jdwmlibconf, "jdwm.snap");
+    awesomeconf->snap = config_lookup_int(&awesomelibconf, "awesome.snap");
 
     /* nmaster */
-    jdwmconf->nmaster = config_lookup_int(&jdwmlibconf, "jdwm.nmaster");
+    awesomeconf->nmaster = config_lookup_int(&awesomelibconf, "awesome.nmaster");
 
     /* mwfact */
-    jdwmconf->mwfact = config_lookup_float(&jdwmlibconf, "jdwm.mwfact");
+    awesomeconf->mwfact = config_lookup_float(&awesomelibconf, "awesome.mwfact");
 
     /* resize_hints */
-    jdwmconf->resize_hints = config_lookup_float(&jdwmlibconf, "jdwm.resize_hints");
+    awesomeconf->resize_hints = config_lookup_float(&awesomelibconf, "awesome.resize_hints");
 
     /* colors */
-    dc.norm[ColBorder] = initcolor(config_lookup_string(&jdwmlibconf, "jdwm.normal_border_color"),
+    dc.norm[ColBorder] = initcolor(config_lookup_string(&awesomelibconf, "awesome.normal_border_color"),
                                    disp, scr);
-    dc.norm[ColBG] = initcolor(config_lookup_string(&jdwmlibconf, "jdwm.normal_bg_color"), disp, scr);
-    dc.norm[ColFG] = initcolor(config_lookup_string(&jdwmlibconf, "jdwm.normal_fg_color"), disp, scr);
-    dc.sel[ColBorder] = initcolor(config_lookup_string(&jdwmlibconf, "jdwm.focus_border_color"),
+    dc.norm[ColBG] = initcolor(config_lookup_string(&awesomelibconf, "awesome.normal_bg_color"), disp, scr);
+    dc.norm[ColFG] = initcolor(config_lookup_string(&awesomelibconf, "awesome.normal_fg_color"), disp, scr);
+    dc.sel[ColBorder] = initcolor(config_lookup_string(&awesomelibconf, "awesome.focus_border_color"),
                                   disp, scr);
-    dc.sel[ColBG] = initcolor(config_lookup_string(&jdwmlibconf, "jdwm.focus_bg_color"), disp, scr);
-    dc.sel[ColFG] = initcolor(config_lookup_string(&jdwmlibconf, "jdwm.focus_fg_color"), disp, scr);
+    dc.sel[ColBG] = initcolor(config_lookup_string(&awesomelibconf, "awesome.focus_bg_color"), disp, scr);
+    dc.sel[ColFG] = initcolor(config_lookup_string(&awesomelibconf, "awesome.focus_fg_color"), disp, scr);
 
     p_delete(&confpath);
 }
@@ -360,7 +360,7 @@ initfont(const char *fontstr, Display * disp, DC * drawcontext)
     if(missing)
     {
         while(n--)
-            fprintf(stderr, "jdwm: missing fontset: %s\n", missing[n]);
+            fprintf(stderr, "awesome: missing fontset: %s\n", missing[n]);
         XFreeStringList(missing);
     }
     if(drawcontext->font.set)

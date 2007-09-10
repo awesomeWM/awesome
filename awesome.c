@@ -12,7 +12,7 @@
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
 
-#include "jdwm.h"
+#include "awesome.h"
 #include "util.h"
 #include "event.h"
 #include "layout.h"
@@ -65,13 +65,13 @@ gettextprop(Display *disp, Window w, Atom atom, char *text, unsigned int size)
 }
 
 static void
-cleanup(Display *disp, jdwm_config *jdwmconf)
+cleanup(Display *disp, awesome_config *awesomeconf)
 {
     close(STDIN_FILENO);
     while(stack)
     {
         unban(stack);
-        unmanage(stack, &dc, NormalState, jdwmconf);
+        unmanage(stack, &dc, NormalState, awesomeconf);
     }
     if(dc.font.set)
         XFreeFontSet(disp, dc.font.set);
@@ -80,7 +80,7 @@ cleanup(Display *disp, jdwm_config *jdwmconf)
     XUngrabKey(disp, AnyKey, AnyModifier, DefaultRootWindow(disp));
     XFreePixmap(disp, dc.drawable);
     XFreeGC(disp, dc.gc);
-    XDestroyWindow(disp, jdwmconf->statusbar.window);
+    XDestroyWindow(disp, awesomeconf->statusbar.window);
     XFreeCursor(disp, cursor[CurNormal]);
     XFreeCursor(disp, cursor[CurResize]);
     XFreeCursor(disp, cursor[CurMove]);
@@ -107,7 +107,7 @@ getstate(Display *disp, Window w)
 }
 
 static void
-scan(Display *disp, jdwm_config *jdwmconf)
+scan(Display *disp, awesome_config *awesomeconf)
 {
     unsigned int i, num;
     Window *wins, d1, d2;
@@ -121,7 +121,7 @@ scan(Display *disp, jdwm_config *jdwmconf)
                || wa.override_redirect || XGetTransientForHint(disp, wins[i], &d1))
                 continue;
             if(wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState)
-                manage(disp, &dc, wins[i], &wa, jdwmconf);
+                manage(disp, &dc, wins[i], &wa, awesomeconf);
         }
     /* now the transients */
     for(i = 0; i < num; i++)
@@ -130,7 +130,7 @@ scan(Display *disp, jdwm_config *jdwmconf)
             continue;
         if(XGetTransientForHint(disp, wins[i], &d1)
            && (wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState))
-            manage(disp, &dc, wins[i], &wa, jdwmconf);
+            manage(disp, &dc, wins[i], &wa, awesomeconf);
     }
     if(wins)
         XFree(wins);
@@ -138,11 +138,11 @@ scan(Display *disp, jdwm_config *jdwmconf)
 
 /** Setup everything before running
  * \param disp Display ref
- * \param jdwmconf jdwm config ref
+ * \param awesomeconf awesome config ref
  * \todo clean things...
  */
 static void
-setup(Display *disp, jdwm_config *jdwmconf)
+setup(Display *disp, awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
 
@@ -165,27 +165,27 @@ setup(Display *disp, jdwm_config *jdwmconf)
     wa.cursor = cursor[CurNormal];
     XChangeWindowAttributes(disp, DefaultRootWindow(disp), CWEventMask | CWCursor, &wa);
     XSelectInput(disp, DefaultRootWindow(disp), wa.event_mask);
-    grabkeys(disp, jdwmconf);
-    compileregs(jdwmconf);
+    grabkeys(disp, awesomeconf);
+    compileregs(awesomeconf);
     /* bar */
-    dc.h = jdwmconf->statusbar.height = dc.font.height + 2;
+    dc.h = awesomeconf->statusbar.height = dc.font.height + 2;
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    jdwmconf->statusbar.window = XCreateWindow(disp, DefaultRootWindow(disp), 0, 0, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0,
+    awesomeconf->statusbar.window = XCreateWindow(disp, DefaultRootWindow(disp), 0, 0, DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, 0,
                                                DefaultDepth(disp, DefaultScreen(disp)), CopyFromParent,
                                                DefaultVisual(disp, DefaultScreen(disp)),
                                                CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-    XDefineCursor(disp, jdwmconf->statusbar.window, cursor[CurNormal]);
-    updatebarpos(disp, jdwmconf->statusbar);
-    XMapRaised(disp, jdwmconf->statusbar.window);
+    XDefineCursor(disp, awesomeconf->statusbar.window, cursor[CurNormal]);
+    updatebarpos(disp, awesomeconf->statusbar);
+    XMapRaised(disp, awesomeconf->statusbar.window);
     /* pixmap for everything */
-    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
+    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
     dc.gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
     XSetLineAttributes(disp, dc.gc, 1, LineSolid, CapButt, JoinMiter);
     if(!dc.font.set)
         XSetFont(disp, dc.gc, dc.font.xfont->fid);
-    loadjdwmprops(disp, jdwmconf);
+    loadawesomeprops(disp, awesomeconf);
 }
 
 /*
@@ -203,7 +203,7 @@ xerrorstart(Display * dsply __attribute__ ((unused)), XErrorEvent * ee __attribu
 
 void
 uicb_quit(Display *disp __attribute__ ((unused)),
-          jdwm_config *jdwmconf __attribute__((unused)),
+          awesome_config *awesomeconf __attribute__((unused)),
           const char *arg __attribute__ ((unused)))
 {
     readin = running = False;
@@ -255,7 +255,7 @@ xerror(Display * edpy, XErrorEvent * ee)
                                               && ee->error_code == BadAccess)
        || (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
         return 0;
-    fprintf(stderr, "jdwm: fatal error: request code=%d, error code=%d\n",
+    fprintf(stderr, "awesome: fatal error: request code=%d, error code=%d\n",
             ee->request_code, ee->error_code);
 
     return xerrorxlib(edpy, ee);        /* may call exit */
@@ -270,17 +270,17 @@ main(int argc, char *argv[])
     XEvent ev;
     Display * dpy;
     Window root;
-    jdwm_config jdwmconf;
+    awesome_config awesomeconf;
 
     if(argc == 2 && !strcmp("-v", argv[1]))
-        eprint("jdwm-" VERSION " © 2007 Julien Danjou\n");
+        eprint("awesome-" VERSION " © 2007 Julien Danjou\n");
     else if(argc != 1)
-        eprint("usage: jdwm [-v]\n");
+        eprint("usage: awesome [-v]\n");
     setlocale(LC_CTYPE, "");
 
 
     if(!(dpy = XOpenDisplay(NULL)))
-        eprint("jdwm: cannot open display\n");
+        eprint("awesome: cannot open display\n");
     xfd = ConnectionNumber(dpy);
     root = RootWindow(dpy, DefaultScreen(dpy));
     XSetErrorHandler(xerrorstart);
@@ -290,19 +290,19 @@ main(int argc, char *argv[])
     XSync(dpy, False);
 
     if(otherwm)
-        eprint("jdwm: another window manager is already running\n");
+        eprint("awesome: another window manager is already running\n");
 
     XSync(dpy, False);
     XSetErrorHandler(NULL);
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
-    parse_config(dpy, DefaultScreen(dpy), &dc, &jdwmconf);
-    setup(dpy, &jdwmconf);
-    drawstatus(dpy, &jdwmconf);
-    scan(dpy, &jdwmconf);
+    parse_config(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
+    setup(dpy, &awesomeconf);
+    drawstatus(dpy, &awesomeconf);
+    scan(dpy, &awesomeconf);
     XSync(dpy, False);
 
-    void (*handler[LASTEvent]) (XEvent *, jdwm_config *) = 
+    void (*handler[LASTEvent]) (XEvent *, awesome_config *) = 
     {
         [ButtonPress] = handle_event_buttonpress,
         [ConfigureRequest] = handle_event_configurerequest,
@@ -334,35 +334,35 @@ main(int argc, char *argv[])
         }
         if(FD_ISSET(STDIN_FILENO, &rd))
         {
-            switch (r = read(STDIN_FILENO, jdwmconf.statustext, sizeof(jdwmconf.statustext) - 1))
+            switch (r = read(STDIN_FILENO, awesomeconf.statustext, sizeof(awesomeconf.statustext) - 1))
             {
             case -1:
-                strncpy(jdwmconf.statustext, strerror(errno), sizeof(jdwmconf.statustext) - 1);
-                jdwmconf.statustext[sizeof(jdwmconf.statustext) - 1] = '\0';
+                strncpy(awesomeconf.statustext, strerror(errno), sizeof(awesomeconf.statustext) - 1);
+                awesomeconf.statustext[sizeof(awesomeconf.statustext) - 1] = '\0';
                 readin = False;
                 break;
             case 0:
-                strncpy(jdwmconf.statustext, "EOF", 4);
+                strncpy(awesomeconf.statustext, "EOF", 4);
                 readin = False;
                 break;
             default:
-                for(jdwmconf.statustext[r] = '\0', p = jdwmconf.statustext + strlen(jdwmconf.statustext) - 1;
-                    p >= jdwmconf.statustext && *p == '\n'; *p-- = '\0');
-                for(; p >= jdwmconf.statustext && *p != '\n'; --p);
-                if(p > jdwmconf.statustext)
-                    strncpy(jdwmconf.statustext, p + 1, sizeof(jdwmconf.statustext));
+                for(awesomeconf.statustext[r] = '\0', p = awesomeconf.statustext + strlen(awesomeconf.statustext) - 1;
+                    p >= awesomeconf.statustext && *p == '\n'; *p-- = '\0');
+                for(; p >= awesomeconf.statustext && *p != '\n'; --p);
+                if(p > awesomeconf.statustext)
+                    strncpy(awesomeconf.statustext, p + 1, sizeof(awesomeconf.statustext));
             }
-            drawstatus(dpy, &jdwmconf);
+            drawstatus(dpy, &awesomeconf);
         }
 
         while(XPending(dpy))
         {
             XNextEvent(dpy, &ev);
             if(handler[ev.type])
-                (handler[ev.type]) (&ev, &jdwmconf);       /* call handler */
+                (handler[ev.type]) (&ev, &awesomeconf);       /* call handler */
         }
     }
-    cleanup(dpy, &jdwmconf);
+    cleanup(dpy, &awesomeconf);
     XCloseDisplay(dpy);
 
     return 0;

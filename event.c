@@ -4,7 +4,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#include "jdwm.h"
+#include "awesome.h"
 #include "util.h"
 #include "event.h"
 #include "layout.h"
@@ -19,7 +19,7 @@ extern Cursor cursor[CurLast];
 extern Client *clients, *sel;   /* global client list */
 extern Atom netatom[NetLast];
 
-#define CLEANMASK(mask)		(mask & ~(jdwmconf->numlockmask | LockMask))
+#define CLEANMASK(mask)		(mask & ~(awesomeconf->numlockmask | LockMask))
 #define MOUSEMASK		(BUTTONMASK | PointerMotionMask)
 
 static Client *
@@ -32,7 +32,7 @@ getclient(Window w)
 }
 
 static void
-movemouse(Client * c, jdwm_config *jdwmconf)
+movemouse(Client * c, awesome_config *awesomeconf)
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
@@ -56,19 +56,19 @@ movemouse(Client * c, jdwm_config *jdwmconf)
         case ConfigureRequest:
         case Expose:
         case MapRequest:
-            handle_event_maprequest(&ev, jdwmconf);
+            handle_event_maprequest(&ev, awesomeconf);
             break;
         case MotionNotify:
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(wax + nx) < jdwmconf->snap)
+            if(abs(wax + nx) < awesomeconf->snap)
                 nx = wax;
-            else if(abs((wax + waw) - (nx + c->w + 2 * c->border)) < jdwmconf->snap)
+            else if(abs((wax + waw) - (nx + c->w + 2 * c->border)) < awesomeconf->snap)
                 nx = wax + waw - c->w - 2 * c->border;
-            if(abs(way - ny) < jdwmconf->snap)
+            if(abs(way - ny) < awesomeconf->snap)
                 ny = way;
-            else if(abs((way + wah) - (ny + c->h + 2 * c->border)) < jdwmconf->snap)
+            else if(abs((way + wah) - (ny + c->h + 2 * c->border)) < awesomeconf->snap)
                 ny = way + wah - c->h - 2 * c->border;
             resize(c, nx, ny, c->w, c->h, False);
             break;
@@ -77,7 +77,7 @@ movemouse(Client * c, jdwm_config *jdwmconf)
 }
 
 static void
-resizemouse(Client * c, jdwm_config *jdwmconf)
+resizemouse(Client * c, awesome_config *awesomeconf)
 {
     int ocx, ocy;
     int nw, nh;
@@ -103,7 +103,7 @@ resizemouse(Client * c, jdwm_config *jdwmconf)
         case ConfigureRequest:
         case Expose:
         case MapRequest:
-            handle_event_maprequest(&ev, jdwmconf);
+            handle_event_maprequest(&ev, awesomeconf);
             break;
         case MotionNotify:
             XSync(c->display, False);
@@ -118,69 +118,69 @@ resizemouse(Client * c, jdwm_config *jdwmconf)
 }
 
 void
-handle_event_buttonpress(XEvent * e, jdwm_config *jdwmconf)
+handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 {
     int i, x;
     Client *c;
     XButtonPressedEvent *ev = &e->xbutton;
 
-    if(jdwmconf->statusbar.window == ev->window)
+    if(awesomeconf->statusbar.window == ev->window)
     {
         x = 0;
-        for(i = 0; i < jdwmconf->ntags; i++)
+        for(i = 0; i < awesomeconf->ntags; i++)
         {
-            x += textw(jdwmconf->tags[i]);
+            x += textw(awesomeconf->tags[i]);
             if(ev->x < x)
             {
                 if(ev->button == Button1)
                 {
-                    if(ev->state & jdwmconf->modkey)
-                        uicb_tag(e->xany.display, jdwmconf, jdwmconf->tags[i]);
+                    if(ev->state & awesomeconf->modkey)
+                        uicb_tag(e->xany.display, awesomeconf, awesomeconf->tags[i]);
                     else
-                        uicb_view(e->xany.display, jdwmconf, jdwmconf->tags[i]);
+                        uicb_view(e->xany.display, awesomeconf, awesomeconf->tags[i]);
                 }
                 else if(ev->button == Button3)
                 {
-                    if(ev->state & jdwmconf->modkey)
-                        uicb_toggletag(e->xany.display, jdwmconf, jdwmconf->tags[i]);
+                    if(ev->state & awesomeconf->modkey)
+                        uicb_toggletag(e->xany.display, awesomeconf, awesomeconf->tags[i]);
                     else
-                        uicb_toggleview(e->xany.display, jdwmconf, jdwmconf->tags[i]);
+                        uicb_toggleview(e->xany.display, awesomeconf, awesomeconf->tags[i]);
                 }
                 return;
             }
         }
-        if((ev->x < x + jdwmconf->statusbar.width) && ev->button == Button1)
-            uicb_setlayout(e->xany.display, jdwmconf, NULL);
+        if((ev->x < x + awesomeconf->statusbar.width) && ev->button == Button1)
+            uicb_setlayout(e->xany.display, awesomeconf, NULL);
     }
     else if((c = getclient(ev->window)))
     {
-        focus(c->display, &dc, c, ev->same_screen, jdwmconf);
-        if(CLEANMASK(ev->state) != jdwmconf->modkey)
+        focus(c->display, &dc, c, ev->same_screen, awesomeconf);
+        if(CLEANMASK(ev->state) != awesomeconf->modkey)
             return;
         if(ev->button == Button1 && (IS_ARRANGE(floating) || c->isfloating))
         {
-            restack(e->xany.display, jdwmconf);
-            movemouse(c, jdwmconf);
+            restack(e->xany.display, awesomeconf);
+            movemouse(c, awesomeconf);
         }
         else if(ev->button == Button2)
-            uicb_zoom(e->xany.display, jdwmconf, NULL);
+            uicb_zoom(e->xany.display, awesomeconf, NULL);
         else if(ev->button == Button3 && (IS_ARRANGE(floating) || c->isfloating) && !c->isfixed)
         {
-            restack(e->xany.display, jdwmconf);
-            resizemouse(c, jdwmconf);
+            restack(e->xany.display, awesomeconf);
+            resizemouse(c, awesomeconf);
         }
     }
     else if(DefaultRootWindow(e->xany.display) == ev->window && !sel)
     {
         if(ev->button == Button4)
-            uicb_tag_viewnext(e->xany.display, jdwmconf, NULL);
+            uicb_tag_viewnext(e->xany.display, awesomeconf, NULL);
         else if(ev->button == Button5)
-            uicb_tag_viewprev(e->xany.display, jdwmconf, NULL);
+            uicb_tag_viewprev(e->xany.display, awesomeconf, NULL);
     }
 }
 
 void
-handle_event_configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((unused)))
+handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf __attribute__ ((unused)))
 {
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
@@ -207,7 +207,7 @@ handle_event_configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((
                 c->y = DisplayHeight(c->display, DefaultScreen(c->display)) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 configure(c);
-            if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
+            if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags))
                 XMoveResizeWindow(e->xany.display, c->win, c->x, c->y, c->w, c->h);
         }
         else
@@ -228,7 +228,7 @@ handle_event_configurerequest(XEvent * e, jdwm_config *jdwmconf __attribute__ ((
 }
 
 void
-handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
 {
     XConfigureEvent *ev = &e->xconfigure;
 
@@ -237,25 +237,25 @@ handle_event_configurenotify(XEvent * e, jdwm_config *jdwmconf)
         DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)) = ev->width;
         DisplayHeight(e->xany.display, DefaultScreen(e->xany.display)) = ev->height;
         XFreePixmap(e->xany.display, dc.drawable);
-        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height, DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
-        XResizeWindow(e->xany.display, jdwmconf->statusbar.window, DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), jdwmconf->statusbar.height);
-        updatebarpos(e->xany.display, jdwmconf->statusbar);
-        arrange(e->xany.display, jdwmconf);
+        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height, DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
+        XResizeWindow(e->xany.display, awesomeconf->statusbar.window, DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height);
+        updatebarpos(e->xany.display, awesomeconf->statusbar);
+        arrange(e->xany.display, awesomeconf);
     }
 }
 
 void
-handle_event_destroynotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_destroynotify(XEvent * e, awesome_config *awesomeconf)
 {
     Client *c;
     XDestroyWindowEvent *ev = &e->xdestroywindow;
 
     if((c = getclient(ev->window)))
-        unmanage(c, &dc, WithdrawnState, jdwmconf);
+        unmanage(c, &dc, WithdrawnState, awesomeconf);
 }
 
 void
-handle_event_enternotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
 {
     Client *c;
     XCrossingEvent *ev = &e->xcrossing;
@@ -263,55 +263,55 @@ handle_event_enternotify(XEvent * e, jdwm_config *jdwmconf)
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
     if((c = getclient(ev->window)))
-        focus(c->display, &dc, c, ev->same_screen, jdwmconf);
+        focus(c->display, &dc, c, ev->same_screen, awesomeconf);
     else if(ev->window == DefaultRootWindow(e->xany.display))
-        focus(e->xany.display, &dc, NULL, True, jdwmconf);
+        focus(e->xany.display, &dc, NULL, True, awesomeconf);
 }
 
 void
-handle_event_expose(XEvent * e, jdwm_config *jdwmconf)
+handle_event_expose(XEvent * e, awesome_config *awesomeconf)
 {
     XExposeEvent *ev = &e->xexpose;
 
-    if(!ev->count && jdwmconf->statusbar.window == ev->window)
-        drawstatus(e->xany.display, jdwmconf);
+    if(!ev->count && awesomeconf->statusbar.window == ev->window)
+        drawstatus(e->xany.display, awesomeconf);
 }
 
 void
-handle_event_keypress(XEvent * e, jdwm_config *jdwmconf)
+handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
 {
     int i;
     KeySym keysym;
     XKeyEvent *ev = &e->xkey;
 
     keysym = XKeycodeToKeysym(e->xany.display, (KeyCode) ev->keycode, 0);
-    for(i = 0; i < jdwmconf->nkeys; i++)
-        if(keysym == jdwmconf->keys[i].keysym
-           && CLEANMASK(jdwmconf->keys[i].mod) == CLEANMASK(ev->state) && jdwmconf->keys[i].func)
-            jdwmconf->keys[i].func(e->xany.display, jdwmconf, jdwmconf->keys[i].arg);
+    for(i = 0; i < awesomeconf->nkeys; i++)
+        if(keysym == awesomeconf->keys[i].keysym
+           && CLEANMASK(awesomeconf->keys[i].mod) == CLEANMASK(ev->state) && awesomeconf->keys[i].func)
+            awesomeconf->keys[i].func(e->xany.display, awesomeconf, awesomeconf->keys[i].arg);
 }
 
 void
-handle_event_leavenotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_leavenotify(XEvent * e, awesome_config *awesomeconf)
 {
     XCrossingEvent *ev = &e->xcrossing;
 
     if((ev->window == DefaultRootWindow(e->xany.display)) && !ev->same_screen)
-        focus(e->xany.display, &dc, NULL, ev->same_screen, jdwmconf);
+        focus(e->xany.display, &dc, NULL, ev->same_screen, awesomeconf);
 }
 
 void
-handle_event_mappingnotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_mappingnotify(XEvent * e, awesome_config *awesomeconf)
 {
     XMappingEvent *ev = &e->xmapping;
 
     XRefreshKeyboardMapping(ev);
     if(ev->request == MappingKeyboard)
-        grabkeys(e->xany.display, jdwmconf);
+        grabkeys(e->xany.display, awesomeconf);
 }
 
 void
-handle_event_maprequest(XEvent * e, jdwm_config *jdwmconf)
+handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
 {
     static XWindowAttributes wa;
     XMapRequestEvent *ev = &e->xmaprequest;
@@ -321,11 +321,11 @@ handle_event_maprequest(XEvent * e, jdwm_config *jdwmconf)
     if(wa.override_redirect)
         return;
     if(!getclient(ev->window))
-        manage(e->xany.display, &dc, ev->window, &wa, jdwmconf);
+        manage(e->xany.display, &dc, ev->window, &wa, awesomeconf);
 }
 
 void
-handle_event_propertynotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
 {
     Client *c;
     Window trans;
@@ -342,7 +342,7 @@ handle_event_propertynotify(XEvent * e, jdwm_config *jdwmconf)
         case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating && (c->isfloating = (getclient(trans) != NULL)))
-                arrange(e->xany.display, jdwmconf);
+                arrange(e->xany.display, awesomeconf);
             break;
         case XA_WM_NORMAL_HINTS:
             updatesizehints(c);
@@ -352,35 +352,35 @@ handle_event_propertynotify(XEvent * e, jdwm_config *jdwmconf)
         {
             updatetitle(c);
             if(c == sel)
-                drawstatus(e->xany.display, jdwmconf);
+                drawstatus(e->xany.display, awesomeconf);
         }
     }
 }
 
 void
-handle_event_unmapnotify(XEvent * e, jdwm_config *jdwmconf)
+handle_event_unmapnotify(XEvent * e, awesome_config *awesomeconf)
 {
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
 
     if((c = getclient(ev->window)) && ev->event == DefaultRootWindow(e->xany.display) && (ev->send_event || !c->unmapped--))
-        unmanage(c, &dc, WithdrawnState, jdwmconf);
+        unmanage(c, &dc, WithdrawnState, awesomeconf);
 }
 
 void
-grabkeys(Display *disp, jdwm_config *jdwmconf)
+grabkeys(Display *disp, awesome_config *awesomeconf)
 {
     int i;
     KeyCode code;
 
     XUngrabKey(disp, AnyKey, AnyModifier, DefaultRootWindow(disp));
-    for(i = 0; i < jdwmconf->nkeys; i++)
+    for(i = 0; i < awesomeconf->nkeys; i++)
     {
-        code = XKeysymToKeycode(disp, jdwmconf->keys[i].keysym);
-        XGrabKey(disp, code, jdwmconf->keys[i].mod, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, jdwmconf->keys[i].mod | LockMask, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, jdwmconf->keys[i].mod | jdwmconf->numlockmask, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, jdwmconf->keys[i].mod | jdwmconf->numlockmask | LockMask, DefaultRootWindow(disp), True,
+        code = XKeysymToKeycode(disp, awesomeconf->keys[i].keysym);
+        XGrabKey(disp, code, awesomeconf->keys[i].mod, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(disp, code, awesomeconf->keys[i].mod | LockMask, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask | LockMask, DefaultRootWindow(disp), True,
                  GrabModeAsync, GrabModeAsync);
     }
 }

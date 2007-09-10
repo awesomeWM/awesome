@@ -5,7 +5,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#include "jdwm.h"
+#include "awesome.h"
 #include "util.h"
 #include "layout.h"
 #include "tag.h"
@@ -235,39 +235,39 @@ detach(Client * c)
  * \param drawcontext drawcontext ref
  * \param c client
  * \param selscreen True if current screen is selected
- * \param jdwmconf jdwm config
+ * \param awesomeconf awesome config
  */
 void
-focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, jdwm_config *jdwmconf)
+focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
-    if((!c && selscreen) || (c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags)))
-        for(c = stack; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->snext);
+    if((!c && selscreen) || (c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags)))
+        for(c = stack; c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags); c = c->snext);
     
     /* if a client was selected but it's not the current client, unfocus it */
     if(sel && sel != c)
     {
-        grabbuttons(sel, False, jdwmconf->modkey, jdwmconf->numlockmask);
+        grabbuttons(sel, False, awesomeconf->modkey, awesomeconf->numlockmask);
         XSetWindowBorder(sel->display, sel->win, drawcontext->norm[ColBorder]);
-        setclienttrans(sel, jdwmconf->opacity_unfocused);
+        setclienttrans(sel, awesomeconf->opacity_unfocused);
     }
     if(c)
     {
         detachstack(c);
         attachstack(c);
-        grabbuttons(c, True, jdwmconf->modkey, jdwmconf->numlockmask);
+        grabbuttons(c, True, awesomeconf->modkey, awesomeconf->numlockmask);
     }
     if(!selscreen)
         return;
     sel = c;
-    drawstatus(disp, jdwmconf);
+    drawstatus(disp, awesomeconf);
     if(sel)
     {
         XSetWindowBorder(sel->display, sel->win, drawcontext->sel[ColBorder]);
         XSetInputFocus(sel->display, sel->win, RevertToPointerRoot, CurrentTime);
         for(c = stack; c; c = c->snext)
             if(c != sel)
-                setclienttrans(c, jdwmconf->opacity_unfocused);
+                setclienttrans(c, awesomeconf->opacity_unfocused);
         setclienttrans(sel, -1);
     }
     else
@@ -276,13 +276,13 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, jdwm_config *j
 
 /** Kill selected client
  * \param disp Display ref
- * \param jdwmconf jdwm config
+ * \param awesomeconf awesome config
  * \param arg unused
  * \ingroup ui_callback
  */
 void
 uicb_killclient(Display *disp __attribute__ ((unused)),
-                jdwm_config *jdwmconf __attribute__ ((unused)),
+                awesome_config *awesomeconf __attribute__ ((unused)),
                 const char *arg __attribute__ ((unused)))
 {
     XEvent ev;
@@ -327,7 +327,7 @@ loadprops(Client * c, int ntags)
 }
 
 void
-manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, jdwm_config *jdwmconf)
+manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, awesome_config *awesomeconf)
 {
     int i;
     Client *c, *t = NULL;
@@ -336,7 +336,7 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, jdwm_c
     XWindowChanges wc;
 
     c = p_new(Client, 1);
-    c->tags = p_new(Bool, jdwmconf->ntags);
+    c->tags = p_new(Bool, awesomeconf->ntags);
     c->win = w;
     c->ftview = True;
     c->x = c->rw = wa->x;
@@ -362,7 +362,7 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, jdwm_c
             c->x = c->rx = wax;
         if(c->y < way)
             c->y = c->ry = way;
-        c->border = jdwmconf->borderpx;
+        c->border = awesomeconf->borderpx;
     }
     wc.border_width = c->border;
     XConfigureWindow(disp, w, CWBorderWidth, &wc);
@@ -370,23 +370,23 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, jdwm_c
     configure(c);               /* propagates border_width, if size doesn't change */
     updatesizehints(c);
     XSelectInput(disp, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
-    grabbuttons(c, False, jdwmconf->modkey, jdwmconf->numlockmask);
+    grabbuttons(c, False, awesomeconf->modkey, awesomeconf->numlockmask);
     updatetitle(c);
     if((rettrans = XGetTransientForHint(disp, w, &trans) == Success))
         for(t = clients; t && t->win != trans; t = t->next);
     if(t)
-        for(i = 0; i < jdwmconf->ntags; i++)
+        for(i = 0; i < awesomeconf->ntags; i++)
             c->tags[i] = t->tags[i];
-    if(!loadprops(c, jdwmconf->ntags))
-        applyrules(c, jdwmconf);
+    if(!loadprops(c, awesomeconf->ntags))
+        applyrules(c, awesomeconf);
     if(!c->isfloating)
         c->isfloating = (rettrans == Success) || c->isfixed;
-    saveprops(c, jdwmconf->ntags);
+    saveprops(c, awesomeconf->ntags);
     attach(c);
     attachstack(c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
     ban(c);
-    arrange(disp, jdwmconf);
+    arrange(disp, awesomeconf);
 }
 
 void
@@ -461,7 +461,7 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
 
 void
 uicb_moveresize(Display *disp __attribute__ ((unused)),
-                jdwm_config *jdwmconf,
+                awesome_config *awesomeconf,
                 const char *arg)
 {
     int x, y, w, h, nx, ny, nw, nh, ox, oy, ow, oh;
@@ -528,7 +528,7 @@ unban(Client * c)
 }
 
 void
-unmanage(Client * c, DC *drawcontext, long state, jdwm_config *jdwmconf)
+unmanage(Client * c, DC *drawcontext, long state, awesome_config *awesomeconf)
 {
     XWindowChanges wc;
 
@@ -539,14 +539,14 @@ unmanage(Client * c, DC *drawcontext, long state, jdwm_config *jdwmconf)
     detach(c);
     detachstack(c);
     if(sel == c)
-        focus(c->display, drawcontext, NULL, True, jdwmconf);
+        focus(c->display, drawcontext, NULL, True, awesomeconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     setclientstate(c, state);
     XSync(c->display, False);
     XSetErrorHandler(xerror);
     XUngrabServer(c->display);
     if(state != NormalState)
-        arrange(c->display, jdwmconf);
+        arrange(c->display, awesomeconf);
     p_delete(&c->tags);
     p_delete(&c);
 }
@@ -617,7 +617,7 @@ updatesizehints(Client * c)
 
 void
 uicb_settrans(Display *disp __attribute__ ((unused)),
-              jdwm_config *jdwmconf __attribute__ ((unused)),
+              awesome_config *awesomeconf __attribute__ ((unused)),
               const char *arg)
 {
     double delta = 100.0;

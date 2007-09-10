@@ -8,7 +8,7 @@
 
 #define textw(text)         (textnw(text, strlen(text)) + dc.font.height)
 
-void drawstatus(Display *, jdwm_config *);          /* draw the bar */
+void drawstatus(Display *, awesome_config *);          /* draw the bar */
 unsigned int textnw(const char *, unsigned int);
 
 #endif

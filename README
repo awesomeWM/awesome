@@ -1,35 +1,35 @@
-jdwm - Julien's dynamic window manager
+awesome - Julien's dynamic window manager
 ============================
-jdwm is an extremely fast, small, and dynamic window manager for X.
+awesome is an extremely fast, small, and dynamic window manager for X.
 It's based on dwm.
 
 Requirements
 ------------
-In order to build jdwm you need the Xlib header files and libconfig.
+In order to build awesome you need the Xlib header files and libconfig.
 
 Installation
 ------------
-Edit config.mk to match your local setup (jdwm is installed into
+Edit config.mk to match your local setup (awesome is installed into
 the /usr/local namespace by default).
 
-Afterwards enter the following command to build and install jdwm (if
+Afterwards enter the following command to build and install awesome (if
 necessary as root):
 
     make clean install
 
-Running jdwm
+Running awesome
 -----------
-Add the following line to your .xinitrc to start jdwm using startx
-or to .xsession to start jdwm using gdm/kdm/xdm...:
+Add the following line to your .xinitrc to start awesome using startx
+or to .xsession to start awesome using gdm/kdm/xdm...:
 
-    exec jdwm
+    exec awesome
 
-In order to connect jdwm to a specific display, make sure that
+In order to connect awesome to a specific display, make sure that
 the DISPLAY environment variable is set correctly, e.g.:
 
-    DISPLAY=foo.bar:1 exec jdwm
+    DISPLAY=foo.bar:1 exec awesome
 
-(This will start jdwm on display :1 of the host foo.bar.)
+(This will start awesome on display :1 of the host foo.bar.)
 
 In order to display status info in the bar, you can do something
 like this in your .xinitrc:
@@ -38,10 +38,10 @@ like this in your .xinitrc:
     do
         echo `date` `uptime | sed 's/.*,//'`
         sleep 1
-    done | jdwm
+    done | awesome
 
 
 Configuration
 -------------
-The configuration of jdwm is done by creating a custom config.h
+The configuration of awesome is done by creating a custom config.h
 and (re)compiling the source code.

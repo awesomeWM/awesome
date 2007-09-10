@@ -1,6 +1,6 @@
-# Configuration file for jdwm
+# Configuration file for awesome
 
-jdwm:
+awesome:
 {
     # Default bar position
     barpos = "BarTop";

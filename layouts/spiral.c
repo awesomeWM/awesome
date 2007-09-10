@@ -9,7 +9,7 @@ extern Client *clients;         /* global client list */
 extern DC dc;
 
 static void
-fibonacci(Display *disp, jdwm_config *jdwmconf, int shape)
+fibonacci(Display *disp, awesome_config *awesomeconf, int shape)
 {
     int n, nx, ny, nh, nw, i;
     Client *c;
@@ -19,7 +19,7 @@ fibonacci(Display *disp, jdwm_config *jdwmconf, int shape)
     nw = waw;
     nh = wah;
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;
     for(i = 0, c = clients; c; c = c->next)
     {
@@ -60,19 +60,19 @@ fibonacci(Display *disp, jdwm_config *jdwmconf, int shape)
         }
         resize(c, nx, ny, nw - 2 * c->border, nh - 2 * c->border, False);
     }
-    focus(disp, &dc, NULL, True, jdwmconf);
-    restack(disp, jdwmconf);
+    focus(disp, &dc, NULL, True, awesomeconf);
+    restack(disp, awesomeconf);
 }
 
 
 void
-dwindle(Display *disp, jdwm_config *jdwmconf)
+dwindle(Display *disp, awesome_config *awesomeconf)
 {
-    fibonacci(disp, jdwmconf, 1);
+    fibonacci(disp, awesomeconf, 1);
 }
 
 void
-spiral(Display *disp, jdwm_config *jdwmconf)
+spiral(Display *disp, awesome_config *awesomeconf)
 {
-    fibonacci(disp, jdwmconf, 0);
+    fibonacci(disp, awesomeconf, 0);
 }

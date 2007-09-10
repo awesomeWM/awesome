@@ -33,7 +33,7 @@ idxoftag(const char *tag_to_find, const char **tags, int ntags)
 }
 
 void
-applyrules(Client * c, jdwm_config *jdwmconf)
+applyrules(Client * c, awesome_config *awesomeconf)
 {
     int i, j, len = 0;
     regmatch_t tmp;
@@ -53,12 +53,12 @@ applyrules(Client * c, jdwm_config *jdwmconf)
     XGetClassHint(c->display, c->win, &ch);
     snprintf(prop, len + 1, "%s:%s:%s",
              ch.res_class ? ch.res_class : "", ch.res_name ? ch.res_name : "", c->name);
-    for(i = 0; i < jdwmconf->nrules; i++)
+    for(i = 0; i < awesomeconf->nrules; i++)
         if(regs[i].propregex && !regexec(regs[i].propregex, prop, 1, &tmp, 0))
         {
-            c->isfloating = jdwmconf->rules[i].isfloating;
-            for(j = 0; regs[i].tagregex && j < jdwmconf->ntags; j++)
-                if(!regexec(regs[i].tagregex, jdwmconf->tags[j], 1, &tmp, 0))
+            c->isfloating = awesomeconf->rules[i].isfloating;
+            for(j = 0; regs[i].tagregex && j < awesomeconf->ntags; j++)
+                if(!regexec(regs[i].tagregex, awesomeconf->tags[j], 1, &tmp, 0))
                 {
                     matched = True;
                     c->tags[j] = True;
@@ -70,33 +70,33 @@ applyrules(Client * c, jdwm_config *jdwmconf)
     if(ch.res_name)
         XFree(ch.res_name);
     if(!matched)
-        for(i = 0; i < jdwmconf->ntags; i++)
-            c->tags[i] = jdwmconf->selected_tags[i];
+        for(i = 0; i < awesomeconf->ntags; i++)
+            c->tags[i] = awesomeconf->selected_tags[i];
 }
 
 void
-compileregs(jdwm_config * jdwmconf)
+compileregs(awesome_config * awesomeconf)
 {
     int i;
     regex_t *reg;
 
     if(regs)
         return;
-    regs = p_new(Regs, jdwmconf->nrules);
-    for(i = 0; i < jdwmconf->nrules; i++)
+    regs = p_new(Regs, awesomeconf->nrules);
+    for(i = 0; i < awesomeconf->nrules; i++)
     {
-        if(jdwmconf->rules[i].prop)
+        if(awesomeconf->rules[i].prop)
         {
             reg = p_new(regex_t, 1);
-            if(regcomp(reg, jdwmconf->rules[i].prop, REG_EXTENDED))
+            if(regcomp(reg, awesomeconf->rules[i].prop, REG_EXTENDED))
                 p_delete(&reg);
             else
                 regs[i].propregex = reg;
         }
-        if(jdwmconf->rules[i].tags)
+        if(awesomeconf->rules[i].tags)
         {
             reg = p_new(regex_t, 1);
-            if(regcomp(reg, jdwmconf->rules[i].tags, REG_EXTENDED))
+            if(regcomp(reg, awesomeconf->rules[i].tags, REG_EXTENDED))
                 p_delete(&reg);
             else
                 regs[i].tagregex = reg;
@@ -130,19 +130,19 @@ isvisible(Client * c, Bool * tags, int ntags)
  * \ingroup ui_callback
  */
 void
-uicb_tag(Display *disp, jdwm_config *jdwmconf, const char *arg)
+uicb_tag(Display *disp, awesome_config *awesomeconf, const char *arg)
 {
     int i;
 
     if(!sel)
         return;
-    for(i = 0; i < jdwmconf->ntags; i++)
+    for(i = 0; i < awesomeconf->ntags; i++)
         sel->tags[i] = arg == NULL;
-    i = idxoftag(arg, jdwmconf->tags, jdwmconf->ntags);
-    if(i >= 0 && i < jdwmconf->ntags)
+    i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
+    if(i >= 0 && i < awesomeconf->ntags)
         sel->tags[i] = True;
-    saveprops(sel, jdwmconf->ntags);
-    arrange(disp, jdwmconf);
+    saveprops(sel, awesomeconf->ntags);
+    arrange(disp, awesomeconf);
 }
 
 /** Toggle floating state of a client
@@ -152,7 +152,7 @@ uicb_tag(Display *disp, jdwm_config *jdwmconf, const char *arg)
  */
 void
 uicb_togglefloating(Display *disp,
-                    jdwm_config * jdwmconf,
+                    awesome_config * awesomeconf,
                     const char *arg __attribute__ ((unused)))
 {
     if(!sel)
@@ -169,8 +169,8 @@ uicb_togglefloating(Display *disp,
         sel->rw = sel->w;
         sel->rh = sel->h;
     }
-    saveprops(sel, jdwmconf->ntags);
-    arrange(disp, jdwmconf);
+    saveprops(sel, awesomeconf->ntags);
+    arrange(disp, awesomeconf);
 }
 
 /** Toggle tag view
@@ -180,7 +180,7 @@ uicb_togglefloating(Display *disp,
  */
 void
 uicb_toggletag(Display *disp,
-               jdwm_config *jdwmconf,
+               awesome_config *awesomeconf,
                const char *arg)
 {
     unsigned int i;
@@ -188,13 +188,13 @@ uicb_toggletag(Display *disp,
 
     if(!sel)
         return;
-    i = idxoftag(arg, jdwmconf->tags, jdwmconf->ntags);
+    i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
     sel->tags[i] = !sel->tags[i];
-    for(j = 0; j < jdwmconf->ntags && !sel->tags[j]; j++);
-    if(j == jdwmconf->ntags)
+    for(j = 0; j < awesomeconf->ntags && !sel->tags[j]; j++);
+    if(j == awesomeconf->ntags)
         sel->tags[i] = True;
-    saveprops(sel, jdwmconf->ntags);
-    arrange(disp, jdwmconf);
+    saveprops(sel, awesomeconf->ntags);
+    arrange(disp, awesomeconf);
 }
 
 /** Add a tag to viewed tags
@@ -204,70 +204,70 @@ uicb_toggletag(Display *disp,
  */
 void
 uicb_toggleview(Display *disp,
-                jdwm_config *jdwmconf,
+                awesome_config *awesomeconf,
                 const char *arg)
 {
     unsigned int i;
     int j;
 
-    i = idxoftag(arg, jdwmconf->tags, jdwmconf->ntags);
-    jdwmconf->selected_tags[i] = !jdwmconf->selected_tags[i];
-    for(j = 0; j < jdwmconf->ntags && !jdwmconf->selected_tags[j]; j++);
-    if(j == jdwmconf->ntags)
-        jdwmconf->selected_tags[i] = True;      /* cannot toggle last view */
-    savejdwmprops(disp, jdwmconf);
-    arrange(disp, jdwmconf);
+    i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
+    awesomeconf->selected_tags[i] = !awesomeconf->selected_tags[i];
+    for(j = 0; j < awesomeconf->ntags && !awesomeconf->selected_tags[j]; j++);
+    if(j == awesomeconf->ntags)
+        awesomeconf->selected_tags[i] = True;      /* cannot toggle last view */
+    saveawesomeprops(disp, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** View tag
  * \param disp Display ref
- * \param jdwmconf jdwm config ref
+ * \param awesomeconf awesome config ref
  * \param arg tag to view
  * \ingroup ui_callback
  */
 void
 uicb_view(Display *disp,
-          jdwm_config *jdwmconf,
+          awesome_config *awesomeconf,
           const char *arg)
 {
     int i;
 
-    for(i = 0; i < jdwmconf->ntags; i++)
+    for(i = 0; i < awesomeconf->ntags; i++)
     {
-        jdwmconf->prev_selected_tags[i] = jdwmconf->selected_tags[i];
-        jdwmconf->selected_tags[i] = arg == NULL;
+        awesomeconf->prev_selected_tags[i] = awesomeconf->selected_tags[i];
+        awesomeconf->selected_tags[i] = arg == NULL;
     }
-    i = idxoftag(arg, jdwmconf->tags, jdwmconf->ntags);
-    if(i >= 0 && i < jdwmconf->ntags)
+    i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
+    if(i >= 0 && i < awesomeconf->ntags)
     {
-        jdwmconf->selected_tags[i] = True;
-        jdwmconf->current_layout = jdwmconf->tag_layouts[i];
+        awesomeconf->selected_tags[i] = True;
+        awesomeconf->current_layout = awesomeconf->tag_layouts[i];
     }
-    savejdwmprops(disp, jdwmconf);
-    arrange(disp, jdwmconf);
+    saveawesomeprops(disp, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** View previously selected tags
  * \param disp Display ref
- * \param jdwmconf jdwm config ref
+ * \param awesomeconf awesome config ref
  * \param arg unused
  * \ingroup ui_callback
  */
 void
 uicb_viewprevtags(Display * disp,
-                  jdwm_config *jdwmconf,
+                  awesome_config *awesomeconf,
                   const char *arg __attribute__ ((unused)))
 {
     int i;
     Bool t;
 
-    for(i = 0; i < jdwmconf->ntags; i++)
+    for(i = 0; i < awesomeconf->ntags; i++)
     {
-        t = jdwmconf->selected_tags[i];
-        jdwmconf->selected_tags[i] = jdwmconf->prev_selected_tags[i];
-        jdwmconf->prev_selected_tags[i] = t;
+        t = awesomeconf->selected_tags[i];
+        awesomeconf->selected_tags[i] = awesomeconf->prev_selected_tags[i];
+        awesomeconf->prev_selected_tags[i] = t;
     }
-    arrange(disp, jdwmconf);
+    arrange(disp, awesomeconf);
 }
 
 /** View next tag
@@ -277,23 +277,23 @@ uicb_viewprevtags(Display * disp,
  */
 void
 uicb_tag_viewnext(Display *disp,
-                  jdwm_config *jdwmconf,
+                  awesome_config *awesomeconf,
                   const char *arg __attribute__ ((unused)))
 {
     int i;
     int firsttag = -1;
 
-    for(i = 0; i < jdwmconf->ntags; i++)
+    for(i = 0; i < awesomeconf->ntags; i++)
     {
-        if(firsttag < 0 && jdwmconf->selected_tags[i])
+        if(firsttag < 0 && awesomeconf->selected_tags[i])
             firsttag = i;
-        jdwmconf->selected_tags[i] = False;
+        awesomeconf->selected_tags[i] = False;
     }
-    if(++firsttag >= jdwmconf->ntags)
+    if(++firsttag >= awesomeconf->ntags)
         firsttag = 0;
-    jdwmconf->selected_tags[firsttag] = True;
-    savejdwmprops(disp, jdwmconf);
-    arrange(disp, jdwmconf);
+    awesomeconf->selected_tags[firsttag] = True;
+    saveawesomeprops(disp, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** View previous tag
@@ -303,21 +303,21 @@ uicb_tag_viewnext(Display *disp,
  */
 void
 uicb_tag_viewprev(Display *disp,
-                  jdwm_config *jdwmconf,
+                  awesome_config *awesomeconf,
                   const char *arg __attribute__ ((unused)))
 {
     int i;
     int firsttag = -1;
 
-    for(i = jdwmconf->ntags - 1; i >= 0; i--)
+    for(i = awesomeconf->ntags - 1; i >= 0; i--)
     {
-        if(firsttag < 0 && jdwmconf->selected_tags[i])
+        if(firsttag < 0 && awesomeconf->selected_tags[i])
             firsttag = i;
-        jdwmconf->selected_tags[i] = False;
+        awesomeconf->selected_tags[i] = False;
     }
     if(--firsttag < 0)
-        firsttag = jdwmconf->ntags - 1;
-    jdwmconf->selected_tags[firsttag] = True;
-    savejdwmprops(disp, jdwmconf);
-    arrange(disp, jdwmconf);
+        firsttag = awesomeconf->ntags - 1;
+    awesomeconf->selected_tags[firsttag] = True;
+    saveawesomeprops(disp, awesomeconf);
+    arrange(disp, awesomeconf);
 }

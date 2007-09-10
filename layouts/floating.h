@@ -3,6 +3,6 @@
 #ifndef JDWM_FLOATING_H
 #define JDWM_FLOATING_H
 
-void floating(Display *, jdwm_config *);            /* floating layout */
+void floating(Display *, awesome_config *);            /* floating layout */
 
 #endif

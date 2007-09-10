@@ -4,7 +4,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#include "jdwm.h"
+#include "awesome.h"
 #include "layout.h"
 #include "tag.h"
 #include "layouts/floating.h"
@@ -16,84 +16,84 @@ extern Client *clients, *sel;   /* global client list */
 extern DC dc;
 
 void
-arrange(Display * disp, jdwm_config *jdwmconf)
+arrange(Display * disp, awesome_config *awesomeconf)
 {
     Client *c;
 
     for(c = clients; c; c = c->next)
-        if(isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags))
+        if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags))
             unban(c);
         else
             ban(c);
-    jdwmconf->current_layout->arrange(disp, jdwmconf);
-    focus(disp, &dc, NULL, True, jdwmconf);
-    restack(disp, jdwmconf);
+    awesomeconf->current_layout->arrange(disp, awesomeconf);
+    focus(disp, &dc, NULL, True, awesomeconf);
+    restack(disp, awesomeconf);
 }
 
 void
 uicb_focusnext(Display *disp __attribute__ ((unused)),
-               jdwm_config * jdwmconf,
+               awesome_config * awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
     Client *c;
 
     if(!sel)
         return;
-    for(c = sel->next; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->next);
+    for(c = sel->next; c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
     if(!c)
-        for(c = clients; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->next);
+        for(c = clients; c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
     if(c)
     {
-        focus(c->display, &dc, c, True, jdwmconf);
-        restack(c->display, jdwmconf);
+        focus(c->display, &dc, c, True, awesomeconf);
+        restack(c->display, awesomeconf);
     }
 }
 
 void
 uicb_focusprev(Display *disp __attribute__ ((unused)),
-               jdwm_config *jdwmconf,
+               awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
     Client *c;
 
     if(!sel)
         return;
-    for(c = sel->prev; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->prev);
+    for(c = sel->prev; c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags); c = c->prev);
     if(!c)
     {
         for(c = clients; c && c->next; c = c->next);
-        for(; c && !isvisible(c, jdwmconf->selected_tags, jdwmconf->ntags); c = c->prev);
+        for(; c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags); c = c->prev);
     }
     if(c)
     {
-        focus(c->display, &dc, c, True, jdwmconf);
-        restack(c->display, jdwmconf);
+        focus(c->display, &dc, c, True, awesomeconf);
+        restack(c->display, awesomeconf);
     }
 }
 
 void
-loadjdwmprops(Display *disp, jdwm_config * jdwmconf)
+loadawesomeprops(Display *disp, awesome_config * awesomeconf)
 {
     int i;
     char *prop;
 
-    prop = p_new(char, jdwmconf->ntags + 1);
+    prop = p_new(char, awesomeconf->ntags + 1);
 
-    if(gettextprop(disp, DefaultRootWindow(disp), JDWMPROPS_ATOM(disp), prop, jdwmconf->ntags + 1))
-        for(i = 0; i < jdwmconf->ntags && prop[i]; i++)
-            jdwmconf->selected_tags[i] = prop[i] == '1';
+    if(gettextprop(disp, DefaultRootWindow(disp), JDWMPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
+        for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
+            awesomeconf->selected_tags[i] = prop[i] == '1';
 
     p_delete(&prop);
 }
 
 void
-restack(Display * disp, jdwm_config *jdwmconf)
+restack(Display * disp, awesome_config *awesomeconf)
 {
     Client *c;
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatus(disp, jdwmconf);
+    drawstatus(disp, awesomeconf);
     if(!sel)
         return;
     if(sel->isfloating || IS_ARRANGE(floating))
@@ -101,7 +101,7 @@ restack(Display * disp, jdwm_config *jdwmconf)
     if(!IS_ARRANGE(floating))
     {
         wc.stack_mode = Below;
-        wc.sibling = jdwmconf->statusbar.window;
+        wc.sibling = awesomeconf->statusbar.window;
         if(!sel->isfloating)
         {
             XConfigureWindow(disp, sel->win, CWSibling | CWStackMode, &wc);
@@ -109,7 +109,7 @@ restack(Display * disp, jdwm_config *jdwmconf)
         }
         for(c = clients; c; c = c->next)
         {
-            if(IS_TILED(c, jdwmconf->selected_tags, jdwmconf->ntags) || c == sel)
+            if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags) || c == sel)
                 continue;
             XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
             wc.sibling = c->win;
@@ -120,14 +120,14 @@ restack(Display * disp, jdwm_config *jdwmconf)
 }
 
 void
-savejdwmprops(Display *disp, jdwm_config *jdwmconf)
+saveawesomeprops(Display *disp, awesome_config *awesomeconf)
 {
     int i;
     char *prop;
 
-    prop = p_new(char, jdwmconf->ntags + 1);
-    for(i = 0; i < jdwmconf->ntags; i++)
-        prop[i] = jdwmconf->selected_tags[i] ? '1' : '0';
+    prop = p_new(char, awesomeconf->ntags + 1);
+    for(i = 0; i < awesomeconf->ntags; i++)
+        prop[i] = awesomeconf->selected_tags[i] ? '1' : '0';
     prop[i] = '\0';
     XChangeProperty(disp, DefaultRootWindow(disp),
                     JDWMPROPS_ATOM(disp), XA_STRING, 8,
@@ -136,54 +136,54 @@ savejdwmprops(Display *disp, jdwm_config *jdwmconf)
 }
 
 void
-uicb_setlayout(Display *disp, jdwm_config * jdwmconf, const char *arg)
+uicb_setlayout(Display *disp, awesome_config * awesomeconf, const char *arg)
 {
     int i, j;
     Client *c;
 
     if(!arg)
     {
-        if(!(++jdwmconf->current_layout)->symbol)
-            jdwmconf->current_layout = &jdwmconf->layouts[0];
+        if(!(++awesomeconf->current_layout)->symbol)
+            awesomeconf->current_layout = &awesomeconf->layouts[0];
     }
     else
     {
         i = strtol(arg, NULL, 10);
-        if(i < 0 || i >= jdwmconf->nlayouts)
+        if(i < 0 || i >= awesomeconf->nlayouts)
             return;
-        jdwmconf->current_layout = &jdwmconf->layouts[i];
+        awesomeconf->current_layout = &awesomeconf->layouts[i];
     }
 
     for(c = clients; c; c = c->next)
         c->ftview = True;
 
     if(sel)
-        arrange(disp, jdwmconf);
+        arrange(disp, awesomeconf);
     else
-        drawstatus(disp, jdwmconf);
+        drawstatus(disp, awesomeconf);
 
-    savejdwmprops(disp, jdwmconf);
+    saveawesomeprops(disp, awesomeconf);
 
-    for(j = 0; j < jdwmconf->ntags; j++)
-        if (jdwmconf->selected_tags[j])
-            jdwmconf->tag_layouts[j] = jdwmconf->current_layout;
+    for(j = 0; j < awesomeconf->ntags; j++)
+        if (awesomeconf->selected_tags[j])
+            awesomeconf->tag_layouts[j] = awesomeconf->current_layout;
 }
 
 void
 uicb_togglebar(Display *disp,
-               jdwm_config *jdwmconf,
+               awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
-    if(jdwmconf->statusbar.position == BarOff)
-        jdwmconf->statusbar.position = (jdwmconf->statusbar.position == BarOff) ? BarTop : jdwmconf->statusbar_default_position;
+    if(awesomeconf->statusbar.position == BarOff)
+        awesomeconf->statusbar.position = (awesomeconf->statusbar.position == BarOff) ? BarTop : awesomeconf->statusbar_default_position;
     else
-        jdwmconf->statusbar.position = BarOff;
-    updatebarpos(disp, jdwmconf->statusbar);
-    arrange(disp, jdwmconf);
+        awesomeconf->statusbar.position = BarOff;
+    updatebarpos(disp, awesomeconf->statusbar);
+    arrange(disp, awesomeconf);
 }
 
 static void
-maximize(int x, int y, int w, int h, jdwm_config *jdwmconf)
+maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
 {
     XEvent ev;
 
@@ -205,48 +205,48 @@ maximize(int x, int y, int w, int h, jdwm_config *jdwmconf)
     else
         sel->isfloating = False;
 
-    drawstatus(sel->display, jdwmconf);
+    drawstatus(sel->display, awesomeconf);
 
     while(XCheckMaskEvent(sel->display, EnterWindowMask, &ev));
 }
 
 void
 uicb_togglemax(Display *disp __attribute__ ((unused)),
-               jdwm_config *jdwmconf,
+               awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
-    maximize(wax, way, waw - 2 * jdwmconf->borderpx, wah - 2 * jdwmconf->borderpx, jdwmconf);
+    maximize(wax, way, waw - 2 * awesomeconf->borderpx, wah - 2 * awesomeconf->borderpx, awesomeconf);
 }
 
 void
 uicb_toggleverticalmax(Display *disp __attribute__ ((unused)),
-                       jdwm_config *jdwmconf,
+                       awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
 {
     if(sel)
-        maximize(sel->x, way, sel->w, wah - 2 * jdwmconf->borderpx, jdwmconf);
+        maximize(sel->x, way, sel->w, wah - 2 * awesomeconf->borderpx, awesomeconf);
 }
 
 
 void
 uicb_togglehorizontalmax(Display *disp __attribute__ ((unused)),
-                         jdwm_config *jdwmconf,
+                         awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
 {
     if(sel)
-        maximize(wax, sel->y, waw - 2 * jdwmconf->borderpx, sel->h, jdwmconf);
+        maximize(wax, sel->y, waw - 2 * awesomeconf->borderpx, sel->h, awesomeconf);
 }
 
 void 
 uicb_zoom(Display *disp __attribute__ ((unused)), 
-          jdwm_config *jdwmconf,
+          awesome_config *awesomeconf,
           const char *arg __attribute__ ((unused))) 
 { 
     if(!sel)
         return;
     detach(sel);
     attach(sel);
-    focus(sel->display, &dc, sel, True, jdwmconf);
-    arrange(sel->display, jdwmconf);
+    focus(sel->display, &dc, sel, True, awesomeconf);
+    arrange(sel->display, awesomeconf);
 } 
 

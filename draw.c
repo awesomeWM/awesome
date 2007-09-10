@@ -105,37 +105,37 @@ textnw(const char *text, unsigned int len)
 }
 
 void
-drawstatus(Display *disp, jdwm_config * jdwmconf)
+drawstatus(Display *disp, awesome_config * awesomeconf)
 {
     int x, i;
     dc.x = dc.y = 0;
-    for(i = 0; i < jdwmconf->ntags; i++)
+    for(i = 0; i < awesomeconf->ntags; i++)
     {
-        dc.w = textw(jdwmconf->tags[i]);
-        if(jdwmconf->selected_tags[i])
+        dc.w = textw(awesomeconf->tags[i]);
+        if(awesomeconf->selected_tags[i])
         {
-            drawtext(disp, jdwmconf->tags[i], dc.sel);
+            drawtext(disp, awesomeconf->tags[i], dc.sel);
             drawsquare(sel && sel->tags[i], isoccupied(i), dc.sel, disp);
         }
         else
         {
-            drawtext(disp, jdwmconf->tags[i], dc.norm);
+            drawtext(disp, awesomeconf->tags[i], dc.norm);
             drawsquare(sel && sel->tags[i], isoccupied(i), dc.norm, disp);
         }
         dc.x += dc.w;
     }
-    dc.w = jdwmconf->statusbar.width;
-    drawtext(disp, jdwmconf->current_layout->symbol, dc.norm);
+    dc.w = awesomeconf->statusbar.width;
+    drawtext(disp, awesomeconf->current_layout->symbol, dc.norm);
     x = dc.x + dc.w;
-    dc.w = textw(jdwmconf->statustext);
+    dc.w = textw(awesomeconf->statustext);
     dc.x = DisplayWidth(disp, DefaultScreen(disp)) - dc.w;
     if(dc.x < x)
     {
         dc.x = x;
         dc.w = DisplayWidth(disp, DefaultScreen(disp)) - x;
     }
-    drawtext(disp, jdwmconf->statustext, dc.norm);
-    if((dc.w = dc.x - x) > jdwmconf->statusbar.height)
+    drawtext(disp, awesomeconf->statustext, dc.norm);
+    if((dc.w = dc.x - x) > awesomeconf->statusbar.height)
     {
         dc.x = x;
         if(sel)
@@ -146,6 +146,6 @@ drawstatus(Display *disp, jdwm_config * jdwmconf)
         else
             drawtext(disp, NULL, dc.norm);
     }
-    XCopyArea(disp, dc.drawable, jdwmconf->statusbar.window, dc.gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), jdwmconf->statusbar.height, 0, 0);
+    XCopyArea(disp, dc.drawable, awesomeconf->statusbar.window, dc.gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, 0, 0);
     XSync(disp, False);
 }

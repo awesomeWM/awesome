@@ -5,19 +5,19 @@
 
 #include "config.h"
 
-void grabkeys(Display *, jdwm_config *);            /* grab all keys defined in config */
+void grabkeys(Display *, awesome_config *);            /* grab all keys defined in config */
 
-void handle_event_buttonpress(XEvent *, jdwm_config *);
-void handle_event_configurerequest(XEvent *, jdwm_config *);
-void handle_event_configurenotify(XEvent *, jdwm_config *); 
-void handle_event_destroynotify(XEvent *, jdwm_config *);
-void handle_event_enternotify(XEvent *, jdwm_config *);
-void handle_event_expose(XEvent *, jdwm_config *);
-void handle_event_keypress(XEvent *, jdwm_config *);
-void handle_event_leavenotify(XEvent *, jdwm_config *);
-void handle_event_mappingnotify(XEvent *, jdwm_config *);
-void handle_event_maprequest(XEvent *, jdwm_config *);
-void handle_event_propertynotify(XEvent *, jdwm_config *);
-void handle_event_unmapnotify(XEvent *, jdwm_config *);
+void handle_event_buttonpress(XEvent *, awesome_config *);
+void handle_event_configurerequest(XEvent *, awesome_config *);
+void handle_event_configurenotify(XEvent *, awesome_config *); 
+void handle_event_destroynotify(XEvent *, awesome_config *);
+void handle_event_enternotify(XEvent *, awesome_config *);
+void handle_event_expose(XEvent *, awesome_config *);
+void handle_event_keypress(XEvent *, awesome_config *);
+void handle_event_leavenotify(XEvent *, awesome_config *);
+void handle_event_mappingnotify(XEvent *, awesome_config *);
+void handle_event_maprequest(XEvent *, awesome_config *);
+void handle_event_propertynotify(XEvent *, awesome_config *);
+void handle_event_unmapnotify(XEvent *, awesome_config *);
 
 #endif

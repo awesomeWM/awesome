@@ -22,7 +22,7 @@ eprint(const char *fmt, ...)
 
 void
 spawn(Display * disp,
-      jdwm_config * jdwmconf __attribute__ ((unused)),
+      awesome_config * awesomeconf __attribute__ ((unused)),
       const char *arg)
 {
     static char *shell = NULL;
@@ -41,7 +41,7 @@ spawn(Display * disp,
                 close(ConnectionNumber(disp));
             setsid();
             execl(shell, shell, "-c", arg, (char *) NULL);
-            fprintf(stderr, "jdwm: execl '%s -c %s'", shell, arg);
+            fprintf(stderr, "awesome: execl '%s -c %s'", shell, arg);
             perror(" failed");
         }
         exit(EXIT_SUCCESS);

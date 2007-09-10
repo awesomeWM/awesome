@@ -61,6 +61,6 @@ xrealloc(void **ptr, ssize_t newsize)
 }
 
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
-void spawn(Display *, jdwm_config *, const char *);
+void spawn(Display *, awesome_config *, const char *);
 
 #endif

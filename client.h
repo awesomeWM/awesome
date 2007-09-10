@@ -33,16 +33,16 @@ void attach(Client *);          /* attaches c to global client list */
 void ban(Client *);             /* bans c */
 void configure(Client *);       /* send synthetic configure event */
 void detach(Client *);          /* detaches c from global client list */
-void focus(Display *, DC *, Client *, Bool, jdwm_config *);           /* focus c if visible && !NULL, or focus top visible */
-void manage(Display *, DC *, Window, XWindowAttributes *, jdwm_config *);       /* manage new client */
+void focus(Display *, DC *, Client *, Bool, awesome_config *);           /* focus c if visible && !NULL, or focus top visible */
+void manage(Display *, DC *, Window, XWindowAttributes *, awesome_config *);       /* manage new client */
 void resize(Client *, int, int, int, int, Bool);        /* resize with given coordinates c */
 void unban(Client *);           /* unbans c */
-void unmanage(Client *, DC *, long, jdwm_config *);  /* unmanage c */
+void unmanage(Client *, DC *, long, awesome_config *);  /* unmanage c */
 void updatesizehints(Client *); /* update the size hint variables of c */
 void updatetitle(Client *);     /* update the name of c */
 void saveprops(Client * c, int);     /* saves client properties */
-void uicb_killclient(Display *, jdwm_config *, const char *); /* kill client */
-void uicb_moveresize(Display *, jdwm_config *, const char *);  /* move and resize window */
-void uicb_settrans(Display *, jdwm_config *, const char *);
+void uicb_killclient(Display *, awesome_config *, const char *); /* kill client */
+void uicb_moveresize(Display *, awesome_config *, const char *);  /* move and resize window */
+void uicb_settrans(Display *, awesome_config *, const char *);
 
 #endif

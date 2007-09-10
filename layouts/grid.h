@@ -6,6 +6,6 @@
 #include "config.h"
 
 /* grid.c */
-void grid(Display *, jdwm_config *);
+void grid(Display *, awesome_config *);
 
 #endif

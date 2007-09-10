@@ -1,4 +1,4 @@
-# jdwm version
+# awesome version
 VERSION = 0.0
 
 # Customize below to fit your system

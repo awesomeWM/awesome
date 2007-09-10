@@ -3,7 +3,7 @@
 #ifndef JDWM_SPIRAL_H
 #define JDWM_SPIRAL_H
 
-void dwindle(Display *, jdwm_config *);              /* dwindle windows */
-void spiral(Display *, jdwm_config *);              /* spiral windows */
+void dwindle(Display *, awesome_config *);              /* dwindle windows */
+void spiral(Display *, awesome_config *);              /* spiral windows */
 
 #endif

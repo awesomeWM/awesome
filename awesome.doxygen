@@ -1,5 +1,5 @@
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = jdwm
+PROJECT_NAME           = awesome
 PROJECT_NUMBER         = 0.0
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO
