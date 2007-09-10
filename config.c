@@ -322,6 +322,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, jdwm_config *jdwmconf)
     /* mwfact */
     jdwmconf->mwfact = config_lookup_float(&jdwmlibconf, "jdwm.mwfact");
 
+    /* resize_hints */
+    jdwmconf->resize_hints = config_lookup_float(&jdwmlibconf, "jdwm.resize_hints");
+
     /* colors */
     dc.norm[ColBorder] = initcolor(config_lookup_string(&jdwmlibconf, "jdwm.normal_border_color"),
                                    disp, scr);

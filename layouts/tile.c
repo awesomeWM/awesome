@@ -122,7 +122,7 @@ _tile(jdwm_config *jdwmconf, const Bool right)
             else
                 nh = th - 2 * c->border;
         }
-        resize(c, nx, ny, nw, nh, False);
+        resize(c, nx, ny, nw, nh, jdwmconf->resize_hints);
         if(n > nmaster && th != wah)
             ny += nh + 2 * c->border;
         i++;

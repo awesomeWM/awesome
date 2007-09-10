@@ -108,6 +108,8 @@ struct jdwm_config
     int nmaster;
     /** Transparency of unfocused clients */
     int opacity_unfocused;
+    /** Respect resize hints */
+    Bool resize_hints;
     /** Text displayed in bar */
     char statustext[256];
     /** Current layout */

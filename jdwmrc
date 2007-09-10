@@ -36,6 +36,9 @@ jdwm:
     # Number of master windows (used by tile layouts)
     nmaster = 2;
 
+    # Resize hints
+    resize_hints = true;
+
     # Set of rules to put some windows floating
     # or to tag them on launch
     rules = ({ name = "Gimp";
