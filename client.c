@@ -190,7 +190,6 @@ ban(Client * c)
     XUnmapWindow(c->display, c->win);
     setclientstate(c, IconicState);
     c->isbanned = True;
-    c->unmapped++;
 }
 
 /** Configure client

@@ -360,7 +360,7 @@ handle_event_unmapnotify(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
 
-    if((c = getclient(ev->window)) && ev->event == DefaultRootWindow(e->xany.display) && (ev->send_event || !c->unmapped--))
+    if((c = getclient(ev->window)) && ev->event == DefaultRootWindow(e->xany.display) && (ev->send_event || !c->isbanned))
         unmanage(c, &dc, WithdrawnState, awesomeconf);
 }
 
