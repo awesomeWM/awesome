@@ -31,6 +31,8 @@ drawtext(Display *disp, const char *text, unsigned long col[ColLast])
     /* shorten text if necessary */
     while(len && (w = textnw(buf, len)) > dc.w - h)
         buf[--len] = 0;
+    if(w > dc.w)
+        return;                 /* too long */
     if(len < olen)
     {
         if(len > 1)
@@ -40,8 +42,6 @@ drawtext(Display *disp, const char *text, unsigned long col[ColLast])
         if(len > 3)
             buf[len - 3] = '.';
     }
-    if(w > dc.w)
-        return;                 /* too long */
     XSetForeground(disp, dc.gc, col[ColFG]);
     if(dc.font.set)
         XmbDrawString(disp, dc.drawable, dc.font.set, dc.gc, x, y, buf, len);
