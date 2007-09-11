@@ -4,6 +4,7 @@
 #define AWESOME_MEM_H
 
 #include <string.h>
+#include <stdlib.h>
 #include "config.h"
 
 #define ssizeof(foo)            (ssize_t)sizeof(foo)

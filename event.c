@@ -1,11 +1,9 @@
 /* See LICENSE file for copyright and license details. */
-#include <stdlib.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
 #include "awesome.h"
-#include "util.h"
 #include "event.h"
 #include "layout.h"
 #include "tag.h"

@@ -4,12 +4,10 @@
  * \defgroup ui_callback
  */
 
-#include <stdlib.h>
 #include <libconfig.h>
 #include <X11/keysym.h>
 
 #include "awesome.h"
-#include "util.h"
 #include "layout.h"
 #include "tag.h"
 #include "layouts/tile.h"

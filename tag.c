@@ -1,10 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <X11/Xutil.h>
 
-#include "util.h"
 #include "layout.h"
 #include "tag.h"
 
@@ -41,11 +39,7 @@ applyrules(Client * c, awesome_config *awesomeconf)
     XClassHint ch = { 0, 0 };
     char *prop;
 
-    if(ch.res_class)
-        len += strlen(ch.res_class);
-    if(ch.res_name)
-        len += strlen(ch.res_name);
-    len += strlen(c->name);
+    len += a_strlen(ch.res_class) + a_strlen(ch.res_name) + a_strlen(c->name);
 
     prop = p_new(char, len + 1);
 

@@ -1,6 +1,5 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <stdlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
@@ -8,7 +7,6 @@
 #include "layout.h"
 #include "tag.h"
 #include "layouts/floating.h"
-#include "util.h"
 
 /* extern */
 extern int wax, way, wah, waw;  /* windowarea geometry */

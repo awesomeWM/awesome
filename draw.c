@@ -20,7 +20,7 @@ drawtext(Display *disp, const char *text, unsigned long col[ColLast])
     if(!text)
         return;
     w = 0;
-    olen = len = strlen(text);
+    olen = len = a_strlen(text);
     if(len >= sizeof buf)
         len = sizeof buf - 1;
     memcpy(buf, text, len);

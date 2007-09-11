@@ -3,7 +3,6 @@
 #include <errno.h>
 #include <locale.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <sys/select.h>
 #include <X11/cursorfont.h>
@@ -13,7 +12,6 @@
 #include <X11/Xutil.h>
 
 #include "awesome.h"
-#include "util.h"
 #include "event.h"
 #include "layout.h"
 #include "tag.h"
@@ -345,7 +343,7 @@ main(int argc, char *argv[])
                 readin = False;
                 break;
             default:
-                for(awesomeconf.statustext[r] = '\0', p = awesomeconf.statustext + strlen(awesomeconf.statustext) - 1;
+                for(awesomeconf.statustext[r] = '\0', p = awesomeconf.statustext + a_strlen(awesomeconf.statustext) - 1;
                     p >= awesomeconf.statustext && *p == '\n'; *p-- = '\0');
                 for(; p >= awesomeconf.statustext && *p != '\n'; --p);
                 if(p > awesomeconf.statustext)

@@ -1,12 +1,10 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
 #include "awesome.h"
-#include "util.h"
 #include "layout.h"
 #include "tag.h"
 
