@@ -117,13 +117,13 @@ resizemouse(Client * c, awesome_config *awesomeconf)
 void
 handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 {
-    int i, x;
+    int i;
     Client *c;
     XButtonPressedEvent *ev = &e->xbutton;
 
     if(awesomeconf->statusbar.window == ev->window)
     {
-        x = 0;
+        int x = 0;
         for(i = 0; i < awesomeconf->ntags; i++)
         {
             x += textw(awesomeconf->tags[i]);
