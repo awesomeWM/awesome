@@ -109,7 +109,7 @@ restack(Display * disp, awesome_config *awesomeconf)
         }
         for(c = clients; c; c = c->next)
         {
-            if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags) || c == sel)
+            if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags) || c == sel)
                 continue;
             XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
             wc.sibling = c->win;
