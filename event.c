@@ -229,13 +229,18 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
 {
     XConfigureEvent *ev = &e->xconfigure;
 
-    if(ev->window == DefaultRootWindow(e->xany.display) && (ev->width != DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)) || ev->height != DisplayHeight(e->xany.display, DefaultScreen(e->xany.display))))
+    if(ev->window == DefaultRootWindow(e->xany.display)
+       && (ev->width != DisplayWidth(e->xany.display, DefaultScreen(e->xany.display))
+           || ev->height != DisplayHeight(e->xany.display, DefaultScreen(e->xany.display))))
     {
         DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)) = ev->width;
         DisplayHeight(e->xany.display, DefaultScreen(e->xany.display)) = ev->height;
         XFreePixmap(e->xany.display, dc.drawable);
-        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display), DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height, DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
-        XResizeWindow(e->xany.display, awesomeconf->statusbar.window, DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height);
+        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display),
+                                    DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)),
+                                    awesomeconf->statusbar.height, DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
+        XResizeWindow(e->xany.display, awesomeconf->statusbar.window,
+                      DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height);
         updatebarpos(e->xany.display, awesomeconf->statusbar);
         arrange(e->xany.display, awesomeconf);
     }
@@ -334,8 +339,6 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
     {
         switch (ev->atom)
         {
-        default:
-            break;
         case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating && (c->isfloating = (getclient(trans) != NULL)))
