@@ -105,9 +105,9 @@ grabbuttons(Client * c, Bool focused, KeySym modkey, unsigned int numlockmask)
     }
 }
 
-/** XXX: No idea
+/** Check if client supports protocol WM_DELETE_WINDOW
  * \param c the client
- * \return True if atom has WM_DELETE_WINDOW
+ * \return True if client has WM_DELETE_WINDOW
  */
 static Bool
 isprotodel(Client * c)
@@ -126,7 +126,7 @@ isprotodel(Client * c)
     return ret;
 }
 
-/** XXX: No idea
+/** Set client WM_STATE property
  * \param c the client
  * \param state no idea
  */
@@ -161,7 +161,6 @@ setclienttrans(Client *c, double opacity)
 
     XSync(c->display, False);
 }
-/* extern */
 
 /** Attach client to the beginning of the clients stack
  * \param c the client
@@ -630,26 +629,22 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
     if(!sel)
         return;
 
-    if(arg && sscanf(arg, "%lf", &delta))
+    if(arg && sscanf(arg, "%lf", &delta) && (arg[0] == '+' || arg[0] == '-'))
     {
-        if(arg[0] == '+' || arg[0] == '-')
+        XGetWindowProperty(sel->display, sel->win, XInternAtom(sel->display, "_NET_WM_WINDOW_OPACITY", False),
+                           0L, 1L, False, XA_CARDINAL, &actual, &format, &n, &left,
+                           (unsigned char **) &data);
+        if(data)
         {
-            XGetWindowProperty(sel->display, sel->win, XInternAtom(sel->display, "_NET_WM_WINDOW_OPACITY", False),
-                               0L, 1L, False, XA_CARDINAL, &actual, &format, &n, &left,
-                               (unsigned char **) &data);
-            if(data)
-            {
-                unsigned int current_opacity = 0;
-                memcpy(&current_opacity, data, sizeof(unsigned int));
-                XFree((void *) data);
-                delta += ((current_opacity * 100.0) / 0xffffffff);
-            }
-            else
-            {
-                delta += 100.0;
-                set_prop = 1;
-            }
-
+            unsigned int current_opacity = 0;
+            memcpy(&current_opacity, data, sizeof(unsigned int));
+            XFree((void *) data);
+            delta += ((current_opacity * 100.0) / 0xffffffff);
+        }
+        else
+        {
+            delta += 100.0;
+            set_prop = 1;
         }
     }
 
