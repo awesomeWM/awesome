@@ -29,22 +29,19 @@ grid(Display *disp, awesome_config *awesomeconf)
     cw = waw / (cols ? cols : 1);
 
     for(i = 0, c = clients; c; c = c->next)
-        if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags))
-        {
-            unban(c);
-            if(c->isfloating)
-                continue;
-            c->ismax = False;
-            cx = (i / rows) * cw;
-            cy = (i % rows) * ch + (awesomeconf->statusbar.position == BarTop ? awesomeconf->statusbar.height : 0);   // bh? adjust
-            /* adjust height/width of last row/column's windows */
-            ah = ((i + 1) % rows == 0) ? wah - ch * rows : 0;
-            aw = (i >= rows * (cols - 1)) ? waw - cw * cols : 0;
-            resize(c, cx, cy, cw - 2 * c->border + aw, ch - 2 * c->border + ah, False);
-            i++;
-        }
-        else
-            ban(c);
+    {
+        if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
+            continue;
+        c->ismax = False;
+        cx = (i / rows) * cw;
+        cy = (i % rows) * ch + (awesomeconf->statusbar.position == BarTop ? awesomeconf->statusbar.height : 0);   // bh? adjust
+        /* adjust height/width of last row/column's windows */
+        ah = ((i + 1) % rows == 0) ? wah - ch * rows : 0;
+        aw = (i >= rows * (cols - 1)) ? waw - cw * cols : 0;
+        resize(c, cx, cy, cw - 2 * c->border + aw, ch - 2 * c->border + ah, False);
+        i++;
+    }
+
     focus(disp, &dc, NULL, True, awesomeconf);
     restack(disp, awesomeconf);
 }
