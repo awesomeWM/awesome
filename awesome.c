@@ -136,13 +136,13 @@ scan(Display *disp, awesome_config *awesomeconf)
 
 
 
+enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
+Atom netatom[NetWMName];
 /** Setup everything before running
  * \param disp Display ref
  * \param awesomeconf awesome config ref
  * \todo clean things...
  */
-enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
-Atom netatom[NetWMName];
 static void
 setup(Display *disp, awesome_config *awesomeconf)
 {
