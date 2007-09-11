@@ -93,7 +93,7 @@ static const NameFuncLink KeyfuncList[] = {
     {"zoom", uicb_zoom},
     /* layouts/tile.c */
     {"setmwfact", uicb_setmwfact},
-    {"incnmaster", uicb_incnmaster},
+    {"setnmaster", uicb_setnmaster},
     /* awesome.c */
     {"quit", uicb_quit},
     {NULL, NULL}

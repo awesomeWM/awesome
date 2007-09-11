@@ -12,28 +12,31 @@ extern Client *sel, *clients;
 
 /* static */
 
-static double mwfact = 0.6;
 static void _tile(awesome_config *, const Bool);    /* arranges all windows tiled */
 
+static double mwfact = 0.6;
 static int nmaster = 2;
 
 void
-uicb_incnmaster(Display *disp,
+uicb_setnmaster(Display *disp,
            awesome_config *awesomeconf,
            const char * arg)
 {
-    int i;
+    int delta;
 
     if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft) && !IS_ARRANGE(bstack) && !IS_ARRANGE(bstackportrait))
         return;
     if(!arg)
         nmaster = awesomeconf->nmaster;
-    else
+    else if(sscanf(arg, "%d", &delta))
     {
-        i = strtol(arg, (char **) NULL, 10);
-        if((nmaster + i) < 1 || wah / (nmaster + i) <= 2 * awesomeconf->borderpx)
+        if((arg[0] == '+' || arg[0] == '-')
+           && !((nmaster + delta) < 1 || wah / (nmaster + delta) <= 2 * awesomeconf->borderpx))
+            nmaster += delta;
+        else if(delta >= 1 && wah / delta <= 2 * awesomeconf->borderpx)
+            nmaster = delta;
+        else
             return;
-        nmaster += i;
     }
     if(sel)
         arrange(disp, awesomeconf);
@@ -54,7 +57,7 @@ uicb_setmwfact(Display *disp,
     /* arg handling, manipulate mwfact */
     if(!arg)
         mwfact = awesomeconf->mwfact;
-    else if(1 == sscanf(arg, "%lf", &delta))
+    else if(sscanf(arg, "%lf", &delta))
     {
         if(arg[0] != '+' && arg[0] != '-')
             mwfact = delta;
