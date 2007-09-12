@@ -47,21 +47,21 @@ static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool readin = True, running = True;
 
 static void
-cleanup(Display *disp, awesome_config *awesomeconf)
+cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
 {
     close(STDIN_FILENO);
     while(stack)
     {
         unban(stack);
-        unmanage(stack, &dc, NormalState, awesomeconf);
+        unmanage(stack, drawcontext, NormalState, awesomeconf);
     }
-    if(dc.font.set)
-        XFreeFontSet(disp, dc.font.set);
+    if(drawcontext->font.set)
+        XFreeFontSet(disp, drawcontext->font.set);
     else
-        XFreeFont(disp, dc.font.xfont);
+        XFreeFont(disp, drawcontext->font.xfont);
     XUngrabKey(disp, AnyKey, AnyModifier, DefaultRootWindow(disp));
-    XFreePixmap(disp, dc.drawable);
-    XFreeGC(disp, dc.gc);
+    XFreePixmap(disp, drawcontext->drawable);
+    XFreeGC(disp, drawcontext->gc);
     XDestroyWindow(disp, awesomeconf->statusbar.window);
     XFreeCursor(disp, cursor[CurNormal]);
     XFreeCursor(disp, cursor[CurResize]);
@@ -90,7 +90,7 @@ getstate(Display *disp, Window w)
 }
 
 static void
-scan(Display *disp, awesome_config *awesomeconf)
+scan(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
 {
     unsigned int i, num;
     Window *wins, d1, d2;
@@ -104,7 +104,7 @@ scan(Display *disp, awesome_config *awesomeconf)
                || wa.override_redirect || XGetTransientForHint(disp, wins[i], &d1))
                 continue;
             if(wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState)
-                manage(disp, &dc, wins[i], &wa, awesomeconf);
+                manage(disp, drawcontext, wins[i], &wa, awesomeconf);
         }
     /* now the transients */
     for(i = 0; i < num; i++)
@@ -113,7 +113,7 @@ scan(Display *disp, awesome_config *awesomeconf)
             continue;
         if(XGetTransientForHint(disp, wins[i], &d1)
            && (wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState))
-            manage(disp, &dc, wins[i], &wa, awesomeconf);
+            manage(disp, drawcontext, wins[i], &wa, awesomeconf);
     }
     if(wins)
         XFree(wins);
@@ -301,7 +301,7 @@ main(int argc, char *argv[])
     parse_config(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
     setup(dpy, &dc, &awesomeconf);
     drawstatus(dpy, &dc, &awesomeconf);
-    scan(dpy, &awesomeconf);
+    scan(dpy, &dc, &awesomeconf);
     XSync(dpy, False);
 
     void (*handler[LASTEvent]) (XEvent *, awesome_config *) = 
@@ -364,7 +364,7 @@ main(int argc, char *argv[])
                 (handler[ev.type]) (&ev, &awesomeconf);       /* call handler */
         }
     }
-    cleanup(dpy, &awesomeconf);
+    cleanup(dpy, &dc, &awesomeconf);
     XCloseDisplay(dpy);
 
     return 0;
