@@ -29,10 +29,9 @@
 
 /* extern */
 extern Client *clients, *sel;   /* global client list */
-extern DC dc;
 
 void
-arrange(Display * disp, DC *drawcontext,  awesome_config *awesomeconf)
+arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
 {
     Client *c;
 
@@ -43,11 +42,12 @@ arrange(Display * disp, DC *drawcontext,  awesome_config *awesomeconf)
             ban(c);
     awesomeconf->current_layout->arrange(disp, awesomeconf);
     focus(disp, drawcontext, NULL, True, awesomeconf);
-    restack(disp, awesomeconf);
+    restack(disp, drawcontext, awesomeconf);
 }
 
 void
 uicb_focusnext(Display *disp __attribute__ ((unused)),
+               DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
@@ -60,13 +60,14 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
         for(c = clients; c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
     if(c)
     {
-        focus(c->display, &dc, c, True, awesomeconf);
-        restack(c->display, awesomeconf);
+        focus(c->display, drawcontext, c, True, awesomeconf);
+        restack(c->display, drawcontext, awesomeconf);
     }
 }
 
 void
 uicb_focusprev(Display *disp __attribute__ ((unused)),
+               DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
@@ -82,8 +83,8 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
     }
     if(c)
     {
-        focus(c->display, &dc, c, True, awesomeconf);
-        restack(c->display, awesomeconf);
+        focus(c->display, drawcontext, c, True, awesomeconf);
+        restack(c->display, drawcontext, awesomeconf);
     }
 }
 
@@ -103,13 +104,13 @@ loadawesomeprops(Display *disp, awesome_config * awesomeconf)
 }
 
 void
-restack(Display * disp, awesome_config *awesomeconf)
+restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
 {
     Client *c;
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatus(disp, &dc, awesomeconf);
+    drawstatus(disp, drawcontext, awesomeconf);
     if(!sel)
         return;
     if(sel->isfloating || IS_ARRANGE(floating))
@@ -152,7 +153,10 @@ saveawesomeprops(Display *disp, awesome_config *awesomeconf)
 }
 
 void
-uicb_setlayout(Display *disp, awesome_config * awesomeconf, const char *arg)
+uicb_setlayout(Display *disp,
+               DC *drawcontext,
+               awesome_config * awesomeconf,
+               const char *arg)
 {
     int i, j;
     Client *c;
@@ -174,9 +178,9 @@ uicb_setlayout(Display *disp, awesome_config * awesomeconf, const char *arg)
         c->ftview = True;
 
     if(sel)
-        arrange(disp, &dc, awesomeconf);
+        arrange(disp, drawcontext, awesomeconf);
     else
-        drawstatus(disp, &dc, awesomeconf);
+        drawstatus(disp, drawcontext, awesomeconf);
 
     saveawesomeprops(disp, awesomeconf);
 
@@ -187,6 +191,7 @@ uicb_setlayout(Display *disp, awesome_config * awesomeconf, const char *arg)
 
 void
 uicb_togglebar(Display *disp,
+               DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
@@ -195,11 +200,11 @@ uicb_togglebar(Display *disp,
     else
         awesomeconf->statusbar.position = BarOff;
     updatebarpos(disp, awesomeconf->statusbar);
-    arrange(disp, &dc, awesomeconf);
+    arrange(disp, drawcontext, awesomeconf);
 }
 
 static void
-maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
+maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomeconf)
 {
     XEvent ev;
 
@@ -221,24 +226,28 @@ maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
     else
         sel->isfloating = False;
 
-    drawstatus(sel->display, &dc, awesomeconf);
+    drawstatus(sel->display, drawcontext, awesomeconf);
 
     while(XCheckMaskEvent(sel->display, EnterWindowMask, &ev));
 }
 
 void
 uicb_togglemax(Display *disp,
+               DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
     maximize(get_windows_area_x(awesomeconf->statusbar),
              get_windows_area_y(awesomeconf->statusbar),
              get_windows_area_width(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
-             get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx, awesomeconf);
+             get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
+             drawcontext,
+             awesomeconf);
 }
 
 void
 uicb_toggleverticalmax(Display *disp,
+                       DC *drawcontext,
                        awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
 {
@@ -247,12 +256,14 @@ uicb_toggleverticalmax(Display *disp,
                  get_windows_area_y(awesomeconf->statusbar),
                  sel->w,
                  get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
+                 drawcontext,
                  awesomeconf);
 }
 
 
 void
 uicb_togglehorizontalmax(Display *disp,
+                         DC *drawcontext,
                          awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
 {
@@ -261,11 +272,13 @@ uicb_togglehorizontalmax(Display *disp,
                  sel->y,
                  get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
                  sel->h,
+                 drawcontext,
                  awesomeconf);
 }
 
 void 
 uicb_zoom(Display *disp __attribute__ ((unused)), 
+          DC *drawcontext __attribute__ ((unused)),
           awesome_config *awesomeconf,
           const char *arg __attribute__ ((unused))) 
 { 
@@ -273,7 +286,7 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
         return;
     detach(sel);
     attach(sel);
-    focus(sel->display, &dc, sel, True, awesomeconf);
-    arrange(sel->display, &dc, awesomeconf);
+    focus(sel->display, drawcontext, sel, True, awesomeconf);
+    arrange(sel->display, drawcontext, awesomeconf);
 } 
 

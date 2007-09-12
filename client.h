@@ -60,8 +60,8 @@ void unmanage(Client *, DC *, long, awesome_config *);  /* unmanage c */
 void updatesizehints(Client *); /* update the size hint variables of c */
 void updatetitle(Client *);     /* update the name of c */
 void saveprops(Client * c, int);     /* saves client properties */
-void uicb_killclient(Display *, awesome_config *, const char *); /* kill client */
-void uicb_moveresize(Display *, awesome_config *, const char *);  /* move and resize window */
-void uicb_settrans(Display *, awesome_config *, const char *);
+void uicb_killclient(Display *, DC *, awesome_config *, const char *); /* kill client */
+void uicb_moveresize(Display *, DC *, awesome_config *, const char *);  /* move and resize window */
+void uicb_settrans(Display *, DC *, awesome_config *, const char *);
 
 #endif
