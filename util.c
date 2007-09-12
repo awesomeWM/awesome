@@ -25,6 +25,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+
 #include "util.h"
 
 void
@@ -65,4 +68,36 @@ spawn(Display * disp,
         exit(EXIT_SUCCESS);
     }
     wait(0);
+}
+
+Bool
+xgettextprop(Display *disp, Window w, Atom atom, char *text, unsigned int size)
+{
+    char **list = NULL;
+    int n;
+
+    XTextProperty name;
+
+    if(!text || size == 0)
+        return False;
+
+    text[0] = '\0';
+    XGetTextProperty(disp, w, &name, atom);
+ 
+    if(!name.nitems)
+        return False;
+ 
+    if(name.encoding == XA_STRING)
+        strncpy(text, (char *) name.value, size - 1);
+
+    else if(XmbTextPropertyToTextList(disp, &name, &list, &n) >= Success && n > 0 && *list)
+    {
+        strncpy(text, *list, size - 1);
+        XFreeStringList(list);
+    }
+
+    text[size - 1] = '\0';
+    XFree(name.value);
+
+    return True;
 }

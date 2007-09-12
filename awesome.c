@@ -45,40 +45,7 @@ DC dc;
 /* static */
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
-static Bool readin = True;
-static Bool running = True;
-
-
-Bool
-gettextprop(Display *disp, Window w, Atom atom, char *text, unsigned int size)
-{
-    char **list = NULL;
-    int n;
-
-    XTextProperty name;
-
-    if(!text || size == 0)
-        return False;
-
-    text[0] = '\0';
-    XGetTextProperty(disp, w, &name, atom);
-
-    if(!name.nitems)
-        return False;
-
-    if(name.encoding == XA_STRING)
-        strncpy(text, (char *) name.value, size - 1);
-    else if(XmbTextPropertyToTextList(disp, &name, &list, &n) >= Success && n > 0 && *list)
-    {
-        strncpy(text, *list, size - 1);
-        XFreeStringList(list);
-    }
-
-    text[size - 1] = '\0';
-    XFree(name.value);
-
-    return True;
-}
+static Bool readin = True, running = True;
 
 static void
 cleanup(Display *disp, awesome_config *awesomeconf)

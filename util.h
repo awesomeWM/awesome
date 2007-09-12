@@ -83,9 +83,6 @@ xrealloc(void **ptr, ssize_t newsize)
     }
 }
 
-void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
-void spawn(Display *, awesome_config *, const char *);
-
 static inline void *xmemdup(const void *src, ssize_t size)
 {
     return memcpy(xmalloc(size), src, size);
@@ -121,5 +118,8 @@ static inline char *a_strdup(const char *s)
     return len ? p_dup(s, len + 1) : NULL;
 }
 
+void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
+void spawn(Display *, awesome_config *, const char *);
+Bool xgettextprop(Display *, Window, Atom, char *, unsigned int);
 
 #endif

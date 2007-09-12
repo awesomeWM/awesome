@@ -96,7 +96,7 @@ loadawesomeprops(Display *disp, awesome_config * awesomeconf)
 
     prop = p_new(char, awesomeconf->ntags + 1);
 
-    if(gettextprop(disp, DefaultRootWindow(disp), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
+    if(xgettextprop(disp, DefaultRootWindow(disp), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
         for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
             awesomeconf->selected_tags[i] = prop[i] == '1';
 

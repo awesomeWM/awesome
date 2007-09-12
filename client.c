@@ -194,8 +194,8 @@ attach(Client * c)
 inline void
 updatetitle(Client * c)
 {
-    if(!gettextprop(c->display, c->win, XInternAtom(c->display, "_NET_WM_NAME", False), c->name, sizeof c->name))
-        gettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof c->name);
+    if(!xgettextprop(c->display, c->win, XInternAtom(c->display, "_NET_WM_NAME", False), c->name, sizeof c->name))
+        xgettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof c->name);
 }
 
 /** Ban client
@@ -328,7 +328,7 @@ loadprops(Client * c, int ntags)
 
     prop = p_new(char, ntags + 2);
 
-    if(gettextprop(c->display, c->win, AWESOMEPROPS_ATOM(c->display), prop, ntags + 2))
+    if(xgettextprop(c->display, c->win, AWESOMEPROPS_ATOM(c->display), prop, ntags + 2))
     {
         for(i = 0; i < ntags && prop[i]; i++)
             if((c->tags[i] = prop[i] == '1'))
