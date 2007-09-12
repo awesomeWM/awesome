@@ -30,7 +30,6 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 
 /** Attach client stack to clients stacks
@@ -370,6 +369,11 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, awesom
     }
     else
     {
+        int wax = get_windows_area_x(awesomeconf->statusbar);
+        int way = get_windows_area_y(awesomeconf->statusbar);
+        int waw = get_windows_area_width(disp, awesomeconf->statusbar);
+        int wah = get_windows_area_height(disp, awesomeconf->statusbar);
+
         if(c->x + c->w + 2 * c->border > wax + waw)
             c->x = c->rx = wax + waw - c->w - 2 * c->border;
         if(c->y + c->h + 2 * c->border > way + wah)

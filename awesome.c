@@ -35,7 +35,6 @@
 #include "layout.h"
 #include "tag.h"
 
-int wax, way, waw, wah;
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
@@ -191,25 +190,49 @@ uicb_quit(Display *disp __attribute__ ((unused)),
     readin = running = False;
 }
 
+int
+get_windows_area_x(Statusbar statusbar __attribute__ ((unused)))
+{
+    return 0;
+}
+
+int
+get_windows_area_y(Statusbar statusbar)
+{
+    if(statusbar.position == BarTop)
+        return statusbar.height;
+
+    return 0;
+}
+
+int
+get_windows_area_height(Display *disp, Statusbar statusbar)
+{
+    if(statusbar.position == BarTop || statusbar.position == BarBot)
+        return DisplayHeight(disp, DefaultScreen(disp)) - statusbar.height;
+
+    return DisplayHeight(disp, DefaultScreen(disp));
+}
+
+int
+get_windows_area_width(Display *disp,
+                       Statusbar statusbar __attribute__ ((unused)))
+{
+    return DisplayWidth(disp, DefaultScreen(disp));
+}
+
 void
 updatebarpos(Display *disp, Statusbar statusbar)
 {
     XEvent ev;
 
-    wax = 0;
-    way = 0;
-    wah = DisplayHeight(disp, DefaultScreen(disp));
-    waw = DisplayWidth(disp, DefaultScreen(disp));
     switch (statusbar.position)
     {
     default:
-        wah -= statusbar.height;
-        way += statusbar.height;
         XMoveWindow(disp, statusbar.window, 0, 0);
         break;
     case BarBot:
-        wah -= statusbar.height;
-        XMoveWindow(disp, statusbar.window, 0, wah);
+        XMoveWindow(disp, statusbar.window, 0, get_windows_area_width(disp, statusbar) - statusbar.height);
         break;
     case BarOff:
         XMoveWindow(disp, statusbar.window, 0, 0 - statusbar.height);

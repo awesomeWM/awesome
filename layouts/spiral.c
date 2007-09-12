@@ -20,11 +20,11 @@
  * 
  */
 
+#include "awesome.h"
 #include "layout.h"
 #include "tag.h"
 #include "spiral.h"
 
-extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *clients;         /* global client list */
 extern DC dc;
 
@@ -34,10 +34,10 @@ fibonacci(Display *disp, awesome_config *awesomeconf, int shape)
     int n, nx, ny, nh, nw, i;
     Client *c;
 
-    nx = wax;
+    nx = get_windows_area_x(awesomeconf->statusbar);
     ny = 0;
-    nw = waw;
-    nh = wah;
+    nw = get_windows_area_width(disp, awesomeconf->statusbar);
+    nh = get_windows_area_height(disp, awesomeconf->statusbar);
     for(n = 0, c = clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;
@@ -75,7 +75,7 @@ fibonacci(Display *disp, awesome_config *awesomeconf, int shape)
                     nx -= nw;
             }
             if(i == 0)
-                ny = way;
+                ny = get_windows_area_y(awesomeconf->statusbar);
             i++;
         }
         resize(c, nx, ny, nw - 2 * c->border, nh - 2 * c->border, False);

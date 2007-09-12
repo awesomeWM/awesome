@@ -22,17 +22,15 @@
 
 #include <stdio.h>
 
-#include "layouts/tile.h"
-#include "layout.h"
+#include "awesome.h"
 #include "tag.h"
+#include "layout.h"
+#include "layouts/tile.h"
 
 /* extern */
-extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *sel, *clients;
 
 /* static */
-
-static void _tile(awesome_config *, const Bool);    /* arranges all windows tiled */
 
 static double mwfact = 0.6;
 static int nmaster = 2;
@@ -43,6 +41,7 @@ uicb_setnmaster(Display *disp,
            const char * arg)
 {
     int delta;
+    int wah = get_windows_area_height(disp, awesomeconf->statusbar);
 
     if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft) && !IS_ARRANGE(bstack) && !IS_ARRANGE(bstackportrait))
         return;
@@ -92,8 +91,12 @@ uicb_setmwfact(Display *disp,
 }
 
 static void
-_tile(awesome_config *awesomeconf, const Bool right)
+_tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 {
+    int wah = get_windows_area_height(disp, awesomeconf->statusbar);
+    int waw = get_windows_area_width(disp, awesomeconf->statusbar);
+    int wax = get_windows_area_x(awesomeconf->statusbar);
+    int way = get_windows_area_y(awesomeconf->statusbar);
     unsigned int nx, ny, nw, nh, mw;
     int n, th, i, mh;
     Client *c;
@@ -152,22 +155,24 @@ _tile(awesome_config *awesomeconf, const Bool right)
 }
 
 void
-tile(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
+tile(Display *disp, awesome_config *awesomeconf)
 {
-    _tile(awesomeconf, True);
+    _tile(disp, awesomeconf, True);
 }
 
 void
-tileleft(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
+tileleft(Display *disp, awesome_config *awesomeconf)
 {
-    _tile(awesomeconf, False);
+    _tile(disp, awesomeconf, False);
 }
 
 
 static void
-_bstack(awesome_config *awesomeconf, Bool portrait)
+_bstack(Display *disp, awesome_config *awesomeconf, Bool portrait)
 {
     int i, n, nx, ny, nw, nh, mw, mh, tw, th;
+    int wah = get_windows_area_height(disp, awesomeconf->statusbar);
+    int waw = get_windows_area_width(disp, awesomeconf->statusbar);
     Client *c;
 
     for(n = 0, c = clients; c; c = c->next)
@@ -186,8 +191,8 @@ _bstack(awesome_config *awesomeconf, Bool portrait)
             continue;
 
         c->ismax = False;
-        nx = wax;
-        ny = way;
+        nx = get_windows_area_x(awesomeconf->statusbar);
+        ny = get_windows_area_y(awesomeconf->statusbar);
         if(i < nmaster)
         {
             ny += i * mh;
@@ -221,13 +226,13 @@ _bstack(awesome_config *awesomeconf, Bool portrait)
 }
 
 void
-bstack(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
+bstack(Display *disp, awesome_config *awesomeconf)
 {
-    _bstack(awesomeconf, False);
+    _bstack(disp, awesomeconf, False);
 }
 
 void
-bstackportrait(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
+bstackportrait(Display *disp, awesome_config *awesomeconf)
 {
-    _bstack(awesomeconf, True);
+    _bstack(disp, awesomeconf, True);
 }

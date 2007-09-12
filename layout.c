@@ -28,7 +28,6 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern int wax, way, wah, waw;  /* windowarea geometry */
 extern Client *clients, *sel;   /* global client list */
 extern DC dc;
 
@@ -228,30 +227,41 @@ maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
 }
 
 void
-uicb_togglemax(Display *disp __attribute__ ((unused)),
+uicb_togglemax(Display *disp,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
-    maximize(wax, way, waw - 2 * awesomeconf->borderpx, wah - 2 * awesomeconf->borderpx, awesomeconf);
+    maximize(get_windows_area_x(awesomeconf->statusbar),
+             get_windows_area_y(awesomeconf->statusbar),
+             get_windows_area_width(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
+             get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx, awesomeconf);
 }
 
 void
-uicb_toggleverticalmax(Display *disp __attribute__ ((unused)),
+uicb_toggleverticalmax(Display *disp,
                        awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
 {
     if(sel)
-        maximize(sel->x, way, sel->w, wah - 2 * awesomeconf->borderpx, awesomeconf);
+        maximize(sel->x,
+                 get_windows_area_y(awesomeconf->statusbar),
+                 sel->w,
+                 get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
+                 awesomeconf);
 }
 
 
 void
-uicb_togglehorizontalmax(Display *disp __attribute__ ((unused)),
+uicb_togglehorizontalmax(Display *disp,
                          awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
 {
     if(sel)
-        maximize(wax, sel->y, waw - 2 * awesomeconf->borderpx, sel->h, awesomeconf);
+        maximize(get_windows_area_x(awesomeconf->statusbar),
+                 sel->y,
+                 get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
+                 sel->h,
+                 awesomeconf);
 }
 
 void 

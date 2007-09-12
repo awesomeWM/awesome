@@ -20,11 +20,11 @@
  * 
  */
 
+#include "awesome.h"
 #include "grid.h"
 #include "layout.h"
 #include "tag.h"
 
-extern int wah, waw;            /* windowarea geometry */
 extern Client *clients;         /* global client list and stack */
 extern DC dc;
 
@@ -32,6 +32,8 @@ void
 grid(Display *disp, awesome_config *awesomeconf)
 {
     unsigned int i, n, cx, cy, cw, ch, aw, ah, cols, rows;
+    int waw = get_windows_area_width(disp, awesomeconf->statusbar);
+    int wah = get_windows_area_height(disp, awesomeconf->statusbar);
     Client *c;
 
     for(n = 0, c = clients; c; c = c->next)

@@ -31,7 +31,6 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern int wax, way, wah, waw;  /* windowarea geometry */
 extern DC dc;                   /* global draw context */
 extern Cursor cursor[CurLast];
 extern Client *clients, *sel;   /* global client list */
@@ -55,6 +54,10 @@ movemouse(Client * c, awesome_config *awesomeconf)
     unsigned int dui;
     Window dummy;
     XEvent ev;
+    int wax = get_windows_area_x(awesomeconf->statusbar);
+    int way = get_windows_area_y(awesomeconf->statusbar);
+    int waw = get_windows_area_width(c->display, awesomeconf->statusbar);
+    int wah = get_windows_area_height(c->display, awesomeconf->statusbar);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
