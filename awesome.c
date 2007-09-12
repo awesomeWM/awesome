@@ -129,7 +129,7 @@ Atom netatom[NetWMName];
  * \todo clean things...
  */
 static void
-setup(Display *disp, awesome_config *awesomeconf)
+setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
 
@@ -150,7 +150,7 @@ setup(Display *disp, awesome_config *awesomeconf)
     grabkeys(disp, awesomeconf);
     compileregs(awesomeconf->rules, awesomeconf->nrules);
     /* bar */
-    dc.h = awesomeconf->statusbar.height = dc.font.height + 2;
+    drawcontext->h = awesomeconf->statusbar.height = drawcontext->font.height + 2;
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
@@ -162,11 +162,11 @@ setup(Display *disp, awesome_config *awesomeconf)
     updatebarpos(disp, awesomeconf->statusbar);
     XMapRaised(disp, awesomeconf->statusbar.window);
     /* pixmap for everything */
-    dc.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
-    dc.gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
-    XSetLineAttributes(disp, dc.gc, 1, LineSolid, CapButt, JoinMiter);
-    if(!dc.font.set)
-        XSetFont(disp, dc.gc, dc.font.xfont->fid);
+    drawcontext->drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
+    drawcontext->gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
+    XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
+    if(!drawcontext->font.set)
+        XSetFont(disp, drawcontext->gc, drawcontext->font.xfont->fid);
     loadawesomeprops(disp, awesomeconf);
 }
 
@@ -299,7 +299,7 @@ main(int argc, char *argv[])
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
     parse_config(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
-    setup(dpy, &awesomeconf);
+    setup(dpy, &dc, &awesomeconf);
     drawstatus(dpy, &dc, &awesomeconf);
     scan(dpy, &awesomeconf);
     XSync(dpy, False);
