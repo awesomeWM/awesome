@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 #include <X11/Xatom.h>
-#include <X11/Xutil.h>dq
+#include <X11/Xutil.h>
 
 #include "awesome.h"
 #include "layout.h"
