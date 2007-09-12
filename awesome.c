@@ -300,7 +300,7 @@ main(int argc, char *argv[])
     XSync(dpy, False);
     parse_config(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
     setup(dpy, &awesomeconf);
-    drawstatus(dpy, &awesomeconf);
+    drawstatus(dpy, &dc, &awesomeconf);
     scan(dpy, &awesomeconf);
     XSync(dpy, False);
 
@@ -354,7 +354,7 @@ main(int argc, char *argv[])
                 if(p > awesomeconf.statustext)
                     strncpy(awesomeconf.statustext, p + 1, sizeof(awesomeconf.statustext));
             }
-            drawstatus(dpy, &awesomeconf);
+            drawstatus(dpy, &dc, &awesomeconf);
         }
 
         while(XPending(dpy))

@@ -21,21 +21,20 @@
 
 #include "layout.h"
 
-extern DC dc;                   /* global draw context */
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 
 /* static */
 
 static void
-drawtext(Display *disp, const char *text, unsigned long col[ColLast])
+drawtext(Display *disp, DC drawcontext, const char *text, unsigned long col[ColLast])
 {
     int x, y, w, h;
     static char buf[256];
     unsigned int len, olen;
-    XRectangle r = { dc.x, dc.y, dc.w, dc.h };
+    XRectangle r = { drawcontext.x, drawcontext.y, drawcontext.w, drawcontext.h };
 
-    XSetForeground(disp, dc.gc, col[ColBG]);
-    XFillRectangles(disp, dc.drawable, dc.gc, &r, 1);
+    XSetForeground(disp, drawcontext.gc, col[ColBG]);
+    XFillRectangles(disp, drawcontext.drawable, drawcontext.gc, &r, 1);
     if(!text)
         return;
     w = 0;
@@ -44,13 +43,13 @@ drawtext(Display *disp, const char *text, unsigned long col[ColLast])
         len = sizeof buf - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    h = dc.font.ascent + dc.font.descent;
-    y = dc.y + (dc.h / 2) - (h / 2) + dc.font.ascent;
-    x = dc.x + (h / 2);
+    h = drawcontext.font.ascent + drawcontext.font.descent;
+    y = drawcontext.y + (drawcontext.h / 2) - (h / 2) + drawcontext.font.ascent;
+    x = drawcontext.x + (h / 2);
     /* shorten text if necessary */
-    while(len && (w = textnw(buf, len)) > dc.w - h)
+    while(len && (w = textnw(drawcontext.font.set, drawcontext.font.xfont, buf, len)) > drawcontext.w - h)
         buf[--len] = 0;
-    if(w > dc.w)
+    if(w > drawcontext.w)
         return;                 /* too long */
     if(len < olen)
     {
@@ -61,34 +60,34 @@ drawtext(Display *disp, const char *text, unsigned long col[ColLast])
         if(len > 3)
             buf[len - 3] = '.';
     }
-    XSetForeground(disp, dc.gc, col[ColFG]);
-    if(dc.font.set)
-        XmbDrawString(disp, dc.drawable, dc.font.set, dc.gc, x, y, buf, len);
+    XSetForeground(disp, drawcontext.gc, col[ColFG]);
+    if(drawcontext.font.set)
+        XmbDrawString(disp, drawcontext.drawable, drawcontext.font.set, drawcontext.gc, x, y, buf, len);
     else
-        XDrawString(disp, dc.drawable, dc.gc, x, y, buf, len);
+        XDrawString(disp, drawcontext.drawable, drawcontext.gc, x, y, buf, len);
 }
 
 static void
-drawsquare(Bool filled, Bool empty, unsigned long col[ColLast], Display *disp)
+drawsquare(Bool filled, Bool empty, unsigned long col[ColLast], Display *disp, DC drawcontext)
 {
     int x;
     XGCValues gcv;
-    XRectangle r = { dc.x, dc.y, dc.w, dc.h };
+    XRectangle r = { drawcontext.x, drawcontext.y, drawcontext.w, drawcontext.h };
 
     gcv.foreground = col[ColFG];
-    XChangeGC(disp, dc.gc, GCForeground, &gcv);
-    x = (dc.font.ascent + dc.font.descent + 2) / 4;
-    r.x = dc.x + 1;
-    r.y = dc.y + 1;
+    XChangeGC(disp, drawcontext.gc, GCForeground, &gcv);
+    x = (drawcontext.font.ascent + drawcontext.font.descent + 2) / 4;
+    r.x = drawcontext.x + 1;
+    r.y = drawcontext.y + 1;
     if(filled)
     {
         r.width = r.height = x + 1;
-        XFillRectangles(disp, dc.drawable, dc.gc, &r, 1);
+        XFillRectangles(disp, drawcontext.drawable, drawcontext.gc, &r, 1);
     }
     else if(empty)
     {
         r.width = r.height = x;
-        XDrawRectangles(disp, dc.drawable, dc.gc, &r, 1);
+        XDrawRectangles(disp, drawcontext.drawable, drawcontext.gc, &r, 1);
     }
 }
 
@@ -111,60 +110,60 @@ isoccupied(unsigned int t)
 /* extern */
 
 unsigned int
-textnw(const char *text, unsigned int len)
+textnw(XFontSet set, XFontStruct *xfont, const char *text, unsigned int len)
 {
     XRectangle r;
 
-    if(dc.font.set)
+    if(set)
     {
-        XmbTextExtents(dc.font.set, text, len, NULL, &r);
+        XmbTextExtents(set, text, len, NULL, &r);
         return r.width;
     }
-    return XTextWidth(dc.font.xfont, text, len);
+    return XTextWidth(xfont, text, len);
 }
 
 void
-drawstatus(Display *disp, awesome_config * awesomeconf)
+drawstatus(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
 {
     int x, i;
-    dc.x = dc.y = 0;
+    drawcontext->x = drawcontext->y = 0;
     for(i = 0; i < awesomeconf->ntags; i++)
     {
-        dc.w = textw(awesomeconf->tags[i]);
+        drawcontext->w = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->tags[i], drawcontext->font.height);
         if(awesomeconf->selected_tags[i])
         {
-            drawtext(disp, awesomeconf->tags[i], dc.sel);
-            drawsquare(sel && sel->tags[i], isoccupied(i), dc.sel, disp);
+            drawtext(disp, *drawcontext, awesomeconf->tags[i], drawcontext->sel);
+            drawsquare(sel && sel->tags[i], isoccupied(i), drawcontext->sel, disp, *drawcontext);
         }
         else
         {
-            drawtext(disp, awesomeconf->tags[i], dc.norm);
-            drawsquare(sel && sel->tags[i], isoccupied(i), dc.norm, disp);
+            drawtext(disp, *drawcontext, awesomeconf->tags[i], drawcontext->norm);
+            drawsquare(sel && sel->tags[i], isoccupied(i), drawcontext->norm, disp, *drawcontext);
         }
-        dc.x += dc.w;
+        drawcontext->x += drawcontext->w;
     }
-    dc.w = awesomeconf->statusbar.width;
-    drawtext(disp, awesomeconf->current_layout->symbol, dc.norm);
-    x = dc.x + dc.w;
-    dc.w = textw(awesomeconf->statustext);
-    dc.x = DisplayWidth(disp, DefaultScreen(disp)) - dc.w;
-    if(dc.x < x)
+    drawcontext->w = awesomeconf->statusbar.width;
+    drawtext(disp, *drawcontext, awesomeconf->current_layout->symbol, drawcontext->norm);
+    x = drawcontext->x + drawcontext->w;
+    drawcontext->w = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->statustext, drawcontext->font.height);
+    drawcontext->x = DisplayWidth(disp, DefaultScreen(disp)) - drawcontext->w;
+    if(drawcontext->x < x)
     {
-        dc.x = x;
-        dc.w = DisplayWidth(disp, DefaultScreen(disp)) - x;
+        drawcontext->x = x;
+        drawcontext->w = DisplayWidth(disp, DefaultScreen(disp)) - x;
     }
-    drawtext(disp, awesomeconf->statustext, dc.norm);
-    if((dc.w = dc.x - x) > awesomeconf->statusbar.height)
+    drawtext(disp, *drawcontext, awesomeconf->statustext, drawcontext->norm);
+    if((drawcontext->w = drawcontext->x - x) > awesomeconf->statusbar.height)
     {
-        dc.x = x;
+        drawcontext->x = x;
         if(sel)
         {
-            drawtext(disp, sel->name, dc.sel);
-            drawsquare(sel->ismax, sel->isfloating, dc.sel, disp);
+            drawtext(disp, *drawcontext, sel->name, drawcontext->sel);
+            drawsquare(sel->ismax, sel->isfloating, drawcontext->sel, disp, *drawcontext);
         }
         else
-            drawtext(disp, NULL, dc.norm);
+            drawtext(disp, *drawcontext, NULL, drawcontext->norm);
     }
-    XCopyArea(disp, dc.drawable, awesomeconf->statusbar.window, dc.gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, 0, 0);
+    XCopyArea(disp, drawcontext->drawable, awesomeconf->statusbar.window, drawcontext->gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, 0, 0);
     XSync(disp, False);
 }

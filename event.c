@@ -149,7 +149,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         int x = 0;
         for(i = 0; i < awesomeconf->ntags; i++)
         {
-            x += textw(awesomeconf->tags[i]);
+            x += textw(dc.font.set, dc.font.xfont, awesomeconf->tags[i], dc.font.height);
             if(ev->x < x)
             {
                 if(ev->button == Button1)
@@ -299,7 +299,7 @@ handle_event_expose(XEvent * e, awesome_config *awesomeconf)
     XExposeEvent *ev = &e->xexpose;
 
     if(!ev->count && awesomeconf->statusbar.window == ev->window)
-        drawstatus(e->xany.display, awesomeconf);
+        drawstatus(e->xany.display, &dc, awesomeconf);
 }
 
 void
@@ -375,7 +375,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         {
             updatetitle(c);
             if(c == sel)
-                drawstatus(e->xany.display, awesomeconf);
+                drawstatus(e->xany.display, &dc, awesomeconf);
         }
     }
 }

@@ -24,9 +24,9 @@
 
 #include "util.h"
 
-#define textw(text)         (textnw(text, a_strlen(text)) + dc.font.height)
+#define textw(set, xfont, text, height)         (textnw(set, xfont, text, a_strlen(text)) + height)
 
-void drawstatus(Display *, awesome_config *);          /* draw the bar */
-unsigned int textnw(const char *, unsigned int);
+void drawstatus(Display *, DC *, awesome_config *);          /* draw the bar */
+unsigned int textnw(XFontSet, XFontStruct *, const char *, unsigned int);
 
 #endif

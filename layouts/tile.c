@@ -29,6 +29,7 @@
 
 /* extern */
 extern Client *sel, *clients;
+extern DC dc;
 
 /* static */
 
@@ -60,7 +61,7 @@ uicb_setnmaster(Display *disp,
     if(sel)
         arrange(disp, awesomeconf);
     else
-        drawstatus(disp, awesomeconf);
+        drawstatus(disp, &dc, awesomeconf);
 }
 
 void

@@ -247,7 +247,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
             }
             awesomeconf->layouts[i].symbol = config_setting_get_string_elem(confsublayouts, 0);
 
-            j = textw(awesomeconf->layouts[i].symbol);
+            j = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->layouts[i].symbol, drawcontext->font.height);
             if(j > awesomeconf->statusbar.width)
                 awesomeconf->statusbar.width = j;
         }
