@@ -38,7 +38,6 @@
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
-Cursor cursor[CurLast];
 DC dc;
 
 /* static */
@@ -63,9 +62,9 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     XFreePixmap(disp, drawcontext->drawable);
     XFreeGC(disp, drawcontext->gc);
     XDestroyWindow(disp, awesomeconf->statusbar.window);
-    XFreeCursor(disp, cursor[CurNormal]);
-    XFreeCursor(disp, cursor[CurResize]);
-    XFreeCursor(disp, cursor[CurMove]);
+    XFreeCursor(disp, drawcontext->cursor[CurNormal]);
+    XFreeCursor(disp, drawcontext->cursor[CurResize]);
+    XFreeCursor(disp, drawcontext->cursor[CurMove]);
     XSetInputFocus(disp, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(disp, False);
 }
@@ -138,13 +137,13 @@ setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     XChangeProperty(disp, DefaultRootWindow(disp), netatom[NetSupported],
                     XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
     /* init cursors */
-    cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);
-    cursor[CurResize] = XCreateFontCursor(disp, XC_sizing);
-    cursor[CurMove] = XCreateFontCursor(disp, XC_fleur);
+    drawcontext->cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);
+    drawcontext->cursor[CurResize] = XCreateFontCursor(disp, XC_sizing);
+    drawcontext->cursor[CurMove] = XCreateFontCursor(disp, XC_fleur);
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
-    wa.cursor = cursor[CurNormal];
+    wa.cursor = drawcontext->cursor[CurNormal];
     XChangeWindowAttributes(disp, DefaultRootWindow(disp), CWEventMask | CWCursor, &wa);
     XSelectInput(disp, DefaultRootWindow(disp), wa.event_mask);
     grabkeys(disp, awesomeconf);
@@ -158,7 +157,7 @@ setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
                                                DefaultDepth(disp, DefaultScreen(disp)), CopyFromParent,
                                                DefaultVisual(disp, DefaultScreen(disp)),
                                                CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-    XDefineCursor(disp, awesomeconf->statusbar.window, cursor[CurNormal]);
+    XDefineCursor(disp, awesomeconf->statusbar.window, drawcontext->cursor[CurNormal]);
     updatebarpos(disp, awesomeconf->statusbar);
     XMapRaised(disp, awesomeconf->statusbar.window);
     /* pixmap for everything */

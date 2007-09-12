@@ -33,6 +33,9 @@ enum
 enum
 { ColBorder, ColFG, ColBG, ColLast };   /* color */
 
+enum 
+{ CurNormal, CurResize, CurMove, CurLast };     /* cursor */ 
+
 typedef struct
 {
     int x, y, w, h;
@@ -40,6 +43,7 @@ typedef struct
     unsigned long sel[ColLast];
     Drawable drawable;
     GC gc;
+    Cursor cursor[CurLast];
     struct
     {
         int ascent;

@@ -24,9 +24,6 @@
 
 #include "config.h"
 
-enum
-{ CurNormal, CurResize, CurMove, CurLast };     /* cursor */
-
 Bool gettextprop(Display *, Window, Atom, char *, unsigned int);   /* return text property, UTF-8 compliant */
 void updatebarpos(Display *, Statusbar);        /* updates the bar position */
 void uicb_quit(Display *, DC *, awesome_config *, const char *);        /* quit awesome nicely */

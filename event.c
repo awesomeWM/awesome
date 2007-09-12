@@ -32,7 +32,6 @@
 
 /* extern */
 extern DC dc;                   /* global draw context */
-extern Cursor cursor[CurLast];
 extern Client *clients, *sel;   /* global client list */
 
 #define CLEANMASK(mask)		(mask & ~(awesomeconf->numlockmask | LockMask))
@@ -62,7 +61,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
     ocx = nx = c->x;
     ocy = ny = c->y;
     if(XGrabPointer(c->display, DefaultRootWindow(c->display), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, cursor[CurMove], CurrentTime) != GrabSuccess)
+                    None, dc.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
     XQueryPointer(c->display, DefaultRootWindow(c->display), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
@@ -106,7 +105,7 @@ resizemouse(Client * c, awesome_config *awesomeconf)
     ocx = c->x;
     ocy = c->y;
     if(XGrabPointer(c->display, DefaultRootWindow(c->display), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, cursor[CurResize], CurrentTime) != GrabSuccess)
+                    None, dc.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
     XWarpPointer(c->display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
