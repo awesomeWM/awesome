@@ -93,8 +93,6 @@ static const NameFuncLink KeyfuncList[] = {
     {"killclient", uicb_killclient},
     {"moveresize", uicb_moveresize},
     {"settrans", uicb_settrans},
-    /* config.c */
-    {"reload", uicb_reload},
     /* tag.c */
     {"tag", uicb_tag},
     {"togglefloating", uicb_togglefloating},
@@ -153,27 +151,6 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
                 return list[i].func;
 
     return NULL;
-}
-
-/** \todo remove dc */
-extern DC dc;
-
-/** Reload configuration file
- * \param disp Display ref
- * \param arg unused
- * \ingroup ui_callback
- * \todo not really working nor safe I guess
- */
-void
-uicb_reload(Display *disp, awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
-{
-    config_destroy(&awesomelibconf);
-    p_delete(&awesomeconf->rules);
-    p_delete(&awesomeconf->tags);
-    p_delete(&awesomeconf->selected_tags);
-    p_delete(&awesomeconf->layouts);
-    p_delete(&awesomeconf->tag_layouts);
-    parse_config(disp, DefaultScreen(disp), &dc, awesomeconf);
 }
 
 /** Set default configuration
@@ -374,22 +351,22 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
 
     /* colors */
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_border_color");
-    dc.norm[ColBorder] = initcolor(tmp ? tmp : "#dddddd", disp, scr);
+    drawcontext->norm[ColBorder] = initcolor(tmp ? tmp : "#dddddd", disp, scr);
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_bg_color");
-    dc.norm[ColBG] = initcolor(tmp ? tmp : "#000000", disp, scr);
+    drawcontext->norm[ColBG] = initcolor(tmp ? tmp : "#000000", disp, scr);
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_fg_color");
-    dc.norm[ColFG] = initcolor(tmp ? tmp : "#ffffff", disp, scr);
+    drawcontext->norm[ColFG] = initcolor(tmp ? tmp : "#ffffff", disp, scr);
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_border_color");
-    dc.sel[ColBorder] = initcolor(tmp ? tmp : "#008b8b", disp, scr);
+    drawcontext->sel[ColBorder] = initcolor(tmp ? tmp : "#008b8b", disp, scr);
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_bg_color");
-    dc.sel[ColBG] = initcolor(tmp ? tmp : "#008b8b", disp, scr);
+    drawcontext->sel[ColBG] = initcolor(tmp ? tmp : "#008b8b", disp, scr);
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_fg_color");
-    dc.sel[ColFG] = initcolor(tmp ? tmp : "#ffffff", disp, scr);
+    drawcontext->sel[ColFG] = initcolor(tmp ? tmp : "#ffffff", disp, scr);
 
     p_delete(&confpath);
 }

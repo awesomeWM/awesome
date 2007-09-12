@@ -83,7 +83,6 @@ awesome:
             (("Mod4", "Control"), "space", "togglefloating"),
             (("Mod4", "Shift"), "c", "killclient"),
             (("Mod4", "Shift"), "q", "quit"),
-            (("Mod4", "Shift"), "r", "reload"),
             (("Mod4"), "0", "view"),
             (("Mod4"), "1", "view", "1"),
             (("Mod4"), "2", "view", "2"),

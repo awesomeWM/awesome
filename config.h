@@ -138,6 +138,5 @@ struct awesome_config
 };
 
 void parse_config(Display *, int, DC *, awesome_config *);        /* parse configuration file */
-void uicb_reload(Display *, awesome_config *, const char *);              /* reload configuration file */
 
 #endif
