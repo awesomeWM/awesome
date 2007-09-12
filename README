@@ -1,5 +1,5 @@
-awesome - Julien's dynamic window manager
-============================
+awesome
+=======
 awesome is an extremely fast, small, and dynamic window manager for X.
 It's based on dwm.
 
@@ -15,7 +15,7 @@ the /usr/local namespace by default).
 Afterwards enter the following command to build and install awesome (if
 necessary as root):
 
-    make clean install
+    make install
 
 Running awesome
 -----------
@@ -43,5 +43,5 @@ like this in your .xinitrc:
 
 Configuration
 -------------
-The configuration of awesome is done by creating a custom config.h
-and (re)compiling the source code.
+The configuration of awesome is done by creating a ~/.awesomerc file.
+An example is provided in the sources.

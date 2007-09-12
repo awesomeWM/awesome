@@ -1,32 +1,22 @@
-/* See LICENSE file for copyright and license details.
+/* 
+ * awesome.h - awesome main header
  *
- * Julien's dynamic window manager is designed like any other X client as well.
- * It is driven through handling X events. In contrast to other X clients, a
- * window manager selects for SubstructureRedirectMask on the root window, to
- * receive events about window (dis-)appearance.  Only one X connection at a
- * time is allowed to select for this event mask.
+ * Copyright © 2007 Julien Danjou <julien@danjou.info>
  *
- * Calls to fetch an X event from the event queue are blocking.  Due reading
- * status text from standard input, a select()-driven main loop has been
- * implemented which selects for reads on the X connection and STDIN_FILENO to
- * handle all data smoothly. The event handlers of awesome are organized in an
- * array which is accessed whenever a new event has been fetched. This allows
- * event dispatching in O(1) time.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * Each child of the root window is called a client, except windows which have
- * set the override_redirect flag.  Clients are organized in a global
- * doubly-linked client list, the focus history is remembered through a global
- * stack list. Each client contains an array of Bools of the same size as the
- * global tags array to indicate the tags of a client.  For each client awesome
- * creates a small title window, which is resized whenever the (_NET_)WM_NAME
- * properties are updated or the client is moved/resized.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * Keys and tagging rules are organized as arrays and defined in the config.h
- * file. These arrays are kept static in event.o and tag.o respectively,
- * because no other part of awesome needs access to them.  The current layout is
- * represented by the lt pointer.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * To understand everything else, start reading main.c:main().
  */
 
 #ifndef AWESOME_AWESOME_H
