@@ -42,7 +42,8 @@ eprint(const char *fmt, ...)
 }
 
 void
-spawn(Display * disp,
+uicb_spawn(Display * disp,
+      DC *drawcontext __attribute__ ((unused)),
       awesome_config * awesomeconf __attribute__ ((unused)),
       const char *arg)
 {

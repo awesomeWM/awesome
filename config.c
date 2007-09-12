@@ -88,7 +88,7 @@ static const NameFuncLink LayoutsList[] =
 /** List of available UI bindable callbacks and functions */
 static const NameFuncLink KeyfuncList[] = {
     /* util.c */
-    {"spawn", spawn},
+    {"spawn", uicb_spawn},
     /* client.c */
     {"killclient", uicb_killclient},
     {"moveresize", uicb_moveresize},
