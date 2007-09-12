@@ -45,7 +45,7 @@ DC dc;
 /* static */
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
-static Bool otherwm = False, readin = True;
+static Bool readin = True;
 static Bool running = True;
 
 
@@ -208,11 +208,10 @@ setup(Display *disp, awesome_config *awesomeconf)
  * Startup Error handler to check if another window manager
  * is already running.
  */
-static int
+static int __attribute__ ((noreturn))
 xerrorstart(Display * dsply __attribute__ ((unused)), XErrorEvent * ee __attribute__ ((unused)))
 {
-    otherwm = True;
-    return -1;
+    eprint("awesome: another window manager is already running\n");
 }
 
 /* extern */
@@ -304,9 +303,6 @@ main(int argc, char *argv[])
     /* this causes an error if some other window manager is running */
     XSelectInput(dpy, root, SubstructureRedirectMask);
     XSync(dpy, False);
-
-    if(otherwm)
-        eprint("awesome: another window manager is already running\n");
 
     XSync(dpy, False);
     XSetErrorHandler(NULL);
