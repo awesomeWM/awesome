@@ -32,7 +32,7 @@ extern Client *clients, *sel;   /* global client list */
 extern DC dc;
 
 void
-arrange(Display * disp, awesome_config *awesomeconf)
+arrange(Display * disp, DC *drawcontext,  awesome_config *awesomeconf)
 {
     Client *c;
 
@@ -42,7 +42,7 @@ arrange(Display * disp, awesome_config *awesomeconf)
         else
             ban(c);
     awesomeconf->current_layout->arrange(disp, awesomeconf);
-    focus(disp, &dc, NULL, True, awesomeconf);
+    focus(disp, drawcontext, NULL, True, awesomeconf);
     restack(disp, awesomeconf);
 }
 
@@ -174,7 +174,7 @@ uicb_setlayout(Display *disp, awesome_config * awesomeconf, const char *arg)
         c->ftview = True;
 
     if(sel)
-        arrange(disp, awesomeconf);
+        arrange(disp, &dc, awesomeconf);
     else
         drawstatus(disp, &dc, awesomeconf);
 
@@ -195,7 +195,7 @@ uicb_togglebar(Display *disp,
     else
         awesomeconf->statusbar.position = BarOff;
     updatebarpos(disp, awesomeconf->statusbar);
-    arrange(disp, awesomeconf);
+    arrange(disp, &dc, awesomeconf);
 }
 
 static void
@@ -274,6 +274,6 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
     detach(sel);
     attach(sel);
     focus(sel->display, &dc, sel, True, awesomeconf);
-    arrange(sel->display, awesomeconf);
+    arrange(sel->display, &dc, awesomeconf);
 } 
 

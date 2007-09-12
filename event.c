@@ -265,7 +265,7 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
         XResizeWindow(e->xany.display, awesomeconf->statusbar.window,
                       DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height);
         updatebarpos(e->xany.display, awesomeconf->statusbar);
-        arrange(e->xany.display, awesomeconf);
+        arrange(e->xany.display, &dc, awesomeconf);
     }
 }
 
@@ -365,7 +365,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating && (c->isfloating = (getclient(trans) != NULL)))
-                arrange(e->xany.display, awesomeconf);
+                arrange(e->xany.display, &dc, awesomeconf);
             break;
         case XA_WM_NORMAL_HINTS:
             updatesizehints(c);

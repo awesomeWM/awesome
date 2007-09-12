@@ -59,7 +59,7 @@ uicb_setnmaster(Display *disp,
             return;
     }
     if(sel)
-        arrange(disp, awesomeconf);
+        arrange(disp, &dc, awesomeconf);
     else
         drawstatus(disp, &dc, awesomeconf);
 }
@@ -88,7 +88,7 @@ uicb_setmwfact(Display *disp,
         else if(mwfact > 0.9)
             mwfact = 0.9;
     }
-    arrange(disp, awesomeconf);
+    arrange(disp, &dc, awesomeconf);
 }
 
 static void
