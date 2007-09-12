@@ -26,7 +26,6 @@
 #include "tag.h"
 
 extern Client *clients;         /* global client list and stack */
-extern DC dc;
 
 void
 grid(Display *disp, awesome_config *awesomeconf)
