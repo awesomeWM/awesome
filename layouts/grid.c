@@ -63,7 +63,4 @@ grid(Display *disp, awesome_config *awesomeconf)
         resize(c, cx, cy, cw - 2 * c->border + aw, ch - 2 * c->border + ah, False);
         i++;
     }
-
-    focus(disp, &dc, NULL, True, awesomeconf);
-    restack(disp, awesomeconf);
 }

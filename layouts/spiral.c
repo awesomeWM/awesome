@@ -80,8 +80,6 @@ fibonacci(Display *disp, awesome_config *awesomeconf, int shape)
         }
         resize(c, nx, ny, nw - 2 * c->border, nh - 2 * c->border, False);
     }
-    focus(disp, &dc, NULL, True, awesomeconf);
-    restack(disp, awesomeconf);
 }
 
 
