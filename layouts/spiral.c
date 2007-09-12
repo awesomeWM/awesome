@@ -26,7 +26,6 @@
 #include "spiral.h"
 
 extern Client *clients;         /* global client list */
-extern DC dc;
 
 static void
 fibonacci(Display *disp, awesome_config *awesomeconf, int shape)
