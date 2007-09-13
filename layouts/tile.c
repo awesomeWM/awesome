@@ -21,6 +21,7 @@
  */
 
 #include <stdio.h>
+#include <X11/extensions/Xinerama.h>
 
 #include "awesome.h"
 #include "tag.h"
@@ -95,65 +96,107 @@ uicb_setmwfact(Display *disp,
 static void
 _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 {
-    int wah = get_windows_area_height(disp, awesomeconf->statusbar);
-    int waw = get_windows_area_width(disp, awesomeconf->statusbar);
-    int wax = get_windows_area_x(awesomeconf->statusbar);
-    int way = get_windows_area_y(awesomeconf->statusbar);
-    unsigned int nx, ny, nw, nh, mw;
-    int n, th, i, mh;
+    /* windows area geometry */
+    int wah = 0, waw = 0, wax = 0, way = 0;
+    /* new coordinates */
+    unsigned int nx, ny, nw, nh;
+    /* master size */
+    unsigned int mw = 0, mh = 0;
+    int n, i, li, last_i = 0, nmaster_screen = 0, otherwin_screen = 0;
+    int screen_numbers = 1, use_screen = -1;
+    XineramaScreenInfo *screens_info = NULL;
     Client *c;
 
+    if(XineramaIsActive(disp))
+    {
+        screens_info = XineramaQueryScreens(disp, &screen_numbers);
+        for(i = 0; i < screen_numbers; i++)
+        {
+            if(awesomeconf->statusbar.position == BarTop
+               || awesomeconf->statusbar.position == BarBot)
+                screens_info[i].height -= awesomeconf->statusbar.height;
+            if(awesomeconf->statusbar.position == BarTop)
+                screens_info[i].y_org += awesomeconf->statusbar.height;
+        }
+    }
+    else
+    {
+        /* emulate Xinerama info */
+        screens_info = p_new(XineramaScreenInfo, 1);
+        screens_info->width = get_windows_area_width(disp, awesomeconf->statusbar);
+        screens_info->height = get_windows_area_height(disp, awesomeconf->statusbar);
+        screens_info->x_org = get_windows_area_x(awesomeconf->statusbar);
+        screens_info->y_org = get_windows_area_y(awesomeconf->statusbar);
+    }
+    
     for(n = 0, c = clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;
 
-    /* window geoms */
-    mh = (n <= nmaster) ? wah / (n > 0 ? n : 1) : wah / nmaster;
-    mw = (n <= nmaster) ? waw : mwfact * waw;
-    th = (n > nmaster) ? wah / (n - nmaster) : 0;
-    if(n > nmaster && th < awesomeconf->statusbar.height)
-        th = wah;
-
-    nx = wax;
-    ny = way;
     for(i = 0, c = clients; c; c = c->next)
     {
         if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             continue;
-        
+
+        if(use_screen == -1 || (screen_numbers > 1 && i && ((i - last_i) >= nmaster_screen + otherwin_screen || n == screen_numbers)))
+        {
+            use_screen++;
+            last_i = i;
+
+            wah = screens_info[use_screen].height;
+            waw = screens_info[use_screen].width;
+            wax = screens_info[use_screen].x_org;
+            way = screens_info[use_screen].y_org;
+
+            if(n >= nmaster * screen_numbers)
+            {
+                nmaster_screen = nmaster;
+                otherwin_screen = (n - (nmaster * screen_numbers)) / screen_numbers;
+                if(use_screen == 0)
+                    otherwin_screen += (n - (nmaster * screen_numbers)) % screen_numbers;
+            }
+            else
+            {
+                nmaster_screen = n / screen_numbers;
+                /* first screen takes more master */
+                if(use_screen == 0)
+                    nmaster_screen += n % screen_numbers;
+                otherwin_screen = 0;
+            }
+
+            mh = nmaster_screen ? wah / nmaster_screen : waw;
+            mw = otherwin_screen ? waw * mwfact : waw;
+        }
+
         c->ismax = False;
-        if(i < nmaster)
+        li = last_i ? i - last_i : i;
+        if(li < nmaster)
         {                       /* master */
-            ny = way + i * mh;
-            if(!right && i == 0)
-                nx += (waw - mw);
+            ny = way + li * mh;
+            if(right)
+                nx = wax;
+            else
+                nx = wax + (waw - mw);
             nw = mw - 2 * c->border;
-            nh = mh;
-            if(i + 1 == (n < nmaster ? n : nmaster)) /* remainder */
-                nh = wah - mh * i;
-            nh -= 2 * c->border;
+            nh = mh - 2 * c->border;
         }
         else
         {                       /* tile window */
-            if(i == nmaster)
-            {
-                ny = way;
-                if(right)
-                    nx += mw;
-                else
-                    nx = 0;
-            }
+            nh = wah / otherwin_screen - 2 * c->border;
             nw = waw - mw - 2 * c->border;
-            if(i + 1 == n)      /* remainder */
-                nh = (way + wah) - ny - 2 * c->border;
+            if(li == nmaster)
+                ny = way;
             else
-                nh = th - 2 * c->border;
+                ny = way + (wah / otherwin_screen) * (li - nmaster_screen);
+            if(right)
+                nx = mw + wax;
+            else
+                nx = wax;
         }
         resize(c, nx, ny, nw, nh, awesomeconf->resize_hints);
-        if(n > nmaster && th != wah)
-            ny += nh + 2 * c->border;
         i++;
     }
+    XFree(screens_info);
 }
 
 void
