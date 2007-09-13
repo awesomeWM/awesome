@@ -29,6 +29,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/shape.h> 
 
 #include "awesome.h"
 #include "event.h"
@@ -270,12 +271,13 @@ int
 main(int argc, char *argv[])
 {
     char *p;
-    int r, xfd;
+    int r, xfd, e_dummy;
     fd_set rd;
     XEvent ev;
     Display * dpy;
     Window root;
     awesome_config awesomeconf;
+    int shape_event;
 
     if(argc == 2 && !strcmp("-v", argv[1]))
         eprint("awesome-" VERSION " © 2007 Julien Danjou\n");
@@ -301,8 +303,6 @@ main(int argc, char *argv[])
     parse_config(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
     setup(dpy, &dc, &awesomeconf);
     drawstatus(dpy, &dc, &awesomeconf);
-    scan(dpy, &dc, &awesomeconf);
-    XSync(dpy, False);
 
     void (*handler[LASTEvent]) (XEvent *, awesome_config *) = 
     {
@@ -317,9 +317,15 @@ main(int argc, char *argv[])
         [MappingNotify] = handle_event_mappingnotify,
         [MapRequest] = handle_event_maprequest,
         [PropertyNotify] = handle_event_propertynotify,
-        [UnmapNotify] = handle_event_unmapnotify
+        [UnmapNotify] = handle_event_unmapnotify,
     };
 
+    /* check for shape extension */
+    if((awesomeconf.have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
+        handler[shape_event] = handle_event_shape;
+
+    scan(dpy, &dc, &awesomeconf);
+    XSync(dpy, False);
 
     /* main event loop, also reads status text from stdin */
     while(running)

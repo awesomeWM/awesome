@@ -22,6 +22,7 @@
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/shape.h> 
 
 #include "awesome.h"
 #include "event.h"
@@ -387,6 +388,17 @@ handle_event_unmapnotify(XEvent * e, awesome_config *awesomeconf)
 
     if((c = getclient(ev->window)) && ev->event == DefaultRootWindow(e->xany.display) && (ev->send_event || !c->unmapped--))
         unmanage(c, &dc, WithdrawnState, awesomeconf);
+}
+
+void
+handle_event_shape(XEvent * e,
+                   awesome_config *awesomeconf __attribute__ ((unused)))
+{
+    XShapeEvent *ev = (XShapeEvent *) e;
+    Client *c = getclient(ev->window);
+
+    if(c)
+        set_shape(c);
 }
 
 void

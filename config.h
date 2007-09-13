@@ -139,6 +139,8 @@ struct awesome_config
     Layout * current_layout;
     /** Status bar */
     Statusbar statusbar;
+    /** Check for XShape extension */
+    Bool have_shape;
 };
 
 void parse_config(Display *, int, DC *, awesome_config *);        /* parse configuration file */

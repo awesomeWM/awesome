@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/shape.h>
 
 #include "awesome.h"
 #include "layout.h"
@@ -391,6 +392,11 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, awesom
     configure(c);               /* propagates border_width, if size doesn't change */
     updatesizehints(c);
     XSelectInput(disp, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
+    if(awesomeconf->have_shape)
+    {
+        XShapeSelectInput(disp, w, ShapeNotifyMask);
+        set_shape(c);
+    }
     grabbuttons(c, False, awesomeconf->modkey, awesomeconf->numlockmask);
     updatetitle(c);
     if((rettrans = XGetTransientForHint(disp, w, &trans) == Success))
@@ -635,6 +641,17 @@ updatesizehints(Client * c)
 
     c->isfixed = (c->maxw && c->minw && c->maxh && c->minh
                   && c->maxw == c->minw && c->maxh == c->minh);
+}
+
+void
+set_shape(Client *c)
+{
+    int bounding_shaped;
+    int i, b;  unsigned int u;  /* dummies */
+    /* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10. */
+    if (XShapeQueryExtents(c->display, c->win, &bounding_shaped, &i, &i,
+                           &u, &u, &b, &i, &i, &u, &u) && bounding_shaped)
+        XShapeCombineShape(c->display, DefaultRootWindow(c->display), ShapeBounding, 0, 0, c->win, ShapeBounding, ShapeSet);
 }
 
 void
