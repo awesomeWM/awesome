@@ -29,7 +29,6 @@
 
 /* extern */
 extern Client *sel, *clients;
-extern DC dc;
 
 /* static */
 
@@ -38,8 +37,9 @@ static int nmaster = 2;
 
 void
 uicb_setnmaster(Display *disp,
-           awesome_config *awesomeconf,
-           const char * arg)
+                DC * drawcontext,
+                awesome_config *awesomeconf,
+                const char * arg)
 {
     int delta;
     int wah = get_windows_area_height(disp, awesomeconf->statusbar);
@@ -59,15 +59,16 @@ uicb_setnmaster(Display *disp,
             return;
     }
     if(sel)
-        arrange(disp, &dc, awesomeconf);
+        arrange(disp, drawcontext, awesomeconf);
     else
-        drawstatus(disp, &dc, awesomeconf);
+        drawstatus(disp, drawcontext, awesomeconf);
 }
 
 void
 uicb_setmwfact(Display *disp,
-          awesome_config * awesomeconf,
-          const char *arg)
+                DC *drawcontext,
+               awesome_config * awesomeconf,
+               const char *arg)
 {
     double delta;
 
@@ -88,7 +89,7 @@ uicb_setmwfact(Display *disp,
         else if(mwfact > 0.9)
             mwfact = 0.9;
     }
-    arrange(disp, &dc, awesomeconf);
+    arrange(disp, drawcontext, awesomeconf);
 }
 
 static void
