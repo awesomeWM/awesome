@@ -141,6 +141,8 @@ struct awesome_config
     Statusbar statusbar;
     /** Check for XShape extension */
     Bool have_shape;
+    /** Check for XRandR extension */
+    Bool have_randr;
 };
 
 void parse_config(Display *, int, DC *, awesome_config *);        /* parse configuration file */

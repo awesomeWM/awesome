@@ -39,5 +39,6 @@ void handle_event_maprequest(XEvent *, awesome_config *);
 void handle_event_propertynotify(XEvent *, awesome_config *);
 void handle_event_unmapnotify(XEvent *, awesome_config *);
 void handle_event_shape(XEvent *, awesome_config *);
+void handle_event_randr_screen_change_notify(XEvent *, awesome_config *);
 
 #endif

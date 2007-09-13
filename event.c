@@ -23,6 +23,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h> 
+#include <X11/extensions/Xrandr.h> 
 
 #include "awesome.h"
 #include "event.h"
@@ -399,6 +400,13 @@ handle_event_shape(XEvent * e,
 
     if(c)
         set_shape(c);
+}
+
+void
+handle_event_randr_screen_change_notify(XEvent *e,
+                                        awesome_config *awesomeconf __attribute__ ((unused)))
+{
+    XRRUpdateConfiguration(e);
 }
 
 void

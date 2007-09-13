@@ -30,6 +30,7 @@
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h> 
+#include <X11/extensions/Xrandr.h> 
 
 #include "awesome.h"
 #include "event.h"
@@ -277,7 +278,7 @@ main(int argc, char *argv[])
     Display * dpy;
     Window root;
     awesome_config awesomeconf;
-    int shape_event;
+    int shape_event, randr_event_base;
 
     if(argc == 2 && !strcmp("-v", argv[1]))
         eprint("awesome-" VERSION " © 2007 Julien Danjou\n");
@@ -323,6 +324,10 @@ main(int argc, char *argv[])
     /* check for shape extension */
     if((awesomeconf.have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
         handler[shape_event] = handle_event_shape;
+
+    /* check for randr extension */
+    if((awesomeconf.have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
+       handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
 
     scan(dpy, &dc, &awesomeconf);
     XSync(dpy, False);
