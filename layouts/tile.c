@@ -50,8 +50,8 @@ uicb_setnmaster(Display *disp,
     else
     {
         nmaster = (int) compute_new_value_from_arg(arg, (double) nmaster);
-        if(nmaster < 1)
-            nmaster = 1;
+        if(nmaster < 0)
+            nmaster = 0;
     }
 
     if(sel)
@@ -152,12 +152,15 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         else
         {                       /* tile window */
             nh = wah / otherwin_screen - 2 * c->border;
-            nw = waw - mw - 2 * c->border;
+            if(nmaster)
+                nw = waw - mw - 2 * c->border;
+            else
+                nw = waw - 2 * c->border;
             if(li == nmaster)
                 ny = way;
             else
                 ny = way + (wah / otherwin_screen) * (li - nmaster_screen);
-            if(right)
+            if(right && nmaster)
                 nx = mw + wax;
             else
                 nx = wax;
