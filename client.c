@@ -659,34 +659,30 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
               awesome_config *awesomeconf __attribute__ ((unused)),
               const char *arg)
 {
-    double delta = 100.0;
+    double delta = 100.0, current_opacity = 0.0;
     unsigned char *data;
     Atom actual;
     int format;
     unsigned long n, left;
+    unsigned int current_opacity_raw = 0;
     int set_prop = 0;
 
     if(!sel)
         return;
 
-    if(arg && sscanf(arg, "%lf", &delta) && (arg[0] == '+' || arg[0] == '-'))
+    XGetWindowProperty(sel->display, sel->win, XInternAtom(sel->display, "_NET_WM_WINDOW_OPACITY", False),
+                       0L, 1L, False, XA_CARDINAL, &actual, &format, &n, &left,
+                       (unsigned char **) &data);
+    if(data)
     {
-        XGetWindowProperty(sel->display, sel->win, XInternAtom(sel->display, "_NET_WM_WINDOW_OPACITY", False),
-                           0L, 1L, False, XA_CARDINAL, &actual, &format, &n, &left,
-                           (unsigned char **) &data);
-        if(data)
-        {
-            unsigned int current_opacity = 0;
-            memcpy(&current_opacity, data, sizeof(unsigned int));
-            XFree((void *) data);
-            delta += ((current_opacity * 100.0) / 0xffffffff);
-        }
-        else
-        {
-            delta += 100.0;
-            set_prop = 1;
-        }
+        memcpy(&current_opacity_raw, data, sizeof(unsigned int));
+        XFree(data);
+        current_opacity = (current_opacity_raw * 100.0) / 0xffffffff;
     }
+    else
+        set_prop = 1;
+
+    delta = compute_new_value_from_arg(arg, current_opacity);
 
     if(delta <= 0.0)
         delta = 0.0;
