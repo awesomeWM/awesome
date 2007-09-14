@@ -74,7 +74,7 @@ awesome:
             (("Mod4"), "h", "setmwfact", "-0.05"),
             (("Mod4"), "l", "setmwfact", "+0.05"),
             (("Mod4"), "Escape", "viewprevtags"),
-            (("Mod4", "Shift"), "h", "incnmaster", "1"),
+            (("Mod4", "Shift"), "h", "incnmaster", "+1"),
             (("Mod4", "Shift"), "l", "incnmaster", "-1"),
             (("Mod4"), "m", "togglemax"),
             (("Mod4"), "t", "settrans", "-5"),
