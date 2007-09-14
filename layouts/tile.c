@@ -48,10 +48,11 @@ uicb_setnmaster(Display *disp,
     if(!arg)
         nmaster = awesomeconf->nmaster;
     else
+    {
         nmaster = (int) compute_new_value_from_arg(arg, (double) nmaster);
-
-    if(nmaster < 1)
-        nmaster = 1;
+        if(nmaster < 1)
+            nmaster = 1;
+    }
 
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
@@ -65,20 +66,14 @@ uicb_setmwfact(Display *disp,
                awesome_config * awesomeconf,
                const char *arg)
 {
-    double delta;
-
     if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft) && !IS_ARRANGE(bstack) && !IS_ARRANGE(bstackportrait))
         return;
 
-    /* arg handling, manipulate mwfact */
     if(!arg)
         mwfact = awesomeconf->mwfact;
-    else if(sscanf(arg, "%lf", &delta))
+    else
     {
-        if(arg[0] != '+' && arg[0] != '-')
-            mwfact = delta;
-        else
-            mwfact += delta;
+        mwfact = compute_new_value_from_arg(arg, mwfact);
         if(mwfact < 0.1)
             mwfact = 0.1;
         else if(mwfact > 0.9)
