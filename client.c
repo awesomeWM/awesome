@@ -24,6 +24,7 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
 
+#include "screen.h"
 #include "awesome.h"
 #include "layout.h"
 #include "tag.h"
@@ -371,20 +372,18 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, awesom
     }
     else
     {
-        int wax = get_windows_area_x(awesomeconf->statusbar);
-        int way = get_windows_area_y(awesomeconf->statusbar);
-        int waw = get_windows_area_width(disp, awesomeconf->statusbar);
-        int wah = get_windows_area_height(disp, awesomeconf->statusbar);
+        ScreenInfo *si = get_display_info(disp, awesomeconf->statusbar);
 
-        if(c->x + c->w + 2 * c->border > wax + waw)
-            c->x = c->rx = wax + waw - c->w - 2 * c->border;
-        if(c->y + c->h + 2 * c->border > way + wah)
-            c->y = c->ry = way + wah - c->h - 2 * c->border;
-        if(c->x < wax)
-            c->x = c->rx = wax;
-        if(c->y < way)
-            c->y = c->ry = way;
+        if(c->x + c->w + 2 * c->border > si->x_org + si->width)
+            c->x = c->rx = si->x_org + si->width - c->w - 2 * c->border;
+        if(c->y + c->h + 2 * c->border > si->y_org + si->height)
+            c->y = c->ry = si->y_org + si->height - c->h - 2 * c->border;
+        if(c->x < si->x_org)
+            c->x = c->rx = si->x_org;
+        if(c->y < si->y_org)
+            c->y = c->ry = si->y_org;
         c->border = awesomeconf->borderpx;
+        XFree(si);
     }
     wc.border_width = c->border;
     XConfigureWindow(disp, w, CWBorderWidth, &wc);

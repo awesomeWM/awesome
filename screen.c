@@ -22,6 +22,12 @@
 #include "util.h"
 #include "screen.h"
 
+/** Get screens info
+ * \param disp Display ref
+ * \param statusbar statusbar
+ * \param screen_number int pointer filled with number of screens
+ * \return ScreenInfo struct array with all screens info
+ */
 ScreenInfo *
 get_screen_info(Display *disp, Statusbar statusbar, int *screen_number)
 {
@@ -50,5 +56,26 @@ get_screen_info(Display *disp, Statusbar statusbar, int *screen_number)
             si[i].y_org += statusbar.height;
     }
     
+    return si;
+}
+
+/** Get display info
+ * \param disp Display ref
+ * \param statusbar statusbar
+ * \return ScreenInfo struct pointer with all display info
+ */
+ScreenInfo *
+get_display_info(Display *disp, Statusbar statusbar)
+{
+    ScreenInfo *si;
+
+    si = p_new(ScreenInfo, 1);
+
+    si->x_org = 0;
+    si->y_org = statusbar.position == BarTop ? statusbar.height : 0;
+    si->width = DisplayWidth(disp, DefaultScreen(disp));
+    si->height = DisplayHeight(disp, DefaultScreen(disp)) -
+        ((statusbar.position == BarTop || statusbar.position == BarBot) ? statusbar.height : 0);
+
     return si;
 }

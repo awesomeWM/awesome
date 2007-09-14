@@ -30,5 +30,6 @@
 typedef XineramaScreenInfo ScreenInfo;
 
 ScreenInfo * get_screen_info(Display *, Statusbar, int *);
+ScreenInfo * get_display_info(Display *disp, Statusbar statusbar);
 
 #endif
