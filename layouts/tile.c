@@ -48,11 +48,8 @@ uicb_setnmaster(Display *disp,
     if(!arg)
         nmaster = awesomeconf->nmaster;
     else
-    {
-        nmaster = (int) compute_new_value_from_arg(arg, (double) nmaster);
-        if(nmaster < 0)
+        if((nmaster = (int) compute_new_value_from_arg(arg, (double) nmaster)) < 0)
             nmaster = 0;
-    }
 
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
@@ -73,8 +70,7 @@ uicb_setmwfact(Display *disp,
         mwfact = awesomeconf->mwfact;
     else
     {
-        mwfact = compute_new_value_from_arg(arg, mwfact);
-        if(mwfact < 0.1)
+        if((mwfact = compute_new_value_from_arg(arg, mwfact)) < 0.1)
             mwfact = 0.1;
         else if(mwfact > 0.9)
             mwfact = 0.9;
