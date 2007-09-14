@@ -42,23 +42,17 @@ uicb_setnmaster(Display *disp,
                 awesome_config *awesomeconf,
                 const char * arg)
 {
-    int delta;
-    int wah = get_windows_area_height(disp, awesomeconf->statusbar);
-
     if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft) && !IS_ARRANGE(bstack) && !IS_ARRANGE(bstackportrait))
         return;
+
     if(!arg)
         nmaster = awesomeconf->nmaster;
-    else if(sscanf(arg, "%d", &delta))
-    {
-        if((arg[0] == '+' || arg[0] == '-')
-           && !((nmaster + delta) < 1 || wah / (nmaster + delta) <= 2 * awesomeconf->borderpx))
-            nmaster += delta;
-        else if(delta >= 1 && wah / delta <= 2 * awesomeconf->borderpx)
-            nmaster = delta;
-        else
-            return;
-    }
+    else
+        nmaster = (int) compute_new_value_from_arg(arg, (double) nmaster);
+
+    if(nmaster < 1)
+        nmaster = 1;
+
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
     else

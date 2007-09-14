@@ -102,3 +102,19 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, unsigned int size)
 
     return True;
 }
+
+double
+compute_new_value_from_arg(const char *arg, double current_value)
+{
+    double delta;
+
+    if(arg && sscanf(arg, "%lf", &delta) == 1)
+    {
+        if(arg[0] == '+' || arg[0] == '-')
+            current_value += delta;
+        else
+            current_value = delta;
+    }
+
+    return current_value;
+}
