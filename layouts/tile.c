@@ -21,8 +21,8 @@
  */
 
 #include <stdio.h>
-#include <X11/extensions/Xinerama.h>
 
+#include "screen.h"
 #include "awesome.h"
 #include "tag.h"
 #include "layout.h"
@@ -104,31 +104,11 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     unsigned int mw = 0, mh = 0;
     int n, i, li, last_i = 0, nmaster_screen = 0, otherwin_screen = 0;
     int screen_numbers = 1, use_screen = -1;
-    XineramaScreenInfo *screens_info = NULL;
+    ScreenInfo *screens_info = NULL;
     Client *c;
 
-    if(XineramaIsActive(disp))
-    {
-        screens_info = XineramaQueryScreens(disp, &screen_numbers);
-        for(i = 0; i < screen_numbers; i++)
-        {
-            if(awesomeconf->statusbar.position == BarTop
-               || awesomeconf->statusbar.position == BarBot)
-                screens_info[i].height -= awesomeconf->statusbar.height;
-            if(awesomeconf->statusbar.position == BarTop)
-                screens_info[i].y_org += awesomeconf->statusbar.height;
-        }
-    }
-    else
-    {
-        /* emulate Xinerama info */
-        screens_info = p_new(XineramaScreenInfo, 1);
-        screens_info->width = get_windows_area_width(disp, awesomeconf->statusbar);
-        screens_info->height = get_windows_area_height(disp, awesomeconf->statusbar);
-        screens_info->x_org = get_windows_area_x(awesomeconf->statusbar);
-        screens_info->y_org = get_windows_area_y(awesomeconf->statusbar);
-    }
-    
+    screens_info = get_screen_info(disp, awesomeconf->statusbar, &screen_numbers);
+ 
     for(n = 0, c = clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;

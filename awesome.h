@@ -28,9 +28,9 @@ Bool gettextprop(Display *, Window, Atom, char *, unsigned int);   /* return tex
 void updatebarpos(Display *, Statusbar);        /* updates the bar position */
 void uicb_quit(Display *, DC *, awesome_config *, const char *);        /* quit awesome nicely */
 int xerror(Display *, XErrorEvent *);   /* awesome's X error handler */
-int get_windows_area_x(Statusbar);
-int get_windows_area_y(Statusbar);
-int get_windows_area_height(Display *, Statusbar);
-int get_windows_area_width(Display *, Statusbar);
+int __attribute__ ((deprecated)) get_windows_area_x(Statusbar);
+int __attribute__ ((deprecated)) get_windows_area_y(Statusbar);
+int __attribute__ ((deprecated)) get_windows_area_height(Display *, Statusbar);
+int __attribute__ ((deprecated)) get_windows_area_width(Display *, Statusbar);
 
 #endif
