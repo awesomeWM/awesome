@@ -26,6 +26,7 @@
 #include <X11/extensions/Xrandr.h> 
 
 #include "awesome.h"
+#include "screen.h"
 #include "event.h"
 #include "layout.h"
 #include "tag.h"
@@ -55,10 +56,9 @@ movemouse(Client * c, awesome_config *awesomeconf)
     unsigned int dui;
     Window dummy;
     XEvent ev;
-    int wax = get_windows_area_x(awesomeconf->statusbar);
-    int way = get_windows_area_y(awesomeconf->statusbar);
-    int waw = get_windows_area_width(c->display, awesomeconf->statusbar);
-    int wah = get_windows_area_height(c->display, awesomeconf->statusbar);
+    ScreenInfo *si;
+
+    si = get_display_info(c->display, awesomeconf->statusbar);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
@@ -83,18 +83,19 @@ movemouse(Client * c, awesome_config *awesomeconf)
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(wax + nx) < awesomeconf->snap)
-                nx = wax;
-            else if(abs((wax + waw) - (nx + c->w + 2 * c->border)) < awesomeconf->snap)
-                nx = wax + waw - c->w - 2 * c->border;
-            if(abs(way - ny) < awesomeconf->snap)
-                ny = way;
-            else if(abs((way + wah) - (ny + c->h + 2 * c->border)) < awesomeconf->snap)
-                ny = way + wah - c->h - 2 * c->border;
+            if(abs(si->x_org + nx) < awesomeconf->snap)
+                nx = si->x_org;
+            else if(abs((si->x_org + si->width) - (nx + c->w + 2 * c->border)) < awesomeconf->snap)
+                nx = si->x_org + si->width - c->w - 2 * c->border;
+            if(abs(si->y_org - ny) < awesomeconf->snap)
+                ny = si->y_org;
+            else if(abs((si->y_org + si->height) - (ny + c->h + 2 * c->border)) < awesomeconf->snap)
+                ny = si->y_org + si->height - c->h - 2 * c->border;
             resize(c, nx, ny, c->w, c->h, False);
             break;
         }
     }
+    XFree(si);
 }
 
 static void
