@@ -142,6 +142,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
                 mh = mw = 0;
 
             mw -= 2 * c->border;
+            mh -= 2 * c->border;
 
             if(otherwin < awesomeconf->ncols)
                 real_ncols = otherwin;
@@ -153,10 +154,9 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         li = last_i ? i - last_i : i;
         if(li < awesomeconf->nmaster)
         {                       /* master */
-            ny = way + li * mh;
-            nx = wax + (right ? 0: waw - (mw + 2 * c->border));
-            nh = mh - 2 * c->border;
-            resize(c, nx, ny, mw, nh, awesomeconf->resize_hints);
+            ny = way + li * (mh + 2 * c->border);
+            nx = wax + (right ? 0 : waw - (mw + 2 * c->border));
+            resize(c, nx, ny, mw, mh, awesomeconf->resize_hints);
         }
         else
         {                       /* tile window */
