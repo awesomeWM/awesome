@@ -65,7 +65,7 @@ typedef struct awesome_config awesome_config;
 typedef struct
 {
     const char *symbol;
-    void (*arrange) (Display *, awesome_config *);
+    void (*arrange) (Display *, int, awesome_config *);
 } Layout;
 
 typedef struct

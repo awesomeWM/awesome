@@ -23,7 +23,7 @@
 #ifndef AWESOME_SPIRAL_H
 #define AWESOME_SPIRAL_H
 
-void dwindle(Display *, awesome_config *);              /* dwindle windows */
-void spiral(Display *, awesome_config *);              /* spiral windows */
+void dwindle(Display *, int, awesome_config *);              /* dwindle windows */
+void spiral(Display *, int, awesome_config *);              /* spiral windows */
 
 #endif

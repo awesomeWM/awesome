@@ -27,12 +27,12 @@
 extern Client *clients;         /* global client */
 
 void
-floating(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
+floating(Display *disp __attribute__ ((unused)), int screen, awesome_config *awesomeconf)
 {                               /* default floating layout */
     Client *c;
 
     for(c = clients; c; c = c->next)
-        if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags) && c->screen == screen)
         {
             if(c->ftview)
             {

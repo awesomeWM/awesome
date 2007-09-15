@@ -28,7 +28,7 @@
 void uicb_setnmaster(Display *, int, DC *, awesome_config *, const char *);        /* change number of master windows */
 void uicb_setncols(Display *, int, DC *, awesome_config *, const char *);
 void uicb_setmwfact(Display *, int, DC *, awesome_config *, const char *);        /* sets master width factor */
-void tile(Display *, awesome_config *);
-void tileleft(Display *, awesome_config *);
+void tile(Display *, int, awesome_config *);
+void tileleft(Display *, int, awesome_config *);
 
 #endif

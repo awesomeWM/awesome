@@ -195,19 +195,13 @@ _tile(Display *disp, int screen, awesome_config *awesomeconf, const Bool right)
 }
 
 void
-tile(Display *disp, awesome_config *awesomeconf)
+tile(Display *disp, int screen, awesome_config *awesomeconf)
 {
-    int screen;
-
-    for(screen = 0; screen < ScreenCount(disp); screen++)
-        _tile(disp, screen, awesomeconf, True);
+    _tile(disp, screen, awesomeconf, True);
 }
 
 void
-tileleft(Display *disp, awesome_config *awesomeconf)
+tileleft(Display *disp, int screen, awesome_config *awesomeconf)
 {
-    int screen;
-
-    for(screen = 0; screen < ScreenCount(disp); screen++)
-        _tile(disp, screen, awesomeconf, False);
+    _tile(disp, screen, awesomeconf, False);
 }

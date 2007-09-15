@@ -42,7 +42,7 @@ arrange(Display * disp, int screen, DC *drawcontext, awesome_config *awesomeconf
             unban(c);
         else
             ban(c);
-    awesomeconf->current_layout->arrange(disp, awesomeconf);
+    awesomeconf->current_layout->arrange(disp, screen, awesomeconf);
     focus(disp, screen, drawcontext, NULL, True, awesomeconf);
     restack(disp, screen, drawcontext, awesomeconf);
 }

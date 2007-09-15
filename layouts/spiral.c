@@ -28,7 +28,7 @@
 extern Client *clients;         /* global client list */
 
 static void
-fibonacci(Display *disp, awesome_config *awesomeconf, int shape)
+fibonacci(Display *disp, int screen, awesome_config *awesomeconf, int shape)
 {
     int n, nx, ny, nh, nw, i;
     Client *c;
@@ -38,10 +38,14 @@ fibonacci(Display *disp, awesome_config *awesomeconf, int shape)
     nw = get_windows_area_width(disp, awesomeconf->statusbar);
     nh = get_windows_area_height(disp, awesomeconf->statusbar);
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags) && c->screen == screen)
             n++;
+
     for(i = 0, c = clients; c; c = c->next)
     {
+        if(c->screen != screen)
+            continue;
+
         c->ismax = False;
         if((i % 2 && nh / 2 > 2 * c->border)
            || (!(i % 2) && nw / 2 > 2 * c->border))
@@ -83,13 +87,13 @@ fibonacci(Display *disp, awesome_config *awesomeconf, int shape)
 
 
 void
-dwindle(Display *disp, awesome_config *awesomeconf)
+dwindle(Display *disp, int screen, awesome_config *awesomeconf)
 {
-    fibonacci(disp, awesomeconf, 1);
+    fibonacci(disp, screen, awesomeconf, 1);
 }
 
 void
-spiral(Display *disp, awesome_config *awesomeconf)
+spiral(Display *disp, int screen, awesome_config *awesomeconf)
 {
-    fibonacci(disp, awesomeconf, 0);
+    fibonacci(disp, screen, awesomeconf, 0);
 }

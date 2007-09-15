@@ -43,17 +43,30 @@ eprint(const char *fmt, ...)
 
 void
 uicb_spawn(Display * disp,
-           int screen __attribute__ ((unused)),
+           int screen,
            DC *drawcontext __attribute__ ((unused)),
            awesome_config * awesomeconf __attribute__ ((unused)),
            const char *arg)
 {
     static char *shell = NULL;
+    char *display = NULL;
+    char *tmp, newdisplay[128];
 
     if(!shell && !(shell = getenv("SHELL")))
         shell = strdup("/bin/sh");
     if(!arg)
         return;
+    
+    if((tmp = getenv("DISPLAY")))
+    {
+        display = strdup(tmp);
+        if((tmp = strrchr(display, '.')))
+            *tmp = '\0';
+        snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, screen);
+        setenv("DISPLAY", newdisplay, 1);
+    }
+
+
     /* The double-fork construct avoids zombie processes and keeps the code
      * clean from stupid signal handlers. */
     if(fork() == 0)

@@ -23,6 +23,6 @@
 #ifndef AWESOME_FLOATING_H
 #define AWESOME_FLOATING_H
 
-void floating(Display *, awesome_config *);            /* floating layout */
+void floating(Display *, int, awesome_config *);            /* floating layout */
 
 #endif
