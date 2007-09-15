@@ -149,6 +149,8 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
                 real_ncols = otherwin;
             else
                 real_ncols = awesomeconf->ncols;
+
+            current_col = 0;
         }
 
         c->ismax = False;
