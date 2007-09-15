@@ -260,10 +260,11 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
     {
         DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)) = ev->width;
         DisplayHeight(e->xany.display, DefaultScreen(e->xany.display)) = ev->height;
-        XFreePixmap(e->xany.display, dc.drawable);
-        dc.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display),
-                                    DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)),
-                                    awesomeconf->statusbar.height, DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
+        XFreePixmap(e->xany.display, awesomeconf->statusbar.drawable);
+        awesomeconf->statusbar.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display),
+                                                        DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)),
+                                                        awesomeconf->statusbar.height,
+                                                        DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
         XResizeWindow(e->xany.display, awesomeconf->statusbar.window,
                       DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height);
         updatebarpos(e->xany.display, awesomeconf->statusbar);

@@ -62,7 +62,7 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     else
         XFreeFont(disp, drawcontext->font.xfont);
     XUngrabKey(disp, AnyKey, AnyModifier, DefaultRootWindow(disp));
-    XFreePixmap(disp, drawcontext->drawable);
+    XFreePixmap(disp, awesomeconf->statusbar.drawable);
     XFreeGC(disp, drawcontext->gc);
     XDestroyWindow(disp, awesomeconf->statusbar.window);
     XFreeCursor(disp, drawcontext->cursor[CurNormal]);
@@ -164,7 +164,7 @@ setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     updatebarpos(disp, awesomeconf->statusbar);
     XMapRaised(disp, awesomeconf->statusbar.window);
     /* pixmap for everything */
-    drawcontext->drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
+    awesomeconf->statusbar.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
     drawcontext->gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
     XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
     if(!drawcontext->font.set)

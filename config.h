@@ -41,7 +41,6 @@ typedef struct
     int x, y, w, h;
     unsigned long norm[ColLast]; 
     unsigned long sel[ColLast];
-    Drawable drawable;
     GC gc;
     Cursor cursor[CurLast];
     struct
@@ -88,6 +87,8 @@ typedef struct
     int position;
     /** Window */
     Window window;
+    /** Drawable object */
+    Drawable drawable;
 } Statusbar;
 
 /** Main configuration structure */
