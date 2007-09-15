@@ -80,8 +80,6 @@ static const NameFuncLink LayoutsList[] =
     {"grid", grid},
     {"spiral", spiral},
     {"dwindle", dwindle},
-    {"bstack", bstack},
-    {"bstackportrait", bstackportrait},
     {NULL, NULL}
 };
 

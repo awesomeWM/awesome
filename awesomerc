@@ -29,8 +29,6 @@ awesome:
 #             ("(@)", "spiral"),
              ("[\]", "dwindle"),
              ("><>", "floating"),
-             ("TTT", "bstack"),
-             ("===", "bstackportrait")
             );
 
     # Number of master windows (used by tile layouts)

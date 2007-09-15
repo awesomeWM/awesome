@@ -29,7 +29,5 @@ void uicb_setnmaster(Display *, DC *, awesome_config *, const char *);        /*
 void uicb_setmwfact(Display *, DC *, awesome_config *, const char *);        /* sets master width factor */
 void tile(Display *, awesome_config *);
 void tileleft(Display *, awesome_config *);
-void bstack(Display *, awesome_config *);
-void bstackportrait(Display *, awesome_config *);
 
 #endif
