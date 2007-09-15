@@ -123,7 +123,7 @@ textnw(XFontSet set, XFontStruct *xfont, const char *text, unsigned int len)
 }
 
 void
-drawstatus(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
+drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
 {
     int x, i;
     drawcontext->x = drawcontext->y = 0;

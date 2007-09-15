@@ -26,7 +26,7 @@
 
 #define textw(set, xfont, text, height)         (textnw(set, xfont, text, a_strlen(text)) + height)
 
-void drawstatus(Display *, DC *, awesome_config *);          /* draw the bar */
+void drawstatusbar(Display *, DC *, awesome_config *);          /* draw the bar */
 unsigned int textnw(XFontSet, XFontStruct *, const char *, unsigned int);
 
 #endif
