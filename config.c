@@ -311,9 +311,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     /* barpos */
     tmp = config_lookup_string(&awesomelibconf, "awesome.barpos");
 
-    if(tmp && !strncmp(tmp, "BarOff", 6))
+    if(tmp && !strncmp(tmp, "off", 6))
         awesomeconf->statusbar_default_position = BarOff;
-    else if(tmp && !strncmp(tmp, "BarBot", 6))
+    else if(tmp && !strncmp(tmp, "bottom", 6))
         awesomeconf->statusbar_default_position = BarBot;
     else
         awesomeconf->statusbar_default_position = BarTop;

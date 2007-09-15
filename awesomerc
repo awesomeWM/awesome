@@ -2,8 +2,8 @@
 
 awesome:
 {
-    # Default bar position
-    barpos = "BarTop";
+    # Default bar position: top, bottom, off
+    barpos = "top";
     # Window border size
     borderpx = 1;
     # Window snap pixels
