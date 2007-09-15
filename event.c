@@ -337,7 +337,7 @@ handle_event_mappingnotify(XEvent * e, awesome_config *awesomeconf)
 
     XRefreshKeyboardMapping(ev);
     if(ev->request == MappingKeyboard)
-        grabkeys(e->xany.display, awesomeconf);
+        grabkeys(e->xany.display, DefaultScreen(e->xany.display), awesomeconf);
 }
 
 void
@@ -391,7 +391,8 @@ handle_event_unmapnotify(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
 
-    if((c = getclient(ev->window)) && ev->event == DefaultRootWindow(e->xany.display) && (ev->send_event || !c->unmapped--))
+    if((c = getclient(ev->window))
+       && ev->event == RootWindow(e->xany.display, c->screen) && (ev->send_event || !c->unmapped--))
         unmanage(c, &dc, WithdrawnState, awesomeconf);
 }
 
@@ -414,19 +415,19 @@ handle_event_randr_screen_change_notify(XEvent *e,
 }
 
 void
-grabkeys(Display *disp, awesome_config *awesomeconf)
+grabkeys(Display *disp, int screen, awesome_config *awesomeconf)
 {
     int i;
     KeyCode code;
 
-    XUngrabKey(disp, AnyKey, AnyModifier, DefaultRootWindow(disp));
+    XUngrabKey(disp, AnyKey, AnyModifier, RootWindow(disp, screen));
     for(i = 0; i < awesomeconf->nkeys; i++)
     {
         code = XKeysymToKeycode(disp, awesomeconf->keys[i].keysym);
-        XGrabKey(disp, code, awesomeconf->keys[i].mod, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, awesomeconf->keys[i].mod | LockMask, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask, DefaultRootWindow(disp), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask | LockMask, DefaultRootWindow(disp), True,
+        XGrabKey(disp, code, awesomeconf->keys[i].mod, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(disp, code, awesomeconf->keys[i].mod | LockMask, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask | LockMask, RootWindow(disp, screen), True,
                  GrabModeAsync, GrabModeAsync);
     }
 }

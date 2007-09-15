@@ -152,7 +152,7 @@ setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     wa.cursor = drawcontext->cursor[CurNormal];
     XChangeWindowAttributes(disp, DefaultRootWindow(disp), CWEventMask | CWCursor, &wa);
     XSelectInput(disp, DefaultRootWindow(disp), wa.event_mask);
-    grabkeys(disp, awesomeconf);
+    grabkeys(disp, DefaultScreen(disp), awesomeconf);
     compileregs(awesomeconf->rules, awesomeconf->nrules);
     /* bar */
     drawcontext->h = awesomeconf->statusbar.height = drawcontext->font.height + 2;
