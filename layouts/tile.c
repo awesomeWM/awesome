@@ -43,7 +43,7 @@ uicb_setnmaster(Display *disp,
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
         awesomeconf->nmaster = 0;
 
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
 }
 
 void
@@ -58,7 +58,7 @@ uicb_setncols(Display *disp,
     if((awesomeconf->ncols = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncols)) < 1)
         awesomeconf->ncols = 1;
 
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
 }
 
 void
@@ -75,7 +75,7 @@ uicb_setmwfact(Display *disp,
     else if(awesomeconf->mwfact > 0.9)
         awesomeconf->mwfact = 0.9;
 
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
 }
 
 static void

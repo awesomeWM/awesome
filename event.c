@@ -183,14 +183,14 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             return;
         if(ev->button == Button1 && (IS_ARRANGE(floating) || c->isfloating))
         {
-            restack(e->xany.display, &dc, awesomeconf);
+            restack(e->xany.display, DefaultScreen(e->xany.display), &dc, awesomeconf);
             movemouse(c, awesomeconf);
         }
         else if(ev->button == Button2)
             uicb_zoom(e->xany.display, &dc, awesomeconf, NULL);
         else if(ev->button == Button3 && (IS_ARRANGE(floating) || c->isfloating) && !c->isfixed)
         {
-            restack(e->xany.display, &dc, awesomeconf);
+            restack(e->xany.display, DefaultScreen(e->xany.display), &dc, awesomeconf);
             resizemouse(c, awesomeconf);
         }
     }
@@ -270,7 +270,7 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
         XResizeWindow(e->xany.display, awesomeconf->statusbar.window,
                       DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height);
         updatebarpos(e->xany.display, awesomeconf->statusbar);
-        arrange(e->xany.display, &dc, awesomeconf);
+        arrange(e->xany.display, DefaultScreen(e->xany.display), &dc, awesomeconf);
     }
 }
 
@@ -370,7 +370,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating && (c->isfloating = (getclient(trans) != NULL)))
-                arrange(e->xany.display, &dc, awesomeconf);
+                arrange(e->xany.display, DefaultScreen(e->xany.display), &dc, awesomeconf);
             break;
         case XA_WM_NORMAL_HINTS:
             updatesizehints(c);

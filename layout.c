@@ -33,7 +33,7 @@
 extern Client *clients, *sel;   /* global client list */
 
 void
-arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
+arrange(Display * disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
 {
     Client *c;
 
@@ -43,8 +43,8 @@ arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
         else
             ban(c);
     awesomeconf->current_layout->arrange(disp, awesomeconf);
-    focus(disp, DefaultScreen(disp), drawcontext, NULL, True, awesomeconf);
-    restack(disp, drawcontext, awesomeconf);
+    focus(disp, screen, drawcontext, NULL, True, awesomeconf);
+    restack(disp, screen, drawcontext, awesomeconf);
 }
 
 void
@@ -63,7 +63,7 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
     if(c)
     {
         focus(c->display, c->screen, drawcontext, c, True, awesomeconf);
-        restack(c->display, drawcontext, awesomeconf);
+        restack(c->display, c->screen, drawcontext, awesomeconf);
     }
 }
 
@@ -86,7 +86,7 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
     if(c)
     {
         focus(c->display, c->screen, drawcontext, c, True, awesomeconf);
-        restack(c->display, drawcontext, awesomeconf);
+        restack(c->display, c->screen, drawcontext, awesomeconf);
     }
 }
 
@@ -106,13 +106,13 @@ loadawesomeprops(Display *disp, int screen, awesome_config * awesomeconf)
 }
 
 void
-restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
+restack(Display * disp, int screen, DC * drawcontext, awesome_config *awesomeconf)
 {
     Client *c;
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatusbar(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    drawstatusbar(disp, screen, drawcontext, awesomeconf);
     if(!sel)
         return;
     if(sel->isfloating || IS_ARRANGE(floating))
@@ -180,7 +180,7 @@ uicb_setlayout(Display *disp,
         c->ftview = True;
 
     if(sel)
-        arrange(disp, drawcontext, awesomeconf);
+        arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
     else
         drawstatusbar(disp, DefaultScreen(disp), drawcontext, awesomeconf);
 
@@ -275,6 +275,6 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
     detach(sel);
     attach(sel);
     focus(sel->display, sel->screen, drawcontext, sel, True, awesomeconf);
-    arrange(sel->display, drawcontext, awesomeconf);
+    arrange(sel->display, sel->screen, drawcontext, awesomeconf);
 } 
 
