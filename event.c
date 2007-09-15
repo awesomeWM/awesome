@@ -255,23 +255,25 @@ void
 handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
 {
     XConfigureEvent *ev = &e->xconfigure;
+    int screen;
 
-    if(ev->window == DefaultRootWindow(e->xany.display)
-       && (ev->width != DisplayWidth(e->xany.display, DefaultScreen(e->xany.display))
-           || ev->height != DisplayHeight(e->xany.display, DefaultScreen(e->xany.display))))
-    {
-        DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)) = ev->width;
-        DisplayHeight(e->xany.display, DefaultScreen(e->xany.display)) = ev->height;
-        XFreePixmap(e->xany.display, awesomeconf->statusbar.drawable);
-        awesomeconf->statusbar.drawable = XCreatePixmap(e->xany.display, DefaultRootWindow(e->xany.display),
-                                                        DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)),
-                                                        awesomeconf->statusbar.height,
-                                                        DefaultDepth(e->xany.display, DefaultScreen(e->xany.display)));
-        XResizeWindow(e->xany.display, awesomeconf->statusbar.window,
-                      DisplayWidth(e->xany.display, DefaultScreen(e->xany.display)), awesomeconf->statusbar.height);
-        updatebarpos(e->xany.display, awesomeconf->statusbar);
-        arrange(e->xany.display, DefaultScreen(e->xany.display), &dc, awesomeconf);
-    }
+    for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+        if(ev->window == RootWindow(e->xany.display, screen)
+           && (ev->width != DisplayWidth(e->xany.display, screen)
+               || ev->height != DisplayHeight(e->xany.display, screen)))
+        {
+            DisplayWidth(e->xany.display, screen) = ev->width;
+            DisplayHeight(e->xany.display, screen) = ev->height;
+            XFreePixmap(e->xany.display, awesomeconf->statusbar.drawable);
+            awesomeconf->statusbar.drawable = XCreatePixmap(e->xany.display, RootWindow(e->xany.display, screen),
+                                                            DisplayWidth(e->xany.display, screen),
+                                                            awesomeconf->statusbar.height,
+                                                            DefaultDepth(e->xany.display, screen));
+            XResizeWindow(e->xany.display, awesomeconf->statusbar.window,
+                          DisplayWidth(e->xany.display, screen), awesomeconf->statusbar.height);
+            updatebarpos(e->xany.display, awesomeconf->statusbar);
+            arrange(e->xany.display, screen, &dc, awesomeconf);
+        }
 }
 
 void
@@ -289,13 +291,16 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
 {
     Client *c;
     XCrossingEvent *ev = &e->xcrossing;
+    int screen;
 
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
     if((c = getclient(ev->window)))
         focus(c->display, c->screen, &dc, c, ev->same_screen, awesomeconf);
-    else if(ev->window == DefaultRootWindow(e->xany.display))
-        focus(e->xany.display, DefaultScreen(e->xany.display), &dc, NULL, True, awesomeconf);
+    else
+        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+            if(ev->window == RootWindow(e->xany.display, screen))
+                focus(e->xany.display, screen, &dc, NULL, True, awesomeconf);
 }
 
 void
@@ -325,9 +330,11 @@ void
 handle_event_leavenotify(XEvent * e, awesome_config *awesomeconf)
 {
     XCrossingEvent *ev = &e->xcrossing;
+    int screen;
 
-    if((ev->window == DefaultRootWindow(e->xany.display)) && !ev->same_screen)
-        focus(e->xany.display, DefaultScreen(e->xany.display), &dc, NULL, ev->same_screen, awesomeconf);
+    for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+        if((ev->window == RootWindow(e->xany.display, screen)) && !ev->same_screen)
+            focus(e->xany.display, screen, &dc, NULL, ev->same_screen, awesomeconf);
 }
 
 void
@@ -345,13 +352,17 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
 {
     static XWindowAttributes wa;
     XMapRequestEvent *ev = &e->xmaprequest;
+    int screen;
 
     if(!XGetWindowAttributes(e->xany.display, ev->window, &wa))
         return;
     if(wa.override_redirect)
         return;
     if(!getclient(ev->window))
-        manage(e->xany.display, DefaultScreen(e->xany.display), &dc, ev->window, &wa, awesomeconf);
+    {
+        for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
+        manage(e->xany.display, screen, &dc, ev->window, &wa, awesomeconf);
+    }
 }
 
 void
