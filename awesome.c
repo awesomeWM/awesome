@@ -36,6 +36,7 @@
 #include "event.h"
 #include "layout.h"
 #include "tag.h"
+#include "screen.h"
 
 Client *clients = NULL;
 Client *sel = NULL;
@@ -227,6 +228,7 @@ void
 updatebarpos(Display *disp, Statusbar statusbar)
 {
     XEvent ev;
+    ScreenInfo *si;
 
     switch (statusbar.position)
     {
@@ -234,7 +236,9 @@ updatebarpos(Display *disp, Statusbar statusbar)
         XMoveWindow(disp, statusbar.window, 0, 0);
         break;
     case BarBot:
-        XMoveWindow(disp, statusbar.window, 0, get_windows_area_width(disp, statusbar) - statusbar.height);
+        si = get_display_info(disp, statusbar);
+        XMoveWindow(disp, statusbar.window, 0, si->height);
+        XFree(si);
         break;
     case BarOff:
         XMoveWindow(disp, statusbar.window, 0, 0 - statusbar.height);
