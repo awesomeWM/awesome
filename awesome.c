@@ -156,18 +156,7 @@ setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     compileregs(awesomeconf->rules, awesomeconf->nrules);
     /* bar */
     drawcontext->h = awesomeconf->statusbar.height = drawcontext->font.height + 2;
-    wa.override_redirect = 1;
-    wa.background_pixmap = ParentRelative;
-    wa.event_mask = ButtonPressMask | ExposureMask;
-    awesomeconf->statusbar.window = XCreateWindow(disp, DefaultRootWindow(disp), 0, 0, DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, 0,
-                                               DefaultDepth(disp, DefaultScreen(disp)), CopyFromParent,
-                                               DefaultVisual(disp, DefaultScreen(disp)),
-                                               CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-    XDefineCursor(disp, awesomeconf->statusbar.window, drawcontext->cursor[CurNormal]);
-    updatebarpos(disp, awesomeconf->statusbar);
-    XMapRaised(disp, awesomeconf->statusbar.window);
-    /* pixmap for everything */
-    awesomeconf->statusbar.drawable = XCreatePixmap(disp, DefaultRootWindow(disp), DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, DefaultDepth(disp, DefaultScreen(disp)));
+    initstatusbar(disp, DefaultScreen(disp), drawcontext, &awesomeconf->statusbar);
     drawcontext->gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
     XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
     if(!drawcontext->font.set)
