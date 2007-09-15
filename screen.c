@@ -24,12 +24,13 @@
 
 /** Get screens info
  * \param disp Display ref
+ * \param screen Screen number
  * \param statusbar statusbar
  * \param screen_number int pointer filled with number of screens
  * \return ScreenInfo struct array with all screens info
  */
 ScreenInfo *
-get_screen_info(Display *disp, Statusbar statusbar, int *screen_number)
+get_screen_info(Display *disp, int screen, Statusbar statusbar, int *screen_number)
 {
     int i;
     ScreenInfo *si;
@@ -40,9 +41,9 @@ get_screen_info(Display *disp, Statusbar statusbar, int *screen_number)
     {
         /* emulate Xinerama info */
         *screen_number = 1;
-        si = p_new(XineramaScreenInfo, 1);
-        si->width = DisplayWidth(disp, DefaultScreen(disp));
-        si->height = DisplayHeight(disp, DefaultScreen(disp));
+        si = p_new(ScreenInfo, 1);
+        si->width = DisplayWidth(disp, screen);
+        si->height = DisplayHeight(disp, screen);
         si->x_org = 0;
         si->y_org = 0;
     }
