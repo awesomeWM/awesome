@@ -35,6 +35,7 @@ extern Client *sel, *clients;
 
 static double mwfact = 0.6;
 static int nmaster = 2;
+static int ncols = 1;
 
 void
 uicb_setnmaster(Display *disp,
@@ -89,6 +90,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     unsigned int mw = 0, mh = 0;
     int n, i, li, last_i = 0, nmaster_screen = 0, otherwin_screen = 0;
     int screen_numbers = 1, use_screen = -1;
+    int real_ncols = 1, win_by_col = 1, current_col = 0;
     ScreenInfo *screens_info = NULL;
     Client *c;
 
@@ -129,8 +131,18 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
                 otherwin_screen = 0;
             }
 
-            mh = nmaster_screen ? wah / nmaster_screen : waw;
-            mw = otherwin_screen ? waw * mwfact : waw;
+            if(nmaster)
+            {
+                mh = nmaster_screen ? wah / nmaster_screen : waw;
+                mw = otherwin_screen ? waw * mwfact : waw;
+            }
+            else
+                mh = mw = 0;
+
+            if(otherwin_screen < ncols)
+                real_ncols = otherwin_screen;
+            else
+                real_ncols = ncols;
         }
 
         c->ismax = False;
@@ -147,19 +159,27 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         }
         else
         {                       /* tile window */
-            nh = wah / otherwin_screen - 2 * c->border;
-            if(nmaster)
-                nw = waw - mw - 2 * c->border;
+            win_by_col = otherwin_screen / real_ncols;
+
+            if((li - nmaster) && (li - nmaster) % win_by_col == 0 && current_col < real_ncols - 1)
+                current_col++;
+
+            if(current_col == real_ncols - 1)
+                win_by_col += otherwin_screen % real_ncols;
+
+            if(otherwin_screen <= real_ncols)
+                nh = wah - 2 * c->border;
             else
-                nw = waw - 2 * c->border;
-            if(li == nmaster)
+                nh = (wah / win_by_col) - 2 * c->border;
+
+            nw = (waw - mw) / real_ncols - 2 * c->border;
+
+            if(li == nmaster || otherwin_screen <= real_ncols || (li - nmaster) % win_by_col == 0)
                 ny = way;
             else
-                ny = way + (wah / otherwin_screen) * (li - nmaster_screen);
-            if(right && nmaster)
-                nx = mw + wax;
-            else
-                nx = wax;
+                ny = way + ((li - nmaster) % win_by_col) * (nh + 2 * c->border);
+
+            nx = wax + current_col * nw + (right ? mw : 0);
         }
         resize(c, nx, ny, nw, nh, awesomeconf->resize_hints);
         i++;
