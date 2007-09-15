@@ -20,13 +20,15 @@
  */
 
 #include "layout.h"
+#include "util.h"
+#include "draw.h"
 
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 
 /* static */
 
-static void
-drawtext(Display *disp, DC drawcontext, Statusbar * statusbar, const char *text, unsigned long col[ColLast])
+void
+drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, unsigned long col[ColLast])
 {
     int x, y, w, h;
     static char buf[256];
@@ -34,7 +36,7 @@ drawtext(Display *disp, DC drawcontext, Statusbar * statusbar, const char *text,
     XRectangle r = { drawcontext.x, drawcontext.y, drawcontext.w, drawcontext.h };
 
     XSetForeground(disp, drawcontext.gc, col[ColBG]);
-    XFillRectangles(disp, statusbar->drawable, drawcontext.gc, &r, 1);
+    XFillRectangles(disp, drawable, drawcontext.gc, &r, 1);
     if(!text)
         return;
     w = 0;
@@ -62,12 +64,12 @@ drawtext(Display *disp, DC drawcontext, Statusbar * statusbar, const char *text,
     }
     XSetForeground(disp, drawcontext.gc, col[ColFG]);
     if(drawcontext.font.set)
-        XmbDrawString(disp, statusbar->drawable, drawcontext.font.set, drawcontext.gc, x, y, buf, len);
+        XmbDrawString(disp, drawable, drawcontext.font.set, drawcontext.gc, x, y, buf, len);
     else
-        XDrawString(disp, statusbar->drawable, drawcontext.gc, x, y, buf, len);
+        XDrawString(disp, drawable, drawcontext.gc, x, y, buf, len);
 }
 
-static void
+void
 drawsquare(Bool filled, Bool empty, unsigned long col[ColLast], Display *disp, DC drawcontext, Statusbar *statusbar)
 {
     int x;
@@ -91,23 +93,6 @@ drawsquare(Bool filled, Bool empty, unsigned long col[ColLast], Display *disp, D
     }
 }
 
-/** Check if at least a client is tagged with tag number t
- * \param t tag number
- * \return True or False
- */
-static Bool
-isoccupied(unsigned int t)
-{
-    Client *c;
-
-    for(c = clients; c; c = c->next)
-        if(c->tags[t])
-            return True;
-    return False;
-}
-
-/* extern */
-
 unsigned int
 textnw(XFontSet set, XFontStruct *xfont, const char *text, unsigned int len)
 {
@@ -121,48 +106,3 @@ textnw(XFontSet set, XFontStruct *xfont, const char *text, unsigned int len)
     return XTextWidth(xfont, text, len);
 }
 
-void
-drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
-{
-    int x, i;
-    drawcontext->x = drawcontext->y = 0;
-    for(i = 0; i < awesomeconf->ntags; i++)
-    {
-        drawcontext->w = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->tags[i], drawcontext->font.height);
-        if(awesomeconf->selected_tags[i])
-        {
-            drawtext(disp, *drawcontext, &awesomeconf->statusbar, awesomeconf->tags[i], drawcontext->sel);
-            drawsquare(sel && sel->tags[i], isoccupied(i), drawcontext->sel, disp, *drawcontext, &awesomeconf->statusbar);
-        }
-        else
-        {
-            drawtext(disp, *drawcontext, &awesomeconf->statusbar, awesomeconf->tags[i], drawcontext->norm);
-            drawsquare(sel && sel->tags[i], isoccupied(i), drawcontext->norm, disp, *drawcontext, &awesomeconf->statusbar);
-        }
-        drawcontext->x += drawcontext->w;
-    }
-    drawcontext->w = awesomeconf->statusbar.width;
-    drawtext(disp, *drawcontext, &awesomeconf->statusbar, awesomeconf->current_layout->symbol, drawcontext->norm);
-    x = drawcontext->x + drawcontext->w;
-    drawcontext->w = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->statustext, drawcontext->font.height);
-    drawcontext->x = DisplayWidth(disp, DefaultScreen(disp)) - drawcontext->w;
-    if(drawcontext->x < x)
-    {
-        drawcontext->x = x;
-        drawcontext->w = DisplayWidth(disp, DefaultScreen(disp)) - x;
-    }
-    drawtext(disp, *drawcontext, &awesomeconf->statusbar, awesomeconf->statustext, drawcontext->norm);
-    if((drawcontext->w = drawcontext->x - x) > awesomeconf->statusbar.height)
-    {
-        drawcontext->x = x;
-        if(sel)
-        {
-            drawtext(disp, *drawcontext, &awesomeconf->statusbar, sel->name, drawcontext->sel);
-            drawsquare(sel->ismax, sel->isfloating, drawcontext->sel, disp, *drawcontext, &awesomeconf->statusbar);
-        }
-        else
-            drawtext(disp, *drawcontext, &awesomeconf->statusbar, NULL, drawcontext->norm);
-    }
-    XCopyArea(disp, awesomeconf->statusbar.drawable, awesomeconf->statusbar.window, drawcontext->gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, 0, 0);
-    XSync(disp, False);
-}

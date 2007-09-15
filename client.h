@@ -25,7 +25,7 @@
 /* mask shorthands, used in event.c and client.c */
 #define BUTTONMASK              (ButtonPressMask | ButtonReleaseMask)
 
-#include "draw.h"
+#include "config.h"
 
 typedef struct Client Client;
 struct Client

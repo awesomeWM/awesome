@@ -24,6 +24,7 @@
 
 #include "layout.h"
 #include "tag.h"
+#include "util.h"
 
 extern Client *sel;             /* global client list */
 

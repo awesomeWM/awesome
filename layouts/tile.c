@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 
+#include "util.h"
 #include "screen.h"
 #include "awesome.h"
 #include "tag.h"

@@ -19,15 +19,11 @@
  * 
  */
 
-#ifndef AWESOME_DRAW_H
-#define AWESOME_DRAW_H
+#ifndef AWESOME_STATUSBAR_H
+#define AWESOME_STATUSBAR_H
 
-#include "util.h"
+#include "config.h"
 
-#define textw(set, xfont, text, height)         (textnw(set, xfont, text, a_strlen(text)) + height)
-
-void drawsquare(Bool, Bool, unsigned long *, Display *, DC, Statusbar *);
-void drawtext(Display *, DC, Drawable, const char *, unsigned long *);
-unsigned int textnw(XFontSet, XFontStruct *, const char *, unsigned int);
+void drawstatusbar(Display *, DC *, awesome_config *);
 
 #endif

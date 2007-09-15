@@ -30,6 +30,8 @@
 #include "event.h"
 #include "layout.h"
 #include "tag.h"
+#include "draw.h"
+#include "statusbar.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 

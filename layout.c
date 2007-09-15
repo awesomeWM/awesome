@@ -25,6 +25,8 @@
 #include "awesome.h"
 #include "layout.h"
 #include "tag.h"
+#include "util.h"
+#include "statusbar.h"
 #include "layouts/floating.h"
 
 /* extern */

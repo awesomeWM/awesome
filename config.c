@@ -30,6 +30,8 @@
 #include "awesome.h"
 #include "layout.h"
 #include "tag.h"
+#include "util.h"
+#include "draw.h"
 #include "layouts/tile.h"
 #include "layouts/spiral.h"
 #include "layouts/floating.h"

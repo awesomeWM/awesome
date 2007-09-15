@@ -37,6 +37,8 @@
 #include "layout.h"
 #include "tag.h"
 #include "screen.h"
+#include "util.h"
+#include "statusbar.h"
 
 Client *clients = NULL;
 Client *sel = NULL;
