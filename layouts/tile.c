@@ -86,7 +86,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     unsigned int nx, ny, nw, nh;
     /* master size */
     unsigned int mw = 0, mh = 0;
-    int n, i, li, last_i = 0, nmaster_screen = 0, otherwin_screen = 0;
+    int n, i, li, last_i = 0, masterwin = 0, otherwin = 0;
     int screen_numbers = 1, use_screen = -1;
     int real_ncols = 1, win_by_col = 1, current_col = 0;
     ScreenInfo *screens_info = NULL;
@@ -106,7 +106,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         if(use_screen == -1
            || (screen_numbers > 1 
                && i
-               && ((i - last_i) >= nmaster_screen + otherwin_screen
+               && ((i - last_i) >= masterwin + otherwin
                    || n == screen_numbers)))
         {
             use_screen++;
@@ -119,30 +119,30 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 
             if(n >= awesomeconf->nmaster * screen_numbers)
             {
-                nmaster_screen = awesomeconf->nmaster;
-                otherwin_screen = (n - (awesomeconf->nmaster * screen_numbers)) / screen_numbers;
+                masterwin = awesomeconf->nmaster;
+                otherwin = (n - (awesomeconf->nmaster * screen_numbers)) / screen_numbers;
                 if(use_screen == 0)
-                    otherwin_screen += (n - (awesomeconf->nmaster * screen_numbers)) % screen_numbers;
+                    otherwin += (n - (awesomeconf->nmaster * screen_numbers)) % screen_numbers;
             }
             else
             {
-                nmaster_screen = n / screen_numbers;
+                masterwin = n / screen_numbers;
                 /* first screen takes more master */
                 if(use_screen == 0)
-                    nmaster_screen += n % screen_numbers;
-                otherwin_screen = 0;
+                    masterwin += n % screen_numbers;
+                otherwin = 0;
             }
 
             if(awesomeconf->nmaster)
             {
-                mh = nmaster_screen ? wah / nmaster_screen : waw;
-                mw = otherwin_screen ? waw * awesomeconf->mwfact : waw;
+                mh = masterwin ? wah / masterwin : waw;
+                mw = otherwin ? waw * awesomeconf->mwfact : waw;
             }
             else
                 mh = mw = 0;
 
-            if(otherwin_screen < awesomeconf->ncols)
-                real_ncols = otherwin_screen;
+            if(otherwin < awesomeconf->ncols)
+                real_ncols = otherwin;
             else
                 real_ncols = awesomeconf->ncols;
         }
@@ -158,22 +158,22 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         }
         else
         {                       /* tile window */
-            win_by_col = otherwin_screen / real_ncols;
+            win_by_col = otherwin / real_ncols;
 
             if((li - awesomeconf->nmaster) && (li - awesomeconf->nmaster) % win_by_col == 0 && current_col < real_ncols - 1)
                 current_col++;
 
             if(current_col == real_ncols - 1)
-                win_by_col += otherwin_screen % real_ncols;
+                win_by_col += otherwin % real_ncols;
 
-            if(otherwin_screen <= real_ncols)
+            if(otherwin <= real_ncols)
                 nh = wah - 2 * c->border;
             else
                 nh = (wah / win_by_col) - 2 * c->border;
 
             nw = (waw - mw) / real_ncols - 2 * c->border;
 
-            if(li == awesomeconf->nmaster || otherwin_screen <= real_ncols || (li - awesomeconf->nmaster) % win_by_col == 0)
+            if(li == awesomeconf->nmaster || otherwin <= real_ncols || (li - awesomeconf->nmaster) % win_by_col == 0)
                 ny = way;
             else
                 ny = way + ((li - awesomeconf->nmaster) % win_by_col) * (nh + 2 * c->border);
