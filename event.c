@@ -64,10 +64,10 @@ movemouse(Client * c, awesome_config *awesomeconf)
 
     ocx = nx = c->x;
     ocy = ny = c->y;
-    if(XGrabPointer(c->display, DefaultRootWindow(c->display), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+    if(XGrabPointer(c->display, RootWindow(c->display, c->screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, dc.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
-    XQueryPointer(c->display, DefaultRootWindow(c->display), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
+    XQueryPointer(c->display, RootWindow(c->display, c->screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
     {
         XMaskEvent(c->display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
@@ -109,7 +109,7 @@ resizemouse(Client * c, awesome_config *awesomeconf)
 
     ocx = c->x;
     ocy = c->y;
-    if(XGrabPointer(c->display, DefaultRootWindow(c->display), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+    if(XGrabPointer(c->display, RootWindow(c->display, c->screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, dc.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
@@ -183,14 +183,14 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             return;
         if(ev->button == Button1 && (IS_ARRANGE(floating) || c->isfloating))
         {
-            restack(e->xany.display, DefaultScreen(e->xany.display), &dc, awesomeconf);
+            restack(e->xany.display, c->screen, &dc, awesomeconf);
             movemouse(c, awesomeconf);
         }
         else if(ev->button == Button2)
             uicb_zoom(e->xany.display, &dc, awesomeconf, NULL);
         else if(ev->button == Button3 && (IS_ARRANGE(floating) || c->isfloating) && !c->isfixed)
         {
-            restack(e->xany.display, DefaultScreen(e->xany.display), &dc, awesomeconf);
+            restack(e->xany.display, c->screen, &dc, awesomeconf);
             resizemouse(c, awesomeconf);
         }
     }
@@ -225,10 +225,10 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf __attribut
                 c->w = ev->width;
             if(ev->value_mask & CWHeight)
                 c->h = ev->height;
-            if((c->x + c->w) > DisplayWidth(c->display, DefaultScreen(c->display)) && c->isfloating)
-                c->x = DisplayWidth(c->display, DefaultScreen(c->display)) / 2 - c->w / 2;       /* center in x direction */
-            if((c->y + c->h) > DisplayHeight(c->display, DefaultScreen(c->display)) && c->isfloating)
-                c->y = DisplayHeight(c->display, DefaultScreen(c->display)) / 2 - c->h / 2;       /* center in y direction */
+            if((c->x + c->w) > DisplayWidth(c->display, c->screen) && c->isfloating)
+                c->x = DisplayWidth(c->display, c->screen) / 2 - c->w / 2;       /* center in x direction */
+            if((c->y + c->h) > DisplayHeight(c->display, c->screen) && c->isfloating)
+                c->y = DisplayHeight(c->display, c->screen) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 configure(c);
             if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags))
@@ -304,7 +304,7 @@ handle_event_expose(XEvent * e, awesome_config *awesomeconf)
     XExposeEvent *ev = &e->xexpose;
 
     if(!ev->count && awesomeconf->statusbar.window == ev->window)
-        drawstatusbar(e->xany.display,  DefaultScreen(e->xany.display), &dc, awesomeconf);
+        drawstatusbar(e->xany.display,  awesomeconf->statusbar.screen, &dc, awesomeconf);
 }
 
 void
@@ -370,7 +370,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating && (c->isfloating = (getclient(trans) != NULL)))
-                arrange(e->xany.display, DefaultScreen(e->xany.display), &dc, awesomeconf);
+                arrange(e->xany.display, c->screen, &dc, awesomeconf);
             break;
         case XA_WM_NORMAL_HINTS:
             updatesizehints(c);
