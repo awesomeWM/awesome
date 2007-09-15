@@ -413,7 +413,7 @@ manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, awesom
     attach(c);
     attachstack(c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
-    ban(c);
+    c->isbanned = True;
     arrange(disp, drawcontext, awesomeconf);
 }
 

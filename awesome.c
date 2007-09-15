@@ -105,7 +105,8 @@ scan(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
         for(i = 0; i < num; i++)
         {
             if(!XGetWindowAttributes(disp, wins[i], &wa)
-               || wa.override_redirect || XGetTransientForHint(disp, wins[i], &d1))
+               || wa.override_redirect
+               || XGetTransientForHint(disp, wins[i], &d1))
                 continue;
             if(wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState)
                 manage(disp, drawcontext, wins[i], &wa, awesomeconf);
