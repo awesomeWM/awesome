@@ -30,39 +30,19 @@
 /* extern */
 extern Client *sel, *clients;
 
-/* static */
-
-static double mwfact = -1;
-static int nmaster = -1;
-static int ncols = -1;
-
-static void
-init_static_var_layout(awesome_config *awesomeconf)
-{
-    if(mwfact == -1)
-        mwfact = awesomeconf->mwfact;
-    if(nmaster == -1)
-        nmaster = awesomeconf->nmaster;
-    if(ncols == -1)
-        ncols = awesomeconf->ncols;
-}
-
 void
 uicb_setnmaster(Display *disp,
                 DC * drawcontext,
                 awesome_config *awesomeconf,
                 const char * arg)
 {
-    if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft))
+    if(!arg || (!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft)))
         return;
 
-    if(!arg)
-        nmaster = awesomeconf->nmaster;
-    else if((nmaster = (int) compute_new_value_from_arg(arg, (double) nmaster)) < 0)
-            nmaster = 0;
+    if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
+        awesomeconf->nmaster = 0;
 
-    if(sel)
-        arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, drawcontext, awesomeconf);
 }
 
 void
@@ -71,16 +51,13 @@ uicb_setncols(Display *disp,
               awesome_config *awesomeconf,
               const char * arg)
 {
-    if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft))
+    if(!arg || (!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft)))
         return;
 
-    if(!arg)
-        ncols = awesomeconf->ncols;
-    else if((ncols = (int) compute_new_value_from_arg(arg, (double) ncols)) < 1)
-            ncols = 1;
+    if((awesomeconf->ncols = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncols)) < 1)
+        awesomeconf->ncols = 1;
 
-    if(sel)
-        arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, drawcontext, awesomeconf);
 }
 
 void
@@ -92,15 +69,11 @@ uicb_setmwfact(Display *disp,
     if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft))
         return;
 
-    if(!arg)
-        mwfact = awesomeconf->mwfact;
-    else
-    {
-        if((mwfact = compute_new_value_from_arg(arg, mwfact)) < 0.1)
-            mwfact = 0.1;
-        else if(mwfact > 0.9)
-            mwfact = 0.9;
-    }
+    if((awesomeconf->mwfact = compute_new_value_from_arg(arg, awesomeconf->mwfact)) < 0.1)
+        awesomeconf->mwfact = 0.1;
+    else if(awesomeconf->mwfact > 0.9)
+        awesomeconf->mwfact = 0.9;
+
     arrange(disp, drawcontext, awesomeconf);
 }
 
@@ -119,7 +92,6 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     ScreenInfo *screens_info = NULL;
     Client *c;
 
-    init_static_var_layout(awesomeconf);
     screens_info = get_screen_info(disp, awesomeconf->statusbar, &screen_numbers);
  
     for(n = 0, c = clients; c; c = c->next)
@@ -141,12 +113,12 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
             wax = screens_info[use_screen].x_org;
             way = screens_info[use_screen].y_org;
 
-            if(n >= nmaster * screen_numbers)
+            if(n >= awesomeconf->nmaster * screen_numbers)
             {
-                nmaster_screen = nmaster;
-                otherwin_screen = (n - (nmaster * screen_numbers)) / screen_numbers;
+                nmaster_screen = awesomeconf->nmaster;
+                otherwin_screen = (n - (awesomeconf->nmaster * screen_numbers)) / screen_numbers;
                 if(use_screen == 0)
-                    otherwin_screen += (n - (nmaster * screen_numbers)) % screen_numbers;
+                    otherwin_screen += (n - (awesomeconf->nmaster * screen_numbers)) % screen_numbers;
             }
             else
             {
@@ -157,23 +129,23 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
                 otherwin_screen = 0;
             }
 
-            if(nmaster)
+            if(awesomeconf->nmaster)
             {
                 mh = nmaster_screen ? wah / nmaster_screen : waw;
-                mw = otherwin_screen ? waw * mwfact : waw;
+                mw = otherwin_screen ? waw * awesomeconf->mwfact : waw;
             }
             else
                 mh = mw = 0;
 
-            if(otherwin_screen < ncols)
+            if(otherwin_screen < awesomeconf->ncols)
                 real_ncols = otherwin_screen;
             else
-                real_ncols = ncols;
+                real_ncols = awesomeconf->ncols;
         }
 
         c->ismax = False;
         li = last_i ? i - last_i : i;
-        if(li < nmaster)
+        if(li < awesomeconf->nmaster)
         {                       /* master */
             ny = way + li * mh;
             if(right)
@@ -187,7 +159,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         {                       /* tile window */
             win_by_col = otherwin_screen / real_ncols;
 
-            if((li - nmaster) && (li - nmaster) % win_by_col == 0 && current_col < real_ncols - 1)
+            if((li - awesomeconf->nmaster) && (li - awesomeconf->nmaster) % win_by_col == 0 && current_col < real_ncols - 1)
                 current_col++;
 
             if(current_col == real_ncols - 1)
@@ -200,10 +172,10 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 
             nw = (waw - mw) / real_ncols - 2 * c->border;
 
-            if(li == nmaster || otherwin_screen <= real_ncols || (li - nmaster) % win_by_col == 0)
+            if(li == awesomeconf->nmaster || otherwin_screen <= real_ncols || (li - awesomeconf->nmaster) % win_by_col == 0)
                 ny = way;
             else
-                ny = way + ((li - nmaster) % win_by_col) * (nh + 2 * c->border);
+                ny = way + ((li - awesomeconf->nmaster) % win_by_col) * (nh + 2 * c->border);
 
             nx = wax + current_col * nw + (right ? mw : 0);
         }
