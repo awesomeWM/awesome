@@ -63,8 +63,6 @@ uicb_setnmaster(Display *disp,
 
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
-    else
-        drawstatusbar(disp, drawcontext, awesomeconf);
 }
 
 void
@@ -83,8 +81,6 @@ uicb_setncols(Display *disp,
 
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
-    else
-        drawstatusbar(disp, drawcontext, awesomeconf);
 }
 
 void
