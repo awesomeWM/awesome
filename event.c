@@ -194,13 +194,15 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             resizemouse(c, awesomeconf);
         }
     }
-    else if(DefaultRootWindow(e->xany.display) == ev->window && !sel)
-    {
-        if(ev->button == Button4)
-            uicb_tag_viewnext(e->xany.display, &dc, awesomeconf, NULL);
-        else if(ev->button == Button5)
-            uicb_tag_viewprev(e->xany.display, &dc, awesomeconf, NULL);
-    }
+    else if(!sel)
+        for(i = 0; i < ScreenCount(e->xany.display); i++)
+            if(RootWindow(e->xany.display, i) == ev->window)
+            {
+                if(ev->button == Button4)
+                    uicb_tag_viewnext(e->xany.display, &dc, awesomeconf, NULL);
+                else if(ev->button == Button5)
+                    uicb_tag_viewprev(e->xany.display, &dc, awesomeconf, NULL);
+            }
 }
 
 void
