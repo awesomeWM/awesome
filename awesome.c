@@ -109,7 +109,7 @@ scan(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
                || XGetTransientForHint(disp, wins[i], &d1))
                 continue;
             if(wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState)
-                manage(disp, drawcontext, wins[i], &wa, awesomeconf);
+                manage(disp, DefaultScreen(disp), drawcontext, wins[i], &wa, awesomeconf);
         }
     /* now the transients */
     for(i = 0; i < num; i++)
@@ -118,7 +118,7 @@ scan(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
             continue;
         if(XGetTransientForHint(disp, wins[i], &d1)
            && (wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState))
-            manage(disp, drawcontext, wins[i], &wa, awesomeconf);
+            manage(disp, DefaultScreen(disp), drawcontext, wins[i], &wa, awesomeconf);
     }
     if(wins)
         XFree(wins);

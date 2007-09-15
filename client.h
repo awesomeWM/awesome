@@ -45,6 +45,7 @@ struct Client
     Client *snext;
     Window win;
     Display * display;
+    int screen;
     Bool ftview; /* first time viewed on new layout */
 };
 
@@ -53,7 +54,7 @@ void ban(Client *);             /* bans c */
 void configure(Client *);       /* send synthetic configure event */
 void detach(Client *);          /* detaches c from global client list */
 void focus(Display *, DC *, Client *, Bool, awesome_config *);           /* focus c if visible && !NULL, or focus top visible */
-void manage(Display *, DC *, Window, XWindowAttributes *, awesome_config *);       /* manage new client */
+void manage(Display *, int, DC *, Window, XWindowAttributes *, awesome_config *);       /* manage new client */
 void resize(Client *, int, int, int, int, Bool);        /* resize with given coordinates c */
 void unban(Client *);           /* unbans c */
 void unmanage(Client *, DC *, long, awesome_config *);  /* unmanage c */

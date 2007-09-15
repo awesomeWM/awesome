@@ -351,7 +351,7 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
     if(wa.override_redirect)
         return;
     if(!getclient(ev->window))
-        manage(e->xany.display, &dc, ev->window, &wa, awesomeconf);
+        manage(e->xany.display, DefaultScreen(e->xany.display), &dc, ev->window, &wa, awesomeconf);
 }
 
 void
