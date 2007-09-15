@@ -32,6 +32,7 @@
 #include "tag.h"
 #include "draw.h"
 #include "util.h"
+#include "statusbar.h"
 #include "layouts/tile.h"
 #include "layouts/spiral.h"
 #include "layouts/floating.h"
@@ -100,7 +101,6 @@ static const NameFuncLink KeyfuncList[] = {
     {"viewprevtags", uicb_viewprevtags},
     /* layout.c */
     {"setlayout", uicb_setlayout},
-    {"togglebar", uicb_togglebar},
     {"focusnext", uicb_focusnext},
     {"focusprev", uicb_focusprev},
     {"togglemax", uicb_togglemax},
@@ -113,6 +113,8 @@ static const NameFuncLink KeyfuncList[] = {
     {"setncols", uicb_setncols},
     /* awesome.c */
     {"quit", uicb_quit},
+    /* statusbar.c */
+    {"togglebar", uicb_togglebar},
     {NULL, NULL}
 };
 

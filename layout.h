@@ -34,7 +34,6 @@ void restack(Display *, DC *, awesome_config *);        /* restores z layers of 
 void uicb_focusnext(Display *, DC *, awesome_config *, const char *);   /* focuses next visible client */
 void uicb_focusprev(Display *, DC *, awesome_config *, const char *);   /* focuses prev visible client */
 void uicb_setlayout(Display *, DC *, awesome_config *, const char *);   /* sets layout, NULL means next layout */
-void uicb_togglebar(Display *, DC *, awesome_config *, const char *);   /* shows/hides the bar */
 void uicb_togglemax(Display *, DC *, awesome_config *, const char *);   /* toggles maximization of floating client */
 void uicb_toggleverticalmax(Display *, DC *, awesome_config *, const char *);
 void uicb_togglehorizontalmax(Display *, DC *, awesome_config *, const char *);

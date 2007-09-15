@@ -112,3 +112,18 @@ updatebarpos(Display *disp, Statusbar statusbar)
     XSync(disp, False);
     while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
 }
+
+void
+uicb_togglebar(Display *disp,
+               DC *drawcontext,
+               awesome_config *awesomeconf,
+               const char *arg __attribute__ ((unused)))
+{
+    if(awesomeconf->statusbar.position == BarOff)
+        awesomeconf->statusbar.position = (awesomeconf->statusbar.position == BarOff) ? BarTop : awesomeconf->statusbar_default_position;
+    else
+        awesomeconf->statusbar.position = BarOff;
+    updatebarpos(disp, awesomeconf->statusbar);
+    arrange(disp, drawcontext, awesomeconf);
+}
+
