@@ -53,7 +53,7 @@ void attach(Client *);          /* attaches c to global client list */
 void ban(Client *);             /* bans c */
 void configure(Client *);       /* send synthetic configure event */
 void detach(Client *);          /* detaches c from global client list */
-void focus(Display *, DC *, Client *, Bool, awesome_config *);           /* focus c if visible && !NULL, or focus top visible */
+void focus(Display *, int, DC *, Client *, Bool, awesome_config *);           /* focus c if visible && !NULL, or focus top visible */
 void manage(Display *, int, DC *, Window, XWindowAttributes *, awesome_config *);       /* manage new client */
 void resize(Client *, int, int, int, int, Bool);        /* resize with given coordinates c */
 void unban(Client *);           /* unbans c */

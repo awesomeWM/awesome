@@ -257,7 +257,7 @@ detach(Client * c)
  * \param awesomeconf awesome config
  */
 void
-focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config *awesomeconf)
+focus(Display *disp, int screen, DC *drawcontext, Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags)))
@@ -290,7 +290,7 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
         setclienttrans(sel, -1);
     }
     else
-        XSetInputFocus(disp, DefaultRootWindow(disp), RevertToPointerRoot, CurrentTime);
+        XSetInputFocus(disp, RootWindow(disp, screen), RevertToPointerRoot, CurrentTime);
 }
 
 /** Kill selected client
@@ -366,8 +366,8 @@ manage(Display * disp, int screen, DC *drawcontext, Window w, XWindowAttributes 
     c->oldborder = wa->border_width;
     c->display = disp;
     c->screen = screen;
-    if(c->w == DisplayWidth(disp, DefaultScreen(disp))
-       && c->h == DisplayHeight(disp, DefaultScreen(disp)))
+    if(c->w == DisplayWidth(disp, screen)
+       && c->h == DisplayHeight(disp, screen))
     {
         c->x = 0;
         c->y = 0;
@@ -467,10 +467,10 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
     if(w <= 0 || h <= 0)
         return;
     /* offscreen appearance fixes */
-    if(x > DisplayWidth(c->display, DefaultScreen(c->display)))
-        x = DisplayWidth(c->display, DefaultScreen(c->display)) - w - 2 * c->border;
-    if(y > DisplayHeight(c->display, DefaultScreen(c->display)))
-        y = DisplayHeight(c->display, DefaultScreen(c->display)) - h - 2 * c->border;
+    if(x > DisplayWidth(c->display, c->screen))
+        x = DisplayWidth(c->display, c->screen) - w - 2 * c->border;
+    if(y > DisplayHeight(c->display, c->screen))
+        y = DisplayHeight(c->display, c->screen) - h - 2 * c->border;
     if(x + w + 2 * c->border < 0)
         x = 0;
     if(y + h + 2 * c->border < 0)
@@ -515,7 +515,7 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
     ow = sel->w;
     oh = sel->h;
 
-    Bool xqp = XQueryPointer(sel->display, DefaultRootWindow(sel->display), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
+    Bool xqp = XQueryPointer(sel->display, RootWindow(sel->display, sel->screen), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
     resize(sel, nx, ny, nw, nh, True);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
@@ -569,7 +569,7 @@ unmanage(Client * c, DC *drawcontext, long state, awesome_config *awesomeconf)
     detach(c);
     detachstack(c);
     if(sel == c)
-        focus(c->display, drawcontext, NULL, True, awesomeconf);
+        focus(c->display, c->screen, drawcontext, NULL, True, awesomeconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     setclientstate(c, state);
     XSync(c->display, False);
@@ -653,7 +653,7 @@ set_shape(Client *c)
     /* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10. */
     if (XShapeQueryExtents(c->display, c->win, &bounding_shaped, &i, &i,
                            &u, &u, &b, &i, &i, &u, &u) && bounding_shaped)
-        XShapeCombineShape(c->display, DefaultRootWindow(c->display), ShapeBounding, 0, 0, c->win, ShapeBounding, ShapeSet);
+        XShapeCombineShape(c->display, RootWindow(c->display, c->screen), ShapeBounding, 0, 0, c->win, ShapeBounding, ShapeSet);
 }
 
 void

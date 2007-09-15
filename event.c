@@ -178,7 +178,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     }
     else if((c = getclient(ev->window)))
     {
-        focus(c->display, &dc, c, ev->same_screen, awesomeconf);
+        focus(c->display, c->screen, &dc, c, ev->same_screen, awesomeconf);
         if(CLEANMASK(ev->state) != awesomeconf->modkey)
             return;
         if(ev->button == Button1 && (IS_ARRANGE(floating) || c->isfloating))
@@ -293,9 +293,9 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
     if((c = getclient(ev->window)))
-        focus(c->display, &dc, c, ev->same_screen, awesomeconf);
+        focus(c->display, c->screen, &dc, c, ev->same_screen, awesomeconf);
     else if(ev->window == DefaultRootWindow(e->xany.display))
-        focus(e->xany.display, &dc, NULL, True, awesomeconf);
+        focus(e->xany.display, DefaultScreen(e->xany.display), &dc, NULL, True, awesomeconf);
 }
 
 void
@@ -327,7 +327,7 @@ handle_event_leavenotify(XEvent * e, awesome_config *awesomeconf)
     XCrossingEvent *ev = &e->xcrossing;
 
     if((ev->window == DefaultRootWindow(e->xany.display)) && !ev->same_screen)
-        focus(e->xany.display, &dc, NULL, ev->same_screen, awesomeconf);
+        focus(e->xany.display, DefaultScreen(e->xany.display), &dc, NULL, ev->same_screen, awesomeconf);
 }
 
 void

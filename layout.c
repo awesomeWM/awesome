@@ -43,7 +43,7 @@ arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
         else
             ban(c);
     awesomeconf->current_layout->arrange(disp, awesomeconf);
-    focus(disp, drawcontext, NULL, True, awesomeconf);
+    focus(disp, DefaultScreen(disp), drawcontext, NULL, True, awesomeconf);
     restack(disp, drawcontext, awesomeconf);
 }
 
@@ -62,7 +62,7 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
         for(c = clients; c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
     if(c)
     {
-        focus(c->display, drawcontext, c, True, awesomeconf);
+        focus(c->display, c->screen, drawcontext, c, True, awesomeconf);
         restack(c->display, drawcontext, awesomeconf);
     }
 }
@@ -85,7 +85,7 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
     }
     if(c)
     {
-        focus(c->display, drawcontext, c, True, awesomeconf);
+        focus(c->display, c->screen, drawcontext, c, True, awesomeconf);
         restack(c->display, drawcontext, awesomeconf);
     }
 }
@@ -274,7 +274,7 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
         return;
     detach(sel);
     attach(sel);
-    focus(sel->display, drawcontext, sel, True, awesomeconf);
+    focus(sel->display, sel->screen, drawcontext, sel, True, awesomeconf);
     arrange(sel->display, drawcontext, awesomeconf);
 } 
 
