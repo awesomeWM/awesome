@@ -416,7 +416,8 @@ initfont(const char *fontstr, Display * disp, DC * drawcontext)
         if(drawcontext->font.xfont)
             XFreeFont(disp, drawcontext->font.xfont);
         drawcontext->font.xfont = NULL;
-        if(!(drawcontext->font.xfont = XLoadQueryFont(disp, fontstr)))
+        if(!(drawcontext->font.xfont = XLoadQueryFont(disp, fontstr))
+           || !(drawcontext->font.xfont = XLoadQueryFont(disp, "fixed")))
             eprint("error, cannot load font: '%s'\n", fontstr);
         drawcontext->font.ascent = drawcontext->font.xfont->ascent;
         drawcontext->font.descent = drawcontext->font.xfont->descent;
