@@ -112,7 +112,7 @@ restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatusbar(disp, drawcontext, awesomeconf);
+    drawstatusbar(disp, DefaultScreen(disp), drawcontext, awesomeconf);
     if(!sel)
         return;
     if(sel->isfloating || IS_ARRANGE(floating))
@@ -182,7 +182,7 @@ uicb_setlayout(Display *disp,
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
     else
-        drawstatusbar(disp, drawcontext, awesomeconf);
+        drawstatusbar(disp, DefaultScreen(disp), drawcontext, awesomeconf);
 
     saveawesomeprops(disp, DefaultScreen(disp), awesomeconf);
 
@@ -214,7 +214,7 @@ maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomecon
     else
         sel->isfloating = False;
 
-    drawstatusbar(sel->display, drawcontext, awesomeconf);
+    drawstatusbar(sel->display, sel->screen, drawcontext, awesomeconf);
 
     while(XCheckMaskEvent(sel->display, EnterWindowMask, &ev));
 }

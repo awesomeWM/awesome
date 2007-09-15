@@ -304,7 +304,7 @@ handle_event_expose(XEvent * e, awesome_config *awesomeconf)
     XExposeEvent *ev = &e->xexpose;
 
     if(!ev->count && awesomeconf->statusbar.window == ev->window)
-        drawstatusbar(e->xany.display, &dc, awesomeconf);
+        drawstatusbar(e->xany.display,  DefaultScreen(e->xany.display), &dc, awesomeconf);
 }
 
 void
@@ -380,7 +380,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         {
             updatetitle(c);
             if(c == sel)
-                drawstatusbar(e->xany.display, &dc, awesomeconf);
+                drawstatusbar(e->xany.display, c->screen, &dc, awesomeconf);
         }
     }
 }

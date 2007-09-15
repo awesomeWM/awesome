@@ -273,7 +273,7 @@ main(int argc, char *argv[])
     XSync(dpy, False);
     parse_config(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
     setup(dpy, &dc, &awesomeconf);
-    drawstatusbar(dpy, &dc, &awesomeconf);
+    drawstatusbar(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
 
     void (*handler[LASTEvent]) (XEvent *, awesome_config *) = 
     {
@@ -335,7 +335,7 @@ main(int argc, char *argv[])
                 if(p > awesomeconf.statustext)
                     strncpy(awesomeconf.statustext, p + 1, sizeof(awesomeconf.statustext));
             }
-            drawstatusbar(dpy, &dc, &awesomeconf);
+            drawstatusbar(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
         }
 
         while(XPending(dpy))

@@ -279,7 +279,7 @@ focus(Display *disp, int screen, DC *drawcontext, Client * c, Bool selscreen, aw
     if(!selscreen)
         return;
     sel = c;
-    drawstatusbar(disp, drawcontext, awesomeconf);
+    drawstatusbar(disp, screen, drawcontext, awesomeconf);
     if(sel)
     {
         XSetWindowBorder(sel->display, sel->win, drawcontext->sel[ColBorder]);
