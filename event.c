@@ -327,14 +327,9 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
     for(i = 0; i < awesomeconf->nkeys; i++)
         if(keysym == awesomeconf->keys[i].keysym
            && CLEANMASK(awesomeconf->keys[i].mod) == CLEANMASK(ev->state) && awesomeconf->keys[i].func)
-        {
-            if(sel)
-                awesomeconf->keys[i].func(e->xany.display, sel->screen, &dc, awesomeconf, awesomeconf->keys[i].arg);
-            else
-                for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-                    if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &y, &x, &d, &d, &m))
-                        awesomeconf->keys[i].func(e->xany.display, screen, &dc, awesomeconf, awesomeconf->keys[i].arg);
-        }
+            for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+                if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &y, &x, &d, &d, &m))
+                    awesomeconf->keys[i].func(e->xany.display, screen, &dc, awesomeconf, awesomeconf->keys[i].arg);
 }
 
 void
