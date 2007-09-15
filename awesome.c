@@ -259,7 +259,6 @@ main(int argc, char *argv[])
     fd_set rd;
     XEvent ev;
     Display * dpy;
-    Window root;
     awesome_config awesomeconf;
     int shape_event, randr_event_base;
 
@@ -273,11 +272,10 @@ main(int argc, char *argv[])
     if(!(dpy = XOpenDisplay(NULL)))
         eprint("awesome: cannot open display\n");
     xfd = ConnectionNumber(dpy);
-    root = RootWindow(dpy, DefaultScreen(dpy));
     XSetErrorHandler(xerrorstart);
 
     /* this causes an error if some other window manager is running */
-    XSelectInput(dpy, root, SubstructureRedirectMask);
+    XSelectInput(dpy, RootWindow(dpy, DefaultScreen(dpy)), SubstructureRedirectMask);
     XSync(dpy, False);
 
     XSync(dpy, False);
