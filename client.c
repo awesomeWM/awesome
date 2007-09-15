@@ -375,7 +375,7 @@ manage(Display * disp, int screen, DC *drawcontext, Window w, XWindowAttributes 
     }
     else
     {
-        ScreenInfo *si = get_display_info(disp, awesomeconf->statusbar);
+        ScreenInfo *si = get_display_info(disp, screen, awesomeconf->statusbar);
 
         if(c->x + c->w + 2 * c->border > si->x_org + si->width)
             c->x = c->rx = si->x_org + si->width - c->w - 2 * c->border;

@@ -93,6 +93,8 @@ initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
 {
     XSetWindowAttributes wa;
 
+    statusbar->screen = screen;
+
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = drawcontext->cursor[CurNormal];
@@ -124,7 +126,7 @@ updatebarpos(Display *disp, Statusbar statusbar)
         XMoveWindow(disp, statusbar.window, 0, 0);
         break;
       case BarBot:
-        si = get_display_info(disp, statusbar);
+        si = get_display_info(disp, statusbar.screen, statusbar);
         XMoveWindow(disp, statusbar.window, 0, si->height);
         XFree(si);
         break;

@@ -61,11 +61,12 @@ get_screen_info(Display *disp, Statusbar statusbar, int *screen_number)
 
 /** Get display info
  * \param disp Display ref
- * \param statusbar statusbar
+ * \param screen Screen number
+ * \param statusbar the statusbar
  * \return ScreenInfo struct pointer with all display info
  */
 ScreenInfo *
-get_display_info(Display *disp, Statusbar statusbar)
+get_display_info(Display *disp, int screen, Statusbar statusbar)
 {
     ScreenInfo *si;
 
@@ -73,8 +74,8 @@ get_display_info(Display *disp, Statusbar statusbar)
 
     si->x_org = 0;
     si->y_org = statusbar.position == BarTop ? statusbar.height : 0;
-    si->width = DisplayWidth(disp, DefaultScreen(disp));
-    si->height = DisplayHeight(disp, DefaultScreen(disp)) -
+    si->width = DisplayWidth(disp, screen);
+    si->height = DisplayHeight(disp, screen) -
         ((statusbar.position == BarTop || statusbar.position == BarBot) ? statusbar.height : 0);
 
     return si;

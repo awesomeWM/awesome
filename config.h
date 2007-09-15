@@ -89,6 +89,8 @@ typedef struct
     Window window;
     /** Drawable object */
     Drawable drawable;
+    /** Screen */
+    int screen;
 } Statusbar;
 
 /** Main configuration structure */
