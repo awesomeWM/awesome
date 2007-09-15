@@ -301,6 +301,7 @@ focus(Display *disp, int screen, DC *drawcontext, Client * c, Bool selscreen, aw
  */
 void
 uicb_killclient(Display *disp __attribute__ ((unused)),
+                int screen __attribute__ ((unused)),
                 DC *drawcontext __attribute__ ((unused)),
                 awesome_config *awesomeconf __attribute__ ((unused)),
                 const char *arg __attribute__ ((unused)))
@@ -490,6 +491,7 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
 
 void
 uicb_moveresize(Display *disp __attribute__ ((unused)),
+                int screen __attribute__ ((unused)),
                 DC *drawcontext __attribute__ ((unused)),
                 awesome_config *awesomeconf,
                 const char *arg)
@@ -658,6 +660,7 @@ set_shape(Client *c)
 
 void
 uicb_settrans(Display *disp __attribute__ ((unused)),
+              int screen __attribute__ ((unused)),
               DC *drawcontext __attribute__ ((unused)),
               awesome_config *awesomeconf __attribute__ ((unused)),
               const char *arg)

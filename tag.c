@@ -145,6 +145,7 @@ isvisible(Client * c, Bool * tags, int ntags)
  */
 void
 uicb_tag(Display *disp,
+         int screen,
          DC *drawcontext,
          awesome_config *awesomeconf,
          const char *arg)
@@ -159,7 +160,7 @@ uicb_tag(Display *disp,
     if(i >= 0 && i < awesomeconf->ntags)
         sel->tags[i] = True;
     saveprops(sel, awesomeconf->ntags);
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 /** Toggle floating state of a client
@@ -169,6 +170,7 @@ uicb_tag(Display *disp,
  */
 void
 uicb_togglefloating(Display *disp,
+                    int screen,
                     DC *drawcontext,
                     awesome_config * awesomeconf,
                     const char *arg __attribute__ ((unused)))
@@ -188,7 +190,7 @@ uicb_togglefloating(Display *disp,
         sel->rh = sel->h;
     }
     saveprops(sel, awesomeconf->ntags);
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 /** Toggle tag view
@@ -198,6 +200,7 @@ uicb_togglefloating(Display *disp,
  */
 void
 uicb_toggletag(Display *disp,
+               int screen,
                DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg)
@@ -213,7 +216,7 @@ uicb_toggletag(Display *disp,
     if(j == awesomeconf->ntags)
         sel->tags[i] = True;
     saveprops(sel, awesomeconf->ntags);
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 /** Add a tag to viewed tags
@@ -223,6 +226,7 @@ uicb_toggletag(Display *disp,
  */
 void
 uicb_toggleview(Display *disp,
+                int screen,
                 DC *drawcontext,
                 awesome_config *awesomeconf,
                 const char *arg)
@@ -236,7 +240,7 @@ uicb_toggleview(Display *disp,
     if(j == awesomeconf->ntags)
         awesomeconf->selected_tags[i] = True;      /* cannot toggle last view */
     saveawesomeprops(disp, DefaultScreen(disp), awesomeconf);
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 /** View tag
@@ -247,6 +251,7 @@ uicb_toggleview(Display *disp,
  */
 void
 uicb_view(Display *disp,
+          int screen,
           DC *drawcontext,
           awesome_config *awesomeconf,
           const char *arg)
@@ -264,8 +269,8 @@ uicb_view(Display *disp,
         awesomeconf->selected_tags[i] = True;
         awesomeconf->current_layout = awesomeconf->tag_layouts[i];
     }
-    saveawesomeprops(disp, DefaultScreen(disp), awesomeconf);
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    saveawesomeprops(disp, screen, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 /** View previously selected tags
@@ -276,6 +281,7 @@ uicb_view(Display *disp,
  */
 void
 uicb_viewprevtags(Display * disp,
+                  int screen,
                   DC *drawcontext,
                   awesome_config *awesomeconf,
                   const char *arg __attribute__ ((unused)))
@@ -289,7 +295,7 @@ uicb_viewprevtags(Display * disp,
         awesomeconf->selected_tags[i] = awesomeconf->prev_selected_tags[i];
         awesomeconf->prev_selected_tags[i] = t;
     }
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 /** View next tag
@@ -299,6 +305,7 @@ uicb_viewprevtags(Display * disp,
  */
 void
 uicb_tag_viewnext(Display *disp,
+                  int screen,
                   DC * drawcontext,
                   awesome_config *awesomeconf,
                   const char *arg __attribute__ ((unused)))
@@ -315,8 +322,8 @@ uicb_tag_viewnext(Display *disp,
     if(++firsttag >= awesomeconf->ntags)
         firsttag = 0;
     awesomeconf->selected_tags[firsttag] = True;
-    saveawesomeprops(disp, DefaultScreen(disp), awesomeconf);
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    saveawesomeprops(disp, screen, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 /** View previous tag
@@ -326,6 +333,7 @@ uicb_tag_viewnext(Display *disp,
  */
 void
 uicb_tag_viewprev(Display *disp,
+                  int screen __attribute__ ((unused)),
                   DC *drawcontext,
                   awesome_config *awesomeconf,
                   const char *arg __attribute__ ((unused)))
@@ -342,6 +350,6 @@ uicb_tag_viewprev(Display *disp,
     if(--firsttag < 0)
         firsttag = awesomeconf->ntags - 1;
     awesomeconf->selected_tags[firsttag] = True;
-    saveawesomeprops(disp, DefaultScreen(disp), awesomeconf);
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    saveawesomeprops(disp, screen, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }

@@ -33,6 +33,7 @@ extern Client *sel, *clients;
 
 void
 uicb_setnmaster(Display *disp,
+                int screen,
                 DC * drawcontext,
                 awesome_config *awesomeconf,
                 const char * arg)
@@ -43,11 +44,12 @@ uicb_setnmaster(Display *disp,
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
         awesomeconf->nmaster = 0;
 
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 void
 uicb_setncols(Display *disp,
+              int screen,
               DC * drawcontext,
               awesome_config *awesomeconf,
               const char * arg)
@@ -58,12 +60,13 @@ uicb_setncols(Display *disp,
     if((awesomeconf->ncols = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncols)) < 1)
         awesomeconf->ncols = 1;
 
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 void
 uicb_setmwfact(Display *disp,
-                DC *drawcontext,
+               int screen,
+               DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg)
 {
@@ -75,7 +78,7 @@ uicb_setmwfact(Display *disp,
     else if(awesomeconf->mwfact > 0.9)
         awesomeconf->mwfact = 0.9;
 
-    arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+    arrange(disp, screen, drawcontext, awesomeconf);
 }
 
 static void

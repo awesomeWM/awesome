@@ -197,6 +197,7 @@ xerrorstart(Display * dsply __attribute__ ((unused)), XErrorEvent * ee __attribu
 
 void
 uicb_quit(Display *disp __attribute__ ((unused)),
+          int screen __attribute__ ((unused)),
           DC *drawcontext __attribute__ ((unused)),
           awesome_config *awesomeconf __attribute__((unused)),
           const char *arg __attribute__ ((unused)))

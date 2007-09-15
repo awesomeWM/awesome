@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-void uicb_quit(Display *, DC *, awesome_config *, const char *);        /* quit awesome nicely */
+void uicb_quit(Display *, int, DC *, awesome_config *, const char *);        /* quit awesome nicely */
 int xerror(Display *, XErrorEvent *);   /* awesome's X error handler */
 int __attribute__ ((deprecated)) get_windows_area_x(Statusbar);
 int __attribute__ ((deprecated)) get_windows_area_y(Statusbar);

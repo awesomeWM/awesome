@@ -43,9 +43,10 @@ eprint(const char *fmt, ...)
 
 void
 uicb_spawn(Display * disp,
-      DC *drawcontext __attribute__ ((unused)),
-      awesome_config * awesomeconf __attribute__ ((unused)),
-      const char *arg)
+           int screen __attribute__ ((unused)),
+           DC *drawcontext __attribute__ ((unused)),
+           awesome_config * awesomeconf __attribute__ ((unused)),
+           const char *arg)
 {
     static char *shell = NULL;
 

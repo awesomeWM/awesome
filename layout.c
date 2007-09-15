@@ -49,6 +49,7 @@ arrange(Display * disp, int screen, DC *drawcontext, awesome_config *awesomeconf
 
 void
 uicb_focusnext(Display *disp __attribute__ ((unused)),
+               int screen __attribute__ ((unused)),
                DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg __attribute__ ((unused)))
@@ -69,6 +70,7 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
 
 void
 uicb_focusprev(Display *disp __attribute__ ((unused)),
+               int screen __attribute__ ((unused)),
                DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
@@ -156,6 +158,7 @@ saveawesomeprops(Display *disp, int screen, awesome_config *awesomeconf)
 
 void
 uicb_setlayout(Display *disp,
+               int screen,
                DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg)
@@ -180,11 +183,11 @@ uicb_setlayout(Display *disp,
         c->ftview = True;
 
     if(sel)
-        arrange(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+        arrange(disp, screen, drawcontext, awesomeconf);
     else
         drawstatusbar(disp, DefaultScreen(disp), drawcontext, awesomeconf);
 
-    saveawesomeprops(disp, DefaultScreen(disp), awesomeconf);
+    saveawesomeprops(disp, screen, awesomeconf);
 
     for(j = 0; j < awesomeconf->ntags; j++)
         if (awesomeconf->selected_tags[j])
@@ -221,6 +224,7 @@ maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomecon
 
 void
 uicb_togglemax(Display *disp,
+               int screen __attribute__ ((unused)),
                DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
@@ -235,6 +239,7 @@ uicb_togglemax(Display *disp,
 
 void
 uicb_toggleverticalmax(Display *disp,
+                       int screen __attribute__ ((unused)),
                        DC *drawcontext,
                        awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
@@ -251,6 +256,7 @@ uicb_toggleverticalmax(Display *disp,
 
 void
 uicb_togglehorizontalmax(Display *disp,
+                         int screen __attribute__ ((unused)),
                          DC *drawcontext,
                          awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
@@ -266,6 +272,7 @@ uicb_togglehorizontalmax(Display *disp,
 
 void 
 uicb_zoom(Display *disp __attribute__ ((unused)), 
+          int screen __attribute__ ((unused)),
           DC *drawcontext __attribute__ ((unused)),
           awesome_config *awesomeconf,
           const char *arg __attribute__ ((unused))) 
