@@ -161,7 +161,7 @@ setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
     if(!drawcontext->font.set)
         XSetFont(disp, drawcontext->gc, drawcontext->font.xfont->fid);
-    loadawesomeprops(disp, awesomeconf);
+    loadawesomeprops(disp, DefaultScreen(disp), awesomeconf);
 }
 
 /*

@@ -91,14 +91,14 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
 }
 
 void
-loadawesomeprops(Display *disp, awesome_config * awesomeconf)
+loadawesomeprops(Display *disp, int screen, awesome_config * awesomeconf)
 {
     int i;
     char *prop;
 
     prop = p_new(char, awesomeconf->ntags + 1);
 
-    if(xgettextprop(disp, DefaultRootWindow(disp), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
+    if(xgettextprop(disp, RootWindow(disp, screen), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
         for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
             awesomeconf->selected_tags[i] = prop[i] == '1';
 
@@ -139,7 +139,7 @@ restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
 }
 
 void
-saveawesomeprops(Display *disp, awesome_config *awesomeconf)
+saveawesomeprops(Display *disp, int screen, awesome_config *awesomeconf)
 {
     int i;
     char *prop;
@@ -148,7 +148,7 @@ saveawesomeprops(Display *disp, awesome_config *awesomeconf)
     for(i = 0; i < awesomeconf->ntags; i++)
         prop[i] = awesomeconf->selected_tags[i] ? '1' : '0';
     prop[i] = '\0';
-    XChangeProperty(disp, DefaultRootWindow(disp),
+    XChangeProperty(disp, RootWindow(disp, screen),
                     AWESOMEPROPS_ATOM(disp), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
     p_delete(&prop);
@@ -184,7 +184,7 @@ uicb_setlayout(Display *disp,
     else
         drawstatusbar(disp, drawcontext, awesomeconf);
 
-    saveawesomeprops(disp, awesomeconf);
+    saveawesomeprops(disp, DefaultScreen(disp), awesomeconf);
 
     for(j = 0; j < awesomeconf->ntags; j++)
         if (awesomeconf->selected_tags[j])
