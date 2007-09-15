@@ -96,12 +96,12 @@ _tile(Display *disp, int screen, awesome_config *awesomeconf, const Bool right)
     screens_info = get_screen_info(disp, screen, awesomeconf->statusbar, &screen_numbers);
  
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags) && c->screen == screen)
             n++;
 
     for(i = 0, c = clients; c; c = c->next)
     {
-        if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags) || c->screen != screen)
             continue;
 
         if(use_screen == -1
@@ -194,11 +194,17 @@ _tile(Display *disp, int screen, awesome_config *awesomeconf, const Bool right)
 void
 tile(Display *disp, awesome_config *awesomeconf)
 {
-    _tile(disp, DefaultScreen(disp), awesomeconf, True);
+    int screen;
+
+    for(screen = 0; screen < ScreenCount(disp); screen++)
+        _tile(disp, screen, awesomeconf, True);
 }
 
 void
 tileleft(Display *disp, awesome_config *awesomeconf)
 {
-    _tile(disp, DefaultScreen(disp), awesomeconf, False);
+    int screen;
+
+    for(screen = 0; screen < ScreenCount(disp); screen++)
+        _tile(disp, screen, awesomeconf, False);
 }
