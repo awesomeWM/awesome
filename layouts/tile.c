@@ -103,7 +103,11 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags))
             continue;
 
-        if(use_screen == -1 || (screen_numbers > 1 && i && ((i - last_i) >= nmaster_screen + otherwin_screen || n == screen_numbers)))
+        if(use_screen == -1
+           || (screen_numbers > 1 
+               && i
+               && ((i - last_i) >= nmaster_screen + otherwin_screen
+                   || n == screen_numbers)))
         {
             use_screen++;
             last_i = i;
@@ -148,10 +152,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         if(li < awesomeconf->nmaster)
         {                       /* master */
             ny = way + li * mh;
-            if(right)
-                nx = wax;
-            else
-                nx = wax + (waw - mw);
+            nx = wax + (right ? 0: waw - mw);
             nw = mw - 2 * c->border;
             nh = mh - 2 * c->border;
         }
