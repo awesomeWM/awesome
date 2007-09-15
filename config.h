@@ -129,6 +129,8 @@ struct awesome_config
     int snap;
     /** Number of master windows */
     int nmaster;
+    /** Number of columns in tile layout */
+    int ncols;
     /** Transparency of unfocused clients */
     int opacity_unfocused;
     /** Respect resize hints */

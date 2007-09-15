@@ -32,9 +32,20 @@ extern Client *sel, *clients;
 
 /* static */
 
-static double mwfact = 0.6;
-static int nmaster = 2;
-static int ncols = 2;
+static double mwfact = -1;
+static int nmaster = -1;
+static int ncols = -1;
+
+static void
+init_static_var_layout(awesome_config *awesomeconf)
+{
+    if(mwfact == -1)
+        mwfact = awesomeconf->mwfact;
+    if(nmaster == -1)
+        nmaster = awesomeconf->nmaster;
+    if(ncols == -1)
+        ncols = awesomeconf->ncols;
+}
 
 void
 uicb_setnmaster(Display *disp,
@@ -47,9 +58,28 @@ uicb_setnmaster(Display *disp,
 
     if(!arg)
         nmaster = awesomeconf->nmaster;
-    else
-        if((nmaster = (int) compute_new_value_from_arg(arg, (double) nmaster)) < 0)
+    else if((nmaster = (int) compute_new_value_from_arg(arg, (double) nmaster)) < 0)
             nmaster = 0;
+
+    if(sel)
+        arrange(disp, drawcontext, awesomeconf);
+    else
+        drawstatus(disp, drawcontext, awesomeconf);
+}
+
+void
+uicb_setncols(Display *disp,
+              DC * drawcontext,
+              awesome_config *awesomeconf,
+              const char * arg)
+{
+    if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft))
+        return;
+
+    if(!arg)
+        ncols = awesomeconf->ncols;
+    else if((ncols = (int) compute_new_value_from_arg(arg, (double) ncols)) < 1)
+            ncols = 1;
 
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
@@ -93,6 +123,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     ScreenInfo *screens_info = NULL;
     Client *c;
 
+    init_static_var_layout(awesomeconf);
     screens_info = get_screen_info(disp, awesomeconf->statusbar, &screen_numbers);
  
     for(n = 0, c = clients; c; c = c->next)

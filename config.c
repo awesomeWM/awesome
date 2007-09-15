@@ -108,6 +108,7 @@ static const NameFuncLink KeyfuncList[] = {
     /* layouts/tile.c */
     {"setmwfact", uicb_setmwfact},
     {"setnmaster", uicb_setnmaster},
+    {"setncols", uicb_setncols},
     /* awesome.c */
     {"quit", uicb_quit},
     {NULL, NULL}
@@ -334,6 +335,10 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     /* nmaster */
     i = config_lookup_int(&awesomelibconf, "awesome.nmaster");
     awesomeconf->nmaster = i ? i : 1;
+
+    /* ncols */
+    i = config_lookup_int(&awesomelibconf, "awesome.ncols");
+    awesomeconf->ncols = i ? i : 1;
 
     /* mwfact */
     f = config_lookup_float(&awesomelibconf, "awesome.mwfact");
