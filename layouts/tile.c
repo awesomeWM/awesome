@@ -141,6 +141,8 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
             else
                 mh = mw = 0;
 
+            mw -= 2 * c->border;
+
             if(otherwin < awesomeconf->ncols)
                 real_ncols = otherwin;
             else
@@ -152,9 +154,9 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         if(li < awesomeconf->nmaster)
         {                       /* master */
             ny = way + li * mh;
-            nx = wax + (right ? 0: waw - mw);
-            nw = mw - 2 * c->border;
+            nx = wax + (right ? 0: waw - (mw + 2 * c->border));
             nh = mh - 2 * c->border;
+            resize(c, nx, ny, mw, nh, awesomeconf->resize_hints);
         }
         else
         {                       /* tile window */
@@ -171,16 +173,16 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
             else
                 nh = (wah / win_by_col) - 2 * c->border;
 
-            nw = (waw - mw) / real_ncols - 2 * c->border;
+            nw = (waw - (mw + 2 * c->border)) / real_ncols - 2 * c->border;
 
             if(li == awesomeconf->nmaster || otherwin <= real_ncols || (li - awesomeconf->nmaster) % win_by_col == 0)
                 ny = way;
             else
                 ny = way + ((li - awesomeconf->nmaster) % win_by_col) * (nh + 2 * c->border);
 
-            nx = wax + current_col * nw + (right ? mw : 0);
+            nx = wax + current_col * nw + (right ? mw + 2 * c->border : 0);
+            resize(c, nx, ny, nw, nh, awesomeconf->resize_hints);
         }
-        resize(c, nx, ny, nw, nh, awesomeconf->resize_hints);
         i++;
     }
     XFree(screens_info);
