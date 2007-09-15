@@ -25,13 +25,13 @@
 #include <X11/extensions/shape.h> 
 #include <X11/extensions/Xrandr.h> 
 
-#include "awesome.h"
 #include "screen.h"
 #include "event.h"
 #include "layout.h"
 #include "tag.h"
 #include "draw.h"
 #include "statusbar.h"
+#include "util.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 

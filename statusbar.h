@@ -25,5 +25,6 @@
 #include "config.h"
 
 void drawstatusbar(Display *, DC *, awesome_config *);
+void updatebarpos(Display *, Statusbar);
 
 #endif

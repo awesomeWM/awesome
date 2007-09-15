@@ -226,30 +226,6 @@ get_windows_area_width(Display *disp,
     return DisplayWidth(disp, DefaultScreen(disp));
 }
 
-void
-updatebarpos(Display *disp, Statusbar statusbar)
-{
-    XEvent ev;
-    ScreenInfo *si;
-
-    switch (statusbar.position)
-    {
-    default:
-        XMoveWindow(disp, statusbar.window, 0, 0);
-        break;
-    case BarBot:
-        si = get_display_info(disp, statusbar);
-        XMoveWindow(disp, statusbar.window, 0, si->height);
-        XFree(si);
-        break;
-    case BarOff:
-        XMoveWindow(disp, statusbar.window, 0, 0 - statusbar.height);
-        break;
-    }
-    XSync(disp, False);
-    while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
-}
-
 /* There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
  * default error handler, which may call exit.

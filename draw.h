@@ -22,7 +22,7 @@
 #ifndef AWESOME_DRAW_H
 #define AWESOME_DRAW_H
 
-#include "util.h"
+#include "config.h"
 
 #define textw(set, xfont, text, height)         (textnw(set, xfont, text, a_strlen(text)) + height)
 

@@ -22,6 +22,8 @@
 #include "layout.h"
 #include "statusbar.h"
 #include "draw.h"
+#include "screen.h"
+#include "util.h"
 
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 
@@ -84,4 +86,29 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
     }
     XCopyArea(disp, awesomeconf->statusbar.drawable, awesomeconf->statusbar.window, drawcontext->gc, 0, 0, DisplayWidth(disp, DefaultScreen(disp)), awesomeconf->statusbar.height, 0, 0);
     XSync(disp, False);
+}
+
+
+void
+updatebarpos(Display *disp, Statusbar statusbar)
+{
+    XEvent ev;
+    ScreenInfo *si;
+
+    switch (statusbar.position)
+    {
+      default:
+        XMoveWindow(disp, statusbar.window, 0, 0);
+        break;
+      case BarBot:
+        si = get_display_info(disp, statusbar);
+        XMoveWindow(disp, statusbar.window, 0, si->height);
+        XFree(si);
+        break;
+      case BarOff:
+        XMoveWindow(disp, statusbar.window, 0, 0 - statusbar.height);
+        break;
+    }
+    XSync(disp, False);
+    while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
 }

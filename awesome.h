@@ -24,8 +24,6 @@
 
 #include "config.h"
 
-Bool gettextprop(Display *, Window, Atom, char *, unsigned int);   /* return text property, UTF-8 compliant */
-void updatebarpos(Display *, Statusbar);        /* updates the bar position */
 void uicb_quit(Display *, DC *, awesome_config *, const char *);        /* quit awesome nicely */
 int xerror(Display *, XErrorEvent *);   /* awesome's X error handler */
 int __attribute__ ((deprecated)) get_windows_area_x(Statusbar);
