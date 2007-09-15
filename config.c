@@ -31,7 +31,6 @@
 #include "layout.h"
 #include "tag.h"
 #include "layouts/tile.h"
-#include "layouts/grid.h"
 #include "layouts/spiral.h"
 #include "layouts/floating.h"
 
@@ -77,7 +76,6 @@ static const NameFuncLink LayoutsList[] =
     {"tile", tile},
     {"tileleft", tileleft},
     {"floating", floating},
-    {"grid", grid},
     {"spiral", spiral},
     {"dwindle", dwindle},
     {NULL, NULL}

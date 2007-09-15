@@ -25,8 +25,7 @@ awesome:
     # Available layouts
     layouts = (("[]=", "tile"),
              ("=[]", "tileleft"),
-             ("+++", "grid"),
-#             ("(@)", "spiral"),
+             ("(@)", "spiral"),
              ("[\]", "dwindle"),
              ("><>", "floating"),
             );
