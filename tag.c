@@ -239,7 +239,7 @@ uicb_toggleview(Display *disp,
     for(j = 0; j < awesomeconf->ntags && !awesomeconf->selected_tags[j]; j++);
     if(j == awesomeconf->ntags)
         awesomeconf->selected_tags[i] = True;      /* cannot toggle last view */
-    saveawesomeprops(disp, DefaultScreen(disp), awesomeconf);
+    saveawesomeprops(disp, screen, awesomeconf);
     arrange(disp, screen, drawcontext, awesomeconf);
 }
 
