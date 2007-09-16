@@ -118,6 +118,7 @@ static inline char *a_strdup(const char *s)
     return len ? p_dup(s, len + 1) : NULL;
 }
 
+void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void uicb_spawn(Display *, int, DC *, awesome_config *, const char *);
 Bool xgettextprop(Display *, Window, Atom, char *, unsigned int);
