@@ -312,16 +312,21 @@ main(int argc, char *argv[])
         [UnmapNotify] = handle_event_unmapnotify,
     };
 
-    /* XXX check for shape extension */
+    /* check for shape extension */
     if((awesomeconf[0].have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
         handler[shape_event] = handle_event_shape;
 
-    /* XXX check for randr extension */
+    /* check for randr extension */
     if((awesomeconf[0].have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
        handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
 
     for(screen = 0; screen < ScreenCount(dpy); screen++)
+    {
+        awesomeconf[screen].have_shape = awesomeconf[0].have_shape;
+        awesomeconf[screen].have_randr = awesomeconf[0].have_randr;
         scan(dpy, screen, &dc[screen], &awesomeconf[screen]);
+    }
+
     XSync(dpy, False);
 
     /* main event loop, also reads status text from stdin */
