@@ -45,6 +45,9 @@ Client *sel = NULL;
 Client *stack = NULL;
 DC *dc;
 
+enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
+Atom netatom[NetWMName];
+
 /* static */
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
@@ -144,10 +147,6 @@ scan(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
         XFree(wins);
 }
 
-
-
-enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
-Atom netatom[NetWMName];
 /** Setup everything before running
  * \param disp Display ref
  * \param screen Screen number
@@ -178,10 +177,6 @@ setup(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
     XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
     if(!drawcontext->font.set)
         XSetFont(disp, drawcontext->gc, drawcontext->font.xfont->fid);
-//    netatom[NetSupported] = XInternAtom(disp, "_NET_SUPPORTED", False);
-//    netatom[NetWMName] = XInternAtom(disp, "_NET_WM_NAME", False);
-//    XChangeProperty(disp, RootWindow(disp, screen), netatom[NetSupported],
-//                    XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
     loadawesomeprops(disp, screen, awesomeconf);
 }
 
@@ -280,28 +275,31 @@ main(int argc, char *argv[])
         eprint("usage: awesome [-v]\n");
     setlocale(LC_CTYPE, "");
 
-
     if(!(dpy = XOpenDisplay(NULL)))
         eprint("awesome: cannot open display\n");
     xfd = ConnectionNumber(dpy);
     XSetErrorHandler(xerrorstart);
-
-    /* this causes an error if some other window manager is running */
-    for(screen = 0; screen < ScreenCount(dpy); screen++)
-        XSelectInput(dpy, RootWindow(dpy, screen), SubstructureRedirectMask);
-
 
     XSync(dpy, False);
     XSetErrorHandler(NULL);
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
 
-    awesomeconf = p_new(awesome_config, ScreenCount(dpy));
+    netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
+    netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
+
     dc = p_new(DC, ScreenCount(dpy));
+    awesomeconf = p_new(awesome_config, ScreenCount(dpy));
+
+    for(screen = 0; screen < ScreenCount(dpy); screen++)
+        /* this causes an error if some other window manager is running */
+        XSelectInput(dpy, RootWindow(dpy, screen), SubstructureRedirectMask);
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
         parse_config(dpy, screen, &dc[screen], &awesomeconf[screen]);
         setup(dpy, screen, &dc[screen], &awesomeconf[screen]);
+        XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
+                        XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
         drawstatusbar(dpy, screen, &dc[screen], &awesomeconf[screen]);
     }
 
