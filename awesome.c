@@ -78,9 +78,18 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
         XFreeCursor(disp, drawcontext[screen].cursor[CurNormal]);
         XFreeCursor(disp, drawcontext[screen].cursor[CurResize]);
         XFreeCursor(disp, drawcontext[screen].cursor[CurMove]);
+        p_delete(&awesomeconf[screen].tags);
+        p_delete(&awesomeconf[screen].selected_tags);
+        p_delete(&awesomeconf[screen].prev_selected_tags);
+        p_delete(&awesomeconf[screen].tag_layouts);
+        p_delete(&awesomeconf[screen].layouts);
+        p_delete(&awesomeconf[screen].rules);
+        p_delete(&awesomeconf[screen].keys);
     }
     XSetInputFocus(disp, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(disp, False);
+    p_delete(&awesomeconf);
+    p_delete(&dc);
 }
 
 static long
