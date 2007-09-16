@@ -45,9 +45,6 @@ Client *sel = NULL;
 Client *stack = NULL;
 DC *dc;
 
-enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
-Atom netatom[NetWMName];
-
 /* static */
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
@@ -268,6 +265,8 @@ main(int argc, char *argv[])
     awesome_config *awesomeconf;
     int shape_event, randr_event_base;
     int screen;
+    enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
+    Atom netatom[NetLast];
 
     if(argc == 2 && !strcmp("-v", argv[1]))
         eprint("awesome-" VERSION " © 2007 Julien Danjou\n");
