@@ -36,7 +36,7 @@ static Regs *regs = NULL;
  * \return index of tag
  */
 static int
-idxoftag(const char *tag_to_find, const char **tags, int ntags)
+idxoftag(const char *tag_to_find, char **tags, int ntags)
 {
     int i;
 

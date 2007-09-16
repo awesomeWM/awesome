@@ -55,8 +55,8 @@ typedef struct
 
 typedef struct
 {
-    const char *prop;
-    const char *tags;
+    char *prop;
+    char *tags;
     Bool isfloating;
 } Rule;
 
@@ -64,7 +64,7 @@ typedef struct awesome_config awesome_config;
 
 typedef struct
 {
-    const char *symbol;
+    char *symbol;
     void (*arrange) (Display *, int, awesome_config *);
 } Layout;
 
@@ -72,8 +72,8 @@ typedef struct
 {
     unsigned long mod;
     KeySym keysym;
-    void (*func) (Display *, int, DC *, awesome_config *, const char *);
-    const char *arg;
+    void (*func) (Display *, int, DC *, awesome_config *, char *);
+    char *arg;
 } Key;
 
 /** Status bar */
@@ -96,8 +96,10 @@ typedef struct
 /** Main configuration structure */
 struct awesome_config
 {
+    /** Config screen number */
+    int screen;
     /** Tag list */
-    const char **tags;
+    char **tags;
     /** Selected tags */
     Bool *selected_tags;
     /* Previously selected tags */

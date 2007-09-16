@@ -37,13 +37,9 @@
 #include "layouts/spiral.h"
 #include "layouts/floating.h"
 
-/* static */
 static void initfont(const char *, Display *, DC *);
-static unsigned long initcolor(const char *colstr, Display *, int);
+static unsigned long initcolor(const char *, Display *, int);
 static unsigned int get_numlockmask(Display *);
-
-/** Main configuration object for parsing*/
-config_t awesomelibconf;
 
 /** Link a name to a function */
 typedef struct
@@ -176,6 +172,8 @@ set_default_config(awesome_config *awesomeconf)
 void
 parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomeconf)
 {
+    /* Main configuration object for parsing*/
+    config_t awesomelibconf;
     config_setting_t *conftags;
     config_setting_t *conflayouts, *confsublayouts;
     config_setting_t *confrules, *confsubrules;
@@ -195,6 +193,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     strcat(confpath, AWESOME_CONFIG_FILE);
 
     config_init(&awesomelibconf);
+
+    /* set screen */
+    awesomeconf->screen = scr;
 
     if(config_read_file(&awesomelibconf, confpath) == CONFIG_FALSE)
         eprint("awesome: error parsing configuration file at line %d: %s\n",
@@ -223,7 +224,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
                 awesomeconf->layouts[i].symbol = NULL;
                 continue;
             }
-            awesomeconf->layouts[i].symbol = config_setting_get_string_elem(confsublayouts, 0);
+            awesomeconf->layouts[i].symbol = a_strdup(config_setting_get_string_elem(confsublayouts, 0));
 
             j = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->layouts[i].symbol, drawcontext->font.height);
             if(j > awesomeconf->statusbar.width)
@@ -245,14 +246,14 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     if(!conftags)
         eprint("awesome: fatal: no tags found in configuration file\n");
     awesomeconf->ntags = config_setting_length(conftags);
-    awesomeconf->tags = p_new(const char *, awesomeconf->ntags);
+    awesomeconf->tags = p_new(char *, awesomeconf->ntags);
     awesomeconf->selected_tags = p_new(Bool, awesomeconf->ntags);
     awesomeconf->prev_selected_tags = p_new(Bool, awesomeconf->ntags);
     awesomeconf->tag_layouts = p_new(Layout *, awesomeconf->ntags);
 
     for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
     {
-        awesomeconf->tags[i] = tmp;
+        awesomeconf->tags[i] = a_strdup(tmp);
         awesomeconf->selected_tags[i] = False;
         awesomeconf->prev_selected_tags[i] = False;
         /** \todo add support for default tag/layout in configuration file */
@@ -274,8 +275,8 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
         awesomeconf->rules = p_new(Rule, awesomeconf->nrules);
         for(i = 0; (confsubrules = config_setting_get_elem(confrules, i)); i++)
         {
-            awesomeconf->rules[i].prop = config_setting_get_string(config_setting_get_member(confsubrules, "name"));
-            awesomeconf->rules[i].tags = config_setting_get_string(config_setting_get_member(confsubrules, "tags"));
+            awesomeconf->rules[i].prop = a_strdup(config_setting_get_string(config_setting_get_member(confsubrules, "name")));
+            awesomeconf->rules[i].tags = a_strdup(config_setting_get_string(config_setting_get_member(confsubrules, "tags")));
             if(awesomeconf->rules[i].tags && !strlen(awesomeconf->rules[i].tags))
                 awesomeconf->rules[i].tags = NULL;
             awesomeconf->rules[i].isfloating =
@@ -308,7 +309,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
             awesomeconf->keys[i].keysym = XStringToKeysym(config_setting_get_string_elem(confsubkeys, 1));
             awesomeconf->keys[i].func =
                 name_func_lookup(config_setting_get_string_elem(confsubkeys, 2), KeyfuncList);
-            awesomeconf->keys[i].arg = config_setting_get_string_elem(confsubkeys, 3);
+            awesomeconf->keys[i].arg = a_strdup(config_setting_get_string_elem(confsubkeys, 3));
         }
     }
 
@@ -370,6 +371,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_fg_color");
     drawcontext->sel[ColFG] = initcolor(tmp ? tmp : "#ffffff", disp, scr);
 
+    config_destroy(&awesomelibconf);
     p_delete(&confpath);
 }
 

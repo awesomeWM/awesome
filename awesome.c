@@ -56,7 +56,7 @@ static Bool readin = True, running = True;
 static void
 cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
 {
-    int screen;
+    int screen, i;
 
     close(STDIN_FILENO);
     
@@ -81,6 +81,18 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
         XFreeCursor(disp, drawcontext[screen].cursor[CurNormal]);
         XFreeCursor(disp, drawcontext[screen].cursor[CurResize]);
         XFreeCursor(disp, drawcontext[screen].cursor[CurMove]);
+
+        for(i = 0; i < awesomeconf[screen].ntags; i++)
+            p_delete(&awesomeconf[screen].tags[i]);
+        for(i = 0; i < awesomeconf[screen].nkeys; i++)
+            p_delete(&awesomeconf[screen].keys[i].arg);
+        for(i = 0; i < awesomeconf[screen].nlayouts; i++)
+            p_delete(&awesomeconf[screen].layouts[i].symbol);
+        for(i = 0; i < awesomeconf[screen].nrules; i++)
+        {
+            p_delete(&awesomeconf[screen].rules[i].prop);
+            p_delete(&awesomeconf[screen].rules[i].tags);
+        }
         p_delete(&awesomeconf[screen].tags);
         p_delete(&awesomeconf[screen].selected_tags);
         p_delete(&awesomeconf[screen].prev_selected_tags);
