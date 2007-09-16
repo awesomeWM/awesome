@@ -27,17 +27,19 @@
 
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 
-/** Check if at least a client is tagged with tag number t
+/** Check if at least a client is tagged with tag number t and is on screen
+ * screen
  * \param t tag number
+ * \param screen screen number
  * \return True or False
  */
 static Bool
-isoccupied(unsigned int t)
+isoccupied(unsigned int t, int screen)
 {
     Client *c;
 
     for(c = clients; c; c = c->next)
-        if(c->tags[t])
+        if(c->tags[t] && c->screen == screen)
             return True;
     return False;
 }
@@ -53,12 +55,12 @@ drawstatusbar(Display *disp, int screen, DC *drawcontext, awesome_config * aweso
         if(awesomeconf->selected_tags[i])
         {
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i], drawcontext->sel);
-            drawsquare(sel && sel->tags[i], isoccupied(i), drawcontext->sel, disp, *drawcontext, &awesomeconf->statusbar);
+            drawsquare(sel && sel->tags[i], isoccupied(i, screen), drawcontext->sel, disp, *drawcontext, &awesomeconf->statusbar);
         }
         else
         {
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i], drawcontext->norm);
-            drawsquare(sel && sel->tags[i], isoccupied(i), drawcontext->norm, disp, *drawcontext, &awesomeconf->statusbar);
+            drawsquare(sel && sel->tags[i], isoccupied(i, screen), drawcontext->norm, disp, *drawcontext, &awesomeconf->statusbar);
         }
         drawcontext->x += drawcontext->w;
     }
