@@ -32,7 +32,7 @@ floating(Display *disp __attribute__ ((unused)), int screen, awesome_config *awe
     Client *c;
 
     for(c = clients; c; c = c->next)
-        if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags) && c->screen == screen)
+        if(isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags))
         {
             if(c->ftview)
             {

@@ -127,12 +127,12 @@ compileregs(Rule * rules, int nrules)
  * \return True or False
  */
 Bool
-isvisible(Client * c, Bool * tags, int ntags)
+isvisible(Client * c, int screen, Bool * tags, int ntags)
 {
     int i;
 
     for(i = 0; i < ntags; i++)
-        if(c->tags[i] && tags[i])
+        if(c->tags[i] && tags[i] && c->screen == screen)
             return True;
     return False;
 }

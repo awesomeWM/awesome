@@ -251,6 +251,7 @@ detach(Client * c)
 
 /** Give focus to client, or to first client if c is NULL
  * \param disp Display ref
+ * \param screen Screen number
  * \param drawcontext drawcontext ref
  * \param c client
  * \param selscreen True if current screen is selected
@@ -260,8 +261,8 @@ void
 focus(Display *disp, int screen, DC *drawcontext, Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
-    if((!c && selscreen) || (c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags)))
-        for(c = stack; c && !isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags); c = c->snext);
+    if((!c && selscreen) || (c && !isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags)))
+        for(c = stack; c && !isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->snext);
     
     /* if a client was selected but it's not the current client, unfocus it */
     if(sel && sel != c)

@@ -238,7 +238,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf __attribut
                 c->y = DisplayHeight(c->display, c->screen) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 configure(c);
-            if(isvisible(c, awesomeconf[c->screen].selected_tags, awesomeconf[c->screen].ntags))
+            if(isvisible(c, c->screen, awesomeconf[c->screen].selected_tags, awesomeconf[c->screen].ntags))
                 XMoveResizeWindow(e->xany.display, c->win, c->x, c->y, c->w, c->h);
         }
         else

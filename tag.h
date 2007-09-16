@@ -26,10 +26,10 @@
 #include "client.h"
 
 /** Check if a client is tiled */ 
-#define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, tags, ntags) && client->screen == screen)
+#define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, screen, tags, ntags))
 
 void compileregs(Rule *, int);         /* initialize regexps of rules defined in config.h */
-Bool isvisible(Client *, Bool *, int);
+Bool isvisible(Client *, int, Bool *, int);
 void applyrules(Client * c, awesome_config *);    /* applies rules to c */
 void uicb_tag(Display *, int, DC *, awesome_config *, const char *);         /* tags sel with arg's index */
 void uicb_togglefloating(Display *, int, DC *, awesome_config *, const char *);      /* toggles sel between floating/tiled state */
