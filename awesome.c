@@ -364,7 +364,7 @@ main(int argc, char *argv[])
         {
             XNextEvent(dpy, &ev);
             if(handler[ev.type])
-                (handler[ev.type]) (&ev, awesomeconf);       /* call handler */
+                handler[ev.type](&ev, awesomeconf);       /* call handler */
         }
     }
     cleanup(dpy, dc, awesomeconf);
