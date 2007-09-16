@@ -356,10 +356,12 @@ void
 handle_event_mappingnotify(XEvent * e, awesome_config *awesomeconf)
 {
     XMappingEvent *ev = &e->xmapping;
+    int screen;
 
     XRefreshKeyboardMapping(ev);
     if(ev->request == MappingKeyboard)
-        grabkeys(e->xany.display, DefaultScreen(e->xany.display), &awesomeconf[DefaultScreen(e->xany.display)]);
+        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+            grabkeys(e->xany.display, screen, &awesomeconf[screen]);
 }
 
 void
