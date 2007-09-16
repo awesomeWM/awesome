@@ -186,7 +186,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             return;
         if(ev->button == Button1)
         {
-            if(IS_ARRANGE(floating) || c->isfloating)
+            if(!IS_ARRANGE(floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
@@ -201,7 +201,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         }
         else if(ev->button == Button3)
         {
-            if(IS_ARRANGE(floating) && !c->isfloating)
+            if(!IS_ARRANGE(floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
