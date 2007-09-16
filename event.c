@@ -436,7 +436,8 @@ grabkeys(Display *disp, int screen, awesome_config *awesomeconf)
     XUngrabKey(disp, AnyKey, AnyModifier, RootWindow(disp, screen));
     for(i = 0; i < awesomeconf->nkeys; i++)
     {
-        code = XKeysymToKeycode(disp, awesomeconf->keys[i].keysym);
+        if((code = XKeysymToKeycode(disp, awesomeconf->keys[i].keysym)) == NoSymbol)
+            continue;
         XGrabKey(disp, code, awesomeconf->keys[i].mod, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
         XGrabKey(disp, code, awesomeconf->keys[i].mod | LockMask, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
         XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
