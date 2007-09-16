@@ -198,7 +198,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         }
     }
     else if(!sel)
-        for(screen = 0; screen < ScreenCount(e->xany.display); i++)
+        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window)
             {
                 if(ev->button == Button4)
