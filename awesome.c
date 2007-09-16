@@ -45,11 +45,14 @@ Client *sel = NULL;
 Client *stack = NULL;
 DC *dc;
 
-/* static */
-
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool readin = True, running = True;
 
+/** Cleanup everything on quit
+ * \param disp Display ref
+ * \param drawcontext Drawcontext ref
+ * \param awesomeconf awesome config
+ */
 static void
 cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
 {
@@ -92,6 +95,11 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     p_delete(&dc);
 }
 
+/** Get a window state (WM_STATE)
+ * \param disp Display ref
+ * \param w Client window
+ * \return state
+ */
 static long
 getstate(Display *disp, Window w)
 {
@@ -111,6 +119,12 @@ getstate(Display *disp, Window w)
     return result;
 }
 
+/** Scan X to find windows to manage
+ * \param disp Display ref
+ * \param screen Screen number
+ * \param drawcontext Drawcontext ref
+ * \param awesomeconf awesome config
+ */
 static void
 scan(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
 {
@@ -159,36 +173,51 @@ setup(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
     drawcontext->cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);
     drawcontext->cursor[CurResize] = XCreateFontCursor(disp, XC_sizing);
     drawcontext->cursor[CurMove] = XCreateFontCursor(disp, XC_fleur);
+
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = drawcontext->cursor[CurNormal];
+
     XChangeWindowAttributes(disp, RootWindow(disp, screen), CWEventMask | CWCursor, &wa);
+
     XSelectInput(disp, RootWindow(disp, screen), wa.event_mask);
+
     grabkeys(disp, screen, awesomeconf);
+
     compileregs(awesomeconf->rules, awesomeconf->nrules);
+
     /* bar */
     drawcontext->h = awesomeconf->statusbar.height = drawcontext->font.height + 2;
     initstatusbar(disp, screen, drawcontext, &awesomeconf->statusbar);
     drawcontext->gc = XCreateGC(disp, RootWindow(disp, screen), 0, 0);
     XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
+
     if(!drawcontext->font.set)
         XSetFont(disp, drawcontext->gc, drawcontext->font.xfont->fid);
+
     loadawesomeprops(disp, screen, awesomeconf);
 }
 
-/*
- * Startup Error handler to check if another window manager
+/** Startup Error handler to check if another window manager
  * is already running.
+ * \param disp Display ref
+ * \param ee Error event
  */
 static int __attribute__ ((noreturn))
-xerrorstart(Display * dsply __attribute__ ((unused)), XErrorEvent * ee __attribute__ ((unused)))
+xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribute__ ((unused)))
 {
     eprint("awesome: another window manager is already running\n");
 }
 
-/* extern */
-
+/** Quit awesome
+ * \param disp Display ref
+ * \param screen Screen number
+ * \param drawcontext Drawcontext ref
+ * \param awesomeconf awesome config
+ * \param arg nothing
+ * \ingroup ui_callback
+ */
 void
 uicb_quit(Display *disp __attribute__ ((unused)),
           int screen __attribute__ ((unused)),
@@ -254,6 +283,11 @@ xerror(Display * edpy, XErrorEvent * ee)
     return xerrorxlib(edpy, ee);        /* may call exit */
 }
 
+/** Hello, this is main
+ * \param argc who knows
+ * \param argv who knows
+ * \return EXIT_SUCCESS I hope
+ */
 int
 main(int argc, char *argv[])
 {
@@ -269,16 +303,27 @@ main(int argc, char *argv[])
     Atom netatom[NetLast];
 
     if(argc == 2 && !strcmp("-v", argv[1]))
-        eprint("awesome-" VERSION " © 2007 Julien Danjou\n");
+    {
+        printf("awesome-" VERSION " © 2007 Julien Danjou\n");
+        return 0;
+    }
     else if(argc != 1)
         eprint("usage: awesome [-v]\n");
+
+    /* Tag won't be printed otherwised */
     setlocale(LC_CTYPE, "");
 
     if(!(dpy = XOpenDisplay(NULL)))
         eprint("awesome: cannot open display\n");
-    xfd = ConnectionNumber(dpy);
-    XSetErrorHandler(xerrorstart);
 
+    xfd = ConnectionNumber(dpy);
+
+    XSetErrorHandler(xerrorstart);
+    for(screen = 0; screen < ScreenCount(dpy); screen++)
+        /* this causes an error if some other window manager is running */
+        XSelectInput(dpy, RootWindow(dpy, screen), SubstructureRedirectMask);
+
+    /* need to XSync to validate errorhandler */
     XSync(dpy, False);
     XSetErrorHandler(NULL);
     xerrorxlib = XSetErrorHandler(xerror);
@@ -287,12 +332,10 @@ main(int argc, char *argv[])
     netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
     netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
 
+    /* allocate stuff */
     dc = p_new(DC, ScreenCount(dpy));
     awesomeconf = p_new(awesome_config, ScreenCount(dpy));
 
-    for(screen = 0; screen < ScreenCount(dpy); screen++)
-        /* this causes an error if some other window manager is running */
-        XSelectInput(dpy, RootWindow(dpy, screen), SubstructureRedirectMask);
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
         parse_config(dpy, screen, &dc[screen], &awesomeconf[screen]);
@@ -381,5 +424,5 @@ main(int argc, char *argv[])
     cleanup(dpy, dc, awesomeconf);
     XCloseDisplay(dpy);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
