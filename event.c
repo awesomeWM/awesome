@@ -184,16 +184,27 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         focus(c->display, c->screen, &dc[c->screen], c, ev->same_screen, &awesomeconf[c->screen]);
         if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
             return;
-        if(ev->button == Button1 && (IS_ARRANGE(floating) || c->isfloating))
+        if(ev->button == Button1)
         {
-            restack(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
+            if(IS_ARRANGE(floating) || c->isfloating)
+                uicb_togglefloating(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
+            else
+                restack(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
             movemouse(c, &awesomeconf[c->screen]);
         }
         else if(ev->button == Button2)
-            uicb_zoom(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
-        else if(ev->button == Button3 && (IS_ARRANGE(floating) || c->isfloating) && !c->isfixed)
         {
-            restack(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
+            if(IS_ARRANGE(tile) && !c->isfixed && c->isfloating)
+                uicb_togglefloating(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
+            else
+                uicb_zoom(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
+        }
+        else if(ev->button == Button3)
+        {
+            if(IS_ARRANGE(floating) && !c->isfloating)
+                uicb_togglefloating(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
+            else
+                restack(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
             resizemouse(c, &awesomeconf[c->screen]);
         }
     }
