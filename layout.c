@@ -38,10 +38,14 @@ arrange(Display * disp, int screen, DC *drawcontext, awesome_config *awesomeconf
     Client *c;
 
     for(c = clients; c; c = c->next)
+    {
+        if(c->screen != screen)
+            continue;
         if(isvisible(c, awesomeconf->selected_tags, awesomeconf->ntags))
             unban(c);
         else
             ban(c);
+    }
     awesomeconf->current_layout->arrange(disp, screen, awesomeconf);
     focus(disp, screen, drawcontext, NULL, True, awesomeconf);
     restack(disp, screen, drawcontext, awesomeconf);
@@ -130,7 +134,7 @@ restack(Display * disp, int screen, DC * drawcontext, awesome_config *awesomecon
         }
         for(c = clients; c; c = c->next)
         {
-            if(!IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags) || c == sel)
+            if(!IS_TILED(c, screen, awesomeconf->selected_tags, awesomeconf->ntags) || c == sel)
                 continue;
             XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
             wc.sibling = c->win;

@@ -26,7 +26,7 @@
 #include "client.h"
 
 /** Check if a client is tiled */ 
-#define IS_TILED(client, tags, ntags)            (client && !client->isfloating && isvisible(client, tags, ntags))
+#define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, tags, ntags) && client->screen == screen)
 
 void compileregs(Rule *, int);         /* initialize regexps of rules defined in config.h */
 Bool isvisible(Client *, Bool *, int);

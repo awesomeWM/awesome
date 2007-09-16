@@ -38,12 +38,12 @@ fibonacci(Display *disp, int screen, awesome_config *awesomeconf, int shape)
     nw = get_windows_area_width(disp, awesomeconf->statusbar);
     nh = get_windows_area_height(disp, awesomeconf->statusbar);
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, awesomeconf->selected_tags, awesomeconf->ntags) && c->screen == screen)
+        if(IS_TILED(c, screen, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;
 
     for(i = 0, c = clients; c; c = c->next)
     {
-        if(c->screen != screen)
+        if(!IS_TILED(c, screen, awesomeconf->selected_tags, awesomeconf->ntags))
             continue;
 
         c->ismax = False;
