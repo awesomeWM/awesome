@@ -149,7 +149,6 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     XButtonPressedEvent *ev = &e->xbutton;
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-    {
         if(awesomeconf[screen].statusbar.window == ev->window)
         {
             int x = 0;
@@ -179,7 +178,6 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 uicb_setlayout(e->xany.display, screen, &dc[screen], &awesomeconf[screen], NULL);
             return;
         }
-    }
 
     if((c = getclient(ev->window)))
     {
