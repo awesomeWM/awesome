@@ -43,7 +43,7 @@
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
-DC dc;
+DC *dc;
 
 /* static */
 
@@ -63,20 +63,22 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
         unmanage(stack, drawcontext, NormalState, awesomeconf);
     }
 
-    if(drawcontext->font.set)
-        XFreeFontSet(disp, drawcontext->font.set);
-    else
-        XFreeFont(disp, drawcontext->font.xfont);
+    for(screen = 0; screen < ScreenCount(disp); screen++)
+    {
+        if(drawcontext[screen].font.set)
+            XFreeFontSet(disp, drawcontext[screen].font.set);
+        else
+            XFreeFont(disp, drawcontext[screen].font.xfont);
 
-    for(screen = 0; screen < ScreenCount(disp); screen++);
-        XUngrabKey(disp, AnyKey, AnyModifier, RootWindow(disp, screen));
+            XUngrabKey(disp, AnyKey, AnyModifier, RootWindow(disp, screen));
 
-    XFreePixmap(disp, awesomeconf->statusbar.drawable);
-    XFreeGC(disp, drawcontext->gc);
-    XDestroyWindow(disp, awesomeconf->statusbar.window);
-    XFreeCursor(disp, drawcontext->cursor[CurNormal]);
-    XFreeCursor(disp, drawcontext->cursor[CurResize]);
-    XFreeCursor(disp, drawcontext->cursor[CurMove]);
+        XFreePixmap(disp, awesomeconf[screen].statusbar.drawable);
+        XFreeGC(disp, drawcontext[screen].gc);
+        XDestroyWindow(disp, awesomeconf[screen].statusbar.window);
+        XFreeCursor(disp, drawcontext[screen].cursor[CurNormal]);
+        XFreeCursor(disp, drawcontext[screen].cursor[CurResize]);
+        XFreeCursor(disp, drawcontext[screen].cursor[CurMove]);
+    }
     XSetInputFocus(disp, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(disp, False);
 }
@@ -101,36 +103,32 @@ getstate(Display *disp, Window w)
 }
 
 static void
-scan(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
+scan(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
 {
     unsigned int i, num;
-    int screen;
     Window *wins, d1, d2;
     XWindowAttributes wa;
 
     wins = NULL;
-    for(screen = 0; screen < ScreenCount(disp); screen++)
+    if(XQueryTree(disp, RootWindow(disp, screen), &d1, &d2, &wins, &num))
     {
-        if(XQueryTree(disp, RootWindow(disp, screen), &d1, &d2, &wins, &num))
+        for(i = 0; i < num; i++)
         {
-            for(i = 0; i < num; i++)
-            {
-                if(!XGetWindowAttributes(disp, wins[i], &wa)
-                   || wa.override_redirect
-                   || XGetTransientForHint(disp, wins[i], &d1))
-                    continue;
+            if(!XGetWindowAttributes(disp, wins[i], &wa)
+               || wa.override_redirect
+               || XGetTransientForHint(disp, wins[i], &d1))
+                continue;
                 if(wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState)
                     manage(disp, screen, drawcontext, wins[i], &wa, awesomeconf);
-            }
-            /* now the transients */
-            for(i = 0; i < num; i++)
-            {
-                if(!XGetWindowAttributes(disp, wins[i], &wa))
-                    continue;
-                if(XGetTransientForHint(disp, wins[i], &d1)
-                   && (wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState))
-                    manage(disp, screen, drawcontext, wins[i], &wa, awesomeconf);
-            }
+        }
+        /* now the transients */
+        for(i = 0; i < num; i++)
+        {
+            if(!XGetWindowAttributes(disp, wins[i], &wa))
+                continue;
+            if(XGetTransientForHint(disp, wins[i], &d1)
+               && (wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState))
+                manage(disp, screen, drawcontext, wins[i], &wa, awesomeconf);
         }
     }
     if(wins)
@@ -143,20 +141,15 @@ enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */
 Atom netatom[NetWMName];
 /** Setup everything before running
  * \param disp Display ref
+ * \param screen Screen number
  * \param awesomeconf awesome config ref
  * \todo clean things...
  */
 static void
-setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
+setup(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
-    int screen;
 
-    netatom[NetSupported] = XInternAtom(disp, "_NET_SUPPORTED", False);
-    netatom[NetWMName] = XInternAtom(disp, "_NET_WM_NAME", False);
-    for(screen = 0; screen < ScreenCount(disp); screen++)
-        XChangeProperty(disp, RootWindow(disp, screen), netatom[NetSupported],
-                        XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
     /* init cursors */
     drawcontext->cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);
     drawcontext->cursor[CurResize] = XCreateFontCursor(disp, XC_sizing);
@@ -165,22 +158,22 @@ setup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = drawcontext->cursor[CurNormal];
-    for(screen = 0; screen < ScreenCount(disp); screen++)
-    {
-        XChangeWindowAttributes(disp, RootWindow(disp, screen), CWEventMask | CWCursor, &wa);
-        XSelectInput(disp, RootWindow(disp, screen), wa.event_mask);
-        grabkeys(disp, screen, awesomeconf);
-    }
+    XChangeWindowAttributes(disp, RootWindow(disp, screen), CWEventMask | CWCursor, &wa);
+    XSelectInput(disp, RootWindow(disp, screen), wa.event_mask);
+    grabkeys(disp, screen, awesomeconf);
     compileregs(awesomeconf->rules, awesomeconf->nrules);
     /* bar */
     drawcontext->h = awesomeconf->statusbar.height = drawcontext->font.height + 2;
-    initstatusbar(disp, DefaultScreen(disp), drawcontext, &awesomeconf->statusbar);
-    drawcontext->gc = XCreateGC(disp, DefaultRootWindow(disp), 0, 0);
+    initstatusbar(disp, screen, drawcontext, &awesomeconf->statusbar);
+    drawcontext->gc = XCreateGC(disp, RootWindow(disp, screen), 0, 0);
     XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
     if(!drawcontext->font.set)
         XSetFont(disp, drawcontext->gc, drawcontext->font.xfont->fid);
-    for(screen = 0; screen < ScreenCount(disp); screen++)
-        loadawesomeprops(disp, screen, awesomeconf);
+//    netatom[NetSupported] = XInternAtom(disp, "_NET_SUPPORTED", False);
+//    netatom[NetWMName] = XInternAtom(disp, "_NET_WM_NAME", False);
+//    XChangeProperty(disp, RootWindow(disp, screen), netatom[NetSupported],
+//                    XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
+    loadawesomeprops(disp, screen, awesomeconf);
 }
 
 /*
@@ -268,7 +261,7 @@ main(int argc, char *argv[])
     fd_set rd;
     XEvent ev;
     Display * dpy;
-    awesome_config awesomeconf;
+    awesome_config *awesomeconf;
     int shape_event, randr_event_base;
     int screen;
 
@@ -288,13 +281,20 @@ main(int argc, char *argv[])
     for(screen = 0; screen < ScreenCount(dpy); screen++)
         XSelectInput(dpy, RootWindow(dpy, screen), SubstructureRedirectMask);
 
+
     XSync(dpy, False);
     XSetErrorHandler(NULL);
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
-    parse_config(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
-    setup(dpy, &dc, &awesomeconf);
-    drawstatusbar(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
+
+    awesomeconf = p_new(awesome_config, ScreenCount(dpy));
+    dc = p_new(DC, ScreenCount(dpy));
+    for(screen = 0; screen < ScreenCount(dpy); screen++)
+    {
+        parse_config(dpy, screen, &dc[screen], &awesomeconf[screen]);
+        setup(dpy, screen, &dc[screen], &awesomeconf[screen]);
+        drawstatusbar(dpy, screen, &dc[screen], &awesomeconf[screen]);
+    }
 
     void (*handler[LASTEvent]) (XEvent *, awesome_config *) = 
     {
@@ -312,15 +312,16 @@ main(int argc, char *argv[])
         [UnmapNotify] = handle_event_unmapnotify,
     };
 
-    /* check for shape extension */
-    if((awesomeconf.have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
+    /* XXX check for shape extension */
+    if((awesomeconf[0].have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
         handler[shape_event] = handle_event_shape;
 
-    /* check for randr extension */
-    if((awesomeconf.have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
+    /* XXX check for randr extension */
+    if((awesomeconf[0].have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
        handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
 
-    scan(dpy, &dc, &awesomeconf);
+    for(screen = 0; screen < ScreenCount(dpy); screen++)
+        scan(dpy, screen, &dc[screen], &awesomeconf[screen]);
     XSync(dpy, False);
 
     /* main event loop, also reads status text from stdin */
@@ -338,35 +339,35 @@ main(int argc, char *argv[])
         }
         if(FD_ISSET(STDIN_FILENO, &rd))
         {
-            switch (r = read(STDIN_FILENO, awesomeconf.statustext, sizeof(awesomeconf.statustext) - 1))
+            switch (r = read(STDIN_FILENO, awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext) - 1))
             {
             case -1:
-                strncpy(awesomeconf.statustext, strerror(errno), sizeof(awesomeconf.statustext) - 1);
-                awesomeconf.statustext[sizeof(awesomeconf.statustext) - 1] = '\0';
+                strncpy(awesomeconf[0].statustext, strerror(errno), sizeof(awesomeconf[0].statustext) - 1);
+                awesomeconf[0].statustext[sizeof(awesomeconf[0].statustext) - 1] = '\0';
                 readin = False;
                 break;
             case 0:
-                strncpy(awesomeconf.statustext, "EOF", 4);
+                strncpy(awesomeconf[0].statustext, "EOF", 4);
                 readin = False;
                 break;
             default:
-                for(awesomeconf.statustext[r] = '\0', p = awesomeconf.statustext + a_strlen(awesomeconf.statustext) - 1;
-                    p >= awesomeconf.statustext && *p == '\n'; *p-- = '\0');
-                for(; p >= awesomeconf.statustext && *p != '\n'; --p);
-                if(p > awesomeconf.statustext)
-                    strncpy(awesomeconf.statustext, p + 1, sizeof(awesomeconf.statustext));
+                for(awesomeconf[0].statustext[r] = '\0', p = awesomeconf[0].statustext + a_strlen(awesomeconf[0].statustext) - 1;
+                    p >= awesomeconf[0].statustext && *p == '\n'; *p-- = '\0');
+                for(; p >= awesomeconf[0].statustext && *p != '\n'; --p);
+                if(p > awesomeconf[0].statustext)
+                    strncpy(awesomeconf[0].statustext, p + 1, sizeof(awesomeconf[0].statustext));
             }
-            drawstatusbar(dpy, DefaultScreen(dpy), &dc, &awesomeconf);
+            drawstatusbar(dpy, 0, &dc[0], &awesomeconf[0]);
         }
 
         while(XPending(dpy))
         {
             XNextEvent(dpy, &ev);
             if(handler[ev.type])
-                (handler[ev.type]) (&ev, &awesomeconf);       /* call handler */
+                (handler[ev.type]) (&ev, awesomeconf);       /* call handler */
         }
     }
-    cleanup(dpy, &dc, &awesomeconf);
+    cleanup(dpy, dc, awesomeconf);
     XCloseDisplay(dpy);
 
     return 0;
