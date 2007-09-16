@@ -177,8 +177,8 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             }
             if((ev->x < x + awesomeconf[screen].statusbar.width) && ev->button == Button1)
                 uicb_setlayout(e->xany.display, screen, &dc[screen], &awesomeconf[screen], NULL);
+            return;
         }
-        return;
     }
 
     if((c = getclient(ev->window)))
