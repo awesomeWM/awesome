@@ -181,7 +181,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 
     if((c = getclient(ev->window)))
     {
-        focus(c->display, c->screen, &dc[c->screen], c, ev->same_screen, &awesomeconf[c->screen]);
+        focus(c->display, &dc[c->screen], c, ev->same_screen, &awesomeconf[c->screen]);
         if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
             return;
         if(ev->button == Button1)
@@ -312,11 +312,11 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
     if((c = getclient(ev->window)))
-        focus(c->display, c->screen, &dc[c->screen], c, ev->same_screen, &awesomeconf[c->screen]);
+        focus(c->display, &dc[c->screen], c, ev->same_screen, &awesomeconf[c->screen]);
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
-                focus(e->xany.display, screen, &dc[screen], NULL, True, &awesomeconf[screen]);
+                focus(e->xany.display, &dc[screen], NULL, True, &awesomeconf[screen]);
 }
 
 void
@@ -358,7 +358,7 @@ handle_event_leavenotify(XEvent * e, awesome_config *awesomeconf)
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if((ev->window == RootWindow(e->xany.display, screen)) && !ev->same_screen)
-            focus(e->xany.display, screen, &dc[screen], NULL, ev->same_screen, &awesomeconf[screen]);
+            focus(e->xany.display, &dc[screen], NULL, ev->same_screen, &awesomeconf[screen]);
 }
 
 void

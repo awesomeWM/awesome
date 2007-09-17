@@ -251,18 +251,17 @@ detach(Client * c)
 
 /** Give focus to client, or to first client if c is NULL
  * \param disp Display ref
- * \param screen Screen number
  * \param drawcontext drawcontext ref
  * \param c client
  * \param selscreen True if current screen is selected
  * \param awesomeconf awesome config
  */
 void
-focus(Display *disp, int screen, DC *drawcontext, Client * c, Bool selscreen, awesome_config *awesomeconf)
+focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
-    if((!c && selscreen) || (c && !isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags)))
-        for(c = stack; c && !isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->snext);
+    if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags)))
+        for(c = stack; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->snext);
     
     /* if a client was selected but it's not the current client, unfocus it */
     if(sel && sel != c)
@@ -280,7 +279,7 @@ focus(Display *disp, int screen, DC *drawcontext, Client * c, Bool selscreen, aw
     if(!selscreen)
         return;
     sel = c;
-    drawstatusbar(disp, screen, drawcontext, awesomeconf);
+    drawstatusbar(disp, awesomeconf->screen, drawcontext, awesomeconf);
     if(sel)
     {
         XSetWindowBorder(sel->display, sel->win, drawcontext->sel[ColBorder]);
@@ -291,7 +290,7 @@ focus(Display *disp, int screen, DC *drawcontext, Client * c, Bool selscreen, aw
         setclienttrans(sel, -1);
     }
     else
-        XSetInputFocus(disp, RootWindow(disp, screen), RevertToPointerRoot, CurrentTime);
+        XSetInputFocus(disp, RootWindow(disp, awesomeconf->screen), RevertToPointerRoot, CurrentTime);
 }
 
 /** Kill selected client
@@ -572,7 +571,7 @@ unmanage(Client * c, DC *drawcontext, long state, awesome_config *awesomeconf)
     detach(c);
     detachstack(c);
     if(sel == c)
-        focus(c->display, c->screen, drawcontext, NULL, True, awesomeconf);
+        focus(c->display, drawcontext, NULL, True, awesomeconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     setclientstate(c, state);
     XSync(c->display, False);
