@@ -348,7 +348,7 @@ loadprops(Client * c, int ntags)
 }
 
 void
-manage(Display * disp, int screen, DC *drawcontext, Window w, XWindowAttributes * wa, awesome_config *awesomeconf)
+manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, awesome_config *awesomeconf)
 {
     int i;
     Client *c, *t = NULL;
@@ -366,9 +366,9 @@ manage(Display * disp, int screen, DC *drawcontext, Window w, XWindowAttributes 
     c->h = c->rh = wa->height;
     c->oldborder = wa->border_width;
     c->display = disp;
-    c->screen = screen;
-    if(c->w == DisplayWidth(disp, screen)
-       && c->h == DisplayHeight(disp, screen))
+    c->screen = awesomeconf->screen;
+    if(c->w == DisplayWidth(disp, c->screen)
+       && c->h == DisplayHeight(disp, c->screen))
     {
         c->x = 0;
         c->y = 0;
@@ -376,7 +376,7 @@ manage(Display * disp, int screen, DC *drawcontext, Window w, XWindowAttributes 
     }
     else
     {
-        ScreenInfo *si = get_display_info(disp, screen, awesomeconf->statusbar);
+        ScreenInfo *si = get_display_info(disp, c->screen, awesomeconf->statusbar);
 
         if(c->x + c->w + 2 * c->border > si->x_org + si->width)
             c->x = c->rx = si->x_org + si->width - c->w - 2 * c->border;

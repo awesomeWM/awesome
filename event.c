@@ -387,7 +387,7 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
     if(!getclient(ev->window))
     {
         for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
-        manage(e->xany.display, screen, &dc[screen], ev->window, &wa, &awesomeconf[screen]);
+        manage(e->xany.display, &dc[screen], ev->window, &wa, &awesomeconf[screen]);
     }
 }
 
