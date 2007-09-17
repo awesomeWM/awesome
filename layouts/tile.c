@@ -79,7 +79,7 @@ uicb_setmwfact(Display *disp,
 }
 
 static void
-_tile(Display *disp, int screen, awesome_config *awesomeconf, const Bool right)
+_tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 {
     /* windows area geometry */
     int wah = 0, waw = 0, wax = 0, way = 0;
@@ -93,15 +93,15 @@ _tile(Display *disp, int screen, awesome_config *awesomeconf, const Bool right)
     ScreenInfo *screens_info = NULL;
     Client *c;
 
-    screens_info = get_screen_info(disp, screen, awesomeconf->statusbar, &screen_numbers);
+    screens_info = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &screen_numbers);
  
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, screen, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
             n++;
 
     for(i = 0, c = clients; c; c = c->next)
     {
-        if(!IS_TILED(c, screen, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(!IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
             continue;
 
         if(use_screen == -1
@@ -192,13 +192,13 @@ _tile(Display *disp, int screen, awesome_config *awesomeconf, const Bool right)
 }
 
 void
-tile(Display *disp, int screen, awesome_config *awesomeconf)
+tile(Display *disp, awesome_config *awesomeconf)
 {
-    _tile(disp, screen, awesomeconf, True);
+    _tile(disp, awesomeconf, True);
 }
 
 void
-tileleft(Display *disp, int screen, awesome_config *awesomeconf)
+tileleft(Display *disp, awesome_config *awesomeconf)
 {
-    _tile(disp, screen, awesomeconf, False);
+    _tile(disp, awesomeconf, False);
 }
