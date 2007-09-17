@@ -235,7 +235,7 @@ uicb_toggleview(Display *disp,
     for(j = 0; j < awesomeconf->ntags && !awesomeconf->selected_tags[j]; j++);
     if(j == awesomeconf->ntags)
         awesomeconf->selected_tags[i] = True;      /* cannot toggle last view */
-    saveawesomeprops(disp, awesomeconf->screen, awesomeconf);
+    saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }
 
@@ -264,7 +264,7 @@ uicb_view(Display *disp,
         awesomeconf->selected_tags[i] = True;
         awesomeconf->current_layout = awesomeconf->tag_layouts[i];
     }
-    saveawesomeprops(disp, awesomeconf->screen, awesomeconf);
+    saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }
 
@@ -315,7 +315,7 @@ uicb_tag_viewnext(Display *disp,
     if(++firsttag >= awesomeconf->ntags)
         firsttag = 0;
     awesomeconf->selected_tags[firsttag] = True;
-    saveawesomeprops(disp, awesomeconf->screen, awesomeconf);
+    saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }
 
@@ -342,6 +342,6 @@ uicb_tag_viewprev(Display *disp,
     if(--firsttag < 0)
         firsttag = awesomeconf->ntags - 1;
     awesomeconf->selected_tags[firsttag] = True;
-    saveawesomeprops(disp, awesomeconf->screen, awesomeconf);
+    saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }

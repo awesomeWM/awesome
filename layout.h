@@ -38,7 +38,7 @@ void uicb_togglemax(Display *, DC *, awesome_config *, const char *);   /* toggl
 void uicb_toggleverticalmax(Display *, DC *, awesome_config *, const char *);
 void uicb_togglehorizontalmax(Display *, DC *, awesome_config *, const char *);
 void uicb_zoom(Display *, DC *, awesome_config *, const char *); /* set current window first in stack */
-void loadawesomeprops(Display *, int, awesome_config *);
-void saveawesomeprops(Display *disp, int, awesome_config *);
+void loadawesomeprops(Display *, awesome_config *);
+void saveawesomeprops(Display *, awesome_config *);
 
 #endif

@@ -208,7 +208,7 @@ setup(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
     if(!drawcontext->font.set)
         XSetFont(disp, drawcontext->gc, drawcontext->font.xfont->fid);
 
-    loadawesomeprops(disp, screen, awesomeconf);
+    loadawesomeprops(disp, awesomeconf);
 }
 
 /** Startup Error handler to check if another window manager
