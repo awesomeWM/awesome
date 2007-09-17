@@ -317,7 +317,7 @@ main(int argc, char *argv[])
     if(argc == 2 && !strcmp("-v", argv[1]))
     {
         printf("awesome-" VERSION " © 2007 Julien Danjou\n");
-        return 0;
+        return EXIT_SUCCESS;
     }
     else if(argc != 1)
         eprint("usage: awesome [-v]\n");
