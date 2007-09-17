@@ -220,7 +220,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 }
 
 void
-handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf __attribute__ ((unused)))
+handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
 {
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
