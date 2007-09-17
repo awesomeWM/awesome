@@ -70,7 +70,7 @@ drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, uns
 }
 
 void
-drawsquare(Bool filled, Bool empty, unsigned long col[ColLast], Display *disp, DC drawcontext, Statusbar *statusbar)
+drawsquare(Display *disp, DC drawcontext, Bool filled, Bool empty, unsigned long col[ColLast], Statusbar *statusbar)
 {
     int x;
     XGCValues gcv;
