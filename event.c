@@ -52,7 +52,7 @@ getclient(Window w)
 }
 
 static void
-movemouse(Client * c, awesome_config *awesomeconf)
+movemouse(Client * c, int screen, awesome_config *awesomeconf)
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
@@ -60,7 +60,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
     XEvent ev;
     ScreenInfo *si;
 
-    si = get_display_info(c->display, c->screen, awesomeconf->statusbar);
+    si = get_display_info(c->display, c->screen, awesomeconf[screen].statusbar);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
@@ -85,13 +85,13 @@ movemouse(Client * c, awesome_config *awesomeconf)
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(si->x_org + nx) < awesomeconf->snap)
+            if(abs(si->x_org + nx) < awesomeconf[screen].snap)
                 nx = si->x_org;
-            else if(abs((si->x_org + si->width) - (nx + c->w + 2 * c->border)) < awesomeconf->snap)
+            else if(abs((si->x_org + si->width) - (nx + c->w + 2 * c->border)) < awesomeconf[screen].snap)
                 nx = si->x_org + si->width - c->w - 2 * c->border;
-            if(abs(si->y_org - ny) < awesomeconf->snap)
+            if(abs(si->y_org - ny) < awesomeconf[screen].snap)
                 ny = si->y_org;
-            else if(abs((si->y_org + si->height) - (ny + c->h + 2 * c->border)) < awesomeconf->snap)
+            else if(abs((si->y_org + si->height) - (ny + c->h + 2 * c->border)) < awesomeconf[screen].snap)
                 ny = si->y_org + si->height - c->h - 2 * c->border;
             resize(c, nx, ny, c->w, c->h, False);
             break;
@@ -190,7 +190,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 uicb_togglefloating(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
-            movemouse(c, &awesomeconf[c->screen]);
+            movemouse(c, screen, awesomeconf);
         }
         else if(ev->button == Button2)
         {
