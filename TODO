@@ -2,6 +2,10 @@ For v1.0:
 - Add uicb for sel->border++-- and awesomeconf->border++--
 - Remove warnings
 - Check spiral layout
+- Check togglemax
+- Check that all uicb have key binding in default conf
+- Allow awesome to be run without any configuration file
+- Write manpage
 
 For future:
 - Move windows from one place to another with mouse in tiled layout
