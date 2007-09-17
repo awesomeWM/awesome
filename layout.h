@@ -29,8 +29,8 @@
 
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 
-void arrange(Display *, int, DC *, awesome_config *);             /* arranges all windows depending on the layout in use */
-void restack(Display *, int, DC *, awesome_config *);        /* restores z layers of all clients */
+void arrange(Display *, DC *, awesome_config *);             /* arranges all windows depending on the layout in use */
+void restack(Display *, DC *, awesome_config *);        /* restores z layers of all clients */
 void uicb_focusnext(Display *, int, DC *, awesome_config *, const char *);   /* focuses next visible client */
 void uicb_focusprev(Display *, int, DC *, awesome_config *, const char *);   /* focuses prev visible client */
 void uicb_setlayout(Display *, int, DC *, awesome_config *, const char *);   /* sets layout, NULL means next layout */

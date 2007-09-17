@@ -416,7 +416,7 @@ manage(Display * disp, int screen, DC *drawcontext, Window w, XWindowAttributes 
     attachstack(c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
     c->isbanned = True;
-    arrange(disp, screen, drawcontext, awesomeconf);
+    arrange(disp, drawcontext, awesomeconf);
 }
 
 void
@@ -578,7 +578,7 @@ unmanage(Client * c, DC *drawcontext, long state, awesome_config *awesomeconf)
     XSetErrorHandler(xerror);
     XUngrabServer(c->display);
     if(state != NormalState)
-        arrange(c->display, c->screen, drawcontext, awesomeconf);
+        arrange(c->display, drawcontext, awesomeconf);
     p_delete(&c->tags);
     p_delete(&c);
 }

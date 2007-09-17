@@ -189,7 +189,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             if(!IS_ARRANGE(floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
-                restack(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
+                restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
             movemouse(c, &awesomeconf[c->screen]);
         }
         else if(ev->button == Button2)
@@ -204,7 +204,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             if(!IS_ARRANGE(floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
-                restack(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
+                restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
             resizemouse(c, &awesomeconf[c->screen]);
         }
     }
@@ -288,7 +288,7 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
             XResizeWindow(e->xany.display, awesomeconf[screen].statusbar.window,
                           DisplayWidth(e->xany.display, screen), awesomeconf[screen].statusbar.height);
             updatebarpos(e->xany.display, awesomeconf[screen].statusbar);
-            arrange(e->xany.display, screen, &dc[screen], &awesomeconf[screen]);
+            arrange(e->xany.display, &dc[screen], &awesomeconf[screen]);
         }
 }
 
@@ -407,7 +407,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating && (c->isfloating = (getclient(trans) != NULL)))
-                arrange(e->xany.display, c->screen, &dc[c->screen], &awesomeconf[c->screen]);
+                arrange(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
             break;
         case XA_WM_NORMAL_HINTS:
             updatesizehints(c);

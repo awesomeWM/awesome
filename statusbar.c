@@ -152,6 +152,6 @@ uicb_togglebar(Display *disp,
     else
         awesomeconf->statusbar.position = BarOff;
     updatebarpos(disp, awesomeconf->statusbar);
-    arrange(disp, screen, drawcontext, awesomeconf);
+    arrange(disp, drawcontext, awesomeconf);
 }
 

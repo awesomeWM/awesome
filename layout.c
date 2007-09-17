@@ -33,22 +33,21 @@
 extern Client *clients, *sel;   /* global client list */
 
 void
-arrange(Display * disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
+arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
 {
     Client *c;
 
     for(c = clients; c; c = c->next)
     {
-        if(c->screen != screen)
-            continue;
-        if(isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
             unban(c);
-        else
+        /* we don't touch other screens windows */
+        else if(c->screen == awesomeconf->screen)
             ban(c);
     }
-    awesomeconf->current_layout->arrange(disp, screen, awesomeconf);
+    awesomeconf->current_layout->arrange(disp, awesomeconf->screen, awesomeconf);
     focus(disp, drawcontext, NULL, True, awesomeconf);
-    restack(disp, screen, drawcontext, awesomeconf);
+    restack(disp, drawcontext, awesomeconf);
 }
 
 void
@@ -68,7 +67,7 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
     if(c)
     {
         focus(c->display, drawcontext, c, True, awesomeconf);
-        restack(c->display, screen, drawcontext, awesomeconf);
+        restack(c->display, drawcontext, awesomeconf);
     }
 }
 
@@ -92,7 +91,7 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
     if(c)
     {
         focus(c->display, drawcontext, c, True, awesomeconf);
-        restack(c->display, screen, drawcontext, awesomeconf);
+        restack(c->display, drawcontext, awesomeconf);
     }
 }
 
@@ -112,13 +111,13 @@ loadawesomeprops(Display *disp, int screen, awesome_config * awesomeconf)
 }
 
 void
-restack(Display * disp, int screen, DC * drawcontext, awesome_config *awesomeconf)
+restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
 {
     Client *c;
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatusbar(disp, screen, drawcontext, awesomeconf);
+    drawstatusbar(disp, awesomeconf->screen, drawcontext, awesomeconf);
     if(!sel)
         return;
     if(sel->isfloating || IS_ARRANGE(floating))
@@ -134,7 +133,7 @@ restack(Display * disp, int screen, DC * drawcontext, awesome_config *awesomecon
         }
         for(c = clients; c; c = c->next)
         {
-            if(!IS_TILED(c, screen, awesomeconf->selected_tags, awesomeconf->ntags) || c == sel)
+            if(!IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags) || c == sel)
                 continue;
             XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
             wc.sibling = c->win;
@@ -187,7 +186,7 @@ uicb_setlayout(Display *disp,
         c->ftview = True;
 
     if(sel)
-        arrange(disp, screen, drawcontext, awesomeconf);
+        arrange(disp, drawcontext, awesomeconf);
     else
         drawstatusbar(disp, DefaultScreen(disp), drawcontext, awesomeconf);
 
@@ -286,6 +285,6 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
     detach(sel);
     attach(sel);
     focus(sel->display, drawcontext, sel, True, awesomeconf);
-    arrange(sel->display, sel->screen, drawcontext, awesomeconf);
+    arrange(sel->display, drawcontext, awesomeconf);
 } 
 
