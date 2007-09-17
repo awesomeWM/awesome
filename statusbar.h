@@ -27,6 +27,6 @@
 void initstatusbar(Display *, int, DC *, Statusbar *);
 void drawstatusbar(Display *, int, DC *, awesome_config *);
 void updatebarpos(Display *, Statusbar);
-void uicb_togglebar(Display *, int, DC *, awesome_config *, const char *);
+void uicb_togglebar(Display *, DC *, awesome_config *, const char *);
 
 #endif

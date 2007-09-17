@@ -54,7 +54,6 @@ eprint(const char *fmt, ...)
 
 void
 uicb_spawn(Display * disp,
-           int screen,
            DC *drawcontext __attribute__ ((unused)),
            awesome_config * awesomeconf __attribute__ ((unused)),
            const char *arg)
@@ -73,7 +72,7 @@ uicb_spawn(Display * disp,
         display = strdup(tmp);
         if((tmp = strrchr(display, '.')))
             *tmp = '\0';
-        snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, screen);
+        snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, awesomeconf->screen);
         setenv("DISPLAY", newdisplay, 1);
     }
 

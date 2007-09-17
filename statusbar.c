@@ -142,7 +142,6 @@ updatebarpos(Display *disp, Statusbar statusbar)
 
 void
 uicb_togglebar(Display *disp,
-               int screen,
                DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))

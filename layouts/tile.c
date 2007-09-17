@@ -33,7 +33,6 @@ extern Client *sel, *clients;
 
 void
 uicb_setnmaster(Display *disp,
-                int screen,
                 DC * drawcontext,
                 awesome_config *awesomeconf,
                 const char * arg)
@@ -49,7 +48,6 @@ uicb_setnmaster(Display *disp,
 
 void
 uicb_setncols(Display *disp,
-              int screen,
               DC * drawcontext,
               awesome_config *awesomeconf,
               const char * arg)
@@ -65,7 +63,6 @@ uicb_setncols(Display *disp,
 
 void
 uicb_setmwfact(Display *disp,
-               int screen,
                DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg)

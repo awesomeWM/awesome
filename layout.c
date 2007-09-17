@@ -52,7 +52,6 @@ arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
 
 void
 uicb_focusnext(Display *disp __attribute__ ((unused)),
-               int screen,
                DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg __attribute__ ((unused)))
@@ -61,9 +60,9 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
 
     if(!sel)
         return;
-    for(c = sel->next; c && !isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
+    for(c = sel->next; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
     if(!c)
-        for(c = clients; c && !isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
+        for(c = clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
     if(c)
     {
         focus(c->display, drawcontext, c, True, awesomeconf);
@@ -73,7 +72,6 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
 
 void
 uicb_focusprev(Display *disp __attribute__ ((unused)),
-               int screen,
                DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
@@ -82,11 +80,11 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
 
     if(!sel)
         return;
-    for(c = sel->prev; c && !isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->prev);
+    for(c = sel->prev; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->prev);
     if(!c)
     {
         for(c = clients; c && c->next; c = c->next);
-        for(; c && !isvisible(c, screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->prev);
+        for(; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->prev);
     }
     if(c)
     {
@@ -161,7 +159,6 @@ saveawesomeprops(Display *disp, int screen, awesome_config *awesomeconf)
 
 void
 uicb_setlayout(Display *disp,
-               int screen,
                DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg)
@@ -190,7 +187,7 @@ uicb_setlayout(Display *disp,
     else
         drawstatusbar(disp, DefaultScreen(disp), drawcontext, awesomeconf);
 
-    saveawesomeprops(disp, screen, awesomeconf);
+    saveawesomeprops(disp, awesomeconf->screen, awesomeconf);
 
     for(j = 0; j < awesomeconf->ntags; j++)
         if (awesomeconf->selected_tags[j])
@@ -227,7 +224,6 @@ maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomecon
 
 void
 uicb_togglemax(Display *disp,
-               int screen __attribute__ ((unused)),
                DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
@@ -242,7 +238,6 @@ uicb_togglemax(Display *disp,
 
 void
 uicb_toggleverticalmax(Display *disp,
-                       int screen __attribute__ ((unused)),
                        DC *drawcontext,
                        awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
@@ -259,7 +254,6 @@ uicb_toggleverticalmax(Display *disp,
 
 void
 uicb_togglehorizontalmax(Display *disp,
-                         int screen __attribute__ ((unused)),
                          DC *drawcontext,
                          awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
@@ -275,7 +269,6 @@ uicb_togglehorizontalmax(Display *disp,
 
 void 
 uicb_zoom(Display *disp __attribute__ ((unused)), 
-          int screen __attribute__ ((unused)),
           DC *drawcontext __attribute__ ((unused)),
           awesome_config *awesomeconf,
           const char *arg __attribute__ ((unused))) 
