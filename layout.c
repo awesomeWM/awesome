@@ -185,7 +185,7 @@ uicb_setlayout(Display *disp,
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
     else
-        drawstatusbar(disp, DefaultScreen(disp), drawcontext, awesomeconf);
+        drawstatusbar(disp, awesomeconf->screen, drawcontext, awesomeconf);
 
     saveawesomeprops(disp, awesomeconf);
 
