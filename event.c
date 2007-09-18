@@ -429,7 +429,7 @@ handle_event_unmapnotify(XEvent * e, awesome_config *awesomeconf)
     XUnmapEvent *ev = &e->xunmap;
 
     if((c = getclient(ev->window))
-       && ev->event == RootWindow(e->xany.display, c->screen) && (ev->send_event || !c->unmapped--))
+       && ev->event == RootWindow(e->xany.display, c->screen) && (ev->send_event || !c->unmapped))
         unmanage(c, &dc[c->screen], WithdrawnState, &awesomeconf[c->screen]);
 }
 

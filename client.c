@@ -207,12 +207,10 @@ updatetitle(Client * c)
 void
 ban(Client * c)
 {
-    if(c->isbanned)
-        return;
     XUnmapWindow(c->display, c->win);
     setclientstate(c, IconicState);
     c->isbanned = True;
-    c->unmapped++;
+    c->unmapped = True;
 }
 
 /** Configure client
@@ -550,11 +548,10 @@ saveprops(Client * c, int ntags)
 void
 unban(Client * c)
 {
-    if(!c->isbanned)
-        return;
     XMapWindow(c->display, c->win);
     setclientstate(c, NormalState);
     c->isbanned = False;
+    c->unmapped = False;
 }
 
 void
@@ -562,6 +559,7 @@ unmanage(Client * c, DC *drawcontext, long state, awesome_config *awesomeconf)
 {
     XWindowChanges wc;
 
+    c->unmapped = True;
     wc.border_width = c->oldborder;
     /* The server grab construct avoids race conditions. */
     XGrabServer(c->display);
