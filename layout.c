@@ -169,16 +169,16 @@ uicb_setlayout(Display *disp,
     if(!arg)
     {
         if(!(++awesomeconf->current_layout)->symbol)
-            awesomeconf->current_layout = &awesomeconf->layouts[0];
+            awesomeconf->current_layout = awesomeconf->layouts;
     }
     else
     {
         i = strtol(arg, NULL, 10);
         if(i < 0 || i >= awesomeconf->nlayouts)
-            return;
+             return;
         awesomeconf->current_layout = &awesomeconf->layouts[i];
     }
-
+    
     for(c = clients; c; c = c->next)
         c->ftview = True;
 
