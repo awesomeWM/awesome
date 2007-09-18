@@ -700,3 +700,24 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
     else
         setclienttrans(sel, delta);
 }
+
+
+/** Set borrder size
+ * \param disp Display ref
+ * \param drawcontext Drawcontext ref
+ * \param awesomeconf awesome config
+ * \param arg X, +X or -X
+ */
+void
+uicb_setborder(Display *disp __attribute__ ((unused)),
+               DC *drawcontext __attribute__ ((unused)),
+               awesome_config *awesomeconf,
+               const char *arg)
+{
+    if(!arg)
+        return;
+
+    if((awesomeconf->borderpx = (int) compute_new_value_from_arg(arg, (double) awesomeconf->borderpx)) < 0)
+        awesomeconf->borderpx = 0;
+}
+

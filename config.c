@@ -85,6 +85,7 @@ static const NameFuncLink KeyfuncList[] = {
     {"killclient", uicb_killclient},
     {"moveresize", uicb_moveresize},
     {"settrans", uicb_settrans},
+    {"setborder", uicb_setborder},
     /* tag.c */
     {"tag", uicb_tag},
     {"togglefloating", uicb_togglefloating},
