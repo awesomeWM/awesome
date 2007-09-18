@@ -5,12 +5,12 @@ awesome \- awesome window manager
 .B awesome
 .RB [ \-v ]
 .SH DESCRIPTION
-awesome is a dynamic window manager for X. It manages windows in tiled and
+awesome is a window manager for X. It manages windows in tiled and
 floating layouts. Either layout can be applied dynamically, optimizing the
 environment for the application in use and the task performed.
 .P
 In tiled layout windows are managed in a master and stacking area. The master
-area contains the window which currently needs most attention, whereas the
+area contains windows which currently needs most attention, whereas the
 stacking area contains all other windows. In floating layout windows can be
 resized and moved freely. Dialog windows are always managed floating,
 regardless of the layout applied.
@@ -22,12 +22,12 @@ awesome contains a small status bar which displays all available tags, the layou
 the title of the focused window, and the text read from standard input. A
 floating window is indicated with an empty square and a maximized
 floating window is indicated with a filled square before the windows
-title.  The selected tags are indicated with a different color. The tags of
+title. The selected tags are indicated with a different color. The tags of
 the focused window are indicated with a filled square in the top left
-corner.  The tags which are applied to one or more windows are indicated
+corner. The tags which are applied to one or more windows are indicated
 with an empty square in the top left corner.
 .P
-awesome draws a small border around windows to indicate the focus state.
+awesome can draw a small border around windows to indicate the focus state.
 .SH OPTIONS
 .TP
 .B \-v
@@ -52,80 +52,19 @@ click on a tag label applies that tag to the focused window.
 click on a tag label adds/removes that tag to/from the focused window.
 .SS Keyboard commands
 .TP
-.B Mod1\-Shift\-Return
-Start
-.BR xterm.
-.TP
-.B Mod1\-Return
-Zooms/cycles current window to/from master area (tiled layout only).
-.TP
-.B Mod1\-b
-Shows/hides the status bar.
-.TP
-.B Mod1\-h
-Decreases the master area width about 5% (tiled layout only).
-.TP
-.B Mod1\-j
-Focus next window.
-.TP
-.B Mod1\-k
-Focus previous window.
-.TP
-.B Mod1\-l
-Increases the master area width about 5% (tiled layout only).
-.TP
-.B Mod1\-m
-Toggles maximization of current window (floating layout only).
-.TP
-.B Mod1\-Shift\-[1..n]
-Apply
-.RB nth
-tag to current window.
-.TP
-.B Mod1\-Shift\-0
-Apply all tags to current window.
-.TP
-.B Mod1\-Control\-Shift\-[1..n]
-Add/remove
-.B nth
-tag to/from current window.
-.TP
-.B Mod1\-Shift\-c
-Close focused window.
-.TP
-.B Mod1\-space
-Toggle between tiled and floating layout (affects all windows).
-.TP
-.B Mod1\-Shift\-space
-Toggle focused window between tiled and floating state (tiled layout only).
-.TP
-.B Mod1\-[1..n]
-View all windows with
-.BR nth
-tag.
-.TP
-.B Mod1\-0
-View all windows with any tag.
-.TP
-.B Mod1\-Control\-[1..n]
-Add/remove all windows with
-.BR nth
-tag to/from the view.
-.TP
-.B Mod1\-Shift\-q
-Quit awesome.
+There's no keyboard binding by default, please look at the example file.
 .SS Mouse commands
 .TP
 .B Mod1\-Button1
-Move current window while dragging (floating layout only).
+Move current window while dragging (and make it floating if tiled).
 .TP
 .B Mod1\-Button2
-Zooms/cycles current window to/from master area (tiled layout only).
+Zooms/cycles current window to/from master area (or tile it if floating).
 .TP
 .B Mod1\-Button3
-Resize current window while dragging (floating layout only).
+Resize current window while dragging (and make it floating if tiled).
 .SH CUSTOMIZATION
-awesome is customized by creating a custom ~/.awesomerc
+awesome is customized by creating a custom ~/.awesomerc file.
 .SH SEE ALSO
 .BR dmenu (1)
 .SH BUGS
@@ -150,3 +89,7 @@ which requests to reconfigure its window size in an endless loop. However, its
 window is still respondable during this state, so you can simply ignore the flicker
 until a new GTK version appears, which will fix this bug, approximately
 GTK 2.10.12+ versions.
+.SH AUTHORS
+Julien Danjou <julien@danjou.info>
+.SH WWW
+http://awesome.naquadah.org
