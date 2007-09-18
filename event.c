@@ -60,7 +60,7 @@ movemouse(Client * c, int screen, awesome_config *awesomeconf)
     XEvent ev;
     ScreenInfo *si;
 
-    si = get_display_info(c->display, c->screen, awesomeconf[screen].statusbar);
+    si = get_screen_info(c->display, c->screen, awesomeconf[screen].statusbar, &x1);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
@@ -85,14 +85,14 @@ movemouse(Client * c, int screen, awesome_config *awesomeconf)
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(si->x_org + nx) < awesomeconf[screen].snap)
-                nx = si->x_org;
-            else if(abs((si->x_org + si->width) - (nx + c->w + 2 * c->border)) < awesomeconf[screen].snap)
-                nx = si->x_org + si->width - c->w - 2 * c->border;
-            if(abs(si->y_org - ny) < awesomeconf[screen].snap)
-                ny = si->y_org;
-            else if(abs((si->y_org + si->height) - (ny + c->h + 2 * c->border)) < awesomeconf[screen].snap)
-                ny = si->y_org + si->height - c->h - 2 * c->border;
+            if(abs(si[c->screen].x_org + nx) < awesomeconf[screen].snap)
+                nx = si[c->screen].x_org;
+            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < awesomeconf[screen].snap)
+                nx = si[c->screen].x_org + si[c->screen].width - c->w - 2 * c->border;
+            if(abs(si[c->screen].y_org - ny) < awesomeconf[screen].snap)
+                ny = si[c->screen].y_org;
+            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf[screen].snap)
+                ny = si[c->screen].y_org + si[c->screen].height - c->h - 2 * c->border;
             resize(c, nx, ny, c->w, c->h, False);
             break;
         }

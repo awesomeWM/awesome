@@ -1,7 +1,5 @@
 For v1.0:
 - Add uicb for sel->border++-- and awesomeconf->border++--
-- Remove warnings
-- Check togglemax
 - Write manpage
 
 For future:

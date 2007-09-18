@@ -22,7 +22,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#include "awesome.h"
+#include "screen.h"
 #include "layout.h"
 #include "tag.h"
 #include "util.h"
@@ -228,12 +228,13 @@ uicb_togglemax(Display *disp,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
-    maximize(get_windows_area_x(awesomeconf->statusbar),
-             get_windows_area_y(awesomeconf->statusbar),
-             get_windows_area_width(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
-             get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
-             drawcontext,
-             awesomeconf);
+    int dummy;
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
+
+    maximize(si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
+             si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
+             si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
+             drawcontext, awesomeconf);
 }
 
 void
@@ -242,13 +243,13 @@ uicb_toggleverticalmax(Display *disp,
                        awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
 {
+    int dummy;
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
+
     if(sel)
-        maximize(sel->x,
-                 get_windows_area_y(awesomeconf->statusbar),
-                 sel->w,
-                 get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
-                 drawcontext,
-                 awesomeconf);
+        maximize(sel->x, si[awesomeconf->screen].y_org,
+                 sel->w, si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
+                 drawcontext, awesomeconf);
 }
 
 
@@ -258,13 +259,13 @@ uicb_togglehorizontalmax(Display *disp,
                          awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
 {
+    int dummy;
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
+
     if(sel)
-        maximize(get_windows_area_x(awesomeconf->statusbar),
-                 sel->y,
-                 get_windows_area_height(disp, awesomeconf->statusbar) - 2 * awesomeconf->borderpx,
-                 sel->h,
-                 drawcontext,
-                 awesomeconf);
+        maximize(si[awesomeconf->screen].x_org, sel->y,
+                 si[awesomeconf->screen].height - 2 * awesomeconf->borderpx, sel->h,
+                 drawcontext, awesomeconf);
 }
 
 void 
