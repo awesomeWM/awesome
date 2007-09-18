@@ -3,7 +3,6 @@ For v1.0:
 - Remove warnings
 - Check spiral layout
 - Check togglemax
-- Check that all uicb have key binding in default conf
 - Write manpage
 
 For future:
