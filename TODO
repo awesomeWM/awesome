@@ -4,7 +4,6 @@ For v1.0:
 - Check spiral layout
 - Check togglemax
 - Check that all uicb have key binding in default conf
-- Allow awesome to be run without any configuration file
 - Write manpage
 
 For future:

@@ -154,14 +154,43 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
  * \param awesomeconf awesome config ref
  */
 static void
-set_default_config(awesome_config *awesomeconf)
+set_default_config(awesome_config *awesomeconf, DC *drawcontext)
 {
+    /** \todo most of this stuff aren't freed when we initialize
+     * the real configuration, we should add a clean conf function */
     strcpy(awesomeconf->statustext, "awesome-" VERSION);
     awesomeconf->statusbar.width = 0;
     awesomeconf->statusbar.height = 0;
     awesomeconf->opacity_unfocused = -1;
     awesomeconf->nkeys = 0;
     awesomeconf->nrules = 0;
+
+    awesomeconf->nlayouts = 2;
+    awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts + 1);
+    awesomeconf->layouts[0].symbol = a_strdup("[]=");
+    awesomeconf->layouts[0].arrange = tile;
+    awesomeconf->layouts[1].symbol = a_strdup("<><");
+    awesomeconf->layouts[1].arrange = floating;
+    awesomeconf->layouts[2].symbol = NULL;
+    awesomeconf->layouts[2].arrange = NULL;
+
+    awesomeconf->ntags = 3;
+    awesomeconf->tags = p_new(char *, awesomeconf->ntags);
+    awesomeconf->selected_tags = p_new(Bool, awesomeconf->ntags);
+    awesomeconf->prev_selected_tags = p_new(Bool, awesomeconf->ntags);
+    awesomeconf->tag_layouts = p_new(Layout *, awesomeconf->ntags);
+    awesomeconf->tags[0] = a_strdup("this");
+    awesomeconf->tags[1] = a_strdup("is");
+    awesomeconf->tags[2] = a_strdup("awesome");
+    awesomeconf->selected_tags[0] = True;
+    awesomeconf->selected_tags[1] = False;
+    awesomeconf->selected_tags[2] = False;
+    awesomeconf->prev_selected_tags[0] = False;
+    awesomeconf->prev_selected_tags[1] = False;
+    awesomeconf->prev_selected_tags[2] = False;
+    awesomeconf->tag_layouts[0] = awesomeconf->layouts;
+    awesomeconf->tag_layouts[1] = awesomeconf->layouts;
+    awesomeconf->tag_layouts[2] = awesomeconf->layouts;
 }
 
 /** Parse configuration file and initialize some stuff
@@ -184,7 +213,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     char *confpath;
     KeySym tmp_key;
 
-    set_default_config(awesomeconf);
+    set_default_config(awesomeconf, drawcontext);
 
     homedir = getenv("HOME");
     confpath = p_new(char, strlen(homedir) + strlen(AWESOME_CONFIG_FILE) + 2);
@@ -198,8 +227,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     awesomeconf->screen = scr;
 
     if(config_read_file(&awesomelibconf, confpath) == CONFIG_FALSE)
-        eprint("awesome: error parsing configuration file at line %d: %s\n",
+        fprintf(stderr, "awesome: error parsing configuration file at line %d: %s\n",
                config_error_line(&awesomelibconf), config_error_text(&awesomelibconf));
+    
 
     /* font */
     tmp = config_lookup_string(&awesomelibconf, "awesome.font");
@@ -209,7 +239,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     conflayouts = config_lookup(&awesomelibconf, "awesome.layouts");
 
     if(!conflayouts)
-        fprintf(stderr, "layouts not found in configuration file\n");
+        fprintf(stderr, "awesome: layouts not found in configuration file\n");
     else
     {
         awesomeconf->nlayouts = config_setting_length(conflayouts);
@@ -225,40 +255,49 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
                 continue;
             }
             awesomeconf->layouts[i].symbol = a_strdup(config_setting_get_string_elem(confsublayouts, 0));
-
-            j = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->layouts[i].symbol, drawcontext->font.height);
-            if(j > awesomeconf->statusbar.width)
-                awesomeconf->statusbar.width = j;
         }
         awesomeconf->layouts[i].symbol = NULL;
         awesomeconf->layouts[i].arrange = NULL;
     }
 
-
-    if(!awesomeconf->layouts[0].arrange)
+    if(!awesomeconf->nlayouts)
         eprint("awesome: fatal: no default layout available\n");
-    /** \todo put this in set_default_layout */
+
+    for(i = 0; i < awesomeconf->nlayouts; i++)
+    {
+        j = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->layouts[i].symbol, drawcontext->font.height);
+        if(j > awesomeconf->statusbar.width)
+            awesomeconf->statusbar.width = j;
+    }
+
     awesomeconf->current_layout = awesomeconf->layouts;
 
     /* tags */
     conftags = config_lookup(&awesomelibconf, "awesome.tags");
 
     if(!conftags)
-        eprint("awesome: fatal: no tags found in configuration file\n");
-    awesomeconf->ntags = config_setting_length(conftags);
-    awesomeconf->tags = p_new(char *, awesomeconf->ntags);
-    awesomeconf->selected_tags = p_new(Bool, awesomeconf->ntags);
-    awesomeconf->prev_selected_tags = p_new(Bool, awesomeconf->ntags);
-    awesomeconf->tag_layouts = p_new(Layout *, awesomeconf->ntags);
-
-    for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
+        fprintf(stderr, "awesome: tags not found in configuration file\n");
+    else
     {
-        awesomeconf->tags[i] = a_strdup(tmp);
-        awesomeconf->selected_tags[i] = False;
-        awesomeconf->prev_selected_tags[i] = False;
-        /** \todo add support for default tag/layout in configuration file */
-        awesomeconf->tag_layouts[i] = awesomeconf->layouts;
+        awesomeconf->ntags = config_setting_length(conftags);
+        awesomeconf->tags = p_new(char *, awesomeconf->ntags);
+        awesomeconf->selected_tags = p_new(Bool, awesomeconf->ntags);
+        awesomeconf->prev_selected_tags = p_new(Bool, awesomeconf->ntags);
+        /** \todo move this in tags or layouts */
+        awesomeconf->tag_layouts = p_new(Layout *, awesomeconf->ntags);
+
+        for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
+        {
+            awesomeconf->tags[i] = a_strdup(tmp);
+            awesomeconf->selected_tags[i] = False;
+            awesomeconf->prev_selected_tags[i] = False;
+            /** \todo add support for default tag/layout in configuration file */
+            awesomeconf->tag_layouts[i] = awesomeconf->layouts;
+        }
     }
+
+    if(!awesomeconf->ntags)
+        eprint("awesome: fatal: no tags found in configuration file\n");
 
     /* select first tag by default */
     awesomeconf->selected_tags[0] = True;
@@ -420,7 +459,7 @@ initfont(const char *fontstr, Display * disp, DC * drawcontext)
         drawcontext->font.xfont = NULL;
         if(!(drawcontext->font.xfont = XLoadQueryFont(disp, fontstr))
            || !(drawcontext->font.xfont = XLoadQueryFont(disp, "fixed")))
-            eprint("error, cannot load font: '%s'\n", fontstr);
+            die("awesome: error, cannot load font: '%s'\n", fontstr);
         drawcontext->font.ascent = drawcontext->font.xfont->ascent;
         drawcontext->font.descent = drawcontext->font.xfont->descent;
     }
@@ -460,6 +499,6 @@ initcolor(const char *colstr, Display * disp, int scr)
     Colormap cmap = DefaultColormap(disp, scr);
     XColor color;
     if(!XAllocNamedColor(disp, cmap, colstr, &color, &color))
-        eprint("error, cannot allocate color '%s'\n", colstr);
+        die("awesome: error, cannot allocate color '%s'\n", colstr);
     return color.pixel;
 }
