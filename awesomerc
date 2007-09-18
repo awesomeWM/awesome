@@ -24,7 +24,8 @@ awesome:
     opacity_unfocused = 100;
 
     # Available layouts
-    layouts = (("[]=", "tile"),
+    layouts = (
+               ("[]=", "tile"),
                ("=[]", "tileleft"),
                ("><>", "floating")
               );
@@ -70,6 +71,8 @@ awesome:
             (("Mod4"), "k", "focusprev"),
             (("Mod4"), "h", "setmwfact", "-0.05"),
             (("Mod4"), "l", "setmwfact", "+0.05"),
+            (("Mod4"), "p", "setborder", "+1),
+            (("Mod4", "Shift"), "p", "setborder", "+2),
             (("Mod4", "Shift"), "h", "setnmaster", "+1"),
             (("Mod4", "Shift"), "l", "setnmaster", "-1"),
             (("Mod4", "Control"), "h", "setncols", "+1"),
