@@ -25,11 +25,9 @@ awesome:
 
     # Available layouts
     layouts = (("[]=", "tile"),
-             ("=[]", "tileleft"),
-             ("(@)", "spiral"),
-             ("[\]", "dwindle"),
-             ("><>", "floating"),
-            );
+               ("=[]", "tileleft"),
+               ("><>", "floating")
+              );
 
     # Number of master windows (used by tile layouts)
     nmaster = 2;

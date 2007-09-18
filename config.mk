@@ -4,7 +4,7 @@ VERSION = devel
 # Customize below to fit your system
 
 # additional layouts beside floating
-LAYOUTS = layouts/tile.c layouts/spiral.c layouts/floating.c
+LAYOUTS = layouts/tile.c layouts/floating.c
 
 # paths
 PREFIX = /usr/local

@@ -34,7 +34,6 @@
 #include "util.h"
 #include "statusbar.h"
 #include "layouts/tile.h"
-#include "layouts/spiral.h"
 #include "layouts/floating.h"
 
 static void initfont(const char *, Display *, DC *);
@@ -75,8 +74,6 @@ static const NameFuncLink LayoutsList[] =
     {"tile", tile},
     {"tileleft", tileleft},
     {"floating", floating},
-    {"spiral", spiral},
-    {"dwindle", dwindle},
     {NULL, NULL}
 };
 
@@ -154,7 +151,7 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
  * \param awesomeconf awesome config ref
  */
 static void
-set_default_config(awesome_config *awesomeconf, DC *drawcontext)
+set_default_config(awesome_config *awesomeconf)
 {
     /** \todo most of this stuff aren't freed when we initialize
      * the real configuration, we should add a clean conf function */
@@ -213,7 +210,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     char *confpath;
     KeySym tmp_key;
 
-    set_default_config(awesomeconf, drawcontext);
+    set_default_config(awesomeconf);
 
     homedir = getenv("HOME");
     confpath = p_new(char, strlen(homedir) + strlen(AWESOME_CONFIG_FILE) + 2);
