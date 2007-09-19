@@ -268,6 +268,7 @@ xerror(Display * edpy, XErrorEvent * ee)
  * \param argv who knows
  * \return EXIT_SUCCESS I hope
  */
+typedef void event_handler (XEvent *, awesome_config *); 
 int
 main(int argc, char *argv[])
 {
@@ -281,6 +282,7 @@ main(int argc, char *argv[])
     int screen;
     enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
     Atom netatom[NetLast];
+    event_handler **handler;
 
     if(argc == 2 && !strcmp("-v", argv[1]))
     {
@@ -325,29 +327,33 @@ main(int argc, char *argv[])
         drawstatusbar(dpy, screen, &dc[screen], &awesomeconf[screen]);
     }
 
-    void (*handler[LASTEvent]) (XEvent *, awesome_config *) = 
-    {
-        [ButtonPress] = handle_event_buttonpress,
-        [ConfigureRequest] = handle_event_configurerequest,
-        [ConfigureNotify] = handle_event_configurenotify,
-        [DestroyNotify] = handle_event_destroynotify,
-        [EnterNotify] = handle_event_enternotify,
-        [LeaveNotify] = handle_event_leavenotify,
-        [Expose] = handle_event_expose,
-        [KeyPress] = handle_event_keypress,
-        [MappingNotify] = handle_event_mappingnotify,
-        [MapRequest] = handle_event_maprequest,
-        [PropertyNotify] = handle_event_propertynotify,
-        [UnmapNotify] = handle_event_unmapnotify,
-    };
+    handler = p_new(event_handler *, LASTEvent);
+    handler[ButtonPress] = handle_event_buttonpress;
+    handler[ConfigureRequest] = handle_event_configurerequest;
+    handler[ConfigureNotify] = handle_event_configurenotify;
+    handler[DestroyNotify] = handle_event_destroynotify;
+    handler[EnterNotify] = handle_event_enternotify;
+    handler[LeaveNotify] = handle_event_leavenotify;
+    handler[Expose] = handle_event_expose;
+    handler[KeyPress] = handle_event_keypress;
+    handler[MappingNotify] = handle_event_mappingnotify;
+    handler[MapRequest] = handle_event_maprequest;
+    handler[PropertyNotify] = handle_event_propertynotify;
+    handler[UnmapNotify] = handle_event_unmapnotify;
 
     /* check for shape extension */
     if((awesomeconf[0].have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
+    {
+        p_realloc(&handler, shape_event + 1);
         handler[shape_event] = handle_event_shape;
+    }
 
     /* check for randr extension */
     if((awesomeconf[0].have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
-       handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
+    {
+        p_realloc(&handler, randr_event_base + RRScreenChangeNotify + 1);
+        handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
+    }
 
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
