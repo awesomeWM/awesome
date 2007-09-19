@@ -34,7 +34,7 @@ dist: clean
 	@echo creating dist tarball
 	@mkdir awesome-${VERSION}
 	@mkdir awesome-${VERSION}/layouts
-	@cp -R LICENSE AUTHORS Makefile README config.mk \
+	@cp -R LICENSE AUTHORS Makefile README awesomerc config.mk \
 	    awesome.1 ${SRC} ${SRC:.c=.h} awesome-${VERSION}
 	@cp -R ${LAYOUTS} ${LAYOUTS:.c=.h} awesome-${VERSION}/layouts
 	@tar -cf awesome-${VERSION}.tar awesome-${VERSION}
