@@ -52,7 +52,7 @@ getclient(Window w)
 }
 
 static void
-movemouse(Client * c, int screen, awesome_config *awesomeconf)
+movemouse(Client * c, awesome_config *awesomeconf)
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
@@ -60,7 +60,7 @@ movemouse(Client * c, int screen, awesome_config *awesomeconf)
     XEvent ev;
     ScreenInfo *si;
 
-    si = get_screen_info(c->display, c->screen, awesomeconf[screen].statusbar, &x1);
+    si = get_screen_info(c->display, c->screen, awesomeconf->statusbar, &x1);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
@@ -85,13 +85,13 @@ movemouse(Client * c, int screen, awesome_config *awesomeconf)
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(si[c->screen].x_org + nx) < awesomeconf[screen].snap)
+            if(abs(si[c->screen].x_org + nx) < awesomeconf->snap)
                 nx = si[c->screen].x_org;
-            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < awesomeconf[screen].snap)
+            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < awesomeconf->snap)
                 nx = si[c->screen].x_org + si[c->screen].width - c->w - 2 * c->border;
-            if(abs(si[c->screen].y_org - ny) < awesomeconf[screen].snap)
+            if(abs(si[c->screen].y_org - ny) < awesomeconf->snap)
                 ny = si[c->screen].y_org;
-            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf[screen].snap)
+            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf->snap)
                 ny = si[c->screen].y_org + si[c->screen].height - c->h - 2 * c->border;
             resize(c, nx, ny, c->w, c->h, False);
             break;
@@ -190,7 +190,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 uicb_togglefloating(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
-            movemouse(c, screen, awesomeconf);
+            movemouse(c, &awesomeconf[c->screen]);
         }
         else if(ev->button == Button2)
         {

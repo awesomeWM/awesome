@@ -55,12 +55,12 @@ drawstatusbar(Display *disp, int screen, DC *drawcontext, awesome_config * aweso
         if(awesomeconf->selected_tags[i])
         {
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i], drawcontext->sel);
-            drawsquare(disp, *drawcontext, sel && sel->tags[i], isoccupied(i, screen), drawcontext->sel, &awesomeconf->statusbar);
+            drawsquare(disp, *drawcontext, sel && sel->tags[i], isoccupied(i, screen), drawcontext->sel[ColFG], &awesomeconf->statusbar);
         }
         else
         {
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i], drawcontext->norm);
-            drawsquare(disp, *drawcontext, sel && sel->tags[i], isoccupied(i, screen), drawcontext->norm, &awesomeconf->statusbar);
+            drawsquare(disp, *drawcontext, sel && sel->tags[i], isoccupied(i, screen), drawcontext->norm[ColFG], &awesomeconf->statusbar);
         }
         drawcontext->x += drawcontext->w;
     }
@@ -81,7 +81,7 @@ drawstatusbar(Display *disp, int screen, DC *drawcontext, awesome_config * aweso
         if(sel)
         {
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, sel->name, drawcontext->sel);
-            drawsquare(disp, *drawcontext, sel->ismax, sel->isfloating, drawcontext->sel, &awesomeconf->statusbar);
+            drawsquare(disp, *drawcontext, sel->ismax, sel->isfloating, drawcontext->sel[ColFG], &awesomeconf->statusbar);
         }
         else
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, NULL, drawcontext->norm);

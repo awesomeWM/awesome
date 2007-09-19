@@ -70,13 +70,13 @@ drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, uns
 }
 
 void
-drawsquare(Display *disp, DC drawcontext, Bool filled, Bool empty, unsigned long col[ColLast], Statusbar *statusbar)
+drawsquare(Display *disp, DC drawcontext, Bool filled, Bool empty, unsigned long col, Statusbar *statusbar)
 {
     int x;
     XGCValues gcv;
     XRectangle r = { drawcontext.x, drawcontext.y, drawcontext.w, drawcontext.h };
 
-    gcv.foreground = col[ColFG];
+    gcv.foreground = col;
     XChangeGC(disp, drawcontext.gc, GCForeground, &gcv);
     x = (drawcontext.font.ascent + drawcontext.font.descent + 2) / 4;
     r.x = drawcontext.x + 1;
