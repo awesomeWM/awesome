@@ -32,7 +32,7 @@
 
 #define p_new(type, count)      ((type *)xmalloc(sizeof(type) * (count)))
 #define p_clear(p, count)       ((void)memset((p), 0, sizeof(*(p)) * (count)))
-#define p_realloc(pp, count)    xrealloc((void*)(pp) sizeof(**(pp) * (count)))
+#define p_realloc(pp, count)    xrealloc((void*)(pp), sizeof(**(pp)) * (count))
 #define p_dup(p, count)         xmemdup((p), sizeof(*(p)) * (count))
 
 #ifdef __GNUC__
