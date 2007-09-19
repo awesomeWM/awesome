@@ -195,10 +195,8 @@ uicb_setlayout(Display *disp,
 }
 
 static void
-maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomeconf)
+maximize(Display *disp, int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomeconf)
 {
-    XEvent ev;
-
     if(!sel)
         return;
 
@@ -217,9 +215,7 @@ maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomecon
     else
         sel->isfloating = False;
 
-    drawstatusbar(sel->display, sel->screen, drawcontext, awesomeconf);
-
-    while(XCheckMaskEvent(sel->display, EnterWindowMask, &ev));
+    restack(disp, drawcontext, awesomeconf);
 }
 
 void
@@ -231,7 +227,7 @@ uicb_togglemax(Display *disp,
     int dummy;
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
 
-    maximize(si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
+    maximize(disp, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
              si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
              si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
              drawcontext, awesomeconf);
@@ -247,7 +243,7 @@ uicb_toggleverticalmax(Display *disp,
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
 
     if(sel)
-        maximize(sel->x, si[awesomeconf->screen].y_org,
+        maximize(disp, sel->x, si[awesomeconf->screen].y_org,
                  sel->w, si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
                  drawcontext, awesomeconf);
 }
@@ -263,7 +259,7 @@ uicb_togglehorizontalmax(Display *disp,
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
 
     if(sel)
-        maximize(si[awesomeconf->screen].x_org, sel->y,
+        maximize(disp, si[awesomeconf->screen].x_org, sel->y,
                  si[awesomeconf->screen].height - 2 * awesomeconf->borderpx, sel->h,
                  drawcontext, awesomeconf);
 }
