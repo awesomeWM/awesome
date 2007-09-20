@@ -92,7 +92,9 @@ static const NameFuncLink KeyfuncList[] = {
     {"toggleview", uicb_toggleview},
     {"toggletag", uicb_toggletag},
     {"view", uicb_view},
-    {"viewprevtags", uicb_viewprevtags},
+    {"view_tag_prev_selected", uicb_tag_prev_selected},
+    {"view_tag_previous", uicb_tag_viewprev},
+    {"view_tag_next", uicb_tag_viewnext},
     /* layout.c */
     {"setlayout", uicb_setlayout},
     {"focusnext", uicb_focusnext},

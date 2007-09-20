@@ -36,7 +36,7 @@ void uicb_togglefloating(Display *, DC *, awesome_config *, const char *);      
 void uicb_toggletag(Display *, DC *, awesome_config *, const char *);   /* toggles sel tags with arg's index */
 void uicb_toggleview(Display *, DC *, awesome_config *, const char *);  /* toggles the tag with arg's index (in)visible */
 void uicb_view(Display *, DC *, awesome_config *, const char *);        /* views the tag with arg's index */
-void uicb_viewprevtags(Display *, DC *, awesome_config *, const char *);
+void uicb_tag_prev_selected(Display *, DC *, awesome_config *, const char *);
 void uicb_tag_viewnext(Display *, DC *, awesome_config *, const char *);        /* view only tag just after the first selected */
 void uicb_tag_viewprev(Display *, DC *, awesome_config *, const char *);        /* view only tag just before the first selected */
 

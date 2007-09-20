@@ -279,10 +279,10 @@ uicb_view(Display *disp,
  * \ingroup ui_callback
  */
 void
-uicb_viewprevtags(Display * disp,
-                  DC *drawcontext,
-                  awesome_config *awesomeconf,
-                  const char *arg __attribute__ ((unused)))
+uicb_tag_prev_selected(Display * disp,
+                       DC *drawcontext,
+                       awesome_config *awesomeconf,
+                       const char *arg __attribute__ ((unused)))
 {
     int i;
     Bool t;
