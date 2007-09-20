@@ -37,7 +37,7 @@ uicb_setnmaster(Display *disp,
                 awesome_config *awesomeconf,
                 const char * arg)
 {
-    if(!arg || (!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft)))
+    if(!arg || (IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)))
         return;
 
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
@@ -52,7 +52,7 @@ uicb_setncols(Display *disp,
               awesome_config *awesomeconf,
               const char * arg)
 {
-    if(!arg || (!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft)))
+    if(!arg || (!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)))
         return;
 
     if((awesomeconf->ncols = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncols)) < 1)
@@ -67,7 +67,7 @@ uicb_setmwfact(Display *disp,
                awesome_config * awesomeconf,
                const char *arg)
 {
-    if(!IS_ARRANGE(tile) && !IS_ARRANGE(tileleft))
+    if(!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft))
         return;
 
     if((awesomeconf->mwfact = compute_new_value_from_arg(arg, awesomeconf->mwfact)) < 0.1)
@@ -192,13 +192,13 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 }
 
 void
-tile(Display *disp, awesome_config *awesomeconf)
+layout_tile(Display *disp, awesome_config *awesomeconf)
 {
     _tile(disp, awesomeconf, True);
 }
 
 void
-tileleft(Display *disp, awesome_config *awesomeconf)
+layout_tileleft(Display *disp, awesome_config *awesomeconf)
 {
     _tile(disp, awesomeconf, False);
 }

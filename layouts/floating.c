@@ -27,7 +27,7 @@
 extern Client *clients;         /* global client */
 
 void
-floating(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
+layout_floating(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
 {                               /* default floating layout */
     Client *c;
 

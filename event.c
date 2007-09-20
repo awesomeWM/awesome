@@ -186,7 +186,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             return;
         if(ev->button == Button1)
         {
-            if(!IS_ARRANGE(floating) && !c->isfloating)
+            if(!IS_ARRANGE(layout_floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
@@ -194,14 +194,14 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         }
         else if(ev->button == Button2)
         {
-            if(IS_ARRANGE(tile) && !c->isfixed && c->isfloating)
+            if(!IS_ARRANGE(layout_floating) && !c->isfixed && c->isfloating)
                 uicb_togglefloating(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
                 uicb_zoom(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
         }
         else if(ev->button == Button3)
         {
-            if(!IS_ARRANGE(floating) && !c->isfloating)
+            if(!IS_ARRANGE(layout_floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
@@ -231,7 +231,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
         c->ismax = False;
         if(ev->value_mask & CWBorderWidth)
             c->border = ev->border_width;
-        if(c->isfixed || c->isfloating || IS_ARRANGE(floating))
+        if(c->isfixed || c->isfloating || IS_ARRANGE(layout_floating))
         {
             if(ev->value_mask & CWX)
                 c->x = ev->x;

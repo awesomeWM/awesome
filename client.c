@@ -513,7 +513,7 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
     unsigned int dui;
     Window dummy;
 
-    if(!IS_ARRANGE(floating))
+    if(!IS_ARRANGE(layout_floating))
         if(!sel || !sel->isfloating || sel->isfixed || !arg)
             return;
     if(sscanf(arg, "%d%c %d%c %d%c %d%c", &x, &xabs, &y, &yabs, &w, &wabs, &h, &habs) != 8)

@@ -71,9 +71,9 @@ static const KeyMod KeyModList[] =
 /** List of available layouts and link between name and functions */
 static const NameFuncLink LayoutsList[] =
 {
-    {"tile", tile},
-    {"tileleft", tileleft},
-    {"floating", floating},
+    {"tile", layout_tile},
+    {"tileleft", layout_tileleft},
+    {"floating", layout_floating},
     {NULL, NULL}
 };
 
@@ -166,9 +166,9 @@ set_default_config(awesome_config *awesomeconf)
     awesomeconf->nlayouts = 2;
     awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts + 1);
     awesomeconf->layouts[0].symbol = a_strdup("[]=");
-    awesomeconf->layouts[0].arrange = tile;
+    awesomeconf->layouts[0].arrange = layout_tile;
     awesomeconf->layouts[1].symbol = a_strdup("<><");
-    awesomeconf->layouts[1].arrange = floating;
+    awesomeconf->layouts[1].arrange = layout_floating;
     awesomeconf->layouts[2].symbol = NULL;
     awesomeconf->layouts[2].arrange = NULL;
 
