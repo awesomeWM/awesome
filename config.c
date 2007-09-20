@@ -34,6 +34,7 @@
 #include "util.h"
 #include "statusbar.h"
 #include "layouts/tile.h"
+#include "layouts/max.h"
 #include "layouts/floating.h"
 
 static void initfont(const char *, Display *, DC *);
@@ -73,6 +74,7 @@ static const NameFuncLink LayoutsList[] =
 {
     {"tile", layout_tile},
     {"tileleft", layout_tileleft},
+    {"max", layout_max},
     {"floating", layout_floating},
     {NULL, NULL}
 };

@@ -1,5 +1,5 @@
 /*  
- * floating.c - floating layout
+ * max.h - max layout header
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info> 
  * 
@@ -19,26 +19,9 @@
  * 
  */
 
-#include "tag.h"
-#include "layouts/floating.h"
+#ifndef AWESOME_MAX_H
+#define AWESOME_MAX_H
 
-/* extern */
-extern Client *clients;         /* global client */
+void layout_max(Display *, awesome_config *);
 
-void
-layout_floating(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
-{                               /* default floating layout */
-    Client *c;
-
-    for(c = clients; c; c = c->next)
-        if(isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
-        {
-            if(c->ftview)
-            {
-                resize(c, c->rx, c->ry, c->rw, c->rh, True);
-                c->ftview = False;
-            }
-            else
-                resize(c, c->x, c->y, c->w, c->h, True);
-        }
-}
+#endif

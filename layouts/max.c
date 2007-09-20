@@ -1,5 +1,5 @@
 /*  
- * floating.c - floating layout
+ * max.c - max layout
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info> 
  * 
@@ -20,25 +20,23 @@
  */
 
 #include "tag.h"
-#include "layouts/floating.h"
+#include "screen.h"
+#include "layouts/max.h"
 
 /* extern */
 extern Client *clients;         /* global client */
 
 void
-layout_floating(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
-{                               /* default floating layout */
+layout_max(Display *disp, awesome_config *awesomeconf)
+{
     Client *c;
+    int dummy;
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
 
     for(c = clients; c; c = c->next)
-        if(isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
-        {
-            if(c->ftview)
-            {
-                resize(c, c->rx, c->ry, c->rw, c->rh, True);
-                c->ftview = False;
-            }
-            else
-                resize(c, c->x, c->y, c->w, c->h, True);
-        }
+        if(IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
+            resize(c, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
+                   si[awesomeconf->screen].width - 2 * c->border,
+                   si[awesomeconf->screen].height - 2 * c->border, awesomeconf->resize_hints);
+    XFree(si);
 }

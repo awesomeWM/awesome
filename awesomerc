@@ -27,6 +27,7 @@ awesome:
     layouts = (
                ("[]=", "tile"),
                ("=[]", "tileleft"),
+               ("[ ]", "max"),
                ("><>", "floating")
               );
 
