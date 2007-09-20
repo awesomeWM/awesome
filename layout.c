@@ -195,7 +195,7 @@ uicb_setlayout(Display *disp,
 }
 
 static void
-maximize(Display *disp, int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomeconf)
+maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomeconf)
 {
     if(!sel)
         return;
@@ -215,7 +215,7 @@ maximize(Display *disp, int x, int y, int w, int h, DC *drawcontext, awesome_con
     else
         sel->isfloating = False;
 
-    restack(disp, drawcontext, awesomeconf);
+    arrange(sel->display, drawcontext, awesomeconf);
 }
 
 void
@@ -227,7 +227,7 @@ uicb_togglemax(Display *disp,
     int dummy;
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
 
-    maximize(disp, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
+    maximize(si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
              si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
              si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
              drawcontext, awesomeconf);
@@ -243,7 +243,7 @@ uicb_toggleverticalmax(Display *disp,
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
 
     if(sel)
-        maximize(disp, sel->x, si[awesomeconf->screen].y_org,
+        maximize(sel->x, si[awesomeconf->screen].y_org,
                  sel->w, si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
                  drawcontext, awesomeconf);
 }
@@ -259,7 +259,7 @@ uicb_togglehorizontalmax(Display *disp,
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
 
     if(sel)
-        maximize(disp, si[awesomeconf->screen].x_org, sel->y,
+        maximize(si[awesomeconf->screen].x_org, sel->y,
                  si[awesomeconf->screen].height - 2 * awesomeconf->borderpx, sel->h,
                  drawcontext, awesomeconf);
 }
