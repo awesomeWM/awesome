@@ -140,6 +140,7 @@ isvisible(Client * c, int screen, Bool * tags, int ntags)
 
 /** Tag selected window with tag
  * \param disp Display ref
+ * \param drawcontext Drawcontext ref
  * \param arg Tag name
  * \ingroup ui_callback
  */
@@ -164,6 +165,7 @@ uicb_tag(Display *disp,
 
 /** Toggle floating state of a client
  * \param disp Display ref
+ * \param drawcontext Drawcontext ref
  * \param arg unused
  * \ingroup ui_callback
  */
@@ -193,6 +195,7 @@ uicb_togglefloating(Display *disp,
 
 /** Toggle tag view
  * \param disp Display ref
+ * \param drawcontext Drawcontext ref
  * \param arg Tag name
  * \ingroup ui_callback
  */
@@ -218,6 +221,7 @@ uicb_toggletag(Display *disp,
 
 /** Add a tag to viewed tags
  * \param disp Display ref
+ * \param drawcontext Drawcontext ref
  * \param arg Tag name
  * \ingroup ui_callback
  */
@@ -294,6 +298,7 @@ uicb_viewprevtags(Display * disp,
 
 /** View next tag
  * \param disp Display ref
+ * \param drawcontext Drawcontext ref
  * \param arg unused
  * \ingroup ui_callback
  */
@@ -321,6 +326,7 @@ uicb_tag_viewnext(Display *disp,
 
 /** View previous tag
  * \param disp Display ref
+ * \param drawcontext Drawcontext ref
  * \param arg unused
  * \ingroup ui_callback
  */
