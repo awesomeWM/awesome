@@ -32,7 +32,7 @@ drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, uns
 {
     int x, y, w, h;
     static char buf[256];
-    unsigned int len, olen;
+    size_t len, olen;
     XRectangle r = { drawcontext.x, drawcontext.y, drawcontext.w, drawcontext.h };
 
     XSetForeground(disp, drawcontext.gc, col[ColBG]);
@@ -41,8 +41,8 @@ drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, uns
         return;
     w = 0;
     olen = len = a_strlen(text);
-    if(len >= sizeof buf)
-        len = sizeof buf - 1;
+    if(len >= sizeof(buf))
+        len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
     h = drawcontext.font.ascent + drawcontext.font.descent;
@@ -70,7 +70,7 @@ drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, uns
 }
 
 void
-drawsquare(Display *disp, DC drawcontext, Bool filled, Bool empty, unsigned long col, Statusbar *statusbar)
+drawsquare(Display *disp, DC drawcontext, Drawable drawable, Bool filled, unsigned long col)
 {
     int x;
     XGCValues gcv;
@@ -81,20 +81,18 @@ drawsquare(Display *disp, DC drawcontext, Bool filled, Bool empty, unsigned long
     x = (drawcontext.font.ascent + drawcontext.font.descent + 2) / 4;
     r.x = drawcontext.x + 1;
     r.y = drawcontext.y + 1;
+    r.width = r.height = x;
     if(filled)
     {
-        r.width = r.height = x + 1;
-        XFillRectangles(disp, statusbar->drawable, drawcontext.gc, &r, 1);
+        r.width++; r.height++;
+        XFillRectangles(disp, drawable, drawcontext.gc, &r, 1);
     }
-    else if(empty)
-    {
-        r.width = r.height = x;
-        XDrawRectangles(disp, statusbar->drawable, drawcontext.gc, &r, 1);
-    }
+    else
+        XDrawRectangles(disp, drawable, drawcontext.gc, &r, 1);
 }
 
-unsigned int
-textnw(XFontSet set, XFontStruct *xfont, const char *text, unsigned int len)
+int
+textnw(XFontSet set, XFontStruct *xfont, const char *text, int len)
 {
     XRectangle r;
 
