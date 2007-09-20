@@ -110,7 +110,12 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
                && ((i - last_i) >= masterwin + otherwin
                    || n == screen_numbers)))
         {
-            use_screen++;
+            /* for multi-head without Xinerama */
+            if(screen_numbers != 1)
+                use_screen++;
+            else
+                use_screen = awesomeconf->screen;
+
             last_i = i;
 
             wah = screens_info[use_screen].height;

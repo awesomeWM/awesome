@@ -32,23 +32,27 @@
 ScreenInfo *
 get_screen_info(Display *disp, int screen, Statusbar statusbar, int *screen_number)
 {
-    int i;
+    int i, fake_screen_number = 0;
     ScreenInfo *si;
 
     if(XineramaIsActive(disp))
+    {
         si = XineramaQueryScreens(disp, screen_number);
+        fake_screen_number = *screen_number;
+    }
     else
     {
         /* emulate Xinerama info but only fill the screen we want */
-        *screen_number = screen + 1;
+        *screen_number =  1;
         si = p_new(ScreenInfo, screen + 1);
         si[screen].width = DisplayWidth(disp, screen);
         si[screen].height = DisplayHeight(disp, screen);
         si[screen].x_org = 0;
         si[screen].y_org = 0;
+        fake_screen_number = screen + 1;
     }
 
-    for(i = 0; i < *screen_number; i++)
+    for(i = 0; i < fake_screen_number; i++)
     {
         if(statusbar.position == BarTop 
            || statusbar.position == BarBot)
