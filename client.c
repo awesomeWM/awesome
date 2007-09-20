@@ -201,7 +201,7 @@ updatetitle(Client * c)
         xgettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof c->name);
 }
 
-/** Ban client
+/** Ban client and unmapped it
  * \param c the client
  */
 void
@@ -293,6 +293,7 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
 
 /** Kill selected client
  * \param disp Display ref
+ * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  * \param arg unused
  * \ingroup ui_callback
@@ -321,6 +322,13 @@ uicb_killclient(Display *disp __attribute__ ((unused)),
         XKillClient(sel->display, sel->win);
 }
 
+
+/** Load windows properties, restoring client's tag
+ * and floating state before awesome was restarted if any
+ * \todo this may bug if number of tags is != than before
+ * \param c Client ref
+ * \param ntags tags number
+ */
 static Bool
 loadprops(Client * c, int ntags)
 {
@@ -344,6 +352,13 @@ loadprops(Client * c, int ntags)
     return result;
 }
 
+/** Manage a new client
+ * \param disp Display ref
+ * \param drawcontext Drawcontext ref
+ * \param w The window
+ * \param wa Window attributes
+ * \param awesomeconf awesome config
+ */
 void
 manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, awesome_config *awesomeconf)
 {
@@ -654,6 +669,13 @@ set_shape(Client *c)
         XShapeCombineShape(c->display, RootWindow(c->display, c->screen), ShapeBounding, 0, 0, c->win, ShapeBounding, ShapeSet);
 }
 
+/** Set selected client transparency
+ * \param disp Display ref
+ * \param drawcontext Drawcontext ref
+ * \param awesomeconf awesome config
+ * \param arg unused arg
+ * \ingroup ui_callback
+ */
 void
 uicb_settrans(Display *disp __attribute__ ((unused)),
               DC *drawcontext __attribute__ ((unused)),
@@ -705,6 +727,7 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
  * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  * \param arg X, +X or -X
+ * \ingroup ui_callback
  */
 void
 uicb_setborder(Display *disp __attribute__ ((unused)),
