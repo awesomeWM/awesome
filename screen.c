@@ -39,13 +39,13 @@ get_screen_info(Display *disp, int screen, Statusbar statusbar, int *screen_numb
         si = XineramaQueryScreens(disp, screen_number);
     else
     {
-        /* emulate Xinerama info */
-        *screen_number = 1;
-        si = p_new(ScreenInfo, 1);
-        si->width = DisplayWidth(disp, screen);
-        si->height = DisplayHeight(disp, screen);
-        si->x_org = 0;
-        si->y_org = 0;
+        /* emulate Xinerama info but only fill the screen we want */
+        *screen_number = screen + 1;
+        si = p_new(ScreenInfo, screen + 1);
+        si[screen].width = DisplayWidth(disp, screen);
+        si[screen].height = DisplayHeight(disp, screen);
+        si[screen].x_org = 0;
+        si[screen].y_org = 0;
     }
 
     for(i = 0; i < *screen_number; i++)

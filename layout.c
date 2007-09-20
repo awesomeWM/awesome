@@ -231,6 +231,7 @@ uicb_togglemax(Display *disp,
              si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
              si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
              drawcontext, awesomeconf);
+    XFree(si);
 }
 
 void
@@ -246,6 +247,7 @@ uicb_toggleverticalmax(Display *disp,
         maximize(sel->x, si[awesomeconf->screen].y_org,
                  sel->w, si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
                  drawcontext, awesomeconf);
+    XFree(si);
 }
 
 
@@ -262,6 +264,7 @@ uicb_togglehorizontalmax(Display *disp,
         maximize(si[awesomeconf->screen].x_org, sel->y,
                  si[awesomeconf->screen].height - 2 * awesomeconf->borderpx, sel->h,
                  drawcontext, awesomeconf);
+    XFree(si);
 }
 
 void 
