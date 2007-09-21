@@ -30,13 +30,20 @@ void
 layout_max(Display *disp, awesome_config *awesomeconf)
 {
     Client *c;
-    int dummy;
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &dummy);
+    int screen_number = 0, use_screen = 0;
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &screen_number);
 
     for(c = clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
-            resize(c, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
-                   si[awesomeconf->screen].width - 2 * c->border,
-                   si[awesomeconf->screen].height - 2 * c->border, awesomeconf->resize_hints);
+        {
+            /* if xinerama */
+            if(screen_number > 1)
+                use_screen = (use_screen == screen_number - 1) ? 0 : use_screen + 1;
+            else
+                use_screen = awesomeconf->screen;
+            resize(c, si[use_screen].x_org, si[use_screen].y_org,
+                   si[use_screen].width - 2 * c->border,
+                   si[use_screen].height - 2 * c->border, awesomeconf->resize_hints);
+        }
     XFree(si);
 }
