@@ -127,7 +127,7 @@ key_mask_lookup(const char *keyname)
 
     if(keyname)
         for(i = 0; KeyModList[i].name; i++)
-            if(!strcmp(keyname, KeyModList[i].name))
+            if(!a_strcmp(keyname, KeyModList[i].name))
                 return KeyModList[i].keysym;
 
     return 0;
@@ -146,7 +146,7 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
 
     if(funcname && list)
         for(i = 0; list[i].name; i++)
-            if(!strcmp(funcname, list[i].name))
+            if(!a_strcmp(funcname, list[i].name))
                 return list[i].func;
 
     return NULL;

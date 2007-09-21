@@ -284,7 +284,7 @@ main(int argc, char *argv[])
     Atom netatom[NetLast];
     event_handler **handler;
 
-    if(argc == 2 && !strcmp("-v", argv[1]))
+    if(argc == 2 && !a_strcmp("-v", argv[1]))
     {
         printf("awesome-" VERSION " © 2007 Julien Danjou\n");
         return EXIT_SUCCESS;

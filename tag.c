@@ -44,7 +44,7 @@ idxoftag(const char *tag_to_find, char **tags, int ntags)
         return 0;
 
     for(i = 0; i < ntags; i++)
-        if(!strcmp(tags[i], tag_to_find))
+        if(!a_strcmp(tags[i], tag_to_find))
             return i;
 
     return 0;
