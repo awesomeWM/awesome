@@ -27,6 +27,9 @@
 #include <stdlib.h>
 #include "config.h"
 
+/** \brief replace \c NULL strings with emtpy strings */ 
+#define NONULL(x)       (x ? x : "") 
+
 #define ssizeof(foo)            (ssize_t)sizeof(foo)
 #define countof(foo)            (ssizeof(foo) / ssizeof(foo[0]))
 
@@ -116,6 +119,17 @@ static inline char *a_strdup(const char *s)
 {
     ssize_t len = a_strlen(s);
     return len ? p_dup(s, len + 1) : NULL;
+}
+
+/** \brief \c NULL resistant strcmp.
+ * \param[in]  a     the first string.
+ * \param[in]  b     the second string.
+ * \return <tt>strcmp(a, b)</tt>, and treats \c NULL strings like \c ""
+ * ones.
+ */
+static inline int a_strcmp(const char *a, const char *b)
+{
+        return strcmp(NONULL(a), NONULL(b));
 }
 
 void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
