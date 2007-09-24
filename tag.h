@@ -41,10 +41,4 @@ UICB_PROTO(uicb_tag_prev_selected);
 UICB_PROTO(uicb_tag_viewnext);
 UICB_PROTO(uicb_tag_viewprev);
 
-typedef struct 
-{
-    regex_t *propregex; 
-    regex_t *tagregex; 
-} Regs; 
-
 #endif

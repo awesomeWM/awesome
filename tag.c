@@ -28,6 +28,12 @@
 
 extern Client *sel;             /* global client list */
 
+typedef struct
+{
+    regex_t *propregex;
+    regex_t *tagregex;
+} Regs;
+
 static Regs *regs = NULL;
 
 /** This function returns the index of
