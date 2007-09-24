@@ -93,7 +93,7 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
         else if(IS_ARRANGE(layout_tile) || IS_ARRANGE(layout_tileleft))
         {
             char buf[256];
-            snprintf(buf, sizeof(buf), "nmaster: %d ncols: %d", awesomeconf->nmaster, awesomeconf->ncols);
+            snprintf(buf, sizeof(buf), "nmaster: %d ncols: %d mwfact: %.2lf", awesomeconf->nmaster, awesomeconf->ncols, awesomeconf->mwfact);
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, buf, drawcontext->norm);
         }
         else
