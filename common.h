@@ -24,6 +24,7 @@
 
 #include "config.h"
 
+/** Common prototype definition for ui_callbak functions */
 #define UICB_PROTO(name)         void name(Display *, DC *, awesome_config *, const char *)
 
 #endif
