@@ -19,11 +19,14 @@
  * 
  */
 
+#include <stdio.h>
+
 #include "layout.h"
 #include "statusbar.h"
 #include "draw.h"
 #include "screen.h"
 #include "util.h"
+#include "layouts/tile.h"
 
 extern Client *clients, *sel, *stack;   /* global client list and stack */
 
@@ -48,6 +51,7 @@ void
 drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
 {
     int x, i;
+
     drawcontext->x = drawcontext->y = 0;
     for(i = 0; i < awesomeconf->ntags; i++)
     {
@@ -85,6 +89,12 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, sel->name, drawcontext->sel);
             if(sel->isfloating)
                 drawsquare(disp, *drawcontext, awesomeconf->statusbar.drawable, sel->ismax, drawcontext->sel[ColFG]);
+        }
+        else if(IS_ARRANGE(layout_tile) || IS_ARRANGE(layout_tileleft))
+        {
+            char buf[256];
+            snprintf(buf, sizeof(buf), "nmaster: %d ncols: %d", awesomeconf->nmaster, awesomeconf->ncols);
+            drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, buf, drawcontext->norm);
         }
         else
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, NULL, drawcontext->norm);
