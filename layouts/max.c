@@ -34,7 +34,7 @@ layout_max(Display *disp, awesome_config *awesomeconf)
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &screen_number);
 
     for(c = clients; c; c = c->next)
-        if(IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
         {
             /* if xinerama */
             if(screen_number > 1)

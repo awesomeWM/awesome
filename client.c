@@ -258,8 +258,8 @@ void
 focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
-    if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags)))
-        for(c = stack; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->snext);
+    if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags)))
+        for(c = stack; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->snext);
     
     /* if a client was selected but it's not the current client, unfocus it */
     if(sel && sel != c)

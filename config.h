@@ -93,25 +93,32 @@ typedef struct
     int screen;
 } Statusbar;
 
+/** Tag type */
+typedef struct
+{
+    /** Tag name */
+    char *name;
+    /** True if selected */
+    Bool selected;
+    /** True if was selected before selecting others tags */
+    Bool was_selected;
+    /** Current tag layout */
+    Layout *layout;
+} Tag;
+
 /** Main configuration structure */
 struct awesome_config
 {
     /** Config screen number */
     int screen;
     /** Tag list */
-    char **tags;
-    /** Selected tags */
-    Bool *selected_tags;
-    /* Previously selected tags */
-    Bool *prev_selected_tags;
+    Tag *tags;
     /** Number of tags in **tags */
     int ntags;
     /** Layout list */
     Layout *layouts;
     /** Number of layouts in *layouts */
     int nlayouts;
-    /** Store layout for eatch tag */
-    Layout **tag_layouts;
     /** Rules list */
     Rule *rules;
     /** Number of rules in *rules */

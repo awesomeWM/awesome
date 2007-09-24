@@ -39,7 +39,7 @@ arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
 
     for(c = clients; c; c = c->next)
     {
-        if(isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             unban(c);
         /* we don't touch other screens windows */
         else if(c->screen == awesomeconf->screen)
@@ -60,9 +60,9 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
 
     if(!sel)
         return;
-    for(c = sel->next; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
+    for(c = sel->next; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
     if(!c)
-        for(c = clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->next);
+        for(c = clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
     if(c)
     {
         focus(c->display, drawcontext, c, True, awesomeconf);
@@ -80,11 +80,11 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
 
     if(!sel)
         return;
-    for(c = sel->prev; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->prev);
+    for(c = sel->prev; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->prev);
     if(!c)
     {
         for(c = clients; c && c->next; c = c->next);
-        for(; c && !isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags); c = c->prev);
+        for(; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->prev);
     }
     if(c)
     {
@@ -103,7 +103,7 @@ loadawesomeprops(Display *disp, awesome_config * awesomeconf)
 
     if(xgettextprop(disp, RootWindow(disp, awesomeconf->screen), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
         for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
-            awesomeconf->selected_tags[i] = prop[i] == '1';
+            awesomeconf->tags[i].selected = prop[i] == '1';
 
     p_delete(&prop);
 }
@@ -131,7 +131,7 @@ restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
         }
         for(c = clients; c; c = c->next)
         {
-            if(!IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags) || c == sel)
+            if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags) || c == sel)
                 continue;
             XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
             wc.sibling = c->win;
@@ -149,7 +149,7 @@ saveawesomeprops(Display *disp, awesome_config *awesomeconf)
 
     prop = p_new(char, awesomeconf->ntags + 1);
     for(i = 0; i < awesomeconf->ntags; i++)
-        prop[i] = awesomeconf->selected_tags[i] ? '1' : '0';
+        prop[i] = awesomeconf->tags[i].selected ? '1' : '0';
     prop[i] = '\0';
     XChangeProperty(disp, RootWindow(disp, awesomeconf->screen),
                     AWESOMEPROPS_ATOM(disp), XA_STRING, 8,
@@ -190,8 +190,8 @@ uicb_setlayout(Display *disp,
     saveawesomeprops(disp, awesomeconf);
 
     for(j = 0; j < awesomeconf->ntags; j++)
-        if (awesomeconf->selected_tags[j])
-            awesomeconf->tag_layouts[j] = awesomeconf->current_layout;
+        if (awesomeconf->tags[j].selected)
+            awesomeconf->tags[j].layout = awesomeconf->current_layout;
 }
 
 static void

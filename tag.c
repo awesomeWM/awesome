@@ -33,10 +33,12 @@ static Regs *regs = NULL;
 /** This function returns the index of
  * the tag given un argument in *tags
  * \param tag_to_find tag name
+ * \param tags tag list
+ * \param ntags number of tags in tag list
  * \return index of tag
  */
 static int
-idxoftag(const char *tag_to_find, char **tags, int ntags)
+idxoftag(const char *tag_to_find, Tag *tags, int ntags)
 {
     int i;
 
@@ -44,7 +46,7 @@ idxoftag(const char *tag_to_find, char **tags, int ntags)
         return 0;
 
     for(i = 0; i < ntags; i++)
-        if(!a_strcmp(tags[i], tag_to_find))
+        if(!a_strcmp(tags[i].name, tag_to_find))
             return i;
 
     return 0;
@@ -72,7 +74,7 @@ applyrules(Client * c, awesome_config *awesomeconf)
         {
             c->isfloating = awesomeconf->rules[i].isfloating;
             for(j = 0; regs[i].tagregex && j < awesomeconf->ntags; j++)
-                if(!regexec(regs[i].tagregex, awesomeconf->tags[j], 1, &tmp, 0))
+                if(!regexec(regs[i].tagregex, awesomeconf->tags[j].name, 1, &tmp, 0))
                 {
                     matched = True;
                     c->tags[j] = True;
@@ -85,7 +87,7 @@ applyrules(Client * c, awesome_config *awesomeconf)
         XFree(ch.res_name);
     if(!matched)
         for(i = 0; i < awesomeconf->ntags; i++)
-            c->tags[i] = awesomeconf->selected_tags[i];
+            c->tags[i] = awesomeconf->tags[i].selected;
 }
 
 void
@@ -127,12 +129,12 @@ compileregs(Rule * rules, int nrules)
  * \return True or False
  */
 Bool
-isvisible(Client * c, int screen, Bool * tags, int ntags)
+isvisible(Client * c, int screen, Tag * tags, int ntags)
 {
     int i;
 
     for(i = 0; i < ntags; i++)
-        if(c->tags[i] && tags[i] && c->screen == screen)
+        if(c->tags[i] && tags[i].selected && c->screen == screen)
             return True;
     return False;
 }
@@ -235,10 +237,10 @@ uicb_toggleview(Display *disp,
     int j;
 
     i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
-    awesomeconf->selected_tags[i] = !awesomeconf->selected_tags[i];
-    for(j = 0; j < awesomeconf->ntags && !awesomeconf->selected_tags[j]; j++);
+    awesomeconf->tags[i].selected = !awesomeconf->tags[i].selected;
+    for(j = 0; j < awesomeconf->ntags && !awesomeconf->tags[j].selected; j++);
     if(j == awesomeconf->ntags)
-        awesomeconf->selected_tags[i] = True;      /* cannot toggle last view */
+        awesomeconf->tags[i].selected = True;
     saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }
@@ -259,14 +261,14 @@ uicb_view(Display *disp,
 
     for(i = 0; i < awesomeconf->ntags; i++)
     {
-        awesomeconf->prev_selected_tags[i] = awesomeconf->selected_tags[i];
-        awesomeconf->selected_tags[i] = arg == NULL;
+        awesomeconf->tags[i].was_selected = awesomeconf->tags[i].selected;
+        awesomeconf->tags[i].selected = arg == NULL;
     }
     i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
     if(i >= 0 && i < awesomeconf->ntags)
     {
-        awesomeconf->selected_tags[i] = True;
-        awesomeconf->current_layout = awesomeconf->tag_layouts[i];
+        awesomeconf->tags[i].selected = True;
+        awesomeconf->current_layout = awesomeconf->tags[i].layout;
     }
     saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
@@ -289,9 +291,9 @@ uicb_tag_prev_selected(Display * disp,
 
     for(i = 0; i < awesomeconf->ntags; i++)
     {
-        t = awesomeconf->selected_tags[i];
-        awesomeconf->selected_tags[i] = awesomeconf->prev_selected_tags[i];
-        awesomeconf->prev_selected_tags[i] = t;
+        t = awesomeconf->tags[i].selected;
+        awesomeconf->tags[i].selected = awesomeconf->tags[i].was_selected;
+        awesomeconf->tags[i].was_selected = t;
     }
     arrange(disp, drawcontext, awesomeconf);
 }
@@ -313,13 +315,13 @@ uicb_tag_viewnext(Display *disp,
 
     for(i = 0; i < awesomeconf->ntags; i++)
     {
-        if(firsttag < 0 && awesomeconf->selected_tags[i])
+        if(firsttag < 0 && awesomeconf->tags[i].selected)
             firsttag = i;
-        awesomeconf->selected_tags[i] = False;
+        awesomeconf->tags[i].selected = False;
     }
     if(++firsttag >= awesomeconf->ntags)
         firsttag = 0;
-    awesomeconf->selected_tags[firsttag] = True;
+    awesomeconf->tags[firsttag].selected = True;
     saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }
@@ -341,13 +343,13 @@ uicb_tag_viewprev(Display *disp,
 
     for(i = awesomeconf->ntags - 1; i >= 0; i--)
     {
-        if(firsttag < 0 && awesomeconf->selected_tags[i])
+        if(firsttag < 0 && awesomeconf->tags[i].selected)
             firsttag = i;
-        awesomeconf->selected_tags[i] = False;
+        awesomeconf->tags[i].selected = False;
     }
     if(--firsttag < 0)
         firsttag = awesomeconf->ntags - 1;
-    awesomeconf->selected_tags[firsttag] = True;
+    awesomeconf->tags[firsttag].selected = True;
     saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }

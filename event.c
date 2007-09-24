@@ -154,22 +154,22 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             int x = 0;
             for(i = 0; i < awesomeconf[screen].ntags; i++)
             {
-                x += textw(dc[screen].font.set, dc[screen].font.xfont, awesomeconf[screen].tags[i], dc[screen].font.height);
+                x += textw(dc[screen].font.set, dc[screen].font.xfont, awesomeconf[screen].tags[i].name, dc[screen].font.height);
                 if(ev->x < x)
                 {
                     if(ev->button == Button1)
                     {
                         if(ev->state & awesomeconf[screen].modkey)
-                            uicb_tag(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i]);
+                            uicb_tag(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                         else
-                            uicb_view(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i]);
+                            uicb_view(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                     }
                     else if(ev->button == Button3)
                     {
                         if(ev->state & awesomeconf[screen].modkey)
-                            uicb_toggletag(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i]);
+                            uicb_toggletag(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                         else
-                            uicb_toggleview(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i]);
+                            uicb_toggleview(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                     }
                     return;
                 }
@@ -247,7 +247,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
                 c->y = DisplayHeight(c->display, c->screen) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 configure(c);
-            if(isvisible(c, c->screen, awesomeconf[c->screen].selected_tags, awesomeconf[c->screen].ntags))
+            if(isvisible(c, c->screen, awesomeconf[c->screen].tags, awesomeconf[c->screen].ntags))
                 XMoveResizeWindow(e->xany.display, c->win, c->x, c->y, c->w, c->h);
         }
         else

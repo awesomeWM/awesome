@@ -96,12 +96,12 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     screens_info = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &screen_numbers);
  
     for(n = 0, c = clients; c; c = c->next)
-        if(IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             n++;
 
     for(i = 0, c = clients; c; c = c->next)
     {
-        if(!IS_TILED(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             continue;
 
         if(use_screen == -1

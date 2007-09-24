@@ -51,16 +51,16 @@ drawstatusbar(Display *disp, int screen, DC *drawcontext, awesome_config * aweso
     drawcontext->x = drawcontext->y = 0;
     for(i = 0; i < awesomeconf->ntags; i++)
     {
-        drawcontext->w = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->tags[i], drawcontext->font.height);
-        if(awesomeconf->selected_tags[i])
+        drawcontext->w = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->tags[i].name, drawcontext->font.height);
+        if(awesomeconf->tags[i].selected)
         {
-            drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i], drawcontext->sel);
+            drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i].name, drawcontext->sel);
             if(isoccupied(i, screen))
                 drawsquare(disp, *drawcontext, awesomeconf->statusbar.drawable, sel && sel->tags[i], drawcontext->sel[ColFG]);
         }
         else
         {
-            drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i], drawcontext->norm);
+            drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i].name, drawcontext->norm);
             if(isoccupied(i, screen))
                 drawsquare(disp, *drawcontext, awesomeconf->statusbar.drawable, sel && sel->tags[i], drawcontext->norm[ColFG]);
         }

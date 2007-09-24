@@ -29,7 +29,7 @@
 #define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, screen, tags, ntags))
 
 void compileregs(Rule *, int);         /* initialize regexps of rules defined in config.h */
-Bool isvisible(Client *, int, Bool *, int);
+Bool isvisible(Client *, int, Tag *, int);
 void applyrules(Client * c, awesome_config *);    /* applies rules to c */
 
 UICB_PROTO(uicb_tag);

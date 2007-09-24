@@ -31,7 +31,7 @@ layout_floating(Display *disp __attribute__ ((unused)), awesome_config *awesomec
     Client *c;
 
     for(c = clients; c; c = c->next)
-        if(isvisible(c, awesomeconf->screen, awesomeconf->selected_tags, awesomeconf->ntags))
+        if(isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
         {
             if(c->ftview)
             {

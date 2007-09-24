@@ -83,7 +83,7 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
         XFreeCursor(disp, drawcontext[screen].cursor[CurMove]);
 
         for(i = 0; i < awesomeconf[screen].ntags; i++)
-            p_delete(&awesomeconf[screen].tags[i]);
+            p_delete(&awesomeconf[screen].tags[i].name);
         for(i = 0; i < awesomeconf[screen].nkeys; i++)
             p_delete(&awesomeconf[screen].keys[i].arg);
         for(i = 0; i < awesomeconf[screen].nlayouts; i++)
@@ -94,9 +94,6 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
             p_delete(&awesomeconf[screen].rules[i].tags);
         }
         p_delete(&awesomeconf[screen].tags);
-        p_delete(&awesomeconf[screen].selected_tags);
-        p_delete(&awesomeconf[screen].prev_selected_tags);
-        p_delete(&awesomeconf[screen].tag_layouts);
         p_delete(&awesomeconf[screen].layouts);
         p_delete(&awesomeconf[screen].rules);
         p_delete(&awesomeconf[screen].keys);

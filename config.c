@@ -181,22 +181,19 @@ set_default_config(awesome_config *awesomeconf)
     awesomeconf->layouts[2].arrange = NULL;
 
     awesomeconf->ntags = 3;
-    awesomeconf->tags = p_new(char *, awesomeconf->ntags);
-    awesomeconf->selected_tags = p_new(Bool, awesomeconf->ntags);
-    awesomeconf->prev_selected_tags = p_new(Bool, awesomeconf->ntags);
-    awesomeconf->tag_layouts = p_new(Layout *, awesomeconf->ntags);
-    awesomeconf->tags[0] = a_strdup("this");
-    awesomeconf->tags[1] = a_strdup("is");
-    awesomeconf->tags[2] = a_strdup("awesome");
-    awesomeconf->selected_tags[0] = True;
-    awesomeconf->selected_tags[1] = False;
-    awesomeconf->selected_tags[2] = False;
-    awesomeconf->prev_selected_tags[0] = False;
-    awesomeconf->prev_selected_tags[1] = False;
-    awesomeconf->prev_selected_tags[2] = False;
-    awesomeconf->tag_layouts[0] = awesomeconf->layouts;
-    awesomeconf->tag_layouts[1] = awesomeconf->layouts;
-    awesomeconf->tag_layouts[2] = awesomeconf->layouts;
+    awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
+    awesomeconf->tags[0].name = a_strdup("this");
+    awesomeconf->tags[1].name = a_strdup("is");
+    awesomeconf->tags[2].name = a_strdup("awesome");
+    awesomeconf->tags[0].selected = True;
+    awesomeconf->tags[1].selected = False;
+    awesomeconf->tags[2].selected = False;
+    awesomeconf->tags[0].was_selected = False;
+    awesomeconf->tags[1].was_selected = False;
+    awesomeconf->tags[2].was_selected = False;
+    awesomeconf->tags[0].layout = awesomeconf->layouts;
+    awesomeconf->tags[1].layout = awesomeconf->layouts;
+    awesomeconf->tags[2].layout = awesomeconf->layouts;
 }
 
 /** Parse configuration file and initialize some stuff
@@ -286,19 +283,15 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     else
     {
         awesomeconf->ntags = config_setting_length(conftags);
-        awesomeconf->tags = p_new(char *, awesomeconf->ntags);
-        awesomeconf->selected_tags = p_new(Bool, awesomeconf->ntags);
-        awesomeconf->prev_selected_tags = p_new(Bool, awesomeconf->ntags);
-        /** \todo move this in tags or layouts */
-        awesomeconf->tag_layouts = p_new(Layout *, awesomeconf->ntags);
+        awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
 
         for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
         {
-            awesomeconf->tags[i] = a_strdup(tmp);
-            awesomeconf->selected_tags[i] = False;
-            awesomeconf->prev_selected_tags[i] = False;
+            awesomeconf->tags[i].name = a_strdup(tmp);
+            awesomeconf->tags[i].selected = False;
+            awesomeconf->tags[i].was_selected = False;
             /** \todo add support for default tag/layout in configuration file */
-            awesomeconf->tag_layouts[i] = awesomeconf->layouts;
+            awesomeconf->tags[i].layout = awesomeconf->layouts;
         }
     }
 
@@ -306,8 +299,8 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
         eprint("awesome: fatal: no tags found in configuration file\n");
 
     /* select first tag by default */
-    awesomeconf->selected_tags[0] = True;
-    awesomeconf->prev_selected_tags[0] = True;
+    awesomeconf->tags[0].selected = True;
+    awesomeconf->tags[0].was_selected = True;
 
     /* rules */
     confrules = config_lookup(&awesomelibconf, "awesome.rules");

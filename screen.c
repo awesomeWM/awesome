@@ -100,7 +100,7 @@ uicb_focusnextscreen(Display *disp,
     Client *c;
     int next_screen = awesomeconf->screen + 1 >= ScreenCount(disp) ? 0 : awesomeconf->screen + 1;
 
-    for(c = clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].selected_tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
+    for(c = clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
     {
         focus(c->display, &drawcontext[next_screen - awesomeconf->screen], c, True, &awesomeconf[next_screen - awesomeconf->screen]);
@@ -117,7 +117,7 @@ uicb_focusprevscreen(Display *disp,
     Client *c;
     int prev_screen = awesomeconf->screen - 1 < 0 ? ScreenCount(disp) - 1 : awesomeconf->screen - 1;
 
-    for(c = clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].selected_tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
+    for(c = clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
     {
         focus(c->display, &drawcontext[prev_screen - awesomeconf->screen], c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
