@@ -25,8 +25,8 @@
 
 #include "common.h"
 
-void layout_tile(Display *, awesome_config *);
-void layout_tileleft(Display *, awesome_config *);
+LAYOUT_PROTO(layout_tile);
+LAYOUT_PROTO(layout_tileleft);
 
 UICB_PROTO(uicb_setnmaster);
 UICB_PROTO(uicb_setncols);

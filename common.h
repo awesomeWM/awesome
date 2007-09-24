@@ -27,4 +27,7 @@
 /** Common prototype definition for ui_callbak functions */
 #define UICB_PROTO(name)         void name(Display *, DC *, awesome_config *, const char *)
 
+/** Common prototype definition for layouts function */
+#define LAYOUT_PROTO(name)         void name(Display *, awesome_config *)
+
 #endif

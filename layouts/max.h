@@ -22,6 +22,8 @@
 #ifndef AWESOME_MAX_H
 #define AWESOME_MAX_H
 
-void layout_max(Display *, awesome_config *);
+#include "common.h"
+
+LAYOUT_PROTO(layout_max);
 
 #endif
