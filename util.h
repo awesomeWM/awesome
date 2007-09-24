@@ -137,6 +137,7 @@ static inline int a_strcmp(const char *a, const char *b)
 }
 
 ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l) __attribute__((nonnull(1)));
+ssize_t a_strcpy(char *dst, ssize_t n, const char *src) __attribute__((nonnull(1)));
 
 void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));

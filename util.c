@@ -168,3 +168,28 @@ ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l)
 
     return len; 
 } 
+
+/** \brief safe strcpy.
+ *
+ * Copies at most <tt>n-1</tt> characters from \c src into \c dst, always
+ * adding a final \c \\0 in \c dst.
+ *
+ * \param[in]  dst      destination buffer.
+ * \param[in]  n        size of the buffer. Negative sizes are allowed.
+ * \param[in]  src      source string.
+ * \return \c src \e length. If this value is \>= \c n then the copy was
+ *         truncated.
+ */
+ssize_t a_strcpy(char *dst, ssize_t n, const char *src)
+{
+    ssize_t len = a_strlen(src);
+
+    if (n > 0)
+    {
+        ssize_t dlen = MIN(n - 1, len);
+        memcpy(dst, src, dlen);
+        dst[dlen] = '\0';
+    }
+
+    return len;
+}
