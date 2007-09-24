@@ -109,6 +109,30 @@ static inline ssize_t a_strlen(const char *s)
     return s ? strlen(s) : 0;
 }
 
+/** \brief \c NULL resistant strnlen.
+ *
+ * Unlinke it's GNU libc sibling, a_strnlen returns a ssize_t, and supports
+ * its argument beeing NULL.
+ *
+ * The a_strnlen() function returns the number of characters in the string
+ * pointed to by \c s, not including the terminating \c \\0 character, but at
+ * most \c n. In doing this, a_strnlen() looks only at the first \c n
+ * characters at \c s and never beyond \c s+n.
+ *
+ * \param[in]  s    the string.
+ * \param[in]  n    the maximum length to return.
+ * \return \c a_strlen(s) if less than \c n, else \c n.
+ */
+static inline ssize_t a_strnlen(const char *s, ssize_t n)
+{
+    if (s)
+    {
+        const char *p = memchr(s, '\0', n);
+        return p ? p - s : n;
+    }
+    return 0;
+}
+
 /** \brief \c NULL resistant strdup.
  *
  * the a_strdup() function returns a pointer to a new string, which is a
@@ -138,6 +162,22 @@ static inline int a_strcmp(const char *a, const char *b)
 
 ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l) __attribute__((nonnull(1)));
 ssize_t a_strcpy(char *dst, ssize_t n, const char *src) __attribute__((nonnull(1)));
+
+/** \brief safe strcat.
+ *
+ * The a_strcat() function appends the string \c src at the end of the buffer
+ * \c dst if space is available.
+ *
+ * \param[in]  dst   destination buffer.
+ * \param[in]  n     size of the buffer, Negative sizes are allowed.
+ * \param[in]  src   the string to append.
+ * \return <tt>a_strlen(dst) + a_strlen(src)</tt>
+ */
+static inline ssize_t a_strcat(char *dst, ssize_t n, const char *src)
+{
+    ssize_t dlen = a_strnlen(dst, n - 1);
+    return dlen + a_strcpy(dst + dlen, n - dlen, src);
+}
 
 void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
