@@ -164,7 +164,7 @@ set_default_config(awesome_config *awesomeconf)
 {
     /** \todo most of this stuff aren't freed when we initialize
      * the real configuration, we should add a clean conf function */
-    strcpy(awesomeconf->statustext, "awesome-" VERSION);
+    a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION);
     awesomeconf->statusbar.width = 0;
     awesomeconf->statusbar.height = 0;
     awesomeconf->opacity_unfocused = -1;
@@ -215,14 +215,16 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     const char *tmp, *homedir;
     char *confpath;
     KeySym tmp_key;
+    ssize_t confpath_len;
 
     set_default_config(awesomeconf);
 
     homedir = getenv("HOME");
-    confpath = p_new(char, strlen(homedir) + strlen(AWESOME_CONFIG_FILE) + 2);
-    strcpy(confpath, homedir);
-    strcat(confpath, "/");
-    strcat(confpath, AWESOME_CONFIG_FILE);
+    confpath_len = a_strlen(homedir) + a_strlen(AWESOME_CONFIG_FILE) + 2;
+    confpath = p_new(char, confpath_len);
+    a_strcpy(confpath, confpath_len, homedir);
+    a_strcat(confpath, confpath_len, "/");
+    a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
 
     config_init(&awesomelibconf);
 
@@ -315,7 +317,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
         {
             awesomeconf->rules[i].prop = a_strdup(config_setting_get_string(config_setting_get_member(confsubrules, "name")));
             awesomeconf->rules[i].tags = a_strdup(config_setting_get_string(config_setting_get_member(confsubrules, "tags")));
-            if(awesomeconf->rules[i].tags && !strlen(awesomeconf->rules[i].tags))
+            if(awesomeconf->rules[i].tags && !a_strlen(awesomeconf->rules[i].tags))
                 awesomeconf->rules[i].tags = NULL;
             awesomeconf->rules[i].isfloating =
                 config_setting_get_bool(config_setting_get_member(confsubrules, "float"));
@@ -354,9 +356,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     /* barpos */
     tmp = config_lookup_string(&awesomelibconf, "awesome.barpos");
 
-    if(tmp && !strncmp(tmp, "off", 6))
+    if(tmp && !a_strncmp(tmp, "off", 6))
         awesomeconf->statusbar_default_position = BarOff;
-    else if(tmp && !strncmp(tmp, "bottom", 6))
+    else if(tmp && !a_strncmp(tmp, "bottom", 6))
         awesomeconf->statusbar_default_position = BarBot;
     else
         awesomeconf->statusbar_default_position = BarTop;

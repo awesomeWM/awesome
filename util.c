@@ -63,13 +63,13 @@ uicb_spawn(Display * disp,
     char *tmp, newdisplay[128];
 
     if(!shell && !(shell = getenv("SHELL")))
-        shell = strdup("/bin/sh");
+        shell = a_strdup("/bin/sh");
     if(!arg)
         return;
     
     if((tmp = getenv("DISPLAY")))
     {
-        display = strdup(tmp);
+        display = a_strdup(tmp);
         if((tmp = strrchr(display, '.')))
             *tmp = '\0';
         snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, awesomeconf->screen);
@@ -96,14 +96,14 @@ uicb_spawn(Display * disp,
 }
 
 Bool
-xgettextprop(Display *disp, Window w, Atom atom, char *text, unsigned int size)
+xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
 {
     char **list = NULL;
     int n;
 
     XTextProperty name;
 
-    if(!text || size == 0)
+    if(!text || !textlen)
         return False;
 
     text[0] = '\0';
@@ -113,15 +113,15 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, unsigned int size)
         return False;
  
     if(name.encoding == XA_STRING)
-        strncpy(text, (char *) name.value, size - 1);
+        a_strncpy(text, textlen, (char *) name.value, textlen - 1);
 
     else if(XmbTextPropertyToTextList(disp, &name, &list, &n) >= Success && n > 0 && *list)
     {
-        strncpy(text, *list, size - 1);
+        a_strncpy(text, textlen, *list, textlen - 1);
         XFreeStringList(list);
     }
 
-    text[size - 1] = '\0';
+    text[textlen - 1] = '\0';
     XFree(name.value);
 
     return True;

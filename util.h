@@ -160,6 +160,18 @@ static inline int a_strcmp(const char *a, const char *b)
         return strcmp(NONULL(a), NONULL(b));
 }
 
+/** \brief \c NULL resistant strncmp.
+ * \param[in]  a     the first string.
+ * \param[in]  b     the second string.
+ * \param[in]  n     the number of maximum chars to compare.
+ * \return <tt>strncmp(a, b, n)</tt>, and treats \c NULL strings like \c ""
+ * ones.
+ */
+static inline int a_strncmp(const char *a, const char *b, ssize_t n)
+{
+    return strncmp(NONULL(a), NONULL(b), n);
+}
+
 ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l) __attribute__((nonnull(1)));
 ssize_t a_strcpy(char *dst, ssize_t n, const char *src) __attribute__((nonnull(1)));
 
@@ -181,7 +193,7 @@ static inline ssize_t a_strcat(char *dst, ssize_t n, const char *src)
 
 void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
-Bool xgettextprop(Display *, Window, Atom, char *, unsigned int);
+Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
 double compute_new_value_from_arg(const char *, double);
 
 UICB_PROTO(uicb_spawn);

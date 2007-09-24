@@ -379,12 +379,14 @@ main(int argc, char *argv[])
             switch (r = read(STDIN_FILENO, awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext) - 1))
             {
             case -1:
-                strncpy(awesomeconf[0].statustext, strerror(errno), sizeof(awesomeconf[0].statustext) - 1);
+                a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
+                          strerror(errno), sizeof(awesomeconf[0].statustext) - 1);
                 awesomeconf[0].statustext[sizeof(awesomeconf[0].statustext) - 1] = '\0';
                 readin = False;
                 break;
             case 0:
-                strncpy(awesomeconf[0].statustext, "EOF", 4);
+                a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
+                          "EOF", 4);
                 readin = False;
                 break;
             default:
@@ -392,7 +394,8 @@ main(int argc, char *argv[])
                     p >= awesomeconf[0].statustext && *p == '\n'; *p-- = '\0');
                 for(; p >= awesomeconf[0].statustext && *p != '\n'; --p);
                 if(p > awesomeconf[0].statustext)
-                    strncpy(awesomeconf[0].statustext, p + 1, sizeof(awesomeconf[0].statustext));
+                    a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
+                              p + 1, sizeof(awesomeconf[0].statustext));
             }
             drawstatusbar(dpy, &dc[0], &awesomeconf[0]);
         }
