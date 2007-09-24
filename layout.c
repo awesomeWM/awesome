@@ -210,7 +210,7 @@ maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomecon
         sel->rh = sel->h;
         resize(sel, x, y, w, h, True);
     }
-    else if(sel->isfloating)
+    else if(sel->wasfloating)
         resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, True);
     else
         sel->isfloating = False;
