@@ -37,7 +37,7 @@ uicb_setnmaster(Display *disp,
                 awesome_config *awesomeconf,
                 const char * arg)
 {
-    if(!arg || (IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)))
+    if(!arg || (!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)))
         return;
 
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
