@@ -321,7 +321,7 @@ main(int argc, char *argv[])
         setup(dpy, screen, &dc[screen], &awesomeconf[screen]);
         XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
                         XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
-        drawstatusbar(dpy, screen, &dc[screen], &awesomeconf[screen]);
+        drawstatusbar(dpy, &dc[screen], &awesomeconf[screen]);
     }
 
     handler = p_new(event_handler *, LASTEvent);
@@ -394,7 +394,7 @@ main(int argc, char *argv[])
                 if(p > awesomeconf[0].statustext)
                     strncpy(awesomeconf[0].statustext, p + 1, sizeof(awesomeconf[0].statustext));
             }
-            drawstatusbar(dpy, 0, &dc[0], &awesomeconf[0]);
+            drawstatusbar(dpy, &dc[0], &awesomeconf[0]);
         }
 
         while(XPending(dpy))

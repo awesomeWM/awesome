@@ -25,7 +25,7 @@
 #include "common.h"
 
 void initstatusbar(Display *, int, DC *, Statusbar *);
-void drawstatusbar(Display *, int, DC *, awesome_config *);
+void drawstatusbar(Display *, DC *, awesome_config *);
 void updatebarpos(Display *, Statusbar);
 
 UICB_PROTO(uicb_togglebar);

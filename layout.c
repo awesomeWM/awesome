@@ -115,7 +115,7 @@ restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatusbar(disp, awesomeconf->screen, drawcontext, awesomeconf);
+    drawstatusbar(disp, drawcontext, awesomeconf);
     if(!sel)
         return;
     if(sel->isfloating || IS_ARRANGE(layout_floating))
@@ -185,7 +185,7 @@ uicb_setlayout(Display *disp,
     if(sel)
         arrange(disp, drawcontext, awesomeconf);
     else
-        drawstatusbar(disp, awesomeconf->screen, drawcontext, awesomeconf);
+        drawstatusbar(disp, drawcontext, awesomeconf);
 
     saveawesomeprops(disp, awesomeconf);
 

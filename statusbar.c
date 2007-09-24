@@ -45,7 +45,7 @@ isoccupied(unsigned int t, int screen)
 }
 
 void
-drawstatusbar(Display *disp, int screen, DC *drawcontext, awesome_config * awesomeconf)
+drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
 {
     int x, i;
     drawcontext->x = drawcontext->y = 0;
@@ -55,13 +55,13 @@ drawstatusbar(Display *disp, int screen, DC *drawcontext, awesome_config * aweso
         if(awesomeconf->tags[i].selected)
         {
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i].name, drawcontext->sel);
-            if(isoccupied(i, screen))
+            if(isoccupied(i, awesomeconf->screen))
                 drawsquare(disp, *drawcontext, awesomeconf->statusbar.drawable, sel && sel->tags[i], drawcontext->sel[ColFG]);
         }
         else
         {
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i].name, drawcontext->norm);
-            if(isoccupied(i, screen))
+            if(isoccupied(i, awesomeconf->screen))
                 drawsquare(disp, *drawcontext, awesomeconf->statusbar.drawable, sel && sel->tags[i], drawcontext->norm[ColFG]);
         }
         drawcontext->x += drawcontext->w;
@@ -70,11 +70,11 @@ drawstatusbar(Display *disp, int screen, DC *drawcontext, awesome_config * aweso
     drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->current_layout->symbol, drawcontext->norm);
     x = drawcontext->x + drawcontext->w;
     drawcontext->w = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->statustext, drawcontext->font.height);
-    drawcontext->x = DisplayWidth(disp, screen) - drawcontext->w;
+    drawcontext->x = DisplayWidth(disp, awesomeconf->screen) - drawcontext->w;
     if(drawcontext->x < x)
     {
         drawcontext->x = x;
-        drawcontext->w = DisplayWidth(disp, screen) - x;
+        drawcontext->w = DisplayWidth(disp, awesomeconf->screen) - x;
     }
     drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->statustext, drawcontext->norm);
     if((drawcontext->w = drawcontext->x - x) > awesomeconf->statusbar.height)
@@ -89,7 +89,7 @@ drawstatusbar(Display *disp, int screen, DC *drawcontext, awesome_config * aweso
         else
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, NULL, drawcontext->norm);
     }
-    XCopyArea(disp, awesomeconf->statusbar.drawable, awesomeconf->statusbar.window, drawcontext->gc, 0, 0, DisplayWidth(disp, screen), awesomeconf->statusbar.height, 0, 0);
+    XCopyArea(disp, awesomeconf->statusbar.drawable, awesomeconf->statusbar.window, drawcontext->gc, 0, 0, DisplayWidth(disp, awesomeconf->screen), awesomeconf->statusbar.height, 0, 0);
     XSync(disp, False);
 }
 
