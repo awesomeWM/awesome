@@ -33,6 +33,7 @@
 #include "draw.h"
 #include "util.h"
 #include "statusbar.h"
+#include "screen.h"
 #include "layouts/tile.h"
 #include "layouts/max.h"
 #include "layouts/floating.h"
@@ -109,6 +110,9 @@ static const NameFuncLink KeyfuncList[] = {
     {"setmwfact", uicb_setmwfact},
     {"setnmaster", uicb_setnmaster},
     {"setncols", uicb_setncols},
+    /* screen.c */
+    {"focusnextscreen", uicb_focusnextscreen},
+    {"focusprevscreen", uicb_focusprevscreen},
     /* awesome.c */
     {"quit", uicb_quit},
     /* statusbar.c */

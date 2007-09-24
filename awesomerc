@@ -70,6 +70,8 @@ awesome:
             (("Mod4"), "b", "togglebar"),
             (("Mod4"), "j", "focusnext"),
             (("Mod4"), "k", "focusprev"),
+            (("Mod4", "Control"), "j", "focusnextscreen"),
+            (("Mod4", "Control"), "k", "focusprevscreen"),
             (("Mod4"), "h", "setmwfact", "-0.05"),
             (("Mod4"), "l", "setmwfact", "+0.05"),
             (("Mod4"), "p", "setborder", "+1"),

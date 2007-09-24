@@ -31,5 +31,7 @@ typedef XineramaScreenInfo ScreenInfo;
 
 ScreenInfo * get_screen_info(Display *, int, Statusbar, int *);
 ScreenInfo * get_display_info(Display *disp, int, Statusbar statusbar);
+void uicb_focusnextscreen(Display *, DC *, awesome_config *, const char *);
+void uicb_focusprevscreen(Display *, DC *, awesome_config *, const char *);
 
 #endif

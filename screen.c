@@ -20,7 +20,12 @@
  */
 
 #include "util.h"
+#include "client.h"
 #include "screen.h"
+#include "tag.h"
+#include "layout.h"
+
+extern Client *sel, *clients;
 
 /** Get screens info
  * \param disp Display ref
@@ -84,4 +89,38 @@ get_display_info(Display *disp, int screen, Statusbar statusbar)
         ((statusbar.position == BarTop || statusbar.position == BarBot) ? statusbar.height : 0);
 
     return si;
+}
+
+void
+uicb_focusnextscreen(Display *disp,
+                     DC *drawcontext,
+                     awesome_config * awesomeconf,
+                     const char *arg __attribute__ ((unused)))
+{
+    Client *c;
+    int next_screen = awesomeconf->screen + 1 >= ScreenCount(disp) ? 0 : awesomeconf->screen + 1;
+
+    for(c = clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].selected_tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
+    if(c)
+    {
+        focus(c->display, &drawcontext[next_screen - awesomeconf->screen], c, True, &awesomeconf[next_screen - awesomeconf->screen]);
+        restack(c->display, &drawcontext[next_screen - awesomeconf->screen], &awesomeconf[next_screen - awesomeconf->screen]);
+    }
+}
+
+void
+uicb_focusprevscreen(Display *disp,
+                     DC *drawcontext,
+                     awesome_config * awesomeconf,
+                     const char *arg __attribute__ ((unused)))
+{
+    Client *c;
+    int prev_screen = awesomeconf->screen - 1 < 0 ? ScreenCount(disp) - 1 : awesomeconf->screen - 1;
+
+    for(c = clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].selected_tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
+    if(c)
+    {
+        focus(c->display, &drawcontext[prev_screen - awesomeconf->screen], c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
+        restack(c->display, &drawcontext[prev_screen - awesomeconf->screen], &awesomeconf[prev_screen - awesomeconf->screen]);
+    }
 }
