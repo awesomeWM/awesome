@@ -22,11 +22,12 @@
 #ifndef AWESOME_STATUSBAR_H
 #define AWESOME_STATUSBAR_H
 
-#include "config.h"
+#include "common.h"
 
 void initstatusbar(Display *, int, DC *, Statusbar *);
 void drawstatusbar(Display *, int, DC *, awesome_config *);
 void updatebarpos(Display *, Statusbar);
-void uicb_togglebar(Display *, DC *, awesome_config *, const char *);
+
+UICB_PROTO(uicb_togglebar);
 
 #endif

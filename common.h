@@ -1,8 +1,7 @@
-/* 
- * tile.h - tile layout
- *
+/*  
+ * common.h - common defines
+ *  
  * Copyright © 2007 Julien Danjou <julien@danjou.info> 
- * Copyright © 2007 Ross Mohn <rpmohn@waxandwane.org>
  * 
  * This program is free software; you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by 
@@ -20,16 +19,11 @@
  * 
  */
 
-#ifndef AWESOME_TILE_H
-#define AWESOME_TILE_H
+#ifndef AWESOME_COMMON_H
+#define AWESOME_COMMON_H
 
-#include "common.h"
+#include "config.h"
 
-void layout_tile(Display *, awesome_config *);
-void layout_tileleft(Display *, awesome_config *);
-
-UICB_PROTO(uicb_setnmaster);
-UICB_PROTO(uicb_setncols);
-UICB_PROTO(uicb_setmwfact);
+#define UICB_PROTO(name)         void name(Display *, DC *, awesome_config *, const char *)
 
 #endif

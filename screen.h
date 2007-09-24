@@ -22,8 +22,7 @@
 #ifndef AWESOME_SCREEN_H
 #define AWESOME_SCREEN_H
 
-
-#include "config.h"
+#include "common.h"
 
 #include <X11/extensions/Xinerama.h> 
 
@@ -31,7 +30,7 @@ typedef XineramaScreenInfo ScreenInfo;
 
 ScreenInfo * get_screen_info(Display *, int, Statusbar, int *);
 ScreenInfo * get_display_info(Display *disp, int, Statusbar statusbar);
-void uicb_focusnextscreen(Display *, DC *, awesome_config *, const char *);
-void uicb_focusprevscreen(Display *, DC *, awesome_config *, const char *);
+UICB_PROTO(uicb_focusnextscreen);
+UICB_PROTO(uicb_focusprevscreen);
 
 #endif

@@ -31,14 +31,15 @@
 void compileregs(Rule *, int);         /* initialize regexps of rules defined in config.h */
 Bool isvisible(Client *, int, Bool *, int);
 void applyrules(Client * c, awesome_config *);    /* applies rules to c */
-void uicb_tag(Display *, DC *, awesome_config *, const char *);         /* tags sel with arg's index */
-void uicb_togglefloating(Display *, DC *, awesome_config *, const char *);      /* toggles sel between floating/tiled state */
-void uicb_toggletag(Display *, DC *, awesome_config *, const char *);   /* toggles sel tags with arg's index */
-void uicb_toggleview(Display *, DC *, awesome_config *, const char *);  /* toggles the tag with arg's index (in)visible */
-void uicb_view(Display *, DC *, awesome_config *, const char *);        /* views the tag with arg's index */
-void uicb_tag_prev_selected(Display *, DC *, awesome_config *, const char *);
-void uicb_tag_viewnext(Display *, DC *, awesome_config *, const char *);        /* view only tag just after the first selected */
-void uicb_tag_viewprev(Display *, DC *, awesome_config *, const char *);        /* view only tag just before the first selected */
+
+UICB_PROTO(uicb_tag);
+UICB_PROTO(uicb_togglefloating);
+UICB_PROTO(uicb_toggletag);
+UICB_PROTO(uicb_toggleview);
+UICB_PROTO(uicb_view);
+UICB_PROTO(uicb_tag_prev_selected);
+UICB_PROTO(uicb_tag_viewnext);
+UICB_PROTO(uicb_tag_viewprev);
 
 typedef struct 
 {

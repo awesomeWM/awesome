@@ -31,14 +31,15 @@
 
 void arrange(Display *, DC *, awesome_config *);             /* arranges all windows depending on the layout in use */
 void restack(Display *, DC *, awesome_config *);        /* restores z layers of all clients */
-void uicb_focusnext(Display *, DC *, awesome_config *, const char *);   /* focuses next visible client */
-void uicb_focusprev(Display *, DC *, awesome_config *, const char *);   /* focuses prev visible client */
-void uicb_setlayout(Display *, DC *, awesome_config *, const char *);   /* sets layout, NULL means next layout */
-void uicb_togglemax(Display *, DC *, awesome_config *, const char *);   /* toggles maximization of floating client */
-void uicb_toggleverticalmax(Display *, DC *, awesome_config *, const char *);
-void uicb_togglehorizontalmax(Display *, DC *, awesome_config *, const char *);
-void uicb_zoom(Display *, DC *, awesome_config *, const char *); /* set current window first in stack */
 void loadawesomeprops(Display *, awesome_config *);
 void saveawesomeprops(Display *, awesome_config *);
+
+UICB_PROTO(uicb_focusnext);
+UICB_PROTO(uicb_focusprev);
+UICB_PROTO(uicb_setlayout);
+UICB_PROTO(uicb_togglemax);
+UICB_PROTO(uicb_toggleverticalmax);
+UICB_PROTO(uicb_togglehorizontalmax);
+UICB_PROTO(uicb_zoom);
 
 #endif

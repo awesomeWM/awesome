@@ -25,7 +25,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "config.h"
+#include "common.h"
 
 /** \brief replace \c NULL strings with emtpy strings */ 
 #define NONULL(x)       (x ? x : "") 
@@ -134,8 +134,8 @@ static inline int a_strcmp(const char *a, const char *b)
 
 void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
-void uicb_spawn(Display *, DC *, awesome_config *, const char *);
 Bool xgettextprop(Display *, Window, Atom, char *, unsigned int);
 double compute_new_value_from_arg(const char *, double);
 
+UICB_PROTO(uicb_spawn);
 #endif

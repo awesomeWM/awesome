@@ -22,7 +22,7 @@
 #ifndef AWESOME_CLIENT_H
 #define AWESOME_CLIENT_H
 
-#include "config.h"
+#include "common.h"
 
 /** Mask shorthands, used in event.c and client.c */
 #define BUTTONMASK              (ButtonPressMask | ButtonReleaseMask)
@@ -68,9 +68,9 @@ void updatesizehints(Client *); /* update the size hint variables of c */
 void updatetitle(Client *);     /* update the name of c */
 void saveprops(Client * c, int);     /* saves client properties */
 void set_shape(Client *);
-void uicb_killclient(Display *, DC *, awesome_config *, const char *); /* kill client */
-void uicb_moveresize(Display *, DC *, awesome_config *, const char *);  /* move and resize window */
-void uicb_settrans(Display *, DC *, awesome_config *, const char *);
-void uicb_setborder(Display *, DC *, awesome_config *, const char *);
+UICB_PROTO(uicb_killclient);
+UICB_PROTO(uicb_moveresize);
+UICB_PROTO(uicb_settrans);
+UICB_PROTO(uicb_setborder);
 
 #endif

@@ -22,9 +22,9 @@
 #ifndef AWESOME_AWESOME_H
 #define AWESOME_AWESOME_H
 
-#include "config.h"
+#include "common.h"
 
-void uicb_quit(Display *, DC *, awesome_config *, const char *);        /* quit awesome nicely */
 int xerror(Display *, XErrorEvent *);   /* awesome's X error handler */
+UICB_PROTO(uicb_quit);
 
 #endif
