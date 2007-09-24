@@ -342,12 +342,17 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
 
     keysym = XKeycodeToKeysym(e->xany.display, (KeyCode) ev->keycode, 0);
 
-    for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-        if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &y, &x, &d, &d, &m))
-            for(i = 0; i < awesomeconf[screen].nkeys; i++)
-                if(keysym == awesomeconf[screen].keys[i].keysym
-                   && CLEANMASK(awesomeconf[screen].keys[i].mod, screen) == CLEANMASK(ev->state, screen) && awesomeconf[screen].keys[i].func)
-                        awesomeconf[screen].keys[i].func(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].keys[i].arg);
+    /* find the right screen for this event */
+    if(sel)
+        screen = sel->screen;
+    else
+        for(screen = 0; screen < ScreenCount(e->xany.display) &&
+            !XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &y, &x, &d, &d, &m); screen++);
+
+    for(i = 0; i < awesomeconf[screen].nkeys; i++)
+        if(keysym == awesomeconf[screen].keys[i].keysym
+           && CLEANMASK(awesomeconf[screen].keys[i].mod, screen) == CLEANMASK(ev->state, screen) && awesomeconf[screen].keys[i].func)
+            awesomeconf[screen].keys[i].func(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].keys[i].arg);
 }
 
 void
