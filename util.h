@@ -30,6 +30,11 @@
 /** \brief replace \c NULL strings with emtpy strings */ 
 #define NONULL(x)       (x ? x : "") 
 
+#undef MAX
+#undef MIN
+#define MAX(a,b) ((a) < (b) ? (b) : (a))
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
 #define ssizeof(foo)            (ssize_t)sizeof(foo)
 #define countof(foo)            (ssizeof(foo) / ssizeof(foo[0]))
 
@@ -104,7 +109,6 @@ static inline ssize_t a_strlen(const char *s)
     return s ? strlen(s) : 0;
 }
 
-
 /** \brief \c NULL resistant strdup.
  *
  * the a_strdup() function returns a pointer to a new string, which is a
@@ -131,6 +135,8 @@ static inline int a_strcmp(const char *a, const char *b)
 {
         return strcmp(NONULL(a), NONULL(b));
 }
+
+ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l) __attribute__((nonnull(1)));
 
 void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));

@@ -142,3 +142,29 @@ compute_new_value_from_arg(const char *arg, double current_value)
 
     return current_value;
 }
+
+/** \brief safe limited strcpy.
+ *
+ * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into \c dst,
+ * always adding a final \c \\0 in \c dst.
+ *
+ * \param[in]  dst      destination buffer.
+ * \param[in]  n        size of the buffer. Negative sizes are allowed.
+ * \param[in]  src      source string.
+ * \param[in]  l        maximum number of chars to copy.
+ *
+ * \return minimum of  \c src \e length and \c l.
+*/
+ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l)
+{
+    ssize_t len = MIN(a_strlen(src), l);
+
+    if (n > 0)
+    {
+        ssize_t dlen = MIN(n - 1, len);
+        memcpy(dst, src, dlen);
+        dst[dlen] = '\0';
+    }
+
+    return len; 
+} 
