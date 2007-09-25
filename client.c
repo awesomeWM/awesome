@@ -182,6 +182,39 @@ setclienttrans(Client *c, double opacity)
     XSync(c->display, False);
 }
 
+/** Swap two client in the linked list clients
+ * \param c1 first client
+ * \param c2 second client
+ */
+static void
+client_swap(Client *c1, Client *c2)
+{
+    Client *tmp;
+
+    tmp = c1->next;
+    c1->next = c2->next; 
+    c2->next = (tmp == c2 ? c1 : tmp);
+
+    tmp = c2->prev;
+    c2->prev = c1->prev;
+    c1->prev = (tmp == c1 ? c2 : tmp );
+
+    if(c1->next)
+        c1->next->prev = c1;
+
+    if(c1->prev)
+        c1->prev->next = c1;
+
+    if(c2->next)
+        c2->next->prev = c2;
+
+    if(c2->prev)
+        c2->prev->next = c2;
+
+    if(clients == c1)
+        clients = c2;
+}
+
 /** Attach client to the beginning of the clients stack
  * \param c the client
  */
@@ -742,3 +775,40 @@ uicb_setborder(Display *disp __attribute__ ((unused)),
         awesomeconf->borderpx = 0;
 }
 
+void
+uicb_swapnext(Display *disp,
+              DC *drawcontext,
+              awesome_config *awesomeconf,
+              const char *arg __attribute__ ((unused)))
+{
+    Client *next;
+
+    if(!sel)
+        return;
+
+    for(next = sel->next; next && !isvisible(next, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); next = next->next);
+    if(next)
+    {
+        client_swap(sel, next);
+        arrange(disp, drawcontext, awesomeconf);
+    }
+}
+
+void
+uicb_swapprev(Display *disp,
+              DC *drawcontext,
+              awesome_config *awesomeconf,
+              const char *arg __attribute__ ((unused)))
+{
+    Client *prev;
+
+    if(!sel)
+        return;
+
+    for(prev = sel->prev; prev && !isvisible(prev, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); prev = prev->prev);
+    if(prev)
+    {
+        client_swap(prev, sel);
+        arrange(disp, drawcontext, awesomeconf);
+    }
+}

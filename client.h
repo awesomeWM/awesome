@@ -72,5 +72,7 @@ UICB_PROTO(uicb_killclient);
 UICB_PROTO(uicb_moveresize);
 UICB_PROTO(uicb_settrans);
 UICB_PROTO(uicb_setborder);
+UICB_PROTO(uicb_swapnext);
+UICB_PROTO(uicb_swapprev);
 
 #endif

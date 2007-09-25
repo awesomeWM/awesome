@@ -89,6 +89,8 @@ static const NameFuncLink KeyfuncList[] = {
     {"moveresize", uicb_moveresize},
     {"settrans", uicb_settrans},
     {"setborder", uicb_setborder},
+    {"swapnext", uicb_swapnext},
+    {"swapprev", uicb_swapprev},
     /* tag.c */
     {"tag", uicb_tag},
     {"togglefloating", uicb_togglefloating},
