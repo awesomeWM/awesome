@@ -39,7 +39,7 @@
 #include "layouts/floating.h"
 
 static void initfont(Display *, DC *, const char *);
-static unsigned long initcolor(const char *, Display *, int);
+static unsigned long initcolor(Display *, int, const char *);
 static unsigned int get_numlockmask(Display *);
 
 /** Link a name to a function */
@@ -388,22 +388,22 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
 
     /* colors */
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_border_color");
-    drawcontext->norm[ColBorder] = initcolor(tmp ? tmp : "#dddddd", disp, scr);
+    drawcontext->norm[ColBorder] = initcolor(disp, scr, tmp ? tmp : "#dddddd");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_bg_color");
-    drawcontext->norm[ColBG] = initcolor(tmp ? tmp : "#000000", disp, scr);
+    drawcontext->norm[ColBG] = initcolor(disp, scr, tmp ? tmp : "#000000");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_fg_color");
-    drawcontext->norm[ColFG] = initcolor(tmp ? tmp : "#ffffff", disp, scr);
+    drawcontext->norm[ColFG] = initcolor(disp, scr, tmp ? tmp : "#ffffff");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_border_color");
-    drawcontext->sel[ColBorder] = initcolor(tmp ? tmp : "#008b8b", disp, scr);
+    drawcontext->sel[ColBorder] = initcolor(disp, scr, tmp ? tmp : "#008b8b");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_bg_color");
-    drawcontext->sel[ColBG] = initcolor(tmp ? tmp : "#008b8b", disp, scr);
+    drawcontext->sel[ColBG] = initcolor(disp, scr, tmp ? tmp : "#008b8b");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_fg_color");
-    drawcontext->sel[ColFG] = initcolor(tmp ? tmp : "#ffffff", disp, scr);
+    drawcontext->sel[ColFG] = initcolor(disp, scr, tmp ? tmp : "#ffffff");
 
     config_destroy(&awesomelibconf);
     p_delete(&confpath);
@@ -489,7 +489,7 @@ get_numlockmask(Display *disp)
  * \return XColor pixel
  */
 static unsigned long
-initcolor(const char *colstr, Display * disp, int scr)
+initcolor(Display *disp, int scr, const char *colstr)
 {
     Colormap cmap = DefaultColormap(disp, scr);
     XColor color;
