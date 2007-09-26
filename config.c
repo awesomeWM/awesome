@@ -38,7 +38,7 @@
 #include "layouts/max.h"
 #include "layouts/floating.h"
 
-static void initfont(const char *, Display *, DC *);
+static void initfont(Display *, DC *, const char *);
 static unsigned long initcolor(const char *, Display *, int);
 static unsigned int get_numlockmask(Display *);
 
@@ -200,7 +200,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
 
     /* font */
     tmp = config_lookup_string(&awesomelibconf, "awesome.font");
-    initfont(tmp ? tmp : "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*", disp, drawcontext);
+    initfont(disp, drawcontext, tmp ? tmp : "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*");
 
     /* layouts */
     conflayouts = config_lookup(&awesomelibconf, "awesome.layouts");
@@ -415,7 +415,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
  * \param drawcontext Draw context
  */
 static void
-initfont(const char *fontstr, Display * disp, DC * drawcontext)
+initfont(Display *disp, DC *drawcontext, const char *fontstr)
 {
     char *def, **missing;
     int i, n;
