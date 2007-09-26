@@ -35,7 +35,7 @@ dist: clean
 	@mkdir awesome-${VERSION}
 	@mkdir awesome-${VERSION}/layouts
 	@cp -R LICENSE AUTHORS Makefile README awesomerc config.mk \
-	    awesome.1 ${SRC} ${SRC:.c=.h} awesome-${VERSION}
+	    awesome.1 ${SRC} ${SRC:.c=.h} common.h awesome-${VERSION}
 	@cp -R ${LAYOUTS} ${LAYOUTS:.c=.h} awesome-${VERSION}/layouts
 	@tar -cf awesome-${VERSION}.tar awesome-${VERSION}
 	@gzip -9 awesome-${VERSION}.tar
