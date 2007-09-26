@@ -20,7 +20,6 @@
  */
 
 #include "util.h"
-#include "client.h"
 #include "screen.h"
 #include "tag.h"
 #include "layout.h"
