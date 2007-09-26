@@ -164,7 +164,7 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
  * \param drawcontext Draw context
  */
 void
-parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomeconf)
+parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg, awesome_config *awesomeconf)
 {
     /* Main configuration object for parsing*/
     config_t awesomelibconf;
@@ -179,12 +179,17 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     KeySym tmp_key;
     ssize_t confpath_len;
 
-    homedir = getenv("HOME");
-    confpath_len = a_strlen(homedir) + a_strlen(AWESOME_CONFIG_FILE) + 2;
-    confpath = p_new(char, confpath_len);
-    a_strcpy(confpath, confpath_len, homedir);
-    a_strcat(confpath, confpath_len, "/");
-    a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
+    if(confpatharg)
+        confpath = a_strdup(confpatharg);
+    else
+    {
+        homedir = getenv("HOME");
+        confpath_len = a_strlen(homedir) + a_strlen(AWESOME_CONFIG_FILE) + 2;
+        confpath = p_new(char, confpath_len);
+        a_strcpy(confpath, confpath_len, homedir);
+        a_strcat(confpath, confpath_len, "/");
+        a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
+    }
 
     config_init(&awesomelibconf);
 

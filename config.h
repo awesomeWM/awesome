@@ -159,6 +159,6 @@ struct awesome_config
     Bool have_randr;
 };
 
-void parse_config(Display *, int, DC *, awesome_config *);        /* parse configuration file */
+void parse_config(Display *, int, DC *, const char *, awesome_config *);        /* parse configuration file */
 
 #endif

@@ -270,6 +270,7 @@ int
 main(int argc, char *argv[])
 {
     char *p;
+    const char *confpath = NULL;
     int r, xfd, e_dummy;
     fd_set rd;
     XEvent ev;
@@ -281,13 +282,23 @@ main(int argc, char *argv[])
     Atom netatom[NetLast];
     event_handler **handler;
 
-    if(argc == 2 && !a_strcmp("-v", argv[1]))
+    if(argc >= 2)
     {
-        printf("awesome-" VERSION " © 2007 Julien Danjou\n");
-        return EXIT_SUCCESS;
+        if(!a_strcmp("-v", argv[1]))
+        {
+            printf("awesome-" VERSION " © 2007 Julien Danjou\n");
+            return EXIT_SUCCESS;
+        }
+        else if(!a_strcmp("-c", argv[1]))
+        {
+            if(a_strlen(argv[2]))
+                confpath = argv[2];
+            else
+                eprint("awesome: -c require a file\n");
+        }
+        else
+            eprint("usage: awesome [-v | -c configfile]\n");
     }
-    else if(argc != 1)
-        eprint("usage: awesome [-v]\n");
 
     /* Tag won't be printed otherwised */
     setlocale(LC_CTYPE, "");
@@ -317,7 +328,7 @@ main(int argc, char *argv[])
 
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
-        parse_config(dpy, screen, &dc[screen], &awesomeconf[screen]);
+        parse_config(dpy, screen, &dc[screen], confpath, &awesomeconf[screen]);
         setup(dpy, screen, &dc[screen], &awesomeconf[screen]);
         XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
                         XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
