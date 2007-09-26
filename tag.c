@@ -139,8 +139,11 @@ isvisible(Client * c, int screen, Tag * tags, int ntags)
 {
     int i;
 
+    if(c->screen != screen)
+        return False;
+
     for(i = 0; i < ntags; i++)
-        if(c->tags[i] && tags[i].selected && c->screen == screen)
+        if(c->tags[i] && tags[i].selected)
             return True;
     return False;
 }
