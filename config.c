@@ -158,46 +158,6 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
     return NULL;
 }
 
-/** Set default configuration
- * \param awesomeconf awesome config ref
- */
-static void
-set_default_config(awesome_config *awesomeconf)
-{
-    /** \todo most of this stuff aren't freed when we initialize
-     * the real configuration, we should add a clean conf function */
-    a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION);
-    awesomeconf->statusbar.width = 0;
-    awesomeconf->statusbar.height = 0;
-    awesomeconf->opacity_unfocused = -1;
-    awesomeconf->nkeys = 0;
-    awesomeconf->nrules = 0;
-
-    awesomeconf->nlayouts = 2;
-    awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts + 1);
-    awesomeconf->layouts[0].symbol = a_strdup("[]=");
-    awesomeconf->layouts[0].arrange = layout_tile;
-    awesomeconf->layouts[1].symbol = a_strdup("<><");
-    awesomeconf->layouts[1].arrange = layout_floating;
-    awesomeconf->layouts[2].symbol = NULL;
-    awesomeconf->layouts[2].arrange = NULL;
-
-    awesomeconf->ntags = 3;
-    awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
-    awesomeconf->tags[0].name = a_strdup("this");
-    awesomeconf->tags[1].name = a_strdup("is");
-    awesomeconf->tags[2].name = a_strdup("awesome");
-    awesomeconf->tags[0].selected = True;
-    awesomeconf->tags[1].selected = False;
-    awesomeconf->tags[2].selected = False;
-    awesomeconf->tags[0].was_selected = False;
-    awesomeconf->tags[1].was_selected = False;
-    awesomeconf->tags[2].was_selected = False;
-    awesomeconf->tags[0].layout = awesomeconf->layouts;
-    awesomeconf->tags[1].layout = awesomeconf->layouts;
-    awesomeconf->tags[2].layout = awesomeconf->layouts;
-}
-
 /** Parse configuration file and initialize some stuff
  * \param disp Display ref
  * \param scr Screen number
@@ -219,8 +179,6 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     KeySym tmp_key;
     ssize_t confpath_len;
 
-    set_default_config(awesomeconf);
-
     homedir = getenv("HOME");
     confpath_len = a_strlen(homedir) + a_strlen(AWESOME_CONFIG_FILE) + 2;
     confpath = p_new(char, confpath_len);
@@ -229,6 +187,8 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
 
     config_init(&awesomelibconf);
+
+    a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION);
 
     /* set screen */
     awesomeconf->screen = scr;
@@ -246,7 +206,17 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     conflayouts = config_lookup(&awesomelibconf, "awesome.layouts");
 
     if(!conflayouts)
-        fprintf(stderr, "awesome: layouts not found in configuration file\n");
+    {
+        fprintf(stderr, "awesome: layouts not found in configuration file, setting default\n");
+        awesomeconf->nlayouts = 2;
+        awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts + 1);
+        awesomeconf->layouts[0].symbol = a_strdup("[]=");
+        awesomeconf->layouts[0].arrange = layout_tile;
+        awesomeconf->layouts[1].symbol = a_strdup("<><");
+        awesomeconf->layouts[1].arrange = layout_floating;
+        awesomeconf->layouts[2].symbol = NULL;
+        awesomeconf->layouts[2].arrange = NULL;
+    }
     else
     {
         awesomeconf->nlayouts = config_setting_length(conflayouts);
@@ -283,7 +253,23 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     conftags = config_lookup(&awesomelibconf, "awesome.tags");
 
     if(!conftags)
-        fprintf(stderr, "awesome: tags not found in configuration file\n");
+    {
+        fprintf(stderr, "awesome: tags not found in configuration file, setting default\n");
+        awesomeconf->ntags = 3;
+        awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
+        awesomeconf->tags[0].name = a_strdup("this");
+        awesomeconf->tags[1].name = a_strdup("is");
+        awesomeconf->tags[2].name = a_strdup("awesome");
+        awesomeconf->tags[0].selected = True;
+        awesomeconf->tags[1].selected = False;
+        awesomeconf->tags[2].selected = False;
+        awesomeconf->tags[0].was_selected = False;
+        awesomeconf->tags[1].was_selected = False;
+        awesomeconf->tags[2].was_selected = False;
+        awesomeconf->tags[0].layout = awesomeconf->layouts;
+        awesomeconf->tags[1].layout = awesomeconf->layouts;
+        awesomeconf->tags[2].layout = awesomeconf->layouts;
+    }
     else
     {
         awesomeconf->ntags = config_setting_length(conftags);
@@ -310,7 +296,10 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     confrules = config_lookup(&awesomelibconf, "awesome.rules");
 
     if(!confrules)
+    {
+        awesomeconf->nrules = 0;
         fprintf(stderr, "awesome: no rules found in configuration file\n");
+    }
     else
     {
         awesomeconf->nrules = config_setting_length(confrules);
@@ -337,7 +326,10 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
     confkeys = config_lookup(&awesomelibconf, "awesome.keys");
 
     if(!confkeys)
+    {
+        awesomeconf->nkeys = 0;
         fprintf(stderr, "awesome: no keys found in configuration file\n");
+    }
     else
     {
         awesomeconf->nkeys = config_setting_length(confkeys);
@@ -372,7 +364,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, awesome_config *awesomec
 
     /* opacity */
     awesomeconf->opacity_unfocused = config_lookup_int(&awesomelibconf, "awesome.opacity_unfocused");
-    if(awesomeconf->opacity_unfocused >= 100)
+    if(awesomeconf->opacity_unfocused >= 100 || awesomeconf->opacity_unfocused == 0)
         awesomeconf->opacity_unfocused = -1;
 
     /* snap */
