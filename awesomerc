@@ -65,7 +65,7 @@ awesome:
     modkey = "Mod4";
 
     # Keys binding
-    keys = ((("Mod4"), "Return", "spawn", "exec urxvt"),
+    keys = ((("Mod4"), "Return", "spawn", "exec x-terminal-emulator"),
             (("Mod4"), "space", "setlayout"),
             (("Mod4"), "b", "togglebar"),
             (("Mod4"), "j", "focusnext"),
