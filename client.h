@@ -38,17 +38,22 @@ struct Client
     int rx, ry, rw, rh;
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
+    /** True if client is unmapped */
     Bool unmapped;
     long flags;
     int border, oldborder;
     Bool isbanned, isfixed, ismax, isfloating, wasfloating;
+    /** Tags for the client */
     Bool *tags;
+    /** Next client */
     Client *next;
+    /** Previous client */
     Client *prev;
     Client *snext;
+    /** Window of the client */
     Window win;
     /** Client display */
-    Display * display;
+    Display *display;
     /** Client screen */
     int screen;
     /** First time viewed on new layout */
