@@ -496,7 +496,12 @@ get_numlockmask(Display *disp)
 static unsigned long
 initcolor(Display *disp, int scr, const char *colstr)
 {
-    Colormap cmap = DefaultColormap(disp, scr);
+    Colormap cmap;
+    /* bypass screen if scr is a Xinerama screen number */
+    if(XineramaIsActive(disp))
+        cmap = DefaultColormap(disp, DefaultScreen(disp));
+    else
+        cmap = DefaultColormap(disp, scr);
     XColor color;
     if(!XAllocNamedColor(disp, cmap, colstr, &color, &color))
         die("awesome: error, cannot allocate color '%s'\n", colstr);

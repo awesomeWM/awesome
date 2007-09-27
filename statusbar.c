@@ -107,8 +107,14 @@ void
 initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
 {
     XSetWindowAttributes wa;
+    int real_screen;
 
     statusbar->screen = screen;
+
+    if(XineramaIsActive(disp))
+        real_screen = DefaultScreen(disp);
+    else
+        real_screen = screen;
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
@@ -116,17 +122,17 @@ initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    statusbar->window = XCreateWindow(disp, RootWindow(disp, screen), 0, 0, DisplayWidth(disp, screen),
-                                      statusbar->height, 0, DefaultDepth(disp, screen), CopyFromParent,
-                                      DefaultVisual(disp, screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+    statusbar->window = XCreateWindow(disp, RootWindow(disp, screen), 0, 0, DisplayWidth(disp, real_screen),
+                                      statusbar->height, 0, DefaultDepth(disp, real_screen), CopyFromParent,
+                                      DefaultVisual(disp, real_screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, drawcontext->cursor[CurNormal]);
     updatebarpos(disp, *statusbar);
     XMapRaised(disp, statusbar->window);
     statusbar->drawable = XCreatePixmap(disp,
-                                        RootWindow(disp, screen),
-                                        DisplayWidth(disp, screen),
+                                        RootWindow(disp, real_screen),
+                                        DisplayWidth(disp, real_screen),
                                         statusbar->height,
-                                        DefaultDepth(disp, screen));
+                                        DefaultDepth(disp, real_screen));
 }
 
 void
