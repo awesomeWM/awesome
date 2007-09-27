@@ -87,8 +87,8 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     unsigned int nx, ny, nw, nh;
     /* master size */
     unsigned int mw = 0, mh = 0;
-    int n, i, li, last_i = 0, masterwin = 0, otherwin = 0;
-    int screen_numbers = 1, use_screen = -1;
+    int n, i, masterwin = 0, otherwin = 0;
+    int screen_numbers = 1;
     int real_ncols = 1, win_by_col = 1, current_col = 0;
     ScreenInfo *screens_info = NULL;
     Client *c;
@@ -99,78 +99,49 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             n++;
 
+    wah = screens_info[awesomeconf->screen].height;
+    waw = screens_info[awesomeconf->screen].width;
+    wax = screens_info[awesomeconf->screen].x_org;
+    way = screens_info[awesomeconf->screen].y_org;
+
+    masterwin = MIN(n, awesomeconf->nmaster);
+    
+    otherwin = n - masterwin;
+    
+    if(otherwin < 0)
+        otherwin = 0;
+
+    if(awesomeconf->nmaster)
+    {
+        mh = masterwin ? wah / masterwin : waw;
+        mw = otherwin ? waw * awesomeconf->mwfact : waw;
+    }
+    else
+        mh = mw = 0;
+
+    real_ncols = MIN(otherwin, awesomeconf->ncols);
+    
+    printf("masterwin %d otherwin %d real_ncols %d\n", masterwin, otherwin, real_ncols);
+
     for(i = 0, c = clients; c; c = c->next)
     {
         if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             continue;
 
-        if(use_screen == -1
-           || (screen_numbers > 1 
-               && i
-               && ((i - last_i) >= masterwin + otherwin
-                   || n == screen_numbers)))
-        {
-            /* for multi-head without Xinerama */
-            if(screen_numbers != 1)
-                use_screen++;
-            else
-                use_screen = awesomeconf->screen;
-
-            last_i = i;
-
-            wah = screens_info[use_screen].height;
-            waw = screens_info[use_screen].width;
-            wax = screens_info[use_screen].x_org;
-            way = screens_info[use_screen].y_org;
-
-            if(n >= awesomeconf->nmaster * screen_numbers)
-            {
-                masterwin = awesomeconf->nmaster;
-                otherwin = (n - (awesomeconf->nmaster * screen_numbers)) / screen_numbers;
-                if(use_screen == 0)
-                    otherwin += (n - (awesomeconf->nmaster * screen_numbers)) % screen_numbers;
-            }
-            else
-            {
-                masterwin = n / screen_numbers;
-                /* first screen takes more master */
-                if(use_screen == 0)
-                    masterwin += n % screen_numbers;
-                otherwin = 0;
-            }
-
-            if(awesomeconf->nmaster)
-            {
-                mh = masterwin ? wah / masterwin : waw;
-                mw = otherwin ? waw * awesomeconf->mwfact : waw;
-            }
-            else
-                mh = mw = 0;
-
-            mw -= 2 * c->border;
-            mh -= 2 * c->border;
-
-            if(otherwin < awesomeconf->ncols)
-                real_ncols = otherwin;
-            else
-                real_ncols = awesomeconf->ncols;
-
-            current_col = 0;
-        }
-
         c->ismax = False;
-        li = last_i ? i - last_i : i;
-        if(li < awesomeconf->nmaster)
+        printf("client %d\n", i);
+        if(i < awesomeconf->nmaster)
         {                       /* master */
-            ny = way + li * (mh + 2 * c->border);
-            nx = wax + (right ? 0 : waw - (mw + 2 * c->border));
-            resize(c, nx, ny, mw, mh, awesomeconf->resize_hints);
+            ny = way + i * mh;
+            nx = wax + (right ? 0 : waw - mw);
+            resize(c, nx, ny, mw - 2 * c->border, mh - 2 * c->border, awesomeconf->resize_hints);
         }
         else
         {                       /* tile window */
-            win_by_col = otherwin / real_ncols;
+            if(real_ncols)
+                win_by_col = otherwin / real_ncols;
 
-            if((li - awesomeconf->nmaster) && (li - awesomeconf->nmaster) % win_by_col == 0 && current_col < real_ncols - 1)
+            if((i - awesomeconf->nmaster) && (i - awesomeconf->nmaster) % win_by_col == 0 && current_col < real_ncols - 1)
                 current_col++;
 
             if(current_col == real_ncols - 1)
@@ -181,14 +152,14 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
             else
                 nh = (wah / win_by_col) - 2 * c->border;
 
-            nw = (waw - (mw + 2 * c->border)) / real_ncols - 2 * c->border;
+            nw = (waw - mw) / real_ncols - 2 * c->border;
 
-            if(li == awesomeconf->nmaster || otherwin <= real_ncols || (li - awesomeconf->nmaster) % win_by_col == 0)
+            if(i == awesomeconf->nmaster || otherwin <= real_ncols || (i - awesomeconf->nmaster) % win_by_col == 0)
                 ny = way;
             else
-                ny = way + ((li - awesomeconf->nmaster) % win_by_col) * (nh + 2 * c->border);
+                ny = way + ((i - awesomeconf->nmaster) % win_by_col) * (nh + 2 * c->border);
 
-            nx = wax + current_col * nw + (right ? mw + 2 * c->border : 0);
+            nx = wax + current_col * nw + (right ? mw : 0);
             resize(c, nx, ny, nw, nh, awesomeconf->resize_hints);
         }
         i++;
