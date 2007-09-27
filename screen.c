@@ -187,3 +187,29 @@ uicb_focusprevscreen(Display *disp,
     }
     move_mouse_pointer_to_screen(disp, prev_screen);
 }
+
+void
+uicb_movetoscreen(Display *disp,
+                  DC *drawcontext,
+                  awesome_config * awesomeconf,
+                  const char *arg)
+{
+    int screen;
+
+    if(!XineramaIsActive(disp) || !sel)
+        return;
+
+    if(arg)
+    {
+        screen = strtol(arg, NULL, 10);
+        if(screen >= get_screen_count(disp) || screen < 0)
+            return;
+    }
+    else
+        screen = sel->screen + 1 >= get_screen_count(disp) ? 0 : sel->screen + 1;
+
+    sel->screen = screen;
+    move_mouse_pointer_to_screen(disp, screen);
+    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, &drawcontext[screen - awesomeconf->screen], &awesomeconf[screen - awesomeconf->screen]);
+}

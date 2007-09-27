@@ -115,6 +115,7 @@ static const NameFuncLink KeyfuncList[] = {
     /* screen.c */
     {"focusnextscreen", uicb_focusnextscreen},
     {"focusprevscreen", uicb_focusprevscreen},
+    {"movetoscreen", uicb_movetoscreen},
     /* awesome.c */
     {"quit", uicb_quit},
     /* statusbar.c */

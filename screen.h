@@ -34,5 +34,6 @@ int get_screen_bycoord(Display *, int, int);
 int get_screen_count(Display *);
 UICB_PROTO(uicb_focusnextscreen);
 UICB_PROTO(uicb_focusprevscreen);
+UICB_PROTO(uicb_movetoscreen);
 
 #endif
