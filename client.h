@@ -54,7 +54,7 @@ struct Client
     Window win;
     /** Client display */
     Display *display;
-    /** Client screen */
+    /** Client screen (Zaphod) */
     int screen;
     /** First time viewed on new layout */
     Bool ftview;

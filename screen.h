@@ -28,8 +28,9 @@
 
 typedef XineramaScreenInfo ScreenInfo;
 
-ScreenInfo * get_screen_info(Display *, int, Statusbar, int *);
-ScreenInfo * get_display_info(Display *disp, int, Statusbar statusbar);
+ScreenInfo * get_screen_info(Display *, int, Statusbar *, int *);
+ScreenInfo * get_display_info(Display *, int, Statusbar);
+int get_screen_bycoord(Display *, int, int);
 UICB_PROTO(uicb_focusnextscreen);
 UICB_PROTO(uicb_focusprevscreen);
 

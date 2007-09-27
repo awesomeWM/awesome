@@ -34,7 +34,7 @@ extern Client *sel, *clients;
  * \return ScreenInfo struct array with all screens info
  */
 ScreenInfo *
-get_screen_info(Display *disp, int screen, Statusbar statusbar, int *screen_number)
+get_screen_info(Display *disp, int screen, Statusbar *statusbar, int *screen_number)
 {
     int i, fake_screen_number = 0;
     ScreenInfo *si;
@@ -56,14 +56,15 @@ get_screen_info(Display *disp, int screen, Statusbar statusbar, int *screen_numb
         fake_screen_number = screen + 1;
     }
 
-    for(i = 0; i < fake_screen_number; i++)
-    {
-        if(statusbar.position == BarTop 
-           || statusbar.position == BarBot)
-            si[i].height -= statusbar.height;
-        if(statusbar.position == BarTop)
-            si[i].y_org += statusbar.height;
-    }
+    if(statusbar)
+        for(i = 0; i < fake_screen_number; i++)
+        {
+            if(statusbar->position == BarTop 
+               || statusbar->position == BarBot)
+                si[i].height -= statusbar->height;
+            if(statusbar->position == BarTop)
+                si[i].y_org += statusbar->height;
+        }
     
     return si;
 }
@@ -88,6 +89,36 @@ get_display_info(Display *disp, int screen, Statusbar statusbar)
         ((statusbar.position == BarTop || statusbar.position == BarBot) ? statusbar.height : 0);
 
     return si;
+}
+
+/** Return the Xinerama screen number where the window is placed
+ * \param disp Display ref
+ * \param x x coordinate of the window
+ * \param y y coordinate of the window
+ * \return screen number or -1 on no match
+ */
+int
+get_screen_bycoord(Display *disp, int x, int y)
+{
+    ScreenInfo *si;
+    int screen_number, i;
+
+    /* don't waste our time */
+    if(!XineramaIsActive(disp))
+        return 0;
+
+    si = get_screen_info(disp, 0, NULL, &screen_number);
+
+    for(i = 0; i < screen_number; i++)
+        if(x >= si[i].x_org && x <= si[i].x_org + si[i].width
+           && y >= si[i].y_org && y <= si[i].x_org + si[i].height)
+        {
+            XFree(si);
+            return i;
+        }
+
+    XFree(si);
+    return -1;
 }
 
 void

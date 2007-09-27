@@ -93,7 +93,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     ScreenInfo *screens_info = NULL;
     Client *c;
 
-    screens_info = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &screen_numbers);
+    screens_info = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar, &screen_numbers);
  
     for(n = 0, c = clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))

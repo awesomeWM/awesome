@@ -60,7 +60,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
     XEvent ev;
     ScreenInfo *si;
 
-    si = get_screen_info(c->display, c->screen, awesomeconf->statusbar, &x1);
+    si = get_screen_info(c->display, c->screen, &awesomeconf->statusbar, &x1);
 
     ocx = nx = c->x;
     ocy = ny = c->y;

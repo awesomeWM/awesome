@@ -31,7 +31,7 @@ layout_max(Display *disp, awesome_config *awesomeconf)
 {
     Client *c;
     int screen_number = 0, use_screen = 0;
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, awesomeconf->statusbar, &screen_number);
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar, &screen_number);
 
     for(c = clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
