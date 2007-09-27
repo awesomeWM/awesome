@@ -135,36 +135,48 @@ getstate(Display *disp, Window w)
  * \param awesomeconf awesome config
  */
 static void
-scan(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
+scan(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
 {
     unsigned int i, num;
-    Window *wins, d1, d2;
+    int screen, real_screen;
+    Window *wins = NULL, d1, d2;
     XWindowAttributes wa;
 
-    wins = NULL;
-    if(XQueryTree(disp, RootWindow(disp, screen), &d1, &d2, &wins, &num))
+    for(screen = 0; screen < ScreenCount(disp); screen++)
     {
-        for(i = 0; i < num; i++)
+        if(XQueryTree(disp, RootWindow(disp, screen), &d1, &d2, &wins, &num))
         {
-            if(!XGetWindowAttributes(disp, wins[i], &wa)
-               || wa.override_redirect
-               || XGetTransientForHint(disp, wins[i], &d1))
-                continue;
+            real_screen = screen;
+            for(i = 0; i < num; i++)
+            {
+                if(!XGetWindowAttributes(disp, wins[i], &wa)
+                   || wa.override_redirect
+                   || XGetTransientForHint(disp, wins[i], &d1))
+                    continue;
                 if(wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState)
-                    manage(disp, drawcontext, wins[i], &wa, awesomeconf);
+                {
+                    if(screen == 0)
+                        real_screen = get_screen_bycoord(disp, wa.x, wa.y);
+                    manage(disp, &drawcontext[real_screen], wins[i], &wa, &awesomeconf[real_screen]);
+                }
+            }
+            /* now the transients */
+            for(i = 0; i < num; i++)
+            {
+                if(!XGetWindowAttributes(disp, wins[i], &wa))
+                    continue;
+                if(XGetTransientForHint(disp, wins[i], &d1)
+                   && (wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState))
+                {
+                    if(screen == 0)
+                        real_screen = get_screen_bycoord(disp, wa.x, wa.y);
+                    manage(disp, &drawcontext[real_screen], wins[i], &wa, &awesomeconf[real_screen]);
+                }
+            }
         }
-        /* now the transients */
-        for(i = 0; i < num; i++)
-        {
-            if(!XGetWindowAttributes(disp, wins[i], &wa))
-                continue;
-            if(XGetTransientForHint(disp, wins[i], &d1)
-               && (wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState))
-                manage(disp, drawcontext, wins[i], &wa, awesomeconf);
-        }
+        if(wins)
+            XFree(wins);
     }
-    if(wins)
-        XFree(wins);
 }
 
 /** Setup everything before running
@@ -375,8 +387,7 @@ main(int argc, char *argv[])
         awesomeconf[screen].have_randr = awesomeconf[0].have_randr;
     }
 
-    for(screen = 0; screen < ScreenCount(dpy); screen++)
-        scan(dpy, screen, &dc[screen], &awesomeconf[screen]);
+    scan(dpy, dc, awesomeconf);
 
     XSync(dpy, False);
 
