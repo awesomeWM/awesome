@@ -68,7 +68,7 @@ uicb_spawn(Display * disp,
     if(!arg)
         return;
     
-    if(XineramaIsActive(disp) && (tmp = getenv("DISPLAY")))
+    if(!XineramaIsActive(disp) && (tmp = getenv("DISPLAY")))
     {
         display = a_strdup(tmp);
         if((tmp = strrchr(display, '.')))
