@@ -421,7 +421,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     }
     else
     {
-        ScreenInfo *si = get_display_info(disp, c->screen, awesomeconf->statusbar);
+        ScreenInfo *si = get_display_info(disp, c->screen, &awesomeconf->statusbar);
 
         if(c->x + c->w + 2 * c->border > si->x_org + si->width)
             c->x = c->rx = si->x_org + si->width - c->w - 2 * c->border;
@@ -469,6 +469,7 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
 {
     double dx, dy, max, min, ratio;
     XWindowChanges wc;
+    ScreenInfo *si;
 
     if(sizehints)
     {
@@ -513,10 +514,15 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
     if(w <= 0 || h <= 0)
         return;
     /* offscreen appearance fixes */
-    if(x > DisplayWidth(c->display, c->screen))
-        x = DisplayWidth(c->display, c->screen) - w - 2 * c->border;
-    if(y > DisplayHeight(c->display, c->screen))
-        y = DisplayHeight(c->display, c->screen) - h - 2 * c->border;
+    if(XineramaIsActive(c->display))
+        si = get_display_info(c->display, DefaultScreen(c->display), NULL);
+    else
+        si = get_display_info(c->display, c->screen, NULL);
+    if(x > si->width)
+        x = si->width - w - 2 * c->border;
+    if(y > si->height)
+        y = si->height - h - 2 * c->border;
+    XFree(si);
     if(x + w + 2 * c->border < 0)
         x = 0;
     if(y + h + 2 * c->border < 0)
@@ -531,6 +537,8 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
         XConfigureWindow(c->display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
         configure(c);
         XSync(c->display, False);
+        if(XineramaIsActive(c->display))
+            c->screen = get_screen_bycoord(c->display, c->x, c->y);
     }
 }
 
