@@ -110,8 +110,8 @@ get_screen_bycoord(Display *disp, int x, int y)
     si = get_screen_info(disp, 0, NULL, &screen_number);
 
     for(i = 0; i < screen_number; i++)
-        if(x >= si[i].x_org && x <= si[i].x_org + si[i].width
-           && y >= si[i].y_org && y <= si[i].x_org + si[i].height)
+        if(x >= si[i].x_org && x < si[i].x_org + si[i].width
+           && y >= si[i].y_org && y < si[i].x_org + si[i].height)
         {
             XFree(si);
             return i;
@@ -138,6 +138,20 @@ get_screen_count(Display *disp)
     return screen_number;
 }
 
+static void
+move_mouse_pointer_to_screen(Display *disp, int screen)
+{
+    if(XineramaIsActive(disp))
+    {
+        int dummy;
+        ScreenInfo *si = get_screen_info(disp, screen, NULL, &dummy);
+        XWarpPointer(disp, None, DefaultRootWindow(disp), 0, 0, 0, 0, si[screen].x_org, si[screen].y_org);
+        XFree(si);
+    }
+    else
+        XWarpPointer(disp, None, RootWindow(disp, screen), 0, 0, 0, 0, 0, 0);
+}
+
 void
 uicb_focusnextscreen(Display *disp,
                      DC *drawcontext,
@@ -145,7 +159,7 @@ uicb_focusnextscreen(Display *disp,
                      const char *arg __attribute__ ((unused)))
 {
     Client *c;
-    int next_screen = awesomeconf->screen + 1 >= ScreenCount(disp) ? 0 : awesomeconf->screen + 1;
+    int next_screen = awesomeconf->screen + 1 >= get_screen_count(disp) ? 0 : awesomeconf->screen + 1;
 
     for(c = clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
@@ -153,6 +167,7 @@ uicb_focusnextscreen(Display *disp,
         focus(c->display, &drawcontext[next_screen - awesomeconf->screen], c, True, &awesomeconf[next_screen - awesomeconf->screen]);
         restack(c->display, &drawcontext[next_screen - awesomeconf->screen], &awesomeconf[next_screen - awesomeconf->screen]);
     }
+    move_mouse_pointer_to_screen(disp, next_screen);
 }
 
 void
@@ -162,7 +177,7 @@ uicb_focusprevscreen(Display *disp,
                      const char *arg __attribute__ ((unused)))
 {
     Client *c;
-    int prev_screen = awesomeconf->screen - 1 < 0 ? ScreenCount(disp) - 1 : awesomeconf->screen - 1;
+    int prev_screen = awesomeconf->screen - 1 < 0 ? get_screen_count(disp) - 1 : awesomeconf->screen - 1;
 
     for(c = clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
@@ -170,4 +185,5 @@ uicb_focusprevscreen(Display *disp,
         focus(c->display, &drawcontext[prev_screen - awesomeconf->screen], c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
         restack(c->display, &drawcontext[prev_screen - awesomeconf->screen], &awesomeconf[prev_screen - awesomeconf->screen]);
     }
+    move_mouse_pointer_to_screen(disp, prev_screen);
 }
