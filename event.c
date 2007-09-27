@@ -148,7 +148,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     XButtonPressedEvent *ev = &e->xbutton;
 
-    for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+    for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
         if(awesomeconf[screen].statusbar.window == ev->window)
         {
             int x = 0;
@@ -326,7 +326,7 @@ handle_event_expose(XEvent * e, awesome_config *awesomeconf)
     int screen;
 
     if(!ev->count)
-        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+        for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
             if(awesomeconf[screen].statusbar.window == ev->window)
                 drawstatusbar(e->xany.display, &dc[screen], &awesomeconf[screen]);
 }
@@ -346,8 +346,17 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
     if(sel)
         screen = sel->screen;
     else
-        for(screen = 0; screen < ScreenCount(e->xany.display) &&
-            !XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &y, &x, &d, &d, &m); screen++);
+        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+            if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &x, &y, &d, &d, &m))
+            {
+                /* if screen is 0, we are on first Zaphod screen or on the
+                 * only screen in Xinerama, so we can ask for a better screen
+                 * number with get_screen_bycoord: we'll get 0 in Zaphod mode
+                 * so it's the same, or maybe the real Xinerama screen */
+                if(screen == 0)
+                    screen = get_screen_bycoord(e->xany.display, x, y);
+                break;
+            }
 
     for(i = 0; i < awesomeconf[screen].nkeys; i++)
         if(keysym == awesomeconf[screen].keys[i].keysym

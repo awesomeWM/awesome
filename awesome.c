@@ -66,7 +66,7 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
         unmanage(stack, drawcontext, NormalState, awesomeconf);
     }
 
-    for(screen = 0; screen < ScreenCount(disp); screen++)
+    for(screen = 0; screen < get_screen_count(disp); screen++)
     {
         if(drawcontext[screen].font.set)
             XFreeFontSet(disp, drawcontext[screen].font.set);
@@ -323,10 +323,10 @@ main(int argc, char *argv[])
     netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
 
     /* allocate stuff */
-    dc = p_new(DC, ScreenCount(dpy));
-    awesomeconf = p_new(awesome_config, ScreenCount(dpy));
+    dc = p_new(DC, get_screen_count(dpy));
+    awesomeconf = p_new(awesome_config, get_screen_count(dpy));
 
-    for(screen = 0; screen < ScreenCount(dpy); screen++)
+    for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
         parse_config(dpy, screen, &dc[screen], confpath, &awesomeconf[screen]);
         setup(dpy, screen, &dc[screen], &awesomeconf[screen]);
@@ -363,12 +363,14 @@ main(int argc, char *argv[])
         handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
     }
 
-    for(screen = 0; screen < ScreenCount(dpy); screen++)
+    for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
         awesomeconf[screen].have_shape = awesomeconf[0].have_shape;
         awesomeconf[screen].have_randr = awesomeconf[0].have_randr;
-        scan(dpy, screen, &dc[screen], &awesomeconf[screen]);
     }
+
+    for(screen = 0; screen < ScreenCount(dpy); screen++)
+        scan(dpy, screen, &dc[screen], &awesomeconf[screen]);
 
     XSync(dpy, False);
 
