@@ -331,6 +331,7 @@ uicb_tag_viewnext(Display *disp,
     if(++firsttag >= awesomeconf->ntags)
         firsttag = 0;
     awesomeconf->tags[firsttag].selected = True;
+    awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
     saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }
@@ -359,6 +360,7 @@ uicb_tag_viewprev(Display *disp,
     if(--firsttag < 0)
         firsttag = awesomeconf->ntags - 1;
     awesomeconf->tags[firsttag].selected = True;
+    awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
     saveawesomeprops(disp, awesomeconf);
     arrange(disp, drawcontext, awesomeconf);
 }
