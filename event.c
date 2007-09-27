@@ -108,13 +108,17 @@ movemouse(Client * c, awesome_config *awesomeconf)
 static void
 resizemouse(Client * c, awesome_config *awesomeconf)
 {
-    int ocx, ocy;
-    int nw, nh;
+    int ocx, ocy, nw, nh, real_screen;
     XEvent ev;
+
+    if(XineramaIsActive(c->display))
+        real_screen = DefaultScreen(c->display);
+    else
+        real_screen = awesomeconf->screen;
 
     ocx = c->x;
     ocy = c->y;
-    if(XGrabPointer(c->display, RootWindow(c->display, c->screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+    if(XGrabPointer(c->display, RootWindow(c->display, real_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, dc[c->screen].cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
