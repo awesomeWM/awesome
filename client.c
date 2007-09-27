@@ -400,6 +400,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     Window trans;
     Status rettrans;
     XWindowChanges wc;
+    ScreenInfo *si = get_display_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
     c = p_new(Client, 1);
     c->tags = p_new(Bool, awesomeconf->ntags);
@@ -412,8 +413,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     c->oldborder = wa->border_width;
     c->display = disp;
     c->screen = awesomeconf->screen;
-    if(c->w == DisplayWidth(disp, c->screen)
-       && c->h == DisplayHeight(disp, c->screen))
+    if(c->w == si->width && c->h == si->height)
     {
         c->x = 0;
         c->y = 0;
@@ -421,8 +421,6 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     }
     else
     {
-        ScreenInfo *si = get_display_info(disp, c->screen, &awesomeconf->statusbar);
-
         if(c->x + c->w + 2 * c->border > si->x_org + si->width)
             c->x = c->rx = si->x_org + si->width - c->w - 2 * c->border;
         if(c->y + c->h + 2 * c->border > si->y_org + si->height)
