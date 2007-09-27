@@ -393,7 +393,7 @@ loadprops(Client * c, int ntags)
  * \param awesomeconf awesome config
  */
 void
-manage(Display * disp, DC *drawcontext, Window w, XWindowAttributes * wa, awesome_config *awesomeconf)
+manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 {
     int i;
     Client *c, *t = NULL;
