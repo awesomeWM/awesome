@@ -27,6 +27,7 @@
 
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/Xinerama.h>  
 
 #include "util.h"
 
@@ -67,7 +68,7 @@ uicb_spawn(Display * disp,
     if(!arg)
         return;
     
-    if((tmp = getenv("DISPLAY")))
+    if(XineramaIsActive(disp) && (tmp = getenv("DISPLAY")))
     {
         display = a_strdup(tmp);
         if((tmp = strrchr(display, '.')))
