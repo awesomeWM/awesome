@@ -51,6 +51,7 @@ void
 drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
 {
     int x, i;
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, NULL, &i);
 
     drawcontext->x = drawcontext->y = 0;
     for(i = 0; i < awesomeconf->ntags; i++)
@@ -74,11 +75,11 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
     drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->current_layout->symbol, drawcontext->norm);
     x = drawcontext->x + drawcontext->w;
     drawcontext->w = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->statustext, drawcontext->font.height);
-    drawcontext->x = DisplayWidth(disp, awesomeconf->screen) - drawcontext->w;
+    drawcontext->x = si[awesomeconf->screen].width - drawcontext->w;
     if(drawcontext->x < x)
     {
         drawcontext->x = x;
-        drawcontext->w = DisplayWidth(disp, awesomeconf->screen) - x;
+        drawcontext->w = si[awesomeconf->screen].width - x;
     }
     drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, awesomeconf->statustext, drawcontext->norm);
     if((drawcontext->w = drawcontext->x - x) > awesomeconf->statusbar.height)
@@ -99,7 +100,7 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
         else
             drawtext(disp, *drawcontext, awesomeconf->statusbar.drawable, NULL, drawcontext->norm);
     }
-    XCopyArea(disp, awesomeconf->statusbar.drawable, awesomeconf->statusbar.window, drawcontext->gc, 0, 0, DisplayWidth(disp, awesomeconf->screen), awesomeconf->statusbar.height, 0, 0);
+    XCopyArea(disp, awesomeconf->statusbar.drawable, awesomeconf->statusbar.window, drawcontext->gc, 0, 0, si[awesomeconf->screen].width, awesomeconf->statusbar.height, 0, 0);
     XSync(disp, False);
 }
 
@@ -107,7 +108,8 @@ void
 initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
 {
     XSetWindowAttributes wa;
-    int real_screen;
+    int screen_number, real_screen;
+    ScreenInfo *si;
 
     statusbar->screen = screen;
 
@@ -116,13 +118,15 @@ initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
     else
         real_screen = screen;
 
+    si = get_screen_info(disp, screen, NULL, &screen_number);
+
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = drawcontext->cursor[CurNormal];
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    statusbar->window = XCreateWindow(disp, RootWindow(disp, screen), 0, 0, DisplayWidth(disp, real_screen),
+    statusbar->window = XCreateWindow(disp, RootWindow(disp, real_screen), 0, 0, si[screen].width,
                                       statusbar->height, 0, DefaultDepth(disp, real_screen), CopyFromParent,
                                       DefaultVisual(disp, real_screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, drawcontext->cursor[CurNormal]);
@@ -130,7 +134,7 @@ initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
     XMapRaised(disp, statusbar->window);
     statusbar->drawable = XCreatePixmap(disp,
                                         RootWindow(disp, real_screen),
-                                        DisplayWidth(disp, real_screen),
+                                        si[screen].width,
                                         statusbar->height,
                                         DefaultDepth(disp, real_screen));
 }
@@ -139,22 +143,22 @@ void
 updatebarpos(Display *disp, Statusbar statusbar)
 {
     XEvent ev;
-    ScreenInfo *si;
+    int dummy;
+    ScreenInfo *si = get_screen_info(disp, statusbar.screen, NULL, &dummy);
 
     switch (statusbar.position)
     {
       default:
-        XMoveWindow(disp, statusbar.window, 0, 0);
+        XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].y_org);
         break;
       case BarBot:
-        si = get_display_info(disp, statusbar.screen, &statusbar);
-        XMoveWindow(disp, statusbar.window, 0, si->height);
-        XFree(si);
+        XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].height - statusbar.height);
         break;
       case BarOff:
-        XMoveWindow(disp, statusbar.window, 0, 0 - statusbar.height);
+        XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].y_org - statusbar.height);
         break;
     }
+    XFree(si);
     XSync(disp, False);
     while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
 }

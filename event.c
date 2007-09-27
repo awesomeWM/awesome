@@ -230,6 +230,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
+    int real_screen;
 
     if((c = getclient(ev->window)))
     {
@@ -238,6 +239,10 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
             c->border = ev->border_width;
         if(c->isfixed || c->isfloating || IS_ARRANGE(layout_floating))
         {
+            if(XineramaIsActive(c->display))
+                real_screen = DefaultScreen(c->display);
+            else
+                real_screen = c->screen;
             if(ev->value_mask & CWX)
                 c->x = ev->x;
             if(ev->value_mask & CWY)
@@ -246,10 +251,10 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
                 c->w = ev->width;
             if(ev->value_mask & CWHeight)
                 c->h = ev->height;
-            if((c->x + c->w) > DisplayWidth(c->display, c->screen) && c->isfloating)
-                c->x = DisplayWidth(c->display, c->screen) / 2 - c->w / 2;       /* center in x direction */
-            if((c->y + c->h) > DisplayHeight(c->display, c->screen) && c->isfloating)
-                c->y = DisplayHeight(c->display, c->screen) / 2 - c->h / 2;       /* center in y direction */
+            if((c->x + c->w) > DisplayWidth(c->display, real_screen) && c->isfloating)
+                c->x = DisplayWidth(c->display, real_screen) / 2 - c->w / 2;       /* center in x direction */
+            if((c->y + c->h) > DisplayHeight(c->display, real_screen) && c->isfloating)
+                c->y = DisplayHeight(c->display, real_screen) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 configure(c);
             if(isvisible(c, c->screen, awesomeconf[c->screen].tags, awesomeconf[c->screen].ntags))
@@ -276,7 +281,8 @@ void
 handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
 {
     XConfigureEvent *ev = &e->xconfigure;
-    int screen;
+    int screen, dummy;
+    ScreenInfo *si;
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if(ev->window == RootWindow(e->xany.display, screen)
@@ -285,13 +291,16 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
         {
             DisplayWidth(e->xany.display, screen) = ev->width;
             DisplayHeight(e->xany.display, screen) = ev->height;
+
+            si = get_screen_info(e->xany.display, screen, NULL, &dummy);
             XFreePixmap(e->xany.display, awesomeconf[screen].statusbar.drawable);
             awesomeconf[screen].statusbar.drawable = XCreatePixmap(e->xany.display, RootWindow(e->xany.display, screen),
-                                                                   DisplayWidth(e->xany.display, screen),
+                                                                   si[screen].width,
                                                                    awesomeconf[screen].statusbar.height,
                                                                    DefaultDepth(e->xany.display, screen));
             XResizeWindow(e->xany.display, awesomeconf[screen].statusbar.window,
-                          DisplayWidth(e->xany.display, screen), awesomeconf[screen].statusbar.height);
+                          si[screen].width, awesomeconf[screen].statusbar.height);
+            XFree(si);
             updatebarpos(e->xany.display, awesomeconf[screen].statusbar);
             arrange(e->xany.display, &dc[screen], &awesomeconf[screen]);
         }
