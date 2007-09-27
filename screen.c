@@ -76,17 +76,17 @@ get_screen_info(Display *disp, int screen, Statusbar *statusbar, int *screen_num
  * \return ScreenInfo struct pointer with all display info
  */
 ScreenInfo *
-get_display_info(Display *disp, int screen, Statusbar statusbar)
+get_display_info(Display *disp, int screen, Statusbar *statusbar)
 {
     ScreenInfo *si;
 
     si = p_new(ScreenInfo, 1);
 
     si->x_org = 0;
-    si->y_org = statusbar.position == BarTop ? statusbar.height : 0;
+    si->y_org = statusbar && statusbar->position == BarTop ? statusbar->height : 0;
     si->width = DisplayWidth(disp, screen);
     si->height = DisplayHeight(disp, screen) -
-        ((statusbar.position == BarTop || statusbar.position == BarBot) ? statusbar.height : 0);
+        (statusbar && (statusbar->position == BarTop || statusbar->position == BarBot) ? statusbar->height : 0);
 
     return si;
 }
@@ -118,7 +118,7 @@ get_screen_bycoord(Display *disp, int x, int y)
         }
 
     XFree(si);
-    return -1;
+    return 0;
 }
 
 /** Return the actual screen count

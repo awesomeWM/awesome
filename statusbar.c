@@ -147,7 +147,7 @@ updatebarpos(Display *disp, Statusbar statusbar)
         XMoveWindow(disp, statusbar.window, 0, 0);
         break;
       case BarBot:
-        si = get_display_info(disp, statusbar.screen, statusbar);
+        si = get_display_info(disp, statusbar.screen, &statusbar);
         XMoveWindow(disp, statusbar.window, 0, si->height);
         XFree(si);
         break;
