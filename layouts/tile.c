@@ -120,8 +120,6 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         mh = mw = 0;
 
     real_ncols = MIN(otherwin, awesomeconf->ncols);
-    
-    printf("masterwin %d otherwin %d real_ncols %d\n", masterwin, otherwin, real_ncols);
 
     for(i = 0, c = clients; c; c = c->next)
     {
@@ -129,7 +127,6 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
             continue;
 
         c->ismax = False;
-        printf("client %d\n", i);
         if(i < awesomeconf->nmaster)
         {                       /* master */
             ny = way + i * mh;
