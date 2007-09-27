@@ -540,8 +540,8 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
                 awesome_config *awesomeconf,
                 const char *arg)
 {
-    int x, y, w, h, nx, ny, nw, nh, ox, oy, ow, oh;
-    char xabs, yabs, wabs, habs;
+    int nx, ny, nw, nh, ox, oy, ow, oh;
+    char x[8], y[8], w[8], h[8];
     int mx, my, dx, dy, nmx, nmy;
     unsigned int dui;
     Window dummy;
@@ -549,12 +549,12 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
     if(!IS_ARRANGE(layout_floating))
         if(!sel || !sel->isfloating || sel->isfixed || !arg)
             return;
-    if(sscanf(arg, "%d%c %d%c %d%c %d%c", &x, &xabs, &y, &yabs, &w, &wabs, &h, &habs) != 8)
+    if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
         return;
-    nx = xabs == 'x' ? sel->x + x : x;
-    ny = yabs == 'y' ? sel->y + y : y;
-    nw = wabs == 'w' ? sel->w + w : w;
-    nh = habs == 'h' ? sel->h + h : h;
+    nx = (int) compute_new_value_from_arg(x, sel->x);
+    ny = (int) compute_new_value_from_arg(y, sel->y);
+    nw = (int) compute_new_value_from_arg(w, sel->w);
+    nh = (int) compute_new_value_from_arg(h, sel->h);
 
     ox = sel->x;
     oy = sel->y;
