@@ -121,6 +121,23 @@ get_screen_bycoord(Display *disp, int x, int y)
     return -1;
 }
 
+/** Return the actual screen count
+ * \param disp Display ref
+ * \return the number of screen available
+ */
+int
+get_screen_count(Display *disp)
+{
+    int screen_number;
+
+    if(XineramaIsActive(disp))
+        XineramaQueryScreens(disp, &screen_number);
+    else
+        return ScreenCount(disp);
+
+    return screen_number;
+}
+
 void
 uicb_focusnextscreen(Display *disp,
                      DC *drawcontext,
