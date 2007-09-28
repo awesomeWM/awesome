@@ -138,6 +138,20 @@ get_screen_count(Display *disp)
     return screen_number;
 }
 
+/** This returns the real X screen number for a logical
+ * screen if Xinerama is active.
+ * \param disp Display ref
+ * \param screen the logical screen
+ * \return the X screen
+ */
+int
+get_real_screen(Display *disp, int screen)
+{
+    if(XineramaIsActive(disp))
+        return DefaultScreen(disp);
+    return screen;
+}
+
 void
 move_client_to_screen(Client *c, awesome_config *acf_new)
 {
