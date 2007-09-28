@@ -84,6 +84,7 @@ static const NameFuncLink LayoutsList[] =
 static const NameFuncLink KeyfuncList[] = {
     /* util.c */
     {"spawn", uicb_spawn},
+    {"exec", uicb_exec},
     /* client.c */
     {"killclient", uicb_killclient},
     {"moveresize", uicb_moveresize},

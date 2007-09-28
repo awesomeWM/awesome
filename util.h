@@ -197,4 +197,5 @@ Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
 double compute_new_value_from_arg(const char *, double);
 
 UICB_PROTO(uicb_spawn);
+UICB_PROTO(uicb_exec);
 #endif

@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <bits/posix1_lim.h>
 
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
@@ -51,6 +52,20 @@ eprint(const char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     va_end(ap);
     exit(EXIT_FAILURE);
+}
+
+void
+uicb_exec(Display * disp,
+          DC *drawcontext __attribute__ ((unused)),
+          awesome_config * awesomeconf __attribute__ ((unused)),
+          const char *arg)
+{
+    char path[_POSIX_PATH_MAX];
+    if(disp)
+        close(ConnectionNumber(disp));
+
+    sscanf(arg, "%s", path);
+    execlp(path, arg, NULL);
 }
 
 void
