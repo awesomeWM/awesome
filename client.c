@@ -403,7 +403,6 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     ScreenInfo *si = get_display_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
     c = p_new(Client, 1);
-    move_client_to_screen(c, awesomeconf);
     c->win = w;
     c->ftview = True;
     c->x = c->rw = wa->x;
@@ -444,6 +443,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     }
     grabbuttons(c, False, awesomeconf->modkey, awesomeconf->numlockmask);
     updatetitle(c);
+    move_client_to_screen(c, awesomeconf, False);
     if((rettrans = XGetTransientForHint(disp, w, &trans) == Success))
         for(t = clients; t && t->win != trans; t = t->next);
     if(t)
@@ -536,8 +536,9 @@ resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool 
         XSync(c->display, False);
         if(XineramaIsActive(c->display))
         {
-            c->screen = get_screen_bycoord(c->display, c->x, c->y);
-            move_client_to_screen(c, &awesomeconf[c->screen - awesomeconf->screen]);
+            int new_screen = get_screen_bycoord(c->display, c->x, c->y);
+            if(c->screen != new_screen)
+                move_client_to_screen(c, &awesomeconf[new_screen - awesomeconf->screen], False);
         }
     }
 }

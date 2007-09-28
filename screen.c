@@ -153,14 +153,22 @@ get_real_screen(Display *disp, int screen)
 }
 
 void
-move_client_to_screen(Client *c, awesome_config *acf_new)
+move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
 {
     int i;
+    ScreenInfo *si;
 
     c->screen = acf_new->screen;
     p_realloc(&c->tags, acf_new->ntags);
     for(i = 0; i < acf_new->ntags; i++)
         c->tags[i] = acf_new->tags[i].selected;
+    
+    si = get_screen_info(c->display, c->screen, &acf_new->statusbar, &i);
+    c->rx = si[c->screen].x_org;
+    c->ry = si[c->screen].y_org;
+    if(doresize)
+        resize(c, c->rx, c->ry, c->rw, c->rh, acf_new, True);
+    XFree(si);
 }
 
 static void
@@ -233,7 +241,7 @@ uicb_movetoscreen(Display *disp,
     else
         screen = sel->screen + 1 >= get_screen_count(disp) ? 0 : sel->screen + 1;
 
-    move_client_to_screen(sel, &awesomeconf[screen - awesomeconf->screen]);
+    move_client_to_screen(sel, &awesomeconf[screen - awesomeconf->screen], True);
     move_mouse_pointer_to_screen(disp, screen);
     arrange(disp, drawcontext, awesomeconf);
     arrange(disp, &drawcontext[screen - awesomeconf->screen], &awesomeconf[screen - awesomeconf->screen]);
