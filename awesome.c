@@ -189,12 +189,7 @@ static void
 setup(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
-    int real_screen;
-
-    if(XineramaIsActive(disp))
-        real_screen = DefaultScreen(disp);
-    else
-        real_screen = screen;
+    int real_screen = get_real_screen(disp, screen);
 
     /* init cursors */
     drawcontext->cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);

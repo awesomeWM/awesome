@@ -60,10 +60,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
     XEvent ev;
     ScreenInfo *si;
 
-    if(XineramaIsActive(c->display))
-        real_screen = DefaultScreen(c->display);
-    else
-        real_screen = awesomeconf->screen;
+    real_screen = get_real_screen(c->display, awesomeconf->screen);
 
     si = get_display_info(c->display, real_screen, NULL);
 
@@ -108,17 +105,13 @@ movemouse(Client * c, awesome_config *awesomeconf)
 static void
 resizemouse(Client * c, awesome_config *awesomeconf)
 {
-    int ocx, ocy, nw, nh, real_screen;
+    int ocx, ocy, nw, nh;
     XEvent ev;
-
-    if(XineramaIsActive(c->display))
-        real_screen = DefaultScreen(c->display);
-    else
-        real_screen = awesomeconf->screen;
 
     ocx = c->x;
     ocy = c->y;
-    if(XGrabPointer(c->display, RootWindow(c->display, real_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+    if(XGrabPointer(c->display, RootWindow(c->display, get_real_screen(c->display, awesomeconf->screen)),
+                    False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, dc[c->screen].cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
@@ -243,10 +236,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
             c->border = ev->border_width;
         if(c->isfixed || c->isfloating || IS_ARRANGE(layout_floating))
         {
-            if(XineramaIsActive(c->display))
-                real_screen = DefaultScreen(c->display);
-            else
-                real_screen = c->screen;
+            real_screen = get_real_screen(c->display, c->screen);
             if(ev->value_mask & CWX)
                 c->x = ev->x;
             if(ev->value_mask & CWY)

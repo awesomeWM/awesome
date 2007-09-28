@@ -111,12 +111,9 @@ initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
     int screen_number, real_screen;
     ScreenInfo *si;
 
-    statusbar->screen = screen;
+    real_screen = get_real_screen(disp, screen);
 
-    if(XineramaIsActive(disp))
-        real_screen = DefaultScreen(disp);
-    else
-        real_screen = screen;
+    statusbar->screen = screen;
 
     si = get_screen_info(disp, screen, NULL, &screen_number);
 
