@@ -138,6 +138,17 @@ get_screen_count(Display *disp)
     return screen_number;
 }
 
+void
+move_client_to_screen(Client *c, awesome_config *acf_new)
+{
+    int i;
+
+    c->screen = acf_new->screen;
+    p_realloc(&c->tags, acf_new->ntags);
+    for(i = 0; i < acf_new->ntags; i++)
+        c->tags[i] = acf_new->tags[i].selected;
+}
+
 static void
 move_mouse_pointer_to_screen(Display *disp, int screen)
 {
@@ -208,7 +219,7 @@ uicb_movetoscreen(Display *disp,
     else
         screen = sel->screen + 1 >= get_screen_count(disp) ? 0 : sel->screen + 1;
 
-    sel->screen = screen;
+    move_client_to_screen(sel, &awesomeconf[screen - awesomeconf->screen]);
     move_mouse_pointer_to_screen(disp, screen);
     arrange(disp, drawcontext, awesomeconf);
     arrange(disp, &drawcontext[screen - awesomeconf->screen], &awesomeconf[screen - awesomeconf->screen]);

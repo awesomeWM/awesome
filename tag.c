@@ -192,7 +192,7 @@ uicb_togglefloating(Display *disp,
     sel->isfloating = !sel->isfloating;
     if(sel->isfloating)
         /*restore last known float dimensions*/
-        resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, True);
+        resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True);
     else
     {
         /*save last known float dimensions*/

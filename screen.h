@@ -22,7 +22,7 @@
 #ifndef AWESOME_SCREEN_H
 #define AWESOME_SCREEN_H
 
-#include "common.h"
+#include "client.h"
 
 #include <X11/extensions/Xinerama.h> 
 
@@ -32,6 +32,7 @@ ScreenInfo * get_screen_info(Display *, int, Statusbar *, int *);
 ScreenInfo * get_display_info(Display *, int, Statusbar *);
 int get_screen_bycoord(Display *, int, int);
 int get_screen_count(Display *);
+void move_client_to_screen(Client *, awesome_config *);
 UICB_PROTO(uicb_focusnextscreen);
 UICB_PROTO(uicb_focusprevscreen);
 UICB_PROTO(uicb_movetoscreen);

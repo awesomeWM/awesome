@@ -35,10 +35,10 @@ layout_floating(Display *disp __attribute__ ((unused)), awesome_config *awesomec
         {
             if(c->ftview)
             {
-                resize(c, c->rx, c->ry, c->rw, c->rh, True);
+                resize(c, c->rx, c->ry, c->rw, c->rh, awesomeconf, True);
                 c->ftview = False;
             }
             else
-                resize(c, c->x, c->y, c->w, c->h, True);
+                resize(c, c->x, c->y, c->w, c->h, awesomeconf, True);
         }
 }

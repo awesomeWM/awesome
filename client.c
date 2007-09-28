@@ -403,7 +403,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     ScreenInfo *si = get_display_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
     c = p_new(Client, 1);
-    c->tags = p_new(Bool, awesomeconf->ntags);
+    move_client_to_screen(c, awesomeconf);
     c->win = w;
     c->ftview = True;
     c->x = c->rw = wa->x;
@@ -412,7 +412,6 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     c->h = c->rh = wa->height;
     c->oldborder = wa->border_width;
     c->display = disp;
-    c->screen = awesomeconf->screen;
     if(c->w == si->width && c->h == si->height)
     {
         c->x = 0;
@@ -463,7 +462,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
 }
 
 void
-resize(Client * c, int x, int y, int w, int h, Bool sizehints)
+resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool sizehints)
 {
     double dx, dy, max, min, ratio;
     XWindowChanges wc;
@@ -536,7 +535,10 @@ resize(Client * c, int x, int y, int w, int h, Bool sizehints)
         configure(c);
         XSync(c->display, False);
         if(XineramaIsActive(c->display))
+        {
             c->screen = get_screen_bycoord(c->display, c->x, c->y);
+            move_client_to_screen(c, &awesomeconf[c->screen - awesomeconf->screen]);
+        }
     }
 }
 
@@ -568,7 +570,7 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
     oh = sel->h;
 
     Bool xqp = XQueryPointer(sel->display, RootWindow(sel->display, sel->screen), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
-    resize(sel, nx, ny, nw, nh, True);
+    resize(sel, nx, ny, nw, nh, awesomeconf, True);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
         nmx = mx-ox+sel->w-ow-1 < 0 ? 0 : mx-ox+sel->w-ow-1;
