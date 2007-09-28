@@ -91,7 +91,7 @@ get_display_info(Display *disp, int screen, Statusbar *statusbar)
     return si;
 }
 
-/** Return the Xinerama screen number where the window is placed
+/** Return the Xinerama screen number where the coordinates belongs to
  * \param disp Display ref
  * \param x x coordinate of the window
  * \param y y coordinate of the window
@@ -105,7 +105,7 @@ get_screen_bycoord(Display *disp, int x, int y)
 
     /* don't waste our time */
     if(!XineramaIsActive(disp))
-        return 0;
+        return DefaultScreen(disp);
 
     si = get_screen_info(disp, 0, NULL, &screen_number);
 
@@ -118,7 +118,7 @@ get_screen_bycoord(Display *disp, int x, int y)
         }
 
     XFree(si);
-    return 0;
+    return DefaultScreen(disp);
 }
 
 /** Return the actual screen count
