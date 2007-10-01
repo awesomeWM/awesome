@@ -62,7 +62,7 @@ struct Client
     Bool ftview;
 };
 
-void attach(Client *);          /* attaches c to global client list */
+inline void attach(Client *);          /* attaches c to global client list */
 void ban(Client *);             /* bans c */
 void configure(Client *);       /* send synthetic configure event */
 void detach(Client *);          /* detaches c from global client list */
@@ -71,7 +71,7 @@ void manage(Display *, DC *, Window, XWindowAttributes *, awesome_config *);
 void resize(Client *, int, int, int, int, awesome_config *, Bool);        /* resize with given coordinates c */
 void unban(Client *);           /* unbans c */
 void unmanage(Client *, DC *, long, awesome_config *);  /* unmanage c */
-void updatesizehints(Client *); /* update the size hint variables of c */
+inline void updatesizehints(Client *); /* update the size hint variables of c */
 void updatetitle(Client *);     /* update the name of c */
 void saveprops(Client * c, int);     /* saves client properties */
 void set_shape(Client *);

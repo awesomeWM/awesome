@@ -218,7 +218,7 @@ client_swap(Client *c1, Client *c2)
 /** Attach client to the beginning of the clients stack
  * \param c the client
  */
-inline void
+void
 attach(Client * c)
 {
     if(clients)
@@ -227,7 +227,7 @@ attach(Client * c)
     clients = c;
 }
 
-inline void
+void
 updatetitle(Client * c)
 {
     if(!xgettextprop(c->display, c->win, XInternAtom(c->display, "_NET_WM_NAME", False), c->name, sizeof c->name))
