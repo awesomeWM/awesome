@@ -342,7 +342,7 @@ handle_event_expose(XEvent * e, awesome_config *awesomeconf)
 void
 handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
 {
-    int i, screen = 0, x, y, d;
+    int i, screen, x, y, d;
     unsigned int m;
     KeySym keysym;
     XKeyEvent *ev = &e->xkey;
@@ -351,20 +351,17 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
     keysym = XKeycodeToKeysym(e->xany.display, (KeyCode) ev->keycode, 0);
 
     /* find the right screen for this event */
-    if(sel)
-        screen = sel->screen;
-    else
-        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-            if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &x, &y, &d, &d, &m))
-            {
-                /* if screen is 0, we are on first Zaphod screen or on the
-                 * only screen in Xinerama, so we can ask for a better screen
-                 * number with get_screen_bycoord: we'll get 0 in Zaphod mode
-                 * so it's the same, or maybe the real Xinerama screen */
-               if(screen == 0)
-                   screen = get_screen_bycoord(e->xany.display, x, y);
-               break;
-            }
+    for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+        if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &x, &y, &d, &d, &m))
+        {
+            /* if screen is 0, we are on first Zaphod screen or on the
+             * only screen in Xinerama, so we can ask for a better screen
+             * number with get_screen_bycoord: we'll get 0 in Zaphod mode
+             * so it's the same, or maybe the real Xinerama screen */
+           if(screen == 0)
+               screen = get_screen_bycoord(e->xany.display, x, y);
+           break;
+        }
 
     for(i = 0; i < awesomeconf[screen].nkeys; i++)
         if(keysym == awesomeconf[screen].keys[i].keysym
