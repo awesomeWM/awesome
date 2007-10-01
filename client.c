@@ -324,37 +324,6 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
         XSetInputFocus(disp, RootWindow(disp, awesomeconf->screen), RevertToPointerRoot, CurrentTime);
 }
 
-/** Kill selected client
- * \param disp Display ref
- * \param drawcontext Drawcontext ref
- * \param awesomeconf awesome config
- * \param arg unused
- * \ingroup ui_callback
- */
-void
-uicb_killclient(Display *disp __attribute__ ((unused)),
-                DC *drawcontext __attribute__ ((unused)),
-                awesome_config *awesomeconf __attribute__ ((unused)),
-                const char *arg __attribute__ ((unused)))
-{
-    XEvent ev;
-
-    if(!sel)
-        return;
-    if(isprotodel(sel))
-    {
-        ev.type = ClientMessage;
-        ev.xclient.window = sel->win;
-        ev.xclient.message_type = XInternAtom(disp, "WM_PROTOCOLS", False);
-        ev.xclient.format = 32;
-        ev.xclient.data.l[0] = XInternAtom(disp, "WM_DELETE_WINDOW", False);
-        ev.xclient.data.l[1] = CurrentTime;
-        XSendEvent(sel->display, sel->win, False, NoEventMask, &ev);
-    }
-    else
-        XKillClient(sel->display, sel->win);
-}
-
 
 /** Load windows properties, restoring client's tag
  * and floating state before awesome was restarted if any
@@ -540,43 +509,6 @@ resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool 
             if(c->screen != new_screen)
                 move_client_to_screen(c, &awesomeconf[new_screen - awesomeconf->screen], False);
         }
-    }
-}
-
-void
-uicb_moveresize(Display *disp __attribute__ ((unused)),
-                DC *drawcontext __attribute__ ((unused)),
-                awesome_config *awesomeconf,
-                const char *arg)
-{
-    int nx, ny, nw, nh, ox, oy, ow, oh;
-    char x[8], y[8], w[8], h[8];
-    int mx, my, dx, dy, nmx, nmy;
-    unsigned int dui;
-    Window dummy;
-
-    if(!IS_ARRANGE(layout_floating))
-        if(!sel || !sel->isfloating || sel->isfixed || !arg)
-            return;
-    if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
-        return;
-    nx = (int) compute_new_value_from_arg(x, sel->x);
-    ny = (int) compute_new_value_from_arg(y, sel->y);
-    nw = (int) compute_new_value_from_arg(w, sel->w);
-    nh = (int) compute_new_value_from_arg(h, sel->h);
-
-    ox = sel->x;
-    oy = sel->y;
-    ow = sel->w;
-    oh = sel->h;
-
-    Bool xqp = XQueryPointer(sel->display, RootWindow(sel->display, sel->screen), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
-    resize(sel, nx, ny, nw, nh, awesomeconf, True);
-    if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
-    {
-        nmx = mx-ox+sel->w-ow-1 < 0 ? 0 : mx-ox+sel->w-ow-1;
-        nmy = my-oy+sel->h-oh-1 < 0 ? 0 : my-oy+sel->h-oh-1;
-        XWarpPointer(sel->display, None, sel->win, 0, 0, 0, 0, nmx, nmy);
     }
 }
 
@@ -820,4 +752,72 @@ uicb_swapprev(Display *disp,
         client_swap(prev, sel);
         arrange(disp, drawcontext, awesomeconf);
     }
+}
+
+void
+uicb_moveresize(Display *disp __attribute__ ((unused)),
+                DC *drawcontext __attribute__ ((unused)),
+                awesome_config *awesomeconf,
+                const char *arg)
+{
+    int nx, ny, nw, nh, ox, oy, ow, oh;
+    char x[8], y[8], w[8], h[8];
+    int mx, my, dx, dy, nmx, nmy;
+    unsigned int dui;
+    Window dummy;
+
+    if(!IS_ARRANGE(layout_floating))
+        if(!sel || !sel->isfloating || sel->isfixed || !arg)
+            return;
+    if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
+        return;
+    nx = (int) compute_new_value_from_arg(x, sel->x);
+    ny = (int) compute_new_value_from_arg(y, sel->y);
+    nw = (int) compute_new_value_from_arg(w, sel->w);
+    nh = (int) compute_new_value_from_arg(h, sel->h);
+
+    ox = sel->x;
+    oy = sel->y;
+    ow = sel->w;
+    oh = sel->h;
+
+    Bool xqp = XQueryPointer(sel->display, RootWindow(sel->display, sel->screen), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
+    resize(sel, nx, ny, nw, nh, awesomeconf, True);
+    if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
+    {
+        nmx = mx-ox+sel->w-ow-1 < 0 ? 0 : mx-ox+sel->w-ow-1;
+        nmy = my-oy+sel->h-oh-1 < 0 ? 0 : my-oy+sel->h-oh-1;
+        XWarpPointer(sel->display, None, sel->win, 0, 0, 0, 0, nmx, nmy);
+    }
+}
+
+/** Kill selected client
+ * \param disp Display ref
+ * \param drawcontext Drawcontext ref
+ * \param awesomeconf awesome config
+ * \param arg unused
+ * \ingroup ui_callback
+ */
+void
+uicb_killclient(Display *disp __attribute__ ((unused)),
+                DC *drawcontext __attribute__ ((unused)),
+                awesome_config *awesomeconf __attribute__ ((unused)),
+                const char *arg __attribute__ ((unused)))
+{
+    XEvent ev;
+
+    if(!sel)
+        return;
+    if(isprotodel(sel))
+    {
+        ev.type = ClientMessage;
+        ev.xclient.window = sel->win;
+        ev.xclient.message_type = XInternAtom(disp, "WM_PROTOCOLS", False);
+        ev.xclient.format = 32;
+        ev.xclient.data.l[0] = XInternAtom(disp, "WM_DELETE_WINDOW", False);
+        ev.xclient.data.l[1] = CurrentTime;
+        XSendEvent(sel->display, sel->win, False, NoEventMask, &ev);
+    }
+    else
+        XKillClient(sel->display, sel->win);
 }
