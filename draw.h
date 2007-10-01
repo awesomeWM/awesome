@@ -24,10 +24,7 @@
 
 #include "config.h"
 
-#define textw(set, xfont, text, height)         (textnw(set, xfont, text, a_strlen(text)) + height)
-
 void drawsquare(Display *, DC, Drawable, Bool, unsigned long);
-void drawtext(Display *, DC, Drawable, const char *, unsigned long *);
-int textnw(XFontSet, XFontStruct *, const char *, int);
-
+void drawtext(Display *, int, DC *, Drawable, const char *, unsigned long *, XColor);
+inline unsigned short textwidth(Display *, XftFont *, char *, ssize_t);
 #endif

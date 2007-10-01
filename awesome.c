@@ -67,12 +67,9 @@ cleanup(DC *drawcontext, awesome_config *awesomeconf)
 
     for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
     {
-        if(drawcontext[screen].font.set)
-            XFreeFontSet(awesomeconf->display, drawcontext[screen].font.set);
-        else
-            XFreeFont(awesomeconf->display, drawcontext[screen].font.xfont);
+        XftFontClose(awesomeconf->display, drawcontext->font);
 
-            XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, screen));
+        XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, screen));
 
         XFreePixmap(awesomeconf->display, awesomeconf[screen].statusbar.drawable);
         XFreeGC(awesomeconf->display, drawcontext[screen].gc);
@@ -206,13 +203,10 @@ setup(DC *drawcontext, awesome_config *awesomeconf)
     compileregs(awesomeconf->rules, awesomeconf->nrules);
 
     /* bar */
-    drawcontext->h = awesomeconf->statusbar.height = drawcontext->font.height + 2;
+    drawcontext->h = awesomeconf->statusbar.height = drawcontext->font->height + 2;
     initstatusbar(awesomeconf->display, awesomeconf->screen, drawcontext, &awesomeconf->statusbar);
     drawcontext->gc = XCreateGC(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), 0, 0);
     XSetLineAttributes(awesomeconf->display, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
-
-    if(!drawcontext->font.set)
-        XSetFont(awesomeconf->display, drawcontext->gc, drawcontext->font.xfont->fid);
 
     loadawesomeprops(awesomeconf->display, awesomeconf);
 }

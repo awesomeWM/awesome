@@ -38,8 +38,7 @@
 #include "layouts/max.h"
 #include "layouts/floating.h"
 
-static void initfont(Display *, DC *, const char *);
-static unsigned long initcolor(Display *, int, const char *);
+static XColor initxcolor(Display *, int, const char *);
 static unsigned int get_numlockmask(Display *);
 
 /** Link a name to a function */
@@ -180,6 +179,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
     char *confpath;
     KeySym tmp_key;
     ssize_t confpath_len;
+    XColor colorbuf;
 
     if(confpatharg)
         confpath = a_strdup(confpatharg);
@@ -211,7 +211,10 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
 
     /* font */
     tmp = config_lookup_string(&awesomelibconf, "awesome.font");
-    initfont(disp, drawcontext, tmp ? tmp : "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*");
+    drawcontext->font = XftFontOpenName(disp, awesomeconf->phys_screen, tmp ? tmp : "sans-12");
+
+    if(!drawcontext->font)
+        eprint("awesome: cannot init font\n");
 
     /* layouts */
     conflayouts = config_lookup(&awesomelibconf, "awesome.layouts");
@@ -253,7 +256,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
 
     for(i = 0; i < awesomeconf->nlayouts; i++)
     {
-        j = textw(drawcontext->font.set, drawcontext->font.xfont, awesomeconf->layouts[i].symbol, drawcontext->font.height);
+        j = drawcontext->font->height +
+            textwidth(disp, drawcontext->font,
+                      awesomeconf->layouts[i].symbol, a_strlen(awesomeconf->layouts[i].symbol));
         if(j > awesomeconf->statusbar.width)
             awesomeconf->statusbar.width = j;
     }
@@ -399,77 +404,33 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
 
     /* colors */
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_border_color");
-    drawcontext->norm[ColBorder] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#dddddd");
+    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#dddddd");
+    drawcontext->norm[ColBorder] = colorbuf.pixel;
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_bg_color");
-    drawcontext->norm[ColBG] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#000000");
+    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#000000");
+    drawcontext->norm[ColBG] = colorbuf.pixel;
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_fg_color");
-    drawcontext->norm[ColFG] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#ffffff");
+    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#ffffff");
+    drawcontext->norm[ColFG] = colorbuf.pixel;
+    drawcontext->text_normal = colorbuf;
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_border_color");
-    drawcontext->sel[ColBorder] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#008b8b");
+    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#008b8b");
+    drawcontext->sel[ColBorder] = colorbuf.pixel;
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_bg_color");
-    drawcontext->sel[ColBG] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#008b8b");
+    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#008b8b");
+    drawcontext->sel[ColBG] = colorbuf.pixel;
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_fg_color");
-    drawcontext->sel[ColFG] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#ffffff");
+    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#ffffff");
+    drawcontext->sel[ColFG] = colorbuf.pixel;
+    drawcontext->text_selected = colorbuf;
 
     config_destroy(&awesomelibconf);
     p_delete(&confpath);
-}
-
-/** Initialize font from X side and store in draw context
- * \param fontstr Font name
- * \param disp Display ref
- * \param drawcontext Draw context
- */
-static void
-initfont(Display *disp, DC *drawcontext, const char *fontstr)
-{
-    char *def, **missing;
-    int i, n;
-
-    missing = NULL;
-    if(drawcontext->font.set)
-        XFreeFontSet(disp, drawcontext->font.set);
-    drawcontext->font.set = XCreateFontSet(disp, fontstr, &missing, &n, &def);
-    if(missing)
-    {
-        while(n--)
-            fprintf(stderr, "awesome: missing fontset: %s\n", missing[n]);
-        XFreeStringList(missing);
-    }
-    if(drawcontext->font.set)
-    {
-        XFontSetExtents *font_extents;
-        XFontStruct **xfonts;
-        char **font_names;
-        drawcontext->font.ascent = drawcontext->font.descent = 0;
-        font_extents = XExtentsOfFontSet(drawcontext->font.set);
-        n = XFontsOfFontSet(drawcontext->font.set, &xfonts, &font_names);
-        for(i = 0, drawcontext->font.ascent = 0, drawcontext->font.descent = 0; i < n; i++)
-        {
-            if(drawcontext->font.ascent < (*xfonts)->ascent)
-                drawcontext->font.ascent = (*xfonts)->ascent;
-            if(drawcontext->font.descent < (*xfonts)->descent)
-                drawcontext->font.descent = (*xfonts)->descent;
-            xfonts++;
-        }
-    }
-    else
-    {
-        if(drawcontext->font.xfont)
-            XFreeFont(disp, drawcontext->font.xfont);
-        drawcontext->font.xfont = NULL;
-        if(!(drawcontext->font.xfont = XLoadQueryFont(disp, fontstr))
-           && !(drawcontext->font.xfont = XLoadQueryFont(disp, "fixed")))
-            die("awesome: error, cannot load font: '%s'\n", fontstr);
-        drawcontext->font.ascent = drawcontext->font.xfont->ascent;
-        drawcontext->font.descent = drawcontext->font.xfont->descent;
-    }
-    drawcontext->font.height = drawcontext->font.ascent + drawcontext->font.descent;
 }
 
 static unsigned int
@@ -499,12 +460,11 @@ get_numlockmask(Display *disp)
  * \param scr Screen number
  * \return XColor pixel
  */
-static unsigned long
-initcolor(Display *disp, int scr, const char *colstr)
+static XColor
+initxcolor(Display *disp, int scr, const char *colstr)
 {
-    Colormap cmap = DefaultColormap(disp, scr);
     XColor color;
-    if(!XAllocNamedColor(disp, cmap, colstr, &color, &color))
+    if(!XAllocNamedColor(disp, DefaultColormap(disp, scr), colstr, &color, &color))
         die("awesome: error, cannot allocate color '%s'\n", colstr);
-    return color.pixel;
+    return color;
 }

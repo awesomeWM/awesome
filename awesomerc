@@ -11,7 +11,7 @@ awesome:
     # Master window width factor (used by tile layouts)
     mwfact = 0.6;
     # Font
-    font = "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*";
+    font = "fixed-12";
     # Tags
     tags = ( "1", "2", "3", "4", "5", "6", "7", "8", "9" );
     # Colors

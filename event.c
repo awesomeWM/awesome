@@ -154,7 +154,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             int x = 0;
             for(i = 0; i < awesomeconf[screen].ntags; i++)
             {
-                x += textw(dc[screen].font.set, dc[screen].font.xfont, awesomeconf[screen].tags[i].name, dc[screen].font.height);
+                x += textwidth(e->xany.display, dc[screen].font, awesomeconf[screen].tags[i].name, a_strlen(awesomeconf[screen].tags[i].name)) + dc[screen].font->height;
                 if(ev->x < x)
                 {
                     if(ev->button == Button1)

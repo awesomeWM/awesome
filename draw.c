@@ -28,15 +28,18 @@ extern Client *clients, *sel, *stack;   /* global client list and stack */
 /* static */
 
 void
-drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, unsigned long col[ColLast])
+drawtext(Display *disp, int screen, DC *drawcontext, Drawable drawable, const char *text, unsigned long col[ColLast], XColor textcolor)
 {
     int x, y, w, h;
     static char buf[256];
     size_t len, olen;
-    XRectangle r = { drawcontext.x, drawcontext.y, drawcontext.w, drawcontext.h };
+    XRectangle r = { drawcontext->x, drawcontext->y, drawcontext->w, drawcontext->h };
+    XRenderColor xrcolor;
+    XftColor xftcolor;
+    XftDraw *xftdrawable;
 
-    XSetForeground(disp, drawcontext.gc, col[ColBG]);
-    XFillRectangles(disp, drawable, drawcontext.gc, &r, 1);
+    XSetForeground(disp, drawcontext->gc, col[ColBG]);
+    XFillRectangles(disp, drawable, drawcontext->gc, &r, 1);
     if(!text)
         return;
     w = 0;
@@ -45,13 +48,12 @@ drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, uns
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    h = drawcontext.font.ascent + drawcontext.font.descent;
-    y = drawcontext.y + (drawcontext.h / 2) - (h / 2) + drawcontext.font.ascent;
-    x = drawcontext.x + (h / 2);
-    /* shorten text if necessary */
-    while(len && (w = textnw(drawcontext.font.set, drawcontext.font.xfont, buf, len)) > drawcontext.w - h)
+    h = drawcontext->font->ascent + drawcontext->font->descent;
+    y = drawcontext->y + (drawcontext->h / 2) - (h / 2) + drawcontext->font->ascent;
+    x = drawcontext->x + (h / 2);
+    while(len && (w = textwidth(disp, drawcontext->font, buf, len)) > drawcontext->w - h)
         buf[--len] = 0;
-    if(w > drawcontext.w)
+    if(w > drawcontext->w)
         return;                 /* too long */
     if(len < olen)
     {
@@ -62,11 +64,14 @@ drawtext(Display *disp, DC drawcontext, Drawable drawable, const char *text, uns
         if(len > 3)
             buf[len - 3] = '.';
     }
-    XSetForeground(disp, drawcontext.gc, col[ColFG]);
-    if(drawcontext.font.set)
-        XmbDrawString(disp, drawable, drawcontext.font.set, drawcontext.gc, x, y, buf, len);
-    else
-        XDrawString(disp, drawable, drawcontext.gc, x, y, buf, len);
+    xrcolor.red = textcolor.red;
+    xrcolor.green = textcolor.green;
+    xrcolor.blue = textcolor.blue;
+    xrcolor.alpha = 255;
+    XftColorAllocValue(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xrcolor, &xftcolor);
+    xftdrawable = XftDrawCreate(disp, drawable, DefaultVisual(disp, screen), DefaultColormap(disp, screen));
+    XftDrawStringUtf8(xftdrawable, &xftcolor, drawcontext->font, x, y, (FcChar8 *) buf, len);
+    XftColorFree(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xftcolor);
 }
 
 void
@@ -76,9 +81,9 @@ drawsquare(Display *disp, DC drawcontext, Drawable drawable, Bool filled, unsign
     XGCValues gcv;
     XRectangle r = { drawcontext.x, drawcontext.y, drawcontext.w, drawcontext.h };
 
+    x = (drawcontext.font->ascent + drawcontext.font->descent + 2) / 4;
     gcv.foreground = col;
     XChangeGC(disp, drawcontext.gc, GCForeground, &gcv);
-    x = (drawcontext.font.ascent + drawcontext.font.descent + 2) / 4;
     r.x = drawcontext.x + 1;
     r.y = drawcontext.y + 1;
     r.width = r.height = x;
@@ -91,16 +96,11 @@ drawsquare(Display *disp, DC drawcontext, Drawable drawable, Bool filled, unsign
         XDrawRectangles(disp, drawable, drawcontext.gc, &r, 1);
 }
 
-int
-textnw(XFontSet set, XFontStruct *xfont, const char *text, int len)
+
+unsigned short
+textwidth(Display *disp, XftFont *font, char *text, ssize_t len)
 {
-    XRectangle r;
-
-    if(set)
-    {
-        XmbTextExtents(set, text, len, NULL, &r);
-        return r.width;
-    }
-    return XTextWidth(xfont, text, len);
+    XGlyphInfo gi;
+    XftTextExtentsUtf8(disp, font, (FcChar8 *) text, len, &gi);
+    return gi.width;
 }
-

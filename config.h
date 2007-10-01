@@ -25,6 +25,7 @@
 #define AWESOME_CONFIG_FILE ".awesomerc"
 
 #include <X11/Xlib.h>
+#include <X11/Xft/Xft.h>
 
 /** Bar possible position */
 enum
@@ -41,16 +42,11 @@ typedef struct
     int x, y, w, h;
     unsigned long norm[ColLast]; 
     unsigned long sel[ColLast];
+    XColor text_normal;
+    XColor text_selected;
     GC gc;
     Cursor cursor[CurLast];
-    struct
-    {
-        int ascent;
-        int descent;
-        int height;
-        XFontSet set;
-        XFontStruct *xfont;
-    } font;
+    XftFont *font;
 } DC;
 
 typedef struct
