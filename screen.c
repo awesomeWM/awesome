@@ -111,7 +111,7 @@ get_screen_bycoord(Display *disp, int x, int y)
 
     for(i = 0; i < screen_number; i++)
         if(x >= si[i].x_org && x < si[i].x_org + si[i].width
-           && y >= si[i].y_org && y < si[i].x_org + si[i].height)
+           && y >= si[i].y_org && y < si[i].y_org + si[i].height)
         {
             XFree(si);
             return i;
