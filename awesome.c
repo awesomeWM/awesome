@@ -49,12 +49,11 @@ static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool readin = True, running = True;
 
 /** Cleanup everything on quit
- * \param disp Display ref
  * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  */
 static void
-cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
+cleanup(DC *drawcontext, awesome_config *awesomeconf)
 {
     int screen, i;
 
@@ -66,21 +65,21 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
         unmanage(stack, drawcontext, NormalState, awesomeconf);
     }
 
-    for(screen = 0; screen < get_screen_count(disp); screen++)
+    for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
     {
         if(drawcontext[screen].font.set)
-            XFreeFontSet(disp, drawcontext[screen].font.set);
+            XFreeFontSet(awesomeconf->display, drawcontext[screen].font.set);
         else
-            XFreeFont(disp, drawcontext[screen].font.xfont);
+            XFreeFont(awesomeconf->display, drawcontext[screen].font.xfont);
 
-            XUngrabKey(disp, AnyKey, AnyModifier, RootWindow(disp, screen));
+            XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, screen));
 
-        XFreePixmap(disp, awesomeconf[screen].statusbar.drawable);
-        XFreeGC(disp, drawcontext[screen].gc);
-        XDestroyWindow(disp, awesomeconf[screen].statusbar.window);
-        XFreeCursor(disp, drawcontext[screen].cursor[CurNormal]);
-        XFreeCursor(disp, drawcontext[screen].cursor[CurResize]);
-        XFreeCursor(disp, drawcontext[screen].cursor[CurMove]);
+        XFreePixmap(awesomeconf->display, awesomeconf[screen].statusbar.drawable);
+        XFreeGC(awesomeconf->display, drawcontext[screen].gc);
+        XDestroyWindow(awesomeconf->display, awesomeconf[screen].statusbar.window);
+        XFreeCursor(awesomeconf->display, drawcontext[screen].cursor[CurNormal]);
+        XFreeCursor(awesomeconf->display, drawcontext[screen].cursor[CurResize]);
+        XFreeCursor(awesomeconf->display, drawcontext[screen].cursor[CurMove]);
 
         for(i = 0; i < awesomeconf[screen].ntags; i++)
             p_delete(&awesomeconf[screen].tags[i].name);
@@ -98,8 +97,8 @@ cleanup(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
         p_delete(&awesomeconf[screen].rules);
         p_delete(&awesomeconf[screen].keys);
     }
-    XSetInputFocus(disp, PointerRoot, RevertToPointerRoot, CurrentTime);
-    XSync(disp, False);
+    XSetInputFocus(awesomeconf->display, PointerRoot, RevertToPointerRoot, CurrentTime);
+    XSync(awesomeconf->display, False);
     p_delete(&awesomeconf);
     p_delete(&dc);
 }
@@ -129,48 +128,47 @@ getstate(Display *disp, Window w)
 }
 
 /** Scan X to find windows to manage
- * \param disp Display ref
  * \param screen Screen number
  * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  */
 static void
-scan(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
+scan(DC *drawcontext, awesome_config *awesomeconf)
 {
     unsigned int i, num;
     int screen, real_screen;
     Window *wins = NULL, d1, d2;
     XWindowAttributes wa;
 
-    for(screen = 0; screen < ScreenCount(disp); screen++)
+    for(screen = 0; screen < ScreenCount(awesomeconf->display); screen++)
     {
-        if(XQueryTree(disp, RootWindow(disp, screen), &d1, &d2, &wins, &num))
+        if(XQueryTree(awesomeconf->display, RootWindow(awesomeconf->display, screen), &d1, &d2, &wins, &num))
         {
             real_screen = screen;
             for(i = 0; i < num; i++)
             {
-                if(!XGetWindowAttributes(disp, wins[i], &wa)
+                if(!XGetWindowAttributes(awesomeconf->display, wins[i], &wa)
                    || wa.override_redirect
-                   || XGetTransientForHint(disp, wins[i], &d1))
+                   || XGetTransientForHint(awesomeconf->display, wins[i], &d1))
                     continue;
-                if(wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState)
+                if(wa.map_state == IsViewable || getstate(awesomeconf->display, wins[i]) == IconicState)
                 {
                     if(screen == 0)
-                        real_screen = get_screen_bycoord(disp, wa.x, wa.y);
-                    manage(disp, &drawcontext[real_screen], wins[i], &wa, &awesomeconf[real_screen]);
+                        real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
+                    manage(awesomeconf->display, &drawcontext[real_screen], wins[i], &wa, &awesomeconf[real_screen]);
                 }
             }
             /* now the transients */
             for(i = 0; i < num; i++)
             {
-                if(!XGetWindowAttributes(disp, wins[i], &wa))
+                if(!XGetWindowAttributes(awesomeconf->display, wins[i], &wa))
                     continue;
-                if(XGetTransientForHint(disp, wins[i], &d1)
-                   && (wa.map_state == IsViewable || getstate(disp, wins[i]) == IconicState))
+                if(XGetTransientForHint(awesomeconf->display, wins[i], &d1)
+                   && (wa.map_state == IsViewable || getstate(awesomeconf->display, wins[i]) == IconicState))
                 {
                     if(screen == 0)
-                        real_screen = get_screen_bycoord(disp, wa.x, wa.y);
-                    manage(disp, &drawcontext[real_screen], wins[i], &wa, &awesomeconf[real_screen]);
+                        real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
+                    manage(awesomeconf->display, &drawcontext[real_screen], wins[i], &wa, &awesomeconf[real_screen]);
                 }
             }
         }
@@ -180,45 +178,43 @@ scan(Display *disp, DC *drawcontext, awesome_config *awesomeconf)
 }
 
 /** Setup everything before running
- * \param disp Display ref
  * \param screen Screen number
  * \param awesomeconf awesome config ref
  * \todo clean things...
  */
 static void
-setup(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
+setup(DC *drawcontext, awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
-    int phys_screen = get_phys_screen(disp, screen);
 
     /* init cursors */
-    drawcontext->cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);
-    drawcontext->cursor[CurResize] = XCreateFontCursor(disp, XC_sizing);
-    drawcontext->cursor[CurMove] = XCreateFontCursor(disp, XC_fleur);
+    drawcontext->cursor[CurNormal] = XCreateFontCursor(awesomeconf->display, XC_left_ptr);
+    drawcontext->cursor[CurResize] = XCreateFontCursor(awesomeconf->display, XC_sizing);
+    drawcontext->cursor[CurMove] = XCreateFontCursor(awesomeconf->display, XC_fleur);
 
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = drawcontext->cursor[CurNormal];
 
-    XChangeWindowAttributes(disp, RootWindow(disp, phys_screen), CWEventMask | CWCursor, &wa);
+    XChangeWindowAttributes(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), CWEventMask | CWCursor, &wa);
 
-    XSelectInput(disp, RootWindow(disp, phys_screen), wa.event_mask);
+    XSelectInput(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), wa.event_mask);
 
-    grabkeys(disp, phys_screen, awesomeconf);
+    grabkeys(awesomeconf->display, awesomeconf->phys_screen, awesomeconf);
 
     compileregs(awesomeconf->rules, awesomeconf->nrules);
 
     /* bar */
     drawcontext->h = awesomeconf->statusbar.height = drawcontext->font.height + 2;
-    initstatusbar(disp, screen, drawcontext, &awesomeconf->statusbar);
-    drawcontext->gc = XCreateGC(disp, RootWindow(disp, phys_screen), 0, 0);
-    XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
+    initstatusbar(awesomeconf->display, awesomeconf->screen, drawcontext, &awesomeconf->statusbar);
+    drawcontext->gc = XCreateGC(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), 0, 0);
+    XSetLineAttributes(awesomeconf->display, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
 
     if(!drawcontext->font.set)
-        XSetFont(disp, drawcontext->gc, drawcontext->font.xfont->fid);
+        XSetFont(awesomeconf->display, drawcontext->gc, drawcontext->font.xfont->fid);
 
-    loadawesomeprops(disp, awesomeconf);
+    loadawesomeprops(awesomeconf->display, awesomeconf);
 }
 
 /** Startup Error handler to check if another window manager
@@ -234,7 +230,6 @@ xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribut
 
 /** Quit awesome
  * \param disp Display ref
- * \param screen Screen number
  * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  * \param arg nothing
@@ -342,7 +337,7 @@ main(int argc, char *argv[])
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
         parse_config(dpy, screen, &dc[screen], confpath, &awesomeconf[screen]);
-        setup(dpy, screen, &dc[screen], &awesomeconf[screen]);
+        setup(&dc[screen], &awesomeconf[screen]);
         XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
                         XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
         drawstatusbar(dpy, &dc[screen], &awesomeconf[screen]);
@@ -382,7 +377,7 @@ main(int argc, char *argv[])
         awesomeconf[screen].have_randr = awesomeconf[0].have_randr;
     }
 
-    scan(dpy, dc, awesomeconf);
+    scan(dc, awesomeconf);
 
     XSync(dpy, False);
 
@@ -432,7 +427,7 @@ main(int argc, char *argv[])
                 handler[ev.type](&ev, awesomeconf);       /* call handler */
         }
     }
-    cleanup(dpy, dc, awesomeconf);
+    cleanup(dc, awesomeconf);
     XCloseDisplay(dpy);
 
     return EXIT_SUCCESS;

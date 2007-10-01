@@ -109,6 +109,8 @@ typedef struct
 /** Main configuration structure */
 struct awesome_config
 {
+    /** Display ref */
+    Display *display;
     /** Config virtual screen number */
     int screen;
     /** Config physical screen */

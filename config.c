@@ -197,6 +197,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
 
     a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION);
 
+    /* store display */
+    awesomeconf->display = disp;
+
     /* set screen */
     awesomeconf->screen = scr;
     awesomeconf->phys_screen = get_phys_screen(disp, scr);
