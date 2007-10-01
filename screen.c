@@ -227,22 +227,23 @@ uicb_movetoscreen(Display *disp,
                   awesome_config * awesomeconf,
                   const char *arg)
 {
-    int screen;
+    int new_screen, prev_screen;
 
     if(!XineramaIsActive(disp) || !sel)
         return;
 
     if(arg)
     {
-        screen = strtol(arg, NULL, 10);
-        if(screen >= get_screen_count(disp) || screen < 0)
+        new_screen = strtol(arg, NULL, 10);
+        if(new_screen >= get_screen_count(disp) || new_screen < 0)
             return;
     }
     else
-        screen = sel->screen + 1 >= get_screen_count(disp) ? 0 : sel->screen + 1;
+        new_screen = sel->screen + 1 >= get_screen_count(disp) ? 0 : sel->screen + 1;
 
-    move_client_to_screen(sel, &awesomeconf[screen - awesomeconf->screen], True);
-    move_mouse_pointer_to_screen(disp, screen);
-    arrange(disp, drawcontext, awesomeconf);
-    arrange(disp, &drawcontext[screen - awesomeconf->screen], &awesomeconf[screen - awesomeconf->screen]);
+    prev_screen = sel->screen;
+    move_client_to_screen(sel, &awesomeconf[new_screen - awesomeconf->screen], True);
+    move_mouse_pointer_to_screen(disp, new_screen);
+    arrange(disp, drawcontext, &awesomeconf[prev_screen - awesomeconf->screen]);
+    arrange(disp, &drawcontext[new_screen - awesomeconf->screen], &awesomeconf[new_screen - awesomeconf->screen]);
 }
