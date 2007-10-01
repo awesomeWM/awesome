@@ -430,8 +430,8 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
         if(c->y < si->y_org)
             c->y = c->ry = si->y_org;
         c->border = awesomeconf->borderpx;
-        XFree(si);
     }
+    XFree(si);
     wc.border_width = c->border;
     XConfigureWindow(disp, w, CWBorderWidth, &wc);
     XSetWindowBorder(disp, w, drawcontext->norm[ColBorder]);
