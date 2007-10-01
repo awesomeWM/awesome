@@ -400,7 +400,8 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     Window trans;
     Status rettrans;
     XWindowChanges wc;
-    ScreenInfo *si = get_display_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_display_info(disp, awesomeconf->screen, NULL);
+    ScreenInfo *screen_info;
 
     c = p_new(Client, 1);
     c->win = w;
@@ -411,8 +412,9 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     c->h = c->rh = wa->height;
     c->oldborder = wa->border_width;
     c->display = disp;
-    c->phys_screen = get_phys_screen(disp, c->screen);
-    if(c->w == si->width && c->h == si->height)
+    c->phys_screen = get_phys_screen(c->display, c->screen);
+    screen_info = get_screen_info(c->display, c->screen, NULL, &i);
+    if(c->w == screen_info[c->screen].width && c->h == screen_info[c->screen].height)
     {
         c->x = 0;
         c->y = 0;
@@ -512,10 +514,7 @@ resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool 
     if(w <= 0 || h <= 0)
         return;
     /* offscreen appearance fixes */
-    if(XineramaIsActive(c->display))
-        si = get_display_info(c->display, DefaultScreen(c->display), NULL);
-    else
-        si = get_display_info(c->display, c->screen, NULL);
+    si = get_display_info(c->display, c->phys_screen, NULL);
     if(x > si->width)
         x = si->width - w - 2 * c->border;
     if(y > si->height)
