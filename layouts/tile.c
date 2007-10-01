@@ -40,6 +40,7 @@ uicb_setnmaster(Display *disp,
     if(!arg || (!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)))
         return;
 
+
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
         awesomeconf->nmaster = 0;
 
@@ -67,15 +68,27 @@ uicb_setmwfact(Display *disp,
                awesome_config * awesomeconf,
                const char *arg)
 {
-    if(!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft))
+    char *newarg;
+
+    if((!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)) || !arg)
         return;
 
-    if((awesomeconf->mwfact = compute_new_value_from_arg(arg, awesomeconf->mwfact)) < 0.1)
+    newarg = a_strdup(arg);
+    if(IS_ARRANGE(layout_tileleft))
+    {
+        if(newarg[0] == '+')
+            newarg[0] = '-';
+        else if(arg[0] == '-')
+            newarg[0] = '+';
+    }
+
+    if((awesomeconf->mwfact = compute_new_value_from_arg(newarg, awesomeconf->mwfact)) < 0.1)
         awesomeconf->mwfact = 0.1;
     else if(awesomeconf->mwfact > 0.9)
         awesomeconf->mwfact = 0.9;
 
     arrange(disp, drawcontext, awesomeconf);
+    p_delete(&newarg);
 }
 
 static void
