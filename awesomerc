@@ -112,7 +112,6 @@ awesome:
             (("Mod4", "Control"), "7", "toggleview", "7"),
             (("Mod4", "Control"), "8", "toggleview", "8"),
             (("Mod4", "Control"), "9", "toggleview", "9"),
-            (("Mod4", "Control"), "0", "toggleview"),
             (("Mod4", "Shift"), "0", "tag"),
             (("Mod4", "Shift"), "1", "tag", "1"),
             (("Mod4", "Shift"), "2", "tag", "2"),
