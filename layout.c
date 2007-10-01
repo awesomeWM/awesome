@@ -224,8 +224,7 @@ uicb_togglemax(Display *disp,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
-    int dummy;
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar, &dummy);
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
     maximize(si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
              si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
@@ -240,8 +239,7 @@ uicb_toggleverticalmax(Display *disp,
                        awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
 {
-    int dummy;
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar, &dummy);
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
     if(sel)
         maximize(sel->x, si[awesomeconf->screen].y_org,
@@ -257,8 +255,7 @@ uicb_togglehorizontalmax(Display *disp,
                          awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
 {
-    int dummy;
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar, &dummy);
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
     if(sel)
         maximize(si[awesomeconf->screen].x_org, sel->y,

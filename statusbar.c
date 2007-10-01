@@ -51,7 +51,7 @@ void
 drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
 {
     int x, i;
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, NULL, &i);
+    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, NULL);
 
     drawcontext->x = drawcontext->y = 0;
     for(i = 0; i < awesomeconf->ntags; i++)
@@ -108,14 +108,14 @@ void
 initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
 {
     XSetWindowAttributes wa;
-    int screen_number, phys_screen;
+    int phys_screen;
     ScreenInfo *si;
 
     phys_screen = get_phys_screen(disp, screen);
 
     statusbar->screen = screen;
 
-    si = get_screen_info(disp, screen, NULL, &screen_number);
+    si = get_screen_info(disp, screen, NULL);
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
@@ -140,8 +140,7 @@ void
 updatebarpos(Display *disp, Statusbar statusbar)
 {
     XEvent ev;
-    int dummy;
-    ScreenInfo *si = get_screen_info(disp, statusbar.screen, NULL, &dummy);
+    ScreenInfo *si = get_screen_info(disp, statusbar.screen, NULL);
 
     switch (statusbar.position)
     {

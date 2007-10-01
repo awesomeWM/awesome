@@ -34,30 +34,26 @@ extern Client *sel, *clients;
  * \return ScreenInfo struct array with all screens info
  */
 ScreenInfo *
-get_screen_info(Display *disp, int screen, Statusbar *statusbar, int *screen_number)
+get_screen_info(Display *disp, int screen, Statusbar *statusbar)
 {
-    int i, fake_screen_number = 0;
+    int i, screen_number = 0;
     ScreenInfo *si;
 
     if(XineramaIsActive(disp))
-    {
-        si = XineramaQueryScreens(disp, screen_number);
-        fake_screen_number = *screen_number;
-    }
+        si = XineramaQueryScreens(disp, &screen_number);
     else
     {
         /* emulate Xinerama info but only fill the screen we want */
-        *screen_number =  1;
         si = p_new(ScreenInfo, screen + 1);
         si[screen].width = DisplayWidth(disp, screen);
         si[screen].height = DisplayHeight(disp, screen);
         si[screen].x_org = 0;
         si[screen].y_org = 0;
-        fake_screen_number = screen + 1;
+        screen_number = screen + 1;
     }
 
     if(statusbar)
-        for(i = 0; i < fake_screen_number; i++)
+        for(i = 0; i < screen_number; i++)
         {
             if(statusbar->position == BarTop 
                || statusbar->position == BarBot)
@@ -101,15 +97,15 @@ int
 get_screen_bycoord(Display *disp, int x, int y)
 {
     ScreenInfo *si;
-    int screen_number, i;
+    int i;
 
     /* don't waste our time */
     if(!XineramaIsActive(disp))
         return DefaultScreen(disp);
 
-    si = get_screen_info(disp, 0, NULL, &screen_number);
+    si = get_screen_info(disp, 0, NULL);
 
-    for(i = 0; i < screen_number; i++)
+    for(i = 0; i < get_screen_count(disp); i++)
         if(x >= si[i].x_org && x < si[i].x_org + si[i].width
            && y >= si[i].y_org && y < si[i].y_org + si[i].height)
         {
@@ -163,7 +159,7 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
     for(i = 0; i < acf_new->ntags; i++)
         c->tags[i] = acf_new->tags[i].selected;
     
-    si = get_screen_info(c->display, c->screen, &acf_new->statusbar, &i);
+    si = get_screen_info(c->display, c->screen, &acf_new->statusbar);
     c->rx = si[c->screen].x_org;
     c->ry = si[c->screen].y_org;
     if(doresize)
@@ -176,8 +172,7 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
 {
     if(XineramaIsActive(disp))
     {
-        int dummy;
-        ScreenInfo *si = get_screen_info(disp, screen, NULL, &dummy);
+        ScreenInfo *si = get_screen_info(disp, screen, NULL);
         XWarpPointer(disp, None, DefaultRootWindow(disp), 0, 0, 0, 0, si[screen].x_org, si[screen].y_org);
         XFree(si);
     }

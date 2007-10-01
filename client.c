@@ -382,7 +382,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     c->oldborder = wa->border_width;
     c->display = disp;
     c->phys_screen = get_phys_screen(c->display, c->screen);
-    screen_info = get_screen_info(c->display, c->screen, NULL, &i);
+    screen_info = get_screen_info(c->display, c->screen, NULL);
     if(c->w == screen_info[c->screen].width && c->h == screen_info[c->screen].height)
     {
         c->x = 0;

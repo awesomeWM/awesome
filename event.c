@@ -60,7 +60,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
     XEvent ev;
     ScreenInfo *si;
 
-    si = get_screen_info(c->display, c->screen, NULL, &x1);
+    si = get_screen_info(c->display, c->screen, NULL);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
@@ -271,7 +271,7 @@ void
 handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
 {
     XConfigureEvent *ev = &e->xconfigure;
-    int screen, dummy;
+    int screen;
     ScreenInfo *si;
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
@@ -282,7 +282,7 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
             DisplayWidth(e->xany.display, screen) = ev->width;
             DisplayHeight(e->xany.display, screen) = ev->height;
 
-            si = get_screen_info(e->xany.display, screen, NULL, &dummy);
+            si = get_screen_info(e->xany.display, screen, NULL);
             XFreePixmap(e->xany.display, awesomeconf[screen].statusbar.drawable);
             awesomeconf[screen].statusbar.drawable = XCreatePixmap(e->xany.display, RootWindow(e->xany.display, screen),
                                                                    si[screen].width,
