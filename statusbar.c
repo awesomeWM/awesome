@@ -108,10 +108,10 @@ void
 initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
 {
     XSetWindowAttributes wa;
-    int screen_number, real_screen;
+    int screen_number, phys_screen;
     ScreenInfo *si;
 
-    real_screen = get_real_screen(disp, screen);
+    phys_screen = get_phys_screen(disp, screen);
 
     statusbar->screen = screen;
 
@@ -123,17 +123,17 @@ initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    statusbar->window = XCreateWindow(disp, RootWindow(disp, real_screen), 0, 0, si[screen].width,
-                                      statusbar->height, 0, DefaultDepth(disp, real_screen), CopyFromParent,
-                                      DefaultVisual(disp, real_screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+    statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0, si[screen].width,
+                                      statusbar->height, 0, DefaultDepth(disp, phys_screen), CopyFromParent,
+                                      DefaultVisual(disp, phys_screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, drawcontext->cursor[CurNormal]);
     updatebarpos(disp, *statusbar);
     XMapRaised(disp, statusbar->window);
     statusbar->drawable = XCreatePixmap(disp,
-                                        RootWindow(disp, real_screen),
+                                        RootWindow(disp, phys_screen),
                                         si[screen].width,
                                         statusbar->height,
-                                        DefaultDepth(disp, real_screen));
+                                        DefaultDepth(disp, phys_screen));
 }
 
 void

@@ -54,22 +54,20 @@ getclient(Window w)
 static void
 movemouse(Client * c, awesome_config *awesomeconf)
 {
-    int x1, y1, ocx, ocy, di, nx, ny, real_screen;
+    int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
     Window dummy;
     XEvent ev;
     ScreenInfo *si;
 
-    real_screen = get_real_screen(c->display, awesomeconf->screen);
-
-    si = get_display_info(c->display, real_screen, NULL);
+    si = get_display_info(c->display, c->phys_screen, NULL);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
-    if(XGrabPointer(c->display, RootWindow(c->display, real_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+    if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, dc[c->screen].cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
-    XQueryPointer(c->display, RootWindow(c->display, real_screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
+    XQueryPointer(c->display, RootWindow(c->display, c->phys_screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
     {
         XMaskEvent(c->display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
@@ -110,7 +108,7 @@ resizemouse(Client * c, awesome_config *awesomeconf)
 
     ocx = c->x;
     ocy = c->y;
-    if(XGrabPointer(c->display, RootWindow(c->display, get_real_screen(c->display, awesomeconf->screen)),
+    if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, dc[c->screen].cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
@@ -227,7 +225,6 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
-    int real_screen;
 
     if((c = getclient(ev->window)))
     {
@@ -236,7 +233,6 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
             c->border = ev->border_width;
         if(c->isfixed || c->isfloating || IS_ARRANGE(layout_floating))
         {
-            real_screen = get_real_screen(c->display, c->screen);
             if(ev->value_mask & CWX)
                 c->x = ev->x;
             if(ev->value_mask & CWY)
@@ -245,10 +241,10 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
                 c->w = ev->width;
             if(ev->value_mask & CWHeight)
                 c->h = ev->height;
-            if((c->x + c->w) > DisplayWidth(c->display, real_screen) && c->isfloating)
-                c->x = DisplayWidth(c->display, real_screen) / 2 - c->w / 2;       /* center in x direction */
-            if((c->y + c->h) > DisplayHeight(c->display, real_screen) && c->isfloating)
-                c->y = DisplayHeight(c->display, real_screen) / 2 - c->h / 2;       /* center in y direction */
+            if((c->x + c->w) > DisplayWidth(c->display, c->phys_screen) && c->isfloating)
+                c->x = DisplayWidth(c->display, c->phys_screen) / 2 - c->w / 2;       /* center in x direction */
+            if((c->y + c->h) > DisplayHeight(c->display, c->phys_screen) && c->isfloating)
+                c->y = DisplayHeight(c->display, c->phys_screen) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 configure(c);
             if(isvisible(c, c->screen, awesomeconf[c->screen].tags, awesomeconf[c->screen].ntags))

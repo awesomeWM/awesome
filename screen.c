@@ -145,7 +145,7 @@ get_screen_count(Display *disp)
  * \return the X screen
  */
 int
-get_real_screen(Display *disp, int screen)
+get_phys_screen(Display *disp, int screen)
 {
     if(XineramaIsActive(disp))
         return DefaultScreen(disp);

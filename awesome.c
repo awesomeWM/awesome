@@ -189,7 +189,7 @@ static void
 setup(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
-    int real_screen = get_real_screen(disp, screen);
+    int phys_screen = get_phys_screen(disp, screen);
 
     /* init cursors */
     drawcontext->cursor[CurNormal] = XCreateFontCursor(disp, XC_left_ptr);
@@ -201,18 +201,18 @@ setup(Display *disp, int screen, DC *drawcontext, awesome_config *awesomeconf)
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = drawcontext->cursor[CurNormal];
 
-    XChangeWindowAttributes(disp, RootWindow(disp, real_screen), CWEventMask | CWCursor, &wa);
+    XChangeWindowAttributes(disp, RootWindow(disp, phys_screen), CWEventMask | CWCursor, &wa);
 
-    XSelectInput(disp, RootWindow(disp, real_screen), wa.event_mask);
+    XSelectInput(disp, RootWindow(disp, phys_screen), wa.event_mask);
 
-    grabkeys(disp, real_screen, awesomeconf);
+    grabkeys(disp, phys_screen, awesomeconf);
 
     compileregs(awesomeconf->rules, awesomeconf->nrules);
 
     /* bar */
     drawcontext->h = awesomeconf->statusbar.height = drawcontext->font.height + 2;
     initstatusbar(disp, screen, drawcontext, &awesomeconf->statusbar);
-    drawcontext->gc = XCreateGC(disp, RootWindow(disp, real_screen), 0, 0);
+    drawcontext->gc = XCreateGC(disp, RootWindow(disp, phys_screen), 0, 0);
     XSetLineAttributes(disp, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
 
     if(!drawcontext->font.set)

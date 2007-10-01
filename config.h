@@ -109,8 +109,10 @@ typedef struct
 /** Main configuration structure */
 struct awesome_config
 {
-    /** Config screen number */
+    /** Config virtual screen number */
     int screen;
+    /** Config physical screen */
+    int phys_screen;
     /** Tag list */
     Tag *tags;
     /** Number of tags in **tags */

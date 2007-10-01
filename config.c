@@ -199,6 +199,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
 
     /* set screen */
     awesomeconf->screen = scr;
+    awesomeconf->phys_screen = get_phys_screen(disp, scr);
 
     if(config_read_file(&awesomelibconf, confpath) == CONFIG_FALSE)
         fprintf(stderr, "awesome: error parsing configuration file at line %d: %s\n",
@@ -395,22 +396,22 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
 
     /* colors */
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_border_color");
-    drawcontext->norm[ColBorder] = initcolor(disp, scr, tmp ? tmp : "#dddddd");
+    drawcontext->norm[ColBorder] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#dddddd");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_bg_color");
-    drawcontext->norm[ColBG] = initcolor(disp, scr, tmp ? tmp : "#000000");
+    drawcontext->norm[ColBG] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#000000");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_fg_color");
-    drawcontext->norm[ColFG] = initcolor(disp, scr, tmp ? tmp : "#ffffff");
+    drawcontext->norm[ColFG] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#ffffff");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_border_color");
-    drawcontext->sel[ColBorder] = initcolor(disp, scr, tmp ? tmp : "#008b8b");
+    drawcontext->sel[ColBorder] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#008b8b");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_bg_color");
-    drawcontext->sel[ColBG] = initcolor(disp, scr, tmp ? tmp : "#008b8b");
+    drawcontext->sel[ColBG] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#008b8b");
 
     tmp = config_lookup_string(&awesomelibconf, "awesome.focus_fg_color");
-    drawcontext->sel[ColFG] = initcolor(disp, scr, tmp ? tmp : "#ffffff");
+    drawcontext->sel[ColFG] = initcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#ffffff");
 
     config_destroy(&awesomelibconf);
     p_delete(&confpath);
@@ -498,7 +499,7 @@ get_numlockmask(Display *disp)
 static unsigned long
 initcolor(Display *disp, int scr, const char *colstr)
 {
-    Colormap cmap = DefaultColormap(disp, get_real_screen(disp, scr));
+    Colormap cmap = DefaultColormap(disp, scr);
     XColor color;
     if(!XAllocNamedColor(disp, cmap, colstr, &color, &color))
         die("awesome: error, cannot allocate color '%s'\n", colstr);
