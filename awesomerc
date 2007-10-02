@@ -15,11 +15,11 @@ awesome:
     # Tags
     tags = ( "1", "2", "3", "4", "5", "6", "7", "8", "9" );
     # Colors
-    normal_border_color = "#dddddd";
-    normal_bg_color = "#000000";
-    normal_fg_color = "#ffffff";
-    focus_border_color = "#008b8b";
-    focus_bg_color = "#008b8b";
+    normal_border_color = "#111111";
+    normal_bg_color = "#111111";
+    normal_fg_color = "#eeeeee";
+    focus_border_color = "#6666ff";
+    focus_bg_color = "#6666ff";
     focus_fg_color = "#ffffff";
     opacity_unfocused = 100;
 
