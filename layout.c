@@ -32,6 +32,11 @@
 /* extern */
 extern Client *clients, *sel;   /* global client list */
 
+/** Arrange windows following current selected layout
+ * \param disp display ref
+ * \param drawcontext drawcontext ref
+ * \param awesomeconf awesome config
+ */
 void
 arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
 {
