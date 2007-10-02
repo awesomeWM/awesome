@@ -66,7 +66,8 @@ awesome:
 
     # Keys binding
     keys = ((("Mod4"), "Return", "spawn", "exec xterm"),
-            (("Mod4"), "space", "setlayout"),
+            (("Mod4"), "space", "setlayout", "+1"),
+            (("Mod4", "Shift"), "space", "setlayout", "-1"),
             (("Mod4"), "b", "togglebar"),
             (("Mod4"), "j", "focusnext"),
             (("Mod4"), "k", "focusprev"),

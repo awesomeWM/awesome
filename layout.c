@@ -166,14 +166,14 @@ uicb_setlayout(Display *disp,
     int i;
     Client *c;
 
-    for(i = 0; i < awesomeconf->nlayouts && &awesomeconf->layouts[i] != awesomeconf->current_layout; i++);
-
-    if(!arg)
-        i++;
-    else
+    if(arg)
+    {
+        for(i = 0; i < awesomeconf->nlayouts && &awesomeconf->layouts[i] != awesomeconf->current_layout; i++);
         i = compute_new_value_from_arg(arg, (double) i);
-
-    if(i < 0 || i >= awesomeconf->nlayouts)
+        if(i < 0 || i >= awesomeconf->nlayouts)
+            i = 0;
+    }
+    else
         i = 0;
 
     awesomeconf->current_layout = &awesomeconf->layouts[i];
