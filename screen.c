@@ -221,6 +221,13 @@ uicb_focusprevscreen(Display *disp,
     move_mouse_pointer_to_screen(disp, prev_screen);
 }
 
+/** Move client to a virtual screen (if Xinerama is active)
+ * \param disp Display ref
+ * \param drawcontext drawcontext ref
+ * \param awesomeconf awesome config
+ * \param arg screen number
+ * \ingroup ui_callback
+ */
 void
 uicb_movetoscreen(Display *disp,
                   DC *drawcontext,
