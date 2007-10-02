@@ -30,7 +30,6 @@ extern Client *sel, *clients;
  * \param disp Display ref
  * \param screen Screen number
  * \param statusbar statusbar
- * \param screen_number int pointer filled with number of screens
  * \return ScreenInfo struct array with all screens info
  */
 ScreenInfo *
@@ -91,7 +90,7 @@ get_display_info(Display *disp, int screen, Statusbar *statusbar)
  * \param disp Display ref
  * \param x x coordinate of the window
  * \param y y coordinate of the window
- * \return screen number or -1 on no match
+ * \return screen number or DefaultScreen of disp on no match
  */
 int
 get_screen_bycoord(Display *disp, int x, int y)
@@ -148,6 +147,12 @@ get_phys_screen(Display *disp, int screen)
     return screen;
 }
 
+/** Move a client to a virtual screen
+ * \param c the client
+ * \param acf_new the awesome_config for the new screen
+ * \param doresize set to True if we also move the client to the new x_org and
+ *         y_org of the new screen
+ */
 void
 move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
 {
