@@ -175,7 +175,9 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 }
             }
             if((ev->x < x + awesomeconf[screen].statusbar.width) && ev->button == Button1)
-                uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], "+1");
+            else if((ev->x < x + awesomeconf[screen].statusbar.width) && ev->button == Button3)
+                uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], "-1");
             return;
         }
 

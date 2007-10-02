@@ -163,21 +163,20 @@ uicb_setlayout(Display *disp,
                awesome_config * awesomeconf,
                const char *arg)
 {
-    int i, j;
+    int i;
     Client *c;
 
+    for(i = 0; i < awesomeconf->nlayouts && &awesomeconf->layouts[i] != awesomeconf->current_layout; i++);
+
     if(!arg)
-    {
-        if(!(++awesomeconf->current_layout)->symbol)
-            awesomeconf->current_layout = awesomeconf->layouts;
-    }
+        i++;
     else
-    {
-        i = strtol(arg, NULL, 10);
-        if(i < 0 || i >= awesomeconf->nlayouts)
-             return;
-        awesomeconf->current_layout = &awesomeconf->layouts[i];
-    }
+        i = compute_new_value_from_arg(arg, (double) i);
+
+    if(i < 0 || i >= awesomeconf->nlayouts)
+        i = 0;
+
+    awesomeconf->current_layout = &awesomeconf->layouts[i];
     
     for(c = clients; c; c = c->next)
         c->ftview = True;
@@ -189,9 +188,9 @@ uicb_setlayout(Display *disp,
 
     saveawesomeprops(disp, awesomeconf);
 
-    for(j = 0; j < awesomeconf->ntags; j++)
-        if (awesomeconf->tags[j].selected)
-            awesomeconf->tags[j].layout = awesomeconf->current_layout;
+    for(i = 0; i < awesomeconf->ntags; i++)
+        if (awesomeconf->tags[i].selected)
+            awesomeconf->tags[i].layout = awesomeconf->current_layout;
 }
 
 static void
