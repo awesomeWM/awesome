@@ -268,6 +268,9 @@ configure(Client * c)
     XSendEvent(c->display, c->win, False, StructureNotifyMask, (XEvent *) & ce);
 }
 
+/** Detach client from clients list
+ * \param c client to detach
+ */
 void
 detach(Client * c)
 {
