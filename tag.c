@@ -86,6 +86,8 @@ applyrules(Client * c, awesome_config *awesomeconf)
                     matched = True;
                     c->tags[j] = True;
                 }
+                else
+                    c->tags[j] = False;
         }
     p_delete(&prop);
     if(ch.res_class)
