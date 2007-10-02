@@ -28,7 +28,7 @@
 #include "util.h"
 #include "layouts/tile.h"
 
-extern Client *clients, *sel, *stack;   /* global client list and stack */
+extern Client *clients, *sel;   /* global client list */
 
 /** Check if at least a client is tagged with tag number t and is on screen
  * screen
