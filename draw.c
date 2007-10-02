@@ -67,7 +67,6 @@ drawtext(Display *disp, int screen, DC *drawcontext, Drawable drawable, const ch
     xrcolor.red = textcolor.red;
     xrcolor.green = textcolor.green;
     xrcolor.blue = textcolor.blue;
-    xrcolor.alpha = 255;
     XftColorAllocValue(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xrcolor, &xftcolor);
     xftdrawable = XftDrawCreate(disp, drawable, DefaultVisual(disp, screen), DefaultColormap(disp, screen));
     XftDrawStringUtf8(xftdrawable, &xftcolor, drawcontext->font, x, y, (FcChar8 *) buf, len);
