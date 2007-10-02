@@ -23,10 +23,6 @@
 #include "util.h"
 #include "draw.h"
 
-extern Client *clients, *sel, *stack;   /* global client list and stack */
-
-/* static */
-
 void
 drawtext(Display *disp, int screen, DC *drawcontext, Drawable drawable, const char *text, unsigned long col[ColLast], XColor textcolor)
 {
