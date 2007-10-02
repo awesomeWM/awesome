@@ -172,6 +172,10 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
     XFree(si);
 }
 
+/** Move mouse pointer to x_org and y_xorg of specified screen
+ * \param disp display ref
+ * \param screen screen number
+ */
 static void
 move_mouse_pointer_to_screen(Display *disp, int screen)
 {
