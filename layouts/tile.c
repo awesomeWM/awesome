@@ -29,7 +29,7 @@
 #include "layouts/tile.h"
 
 /* extern */
-extern Client *sel, *clients;
+extern Client *clients;
 
 void
 uicb_setnmaster(Display *disp,
