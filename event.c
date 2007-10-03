@@ -144,14 +144,15 @@ resizemouse(Client * c, awesome_config *awesomeconf)
 void
 handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 {
-    int i, screen;
+    int i, screen, x = 0, y = 0;
+    unsigned int udummy;
     Client *c;
+    Window wdummy;
     XButtonPressedEvent *ev = &e->xbutton;
 
     for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
         if(awesomeconf[screen].statusbar.window == ev->window)
         {
-            int x = 0;
             for(i = 0; i < awesomeconf[screen].ntags; i++)
             {
                 x += textwidth(e->xany.display, dc[screen].font, awesomeconf[screen].tags[i].name, a_strlen(awesomeconf[screen].tags[i].name)) + dc[screen].font->height;
@@ -212,12 +213,15 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     }
     else if(!sel)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-            if(RootWindow(e->xany.display, screen) == ev->window)
+            if(RootWindow(e->xany.display, screen) == ev->window
+               && XQueryPointer(e->xany.display, ev->window, &wdummy, &wdummy, &x, &y, &i, &i, &udummy))
             {
+                screen = get_screen_bycoord(e->xany.display, x, y);
                 if(ev->button == Button4)
                     uicb_tag_viewnext(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
                 else if(ev->button == Button5)
                     uicb_tag_viewprev(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                break;
             }
 }
 
