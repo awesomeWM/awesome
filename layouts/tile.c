@@ -1,22 +1,22 @@
-/* 
+/*
  * tile.c - tile layout
  *
- * Copyright © 2007 Julien Danjou <julien@danjou.info> 
- * 
- * This program is free software; you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
- * the Free Software Foundation; either version 2 of the License, or 
- * (at your option) any later version. 
- * 
- * This program is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
- * GNU General Public License for more details. 
- * 
- * You should have received a copy of the GNU General Public License along 
- * with this program; if not, write to the Free Software Foundation, Inc., 
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 
- * 
+ * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
  */
 
 #include <stdio.h>
@@ -106,7 +106,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     Client *c;
 
     screens_info = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
- 
+
     for(n = 0, c = clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             n++;
@@ -117,9 +117,9 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     way = screens_info[awesomeconf->screen].y_org;
 
     masterwin = MIN(n, awesomeconf->nmaster);
-    
+
     otherwin = n - masterwin;
-    
+
     if(otherwin < 0)
         otherwin = 0;
 

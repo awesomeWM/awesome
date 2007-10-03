@@ -1,22 +1,22 @@
-/*  
- * client.c - client management 
- *  
- * Copyright © 2007 Julien Danjou <julien@danjou.info> 
- * 
- * This program is free software; you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
- * the Free Software Foundation; either version 2 of the License, or 
- * (at your option) any later version. 
- * 
- * This program is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
- * GNU General Public License for more details. 
- * 
- * You should have received a copy of the GNU General Public License along 
- * with this program; if not, write to the Free Software Foundation, Inc., 
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 
- * 
+/*
+ * client.c - client management
+ *
+ * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
  */
 
 #include <stdio.h>
@@ -38,7 +38,7 @@ extern Client *clients, *sel, *stack;   /* global client list and stack */
 
 /** Attach client stack to clients stacks
  * \param c the client
- */ 
+ */
 static inline void
 attachstack(Client * c)
 {
@@ -192,7 +192,7 @@ client_swap(Client *c1, Client *c2)
     Client *tmp;
 
     tmp = c1->next;
-    c1->next = c2->next; 
+    c1->next = c2->next;
     c2->next = (tmp == c2 ? c1 : tmp);
 
     tmp = c2->prev;
@@ -296,7 +296,7 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags)))
         for(c = stack; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->snext);
-    
+
     /* if a client was selected but it's not the current client, unfocus it */
     if(sel && sel != c)
     {

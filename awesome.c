@@ -1,23 +1,23 @@
-/*  
+/*
  * awesome.c - awesome main functions
- * 
- * Copyright © 2007 Julien Danjou <julien@danjou.info> 
- * 
- * This program is free software; you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
- * the Free Software Foundation; either version 2 of the License, or 
- * (at your option) any later version. 
- * 
- * This program is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
- * GNU General Public License for more details. 
- * 
- * You should have received a copy of the GNU General Public License along 
- * with this program; if not, write to the Free Software Foundation, Inc., 
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 
- * 
- */ 
+ *
+ * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #include <errno.h>
 #include <locale.h>
@@ -29,8 +29,8 @@
 #include <X11/Xatom.h>
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
-#include <X11/extensions/shape.h> 
-#include <X11/extensions/Xrandr.h> 
+#include <X11/extensions/shape.h>
+#include <X11/extensions/Xrandr.h>
 
 #include "awesome.h"
 #include "event.h"
@@ -58,7 +58,7 @@ cleanup(DC *drawcontext, awesome_config *awesomeconf)
     int screen, i;
 
     close(STDIN_FILENO);
-    
+
     while(stack)
     {
         unban(stack);
@@ -267,7 +267,7 @@ xerror(Display * edpy, XErrorEvent * ee)
  * \param argv who knows
  * \return EXIT_SUCCESS I hope
  */
-typedef void event_handler (XEvent *, awesome_config *); 
+typedef void event_handler (XEvent *, awesome_config *);
 int
 main(int argc, char *argv[])
 {
@@ -280,7 +280,7 @@ main(int argc, char *argv[])
     awesome_config *awesomeconf;
     int shape_event, randr_event_base;
     int screen;
-    enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */ 
+    enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */
     Atom netatom[NetLast];
     event_handler **handler;
 

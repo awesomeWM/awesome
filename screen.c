@@ -1,22 +1,22 @@
-/*  
+/*
  * screen.c - screen management
- *  
- * Copyright © 2007 Julien Danjou <julien@danjou.info> 
- * 
- * This program is free software; you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
- * the Free Software Foundation; either version 2 of the License, or 
- * (at your option) any later version. 
- * 
- * This program is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
- * GNU General Public License for more details. 
- * 
- * You should have received a copy of the GNU General Public License along 
- * with this program; if not, write to the Free Software Foundation, Inc., 
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 
- * 
+ *
+ * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
  */
 
 #include "util.h"
@@ -54,13 +54,13 @@ get_screen_info(Display *disp, int screen, Statusbar *statusbar)
     if(statusbar)
         for(i = 0; i < screen_number; i++)
         {
-            if(statusbar->position == BarTop 
+            if(statusbar->position == BarTop
                || statusbar->position == BarBot)
                 si[i].height -= statusbar->height;
             if(statusbar->position == BarTop)
                 si[i].y_org += statusbar->height;
         }
-    
+
     return si;
 }
 
@@ -163,7 +163,7 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
     p_realloc(&c->tags, acf_new->ntags);
     for(i = 0; i < acf_new->ntags; i++)
         c->tags[i] = acf_new->tags[i].selected;
-    
+
     si = get_screen_info(c->display, c->screen, &acf_new->statusbar);
     c->rx = si[c->screen].x_org;
     c->ry = si[c->screen].y_org;

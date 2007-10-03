@@ -60,7 +60,7 @@ awesome:
                tags = "";
                float = true;
              });
-    
+
     # modkey for mouse actions
     modkey = "Mod4";
 

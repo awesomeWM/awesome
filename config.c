@@ -1,22 +1,22 @@
-/*  
+/*
  * config.c - configuration management
- *  
- * Copyright © 2007 Julien Danjou <julien@danjou.info> 
- * 
- * This program is free software; you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
- * the Free Software Foundation; either version 2 of the License, or 
- * (at your option) any later version. 
- * 
- * This program is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
- * GNU General Public License for more details. 
- * 
- * You should have received a copy of the GNU General Public License along 
- * with this program; if not, write to the Free Software Foundation, Inc., 
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 
- * 
+ *
+ * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
  */
 
 
@@ -207,7 +207,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
     if(config_read_file(&awesomelibconf, confpath) == CONFIG_FALSE)
         fprintf(stderr, "awesome: error parsing configuration file at line %d: %s\n",
                config_error_line(&awesomelibconf), config_error_text(&awesomelibconf));
-    
+
 
     /* font */
     tmp = config_lookup_string(&awesomelibconf, "awesome.font");
@@ -237,7 +237,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
         awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts + 1);
         for(i = 0; (confsublayouts = config_setting_get_elem(conflayouts, i)); i++)
         {
-            awesomeconf->layouts[i].arrange = 
+            awesomeconf->layouts[i].arrange =
                 name_func_lookup(config_setting_get_string_elem(confsublayouts, 1), LayoutsList);
             if(!awesomeconf->layouts[i].arrange)
             {
