@@ -372,7 +372,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     Window trans;
     Status rettrans;
     XWindowChanges wc;
-    ScreenInfo *si = get_display_info(disp, awesomeconf->screen, NULL);
+    ScreenInfo *si = get_display_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
     ScreenInfo *screen_info;
 
     c = p_new(Client, 1);
