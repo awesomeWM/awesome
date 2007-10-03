@@ -106,7 +106,7 @@ loadawesomeprops(Display *disp, awesome_config * awesomeconf)
 
     prop = p_new(char, awesomeconf->ntags + 1);
 
-    if(xgettextprop(disp, RootWindow(disp, awesomeconf->screen), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
+    if(xgettextprop(disp, RootWindow(disp, awesomeconf->phys_screen), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
         for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
             awesomeconf->tags[i].selected = prop[i] == '1';
 
@@ -156,7 +156,7 @@ saveawesomeprops(Display *disp, awesome_config *awesomeconf)
     for(i = 0; i < awesomeconf->ntags; i++)
         prop[i] = awesomeconf->tags[i].selected ? '1' : '0';
     prop[i] = '\0';
-    XChangeProperty(disp, RootWindow(disp, awesomeconf->screen),
+    XChangeProperty(disp, RootWindow(disp, awesomeconf->phys_screen),
                     AWESOMEPROPS_ATOM(disp), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
     p_delete(&prop);

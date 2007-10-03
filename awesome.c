@@ -69,7 +69,7 @@ cleanup(DC *drawcontext, awesome_config *awesomeconf)
     {
         XftFontClose(awesomeconf->display, drawcontext->font);
 
-        XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, screen));
+        XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf[screen].phys_screen));
 
         XFreePixmap(awesomeconf->display, awesomeconf[screen].statusbar.drawable);
         XFreeGC(awesomeconf->display, drawcontext[screen].gc);
@@ -207,8 +207,6 @@ setup(DC *drawcontext, awesome_config *awesomeconf)
     initstatusbar(awesomeconf->display, awesomeconf->screen, drawcontext, &awesomeconf->statusbar);
     drawcontext->gc = XCreateGC(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), 0, 0);
     XSetLineAttributes(awesomeconf->display, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
-
-    loadawesomeprops(awesomeconf->display, awesomeconf);
 }
 
 /** Startup Error handler to check if another window manager
@@ -321,9 +319,6 @@ main(int argc, char *argv[])
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
 
-    netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
-    netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
-
     /* allocate stuff */
     dc = p_new(DC, get_screen_count(dpy));
     awesomeconf = p_new(awesome_config, get_screen_count(dpy));
@@ -332,9 +327,18 @@ main(int argc, char *argv[])
     {
         parse_config(dpy, screen, &dc[screen], confpath, &awesomeconf[screen]);
         setup(&dc[screen], &awesomeconf[screen]);
+        drawstatusbar(dpy, &dc[screen], &awesomeconf[screen]);
+    }
+
+    netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
+    netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
+
+    /* do this only for real screen */
+    for(screen = 0; screen < ScreenCount(dpy); screen++)
+    {
+        loadawesomeprops(dpy, &awesomeconf[screen]);
         XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
                         XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
-        drawstatusbar(dpy, &dc[screen], &awesomeconf[screen]);
     }
 
     handler = p_new(event_handler *, LASTEvent);

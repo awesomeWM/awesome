@@ -324,7 +324,7 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
         setclienttrans(sel, -1);
     }
     else
-        XSetInputFocus(disp, RootWindow(disp, awesomeconf->screen), RevertToPointerRoot, CurrentTime);
+        XSetInputFocus(disp, RootWindow(disp, awesomeconf->phys_screen), RevertToPointerRoot, CurrentTime);
 }
 
 
@@ -372,7 +372,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     Window trans;
     Status rettrans;
     XWindowChanges wc;
-    ScreenInfo *si = get_display_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_display_info(disp, awesomeconf->phys_screen, &awesomeconf->statusbar);
     ScreenInfo *screen_info;
 
     c = p_new(Client, 1);
@@ -643,7 +643,7 @@ set_shape(Client *c)
     /* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10. */
     if (XShapeQueryExtents(c->display, c->win, &bounding_shaped, &i, &i,
                            &u, &u, &b, &i, &i, &u, &u) && bounding_shaped)
-        XShapeCombineShape(c->display, RootWindow(c->display, c->screen), ShapeBounding, 0, 0, c->win, ShapeBounding, ShapeSet);
+        XShapeCombineShape(c->display, RootWindow(c->display, c->phys_screen), ShapeBounding, 0, 0, c->win, ShapeBounding, ShapeSet);
 }
 
 /** Set selected client transparency
@@ -784,7 +784,7 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
     ow = sel->w;
     oh = sel->h;
 
-    Bool xqp = XQueryPointer(sel->display, RootWindow(sel->display, sel->screen), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
+    Bool xqp = XQueryPointer(sel->display, RootWindow(sel->display, sel->phys_screen), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
     resize(sel, nx, ny, nw, nh, awesomeconf, True);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
