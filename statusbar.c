@@ -56,7 +56,7 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
     drawcontext->x = drawcontext->y = 0;
     for(i = 0; i < awesomeconf->ntags; i++)
     {
-        drawcontext->w = textwidth(disp, drawcontext->font, awesomeconf->tags[i].name, a_strlen(awesomeconf->tags[i].name)) + drawcontext->font->height;
+        drawcontext->w = textwidth(disp, drawcontext->font, awesomeconf->tags[i].name, a_strlen(awesomeconf->tags[i].name)) + drawcontext->font->height + 1;
         if(awesomeconf->tags[i].selected)
         {
             drawtext(disp, awesomeconf->phys_screen, drawcontext, awesomeconf->statusbar.drawable, awesomeconf->tags[i].name, drawcontext->sel, drawcontext->text_selected);
