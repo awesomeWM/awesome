@@ -44,7 +44,7 @@ drawtext(Display *disp, int screen, DC *drawcontext, Drawable drawable, const ch
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    h = drawcontext->font->ascent + drawcontext->font->descent;
+    h = drawcontext->font->height;
     y = drawcontext->y + (drawcontext->h / 2) - (h / 2) + drawcontext->font->ascent;
     x = drawcontext->x + (h / 2);
     while(len && (w = textwidth(disp, drawcontext->font, buf, len)) > drawcontext->w - h)
