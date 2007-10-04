@@ -74,7 +74,7 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
     drawcontext->w = awesomeconf->statusbar.width;
     drawtext(disp, awesomeconf->phys_screen, drawcontext, awesomeconf->statusbar.drawable, awesomeconf->current_layout->symbol, drawcontext->norm, drawcontext->text_normal);
     x = drawcontext->x + drawcontext->w;
-    drawcontext->w = textwidth(disp, drawcontext->font, awesomeconf->statustext, a_strlen(awesomeconf->statustext)) + drawcontext->font->height;
+    drawcontext->w = textwidth(disp, drawcontext->font, awesomeconf->statustext, a_strlen(awesomeconf->statustext)) + drawcontext->font->height + 1;
     drawcontext->x = si[awesomeconf->screen].width - drawcontext->w;
     if(drawcontext->x < x)
     {
