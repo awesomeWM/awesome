@@ -180,9 +180,9 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 }
             }
             x += awesomeconf[screen].statusbar.width;
-            if(ev->x < x && ev->button == Button1)
+            if(ev->x < x && (ev->button == Button1 || ev->button == Button4))
                 uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], "+1");
-            else if(ev->x < x && ev->button == Button3)
+            else if(ev->x < x && (ev->button == Button3 || ev->button == Button5))
                 uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], "-1");
             else if(ev->button == Button4)
                 uicb_focusnext(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
