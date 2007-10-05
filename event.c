@@ -184,6 +184,10 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], "+1");
             else if(ev->x < x && ev->button == Button3)
                 uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], "-1");
+            else if(ev->button == Button4)
+                uicb_focusnext(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+            else if(ev->button == Button5)
+                uicb_focusprev(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
             return;
         }
 
