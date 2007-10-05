@@ -172,6 +172,10 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                         else
                             uicb_toggleview(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                     }
+                    else if(ev->button == Button4)
+                        uicb_tag_viewnext(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                    else if(ev->button == Button5)
+                        uicb_tag_viewprev(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
                     return;
                 }
             }
