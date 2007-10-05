@@ -240,17 +240,18 @@ uicb_movetoscreen(Display *disp,
 {
     int new_screen, prev_screen;
 
-    if(!XineramaIsActive(disp) || !sel)
+    if(!sel || !XineramaIsActive(disp))
         return;
 
     if(arg)
-    {
-        new_screen = strtol(arg, NULL, 10);
-        if(new_screen >= get_screen_count(disp) || new_screen < 0)
-            return;
-    }
+        new_screen = compute_value_from_arg(arg, sel->screen);
     else
-        new_screen = sel->screen + 1 >= get_screen_count(disp) ? 0 : sel->screen + 1;
+        new_screen = sel->screen + 1;
+
+    if(new_screen >= get_screen_count(disp))
+        new_screen = 0;
+    else if(new_screen < 0)
+        new_screen = get_screen_count(disp) - 1;
 
     prev_screen = sel->screen;
     move_client_to_screen(sel, &awesomeconf[new_screen - awesomeconf->screen], True);
