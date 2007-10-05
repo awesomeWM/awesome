@@ -251,7 +251,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
         awesomeconf->layouts[i].arrange = NULL;
     }
 
-    if(!awesomeconf->nlayouts)
+    awesomeconf->current_layout = awesomeconf->layouts;
+
+    if(!awesomeconf->nlayouts || !awesomeconf->current_layout->arrange)
         eprint("awesome: fatal: no default layout available\n");
 
     for(i = 0; i < awesomeconf->nlayouts; i++)
@@ -262,8 +264,6 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
         if(j > awesomeconf->statusbar.width)
             awesomeconf->statusbar.width = j;
     }
-
-    awesomeconf->current_layout = awesomeconf->layouts;
 
     /* tags */
     conftags = config_lookup(&awesomelibconf, "awesome.tags");
