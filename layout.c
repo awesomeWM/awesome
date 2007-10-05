@@ -175,8 +175,10 @@ uicb_setlayout(Display *disp,
     {
         for(i = 0; i < awesomeconf->nlayouts && &awesomeconf->layouts[i] != awesomeconf->current_layout; i++);
         i = compute_new_value_from_arg(arg, (double) i);
-        if(i < 0 || i >= awesomeconf->nlayouts)
+        if(i >= awesomeconf->nlayouts)
             i = 0;
+        else if(i < 0)
+            i = awesomeconf->nlayouts - 1;
     }
     else
         i = 0;
