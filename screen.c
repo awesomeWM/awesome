@@ -244,7 +244,7 @@ uicb_movetoscreen(Display *disp,
         return;
 
     if(arg)
-        new_screen = compute_value_from_arg(arg, sel->screen);
+        new_screen = compute_new_value_from_arg(arg, sel->screen);
     else
         new_screen = sel->screen + 1;
 
