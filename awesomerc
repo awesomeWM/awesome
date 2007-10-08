@@ -1,140 +1,555 @@
 # Configuration file for awesome
 
-awesome:
+general
 {
-    # Default bar position: top, bottom, off
-    barpos = "top";
-    # Window border size
-    borderpx = 1;
-    # Window snap pixels
-    snap = 8;
-    # Master window width factor (used by tile layouts)
-    mwfact = 0.6;
-    # Font
-    font = "fixed-12";
-    # Tags
-    tags = ( "1", "2", "3", "4", "5", "6", "7", "8", "9" );
-    # Colors
-    normal_border_color = "#111111";
-    normal_bg_color = "#111111";
-    normal_fg_color = "#eeeeee";
-    focus_border_color = "#6666ff";
-    focus_bg_color = "#6666ff";
-    focus_fg_color = "#ffffff";
-    opacity_unfocused = 100;
+    border = 1
+    snap = 8
+    resize_hints = true
+    opacity_unfocused = 100
+    focus_move_pointer = false
+    font = "fixed-12"
+}
 
-    # Available layouts
-    layouts = (
-               ("[]=", "tile"),
-               ("=[]", "tileleft"),
-               ("[ ]", "max"),
-               ("><>", "floating")
-              );
+colors
+{
+    normal_border = "#111111"
+    normal_bg = "#111111"
+    normal_fg = "#eeeeee"
+    focus_border = "#6666ff"
+    focus_bg = "#6666ff"
+    focus_fg = "#ffffff"
+}
 
-    # Number of master windows (used by tile layouts)
-    nmaster = 2;
-    ncols = 1;
+statusbar
+{
+    position = "top"
+}
 
-    # Resize hints
-    resize_hints = true;
+tags
+{
+    tag 1
+    {
+        layout = "tile"
+    }
+    tag 2
+    {
+        layout = "tile"
+    }
+    tag 3
+    {
+        layout = "tile"
+    }
+    tag 4
+    {
+        layout = "tile"
+    }
+    tag 5
+    {
+        layout = "tile"
+    }
+    tag 6
+    {
+        layout = "tile"
+    }
+    tag 7
+    {
+        layout = "tile"
+    }
+    tag 8
+    {
+        layout = "tile"
+    }
+    tag 9
+    {
+        layout = "floating"
+    }
+}
 
-    # Move pointer to the center of the focused window
-    focus_move_pointer = false;
+layouts
+{
+    mwfact = 0.5
+    nmaster = 1
+    ncol = 1
+    layout tile
+    {
+        symbol = "[]="
+    }
+    layout tileleft
+    {
+        symbol = "=[]"
+    }
+    
+}
 
-    # Set of rules to put some windows floating
-    # or to tag them on launch
-    rules = ({ name = "Gimp";
-               tags = "";
-               float = true;
-             },
-             { name = "MPlayer";
-               tags = "";
-               float = true;
-             },
-             { name = "Acroread";
-               tags = "";
-               float = true;
-             },
-             { name = "VLC";
-               tags = "";
-               float = true;
-             },
-             { name = "pinentry";
-               tags = "";
-               float = true;
-             });
+rules
+{
+    rule
+    {
+        name = "Gimp"
+        tags = ""
+        float = true
+    }
+    rule
+    {
+        name = "MPlayer"
+        float = true
+    }
+    rule
+    {
+        name = "Acroread"
+        float = true
+    }
+    rule
+    {
+        name = "pinentry"
+        float = true
+    }
+}
 
-    # modkey for mouse actions
-    modkey = "Mod4";
-
-    # Keys binding
-    keys = ((("Mod4"), "Return", "spawn", "exec xterm"),
-            (("Mod4"), "space", "setlayout", "+1"),
-            (("Mod4", "Shift"), "space", "setlayout", "-1"),
-            (("Mod4"), "b", "togglebar"),
-            (("Mod4"), "j", "focusnext"),
-            (("Mod4"), "k", "focusprev"),
-            (("Mod4", "Shift"), "j", "swapnext"),
-            (("Mod4", "Shift"), "k", "swapprev"),
-            (("Mod4", "Control"), "j", "focusnextscreen"),
-            (("Mod4", "Control"), "k", "focusprevscreen"),
-            (("Mod4"), "h", "setmwfact", "-0.05"),
-            (("Mod4"), "l", "setmwfact", "+0.05"),
-            (("Mod4"), "p", "setborder", "+1"),
-            (("Mod4", "Shift"), "p", "setborder", "-1"),
-            (("Mod4", "Shift"), "h", "setnmaster", "+1"),
-            (("Mod4", "Shift"), "l", "setnmaster", "-1"),
-            (("Mod4", "Control"), "h", "setncols", "+1"),
-            (("Mod4", "Control"), "l", "setncols", "-1"),
-            (("Mod4"), "Escape", "view_tag_prev_selected"),
-            (("Mod4", "Control"), "Left", "view_tag_previous"),
-            (("Mod4", "Control"), "Right", "view_tag_next"),
-            (("Mod4"), "m", "togglemax"),
-            (("Mod4"), "t", "settrans", "-5"),
-            (("Mod4", "Shift"), "t", "settrans", "+5"),
-            (("Mod4", "Control"), "Return", "zoom"),
-            (("Mod4", "Control"), "space", "togglefloating"),
-            (("Mod4", "Shift"), "c", "killclient"),
-            (("Mod4", "Shift"), "q", "quit"),
-            (("Mod4"), "0", "view"),
-            (("Mod4"), "1", "view", "1"),
-            (("Mod4"), "2", "view", "2"),
-            (("Mod4"), "3", "view", "3"),
-            (("Mod4"), "4", "view", "4"),
-            (("Mod4"), "5", "view", "5"),
-            (("Mod4"), "6", "view", "6"),
-            (("Mod4"), "7", "view", "7"),
-            (("Mod4"), "8", "view", "8"),
-            (("Mod4"), "9", "view", "9"),
-            (("Mod4", "Control"), "0", "toggleview"),
-            (("Mod4", "Control"), "1", "toggleview", "1"),
-            (("Mod4", "Control"), "2", "toggleview", "2"),
-            (("Mod4", "Control"), "3", "toggleview", "3"),
-            (("Mod4", "Control"), "4", "toggleview", "4"),
-            (("Mod4", "Control"), "5", "toggleview", "5"),
-            (("Mod4", "Control"), "6", "toggleview", "6"),
-            (("Mod4", "Control"), "7", "toggleview", "7"),
-            (("Mod4", "Control"), "8", "toggleview", "8"),
-            (("Mod4", "Control"), "9", "toggleview", "9"),
-            (("Mod4", "Shift"), "0", "tag"),
-            (("Mod4", "Shift"), "1", "tag", "1"),
-            (("Mod4", "Shift"), "2", "tag", "2"),
-            (("Mod4", "Shift"), "3", "tag", "3"),
-            (("Mod4", "Shift"), "4", "tag", "4"),
-            (("Mod4", "Shift"), "5", "tag", "5"),
-            (("Mod4", "Shift"), "6", "tag", "6"),
-            (("Mod4", "Shift"), "7", "tag", "7"),
-            (("Mod4", "Shift"), "8", "tag", "8"),
-            (("Mod4", "Shift"), "9", "tag", "9"),
-            (("Mod4", "Shift", "Control"), "0", "toggletag"),
-            (("Mod4", "Shift", "Control"), "1", "toggletag", "1"),
-            (("Mod4", "Shift", "Control"), "2", "toggletag", "2"),
-            (("Mod4", "Shift", "Control"), "3", "toggletag", "3"),
-            (("Mod4", "Shift", "Control"), "4", "toggletag", "4"),
-            (("Mod4", "Shift", "Control"), "5", "toggletag", "5"),
-            (("Mod4", "Shift", "Control"), "6", "toggletag", "6"),
-            (("Mod4", "Shift", "Control"), "7", "toggletag", "7"),
-            (("Mod4", "Shift", "Control"), "8", "toggletag", "8"),
-            (("Mod4", "Shift", "Control"), "9", "toggletag", "9")
-           );
-};
+keys
+{
+    modkey = "Mod4"
+    key
+    {
+        modkey = {"Mod4"}
+        key = "Return"
+        command = "spawn"
+        arg = "exec xterm"
+    }
+    key
+    {
+        modkey = {"Mod4"}
+        key = "space"
+        command = "setlayout"
+        arg = "+1"
+    }
+    key
+    {
+        modkey = {"Mod4", "Shift"}
+        key = "space"
+        command = "setlayout"
+        arg = "-1"
+    }
+    key
+    {
+        modkey = {"Mod4"}
+        key = "b"
+        command = "togglebar"
+    }
+    key
+    {
+        modkey = {"Mod4"}
+        key = "j"
+        command = "focusnext"
+    }
+    key
+    {
+        modkey = {"Mod4"}
+        key = "k"
+        command = "focusprev"
+    }
+    key
+    {
+        modkey = {"Mod4", "Shift"}
+        key = "j"
+        command = "swapprev"
+    }
+    key
+    {
+        modkey = {"Mod4", "Shift"}
+        key = "k"
+        command = "swapnext"
+    }
+    key
+    {
+        modkey = {"Mod4", "Control"}
+        key = "j"
+        command = "focusnextscreen"
+    }
+    key
+    {
+        modkey = {"Mod4", "Control"}
+        key = "k"
+        command = "focusprevscreen"
+    }
+    key
+    {
+        modkey = {"Mod4"}
+        key = "h"
+        command = "setmwfact"
+        arg = "-0.05"
+    }
+    key
+    {
+        modkey = {"Mod4"}
+        key = "l"
+        command = "setmwfact"
+        arg = "+0.05"
+    }
+    key
+    {
+        modkey = {"Mod4", "Shift"}
+        key = "h"
+        command = "setnmaster"
+        arg = "+1"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "l"
+        command = "setnmaster"
+        arg = "-1"
+     }
+     key
+     {
+         modkey = {"Mod4", "Control"}
+         key = "h"
+         command = "setncol"
+         arg = "+1"
+     }
+     key
+     {
+         modkey = {"Mod4", "Control"}
+         key = "l"
+         command = "setncol"
+         arg = "-1"
+     }
+     key
+     {
+         modkey = {"Mod4"}
+         key = "escape"
+         command = "view_tag_prev_selected"
+     }
+     key
+     {
+         modkey = {"Mod4"}
+         key = "Left"
+         command = "view_tag_previous"
+     }
+     key
+     {
+         modkey = {"Mod4"}
+         key = "Right"
+         command = "view_tag_next"
+     }
+     key
+     {
+         modkey = {"Mod4"}
+         key = "m"
+         command = "togglemax"
+     }
+     key
+     {
+         modkey = {"Mod4", "Control"}
+         key = "Return"
+         command = "zoom"
+     }
+     key
+     {
+         modkey = {"Mod4", "Control"}
+         key = "Space"
+         command = "togglefloating"
+     }
+     key
+     {
+         modkey = {"Mod4", "Shift"}
+         key = "c"
+         command = "killclient"
+     }
+     key
+     {
+         modkey = {"Mod4", "Shift"}
+         key = "q"
+         command = "quit"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "0"
+        command = "view"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "1"
+        command = "view"
+        arg = "1"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "2"
+        command = "view"
+        arg = "2"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "3"
+        command = "view"
+        arg = "3"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "4"
+        command = "view"
+        arg = "5"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "5"
+        command = "view"
+        arg = "5"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "6"
+        command = "view"
+        arg = "6"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "7"
+        command = "view"
+        arg = "7"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "8"
+        command = "view"
+        arg = "8"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "9"
+        command = "view"
+        arg = "9"
+     }
+     key
+     {
+        modkey = {"Mod4"}
+        key = "9"
+        command = "view"
+        arg = "9"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "0"
+        command = "toggleview"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "1"
+        command = "toggleview"
+        arg = "1"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "2"
+        command = "toggleview"
+        arg = "2"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "3"
+        command = "toggleview"
+        arg = "3"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "4"
+        command = "toggleview"
+        arg = "4"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "5"
+        command = "toggleview"
+        arg = "5"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "6"
+        command = "toggleview"
+        arg = "6"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "7"
+        command = "toggleview"
+        arg = "7"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "8"
+        command = "toggleview"
+        arg = "8"
+     }
+     key
+     {
+        modkey = {"Mod4", "Control"}
+        key = "9"
+        command = "toggleview"
+        arg = "9"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "0"
+        command = "tag"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "1"
+        command = "tag"
+        arg = "1"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "2"
+        command = "tag"
+        arg = "2"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "3"
+        command = "tag"
+        arg = "3"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "4"
+        command = "tag"
+        arg = "4"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "5"
+        command = "tag"
+        arg = "5"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "6"
+        command = "tag"
+        arg = "6"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "7"
+        command = "tag"
+        arg = "7"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "8"
+        command = "tag"
+        arg = "8"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift"}
+        key = "9"
+        command = "tag"
+        arg = "9"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "0"
+        command = "toggletag"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "1"
+        command = "toggletag"
+        arg = "1"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "2"
+        command = "toggletag"
+        arg = "2"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "3"
+        command = "toggletag"
+        arg = "3"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "3"
+        command = "toggletag"
+        arg = "3"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "4"
+        command = "toggletag"
+        arg = "4"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "5"
+        command = "toggletag"
+        arg = "5"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "6"
+        command = "toggletag"
+        arg = "6"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "7"
+        command = "toggletag"
+        arg = "7"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "8"
+        command = "toggletag"
+        arg = "8"
+     }
+     key
+     {
+        modkey = {"Mod4", "Shift", "Control"}
+        key = "9"
+        command = "toggletag"
+        arg = "9"
+     }
+}

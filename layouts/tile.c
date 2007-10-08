@@ -48,16 +48,16 @@ uicb_setnmaster(Display *disp,
 }
 
 void
-uicb_setncols(Display *disp,
-              DC * drawcontext,
-              awesome_config *awesomeconf,
-              const char * arg)
+uicb_setncol(Display *disp,
+             DC * drawcontext,
+             awesome_config *awesomeconf,
+             const char * arg)
 {
     if(!arg || (!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)))
         return;
 
-    if((awesomeconf->ncols = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncols)) < 1)
-        awesomeconf->ncols = 1;
+    if((awesomeconf->ncol = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncol)) < 1)
+        awesomeconf->ncol = 1;
 
     arrange(disp, drawcontext, awesomeconf);
 }
@@ -101,7 +101,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     /* master size */
     unsigned int mw = 0, mh = 0;
     int n, i, masterwin = 0, otherwin = 0;
-    int real_ncols = 1, win_by_col = 1, current_col = 0;
+    int real_ncol = 1, win_by_col = 1, current_col = 0;
     ScreenInfo *screens_info = NULL;
     Client *c;
 
@@ -131,7 +131,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     else
         mh = mw = 0;
 
-    real_ncols = MIN(otherwin, awesomeconf->ncols);
+    real_ncol = MIN(otherwin, awesomeconf->ncol);
 
     for(i = 0, c = clients; c; c = c->next)
     {
@@ -147,23 +147,23 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
         }
         else
         {                       /* tile window */
-            if(real_ncols)
-                win_by_col = otherwin / real_ncols;
+            if(real_ncol)
+                win_by_col = otherwin / real_ncol;
 
-            if((i - awesomeconf->nmaster) && (i - awesomeconf->nmaster) % win_by_col == 0 && current_col < real_ncols - 1)
+            if((i - awesomeconf->nmaster) && (i - awesomeconf->nmaster) % win_by_col == 0 && current_col < real_ncol - 1)
                 current_col++;
 
-            if(current_col == real_ncols - 1)
-                win_by_col += otherwin % real_ncols;
+            if(current_col == real_ncol - 1)
+                win_by_col += otherwin % real_ncol;
 
-            if(otherwin <= real_ncols)
+            if(otherwin <= real_ncol)
                 nh = wah - 2 * c->border;
             else
                 nh = (wah / win_by_col) - 2 * c->border;
 
-            nw = (waw - mw) / real_ncols - 2 * c->border;
+            nw = (waw - mw) / real_ncol - 2 * c->border;
 
-            if(i == awesomeconf->nmaster || otherwin <= real_ncols || (i - awesomeconf->nmaster) % win_by_col == 0)
+            if(i == awesomeconf->nmaster || otherwin <= real_ncol || (i - awesomeconf->nmaster) % win_by_col == 0)
                 ny = way;
             else
                 ny = way + ((i - awesomeconf->nmaster) % win_by_col) * (nh + 2 * c->border);

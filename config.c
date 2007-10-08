@@ -24,7 +24,7 @@
  * \defgroup ui_callback
  */
 
-#include <libconfig.h>
+#include <confuse.h>
 #include <X11/keysym.h>
 
 #include "awesome.h"
@@ -111,7 +111,7 @@ static const NameFuncLink KeyfuncList[] = {
     /* layouts/tile.c */
     {"setmwfact", uicb_setmwfact},
     {"setnmaster", uicb_setnmaster},
-    {"setncols", uicb_setncols},
+    {"setncol", uicb_setncol},
     /* screen.c */
     {"focusnextscreen", uicb_focusnextscreen},
     {"focusprevscreen", uicb_focusprevscreen},
@@ -167,14 +167,95 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
 void
 parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg, awesome_config *awesomeconf)
 {
-    /* Main configuration object for parsing*/
-    config_t awesomelibconf;
-    config_setting_t *conftags;
-    config_setting_t *conflayouts, *confsublayouts;
-    config_setting_t *confrules, *confsubrules;
-    config_setting_t *confkeys, *confsubkeys, *confkeysmasks, *confkeymaskelem;
-    int i = 0, j = 0;
-    double f = 0.0;
+    static cfg_opt_t general_opts[] =
+    {
+        CFG_INT((char *) "border", 1, CFGF_NONE),
+        CFG_INT((char *) "snap", 8, CFGF_NONE),
+        CFG_BOOL((char *) "resize_hints", cfg_false, CFGF_NONE),
+        CFG_INT((char *) "opacity_unfocused", 100, CFGF_NONE),
+        CFG_BOOL((char *) "focus_move_pointer", cfg_false, CFGF_NONE),
+        CFG_STR((char *) "font", (char *) "mono-12", CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t colors_opts[] =
+    {
+        CFG_STR((char *) "normal_border", (char *) "#111111", CFGF_NONE),
+        CFG_STR((char *) "normal_bg", (char *) "#111111", CFGF_NONE),
+        CFG_STR((char *) "normal_fg", (char *) "#eeeeee", CFGF_NONE),
+        CFG_STR((char *) "focus_border", (char *) "#6666ff", CFGF_NONE),
+        CFG_STR((char *) "focus_bg", (char *) "#6666ff", CFGF_NONE),
+        CFG_STR((char *) "focus_fg", (char *) "#ffffff", CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t statusbar_opts[] =
+    {
+        CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t tag_opts[] =
+    {
+        CFG_STR((char *) "layout", (char *) "tile", CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t tags_opts[] =
+    {
+        CFG_SEC((char *) "tag", tag_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_END()
+    };
+    static cfg_opt_t layout_opts[] =
+    {
+        CFG_STR((char *) "symbol", (char *) "???", CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t layouts_opts[] =
+    {
+        CFG_SEC((char *) "layout", layout_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_FLOAT((char *) "mwfact", 0.5, CFGF_NONE),
+        CFG_INT((char *) "nmaster", 1, CFGF_NONE),
+        CFG_INT((char *) "ncol", 1, CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t rule_opts[] =
+    {
+        CFG_STR((char *) "name", (char *) "", CFGF_NONE),
+        CFG_STR((char *) "tags", (char *) "", CFGF_NONE),
+        CFG_BOOL((char *) "float", cfg_false, CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t rules_opts[] =
+    {
+        CFG_SEC((char *) "rule", rule_opts, CFGF_MULTI),
+        CFG_END()
+    };
+    static cfg_opt_t key_opts[] =
+    {
+        CFG_STR_LIST((char *) "modkey", (char *) "{Mod4}", CFGF_NONE),
+        CFG_STR((char *) "key", (char *) "None", CFGF_NONE),
+        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+        CFG_STR((char *) "arg", NULL, CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t keys_opts[] =
+    {
+        CFG_STR((char *) "modkey", (char *) "Mod4", CFGF_NONE),
+        CFG_SEC((char *) "key", key_opts, CFGF_MULTI),
+        CFG_END()
+    };
+    static cfg_opt_t opts[] =
+    {
+        CFG_SEC((char *) "general", general_opts, CFGF_NONE),
+        CFG_SEC((char *) "colors", colors_opts, CFGF_NONE),
+        CFG_SEC((char *) "statusbar", statusbar_opts, CFGF_NONE),
+        CFG_SEC((char *) "tags", tags_opts, CFGF_NONE),
+        CFG_SEC((char *) "layouts", layouts_opts, CFGF_NONE),
+        CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
+        CFG_SEC((char *) "keys", keys_opts, CFGF_NONE),
+        CFG_END()
+    };
+    cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_statusbar,
+          *cfg_tags, *cfg_layouts, *cfg_rules, *cfg_keys, *cfgsectmp;
+    int i = 0;
+    unsigned int j = 0;
     const char *tmp, *homedir;
     char *confpath;
     KeySym tmp_key;
@@ -193,8 +274,6 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
         a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
     }
 
-    config_init(&awesomelibconf);
-
     a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION);
 
     /* store display */
@@ -204,167 +283,49 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
     awesomeconf->screen = scr;
     awesomeconf->phys_screen = get_phys_screen(disp, scr);
 
-    if(config_read_file(&awesomelibconf, confpath) == CONFIG_FALSE)
-        fprintf(stderr, "awesome: error parsing configuration file at line %d: %s\n",
-               config_error_line(&awesomelibconf), config_error_text(&awesomelibconf));
+    cfg = cfg_init(opts, CFGF_NONE);
 
+    if(cfg_parse(cfg, confpath) == CFG_PARSE_ERROR)
+        fprintf(stderr, "awesome: error parsing configuration file\n");
 
-    /* font */
-    tmp = config_lookup_string(&awesomelibconf, "awesome.font");
-    drawcontext->font = XftFontOpenName(disp, awesomeconf->phys_screen, tmp ? tmp : "sans-12");
+    cfg_general = cfg_getsec(cfg, "general");
+    cfg_colors = cfg_getsec(cfg, "colors");
+    cfg_statusbar = cfg_getsec(cfg, "statusbar");
+    cfg_tags = cfg_getsec(cfg, "tags");
+    cfg_layouts = cfg_getsec(cfg, "layouts");
+    cfg_rules = cfg_getsec(cfg, "rules");
+    cfg_keys = cfg_getsec(cfg, "keys");
 
+    /* General section */
+
+    awesomeconf->borderpx = cfg_getint(cfg_general, "border");
+    awesomeconf->snap = cfg_getint(cfg_general, "snap");
+    awesomeconf->resize_hints = cfg_getbool(cfg_general, "resize_hints");
+    awesomeconf->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
+    awesomeconf->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
+    drawcontext->font = XftFontOpenName(disp, awesomeconf->phys_screen, cfg_getstr(cfg_general, "font"));
     if(!drawcontext->font)
         eprint("awesome: cannot init font\n");
 
-    /* layouts */
-    conflayouts = config_lookup(&awesomelibconf, "awesome.layouts");
+    /* Colors */
+    drawcontext->norm[ColBorder] = initxcolor(disp, awesomeconf->phys_screen,
+                                              cfg_getstr(cfg_colors, "normal_border")).pixel;
+    drawcontext->norm[ColBG] = initxcolor(disp, awesomeconf->phys_screen,
+                                          cfg_getstr(cfg_colors, "normal_bg")).pixel;
+    drawcontext->sel[ColBorder] = initxcolor(disp, awesomeconf->phys_screen,
+                                             cfg_getstr(cfg_colors, "focus_border")).pixel;
+    drawcontext->sel[ColBG] = initxcolor(disp, awesomeconf->phys_screen,
+                                         cfg_getstr(cfg_colors, "focus_bg")).pixel;
 
-    if(!conflayouts)
-    {
-        fprintf(stderr, "awesome: layouts not found in configuration file, setting default\n");
-        awesomeconf->nlayouts = 2;
-        awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts + 1);
-        awesomeconf->layouts[0].symbol = a_strdup("[]=");
-        awesomeconf->layouts[0].arrange = layout_tile;
-        awesomeconf->layouts[1].symbol = a_strdup("<><");
-        awesomeconf->layouts[1].arrange = layout_floating;
-        awesomeconf->layouts[2].symbol = NULL;
-        awesomeconf->layouts[2].arrange = NULL;
-    }
-    else
-    {
-        awesomeconf->nlayouts = config_setting_length(conflayouts);
-        awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts + 1);
-        for(i = 0; (confsublayouts = config_setting_get_elem(conflayouts, i)); i++)
-        {
-            awesomeconf->layouts[i].arrange =
-                name_func_lookup(config_setting_get_string_elem(confsublayouts, 1), LayoutsList);
-            if(!awesomeconf->layouts[i].arrange)
-            {
-                fprintf(stderr, "awesome: unknown layout #%d in configuration file\n", i);
-                awesomeconf->layouts[i].symbol = NULL;
-                continue;
-            }
-            awesomeconf->layouts[i].symbol = a_strdup(config_setting_get_string_elem(confsublayouts, 0));
-        }
-        awesomeconf->layouts[i].symbol = NULL;
-        awesomeconf->layouts[i].arrange = NULL;
-    }
+    colorbuf = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_fg"));
+    drawcontext->norm[ColFG] = colorbuf.pixel;
+    drawcontext->text_normal = colorbuf;
+    colorbuf = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_fg"));
+    drawcontext->sel[ColFG] = colorbuf.pixel;
+    drawcontext->text_selected = colorbuf;
 
-    awesomeconf->current_layout = awesomeconf->layouts;
-
-    if(!awesomeconf->nlayouts || !awesomeconf->current_layout->arrange)
-        eprint("awesome: fatal: no default layout available\n");
-
-    for(i = 0; i < awesomeconf->nlayouts; i++)
-    {
-        j = drawcontext->font->height +
-            textwidth(disp, drawcontext->font,
-                      awesomeconf->layouts[i].symbol, a_strlen(awesomeconf->layouts[i].symbol));
-        if(j > awesomeconf->statusbar.width)
-            awesomeconf->statusbar.width = j;
-    }
-
-    /* tags */
-    conftags = config_lookup(&awesomelibconf, "awesome.tags");
-
-    if(!conftags)
-    {
-        fprintf(stderr, "awesome: tags not found in configuration file, setting default\n");
-        awesomeconf->ntags = 3;
-        awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
-        awesomeconf->tags[0].name = a_strdup("this");
-        awesomeconf->tags[1].name = a_strdup("is");
-        awesomeconf->tags[2].name = a_strdup("awesome");
-        awesomeconf->tags[0].selected = True;
-        awesomeconf->tags[1].selected = False;
-        awesomeconf->tags[2].selected = False;
-        awesomeconf->tags[0].was_selected = False;
-        awesomeconf->tags[1].was_selected = False;
-        awesomeconf->tags[2].was_selected = False;
-        awesomeconf->tags[0].layout = awesomeconf->layouts;
-        awesomeconf->tags[1].layout = awesomeconf->layouts;
-        awesomeconf->tags[2].layout = awesomeconf->layouts;
-    }
-    else
-    {
-        awesomeconf->ntags = config_setting_length(conftags);
-        awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
-
-        for(i = 0; (tmp = config_setting_get_string_elem(conftags, i)); i++)
-        {
-            awesomeconf->tags[i].name = a_strdup(tmp);
-            awesomeconf->tags[i].selected = False;
-            awesomeconf->tags[i].was_selected = False;
-            /** \todo add support for default tag/layout in configuration file */
-            awesomeconf->tags[i].layout = awesomeconf->layouts;
-        }
-    }
-
-    if(!awesomeconf->ntags)
-        eprint("awesome: fatal: no tags found in configuration file\n");
-
-    /* select first tag by default */
-    awesomeconf->tags[0].selected = True;
-    awesomeconf->tags[0].was_selected = True;
-
-    /* rules */
-    confrules = config_lookup(&awesomelibconf, "awesome.rules");
-
-    if(!confrules)
-    {
-        awesomeconf->nrules = 0;
-        fprintf(stderr, "awesome: no rules found in configuration file\n");
-    }
-    else
-    {
-        awesomeconf->nrules = config_setting_length(confrules);
-        awesomeconf->rules = p_new(Rule, awesomeconf->nrules);
-        for(i = 0; (confsubrules = config_setting_get_elem(confrules, i)); i++)
-        {
-            awesomeconf->rules[i].prop = a_strdup(config_setting_get_string(config_setting_get_member(confsubrules, "name")));
-            awesomeconf->rules[i].tags = a_strdup(config_setting_get_string(config_setting_get_member(confsubrules, "tags")));
-            if(awesomeconf->rules[i].tags && !a_strlen(awesomeconf->rules[i].tags))
-                awesomeconf->rules[i].tags = NULL;
-            awesomeconf->rules[i].isfloating =
-                config_setting_get_bool(config_setting_get_member(confsubrules, "float"));
-        }
-    }
-
-    /* modkey */
-    tmp_key = key_mask_lookup(config_lookup_string(&awesomelibconf, "awesome.modkey"));
-    awesomeconf->modkey = tmp_key ? tmp_key : Mod1Mask;
-
-    /* find numlock mask */
-    awesomeconf->numlockmask = get_numlockmask(disp);
-
-    /* keys */
-    confkeys = config_lookup(&awesomelibconf, "awesome.keys");
-
-    if(!confkeys)
-    {
-        awesomeconf->nkeys = 0;
-        fprintf(stderr, "awesome: no keys found in configuration file\n");
-    }
-    else
-    {
-        awesomeconf->nkeys = config_setting_length(confkeys);
-        awesomeconf->keys = p_new(Key, awesomeconf->nkeys);
-
-        for(i = 0; (confsubkeys = config_setting_get_elem(confkeys, i)); i++)
-        {
-            confkeysmasks = config_setting_get_elem(confsubkeys, 0);
-            for(j = 0; (confkeymaskelem = config_setting_get_elem(confkeysmasks, j)); j++)
-                awesomeconf->keys[i].mod |= key_mask_lookup(config_setting_get_string(confkeymaskelem));
-            awesomeconf->keys[i].keysym = XStringToKeysym(config_setting_get_string_elem(confsubkeys, 1));
-            awesomeconf->keys[i].func =
-                name_func_lookup(config_setting_get_string_elem(confsubkeys, 2), KeyfuncList);
-            awesomeconf->keys[i].arg = a_strdup(config_setting_get_string_elem(confsubkeys, 3));
-        }
-    }
-
-    /* barpos */
-    tmp = config_lookup_string(&awesomelibconf, "awesome.barpos");
+    /* Statusbar */
+    tmp = cfg_getstr(cfg_statusbar, "position");
 
     if(tmp && !a_strncmp(tmp, "off", 6))
         awesomeconf->statusbar_default_position = BarOff;
@@ -375,64 +336,85 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
 
     awesomeconf->statusbar.position = awesomeconf->statusbar_default_position;
 
-    /* borderpx */
-    awesomeconf->borderpx = config_lookup_int(&awesomelibconf, "awesome.borderpx");
+    /* Layouts */
 
-    /* opacity */
-    awesomeconf->opacity_unfocused = config_lookup_int(&awesomelibconf, "awesome.opacity_unfocused");
-    if(awesomeconf->opacity_unfocused >= 100 || awesomeconf->opacity_unfocused == 0)
-        awesomeconf->opacity_unfocused = -1;
+    awesomeconf->nlayouts = cfg_size(cfg_layouts, "layout");
+    awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts);
+    for(i = 0; i < awesomeconf->nlayouts; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
+        awesomeconf->layouts[i].arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
+        if(!awesomeconf->layouts[i].arrange)
+        {
+            fprintf(stderr, "awesome: unknown layout #%d in configuration file\n", i);
+            awesomeconf->layouts[i].symbol = NULL;
+            continue;
+        }
+        awesomeconf->layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
+    }
 
-    /* snap */
-    i = config_lookup_int(&awesomelibconf, "awesome.snap");
-    awesomeconf->snap = i ? i : 8;
+    awesomeconf->mwfact = cfg_getfloat(cfg_layouts, "mwfact");
+    awesomeconf->nmaster = cfg_getint(cfg_layouts, "nmaster");
+    awesomeconf->ncol = cfg_getint(cfg_layouts, "ncol");
 
-    /* nmaster */
-    i = config_lookup_int(&awesomelibconf, "awesome.nmaster");
-    awesomeconf->nmaster = i ? i : 1;
+    awesomeconf->current_layout = awesomeconf->layouts;
 
-    /* ncols */
-    i = config_lookup_int(&awesomelibconf, "awesome.ncols");
-    awesomeconf->ncols = i ? i : 1;
+    if(!awesomeconf->nlayouts || !awesomeconf->current_layout->arrange)
+        eprint("awesome: fatal: no default layout available\n");
 
-    /* mwfact */
-    f = config_lookup_float(&awesomelibconf, "awesome.mwfact");
-    awesomeconf->mwfact = f ? f : 0.6;
+    /* Rules */
 
-    /* resize_hints */
-    awesomeconf->resize_hints = config_lookup_bool(&awesomelibconf, "awesome.resize_hints");
+    awesomeconf->nrules = cfg_size(cfg_rules, "rule");
+    awesomeconf->rules = p_new(Rule, awesomeconf->nrules);
+    for(i = 0; i < awesomeconf->nrules; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
+        awesomeconf->rules[i].prop = a_strdup(cfg_getstr(cfgsectmp, "name"));
+        awesomeconf->rules[i].tags = a_strdup(cfg_getstr(cfgsectmp, "tags"));
+        if(!a_strlen(awesomeconf->rules[i].tags))
+            awesomeconf->rules[i].tags = NULL;
+        awesomeconf->rules[i].isfloating = cfg_getbool(cfgsectmp, "float");
+    }
 
-    /* focus_move_pointer */
-    awesomeconf->focus_move_pointer = config_lookup_bool(&awesomelibconf, "awesome.focus_move_pointer");
+    /* Tags */
 
-    /* colors */
-    tmp = config_lookup_string(&awesomelibconf, "awesome.normal_border_color");
-    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#dddddd");
-    drawcontext->norm[ColBorder] = colorbuf.pixel;
+    awesomeconf->ntags = cfg_size(cfg_tags, "tag");
+    awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
+    for(i = 0; i < awesomeconf->ntags; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
+        awesomeconf->tags[i].name = a_strdup(cfg_title(cfgsectmp));
+        awesomeconf->tags[i].selected = False;
+        awesomeconf->tags[i].was_selected = False;
+        awesomeconf->tags[i].layout = awesomeconf->layouts;
+    }
 
-    tmp = config_lookup_string(&awesomelibconf, "awesome.normal_bg_color");
-    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#000000");
-    drawcontext->norm[ColBG] = colorbuf.pixel;
+    if(!awesomeconf->ntags)
+        eprint("awesome: fatal: no tags found in configuration file\n");
 
-    tmp = config_lookup_string(&awesomelibconf, "awesome.normal_fg_color");
-    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#ffffff");
-    drawcontext->norm[ColFG] = colorbuf.pixel;
-    drawcontext->text_normal = colorbuf;
+    /* select first tag by default */
+    awesomeconf->tags[0].selected = True;
+    awesomeconf->tags[0].was_selected = True;
 
-    tmp = config_lookup_string(&awesomelibconf, "awesome.focus_border_color");
-    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#008b8b");
-    drawcontext->sel[ColBorder] = colorbuf.pixel;
+    /* Keys */
+    tmp_key = key_mask_lookup(cfg_getstr(cfg_keys, "modkey"));
+    awesomeconf->modkey = tmp_key ? tmp_key : Mod4Mask;
+    awesomeconf->numlockmask = get_numlockmask(disp);
 
-    tmp = config_lookup_string(&awesomelibconf, "awesome.focus_bg_color");
-    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#008b8b");
-    drawcontext->sel[ColBG] = colorbuf.pixel;
+    awesomeconf->nkeys = cfg_size(cfg_keys, "key");
+    awesomeconf->keys = p_new(Key, awesomeconf->nkeys);
+    for(i = 0; i < awesomeconf->nkeys; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg_keys, "key", i);
+        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
+            awesomeconf->keys[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
+        awesomeconf->keys[i].keysym = XStringToKeysym(cfg_getstr(cfgsectmp, "key"));
+        awesomeconf->keys[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), KeyfuncList);
+        awesomeconf->keys[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
+    }
 
-    tmp = config_lookup_string(&awesomelibconf, "awesome.focus_fg_color");
-    colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#ffffff");
-    drawcontext->sel[ColFG] = colorbuf.pixel;
-    drawcontext->text_selected = colorbuf;
-
-    config_destroy(&awesomelibconf);
+    /* Free! Like a river! */
+    cfg_free(cfg);
     p_delete(&confpath);
 }
 

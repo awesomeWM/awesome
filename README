@@ -5,7 +5,7 @@ It's based on dwm.
 
 Requirements
 ------------
-In order to build awesome you need the Xlib header files and libconfig.
+In order to build awesome you need the Xlib header files and libconfuse.
 
 Installation
 ------------

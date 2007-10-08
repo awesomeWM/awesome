@@ -142,7 +142,7 @@ struct awesome_config
     /** Number of master windows */
     int nmaster;
     /** Number of columns in tile layout */
-    int ncols;
+    int ncol;
     /** Transparency of unfocused clients */
     int opacity_unfocused;
     /** Focus move pointer */

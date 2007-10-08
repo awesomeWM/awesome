@@ -29,7 +29,7 @@ LAYOUT_PROTO(layout_tile);
 LAYOUT_PROTO(layout_tileleft);
 
 UICB_PROTO(uicb_setnmaster);
-UICB_PROTO(uicb_setncols);
+UICB_PROTO(uicb_setncol);
 UICB_PROTO(uicb_setmwfact);
 
 #endif
