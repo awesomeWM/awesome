@@ -38,6 +38,9 @@ awesome:
     # Resize hints
     resize_hints = true;
 
+    # Move pointer to the center of the focused window
+    focus_move_pointer = false;
+
     # Set of rules to put some windows floating
     # or to tag them on launch
     rules = ({ name = "Gimp";

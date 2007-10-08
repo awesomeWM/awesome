@@ -142,6 +142,8 @@ restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
             wc.sibling = c->win;
         }
     }
+    if(awesomeconf->focus_move_pointer)
+        XWarpPointer(disp, None, sel->win, 0, 0, 0, 0, sel->w / 2, sel->h / 2);
     XSync(disp, False);
     while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
 }

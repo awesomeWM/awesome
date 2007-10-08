@@ -402,6 +402,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
     /* resize_hints */
     awesomeconf->resize_hints = config_lookup_bool(&awesomelibconf, "awesome.resize_hints");
 
+    /* focus_move_pointer */
+    awesomeconf->focus_move_pointer = config_lookup_bool(&awesomelibconf, "awesome.focus_move_pointer");
+
     /* colors */
     tmp = config_lookup_string(&awesomelibconf, "awesome.normal_border_color");
     colorbuf = initxcolor(disp, awesomeconf->phys_screen, tmp ? tmp : "#dddddd");

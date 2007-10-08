@@ -145,6 +145,8 @@ struct awesome_config
     int ncols;
     /** Transparency of unfocused clients */
     int opacity_unfocused;
+    /** Focus move pointer */
+    Bool focus_move_pointer;
     /** Respect resize hints */
     Bool resize_hints;
     /** Text displayed in bar */
