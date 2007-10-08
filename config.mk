@@ -1,5 +1,5 @@
 # awesome version
-VERSION = 1.3
+VERSION = devel
 
 # Customize below to fit your system
 
