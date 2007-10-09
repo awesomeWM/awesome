@@ -247,7 +247,7 @@ keys
      key
      {
          modkey = {"Mod4", "Control"}
-         key = "Space"
+         key = "space"
          command = "togglefloating"
      }
      key
