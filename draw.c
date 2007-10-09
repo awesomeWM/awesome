@@ -69,25 +69,20 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable 
 }
 
 void
-drawsquare(Display *disp, DC drawcontext, Drawable drawable, Bool filled, unsigned long col)
+drawsquare(Display *disp, int x, int y, int h, GC gc, Drawable drawable, Bool filled, unsigned long col)
 {
-    int x;
     XGCValues gcv;
-    XRectangle r = { drawcontext.x, drawcontext.y, drawcontext.w, drawcontext.h };
+    XRectangle r = { x, y, h, h };
 
-    x = (drawcontext.font->ascent + drawcontext.font->descent + 2) / 4;
     gcv.foreground = col;
-    XChangeGC(disp, drawcontext.gc, GCForeground, &gcv);
-    r.x = drawcontext.x + 1;
-    r.y = drawcontext.y + 1;
-    r.width = r.height = x;
+    XChangeGC(disp, gc, GCForeground, &gcv);
     if(filled)
     {
         r.width++; r.height++;
-        XFillRectangles(disp, drawable, drawcontext.gc, &r, 1);
+        XFillRectangles(disp, drawable, gc, &r, 1);
     }
     else
-        XDrawRectangles(disp, drawable, drawcontext.gc, &r, 1);
+        XDrawRectangles(disp, drawable, gc, &r, 1);
 }
 
 

@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-void drawsquare(Display *, DC, Drawable, Bool, unsigned long);
 void drawtext(Display *, int, int, int, int, int, GC, Drawable, XftFont *, const char *, unsigned long *, XColor);
+void drawsquare(Display *, int, int, int, GC, Drawable, Bool, unsigned long);
 inline unsigned short textwidth(Display *, XftFont *, char *, ssize_t);
 #endif

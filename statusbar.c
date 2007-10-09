@@ -61,13 +61,13 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
         {
             drawtext(disp, awesomeconf->phys_screen, drawcontext->x, drawcontext->y, drawcontext->w, drawcontext->h, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, awesomeconf->tags[i].name, drawcontext->sel, drawcontext->text_selected);
             if(isoccupied(i, awesomeconf->screen))
-                drawsquare(disp, *drawcontext, awesomeconf->statusbar.drawable, sel && sel->tags[i], drawcontext->sel[ColFG]);
+                drawsquare(disp, drawcontext->x, drawcontext->y, (drawcontext->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel && sel->tags[i], drawcontext->sel[ColFG]);
         }
         else
         {
             drawtext(disp, awesomeconf->phys_screen, drawcontext->x, drawcontext->y, drawcontext->w, drawcontext->h, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, awesomeconf->tags[i].name, drawcontext->norm, drawcontext->text_normal);
             if(isoccupied(i, awesomeconf->screen))
-                drawsquare(disp, *drawcontext, awesomeconf->statusbar.drawable, sel && sel->tags[i], drawcontext->norm[ColFG]);
+                drawsquare(disp, drawcontext->x, drawcontext->y, (drawcontext->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel && sel->tags[i], drawcontext->norm[ColFG]);
         }
         drawcontext->x += drawcontext->w;
     }
@@ -89,7 +89,7 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
         {
             drawtext(disp, awesomeconf->phys_screen, drawcontext->x, drawcontext->y, drawcontext->w, drawcontext->h, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, sel->name, drawcontext->sel, drawcontext->text_selected);
             if(sel->isfloating)
-                drawsquare(disp, *drawcontext, awesomeconf->statusbar.drawable, sel->ismax, drawcontext->sel[ColFG]);
+                drawsquare(disp, drawcontext->x, drawcontext->y, (drawcontext->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel->ismax, drawcontext->sel[ColFG]);
         }
         else if(IS_ARRANGE(layout_tile) || IS_ARRANGE(layout_tileleft))
         {
