@@ -39,7 +39,6 @@ enum
 
 typedef struct
 {
-    int x, y;
     unsigned long norm[ColLast];
     unsigned long sel[ColLast];
     XColor text_normal;
