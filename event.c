@@ -219,7 +219,11 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
             resizemouse(c, &awesomeconf[c->screen]);
         }
-    }
+        else if(ev->button == Button4)
+            uicb_settrans(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], "+5");
+        else if(ev->button == Button5)
+            uicb_settrans(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], "-5");
+        }
     else if(!sel)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window

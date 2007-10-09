@@ -98,6 +98,24 @@ grabbuttons(Client * c, Bool focused, KeySym modkey, unsigned int numlockmask)
         XGrabButton(c->display, Button3, modkey | numlockmask | LockMask,
                     c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
 
+        XGrabButton(c->display, Button4, modkey, c->win, False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(c->display, Button4, modkey | LockMask, c->win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(c->display, Button4, modkey | numlockmask, c->win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(c->display, Button4, modkey | numlockmask | LockMask,
+                    c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+
+        XGrabButton(c->display, Button5, modkey, c->win, False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(c->display, Button5, modkey | LockMask, c->win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(c->display, Button5, modkey | numlockmask, c->win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(c->display, Button5, modkey | numlockmask | LockMask,
+                    c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        
         XUngrabButton(c->display, AnyButton, AnyModifier, RootWindow(c->display, c->phys_screen));
     }
     else
@@ -304,6 +322,8 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
         XSetWindowBorder(sel->display, sel->win, drawcontext->norm[ColBorder]);
         setclienttrans(sel, awesomeconf->opacity_unfocused);
     }
+    if(sel == c)
+        return;
     if(c)
     {
         detachstack(c);
@@ -659,7 +679,7 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
               awesome_config *awesomeconf __attribute__ ((unused)),
               const char *arg)
 {
-    double delta = 100.0, current_opacity = 0.0;
+    double delta = 100.0, current_opacity = 100.0;
     unsigned char *data;
     Atom actual;
     int format;
