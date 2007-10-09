@@ -294,7 +294,7 @@ keys
         modkey = {"Mod4"}
         key = "4"
         command = "view"
-        arg = "5"
+        arg = "4"
      }
      key
      {
