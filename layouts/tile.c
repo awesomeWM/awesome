@@ -168,7 +168,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
             else
                 ny = way + ((i - awesomeconf->nmaster) % win_by_col) * (nh + 2 * c->border);
 
-            nx = wax + current_col * nw + (right ? mw : 0);
+            nx = wax + current_col * (nw + 2 * c->border) + (right ? mw : 0);
             resize(c, nx, ny, nw, nh, awesomeconf, awesomeconf->resize_hints);
         }
         i++;
