@@ -24,32 +24,28 @@
 #include "draw.h"
 
 void
-drawtext(Display *disp, int screen, DC *drawcontext, Drawable drawable, const char *text, unsigned long col[ColLast], XColor textcolor)
+drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable drawable, XftFont *font, const char *text, unsigned long col[ColLast], XColor textcolor)
 {
-    int x, y, w, h;
+    int nw = 0;
     static char buf[256];
     size_t len, olen;
-    XRectangle r = { drawcontext->x, drawcontext->y, drawcontext->w, drawcontext->h };
+    XRectangle r = { x, y, w, h };
     XRenderColor xrcolor;
     XftColor xftcolor;
     XftDraw *xftdrawable;
 
-    XSetForeground(disp, drawcontext->gc, col[ColBG]);
-    XFillRectangles(disp, drawable, drawcontext->gc, &r, 1);
+    XSetForeground(disp, gc, col[ColBG]);
+    XFillRectangles(disp, drawable, gc, &r, 1);
     if(!text)
         return;
-    w = 0;
     olen = len = a_strlen(text);
     if(len >= sizeof(buf))
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    h = drawcontext->font->height;
-    y = drawcontext->y + (drawcontext->h / 2) - (h / 2) + drawcontext->font->ascent;
-    x = drawcontext->x + (h / 2);
-    while(len && (w = textwidth(disp, drawcontext->font, buf, len)) > drawcontext->w - h)
+    while(len && (nw = textwidth(disp, font, buf, len)) > w - font->height)
         buf[--len] = 0;
-    if(w > drawcontext->w)
+    if(nw > w)
         return;                 /* too long */
     if(len < olen)
     {
@@ -65,7 +61,10 @@ drawtext(Display *disp, int screen, DC *drawcontext, Drawable drawable, const ch
     xrcolor.blue = textcolor.blue;
     XftColorAllocValue(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xrcolor, &xftcolor);
     xftdrawable = XftDrawCreate(disp, drawable, DefaultVisual(disp, screen), DefaultColormap(disp, screen));
-    XftDrawStringUtf8(xftdrawable, &xftcolor, drawcontext->font, x, y, (FcChar8 *) buf, len);
+    XftDrawStringUtf8(xftdrawable, &xftcolor, font,
+                      x + (font->height / 2),
+                      y + (h / 2) - (font->height / 2) + font->ascent,
+                      (FcChar8 *) buf, len);
     XftColorFree(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xftcolor);
 }
 
