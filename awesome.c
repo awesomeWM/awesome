@@ -203,7 +203,7 @@ setup(DC *drawcontext, awesome_config *awesomeconf)
     compileregs(awesomeconf->rules, awesomeconf->nrules);
 
     /* bar */
-    drawcontext->h = awesomeconf->statusbar.height = drawcontext->font->height + 2;
+    awesomeconf->statusbar.height = drawcontext->font->height + 2;
     initstatusbar(awesomeconf->display, awesomeconf->screen, drawcontext, &awesomeconf->statusbar);
     drawcontext->gc = XCreateGC(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), 0, 0);
     XSetLineAttributes(awesomeconf->display, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
