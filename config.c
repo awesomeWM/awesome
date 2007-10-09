@@ -259,7 +259,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
     const char *tmp, *homedir;
     char *confpath;
     KeySym tmp_key;
-    ssize_t confpath_len;
+    ssize_t confpath_len, txtlen;
     XColor colorbuf;
 
     if(confpatharg)
@@ -351,6 +351,9 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
             continue;
         }
         awesomeconf->layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
+        txtlen = drawcontext->font->height + textwidth(disp, drawcontext->font, awesomeconf->layouts[i].symbol, a_strlen(awesomeconf->layouts[i].symbol));
+        if(txtlen > awesomeconf->statusbar.width)
+            awesomeconf->statusbar.width = txtlen;
     }
 
     awesomeconf->mwfact = cfg_getfloat(cfg_layouts, "mwfact");
