@@ -29,39 +29,39 @@ tags
 {
     tag 1
     {
-        layout = "tile"
+          layout = "tile"
     }
     tag 2
     {
-        layout = "tile"
+          layout = "tile"
     }
     tag 3
     {
-        layout = "tile"
+          layout = "tile"
     }
     tag 4
     {
-        layout = "tile"
+          layout = "tile"
     }
     tag 5
     {
-        layout = "tile"
+          layout = "tile"
     }
     tag 6
     {
-        layout = "tile"
+          layout = "tile"
     }
     tag 7
     {
-        layout = "tile"
+          layout = "tile"
     }
     tag 8
     {
-        layout = "tile"
+          layout = "tile"
     }
     tag 9
     {
-        layout = "floating"
+          layout = "floating"
     }
 }
 
@@ -72,11 +72,11 @@ layouts
     ncol = 1
     layout tile
     {
-        symbol = "[]="
+          symbol = "[]="
     }
     layout tileleft
     {
-        symbol = "=[]"
+          symbol = "=[]"
     }
     
 }
@@ -85,24 +85,24 @@ rules
 {
     rule
     {
-        name = "Gimp"
-        tags = ""
-        float = true
+          name = "Gimp"
+          tags = ""
+          float = true
     }
     rule
     {
-        name = "MPlayer"
-        float = true
+          name = "MPlayer"
+          float = true
     }
     rule
     {
-        name = "Acroread"
-        float = true
+          name = "Acroread"
+          float = true
     }
     rule
     {
-        name = "pinentry"
-        float = true
+          name = "pinentry"
+          float = true
     }
 }
 
@@ -111,445 +111,445 @@ keys
     modkey = "Mod4"
     key
     {
-        modkey = {"Mod4"}
-        key = "Return"
-        command = "spawn"
-        arg = "exec xterm"
+          modkey = {"Mod4"}
+          key = "Return"
+          command = "spawn"
+          arg = "exec xterm"
     }
     key
     {
-        modkey = {"Mod4"}
-        key = "space"
-        command = "setlayout"
-        arg = "+1"
+          modkey = {"Mod4"}
+          key = "space"
+          command = "setlayout"
+          arg = "+1"
     }
     key
     {
-        modkey = {"Mod4", "Shift"}
-        key = "space"
-        command = "setlayout"
-        arg = "-1"
+          modkey = {"Mod4", "Shift"}
+          key = "space"
+          command = "setlayout"
+          arg = "-1"
     }
     key
     {
-        modkey = {"Mod4"}
-        key = "b"
-        command = "togglebar"
+          modkey = {"Mod4"}
+          key = "b"
+          command = "togglebar"
     }
     key
     {
-        modkey = {"Mod4"}
-        key = "j"
-        command = "focusnext"
+          modkey = {"Mod4"}
+          key = "j"
+          command = "focusnext"
     }
     key
     {
-        modkey = {"Mod4"}
-        key = "k"
-        command = "focusprev"
+          modkey = {"Mod4"}
+          key = "k"
+          command = "focusprev"
     }
     key
     {
-        modkey = {"Mod4", "Shift"}
-        key = "j"
-        command = "swapprev"
+          modkey = {"Mod4", "Shift"}
+          key = "j"
+          command = "swapprev"
     }
     key
     {
-        modkey = {"Mod4", "Shift"}
-        key = "k"
-        command = "swapnext"
+          modkey = {"Mod4", "Shift"}
+          key = "k"
+          command = "swapnext"
     }
     key
     {
-        modkey = {"Mod4", "Control"}
-        key = "j"
-        command = "focusnextscreen"
+          modkey = {"Mod4", "Control"}
+          key = "j"
+          command = "focusnextscreen"
     }
     key
     {
-        modkey = {"Mod4", "Control"}
-        key = "k"
-        command = "focusprevscreen"
+          modkey = {"Mod4", "Control"}
+          key = "k"
+          command = "focusprevscreen"
     }
     key
     {
-        modkey = {"Mod4"}
-        key = "h"
-        command = "setmwfact"
-        arg = "-0.05"
+          modkey = {"Mod4"}
+          key = "h"
+          command = "setmwfact"
+          arg = "-0.05"
     }
     key
     {
-        modkey = {"Mod4"}
-        key = "l"
-        command = "setmwfact"
-        arg = "+0.05"
+          modkey = {"Mod4"}
+          key = "l"
+          command = "setmwfact"
+          arg = "+0.05"
     }
     key
     {
-        modkey = {"Mod4", "Shift"}
-        key = "h"
-        command = "setnmaster"
-        arg = "+1"
+          modkey = {"Mod4", "Shift"}
+          key = "h"
+          command = "setnmaster"
+          arg = "+1"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "l"
-        command = "setnmaster"
-        arg = "-1"
+          modkey = {"Mod4", "Shift"}
+          key = "l"
+          command = "setnmaster"
+          arg = "-1"
      }
      key
      {
-         modkey = {"Mod4", "Control"}
-         key = "h"
-         command = "setncol"
-         arg = "+1"
+           modkey = {"Mod4", "Control"}
+           key = "h"
+           command = "setncol"
+           arg = "+1"
      }
      key
      {
-         modkey = {"Mod4", "Control"}
-         key = "l"
-         command = "setncol"
-         arg = "-1"
+           modkey = {"Mod4", "Control"}
+           key = "l"
+           command = "setncol"
+           arg = "-1"
      }
      key
      {
-         modkey = {"Mod4"}
-         key = "escape"
-         command = "view_tag_prev_selected"
+           modkey = {"Mod4"}
+           key = "escape"
+           command = "view_tag_prev_selected"
      }
      key
      {
-         modkey = {"Mod4"}
-         key = "Left"
-         command = "view_tag_previous"
+           modkey = {"Mod4"}
+           key = "Left"
+           command = "view_tag_previous"
      }
      key
      {
-         modkey = {"Mod4"}
-         key = "Right"
-         command = "view_tag_next"
+           modkey = {"Mod4"}
+           key = "Right"
+           command = "view_tag_next"
      }
      key
      {
-         modkey = {"Mod4"}
-         key = "m"
-         command = "togglemax"
+           modkey = {"Mod4"}
+           key = "m"
+           command = "togglemax"
      }
      key
      {
-         modkey = {"Mod4", "Control"}
-         key = "Return"
-         command = "zoom"
+           modkey = {"Mod4", "Control"}
+           key = "Return"
+           command = "zoom"
      }
      key
      {
-         modkey = {"Mod4", "Control"}
-         key = "space"
-         command = "togglefloating"
+           modkey = {"Mod4", "Control"}
+           key = "space"
+           command = "togglefloating"
      }
      key
      {
-         modkey = {"Mod4", "Shift"}
-         key = "c"
-         command = "killclient"
+           modkey = {"Mod4", "Shift"}
+           key = "c"
+           command = "killclient"
      }
      key
      {
-         modkey = {"Mod4", "Shift"}
-         key = "q"
-         command = "quit"
+           modkey = {"Mod4", "Shift"}
+           key = "q"
+           command = "quit"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "0"
-        command = "view"
+          modkey = {"Mod4"}
+          key = "0"
+          command = "view"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "1"
-        command = "view"
-        arg = "1"
+          modkey = {"Mod4"}
+          key = "1"
+          command = "view"
+          arg = "1"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "2"
-        command = "view"
-        arg = "2"
+          modkey = {"Mod4"}
+          key = "2"
+          command = "view"
+          arg = "2"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "3"
-        command = "view"
-        arg = "3"
+          modkey = {"Mod4"}
+          key = "3"
+          command = "view"
+          arg = "3"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "4"
-        command = "view"
-        arg = "4"
+          modkey = {"Mod4"}
+          key = "4"
+          command = "view"
+          arg = "4"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "5"
-        command = "view"
-        arg = "5"
+          modkey = {"Mod4"}
+          key = "5"
+          command = "view"
+          arg = "5"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "6"
-        command = "view"
-        arg = "6"
+          modkey = {"Mod4"}
+          key = "6"
+          command = "view"
+          arg = "6"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "7"
-        command = "view"
-        arg = "7"
+          modkey = {"Mod4"}
+          key = "7"
+          command = "view"
+          arg = "7"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "8"
-        command = "view"
-        arg = "8"
+          modkey = {"Mod4"}
+          key = "8"
+          command = "view"
+          arg = "8"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "9"
-        command = "view"
-        arg = "9"
+          modkey = {"Mod4"}
+          key = "9"
+          command = "view"
+          arg = "9"
      }
      key
      {
-        modkey = {"Mod4"}
-        key = "9"
-        command = "view"
-        arg = "9"
+          modkey = {"Mod4"}
+          key = "9"
+          command = "view"
+          arg = "9"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "0"
-        command = "toggleview"
+          modkey = {"Mod4", "Control"}
+          key = "0"
+          command = "toggleview"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "1"
-        command = "toggleview"
-        arg = "1"
+          modkey = {"Mod4", "Control"}
+          key = "1"
+          command = "toggleview"
+          arg = "1"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "2"
-        command = "toggleview"
-        arg = "2"
+          modkey = {"Mod4", "Control"}
+          key = "2"
+          command = "toggleview"
+          arg = "2"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "3"
-        command = "toggleview"
-        arg = "3"
+          modkey = {"Mod4", "Control"}
+          key = "3"
+          command = "toggleview"
+          arg = "3"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "4"
-        command = "toggleview"
-        arg = "4"
+          modkey = {"Mod4", "Control"}
+          key = "4"
+          command = "toggleview"
+          arg = "4"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "5"
-        command = "toggleview"
-        arg = "5"
+          modkey = {"Mod4", "Control"}
+          key = "5"
+          command = "toggleview"
+          arg = "5"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "6"
-        command = "toggleview"
-        arg = "6"
+          modkey = {"Mod4", "Control"}
+          key = "6"
+          command = "toggleview"
+          arg = "6"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "7"
-        command = "toggleview"
-        arg = "7"
+          modkey = {"Mod4", "Control"}
+          key = "7"
+          command = "toggleview"
+          arg = "7"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "8"
-        command = "toggleview"
-        arg = "8"
+          modkey = {"Mod4", "Control"}
+          key = "8"
+          command = "toggleview"
+          arg = "8"
      }
      key
      {
-        modkey = {"Mod4", "Control"}
-        key = "9"
-        command = "toggleview"
-        arg = "9"
+          modkey = {"Mod4", "Control"}
+          key = "9"
+          command = "toggleview"
+          arg = "9"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "0"
-        command = "tag"
+          modkey = {"Mod4", "Shift"}
+          key = "0"
+          command = "tag"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "1"
-        command = "tag"
-        arg = "1"
+          modkey = {"Mod4", "Shift"}
+          key = "1"
+          command = "tag"
+          arg = "1"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "2"
-        command = "tag"
-        arg = "2"
+          modkey = {"Mod4", "Shift"}
+          key = "2"
+          command = "tag"
+          arg = "2"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "3"
-        command = "tag"
-        arg = "3"
+          modkey = {"Mod4", "Shift"}
+          key = "3"
+          command = "tag"
+          arg = "3"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "4"
-        command = "tag"
-        arg = "4"
+          modkey = {"Mod4", "Shift"}
+          key = "4"
+          command = "tag"
+          arg = "4"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "5"
-        command = "tag"
-        arg = "5"
+          modkey = {"Mod4", "Shift"}
+          key = "5"
+          command = "tag"
+          arg = "5"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "6"
-        command = "tag"
-        arg = "6"
+          modkey = {"Mod4", "Shift"}
+          key = "6"
+          command = "tag"
+          arg = "6"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "7"
-        command = "tag"
-        arg = "7"
+          modkey = {"Mod4", "Shift"}
+          key = "7"
+          command = "tag"
+          arg = "7"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "8"
-        command = "tag"
-        arg = "8"
+          modkey = {"Mod4", "Shift"}
+          key = "8"
+          command = "tag"
+          arg = "8"
      }
      key
      {
-        modkey = {"Mod4", "Shift"}
-        key = "9"
-        command = "tag"
-        arg = "9"
+          modkey = {"Mod4", "Shift"}
+          key = "9"
+          command = "tag"
+          arg = "9"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "0"
-        command = "toggletag"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "0"
+          command = "toggletag"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "1"
-        command = "toggletag"
-        arg = "1"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "1"
+          command = "toggletag"
+          arg = "1"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "2"
-        command = "toggletag"
-        arg = "2"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "2"
+          command = "toggletag"
+          arg = "2"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "3"
-        command = "toggletag"
-        arg = "3"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "3"
+          command = "toggletag"
+          arg = "3"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "3"
-        command = "toggletag"
-        arg = "3"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "3"
+          command = "toggletag"
+          arg = "3"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "4"
-        command = "toggletag"
-        arg = "4"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "4"
+          command = "toggletag"
+          arg = "4"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "5"
-        command = "toggletag"
-        arg = "5"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "5"
+          command = "toggletag"
+          arg = "5"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "6"
-        command = "toggletag"
-        arg = "6"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "6"
+          command = "toggletag"
+          arg = "6"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "7"
-        command = "toggletag"
-        arg = "7"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "7"
+          command = "toggletag"
+          arg = "7"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "8"
-        command = "toggletag"
-        arg = "8"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "8"
+          command = "toggletag"
+          arg = "8"
      }
      key
      {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "9"
-        command = "toggletag"
-        arg = "9"
+          modkey = {"Mod4", "Shift", "Control"}
+          key = "9"
+          command = "toggletag"
+          arg = "9"
      }
 }
