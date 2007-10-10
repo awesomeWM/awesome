@@ -350,7 +350,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
     awesomeconf->nmaster = cfg_getint(cfg_layouts, "nmaster");
     awesomeconf->ncol = cfg_getint(cfg_layouts, "ncol");
 
-    if(!awesomeconf->nlayouts || !awesomeconf->current_layout->arrange)
+    if(!awesomeconf->nlayouts)
         eprint("awesome: fatal: no default layout available\n");
 
     /* Rules */
