@@ -372,9 +372,9 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
              * only screen in Xinerama, so we can ask for a better screen
              * number with get_screen_bycoord: we'll get 0 in Zaphod mode
              * so it's the same, or maybe the real Xinerama screen */
-           if(screen == 0)
-               screen = get_screen_bycoord(e->xany.display, x, y);
-           break;
+            if(screen == 0)
+                screen = get_screen_bycoord(e->xany.display, x, y);
+            break;
         }
 
     for(i = 0; i < awesomeconf[screen].nkeys; i++)
