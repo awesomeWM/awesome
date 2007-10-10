@@ -134,7 +134,7 @@ resizemouse(Client * c, awesome_config *awesomeconf)
                 nw = 1;
             if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
                 nh = 1;
-            resize(c, c->x, c->y, nw, nh, awesomeconf, True);
+            resize(c, c->x, c->y, nw, nh, &awesomeconf[c->screen], True);
             break;
         }
     }
@@ -216,7 +216,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &awesomeconf[c->screen]);
-            resizemouse(c, &awesomeconf[c->screen]);
+            resizemouse(c, awesomeconf);
         }
         else if(ev->button == Button4)
             uicb_settrans(e->xany.display, &awesomeconf[c->screen], "+5");
