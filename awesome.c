@@ -74,9 +74,9 @@ cleanup(DC *drawcontext, awesome_config *awesomeconf)
         XFreePixmap(awesomeconf->display, awesomeconf[screen].statusbar.drawable);
         XFreeGC(awesomeconf->display, drawcontext[screen].gc);
         XDestroyWindow(awesomeconf->display, awesomeconf[screen].statusbar.window);
-        XFreeCursor(awesomeconf->display, drawcontext[screen].cursor[CurNormal]);
-        XFreeCursor(awesomeconf->display, drawcontext[screen].cursor[CurResize]);
-        XFreeCursor(awesomeconf->display, drawcontext[screen].cursor[CurMove]);
+        XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurNormal]);
+        XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurResize]);
+        XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurMove]);
 
         for(i = 0; i < awesomeconf[screen].ntags; i++)
             p_delete(&awesomeconf[screen].tags[i].name);
@@ -185,14 +185,14 @@ setup(DC *drawcontext, awesome_config *awesomeconf)
     XSetWindowAttributes wa;
 
     /* init cursors */
-    drawcontext->cursor[CurNormal] = XCreateFontCursor(awesomeconf->display, XC_left_ptr);
-    drawcontext->cursor[CurResize] = XCreateFontCursor(awesomeconf->display, XC_sizing);
-    drawcontext->cursor[CurMove] = XCreateFontCursor(awesomeconf->display, XC_fleur);
+    awesomeconf->cursor[CurNormal] = XCreateFontCursor(awesomeconf->display, XC_left_ptr);
+    awesomeconf->cursor[CurResize] = XCreateFontCursor(awesomeconf->display, XC_sizing);
+    awesomeconf->cursor[CurMove] = XCreateFontCursor(awesomeconf->display, XC_fleur);
 
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
-    wa.cursor = drawcontext->cursor[CurNormal];
+    wa.cursor = awesomeconf->cursor[CurNormal];
 
     XChangeWindowAttributes(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), CWEventMask | CWCursor, &wa);
 
@@ -204,7 +204,7 @@ setup(DC *drawcontext, awesome_config *awesomeconf)
 
     /* bar */
     awesomeconf->statusbar.height = drawcontext->font->height + 2;
-    initstatusbar(awesomeconf->display, awesomeconf->screen, drawcontext, &awesomeconf->statusbar);
+    initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, awesomeconf->cursor[CurNormal]);
     drawcontext->gc = XCreateGC(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), 0, 0);
     XSetLineAttributes(awesomeconf->display, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
 }

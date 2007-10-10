@@ -65,7 +65,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
     ocx = nx = c->x;
     ocy = ny = c->y;
     if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, dc[c->screen].cursor[CurMove], CurrentTime) != GrabSuccess)
+                    None, awesomeconf[c->screen].cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
     XQueryPointer(c->display, RootWindow(c->display, c->phys_screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
@@ -110,7 +110,7 @@ resizemouse(Client * c, awesome_config *awesomeconf)
     ocy = c->y;
     if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, dc[c->screen].cursor[CurResize], CurrentTime) != GrabSuccess)
+                    None, awesomeconf[c->screen].cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
     XWarpPointer(c->display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);

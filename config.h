@@ -40,7 +40,6 @@ enum
 typedef struct
 {
     GC gc;
-    Cursor cursor[CurLast];
     XftFont *font;
 } DC;
 
@@ -158,6 +157,8 @@ struct awesome_config
     XColor colors_normal[ColLast];
     /** Selected colors */
     XColor colors_selected[ColLast];
+    /** Cursors */
+    Cursor cursor[CurLast];
 };
 
 void parse_config(Display *, int, DC *, const char *, awesome_config *);        /* parse configuration file */

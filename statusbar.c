@@ -104,7 +104,7 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
 }
 
 void
-initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
+initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor)
 {
     XSetWindowAttributes wa;
     int phys_screen;
@@ -118,14 +118,14 @@ initstatusbar(Display *disp, int screen, DC *drawcontext, Statusbar *statusbar)
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
-    wa.cursor = drawcontext->cursor[CurNormal];
+    wa.cursor = cursor;
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
     statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0, si[screen].width,
                                       statusbar->height, 0, DefaultDepth(disp, phys_screen), CopyFromParent,
                                       DefaultVisual(disp, phys_screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-    XDefineCursor(disp, statusbar->window, drawcontext->cursor[CurNormal]);
+    XDefineCursor(disp, statusbar->window, cursor);
     updatebarpos(disp, *statusbar);
     XMapRaised(disp, statusbar->window);
     statusbar->drawable = XCreatePixmap(disp,
