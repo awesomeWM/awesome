@@ -19,6 +19,8 @@
  *
  */
 
+#include <cairo.h>
+#include <cairo-xlib.h>
 #include "layout.h"
 #include "util.h"
 #include "draw.h"
@@ -69,20 +71,28 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable 
 }
 
 void
-drawsquare(Display *disp, int x, int y, int h, GC gc, Drawable drawable, Bool filled, XColor color)
+drawsquare(Display *disp, int screen, int x, int y, int h, Drawable drawable, int dw, int dh, Bool filled, XColor color)
 {
-    XGCValues gcv;
-    XRectangle r = { x, y, h, h };
+    cairo_surface_t *surface;
+    cairo_t *cr;
 
-    gcv.foreground = color.pixel;
-    XChangeGC(disp, gc, GCForeground, &gcv);
+    surface = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dh);
+    cr = cairo_create (surface);
+
+    cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
+    cairo_set_line_width(cr, 1.0);
+    cairo_set_source_rgb(cr, color.red, color.green, color.blue);
     if(filled)
     {
-        r.width++; r.height++;
-        XFillRectangles(disp, drawable, gc, &r, 1);
+        cairo_rectangle(cr, x + 1, y + 1, h + 1, h + 1);
+        cairo_fill(cr);
     }
     else
-        XDrawRectangles(disp, drawable, gc, &r, 1);
+        cairo_rectangle(cr, x + 1, y + 1, h, h);
+    cairo_stroke(cr);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
 }
 
 

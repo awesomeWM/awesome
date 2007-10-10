@@ -67,6 +67,8 @@ typedef struct
     int width;
     /** Bar height */
     int height;
+    /** Layout txt width */
+    int txtlayoutwidth;
     /** Bar position */
     int position;
     /** Window */

@@ -342,8 +342,8 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         }
         awesomeconf->layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
         txtlen = awesomeconf->font->height + textwidth(disp, awesomeconf->font, awesomeconf->layouts[i].symbol, a_strlen(awesomeconf->layouts[i].symbol));
-        if(txtlen > awesomeconf->statusbar.width)
-            awesomeconf->statusbar.width = txtlen;
+        if(txtlen > awesomeconf->statusbar.txtlayoutwidth)
+            awesomeconf->statusbar.txtlayoutwidth = txtlen;
     }
 
     awesomeconf->mwfact = cfg_getfloat(cfg_layouts, "mwfact");
