@@ -165,7 +165,7 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
  * \param drawcontext Draw context
  */
 void
-parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg, awesome_config *awesomeconf)
+parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *awesomeconf)
 {
     static cfg_opt_t general_opts[] =
     {
@@ -302,8 +302,8 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
     awesomeconf->resize_hints = cfg_getbool(cfg_general, "resize_hints");
     awesomeconf->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
     awesomeconf->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
-    drawcontext->font = XftFontOpenName(disp, awesomeconf->phys_screen, cfg_getstr(cfg_general, "font"));
-    if(!drawcontext->font)
+    awesomeconf->font = XftFontOpenName(disp, awesomeconf->phys_screen, cfg_getstr(cfg_general, "font"));
+    if(!awesomeconf->font)
         eprint("awesome: cannot init font\n");
 
     /* Colors */
@@ -341,7 +341,7 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
             continue;
         }
         awesomeconf->layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
-        txtlen = drawcontext->font->height + textwidth(disp, drawcontext->font, awesomeconf->layouts[i].symbol, a_strlen(awesomeconf->layouts[i].symbol));
+        txtlen = awesomeconf->font->height + textwidth(disp, awesomeconf->font, awesomeconf->layouts[i].symbol, a_strlen(awesomeconf->layouts[i].symbol));
         if(txtlen > awesomeconf->statusbar.width)
             awesomeconf->statusbar.width = txtlen;
     }

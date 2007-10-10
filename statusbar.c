@@ -55,49 +55,49 @@ drawstatusbar(Display *disp, DC *drawcontext, awesome_config * awesomeconf)
 
     for(i = 0; i < awesomeconf->ntags; i++)
     {
-        w = textwidth(disp, drawcontext->font, awesomeconf->tags[i].name, a_strlen(awesomeconf->tags[i].name)) + drawcontext->font->height;
+        w = textwidth(disp, awesomeconf->font, awesomeconf->tags[i].name, a_strlen(awesomeconf->tags[i].name)) + awesomeconf->font->height;
         if(awesomeconf->tags[i].selected)
         {
-            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, awesomeconf->tags[i].name, awesomeconf->colors_selected);
+            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, awesomeconf->font, awesomeconf->tags[i].name, awesomeconf->colors_selected);
             if(isoccupied(i, awesomeconf->screen))
-                drawsquare(disp, x, y, (drawcontext->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel && sel->tags[i], awesomeconf->colors_selected[ColFG]);
+                drawsquare(disp, x, y, (awesomeconf->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel && sel->tags[i], awesomeconf->colors_selected[ColFG]);
         }
         else
         {
-            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, awesomeconf->tags[i].name, awesomeconf->colors_normal);
+            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, awesomeconf->font, awesomeconf->tags[i].name, awesomeconf->colors_normal);
             if(isoccupied(i, awesomeconf->screen))
-                drawsquare(disp, x, y, (drawcontext->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel && sel->tags[i], awesomeconf->colors_normal[ColFG]);
+                drawsquare(disp, x, y, (awesomeconf->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel && sel->tags[i], awesomeconf->colors_normal[ColFG]);
         }
         x += w;
     }
     w = awesomeconf->statusbar.width;
-    drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, awesomeconf->current_layout->symbol, awesomeconf->colors_normal);
+    drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, awesomeconf->font, awesomeconf->current_layout->symbol, awesomeconf->colors_normal);
     z = x + w;
-    w = textwidth(disp, drawcontext->font, awesomeconf->statustext, a_strlen(awesomeconf->statustext)) + drawcontext->font->height;
+    w = textwidth(disp, awesomeconf->font, awesomeconf->statustext, a_strlen(awesomeconf->statustext)) + awesomeconf->font->height;
     x = si[awesomeconf->screen].width - w;
     if(x < z)
     {
         x = z;
         w = si[awesomeconf->screen].width - z;
     }
-    drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, awesomeconf->statustext, awesomeconf->colors_normal);
+    drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, awesomeconf->font, awesomeconf->statustext, awesomeconf->colors_normal);
     if((w = x - z) > awesomeconf->statusbar.height)
     {
         x = z;
         if(sel)
         {
-            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, sel->name, awesomeconf->colors_selected);
+            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, awesomeconf->font, sel->name, awesomeconf->colors_selected);
             if(sel->isfloating)
-                drawsquare(disp, x, y, (drawcontext->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel->ismax, awesomeconf->colors_selected[ColFG]);
+                drawsquare(disp, x, y, (awesomeconf->font->height + 2) / 4, drawcontext->gc, awesomeconf->statusbar.drawable, sel->ismax, awesomeconf->colors_selected[ColFG]);
         }
         else if(IS_ARRANGE(layout_tile) || IS_ARRANGE(layout_tileleft))
         {
             char buf[256];
             snprintf(buf, sizeof(buf), "nmaster: %d ncol: %d mwfact: %.2lf", awesomeconf->nmaster, awesomeconf->ncol, awesomeconf->mwfact);
-            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, buf, awesomeconf->colors_normal);
+            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, awesomeconf->font, buf, awesomeconf->colors_normal);
         }
         else
-            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, drawcontext->font, NULL, awesomeconf->colors_normal);
+            drawtext(disp, awesomeconf->phys_screen, x, y, w, awesomeconf->statusbar.height, drawcontext->gc, awesomeconf->statusbar.drawable, awesomeconf->font, NULL, awesomeconf->colors_normal);
     }
     XCopyArea(disp, awesomeconf->statusbar.drawable, awesomeconf->statusbar.window, drawcontext->gc, 0, 0, si[awesomeconf->screen].width, awesomeconf->statusbar.height, 0, 0);
     XSync(disp, False);

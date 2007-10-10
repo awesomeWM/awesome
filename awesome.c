@@ -67,7 +67,7 @@ cleanup(DC *drawcontext, awesome_config *awesomeconf)
 
     for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
     {
-        XftFontClose(awesomeconf->display, drawcontext->font);
+        XftFontClose(awesomeconf->display, awesomeconf->font);
 
         XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf[screen].phys_screen));
 
@@ -203,7 +203,7 @@ setup(DC *drawcontext, awesome_config *awesomeconf)
     compileregs(awesomeconf->rules, awesomeconf->nrules);
 
     /* bar */
-    awesomeconf->statusbar.height = drawcontext->font->height + 2;
+    awesomeconf->statusbar.height = awesomeconf->font->height + 2;
     initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, awesomeconf->cursor[CurNormal]);
     drawcontext->gc = XCreateGC(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), 0, 0);
     XSetLineAttributes(awesomeconf->display, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
@@ -325,7 +325,7 @@ main(int argc, char *argv[])
 
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
-        parse_config(dpy, screen, &dc[screen], confpath, &awesomeconf[screen]);
+        parse_config(dpy, screen, confpath, &awesomeconf[screen]);
         setup(&dc[screen], &awesomeconf[screen]);
         drawstatusbar(dpy, &dc[screen], &awesomeconf[screen]);
     }
