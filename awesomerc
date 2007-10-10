@@ -152,13 +152,13 @@ keys
     {
           modkey = {"Mod4", "Shift"}
           key = "j"
-          command = "swapprev"
+          command = "swapnext"
     }
     key
     {
           modkey = {"Mod4", "Shift"}
           key = "k"
-          command = "swapnext"
+          command = "swapprev"
     }
     key
     {
