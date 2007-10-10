@@ -24,7 +24,7 @@
 #include "draw.h"
 
 void
-drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable drawable, XftFont *font, const char *text, unsigned long col[ColLast], XColor textcolor)
+drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable drawable, XftFont *font, const char *text, XColor color[ColLast])
 {
     int nw = 0;
     static char buf[256];
@@ -34,7 +34,7 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable 
     XftColor xftcolor;
     XftDraw *xftdrawable;
 
-    XSetForeground(disp, gc, col[ColBG]);
+    XSetForeground(disp, gc, color[ColBG].pixel);
     XFillRectangles(disp, drawable, gc, &r, 1);
     if(!text)
         return;
@@ -56,9 +56,9 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable 
         if(len > 3)
             buf[len - 3] = '.';
     }
-    xrcolor.red = textcolor.red;
-    xrcolor.green = textcolor.green;
-    xrcolor.blue = textcolor.blue;
+    xrcolor.red = color[ColFG].red;
+    xrcolor.green = color[ColFG].green;
+    xrcolor.blue = color[ColFG].blue;
     XftColorAllocValue(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xrcolor, &xftcolor);
     xftdrawable = XftDrawCreate(disp, drawable, DefaultVisual(disp, screen), DefaultColormap(disp, screen));
     XftDrawStringUtf8(xftdrawable, &xftcolor, font,
@@ -69,12 +69,12 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable 
 }
 
 void
-drawsquare(Display *disp, int x, int y, int h, GC gc, Drawable drawable, Bool filled, unsigned long col)
+drawsquare(Display *disp, int x, int y, int h, GC gc, Drawable drawable, Bool filled, XColor color)
 {
     XGCValues gcv;
     XRectangle r = { x, y, h, h };
 
-    gcv.foreground = col;
+    gcv.foreground = color.pixel;
     XChangeGC(disp, gc, GCForeground, &gcv);
     if(filled)
     {

@@ -260,7 +260,6 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
     char *confpath;
     KeySym tmp_key;
     ssize_t confpath_len, txtlen;
-    XColor colorbuf;
 
     if(confpatharg)
         confpath = a_strdup(confpatharg);
@@ -308,21 +307,12 @@ parse_config(Display * disp, int scr, DC * drawcontext, const char *confpatharg,
         eprint("awesome: cannot init font\n");
 
     /* Colors */
-    drawcontext->norm[ColBorder] = initxcolor(disp, awesomeconf->phys_screen,
-                                              cfg_getstr(cfg_colors, "normal_border")).pixel;
-    drawcontext->norm[ColBG] = initxcolor(disp, awesomeconf->phys_screen,
-                                          cfg_getstr(cfg_colors, "normal_bg")).pixel;
-    drawcontext->sel[ColBorder] = initxcolor(disp, awesomeconf->phys_screen,
-                                             cfg_getstr(cfg_colors, "focus_border")).pixel;
-    drawcontext->sel[ColBG] = initxcolor(disp, awesomeconf->phys_screen,
-                                         cfg_getstr(cfg_colors, "focus_bg")).pixel;
-
-    colorbuf = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_fg"));
-    drawcontext->norm[ColFG] = colorbuf.pixel;
-    drawcontext->text_normal = colorbuf;
-    colorbuf = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_fg"));
-    drawcontext->sel[ColFG] = colorbuf.pixel;
-    drawcontext->text_selected = colorbuf;
+    awesomeconf->colors_normal[ColBorder] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_border"));
+    awesomeconf->colors_normal[ColBG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_bg"));
+    awesomeconf->colors_normal[ColFG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_fg"));
+    awesomeconf->colors_selected[ColBorder] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_border"));
+    awesomeconf->colors_selected[ColBG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_bg"));
+    awesomeconf->colors_selected[ColFG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_fg"));
 
     /* Statusbar */
     tmp = cfg_getstr(cfg_statusbar, "position");

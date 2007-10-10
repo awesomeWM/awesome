@@ -319,7 +319,7 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
     if(sel && sel != c)
     {
         grabbuttons(sel, False, awesomeconf->modkey, awesomeconf->numlockmask);
-        XSetWindowBorder(sel->display, sel->win, drawcontext->norm[ColBorder]);
+        XSetWindowBorder(sel->display, sel->win, awesomeconf->colors_normal[ColBorder].pixel);
         setclienttrans(sel, awesomeconf->opacity_unfocused);
     }
     if(sel == c)
@@ -336,7 +336,7 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
     drawstatusbar(disp, drawcontext, awesomeconf);
     if(sel)
     {
-        XSetWindowBorder(sel->display, sel->win, drawcontext->sel[ColBorder]);
+        XSetWindowBorder(sel->display, sel->win, awesomeconf->colors_selected[ColBorder].pixel);
         XSetInputFocus(sel->display, sel->win, RevertToPointerRoot, CurrentTime);
         for(c = stack; c; c = c->snext)
             if(c != sel)
@@ -427,7 +427,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     XFree(si);
     wc.border_width = c->border;
     XConfigureWindow(disp, w, CWBorderWidth, &wc);
-    XSetWindowBorder(disp, w, drawcontext->norm[ColBorder]);
+    XSetWindowBorder(disp, w, awesomeconf->colors_normal[ColBorder].pixel);
     configure(c);               /* propagates border_width, if size doesn't change */
     updatesizehints(c);
     XSelectInput(disp, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);

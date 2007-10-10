@@ -39,10 +39,6 @@ enum
 
 typedef struct
 {
-    unsigned long norm[ColLast];
-    unsigned long sel[ColLast];
-    XColor text_normal;
-    XColor text_selected;
     GC gc;
     Cursor cursor[CurLast];
     XftFont *font;
@@ -158,6 +154,10 @@ struct awesome_config
     Bool have_shape;
     /** Check for XRandR extension */
     Bool have_randr;
+    /** Normal colors */
+    XColor colors_normal[ColLast];
+    /** Selected colors */
+    XColor colors_selected[ColLast];
 };
 
 void parse_config(Display *, int, DC *, const char *, awesome_config *);        /* parse configuration file */
