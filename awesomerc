@@ -78,7 +78,14 @@ layouts
     {
           symbol = "=[]"
     }
-    
+    layout max
+    {
+          symbol = "[ ]"
+    }
+    layout floating
+    {
+          symbol = "><>"
+    }
 }
 
 rules
