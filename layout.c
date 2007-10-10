@@ -105,7 +105,13 @@ loadawesomeprops(Display *disp, awesome_config * awesomeconf)
 
     if(xgettextprop(disp, RootWindow(disp, awesomeconf->phys_screen), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
         for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
-            awesomeconf->tags[i].selected = prop[i] == '1';
+            if(prop[i] == '1')
+            {
+                awesomeconf->tags[i].selected = True;
+                awesomeconf->current_layout = awesomeconf->tags[i].layout;
+            }
+            else
+                awesomeconf->tags[i].selected = False;
 
     p_delete(&prop);
 }

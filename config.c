@@ -255,6 +255,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
           *cfg_tags, *cfg_layouts, *cfg_rules, *cfg_keys, *cfgsectmp;
     int i = 0;
     unsigned int j = 0;
+    int k = 0;
     const char *tmp, *homedir;
     char *confpath;
     KeySym tmp_key;
@@ -349,8 +350,6 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
     awesomeconf->nmaster = cfg_getint(cfg_layouts, "nmaster");
     awesomeconf->ncol = cfg_getint(cfg_layouts, "ncol");
 
-    awesomeconf->current_layout = awesomeconf->layouts;
-
     if(!awesomeconf->nlayouts || !awesomeconf->current_layout->arrange)
         eprint("awesome: fatal: no default layout available\n");
 
@@ -378,13 +377,21 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         awesomeconf->tags[i].name = a_strdup(cfg_title(cfgsectmp));
         awesomeconf->tags[i].selected = False;
         awesomeconf->tags[i].was_selected = False;
-        awesomeconf->tags[i].layout = awesomeconf->layouts;
+        tmp = cfg_getstr(cfgsectmp, "layout");
+        for(k = 0; k < awesomeconf->nlayouts; k++)
+            if(awesomeconf->layouts[k].arrange == name_func_lookup(tmp, LayoutsList))
+                break;
+        if(k == awesomeconf->nlayouts)
+            k = 0;
+        awesomeconf->tags[i].layout = &awesomeconf->layouts[k];
     }
 
+    
     if(!awesomeconf->ntags)
         eprint("awesome: fatal: no tags found in configuration file\n");
 
     /* select first tag by default */
+    awesomeconf->current_layout = awesomeconf->tags[0].layout;
     awesomeconf->tags[0].selected = True;
     awesomeconf->tags[0].was_selected = True;
 
