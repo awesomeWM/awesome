@@ -154,13 +154,11 @@ isvisible(Client * c, int screen, Tag * tags, int ntags)
 
 /** Tag selected window with tag
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param arg Tag name
  * \ingroup ui_callback
  */
 void
 uicb_tag(Display *disp,
-         DC *drawcontext,
          awesome_config *awesomeconf,
          const char *arg)
 {
@@ -174,18 +172,16 @@ uicb_tag(Display *disp,
     if(i >= 0 && i < awesomeconf->ntags)
         sel->tags[i] = True;
     saveprops(sel, awesomeconf->ntags);
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** Toggle floating state of a client
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param arg unused
  * \ingroup ui_callback
  */
 void
 uicb_togglefloating(Display *disp,
-                    DC *drawcontext,
                     awesome_config * awesomeconf,
                     const char *arg __attribute__ ((unused)))
 {
@@ -204,18 +200,16 @@ uicb_togglefloating(Display *disp,
         sel->rh = sel->h;
     }
     saveprops(sel, awesomeconf->ntags);
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** Toggle tag view
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param arg Tag name
  * \ingroup ui_callback
  */
 void
 uicb_toggletag(Display *disp,
-               DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg)
 {
@@ -230,18 +224,16 @@ uicb_toggletag(Display *disp,
     if(j == awesomeconf->ntags)
         sel->tags[i] = True;
     saveprops(sel, awesomeconf->ntags);
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** Add a tag to viewed tags
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param arg Tag name
  * \ingroup ui_callback
  */
 void
 uicb_toggleview(Display *disp,
-                DC *drawcontext,
                 awesome_config *awesomeconf,
                 const char *arg)
 {
@@ -254,7 +246,7 @@ uicb_toggleview(Display *disp,
     if(j == awesomeconf->ntags)
         awesomeconf->tags[i].selected = True;
     saveawesomeprops(disp, awesomeconf);
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** View tag
@@ -265,7 +257,6 @@ uicb_toggleview(Display *disp,
  */
 void
 uicb_view(Display *disp,
-          DC *drawcontext,
           awesome_config *awesomeconf,
           const char *arg)
 {
@@ -283,7 +274,7 @@ uicb_view(Display *disp,
         awesomeconf->current_layout = awesomeconf->tags[i].layout;
     }
     saveawesomeprops(disp, awesomeconf);
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** View previously selected tags
@@ -294,7 +285,6 @@ uicb_view(Display *disp,
  */
 void
 uicb_tag_prev_selected(Display * disp,
-                       DC *drawcontext,
                        awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
 {
@@ -307,18 +297,16 @@ uicb_tag_prev_selected(Display * disp,
         awesomeconf->tags[i].selected = awesomeconf->tags[i].was_selected;
         awesomeconf->tags[i].was_selected = t;
     }
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** View next tag
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param arg unused
  * \ingroup ui_callback
  */
 void
 uicb_tag_viewnext(Display *disp,
-                  DC * drawcontext,
                   awesome_config *awesomeconf,
                   const char *arg __attribute__ ((unused)))
 {
@@ -336,18 +324,16 @@ uicb_tag_viewnext(Display *disp,
     awesomeconf->tags[firsttag].selected = True;
     awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
     saveawesomeprops(disp, awesomeconf);
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 /** View previous tag
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param arg unused
  * \ingroup ui_callback
  */
 void
 uicb_tag_viewprev(Display *disp,
-                  DC *drawcontext,
                   awesome_config *awesomeconf,
                   const char *arg __attribute__ ((unused)))
 {
@@ -365,5 +351,5 @@ uicb_tag_viewprev(Display *disp,
     awesomeconf->tags[firsttag].selected = True;
     awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
     saveawesomeprops(disp, awesomeconf);
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }

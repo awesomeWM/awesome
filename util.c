@@ -56,7 +56,6 @@ eprint(const char *fmt, ...)
 
 void
 uicb_exec(Display * disp,
-          DC *drawcontext __attribute__ ((unused)),
           awesome_config * awesomeconf __attribute__ ((unused)),
           const char *arg)
 {
@@ -70,7 +69,6 @@ uicb_exec(Display * disp,
 
 void
 uicb_spawn(Display * disp,
-           DC *drawcontext __attribute__ ((unused)),
            awesome_config * awesomeconf __attribute__ ((unused)),
            const char *arg)
 {

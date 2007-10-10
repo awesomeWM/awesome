@@ -303,13 +303,12 @@ detach(Client * c)
 
 /** Give focus to client, or to first client if c is NULL
  * \param disp Display ref
- * \param drawcontext drawcontext ref
  * \param c client
  * \param selscreen True if current screen is selected
  * \param awesomeconf awesome config
  */
 void
-focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config *awesomeconf)
+focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags)))
@@ -333,7 +332,7 @@ focus(Display *disp, DC *drawcontext, Client * c, Bool selscreen, awesome_config
     if(!selscreen)
         return;
     sel = c;
-    drawstatusbar(disp, drawcontext, awesomeconf);
+    drawstatusbar(disp, awesomeconf);
     if(sel)
     {
         XSetWindowBorder(sel->display, sel->win, awesomeconf->colors_selected[ColBorder].pixel);
@@ -379,13 +378,12 @@ loadprops(Client * c, int ntags)
 
 /** Manage a new client
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param w The window
  * \param wa Window attributes
  * \param awesomeconf awesome config
  */
 void
-manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
+manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 {
     int i;
     Client *c, *t = NULL;
@@ -453,7 +451,7 @@ manage(Display *disp, DC *drawcontext, Window w, XWindowAttributes *wa, awesome_
     attachstack(c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
     c->isbanned = True;
-    arrange(disp, drawcontext, awesomeconf);
+    arrange(disp, awesomeconf);
 }
 
 void
@@ -567,7 +565,7 @@ unban(Client * c)
 }
 
 void
-unmanage(Client * c, DC *drawcontext, long state, awesome_config *awesomeconf)
+unmanage(Client * c, long state, awesome_config *awesomeconf)
 {
     XWindowChanges wc;
 
@@ -579,14 +577,14 @@ unmanage(Client * c, DC *drawcontext, long state, awesome_config *awesomeconf)
     detach(c);
     detachstack(c);
     if(sel == c)
-        focus(c->display, drawcontext, NULL, True, awesomeconf);
+        focus(c->display, NULL, True, awesomeconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     setclientstate(c, state);
     XSync(c->display, False);
     XSetErrorHandler(xerror);
     XUngrabServer(c->display);
     if(state != NormalState)
-        arrange(c->display, drawcontext, awesomeconf);
+        arrange(c->display, awesomeconf);
     p_delete(&c->tags);
     p_delete(&c);
 }
@@ -668,14 +666,12 @@ set_shape(Client *c)
 
 /** Set selected client transparency
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  * \param arg unused arg
  * \ingroup ui_callback
  */
 void
 uicb_settrans(Display *disp __attribute__ ((unused)),
-              DC *drawcontext __attribute__ ((unused)),
               awesome_config *awesomeconf __attribute__ ((unused)),
               const char *arg)
 {
@@ -721,14 +717,12 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
 
 /** Set borrder size
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  * \param arg X, +X or -X
  * \ingroup ui_callback
  */
 void
 uicb_setborder(Display *disp __attribute__ ((unused)),
-               DC *drawcontext __attribute__ ((unused)),
                awesome_config *awesomeconf,
                const char *arg)
 {
@@ -741,7 +735,6 @@ uicb_setborder(Display *disp __attribute__ ((unused)),
 
 void
 uicb_swapnext(Display *disp,
-              DC *drawcontext,
               awesome_config *awesomeconf,
               const char *arg __attribute__ ((unused)))
 {
@@ -754,13 +747,12 @@ uicb_swapnext(Display *disp,
     if(next)
     {
         client_swap(sel, next);
-        arrange(disp, drawcontext, awesomeconf);
+        arrange(disp, awesomeconf);
     }
 }
 
 void
 uicb_swapprev(Display *disp,
-              DC *drawcontext,
               awesome_config *awesomeconf,
               const char *arg __attribute__ ((unused)))
 {
@@ -773,13 +765,12 @@ uicb_swapprev(Display *disp,
     if(prev)
     {
         client_swap(prev, sel);
-        arrange(disp, drawcontext, awesomeconf);
+        arrange(disp, awesomeconf);
     }
 }
 
 void
 uicb_moveresize(Display *disp __attribute__ ((unused)),
-                DC *drawcontext __attribute__ ((unused)),
                 awesome_config *awesomeconf,
                 const char *arg)
 {
@@ -816,14 +807,12 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
 
 /** Kill selected client
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  * \param arg unused
  * \ingroup ui_callback
  */
 void
 uicb_killclient(Display *disp __attribute__ ((unused)),
-                DC *drawcontext __attribute__ ((unused)),
                 awesome_config *awesomeconf __attribute__ ((unused)),
                 const char *arg __attribute__ ((unused)))
 {

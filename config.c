@@ -162,7 +162,6 @@ name_func_lookup(const char *funcname, const NameFuncLink * list)
 /** Parse configuration file and initialize some stuff
  * \param disp Display ref
  * \param scr Screen number
- * \param drawcontext Draw context
  */
 void
 parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *awesomeconf)

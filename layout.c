@@ -34,11 +34,10 @@ extern Client *clients, *sel;   /* global client list */
 
 /** Arrange windows following current selected layout
  * \param disp display ref
- * \param drawcontext drawcontext ref
  * \param awesomeconf awesome config
  */
 void
-arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
+arrange(Display * disp, awesome_config *awesomeconf)
 {
     Client *c;
 
@@ -51,13 +50,12 @@ arrange(Display * disp, DC *drawcontext, awesome_config *awesomeconf)
             ban(c);
     }
     awesomeconf->current_layout->arrange(disp, awesomeconf);
-    focus(disp, drawcontext, NULL, True, awesomeconf);
-    restack(disp, drawcontext, awesomeconf);
+    focus(disp, NULL, True, awesomeconf);
+    restack(disp, awesomeconf);
 }
 
 void
 uicb_focusnext(Display *disp __attribute__ ((unused)),
-               DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
@@ -70,14 +68,13 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
         for(c = clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
     if(c)
     {
-        focus(c->display, drawcontext, c, True, awesomeconf);
-        restack(c->display, drawcontext, awesomeconf);
+        focus(c->display, c, True, awesomeconf);
+        restack(c->display, awesomeconf);
     }
 }
 
 void
 uicb_focusprev(Display *disp __attribute__ ((unused)),
-               DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
@@ -93,8 +90,8 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
     }
     if(c)
     {
-        focus(c->display, drawcontext, c, True, awesomeconf);
-        restack(c->display, drawcontext, awesomeconf);
+        focus(c->display, c, True, awesomeconf);
+        restack(c->display, awesomeconf);
     }
 }
 
@@ -114,13 +111,13 @@ loadawesomeprops(Display *disp, awesome_config * awesomeconf)
 }
 
 void
-restack(Display * disp, DC * drawcontext, awesome_config *awesomeconf)
+restack(Display * disp, awesome_config *awesomeconf)
 {
     Client *c;
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatusbar(disp, drawcontext, awesomeconf);
+    drawstatusbar(disp, awesomeconf);
     if(!sel)
         return;
     if(sel->isfloating || IS_ARRANGE(layout_floating))
@@ -166,7 +163,6 @@ saveawesomeprops(Display *disp, awesome_config *awesomeconf)
 
 void
 uicb_setlayout(Display *disp,
-               DC *drawcontext,
                awesome_config * awesomeconf,
                const char *arg)
 {
@@ -191,9 +187,9 @@ uicb_setlayout(Display *disp,
         c->ftview = True;
 
     if(sel)
-        arrange(disp, drawcontext, awesomeconf);
+        arrange(disp, awesomeconf);
     else
-        drawstatusbar(disp, drawcontext, awesomeconf);
+        drawstatusbar(disp, awesomeconf);
 
     saveawesomeprops(disp, awesomeconf);
 
@@ -203,7 +199,7 @@ uicb_setlayout(Display *disp,
 }
 
 static void
-maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomeconf)
+maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
 {
     if(!sel)
         return;
@@ -223,12 +219,11 @@ maximize(int x, int y, int w, int h, DC *drawcontext, awesome_config *awesomecon
     else
         sel->isfloating = False;
 
-    arrange(sel->display, drawcontext, awesomeconf);
+    arrange(sel->display, awesomeconf);
 }
 
 void
 uicb_togglemax(Display *disp,
-               DC *drawcontext,
                awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
@@ -237,13 +232,12 @@ uicb_togglemax(Display *disp,
     maximize(si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
              si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
              si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
-             drawcontext, awesomeconf);
+             awesomeconf);
     XFree(si);
 }
 
 void
 uicb_toggleverticalmax(Display *disp,
-                       DC *drawcontext,
                        awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
 {
@@ -252,14 +246,13 @@ uicb_toggleverticalmax(Display *disp,
     if(sel)
         maximize(sel->x, si[awesomeconf->screen].y_org,
                  sel->w, si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
-                 drawcontext, awesomeconf);
+                 awesomeconf);
     XFree(si);
 }
 
 
 void
 uicb_togglehorizontalmax(Display *disp,
-                         DC *drawcontext,
                          awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
 {
@@ -268,13 +261,12 @@ uicb_togglehorizontalmax(Display *disp,
     if(sel)
         maximize(si[awesomeconf->screen].x_org, sel->y,
                  si[awesomeconf->screen].height - 2 * awesomeconf->borderpx, sel->h,
-                 drawcontext, awesomeconf);
+                 awesomeconf);
     XFree(si);
 }
 
 void
 uicb_zoom(Display *disp __attribute__ ((unused)),
-          DC *drawcontext __attribute__ ((unused)),
           awesome_config *awesomeconf,
           const char *arg __attribute__ ((unused)))
 {
@@ -282,7 +274,7 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
         return;
     detach(sel);
     attach(sel);
-    focus(sel->display, drawcontext, sel, True, awesomeconf);
-    arrange(sel->display, drawcontext, awesomeconf);
+    focus(sel->display, sel, True, awesomeconf);
+    arrange(sel->display, awesomeconf);
 }
 

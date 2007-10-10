@@ -36,7 +36,6 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern DC *dc;                   /* global draw context */
 extern Client *clients, *sel;   /* global client list */
 
 #define CLEANMASK(mask, screen)		(mask & ~(awesomeconf[screen].numlockmask | LockMask))
@@ -161,68 +160,68 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                     if(ev->button == Button1)
                     {
                         if(ev->state & awesomeconf[screen].modkey)
-                            uicb_tag(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_tag(e->xany.display, &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                         else
-                            uicb_view(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_view(e->xany.display, &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                     }
                     else if(ev->button == Button3)
                     {
                         if(ev->state & awesomeconf[screen].modkey)
-                            uicb_toggletag(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_toggletag(e->xany.display, &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                         else
-                            uicb_toggleview(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_toggleview(e->xany.display, &awesomeconf[screen], awesomeconf[screen].tags[i].name);
                     }
                     else if(ev->button == Button4)
-                        uicb_tag_viewnext(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                        uicb_tag_viewnext(e->xany.display, &awesomeconf[screen], NULL);
                     else if(ev->button == Button5)
-                        uicb_tag_viewprev(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                        uicb_tag_viewprev(e->xany.display, &awesomeconf[screen], NULL);
                     return;
                 }
             }
             x += awesomeconf[screen].statusbar.width;
             if(ev->x < x && (ev->button == Button1 || ev->button == Button4))
-                uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], "+1");
+                uicb_setlayout(e->xany.display, &awesomeconf[screen], "+1");
             else if(ev->x < x && (ev->button == Button3 || ev->button == Button5))
-                uicb_setlayout(e->xany.display, &dc[screen], &awesomeconf[screen], "-1");
+                uicb_setlayout(e->xany.display, &awesomeconf[screen], "-1");
             else if(ev->button == Button4)
-                uicb_focusnext(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                uicb_focusnext(e->xany.display, &awesomeconf[screen], NULL);
             else if(ev->button == Button5)
-                uicb_focusprev(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                uicb_focusprev(e->xany.display, &awesomeconf[screen], NULL);
             return;
         }
 
     if((c = getclient(ev->window)))
     {
-        focus(c->display, &dc[c->screen], c, ev->same_screen, &awesomeconf[c->screen]);
+        focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
         if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
             return;
         if(ev->button == Button1)
         {
             if(!IS_ARRANGE(layout_floating) && !c->isfloating)
-                uicb_togglefloating(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
+                uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
             else
-                restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
+                restack(e->xany.display, &awesomeconf[c->screen]);
             movemouse(c, &awesomeconf[c->screen]);
         }
         else if(ev->button == Button2)
         {
             if(!IS_ARRANGE(layout_floating) && !c->isfixed && c->isfloating)
-                uicb_togglefloating(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
+                uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
             else
-                uicb_zoom(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
+                uicb_zoom(e->xany.display, &awesomeconf[c->screen], NULL);
         }
         else if(ev->button == Button3)
         {
             if(!IS_ARRANGE(layout_floating) && !c->isfloating)
-                uicb_togglefloating(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], NULL);
+                uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
             else
-                restack(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
+                restack(e->xany.display, &awesomeconf[c->screen]);
             resizemouse(c, &awesomeconf[c->screen]);
         }
         else if(ev->button == Button4)
-            uicb_settrans(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], "+5");
+            uicb_settrans(e->xany.display, &awesomeconf[c->screen], "+5");
         else if(ev->button == Button5)
-            uicb_settrans(e->xany.display, &dc[c->screen], &awesomeconf[c->screen], "-5");
+            uicb_settrans(e->xany.display, &awesomeconf[c->screen], "-5");
         }
     else if(!sel)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
@@ -231,9 +230,9 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             {
                 screen = get_screen_bycoord(e->xany.display, x, y);
                 if(ev->button == Button4)
-                    uicb_tag_viewnext(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                    uicb_tag_viewnext(e->xany.display, &awesomeconf[screen], NULL);
                 else if(ev->button == Button5)
-                    uicb_tag_viewprev(e->xany.display, &dc[screen], &awesomeconf[screen], NULL);
+                    uicb_tag_viewprev(e->xany.display, &awesomeconf[screen], NULL);
                 break;
             }
 }
@@ -311,7 +310,7 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
                           si[screen].width, awesomeconf[screen].statusbar.height);
             XFree(si);
             updatebarpos(e->xany.display, awesomeconf[screen].statusbar);
-            arrange(e->xany.display, &dc[screen], &awesomeconf[screen]);
+            arrange(e->xany.display, &awesomeconf[screen]);
         }
 }
 
@@ -322,7 +321,7 @@ handle_event_destroynotify(XEvent * e, awesome_config *awesomeconf)
     XDestroyWindowEvent *ev = &e->xdestroywindow;
 
     if((c = getclient(ev->window)))
-        unmanage(c, &dc[c->screen], WithdrawnState, &awesomeconf[c->screen]);
+        unmanage(c, WithdrawnState, &awesomeconf[c->screen]);
 }
 
 void
@@ -335,11 +334,11 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
     if((c = getclient(ev->window)))
-        focus(c->display, &dc[c->screen], c, ev->same_screen, &awesomeconf[c->screen]);
+        focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
-                focus(e->xany.display, &dc[screen], NULL, True, &awesomeconf[screen]);
+                focus(e->xany.display, NULL, True, &awesomeconf[screen]);
 }
 
 void
@@ -351,7 +350,7 @@ handle_event_expose(XEvent * e, awesome_config *awesomeconf)
     if(!ev->count)
         for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
             if(awesomeconf[screen].statusbar.window == ev->window)
-                drawstatusbar(e->xany.display, &dc[screen], &awesomeconf[screen]);
+                drawstatusbar(e->xany.display, &awesomeconf[screen]);
 }
 
 void
@@ -381,7 +380,7 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
     for(i = 0; i < awesomeconf[screen].nkeys; i++)
         if(keysym == awesomeconf[screen].keys[i].keysym
            && CLEANMASK(awesomeconf[screen].keys[i].mod, screen) == CLEANMASK(ev->state, screen) && awesomeconf[screen].keys[i].func)
-            awesomeconf[screen].keys[i].func(e->xany.display, &dc[screen], &awesomeconf[screen], awesomeconf[screen].keys[i].arg);
+            awesomeconf[screen].keys[i].func(e->xany.display, &awesomeconf[screen], awesomeconf[screen].keys[i].arg);
 }
 
 void
@@ -392,7 +391,7 @@ handle_event_leavenotify(XEvent * e, awesome_config *awesomeconf)
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if((ev->window == RootWindow(e->xany.display, screen)) && !ev->same_screen)
-            focus(e->xany.display, &dc[screen], NULL, ev->same_screen, &awesomeconf[screen]);
+            focus(e->xany.display, NULL, ev->same_screen, &awesomeconf[screen]);
 }
 
 void
@@ -423,7 +422,7 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
         for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
         if(screen == 0)
             screen = get_screen_bycoord(e->xany.display, wa.x, wa.y);
-        manage(e->xany.display, &dc[screen], ev->window, &wa, &awesomeconf[screen]);
+        manage(e->xany.display, ev->window, &wa, &awesomeconf[screen]);
     }
 }
 
@@ -443,7 +442,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating && (c->isfloating = (getclient(trans) != NULL)))
-                arrange(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
+                arrange(e->xany.display, &awesomeconf[c->screen]);
             break;
         case XA_WM_NORMAL_HINTS:
             updatesizehints(c);
@@ -453,7 +452,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         {
             updatetitle(c);
             if(c == sel)
-                drawstatusbar(e->xany.display, &dc[c->screen], &awesomeconf[c->screen]);
+                drawstatusbar(e->xany.display, &awesomeconf[c->screen]);
         }
     }
 }
@@ -466,7 +465,7 @@ handle_event_unmapnotify(XEvent * e, awesome_config *awesomeconf)
 
     if((c = getclient(ev->window))
        && ev->event == RootWindow(e->xany.display, c->phys_screen) && (ev->send_event || !c->unmapped))
-        unmanage(c, &dc[c->screen], WithdrawnState, &awesomeconf[c->screen]);
+        unmanage(c, WithdrawnState, &awesomeconf[c->screen]);
 }
 
 void

@@ -43,17 +43,15 @@
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
-DC *dc;
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool readin = True, running = True;
 
 /** Cleanup everything on quit
- * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  */
 static void
-cleanup(DC *drawcontext, awesome_config *awesomeconf)
+cleanup(awesome_config *awesomeconf)
 {
     int screen, i;
 
@@ -62,7 +60,7 @@ cleanup(DC *drawcontext, awesome_config *awesomeconf)
     while(stack)
     {
         unban(stack);
-        unmanage(stack, drawcontext, NormalState, awesomeconf);
+        unmanage(stack, NormalState, awesomeconf);
     }
 
     for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
@@ -72,7 +70,6 @@ cleanup(DC *drawcontext, awesome_config *awesomeconf)
         XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf[screen].phys_screen));
 
         XFreePixmap(awesomeconf->display, awesomeconf[screen].statusbar.drawable);
-        XFreeGC(awesomeconf->display, drawcontext[screen].gc);
         XDestroyWindow(awesomeconf->display, awesomeconf[screen].statusbar.window);
         XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurNormal]);
         XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurResize]);
@@ -97,7 +94,6 @@ cleanup(DC *drawcontext, awesome_config *awesomeconf)
     XSetInputFocus(awesomeconf->display, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(awesomeconf->display, False);
     p_delete(&awesomeconf);
-    p_delete(&dc);
 }
 
 /** Get a window state (WM_STATE)
@@ -126,11 +122,10 @@ getstate(Display *disp, Window w)
 
 /** Scan X to find windows to manage
  * \param screen Screen number
- * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  */
 static void
-scan(DC *drawcontext, awesome_config *awesomeconf)
+scan(awesome_config *awesomeconf)
 {
     unsigned int i, num;
     int screen, real_screen;
@@ -152,7 +147,7 @@ scan(DC *drawcontext, awesome_config *awesomeconf)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    manage(awesomeconf->display, &drawcontext[real_screen], wins[i], &wa, &awesomeconf[real_screen]);
+                    manage(awesomeconf->display, wins[i], &wa, &awesomeconf[real_screen]);
                 }
             }
             /* now the transients */
@@ -165,7 +160,7 @@ scan(DC *drawcontext, awesome_config *awesomeconf)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    manage(awesomeconf->display, &drawcontext[real_screen], wins[i], &wa, &awesomeconf[real_screen]);
+                    manage(awesomeconf->display, wins[i], &wa, &awesomeconf[real_screen]);
                 }
             }
         }
@@ -180,7 +175,7 @@ scan(DC *drawcontext, awesome_config *awesomeconf)
  * \todo clean things...
  */
 static void
-setup(DC *drawcontext, awesome_config *awesomeconf)
+setup(awesome_config *awesomeconf)
 {
     XSetWindowAttributes wa;
 
@@ -205,8 +200,6 @@ setup(DC *drawcontext, awesome_config *awesomeconf)
     /* bar */
     awesomeconf->statusbar.height = awesomeconf->font->height + 2;
     initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, awesomeconf->cursor[CurNormal]);
-    drawcontext->gc = XCreateGC(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), 0, 0);
-    XSetLineAttributes(awesomeconf->display, drawcontext->gc, 1, LineSolid, CapButt, JoinMiter);
 }
 
 /** Startup Error handler to check if another window manager
@@ -222,14 +215,12 @@ xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribut
 
 /** Quit awesome
  * \param disp Display ref
- * \param drawcontext Drawcontext ref
  * \param awesomeconf awesome config
  * \param arg nothing
  * \ingroup ui_callback
  */
 void
 uicb_quit(Display *disp __attribute__ ((unused)),
-          DC *drawcontext __attribute__ ((unused)),
           awesome_config *awesomeconf __attribute__((unused)),
           const char *arg __attribute__ ((unused)))
 {
@@ -320,14 +311,13 @@ main(int argc, char *argv[])
     XSync(dpy, False);
 
     /* allocate stuff */
-    dc = p_new(DC, get_screen_count(dpy));
     awesomeconf = p_new(awesome_config, get_screen_count(dpy));
 
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
         parse_config(dpy, screen, confpath, &awesomeconf[screen]);
-        setup(&dc[screen], &awesomeconf[screen]);
-        drawstatusbar(dpy, &dc[screen], &awesomeconf[screen]);
+        setup(&awesomeconf[screen]);
+        drawstatusbar(dpy, &awesomeconf[screen]);
     }
 
     netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
@@ -375,7 +365,7 @@ main(int argc, char *argv[])
         awesomeconf[screen].have_randr = awesomeconf[0].have_randr;
     }
 
-    scan(dc, awesomeconf);
+    scan(awesomeconf);
 
     XSync(dpy, False);
 
@@ -415,7 +405,7 @@ main(int argc, char *argv[])
                     a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
                               p + 1, sizeof(awesomeconf[0].statustext));
             }
-            drawstatusbar(dpy, &dc[0], &awesomeconf[0]);
+            drawstatusbar(dpy, &awesomeconf[0]);
         }
 
         while(XPending(dpy))
@@ -425,7 +415,7 @@ main(int argc, char *argv[])
                 handler[ev.type](&ev, awesomeconf);       /* call handler */
         }
     }
-    cleanup(dc, awesomeconf);
+    cleanup(awesomeconf);
     XCloseDisplay(dpy);
 
     return EXIT_SUCCESS;

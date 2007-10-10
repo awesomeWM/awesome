@@ -191,7 +191,6 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
 
 void
 uicb_focusnextscreen(Display *disp,
-                     DC *drawcontext,
                      awesome_config * awesomeconf,
                      const char *arg __attribute__ ((unused)))
 {
@@ -201,15 +200,14 @@ uicb_focusnextscreen(Display *disp,
     for(c = clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
     {
-        focus(c->display, &drawcontext[next_screen - awesomeconf->screen], c, True, &awesomeconf[next_screen - awesomeconf->screen]);
-        restack(c->display, &drawcontext[next_screen - awesomeconf->screen], &awesomeconf[next_screen - awesomeconf->screen]);
+        focus(c->display, c, True, &awesomeconf[next_screen - awesomeconf->screen]);
+        restack(c->display, &awesomeconf[next_screen - awesomeconf->screen]);
     }
     move_mouse_pointer_to_screen(disp, next_screen);
 }
 
 void
 uicb_focusprevscreen(Display *disp,
-                     DC *drawcontext,
                      awesome_config * awesomeconf,
                      const char *arg __attribute__ ((unused)))
 {
@@ -219,22 +217,20 @@ uicb_focusprevscreen(Display *disp,
     for(c = clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
     {
-        focus(c->display, &drawcontext[prev_screen - awesomeconf->screen], c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
-        restack(c->display, &drawcontext[prev_screen - awesomeconf->screen], &awesomeconf[prev_screen - awesomeconf->screen]);
+        focus(c->display, c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
+        restack(c->display, &awesomeconf[prev_screen - awesomeconf->screen]);
     }
     move_mouse_pointer_to_screen(disp, prev_screen);
 }
 
 /** Move client to a virtual screen (if Xinerama is active)
  * \param disp Display ref
- * \param drawcontext drawcontext ref
  * \param awesomeconf awesome config
  * \param arg screen number
  * \ingroup ui_callback
  */
 void
 uicb_movetoscreen(Display *disp,
-                  DC *drawcontext,
                   awesome_config * awesomeconf,
                   const char *arg)
 {
@@ -256,6 +252,6 @@ uicb_movetoscreen(Display *disp,
     prev_screen = sel->screen;
     move_client_to_screen(sel, &awesomeconf[new_screen - awesomeconf->screen], True);
     move_mouse_pointer_to_screen(disp, new_screen);
-    arrange(disp, drawcontext, &awesomeconf[prev_screen - awesomeconf->screen]);
-    arrange(disp, &drawcontext[new_screen - awesomeconf->screen], &awesomeconf[new_screen - awesomeconf->screen]);
+    arrange(disp, &awesomeconf[prev_screen - awesomeconf->screen]);
+    arrange(disp, &awesomeconf[new_screen - awesomeconf->screen]);
 }

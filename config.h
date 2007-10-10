@@ -39,11 +39,6 @@ enum
 
 typedef struct
 {
-    GC gc;
-} DC;
-
-typedef struct
-{
     char *prop;
     char *tags;
     Bool isfloating;
@@ -61,7 +56,7 @@ typedef struct
 {
     unsigned long mod;
     KeySym keysym;
-    void (*func) (Display *, DC *, awesome_config *, char *);
+    void (*func) (Display *, awesome_config *, char *);
     char *arg;
 } Key;
 
