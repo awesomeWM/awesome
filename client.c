@@ -72,16 +72,16 @@ grabbuttons(Client * c, Bool focused, Bool raised, KeySym modkey, unsigned int n
 
     if(focused)
     {
-        if (!raised)
+        if(!raised)
         {
-            XGrabButton(c->display, Button1, NoSymbol, c->win, False, BUTTONMASK,
-                  GrabModeAsync, GrabModeSync, None, None);
+            XGrabButton(c->display, Button1, NoSymbol, c->win, False,
+                        ButtonPressMask, GrabModeAsync, GrabModeSync, None, None);
             XGrabButton(c->display, Button1, LockMask, c->win, False,
-                  BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+                        ButtonPressMask, GrabModeAsync, GrabModeSync, None, None);
             XGrabButton(c->display, Button1, numlockmask, c->win, False,
-                  BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-            XGrabButton(c->display, Button1, numlockmask | LockMask,
-                  c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+                        ButtonPressMask, GrabModeAsync, GrabModeSync, None, None);
+            XGrabButton(c->display, Button1, numlockmask | LockMask, c->win, False,
+                        ButtonPressMask, GrabModeAsync, GrabModeSync, None, None);
         }
 
         XGrabButton(c->display, Button1, modkey, c->win, False, BUTTONMASK,
@@ -135,6 +135,7 @@ grabbuttons(Client * c, Bool focused, Bool raised, KeySym modkey, unsigned int n
     {
         XGrabButton(c->display, AnyButton, AnyModifier, c->win, False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
+
         XGrabButton(c->display, Button4, NoSymbol, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
         XGrabButton(c->display, Button4, LockMask, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,

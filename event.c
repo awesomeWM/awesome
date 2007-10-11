@@ -205,8 +205,8 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         {
            if (ev->button == Button1)
            {
-              restack(c->display, &awesomeconf[c->screen]);
-              grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
+               restack(c->display, &awesomeconf[c->screen]);
+               grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
            }
         }
         else if(ev->button == Button1)
