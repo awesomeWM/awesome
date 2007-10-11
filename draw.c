@@ -21,23 +21,22 @@
 
 #include <cairo.h>
 #include <cairo-xlib.h>
+#include <math.h>
 #include "layout.h"
 #include "util.h"
 #include "draw.h"
 
 void
-drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable drawable, XftFont *font, const char *text, XColor color[ColLast])
+drawtext(Display *disp, int screen, int x, int y, int w, int h, Drawable drawable, int dw, int dh, XftFont *font, const char *text, XColor color[ColLast])
 {
     int nw = 0;
     static char buf[256];
     size_t len, olen;
-    XRectangle r = { x, y, w, h };
     XRenderColor xrcolor;
     XftColor xftcolor;
     XftDraw *xftdrawable;
 
-    XSetForeground(disp, gc, color[ColBG].pixel);
-    XFillRectangles(disp, drawable, gc, &r, 1);
+    drawrectangle(disp, screen, x, y, w, h, drawable, dw, dh, True, color[ColBG]);
     if(!text)
         return;
     olen = len = a_strlen(text);
@@ -81,14 +80,14 @@ drawrectangle(Display *disp, int screen, int x, int y, int w, int h, Drawable dr
 
     cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(cr, 1.0);
-    cairo_set_source_rgb(cr, color.red, color.green, color.blue);
+    cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
     if(filled)
     {
-        cairo_rectangle(cr, x + 1, y + 1, w + 1, h + 1);
+        cairo_rectangle(cr, x, y, w + 1, h + 1);
         cairo_fill(cr);
     }
     else
-        cairo_rectangle(cr, x + 1, y + 1, w, h);
+        cairo_rectangle(cr, x + 1, y, w, h);
     cairo_stroke(cr);
 
     cairo_destroy(cr);
