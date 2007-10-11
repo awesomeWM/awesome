@@ -46,7 +46,7 @@ arrange(Display * disp, awesome_config *awesomeconf)
         else if(c->screen == awesomeconf->screen)
             ban(c);
     }
-    awesomeconf->current_layout->arrange(disp, awesomeconf);
+    awesomeconf->current_layout->arrange(awesomeconf);
     focus(disp, NULL, True, awesomeconf);
     restack(disp, awesomeconf);
 }

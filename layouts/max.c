@@ -24,10 +24,10 @@
 #include "layouts/max.h"
 
 void
-layout_max(Display *disp, awesome_config *awesomeconf)
+layout_max(awesome_config *awesomeconf)
 {
     Client *c;
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
 
     for(c = *awesomeconf->clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))

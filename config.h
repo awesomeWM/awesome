@@ -49,7 +49,7 @@ typedef struct awesome_config awesome_config;
 typedef struct
 {
     char *symbol;
-    void (*arrange) (Display *, awesome_config *);
+    void (*arrange) (awesome_config *);
 } Layout;
 
 typedef struct

@@ -28,6 +28,6 @@
 #define UICB_PROTO(name)         void name(awesome_config *, const char *)
 
 /** Common prototype definition for layouts function */
-#define LAYOUT_PROTO(name)         void name(Display *, awesome_config *)
+#define LAYOUT_PROTO(name)         void name(awesome_config *)
 
 #endif

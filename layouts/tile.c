@@ -83,7 +83,7 @@ uicb_setmwfact(awesome_config * awesomeconf,
 }
 
 static void
-_tile(Display *disp, awesome_config *awesomeconf, const Bool right)
+_tile(awesome_config *awesomeconf, const Bool right)
 {
     /* windows area geometry */
     int wah = 0, waw = 0, wax = 0, way = 0;
@@ -96,7 +96,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
     ScreenInfo *screens_info = NULL;
     Client *c;
 
-    screens_info = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
+    screens_info = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
 
     for(n = 0, c = *awesomeconf->clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
@@ -168,13 +168,13 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 }
 
 void
-layout_tile(Display *disp, awesome_config *awesomeconf)
+layout_tile(awesome_config *awesomeconf)
 {
-    _tile(disp, awesomeconf, True);
+    _tile(awesomeconf, True);
 }
 
 void
-layout_tileleft(Display *disp, awesome_config *awesomeconf)
+layout_tileleft(awesome_config *awesomeconf)
 {
-    _tile(disp, awesomeconf, False);
+    _tile(awesomeconf, False);
 }

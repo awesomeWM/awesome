@@ -23,8 +23,8 @@
 #include "layouts/floating.h"
 
 void
-layout_floating(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
-{                               /* default floating layout */
+layout_floating(awesome_config *awesomeconf)
+{
     Client *c;
 
     for(c = *awesomeconf->clients; c; c = c->next)
