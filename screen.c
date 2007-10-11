@@ -106,11 +106,11 @@ get_screen_bycoord(Display *disp, int x, int y)
         if(x >= si[i].x_org && x < si[i].x_org + si[i].width
            && y >= si[i].y_org && y < si[i].y_org + si[i].height)
         {
-            XFree(si);
+            p_delete(&si);
             return i;
         }
 
-    XFree(si);
+    p_delete(&si);
     return DefaultScreen(disp);
 }
 
@@ -167,7 +167,7 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
     c->ry = si[c->screen].y_org;
     if(doresize)
         resize(c, c->rx, c->ry, c->rw, c->rh, acf_new, True);
-    XFree(si);
+    p_delete(&si);
 }
 
 /** Move mouse pointer to x_org and y_xorg of specified screen
@@ -181,7 +181,7 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
     {
         ScreenInfo *si = get_screen_info(disp, screen, NULL);
         XWarpPointer(disp, None, DefaultRootWindow(disp), 0, 0, 0, 0, si[screen].x_org, si[screen].y_org);
-        XFree(si);
+        p_delete(&si);
     }
     else
         XWarpPointer(disp, None, RootWindow(disp, screen), 0, 0, 0, 0, 0, 0);

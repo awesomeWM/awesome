@@ -97,7 +97,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
             break;
         }
     }
-    XFree(si);
+    p_delete(&si);
 }
 
 static void
@@ -311,15 +311,22 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
             DisplayWidth(e->xany.display, screen) = ev->width;
             DisplayHeight(e->xany.display, screen) = ev->height;
 
-            si = get_screen_info(e->xany.display, screen, NULL);
+            /* update statusbar */
             XFreePixmap(e->xany.display, awesomeconf[screen].statusbar.drawable);
+
+            si = get_screen_info(e->xany.display, screen, NULL);
+            awesomeconf[screen].statusbar.width = si[screen].width;
+            p_delete(&si);
+
             awesomeconf[screen].statusbar.drawable = XCreatePixmap(e->xany.display, RootWindow(e->xany.display, screen),
-                                                                   si[screen].width,
+                                                                   awesomeconf[screen].statusbar.width,
                                                                    awesomeconf[screen].statusbar.height,
                                                                    DefaultDepth(e->xany.display, screen));
-            XResizeWindow(e->xany.display, awesomeconf[screen].statusbar.window,
-                          si[screen].width, awesomeconf[screen].statusbar.height);
-            XFree(si);
+            XResizeWindow(e->xany.display,
+                          awesomeconf[screen].statusbar.window,
+                          awesomeconf[screen].statusbar.width,
+                          awesomeconf[screen].statusbar.height);
+
             updatebarpos(e->xany.display, awesomeconf[screen].statusbar);
             arrange(e->xany.display, &awesomeconf[screen]);
         }

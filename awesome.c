@@ -112,7 +112,7 @@ getstate(Display *disp, Window w)
         return -1;
     if(n != 0)
         result = *p;
-    XFree(p);
+    p_delete(&p);
     return result;
 }
 

@@ -231,7 +231,7 @@ updatebarpos(Display *disp, Statusbar statusbar)
         XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].y_org - statusbar.height);
         break;
     }
-    XFree(si);
+    p_delete(&si);
     XSync(disp, False);
     while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
 }

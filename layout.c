@@ -237,7 +237,7 @@ uicb_togglemax(awesome_config *awesomeconf,
              si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
              si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
              awesomeconf);
-    XFree(si);
+    p_delete(&si);
 }
 
 void
@@ -252,7 +252,7 @@ uicb_toggleverticalmax(awesome_config *awesomeconf,
                  (*awesomeconf->client_sel)->w,
                  si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
                  awesomeconf);
-    XFree(si);
+    p_delete(&si);
 }
 
 
@@ -268,7 +268,7 @@ uicb_togglehorizontalmax(awesome_config *awesomeconf,
                  si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
                  (*awesomeconf->client_sel)->h,
                  awesomeconf);
-    XFree(si);
+    p_delete(&si);
 }
 
 void

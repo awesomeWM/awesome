@@ -407,7 +407,7 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
             c->y = c->ry = si->y_org;
         c->border = awesomeconf->borderpx;
     }
-    XFree(si);
+    p_delete(&si);
     wc.border_width = c->border;
     XConfigureWindow(disp, w, CWBorderWidth, &wc);
     XSetWindowBorder(disp, w, awesomeconf->colors_normal[ColBorder].pixel);
@@ -493,7 +493,7 @@ resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool 
         x = si->width - w - 2 * c->border;
     if(y > si->height)
         y = si->height - h - 2 * c->border;
-    XFree(si);
+    p_delete(&si);
     if(x + w + 2 * c->border < 0)
         x = 0;
     if(y + h + 2 * c->border < 0)
