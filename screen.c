@@ -24,7 +24,7 @@
 #include "tag.h"
 #include "layout.h"
 
-extern Client *sel, *clients;
+extern Client *sel;
 
 /** Get screens info
  * \param disp Display ref
@@ -197,7 +197,7 @@ uicb_focusnextscreen(Display *disp,
     Client *c;
     int next_screen = awesomeconf->screen + 1 >= get_screen_count(disp) ? 0 : awesomeconf->screen + 1;
 
-    for(c = clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
+    for(c = *awesomeconf->clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
     {
         focus(c->display, c, True, &awesomeconf[next_screen - awesomeconf->screen]);
@@ -214,7 +214,7 @@ uicb_focusprevscreen(Display *disp,
     Client *c;
     int prev_screen = awesomeconf->screen - 1 < 0 ? get_screen_count(disp) - 1 : awesomeconf->screen - 1;
 
-    for(c = clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
+    for(c = *awesomeconf->clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
     {
         focus(c->display, c, True, &awesomeconf[prev_screen - awesomeconf->screen]);

@@ -28,7 +28,7 @@
 #include "util.h"
 #include "layouts/tile.h"
 
-extern Client *clients, *sel;   /* global client list */
+extern Client *sel;
 
 /** Check if at least a client is tagged with tag number t and is on screen
  * screen
@@ -37,11 +37,11 @@ extern Client *clients, *sel;   /* global client list */
  * \return True or False
  */
 static Bool
-isoccupied(unsigned int t, int screen)
+isoccupied(Client **head, unsigned int t, int screen)
 {
     Client *c;
 
-    for(c = clients; c; c = c->next)
+    for(c = *head; c; c = c->next)
         if(c->tags[t] && c->screen == screen)
             return True;
     return False;
@@ -67,7 +67,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->statusbar.height,
                      awesomeconf->font,
                      awesomeconf->tags[i].name, awesomeconf->colors_selected);
-            if(isoccupied(i, awesomeconf->screen))
+            if(isoccupied(awesomeconf->clients, i, awesomeconf->screen))
                 drawrectangle(disp, awesomeconf->phys_screen,
                               x, y,
                               (awesomeconf->font->height + 2) / 4,
@@ -88,7 +88,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->statusbar.height,
                      awesomeconf->font,
                      awesomeconf->tags[i].name, awesomeconf->colors_normal);
-            if(isoccupied(i, awesomeconf->screen))
+            if(isoccupied(awesomeconf->clients, i, awesomeconf->screen))
                 drawrectangle(disp, awesomeconf->phys_screen,
                               x, y,
                               (awesomeconf->font->height + 2) / 4,

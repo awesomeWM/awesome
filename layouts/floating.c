@@ -22,15 +22,12 @@
 #include "tag.h"
 #include "layouts/floating.h"
 
-/* extern */
-extern Client *clients;         /* global client */
-
 void
 layout_floating(Display *disp __attribute__ ((unused)), awesome_config *awesomeconf)
 {                               /* default floating layout */
     Client *c;
 
-    for(c = clients; c; c = c->next)
+    for(c = *awesomeconf->clients; c; c = c->next)
         if(isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
         {
             if(c->ftview)

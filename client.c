@@ -34,7 +34,7 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern Client *clients, *sel, *stack;   /* global client list and stack */
+extern Client *sel, *stack;   /* global client list and stack */
 
 /** Attach client stack to clients stacks
  * \param c the client
@@ -219,7 +219,7 @@ setclienttrans(Client *c, double opacity)
  * \param c2 second client
  */
 static void
-client_swap(Client *c1, Client *c2)
+client_swap(Client **head, Client *c1, Client *c2)
 {
     Client *tmp;
 
@@ -243,24 +243,24 @@ client_swap(Client *c1, Client *c2)
     if(c2->prev)
         c2->prev->next = c2;
 
-    if(clients == c1)
-        clients = c2;
+    if(*head == c1)
+        *head = c2;
 }
 
 /** Attach client to the beginning of the clients stack
  * \param c the client
  */
 void
-attach(Client * c)
+attach(Client **head, Client *c)
 {
-    if(clients)
-        clients->prev = c;
-    c->next = clients;
-    clients = c;
+    if(*head)
+        (*head)->prev = c;
+    c->next = *head;
+    *head = c;
 }
 
 void
-updatetitle(Client * c)
+updatetitle(Client *c)
 {
     if(!xgettextprop(c->display, c->win, XInternAtom(c->display, "_NET_WM_NAME", False), c->name, sizeof c->name))
         xgettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof c->name);
@@ -304,14 +304,14 @@ configure(Client * c)
  * \param c client to detach
  */
 void
-detach(Client * c)
+detach(Client **head, Client *c)
 {
     if(c->prev)
         c->prev->next = c->next;
     if(c->next)
         c->next->prev = c->prev;
-    if(c == clients)
-        clients = c->next;
+    if(c == *head)
+        *head = c->next;
     c->next = c->prev = NULL;
 }
 
@@ -452,7 +452,7 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     updatetitle(c);
     move_client_to_screen(c, awesomeconf, False);
     if((rettrans = XGetTransientForHint(disp, w, &trans) == Success))
-        for(t = clients; t && t->win != trans; t = t->next);
+        for(t = *awesomeconf->clients; t && t->win != trans; t = t->next);
     if(t)
         for(i = 0; i < awesomeconf->ntags; i++)
             c->tags[i] = t->tags[i];
@@ -461,7 +461,7 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     if(!c->isfloating)
         c->isfloating = (rettrans == Success) || c->isfixed;
     saveprops(c, awesomeconf->ntags);
-    attach(c);
+    attach(awesomeconf->clients, c);
     attachstack(c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
     c->isbanned = True;
@@ -588,7 +588,7 @@ unmanage(Client * c, long state, awesome_config *awesomeconf)
     /* The server grab construct avoids race conditions. */
     XGrabServer(c->display);
     XConfigureWindow(c->display, c->win, CWBorderWidth, &wc);  /* restore border */
-    detach(c);
+    detach(awesomeconf->clients, c);
     detachstack(c);
     if(sel == c)
         focus(c->display, NULL, True, awesomeconf);
@@ -760,7 +760,7 @@ uicb_swapnext(Display *disp,
     for(next = sel->next; next && !isvisible(next, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); next = next->next);
     if(next)
     {
-        client_swap(sel, next);
+        client_swap(awesomeconf->clients, sel, next);
         arrange(disp, awesomeconf);
     }
 }
@@ -778,7 +778,7 @@ uicb_swapprev(Display *disp,
     for(prev = sel->prev; prev && !isvisible(prev, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); prev = prev->prev);
     if(prev)
     {
-        client_swap(prev, sel);
+        client_swap(awesomeconf->clients, prev, sel);
         arrange(disp, awesomeconf);
     }
 }

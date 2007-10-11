@@ -40,7 +40,6 @@
 #include "util.h"
 #include "statusbar.h"
 
-Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
 
@@ -91,6 +90,7 @@ cleanup(awesome_config *awesomeconf)
     }
     XSetInputFocus(awesomeconf->display, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(awesomeconf->display, False);
+    p_delete(&awesomeconf->clients);
     p_delete(&awesomeconf);
 }
 
@@ -269,6 +269,7 @@ main(int argc, char *argv[])
     enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */
     Atom netatom[NetLast];
     event_handler **handler;
+    Client **clients;
 
     if(argc >= 2)
     {
@@ -309,11 +310,13 @@ main(int argc, char *argv[])
 
     /* allocate stuff */
     awesomeconf = p_new(awesome_config, get_screen_count(dpy));
+    clients = p_new(Client *, 1);
 
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
         parse_config(dpy, screen, confpath, &awesomeconf[screen]);
         setup(&awesomeconf[screen]);
+        awesomeconf[screen].clients = clients;
         drawstatusbar(dpy, &awesomeconf[screen]);
     }
 

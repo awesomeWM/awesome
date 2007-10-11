@@ -92,6 +92,41 @@ typedef struct
     Layout *layout;
 } Tag;
 
+typedef struct Client Client; 
+struct Client
+{
+    /** Client name */
+    char name[256];
+    /** Window geometry */
+    int x, y, w, h;
+    /** Real window geometry for floating */
+    int rx, ry, rw, rh;
+    int basew, baseh, incw, inch, maxw, maxh, minw, minh;
+    int minax, maxax, minay, maxay;
+    /** True if client is unmapped */
+    Bool unmapped;
+    long flags;
+    int border, oldborder;
+    Bool isbanned, isfixed, ismax, isfloating, wasfloating;
+    /** Tags for the client */
+    Bool *tags;
+    /** Next client */
+    Client *next;
+    /** Previous client */
+    Client *prev;
+    Client *snext;
+    /** Window of the client */
+    Window win;
+    /** Client display */
+    Display *display;
+    /** Client logical screen */
+    int screen;
+    /** Client physical screen */
+    int phys_screen;
+    /** First time viewed on new layout */
+    Bool ftview;
+};
+
 /** Main configuration structure */
 struct awesome_config
 {
@@ -157,6 +192,8 @@ struct awesome_config
     Cursor cursor[CurLast];
     /** Font */
     XftFont *font;
+    /** Clients list */
+    Client **clients;
 };
 
 void parse_config(Display *, int, const char *, awesome_config *);        /* parse configuration file */

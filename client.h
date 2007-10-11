@@ -27,46 +27,12 @@
 /** Mask shorthands, used in event.c and client.c */
 #define BUTTONMASK              (ButtonPressMask | ButtonReleaseMask)
 
-typedef struct Client Client;
-struct Client
-{
-    /** Client name */
-    char name[256];
-    /** Window geometry */
-    int x, y, w, h;
-    /** Real window geometry for floating */
-    int rx, ry, rw, rh;
-    int basew, baseh, incw, inch, maxw, maxh, minw, minh;
-    int minax, maxax, minay, maxay;
-    /** True if client is unmapped */
-    Bool unmapped;
-    long flags;
-    int border, oldborder;
-    Bool isbanned, isfixed, ismax, isfloating, wasfloating;
-    /** Tags for the client */
-    Bool *tags;
-    /** Next client */
-    Client *next;
-    /** Previous client */
-    Client *prev;
-    Client *snext;
-    /** Window of the client */
-    Window win;
-    /** Client display */
-    Display *display;
-    /** Client logical screen */
-    int screen;
-    /** Client physical screen */
-    int phys_screen;
-    /** First time viewed on new layout */
-    Bool ftview;
-};
 
 void grabbuttons(Client *, Bool, Bool, KeySym, unsigned int);
-inline void attach(Client *);          /* attaches c to global client list */
+inline void attach(Client **, Client *);
+inline void detach(Client **, Client *);
 void ban(Client *);             /* bans c */
 void configure(Client *);       /* send synthetic configure event */
-void detach(Client *);          /* detaches c from global client list */
 void focus(Display *, Client *, Bool, awesome_config *);           /* focus c if visible && !NULL, or focus top visible */
 void manage(Display *, Window, XWindowAttributes *, awesome_config *);
 void resize(Client *, int, int, int, int, awesome_config *, Bool);        /* resize with given coordinates c */

@@ -28,9 +28,6 @@
 #include "layout.h"
 #include "layouts/tile.h"
 
-/* extern */
-extern Client *clients;
-
 void
 uicb_setnmaster(Display *disp,
                 awesome_config *awesomeconf,
@@ -104,7 +101,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 
     screens_info = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
-    for(n = 0, c = clients; c; c = c->next)
+    for(n = 0, c = *awesomeconf->clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             n++;
 
@@ -130,7 +127,7 @@ _tile(Display *disp, awesome_config *awesomeconf, const Bool right)
 
     real_ncol = MIN(otherwin, awesomeconf->ncol);
 
-    for(i = 0, c = clients; c; c = c->next)
+    for(i = 0, c = *awesomeconf->clients; c; c = c->next)
     {
         if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             continue;

@@ -30,7 +30,7 @@
 #include "layouts/floating.h"
 
 /* extern */
-extern Client *clients, *sel;   /* global client list */
+extern Client *sel;
 
 /** Arrange windows following current selected layout
  * \param disp display ref
@@ -41,7 +41,7 @@ arrange(Display * disp, awesome_config *awesomeconf)
 {
     Client *c;
 
-    for(c = clients; c; c = c->next)
+    for(c = *awesomeconf->clients; c; c = c->next)
     {
         if(isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             unban(c);
@@ -65,7 +65,7 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
         return;
     for(c = sel->next; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
     if(!c)
-        for(c = clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
+        for(c = *awesomeconf->clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
     if(c)
     {
         focus(c->display, c, True, awesomeconf);
@@ -85,7 +85,7 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
     for(c = sel->prev; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->prev);
     if(!c)
     {
-        for(c = clients; c && c->next; c = c->next);
+        for(c = *awesomeconf->clients; c && c->next; c = c->next);
         for(; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->prev);
     }
     if(c)
@@ -137,7 +137,7 @@ restack(Display * disp, awesome_config *awesomeconf)
             XConfigureWindow(disp, sel->win, CWSibling | CWStackMode, &wc);
             wc.sibling = sel->win;
         }
-        for(c = clients; c; c = c->next)
+        for(c = *awesomeconf->clients; c; c = c->next)
         {
             if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags) || c == sel)
                 continue;
@@ -189,7 +189,7 @@ uicb_setlayout(Display *disp,
 
     awesomeconf->current_layout = &awesomeconf->layouts[i];
 
-    for(c = clients; c; c = c->next)
+    for(c = *awesomeconf->clients; c; c = c->next)
         c->ftview = True;
 
     if(sel)
@@ -278,8 +278,8 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
 {
     if(!sel)
         return;
-    detach(sel);
-    attach(sel);
+    detach(awesomeconf->clients, sel);
+    attach(awesomeconf->clients, sel);
     focus(sel->display, sel, True, awesomeconf);
     arrange(sel->display, awesomeconf);
 }

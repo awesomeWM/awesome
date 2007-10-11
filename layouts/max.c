@@ -23,16 +23,13 @@
 #include "screen.h"
 #include "layouts/max.h"
 
-/* extern */
-extern Client *clients;         /* global client */
-
 void
 layout_max(Display *disp, awesome_config *awesomeconf)
 {
     Client *c;
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
-    for(c = clients; c; c = c->next)
+    for(c = *awesomeconf->clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             resize(c, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
                    si[awesomeconf->screen].width - 2 * c->border,
