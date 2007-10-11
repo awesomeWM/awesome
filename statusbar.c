@@ -179,7 +179,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
 }
 
 void
-initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor)
+initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font)
 {
     XSetWindowAttributes wa;
     int phys_screen;
@@ -209,6 +209,7 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor)
                                         statusbar->height,
                                         DefaultDepth(disp, phys_screen));
     statusbar->width = si[screen].width;
+    statusbar->height = font->height + 2; 
 }
 
 void
