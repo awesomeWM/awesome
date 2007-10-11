@@ -25,6 +25,6 @@
 #include "config.h"
 
 void drawtext(Display *, int, int, int, int, int, GC, Drawable, XftFont *, const char *, XColor []);
-void drawsquare(Display *, int, int, int, int, Drawable, int, int, Bool, XColor);
+void drawrectangle(Display *, int, int, int, int, int, Drawable, int, int, Bool, XColor);
 inline unsigned short textwidth(Display *, XftFont *, char *, ssize_t);
 #endif

@@ -70,13 +70,15 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->statusbar.drawable, awesomeconf->font,
                      awesomeconf->tags[i].name, awesomeconf->colors_selected);
             if(isoccupied(i, awesomeconf->screen))
-                drawsquare(disp, awesomeconf->phys_screen,
-                           x, y, (awesomeconf->font->height + 2) / 4,
-                           awesomeconf->statusbar.drawable,
-                           awesomeconf->statusbar.width,
-                           awesomeconf->statusbar.height,
-                           sel && sel->tags[i],
-                           awesomeconf->colors_selected[ColFG]);
+                drawrectangle(disp, awesomeconf->phys_screen,
+                              x, y,
+                              (awesomeconf->font->height + 2) / 4,
+                              (awesomeconf->font->height + 2) / 4,
+                              awesomeconf->statusbar.drawable,
+                              awesomeconf->statusbar.width,
+                              awesomeconf->statusbar.height,
+                              sel && sel->tags[i],
+                              awesomeconf->colors_selected[ColFG]);
         }
         else
         {
@@ -86,13 +88,15 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->statusbar.drawable, awesomeconf->font,
                      awesomeconf->tags[i].name, awesomeconf->colors_normal);
             if(isoccupied(i, awesomeconf->screen))
-                drawsquare(disp, awesomeconf->phys_screen,
-                           x, y, (awesomeconf->font->height + 2) / 4,
-                           awesomeconf->statusbar.drawable,
-                           awesomeconf->statusbar.width,
-                           awesomeconf->statusbar.height,
-                           sel && sel->tags[i],
-                           awesomeconf->colors_normal[ColFG]);
+                drawrectangle(disp, awesomeconf->phys_screen,
+                              x, y,
+                              (awesomeconf->font->height + 2) / 4,
+                              (awesomeconf->font->height + 2) / 4,
+                              awesomeconf->statusbar.drawable,
+                              awesomeconf->statusbar.width,
+                              awesomeconf->statusbar.height,
+                              sel && sel->tags[i],
+                              awesomeconf->colors_normal[ColFG]);
         }
         x += w;
     }
@@ -126,13 +130,15 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->statusbar.drawable, awesomeconf->font,
                      sel->name, awesomeconf->colors_selected);
             if(sel->isfloating)
-                drawsquare(disp, awesomeconf->phys_screen,
-                           x, y,  (awesomeconf->font->height + 2) / 4,
-                           awesomeconf->statusbar.drawable,
-                           awesomeconf->statusbar.width,
-                           awesomeconf->statusbar.height,
-                           sel->ismax,
-                           awesomeconf->colors_selected[ColFG]);
+                drawrectangle(disp, awesomeconf->phys_screen,
+                              x, y,
+                              (awesomeconf->font->height + 2) / 4,
+                              (awesomeconf->font->height + 2) / 4,
+                              awesomeconf->statusbar.drawable,
+                              awesomeconf->statusbar.width,
+                              awesomeconf->statusbar.height,
+                              sel->ismax,
+                              awesomeconf->colors_selected[ColFG]);
         }
         else if(IS_ARRANGE(0, layout_tile) || IS_ARRANGE(0, layout_tileleft))
         {

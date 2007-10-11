@@ -71,7 +71,7 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, GC gc, Drawable 
 }
 
 void
-drawsquare(Display *disp, int screen, int x, int y, int h, Drawable drawable, int dw, int dh, Bool filled, XColor color)
+drawrectangle(Display *disp, int screen, int x, int y, int w, int h, Drawable drawable, int dw, int dh, Bool filled, XColor color)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -84,11 +84,11 @@ drawsquare(Display *disp, int screen, int x, int y, int h, Drawable drawable, in
     cairo_set_source_rgb(cr, color.red, color.green, color.blue);
     if(filled)
     {
-        cairo_rectangle(cr, x + 1, y + 1, h + 1, h + 1);
+        cairo_rectangle(cr, x + 1, y + 1, w + 1, h + 1);
         cairo_fill(cr);
     }
     else
-        cairo_rectangle(cr, x + 1, y + 1, h, h);
+        cairo_rectangle(cr, x + 1, y + 1, w, h);
     cairo_stroke(cr);
 
     cairo_destroy(cr);
