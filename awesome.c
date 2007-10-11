@@ -55,8 +55,6 @@ cleanup(awesome_config *awesomeconf)
 {
     int screen, i;
 
-    close(STDIN_FILENO);
-
     while(stack)
     {
         unban(stack);
@@ -414,6 +412,7 @@ main(int argc, char *argv[])
                 handler[ev.type](&ev, awesomeconf);       /* call handler */
         }
     }
+    close(STDIN_FILENO);
     cleanup(awesomeconf);
     XCloseDisplay(dpy);
 
