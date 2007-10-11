@@ -29,8 +29,7 @@
 #include "layouts/tile.h"
 
 void
-uicb_setnmaster(Display *disp,
-                awesome_config *awesomeconf,
+uicb_setnmaster(awesome_config *awesomeconf,
                 const char * arg)
 {
     if(!arg || (!IS_ARRANGE(0, layout_tile) && !IS_ARRANGE(0, layout_tileleft)))
@@ -40,12 +39,11 @@ uicb_setnmaster(Display *disp,
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
         awesomeconf->nmaster = 0;
 
-    arrange(disp, awesomeconf);
+    arrange(awesomeconf->display, awesomeconf);
 }
 
 void
-uicb_setncol(Display *disp,
-             awesome_config *awesomeconf,
+uicb_setncol(awesome_config *awesomeconf,
              const char * arg)
 {
     if(!arg || (!IS_ARRANGE(0, layout_tile) && !IS_ARRANGE(0, layout_tileleft)))
@@ -54,12 +52,11 @@ uicb_setncol(Display *disp,
     if((awesomeconf->ncol = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncol)) < 1)
         awesomeconf->ncol = 1;
 
-    arrange(disp, awesomeconf);
+    arrange(awesomeconf->display, awesomeconf);
 }
 
 void
-uicb_setmwfact(Display *disp,
-               awesome_config * awesomeconf,
+uicb_setmwfact(awesome_config * awesomeconf,
                const char *arg)
 {
     char *newarg;
@@ -81,7 +78,7 @@ uicb_setmwfact(Display *disp,
     else if(awesomeconf->mwfact > 0.9)
         awesomeconf->mwfact = 0.9;
 
-    arrange(disp, awesomeconf);
+    arrange(awesomeconf->display, awesomeconf);
     p_delete(&newarg);
 }
 

@@ -52,8 +52,7 @@ arrange(Display * disp, awesome_config *awesomeconf)
 }
 
 void
-uicb_focusnext(Display *disp __attribute__ ((unused)),
-               awesome_config * awesomeconf,
+uicb_focusnext(awesome_config * awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
     Client *c;
@@ -71,8 +70,7 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
 }
 
 void
-uicb_focusprev(Display *disp __attribute__ ((unused)),
-               awesome_config *awesomeconf,
+uicb_focusprev(awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
     Client *c;
@@ -165,8 +163,7 @@ saveawesomeprops(Display *disp, awesome_config *awesomeconf)
 }
 
 void
-uicb_setlayout(Display *disp,
-               awesome_config * awesomeconf,
+uicb_setlayout(awesome_config * awesomeconf,
                const char *arg)
 {
     int i;
@@ -190,11 +187,11 @@ uicb_setlayout(Display *disp,
         c->ftview = True;
 
     if(*awesomeconf->client_sel)
-        arrange(disp, awesomeconf);
+        arrange(awesomeconf->display, awesomeconf);
     else
-        drawstatusbar(disp, awesomeconf);
+        drawstatusbar(awesomeconf->display, awesomeconf);
 
-    saveawesomeprops(disp, awesomeconf);
+    saveawesomeprops(awesomeconf->display, awesomeconf);
 
     for(i = 0; i < awesomeconf->ntags; i++)
         if (awesomeconf->tags[i].selected)
@@ -231,11 +228,10 @@ maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
 }
 
 void
-uicb_togglemax(Display *disp,
-               awesome_config *awesomeconf,
+uicb_togglemax(awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
 
     maximize(si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
              si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
@@ -245,11 +241,10 @@ uicb_togglemax(Display *disp,
 }
 
 void
-uicb_toggleverticalmax(Display *disp,
-                       awesome_config *awesomeconf,
+uicb_toggleverticalmax(awesome_config *awesomeconf,
                        const char *arg __attribute__ ((unused)))
 {
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
 
     if(*awesomeconf->client_sel)
         maximize((*awesomeconf->client_sel)->x,
@@ -262,11 +257,10 @@ uicb_toggleverticalmax(Display *disp,
 
 
 void
-uicb_togglehorizontalmax(Display *disp,
-                         awesome_config *awesomeconf,
+uicb_togglehorizontalmax(awesome_config *awesomeconf,
                          const char *arg __attribute__ ((unused)))
 {
-    ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
 
     if(*awesomeconf->client_sel)
         maximize(si[awesomeconf->screen].x_org,
@@ -278,8 +272,7 @@ uicb_togglehorizontalmax(Display *disp,
 }
 
 void
-uicb_zoom(Display *disp __attribute__ ((unused)),
-          awesome_config *awesomeconf,
+uicb_zoom(awesome_config *awesomeconf,
           const char *arg __attribute__ ((unused)))
 {
     if(!*awesomeconf->client_sel)

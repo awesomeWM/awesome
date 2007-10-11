@@ -55,21 +55,19 @@ eprint(const char *fmt, ...)
 }
 
 void
-uicb_exec(Display * disp,
-          awesome_config * awesomeconf __attribute__ ((unused)),
+uicb_exec(awesome_config * awesomeconf,
           const char *arg)
 {
     char path[PATH_MAX];
-    if(disp)
-        close(ConnectionNumber(disp));
+    if(awesomeconf->display)
+        close(ConnectionNumber(awesomeconf->display));
 
     sscanf(arg, "%s", path);
     execlp(path, arg, NULL);
 }
 
 void
-uicb_spawn(Display * disp,
-           awesome_config * awesomeconf __attribute__ ((unused)),
+uicb_spawn(awesome_config * awesomeconf,
            const char *arg)
 {
     static char *shell = NULL;
@@ -81,7 +79,7 @@ uicb_spawn(Display * disp,
     if(!arg)
         return;
 
-    if(!XineramaIsActive(disp) && (tmp = getenv("DISPLAY")))
+    if(!XineramaIsActive(awesomeconf->display) && (tmp = getenv("DISPLAY")))
     {
         display = a_strdup(tmp);
         if((tmp = strrchr(display, '.')))
@@ -97,8 +95,8 @@ uicb_spawn(Display * disp,
     {
         if(fork() == 0)
         {
-            if(disp)
-                close(ConnectionNumber(disp));
+            if(awesomeconf->display)
+                close(ConnectionNumber(awesomeconf->display));
             setsid();
             execl(shell, shell, "-c", arg, (char *) NULL);
             fprintf(stderr, "awesome: execl '%s -c %s'", shell, arg);

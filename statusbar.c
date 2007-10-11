@@ -237,15 +237,14 @@ updatebarpos(Display *disp, Statusbar statusbar)
 }
 
 void
-uicb_togglebar(Display *disp,
-               awesome_config *awesomeconf,
+uicb_togglebar(awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
     if(awesomeconf->statusbar.position == BarOff)
         awesomeconf->statusbar.position = (awesomeconf->statusbar_default_position == BarOff) ? BarTop : awesomeconf->statusbar_default_position;
     else
         awesomeconf->statusbar.position = BarOff;
-    updatebarpos(disp, awesomeconf->statusbar);
-    arrange(disp, awesomeconf);
+    updatebarpos(awesomeconf->display, awesomeconf->statusbar);
+    arrange(awesomeconf->display, awesomeconf);
 }
 

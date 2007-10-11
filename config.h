@@ -56,7 +56,7 @@ typedef struct
 {
     unsigned long mod;
     KeySym keysym;
-    void (*func) (Display *, awesome_config *, char *);
+    void (*func) (awesome_config *, char *);
     char *arg;
 } Key;
 

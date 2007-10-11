@@ -209,14 +209,12 @@ xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribut
 }
 
 /** Quit awesome
- * \param disp Display ref
  * \param awesomeconf awesome config
  * \param arg nothing
  * \ingroup ui_callback
  */
 void
-uicb_quit(Display *disp __attribute__ ((unused)),
-          awesome_config *awesomeconf __attribute__((unused)),
+uicb_quit(awesome_config *awesomeconf __attribute__((unused)),
           const char *arg __attribute__ ((unused)))
 {
     readin = running = False;

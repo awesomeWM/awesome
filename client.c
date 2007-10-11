@@ -648,14 +648,12 @@ set_shape(Client *c)
 }
 
 /** Set selected client transparency
- * \param disp Display ref
  * \param awesomeconf awesome config
  * \param arg unused arg
  * \ingroup ui_callback
  */
 void
-uicb_settrans(Display *disp __attribute__ ((unused)),
-              awesome_config *awesomeconf __attribute__ ((unused)),
+uicb_settrans(awesome_config *awesomeconf __attribute__ ((unused)),
               const char *arg)
 {
     double delta = 100.0, current_opacity = 100.0;
@@ -700,14 +698,12 @@ uicb_settrans(Display *disp __attribute__ ((unused)),
 
 
 /** Set borrder size
- * \param disp Display ref
  * \param awesomeconf awesome config
  * \param arg X, +X or -X
  * \ingroup ui_callback
  */
 void
-uicb_setborder(Display *disp __attribute__ ((unused)),
-               awesome_config *awesomeconf,
+uicb_setborder(awesome_config *awesomeconf,
                const char *arg)
 {
     if(!arg)
@@ -718,8 +714,7 @@ uicb_setborder(Display *disp __attribute__ ((unused)),
 }
 
 void
-uicb_swapnext(Display *disp,
-              awesome_config *awesomeconf,
+uicb_swapnext(awesome_config *awesomeconf,
               const char *arg __attribute__ ((unused)))
 {
     Client *next;
@@ -731,13 +726,12 @@ uicb_swapnext(Display *disp,
     if(next)
     {
         client_swap(awesomeconf->clients, *awesomeconf->client_sel, next);
-        arrange(disp, awesomeconf);
+        arrange(awesomeconf->display, awesomeconf);
     }
 }
 
 void
-uicb_swapprev(Display *disp,
-              awesome_config *awesomeconf,
+uicb_swapprev(awesome_config *awesomeconf,
               const char *arg __attribute__ ((unused)))
 {
     Client *prev;
@@ -749,13 +743,12 @@ uicb_swapprev(Display *disp,
     if(prev)
     {
         client_swap(awesomeconf->clients, prev, *awesomeconf->client_sel);
-        arrange(disp, awesomeconf);
+        arrange(awesomeconf->display, awesomeconf);
     }
 }
 
 void
-uicb_moveresize(Display *disp __attribute__ ((unused)),
-                awesome_config *awesomeconf,
+uicb_moveresize(awesome_config *awesomeconf,
                 const char *arg)
 {
     int nx, ny, nw, nh, ox, oy, ow, oh;
@@ -790,14 +783,12 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
 }
 
 /** Kill selected client
- * \param disp Display ref
  * \param awesomeconf awesome config
  * \param arg unused
  * \ingroup ui_callback
  */
 void
-uicb_killclient(Display *disp __attribute__ ((unused)),
-                awesome_config *awesomeconf __attribute__ ((unused)),
+uicb_killclient(awesome_config *awesomeconf,
                 const char *arg __attribute__ ((unused)))
 {
     XEvent ev;
@@ -808,9 +799,9 @@ uicb_killclient(Display *disp __attribute__ ((unused)),
     {
         ev.type = ClientMessage;
         ev.xclient.window = (*awesomeconf->client_sel)->win;
-        ev.xclient.message_type = XInternAtom(disp, "WM_PROTOCOLS", False);
+        ev.xclient.message_type = XInternAtom(awesomeconf->display, "WM_PROTOCOLS", False);
         ev.xclient.format = 32;
-        ev.xclient.data.l[0] = XInternAtom(disp, "WM_DELETE_WINDOW", False);
+        ev.xclient.data.l[0] = XInternAtom(awesomeconf->display, "WM_DELETE_WINDOW", False);
         ev.xclient.data.l[1] = CurrentTime;
         XSendEvent(awesomeconf->display, (*awesomeconf->client_sel)->win, False, NoEventMask, &ev);
     }

@@ -165,33 +165,33 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                     if(ev->button == Button1)
                     {
                         if(ev->state & awesomeconf[screen].modkey)
-                            uicb_tag(e->xany.display, &awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_tag(&awesomeconf[screen], awesomeconf[screen].tags[i].name);
                         else
-                            uicb_view(e->xany.display, &awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_view(&awesomeconf[screen], awesomeconf[screen].tags[i].name);
                     }
                     else if(ev->button == Button3)
                     {
                         if(ev->state & awesomeconf[screen].modkey)
-                            uicb_toggletag(e->xany.display, &awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_toggletag(&awesomeconf[screen], awesomeconf[screen].tags[i].name);
                         else
-                            uicb_toggleview(e->xany.display, &awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_toggleview(&awesomeconf[screen], awesomeconf[screen].tags[i].name);
                     }
                     else if(ev->button == Button4)
-                        uicb_tag_viewnext(e->xany.display, &awesomeconf[screen], NULL);
+                        uicb_tag_viewnext(&awesomeconf[screen], NULL);
                     else if(ev->button == Button5)
-                        uicb_tag_viewprev(e->xany.display, &awesomeconf[screen], NULL);
+                        uicb_tag_viewprev(&awesomeconf[screen], NULL);
                     return;
                 }
             }
             x += awesomeconf[screen].statusbar.width;
             if(ev->x < x && (ev->button == Button1 || ev->button == Button4))
-                uicb_setlayout(e->xany.display, &awesomeconf[screen], "+1");
+                uicb_setlayout(&awesomeconf[screen], "+1");
             else if(ev->x < x && (ev->button == Button3 || ev->button == Button5))
-                uicb_setlayout(e->xany.display, &awesomeconf[screen], "-1");
+                uicb_setlayout(&awesomeconf[screen], "-1");
             else if(ev->button == Button4)
-                uicb_focusnext(e->xany.display, &awesomeconf[screen], NULL);
+                uicb_focusnext(&awesomeconf[screen], NULL);
             else if(ev->button == Button5)
-                uicb_focusprev(e->xany.display, &awesomeconf[screen], NULL);
+                uicb_focusprev(&awesomeconf[screen], NULL);
             return;
         }
 
@@ -209,7 +209,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         else if(ev->button == Button1)
         {
             if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfloating)
-                uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
+                uicb_togglefloating(&awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &awesomeconf[c->screen]);
             movemouse(c, awesomeconf);
@@ -217,22 +217,22 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         else if(ev->button == Button2)
         {
             if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfixed && c->isfloating)
-                uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
+                uicb_togglefloating(&awesomeconf[c->screen], NULL);
             else
-                uicb_zoom(e->xany.display, &awesomeconf[c->screen], NULL);
+                uicb_zoom(&awesomeconf[c->screen], NULL);
         }
         else if(ev->button == Button3)
         {
             if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfloating)
-                uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
+                uicb_togglefloating(&awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &awesomeconf[c->screen]);
             resizemouse(c, awesomeconf);
         }
         else if(ev->button == Button4)
-            uicb_settrans(e->xany.display, &awesomeconf[c->screen], "+5");
+            uicb_settrans(&awesomeconf[c->screen], "+5");
         else if(ev->button == Button5)
-            uicb_settrans(e->xany.display, &awesomeconf[c->screen], "-5");
+            uicb_settrans(&awesomeconf[c->screen], "-5");
         }
     else if(!*awesomeconf->client_sel)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
@@ -241,9 +241,9 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             {
                 screen = get_screen_bycoord(e->xany.display, x, y);
                 if(ev->button == Button4)
-                    uicb_tag_viewnext(e->xany.display, &awesomeconf[screen], NULL);
+                    uicb_tag_viewnext(&awesomeconf[screen], NULL);
                 else if(ev->button == Button5)
-                    uicb_tag_viewprev(e->xany.display, &awesomeconf[screen], NULL);
+                    uicb_tag_viewprev(&awesomeconf[screen], NULL);
                 break;
             }
 }
@@ -398,7 +398,7 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
     for(i = 0; i < awesomeconf[screen].nkeys; i++)
         if(keysym == awesomeconf[screen].keys[i].keysym
            && CLEANMASK(awesomeconf[screen].keys[i].mod, screen) == CLEANMASK(ev->state, screen) && awesomeconf[screen].keys[i].func)
-            awesomeconf[screen].keys[i].func(e->xany.display, &awesomeconf[screen], awesomeconf[screen].keys[i].arg);
+            awesomeconf[screen].keys[i].func(&awesomeconf[screen], awesomeconf[screen].keys[i].arg);
 }
 
 void
