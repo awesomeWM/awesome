@@ -111,7 +111,7 @@ drawcircle(Display *disp, int screen, int x, int y, int r, Drawable drawable, in
         cairo_fill(cr);
     }
     else
-        cairo_arc (cr, x + r + 1, y + r, r, 0, 2 * M_PI);
+        cairo_arc (cr, x + r, y + r, r - 1, 0, 2 * M_PI);
 
     cairo_stroke(cr);
 
