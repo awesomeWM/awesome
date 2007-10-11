@@ -201,9 +201,13 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     if((c = getclient(ev->window)))
     {
         focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
-        if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
-            return;
-        if(ev->button == Button1)
+        if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey) {
+           if (ev->button == Button1) {
+              restack(c->display, &awesomeconf[c->screen]);
+              grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
+           }
+        }
+        else if(ev->button == Button1)
         {
             if(!IS_ARRANGE(layout_floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
@@ -341,8 +345,11 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
 
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
-    if((c = getclient(ev->window)))
+    if((c = getclient(ev->window))) {
         focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
+        if (sel)
+           grabbuttons(sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
+    }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))

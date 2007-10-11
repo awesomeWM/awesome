@@ -62,6 +62,7 @@ struct Client
     Bool ftview;
 };
 
+void grabbuttons(Client *, Bool, Bool, KeySym, unsigned int);
 inline void attach(Client *);          /* attaches c to global client list */
 void ban(Client *);             /* bans c */
 void configure(Client *);       /* send synthetic configure event */

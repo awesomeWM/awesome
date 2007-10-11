@@ -61,16 +61,28 @@ detachstack(Client * c)
 /** Grab or ungrab buttons when a client is focused
  * \param c client
  * \param focused True if client is focused
+ * \param raised True if the client is above other clients
  * \param modkey Mod key mask
  * \param numlockmask Numlock mask
  */
-static void
-grabbuttons(Client * c, Bool focused, KeySym modkey, unsigned int numlockmask)
+void
+grabbuttons(Client * c, Bool focused, Bool raised, KeySym modkey, unsigned int numlockmask)
 {
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
 
     if(focused)
     {
+        if (!raised) {
+            XGrabButton(c->display, Button1, NoSymbol, c->win, False, BUTTONMASK,
+                  GrabModeAsync, GrabModeSync, None, None);
+            XGrabButton(c->display, Button1, LockMask, c->win, False,
+                  BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+            XGrabButton(c->display, Button1, numlockmask, c->win, False,
+                  BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+            XGrabButton(c->display, Button1, numlockmask | LockMask,
+                  c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        }
+
         XGrabButton(c->display, Button1, modkey, c->win, False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
         XGrabButton(c->display, Button1, modkey | LockMask, c->win, False,
@@ -317,7 +329,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
     /* if a client was selected but it's not the current client, unfocus it */
     if(sel && sel != c)
     {
-        grabbuttons(sel, False, awesomeconf->modkey, awesomeconf->numlockmask);
+        grabbuttons(sel, False, True, awesomeconf->modkey, awesomeconf->numlockmask);
         XSetWindowBorder(sel->display, sel->win, awesomeconf->colors_normal[ColBorder].pixel);
         setclienttrans(sel, awesomeconf->opacity_unfocused);
     }
@@ -327,7 +339,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
     {
         detachstack(c);
         attachstack(c);
-        grabbuttons(c, True, awesomeconf->modkey, awesomeconf->numlockmask);
+        grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
     }
     if(!selscreen)
         return;
@@ -434,7 +446,7 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
         XShapeSelectInput(disp, w, ShapeNotifyMask);
         set_shape(c);
     }
-    grabbuttons(c, False, awesomeconf->modkey, awesomeconf->numlockmask);
+    grabbuttons(c, False, True, awesomeconf->modkey, awesomeconf->numlockmask);
     updatetitle(c);
     move_client_to_screen(c, awesomeconf, False);
     if((rettrans = XGetTransientForHint(disp, w, &trans) == Success))
