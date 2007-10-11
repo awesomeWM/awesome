@@ -140,15 +140,14 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->font,
                      sel->name, awesomeconf->colors_selected);
             if(sel->isfloating)
-                drawrectangle(disp, awesomeconf->phys_screen,
-                              x, y,
-                              (awesomeconf->font->height + 2) / 4,
-                              (awesomeconf->font->height + 2) / 4,
-                              awesomeconf->statusbar.drawable,
-                              awesomeconf->statusbar.width,
-                              awesomeconf->statusbar.height,
-                              sel->ismax,
-                              awesomeconf->colors_selected[ColFG]);
+                drawcircle(disp, awesomeconf->phys_screen,
+                           x, y,
+                           (awesomeconf->font->height + 2) / 4,
+                           awesomeconf->statusbar.drawable,
+                           awesomeconf->statusbar.width,
+                           awesomeconf->statusbar.height,
+                           sel->ismax,
+                           awesomeconf->colors_selected[ColFG]);
         }
         else if(IS_ARRANGE(0, layout_tile) || IS_ARRANGE(0, layout_tileleft))
         {

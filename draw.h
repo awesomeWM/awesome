@@ -26,5 +26,6 @@
 
 void drawtext(Display *, int, int, int, int, int, Drawable, int, int, XftFont *, const char *, XColor []);
 void drawrectangle(Display *, int, int, int, int, int, Drawable, int, int, Bool, XColor);
+void drawcircle(Display *, int, int, int, int, Drawable, int, int, Bool, XColor);
 inline unsigned short textwidth(Display *, XftFont *, char *, ssize_t);
 #endif

@@ -21,6 +21,7 @@
 
 #include <cairo.h>
 #include <cairo-xlib.h>
+#include <math.h>
 #include "layout.h"
 #include "util.h"
 #include "draw.h"
@@ -87,12 +88,36 @@ drawrectangle(Display *disp, int screen, int x, int y, int w, int h, Drawable dr
     }
     else
         cairo_rectangle(cr, x + 1, y, w, h);
+
     cairo_stroke(cr);
 
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
 }
 
+void
+drawcircle(Display *disp, int screen, int x, int y, int r, Drawable drawable, int dw, int dh, Bool filled, XColor color)
+{
+    cairo_surface_t *surface;
+    cairo_t *cr;
+
+    surface = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dh);
+    cr = cairo_create (surface);
+    cairo_set_line_width(cr, 1.0);
+    cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+    if(filled)
+    {
+        cairo_arc (cr, x + r, y + r, r, 0, 2 * M_PI);
+        cairo_fill(cr);
+    }
+    else
+        cairo_arc (cr, x + r + 1, y + r, r, 0, 2 * M_PI);
+
+    cairo_stroke(cr);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+}
 
 unsigned short
 textwidth(Display *disp, XftFont *font, char *text, ssize_t len)
