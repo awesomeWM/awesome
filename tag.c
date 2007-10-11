@@ -26,8 +26,6 @@
 #include "tag.h"
 #include "util.h"
 
-extern Client *sel;             /* global client list */
-
 typedef struct
 {
     regex_t *propregex;
@@ -164,14 +162,14 @@ uicb_tag(Display *disp,
 {
     int i;
 
-    if(!sel)
+    if(!*awesomeconf->client_sel)
         return;
     for(i = 0; i < awesomeconf->ntags; i++)
-        sel->tags[i] = arg == NULL;
+        (*awesomeconf->client_sel)->tags[i] = arg == NULL;
     i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
     if(i >= 0 && i < awesomeconf->ntags)
-        sel->tags[i] = True;
-    saveprops(sel, awesomeconf->ntags);
+        (*awesomeconf->client_sel)->tags[i] = True;
+    saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
     arrange(disp, awesomeconf);
 }
 
@@ -185,21 +183,26 @@ uicb_togglefloating(Display *disp,
                     awesome_config * awesomeconf,
                     const char *arg __attribute__ ((unused)))
 {
-    if(!sel)
+    if(!*awesomeconf->client_sel)
         return;
-    sel->isfloating = !sel->isfloating;
-    if(sel->isfloating)
+    (*awesomeconf->client_sel)->isfloating = !(*awesomeconf->client_sel)->isfloating;
+    if((*awesomeconf->client_sel)->isfloating)
         /*restore last known float dimensions*/
-        resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True);
+        resize(*awesomeconf->client_sel,
+               (*awesomeconf->client_sel)->rx,
+               (*awesomeconf->client_sel)->ry,
+               (*awesomeconf->client_sel)->rw, 
+               (*awesomeconf->client_sel)->rh,
+               awesomeconf, True);
     else
     {
         /*save last known float dimensions*/
-        sel->rx = sel->x;
-        sel->ry = sel->y;
-        sel->rw = sel->w;
-        sel->rh = sel->h;
+        (*awesomeconf->client_sel)->rx = (*awesomeconf->client_sel)->x;
+        (*awesomeconf->client_sel)->ry = (*awesomeconf->client_sel)->y;
+        (*awesomeconf->client_sel)->rw = (*awesomeconf->client_sel)->w;
+        (*awesomeconf->client_sel)->rh = (*awesomeconf->client_sel)->h;
     }
-    saveprops(sel, awesomeconf->ntags);
+    saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
     arrange(disp, awesomeconf);
 }
 
@@ -216,14 +219,14 @@ uicb_toggletag(Display *disp,
     unsigned int i;
     int j;
 
-    if(!sel)
+    if(!*awesomeconf->client_sel)
         return;
     i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
-    sel->tags[i] = !sel->tags[i];
-    for(j = 0; j < awesomeconf->ntags && !sel->tags[j]; j++);
+    (*awesomeconf->client_sel)->tags[i] = !(*awesomeconf->client_sel)->tags[i];
+    for(j = 0; j < awesomeconf->ntags && !(*awesomeconf->client_sel)->tags[j]; j++);
     if(j == awesomeconf->ntags)
-        sel->tags[i] = True;
-    saveprops(sel, awesomeconf->ntags);
+        (*awesomeconf->client_sel)->tags[i] = True;
+    saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
     arrange(disp, awesomeconf);
 }
 

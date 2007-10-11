@@ -24,8 +24,6 @@
 #include "tag.h"
 #include "layout.h"
 
-extern Client *sel;
-
 /** Get screens info
  * \param disp Display ref
  * \param screen Screen number
@@ -236,21 +234,21 @@ uicb_movetoscreen(Display *disp,
 {
     int new_screen, prev_screen;
 
-    if(!sel || !XineramaIsActive(disp))
+    if(!*awesomeconf->client_sel || !XineramaIsActive(disp))
         return;
 
     if(arg)
-        new_screen = compute_new_value_from_arg(arg, sel->screen);
+        new_screen = compute_new_value_from_arg(arg, (*awesomeconf->client_sel)->screen);
     else
-        new_screen = sel->screen + 1;
+        new_screen = (*awesomeconf->client_sel)->screen + 1;
 
     if(new_screen >= get_screen_count(disp))
         new_screen = 0;
     else if(new_screen < 0)
         new_screen = get_screen_count(disp) - 1;
 
-    prev_screen = sel->screen;
-    move_client_to_screen(sel, &awesomeconf[new_screen - awesomeconf->screen], True);
+    prev_screen = (*awesomeconf->client_sel)->screen;
+    move_client_to_screen(*awesomeconf->client_sel, &awesomeconf[new_screen - awesomeconf->screen], True);
     move_mouse_pointer_to_screen(disp, new_screen);
     arrange(disp, &awesomeconf[prev_screen - awesomeconf->screen]);
     arrange(disp, &awesomeconf[new_screen - awesomeconf->screen]);

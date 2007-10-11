@@ -29,9 +29,6 @@
 #include "statusbar.h"
 #include "layouts/floating.h"
 
-/* extern */
-extern Client *sel;
-
 /** Arrange windows following current selected layout
  * \param disp display ref
  * \param awesomeconf awesome config
@@ -61,9 +58,9 @@ uicb_focusnext(Display *disp __attribute__ ((unused)),
 {
     Client *c;
 
-    if(!sel)
+    if(!*awesomeconf->client_sel)
         return;
-    for(c = sel->next; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
+    for(c = (*awesomeconf->client_sel)->next; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
     if(!c)
         for(c = *awesomeconf->clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
     if(c)
@@ -80,9 +77,9 @@ uicb_focusprev(Display *disp __attribute__ ((unused)),
 {
     Client *c;
 
-    if(!sel)
+    if(!*awesomeconf->client_sel)
         return;
-    for(c = sel->prev; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->prev);
+    for(c = (*awesomeconf->client_sel)->prev; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->prev);
     if(!c)
     {
         for(c = *awesomeconf->clients; c && c->next; c = c->next);
@@ -124,29 +121,29 @@ restack(Display * disp, awesome_config *awesomeconf)
     XWindowChanges wc;
 
     drawstatusbar(disp, awesomeconf);
-    if(!sel)
+    if(!*awesomeconf->client_sel)
         return;
-    if(sel->isfloating || IS_ARRANGE(0, layout_floating))
-        XRaiseWindow(disp, sel->win);
+    if((*awesomeconf->client_sel)->isfloating || IS_ARRANGE(0, layout_floating))
+        XRaiseWindow(disp, (*awesomeconf->client_sel)->win);
     if(!IS_ARRANGE(0, layout_floating))
     {
         wc.stack_mode = Below;
         wc.sibling = awesomeconf->statusbar.window;
-        if(!sel->isfloating)
+        if(!(*awesomeconf->client_sel)->isfloating)
         {
-            XConfigureWindow(disp, sel->win, CWSibling | CWStackMode, &wc);
-            wc.sibling = sel->win;
+            XConfigureWindow(disp, (*awesomeconf->client_sel)->win, CWSibling | CWStackMode, &wc);
+            wc.sibling = (*awesomeconf->client_sel)->win;
         }
         for(c = *awesomeconf->clients; c; c = c->next)
         {
-            if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags) || c == sel)
+            if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags) || c == *awesomeconf->client_sel)
                 continue;
             XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
             wc.sibling = c->win;
         }
     }
     if(awesomeconf->focus_move_pointer)
-        XWarpPointer(disp, None, sel->win, 0, 0, 0, 0, sel->w / 2, sel->h / 2);
+        XWarpPointer(disp, None, (*awesomeconf->client_sel)->win, 0, 0, 0, 0, (*awesomeconf->client_sel)->w / 2, (*awesomeconf->client_sel)->h / 2);
     XSync(disp, False);
     while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
 }
@@ -192,7 +189,7 @@ uicb_setlayout(Display *disp,
     for(c = *awesomeconf->clients; c; c = c->next)
         c->ftview = True;
 
-    if(sel)
+    if(*awesomeconf->client_sel)
         arrange(disp, awesomeconf);
     else
         drawstatusbar(disp, awesomeconf);
@@ -207,25 +204,30 @@ uicb_setlayout(Display *disp,
 static void
 maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
 {
-    if(!sel)
+    if(!*awesomeconf->client_sel)
         return;
 
-    if((sel->ismax = !sel->ismax))
+    if(((*awesomeconf->client_sel)->ismax = !(*awesomeconf->client_sel)->ismax))
     {
-        sel->wasfloating = sel->isfloating;
-        sel->isfloating = True;
-        sel->rx = sel->x;
-        sel->ry = sel->y;
-        sel->rw = sel->w;
-        sel->rh = sel->h;
-        resize(sel, x, y, w, h, awesomeconf, True);
+        (*awesomeconf->client_sel)->wasfloating = (*awesomeconf->client_sel)->isfloating;
+        (*awesomeconf->client_sel)->isfloating = True;
+        (*awesomeconf->client_sel)->rx = (*awesomeconf->client_sel)->x;
+        (*awesomeconf->client_sel)->ry = (*awesomeconf->client_sel)->y;
+        (*awesomeconf->client_sel)->rw = (*awesomeconf->client_sel)->w;
+        (*awesomeconf->client_sel)->rh = (*awesomeconf->client_sel)->h;
+        resize(*awesomeconf->client_sel, x, y, w, h, awesomeconf, True);
     }
-    else if(sel->wasfloating)
-        resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True);
+    else if((*awesomeconf->client_sel)->wasfloating)
+        resize(*awesomeconf->client_sel,
+               (*awesomeconf->client_sel)->rx,
+               (*awesomeconf->client_sel)->ry,
+               (*awesomeconf->client_sel)->rw,
+               (*awesomeconf->client_sel)->rh,
+               awesomeconf, True);
     else
-        sel->isfloating = False;
+        (*awesomeconf->client_sel)->isfloating = False;
 
-    arrange(sel->display, awesomeconf);
+    arrange(awesomeconf->display, awesomeconf);
 }
 
 void
@@ -249,9 +251,11 @@ uicb_toggleverticalmax(Display *disp,
 {
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
-    if(sel)
-        maximize(sel->x, si[awesomeconf->screen].y_org,
-                 sel->w, si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
+    if(*awesomeconf->client_sel)
+        maximize((*awesomeconf->client_sel)->x,
+                 si[awesomeconf->screen].y_org,
+                 (*awesomeconf->client_sel)->w,
+                 si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
                  awesomeconf);
     XFree(si);
 }
@@ -264,9 +268,11 @@ uicb_togglehorizontalmax(Display *disp,
 {
     ScreenInfo *si = get_screen_info(disp, awesomeconf->screen, &awesomeconf->statusbar);
 
-    if(sel)
-        maximize(si[awesomeconf->screen].x_org, sel->y,
-                 si[awesomeconf->screen].height - 2 * awesomeconf->borderpx, sel->h,
+    if(*awesomeconf->client_sel)
+        maximize(si[awesomeconf->screen].x_org,
+                 (*awesomeconf->client_sel)->y,
+                 si[awesomeconf->screen].height - 2 * awesomeconf->borderpx,
+                 (*awesomeconf->client_sel)->h,
                  awesomeconf);
     XFree(si);
 }
@@ -276,11 +282,11 @@ uicb_zoom(Display *disp __attribute__ ((unused)),
           awesome_config *awesomeconf,
           const char *arg __attribute__ ((unused)))
 {
-    if(!sel)
+    if(!*awesomeconf->client_sel)
         return;
-    detach(awesomeconf->clients, sel);
-    attach(awesomeconf->clients, sel);
-    focus(sel->display, sel, True, awesomeconf);
-    arrange(sel->display, awesomeconf);
+    detach(awesomeconf->clients, *awesomeconf->client_sel);
+    attach(awesomeconf->clients, *awesomeconf->client_sel);
+    focus(awesomeconf->display, *awesomeconf->client_sel, True, awesomeconf);
+    arrange(awesomeconf->display, awesomeconf);
 }
 

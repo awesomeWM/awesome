@@ -28,8 +28,6 @@
 #include "util.h"
 #include "layouts/tile.h"
 
-extern Client *sel;
-
 /** Check if at least a client is tagged with tag number t and is on screen
  * screen
  * \param t tag number
@@ -75,7 +73,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                               awesomeconf->statusbar.drawable,
                               awesomeconf->statusbar.width,
                               awesomeconf->statusbar.height,
-                              sel && sel->tags[i],
+                              *awesomeconf->client_sel && (*awesomeconf->client_sel)->tags[i],
                               awesomeconf->colors_selected[ColFG]);
         }
         else
@@ -96,7 +94,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                               awesomeconf->statusbar.drawable,
                               awesomeconf->statusbar.width,
                               awesomeconf->statusbar.height,
-                              sel && sel->tags[i],
+                              *awesomeconf->client_sel && (*awesomeconf->client_sel)->tags[i],
                               awesomeconf->colors_normal[ColFG]);
         }
         x += w;
@@ -129,7 +127,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
     if((w = x - z) > awesomeconf->statusbar.height)
     {
         x = z;
-        if(sel)
+        if(*awesomeconf->client_sel)
         {
             drawtext(disp, awesomeconf->phys_screen,
                      x, y, w,
@@ -138,15 +136,15 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->statusbar.width,
                      awesomeconf->statusbar.height,
                      awesomeconf->font,
-                     sel->name, awesomeconf->colors_selected);
-            if(sel->isfloating)
+                     (*awesomeconf->client_sel)->name, awesomeconf->colors_selected);
+            if((*awesomeconf->client_sel)->isfloating)
                 drawcircle(disp, awesomeconf->phys_screen,
                            x, y,
                            (awesomeconf->font->height + 2) / 4,
                            awesomeconf->statusbar.drawable,
                            awesomeconf->statusbar.width,
                            awesomeconf->statusbar.height,
-                           sel->ismax,
+                           (*awesomeconf->client_sel)->ismax,
                            awesomeconf->colors_selected[ColFG]);
         }
         else if(IS_ARRANGE(0, layout_tile) || IS_ARRANGE(0, layout_tileleft))

@@ -35,9 +35,6 @@
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 
-/* extern */
-extern Client *sel;
-
 #define CLEANMASK(mask, screen)		(mask & ~(awesomeconf[screen].numlockmask | LockMask))
 #define MOUSEMASK	                (BUTTONMASK | PointerMotionMask)
 
@@ -237,7 +234,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         else if(ev->button == Button5)
             uicb_settrans(e->xany.display, &awesomeconf[c->screen], "-5");
         }
-    else if(!sel)
+    else if(!*awesomeconf->client_sel)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window
                && XQueryPointer(e->xany.display, ev->window, &wdummy, &wdummy, &x, &y, &i, &i, &udummy))
@@ -349,11 +346,11 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
         return;
     if((c = getclient(awesomeconf->clients, ev->window)))
     {
-        if(!sel || sel != c)
+        if(!*awesomeconf->client_sel || *awesomeconf->client_sel != c)
         {
             focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
-            if (sel && (sel->isfloating || IS_ARRANGE(sel->screen, layout_floating)))
-                grabbuttons(sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
+            if (*awesomeconf->client_sel && ((*awesomeconf->client_sel)->isfloating || IS_ARRANGE((*awesomeconf->client_sel)->screen, layout_floating)))
+                grabbuttons(*awesomeconf->client_sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
         }
     }
     else
@@ -472,7 +469,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(c->display, "_NET_WM_NAME", False))
         {
             updatetitle(c);
-            if(c == sel)
+            if(c == *awesomeconf->client_sel)
                 drawstatusbar(e->xany.display, &awesomeconf[c->screen]);
         }
     }
