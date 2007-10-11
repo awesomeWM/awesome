@@ -33,31 +33,6 @@
 
 #include "layouts/floating.h"
 
-/* extern */
-extern Client *stack;
-
-/** Attach client stack to clients stacks
- * \param c the client
- */
-static inline void
-attachstack(Client * c)
-{
-    c->snext = stack;
-    stack = c;
-}
-
-/** Detach client from stack
- * \param c the client
- */
-static inline void
-detachstack(Client * c)
-{
-    Client **tc;
-
-    for(tc = &stack; *tc && *tc != c; tc = &(*tc)->snext);
-    *tc = c->snext;
-}
-
 /** Grab or ungrab buttons when a client is focused
  * \param c client
  * \param focused True if client is focused
@@ -326,7 +301,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags)))
-        for(c = stack; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->snext);
+        for(c = *awesomeconf->clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->snext);
 
     /* if a client was selected but it's not the current client, unfocus it */
     if(*awesomeconf->client_sel && *awesomeconf->client_sel != c)
@@ -338,11 +313,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
     if(*awesomeconf->client_sel == c)
         return;
     if(c)
-    {
-        detachstack(c);
-        attachstack(c);
         grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
-    }
     if(!selscreen)
         return;
     *awesomeconf->client_sel = c;
@@ -351,7 +322,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
     {
         XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_selected[ColBorder].pixel);
         XSetInputFocus(awesomeconf->display, (*awesomeconf->client_sel)->win, RevertToPointerRoot, CurrentTime);
-        for(c = stack; c; c = c->snext)
+        for(c = *awesomeconf->clients; c; c = c->snext)
             if(c != *awesomeconf->client_sel)
                 setclienttrans(c, awesomeconf->opacity_unfocused);
         setclienttrans(*awesomeconf->client_sel, -1);
@@ -462,7 +433,6 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
         c->isfloating = (rettrans == Success) || c->isfixed;
     saveprops(c, awesomeconf->ntags);
     attach(awesomeconf->clients, c);
-    attachstack(c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
     c->isbanned = True;
     arrange(disp, awesomeconf);
@@ -589,7 +559,6 @@ unmanage(Client * c, long state, awesome_config *awesomeconf)
     XGrabServer(c->display);
     XConfigureWindow(c->display, c->win, CWBorderWidth, &wc);  /* restore border */
     detach(awesomeconf->clients, c);
-    detachstack(c);
     if(*awesomeconf->client_sel == c)
         focus(c->display, NULL, True, awesomeconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);

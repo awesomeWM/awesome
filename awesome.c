@@ -40,8 +40,6 @@
 #include "util.h"
 #include "statusbar.h"
 
-Client *stack = NULL;
-
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool readin = True, running = True;
 
@@ -53,10 +51,10 @@ cleanup(awesome_config *awesomeconf)
 {
     int screen, i;
 
-    while(stack)
+    while(*awesomeconf->clients)
     {
-        unban(stack);
-        unmanage(stack, NormalState, awesomeconf);
+        unban(*awesomeconf->clients);
+        unmanage(*awesomeconf->clients, NormalState, awesomeconf);
     }
 
     for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
