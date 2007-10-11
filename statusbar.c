@@ -190,6 +190,9 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
     statusbar->screen = screen;
 
     si = get_screen_info(disp, screen, NULL);
+    statusbar->width = si[screen].width;
+    statusbar->height = font->height + 2; 
+    p_delete(&si);
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
@@ -197,19 +200,19 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0, si[screen].width,
-                                      statusbar->height, 0, DefaultDepth(disp, phys_screen), CopyFromParent,
+    statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0,
+                                      statusbar->width,
+                                      statusbar->height,
+                                      0, DefaultDepth(disp, phys_screen), CopyFromParent,
                                       DefaultVisual(disp, phys_screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, cursor);
     updatebarpos(disp, *statusbar);
     XMapRaised(disp, statusbar->window);
     statusbar->drawable = XCreatePixmap(disp,
                                         RootWindow(disp, phys_screen),
-                                        si[screen].width,
+                                        statusbar->width,
                                         statusbar->height,
                                         DefaultDepth(disp, phys_screen));
-    statusbar->width = si[screen].width;
-    statusbar->height = font->height + 2; 
 }
 
 void
