@@ -349,9 +349,12 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
         return;
     if((c = getclient(ev->window)))
     {
-        focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
-        if (sel && (sel->isfloating || IS_ARRANGE(sel->screen, layout_floating)))
-            grabbuttons(sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
+        if(!sel || sel != c)
+        {
+            focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
+            if (sel && (sel->isfloating || IS_ARRANGE(sel->screen, layout_floating)))
+                grabbuttons(sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
+        }
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
