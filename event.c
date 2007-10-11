@@ -76,7 +76,11 @@ movemouse(Client * c, awesome_config *awesomeconf)
             XUngrabPointer(c->display, CurrentTime);
             return;
         case ConfigureRequest:
+            handle_event_configurerequest(&ev,awesomeconf);
+            break;
         case Expose:
+            handle_event_expose(&ev, awesomeconf);
+            break;
         case MapRequest:
             handle_event_maprequest(&ev, awesomeconf);
             break;
@@ -124,7 +128,11 @@ resizemouse(Client * c, awesome_config *awesomeconf)
             while(XCheckMaskEvent(c->display, EnterWindowMask, &ev));
             return;
         case ConfigureRequest:
+            handle_event_configurerequest(&ev,awesomeconf);
+            break;
         case Expose:
+            handle_event_expose(&ev, awesomeconf);
+            break;
         case MapRequest:
             handle_event_maprequest(&ev, awesomeconf);
             break;
