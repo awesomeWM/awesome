@@ -126,9 +126,9 @@ restack(Display * disp, awesome_config *awesomeconf)
     drawstatusbar(disp, awesomeconf);
     if(!sel)
         return;
-    if(sel->isfloating || IS_ARRANGE(layout_floating))
+    if(sel->isfloating || IS_ARRANGE(0, layout_floating))
         XRaiseWindow(disp, sel->win);
-    if(!IS_ARRANGE(layout_floating))
+    if(!IS_ARRANGE(0, layout_floating))
     {
         wc.stack_mode = Below;
         wc.sibling = awesomeconf->statusbar.window;

@@ -25,7 +25,7 @@
 #include "client.h"
 
 /** Check if current layout is arranged with a layout */
-#define IS_ARRANGE(layout)          (layout == awesomeconf->current_layout->arrange)
+#define IS_ARRANGE(screen, layout)          (layout == awesomeconf[screen].current_layout->arrange)
 
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 

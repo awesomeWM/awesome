@@ -134,7 +134,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                            sel->ismax,
                            awesomeconf->colors_selected[ColFG]);
         }
-        else if(IS_ARRANGE(layout_tile) || IS_ARRANGE(layout_tileleft))
+        else if(IS_ARRANGE(0, layout_tile) || IS_ARRANGE(0, layout_tileleft))
         {
             char buf[256];
             snprintf(buf, sizeof(buf), "nmaster: %d ncol: %d mwfact: %.2lf", awesomeconf->nmaster, awesomeconf->ncol, awesomeconf->mwfact);

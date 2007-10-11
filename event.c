@@ -201,15 +201,17 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     if((c = getclient(ev->window)))
     {
         focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
-        if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey) {
-           if (ev->button == Button1) {
+        if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
+        {
+           if (ev->button == Button1)
+           {
               restack(c->display, &awesomeconf[c->screen]);
               grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
            }
         }
         else if(ev->button == Button1)
         {
-            if(!IS_ARRANGE(layout_floating) && !c->isfloating)
+            if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &awesomeconf[c->screen]);
@@ -217,14 +219,14 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         }
         else if(ev->button == Button2)
         {
-            if(!IS_ARRANGE(layout_floating) && !c->isfixed && c->isfloating)
+            if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfixed && c->isfloating)
                 uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
             else
                 uicb_zoom(e->xany.display, &awesomeconf[c->screen], NULL);
         }
         else if(ev->button == Button3)
         {
-            if(!IS_ARRANGE(layout_floating) && !c->isfloating)
+            if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfloating)
                 uicb_togglefloating(e->xany.display, &awesomeconf[c->screen], NULL);
             else
                 restack(e->xany.display, &awesomeconf[c->screen]);
@@ -261,7 +263,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
         c->ismax = False;
         if(ev->value_mask & CWBorderWidth)
             c->border = ev->border_width;
-        if(c->isfixed || c->isfloating || IS_ARRANGE(layout_floating))
+        if(c->isfixed || c->isfloating || IS_ARRANGE(c->screen, layout_floating))
         {
             if(ev->value_mask & CWX)
                 c->x = ev->x;
@@ -345,10 +347,11 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
 
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
-    if((c = getclient(ev->window))) {
+    if((c = getclient(ev->window)))
+    {
         focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
-        if (sel)
-           grabbuttons(sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
+        if (sel && (sel->isfloating || IS_ARRANGE(sel->screen, layout_floating)))
+            grabbuttons(sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)

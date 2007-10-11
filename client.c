@@ -72,7 +72,8 @@ grabbuttons(Client * c, Bool focused, Bool raised, KeySym modkey, unsigned int n
 
     if(focused)
     {
-        if (!raised) {
+        if (!raised)
+        {
             XGrabButton(c->display, Button1, NoSymbol, c->win, False, BUTTONMASK,
                   GrabModeAsync, GrabModeSync, None, None);
             XGrabButton(c->display, Button1, LockMask, c->win, False,
@@ -792,7 +793,7 @@ uicb_moveresize(Display *disp __attribute__ ((unused)),
     unsigned int dui;
     Window dummy;
 
-    if(!IS_ARRANGE(layout_floating))
+    if(!IS_ARRANGE(0, layout_floating))
         if(!sel || !sel->isfloating || sel->isfixed || !arg)
             return;
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)

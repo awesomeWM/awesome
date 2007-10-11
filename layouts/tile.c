@@ -36,7 +36,7 @@ uicb_setnmaster(Display *disp,
                 awesome_config *awesomeconf,
                 const char * arg)
 {
-    if(!arg || (!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)))
+    if(!arg || (!IS_ARRANGE(0, layout_tile) && !IS_ARRANGE(0, layout_tileleft)))
         return;
 
 
@@ -51,7 +51,7 @@ uicb_setncol(Display *disp,
              awesome_config *awesomeconf,
              const char * arg)
 {
-    if(!arg || (!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)))
+    if(!arg || (!IS_ARRANGE(0, layout_tile) && !IS_ARRANGE(0, layout_tileleft)))
         return;
 
     if((awesomeconf->ncol = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncol)) < 1)
@@ -67,11 +67,11 @@ uicb_setmwfact(Display *disp,
 {
     char *newarg;
 
-    if((!IS_ARRANGE(layout_tile) && !IS_ARRANGE(layout_tileleft)) || !arg)
+    if((!IS_ARRANGE(0, layout_tile) && !IS_ARRANGE(0, layout_tileleft)) || !arg)
         return;
 
     newarg = a_strdup(arg);
-    if(IS_ARRANGE(layout_tileleft))
+    if(IS_ARRANGE(0, layout_tileleft))
     {
         if(newarg[0] == '+')
             newarg[0] = '-';
