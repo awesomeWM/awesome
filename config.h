@@ -22,8 +22,6 @@
 #ifndef AWESOME_CONFIG_H
 #define AWESOME_CONFIG_H
 
-#define AWESOME_CONFIG_FILE ".awesomerc"
-
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 

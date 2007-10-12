@@ -38,6 +38,8 @@
 #include "layouts/max.h"
 #include "layouts/floating.h"
 
+#define AWESOME_CONFIG_FILE ".awesomerc" 
+
 static XColor initxcolor(Display *, int, const char *);
 static unsigned int get_numlockmask(Display *);
 
