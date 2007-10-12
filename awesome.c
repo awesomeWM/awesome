@@ -258,9 +258,8 @@ typedef void event_handler (XEvent *, awesome_config *);
 int
 main(int argc, char *argv[])
 {
-    char *p;
+    char *p, *fifopath;
     const char *confpath = NULL, *homedir;
-    char *fifopath;
     int r, cfd, xfd, e_dummy;
     fd_set rd;
     XEvent ev;
