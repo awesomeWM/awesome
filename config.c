@@ -147,6 +147,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         CFG_BOOL((char *) "resize_hints", cfg_false, CFGF_NONE),
         CFG_INT((char *) "opacity_unfocused", 100, CFGF_NONE),
         CFG_BOOL((char *) "focus_move_pointer", cfg_false, CFGF_NONE),
+        CFG_BOOL((char *) "allow_lower_floats", cfg_false, CFGF_NONE),
         CFG_STR((char *) "font", (char *) "mono-12", CFGF_NONE),
         CFG_END()
     };
@@ -276,6 +277,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
     awesomeconf->resize_hints = cfg_getbool(cfg_general, "resize_hints");
     awesomeconf->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
     awesomeconf->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
+    awesomeconf->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
     awesomeconf->font = XftFontOpenName(disp, awesomeconf->phys_screen, cfg_getstr(cfg_general, "font"));
     if(!awesomeconf->font)
         eprint("awesome: cannot init font\n");

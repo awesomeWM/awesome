@@ -169,6 +169,8 @@ struct awesome_config
     int opacity_unfocused;
     /** Focus move pointer */
     Bool focus_move_pointer;
+    /** Allow floats to be lowered on focus change */
+    Bool allow_lower_floats;
     /** Respect resize hints */
     Bool resize_hints;
     /** Text displayed in bar */

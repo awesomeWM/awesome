@@ -121,23 +121,28 @@ restack(Display * disp, awesome_config *awesomeconf)
     drawstatusbar(disp, awesomeconf);
     if(!*awesomeconf->client_sel)
         return;
-    if((*awesomeconf->client_sel)->isfloating || IS_ARRANGE(0, layout_floating))
+    if(awesomeconf->allow_lower_floats)
         XRaiseWindow(disp, (*awesomeconf->client_sel)->win);
-    if(!IS_ARRANGE(0, layout_floating))
+    else
     {
-        wc.stack_mode = Below;
-        wc.sibling = awesomeconf->statusbar.window;
-        if(!(*awesomeconf->client_sel)->isfloating)
+        if((*awesomeconf->client_sel)->isfloating || IS_ARRANGE(0, layout_floating))
+            XRaiseWindow(disp, (*awesomeconf->client_sel)->win);
+        if(!IS_ARRANGE(0, layout_floating))
         {
-            XConfigureWindow(disp, (*awesomeconf->client_sel)->win, CWSibling | CWStackMode, &wc);
-            wc.sibling = (*awesomeconf->client_sel)->win;
-        }
-        for(c = *awesomeconf->clients; c; c = c->next)
-        {
-            if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags) || c == *awesomeconf->client_sel)
-                continue;
-            XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
-            wc.sibling = c->win;
+            wc.stack_mode = Below;
+            wc.sibling = awesomeconf->statusbar.window;
+            if(!(*awesomeconf->client_sel)->isfloating)
+            {
+                XConfigureWindow(disp, (*awesomeconf->client_sel)->win, CWSibling | CWStackMode, &wc);
+                wc.sibling = (*awesomeconf->client_sel)->win;
+            }
+            for(c = *awesomeconf->clients; c; c = c->next)
+            {
+                if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags) || c == *awesomeconf->client_sel)
+                    continue;
+                XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
+                wc.sibling = c->win;
+            }
         }
     }
     if(awesomeconf->focus_move_pointer)
