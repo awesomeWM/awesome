@@ -389,15 +389,13 @@ main(int argc, char *argv[])
 
     cfd = open(fifopath, O_RDONLY | O_NDELAY);
 
-    p_delete(&fifopath);
-
-    FD_ZERO(&rd);
-    if(cfd > 0)
-        FD_SET(cfd, &rd);
-    FD_SET(xfd, &rd);
     /* main event loop, also reads status text from stdin */
     while(running)
     {
+        FD_ZERO(&rd);
+        if(cfd >= 0)
+            FD_SET(cfd, &rd);
+        FD_SET(xfd, &rd);
         if(select(MAX(xfd, cfd) + 1, &rd, NULL, NULL, NULL) == -1)
         {
             if(errno == EINTR)
@@ -416,6 +414,8 @@ main(int argc, char *argv[])
                 cfd = -1;
                 break;
             case 0:
+                close(cfd);
+                cfd = open(fifopath, O_RDONLY | O_NDELAY);
                 break;
             default:
                 parse_control(buf, awesomeconf);
@@ -430,6 +430,9 @@ main(int argc, char *argv[])
                 handler[ev.type](&ev, awesomeconf);       /* call handler */
         }
     }
+
+    p_delete(&fifopath);
+
     cleanup(awesomeconf);
     XCloseDisplay(dpy);
 
