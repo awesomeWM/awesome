@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/select.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
@@ -40,8 +43,10 @@
 #include "util.h"
 #include "statusbar.h"
 
+#define CONTROL_FIFO_PATH ".awesome_ctl"
+
 static int (*xerrorxlib) (Display *, XErrorEvent *);
-static Bool readin = True, running = True;
+static Bool running = True;
 
 /** Cleanup everything on quit
  * \param awesomeconf awesome config
@@ -217,7 +222,7 @@ void
 uicb_quit(awesome_config *awesomeconf __attribute__((unused)),
           const char *arg __attribute__ ((unused)))
 {
-    readin = running = False;
+    running = False;
 }
 
 /* There's no way to check accesses to destroyed windows, thus those cases are
@@ -254,8 +259,9 @@ int
 main(int argc, char *argv[])
 {
     char *p;
-    const char *confpath = NULL;
-    int r, xfd, e_dummy;
+    const char *confpath = NULL, *homedir;
+    char *fifopath;
+    int r, cfd, xfd, e_dummy;
     fd_set rd;
     XEvent ev;
     Display * dpy;
@@ -266,6 +272,8 @@ main(int argc, char *argv[])
     Atom netatom[NetLast];
     event_handler **handler;
     Client **clients, **sel;
+    struct stat fifost;
+    ssize_t fifopath_len;
 
     if(argc >= 2)
     {
@@ -367,33 +375,47 @@ main(int argc, char *argv[])
 
     XSync(dpy, False);
 
+    /* construct fifo path */
+    homedir = getenv("HOME");
+    fifopath_len = a_strlen(homedir) + a_strlen(CONTROL_FIFO_PATH) + 2;
+    fifopath = p_new(char, fifopath_len);
+    a_strcpy(fifopath, fifopath_len, homedir);
+    a_strcat(fifopath, fifopath_len, "/");
+    a_strcat(fifopath, fifopath_len, CONTROL_FIFO_PATH);
+
+    if(lstat(fifopath, &fifost) == -1)
+        if(mkfifo(fifopath, 0600) == -1)
+           perror("error creating control fifo");
+
+    cfd = open(fifopath, O_RDONLY | O_NDELAY);
+
+    p_delete(&fifopath);
+
     /* main event loop, also reads status text from stdin */
     while(running)
     {
         FD_ZERO(&rd);
-        if(readin)
-            FD_SET(STDIN_FILENO, &rd);
+        if(cfd > 0)
+            FD_SET(cfd, &rd);
         FD_SET(xfd, &rd);
-        if(select(xfd + 1, &rd, NULL, NULL, NULL) == -1)
+        if(select(MAX(xfd, cfd) + 1, &rd, NULL, NULL, NULL) == -1)
         {
             if(errno == EINTR)
                 continue;
             eprint("select failed\n");
         }
-        if(FD_ISSET(STDIN_FILENO, &rd))
+        if(cfd >= 0 && FD_ISSET(cfd, &rd))
         {
-            switch (r = read(STDIN_FILENO, awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext) - 1))
+            switch (r = read(cfd, awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext) - 1))
             {
             case -1:
+                perror("awesome: error reading fifo");
                 a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
                           strerror(errno), sizeof(awesomeconf[0].statustext) - 1);
                 awesomeconf[0].statustext[sizeof(awesomeconf[0].statustext) - 1] = '\0';
-                readin = False;
+                cfd = -1;
                 break;
             case 0:
-                a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
-                          "EOF", 4);
-                readin = False;
                 break;
             default:
                 for(awesomeconf[0].statustext[r] = '\0', p = awesomeconf[0].statustext + a_strlen(awesomeconf[0].statustext) - 1;
@@ -413,7 +435,6 @@ main(int argc, char *argv[])
                 handler[ev.type](&ev, awesomeconf);       /* call handler */
         }
     }
-    close(STDIN_FILENO);
     cleanup(awesomeconf);
     XCloseDisplay(dpy);
 
