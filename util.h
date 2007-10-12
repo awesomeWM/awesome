@@ -27,6 +27,13 @@
 #include <stdlib.h>
 #include "common.h"
 
+/** Link a name to a function */
+typedef struct
+{
+    const char *name;
+    void *func;
+} NameFuncLink;
+
 /** \brief replace \c NULL strings with emtpy strings */
 #define NONULL(x)       (x ? x : "")
 
@@ -195,6 +202,7 @@ void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(pr
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
 double compute_new_value_from_arg(const char *, double);
+void *name_func_lookup(const char *, const NameFuncLink *);
 
 UICB_PROTO(uicb_spawn);
 UICB_PROTO(uicb_exec);

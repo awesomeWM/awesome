@@ -1,5 +1,5 @@
 /*
- * draw.h - draw functions header
+ * uicb.h - user interface callbacks management header
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info>
  *
@@ -19,16 +19,18 @@
  *
  */
 
-#ifndef AWESOME_STATUSBAR_H
-#define AWESOME_STATUSBAR_H
+#ifndef AWESOME_UICB_H
+#define AWESOME_UICB_H
 
-#include "common.h"
+#include "config.h"
+#include "screen.h"
+#include "tag.h"
+#include "layout.h"
+#include "awesome.h"
+#include "statusbar.h"
+#include "layouts/tile.h"
 
-void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *);
-void drawstatusbar(Display *, awesome_config *);
-void updatebarpos(Display *, Statusbar);
-
-UICB_PROTO(uicb_togglebar);
-UICB_PROTO(uicb_setstatustext);
+int parse_control(char *, awesome_config *);
+int run_uicb(char *, awesome_config *);
 
 #endif

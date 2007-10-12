@@ -27,28 +27,18 @@
 #include <confuse.h>
 #include <X11/keysym.h>
 
-#include "awesome.h"
-#include "layout.h"
-#include "tag.h"
-#include "draw.h"
 #include "util.h"
-#include "statusbar.h"
+#include "uicb.h"
 #include "screen.h"
+#include "draw.h"
 #include "layouts/tile.h"
-#include "layouts/max.h"
 #include "layouts/floating.h"
+#include "layouts/max.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 
 static XColor initxcolor(Display *, int, const char *);
 static unsigned int get_numlockmask(Display *);
-
-/** Link a name to a function */
-typedef struct
-{
-    const char *name;
-    void *func;
-} NameFuncLink;
 
 /** Link a name to a key symbol */
 typedef struct
@@ -56,6 +46,51 @@ typedef struct
     const char *name;
     KeySym keysym;
 } KeyMod;
+
+/** List of available UI bindable callbacks and functions */
+const NameFuncLink UicbList[] = {
+    /* util.c */
+    {"spawn", uicb_spawn},
+    {"exec", uicb_exec},
+    /* client.c */
+    {"killclient", uicb_killclient},
+    {"moveresize", uicb_moveresize},
+    {"settrans", uicb_settrans},
+    {"setborder", uicb_setborder},
+    {"swapnext", uicb_swapnext},
+    {"swapprev", uicb_swapprev},
+    /* tag.c */
+    {"tag", uicb_tag},
+    {"togglefloating", uicb_togglefloating},
+    {"toggleview", uicb_toggleview},
+    {"toggletag", uicb_toggletag},
+    {"view", uicb_view},
+    {"view_tag_prev_selected", uicb_tag_prev_selected},
+    {"view_tag_previous", uicb_tag_viewprev},
+    {"view_tag_next", uicb_tag_viewnext},
+    /* layout.c */
+    {"setlayout", uicb_setlayout},
+    {"focusnext", uicb_focusnext},
+    {"focusprev", uicb_focusprev}, 
+    {"togglemax", uicb_togglemax},
+    {"toggleverticalmax", uicb_toggleverticalmax},
+    {"togglehorizontalmax", uicb_togglehorizontalmax},
+    {"zoom", uicb_zoom},
+    /* layouts/tile.c */
+    {"setmwfact", uicb_setmwfact},
+    {"setnmaster", uicb_setnmaster},
+    {"setncol", uicb_setncol},
+    /* screen.c */
+    {"focusnextscreen", uicb_focusnextscreen},
+    {"focusprevscreen", uicb_focusprevscreen},
+    {"movetoscreen", uicb_movetoscreen},
+    /* awesome.c */
+    {"quit", uicb_quit},
+    /* statusbar.c */
+    {"togglebar", uicb_togglebar},
+    {"setstatustext", uicb_setstatustext},
+    {NULL, NULL}
+};
 
 /** List of keyname and corresponding X11 mask codes */
 static const KeyMod KeyModList[] =
@@ -81,50 +116,6 @@ static const NameFuncLink LayoutsList[] =
     {NULL, NULL}
 };
 
-/** List of available UI bindable callbacks and functions */
-static const NameFuncLink KeyfuncList[] = {
-    /* util.c */
-    {"spawn", uicb_spawn},
-    {"exec", uicb_exec},
-    /* client.c */
-    {"killclient", uicb_killclient},
-    {"moveresize", uicb_moveresize},
-    {"settrans", uicb_settrans},
-    {"setborder", uicb_setborder},
-    {"swapnext", uicb_swapnext},
-    {"swapprev", uicb_swapprev},
-    /* tag.c */
-    {"tag", uicb_tag},
-    {"togglefloating", uicb_togglefloating},
-    {"toggleview", uicb_toggleview},
-    {"toggletag", uicb_toggletag},
-    {"view", uicb_view},
-    {"view_tag_prev_selected", uicb_tag_prev_selected},
-    {"view_tag_previous", uicb_tag_viewprev},
-    {"view_tag_next", uicb_tag_viewnext},
-    /* layout.c */
-    {"setlayout", uicb_setlayout},
-    {"focusnext", uicb_focusnext},
-    {"focusprev", uicb_focusprev},
-    {"togglemax", uicb_togglemax},
-    {"toggleverticalmax", uicb_toggleverticalmax},
-    {"togglehorizontalmax", uicb_togglehorizontalmax},
-    {"zoom", uicb_zoom},
-    /* layouts/tile.c */
-    {"setmwfact", uicb_setmwfact},
-    {"setnmaster", uicb_setnmaster},
-    {"setncol", uicb_setncol},
-    /* screen.c */
-    {"focusnextscreen", uicb_focusnextscreen},
-    {"focusprevscreen", uicb_focusprevscreen},
-    {"movetoscreen", uicb_movetoscreen},
-    /* awesome.c */
-    {"quit", uicb_quit},
-    /* statusbar.c */
-    {"togglebar", uicb_togglebar},
-    {NULL, NULL}
-};
-
 /** Lookup for a key mask from its name
  * \param keyname Key name
  * \return Key mask or 0 if not found
@@ -140,25 +131,6 @@ key_mask_lookup(const char *keyname)
                 return KeyModList[i].keysym;
 
     return 0;
-}
-
-/** Lookup for a function pointer from its name
- * in the given NameFuncLink list
- * \param funcname Function name
- * \param list Function and name link list
- * \return function pointer
- */
-static void *
-name_func_lookup(const char *funcname, const NameFuncLink * list)
-{
-    int i;
-
-    if(funcname && list)
-        for(i = 0; list[i].name; i++)
-            if(!a_strcmp(funcname, list[i].name))
-                return list[i].func;
-
-    return NULL;
 }
 
 /** Parse configuration file and initialize some stuff
@@ -410,7 +382,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
             awesomeconf->keys[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
         awesomeconf->keys[i].keysym = XStringToKeysym(cfg_getstr(cfgsectmp, "key"));
-        awesomeconf->keys[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), KeyfuncList);
+        awesomeconf->keys[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
         awesomeconf->keys[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
     }
 

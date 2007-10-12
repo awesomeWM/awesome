@@ -248,3 +248,13 @@ uicb_togglebar(awesome_config *awesomeconf,
     arrange(awesomeconf->display, awesomeconf);
 }
 
+
+void
+uicb_setstatustext(awesome_config *awesomeconf, const char *arg)
+{
+    if(!arg)
+        return;
+    a_strncpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), arg, a_strlen(arg));
+
+    drawstatusbar(awesomeconf->display, awesomeconf);
+}

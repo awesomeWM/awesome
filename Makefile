@@ -3,7 +3,7 @@
 
 include config.mk
 
-SRC = client.c draw.c event.c layout.c awesome.c tag.c util.c config.c screen.c statusbar.c
+SRC = client.c draw.c event.c layout.c awesome.c tag.c util.c config.c screen.c statusbar.c uicb.c
 OBJ = ${SRC:.c=.o} ${LAYOUTS:.c=.o}
 
 all: options awesome

@@ -42,6 +42,7 @@
 #include "screen.h"
 #include "util.h"
 #include "statusbar.h"
+#include "uicb.h"
 
 #define CONTROL_FIFO_PATH ".awesome_ctl"
 
@@ -258,7 +259,7 @@ typedef void event_handler (XEvent *, awesome_config *);
 int
 main(int argc, char *argv[])
 {
-    char *p, *fifopath;
+    char *fifopath, buf[1024];
     const char *confpath = NULL, *homedir;
     int r, cfd, xfd, e_dummy;
     fd_set rd;
@@ -390,13 +391,13 @@ main(int argc, char *argv[])
 
     p_delete(&fifopath);
 
+    FD_ZERO(&rd);
+    if(cfd > 0)
+        FD_SET(cfd, &rd);
+    FD_SET(xfd, &rd);
     /* main event loop, also reads status text from stdin */
     while(running)
     {
-        FD_ZERO(&rd);
-        if(cfd > 0)
-            FD_SET(cfd, &rd);
-        FD_SET(xfd, &rd);
         if(select(MAX(xfd, cfd) + 1, &rd, NULL, NULL, NULL) == -1)
         {
             if(errno == EINTR)
@@ -405,7 +406,7 @@ main(int argc, char *argv[])
         }
         if(cfd >= 0 && FD_ISSET(cfd, &rd))
         {
-            switch (r = read(cfd, awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext) - 1))
+            switch (r = read(cfd, buf, sizeof(buf)))
             {
             case -1:
                 perror("awesome: error reading fifo");
@@ -417,12 +418,7 @@ main(int argc, char *argv[])
             case 0:
                 break;
             default:
-                for(awesomeconf[0].statustext[r] = '\0', p = awesomeconf[0].statustext + a_strlen(awesomeconf[0].statustext) - 1;
-                    p >= awesomeconf[0].statustext && *p == '\n'; *p-- = '\0');
-                for(; p >= awesomeconf[0].statustext && *p != '\n'; --p);
-                if(p > awesomeconf[0].statustext)
-                    a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
-                              p + 1, sizeof(awesomeconf[0].statustext));
+                parse_control(buf, awesomeconf);
             }
             drawstatusbar(dpy, &awesomeconf[0]);
         }

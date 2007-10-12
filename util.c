@@ -155,6 +155,26 @@ compute_new_value_from_arg(const char *arg, double current_value)
     return current_value;
 }
 
+
+/** Lookup for a function pointer from its name
+ * in the given NameFuncLink list
+ * \param funcname Function name
+ * \param list Function and name link list
+ * \return function pointer
+ */
+void *
+name_func_lookup(const char *funcname, const NameFuncLink * list)
+{
+    int i;
+
+    if(funcname && list)
+        for(i = 0; list[i].name; i++)
+            if(!a_strcmp(funcname, list[i].name))
+                return list[i].func;
+
+    return NULL;
+}
+
 /** \brief safe limited strcpy.
  *
  * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into \c dst,
