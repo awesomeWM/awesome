@@ -183,7 +183,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                     return;
                 }
             }
-            x += awesomeconf[screen].statusbar.width;
+            x += awesomeconf[screen].statusbar.txtlayoutwidth;
             if(ev->x < x && (ev->button == Button1 || ev->button == Button4))
                 uicb_setlayout(&awesomeconf[screen], "+1");
             else if(ev->x < x && (ev->button == Button3 || ev->button == Button5))
