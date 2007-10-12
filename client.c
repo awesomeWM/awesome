@@ -301,7 +301,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags)))
-        for(c = *awesomeconf->clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->snext);
+        for(c = *awesomeconf->clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
 
     /* if a client was selected but it's not the current client, unfocus it */
     if(*awesomeconf->client_sel && *awesomeconf->client_sel != c)
@@ -322,7 +322,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
     {
         XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_selected[ColBorder].pixel);
         XSetInputFocus(awesomeconf->display, (*awesomeconf->client_sel)->win, RevertToPointerRoot, CurrentTime);
-        for(c = *awesomeconf->clients; c; c = c->snext)
+        for(c = *awesomeconf->clients; c; c = c->next)
             if(c != *awesomeconf->client_sel)
                 setclienttrans(c, awesomeconf->opacity_unfocused);
         setclienttrans(*awesomeconf->client_sel, -1);

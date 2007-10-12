@@ -114,7 +114,6 @@ struct Client
     Client *next;
     /** Previous client */
     Client *prev;
-    Client *snext;
     /** Window of the client */
     Window win;
     /** Client display */
