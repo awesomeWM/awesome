@@ -323,7 +323,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
     if(!selscreen)
         return;
     *awesomeconf->client_sel = c;
-    drawstatusbar(disp, awesomeconf);
+    drawstatusbar(awesomeconf);
     if(*awesomeconf->client_sel)
     {
         XSetInputFocus(awesomeconf->display, (*awesomeconf->client_sel)->win, RevertToPointerRoot, CurrentTime);

@@ -320,7 +320,7 @@ main(int argc, char *argv[])
         initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar,
                       awesomeconf->cursor[CurNormal], awesomeconf->font,
                       awesomeconf->layouts, awesomeconf->nlayouts);
-        drawstatusbar(dpy, &awesomeconf[screen]);
+        drawstatusbar(&awesomeconf[screen]);
     }
 
     netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);

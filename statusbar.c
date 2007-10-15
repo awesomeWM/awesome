@@ -46,18 +46,18 @@ isoccupied(Client **head, unsigned int t, int screen)
 }
 
 void
-drawstatusbar(Display *disp, awesome_config * awesomeconf)
+drawstatusbar(awesome_config * awesomeconf)
 {
     int z, i, x = 0, y = 0, w;
 
     for(i = 0; i < awesomeconf->ntags; i++)
     {
-        w = textwidth(disp, awesomeconf->font,
+        w = textwidth(awesomeconf->display, awesomeconf->font,
                       awesomeconf->tags[i].name, a_strlen(awesomeconf->tags[i].name))
             + awesomeconf->font->height;
         if(awesomeconf->tags[i].selected)
         {
-            drawtext(disp, awesomeconf->phys_screen,
+            drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
                      awesomeconf->statusbar.height,
                      awesomeconf->statusbar.drawable,
@@ -66,7 +66,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->font,
                      awesomeconf->tags[i].name, awesomeconf->colors_selected);
             if(isoccupied(awesomeconf->clients, i, awesomeconf->screen))
-                drawrectangle(disp, awesomeconf->phys_screen,
+                drawrectangle(awesomeconf->display, awesomeconf->phys_screen,
                               x, y,
                               (awesomeconf->font->height + 2) / 4,
                               (awesomeconf->font->height + 2) / 4,
@@ -78,7 +78,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
         }
         else
         {
-            drawtext(disp, awesomeconf->phys_screen,
+            drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
                      awesomeconf->statusbar.height,
                      awesomeconf->statusbar.drawable,
@@ -87,7 +87,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->font,
                      awesomeconf->tags[i].name, awesomeconf->colors_normal);
             if(isoccupied(awesomeconf->clients, i, awesomeconf->screen))
-                drawrectangle(disp, awesomeconf->phys_screen,
+                drawrectangle(awesomeconf->display, awesomeconf->phys_screen,
                               x, y,
                               (awesomeconf->font->height + 2) / 4,
                               (awesomeconf->font->height + 2) / 4,
@@ -99,7 +99,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
         }
         x += w;
     }
-    drawtext(disp, awesomeconf->phys_screen,
+    drawtext(awesomeconf->display, awesomeconf->phys_screen,
              x, y, awesomeconf->statusbar.txtlayoutwidth,
              awesomeconf->statusbar.height,
              awesomeconf->statusbar.drawable,
@@ -108,7 +108,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
              awesomeconf->font,
              awesomeconf->current_layout->symbol, awesomeconf->colors_normal);
     z = x + awesomeconf->statusbar.txtlayoutwidth;
-    w = textwidth(disp, awesomeconf->font, awesomeconf->statustext, a_strlen(awesomeconf->statustext))
+    w = textwidth(awesomeconf->display, awesomeconf->font, awesomeconf->statustext, a_strlen(awesomeconf->statustext))
         + awesomeconf->font->height;
     x = awesomeconf->statusbar.width - w;
     if(x < z)
@@ -116,7 +116,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
         x = z;
         w = awesomeconf->statusbar.width - z;
     }
-    drawtext(disp, awesomeconf->phys_screen,
+    drawtext(awesomeconf->display, awesomeconf->phys_screen,
              x, y, w,
              awesomeconf->statusbar.height,
              awesomeconf->statusbar.drawable,
@@ -129,7 +129,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
         x = z;
         if(*awesomeconf->client_sel)
         {
-            drawtext(disp, awesomeconf->phys_screen,
+            drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
                      awesomeconf->statusbar.height,
                      awesomeconf->statusbar.drawable,
@@ -138,7 +138,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->font,
                      (*awesomeconf->client_sel)->name, awesomeconf->colors_selected);
             if((*awesomeconf->client_sel)->isfloating)
-                drawcircle(disp, awesomeconf->phys_screen,
+                drawcircle(awesomeconf->display, awesomeconf->phys_screen,
                            x, y,
                            (awesomeconf->font->height + 2) / 4,
                            awesomeconf->statusbar.drawable,
@@ -151,7 +151,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
         {
             char buf[256];
             snprintf(buf, sizeof(buf), "nmaster: %d ncol: %d mwfact: %.2lf", awesomeconf->nmaster, awesomeconf->ncol, awesomeconf->mwfact);
-            drawtext(disp, awesomeconf->phys_screen,
+            drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w, 
                      awesomeconf->statusbar.height,
                      awesomeconf->statusbar.drawable,
@@ -161,7 +161,7 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      buf, awesomeconf->colors_normal);
         }
         else
-            drawtext(disp, awesomeconf->phys_screen,
+            drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
                      awesomeconf->statusbar.height,
                      awesomeconf->statusbar.drawable,
@@ -170,10 +170,10 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
                      awesomeconf->font,
                      NULL, awesomeconf->colors_normal);
     }
-    XCopyArea(disp, awesomeconf->statusbar.drawable,
-              awesomeconf->statusbar.window, DefaultGC(disp, awesomeconf->phys_screen), 0, 0,
+    XCopyArea(awesomeconf->display, awesomeconf->statusbar.drawable,
+              awesomeconf->statusbar.window, DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,
               awesomeconf->statusbar.width, awesomeconf->statusbar.height, 0, 0);
-    XSync(disp, False);
+    XSync(awesomeconf->display, False);
 }
 
 void
@@ -258,6 +258,6 @@ uicb_setstatustext(awesome_config *awesomeconf, const char *arg)
         return;
     a_strncpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), arg, a_strlen(arg));
 
-    drawstatusbar(awesomeconf->display, awesomeconf);
+    drawstatusbar(awesomeconf);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

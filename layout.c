@@ -119,7 +119,7 @@ restack(Display * disp, awesome_config *awesomeconf)
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatusbar(disp, awesomeconf);
+    drawstatusbar(awesomeconf);
     if(!*awesomeconf->client_sel)
         return;
     if(awesomeconf->allow_lower_floats)
@@ -195,7 +195,7 @@ uicb_setlayout(awesome_config * awesomeconf,
     if(*awesomeconf->client_sel)
         arrange(awesomeconf->display, awesomeconf);
     else
-        drawstatusbar(awesomeconf->display, awesomeconf);
+        drawstatusbar(awesomeconf);
 
     saveawesomeprops(awesomeconf);
 
