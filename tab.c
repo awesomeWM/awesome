@@ -62,7 +62,6 @@ uicb_tab(awesome_config *awesomeconf,
                     awesomeconf[awesomeconf->screen].cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
 
-
     for(;;)
     {
         XMaskEvent(awesomeconf->display, ButtonPressMask, &ev);
@@ -72,11 +71,13 @@ uicb_tab(awesome_config *awesomeconf,
             break;
         }
     }
+
     XQueryPointer(awesomeconf->display,
                   RootWindow(awesomeconf->display, awesomeconf->phys_screen),
                   &dummy, &child, &x1, &y1, &di, &di, &dui);
+
     if((c = get_client_bywin(awesomeconf->clients, child))
-       && c != sel)
+       && c != sel && !c->isfloating)
     {
         /* take the last tabbed window */
         for(tmp = sel; tmp->tab.next; tmp = tmp->tab.next);
@@ -85,8 +86,8 @@ uicb_tab(awesome_config *awesomeconf,
 
         c->tab.isvisible = False;
         arrange(awesomeconf->display, awesomeconf);
+        focus(awesomeconf->display, sel, True, awesomeconf);
     }
-    focus(awesomeconf->display, sel, True, awesomeconf);
 }
 
 void

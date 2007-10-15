@@ -24,6 +24,7 @@
 
 #include "layout.h"
 #include "tag.h"
+#include "tab.h"
 #include "util.h"
 
 /** This function returns the index of
@@ -187,6 +188,7 @@ uicb_togglefloating(awesome_config * awesomeconf,
         (*awesomeconf->client_sel)->rw = (*awesomeconf->client_sel)->w;
         (*awesomeconf->client_sel)->rh = (*awesomeconf->client_sel)->h;
     }
+    client_untab(*awesomeconf->client_sel);
     saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
     arrange(awesomeconf->display, awesomeconf);
 }
