@@ -19,7 +19,6 @@
  *
  */
 
-
 /**
  * \defgroup ui_callback
  */
@@ -237,7 +236,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
     const char *tmp, *homedir;
     char *confpath;
     KeySym tmp_key;
-    ssize_t confpath_len, txtlen;
+    ssize_t confpath_len;
 
     if(confpatharg)
         confpath = a_strdup(confpatharg);
@@ -320,9 +319,6 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
             continue;
         }
         awesomeconf->layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
-        txtlen = awesomeconf->font->height + textwidth(disp, awesomeconf->font, awesomeconf->layouts[i].symbol, a_strlen(awesomeconf->layouts[i].symbol));
-        if(txtlen > awesomeconf->statusbar.txtlayoutwidth)
-            awesomeconf->statusbar.txtlayoutwidth = txtlen;
     }
 
     awesomeconf->mwfact = cfg_getfloat(cfg_layouts, "mwfact");

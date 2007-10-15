@@ -200,7 +200,7 @@ setup(awesome_config *awesomeconf)
     compileregs(awesomeconf->rules, awesomeconf->nrules);
 
     /* bar */
-    initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, awesomeconf->cursor[CurNormal], awesomeconf->font);
+    initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, awesomeconf->cursor[CurNormal], awesomeconf->font, awesomeconf->layouts, awesomeconf->nlayouts);
 }
 
 /** Startup Error handler to check if another window manager

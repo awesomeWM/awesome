@@ -24,7 +24,7 @@
 
 #include "common.h"
 
-void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *);
+void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *, Layout *, int);
 void drawstatusbar(Display *, awesome_config *);
 void updatebarpos(Display *, Statusbar);
 

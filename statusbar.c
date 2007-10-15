@@ -177,20 +177,17 @@ drawstatusbar(Display *disp, awesome_config * awesomeconf)
 }
 
 void
-initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font)
+initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Layout *layouts, int nlayouts)
 {
     XSetWindowAttributes wa;
-    int phys_screen;
-    ScreenInfo *si;
+    int i, phys_screen = get_phys_screen(disp, screen);
+    ScreenInfo *si = get_screen_info(disp, screen, NULL);
 
-    phys_screen = get_phys_screen(disp, screen);
-
-    statusbar->screen = screen;
-
-    si = get_screen_info(disp, screen, NULL);
     statusbar->width = si[screen].width;
     statusbar->height = font->height + 2; 
     p_delete(&si);
+
+    statusbar->screen = screen;
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
@@ -202,7 +199,8 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
                                       statusbar->width,
                                       statusbar->height,
                                       0, DefaultDepth(disp, phys_screen), CopyFromParent,
-                                      DefaultVisual(disp, phys_screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+                                      DefaultVisual(disp, phys_screen),
+                                      CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, cursor);
     updatebarpos(disp, *statusbar);
     XMapRaised(disp, statusbar->window);
@@ -211,6 +209,10 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
                                         statusbar->width,
                                         statusbar->height,
                                         DefaultDepth(disp, phys_screen));
+
+    for(i = 0; i < nlayouts; i++)
+        statusbar->txtlayoutwidth = MAX(statusbar->txtlayoutwidth,
+                                        (font->height + textwidth(disp, font, layouts[i].symbol, a_strlen(layouts[i].symbol))));
 }
 
 void
