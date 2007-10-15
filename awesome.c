@@ -317,9 +317,9 @@ main(int argc, char *argv[])
         setup(&awesomeconf[screen]);
         awesomeconf[screen].clients = clients;
         awesomeconf[screen].client_sel = sel;
-        initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar,
-                      awesomeconf->cursor[CurNormal], awesomeconf->font,
-                      awesomeconf->layouts, awesomeconf->nlayouts);
+        initstatusbar(awesomeconf[screen].display, screen, &awesomeconf[screen].statusbar,
+                      awesomeconf[screen].cursor[CurNormal], awesomeconf[screen].font,
+                      awesomeconf[screen].layouts, awesomeconf[screen].nlayouts);
         drawstatusbar(&awesomeconf[screen]);
     }
 
