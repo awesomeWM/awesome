@@ -26,6 +26,8 @@
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <fcntl.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
@@ -45,6 +47,7 @@
 #include "uicb.h"
 
 #define CONTROL_FIFO_PATH ".awesome_ctl"
+#define CONTROL_UNIX_SOCKET_PATH ".awesome_so_ctl"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
@@ -255,7 +258,7 @@ main(int argc, char *argv[])
 {
     char *fifopath, buf[1024];
     const char *confpath = NULL, *homedir;
-    int r, cfd, xfd, e_dummy;
+    int r, cfd, xfd, e_dummy, csfd;
     fd_set rd;
     XEvent ev;
     Display * dpy;
@@ -267,7 +270,8 @@ main(int argc, char *argv[])
     event_handler **handler;
     Client **clients, **sel;
     struct stat fifost;
-    ssize_t fifopath_len;
+    ssize_t path_len;
+    struct sockaddr_un addr;
 
     if(argc >= 2)
     {
@@ -374,11 +378,11 @@ main(int argc, char *argv[])
 
     /* construct fifo path */
     homedir = getenv("HOME");
-    fifopath_len = a_strlen(homedir) + a_strlen(CONTROL_FIFO_PATH) + 2;
-    fifopath = p_new(char, fifopath_len);
-    a_strcpy(fifopath, fifopath_len, homedir);
-    a_strcat(fifopath, fifopath_len, "/");
-    a_strcat(fifopath, fifopath_len, CONTROL_FIFO_PATH);
+    path_len = a_strlen(homedir) + a_strlen(CONTROL_FIFO_PATH) + 2;
+    fifopath = p_new(char, path_len);
+    a_strcpy(fifopath, path_len, homedir);
+    a_strcat(fifopath, path_len, "/");
+    a_strcat(fifopath, path_len, CONTROL_FIFO_PATH);
 
     if(lstat(fifopath, &fifost) == -1)
         if(mkfifo(fifopath, 0600) == -1)
@@ -386,14 +390,43 @@ main(int argc, char *argv[])
 
     cfd = open(fifopath, O_RDONLY | O_NDELAY);
 
+    csfd = -1;
+    path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + 2;
+    if(path_len <= (int)sizeof(addr.sun_path))
+    {
+        a_strcpy(addr.sun_path, path_len, homedir);
+        a_strcat(addr.sun_path, path_len, "/");
+        a_strcat(addr.sun_path, path_len, CONTROL_UNIX_SOCKET_PATH);
+        csfd = socket(AF_UNIX, SOCK_DGRAM, 0);
+        if(csfd < 0)
+            perror("error opening UNIX domain socket");
+        addr.sun_family = AF_UNIX;
+        if(bind(csfd, (struct sockaddr *) &addr, SUN_LEN(&addr)))
+        {
+            if(errno == EADDRINUSE)
+            {
+                if(unlink(addr.sun_path))
+                    perror("error unlinking existend file");
+                if(bind(csfd, (struct sockaddr *) &addr, SUN_LEN(&addr)))
+                    perror("error binding UNIX domain socket");
+            }
+            else
+                perror("error binding UNIX domain socket");
+        }
+    }
+    else
+        fprintf(stderr, "error: path of control UNIX domain socket is too long");
+
     /* main event loop, also reads status text from stdin */
     while(running)
     {
         FD_ZERO(&rd);
         if(cfd >= 0)
             FD_SET(cfd, &rd);
+        if(csfd >= 0)
+            FD_SET(csfd, &rd);
         FD_SET(xfd, &rd);
-        if(select(MAX(xfd, cfd) + 1, &rd, NULL, NULL, NULL) == -1)
+        if(select(MAX(xfd, MAX(csfd, cfd)) + 1, &rd, NULL, NULL, NULL) == -1)
         {
             if(errno == EINTR)
                 continue;
@@ -416,6 +449,24 @@ main(int argc, char *argv[])
             default:
                 parse_control(buf, awesomeconf);
             }
+        if(csfd >= 0 && FD_ISSET(csfd, &rd))
+            switch (r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
+            {
+            case -1:
+                perror("awesome: error reading UNIX domain socket");
+                a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
+                          strerror(errno), sizeof(awesomeconf[0].statustext) - 1);
+                awesomeconf[0].statustext[sizeof(awesomeconf[0].statustext) - 1] = '\0';
+                csfd = -1;
+                break;
+            case 0:
+                break;
+            default:
+                if(r >= (int)sizeof(buf))
+                    break;
+                buf[r] = '\0';
+                parse_control(buf, awesomeconf);
+            }
 
         while(XPending(dpy))
         {
@@ -424,6 +475,11 @@ main(int argc, char *argv[])
                 handler[ev.type](&ev, awesomeconf);       /* call handler */
         }
     }
+
+    if(csfd > 0 && close(csfd))
+        perror("error closing UNIX domain socket");
+    if(unlink(addr.sun_path))
+        perror("error unlinking UNIX domain socket");
 
     p_delete(&fifopath);
 
