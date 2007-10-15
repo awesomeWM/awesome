@@ -34,7 +34,7 @@
  * \param awesomeconf awesome config
  */
 void
-arrange(Display * disp, awesome_config *awesomeconf)
+arrange(awesome_config *awesomeconf)
 {
     Client *c;
 
@@ -47,8 +47,8 @@ arrange(Display * disp, awesome_config *awesomeconf)
             ban(c);
     }
     awesomeconf->current_layout->arrange(awesomeconf);
-    focus(disp, NULL, True, awesomeconf);
-    restack(disp, awesomeconf);
+    focus(awesomeconf->display, NULL, True, awesomeconf);
+    restack(awesomeconf->display, awesomeconf);
 }
 
 void
@@ -193,7 +193,7 @@ uicb_setlayout(awesome_config * awesomeconf,
         c->ftview = True;
 
     if(*awesomeconf->client_sel)
-        arrange(awesomeconf->display, awesomeconf);
+        arrange(awesomeconf);
     else
         drawstatusbar(awesomeconf);
 
@@ -230,7 +230,7 @@ maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
     else
         (*awesomeconf->client_sel)->isfloating = False;
 
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 void
@@ -286,7 +286,7 @@ uicb_zoom(awesome_config *awesomeconf,
     detach(awesomeconf->clients, *awesomeconf->client_sel);
     attach(awesomeconf->clients, *awesomeconf->client_sel);
     focus(awesomeconf->display, *awesomeconf->client_sel, True, awesomeconf);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

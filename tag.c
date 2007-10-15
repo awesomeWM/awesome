@@ -158,7 +158,7 @@ uicb_tag(awesome_config *awesomeconf,
     if(i >= 0 && i < awesomeconf->ntags)
         (*awesomeconf->client_sel)->tags[i] = True;
     saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 /** Toggle floating state of a client
@@ -190,7 +190,7 @@ uicb_togglefloating(awesome_config * awesomeconf,
     }
     client_untab(*awesomeconf->client_sel);
     saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 /** Toggle tag view
@@ -212,7 +212,7 @@ uicb_toggletag(awesome_config *awesomeconf,
     if(j == awesomeconf->ntags)
         (*awesomeconf->client_sel)->tags[i] = True;
     saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 /** Add a tag to viewed tags
@@ -232,7 +232,7 @@ uicb_toggleview(awesome_config *awesomeconf,
     if(j == awesomeconf->ntags)
         awesomeconf->tags[i].selected = True;
     saveawesomeprops(awesomeconf);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 /** View tag
@@ -258,7 +258,7 @@ uicb_view(awesome_config *awesomeconf,
         awesomeconf->current_layout = awesomeconf->tags[i].layout;
     }
     saveawesomeprops(awesomeconf);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 /** View previously selected tags
@@ -279,7 +279,7 @@ uicb_tag_prev_selected(awesome_config *awesomeconf,
         awesomeconf->tags[i].selected = awesomeconf->tags[i].was_selected;
         awesomeconf->tags[i].was_selected = t;
     }
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 /** View next tag
@@ -304,7 +304,7 @@ uicb_tag_viewnext(awesome_config *awesomeconf,
     awesomeconf->tags[firsttag].selected = True;
     awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
     saveawesomeprops(awesomeconf);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 /** View previous tag
@@ -329,6 +329,6 @@ uicb_tag_viewprev(awesome_config *awesomeconf,
     awesomeconf->tags[firsttag].selected = True;
     awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
     saveawesomeprops(awesomeconf);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

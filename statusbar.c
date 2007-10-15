@@ -247,7 +247,7 @@ uicb_togglebar(awesome_config *awesomeconf,
     else
         awesomeconf->statusbar.position = BarOff;
     updatebarpos(awesomeconf->display, awesomeconf->statusbar);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 

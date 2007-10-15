@@ -39,7 +39,7 @@ uicb_setnmaster(awesome_config *awesomeconf,
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
         awesomeconf->nmaster = 0;
 
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 void
@@ -52,7 +52,7 @@ uicb_setncol(awesome_config *awesomeconf,
     if((awesomeconf->ncol = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncol)) < 1)
         awesomeconf->ncol = 1;
 
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
 }
 
 void
@@ -78,7 +78,7 @@ uicb_setmwfact(awesome_config * awesomeconf,
     else if(awesomeconf->mwfact > 0.9)
         awesomeconf->mwfact = 0.9;
 
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
     p_delete(&newarg);
 }
 

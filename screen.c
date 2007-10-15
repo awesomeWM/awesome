@@ -246,7 +246,7 @@ uicb_movetoscreen(awesome_config * awesomeconf,
     prev_screen = (*awesomeconf->client_sel)->screen;
     move_client_to_screen(*awesomeconf->client_sel, &awesomeconf[new_screen - awesomeconf->screen], True);
     move_mouse_pointer_to_screen(awesomeconf->display, new_screen);
-    arrange(awesomeconf->display, &awesomeconf[prev_screen - awesomeconf->screen]);
-    arrange(awesomeconf->display, &awesomeconf[new_screen - awesomeconf->screen]);
+    arrange(&awesomeconf[prev_screen - awesomeconf->screen]);
+    arrange(&awesomeconf[new_screen - awesomeconf->screen]);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

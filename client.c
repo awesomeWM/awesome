@@ -441,7 +441,7 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     attach(awesomeconf->clients, c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
     c->isbanned = True;
-    arrange(disp, awesomeconf);
+    arrange(awesomeconf);
 }
 
 void
@@ -573,7 +573,7 @@ unmanage(Client * c, long state, awesome_config *awesomeconf)
     XSetErrorHandler(xerror);
     XUngrabServer(c->display);
     if(state != NormalState)
-        arrange(c->display, awesomeconf);
+        arrange(awesomeconf);
     p_delete(&c->tags);
     p_delete(&c);
 }
@@ -732,7 +732,7 @@ uicb_swapnext(awesome_config *awesomeconf,
     if(next)
     {
         client_swap(awesomeconf->clients, *awesomeconf->client_sel, next);
-        arrange(awesomeconf->display, awesomeconf);
+        arrange(awesomeconf);
     }
 }
 
@@ -749,7 +749,7 @@ uicb_swapprev(awesome_config *awesomeconf,
     if(prev)
     {
         client_swap(awesomeconf->clients, prev, *awesomeconf->client_sel);
-        arrange(awesomeconf->display, awesomeconf);
+        arrange(awesomeconf);
     }
 }
 

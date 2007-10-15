@@ -85,7 +85,7 @@ uicb_tab(awesome_config *awesomeconf,
         c->tab.prev = tmp;
 
         c->tab.isvisible = False;
-        arrange(awesomeconf->display, awesomeconf);
+        arrange(awesomeconf);
         focus(awesomeconf->display, sel, True, awesomeconf);
     }
 }
@@ -100,7 +100,7 @@ uicb_untab(awesome_config *awesomeconf,
         return;
 
     client_untab(sel);
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
     focus(awesomeconf->display, sel, True, awesomeconf);
 }
 
@@ -115,7 +115,7 @@ uicb_viewnexttab(awesome_config *awesomeconf,
 
     sel->tab.isvisible = False;
     sel->tab.next->tab.isvisible = True;
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
     focus(awesomeconf->display, sel->tab.next, True, awesomeconf);
 }
 
@@ -130,7 +130,7 @@ uicb_viewprevtab(awesome_config *awesomeconf,
 
     sel->tab.isvisible = False;
     sel->tab.prev->tab.isvisible = True;
-    arrange(awesomeconf->display, awesomeconf);
+    arrange(awesomeconf);
     focus(awesomeconf->display, sel->tab.prev, True, awesomeconf);
 }
 
