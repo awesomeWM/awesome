@@ -115,6 +115,17 @@ struct Client
     Client *next;
     /** Previous client */
     Client *prev;
+    /** Tabs support */
+    struct
+    {
+          /** Next client in tab */
+          Client *next;
+          /** Previous client in tab */
+          Client *prev;
+          /** True if client is the visible one */
+          Bool isvisible;
+          /** True if client is tabbed */
+    } tab;
     /** Window of the client */
     Window win;
     /** Client display */
@@ -190,6 +201,8 @@ struct awesome_config
     XColor colors_normal[ColLast];
     /** Selected colors */
     XColor colors_selected[ColLast];
+    /** Tabbed colors */
+    XColor colors_tab[ColLast];
     /** Cursors */
     Cursor cursor[CurLast];
     /** Font */

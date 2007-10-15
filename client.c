@@ -320,7 +320,10 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
     drawstatusbar(disp, awesomeconf);
     if(*awesomeconf->client_sel)
     {
-        XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_selected[ColBorder].pixel);
+        if((*awesomeconf->client_sel)->tab.next || (*awesomeconf->client_sel)->tab.prev)
+            XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_tab[ColBorder].pixel);
+        else
+            XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_selected[ColBorder].pixel);
         XSetInputFocus(awesomeconf->display, (*awesomeconf->client_sel)->win, RevertToPointerRoot, CurrentTime);
         for(c = *awesomeconf->clients; c; c = c->next)
             if(c != *awesomeconf->client_sel)
@@ -388,6 +391,7 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     c->oldborder = wa->border_width;
     c->display = disp;
     c->phys_screen = get_phys_screen(c->display, c->screen);
+    c->tab.isvisible = True;
     screen_info = get_screen_info(c->display, c->screen, NULL);
     if(c->w == screen_info[c->screen].width && c->h == screen_info[c->screen].height)
     {

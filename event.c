@@ -38,8 +38,8 @@
 #define CLEANMASK(mask, screen)		(mask & ~(awesomeconf[screen].numlockmask | LockMask))
 #define MOUSEMASK	                (BUTTONMASK | PointerMotionMask)
 
-static Client *
-getclient(Client **list, Window w)
+Client *
+get_client_bywin(Client **list, Window w)
 {
     Client *c;
 
@@ -195,7 +195,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             return;
         }
 
-    if((c = getclient(awesomeconf->clients, ev->window)))
+    if((c = get_client_bywin(awesomeconf->clients, ev->window)))
     {
         focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
         if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
@@ -255,7 +255,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
 
-    if((c = getclient(awesomeconf->clients, ev->window)))
+    if((c = get_client_bywin(awesomeconf->clients, ev->window)))
     {
         c->ismax = False;
         if(ev->value_mask & CWBorderWidth)
@@ -338,7 +338,7 @@ handle_event_destroynotify(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     XDestroyWindowEvent *ev = &e->xdestroywindow;
 
-    if((c = getclient(awesomeconf->clients, ev->window)))
+    if((c = get_client_bywin(awesomeconf->clients, ev->window)))
         unmanage(c, WithdrawnState, &awesomeconf[c->screen]);
 }
 
@@ -351,7 +351,7 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
 
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
-    if((c = getclient(awesomeconf->clients, ev->window)))
+    if((c = get_client_bywin(awesomeconf->clients, ev->window)))
     {
         if(!*awesomeconf->client_sel || *awesomeconf->client_sel != c)
         {
@@ -444,7 +444,7 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
         return;
     if(wa.override_redirect)
         return;
-    if(!getclient(awesomeconf->clients, ev->window))
+    if(!get_client_bywin(awesomeconf->clients, ev->window))
     {
         for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
         if(screen == 0)
@@ -469,13 +469,13 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
 
     if(ev->state == PropertyDelete)
         return;                 /* ignore */
-    if((c = getclient(awesomeconf->clients, ev->window)))
+    if((c = get_client_bywin(awesomeconf->clients, ev->window)))
     {
         switch (ev->atom)
         {
         case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
-            if(!c->isfloating && (c->isfloating = (getclient(awesomeconf->clients, trans) != NULL)))
+            if(!c->isfloating && (c->isfloating = (get_client_bywin(awesomeconf->clients, trans) != NULL)))
                 arrange(e->xany.display, &awesomeconf[c->screen]);
             break;
         case XA_WM_NORMAL_HINTS:
@@ -497,7 +497,7 @@ handle_event_unmapnotify(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
 
-    if((c = getclient(awesomeconf->clients, ev->window))
+    if((c = get_client_bywin(awesomeconf->clients, ev->window))
        && ev->event == RootWindow(e->xany.display, c->phys_screen) && (ev->send_event || !c->unmapped))
         unmanage(c, WithdrawnState, &awesomeconf[c->screen]);
 }
@@ -507,7 +507,7 @@ handle_event_shape(XEvent * e,
                    awesome_config *awesomeconf __attribute__ ((unused)))
 {
     XShapeEvent *ev = (XShapeEvent *) e;
-    Client *c = getclient(awesomeconf->clients, ev->window);
+    Client *c = get_client_bywin(awesomeconf->clients, ev->window);
 
     if(c)
         set_shape(c);

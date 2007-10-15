@@ -129,7 +129,7 @@ isvisible(Client * c, int screen, Tag * tags, int ntags)
 {
     int i;
 
-    if(c->screen != screen)
+    if(c->screen != screen || !c->tab.isvisible)
         return False;
 
     for(i = 0; i < ntags; i++)

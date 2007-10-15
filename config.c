@@ -33,6 +33,7 @@
 #include "tag.h"
 #include "statusbar.h"
 #include "layout.h"
+#include "tab.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "layouts/max.h"
@@ -91,6 +92,11 @@ const NameFuncLink UicbList[] = {
     /* statusbar.c */
     {"togglebar", uicb_togglebar},
     {"setstatustext", uicb_setstatustext},
+    /* tab.c */
+    {"tab", uicb_tab},
+    {"untab", uicb_untab},
+    {"viewnexttab", uicb_viewnexttab},
+    {"viewprevtab", uicb_viewprevtab},
     {NULL, NULL}
 };
 
@@ -161,6 +167,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         CFG_STR((char *) "focus_border", (char *) "#6666ff", CFGF_NONE),
         CFG_STR((char *) "focus_bg", (char *) "#6666ff", CFGF_NONE),
         CFG_STR((char *) "focus_fg", (char *) "#ffffff", CFGF_NONE),
+        CFG_STR((char *) "tab_border", (char *) "#ff0000", CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t statusbar_opts[] =
@@ -291,6 +298,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
     awesomeconf->colors_selected[ColBorder] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_border"));
     awesomeconf->colors_selected[ColBG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_bg"));
     awesomeconf->colors_selected[ColFG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_fg"));
+    awesomeconf->colors_tab[ColBorder] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "tab_border"));
 
     /* Statusbar */
     tmp = cfg_getstr(cfg_statusbar, "position");
