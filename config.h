@@ -24,6 +24,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
+#include <regex.h>
 
 /** Bar possible position */
 enum
@@ -40,6 +41,8 @@ typedef struct
     char *prop;
     char *tags;
     Bool isfloating;
+    regex_t *propregex;
+    regex_t *tagregex;
 } Rule;
 
 typedef struct awesome_config awesome_config;

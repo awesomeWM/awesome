@@ -197,8 +197,6 @@ setup(awesome_config *awesomeconf)
 
     grabkeys(awesomeconf->display, awesomeconf->phys_screen, awesomeconf);
 
-    compileregs(awesomeconf->rules, awesomeconf->nrules);
-
     /* bar */
     initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, awesomeconf->cursor[CurNormal], awesomeconf->font, awesomeconf->layouts, awesomeconf->nlayouts);
 }

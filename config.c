@@ -342,6 +342,8 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         awesomeconf->rules[i].isfloating = cfg_getbool(cfgsectmp, "float");
     }
 
+    compileregs(awesomeconf->rules, awesomeconf->nrules);
+
     /* Tags */
 
     awesomeconf->ntags = cfg_size(cfg_tags, "tag");

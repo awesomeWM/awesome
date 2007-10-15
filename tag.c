@@ -26,14 +26,6 @@
 #include "tag.h"
 #include "util.h"
 
-typedef struct
-{
-    regex_t *propregex;
-    regex_t *tagregex;
-} Regs;
-
-static Regs *regs = NULL;
-
 /** This function returns the index of
  * the tag given un argument in *tags
  * \param tag_to_find tag name
@@ -75,11 +67,11 @@ applyrules(Client * c, awesome_config *awesomeconf)
     snprintf(prop, len + 3, "%s:%s:%s",
              ch.res_class ? ch.res_class : "", ch.res_name ? ch.res_name : "", c->name);
     for(i = 0; i < awesomeconf->nrules; i++)
-        if(regs[i].propregex && !regexec(regs[i].propregex, prop, 1, &tmp, 0))
+        if(awesomeconf->rules[i].propregex && !regexec(awesomeconf->rules[i].propregex, prop, 1, &tmp, 0))
         {
             c->isfloating = awesomeconf->rules[i].isfloating;
-            for(j = 0; regs[i].tagregex && j < awesomeconf->ntags; j++)
-                if(!regexec(regs[i].tagregex, awesomeconf->tags[j].name, 1, &tmp, 0))
+            for(j = 0; awesomeconf->rules[i].tagregex && j < awesomeconf->ntags; j++)
+                if(!regexec(awesomeconf->rules[i].tagregex, awesomeconf->tags[j].name, 1, &tmp, 0))
                 {
                     matched = True;
                     c->tags[j] = True;
@@ -103,9 +95,6 @@ compileregs(Rule * rules, int nrules)
     int i;
     regex_t *reg;
 
-    if(regs)
-        return;
-    regs = p_new(Regs, nrules);
     for(i = 0; i < nrules; i++)
     {
         if(rules[i].prop)
@@ -114,7 +103,7 @@ compileregs(Rule * rules, int nrules)
             if(regcomp(reg, rules[i].prop, REG_EXTENDED))
                 p_delete(&reg);
             else
-                regs[i].propregex = reg;
+                rules[i].propregex = reg;
         }
         if(rules[i].tags)
         {
@@ -122,7 +111,7 @@ compileregs(Rule * rules, int nrules)
             if(regcomp(reg, rules[i].tags, REG_EXTENDED))
                 p_delete(&reg);
             else
-                regs[i].tagregex = reg;
+                rules[i].tagregex = reg;
         }
     }
 }

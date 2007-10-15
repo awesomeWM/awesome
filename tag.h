@@ -22,7 +22,6 @@
 #ifndef AWESOME_TAG_H
 #define AWESOME_TAG_H
 
-#include <regex.h>
 #include "client.h"
 
 /** Check if a client is tiled */
