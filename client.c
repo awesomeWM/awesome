@@ -808,4 +808,4 @@ uicb_killclient(awesome_config *awesomeconf,
     else
         XKillClient(awesomeconf->display, (*awesomeconf->client_sel)->win);
 }
-// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

@@ -36,4 +36,4 @@ layout_max(awesome_config *awesomeconf)
                    si[awesomeconf->screen].height - 2 * c->border, awesomeconf, awesomeconf->resize_hints);
     XFree(si);
 }
-// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

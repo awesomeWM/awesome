@@ -29,4 +29,4 @@ void drawrectangle(Display *, int, int, int, int, int, Drawable, int, int, Bool,
 void drawcircle(Display *, int, int, int, int, Drawable, int, int, Bool, XColor);
 inline unsigned short textwidth(Display *, XftFont *, char *, ssize_t);
 #endif
-// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

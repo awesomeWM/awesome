@@ -225,4 +225,4 @@ ssize_t a_strcpy(char *dst, ssize_t n, const char *src)
 
     return len;
 }
-// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

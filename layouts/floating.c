@@ -39,4 +39,4 @@ layout_floating(awesome_config *awesomeconf)
                 resize(c, c->x, c->y, c->w, c->h, awesomeconf, True);
         }
 }
-// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
