@@ -53,8 +53,7 @@ drawstatusbar(awesome_config * awesomeconf)
     for(i = 0; i < awesomeconf->ntags; i++)
     {
         w = textwidth(awesomeconf->display, awesomeconf->font,
-                      awesomeconf->tags[i].name, a_strlen(awesomeconf->tags[i].name))
-            + awesomeconf->font->height;
+                      awesomeconf->tags[i].name);
         if(awesomeconf->tags[i].selected)
         {
             drawtext(awesomeconf->display, awesomeconf->phys_screen,
@@ -108,8 +107,7 @@ drawstatusbar(awesome_config * awesomeconf)
              awesomeconf->font,
              awesomeconf->current_layout->symbol, awesomeconf->colors_normal);
     z = x + awesomeconf->statusbar.txtlayoutwidth;
-    w = textwidth(awesomeconf->display, awesomeconf->font, awesomeconf->statustext, a_strlen(awesomeconf->statustext))
-        + awesomeconf->font->height;
+    w = textwidth(awesomeconf->display, awesomeconf->font, awesomeconf->statustext);
     x = awesomeconf->statusbar.width - w;
     if(x < z)
     {
@@ -184,7 +182,7 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
     ScreenInfo *si = get_screen_info(disp, screen, NULL);
 
     statusbar->width = si[screen].width;
-    statusbar->height = font->height + 2; 
+    statusbar->height = font->height * 1.5;
     p_delete(&si);
 
     statusbar->screen = screen;
@@ -212,7 +210,7 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
 
     for(i = 0; i < nlayouts; i++)
         statusbar->txtlayoutwidth = MAX(statusbar->txtlayoutwidth,
-                                        (font->height + textwidth(disp, font, layouts[i].symbol, a_strlen(layouts[i].symbol))));
+                                        (textwidth(disp, font, layouts[i].symbol)));
 }
 
 void

@@ -20,6 +20,7 @@
  */
 
 #include <cairo.h>
+#include <cairo-ft.h>
 #include <cairo-xlib.h>
 #include <math.h>
 #include "layout.h"
@@ -32,19 +33,27 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, Drawable drawabl
     int nw = 0;
     static char buf[256];
     size_t len, olen;
-    XRenderColor xrcolor;
-    XftColor xftcolor;
-    XftDraw *xftdrawable;
+    cairo_font_face_t *font_face;
+    cairo_surface_t *surface;
+    cairo_t *cr;
 
     drawrectangle(disp, screen, x, y, w, h, drawable, dw, dh, True, color[ColBG]);
     if(!a_strlen(text))
         return;
+
+    surface = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dh);
+    cr = cairo_create(surface);
+    font_face = (cairo_font_face_t *)cairo_ft_font_face_create_for_pattern(font->pattern);
+    cairo_set_font_face(cr, font_face);
+    cairo_set_font_size(cr, font->height);
+    cairo_set_source_rgb(cr, color[ColFG].red / 65535.0, color[ColFG].green / 65535.0, color[ColFG].blue / 65535.0);
+
     olen = len = a_strlen(text);
     if(len >= sizeof(buf))
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    while(len && (nw = textwidth(disp, font, buf, len)) > w - font->height)
+    while(len && (nw = textwidth(disp, font, buf)) > w)
         buf[--len] = 0;
     if(nw > w)
         return;                 /* too long */
@@ -57,17 +66,13 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, Drawable drawabl
         if(len > 3)
             buf[len - 3] = '.';
     }
-    xrcolor.red = color[ColFG].red;
-    xrcolor.green = color[ColFG].green;
-    xrcolor.blue = color[ColFG].blue;
-    XftColorAllocValue(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xrcolor, &xftcolor);
-    xftdrawable = XftDrawCreate(disp, drawable, DefaultVisual(disp, screen), DefaultColormap(disp, screen));
-    XftDrawStringUtf8(xftdrawable, &xftcolor, font,
-                      x + (font->height / 2),
-                      y + (h / 2) - (font->height / 2) + font->ascent,
-                      (XftChar8 *) buf, len);
-    XftColorFree(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xftcolor);
-    XftDrawDestroy(xftdrawable);
+
+    cairo_move_to(cr, x + font->height / 2, y + font->height);
+    cairo_show_text(cr, buf);
+
+    cairo_font_face_destroy(font_face);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
 }
 
 void
@@ -121,11 +126,27 @@ drawcircle(Display *disp, int screen, int x, int y, int r, Drawable drawable, in
 }
 
 unsigned short
-textwidth(Display *disp, XftFont *font, char *text, ssize_t len)
+textwidth(Display *disp, XftFont *font, char *text)
 {
-    XGlyphInfo gi;
-    XftTextExtentsUtf8(disp, font, (FcChar8 *) text, len, &gi);
-    return gi.width;
+    cairo_surface_t *surface;
+    cairo_t *cr;
+    cairo_font_face_t *font_face;
+    cairo_text_extents_t te;
+
+    surface = cairo_xlib_surface_create(disp, DefaultScreen(disp),
+                                        DefaultVisual(disp, DefaultScreen(disp)),
+                                        DisplayWidth(disp, DefaultScreen(disp)),
+                                        DisplayHeight(disp, DefaultScreen(disp)));
+    cr = cairo_create(surface);
+    font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
+    cairo_set_font_face(cr, font_face);
+    cairo_set_font_size(cr, font->height);
+    cairo_text_extents(cr, text, &te);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+    cairo_font_face_destroy(font_face);
+
+    return MAX(te.x_advance, te.width) + font->height;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
