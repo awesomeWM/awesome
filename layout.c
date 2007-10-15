@@ -48,7 +48,7 @@ arrange(awesome_config *awesomeconf)
     }
     awesomeconf->current_layout->arrange(awesomeconf);
     focus(NULL, True, awesomeconf);
-    restack(awesomeconf->display, awesomeconf);
+    restack(awesomeconf);
 }
 
 void
@@ -65,7 +65,7 @@ uicb_focusnext(awesome_config * awesomeconf,
     if(c)
     {
         focus(c, True, awesomeconf);
-        restack(c->display, awesomeconf);
+        restack(awesomeconf);
     }
 }
 
@@ -86,7 +86,7 @@ uicb_focusprev(awesome_config *awesomeconf,
     if(c)
     {
         focus(c, True, awesomeconf);
-        restack(c->display, awesomeconf);
+        restack(awesomeconf);
     }
 }
 
@@ -113,7 +113,7 @@ loadawesomeprops(awesome_config * awesomeconf)
 }
 
 void
-restack(Display * disp, awesome_config *awesomeconf)
+restack(awesome_config *awesomeconf)
 {
     Client *c;
     XEvent ev;
@@ -123,33 +123,33 @@ restack(Display * disp, awesome_config *awesomeconf)
     if(!*awesomeconf->client_sel)
         return;
     if(awesomeconf->allow_lower_floats)
-        XRaiseWindow(disp, (*awesomeconf->client_sel)->win);
+        XRaiseWindow(awesomeconf->display, (*awesomeconf->client_sel)->win);
     else
     {
         if((*awesomeconf->client_sel)->isfloating || IS_ARRANGE(0, layout_floating))
-            XRaiseWindow(disp, (*awesomeconf->client_sel)->win);
+            XRaiseWindow(awesomeconf->display, (*awesomeconf->client_sel)->win);
         if(!IS_ARRANGE(0, layout_floating))
         {
             wc.stack_mode = Below;
             wc.sibling = awesomeconf->statusbar.window;
             if(!(*awesomeconf->client_sel)->isfloating)
             {
-                XConfigureWindow(disp, (*awesomeconf->client_sel)->win, CWSibling | CWStackMode, &wc);
+                XConfigureWindow(awesomeconf->display, (*awesomeconf->client_sel)->win, CWSibling | CWStackMode, &wc);
                 wc.sibling = (*awesomeconf->client_sel)->win;
             }
             for(c = *awesomeconf->clients; c; c = c->next)
             {
                 if(!IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags) || c == *awesomeconf->client_sel)
                     continue;
-                XConfigureWindow(disp, c->win, CWSibling | CWStackMode, &wc);
+                XConfigureWindow(awesomeconf->display, c->win, CWSibling | CWStackMode, &wc);
                 wc.sibling = c->win;
             }
         }
     }
     if(awesomeconf->focus_move_pointer)
-        XWarpPointer(disp, None, (*awesomeconf->client_sel)->win, 0, 0, 0, 0, (*awesomeconf->client_sel)->w / 2, (*awesomeconf->client_sel)->h / 2);
-    XSync(disp, False);
-    while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
+        XWarpPointer(awesomeconf->display, None, (*awesomeconf->client_sel)->win, 0, 0, 0, 0, (*awesomeconf->client_sel)->w / 2, (*awesomeconf->client_sel)->h / 2);
+    XSync(awesomeconf->display, False);
+    while(XCheckMaskEvent(awesomeconf->display, EnterWindowMask, &ev));
 }
 
 void

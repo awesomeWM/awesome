@@ -202,7 +202,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         {
            if (ev->button == Button1)
            {
-               restack(c->display, &awesomeconf[c->screen]);
+               restack(&awesomeconf[c->screen]);
                grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
            }
         }
@@ -211,7 +211,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfloating)
                 uicb_togglefloating(&awesomeconf[c->screen], NULL);
             else
-                restack(e->xany.display, &awesomeconf[c->screen]);
+                restack(&awesomeconf[c->screen]);
             movemouse(c, awesomeconf);
         }
         else if(ev->button == Button2)
@@ -226,7 +226,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfloating)
                 uicb_togglefloating(&awesomeconf[c->screen], NULL);
             else
-                restack(e->xany.display, &awesomeconf[c->screen]);
+                restack(&awesomeconf[c->screen]);
             resizemouse(c, awesomeconf);
         }
         else if(ev->button == Button4)

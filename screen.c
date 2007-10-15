@@ -198,7 +198,7 @@ uicb_focusnextscreen(awesome_config * awesomeconf,
     if(c)
     {
         focus(c, True, &awesomeconf[next_screen - awesomeconf->screen]);
-        restack(c->display, &awesomeconf[next_screen - awesomeconf->screen]);
+        restack(&awesomeconf[next_screen - awesomeconf->screen]);
     }
     move_mouse_pointer_to_screen(awesomeconf->display, next_screen);
 }
@@ -214,7 +214,7 @@ uicb_focusprevscreen(awesome_config * awesomeconf,
     if(c)
     {
         focus(c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
-        restack(c->display, &awesomeconf[prev_screen - awesomeconf->screen]);
+        restack(&awesomeconf[prev_screen - awesomeconf->screen]);
     }
     move_mouse_pointer_to_screen(awesomeconf->display, prev_screen);
 }

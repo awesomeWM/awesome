@@ -30,7 +30,7 @@
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 
 void arrange(awesome_config *);             /* arranges all windows depending on the layout in use */
-void restack(Display *, awesome_config *);        /* restores z layers of all clients */
+void restack(awesome_config *);        /* restores z layers of all clients */
 void loadawesomeprops(awesome_config *);
 void saveawesomeprops(awesome_config *);
 
