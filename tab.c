@@ -62,6 +62,7 @@ uicb_tab(awesome_config *awesomeconf,
         c->tab.isvisible = False;
         arrange(awesomeconf->display, awesomeconf);
     }
+    focus(awesomeconf->display, sel, True, awesomeconf);
 }
 
 void
@@ -92,6 +93,7 @@ uicb_untab(awesome_config *awesomeconf,
     sel->tab.prev = NULL;
 
     arrange(awesomeconf->display, awesomeconf);
+    focus(awesomeconf->display, sel, True, awesomeconf);
 }
 
 void

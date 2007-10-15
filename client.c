@@ -310,6 +310,13 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
         XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_normal[ColBorder].pixel);
         setclienttrans(*awesomeconf->client_sel, awesomeconf->opacity_unfocused);
     }
+    if(c)
+    {
+        if(c->tab.next || c->tab.prev)
+            XSetWindowBorder(awesomeconf->display, c->win, awesomeconf->colors_tab[ColBorder].pixel);
+        else
+            XSetWindowBorder(awesomeconf->display, c->win, awesomeconf->colors_selected[ColBorder].pixel);
+    }
     if(*awesomeconf->client_sel == c)
         return;
     if(c)
@@ -320,10 +327,6 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
     drawstatusbar(disp, awesomeconf);
     if(*awesomeconf->client_sel)
     {
-        if((*awesomeconf->client_sel)->tab.next || (*awesomeconf->client_sel)->tab.prev)
-            XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_tab[ColBorder].pixel);
-        else
-            XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_selected[ColBorder].pixel);
         XSetInputFocus(awesomeconf->display, (*awesomeconf->client_sel)->win, RevertToPointerRoot, CurrentTime);
         for(c = *awesomeconf->clients; c; c = c->next)
             if(c != *awesomeconf->client_sel)
