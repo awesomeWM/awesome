@@ -296,7 +296,7 @@ detach(Client **head, Client *c)
  * \param awesomeconf awesome config
  */
 void
-focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
+focus(Client * c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags)))
@@ -333,7 +333,7 @@ focus(Display *disp, Client * c, Bool selscreen, awesome_config *awesomeconf)
         setclienttrans(*awesomeconf->client_sel, -1);
     }
     else
-        XSetInputFocus(disp, RootWindow(disp, awesomeconf->phys_screen), RevertToPointerRoot, CurrentTime);
+        XSetInputFocus(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), RevertToPointerRoot, CurrentTime);
 }
 
 
@@ -566,7 +566,7 @@ unmanage(Client * c, long state, awesome_config *awesomeconf)
     XConfigureWindow(c->display, c->win, CWBorderWidth, &wc);  /* restore border */
     detach(awesomeconf->clients, c);
     if(*awesomeconf->client_sel == c)
-        focus(c->display, NULL, True, awesomeconf);
+        focus(NULL, True, awesomeconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     setclientstate(c, state);
     XSync(c->display, False);

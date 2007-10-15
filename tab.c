@@ -86,7 +86,7 @@ uicb_tab(awesome_config *awesomeconf,
 
         c->tab.isvisible = False;
         arrange(awesomeconf);
-        focus(awesomeconf->display, sel, True, awesomeconf);
+        focus(sel, True, awesomeconf);
     }
 }
 
@@ -101,7 +101,7 @@ uicb_untab(awesome_config *awesomeconf,
 
     client_untab(sel);
     arrange(awesomeconf);
-    focus(awesomeconf->display, sel, True, awesomeconf);
+    focus(sel, True, awesomeconf);
 }
 
 void
@@ -116,7 +116,7 @@ uicb_viewnexttab(awesome_config *awesomeconf,
     sel->tab.isvisible = False;
     sel->tab.next->tab.isvisible = True;
     arrange(awesomeconf);
-    focus(awesomeconf->display, sel->tab.next, True, awesomeconf);
+    focus(sel->tab.next, True, awesomeconf);
 }
 
 void
@@ -131,7 +131,7 @@ uicb_viewprevtab(awesome_config *awesomeconf,
     sel->tab.isvisible = False;
     sel->tab.prev->tab.isvisible = True;
     arrange(awesomeconf);
-    focus(awesomeconf->display, sel->tab.prev, True, awesomeconf);
+    focus(sel->tab.prev, True, awesomeconf);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

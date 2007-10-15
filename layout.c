@@ -47,7 +47,7 @@ arrange(awesome_config *awesomeconf)
             ban(c);
     }
     awesomeconf->current_layout->arrange(awesomeconf);
-    focus(awesomeconf->display, NULL, True, awesomeconf);
+    focus(NULL, True, awesomeconf);
     restack(awesomeconf->display, awesomeconf);
 }
 
@@ -64,7 +64,7 @@ uicb_focusnext(awesome_config * awesomeconf,
         for(c = *awesomeconf->clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
     if(c)
     {
-        focus(c->display, c, True, awesomeconf);
+        focus(c, True, awesomeconf);
         restack(c->display, awesomeconf);
     }
 }
@@ -85,7 +85,7 @@ uicb_focusprev(awesome_config *awesomeconf,
     }
     if(c)
     {
-        focus(c->display, c, True, awesomeconf);
+        focus(c, True, awesomeconf);
         restack(c->display, awesomeconf);
     }
 }
@@ -285,7 +285,7 @@ uicb_zoom(awesome_config *awesomeconf,
         return;
     detach(awesomeconf->clients, *awesomeconf->client_sel);
     attach(awesomeconf->clients, *awesomeconf->client_sel);
-    focus(awesomeconf->display, *awesomeconf->client_sel, True, awesomeconf);
+    focus(*awesomeconf->client_sel, True, awesomeconf);
     arrange(awesomeconf);
 }
 

@@ -197,7 +197,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 
     if((c = get_client_bywin(awesomeconf->clients, ev->window)))
     {
-        focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
+        focus(c, ev->same_screen, &awesomeconf[c->screen]);
         if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
         {
            if (ev->button == Button1)
@@ -355,7 +355,7 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
     {
         if(!*awesomeconf->client_sel || *awesomeconf->client_sel != c)
         {
-            focus(c->display, c, ev->same_screen, &awesomeconf[c->screen]);
+            focus(c, ev->same_screen, &awesomeconf[c->screen]);
             if (*awesomeconf->client_sel && ((*awesomeconf->client_sel)->isfloating || IS_ARRANGE((*awesomeconf->client_sel)->screen, layout_floating)))
                 grabbuttons(*awesomeconf->client_sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
         }
@@ -363,7 +363,7 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
-                focus(e->xany.display, NULL, True, &awesomeconf[screen]);
+                focus(NULL, True, &awesomeconf[screen]);
 }
 
 void
@@ -416,7 +416,7 @@ handle_event_leavenotify(XEvent * e, awesome_config *awesomeconf)
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if((ev->window == RootWindow(e->xany.display, screen)) && !ev->same_screen)
-            focus(e->xany.display, NULL, ev->same_screen, &awesomeconf[screen]);
+            focus(NULL, ev->same_screen, &awesomeconf[screen]);
 }
 
 void

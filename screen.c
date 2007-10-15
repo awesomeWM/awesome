@@ -197,7 +197,7 @@ uicb_focusnextscreen(awesome_config * awesomeconf,
     for(c = *awesomeconf->clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
     {
-        focus(c->display, c, True, &awesomeconf[next_screen - awesomeconf->screen]);
+        focus(c, True, &awesomeconf[next_screen - awesomeconf->screen]);
         restack(c->display, &awesomeconf[next_screen - awesomeconf->screen]);
     }
     move_mouse_pointer_to_screen(awesomeconf->display, next_screen);
@@ -213,7 +213,7 @@ uicb_focusprevscreen(awesome_config * awesomeconf,
     for(c = *awesomeconf->clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
     if(c)
     {
-        focus(c->display, c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
+        focus(c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
         restack(c->display, &awesomeconf[prev_screen - awesomeconf->screen]);
     }
     move_mouse_pointer_to_screen(awesomeconf->display, prev_screen);
