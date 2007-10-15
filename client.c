@@ -25,6 +25,7 @@
 #include <X11/extensions/shape.h>
 
 #include "screen.h"
+#include "tab.h"
 #include "awesome.h"
 #include "layout.h"
 #include "tag.h"
@@ -559,6 +560,7 @@ unmanage(Client * c, long state, awesome_config *awesomeconf)
 {
     XWindowChanges wc;
 
+    client_untab(c);
     c->unmapped = True;
     wc.border_width = c->oldborder;
     /* The server grab construct avoids race conditions. */
