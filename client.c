@@ -50,13 +50,7 @@ grabbuttons(Client * c, Bool focused, Bool raised, KeySym modkey, unsigned int n
         if(!raised)
         {
             XGrabButton(c->display, Button1, NoSymbol, c->win, False,
-                        ButtonPressMask, GrabModeAsync, GrabModeSync, None, None);
-            XGrabButton(c->display, Button1, LockMask, c->win, False,
-                        ButtonPressMask, GrabModeAsync, GrabModeSync, None, None);
-            XGrabButton(c->display, Button1, numlockmask, c->win, False,
-                        ButtonPressMask, GrabModeAsync, GrabModeSync, None, None);
-            XGrabButton(c->display, Button1, numlockmask | LockMask, c->win, False,
-                        ButtonPressMask, GrabModeAsync, GrabModeSync, None, None);
+                        BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
         }
 
         XGrabButton(c->display, Button1, modkey, c->win, False, BUTTONMASK,

@@ -197,6 +197,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 
     if((c = get_client_bywin(awesomeconf->clients, ev->window)))
     {
+        XAllowEvents(c->display, ReplayPointer, CurrentTime);
         focus(c, ev->same_screen, &awesomeconf[c->screen]);
         if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
         {
@@ -233,7 +234,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             uicb_settrans(&awesomeconf[c->screen], "+5");
         else if(ev->button == Button5)
             uicb_settrans(&awesomeconf[c->screen], "-5");
-        }
+    }
     else if(!*awesomeconf->client_sel)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window
