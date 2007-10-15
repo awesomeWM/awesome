@@ -71,6 +71,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
         {
         case ButtonRelease:
             XUngrabPointer(c->display, CurrentTime);
+            p_delete(&si);
             return;
         case ConfigureRequest:
             handle_event_configurerequest(&ev,awesomeconf);
@@ -97,7 +98,6 @@ movemouse(Client * c, awesome_config *awesomeconf)
             break;
         }
     }
-    p_delete(&si);
 }
 
 static void
