@@ -24,6 +24,30 @@
 #include "layout.h"
 
 void
+client_untab(Client *c)
+{
+    Client *tmp;
+
+    if(c->tab.next)
+        c->tab.next->tab.isvisible = True;
+    else if(c->tab.prev)
+        c->tab.prev->tab.isvisible = True;
+
+    c->tab.isvisible = True;
+
+    if(c->tab.next)
+        c->tab.next->tab.prev = c->tab.prev;
+
+    tmp = c->tab.next;
+    c->tab.next = NULL;
+
+    if(c->tab.prev)
+        c->tab.prev->tab.next = tmp;
+
+    c->tab.prev = NULL;
+}
+
+void
 uicb_tab(awesome_config *awesomeconf,
          const char *arg __attribute__ ((unused)))
 {
@@ -69,29 +93,12 @@ void
 uicb_untab(awesome_config *awesomeconf,
            const char *arg __attribute__ ((unused)))
 {
-    Client *tmp, *sel = *awesomeconf->client_sel;
+    Client *sel = *awesomeconf->client_sel;
 
     if(!sel)
         return;
 
-    if(sel->tab.next)
-        sel->tab.next->tab.isvisible = True;
-    else if(sel->tab.prev)
-        sel->tab.prev->tab.isvisible = True;
-
-    sel->tab.isvisible = True;
-
-    if(sel->tab.next)
-        sel->tab.next->tab.prev = sel->tab.prev;
-
-    tmp = sel->tab.next;
-    sel->tab.next = NULL;
-
-    if(sel->tab.prev)
-        sel->tab.prev->tab.next = tmp;
-
-    sel->tab.prev = NULL;
-
+    client_untab(sel);
     arrange(awesomeconf->display, awesomeconf);
     focus(awesomeconf->display, sel, True, awesomeconf);
 }

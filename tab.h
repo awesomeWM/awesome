@@ -24,6 +24,8 @@
 
 #include "common.h"
 
+void client_untab(Client *);
+
 UICB_PROTO(uicb_tab);
 UICB_PROTO(uicb_untab);
 UICB_PROTO(uicb_viewnexttab);
