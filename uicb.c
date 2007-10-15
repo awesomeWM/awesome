@@ -23,6 +23,7 @@
 
 #include "util.h"
 #include "uicb.h"
+#include "screen.h"
 
 extern const NameFuncLink UicbList[];
 

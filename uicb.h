@@ -23,12 +23,6 @@
 #define AWESOME_UICB_H
 
 #include "config.h"
-#include "screen.h"
-#include "tag.h"
-#include "layout.h"
-#include "awesome.h"
-#include "statusbar.h"
-#include "layouts/tile.h"
 
 int parse_control(char *, awesome_config *);
 int run_uicb(char *, awesome_config *);

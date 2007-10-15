@@ -28,9 +28,12 @@
 #include <X11/keysym.h>
 
 #include "util.h"
-#include "uicb.h"
+#include "awesome.h"
 #include "screen.h"
 #include "draw.h"
+#include "tag.h"
+#include "statusbar.h"
+#include "layout.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "layouts/max.h"
