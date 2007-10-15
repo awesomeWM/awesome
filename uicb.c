@@ -48,9 +48,10 @@ parse_control(char *cmd, awesome_config *awesomeconf)
 int
 run_uicb(char *cmd, awesome_config *awesomeconf)
 {
-    char *p, *uicb_name, *arg;
+    char *p, *uicb_name;
+    const char *arg;
     int screen;
-    void (*uicb) (awesome_config *, char *);
+    void (*uicb) (awesome_config *, const char *);
 
     if(!a_strlen(cmd))
         return -1;
@@ -66,11 +67,12 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
     uicb_name = p;
 
     if(!(p = strchr(p, ' ')))
-       return -1;
-
-    *p++ = '\0';
-
-    arg = p;
+        arg = "";
+    else
+    {
+        *p++ = '\0';
+        arg = p;
+    }
 
     if((p = strchr(arg, '\n')))
         *p = '\0';
