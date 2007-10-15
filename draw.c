@@ -65,7 +65,7 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, Drawable drawabl
     XftDrawStringUtf8(xftdrawable, &xftcolor, font,
                       x + (font->height / 2),
                       y + (h / 2) - (font->height / 2) + font->ascent,
-                      (FcChar8 *) buf, len);
+                      (XftChar8 *) buf, len);
     XftColorFree(disp, DefaultVisual(disp, screen), DefaultColormap(disp, screen), &xftcolor);
     XftDrawDestroy(xftdrawable);
 }
