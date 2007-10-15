@@ -725,16 +725,18 @@ void
 uicb_swapnext(awesome_config *awesomeconf,
               const char *arg __attribute__ ((unused)))
 {
-    Client *next;
+    Client *next, *sel = *awesomeconf->client_sel;
 
-    if(!*awesomeconf->client_sel)
+    if(!sel)
         return;
 
-    for(next = (*awesomeconf->client_sel)->next; next && !isvisible(next, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); next = next->next);
+    for(next = sel->next; next && !isvisible(next, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); next = next->next);
     if(next)
     {
         client_swap(awesomeconf->clients, *awesomeconf->client_sel, next);
         arrange(awesomeconf);
+        /* restore focus */
+        focus(sel, True, awesomeconf);
     }
 }
 
@@ -742,16 +744,18 @@ void
 uicb_swapprev(awesome_config *awesomeconf,
               const char *arg __attribute__ ((unused)))
 {
-    Client *prev;
+    Client *prev, *sel = *awesomeconf->client_sel;
 
-    if(!*awesomeconf->client_sel)
+    if(!sel)
         return;
 
-    for(prev = (*awesomeconf->client_sel)->prev; prev && !isvisible(prev, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); prev = prev->prev);
+    for(prev = sel->prev; prev && !isvisible(prev, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); prev = prev->prev);
     if(prev)
     {
         client_swap(awesomeconf->clients, prev, *awesomeconf->client_sel);
         arrange(awesomeconf);
+        /* restore focus */
+        focus(sel, True, awesomeconf);
     }
 }
 
