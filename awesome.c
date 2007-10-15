@@ -194,7 +194,7 @@ setup(awesome_config *awesomeconf)
 
     XSelectInput(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), wa.event_mask);
 
-    grabkeys(awesomeconf->display, awesomeconf->phys_screen, awesomeconf);
+    grabkeys(awesomeconf);
 }
 
 /** Startup Error handler to check if another window manager

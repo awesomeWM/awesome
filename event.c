@@ -428,7 +428,7 @@ handle_event_mappingnotify(XEvent * e, awesome_config *awesomeconf)
     XRefreshKeyboardMapping(ev);
     if(ev->request == MappingKeyboard)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-            grabkeys(e->xany.display, screen, &awesomeconf[screen]);
+            grabkeys(&awesomeconf[screen]);
 }
 
 void
@@ -521,20 +521,20 @@ handle_event_randr_screen_change_notify(XEvent *e,
 }
 
 void
-grabkeys(Display *disp, int screen, awesome_config *awesomeconf)
+grabkeys(awesome_config *awesomeconf)
 {
     int i;
     KeyCode code;
 
-    XUngrabKey(disp, AnyKey, AnyModifier, RootWindow(disp, screen));
+    XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf->phys_screen));
     for(i = 0; i < awesomeconf->nkeys; i++)
     {
-        if((code = XKeysymToKeycode(disp, awesomeconf->keys[i].keysym)) == NoSymbol)
+        if((code = XKeysymToKeycode(awesomeconf->display, awesomeconf->keys[i].keysym)) == NoSymbol)
             continue;
-        XGrabKey(disp, code, awesomeconf->keys[i].mod, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, awesomeconf->keys[i].mod | LockMask, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask, RootWindow(disp, screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(disp, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask | LockMask, RootWindow(disp, screen), True,
+        XGrabKey(awesomeconf->display, code, awesomeconf->keys[i].mod, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(awesomeconf->display, code, awesomeconf->keys[i].mod | LockMask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(awesomeconf->display, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(awesomeconf->display, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask | LockMask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True,
                  GrabModeAsync, GrabModeAsync);
     }
 }
