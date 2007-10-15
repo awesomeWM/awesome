@@ -28,3 +28,4 @@ int parse_control(char *, awesome_config *);
 int run_uicb(char *, awesome_config *);
 
 #endif
+// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

@@ -84,3 +84,4 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
 
     return 0;
 }
+// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

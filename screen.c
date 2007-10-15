@@ -249,3 +249,4 @@ uicb_movetoscreen(awesome_config * awesomeconf,
     arrange(awesomeconf->display, &awesomeconf[prev_screen - awesomeconf->screen]);
     arrange(awesomeconf->display, &awesomeconf[new_screen - awesomeconf->screen]);
 }
+// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

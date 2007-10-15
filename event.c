@@ -538,3 +538,4 @@ grabkeys(Display *disp, int screen, awesome_config *awesomeconf)
                  GrabModeAsync, GrabModeAsync);
     }
 }
+// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

@@ -429,3 +429,4 @@ initxcolor(Display *disp, int scr, const char *colstr)
         die("awesome: error, cannot allocate color '%s'\n", colstr);
     return color;
 }
+// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

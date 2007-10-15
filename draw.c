@@ -126,3 +126,5 @@ textwidth(Display *disp, XftFont *font, char *text, ssize_t len)
     XftTextExtentsUtf8(disp, font, (FcChar8 *) text, len, &gi);
     return gi.width;
 }
+
+// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

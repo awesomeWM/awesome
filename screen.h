@@ -39,3 +39,4 @@ UICB_PROTO(uicb_focusprevscreen);
 UICB_PROTO(uicb_movetoscreen);
 
 #endif
+// vim: filetype=c:expandtab:shiftwidth=6:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
