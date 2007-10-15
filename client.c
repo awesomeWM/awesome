@@ -237,8 +237,8 @@ attach(Client **head, Client *c)
 void
 updatetitle(Client *c)
 {
-    if(!xgettextprop(c->display, c->win, XInternAtom(c->display, "_NET_WM_NAME", False), c->name, sizeof c->name))
-        xgettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof c->name);
+    if(!xgettextprop(c->display, c->win, XInternAtom(c->display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
+        xgettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof(c->name));
 }
 
 /** Ban client and unmapped it

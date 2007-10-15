@@ -172,7 +172,6 @@ scan(awesome_config *awesomeconf)
 }
 
 /** Setup everything before running
- * \param screen Screen number
  * \param awesomeconf awesome config ref
  * \todo clean things...
  */
@@ -196,9 +195,6 @@ setup(awesome_config *awesomeconf)
     XSelectInput(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), wa.event_mask);
 
     grabkeys(awesomeconf->display, awesomeconf->phys_screen, awesomeconf);
-
-    /* bar */
-    initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, awesomeconf->cursor[CurNormal], awesomeconf->font, awesomeconf->layouts, awesomeconf->nlayouts);
 }
 
 /** Startup Error handler to check if another window manager
@@ -321,6 +317,9 @@ main(int argc, char *argv[])
         setup(&awesomeconf[screen]);
         awesomeconf[screen].clients = clients;
         awesomeconf[screen].client_sel = sel;
+        initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar,
+                      awesomeconf->cursor[CurNormal], awesomeconf->font,
+                      awesomeconf->layouts, awesomeconf->nlayouts);
         drawstatusbar(dpy, &awesomeconf[screen]);
     }
 
@@ -401,7 +400,6 @@ main(int argc, char *argv[])
             eprint("select failed\n");
         }
         if(cfd >= 0 && FD_ISSET(cfd, &rd))
-        {
             switch (r = read(cfd, buf, sizeof(buf)))
             {
             case -1:
@@ -418,8 +416,6 @@ main(int argc, char *argv[])
             default:
                 parse_control(buf, awesomeconf);
             }
-            drawstatusbar(dpy, &awesomeconf[0]);
-        }
 
         while(XPending(dpy))
         {

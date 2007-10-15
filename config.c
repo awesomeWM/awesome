@@ -412,11 +412,9 @@ get_numlockmask(Display *disp)
     modmap = XGetModifierMapping(disp);
     for(i = 0; i < 8; i++)
         for(j = 0; j < modmap->max_keypermod; j++)
-        {
             if(modmap->modifiermap[i * modmap->max_keypermod + j]
                == XKeysymToKeycode(disp, XK_Num_Lock))
                 mask = (1 << i);
-        }
 
     XFreeModifiermap(modmap);
 
