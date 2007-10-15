@@ -91,14 +91,15 @@ uicb_focusprev(awesome_config *awesomeconf,
 }
 
 void
-loadawesomeprops(Display *disp, awesome_config * awesomeconf)
+loadawesomeprops(awesome_config * awesomeconf)
 {
     int i;
     char *prop;
 
     prop = p_new(char, awesomeconf->ntags + 1);
 
-    if(xgettextprop(disp, RootWindow(disp, awesomeconf->phys_screen), AWESOMEPROPS_ATOM(disp), prop, awesomeconf->ntags + 1))
+    if(xgettextprop(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen),
+                    AWESOMEPROPS_ATOM(awesomeconf->display), prop, awesomeconf->ntags + 1))
         for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
             if(prop[i] == '1')
             {
@@ -152,7 +153,7 @@ restack(Display * disp, awesome_config *awesomeconf)
 }
 
 void
-saveawesomeprops(Display *disp, awesome_config *awesomeconf)
+saveawesomeprops(awesome_config *awesomeconf)
 {
     int i;
     char *prop;
@@ -161,8 +162,8 @@ saveawesomeprops(Display *disp, awesome_config *awesomeconf)
     for(i = 0; i < awesomeconf->ntags; i++)
         prop[i] = awesomeconf->tags[i].selected ? '1' : '0';
     prop[i] = '\0';
-    XChangeProperty(disp, RootWindow(disp, awesomeconf->phys_screen),
-                    AWESOMEPROPS_ATOM(disp), XA_STRING, 8,
+    XChangeProperty(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen),
+                    AWESOMEPROPS_ATOM(awesomeconf->display), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
     p_delete(&prop);
 }
@@ -196,7 +197,7 @@ uicb_setlayout(awesome_config * awesomeconf,
     else
         drawstatusbar(awesomeconf->display, awesomeconf);
 
-    saveawesomeprops(awesomeconf->display, awesomeconf);
+    saveawesomeprops(awesomeconf);
 
     for(i = 0; i < awesomeconf->ntags; i++)
         if (awesomeconf->tags[i].selected)

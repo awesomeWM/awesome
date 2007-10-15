@@ -231,7 +231,7 @@ uicb_toggleview(awesome_config *awesomeconf,
     for(j = 0; j < awesomeconf->ntags && !awesomeconf->tags[j].selected; j++);
     if(j == awesomeconf->ntags)
         awesomeconf->tags[i].selected = True;
-    saveawesomeprops(awesomeconf->display, awesomeconf);
+    saveawesomeprops(awesomeconf);
     arrange(awesomeconf->display, awesomeconf);
 }
 
@@ -257,7 +257,7 @@ uicb_view(awesome_config *awesomeconf,
         awesomeconf->tags[i].selected = True;
         awesomeconf->current_layout = awesomeconf->tags[i].layout;
     }
-    saveawesomeprops(awesomeconf->display, awesomeconf);
+    saveawesomeprops(awesomeconf);
     arrange(awesomeconf->display, awesomeconf);
 }
 
@@ -303,7 +303,7 @@ uicb_tag_viewnext(awesome_config *awesomeconf,
         firsttag = 0;
     awesomeconf->tags[firsttag].selected = True;
     awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
-    saveawesomeprops(awesomeconf->display, awesomeconf);
+    saveawesomeprops(awesomeconf);
     arrange(awesomeconf->display, awesomeconf);
 }
 
@@ -328,7 +328,7 @@ uicb_tag_viewprev(awesome_config *awesomeconf,
         firsttag = awesomeconf->ntags - 1;
     awesomeconf->tags[firsttag].selected = True;
     awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
-    saveawesomeprops(awesomeconf->display, awesomeconf);
+    saveawesomeprops(awesomeconf);
     arrange(awesomeconf->display, awesomeconf);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

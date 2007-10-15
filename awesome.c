@@ -329,7 +329,7 @@ main(int argc, char *argv[])
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
-        loadawesomeprops(dpy, &awesomeconf[screen]);
+        loadawesomeprops(&awesomeconf[screen]);
         XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
                         XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
     }
