@@ -30,7 +30,6 @@
 #include "tag.h"
 #include "util.h"
 #include "statusbar.h"
-
 #include "layouts/floating.h"
 
 /** Grab or ungrab buttons when a client is focused
