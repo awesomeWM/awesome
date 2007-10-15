@@ -37,7 +37,7 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, Drawable drawabl
     XftDraw *xftdrawable;
 
     drawrectangle(disp, screen, x, y, w, h, drawable, dw, dh, True, color[ColBG]);
-    if(!text)
+    if(!a_strlen(text))
         return;
     olen = len = a_strlen(text);
     if(len >= sizeof(buf))
