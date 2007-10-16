@@ -432,9 +432,8 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     grabbuttons(c, False, True, awesomeconf->modkey, awesomeconf->numlockmask);
     updatetitle(c);
     move_client_to_screen(c, awesomeconf, False);
-    if((rettrans = XGetTransientForHint(disp, w, &trans) == Success))
-        for(t = *awesomeconf->clients; t && t->win != trans; t = t->next);
-    if(t)
+    if((rettrans = XGetTransientForHint(disp, w, &trans) == Success)
+       && (t = get_client_bywin(awesomeconf->clients, trans)))
         for(i = 0; i < awesomeconf->ntags; i++)
             c->tags[i] = t->tags[i];
     if(!loadprops(c, awesomeconf->ntags))
