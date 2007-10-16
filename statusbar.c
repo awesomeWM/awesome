@@ -105,7 +105,8 @@ drawstatusbar(awesome_config * awesomeconf)
              awesomeconf->statusbar.width,
              awesomeconf->statusbar.height,
              awesomeconf->font,
-             awesomeconf->current_layout->symbol, awesomeconf->colors_normal);
+             get_current_layout(awesomeconf->tags, awesomeconf->ntags)->symbol,
+             awesomeconf->colors_normal);
     z = x + awesomeconf->statusbar.txtlayoutwidth;
     w = textwidth(awesomeconf->display, awesomeconf->font, awesomeconf->statustext);
     x = awesomeconf->statusbar.width - w;
@@ -144,19 +145,6 @@ drawstatusbar(awesome_config * awesomeconf)
                            awesomeconf->statusbar.height,
                            (*awesomeconf->client_sel)->ismax,
                            awesomeconf->colors_selected[ColFG]);
-        }
-        else if(IS_ARRANGE(0, layout_tile) || IS_ARRANGE(0, layout_tileleft))
-        {
-            char buf[256];
-            snprintf(buf, sizeof(buf), "nmaster: %d ncol: %d mwfact: %.2lf", awesomeconf->nmaster, awesomeconf->ncol, awesomeconf->mwfact);
-            drawtext(awesomeconf->display, awesomeconf->phys_screen,
-                     x, y, w, 
-                     awesomeconf->statusbar.height,
-                     awesomeconf->statusbar.drawable,
-                     awesomeconf->statusbar.width,
-                     awesomeconf->statusbar.height,
-                     awesomeconf->font,
-                     buf, awesomeconf->colors_normal);
         }
         else
             drawtext(awesomeconf->display, awesomeconf->phys_screen,

@@ -24,12 +24,10 @@
 
 #include "client.h"
 
-/** Check if current layout is arranged with a layout */
-#define IS_ARRANGE(screen, layout)          (layout == awesomeconf[screen].current_layout->arrange)
-
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 
 void arrange(awesome_config *);             /* arranges all windows depending on the layout in use */
+Layout * get_current_layout(Tag *, int);
 void restack(awesome_config *);        /* restores z layers of all clients */
 void loadawesomeprops(awesome_config *);
 void saveawesomeprops(awesome_config *);

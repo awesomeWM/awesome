@@ -376,7 +376,6 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         eprint("awesome: fatal: no tags found in configuration file\n");
 
     /* select first tag by default */
-    awesomeconf->current_layout = awesomeconf->tags[0].layout;
     awesomeconf->tags[0].selected = True;
     awesomeconf->tags[0].was_selected = True;
 

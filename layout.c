@@ -46,9 +46,22 @@ arrange(awesome_config *awesomeconf)
         else if(c->screen == awesomeconf->screen)
             ban(c);
     }
-    awesomeconf->current_layout->arrange(awesomeconf);
+    get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange(awesomeconf);
     focus(NULL, True, awesomeconf);
     restack(awesomeconf);
+}
+
+
+Layout *
+get_current_layout(Tag *tags, int ntags)
+{
+    int i;
+
+    for(i = 0; i < ntags; i++)
+        if(tags[i].selected)
+            return tags[i].layout;
+
+    return NULL;
 }
 
 void
@@ -102,10 +115,7 @@ loadawesomeprops(awesome_config * awesomeconf)
                     AWESOMEPROPS_ATOM(awesomeconf->display), prop, awesomeconf->ntags + 1))
         for(i = 0; i < awesomeconf->ntags && prop[i]; i++)
             if(prop[i] == '1')
-            {
                 awesomeconf->tags[i].selected = True;
-                awesomeconf->current_layout = awesomeconf->tags[i].layout;
-            }
             else
                 awesomeconf->tags[i].selected = False;
 
@@ -126,9 +136,10 @@ restack(awesome_config *awesomeconf)
         XRaiseWindow(awesomeconf->display, (*awesomeconf->client_sel)->win);
     else
     {
-        if((*awesomeconf->client_sel)->isfloating || IS_ARRANGE(0, layout_floating))
+        if((*awesomeconf->client_sel)->isfloating ||
+           (get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange == layout_floating))
             XRaiseWindow(awesomeconf->display, (*awesomeconf->client_sel)->win);
-        if(!IS_ARRANGE(0, layout_floating))
+        if(!(get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange == layout_floating))
         {
             wc.stack_mode = Below;
             wc.sibling = awesomeconf->statusbar.window;
@@ -172,13 +183,17 @@ void
 uicb_setlayout(awesome_config * awesomeconf,
                const char *arg)
 {
-    int i;
+    int i, j;
     Client *c;
 
     if(arg)
     {
-        for(i = 0; i < awesomeconf->nlayouts && &awesomeconf->layouts[i] != awesomeconf->current_layout; i++);
+        /* compute current index */
+        for(i = 0; i < awesomeconf->nlayouts &&
+            &awesomeconf->layouts[i] != get_current_layout(awesomeconf->tags, awesomeconf->ntags); i++);
+        printf("current i %d\n", i);
         i = compute_new_value_from_arg(arg, (double) i);
+        printf("next i %d\n", i);
         if(i >= awesomeconf->nlayouts)
             i = 0;
         else if(i < 0)
@@ -187,7 +202,9 @@ uicb_setlayout(awesome_config * awesomeconf,
     else
         i = 0;
 
-    awesomeconf->current_layout = &awesomeconf->layouts[i];
+    for(j = 0; j < awesomeconf->ntags; j++)
+        if (awesomeconf->tags[j].selected)
+            awesomeconf->tags[j].layout = &awesomeconf->layouts[i];
 
     for(c = *awesomeconf->clients; c; c = c->next)
         c->ftview = True;
@@ -198,10 +215,6 @@ uicb_setlayout(awesome_config * awesomeconf,
         drawstatusbar(awesomeconf);
 
     saveawesomeprops(awesomeconf);
-
-    for(i = 0; i < awesomeconf->ntags; i++)
-        if (awesomeconf->tags[i].selected)
-            awesomeconf->tags[i].layout = awesomeconf->current_layout;
 }
 
 static void

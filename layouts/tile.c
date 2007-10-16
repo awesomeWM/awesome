@@ -32,9 +32,10 @@ void
 uicb_setnmaster(awesome_config *awesomeconf,
                 const char * arg)
 {
-    if(!arg || (!IS_ARRANGE(0, layout_tile) && !IS_ARRANGE(0, layout_tileleft)))
-        return;
+    Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
 
+    if(!arg || curlay->arrange != layout_tile || curlay->arrange != layout_tileleft)
+        return;
 
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
         awesomeconf->nmaster = 0;
@@ -46,7 +47,9 @@ void
 uicb_setncol(awesome_config *awesomeconf,
              const char * arg)
 {
-    if(!arg || (!IS_ARRANGE(0, layout_tile) && !IS_ARRANGE(0, layout_tileleft)))
+    Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
+
+    if(!arg || curlay->arrange != layout_tile || curlay->arrange != layout_tileleft)
         return;
 
     if((awesomeconf->ncol = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncol)) < 1)
@@ -60,12 +63,13 @@ uicb_setmwfact(awesome_config * awesomeconf,
                const char *arg)
 {
     char *newarg;
+    Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
 
-    if((!IS_ARRANGE(0, layout_tile) && !IS_ARRANGE(0, layout_tileleft)) || !arg)
+    if(!arg || curlay->arrange != layout_tile || curlay->arrange != layout_tileleft)
         return;
 
     newarg = a_strdup(arg);
-    if(IS_ARRANGE(0, layout_tileleft))
+    if(curlay->arrange == layout_tileleft)
     {
         if(newarg[0] == '+')
             newarg[0] = '-';

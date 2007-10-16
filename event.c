@@ -209,7 +209,9 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         }
         else if(ev->button == Button1)
         {
-            if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfloating)
+            if((get_current_layout(awesomeconf[c->screen].tags,
+                                   awesomeconf[c->screen].ntags)->arrange != layout_floating)
+               && !c->isfloating)
                 uicb_togglefloating(&awesomeconf[c->screen], NULL);
             else
                 restack(&awesomeconf[c->screen]);
@@ -217,14 +219,18 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         }
         else if(ev->button == Button2)
         {
-            if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfixed && c->isfloating)
+            if((get_current_layout(awesomeconf[c->screen].tags,
+                                   awesomeconf[c->screen].ntags)->arrange != layout_floating)
+                && !c->isfixed && c->isfloating)
                 uicb_togglefloating(&awesomeconf[c->screen], NULL);
             else
                 uicb_zoom(&awesomeconf[c->screen], NULL);
         }
         else if(ev->button == Button3)
         {
-            if(!IS_ARRANGE(c->screen, layout_floating) && !c->isfloating)
+            if((get_current_layout(awesomeconf[c->screen].tags,
+                                   awesomeconf[c->screen].ntags)->arrange != layout_floating)
+               && !c->isfloating)
                 uicb_togglefloating(&awesomeconf[c->screen], NULL);
             else
                 restack(&awesomeconf[c->screen]);
@@ -261,7 +267,9 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
         c->ismax = False;
         if(ev->value_mask & CWBorderWidth)
             c->border = ev->border_width;
-        if(c->isfixed || c->isfloating || IS_ARRANGE(c->screen, layout_floating))
+        if(c->isfixed || c->isfloating
+           || get_current_layout(awesomeconf[c->screen].tags, 
+                                 awesomeconf[c->screen].ntags)->arrange == layout_floating)
         {
             if(ev->value_mask & CWX)
                 c->x = ev->x;
@@ -357,7 +365,10 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
         if(!*awesomeconf->client_sel || *awesomeconf->client_sel != c)
         {
             focus(c, ev->same_screen, &awesomeconf[c->screen]);
-            if (*awesomeconf->client_sel && ((*awesomeconf->client_sel)->isfloating || IS_ARRANGE((*awesomeconf->client_sel)->screen, layout_floating)))
+            if (*awesomeconf->client_sel
+                && ((*awesomeconf->client_sel)->isfloating
+                    || get_current_layout(awesomeconf[(*awesomeconf->client_sel)->screen].tags,
+                                         awesomeconf[(*awesomeconf->client_sel)->screen].ntags)->arrange == layout_floating))
                 grabbuttons(*awesomeconf->client_sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
         }
     }

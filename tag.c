@@ -251,12 +251,12 @@ uicb_view(awesome_config *awesomeconf,
         awesomeconf->tags[i].was_selected = awesomeconf->tags[i].selected;
         awesomeconf->tags[i].selected = arg == NULL;
     }
+
     i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
+
     if(i >= 0 && i < awesomeconf->ntags)
-    {
         awesomeconf->tags[i].selected = True;
-        awesomeconf->current_layout = awesomeconf->tags[i].layout;
-    }
+
     saveawesomeprops(awesomeconf);
     arrange(awesomeconf);
 }
@@ -302,7 +302,6 @@ uicb_tag_viewnext(awesome_config *awesomeconf,
     if(++firsttag >= awesomeconf->ntags)
         firsttag = 0;
     awesomeconf->tags[firsttag].selected = True;
-    awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
     saveawesomeprops(awesomeconf);
     arrange(awesomeconf);
 }
@@ -327,7 +326,6 @@ uicb_tag_viewprev(awesome_config *awesomeconf,
     if(--firsttag < 0)
         firsttag = awesomeconf->ntags - 1;
     awesomeconf->tags[firsttag].selected = True;
-    awesomeconf->current_layout = awesomeconf->tags[firsttag].layout;
     saveawesomeprops(awesomeconf);
     arrange(awesomeconf);
 }

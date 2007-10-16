@@ -189,8 +189,6 @@ struct awesome_config
     Bool resize_hints;
     /** Text displayed in bar */
     char statustext[256];
-    /** Current layout */
-    Layout * current_layout;
     /** Status bar */
     Statusbar statusbar;
     /** Check for XShape extension */

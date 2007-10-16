@@ -763,7 +763,7 @@ uicb_moveresize(awesome_config *awesomeconf,
     unsigned int dui;
     Window dummy;
 
-    if(!IS_ARRANGE(0, layout_floating))
+    if(get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange == layout_floating)
         if(!*awesomeconf->client_sel || !(*awesomeconf->client_sel)->isfloating || (*awesomeconf->client_sel)->isfixed || !arg)
             return;
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
