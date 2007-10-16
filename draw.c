@@ -43,7 +43,7 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, Drawable drawabl
 
     surface = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dh);
     cr = cairo_create(surface);
-    font_face = (cairo_font_face_t *)cairo_ft_font_face_create_for_pattern(font->pattern);
+    font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
     cairo_set_font_face(cr, font_face);
     cairo_set_font_size(cr, font->height);
     cairo_set_source_rgb(cr, color[ColFG].red / 65535.0, color[ColFG].green / 65535.0, color[ColFG].blue / 65535.0);
