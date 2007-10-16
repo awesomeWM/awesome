@@ -81,7 +81,11 @@ uicb_tab(awesome_config *awesomeconf,
     {
         /* take the last tabbed window */
         for(tmp = sel; tmp->tab.next; tmp = tmp->tab.next);
+
         tmp->tab.next = c;
+        if(c->tab.prev)
+            c->tab.prev->tab.next = tmp;
+
         c->tab.prev = tmp;
 
         c->tab.isvisible = False;
