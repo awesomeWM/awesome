@@ -341,13 +341,6 @@ keys
     }
     key
     {
-        modkey = {"Mod4"}
-        key = "9"
-        command = "view"
-        arg = "9"
-    }
-    key
-    {
         modkey = {"Mod4", "Control"}
         key = "0"
         command = "toggleview"
