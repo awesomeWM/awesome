@@ -27,7 +27,7 @@
 /** Mask shorthands, used in event.c and client.c */
 #define BUTTONMASK              (ButtonPressMask | ButtonReleaseMask)
 
-
+Client * get_client_bywin(Client **, Window);
 void grabbuttons(Client *, Bool, Bool, KeySym, unsigned int);
 inline void attach(Client **, Client *);
 inline void detach(Client **, Client *);

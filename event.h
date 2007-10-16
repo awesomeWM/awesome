@@ -24,7 +24,6 @@
 
 #include "config.h"
 
-Client * get_client_bywin(Client **list, Window w);
 void grabkeys(awesome_config *);            /* grab all keys defined in config */
 
 void handle_event_buttonpress(XEvent *, awesome_config *);

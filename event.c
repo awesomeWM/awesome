@@ -38,15 +38,6 @@
 #define CLEANMASK(mask, screen)		(mask & ~(awesomeconf[screen].numlockmask | LockMask))
 #define MOUSEMASK	                (BUTTONMASK | PointerMotionMask)
 
-Client *
-get_client_bywin(Client **list, Window w)
-{
-    Client *c;
-
-    for(c = *list; c && c->win != w; c = c->next);
-    return c;
-}
-
 static void
 movemouse(Client * c, awesome_config *awesomeconf)
 {

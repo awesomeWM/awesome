@@ -33,6 +33,15 @@
 #include "statusbar.h"
 #include "layouts/floating.h"
 
+Client *
+get_client_bywin(Client **list, Window w)
+{
+    Client *c;
+
+    for(c = *list; c && c->win != w; c = c->next);
+    return c;
+}
+
 /** Grab or ungrab buttons when a client is focused
  * \param c client
  * \param focused True if client is focused
