@@ -67,7 +67,7 @@ drawtext(Display *disp, int screen, int x, int y, int w, int h, Drawable drawabl
             buf[len - 3] = '.';
     }
 
-    cairo_move_to(cr, x + font->height / 2, y + font->height);
+    cairo_move_to(cr, x + font->height / 2, y + font->ascent + (dh - font->height) / 2);
     cairo_show_text(cr, buf);
 
     cairo_font_face_destroy(font_face);
