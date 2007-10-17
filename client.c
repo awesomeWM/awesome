@@ -253,22 +253,22 @@ ban(Client * c)
  * \param c the client
  */
 void
-configure(Client * c)
+window_configure(Display *disp, Window win, int x, int y, int w, int h, int border)
 {
     XConfigureEvent ce;
 
     ce.type = ConfigureNotify;
-    ce.display = c->display;
-    ce.event = c->win;
-    ce.window = c->win;
-    ce.x = c->x;
-    ce.y = c->y;
-    ce.width = c->w;
-    ce.height = c->h;
-    ce.border_width = c->border;
+    ce.display = disp;
+    ce.event = win;
+    ce.window = win;
+    ce.x = x;
+    ce.y = y;
+    ce.width = w;
+    ce.height = h;
+    ce.border_width = border;
     ce.above = None;
     ce.override_redirect = False;
-    XSendEvent(c->display, c->win, False, StructureNotifyMask, (XEvent *) & ce);
+    XSendEvent(disp, win, False, StructureNotifyMask, (XEvent *) & ce);
 }
 
 /** Attach client after another one
@@ -449,7 +449,8 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     wc.border_width = c->border;
     XConfigureWindow(disp, w, CWBorderWidth, &wc);
     XSetWindowBorder(disp, w, awesomeconf->colors_normal[ColBorder].pixel);
-    configure(c);               /* propagates border_width, if size doesn't change */
+    /* propagates border_width, if size doesn't change */
+    window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
     updatesizehints(c);
     XSelectInput(disp, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
     if(awesomeconf->have_shape)
@@ -543,7 +544,7 @@ resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool 
         c->h = wc.height = h;
         wc.border_width = c->border;
         XConfigureWindow(c->display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
-        configure(c);
+        window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
         XSync(c->display, False);
         if(XineramaIsActive(c->display))
         {

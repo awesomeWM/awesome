@@ -275,12 +275,12 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
             if((c->y + c->h) > DisplayHeight(c->display, c->phys_screen) && c->isfloating)
                 c->y = DisplayHeight(c->display, c->phys_screen) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-                configure(c);
+                window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
             if(isvisible(c, c->screen, awesomeconf[c->screen].tags, awesomeconf[c->screen].ntags))
                 XMoveResizeWindow(e->xany.display, c->win, c->x, c->y, c->w, c->h);
         }
         else
-            configure(c);
+            window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
     }
     else
     {
