@@ -29,8 +29,8 @@
 
 Client * get_client_bywin(Client **, Window);
 void grabbuttons(Client *, Bool, Bool, KeySym, unsigned int);
-inline void attach(Client **, Client *);
-inline void detach(Client **, Client *);
+inline void client_attach(Client **, Client *);
+inline void client_detach(Client **, Client *);
 void ban(Client *);             /* bans c */
 void configure(Client *);       /* send synthetic configure event */
 void focus(Client *, Bool, awesome_config *);

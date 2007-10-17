@@ -296,8 +296,8 @@ uicb_zoom(awesome_config *awesomeconf,
 {
     if(!*awesomeconf->client_sel)
         return;
-    detach(awesomeconf->clients, *awesomeconf->client_sel);
-    attach(awesomeconf->clients, *awesomeconf->client_sel);
+    client_detach(awesomeconf->clients, *awesomeconf->client_sel);
+    client_attach(awesomeconf->clients, *awesomeconf->client_sel);
     focus(*awesomeconf->client_sel, True, awesomeconf);
     arrange(awesomeconf);
 }

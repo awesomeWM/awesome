@@ -231,10 +231,11 @@ client_swap(Client **head, Client *c1, Client *c2)
 }
 
 /** Attach client to the beginning of the clients stack
+ * \param head client list
  * \param c the client
  */
 void
-attach(Client **head, Client *c)
+client_attach(Client **head, Client *c)
 {
     if(*head)
         (*head)->prev = c;
@@ -284,10 +285,11 @@ configure(Client * c)
 }
 
 /** Detach client from clients list
+ * \param head client list
  * \param c client to detach
  */
 void
-detach(Client **head, Client *c)
+client_detach(Client **head, Client *c)
 {
     if(c->prev)
         c->prev->next = c->next;
@@ -446,7 +448,7 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     if(!c->isfloating)
         c->isfloating = (rettrans == Success) || c->isfixed;
     saveprops(c, awesomeconf->ntags);
-    attach(awesomeconf->clients, c);
+    client_attach(awesomeconf->clients, c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
     c->isbanned = True;
     arrange(awesomeconf);
@@ -573,7 +575,7 @@ unmanage(Client * c, long state, awesome_config *awesomeconf)
     /* The server grab construct avoids race conditions. */
     XGrabServer(c->display);
     XConfigureWindow(c->display, c->win, CWBorderWidth, &wc);  /* restore border */
-    detach(awesomeconf->clients, c);
+    client_detach(awesomeconf->clients, c);
     if(*awesomeconf->client_sel == c)
         focus(NULL, True, awesomeconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
