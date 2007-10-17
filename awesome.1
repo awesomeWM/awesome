@@ -3,14 +3,14 @@
 awesome \- awesome window manager
 .SH SYNOPSIS
 .B awesome
-.RB [ \-v ]
+.RB [\ \-v\ |\ \-c\ <configfile>\ ]
 .SH DESCRIPTION
 awesome is a window manager for X. It manages windows in tiled and
 floating layouts. Either layout can be applied dynamically, optimizing the
 environment for the application in use and the task performed.
 .P
 In tiled layout windows are managed in a master and stacking area. The master
-area contains windows which currently needs most attention, whereas the
+area contains windows which currently need most attention, whereas the
 stacking area contains all other windows. In floating layout windows can be
 resized and moved freely. Dialog windows are always managed floating,
 regardless of the layout applied.
@@ -19,9 +19,9 @@ Windows are grouped by tags. Each window can be tagged with one or multiple
 tags. Selecting certain tags displays all windows with these tags.
 .P
 awesome contains a small status bar which displays all available tags, the layout,
-the title of the focused window, and the text read from standard input. A
-floating window is indicated with an empty square and a maximized
-floating window is indicated with a filled square before the windows
+the title of the focused window, and a status text. A
+floating window is indicated with an empty circle and a maximized
+floating window is indicated with a circle square before the windows
 title. The selected tags are indicated with a different color. The tags of
 the focused window are indicated with a filled square in the top left
 corner. The tags which are applied to one or more windows are indicated
@@ -32,11 +32,11 @@ awesome can draw a small border around windows to indicate the focus state.
 .TP
 .B \-v
 prints version information to standard output, then exits.
+.TP
+.B \-c
+use an alternate configuration file instead of $HOME/.awesomerc
 .SH USAGE
 .SS Status bar
-.TP
-.B Standard input
-is read and displayed in the status text area.
 .TP
 .B Button1
 click on a tag label to display all windows with that tag, click on the layout
@@ -45,34 +45,36 @@ label toggles between tiled and floating layout.
 .B Button3
 click on a tag label adds/removes all windows with that tag to/from the view.
 .TP
-.B Mod1\-Button1
+.B Button4 or Button5 (mouse wheel)
+use mouse wheel on tags to switch them, on layout to switch them or in title bar to
+cycle between clients.
+.TP
+.B Modkey\-Button1
 click on a tag label applies that tag to the focused window.
 .TP
-.B Mod1\-Button3
+.B Modkey\-Button3
 click on a tag label adds/removes that tag to/from the focused window.
 .SS Keyboard commands
 .TP
 There's no keyboard binding by default, please look at the example file.
 .SS Mouse commands
 .TP
-.B Mod1\-Button1
+.B Modkey\-Button1
 Move current window while dragging (and make it floating if tiled).
 .TP
-.B Mod1\-Button2
+.B Modkey\-Button2
 Zooms/cycles current window to/from master area (or tile it if floating).
 .TP
-.B Mod1\-Button3
+.B Modkey\-Button3
 Resize current window while dragging (and make it floating if tiled).
 .SH CUSTOMIZATION
-awesome is customized by creating a custom ~/.awesomerc file.
+awesome is customized by creating a custom $HOME/.awesomerc file.
 .SH SEE ALSO
 .BR dmenu (1)
+.BR dzen2 (1)
 .SH BUGS
-The status bar may display
-.BR "EOF"
-when awesome has been started by an X session manager like
-.BR xdm (1),
-because those close standard output before executing awesome.
+.P
+Of course there's no bug in awesome. There may be unexpected behaviours.
 .P
 Java applications which use the XToolkit/XAWT backend may draw grey windows
 only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and early
