@@ -39,11 +39,11 @@
  * \return client
  */
 Client *
-get_client_bywin(Client **list, Window w)
+get_client_bywin(Client *list, Window w)
 {
     Client *c;
 
-    for(c = *list; c && c->win != w; c = c->next);
+    for(c = list; c && c->win != w; c = c->next);
     return c;
 }
 
@@ -328,7 +328,7 @@ client_detach(Client **head, Client *c)
  * \param awesomeconf awesome config
  */
 void
-focus(Client * c, Bool selscreen, awesome_config *awesomeconf)
+focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
 {
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags)))
@@ -461,7 +461,7 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     updatetitle(c);
     move_client_to_screen(c, awesomeconf, False);
     if((rettrans = XGetTransientForHint(disp, w, &trans) == Success)
-       && (t = get_client_bywin(awesomeconf->clients, trans)))
+       && (t = get_client_bywin(*awesomeconf->clients, trans)))
         for(i = 0; i < awesomeconf->ntags; i++)
             c->tags[i] = t->tags[i];
     if(!loadprops(c, awesomeconf->ntags))

@@ -76,7 +76,7 @@ uicb_tab(awesome_config *awesomeconf,
                   RootWindow(awesomeconf->display, awesomeconf->phys_screen),
                   &dummy, &child, &x1, &y1, &di, &di, &dui);
 
-    if((c = get_client_bywin(awesomeconf->clients, child))
+    if((c = get_client_bywin(*awesomeconf->clients, child))
        && c != sel && !c->isfloating)
     {
         /* take the last tabbed window */
