@@ -89,6 +89,7 @@ uicb_tab(awesome_config *awesomeconf,
         c->tab.prev = tmp;
 
         c->tab.isvisible = False;
+        client_reattach_after(sel, c);
         arrange(awesomeconf);
         focus(sel, True, awesomeconf);
     }

@@ -271,6 +271,27 @@ configure(Client * c)
     XSendEvent(c->display, c->win, False, StructureNotifyMask, (XEvent *) & ce);
 }
 
+/** Attach client after another one
+* \param client to attach to
+* \param c the client
+*/
+void
+client_reattach_after(Client *head, Client *c)
+{
+    if(head->next == c)
+        return;
+
+    if(head->next)
+        head->next->prev = c;
+
+    if(c->prev)
+        c->prev->next = c->next;
+
+    c->next = head->next;
+    head->next = c;
+    c->prev = head;
+}
+
 /** Attach client to the beginning of the clients stack
  * \param head client list
  * \param c the client
