@@ -1,5 +1,5 @@
 /*
- * draw.h - draw functions header
+ * statusbar.h - statusbar functions header
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info>
  *

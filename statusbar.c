@@ -1,5 +1,5 @@
 /*
- * draw.c - draw functions
+ * statusbar.c - statusbar functions
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info>
  *
