@@ -33,6 +33,11 @@
 #include "statusbar.h"
 #include "layouts/floating.h"
 
+/** Get a Client by its window
+ * \param list Client list to look info
+ * \param w Client window to find
+ * \return client
+ */
 Client *
 get_client_bywin(Client **list, Window w)
 {
