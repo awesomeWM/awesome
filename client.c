@@ -230,19 +230,6 @@ client_swap(Client **head, Client *c1, Client *c2)
         *head = c2;
 }
 
-/** Attach client to the beginning of the clients stack
- * \param head client list
- * \param c the client
- */
-void
-client_attach(Client **head, Client *c)
-{
-    if(*head)
-        (*head)->prev = c;
-    c->next = *head;
-    *head = c;
-}
-
 void
 updatetitle(Client *c)
 {
@@ -282,6 +269,19 @@ configure(Client * c)
     ce.above = None;
     ce.override_redirect = False;
     XSendEvent(c->display, c->win, False, StructureNotifyMask, (XEvent *) & ce);
+}
+
+/** Attach client to the beginning of the clients stack
+ * \param head client list
+ * \param c the client
+ */
+void
+client_attach(Client **head, Client *c)
+{
+    if(*head)
+        (*head)->prev = c;
+    c->next = *head;
+    *head = c;
 }
 
 /** Detach client from clients list
