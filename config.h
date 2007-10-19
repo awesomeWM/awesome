@@ -134,8 +134,6 @@ struct Client
     int screen;
     /** Client physical screen */
     int phys_screen;
-    /** First time viewed on new layout */
-    Bool ftview;
 };
 
 /** Main configuration structure */

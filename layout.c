@@ -184,7 +184,6 @@ uicb_setlayout(awesome_config * awesomeconf,
                const char *arg)
 {
     int i, j;
-    Client *c;
 
     if(arg)
     {
@@ -205,9 +204,6 @@ uicb_setlayout(awesome_config * awesomeconf,
     for(j = 0; j < awesomeconf->ntags; j++)
         if (awesomeconf->tags[j].selected)
             awesomeconf->tags[j].layout = &awesomeconf->layouts[i];
-
-    for(c = *awesomeconf->clients; c; c = c->next)
-        c->ftview = True;
 
     if(*awesomeconf->client_sel)
         arrange(awesomeconf);

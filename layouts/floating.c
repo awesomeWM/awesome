@@ -29,14 +29,6 @@ layout_floating(awesome_config *awesomeconf)
 
     for(c = *awesomeconf->clients; c; c = c->next)
         if(isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
-        {
-            if(c->ftview)
-            {
-                resize(c, c->rx, c->ry, c->rw, c->rh, awesomeconf, True);
-                c->ftview = False;
-            }
-            else
-                resize(c, c->x, c->y, c->w, c->h, awesomeconf, True);
-        }
+            resize(c, c->rx, c->ry, c->rw, c->rh, awesomeconf, True);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

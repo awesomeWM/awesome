@@ -415,7 +415,6 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
 
     c = p_new(Client, 1);
     c->win = w;
-    c->ftview = True;
     c->x = c->rw = wa->x;
     c->y = c->ry = wa->y;
     c->w = c->rw = wa->width;
