@@ -243,7 +243,6 @@ ban(Client * c)
 {
     XUnmapWindow(c->display, c->win);
     window_setstate(c->display, c->win, IconicState);
-    c->isbanned = True;
     c->unmapped = True;
 }
 
@@ -469,7 +468,6 @@ manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeco
     saveprops(c, awesomeconf->ntags);
     client_attach(awesomeconf->clients, c);
     XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
-    c->isbanned = True;
     arrange(awesomeconf);
 }
 
@@ -579,7 +577,6 @@ unban(Client *c)
 {
     XMapWindow(c->display, c->win);
     window_setstate(c->display, c->win, NormalState);
-    c->isbanned = False;
     c->unmapped = False;
 }
 

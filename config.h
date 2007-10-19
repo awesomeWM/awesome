@@ -108,7 +108,7 @@ struct Client
     Bool unmapped;
     long flags;
     int border, oldborder;
-    Bool isbanned, isfixed, ismax, isfloating, wasfloating;
+    Bool isfixed, ismax, isfloating, wasfloating;
     /** Tags for the client */
     Bool *tags;
     /** Next client */
