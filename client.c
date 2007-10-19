@@ -55,7 +55,7 @@ get_client_bywin(Client *list, Window w)
  * \param numlockmask Numlock mask
  */
 void
-grabbuttons(Client * c, Bool focused, Bool raised, KeySym modkey, unsigned int numlockmask)
+grabbuttons(Client *c, Bool focused, Bool raised, KeySym modkey, unsigned int numlockmask)
 {
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
 
@@ -143,16 +143,16 @@ grabbuttons(Client * c, Bool focused, Bool raised, KeySym modkey, unsigned int n
  * \return True if client has WM_DELETE_WINDOW
  */
 static Bool
-isprotodel(Client * c)
+isprotodel(Display *disp, Window win)
 {
     int i, n;
     Atom *protocols;
     Bool ret = False;
 
-    if(XGetWMProtocols(c->display, c->win, &protocols, &n))
+    if(XGetWMProtocols(disp, win, &protocols, &n))
     {
         for(i = 0; !ret && i < n; i++)
-            if(protocols[i] == XInternAtom(c->display, "WM_DELETE_WINDOW", False))
+            if(protocols[i] == XInternAtom(disp, "WM_DELETE_WINDOW", False))
                 ret = True;
         XFree(protocols);
     }
@@ -164,12 +164,12 @@ isprotodel(Client * c)
  * \param state no idea
  */
 static void
-setclientstate(Client * c, long state)
+window_setstate(Display *disp, Window win, long state)
 {
     long data[] = { state, None };
 
-    XChangeProperty(c->display, c->win, XInternAtom(c->display, "WM_STATE", False),
-                    XInternAtom(c->display, "WM_STATE", False),  32,
+    XChangeProperty(disp, win, XInternAtom(disp, "WM_STATE", False),
+                    XInternAtom(disp, "WM_STATE", False),  32,
                     PropModeReplace, (unsigned char *) data, 2);
 }
 
@@ -242,7 +242,7 @@ void
 ban(Client * c)
 {
     XUnmapWindow(c->display, c->win);
-    setclientstate(c, IconicState);
+    window_setstate(c->display, c->win, IconicState);
     c->isbanned = True;
     c->unmapped = True;
 }
@@ -576,16 +576,16 @@ saveprops(Client * c, int ntags)
 }
 
 void
-unban(Client * c)
+unban(Client *c)
 {
     XMapWindow(c->display, c->win);
-    setclientstate(c, NormalState);
+    window_setstate(c->display, c->win, NormalState);
     c->isbanned = False;
     c->unmapped = False;
 }
 
 void
-unmanage(Client * c, long state, awesome_config *awesomeconf)
+unmanage(Client *c, long state, awesome_config *awesomeconf)
 {
     XWindowChanges wc;
 
@@ -599,7 +599,7 @@ unmanage(Client * c, long state, awesome_config *awesomeconf)
     if(*awesomeconf->client_sel == c)
         focus(NULL, True, awesomeconf);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
-    setclientstate(c, state);
+    window_setstate(c->display, c->win, state);
     XSync(c->display, False);
     XSetErrorHandler(xerror);
     XUngrabServer(c->display);
@@ -833,20 +833,21 @@ uicb_killclient(awesome_config *awesomeconf,
                 const char *arg __attribute__ ((unused)))
 {
     XEvent ev;
+    Client *sel = *awesomeconf->client_sel;
 
     if(!*awesomeconf->client_sel)
         return;
-    if(isprotodel(*awesomeconf->client_sel))
+    if(isprotodel(sel->display, sel->win))
     {
         ev.type = ClientMessage;
-        ev.xclient.window = (*awesomeconf->client_sel)->win;
+        ev.xclient.window = sel->win;
         ev.xclient.message_type = XInternAtom(awesomeconf->display, "WM_PROTOCOLS", False);
         ev.xclient.format = 32;
         ev.xclient.data.l[0] = XInternAtom(awesomeconf->display, "WM_DELETE_WINDOW", False);
         ev.xclient.data.l[1] = CurrentTime;
-        XSendEvent(awesomeconf->display, (*awesomeconf->client_sel)->win, False, NoEventMask, &ev);
+        XSendEvent(awesomeconf->display, sel->win, False, NoEventMask, &ev);
     }
     else
-        XKillClient(awesomeconf->display, (*awesomeconf->client_sel)->win);
+        XKillClient(awesomeconf->display, sel->win);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
