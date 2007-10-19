@@ -62,10 +62,8 @@ grabbuttons(Client * c, Bool focused, Bool raised, KeySym modkey, unsigned int n
     if(focused)
     {
         if(!raised)
-        {
             XGrabButton(c->display, Button1, NoSymbol, c->win, False,
                         BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-        }
 
         XGrabButton(c->display, Button1, modkey, c->win, False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
