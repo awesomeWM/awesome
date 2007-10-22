@@ -412,7 +412,7 @@ manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     c = p_new(Client, 1);
 
     c->win = w;
-    c->x = c->rw = wa->x;
+    c->x = c->rx = wa->x;
     c->y = c->ry = wa->y;
     c->w = c->rw = wa->width;
     c->h = c->rh = wa->height;
