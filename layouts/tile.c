@@ -34,7 +34,7 @@ uicb_setnmaster(awesome_config *awesomeconf,
 {
     Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
 
-    if(!arg || curlay->arrange != layout_tile || curlay->arrange != layout_tileleft)
+    if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
 
     if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
@@ -49,7 +49,7 @@ uicb_setncol(awesome_config *awesomeconf,
 {
     Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
 
-    if(!arg || curlay->arrange != layout_tile || curlay->arrange != layout_tileleft)
+    if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
 
     if((awesomeconf->ncol = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncol)) < 1)
@@ -65,7 +65,7 @@ uicb_setmwfact(awesome_config * awesomeconf,
     char *newarg;
     Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
 
-    if(!arg || curlay->arrange != layout_tile || curlay->arrange != layout_tileleft)
+    if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
 
     newarg = a_strdup(arg);
