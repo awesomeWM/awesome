@@ -108,7 +108,14 @@ struct Client
     Bool unmapped;
     long flags;
     int border, oldborder;
-    Bool isfixed, ismax, isfloating, wasfloating;
+    /** Store previous floating state before maximizing */
+    Bool wasfloating;
+    /** True if the window is floating */
+    Bool isfloating;
+    /** True if the window is fixed */
+    Bool isfixed;
+    /** True if the window is maximized */
+    Bool ismax;
     /** Tags for the client */
     Bool *tags;
     /** Next client */

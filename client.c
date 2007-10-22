@@ -606,7 +606,7 @@ unmanage(Client *c, long state, awesome_config *awesomeconf)
 }
 
 void
-updatesizehints(Client * c)
+updatesizehints(Client *c)
 {
     long msize;
     XSizeHints size;
