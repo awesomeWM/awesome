@@ -216,28 +216,25 @@ uicb_setlayout(awesome_config * awesomeconf,
 static void
 maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
 {
-    if(!*awesomeconf->client_sel)
+    Client *sel = *awesomeconf->client_sel;
+
+    if(!sel)
         return;
 
-    if(((*awesomeconf->client_sel)->ismax = !(*awesomeconf->client_sel)->ismax))
+    if((sel->ismax = !sel->ismax))
     {
-        (*awesomeconf->client_sel)->wasfloating = (*awesomeconf->client_sel)->isfloating;
-        (*awesomeconf->client_sel)->isfloating = True;
-        (*awesomeconf->client_sel)->rx = (*awesomeconf->client_sel)->x;
-        (*awesomeconf->client_sel)->ry = (*awesomeconf->client_sel)->y;
-        (*awesomeconf->client_sel)->rw = (*awesomeconf->client_sel)->w;
-        (*awesomeconf->client_sel)->rh = (*awesomeconf->client_sel)->h;
-        resize(*awesomeconf->client_sel, x, y, w, h, awesomeconf, True);
+        sel->wasfloating = sel->isfloating;
+        sel->isfloating = True;
+        sel->rx = sel->x;
+        sel->ry = sel->y;
+        sel->rw = sel->w;
+        sel->rh = sel->h;
+        resize(sel, x, y, w, h, awesomeconf, True);
     }
-    else if((*awesomeconf->client_sel)->wasfloating)
-        resize(*awesomeconf->client_sel,
-               (*awesomeconf->client_sel)->rx,
-               (*awesomeconf->client_sel)->ry,
-               (*awesomeconf->client_sel)->rw,
-               (*awesomeconf->client_sel)->rh,
-               awesomeconf, True);
+    else if(sel->wasfloating)
+        resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True);
     else
-        (*awesomeconf->client_sel)->isfloating = False;
+        sel->isfloating = False;
 
     arrange(awesomeconf);
 }
