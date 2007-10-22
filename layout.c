@@ -190,9 +190,7 @@ uicb_setlayout(awesome_config * awesomeconf,
         /* compute current index */
         for(i = 0; i < awesomeconf->nlayouts &&
             &awesomeconf->layouts[i] != get_current_layout(awesomeconf->tags, awesomeconf->ntags); i++);
-        printf("current i %d\n", i);
         i = compute_new_value_from_arg(arg, (double) i);
-        printf("next i %d\n", i);
         if(i >= awesomeconf->nlayouts)
             i = 0;
         else if(i < 0)
