@@ -459,7 +459,7 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
                 screen = get_screen_bycoord(e->xany.display, x, y);
 
         }
-        manage(e->xany.display, ev->window, &wa, &awesomeconf[screen]);
+        manage(ev->window, &wa, &awesomeconf[screen]);
     }
 }
 

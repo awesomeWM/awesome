@@ -35,7 +35,7 @@ void client_reattach_after(Client *, Client *);
 void ban(Client *);             /* bans c */
 void window_configure(Display *, Window, int, int, int, int, int);
 void focus(Client *, Bool, awesome_config *);
-void manage(Display *, Window, XWindowAttributes *, awesome_config *);
+void manage(Window, XWindowAttributes *, awesome_config *);
 void resize(Client *, int, int, int, int, awesome_config *, Bool);        /* resize with given coordinates c */
 void unban(Client *);           /* unbans c */
 void unmanage(Client *, long, awesome_config *);  /* unmanage c */

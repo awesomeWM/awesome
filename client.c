@@ -178,21 +178,21 @@ window_setstate(Display *disp, Window win, long state)
  * \param opacity opacity percentage
  */
 static void
-setclienttrans(Client *c, double opacity)
+window_settrans(Display *disp, Window win, double opacity)
 {
     unsigned int real_opacity = 0xffffffff;
 
     if(opacity >= 0 && opacity <= 100)
     {
         real_opacity = ((opacity / 100.0) * 0xffffffff);
-        XChangeProperty(c->display, c->win,
-                        XInternAtom(c->display, "_NET_WM_WINDOW_OPACITY", False),
+        XChangeProperty(disp, win,
+                        XInternAtom(disp, "_NET_WM_WINDOW_OPACITY", False),
                         XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &real_opacity, 1L);
     }
     else
-        XDeleteProperty(c->display, c->win, XInternAtom(c->display, "_NET_WM_WINDOW_OPACITY", False));
+        XDeleteProperty(disp, win, XInternAtom(disp, "_NET_WM_WINDOW_OPACITY", False));
 
-    XSync(c->display, False);
+    XSync(disp, False);
 }
 
 /** Swap two client in the linked list clients
@@ -319,7 +319,6 @@ client_detach(Client **head, Client *c)
 }
 
 /** Give focus to client, or to first client if c is NULL
- * \param disp Display ref
  * \param c client
  * \param selscreen True if current screen is selected
  * \param awesomeconf awesome config
@@ -336,7 +335,7 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
     {
         grabbuttons(*awesomeconf->client_sel, False, True, awesomeconf->modkey, awesomeconf->numlockmask);
         XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_normal[ColBorder].pixel);
-        setclienttrans(*awesomeconf->client_sel, awesomeconf->opacity_unfocused);
+        window_settrans(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->opacity_unfocused);
     }
     if(c)
     {
@@ -358,8 +357,8 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
         XSetInputFocus(awesomeconf->display, (*awesomeconf->client_sel)->win, RevertToPointerRoot, CurrentTime);
         for(c = *awesomeconf->clients; c; c = c->next)
             if(c != *awesomeconf->client_sel)
-                setclienttrans(c, awesomeconf->opacity_unfocused);
-        setclienttrans(*awesomeconf->client_sel, -1);
+                window_settrans(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->opacity_unfocused);
+        window_settrans(awesomeconf->display, (*awesomeconf->client_sel)->win, -1);
     }
     else
         XSetInputFocus(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), RevertToPointerRoot, CurrentTime);
@@ -373,7 +372,7 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
  * \param ntags tags number
  */
 static Bool
-loadprops(Client * c, int ntags)
+loadprops(Client *c, int ntags)
 {
     int i;
     char *prop;
@@ -396,78 +395,115 @@ loadprops(Client * c, int ntags)
 }
 
 /** Manage a new client
- * \param disp Display ref
  * \param w The window
  * \param wa Window attributes
  * \param awesomeconf awesome config
  */
 void
-manage(Display *disp, Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
+manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 {
     int i;
     Client *c, *t = NULL;
     Window trans;
     Status rettrans;
     XWindowChanges wc;
-    ScreenInfo *si = get_display_info(disp, awesomeconf->phys_screen, &awesomeconf->statusbar);
-    ScreenInfo *screen_info;
+    ScreenInfo *screen_info = get_screen_info(awesomeconf->display, awesomeconf->screen, NULL);
 
     c = p_new(Client, 1);
+
     c->win = w;
     c->x = c->rw = wa->x;
     c->y = c->ry = wa->y;
     c->w = c->rw = wa->width;
     c->h = c->rh = wa->height;
     c->oldborder = wa->border_width;
-    c->display = disp;
-    c->phys_screen = get_phys_screen(c->display, c->screen);
+
+    c->display = awesomeconf->display;
+    c->phys_screen = awesomeconf->phys_screen;
+
     c->tab.isvisible = True;
-    screen_info = get_screen_info(c->display, c->screen, NULL);
+
+    /* if window request fullscreen mode */
     if(c->w == screen_info[c->screen].width && c->h == screen_info[c->screen].height)
     {
         c->x = 0;
         c->y = 0;
+
         c->border = wa->border_width;
     }
     else
     {
-        if(c->x + c->w + 2 * c->border > si->x_org + si->width)
-            c->x = c->rx = si->x_org + si->width - c->w - 2 * c->border;
-        if(c->y + c->h + 2 * c->border > si->y_org + si->height)
-            c->y = c->ry = si->y_org + si->height - c->h - 2 * c->border;
-        if(c->x < si->x_org)
-            c->x = c->rx = si->x_org;
-        if(c->y < si->y_org)
-            c->y = c->ry = si->y_org;
+        ScreenInfo *display_info = get_display_info(c->display, c->phys_screen, &awesomeconf->statusbar);
+
+        if(c->x + c->w + 2 * c->border > display_info->x_org + display_info->width)
+            c->x = c->rx = display_info->x_org + display_info->width - c->w - 2 * c->border;
+        if(c->y + c->h + 2 * c->border > display_info->y_org + display_info->height)
+            c->y = c->ry = display_info->y_org + display_info->height - c->h - 2 * c->border;
+        if(c->x < display_info->x_org)
+            c->x = c->rx = display_info->x_org;
+        if(c->y < display_info->y_org)
+            c->y = c->ry = display_info->y_org;
+
         c->border = awesomeconf->borderpx;
+
+        p_delete(&display_info);
     }
-    p_delete(&si);
+    p_delete(&screen_info);
+
+    /* set borders */
     wc.border_width = c->border;
-    XConfigureWindow(disp, w, CWBorderWidth, &wc);
-    XSetWindowBorder(disp, w, awesomeconf->colors_normal[ColBorder].pixel);
+    XConfigureWindow(c->display, w, CWBorderWidth, &wc);
+    XSetWindowBorder(c->display, w, awesomeconf->colors_normal[ColBorder].pixel);
+
     /* propagates border_width, if size doesn't change */
     window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
+
+    /* update sizehint */
     updatesizehints(c);
-    XSelectInput(disp, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
+
+    XSelectInput(c->display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
+
+    /* handle xshape */
     if(awesomeconf->have_shape)
     {
-        XShapeSelectInput(disp, w, ShapeNotifyMask);
+        XShapeSelectInput(c->display, w, ShapeNotifyMask);
         set_shape(c);
     }
+
+    /* grab buttons */
+
     grabbuttons(c, False, True, awesomeconf->modkey, awesomeconf->numlockmask);
+
+    /* update window title */
     updatetitle(c);
+
+    /* move client to screen: this will set screen and create tags array */
     move_client_to_screen(c, awesomeconf, False);
-    if((rettrans = XGetTransientForHint(disp, w, &trans) == Success)
+
+    /* check for transient and set tags like its parent */
+    if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)
        && (t = get_client_bywin(*awesomeconf->clients, trans)))
         for(i = 0; i < awesomeconf->ntags; i++)
             c->tags[i] = t->tags[i];
+
+    /* loadprops or apply rules if no props */
     if(!loadprops(c, awesomeconf->ntags))
         applyrules(c, awesomeconf);
+
+    /* should be floating if transsient or fixed) */
     if(!c->isfloating)
         c->isfloating = (rettrans == Success) || c->isfixed;
+
+    /* save new props */
     saveprops(c, awesomeconf->ntags);
+
+    /* attach to the stack */
     client_attach(awesomeconf->clients, c);
-    XMoveResizeWindow(disp, c->win, c->x, c->y, c->w, c->h);     /* some windows require this */
+
+    /* some windows require this */
+    XMoveResizeWindow(c->display, c->win, c->x, c->y, c->w, c->h);
+
+    /* rearrange to display new window */
     arrange(awesomeconf);
 }
 
@@ -724,9 +760,9 @@ uicb_settrans(awesome_config *awesomeconf __attribute__ ((unused)),
     }
 
     if(delta == 100.0 && !set_prop)
-        setclienttrans(*awesomeconf->client_sel, -1);
+        window_settrans((*awesomeconf->client_sel)->display, (*awesomeconf->client_sel)->win, -1);
     else
-        setclienttrans(*awesomeconf->client_sel, delta);
+        window_settrans((*awesomeconf->client_sel)->display, (*awesomeconf->client_sel)->win, delta);
 }
 
 

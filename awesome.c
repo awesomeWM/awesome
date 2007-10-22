@@ -152,7 +152,7 @@ scan(awesome_config *awesomeconf)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    manage(awesomeconf->display, wins[i], &wa, &awesomeconf[real_screen]);
+                    manage(wins[i], &wa, &awesomeconf[real_screen]);
                 }
             }
             /* now the transients */
@@ -165,7 +165,7 @@ scan(awesome_config *awesomeconf)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    manage(awesomeconf->display, wins[i], &wa, &awesomeconf[real_screen]);
+                    manage(wins[i], &wa, &awesomeconf[real_screen]);
                 }
             }
         }
