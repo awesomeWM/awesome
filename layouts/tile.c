@@ -168,7 +168,7 @@ _tile(awesome_config *awesomeconf, const Bool right)
         }
         i++;
     }
-    XFree(screens_info);
+    p_delete(&screens_info);
 }
 
 void
