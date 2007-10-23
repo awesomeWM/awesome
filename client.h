@@ -32,18 +32,19 @@ void grabbuttons(Client *, Bool, Bool, KeySym, unsigned int);
 inline void client_attach(Client **, Client *);
 inline void client_detach(Client **, Client *);
 void client_reattach_after(Client *, Client *);
-void ban(Client *);             /* bans c */
+void ban(Client *);
 void window_configure(Display *, Window, int, int, int, int, int);
 long window_getstate(Display *, Window);
 void focus(Client *, Bool, awesome_config *);
 void manage(Window, XWindowAttributes *, awesome_config *);
-void resize(Client *, int, int, int, int, awesome_config *, Bool);        /* resize with given coordinates c */
-void unban(Client *);           /* unbans c */
-void unmanage(Client *, long, awesome_config *);  /* unmanage c */
-inline void updatesizehints(Client *); /* update the size hint variables of c */
-void updatetitle(Client *);     /* update the name of c */
-void saveprops(Client * c, int);     /* saves client properties */
+void resize(Client *, int, int, int, int, awesome_config *, Bool);
+void unban(Client *);
+void unmanage(Client *, long, awesome_config *);
+inline void updatesizehints(Client *);
+void updatetitle(Client *);
+void saveprops(Client *, int);
 void set_shape(Client *);
+
 UICB_PROTO(uicb_killclient);
 UICB_PROTO(uicb_moveresize);
 UICB_PROTO(uicb_settrans);

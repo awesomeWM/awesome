@@ -24,7 +24,7 @@
 
 #include "common.h"
 
-int xerror(Display *, XErrorEvent *);   /* awesome's X error handler */
+int xerror(Display *, XErrorEvent *);
 UICB_PROTO(uicb_quit);
 
 #endif

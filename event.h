@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-void grabkeys(awesome_config *);            /* grab all keys defined in config */
+void grabkeys(awesome_config *);
 
 void handle_event_buttonpress(XEvent *, awesome_config *);
 void handle_event_configurerequest(XEvent *, awesome_config *);
