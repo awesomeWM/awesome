@@ -104,8 +104,6 @@ struct Client
     int rx, ry, rw, rh;
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
-    /** True if client is unmapped */
-    Bool unmapped;
     long flags;
     int border, oldborder;
     /** Store previous floating state before maximizing */

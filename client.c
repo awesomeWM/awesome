@@ -243,7 +243,6 @@ ban(Client * c)
 {
     XUnmapWindow(c->display, c->win);
     window_setstate(c->display, c->win, IconicState);
-    c->unmapped = True;
 }
 
 /** Configure client
@@ -266,6 +265,30 @@ window_configure(Display *disp, Window win, int x, int y, int w, int h, int bord
     ce.above = None;
     ce.override_redirect = False;
     XSendEvent(disp, win, False, StructureNotifyMask, (XEvent *) & ce);
+}
+
+/** Get a window state (WM_STATE)
+ * \param disp Display ref
+ * \param w Client window
+ * \return state
+ */
+long
+window_getstate(Display *disp, Window w)
+{
+    int format, status;
+    long result = -1;
+    unsigned char *p = NULL;
+    unsigned long n, extra;
+    Atom real;
+    status = XGetWindowProperty(disp, w, XInternAtom(disp, "WM_STATE", False),
+                                0L, 2L, False, XInternAtom(disp, "WM_STATE", False),
+                                &real, &format, &n, &extra, (unsigned char **) &p);
+    if(status != Success)
+        return -1;
+    if(n != 0)
+        result = *p;
+    p_delete(&p);
+    return result;
 }
 
 /** Attach client after another one
@@ -613,7 +636,6 @@ unban(Client *c)
 {
     XMapWindow(c->display, c->win);
     window_setstate(c->display, c->win, NormalState);
-    c->unmapped = False;
 }
 
 void
@@ -622,7 +644,6 @@ unmanage(Client *c, long state, awesome_config *awesomeconf)
     XWindowChanges wc;
 
     client_untab(c);
-    c->unmapped = True;
     wc.border_width = c->oldborder;
     /* The server grab construct avoids race conditions. */
     XGrabServer(c->display);

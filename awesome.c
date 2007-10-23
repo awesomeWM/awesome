@@ -101,30 +101,6 @@ cleanup(awesome_config *awesomeconf)
     p_delete(&awesomeconf);
 }
 
-/** Get a window state (WM_STATE)
- * \param disp Display ref
- * \param w Client window
- * \return state
- */
-static long
-getstate(Display *disp, Window w)
-{
-    int format, status;
-    long result = -1;
-    unsigned char *p = NULL;
-    unsigned long n, extra;
-    Atom real;
-    status = XGetWindowProperty(disp, w, XInternAtom(disp, "WM_STATE", False),
-                                0L, 2L, False, XInternAtom(disp, "WM_STATE", False),
-                                &real, &format, &n, &extra, (unsigned char **) &p);
-    if(status != Success)
-        return -1;
-    if(n != 0)
-        result = *p;
-    p_delete(&p);
-    return result;
-}
-
 /** Scan X to find windows to manage
  * \param screen Screen number
  * \param awesomeconf awesome config
@@ -148,7 +124,7 @@ scan(awesome_config *awesomeconf)
                    || wa.override_redirect
                    || XGetTransientForHint(awesomeconf->display, wins[i], &d1))
                     continue;
-                if(wa.map_state == IsViewable || getstate(awesomeconf->display, wins[i]) == IconicState)
+                if(wa.map_state == IsViewable || window_getstate(awesomeconf->display, wins[i]) == IconicState)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
@@ -161,7 +137,7 @@ scan(awesome_config *awesomeconf)
                 if(!XGetWindowAttributes(awesomeconf->display, wins[i], &wa))
                     continue;
                 if(XGetTransientForHint(awesomeconf->display, wins[i], &d1)
-                   && (wa.map_state == IsViewable || getstate(awesomeconf->display, wins[i]) == IconicState))
+                   && (wa.map_state == IsViewable || window_getstate(awesomeconf->display, wins[i]) == IconicState))
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
