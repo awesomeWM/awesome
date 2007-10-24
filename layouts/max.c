@@ -21,6 +21,7 @@
 
 #include "tag.h"
 #include "screen.h"
+#include "util.h"
 #include "layouts/max.h"
 
 void
