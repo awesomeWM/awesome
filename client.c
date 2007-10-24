@@ -447,7 +447,7 @@ manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     c->tab.isvisible = True;
 
     /* if window request fullscreen mode */
-    if(c->w == screen_info[c->screen].width && c->h == screen_info[c->screen].height)
+    if(c->w == screen_info[awesomeconf->screen].width && c->h == screen_info[awesomeconf->screen].height)
     {
         c->x = 0;
         c->y = 0;
