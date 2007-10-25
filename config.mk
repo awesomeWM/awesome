@@ -1,9 +1,9 @@
 # awesome version
-VERSION = devel
+VERSION = $(shell git describe 2>/dev/null || echo devel)
 
 # Customize below to fit your system
 
-# additional layouts beside floating
+# additional layouts
 LAYOUTS = layouts/tile.c layouts/floating.c layouts/max.c
 
 # paths
