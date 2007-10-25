@@ -596,6 +596,13 @@ resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool 
         c->y = wc.y = y;
         c->w = wc.width = w;
         c->h = wc.height = h;
+        if(c->isfloating)
+        {
+            c->rx = c->x;
+            c->ry = c->y;
+            c->rw = c->w;
+            c->rh = c->h;
+        }
         wc.border_width = c->border;
         XConfigureWindow(c->display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
         window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);

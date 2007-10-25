@@ -23,6 +23,7 @@
 #include "screen.h"
 #include "tag.h"
 #include "layout.h"
+#include "statusbar.h"
 
 /** Get screens info
  * \param disp Display ref
@@ -155,31 +156,41 @@ void
 move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
 {
     int i, old_screen = c->screen;
-    ScreenInfo *si, *si_old;
 
     c->screen = acf_new->screen;
+
     p_realloc(&c->tags, acf_new->ntags);
     for(i = 0; i < acf_new->ntags; i++)
         c->tags[i] = acf_new->tags[i].selected;
 
-    si = get_screen_info(c->display, c->screen, NULL);
-    si_old = get_screen_info(c->display, old_screen, NULL);
-    /* compute new coords in new screen */
-    c->rx -= si_old[old_screen].x_org + si[c->screen].x_org;
-    c->ry -= si_old[old_screen].y_org + si[c->screen].y_org;
-    /* check that new coords are still in the screen */
-    if(c->rw > si[c->screen].width)
-        c->rw = si[c->screen].width;
-    if(c->rh > si[c->screen].height)
-        c->rh = si[c->screen].height;
-    if(c->rx >= si[c->screen].x_org + si[c->screen].width)
-        c->rx = si[c->screen].x_org - c->rw;
-    if(c->ry >= si[c->screen].y_org + si[c->screen].height)
-        c->ry = si[c->screen].y_org - c->rh;
     if(doresize)
+    {
+        ScreenInfo *si, *si_old;
+
+        si = get_screen_info(c->display, c->screen, NULL);
+        si_old = get_screen_info(c->display, old_screen, NULL);
+
+        /* compute new coords in new screen */
+        c->rx -= si_old[old_screen].x_org + si[c->screen].x_org;
+        c->ry -= si_old[old_screen].y_org + si[c->screen].y_org;
+        /* check that new coords are still in the screen */
+        if(c->rw > si[c->screen].width)
+            c->rw = si[c->screen].width;
+        if(c->rh > si[c->screen].height)
+            c->rh = si[c->screen].height;
+        if(c->rx >= si[c->screen].x_org + si[c->screen].width)
+            c->rx = si[c->screen].x_org - c->rw;
+        if(c->ry >= si[c->screen].y_org + si[c->screen].height)
+            c->ry = si[c->screen].y_org - c->rh;
+
         resize(c, c->rx, c->ry, c->rw, c->rh, acf_new, True);
-    p_delete(&si);
-    p_delete(&si_old);
+
+        p_delete(&si);
+        p_delete(&si_old);
+    }
+    /* redraw statusbar on all screens */
+    drawstatusbar(&acf_new[old_screen - acf_new->screen]);
+    drawstatusbar(acf_new);
 }
 
 /** Move mouse pointer to x_org and y_xorg of specified screen
