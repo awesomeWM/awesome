@@ -80,19 +80,6 @@ typedef struct
     int screen;
 } Statusbar;
 
-/** Tag type */
-typedef struct
-{
-    /** Tag name */
-    char *name;
-    /** True if selected */
-    Bool selected;
-    /** True if was selected before selecting others tags */
-    Bool was_selected;
-    /** Current tag layout */
-    Layout *layout;
-} Tag;
-
 typedef struct Client Client; 
 struct Client
 {
@@ -140,6 +127,21 @@ struct Client
     /** Client physical screen */
     int phys_screen;
 };
+
+/** Tag type */
+typedef struct
+{
+    /** Tag name */
+    char *name;
+    /** True if selected */
+    Bool selected;
+    /** True if was selected before selecting others tags */
+    Bool was_selected;
+    /** Current tag layout */
+    Layout *layout;
+    /** Selected client on this tag */
+    Client **client_sel;
+} Tag;
 
 /** Main configuration structure */
 struct awesome_config

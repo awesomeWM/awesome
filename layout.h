@@ -28,6 +28,7 @@
 
 void arrange(awesome_config *);
 Layout * get_current_layout(Tag *, int);
+int get_current_tag_number(Tag *, int);
 void restack(awesome_config *);
 void loadawesomeprops(awesome_config *);
 void saveawesomeprops(awesome_config *);

@@ -29,6 +29,22 @@
 #include "statusbar.h"
 #include "layouts/floating.h"
 
+/** Find the index of the first currently selected tag
+ * \param tags the array of tags to search
+ * \param ntags number of elements in above array
+ */
+int
+get_current_tag_number(Tag *tags, int ntags)
+{
+    int i;
+
+    for(i = 0; i < ntags; i++)
+        if(tags[i].selected == True)
+            return i;
+
+    return -1;
+}
+
 /** Arrange windows following current selected layout
  * \param disp display ref
  * \param awesomeconf awesome config
@@ -37,6 +53,7 @@ void
 arrange(awesome_config *awesomeconf)
 {
     Client *c;
+    int curtag;
 
     for(c = *awesomeconf->clients; c; c = c->next)
     {
@@ -46,20 +63,23 @@ arrange(awesome_config *awesomeconf)
         else if(c->screen == awesomeconf->screen)
             ban(c);
     }
-    get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange(awesomeconf);
-    focus(NULL, True, awesomeconf);
+    if ((curtag = get_current_tag_number(awesomeconf->tags, awesomeconf->ntags)) >= 0)
+    {
+        awesomeconf->tags[curtag].layout->arrange(awesomeconf);
+        focus(*awesomeconf->tags[curtag].client_sel, True, awesomeconf);
+    }
+    else
+        focus(NULL, True, awesomeconf);
     restack(awesomeconf);
 }
-
 
 Layout *
 get_current_layout(Tag *tags, int ntags)
 {
-    int i;
+    int curtag;
 
-    for(i = 0; i < ntags; i++)
-        if(tags[i].selected)
-            return tags[i].layout;
+    if ((curtag = get_current_tag_number(tags, ntags)) >= 0)
+        return tags[curtag].layout;
 
     return NULL;
 }
