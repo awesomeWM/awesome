@@ -449,8 +449,8 @@ manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     /* if window request fullscreen mode */
     if(c->w == screen_info[awesomeconf->screen].width && c->h == screen_info[awesomeconf->screen].height)
     {
-        c->x = 0;
-        c->y = 0;
+        c->x = screen_info[awesomeconf->screen].x_org;
+        c->y = screen_info[awesomeconf->screen].y_org;
 
         c->border = wa->border_width;
     }
