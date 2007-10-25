@@ -171,8 +171,8 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
         si_old = get_screen_info(c->display, old_screen, NULL);
 
         /* compute new coords in new screen */
-        c->rx -= si_old[old_screen].x_org + si[c->screen].x_org;
-        c->ry -= si_old[old_screen].y_org + si[c->screen].y_org;
+        c->rx = (c->rx - si_old[old_screen].x_org) + si[c->screen].x_org;
+        c->ry = (c->ry - si_old[old_screen].y_org) + si[c->screen].y_org;
         /* check that new coords are still in the screen */
         if(c->rw > si[c->screen].width)
             c->rw = si[c->screen].width;
@@ -188,6 +188,7 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
         p_delete(&si);
         p_delete(&si_old);
     }
+
     /* redraw statusbar on all screens */
     drawstatusbar(&acf_new[old_screen - acf_new->screen]);
     drawstatusbar(acf_new);
