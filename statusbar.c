@@ -126,7 +126,7 @@ drawstatusbar(awesome_config * awesomeconf)
     if((w = x - z) > awesomeconf->statusbar.height)
     {
         x = z;
-        if(*awesomeconf->client_sel)
+        if(*awesomeconf->client_sel && (*awesomeconf->client_sel)->screen == awesomeconf->screen)
         {
             drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
