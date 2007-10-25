@@ -79,7 +79,10 @@ cleanup(awesome_config *awesomeconf)
         XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurMove]);
 
         for(i = 0; i < awesomeconf[screen].ntags; i++)
+        {
             p_delete(&awesomeconf[screen].tags[i].name);
+            p_delete(&awesomeconf[screen].tags[i].client_sel);
+        }
         for(i = 0; i < awesomeconf[screen].nkeys; i++)
             p_delete(&awesomeconf[screen].keys[i].arg);
         for(i = 0; i < awesomeconf[screen].nlayouts; i++)
