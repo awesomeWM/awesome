@@ -32,6 +32,7 @@
 /** Find the index of the first currently selected tag
  * \param tags the array of tags to search
  * \param ntags number of elements in above array
+ * \return tag number
  */
 int
 get_current_tag_number(Tag *tags, int ntags)
