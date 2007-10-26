@@ -45,6 +45,7 @@
 #include "util.h"
 #include "statusbar.h"
 #include "uicb.h"
+#include "window.h"
 
 #define CONTROL_FIFO_PATH ".awesome_ctl"
 #define CONTROL_UNIX_SOCKET_PATH ".awesome_so_ctl"

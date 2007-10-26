@@ -21,7 +21,6 @@
 
 #include <stdio.h>
 #include <X11/Xatom.h>
-#include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
 
 #include "screen.h"
@@ -31,6 +30,7 @@
 #include "tag.h"
 #include "util.h"
 #include "statusbar.h"
+#include "window.h"
 #include "layouts/floating.h"
 
 /** Get a Client by its window
@@ -159,42 +159,6 @@ isprotodel(Display *disp, Window win)
     return ret;
 }
 
-/** Set client WM_STATE property
- * \param c the client
- * \param state no idea
- */
-static void
-window_setstate(Display *disp, Window win, long state)
-{
-    long data[] = { state, None };
-
-    XChangeProperty(disp, win, XInternAtom(disp, "WM_STATE", False),
-                    XInternAtom(disp, "WM_STATE", False),  32,
-                    PropModeReplace, (unsigned char *) data, 2);
-}
-
-/** Set client transparency using composite
- * \param c client
- * \param opacity opacity percentage
- */
-static void
-window_settrans(Display *disp, Window win, double opacity)
-{
-    unsigned int real_opacity = 0xffffffff;
-
-    if(opacity >= 0 && opacity <= 100)
-    {
-        real_opacity = ((opacity / 100.0) * 0xffffffff);
-        XChangeProperty(disp, win,
-                        XInternAtom(disp, "_NET_WM_WINDOW_OPACITY", False),
-                        XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &real_opacity, 1L);
-    }
-    else
-        XDeleteProperty(disp, win, XInternAtom(disp, "_NET_WM_WINDOW_OPACITY", False));
-
-    XSync(disp, False);
-}
-
 /** Swap two client in the linked list clients
  * \param c1 first client
  * \param c2 second client
@@ -243,52 +207,6 @@ ban(Client * c)
 {
     XUnmapWindow(c->display, c->win);
     window_setstate(c->display, c->win, IconicState);
-}
-
-/** Configure client
- * \param c the client
- */
-void
-window_configure(Display *disp, Window win, int x, int y, int w, int h, int border)
-{
-    XConfigureEvent ce;
-
-    ce.type = ConfigureNotify;
-    ce.display = disp;
-    ce.event = win;
-    ce.window = win;
-    ce.x = x;
-    ce.y = y;
-    ce.width = w;
-    ce.height = h;
-    ce.border_width = border;
-    ce.above = None;
-    ce.override_redirect = False;
-    XSendEvent(disp, win, False, StructureNotifyMask, (XEvent *) & ce);
-}
-
-/** Get a window state (WM_STATE)
- * \param disp Display ref
- * \param w Client window
- * \return state
- */
-long
-window_getstate(Display *disp, Window w)
-{
-    int format, status;
-    long result = -1;
-    unsigned char *p = NULL;
-    unsigned long n, extra;
-    Atom real;
-    status = XGetWindowProperty(disp, w, XInternAtom(disp, "WM_STATE", False),
-                                0L, 2L, False, XInternAtom(disp, "WM_STATE", False),
-                                &real, &format, &n, &extra, (unsigned char **) &p);
-    if(status != Success)
-        return -1;
-    if(n != 0)
-        result = *p;
-    p_delete(&p);
-    return result;
 }
 
 /** Attach client after another one

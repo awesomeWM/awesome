@@ -32,6 +32,7 @@
 #include "draw.h"
 #include "statusbar.h"
 #include "util.h"
+#include "window.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 

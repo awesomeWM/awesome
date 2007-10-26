@@ -33,8 +33,6 @@ inline void client_attach(Client **, Client *);
 inline void client_detach(Client **, Client *);
 void client_reattach_after(Client *, Client *);
 void ban(Client *);
-void window_configure(Display *, Window, int, int, int, int, int);
-long window_getstate(Display *, Window);
 void focus(Client *, Bool, awesome_config *);
 void manage(Window, XWindowAttributes *, awesome_config *);
 void resize(Client *, int, int, int, int, awesome_config *, Bool);
