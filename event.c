@@ -196,7 +196,8 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
            if (ev->button == Button1)
            {
                restack(&awesomeconf[c->screen]);
-               grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
+               window_grabbuttons(c->display, c->phys_screen, c->win,
+                                  True, True, awesomeconf->modkey, awesomeconf->numlockmask);
            }
         }
         else if(ev->button == Button1)
@@ -361,7 +362,10 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
                 && ((*awesomeconf->client_sel)->isfloating
                     || get_current_layout(awesomeconf[(*awesomeconf->client_sel)->screen].tags,
                                          awesomeconf[(*awesomeconf->client_sel)->screen].ntags)->arrange == layout_floating))
-                grabbuttons(*awesomeconf->client_sel, True, False, awesomeconf->modkey, awesomeconf->numlockmask);
+                window_grabbuttons((*awesomeconf->client_sel)->display,
+                                   (*awesomeconf->client_sel)->phys_screen,
+                                   (*awesomeconf->client_sel)->win,
+                                   True, False, awesomeconf->modkey, awesomeconf->numlockmask);
         }
     }
     else

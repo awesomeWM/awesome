@@ -82,6 +82,99 @@ window_configure(Display *disp, Window win, int x, int y, int w, int h, int bord
     return XSendEvent(disp, win, False, StructureNotifyMask, (XEvent *) & ce);
 }
 
+
+
+/** Grab or ungrab buttons on a window
+ * \param disp Display ref
+ * \param focused True if client is focused
+ * \param raised True if the client is above other clients
+ * \param modkey Mod key mask
+ * \param numlockmask Numlock mask
+ */
+void
+window_grabbuttons(Display *disp, int screen, Window win, Bool focused, Bool raised, KeySym modkey, unsigned int numlockmask)
+{
+    XUngrabButton(disp, AnyButton, AnyModifier, win);
+
+    if(focused)
+    {
+        if(!raised)
+            XGrabButton(disp, Button1, NoSymbol, win, False,
+                        BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
+
+        XGrabButton(disp, Button1, modkey, win, False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button1, modkey | LockMask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button1, modkey | numlockmask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button1, modkey | numlockmask | LockMask,
+                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+
+        XGrabButton(disp, Button2, modkey, win, False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button2, modkey | LockMask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button2, modkey | numlockmask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button2, modkey | numlockmask | LockMask,
+                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+
+        XGrabButton(disp, Button3, modkey, win, False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button3, modkey | LockMask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button3, modkey | numlockmask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button3, modkey | numlockmask | LockMask,
+                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+
+        XGrabButton(disp, Button4, modkey, win, False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button4, modkey | LockMask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button4, modkey | numlockmask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button4, modkey | numlockmask | LockMask,
+                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+
+        XGrabButton(disp, Button5, modkey, win, False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button5, modkey | LockMask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button5, modkey | numlockmask, win, False,
+                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button5, modkey | numlockmask | LockMask,
+                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        
+        XUngrabButton(disp, AnyButton, AnyModifier, RootWindow(disp, screen));
+    }
+    else
+    {
+        XGrabButton(disp, AnyButton, AnyModifier, win, False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+
+        XGrabButton(disp, Button4, NoSymbol, RootWindow(disp, screen), False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button4, LockMask, RootWindow(disp, screen), False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button4, numlockmask, RootWindow(disp, screen), False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button4, numlockmask | LockMask, RootWindow(disp, screen), False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+
+        XGrabButton(disp, Button5, NoSymbol, RootWindow(disp, screen), False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button5, LockMask, RootWindow(disp, screen), False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button5, numlockmask, RootWindow(disp, screen), False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+        XGrabButton(disp, Button5, numlockmask | LockMask, RootWindow(disp, screen), False, BUTTONMASK,
+                    GrabModeAsync, GrabModeSync, None, None);
+
+    }
+}
+
 void
 window_setshape(Display *disp, int screen, Window win)
 {

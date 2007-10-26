@@ -47,97 +47,6 @@ get_client_bywin(Client *list, Window w)
     return c;
 }
 
-/** Grab or ungrab buttons when a client is focused
- * \param c client
- * \param focused True if client is focused
- * \param raised True if the client is above other clients
- * \param modkey Mod key mask
- * \param numlockmask Numlock mask
- */
-void
-grabbuttons(Client *c, Bool focused, Bool raised, KeySym modkey, unsigned int numlockmask)
-{
-    XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
-
-    if(focused)
-    {
-        if(!raised)
-            XGrabButton(c->display, Button1, NoSymbol, c->win, False,
-                        BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-
-        XGrabButton(c->display, Button1, modkey, c->win, False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button1, modkey | LockMask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button1, modkey | numlockmask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button1, modkey | numlockmask | LockMask,
-                    c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-
-        XGrabButton(c->display, Button2, modkey, c->win, False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button2, modkey | LockMask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button2, modkey | numlockmask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button2, modkey | numlockmask | LockMask,
-                    c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-
-        XGrabButton(c->display, Button3, modkey, c->win, False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button3, modkey | LockMask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button3, modkey | numlockmask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button3, modkey | numlockmask | LockMask,
-                    c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-
-        XGrabButton(c->display, Button4, modkey, c->win, False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button4, modkey | LockMask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button4, modkey | numlockmask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button4, modkey | numlockmask | LockMask,
-                    c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-
-        XGrabButton(c->display, Button5, modkey, c->win, False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button5, modkey | LockMask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button5, modkey | numlockmask, c->win, False,
-                    BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button5, modkey | numlockmask | LockMask,
-                    c->win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        
-        XUngrabButton(c->display, AnyButton, AnyModifier, RootWindow(c->display, c->phys_screen));
-    }
-    else
-    {
-        XGrabButton(c->display, AnyButton, AnyModifier, c->win, False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-
-        XGrabButton(c->display, Button4, NoSymbol, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button4, LockMask, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button4, numlockmask, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button4, numlockmask | LockMask, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-
-        XGrabButton(c->display, Button5, NoSymbol, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button5, LockMask, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button5, numlockmask, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(c->display, Button5, numlockmask | LockMask, RootWindow(c->display, c->phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-
-    }
-}
-
 /** Check if client supports protocol WM_DELETE_WINDOW
  * \param c the client
  * \return True if client has WM_DELETE_WINDOW
@@ -275,7 +184,10 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
     /* if a client was selected but it's not the current client, unfocus it */
     if(*awesomeconf->client_sel && *awesomeconf->client_sel != c)
     {
-        grabbuttons(*awesomeconf->client_sel, False, True, awesomeconf->modkey, awesomeconf->numlockmask);
+        window_grabbuttons((*awesomeconf->client_sel)->display,
+                           (*awesomeconf->client_sel)->phys_screen,
+                           (*awesomeconf->client_sel)->win,
+                           False, True, awesomeconf->modkey, awesomeconf->numlockmask);
         XSetWindowBorder(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->colors_normal[ColBorder].pixel);
         window_settrans(awesomeconf->display, (*awesomeconf->client_sel)->win, awesomeconf->opacity_unfocused);
     }
@@ -289,7 +201,8 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
     if(*awesomeconf->client_sel == c)
         return;
     if(c)
-        grabbuttons(c, True, True, awesomeconf->modkey, awesomeconf->numlockmask);
+        window_grabbuttons(c->display, c->phys_screen, c->win,
+                           True, True, awesomeconf->modkey, awesomeconf->numlockmask);
     if(!selscreen)
         return;
     *awesomeconf->client_sel = c;
@@ -415,8 +328,8 @@ manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     }
 
     /* grab buttons */
-
-    grabbuttons(c, False, True, awesomeconf->modkey, awesomeconf->numlockmask);
+    window_grabbuttons(c->display, c->phys_screen, c->win,
+                       False, True, awesomeconf->modkey, awesomeconf->numlockmask);
 
     /* update window title */
     updatetitle(c);
