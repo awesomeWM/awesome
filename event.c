@@ -515,7 +515,7 @@ handle_event_shape(XEvent * e,
     Client *c = get_client_bywin(*awesomeconf->clients, ev->window);
 
     if(c)
-        set_shape(c);
+        window_setshape(c->display, c->phys_screen, c->win);
 }
 
 void

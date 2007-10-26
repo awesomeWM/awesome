@@ -20,6 +20,7 @@
  */
 
 #include <X11/Xatom.h>
+#include <X11/extensions/shape.h> 
 
 #include "window.h"
 #include "util.h"
@@ -79,6 +80,17 @@ window_configure(Display *disp, Window win, int x, int y, int w, int h, int bord
     ce.above = None;
     ce.override_redirect = False;
     return XSendEvent(disp, win, False, StructureNotifyMask, (XEvent *) & ce);
+}
+
+void
+window_setshape(Display *disp, int screen, Window win)
+{
+    int bounding_shaped;
+    int i, b;  unsigned int u;  /* dummies */
+    /* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10. */
+    if(XShapeQueryExtents(disp, win, &bounding_shaped, &i, &i,
+                          &u, &u, &b, &i, &i, &u, &u) && bounding_shaped)
+        XShapeCombineShape(disp, RootWindow(disp, screen), ShapeBounding, 0, 0, win, ShapeBounding, ShapeSet);
 }
 
 void

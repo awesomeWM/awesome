@@ -411,7 +411,7 @@ manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     if(awesomeconf->have_shape)
     {
         XShapeSelectInput(c->display, w, ShapeNotifyMask);
-        set_shape(c);
+        window_setshape(c->display, c->phys_screen, c->win);
     }
 
     /* grab buttons */
@@ -660,17 +660,6 @@ updatesizehints(Client *c)
 
     c->isfixed = (c->maxw && c->minw && c->maxh && c->minh
                   && c->maxw == c->minw && c->maxh == c->minh);
-}
-
-void
-set_shape(Client *c)
-{
-    int bounding_shaped;
-    int i, b;  unsigned int u;  /* dummies */
-    /* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10. */
-    if (XShapeQueryExtents(c->display, c->win, &bounding_shaped, &i, &i,
-                           &u, &u, &b, &i, &i, &u, &u) && bounding_shaped)
-        XShapeCombineShape(c->display, RootWindow(c->display, c->phys_screen), ShapeBounding, 0, 0, c->win, ShapeBounding, ShapeSet);
 }
 
 /** Set selected client transparency

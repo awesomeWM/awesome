@@ -27,6 +27,7 @@
 int window_setstate(Display *, Window, long);
 long window_getstate(Display *, Window);
 Status window_configure(Display *, Window, int, int, int, int, int);
+void window_setshape(Display *, int, Window);
 void window_settrans(Display *, Window, double);
 
 #endif

@@ -41,7 +41,6 @@ void unmanage(Client *, long, awesome_config *);
 inline void updatesizehints(Client *);
 void updatetitle(Client *);
 void saveprops(Client *, int);
-void set_shape(Client *);
 
 UICB_PROTO(uicb_killclient);
 UICB_PROTO(uicb_moveresize);
