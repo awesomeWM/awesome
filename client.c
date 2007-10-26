@@ -112,7 +112,7 @@ updatetitle(Client *c)
  * \param c the client
  */
 void
-ban(Client * c)
+client_ban(Client * c)
 {
     XUnmapWindow(c->display, c->win);
     window_setstate(c->display, c->win, IconicState);
@@ -477,7 +477,7 @@ saveprops(Client * c, int ntags)
 }
 
 void
-unban(Client *c)
+client_unban(Client *c)
 {
     XMapWindow(c->display, c->win);
     window_setstate(c->display, c->win, NormalState);

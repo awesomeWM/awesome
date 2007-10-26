@@ -63,7 +63,7 @@ cleanup(awesome_config *awesomeconf)
 
     while(*awesomeconf->clients)
     {
-        unban(*awesomeconf->clients);
+        client_unban(*awesomeconf->clients);
         client_unmanage(*awesomeconf->clients, NormalState, awesomeconf);
     }
 

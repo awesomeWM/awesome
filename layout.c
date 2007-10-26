@@ -58,10 +58,10 @@ arrange(awesome_config *awesomeconf)
     for(c = *awesomeconf->clients; c; c = c->next)
     {
         if(isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
-            unban(c);
+            client_unban(c);
         /* we don't touch other screens windows */
         else if(c->screen == awesomeconf->screen)
-            ban(c);
+            client_ban(c);
     }
     if ((curtag = get_current_tag_number(awesomeconf->tags, awesomeconf->ntags)) >= 0)
     {
