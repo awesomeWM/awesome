@@ -341,7 +341,7 @@ handle_event_destroynotify(XEvent * e, awesome_config *awesomeconf)
     XDestroyWindowEvent *ev = &e->xdestroywindow;
 
     if((c = get_client_bywin(*awesomeconf->clients, ev->window)))
-        unmanage(c, WithdrawnState, &awesomeconf[c->screen]);
+        client_unmanage(c, WithdrawnState, &awesomeconf[c->screen]);
 }
 
 void
@@ -464,7 +464,7 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
                 screen = get_screen_bycoord(e->xany.display, x, y);
 
         }
-        manage(ev->window, &wa, &awesomeconf[screen]);
+        client_manage(ev->window, &wa, &awesomeconf[screen]);
     }
 }
 
@@ -508,7 +508,7 @@ handle_event_unmapnotify(XEvent * e, awesome_config *awesomeconf)
     if((c = get_client_bywin(*awesomeconf->clients, ev->window))
        && ev->event == RootWindow(e->xany.display, c->phys_screen)
        && ev->send_event && window_getstate(c->display, c->win) == NormalState)
-        unmanage(c, WithdrawnState, &awesomeconf[c->screen]);
+        client_unmanage(c, WithdrawnState, &awesomeconf[c->screen]);
 }
 
 void

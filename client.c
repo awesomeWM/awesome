@@ -257,7 +257,7 @@ loadprops(Client *c, int ntags)
  * \param awesomeconf awesome config
  */
 void
-manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
+client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 {
     int i, tag;
     Client *c, *t = NULL;
@@ -484,7 +484,7 @@ unban(Client *c)
 }
 
 void
-unmanage(Client *c, long state, awesome_config *awesomeconf)
+client_unmanage(Client *c, long state, awesome_config *awesomeconf)
 {
     XWindowChanges wc;
     int tag;

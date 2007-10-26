@@ -64,7 +64,7 @@ cleanup(awesome_config *awesomeconf)
     while(*awesomeconf->clients)
     {
         unban(*awesomeconf->clients);
-        unmanage(*awesomeconf->clients, NormalState, awesomeconf);
+        client_unmanage(*awesomeconf->clients, NormalState, awesomeconf);
     }
 
     for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
@@ -132,7 +132,7 @@ scan(awesome_config *awesomeconf)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    manage(wins[i], &wa, &awesomeconf[real_screen]);
+                    client_manage(wins[i], &wa, &awesomeconf[real_screen]);
                 }
             }
             /* now the transients */
@@ -145,7 +145,7 @@ scan(awesome_config *awesomeconf)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    manage(wins[i], &wa, &awesomeconf[real_screen]);
+                    client_manage(wins[i], &wa, &awesomeconf[real_screen]);
                 }
             }
         }
