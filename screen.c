@@ -183,7 +183,7 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
         if(c->ry >= si[c->screen].y_org + si[c->screen].height)
             c->ry = si[c->screen].y_org - c->rh;
 
-        resize(c, c->rx, c->ry, c->rw, c->rh, acf_new, True);
+        client_resize(c, c->rx, c->ry, c->rw, c->rh, acf_new, True);
 
         p_delete(&si);
         p_delete(&si_old);

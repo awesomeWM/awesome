@@ -31,7 +31,7 @@ void client_reattach_after(Client *, Client *);
 void ban(Client *);
 void focus(Client *, Bool, awesome_config *);
 void manage(Window, XWindowAttributes *, awesome_config *);
-void resize(Client *, int, int, int, int, awesome_config *, Bool);
+void client_resize(Client *, int, int, int, int, awesome_config *, Bool);
 void unban(Client *);
 void unmanage(Client *, long, awesome_config *);
 inline void updatesizehints(Client *);

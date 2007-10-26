@@ -247,10 +247,10 @@ maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
         sel->ry = sel->y;
         sel->rw = sel->w;
         sel->rh = sel->h;
-        resize(sel, x, y, w, h, awesomeconf, True);
+        client_resize(sel, x, y, w, h, awesomeconf, True);
     }
     else if(sel->wasfloating)
-        resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True);
+        client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True);
     else
         sel->isfloating = False;
 

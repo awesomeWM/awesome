@@ -32,7 +32,7 @@ layout_max(awesome_config *awesomeconf)
 
     for(c = *awesomeconf->clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
-            resize(c, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
+            client_resize(c, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
                    si[awesomeconf->screen].width - 2 * c->border,
                    si[awesomeconf->screen].height - 2 * c->border, awesomeconf, awesomeconf->resize_hints);
     p_delete(&si);

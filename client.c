@@ -369,7 +369,7 @@ manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 }
 
 void
-resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool sizehints)
+client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf, Bool sizehints)
 {
     double dx, dy, max, min, ratio;
     XWindowChanges wc;
@@ -705,7 +705,7 @@ uicb_moveresize(awesome_config *awesomeconf,
     oh = (*awesomeconf->client_sel)->h;
 
     Bool xqp = XQueryPointer(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
-    resize(*awesomeconf->client_sel, nx, ny, nw, nh, awesomeconf, True);
+    client_resize(*awesomeconf->client_sel, nx, ny, nw, nh, awesomeconf, True);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
         nmx = mx - ox + (*awesomeconf->client_sel)->w - ow - 1 < 0 ? 0 : mx - ox + (*awesomeconf->client_sel)->w - ow - 1;
