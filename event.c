@@ -234,7 +234,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         else if(ev->button == Button5)
             uicb_settrans(&awesomeconf[c->screen], "-5");
     }
-    else if(!*awesomeconf->client_sel)
+    else if(!get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window
                && XQueryPointer(e->xany.display, ev->window, &wdummy, &wdummy, &x, &y, &i, &i, &udummy))
@@ -355,18 +355,12 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
         return;
     if((c = get_client_bywin(*awesomeconf->clients, ev->window)))
     {
-        if(!*awesomeconf->client_sel || *awesomeconf->client_sel != c)
-        {
-            focus(c, ev->same_screen, &awesomeconf[c->screen]);
-            if (*awesomeconf->client_sel
-                && ((*awesomeconf->client_sel)->isfloating
-                    || get_current_layout(awesomeconf[(*awesomeconf->client_sel)->screen].tags,
-                                         awesomeconf[(*awesomeconf->client_sel)->screen].ntags)->arrange == layout_floating))
-                window_grabbuttons((*awesomeconf->client_sel)->display,
-                                   (*awesomeconf->client_sel)->phys_screen,
-                                   (*awesomeconf->client_sel)->win,
-                                   True, False, awesomeconf->modkey, awesomeconf->numlockmask);
-        }
+        focus(c, ev->same_screen, &awesomeconf[c->screen]);
+        if (c->isfloating
+                || get_current_layout(awesomeconf[c->screen].tags,
+                                    awesomeconf[c->screen].ntags)->arrange == layout_floating)
+            window_grabbuttons(c->display, c->phys_screen, c->win,
+                               True, False, awesomeconf->modkey, awesomeconf->numlockmask);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
@@ -493,7 +487,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(c->display, "_NET_WM_NAME", False))
         {
             updatetitle(c);
-            if(c == *awesomeconf->client_sel)
+            if(c == get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel)
                 drawstatusbar(&awesomeconf[c->screen]);
         }
     }

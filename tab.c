@@ -55,7 +55,7 @@ uicb_tab(awesome_config *awesomeconf,
     int x1, y1, di;
     unsigned int dui;
     XEvent ev;
-    Client *sel = *awesomeconf->client_sel, *c = NULL, *tmp;
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel, *c = NULL, *tmp;
 
     if(XGrabPointer(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen),
                     False, ButtonPressMask, GrabModeAsync, GrabModeAsync, None,
@@ -99,7 +99,7 @@ void
 uicb_untab(awesome_config *awesomeconf,
            const char *arg __attribute__ ((unused)))
 {
-    Client *sel = *awesomeconf->client_sel;
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
     if(!sel)
         return;
@@ -113,7 +113,7 @@ void
 uicb_viewnexttab(awesome_config *awesomeconf,
                  const char *arg __attribute__ ((unused)))
 {
-    Client *sel = *awesomeconf->client_sel;
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
     if(!sel || !sel->tab.next)
         return;
@@ -128,7 +128,7 @@ void
 uicb_viewprevtab(awesome_config *awesomeconf,
                  const char *arg __attribute__ ((unused)))
 {
-    Client *sel = *awesomeconf->client_sel;
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
     if(!sel || !sel->tab.prev)
         return;

@@ -49,6 +49,7 @@ void
 drawstatusbar(awesome_config * awesomeconf)
 {
     int z, i, x = 0, y = 0, w;
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
     for(i = 0; i < awesomeconf->ntags; i++)
     {
@@ -72,7 +73,7 @@ drawstatusbar(awesome_config * awesomeconf)
                               awesomeconf->statusbar.drawable,
                               awesomeconf->statusbar.width,
                               awesomeconf->statusbar.height,
-                              *awesomeconf->client_sel && (*awesomeconf->client_sel)->tags[i],
+                              sel && sel->tags[i],
                               awesomeconf->colors_selected[ColFG]);
         }
         else
@@ -93,7 +94,7 @@ drawstatusbar(awesome_config * awesomeconf)
                               awesomeconf->statusbar.drawable,
                               awesomeconf->statusbar.width,
                               awesomeconf->statusbar.height,
-                              *awesomeconf->client_sel && (*awesomeconf->client_sel)->tags[i],
+                              sel && sel->tags[i],
                               awesomeconf->colors_normal[ColFG]);
         }
         x += w;
@@ -126,7 +127,7 @@ drawstatusbar(awesome_config * awesomeconf)
     if((w = x - z) > awesomeconf->statusbar.height)
     {
         x = z;
-        if(*awesomeconf->client_sel && (*awesomeconf->client_sel)->screen == awesomeconf->screen)
+        if(sel && sel->screen == awesomeconf->screen)
         {
             drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
@@ -135,15 +136,15 @@ drawstatusbar(awesome_config * awesomeconf)
                      awesomeconf->statusbar.width,
                      awesomeconf->statusbar.height,
                      awesomeconf->font,
-                     (*awesomeconf->client_sel)->name, awesomeconf->colors_selected);
-            if((*awesomeconf->client_sel)->isfloating)
+                     sel->name, awesomeconf->colors_selected);
+            if(sel->isfloating)
                 drawcircle(awesomeconf->display, awesomeconf->phys_screen,
                            x, y,
                            (awesomeconf->font->height + 2) / 4,
                            awesomeconf->statusbar.drawable,
                            awesomeconf->statusbar.width,
                            awesomeconf->statusbar.height,
-                           (*awesomeconf->client_sel)->ismax,
+                           sel->ismax,
                            awesomeconf->colors_selected[ColFG]);
         }
         else

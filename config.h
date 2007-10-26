@@ -212,8 +212,6 @@ struct awesome_config
     XftFont *font;
     /** Clients list */
     Client **clients;
-    /** Focused client */
-    Client **client_sel;
 };
 
 void parse_config(Display *, int, const char *, awesome_config *);

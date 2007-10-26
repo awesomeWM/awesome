@@ -149,15 +149,16 @@ uicb_tag(awesome_config *awesomeconf,
          const char *arg)
 {
     int i;
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
-    if(!*awesomeconf->client_sel)
+    if(!sel)
         return;
     for(i = 0; i < awesomeconf->ntags; i++)
-        (*awesomeconf->client_sel)->tags[i] = arg == NULL;
+        sel->tags[i] = arg == NULL;
     i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
     if(i >= 0 && i < awesomeconf->ntags)
-        (*awesomeconf->client_sel)->tags[i] = True;
-    saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
+        sel->tags[i] = True;
+    saveprops(sel, awesomeconf->ntags);
     arrange(awesomeconf);
 }
 
@@ -169,20 +170,17 @@ void
 uicb_togglefloating(awesome_config * awesomeconf,
                     const char *arg __attribute__ ((unused)))
 {
-    if(!*awesomeconf->client_sel)
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
+
+    if(!sel)
         return;
 
-    (*awesomeconf->client_sel)->isfloating = !(*awesomeconf->client_sel)->isfloating;
+    sel->isfloating = !sel->isfloating;
 
-    client_resize(*awesomeconf->client_sel,
-                  (*awesomeconf->client_sel)->rx,
-                  (*awesomeconf->client_sel)->ry,
-                  (*awesomeconf->client_sel)->rw,
-                  (*awesomeconf->client_sel)->rh,
-                  awesomeconf, True);
+    client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True);
 
-    client_untab(*awesomeconf->client_sel);
-    saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
+    client_untab(sel);
+    saveprops(sel, awesomeconf->ntags);
     arrange(awesomeconf);
 }
 
@@ -194,17 +192,18 @@ void
 uicb_toggletag(awesome_config *awesomeconf,
                const char *arg)
 {
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
     unsigned int i;
     int j;
 
-    if(!*awesomeconf->client_sel)
+    if(!sel)
         return;
     i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
-    (*awesomeconf->client_sel)->tags[i] = !(*awesomeconf->client_sel)->tags[i];
-    for(j = 0; j < awesomeconf->ntags && !(*awesomeconf->client_sel)->tags[j]; j++);
+    sel->tags[i] = !sel->tags[i];
+    for(j = 0; j < awesomeconf->ntags && !sel->tags[j]; j++);
     if(j == awesomeconf->ntags)
-        (*awesomeconf->client_sel)->tags[i] = True;
-    saveprops(*awesomeconf->client_sel, awesomeconf->ntags);
+        sel->tags[i] = True;
+    saveprops(sel, awesomeconf->ntags);
     arrange(awesomeconf);
 }
 

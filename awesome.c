@@ -101,7 +101,6 @@ cleanup(awesome_config *awesomeconf)
     XSetInputFocus(awesomeconf->display, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(awesomeconf->display, False);
     p_delete(&awesomeconf->clients);
-    p_delete(&awesomeconf->client_sel);
     p_delete(&awesomeconf);
 }
 
@@ -300,7 +299,6 @@ main(int argc, char *argv[])
         parse_config(dpy, screen, confpath, &awesomeconf[screen]);
         setup(&awesomeconf[screen]);
         awesomeconf[screen].clients = clients;
-        awesomeconf[screen].client_sel = sel;
         initstatusbar(awesomeconf[screen].display, screen, &awesomeconf[screen].statusbar,
                       awesomeconf[screen].cursor[CurNormal], awesomeconf[screen].font,
                       awesomeconf[screen].layouts, awesomeconf[screen].nlayouts);
