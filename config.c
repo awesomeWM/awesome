@@ -362,7 +362,6 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         awesomeconf->tags[i].name = a_strdup(cfg_title(cfgsectmp));
         awesomeconf->tags[i].selected = False;
         awesomeconf->tags[i].was_selected = False;
-        awesomeconf->tags[i].client_sel = p_new(Client *, 1);
         tmp = cfg_getstr(cfgsectmp, "layout");
         for(k = 0; k < awesomeconf->nlayouts; k++)
             if(awesomeconf->layouts[k].arrange == name_func_lookup(tmp, LayoutsList))

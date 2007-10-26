@@ -32,18 +32,18 @@
 /** Find the index of the first currently selected tag
  * \param tags the array of tags to search
  * \param ntags number of elements in above array
- * \return tag number
+ * \return tag
  */
-int
-get_current_tag_number(Tag *tags, int ntags)
+Tag *
+get_current_tag(Tag *tags, int ntags)
 {
     int i;
 
     for(i = 0; i < ntags; i++)
         if(tags[i].selected == True)
-            return i;
+            return &tags[i];
 
-    return -1;
+    return NULL;
 }
 
 /** Arrange windows following current selected layout
@@ -54,7 +54,7 @@ void
 arrange(awesome_config *awesomeconf)
 {
     Client *c;
-    int curtag;
+    Tag *curtag;
 
     for(c = *awesomeconf->clients; c; c = c->next)
     {
@@ -64,10 +64,10 @@ arrange(awesome_config *awesomeconf)
         else if(c->screen == awesomeconf->screen)
             client_ban(c);
     }
-    if ((curtag = get_current_tag_number(awesomeconf->tags, awesomeconf->ntags)) >= 0)
+    if ((curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags)))
     {
-        awesomeconf->tags[curtag].layout->arrange(awesomeconf);
-        focus(*awesomeconf->tags[curtag].client_sel, True, awesomeconf);
+        curtag->layout->arrange(awesomeconf);
+        focus(curtag->client_sel, True, awesomeconf);
     }
     else
         focus(NULL, True, awesomeconf);
@@ -77,10 +77,10 @@ arrange(awesome_config *awesomeconf)
 Layout *
 get_current_layout(Tag *tags, int ntags)
 {
-    int curtag;
+    Tag *curtag;
 
-    if ((curtag = get_current_tag_number(tags, ntags)) >= 0)
-        return tags[curtag].layout;
+    if ((curtag = get_current_tag(tags, ntags)))
+        return curtag->layout;
 
     return NULL;
 }

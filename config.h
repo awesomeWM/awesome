@@ -140,7 +140,7 @@ typedef struct
     /** Current tag layout */
     Layout *layout;
     /** Selected client on this tag */
-    Client **client_sel;
+    Client *client_sel;
 } Tag;
 
 /** Main configuration structure */

@@ -176,7 +176,8 @@ client_detach(Client **head, Client *c)
 void
 focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
 {
-    int tag;
+    Tag *tag;
+
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags)))
         for(c = *awesomeconf->clients; c && !isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); c = c->next);
@@ -206,8 +207,8 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
     if(!selscreen)
         return;
     *awesomeconf->client_sel = c;
-    if ((tag = get_current_tag_number(awesomeconf->tags, awesomeconf->ntags)) >= 0)
-        *awesomeconf->tags[tag].client_sel = c;
+    if((tag = get_current_tag(awesomeconf->tags, awesomeconf->ntags)))
+        tag->client_sel = c;
     drawstatusbar(awesomeconf);
     if(*awesomeconf->client_sel)
     {
@@ -259,7 +260,8 @@ loadprops(Client *c, int ntags)
 void
 client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 {
-    int i, tag;
+    int i;
+    Tag *tag;
     Client *c, *t = NULL;
     Window trans;
     Status rettrans;
@@ -361,8 +363,8 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     /* some windows require this */
     XMoveResizeWindow(c->display, c->win, c->x, c->y, c->w, c->h);
 
-    if((tag = get_current_tag_number(awesomeconf->tags, awesomeconf->ntags)) >= 0)
-        *awesomeconf->tags[tag].client_sel = c;
+    if((tag = get_current_tag(awesomeconf->tags, awesomeconf->ntags)))
+        tag->client_sel = c;
 
     /* rearrange to display new window */
     arrange(awesomeconf);
@@ -498,8 +500,8 @@ client_unmanage(Client *c, long state, awesome_config *awesomeconf)
     if(*awesomeconf->client_sel == c)
         focus(NULL, True, awesomeconf);
     for(tag = 0; tag < awesomeconf->ntags; tag++)
-        if(*awesomeconf->tags[tag].client_sel == c)
-            *awesomeconf->tags[tag].client_sel = NULL;
+        if(awesomeconf->tags[tag].client_sel == c)
+            awesomeconf->tags[tag].client_sel = NULL;
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     window_setstate(c->display, c->win, state);
     XSync(c->display, False);
