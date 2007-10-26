@@ -422,6 +422,7 @@ manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     updatetitle(c);
 
     /* move client to screen: this will set screen and create tags array */
+    c->screen = get_screen_bycoord(c->display, c->x, c->y);
     move_client_to_screen(c, awesomeconf, False);
 
     /* check for transient and set tags like its parent */
