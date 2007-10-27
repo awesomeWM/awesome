@@ -507,13 +507,6 @@ keys
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
-        key = "3"
-        command = "toggletag"
-        arg = "3"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
         key = "4"
         command = "toggletag"
         arg = "4"
