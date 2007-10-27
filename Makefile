@@ -6,7 +6,10 @@ include config.mk
 SRC = client.c draw.c event.c layout.c awesome.c tag.c util.c config.c screen.c statusbar.c uicb.c tab.c window.c
 OBJ = ${SRC:.c=.o} ${LAYOUTS:.c=.o}
 
-all: options awesome
+SRCCLIENT = awesome-client.c util.c
+OBJCLIENT = ${SRCCLIENT:.c=.o}
+
+all: options awesome awesome-client
 
 options:
 	@echo awesome build options:
@@ -20,6 +23,12 @@ options:
 	@${CC} -c ${CFLAGS} $< -o $@
 
 ${OBJ}: awesome.h config.mk
+
+${OBJCLIENT}: config.mk
+
+awesome-client: ${OBJCLIENT}
+	@echo -e \\t\(CC\) ${OBJCLIENT} -o $@
+	@${CC} -o $@ ${OBJCLIENT} ${LDFLAGS}
 
 awesome: ${OBJ}
 	@echo -e \\t\(CC\) ${OBJ} -o $@
