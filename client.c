@@ -437,7 +437,7 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
         c->y = wc.y = y;
         c->w = wc.width = w;
         c->h = wc.height = h;
-        if(c->isfloating)
+        if(c->isfloating || get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange == layout_floating)
         {
             c->rx = c->x;
             c->ry = c->y;
