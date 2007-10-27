@@ -111,7 +111,7 @@ static const KeyMod KeyModList[] =
     {"Mod3", Mod3Mask},
     {"Mod4", Mod4Mask},
     {"Mod5", Mod5Mask},
-    {"None", 0}
+    {NULL, 0}
 };
 
 /** List of available layouts and link between name and functions */
