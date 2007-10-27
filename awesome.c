@@ -46,9 +46,9 @@
 #include "statusbar.h"
 #include "uicb.h"
 #include "window.h"
+#include "awesome-client.h"
 
 #define CONTROL_FIFO_PATH ".awesome_ctl"
-#define CONTROL_UNIX_SOCKET_PATH ".awesome_so_ctl"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
