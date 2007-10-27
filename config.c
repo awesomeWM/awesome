@@ -268,8 +268,8 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
 
     cfg = cfg_init(opts, CFGF_NONE);
 
-    if(cfg_parse(cfg, confpath) == CFG_PARSE_ERROR)
-        fprintf(stderr, "awesome: error parsing configuration file\n");
+    if(cfg_parse(cfg, confpath) != CFG_SUCCESS)
+        fprintf(stderr, "awesome: fatal: Parsing configuration file %s failed.\n", confpath);
 
     cfg_general = cfg_getsec(cfg, "general");
     cfg_colors = cfg_getsec(cfg, "colors");
