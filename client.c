@@ -339,7 +339,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     /* move client to screen: this will set screen and create tags array */
     c->screen = get_screen_bycoord(c->display, c->x, c->y);
-    move_client_to_screen(c, awesomeconf, False);
+    move_client_to_screen(c, awesomeconf, True);
 
     /* check for transient and set tags like its parent */
     if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)

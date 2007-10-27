@@ -163,7 +163,7 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
     for(i = 0; i < acf_new->ntags; i++)
         c->tags[i] = acf_new->tags[i].selected;
 
-    if(doresize)
+    if(doresize && old_screen != c->screen)
     {
         ScreenInfo *si, *si_old;
 
