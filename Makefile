@@ -54,8 +54,9 @@ dist: clean
 install: all
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
-	@cp -f awesome ${DESTDIR}${PREFIX}/bin
+	@cp -f awesome awesome-client ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/awesome
+	@chmod 755 ${DESTDIR}${PREFIX}/bin/awesome-client
 	@echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	@sed "s/VERSION/${VERSION}/g" < awesome.1 > ${DESTDIR}${MANPREFIX}/man1/awesome.1
