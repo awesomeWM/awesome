@@ -65,6 +65,7 @@ install: all
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	@rm -f ${DESTDIR}${PREFIX}/bin/awesome
+	@rm -f ${DESTDIR}${PREFIX}/bin/awesome-client
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
 	@rm -f ${DESTDIR}${MANPREFIX}/man1/awesome.1
 
