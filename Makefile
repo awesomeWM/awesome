@@ -51,7 +51,13 @@ dist: clean
 	@gzip -9 awesome-${VERSION}.tar
 	@rm -rf awesome-${VERSION}
 
-install: all
+strip: all
+	strip awesome
+	strip awesome-client
+
+install: strip install-raw
+
+install-raw:
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f awesome awesome-client ${DESTDIR}${PREFIX}/bin
