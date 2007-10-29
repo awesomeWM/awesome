@@ -30,14 +30,17 @@
 #include "util.h"
 
 int
-main()
+main(int argc, char **argv)
 {
     struct sockaddr_un *addr;
     char buf[1024];
     int csfd;
-    
+
     csfd = get_client_socket();
-    addr = get_client_addr();
+    if(argc > 1)
+        addr = get_client_addr(argv[1]);
+    else
+        addr = get_client_addr(":0");
 
     if(!addr || csfd < 0)
         return EXIT_FAILURE;

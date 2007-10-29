@@ -26,10 +26,10 @@
 #include "awesome-client.h"
 #include "util.h"
 
-#define CONTROL_UNIX_SOCKET_PATH ".awesome_so_ctl"
+#define CONTROL_UNIX_SOCKET_PATH ".awesome_ctl."
 
 struct sockaddr_un *
-get_client_addr(void)
+get_client_addr(const char *display)
 {
     char *homedir;
     ssize_t path_len;
@@ -37,7 +37,7 @@ get_client_addr(void)
 
     addr = p_new(struct sockaddr_un, 1);
     homedir = getenv("HOME");
-    path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + 2;
+    path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + a_strlen(display) + 2;
     if(path_len >= ssizeof(addr->sun_path))
     {
         fprintf(stderr, "error: path of control UNIX domain socket is too long");
@@ -46,6 +46,10 @@ get_client_addr(void)
     a_strcpy(addr->sun_path, path_len, homedir);
     a_strcat(addr->sun_path, path_len, "/");
     a_strcat(addr->sun_path, path_len, CONTROL_UNIX_SOCKET_PATH);
+    if(display)
+        a_strcat(addr->sun_path, path_len, display + 1);
+    else
+        a_strcat(addr->sun_path, path_len, "0");
 
     addr->sun_family = AF_UNIX;
 

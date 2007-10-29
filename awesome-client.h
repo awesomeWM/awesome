@@ -22,7 +22,7 @@
 #ifndef AWESOME_AWESOME_CLIENT_H
 #define AWESOME_AWESOME_CLIENT_H
 
-struct sockaddr_un * get_client_addr(void);
+struct sockaddr_un * get_client_addr(const char *);
 int get_client_socket(void);
 
 #endif

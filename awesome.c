@@ -351,7 +351,7 @@ main(int argc, char *argv[])
 
     /* get socket fd */
     csfd = get_client_socket();
-    addr = get_client_addr();
+    addr = get_client_addr(getenv("DISPLAY"));
 
     if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
     {
