@@ -177,7 +177,7 @@ uicb_togglefloating(awesome_config * awesomeconf,
 
     sel->isfloating = !sel->isfloating;
 
-    client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True);
+    client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True, False);
 
     client_untab(sel);
     saveprops(sel, awesomeconf->ntags);

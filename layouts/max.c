@@ -34,7 +34,7 @@ layout_max(awesome_config *awesomeconf)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
             client_resize(c, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
                    si[awesomeconf->screen].width - 2 * c->border,
-                   si[awesomeconf->screen].height - 2 * c->border, awesomeconf, awesomeconf->resize_hints);
+                   si[awesomeconf->screen].height - 2 * c->border, awesomeconf, awesomeconf->resize_hints, False);
     p_delete(&si);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

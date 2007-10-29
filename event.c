@@ -86,7 +86,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
                 ny = si[c->screen].y_org;
             else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf[c->screen].snap)
                 ny = si[c->screen].y_org + si[c->screen].height - c->h - 2 * c->border;
-            client_resize(c, nx, ny, c->w, c->h, &awesomeconf[c->screen], False);
+            client_resize(c, nx, ny, c->w, c->h, &awesomeconf[c->screen], False, False);
             break;
         }
     }
@@ -131,7 +131,7 @@ resizemouse(Client * c, awesome_config *awesomeconf)
                 nw = 1;
             if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
                 nh = 1;
-            client_resize(c, c->x, c->y, nw, nh, &awesomeconf[c->screen], True);
+            client_resize(c, c->x, c->y, nw, nh, &awesomeconf[c->screen], True, False);
             break;
         }
     }

@@ -29,6 +29,6 @@ layout_floating(awesome_config *awesomeconf)
 
     for(c = *awesomeconf->clients; c; c = c->next)
         if(isvisible(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
-            client_resize(c, c->rx, c->ry, c->rw, c->rh, awesomeconf, True);
+            client_resize(c, c->rx, c->ry, c->rw, c->rh, awesomeconf, True, False);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
