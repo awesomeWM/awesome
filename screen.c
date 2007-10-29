@@ -178,10 +178,10 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
             c->rw = si[c->screen].width;
         if(c->rh > si[c->screen].height)
             c->rh = si[c->screen].height;
-        if(c->rx >= si[c->screen].x_org + si[c->screen].width)
-            c->rx = si[c->screen].x_org - c->rw;
-        if(c->ry >= si[c->screen].y_org + si[c->screen].height)
-            c->ry = si[c->screen].y_org - c->rh;
+        if(c->rx + c->rw >= si[c->screen].x_org + si[c->screen].width)
+            c->rx = si[c->screen].x_org + si[c->screen].width - c->rw - 2 * c->border;
+        if(c->ry + c->rh >= si[c->screen].y_org + si[c->screen].height)
+            c->ry = si[c->screen].y_org + si[c->screen].height - c->rh - 2 * c->border;
 
         client_resize(c, c->rx, c->ry, c->rw, c->rh, acf_new, True);
 
