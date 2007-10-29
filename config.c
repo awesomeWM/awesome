@@ -257,7 +257,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
         a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
     }
 
-    a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION);
+    a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION " (" RELEASE ")");
 
     /* store display */
     awesomeconf->display = disp;
