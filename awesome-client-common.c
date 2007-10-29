@@ -1,5 +1,5 @@
 /*
- * awesome-client.c - awesome client, communicate with socket
+ * awesome-client-common.c - awesome client, communicate with socket, common functions
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info>
  * Copyright © 2007 daniel@brinkers.de
@@ -20,30 +20,47 @@
  *
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 
 #include "awesome-client.h"
 #include "util.h"
 
-int
-main()
+#define CONTROL_UNIX_SOCKET_PATH ".awesome_so_ctl"
+
+struct sockaddr_un *
+get_client_addr(void)
 {
+    char *homedir;
+    ssize_t path_len;
     struct sockaddr_un *addr;
-    char buf[1024];
-    int csfd;
-    
-    csfd = get_client_socket();
-    addr = get_client_addr();
 
-    while(fgets(buf, sizeof(buf), stdin))
-        if(sendto(csfd, buf, a_strlen(buf), MSG_NOSIGNAL,
-                  (const struct sockaddr *) addr, sizeof(struct sockaddr_un)) == -1)
-            perror("error sending datagram");
+    addr = p_new(struct sockaddr_un, 1);
+    homedir = getenv("HOME");
+    path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + 2;
+    if(path_len >= ssizeof(addr->sun_path))
+    {
+        fprintf(stderr, "error: path of control UNIX domain socket is too long");
+        return NULL;
+    }
+    a_strcpy(addr->sun_path, path_len, homedir);
+    a_strcat(addr->sun_path, path_len, "/");
+    a_strcat(addr->sun_path, path_len, CONTROL_UNIX_SOCKET_PATH);
 
-    return EXIT_SUCCESS;
+    addr->sun_family = AF_UNIX;
+
+    return addr;
 }
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+
+int
+get_client_socket(void)
+{
+    int csfd;
+
+    csfd = socket(AF_UNIX, SOCK_DGRAM, 0);
+
+    if(csfd < 0)
+        perror("error opening UNIX domain socket");
+
+    return csfd;
+}

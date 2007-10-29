@@ -3,10 +3,10 @@
 
 include config.mk
 
-SRC = client.c draw.c event.c layout.c awesome.c tag.c util.c config.c screen.c statusbar.c uicb.c tab.c window.c
+SRC = client.c draw.c event.c layout.c awesome.c tag.c util.c config.c screen.c statusbar.c uicb.c tab.c window.c awesome-client-common.c
 OBJ = ${SRC:.c=.o} ${LAYOUTS:.c=.o}
 
-SRCCLIENT = awesome-client.c util.c
+SRCCLIENT = awesome-client.c awesome-client-common.c util.c
 OBJCLIENT = ${SRCCLIENT:.c=.o}
 
 all: options awesome awesome-client

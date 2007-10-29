@@ -22,7 +22,8 @@
 #ifndef AWESOME_AWESOME_CLIENT_H
 #define AWESOME_AWESOME_CLIENT_H
 
-#define CONTROL_UNIX_SOCKET_PATH ".awesome_so_ctl"
+struct sockaddr_un * get_client_addr(void);
+int get_client_socket(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

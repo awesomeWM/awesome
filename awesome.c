@@ -234,7 +234,7 @@ int
 main(int argc, char *argv[])
 {
     char buf[1024];
-    const char *confpath = NULL, *homedir;
+    const char *confpath = NULL;
     int r, xfd, e_dummy, csfd;
     fd_set rd;
     XEvent ev;
@@ -246,8 +246,7 @@ main(int argc, char *argv[])
     Atom netatom[NetLast];
     event_handler **handler;
     Client **clients, **sel;
-    ssize_t path_len;
-    struct sockaddr_un addr;
+    struct sockaddr_un *addr;
 
     if(argc >= 2)
     {
@@ -351,35 +350,22 @@ main(int argc, char *argv[])
 
     XSync(dpy, False);
 
-    /* construct socket path */
-    homedir = getenv("HOME");
-    csfd = -1;
-    path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + 2;
+    /* get socket fd */
+    csfd = get_client_socket();
+    addr = get_client_addr();
 
-    if(path_len <= ssizeof(addr.sun_path))
+    if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
     {
-        a_strcpy(addr.sun_path, path_len, homedir);
-        a_strcat(addr.sun_path, path_len, "/");
-        a_strcat(addr.sun_path, path_len, CONTROL_UNIX_SOCKET_PATH);
-        csfd = socket(AF_UNIX, SOCK_DGRAM, 0);
-        if(csfd < 0)
-            perror("error opening UNIX domain socket");
-        addr.sun_family = AF_UNIX;
-        if(bind(csfd, (struct sockaddr *) &addr, SUN_LEN(&addr)))
+        if(errno == EADDRINUSE)
         {
-            if(errno == EADDRINUSE)
-            {
-                if(unlink(addr.sun_path))
-                    perror("error unlinking existend file");
-                if(bind(csfd, (struct sockaddr *) &addr, SUN_LEN(&addr)))
-                    perror("error binding UNIX domain socket");
-            }
-            else
+            if(unlink(addr->sun_path))
+                perror("error unlinking existing file");
+            if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
                 perror("error binding UNIX domain socket");
         }
+        else
+            perror("error binding UNIX domain socket");
     }
-    else
-        fprintf(stderr, "error: path of control UNIX domain socket is too long");
 
     /* main event loop, also reads status text from socket */
     while(running)
@@ -423,7 +409,7 @@ main(int argc, char *argv[])
 
     if(csfd > 0 && close(csfd))
         perror("error closing UNIX domain socket");
-    if(unlink(addr.sun_path))
+    if(unlink(addr->sun_path))
         perror("error unlinking UNIX domain socket");
 
     cleanup(awesomeconf);
