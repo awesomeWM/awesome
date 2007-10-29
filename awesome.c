@@ -48,8 +48,6 @@
 #include "window.h"
 #include "awesome-client.h"
 
-#define CONTROL_FIFO_PATH ".awesome_ctl"
-
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
 
@@ -235,9 +233,9 @@ typedef void event_handler (XEvent *, awesome_config *);
 int
 main(int argc, char *argv[])
 {
-    char *fifopath, buf[1024];
+    char buf[1024];
     const char *confpath = NULL, *homedir;
-    int r, cfd, xfd, e_dummy, csfd;
+    int r, xfd, e_dummy, csfd;
     fd_set rd;
     XEvent ev;
     Display * dpy;
@@ -248,7 +246,6 @@ main(int argc, char *argv[])
     Atom netatom[NetLast];
     event_handler **handler;
     Client **clients, **sel;
-    struct stat fifost;
     ssize_t path_len;
     struct sockaddr_un addr;
 
@@ -354,23 +351,12 @@ main(int argc, char *argv[])
 
     XSync(dpy, False);
 
-    /* construct fifo path */
+    /* construct socket path */
     homedir = getenv("HOME");
-    path_len = a_strlen(homedir) + a_strlen(CONTROL_FIFO_PATH) + 2;
-    fifopath = p_new(char, path_len);
-    a_strcpy(fifopath, path_len, homedir);
-    a_strcat(fifopath, path_len, "/");
-    a_strcat(fifopath, path_len, CONTROL_FIFO_PATH);
-
-    if(lstat(fifopath, &fifost) == -1)
-        if(mkfifo(fifopath, 0600) == -1)
-           perror("error creating control fifo");
-
-    cfd = open(fifopath, O_RDONLY | O_NDELAY);
-
     csfd = -1;
     path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + 2;
-    if(path_len <= (int)sizeof(addr.sun_path))
+
+    if(path_len <= ssizeof(addr.sun_path))
     {
         a_strcpy(addr.sun_path, path_len, homedir);
         a_strcat(addr.sun_path, path_len, "/");
@@ -395,38 +381,19 @@ main(int argc, char *argv[])
     else
         fprintf(stderr, "error: path of control UNIX domain socket is too long");
 
-    /* main event loop, also reads status text from stdin */
+    /* main event loop, also reads status text from socket */
     while(running)
     {
         FD_ZERO(&rd);
-        if(cfd >= 0)
-            FD_SET(cfd, &rd);
         if(csfd >= 0)
             FD_SET(csfd, &rd);
         FD_SET(xfd, &rd);
-        if(select(MAX(xfd, MAX(csfd, cfd)) + 1, &rd, NULL, NULL, NULL) == -1)
+        if(select(MAX(xfd, csfd) + 1, &rd, NULL, NULL, NULL) == -1)
         {
             if(errno == EINTR)
                 continue;
             eprint("select failed\n");
         }
-        if(cfd >= 0 && FD_ISSET(cfd, &rd))
-            switch (r = read(cfd, buf, sizeof(buf)))
-            {
-            case -1:
-                perror("awesome: error reading fifo");
-                a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
-                          strerror(errno), sizeof(awesomeconf[0].statustext) - 1);
-                awesomeconf[0].statustext[sizeof(awesomeconf[0].statustext) - 1] = '\0';
-                cfd = -1;
-                break;
-            case 0:
-                close(cfd);
-                cfd = open(fifopath, O_RDONLY | O_NDELAY);
-                break;
-            default:
-                parse_control(buf, awesomeconf);
-            }
         if(csfd >= 0 && FD_ISSET(csfd, &rd))
             switch (r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
             {
@@ -440,7 +407,7 @@ main(int argc, char *argv[])
             case 0:
                 break;
             default:
-                if(r >= (int)sizeof(buf))
+                if(r >= ssizeof(buf))
                     break;
                 buf[r] = '\0';
                 parse_control(buf, awesomeconf);
@@ -458,8 +425,6 @@ main(int argc, char *argv[])
         perror("error closing UNIX domain socket");
     if(unlink(addr.sun_path))
         perror("error unlinking UNIX domain socket");
-
-    p_delete(&fifopath);
 
     cleanup(awesomeconf);
     XCloseDisplay(dpy);
