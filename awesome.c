@@ -245,7 +245,7 @@ main(int argc, char *argv[])
     enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */
     Atom netatom[NetLast];
     event_handler **handler;
-    Client **clients, **sel;
+    Client **clients;
     struct sockaddr_un *addr;
 
     if(argc >= 2)
@@ -288,7 +288,6 @@ main(int argc, char *argv[])
     /* allocate stuff */
     awesomeconf = p_new(awesome_config, get_screen_count(dpy));
     clients = p_new(Client *, 1);
-    sel = p_new(Client *, 1);
 
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
