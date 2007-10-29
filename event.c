@@ -234,7 +234,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         else if(ev->button == Button5)
             uicb_settrans(&awesomeconf[c->screen], "-5");
     }
-    else if(!get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel)
+    else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window
                && XQueryPointer(e->xany.display, ev->window, &wdummy, &wdummy, &x, &y, &i, &i, &udummy))
