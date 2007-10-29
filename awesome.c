@@ -410,6 +410,7 @@ main(int argc, char *argv[])
         perror("error closing UNIX domain socket");
     if(unlink(addr->sun_path))
         perror("error unlinking UNIX domain socket");
+    p_delete(&addr);
 
     cleanup(awesomeconf);
     XCloseDisplay(dpy);
