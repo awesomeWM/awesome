@@ -51,13 +51,43 @@
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
 
+void
+cleanup_screen(awesome_config *awesomeconf)
+{
+    int i;
+
+    XftFontClose(awesomeconf->display, awesomeconf->font);
+    XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf->phys_screen));
+    XFreePixmap(awesomeconf->display, awesomeconf->statusbar.drawable);
+    XDestroyWindow(awesomeconf->display, awesomeconf->statusbar.window);
+    XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurNormal]);
+    XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurResize]);
+    XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurMove]);
+
+    for(i = 0; i < awesomeconf->ntags; i++)
+        p_delete(&awesomeconf->tags[i].name);
+    for(i = 0; i < awesomeconf->nkeys; i++)
+        p_delete(&awesomeconf->keys[i].arg);
+    for(i = 0; i < awesomeconf->nlayouts; i++)
+        p_delete(&awesomeconf->layouts[i].symbol);
+    for(i = 0; i < awesomeconf->nrules; i++)
+    {
+        p_delete(&awesomeconf->rules[i].prop);
+        p_delete(&awesomeconf->rules[i].tags);
+    }
+    p_delete(&awesomeconf->tags);
+    p_delete(&awesomeconf->layouts);
+    p_delete(&awesomeconf->rules);
+    p_delete(&awesomeconf->keys);
+}
+
 /** Cleanup everything on quit
  * \param awesomeconf awesome config
  */
 static void
 cleanup(awesome_config *awesomeconf)
 {
-    int screen, i;
+    int screen;
 
     while(*awesomeconf->clients)
     {
@@ -66,35 +96,11 @@ cleanup(awesome_config *awesomeconf)
     }
 
     for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
-    {
-        XftFontClose(awesomeconf->display, awesomeconf->font);
+        cleanup_screen(&awesomeconf[screen]);
 
-        XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf[screen].phys_screen));
-
-        XFreePixmap(awesomeconf->display, awesomeconf[screen].statusbar.drawable);
-        XDestroyWindow(awesomeconf->display, awesomeconf[screen].statusbar.window);
-        XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurNormal]);
-        XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurResize]);
-        XFreeCursor(awesomeconf->display, awesomeconf[screen].cursor[CurMove]);
-
-        for(i = 0; i < awesomeconf[screen].ntags; i++)
-            p_delete(&awesomeconf[screen].tags[i].name);
-        for(i = 0; i < awesomeconf[screen].nkeys; i++)
-            p_delete(&awesomeconf[screen].keys[i].arg);
-        for(i = 0; i < awesomeconf[screen].nlayouts; i++)
-            p_delete(&awesomeconf[screen].layouts[i].symbol);
-        for(i = 0; i < awesomeconf[screen].nrules; i++)
-        {
-            p_delete(&awesomeconf[screen].rules[i].prop);
-            p_delete(&awesomeconf[screen].rules[i].tags);
-        }
-        p_delete(&awesomeconf[screen].tags);
-        p_delete(&awesomeconf[screen].layouts);
-        p_delete(&awesomeconf[screen].rules);
-        p_delete(&awesomeconf[screen].keys);
-    }
     XSetInputFocus(awesomeconf->display, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(awesomeconf->display, False);
+
     p_delete(&awesomeconf->clients);
     p_delete(&awesomeconf);
 }
@@ -172,6 +178,16 @@ setup(awesome_config *awesomeconf)
     XSelectInput(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), wa.event_mask);
 
     grabkeys(awesomeconf);
+}
+
+void
+setup_screen(awesome_config *awesomeconf, const char *confpath)
+{
+    parse_config(confpath, awesomeconf);
+    setup(awesomeconf);
+    initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar,
+            awesomeconf->cursor[CurNormal], awesomeconf->font,
+            awesomeconf->layouts, awesomeconf->nlayouts);
 }
 
 /** Startup Error handler to check if another window manager
@@ -293,12 +309,8 @@ main(int argc, char *argv[])
 
         /* set screen */
         awesomeconf[screen].screen = screen;
-        parse_config(confpath, &awesomeconf[screen]);
-        setup(&awesomeconf[screen]);
+        setup_screen(&awesomeconf[screen], confpath);
         awesomeconf[screen].clients = clients;
-        initstatusbar(awesomeconf[screen].display, screen, &awesomeconf[screen].statusbar,
-                      awesomeconf[screen].cursor[CurNormal], awesomeconf[screen].font,
-                      awesomeconf[screen].layouts, awesomeconf[screen].nlayouts);
         drawstatusbar(&awesomeconf[screen]);
     }
 
