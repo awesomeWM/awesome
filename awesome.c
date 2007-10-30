@@ -288,7 +288,12 @@ main(int argc, char *argv[])
 
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
-        parse_config(dpy, screen, confpath, &awesomeconf[screen]);
+        /* store display */
+        awesomeconf[screen].display = dpy;
+
+        /* set screen */
+        awesomeconf[screen].screen = screen;
+        parse_config(confpath, &awesomeconf[screen]);
         setup(&awesomeconf[screen]);
         awesomeconf[screen].clients = clients;
         initstatusbar(awesomeconf[screen].display, screen, &awesomeconf[screen].statusbar,

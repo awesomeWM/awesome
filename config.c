@@ -146,7 +146,7 @@ key_mask_lookup(const char *keyname)
  * \param scr Screen number
  */
 void
-parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *awesomeconf)
+parse_config(const char *confpatharg, awesome_config *awesomeconf)
 {
     static cfg_opt_t general_opts[] =
     {
@@ -259,12 +259,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
 
     a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION " (" RELEASE ")");
 
-    /* store display */
-    awesomeconf->display = disp;
-
-    /* set screen */
-    awesomeconf->screen = scr;
-    awesomeconf->phys_screen = get_phys_screen(disp, scr);
+    awesomeconf->phys_screen = get_phys_screen(awesomeconf->display, awesomeconf->screen);
 
     cfg = cfg_init(opts, CFGF_NONE);
 
@@ -287,18 +282,18 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
     awesomeconf->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
     awesomeconf->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
     awesomeconf->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
-    awesomeconf->font = XftFontOpenName(disp, awesomeconf->phys_screen, cfg_getstr(cfg_general, "font"));
+    awesomeconf->font = XftFontOpenName(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_general, "font"));
     if(!awesomeconf->font)
         eprint("awesome: cannot init font\n");
 
     /* Colors */
-    awesomeconf->colors_normal[ColBorder] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_border"));
-    awesomeconf->colors_normal[ColBG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_bg"));
-    awesomeconf->colors_normal[ColFG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_fg"));
-    awesomeconf->colors_selected[ColBorder] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_border"));
-    awesomeconf->colors_selected[ColBG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_bg"));
-    awesomeconf->colors_selected[ColFG] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_fg"));
-    awesomeconf->colors_tab[ColBorder] = initxcolor(disp, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "tab_border"));
+    awesomeconf->colors_normal[ColBorder] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_border"));
+    awesomeconf->colors_normal[ColBG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_bg"));
+    awesomeconf->colors_normal[ColFG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_fg"));
+    awesomeconf->colors_selected[ColBorder] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_border"));
+    awesomeconf->colors_selected[ColBG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_bg"));
+    awesomeconf->colors_selected[ColFG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_fg"));
+    awesomeconf->colors_tab[ColBorder] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "tab_border"));
 
     /* Statusbar */
     tmp = cfg_getstr(cfg_statusbar, "position");
@@ -382,7 +377,7 @@ parse_config(Display * disp, int scr,const char *confpatharg, awesome_config *aw
     /* Keys */
     tmp_key = key_mask_lookup(cfg_getstr(cfg_keys, "modkey"));
     awesomeconf->modkey = tmp_key ? tmp_key : Mod4Mask;
-    awesomeconf->numlockmask = get_numlockmask(disp);
+    awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
 
     awesomeconf->nkeys = cfg_size(cfg_keys, "key");
     awesomeconf->keys = p_new(Key, awesomeconf->nkeys);
