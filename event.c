@@ -40,7 +40,7 @@
 #define MOUSEMASK	                (BUTTONMASK | PointerMotionMask)
 
 static void
-movemouse(Client * c, awesome_config *awesomeconf)
+movemouse(Client *c, awesome_config *awesomeconf)
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
@@ -55,6 +55,7 @@ movemouse(Client * c, awesome_config *awesomeconf)
     if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, awesomeconf[c->screen].cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
+    XWarpPointer(c->display, None, c->win, 0, 0, 0, 0, c->w / 2, c->h / 2);
     XQueryPointer(c->display, RootWindow(c->display, c->phys_screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
     {
