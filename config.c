@@ -240,9 +240,8 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     };
     cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_statusbar,
           *cfg_tags, *cfg_layouts, *cfg_rules, *cfg_keys, *cfgsectmp;
-    int i = 0;
+    int i = 0, k = 0, ret;
     unsigned int j = 0;
-    int k = 0;
     const char *tmp, *homedir;
     char *confpath;
     KeySym tmp_key;
@@ -266,8 +265,11 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
     cfg = cfg_init(opts, CFGF_NONE);
 
-    if(cfg_parse(cfg, confpath) != CFG_SUCCESS)
-        fprintf(stderr, "awesome: fatal: Parsing configuration file %s failed.\n", confpath);
+    ret = cfg_parse(cfg, confpath);
+    if(ret == CFG_FILE_ERROR)
+        perror("awesome: parsing configuration file failed");
+    else if(ret == CFG_PARSE_ERROR)
+        cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
 
     cfg_general = cfg_getsec(cfg, "general");
     cfg_colors = cfg_getsec(cfg, "colors");
