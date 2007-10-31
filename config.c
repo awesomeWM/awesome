@@ -441,23 +441,22 @@ uicb_reloadconfig(awesome_config *awesomeconf,
     awesome_config *awesomeconf_first = &awesomeconf[-awesomeconf->screen];
     int *old_ntags, old_c_ntags, new_c_ntags, **mapping;
     char ***savetagnames;
-    Client ****savetagclientsel;
+    Client ***savetagclientsel;
     Bool *old_c_tags;
     Client *c, *clients;
 
     /* Save tag information */
     savetagnames = p_new(char **, screen_count);
-    savetagclientsel = p_new(Client ***, screen_count);
+    savetagclientsel = p_new(Client **, screen_count);
     clients = *awesomeconf_first->clients;
     for (screen = 0; screen < screen_count; screen ++)
     {
        savetagnames[screen] = p_new(char *, awesomeconf_first[screen].ntags);
-       savetagclientsel[screen] = p_new(Client **, awesomeconf_first[screen].ntags);
+       savetagclientsel[screen] = p_new(Client *, awesomeconf_first[screen].ntags);
        for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
        {
            savetagnames[screen][tag] = strdup(awesomeconf_first[screen].tags[tag].name);
-           savetagclientsel[screen][tag] = p_new(Client*, 1);
-           *savetagclientsel[screen][tag] = awesomeconf_first[screen].tags[tag].client_sel;
+           savetagclientsel[screen][tag] = awesomeconf_first[screen].tags[tag].client_sel;
        }
     }
     old_ntags = p_new(int, screen_count);
@@ -489,7 +488,7 @@ uicb_reloadconfig(awesome_config *awesomeconf,
         *awesomeconf_first[screen].clients = clients;
         for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
             if (mapping[screen][tag] >= 0)
-                awesomeconf_first[screen].tags[tag].client_sel = *savetagclientsel[screen][mapping[screen][tag]];
+                awesomeconf_first[screen].tags[tag].client_sel = savetagclientsel[screen][mapping[screen][tag]];
         drawstatusbar(&awesomeconf_first[screen]);
     }
 
