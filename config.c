@@ -455,7 +455,7 @@ uicb_reloadconfig(awesome_config *awesomeconf,
        savetagclientsel[screen] = p_new(Client *, awesomeconf_first[screen].ntags);
        for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
        {
-           savetagnames[screen][tag] = strdup(awesomeconf_first[screen].tags[tag].name);
+           savetagnames[screen][tag] = a_strdup(awesomeconf_first[screen].tags[tag].name);
            savetagclientsel[screen][tag] = awesomeconf_first[screen].tags[tag].client_sel;
        }
     }
@@ -477,7 +477,7 @@ uicb_reloadconfig(awesome_config *awesomeconf,
         {
             mapping[screen][i] = -1;
             for (j = 0; j < old_ntags[screen]; j ++)
-                if (!strcmp(savetagnames[screen][j], awesomeconf_first[screen].tags[i].name))
+                if (!a_strcmp(savetagnames[screen][j], awesomeconf_first[screen].tags[i].name))
                 {
                     mapping[screen][i] = j;
                     break;
