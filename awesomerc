@@ -272,6 +272,12 @@ keys
     }
     key
     {
+        modkey = {"Mod4", "Control"}
+        key = "r"
+        command = "reloadconfig"
+    }
+    key
+    {
        modkey = {"Mod4"}
        key = "0"
        command = "view"
