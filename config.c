@@ -523,10 +523,12 @@ uicb_reloadconfig(awesome_config *awesomeconf,
             p_delete(&savetagnames[screen][i]);
         p_delete(&savetagnames[screen]);
         p_delete(&mapping[screen]);
+        p_delete(&savetagclientsel[screen]);
     }
     p_delete(&mapping);
     p_delete(&savetagnames);
     p_delete(&old_ntags);
+    p_delete(&savetagclientsel);
     for (screen = 0; screen < screen_count; screen ++)
         arrange(&awesomeconf_first[screen]);
 }
