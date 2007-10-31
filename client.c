@@ -230,8 +230,8 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
  * \param c Client ref
  * \param ntags tags number
  */
-static Bool
-loadprops(Client *c, int ntags)
+Bool
+loadprops(Client * c, int ntags)
 {
     int i;
     char *prop;

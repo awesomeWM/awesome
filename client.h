@@ -28,6 +28,7 @@ Client * get_client_bywin(Client *, Window);
 inline void client_attach(Client **, Client *);
 inline void client_detach(Client **, Client *);
 void client_reattach_after(Client *, Client *);
+Bool loadprops(Client *, int );
 void client_ban(Client *);
 void focus(Client *, Bool, awesome_config *);
 void client_manage(Window, XWindowAttributes *, awesome_config *);

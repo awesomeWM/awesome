@@ -30,6 +30,7 @@
 #include "awesome.h"
 #include "screen.h"
 #include "draw.h"
+#include "event.h"
 #include "tag.h"
 #include "statusbar.h"
 #include "layout.h"
@@ -91,6 +92,8 @@ const NameFuncLink UicbList[] = {
     {"quit", uicb_quit},
     /* statusbar.c */
     {"togglebar", uicb_togglebar},
+    /* config.c */
+    {"reloadconfig", uicb_reloadconfig},
     {"setstatustext", uicb_setstatustext},
     /* tab.c */
     {"tab", uicb_tab},
@@ -429,4 +432,113 @@ initxcolor(Display *disp, int scr, const char *colstr)
         die("awesome: error, cannot allocate color '%s'\n", colstr);
     return color;
 }
+
+void
+uicb_reloadconfig(awesome_config *awesomeconf,
+               const char *arg __attribute__ ((unused)))
+{
+    int i, j, tag, screen, screen_count = get_screen_count(awesomeconf->display);
+    awesome_config *awesomeconf_first = &awesomeconf[-awesomeconf->screen];
+    int *old_ntags, old_c_ntags, new_c_ntags, **mapping;
+    char ***savetagnames;
+    Client ****savetagclientsel;
+    Bool *old_c_tags;
+    Client *c, **clients;
+
+    // Save tag information
+    savetagnames = p_new(char**, screen_count);
+    savetagclientsel = p_new(Client ***, screen_count);
+    clients = p_new(Client*, 1);
+    *clients = *awesomeconf_first->clients;
+    for (screen = 0; screen < screen_count; screen ++)
+    {
+       savetagnames[screen] = p_new(char*, awesomeconf_first[screen].ntags);
+       savetagclientsel[screen] = p_new(Client **, awesomeconf_first[screen].ntags);
+       for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
+       {
+           savetagnames[screen][tag] = strdup(awesomeconf_first[screen].tags[tag].name);
+           savetagclientsel[screen][tag] = p_new(Client*, 1);
+           *savetagclientsel[screen][tag] = awesomeconf_first[screen].tags[tag].client_sel;
+       }
+    }
+    old_ntags = p_new(int, screen_count);
+    for (screen = 0; screen < screen_count; screen ++)
+       old_ntags[screen] = awesomeconf_first[screen].ntags;
+
+    mapping = p_new(int*, screen_count);
+    for(screen = 0; screen < screen_count; screen++)
+    {
+        // Cleanup screens and reload their config.
+        cleanup_screen(&awesomeconf_first[screen]);
+        setup_screen(&awesomeconf_first[screen], awesomeconf_first->configpath);
+
+        // Compute a mapping of tags between the old and new config, based on
+        // tag names.
+        mapping[screen] = p_new(int, awesomeconf_first[screen].ntags);
+        for (i = 0; i < awesomeconf_first[screen].ntags; i ++)
+        {
+            mapping[screen][i] = -1;
+            for (j = 0; j < old_ntags[screen]; j ++)
+            {
+                if (!strcmp(savetagnames[screen][j], awesomeconf_first[screen].tags[i].name))
+                {
+                    mapping[screen][i] = j;
+                    break;
+                }
+            }
+        }
+
+        // Reinitialize the tags' client lists and selected client.
+        *awesomeconf_first[screen].clients = *clients;
+        for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
+        {
+            if (mapping[screen][tag] >= 0)
+                awesomeconf_first[screen].tags[tag].client_sel = *savetagclientsel[screen][mapping[screen][tag]];
+        }
+        drawstatusbar(&awesomeconf_first[screen]);
+    }
+
+    //for (screen = 0; screen < ScreenCount(awesomeconf_first->display); screen++)
+    //    loadawesomeprops(&awesomeconf_first[screen]);
+
+    // Reinitialize the 'tags' array of each client.
+    // Clients are assigned to the tags of the same name as in the previous
+    // awesomerc, or to tag #1 otherwise.
+    for (c = *awesomeconf_first->clients; c; c = c->next)
+    {
+       old_c_ntags = old_ntags[c->screen];
+       new_c_ntags = awesomeconf_first[c->screen].ntags;
+
+       old_c_tags = c->tags;
+       c->tags = p_new(Bool, new_c_ntags);
+       for (i = 0; i < new_c_ntags; i ++)
+          if (mapping[c->screen][i] >= 0)
+             c->tags[i] = old_c_tags[mapping[c->screen][i]];
+       p_delete(&old_c_tags);
+
+       for (i = 0; i < new_c_ntags && c->tags[i] == 0; i++) {}
+       if (i == new_c_ntags)
+          c->tags[0] = 1;
+
+       saveprops(c, awesomeconf_first[c->screen].ntags);
+       if (!loadprops(c, awesomeconf_first[c->screen].ntags))
+          applyrules(c, awesomeconf_first);
+    }
+
+    // Cleanup after ourselves
+    for(screen = 0; screen < screen_count; screen++)
+    {
+        for(i = 0; i < old_ntags[screen]; i++)
+            p_delete(&savetagnames[screen][i]);
+        p_delete(&savetagnames[screen]);
+        p_delete(&mapping[screen]);
+    }
+    p_delete(&mapping);
+    p_delete(&savetagnames);
+    p_delete(&old_ntags);
+    p_delete(&clients);
+    for (screen = 0; screen < screen_count; screen ++)
+        arrange(&awesomeconf_first[screen]);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
