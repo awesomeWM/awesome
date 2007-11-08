@@ -447,21 +447,27 @@ uicb_reloadconfig(awesome_config *awesomeconf,
     char ***savetagnames;
     Client ***savetagclientsel;
     char *configpath = a_strdup(awesomeconf_first->configpath);
+    Bool ***savetagselected;
     Bool *old_c_tags;
     Client *c, *clients;
 
     /* Save tag information */
     savetagnames = p_new(char **, screen_count);
     savetagclientsel = p_new(Client **, screen_count);
+    savetagselected = p_new(Bool **, screen_count);
     clients = *awesomeconf_first->clients;
     for (screen = 0; screen < screen_count; screen ++)
     {
        savetagnames[screen] = p_new(char *, awesomeconf_first[screen].ntags);
        savetagclientsel[screen] = p_new(Client *, awesomeconf_first[screen].ntags);
+       savetagselected[screen] = p_new(Bool *, awesomeconf_first[screen].ntags);
        for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
        {
            savetagnames[screen][tag] = a_strdup(awesomeconf_first[screen].tags[tag].name);
            savetagclientsel[screen][tag] = awesomeconf_first[screen].tags[tag].client_sel;
+           savetagselected[screen][tag] = p_new(Bool, 2);
+           savetagselected[screen][tag][0] = awesomeconf_first[screen].tags[tag].selected;
+           savetagselected[screen][tag][1] = awesomeconf_first[screen].tags[tag].was_selected;
        }
     }
     old_ntags = p_new(int, screen_count);
@@ -493,7 +499,11 @@ uicb_reloadconfig(awesome_config *awesomeconf,
         *awesomeconf_first[screen].clients = clients;
         for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
             if (mapping[screen][tag] >= 0)
+            {
                 awesomeconf_first[screen].tags[tag].client_sel = savetagclientsel[screen][mapping[screen][tag]];
+                awesomeconf_first[screen].tags[tag].selected = savetagselected[screen][mapping[screen][tag]][0];
+                awesomeconf_first[screen].tags[tag].was_selected = savetagselected[screen][mapping[screen][tag]][1];
+            }
         drawstatusbar(&awesomeconf_first[screen]);
     }
 
@@ -525,12 +535,17 @@ uicb_reloadconfig(awesome_config *awesomeconf,
     for(screen = 0; screen < screen_count; screen++)
     {
         for(i = 0; i < old_ntags[screen]; i++)
+        {
             p_delete(&savetagnames[screen][i]);
+            p_delete(&savetagselected[screen][i]);
+        }
+        p_delete(&savetagselected[screen]);
         p_delete(&savetagnames[screen]);
         p_delete(&mapping[screen]);
         p_delete(&savetagclientsel[screen]);
     }
     p_delete(&mapping);
+    p_delete(&savetagselected);
     p_delete(&savetagnames);
     p_delete(&old_ntags);
     p_delete(&savetagclientsel);
