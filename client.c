@@ -262,7 +262,6 @@ void
 client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 {
     int i;
-    Tag *tag;
     Client *c, *t = NULL;
     Window trans;
     Status rettrans;
@@ -364,8 +363,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     /* some windows require this */
     XMoveResizeWindow(c->display, c->win, c->x, c->y, c->w, c->h);
 
-    if((tag = get_current_tag(awesomeconf->tags, awesomeconf->ntags)))
-        tag->client_sel = c;
+    focus(c, True, awesomeconf);
 
     /* rearrange to display new window */
     arrange(awesomeconf);
