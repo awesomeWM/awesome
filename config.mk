@@ -1,5 +1,5 @@
 # awesome version
-VERSION = $(shell git describe 2>/dev/null || echo devel)
+VERSION = $$(git describe 2>/dev/null || echo devel)
 RELEASE = "Productivity Breaker"
 
 # Customize below to fit your system
