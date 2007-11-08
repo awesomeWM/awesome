@@ -452,9 +452,7 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
         for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
         if(screen == 0)
         {
-            screen = get_screen_bycoord(e->xany.display, wa.x, wa.y);
-            if(screen == 0 &&
-               XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
+            if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
                              &dummy, &dummy, &x, &y, &d, &d, &m))
                 screen = get_screen_bycoord(e->xany.display, x, y);
 
