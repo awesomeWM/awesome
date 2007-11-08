@@ -79,6 +79,7 @@ cleanup_screen(awesome_config *awesomeconf)
     p_delete(&awesomeconf->layouts);
     p_delete(&awesomeconf->rules);
     p_delete(&awesomeconf->keys);
+    p_delete(&awesomeconf->configpath);
 }
 
 /** Cleanup everything on quit

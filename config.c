@@ -259,6 +259,8 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
     }
 
+    awesomeconf->configpath = a_strdup(confpath);
+
     a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION " (" RELEASE ")");
 
     awesomeconf->phys_screen = get_phys_screen(awesomeconf->display, awesomeconf->screen);
@@ -444,6 +446,7 @@ uicb_reloadconfig(awesome_config *awesomeconf,
     int *old_ntags, old_c_ntags, new_c_ntags, **mapping;
     char ***savetagnames;
     Client ***savetagclientsel;
+    char *configpath = a_strdup(awesomeconf_first->configpath);
     Bool *old_c_tags;
     Client *c, *clients;
 
@@ -470,7 +473,7 @@ uicb_reloadconfig(awesome_config *awesomeconf,
     {
         /* Cleanup screens and reload their config. */
         cleanup_screen(&awesomeconf_first[screen]);
-        setup_screen(&awesomeconf_first[screen], awesomeconf_first->configpath);
+        setup_screen(&awesomeconf_first[screen], configpath);
 
         /* Compute a mapping of tags between the old and new config, based on
          * tag names. */
@@ -531,6 +534,7 @@ uicb_reloadconfig(awesome_config *awesomeconf,
     p_delete(&savetagnames);
     p_delete(&old_ntags);
     p_delete(&savetagclientsel);
+    p_delete(&configpath);
     for (screen = 0; screen < screen_count; screen ++)
         arrange(&awesomeconf_first[screen]);
 }
