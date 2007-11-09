@@ -201,6 +201,10 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_INT((char *) "ncol", 1, CFGF_NONE),
         CFG_END()
     };
+    static cfg_opt_t screen_opts[] =
+    {
+        CFG_SEC((char *) "statusbar", statusbar_opts, CFGF_NONE),
+    };
     static cfg_opt_t rule_opts[] =
     {
         CFG_STR((char *) "name", (char *) "", CFGF_NONE),
@@ -231,19 +235,19 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     {
         CFG_SEC((char *) "general", general_opts, CFGF_NONE),
         CFG_SEC((char *) "colors", colors_opts, CFGF_NONE),
-        CFG_SEC((char *) "statusbar", statusbar_opts, CFGF_NONE),
+        CFG_SEC((char *) "screen", screen_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "tags", tags_opts, CFGF_NONE),
         CFG_SEC((char *) "layouts", layouts_opts, CFGF_NONE),
         CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
         CFG_SEC((char *) "keys", keys_opts, CFGF_NONE),
         CFG_END()
     };
-    cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_statusbar,
+    cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar,
           *cfg_tags, *cfg_layouts, *cfg_rules, *cfg_keys, *cfgsectmp;
     int i = 0, k = 0, ret;
     unsigned int j = 0;
     const char *tmp, *homedir;
-    char *confpath;
+    char *confpath, buf[2];
     KeySym tmp_key;
     ssize_t confpath_len;
 
@@ -273,9 +277,18 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     else if(ret == CFG_PARSE_ERROR)
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
 
+    /* get the right screen section */
+    snprintf(buf, sizeof(buf), "%d", awesomeconf->screen);
+    cfg_screen = cfg_gettsec(cfg, "screen", buf);
+    if(!cfg_screen)
+        cfg_screen = cfg_getsec(cfg, "screen");
+
+    /* get screen specific sections */
+    cfg_statusbar = cfg_getsec(cfg_screen, "statusbar");
+
+    /* get general sections */
     cfg_general = cfg_getsec(cfg, "general");
     cfg_colors = cfg_getsec(cfg, "colors");
-    cfg_statusbar = cfg_getsec(cfg, "statusbar");
     cfg_tags = cfg_getsec(cfg, "tags");
     cfg_layouts = cfg_getsec(cfg, "layouts");
     cfg_rules = cfg_getsec(cfg, "rules");

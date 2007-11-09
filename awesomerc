@@ -21,9 +21,12 @@ colors
     tab_border = "#ff0000"
 }
 
-statusbar
+screen 0
 {
-    position = "top"
+    statusbar
+    {
+        position = "top"
+    }
 }
 
 tags
