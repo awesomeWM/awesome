@@ -55,7 +55,6 @@ movemouse(Client *c, awesome_config *awesomeconf)
     if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, awesomeconf[c->screen].cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
-    XWarpPointer(c->display, None, c->win, 0, 0, 0, 0, c->w / 2, c->h / 2);
     XQueryPointer(c->display, RootWindow(c->display, c->phys_screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
     {
@@ -206,7 +205,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             if((get_current_layout(awesomeconf[c->screen].tags,
                                    awesomeconf[c->screen].ntags)->arrange != layout_floating)
                && !c->isfloating)
-                uicb_togglefloating(&awesomeconf[c->screen], NULL);
+                uicb_togglefloating(&awesomeconf[c->screen], "DUMMY");
             else
                 restack(&awesomeconf[c->screen]);
             movemouse(c, awesomeconf);
