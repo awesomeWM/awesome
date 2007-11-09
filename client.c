@@ -452,10 +452,10 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
         XConfigureWindow(c->display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
         window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
         XSync(c->display, False);
-        if(XineramaIsActive(c->display))
+        if(c->x >=0 && c->y >= 0 && XineramaIsActive(c->display))
         {
             int new_screen = get_screen_bycoord(c->display, c->x, c->y);
-            if(c->screen != new_screen)
+            if(new_screen >= 0 && c->screen != new_screen)
                 move_client_to_screen(c, &awesomeconf[new_screen - awesomeconf->screen], False);
         }
     }
