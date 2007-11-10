@@ -442,11 +442,8 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
         {
             c->rx = c->x;
             c->ry = c->y;
-            if (c->w != w || c->h != h)
-            {
-                c->rw = c->w;
-                c->rh = c->h;
-            }
+            c->rw = c->w;
+            c->rh = c->h;
         }
         wc.border_width = c->border;
         XConfigureWindow(c->display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
