@@ -189,6 +189,8 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
         p_delete(&si_old);
     }
 
+    focus(c, True, acf_new);
+
     /* redraw statusbar on all screens */
     drawstatusbar(&acf_new[old_screen - acf_new->screen]);
     drawstatusbar(acf_new);
