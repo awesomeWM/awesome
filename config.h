@@ -70,6 +70,8 @@ typedef struct
     int height;
     /** Layout txt width */
     int txtlayoutwidth;
+    /** Default position */
+    int dposition;
     /** Bar position */
     int position;
     /** Window */
@@ -172,8 +174,6 @@ struct awesome_config
     KeySym modkey;
     /** Numlock mask */
     unsigned int numlockmask;
-    /** Default status bar position */
-    int statusbar_default_position;
     /** Border size */
     int borderpx;
     /** Master width factor */

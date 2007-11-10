@@ -319,13 +319,13 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     tmp = cfg_getstr(cfg_statusbar, "position");
 
     if(tmp && !a_strncmp(tmp, "off", 6))
-        awesomeconf->statusbar_default_position = BarOff;
+        awesomeconf->statusbar.dposition = BarOff;
     else if(tmp && !a_strncmp(tmp, "bottom", 6))
-        awesomeconf->statusbar_default_position = BarBot;
+        awesomeconf->statusbar.dposition = BarBot;
     else
-        awesomeconf->statusbar_default_position = BarTop;
+        awesomeconf->statusbar.dposition = BarTop;
 
-    awesomeconf->statusbar.position = awesomeconf->statusbar_default_position;
+    awesomeconf->statusbar.position = awesomeconf->statusbar.dposition;
 
     /* Layouts */
 

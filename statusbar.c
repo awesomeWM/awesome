@@ -230,7 +230,7 @@ uicb_togglebar(awesome_config *awesomeconf,
                const char *arg __attribute__ ((unused)))
 {
     if(awesomeconf->statusbar.position == BarOff)
-        awesomeconf->statusbar.position = (awesomeconf->statusbar_default_position == BarOff) ? BarTop : awesomeconf->statusbar_default_position;
+        awesomeconf->statusbar.position = (awesomeconf->statusbar.dposition == BarOff) ? BarTop : awesomeconf->statusbar.dposition;
     else
         awesomeconf->statusbar.position = BarOff;
     updatebarpos(awesomeconf->display, awesomeconf->statusbar);
