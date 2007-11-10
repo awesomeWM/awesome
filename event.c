@@ -224,7 +224,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             if((get_current_layout(awesomeconf[c->screen].tags,
                                    awesomeconf[c->screen].ntags)->arrange != layout_floating)
                && !c->isfloating)
-                uicb_togglefloating(&awesomeconf[c->screen], NULL);
+                uicb_togglefloating(&awesomeconf[c->screen], "DUMMY");
             else
                 restack(&awesomeconf[c->screen]);
             resizemouse(c, awesomeconf);
