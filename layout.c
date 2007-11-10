@@ -300,17 +300,13 @@ void
 uicb_zoom(awesome_config *awesomeconf,
           const char *arg __attribute__ ((unused)))
 {
-    Client *c, *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
     if(!sel)
         return;
 
     client_detach(awesomeconf->clients, sel);
     client_attach(awesomeconf->clients, sel);
-
-    /* reattach tabbed windows just after the master one */
-    for(c = sel->tab.next; c; c = c->tab.next)
-        client_reattach_after(sel, c);
 
     focus(sel, True, awesomeconf);
     arrange(awesomeconf);

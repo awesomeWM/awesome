@@ -24,7 +24,6 @@
 #include <X11/extensions/shape.h>
 
 #include "screen.h"
-#include "tab.h"
 #include "awesome.h"
 #include "layout.h"
 #include "tag.h"
@@ -199,14 +198,10 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
         }
     if(c)
     {
-        if(c->tab.next || c->tab.prev)
-            XSetWindowBorder(awesomeconf->display, c->win, awesomeconf->colors_tab[ColBorder].pixel);
-        else
-            XSetWindowBorder(awesomeconf->display, c->win, awesomeconf->colors_selected[ColBorder].pixel);
-    }
-    if(c)
+        XSetWindowBorder(awesomeconf->display, c->win, awesomeconf->colors_selected[ColBorder].pixel);
         window_grabbuttons(c->display, c->phys_screen, c->win,
                            True, True, awesomeconf->modkey, awesomeconf->numlockmask);
+    }
     if(!selscreen)
         return;
     tag->client_sel = c;
@@ -279,8 +274,6 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     c->display = awesomeconf->display;
     c->phys_screen = awesomeconf->phys_screen;
-
-    c->tab.isvisible = True;
 
     /* if window request fullscreen mode */
     if(c->w == screen_info[awesomeconf->screen].width && c->h == screen_info[awesomeconf->screen].height)
@@ -493,7 +486,6 @@ client_unmanage(Client *c, long state, awesome_config *awesomeconf)
     XWindowChanges wc;
     int tag;
 
-    client_untab(c);
     wc.border_width = c->oldborder;
     /* The server grab construct avoids race conditions. */
     XGrabServer(c->display);

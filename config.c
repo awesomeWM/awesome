@@ -34,7 +34,6 @@
 #include "tag.h"
 #include "statusbar.h"
 #include "layout.h"
-#include "tab.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "layouts/max.h"
@@ -95,11 +94,6 @@ const NameFuncLink UicbList[] = {
     /* config.c */
     {"reloadconfig", uicb_reloadconfig},
     {"setstatustext", uicb_setstatustext},
-    /* tab.c */
-    {"tab", uicb_tab},
-    {"untab", uicb_untab},
-    {"viewnexttab", uicb_viewnexttab},
-    {"viewprevtab", uicb_viewprevtab},
     {NULL, NULL}
 };
 
@@ -313,7 +307,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     awesomeconf->colors_selected[ColBorder] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_border"));
     awesomeconf->colors_selected[ColBG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_bg"));
     awesomeconf->colors_selected[ColFG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_fg"));
-    awesomeconf->colors_tab[ColBorder] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "tab_border"));
 
     /* Statusbar */
     tmp = cfg_getstr(cfg_statusbar, "position");

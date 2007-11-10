@@ -24,7 +24,6 @@
 
 #include "layout.h"
 #include "tag.h"
-#include "tab.h"
 #include "util.h"
 
 /** This function returns the index of
@@ -130,7 +129,7 @@ isvisible(Client * c, int screen, Tag * tags, int ntags)
 {
     int i;
 
-    if(c->screen != screen || !c->tab.isvisible)
+    if(c->screen != screen)
         return False;
 
     for(i = 0; i < ntags; i++)
@@ -182,7 +181,6 @@ uicb_togglefloating(awesome_config * awesomeconf,
     else
         client_resize(sel, sel->x, sel->y, sel->w, sel->h, awesomeconf, True, True);
 
-    client_untab(sel);
     saveprops(sel, awesomeconf->ntags);
     arrange(awesomeconf);
 }
