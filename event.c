@@ -144,6 +144,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     unsigned int udummy;
     Client *c;
     Window wdummy;
+    char buf[256];
     XButtonPressedEvent *ev = &e->xbutton;
 
     for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
@@ -154,12 +155,13 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 x += textwidth(e->xany.display, awesomeconf[screen].font, awesomeconf[screen].tags[i].name);
                 if(ev->x < x)
                 {
+                    snprintf(buf, sizeof(buf), "%d", i + 1);
                     if(ev->button == Button1)
                     {
                         if(ev->state & awesomeconf[screen].modkey)
-                            uicb_tag(&awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_tag(&awesomeconf[screen], buf);
                         else
-                            uicb_view(&awesomeconf[screen], awesomeconf[screen].tags[i].name);
+                            uicb_view(&awesomeconf[screen], buf);
                     }
                     else if(ev->button == Button3)
                     {

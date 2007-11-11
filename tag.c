@@ -26,28 +26,6 @@
 #include "tag.h"
 #include "util.h"
 
-/** This function returns the index of
- * the tag given un argument in *tags
- * \param tag_to_find tag name
- * \param tags tag list
- * \param ntags number of tags in tag list
- * \return index of tag
- */
-static int
-idxoftag(const char *tag_to_find, Tag *tags, int ntags)
-{
-    int i;
-
-    if(!tag_to_find)
-        return 0;
-
-    for(i = 0; i < ntags; i++)
-        if(!a_strcmp(tags[i].name, tag_to_find))
-            return i;
-
-    return 0;
-}
-
 void
 applyrules(Client * c, awesome_config *awesomeconf)
 {
@@ -152,11 +130,15 @@ uicb_tag(awesome_config *awesomeconf,
 
     if(!sel)
         return;
+
     for(i = 0; i < awesomeconf->ntags; i++)
         sel->tags[i] = arg == NULL;
-    i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
+
+    i =  arg ? atoi(arg) - 1 : 0;
+
     if(i >= 0 && i < awesomeconf->ntags)
         sel->tags[i] = True;
+
     saveprops(sel, awesomeconf->ntags);
     arrange(awesomeconf);
 }
@@ -199,7 +181,7 @@ uicb_toggletag(awesome_config *awesomeconf,
 
     if(!sel)
         return;
-    i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
+    i = arg ? atoi(arg) - 1 : 0;
     sel->tags[i] = !sel->tags[i];
     for(j = 0; j < awesomeconf->ntags && !sel->tags[j]; j++);
     if(j == awesomeconf->ntags)
@@ -219,7 +201,7 @@ uicb_toggleview(awesome_config *awesomeconf,
     unsigned int i;
     int j;
 
-    i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
+    i = arg ? atoi(arg) - 1: 0;
     awesomeconf->tags[i].selected = !awesomeconf->tags[i].selected;
     for(j = 0; j < awesomeconf->ntags && !awesomeconf->tags[j].selected; j++);
     if(j == awesomeconf->ntags)
@@ -245,10 +227,12 @@ uicb_view(awesome_config *awesomeconf,
         awesomeconf->tags[i].selected = arg == NULL;
     }
 
-    i = idxoftag(arg, awesomeconf->tags, awesomeconf->ntags);
-
-    if(i >= 0 && i < awesomeconf->ntags)
-        awesomeconf->tags[i].selected = True;
+    if(arg)
+    {
+        i = atoi(arg) - 1;
+        if(i >= 0 && i < awesomeconf->ntags)
+            awesomeconf->tags[i].selected = True;
+    }
 
     saveawesomeprops(awesomeconf);
     arrange(awesomeconf);
