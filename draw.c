@@ -135,8 +135,8 @@ draw_rotate(Display *disp, int screen, Drawable drawable, int dw, int dh, double
     source = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dw);
     cr = cairo_create (surface);
 
-    cairo_rotate(cr, angle);
     cairo_translate(cr, tx, ty);
+    cairo_rotate(cr, angle);
 
     cairo_set_source_surface(cr, source, 0.0, 0.0);
     cairo_paint(cr);

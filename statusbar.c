@@ -165,7 +165,7 @@ drawstatusbar(awesome_config *awesomeconf)
             draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
                         awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
                         awesomeconf->statusbar.height, M_PI * 0.5,
-                        0, -awesomeconf->statusbar.height);
+                        awesomeconf->statusbar.height, 0);
         else
             draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
                         awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
@@ -257,7 +257,7 @@ updatebarpos(Display *disp, Statusbar statusbar)
         XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].y_org);
         break;
       case BarRight:
-        XMoveWindow(disp, statusbar.window, si[statusbar.screen].width - statusbar.height, si[statusbar.screen].y_org);
+        XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org + (si[statusbar.screen].width - statusbar.height), si[statusbar.screen].y_org);
         break;
       case BarBot:
         XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].height - statusbar.height);
