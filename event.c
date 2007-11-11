@@ -140,11 +140,11 @@ resizemouse(Client * c, awesome_config *awesomeconf)
 void
 handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 {
-    int i, screen, x = 0, y = 0;
+    int i, j, screen, x = 0, y = 0;
     unsigned int udummy;
     Client *c;
     Window wdummy;
-    char buf[256];
+    char arg[256];
     XButtonPressedEvent *ev = &e->xbutton;
 
     for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
@@ -155,25 +155,18 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 x += textwidth(e->xany.display, awesomeconf[screen].font, awesomeconf[screen].tags[i].name);
                 if(ev->x < x)
                 {
-                    snprintf(buf, sizeof(buf), "%d", i + 1);
-                    if(ev->button == Button1)
+                    snprintf(arg, sizeof(arg), "%d", i + 1);
+                    for(j = 0; j < awesomeconf[screen].buttons.ntag; j++)
                     {
-                        if(ev->state & awesomeconf[screen].modkey)
-                            uicb_tag(&awesomeconf[screen], buf);
-                        else
-                            uicb_view(&awesomeconf[screen], buf);
+                        if(ev->button == awesomeconf[screen].buttons.tag[j].button
+                           && (ev->state == awesomeconf[screen].buttons.tag[j].mod
+                               || ev->state == (awesomeconf[screen].buttons.tag[j].mod | awesomeconf[screen].numlockmask))
+                           && awesomeconf[screen].buttons.tag[j].func)
+                        {
+                            awesomeconf[screen].buttons.tag[j].func(&awesomeconf[screen], arg);
+                            return;
+                        }
                     }
-                    else if(ev->button == Button3)
-                    {
-                        if(ev->state & awesomeconf[screen].modkey)
-                            uicb_toggletag(&awesomeconf[screen], awesomeconf[screen].tags[i].name);
-                        else
-                            uicb_toggleview(&awesomeconf[screen], awesomeconf[screen].tags[i].name);
-                    }
-                    else if(ev->button == Button4)
-                        uicb_tag_viewnext(&awesomeconf[screen], NULL);
-                    else if(ev->button == Button5)
-                        uicb_tag_viewprev(&awesomeconf[screen], NULL);
                     return;
                 }
             }

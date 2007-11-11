@@ -115,6 +115,39 @@ rules
 mouse
 {
     modkey = "Mod4"
+    # For click on tag
+    tag
+    {
+        button = "1"
+        command = "view"
+    }
+    tag
+    {
+        button = "1"
+        modkey = {"Mod4"}
+        command = "tag"
+    }
+    tag
+    {
+        button = "3"
+        command = "toggleview"
+    }
+    tag
+    {
+        button = "3"
+        modkey = {"Mod4"}
+        command = "toggletag"
+    }
+    tag
+    {
+        button = "4"
+        command = "view_tag_next"
+    }
+    tag
+    {
+        button = "5"
+        command = "view_tag_previous"
+    }    
 }
 
 keys

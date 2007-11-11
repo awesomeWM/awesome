@@ -50,6 +50,13 @@ typedef struct
     KeySym keysym;
 } KeyMod;
 
+/** Link a name to a mouse button symbol */
+typedef struct
+{
+    const char *name;
+    unsigned int button;
+} MouseButton;
+
 /** List of available UI bindable callbacks and functions */
 const NameFuncLink UicbList[] = {
     /* util.c */
@@ -111,6 +118,16 @@ static const KeyMod KeyModList[] =
     {NULL, 0}
 };
 
+/** List of button name and corresponding X11 mask codes */
+static const MouseButton MouseButtonList[] =
+{
+    {"1", Button1},
+    {"2", Button2},
+    {"3", Button3},
+    {"4", Button4},
+    {"5", Button5},
+    {NULL, 0}
+};
 /** List of available layouts and link between name and functions */
 static const NameFuncLink LayoutsList[] =
 {
@@ -134,6 +151,23 @@ key_mask_lookup(const char *keyname)
         for(i = 0; KeyModList[i].name; i++)
             if(!a_strcmp(keyname, KeyModList[i].name))
                 return KeyModList[i].keysym;
+
+    return 0;
+}
+
+/** Lookup for a mouse button from its name
+ * \param button Mouse button name
+ * \return Mouse button or 0 if not found
+ */
+static unsigned int
+mouse_button_lookup(const char *button)
+{
+    int i;
+    
+    if(button)
+        for(i = 0; MouseButtonList[i].name; i++)
+            if(!a_strcmp(button, MouseButtonList[i].name))
+                return MouseButtonList[i].button;
 
     return 0;
 }
@@ -228,9 +262,16 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_SEC((char *) "key", key_opts, CFGF_MULTI),
         CFG_END()
     };
+    static cfg_opt_t mouse_tag_opts[] =
+    {
+        CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
+        CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
+        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+    };
     static cfg_opt_t mouse_opts[] =
     {
         CFG_STR((char *) "modkey", (char *) "Mod4", CFGF_NONE),
+        CFG_SEC((char *) "tag", mouse_tag_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t opts[] =
@@ -247,7 +288,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     unsigned int j = 0;
     const char *tmp, *homedir;
     char *confpath, buf[2];
-    KeySym tmp_key;
     ssize_t confpath_len;
 
     if(confpatharg)
@@ -363,7 +403,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     compileregs(awesomeconf->rules, awesomeconf->nrules);
 
     /* Tags */
-
     awesomeconf->ntags = cfg_size(cfg_tags, "tag");
     awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
     for(i = 0; i < awesomeconf->ntags; i++)
@@ -392,11 +431,25 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     awesomeconf->tags[0].selected = True;
     awesomeconf->tags[0].was_selected = True;
 
-    /* Keys */
-    tmp_key = key_mask_lookup(cfg_getstr(cfg_mouse, "modkey"));
-    awesomeconf->modkey = tmp_key ? tmp_key : Mod4Mask;
-    awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
+    /* Mouse */
+    if(!(awesomeconf->modkey = key_mask_lookup(cfg_getstr(cfg_mouse, "modkey"))))
+       awesomeconf->modkey = Mod4Mask;
 
+    /* Mouse: tags click bindings */
+    awesomeconf->buttons.ntag = cfg_size(cfg_mouse, "tag");
+    awesomeconf->buttons.tag = p_new(Button, awesomeconf->buttons.ntag);
+    for(i = 0; i < awesomeconf->buttons.ntag; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg_mouse, "tag", i);
+        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
+            awesomeconf->buttons.tag[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
+        awesomeconf->buttons.tag[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
+        awesomeconf->buttons.tag[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
+        awesomeconf->buttons.tag[i].arg = NULL; /* for now */
+    }
+
+    /* Keys */
+    awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
     awesomeconf->nkeys = cfg_size(cfg_keys, "key");
     awesomeconf->keys = p_new(Key, awesomeconf->nkeys);
     for(i = 0; i < awesomeconf->nkeys; i++)

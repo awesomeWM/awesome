@@ -61,6 +61,15 @@ typedef struct
     char *arg;
 } Key;
 
+typedef struct Button Button;
+struct Button
+{
+    unsigned long mod;
+    unsigned int button;
+    void (*func) (awesome_config *, char *);
+    char *arg;
+};
+
 /** Status bar */
 typedef struct
 {
@@ -161,8 +170,14 @@ struct awesome_config
     Rule *rules;
     /** Number of rules in *rules */
     int nrules;
-    /** Keys binding list */
+    /** Keys bindings list */
     Key *keys;
+    /** Mouse bindings list */
+    struct
+    {
+           Button *tag;
+           int ntag;
+    } buttons;
     /** Number of keys binding in *keys */
     int nkeys;
     /** Default modkey */
