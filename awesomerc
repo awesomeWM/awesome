@@ -10,18 +10,17 @@ general
     font = "fixed-12"
 }
 
-colors
-{
-    normal_border = "#111111"
-    normal_bg = "#111111"
-    normal_fg = "#eeeeee"
-    focus_border = "#6666ff"
-    focus_bg = "#6666ff"
-    focus_fg = "#ffffff"
-}
-
 screen 0
 {
+    colors
+    {
+        normal_border = "#111111"
+        normal_bg = "#111111"
+        normal_fg = "#eeeeee"
+        focus_border = "#6666ff"
+        focus_bg = "#6666ff"
+        focus_fg = "#ffffff"
+    }
     statusbar
     {
         position = "top"
