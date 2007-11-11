@@ -247,6 +247,7 @@ updatebarpos(Display *disp, Statusbar statusbar)
     XEvent ev;
     ScreenInfo *si = get_screen_info(disp, statusbar.screen, NULL);
 
+    XMapRaised(disp, statusbar.window);
     switch (statusbar.position)
     {
       default:
@@ -259,7 +260,7 @@ updatebarpos(Display *disp, Statusbar statusbar)
         XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].height - statusbar.height);
         break;
       case BarOff:
-        XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].y_org - statusbar.height);
+        XUnmapWindow(disp, statusbar.window);
         break;
     }
     p_delete(&si);
