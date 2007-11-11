@@ -164,12 +164,12 @@ drawstatusbar(awesome_config *awesomeconf)
         if(awesomeconf->statusbar.position == BarRight)
             draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
                         awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
-                        awesomeconf->statusbar.height, M_PI * 0.5,
+                        awesomeconf->statusbar.height, M_PI_2,
                         awesomeconf->statusbar.height, 0);
         else
             draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
                         awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
-                        awesomeconf->statusbar.height, M_PI * 0.5,
+                        awesomeconf->statusbar.height, - M_PI_2,
                         0, -awesomeconf->statusbar.height);
         XCopyArea(awesomeconf->display, awesomeconf->statusbar.drawable,
                   awesomeconf->statusbar.window,
