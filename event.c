@@ -137,10 +137,30 @@ resizemouse(Client * c, awesome_config *awesomeconf)
     }
 }
 
+
+static void
+handle_mouse_button_press(awesome_config *awesomeconf,
+                          unsigned int button, unsigned int state, unsigned int numlockmask,
+                          Button *buttons, int nbuttons, char *arg)
+{
+    int i;
+
+    for(i = 0; i < nbuttons; i++)
+        if(button == buttons[i].button
+           && (state == buttons[i].mod || state == (buttons[i].mod | numlockmask))
+           && buttons[i].func)
+        {
+            if(arg)
+                buttons[i].func(awesomeconf, arg);
+            else
+                buttons[i].func(awesomeconf, buttons[i].arg);
+            return;
+        }
+}
 void
 handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 {
-    int i, j, screen, x = 0, y = 0;
+    int i, screen, x = 0, y = 0;
     unsigned int udummy;
     Client *c;
     Window wdummy;
@@ -156,47 +176,21 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 if(ev->x < x)
                 {
                     snprintf(arg, sizeof(arg), "%d", i + 1);
-                    for(j = 0; j < awesomeconf[screen].buttons.ntag; j++)
-                    {
-                        if(ev->button == awesomeconf[screen].buttons.tag[j].button
-                           && (ev->state == awesomeconf[screen].buttons.tag[j].mod
-                               || ev->state == (awesomeconf[screen].buttons.tag[j].mod | awesomeconf[screen].numlockmask))
-                           && awesomeconf[screen].buttons.tag[j].func)
-                        {
-                            awesomeconf[screen].buttons.tag[j].func(&awesomeconf[screen], arg);
-                            return;
-                        }
-                    }
+                    handle_mouse_button_press(&awesomeconf[screen],
+                                              ev->button, ev->state, awesomeconf->numlockmask,
+                                              awesomeconf->buttons.tag, awesomeconf->buttons.ntag, arg);
                     return;
                 }
             }
             x += awesomeconf[screen].statusbar.txtlayoutwidth;
             if(ev->x <x)
-            {
-                for(j = 0; j < awesomeconf[screen].buttons.nlayout; j++)
-                    if(ev->button == awesomeconf[screen].buttons.layout[j].button
-                       && (ev->state == awesomeconf[screen].buttons.layout[j].mod
-                           || ev->state == (awesomeconf[screen].buttons.layout[j].mod | awesomeconf[screen].numlockmask))
-                        && awesomeconf[screen].buttons.layout[j].func)
-                    {
-                        awesomeconf[screen].buttons.layout[j].func(&awesomeconf[screen],
-                                                                  awesomeconf[screen].buttons.layout[j].arg);
-                        return;
-                    }
-            }
+                handle_mouse_button_press(&awesomeconf[screen],
+                                          ev->button, ev->state, awesomeconf->numlockmask,
+                                          awesomeconf->buttons.layout, awesomeconf->buttons.nlayout, NULL);
             else
-            {
-                for(j = 0; j < awesomeconf[screen].buttons.ntitle; j++)
-                    if(ev->button == awesomeconf[screen].buttons.title[j].button
-                       && (ev->state == awesomeconf[screen].buttons.title[j].mod
-                           || ev->state == (awesomeconf[screen].buttons.title[j].mod | awesomeconf[screen].numlockmask))
-                        && awesomeconf[screen].buttons.title[j].func)
-                    {
-                        awesomeconf[screen].buttons.title[j].func(&awesomeconf[screen],
-                                                                  awesomeconf[screen].buttons.title[j].arg);
-                        return;
-                    }
-            }
+                handle_mouse_button_press(&awesomeconf[screen],
+                                          ev->button, ev->state, awesomeconf->numlockmask,
+                                          awesomeconf->buttons.title, awesomeconf->buttons.ntitle, NULL);
             return;
         }
 
