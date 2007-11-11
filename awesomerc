@@ -66,25 +66,24 @@ screen 0
             layout = "floating"
         }
     }
-}
-
-layouts
-{
-    layout tile
+    layouts
     {
-        symbol = "[]="
-    }
-    layout tileleft
-    {
-        symbol = "=[]"
-    }
-    layout max
-    {
-        symbol = "[ ]"
-    }
-    layout floating
-    {
-        symbol = "><>"
+        layout tile
+        {
+            symbol = "[]="
+        }
+        layout tileleft
+        {
+            symbol = "=[]"
+        }
+        layout max
+        {
+            symbol = "[ ]"
+        }
+        layout floating
+        {
+            symbol = "><>"
+        }
     }
 }
 
