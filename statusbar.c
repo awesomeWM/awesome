@@ -161,9 +161,16 @@ drawstatusbar(awesome_config *awesomeconf)
     if(awesomeconf->statusbar.position == BarRight
        || awesomeconf->statusbar.position == BarLeft)
     {
-        draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
-                    awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
-                    awesomeconf->statusbar.height, M_PI * 1.5);
+        if(awesomeconf->statusbar.position == BarRight)
+            draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
+                        awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
+                        awesomeconf->statusbar.height, M_PI * 0.5,
+                        0, -awesomeconf->statusbar.height);
+        else
+            draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
+                        awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
+                        awesomeconf->statusbar.height, M_PI * 0.5,
+                        0, -awesomeconf->statusbar.height);
         XCopyArea(awesomeconf->display, awesomeconf->statusbar.drawable,
                   awesomeconf->statusbar.window,
                   DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,
@@ -250,7 +257,7 @@ updatebarpos(Display *disp, Statusbar statusbar)
         XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].y_org);
         break;
       case BarRight:
-        XMoveWindow(disp, statusbar.window, si[statusbar.screen].width - statusbar.width, si[statusbar.screen].y_org);
+        XMoveWindow(disp, statusbar.window, si[statusbar.screen].width - statusbar.height, si[statusbar.screen].y_org);
         break;
       case BarBot:
         XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].height - statusbar.height);
