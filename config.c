@@ -225,8 +225,12 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     };
     static cfg_opt_t keys_opts[] =
     {
-        CFG_STR((char *) "modkey", (char *) "Mod4", CFGF_NONE),
         CFG_SEC((char *) "key", key_opts, CFGF_MULTI),
+        CFG_END()
+    };
+    static cfg_opt_t mouse_opts[] =
+    {
+        CFG_STR((char *) "modkey", (char *) "Mod4", CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t opts[] =
@@ -234,10 +238,11 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_SEC((char *) "screen", screen_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
         CFG_SEC((char *) "keys", keys_opts, CFGF_NONE),
+        CFG_SEC((char *) "mouse", mouse_opts, CFGF_NONE),
         CFG_END()
     };
     cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar,
-          *cfg_tags, *cfg_layouts, *cfg_rules, *cfg_keys, *cfgsectmp;
+          *cfg_tags, *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp;
     int i = 0, k = 0, ret;
     unsigned int j = 0;
     const char *tmp, *homedir;
@@ -287,6 +292,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     /* get general sections */
     cfg_rules = cfg_getsec(cfg, "rules");
     cfg_keys = cfg_getsec(cfg, "keys");
+    cfg_mouse = cfg_getsec(cfg, "mouse");
 
     /* General section */
 
@@ -387,7 +393,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     awesomeconf->tags[0].was_selected = True;
 
     /* Keys */
-    tmp_key = key_mask_lookup(cfg_getstr(cfg_keys, "modkey"));
+    tmp_key = key_mask_lookup(cfg_getstr(cfg_mouse, "modkey"));
     awesomeconf->modkey = tmp_key ? tmp_key : Mod4Mask;
     awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
 

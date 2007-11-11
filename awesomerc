@@ -112,9 +112,13 @@ rules
     }
 }
 
-keys
+mouse
 {
     modkey = "Mod4"
+}
+
+keys
+{
     key
     {
         modkey = {"Mod4"}
