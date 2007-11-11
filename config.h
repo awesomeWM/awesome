@@ -134,6 +134,8 @@ typedef struct
     Client *client_sel;
     /** Master width factor */
     double mwfact;
+    /** Number of master windows */
+    int nmaster;
 } Tag;
 
 /** Main configuration structure */
@@ -169,8 +171,6 @@ struct awesome_config
     int borderpx;
     /** Number of pixels to snap windows */
     int snap;
-    /** Number of master windows */
-    int nmaster;
     /** Number of columns in tile layout */
     int ncol;
     /** Transparency of unfocused clients */

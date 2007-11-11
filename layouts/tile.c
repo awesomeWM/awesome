@@ -32,13 +32,14 @@ void
 uicb_setnmaster(awesome_config *awesomeconf,
                 const char * arg)
 {
-    Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
+    Tag *curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags);
+    Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
 
-    if((awesomeconf->nmaster = (int) compute_new_value_from_arg(arg, (double) awesomeconf->nmaster)) < 0)
-        awesomeconf->nmaster = 0;
+    if((curtag->nmaster = (int) compute_new_value_from_arg(arg, (double) curtag->nmaster)) < 0)
+        curtag->nmaster = 0;
 
     arrange(awesomeconf);
 }
@@ -113,14 +114,14 @@ _tile(awesome_config *awesomeconf, const Bool right)
     wax = screens_info[awesomeconf->screen].x_org;
     way = screens_info[awesomeconf->screen].y_org;
 
-    masterwin = MIN(n, awesomeconf->nmaster);
+    masterwin = MIN(n, curtag->nmaster);
 
     otherwin = n - masterwin;
 
     if(otherwin < 0)
         otherwin = 0;
 
-    if(awesomeconf->nmaster)
+    if(curtag->nmaster)
     {
         mh = masterwin ? wah / masterwin : waw;
         mw = otherwin ? waw * curtag->mwfact : waw;
@@ -136,7 +137,7 @@ _tile(awesome_config *awesomeconf, const Bool right)
             continue;
 
         c->ismax = False;
-        if(i < awesomeconf->nmaster)
+        if(i < curtag->nmaster)
         {                       /* master */
             ny = way + i * mh;
             nx = wax + (right ? 0 : waw - mw);
@@ -147,7 +148,7 @@ _tile(awesome_config *awesomeconf, const Bool right)
             if(real_ncol)
                 win_by_col = otherwin / real_ncol;
 
-            if((i - awesomeconf->nmaster) && (i - awesomeconf->nmaster) % win_by_col == 0 && current_col < real_ncol - 1)
+            if((i - curtag->nmaster) && (i - curtag->nmaster) % win_by_col == 0 && current_col < real_ncol - 1)
                 current_col++;
 
             if(current_col == real_ncol - 1)
@@ -160,10 +161,10 @@ _tile(awesome_config *awesomeconf, const Bool right)
 
             nw = (waw - mw) / real_ncol - 2 * c->border;
 
-            if(i == awesomeconf->nmaster || otherwin <= real_ncol || (i - awesomeconf->nmaster) % win_by_col == 0)
+            if(i == curtag->nmaster || otherwin <= real_ncol || (i - curtag->nmaster) % win_by_col == 0)
                 ny = way;
             else
-                ny = way + ((i - awesomeconf->nmaster) % win_by_col) * (nh + 2 * c->border);
+                ny = way + ((i - curtag->nmaster) % win_by_col) * (nh + 2 * c->border);
 
             nx = wax + current_col * (nw + 2 * c->border) + (right ? mw : 0);
             client_resize(c, nx, ny, nw, nh, awesomeconf, awesomeconf->resize_hints, False);

@@ -34,6 +34,7 @@ screen 0
         }
         tag 2
         {
+            nmaster = 2
             layout = "tile"
         }
         tag 3
@@ -70,7 +71,6 @@ screen 0
 
 layouts
 {
-    nmaster = 1
     ncol = 1
     layout tile
     {
