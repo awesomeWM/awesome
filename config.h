@@ -132,6 +132,8 @@ typedef struct
     Layout *layout;
     /** Selected client on this tag */
     Client *client_sel;
+    /** Master width factor */
+    double mwfact;
 } Tag;
 
 /** Main configuration structure */
@@ -165,8 +167,6 @@ struct awesome_config
     unsigned int numlockmask;
     /** Border size */
     int borderpx;
-    /** Master width factor */
-    double mwfact;
     /** Number of pixels to snap windows */
     int snap;
     /** Number of master windows */

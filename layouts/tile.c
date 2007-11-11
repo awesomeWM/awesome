@@ -63,7 +63,8 @@ uicb_setmwfact(awesome_config * awesomeconf,
                const char *arg)
 {
     char *newarg;
-    Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
+    Tag *curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags);
+    Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
@@ -77,10 +78,10 @@ uicb_setmwfact(awesome_config * awesomeconf,
             newarg[0] = '+';
     }
 
-    if((awesomeconf->mwfact = compute_new_value_from_arg(newarg, awesomeconf->mwfact)) < 0.1)
-        awesomeconf->mwfact = 0.1;
-    else if(awesomeconf->mwfact > 0.9)
-        awesomeconf->mwfact = 0.9;
+    if((curtag->mwfact = compute_new_value_from_arg(newarg, curtag->mwfact)) < 0.1)
+        curtag->mwfact = 0.1;
+    else if(curtag->mwfact > 0.9)
+        curtag->mwfact = 0.9;
 
     arrange(awesomeconf);
     p_delete(&newarg);
@@ -99,6 +100,7 @@ _tile(awesome_config *awesomeconf, const Bool right)
     int real_ncol = 1, win_by_col = 1, current_col = 0;
     ScreenInfo *screens_info = NULL;
     Client *c;
+    Tag *curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags);
 
     screens_info = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
 
@@ -121,7 +123,7 @@ _tile(awesome_config *awesomeconf, const Bool right)
     if(awesomeconf->nmaster)
     {
         mh = masterwin ? wah / masterwin : waw;
-        mw = otherwin ? waw * awesomeconf->mwfact : waw;
+        mw = otherwin ? waw * curtag->mwfact : waw;
     }
     else
         mh = mw = 0;

@@ -175,6 +175,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     static cfg_opt_t tag_opts[] =
     {
         CFG_STR((char *) "layout", (char *) "tile", CFGF_NONE),
+        CFG_FLOAT((char *) "mwfact", 0.5, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t tags_opts[] =
@@ -190,7 +191,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     static cfg_opt_t layouts_opts[] =
     {
         CFG_SEC((char *) "layout", layout_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_FLOAT((char *) "mwfact", 0.5, CFGF_NONE),
         CFG_INT((char *) "nmaster", 1, CFGF_NONE),
         CFG_INT((char *) "ncol", 1, CFGF_NONE),
         CFG_END()
@@ -337,7 +337,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
     }
 
-    awesomeconf->mwfact = cfg_getfloat(cfg_layouts, "mwfact");
     awesomeconf->nmaster = cfg_getint(cfg_layouts, "nmaster");
     awesomeconf->ncol = cfg_getint(cfg_layouts, "ncol");
 
@@ -377,6 +376,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         if(k == awesomeconf->nlayouts)
             k = 0;
         awesomeconf->tags[i].layout = &awesomeconf->layouts[k];
+        awesomeconf->tags[i].mwfact = cfg_getfloat(cfgsectmp, "mwfact");
     }
 
     

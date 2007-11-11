@@ -58,6 +58,7 @@ screen 0
         }
         tag 8
         {
+            mwfact = 0.3
             layout = "tile"
         }
         tag 9
@@ -69,7 +70,6 @@ screen 0
 
 layouts
 {
-    mwfact = 0.5
     nmaster = 1
     ncol = 1
     layout tile
