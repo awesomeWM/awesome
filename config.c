@@ -268,10 +268,18 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
         CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     };
+    static cfg_opt_t mouse_title_opts[] =
+    {
+        CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
+        CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
+        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+        CFG_STR((char *) "arg", NULL, CFGF_NONE),
+    };
     static cfg_opt_t mouse_opts[] =
     {
         CFG_STR((char *) "modkey", (char *) "Mod4", CFGF_NONE),
         CFG_SEC((char *) "tag", mouse_tag_opts, CFGF_MULTI),
+        CFG_SEC((char *) "title", mouse_title_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t opts[] =
@@ -367,7 +375,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     awesomeconf->statusbar.position = awesomeconf->statusbar.dposition;
 
     /* Layouts */
-
     awesomeconf->nlayouts = cfg_size(cfg_layouts, "layout");
     awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts);
     for(i = 0; i < awesomeconf->nlayouts; i++)
@@ -387,7 +394,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         eprint("awesome: fatal: no default layout available\n");
 
     /* Rules */
-
     awesomeconf->nrules = cfg_size(cfg_rules, "rule");
     awesomeconf->rules = p_new(Rule, awesomeconf->nrules);
     for(i = 0; i < awesomeconf->nrules; i++)
@@ -446,6 +452,19 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->buttons.tag[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
         awesomeconf->buttons.tag[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
         awesomeconf->buttons.tag[i].arg = NULL; /* for now */
+    }
+
+    /* Mouse: title click bindings */
+    awesomeconf->buttons.ntitle = cfg_size(cfg_mouse, "title");
+    awesomeconf->buttons.title = p_new(Button, awesomeconf->buttons.ntitle);
+    for(i = 0; i < awesomeconf->buttons.ntitle; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg_mouse, "title", i);
+        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
+            awesomeconf->buttons.title[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
+        awesomeconf->buttons.title[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
+        awesomeconf->buttons.title[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
+        awesomeconf->buttons.title[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
     }
 
     /* Keys */

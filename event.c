@@ -175,10 +175,19 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 uicb_setlayout(&awesomeconf[screen], "+1");
             else if(ev->x < x && (ev->button == Button3 || ev->button == Button5))
                 uicb_setlayout(&awesomeconf[screen], "-1");
-            else if(ev->button == Button4)
-                uicb_focusnext(&awesomeconf[screen], NULL);
-            else if(ev->button == Button5)
-                uicb_focusprev(&awesomeconf[screen], NULL);
+            else
+            {
+                for(j = 0; j < awesomeconf[screen].buttons.ntitle; j++)
+                    if(ev->button == awesomeconf[screen].buttons.title[j].button
+                       && (ev->state == awesomeconf[screen].buttons.title[j].mod
+                           || ev->state == (awesomeconf[screen].buttons.title[j].mod | awesomeconf[screen].numlockmask))
+                        && awesomeconf[screen].buttons.title[j].func)
+                    {
+                        awesomeconf[screen].buttons.title[j].func(&awesomeconf[screen],
+                                                                  awesomeconf[screen].buttons.title[j].arg);
+                        return;
+                    }
+            }
             return;
         }
 
