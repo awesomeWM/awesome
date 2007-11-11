@@ -198,6 +198,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     static cfg_opt_t screen_opts[] =
     {
         CFG_SEC((char *) "statusbar", statusbar_opts, CFGF_NONE),
+        CFG_SEC((char *) "tags", tags_opts, CFGF_NONE),
     };
     static cfg_opt_t rule_opts[] =
     {
@@ -230,7 +231,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_SEC((char *) "general", general_opts, CFGF_NONE),
         CFG_SEC((char *) "colors", colors_opts, CFGF_NONE),
         CFG_SEC((char *) "screen", screen_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "tags", tags_opts, CFGF_NONE),
         CFG_SEC((char *) "layouts", layouts_opts, CFGF_NONE),
         CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
         CFG_SEC((char *) "keys", keys_opts, CFGF_NONE),
@@ -279,11 +279,11 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
     /* get screen specific sections */
     cfg_statusbar = cfg_getsec(cfg_screen, "statusbar");
+    cfg_tags = cfg_getsec(cfg_screen, "tags");
 
     /* get general sections */
     cfg_general = cfg_getsec(cfg, "general");
     cfg_colors = cfg_getsec(cfg, "colors");
-    cfg_tags = cfg_getsec(cfg, "tags");
     cfg_layouts = cfg_getsec(cfg, "layouts");
     cfg_rules = cfg_getsec(cfg, "rules");
     cfg_keys = cfg_getsec(cfg, "keys");

@@ -26,45 +26,44 @@ screen 0
     {
         position = "top"
     }
-}
-
-tags
-{
-    tag 1
+    tags
     {
-        layout = "tile"
-    }
-    tag 2
-    {
-        layout = "tile"
-    }
-    tag 3
-    {
-        layout = "tile"
-    }
-    tag 4
-    {
-        layout = "tile"
-    }
-    tag 5
-    {
-        layout = "tile"
-    }
-    tag 6
-    {
-        layout = "tile"
-    }
-    tag 7
-    {
-        layout = "tile"
-    }
-    tag 8
-    {
-        layout = "tile"
-    }
-    tag 9
-    {
-        layout = "floating"
+        tag 1
+        {
+            layout = "tile"
+        }
+        tag 2
+        {
+            layout = "tile"
+        }
+        tag 3
+        {
+            layout = "tile"
+        }
+        tag 4
+        {
+            layout = "tile"
+        }
+        tag 5
+        {
+            layout = "tile"
+        }
+        tag 6
+        {
+            layout = "tile"
+        }
+        tag 7
+        {
+            layout = "tile"
+        }
+        tag 8
+        {
+            layout = "tile"
+        }
+        tag 9
+        {
+            layout = "floating"
+        }
     }
 }
 
