@@ -173,7 +173,11 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
             for(i = 0; i < awesomeconf[screen].ntags; i++)
             {
                 x += textwidth(e->xany.display, awesomeconf[screen].font, awesomeconf[screen].tags[i].name);
-                if(ev->x < x)
+                if(((awesomeconf[screen].statusbar.position == BarTop
+                     || awesomeconf[screen].statusbar.position == BarBot)
+                   && ev->x < x)
+                   || (awesomeconf[screen].statusbar.position == BarRight && ev->y < x)
+                   || (awesomeconf[screen].statusbar.position == BarLeft && ev->y > awesomeconf[screen].statusbar.width - x))
                 {
                     snprintf(arg, sizeof(arg), "%d", i + 1);
                     handle_mouse_button_press(&awesomeconf[screen],
@@ -183,7 +187,11 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 }
             }
             x += awesomeconf[screen].statusbar.txtlayoutwidth;
-            if(ev->x <x)
+            if(((awesomeconf[screen].statusbar.position == BarTop
+                 || awesomeconf[screen].statusbar.position == BarBot)
+                && ev->x < x)
+                || (awesomeconf[screen].statusbar.position == BarRight && ev->y < x)
+                || (awesomeconf[screen].statusbar.position == BarLeft && ev->y > awesomeconf[screen].statusbar.width - x))
                 handle_mouse_button_press(&awesomeconf[screen],
                                           ev->button, ev->state, awesomeconf->numlockmask,
                                           awesomeconf->buttons.layout, awesomeconf->buttons.nlayout, NULL);
