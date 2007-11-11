@@ -268,6 +268,13 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
         CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     };
+    static cfg_opt_t mouse_layout_opts[] =
+    {
+        CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
+        CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
+        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+        CFG_STR((char *) "arg", NULL, CFGF_NONE),
+    };
     static cfg_opt_t mouse_title_opts[] =
     {
         CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
@@ -279,6 +286,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     {
         CFG_STR((char *) "modkey", (char *) "Mod4", CFGF_NONE),
         CFG_SEC((char *) "tag", mouse_tag_opts, CFGF_MULTI),
+        CFG_SEC((char *) "layout", mouse_layout_opts, CFGF_MULTI),
         CFG_SEC((char *) "title", mouse_title_opts, CFGF_MULTI),
         CFG_END()
     };
@@ -452,6 +460,19 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->buttons.tag[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
         awesomeconf->buttons.tag[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
         awesomeconf->buttons.tag[i].arg = NULL; /* for now */
+    }
+
+    /* Mouse: layout click bindings */
+    awesomeconf->buttons.nlayout = cfg_size(cfg_mouse, "layout");
+    awesomeconf->buttons.layout = p_new(Button, awesomeconf->buttons.nlayout);
+    for(i = 0; i < awesomeconf->buttons.nlayout; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg_mouse, "layout", i);
+        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
+            awesomeconf->buttons.layout[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
+        awesomeconf->buttons.layout[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
+        awesomeconf->buttons.layout[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
+        awesomeconf->buttons.layout[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
     }
 
     /* Mouse: title click bindings */

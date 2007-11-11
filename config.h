@@ -179,6 +179,8 @@ struct awesome_config
            int ntag;
            Button *title;
            int ntitle;
+           Button *layout;
+           int nlayout;
     } buttons;
     /** Number of keys binding in *keys */
     int nkeys;

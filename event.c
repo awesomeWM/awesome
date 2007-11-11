@@ -171,10 +171,19 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 }
             }
             x += awesomeconf[screen].statusbar.txtlayoutwidth;
-            if(ev->x < x && (ev->button == Button1 || ev->button == Button4))
-                uicb_setlayout(&awesomeconf[screen], "+1");
-            else if(ev->x < x && (ev->button == Button3 || ev->button == Button5))
-                uicb_setlayout(&awesomeconf[screen], "-1");
+            if(ev->x <x)
+            {
+                for(j = 0; j < awesomeconf[screen].buttons.nlayout; j++)
+                    if(ev->button == awesomeconf[screen].buttons.layout[j].button
+                       && (ev->state == awesomeconf[screen].buttons.layout[j].mod
+                           || ev->state == (awesomeconf[screen].buttons.layout[j].mod | awesomeconf[screen].numlockmask))
+                        && awesomeconf[screen].buttons.layout[j].func)
+                    {
+                        awesomeconf[screen].buttons.layout[j].func(&awesomeconf[screen],
+                                                                  awesomeconf[screen].buttons.layout[j].arg);
+                        return;
+                    }
+            }
             else
             {
                 for(j = 0; j < awesomeconf[screen].buttons.ntitle; j++)

@@ -70,6 +70,8 @@ cleanup_screen(awesome_config *awesomeconf)
         p_delete(&awesomeconf->keys[i].arg);
     for(i = 0; i< awesomeconf->buttons.ntitle; i++)
         p_delete(&awesomeconf->buttons.title[i].arg);
+    for(i = 0; i< awesomeconf->buttons.nlayout; i++)
+        p_delete(&awesomeconf->buttons.layout[i].arg);
     for(i = 0; i < awesomeconf->nlayouts; i++)
         p_delete(&awesomeconf->layouts[i].symbol);
     for(i = 0; i < awesomeconf->nrules; i++)
@@ -83,6 +85,7 @@ cleanup_screen(awesome_config *awesomeconf)
     p_delete(&awesomeconf->keys);
     p_delete(&awesomeconf->buttons.tag);
     p_delete(&awesomeconf->buttons.title);
+    p_delete(&awesomeconf->buttons.layout);
     p_delete(&awesomeconf->configpath);
 }
 
