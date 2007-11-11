@@ -53,6 +53,10 @@ drawstatusbar(awesome_config *awesomeconf)
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
     Drawable drawable;
 
+    /* don't waste our time */
+    if(awesomeconf->statusbar.position == BarOff)
+        return;
+
     drawable = XCreatePixmap(awesomeconf->display,
                              RootWindow(awesomeconf->display, awesomeconf->phys_screen),
                              awesomeconf->statusbar.width,
