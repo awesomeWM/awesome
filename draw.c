@@ -148,6 +148,7 @@ draw_rotate(Display *disp, int screen, Drawable drawable, int dw, int dh, double
 
     cairo_destroy(cr);
     cairo_surface_destroy(source);
+    cairo_surface_destroy(surface);
 
     return newdrawable;
 }
