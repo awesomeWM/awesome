@@ -268,14 +268,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
         CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     };
-    static cfg_opt_t mouse_layout_opts[] =
-    {
-        CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
-        CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
-        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
-        CFG_STR((char *) "arg", NULL, CFGF_NONE),
-    };
-    static cfg_opt_t mouse_title_opts[] =
+    static cfg_opt_t mouse_generic_opts[] =
     {
         CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
         CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
@@ -286,8 +279,8 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     {
         CFG_STR((char *) "modkey", (char *) "Mod4", CFGF_NONE),
         CFG_SEC((char *) "tag", mouse_tag_opts, CFGF_MULTI),
-        CFG_SEC((char *) "layout", mouse_layout_opts, CFGF_MULTI),
-        CFG_SEC((char *) "title", mouse_title_opts, CFGF_MULTI),
+        CFG_SEC((char *) "layout", mouse_generic_opts, CFGF_MULTI),
+        CFG_SEC((char *) "title", mouse_generic_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t opts[] =
