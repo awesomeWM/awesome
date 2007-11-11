@@ -58,7 +58,6 @@ cleanup_screen(awesome_config *awesomeconf)
 
     XftFontClose(awesomeconf->display, awesomeconf->font);
     XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf->phys_screen));
-    XFreePixmap(awesomeconf->display, awesomeconf->statusbar.drawable);
     XDestroyWindow(awesomeconf->display, awesomeconf->statusbar.window);
     XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurNormal]);
     XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurResize]);

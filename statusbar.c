@@ -51,6 +51,13 @@ drawstatusbar(awesome_config *awesomeconf)
 {
     int z, i, x = 0, y = 0, w;
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
+    Drawable drawable;
+
+    drawable = XCreatePixmap(awesomeconf->display,
+                             RootWindow(awesomeconf->display, awesomeconf->phys_screen),
+                             awesomeconf->statusbar.width,
+                             awesomeconf->statusbar.width,
+                             DefaultDepth(awesomeconf->display, awesomeconf->phys_screen));
 
     for(i = 0; i < awesomeconf->ntags; i++)
     {
@@ -61,7 +68,7 @@ drawstatusbar(awesome_config *awesomeconf)
             drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
                      awesomeconf->statusbar.height,
-                     awesomeconf->statusbar.drawable,
+                     drawable,
                      awesomeconf->statusbar.width,
                      awesomeconf->statusbar.height,
                      awesomeconf->font,
@@ -71,7 +78,7 @@ drawstatusbar(awesome_config *awesomeconf)
                               x, y,
                               (awesomeconf->font->height + 2) / 4,
                               (awesomeconf->font->height + 2) / 4,
-                              awesomeconf->statusbar.drawable,
+                              drawable,
                               awesomeconf->statusbar.width,
                               awesomeconf->statusbar.height,
                               sel && sel->tags[i],
@@ -82,7 +89,7 @@ drawstatusbar(awesome_config *awesomeconf)
             drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
                      awesomeconf->statusbar.height,
-                     awesomeconf->statusbar.drawable,
+                     drawable,
                      awesomeconf->statusbar.width,
                      awesomeconf->statusbar.height,
                      awesomeconf->font,
@@ -92,7 +99,7 @@ drawstatusbar(awesome_config *awesomeconf)
                               x, y,
                               (awesomeconf->font->height + 2) / 4,
                               (awesomeconf->font->height + 2) / 4,
-                              awesomeconf->statusbar.drawable,
+                              drawable,
                               awesomeconf->statusbar.width,
                               awesomeconf->statusbar.height,
                               sel && sel->tags[i],
@@ -103,7 +110,7 @@ drawstatusbar(awesome_config *awesomeconf)
     drawtext(awesomeconf->display, awesomeconf->phys_screen,
              x, y, awesomeconf->statusbar.txtlayoutwidth,
              awesomeconf->statusbar.height,
-             awesomeconf->statusbar.drawable,
+             drawable,
              awesomeconf->statusbar.width,
              awesomeconf->statusbar.height,
              awesomeconf->font,
@@ -120,7 +127,7 @@ drawstatusbar(awesome_config *awesomeconf)
     drawtext(awesomeconf->display, awesomeconf->phys_screen,
              x, y, w,
              awesomeconf->statusbar.height,
-             awesomeconf->statusbar.drawable,
+             drawable,
              awesomeconf->statusbar.width,
              awesomeconf->statusbar.height,
              awesomeconf->font,
@@ -133,7 +140,7 @@ drawstatusbar(awesome_config *awesomeconf)
             drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
                      awesomeconf->statusbar.height,
-                     awesomeconf->statusbar.drawable,
+                     drawable,
                      awesomeconf->statusbar.width,
                      awesomeconf->statusbar.height,
                      awesomeconf->font,
@@ -142,7 +149,7 @@ drawstatusbar(awesome_config *awesomeconf)
                 drawcircle(awesomeconf->display, awesomeconf->phys_screen,
                            x, y,
                            (awesomeconf->font->height + 2) / 4,
-                           awesomeconf->statusbar.drawable,
+                           drawable,
                            awesomeconf->statusbar.width,
                            awesomeconf->statusbar.height,
                            sel->ismax,
@@ -152,7 +159,7 @@ drawstatusbar(awesome_config *awesomeconf)
             drawtext(awesomeconf->display, awesomeconf->phys_screen,
                      x, y, w,
                      awesomeconf->statusbar.height,
-                     awesomeconf->statusbar.drawable,
+                     drawable,
                      awesomeconf->statusbar.width,
                      awesomeconf->statusbar.height,
                      awesomeconf->font,
@@ -161,26 +168,29 @@ drawstatusbar(awesome_config *awesomeconf)
     if(awesomeconf->statusbar.position == BarRight
        || awesomeconf->statusbar.position == BarLeft)
     {
+        Drawable d;
         if(awesomeconf->statusbar.position == BarRight)
-            draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
-                        awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
-                        awesomeconf->statusbar.height, M_PI_2,
-                        awesomeconf->statusbar.height, 0);
+            d = draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
+                            drawable, awesomeconf->statusbar.width,
+                            awesomeconf->statusbar.height, M_PI_2,
+                            awesomeconf->statusbar.height, 0);
         else
-            draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
-                        awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
-                        awesomeconf->statusbar.height, - M_PI_2,
-                        0, -awesomeconf->statusbar.height);
-        XCopyArea(awesomeconf->display, awesomeconf->statusbar.drawable,
+            d = draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
+                            drawable, awesomeconf->statusbar.width,
+                            awesomeconf->statusbar.height, - M_PI_2,
+                            0, -awesomeconf->statusbar.height);
+        XCopyArea(awesomeconf->display, d,
                   awesomeconf->statusbar.window,
                   DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,
                   awesomeconf->statusbar.height, awesomeconf->statusbar.width, 0, 0);
+        XFreePixmap(awesomeconf->display, d);
     }
     else
-        XCopyArea(awesomeconf->display, awesomeconf->statusbar.drawable,
+        XCopyArea(awesomeconf->display, drawable,
                   awesomeconf->statusbar.window,
                   DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,
                   awesomeconf->statusbar.width, awesomeconf->statusbar.height, 0, 0);
+    XFreePixmap(awesomeconf->display, drawable);
     XSync(awesomeconf->display, False);
 }
 
@@ -209,33 +219,19 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
     if(statusbar->dposition == BarRight || statusbar->dposition == BarLeft)
-    {
         statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0,
                                           statusbar->height,
                                           statusbar->width,
                                           0, DefaultDepth(disp, phys_screen), CopyFromParent,
                                           DefaultVisual(disp, phys_screen),
                                           CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-        statusbar->drawable = XCreatePixmap(disp,
-                                            RootWindow(disp, phys_screen),
-                                            statusbar->width,
-                                            statusbar->width,
-                                            DefaultDepth(disp, phys_screen));
-    }
     else
-    {
         statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0,
                                           statusbar->width,
                                           statusbar->height,
                                           0, DefaultDepth(disp, phys_screen), CopyFromParent,
                                           DefaultVisual(disp, phys_screen),
                                           CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-        statusbar->drawable = XCreatePixmap(disp,
-                                            RootWindow(disp, phys_screen),
-                                            statusbar->width,
-                                            statusbar->height,
-                                            DefaultDepth(disp, phys_screen));
-    }
     XDefineCursor(disp, statusbar->window, cursor);
     updatebarpos(disp, *statusbar);
     XMapRaised(disp, statusbar->window);

@@ -85,8 +85,6 @@ typedef struct
     int position;
     /** Window */
     Window window;
-    /** Drawable object */
-    Drawable drawable;
     /** Screen */
     int screen;
 } Statusbar;

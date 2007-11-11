@@ -125,13 +125,18 @@ drawcircle(Display *disp, int screen, int x, int y, int r, Drawable drawable, in
     cairo_surface_destroy(surface);
 }
 
-void
+Drawable
 draw_rotate(Display *disp, int screen, Drawable drawable, int dw, int dh, double angle, int tx, int ty)
 {
     cairo_surface_t *surface, *source;
     cairo_t *cr;
-    
-    surface = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dw);
+    Drawable newdrawable;
+
+    newdrawable = XCreatePixmap(disp,
+                                RootWindow(disp, screen),
+                                dw, dw,
+                                DefaultDepth(disp, screen));
+    surface = cairo_xlib_surface_create(disp, newdrawable, DefaultVisual(disp, screen), dw, dw);
     source = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dw);
     cr = cairo_create (surface);
 
@@ -143,6 +148,8 @@ draw_rotate(Display *disp, int screen, Drawable drawable, int dw, int dh, double
 
     cairo_destroy(cr);
     cairo_surface_destroy(source);
+
+    return newdrawable;
 }
 
 unsigned short
