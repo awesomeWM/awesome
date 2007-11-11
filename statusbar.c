@@ -178,7 +178,7 @@ drawstatusbar(awesome_config *awesomeconf)
             d = draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
                             drawable, awesomeconf->statusbar.width,
                             awesomeconf->statusbar.height, - M_PI_2,
-                            0, -awesomeconf->statusbar.height);
+                            0, awesomeconf->statusbar.width);
         XCopyArea(awesomeconf->display, d,
                   awesomeconf->statusbar.window,
                   DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,
