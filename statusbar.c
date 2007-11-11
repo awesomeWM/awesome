@@ -20,6 +20,7 @@
  */
 
 #include <stdio.h>
+#include <math.h>
 
 #include "layout.h"
 #include "statusbar.h"
@@ -46,7 +47,7 @@ isoccupied(Client **head, unsigned int t, int screen)
 }
 
 void
-drawstatusbar(awesome_config * awesomeconf)
+drawstatusbar(awesome_config *awesomeconf)
 {
     int z, i, x = 0, y = 0, w;
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
@@ -157,9 +158,22 @@ drawstatusbar(awesome_config * awesomeconf)
                      awesomeconf->font,
                      NULL, awesomeconf->colors_normal);
     }
-    XCopyArea(awesomeconf->display, awesomeconf->statusbar.drawable,
-              awesomeconf->statusbar.window, DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,
-              awesomeconf->statusbar.width, awesomeconf->statusbar.height, 0, 0);
+    if(awesomeconf->statusbar.position == BarRight
+       || awesomeconf->statusbar.position == BarLeft)
+    {
+        draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
+                    awesomeconf->statusbar.drawable, awesomeconf->statusbar.width,
+                    awesomeconf->statusbar.height, M_PI * 1.5);
+        XCopyArea(awesomeconf->display, awesomeconf->statusbar.drawable,
+                  awesomeconf->statusbar.window,
+                  DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,
+                  awesomeconf->statusbar.height, awesomeconf->statusbar.width, 0, 0);
+    }
+    else
+        XCopyArea(awesomeconf->display, awesomeconf->statusbar.drawable,
+                  awesomeconf->statusbar.window,
+                  DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,
+                  awesomeconf->statusbar.width, awesomeconf->statusbar.height, 0, 0);
     XSync(awesomeconf->display, False);
 }
 
@@ -170,8 +184,13 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
     int i, phys_screen = get_phys_screen(disp, screen);
     ScreenInfo *si = get_screen_info(disp, screen, NULL);
 
-    statusbar->width = si[screen].width;
     statusbar->height = font->height * 1.5;
+
+    if(statusbar->position == BarRight || statusbar->position == BarLeft)
+        statusbar->width = si[screen].height;
+    else
+        statusbar->width = si[screen].width;
+
     p_delete(&si);
 
     statusbar->screen = screen;
@@ -182,20 +201,37 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0,
-                                      statusbar->width,
-                                      statusbar->height,
-                                      0, DefaultDepth(disp, phys_screen), CopyFromParent,
-                                      DefaultVisual(disp, phys_screen),
-                                      CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+    if(statusbar->dposition == BarRight || statusbar->dposition == BarLeft)
+    {
+        statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0,
+                                          statusbar->height,
+                                          statusbar->width,
+                                          0, DefaultDepth(disp, phys_screen), CopyFromParent,
+                                          DefaultVisual(disp, phys_screen),
+                                          CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+        statusbar->drawable = XCreatePixmap(disp,
+                                            RootWindow(disp, phys_screen),
+                                            statusbar->width,
+                                            statusbar->width,
+                                            DefaultDepth(disp, phys_screen));
+    }
+    else
+    {
+        statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0,
+                                          statusbar->width,
+                                          statusbar->height,
+                                          0, DefaultDepth(disp, phys_screen), CopyFromParent,
+                                          DefaultVisual(disp, phys_screen),
+                                          CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+        statusbar->drawable = XCreatePixmap(disp,
+                                            RootWindow(disp, phys_screen),
+                                            statusbar->width,
+                                            statusbar->height,
+                                            DefaultDepth(disp, phys_screen));
+    }
     XDefineCursor(disp, statusbar->window, cursor);
     updatebarpos(disp, *statusbar);
     XMapRaised(disp, statusbar->window);
-    statusbar->drawable = XCreatePixmap(disp,
-                                        RootWindow(disp, phys_screen),
-                                        statusbar->width,
-                                        statusbar->height,
-                                        DefaultDepth(disp, phys_screen));
 
     for(i = 0; i < nlayouts; i++)
         statusbar->txtlayoutwidth = MAX(statusbar->txtlayoutwidth,
@@ -212,6 +248,9 @@ updatebarpos(Display *disp, Statusbar statusbar)
     {
       default:
         XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].y_org);
+        break;
+      case BarRight:
+        XMoveWindow(disp, statusbar.window, si[statusbar.screen].width - statusbar.width, si[statusbar.screen].y_org);
         break;
       case BarBot:
         XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].height - statusbar.height);

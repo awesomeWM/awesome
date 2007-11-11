@@ -125,6 +125,25 @@ drawcircle(Display *disp, int screen, int x, int y, int r, Drawable drawable, in
     cairo_surface_destroy(surface);
 }
 
+void
+draw_rotate(Display *disp, int screen, Drawable drawable, int dw, int dh, double angle)
+{
+    cairo_surface_t *surface, *source;
+    cairo_t *cr;
+    
+    surface = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dw);
+    source = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dw);
+    cr = cairo_create (surface);
+    cairo_rotate(cr, M_PI / 2);
+    cairo_translate(cr, 0.0, -dh);
+
+    cairo_set_source_surface(cr, source, 0.0, 0.0);
+    cairo_paint_with_alpha(cr, 1.0);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(source);
+}
+
 unsigned short
 textwidth(Display *disp, XftFont *font, char *text)
 {

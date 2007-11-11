@@ -370,6 +370,10 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->statusbar.dposition = BarOff;
     else if(tmp && !a_strncmp(tmp, "bottom", 6))
         awesomeconf->statusbar.dposition = BarBot;
+    else if(tmp && !a_strncmp(tmp, "right", 5))
+        awesomeconf->statusbar.dposition = BarRight;
+    else if(tmp && !a_strncmp(tmp, "left", 4))
+        awesomeconf->statusbar.dposition = BarLeft;
     else
         awesomeconf->statusbar.dposition = BarTop;
 

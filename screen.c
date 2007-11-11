@@ -52,13 +52,19 @@ get_screen_info(Display *disp, int screen, Statusbar *statusbar)
 
     if(statusbar)
         for(i = 0; i < screen_number; i++)
-        {
-            if(statusbar->position == BarTop
-               || statusbar->position == BarBot)
-                si[i].height -= statusbar->height;
-            if(statusbar->position == BarTop)
+            switch(statusbar->position)
+            {
+              case BarTop:
                 si[i].y_org += statusbar->height;
-        }
+              case BarBot:
+                si[i].height -= statusbar->height;
+                break;
+              case BarLeft:
+                si[i].x_org += statusbar->height;
+              case BarRight:
+                si[i].width -=  statusbar->height;
+                break;
+            }
 
     return si;
 }

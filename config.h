@@ -28,7 +28,7 @@
 
 /** Bar possible position */
 enum
-{ BarTop, BarBot, BarOff };
+{ BarTop, BarBot, BarLeft, BarRight, BarOff };
 
 enum
 { ColBorder, ColFG, ColBG, ColLast };   /* color */
