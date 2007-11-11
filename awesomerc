@@ -1,17 +1,16 @@
 # Configuration file for awesome
 
-general
-{
-    border = 1
-    snap = 8
-    resize_hints = true
-    opacity_unfocused = 100
-    focus_move_pointer = false
-    font = "fixed-12"
-}
-
 screen 0
 {
+    general
+    {
+        border = 1
+        snap = 8
+        resize_hints = true
+        opacity_unfocused = 100
+        focus_move_pointer = false
+        font = "fixed-12"
+    }
     colors
     {
         normal_border = "#111111"
