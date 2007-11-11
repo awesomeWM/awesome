@@ -177,6 +177,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR((char *) "layout", (char *) "tile", CFGF_NONE),
         CFG_FLOAT((char *) "mwfact", 0.5, CFGF_NONE),
         CFG_INT((char *) "nmaster", 1, CFGF_NONE),
+        CFG_INT((char *) "ncol", 1, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t tags_opts[] =
@@ -192,7 +193,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     static cfg_opt_t layouts_opts[] =
     {
         CFG_SEC((char *) "layout", layout_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_INT((char *) "ncol", 1, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t screen_opts[] =
@@ -337,8 +337,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
     }
 
-    awesomeconf->ncol = cfg_getint(cfg_layouts, "ncol");
-
     if(!awesomeconf->nlayouts)
         eprint("awesome: fatal: no default layout available\n");
 
@@ -377,6 +375,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->tags[i].layout = &awesomeconf->layouts[k];
         awesomeconf->tags[i].mwfact = cfg_getfloat(cfgsectmp, "mwfact");
         awesomeconf->tags[i].nmaster = cfg_getint(cfgsectmp, "nmaster");
+        awesomeconf->tags[i].ncol = cfg_getint(cfgsectmp, "ncol");
     }
 
     

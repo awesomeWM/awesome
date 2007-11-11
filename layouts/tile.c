@@ -48,13 +48,14 @@ void
 uicb_setncol(awesome_config *awesomeconf,
              const char * arg)
 {
-    Layout *curlay = get_current_layout(awesomeconf->tags, awesomeconf->ntags);
+    Tag *curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags);
+    Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
 
-    if((awesomeconf->ncol = (int) compute_new_value_from_arg(arg, (double) awesomeconf->ncol)) < 1)
-        awesomeconf->ncol = 1;
+    if((curtag->ncol = (int) compute_new_value_from_arg(arg, (double) curtag->ncol)) < 1)
+        curtag->ncol = 1;
 
     arrange(awesomeconf);
 }
@@ -129,7 +130,7 @@ _tile(awesome_config *awesomeconf, const Bool right)
     else
         mh = mw = 0;
 
-    real_ncol = MIN(otherwin, awesomeconf->ncol);
+    real_ncol = MIN(otherwin, curtag->ncol);
 
     for(i = 0, c = *awesomeconf->clients; c; c = c->next)
     {

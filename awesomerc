@@ -39,6 +39,7 @@ screen 0
         }
         tag 3
         {
+            ncol = 2
             layout = "tile"
         }
         tag 4
@@ -71,7 +72,6 @@ screen 0
 
 layouts
 {
-    ncol = 1
     layout tile
     {
         symbol = "[]="
