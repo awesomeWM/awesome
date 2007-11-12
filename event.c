@@ -478,12 +478,12 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
     {
         switch (ev->atom)
         {
-        case XA_WM_TRANSIENT_FOR:
+          case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating && (c->isfloating = (get_client_bywin(*awesomeconf->clients, trans) != NULL)))
                 arrange(&awesomeconf[c->screen]);
             break;
-        case XA_WM_NORMAL_HINTS:
+          case XA_WM_NORMAL_HINTS:
             updatesizehints(c);
             break;
         }
