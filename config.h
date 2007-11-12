@@ -68,6 +68,7 @@ struct Button
     unsigned int button;
     void (*func) (awesome_config *, char *);
     char *arg;
+    Button *next;
 };
 
 /** Status bar */
@@ -174,13 +175,9 @@ struct awesome_config
     struct
     {
            Button *tag;
-           int ntag;
            Button *title;
-           int ntitle;
            Button *layout;
-           int nlayout;
            Button *root;
-           int nroot;
     } buttons;
     /** Number of keys binding in *keys */
     int nkeys;

@@ -141,19 +141,17 @@ resizemouse(Client * c, awesome_config *awesomeconf)
 static void
 handle_mouse_button_press(awesome_config *awesomeconf,
                           unsigned int button, unsigned int state, unsigned int numlockmask,
-                          Button *buttons, int nbuttons, char *arg)
+                          Button *buttons, char *arg)
 {
-    int i;
+    Button *b;
 
-    for(i = 0; i < nbuttons; i++)
-        if(button == buttons[i].button
-           && (state == buttons[i].mod || state == (buttons[i].mod | numlockmask))
-           && buttons[i].func)
+    for(b = buttons; b; b = b->next)
+        if(button == b->button && (state == b->mod || state == (b->mod | numlockmask)) && b->func)
         {
             if(arg)
-                buttons[i].func(awesomeconf, arg);
+                b->func(awesomeconf, arg);
             else
-                buttons[i].func(awesomeconf, buttons[i].arg);
+                b->func(awesomeconf, b->arg);
             return;
         }
 }
@@ -182,7 +180,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                     snprintf(arg, sizeof(arg), "%d", i + 1);
                     handle_mouse_button_press(&awesomeconf[screen],
                                               ev->button, ev->state, awesomeconf->numlockmask,
-                                              awesomeconf->buttons.tag, awesomeconf->buttons.ntag, arg);
+                                              awesomeconf[screen].buttons.tag, arg);
                     return;
                 }
             }
@@ -194,11 +192,11 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 || (awesomeconf[screen].statusbar.position == BarLeft && ev->y > awesomeconf[screen].statusbar.width - x))
                 handle_mouse_button_press(&awesomeconf[screen],
                                           ev->button, ev->state, awesomeconf->numlockmask,
-                                          awesomeconf->buttons.layout, awesomeconf->buttons.nlayout, NULL);
+                                          awesomeconf[screen].buttons.layout, NULL);
             else
                 handle_mouse_button_press(&awesomeconf[screen],
                                           ev->button, ev->state, awesomeconf->numlockmask,
-                                          awesomeconf->buttons.title, awesomeconf->buttons.ntitle, NULL);
+                                          awesomeconf[screen].buttons.title, NULL);
             return;
         }
 
@@ -212,7 +210,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
            {
                restack(&awesomeconf[c->screen]);
                window_grabbuttons(c->display, c->phys_screen, c->win,
-                                  True, True, awesomeconf->buttons.root, awesomeconf->buttons.nroot,
+                                  True, True, awesomeconf->buttons.root,
                                   awesomeconf->modkey, awesomeconf->numlockmask);
            }
         }
@@ -258,7 +256,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 screen = get_screen_bycoord(e->xany.display, x, y);
                 handle_mouse_button_press(&awesomeconf[screen],
                                           ev->button, ev->state, awesomeconf->numlockmask,
-                                          awesomeconf->buttons.root, awesomeconf->buttons.nroot, NULL);
+                                          awesomeconf[screen].buttons.root, NULL);
                 return;
             }
 }
@@ -369,7 +367,7 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
                 || get_current_layout(awesomeconf[c->screen].tags,
                                     awesomeconf[c->screen].ntags)->arrange == layout_floating)
             window_grabbuttons(c->display, c->phys_screen, c->win,
-                               True, False, awesomeconf->buttons.root, awesomeconf->buttons.nroot,
+                               True, False, awesomeconf->buttons.root,
                                awesomeconf->modkey, awesomeconf->numlockmask);
     }
     else

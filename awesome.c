@@ -55,6 +55,7 @@ void
 cleanup_screen(awesome_config *awesomeconf)
 {
     int i;
+    Button *b, *bn;
 
     XftFontClose(awesomeconf->display, awesomeconf->font);
     XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf->phys_screen));
@@ -67,10 +68,29 @@ cleanup_screen(awesome_config *awesomeconf)
         p_delete(&awesomeconf->tags[i].name);
     for(i = 0; i < awesomeconf->nkeys; i++)
         p_delete(&awesomeconf->keys[i].arg);
-    for(i = 0; i< awesomeconf->buttons.ntitle; i++)
-        p_delete(&awesomeconf->buttons.title[i].arg);
-    for(i = 0; i< awesomeconf->buttons.nlayout; i++)
-        p_delete(&awesomeconf->buttons.layout[i].arg);
+    for(b = awesomeconf->buttons.tag; b; b = bn)
+    {
+        bn = b->next;
+        p_delete(&b);
+    }
+    for(b = awesomeconf->buttons.title; b; b = bn)
+    {
+        bn = b->next;
+        p_delete(&b->arg);
+        p_delete(&b);
+    }
+    for(b = awesomeconf->buttons.layout; b; b = bn)
+    {
+        bn = b->next;
+        p_delete(&b->arg);
+        p_delete(&b);
+    }
+    for(b = awesomeconf->buttons.root; b; b = bn)
+    {
+        bn = b->next;
+        p_delete(&b->arg);
+        p_delete(&b);
+    }
     for(i = 0; i < awesomeconf->nlayouts; i++)
         p_delete(&awesomeconf->layouts[i].symbol);
     for(i = 0; i < awesomeconf->nrules; i++)
@@ -82,9 +102,6 @@ cleanup_screen(awesome_config *awesomeconf)
     p_delete(&awesomeconf->layouts);
     p_delete(&awesomeconf->rules);
     p_delete(&awesomeconf->keys);
-    p_delete(&awesomeconf->buttons.tag);
-    p_delete(&awesomeconf->buttons.title);
-    p_delete(&awesomeconf->buttons.layout);
     p_delete(&awesomeconf->configpath);
 }
 
