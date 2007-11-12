@@ -391,11 +391,12 @@ handle_event_expose(XEvent * e, awesome_config *awesomeconf)
 void
 handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
 {
-    int i, screen, x, y, d;
+    int screen, x, y, d;
     unsigned int m;
     KeySym keysym;
     XKeyEvent *ev = &e->xkey;
     Window dummy;
+    Key *k;
 
     keysym = XKeycodeToKeysym(e->xany.display, (KeyCode) ev->keycode, 0);
 
@@ -412,11 +413,10 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
             break;
         }
 
-    for(i = 0; i < awesomeconf[screen].nkeys; i++)
-        if(keysym == awesomeconf[screen].keys[i].keysym
-           && CLEANMASK(awesomeconf[screen].keys[i].mod, awesomeconf[screen])
-           == CLEANMASK(ev->state, awesomeconf[screen]) && awesomeconf[screen].keys[i].func)
-            awesomeconf[screen].keys[i].func(&awesomeconf[screen], awesomeconf[screen].keys[i].arg);
+    for(k = awesomeconf[screen].keys; k; k = k->next)
+        if(keysym == k->keysym && k->func
+           && CLEANMASK(k->mod, awesomeconf[screen]) == CLEANMASK(ev->state, awesomeconf[screen]))
+            k->func(&awesomeconf[screen], k->arg);
 }
 
 void
@@ -529,19 +529,18 @@ handle_event_randr_screen_change_notify(XEvent *e,
 void
 grabkeys(awesome_config *awesomeconf)
 {
-    int i;
+    Key *k;
     KeyCode code;
 
     XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf->phys_screen));
-    for(i = 0; i < awesomeconf->nkeys; i++)
+    for(k = awesomeconf->keys; k; k = k->next)
     {
-        if((code = XKeysymToKeycode(awesomeconf->display, awesomeconf->keys[i].keysym)) == NoSymbol)
+        if((code = XKeysymToKeycode(awesomeconf->display, k->keysym)) == NoSymbol)
             continue;
-        XGrabKey(awesomeconf->display, code, awesomeconf->keys[i].mod, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(awesomeconf->display, code, awesomeconf->keys[i].mod | LockMask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(awesomeconf->display, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(awesomeconf->display, code, awesomeconf->keys[i].mod | awesomeconf->numlockmask | LockMask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True,
-                 GrabModeAsync, GrabModeAsync);
+        XGrabKey(awesomeconf->display, code, k->mod, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(awesomeconf->display, code, k->mod | LockMask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(awesomeconf->display, code, k->mod | awesomeconf->numlockmask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(awesomeconf->display, code, k->mod | awesomeconf->numlockmask | LockMask, RootWindow(awesomeconf->display, awesomeconf->phys_screen), True, GrabModeAsync, GrabModeAsync);
     }
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

@@ -336,10 +336,11 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar,
           *cfg_tags, *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp;
     int i = 0, k = 0, ret;
-    unsigned int j = 0;
+    unsigned int j = 0, l = 0;
     const char *tmp, *homedir;
     char *confpath, buf[2];
     ssize_t confpath_len;
+    Key *key = NULL;
 
     if(confpatharg)
         confpath = a_strdup(confpatharg);
@@ -502,17 +503,30 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
     /* Keys */
     awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
-    awesomeconf->nkeys = cfg_size(cfg_keys, "key");
-    awesomeconf->keys = p_new(Key, awesomeconf->nkeys);
-    for(i = 0; i < awesomeconf->nkeys; i++)
+
+    if(cfg_size(cfg_keys, "key"))
     {
-        cfgsectmp = cfg_getnsec(cfg_keys, "key", i);
-        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
-            awesomeconf->keys[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
-        awesomeconf->keys[i].keysym = XStringToKeysym(cfg_getstr(cfgsectmp, "key"));
-        awesomeconf->keys[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
-        awesomeconf->keys[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
+        awesomeconf->keys = key = p_new(Key, 1);
+        for(j = 0; j < cfg_size(cfg_keys, "key"); j++)
+        {
+            cfgsectmp = cfg_getnsec(cfg_keys, "key", j);
+            for(l = 0; l < cfg_size(cfgsectmp, "modkey"); l++)
+                key->mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", l));
+            key->keysym = XStringToKeysym(cfg_getstr(cfgsectmp, "key"));
+            key->func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
+            key->arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
+
+            if(j < cfg_size(cfg_keys, "key") - 1)
+            {
+                key->next = p_new(Key, 1);
+                key = key->next;
+            }
+            else
+                key->next = NULL;
+        }
     }
+    else
+        awesomeconf->keys = NULL;
 
     /* Free! Like a river! */
     cfg_free(cfg);

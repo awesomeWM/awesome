@@ -53,13 +53,15 @@ typedef struct
     void (*arrange) (awesome_config *);
 } Layout;
 
-typedef struct
+typedef struct Key Key;
+struct Key
 {
     unsigned long mod;
     KeySym keysym;
     void (*func) (awesome_config *, char *);
     char *arg;
-} Key;
+    Key *next;
+};
 
 typedef struct Button Button;
 struct Button
@@ -179,8 +181,6 @@ struct awesome_config
            Button *layout;
            Button *root;
     } buttons;
-    /** Number of keys binding in *keys */
-    int nkeys;
     /** Default modkey */
     KeySym modkey;
     /** Numlock mask */

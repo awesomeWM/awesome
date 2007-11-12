@@ -56,6 +56,7 @@ cleanup_screen(awesome_config *awesomeconf)
 {
     int i;
     Button *b, *bn;
+    Key *k, *kn;
 
     XftFontClose(awesomeconf->display, awesomeconf->font);
     XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf->phys_screen));
@@ -66,8 +67,11 @@ cleanup_screen(awesome_config *awesomeconf)
 
     for(i = 0; i < awesomeconf->ntags; i++)
         p_delete(&awesomeconf->tags[i].name);
-    for(i = 0; i < awesomeconf->nkeys; i++)
-        p_delete(&awesomeconf->keys[i].arg);
+    for(k = awesomeconf->keys; k; k = kn)
+    {
+        kn = k->next;
+        p_delete(&k);
+    }
     for(b = awesomeconf->buttons.tag; b; b = bn)
     {
         bn = b->next;
@@ -101,7 +105,6 @@ cleanup_screen(awesome_config *awesomeconf)
     p_delete(&awesomeconf->tags);
     p_delete(&awesomeconf->layouts);
     p_delete(&awesomeconf->rules);
-    p_delete(&awesomeconf->keys);
     p_delete(&awesomeconf->configpath);
 }
 
