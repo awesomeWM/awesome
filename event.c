@@ -102,11 +102,21 @@ uicb_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unus
     }
 }
 
-static void
-resizemouse(Client * c, awesome_config *awesomeconf)
+void
+uicb_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
 {
     int ocx, ocy, nw, nh;
     XEvent ev;
+    Client *c = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
+
+    if(!c)
+        return;
+
+    if((get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange != layout_floating)
+       && !c->isfloating)
+        uicb_togglefloating(awesomeconf, "DUMMY");
+    else
+        restack(&awesomeconf[c->screen]);
 
     ocx = c->x;
     ocy = c->y;
@@ -236,15 +246,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 uicb_zoom(&awesomeconf[c->screen], NULL);
         }
         else if(ev->button == Button3)
-        {
-            if((get_current_layout(awesomeconf[c->screen].tags,
-                                   awesomeconf[c->screen].ntags)->arrange != layout_floating)
-               && !c->isfloating)
-                uicb_togglefloating(&awesomeconf[c->screen], "DUMMY");
-            else
-                restack(&awesomeconf[c->screen]);
-            resizemouse(c, awesomeconf);
-        }
+            uicb_resizemouse(&awesomeconf[c->screen], NULL);
         else if(ev->button == Button4)
             uicb_settrans(&awesomeconf[c->screen], "+5");
         else if(ev->button == Button5)

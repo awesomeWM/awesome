@@ -104,6 +104,7 @@ const NameFuncLink UicbList[] = {
     {"setstatustext", uicb_setstatustext},
     /* event.c */
     {"movemouse", uicb_movemouse},
+    {"resizemouse", uicb_resizemouse},
     {NULL, NULL}
 };
 
