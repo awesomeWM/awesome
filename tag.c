@@ -58,7 +58,7 @@ applyrules(Client *c, awesome_config *awesomeconf)
                 }
                 else
                     c->tags[j] = False;
-            if(r->screen != -1 && r->screen != awesomeconf->screen)
+            if(r->screen != RULE_NOSCREEN && r->screen != awesomeconf->screen)
             {
                 screen = r->screen;
                 move_client_to_screen(c, &awesomeconf[r->screen - awesomeconf->screen], True);

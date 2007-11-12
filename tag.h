@@ -24,6 +24,8 @@
 
 #include "client.h"
 
+#define RULE_NOSCREEN                                     -1
+
 /** Check if a client is tiled */
 #define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, screen, tags, ntags))
 

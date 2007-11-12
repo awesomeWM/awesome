@@ -363,7 +363,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     /* rearrange to display new window */
     arrange(awesomeconf);
-    if(newscreen != -1)
+    if(newscreen != RULE_NOSCREEN)
         arrange(&awesomeconf[newscreen - awesomeconf->screen]);
 }
 

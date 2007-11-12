@@ -283,7 +283,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR((char *) "name", (char *) "", CFGF_NONE),
         CFG_STR((char *) "tags", (char *) "", CFGF_NONE),
         CFG_BOOL((char *) "float", cfg_false, CFGF_NONE),
-        CFG_INT((char *) "screen", -1, CFGF_NONE),
+        CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t rules_opts[] =
