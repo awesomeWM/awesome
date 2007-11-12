@@ -212,7 +212,8 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
            {
                restack(&awesomeconf[c->screen]);
                window_grabbuttons(c->display, c->phys_screen, c->win,
-                                  True, True, awesomeconf->modkey, awesomeconf->numlockmask);
+                                  True, True, awesomeconf->buttons.root, awesomeconf->buttons.nroot,
+                                  awesomeconf->modkey, awesomeconf->numlockmask);
            }
         }
         else if(ev->button == Button1)
@@ -255,11 +256,10 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                && XQueryPointer(e->xany.display, ev->window, &wdummy, &wdummy, &x, &y, &i, &i, &udummy))
             {
                 screen = get_screen_bycoord(e->xany.display, x, y);
-                if(ev->button == Button4)
-                    uicb_tag_viewnext(&awesomeconf[screen], NULL);
-                else if(ev->button == Button5)
-                    uicb_tag_viewprev(&awesomeconf[screen], NULL);
-                break;
+                handle_mouse_button_press(&awesomeconf[screen],
+                                          ev->button, ev->state, awesomeconf->numlockmask,
+                                          awesomeconf->buttons.root, awesomeconf->buttons.nroot, NULL);
+                return;
             }
 }
 
@@ -369,7 +369,8 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
                 || get_current_layout(awesomeconf[c->screen].tags,
                                     awesomeconf[c->screen].ntags)->arrange == layout_floating)
             window_grabbuttons(c->display, c->phys_screen, c->win,
-                               True, False, awesomeconf->modkey, awesomeconf->numlockmask);
+                               True, False, awesomeconf->buttons.root, awesomeconf->buttons.nroot,
+                               awesomeconf->modkey, awesomeconf->numlockmask);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)

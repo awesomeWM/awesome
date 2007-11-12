@@ -115,7 +115,7 @@ static const KeyMod KeyModList[] =
     {"Mod3", Mod3Mask},
     {"Mod4", Mod4Mask},
     {"Mod5", Mod5Mask},
-    {NULL, 0}
+    {NULL, NoSymbol}
 };
 
 /** List of button name and corresponding X11 mask codes */
@@ -152,7 +152,7 @@ key_mask_lookup(const char *keyname)
             if(!a_strcmp(keyname, KeyModList[i].name))
                 return KeyModList[i].keysym;
 
-    return 0;
+    return NoSymbol;
 }
 
 /** Lookup for a mouse button from its name
@@ -281,6 +281,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_SEC((char *) "tag", mouse_tag_opts, CFGF_MULTI),
         CFG_SEC((char *) "layout", mouse_generic_opts, CFGF_MULTI),
         CFG_SEC((char *) "title", mouse_generic_opts, CFGF_MULTI),
+        CFG_SEC((char *) "root", mouse_generic_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t opts[] =
@@ -483,6 +484,19 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->buttons.title[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
         awesomeconf->buttons.title[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
         awesomeconf->buttons.title[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
+    }
+
+    /* Mouse: root window click bindings */
+    awesomeconf->buttons.nroot = cfg_size(cfg_mouse, "root");
+    awesomeconf->buttons.root = p_new(Button, awesomeconf->buttons.nroot);
+    for(i = 0; i < awesomeconf->buttons.nroot; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg_mouse, "root", i);
+        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
+            awesomeconf->buttons.root[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
+        awesomeconf->buttons.root[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
+        awesomeconf->buttons.root[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
+        awesomeconf->buttons.root[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
     }
 
     /* Keys */

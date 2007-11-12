@@ -147,7 +147,23 @@ mouse
     {
         button = "5"
         command = "view_tag_previous"
-    }    
+    }
+    root
+    {
+        button = "3"
+        command = "spawn"
+        arg = "exec urxvt"
+    }
+    root
+    {
+        button = "4"
+        command = "view_tag_next"
+    }
+    root
+    {
+        button = "5"
+        command = "view_tag_previous"
+    }
 }
 
 keys
