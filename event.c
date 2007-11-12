@@ -458,13 +458,9 @@ handle_event_maprequest(XEvent * e, awesome_config *awesomeconf)
     if(!get_client_bywin(*awesomeconf->clients, ev->window))
     {
         for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
-        if(screen == 0)
-        {
-            if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
-                             &dummy, &dummy, &x, &y, &d, &d, &m))
-                screen = get_screen_bycoord(e->xany.display, x, y);
-
-        }
+        if(screen == 0 && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
+                                        &dummy, &dummy, &x, &y, &d, &d, &m))
+            screen = get_screen_bycoord(e->xany.display, x, y);
         client_manage(ev->window, &wa, &awesomeconf[screen]);
     }
 }
