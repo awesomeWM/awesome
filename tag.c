@@ -35,6 +35,7 @@ applyrules(Client *c, awesome_config *awesomeconf)
     Bool matched = False;
     XClassHint ch = { 0, 0 };
     char *prop;
+    Rule *r;
 
     XGetClassHint(c->display, c->win, &ch);
 
@@ -45,25 +46,22 @@ applyrules(Client *c, awesome_config *awesomeconf)
     /* rule matching */
     snprintf(prop, len + 3, "%s:%s:%s",
              ch.res_class ? ch.res_class : "", ch.res_name ? ch.res_name : "", c->name);
-    for(i = 0; i < awesomeconf->nrules; i++)
-        if(awesomeconf->rules[i].propregex && !regexec(awesomeconf->rules[i].propregex, prop, 1, &tmp, 0))
+    for(r = awesomeconf->rules; r; r = r->next)
+        if(r->propregex && !regexec(r->propregex, prop, 1, &tmp, 0))
         {
-            c->isfloating = awesomeconf->rules[i].isfloating;
-            for(j = 0; awesomeconf->rules[i].tagregex && j < awesomeconf->ntags; j++)
-                if(!regexec(awesomeconf->rules[i].tagregex, awesomeconf->tags[j].name, 1, &tmp, 0))
+            c->isfloating = r->isfloating;
+            for(j = 0; r->tagregex && j < awesomeconf->ntags; j++)
+                if(!regexec(r->tagregex, awesomeconf->tags[j].name, 1, &tmp, 0))
                 {
                     matched = True;
                     c->tags[j] = True;
                 }
                 else
                     c->tags[j] = False;
-            if(awesomeconf->rules[i].screen != -1
-               && awesomeconf->rules[i].screen != awesomeconf->screen)
+            if(r->screen != -1 && r->screen != awesomeconf->screen)
             {
-                screen = awesomeconf->rules[i].screen;
-                move_client_to_screen(c,
-                                      &awesomeconf[awesomeconf->rules[i].screen - awesomeconf->screen],
-                                      True);
+                screen = r->screen;
+                move_client_to_screen(c, &awesomeconf[r->screen - awesomeconf->screen], True);
             }
         }
     p_delete(&prop);
@@ -79,28 +77,28 @@ applyrules(Client *c, awesome_config *awesomeconf)
 }
 
 void
-compileregs(Rule * rules, int nrules)
+compileregs(Rule *rules)
 {
-    int i;
+    Rule *r;
     regex_t *reg;
 
-    for(i = 0; i < nrules; i++)
+    for(r = rules; r; r = r->next)
     {
-        if(rules[i].prop)
+        if(r->prop)
         {
             reg = p_new(regex_t, 1);
-            if(regcomp(reg, rules[i].prop, REG_EXTENDED))
+            if(regcomp(reg, r->prop, REG_EXTENDED))
                 p_delete(&reg);
             else
-                rules[i].propregex = reg;
+                r->propregex = reg;
         }
-        if(rules[i].tags)
+        if(r->tags)
         {
             reg = p_new(regex_t, 1);
-            if(regcomp(reg, rules[i].tags, REG_EXTENDED))
+            if(regcomp(reg, r->tags, REG_EXTENDED))
                 p_delete(&reg);
             else
-                rules[i].tagregex = reg;
+                r->tagregex = reg;
         }
     }
 }

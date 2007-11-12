@@ -36,7 +36,8 @@ enum
 enum
 { CurNormal, CurResize, CurMove, CurLast };     /* cursor */
 
-typedef struct
+typedef struct Rule Rule;
+struct Rule
 {
     char *prop;
     char *tags;
@@ -44,7 +45,8 @@ typedef struct
     Bool isfloating;
     regex_t *propregex;
     regex_t *tagregex;
-} Rule;
+    Rule *next;
+};
 
 typedef struct awesome_config awesome_config;
 
@@ -169,8 +171,6 @@ struct awesome_config
     int nlayouts;
     /** Rules list */
     Rule *rules;
-    /** Number of rules in *rules */
-    int nrules;
     /** Keys bindings list */
     Key *keys;
     /** Mouse bindings list */

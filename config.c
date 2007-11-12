@@ -342,6 +342,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     char *confpath, buf[2];
     ssize_t confpath_len;
     Key *key = NULL;
+    Rule *rule = NULL;
 
     if(confpatharg)
         confpath = a_strdup(confpatharg);
@@ -443,22 +444,26 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         eprint("awesome: fatal: no default layout available\n");
 
     /* Rules */
-    awesomeconf->nrules = cfg_size(cfg_rules, "rule");
-    awesomeconf->rules = p_new(Rule, awesomeconf->nrules);
-    for(i = 0; i < awesomeconf->nrules; i++)
+    if(cfg_size(cfg_rules, "rule"))
     {
-        cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
-        awesomeconf->rules[i].prop = a_strdup(cfg_getstr(cfgsectmp, "name"));
-        awesomeconf->rules[i].tags = a_strdup(cfg_getstr(cfgsectmp, "tags"));
-        if(!a_strlen(awesomeconf->rules[i].tags))
-            awesomeconf->rules[i].tags = NULL;
-        awesomeconf->rules[i].isfloating = cfg_getbool(cfgsectmp, "float");
-        awesomeconf->rules[i].screen = cfg_getint(cfgsectmp, "screen");
-        if(awesomeconf->rules[i].screen >= get_screen_count(awesomeconf->display))
-            awesomeconf->rules[i].screen = 0;
+        awesomeconf->rules = rule = p_new(Rule, 1);
+        for(j = 0; j < cfg_size(cfg_rules, "rule"); j++)
+        {
+            cfgsectmp = cfg_getnsec(cfg_rules, "rule", j);
+            rule->prop = a_strdup(cfg_getstr(cfgsectmp, "name"));
+            rule->tags = a_strdup(cfg_getstr(cfgsectmp, "tags"));
+            if(!a_strlen(rule->tags))
+                rule->tags = NULL;
+            rule->isfloating = cfg_getbool(cfgsectmp, "float");
+            rule->screen = cfg_getint(cfgsectmp, "screen");
+            if(rule->screen >= get_screen_count(awesomeconf->display))
+                rule->screen = 0;
+        }
     }
+    else
+        awesomeconf->rules = NULL;
 
-    compileregs(awesomeconf->rules, awesomeconf->nrules);
+    compileregs(awesomeconf->rules);
 
     /* Tags */
     awesomeconf->ntags = cfg_size(cfg_tags, "tag");
