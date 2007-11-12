@@ -30,7 +30,7 @@
 int
 applyrules(Client *c, awesome_config *awesomeconf)
 {
-    int i, j, screen = -1, len = 0;
+    int i, j, screen = RULE_NOSCREEN, len = 0;
     regmatch_t tmp;
     Bool matched = False;
     XClassHint ch = { 0, 0 };
