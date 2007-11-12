@@ -172,6 +172,27 @@ mouse_button_lookup(const char *button)
     return 0;
 }
 
+static void
+parse_mouse_bindings(cfg_t * cfg, const char *secname, Button **buttons, int *n)
+{
+    int i;
+    unsigned int j;
+    cfg_t *cfgsectmp;
+
+    /* Mouse: layout click bindings */
+    *n = cfg_size(cfg, secname);
+    *buttons = p_new(Button, *n);
+    for(i = 0; i < *n; i++)
+    {
+        cfgsectmp = cfg_getnsec(cfg, secname, i);
+        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
+            (*buttons)[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
+        (*buttons)[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
+        (*buttons)[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
+        (*buttons)[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
+    }
+}
+
 /** Parse configuration file and initialize some stuff
  * \param disp Display ref
  * \param scr Screen number
@@ -461,43 +482,13 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     }
 
     /* Mouse: layout click bindings */
-    awesomeconf->buttons.nlayout = cfg_size(cfg_mouse, "layout");
-    awesomeconf->buttons.layout = p_new(Button, awesomeconf->buttons.nlayout);
-    for(i = 0; i < awesomeconf->buttons.nlayout; i++)
-    {
-        cfgsectmp = cfg_getnsec(cfg_mouse, "layout", i);
-        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
-            awesomeconf->buttons.layout[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
-        awesomeconf->buttons.layout[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
-        awesomeconf->buttons.layout[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
-        awesomeconf->buttons.layout[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
-    }
+    parse_mouse_bindings(cfg_mouse, "layout", &awesomeconf->buttons.layout, &awesomeconf->buttons.nlayout);
 
     /* Mouse: title click bindings */
-    awesomeconf->buttons.ntitle = cfg_size(cfg_mouse, "title");
-    awesomeconf->buttons.title = p_new(Button, awesomeconf->buttons.ntitle);
-    for(i = 0; i < awesomeconf->buttons.ntitle; i++)
-    {
-        cfgsectmp = cfg_getnsec(cfg_mouse, "title", i);
-        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
-            awesomeconf->buttons.title[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
-        awesomeconf->buttons.title[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
-        awesomeconf->buttons.title[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
-        awesomeconf->buttons.title[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
-    }
+    parse_mouse_bindings(cfg_mouse, "title", &awesomeconf->buttons.title, &awesomeconf->buttons.ntitle);
 
     /* Mouse: root window click bindings */
-    awesomeconf->buttons.nroot = cfg_size(cfg_mouse, "root");
-    awesomeconf->buttons.root = p_new(Button, awesomeconf->buttons.nroot);
-    for(i = 0; i < awesomeconf->buttons.nroot; i++)
-    {
-        cfgsectmp = cfg_getnsec(cfg_mouse, "root", i);
-        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
-            awesomeconf->buttons.root[i].mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
-        awesomeconf->buttons.root[i].button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
-        awesomeconf->buttons.root[i].func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
-        awesomeconf->buttons.root[i].arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
-    }
+    parse_mouse_bindings(cfg_mouse, "root", &awesomeconf->buttons.root, &awesomeconf->buttons.nroot);
 
     /* Keys */
     awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
