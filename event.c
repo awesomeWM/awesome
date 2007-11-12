@@ -54,16 +54,16 @@ uicb_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unus
 
     if((get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange != layout_floating)
         && !c->isfloating)
-         uicb_togglefloating(&awesomeconf[c->screen], "DUMMY");
+         uicb_togglefloating(awesomeconf, "DUMMY");
      else
          restack(awesomeconf);
 
-    si = get_screen_info(c->display, c->screen, &awesomeconf[c->screen].statusbar);
+    si = get_screen_info(c->display, c->screen, &awesomeconf->statusbar);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
     if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, awesomeconf[c->screen].cursor[CurMove], CurrentTime) != GrabSuccess)
+                    None, awesomeconf->cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
     XQueryPointer(c->display, RootWindow(c->display, c->phys_screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
@@ -76,27 +76,27 @@ uicb_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unus
             p_delete(&si);
             return;
         case ConfigureRequest:
-            handle_event_configurerequest(&ev,awesomeconf);
+            handle_event_configurerequest(&ev, &awesomeconf[0 - awesomeconf->screen]);
             break;
         case Expose:
-            handle_event_expose(&ev, awesomeconf);
+            handle_event_expose(&ev, &awesomeconf[0 - awesomeconf->screen]);
             break;
         case MapRequest:
-            handle_event_maprequest(&ev, awesomeconf);
+            handle_event_maprequest(&ev, &awesomeconf[0 - awesomeconf->screen]);
             break;
         case MotionNotify:
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(nx) < awesomeconf[c->screen].snap + si[c->screen].x_org && nx > si[c->screen].x_org)
+            if(abs(nx) < awesomeconf->snap + si[c->screen].x_org && nx > si[c->screen].x_org)
                 nx = si[c->screen].x_org;
-            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < awesomeconf[c->screen].snap)
+            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < awesomeconf->snap)
                 nx = si[c->screen].x_org + si[c->screen].width - c->w - 2 * c->border;
-            if(abs(ny) < awesomeconf[c->screen].snap + si[c->screen].y_org && ny > si[c->screen].y_org)
+            if(abs(ny) < awesomeconf->snap + si[c->screen].y_org && ny > si[c->screen].y_org)
                 ny = si[c->screen].y_org;
             else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf[c->screen].snap)
                 ny = si[c->screen].y_org + si[c->screen].height - c->h - 2 * c->border;
-            client_resize(c, nx, ny, c->w, c->h, &awesomeconf[c->screen], False, False);
+            client_resize(c, nx, ny, c->w, c->h, awesomeconf, False, False);
             break;
         }
     }
@@ -116,13 +116,13 @@ uicb_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((un
        && !c->isfloating)
         uicb_togglefloating(awesomeconf, "DUMMY");
     else
-        restack(&awesomeconf[c->screen]);
+        restack(awesomeconf);
 
     ocx = c->x;
     ocy = c->y;
     if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, awesomeconf[c->screen].cursor[CurResize], CurrentTime) != GrabSuccess)
+                    None, awesomeconf->cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
     XWarpPointer(c->display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
@@ -137,13 +137,13 @@ uicb_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((un
             while(XCheckMaskEvent(c->display, EnterWindowMask, &ev));
             return;
         case ConfigureRequest:
-            handle_event_configurerequest(&ev,awesomeconf);
+            handle_event_configurerequest(&ev, &awesomeconf[0 - awesomeconf->screen]);
             break;
         case Expose:
-            handle_event_expose(&ev, awesomeconf);
+            handle_event_expose(&ev, &awesomeconf[0 - awesomeconf->screen]);
             break;
         case MapRequest:
-            handle_event_maprequest(&ev, awesomeconf);
+            handle_event_maprequest(&ev, &awesomeconf[0 - awesomeconf->screen]);
             break;
         case MotionNotify:
             XSync(c->display, False);
@@ -151,7 +151,7 @@ uicb_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((un
                 nw = 1;
             if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
                 nh = 1;
-            client_resize(c, c->x, c->y, nw, nh, &awesomeconf[c->screen], True, False);
+            client_resize(c, c->x, c->y, nw, nh, awesomeconf, True, False);
             break;
         }
     }
