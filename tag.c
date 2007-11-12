@@ -30,7 +30,7 @@
 int
 applyrules(Client *c, awesome_config *awesomeconf)
 {
-    int i, j, screen = RULE_NOSCREEN, len = 0;
+    int i, screen = RULE_NOSCREEN, len = 0;
     regmatch_t tmp;
     Bool matched = False;
     XClassHint ch = { 0, 0 };
@@ -50,19 +50,20 @@ applyrules(Client *c, awesome_config *awesomeconf)
         if(r->propregex && !regexec(r->propregex, prop, 1, &tmp, 0))
         {
             c->isfloating = r->isfloating;
-            for(j = 0; r->tagregex && j < awesomeconf->ntags; j++)
-                if(!regexec(r->tagregex, awesomeconf->tags[j].name, 1, &tmp, 0))
-                {
-                    matched = True;
-                    c->tags[j] = True;
-                }
-                else
-                    c->tags[j] = False;
             if(r->screen != RULE_NOSCREEN && r->screen != awesomeconf->screen)
             {
                 screen = r->screen;
                 move_client_to_screen(c, &awesomeconf[r->screen - awesomeconf->screen], True);
             }
+            /* we need to recompute awesomeconf index because we might have changed screen */
+            for(i = 0; r->tagregex && i < awesomeconf[c->screen - awesomeconf->screen].ntags; i++)
+                if(!regexec(r->tagregex, awesomeconf[c->screen - awesomeconf->screen].tags[i].name, 1, &tmp, 0))
+                {
+                    matched = True;
+                    c->tags[i] = True;
+                }
+                else
+                    c->tags[i] = False;
         }
     p_delete(&prop);
     if(ch.res_class)
