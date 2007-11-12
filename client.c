@@ -258,7 +258,7 @@ loadprops(Client * c, int ntags)
 void
 client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 {
-    int i;
+    int i, newscreen = -1;
     Client *c, *t = NULL;
     Window trans;
     Status rettrans;
@@ -344,7 +344,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     /* loadprops or apply rules if no props */
     if(!loadprops(c, awesomeconf->ntags))
-        applyrules(c, awesomeconf);
+        newscreen = applyrules(c, awesomeconf);
 
     /* should be floating if transsient or fixed) */
     if(!c->isfloating)
@@ -363,6 +363,8 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     /* rearrange to display new window */
     arrange(awesomeconf);
+    if(newscreen != -1)
+        arrange(&awesomeconf[newscreen - awesomeconf->screen]);
 }
 
 void

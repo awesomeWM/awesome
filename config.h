@@ -40,6 +40,7 @@ typedef struct
 {
     char *prop;
     char *tags;
+    int screen;
     Bool isfloating;
     regex_t *propregex;
     regex_t *tagregex;
@@ -165,7 +166,6 @@ struct awesome_config
     int ntags;
     /** Layout list */
     Layout *layouts;
-    /** Number of layouts in *layouts */
     int nlayouts;
     /** Rules list */
     Rule *rules;

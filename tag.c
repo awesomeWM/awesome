@@ -22,14 +22,15 @@
 #include <stdio.h>
 #include <X11/Xutil.h>
 
+#include "screen.h"
 #include "layout.h"
 #include "tag.h"
 #include "util.h"
 
-void
-applyrules(Client * c, awesome_config *awesomeconf)
+int
+applyrules(Client *c, awesome_config *awesomeconf)
 {
-    int i, j, len = 0;
+    int i, j, screen = -1, len = 0;
     regmatch_t tmp;
     Bool matched = False;
     XClassHint ch = { 0, 0 };
@@ -56,6 +57,14 @@ applyrules(Client * c, awesome_config *awesomeconf)
                 }
                 else
                     c->tags[j] = False;
+            if(awesomeconf->rules[i].screen != -1
+               && awesomeconf->rules[i].screen != awesomeconf->screen)
+            {
+                screen = awesomeconf->rules[i].screen;
+                move_client_to_screen(c,
+                                      &awesomeconf[awesomeconf->rules[i].screen - awesomeconf->screen],
+                                      True);
+            }
         }
     p_delete(&prop);
     if(ch.res_class)
@@ -65,6 +74,8 @@ applyrules(Client * c, awesome_config *awesomeconf)
     if(!matched)
         for(i = 0; i < awesomeconf->ntags; i++)
             c->tags[i] = awesomeconf->tags[i].selected;
+
+    return screen;
 }
 
 void

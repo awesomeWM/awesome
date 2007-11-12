@@ -92,8 +92,9 @@ rules
     rule
     {
         name = "Gimp"
-        tags = ""
+        tags = "9"
         float = true
+        screen = 0
     }
     rule
     {

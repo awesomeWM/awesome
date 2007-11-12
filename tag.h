@@ -29,7 +29,7 @@
 
 void compileregs(Rule *, int);
 Bool isvisible(Client *, int, Tag *, int);
-void applyrules(Client * c, awesome_config *);
+int applyrules(Client * c, awesome_config *);
 
 UICB_PROTO(uicb_tag);
 UICB_PROTO(uicb_togglefloating);
