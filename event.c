@@ -39,14 +39,24 @@
 #define CLEANMASK(mask, screen)		(mask & ~(awesomeconf[screen].numlockmask | LockMask))
 #define MOUSEMASK	                (BUTTONMASK | PointerMotionMask)
 
-static void
-movemouse(Client *c, awesome_config *awesomeconf)
+void
+uicb_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
     Window dummy;
     XEvent ev;
     ScreenInfo *si;
+    Client *c = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
+
+    if(!c)
+        return;
+
+    if((get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange != layout_floating)
+        && !c->isfloating)
+         uicb_togglefloating(&awesomeconf[c->screen], "DUMMY");
+     else
+         restack(awesomeconf);
 
     si = get_screen_info(c->display, c->screen, &awesomeconf[c->screen].statusbar);
 
@@ -215,15 +225,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
            }
         }
         else if(ev->button == Button1)
-        {
-            if((get_current_layout(awesomeconf[c->screen].tags,
-                                   awesomeconf[c->screen].ntags)->arrange != layout_floating)
-               && !c->isfloating)
-                uicb_togglefloating(&awesomeconf[c->screen], "DUMMY");
-            else
-                restack(&awesomeconf[c->screen]);
-            movemouse(c, awesomeconf);
-        }
+            uicb_movemouse(&awesomeconf[c->screen], NULL);
         else if(ev->button == Button2)
         {
             if((get_current_layout(awesomeconf[c->screen].tags,

@@ -33,6 +33,7 @@
 #include "event.h"
 #include "tag.h"
 #include "statusbar.h"
+#include "event.h"
 #include "layout.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
@@ -101,6 +102,8 @@ const NameFuncLink UicbList[] = {
     /* config.c */
     {"reloadconfig", uicb_reloadconfig},
     {"setstatustext", uicb_setstatustext},
+    /* event.c */
+    {"movemouse", uicb_movemouse},
     {NULL, NULL}
 };
 
