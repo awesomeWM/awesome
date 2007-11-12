@@ -36,7 +36,7 @@
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 
-#define CLEANMASK(mask, screen)		(mask & ~(awesomeconf[screen].numlockmask | LockMask))
+#define CLEANMASK(mask, acf)		(mask & ~(acf.numlockmask | LockMask))
 #define MOUSEMASK	                (BUTTONMASK | PointerMotionMask)
 
 void
@@ -160,13 +160,13 @@ uicb_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((un
 
 static void
 handle_mouse_button_press(awesome_config *awesomeconf,
-                          unsigned int button, unsigned int state, unsigned int numlockmask,
+                          unsigned int button, unsigned int state,
                           Button *buttons, char *arg)
 {
     Button *b;
 
     for(b = buttons; b; b = b->next)
-        if(button == b->button && (state == b->mod || state == (b->mod | numlockmask)) && b->func)
+        if(button == b->button && CLEANMASK(state, awesomeconf[0]) == b->mod && b->func)
         {
             if(arg)
                 b->func(awesomeconf, arg);
@@ -198,8 +198,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                    || (awesomeconf[screen].statusbar.position == BarLeft && ev->y > awesomeconf[screen].statusbar.width - x))
                 {
                     snprintf(arg, sizeof(arg), "%d", i + 1);
-                    handle_mouse_button_press(&awesomeconf[screen],
-                                              ev->button, ev->state, awesomeconf->numlockmask,
+                    handle_mouse_button_press(&awesomeconf[screen], ev->button, ev->state,
                                               awesomeconf[screen].buttons.tag, arg);
                     return;
                 }
@@ -210,12 +209,10 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                 && ev->x < x)
                 || (awesomeconf[screen].statusbar.position == BarRight && ev->y < x)
                 || (awesomeconf[screen].statusbar.position == BarLeft && ev->y > awesomeconf[screen].statusbar.width - x))
-                handle_mouse_button_press(&awesomeconf[screen],
-                                          ev->button, ev->state, awesomeconf->numlockmask,
+                handle_mouse_button_press(&awesomeconf[screen], ev->button, ev->state,
                                           awesomeconf[screen].buttons.layout, NULL);
             else
-                handle_mouse_button_press(&awesomeconf[screen],
-                                          ev->button, ev->state, awesomeconf->numlockmask,
+                handle_mouse_button_press(&awesomeconf[screen], ev->button, ev->state,
                                           awesomeconf[screen].buttons.title, NULL);
             return;
         }
@@ -224,7 +221,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     {
         XAllowEvents(c->display, ReplayPointer, CurrentTime);
         focus(c, ev->same_screen, &awesomeconf[c->screen]);
-        if(CLEANMASK(ev->state, c->screen) != awesomeconf[c->screen].modkey)
+        if(CLEANMASK(ev->state, awesomeconf[c->screen]) != awesomeconf[c->screen].modkey)
         {
            if (ev->button == Button1)
            {
@@ -258,8 +255,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
                && XQueryPointer(e->xany.display, ev->window, &wdummy, &wdummy, &x, &y, &i, &i, &udummy))
             {
                 screen = get_screen_bycoord(e->xany.display, x, y);
-                handle_mouse_button_press(&awesomeconf[screen],
-                                          ev->button, ev->state, awesomeconf->numlockmask,
+                handle_mouse_button_press(&awesomeconf[screen], ev->button, ev->state,
                                           awesomeconf[screen].buttons.root, NULL);
                 return;
             }
@@ -418,7 +414,8 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
 
     for(i = 0; i < awesomeconf[screen].nkeys; i++)
         if(keysym == awesomeconf[screen].keys[i].keysym
-           && CLEANMASK(awesomeconf[screen].keys[i].mod, screen) == CLEANMASK(ev->state, screen) && awesomeconf[screen].keys[i].func)
+           && CLEANMASK(awesomeconf[screen].keys[i].mod, awesomeconf[screen])
+           == CLEANMASK(ev->state, awesomeconf[screen]) && awesomeconf[screen].keys[i].func)
             awesomeconf[screen].keys[i].func(&awesomeconf[screen], awesomeconf[screen].keys[i].arg);
 }
 
