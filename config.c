@@ -454,6 +454,8 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             awesomeconf->rules[i].tags = NULL;
         awesomeconf->rules[i].isfloating = cfg_getbool(cfgsectmp, "float");
         awesomeconf->rules[i].screen = cfg_getint(cfgsectmp, "screen");
+        if(awesomeconf->rules[i].screen >= get_screen_count(awesomeconf->display))
+            awesomeconf->rules[i].screen = 0;
     }
 
     compileregs(awesomeconf->rules, awesomeconf->nrules);
