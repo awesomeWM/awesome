@@ -259,12 +259,13 @@ loadprops(Client * c, int ntags)
 void
 client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 {
-    int i, newscreen = -1;
+    int i;
     Client *c, *t = NULL;
     Window trans;
     Status rettrans;
     XWindowChanges wc;
     ScreenInfo *screen_info = get_screen_info(awesomeconf->display, awesomeconf->screen, NULL);
+    awesome_config *current_acf = awesomeconf;
 
     c = p_new(Client, 1);
 
@@ -277,18 +278,63 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     c->display = awesomeconf->display;
     c->phys_screen = awesomeconf->phys_screen;
+    c->tags = p_new(Bool, awesomeconf->ntags);
+
+    /* update window title */
+    updatetitle(c);
+
+    c->screen = get_screen_bycoord(c->display, c->x, c->y);
+    printf("win coords %d %d so screen %d\n", c->x, c->y, c->screen);
+    /* loadprops or apply rules if no props */
+    if(!loadprops(c, awesomeconf->ntags))
+    {
+        Rule *r;
+        Bool matched, has_rule = False;
+        printf("loadprops failed for %s, watching rules\n", c->name);
+        for(r = awesomeconf->rules; r; r = r->next)
+            if(client_match_rule(c, r))
+            {
+                has_rule = True;
+
+                c->isfloating = r->isfloating;
+
+                if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
+                {
+                    printf("Changing screen, was %d now %d\n", awesomeconf->screen, r->screen);
+                    current_acf = &awesomeconf[r->screen - awesomeconf->screen];
+                    move_client_to_screen(c, current_acf, True);
+                }
+
+                for(i = 0; i < current_acf->ntags; i++)
+                    if(is_tag_match_rules(&current_acf->tags[i], r))
+                    {
+                        printf("tagged with: %s\n", current_acf->tags[i].name);
+                        matched = True;
+                        c->tags[i] = True;
+                    }
+                    else
+                        c->tags[i] = False;
+
+                if(!matched)
+                    for(i = 0; i < current_acf->ntags; i++)
+                        c->tags[i] = current_acf->tags[i].selected;
+                break;
+            }
+        if(!has_rule)
+            move_client_to_screen(c, current_acf, True);
+    }
 
     /* if window request fullscreen mode */
-    if(c->w == screen_info[awesomeconf->screen].width && c->h == screen_info[awesomeconf->screen].height)
+    if(c->w == screen_info[current_acf->screen].width && c->h == screen_info[current_acf->screen].height)
     {
-        c->x = screen_info[awesomeconf->screen].x_org;
-        c->y = screen_info[awesomeconf->screen].y_org;
+        c->x = screen_info[current_acf->screen].x_org;
+        c->y = screen_info[current_acf->screen].y_org;
 
         c->border = wa->border_width;
     }
     else
     {
-        ScreenInfo *display_info = get_display_info(c->display, c->phys_screen, &awesomeconf->statusbar);
+        ScreenInfo *display_info = get_display_info(c->display, c->phys_screen, &current_acf->statusbar);
 
         if(c->x + c->w + 2 * c->border > display_info->x_org + display_info->width)
             c->x = c->rx = display_info->x_org + display_info->width - c->w - 2 * c->border;
@@ -299,7 +345,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
         if(c->y < display_info->y_org)
             c->y = c->ry = display_info->y_org;
 
-        c->border = awesomeconf->borderpx;
+        c->border = current_acf->borderpx;
 
         p_delete(&display_info);
     }
@@ -308,7 +354,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     /* set borders */
     wc.border_width = c->border;
     XConfigureWindow(c->display, w, CWBorderWidth, &wc);
-    XSetWindowBorder(c->display, w, awesomeconf->colors_normal[ColBorder].pixel);
+    XSetWindowBorder(c->display, w, current_acf->colors_normal[ColBorder].pixel);
 
     /* propagates border_width, if size doesn't change */
     window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
@@ -319,7 +365,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     XSelectInput(c->display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
     /* handle xshape */
-    if(awesomeconf->have_shape)
+    if(current_acf->have_shape)
     {
         XShapeSelectInput(c->display, w, ShapeNotifyMask);
         window_setshape(c->display, c->phys_screen, c->win);
@@ -327,45 +373,32 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     /* grab buttons */
     window_grabbuttons(c->display, c->phys_screen, c->win,
-                       False, True, awesomeconf->buttons.root,
-                       awesomeconf->modkey, awesomeconf->numlockmask);
-
-    /* update window title */
-    updatetitle(c);
-
-    /* move client to screen: this will set screen and create tags array */
-    c->screen = get_screen_bycoord(c->display, c->x, c->y);
-    move_client_to_screen(c, awesomeconf, True);
+                       False, True, current_acf->buttons.root,
+                       current_acf->modkey, current_acf->numlockmask);
 
     /* check for transient and set tags like its parent */
     if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)
-       && (t = get_client_bywin(*awesomeconf->clients, trans)))
-        for(i = 0; i < awesomeconf->ntags; i++)
+       && (t = get_client_bywin(*current_acf->clients, trans)))
+        for(i = 0; i < current_acf->ntags; i++)
             c->tags[i] = t->tags[i];
-
-    /* loadprops or apply rules if no props */
-    if(!loadprops(c, awesomeconf->ntags))
-        newscreen = applyrules(c, awesomeconf);
 
     /* should be floating if transsient or fixed) */
     if(!c->isfloating)
         c->isfloating = (rettrans == Success) || c->isfixed;
 
     /* save new props */
-    saveprops(c, awesomeconf->ntags);
+    saveprops(c, current_acf->ntags);
 
     /* attach to the stack */
-    client_attach(awesomeconf->clients, c);
+    client_attach(current_acf->clients, c);
 
     /* some windows require this */
     XMoveResizeWindow(c->display, c->win, c->x, c->y, c->w, c->h);
 
-    focus(c, True, awesomeconf);
+    focus(c, True, current_acf);
 
     /* rearrange to display new window */
-    arrange(awesomeconf);
-    if(newscreen != RULE_NOSCREEN)
-        arrange(&awesomeconf[newscreen - awesomeconf->screen]);
+    arrange(current_acf);
 }
 
 void
