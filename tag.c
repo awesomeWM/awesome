@@ -26,6 +26,7 @@
 #include "layout.h"
 #include "tag.h"
 #include "util.h"
+#include "rules.h"
 
 int
 applyrules(Client *c, awesome_config *awesomeconf)

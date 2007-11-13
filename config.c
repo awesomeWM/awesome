@@ -32,6 +32,7 @@
 #include "draw.h"
 #include "event.h"
 #include "tag.h"
+#include "rules.h"
 #include "statusbar.h"
 #include "event.h"
 #include "layout.h"

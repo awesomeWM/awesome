@@ -1,5 +1,5 @@
 /*
- * tag.h - tag management header
+ * rules.h - rules management header
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info>
  *
@@ -19,26 +19,16 @@
  *
  */
 
-#ifndef AWESOME_TAG_H
-#define AWESOME_TAG_H
+#ifndef AWESOME_RULES_H
+#define AWESOME_RULES_H
 
-#include "client.h"
+#include "config.h"
 
-/** Check if a client is tiled */
-#define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, screen, tags, ntags))
+#define RULE_NOSCREEN        -1
 
-void compileregs(Rule *);
-Bool isvisible(Client *, int, Tag *, int);
-int applyrules(Client * c, awesome_config *);
-
-UICB_PROTO(uicb_tag);
-UICB_PROTO(uicb_togglefloating);
-UICB_PROTO(uicb_toggletag);
-UICB_PROTO(uicb_toggleview);
-UICB_PROTO(uicb_view);
-UICB_PROTO(uicb_tag_prev_selected);
-UICB_PROTO(uicb_tag_viewnext);
-UICB_PROTO(uicb_tag_viewprev);
+Bool client_match_rule(Client *, Rule *);
+int get_client_screen_from_rules(Client *, Rule *);
+Bool is_client_tag_from_rules(Client *, Tag *, Rule *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
