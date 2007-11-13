@@ -22,6 +22,32 @@
 #include "util.h"
 #include "rules.h"
 
+void
+compileregs(Rule *rules)
+{
+    Rule *r;
+    regex_t *reg;
+    for(r = rules; r; r = r->next)
+    {
+        if(r->prop)
+        {
+            reg = p_new(regex_t, 1);
+            if(regcomp(reg, r->prop, REG_EXTENDED))
+                p_delete(&reg);
+            else
+                r->propregex = reg;
+        }
+        if(r->tags)
+        {
+            reg = p_new(regex_t, 1);
+            if(regcomp(reg, r->tags, REG_EXTENDED))
+                p_delete(&reg);
+            else
+                r->tagregex = reg;
+        }
+    }
+}
+
 Bool
 client_match_rule(Client *c, Rule *r)
 {

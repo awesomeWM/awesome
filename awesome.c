@@ -40,7 +40,6 @@
 #include "awesome.h"
 #include "event.h"
 #include "layout.h"
-#include "tag.h"
 #include "screen.h"
 #include "util.h"
 #include "statusbar.h"

@@ -27,7 +27,6 @@
 /** Check if a client is tiled */
 #define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, screen, tags, ntags))
 
-void compileregs(Rule *);
 Bool isvisible(Client *, int, Tag *, int);
 
 UICB_PROTO(uicb_tag);
