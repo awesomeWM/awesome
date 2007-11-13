@@ -28,7 +28,7 @@
 
 Bool client_match_rule(Client *, Rule *);
 int get_client_screen_from_rules(Client *, Rule *);
-Bool is_client_tag_from_rules(Client *, Tag *, Rule *);
+Bool is_tag_match_rules(Tag *, Rule *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

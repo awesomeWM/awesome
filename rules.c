@@ -65,11 +65,11 @@ get_client_screen_from_rules(Client *c, Rule *rules)
 }
 
 Bool
-is_client_tag_from_rules(Client *c, Tag *t, Rule *r)
+is_tag_match_rules(Tag *t, Rule *r)
 {
     regmatch_t tmp;
 
-    if(!regexec(r->tagregex, t->name, 1, &tmp, 0))
+    if(r->tagregex && !regexec(r->tagregex, t->name, 1, &tmp, 0))
         return True;
 
     return False;
