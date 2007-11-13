@@ -284,13 +284,11 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     updatetitle(c);
 
     c->screen = get_screen_bycoord(c->display, c->x, c->y);
-    printf("win coords %d %d so screen %d\n", c->x, c->y, c->screen);
     /* loadprops or apply rules if no props */
     if(!loadprops(c, awesomeconf->ntags))
     {
         Rule *r;
         Bool matched, has_rule = False;
-        printf("loadprops failed for %s, watching rules\n", c->name);
         for(r = awesomeconf->rules; r; r = r->next)
             if(client_match_rule(c, r))
             {
@@ -300,7 +298,6 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
                 if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
                 {
-                    printf("Changing screen, was %d now %d\n", awesomeconf->screen, r->screen);
                     current_acf = &awesomeconf[r->screen - awesomeconf->screen];
                     move_client_to_screen(c, current_acf, True);
                 }
@@ -308,7 +305,6 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
                 for(i = 0; i < current_acf->ntags; i++)
                     if(is_tag_match_rules(&current_acf->tags[i], r))
                     {
-                        printf("tagged with: %s\n", current_acf->tags[i].name);
                         matched = True;
                         c->tags[i] = True;
                     }
