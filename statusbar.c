@@ -60,7 +60,7 @@ drawstatusbar(awesome_config *awesomeconf)
     drawable = XCreatePixmap(awesomeconf->display,
                              RootWindow(awesomeconf->display, awesomeconf->phys_screen),
                              awesomeconf->statusbar.width,
-                             awesomeconf->statusbar.width,
+                             awesomeconf->statusbar.height,
                              DefaultDepth(awesomeconf->display, awesomeconf->phys_screen));
 
     for(i = 0; i < awesomeconf->ntags; i++)
@@ -174,15 +174,13 @@ drawstatusbar(awesome_config *awesomeconf)
     {
         Drawable d;
         if(awesomeconf->statusbar.position == BarRight)
-            d = draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
-                            drawable, awesomeconf->statusbar.width,
-                            awesomeconf->statusbar.height, M_PI_2,
-                            awesomeconf->statusbar.height, 0);
+            d = draw_rotate(awesomeconf->display, awesomeconf->phys_screen, drawable,
+                            awesomeconf->statusbar.width, awesomeconf->statusbar.height,
+                            M_PI_2, awesomeconf->statusbar.height, 0);
         else
-            d = draw_rotate(awesomeconf->display, awesomeconf->phys_screen,
-                            drawable, awesomeconf->statusbar.width,
-                            awesomeconf->statusbar.height, - M_PI_2,
-                            0, awesomeconf->statusbar.width);
+            d = draw_rotate(awesomeconf->display, awesomeconf->phys_screen, drawable,
+                            awesomeconf->statusbar.width, awesomeconf->statusbar.height,
+                            - M_PI_2, 0, awesomeconf->statusbar.width);
         XCopyArea(awesomeconf->display, d,
                   awesomeconf->statusbar.window,
                   DefaultGC(awesomeconf->display, awesomeconf->phys_screen), 0, 0,

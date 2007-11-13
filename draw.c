@@ -134,10 +134,10 @@ draw_rotate(Display *disp, int screen, Drawable drawable, int dw, int dh, double
 
     newdrawable = XCreatePixmap(disp,
                                 RootWindow(disp, screen),
-                                dw, dw,
+                                dh, dw,
                                 DefaultDepth(disp, screen));
-    surface = cairo_xlib_surface_create(disp, newdrawable, DefaultVisual(disp, screen), dw, dw);
-    source = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dw);
+    surface = cairo_xlib_surface_create(disp, newdrawable, DefaultVisual(disp, screen), dh, dw);
+    source = cairo_xlib_surface_create(disp, drawable, DefaultVisual(disp, screen), dw, dh);
     cr = cairo_create (surface);
 
     cairo_translate(cr, tx, ty);
