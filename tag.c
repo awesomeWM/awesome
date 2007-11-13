@@ -28,56 +28,6 @@
 #include "util.h"
 #include "rules.h"
 
-int
-applyrules(Client *c, awesome_config *awesomeconf)
-{
-    int i, screen = RULE_NOSCREEN, len = 0;
-    regmatch_t tmp;
-    Bool matched = False;
-    XClassHint ch = { 0, 0 };
-    char *prop;
-    Rule *r;
-
-    XGetClassHint(c->display, c->win, &ch);
-
-    len = a_strlen(ch.res_class) + a_strlen(ch.res_name) + a_strlen(c->name);
-
-    prop = p_new(char, len + 3);
-
-    /* rule matching */
-    snprintf(prop, len + 3, "%s:%s:%s",
-             ch.res_class ? ch.res_class : "", ch.res_name ? ch.res_name : "", c->name);
-    for(r = awesomeconf->rules; r; r = r->next)
-        if(r->propregex && !regexec(r->propregex, prop, 1, &tmp, 0))
-        {
-            c->isfloating = r->isfloating;
-            if(r->screen != RULE_NOSCREEN && r->screen != awesomeconf->screen)
-            {
-                screen = r->screen;
-                move_client_to_screen(c, &awesomeconf[r->screen - awesomeconf->screen], True);
-            }
-            /* we need to recompute awesomeconf index because we might have changed screen */
-            for(i = 0; r->tagregex && i < awesomeconf[c->screen - awesomeconf->screen].ntags; i++)
-                if(!regexec(r->tagregex, awesomeconf[c->screen - awesomeconf->screen].tags[i].name, 1, &tmp, 0))
-                {
-                    matched = True;
-                    c->tags[i] = True;
-                }
-                else
-                    c->tags[i] = False;
-        }
-    p_delete(&prop);
-    if(ch.res_class)
-        XFree(ch.res_class);
-    if(ch.res_name)
-        XFree(ch.res_name);
-    if(!matched)
-        for(i = 0; i < awesomeconf->ntags; i++)
-            c->tags[i] = awesomeconf->tags[i].selected;
-
-    return screen;
-}
-
 void
 compileregs(Rule *rules)
 {

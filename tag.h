@@ -29,7 +29,6 @@
 
 void compileregs(Rule *);
 Bool isvisible(Client *, int, Tag *, int);
-int applyrules(Client * c, awesome_config *);
 
 UICB_PROTO(uicb_tag);
 UICB_PROTO(uicb_togglefloating);
