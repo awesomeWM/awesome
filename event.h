@@ -41,8 +41,5 @@ void handle_event_unmapnotify(XEvent *, awesome_config *);
 void handle_event_shape(XEvent *, awesome_config *);
 void handle_event_randr_screen_change_notify(XEvent *, awesome_config *);
 
-UICB_PROTO(uicb_movemouse);
-UICB_PROTO(uicb_resizemouse);
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

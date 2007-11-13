@@ -30,12 +30,11 @@
 #include "awesome.h"
 #include "screen.h"
 #include "draw.h"
-#include "event.h"
 #include "tag.h"
 #include "rules.h"
 #include "statusbar.h"
-#include "event.h"
 #include "layout.h"
+#include "mouse.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "layouts/max.h"
@@ -103,7 +102,7 @@ const NameFuncLink UicbList[] = {
     /* config.c */
     {"reloadconfig", uicb_reloadconfig},
     {"setstatustext", uicb_setstatustext},
-    /* event.c */
+    /* mouse.c */
     {"movemouse", uicb_movemouse},
     {"resizemouse", uicb_resizemouse},
     {NULL, NULL}
