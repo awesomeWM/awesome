@@ -459,6 +459,14 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             rule->screen = cfg_getint(cfgsectmp, "screen");
             if(rule->screen >= get_screen_count(awesomeconf->display))
                 rule->screen = 0;
+
+            if(j < cfg_size(cfg_rules, "rule") - 1)
+            {
+                rule->next = p_new(Rule, 1);
+                rule = rule->next;
+            }
+            else
+                rule->next = NULL;
         }
     }
     else
@@ -667,8 +675,6 @@ uicb_reloadconfig(awesome_config *awesomeconf,
           c->tags[0] = 1;
 
        saveprops(c, awesomeconf_first[c->screen].ntags);
-       if (!loadprops(c, awesomeconf_first[c->screen].ntags))
-          applyrules(c, awesomeconf_first);
     }
 
     /* Cleanup after ourselves */
