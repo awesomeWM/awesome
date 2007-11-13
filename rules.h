@@ -28,7 +28,6 @@
 
 void compileregs(Rule *);
 Bool client_match_rule(Client *, Rule *);
-int get_client_screen_from_rules(Client *, Rule *);
 Bool is_tag_match_rules(Tag *, Rule *);
 
 #endif

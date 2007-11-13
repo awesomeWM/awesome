@@ -78,18 +78,6 @@ client_match_rule(Client *c, Rule *r)
     return ret;
 }
 
-int
-get_client_screen_from_rules(Client *c, Rule *rules)
-{
-    Rule *r;
-
-    for(r = rules; r; r = r->next)
-        if(client_match_rule(c, r))
-            return r->screen;
-
-    return RULE_NOSCREEN;
-}
-
 Bool
 is_tag_match_rules(Tag *t, Rule *r)
 {
