@@ -316,7 +316,10 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
                 break;
             }
         if(!has_rule)
+        {
+            tag_client_with_current_selected(c, current_acf);
             move_client_to_screen(c, current_acf, True);
+        }
     }
 
     /* if window request fullscreen mode */
@@ -482,7 +485,10 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
         {
             int new_screen = get_screen_bycoord(c->display, c->x, c->y);
             if(c->screen != new_screen)
+            {
+                tag_client_with_current_selected(c, &awesomeconf[new_screen - awesomeconf->screen]);
                 move_client_to_screen(c, &awesomeconf[new_screen - awesomeconf->screen], False);
+            }
         }
     }
 }
