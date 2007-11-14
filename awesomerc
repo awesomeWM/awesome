@@ -126,7 +126,7 @@ mouse
     {
         button = "1"
         modkey = {"Mod4"}
-        command = "tag"
+        command = "client_tag"
     }
     tag
     {
@@ -147,7 +147,7 @@ mouse
     tag
     {
         button = "5"
-        command = "tag_view_previous"
+        command = "tag_view_prev"
     }
     layout
     {
@@ -187,7 +187,7 @@ mouse
     root
     {
         button = "5"
-        command = "tag_view_previous"
+        command = "tag_view_prev"
     }
     client
     {
@@ -199,7 +199,7 @@ mouse
     {
         modkey = {"Mod4"}
         button = "2"
-        command = "zoom"
+        command = "client_zoom"
     }
     client
     {
@@ -326,7 +326,7 @@ keys
     {
         modkey = {"Mod4"}
         key = "Left"
-        command = "tag_view_previous"
+        command = "tag_view_prev"
     }
     key
     {
@@ -344,7 +344,7 @@ keys
     {
         modkey = {"Mod4", "Control"}
         key = "Return"
-        command = "zoom"
+        command = "client_zoom"
     }
     key
     {
@@ -512,7 +512,7 @@ keys
     {
         modkey = {"Mod4", "Shift"}
         key = "0"
-        command = "tag_client"
+        command = "client_tag"
     }
     key
     {
