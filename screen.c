@@ -161,13 +161,9 @@ get_phys_screen(Display *disp, int screen)
 void
 move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
 {
-    int i, old_screen = c->screen;
+    int old_screen = c->screen;
 
     c->screen = acf_new->screen;
-
-    p_realloc(&c->tags, acf_new->ntags);
-    for(i = 0; i < acf_new->ntags; i++)
-        c->tags[i] = acf_new->tags[i].selected;
 
     if(doresize && old_screen != c->screen)
     {
@@ -277,6 +273,7 @@ uicb_movetoscreen(awesome_config * awesomeconf,
         new_screen = get_screen_count(awesomeconf->display) - 1;
 
     prev_screen = sel->screen;
+    tag_client_with_current_selected(sel, &awesomeconf[new_screen - awesomeconf->screen]);
     move_client_to_screen(sel, &awesomeconf[new_screen - awesomeconf->screen], True);
     move_mouse_pointer_to_screen(awesomeconf->display, new_screen);
     arrange(&awesomeconf[prev_screen - awesomeconf->screen]);
