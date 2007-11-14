@@ -278,7 +278,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     c->display = awesomeconf->display;
     c->phys_screen = awesomeconf->phys_screen;
-    c->tags = p_new(Bool, awesomeconf->ntags);
+    tag_client_with_current_selected(c, awesomeconf);
 
     /* update window title */
     updatetitle(c);
@@ -371,6 +371,8 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     window_grabbuttons(c->display, c->phys_screen, c->win,
                        False, True, current_acf->buttons.root,
                        current_acf->modkey, current_acf->numlockmask);
+
+    move_client_to_screen(c, current_acf, True);
 
     /* check for transient and set tags like its parent */
     if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)
