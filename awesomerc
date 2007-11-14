@@ -169,7 +169,7 @@ mouse
     {
         modkey = {"Mod4"}
         button = "1"
-        command = "movemouse"
+        command = "client_movemouse"
     }
     client
     {
@@ -181,7 +181,7 @@ mouse
     {
         modkey = {"Mod4"}
         button = "3"
-        command = "resizemouse"
+        command = "client_resizemouse"
     }
 }
 

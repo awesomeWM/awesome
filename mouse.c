@@ -29,7 +29,7 @@
 #include "layouts/floating.h"
 
 void
-uicb_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
+uicb_client_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
@@ -92,7 +92,7 @@ uicb_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unus
 }
 
 void
-uicb_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
+uicb_client_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
 {
     int ocx, ocy, nw, nh;
     XEvent ev;

@@ -103,8 +103,8 @@ const NameFuncLink UicbList[] = {
     {"reloadconfig", uicb_reloadconfig},
     {"setstatustext", uicb_setstatustext},
     /* mouse.c */
-    {"movemouse", uicb_movemouse},
-    {"resizemouse", uicb_resizemouse},
+    {"client_movemouse", uicb_client_movemouse},
+    {"client_resizemouse", uicb_client_resizemouse},
     {NULL, NULL}
 };
 
