@@ -43,8 +43,8 @@ UICB_PROTO(uicb_client_kill);
 UICB_PROTO(uicb_client_moveresize);
 UICB_PROTO(uicb_client_settrans);
 UICB_PROTO(uicb_setborder);
-UICB_PROTO(uicb_swapnext);
-UICB_PROTO(uicb_swapprev);
+UICB_PROTO(uicb_client_swapnext);
+UICB_PROTO(uicb_client_swapprev);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

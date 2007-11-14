@@ -683,8 +683,8 @@ uicb_setborder(awesome_config *awesomeconf,
 }
 
 void
-uicb_swapnext(awesome_config *awesomeconf,
-              const char *arg __attribute__ ((unused)))
+uicb_client_swapnext(awesome_config *awesomeconf,
+                     const char *arg __attribute__ ((unused)))
 {
     Client *next, *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
@@ -702,8 +702,8 @@ uicb_swapnext(awesome_config *awesomeconf,
 }
 
 void
-uicb_swapprev(awesome_config *awesomeconf,
-              const char *arg __attribute__ ((unused)))
+uicb_client_swapprev(awesome_config *awesomeconf,
+                     const char *arg __attribute__ ((unused)))
 {
     Client *prev, *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 

@@ -230,13 +230,13 @@ keys
     {
         modkey = {"Mod4", "Shift"}
         key = "j"
-        command = "swapnext"
+        command = "client_swapnext"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "k"
-        command = "swapprev"
+        command = "client_swapprev"
     }
     key
     {
