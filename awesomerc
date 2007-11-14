@@ -326,7 +326,7 @@ keys
     {
         modkey = {"Mod4", "Control"}
         key = "space"
-        command = "togglefloating"
+        command = "client_togglefloating"
     }
     key
     {

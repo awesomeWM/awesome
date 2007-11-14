@@ -90,7 +90,7 @@ uicb_client_tag(awesome_config *awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_togglefloating(awesome_config * awesomeconf,
+uicb_client_togglefloating(awesome_config * awesomeconf,
                     const char *arg __attribute__ ((unused)))
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;

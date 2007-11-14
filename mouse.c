@@ -43,7 +43,7 @@ uicb_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unus
 
     if((get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange != layout_floating)
         && !c->isfloating)
-         uicb_togglefloating(awesomeconf, "DUMMY");
+         uicb_client_togglefloating(awesomeconf, "DUMMY");
      else
          restack(awesomeconf);
 
@@ -103,7 +103,7 @@ uicb_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((un
 
     if((get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange != layout_floating)
        && !c->isfloating)
-        uicb_togglefloating(awesomeconf, "DUMMY");
+        uicb_client_togglefloating(awesomeconf, "DUMMY");
     else
         restack(awesomeconf);
 
