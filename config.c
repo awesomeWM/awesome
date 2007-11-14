@@ -195,6 +195,8 @@ parse_mouse_bindings(cfg_t * cfg, const char *secname, Bool handle_arg)
             b->mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
         b->button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
         b->func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
+        if(!b->func)
+            fprintf(stderr, "awesome: unknown command %s\n", cfg_getstr(cfgsectmp, "command"));
         if(handle_arg)
             b->arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
         else
@@ -434,7 +436,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->layouts[i].arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
         if(!awesomeconf->layouts[i].arrange)
         {
-            fprintf(stderr, "awesome: unknown layout #%d in configuration file\n", i);
+            fprintf(stderr, "awesome: unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
             awesomeconf->layouts[i].symbol = NULL;
             continue;
         }
@@ -535,6 +537,8 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
                 key->mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", l));
             key->keysym = XStringToKeysym(cfg_getstr(cfgsectmp, "key"));
             key->func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
+            if(!key->func)
+                fprintf(stderr, "awesome: unknown command %s\n", cfg_getstr(cfgsectmp, "command"));
             key->arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
 
             if(j < cfg_size(cfg_keys, "key") - 1)
