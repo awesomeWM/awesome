@@ -131,7 +131,7 @@ mouse
     tag
     {
         button = "3"
-        command = "toggleview"
+        command = "tag_toggleview"
     }
     tag
     {
@@ -419,69 +419,69 @@ keys
     {
         modkey = {"Mod4", "Control"}
         key = "0"
-        command = "toggleview"
+        command = "tag_toggleview"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "1"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "1"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "2"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "2"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "3"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "3"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "4"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "4"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "5"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "5"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "6"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "6"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "7"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "7"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "8"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "8"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "9"
-        command = "toggleview"
+        command = "tag_toggleview"
         arg = "9"
     }
     key

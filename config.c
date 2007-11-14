@@ -73,7 +73,7 @@ const NameFuncLink UicbList[] = {
     /* tag.c */
     {"client_tag", uicb_client_tag},
     {"client_togglefloating", uicb_client_togglefloating},
-    {"toggleview", uicb_toggleview},
+    {"tag_toggleview", uicb_tag_toggleview},
     {"toggletag", uicb_toggletag},
     {"view", uicb_view},
     {"view_tag_prev_selected", uicb_tag_prev_selected},

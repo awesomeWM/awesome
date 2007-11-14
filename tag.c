@@ -137,8 +137,8 @@ uicb_toggletag(awesome_config *awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_toggleview(awesome_config *awesomeconf,
-                const char *arg)
+uicb_tag_toggleview(awesome_config *awesomeconf,
+                    const char *arg)
 {
     unsigned int i;
     int j;
