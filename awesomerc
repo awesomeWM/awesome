@@ -137,7 +137,7 @@ mouse
     {
         button = "3"
         modkey = {"Mod4"}
-        command = "toggletag"
+        command = "client_toggletag"
     }
     tag
     {
@@ -557,69 +557,69 @@ keys
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "0"
-        command = "toggletag"
+        command = "client_toggletag"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "1"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "1"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "2"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "2"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "3"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "3"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "4"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "4"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "5"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "5"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "6"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "6"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "7"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "7"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "8"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "8"
     }
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "9"
-        command = "toggletag"
+        command = "client_toggletag"
         arg = "9"
     }
 }

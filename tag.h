@@ -32,7 +32,7 @@ void tag_client_with_current_selected(Client *, awesome_config *);
 
 UICB_PROTO(uicb_client_tag);
 UICB_PROTO(uicb_client_togglefloating);
-UICB_PROTO(uicb_toggletag);
+UICB_PROTO(uicb_client_toggletag);
 UICB_PROTO(uicb_tag_toggleview);
 UICB_PROTO(uicb_view);
 UICB_PROTO(uicb_tag_prev_selected);

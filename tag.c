@@ -109,13 +109,13 @@ uicb_client_togglefloating(awesome_config * awesomeconf,
     arrange(awesomeconf);
 }
 
-/** Toggle tag view
+/** Toggle a tag on client
  * \param arg Tag name
  * \ingroup ui_callback
  */
 void
-uicb_toggletag(awesome_config *awesomeconf,
-               const char *arg)
+uicb_client_toggletag(awesome_config *awesomeconf,
+                      const char *arg)
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
     unsigned int i;
