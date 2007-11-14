@@ -165,6 +165,24 @@ mouse
         button = "5"
         command = "view_tag_previous"
     }
+    client
+    {
+        modkey = {"Mod4"}
+        button = "1"
+        command = "movemouse"
+    }
+    client
+    {
+        modkey = {"Mod4"}
+        button = "2"
+        command = "zoom"
+    }
+    client
+    {
+        modkey = {"Mod4"}
+        button = "3"
+        command = "resizemouse"
+    }
 }
 
 keys

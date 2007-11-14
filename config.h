@@ -180,6 +180,7 @@ struct awesome_config
            Button *title;
            Button *layout;
            Button *root;
+           Button *client;
     } buttons;
     /** Default modkey */
     KeySym modkey;

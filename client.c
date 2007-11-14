@@ -191,7 +191,7 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
                                awesomeconf->tags[i].client_sel->phys_screen,
                                awesomeconf->tags[i].client_sel->win,
                                False, True, awesomeconf->buttons.root,
-                               awesomeconf->modkey, awesomeconf->numlockmask);
+                               awesomeconf->buttons.client, awesomeconf->numlockmask);
             XSetWindowBorder(awesomeconf->tags[i].client_sel->display,
                              awesomeconf->tags[i].client_sel->win,
                              awesomeconf->colors_normal[ColBorder].pixel);
@@ -203,7 +203,7 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf)
         XSetWindowBorder(awesomeconf->display, c->win, awesomeconf->colors_selected[ColBorder].pixel);
         window_grabbuttons(c->display, c->phys_screen, c->win,
                            True, True, awesomeconf->buttons.root,
-                           awesomeconf->modkey, awesomeconf->numlockmask);
+                           awesomeconf->buttons.client, awesomeconf->numlockmask);
     }
     if(!selscreen)
         return;
@@ -374,7 +374,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     /* grab buttons */
     window_grabbuttons(c->display, c->phys_screen, c->win,
                        False, True, current_acf->buttons.root,
-                       current_acf->modkey, current_acf->numlockmask);
+                       current_acf->buttons.client, current_acf->numlockmask);
 
     move_client_to_screen(c, current_acf, True);
 

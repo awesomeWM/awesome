@@ -103,33 +103,17 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     {
         XAllowEvents(c->display, ReplayPointer, CurrentTime);
         focus(c, ev->same_screen, &awesomeconf[c->screen]);
-        if(CLEANMASK(ev->state, awesomeconf[c->screen]) != awesomeconf[c->screen].modkey)
+        if(CLEANMASK(ev->state, awesomeconf[c->screen]) == NoSymbol
+           && ev->button == Button1)
         {
-           if (ev->button == Button1)
-           {
-               restack(&awesomeconf[c->screen]);
-               window_grabbuttons(c->display, c->phys_screen, c->win,
-                                  True, True, awesomeconf->buttons.root,
-                                  awesomeconf->modkey, awesomeconf->numlockmask);
-           }
+            restack(&awesomeconf[c->screen]);
+            window_grabbuttons(c->display, c->phys_screen, c->win,
+                               True, True, awesomeconf->buttons.root,
+                               awesomeconf->buttons.client, awesomeconf->numlockmask);
         }
-        else if(ev->button == Button1)
-            uicb_movemouse(&awesomeconf[c->screen], NULL);
-        else if(ev->button == Button2)
-        {
-            if((get_current_layout(awesomeconf[c->screen].tags,
-                                   awesomeconf[c->screen].ntags)->arrange != layout_floating)
-                && !c->isfixed && c->isfloating)
-                uicb_togglefloating(&awesomeconf[c->screen], NULL);
-            else
-                uicb_zoom(&awesomeconf[c->screen], NULL);
-        }
-        else if(ev->button == Button3)
-            uicb_resizemouse(&awesomeconf[c->screen], NULL);
-        else if(ev->button == Button4)
-            uicb_settrans(&awesomeconf[c->screen], "+5");
-        else if(ev->button == Button5)
-            uicb_settrans(&awesomeconf[c->screen], "-5");
+        else
+            handle_mouse_button_press(&awesomeconf[c->screen], ev->button, ev->state,
+                                      awesomeconf[c->screen].buttons.client, NULL);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
@@ -250,7 +234,7 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
                                     awesomeconf[c->screen].ntags)->arrange == layout_floating)
             window_grabbuttons(c->display, c->phys_screen, c->win,
                                True, False, awesomeconf->buttons.root,
-                               awesomeconf->modkey, awesomeconf->numlockmask);
+                               awesomeconf->buttons.client, awesomeconf->numlockmask);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)

@@ -324,6 +324,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_SEC((char *) "layout", mouse_generic_opts, CFGF_MULTI),
         CFG_SEC((char *) "title", mouse_generic_opts, CFGF_MULTI),
         CFG_SEC((char *) "root", mouse_generic_opts, CFGF_MULTI),
+        CFG_SEC((char *) "client", mouse_generic_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t opts[] =
@@ -517,6 +518,9 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
     /* Mouse: root window click bindings */
     awesomeconf->buttons.root = parse_mouse_bindings(cfg_mouse, "root", True);
+
+    /* Mouse: client windows click bindings */
+    awesomeconf->buttons.client = parse_mouse_bindings(cfg_mouse, "client", True);
 
     /* Keys */
     awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
