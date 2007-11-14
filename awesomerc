@@ -142,12 +142,12 @@ mouse
     tag
     {
         button = "4"
-        command = "view_tag_next"
+        command = "tag_view_next"
     }
     tag
     {
         button = "5"
-        command = "view_tag_previous"
+        command = "tag_view_previous"
     }
     root
     {
@@ -158,12 +158,12 @@ mouse
     root
     {
         button = "4"
-        command = "view_tag_next"
+        command = "tag_view_next"
     }
     root
     {
         button = "5"
-        command = "view_tag_previous"
+        command = "tag_view_previous"
     }
     client
     {
@@ -296,19 +296,19 @@ keys
     {
         modkey = {"Mod4"}
         key = "Escape"
-        command = "view_tag_prev_selected"
+        command = "tag_view_prev_selected"
     }
     key
     {
         modkey = {"Mod4"}
         key = "Left"
-        command = "view_tag_previous"
+        command = "tag_view_previous"
     }
     key
     {
         modkey = {"Mod4"}
         key = "Right"
-        command = "view_tag_next"
+        command = "tag_view_next"
     }
     key
     {
