@@ -76,9 +76,9 @@ const NameFuncLink UicbList[] = {
     {"tag_toggleview", uicb_tag_toggleview},
     {"client_toggletag", uicb_client_toggletag},
     {"tag_view", uicb_tag_view},
-    {"tag_view_prev_selected", uicb_tag_prev_selected},
-    {"tag_view_prev", uicb_tag_viewprev},
-    {"tag_view_next", uicb_tag_viewnext},
+    {"tag_viewprev_selected", uicb_tag_prev_selected},
+    {"tag_viewprev", uicb_tag_viewprev},
+    {"tag_viewnext", uicb_tag_viewnext},
     /* layout.c */
     {"tag_setlayout", uicb_tag_setlayout},
     {"client_focusnext", uicb_client_focusnext},
