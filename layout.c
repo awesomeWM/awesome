@@ -82,8 +82,8 @@ get_current_layout(Tag *tags, int ntags)
 }
 
 void
-uicb_focusnext(awesome_config * awesomeconf,
-               const char *arg __attribute__ ((unused)))
+uicb_client_focusnext(awesome_config * awesomeconf,
+                      const char *arg __attribute__ ((unused)))
 {
     Client *c, *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
@@ -100,8 +100,8 @@ uicb_focusnext(awesome_config * awesomeconf,
 }
 
 void
-uicb_focusprev(awesome_config *awesomeconf,
-               const char *arg __attribute__ ((unused)))
+uicb_client_focusprev(awesome_config *awesomeconf,
+                      const char *arg __attribute__ ((unused)))
 {
     Client *c, *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
@@ -251,8 +251,8 @@ maximize(int x, int y, int w, int h, awesome_config *awesomeconf)
 }
 
 void
-uicb_togglemax(awesome_config *awesomeconf,
-               const char *arg __attribute__ ((unused)))
+uicb_client_togglemax(awesome_config *awesomeconf,
+                      const char *arg __attribute__ ((unused)))
 {
     ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
 
@@ -264,8 +264,8 @@ uicb_togglemax(awesome_config *awesomeconf,
 }
 
 void
-uicb_toggleverticalmax(awesome_config *awesomeconf,
-                       const char *arg __attribute__ ((unused)))
+uicb_client_toggleverticalmax(awesome_config *awesomeconf,
+                              const char *arg __attribute__ ((unused)))
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
     ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
@@ -281,8 +281,8 @@ uicb_toggleverticalmax(awesome_config *awesomeconf,
 
 
 void
-uicb_togglehorizontalmax(awesome_config *awesomeconf,
-                         const char *arg __attribute__ ((unused)))
+uicb_client_togglehorizontalmax(awesome_config *awesomeconf,
+                                const char *arg __attribute__ ((unused)))
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
     ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
@@ -297,8 +297,8 @@ uicb_togglehorizontalmax(awesome_config *awesomeconf,
 }
 
 void
-uicb_zoom(awesome_config *awesomeconf,
-          const char *arg __attribute__ ((unused)))
+uicb_client_zoom(awesome_config *awesomeconf,
+                 const char *arg __attribute__ ((unused)))
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 

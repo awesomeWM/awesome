@@ -33,13 +33,13 @@ void restack(awesome_config *);
 void loadawesomeprops(awesome_config *);
 void saveawesomeprops(awesome_config *);
 
-UICB_PROTO(uicb_focusnext);
-UICB_PROTO(uicb_focusprev);
+UICB_PROTO(uicb_client_focusnext);
+UICB_PROTO(uicb_client_focusprev);
 UICB_PROTO(uicb_setlayout);
-UICB_PROTO(uicb_togglemax);
-UICB_PROTO(uicb_toggleverticalmax);
-UICB_PROTO(uicb_togglehorizontalmax);
-UICB_PROTO(uicb_zoom);
+UICB_PROTO(uicb_client_togglemax);
+UICB_PROTO(uicb_client_toggleverticalmax);
+UICB_PROTO(uicb_client_togglehorizontalmax);
+UICB_PROTO(uicb_client_zoom);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

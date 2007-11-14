@@ -218,13 +218,13 @@ keys
     {
         modkey = {"Mod4"}
         key = "j"
-        command = "focusnext"
+        command = "client_focusnext"
     }
     key
     {
         modkey = {"Mod4"}
         key = "k"
-        command = "focusprev"
+        command = "client_focusprev"
     }
     key
     {
@@ -314,7 +314,7 @@ keys
     {
         modkey = {"Mod4"}
         key = "m"
-        command = "togglemax"
+        command = "client_togglemax"
     }
     key
     {

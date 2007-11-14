@@ -81,12 +81,12 @@ const NameFuncLink UicbList[] = {
     {"tag_view_next", uicb_tag_viewnext},
     /* layout.c */
     {"setlayout", uicb_setlayout},
-    {"focusnext", uicb_focusnext},
-    {"focusprev", uicb_focusprev}, 
-    {"togglemax", uicb_togglemax},
-    {"toggleverticalmax", uicb_toggleverticalmax},
-    {"togglehorizontalmax", uicb_togglehorizontalmax},
-    {"zoom", uicb_zoom},
+    {"client_focusnext", uicb_client_focusnext},
+    {"client_focusprev", uicb_client_focusprev}, 
+    {"client_togglemax", uicb_client_togglemax},
+    {"client_toggleverticalmax", uicb_client_toggleverticalmax},
+    {"client_togglehorizontalmax", uicb_client_togglehorizontalmax},
+    {"client_zoom", uicb_client_zoom},
     /* layouts/tile.c */
     {"setmwfact", uicb_setmwfact},
     {"setnmaster", uicb_setnmaster},
