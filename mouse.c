@@ -83,7 +83,7 @@ uicb_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unus
                 nx = si[c->screen].x_org + si[c->screen].width - c->w - 2 * c->border;
             if(abs(ny) < awesomeconf->snap + si[c->screen].y_org && ny > si[c->screen].y_org)
                 ny = si[c->screen].y_org;
-            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf[c->screen].snap)
+            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf->snap)
                 ny = si[c->screen].y_org + si[c->screen].height - c->h - 2 * c->border;
             client_resize(c, nx, ny, c->w, c->h, awesomeconf, False, False);
             break;
