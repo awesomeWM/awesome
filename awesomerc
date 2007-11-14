@@ -9,6 +9,7 @@ screen 0
         resize_hints = true
         opacity_unfocused = 100
         focus_move_pointer = false
+        allow_lower_floats = false
         font = "fixed-12"
     }
     colors
