@@ -34,7 +34,7 @@ UICB_PROTO(uicb_client_tag);
 UICB_PROTO(uicb_client_togglefloating);
 UICB_PROTO(uicb_client_toggletag);
 UICB_PROTO(uicb_tag_toggleview);
-UICB_PROTO(uicb_view);
+UICB_PROTO(uicb_tag_view);
 UICB_PROTO(uicb_tag_prev_selected);
 UICB_PROTO(uicb_tag_viewnext);
 UICB_PROTO(uicb_tag_viewprev);

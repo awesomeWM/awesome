@@ -120,7 +120,7 @@ mouse
     tag
     {
         button = "1"
-        command = "view"
+        command = "tag_view"
     }
     tag
     {
@@ -350,69 +350,69 @@ keys
     {
        modkey = {"Mod4"}
        key = "0"
-       command = "view"
+       command = "tag_view"
     }
     key
     {
         modkey = {"Mod4"}
         key = "1"
-        command = "view"
+        command = "tag_view"
         arg = "1"
     }
     key
     {
         modkey = {"Mod4"}
         key = "2"
-        command = "view"
+        command = "tag_view"
         arg = "2"
     }
     key
     {
         modkey = {"Mod4"}
         key = "3"
-        command = "view"
+        command = "tag_view"
         arg = "3"
     }
     key
     {
         modkey = {"Mod4"}
         key = "4"
-        command = "view"
+        command = "tag_view"
         arg = "4"
     }
     key
     {
         modkey = {"Mod4"}
         key = "5"
-        command = "view"
+        command = "tag_view"
         arg = "5"
     }
     key
     {
         modkey = {"Mod4"}
         key = "6"
-        command = "view"
+        command = "tag_view"
         arg = "6"
     }
     key
     {
         modkey = {"Mod4"}
         key = "7"
-        command = "view"
+        command = "tag_view"
         arg = "7"
     }
     key
     {
         modkey = {"Mod4"}
         key = "8"
-        command = "view"
+        command = "tag_view"
         arg = "8"
     }
     key
     {
         modkey = {"Mod4"}
         key = "9"
-        command = "view"
+        command = "tag_view"
         arg = "9"
     }
     key
