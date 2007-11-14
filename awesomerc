@@ -488,69 +488,69 @@ keys
     {
         modkey = {"Mod4", "Shift"}
         key = "0"
-        command = "tag"
+        command = "tag_client"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "1"
-        command = "tag"
+        command = "client_tag"
         arg = "1"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "2"
-        command = "tag"
+        command = "client_tag"
         arg = "2"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "3"
-        command = "tag"
+        command = "client_tag"
         arg = "3"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "4"
-        command = "tag"
+        command = "client_tag"
         arg = "4"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "5"
-        command = "tag"
+        command = "client_tag"
         arg = "5"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "6"
-        command = "tag"
+        command = "client_tag"
         arg = "6"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "7"
-        command = "tag"
+        command = "client_tag"
         arg = "7"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "8"
-        command = "tag"
+        command = "client_tag"
         arg = "8"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "9"
-        command = "tag"
+        command = "client_tag"
         arg = "9"
     }
     key
