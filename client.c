@@ -721,8 +721,8 @@ uicb_swapprev(awesome_config *awesomeconf,
 }
 
 void
-uicb_moveresize(awesome_config *awesomeconf,
-                const char *arg)
+uicb_client_moveresize(awesome_config *awesomeconf,
+                       const char *arg)
 {
     int nx, ny, nw, nh, ox, oy, ow, oh;
     char x[8], y[8], w[8], h[8];

@@ -65,7 +65,7 @@ const NameFuncLink UicbList[] = {
     {"exec", uicb_exec},
     /* client.c */
     {"client_kill", uicb_client_kill},
-    {"moveresize", uicb_moveresize},
+    {"client_moveresize", uicb_client_moveresize},
     {"settrans", uicb_settrans},
     {"setborder", uicb_setborder},
     {"swapnext", uicb_swapnext},

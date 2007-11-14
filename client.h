@@ -40,7 +40,7 @@ void updatetitle(Client *);
 void saveprops(Client *, int);
 
 UICB_PROTO(uicb_client_kill);
-UICB_PROTO(uicb_moveresize);
+UICB_PROTO(uicb_client_moveresize);
 UICB_PROTO(uicb_settrans);
 UICB_PROTO(uicb_setborder);
 UICB_PROTO(uicb_swapnext);
