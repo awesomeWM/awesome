@@ -28,6 +28,7 @@
 #define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, screen, tags, ntags))
 
 Bool isvisible(Client *, int, Tag *, int);
+void tag_client_with_current_selected(Client *, awesome_config *);
 
 UICB_PROTO(uicb_tag);
 UICB_PROTO(uicb_togglefloating);

@@ -49,6 +49,15 @@ isvisible(Client * c, int screen, Tag * tags, int ntags)
     return False;
 }
 
+void
+tag_client_with_current_selected(Client *c, awesome_config *awesomeconf)
+{
+    int i;
+
+    p_realloc(&c->tags, awesomeconf->ntags);
+    for(i = 0; i < awesomeconf->ntags; i++)
+        c->tags[i] = awesomeconf->tags[i].selected;
+}
 
 /** Tag selected window with tag
  * \param arg Tag name
