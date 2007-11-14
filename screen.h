@@ -34,9 +34,10 @@ int get_screen_bycoord(Display *, int, int);
 int get_screen_count(Display *);
 int get_phys_screen(Display *, int);
 void move_client_to_screen(Client *, awesome_config *, Bool);
-UICB_PROTO(uicb_focusnextscreen);
-UICB_PROTO(uicb_focusprevscreen);
-UICB_PROTO(uicb_movetoscreen);
+
+UICB_PROTO(uicb_screen_focusnext);
+UICB_PROTO(uicb_screen_focusprev);
+UICB_PROTO(uicb_client_movetoscreen);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

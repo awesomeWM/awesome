@@ -216,8 +216,8 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
 }
 
 void
-uicb_focusnextscreen(awesome_config * awesomeconf,
-                     const char *arg __attribute__ ((unused)))
+uicb_screen_focusnext(awesome_config * awesomeconf,
+                      const char *arg __attribute__ ((unused)))
 {
     Client *c;
     int next_screen = awesomeconf->screen + 1 >= get_screen_count(awesomeconf->display) ? 0 : awesomeconf->screen + 1;
@@ -232,8 +232,8 @@ uicb_focusnextscreen(awesome_config * awesomeconf,
 }
 
 void
-uicb_focusprevscreen(awesome_config * awesomeconf,
-                     const char *arg __attribute__ ((unused)))
+uicb_screen_focusprev(awesome_config * awesomeconf,
+                      const char *arg __attribute__ ((unused)))
 {
     Client *c;
     int prev_screen = awesomeconf->screen - 1 < 0 ? get_screen_count(awesomeconf->display) - 1 : awesomeconf->screen - 1;
@@ -253,8 +253,8 @@ uicb_focusprevscreen(awesome_config * awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_movetoscreen(awesome_config * awesomeconf,
-                  const char *arg)
+uicb_client_movetoscreen(awesome_config * awesomeconf,
+                         const char *arg)
 {
     int new_screen, prev_screen;
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;

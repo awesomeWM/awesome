@@ -242,13 +242,13 @@ keys
     {
         modkey = {"Mod4", "Control"}
         key = "j"
-        command = "focusnextscreen"
+        command = "screen_focusnext"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "k"
-        command = "focusprevscreen"
+        command = "screen_focusprev"
     }
     key
     {

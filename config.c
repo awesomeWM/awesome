@@ -92,9 +92,9 @@ const NameFuncLink UicbList[] = {
     {"tag_setnmaster", uicb_tag_setnmaster},
     {"tag_setncol", uicb_tag_setncol},
     /* screen.c */
-    {"focusnextscreen", uicb_focusnextscreen},
-    {"focusprevscreen", uicb_focusprevscreen},
-    {"movetoscreen", uicb_movetoscreen},
+    {"screen_focusnext", uicb_screen_focusnext},
+    {"screen_focusprev", uicb_screen_focusprev},
+    {"client_movetoscreen", uicb_client_movetoscreen},
     /* awesome.c */
     {"quit", uicb_quit},
     /* statusbar.c */
