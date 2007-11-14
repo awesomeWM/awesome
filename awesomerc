@@ -332,7 +332,7 @@ keys
     {
         modkey = {"Mod4", "Shift"}
         key = "c"
-        command = "killclient"
+        command = "client_kill"
     }
     key
     {

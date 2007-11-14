@@ -762,8 +762,8 @@ uicb_moveresize(awesome_config *awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_killclient(awesome_config *awesomeconf,
-                const char *arg __attribute__ ((unused)))
+uicb_client_kill(awesome_config *awesomeconf,
+                 const char *arg __attribute__ ((unused)))
 {
     XEvent ev;
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
