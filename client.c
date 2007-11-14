@@ -264,7 +264,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     Window trans;
     Status rettrans;
     XWindowChanges wc;
-    ScreenInfo *screen_info = get_screen_info(awesomeconf->display, awesomeconf->screen, NULL);
+    ScreenInfo *screen_info;
     awesome_config *current_acf = awesomeconf;
 
     c = p_new(Client, 1);
@@ -288,8 +288,8 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     if(!loadprops(c, awesomeconf->ntags))
     {
         Rule *r;
-        Bool matched, has_rule = False;
-        for(r = awesomeconf->rules; r; r = r->next)
+        Bool matched = False, has_rule = False;
+        for(r = current_acf->rules; r; r = r->next)
             if(client_match_rule(c, r))
             {
                 has_rule = True;
@@ -299,6 +299,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
                 if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
                 {
                     current_acf = &awesomeconf[r->screen - awesomeconf->screen];
+                    tag_client_with_current_selected(c, current_acf);
                     move_client_to_screen(c, current_acf, True);
                 }
 
@@ -322,6 +323,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
         }
     }
 
+    screen_info = get_screen_info(current_acf->display, current_acf->screen, NULL);
     /* if window request fullscreen mode */
     if(c->w == screen_info[current_acf->screen].width && c->h == screen_info[current_acf->screen].height)
     {
