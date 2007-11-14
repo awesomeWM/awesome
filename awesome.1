@@ -5,8 +5,8 @@ awesome \- awesome window manager
 .B awesome
 .RB [\ \-v\ |\ \-c\ <configfile>\ ]
 .SH DESCRIPTION
-awesome is a window manager for X. It manages windows in tiled and
-floating layouts. Either layout can be applied dynamically, optimizing the
+awesome is a window manager for X. It manages windows in different layouts, like
+floating or tiled. Either layout can be applied dynamically, optimizing the
 environment for the application in use and the task performed.
 .P
 In tiled layout windows are managed in a master and stacking area. The master
@@ -36,37 +36,8 @@ prints version information to standard output, then exits.
 .B \-c
 use an alternate configuration file instead of $HOME/.awesomerc
 .SH USAGE
-.SS Status bar
 .TP
-.B Button1
-click on a tag label to display all windows with that tag, click on the layout
-label toggles between tiled and floating layout.
-.TP
-.B Button3
-click on a tag label adds/removes all windows with that tag to/from the view.
-.TP
-.B Button4 or Button5 (mouse wheel)
-use mouse wheel on tags to switch them, on layout to switch them or in title bar to
-cycle between clients.
-.TP
-.B Modkey\-Button1
-click on a tag label applies that tag to the focused window.
-.TP
-.B Modkey\-Button3
-click on a tag label adds/removes that tag to/from the focused window.
-.SS Keyboard commands
-.TP
-There's no keyboard binding by default, please look at the example file.
-.SS Mouse commands
-.TP
-.B Modkey\-Button1
-Move current window while dragging (and make it floating if tiled).
-.TP
-.B Modkey\-Button2
-Zooms/cycles current window to/from master area (or tile it if floating).
-.TP
-.B Modkey\-Button3
-Resize current window while dragging (and make it floating if tiled).
+Please read the default configuration file to see mouse and key actions.
 .SH CUSTOMIZATION
 awesome is customized by creating a custom $HOME/.awesomerc file.
 .SH SEE ALSO
