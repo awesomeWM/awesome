@@ -182,8 +182,6 @@ struct awesome_config
            Button *root;
            Button *client;
     } buttons;
-    /** Default modkey */
-    KeySym modkey;
     /** Numlock mask */
     unsigned int numlockmask;
     /** Border size */

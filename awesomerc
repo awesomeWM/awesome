@@ -115,7 +115,6 @@ rules
 
 mouse
 {
-    modkey = "Mod4"
     # For click on tag
     tag
     {

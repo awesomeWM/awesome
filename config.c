@@ -321,7 +321,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     };
     static cfg_opt_t mouse_opts[] =
     {
-        CFG_STR((char *) "modkey", (char *) "Mod4", CFGF_NONE),
         CFG_SEC((char *) "tag", mouse_tag_opts, CFGF_MULTI),
         CFG_SEC((char *) "layout", mouse_generic_opts, CFGF_MULTI),
         CFG_SEC((char *) "title", mouse_generic_opts, CFGF_MULTI),
@@ -504,10 +503,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     /* select first tag by default */
     awesomeconf->tags[0].selected = True;
     awesomeconf->tags[0].was_selected = True;
-
-    /* Mouse */
-    if(!(awesomeconf->modkey = key_mask_lookup(cfg_getstr(cfg_mouse, "modkey"))))
-       awesomeconf->modkey = Mod4Mask;
 
     /* Mouse: tags click bindings */
     awesomeconf->buttons.tag = parse_mouse_bindings(cfg_mouse, "tag", False);
