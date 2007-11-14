@@ -621,8 +621,8 @@ updatesizehints(Client *c)
  * \ingroup ui_callback
  */
 void
-uicb_settrans(awesome_config *awesomeconf,
-              const char *arg)
+uicb_client_settrans(awesome_config *awesomeconf,
+                     const char *arg)
 {
     double delta = 100.0, current_opacity = 100.0;
     unsigned char *data;
