@@ -149,6 +149,30 @@ mouse
         button = "5"
         command = "tag_view_previous"
     }
+    layout
+    {
+        button = "1"
+        command = "tag_setlayout"
+        arg = "+1"
+    }
+    layout
+    {
+        button = "4"
+        command = "tag_setlayout"
+        arg = "+1"
+    }
+    layout
+    {
+        button = "3"
+        command = "tag_setlayout"
+        arg = "-1"
+    }
+    layout
+    {
+        button = "5"
+        command = "tag_setlayout"
+        arg = "-1"
+    }
     root
     {
         button = "3"
