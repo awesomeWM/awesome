@@ -312,8 +312,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
                         c->tags[i] = False;
 
                 if(!matched)
-                    for(i = 0; i < current_acf->ntags; i++)
-                        c->tags[i] = current_acf->tags[i].selected;
+                    tag_client_with_current_selected(c, current_acf);
                 break;
             }
         if(!has_rule)
