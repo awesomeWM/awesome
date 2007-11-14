@@ -133,6 +133,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
+    int old_screen;
 
     if((c = get_client_bywin(*awesomeconf->clients, ev->window)))
     {
@@ -157,6 +158,16 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
                 c->y = DisplayHeight(c->display, c->phys_screen) / 2 - c->h / 2;       /* center in y direction */
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
+            /* recompute screen */
+            old_screen = c->screen;
+            c->screen = get_screen_bycoord(c->display, c->x, c->y);
+            if(old_screen != c->screen)
+            {
+                move_client_to_screen(c, &awesomeconf[c->screen], False);
+                tag_client_with_current_selected(c, &awesomeconf[c->screen]);
+                drawstatusbar(&awesomeconf[old_screen]);
+                drawstatusbar(&awesomeconf[c->screen]);
+            }
             if(isvisible(c, c->screen, awesomeconf[c->screen].tags, awesomeconf[c->screen].ntags))
                 XMoveResizeWindow(e->xany.display, c->win, c->x, c->y, c->w, c->h);
         }
