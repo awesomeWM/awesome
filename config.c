@@ -80,7 +80,7 @@ const NameFuncLink UicbList[] = {
     {"tag_view_prev", uicb_tag_viewprev},
     {"tag_view_next", uicb_tag_viewnext},
     /* layout.c */
-    {"setlayout", uicb_setlayout},
+    {"tag_setlayout", uicb_tag_setlayout},
     {"client_focusnext", uicb_client_focusnext},
     {"client_focusprev", uicb_client_focusprev}, 
     {"client_togglemax", uicb_client_togglemax},

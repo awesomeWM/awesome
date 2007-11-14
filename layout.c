@@ -197,7 +197,7 @@ saveawesomeprops(awesome_config *awesomeconf)
 }
 
 void
-uicb_setlayout(awesome_config * awesomeconf,
+uicb_tag_setlayout(awesome_config * awesomeconf,
                const char *arg)
 {
     int i, j;

@@ -198,14 +198,14 @@ keys
     {
         modkey = {"Mod4"}
         key = "space"
-        command = "setlayout"
+        command = "tag_setlayout"
         arg = "+1"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "space"
-        command = "setlayout"
+        command = "tag_setlayout"
         arg = "-1"
     }
     key

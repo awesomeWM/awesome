@@ -35,7 +35,7 @@ void saveawesomeprops(awesome_config *);
 
 UICB_PROTO(uicb_client_focusnext);
 UICB_PROTO(uicb_client_focusprev);
-UICB_PROTO(uicb_setlayout);
+UICB_PROTO(uicb_tag_setlayout);
 UICB_PROTO(uicb_client_togglemax);
 UICB_PROTO(uicb_client_toggleverticalmax);
 UICB_PROTO(uicb_client_togglehorizontalmax);
