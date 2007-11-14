@@ -254,42 +254,42 @@ keys
     {
         modkey = {"Mod4"}
         key = "h"
-        command = "setmwfact"
+        command = "tag_setmwfact"
         arg = "-0.05"
     }
     key
     {
         modkey = {"Mod4"}
         key = "l"
-        command = "setmwfact"
+        command = "tag_setmwfact"
         arg = "+0.05"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "h"
-        command = "setnmaster"
+        command = "tag_setnmaster"
         arg = "+1"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "l"
-        command = "setnmaster"
+        command = "tag_setnmaster"
         arg = "-1"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "h"
-        command = "setncol"
+        command = "tag_setncol"
         arg = "+1"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "l"
-        command = "setncol"
+        command = "tag_setncol"
         arg = "-1"
     }
     key

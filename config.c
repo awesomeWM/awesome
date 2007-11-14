@@ -88,9 +88,9 @@ const NameFuncLink UicbList[] = {
     {"client_togglehorizontalmax", uicb_client_togglehorizontalmax},
     {"client_zoom", uicb_client_zoom},
     /* layouts/tile.c */
-    {"setmwfact", uicb_setmwfact},
-    {"setnmaster", uicb_setnmaster},
-    {"setncol", uicb_setncol},
+    {"tag_setmwfact", uicb_tag_setmwfact},
+    {"tag_setnmaster", uicb_tag_setnmaster},
+    {"tag_setncol", uicb_tag_setncol},
     /* screen.c */
     {"focusnextscreen", uicb_focusnextscreen},
     {"focusprevscreen", uicb_focusprevscreen},

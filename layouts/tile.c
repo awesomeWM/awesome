@@ -29,8 +29,8 @@
 #include "layouts/tile.h"
 
 void
-uicb_setnmaster(awesome_config *awesomeconf,
-                const char * arg)
+uicb_tag_setnmaster(awesome_config *awesomeconf,
+                    const char * arg)
 {
     Tag *curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags);
     Layout *curlay = curtag->layout;
@@ -45,8 +45,8 @@ uicb_setnmaster(awesome_config *awesomeconf,
 }
 
 void
-uicb_setncol(awesome_config *awesomeconf,
-             const char * arg)
+uicb_tag_setncol(awesome_config *awesomeconf,
+                 const char * arg)
 {
     Tag *curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags);
     Layout *curlay = curtag->layout;
@@ -61,8 +61,8 @@ uicb_setncol(awesome_config *awesomeconf,
 }
 
 void
-uicb_setmwfact(awesome_config * awesomeconf,
-               const char *arg)
+uicb_tag_setmwfact(awesome_config * awesomeconf,
+                   const char *arg)
 {
     char *newarg;
     Tag *curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags);
