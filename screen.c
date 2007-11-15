@@ -111,7 +111,7 @@ get_screen_bycoord(Display *disp, int x, int y)
 
     for(i = 0; i < get_screen_count(disp); i++)
         if((x < 0 || (x >= si[i].x_org && x < si[i].x_org + si[i].width))
-           && (y< 0 || (y >= si[i].y_org && y < si[i].y_org + si[i].height)))
+           && (y < 0 || (y >= si[i].y_org && y < si[i].y_org + si[i].height)))
         {
             p_delete(&si);
             return i;
