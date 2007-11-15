@@ -50,11 +50,24 @@
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
 
+
+static inline void
+cleanup_buttons(Button *buttons)
+{
+    Button *b, *bn;
+
+    for(b = buttons; b; b = bn)
+    {
+        bn = b->next;
+        p_delete(&b->arg);
+        p_delete(&b);
+    }
+}
+
 void
 cleanup_screen(awesome_config *awesomeconf)
 {
     int i;
-    Button *b, *bn;
     Key *k, *kn;
     Rule *r, *rn;
 
@@ -72,29 +85,13 @@ cleanup_screen(awesome_config *awesomeconf)
         kn = k->next;
         p_delete(&k);
     }
-    for(b = awesomeconf->buttons.tag; b; b = bn)
-    {
-        bn = b->next;
-        p_delete(&b);
-    }
-    for(b = awesomeconf->buttons.title; b; b = bn)
-    {
-        bn = b->next;
-        p_delete(&b->arg);
-        p_delete(&b);
-    }
-    for(b = awesomeconf->buttons.layout; b; b = bn)
-    {
-        bn = b->next;
-        p_delete(&b->arg);
-        p_delete(&b);
-    }
-    for(b = awesomeconf->buttons.root; b; b = bn)
-    {
-        bn = b->next;
-        p_delete(&b->arg);
-        p_delete(&b);
-    }
+
+    cleanup_buttons(awesomeconf->buttons.tag);
+    cleanup_buttons(awesomeconf->buttons.title);
+    cleanup_buttons(awesomeconf->buttons.layout);
+    cleanup_buttons(awesomeconf->buttons.root);
+    cleanup_buttons(awesomeconf->buttons.client);
+
     for(i = 0; i < awesomeconf->nlayouts; i++)
         p_delete(&awesomeconf->layouts[i].symbol);
     for(r = awesomeconf->rules; r; r = rn)
@@ -104,6 +101,7 @@ cleanup_screen(awesome_config *awesomeconf)
         p_delete(&r->tags);
         p_delete(&r);
     }
+
     p_delete(&awesomeconf->tags);
     p_delete(&awesomeconf->layouts);
     p_delete(&awesomeconf->configpath);
