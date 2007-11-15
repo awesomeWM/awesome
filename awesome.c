@@ -83,6 +83,7 @@ cleanup_screen(awesome_config *awesomeconf)
     for(k = awesomeconf->keys; k; k = kn)
     {
         kn = k->next;
+        p_delete(&k->arg);
         p_delete(&k);
     }
 
