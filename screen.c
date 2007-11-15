@@ -161,7 +161,12 @@ get_phys_screen(Display *disp, int screen)
 void
 move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
 {
-    int old_screen = c->screen;
+    int i, old_screen = c->screen;
+
+    /* if the client was focused on an old screen tag, remove it */
+    for(i = 0; i < acf_new[old_screen - acf_new->screen].ntags; i++)
+        if(acf_new[old_screen - acf_new->screen].tags[i].client_sel == c)
+            acf_new[old_screen - acf_new->screen].tags[i].client_sel = NULL;
 
     /* tag client with new screen tags */
     tag_client_with_current_selected(c, acf_new);
