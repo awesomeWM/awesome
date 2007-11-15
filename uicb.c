@@ -21,11 +21,64 @@
 
 #include <string.h>
 
+#include "awesome.h"
 #include "util.h"
 #include "uicb.h"
 #include "screen.h"
+#include "tag.h"
+#include "layout.h"
+#include "mouse.h"
+#include "statusbar.h"
+#include "layouts/tile.h"
 
-extern const NameFuncLink UicbList[];
+const NameFuncLink UicbList[] = {
+    /* util.c */
+    {"spawn", uicb_spawn},
+    {"exec", uicb_exec},
+    /* client.c */
+    {"client_kill", uicb_client_kill},
+    {"client_moveresize", uicb_client_moveresize},
+    {"client_settrans", uicb_client_settrans},
+    {"setborder", uicb_setborder},
+    {"client_swapnext", uicb_client_swapnext},
+    {"client_swapprev", uicb_client_swapprev},
+    /* tag.c */
+    {"client_tag", uicb_client_tag},
+    {"client_togglefloating", uicb_client_togglefloating},
+    {"tag_toggleview", uicb_tag_toggleview},
+    {"client_toggletag", uicb_client_toggletag},
+    {"tag_view", uicb_tag_view},
+    {"tag_viewprev_selected", uicb_tag_prev_selected},
+    {"tag_viewprev", uicb_tag_viewprev},
+    {"tag_viewnext", uicb_tag_viewnext},
+    /* layout.c */
+    {"tag_setlayout", uicb_tag_setlayout},
+    {"client_focusnext", uicb_client_focusnext},
+    {"client_focusprev", uicb_client_focusprev}, 
+    {"client_togglemax", uicb_client_togglemax},
+    {"client_toggleverticalmax", uicb_client_toggleverticalmax},
+    {"client_togglehorizontalmax", uicb_client_togglehorizontalmax},
+    {"client_zoom", uicb_client_zoom},
+    /* layouts/tile.c */
+    {"tag_setmwfact", uicb_tag_setmwfact},
+    {"tag_setnmaster", uicb_tag_setnmaster},
+    {"tag_setncol", uicb_tag_setncol},
+    /* screen.c */
+    {"screen_focusnext", uicb_screen_focusnext},
+    {"screen_focusprev", uicb_screen_focusprev},
+    {"client_movetoscreen", uicb_client_movetoscreen},
+    /* awesome.c */
+    {"quit", uicb_quit},
+    /* statusbar.c */
+    {"togglebar", uicb_togglebar},
+    /* config.c */
+    {"reloadconfig", uicb_reloadconfig},
+    {"setstatustext", uicb_setstatustext},
+    /* mouse.c */
+    {"client_movemouse", uicb_client_movemouse},
+    {"client_resizemouse", uicb_client_resizemouse},
+    {NULL, NULL}
+};
 
 int
 parse_control(char *cmd, awesome_config *awesomeconf)
