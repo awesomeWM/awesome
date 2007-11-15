@@ -164,7 +164,6 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
             if(old_screen != c->screen)
             {
                 move_client_to_screen(c, &awesomeconf[c->screen], False);
-                tag_client_with_current_selected(c, &awesomeconf[c->screen]);
                 drawstatusbar(&awesomeconf[old_screen]);
                 drawstatusbar(&awesomeconf[c->screen]);
             }

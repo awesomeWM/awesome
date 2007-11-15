@@ -163,6 +163,9 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
 {
     int old_screen = c->screen;
 
+    /* tag client with new screen tags */
+    tag_client_with_current_selected(c, acf_new);
+
     c->screen = acf_new->screen;
 
     if(doresize && old_screen != c->screen)
@@ -273,7 +276,6 @@ uicb_client_movetoscreen(awesome_config * awesomeconf,
         new_screen = get_screen_count(awesomeconf->display) - 1;
 
     prev_screen = sel->screen;
-    tag_client_with_current_selected(sel, &awesomeconf[new_screen - awesomeconf->screen]);
     move_client_to_screen(sel, &awesomeconf[new_screen - awesomeconf->screen], True);
     move_mouse_pointer_to_screen(awesomeconf->display, new_screen);
     arrange(&awesomeconf[prev_screen - awesomeconf->screen]);
