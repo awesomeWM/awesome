@@ -289,7 +289,10 @@ handle_event_keypress(XEvent * e, awesome_config *awesomeconf)
     for(k = awesomeconf[screen].keys; k; k = k->next)
         if(keysym == k->keysym && k->func
            && CLEANMASK(k->mod, awesomeconf[screen]) == CLEANMASK(ev->state, awesomeconf[screen]))
+        {
             k->func(&awesomeconf[screen], k->arg);
+            break;
+        }
 }
 
 void
