@@ -145,17 +145,13 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
                                  awesomeconf[c->screen].ntags)->arrange == layout_floating)
         {
             if(ev->value_mask & CWX)
-                c->x = ev->x;
+                c->rx = c->x = ev->x;
             if(ev->value_mask & CWY)
-                c->y = ev->y;
+                c->ry = c->y = ev->y;
             if(ev->value_mask & CWWidth)
-                c->w = ev->width;
+                c->rw = c->w = ev->width;
             if(ev->value_mask & CWHeight)
-                c->h = ev->height;
-            if((c->x + c->w) > DisplayWidth(c->display, c->phys_screen) && c->isfloating)
-                c->x = DisplayWidth(c->display, c->phys_screen) / 2 - c->w / 2;       /* center in x direction */
-            if((c->y + c->h) > DisplayHeight(c->display, c->phys_screen) && c->isfloating)
-                c->y = DisplayHeight(c->display, c->phys_screen) / 2 - c->h / 2;       /* center in y direction */
+                c->rh = c->h = ev->height;
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
                 window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
             /* recompute screen */
