@@ -278,22 +278,22 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     c->display = awesomeconf->display;
     c->phys_screen = awesomeconf->phys_screen;
+    c->screen = get_screen_bycoord(c->display, c->x, c->y);
+
     tag_client_with_current_selected(c, awesomeconf);
+    move_client_to_screen(c, current_acf, True);
 
     /* update window title */
     updatetitle(c);
 
-    c->screen = get_screen_bycoord(c->display, c->x, c->y);
     /* loadprops or apply rules if no props */
     if(!loadprops(c, awesomeconf->ntags))
     {
         Rule *r;
-        Bool matched = False, has_rule = False;
+        Bool matched = False;
         for(r = current_acf->rules; r; r = r->next)
             if(client_match_rule(c, r))
             {
-                has_rule = True;
-
                 c->isfloating = r->isfloating;
 
                 if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
@@ -316,14 +316,10 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
                     tag_client_with_current_selected(c, current_acf);
                 break;
             }
-        if(!has_rule)
-        {
-            tag_client_with_current_selected(c, current_acf);
-            move_client_to_screen(c, current_acf, True);
-        }
     }
 
     screen_info = get_screen_info(current_acf->display, current_acf->screen, NULL);
+
     /* if window request fullscreen mode */
     if(c->w == screen_info[current_acf->screen].width && c->h == screen_info[current_acf->screen].height)
     {
@@ -375,8 +371,6 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     window_grabbuttons(c->display, c->phys_screen, c->win,
                        False, True, current_acf->buttons.root,
                        current_acf->buttons.client, current_acf->numlockmask);
-
-    move_client_to_screen(c, current_acf, True);
 
     /* check for transient and set tags like its parent */
     if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)
