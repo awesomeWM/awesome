@@ -120,16 +120,29 @@ uicb_client_toggletag(awesome_config *awesomeconf,
                       const char *arg)
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
-    unsigned int i;
-    int j;
+    int i, j;
 
     if(!sel)
         return;
-    i = arg ? atoi(arg) - 1 : 0;
-    sel->tags[i] = !sel->tags[i];
-    for(j = 0; j < awesomeconf->ntags && !sel->tags[j]; j++);
-    if(j == awesomeconf->ntags)
-        sel->tags[i] = True;
+
+    if(arg)
+    {
+        i = atoi(arg) - 1;
+
+        if(i >= awesomeconf->ntags)
+            return;
+
+        sel->tags[i] = !sel->tags[i];
+
+        /* check that there's at least one tag selected for this client*/
+        for(j = 0; j < awesomeconf->ntags && !sel->tags[j]; j++);
+            if(j == awesomeconf->ntags)
+                sel->tags[i] = True;
+    }
+    else
+        for(i = 0; i < awesomeconf->ntags; i++)
+            sel->tags[i] = True;
+
     saveprops(sel, awesomeconf->ntags);
     arrange(awesomeconf);
 }
