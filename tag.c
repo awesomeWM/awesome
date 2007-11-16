@@ -142,14 +142,20 @@ void
 uicb_tag_toggleview(awesome_config *awesomeconf,
                     const char *arg)
 {
-    unsigned int i;
-    int j;
+    int i, j;
 
     i = arg ? atoi(arg) - 1: 0;
+
+    if(i >= awesomeconf->ntags)
+        return;
+
     awesomeconf->tags[i].selected = !awesomeconf->tags[i].selected;
+
+    /* check that there's at least one tag selected */
     for(j = 0; j < awesomeconf->ntags && !awesomeconf->tags[j].selected; j++);
     if(j == awesomeconf->ntags)
         awesomeconf->tags[i].selected = True;
+
     saveawesomeprops(awesomeconf);
     arrange(awesomeconf);
 }
