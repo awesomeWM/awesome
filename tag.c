@@ -76,10 +76,12 @@ uicb_client_tag(awesome_config *awesomeconf,
     for(i = 0; i < awesomeconf->ntags; i++)
         sel->tags[i] = arg == NULL;
 
-    i =  arg ? atoi(arg) - 1 : 0;
-
-    if(i >= 0 && i < awesomeconf->ntags)
-        sel->tags[i] = True;
+    if(arg)
+    {
+        i =  atoi(arg) - 1;
+        if(i >= 0 && i < awesomeconf->ntags)
+            sel->tags[i] = True;
+    }
 
     saveprops(sel, awesomeconf->ntags);
     arrange(awesomeconf);
