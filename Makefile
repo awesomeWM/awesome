@@ -43,9 +43,9 @@ dist: clean
 	@echo creating dist tarball
 	@mkdir awesome-${VERSION}
 	@mkdir awesome-${VERSION}/layouts
-	@cp -R STYLE LICENSE AUTHORS Makefile README awesomerc config.mk \
+	@cp -fR STYLE LICENSE AUTHORS Makefile README awesomerc config.mk \
 	    awesome.1 ${SRCCLIENT} ${SRCCLIENT:.c=.h} ${SRC} ${SRC:.c=.h} \
-	    common.h awesome-${VERSION}
+	    common.h awesome-${VERSION} || true
 	@cp -R ${LAYOUTS} ${LAYOUTS:.c=.h} awesome-${VERSION}/layouts
 	@tar -cf awesome-${VERSION}.tar awesome-${VERSION}
 	@gzip -9 awesome-${VERSION}.tar
