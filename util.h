@@ -200,11 +200,8 @@ static inline ssize_t a_strcat(char *dst, ssize_t n, const char *src)
 
 void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
-Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
 double compute_new_value_from_arg(const char *, double);
 void *name_func_lookup(const char *, const NameFuncLink *);
 
-UICB_PROTO(uicb_spawn);
-UICB_PROTO(uicb_exec);
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

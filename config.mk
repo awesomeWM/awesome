@@ -21,6 +21,7 @@ LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 `pkg-config --libs libconfuse xft cairo`
 # flags
 CFLAGS = -fgnu89-inline -std=gnu99 -ggdb3 -pipe -Wall -Wextra -W -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings -Wsign-compare -Wunused -Wuninitialized -Winit-self -Wpointer-arith -Wredundant-decls -Wno-format-zero-length -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn -O3 ${INCS} -DVERSION=\"${VERSION}\" -DRELEASE=\"${RELEASE}\"
 LDFLAGS = -ggdb3 ${LIBS}
+CLIENTLDFLAGS = -ggdb3
 
 # compiler and linker
 CC = cc
