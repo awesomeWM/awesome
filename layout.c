@@ -302,6 +302,9 @@ uicb_client_zoom(awesome_config *awesomeconf,
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
+    if(*awesomeconf->clients == sel)
+         for(sel = sel->next; sel && !isvisible(sel, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags); sel = sel->next);
+
     if(!sel)
         return;
 
