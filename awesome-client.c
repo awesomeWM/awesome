@@ -34,7 +34,7 @@ main(int argc, char **argv)
 {
     struct sockaddr_un *addr;
     char buf[1024];
-    int csfd;
+    int csfd, ret_value = EXIT_SUCCESS;
 
     csfd = get_client_socket();
     if(argc > 1)
@@ -46,12 +46,25 @@ main(int argc, char **argv)
         return EXIT_FAILURE;
 
     while(fgets(buf, sizeof(buf), stdin))
+    {
         if(sendto(csfd, buf, a_strlen(buf), MSG_NOSIGNAL,
                   (const struct sockaddr *) addr, sizeof(struct sockaddr_un)) == -1)
-            perror("error sending datagram");
+        {
+            switch (errno)
+            {
+                case ENOENT:
+                    fprintf(stderr, "Can't write to %s\n", addr->sun_path);
+                    break;
+                default:
+                    perror("error sending datagram");
+            }
+            ret_value = errno;
+            break;
+        }
+    }
 
     p_delete(&addr);
 
-    return EXIT_SUCCESS;
+    return ret_value;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
