@@ -29,6 +29,11 @@
 #include "awesome-client.h"
 #include "util.h"
 
+/* GNU/Hurd workaround */
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 int
 main(int argc, char **argv)
 {
