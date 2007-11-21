@@ -1,38 +1,58 @@
 # Configuration file for awesome
 
+# First physical screen
 screen 0
 {
     general
     {
+        # Windows border size in pixel
         border = 1
+        # Pixels number before collapsing window border and screen border
         snap = 8
+        # Respect windows minimal geometry
         resize_hints = true
+        # Opacity for unfocused windows (with xcompmgr)
         opacity_unfocused = 100
+        # Should focus switching move pointer
         focus_move_pointer = false
+        # Allow floating windows to be below others
         allow_lower_floats = false
+        # Status bar font (Xft)
         font = "fixed-12"
     }
     colors
     {
+        # Normal border color
         normal_border = "#111111"
+        # Normal background color (statusbar)
         normal_bg = "#111111"
+        # Normal foreground color (statusbar)
         normal_fg = "#eeeeee"
+        # Focused border color
         focus_border = "#6666ff"
+        # Focused background color (statusbar)
         focus_bg = "#6666ff"
+        # Focused foreground color (statusbar)
         focus_fg = "#ffffff"
     }
     statusbar
     {
+        # Statusbar position
+        # top, bottom, left, right, off
         position = "top"
     }
     tags
     {
+        # Tag name
         tag 1
         {
+            # Tag default layout
+            # tile, tileleft, max, floating
             layout = "tile"
         }
         tag 2
         {
+            # Number of master windows on this tag
             nmaster = 2
             layout = "tile"
         }
@@ -59,6 +79,8 @@ screen 0
         }
         tag 8
         {
+            # Master width factor
+            # 0 < mwfact < 1
             mwfact = 0.3
             layout = "tile"
         }
@@ -69,8 +91,10 @@ screen 0
     }
     layouts
     {
+        # Available layout
         layout tile
         {
+            # Symbol drawn in statusbar for this layout
             symbol = "[]="
         }
         layout tileleft
@@ -92,9 +116,13 @@ rules
 {
     rule
     {
+        # Programe name (regexp)
         name = "Gimp"
+        # Program tags (regexp)
         tags = "9"
+        # Should we set this program to floating mode?
         float = true
+        # Physical screen to map this windows to
         screen = 0
     }
     rule
@@ -114,6 +142,7 @@ rules
     }
 }
 
+# Mouse buttons bindings
 mouse
 {
     # For click on tag
@@ -149,6 +178,7 @@ mouse
         button = "5"
         command = "tag_viewprev"
     }
+    # For click on layout symbol
     layout
     {
         button = "1"
@@ -173,6 +203,7 @@ mouse
         command = "tag_setlayout"
         arg = "-1"
     }
+    # For click on root window
     root
     {
         button = "3"
@@ -189,6 +220,7 @@ mouse
         button = "5"
         command = "tag_viewprev"
     }
+    # For click on client windows
     client
     {
         modkey = {"Mod4"}
@@ -209,6 +241,7 @@ mouse
     }
 }
 
+# Keys bindings
 keys
 {
     key
