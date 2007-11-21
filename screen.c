@@ -227,15 +227,11 @@ void
 uicb_screen_focusnext(awesome_config * awesomeconf,
                       const char *arg __attribute__ ((unused)))
 {
-    Client *c;
     int next_screen = awesomeconf->screen + 1 >= get_screen_count(awesomeconf->display) ? 0 : awesomeconf->screen + 1;
+    Client *sel = get_current_tag(awesomeconf[next_screen - awesomeconf->screen].tags,
+                                  awesomeconf[next_screen - awesomeconf->screen].ntags)->client_sel;
 
-    for(c = *awesomeconf->clients; c && !isvisible(c, next_screen, awesomeconf[next_screen - awesomeconf->screen].tags, awesomeconf[next_screen - awesomeconf->screen].ntags); c = c->next);
-    if(c)
-    {
-        focus(c, True, &awesomeconf[next_screen - awesomeconf->screen]);
-        restack(&awesomeconf[next_screen - awesomeconf->screen]);
-    }
+    focus(sel, True, &awesomeconf[next_screen - awesomeconf->screen]);
     move_mouse_pointer_to_screen(awesomeconf->display, next_screen);
 }
 
@@ -243,15 +239,11 @@ void
 uicb_screen_focusprev(awesome_config * awesomeconf,
                       const char *arg __attribute__ ((unused)))
 {
-    Client *c;
     int prev_screen = awesomeconf->screen - 1 < 0 ? get_screen_count(awesomeconf->display) - 1 : awesomeconf->screen - 1;
+    Client *sel = get_current_tag(awesomeconf[prev_screen - awesomeconf->screen].tags,
+                                  awesomeconf[prev_screen - awesomeconf->screen].ntags)->client_sel;
 
-    for(c = *awesomeconf->clients; c && !isvisible(c, prev_screen, awesomeconf[prev_screen - awesomeconf->screen].tags, awesomeconf[prev_screen - awesomeconf->screen].ntags); c = c->next);
-    if(c)
-    {
-        focus(c, True, &awesomeconf[prev_screen - awesomeconf->screen]);
-        restack(&awesomeconf[prev_screen - awesomeconf->screen]);
-    }
+    focus(sel, True, &awesomeconf[prev_screen - awesomeconf->screen]);
     move_mouse_pointer_to_screen(awesomeconf->display, prev_screen);
 }
 
