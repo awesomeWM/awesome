@@ -5,11 +5,12 @@ include config.mk
 
 SRC = client.c draw.c event.c layout.c awesome.c tag.c util.c xutil.c config.c screen.c statusbar.c uicb.c window.c rules.c mouse.c awesome-client-common.c
 OBJ = ${SRC:.c=.o} ${LAYOUTS:.c=.o}
+DOCS = awesome.1.txt
 
 SRCCLIENT = awesome-client.c awesome-client-common.c util.c
 OBJCLIENT = ${SRCCLIENT:.c=.o}
 
-all: options awesome awesome-client
+all: options awesome.1 awesome awesome-client
 
 options:
 	@echo awesome build options:
@@ -25,6 +26,12 @@ options:
 ${OBJ}: awesome.h config.mk
 
 ${OBJCLIENT}: config.mk
+
+awesome.1.xml: $(DOCS)
+	asciidoc -d manpage -b docbook $<
+
+awesome.1: ${DOCS:.txt=.xml}
+	xmlto man $<
 
 awesome-client: ${OBJCLIENT}
 	@echo -e \\t\(CC\) ${OBJCLIENT} -o $@

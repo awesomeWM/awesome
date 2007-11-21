@@ -1,23 +1,28 @@
-.TH AWESOME 1 awesome\-VERSION
-.SH NAME
-awesome \- awesome window manager
-.SH SYNOPSIS
-.B awesome
-.RB [\ \-v\ |\ \-c\ <configfile>\ ]
-.SH DESCRIPTION
-awesome is a window manager for X. It manages windows in different layouts, like
+= awesome(1) =
+
+== NAME ==
+
+awesome - awesome window manager
+
+== SYNOPSIS ==
+
+awesome [-v] [-c configuration file]
+
+== DESCRIPTION ==
+
++awesome+ is a window manager for X. It manages windows in different layouts, like
 floating or tiled. Either layout can be applied dynamically, optimizing the
 environment for the application in use and the task performed.
-.P
+
 In tiled layout windows are managed in a master and stacking area. The master
 area contains windows which currently need most attention, whereas the
 stacking area contains all other windows. In floating layout windows can be
 resized and moved freely. Dialog windows are always managed floating,
 regardless of the layout applied.
-.P
+
 Windows are grouped by tags. Each window can be tagged with one or multiple
 tags. Selecting certain tags displays all windows with these tags.
-.P
+
 awesome contains a small status bar which displays all available tags, the layout,
 the title of the focused window, and a status text. A
 floating window is indicated with an empty circle and a maximized
@@ -26,43 +31,36 @@ title. The selected tags are indicated with a different color. The tags of
 the focused window are indicated with a filled square in the top left
 corner. The tags which are applied to one or more windows are indicated
 with an empty square in the top left corner.
-.P
+
 awesome can draw a small border around windows to indicate the focus state.
-.SH OPTIONS
-.TP
-.B \-v
-prints version information to standard output, then exits.
-.TP
-.B \-c
-use an alternate configuration file instead of $HOME/.awesomerc
-.SH USAGE
-.TP
+
+== OPTIONS ==
+-v::
+    prints version information to standard output, then exits.
+-c::
+    use an alternate configuration file instead of $HOME/.awesomerc.
+
+== USAGE ==
 Please read the default configuration file to see mouse and key actions.
-.SH CUSTOMIZATION
+
+== CUSTOMIZATION ==
 awesome is customized by creating a custom $HOME/.awesomerc file.
-.SH SEE ALSO
-.BR dmenu (1)
-.BR dzen2 (1)
-.SH BUGS
-.P
-Of course there's no bug in awesome. There may be unexpected behaviours.
-.P
+
+== SEE ALSO ==
+dmenu(1) dzen2(1)
+
+== BUGS ==
+Of course there's no bug in awesome. But there may be unexpected behaviours.
+
 Java applications which use the XToolkit/XAWT backend may draw grey windows
 only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and early
 JDK 1.6 versions, because it assumes a reparenting window manager. As a workaround
 you can use JDK 1.4 (which doesn't contain the XToolkit/XAWT backend) or you
 can set the following environment variable (to use the older Motif
-backend instead):
-.BR AWT_TOOLKIT=MToolkit .
-.P
-Recent GTK 2.10.9+ versions contain a broken
-.BR Save\-As
-file dialog implementation,
-which requests to reconfigure its window size in an endless loop. However, its
-window is still responsive during this state, so you can simply ignore the flicker
-until a new GTK version appears, which will fix this bug, approximately
-GTK 2.10.12+ versions.
-.SH AUTHORS
+backend instead): AWT_TOOLKIT=MToolkit
+
+== AUTHORS ==
 Julien Danjou <julien@danjou.info>
-.SH WWW
-http://awesome.naquadah.org
+
+== WWW ==
+http://awesome.naqudah.org
