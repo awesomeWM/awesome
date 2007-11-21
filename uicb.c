@@ -32,7 +32,7 @@
 #include "layouts/tile.h"
 
 const NameFuncLink UicbList[] = {
-    /* util.c */
+    /* xutil.c */
     {"spawn", uicb_spawn},
     {"exec", uicb_exec},
     /* client.c */
