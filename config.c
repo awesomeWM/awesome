@@ -260,6 +260,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
         CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
         CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+        CFG_END()
     };
     static cfg_opt_t mouse_generic_opts[] =
     {
@@ -267,6 +268,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
         CFG_STR((char *) "command", (char *) "", CFGF_NONE),
         CFG_STR((char *) "arg", NULL, CFGF_NONE),
+        CFG_END()
     };
     static cfg_opt_t mouse_opts[] =
     {
