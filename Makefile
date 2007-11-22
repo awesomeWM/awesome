@@ -20,7 +20,7 @@ options:
 	@echo "CC       = ${CC}"
 
 .c.o:
-	@echo -e \\t\(CC\) $<
+	@echo -e "\t(CC) $<"
 	@${CC} -c ${CFLAGS} $< -o $@
 
 ${OBJ}: awesome.h config.mk
@@ -34,11 +34,11 @@ awesome.1: ${DOCS:.txt=.xml}
 	xmlto man $<
 
 awesome-client: ${OBJCLIENT}
-	@echo -e \\t\(CC\) ${OBJCLIENT} -o $@
+	@echo -e "\t(CC) ${OBJCLIENT} -o $@"
 	@${CC} -o $@ ${OBJCLIENT} ${CLIENTLDFLAGS}
 
 awesome: ${OBJ}
-	@echo -e \\t\(CC\) ${OBJ} -o $@
+	@echo -e "\t(CC) ${OBJ} -o $@"
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 clean:
