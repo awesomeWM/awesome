@@ -43,7 +43,7 @@ awesome: ${OBJ}
 
 clean:
 	@echo cleaning
-	@rm -f awesome awesome-client ${OBJCLIENT} ${OBJ} awesome-${VERSION}.tar.gz
+	@rm -f awesome awesome-client awesome.1 ${DOCS:.txt=.xml} ${OBJCLIENT} ${OBJ} awesome-${VERSION}.tar.gz
 	@rm -rf doc
 
 dist: clean
