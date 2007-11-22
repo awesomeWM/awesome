@@ -28,10 +28,10 @@ ${OBJ}: awesome.h config.mk
 ${OBJCLIENT}: config.mk
 
 awesome.1.xml: $(DOCS)
-	asciidoc -d manpage -b docbook $<
+	asciidoc -d manpage -b docbook $< ${.ALLSRC}
 
 awesome.1: ${DOCS:.txt=.xml}
-	xmlto man $<
+	xmlto man $< ${.ALLSRC}
 
 awesome-client: ${OBJCLIENT}
 	@echo -e "\t(CC) ${OBJCLIENT} -o $@"
