@@ -1,14 +1,18 @@
-= awesome(1) =
+awesome(1)
+==========
 
-== NAME ==
+NAME
+----
 
 awesome - awesome window manager
 
-== SYNOPSIS ==
+SYNOPSIS
+--------
 
 awesome [-v] [-c configuration file]
 
-== DESCRIPTION ==
+DESCRIPTION
+-----------
 
 +awesome+ is a window manager for X. It manages windows in different layouts, like
 floating or tiled. Either layout can be applied dynamically, optimizing the
@@ -34,22 +38,27 @@ with an empty square in the top left corner.
 
 awesome can draw a small border around windows to indicate the focus state.
 
-== OPTIONS ==
+OPTIONS
+-------
 -v::
     prints version information to standard output, then exits.
 -c::
     use an alternate configuration file instead of $HOME/.awesomerc.
 
-== USAGE ==
+USAGE
+-----
 Please read the default configuration file to see mouse and key actions.
 
-== CUSTOMIZATION ==
+CUSTOMIZATION
+-------------
 awesome is customized by creating a custom $HOME/.awesomerc file.
 
-== SEE ALSO ==
+SEE ALSO
+--------
 dmenu(1) dzen2(1)
 
-== BUGS ==
+BUGS
+----
 Of course there's no bug in awesome. But there may be unexpected behaviours.
 
 Java applications which use the XToolkit/XAWT backend may draw grey windows
@@ -59,8 +68,10 @@ you can use JDK 1.4 (which doesn't contain the XToolkit/XAWT backend) or you
 can set the following environment variable (to use the older Motif
 backend instead): AWT_TOOLKIT=MToolkit
 
-== AUTHORS ==
+AUTHORS
+-------
 Julien Danjou <julien@danjou.info>
 
-== WWW ==
+WWW
+---
 http://awesome.naqudah.org
