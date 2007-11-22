@@ -10,7 +10,7 @@ DOCS = awesome.1.txt
 SRCCLIENT = awesome-client.c awesome-client-common.c util.c
 OBJCLIENT = ${SRCCLIENT:.c=.o}
 
-all: options awesome.1 awesome awesome-client
+all: options awesome awesome-client
 
 options:
 	@echo awesome build options:
@@ -58,11 +58,11 @@ dist: clean
 	@gzip -9 awesome-${VERSION}.tar
 	@rm -rf awesome-${VERSION}
 
-strip: all
+strip: awesome awesome-client
 	strip awesome
 	strip awesome-client
 
-install: strip install-unstrip
+install: awesome.1 strip install-unstrip
 
 install-unstrip:
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
