@@ -62,9 +62,9 @@ strip: awesome awesome-client
 	strip awesome
 	strip awesome-client
 
-install: awesome.1 strip install-unstrip
+install: strip install-unstrip
 
-install-unstrip:
+install-unstrip: awesome awesome-client awesome.1
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f awesome awesome-client ${DESTDIR}${PREFIX}/bin
