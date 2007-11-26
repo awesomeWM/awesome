@@ -66,6 +66,8 @@ main(void)
             break;
         }
 
+    close(csfd);
+
     p_delete(&addr);
     p_delete(&display);
 
