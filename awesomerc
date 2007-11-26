@@ -44,47 +44,47 @@ screen 0
     tags
     {
         # Tag name
-        tag 1
+        tag one
         {
             # Tag default layout
             # tile, tileleft, max, floating
             layout = "tile"
         }
-        tag 2
+        tag two
         {
             # Number of master windows on this tag
             nmaster = 2
             layout = "tile"
         }
-        tag 3
+        tag three
         {
             ncol = 2
             layout = "tile"
         }
-        tag 4
+        tag four
         {
             layout = "tile"
         }
-        tag 5
+        tag five
         {
             layout = "tile"
         }
-        tag 6
+        tag six
         {
             layout = "tile"
         }
-        tag 7
+        tag seven
         {
             layout = "tile"
         }
-        tag 8
+        tag eight
         {
             # Master width factor
             # 0 < mwfact < 1
             mwfact = 0.3
             layout = "tile"
         }
-        tag 9
+        tag nine
         {
             layout = "floating"
         }
@@ -119,7 +119,7 @@ rules
         # Programe name (regexp)
         name = "Gimp"
         # Program tags (regexp)
-        tags = "9"
+        tags = "nine"
         # Should we set this program to floating mode?
         float = true
         # Physical screen to map this windows to
