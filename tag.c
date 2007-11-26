@@ -67,21 +67,24 @@ void
 uicb_client_tag(awesome_config *awesomeconf,
                 const char *arg)
 {
-    int i;
+    int i, tag_id = -1;
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
 
     if(!sel)
         return;
 
+    if(arg)
+    {
+	tag_id = atoi(arg) - 1;
+	if(tag_id < 0 || tag_id >= awesomeconf->ntags)
+	    return;
+    }
+
     for(i = 0; i < awesomeconf->ntags; i++)
         sel->tags[i] = arg == NULL;
 
-    if(arg)
-    {
-        i =  atoi(arg) - 1;
-        if(i >= 0 && i < awesomeconf->ntags)
-            sel->tags[i] = True;
-    }
+    if(tag_id != -1)
+        sel->tags[tag_id] = True;
 
     saveprops(sel, awesomeconf->ntags);
     arrange(awesomeconf);
@@ -129,7 +132,7 @@ uicb_client_toggletag(awesome_config *awesomeconf,
     {
         i = atoi(arg) - 1;
 
-        if(i >= awesomeconf->ntags)
+        if(i < 0 || i >= awesomeconf->ntags)
             return;
 
         sel->tags[i] = !sel->tags[i];
@@ -159,7 +162,7 @@ uicb_tag_toggleview(awesome_config *awesomeconf,
 
     i = arg ? atoi(arg) - 1: 0;
 
-    if(i >= awesomeconf->ntags)
+    if(i < 0 || i >= awesomeconf->ntags)
         return;
 
     awesomeconf->tags[i].selected = !awesomeconf->tags[i].selected;
@@ -182,7 +185,14 @@ void
 uicb_tag_view(awesome_config *awesomeconf,
           const char *arg)
 {
-    int i;
+    int i, tag_id = -1;
+
+    if(arg)
+    {
+	tag_id = atoi(arg) - 1;
+	if(tag_id < 0 || tag_id >= awesomeconf->ntags)
+	    return;
+    }
 
     for(i = 0; i < awesomeconf->ntags; i++)
     {
@@ -190,12 +200,8 @@ uicb_tag_view(awesome_config *awesomeconf,
         awesomeconf->tags[i].selected = arg == NULL;
     }
 
-    if(arg)
-    {
-        i = atoi(arg) - 1;
-        if(i >= 0 && i < awesomeconf->ntags)
-            awesomeconf->tags[i].selected = True;
-    }
+    if(tag_id != -1)
+	awesomeconf->tags[tag_id].selected = True;
 
     saveawesomeprops(awesomeconf);
     arrange(awesomeconf);
