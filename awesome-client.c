@@ -51,7 +51,6 @@ main(int argc, char **argv)
         return EXIT_FAILURE;
 
     while(fgets(buf, sizeof(buf), stdin))
-    {
         if(sendto(csfd, buf, a_strlen(buf), MSG_NOSIGNAL,
                   (const struct sockaddr *) addr, sizeof(struct sockaddr_un)) == -1)
         {
@@ -66,7 +65,6 @@ main(int argc, char **argv)
             ret_value = errno;
             break;
         }
-    }
 
     p_delete(&addr);
 
