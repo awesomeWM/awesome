@@ -37,7 +37,9 @@ get_client_addr(const char *display)
 
     addr = p_new(struct sockaddr_un, 1);
     homedir = getenv("HOME");
-    path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + a_strlen(display) + 2;
+    /* (a_strlen(display) - 1) because we strcat on display + 1 and
+     * + 3 for /, \0 and possibly 0 if display is NULL */
+    path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + (a_strlen(display) - 1) + 3;
     if(path_len >= ssizeof(addr->sun_path))
     {
         fprintf(stderr, "error: path of control UNIX domain socket is too long");
