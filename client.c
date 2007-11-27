@@ -287,34 +287,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
 
     /* loadprops or apply rules if no props */
     if(!loadprops(c, awesomeconf->ntags))
-    {
-        Rule *r;
-        Bool matched = False;
-        for(r = current_acf->rules; r; r = r->next)
-            if(client_match_rule(c, r))
-            {
-                c->isfloating = r->isfloating;
-
-                if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
-                {
-                    current_acf = &awesomeconf[r->screen - awesomeconf->screen];
-                    move_client_to_screen(c, current_acf, True);
-                }
-
-                for(i = 0; i < current_acf->ntags; i++)
-                    if(is_tag_match_rules(&current_acf->tags[i], r))
-                    {
-                        matched = True;
-                        c->tags[i] = True;
-                    }
-                    else
-                        c->tags[i] = False;
-
-                if(!matched)
-                    tag_client_with_current_selected(c, current_acf);
-                break;
-            }
-    }
+        tag_client_with_rules(c, current_acf);
 
     screen_info = get_screen_info(current_acf->display, current_acf->screen, NULL);
 
@@ -602,6 +575,39 @@ updatesizehints(Client *c)
 
     c->isfixed = (c->maxw && c->minw && c->maxh && c->minh
                   && c->maxw == c->minw && c->maxh == c->minh);
+}
+
+void
+tag_client_with_rules(Client *c, awesome_config *current_acf)
+{
+    Rule *r;
+    Bool matched = False;
+    int i;
+
+    for(r = current_acf->rules; r; r = r->next)
+        if(client_match_rule(c, r))
+        {
+            c->isfloating = r->isfloating;
+
+            if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
+            {
+                current_acf = &current_acf[r->screen - current_acf->screen];
+                move_client_to_screen(c, current_acf, True);
+            }
+
+            for(i = 0; i < current_acf->ntags; i++)
+                if(is_tag_match_rules(&current_acf->tags[i], r))
+                {
+                    matched = True;
+                    c->tags[i] = True;
+                }
+                else
+                    c->tags[i] = False;
+
+            if(!matched)
+                tag_client_with_current_selected(c, current_acf);
+            break;
+        }
 }
 
 /** Set selected client transparency

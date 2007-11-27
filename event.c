@@ -163,7 +163,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
                 drawstatusbar(&awesomeconf[old_screen]);
                 drawstatusbar(&awesomeconf[c->screen]);
             }
-            tag_client_with_current_selected(c, &awesomeconf[c->screen]);
+            tag_client_with_rules(c, &awesomeconf[c->screen]);
             XMoveResizeWindow(e->xany.display, c->win, c->rx, c->ry, c->rw, c->rh);
             arrange(&awesomeconf[c->screen]);
         }
