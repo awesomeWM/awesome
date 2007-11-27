@@ -38,14 +38,11 @@ int
 main(void)
 {
     struct sockaddr_un *addr;
-    char buf[1024], *display, *tmp;
+    char buf[1024];
     int csfd, ret_value = EXIT_SUCCESS;
 
     csfd = get_client_socket();
-    display = a_strdup(getenv("DISPLAY"));
-    if(display && (tmp = strrchr(display, '.')))
-       *tmp = '\0';
-    addr = get_client_addr(display);
+    addr = get_client_addr(getenv("DISPLAY"));
 
     if(!addr || csfd < 0)
         return EXIT_FAILURE;
@@ -69,7 +66,6 @@ main(void)
     close(csfd);
 
     p_delete(&addr);
-    p_delete(&display);
 
     return ret_value;
 }

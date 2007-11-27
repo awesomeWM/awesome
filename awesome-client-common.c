@@ -31,7 +31,7 @@
 struct sockaddr_un *
 get_client_addr(const char *display)
 {
-    char *homedir;
+    char *homedir, *tmp;
     ssize_t path_len;
     struct sockaddr_un *addr;
 
@@ -39,6 +39,8 @@ get_client_addr(const char *display)
     homedir = getenv("HOME");
     /* (a_strlen(display) - 1) because we strcat on display + 1 and
      * + 3 for /, \0 and possibly 0 if display is NULL */
+    if(display && (tmp = strrchr(display, '.')))
+       *tmp = '\0';
     path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH) + (a_strlen(display) - 1) + 3;
     if(path_len >= ssizeof(addr->sun_path))
     {
