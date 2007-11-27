@@ -32,7 +32,7 @@
  * \return ScreenInfo struct array with all screens info
  */
 ScreenInfo *
-get_screen_info(Display *disp, int screen, Statusbar *statusbar)
+get_screen_info(Display *disp, int screen, Statusbar *statusbar, Padding *padding)
 {
     int i, screen_number = 0;
     ScreenInfo *si;
@@ -48,6 +48,15 @@ get_screen_info(Display *disp, int screen, Statusbar *statusbar)
         si[screen].x_org = 0;
         si[screen].y_org = 0;
         screen_number = screen + 1;
+    }
+
+     /* make padding corrections */
+    if(padding)
+    {
+        si[screen].x_org+=padding->left;
+        si[screen].y_org+=padding->top;
+        si[screen].width-=padding->left+padding->right;
+        si[screen].height-=padding->top+padding->bottom;
     }
 
     if(statusbar)
@@ -76,7 +85,7 @@ get_screen_info(Display *disp, int screen, Statusbar *statusbar)
  * \return ScreenInfo struct pointer with all display info
  */
 ScreenInfo *
-get_display_info(Display *disp, int screen, Statusbar *statusbar)
+get_display_info(Display *disp, int screen, Statusbar *statusbar, Padding *padding)
 {
     ScreenInfo *si;
 
@@ -87,6 +96,15 @@ get_display_info(Display *disp, int screen, Statusbar *statusbar)
     si->width = DisplayWidth(disp, screen);
     si->height = DisplayHeight(disp, screen) -
         (statusbar && (statusbar->position == BarTop || statusbar->position == BarBot) ? statusbar->height : 0);
+
+	/* make padding corrections */
+	if(padding)
+	{
+		si[screen].x_org+=padding->left;
+		si[screen].y_org+=padding->top;
+		si[screen].width-=padding->left+padding->right;
+		si[screen].height-=padding->top+padding->bottom;
+	}
 
     return si;
 }
@@ -107,7 +125,7 @@ get_screen_bycoord(Display *disp, int x, int y)
     if(!XineramaIsActive(disp))
         return DefaultScreen(disp);
 
-    si = get_screen_info(disp, 0, NULL);
+    si = get_screen_info(disp, 0, NULL, NULL);
 
     for(i = 0; i < get_screen_count(disp); i++)
         if((x < 0 || (x >= si[i].x_org && x < si[i].x_org + si[i].width))
@@ -177,8 +195,8 @@ move_client_to_screen(Client *c, awesome_config *acf_new, Bool doresize)
     {
         ScreenInfo *si, *si_old;
 
-        si = get_screen_info(c->display, c->screen, NULL);
-        si_old = get_screen_info(c->display, old_screen, NULL);
+        si = get_screen_info(c->display, c->screen, NULL, NULL);
+        si_old = get_screen_info(c->display, old_screen, NULL, NULL);
 
         /* compute new coords in new screen */
         c->rx = (c->rx - si_old[old_screen].x_org) + si[c->screen].x_org;
@@ -215,7 +233,7 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
 {
     if(XineramaIsActive(disp))
     {
-        ScreenInfo *si = get_screen_info(disp, screen, NULL);
+        ScreenInfo *si = get_screen_info(disp, screen, NULL, NULL);
         XWarpPointer(disp, None, DefaultRootWindow(disp), 0, 0, 0, 0, si[screen].x_org, si[screen].y_org);
         p_delete(&si);
     }

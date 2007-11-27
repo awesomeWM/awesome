@@ -28,8 +28,8 @@
 
 typedef XineramaScreenInfo ScreenInfo;
 
-ScreenInfo * get_screen_info(Display *, int, Statusbar *);
-ScreenInfo * get_display_info(Display *, int, Statusbar *);
+ScreenInfo * get_screen_info(Display *, int, Statusbar *, Padding *);
+ScreenInfo * get_display_info(Display *, int, Statusbar *, Padding *);
 int get_screen_bycoord(Display *, int, int);
 int get_screen_count(Display *);
 int get_phys_screen(Display *, int);

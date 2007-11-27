@@ -47,7 +47,7 @@ uicb_client_movemouse(awesome_config *awesomeconf, const char *arg __attribute__
      else
          restack(awesomeconf);
 
-    si = get_screen_info(c->display, c->screen, &awesomeconf->statusbar);
+    si = get_screen_info(c->display, c->screen, &awesomeconf->statusbar, &awesomeconf->padding);
 
     ocx = nx = c->x;
     ocy = ny = c->y;

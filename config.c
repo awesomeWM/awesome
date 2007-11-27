@@ -221,6 +221,14 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_SEC((char *) "layout", layout_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_END()
     };
+    static cfg_opt_t padding_opts[] =
+    {
+        CFG_INT((char *) "top", 0, CFGF_NONE),
+        CFG_INT((char *) "bottom", 0, CFGF_NONE),
+        CFG_INT((char *) "right", 0, CFGF_NONE),
+        CFG_INT((char *) "left", 0, CFGF_NONE),
+        CFG_END()
+    };
     static cfg_opt_t screen_opts[] =
     {
         CFG_SEC((char *) "general", general_opts, CFGF_NONE),
@@ -228,6 +236,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_SEC((char *) "tags", tags_opts, CFGF_NONE),
         CFG_SEC((char *) "colors", colors_opts, CFGF_NONE),
         CFG_SEC((char *) "layouts", layouts_opts, CFGF_NONE),
+        CFG_SEC((char *) "padding", padding_opts, CFGF_NONE),
     };
     static cfg_opt_t rule_opts[] =
     {
@@ -287,8 +296,8 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_SEC((char *) "mouse", mouse_opts, CFGF_NONE),
         CFG_END()
     };
-    cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar,
-          *cfg_tags, *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp;
+    cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
+          *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp, *cfg_padding;
     int i = 0, k = 0, ret;
     unsigned int j = 0, l = 0;
     const char *tmp, *homedir;
@@ -335,6 +344,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     cfg_colors = cfg_getsec(cfg_screen, "colors");
     cfg_general = cfg_getsec(cfg_screen, "general");
     cfg_layouts = cfg_getsec(cfg_screen, "layouts");
+    cfg_padding = cfg_getsec(cfg_screen, "padding");
 
     /* get general sections */
     cfg_rules = cfg_getsec(cfg, "rules");
@@ -446,7 +456,12 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->tags[i].nmaster = cfg_getint(cfgsectmp, "nmaster");
         awesomeconf->tags[i].ncol = cfg_getint(cfgsectmp, "ncol");
     }
-
+	
+    /* padding */
+    awesomeconf->padding.top = cfg_getint(cfg_padding, "top");
+    awesomeconf->padding.bottom = cfg_getint(cfg_padding, "bottom");
+    awesomeconf->padding.left = cfg_getint(cfg_padding, "left");
+    awesomeconf->padding.right = cfg_getint(cfg_padding, "right");
     
     if(!awesomeconf->ntags)
         eprint("awesome: fatal: no tags found in configuration file\n");

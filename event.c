@@ -200,7 +200,7 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
             DisplayHeight(e->xany.display, screen) = ev->height;
 
             /* update statusbar */
-            si = get_screen_info(e->xany.display, screen, NULL);
+            si = get_screen_info(e->xany.display, screen, NULL, &awesomeconf->padding);
             awesomeconf[screen].statusbar.width = si[screen].width;
             p_delete(&si);
 
@@ -209,7 +209,7 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
                           awesomeconf[screen].statusbar.width,
                           awesomeconf[screen].statusbar.height);
 
-            updatebarpos(e->xany.display, awesomeconf[screen].statusbar);
+            updatebarpos(e->xany.display, awesomeconf[screen].statusbar, &awesomeconf[screen].padding);
             arrange(&awesomeconf[screen]);
         }
 }

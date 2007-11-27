@@ -289,7 +289,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     if(!loadprops(c, awesomeconf->ntags))
         tag_client_with_rules(c, current_acf);
 
-    screen_info = get_screen_info(current_acf->display, current_acf->screen, NULL);
+    screen_info = get_screen_info(current_acf->display, current_acf->screen, NULL, NULL);
 
     /* if window request fullscreen mode */
     if(c->w == screen_info[current_acf->screen].width && c->h == screen_info[current_acf->screen].height)
@@ -301,7 +301,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf)
     }
     else
     {
-        ScreenInfo *display_info = get_display_info(c->display, c->phys_screen, &current_acf->statusbar);
+        ScreenInfo *display_info = get_display_info(c->display, c->phys_screen, &current_acf->statusbar,&awesomeconf->padding);
 
         if(c->x + c->w + 2 * c->border > display_info->x_org + display_info->width)
             c->x = c->rx = display_info->x_org + display_info->width - c->w - 2 * c->border;
@@ -419,7 +419,7 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
     if(w <= 0 || h <= 0)
         return;
     /* offscreen appearance fixes */
-    si = get_display_info(c->display, c->phys_screen, NULL);
+    si = get_display_info(c->display, c->phys_screen, NULL, &awesomeconf->padding);
     if(x > si->width)
         x = si->width - w - 2 * c->border;
     if(y > si->height)

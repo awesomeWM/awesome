@@ -197,11 +197,11 @@ drawstatusbar(awesome_config *awesomeconf)
 }
 
 void
-initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Layout *layouts, int nlayouts)
+initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Layout *layouts, int nlayouts, Padding *padding)
 {
     XSetWindowAttributes wa;
     int i, phys_screen = get_phys_screen(disp, screen);
-    ScreenInfo *si = get_screen_info(disp, screen, NULL);
+    ScreenInfo *si = get_screen_info(disp, screen, NULL, padding);
 
     statusbar->height = font->height * 1.5;
 
@@ -235,7 +235,7 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
                                           DefaultVisual(disp, phys_screen),
                                           CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, cursor);
-    updatebarpos(disp, *statusbar);
+    updatebarpos(disp, *statusbar, padding);
     XMapRaised(disp, statusbar->window);
 
     for(i = 0; i < nlayouts; i++)
@@ -244,10 +244,10 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
 }
 
 void
-updatebarpos(Display *disp, Statusbar statusbar)
+updatebarpos(Display *disp, Statusbar statusbar, Padding *padding)
 {
     XEvent ev;
-    ScreenInfo *si = get_screen_info(disp, statusbar.screen, NULL);
+    ScreenInfo *si = get_screen_info(disp, statusbar.screen, NULL, padding);
 
     XMapRaised(disp, statusbar.window);
     switch (statusbar.position)
@@ -278,7 +278,7 @@ uicb_togglebar(awesome_config *awesomeconf,
         awesomeconf->statusbar.position = (awesomeconf->statusbar.dposition == BarOff) ? BarTop : awesomeconf->statusbar.dposition;
     else
         awesomeconf->statusbar.position = BarOff;
-    updatebarpos(awesomeconf->display, awesomeconf->statusbar);
+    updatebarpos(awesomeconf->display, awesomeconf->statusbar, &awesomeconf->padding);
     arrange(awesomeconf);
 }
 

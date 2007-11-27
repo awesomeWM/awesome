@@ -254,7 +254,7 @@ void
 uicb_client_togglemax(awesome_config *awesomeconf,
                       const char *arg __attribute__ ((unused)))
 {
-    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, &awesomeconf->padding);
 
     maximize(si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
              si[awesomeconf->screen].width - 2 * awesomeconf->borderpx,
@@ -268,7 +268,7 @@ uicb_client_toggleverticalmax(awesome_config *awesomeconf,
                               const char *arg __attribute__ ((unused)))
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
-    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, &awesomeconf->padding);
 
     if(sel)
         maximize(sel->x,
@@ -285,7 +285,7 @@ uicb_client_togglehorizontalmax(awesome_config *awesomeconf,
                                 const char *arg __attribute__ ((unused)))
 {
     Client *sel = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
-    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
+    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, &awesomeconf->padding);
 
     if(sel)
         maximize(si[awesomeconf->screen].x_org,

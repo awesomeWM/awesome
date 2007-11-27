@@ -35,6 +35,14 @@ screen 0
         # Focused foreground color (statusbar)
         focus_fg = "#ffffff"
     }
+    # Optionnal screen padding
+    #padding
+    #{
+    #    left = 10
+    #    right = 0
+    #    top = 0
+    #    bottom = 10
+    #}
     statusbar
     {
         # Statusbar position

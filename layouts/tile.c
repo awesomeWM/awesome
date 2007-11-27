@@ -104,7 +104,7 @@ _tile(awesome_config *awesomeconf, const Bool right)
     Client *c;
     Tag *curtag = get_current_tag(awesomeconf->tags, awesomeconf->ntags);
 
-    screens_info = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar);
+    screens_info = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, &awesomeconf->padding);
 
     for(n = 0, c = *awesomeconf->clients; c; c = c->next)
         if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))

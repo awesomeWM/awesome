@@ -153,6 +153,19 @@ typedef struct
     int ncol;
 } Tag;
 
+/** Padding type */
+typedef struct
+{
+    /** Padding at top */
+    int top;
+    /** Padding at bottom */
+    int bottom;
+    /** Padding at left */
+    int left;
+    /** Padding at right */
+    int right;
+} Padding;
+
 /** Main configuration structure */
 struct awesome_config
 {
@@ -210,6 +223,8 @@ struct awesome_config
     XColor colors_selected[ColLast];
     /** Cursors */
     Cursor cursor[CurLast];
+    /** Padding */
+    Padding padding;	
     /** Font */
     XftFont *font;
     /** Clients list */

@@ -24,9 +24,9 @@
 
 #include "common.h"
 
-void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *, Layout *, int);
+void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *, Layout *, int, Padding *);
 void drawstatusbar(awesome_config *);
-void updatebarpos(Display *, Statusbar);
+void updatebarpos(Display *, Statusbar, Padding *);
 
 UICB_PROTO(uicb_togglebar);
 UICB_PROTO(uicb_setstatustext);
