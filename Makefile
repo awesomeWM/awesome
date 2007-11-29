@@ -51,7 +51,7 @@ dist: clean
 	@mkdir awesome-${VERSION}
 	@mkdir awesome-${VERSION}/layouts
 	@cp -fR STYLE LICENSE AUTHORS Makefile README awesomerc config.mk \
-	    awesome.1 ${SRCCLIENT} ${SRCCLIENT:.c=.h} ${SRC} ${SRC:.c=.h} \
+	    awesome.1 awesome.1.txt ${SRCCLIENT} ${SRCCLIENT:.c=.h} ${SRC} ${SRC:.c=.h} \
 	    common.h awesome-${VERSION} || true
 	@cp -R ${LAYOUTS} ${LAYOUTS:.c=.h} awesome-${VERSION}/layouts
 	@tar -cf awesome-${VERSION}.tar awesome-${VERSION}
