@@ -101,12 +101,12 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
 
     if((c = get_client_bywin(*awesomeconf->clients, ev->window)))
     {
-        XAllowEvents(c->display, ReplayPointer, CurrentTime);
         focus(c, ev->same_screen, &awesomeconf[c->screen]);
         if(CLEANMASK(ev->state, awesomeconf[c->screen]) == NoSymbol
            && ev->button == Button1)
         {
             restack(&awesomeconf[c->screen]);
+            XAllowEvents(c->display, ReplayPointer, CurrentTime);
             window_grabbuttons(c->display, c->phys_screen, c->win,
                                True, True, awesomeconf->buttons.root,
                                awesomeconf->buttons.client, awesomeconf->numlockmask);
