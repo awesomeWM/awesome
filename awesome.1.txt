@@ -74,4 +74,4 @@ Julien Danjou <julien@danjou.info>
 
 WWW
 ---
-http://awesome.naqudah.org
+http://awesome.naquadah.org
