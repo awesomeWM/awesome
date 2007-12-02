@@ -1,0 +1,49 @@
+awesome-client(1)
+=================
+
+NAME
+----
+
+awesome-client - awesome window manager command line interface
+
+SYNOPSIS
+--------
+
+awesome-client
+
+DESCRIPTION
+-----------
+
+awesome-client is the command line interface to awesome. It communicates with awesome
+via a socket located in the users's HOME directory.
+
+USAGE
+-----
+To determine which socket is to be used, it read the DISPLAY environment variable.
+awesome-client read commands from standart input. The command format is:
+ screen_number command argument
+
+For example, to change statusbar text on screen 0, you can do the following:
+
+    echo 0 setstatustext Hello, world | awesome-client
+ 
+To view tag number 3 on screen 1:
+
+    echo 1 tag_view 3 | awesome-client
+ 
+To zoom focused window on screen 0:
+
+    echo 0 client_zoom | awesome-client
+
+
+SEE ALSO
+--------
+awesome(1)
+
+AUTHORS
+-------
+Julien Danjou <julien@danjou.info>
+
+WWW
+---
+http://awesome.naquadah.org
