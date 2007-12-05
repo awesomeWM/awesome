@@ -19,8 +19,6 @@
  *
  */
 
-#include <string.h>
-
 #include "awesome.h"
 #include "xutil.h"
 #include "uicb.h"
