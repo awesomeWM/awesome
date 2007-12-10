@@ -319,7 +319,7 @@ mouse \
     { \
         button = \"3\" \
         command = \"spawn\" \
-        arg = \"exec urxvt\" \
+        arg = \"exec xterm\" \
     } \
     root \
     { \
