@@ -1,4 +1,4 @@
-*
+/*
  * config.h - configuration management header
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info>
