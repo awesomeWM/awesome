@@ -292,7 +292,7 @@ main(int argc, char *argv[])
     {
         if(!a_strcmp("-v", argv[1]))
         {
-            printf("awesome-" VERSION " © 2007 Julien Danjou\n");
+            printf("awesome-" VERSION " (" RELEASE ") © 2007 Julien Danjou\n");
             return EXIT_SUCCESS;
         }
         else if(!a_strcmp("-c", argv[1]))
