@@ -1,4 +1,4 @@
-/*
+*
  * config.h - configuration management header
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info>
@@ -291,7 +291,6 @@ mouse \
         button = \"5\" \
         command = \"tag_viewprev\" \
     } \
-    # For click on layout symbol \
     layout \
     { \
         button = \"1\" \
