@@ -328,7 +328,10 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
     ret = cfg_parse(cfg, confpath);
     if(ret == CFG_FILE_ERROR)
+    {
         perror("awesome: parsing configuration file failed");
+        cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
+    }
     else if(ret == CFG_PARSE_ERROR)
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
 
@@ -337,6 +340,13 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     cfg_screen = cfg_gettsec(cfg, "screen", buf);
     if(!cfg_screen)
         cfg_screen = cfg_getsec(cfg, "screen");
+
+    if(!cfg_screen)
+    {
+        fprintf(stderr, "awesome: parsing configuration file failed, no screen section found");
+        cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
+        cfg_screen = cfg_getsec(cfg, "screen");
+    }
 
     /* get screen specific sections */
     cfg_statusbar = cfg_getsec(cfg_screen, "statusbar");
