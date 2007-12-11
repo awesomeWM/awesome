@@ -298,7 +298,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     };
     cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
           *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp, *cfg_padding;
-    int i = 0, k = 0, ret;
+    int i = 0, k = 0, ret, screen;
     unsigned int j = 0, l = 0;
     const char *tmp, *homedir;
     char *confpath, buf[2];
@@ -320,10 +320,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
     awesomeconf->configpath = a_strdup(confpath);
 
-    a_strcpy(awesomeconf->statustext, sizeof(awesomeconf->statustext), "awesome-" VERSION " (" RELEASE ")");
-
-    awesomeconf->phys_screen = get_phys_screen(awesomeconf->display, awesomeconf->screen);
-
     cfg = cfg_init(opts, CFGF_NONE);
 
     ret = cfg_parse(cfg, confpath);
@@ -336,85 +332,126 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
 
     /* get the right screen section */
-    snprintf(buf, sizeof(buf), "%d", awesomeconf->screen);
-    cfg_screen = cfg_gettsec(cfg, "screen", buf);
-    if(!cfg_screen)
-        cfg_screen = cfg_getsec(cfg, "screen");
-
-    if(!cfg_screen)
+    for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
     {
-        fprintf(stderr, "awesome: parsing configuration file failed, no screen section found");
-        cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
-        cfg_screen = cfg_getsec(cfg, "screen");
-    }
+        a_strcpy(awesomeconf->screens[screen].statustext,
+                 sizeof(awesomeconf->screens[screen].statustext),
+                 "awesome-" VERSION " (" RELEASE ")");
+        snprintf(buf, sizeof(buf), "%d", screen);
+        cfg_screen = cfg_gettsec(cfg, "screen", buf);
+        if(!cfg_screen)
+            cfg_screen = cfg_getsec(cfg, "screen");
 
-    /* get screen specific sections */
-    cfg_statusbar = cfg_getsec(cfg_screen, "statusbar");
-    cfg_tags = cfg_getsec(cfg_screen, "tags");
-    cfg_colors = cfg_getsec(cfg_screen, "colors");
-    cfg_general = cfg_getsec(cfg_screen, "general");
-    cfg_layouts = cfg_getsec(cfg_screen, "layouts");
-    cfg_padding = cfg_getsec(cfg_screen, "padding");
+        if(!cfg_screen)
+        {
+            fprintf(stderr, "awesome: parsing configuration file failed, no screen section found");
+            cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
+            cfg_screen = cfg_getsec(cfg, "screen");
+        }
+
+        /* get screen specific sections */
+        cfg_statusbar = cfg_getsec(cfg_screen, "statusbar");
+        cfg_tags = cfg_getsec(cfg_screen, "tags");
+        cfg_colors = cfg_getsec(cfg_screen, "colors");
+        cfg_general = cfg_getsec(cfg_screen, "general");
+        cfg_layouts = cfg_getsec(cfg_screen, "layouts");
+        cfg_padding = cfg_getsec(cfg_screen, "padding");
+
+
+        /* General section */
+        awesomeconf->screens[screen].borderpx = cfg_getint(cfg_general, "border");
+        awesomeconf->screens[screen].snap = cfg_getint(cfg_general, "snap");
+        awesomeconf->screens[screen].resize_hints = cfg_getbool(cfg_general, "resize_hints");
+        awesomeconf->screens[screen].opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
+        awesomeconf->screens[screen].focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
+        awesomeconf->screens[screen].allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
+        awesomeconf->screens[screen].font = XftFontOpenName(awesomeconf->display,
+                                                            get_phys_screen(awesomeconf->display, screen),
+                                                            cfg_getstr(cfg_general, "font"));
+        if(!awesomeconf->screens[screen].font)
+            eprint("awesome: cannot init font\n");
+        /* Colors */
+        awesomeconf->screens[screen].colors_normal[ColBorder] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "normal_border"));
+        awesomeconf->screens[screen].colors_normal[ColBG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "normal_bg"));
+        awesomeconf->screens[screen].colors_normal[ColFG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "normal_fg"));
+        awesomeconf->screens[screen].colors_selected[ColBorder] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "focus_border"));
+        awesomeconf->screens[screen].colors_selected[ColBG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "focus_bg"));
+        awesomeconf->screens[screen].colors_selected[ColFG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "focus_fg"));
+
+        /* Statusbar */
+        tmp = cfg_getstr(cfg_statusbar, "position");
+
+        if(tmp && !a_strncmp(tmp, "off", 6))
+            awesomeconf->screens[screen].statusbar.dposition = BarOff;
+        else if(tmp && !a_strncmp(tmp, "bottom", 6))
+            awesomeconf->screens[screen].statusbar.dposition = BarBot;
+        else if(tmp && !a_strncmp(tmp, "right", 5))
+            awesomeconf->screens[screen].statusbar.dposition = BarRight;
+        else if(tmp && !a_strncmp(tmp, "left", 4))
+            awesomeconf->screens[screen].statusbar.dposition = BarLeft;
+        else
+            awesomeconf->screens[screen].statusbar.dposition = BarTop;
+
+        awesomeconf->screens[screen].statusbar.position = awesomeconf->screens[screen].statusbar.dposition;
+
+        /* Layouts */
+        awesomeconf->screens[screen].nlayouts = cfg_size(cfg_layouts, "layout");
+        awesomeconf->screens[screen].layouts = p_new(Layout, awesomeconf->screens[screen].nlayouts);
+        for(i = 0; i < awesomeconf->screens[screen].nlayouts; i++)
+        {
+            cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
+            awesomeconf->screens[screen].layouts[i].arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
+            if(!awesomeconf->screens[screen].layouts[i].arrange)
+            {
+                fprintf(stderr, "awesome: unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
+                awesomeconf->screens[screen].layouts[i].symbol = NULL;
+                continue;
+            }
+            awesomeconf->screens[screen].layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
+        }
+
+        if(!awesomeconf->screens[screen].nlayouts)
+            eprint("awesome: fatal: no default layout available\n");
+
+        /* Tags */
+        awesomeconf->screens[screen].ntags = cfg_size(cfg_tags, "tag");
+        awesomeconf->screens[screen].tags = p_new(Tag, awesomeconf->screens[screen].ntags);
+        for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
+        {
+            cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
+            awesomeconf->screens[screen].tags[i].name = a_strdup(cfg_title(cfgsectmp));
+            awesomeconf->screens[screen].tags[i].selected = False;
+            awesomeconf->screens[screen].tags[i].was_selected = False;
+            tmp = cfg_getstr(cfgsectmp, "layout");
+            for(k = 0; k < awesomeconf->screens[screen].nlayouts; k++)
+                if(awesomeconf->screens[screen].layouts[k].arrange == name_func_lookup(tmp, LayoutsList))
+                    break;
+            if(k == awesomeconf->screens[screen].nlayouts)
+                k = 0;
+            awesomeconf->screens[screen].tags[i].layout = &awesomeconf->screens[screen].layouts[k];
+            awesomeconf->screens[screen].tags[i].mwfact = cfg_getfloat(cfgsectmp, "mwfact");
+            awesomeconf->screens[screen].tags[i].nmaster = cfg_getint(cfgsectmp, "nmaster");
+            awesomeconf->screens[screen].tags[i].ncol = cfg_getint(cfgsectmp, "ncol");
+        }
+	 
+        if(!awesomeconf->screens[screen].ntags)
+            eprint("awesome: fatal: no tags found in configuration file\n");
+
+        /* select first tag by default */
+        awesomeconf->screens[screen].tags[0].selected = True;
+        awesomeconf->screens[screen].tags[0].was_selected = True;
+
+        /* padding */
+        awesomeconf->screens[screen].padding.top = cfg_getint(cfg_padding, "top");
+        awesomeconf->screens[screen].padding.bottom = cfg_getint(cfg_padding, "bottom");
+        awesomeconf->screens[screen].padding.left = cfg_getint(cfg_padding, "left");
+        awesomeconf->screens[screen].padding.right = cfg_getint(cfg_padding, "right");
+    }
 
     /* get general sections */
     cfg_rules = cfg_getsec(cfg, "rules");
     cfg_keys = cfg_getsec(cfg, "keys");
     cfg_mouse = cfg_getsec(cfg, "mouse");
-
-    /* General section */
-
-    awesomeconf->borderpx = cfg_getint(cfg_general, "border");
-    awesomeconf->snap = cfg_getint(cfg_general, "snap");
-    awesomeconf->resize_hints = cfg_getbool(cfg_general, "resize_hints");
-    awesomeconf->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
-    awesomeconf->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
-    awesomeconf->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
-    awesomeconf->font = XftFontOpenName(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_general, "font"));
-    if(!awesomeconf->font)
-        eprint("awesome: cannot init font\n");
-
-    /* Colors */
-    awesomeconf->colors_normal[ColBorder] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_border"));
-    awesomeconf->colors_normal[ColBG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_bg"));
-    awesomeconf->colors_normal[ColFG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "normal_fg"));
-    awesomeconf->colors_selected[ColBorder] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_border"));
-    awesomeconf->colors_selected[ColBG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_bg"));
-    awesomeconf->colors_selected[ColFG] = initxcolor(awesomeconf->display, awesomeconf->phys_screen, cfg_getstr(cfg_colors, "focus_fg"));
-
-    /* Statusbar */
-    tmp = cfg_getstr(cfg_statusbar, "position");
-
-    if(tmp && !a_strncmp(tmp, "off", 6))
-        awesomeconf->statusbar.dposition = BarOff;
-    else if(tmp && !a_strncmp(tmp, "bottom", 6))
-        awesomeconf->statusbar.dposition = BarBot;
-    else if(tmp && !a_strncmp(tmp, "right", 5))
-        awesomeconf->statusbar.dposition = BarRight;
-    else if(tmp && !a_strncmp(tmp, "left", 4))
-        awesomeconf->statusbar.dposition = BarLeft;
-    else
-        awesomeconf->statusbar.dposition = BarTop;
-
-    awesomeconf->statusbar.position = awesomeconf->statusbar.dposition;
-
-    /* Layouts */
-    awesomeconf->nlayouts = cfg_size(cfg_layouts, "layout");
-    awesomeconf->layouts = p_new(Layout, awesomeconf->nlayouts);
-    for(i = 0; i < awesomeconf->nlayouts; i++)
-    {
-        cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
-        awesomeconf->layouts[i].arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
-        if(!awesomeconf->layouts[i].arrange)
-        {
-            fprintf(stderr, "awesome: unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
-            awesomeconf->layouts[i].symbol = NULL;
-            continue;
-        }
-        awesomeconf->layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
-    }
-
-    if(!awesomeconf->nlayouts)
-        eprint("awesome: fatal: no default layout available\n");
 
     /* Rules */
     if(cfg_size(cfg_rules, "rule"))
@@ -446,39 +483,6 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
     compileregs(awesomeconf->rules);
 
-    /* Tags */
-    awesomeconf->ntags = cfg_size(cfg_tags, "tag");
-    awesomeconf->tags = p_new(Tag, awesomeconf->ntags);
-    for(i = 0; i < awesomeconf->ntags; i++)
-    {
-        cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
-        awesomeconf->tags[i].name = a_strdup(cfg_title(cfgsectmp));
-        awesomeconf->tags[i].selected = False;
-        awesomeconf->tags[i].was_selected = False;
-        tmp = cfg_getstr(cfgsectmp, "layout");
-        for(k = 0; k < awesomeconf->nlayouts; k++)
-            if(awesomeconf->layouts[k].arrange == name_func_lookup(tmp, LayoutsList))
-                break;
-        if(k == awesomeconf->nlayouts)
-            k = 0;
-        awesomeconf->tags[i].layout = &awesomeconf->layouts[k];
-        awesomeconf->tags[i].mwfact = cfg_getfloat(cfgsectmp, "mwfact");
-        awesomeconf->tags[i].nmaster = cfg_getint(cfgsectmp, "nmaster");
-        awesomeconf->tags[i].ncol = cfg_getint(cfgsectmp, "ncol");
-    }
-	
-    /* padding */
-    awesomeconf->padding.top = cfg_getint(cfg_padding, "top");
-    awesomeconf->padding.bottom = cfg_getint(cfg_padding, "bottom");
-    awesomeconf->padding.left = cfg_getint(cfg_padding, "left");
-    awesomeconf->padding.right = cfg_getint(cfg_padding, "right");
-    
-    if(!awesomeconf->ntags)
-        eprint("awesome: fatal: no tags found in configuration file\n");
-
-    /* select first tag by default */
-    awesomeconf->tags[0].selected = True;
-    awesomeconf->tags[0].was_selected = True;
 
     /* Mouse: tags click bindings */
     awesomeconf->buttons.tag = parse_mouse_bindings(cfg_mouse, "tag", False);
@@ -561,121 +565,6 @@ initxcolor(Display *disp, int scr, const char *colstr)
     if(!XAllocNamedColor(disp, DefaultColormap(disp, scr), colstr, &color, &color))
         die("awesome: error, cannot allocate color '%s'\n", colstr);
     return color;
-}
-
-void
-uicb_reloadconfig(awesome_config *awesomeconf,
-                  const char *arg __attribute__ ((unused)))
-{
-    int i, j, tag, screen, screen_count = get_screen_count(awesomeconf->display);
-    awesome_config *awesomeconf_first = &awesomeconf[-awesomeconf->screen];
-    int *old_ntags, old_c_ntags, new_c_ntags, **mapping;
-    char ***savetagnames;
-    Client ***savetagclientsel;
-    char *configpath = a_strdup(awesomeconf_first->configpath);
-    Bool ***savetagselected;
-    Bool *old_c_tags;
-    Client *c, *clients;
-
-    /* Save tag information */
-    savetagnames = p_new(char **, screen_count);
-    savetagclientsel = p_new(Client **, screen_count);
-    savetagselected = p_new(Bool **, screen_count);
-    clients = *awesomeconf_first->clients;
-    for (screen = 0; screen < screen_count; screen ++)
-    {
-       savetagnames[screen] = p_new(char *, awesomeconf_first[screen].ntags);
-       savetagclientsel[screen] = p_new(Client *, awesomeconf_first[screen].ntags);
-       savetagselected[screen] = p_new(Bool *, awesomeconf_first[screen].ntags);
-       for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
-       {
-           savetagnames[screen][tag] = a_strdup(awesomeconf_first[screen].tags[tag].name);
-           savetagclientsel[screen][tag] = awesomeconf_first[screen].tags[tag].client_sel;
-           savetagselected[screen][tag] = p_new(Bool, 2);
-           savetagselected[screen][tag][0] = awesomeconf_first[screen].tags[tag].selected;
-           savetagselected[screen][tag][1] = awesomeconf_first[screen].tags[tag].was_selected;
-       }
-    }
-    old_ntags = p_new(int, screen_count);
-    for (screen = 0; screen < screen_count; screen ++)
-       old_ntags[screen] = awesomeconf_first[screen].ntags;
-
-    mapping = p_new(int*, screen_count);
-    for(screen = 0; screen < screen_count; screen++)
-    {
-        /* Cleanup screens and reload their config. */
-        cleanup_screen(&awesomeconf_first[screen]);
-        setup_screen(&awesomeconf_first[screen], configpath);
-
-        /* Compute a mapping of tags between the old and new config, based on
-         * tag names. */
-        mapping[screen] = p_new(int, awesomeconf_first[screen].ntags);
-        for (i = 0; i < awesomeconf_first[screen].ntags; i ++)
-        {
-            mapping[screen][i] = -1;
-            for (j = 0; j < old_ntags[screen]; j ++)
-                if (!a_strcmp(savetagnames[screen][j], awesomeconf_first[screen].tags[i].name))
-                {
-                    mapping[screen][i] = j;
-                    break;
-                }
-        }
-
-        /* Reinitialize the tags' client lists and selected client. */
-        *awesomeconf_first[screen].clients = clients;
-        for (tag = 0; tag < awesomeconf_first[screen].ntags; tag++)
-            if (mapping[screen][tag] >= 0)
-            {
-                awesomeconf_first[screen].tags[tag].client_sel = savetagclientsel[screen][mapping[screen][tag]];
-                awesomeconf_first[screen].tags[tag].selected = savetagselected[screen][mapping[screen][tag]][0];
-                awesomeconf_first[screen].tags[tag].was_selected = savetagselected[screen][mapping[screen][tag]][1];
-            }
-        drawstatusbar(&awesomeconf_first[screen]);
-    }
-
-    /* Reinitialize the 'tags' array of each client.
-     * Clients are assigned to the tags of the same name as in the previous
-     * awesomerc, or to tag #1 otherwise. */
-    for (c = *awesomeconf_first->clients; c; c = c->next)
-    {
-       old_c_ntags = old_ntags[c->screen];
-       new_c_ntags = awesomeconf_first[c->screen].ntags;
-
-       old_c_tags = c->tags;
-       c->tags = p_new(Bool, new_c_ntags);
-       for (i = 0; i < new_c_ntags; i ++)
-          if (mapping[c->screen][i] >= 0)
-             c->tags[i] = old_c_tags[mapping[c->screen][i]];
-       p_delete(&old_c_tags);
-
-       for (i = 0; i < new_c_ntags && c->tags[i] == 0; i++) {}
-       if (i == new_c_ntags)
-          c->tags[0] = 1;
-
-       saveprops(c, awesomeconf_first[c->screen].ntags);
-    }
-
-    /* Cleanup after ourselves */
-    for(screen = 0; screen < screen_count; screen++)
-    {
-        for(i = 0; i < old_ntags[screen]; i++)
-        {
-            p_delete(&savetagnames[screen][i]);
-            p_delete(&savetagselected[screen][i]);
-        }
-        p_delete(&savetagselected[screen]);
-        p_delete(&savetagnames[screen]);
-        p_delete(&mapping[screen]);
-        p_delete(&savetagclientsel[screen]);
-    }
-    p_delete(&mapping);
-    p_delete(&savetagselected);
-    p_delete(&savetagnames);
-    p_delete(&old_ntags);
-    p_delete(&savetagclientsel);
-    p_delete(&configpath);
-    for (screen = 0; screen < screen_count; screen ++)
-        arrange(&awesomeconf_first[screen]);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

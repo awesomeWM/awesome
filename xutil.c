@@ -7,6 +7,7 @@
 
 void
 uicb_exec(awesome_config * awesomeconf,
+          int screen __attribute__ ((unused)),
           const char *arg)
 {
     char path[PATH_MAX];
@@ -19,6 +20,7 @@ uicb_exec(awesome_config * awesomeconf,
 
 void
 uicb_spawn(awesome_config * awesomeconf,
+           int screen,
            const char *arg)
 {
     static char *shell = NULL;
@@ -35,7 +37,7 @@ uicb_spawn(awesome_config * awesomeconf,
         display = a_strdup(tmp);
         if((tmp = strrchr(display, '.')))
             *tmp = '\0';
-        snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, awesomeconf->screen);
+        snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, screen);
         setenv("DISPLAY", newdisplay, 1);
     }
 

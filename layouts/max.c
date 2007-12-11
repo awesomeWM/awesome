@@ -25,16 +25,16 @@
 #include "layouts/max.h"
 
 void
-layout_max(awesome_config *awesomeconf)
+layout_max(awesome_config *awesomeconf, int screen)
 {
     Client *c;
-    ScreenInfo *si = get_screen_info(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar, &awesomeconf->padding);
+    ScreenInfo *si = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 
-    for(c = *awesomeconf->clients; c; c = c->next)
-        if(IS_TILED(c, awesomeconf->screen, awesomeconf->tags, awesomeconf->ntags))
-            client_resize(c, si[awesomeconf->screen].x_org, si[awesomeconf->screen].y_org,
-                   si[awesomeconf->screen].width - 2 * c->border,
-                   si[awesomeconf->screen].height - 2 * c->border, awesomeconf, awesomeconf->resize_hints, False);
+    for(c = awesomeconf->clients; c; c = c->next)
+        if(IS_TILED(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags))
+            client_resize(c, si[screen].x_org, si[screen].y_org,
+                   si[screen].width - 2 * c->border,
+                   si[screen].height - 2 * c->border, awesomeconf, awesomeconf->screens[screen].resize_hints, False);
     p_delete(&si);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

@@ -53,7 +53,7 @@ typedef struct awesome_config awesome_config;
 typedef struct
 {
     char *symbol;
-    void (*arrange) (awesome_config *);
+    void (*arrange) (awesome_config *, int);
 } Layout;
 
 typedef struct Key Key;
@@ -61,7 +61,7 @@ struct Key
 {
     unsigned long mod;
     KeySym keysym;
-    void (*func) (awesome_config *, char *);
+    void (*func) (awesome_config *, int, char *);
     char *arg;
     Key *next;
 };
@@ -71,7 +71,7 @@ struct Button
 {
     unsigned long mod;
     unsigned int button;
-    void (*func) (awesome_config *, char *);
+    void (*func) (awesome_config *, int, char *);
     char *arg;
     Button *next;
 };
@@ -166,15 +166,26 @@ typedef struct
     int right;
 } Padding;
 
-/** Main configuration structure */
-struct awesome_config
+typedef struct
 {
-    /** Display ref */
-    Display *display;
-    /** Config virtual screen number */
-    int screen;
-    /** Config physical screen */
-    int phys_screen;
+    /** Text displayed in bar */
+    char statustext[256];
+    /** Number of pixels to snap windows */
+    int snap;
+    /** Border size */
+    int borderpx;
+    /** Transparency of unfocused clients */
+    int opacity_unfocused;
+    /** Focus move pointer */
+    Bool focus_move_pointer;
+    /** Allow floats to be lowered on focus change */
+    Bool allow_lower_floats;
+    /** Respect resize hints */
+    Bool resize_hints;
+    /** Normal colors */
+    XColor colors_normal[ColLast];
+    /** Selected colors */
+    XColor colors_selected[ColLast];
     /** Tag list */
     Tag *tags;
     /** Number of tags in **tags */
@@ -182,6 +193,21 @@ struct awesome_config
     /** Layout list */
     Layout *layouts;
     int nlayouts;
+    /** Status bar */
+    Statusbar statusbar;
+    /** Padding */
+    Padding padding;	
+    /** Font */
+    XftFont *font;
+} VirtScreen;
+
+/** Main configuration structure */
+struct awesome_config
+{
+    /** Display ref */
+    Display *display;
+    /** Logical screens */
+    VirtScreen *screens;
     /** Rules list */
     Rule *rules;
     /** Keys bindings list */
@@ -197,38 +223,14 @@ struct awesome_config
     } buttons;
     /** Numlock mask */
     unsigned int numlockmask;
-    /** Border size */
-    int borderpx;
-    /** Number of pixels to snap windows */
-    int snap;
-    /** Transparency of unfocused clients */
-    int opacity_unfocused;
-    /** Focus move pointer */
-    Bool focus_move_pointer;
-    /** Allow floats to be lowered on focus change */
-    Bool allow_lower_floats;
-    /** Respect resize hints */
-    Bool resize_hints;
-    /** Text displayed in bar */
-    char statustext[256];
-    /** Status bar */
-    Statusbar statusbar;
     /** Check for XShape extension */
     Bool have_shape;
     /** Check for XRandR extension */
     Bool have_randr;
-    /** Normal colors */
-    XColor colors_normal[ColLast];
-    /** Selected colors */
-    XColor colors_selected[ColLast];
     /** Cursors */
     Cursor cursor[CurLast];
-    /** Padding */
-    Padding padding;	
-    /** Font */
-    XftFont *font;
     /** Clients list */
-    Client **clients;
+    Client *clients;
     /** Path to config file */
     char *configpath;
 };

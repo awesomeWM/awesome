@@ -65,21 +65,52 @@ cleanup_buttons(Button *buttons)
 }
 
 void
-cleanup_screen(awesome_config *awesomeconf)
+cleanup_screen(awesome_config *awesomeconf, int screen)
 {
     int i;
-    Key *k, *kn;
-    Rule *r, *rn;
 
-    XftFontClose(awesomeconf->display, awesomeconf->font);
-    XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, awesomeconf->phys_screen));
-    XDestroyWindow(awesomeconf->display, awesomeconf->statusbar.window);
+    XftFontClose(awesomeconf->display, awesomeconf->screens[screen].font);
+    XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)));
+    XDestroyWindow(awesomeconf->display, awesomeconf->screens[screen].statusbar.window);
+
+    for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
+        p_delete(&awesomeconf->screens[screen].tags[i].name);
+
+    for(i = 0; i < awesomeconf->screens[screen].nlayouts; i++)
+        p_delete(&awesomeconf->screens[screen].layouts[i].symbol);
+
+    p_delete(&awesomeconf->screens[screen].tags);
+    p_delete(&awesomeconf->screens[screen].layouts);
+}
+
+/** Cleanup everything on quit
+ * \param awesomeconf awesome config
+ */
+static void
+cleanup(awesome_config *awesomeconf)
+{
+    int screen;
+    Rule *r, *rn;
+    Key *k, *kn;
+
+    while(awesomeconf->clients)
+    {
+        client_unban(awesomeconf->clients);
+        client_unmanage(awesomeconf->clients, NormalState, awesomeconf);
+    }
+
     XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurNormal]);
     XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurResize]);
     XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurMove]);
 
-    for(i = 0; i < awesomeconf->ntags; i++)
-        p_delete(&awesomeconf->tags[i].name);
+    for(r = awesomeconf->rules; r; r = rn)
+    {
+        rn = r->next;
+        p_delete(&r->prop);
+        p_delete(&r->tags);
+        p_delete(&r);
+    }
+
     for(k = awesomeconf->keys; k; k = kn)
     {
         kn = k->next;
@@ -93,37 +124,10 @@ cleanup_screen(awesome_config *awesomeconf)
     cleanup_buttons(awesomeconf->buttons.root);
     cleanup_buttons(awesomeconf->buttons.client);
 
-    for(i = 0; i < awesomeconf->nlayouts; i++)
-        p_delete(&awesomeconf->layouts[i].symbol);
-    for(r = awesomeconf->rules; r; r = rn)
-    {
-        rn = r->next;
-        p_delete(&r->prop);
-        p_delete(&r->tags);
-        p_delete(&r);
-    }
-
-    p_delete(&awesomeconf->tags);
-    p_delete(&awesomeconf->layouts);
     p_delete(&awesomeconf->configpath);
-}
-
-/** Cleanup everything on quit
- * \param awesomeconf awesome config
- */
-static void
-cleanup(awesome_config *awesomeconf)
-{
-    int screen;
-
-    while(*awesomeconf->clients)
-    {
-        client_unban(*awesomeconf->clients);
-        client_unmanage(*awesomeconf->clients, NormalState, awesomeconf);
-    }
 
     for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
-        cleanup_screen(&awesomeconf[screen]);
+        cleanup_screen(awesomeconf, screen);
 
     XSetInputFocus(awesomeconf->display, PointerRoot, RevertToPointerRoot, CurrentTime);
     XSync(awesomeconf->display, False);
@@ -159,7 +163,7 @@ scan(awesome_config *awesomeconf)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    client_manage(wins[i], &wa, &awesomeconf[real_screen]);
+                    client_manage(wins[i], &wa, awesomeconf, real_screen);
                 }
             }
             /* now the transients */
@@ -172,7 +176,7 @@ scan(awesome_config *awesomeconf)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    client_manage(wins[i], &wa, &awesomeconf[real_screen]);
+                    client_manage(wins[i], &wa, awesomeconf, real_screen);
                 }
             }
         }
@@ -186,7 +190,7 @@ scan(awesome_config *awesomeconf)
  * \todo clean things...
  */
 static void
-setup(awesome_config *awesomeconf)
+setup(awesome_config *awesomeconf, int screen)
 {
     XSetWindowAttributes wa;
 
@@ -200,21 +204,22 @@ setup(awesome_config *awesomeconf)
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = awesomeconf->cursor[CurNormal];
 
-    XChangeWindowAttributes(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), CWEventMask | CWCursor, &wa);
+    XChangeWindowAttributes(awesomeconf->display,
+                            RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)),
+                            CWEventMask | CWCursor, &wa);
 
-    XSelectInput(awesomeconf->display, RootWindow(awesomeconf->display, awesomeconf->phys_screen), wa.event_mask);
+    XSelectInput(awesomeconf->display, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)), wa.event_mask);
 
-    grabkeys(awesomeconf);
+    grabkeys(awesomeconf, screen);
 }
 
 void
-setup_screen(awesome_config *awesomeconf, const char *confpath)
+setup_screen(awesome_config *awesomeconf, int screen)
 {
-    parse_config(confpath, awesomeconf);
-    setup(awesomeconf);
-    initstatusbar(awesomeconf->display, awesomeconf->screen, &awesomeconf->statusbar,
-                  awesomeconf->cursor[CurNormal], awesomeconf->font,
-                  awesomeconf->layouts, awesomeconf->nlayouts,&awesomeconf->padding);
+    setup(awesomeconf, screen);
+    initstatusbar(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar,
+                  awesomeconf->cursor[CurNormal], awesomeconf->screens[screen].font,
+                  awesomeconf->screens[screen].layouts, awesomeconf->screens[screen].nlayouts, &awesomeconf->screens[screen].padding);
 }
 
 /** Startup Error handler to check if another window manager
@@ -235,6 +240,7 @@ xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribut
  */
 void
 uicb_quit(awesome_config *awesomeconf __attribute__((unused)),
+          int screen __attribute__ ((unused)),
           const char *arg __attribute__ ((unused)))
 {
     running = False;
@@ -285,7 +291,6 @@ main(int argc, char *argv[])
     enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */
     Atom netatom[NetLast];
     event_handler **handler;
-    Client **clients;
     struct sockaddr_un *addr;
 
     if(argc >= 2)
@@ -326,19 +331,17 @@ main(int argc, char *argv[])
     XSync(dpy, False);
 
     /* allocate stuff */
-    awesomeconf = p_new(awesome_config, get_screen_count(dpy));
-    clients = p_new(Client *, 1);
+    awesomeconf = p_new(awesome_config, 1);
+    awesomeconf->screens = p_new(VirtScreen, get_screen_count(dpy));
+    /* store display */
+    awesomeconf->display = dpy;
+    parse_config(confpath, awesomeconf);
 
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
-        /* store display */
-        awesomeconf[screen].display = dpy;
-
         /* set screen */
-        awesomeconf[screen].screen = screen;
-        setup_screen(&awesomeconf[screen], confpath);
-        awesomeconf[screen].clients = clients;
-        drawstatusbar(&awesomeconf[screen]);
+        setup_screen(awesomeconf, screen);
+        drawstatusbar(awesomeconf, screen);
     }
 
     netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
@@ -347,7 +350,7 @@ main(int argc, char *argv[])
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
-        loadawesomeprops(&awesomeconf[screen]);
+        loadawesomeprops(awesomeconf, screen);
         XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
                         XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
     }
@@ -367,23 +370,17 @@ main(int argc, char *argv[])
     handler[UnmapNotify] = handle_event_unmapnotify;
 
     /* check for shape extension */
-    if((awesomeconf[0].have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
+    if((awesomeconf->have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
     {
         p_realloc(&handler, shape_event + 1);
         handler[shape_event] = handle_event_shape;
     }
 
     /* check for randr extension */
-    if((awesomeconf[0].have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
+    if((awesomeconf->have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
     {
         p_realloc(&handler, randr_event_base + RRScreenChangeNotify + 1);
         handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
-    }
-
-    for(screen = 0; screen < get_screen_count(dpy); screen++)
-    {
-        awesomeconf[screen].have_shape = awesomeconf[0].have_shape;
-        awesomeconf[screen].have_randr = awesomeconf[0].have_randr;
     }
 
     scan(awesomeconf);
@@ -425,9 +422,6 @@ main(int argc, char *argv[])
             {
             case -1:
                 perror("awesome: error reading UNIX domain socket");
-                a_strncpy(awesomeconf[0].statustext, sizeof(awesomeconf[0].statustext),
-                          strerror(errno), sizeof(awesomeconf[0].statustext) - 1);
-                awesomeconf[0].statustext[sizeof(awesomeconf[0].statustext) - 1] = '\0';
                 csfd = -1;
                 break;
             case 0:

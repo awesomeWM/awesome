@@ -70,7 +70,6 @@ const NameFuncLink UicbList[] = {
     /* statusbar.c */
     {"togglebar", uicb_togglebar},
     /* config.c */
-    {"reloadconfig", uicb_reloadconfig},
     {"setstatustext", uicb_setstatustext},
     /* mouse.c */
     {"client_movemouse", uicb_client_movemouse},
@@ -102,7 +101,7 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
     char *p, *uicb_name;
     const char *arg;
     int screen;
-    void (*uicb) (awesome_config *, const char *);
+    void (*uicb) (awesome_config *, int, const char *);
 
     if(!a_strlen(cmd))
         return -1;
@@ -131,7 +130,7 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
     uicb = name_func_lookup(uicb_name, UicbList);
 
     if(uicb)
-        uicb(&awesomeconf[screen], arg);
+        uicb(awesomeconf, screen, arg);
     else
         return -1;
 

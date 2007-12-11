@@ -26,12 +26,12 @@
 
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 
-void arrange(awesome_config *);
+void arrange(awesome_config *, int);
 Layout * get_current_layout(Tag *, int);
 Tag * get_current_tag(Tag *, int);
-void restack(awesome_config *);
-void loadawesomeprops(awesome_config *);
-void saveawesomeprops(awesome_config *);
+void restack(awesome_config *, int);
+void loadawesomeprops(awesome_config *, int);
+void saveawesomeprops(awesome_config *, int);
 
 UICB_PROTO(uicb_client_focusnext);
 UICB_PROTO(uicb_client_focusprev);

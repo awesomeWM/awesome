@@ -29,25 +29,25 @@
 #include "layouts/floating.h"
 
 void
-uicb_client_movemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
+uicb_client_movemouse(awesome_config *awesomeconf, int screen, const char *arg __attribute__ ((unused)))
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
     Window dummy;
     XEvent ev;
     ScreenInfo *si;
-    Client *c = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
+    Client *c = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
 
     if(!c)
         return;
 
-    if((get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange != layout_floating)
+    if((get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->arrange != layout_floating)
         && !c->isfloating)
-         uicb_client_togglefloating(awesomeconf, "DUMMY");
+         uicb_client_togglefloating(awesomeconf, screen, "DUMMY");
      else
-         restack(awesomeconf);
+         restack(awesomeconf, screen);
 
-    si = get_screen_info(c->display, c->screen, &awesomeconf->statusbar, &awesomeconf->padding);
+    si = get_screen_info(c->display, c->screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
@@ -65,25 +65,25 @@ uicb_client_movemouse(awesome_config *awesomeconf, const char *arg __attribute__
             p_delete(&si);
             return;
         case ConfigureRequest:
-            handle_event_configurerequest(&ev, &awesomeconf[0 - awesomeconf->screen]);
+            handle_event_configurerequest(&ev, awesomeconf);
             break;
         case Expose:
-            handle_event_expose(&ev, &awesomeconf[0 - awesomeconf->screen]);
+            handle_event_expose(&ev, awesomeconf);
             break;
         case MapRequest:
-            handle_event_maprequest(&ev, &awesomeconf[0 - awesomeconf->screen]);
+            handle_event_maprequest(&ev, awesomeconf);
             break;
         case MotionNotify:
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(nx) < awesomeconf->snap + si[c->screen].x_org && nx > si[c->screen].x_org)
+            if(abs(nx) < awesomeconf->screens[screen].snap + si[c->screen].x_org && nx > si[c->screen].x_org)
                 nx = si[c->screen].x_org;
-            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < awesomeconf->snap)
+            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < awesomeconf->screens[screen].snap)
                 nx = si[c->screen].x_org + si[c->screen].width - c->w - 2 * c->border;
-            if(abs(ny) < awesomeconf->snap + si[c->screen].y_org && ny > si[c->screen].y_org)
+            if(abs(ny) < awesomeconf->screens[screen].snap + si[c->screen].y_org && ny > si[c->screen].y_org)
                 ny = si[c->screen].y_org;
-            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf->snap)
+            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf->screens[screen].snap)
                 ny = si[c->screen].y_org + si[c->screen].height - c->h - 2 * c->border;
             client_resize(c, nx, ny, c->w, c->h, awesomeconf, False, False);
             break;
@@ -92,20 +92,20 @@ uicb_client_movemouse(awesome_config *awesomeconf, const char *arg __attribute__
 }
 
 void
-uicb_client_resizemouse(awesome_config *awesomeconf, const char *arg __attribute__ ((unused)))
+uicb_client_resizemouse(awesome_config *awesomeconf, int screen, const char *arg __attribute__ ((unused)))
 {
     int ocx, ocy, nw, nh;
     XEvent ev;
-    Client *c = get_current_tag(awesomeconf->tags, awesomeconf->ntags)->client_sel;
+    Client *c = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
 
     if(!c)
         return;
 
-    if((get_current_layout(awesomeconf->tags, awesomeconf->ntags)->arrange != layout_floating)
+    if((get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->arrange != layout_floating)
        && !c->isfloating)
-        uicb_client_togglefloating(awesomeconf, "DUMMY");
+        uicb_client_togglefloating(awesomeconf, screen, "DUMMY");
     else
-        restack(awesomeconf);
+        restack(awesomeconf, screen);
 
     ocx = c->x;
     ocy = c->y;
@@ -126,13 +126,13 @@ uicb_client_resizemouse(awesome_config *awesomeconf, const char *arg __attribute
             while(XCheckMaskEvent(c->display, EnterWindowMask, &ev));
             return;
         case ConfigureRequest:
-            handle_event_configurerequest(&ev, &awesomeconf[0 - awesomeconf->screen]);
+            handle_event_configurerequest(&ev, awesomeconf);
             break;
         case Expose:
-            handle_event_expose(&ev, &awesomeconf[0 - awesomeconf->screen]);
+            handle_event_expose(&ev, awesomeconf);
             break;
         case MapRequest:
-            handle_event_maprequest(&ev, &awesomeconf[0 - awesomeconf->screen]);
+            handle_event_maprequest(&ev, awesomeconf);
             break;
         case MotionNotify:
             XSync(c->display, False);
