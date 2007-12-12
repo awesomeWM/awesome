@@ -165,6 +165,78 @@ parse_mouse_bindings(cfg_t * cfg, const char *secname, Bool handle_arg)
     return head;
 }
 
+
+static void set_key_info(Key *key, cfg_t *cfg)
+{
+    unsigned int j;
+
+    for(j = 0; j < cfg_size(cfg, "modkey"); j++)
+        key->mod |= key_mask_lookup(cfg_getnstr(cfg, "modkey", j));
+    key->func = name_func_lookup(cfg_getstr(cfg, "command"), UicbList);
+    if(!key->func)
+        warn("awesome: unknown command %s\n", cfg_getstr(cfg, "command"));
+}
+
+
+static Key *section_keys(cfg_t *cfg_keys)
+{
+    Key *key, *head;
+    unsigned int i, j, numkeys;
+    cfg_t *cfgkeytmp;
+
+    head = key = NULL;
+    for(i = 0; i < cfg_size(cfg_keys, "key"); i++)
+    {
+        if (i == 0)
+            key = head = p_new(Key, 1);
+        else
+        {
+            key->next = p_new(Key, 1);
+            key = key->next;
+        }
+        cfgkeytmp = cfg_getnsec(cfg_keys, "key", i);
+        set_key_info(key, cfgkeytmp);
+        key->keysym = XStringToKeysym(cfg_getstr(cfgkeytmp, "key"));
+        key->arg = a_strdup(cfg_getstr(cfgkeytmp, "arg"));
+    }
+
+    for(i = 0; i < cfg_size(cfg_keys, "keylist"); i++)
+    {
+        cfgkeytmp = cfg_getnsec(cfg_keys, "keylist", i);
+        numkeys = cfg_size(cfgkeytmp, "keylist");
+        if (numkeys != cfg_size(cfgkeytmp, "arglist"))
+        {
+            warn("awesome: number of keys != number of args in keylist");
+            continue;
+        }
+        for(j=0; j < numkeys; j++)
+        {
+            if (head == NULL)
+            {
+                key = p_new(Key, 1);
+                head = key;
+            }
+            else
+            {
+                key->next = p_new(Key, 1);
+                key = key->next;
+            }
+            set_key_info(key, cfgkeytmp);
+            key->keysym = XStringToKeysym(cfg_getnstr(cfgkeytmp, "keylist", j));
+            key->arg = a_strdup(cfg_getnstr(cfgkeytmp, "arglist", j));
+            if(j < numkeys - 1)
+            {
+                key->next = p_new(Key, 1);
+                key = key->next;
+            }
+        }
+    }
+    if (key)
+        key->next = NULL;
+    return head;
+}
+
+
 /** Parse configuration file and initialize some stuff
  * \param disp Display ref
  * \param scr Screen number
@@ -260,9 +332,18 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR((char *) "arg", NULL, CFGF_NONE),
         CFG_END()
     };
+    static cfg_opt_t keylist_opts[] =
+    {
+        CFG_STR_LIST((char *) "modkey", (char *) "{Mod4}", CFGF_NONE),
+        CFG_STR_LIST((char *) "keylist", (char *) NULL, CFGF_NONE),
+        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+        CFG_STR_LIST((char *) "arglist", NULL, CFGF_NONE),
+        CFG_END()
+    };
     static cfg_opt_t keys_opts[] =
     {
         CFG_SEC((char *) "key", key_opts, CFGF_MULTI),
+        CFG_SEC((char *) "keylist", keylist_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t mouse_tag_opts[] =
@@ -300,11 +381,10 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
           *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp, *cfg_padding;
     int i = 0, k = 0, ret, screen;
-    unsigned int j = 0, l = 0;
+    unsigned int j = 0;
     const char *tmp, *homedir;
     char *confpath, buf[2];
     ssize_t confpath_len;
-    Key *key = NULL;
     Rule *rule = NULL;
     FILE *defconfig = NULL;
 
@@ -506,31 +586,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     /* Keys */
     awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
 
-    if(cfg_size(cfg_keys, "key"))
-    {
-        awesomeconf->keys = key = p_new(Key, 1);
-        for(j = 0; j < cfg_size(cfg_keys, "key"); j++)
-        {
-            cfgsectmp = cfg_getnsec(cfg_keys, "key", j);
-            for(l = 0; l < cfg_size(cfgsectmp, "modkey"); l++)
-                key->mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", l));
-            key->keysym = XStringToKeysym(cfg_getstr(cfgsectmp, "key"));
-            key->func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
-            if(!key->func)
-                fprintf(stderr, "awesome: unknown command %s\n", cfg_getstr(cfgsectmp, "command"));
-            key->arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
-
-            if(j < cfg_size(cfg_keys, "key") - 1)
-            {
-                key->next = p_new(Key, 1);
-                key = key->next;
-            }
-            else
-                key->next = NULL;
-        }
-    }
-    else
-        awesomeconf->keys = NULL;
+    awesomeconf->keys = section_keys(cfg_keys);
 
     if(defconfig)
     {

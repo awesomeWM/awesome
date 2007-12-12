@@ -294,280 +294,60 @@ keys
         key = "r"
         command = "reloadconfig"
     }
+
     key
     {
        modkey = {"Mod4"}
        key = "0"
        command = "tag_view"
     }
-    key
+    keylist
     {
         modkey = {"Mod4"}
-        key = "1"
         command = "tag_view"
-        arg = "1"
+        keylist = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+        arglist = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
     }
-    key
-    {
-        modkey = {"Mod4"}
-        key = "2"
-        command = "tag_view"
-        arg = "2"
-    }
-    key
-    {
-        modkey = {"Mod4"}
-        key = "3"
-        command = "tag_view"
-        arg = "3"
-    }
-    key
-    {
-        modkey = {"Mod4"}
-        key = "4"
-        command = "tag_view"
-        arg = "4"
-    }
-    key
-    {
-        modkey = {"Mod4"}
-        key = "5"
-        command = "tag_view"
-        arg = "5"
-    }
-    key
-    {
-        modkey = {"Mod4"}
-        key = "6"
-        command = "tag_view"
-        arg = "6"
-    }
-    key
-    {
-        modkey = {"Mod4"}
-        key = "7"
-        command = "tag_view"
-        arg = "7"
-    }
-    key
-    {
-        modkey = {"Mod4"}
-        key = "8"
-        command = "tag_view"
-        arg = "8"
-    }
-    key
-    {
-        modkey = {"Mod4"}
-        key = "9"
-        command = "tag_view"
-        arg = "9"
-    }
+
     key
     {
         modkey = {"Mod4", "Control"}
         key = "0"
         command = "tag_toggleview"
     }
-    key
+    keylist
     {
         modkey = {"Mod4", "Control"}
-        key = "1"
         command = "tag_toggleview"
-        arg = "1"
+        keylist = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+        arglist = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
     }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "2"
-        command = "tag_toggleview"
-        arg = "2"
-    }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "3"
-        command = "tag_toggleview"
-        arg = "3"
-    }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "4"
-        command = "tag_toggleview"
-        arg = "4"
-    }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "5"
-        command = "tag_toggleview"
-        arg = "5"
-    }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "6"
-        command = "tag_toggleview"
-        arg = "6"
-    }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "7"
-        command = "tag_toggleview"
-        arg = "7"
-    }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "8"
-        command = "tag_toggleview"
-        arg = "8"
-    }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "9"
-        command = "tag_toggleview"
-        arg = "9"
-    }
+
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "0"
         command = "client_tag"
     }
-    key
+    keylist
     {
         modkey = {"Mod4", "Shift"}
-        key = "1"
         command = "client_tag"
-        arg = "1"
+        keylist = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+        arglist = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
     }
-    key
-    {
-        modkey = {"Mod4", "Shift"}
-        key = "2"
-        command = "client_tag"
-        arg = "2"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift"}
-        key = "3"
-        command = "client_tag"
-        arg = "3"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift"}
-        key = "4"
-        command = "client_tag"
-        arg = "4"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift"}
-        key = "5"
-        command = "client_tag"
-        arg = "5"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift"}
-        key = "6"
-        command = "client_tag"
-        arg = "6"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift"}
-        key = "7"
-        command = "client_tag"
-        arg = "7"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift"}
-        key = "8"
-        command = "client_tag"
-        arg = "8"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift"}
-        key = "9"
-        command = "client_tag"
-        arg = "9"
-    }
+
     key
     {
         modkey = {"Mod4", "Shift", "Control"}
         key = "0"
         command = "client_toggletag"
     }
-    key
+    keylist
     {
         modkey = {"Mod4", "Shift", "Control"}
-        key = "1"
         command = "client_toggletag"
-        arg = "1"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "2"
-        command = "client_toggletag"
-        arg = "2"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "3"
-        command = "client_toggletag"
-        arg = "3"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "4"
-        command = "client_toggletag"
-        arg = "4"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "5"
-        command = "client_toggletag"
-        arg = "5"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "6"
-        command = "client_toggletag"
-        arg = "6"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "7"
-        command = "client_toggletag"
-        arg = "7"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "8"
-        command = "client_toggletag"
-        arg = "8"
-    }
-    key
-    {
-        modkey = {"Mod4", "Shift", "Control"}
-        key = "9"
-        command = "client_toggletag"
-        arg = "9"
+        keylist = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+        arglist = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
     }
 }
