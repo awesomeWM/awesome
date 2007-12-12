@@ -111,7 +111,8 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
 
     *p++ = '\0';
 
-    if((screen = atoi(cmd)) >= get_screen_count(awesomeconf->display))
+    screen = atoi(cmd);
+    if(screen >= get_screen_count(awesomeconf->display) || screen < 0)
         return -1;
 
     uicb_name = p;
