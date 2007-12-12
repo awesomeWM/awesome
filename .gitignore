@@ -1,4 +1,5 @@
 *.o
 awesome
 awesome-client
+doc
 *.swp
