@@ -175,7 +175,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     {
         CFG_INT((char *) "border", 1, CFGF_NONE),
         CFG_INT((char *) "snap", 8, CFGF_NONE),
-        CFG_BOOL((char *) "resize_hints", cfg_false, CFGF_NONE),
+        CFG_BOOL((char *) "resize_hints", cfg_true, CFGF_NONE),
         CFG_INT((char *) "opacity_unfocused", 100, CFGF_NONE),
         CFG_BOOL((char *) "focus_move_pointer", cfg_false, CFGF_NONE),
         CFG_BOOL((char *) "allow_lower_floats", cfg_false, CFGF_NONE),
