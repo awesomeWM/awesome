@@ -174,7 +174,7 @@ static void set_key_info(Key *key, cfg_t *cfg)
         key->mod |= key_mask_lookup(cfg_getnstr(cfg, "modkey", j));
     key->func = name_func_lookup(cfg_getstr(cfg, "command"), UicbList);
     if(!key->func)
-        warn("awesome: unknown command %s\n", cfg_getstr(cfg, "command"));
+        warn("unknown command %s\n", cfg_getstr(cfg, "command"));
 }
 
 
@@ -206,7 +206,7 @@ static Key *section_keys(cfg_t *cfg_keys)
         numkeys = cfg_size(cfgkeytmp, "keylist");
         if (numkeys != cfg_size(cfgkeytmp, "arglist"))
         {
-            warn("awesome: number of keys != number of args in keylist");
+            warn("number of keys != number of args in keylist");
             continue;
         }
         for(j=0; j < numkeys; j++)
