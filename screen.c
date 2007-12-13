@@ -241,30 +241,32 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
         XWarpPointer(disp, None, RootWindow(disp, screen), 0, 0, 0, 0, 0, 0);
 }
 
+
+/** Switch focus to a specified screen
+ * \param awesomeconf awesome config ref
+ * \param arg screen number
+ * \ingroup ui_callback
+ */
 void
-uicb_screen_focusnext(awesome_config * awesomeconf,
-                      int screen,
-                      const char *arg __attribute__ ((unused)))
+uicb_screen_focus(awesome_config *awesomeconf, int screen, const char *arg)
 {
-    int next_screen = screen + 1 >= get_screen_count(awesomeconf->display) ? 0 : screen + 1;
-    Client *sel = get_current_tag(awesomeconf->screens[next_screen].tags,
-                                  awesomeconf->screens[next_screen].ntags)->client_sel;
+    int new_screen, numscreens = get_screen_count(awesomeconf->display);
 
-    focus(sel, True, awesomeconf, next_screen - screen);
-    move_mouse_pointer_to_screen(awesomeconf->display, next_screen);
-}
+    if(arg)
+        new_screen = compute_new_value_from_arg(arg, screen);
+    else
+        new_screen = screen + 1;
 
-void
-uicb_screen_focusprev(awesome_config * awesomeconf,
-                      int screen,
-                      const char *arg __attribute__ ((unused)))
-{
-    int prev_screen = screen - 1 < 0 ? get_screen_count(awesomeconf->display) - 1 : screen - 1;
-    Client *sel = get_current_tag(awesomeconf->screens[prev_screen].tags,
-                                  awesomeconf->screens[prev_screen].ntags)->client_sel;
+    if (new_screen < 0)
+        new_screen = numscreens - 1;
+    if (new_screen > (numscreens - 1))
+        new_screen = 0;
 
-    focus(sel, True, awesomeconf, prev_screen - screen);
-    move_mouse_pointer_to_screen(awesomeconf->display, prev_screen);
+    focus(get_current_tag(awesomeconf->screens[new_screen].tags,
+                          awesomeconf->screens[new_screen].ntags)->client_sel,
+          True, awesomeconf, new_screen);
+
+    move_mouse_pointer_to_screen(awesomeconf->display, new_screen);
 }
 
 /** Move client to a virtual screen (if Xinerama is active)

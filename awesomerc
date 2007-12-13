@@ -181,13 +181,15 @@ keys
     {
         modkey = {"Mod4", "Control"}
         key = "j"
-        command = "screen_focusnext"
+        command = "screen_focus"
+        arg = "+1"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "k"
-        command = "screen_focusprev"
+        command = "screen_focus"
+        arg = "-1"
     }
     key
     {
