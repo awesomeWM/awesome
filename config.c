@@ -305,6 +305,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     ssize_t confpath_len;
     Key *key = NULL;
     Rule *rule = NULL;
+    FILE *defconfig = NULL;
 
     if(confpatharg)
         confpath = a_strdup(confpatharg);
@@ -327,6 +328,8 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     {
         perror("awesome: parsing configuration file failed");
         cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
+        if(!(defconfig = fopen(confpath, "w")))
+           perror("awesome: unable to create default configuration file");
     }
     else if(ret == CFG_PARSE_ERROR)
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
@@ -527,6 +530,12 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     }
     else
         awesomeconf->keys = NULL;
+
+    if(defconfig)
+    {
+        cfg_print(cfg, defconfig);
+        fclose(defconfig);
+    }
 
     /* Free! Like a river! */
     cfg_free(cfg);
