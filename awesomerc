@@ -35,7 +35,7 @@ screen 0
         # Focused foreground color (statusbar)
         focus_fg = "#ffffff"
     }
-    # Optionnal screen padding
+    # Optional screen padding
     #padding
     #{
     #    left = 10
