@@ -495,7 +495,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         }
 
         if(!awesomeconf->screens[screen].nlayouts)
-            eprint("awesome: fatal: no default layout available\n");
+            eprint("fatal: no default layout available\n");
 
         /* Tags */
         awesomeconf->screens[screen].ntags = cfg_size(cfg_tags, "tag");
@@ -519,7 +519,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         }
 	 
         if(!awesomeconf->screens[screen].ntags)
-            eprint("awesome: fatal: no tags found in configuration file\n");
+            eprint("fatal: no tags found in configuration file\n");
 
         /* select first tag by default */
         awesomeconf->screens[screen].tags[0].selected = True;

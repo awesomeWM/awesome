@@ -229,7 +229,7 @@ setup_screen(awesome_config *awesomeconf, int screen)
 static int __attribute__ ((noreturn))
 xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribute__ ((unused)))
 {
-    eprint("awesome: another window manager is already running\n");
+    eprint("another window manager is already running\n");
 }
 
 /** Quit awesome
@@ -302,17 +302,17 @@ main(int argc, char *argv[])
             if(a_strlen(argv[2]))
                 confpath = argv[2];
             else
-                eprint("awesome: -c require a file\n");
+                eprint("-c require a file\n");
         }
         else
-            eprint("usage: awesome [-v | -c configfile]\n");
+            eprint("options: [-v | -c configfile]\n");
     }
 
     /* Tag won't be printed otherwised */
     setlocale(LC_CTYPE, "");
 
     if(!(dpy = XOpenDisplay(NULL)))
-        eprint("awesome: cannot open display\n");
+        eprint("cannot open display\n");
 
     xfd = ConnectionNumber(dpy);
 
