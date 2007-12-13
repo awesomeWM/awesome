@@ -50,13 +50,13 @@ isvisible(Client * c, int screen, Tag * tags, int ntags)
 }
 
 void
-tag_client_with_current_selected(Client *c, awesome_config *awesomeconf, int screen)
+tag_client_with_current_selected(Client *c, VirtScreen *screen)
 {
     int i;
 
-    p_realloc(&c->tags, awesomeconf->screens[screen].ntags);
-    for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
-        c->tags[i] = awesomeconf->screens[screen].tags[i].selected;
+    p_realloc(&c->tags, screen->ntags);
+    for(i = 0; i < screen->ntags; i++)
+        c->tags[i] = screen->tags[i].selected;
 }
 
 /** Tag selected window with tag

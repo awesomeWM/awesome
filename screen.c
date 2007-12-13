@@ -187,7 +187,7 @@ move_client_to_screen(Client *c, awesome_config *awesomeconf, int new_screen, Bo
             awesomeconf->screens[old_screen].tags[i].client_sel = NULL;
 
     /* tag client with new screen tags */
-    tag_client_with_current_selected(c, awesomeconf, new_screen);
+    tag_client_with_current_selected(c, &awesomeconf->screens[new_screen]);
 
     c->screen = new_screen;
 

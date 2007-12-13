@@ -50,7 +50,6 @@
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
 
-
 static inline void
 cleanup_buttons(Button *buttons)
 {

@@ -601,7 +601,7 @@ tag_client_with_rules(Client *c, awesome_config *awesomeconf)
                     c->tags[i] = False;
 
             if(!matched)
-                tag_client_with_current_selected(c, awesomeconf, c->screen);
+                tag_client_with_current_selected(c, &awesomeconf->screens[c->screen]);
             break;
         }
 }
