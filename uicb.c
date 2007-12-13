@@ -106,18 +106,26 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
 
     len = strlen(cmd);
     p = strtok(cmd, " ");
-    if (!p)
+    if (!p){
+        warn("Ignoring malformed command\n");
         return -1;
+    }
     screen = atoi(cmd);
-    if(screen >= get_screen_count(awesomeconf->display) || screen < 0)
+    if(screen >= get_screen_count(awesomeconf->display) || screen < 0){
+        warn("Invalid screen specified: %i\n", screen);
         return -1;
+    }
 
     p = strtok(NULL, " ");
-    if (!p)
+    if (!p){
+        warn("Ignoring malformed command.\n");
         return -1;
+    }
     uicb = name_func_lookup(p, UicbList);
-    if (!uicb)
+    if (!uicb){
+        warn("Unknown UICB function: %s.\n", p);
         return -1;
+    }
 
     if (p+strlen(p) < cmd+len)
         arg = p + strlen(p) + 1;

@@ -50,6 +50,16 @@ eprint(const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
+void
+warn(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    fprintf(stderr, "awesome: ");
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+}
+
 double
 compute_new_value_from_arg(const char *arg, double current_value)
 {
