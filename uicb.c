@@ -95,46 +95,38 @@ parse_control(char *cmd, awesome_config *awesomeconf)
     return 0;
 }
 
+
 int
 run_uicb(char *cmd, awesome_config *awesomeconf)
 {
-    char *p, *uicb_name;
+    char *p;
     const char *arg;
-    int screen;
+    int screen, len;
     void (*uicb) (awesome_config *, int, const char *);
 
-    if(!a_strlen(cmd))
+    len = strlen(cmd);
+    p = strtok(cmd, " ");
+    if (!p)
         return -1;
-
-    if(!(p = strchr(cmd, ' ')))
-        return -1;
-
-    *p++ = '\0';
-
     screen = atoi(cmd);
     if(screen >= get_screen_count(awesomeconf->display) || screen < 0)
         return -1;
 
-    uicb_name = p;
-
-    if(!(p = strchr(p, ' ')))
-        arg = "";
-    else
-    {
-        *p++ = '\0';
-        arg = p;
-    }
-
-    if((p = strchr(arg, '\n')))
-        *p = '\0';
-
-    uicb = name_func_lookup(uicb_name, UicbList);
-
-    if(uicb)
-        uicb(awesomeconf, screen, arg);
-    else
+    p = strtok(NULL, " ");
+    if (!p)
+        return -1;
+    uicb = name_func_lookup(p, UicbList);
+    if (!uicb)
         return -1;
 
+    if (p+strlen(p) < cmd+len)
+        arg = p + strlen(p) + 1;
+    else
+        arg = NULL;
+
+    uicb(awesomeconf, screen, arg);
     return 0;
 }
+
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
