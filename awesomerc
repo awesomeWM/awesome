@@ -1,153 +1,36 @@
-# Configuration file for awesome
-
+# Minimal configuration file for awesome
 # First physical screen
 screen 0
 {
-    general
-    {
-        # Windows border size in pixel
-        border = 1
-        # Pixels number before collapsing window border and screen border
-        snap = 8
-        # Respect windows minimal geometry
-        resize_hints = true
-        # Opacity for unfocused windows (with xcompmgr)
-        opacity_unfocused = 100
-        # Should focus switching move pointer
-        focus_move_pointer = false
-        # Allow floating windows to be below others
-        allow_lower_floats = false
-        # Status bar font (Xft)
-        font = "fixed-12"
-    }
-    colors
-    {
-        # Normal border color
-        normal_border = "#111111"
-        # Normal background color (statusbar)
-        normal_bg = "#111111"
-        # Normal foreground color (statusbar)
-        normal_fg = "#eeeeee"
-        # Focused border color
-        focus_border = "#6666ff"
-        # Focused background color (statusbar)
-        focus_bg = "#6666ff"
-        # Focused foreground color (statusbar)
-        focus_fg = "#ffffff"
-    }
-    # Optional screen padding
-    #padding
-    #{
-    #    left = 10
-    #    right = 0
-    #    top = 0
-    #    bottom = 10
-    #}
-    statusbar
-    {
-        # Statusbar position
-        # top, bottom, left, right, off
-        position = "top"
-    }
     tags
     {
         # Tag name
-        tag one
-        {
-            # Tag default layout
-            # tile, tileleft, max, floating
-            layout = "tile"
-        }
-        tag two
-        {
-            # Number of master windows on this tag
-            nmaster = 2
-            layout = "tile"
-        }
-        tag three
-        {
-            ncol = 2
-            layout = "tile"
-        }
-        tag four
-        {
-            layout = "tile"
-        }
-        tag five
-        {
-            layout = "tile"
-        }
-        tag six
-        {
-            layout = "tile"
-        }
-        tag seven
-        {
-            layout = "tile"
-        }
-        tag eight
-        {
-            # Master width factor
-            # 0 < mwfact < 1
-            mwfact = 0.3
-            layout = "tile"
-        }
-        tag nine
-        {
-            layout = "floating"
-        }
+        tag one { }
+        tag two { }
+        tag three { }
+        tag four { }
+        tag five { }
+        tag six { }
+        tag seven { }
+        tag eight { }
+        tag nine { }
     }
     layouts
     {
-        # Available layout
-        layout tile
-        {
-            # Symbol drawn in statusbar for this layout
-            symbol = "[]="
-        }
-        layout tileleft
-        {
-            symbol = "=[]"
-        }
-        layout max
-        {
-            symbol = "[ ]"
-        }
-        layout floating
-        {
-            symbol = "><>"
-        }
+        layout tile { symbol = "[]=" }
+        layout tileleft { symbol = "=[]" }
+        layout max { symbol = "[ ]" }
+        layout floating { symbol = "><>" }
     }
 }
 
 rules
 {
     rule
-    {
-        # Programe name (regexp)
-        name = "Gimp"
-        # Program tags (regexp)
-        tags = "nine"
-        # Should we set this program to floating mode?
-        float = true
-        # Physical screen to map this windows to
-        screen = 0
-    }
-    rule
-    {
-        name = "MPlayer"
-        float = true
-    }
-    rule
-    {
-        name = "Acroread"
-        float = true
-    }
-    rule
-    {
-        name = "pinentry"
-        float = true
-    }
+    { name = "Gimp" float = true }
+    rule { name = "MPlayer" float = true }
+    rule { name = "Acroread" float = true }
+    rule { name = "pinentry" float = true }
 }
 
 # Mouse buttons bindings

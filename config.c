@@ -35,6 +35,7 @@
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "layouts/max.h"
+#include "defconfig.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 

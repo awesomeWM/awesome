@@ -37,13 +37,20 @@ awesome-client: ${OBJCLIENT}
 	@echo -e "\t(CC) ${OBJCLIENT} -o $@"
 	@${CC} -o $@ ${OBJCLIENT} ${CLIENTLDFLAGS}
 
-awesome: ${OBJ}
+defconfig.h: awesomerc
+	@echo generating defconfig.h from awesomerc
+	@echo "#define AWESOME_DEFAULT_CONFIG \\" > defconfig.h
+	@echo -n "\"" >> defconfig.h
+	@sed 's/$$/ \\/;s/"/\\"/g' awesomerc >> defconfig.h
+	@echo "\"" >> defconfig.h
+
+awesome: defconfig.h ${OBJ}
 	@echo -e "\t(CC) ${OBJ} -o $@"
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 clean:
 	@echo cleaning
-	@rm -f awesome awesome-client ${DOCS:.txt=} ${DOCS:.txt=.xml} ${OBJCLIENT} ${OBJ} awesome-${VERSION}.tar.gz
+	@rm -f awesome awesome-client defconfig.h ${DOCS:.txt=} ${DOCS:.txt=.xml} ${OBJCLIENT} ${OBJ} awesome-${VERSION}.tar.gz
 	@rm -rf doc
 
 dist: clean
