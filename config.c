@@ -428,7 +428,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
         if(!cfg_screen)
         {
-            warn("parsing configuration file failed, no screen section found");
+            warn("parsing configuration file failed, no screen section found\n");
             cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
             cfg_screen = cfg_getsec(cfg, "screen");
         }
