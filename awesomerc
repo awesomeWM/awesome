@@ -1,10 +1,7 @@
-# Minimal configuration file for awesome
-# First physical screen
 screen 0
 {
     tags
     {
-        # Tag name
         tag one { }
         tag two { }
         tag three { }
@@ -33,10 +30,8 @@ rules
     rule { name = "pinentry" float = true }
 }
 
-# Mouse buttons bindings
 mouse
 {
-    # For click on tag
     tag
     {
         button = "1"
@@ -69,7 +64,6 @@ mouse
         button = "5"
         command = "tag_viewprev"
     }
-    # For click on layout symbol
     layout
     {
         button = "1"
@@ -94,7 +88,6 @@ mouse
         command = "tag_setlayout"
         arg = "-1"
     }
-    # For click on root window
     root
     {
         button = "3"
@@ -111,7 +104,6 @@ mouse
         button = "5"
         command = "tag_viewprev"
     }
-    # For click on client windows
     client
     {
         modkey = {"Mod4"}
@@ -132,7 +124,6 @@ mouse
     }
 }
 
-# Keys bindings
 keys
 {
     key
