@@ -145,7 +145,7 @@ parse_mouse_bindings(cfg_t * cfg, const char *secname, Bool handle_arg)
         b->button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
         b->func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
         if(!b->func)
-            fprintf(stderr, "awesome: unknown command %s\n", cfg_getstr(cfgsectmp, "command"));
+            warn("unknown command %s\n", cfg_getstr(cfgsectmp, "command"));
         if(handle_arg)
             b->arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
         else
@@ -344,7 +344,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
         if(!cfg_screen)
         {
-            fprintf(stderr, "awesome: parsing configuration file failed, no screen section found");
+            warn("parsing configuration file failed, no screen section found");
             cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
             cfg_screen = cfg_getsec(cfg, "screen");
         }
@@ -403,7 +403,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             awesomeconf->screens[screen].layouts[i].arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
             if(!awesomeconf->screens[screen].layouts[i].arrange)
             {
-                fprintf(stderr, "awesome: unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
+                warn("unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
                 awesomeconf->screens[screen].layouts[i].symbol = NULL;
                 continue;
             }

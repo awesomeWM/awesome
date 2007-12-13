@@ -52,7 +52,7 @@ uicb_spawn(awesome_config * awesomeconf,
                 close(ConnectionNumber(awesomeconf->display));
             setsid();
             execl(shell, shell, "-c", arg, (char *) NULL);
-            fprintf(stderr, "awesome: execl '%s -c %s'", shell, arg);
+            warn("execl '%s -c %s'", shell, arg);
             perror(" failed");
         }
         exit(EXIT_SUCCESS);

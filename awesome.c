@@ -264,9 +264,7 @@ xerror(Display * edpy, XErrorEvent * ee)
                                               && ee->error_code == BadAccess)
        || (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
         return 0;
-    fprintf(stderr, "awesome: fatal error: request code=%d, error code=%d\n",
-            ee->request_code, ee->error_code);
-
+    warn("fatal error: request code=%d, error code=%d\n", ee->request_code, ee->error_code);
     return xerrorxlib(edpy, ee);        /* may call exit */
 }
 
