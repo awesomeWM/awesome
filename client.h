@@ -25,8 +25,8 @@
 #include "common.h"
 
 Client * get_client_bywin(Client *, Window);
-inline void client_attach(Client **, Client *);
-inline void client_detach(Client **, Client *);
+void client_attach(Client **, Client *);
+void client_detach(Client **, Client *);
 void client_reattach_after(Client *, Client *);
 Bool loadprops(Client *, int );
 void client_ban(Client *);
@@ -35,7 +35,7 @@ void client_manage(Window, XWindowAttributes *, awesome_config *, int);
 void client_resize(Client *, int, int, int, int, awesome_config *, Bool, Bool);
 void client_unban(Client *);
 void client_unmanage(Client *, long, awesome_config *);
-inline void updatesizehints(Client *);
+void updatesizehints(Client *);
 void updatetitle(Client *);
 void saveprops(Client *, int);
 void tag_client_with_rules(Client *, awesome_config *);
