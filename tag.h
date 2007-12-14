@@ -31,6 +31,7 @@ void tag_client(TagClientLink **, Client *, Tag *);
 void untag_client(TagClientLink **, Client *, Tag *);
 Bool is_client_tagged(TagClientLink *, Client *, Tag *);
 void tag_client_with_current_selected(Client *, VirtScreen *);
+void tag_client_with_rules(Client *, awesome_config *);
 
 UICB_PROTO(uicb_client_tag);
 UICB_PROTO(uicb_client_togglefloating);

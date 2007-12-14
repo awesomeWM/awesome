@@ -37,7 +37,6 @@ void client_unmanage(Client *, long, awesome_config *);
 void client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *, VirtScreen *);
-void tag_client_with_rules(Client *, awesome_config *);
 
 UICB_PROTO(uicb_client_kill);
 UICB_PROTO(uicb_client_moveresize);

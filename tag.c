@@ -105,6 +105,35 @@ tag_client_with_current_selected(Client *c, VirtScreen *screen)
             untag_client(&screen->tclink, c, &screen->tags[i]);
 }
 
+void
+tag_client_with_rules(Client *c, awesome_config *awesomeconf)
+{
+    Rule *r;
+    Bool matched = False;
+    int i;
+
+    for(r = awesomeconf->rules; r; r = r->next)
+        if(client_match_rule(c, r))
+        {
+            c->isfloating = r->isfloating;
+
+            if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
+                move_client_to_screen(c, awesomeconf, r->screen, True);
+
+            for(i = 0; i < awesomeconf->screens[c->screen].ntags; i++)
+                if(is_tag_match_rules(&awesomeconf->screens[c->screen].tags[i], r))
+                {
+                    matched = True;
+                    tag_client(&awesomeconf->screens[c->screen].tclink, c,
+                               &awesomeconf->screens[c->screen].tags[i]);
+                }
+
+            if(!matched)
+                tag_client_with_current_selected(c, &awesomeconf->screens[c->screen]);
+            break;
+        }
+}
+
 /** Tag selected window with tag
  * \param arg Tag name
  * \ingroup ui_callback
