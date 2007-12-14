@@ -76,26 +76,7 @@ const NameFuncLink UicbList[] = {
     {NULL, NULL}
 };
 
-int
-parse_control(char *cmd, awesome_config *awesomeconf)
-{
-    char *p, *curcmd = cmd;
-
-    if(!a_strlen(cmd))
-        return -1;
-    
-    while((p = strchr(curcmd, '\n')))
-    {
-        *p = '\0';
-        run_uicb(curcmd, awesomeconf);
-        curcmd = p + 1;
-    }
-
-    return 0;
-}
-
-
-int
+static int
 run_uicb(char *cmd, awesome_config *awesomeconf)
 {
     char *p;
@@ -135,5 +116,22 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
     return 0;
 }
 
+int
+parse_control(char *cmd, awesome_config *awesomeconf)
+{
+    char *p, *curcmd = cmd;
+
+    if(!a_strlen(cmd))
+        return -1;
+    
+    while((p = strchr(curcmd, '\n')))
+    {
+        *p = '\0';
+        run_uicb(curcmd, awesomeconf);
+        curcmd = p + 1;
+    }
+
+    return 0;
+}
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
