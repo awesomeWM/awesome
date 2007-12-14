@@ -17,6 +17,8 @@ screen 0
         layout tile { symbol = "[]=" }
         layout tileleft { symbol = "=[]" }
         layout max { symbol = "[ ]" }
+        layout spiral { symbol = "(@)" }
+        layout dwindle { symbol = "[\\]" }
         layout floating { symbol = "><>" }
     }
 }

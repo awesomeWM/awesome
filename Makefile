@@ -41,7 +41,7 @@ defconfig.h: awesomerc
 	@echo generating defconfig.h from awesomerc
 	@echo "#define AWESOME_DEFAULT_CONFIG \\" > defconfig.h
 	@echo -n "\"" >> defconfig.h
-	@sed 's/$$/ \\/;s/"/\\"/g' awesomerc >> defconfig.h
+	@sed 's,\\,\\\\,g;s/$$/ \\/;s/"/\\"/g' awesomerc >> defconfig.h
 	@echo "\"" >> defconfig.h
 
 awesome: defconfig.h ${OBJ}

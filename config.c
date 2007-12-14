@@ -35,6 +35,7 @@
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "layouts/max.h"
+#include "layouts/fibonacci.h"
 #include "defconfig.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
@@ -88,6 +89,8 @@ static const NameFuncLink LayoutsList[] =
     {"tile", layout_tile},
     {"tileleft", layout_tileleft},
     {"max", layout_max},
+    {"spiral", layout_spiral},
+    {"dwindle", layout_dwindle},
     {"floating", layout_floating},
     {NULL, NULL}
 };

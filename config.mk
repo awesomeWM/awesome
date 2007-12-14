@@ -5,7 +5,7 @@ RELEASE = "Productivity Breaker"
 # Customize below to fit your system
 
 # additional layouts
-LAYOUTS = layouts/tile.c layouts/floating.c layouts/max.c
+LAYOUTS = layouts/tile.c layouts/floating.c layouts/max.c layouts/fibonacci.c
 
 # paths
 PREFIX = /usr/local
