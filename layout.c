@@ -58,7 +58,7 @@ arrange(awesome_config *awesomeconf, int screen)
 
     for(c = awesomeconf->clients; c; c = c->next)
     {
-        if(isvisible(c, &awesomeconf->screens[screen], screen))
+        if(client_isvisible(c, &awesomeconf->screens[screen], screen))
             client_unban(c);
         /* we don't touch other screens windows */
         else if(c->screen == screen)
@@ -90,9 +90,9 @@ uicb_client_focusnext(awesome_config * awesomeconf,
 
     if(!sel)
         return;
-    for(c = sel->next; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
+    for(c = sel->next; c && !client_isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
     if(!c)
-        for(c = awesomeconf->clients; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
+        for(c = awesomeconf->clients; c && !client_isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
     if(c)
     {
         focus(c, True, awesomeconf, screen);
@@ -109,11 +109,11 @@ uicb_client_focusprev(awesome_config *awesomeconf,
 
     if(!sel)
         return;
-    for(c = sel->prev; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->prev);
+    for(c = sel->prev; c && !client_isvisible(c, &awesomeconf->screens[screen], screen); c = c->prev);
     if(!c)
     {
         for(c = awesomeconf->clients; c && c->next; c = c->next);
-        for(; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->prev);
+        for(; c && !client_isvisible(c, &awesomeconf->screens[screen], screen); c = c->prev);
     }
     if(c)
     {
@@ -310,7 +310,7 @@ uicb_client_zoom(awesome_config *awesomeconf,
     Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(awesomeconf->clients == sel)
-         for(sel = sel->next; sel && !isvisible(sel, &awesomeconf->screens[screen], screen); sel = sel->next);
+         for(sel = sel->next; sel && !client_isvisible(sel, &awesomeconf->screens[screen], screen); sel = sel->next);
 
     if(!sel)
         return;

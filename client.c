@@ -195,8 +195,8 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
     Tag *tag = get_current_tag(awesomeconf->screens[screen]);
 
     /* if c is NULL or invisible, take next client in the stack */
-    if((!c && selscreen) || (c && !isvisible(c, &awesomeconf->screens[screen], screen)))
-        for(c = awesomeconf->clients; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
+    if((!c && selscreen) || (c && !client_isvisible(c, &awesomeconf->screens[screen], screen)))
+        for(c = awesomeconf->clients; c && !client_isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
 
     /* XXX unfocus other tags clients, this is a bit too much */
     for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
@@ -590,6 +590,24 @@ tag_client_with_rules(Client *c, awesome_config *awesomeconf)
         }
 }
 
+/** Returns True if a client is tagged
+ * with one of the tags
+ * \return True or False
+ */
+Bool
+client_isvisible(Client *c, VirtScreen *scr, int screen)
+{
+    int i;
+
+    if(c->screen != screen)
+        return False;
+
+    for(i = 0; i < scr->ntags; i++)
+        if(is_client_tagged(scr->tclink, c, &scr->tags[i]) && scr->tags[i].selected)
+            return True;
+    return False;
+}
+
 /** Set selected client transparency
  * \param awesomeconf awesome config
  * \param arg unused arg
@@ -669,7 +687,7 @@ uicb_client_swapnext(awesome_config *awesomeconf,
     if(!sel)
         return;
 
-    for(next = sel->next; next && !isvisible(next, &awesomeconf->screens[screen], screen); next = next->next);
+    for(next = sel->next; next && !client_isvisible(next, &awesomeconf->screens[screen], screen); next = next->next);
     if(next)
     {
         client_swap(&awesomeconf->clients, sel, next);
@@ -689,7 +707,7 @@ uicb_client_swapprev(awesome_config *awesomeconf,
     if(!sel)
         return;
 
-    for(prev = sel->prev; prev && !isvisible(prev, &awesomeconf->screens[screen], screen); prev = prev->prev);
+    for(prev = sel->prev; prev && !client_isvisible(prev, &awesomeconf->screens[screen], screen); prev = prev->prev);
     if(prev)
     {
         client_swap(&awesomeconf->clients, prev, sel);

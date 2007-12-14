@@ -93,24 +93,6 @@ is_client_tagged(TagClientLink *head, Client *c, Tag *t)
     return False;
 }
 
-/** Returns True if a client is tagged
- * with one of the tags
- * \return True or False
- */
-Bool
-isvisible(Client *c, VirtScreen *scr, int screen)
-{
-    int i;
-
-    if(c->screen != screen)
-        return False;
-
-    for(i = 0; i < scr->ntags; i++)
-        if(is_client_tagged(scr->tclink, c, &scr->tags[i]) && scr->tags[i].selected)
-            return True;
-    return False;
-}
-
 void
 tag_client_with_current_selected(Client *c, VirtScreen *screen)
 {

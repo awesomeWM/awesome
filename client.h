@@ -24,6 +24,7 @@
 
 #include "common.h"
 
+Bool client_isvisible(Client *, VirtScreen *, int);
 Client * get_client_bywin(Client *, Window);
 void client_attach(Client **, Client *);
 void client_detach(Client **, Client *);
