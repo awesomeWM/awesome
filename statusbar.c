@@ -52,157 +52,122 @@ statusbar_draw(awesome_config *awesomeconf, int screen)
 {
     int z, x = 0, y = 0, w;
     Client *sel = awesomeconf->focus->client;
-    Drawable drawable;
     int phys_screen = get_phys_screen(awesomeconf->display, screen);
+    Statusbar sbar;
     Tag *tag;
-
+    Layout *layout;
+    
+    sbar = awesomeconf->screens[screen].statusbar;
+    DrawCtx *ctx = draw_get_context(awesomeconf->display, phys_screen, sbar.width, sbar.height);
     /* don't waste our time */
-    if(awesomeconf->screens[screen].statusbar.position == BarOff)
+    if(sbar.position == BarOff)
         return;
-
-    drawable = XCreatePixmap(awesomeconf->display,
-                             RootWindow(awesomeconf->display, phys_screen),
-                             awesomeconf->screens[screen].statusbar.width,
-                             awesomeconf->screens[screen].statusbar.height,
-                             DefaultDepth(awesomeconf->display, phys_screen));
 
     for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
     {
-        w = textwidth(awesomeconf->display, awesomeconf->screens[screen].font, tag->name);
+        w = textwidth(ctx, awesomeconf->screens[screen].font, tag->name);
         if(tag->selected)
         {
-            drawtext(awesomeconf->display, phys_screen,
-                     x, y, w,
-                     awesomeconf->screens[screen].statusbar.height,
-                     drawable,
-                     awesomeconf->screens[screen].statusbar.width,
-                     awesomeconf->screens[screen].statusbar.height,
+            drawtext(ctx, x, y, w,
+                     sbar.height,
                      awesomeconf->screens[screen].font,
-                     tag->name, awesomeconf->screens[screen].colors_selected);
+                     tag->name,
+                     awesomeconf->screens[screen].colors_selected);
             if(isoccupied(awesomeconf->screens[screen].tclink, screen, awesomeconf->clients, tag))
-                drawrectangle(awesomeconf->display, phys_screen,
-                              x, y,
+                drawrectangle(ctx, x, y,
                               (awesomeconf->screens[screen].font->height + 2) / 4,
                               (awesomeconf->screens[screen].font->height + 2) / 4,
-                              drawable,
-                              awesomeconf->screens[screen].statusbar.width,
-                              awesomeconf->screens[screen].statusbar.height,
                               sel && is_client_tagged(awesomeconf->screens[screen].tclink, sel, tag),
                               awesomeconf->screens[screen].colors_selected[ColFG]);
         }
         else
         {
-            drawtext(awesomeconf->display, phys_screen,
-                     x, y, w,
-                     awesomeconf->screens[screen].statusbar.height,
-                     drawable,
-                     awesomeconf->screens[screen].statusbar.width,
-                     awesomeconf->screens[screen].statusbar.height,
+            drawtext(ctx, x, y, w,
+                     sbar.height,
                      awesomeconf->screens[screen].font,
-                     tag->name, awesomeconf->screens[screen].colors_normal);
+                     tag->name,
+                     awesomeconf->screens[screen].colors_normal);
             if(isoccupied(awesomeconf->screens[screen].tclink, screen, awesomeconf->clients, tag))
-                drawrectangle(awesomeconf->display, phys_screen,
-                              x, y,
+                drawrectangle(ctx, x, y,
                               (awesomeconf->screens[screen].font->height + 2) / 4,
                               (awesomeconf->screens[screen].font->height + 2) / 4,
-                              drawable,
-                              awesomeconf->screens[screen].statusbar.width,
-                              awesomeconf->screens[screen].statusbar.height,
                               sel && is_client_tagged(awesomeconf->screens[screen].tclink, sel, tag),
                               awesomeconf->screens[screen].colors_normal[ColFG]);
         }
         x += w;
     }
-    drawtext(awesomeconf->display, phys_screen,
-             x, y, awesomeconf->screens[screen].statusbar.txtlayoutwidth,
-             awesomeconf->screens[screen].statusbar.height,
-             drawable,
-             awesomeconf->screens[screen].statusbar.width,
-             awesomeconf->screens[screen].statusbar.height,
+
+    /* This is only here until we refactor this function. */
+    for(layout = awesomeconf->screens[screen].layouts; layout; layout = layout->next)
+        sbar.txtlayoutwidth = MAX(sbar.txtlayoutwidth,
+                                  textwidth(ctx, awesomeconf->screens[screen].font, layout->symbol));
+    drawtext(ctx, x, y,
+             sbar.txtlayoutwidth,
+             sbar.height,
              awesomeconf->screens[screen].font,
              get_current_layout(awesomeconf->screens[screen])->symbol,
              awesomeconf->screens[screen].colors_normal);
-    z = x + awesomeconf->screens[screen].statusbar.txtlayoutwidth;
-    w = textwidth(awesomeconf->display, awesomeconf->screens[screen].font, awesomeconf->screens[screen].statustext);
-    x = awesomeconf->screens[screen].statusbar.width - w;
+    z = x + sbar.txtlayoutwidth;
+    w = textwidth(ctx, awesomeconf->screens[screen].font, awesomeconf->screens[screen].statustext);
+    x = sbar.width - w;
     if(x < z)
     {
         x = z;
-        w = awesomeconf->screens[screen].statusbar.width - z;
+        w = sbar.width - z;
     }
-    drawtext(awesomeconf->display, phys_screen,
-             x, y, w,
-             awesomeconf->screens[screen].statusbar.height,
-             drawable,
-             awesomeconf->screens[screen].statusbar.width,
-             awesomeconf->screens[screen].statusbar.height,
+    drawtext(ctx, x, y, w,
+             sbar.height,
              awesomeconf->screens[screen].font,
-             awesomeconf->screens[screen].statustext, awesomeconf->screens[screen].colors_normal);
-    if((w = x - z) > awesomeconf->screens[screen].statusbar.height)
+             awesomeconf->screens[screen].statustext,
+             awesomeconf->screens[screen].colors_normal);
+    if((w = x - z) > sbar.height)
     {
         x = z;
         if(sel && sel->screen == screen)
         {
-            drawtext(awesomeconf->display, phys_screen,
-                     x, y, w,
-                     awesomeconf->screens[screen].statusbar.height,
-                     drawable,
-                     awesomeconf->screens[screen].statusbar.width,
-                     awesomeconf->screens[screen].statusbar.height,
+            drawtext(ctx, x, y, w,
+                     sbar.height,
                      awesomeconf->screens[screen].font,
-                     sel->name, awesomeconf->screens[screen].colors_selected);
+                     sel->name,
+                     awesomeconf->screens[screen].colors_selected);
             if(sel->isfloating)
-                drawcircle(awesomeconf->display, phys_screen,
-                           x, y,
+                drawcircle(ctx, x, y,
                            (awesomeconf->screens[screen].font->height + 2) / 4,
-                           drawable,
-                           awesomeconf->screens[screen].statusbar.width,
-                           awesomeconf->screens[screen].statusbar.height,
                            sel->ismax,
                            awesomeconf->screens[screen].colors_selected[ColFG]);
         }
         else
-            drawtext(awesomeconf->display, phys_screen,
-                     x, y, w,
-                     awesomeconf->screens[screen].statusbar.height,
-                     drawable,
-                     awesomeconf->screens[screen].statusbar.width,
-                     awesomeconf->screens[screen].statusbar.height,
+            drawtext(ctx, x, y, w,
+                     sbar.height,
                      awesomeconf->screens[screen].font,
                      NULL, awesomeconf->screens[screen].colors_normal);
     }
-    if(awesomeconf->screens[screen].statusbar.position == BarRight
-       || awesomeconf->screens[screen].statusbar.position == BarLeft)
+    if(sbar.position == BarRight || sbar.position == BarLeft)
     {
         Drawable d;
-        if(awesomeconf->screens[screen].statusbar.position == BarRight)
-            d = draw_rotate(awesomeconf->display, phys_screen, drawable,
-                            awesomeconf->screens[screen].statusbar.width, awesomeconf->screens[screen].statusbar.height,
-                            M_PI_2, awesomeconf->screens[screen].statusbar.height, 0);
+        if(sbar.position == BarRight)
+            d = draw_rotate(ctx, phys_screen, M_PI_2, sbar.height, 0);
         else
-            d = draw_rotate(awesomeconf->display, phys_screen, drawable,
-                            awesomeconf->screens[screen].statusbar.width, awesomeconf->screens[screen].statusbar.height,
-                            - M_PI_2, 0, awesomeconf->screens[screen].statusbar.width);
+            d = draw_rotate(ctx, phys_screen, - M_PI_2, 0, sbar.width);
         XCopyArea(awesomeconf->display, d,
-                  awesomeconf->screens[screen].statusbar.window,
+                  sbar.window,
                   DefaultGC(awesomeconf->display, phys_screen), 0, 0,
-                  awesomeconf->screens[screen].statusbar.height, awesomeconf->screens[screen].statusbar.width, 0, 0);
+                  sbar.height,
+                  sbar.width, 0, 0);
         XFreePixmap(awesomeconf->display, d);
     }
     else
-        XCopyArea(awesomeconf->display, drawable,
-                  awesomeconf->screens[screen].statusbar.window,
+        XCopyArea(awesomeconf->display, ctx->drawable,
+                  sbar.window,
                   DefaultGC(awesomeconf->display, phys_screen), 0, 0,
-                  awesomeconf->screens[screen].statusbar.width, awesomeconf->screens[screen].statusbar.height, 0, 0);
-    XFreePixmap(awesomeconf->display, drawable);
+                  sbar.width, sbar.height, 0, 0);
+    draw_free_context(ctx);
     XSync(awesomeconf->display, False);
 }
 
 void
-statusbar_init(Display *disp, int screen, Statusbar *statusbar,
-               Cursor cursor, XftFont *font, Layout *layouts, Padding *padding)
+statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Padding *padding)
 {
-    Layout *l;
     XSetWindowAttributes wa;
     int phys_screen = get_phys_screen(disp, screen);
     ScreenInfo *si = get_screen_info(disp, screen, NULL, padding);
@@ -241,10 +206,6 @@ statusbar_init(Display *disp, int screen, Statusbar *statusbar,
     XDefineCursor(disp, statusbar->window, cursor);
     statusbar_update_position(disp, *statusbar, padding);
     XMapRaised(disp, statusbar->window);
-
-    for(l = layouts ; l; l = l->next)
-        statusbar->txtlayoutwidth = MAX(statusbar->txtlayoutwidth,
-                                        (textwidth(disp, font, l->symbol)));
 }
 
 void

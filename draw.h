@@ -24,10 +24,25 @@
 
 #include "config.h"
 
-void drawtext(Display *, int, int, int, int, int, Drawable, int, int, XftFont *, const char *, XColor []);
-void drawrectangle(Display *, int, int, int, int, int, Drawable, int, int, Bool, XColor);
-void drawcircle(Display *, int, int, int, int, Drawable, int, int, Bool, XColor);
-Drawable draw_rotate(Display *, int, Drawable, int, int, double, int, int);
-unsigned short textwidth(Display *, XftFont *, char *);
+typedef struct DrawCtx DrawCtx;
+struct DrawCtx
+{
+    Display *display;
+    Drawable drawable;
+    Visual *visual;
+    int width;
+    int height;
+    int phys_screen;
+    int depth;
+};
+
+DrawCtx *draw_get_context(Display*, int, int, int);
+void draw_free_context(DrawCtx*);
+void drawtext(DrawCtx *, int, int, int, int, XftFont *, const char *, XColor []);
+void drawrectangle(DrawCtx *, int, int, int, int, Bool, XColor);
+void drawcircle(DrawCtx *, int, int, int, Bool, XColor);
+Drawable draw_rotate(DrawCtx *, int, double, int, int);
+unsigned short textwidth(DrawCtx *, XftFont *, char *);
+unsigned short textwidth_primitive(Display*, XftFont*, char*);
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

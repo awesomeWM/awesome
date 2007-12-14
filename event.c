@@ -73,7 +73,7 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
         {
             for(i = 1, tag = awesomeconf->screens[screen].tags; tag; tag = tag->next, i++)
             {
-                x += textwidth(e->xany.display, awesomeconf->screens[screen].font, tag->name);
+                x += textwidth_primitive(e->xany.display, awesomeconf->screens[screen].font, awesomeconf->screens[screen].tags[i].name);
                 if(((awesomeconf->screens[screen].statusbar.position == BarTop
                      || awesomeconf->screens[screen].statusbar.position == BarBot)
                    && ev->x < x)

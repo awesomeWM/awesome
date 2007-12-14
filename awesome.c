@@ -228,7 +228,7 @@ setup_screen(awesome_config *awesomeconf, int screen)
     setup(awesomeconf, screen);
     statusbar_init(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar,
                    awesomeconf->cursor[CurNormal], awesomeconf->screens[screen].font,
-                   awesomeconf->screens[screen].layouts, &awesomeconf->screens[screen].padding);
+                   &awesomeconf->screens[screen].padding);
 }
 
 /** Startup Error handler to check if another window manager
