@@ -108,7 +108,7 @@ updatetitle(Client *c)
         xgettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof(c->name));
 }
 
-/** Ban client and unmapped it
+/** Ban client and unmap it
  * \param c the client
  */
 void
@@ -658,7 +658,7 @@ uicb_client_settrans(awesome_config *awesomeconf,
 }
 
 
-/** Set borrder size
+/** Set border size
  * \param awesomeconf awesome config
  * \param arg X, +X or -X
  * \ingroup ui_callback

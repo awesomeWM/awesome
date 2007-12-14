@@ -105,8 +105,8 @@ static inline void *xmemdup(const void *src, ssize_t size)
 
 /** \brief \c NULL resistant strlen.
  *
- * Unlinke it's libc sibling, a_strlen returns a ssize_t, and supports its
- * argument beeing NULL.
+ * Unlike it's libc sibling, a_strlen returns a ssize_t, and supports its
+ * argument being NULL.
  *
  * \param[in] s the string.
  * \return the string length (or 0 if \c s is \c NULL).
@@ -118,8 +118,8 @@ static inline ssize_t a_strlen(const char *s)
 
 /** \brief \c NULL resistant strnlen.
  *
- * Unlinke it's GNU libc sibling, a_strnlen returns a ssize_t, and supports
- * its argument beeing NULL.
+ * Unlike it's GNU libc sibling, a_strnlen returns a ssize_t, and supports
+ * its argument being NULL.
  *
  * The a_strnlen() function returns the number of characters in the string
  * pointed to by \c s, not including the terminating \c \\0 character, but at
