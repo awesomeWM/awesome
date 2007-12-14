@@ -157,7 +157,7 @@ uicb_client_tag(awesome_config *awesomeconf,
         tag_client(&awesomeconf->screens[screen].tclink, sel,
                    &awesomeconf->screens[screen].tags[tag_id]);
 
-    saveprops(sel, &awesomeconf->screens[screen]);
+    client_saveprops(sel, &awesomeconf->screens[screen]);
     arrange(awesomeconf, screen);
 }
 
@@ -182,7 +182,7 @@ uicb_client_togglefloating(awesome_config * awesomeconf,
     else
         client_resize(sel, sel->x, sel->y, sel->w, sel->h, awesomeconf, True, True);
 
-    saveprops(sel, &awesomeconf->screens[screen]);
+    client_saveprops(sel, &awesomeconf->screens[screen]);
     arrange(awesomeconf, screen);
 }
 
@@ -226,7 +226,7 @@ uicb_client_toggletag(awesome_config *awesomeconf,
         for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
             tag_client(&awesomeconf->screens[screen].tclink, sel,&awesomeconf->screens[screen].tags[i]);
 
-    saveprops(sel, &awesomeconf->screens[screen]);
+    client_saveprops(sel, &awesomeconf->screens[screen]);
     arrange(awesomeconf, screen);
 }
 

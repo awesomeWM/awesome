@@ -358,12 +358,12 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
                 arrange(awesomeconf, c->screen);
             break;
           case XA_WM_NORMAL_HINTS:
-            updatesizehints(c);
+            client_updatesizehints(c);
             break;
         }
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(c->display, "_NET_WM_NAME", False))
         {
-            updatetitle(c);
+            client_updatetitle(c);
             if(c == get_current_tag(awesomeconf->screens[c->screen])->client_sel)
                 drawstatusbar(awesomeconf, c->screen);
         }

@@ -137,7 +137,7 @@ get_client_bywin(Client *list, Window w)
 }
 
 void
-updatetitle(Client *c)
+client_updatetitle(Client *c)
 {
     if(!xgettextprop(c->display, c->win, XInternAtom(c->display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
         xgettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof(c->name));
@@ -266,7 +266,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf, int 
     move_client_to_screen(c, awesomeconf, screen, True);
 
     /* update window title */
-    updatetitle(c);
+    client_updatetitle(c);
 
     /* loadprops or apply rules if no props */
     if(!loadprops(c, &awesomeconf->screens[screen]))
@@ -310,7 +310,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf, int 
     window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
 
     /* update sizehint */
-    updatesizehints(c);
+    client_updatesizehints(c);
 
     XSelectInput(c->display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
@@ -338,7 +338,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf, int 
         c->isfloating = (rettrans == Success) || c->isfixed;
 
     /* save new props */
-    saveprops(c, &awesomeconf->screens[c->screen]);
+    client_saveprops(c, &awesomeconf->screens[c->screen]);
 
     /* attach to the stack */
     client_attach(&awesomeconf->clients, c);
@@ -442,7 +442,7 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
 }
 
 void
-saveprops(Client * c, VirtScreen *scr)
+client_saveprops(Client * c, VirtScreen *scr)
 {
     int i;
     char *prop;
@@ -497,7 +497,7 @@ client_unmanage(Client *c, long state, awesome_config *awesomeconf)
 }
 
 void
-updatesizehints(Client *c)
+client_updatesizehints(Client *c)
 {
     long msize;
     XSizeHints size;
