@@ -9,7 +9,7 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-awesome [-v] [-c configuration file]
+awesome [-v | --version] [-c configuration file]
 
 DESCRIPTION
 -----------
@@ -39,7 +39,7 @@ awesome can draw a small border around windows to indicate the focus state.
 
 OPTIONS
 -------
--v::
+-v | --version::
     prints version information to standard output, then exits.
 -c::
     use an alternate configuration file instead of $HOME/.awesomerc.
