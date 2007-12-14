@@ -76,7 +76,7 @@ cleanup_screen(awesome_config *awesomeconf, int screen)
 
     for(t = awesomeconf->screens[screen].tags; t; t = tn)
     {
-        tn = t;
+        tn = t->next;
         p_delete(&t->name);
         p_delete(&t);
     }
@@ -114,6 +114,8 @@ cleanup(awesome_config *awesomeconf)
         rn = r->next;
         p_delete(&r->prop);
         p_delete(&r->tags);
+        p_delete(&r->propregex);
+        p_delete(&r->tagregex);
         p_delete(&r);
     }
 
