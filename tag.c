@@ -75,7 +75,11 @@ untag_client(TagClientLink **head, Client *c, Tag *t)
 
     for(tc = *head; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
+        {
             detach_tagclientlink(head, tc);
+            if(t->client_sel == c)
+                t->client_sel = NULL;
+        }
 }
 
 Bool

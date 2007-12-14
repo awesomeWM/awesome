@@ -484,12 +484,8 @@ client_unmanage(Client *c, long state, awesome_config *awesomeconf)
     if(get_current_tag(awesomeconf->screens[c->screen])->client_sel == c)
         focus(NULL, True, awesomeconf, c->screen);
     for(tag = 0; tag < awesomeconf->screens[c->screen].ntags; tag++)
-    {
-        if(awesomeconf->screens[c->screen].tags[tag].client_sel == c)
-            awesomeconf->screens[c->screen].tags[tag].client_sel = NULL;
         untag_client(&awesomeconf->screens[c->screen].tclink, c,
                      &awesomeconf->screens[c->screen].tags[tag]);
-    }
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     window_setstate(c->display, c->win, state);
     XSync(c->display, False);
