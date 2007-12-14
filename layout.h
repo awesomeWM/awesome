@@ -22,7 +22,7 @@
 #ifndef AWESOME_LAYOUT_H
 #define AWESOME_LAYOUT_H
 
-#include "client.h"
+#include "common.h"
 
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 

@@ -22,7 +22,7 @@
 #ifndef AWESOME_SCREEN_H
 #define AWESOME_SCREEN_H
 
-#include "client.h"
+#include "common.h"
 
 #include <X11/extensions/Xinerama.h>
 

@@ -45,6 +45,7 @@
 #include "statusbar.h"
 #include "uicb.h"
 #include "window.h"
+#include "client.h"
 #include "awesome-client.h"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
