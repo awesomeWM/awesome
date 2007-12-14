@@ -26,10 +26,12 @@
 
 void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *, Layout *, int, Padding *);
 void drawstatusbar(awesome_config *, int);
+int get_statusbar_position_from_str(const char *);
 void updatebarpos(Display *, Statusbar, Padding *);
 
-UICB_PROTO(uicb_togglebar);
-UICB_PROTO(uicb_setstatustext);
+UICB_PROTO(uicb_statusbar_toggle);
+UICB_PROTO(uicb_statusbar_set_position);
+UICB_PROTO(uicb_statusbar_set_text);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

@@ -151,7 +151,7 @@ keys
     {
         modkey = {"Mod4"}
         key = "b"
-        command = "togglebar"
+        command = "statusbar_toggle"
     }
     key
     {

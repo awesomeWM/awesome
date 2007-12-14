@@ -67,9 +67,9 @@ const NameFuncLink UicbList[] = {
     /* awesome.c */
     {"quit", uicb_quit},
     /* statusbar.c */
-    {"togglebar", uicb_togglebar},
-    /* config.c */
-    {"setstatustext", uicb_setstatustext},
+    {"statusbar_toggle", uicb_statusbar_toggle},
+    {"statusbar_set_position", uicb_statusbar_set_position},
+    {"statusbar_set_text", uicb_statusbar_set_text},
     /* mouse.c */
     {"client_movemouse", uicb_client_movemouse},
     {"client_resizemouse", uicb_client_resizemouse},

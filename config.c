@@ -463,20 +463,9 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->screens[screen].colors_selected[ColFG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "focus_fg"));
 
         /* Statusbar */
-        tmp = cfg_getstr(cfg_statusbar, "position");
-
-        if(tmp && !a_strncmp(tmp, "off", 6))
-            awesomeconf->screens[screen].statusbar.dposition = BarOff;
-        else if(tmp && !a_strncmp(tmp, "bottom", 6))
-            awesomeconf->screens[screen].statusbar.dposition = BarBot;
-        else if(tmp && !a_strncmp(tmp, "right", 5))
-            awesomeconf->screens[screen].statusbar.dposition = BarRight;
-        else if(tmp && !a_strncmp(tmp, "left", 4))
-            awesomeconf->screens[screen].statusbar.dposition = BarLeft;
-        else
-            awesomeconf->screens[screen].statusbar.dposition = BarTop;
-
-        awesomeconf->screens[screen].statusbar.position = awesomeconf->screens[screen].statusbar.dposition;
+        awesomeconf->screens[screen].statusbar.position =
+            awesomeconf->screens[screen].statusbar.dposition =
+            get_statusbar_position_from_str(cfg_getstr(cfg_statusbar, "position"));
 
         /* Layouts */
         awesomeconf->screens[screen].nlayouts = cfg_size(cfg_layouts, "layout");

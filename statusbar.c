@@ -276,8 +276,22 @@ updatebarpos(Display *disp, Statusbar statusbar, Padding *padding)
     while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
 }
 
+int
+get_statusbar_position_from_str(const char * pos)
+{
+    if(!a_strncmp(pos, "off", 3)) 
+        return BarOff;
+    else if(!a_strncmp(pos, "bottom", 6))
+        return BarBot;
+    else if(!a_strncmp(pos, "right", 5))
+        return BarRight;
+    else if(!a_strncmp(pos, "left", 4))
+        return BarLeft;
+    return BarTop;
+}
+
 void
-uicb_togglebar(awesome_config *awesomeconf,
+uicb_statusbar_toggle(awesome_config *awesomeconf,
                int screen,
                const char *arg __attribute__ ((unused)))
 {
@@ -289,9 +303,19 @@ uicb_togglebar(awesome_config *awesomeconf,
     arrange(awesomeconf, screen);
 }
 
+void
+uicb_statusbar_set_position(awesome_config *awesomeconf,
+                    int screen,
+                    const char *arg)
+{
+    awesomeconf->screens[screen].statusbar.dposition = 
+        awesomeconf->screens[screen].statusbar.position =
+            get_statusbar_position_from_str(arg);
+    updatebarpos(awesomeconf->display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
+}
 
 void
-uicb_setstatustext(awesome_config *awesomeconf, int screen, const char *arg)
+uicb_statusbar_set_text(awesome_config *awesomeconf, int screen, const char *arg)
 {
     if(!arg)
         return;
