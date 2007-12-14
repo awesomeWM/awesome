@@ -27,6 +27,7 @@
 #include "tag.h"
 #include "util.h"
 #include "xutil.h"
+#include "focus.h"
 #include "statusbar.h"
 #include "layouts/floating.h"
 
@@ -66,7 +67,8 @@ arrange(awesome_config *awesomeconf, int screen)
     }
 
     curtag->layout->arrange(awesomeconf, screen);
-    focus(curtag->client_sel, True, awesomeconf, screen);
+    focus(focus_get_latest_client_for_tag(awesomeconf->focus, awesomeconf->screens[screen].tclink, curtag),
+          True, awesomeconf, screen);
     restack(awesomeconf, screen);
 }
 
@@ -86,7 +88,7 @@ uicb_client_focusnext(awesome_config * awesomeconf,
                       int screen,
                       const char *arg __attribute__ ((unused)))
 {
-    Client *c, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *c, *sel = awesomeconf->focus->client;
 
     if(!sel)
         return;
@@ -105,7 +107,7 @@ uicb_client_focusprev(awesome_config *awesomeconf,
                       int screen,
                       const char *arg __attribute__ ((unused)))
 {
-    Client *c, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *c, *sel = awesomeconf->focus->client;
 
     if(!sel)
         return;
@@ -149,7 +151,7 @@ loadawesomeprops(awesome_config *awesomeconf, int screen)
 void
 restack(awesome_config *awesomeconf, int screen)
 {
-    Client *c, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *c, *sel = awesomeconf->focus->client;
     XEvent ev;
     XWindowChanges wc;
 
@@ -235,7 +237,7 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
         if(tag->selected)
             tag->layout = l;
 
-    if(get_current_tag(awesomeconf->screens[screen])->client_sel)
+    if(awesomeconf->focus->client)
         arrange(awesomeconf, screen);
     else
         statusbar_draw(awesomeconf, screen);
@@ -246,7 +248,7 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
 static void
 maximize(int x, int y, int w, int h, awesome_config *awesomeconf, int screen)
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
 
     if(!sel)
         return;
@@ -284,7 +286,7 @@ uicb_client_toggleverticalmax(awesome_config *awesomeconf,
                               int screen,
                               const char *arg __attribute__ ((unused)))
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
     ScreenInfo *si = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 
     if(sel)
@@ -302,7 +304,7 @@ uicb_client_togglehorizontalmax(awesome_config *awesomeconf,
                                 int screen,
                                 const char *arg __attribute__ ((unused)))
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
     ScreenInfo *si = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 
     if(sel)
@@ -319,7 +321,7 @@ uicb_client_zoom(awesome_config *awesomeconf,
                  int screen,
                  const char *arg __attribute__ ((unused)))
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
 
     if(awesomeconf->clients == sel)
          for(sel = sel->next; sel && !client_isvisible(sel, &awesomeconf->screens[screen], screen); sel = sel->next);

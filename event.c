@@ -365,7 +365,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(c->display, "_NET_WM_NAME", False))
         {
             client_updatetitle(c);
-            if(c == get_current_tag(awesomeconf->screens[c->screen])->client_sel)
+            if(c == awesomeconf->focus->client)
                 statusbar_draw(awesomeconf, c->screen);
         }
     }

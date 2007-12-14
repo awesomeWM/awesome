@@ -46,6 +46,7 @@
 #include "uicb.h"
 #include "window.h"
 #include "client.h"
+#include "focus.h"
 #include "awesome-client.h"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
@@ -339,6 +340,7 @@ main(int argc, char *argv[])
     /* allocate stuff */
     awesomeconf = p_new(awesome_config, 1);
     awesomeconf->screens = p_new(VirtScreen, get_screen_count(dpy));
+    focus_add_client(&awesomeconf->focus, NULL);
     /* store display */
     awesomeconf->display = dpy;
     parse_config(confpath, awesomeconf);

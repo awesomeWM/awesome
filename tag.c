@@ -75,11 +75,7 @@ untag_client(TagClientLink **head, Client *c, Tag *t)
 
     for(tc = *head; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
-        {
             detach_tagclientlink(head, tc);
-            if(t->client_sel == c)
-                t->client_sel = NULL;
-        }
 }
 
 Bool
@@ -144,7 +140,7 @@ uicb_client_tag(awesome_config *awesomeconf,
 {
     int tag_id = -1;
     Tag *tag, *target_tag;
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
 
     if(!sel)
         return;
@@ -181,8 +177,8 @@ uicb_client_togglefloating(awesome_config * awesomeconf,
                            int screen,
                     const char *arg __attribute__ ((unused)))
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
-
+    Client *sel = awesomeconf->focus->client;
+    
     if(!sel)
         return;
 
@@ -206,7 +202,7 @@ uicb_client_toggletag(awesome_config *awesomeconf,
                       int screen,
                       const char *arg)
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
     int i;
     Tag *tag, *target_tag;
 

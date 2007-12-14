@@ -132,6 +132,13 @@ struct Client
     int phys_screen;
 };
 
+typedef struct FocusList FocusList;
+struct FocusList
+{
+    Client *client;
+    FocusList *prev;
+};
+
 /** Tag type */
 typedef struct Tag Tag;
 struct Tag
@@ -144,8 +151,6 @@ struct Tag
     Bool was_selected;
     /** Current tag layout */
     Layout *layout;
-    /** Selected client on this tag */
-    Client *client_sel;
     /** Master width factor */
     double mwfact;
     /** Number of master windows */
@@ -243,6 +248,8 @@ struct awesome_config
     Client *clients;
     /** Path to config file */
     char *configpath;
+    /** Selected clients on this tag */
+    FocusList *focus;
 };
 
 void parse_config(const char *, awesome_config *);

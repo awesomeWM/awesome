@@ -32,6 +32,7 @@
 #include "xutil.h"
 #include "statusbar.h"
 #include "window.h"
+#include "focus.h"
 #include "layouts/floating.h"
 
 /** Load windows properties, restoring client's tag
@@ -195,24 +196,22 @@ client_detach(Client **head, Client *c)
 void
 focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
 {
-    Tag *tag, *curtag = get_current_tag(awesomeconf->screens[screen]);
+    /* unfocus current selected client */
+    if(awesomeconf->focus->client)
+    {
+        window_grabbuttons(awesomeconf->focus->client->display, awesomeconf->focus->client->phys_screen,
+                           awesomeconf->focus->client->win, False, True, awesomeconf->buttons.root,
+                           awesomeconf->buttons.client, awesomeconf->numlockmask);
+        XSetWindowBorder(awesomeconf->focus->client->display, awesomeconf->focus->client->win,
+                         awesomeconf->screens[screen].colors_normal[ColBorder].pixel);
+        window_settrans(awesomeconf->focus->client->display, awesomeconf->focus->client->win,
+                        awesomeconf->screens[screen].opacity_unfocused);
+    }
 
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !client_isvisible(c, &awesomeconf->screens[screen], screen)))
         for(c = awesomeconf->clients; c && !client_isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
 
-    /* XXX unfocus other tags clients, this is a bit too much */
-    for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
-        if(tag->client_sel)
-        {
-            window_grabbuttons(tag->client_sel->display, tag->client_sel->phys_screen,
-                               tag->client_sel->win, False, True, awesomeconf->buttons.root,
-                               awesomeconf->buttons.client, awesomeconf->numlockmask);
-            XSetWindowBorder(tag->client_sel->display, tag->client_sel->win,
-                             awesomeconf->screens[screen].colors_normal[ColBorder].pixel);
-            window_settrans(tag->client_sel->display, tag->client_sel->win,
-                            awesomeconf->screens[screen].opacity_unfocused);
-        }
     if(c)
     {
         XSetWindowBorder(awesomeconf->display, c->win, awesomeconf->screens[screen].colors_selected[ColBorder].pixel);
@@ -220,20 +219,29 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
                            True, True, awesomeconf->buttons.root,
                            awesomeconf->buttons.client, awesomeconf->numlockmask);
     }
+
     if(!selscreen)
         return;
-    curtag->client_sel = c;
+
+    /* save old sel in focus history */
+    focus_add_client(&awesomeconf->focus, c);
+
     statusbar_draw(awesomeconf, screen);
-    if(curtag->client_sel)
+
+    if(awesomeconf->focus->client)
     {
-        XSetInputFocus(curtag->client_sel->display, curtag->client_sel->win, RevertToPointerRoot, CurrentTime);
+        XSetInputFocus(awesomeconf->focus->client->display,
+                       awesomeconf->focus->client->win, RevertToPointerRoot, CurrentTime);
         for(c = awesomeconf->clients; c; c = c->next)
-            if(c != curtag->client_sel)
-                window_settrans(awesomeconf->display, curtag->client_sel->win, awesomeconf->screens[screen].opacity_unfocused);
-        window_settrans(awesomeconf->display, curtag->client_sel->win, -1);
+            if(c != awesomeconf->focus->client)
+                window_settrans(awesomeconf->display, awesomeconf->focus->client->win,
+                                awesomeconf->screens[screen].opacity_unfocused);
+        window_settrans(awesomeconf->display, awesomeconf->focus->client->win, -1);
     }
     else
-        XSetInputFocus(awesomeconf->display, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)), RevertToPointerRoot, CurrentTime);
+        XSetInputFocus(awesomeconf->display,
+                       RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)),
+                       RevertToPointerRoot, CurrentTime);
 }
 
 /** Manage a new client
@@ -486,8 +494,9 @@ client_unmanage(Client *c, long state, awesome_config *awesomeconf)
     XGrabServer(c->display);
     XConfigureWindow(c->display, c->win, CWBorderWidth, &wc);  /* restore border */
     client_detach(&awesomeconf->clients, c);
-    if(get_current_tag(awesomeconf->screens[c->screen])->client_sel == c)
+    if(awesomeconf->focus->client == c)
         focus(NULL, True, awesomeconf, c->screen);
+    focus_delete_client(&awesomeconf->focus, c);
     for(tag = awesomeconf->screens[c->screen].tags; tag; tag = tag->next)
         untag_client(&awesomeconf->screens[c->screen].tclink, c, tag);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
@@ -589,7 +598,7 @@ client_isvisible(Client *c, VirtScreen *scr, int screen)
  */
 void
 uicb_client_settrans(awesome_config *awesomeconf,
-                     int screen,
+                     int screen __attribute__ ((unused)),
                      const char *arg)
 {
     double delta = 100.0, current_opacity = 100.0;
@@ -599,7 +608,7 @@ uicb_client_settrans(awesome_config *awesomeconf,
     unsigned long n, left;
     unsigned int current_opacity_raw = 0;
     int set_prop = 0;
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
 
     if(!sel)
         return;
@@ -656,7 +665,7 @@ uicb_client_swapnext(awesome_config *awesomeconf,
                      int screen,
                      const char *arg __attribute__ ((unused)))
 {
-    Client *next, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *next, *sel = awesomeconf->focus->client;
 
     if(!sel)
         return;
@@ -676,7 +685,7 @@ uicb_client_swapprev(awesome_config *awesomeconf,
                      int screen,
                      const char *arg __attribute__ ((unused)))
 {
-    Client *prev, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *prev, *sel = awesomeconf->focus->client;
 
     if(!sel)
         return;
@@ -701,7 +710,7 @@ uicb_client_moveresize(awesome_config *awesomeconf,
     int mx, my, dx, dy, nmx, nmy;
     unsigned int dui;
     Window dummy;
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
 
     if(get_current_layout(awesomeconf->screens[screen])->arrange != layout_floating)
         if(!sel || !sel->isfloating || sel->isfixed || !arg)
@@ -735,11 +744,11 @@ uicb_client_moveresize(awesome_config *awesomeconf,
  */
 void
 uicb_client_kill(awesome_config *awesomeconf,
-                 int screen,
+                 int screen __attribute__ ((unused)),
                  const char *arg __attribute__ ((unused)))
 {
     XEvent ev;
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
 
     if(!sel)
         return;

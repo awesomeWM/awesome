@@ -51,7 +51,7 @@ void
 statusbar_draw(awesome_config *awesomeconf, int screen)
 {
     int z, x = 0, y = 0, w;
-    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *sel = awesomeconf->focus->client;
     Drawable drawable;
     int phys_screen = get_phys_screen(awesomeconf->display, screen);
     Tag *tag;

@@ -36,7 +36,7 @@ uicb_client_movemouse(awesome_config *awesomeconf, int screen, const char *arg _
     Window dummy;
     XEvent ev;
     ScreenInfo *si;
-    Client *c = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *c = awesomeconf->focus->client;
 
     if(!c)
         return;
@@ -96,7 +96,7 @@ uicb_client_resizemouse(awesome_config *awesomeconf, int screen, const char *arg
 {
     int ocx, ocy, nw, nh;
     XEvent ev;
-    Client *c = get_current_tag(awesomeconf->screens[screen])->client_sel;
+    Client *c = awesomeconf->focus->client;
 
     if(!c)
         return;
