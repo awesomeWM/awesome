@@ -28,6 +28,7 @@
 #include "layout.h"
 #include "tag.h"
 #include "rules.h"
+#include "util.h"
 #include "xutil.h"
 #include "statusbar.h"
 #include "window.h"

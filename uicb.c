@@ -20,6 +20,7 @@
  */
 
 #include "awesome.h"
+#include "util.h"
 #include "xutil.h"
 #include "uicb.h"
 #include "screen.h"

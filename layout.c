@@ -25,6 +25,7 @@
 #include "screen.h"
 #include "layout.h"
 #include "tag.h"
+#include "util.h"
 #include "xutil.h"
 #include "statusbar.h"
 #include "layouts/floating.h"
