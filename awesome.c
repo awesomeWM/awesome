@@ -68,14 +68,18 @@ void
 cleanup_screen(awesome_config *awesomeconf, int screen)
 {
     Layout *l, *ln;
-    int i;
+    Tag *t, *tn;
 
     XftFontClose(awesomeconf->display, awesomeconf->screens[screen].font);
     XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)));
     XDestroyWindow(awesomeconf->display, awesomeconf->screens[screen].statusbar.window);
 
-    for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
-        p_delete(&awesomeconf->screens[screen].tags[i].name);
+    for(t = awesomeconf->screens[screen].tags; t; t = tn)
+    {
+        tn = t;
+        p_delete(&t->name);
+        p_delete(&t);
+    }
 
     for(l = awesomeconf->screens[screen].layouts; l; l = ln)
     {
@@ -83,9 +87,6 @@ cleanup_screen(awesome_config *awesomeconf, int screen)
         p_delete(&l->symbol);
         p_delete(&l);
     }
-
-    p_delete(&awesomeconf->screens[screen].tags);
-    p_delete(&awesomeconf->screens[screen].layouts);
 }
 
 /** Cleanup everything on quit

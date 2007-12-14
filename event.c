@@ -65,21 +65,22 @@ handle_event_buttonpress(XEvent * e, awesome_config *awesomeconf)
     Client *c;
     Window wdummy;
     char arg[256];
+    Tag *tag;
     XButtonPressedEvent *ev = &e->xbutton;
 
     for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
         if(awesomeconf->screens[screen].statusbar.window == ev->window)
         {
-            for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
+            for(i = 1, tag = awesomeconf->screens[screen].tags; tag; tag = tag->next, i++)
             {
-                x += textwidth(e->xany.display, awesomeconf->screens[screen].font, awesomeconf->screens[screen].tags[i].name);
+                x += textwidth(e->xany.display, awesomeconf->screens[screen].font, tag->name);
                 if(((awesomeconf->screens[screen].statusbar.position == BarTop
                      || awesomeconf->screens[screen].statusbar.position == BarBot)
                    && ev->x < x)
                    || (awesomeconf->screens[screen].statusbar.position == BarRight && ev->y < x)
                    || (awesomeconf->screens[screen].statusbar.position == BarLeft && ev->y > awesomeconf->screens[screen].statusbar.width - x))
                 {
-                    snprintf(arg, sizeof(arg), "%d", i + 1);
+                    snprintf(arg, sizeof(arg), "%d", i);
                     handle_mouse_button_press(awesomeconf, screen, ev->button, ev->state,
                                               awesomeconf->buttons.tag, arg);
                     return;

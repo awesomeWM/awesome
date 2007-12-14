@@ -43,24 +43,28 @@
 static Bool
 loadprops(Client * c, VirtScreen *scr)
 {
-    int i;
+    int i, ntags = 0;
+    Tag *tag;
     char *prop;
     Bool result = False;
 
-    prop = p_new(char, scr->ntags + 2);
+    for(tag = scr->tags; tag; tag = tag->next)
+        ntags++;
 
-    if(xgettextprop(c->display, c->win, AWESOMEPROPS_ATOM(c->display), prop, scr->ntags + 2))
+    prop = p_new(char, ntags + 2);
+
+    if(xgettextprop(c->display, c->win, AWESOMEPROPS_ATOM(c->display), prop, ntags + 2))
     {
-        for(i = 0; i < scr->ntags && prop[i]; i++)
+        for(i = 0, tag = scr->tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
             {
-                tag_client(&scr->tclink, c, &scr->tags[i]);
+                tag_client(&scr->tclink, c, tag);
                 result = True;
             }
             else
-                untag_client(&scr->tclink, c, &scr->tags[i]);
+                untag_client(&scr->tclink, c, tag);
 
-        if(i <= scr->ntags && prop[i])
+        if(i <= ntags && prop[i])
             c->isfloating = prop[i] == '1';
     }
 
@@ -191,27 +195,23 @@ client_detach(Client **head, Client *c)
 void
 focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
 {
-    int i;
-    Tag *tag = get_current_tag(awesomeconf->screens[screen]);
+    Tag *tag, *curtag = get_current_tag(awesomeconf->screens[screen]);
 
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !client_isvisible(c, &awesomeconf->screens[screen], screen)))
         for(c = awesomeconf->clients; c && !client_isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
 
     /* XXX unfocus other tags clients, this is a bit too much */
-    for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
-        if(awesomeconf->screens[screen].tags[i].client_sel)
+    for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
+        if(tag->client_sel)
         {
-            window_grabbuttons(awesomeconf->screens[screen].tags[i].client_sel->display,
-                               awesomeconf->screens[screen].tags[i].client_sel->phys_screen,
-                               awesomeconf->screens[screen].tags[i].client_sel->win,
-                               False, True, awesomeconf->buttons.root,
+            window_grabbuttons(tag->client_sel->display, tag->client_sel->phys_screen,
+                               tag->client_sel->win, False, True, awesomeconf->buttons.root,
                                awesomeconf->buttons.client, awesomeconf->numlockmask);
-            XSetWindowBorder(awesomeconf->screens[screen].tags[i].client_sel->display,
-                             awesomeconf->screens[screen].tags[i].client_sel->win,
+            XSetWindowBorder(tag->client_sel->display, tag->client_sel->win,
                              awesomeconf->screens[screen].colors_normal[ColBorder].pixel);
-            window_settrans(awesomeconf->screens[screen].tags[i].client_sel->display,
-                            awesomeconf->screens[screen].tags[i].client_sel->win, awesomeconf->screens[screen].opacity_unfocused);
+            window_settrans(tag->client_sel->display, tag->client_sel->win,
+                            awesomeconf->screens[screen].opacity_unfocused);
         }
     if(c)
     {
@@ -222,15 +222,15 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
     }
     if(!selscreen)
         return;
-    tag->client_sel = c;
+    curtag->client_sel = c;
     drawstatusbar(awesomeconf, screen);
-    if(tag->client_sel)
+    if(curtag->client_sel)
     {
-        XSetInputFocus(tag->client_sel->display, tag->client_sel->win, RevertToPointerRoot, CurrentTime);
+        XSetInputFocus(curtag->client_sel->display, curtag->client_sel->win, RevertToPointerRoot, CurrentTime);
         for(c = awesomeconf->clients; c; c = c->next)
-            if(c != tag->client_sel)
-                window_settrans(awesomeconf->display, tag->client_sel->win, awesomeconf->screens[screen].opacity_unfocused);
-        window_settrans(awesomeconf->display, tag->client_sel->win, -1);
+            if(c != curtag->client_sel)
+                window_settrans(awesomeconf->display, curtag->client_sel->win, awesomeconf->screens[screen].opacity_unfocused);
+        window_settrans(awesomeconf->display, curtag->client_sel->win, -1);
     }
     else
         XSetInputFocus(awesomeconf->display, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)), RevertToPointerRoot, CurrentTime);
@@ -244,12 +244,12 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
 void
 client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf, int screen)
 {
-    int i;
     Client *c, *t = NULL;
     Window trans;
     Status rettrans;
     XWindowChanges wc;
     ScreenInfo *screen_info;
+    Tag *tag;
 
     c = p_new(Client, 1);
 
@@ -330,9 +330,9 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf, int 
     /* check for transient and set tags like its parent */
     if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)
        && (t = get_client_bywin(awesomeconf->clients, trans)))
-        for(i = 0; i < awesomeconf->screens[c->screen].ntags; i++)
-            if(is_client_tagged(awesomeconf->screens[c->screen].tclink, t, &awesomeconf->screens[c->screen].tags[i]))
-                tag_client(&awesomeconf->screens[c->screen].tclink, c, &awesomeconf->screens[c->screen].tags[i]);
+        for(tag = awesomeconf->screens[c->screen].tags; tag; tag = tag->next)
+            if(is_client_tagged(awesomeconf->screens[c->screen].tclink, t, tag))
+                tag_client(&awesomeconf->screens[c->screen].tclink, c, tag);
 
     /* should be floating if transsient or fixed) */
     if(!c->isfloating)
@@ -445,15 +445,19 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
 void
 client_saveprops(Client * c, VirtScreen *scr)
 {
-    int i;
+    int i = 0, ntags = 0;
     char *prop;
+    Tag *tag;
 
-    prop = p_new(char, scr->ntags + 2);
+    for(tag = scr->tags; tag; tag = tag->next)
+        ntags++;
 
-    for(i = 0; i < scr->ntags; i++)
-        prop[i] = is_client_tagged(scr->tclink, c, &scr->tags[i]) ? '1' : '0';
+    prop = p_new(char, ntags + 2);
 
-    if(i <= scr->ntags)
+    for(tag = scr->tags; tag; tag = tag->next, i++)
+        prop[i] = is_client_tagged(scr->tclink, c, tag) ? '1' : '0';
+
+    if(i <= ntags)
         prop[i] = c->isfloating ? '1' : '0';
 
     prop[++i] = '\0';
@@ -475,7 +479,7 @@ void
 client_unmanage(Client *c, long state, awesome_config *awesomeconf)
 {
     XWindowChanges wc;
-    int tag;
+    Tag *tag;
 
     wc.border_width = c->oldborder;
     /* The server grab construct avoids race conditions. */
@@ -484,9 +488,8 @@ client_unmanage(Client *c, long state, awesome_config *awesomeconf)
     client_detach(&awesomeconf->clients, c);
     if(get_current_tag(awesomeconf->screens[c->screen])->client_sel == c)
         focus(NULL, True, awesomeconf, c->screen);
-    for(tag = 0; tag < awesomeconf->screens[c->screen].ntags; tag++)
-        untag_client(&awesomeconf->screens[c->screen].tclink, c,
-                     &awesomeconf->screens[c->screen].tags[tag]);
+    for(tag = awesomeconf->screens[c->screen].tags; tag; tag = tag->next)
+        untag_client(&awesomeconf->screens[c->screen].tclink, c, tag);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     window_setstate(c->display, c->win, state);
     XSync(c->display, False);
@@ -568,13 +571,13 @@ client_updatesizehints(Client *c)
 Bool
 client_isvisible(Client *c, VirtScreen *scr, int screen)
 {
-    int i;
+    Tag *tag;
 
     if(c->screen != screen)
         return False;
 
-    for(i = 0; i < scr->ntags; i++)
-        if(is_client_tagged(scr->tclink, c, &scr->tags[i]) && scr->tags[i].selected)
+    for(tag = scr->tags; tag; tag = tag->next)
+        if(tag->selected && is_client_tagged(scr->tclink, c, tag))
             return True;
     return False;
 }

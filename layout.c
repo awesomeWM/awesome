@@ -37,11 +37,11 @@
 Tag *
 get_current_tag(VirtScreen screen)
 {
-    int i;
+    Tag *tag;
 
-    for(i = 0; i < screen.ntags; i++)
-        if(screen.tags[i].selected == True)
-            return &screen.tags[i];
+    for(tag = screen.tags; tag; tag = tag->next)
+        if(tag->selected)
+            return tag;
 
     return NULL;
 }
@@ -123,20 +123,25 @@ uicb_client_focusprev(awesome_config *awesomeconf,
 }
 
 void
-loadawesomeprops(awesome_config * awesomeconf, int screen)
+loadawesomeprops(awesome_config *awesomeconf, int screen)
 {
-    int i;
+    int i, ntags = 0;
     char *prop;
+    Tag *tag;
 
-    prop = p_new(char, awesomeconf->screens[screen].ntags + 1);
+    for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
+        ntags++;
 
-    if(xgettextprop(awesomeconf->display, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)),
-                    AWESOMEPROPS_ATOM(awesomeconf->display), prop, awesomeconf->screens[screen].ntags + 1))
-        for(i = 0; i < awesomeconf->screens[screen].ntags && prop[i]; i++)
+    prop = p_new(char, ntags + 1);
+
+    if(xgettextprop(awesomeconf->display,
+                    RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)),
+                    AWESOMEPROPS_ATOM(awesomeconf->display), prop, ntags + 1))
+        for(i = 0, tag = awesomeconf->screens[screen].tags; tag && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
-                awesomeconf->screens[screen].tags[i].selected = True;
+                tag->selected = True;
             else
-                awesomeconf->screens[screen].tags[i].selected = False;
+                tag->selected = False;
 
     p_delete(&prop);
 }
@@ -185,14 +190,21 @@ restack(awesome_config *awesomeconf, int screen)
 void
 saveawesomeprops(awesome_config *awesomeconf, int screen)
 {
-    int i;
+    int i, ntags = 0;
     char *prop;
+    Tag *tag;
 
-    prop = p_new(char, awesomeconf->screens[screen].ntags + 1);
-    for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
-        prop[i] = awesomeconf->screens[screen].tags[i].selected ? '1' : '0';
+    for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
+        ntags++;
+
+    prop = p_new(char, ntags + 1);
+
+    for(i = 0, tag = awesomeconf->screens[screen].tags; tag; tag = tag->next, i++)
+        prop[i] = tag->selected ? '1' : '0';
+
     prop[i] = '\0';
-    XChangeProperty(awesomeconf->display, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)),
+    XChangeProperty(awesomeconf->display,
+                    RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)),
                     AWESOMEPROPS_ATOM(awesomeconf->display), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
     p_delete(&prop);
@@ -204,6 +216,7 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
                    const char *arg)
 {
     Layout *l = awesomeconf->screens[screen].layouts;
+    Tag *tag;
     int i;
 
     if(arg)
@@ -218,9 +231,9 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
             l = awesomeconf->screens[screen].layouts;
     }
 
-    for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
-        if (awesomeconf->screens[screen].tags[i].selected)
-            awesomeconf->screens[screen].tags[i].layout = l;
+    for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
+        if(tag->selected)
+            tag->layout = l;
 
     if(get_current_tag(awesomeconf->screens[screen])->client_sel)
         arrange(awesomeconf, screen);

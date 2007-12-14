@@ -133,7 +133,8 @@ struct Client
 };
 
 /** Tag type */
-typedef struct
+typedef struct Tag Tag;
+struct Tag
 {
     /** Tag name */
     char *name;
@@ -151,7 +152,9 @@ typedef struct
     int nmaster;
     /** Number of columns in tile layout */
     int ncol;
-} Tag;
+    /** Next tag */
+    Tag *next;
+};
 
 /** TagClientLink type */
 typedef struct TagClientLink TagClientLink;
@@ -197,8 +200,6 @@ typedef struct
     XColor colors_selected[ColLast];
     /** Tag list */
     Tag *tags;
-    /** Number of tags in **tags */
-    int ntags;
     TagClientLink *tclink;
     /** Layout list */
     Layout *layouts;

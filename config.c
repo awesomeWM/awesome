@@ -383,13 +383,14 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     };
     cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
           *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp, *cfg_padding;
-    int i = 0, ret, screen;
-    unsigned int j = 0;
+    int ret, screen;
+    unsigned int i = 0;
     const char *tmp, *homedir;
     char *confpath, buf[2];
     ssize_t confpath_len;
     Rule *rule = NULL;
     Layout *layout = NULL;
+    Tag *tag = NULL;
     FILE *defconfig = NULL;
 
     if(confpatharg)
@@ -475,9 +476,9 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         if(cfg_size(cfg_layouts, "layout"))
         {
             awesomeconf->screens[screen].layouts = layout = p_new(Layout, 1);
-            for(j = 0; j < cfg_size(cfg_layouts, "layout"); j++)
+            for(i = 0; i < cfg_size(cfg_layouts, "layout"); i++)
             {
-                cfgsectmp = cfg_getnsec(cfg_layouts, "layout", j);
+                cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
                 layout->arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
                 if(!layout->arrange)
                 {
@@ -487,7 +488,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
                 }
                 layout->symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
 
-                if(j < cfg_size(cfg_layouts, "layout") - 1)
+                if(i < cfg_size(cfg_layouts, "layout") - 1)
                     layout = layout->next = p_new(Layout, 1);
                 else
                     layout->next = NULL;
@@ -497,27 +498,33 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             eprint("fatal: no default layout available\n");
 
         /* Tags */
-        awesomeconf->screens[screen].ntags = cfg_size(cfg_tags, "tag");
-        awesomeconf->screens[screen].tags = p_new(Tag, awesomeconf->screens[screen].ntags);
-        for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
+        if(cfg_size(cfg_tags, "tag"))
         {
-            cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
-            awesomeconf->screens[screen].tags[i].name = a_strdup(cfg_title(cfgsectmp));
-            awesomeconf->screens[screen].tags[i].selected = False;
-            awesomeconf->screens[screen].tags[i].was_selected = False;
-            tmp = cfg_getstr(cfgsectmp, "layout");
-            for(layout = awesomeconf->screens[screen].layouts;
-                layout && layout->arrange != name_func_lookup(tmp, LayoutsList); layout = layout->next);
-            if(!layout)
-                awesomeconf->screens[screen].tags[i].layout = awesomeconf->screens[screen].layouts;
-            else
-                awesomeconf->screens[screen].tags[i].layout = layout;
-            awesomeconf->screens[screen].tags[i].mwfact = cfg_getfloat(cfgsectmp, "mwfact");
-            awesomeconf->screens[screen].tags[i].nmaster = cfg_getint(cfgsectmp, "nmaster");
-            awesomeconf->screens[screen].tags[i].ncol = cfg_getint(cfgsectmp, "ncol");
+            awesomeconf->screens[screen].tags = tag = p_new(Tag, 1);
+            for(i = 0; i < cfg_size(cfg_tags, "tag"); i++)
+            {
+                cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
+                tag->name = a_strdup(cfg_title(cfgsectmp));
+                tag->selected = False;
+                tag->was_selected = False;
+                tmp = cfg_getstr(cfgsectmp, "layout");
+                for(layout = awesomeconf->screens[screen].layouts;
+                    layout && layout->arrange != name_func_lookup(tmp, LayoutsList); layout = layout->next);
+                if(!layout)
+                    tag->layout = awesomeconf->screens[screen].layouts;
+                else
+                    tag->layout = layout;
+                tag->mwfact = cfg_getfloat(cfgsectmp, "mwfact");
+                tag->nmaster = cfg_getint(cfgsectmp, "nmaster");
+                tag->ncol = cfg_getint(cfgsectmp, "ncol");
+
+                if(i < cfg_size(cfg_tags, "tag") - 1)
+                    tag = tag->next = p_new(Tag, 1);
+                else
+                    tag->next = NULL;
+            }
         }
-	 
-        if(!awesomeconf->screens[screen].ntags)
+        else
             eprint("fatal: no tags found in configuration file\n");
 
         /* select first tag by default */
@@ -540,9 +547,9 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     if(cfg_size(cfg_rules, "rule"))
     {
         awesomeconf->rules = rule = p_new(Rule, 1);
-        for(j = 0; j < cfg_size(cfg_rules, "rule"); j++)
+        for(i = 0; i < cfg_size(cfg_rules, "rule"); i++)
         {
-            cfgsectmp = cfg_getnsec(cfg_rules, "rule", j);
+            cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
             rule->prop = a_strdup(cfg_getstr(cfgsectmp, "name"));
             rule->tags = a_strdup(cfg_getstr(cfgsectmp, "tags"));
             if(!a_strlen(rule->tags))
@@ -552,7 +559,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             if(rule->screen >= get_screen_count(awesomeconf->display))
                 rule->screen = 0;
 
-            if(j < cfg_size(cfg_rules, "rule") - 1)
+            if(i < cfg_size(cfg_rules, "rule") - 1)
                 rule = rule->next = p_new(Rule, 1);
             else
                 rule->next = NULL;
