@@ -31,7 +31,7 @@ layout_max(awesome_config *awesomeconf, int screen)
     ScreenInfo *si = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 
     for(c = awesomeconf->clients; c; c = c->next)
-        if(IS_TILED(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags))
+        if(IS_TILED(c, &awesomeconf->screens[screen], screen))
             client_resize(c, si[screen].x_org, si[screen].y_org,
                    si[screen].width - 2 * c->border,
                    si[screen].height - 2 * c->border, awesomeconf, awesomeconf->screens[screen].resize_hints, False);

@@ -110,7 +110,7 @@ _tile(awesome_config *awesomeconf, int screen, const Bool right)
     screens_info = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 
     for(n = 0, c = awesomeconf->clients; c; c = c->next)
-        if(IS_TILED(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags))
+        if(IS_TILED(c, &awesomeconf->screens[screen], screen))
             n++;
 
     wah = screens_info[screen].height;
@@ -137,7 +137,7 @@ _tile(awesome_config *awesomeconf, int screen, const Bool right)
 
     for(i = 0, c = awesomeconf->clients; c; c = c->next)
     {
-        if(!IS_TILED(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags))
+        if(!IS_TILED(c, &awesomeconf->screens[screen], screen))
             continue;
 
         c->ismax = False;

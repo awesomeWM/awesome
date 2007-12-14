@@ -28,7 +28,6 @@ Client * get_client_bywin(Client *, Window);
 void client_attach(Client **, Client *);
 void client_detach(Client **, Client *);
 void client_reattach_after(Client *, Client *);
-Bool loadprops(Client *, int );
 void client_ban(Client *);
 void focus(Client *, Bool, awesome_config *, int);
 void client_manage(Window, XWindowAttributes *, awesome_config *, int);
@@ -37,7 +36,7 @@ void client_unban(Client *);
 void client_unmanage(Client *, long, awesome_config *);
 void updatesizehints(Client *);
 void updatetitle(Client *);
-void saveprops(Client *, int);
+void saveprops(Client *, VirtScreen *);
 void tag_client_with_rules(Client *, awesome_config *);
 
 UICB_PROTO(uicb_client_kill);

@@ -57,7 +57,7 @@ arrange(awesome_config *awesomeconf, int screen)
 
     for(c = awesomeconf->clients; c; c = c->next)
     {
-        if(isvisible(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags))
+        if(isvisible(c, &awesomeconf->screens[screen], screen))
             client_unban(c);
         /* we don't touch other screens windows */
         else if(c->screen == screen)
@@ -89,9 +89,9 @@ uicb_client_focusnext(awesome_config * awesomeconf,
 
     if(!sel)
         return;
-    for(c = sel->next; c && !isvisible(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); c = c->next);
+    for(c = sel->next; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
     if(!c)
-        for(c = awesomeconf->clients; c && !isvisible(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); c = c->next);
+        for(c = awesomeconf->clients; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
     if(c)
     {
         focus(c, True, awesomeconf, screen);
@@ -108,11 +108,11 @@ uicb_client_focusprev(awesome_config *awesomeconf,
 
     if(!sel)
         return;
-    for(c = sel->prev; c && !isvisible(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); c = c->prev);
+    for(c = sel->prev; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->prev);
     if(!c)
     {
         for(c = awesomeconf->clients; c && c->next; c = c->next);
-        for(; c && !isvisible(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); c = c->prev);
+        for(; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->prev);
     }
     if(c)
     {
@@ -168,7 +168,7 @@ restack(awesome_config *awesomeconf, int screen)
             }
             for(c = awesomeconf->clients; c; c = c->next)
             {
-                if(!IS_TILED(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags) || c == sel)
+                if(!IS_TILED(c, &awesomeconf->screens[screen], screen) || c == sel)
                     continue;
                 XConfigureWindow(awesomeconf->display, c->win, CWSibling | CWStackMode, &wc);
                 wc.sibling = c->win;
@@ -309,7 +309,7 @@ uicb_client_zoom(awesome_config *awesomeconf,
     Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(awesomeconf->clients == sel)
-         for(sel = sel->next; sel && !isvisible(sel, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); sel = sel->next);
+         for(sel = sel->next; sel && !isvisible(sel, &awesomeconf->screens[screen], screen); sel = sel->next);
 
     if(!sel)
         return;

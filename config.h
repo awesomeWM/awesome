@@ -116,8 +116,6 @@ struct Client
     Bool isfixed;
     /** True if the window is maximized */
     Bool ismax;
-    /** Tags for the client */
-    Bool *tags;
     /** Next client */
     Client *next;
     /** Previous client */
@@ -152,6 +150,15 @@ typedef struct
     /** Number of columns in tile layout */
     int ncol;
 } Tag;
+
+/** TagClientLink type */
+typedef struct TagClientLink TagClientLink;
+struct TagClientLink
+{
+    Tag *tag;
+    Client *client;
+    TagClientLink *next;
+};
 
 /** Padding type */
 typedef struct
@@ -190,6 +197,7 @@ typedef struct
     Tag *tags;
     /** Number of tags in **tags */
     int ntags;
+    TagClientLink *tclink;
     /** Layout list */
     Layout *layouts;
     int nlayouts;

@@ -28,23 +28,81 @@
 #include "util.h"
 #include "rules.h"
 
+
+static void
+detach_tagclientlink(TagClientLink **head, TagClientLink *tc)
+{
+    TagClientLink *tmp;
+
+    if(*head == tc)
+        *head = tc->next;
+    else
+    {
+        for(tmp = *head; tmp && tmp->next != tc; tmp = tmp->next);
+        tmp->next = tc->next;
+    }
+    
+    p_delete(&tc);
+}
+
+void
+tag_client(TagClientLink **head, Client *c, Tag *t)
+{
+    TagClientLink *tc, *new_tc;
+
+    /* don't tag twice */
+    if(is_client_tagged(*head, c, t))
+        return;
+
+    new_tc = p_new(TagClientLink, 1);
+
+    if(!*head)
+        *head = new_tc;
+    else
+    {
+        for(tc = *head; tc->next; tc = tc->next);
+        tc->next = new_tc;
+    }
+
+    new_tc->client = c;
+    new_tc->tag = t;
+}
+
+void
+untag_client(TagClientLink **head, Client *c, Tag *t)
+{
+    TagClientLink *tc;
+
+    for(tc = *head; tc; tc = tc->next)
+        if(tc->client == c && tc->tag == t)
+            detach_tagclientlink(head, tc);
+}
+
+Bool
+is_client_tagged(TagClientLink *head, Client *c, Tag *t)
+{
+    TagClientLink *tc;
+
+    for(tc = head; tc; tc = tc->next)
+        if(tc->client == c && tc->tag == t)
+            return True;
+    return False;
+}
+
 /** Returns True if a client is tagged
  * with one of the tags
- * \param c Client
- * \param tags tag to check
- * \param ntags number of tags in *tags
  * \return True or False
  */
 Bool
-isvisible(Client * c, int screen, Tag * tags, int ntags)
+isvisible(Client *c, VirtScreen *scr, int screen)
 {
     int i;
 
     if(c->screen != screen)
         return False;
 
-    for(i = 0; i < ntags; i++)
-        if(c->tags[i] && tags[i].selected)
+    for(i = 0; i < scr->ntags; i++)
+        if(is_client_tagged(scr->tclink, c, &scr->tags[i]) && scr->tags[i].selected)
             return True;
     return False;
 }
@@ -54,9 +112,11 @@ tag_client_with_current_selected(Client *c, VirtScreen *screen)
 {
     int i;
 
-    p_realloc(&c->tags, screen->ntags);
     for(i = 0; i < screen->ntags; i++)
-        c->tags[i] = screen->tags[i].selected;
+        if(screen->tags[i].selected)
+            tag_client(&screen->tclink, c, &screen->tags[i]);
+        else
+            untag_client(&screen->tclink, c, &screen->tags[i]);
 }
 
 /** Tag selected window with tag
@@ -81,13 +141,19 @@ uicb_client_tag(awesome_config *awesomeconf,
 	    return;
     }
 
-    for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
-        sel->tags[i] = arg == NULL;
-
+    if(arg)
+        for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
+            untag_client(&awesomeconf->screens[screen].tclink, sel,
+                         &awesomeconf->screens[screen].tags[i]);
+    else
+        for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
+            tag_client(&awesomeconf->screens[screen].tclink, sel,
+                       &awesomeconf->screens[screen].tags[i]);
     if(tag_id != -1)
-        sel->tags[tag_id] = True;
+        tag_client(&awesomeconf->screens[screen].tclink, sel,
+                   &awesomeconf->screens[screen].tags[tag_id]);
 
-    saveprops(sel, awesomeconf->screens[screen].ntags);
+    saveprops(sel, &awesomeconf->screens[screen]);
     arrange(awesomeconf, screen);
 }
 
@@ -112,7 +178,7 @@ uicb_client_togglefloating(awesome_config * awesomeconf,
     else
         client_resize(sel, sel->x, sel->y, sel->w, sel->h, awesomeconf, True, True);
 
-    saveprops(sel, awesomeconf->screens[screen].ntags);
+    saveprops(sel, &awesomeconf->screens[screen]);
     arrange(awesomeconf, screen);
 }
 
@@ -138,18 +204,25 @@ uicb_client_toggletag(awesome_config *awesomeconf,
         if(i < 0 || i >= awesomeconf->screens[screen].ntags)
             return;
 
-        sel->tags[i] = !sel->tags[i];
+        if(is_client_tagged(awesomeconf->screens[screen].tclink, sel,
+                            &awesomeconf->screens[screen].tags[i]))
+            untag_client(&awesomeconf->screens[screen].tclink, sel,&awesomeconf->screens[screen].tags[i]);
+        else
+            tag_client(&awesomeconf->screens[screen].tclink, sel,&awesomeconf->screens[screen].tags[i]);
 
         /* check that there's at least one tag selected for this client*/
-        for(j = 0; j < awesomeconf->screens[screen].ntags && !sel->tags[j]; j++);
-            if(j == awesomeconf->screens[screen].ntags)
-                sel->tags[i] = True;
+        for(j = 0; j < awesomeconf->screens[screen].ntags
+            && !is_client_tagged(awesomeconf->screens[screen].tclink, sel,
+                                 &awesomeconf->screens[screen].tags[j]); j++);
+
+        if(j == awesomeconf->screens[screen].ntags)
+            tag_client(&awesomeconf->screens[screen].tclink, sel,&awesomeconf->screens[screen].tags[i]);
     }
     else
         for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
-            sel->tags[i] = True;
+            tag_client(&awesomeconf->screens[screen].tclink, sel,&awesomeconf->screens[screen].tags[i]);
 
-    saveprops(sel, awesomeconf->screens[screen].ntags);
+    saveprops(sel, &awesomeconf->screens[screen]);
     arrange(awesomeconf, screen);
 }
 

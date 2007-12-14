@@ -33,18 +33,39 @@
 #include "window.h"
 #include "layouts/floating.h"
 
-/** Get a Client by its window
- * \param list Client list to look info
- * \param w Client window to find
- * \return client
+/** Load windows properties, restoring client's tag
+ * and floating state before awesome was restarted if any
+ * \todo this may bug if number of tags is != than before
+ * \param c Client ref
+ * \param ntags tags number
  */
-Client *
-get_client_bywin(Client *list, Window w)
+static Bool
+loadprops(Client * c, VirtScreen *scr)
 {
-    Client *c;
+    int i;
+    char *prop;
+    Bool result = False;
 
-    for(c = list; c && c->win != w; c = c->next);
-    return c;
+    prop = p_new(char, scr->ntags + 2);
+
+    if(xgettextprop(c->display, c->win, AWESOMEPROPS_ATOM(c->display), prop, scr->ntags + 2))
+    {
+        for(i = 0; i < scr->ntags && prop[i]; i++)
+            if(prop[i] == '1')
+            {
+                tag_client(&scr->tclink, c, &scr->tags[i]);
+                result = True;
+            }
+            else
+                untag_client(&scr->tclink, c, &scr->tags[i]);
+
+        if(i <= scr->ntags && prop[i])
+            c->isfloating = prop[i] == '1';
+    }
+
+    p_delete(&prop);
+
+    return result;
 }
 
 /** Check if client supports protocol WM_DELETE_WINDOW
@@ -99,6 +120,20 @@ client_swap(Client **head, Client *c1, Client *c2)
 
     if(*head == c1)
         *head = c2;
+}
+
+/** Get a Client by its window
+ * \param list Client list to look info
+ * \param w Client window to find
+ * \return client
+ */
+Client *
+get_client_bywin(Client *list, Window w)
+{
+    Client *c;
+
+    for(c = list; c && c->win != w; c = c->next);
+    return c;
 }
 
 void
@@ -180,8 +215,8 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
     Tag *tag = get_current_tag(awesomeconf->screens[screen]);
 
     /* if c is NULL or invisible, take next client in the stack */
-    if((!c && selscreen) || (c && !isvisible(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)))
-        for(c = awesomeconf->clients; c && !isvisible(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); c = c->next);
+    if((!c && selscreen) || (c && !isvisible(c, &awesomeconf->screens[screen], screen)))
+        for(c = awesomeconf->clients; c && !isvisible(c, &awesomeconf->screens[screen], screen); c = c->next);
 
     /* XXX unfocus other tags clients, this is a bit too much */
     for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
@@ -221,36 +256,6 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
         XSetInputFocus(awesomeconf->display, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)), RevertToPointerRoot, CurrentTime);
 }
 
-
-/** Load windows properties, restoring client's tag
- * and floating state before awesome was restarted if any
- * \todo this may bug if number of tags is != than before
- * \param c Client ref
- * \param ntags tags number
- */
-Bool
-loadprops(Client * c, int ntags)
-{
-    int i;
-    char *prop;
-    Bool result = False;
-
-    prop = p_new(char, ntags + 2);
-
-    if(xgettextprop(c->display, c->win, AWESOMEPROPS_ATOM(c->display), prop, ntags + 2))
-    {
-        for(i = 0; i < ntags && prop[i]; i++)
-            if((c->tags[i] = prop[i] == '1'))
-                result = True;
-        if(i <= ntags && prop[i])
-            c->isfloating = prop[i] == '1';
-    }
-
-    p_delete(&prop);
-
-    return result;
-}
-
 /** Manage a new client
  * \param w The window
  * \param wa Window attributes
@@ -285,7 +290,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf, int 
     updatetitle(c);
 
     /* loadprops or apply rules if no props */
-    if(!loadprops(c, awesomeconf->screens[screen].ntags))
+    if(!loadprops(c, &awesomeconf->screens[screen]))
         tag_client_with_rules(c, awesomeconf);
 
     screen_info = get_screen_info(awesomeconf->display, screen, NULL, NULL);
@@ -346,14 +351,15 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf, int 
     if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)
        && (t = get_client_bywin(awesomeconf->clients, trans)))
         for(i = 0; i < awesomeconf->screens[c->screen].ntags; i++)
-            c->tags[i] = t->tags[i];
+            if(is_client_tagged(awesomeconf->screens[c->screen].tclink, t, &awesomeconf->screens[c->screen].tags[i]))
+                tag_client(&awesomeconf->screens[c->screen].tclink, c, &awesomeconf->screens[c->screen].tags[i]);
 
     /* should be floating if transsient or fixed) */
     if(!c->isfloating)
         c->isfloating = (rettrans == Success) || c->isfixed;
 
     /* save new props */
-    saveprops(c, awesomeconf->screens[c->screen].ntags);
+    saveprops(c, &awesomeconf->screens[c->screen]);
 
     /* attach to the stack */
     client_attach(&awesomeconf->clients, c);
@@ -457,17 +463,17 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
 }
 
 void
-saveprops(Client * c, int ntags)
+saveprops(Client * c, VirtScreen *scr)
 {
     int i;
     char *prop;
 
-    prop = p_new(char, ntags + 2);
+    prop = p_new(char, scr->ntags + 2);
 
-    for(i = 0; i < ntags; i++)
-        prop[i] = c->tags[i] ? '1' : '0';
+    for(i = 0; i < scr->ntags; i++)
+        prop[i] = is_client_tagged(scr->tclink, c, &scr->tags[i]) ? '1' : '0';
 
-    if(i <= ntags)
+    if(i <= scr->ntags)
         prop[i] = c->isfloating ? '1' : '0';
 
     prop[++i] = '\0';
@@ -508,7 +514,6 @@ client_unmanage(Client *c, long state, awesome_config *awesomeconf)
     XUngrabServer(c->display);
     if(state != NormalState)
         arrange(awesomeconf, c->screen);
-    p_delete(&c->tags);
     p_delete(&c);
 }
 
@@ -595,10 +600,9 @@ tag_client_with_rules(Client *c, awesome_config *awesomeconf)
                 if(is_tag_match_rules(&awesomeconf->screens[c->screen].tags[i], r))
                 {
                     matched = True;
-                    c->tags[i] = True;
+                    tag_client(&awesomeconf->screens[c->screen].tclink, c,
+                               &awesomeconf->screens[c->screen].tags[i]);
                 }
-                else
-                    c->tags[i] = False;
 
             if(!matched)
                 tag_client_with_current_selected(c, &awesomeconf->screens[c->screen]);
@@ -685,7 +689,7 @@ uicb_client_swapnext(awesome_config *awesomeconf,
     if(!sel)
         return;
 
-    for(next = sel->next; next && !isvisible(next, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); next = next->next);
+    for(next = sel->next; next && !isvisible(next, &awesomeconf->screens[screen], screen); next = next->next);
     if(next)
     {
         client_swap(&awesomeconf->clients, sel, next);
@@ -705,7 +709,7 @@ uicb_client_swapprev(awesome_config *awesomeconf,
     if(!sel)
         return;
 
-    for(prev = sel->prev; prev && !isvisible(prev, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); prev = prev->prev);
+    for(prev = sel->prev; prev && !isvisible(prev, &awesomeconf->screens[screen], screen); prev = prev->prev);
     if(prev)
     {
         client_swap(&awesomeconf->clients, prev, sel);

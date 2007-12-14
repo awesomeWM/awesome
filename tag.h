@@ -25,9 +25,12 @@
 #include "client.h"
 
 /** Check if a client is tiled */
-#define IS_TILED(client, screen, tags, ntags)            (client && !client->isfloating && isvisible(client, screen, tags, ntags))
+#define IS_TILED(client, scr, screen)            (client && !client->isfloating && isvisible(client, scr, screen))
 
-Bool isvisible(Client *, int, Tag *, int);
+Bool isvisible(Client *, VirtScreen *, int);
+void tag_client(TagClientLink **, Client *, Tag *);
+void untag_client(TagClientLink **, Client *, Tag *);
+Bool is_client_tagged(TagClientLink *, Client *, Tag *);
 void tag_client_with_current_selected(Client *, VirtScreen *);
 
 UICB_PROTO(uicb_client_tag);

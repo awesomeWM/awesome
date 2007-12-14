@@ -27,6 +27,7 @@
 #include "draw.h"
 #include "screen.h"
 #include "util.h"
+#include "tag.h"
 #include "layouts/tile.h"
 
 /** Check if at least a client is tagged with tag number t and is on screen
@@ -36,12 +37,12 @@
  * \return True or False
  */
 static Bool
-isoccupied(Client *head, unsigned int t, int screen)
+isoccupied(TagClientLink *tc, int screen, Client *head, Tag *t)
 {
     Client *c;
 
     for(c = head; c; c = c->next)
-        if(c->tags[t] && c->screen == screen)
+        if(c->screen == screen && is_client_tagged(tc, c, t))
             return True;
     return False;
 }
@@ -78,7 +79,8 @@ drawstatusbar(awesome_config *awesomeconf, int screen)
                      awesomeconf->screens[screen].statusbar.height,
                      awesomeconf->screens[screen].font,
                      awesomeconf->screens[screen].tags[i].name, awesomeconf->screens[screen].colors_selected);
-            if(isoccupied(awesomeconf->clients, i, screen))
+            if(isoccupied(awesomeconf->screens[screen].tclink, screen, awesomeconf->clients,
+                          &awesomeconf->screens[screen].tags[i]))
                 drawrectangle(awesomeconf->display, phys_screen,
                               x, y,
                               (awesomeconf->screens[screen].font->height + 2) / 4,
@@ -86,7 +88,8 @@ drawstatusbar(awesome_config *awesomeconf, int screen)
                               drawable,
                               awesomeconf->screens[screen].statusbar.width,
                               awesomeconf->screens[screen].statusbar.height,
-                              sel && sel->tags[i],
+                              sel && is_client_tagged(awesomeconf->screens[screen].tclink, sel,
+                                                      &awesomeconf->screens[screen].tags[i]),
                               awesomeconf->screens[screen].colors_selected[ColFG]);
         }
         else
@@ -99,7 +102,8 @@ drawstatusbar(awesome_config *awesomeconf, int screen)
                      awesomeconf->screens[screen].statusbar.height,
                      awesomeconf->screens[screen].font,
                      awesomeconf->screens[screen].tags[i].name, awesomeconf->screens[screen].colors_normal);
-            if(isoccupied(awesomeconf->clients, i, screen))
+            if(isoccupied(awesomeconf->screens[screen].tclink, screen,
+                          awesomeconf->clients, &awesomeconf->screens[screen].tags[i]))
                 drawrectangle(awesomeconf->display, phys_screen,
                               x, y,
                               (awesomeconf->screens[screen].font->height + 2) / 4,
@@ -107,7 +111,8 @@ drawstatusbar(awesome_config *awesomeconf, int screen)
                               drawable,
                               awesomeconf->screens[screen].statusbar.width,
                               awesomeconf->screens[screen].statusbar.height,
-                              sel && sel->tags[i],
+                              sel && is_client_tagged(awesomeconf->screens[screen].tclink, sel,
+                                                      &awesomeconf->screens[screen].tags[i]),
                               awesomeconf->screens[screen].colors_normal[ColFG]);
         }
         x += w;
