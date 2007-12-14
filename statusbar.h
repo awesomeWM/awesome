@@ -24,7 +24,7 @@
 
 #include "common.h"
 
-void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *, Layout *, int, Padding *);
+void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *, Layout *, Padding *);
 void drawstatusbar(awesome_config *, int);
 int get_statusbar_position_from_str(const char *);
 void updatebarpos(Display *, Statusbar, Padding *);

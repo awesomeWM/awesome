@@ -203,10 +203,11 @@ drawstatusbar(awesome_config *awesomeconf, int screen)
 }
 
 void
-initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Layout *layouts, int nlayouts, Padding *padding)
+initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Layout *layouts, Padding *padding)
 {
+    Layout *l;
     XSetWindowAttributes wa;
-    int i, phys_screen = get_phys_screen(disp, screen);
+    int phys_screen = get_phys_screen(disp, screen);
     ScreenInfo *si = get_screen_info(disp, screen, NULL, padding);
 
     statusbar->height = font->height * 1.5;
@@ -244,9 +245,9 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
     updatebarpos(disp, *statusbar, padding);
     XMapRaised(disp, statusbar->window);
 
-    for(i = 0; i < nlayouts; i++)
+    for(l = layouts ; l; l = l->next)
         statusbar->txtlayoutwidth = MAX(statusbar->txtlayoutwidth,
-                                        (textwidth(disp, font, layouts[i].symbol)));
+                                        (textwidth(disp, font, l->symbol)));
 }
 
 void

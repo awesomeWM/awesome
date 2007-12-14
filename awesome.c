@@ -67,6 +67,7 @@ cleanup_buttons(Button *buttons)
 void
 cleanup_screen(awesome_config *awesomeconf, int screen)
 {
+    Layout *l, *ln;
     int i;
 
     XftFontClose(awesomeconf->display, awesomeconf->screens[screen].font);
@@ -76,8 +77,12 @@ cleanup_screen(awesome_config *awesomeconf, int screen)
     for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
         p_delete(&awesomeconf->screens[screen].tags[i].name);
 
-    for(i = 0; i < awesomeconf->screens[screen].nlayouts; i++)
-        p_delete(&awesomeconf->screens[screen].layouts[i].symbol);
+    for(l = awesomeconf->screens[screen].layouts; l; l = ln)
+    {
+        ln = l->next;
+        p_delete(&l->symbol);
+        p_delete(&l);
+    }
 
     p_delete(&awesomeconf->screens[screen].tags);
     p_delete(&awesomeconf->screens[screen].layouts);
@@ -219,7 +224,7 @@ setup_screen(awesome_config *awesomeconf, int screen)
     setup(awesomeconf, screen);
     initstatusbar(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar,
                   awesomeconf->cursor[CurNormal], awesomeconf->screens[screen].font,
-                  awesomeconf->screens[screen].layouts, awesomeconf->screens[screen].nlayouts, &awesomeconf->screens[screen].padding);
+                  awesomeconf->screens[screen].layouts, &awesomeconf->screens[screen].padding);
 }
 
 /** Startup Error handler to check if another window manager

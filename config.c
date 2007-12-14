@@ -383,12 +383,13 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     };
     cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
           *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp, *cfg_padding;
-    int i = 0, k = 0, ret, screen;
+    int i = 0, ret, screen;
     unsigned int j = 0;
     const char *tmp, *homedir;
     char *confpath, buf[2];
     ssize_t confpath_len;
     Rule *rule = NULL;
+    Layout *layout = NULL;
     FILE *defconfig = NULL;
 
     if(confpatharg)
@@ -471,22 +472,28 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             get_statusbar_position_from_str(cfg_getstr(cfg_statusbar, "position"));
 
         /* Layouts */
-        awesomeconf->screens[screen].nlayouts = cfg_size(cfg_layouts, "layout");
-        awesomeconf->screens[screen].layouts = p_new(Layout, awesomeconf->screens[screen].nlayouts);
-        for(i = 0; i < awesomeconf->screens[screen].nlayouts; i++)
+        if(cfg_size(cfg_layouts, "layout"))
         {
-            cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
-            awesomeconf->screens[screen].layouts[i].arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
-            if(!awesomeconf->screens[screen].layouts[i].arrange)
+            awesomeconf->screens[screen].layouts = layout = p_new(Layout, 1);
+            for(j = 0; j < cfg_size(cfg_layouts, "layout"); j++)
             {
-                warn("unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
-                awesomeconf->screens[screen].layouts[i].symbol = NULL;
-                continue;
-            }
-            awesomeconf->screens[screen].layouts[i].symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
-        }
+                cfgsectmp = cfg_getnsec(cfg_layouts, "layout", j);
+                layout->arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
+                if(!layout->arrange)
+                {
+                    warn("unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
+                    layout->symbol = NULL;
+                    continue;
+                }
+                layout->symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
 
-        if(!awesomeconf->screens[screen].nlayouts)
+                if(j < cfg_size(cfg_layouts, "layout") - 1)
+                    layout = layout->next = p_new(Layout, 1);
+                else
+                    layout->next = NULL;
+            }
+        }
+        else
             eprint("fatal: no default layout available\n");
 
         /* Tags */
@@ -499,12 +506,12 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             awesomeconf->screens[screen].tags[i].selected = False;
             awesomeconf->screens[screen].tags[i].was_selected = False;
             tmp = cfg_getstr(cfgsectmp, "layout");
-            for(k = 0; k < awesomeconf->screens[screen].nlayouts; k++)
-                if(awesomeconf->screens[screen].layouts[k].arrange == name_func_lookup(tmp, LayoutsList))
-                    break;
-            if(k == awesomeconf->screens[screen].nlayouts)
-                k = 0;
-            awesomeconf->screens[screen].tags[i].layout = &awesomeconf->screens[screen].layouts[k];
+            for(layout = awesomeconf->screens[screen].layouts;
+                layout && layout->arrange != name_func_lookup(tmp, LayoutsList); layout = layout->next);
+            if(!layout)
+                awesomeconf->screens[screen].tags[i].layout = awesomeconf->screens[screen].layouts;
+            else
+                awesomeconf->screens[screen].tags[i].layout = layout;
             awesomeconf->screens[screen].tags[i].mwfact = cfg_getfloat(cfgsectmp, "mwfact");
             awesomeconf->screens[screen].tags[i].nmaster = cfg_getint(cfgsectmp, "nmaster");
             awesomeconf->screens[screen].tags[i].ncol = cfg_getint(cfgsectmp, "ncol");
@@ -546,10 +553,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
                 rule->screen = 0;
 
             if(j < cfg_size(cfg_rules, "rule") - 1)
-            {
-                rule->next = p_new(Rule, 1);
-                rule = rule->next;
-            }
+                rule = rule->next = p_new(Rule, 1);
             else
                 rule->next = NULL;
         }

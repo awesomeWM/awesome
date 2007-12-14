@@ -50,11 +50,13 @@ struct Rule
 
 typedef struct awesome_config awesome_config;
 
-typedef struct
+typedef struct Layout Layout;
+struct Layout
 {
     char *symbol;
     void (*arrange) (awesome_config *, int);
-} Layout;
+    Layout *next;
+};
 
 typedef struct Key Key;
 struct Key
@@ -200,7 +202,6 @@ typedef struct
     TagClientLink *tclink;
     /** Layout list */
     Layout *layouts;
-    int nlayouts;
     /** Status bar */
     Statusbar statusbar;
     /** Padding */

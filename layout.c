@@ -203,25 +203,24 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
                    int screen,
                    const char *arg)
 {
-    int i, j;
+    Layout *l = awesomeconf->screens[screen].layouts;
+    int i;
 
     if(arg)
     {
-        /* compute current index */
-        for(i = 0; i < awesomeconf->screens[screen].nlayouts &&
-            &awesomeconf->screens[screen].layouts[i] != get_current_layout(awesomeconf->screens[screen]); i++);
-        i = compute_new_value_from_arg(arg, (double) i);
-        if(i >= awesomeconf->screens[screen].nlayouts)
+        for(i = 0; l && l != get_current_layout(awesomeconf->screens[screen]); i++, l = l->next);
+        if(!l)
             i = 0;
-        else if(i < 0)
-            i = awesomeconf->screens[screen].nlayouts - 1;
+        for(i = compute_new_value_from_arg(arg, (double) i),
+            l = awesomeconf->screens[screen].layouts; l && i > 0; i--)
+            l = l->next;
+        if(!l)
+            l = awesomeconf->screens[screen].layouts;
     }
-    else
-        i = 0;
 
-    for(j = 0; j < awesomeconf->screens[screen].ntags; j++)
-        if (awesomeconf->screens[screen].tags[j].selected)
-            awesomeconf->screens[screen].tags[j].layout = &awesomeconf->screens[screen].layouts[i];
+    for(i = 0; i < awesomeconf->screens[screen].ntags; i++)
+        if (awesomeconf->screens[screen].tags[i].selected)
+            awesomeconf->screens[screen].tags[i].layout = l;
 
     if(get_current_tag(awesomeconf->screens[screen])->client_sel)
         arrange(awesomeconf, screen);
