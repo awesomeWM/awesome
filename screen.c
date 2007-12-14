@@ -219,8 +219,8 @@ move_client_to_screen(Client *c, awesome_config *awesomeconf, int new_screen, Bo
     focus(c, True, awesomeconf, c->screen);
 
     /* redraw statusbar on all screens */
-    drawstatusbar(awesomeconf, old_screen);
-    drawstatusbar(awesomeconf, new_screen);
+    statusbar_draw(awesomeconf, old_screen);
+    statusbar_draw(awesomeconf, new_screen);
 }
 
 /** Move mouse pointer to x_org and y_xorg of specified screen

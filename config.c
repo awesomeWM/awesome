@@ -470,7 +470,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         /* Statusbar */
         awesomeconf->screens[screen].statusbar.position =
             awesomeconf->screens[screen].statusbar.dposition =
-            get_statusbar_position_from_str(cfg_getstr(cfg_statusbar, "position"));
+            statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
 
         /* Layouts */
         if(cfg_size(cfg_layouts, "layout"))

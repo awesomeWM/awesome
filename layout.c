@@ -153,7 +153,7 @@ restack(awesome_config *awesomeconf, int screen)
     XEvent ev;
     XWindowChanges wc;
 
-    drawstatusbar(awesomeconf, screen);
+    statusbar_draw(awesomeconf, screen);
     if(!sel)
         return;
     if(awesomeconf->screens[screen].allow_lower_floats)
@@ -238,7 +238,7 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
     if(get_current_tag(awesomeconf->screens[screen])->client_sel)
         arrange(awesomeconf, screen);
     else
-        drawstatusbar(awesomeconf, screen);
+        statusbar_draw(awesomeconf, screen);
 
     saveawesomeprops(awesomeconf, screen);
 }

@@ -160,8 +160,8 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
             if(old_screen != c->screen)
             {
                 move_client_to_screen(c, awesomeconf, c->screen, False);
-                drawstatusbar(awesomeconf, old_screen);
-                drawstatusbar(awesomeconf, c->screen);
+                statusbar_draw(awesomeconf, old_screen);
+                statusbar_draw(awesomeconf, c->screen);
             }
             tag_client_with_rules(c, awesomeconf);
             XMoveResizeWindow(e->xany.display, c->win, c->rx, c->ry, c->rw, c->rh);
@@ -209,7 +209,7 @@ handle_event_configurenotify(XEvent * e, awesome_config *awesomeconf)
                           awesomeconf->screens[screen].statusbar.width,
                           awesomeconf->screens[screen].statusbar.height);
 
-            updatebarpos(e->xany.display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
+            statusbar_update_position(e->xany.display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
             arrange(awesomeconf, screen);
         }
 }
@@ -257,7 +257,7 @@ handle_event_expose(XEvent * e, awesome_config *awesomeconf)
     if(!ev->count)
         for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
             if(awesomeconf->screens[screen].statusbar.window == ev->window)
-                drawstatusbar(awesomeconf, screen);
+                statusbar_draw(awesomeconf, screen);
 }
 
 void
@@ -366,7 +366,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         {
             client_updatetitle(c);
             if(c == get_current_tag(awesomeconf->screens[c->screen])->client_sel)
-                drawstatusbar(awesomeconf, c->screen);
+                statusbar_draw(awesomeconf, c->screen);
         }
     }
 }

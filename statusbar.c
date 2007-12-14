@@ -48,7 +48,7 @@ isoccupied(TagClientLink *tc, int screen, Client *head, Tag *t)
 }
 
 void
-drawstatusbar(awesome_config *awesomeconf, int screen)
+statusbar_draw(awesome_config *awesomeconf, int screen)
 {
     int z, x = 0, y = 0, w;
     Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
@@ -199,7 +199,8 @@ drawstatusbar(awesome_config *awesomeconf, int screen)
 }
 
 void
-initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Layout *layouts, Padding *padding)
+statusbar_init(Display *disp, int screen, Statusbar *statusbar,
+               Cursor cursor, XftFont *font, Layout *layouts, Padding *padding)
 {
     Layout *l;
     XSetWindowAttributes wa;
@@ -238,7 +239,7 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
                                           DefaultVisual(disp, phys_screen),
                                           CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, cursor);
-    updatebarpos(disp, *statusbar, padding);
+    statusbar_update_position(disp, *statusbar, padding);
     XMapRaised(disp, statusbar->window);
 
     for(l = layouts ; l; l = l->next)
@@ -247,7 +248,7 @@ initstatusbar(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, Xf
 }
 
 void
-updatebarpos(Display *disp, Statusbar statusbar, Padding *padding)
+statusbar_update_position(Display *disp, Statusbar statusbar, Padding *padding)
 {
     XEvent ev;
     ScreenInfo *si = get_screen_info(disp, statusbar.screen, NULL, padding);
@@ -274,7 +275,7 @@ updatebarpos(Display *disp, Statusbar statusbar, Padding *padding)
 }
 
 int
-get_statusbar_position_from_str(const char * pos)
+statusbar_get_position_from_str(const char * pos)
 {
     if(!a_strncmp(pos, "off", 3)) 
         return BarOff;
@@ -296,7 +297,7 @@ uicb_statusbar_toggle(awesome_config *awesomeconf,
         awesomeconf->screens[screen].statusbar.position = (awesomeconf->screens[screen].statusbar.dposition == BarOff) ? BarTop : awesomeconf->screens[screen].statusbar.dposition;
     else
         awesomeconf->screens[screen].statusbar.position = BarOff;
-    updatebarpos(awesomeconf->display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
+    statusbar_update_position(awesomeconf->display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
     arrange(awesomeconf, screen);
 }
 
@@ -307,8 +308,8 @@ uicb_statusbar_set_position(awesome_config *awesomeconf,
 {
     awesomeconf->screens[screen].statusbar.dposition = 
         awesomeconf->screens[screen].statusbar.position =
-            get_statusbar_position_from_str(arg);
-    updatebarpos(awesomeconf->display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
+            statusbar_get_position_from_str(arg);
+    statusbar_update_position(awesomeconf->display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 }
 
 void
@@ -319,6 +320,6 @@ uicb_statusbar_set_text(awesome_config *awesomeconf, int screen, const char *arg
     a_strncpy(awesomeconf->screens[screen].statustext,
               sizeof(awesomeconf->screens[screen].statustext), arg, a_strlen(arg));
 
-    drawstatusbar(awesomeconf, screen);
+    statusbar_draw(awesomeconf, screen);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

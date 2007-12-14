@@ -223,7 +223,7 @@ focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
     if(!selscreen)
         return;
     curtag->client_sel = c;
-    drawstatusbar(awesomeconf, screen);
+    statusbar_draw(awesomeconf, screen);
     if(curtag->client_sel)
     {
         XSetInputFocus(curtag->client_sel->display, curtag->client_sel->win, RevertToPointerRoot, CurrentTime);

@@ -24,10 +24,10 @@
 
 #include "common.h"
 
-void initstatusbar(Display *, int, Statusbar *, Cursor, XftFont *, Layout *, Padding *);
-void drawstatusbar(awesome_config *, int);
-int get_statusbar_position_from_str(const char *);
-void updatebarpos(Display *, Statusbar, Padding *);
+void statusbar_init(Display *, int, Statusbar *, Cursor, XftFont *, Layout *, Padding *);
+void statusbar_draw(awesome_config *, int);
+int statusbar_get_position_from_str(const char *);
+void statusbar_update_position(Display *, Statusbar, Padding *);
 
 UICB_PROTO(uicb_statusbar_toggle);
 UICB_PROTO(uicb_statusbar_set_position);
