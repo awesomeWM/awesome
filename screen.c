@@ -53,10 +53,10 @@ get_screen_info(Display *disp, int screen, Statusbar *statusbar, Padding *paddin
      /* make padding corrections */
     if(padding)
     {
-        si[screen].x_org+=padding->left;
-        si[screen].y_org+=padding->top;
-        si[screen].width-=padding->left+padding->right;
-        si[screen].height-=padding->top+padding->bottom;
+        si[screen].x_org += padding->left;
+        si[screen].y_org += padding->top;
+        si[screen].width -= padding->left + padding->right;
+        si[screen].height -= padding->top + padding->bottom;
     }
 
     if(statusbar)
