@@ -254,7 +254,5 @@ struct awesome_config
 
 void parse_config(const char *, awesome_config *);
 
-void uicb_reloadconfig(awesome_config *, const char *);
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

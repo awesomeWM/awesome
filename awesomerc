@@ -283,12 +283,6 @@ keys
         key = "q"
         command = "quit"
     }
-    key
-    {
-        modkey = {"Mod4", "Control"}
-        key = "r"
-        command = "reloadconfig"
-    }
 
     key
     {
