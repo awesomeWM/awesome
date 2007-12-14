@@ -69,7 +69,7 @@ uicb_client_tag(awesome_config *awesomeconf,
                 const char *arg)
 {
     int i, tag_id = -1;
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;
@@ -100,7 +100,7 @@ uicb_client_togglefloating(awesome_config * awesomeconf,
                            int screen,
                     const char *arg __attribute__ ((unused)))
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;
@@ -125,7 +125,7 @@ uicb_client_toggletag(awesome_config *awesomeconf,
                       int screen,
                       const char *arg)
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
     int i, j;
 
     if(!sel)

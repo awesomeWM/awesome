@@ -141,8 +141,7 @@ handle_event_configurerequest(XEvent * e, awesome_config *awesomeconf)
         if(ev->value_mask & CWBorderWidth)
             c->border = ev->border_width;
         if(c->isfixed || c->isfloating
-           || get_current_layout(awesomeconf->screens[c->screen].tags, 
-                                 awesomeconf->screens[c->screen].ntags)->arrange == layout_floating)
+           || get_current_layout(awesomeconf->screens[c->screen])->arrange == layout_floating)
         {
             if(ev->value_mask & CWX)
                 c->rx = c->x = ev->x;
@@ -237,8 +236,7 @@ handle_event_enternotify(XEvent * e, awesome_config *awesomeconf)
     {
         focus(c, ev->same_screen, awesomeconf, c->screen);
         if (c->isfloating
-                || get_current_layout(awesomeconf->screens[c->screen].tags,
-                                    awesomeconf->screens[c->screen].ntags)->arrange == layout_floating)
+                || get_current_layout(awesomeconf->screens[c->screen])->arrange == layout_floating)
             window_grabbuttons(c->display, c->phys_screen, c->win,
                                True, False, awesomeconf->buttons.root,
                                awesomeconf->buttons.client, awesomeconf->numlockmask);
@@ -366,7 +364,7 @@ handle_event_propertynotify(XEvent * e, awesome_config *awesomeconf)
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(c->display, "_NET_WM_NAME", False))
         {
             updatetitle(c);
-            if(c == get_current_tag(awesomeconf->screens[c->screen].tags, awesomeconf->screens[c->screen].ntags)->client_sel)
+            if(c == get_current_tag(awesomeconf->screens[c->screen])->client_sel)
                 drawstatusbar(awesomeconf, c->screen);
         }
     }

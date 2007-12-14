@@ -50,7 +50,7 @@ void
 drawstatusbar(awesome_config *awesomeconf, int screen)
 {
     int z, i, x = 0, y = 0, w;
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
     Drawable drawable;
     int phys_screen = get_phys_screen(awesomeconf->display, screen);
 
@@ -119,7 +119,7 @@ drawstatusbar(awesome_config *awesomeconf, int screen)
              awesomeconf->screens[screen].statusbar.width,
              awesomeconf->screens[screen].statusbar.height,
              awesomeconf->screens[screen].font,
-             get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->symbol,
+             get_current_layout(awesomeconf->screens[screen])->symbol,
              awesomeconf->screens[screen].colors_normal);
     z = x + awesomeconf->screens[screen].statusbar.txtlayoutwidth;
     w = textwidth(awesomeconf->display, awesomeconf->screens[screen].font, awesomeconf->screens[screen].statustext);

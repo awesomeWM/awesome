@@ -262,8 +262,7 @@ uicb_screen_focus(awesome_config *awesomeconf, int screen, const char *arg)
     if (new_screen > (numscreens - 1))
         new_screen = 0;
 
-    focus(get_current_tag(awesomeconf->screens[new_screen].tags,
-                          awesomeconf->screens[new_screen].ntags)->client_sel,
+    focus(get_current_tag(awesomeconf->screens[new_screen])->client_sel,
           True, awesomeconf, new_screen);
 
     move_mouse_pointer_to_screen(awesomeconf->display, new_screen);
@@ -280,7 +279,7 @@ uicb_client_movetoscreen(awesome_config * awesomeconf,
                          const char *arg)
 {
     int new_screen, prev_screen;
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel || !XineramaIsActive(awesomeconf->display))
         return;

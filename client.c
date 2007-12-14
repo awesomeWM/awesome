@@ -177,7 +177,7 @@ void
 focus(Client *c, Bool selscreen, awesome_config *awesomeconf, int screen)
 {
     int i;
-    Tag *tag = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags);
+    Tag *tag = get_current_tag(awesomeconf->screens[screen]);
 
     /* if c is NULL or invisible, take next client in the stack */
     if((!c && selscreen) || (c && !isvisible(c, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)))
@@ -436,7 +436,7 @@ client_resize(Client *c, int x, int y, int w, int h, awesome_config *awesomeconf
         c->h = wc.height = h;
         if(!volatile_coords
            && (c->isfloating
-               || get_current_layout(awesomeconf->screens[c->screen].tags, awesomeconf->screens[c->screen].ntags)->arrange == layout_floating))
+               || get_current_layout(awesomeconf->screens[c->screen])->arrange == layout_floating))
         {
             c->rx = c->x;
             c->ry = c->y;
@@ -496,7 +496,7 @@ client_unmanage(Client *c, long state, awesome_config *awesomeconf)
     XGrabServer(c->display);
     XConfigureWindow(c->display, c->win, CWBorderWidth, &wc);  /* restore border */
     client_detach(&awesomeconf->clients, c);
-    if(get_current_tag(awesomeconf->screens[c->screen].tags, awesomeconf->screens[c->screen].ntags)->client_sel == c)
+    if(get_current_tag(awesomeconf->screens[c->screen])->client_sel == c)
         focus(NULL, True, awesomeconf, c->screen);
     for(tag = 0; tag < awesomeconf->screens[c->screen].ntags; tag++)
         if(awesomeconf->screens[c->screen].tags[tag].client_sel == c)
@@ -623,7 +623,7 @@ uicb_client_settrans(awesome_config *awesomeconf,
     unsigned long n, left;
     unsigned int current_opacity_raw = 0;
     int set_prop = 0;
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;
@@ -680,7 +680,7 @@ uicb_client_swapnext(awesome_config *awesomeconf,
                      int screen,
                      const char *arg __attribute__ ((unused)))
 {
-    Client *next, *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *next, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;
@@ -700,7 +700,7 @@ uicb_client_swapprev(awesome_config *awesomeconf,
                      int screen,
                      const char *arg __attribute__ ((unused)))
 {
-    Client *prev, *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *prev, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;
@@ -725,9 +725,9 @@ uicb_client_moveresize(awesome_config *awesomeconf,
     int mx, my, dx, dy, nmx, nmy;
     unsigned int dui;
     Window dummy;
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
-    if(get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->arrange != layout_floating)
+    if(get_current_layout(awesomeconf->screens[screen])->arrange != layout_floating)
         if(!sel || !sel->isfloating || sel->isfixed || !arg)
             return;
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
@@ -763,7 +763,7 @@ uicb_client_kill(awesome_config *awesomeconf,
                  const char *arg __attribute__ ((unused)))
 {
     XEvent ev;
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;

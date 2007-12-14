@@ -36,12 +36,12 @@ uicb_client_movemouse(awesome_config *awesomeconf, int screen, const char *arg _
     Window dummy;
     XEvent ev;
     ScreenInfo *si;
-    Client *c = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *c = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!c)
         return;
 
-    if((get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->arrange != layout_floating)
+    if((get_current_layout(awesomeconf->screens[screen])->arrange != layout_floating)
         && !c->isfloating)
          uicb_client_togglefloating(awesomeconf, screen, "DUMMY");
      else
@@ -96,12 +96,12 @@ uicb_client_resizemouse(awesome_config *awesomeconf, int screen, const char *arg
 {
     int ocx, ocy, nw, nh;
     XEvent ev;
-    Client *c = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *c = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!c)
         return;
 
-    if((get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->arrange != layout_floating)
+    if((get_current_layout(awesomeconf->screens[screen])->arrange != layout_floating)
        && !c->isfloating)
         uicb_client_togglefloating(awesomeconf, screen, "DUMMY");
     else

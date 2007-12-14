@@ -33,7 +33,7 @@ uicb_tag_setnmaster(awesome_config *awesomeconf,
                     int screen,
                     const char * arg)
 {
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags);
+    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
     Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
@@ -50,7 +50,7 @@ uicb_tag_setncol(awesome_config *awesomeconf,
                  int screen,
                  const char * arg)
 {
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags);
+    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
     Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
@@ -68,7 +68,7 @@ uicb_tag_setmwfact(awesome_config * awesomeconf,
                    const char *arg)
 {
     char *newarg;
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags);
+    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
     Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
@@ -105,7 +105,7 @@ _tile(awesome_config *awesomeconf, int screen, const Bool right)
     int real_ncol = 1, win_by_col = 1, current_col = 0;
     ScreenInfo *screens_info = NULL;
     Client *c;
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags);
+    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
 
     screens_info = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 

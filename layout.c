@@ -30,18 +30,17 @@
 #include "layouts/floating.h"
 
 /** Find the index of the first currently selected tag
- * \param tags the array of tags to search
- * \param ntags number of elements in above array
+ * \param screen the screen to search
  * \return tag
  */
 Tag *
-get_current_tag(Tag *tags, int ntags)
+get_current_tag(VirtScreen screen)
 {
     int i;
 
-    for(i = 0; i < ntags; i++)
-        if(tags[i].selected == True)
-            return &tags[i];
+    for(i = 0; i < screen.ntags; i++)
+        if(screen.tags[i].selected == True)
+            return &screen.tags[i];
 
     return NULL;
 }
@@ -54,7 +53,7 @@ void
 arrange(awesome_config *awesomeconf, int screen)
 {
     Client *c;
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags);
+    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
 
     for(c = awesomeconf->clients; c; c = c->next)
     {
@@ -71,11 +70,11 @@ arrange(awesome_config *awesomeconf, int screen)
 }
 
 Layout *
-get_current_layout(Tag *tags, int ntags)
+get_current_layout(VirtScreen screen)
 {
     Tag *curtag;
 
-    if ((curtag = get_current_tag(tags, ntags)))
+    if ((curtag = get_current_tag(screen)))
         return curtag->layout;
 
     return NULL;
@@ -86,7 +85,7 @@ uicb_client_focusnext(awesome_config * awesomeconf,
                       int screen,
                       const char *arg __attribute__ ((unused)))
 {
-    Client *c, *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *c, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;
@@ -105,7 +104,7 @@ uicb_client_focusprev(awesome_config *awesomeconf,
                       int screen,
                       const char *arg __attribute__ ((unused)))
 {
-    Client *c, *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *c, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;
@@ -144,7 +143,7 @@ loadawesomeprops(awesome_config * awesomeconf, int screen)
 void
 restack(awesome_config *awesomeconf, int screen)
 {
-    Client *c, *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *c, *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
     XEvent ev;
     XWindowChanges wc;
 
@@ -156,9 +155,9 @@ restack(awesome_config *awesomeconf, int screen)
     else
     {
         if(sel->isfloating ||
-           get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->arrange == layout_floating)
+           get_current_layout(awesomeconf->screens[screen])->arrange == layout_floating)
             XRaiseWindow(sel->display, sel->win);
-        if(!(get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->arrange == layout_floating))
+        if(!(get_current_layout(awesomeconf->screens[screen])->arrange == layout_floating))
         {
             wc.stack_mode = Below;
             wc.sibling = awesomeconf->screens[screen].statusbar.window;
@@ -209,7 +208,7 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
     {
         /* compute current index */
         for(i = 0; i < awesomeconf->screens[screen].nlayouts &&
-            &awesomeconf->screens[screen].layouts[i] != get_current_layout(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); i++);
+            &awesomeconf->screens[screen].layouts[i] != get_current_layout(awesomeconf->screens[screen]); i++);
         i = compute_new_value_from_arg(arg, (double) i);
         if(i >= awesomeconf->screens[screen].nlayouts)
             i = 0;
@@ -223,7 +222,7 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
         if (awesomeconf->screens[screen].tags[j].selected)
             awesomeconf->screens[screen].tags[j].layout = &awesomeconf->screens[screen].layouts[i];
 
-    if(get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel)
+    if(get_current_tag(awesomeconf->screens[screen])->client_sel)
         arrange(awesomeconf, screen);
     else
         drawstatusbar(awesomeconf, screen);
@@ -234,7 +233,7 @@ uicb_tag_setlayout(awesome_config * awesomeconf,
 static void
 maximize(int x, int y, int w, int h, awesome_config *awesomeconf, int screen)
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(!sel)
         return;
@@ -272,7 +271,7 @@ uicb_client_toggleverticalmax(awesome_config *awesomeconf,
                               int screen,
                               const char *arg __attribute__ ((unused)))
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
     ScreenInfo *si = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 
     if(sel)
@@ -290,7 +289,7 @@ uicb_client_togglehorizontalmax(awesome_config *awesomeconf,
                                 int screen,
                                 const char *arg __attribute__ ((unused)))
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
     ScreenInfo *si = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
 
     if(sel)
@@ -307,7 +306,7 @@ uicb_client_zoom(awesome_config *awesomeconf,
                  int screen,
                  const char *arg __attribute__ ((unused)))
 {
-    Client *sel = get_current_tag(awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags)->client_sel;
+    Client *sel = get_current_tag(awesomeconf->screens[screen])->client_sel;
 
     if(awesomeconf->clients == sel)
          for(sel = sel->next; sel && !isvisible(sel, screen, awesomeconf->screens[screen].tags, awesomeconf->screens[screen].ntags); sel = sel->next);
