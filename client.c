@@ -41,7 +41,7 @@
  * \param ntags tags number
  */
 static Bool
-loadprops(Client * c, VirtScreen *scr)
+client_loadprops(Client * c, VirtScreen *scr)
 {
     int i, ntags = 0;
     Tag *tag;
@@ -270,7 +270,7 @@ client_manage(Window w, XWindowAttributes *wa, awesome_config *awesomeconf, int 
     client_updatetitle(c);
 
     /* loadprops or apply rules if no props */
-    if(!loadprops(c, &awesomeconf->screens[screen]))
+    if(!client_loadprops(c, &awesomeconf->screens[screen]))
         tag_client_with_rules(c, awesomeconf);
 
     screen_info = get_screen_info(awesomeconf->display, screen, NULL, NULL);
