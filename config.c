@@ -398,8 +398,9 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     Rule *rule = NULL;
     Layout *layout = NULL;
     Tag *tag = NULL;
-    Widget_ptr widget = NULL;
-    Widget_ptr (*widget_fct)(Statusbar *);
+    Widget *widget = NULL;
+    Widget *(*widget_new)(Statusbar *);
+    VirtScreen *virtscreen;
     FILE *defconfig = NULL;
 
     if(confpatharg)
@@ -432,8 +433,9 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     /* get the right screen section */
     for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
     {
-        a_strcpy(awesomeconf->screens[screen].statustext,
-                 sizeof(awesomeconf->screens[screen].statustext),
+        virtscreen = &awesomeconf->screens[screen]; 
+        a_strcpy(virtscreen->statustext,
+                 sizeof(virtscreen->statustext),
                  "awesome-" VERSION " (" RELEASE ")");
         snprintf(buf, sizeof(buf), "%d", screen);
         cfg_screen = cfg_gettsec(cfg, "screen", buf);
@@ -457,28 +459,39 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
 
 
         /* General section */
-        awesomeconf->screens[screen].borderpx = cfg_getint(cfg_general, "border");
-        awesomeconf->screens[screen].snap = cfg_getint(cfg_general, "snap");
-        awesomeconf->screens[screen].resize_hints = cfg_getbool(cfg_general, "resize_hints");
-        awesomeconf->screens[screen].opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
-        awesomeconf->screens[screen].focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
-        awesomeconf->screens[screen].allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
-        awesomeconf->screens[screen].font = XftFontOpenName(awesomeconf->display,
+        virtscreen->borderpx = cfg_getint(cfg_general, "border");
+        virtscreen->snap = cfg_getint(cfg_general, "snap");
+        virtscreen->resize_hints = cfg_getbool(cfg_general, "resize_hints");
+        virtscreen->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
+        virtscreen->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
+        virtscreen->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
+        virtscreen->font = XftFontOpenName(awesomeconf->display,
                                                             get_phys_screen(awesomeconf->display, screen),
                                                             cfg_getstr(cfg_general, "font"));
-        if(!awesomeconf->screens[screen].font)
+        if(!virtscreen->font)
             eprint("awesome: cannot init font\n");
         /* Colors */
-        awesomeconf->screens[screen].colors_normal[ColBorder] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "normal_border"));
-        awesomeconf->screens[screen].colors_normal[ColBG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "normal_bg"));
-        awesomeconf->screens[screen].colors_normal[ColFG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "normal_fg"));
-        awesomeconf->screens[screen].colors_selected[ColBorder] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "focus_border"));
-        awesomeconf->screens[screen].colors_selected[ColBG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "focus_bg"));
-        awesomeconf->screens[screen].colors_selected[ColFG] = initxcolor(awesomeconf->display, get_phys_screen(awesomeconf->display, screen), cfg_getstr(cfg_colors, "focus_fg"));
+        virtscreen->colors_normal[ColBorder] = initxcolor(awesomeconf->display,
+                                                         get_phys_screen(awesomeconf->display, screen),
+                                                         cfg_getstr(cfg_colors, "normal_border"));
+        virtscreen->colors_normal[ColBG] = initxcolor(awesomeconf->display,
+                                                     get_phys_screen(awesomeconf->display, screen),
+                                                     cfg_getstr(cfg_colors, "normal_bg"));
+        virtscreen->colors_normal[ColFG] = initxcolor(awesomeconf->display,
+                                                     get_phys_screen(awesomeconf->display, screen),
+                                                     cfg_getstr(cfg_colors, "normal_fg"));
+        virtscreen->colors_selected[ColBorder] = initxcolor(awesomeconf->display,
+                                                           get_phys_screen(awesomeconf->display, screen),
+                                                           cfg_getstr(cfg_colors, "focus_border"));
+        virtscreen->colors_selected[ColBG] = initxcolor(awesomeconf->display,
+                                                       get_phys_screen(awesomeconf->display, screen),
+                                                       cfg_getstr(cfg_colors, "focus_bg"));
+        virtscreen->colors_selected[ColFG] = initxcolor(awesomeconf->display,
+                                                       get_phys_screen(awesomeconf->display, screen),
+                                                       cfg_getstr(cfg_colors, "focus_fg"));
 
         /* Statusbar */
-        awesomeconf->screens[screen].statusbar.position =
-            awesomeconf->screens[screen].statusbar.dposition =
+        virtscreen->statusbar.position = virtscreen->statusbar.dposition =
             statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
 
         /* Statusbar widgets */
@@ -486,13 +499,13 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             for(i = 0; i < cfg_size(cfg_statusbar, "widget"); i++)
             {
                 cfgsectmp = cfg_getnsec(cfg_statusbar, "widget", i);
-                widget_fct = (Widget_ptr **) name_func_lookup(cfg_title(cfgsectmp), WidgetList);
+                widget_new = name_func_lookup(cfg_title(cfgsectmp), WidgetList);
                 if(!widget)
-                    awesomeconf->screens[screen].statusbar.widgets = widget =
-                        widget_fct(&awesomeconf->screens[screen].statusbar);
+                    virtscreen->statusbar.widgets = widget =
+                        widget_new(&virtscreen->statusbar);
                 else
                 {
-                    widget->next = widget_fct(&awesomeconf->screens[screen].statusbar);
+                    widget->next = widget_new(&virtscreen->statusbar);
                     widget = widget->next;
                 }
             }
@@ -500,7 +513,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         /* Layouts */
         if(cfg_size(cfg_layouts, "layout"))
         {
-            awesomeconf->screens[screen].layouts = layout = p_new(Layout, 1);
+            virtscreen->layouts = layout = p_new(Layout, 1);
             for(i = 0; i < cfg_size(cfg_layouts, "layout"); i++)
             {
                 cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
@@ -525,7 +538,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         /* Tags */
         if(cfg_size(cfg_tags, "tag"))
         {
-            awesomeconf->screens[screen].tags = tag = p_new(Tag, 1);
+            virtscreen->tags = tag = p_new(Tag, 1);
             for(i = 0; i < cfg_size(cfg_tags, "tag"); i++)
             {
                 cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
@@ -533,10 +546,10 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
                 tag->selected = False;
                 tag->was_selected = False;
                 tmp = cfg_getstr(cfgsectmp, "layout");
-                for(layout = awesomeconf->screens[screen].layouts;
+                for(layout = virtscreen->layouts;
                     layout && layout->arrange != name_func_lookup(tmp, LayoutsList); layout = layout->next);
                 if(!layout)
-                    tag->layout = awesomeconf->screens[screen].layouts;
+                    tag->layout = virtscreen->layouts;
                 else
                     tag->layout = layout;
                 tag->mwfact = cfg_getfloat(cfgsectmp, "mwfact");
@@ -553,14 +566,14 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
             eprint("fatal: no tags found in configuration file\n");
 
         /* select first tag by default */
-        awesomeconf->screens[screen].tags[0].selected = True;
-        awesomeconf->screens[screen].tags[0].was_selected = True;
+        virtscreen->tags[0].selected = True;
+        virtscreen->tags[0].was_selected = True;
 
         /* padding */
-        awesomeconf->screens[screen].padding.top = cfg_getint(cfg_padding, "top");
-        awesomeconf->screens[screen].padding.bottom = cfg_getint(cfg_padding, "bottom");
-        awesomeconf->screens[screen].padding.left = cfg_getint(cfg_padding, "left");
-        awesomeconf->screens[screen].padding.right = cfg_getint(cfg_padding, "right");
+        virtscreen->padding.top = cfg_getint(cfg_padding, "top");
+        virtscreen->padding.bottom = cfg_getint(cfg_padding, "bottom");
+        virtscreen->padding.left = cfg_getint(cfg_padding, "left");
+        virtscreen->padding.right = cfg_getint(cfg_padding, "right");
     }
 
     /* get general sections */

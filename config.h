@@ -81,7 +81,6 @@ struct Button
 
 /** Status bar */
 typedef struct Widget Widget;
-typedef Widget * Widget_ptr;
 typedef struct
 {
     /** Bar width */
@@ -99,7 +98,7 @@ typedef struct
     /** Screen */
     int screen;
     /** Screen */
-    Widget_ptr widgets;
+    Widget *widgets;
 } Statusbar;
 
 typedef struct Client Client; 
@@ -230,7 +229,7 @@ struct Widget
                 VirtScreen, int, int, int, int);
     Statusbar *statusbar;
     int alignment;
-    Widget_ptr next;
+    Widget *next;
 };
 
 
