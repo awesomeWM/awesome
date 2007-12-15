@@ -30,7 +30,8 @@
 #include "statusbar.h"
 #include "layouts/tile.h"
 
-const NameFuncLink UicbList[] = {
+const NameFuncLink UicbList[] =
+{
     /* xutil.c */
     {"spawn", uicb_spawn},
     {"exec", uicb_exec},
