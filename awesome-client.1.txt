@@ -25,7 +25,7 @@ awesome-client read commands from standart input. The command format is:
 
 For example, to change statusbar text on screen 0, you can do the following:
 
-    echo 0 setstatustext Hello, world | awesome-client
+    echo 0 statusbar_set_text Hello, world | awesome-client
  
 To view tag number 3 on screen 1:
 
