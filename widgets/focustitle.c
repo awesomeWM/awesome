@@ -38,7 +38,7 @@ focustitle_new(Statusbar *statusbar)
 {
     Widget *w;
     w = p_new(Widget, 1);
-    w->draw = (void*) focustitle_draw;
+    w->draw = focustitle_draw;
     w->statusbar = statusbar;
     w->name = name;
     w->alignment = AlignFlex;

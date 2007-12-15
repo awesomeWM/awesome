@@ -22,15 +22,14 @@ isoccupied(TagClientLink *tc, int screen, Client *head, Tag *t)
     return False;
 }
 
-
 static int
 taglist_draw(DrawCtx *ctx,
-               awesome_config *awesomeconf,
-               VirtScreen vscreen,
-               int screen,
-               int offset,
-               int used __attribute__ ((unused)),
-               int align __attribute__ ((unused)))
+             awesome_config *awesomeconf,
+             VirtScreen vscreen,
+             int screen,
+             int offset,
+             int used __attribute__ ((unused)),
+             int align __attribute__ ((unused)))
 {
     Tag *tag;
     Client *sel = awesomeconf->focus->client;
@@ -65,17 +64,15 @@ taglist_draw(DrawCtx *ctx,
     return width;
 }
 
-
 Widget *
 taglist_new(Statusbar *statusbar)
 {
     Widget *w;
     w = p_new(Widget, 1);
-    w->draw = (void*) taglist_draw;
+    w->draw = taglist_draw;
     w->statusbar = statusbar;
     w->name = name;
     return w;
 }
-
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

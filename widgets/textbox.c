@@ -1,17 +1,16 @@
 #include "util.h"
 #include "widget.h"
 
-
 static char name[] = "textbox";
 
 static int
 textbox_draw(DrawCtx *ctx,
-                awesome_config *awesomeconf __attribute__ ((unused)),
-                VirtScreen vscreen,
-                int screen __attribute__ ((unused)),
-                int offset, 
-                int used __attribute__ ((unused)),
-                int align)
+             awesome_config *awesomeconf __attribute__ ((unused)),
+             VirtScreen vscreen,
+             int screen __attribute__ ((unused)),
+             int offset, 
+             int used __attribute__ ((unused)),
+             int align)
 {
     int width = textwidth(ctx, vscreen.font, vscreen.statustext);
     int location = calculate_offset(vscreen.statusbar.width, width, offset, align);
@@ -20,13 +19,12 @@ textbox_draw(DrawCtx *ctx,
     return width;
 }
 
-
 Widget *
 textbox_new(Statusbar *statusbar)
 {
     Widget *w;
     w = p_new(Widget, 1);
-    w->draw = (void*) textbox_draw;
+    w->draw = textbox_draw;
     w->statusbar = statusbar;
     w->name = name;
     return w;
