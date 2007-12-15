@@ -1,0 +1,118 @@
+awesomerc(1)
+===========
+
+NAME
+----
+
+awesomerc - Configuration file for the 'awesome window manager'
+
+SYNOPSIS
+--------
+
+*awesome* reads *$HOME/.awesomerc* by default. You can choose another configuration
+file with: awesome -c configuration
+
+DESCRIPTION
+-----------
+
+In awesome, a lot of *functions* are available. These functions are called uicb (User Interface Call Backs). Each function can be bound to a key shortcut or a mouse button.
+
+General
+~~~~~~~
+*quit*::
+    This function quits awesome.
+*statusbar_toggle*::
+    Hide or show statusbar.
+*statusbar_set_position* top, bottom, left, right::
+    Set the position of the statusbar.
+*spawn* client::
+    Execute an external program.
+*exec* program::
+    Replace awesome with another window manager (or itself; i.e. reload config).
+*statusbar_set_text*::
+    Set the statusbar text.
+
+Client
+~~~~~~
+*client_kill*::
+    Closes the focused client.
+*client_moveresize* x y width height::
+    Dynamically move and resize floating windows.
+    Coordinates can be relative or absolute. Relative values must begin with + or -.
+    E.g: to move a window 10 pixels up: "+0 \+10 +0 +0" To move a window
+    in the upper left corner and increase its width by 10px: "0 0 \+0 +10"
+*client_settrans* float::
+    Set client transparency, number can be a relative or absolute floating number in percentage.
+*client_swapnext*::
+    Swap window placement with the next displayed window.
+*client_swapprev*::
+    Swap window placement with the previous displayed window.
+*client_focusnext*::
+    Focus next window.
+*client_focusprev*::
+    Focus previous window.
+*client_togglemax*::
+    Set window fullscreen. Calling this function another time will reset the window to its previous state.
+*client_togglehorizontalmax*::
+    Set window's horizontal size to display width. Calling another time will reset the window to its previous state.
+*client_toggleverticalmax*::
+    Set window's vertical size to display height. Calling another time will reset the window to its previous state.
+*client_togglefloating*::
+    Set window floating or tiled.
+*client_zoom*::
+    Set window as master window.
+*client_movetoscreen* relative or absolute integer::
+    Move focused window to the nth screen, or next (+1) or previous (-1). If no screen_number is set, move to the next screen.
+*client_tag* tag number::
+    Tag focused window with this tag.
+*client_toggletag*::
+    Add or remove tag to focused window.
+*client_movemouse*::
+    Move client window with mouse.
+*client_resizemouse*::
+    Resize client window with mouse.
+
+Tag
+~~~
+*tag_setlayout* relative or absolute integer::
+    Set layout number; or just switch to the next layout for current tag.
+*tag_toggleview* tag::
+    Add windows tagged with tag number to current display.
+*tag_view* tag number::
+    View windows tagged with tag number.
+*tag_viewnext*::
+    Show windows tagged with next tag in list.
+*tag_viewperv*::
+    Show windows tagged with previous tag in list.
+*tag_viewprev_selected*::
+    Switch back to the previously displayed set of tags.
+*tag_setmwfact* relative or absolute float::
+    Set master width factor.
+*tag_setncol* relative or absolute integer::
+    Set number of columns for non-master windows.
+*tag_setnmaster* relative or absolute integer::
+    Set number of master windows.
+
+Screen
+~~~~~~
+*screen_focus* relative or absolute integer::
+    Select Screen and focus first window and move mouse.
+*setborder* relative or absolute integer::
+    Set default border size in pixels for new clients.
+
+FILES
+-----
+For an example of an awesomerc file, see the file provided with the sources
+
+SEE ALSO
+--------
+awesome(1) awesome-client(1)
+
+
+AUTHORS
+-------
+Julien Danjou <julien@danjou.info>
+
+WWW
+---
+http://awesome.naquadah.org

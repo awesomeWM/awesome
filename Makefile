@@ -5,7 +5,7 @@ include config.mk
 
 SRC = focus.c client.c draw.c event.c layout.c awesome.c tag.c util.c xutil.c config.c screen.c statusbar.c uicb.c window.c rules.c mouse.c awesome-client-common.c
 OBJ = ${SRC:.c=.o} ${LAYOUTS:.c=.o}
-DOCS = awesome.1.txt awesome-client.1.txt
+DOCS = awesome.1.txt awesome-client.1.txt awesomerc.1.txt
 
 SRCCLIENT = awesome-client.c awesome-client-common.c util.c
 OBJCLIENT = ${SRCCLIENT:.c=.o}
@@ -30,8 +30,10 @@ ${OBJCLIENT}: config.mk
 man: ${DOCS}
 	asciidoc -d manpage -b docbook awesome.1.txt
 	asciidoc -d manpage -b docbook awesome-client.1.txt
+	asciidoc -d manpage -b docbook awesomerc.1.txt
 	xmlto man awesome.1.xml
 	xmlto man awesome-client.1.xml
+	xmlto man awesomerc.1.xml
 
 awesome-client: ${OBJCLIENT}
 	@echo -e "\t(CC) ${OBJCLIENT} -o $@"
@@ -58,7 +60,7 @@ dist: clean
 	@mkdir awesome-${VERSION}
 	@mkdir awesome-${VERSION}/layouts
 	@cp -fR STYLE LICENSE AUTHORS Makefile README awesomerc config.mk \
-	    awesome-client.1.txt awesome.1.txt ${SRCCLIENT} ${SRCCLIENT:.c=.h} ${SRC} ${SRC:.c=.h} \
+	    awesome-client.1.txt awesome.1.txt awesomerc.1.txt ${SRCCLIENT} ${SRCCLIENT:.c=.h} ${SRC} ${SRC:.c=.h} \
 	    common.h awesome-${VERSION} || true
 	@cp -R ${LAYOUTS} ${LAYOUTS:.c=.h} awesome-${VERSION}/layouts
 	@tar -cf awesome-${VERSION}.tar awesome-${VERSION}
@@ -83,7 +85,7 @@ uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	@rm ${DESTDIR}${PREFIX}/bin/awesome ${DESTDIR}${PREFIX}/bin/awesome-client
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
-	@rm ${DESTDIR}${MANPREFIX}/man1/awesome.1 ${DESTDIR}${MANPREFIX}/man1/awesome-client.1
+	@rm ${DESTDIR}${MANPREFIX}/man1/awesome.1 ${DESTDIR}${MANPREFIX}/man1/awesome-client.1 ${DESTDIR}${MANPREFIX}/man1/awesomerc.1
 
 doc:
 	@echo generating documentation
