@@ -23,6 +23,7 @@
 #include "screen.h"
 #include "tag.h"
 #include "layout.h"
+#include "focus.h"
 #include "statusbar.h"
 
 /** Get screens info
@@ -261,7 +262,10 @@ uicb_screen_focus(awesome_config *awesomeconf, int screen, const char *arg)
     if (new_screen > (numscreens - 1))
         new_screen = 0;
 
-    focus(awesomeconf->focus->client, True, awesomeconf, new_screen);
+    focus(focus_get_latest_client_for_tag(awesomeconf->focus,
+                                          awesomeconf->screens[new_screen].tclink,
+                                          get_current_tag(awesomeconf->screens[new_screen])),
+          True, awesomeconf, new_screen);
 
     move_mouse_pointer_to_screen(awesomeconf->display, new_screen);
 }
