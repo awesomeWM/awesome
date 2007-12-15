@@ -342,6 +342,9 @@ uicb_tag_viewnext(awesome_config *awesomeconf,
 {
     Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
 
+    if(!curtag->next)
+        return;
+
     curtag->selected = False;
     curtag->next->selected = True;
 
@@ -360,14 +363,13 @@ uicb_tag_viewprev(awesome_config *awesomeconf,
 {
     Tag *tag, *curtag = get_current_tag(awesomeconf->screens[screen]);
 
-    for(tag = awesomeconf->screens[screen].tags - 1; tag && tag->next != curtag; tag = tag->next);
+    for(tag = awesomeconf->screens[screen].tags; tag && tag->next != curtag; tag = tag->next);
     if(tag)
     {
         tag->selected = True;
         curtag->selected = False;
+        saveawesomeprops(awesomeconf, screen);
+        arrange(awesomeconf, screen);
     }
-
-    saveawesomeprops(awesomeconf, screen);
-    arrange(awesomeconf, screen);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
