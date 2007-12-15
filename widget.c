@@ -6,7 +6,8 @@ const NameFuncLink WidgetList[] =
     {"taglist", taglist_new},
     {"layoutinfo", layoutinfo_new},
     {"focustitle", focustitle_new},
-    {"textbox", textbox_new}
+    {"textbox", textbox_new},
+    {NULL, NULL}
 };
 
 void
