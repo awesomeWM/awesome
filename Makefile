@@ -3,8 +3,8 @@
 
 include config.mk
 
-SRC = focus.c client.c draw.c event.c layout.c awesome.c tag.c util.c xutil.c config.c screen.c statusbar.c uicb.c window.c rules.c mouse.c awesome-client-common.c
-OBJ = ${SRC:.c=.o} ${LAYOUTS:.c=.o}
+SRC = focus.c client.c draw.c event.c layout.c awesome.c tag.c util.c xutil.c config.c screen.c statusbar.c uicb.c window.c rules.c mouse.c awesome-client-common.c widget.c
+OBJ = ${SRC:.c=.o} ${LAYOUTS:.c=.o} ${WIDGETS:.c=.o}
 DOCS = awesome.1.txt awesome-client.1.txt awesomerc.1.txt
 
 SRCCLIENT = awesome-client.c awesome-client-common.c util.c
@@ -15,6 +15,7 @@ all: options awesome awesome-client
 options:
 	@echo awesome build options:
 	@echo "LAYOUTS  = ${LAYOUTS}"
+	@echo "WIDGETS  = ${WIDGETS}"
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
@@ -59,10 +60,12 @@ dist: clean
 	@echo creating dist tarball
 	@mkdir awesome-${VERSION}
 	@mkdir awesome-${VERSION}/layouts
+	@mkdir awesome-${VERSION}/widgets
 	@cp -fR STYLE LICENSE AUTHORS Makefile README awesomerc config.mk \
 	    awesome-client.1.txt awesome.1.txt awesomerc.1.txt ${SRCCLIENT} ${SRCCLIENT:.c=.h} ${SRC} ${SRC:.c=.h} \
 	    common.h awesome-${VERSION} || true
 	@cp -R ${LAYOUTS} ${LAYOUTS:.c=.h} awesome-${VERSION}/layouts
+	@cp -R ${WIDGETS} ${WIDGETS:.c=.h} awesome-${VERSION}/layouts
 	@tar -cf awesome-${VERSION}.tar awesome-${VERSION}
 	@gzip -9 awesome-${VERSION}.tar
 	@rm -rf awesome-${VERSION}

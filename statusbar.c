@@ -28,158 +28,17 @@
 #include "screen.h"
 #include "util.h"
 #include "tag.h"
+#include "widget.h"
 #include "layouts/tile.h"
-
-enum { AlignLeft, AlignRight, AlignFlex };
-
-/** Check if at least a client is tagged with tag number t and is on screen
- * screen
- * \param t tag number
- * \param screen screen number
- * \return True or False
- */
-static Bool
-isoccupied(TagClientLink *tc, int screen, Client *head, Tag *t)
-{
-    Client *c;
-
-    for(c = head; c; c = c->next)
-        if(c->screen == screen && is_client_tagged(tc, c, t))
-            return True;
-    return False;
-}
-
-
-static int
-calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
-{
-    if (alignment == AlignLeft || alignment == AlignFlex)
-        return offset;
-    else
-        return barwidth - offset - widgetwidth;
-}
-
-
-static int
-tagwidget_draw(DrawCtx *ctx,
-               awesome_config *awesomeconf,
-               VirtScreen vscreen,
-               int screen,
-               int offset,
-               int used __attribute__ ((unused)),
-               int align __attribute__ ((unused)))
-{
-    Tag *tag;
-    Client *sel = awesomeconf->focus->client;
-    int w = 0, width = 0, location;
-    int flagsize;
-    XColor *colors;
-
-    flagsize = (vscreen.font->height + 2) / 4;
-
-    for(tag = vscreen.tags; tag; tag = tag->next)
-        width  += textwidth(ctx, vscreen.font, tag->name);
-
-    location = calculate_offset(vscreen.statusbar.width, width, offset, align);
-
-    width = 0;
-    for(tag = vscreen.tags; tag; tag = tag->next)
-    {
-        w = textwidth(ctx, vscreen.font, tag->name);
-        if(tag->selected)
-            colors = vscreen.colors_selected;
-        else
-            colors = vscreen.colors_normal;
-        drawtext(ctx, location + width, 0, w,
-                 vscreen.statusbar.height, vscreen.font, tag->name, colors);
-        if(isoccupied(vscreen.tclink, screen, awesomeconf->clients, tag))
-            drawrectangle(ctx, location + width, 0, flagsize, flagsize,
-                          sel && is_client_tagged(vscreen.tclink, sel, tag),
-                          colors[ColFG]);
-        width += w;
-    }
-    return width;
-}
-
-
-static int
-layoutsymbol_draw(DrawCtx *ctx,
-                  awesome_config *awesomeconf __attribute__ ((unused)),
-                  VirtScreen vscreen,
-                  int screen __attribute__ ((unused)),
-                  int offset, 
-                  int used __attribute__ ((unused)),
-                  int align __attribute__ ((unused)))
-{
-    int width = 0, location; 
-    Layout *l;
-    for(l = vscreen.layouts ; l; l = l->next)
-        width = MAX(width, (textwidth(ctx, vscreen.font, l->symbol)));
-    location = calculate_offset(vscreen.statusbar.width, width, offset, align);
-    drawtext(ctx, location, 0,
-             width,
-             vscreen.statusbar.height,
-             vscreen.font,
-             get_current_layout(vscreen)->symbol,
-             vscreen.colors_normal);
-    return width;
-}
-
-
-static int
-statustext_draw(DrawCtx *ctx,
-                awesome_config *awesomeconf __attribute__ ((unused)),
-                VirtScreen vscreen,
-                int screen __attribute__ ((unused)),
-                int offset, 
-                int used __attribute__ ((unused)),
-                int align)
-{
-    int width = textwidth(ctx, vscreen.font, vscreen.statustext);
-    int location = calculate_offset(vscreen.statusbar.width, width, offset, align);
-    drawtext(ctx, location, 0, width, vscreen.statusbar.height,
-             vscreen.font, vscreen.statustext, vscreen.colors_normal);
-    return width;
-}
-
-
-static int
-focustitle_draw(DrawCtx *ctx,
-                awesome_config *awesomeconf __attribute__ ((unused)),
-                VirtScreen vscreen,
-                int screen __attribute__ ((unused)),
-                int offset, 
-                int used,
-                int align)
-{
-    Client *sel = awesomeconf->focus->client;
-    int location = calculate_offset(vscreen.statusbar.width, 0, offset, align);
-
-    if(sel)
-    {
-        drawtext(ctx, location, 0, vscreen.statusbar.width - used,
-                 vscreen.statusbar.height, vscreen.font, sel->name,
-                 vscreen.colors_selected);
-        if(sel->isfloating)
-            drawcircle(ctx, location, 0,
-                       (vscreen.font->height + 2) / 4,
-                       sel->ismax,
-                       vscreen.colors_selected[ColFG]);
-    }
-    else
-        drawtext(ctx, location, 0, vscreen.statusbar.width - used,
-                 vscreen.statusbar.height, vscreen.font, NULL,
-                 vscreen.colors_normal);
-    return vscreen.statusbar.width - used;
-}
-
+#include "widget.h"
 
 void
 statusbar_draw(awesome_config *awesomeconf, int screen)
 {
-    int x = 0, split;
     int phys_screen = get_phys_screen(awesomeconf->display, screen);
     VirtScreen vscreen;
+    Widget *widget;
+    int left = 0, right = 0;
     
     vscreen = awesomeconf->screens[screen];
     /* don't waste our time */
@@ -188,11 +47,16 @@ statusbar_draw(awesome_config *awesomeconf, int screen)
 
     DrawCtx *ctx = draw_get_context(awesomeconf->display, phys_screen,
                                     vscreen.statusbar.width, vscreen.statusbar.height);
-    x += tagwidget_draw(ctx, awesomeconf, vscreen, screen, x, x, AlignLeft);
-    x += layoutsymbol_draw(ctx, awesomeconf, vscreen, screen, x, x, AlignLeft);
-    split = x;
-    x += statustext_draw(ctx, awesomeconf, vscreen, screen, 0, x, AlignRight);
-    focustitle_draw(ctx, awesomeconf, vscreen, screen, split, x, AlignFlex);
+
+    for(widget = vscreen.statusbar.widgets; widget; widget = widget->next)
+        if (widget->alignment == AlignLeft)
+            left += widget->draw(ctx, awesomeconf, vscreen, screen, left, (left + right), AlignLeft);
+        else if (widget->alignment == AlignRight)
+            right += widget->draw(ctx, awesomeconf, vscreen, screen, right, (left + right), AlignRight);
+
+    for(widget = vscreen.statusbar.widgets; widget; widget = widget->next)
+        if (widget->alignment == AlignFlex)
+            left += widget->draw(ctx, awesomeconf, vscreen, screen, left, (left + right), AlignFlex);
 
     if(vscreen.statusbar.position == BarRight || vscreen.statusbar.position == BarLeft)
     {
@@ -224,6 +88,7 @@ statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, X
     XSetWindowAttributes wa;
     int phys_screen = get_phys_screen(disp, screen);
     ScreenInfo *si = get_screen_info(disp, screen, NULL, padding);
+    Widget *widget;
 
     statusbar->height = font->height * 1.5;
 
@@ -257,6 +122,15 @@ statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, X
                                           DefaultVisual(disp, phys_screen),
                                           CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, cursor);
+
+    /* For now, we just create a standard set of widgets by hand. As the refactoring continues,
+     * these will become configurable. */
+    statusbar->widgets = widget = taglist_new(statusbar);
+    widget->next = layoutinfo_new(statusbar); widget = widget->next;
+    widget->next = focustitle_new(statusbar); widget = widget->next;
+    widget->next = textbox_new(statusbar);
+    calculate_alignments(statusbar->widgets);
+
     statusbar_update_position(disp, *statusbar, padding);
     XMapRaised(disp, statusbar->window);
 }
@@ -336,4 +210,5 @@ uicb_statusbar_set_text(awesome_config *awesomeconf, int screen, const char *arg
 
     statusbar_draw(awesomeconf, screen);
 }
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

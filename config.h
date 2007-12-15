@@ -25,6 +25,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 #include <regex.h>
+#include <draw.h>
 
 /** Bar possible position */
 enum
@@ -79,6 +80,7 @@ struct Button
 };
 
 /** Status bar */
+typedef struct Widget Widget;
 typedef struct
 {
     /** Bar width */
@@ -95,6 +97,8 @@ typedef struct
     Window window;
     /** Screen */
     int screen;
+    /** Screen */
+    Widget *widgets;
 } Statusbar;
 
 typedef struct Client Client; 
@@ -215,6 +219,19 @@ typedef struct
     /** Font */
     XftFont *font;
 } VirtScreen;
+
+
+struct Widget
+{
+    char *name;
+    int (*draw)(DrawCtx *,
+                awesome_config *,
+                VirtScreen, int, int, int, int);
+    Statusbar *statusbar;
+    int alignment;
+    Widget *next;
+};
+
 
 /** Main configuration structure */
 struct awesome_config
