@@ -21,6 +21,14 @@ screen 0
         layout dwindle { symbol = "[\\]" }
         layout floating { symbol = "><>" }
     }
+    statusbar
+    {
+         position = "top"
+         widget taglist {}
+         widget layoutinfo {}
+         widget focustitle {}
+         widget textbox {}
+    }
 }
 
 rules

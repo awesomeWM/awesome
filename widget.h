@@ -6,13 +6,15 @@
 
 enum { AlignLeft, AlignRight, AlignFlex };
 
+typedef Widget_ptr (WidgetConstructor)(Statusbar *);
+
 int calculate_offset(int, int, int, int);
 void calculate_alignments(Widget *widget);
 
-Widget *layoutinfo_new(Statusbar*);
-Widget *taglist_new(Statusbar*);
-Widget *textbox_new(Statusbar*);
-Widget *focustitle_new(Statusbar*);
+Widget_ptr layoutinfo_new(Statusbar*);
+Widget_ptr taglist_new(Statusbar*);
+Widget_ptr textbox_new(Statusbar*);
+Widget_ptr focustitle_new(Statusbar*);
 
 #endif
 

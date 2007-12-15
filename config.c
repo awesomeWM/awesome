@@ -32,6 +32,7 @@
 #include "util.h"
 #include "rules.h"
 #include "screen.h"
+#include "widget.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "layouts/max.h"
@@ -58,6 +59,7 @@ typedef struct
 } MouseButton;
 
 extern const NameFuncLink UicbList[];
+extern const NameFuncLink WidgetList[];
 
 /** List of keyname and corresponding X11 mask codes */
 static const KeyMod KeyModList[] =
@@ -269,9 +271,14 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_STR((char *) "tab_border", (char *) "#ff0000", CFGF_NONE),
         CFG_END()
     };
+    static cfg_opt_t widget_opts[] =
+    {
+        CFG_END()
+    };
     static cfg_opt_t statusbar_opts[] =
     {
         CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
+        CFG_SEC((char *) "widget", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t tag_opts[] =
@@ -382,7 +389,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         CFG_END()
     };
     cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
-          *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp, *cfg_padding;
+          *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfg_padding, *cfgsectmp;
     int ret, screen;
     unsigned int i = 0;
     const char *tmp, *homedir;
@@ -391,6 +398,8 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     Rule *rule = NULL;
     Layout *layout = NULL;
     Tag *tag = NULL;
+    Widget_ptr widget = NULL;
+    Widget_ptr (*widget_fct)(Statusbar *);
     FILE *defconfig = NULL;
 
     if(confpatharg)
@@ -471,6 +480,22 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         awesomeconf->screens[screen].statusbar.position =
             awesomeconf->screens[screen].statusbar.dposition =
             statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
+
+        /* Statusbar widgets */
+        if(cfg_size(cfg_statusbar, "widget"))
+            for(i = 0; i < cfg_size(cfg_statusbar, "widget"); i++)
+            {
+                cfgsectmp = cfg_getnsec(cfg_statusbar, "widget", i);
+                widget_fct = (Widget_ptr **) name_func_lookup(cfg_title(cfgsectmp), WidgetList);
+                if(!widget)
+                    awesomeconf->screens[screen].statusbar.widgets = widget =
+                        widget_fct(&awesomeconf->screens[screen].statusbar);
+                else
+                {
+                    widget->next = widget_fct(&awesomeconf->screens[screen].statusbar);
+                    widget = widget->next;
+                }
+            }
 
         /* Layouts */
         if(cfg_size(cfg_layouts, "layout"))

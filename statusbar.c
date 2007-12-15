@@ -86,7 +86,6 @@ statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, X
     XSetWindowAttributes wa;
     int phys_screen = get_phys_screen(disp, screen);
     ScreenInfo *si = get_screen_info(disp, screen, NULL, padding);
-    Widget *widget;
 
     statusbar->height = font->height * 1.5;
 
@@ -121,12 +120,6 @@ statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, X
                                           CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
     XDefineCursor(disp, statusbar->window, cursor);
 
-    /* For now, we just create a standard set of widgets by hand. As the refactoring continues,
-     * these will become configurable. */
-    statusbar->widgets = widget = taglist_new(statusbar);
-    widget->next = layoutinfo_new(statusbar); widget = widget->next;
-    widget->next = focustitle_new(statusbar); widget = widget->next;
-    widget->next = textbox_new(statusbar);
     calculate_alignments(statusbar->widgets);
 
     statusbar_update_position(disp, *statusbar, padding);

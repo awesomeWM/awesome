@@ -1,4 +1,13 @@
+#include "util.h"
 #include "widget.h"
+
+const NameFuncLink WidgetList[] =
+{
+    {"taglist", taglist_new},
+    {"layoutinfo", layoutinfo_new},
+    {"focustitle", focustitle_new},
+    {"textbox", textbox_new}
+};
 
 void
 calculate_alignments(Widget *widget)
