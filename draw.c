@@ -27,7 +27,6 @@
 #include "util.h"
 #include "draw.h"
 
-
 DrawCtx *
 draw_get_context(Display *display, int phys_screen, int width, int height)
 {

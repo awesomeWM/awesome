@@ -30,6 +30,8 @@
 #include "tag.h"
 #include "layouts/tile.h"
 
+enum { AlignLeft, AlignRight, AlignFlex };
+
 /** Check if at least a client is tagged with tag number t and is on screen
  * screen
  * \param t tag number
@@ -47,120 +49,171 @@ isoccupied(TagClientLink *tc, int screen, Client *head, Tag *t)
     return False;
 }
 
+
+static int
+calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
+{
+    if (alignment == AlignLeft || alignment == AlignFlex)
+        return offset;
+    else
+        return barwidth - offset - widgetwidth;
+}
+
+
+static int
+tagwidget_draw(DrawCtx *ctx,
+               awesome_config *awesomeconf,
+               VirtScreen vscreen,
+               int screen,
+               int offset,
+               int used __attribute__ ((unused)),
+               int align __attribute__ ((unused)))
+{
+    Tag *tag;
+    Client *sel = awesomeconf->focus->client;
+    int w = 0, width = 0, location;
+    int flagsize;
+    XColor *colors;
+
+    flagsize = (vscreen.font->height + 2) / 4;
+
+    for(tag = vscreen.tags; tag; tag = tag->next)
+        width  += textwidth(ctx, vscreen.font, tag->name);
+
+    location = calculate_offset(vscreen.statusbar.width, width, offset, align);
+
+    width = 0;
+    for(tag = vscreen.tags; tag; tag = tag->next)
+    {
+        w = textwidth(ctx, vscreen.font, tag->name);
+        if(tag->selected)
+            colors = vscreen.colors_selected;
+        else
+            colors = vscreen.colors_normal;
+        drawtext(ctx, location + width, 0, w,
+                 vscreen.statusbar.height, vscreen.font, tag->name, colors);
+        if(isoccupied(vscreen.tclink, screen, awesomeconf->clients, tag))
+            drawrectangle(ctx, location + width, 0, flagsize, flagsize,
+                          sel && is_client_tagged(vscreen.tclink, sel, tag),
+                          colors[ColFG]);
+        width += w;
+    }
+    return width;
+}
+
+
+static int
+layoutsymbol_draw(DrawCtx *ctx,
+                  awesome_config *awesomeconf __attribute__ ((unused)),
+                  VirtScreen vscreen,
+                  int screen __attribute__ ((unused)),
+                  int offset, 
+                  int used __attribute__ ((unused)),
+                  int align __attribute__ ((unused)))
+{
+    int width = 0, location; 
+    Layout *l;
+    for(l = vscreen.layouts ; l; l = l->next)
+        width = MAX(width, (textwidth(ctx, vscreen.font, l->symbol)));
+    location = calculate_offset(vscreen.statusbar.width, width, offset, align);
+    drawtext(ctx, location, 0,
+             width,
+             vscreen.statusbar.height,
+             vscreen.font,
+             get_current_layout(vscreen)->symbol,
+             vscreen.colors_normal);
+    return width;
+}
+
+
+static int
+statustext_draw(DrawCtx *ctx,
+                awesome_config *awesomeconf __attribute__ ((unused)),
+                VirtScreen vscreen,
+                int screen __attribute__ ((unused)),
+                int offset, 
+                int used __attribute__ ((unused)),
+                int align)
+{
+    int width = textwidth(ctx, vscreen.font, vscreen.statustext);
+    int location = calculate_offset(vscreen.statusbar.width, width, offset, align);
+    drawtext(ctx, location, 0, width, vscreen.statusbar.height,
+             vscreen.font, vscreen.statustext, vscreen.colors_normal);
+    return width;
+}
+
+
+static int
+focustitle_draw(DrawCtx *ctx,
+                awesome_config *awesomeconf __attribute__ ((unused)),
+                VirtScreen vscreen,
+                int screen __attribute__ ((unused)),
+                int offset, 
+                int used,
+                int align)
+{
+    Client *sel = awesomeconf->focus->client;
+    int location = calculate_offset(vscreen.statusbar.width, 0, offset, align);
+
+    if(sel)
+    {
+        drawtext(ctx, location, 0, vscreen.statusbar.width - used,
+                 vscreen.statusbar.height, vscreen.font, sel->name,
+                 vscreen.colors_selected);
+        if(sel->isfloating)
+            drawcircle(ctx, location, 0,
+                       (vscreen.font->height + 2) / 4,
+                       sel->ismax,
+                       vscreen.colors_selected[ColFG]);
+    }
+    else
+        drawtext(ctx, location, 0, vscreen.statusbar.width - used,
+                 vscreen.statusbar.height, vscreen.font, NULL,
+                 vscreen.colors_normal);
+    return vscreen.statusbar.width - used;
+}
+
+
 void
 statusbar_draw(awesome_config *awesomeconf, int screen)
 {
-    int z, x = 0, y = 0, w;
-    Client *sel = awesomeconf->focus->client;
+    int x = 0, split;
     int phys_screen = get_phys_screen(awesomeconf->display, screen);
-    Statusbar sbar;
-    Tag *tag;
-    Layout *layout;
+    VirtScreen vscreen;
     
-    sbar = awesomeconf->screens[screen].statusbar;
-    DrawCtx *ctx = draw_get_context(awesomeconf->display, phys_screen, sbar.width, sbar.height);
+    vscreen = awesomeconf->screens[screen];
     /* don't waste our time */
-    if(sbar.position == BarOff)
+    if(vscreen.statusbar.position == BarOff)
         return;
 
-    for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
-    {
-        w = textwidth(ctx, awesomeconf->screens[screen].font, tag->name);
-        if(tag->selected)
-        {
-            drawtext(ctx, x, y, w,
-                     sbar.height,
-                     awesomeconf->screens[screen].font,
-                     tag->name,
-                     awesomeconf->screens[screen].colors_selected);
-            if(isoccupied(awesomeconf->screens[screen].tclink, screen, awesomeconf->clients, tag))
-                drawrectangle(ctx, x, y,
-                              (awesomeconf->screens[screen].font->height + 2) / 4,
-                              (awesomeconf->screens[screen].font->height + 2) / 4,
-                              sel && is_client_tagged(awesomeconf->screens[screen].tclink, sel, tag),
-                              awesomeconf->screens[screen].colors_selected[ColFG]);
-        }
-        else
-        {
-            drawtext(ctx, x, y, w,
-                     sbar.height,
-                     awesomeconf->screens[screen].font,
-                     tag->name,
-                     awesomeconf->screens[screen].colors_normal);
-            if(isoccupied(awesomeconf->screens[screen].tclink, screen, awesomeconf->clients, tag))
-                drawrectangle(ctx, x, y,
-                              (awesomeconf->screens[screen].font->height + 2) / 4,
-                              (awesomeconf->screens[screen].font->height + 2) / 4,
-                              sel && is_client_tagged(awesomeconf->screens[screen].tclink, sel, tag),
-                              awesomeconf->screens[screen].colors_normal[ColFG]);
-        }
-        x += w;
-    }
+    DrawCtx *ctx = draw_get_context(awesomeconf->display, phys_screen,
+                                    vscreen.statusbar.width, vscreen.statusbar.height);
+    x += tagwidget_draw(ctx, awesomeconf, vscreen, screen, x, x, AlignLeft);
+    x += layoutsymbol_draw(ctx, awesomeconf, vscreen, screen, x, x, AlignLeft);
+    split = x;
+    x += statustext_draw(ctx, awesomeconf, vscreen, screen, 0, x, AlignRight);
+    focustitle_draw(ctx, awesomeconf, vscreen, screen, split, x, AlignFlex);
 
-    /* This is only here until we refactor this function. */
-    for(layout = awesomeconf->screens[screen].layouts; layout; layout = layout->next)
-        sbar.txtlayoutwidth = MAX(sbar.txtlayoutwidth,
-                                  textwidth(ctx, awesomeconf->screens[screen].font, layout->symbol));
-    drawtext(ctx, x, y,
-             sbar.txtlayoutwidth,
-             sbar.height,
-             awesomeconf->screens[screen].font,
-             get_current_layout(awesomeconf->screens[screen])->symbol,
-             awesomeconf->screens[screen].colors_normal);
-    z = x + sbar.txtlayoutwidth;
-    w = textwidth(ctx, awesomeconf->screens[screen].font, awesomeconf->screens[screen].statustext);
-    x = sbar.width - w;
-    if(x < z)
-    {
-        x = z;
-        w = sbar.width - z;
-    }
-    drawtext(ctx, x, y, w,
-             sbar.height,
-             awesomeconf->screens[screen].font,
-             awesomeconf->screens[screen].statustext,
-             awesomeconf->screens[screen].colors_normal);
-    if((w = x - z) > sbar.height)
-    {
-        x = z;
-        if(sel && sel->screen == screen)
-        {
-            drawtext(ctx, x, y, w,
-                     sbar.height,
-                     awesomeconf->screens[screen].font,
-                     sel->name,
-                     awesomeconf->screens[screen].colors_selected);
-            if(sel->isfloating)
-                drawcircle(ctx, x, y,
-                           (awesomeconf->screens[screen].font->height + 2) / 4,
-                           sel->ismax,
-                           awesomeconf->screens[screen].colors_selected[ColFG]);
-        }
-        else
-            drawtext(ctx, x, y, w,
-                     sbar.height,
-                     awesomeconf->screens[screen].font,
-                     NULL, awesomeconf->screens[screen].colors_normal);
-    }
-    if(sbar.position == BarRight || sbar.position == BarLeft)
+    if(vscreen.statusbar.position == BarRight || vscreen.statusbar.position == BarLeft)
     {
         Drawable d;
-        if(sbar.position == BarRight)
-            d = draw_rotate(ctx, phys_screen, M_PI_2, sbar.height, 0);
+        if(vscreen.statusbar.position == BarRight)
+            d = draw_rotate(ctx, phys_screen, M_PI_2, vscreen.statusbar.height, 0);
         else
-            d = draw_rotate(ctx, phys_screen, - M_PI_2, 0, sbar.width);
+            d = draw_rotate(ctx, phys_screen, - M_PI_2, 0, vscreen.statusbar.width);
         XCopyArea(awesomeconf->display, d,
-                  sbar.window,
+                  vscreen.statusbar.window,
                   DefaultGC(awesomeconf->display, phys_screen), 0, 0,
-                  sbar.height,
-                  sbar.width, 0, 0);
+                  vscreen.statusbar.height,
+                  vscreen.statusbar.width, 0, 0);
         XFreePixmap(awesomeconf->display, d);
     }
     else
         XCopyArea(awesomeconf->display, ctx->drawable,
-                  sbar.window,
+                  vscreen.statusbar.window,
                   DefaultGC(awesomeconf->display, phys_screen), 0, 0,
-                  sbar.width, sbar.height, 0, 0);
+                  vscreen.statusbar.width, vscreen.statusbar.height, 0, 0);
+
     draw_free_context(ctx);
     XSync(awesomeconf->display, False);
 }
