@@ -122,6 +122,8 @@ tag_client_with_rules(Client *c, awesome_config *awesomeconf)
                     matched = True;
                     tag_client(&awesomeconf->screens[c->screen].tclink, c, tag);
                 }
+                else
+                    untag_client(&awesomeconf->screens[c->screen].tclink, c, tag);
 
             if(!matched)
                 tag_client_with_current_selected(c, &awesomeconf->screens[c->screen]);
