@@ -29,8 +29,6 @@
 #include "util.h"
 #include "tag.h"
 #include "widget.h"
-#include "layouts/tile.h"
-#include "widget.h"
 
 void
 statusbar_draw(awesome_config *awesomeconf, int screen)
