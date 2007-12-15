@@ -83,8 +83,12 @@ focus_add_client(FocusList **head, Client *c)
 void
 focus_delete_client(FocusList **head, Client *c)
 {
-    FocusList *target = focus_detach_node(head, focus_get_node_by_client(*head, c));
-    p_delete(&target);
+    FocusList *fc = focus_get_node_by_client(*head, c), *target;
+    if (fc)
+    {
+        target = focus_detach_node(head, fc);
+        p_delete(&target);
+    }
 }
 
 Client *
