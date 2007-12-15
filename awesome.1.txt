@@ -117,8 +117,6 @@ DEFAULTS KEY BINDINGS
     Kill client.
 *Mod4 \+ Shift \+ q*::
     Quit awesome.
-*Mod4 \+ Control \+ r*::
-    Reload awesome config.
 *Mod4 + 0-9*::
     Switch to tag 1-9, 0 for all.
 *Mod4 \+ Control \+ 0-9*::
