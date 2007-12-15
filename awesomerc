@@ -177,6 +177,13 @@ keys
     }
     key
     {
+        modkey = {"Mod4"}
+        key = "Tab"
+        command = "focus_history"
+        arg = "-1"
+    }
+    key
+    {
         modkey = {"Mod4", "Shift"}
         key = "j"
         command = "client_swapnext"

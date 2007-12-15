@@ -21,6 +21,7 @@
 
 #include "util.h"
 #include "tag.h"
+#include "layout.h"
 #include "focus.h" 
 
 static FocusList *
@@ -101,6 +102,32 @@ focus_get_latest_client_for_tag(FocusList *head, TagClientLink *tc, Tag *t)
            return fl->client;
 
     return NULL;
+}
+
+void
+uicb_focus_history(awesome_config *awesomeconf,
+                   int screen,
+                   const char *arg)
+{
+    int i;
+    FocusList *fl = awesomeconf->focus;
+    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
+
+    if(arg)
+    {
+        i = atoi(arg);
+
+        if(i < 0)
+        {
+            for(; fl && i < 0; fl = fl->prev)
+                if(is_client_tagged(awesomeconf->screens[screen].tclink,
+                                    fl->client,
+                                    curtag))
+                    i++;
+            if(fl)
+                focus(fl->client, True, awesomeconf, screen);
+        }
+    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

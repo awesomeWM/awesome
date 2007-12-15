@@ -28,6 +28,7 @@
 #include "layout.h"
 #include "mouse.h"
 #include "statusbar.h"
+#include "focus.h"
 #include "layouts/tile.h"
 
 const NameFuncLink UicbList[] =
@@ -75,6 +76,8 @@ const NameFuncLink UicbList[] =
     /* mouse.c */
     {"client_movemouse", uicb_client_movemouse},
     {"client_resizemouse", uicb_client_resizemouse},
+    /* focus.c */
+    {"focus_history", uicb_focus_history},
     {NULL, NULL}
 };
 
