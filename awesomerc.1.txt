@@ -12,8 +12,8 @@ SYNOPSIS
 *awesome* reads *$HOME/.awesomerc* by default. You can choose another configuration
 file with: awesome -c configuration
 
-DESCRIPTION
------------
+UICB FUNCTIONS
+--------------
 
 In awesome, a lot of *functions* are available. These functions are called uicb (User Interface Call Backs). Each function can be bound to a key shortcut or a mouse button.
 
