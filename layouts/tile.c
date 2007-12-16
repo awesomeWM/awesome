@@ -129,7 +129,8 @@ _tile(int screen, const Bool right)
     else
         mh = mw = 0;
 
-    real_ncol = MIN(otherwin, curtag->ncol);
+    if((real_ncol = MIN(otherwin, curtag->ncol) <= 0))
+       real_ncol = 1;
 
     for(i = 0, c = globalconf.clients; c; c = c->next)
     {
