@@ -24,10 +24,10 @@ screen 0
     statusbar
     {
          position = "top"
-         widget taglist {}
-         widget layoutinfo {}
-         widget focustitle {}
-         widget textbox {}
+         taglist tl {}
+         layoutinfo li {}
+         focustitle ft  {}
+         textbox tb {}
     }
 }
 
