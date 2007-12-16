@@ -28,6 +28,7 @@
 #include "layout.h"
 #include "mouse.h"
 #include "statusbar.h"
+#include "widget.h"
 #include "focus.h"
 #include "layouts/tile.h"
 
@@ -80,6 +81,8 @@ const NameFuncLink UicbList[] =
     {"client_resizemouse", uicb_client_resizemouse},
     /* focus.c */
     {"focus_history", uicb_focus_history},
+    /* widgets.c */
+    {"widget_tell", uicb_widget_tell},
     {NULL, NULL}
 };
 
@@ -88,6 +91,7 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
 {
     char *p;
     const char *arg;
+    char *argcpy;
     int screen, len;
     void (*uicb) (int, const char *);
 
@@ -115,11 +119,16 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
     }
 
     if (p+strlen(p) < cmd+len)
+    {
         arg = p + strlen(p) + 1;
+        /* Allow our callees to modify this string. */
+        argcpy = p_new(char, strlen(arg)+1);
+        strncpy(argcpy, arg, strlen(arg));
+        uicb(screen, argcpy);
+        p_delete(&argcpy);
+    }
     else
-        arg = NULL;
-
-    uicb(screen, arg);
+        uicb(screen, NULL);
     return 0;
 }
 
@@ -137,7 +146,6 @@ parse_control(char *cmd)
         run_uicb(curcmd, &globalconf);
         curcmd = p + 1;
     }
-
     return 0;
 }
 

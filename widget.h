@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "draw.h"
+#include "common.h"
 
 enum { AlignLeft, AlignRight, AlignFlex };
 
@@ -16,6 +17,8 @@ WidgetConstructor layoutinfo_new;
 WidgetConstructor taglist_new;
 WidgetConstructor textbox_new;
 WidgetConstructor focustitle_new;
+
+UICB_PROTO(uicb_widget_tell);
 
 #endif
 

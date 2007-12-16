@@ -1,6 +1,8 @@
 #include "util.h"
 #include "widget.h"
 
+extern awesome_config globalconf;
+
 const NameFuncLink WidgetList[] =
 {
     {"taglist", taglist_new},
@@ -41,6 +43,17 @@ calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
 }
 
 
+static Widget *
+find_widget(char *name, int screen)
+{
+    Widget *widget;
+    widget = globalconf.screens[screen].statusbar.widgets;
+    for(; widget; widget = widget->next)
+        if (strcmp(name, widget->name) == 0)
+            return widget;
+    return NULL;
+}
+
 void
 common_new(Widget *widget, Statusbar *statusbar, const char *name)
 {
@@ -49,5 +62,24 @@ common_new(Widget *widget, Statusbar *statusbar, const char *name)
     strncpy(widget->name, name, strlen(name));
 }
 
+void
+uicb_widget_tell(int screen, char *arg)
+{
+    Widget *widget;
+    char *p;
+    p = strtok(arg, " ");
+    if (!p){
+        warn("Ignoring malformed widget command.");
+        return;
+    }
+    widget = find_widget(p, screen);
+    if (!widget){
+        warn("No such widget: %s\n", p);
+        return;
+    }
+
+    /* To be continued... */
+
+}
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
