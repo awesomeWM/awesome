@@ -50,7 +50,7 @@ get_current_tag(int screen)
 }
 
 /** Arrange windows following current selected layout
- * \param disp display ref
+ * \param screen the screen to arrange
  */
 void
 arrange(int screen)

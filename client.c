@@ -78,7 +78,8 @@ client_loadprops(Client * c, int screen)
 }
 
 /** Check if client supports protocol WM_DELETE_WINDOW
- * \param c the client
+ * \param disp the display
+ * \win the Window
  * \return True if client has WM_DELETE_WINDOW
  */
 static Bool
@@ -99,6 +100,7 @@ isprotodel(Display *disp, Window win)
 }
 
 /** Swap two client in the linked list clients
+ * \param head pointer ito the client list head
  * \param c1 first client
  * \param c2 second client
  */
@@ -175,7 +177,6 @@ client_attach(Client *c)
 }
 
 /** Detach client from clients list
- * \param head client list
  * \param c client to detach
  */
 void

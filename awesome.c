@@ -147,7 +147,6 @@ cleanup()
 }
 
 /** Scan X to find windows to manage
- * \param screen Screen number
  */
 static void
 scan()

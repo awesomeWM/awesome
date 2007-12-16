@@ -245,8 +245,7 @@ static Key *section_keys(cfg_t *cfg_keys)
 
 
 /** Parse configuration file and initialize some stuff
- * \param disp Display ref
- * \param scr Screen number
+ * \param configpatharg Path to configuration file
  */
 void
 parse_config(const char *confpatharg)
@@ -662,10 +661,9 @@ get_numlockmask(Display *disp)
 }
 
 /** Initialize color from X side
- * \param colorstr Color code
  * \param disp Display ref
  * \param scr Screen number
- * \return XColor pixel
+ * \param colorstr Color code
  */
 static XColor
 initxcolor(Display *disp, int scr, const char *colstr)

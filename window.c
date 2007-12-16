@@ -88,6 +88,7 @@ window_configure(Display *disp, Window win, int x, int y, int w, int h, int bord
 
 /** Grab or ungrab buttons on a window
  * \param disp Display ref
+ * \param screen The screen
  * \param focused True if client is focused
  * \param raised True if the client is above other clients
  * \param modkey Mod key mask
