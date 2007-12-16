@@ -1,16 +1,19 @@
+#include <stdio.h>
 #include "util.h"
 #include "widget.h"
 
-extern awesome_config globalconf;
 
-static char name[] = "focustitle";
+extern awesome_config globalconf;
 
 static int
 focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
     Client *sel = globalconf.focus->client;
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
-    int location = calculate_offset(vscreen.statusbar.width, 0, offset, widget->alignment);
+    int location = calculate_offset(vscreen.statusbar.width,
+                                    0,
+                                    offset,
+                                    widget->alignment);
 
     if(sel)
     {
@@ -31,13 +34,12 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 }
 
 Widget *
-focustitle_new(Statusbar *statusbar)
+focustitle_new(Statusbar *statusbar, const char *name)
 {
     Widget *w;
     w = p_new(Widget, 1);
     w->draw = focustitle_draw;
-    w->statusbar = statusbar;
-    w->name = name;
+    common_new(w, statusbar, name);
     w->alignment = AlignFlex;
     return w;
 }

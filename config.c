@@ -268,7 +268,7 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
     cfg_t* widgets, *wptr;
     Widget *widget = NULL;
     unsigned int i, j, numnames, numwidgets = 0;
-    Widget *(*widget_new)(Statusbar *);
+    WidgetConstructor *widget_new;
 
     numnames = sizeof(widget_names)/sizeof(widget_names[0]);
     for (i = 0; i < numnames; i++)
@@ -290,19 +290,21 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 
     for (i = 0; i < numwidgets; i++){
         widget_new = name_func_lookup(cfg_name(widgets + i), WidgetList);
-
         if (widget_new)
-            if(!widget)
-                statusbar->widgets = widget = widget_new(statusbar);
+            if(!widget){
+                widget = widget_new(statusbar,
+                                    cfg_title(widgets + i));
+                statusbar->widgets = widget;
+            }
             else
             {
-                widget->next = widget_new(statusbar);
+                widget->next = widget_new(statusbar,
+                                          cfg_title(widgets + i));
                 widget = widget->next;
             }
         else
             warn("Ignoring unknown widget: %s.\n", cfg_name(widgets + i));
     }
-
 }
 
 

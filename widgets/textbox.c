@@ -3,8 +3,6 @@
 
 extern awesome_config globalconf;
 
-static char name[] = "textbox";
-
 static int
 textbox_draw(Widget *widget,
              DrawCtx *ctx,
@@ -13,20 +11,22 @@ textbox_draw(Widget *widget,
 {
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int width = textwidth(ctx, vscreen.font, vscreen.statustext);
-    int location = calculate_offset(vscreen.statusbar.width, width, offset, widget->alignment);
+    int location = calculate_offset(vscreen.statusbar.width,
+                                    width,
+                                    offset,
+                                    widget->alignment);
     drawtext(ctx, location, 0, width, vscreen.statusbar.height,
              vscreen.font, vscreen.statustext, vscreen.colors_normal);
     return width;
 }
 
 Widget *
-textbox_new(Statusbar *statusbar)
+textbox_new(Statusbar *statusbar, const char *name)
 {
     Widget *w;
     w = p_new(Widget, 1);
     w->draw = textbox_draw;
-    w->statusbar = statusbar;
-    w->name = name;
+    common_new(w, statusbar, name);
     return w;
 }
 

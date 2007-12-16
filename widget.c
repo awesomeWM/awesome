@@ -26,7 +26,8 @@ calculate_alignments(Widget *widget)
     if(widget)
         for(; widget; widget = widget->next){
             if (widget->alignment == AlignFlex)
-                warn("Multiple flex widgets in panel - ignoring flex for all but the first.");
+                warn("Multiple flex widgets in panel -"
+                     " ignoring flex for all but the first.");
             widget->alignment = AlignRight;
         }
 }
@@ -36,8 +37,17 @@ calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
 {
     if (alignment == AlignLeft || alignment == AlignFlex)
         return offset;
-
     return barwidth - offset - widgetwidth;
 }
+
+
+void
+common_new(Widget *widget, Statusbar *statusbar, const char *name)
+{
+    widget->statusbar = statusbar;
+    widget->name = p_new(char, strlen(name)+1);
+    strncpy(widget->name, name, strlen(name));
+}
+
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

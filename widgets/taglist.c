@@ -5,8 +5,6 @@
 
 extern awesome_config globalconf;
 
-static char name[] = "taglist";
-
 /** Check if at least one client is tagged with tag number t and is on screen
  * screen
  * \param screen screen number
@@ -43,7 +41,10 @@ taglist_draw(Widget *widget,
     {
         width  += textwidth(ctx, vscreen.font, tag->name);
     }
-    location = calculate_offset(vscreen.statusbar.width, width, offset, widget->alignment);
+    location = calculate_offset(vscreen.statusbar.width,
+                                width,
+                                offset,
+                                widget->alignment);
 
     width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
@@ -57,7 +58,9 @@ taglist_draw(Widget *widget,
                  vscreen.statusbar.height, vscreen.font, tag->name, colors);
         if(isoccupied(widget->statusbar->screen, tag))
             drawrectangle(ctx, location + width, 0, flagsize, flagsize,
-                          sel && is_client_tagged(sel, tag, widget->statusbar->screen),
+                          sel && is_client_tagged(sel,
+                                                  tag,
+                                                  widget->statusbar->screen),
                           colors[ColFG]);
         width += w;
     }
@@ -65,13 +68,12 @@ taglist_draw(Widget *widget,
 }
 
 Widget *
-taglist_new(Statusbar *statusbar)
+taglist_new(Statusbar *statusbar, const char *name)
 {
     Widget *w;
     w = p_new(Widget, 1);
     w->draw = taglist_draw;
-    w->statusbar = statusbar;
-    w->name = name;
+    common_new(w, statusbar, name);
     return w;
 }
 
