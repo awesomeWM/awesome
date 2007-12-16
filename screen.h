@@ -33,7 +33,7 @@ ScreenInfo * get_display_info(Display *, int, Statusbar *, Padding *);
 int get_screen_bycoord(Display *, int, int);
 int get_screen_count(Display *);
 int get_phys_screen(Display *, int);
-void move_client_to_screen(Client *, awesome_config *, int, Bool);
+void move_client_to_screen(Client *, int, Bool);
 
 UICB_PROTO(uicb_screen_focus);
 UICB_PROTO(uicb_client_movetoscreen);

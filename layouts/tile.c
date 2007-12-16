@@ -28,12 +28,12 @@
 #include "layout.h"
 #include "layouts/tile.h"
 
+extern awesome_config globalconf;
+
 void
-uicb_tag_setnmaster(awesome_config *awesomeconf,
-                    int screen,
-                    const char * arg)
+uicb_tag_setnmaster(int screen, const char * arg)
 {
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
+    Tag *curtag = get_current_tag(screen);
     Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
@@ -42,15 +42,13 @@ uicb_tag_setnmaster(awesome_config *awesomeconf,
     if((curtag->nmaster = (int) compute_new_value_from_arg(arg, (double) curtag->nmaster)) < 0)
         curtag->nmaster = 0;
 
-    arrange(awesomeconf, screen);
+    arrange(screen);
 }
 
 void
-uicb_tag_setncol(awesome_config *awesomeconf,
-                 int screen,
-                 const char * arg)
+uicb_tag_setncol(int screen, const char * arg)
 {
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
+    Tag *curtag = get_current_tag(screen);
     Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
@@ -59,16 +57,14 @@ uicb_tag_setncol(awesome_config *awesomeconf,
     if((curtag->ncol = (int) compute_new_value_from_arg(arg, (double) curtag->ncol)) < 1)
         curtag->ncol = 1;
 
-    arrange(awesomeconf, screen);
+    arrange(screen);
 }
 
 void
-uicb_tag_setmwfact(awesome_config * awesomeconf,
-                   int screen,
-                   const char *arg)
+uicb_tag_setmwfact(int screen, const char *arg)
 {
     char *newarg;
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
+    Tag *curtag = get_current_tag(screen);
     Layout *curlay = curtag->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
@@ -88,12 +84,12 @@ uicb_tag_setmwfact(awesome_config * awesomeconf,
     else if(curtag->mwfact > 0.9)
         curtag->mwfact = 0.9;
 
-    arrange(awesomeconf, screen);
+    arrange(screen);
     p_delete(&newarg);
 }
 
 static void
-_tile(awesome_config *awesomeconf, int screen, const Bool right)
+_tile(int screen, const Bool right)
 {
     /* windows area geometry */
     int wah = 0, waw = 0, wax = 0, way = 0;
@@ -105,12 +101,12 @@ _tile(awesome_config *awesomeconf, int screen, const Bool right)
     int real_ncol = 1, win_by_col = 1, current_col = 0;
     ScreenInfo *screens_info = NULL;
     Client *c;
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
+    Tag *curtag = get_current_tag(screen);
 
-    screens_info = get_screen_info(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
+    screens_info = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
-    for(n = 0, c = awesomeconf->clients; c; c = c->next)
-        if(IS_TILED(c, &awesomeconf->screens[screen], screen))
+    for(n = 0, c = globalconf.clients; c; c = c->next)
+        if(IS_TILED(c, screen))
             n++;
 
     wah = screens_info[screen].height;
@@ -135,9 +131,9 @@ _tile(awesome_config *awesomeconf, int screen, const Bool right)
 
     real_ncol = MIN(otherwin, curtag->ncol);
 
-    for(i = 0, c = awesomeconf->clients; c; c = c->next)
+    for(i = 0, c = globalconf.clients; c; c = c->next)
     {
-        if(!IS_TILED(c, &awesomeconf->screens[screen], screen))
+        if(!IS_TILED(c, screen))
             continue;
 
         c->ismax = False;
@@ -145,7 +141,7 @@ _tile(awesome_config *awesomeconf, int screen, const Bool right)
         {                       /* master */
             ny = way + i * mh;
             nx = wax + (right ? 0 : waw - mw);
-            client_resize(c, nx, ny, mw - 2 * c->border, mh - 2 * c->border, awesomeconf, awesomeconf->screens[screen].resize_hints, False);
+            client_resize(c, nx, ny, mw - 2 * c->border, mh - 2 * c->border, globalconf.screens[screen].resize_hints, False);
         }
         else
         {                       /* tile window */
@@ -171,7 +167,7 @@ _tile(awesome_config *awesomeconf, int screen, const Bool right)
                 ny = way + ((i - curtag->nmaster) % win_by_col) * (nh + 2 * c->border);
 
             nx = wax + current_col * (nw + 2 * c->border) + (right ? mw : 0);
-            client_resize(c, nx, ny, nw, nh, awesomeconf, awesomeconf->screens[screen].resize_hints, False);
+            client_resize(c, nx, ny, nw, nh, globalconf.screens[screen].resize_hints, False);
         }
         i++;
     }
@@ -179,15 +175,15 @@ _tile(awesome_config *awesomeconf, int screen, const Bool right)
 }
 
 void
-layout_tile(awesome_config *awesomeconf, int screen)
+layout_tile(int screen)
 {
-    _tile(awesomeconf, screen, True);
+    _tile(screen, True);
 }
 
 void
-layout_tileleft(awesome_config *awesomeconf, int screen)
+layout_tileleft(int screen)
 {
-    _tile(awesomeconf, screen, False);
+    _tile(screen, False);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

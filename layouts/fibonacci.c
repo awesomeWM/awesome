@@ -24,25 +24,27 @@
 #include "util.h"
 #include "layouts/fibonacci.h"
 
+extern awesome_config globalconf;
+
 static void
-layout_fibonacci(awesome_config *awesomeconf, int screen, int shape)
+layout_fibonacci(int screen, int shape)
 {
     int n = 0, i = 0, nx, ny, nw, nh;
     Client *c;
-    ScreenInfo *si = get_screen_info(awesomeconf->display, screen,
-                                     &awesomeconf->screens[screen].statusbar,
-                                     &awesomeconf->screens[screen].padding);
+    ScreenInfo *si = get_screen_info(globalconf.display, screen,
+                                     &globalconf.screens[screen].statusbar,
+                                     &globalconf.screens[screen].padding);
 
     nx = si[screen].x_org;
     ny = si[screen].y_org;
     nw = si[screen].width;
     nh = si[screen].height;
 
-    for(c = awesomeconf->clients; c; c = c->next)
-        if(IS_TILED(c, &awesomeconf->screens[screen], screen))
+    for(c = globalconf.clients; c; c = c->next)
+        if(IS_TILED(c, screen))
             n++;
-    for(c = awesomeconf->clients; c; c = c->next)
-        if(IS_TILED(c, &awesomeconf->screens[screen], screen))
+    for(c = globalconf.clients; c; c = c->next)
+        if(IS_TILED(c, screen))
         {
             c->ismax = False;
             if((i % 2 && nh / 2 > 2 * c->border)
@@ -81,22 +83,22 @@ layout_fibonacci(awesome_config *awesomeconf, int screen, int shape)
                     ny = si[screen].y_org;
                 i++;
             }
-            client_resize(c, nx, ny, nw - 2 * c->border, nh - 2 * c->border, awesomeconf,
-                          awesomeconf->screens[screen].resize_hints, False);
+            client_resize(c, nx, ny, nw - 2 * c->border, nh - 2 * c->border,
+                          globalconf.screens[screen].resize_hints, False);
         }
     p_delete(&si);
 }
 
 void
-layout_spiral(awesome_config *awesomeconf, int screen)
+layout_spiral(int screen)
 {
-    layout_fibonacci(awesomeconf, screen, 0);
+    layout_fibonacci(screen, 0);
 }
 
 void
-layout_dwindle(awesome_config *awesomeconf, int screen)
+layout_dwindle(int screen)
 {
-    layout_fibonacci(awesomeconf, screen, 1);
+    layout_fibonacci(screen, 1);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

@@ -31,6 +31,8 @@
 #include "focus.h"
 #include "layouts/tile.h"
 
+extern awesome_config globalconf;
+
 const NameFuncLink UicbList[] =
 {
     /* xutil.c */
@@ -87,7 +89,7 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
     char *p;
     const char *arg;
     int screen, len;
-    void (*uicb) (awesome_config *, int, const char *);
+    void (*uicb) (int, const char *);
 
     len = strlen(cmd);
     p = strtok(cmd, " ");
@@ -117,12 +119,12 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
     else
         arg = NULL;
 
-    uicb(awesomeconf, screen, arg);
+    uicb(screen, arg);
     return 0;
 }
 
 int
-parse_control(char *cmd, awesome_config *awesomeconf)
+parse_control(char *cmd)
 {
     char *p, *curcmd = cmd;
 
@@ -132,7 +134,7 @@ parse_control(char *cmd, awesome_config *awesomeconf)
     while((p = strchr(curcmd, '\n')))
     {
         *p = '\0';
-        run_uicb(curcmd, awesomeconf);
+        run_uicb(curcmd, &globalconf);
         curcmd = p + 1;
     }
 

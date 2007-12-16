@@ -22,13 +22,15 @@
 #include "tag.h"
 #include "layouts/floating.h"
 
+extern awesome_config globalconf;
+
 void
-layout_floating(awesome_config *awesomeconf, int screen)
+layout_floating(int screen)
 {
     Client *c;
 
-    for(c = awesomeconf->clients; c; c = c->next)
-        if(client_isvisible(c, &awesomeconf->screens[screen], screen))
-            client_resize(c, c->rx, c->ry, c->rw, c->rh, awesomeconf, True, False);
+    for(c = globalconf.clients; c; c = c->next)
+        if(client_isvisible(c, screen))
+            client_resize(c, c->rx, c->ry, c->rw, c->rh, True, False);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

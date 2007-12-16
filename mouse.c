@@ -28,31 +28,33 @@
 #include "window.h"
 #include "layouts/floating.h"
 
+extern awesome_config globalconf;
+
 void
-uicb_client_movemouse(awesome_config *awesomeconf, int screen, const char *arg __attribute__ ((unused)))
+uicb_client_movemouse(int screen, const char *arg __attribute__ ((unused)))
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
     Window dummy;
     XEvent ev;
     ScreenInfo *si;
-    Client *c = awesomeconf->focus->client;
+    Client *c = globalconf.focus->client;
 
     if(!c)
         return;
 
-    if((get_current_layout(awesomeconf->screens[screen])->arrange != layout_floating)
+    if((get_current_layout(screen)->arrange != layout_floating)
         && !c->isfloating)
-         uicb_client_togglefloating(awesomeconf, screen, "DUMMY");
+         uicb_client_togglefloating(screen, "DUMMY");
      else
-         restack(awesomeconf, screen);
+         restack(screen);
 
-    si = get_screen_info(c->display, c->screen, &awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
+    si = get_screen_info(c->display, c->screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
     if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, awesomeconf->cursor[CurMove], CurrentTime) != GrabSuccess)
+                    None, globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
     XQueryPointer(c->display, RootWindow(c->display, c->phys_screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
@@ -65,53 +67,53 @@ uicb_client_movemouse(awesome_config *awesomeconf, int screen, const char *arg _
             p_delete(&si);
             return;
         case ConfigureRequest:
-            handle_event_configurerequest(&ev, awesomeconf);
+            handle_event_configurerequest(&ev);
             break;
         case Expose:
-            handle_event_expose(&ev, awesomeconf);
+            handle_event_expose(&ev);
             break;
         case MapRequest:
-            handle_event_maprequest(&ev, awesomeconf);
+            handle_event_maprequest(&ev);
             break;
         case MotionNotify:
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(nx) < awesomeconf->screens[screen].snap + si[c->screen].x_org && nx > si[c->screen].x_org)
+            if(abs(nx) < globalconf.screens[screen].snap + si[c->screen].x_org && nx > si[c->screen].x_org)
                 nx = si[c->screen].x_org;
-            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < awesomeconf->screens[screen].snap)
+            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < globalconf.screens[screen].snap)
                 nx = si[c->screen].x_org + si[c->screen].width - c->w - 2 * c->border;
-            if(abs(ny) < awesomeconf->screens[screen].snap + si[c->screen].y_org && ny > si[c->screen].y_org)
+            if(abs(ny) < globalconf.screens[screen].snap + si[c->screen].y_org && ny > si[c->screen].y_org)
                 ny = si[c->screen].y_org;
-            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < awesomeconf->screens[screen].snap)
+            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < globalconf.screens[screen].snap)
                 ny = si[c->screen].y_org + si[c->screen].height - c->h - 2 * c->border;
-            client_resize(c, nx, ny, c->w, c->h, awesomeconf, False, False);
+            client_resize(c, nx, ny, c->w, c->h, False, False);
             break;
         }
     }
 }
 
 void
-uicb_client_resizemouse(awesome_config *awesomeconf, int screen, const char *arg __attribute__ ((unused)))
+uicb_client_resizemouse(int screen, const char *arg __attribute__ ((unused)))
 {
     int ocx, ocy, nw, nh;
     XEvent ev;
-    Client *c = awesomeconf->focus->client;
+    Client *c = globalconf.focus->client;
 
     if(!c)
         return;
 
-    if((get_current_layout(awesomeconf->screens[screen])->arrange != layout_floating)
+    if((get_current_layout(screen)->arrange != layout_floating)
        && !c->isfloating)
-        uicb_client_togglefloating(awesomeconf, screen, "DUMMY");
+        uicb_client_togglefloating(screen, "DUMMY");
     else
-        restack(awesomeconf, screen);
+        restack(screen);
 
     ocx = c->x;
     ocy = c->y;
     if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, awesomeconf->cursor[CurResize], CurrentTime) != GrabSuccess)
+                    None, globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
     XWarpPointer(c->display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
@@ -126,13 +128,13 @@ uicb_client_resizemouse(awesome_config *awesomeconf, int screen, const char *arg
             while(XCheckMaskEvent(c->display, EnterWindowMask, &ev));
             return;
         case ConfigureRequest:
-            handle_event_configurerequest(&ev, awesomeconf);
+            handle_event_configurerequest(&ev);
             break;
         case Expose:
-            handle_event_expose(&ev, awesomeconf);
+            handle_event_expose(&ev);
             break;
         case MapRequest:
-            handle_event_maprequest(&ev, awesomeconf);
+            handle_event_maprequest(&ev);
             break;
         case MotionNotify:
             XSync(c->display, False);
@@ -140,7 +142,7 @@ uicb_client_resizemouse(awesome_config *awesomeconf, int screen, const char *arg
                 nw = 1;
             if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
                 nh = 1;
-            client_resize(c, c->x, c->y, nw, nh, awesomeconf, True, False);
+            client_resize(c, c->x, c->y, nw, nh, True, False);
             break;
         }
     }

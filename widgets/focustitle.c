@@ -1,18 +1,15 @@
 #include "util.h"
 #include "widget.h"
 
+extern awesome_config globalconf;
+
 static char name[] = "focustitle";
 
 static int
-focustitle_draw(DrawCtx *ctx,
-                awesome_config *awesomeconf __attribute__ ((unused)),
-                VirtScreen vscreen,
-                int screen __attribute__ ((unused)),
-                int offset, 
-                int used,
-                int align)
+focustitle_draw(DrawCtx *ctx, int screen, int offset, int used, int align)
 {
-    Client *sel = awesomeconf->focus->client;
+    Client *sel = globalconf.focus->client;
+    VirtScreen vscreen = globalconf.screens[screen];
     int location = calculate_offset(vscreen.statusbar.width, 0, offset, align);
 
     if(sel)

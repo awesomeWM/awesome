@@ -26,6 +26,8 @@
 #include "focus.h"
 #include "statusbar.h"
 
+extern awesome_config globalconf;
+
 /** Get screens info
  * \param disp Display ref
  * \param screen Screen number
@@ -173,21 +175,20 @@ get_phys_screen(Display *disp, int screen)
 
 /** Move a client to a virtual screen
  * \param c the client
- * \param acf_new the awesome_config for the new screen
  * \param doresize set to True if we also move the client to the new x_org and
  *         y_org of the new screen
  */
 void
-move_client_to_screen(Client *c, awesome_config *awesomeconf, int new_screen, Bool doresize)
+move_client_to_screen(Client *c, int new_screen, Bool doresize)
 {
     Tag *tag;
     int old_screen = c->screen;
 
-    for(tag = awesomeconf->screens[old_screen].tags; tag; tag = tag->next)
-        untag_client(&awesomeconf->screens[old_screen].tclink, c, tag);
+    for(tag = globalconf.screens[old_screen].tags; tag; tag = tag->next)
+        untag_client(c, tag, old_screen);
 
     /* tag client with new screen tags */
-    tag_client_with_current_selected(c, &awesomeconf->screens[new_screen]);
+    tag_client_with_current_selected(c, new_screen);
 
     c->screen = new_screen;
 
@@ -211,17 +212,17 @@ move_client_to_screen(Client *c, awesome_config *awesomeconf, int new_screen, Bo
         if(c->ry + c->rh >= si[c->screen].y_org + si[c->screen].height)
             c->ry = si[c->screen].y_org + si[c->screen].height - c->rh - 2 * c->border;
 
-        client_resize(c, c->rx, c->ry, c->rw, c->rh, awesomeconf, True, False);
+        client_resize(c, c->rx, c->ry, c->rw, c->rh, True, False);
 
         p_delete(&si);
         p_delete(&si_old);
     }
 
-    focus(c, True, awesomeconf, c->screen);
+    focus(c, True, c->screen);
 
     /* redraw statusbar on all screens */
-    statusbar_draw(awesomeconf, old_screen);
-    statusbar_draw(awesomeconf, new_screen);
+    statusbar_draw(old_screen);
+    statusbar_draw(new_screen);
 }
 
 /** Move mouse pointer to x_org and y_xorg of specified screen
@@ -243,14 +244,13 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
 
 
 /** Switch focus to a specified screen
- * \param awesomeconf awesome config ref
  * \param arg screen number
  * \ingroup ui_callback
  */
 void
-uicb_screen_focus(awesome_config *awesomeconf, int screen, const char *arg)
+uicb_screen_focus(int screen, const char *arg)
 {
-    int new_screen, numscreens = get_screen_count(awesomeconf->display);
+    int new_screen, numscreens = get_screen_count(globalconf.display);
 
     if(arg)
         new_screen = compute_new_value_from_arg(arg, screen);
@@ -262,28 +262,25 @@ uicb_screen_focus(awesome_config *awesomeconf, int screen, const char *arg)
     if (new_screen > (numscreens - 1))
         new_screen = 0;
 
-    focus(focus_get_latest_client_for_tag(awesomeconf->focus,
-                                          awesomeconf->screens[new_screen].tclink,
-                                          get_current_tag(awesomeconf->screens[new_screen])),
-          True, awesomeconf, new_screen);
+    focus(focus_get_latest_client_for_tag(globalconf.focus,
+                                          new_screen,
+                                          get_current_tag(new_screen)),
+          True, new_screen);
 
-    move_mouse_pointer_to_screen(awesomeconf->display, new_screen);
+    move_mouse_pointer_to_screen(globalconf.display, new_screen);
 }
 
 /** Move client to a virtual screen (if Xinerama is active)
- * \param awesomeconf awesome config
  * \param arg screen number
  * \ingroup ui_callback
  */
 void
-uicb_client_movetoscreen(awesome_config * awesomeconf,
-                         int screen __attribute__ ((unused)),
-                         const char *arg)
+uicb_client_movetoscreen(int screen __attribute__ ((unused)), const char *arg)
 {
     int new_screen, prev_screen;
-    Client *sel = awesomeconf->focus->client;
+    Client *sel = globalconf.focus->client;
 
-    if(!sel || !XineramaIsActive(awesomeconf->display))
+    if(!sel || !XineramaIsActive(globalconf.display))
         return;
 
     if(arg)
@@ -291,15 +288,15 @@ uicb_client_movetoscreen(awesome_config * awesomeconf,
     else
         new_screen = sel->screen + 1;
 
-    if(new_screen >= get_screen_count(awesomeconf->display))
+    if(new_screen >= get_screen_count(globalconf.display))
         new_screen = 0;
     else if(new_screen < 0)
-        new_screen = get_screen_count(awesomeconf->display) - 1;
+        new_screen = get_screen_count(globalconf.display) - 1;
 
     prev_screen = sel->screen;
-    move_client_to_screen(sel, awesomeconf, new_screen, True);
-    move_mouse_pointer_to_screen(awesomeconf->display, new_screen);
-    arrange(awesomeconf, prev_screen);
-    arrange(awesomeconf, new_screen);
+    move_client_to_screen(sel, new_screen, True);
+    move_mouse_pointer_to_screen(globalconf.display, new_screen);
+    arrange(prev_screen);
+    arrange(new_screen);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

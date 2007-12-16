@@ -24,19 +24,19 @@
 
 #include "common.h"
 
-Bool client_isvisible(Client *, VirtScreen *, int);
+Bool client_isvisible(Client *, int);
 Client * get_client_bywin(Client *, Window);
-void client_attach(Client **, Client *);
-void client_detach(Client **, Client *);
+void client_attach(Client *);
+void client_detach(Client *);
 void client_ban(Client *);
-void focus(Client *, Bool, awesome_config *, int);
-void client_manage(Window, XWindowAttributes *, awesome_config *, int);
-void client_resize(Client *, int, int, int, int, awesome_config *, Bool, Bool);
+void focus(Client *, Bool, int);
+void client_manage(Window, XWindowAttributes *, int);
+void client_resize(Client *, int, int, int, int, Bool, Bool);
 void client_unban(Client *);
-void client_unmanage(Client *, long, awesome_config *);
+void client_unmanage(Client *, long);
 void client_updatesizehints(Client *);
 void client_updatetitle(Client *);
-void client_saveprops(Client *, VirtScreen *);
+void client_saveprops(Client *, int); 
 
 UICB_PROTO(uicb_client_kill);
 UICB_PROTO(uicb_client_moveresize);

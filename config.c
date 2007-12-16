@@ -41,6 +41,8 @@
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 
+extern awesome_config globalconf;
+
 static XColor initxcolor(Display *, int, const char *);
 static unsigned int get_numlockmask(Display *);
 
@@ -247,7 +249,7 @@ static Key *section_keys(cfg_t *cfg_keys)
  * \param scr Screen number
  */
 void
-parse_config(const char *confpatharg, awesome_config *awesomeconf)
+parse_config(const char *confpatharg)
 {
     static cfg_opt_t general_opts[] =
     {
@@ -415,7 +417,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
     }
 
-    awesomeconf->configpath = a_strdup(confpath);
+    globalconf.configpath = a_strdup(confpath);
 
     cfg = cfg_init(opts, CFGF_NONE);
 
@@ -431,9 +433,9 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
 
     /* get the right screen section */
-    for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
+    for(screen = 0; screen < get_screen_count(globalconf.display); screen++)
     {
-        virtscreen = &awesomeconf->screens[screen]; 
+        virtscreen = &globalconf.screens[screen]; 
         a_strcpy(virtscreen->statustext,
                  sizeof(virtscreen->statustext),
                  "awesome-" VERSION " (" RELEASE ")");
@@ -465,29 +467,29 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         virtscreen->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
         virtscreen->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
         virtscreen->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
-        virtscreen->font = XftFontOpenName(awesomeconf->display,
-                                                            get_phys_screen(awesomeconf->display, screen),
+        virtscreen->font = XftFontOpenName(globalconf.display,
+                                                            get_phys_screen(globalconf.display, screen),
                                                             cfg_getstr(cfg_general, "font"));
         if(!virtscreen->font)
             eprint("awesome: cannot init font\n");
         /* Colors */
-        virtscreen->colors_normal[ColBorder] = initxcolor(awesomeconf->display,
-                                                         get_phys_screen(awesomeconf->display, screen),
+        virtscreen->colors_normal[ColBorder] = initxcolor(globalconf.display,
+                                                         get_phys_screen(globalconf.display, screen),
                                                          cfg_getstr(cfg_colors, "normal_border"));
-        virtscreen->colors_normal[ColBG] = initxcolor(awesomeconf->display,
-                                                     get_phys_screen(awesomeconf->display, screen),
+        virtscreen->colors_normal[ColBG] = initxcolor(globalconf.display,
+                                                     get_phys_screen(globalconf.display, screen),
                                                      cfg_getstr(cfg_colors, "normal_bg"));
-        virtscreen->colors_normal[ColFG] = initxcolor(awesomeconf->display,
-                                                     get_phys_screen(awesomeconf->display, screen),
+        virtscreen->colors_normal[ColFG] = initxcolor(globalconf.display,
+                                                     get_phys_screen(globalconf.display, screen),
                                                      cfg_getstr(cfg_colors, "normal_fg"));
-        virtscreen->colors_selected[ColBorder] = initxcolor(awesomeconf->display,
-                                                           get_phys_screen(awesomeconf->display, screen),
+        virtscreen->colors_selected[ColBorder] = initxcolor(globalconf.display,
+                                                           get_phys_screen(globalconf.display, screen),
                                                            cfg_getstr(cfg_colors, "focus_border"));
-        virtscreen->colors_selected[ColBG] = initxcolor(awesomeconf->display,
-                                                       get_phys_screen(awesomeconf->display, screen),
+        virtscreen->colors_selected[ColBG] = initxcolor(globalconf.display,
+                                                       get_phys_screen(globalconf.display, screen),
                                                        cfg_getstr(cfg_colors, "focus_bg"));
-        virtscreen->colors_selected[ColFG] = initxcolor(awesomeconf->display,
-                                                       get_phys_screen(awesomeconf->display, screen),
+        virtscreen->colors_selected[ColFG] = initxcolor(globalconf.display,
+                                                       get_phys_screen(globalconf.display, screen),
                                                        cfg_getstr(cfg_colors, "focus_fg"));
 
         /* Statusbar */
@@ -584,7 +586,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
     /* Rules */
     if(cfg_size(cfg_rules, "rule"))
     {
-        awesomeconf->rules = rule = p_new(Rule, 1);
+        globalconf.rules = rule = p_new(Rule, 1);
         for(i = 0; i < cfg_size(cfg_rules, "rule"); i++)
         {
             cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
@@ -594,7 +596,7 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
                 rule->tags = NULL;
             rule->isfloating = cfg_getbool(cfgsectmp, "float");
             rule->screen = cfg_getint(cfgsectmp, "screen");
-            if(rule->screen >= get_screen_count(awesomeconf->display))
+            if(rule->screen >= get_screen_count(globalconf.display))
                 rule->screen = 0;
 
             if(i < cfg_size(cfg_rules, "rule") - 1)
@@ -604,30 +606,30 @@ parse_config(const char *confpatharg, awesome_config *awesomeconf)
         }
     }
     else
-        awesomeconf->rules = NULL;
+        globalconf.rules = NULL;
 
-    compileregs(awesomeconf->rules);
+    compileregs(globalconf.rules);
 
 
     /* Mouse: tags click bindings */
-    awesomeconf->buttons.tag = parse_mouse_bindings(cfg_mouse, "tag", False);
+    globalconf.buttons.tag = parse_mouse_bindings(cfg_mouse, "tag", False);
 
     /* Mouse: layout click bindings */
-    awesomeconf->buttons.layout = parse_mouse_bindings(cfg_mouse, "layout", True);
+    globalconf.buttons.layout = parse_mouse_bindings(cfg_mouse, "layout", True);
 
     /* Mouse: title click bindings */
-    awesomeconf->buttons.title = parse_mouse_bindings(cfg_mouse, "title", True);
+    globalconf.buttons.title = parse_mouse_bindings(cfg_mouse, "title", True);
 
     /* Mouse: root window click bindings */
-    awesomeconf->buttons.root = parse_mouse_bindings(cfg_mouse, "root", True);
+    globalconf.buttons.root = parse_mouse_bindings(cfg_mouse, "root", True);
 
     /* Mouse: client windows click bindings */
-    awesomeconf->buttons.client = parse_mouse_bindings(cfg_mouse, "client", True);
+    globalconf.buttons.client = parse_mouse_bindings(cfg_mouse, "client", True);
 
     /* Keys */
-    awesomeconf->numlockmask = get_numlockmask(awesomeconf->display);
+    globalconf.numlockmask = get_numlockmask(globalconf.display);
 
-    awesomeconf->keys = section_keys(cfg_keys);
+    globalconf.keys = section_keys(cfg_keys);
 
     if(defconfig)
     {

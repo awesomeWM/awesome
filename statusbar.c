@@ -30,31 +30,33 @@
 #include "tag.h"
 #include "widget.h"
 
+extern awesome_config globalconf;
+
 void
-statusbar_draw(awesome_config *awesomeconf, int screen)
+statusbar_draw(int screen)
 {
-    int phys_screen = get_phys_screen(awesomeconf->display, screen);
+    int phys_screen = get_phys_screen(globalconf.display, screen);
     VirtScreen vscreen;
     Widget *widget;
     int left = 0, right = 0;
     
-    vscreen = awesomeconf->screens[screen];
+    vscreen = globalconf.screens[screen];
     /* don't waste our time */
     if(vscreen.statusbar.position == BarOff)
         return;
 
-    DrawCtx *ctx = draw_get_context(awesomeconf->display, phys_screen,
+    DrawCtx *ctx = draw_get_context(globalconf.display, phys_screen,
                                     vscreen.statusbar.width, vscreen.statusbar.height);
 
     for(widget = vscreen.statusbar.widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
-            left += widget->draw(ctx, awesomeconf, vscreen, screen, left, (left + right), AlignLeft);
+            left += widget->draw(ctx, screen, left, (left + right), AlignLeft);
         else if (widget->alignment == AlignRight)
-            right += widget->draw(ctx, awesomeconf, vscreen, screen, right, (left + right), AlignRight);
+            right += widget->draw(ctx, screen, right, (left + right), AlignRight);
 
     for(widget = vscreen.statusbar.widgets; widget; widget = widget->next)
         if (widget->alignment == AlignFlex)
-            left += widget->draw(ctx, awesomeconf, vscreen, screen, left, (left + right), AlignFlex);
+            left += widget->draw(ctx, screen, left, (left + right), AlignFlex);
 
     if(vscreen.statusbar.position == BarRight || vscreen.statusbar.position == BarLeft)
     {
@@ -63,21 +65,21 @@ statusbar_draw(awesome_config *awesomeconf, int screen)
             d = draw_rotate(ctx, phys_screen, M_PI_2, vscreen.statusbar.height, 0);
         else
             d = draw_rotate(ctx, phys_screen, - M_PI_2, 0, vscreen.statusbar.width);
-        XCopyArea(awesomeconf->display, d,
+        XCopyArea(globalconf.display, d,
                   vscreen.statusbar.window,
-                  DefaultGC(awesomeconf->display, phys_screen), 0, 0,
+                  DefaultGC(globalconf.display, phys_screen), 0, 0,
                   vscreen.statusbar.height,
                   vscreen.statusbar.width, 0, 0);
-        XFreePixmap(awesomeconf->display, d);
+        XFreePixmap(globalconf.display, d);
     }
     else
-        XCopyArea(awesomeconf->display, ctx->drawable,
+        XCopyArea(globalconf.display, ctx->drawable,
                   vscreen.statusbar.window,
-                  DefaultGC(awesomeconf->display, phys_screen), 0, 0,
+                  DefaultGC(globalconf.display, phys_screen), 0, 0,
                   vscreen.statusbar.width, vscreen.statusbar.height, 0, 0);
 
     draw_free_context(ctx);
-    XSync(awesomeconf->display, False);
+    XSync(globalconf.display, False);
 }
 
 void
@@ -168,38 +170,34 @@ statusbar_get_position_from_str(const char * pos)
 }
 
 void
-uicb_statusbar_toggle(awesome_config *awesomeconf,
-               int screen,
-               const char *arg __attribute__ ((unused)))
+uicb_statusbar_toggle(int screen, const char *arg __attribute__ ((unused)))
 {
-    if(awesomeconf->screens[screen].statusbar.position == BarOff)
-        awesomeconf->screens[screen].statusbar.position = (awesomeconf->screens[screen].statusbar.dposition == BarOff) ? BarTop : awesomeconf->screens[screen].statusbar.dposition;
+    if(globalconf.screens[screen].statusbar.position == BarOff)
+        globalconf.screens[screen].statusbar.position = (globalconf.screens[screen].statusbar.dposition == BarOff) ? BarTop : globalconf.screens[screen].statusbar.dposition;
     else
-        awesomeconf->screens[screen].statusbar.position = BarOff;
-    statusbar_update_position(awesomeconf->display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
-    arrange(awesomeconf, screen);
+        globalconf.screens[screen].statusbar.position = BarOff;
+    statusbar_update_position(globalconf.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    arrange(screen);
 }
 
 void
-uicb_statusbar_set_position(awesome_config *awesomeconf,
-                    int screen,
-                    const char *arg)
+uicb_statusbar_set_position(int screen, const char *arg)
 {
-    awesomeconf->screens[screen].statusbar.dposition = 
-        awesomeconf->screens[screen].statusbar.position =
+    globalconf.screens[screen].statusbar.dposition = 
+        globalconf.screens[screen].statusbar.position =
             statusbar_get_position_from_str(arg);
-    statusbar_update_position(awesomeconf->display, awesomeconf->screens[screen].statusbar, &awesomeconf->screens[screen].padding);
+    statusbar_update_position(globalconf.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 }
 
 void
-uicb_statusbar_set_text(awesome_config *awesomeconf, int screen, const char *arg)
+uicb_statusbar_set_text(int screen, const char *arg)
 {
     if(!arg)
         return;
-    a_strncpy(awesomeconf->screens[screen].statustext,
-              sizeof(awesomeconf->screens[screen].statustext), arg, a_strlen(arg));
+    a_strncpy(globalconf.screens[screen].statustext,
+              sizeof(globalconf.screens[screen].statustext), arg, a_strlen(arg));
 
-    statusbar_draw(awesomeconf, screen);
+    statusbar_draw(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

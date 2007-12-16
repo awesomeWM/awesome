@@ -28,17 +28,18 @@
 #include "util.h"
 #include "rules.h"
 
+extern awesome_config globalconf;
 
 static void
-detach_tagclientlink(TagClientLink **head, TagClientLink *tc)
+detach_tagclientlink(int screen, TagClientLink *tc)
 {
     TagClientLink *tmp;
 
-    if(*head == tc)
-        *head = tc->next;
+    if(globalconf.screens[screen].tclink == tc)
+        globalconf.screens[screen].tclink = tc->next;
     else
     {
-        for(tmp = *head; tmp && tmp->next != tc; tmp = tmp->next);
+        for(tmp = globalconf.screens[screen].tclink; tmp && tmp->next != tc; tmp = tmp->next);
         tmp->next = tc->next;
     }
     
@@ -46,21 +47,21 @@ detach_tagclientlink(TagClientLink **head, TagClientLink *tc)
 }
 
 void
-tag_client(TagClientLink **head, Client *c, Tag *t)
+tag_client(Client *c, Tag *t, int screen)
 {
     TagClientLink *tc, *new_tc;
 
     /* don't tag twice */
-    if(is_client_tagged(*head, c, t))
+    if(is_client_tagged(c, t, screen))
         return;
 
     new_tc = p_new(TagClientLink, 1);
 
-    if(!*head)
-        *head = new_tc;
+    if(!globalconf.screens[screen].tclink)
+        globalconf.screens[screen].tclink = new_tc;
     else
     {
-        for(tc = *head; tc->next; tc = tc->next);
+        for(tc = globalconf.screens[screen].tclink; tc->next; tc = tc->next);
         tc->next = new_tc;
     }
 
@@ -69,64 +70,66 @@ tag_client(TagClientLink **head, Client *c, Tag *t)
 }
 
 void
-untag_client(TagClientLink **head, Client *c, Tag *t)
+untag_client(Client *c, Tag *t, int screen)
 {
     TagClientLink *tc;
 
-    for(tc = *head; tc; tc = tc->next)
+    for(tc = globalconf.screens[screen].tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
-            detach_tagclientlink(head, tc);
+            detach_tagclientlink(screen, tc);
 }
 
 Bool
-is_client_tagged(TagClientLink *head, Client *c, Tag *t)
+is_client_tagged(Client *c, Tag *t, int screen)
 {
     TagClientLink *tc;
 
-    for(tc = head; tc; tc = tc->next)
+    for(tc = globalconf.screens[screen].tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
             return True;
     return False;
 }
 
 void
-tag_client_with_current_selected(Client *c, VirtScreen *screen)
+tag_client_with_current_selected(Client *c, int screen)
 {
     Tag *tag;
+    VirtScreen vscreen;
 
-    for(tag = screen->tags; tag; tag = tag->next)
+    vscreen = globalconf.screens[screen];
+    for(tag = vscreen.tags; tag; tag = tag->next)
         if(tag->selected)
-            tag_client(&screen->tclink, c, tag);
+            tag_client(c, tag, screen);
         else
-            untag_client(&screen->tclink, c, tag);
+            untag_client(c, tag, screen);
 }
 
 void
-tag_client_with_rules(Client *c, awesome_config *awesomeconf)
+tag_client_with_rules(Client *c)
 {
     Rule *r;
     Tag *tag;
     Bool matched = False;
 
-    for(r = awesomeconf->rules; r; r = r->next)
+    for(r = globalconf.rules; r; r = r->next)
         if(client_match_rule(c, r))
         {
             c->isfloating = r->isfloating;
 
             if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
-                move_client_to_screen(c, awesomeconf, r->screen, True);
+                move_client_to_screen(c, r->screen, True);
 
-            for(tag = awesomeconf->screens[c->screen].tags; tag; tag = tag->next)
+            for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
                 if(is_tag_match_rules(tag, r))
                 {
                     matched = True;
-                    tag_client(&awesomeconf->screens[c->screen].tclink, c, tag);
+                    tag_client(c, tag, c->screen);
                 }
                 else
-                    untag_client(&awesomeconf->screens[c->screen].tclink, c, tag);
+                    untag_client(c, tag, c->screen);
 
             if(!matched)
-                tag_client_with_current_selected(c, &awesomeconf->screens[c->screen]);
+                tag_client_with_current_selected(c, c->screen);
             break;
         }
 }
@@ -136,13 +139,11 @@ tag_client_with_rules(Client *c, awesome_config *awesomeconf)
  * \ingroup ui_callback
  */
 void
-uicb_client_tag(awesome_config *awesomeconf,
-                int screen,
-                const char *arg)
+uicb_client_tag(int screen, const char *arg)
 {
     int tag_id = -1;
     Tag *tag, *target_tag;
-    Client *sel = awesomeconf->focus->client;
+    Client *sel = globalconf.focus->client;
 
     if(!sel)
         return;
@@ -152,22 +153,22 @@ uicb_client_tag(awesome_config *awesomeconf,
 	tag_id = atoi(arg) - 1;
         if(tag_id != -1)
         {
-            for(target_tag = awesomeconf->screens[screen].tags; target_tag && tag_id > 0;
+            for(target_tag = globalconf.screens[screen].tags; target_tag && tag_id > 0;
                 target_tag = target_tag->next, tag_id--);
             if(target_tag)
             {
-                for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
-                    untag_client(&awesomeconf->screens[screen].tclink, sel, tag);
-                tag_client(&awesomeconf->screens[screen].tclink, sel, target_tag);
+                for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+                    untag_client(sel, tag, screen);
+                tag_client(sel, target_tag, screen);
             }
         }
     }
     else
-        for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
-            tag_client(&awesomeconf->screens[screen].tclink, sel, tag);
+        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+            tag_client(sel, tag, screen);
 
-    client_saveprops(sel, &awesomeconf->screens[screen]);
-    arrange(awesomeconf, screen);
+    client_saveprops(sel, screen);
+    arrange(screen);
 }
 
 /** Toggle floating state of a client
@@ -175,11 +176,9 @@ uicb_client_tag(awesome_config *awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_client_togglefloating(awesome_config * awesomeconf,
-                           int screen,
-                    const char *arg __attribute__ ((unused)))
+uicb_client_togglefloating(int screen, const char *arg __attribute__ ((unused)))
 {
-    Client *sel = awesomeconf->focus->client;
+    Client *sel = globalconf.focus->client;
     
     if(!sel)
         return;
@@ -187,12 +186,12 @@ uicb_client_togglefloating(awesome_config * awesomeconf,
     sel->isfloating = !sel->isfloating;
 
     if (arg == NULL)
-        client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, awesomeconf, True, False);
+        client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, True, False);
     else
-        client_resize(sel, sel->x, sel->y, sel->w, sel->h, awesomeconf, True, True);
+        client_resize(sel, sel->x, sel->y, sel->w, sel->h, True, True);
 
-    client_saveprops(sel, &awesomeconf->screens[screen]);
-    arrange(awesomeconf, screen);
+    client_saveprops(sel, screen);
+    arrange(screen);
 }
 
 /** Toggle a tag on client
@@ -200,11 +199,9 @@ uicb_client_togglefloating(awesome_config * awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_client_toggletag(awesome_config *awesomeconf,
-                      int screen,
-                      const char *arg)
+uicb_client_toggletag(int screen, const char *arg)
 {
-    Client *sel = awesomeconf->focus->client;
+    Client *sel = globalconf.focus->client;
     int i;
     Tag *tag, *target_tag;
 
@@ -214,32 +211,32 @@ uicb_client_toggletag(awesome_config *awesomeconf,
     if(arg)
     {
         i = atoi(arg) - 1;
-        for(target_tag = awesomeconf->screens[screen].tags; target_tag && i > 0;
+        for(target_tag = globalconf.screens[screen].tags; target_tag && i > 0;
             target_tag = target_tag->next, i--);
         if(target_tag)
         {
-            if(is_client_tagged(awesomeconf->screens[screen].tclink, sel, target_tag))
-                untag_client(&awesomeconf->screens[screen].tclink, sel, target_tag);
+            if(is_client_tagged(sel, target_tag, screen))
+                untag_client(sel, target_tag, screen);
             else
-                tag_client(&awesomeconf->screens[screen].tclink, sel, target_tag);
+                tag_client(sel, target_tag, screen);
         }
 
         /* check that there's at least one tag selected for this client*/
-        for(tag = awesomeconf->screens[screen].tags; tag
-            && !is_client_tagged(awesomeconf->screens[screen].tclink, sel, tag); tag = tag->next)
+        for(tag = globalconf.screens[screen].tags; tag
+            && !is_client_tagged(sel, tag, screen); tag = tag->next)
 
         if(!tag)
-            tag_client(&awesomeconf->screens[screen].tclink, sel, target_tag);
+            tag_client(sel, target_tag, screen);
     }
     else
-        for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
-            if(is_client_tagged(awesomeconf->screens[screen].tclink, sel, tag))
-                tag_client(&awesomeconf->screens[screen].tclink, sel, tag);
+        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+            if(is_client_tagged(sel, tag, screen))
+                tag_client(sel, tag, screen);
             else
-                untag_client(&awesomeconf->screens[screen].tclink, sel, tag);
+                untag_client(sel, tag, screen);
 
-    client_saveprops(sel, &awesomeconf->screens[screen]);
-    arrange(awesomeconf, screen);
+    client_saveprops(sel, screen);
+    arrange(screen);
 }
 
 /** Add a tag to viewed tags
@@ -247,9 +244,7 @@ uicb_client_toggletag(awesome_config *awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_tag_toggleview(awesome_config *awesomeconf,
-                    int screen,
-                    const char *arg)
+uicb_tag_toggleview(int screen, const char *arg)
 {
     int i;
     Tag *tag, *target_tag;
@@ -257,34 +252,31 @@ uicb_tag_toggleview(awesome_config *awesomeconf,
     if(arg)
     {
         i = atoi(arg) - 1;
-        for(target_tag = awesomeconf->screens[screen].tags; target_tag && i > 0;
+        for(target_tag = globalconf.screens[screen].tags; target_tag && i > 0;
             target_tag = target_tag->next, i--);
 
         if(target_tag)
             target_tag->selected = !target_tag->selected;
 
         /* check that there's at least one tag selected */
-        for(tag = awesomeconf->screens[screen].tags; tag && !tag->selected; tag = tag->next);
+        for(tag = globalconf.screens[screen].tags; tag && !tag->selected; tag = tag->next);
         if(!tag)
             target_tag->selected = True;
     }
     else
-        for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
+        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag->selected = !tag->selected;
 
-    saveawesomeprops(awesomeconf, screen);
-    arrange(awesomeconf, screen);
+    saveawesomeprops(screen);
+    arrange(screen);
 }
 
 /** View tag
- * \param awesomeconf awesome config ref
  * \param arg tag to view
  * \ingroup ui_callback
  */
 void
-uicb_tag_view(awesome_config *awesomeconf,
-              int screen,
-              const char *arg)
+uicb_tag_view(int screen, const char *arg)
 {
     int i;
     Tag *tag, *target_tag;
@@ -292,43 +284,40 @@ uicb_tag_view(awesome_config *awesomeconf,
     if(arg)
     {
 	i = atoi(arg) - 1;
-        for(target_tag = awesomeconf->screens[screen].tags; target_tag && i > 0;
+        for(target_tag = globalconf.screens[screen].tags; target_tag && i > 0;
             target_tag = target_tag->next, i--);
         if(target_tag)
         {
-            for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
+            for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
                 tag->selected = False;
             target_tag->selected = True;
         }
     }
     else
-        for(tag = awesomeconf->screens[screen].tags; tag; tag = tag->next)
+        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag->selected = True;
 
-    saveawesomeprops(awesomeconf, screen);
-    arrange(awesomeconf, screen);
+    saveawesomeprops(screen);
+    arrange(screen);
 }
 
 /** View previously selected tags
- * \param awesomeconf awesome config ref
  * \param arg unused
  * \ingroup ui_callback
  */
 void
-uicb_tag_prev_selected(awesome_config *awesomeconf,
-                       int screen,
-                       const char *arg __attribute__ ((unused)))
+uicb_tag_prev_selected(int screen, const char *arg __attribute__ ((unused)))
 {
     Tag *tag;
     Bool t;
 
-    for(tag =  awesomeconf->screens[screen].tags; tag; tag = tag->next)
+    for(tag =  globalconf.screens[screen].tags; tag; tag = tag->next)
     {
         t = tag->selected;
         tag->selected = tag->was_selected;
         tag->was_selected = t;
     }
-    arrange(awesomeconf, screen);
+    arrange(screen);
 }
 
 /** View next tag
@@ -336,11 +325,9 @@ uicb_tag_prev_selected(awesome_config *awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_tag_viewnext(awesome_config *awesomeconf,
-                  int screen,
-                  const char *arg __attribute__ ((unused)))
+uicb_tag_viewnext(int screen, const char *arg __attribute__ ((unused)))
 {
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
+    Tag *curtag = get_current_tag(screen);
 
     if(!curtag->next)
         return;
@@ -348,8 +335,8 @@ uicb_tag_viewnext(awesome_config *awesomeconf,
     curtag->selected = False;
     curtag->next->selected = True;
 
-    saveawesomeprops(awesomeconf, screen);
-    arrange(awesomeconf, screen);
+    saveawesomeprops(screen);
+    arrange(screen);
 }
 
 /** View previous tag
@@ -357,19 +344,17 @@ uicb_tag_viewnext(awesome_config *awesomeconf,
  * \ingroup ui_callback
  */
 void
-uicb_tag_viewprev(awesome_config *awesomeconf,
-                  int screen,
-                  const char *arg __attribute__ ((unused)))
+uicb_tag_viewprev(int screen, const char *arg __attribute__ ((unused)))
 {
-    Tag *tag, *curtag = get_current_tag(awesomeconf->screens[screen]);
+    Tag *tag, *curtag = get_current_tag(screen);
 
-    for(tag = awesomeconf->screens[screen].tags; tag && tag->next != curtag; tag = tag->next);
+    for(tag = globalconf.screens[screen].tags; tag && tag->next != curtag; tag = tag->next);
     if(tag)
     {
         tag->selected = True;
         curtag->selected = False;
-        saveawesomeprops(awesomeconf, screen);
-        arrange(awesomeconf, screen);
+        saveawesomeprops(screen);
+        arrange(screen);
     }
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

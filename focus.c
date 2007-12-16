@@ -24,6 +24,8 @@
 #include "layout.h"
 #include "focus.h" 
 
+extern awesome_config globalconf;
+
 static FocusList *
 focus_get_node_by_client(FocusList *head, Client *c)
 {
@@ -93,25 +95,23 @@ focus_delete_client(FocusList **head, Client *c)
 }
 
 Client *
-focus_get_latest_client_for_tag(FocusList *head, TagClientLink *tc, Tag *t)
+focus_get_latest_client_for_tag(FocusList *head, int screen, Tag *t)
 {
     FocusList *fl;
 
     for(fl = head; fl; fl = fl->prev)
-        if(is_client_tagged(tc, fl->client, t))
+        if(is_client_tagged(fl->client, t, screen))
            return fl->client;
 
     return NULL;
 }
 
 void
-uicb_focus_history(awesome_config *awesomeconf,
-                   int screen,
-                   const char *arg)
+uicb_focus_history(int screen, const char *arg)
 {
     int i;
-    FocusList *fl = awesomeconf->focus;
-    Tag *curtag = get_current_tag(awesomeconf->screens[screen]);
+    FocusList *fl = globalconf.focus;
+    Tag *curtag = get_current_tag(screen);
 
     if(arg)
     {
@@ -120,12 +120,10 @@ uicb_focus_history(awesome_config *awesomeconf,
         if(i < 0)
         {
             for(; fl && i < 0; fl = fl->prev)
-                if(is_client_tagged(awesomeconf->screens[screen].tclink,
-                                    fl->client,
-                                    curtag))
+                if(is_client_tagged(fl->client, curtag, screen))
                     i++;
             if(fl)
-                focus(fl->client, True, awesomeconf, screen);
+                focus(fl->client, True, screen);
         }
     }
 }

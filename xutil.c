@@ -27,23 +27,22 @@
 #include "util.h"
 #include "xutil.h"
 
+
+extern awesome_config globalconf;
+
 void
-uicb_exec(awesome_config * awesomeconf,
-          int screen __attribute__ ((unused)),
-          const char *arg)
+uicb_exec(int screen __attribute__ ((unused)), const char *arg)
 {
     char path[PATH_MAX];
-    if(awesomeconf->display)
-        close(ConnectionNumber(awesomeconf->display));
+    if(globalconf.display)
+        close(ConnectionNumber(globalconf.display));
 
     sscanf(arg, "%s", path);
     execlp(path, arg, NULL);
 }
 
 void
-uicb_spawn(awesome_config * awesomeconf,
-           int screen,
-           const char *arg)
+uicb_spawn(int screen, const char *arg)
 {
     static char *shell = NULL;
     char *display = NULL;
@@ -54,7 +53,7 @@ uicb_spawn(awesome_config * awesomeconf,
     if(!arg)
         return;
 
-    if(!XineramaIsActive(awesomeconf->display) && (tmp = getenv("DISPLAY")))
+    if(!XineramaIsActive(globalconf.display) && (tmp = getenv("DISPLAY")))
     {
         display = a_strdup(tmp);
         if((tmp = strrchr(display, '.')))
@@ -70,8 +69,8 @@ uicb_spawn(awesome_config * awesomeconf,
     {
         if(fork() == 0)
         {
-            if(awesomeconf->display)
-                close(ConnectionNumber(awesomeconf->display));
+            if(globalconf.display)
+                close(ConnectionNumber(globalconf.display));
             setsid();
             execl(shell, shell, "-c", arg, (char *) NULL);
             warn("execl '%s -c %s'", shell, arg);

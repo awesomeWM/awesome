@@ -24,22 +24,22 @@
 
 #include "config.h"
 
-void grabkeys(awesome_config *, int);
+void grabkeys(int);
 
-void handle_event_buttonpress(XEvent *, awesome_config *);
-void handle_event_configurerequest(XEvent *, awesome_config *);
-void handle_event_configurenotify(XEvent *, awesome_config *);
-void handle_event_destroynotify(XEvent *, awesome_config *);
-void handle_event_enternotify(XEvent *, awesome_config *);
-void handle_event_expose(XEvent *, awesome_config *);
-void handle_event_keypress(XEvent *, awesome_config *);
-void handle_event_leavenotify(XEvent *, awesome_config *);
-void handle_event_mappingnotify(XEvent *, awesome_config *);
-void handle_event_maprequest(XEvent *, awesome_config *);
-void handle_event_propertynotify(XEvent *, awesome_config *);
-void handle_event_unmapnotify(XEvent *, awesome_config *);
-void handle_event_shape(XEvent *, awesome_config *);
-void handle_event_randr_screen_change_notify(XEvent *, awesome_config *);
+void handle_event_buttonpress(XEvent *);
+void handle_event_configurerequest(XEvent *);
+void handle_event_configurenotify(XEvent *);
+void handle_event_destroynotify(XEvent *);
+void handle_event_enternotify(XEvent *);
+void handle_event_expose(XEvent *);
+void handle_event_keypress(XEvent *);
+void handle_event_leavenotify(XEvent *);
+void handle_event_mappingnotify(XEvent *);
+void handle_event_maprequest(XEvent *);
+void handle_event_propertynotify(XEvent *);
+void handle_event_unmapnotify(XEvent *);
+void handle_event_shape(XEvent *);
+void handle_event_randr_screen_change_notify(XEvent *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

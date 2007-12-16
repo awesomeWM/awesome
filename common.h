@@ -24,11 +24,11 @@
 
 #include "config.h"
 
-/** Common prototype definition for ui_callbak functions */
-#define UICB_PROTO(name)         void name(awesome_config *, int, const char *)
+/** Common prototype definition for ui_callback functions */
+#define UICB_PROTO(name)         void name(int, const char *)
 
 /** Common prototype definition for layouts function */
-#define LAYOUT_PROTO(name)         void name(awesome_config *, int)
+#define LAYOUT_PROTO(name)         void name(int)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

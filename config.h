@@ -55,7 +55,7 @@ typedef struct Layout Layout;
 struct Layout
 {
     char *symbol;
-    void (*arrange) (awesome_config *, int);
+    void (*arrange) (int);
     Layout *next;
 };
 
@@ -64,7 +64,7 @@ struct Key
 {
     unsigned long mod;
     KeySym keysym;
-    void (*func) (awesome_config *, int, char *);
+    void (*func) (int, char *);
     char *arg;
     Key *next;
 };
@@ -74,7 +74,7 @@ struct Button
 {
     unsigned long mod;
     unsigned int button;
-    void (*func) (awesome_config *, int, char *);
+    void (*func) (int, char *);
     char *arg;
     Button *next;
 };
@@ -224,9 +224,7 @@ typedef struct
 struct Widget
 {
     char *name;
-    int (*draw)(DrawCtx *,
-                awesome_config *,
-                VirtScreen, int, int, int, int);
+    int (*draw)(DrawCtx *, int, int, int, int);
     Statusbar *statusbar;
     int alignment;
     Widget *next;
@@ -269,7 +267,7 @@ struct awesome_config
     FocusList *focus;
 };
 
-void parse_config(const char *, awesome_config *);
+void parse_config(const char *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

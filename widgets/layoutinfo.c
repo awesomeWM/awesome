@@ -2,18 +2,17 @@
 #include "util.h"
 #include "layout.h"
 
+extern awesome_config globalconf;
+
 static char name[] = "layoutinfo";
 
 static int
-layoutinfo_draw(DrawCtx *ctx,
-                  awesome_config *awesomeconf __attribute__ ((unused)),
-                  VirtScreen vscreen,
-                  int screen __attribute__ ((unused)),
-                  int offset, 
+layoutinfo_draw(DrawCtx *ctx, int screen, int offset, 
                   int used __attribute__ ((unused)),
                   int align __attribute__ ((unused)))
 {
     int width = 0, location; 
+    VirtScreen vscreen = globalconf.screens[screen];
     Layout *l;
     for(l = vscreen.layouts ; l; l = l->next)
         width = MAX(width, (textwidth(ctx, vscreen.font, l->symbol)));
@@ -22,7 +21,7 @@ layoutinfo_draw(DrawCtx *ctx,
              width,
              vscreen.statusbar.height,
              vscreen.font,
-             get_current_layout(vscreen)->symbol,
+             get_current_layout(screen)->symbol,
              vscreen.colors_normal);
     return width;
 }

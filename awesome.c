@@ -52,6 +52,8 @@
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
 
+awesome_config globalconf;
+
 static inline void
 cleanup_buttons(Button *buttons)
 {
@@ -65,24 +67,24 @@ cleanup_buttons(Button *buttons)
     }
 }
 
-void
-cleanup_screen(awesome_config *awesomeconf, int screen)
+static void
+cleanup_screen(int screen)
 {
     Layout *l, *ln;
     Tag *t, *tn;
 
-    XftFontClose(awesomeconf->display, awesomeconf->screens[screen].font);
-    XUngrabKey(awesomeconf->display, AnyKey, AnyModifier, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)));
-    XDestroyWindow(awesomeconf->display, awesomeconf->screens[screen].statusbar.window);
+    XftFontClose(globalconf.display, globalconf.screens[screen].font);
+    XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)));
+    XDestroyWindow(globalconf.display, globalconf.screens[screen].statusbar.window);
 
-    for(t = awesomeconf->screens[screen].tags; t; t = tn)
+    for(t = globalconf.screens[screen].tags; t; t = tn)
     {
         tn = t->next;
         p_delete(&t->name);
         p_delete(&t);
     }
 
-    for(l = awesomeconf->screens[screen].layouts; l; l = ln)
+    for(l = globalconf.screens[screen].layouts; l; l = ln)
     {
         ln = l->next;
         p_delete(&l->symbol);
@@ -94,23 +96,23 @@ cleanup_screen(awesome_config *awesomeconf, int screen)
  * \param awesomeconf awesome config
  */
 static void
-cleanup(awesome_config *awesomeconf)
+cleanup()
 {
     int screen;
     Rule *r, *rn;
     Key *k, *kn;
 
-    while(awesomeconf->clients)
+    while(globalconf.clients)
     {
-        client_unban(awesomeconf->clients);
-        client_unmanage(awesomeconf->clients, NormalState, awesomeconf);
+        client_unban(globalconf.clients);
+        client_unmanage(globalconf.clients, NormalState);
     }
 
-    XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurNormal]);
-    XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurResize]);
-    XFreeCursor(awesomeconf->display, awesomeconf->cursor[CurMove]);
+    XFreeCursor(globalconf.display, globalconf.cursor[CurNormal]);
+    XFreeCursor(globalconf.display, globalconf.cursor[CurResize]);
+    XFreeCursor(globalconf.display, globalconf.cursor[CurMove]);
 
-    for(r = awesomeconf->rules; r; r = rn)
+    for(r = globalconf.rules; r; r = rn)
     {
         rn = r->next;
         p_delete(&r->prop);
@@ -120,72 +122,70 @@ cleanup(awesome_config *awesomeconf)
         p_delete(&r);
     }
 
-    for(k = awesomeconf->keys; k; k = kn)
+    for(k = globalconf.keys; k; k = kn)
     {
         kn = k->next;
         p_delete(&k->arg);
         p_delete(&k);
     }
 
-    cleanup_buttons(awesomeconf->buttons.tag);
-    cleanup_buttons(awesomeconf->buttons.title);
-    cleanup_buttons(awesomeconf->buttons.layout);
-    cleanup_buttons(awesomeconf->buttons.root);
-    cleanup_buttons(awesomeconf->buttons.client);
+    cleanup_buttons(globalconf.buttons.tag);
+    cleanup_buttons(globalconf.buttons.title);
+    cleanup_buttons(globalconf.buttons.layout);
+    cleanup_buttons(globalconf.buttons.root);
+    cleanup_buttons(globalconf.buttons.client);
 
-    p_delete(&awesomeconf->configpath);
+    p_delete(&globalconf.configpath);
 
-    for(screen = 0; screen < get_screen_count(awesomeconf->display); screen++)
-        cleanup_screen(awesomeconf, screen);
+    for(screen = 0; screen < get_screen_count(globalconf.display); screen++)
+        cleanup_screen(screen);
 
-    XSetInputFocus(awesomeconf->display, PointerRoot, RevertToPointerRoot, CurrentTime);
-    XSync(awesomeconf->display, False);
+    XSetInputFocus(globalconf.display, PointerRoot, RevertToPointerRoot, CurrentTime);
+    XSync(globalconf.display, False);
 
-    p_delete(&awesomeconf->clients);
-    p_delete(&awesomeconf);
+    p_delete(&globalconf.clients);
 }
 
 /** Scan X to find windows to manage
  * \param screen Screen number
- * \param awesomeconf awesome config
  */
 static void
-scan(awesome_config *awesomeconf)
+scan()
 {
     unsigned int i, num;
     int screen, real_screen;
     Window *wins = NULL, d1, d2;
     XWindowAttributes wa;
 
-    for(screen = 0; screen < ScreenCount(awesomeconf->display); screen++)
+    for(screen = 0; screen < ScreenCount(globalconf.display); screen++)
     {
-        if(XQueryTree(awesomeconf->display, RootWindow(awesomeconf->display, screen), &d1, &d2, &wins, &num))
+        if(XQueryTree(globalconf.display, RootWindow(globalconf.display, screen), &d1, &d2, &wins, &num))
         {
             real_screen = screen;
             for(i = 0; i < num; i++)
             {
-                if(!XGetWindowAttributes(awesomeconf->display, wins[i], &wa)
+                if(!XGetWindowAttributes(globalconf.display, wins[i], &wa)
                    || wa.override_redirect
-                   || XGetTransientForHint(awesomeconf->display, wins[i], &d1))
+                   || XGetTransientForHint(globalconf.display, wins[i], &d1))
                     continue;
-                if(wa.map_state == IsViewable || window_getstate(awesomeconf->display, wins[i]) == IconicState)
+                if(wa.map_state == IsViewable || window_getstate(globalconf.display, wins[i]) == IconicState)
                 {
                     if(screen == 0)
-                        real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    client_manage(wins[i], &wa, awesomeconf, real_screen);
+                        real_screen = get_screen_bycoord(globalconf.display, wa.x, wa.y);
+                    client_manage(wins[i], &wa, real_screen);
                 }
             }
             /* now the transients */
             for(i = 0; i < num; i++)
             {
-                if(!XGetWindowAttributes(awesomeconf->display, wins[i], &wa))
+                if(!XGetWindowAttributes(globalconf.display, wins[i], &wa))
                     continue;
-                if(XGetTransientForHint(awesomeconf->display, wins[i], &d1)
-                   && (wa.map_state == IsViewable || window_getstate(awesomeconf->display, wins[i]) == IconicState))
+                if(XGetTransientForHint(globalconf.display, wins[i], &d1)
+                   && (wa.map_state == IsViewable || window_getstate(globalconf.display, wins[i]) == IconicState))
                 {
                     if(screen == 0)
-                        real_screen = get_screen_bycoord(awesomeconf->display, wa.x, wa.y);
-                    client_manage(wins[i], &wa, awesomeconf, real_screen);
+                        real_screen = get_screen_bycoord(globalconf.display, wa.x, wa.y);
+                    client_manage(wins[i], &wa, real_screen);
                 }
             }
         }
@@ -195,40 +195,40 @@ scan(awesome_config *awesomeconf)
 }
 
 /** Setup everything before running
- * \param awesomeconf awesome config ref
+ * \param screen Screen number
  * \todo clean things...
  */
 static void
-setup(awesome_config *awesomeconf, int screen)
+setup(int screen)
 {
     XSetWindowAttributes wa;
 
     /* init cursors */
-    awesomeconf->cursor[CurNormal] = XCreateFontCursor(awesomeconf->display, XC_left_ptr);
-    awesomeconf->cursor[CurResize] = XCreateFontCursor(awesomeconf->display, XC_sizing);
-    awesomeconf->cursor[CurMove] = XCreateFontCursor(awesomeconf->display, XC_fleur);
+    globalconf.cursor[CurNormal] = XCreateFontCursor(globalconf.display, XC_left_ptr);
+    globalconf.cursor[CurResize] = XCreateFontCursor(globalconf.display, XC_sizing);
+    globalconf.cursor[CurMove] = XCreateFontCursor(globalconf.display, XC_fleur);
 
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
-    wa.cursor = awesomeconf->cursor[CurNormal];
+    wa.cursor = globalconf.cursor[CurNormal];
 
-    XChangeWindowAttributes(awesomeconf->display,
-                            RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)),
+    XChangeWindowAttributes(globalconf.display,
+                            RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)),
                             CWEventMask | CWCursor, &wa);
 
-    XSelectInput(awesomeconf->display, RootWindow(awesomeconf->display, get_phys_screen(awesomeconf->display, screen)), wa.event_mask);
+    XSelectInput(globalconf.display, RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)), wa.event_mask);
 
-    grabkeys(awesomeconf, screen);
+    grabkeys(screen);
 }
 
-void
-setup_screen(awesome_config *awesomeconf, int screen)
+static void
+setup_screen(int screen)
 {
-    setup(awesomeconf, screen);
-    statusbar_init(awesomeconf->display, screen, &awesomeconf->screens[screen].statusbar,
-                   awesomeconf->cursor[CurNormal], awesomeconf->screens[screen].font,
-                   &awesomeconf->screens[screen].padding);
+    setup(screen);
+    statusbar_init(globalconf.display, screen, &globalconf.screens[screen].statusbar,
+                   globalconf.cursor[CurNormal], globalconf.screens[screen].font,
+                   &globalconf.screens[screen].padding);
 }
 
 /** Startup Error handler to check if another window manager
@@ -243,14 +243,11 @@ xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribut
 }
 
 /** Quit awesome
- * \param awesomeconf awesome config
  * \param arg nothing
  * \ingroup ui_callback
  */
 void
-uicb_quit(awesome_config *awesomeconf __attribute__((unused)),
-          int screen __attribute__ ((unused)),
-          const char *arg __attribute__ ((unused)))
+uicb_quit(int screen __attribute__ ((unused)), const char *arg __attribute__ ((unused)))
 {
     running = False;
 }
@@ -282,7 +279,7 @@ xerror(Display * edpy, XErrorEvent * ee)
  * \param argv who knows
  * \return EXIT_SUCCESS I hope
  */
-typedef void event_handler (XEvent *, awesome_config *);
+typedef void event_handler (XEvent *);
 int
 main(int argc, char *argv[])
 {
@@ -292,7 +289,6 @@ main(int argc, char *argv[])
     fd_set rd;
     XEvent ev;
     Display * dpy;
-    awesome_config *awesomeconf;
     int shape_event, randr_event_base;
     int screen;
     enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */
@@ -337,19 +333,17 @@ main(int argc, char *argv[])
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
 
-    /* allocate stuff */
-    awesomeconf = p_new(awesome_config, 1);
-    awesomeconf->screens = p_new(VirtScreen, get_screen_count(dpy));
-    focus_add_client(&awesomeconf->focus, NULL);
+    globalconf.screens = p_new(VirtScreen, get_screen_count(dpy));
+    focus_add_client(&globalconf.focus, NULL);
     /* store display */
-    awesomeconf->display = dpy;
-    parse_config(confpath, awesomeconf);
+    globalconf.display = dpy;
+    parse_config(confpath);
 
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {
         /* set screen */
-        setup_screen(awesomeconf, screen);
-        statusbar_draw(awesomeconf, screen);
+        setup_screen(screen);
+        statusbar_draw(screen);
     }
 
     netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
@@ -358,7 +352,7 @@ main(int argc, char *argv[])
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
-        loadawesomeprops(awesomeconf, screen);
+        loadawesomeprops(screen);
         XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
                         XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
     }
@@ -378,20 +372,20 @@ main(int argc, char *argv[])
     handler[UnmapNotify] = handle_event_unmapnotify;
 
     /* check for shape extension */
-    if((awesomeconf->have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
+    if((globalconf.have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
     {
         p_realloc(&handler, shape_event + 1);
         handler[shape_event] = handle_event_shape;
     }
 
     /* check for randr extension */
-    if((awesomeconf->have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
+    if((globalconf.have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
     {
         p_realloc(&handler, randr_event_base + RRScreenChangeNotify + 1);
         handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
     }
 
-    scan(awesomeconf);
+    scan();
 
     XSync(dpy, False);
 
@@ -438,14 +432,14 @@ main(int argc, char *argv[])
                 if(r >= ssizeof(buf))
                     break;
                 buf[r] = '\0';
-                parse_control(buf, awesomeconf);
+                parse_control(buf);
             }
 
         while(XPending(dpy))
         {
             XNextEvent(dpy, &ev);
             if(handler[ev.type])
-                handler[ev.type](&ev, awesomeconf);       /* call handler */
+                handler[ev.type](&ev);       /* call handler */
         }
     }
 
@@ -455,7 +449,7 @@ main(int argc, char *argv[])
         perror("error unlinking UNIX domain socket");
     p_delete(&addr);
 
-    cleanup(awesomeconf);
+    cleanup();
     XCloseDisplay(dpy);
 
     return EXIT_SUCCESS;

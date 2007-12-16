@@ -24,8 +24,6 @@
 
 #include "common.h"
 
-void cleanup_screen(awesome_config *, int);
-void setup_screen(awesome_config *, int);
 int xerror(Display *, XErrorEvent *);
 UICB_PROTO(uicb_quit);
 
