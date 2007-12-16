@@ -51,6 +51,7 @@ const NameFuncLink LayoutsList[] =
  * \param screen the screen to search
  * \return tag
  */
+#warning this function is bugged and should be replaced
 Tag *
 get_current_tag(int screen)
 {
