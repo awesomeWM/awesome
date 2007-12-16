@@ -7,18 +7,18 @@ extern awesome_config globalconf;
 
 static char name[] = "taglist";
 
-/** Check if at least a client is tagged with tag number t and is on screen
+/** Check if at least one client is tagged with tag number t and is on screen
  * screen
- * \param t tag number
  * \param screen screen number
+ * \param t tag
  * \return True or False
  */
 static Bool
-isoccupied(TagClientLink *tc, int screen, Client *head, Tag *t)
+isoccupied(int screen, Tag *t)
 {
     Client *c;
 
-    for(c = head; c; c = c->next)
+    for(c = globalconf.clients; c; c = c->next)
         if(c->screen == screen && is_client_tagged(c, t, screen))
             return True;
     return False;
@@ -56,7 +56,7 @@ taglist_draw(DrawCtx *ctx,
             colors = vscreen.colors_normal;
         drawtext(ctx, location + width, 0, w,
                  vscreen.statusbar.height, vscreen.font, tag->name, colors);
-        if(isoccupied(vscreen.tclink, screen, globalconf.clients, tag))
+        if(isoccupied(screen, tag))
             drawrectangle(ctx, location + width, 0, flagsize, flagsize,
                           sel && is_client_tagged(sel, tag, screen),
                           colors[ColFG]);
