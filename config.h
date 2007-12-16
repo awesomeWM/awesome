@@ -224,7 +224,7 @@ typedef struct
 struct Widget
 {
     char *name;
-    int (*draw)(DrawCtx *, int, int, int, int);
+    int (*draw)(Widget *, DrawCtx *, int, int);
     Statusbar *statusbar;
     int alignment;
     Widget *next;

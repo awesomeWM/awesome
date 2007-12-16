@@ -24,8 +24,11 @@ calculate_alignments(Widget *widget)
     }
 
     if(widget)
-        for(; widget; widget = widget->next)
+        for(; widget; widget = widget->next){
+            if (widget->alignment == AlignFlex)
+                warn("Multiple flex widgets in panel - ignoring flex for all but the first.");
             widget->alignment = AlignRight;
+        }
 }
 
 int

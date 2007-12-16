@@ -50,13 +50,13 @@ statusbar_draw(int screen)
 
     for(widget = vscreen.statusbar.widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
-            left += widget->draw(ctx, screen, left, (left + right), AlignLeft);
+            left += widget->draw(widget, ctx, left, (left + right));
         else if (widget->alignment == AlignRight)
-            right += widget->draw(ctx, screen, right, (left + right), AlignRight);
+            right += widget->draw(widget, ctx, right, (left + right));
 
     for(widget = vscreen.statusbar.widgets; widget; widget = widget->next)
         if (widget->alignment == AlignFlex)
-            left += widget->draw(ctx, screen, left, (left + right), AlignFlex);
+            left += widget->draw(widget, ctx, left, (left + right));
 
     if(vscreen.statusbar.position == BarRight || vscreen.statusbar.position == BarLeft)
     {

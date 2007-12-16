@@ -6,11 +6,11 @@ extern awesome_config globalconf;
 static char name[] = "focustitle";
 
 static int
-focustitle_draw(DrawCtx *ctx, int screen, int offset, int used, int align)
+focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
     Client *sel = globalconf.focus->client;
-    VirtScreen vscreen = globalconf.screens[screen];
-    int location = calculate_offset(vscreen.statusbar.width, 0, offset, align);
+    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
+    int location = calculate_offset(vscreen.statusbar.width, 0, offset, widget->alignment);
 
     if(sel)
     {

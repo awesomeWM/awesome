@@ -25,15 +25,14 @@ isoccupied(int screen, Tag *t)
 }
 
 static int
-taglist_draw(DrawCtx *ctx,
-             int screen,
+taglist_draw(Widget *widget,
+             DrawCtx *ctx,
              int offset,
-             int used __attribute__ ((unused)),
-             int align __attribute__ ((unused)))
+             int used __attribute__ ((unused)))
 {
     Tag *tag;
     Client *sel = globalconf.focus->client;
-    VirtScreen vscreen = globalconf.screens[screen];
+    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int w = 0, width = 0, location;
     int flagsize;
     XColor *colors;
@@ -44,7 +43,7 @@ taglist_draw(DrawCtx *ctx,
     {
         width  += textwidth(ctx, vscreen.font, tag->name);
     }
-    location = calculate_offset(vscreen.statusbar.width, width, offset, align);
+    location = calculate_offset(vscreen.statusbar.width, width, offset, widget->alignment);
 
     width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
@@ -56,9 +55,9 @@ taglist_draw(DrawCtx *ctx,
             colors = vscreen.colors_normal;
         drawtext(ctx, location + width, 0, w,
                  vscreen.statusbar.height, vscreen.font, tag->name, colors);
-        if(isoccupied(screen, tag))
+        if(isoccupied(widget->statusbar->screen, tag))
             drawrectangle(ctx, location + width, 0, flagsize, flagsize,
-                          sel && is_client_tagged(sel, tag, screen),
+                          sel && is_client_tagged(sel, tag, widget->statusbar->screen),
                           colors[ColFG]);
         width += w;
     }

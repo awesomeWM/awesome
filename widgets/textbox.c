@@ -6,15 +6,14 @@ extern awesome_config globalconf;
 static char name[] = "textbox";
 
 static int
-textbox_draw(DrawCtx *ctx,
-             int screen __attribute__ ((unused)),
+textbox_draw(Widget *widget,
+             DrawCtx *ctx,
              int offset, 
-             int used __attribute__ ((unused)),
-             int align)
+             int used __attribute__ ((unused)))
 {
-    VirtScreen vscreen = globalconf.screens[screen];
+    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int width = textwidth(ctx, vscreen.font, vscreen.statustext);
-    int location = calculate_offset(vscreen.statusbar.width, width, offset, align);
+    int location = calculate_offset(vscreen.statusbar.width, width, offset, widget->alignment);
     drawtext(ctx, location, 0, width, vscreen.statusbar.height,
              vscreen.font, vscreen.statustext, vscreen.colors_normal);
     return width;
