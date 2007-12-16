@@ -39,8 +39,8 @@ focustitle_new(Statusbar *statusbar, const char *name)
     Widget *w;
     w = p_new(Widget, 1);
     w->draw = focustitle_draw;
-    common_new(w, statusbar, name);
     w->alignment = AlignFlex;
+    common_new(w, statusbar, name);
     return w;
 }
 
