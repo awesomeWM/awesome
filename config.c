@@ -243,6 +243,68 @@ static Key *section_keys(cfg_t *cfg_keys)
     return head;
 }
 
+const char *widget_names[] = {
+    "focustitle",
+    "layoutinfo",
+    "taglist",
+    "textbox",
+};
+
+
+static int
+cmp_widget_cfg(const void *a, const void *b){
+    if (((cfg_t*)a)->line < ((cfg_t*)b)->line)
+        return -1;
+    else if (((cfg_t*)a)->line > ((cfg_t*)b)->line)
+        return 1;
+    else
+        return 0;
+}
+
+
+static void
+create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
+{
+    cfg_t* widgets, *wptr;
+    Widget *widget = NULL;
+    unsigned int i, j, numnames, numwidgets = 0;
+    Widget *(*widget_new)(Statusbar *);
+
+    numnames = sizeof(widget_names)/sizeof(widget_names[0]);
+    for (i = 0; i < numnames; i++)
+        numwidgets += cfg_size(cfg_statusbar, widget_names[i]);
+    
+    widgets = p_new(cfg_t, numwidgets);
+    wptr = widgets;
+
+    for (i = 0; i < numnames; i++)
+        for (j = 0; j < cfg_size(cfg_statusbar, widget_names[i]); j++)
+        {
+            memcpy(wptr,
+                   cfg_getnsec(cfg_statusbar, widget_names[i], j),
+                   sizeof(cfg_t));
+            wptr++;
+        }
+
+    qsort(widgets, numwidgets, sizeof(cfg_t), cmp_widget_cfg);
+
+    for (i = 0; i < numwidgets; i++){
+        widget_new = name_func_lookup(cfg_name(widgets + i), WidgetList);
+
+        if (widget_new)
+            if(!widget)
+                statusbar->widgets = widget = widget_new(statusbar);
+            else
+            {
+                widget->next = widget_new(statusbar);
+                widget = widget->next;
+            }
+        else
+            warn("Ignoring unknown widget: %s.\n", cfg_name(widgets + i));
+    }
+
+}
+
 
 /** Parse configuration file and initialize some stuff
  * \param configpatharg Path to configuration file
@@ -279,7 +341,10 @@ parse_config(const char *confpatharg)
     static cfg_opt_t statusbar_opts[] =
     {
         CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
-        CFG_SEC((char *) "widget", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "textbox", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "taglist", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "focustitle", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t tag_opts[] =
@@ -399,8 +464,6 @@ parse_config(const char *confpatharg)
     Rule *rule = NULL;
     Layout *layout = NULL;
     Tag *tag = NULL;
-    Widget *widget = NULL;
-    Widget *(*widget_new)(Statusbar *);
     VirtScreen *virtscreen;
     FILE *defconfig = NULL;
 
@@ -495,21 +558,7 @@ parse_config(const char *confpatharg)
         virtscreen->statusbar.position = virtscreen->statusbar.dposition =
             statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
 
-        /* Statusbar widgets */
-        if(cfg_size(cfg_statusbar, "widget"))
-            for(i = 0; i < cfg_size(cfg_statusbar, "widget"); i++)
-            {
-                cfgsectmp = cfg_getnsec(cfg_statusbar, "widget", i);
-                widget_new = name_func_lookup(cfg_title(cfgsectmp), WidgetList);
-                if(!widget)
-                    virtscreen->statusbar.widgets = widget =
-                        widget_new(&virtscreen->statusbar);
-                else
-                {
-                    widget->next = widget_new(&virtscreen->statusbar);
-                    widget = widget->next;
-                }
-            }
+        create_widgets(cfg_statusbar, &virtscreen->statusbar);
 
         /* Layouts */
         if(cfg_size(cfg_layouts, "layout"))
