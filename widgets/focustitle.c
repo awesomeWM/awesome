@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include "util.h"
 #include "widget.h"
-
+#include "layout.h"
+#include "focus.h"
 
 extern awesome_config globalconf;
 
 static int
 focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
-    Client *sel = globalconf.focus->client;
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
+    Client *sel = focus_get_latest_client_for_tag(globalconf.focus,
+                                                  widget->statusbar->screen, 
+                                                  get_current_tag(widget->statusbar->screen));
     int location = calculate_offset(vscreen.statusbar.width,
                                     0,
                                     offset,
