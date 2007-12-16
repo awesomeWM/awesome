@@ -26,25 +26,16 @@
 #include <confuse.h>
 #include <X11/keysym.h>
 
-#include "awesome.h"
-#include "layout.h"
 #include "statusbar.h"
 #include "util.h"
 #include "rules.h"
 #include "screen.h"
 #include "widget.h"
-#include "layouts/tile.h"
-#include "layouts/floating.h"
-#include "layouts/max.h"
-#include "layouts/fibonacci.h"
 #include "defconfig.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 
 extern awesome_config globalconf;
-
-static XColor initxcolor(Display *, int, const char *);
-static unsigned int get_numlockmask(Display *);
 
 /** Link a name to a key symbol */
 typedef struct
@@ -62,42 +53,39 @@ typedef struct
 
 extern const NameFuncLink UicbList[];
 extern const NameFuncLink WidgetList[];
+extern const NameFuncLink LayoutsList[];
 
-/** List of keyname and corresponding X11 mask codes */
-static const KeyMod KeyModList[] =
+/** Initialize color from X side
+ * \param disp Display ref
+ * \param scr Screen number
+ * \param colorstr Color code
+ */
+static XColor
+initxcolor(Display *disp, int scr, const char *colstr)
 {
-    {"Shift", ShiftMask},
-    {"Lock", LockMask},
-    {"Control", ControlMask},
-    {"Mod1", Mod1Mask},
-    {"Mod2", Mod2Mask},
-    {"Mod3", Mod3Mask},
-    {"Mod4", Mod4Mask},
-    {"Mod5", Mod5Mask},
-    {NULL, NoSymbol}
-};
+    XColor color;
+    if(!XAllocNamedColor(disp, DefaultColormap(disp, scr), colstr, &color, &color))
+        die("awesome: error, cannot allocate color '%s'\n", colstr);
+    return color;
+}
+static unsigned int
+get_numlockmask(Display *disp)
+{
+    XModifierKeymap *modmap;
+    unsigned int mask = 0;
+    int i, j;
 
-/** List of button name and corresponding X11 mask codes */
-static const MouseButton MouseButtonList[] =
-{
-    {"1", Button1},
-    {"2", Button2},
-    {"3", Button3},
-    {"4", Button4},
-    {"5", Button5},
-    {NULL, 0}
-};
-/** List of available layouts and link between name and functions */
-static const NameFuncLink LayoutsList[] =
-{
-    {"tile", layout_tile},
-    {"tileleft", layout_tileleft},
-    {"max", layout_max},
-    {"spiral", layout_spiral},
-    {"dwindle", layout_dwindle},
-    {"floating", layout_floating},
-    {NULL, NULL}
-};
+    modmap = XGetModifierMapping(disp);
+    for(i = 0; i < 8; i++)
+        for(j = 0; j < modmap->max_keypermod; j++)
+            if(modmap->modifiermap[i * modmap->max_keypermod + j]
+               == XKeysymToKeycode(disp, XK_Num_Lock))
+                mask = (1 << i);
+
+    XFreeModifiermap(modmap);
+
+    return mask;
+}
 
 /** Lookup for a key mask from its name
  * \param keyname Key name
@@ -106,6 +94,19 @@ static const NameFuncLink LayoutsList[] =
 static KeySym
 key_mask_lookup(const char *keyname)
 {
+    /** List of keyname and corresponding X11 mask codes */
+    static const KeyMod KeyModList[] =
+    {
+        {"Shift", ShiftMask},
+        {"Lock", LockMask},
+        {"Control", ControlMask},
+        {"Mod1", Mod1Mask},
+        {"Mod2", Mod2Mask},
+        {"Mod3", Mod3Mask},
+        {"Mod4", Mod4Mask},
+        {"Mod5", Mod5Mask},
+        {NULL, NoSymbol}
+    };
     int i;
 
     if(keyname)
@@ -123,6 +124,16 @@ key_mask_lookup(const char *keyname)
 static unsigned int
 mouse_button_lookup(const char *button)
 {
+    /** List of button name and corresponding X11 mask codes */
+    static const MouseButton MouseButtonList[] =
+    {
+        {"1", Button1},
+        {"2", Button2},
+        {"3", Button3},
+        {"4", Button4},
+        {"5", Button5},
+        {NULL, 0}
+    };
     int i;
     
     if(button)
@@ -243,28 +254,30 @@ static Key *section_keys(cfg_t *cfg_keys)
     return head;
 }
 
-const char *widget_names[] = {
-    "focustitle",
-    "layoutinfo",
-    "taglist",
-    "textbox",
-};
-
 
 static int
-cmp_widget_cfg(const void *a, const void *b){
+cmp_widget_cfg(const void *a, const void *b)
+{
     if (((cfg_t*)a)->line < ((cfg_t*)b)->line)
         return -1;
-    else if (((cfg_t*)a)->line > ((cfg_t*)b)->line)
+
+    if (((cfg_t*)a)->line > ((cfg_t*)b)->line)
         return 1;
-    else
-        return 0;
+
+    return 0;
 }
 
 
 static void
 create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 {
+    static const char *widget_names[] =
+    {
+        "focustitle",
+        "layoutinfo",
+        "taglist",
+        "textbox",
+    };
     cfg_t* widgets, *wptr;
     Widget *widget = NULL;
     unsigned int i, j, numnames, numwidgets = 0;
@@ -307,12 +320,11 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
     }
 }
 
-
 /** Parse configuration file and initialize some stuff
  * \param configpatharg Path to configuration file
  */
 void
-parse_config(const char *confpatharg)
+config_parse(const char *confpatharg)
 {
     static cfg_opt_t general_opts[] =
     {
@@ -690,39 +702,6 @@ parse_config(const char *confpatharg)
     /* Free! Like a river! */
     cfg_free(cfg);
     p_delete(&confpath);
-}
-
-static unsigned int
-get_numlockmask(Display *disp)
-{
-    XModifierKeymap *modmap;
-    unsigned int mask = 0;
-    int i, j;
-
-    modmap = XGetModifierMapping(disp);
-    for(i = 0; i < 8; i++)
-        for(j = 0; j < modmap->max_keypermod; j++)
-            if(modmap->modifiermap[i * modmap->max_keypermod + j]
-               == XKeysymToKeycode(disp, XK_Num_Lock))
-                mask = (1 << i);
-
-    XFreeModifiermap(modmap);
-
-    return mask;
-}
-
-/** Initialize color from X side
- * \param disp Display ref
- * \param scr Screen number
- * \param colorstr Color code
- */
-static XColor
-initxcolor(Display *disp, int scr, const char *colstr)
-{
-    XColor color;
-    if(!XAllocNamedColor(disp, DefaultColormap(disp, scr), colstr, &color, &color))
-        die("awesome: error, cannot allocate color '%s'\n", colstr);
-    return color;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99

@@ -336,7 +336,7 @@ main(int argc, char *argv[])
     focus_add_client(&globalconf.focus, NULL);
     /* store display */
     globalconf.display = dpy;
-    parse_config(confpath);
+    config_parse(confpath);
 
     for(screen = 0; screen < get_screen_count(dpy); screen++)
     {

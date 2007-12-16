@@ -267,7 +267,7 @@ struct awesome_config
     FocusList *focus;
 };
 
-void parse_config(const char *);
+void config_parse(const char *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
