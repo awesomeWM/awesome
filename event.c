@@ -75,7 +75,7 @@ handle_event_buttonpress(XEvent * e)
         {
             for(i = 1, tag = globalconf.screens[screen].tags; tag; tag = tag->next, i++)
             {
-                x += textwidth_primitive(e->xany.display, globalconf.screens[screen].font, globalconf.screens[screen].tags[i].name);
+                x += textwidth_primitive(e->xany.display, globalconf.screens[screen].font, tag->name);
                 if(((globalconf.screens[screen].statusbar.position == BarTop
                      || globalconf.screens[screen].statusbar.position == BarBot)
                    && ev->x < x)
