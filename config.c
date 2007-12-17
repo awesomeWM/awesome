@@ -294,17 +294,16 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
     qsort(widgets, numwidgets, sizeof(cfg_t), cmp_widget_cfg);
 
     for (i = 0; i < numwidgets; i++){
-        widget_new = name_func_lookup(cfg_name(widgets + i), WidgetList);
+        wptr = widgets + i;
+        widget_new = name_func_lookup(cfg_name(wptr), WidgetList);
         if (widget_new)
             if(!widget){
-                widget = widget_new(statusbar,
-                                    cfg_title(widgets + i));
+                widget = widget_new(statusbar, wptr);
                 statusbar->widgets = widget;
             }
             else
             {
-                widget->next = widget_new(statusbar,
-                                          cfg_title(widgets + i));
+                widget->next = widget_new(statusbar, wptr);
                 widget = widget->next;
             }
         else
@@ -509,9 +508,6 @@ config_parse(const char *confpatharg)
     for(screen = 0; screen < get_screen_count(globalconf.display); screen++)
     {
         virtscreen = &globalconf.screens[screen]; 
-        a_strcpy(virtscreen->statustext,
-                 sizeof(virtscreen->statustext),
-                 "awesome-" VERSION " (" RELEASE ")");
         snprintf(buf, sizeof(buf), "%d", screen);
         cfg_screen = cfg_gettsec(cfg, "screen", buf);
         if(!cfg_screen)

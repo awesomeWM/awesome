@@ -1,3 +1,4 @@
+#include <confuse.h>
 #include "config.h"
 #include "util.h"
 #include "widget.h"
@@ -68,12 +69,12 @@ taglist_draw(Widget *widget,
 }
 
 Widget *
-taglist_new(Statusbar *statusbar, const char *name)
+taglist_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
     w = p_new(Widget, 1);
+    common_new(w, statusbar, config);
     w->draw = taglist_draw;
-    common_new(w, statusbar, name);
     return w;
 }
 

@@ -1,17 +1,18 @@
 #ifndef AWESOME_WIDGET_H
 #define AWESOME_WIDGET_H
 
+#include <confuse.h>
 #include "config.h"
 #include "draw.h"
 #include "common.h"
 
 enum { AlignLeft, AlignRight, AlignFlex };
 
-typedef Widget *(WidgetConstructor)(Statusbar*, const char*);
+typedef Widget *(WidgetConstructor)(Statusbar*, cfg_t*);
 
 int calculate_offset(int, int, int, int);
 void calculate_alignments(Widget *widget);
-void common_new(Widget *, Statusbar *, const char *);
+void common_new(Widget*, Statusbar*, cfg_t*);
 
 WidgetConstructor layoutinfo_new;
 WidgetConstructor taglist_new;

@@ -189,8 +189,6 @@ typedef struct
 
 typedef struct
 {
-    /** Text displayed in bar */
-    char statustext[256];
     /** Number of pixels to snap windows */
     int snap;
     /** Border size */
@@ -225,8 +223,10 @@ struct Widget
 {
     char *name;
     int (*draw)(Widget *, DrawCtx *, int, int);
+    void (*tell)(Widget *, char *);
     Statusbar *statusbar;
     int alignment;
+    void *data;
     Widget *next;
 };
 

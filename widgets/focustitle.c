@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <confuse.h>
 #include "util.h"
 #include "widget.h"
 #include "layout.h"
@@ -36,13 +37,13 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 }
 
 Widget *
-focustitle_new(Statusbar *statusbar, const char *name)
+focustitle_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
     w = p_new(Widget, 1);
+    common_new(w, statusbar, config);
     w->draw = focustitle_draw;
     w->alignment = AlignFlex;
-    common_new(w, statusbar, name);
     return w;
 }
 

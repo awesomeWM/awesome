@@ -1,3 +1,4 @@
+#include <confuse.h>
 #include "widget.h"
 #include "util.h"
 #include "layout.h"
@@ -30,12 +31,12 @@ layoutinfo_draw(Widget *widget,
 
 
 Widget *
-layoutinfo_new(Statusbar *statusbar, const char* name)
+layoutinfo_new(Statusbar *statusbar, cfg_t* config)
 {
     Widget *w;
     w = p_new(Widget, 1);
+    common_new(w, statusbar, config);
     w->draw = (void*) layoutinfo_draw;
-    common_new(w, statusbar, name);
     return w;
 }
 
