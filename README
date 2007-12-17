@@ -5,7 +5,10 @@ It's based on dwm.
 
 Requirements
 ------------
+
 In order to build awesome you need the Xlib header files, libconfuse and cairo.
+Creating the man pages also requires recent versions of the asciidoc and xmlto
+tools.
 
 Installation
 ------------
