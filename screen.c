@@ -262,9 +262,7 @@ uicb_screen_focus(int screen, char *arg)
     if (new_screen > (numscreens - 1))
         new_screen = 0;
 
-    focus(focus_get_latest_client_for_tag(globalconf.focus,
-                                          new_screen,
-                                          get_current_tag(new_screen)),
+    focus(focus_get_latest_client_for_tag(new_screen, get_current_tag(new_screen)),
           True, new_screen);
 
     move_mouse_pointer_to_screen(globalconf.display, new_screen);

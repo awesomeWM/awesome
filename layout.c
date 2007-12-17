@@ -83,7 +83,7 @@ arrange(int screen)
     }
 
     curtag->layout->arrange(screen);
-    focus(focus_get_latest_client_for_tag(globalconf.focus, screen, curtag),
+    focus(focus_get_latest_client_for_tag(screen, curtag),
           True, screen);
     restack(screen);
 }

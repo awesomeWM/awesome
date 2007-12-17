@@ -224,7 +224,7 @@ focus(Client *c, Bool selscreen, int screen)
         return;
 
     /* save old sel in focus history */
-    focus_add_client(&globalconf.focus, c);
+    focus_add_client(c);
 
     statusbar_draw(screen);
 
@@ -493,7 +493,7 @@ client_unmanage(Client *c, long state)
     client_detach(c);
     if(globalconf.focus->client == c)
         focus(NULL, True, c->screen);
-    focus_delete_client(&globalconf.focus, c);
+    focus_delete_client(c);
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag, c->screen);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);

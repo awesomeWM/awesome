@@ -24,9 +24,9 @@
 
 #include "config.h"
 
-void focus_add_client(FocusList **, Client *);
-void focus_delete_client(FocusList **, Client *);
-Client * focus_get_latest_client_for_tag(FocusList *, int, Tag *);
+void focus_add_client(Client *);
+void focus_delete_client(Client *);
+Client * focus_get_latest_client_for_tag(int, Tag *);
 
 UICB_PROTO(uicb_focus_history);
 

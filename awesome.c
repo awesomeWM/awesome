@@ -333,7 +333,7 @@ main(int argc, char *argv[])
     XSync(dpy, False);
 
     globalconf.screens = p_new(VirtScreen, get_screen_count(dpy));
-    focus_add_client(&globalconf.focus, NULL);
+    focus_add_client(NULL);
     /* store display */
     globalconf.display = dpy;
     config_parse(confpath);

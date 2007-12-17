@@ -27,11 +27,11 @@
 extern awesome_config globalconf;
 
 static FocusList *
-focus_get_node_by_client(FocusList *head, Client *c)
+focus_get_node_by_client(Client *c)
 {
     FocusList *fh;
 
-    for(fh = head; fh; fh = fh->prev)
+    for(fh = globalconf.focus; fh; fh = fh->prev)
         if(fh->client == c)
             return fh;
 
@@ -39,15 +39,15 @@ focus_get_node_by_client(FocusList *head, Client *c)
 }
 
 static FocusList *
-focus_detach_node(FocusList **head, FocusList *fl)
+focus_detach_node(FocusList *fl)
 {
     FocusList *tmp;
 
-    if(*head == fl)
-        *head = fl->prev;
+    if(globalconf.focus == fl)
+        globalconf.focus = fl->prev;
     else
     {
-        for(tmp = *head; tmp && tmp->prev != fl; tmp = tmp->prev);
+        for(tmp = globalconf.focus; tmp && tmp->prev != fl; tmp = tmp->prev);
         tmp->prev = fl->prev;
     }
 
@@ -55,51 +55,51 @@ focus_detach_node(FocusList **head, FocusList *fl)
 }
 
 static FocusList *
-focus_attach_node(FocusList **head, FocusList *fl)
+focus_attach_node(FocusList *fl)
 {
     FocusList *old_head;
 
-    old_head = *head;
-    *head = fl;
+    old_head = globalconf.focus;
+    globalconf.focus = fl;
     fl->prev = old_head;
 
     return fl;
 }
 
 void
-focus_add_client(FocusList **head, Client *c)
+focus_add_client(Client *c)
 {
     FocusList *new_fh;
 
     /* if we don't find this node, create a new one */
-    if(!(new_fh = focus_get_node_by_client(*head, c)))
+    if(!(new_fh = focus_get_node_by_client(c)))
     {
         new_fh = p_new(FocusList, 1);
         new_fh->client = c;
     }
     else /* if we've got a node, detach it */
-        focus_detach_node(head, new_fh);
+        focus_detach_node(new_fh);
 
-    focus_attach_node(head, new_fh);
+    focus_attach_node(new_fh);
 }
 
 void
-focus_delete_client(FocusList **head, Client *c)
+focus_delete_client(Client *c)
 {
-    FocusList *fc = focus_get_node_by_client(*head, c), *target;
+    FocusList *fc = focus_get_node_by_client(c), *target;
     if (fc)
     {
-        target = focus_detach_node(head, fc);
+        target = focus_detach_node(fc);
         p_delete(&target);
     }
 }
 
 Client *
-focus_get_latest_client_for_tag(FocusList *head, int screen, Tag *t)
+focus_get_latest_client_for_tag(int screen, Tag *t)
 {
     FocusList *fl;
 
-    for(fl = head; fl; fl = fl->prev)
+    for(fl = globalconf.focus; fl; fl = fl->prev)
         if(is_client_tagged(fl->client, t, screen))
            return fl->client;
 
