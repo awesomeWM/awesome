@@ -271,30 +271,22 @@ cmp_widget_cfg(const void *a, const void *b)
 static void
 create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 {
-    static const char *widget_names[] =
-    {
-        "focustitle",
-        "layoutinfo",
-        "taglist",
-        "textbox",
-    };
     cfg_t* widgets, *wptr;
     Widget *widget = NULL;
-    unsigned int i, j, numnames, numwidgets = 0;
+    unsigned int i, j, numwidgets = 0;
     WidgetConstructor *widget_new;
 
-    numnames = sizeof(widget_names)/sizeof(widget_names[0]);
-    for (i = 0; i < numnames; i++)
-        numwidgets += cfg_size(cfg_statusbar, widget_names[i]);
-    
+    for(i = 0; WidgetList[i].name; i++)
+        numwidgets += cfg_size(cfg_statusbar, WidgetList[i].name);
+
     widgets = p_new(cfg_t, numwidgets);
     wptr = widgets;
 
-    for (i = 0; i < numnames; i++)
-        for (j = 0; j < cfg_size(cfg_statusbar, widget_names[i]); j++)
+    for(i = 0; WidgetList[i].name; i++)
+        for (j = 0; j < cfg_size(cfg_statusbar, WidgetList[i].name); j++)
         {
             memcpy(wptr,
-                   cfg_getnsec(cfg_statusbar, widget_names[i], j),
+                   cfg_getnsec(cfg_statusbar, WidgetList[i].name, j),
                    sizeof(cfg_t));
             wptr++;
         }
@@ -352,10 +344,15 @@ config_parse(const char *confpatharg)
     {
         CFG_END()
     };
+    static cfg_opt_t widget_textbox_opts[] =
+    {
+        CFG_STR((char *) "default", (char *) NULL, CFGF_NONE),
+        CFG_END()
+    };
     static cfg_opt_t statusbar_opts[] =
     {
         CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
-        CFG_SEC((char *) "textbox", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "textbox", widget_textbox_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "taglist", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "focustitle", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI),
