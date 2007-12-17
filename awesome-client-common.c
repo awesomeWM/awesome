@@ -31,7 +31,8 @@
 struct sockaddr_un *
 get_client_addr(const char *display)
 {
-    char *homedir, *tmp, *real_display = NULL;
+    char *homedir, *tmp;
+    const char *real_display = NULL;
     ssize_t path_len;
     struct sockaddr_un *addr;
 
@@ -42,7 +43,7 @@ get_client_addr(const char *display)
         if((tmp = strchr(display, ':')))
             real_display = tmp + 1;
         else
-            real_display = (char *) display;
+            real_display = display;
         if((tmp = strrchr(display, '.')))
             *tmp = '\0';
     }
