@@ -107,7 +107,7 @@ focus_get_latest_client_for_tag(FocusList *head, int screen, Tag *t)
 }
 
 void
-uicb_focus_history(int screen, const char *arg)
+uicb_focus_history(int screen, char *arg)
 {
     int i;
     FocusList *fl = globalconf.focus;

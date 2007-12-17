@@ -246,7 +246,7 @@ xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribut
  * \ingroup ui_callback
  */
 void
-uicb_quit(int screen __attribute__ ((unused)), const char *arg __attribute__ ((unused)))
+uicb_quit(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
     running = False;
 }

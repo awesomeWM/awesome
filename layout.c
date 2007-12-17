@@ -100,7 +100,7 @@ get_current_layout(int screen)
 }
 
 void
-uicb_client_focusnext(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
 {
     Client *c, *sel = globalconf.focus->client;
 
@@ -117,7 +117,7 @@ uicb_client_focusnext(int screen, const char *arg __attribute__ ((unused)))
 }
 
 void
-uicb_client_focusprev(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
 {
     Client *c, *sel = globalconf.focus->client;
 
@@ -225,7 +225,7 @@ saveawesomeprops(int screen)
 }
 
 void
-uicb_tag_setlayout(int screen, const char *arg)
+uicb_tag_setlayout(int screen, char *arg)
 {
     Layout *l = globalconf.screens[screen].layouts;
     Tag *tag;
@@ -278,7 +278,7 @@ maximize(int x, int y, int w, int h, int screen)
 }
 
 void
-uicb_client_togglemax(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 {
     ScreenInfo *si = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
@@ -290,7 +290,7 @@ uicb_client_togglemax(int screen, const char *arg __attribute__ ((unused)))
 }
 
 void
-uicb_client_toggleverticalmax(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
     ScreenInfo *si = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
@@ -306,7 +306,7 @@ uicb_client_toggleverticalmax(int screen, const char *arg __attribute__ ((unused
 
 
 void
-uicb_client_togglehorizontalmax(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
     ScreenInfo *si = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
@@ -321,8 +321,7 @@ uicb_client_togglehorizontalmax(int screen, const char *arg __attribute__ ((unus
 }
 
 void
-uicb_client_zoom(int screen,
-                 const char *arg __attribute__ ((unused)))
+uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
 

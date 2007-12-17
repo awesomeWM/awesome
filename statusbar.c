@@ -186,7 +186,7 @@ statusbar_get_position_from_str(const char * pos)
 }
 
 void
-uicb_statusbar_toggle(int screen, const char *arg __attribute__ ((unused)))
+uicb_statusbar_toggle(int screen, char *arg __attribute__ ((unused)))
 {
     if(globalconf.screens[screen].statusbar.position == BarOff)
         globalconf.screens[screen].statusbar.position = (globalconf.screens[screen].statusbar.dposition == BarOff) ? BarTop : globalconf.screens[screen].statusbar.dposition;
@@ -197,7 +197,7 @@ uicb_statusbar_toggle(int screen, const char *arg __attribute__ ((unused)))
 }
 
 void
-uicb_statusbar_set_position(int screen, const char *arg)
+uicb_statusbar_set_position(int screen, char *arg)
 {
     globalconf.screens[screen].statusbar.dposition = 
         globalconf.screens[screen].statusbar.position =
@@ -206,7 +206,7 @@ uicb_statusbar_set_position(int screen, const char *arg)
 }
 
 void
-uicb_statusbar_set_text(int screen, const char *arg)
+uicb_statusbar_set_text(int screen, char *arg)
 {
     if(!arg)
         return;

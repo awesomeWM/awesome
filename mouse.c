@@ -31,7 +31,7 @@
 extern awesome_config globalconf;
 
 void
-uicb_client_movemouse(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
     int x1, y1, ocx, ocy, di, nx, ny;
     unsigned int dui;
@@ -45,7 +45,7 @@ uicb_client_movemouse(int screen, const char *arg __attribute__ ((unused)))
 
     if((get_current_layout(screen)->arrange != layout_floating)
         && !c->isfloating)
-         uicb_client_togglefloating(screen, "DUMMY");
+         uicb_client_togglefloating(screen, NULL);
      else
          restack(screen);
 
@@ -94,7 +94,7 @@ uicb_client_movemouse(int screen, const char *arg __attribute__ ((unused)))
 }
 
 void
-uicb_client_resizemouse(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 {
     int ocx, ocy, nw, nh;
     XEvent ev;
@@ -105,7 +105,7 @@ uicb_client_resizemouse(int screen, const char *arg __attribute__ ((unused)))
 
     if((get_current_layout(screen)->arrange != layout_floating)
        && !c->isfloating)
-        uicb_client_togglefloating(screen, "DUMMY");
+        uicb_client_togglefloating(screen, NULL);
     else
         restack(screen);
 

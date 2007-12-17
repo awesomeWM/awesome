@@ -139,7 +139,7 @@ tag_client_with_rules(Client *c)
  * \ingroup ui_callback
  */
 void
-uicb_client_tag(int screen, const char *arg)
+uicb_client_tag(int screen, char *arg)
 {
     int tag_id = -1;
     Tag *tag, *target_tag;
@@ -176,7 +176,7 @@ uicb_client_tag(int screen, const char *arg)
  * \ingroup ui_callback
  */
 void
-uicb_client_togglefloating(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_togglefloating(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
     
@@ -199,7 +199,7 @@ uicb_client_togglefloating(int screen, const char *arg __attribute__ ((unused)))
  * \ingroup ui_callback
  */
 void
-uicb_client_toggletag(int screen, const char *arg)
+uicb_client_toggletag(int screen, char *arg)
 {
     Client *sel = globalconf.focus->client;
     int i;
@@ -244,7 +244,7 @@ uicb_client_toggletag(int screen, const char *arg)
  * \ingroup ui_callback
  */
 void
-uicb_tag_toggleview(int screen, const char *arg)
+uicb_tag_toggleview(int screen, char *arg)
 {
     int i;
     Tag *tag, *target_tag;
@@ -276,7 +276,7 @@ uicb_tag_toggleview(int screen, const char *arg)
  * \ingroup ui_callback
  */
 void
-uicb_tag_view(int screen, const char *arg)
+uicb_tag_view(int screen, char *arg)
 {
     int i;
     Tag *tag, *target_tag;
@@ -306,7 +306,7 @@ uicb_tag_view(int screen, const char *arg)
  * \ingroup ui_callback
  */
 void
-uicb_tag_prev_selected(int screen, const char *arg __attribute__ ((unused)))
+uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
 {
     Tag *tag;
     Bool t;
@@ -325,7 +325,7 @@ uicb_tag_prev_selected(int screen, const char *arg __attribute__ ((unused)))
  * \ingroup ui_callback
  */
 void
-uicb_tag_viewnext(int screen, const char *arg __attribute__ ((unused)))
+uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 {
     Tag *curtag = get_current_tag(screen);
 
@@ -344,7 +344,7 @@ uicb_tag_viewnext(int screen, const char *arg __attribute__ ((unused)))
  * \ingroup ui_callback
  */
 void
-uicb_tag_viewprev(int screen, const char *arg __attribute__ ((unused)))
+uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
 {
     Tag *tag, *curtag = get_current_tag(screen);
 

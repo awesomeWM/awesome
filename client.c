@@ -593,7 +593,7 @@ client_isvisible(Client *c, int screen)
  * \ingroup ui_callback
  */
 void
-uicb_client_settrans(int screen __attribute__ ((unused)), const char *arg)
+uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
 {
     double delta = 100.0, current_opacity = 100.0;
     unsigned char *data;
@@ -642,7 +642,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), const char *arg)
  * \ingroup ui_callback
  */
 void
-uicb_setborder(int screen, const char *arg)
+uicb_setborder(int screen, char *arg)
 {
     if(!arg)
         return;
@@ -652,7 +652,7 @@ uicb_setborder(int screen, const char *arg)
 }
 
 void
-uicb_client_swapnext(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
 {
     Client *next, *sel = globalconf.focus->client;
 
@@ -670,7 +670,7 @@ uicb_client_swapnext(int screen, const char *arg __attribute__ ((unused)))
 }
 
 void
-uicb_client_swapprev(int screen, const char *arg __attribute__ ((unused)))
+uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
 {
     Client *prev, *sel = globalconf.focus->client;
 
@@ -688,7 +688,7 @@ uicb_client_swapprev(int screen, const char *arg __attribute__ ((unused)))
 }
 
 void
-uicb_client_moveresize(int screen, const char *arg)
+uicb_client_moveresize(int screen, char *arg)
 {
     int nx, ny, nw, nh, ox, oy, ow, oh;
     char x[8], y[8], w[8], h[8];
@@ -727,7 +727,7 @@ uicb_client_moveresize(int screen, const char *arg)
  * \ingroup ui_callback
  */
 void
-uicb_client_kill(int screen __attribute__ ((unused)), const char *arg __attribute__ ((unused)))
+uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
     XEvent ev;
     Client *sel = globalconf.focus->client;

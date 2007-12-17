@@ -31,7 +31,7 @@
 extern awesome_config globalconf;
 
 void
-uicb_tag_setnmaster(int screen, const char * arg)
+uicb_tag_setnmaster(int screen, char * arg)
 {
     Tag *curtag = get_current_tag(screen);
     Layout *curlay = curtag->layout;
@@ -46,7 +46,7 @@ uicb_tag_setnmaster(int screen, const char * arg)
 }
 
 void
-uicb_tag_setncol(int screen, const char * arg)
+uicb_tag_setncol(int screen, char * arg)
 {
     Tag *curtag = get_current_tag(screen);
     Layout *curlay = curtag->layout;
@@ -61,7 +61,7 @@ uicb_tag_setncol(int screen, const char * arg)
 }
 
 void
-uicb_tag_setmwfact(int screen, const char *arg)
+uicb_tag_setmwfact(int screen, char *arg)
 {
     char *newarg;
     Tag *curtag = get_current_tag(screen);

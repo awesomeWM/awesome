@@ -248,7 +248,7 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
  * \ingroup ui_callback
  */
 void
-uicb_screen_focus(int screen, const char *arg)
+uicb_screen_focus(int screen, char *arg)
 {
     int new_screen, numscreens = get_screen_count(globalconf.display);
 
@@ -275,7 +275,7 @@ uicb_screen_focus(int screen, const char *arg)
  * \ingroup ui_callback
  */
 void
-uicb_client_movetoscreen(int screen __attribute__ ((unused)), const char *arg)
+uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
 {
     int new_screen, prev_screen;
     Client *sel = globalconf.focus->client;

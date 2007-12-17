@@ -31,7 +31,7 @@
 extern awesome_config globalconf;
 
 void
-uicb_exec(int screen __attribute__ ((unused)), const char *arg)
+uicb_exec(int screen __attribute__ ((unused)), char *arg)
 {
     char path[PATH_MAX];
     if(globalconf.display)
@@ -42,7 +42,7 @@ uicb_exec(int screen __attribute__ ((unused)), const char *arg)
 }
 
 void
-uicb_spawn(int screen, const char *arg)
+uicb_spawn(int screen, char *arg)
 {
     static char *shell = NULL;
     char *display = NULL;
