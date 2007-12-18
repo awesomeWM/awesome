@@ -86,7 +86,7 @@ const NameFuncLink UicbList[] =
 };
 
 static int
-run_uicb(char *cmd, awesome_config *awesomeconf)
+run_uicb(char *cmd, awesome_config *awesomeconf __attribute ((unused)))
 {
     char *p;
     const char *arg;
@@ -101,7 +101,7 @@ run_uicb(char *cmd, awesome_config *awesomeconf)
         return -1;
     }
     screen = atoi(cmd);
-    if(screen >= get_screen_count(awesomeconf->display) || screen < 0){
+    if(screen >= get_screen_count() || screen < 0){
         warn("Invalid screen specified: %i\n", screen);
         return -1;
     }

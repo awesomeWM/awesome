@@ -240,7 +240,7 @@ focus(Client *c, Bool selscreen, int screen)
     }
     else
         XSetInputFocus(globalconf.display,
-                       RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)),
+                       RootWindow(globalconf.display, get_phys_screen(screen)),
                        RevertToPointerRoot, CurrentTime);
 }
 
@@ -268,8 +268,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->oldborder = wa->border_width;
 
     c->display = globalconf.display;
-    c->screen = get_screen_bycoord(c->display, c->x, c->y);
-    c->phys_screen = get_phys_screen(globalconf.display, c->screen);
+    c->screen = get_screen_bycoord(c->x, c->y);
+    c->phys_screen = get_phys_screen(c->screen);
 
     move_client_to_screen(c, screen, True);
 
@@ -280,7 +280,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(!client_loadprops(c, screen))
         tag_client_with_rules(c);
 
-    screen_info = get_screen_info(globalconf.display, screen, NULL, NULL);
+    screen_info = get_screen_info(screen, NULL, NULL);
 
     /* if window request fullscreen mode */
     if(c->w == screen_info[screen].width && c->h == screen_info[screen].height)
@@ -292,7 +292,9 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
     else
     {
-        ScreenInfo *display_info = get_display_info(c->display, c->phys_screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+        ScreenInfo *display_info = get_display_info(c->phys_screen,
+                                                    globalconf.screens[screen].statusbar,
+                                                    &globalconf.screens[screen].padding);
 
         if(c->x + c->w + 2 * c->border > display_info->x_org + display_info->width)
             c->x = c->rx = display_info->x_org + display_info->width - c->w - 2 * c->border;
@@ -409,7 +411,9 @@ client_resize(Client *c, int x, int y, int w, int h,
     if(w <= 0 || h <= 0)
         return;
     /* offscreen appearance fixes */
-    si = get_display_info(c->display, c->phys_screen, NULL, &globalconf.screens[c->screen].padding);
+    si = get_display_info(c->phys_screen,
+                          NULL,
+                          &globalconf.screens[c->screen].padding);
     if(x > si->width)
         x = si->width - w - 2 * c->border;
     if(y > si->height)
@@ -440,7 +444,7 @@ client_resize(Client *c, int x, int y, int w, int h,
         XSync(c->display, False);
         if((c->x >= 0 || c->y >= 0) && XineramaIsActive(c->display))
         {
-            int new_screen = get_screen_bycoord(c->display, c->x, c->y);
+            int new_screen = get_screen_bycoord(c->x, c->y);
             if(c->screen != new_screen)
                 move_client_to_screen(c, new_screen, False);
         }
@@ -712,7 +716,7 @@ uicb_client_moveresize(int screen, char *arg)
     ow = sel->w;
     oh = sel->h;
 
-    Bool xqp = XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
+    Bool xqp = XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
     client_resize(sel, nx, ny, nw, nh, True, False);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {

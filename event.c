@@ -70,7 +70,7 @@ handle_event_buttonpress(XEvent * e)
     Tag *tag;
     XButtonPressedEvent *ev = &e->xbutton;
 
-    for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
+    for(screen = 0; screen < get_screen_count(); screen++)
         if(globalconf.screens[screen].statusbar->window == ev->window)
         {
             for(i = 1, tag = globalconf.screens[screen].tags; tag; tag = tag->next, i++)
@@ -115,9 +115,12 @@ handle_event_buttonpress(XEvent * e)
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window
-               && XQueryPointer(e->xany.display, ev->window, &wdummy, &wdummy, &x, &y, &i, &i, &udummy))
+               && XQueryPointer(e->xany.display,
+                                ev->window, &wdummy,
+                                &wdummy, &x, &y, &i,
+                                &i, &udummy))
             {
-                screen = get_screen_bycoord(e->xany.display, x, y);
+                screen = get_screen_bycoord(x, y);
                 handle_mouse_button_press(screen, ev->button, ev->state,
                                           globalconf.buttons.root, NULL);
                 return;
@@ -152,7 +155,7 @@ handle_event_configurerequest(XEvent * e)
                 window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
             /* recompute screen */
             old_screen = c->screen;
-            c->screen = get_screen_bycoord(c->display, c->x, c->y);
+            c->screen = get_screen_bycoord(c->x, c->y);
             if(old_screen != c->screen)
             {
                 move_client_to_screen(c, c->screen, False);
@@ -196,7 +199,7 @@ handle_event_configurenotify(XEvent * e)
             DisplayHeight(e->xany.display, screen) = ev->height;
 
             /* update statusbar */
-            si = get_screen_info(e->xany.display, screen, NULL, &globalconf.screens[screen].padding);
+            si = get_screen_info(screen, NULL, &globalconf.screens[screen].padding);
             globalconf.screens[screen].statusbar->width = si[screen].width;
             p_delete(&si);
 
@@ -249,7 +252,7 @@ handle_event_expose(XEvent * e)
     int screen;
 
     if(!ev->count)
-        for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
+        for(screen = 0; screen < get_screen_count(); screen++)
             if(globalconf.screens[screen].statusbar->window == ev->window)
                 statusbar_draw(screen);
 }
@@ -275,7 +278,7 @@ handle_event_keypress(XEvent * e)
              * number with get_screen_bycoord: we'll get 0 in Zaphod mode
              * so it's the same, or maybe the real Xinerama screen */
             if(screen == 0)
-                screen = get_screen_bycoord(e->xany.display, x, y);
+                screen = get_screen_bycoord(x, y);
             break;
         }
 
@@ -308,7 +311,7 @@ handle_event_mappingnotify(XEvent * e)
     XRefreshKeyboardMapping(ev);
     if(ev->request == MappingKeyboard)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-            grabkeys(get_phys_screen(globalconf.display, screen));
+            grabkeys(get_phys_screen(screen));
 }
 
 void
@@ -329,7 +332,7 @@ handle_event_maprequest(XEvent * e)
         for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
         if(screen == 0 && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
                                         &dummy, &dummy, &x, &y, &d, &d, &m))
-            screen = get_screen_bycoord(e->xany.display, x, y);
+            screen = get_screen_bycoord(x, y);
         client_manage(ev->window, &wa, screen);
     }
 }

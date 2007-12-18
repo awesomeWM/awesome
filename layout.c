@@ -149,7 +149,7 @@ loadawesomeprops(int screen)
     prop = p_new(char, ntags + 1);
 
     if(xgettextprop(globalconf.display,
-                    RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)),
+                    RootWindow(globalconf.display, get_phys_screen(screen)),
                     AWESOMEPROPS_ATOM(globalconf.display), prop, ntags + 1))
         for(i = 0, tag = globalconf.screens[screen].tags; tag && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
@@ -218,7 +218,7 @@ saveawesomeprops(int screen)
 
     prop[i] = '\0';
     XChangeProperty(globalconf.display,
-                    RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)),
+                    RootWindow(globalconf.display, get_phys_screen(screen)),
                     AWESOMEPROPS_ATOM(globalconf.display), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
     p_delete(&prop);
@@ -280,7 +280,9 @@ maximize(int x, int y, int w, int h, int screen)
 void
 uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 {
-    ScreenInfo *si = get_screen_info(globalconf.display, screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    ScreenInfo *si = get_screen_info(screen,
+                                     globalconf.screens[screen].statusbar,
+                                     &globalconf.screens[screen].padding);
 
     maximize(si[screen].x_org, si[screen].y_org,
              si[screen].width - 2 * globalconf.screens[screen].borderpx,
@@ -293,7 +295,9 @@ void
 uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    ScreenInfo *si = get_screen_info(globalconf.display, screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    ScreenInfo *si = get_screen_info(screen,
+                                     globalconf.screens[screen].statusbar,
+                                     &globalconf.screens[screen].padding);
 
     if(sel)
         maximize(sel->x,
@@ -309,7 +313,9 @@ void
 uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    ScreenInfo *si = get_screen_info(globalconf.display, screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    ScreenInfo *si = get_screen_info(screen,
+                                     globalconf.screens[screen].statusbar,
+                                     &globalconf.screens[screen].padding);
 
     if(sel)
         maximize(si[screen].x_org,

@@ -28,11 +28,11 @@
 
 typedef XineramaScreenInfo ScreenInfo;
 
-ScreenInfo * get_screen_info(Display *, int, Statusbar *, Padding *);
-ScreenInfo * get_display_info(Display *, int, Statusbar *, Padding *);
-int get_screen_bycoord(Display *, int, int);
-int get_screen_count(Display *);
-int get_phys_screen(Display *, int);
+ScreenInfo * get_screen_info(int, Statusbar *, Padding *);
+ScreenInfo * get_display_info(int, Statusbar *, Padding *);
+int get_screen_bycoord(int, int);
+int get_screen_count(void);
+int get_phys_screen(int);
 void move_client_to_screen(Client *, int, Bool);
 
 UICB_PROTO(uicb_screen_focus);

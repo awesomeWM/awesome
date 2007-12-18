@@ -29,25 +29,24 @@
 extern awesome_config globalconf;
 
 /** Get screens info
- * \param disp Display ref
  * \param screen Screen number
  * \param statusbar statusbar
  * \return ScreenInfo struct array with all screens info
  */
 ScreenInfo *
-get_screen_info(Display *disp, int screen, Statusbar *statusbar, Padding *padding)
+get_screen_info(int screen, Statusbar *statusbar, Padding *padding)
 {
     int i, screen_number = 0;
     ScreenInfo *si;
 
-    if(XineramaIsActive(disp))
-        si = XineramaQueryScreens(disp, &screen_number);
+    if(XineramaIsActive(globalconf.display))
+        si = XineramaQueryScreens(globalconf.display, &screen_number);
     else
     {
         /* emulate Xinerama info but only fill the screen we want */
         si = p_new(ScreenInfo, screen + 1);
-        si[screen].width = DisplayWidth(disp, screen);
-        si[screen].height = DisplayHeight(disp, screen);
+        si[screen].width = DisplayWidth(globalconf.display, screen);
+        si[screen].height = DisplayHeight(globalconf.display, screen);
         si[screen].x_org = 0;
         si[screen].y_org = 0;
         screen_number = screen + 1;
@@ -82,13 +81,12 @@ get_screen_info(Display *disp, int screen, Statusbar *statusbar, Padding *paddin
 }
 
 /** Get display info
- * \param disp Display ref
  * \param screen Screen number
  * \param statusbar the statusbar
  * \return ScreenInfo struct pointer with all display info
  */
 ScreenInfo *
-get_display_info(Display *disp, int screen, Statusbar *statusbar, Padding *padding)
+get_display_info(int screen, Statusbar *statusbar, Padding *padding)
 {
     ScreenInfo *si;
 
@@ -96,8 +94,8 @@ get_display_info(Display *disp, int screen, Statusbar *statusbar, Padding *paddi
 
     si->x_org = 0;
     si->y_org = statusbar && statusbar->position == BarTop ? statusbar->height : 0;
-    si->width = DisplayWidth(disp, screen);
-    si->height = DisplayHeight(disp, screen) -
+    si->width = DisplayWidth(globalconf.display, screen);
+    si->height = DisplayHeight(globalconf.display, screen) -
         (statusbar && (statusbar->position == BarTop || statusbar->position == BarBot) ? statusbar->height : 0);
 
 	/* make padding corrections */
@@ -113,24 +111,23 @@ get_display_info(Display *disp, int screen, Statusbar *statusbar, Padding *paddi
 }
 
 /** Return the Xinerama screen number where the coordinates belongs to
- * \param disp Display ref
  * \param x x coordinate of the window
  * \param y y coordinate of the window
  * \return screen number or DefaultScreen of disp on no match
  */
 int
-get_screen_bycoord(Display *disp, int x, int y)
+get_screen_bycoord(int x, int y)
 {
     ScreenInfo *si;
     int i;
 
     /* don't waste our time */
-    if(!XineramaIsActive(disp))
-        return DefaultScreen(disp);
+    if(!XineramaIsActive(globalconf.display))
+        return DefaultScreen(globalconf.display);
 
-    si = get_screen_info(disp, 0, NULL, NULL);
+    si = get_screen_info(0, NULL, NULL);
 
-    for(i = 0; i < get_screen_count(disp); i++)
+    for(i = 0; i < get_screen_count(); i++)
         if((x < 0 || (x >= si[i].x_org && x < si[i].x_org + si[i].width))
            && (y < 0 || (y >= si[i].y_org && y < si[i].y_org + si[i].height)))
         {
@@ -139,37 +136,35 @@ get_screen_bycoord(Display *disp, int x, int y)
         }
 
     p_delete(&si);
-    return DefaultScreen(disp);
+    return DefaultScreen(globalconf.display);
 }
 
 /** Return the actual screen count
- * \param disp Display ref
  * \return the number of screen available
  */
 int
-get_screen_count(Display *disp)
+get_screen_count(void)
 {
     int screen_number;
 
-    if(XineramaIsActive(disp))
-        XineramaQueryScreens(disp, &screen_number);
+    if(XineramaIsActive(globalconf.display))
+        XineramaQueryScreens(globalconf.display, &screen_number);
     else
-        return ScreenCount(disp);
+        return ScreenCount(globalconf.display);
 
     return screen_number;
 }
 
 /** This returns the real X screen number for a logical
  * screen if Xinerama is active.
- * \param disp Display ref
  * \param screen the logical screen
  * \return the X screen
  */
 int
-get_phys_screen(Display *disp, int screen)
+get_phys_screen(int screen)
 {
-    if(XineramaIsActive(disp))
-        return DefaultScreen(disp);
+    if(XineramaIsActive(globalconf.display))
+        return DefaultScreen(globalconf.display);
     return screen;
 }
 
@@ -196,8 +191,8 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
     {
         ScreenInfo *si, *si_old;
 
-        si = get_screen_info(c->display, c->screen, NULL, NULL);
-        si_old = get_screen_info(c->display, old_screen, NULL, NULL);
+        si = get_screen_info(c->screen, NULL, NULL);
+        si_old = get_screen_info(old_screen, NULL, NULL);
 
         /* compute new coords in new screen */
         c->rx = (c->rx - si_old[old_screen].x_org) + si[c->screen].x_org;
@@ -226,20 +221,19 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
 }
 
 /** Move mouse pointer to x_org and y_xorg of specified screen
- * \param disp display ref
  * \param screen screen number
  */
 static void
-move_mouse_pointer_to_screen(Display *disp, int screen)
+move_mouse_pointer_to_screen(int screen)
 {
-    if(XineramaIsActive(disp))
+    if(XineramaIsActive(globalconf.display))
     {
-        ScreenInfo *si = get_screen_info(disp, screen, NULL, NULL);
-        XWarpPointer(disp, None, DefaultRootWindow(disp), 0, 0, 0, 0, si[screen].x_org, si[screen].y_org);
+        ScreenInfo *si = get_screen_info(screen, NULL, NULL);
+        XWarpPointer(globalconf.display, None, DefaultRootWindow(globalconf.display), 0, 0, 0, 0, si[screen].x_org, si[screen].y_org);
         p_delete(&si);
     }
     else
-        XWarpPointer(disp, None, RootWindow(disp, screen), 0, 0, 0, 0, 0, 0);
+        XWarpPointer(globalconf.display, None, RootWindow(globalconf.display, screen), 0, 0, 0, 0, 0, 0);
 }
 
 
@@ -250,7 +244,7 @@ move_mouse_pointer_to_screen(Display *disp, int screen)
 void
 uicb_screen_focus(int screen, char *arg)
 {
-    int new_screen, numscreens = get_screen_count(globalconf.display);
+    int new_screen, numscreens = get_screen_count();
 
     if(arg)
         new_screen = compute_new_value_from_arg(arg, screen);
@@ -265,7 +259,7 @@ uicb_screen_focus(int screen, char *arg)
     focus(focus_get_latest_client_for_tag(new_screen, get_current_tag(new_screen)),
           True, new_screen);
 
-    move_mouse_pointer_to_screen(globalconf.display, new_screen);
+    move_mouse_pointer_to_screen(new_screen);
 }
 
 /** Move client to a virtual screen (if Xinerama is active)
@@ -286,14 +280,14 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     else
         new_screen = sel->screen + 1;
 
-    if(new_screen >= get_screen_count(globalconf.display))
+    if(new_screen >= get_screen_count())
         new_screen = 0;
     else if(new_screen < 0)
-        new_screen = get_screen_count(globalconf.display) - 1;
+        new_screen = get_screen_count() - 1;
 
     prev_screen = sel->screen;
     move_client_to_screen(sel, new_screen, True);
-    move_mouse_pointer_to_screen(globalconf.display, new_screen);
+    move_mouse_pointer_to_screen(new_screen);
     arrange(prev_screen);
     arrange(new_screen);
 }

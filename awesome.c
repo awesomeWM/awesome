@@ -170,7 +170,7 @@ scan()
                 if(wa.map_state == IsViewable || window_getstate(globalconf.display, wins[i]) == IconicState)
                 {
                     if(screen == 0)
-                        real_screen = get_screen_bycoord(globalconf.display, wa.x, wa.y);
+                        real_screen = get_screen_bycoord(wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }
@@ -183,7 +183,7 @@ scan()
                    && (wa.map_state == IsViewable || window_getstate(globalconf.display, wins[i]) == IconicState))
                 {
                     if(screen == 0)
-                        real_screen = get_screen_bycoord(globalconf.display, wa.x, wa.y);
+                        real_screen = get_screen_bycoord(wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }
@@ -213,10 +213,12 @@ setup(int screen)
     wa.cursor = globalconf.cursor[CurNormal];
 
     XChangeWindowAttributes(globalconf.display,
-                            RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)),
+                            RootWindow(globalconf.display, get_phys_screen(screen)),
                             CWEventMask | CWCursor, &wa);
 
-    XSelectInput(globalconf.display, RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)), wa.event_mask);
+    XSelectInput(globalconf.display,
+                 RootWindow(globalconf.display, get_phys_screen(screen)),
+                 wa.event_mask);
 
     grabkeys(screen);
 }
@@ -331,14 +333,14 @@ main(int argc, char *argv[])
     XSetErrorHandler(NULL);
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
+    globalconf.display = dpy;
 
-    globalconf.screens = p_new(VirtScreen, get_screen_count(dpy));
+    globalconf.screens = p_new(VirtScreen, get_screen_count());
     focus_add_client(NULL);
     /* store display */
-    globalconf.display = dpy;
     config_parse(confpath);
 
-    for(screen = 0; screen < get_screen_count(dpy); screen++)
+    for(screen = 0; screen < get_screen_count(); screen++)
     {
         /* set screen */
         setup_screen(screen);

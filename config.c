@@ -505,7 +505,7 @@ config_parse(const char *confpatharg)
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
 
     /* get the right screen section */
-    for(screen = 0; screen < get_screen_count(globalconf.display); screen++)
+    for(screen = 0; screen < get_screen_count(); screen++)
     {
         virtscreen = &globalconf.screens[screen]; 
         snprintf(buf, sizeof(buf), "%d", screen);
@@ -537,28 +537,28 @@ config_parse(const char *confpatharg)
         virtscreen->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
         virtscreen->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
         virtscreen->font = XftFontOpenName(globalconf.display,
-                                                            get_phys_screen(globalconf.display, screen),
-                                                            cfg_getstr(cfg_general, "font"));
+                                           get_phys_screen(screen),
+                                           cfg_getstr(cfg_general, "font"));
         if(!virtscreen->font)
             eprint("awesome: cannot init font\n");
         /* Colors */
         virtscreen->colors_normal[ColBorder] = initxcolor(globalconf.display,
-                                                         get_phys_screen(globalconf.display, screen),
+                                                         get_phys_screen(screen),
                                                          cfg_getstr(cfg_colors, "normal_border"));
         virtscreen->colors_normal[ColBG] = initxcolor(globalconf.display,
-                                                     get_phys_screen(globalconf.display, screen),
+                                                     get_phys_screen(screen),
                                                      cfg_getstr(cfg_colors, "normal_bg"));
         virtscreen->colors_normal[ColFG] = initxcolor(globalconf.display,
-                                                     get_phys_screen(globalconf.display, screen),
+                                                     get_phys_screen(screen),
                                                      cfg_getstr(cfg_colors, "normal_fg"));
         virtscreen->colors_selected[ColBorder] = initxcolor(globalconf.display,
-                                                           get_phys_screen(globalconf.display, screen),
+                                                           get_phys_screen(screen),
                                                            cfg_getstr(cfg_colors, "focus_border"));
         virtscreen->colors_selected[ColBG] = initxcolor(globalconf.display,
-                                                       get_phys_screen(globalconf.display, screen),
+                                                       get_phys_screen(screen),
                                                        cfg_getstr(cfg_colors, "focus_bg"));
         virtscreen->colors_selected[ColFG] = initxcolor(globalconf.display,
-                                                       get_phys_screen(globalconf.display, screen),
+                                                       get_phys_screen(screen),
                                                        cfg_getstr(cfg_colors, "focus_fg"));
 
         /* Statusbar */
@@ -652,7 +652,7 @@ config_parse(const char *confpatharg)
                 rule->tags = NULL;
             rule->isfloating = cfg_getbool(cfgsectmp, "float");
             rule->screen = cfg_getint(cfgsectmp, "screen");
-            if(rule->screen >= get_screen_count(globalconf.display))
+            if(rule->screen >= get_screen_count())
                 rule->screen = 0;
 
             if(i < cfg_size(cfg_rules, "rule") - 1)

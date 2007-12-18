@@ -35,7 +35,7 @@ extern awesome_config globalconf;
 void
 statusbar_draw(int screen)
 {
-    int phys_screen = get_phys_screen(globalconf.display, screen);
+    int phys_screen = get_phys_screen(screen);
     VirtScreen vscreen;
     Widget *widget;
     int left = 0, right = 0;
@@ -102,8 +102,8 @@ void
 statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Padding *padding)
 {
     XSetWindowAttributes wa;
-    int phys_screen = get_phys_screen(disp, screen);
-    ScreenInfo *si = get_screen_info(disp, screen, NULL, padding);
+    int phys_screen = get_phys_screen(screen);
+    ScreenInfo *si = get_screen_info(screen, NULL, padding);
 
     statusbar->height = font->height * 1.5;
 
@@ -148,7 +148,7 @@ void
 statusbar_update_position(Display *disp, Statusbar *statusbar, Padding *padding)
 {
     XEvent ev;
-    ScreenInfo *si = get_screen_info(disp, statusbar->screen, NULL, padding);
+    ScreenInfo *si = get_screen_info(statusbar->screen, NULL, padding);
 
     XMapRaised(disp, statusbar->window);
     switch (statusbar->position)
