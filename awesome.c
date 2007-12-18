@@ -74,8 +74,8 @@ cleanup_screen(int screen)
     Tag *t, *tn;
 
     XftFontClose(globalconf.display, globalconf.screens[screen].font);
-    XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, get_phys_screen(globalconf.display, screen)));
-    XDestroyWindow(globalconf.display, globalconf.screens[screen].statusbar.window);
+    XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, get_phys_screen(screen)));
+    XDestroyWindow(globalconf.display, globalconf.screens[screen].statusbar->window);
 
     for(t = globalconf.screens[screen].tags; t; t = tn)
     {
@@ -137,7 +137,7 @@ cleanup()
 
     p_delete(&globalconf.configpath);
 
-    for(screen = 0; screen < get_screen_count(globalconf.display); screen++)
+    for(screen = 0; screen < get_screen_count(); screen++)
         cleanup_screen(screen);
 
     XSetInputFocus(globalconf.display, PointerRoot, RevertToPointerRoot, CurrentTime);
