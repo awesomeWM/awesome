@@ -32,7 +32,7 @@ layout_fibonacci(int screen, int shape)
     int n = 0, i = 0, nx, ny, nw, nh;
     Client *c;
     ScreenInfo *si = get_screen_info(globalconf.display, screen,
-                                     &globalconf.screens[screen].statusbar,
+                                     globalconf.screens[screen].statusbar,
                                      &globalconf.screens[screen].padding);
 
     nx = si[screen].x_org;

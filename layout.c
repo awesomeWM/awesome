@@ -180,7 +180,7 @@ restack(int screen)
         if(!(get_current_layout(screen)->arrange == layout_floating))
         {
             wc.stack_mode = Below;
-            wc.sibling = globalconf.screens[screen].statusbar.window;
+            wc.sibling = globalconf.screens[screen].statusbar->window;
             if(!sel->isfloating)
             {
                 XConfigureWindow(sel->display, sel->win, CWSibling | CWStackMode, &wc);
@@ -280,7 +280,7 @@ maximize(int x, int y, int w, int h, int screen)
 void
 uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 {
-    ScreenInfo *si = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    ScreenInfo *si = get_screen_info(globalconf.display, screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
     maximize(si[screen].x_org, si[screen].y_org,
              si[screen].width - 2 * globalconf.screens[screen].borderpx,
@@ -293,7 +293,7 @@ void
 uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    ScreenInfo *si = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    ScreenInfo *si = get_screen_info(globalconf.display, screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
     if(sel)
         maximize(sel->x,
@@ -309,7 +309,7 @@ void
 uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    ScreenInfo *si = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    ScreenInfo *si = get_screen_info(globalconf.display, screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
     if(sel)
         maximize(si[screen].x_org,

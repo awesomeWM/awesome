@@ -562,10 +562,11 @@ config_parse(const char *confpatharg)
                                                        cfg_getstr(cfg_colors, "focus_fg"));
 
         /* Statusbar */
-        virtscreen->statusbar.position = virtscreen->statusbar.dposition =
+        virtscreen->statusbar = p_new(Statusbar, 1);
+        virtscreen->statusbar->position = virtscreen->statusbar->dposition =
             statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
 
-        create_widgets(cfg_statusbar, &virtscreen->statusbar);
+        create_widgets(cfg_statusbar, virtscreen->statusbar);
 
         /* Layouts */
         if(cfg_size(cfg_layouts, "layout"))

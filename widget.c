@@ -49,7 +49,7 @@ static Widget *
 find_widget(char *name, int screen)
 {
     Widget *widget;
-    widget = globalconf.screens[screen].statusbar.widgets;
+    widget = globalconf.screens[screen].statusbar->widgets;
     for(; widget; widget = widget->next)
         if (strcmp(name, widget->name) == 0)
             return widget;

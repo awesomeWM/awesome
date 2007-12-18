@@ -71,28 +71,28 @@ handle_event_buttonpress(XEvent * e)
     XButtonPressedEvent *ev = &e->xbutton;
 
     for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
-        if(globalconf.screens[screen].statusbar.window == ev->window)
+        if(globalconf.screens[screen].statusbar->window == ev->window)
         {
             for(i = 1, tag = globalconf.screens[screen].tags; tag; tag = tag->next, i++)
             {
                 x += textwidth_primitive(e->xany.display, globalconf.screens[screen].font, tag->name);
-                if(((globalconf.screens[screen].statusbar.position == BarTop
-                     || globalconf.screens[screen].statusbar.position == BarBot)
+                if(((globalconf.screens[screen].statusbar->position == BarTop
+                     || globalconf.screens[screen].statusbar->position == BarBot)
                    && ev->x < x)
-                   || (globalconf.screens[screen].statusbar.position == BarRight && ev->y < x)
-                   || (globalconf.screens[screen].statusbar.position == BarLeft && ev->y > globalconf.screens[screen].statusbar.width - x))
+                   || (globalconf.screens[screen].statusbar->position == BarRight && ev->y < x)
+                   || (globalconf.screens[screen].statusbar->position == BarLeft && ev->y > globalconf.screens[screen].statusbar->width - x))
                 {
                     snprintf(arg, sizeof(arg), "%d", i);
                     handle_mouse_button_press(screen, ev->button, ev->state, globalconf.buttons.tag, arg);
                     return;
                 }
             }
-            x += globalconf.screens[screen].statusbar.txtlayoutwidth;
-            if(((globalconf.screens[screen].statusbar.position == BarTop
-                 || globalconf.screens[screen].statusbar.position == BarBot)
+            x += globalconf.screens[screen].statusbar->txtlayoutwidth;
+            if(((globalconf.screens[screen].statusbar->position == BarTop
+                 || globalconf.screens[screen].statusbar->position == BarBot)
                 && ev->x < x)
-                || (globalconf.screens[screen].statusbar.position == BarRight && ev->y < x)
-                || (globalconf.screens[screen].statusbar.position == BarLeft && ev->y > globalconf.screens[screen].statusbar.width - x))
+                || (globalconf.screens[screen].statusbar->position == BarRight && ev->y < x)
+                || (globalconf.screens[screen].statusbar->position == BarLeft && ev->y > globalconf.screens[screen].statusbar->width - x))
                 handle_mouse_button_press(screen, ev->button, ev->state, globalconf.buttons.layout, NULL);
             else
                 handle_mouse_button_press(screen, ev->button, ev->state, globalconf.buttons.title, NULL);
@@ -197,13 +197,13 @@ handle_event_configurenotify(XEvent * e)
 
             /* update statusbar */
             si = get_screen_info(e->xany.display, screen, NULL, &globalconf.screens[screen].padding);
-            globalconf.screens[screen].statusbar.width = si[screen].width;
+            globalconf.screens[screen].statusbar->width = si[screen].width;
             p_delete(&si);
 
             XResizeWindow(e->xany.display,
-                          globalconf.screens[screen].statusbar.window,
-                          globalconf.screens[screen].statusbar.width,
-                          globalconf.screens[screen].statusbar.height);
+                          globalconf.screens[screen].statusbar->window,
+                          globalconf.screens[screen].statusbar->width,
+                          globalconf.screens[screen].statusbar->height);
 
             statusbar_update_position(e->xany.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
             arrange(screen);
@@ -250,7 +250,7 @@ handle_event_expose(XEvent * e)
 
     if(!ev->count)
         for(screen = 0; screen < get_screen_count(e->xany.display); screen++)
-            if(globalconf.screens[screen].statusbar.window == ev->window)
+            if(globalconf.screens[screen].statusbar->window == ev->window)
                 statusbar_draw(screen);
 }
 

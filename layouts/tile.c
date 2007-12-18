@@ -103,7 +103,7 @@ _tile(int screen, const Bool right)
     Client *c;
     Tag *curtag = get_current_tag(screen);
 
-    screens_info = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    screens_info = get_screen_info(globalconf.display, screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
     for(n = 0, c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))

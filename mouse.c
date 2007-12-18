@@ -49,7 +49,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
      else
          restack(screen);
 
-    si = get_screen_info(c->display, c->screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    si = get_screen_info(c->display, c->screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
     ocx = nx = c->x;
     ocy = ny = c->y;

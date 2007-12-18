@@ -292,7 +292,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
     else
     {
-        ScreenInfo *display_info = get_display_info(c->display, c->phys_screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+        ScreenInfo *display_info = get_display_info(c->display, c->phys_screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
         if(c->x + c->w + 2 * c->border > display_info->x_org + display_info->width)
             c->x = c->rx = display_info->x_org + display_info->width - c->w - 2 * c->border;

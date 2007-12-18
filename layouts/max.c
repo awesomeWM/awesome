@@ -30,7 +30,7 @@ void
 layout_max(int screen)
 {
     Client *c;
-    ScreenInfo *si = get_screen_info(globalconf.display, screen, &globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    ScreenInfo *si = get_screen_info(globalconf.display, screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))

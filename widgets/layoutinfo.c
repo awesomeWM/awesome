@@ -16,13 +16,13 @@ layoutinfo_draw(Widget *widget,
     Layout *l;
     for(l = vscreen.layouts ; l; l = l->next)
         width = MAX(width, (textwidth(ctx, vscreen.font, l->symbol)));
-    location = calculate_offset(vscreen.statusbar.width,
+    location = calculate_offset(vscreen.statusbar->width,
                                 width,
                                 offset,
                                 widget->alignment);
     drawtext(ctx, location, 0,
              width,
-             vscreen.statusbar.height,
+             vscreen.statusbar->height,
              vscreen.font,
              get_current_layout(widget->statusbar->screen)->symbol,
              vscreen.colors_normal[ColFG],

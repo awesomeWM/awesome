@@ -42,7 +42,7 @@ taglist_draw(Widget *widget,
     {
         width  += textwidth(ctx, vscreen.font, tag->name);
     }
-    location = calculate_offset(vscreen.statusbar.width,
+    location = calculate_offset(vscreen.statusbar->width,
                                 width,
                                 offset,
                                 widget->alignment);
@@ -56,7 +56,7 @@ taglist_draw(Widget *widget,
         else
             colors = vscreen.colors_normal;
         drawtext(ctx, location + width, 0, w,
-                 vscreen.statusbar.height,
+                 vscreen.statusbar->height,
                  vscreen.font,
                  tag->name,
                  colors[ColFG],

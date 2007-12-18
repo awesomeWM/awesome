@@ -31,11 +31,11 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
     Data *d;
     d = (Data*) widget->data;
     width = textwidth(ctx, vscreen.font, d->text);
-    location = calculate_offset(vscreen.statusbar.width,
+    location = calculate_offset(vscreen.statusbar->width,
                                 width,
                                 offset,
                                 widget->alignment);
-    drawtext(ctx, location, 0, width, vscreen.statusbar.height,
+    drawtext(ctx, location, 0, width, vscreen.statusbar->height,
              vscreen.font, d->text,
              vscreen.colors_normal[ColFG], 
              vscreen.colors_normal[ColBG]);

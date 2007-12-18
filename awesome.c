@@ -225,7 +225,7 @@ static void
 setup_screen(int screen)
 {
     setup(screen);
-    statusbar_init(globalconf.display, screen, &globalconf.screens[screen].statusbar,
+    statusbar_init(globalconf.display, screen, globalconf.screens[screen].statusbar,
                    globalconf.cursor[CurNormal], globalconf.screens[screen].font,
                    &globalconf.screens[screen].padding);
 }

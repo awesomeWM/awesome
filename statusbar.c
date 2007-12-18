@@ -42,57 +42,57 @@ statusbar_draw(int screen)
     
     vscreen = globalconf.screens[screen];
     /* don't waste our time */
-    if(vscreen.statusbar.position == BarOff)
+    if(vscreen.statusbar->position == BarOff)
         return;
 
     DrawCtx *ctx = draw_get_context(globalconf.display, phys_screen,
-                                    vscreen.statusbar.width,
-                                    vscreen.statusbar.height);
+                                    vscreen.statusbar->width,
+                                    vscreen.statusbar->height);
     drawrectangle(ctx,
                   0,
                   0,
-                  vscreen.statusbar.width, 
-                  vscreen.statusbar.height, 
+                  vscreen.statusbar->width, 
+                  vscreen.statusbar->height, 
                   True,
                   vscreen.colors_normal[ColBG]);
-    for(widget = vscreen.statusbar.widgets; widget; widget = widget->next)
+    for(widget = vscreen.statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
             left += widget->draw(widget, ctx, left, (left + right));
         else if (widget->alignment == AlignRight)
             right += widget->draw(widget, ctx, right, (left + right));
 
-    for(widget = vscreen.statusbar.widgets; widget; widget = widget->next)
+    for(widget = vscreen.statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignFlex)
             left += widget->draw(widget, ctx, left, (left + right));
 
-    if(vscreen.statusbar.position == BarRight ||
-       vscreen.statusbar.position == BarLeft)
+    if(vscreen.statusbar->position == BarRight ||
+       vscreen.statusbar->position == BarLeft)
     {
         Drawable d;
-        if(vscreen.statusbar.position == BarRight)
+        if(vscreen.statusbar->position == BarRight)
             d = draw_rotate(ctx,
                             phys_screen,
                             M_PI_2,
-                            vscreen.statusbar.height,
+                            vscreen.statusbar->height,
                             0);
         else
             d = draw_rotate(ctx,
                             phys_screen,
                             - M_PI_2,
                             0,
-                            vscreen.statusbar.width);
+                            vscreen.statusbar->width);
         XCopyArea(globalconf.display, d,
-                  vscreen.statusbar.window,
+                  vscreen.statusbar->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
-                  vscreen.statusbar.height,
-                  vscreen.statusbar.width, 0, 0);
+                  vscreen.statusbar->height,
+                  vscreen.statusbar->width, 0, 0);
         XFreePixmap(globalconf.display, d);
     }
     else
         XCopyArea(globalconf.display, ctx->drawable,
-                  vscreen.statusbar.window,
+                  vscreen.statusbar->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
-                  vscreen.statusbar.width, vscreen.statusbar.height, 0, 0);
+                  vscreen.statusbar->width, vscreen.statusbar->height, 0, 0);
 
     draw_free_context(ctx);
     XSync(globalconf.display, False);
@@ -140,30 +140,30 @@ statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, X
 
     calculate_alignments(statusbar->widgets);
 
-    statusbar_update_position(disp, *statusbar, padding);
+    statusbar_update_position(disp, statusbar, padding);
     XMapRaised(disp, statusbar->window);
 }
 
 void
-statusbar_update_position(Display *disp, Statusbar statusbar, Padding *padding)
+statusbar_update_position(Display *disp, Statusbar *statusbar, Padding *padding)
 {
     XEvent ev;
-    ScreenInfo *si = get_screen_info(disp, statusbar.screen, NULL, padding);
+    ScreenInfo *si = get_screen_info(disp, statusbar->screen, NULL, padding);
 
-    XMapRaised(disp, statusbar.window);
-    switch (statusbar.position)
+    XMapRaised(disp, statusbar->window);
+    switch (statusbar->position)
     {
       default:
-        XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].y_org);
+        XMoveWindow(disp, statusbar->window, si[statusbar->screen].x_org, si[statusbar->screen].y_org);
         break;
       case BarRight:
-        XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org + (si[statusbar.screen].width - statusbar.height), si[statusbar.screen].y_org);
+        XMoveWindow(disp, statusbar->window, si[statusbar->screen].x_org + (si[statusbar->screen].width - statusbar->height), si[statusbar->screen].y_org);
         break;
       case BarBot:
-        XMoveWindow(disp, statusbar.window, si[statusbar.screen].x_org, si[statusbar.screen].height - statusbar.height);
+        XMoveWindow(disp, statusbar->window, si[statusbar->screen].x_org, si[statusbar->screen].height - statusbar->height);
         break;
       case BarOff:
-        XUnmapWindow(disp, statusbar.window);
+        XUnmapWindow(disp, statusbar->window);
         break;
     }
     p_delete(&si);
@@ -188,10 +188,10 @@ statusbar_get_position_from_str(const char * pos)
 void
 uicb_statusbar_toggle(int screen, char *arg __attribute__ ((unused)))
 {
-    if(globalconf.screens[screen].statusbar.position == BarOff)
-        globalconf.screens[screen].statusbar.position = (globalconf.screens[screen].statusbar.dposition == BarOff) ? BarTop : globalconf.screens[screen].statusbar.dposition;
+    if(globalconf.screens[screen].statusbar->position == BarOff)
+        globalconf.screens[screen].statusbar->position = (globalconf.screens[screen].statusbar->dposition == BarOff) ? BarTop : globalconf.screens[screen].statusbar->dposition;
     else
-        globalconf.screens[screen].statusbar.position = BarOff;
+        globalconf.screens[screen].statusbar->position = BarOff;
     statusbar_update_position(globalconf.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
     arrange(screen);
 }
@@ -199,8 +199,8 @@ uicb_statusbar_toggle(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_statusbar_set_position(int screen, char *arg)
 {
-    globalconf.screens[screen].statusbar.dposition = 
-        globalconf.screens[screen].statusbar.position =
+    globalconf.screens[screen].statusbar->dposition = 
+        globalconf.screens[screen].statusbar->position =
             statusbar_get_position_from_str(arg);
     statusbar_update_position(globalconf.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 }

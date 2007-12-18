@@ -211,7 +211,7 @@ typedef struct
     /** Layout list */
     Layout *layouts;
     /** Status bar */
-    Statusbar statusbar;
+    Statusbar *statusbar;
     /** Padding */
     Padding padding;	
     /** Font */
