@@ -36,7 +36,9 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
                                 offset,
                                 widget->alignment);
     drawtext(ctx, location, 0, width, vscreen.statusbar.height,
-             vscreen.font, d->text, vscreen.colors_normal);
+             vscreen.font, d->text,
+             vscreen.colors_normal[ColFG], 
+             vscreen.colors_normal[ColBG]);
     return width;
 }
 

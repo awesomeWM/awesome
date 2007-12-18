@@ -22,7 +22,8 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     {
         drawtext(ctx, location, 0, vscreen.statusbar.width - used,
                  vscreen.statusbar.height, vscreen.font, sel->name,
-                 vscreen.colors_selected);
+                 vscreen.colors_selected[ColFG],
+                 vscreen.colors_selected[ColBG]);
         if(sel->isfloating)
             drawcircle(ctx, location, 0,
                        (vscreen.font->height + 2) / 4,
@@ -32,7 +33,8 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     else
         drawtext(ctx, location, 0, vscreen.statusbar.width - used,
                  vscreen.statusbar.height, vscreen.font, NULL,
-                 vscreen.colors_normal);
+                 vscreen.colors_normal[ColFG],
+                 vscreen.colors_normal[ColBG]);
     return vscreen.statusbar.width - used;
 }
 

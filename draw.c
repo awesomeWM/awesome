@@ -52,7 +52,7 @@ draw_free_context(DrawCtx *ctx)
 }
 
 void
-drawtext(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *text, XColor color[ColLast])
+drawtext(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *text, XColor fg, XColor bg)
 {
     int nw = 0;
     static char buf[256];
@@ -61,7 +61,7 @@ drawtext(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *te
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    drawrectangle(ctx, x, y, w, h, True, color[ColBG]);
+    drawrectangle(ctx, x, y, w, h, True, bg);
     if(!a_strlen(text))
         return;
 
@@ -70,7 +70,7 @@ drawtext(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *te
     font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
     cairo_set_font_face(cr, font_face);
     cairo_set_font_size(cr, font->height);
-    cairo_set_source_rgb(cr, color[ColFG].red / 65535.0, color[ColFG].green / 65535.0, color[ColFG].blue / 65535.0);
+    cairo_set_source_rgb(cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
 
     olen = len = a_strlen(text);
     if(len >= sizeof(buf))
@@ -176,7 +176,6 @@ draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
 
     return newdrawable;
 }
-
 
 unsigned short
 textwidth_primitive(Display *display, XftFont *font, char *text)

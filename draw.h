@@ -38,7 +38,7 @@ struct DrawCtx
 
 DrawCtx *draw_get_context(Display*, int, int, int);
 void draw_free_context(DrawCtx*);
-void drawtext(DrawCtx *, int, int, int, int, XftFont *, const char *, XColor []);
+void drawtext(DrawCtx *, int, int, int, int, XftFont *, const char *, XColor fg, XColor bg);
 void drawrectangle(DrawCtx *, int, int, int, int, Bool, XColor);
 void drawcircle(DrawCtx *, int, int, int, Bool, XColor);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);

@@ -25,7 +25,8 @@ layoutinfo_draw(Widget *widget,
              vscreen.statusbar.height,
              vscreen.font,
              get_current_layout(widget->statusbar->screen)->symbol,
-             vscreen.colors_normal);
+             vscreen.colors_normal[ColFG],
+             vscreen.colors_normal[ColBG]);
     return width;
 }
 
