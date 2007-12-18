@@ -89,4 +89,4 @@ is_tag_match_rules(Tag *t, Rule *r)
     return False;
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -113,4 +113,4 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
     return True;
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

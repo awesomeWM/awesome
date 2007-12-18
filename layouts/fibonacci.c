@@ -101,4 +101,4 @@ layout_dwindle(int screen)
     layout_fibonacci(screen, 1);
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -205,4 +205,4 @@ uicb_statusbar_set_position(int screen, char *arg)
     statusbar_update_position(globalconf.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

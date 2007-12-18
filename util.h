@@ -205,4 +205,4 @@ void warn(const char *, ...) __attribute__ ((format(printf, 1, 2)));
 void *name_func_lookup(const char *, const NameFuncLink *);
 
 #endif
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

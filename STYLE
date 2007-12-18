@@ -2,7 +2,7 @@ If you intend to patch and contribute awesome, please respect the following codi
 - Use 4 space tabs instead of tabs;
 - Place braces alone on new lines;
 - No space before if, for, while statements or function call;
-- Do not put very long line, split them;
+- The preferred line length is 80 characters;
 - Be clear in what you do.
 
 A vim modeline is set in each file to respect this.

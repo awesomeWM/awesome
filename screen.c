@@ -291,4 +291,4 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     arrange(prev_screen);
     arrange(new_screen);
 }
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=99
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
