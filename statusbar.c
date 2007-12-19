@@ -172,37 +172,49 @@ statusbar_init(int screen)
 
     widget_calculate_alignments(statusbar->widgets);
 
-    statusbar_update_position(globalconf.display,
-                              statusbar,
-                              &globalconf.screens[screen].padding);
+    statusbar_update_position(screen);
     XMapRaised(globalconf.display, statusbar->window);
 }
 
 void
-statusbar_update_position(Display *disp, Statusbar *statusbar, Padding *padding)
+statusbar_update_position(int screen)
 {
     XEvent ev;
-    ScreenInfo *si = get_screen_info(statusbar->screen, NULL, padding);
+    Statusbar *statusbar = globalconf.screens[screen].statusbar;
+    ScreenInfo *si = get_screen_info(statusbar->screen,
+                                     NULL,
+                                     &globalconf.screens[screen].padding);
 
-    XMapRaised(disp, statusbar->window);
+    XMapRaised(globalconf.display, statusbar->window);
     switch (statusbar->position)
     {
       default:
-        XMoveWindow(disp, statusbar->window, si[statusbar->screen].x_org, si[statusbar->screen].y_org);
+        XMoveWindow(globalconf.display,
+                    statusbar->window,
+                    si[statusbar->screen].x_org,
+                    si[statusbar->screen].y_org);
         break;
       case BarRight:
-        XMoveWindow(disp, statusbar->window, si[statusbar->screen].x_org + (si[statusbar->screen].width - statusbar->height), si[statusbar->screen].y_org);
+        XMoveWindow(globalconf.display,
+                    statusbar->window,
+                    si[statusbar->screen].x_org +
+                    (si[statusbar->screen].width -
+                    statusbar->height),
+                    si[statusbar->screen].y_org);
         break;
       case BarBot:
-        XMoveWindow(disp, statusbar->window, si[statusbar->screen].x_org, si[statusbar->screen].height - statusbar->height);
+        XMoveWindow(globalconf.display,
+                    statusbar->window,
+                    si[statusbar->screen].x_org,
+                    si[statusbar->screen].height - statusbar->height);
         break;
       case BarOff:
-        XUnmapWindow(disp, statusbar->window);
+        XUnmapWindow(globalconf.display, statusbar->window);
         break;
     }
     p_delete(&si);
-    XSync(disp, False);
-    while(XCheckMaskEvent(disp, EnterWindowMask, &ev));
+    XSync(globalconf.display, False);
+    while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
 }
 
 int
@@ -231,7 +243,7 @@ uicb_statusbar_toggle(int screen, char *arg __attribute__ ((unused)))
         globalconf.screens[screen].statusbar->position = (globalconf.screens[screen].statusbar->dposition == BarOff) ? BarTop : globalconf.screens[screen].statusbar->dposition;
     else
         globalconf.screens[screen].statusbar->position = BarOff;
-    statusbar_update_position(globalconf.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    statusbar_update_position(screen);
     arrange(screen);
 }
 
@@ -246,9 +258,7 @@ uicb_statusbar_set_position(int screen, char *arg)
     globalconf.screens[screen].statusbar->dposition = 
         globalconf.screens[screen].statusbar->position =
             statusbar_get_position_from_str(arg);
-    statusbar_update_position(globalconf.display,
-                              globalconf.screens[screen].statusbar,
-                              &globalconf.screens[screen].padding);
+    statusbar_update_position(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

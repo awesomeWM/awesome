@@ -208,7 +208,7 @@ handle_event_configurenotify(XEvent * e)
                           globalconf.screens[screen].statusbar->width,
                           globalconf.screens[screen].statusbar->height);
 
-            statusbar_update_position(e->xany.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+            statusbar_update_position(screen);
             arrange(screen);
         }
 }
