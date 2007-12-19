@@ -4,7 +4,7 @@
 #include "widget.h"
 #include "tag.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 /** Check if at least one client is tagged with tag number t and is on screen
  * screen

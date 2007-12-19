@@ -34,7 +34,7 @@
 #include "layouts/fibonacci.h"
 #include "layouts/floating.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 const NameFuncLink LayoutsList[] =
 {

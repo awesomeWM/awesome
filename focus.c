@@ -24,7 +24,7 @@
 #include "layout.h"
 #include "focus.h" 
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 static FocusList *
 focus_get_node_by_client(Client *c)

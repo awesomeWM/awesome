@@ -30,7 +30,7 @@
 #include "tag.h"
 #include "widget.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 void
 statusbar_draw(int screen)

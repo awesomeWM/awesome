@@ -32,7 +32,7 @@
 #include "focus.h"
 #include "layouts/tile.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 const NameFuncLink UicbList[] =
 {
@@ -86,7 +86,7 @@ const NameFuncLink UicbList[] =
 };
 
 static int
-run_uicb(char *cmd, awesome_config *awesomeconf __attribute ((unused)))
+run_uicb(char *cmd, AwesomeConf *awesomeconf __attribute ((unused)))
 {
     char *p;
     const char *arg;

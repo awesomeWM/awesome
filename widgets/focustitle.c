@@ -5,7 +5,7 @@
 #include "layout.h"
 #include "focus.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 static int
 focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)

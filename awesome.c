@@ -52,7 +52,7 @@
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
 
-awesome_config globalconf;
+AwesomeConf globalconf;
 
 static inline void
 cleanup_buttons(Button *buttons)

@@ -28,7 +28,7 @@
 #include "window.h"
 #include "layouts/floating.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 /** Move client with mouse
  * \param screen Screen ID

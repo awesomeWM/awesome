@@ -36,7 +36,7 @@
 #include "layouts/floating.h"
 
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 /** Load windows properties, restoring client's tag
  * and floating state before awesome was restarted if any

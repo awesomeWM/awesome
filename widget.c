@@ -3,7 +3,7 @@
 #include "widget.h"
 #include "statusbar.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 const NameFuncLink WidgetList[] =
 {

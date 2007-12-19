@@ -36,7 +36,7 @@
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 /** Link a name to a key symbol */
 typedef struct

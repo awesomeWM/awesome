@@ -38,7 +38,7 @@
 #include "layouts/floating.h"
 
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 #define CLEANMASK(mask)		(mask & ~(globalconf.numlockmask | LockMask))
 

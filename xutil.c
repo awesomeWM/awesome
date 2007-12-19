@@ -27,7 +27,7 @@
 #include "xutil.h"
 
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 /** Execute another process, replacing the current instance of Awesome
  * \param screen Screen ID

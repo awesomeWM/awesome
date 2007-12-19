@@ -24,7 +24,7 @@
 #include "util.h"
 #include "layouts/fibonacci.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 static void
 layout_fibonacci(int screen, int shape)

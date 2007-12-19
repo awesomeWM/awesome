@@ -26,7 +26,7 @@
 #include "focus.h"
 #include "statusbar.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 /** Get screens info
  * \param screen Screen number

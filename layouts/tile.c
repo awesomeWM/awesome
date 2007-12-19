@@ -28,7 +28,7 @@
 #include "layout.h"
 #include "layouts/tile.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 void
 uicb_tag_setnmaster(int screen, char * arg)

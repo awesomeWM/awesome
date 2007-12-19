@@ -49,7 +49,7 @@ struct Rule
     Rule *next;
 };
 
-typedef struct awesome_config awesome_config;
+typedef struct AwesomeConf AwesomeConf;
 
 typedef struct Layout Layout;
 struct Layout
@@ -232,7 +232,7 @@ struct Widget
 
 
 /** Main configuration structure */
-struct awesome_config
+struct AwesomeConf
 {
     /** Display ref */
     Display *display;

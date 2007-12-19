@@ -3,7 +3,7 @@
 #include "util.h"
 #include "layout.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 static int
 layoutinfo_draw(Widget *widget,

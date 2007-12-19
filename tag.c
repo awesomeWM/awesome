@@ -28,7 +28,7 @@
 #include "util.h"
 #include "rules.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 static void
 detach_tagclientlink(int screen, TagClientLink *tc)

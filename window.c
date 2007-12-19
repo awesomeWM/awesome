@@ -25,7 +25,7 @@
 #include "window.h"
 #include "util.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 /** Set client WM_STATE property
  * \param disp Display ref

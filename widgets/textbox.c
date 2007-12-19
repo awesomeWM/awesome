@@ -3,7 +3,7 @@
 #include "widget.h"
 #include "xutil.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 
 typedef struct Data Data;

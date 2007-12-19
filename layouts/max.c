@@ -24,7 +24,7 @@
 #include "util.h"
 #include "layouts/max.h"
 
-extern awesome_config globalconf;
+extern AwesomeConf globalconf;
 
 void
 layout_max(int screen)
