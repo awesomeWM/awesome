@@ -227,9 +227,7 @@ static void
 setup_screen(int screen)
 {
     setup(screen);
-    statusbar_init(globalconf.display, screen, globalconf.screens[screen].statusbar,
-                   globalconf.cursor[CurNormal], globalconf.screens[screen].font,
-                   &globalconf.screens[screen].padding);
+    statusbar_init(screen);
 }
 
 /** Startup Error handler to check if another window manager

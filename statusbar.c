@@ -99,13 +99,16 @@ statusbar_draw(int screen)
 }
 
 void
-statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, XftFont *font, Padding *padding)
+statusbar_init(int screen)
 {
     XSetWindowAttributes wa;
     int phys_screen = get_phys_screen(screen);
-    ScreenInfo *si = get_screen_info(screen, NULL, padding);
+    ScreenInfo *si = get_screen_info(screen,
+                                     NULL,
+                                     &globalconf.screens[screen].padding);
+    Statusbar *statusbar = globalconf.screens[screen].statusbar;
 
-    statusbar->height = font->height * 1.5;
+    statusbar->height = globalconf.screens[screen].font->height * 1.5;
 
     if(statusbar->position == BarRight || statusbar->position == BarLeft)
         statusbar->width = si[screen].height;
@@ -118,30 +121,54 @@ statusbar_init(Display *disp, int screen, Statusbar *statusbar, Cursor cursor, X
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
-    wa.cursor = cursor;
+    wa.cursor = globalconf.cursor[CurNormal];
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
     if(statusbar->dposition == BarRight || statusbar->dposition == BarLeft)
-        statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0,
+        statusbar->window = XCreateWindow(globalconf.display,
+                                          RootWindow(globalconf.display,
+                                          phys_screen),
+                                          0, 0,
                                           statusbar->height,
                                           statusbar->width,
-                                          0, DefaultDepth(disp, phys_screen), CopyFromParent,
-                                          DefaultVisual(disp, phys_screen),
-                                          CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+                                          0,
+                                          DefaultDepth(globalconf.display,
+                                                       phys_screen),
+                                          CopyFromParent,
+                                          DefaultVisual(globalconf.display,
+                                                        phys_screen),
+                                          CWOverrideRedirect |
+                                          CWBackPixmap |
+                                          CWEventMask,
+                                          &wa);
     else
-        statusbar->window = XCreateWindow(disp, RootWindow(disp, phys_screen), 0, 0,
+        statusbar->window = XCreateWindow(globalconf.display,
+                                          RootWindow(globalconf.display,
+                                                     phys_screen),
+                                          0, 0,
                                           statusbar->width,
                                           statusbar->height,
-                                          0, DefaultDepth(disp, phys_screen), CopyFromParent,
-                                          DefaultVisual(disp, phys_screen),
-                                          CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-    XDefineCursor(disp, statusbar->window, cursor);
+                                          0,
+                                          DefaultDepth(globalconf.display,
+                                                       phys_screen),
+                                          CopyFromParent,
+                                          DefaultVisual(globalconf.display,
+                                                        phys_screen),
+                                          CWOverrideRedirect |
+                                          CWBackPixmap |
+                                          CWEventMask,
+                                          &wa);
+    XDefineCursor(globalconf.display,
+                  statusbar->window,
+                  globalconf.cursor[CurNormal]);
 
     calculate_alignments(statusbar->widgets);
 
-    statusbar_update_position(disp, statusbar, padding);
-    XMapRaised(disp, statusbar->window);
+    statusbar_update_position(globalconf.display,
+                              statusbar,
+                              &globalconf.screens[screen].padding);
+    XMapRaised(globalconf.display, statusbar->window);
 }
 
 void
