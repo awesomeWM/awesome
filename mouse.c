@@ -30,6 +30,11 @@
 
 extern awesome_config globalconf;
 
+/** Move client with mouse
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
@@ -49,14 +54,20 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
      else
          restack(screen);
 
-    si = get_screen_info(c->screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    si = get_screen_info(c->screen,
+                         globalconf.screens[screen].statusbar,
+                         &globalconf.screens[screen].padding);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
-    if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen), False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+    if(XGrabPointer(c->display,
+                    RootWindow(c->display, c->phys_screen),
+                    False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
-    XQueryPointer(c->display, RootWindow(c->display, c->phys_screen), &dummy, &dummy, &x1, &y1, &di, &di, &dui);
+    XQueryPointer(c->display,
+                  RootWindow(c->display, c->phys_screen),
+                  &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
     {
         XMaskEvent(c->display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
@@ -93,6 +104,11 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
+/** Resize client with mouse
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 {

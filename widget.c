@@ -77,6 +77,11 @@ common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
 }
 
 
+/** Send command to widget
+ * \param screen Screen ID
+ * \param arg Widget command. Syntax depends on specific widget.
+ * \ingroup ui_callback
+ */
 void
 uicb_widget_tell(int screen, char *arg)
 {

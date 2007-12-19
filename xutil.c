@@ -29,6 +29,11 @@
 
 extern awesome_config globalconf;
 
+/** Execute another process, replacing the current instance of Awesome
+ * \param screen Screen ID
+ * \param arg Command
+ * \ingroup ui_callback
+ */
 void
 uicb_exec(int screen __attribute__ ((unused)), char *arg)
 {
@@ -40,6 +45,11 @@ uicb_exec(int screen __attribute__ ((unused)), char *arg)
     execlp(path, arg, NULL);
 }
 
+/** Spawn another process
+ * \param screen Screen ID
+ * \param arg Command
+ * \ingroup ui_callback
+ */
 void
 uicb_spawn(int screen, char *arg)
 {

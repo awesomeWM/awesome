@@ -99,6 +99,11 @@ get_current_layout(int screen)
     return NULL;
 }
 
+/** Send focus to next client in stack
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
 {
@@ -116,6 +121,11 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
+/** Send focus to previous client in stack
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
 {
@@ -224,6 +234,11 @@ saveawesomeprops(int screen)
     p_delete(&prop);
 }
 
+/** Set layout for tag
+ * \param screen Screen ID
+ * \param arg Layout specifier
+ * \ingroup ui_callback
+ */
 void
 uicb_tag_setlayout(int screen, char *arg)
 {
@@ -277,6 +292,11 @@ maximize(int x, int y, int w, int h, int screen)
     arrange(screen);
 }
 
+/** Toggle maximize for client
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 {
@@ -291,6 +311,11 @@ uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
     p_delete(&si);
 }
 
+/** Toggle vertical maximize for client
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 {
@@ -309,6 +334,11 @@ uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 }
 
 
+/** Toggle horizontal maximize for client
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 {
@@ -326,6 +356,11 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
     p_delete(&si);
 }
 
+/** Zoom client
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 {

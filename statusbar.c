@@ -185,6 +185,11 @@ statusbar_get_position_from_str(const char * pos)
     return BarTop;
 }
 
+/** Toggle statusbar
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
 void
 uicb_statusbar_toggle(int screen, char *arg __attribute__ ((unused)))
 {
@@ -196,13 +201,20 @@ uicb_statusbar_toggle(int screen, char *arg __attribute__ ((unused)))
     arrange(screen);
 }
 
+/** Set statusbar position
+ * \param screen Screen ID
+ * \param arg off | bottom | right | left | top
+ * \ingroup ui_callback
+ */
 void
 uicb_statusbar_set_position(int screen, char *arg)
 {
     globalconf.screens[screen].statusbar->dposition = 
         globalconf.screens[screen].statusbar->position =
             statusbar_get_position_from_str(arg);
-    statusbar_update_position(globalconf.display, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    statusbar_update_position(globalconf.display,
+                              globalconf.screens[screen].statusbar,
+                              &globalconf.screens[screen].padding);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

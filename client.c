@@ -660,6 +660,8 @@ uicb_setborder(int screen, char *arg)
 }
 
 /** Swap current with next client
+ * \param screen Screen ID
+ * \param arg nothing
  * \ingroup ui_callback
  */
 void
@@ -681,6 +683,8 @@ uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
 }
 
 /** Swap current with previous client
+ * \param screen Screen ID
+ * \param arg nothing
  * \ingroup ui_callback
  */
 void

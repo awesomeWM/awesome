@@ -106,6 +106,11 @@ focus_get_latest_client_for_tag(int screen, Tag *t)
     return NULL;
 }
 
+/** Jump in focus history stack
+ * \param screen Screen ID
+ * \param arg Integer argument
+ * \ingroup ui_callback
+ */
 void
 uicb_focus_history(int screen, char *arg)
 {
