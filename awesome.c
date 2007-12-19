@@ -223,13 +223,6 @@ setup(int screen)
     grabkeys(screen);
 }
 
-static void
-setup_screen(int screen)
-{
-    setup(screen);
-    statusbar_init(screen);
-}
-
 /** Startup Error handler to check if another window manager
  * is already running.
  * \param disp Display
@@ -343,7 +336,8 @@ main(int argc, char *argv[])
     for(screen = 0; screen < get_screen_count(); screen++)
     {
         /* set screen */
-        setup_screen(screen);
+        setup(screen);
+        statusbar_init(screen);
         statusbar_draw(screen);
     }
 
