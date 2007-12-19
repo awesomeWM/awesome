@@ -129,7 +129,7 @@ initxcolor(int screen, const char *colstr)
                            &screenColor,
                            &exactColor);
     if(!ret)
-        die("awesome: error, cannot allocate color '%s'\n", colstr);
+        eprint("awesome: error, cannot allocate color '%s'\n", colstr);
     return screenColor;
 }
 
