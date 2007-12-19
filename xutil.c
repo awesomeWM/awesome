@@ -18,7 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
  */
-
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/Xinerama.h>
@@ -111,6 +110,27 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
     XFree(name.value);
 
     return True;
+}
+
+
+/** Initialize an X color
+ * \param screen Screen number
+ * \param colorstr Color specification
+ */
+XColor
+initxcolor(int screen, const char *colstr)
+{
+    XColor screenColor, exactColor;
+    int ret, physcreen = get_phys_screen(screen);
+
+    ret = XAllocNamedColor(globalconf.display, 
+                           DefaultColormap(globalconf.display, physcreen),
+                           colstr,
+                           &screenColor,
+                           &exactColor);
+    if(!ret)
+        die("awesome: error, cannot allocate color '%s'\n", colstr);
+    return screenColor;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -31,6 +31,7 @@
 #include "rules.h"
 #include "screen.h"
 #include "widget.h"
+#include "xutil.h"
 #include "defconfig.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
@@ -55,19 +56,7 @@ extern const NameFuncLink UicbList[];
 extern const NameFuncLink WidgetList[];
 extern const NameFuncLink LayoutsList[];
 
-/** Initialize color from X side
- * \param disp Display ref
- * \param scr Screen number
- * \param colorstr Color code
- */
-static XColor
-initxcolor(Display *disp, int scr, const char *colstr)
-{
-    XColor color;
-    if(!XAllocNamedColor(disp, DefaultColormap(disp, scr), colstr, &color, &color))
-        die("awesome: error, cannot allocate color '%s'\n", colstr);
-    return color;
-}
+
 static unsigned int
 get_numlockmask(Display *disp)
 {
@@ -346,6 +335,8 @@ config_parse(const char *confpatharg)
     static cfg_opt_t widget_textbox_opts[] =
     {
         CFG_STR((char *) "default", (char *) NULL, CFGF_NONE),
+        CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
+        CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t statusbar_opts[] =
@@ -542,23 +533,17 @@ config_parse(const char *confpatharg)
         if(!virtscreen->font)
             eprint("awesome: cannot init font\n");
         /* Colors */
-        virtscreen->colors_normal[ColBorder] = initxcolor(globalconf.display,
-                                                         get_phys_screen(screen),
+        virtscreen->colors_normal[ColBorder] = initxcolor(screen,
                                                          cfg_getstr(cfg_colors, "normal_border"));
-        virtscreen->colors_normal[ColBG] = initxcolor(globalconf.display,
-                                                     get_phys_screen(screen),
+        virtscreen->colors_normal[ColBG] = initxcolor(screen,
                                                      cfg_getstr(cfg_colors, "normal_bg"));
-        virtscreen->colors_normal[ColFG] = initxcolor(globalconf.display,
-                                                     get_phys_screen(screen),
+        virtscreen->colors_normal[ColFG] = initxcolor(screen,
                                                      cfg_getstr(cfg_colors, "normal_fg"));
-        virtscreen->colors_selected[ColBorder] = initxcolor(globalconf.display,
-                                                           get_phys_screen(screen),
+        virtscreen->colors_selected[ColBorder] = initxcolor(screen,
                                                            cfg_getstr(cfg_colors, "focus_border"));
-        virtscreen->colors_selected[ColBG] = initxcolor(globalconf.display,
-                                                       get_phys_screen(screen),
+        virtscreen->colors_selected[ColBG] = initxcolor(screen,
                                                        cfg_getstr(cfg_colors, "focus_bg"));
-        virtscreen->colors_selected[ColFG] = initxcolor(globalconf.display,
-                                                       get_phys_screen(screen),
+        virtscreen->colors_selected[ColFG] = initxcolor(screen,
                                                        cfg_getstr(cfg_colors, "focus_fg"));
 
         /* Statusbar */

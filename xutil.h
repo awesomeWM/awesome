@@ -23,8 +23,10 @@
 #define AWESOME_XUTIL_H
 
 #include "common.h"
+#include "screen.h"
 
 Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
+XColor initxcolor(int, const char *);
 UICB_PROTO(uicb_spawn);
 UICB_PROTO(uicb_exec);
 
