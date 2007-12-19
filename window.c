@@ -89,12 +89,16 @@ window_configure(Display *disp, Window win, int x, int y, int w, int h, int bord
 /** Grab or ungrab buttons on a window
  * \param disp Display ref
  * \param screen The screen
+ * \param win The window
  * \param focused True if client is focused
  * \param raised True if the client is above other clients
- * \param modkey Mod key mask
  */
 void
-window_grabbuttons(Display *disp, int screen, Window win, Bool focused, Bool raised)
+window_grabbuttons(Display *disp,
+                   int screen,
+                   Window win,
+                   Bool focused,
+                   Bool raised)
 {
     Button *b;
 

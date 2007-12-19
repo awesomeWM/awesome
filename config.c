@@ -20,7 +20,7 @@
  */
 
 /**
- * \defgroup ui_callback
+ * @defgroup ui_callback User Interface Callbacks
  */
 
 #include <confuse.h>
@@ -301,7 +301,7 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 }
 
 /** Parse configuration file and initialize some stuff
- * \param configpatharg Path to configuration file
+ * \param confpatharg Path to configuration file
  */
 void
 config_parse(const char *confpatharg)

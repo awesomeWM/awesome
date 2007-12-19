@@ -234,16 +234,18 @@ setup_screen(int screen)
 
 /** Startup Error handler to check if another window manager
  * is already running.
- * \param disp Display ref
+ * \param disp Display
  * \param ee Error event
  */
 static int __attribute__ ((noreturn))
-xerrorstart(Display * disp __attribute__ ((unused)), XErrorEvent * ee __attribute__ ((unused)))
+xerrorstart(Display * disp __attribute__ ((unused)),
+            XErrorEvent * ee __attribute__ ((unused)))
 {
     eprint("another window manager is already running\n");
 }
 
 /** Quit awesome
+ * \param screen Screen ID
  * \param arg nothing
  * \ingroup ui_callback
  */

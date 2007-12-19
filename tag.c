@@ -135,6 +135,7 @@ tag_client_with_rules(Client *c)
 }
 
 /** Tag selected window with tag
+ * \param screen Screen ID
  * \param arg Tag name
  * \ingroup ui_callback
  */
@@ -172,6 +173,7 @@ uicb_client_tag(int screen, char *arg)
 }
 
 /** Toggle floating state of a client
+ * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
  */
@@ -195,6 +197,7 @@ uicb_client_togglefloating(int screen, char *arg __attribute__ ((unused)))
 }
 
 /** Toggle a tag on client
+ * \param screen Screen ID
  * \param arg Tag name
  * \ingroup ui_callback
  */
@@ -240,6 +243,7 @@ uicb_client_toggletag(int screen, char *arg)
 }
 
 /** Add a tag to viewed tags
+ * \param screen Screen ID
  * \param arg Tag name
  * \ingroup ui_callback
  */
@@ -272,6 +276,7 @@ uicb_tag_toggleview(int screen, char *arg)
 }
 
 /** View tag
+ * \param screen Screen ID
  * \param arg tag to view
  * \ingroup ui_callback
  */
@@ -302,6 +307,7 @@ uicb_tag_view(int screen, char *arg)
 }
 
 /** View previously selected tags
+ * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
  */
@@ -321,6 +327,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
 }
 
 /** View next tag
+ * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
  */
@@ -340,6 +347,7 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 }
 
 /** View previous tag
+ * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
  */

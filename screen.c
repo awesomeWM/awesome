@@ -32,6 +32,7 @@ extern awesome_config globalconf;
  * \param screen Screen number
  * \param statusbar statusbar
  * \return ScreenInfo struct array with all screens info
+ * \param padding Padding
  */
 ScreenInfo *
 get_screen_info(int screen, Statusbar *statusbar, Padding *padding)
@@ -83,6 +84,7 @@ get_screen_info(int screen, Statusbar *statusbar, Padding *padding)
 /** Get display info
  * \param screen Screen number
  * \param statusbar the statusbar
+ * \param padding Padding
  * \return ScreenInfo struct pointer with all display info
  */
 ScreenInfo *
@@ -170,6 +172,7 @@ get_phys_screen(int screen)
 
 /** Move a client to a virtual screen
  * \param c the client
+ * \param new_screen The destinatiuon screen
  * \param doresize set to True if we also move the client to the new x_org and
  *         y_org of the new screen
  */
@@ -238,6 +241,7 @@ move_mouse_pointer_to_screen(int screen)
 
 
 /** Switch focus to a specified screen
+ * \param screen Screen ID
  * \param arg screen number
  * \ingroup ui_callback
  */
@@ -263,6 +267,7 @@ uicb_screen_focus(int screen, char *arg)
 }
 
 /** Move client to a virtual screen (if Xinerama is active)
+ * \param screen Screen ID
  * \param arg screen number
  * \ingroup ui_callback
  */

@@ -115,7 +115,7 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
 
 /** Initialize an X color
  * \param screen Screen number
- * \param colorstr Color specification
+ * \param colstr Color specification
  */
 XColor
 initxcolor(int screen, const char *colstr)

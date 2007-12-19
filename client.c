@@ -42,7 +42,7 @@ extern awesome_config globalconf;
  * and floating state before awesome was restarted if any
  * \todo this may bug if number of tags is != than before
  * \param c Client ref
- * \param ntags tags number
+ * \param screen Screen ID
  */
 static Bool
 client_loadprops(Client * c, int screen)
@@ -79,7 +79,7 @@ client_loadprops(Client * c, int screen)
 
 /** Check if client supports protocol WM_DELETE_WINDOW
  * \param disp the display
- * \win the Window
+ * \param win the Window
  * \return True if client has WM_DELETE_WINDOW
  */
 static Bool
@@ -194,6 +194,7 @@ client_detach(Client *c)
 /** Give focus to client, or to first client if c is NULL
  * \param c client
  * \param selscreen True if current screen is selected
+ * \param screen Screen ID
  */
 void
 focus(Client *c, Bool selscreen, int screen)
@@ -247,6 +248,7 @@ focus(Client *c, Bool selscreen, int screen)
 /** Manage a new client
  * \param w The window
  * \param wa Window attributes
+ * \param screen Screen ID
  */
 void
 client_manage(Window w, XWindowAttributes *wa, int screen)
@@ -593,6 +595,7 @@ client_isvisible(Client *c, int screen)
 }
 
 /** Set selected client transparency
+ * \param screen Screen ID
  * \param arg unused arg
  * \ingroup ui_callback
  */
@@ -642,6 +645,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
 
 
 /** Set border size
+ * \param screen Screen ID
  * \param arg X, +X or -X
  * \ingroup ui_callback
  */
@@ -655,6 +659,9 @@ uicb_setborder(int screen, char *arg)
         globalconf.screens[screen].borderpx = 0;
 }
 
+/** Swap current with next client
+ * \ingroup ui_callback
+ */
 void
 uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
 {
@@ -673,6 +680,9 @@ uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
+/** Swap current with previous client
+ * \ingroup ui_callback
+ */
 void
 uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
 {
@@ -691,6 +701,11 @@ uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
+/** Move and resize client
+ * \param screen Screen ID
+ * \param arg x y w h
+ * \ingroup ui_callback
+ */
 void
 uicb_client_moveresize(int screen, char *arg)
 {
@@ -716,17 +731,23 @@ uicb_client_moveresize(int screen, char *arg)
     ow = sel->w;
     oh = sel->h;
 
-    Bool xqp = XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)), &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
+    Bool xqp = XQueryPointer(globalconf.display,
+                             RootWindow(globalconf.display,
+                                        get_phys_screen(screen)),
+                             &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
     client_resize(sel, nx, ny, nw, nh, True, False);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
         nmx = mx - ox + sel->w - ow - 1 < 0 ? 0 : mx - ox + sel->w - ow - 1;
         nmy = my - oy + sel->h - oh - 1 < 0 ? 0 : my - oy + sel->h - oh - 1;
-        XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0, nmx, nmy);
+        XWarpPointer(globalconf.display,
+                     None, sel->win,
+                     0, 0, 0, 0, nmx, nmy);
     }
 }
 
 /** Kill selected client
+ * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
  */
