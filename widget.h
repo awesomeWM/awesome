@@ -32,9 +32,9 @@ enum { AlignLeft, AlignRight, AlignFlex };
 
 typedef Widget *(WidgetConstructor)(Statusbar *, cfg_t *);
 
-int calculate_offset(int, int, int, int);
-void calculate_alignments(Widget *);
-void common_new(Widget*, Statusbar *, cfg_t *);
+int widget_calculate_offset(int, int, int, int);
+void widget_calculate_alignments(Widget *);
+void widget_common_new(Widget*, Statusbar *, cfg_t *);
 
 WidgetConstructor layoutinfo_new;
 WidgetConstructor taglist_new;

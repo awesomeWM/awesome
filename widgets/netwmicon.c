@@ -78,10 +78,10 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
         imgdata[2] = pixel & 0xff;         /* B */
     }
 
-    location = calculate_offset(vscreen.statusbar->width,
-                                width,
-                                offset,
-                                widget->alignment);
+    location = widget_calculate_offset(vscreen.statusbar->width,
+                                       width,
+                                       offset,
+                                       widget->alignment);
 
     draw_image_from_argb_data(ctx, location, 0, width, height, vscreen.statusbar->height, image);
 
@@ -97,7 +97,7 @@ netwmicon_new(Statusbar *statusbar, cfg_t *config)
     Widget *w;
 
     w = p_new(Widget, 1);
-    common_new(w, statusbar, config);
+    widget_common_new(w, statusbar, config);
     w->draw = netwmicon_draw;
     
     return w;

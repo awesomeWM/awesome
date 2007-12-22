@@ -62,10 +62,10 @@ taglist_draw(Widget *widget,
     for(tag = vscreen.tags; tag; tag = tag->next)
         width += textwidth(ctx, vscreen.font, tag->name);
 
-    location = calculate_offset(vscreen.statusbar->width,
-                                width,
-                                offset,
-                                widget->alignment);
+    location = widget_calculate_offset(vscreen.statusbar->width,
+                                       width,
+                                       offset,
+                                       widget->alignment);
 
     width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
@@ -97,7 +97,7 @@ taglist_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
     w = p_new(Widget, 1);
-    common_new(w, statusbar, config);
+    widget_common_new(w, statusbar, config);
     w->draw = taglist_draw;
     return w;
 }

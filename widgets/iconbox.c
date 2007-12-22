@@ -34,10 +34,10 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     width = draw_get_image_width(widget->data);
 
-    location = calculate_offset(vscreen.statusbar->width,
-                                width,
-                                offset,
-                                widget->alignment);
+    location = widget_calculate_offset(vscreen.statusbar->width,
+                                       width,
+                                       offset,
+                                       widget->alignment);
 
     draw_image(ctx, location, 0, widget->data);
 
@@ -59,7 +59,7 @@ iconbox_new(Statusbar *statusbar, cfg_t *config)
     Widget *w;
 
     w = p_new(Widget, 1);
-    common_new(w, statusbar, config);
+    widget_common_new(w, statusbar, config);
     w->draw = iconbox_draw;
     w->tell = iconbox_tell;
     w->data = (void *) a_strdup(cfg_getstr(config, "image"));

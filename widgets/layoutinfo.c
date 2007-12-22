@@ -37,10 +37,10 @@ layoutinfo_draw(Widget *widget,
     Layout *l;
     for(l = vscreen.layouts ; l; l = l->next)
         width = MAX(width, (textwidth(ctx, vscreen.font, l->symbol)));
-    location = calculate_offset(vscreen.statusbar->width,
-                                width,
-                                offset,
-                                widget->alignment);
+    location = widget_calculate_offset(vscreen.statusbar->width,
+                                       width,
+                                       offset,
+                                       widget->alignment);
     draw_text(ctx, location, 0,
               width,
               vscreen.statusbar->height,
@@ -56,7 +56,7 @@ layoutinfo_new(Statusbar *statusbar, cfg_t* config)
 {
     Widget *w;
     w = p_new(Widget, 1);
-    common_new(w, statusbar, config);
+    widget_common_new(w, statusbar, config);
     w->draw = (void*) layoutinfo_draw;
     return w;
 }

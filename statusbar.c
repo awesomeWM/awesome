@@ -170,7 +170,7 @@ statusbar_init(int screen)
                   statusbar->window,
                   globalconf.cursor[CurNormal]);
 
-    calculate_alignments(statusbar->widgets);
+    widget_calculate_alignments(statusbar->widgets);
 
     statusbar_update_position(globalconf.display,
                               statusbar,

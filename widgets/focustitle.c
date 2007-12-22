@@ -13,10 +13,10 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Client *sel = focus_get_latest_client_for_tag(widget->statusbar->screen, 
                                                   get_current_tag(widget->statusbar->screen));
-    int location = calculate_offset(vscreen.statusbar->width,
-                                    0,
-                                    offset,
-                                    widget->alignment);
+    int location = widget_calculate_offset(vscreen.statusbar->width,
+                                           0,
+                                           offset,
+                                           widget->alignment);
 
     if(sel)
     {
@@ -43,7 +43,7 @@ focustitle_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
     w = p_new(Widget, 1);
-    common_new(w, statusbar, config);
+    widget_common_new(w, statusbar, config);
     w->draw = focustitle_draw;
     w->alignment = AlignFlex;
     return w;

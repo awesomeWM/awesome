@@ -38,7 +38,7 @@ const NameFuncLink WidgetList[] =
 };
 
 void
-calculate_alignments(Widget *widget)
+widget_calculate_alignments(Widget *widget)
 {
     for(; widget; widget = widget->next)
     {
@@ -61,7 +61,7 @@ calculate_alignments(Widget *widget)
 }
 
 int
-calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
+widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
 {
     if (alignment == AlignLeft || alignment == AlignFlex)
         return offset;
@@ -69,7 +69,7 @@ calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
 }
 
 static Widget *
-find_widget(char *name, int screen)
+widget_find(char *name, int screen)
 {
     Widget *widget;
     widget = globalconf.screens[screen].statusbar->widgets;
@@ -80,20 +80,20 @@ find_widget(char *name, int screen)
 }
 
 static void
-common_tell(Widget *widget, char *command __attribute__ ((unused)))
+widget_common_tell(Widget *widget, char *command __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
 }
 
 void
-common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
+widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
 {
     const char *name;
 
     widget->statusbar = statusbar;
     name = cfg_title(config);
     widget->name = p_new(char, strlen(name)+1);
-    widget->tell = common_tell;
+    widget->tell = widget_common_tell;
     strncpy(widget->name, name, strlen(name));
 }
 
@@ -123,7 +123,7 @@ uicb_widget_tell(int screen, char *arg)
         return;
     }
 
-    widget = find_widget(p, screen);
+    widget = widget_find(p, screen);
     if (!widget)
     {
         warn("No such widget: %s\n", p);
