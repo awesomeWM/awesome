@@ -23,11 +23,11 @@ screen 0
     }
     statusbar
     {
-         position = "top"
-         taglist tl {}
-         layoutinfo li {}
-         focustitle ft  {}
-         textbox tb {}
+        position = "top"
+        taglist tl {}
+        layoutinfo li {}
+        focustitle ft  {}
+        textbox tb {}
     }
 }
 
