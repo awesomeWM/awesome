@@ -52,7 +52,7 @@ draw_free_context(DrawCtx *ctx)
 }
 
 void
-drawtext(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *text, XColor fg, XColor bg)
+draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *text, XColor fg, XColor bg)
 {
     int nw = 0;
     static char buf[256];
@@ -61,7 +61,7 @@ drawtext(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *te
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    drawrectangle(ctx, x, y, w, h, True, bg);
+    draw_rectangle(ctx, x, y, w, h, True, bg);
     if(!a_strlen(text))
         return;
 
@@ -100,7 +100,7 @@ drawtext(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *te
 }
 
 void
-drawrectangle(DrawCtx *ctx, int x, int y, int w, int h, Bool filled, XColor color)
+draw_rectangle(DrawCtx *ctx, int x, int y, int w, int h, Bool filled, XColor color)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -126,7 +126,7 @@ drawrectangle(DrawCtx *ctx, int x, int y, int w, int h, Bool filled, XColor colo
 }
 
 void
-drawcircle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
+draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -175,7 +175,7 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
 }
 
 void
-drawimage(DrawCtx *ctx, int x, int y, const char *filename)
+draw_image(DrawCtx *ctx, int x, int y, const char *filename)
 {
     cairo_surface_t *surface, *source;
     cairo_t *cr;
@@ -191,7 +191,8 @@ drawimage(DrawCtx *ctx, int x, int y, const char *filename)
     cairo_surface_destroy(surface);
 }
 
-int draw_get_image_width(const char *filename)
+int
+draw_get_image_width(const char *filename)
 {
     int width;
     cairo_surface_t *surface;

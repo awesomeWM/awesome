@@ -48,13 +48,13 @@ statusbar_draw(int screen)
     DrawCtx *ctx = draw_get_context(globalconf.display, phys_screen,
                                     vscreen.statusbar->width,
                                     vscreen.statusbar->height);
-    drawrectangle(ctx,
-                  0,
-                  0,
-                  vscreen.statusbar->width, 
-                  vscreen.statusbar->height, 
-                  True,
-                  vscreen.colors_normal[ColBG]);
+    draw_rectangle(ctx,
+                   0,
+                   0,
+                   vscreen.statusbar->width, 
+                   vscreen.statusbar->height, 
+                   True,
+                   vscreen.colors_normal[ColBG]);
     for(widget = vscreen.statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
             left += widget->draw(widget, ctx, left, (left + right));

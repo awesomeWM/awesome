@@ -38,10 +38,10 @@ struct DrawCtx
 
 DrawCtx *draw_get_context(Display*, int, int, int);
 void draw_free_context(DrawCtx*);
-void drawtext(DrawCtx *, int, int, int, int, XftFont *, const char *, XColor fg, XColor bg);
-void drawrectangle(DrawCtx *, int, int, int, int, Bool, XColor);
-void drawcircle(DrawCtx *, int, int, int, Bool, XColor);
-void drawimage(DrawCtx *, int, int, const char *);
+void draw_text(DrawCtx *, int, int, int, int, XftFont *, const char *, XColor fg, XColor bg);
+void draw_rectangle(DrawCtx *, int, int, int, int, Bool, XColor);
+void draw_circle(DrawCtx *, int, int, int, Bool, XColor);
+void draw_image(DrawCtx *, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
 int draw_get_image_width(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);

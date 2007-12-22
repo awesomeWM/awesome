@@ -39,7 +39,7 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
                                 offset,
                                 widget->alignment);
 
-    drawimage(ctx, location, 0, widget->data);
+    draw_image(ctx, location, 0, widget->data);
 
     return width;
 }

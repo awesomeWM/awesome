@@ -75,18 +75,18 @@ taglist_draw(Widget *widget,
             colors = vscreen.colors_selected;
         else
             colors = vscreen.colors_normal;
-        drawtext(ctx, location + width, 0, w,
-                 vscreen.statusbar->height,
-                 vscreen.font,
-                 tag->name,
-                 colors[ColFG],
-                 colors[ColBG]);
+        draw_text(ctx, location + width, 0, w,
+                  vscreen.statusbar->height,
+                  vscreen.font,
+                  tag->name,
+                  colors[ColFG],
+                  colors[ColBG]);
         if(isoccupied(widget->statusbar->screen, tag))
-            drawrectangle(ctx, location + width, 0, flagsize, flagsize,
-                          sel && is_client_tagged(sel,
-                                                  tag,
-                                                  widget->statusbar->screen),
-                          colors[ColFG]);
+            draw_rectangle(ctx, location + width, 0, flagsize, flagsize,
+                           sel && is_client_tagged(sel,
+                                                   tag,
+                                                   widget->statusbar->screen),
+                           colors[ColFG]);
         width += w;
     }
     return width;

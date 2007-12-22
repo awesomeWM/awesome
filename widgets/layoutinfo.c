@@ -41,13 +41,13 @@ layoutinfo_draw(Widget *widget,
                                 width,
                                 offset,
                                 widget->alignment);
-    drawtext(ctx, location, 0,
-             width,
-             vscreen.statusbar->height,
-             vscreen.font,
-             get_current_layout(widget->statusbar->screen)->symbol,
-             vscreen.colors_normal[ColFG],
-             vscreen.colors_normal[ColBG]);
+    draw_text(ctx, location, 0,
+              width,
+              vscreen.statusbar->height,
+              vscreen.font,
+              get_current_layout(widget->statusbar->screen)->symbol,
+              vscreen.colors_normal[ColFG],
+              vscreen.colors_normal[ColBG]);
     return width;
 }
 
