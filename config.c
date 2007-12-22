@@ -282,11 +282,13 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 
     qsort(widgets, numwidgets, sizeof(cfg_t), cmp_widget_cfg);
 
-    for (i = 0; i < numwidgets; i++){
+    for (i = 0; i < numwidgets; i++)
+    {
         wptr = widgets + i;
         widget_new = name_func_lookup(cfg_name(wptr), WidgetList);
         if (widget_new)
-            if(!widget){
+            if(!widget)
+            {
                 widget = widget_new(statusbar, wptr);
                 statusbar->widgets = widget;
             }
