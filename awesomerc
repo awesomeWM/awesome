@@ -33,8 +33,7 @@ screen 0
 
 rules
 {
-    rule
-    { name = "Gimp" float = true }
+    rule { name = "Gimp" float = true }
     rule { name = "MPlayer" float = true }
     rule { name = "Acroread" float = true }
     rule { name = "pinentry" float = true }
