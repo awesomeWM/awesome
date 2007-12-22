@@ -37,7 +37,7 @@ statusbar_draw(int screen)
 {
     int phys_screen = get_phys_screen(screen);
     VirtScreen vscreen;
-    Widget *widget;
+    Widget *widget, *last_drawn = NULL;
     int left = 0, right = 0;
     
     vscreen = globalconf.screens[screen];
@@ -58,8 +58,15 @@ statusbar_draw(int screen)
     for(widget = vscreen.statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
             left += widget->draw(widget, ctx, left, (left + right));
-        else if (widget->alignment == AlignRight)
+
+    /* renders right widget from last to first */
+    for(widget = vscreen.statusbar->widgets; widget; widget = widget->next)
+        if (widget->alignment == AlignRight && last_drawn == widget->next)
+        {
             right += widget->draw(widget, ctx, right, (left + right));
+            last_drawn = widget;
+            widget = vscreen.statusbar->widgets;
+        }
 
     for(widget = vscreen.statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignFlex)
