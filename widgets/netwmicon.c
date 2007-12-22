@@ -83,12 +83,12 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
                                 offset,
                                 widget->alignment);
 
-    draw_image_from_argb_data(ctx, location, 0, width, height, image);
+    draw_image_from_argb_data(ctx, location, 0, width, height, vscreen.statusbar->height, image);
 
     p_delete(&image);
 
     XFree(data);
-    return width;
+    return vscreen.statusbar->height;
 }
 
 Widget *

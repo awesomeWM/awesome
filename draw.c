@@ -149,15 +149,24 @@ drawcircle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
     cairo_surface_destroy(surface);
 }
 
-void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h, unsigned char *data)
+void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
+                               int wanted_w, unsigned char *data)
 {
+    double ratio;
     cairo_surface_t *surface, *source;
     cairo_t *cr;
 
-    source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
-    surface = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h, 0);
-    cr = cairo_create (source);
-    cairo_set_source_surface(cr, surface, x, y);
+    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h, 0);
+    cr = cairo_create (surface);
+    if(wanted_w > 0 && w > 0)
+    {
+        ratio = (double) wanted_w / (double) w;
+        cairo_scale(cr, ratio, ratio);
+        cairo_set_source_surface(cr, source, x / ratio, y / ratio);
+    }
+    else
+        cairo_set_source_surface(cr, source, x, y);
     cairo_paint(cr);
 
     cairo_destroy(cr);
