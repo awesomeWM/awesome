@@ -41,6 +41,7 @@ WidgetConstructor taglist_new;
 WidgetConstructor textbox_new;
 WidgetConstructor focustitle_new;
 WidgetConstructor iconbox_new;
+WidgetConstructor netwmicon_new;
 
 UICB_PROTO(uicb_widget_tell);
 
