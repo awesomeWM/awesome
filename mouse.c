@@ -42,7 +42,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     unsigned int dui;
     Window dummy;
     XEvent ev;
-    ScreenInfo *si;
+    Area area;
     Client *c = globalconf.focus->client;
 
     if(!c)
@@ -54,9 +54,9 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
      else
          restack(screen);
 
-    si = get_screen_info(c->screen,
-                         globalconf.screens[screen].statusbar,
-                         &globalconf.screens[screen].padding);
+    area = get_screen_area(c->screen,
+                           globalconf.screens[screen].statusbar,
+                           &globalconf.screens[screen].padding);
 
     ocx = nx = c->x;
     ocy = ny = c->y;
@@ -75,7 +75,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         {
         case ButtonRelease:
             XUngrabPointer(c->display, CurrentTime);
-            p_delete(&si);
             return;
         case ConfigureRequest:
             handle_event_configurerequest(&ev);
@@ -90,14 +89,14 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             XSync(c->display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
-            if(abs(nx) < globalconf.screens[screen].snap + si[c->screen].x_org && nx > si[c->screen].x_org)
-                nx = si[c->screen].x_org;
-            else if(abs((si[c->screen].x_org + si[c->screen].width) - (nx + c->w + 2 * c->border)) < globalconf.screens[screen].snap)
-                nx = si[c->screen].x_org + si[c->screen].width - c->w - 2 * c->border;
-            if(abs(ny) < globalconf.screens[screen].snap + si[c->screen].y_org && ny > si[c->screen].y_org)
-                ny = si[c->screen].y_org;
-            else if(abs((si[c->screen].y_org + si[c->screen].height) - (ny + c->h + 2 * c->border)) < globalconf.screens[screen].snap)
-                ny = si[c->screen].y_org + si[c->screen].height - c->h - 2 * c->border;
+            if(abs(nx) < globalconf.screens[screen].snap + area.x && nx > area.x)
+                nx = area.x;
+            else if(abs((area.x + area.width) - (nx + c->w + 2 * c->border)) < globalconf.screens[screen].snap)
+                nx = area.x + area.width - c->w - 2 * c->border;
+            if(abs(ny) < globalconf.screens[screen].snap + area.y && ny > area.y)
+                ny = area.y;
+            else if(abs((area.y + area.height) - (ny + c->h + 2 * c->border)) < globalconf.screens[screen].snap)
+                ny = area.y + area.height - c->h - 2 * c->border;
             client_resize(c, nx, ny, c->w, c->h, False, False);
             break;
         }

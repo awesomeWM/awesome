@@ -30,13 +30,14 @@ void
 layout_max(int screen)
 {
     Client *c;
-    ScreenInfo *si = get_screen_info(screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    Area area = get_screen_area(screen,
+                                globalconf.screens[screen].statusbar,
+                                &globalconf.screens[screen].padding);
 
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))
-            client_resize(c, si[screen].x_org, si[screen].y_org,
-                   si[screen].width - 2 * c->border,
-                   si[screen].height - 2 * c->border, globalconf.screens[screen].resize_hints, False);
-    p_delete(&si);
+            client_resize(c, area.x, area.y,
+                   area.width - 2 * c->border,
+                   area.height - 2 * c->border, globalconf.screens[screen].resize_hints, False);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

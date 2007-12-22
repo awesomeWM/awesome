@@ -300,15 +300,13 @@ maximize(int x, int y, int w, int h, int screen)
 void
 uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 {
-    ScreenInfo *si = get_screen_info(screen,
-                                     globalconf.screens[screen].statusbar,
-                                     &globalconf.screens[screen].padding);
-
-    maximize(si[screen].x_org, si[screen].y_org,
-             si[screen].width - 2 * globalconf.screens[screen].borderpx,
-             si[screen].height - 2 * globalconf.screens[screen].borderpx,
+    Area area = get_screen_area(screen,
+                                globalconf.screens[screen].statusbar,
+                                &globalconf.screens[screen].padding);
+    maximize(area.x, area.y,
+             area.width - 2 * globalconf.screens[screen].borderpx,
+             area.height - 2 * globalconf.screens[screen].borderpx,
              screen);
-    p_delete(&si);
 }
 
 /** Toggle vertical maximize for client
@@ -320,17 +318,16 @@ void
 uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    ScreenInfo *si = get_screen_info(screen,
-                                     globalconf.screens[screen].statusbar,
-                                     &globalconf.screens[screen].padding);
+    Area area = get_screen_area(screen,
+                                globalconf.screens[screen].statusbar,
+                                &globalconf.screens[screen].padding);
 
     if(sel)
         maximize(sel->x,
-                 si[screen].y_org,
+                 area.y,
                  sel->w,
-                 si[screen].height - 2 * globalconf.screens[screen].borderpx,
+                 area.height - 2 * globalconf.screens[screen].borderpx,
                  screen);
-    p_delete(&si);
 }
 
 
@@ -343,17 +340,16 @@ void
 uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    ScreenInfo *si = get_screen_info(screen,
-                                     globalconf.screens[screen].statusbar,
-                                     &globalconf.screens[screen].padding);
+    Area area = get_screen_area(screen,
+                                globalconf.screens[screen].statusbar,
+                                &globalconf.screens[screen].padding);
 
     if(sel)
-        maximize(si[screen].x_org,
+        maximize(area.x,
                  sel->y,
-                 si[screen].height - 2 * globalconf.screens[screen].borderpx,
+                 area.height - 2 * globalconf.screens[screen].borderpx,
                  sel->h,
                  screen);
-    p_delete(&si);
 }
 
 /** Zoom client

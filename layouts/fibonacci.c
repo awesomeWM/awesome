@@ -31,14 +31,14 @@ layout_fibonacci(int screen, int shape)
 {
     int n = 0, i = 0, nx, ny, nw, nh;
     Client *c;
-    ScreenInfo *si = get_screen_info(screen,
-                                     globalconf.screens[screen].statusbar,
-                                     &globalconf.screens[screen].padding);
+    Area area = get_screen_area(screen,
+                                globalconf.screens[screen].statusbar,
+                                &globalconf.screens[screen].padding);
 
-    nx = si[screen].x_org;
-    ny = si[screen].y_org;
-    nw = si[screen].width;
-    nh = si[screen].height;
+    nx = area.x;
+    ny = area.y;
+    nw = area.width;
+    nh = area.height;
 
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))
@@ -80,13 +80,12 @@ layout_fibonacci(int screen, int shape)
                         nx -= nw;
                 }
                 if(i == 0)
-                    ny = si[screen].y_org;
+                    ny = area.y;
                 i++;
             }
             client_resize(c, nx, ny, nw - 2 * c->border, nh - 2 * c->border,
                           globalconf.screens[screen].resize_hints, False);
         }
-    p_delete(&si);
 }
 
 void

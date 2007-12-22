@@ -99,20 +99,22 @@ _tile(int screen, const Bool right)
     unsigned int mw = 0, mh = 0;
     int n, i, masterwin = 0, otherwin = 0;
     int real_ncol = 1, win_by_col = 1, current_col = 0;
-    ScreenInfo *screens_info = NULL;
+    Area area;
     Client *c;
     Tag *curtag = get_current_tag(screen);
 
-    screens_info = get_screen_info(screen, globalconf.screens[screen].statusbar, &globalconf.screens[screen].padding);
+    area = get_screen_area(screen,
+                           globalconf.screens[screen].statusbar,
+                            &globalconf.screens[screen].padding);
 
     for(n = 0, c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))
             n++;
 
-    wah = screens_info[screen].height;
-    waw = screens_info[screen].width;
-    wax = screens_info[screen].x_org;
-    way = screens_info[screen].y_org;
+    wah = area.height;
+    waw = area.width;
+    wax = area.x;
+    way = area.y;
 
     masterwin = MIN(n, curtag->nmaster);
 
@@ -171,7 +173,6 @@ _tile(int screen, const Bool right)
         }
         i++;
     }
-    p_delete(&screens_info);
 }
 
 void

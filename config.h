@@ -51,6 +51,16 @@ struct Rule
 
 typedef struct AwesomeConf AwesomeConf;
 
+typedef struct Area Area;
+struct Area
+{
+    /* Co-ords of upper left corner */
+    int x;
+    int y;
+    int width;
+    int height;
+};
+
 typedef struct Layout Layout;
 struct Layout
 {

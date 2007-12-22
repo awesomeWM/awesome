@@ -31,85 +31,88 @@ extern AwesomeConf globalconf;
 /** Get screens info
  * \param screen Screen number
  * \param statusbar statusbar
- * \return ScreenInfo struct array with all screens info
+ * \return Area
  * \param padding Padding
  */
-ScreenInfo *
-get_screen_info(int screen, Statusbar *statusbar, Padding *padding)
+Area
+get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
 {
-    int i, screen_number = 0;
+    int screen_number = 0;
     ScreenInfo *si;
+    Area area;
 
-    if(XineramaIsActive(globalconf.display))
+    if(XineramaIsActive(globalconf.display)){
         si = XineramaQueryScreens(globalconf.display, &screen_number);
-    else
+        if (screen_number < screen)
+            eprint("Info request for unknown screen.");
+        area.x = si[screen].x_org;
+        area.y = si[screen].y_org;
+        area.width = si[screen].width;
+        area.height = si[screen].height;
+        XFree(si);
+    } else
     {
         /* emulate Xinerama info but only fill the screen we want */
-        si = p_new(ScreenInfo, screen + 1);
-        si[screen].width = DisplayWidth(globalconf.display, screen);
-        si[screen].height = DisplayHeight(globalconf.display, screen);
-        si[screen].x_org = 0;
-        si[screen].y_org = 0;
-        screen_number = screen + 1;
+        area.x = 0;
+        area.y = 0;
+        area.width = DisplayWidth(globalconf.display, screen);
+        area.height = DisplayHeight(globalconf.display, screen);
     }
 
      /* make padding corrections */
     if(padding)
     {
-        si[screen].x_org += padding->left;
-        si[screen].y_org += padding->top;
-        si[screen].width -= padding->left + padding->right;
-        si[screen].height -= padding->top + padding->bottom;
+        area.x += padding->left;
+        area.y += padding->top;
+        area.width -= padding->left + padding->right;
+        area.height -= padding->top + padding->bottom;
     }
 
-    if(statusbar)
-        for(i = 0; i < screen_number; i++)
-            switch(statusbar->position)
-            {
-              case BarTop:
-                si[i].y_org += statusbar->height;
-              case BarBot:
-                si[i].height -= statusbar->height;
-                break;
-              case BarLeft:
-                si[i].x_org += statusbar->height;
-              case BarRight:
-                si[i].width -=  statusbar->height;
-                break;
-            }
+    if (statusbar)
+        switch(statusbar->position)
+        {
+          case BarTop:
+            area.y += statusbar->height;
+          case BarBot:
+            area.height -= statusbar->height;
+            break;
+          case BarLeft:
+            area.x += statusbar->height;
+          case BarRight:
+            area.width -=  statusbar->height;
+            break;
+        }
 
-    return si;
+    return area;
 }
 
 /** Get display info
  * \param screen Screen number
  * \param statusbar the statusbar
  * \param padding Padding
- * \return ScreenInfo struct pointer with all display info
+ * \return Area
  */
-ScreenInfo *
-get_display_info(int screen, Statusbar *statusbar, Padding *padding)
+Area
+get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 {
-    ScreenInfo *si;
+    Area area;
 
-    si = p_new(ScreenInfo, 1);
+    area.x = 0;
+    area.y = statusbar && statusbar->position == BarTop ? statusbar->height : 0;
+    area.width = DisplayWidth(globalconf.display, screen);
+    area.height = DisplayHeight(globalconf.display, screen) -
+                    (statusbar &&
+                     (statusbar->position == BarTop || statusbar->position == BarBot) ? statusbar->height : 0);
 
-    si->x_org = 0;
-    si->y_org = statusbar && statusbar->position == BarTop ? statusbar->height : 0;
-    si->width = DisplayWidth(globalconf.display, screen);
-    si->height = DisplayHeight(globalconf.display, screen) -
-        (statusbar && (statusbar->position == BarTop || statusbar->position == BarBot) ? statusbar->height : 0);
-
-	/* make padding corrections */
-	if(padding)
-	{
-		si[screen].x_org+=padding->left;
-		si[screen].y_org+=padding->top;
-		si[screen].width-=padding->left+padding->right;
-		si[screen].height-=padding->top+padding->bottom;
-	}
-
-    return si;
+    /* make padding corrections */
+    if(padding)
+    {
+            area.x += padding->left;
+            area.y += padding->top;
+            area.width -= padding->left + padding->right;
+            area.height -= padding->top + padding->bottom;
+    }
+    return area;
 }
 
 /** Return the Xinerama screen number where the coordinates belongs to
@@ -120,24 +123,20 @@ get_display_info(int screen, Statusbar *statusbar, Padding *padding)
 int
 get_screen_bycoord(int x, int y)
 {
-    ScreenInfo *si;
     int i;
+    Area area;
 
     /* don't waste our time */
     if(!XineramaIsActive(globalconf.display))
         return DefaultScreen(globalconf.display);
 
-    si = get_screen_info(0, NULL, NULL);
 
-    for(i = 0; i < get_screen_count(); i++)
-        if((x < 0 || (x >= si[i].x_org && x < si[i].x_org + si[i].width))
-           && (y < 0 || (y >= si[i].y_org && y < si[i].y_org + si[i].height)))
-        {
-            p_delete(&si);
+    for(i = 0; i < get_screen_count(); i++){
+        area = get_screen_area(i, NULL, NULL);
+        if((x < 0 || (x >= area.x && x < area.x + area.width))
+           && (y < 0 || (y >= area.y && y < area.y + area.height)))
             return i;
-        }
-
-    p_delete(&si);
+    }
     return DefaultScreen(globalconf.display);
 }
 
@@ -181,6 +180,7 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
 {
     Tag *tag;
     int old_screen = c->screen;
+    Area from, to;
 
     for(tag = globalconf.screens[old_screen].tags; tag; tag = tag->next)
         untag_client(c, tag, old_screen);
@@ -192,28 +192,23 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
 
     if(doresize && old_screen != c->screen)
     {
-        ScreenInfo *si, *si_old;
-
-        si = get_screen_info(c->screen, NULL, NULL);
-        si_old = get_screen_info(old_screen, NULL, NULL);
+        to = get_screen_area(c->screen, NULL, NULL);
+        from = get_screen_area(old_screen, NULL, NULL);
 
         /* compute new coords in new screen */
-        c->rx = (c->rx - si_old[old_screen].x_org) + si[c->screen].x_org;
-        c->ry = (c->ry - si_old[old_screen].y_org) + si[c->screen].y_org;
+        c->rx = (c->rx - from.x) + to.x;
+        c->ry = (c->ry - from.y) + to.y;
         /* check that new coords are still in the screen */
-        if(c->rw > si[c->screen].width)
-            c->rw = si[c->screen].width;
-        if(c->rh > si[c->screen].height)
-            c->rh = si[c->screen].height;
-        if(c->rx + c->rw >= si[c->screen].x_org + si[c->screen].width)
-            c->rx = si[c->screen].x_org + si[c->screen].width - c->rw - 2 * c->border;
-        if(c->ry + c->rh >= si[c->screen].y_org + si[c->screen].height)
-            c->ry = si[c->screen].y_org + si[c->screen].height - c->rh - 2 * c->border;
+        if(c->rw > to.width)
+            c->rw = to.width;
+        if(c->rh > to.height)
+            c->rh = to.height;
+        if(c->rx + c->rw >= to.x + to.width)
+            c->rx = to.x + to.width - c->rw - 2 * c->border;
+        if(c->ry + c->rh >= to.y + to.height)
+            c->ry = to.y + to.height - c->rh - 2 * c->border;
 
         client_resize(c, c->rx, c->ry, c->rw, c->rh, True, False);
-
-        p_delete(&si);
-        p_delete(&si_old);
     }
 
     focus(c, True, c->screen);
@@ -231,12 +226,17 @@ move_mouse_pointer_to_screen(int screen)
 {
     if(XineramaIsActive(globalconf.display))
     {
-        ScreenInfo *si = get_screen_info(screen, NULL, NULL);
-        XWarpPointer(globalconf.display, None, DefaultRootWindow(globalconf.display), 0, 0, 0, 0, si[screen].x_org, si[screen].y_org);
-        p_delete(&si);
+        Area area = get_screen_area(screen, NULL, NULL);
+        XWarpPointer(globalconf.display,
+                     None,
+                     DefaultRootWindow(globalconf.display),
+                     0, 0, 0, 0, area.x, area.y);
     }
     else
-        XWarpPointer(globalconf.display, None, RootWindow(globalconf.display, screen), 0, 0, 0, 0, 0, 0);
+        XWarpPointer(globalconf.display,
+                     None,
+                     RootWindow(globalconf.display, screen),
+                     0, 0, 0, 0, 0, 0);
 }
 
 

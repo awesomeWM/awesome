@@ -257,7 +257,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Window trans;
     Status rettrans;
     XWindowChanges wc;
-    ScreenInfo *screen_info;
+    Area area, darea;
     Tag *tag;
 
     c = p_new(Client, 1);
@@ -282,36 +282,32 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(!client_loadprops(c, screen))
         tag_client_with_rules(c);
 
-    screen_info = get_screen_info(screen, NULL, NULL);
+    area = get_screen_area(screen, NULL, NULL);
 
     /* if window request fullscreen mode */
-    if(c->w == screen_info[screen].width && c->h == screen_info[screen].height)
+    if(c->w == area.width && c->h == area.height)
     {
-        c->x = screen_info[screen].x_org;
-        c->y = screen_info[screen].y_org;
-
+        c->x = area.x;
+        c->y = area.y;
         c->border = wa->border_width;
     }
     else
     {
-        ScreenInfo *display_info = get_display_info(c->phys_screen,
-                                                    globalconf.screens[screen].statusbar,
-                                                    &globalconf.screens[screen].padding);
+        darea = get_display_area(c->phys_screen,
+                                 globalconf.screens[screen].statusbar,
+                                 &globalconf.screens[screen].padding);
 
-        if(c->x + c->w + 2 * c->border > display_info->x_org + display_info->width)
-            c->x = c->rx = display_info->x_org + display_info->width - c->w - 2 * c->border;
-        if(c->y + c->h + 2 * c->border > display_info->y_org + display_info->height)
-            c->y = c->ry = display_info->y_org + display_info->height - c->h - 2 * c->border;
-        if(c->x < display_info->x_org)
-            c->x = c->rx = display_info->x_org;
-        if(c->y < display_info->y_org)
-            c->y = c->ry = display_info->y_org;
+        if(c->x + c->w + 2 * c->border > darea.x + darea.width)
+            c->x = c->rx = darea.x + darea.width - c->w - 2 * c->border;
+        if(c->y + c->h + 2 * c->border > darea.y + darea.height)
+            c->y = c->ry = darea.y + darea.height - c->h - 2 * c->border;
+        if(c->x < darea.x)
+            c->x = c->rx = darea.x;
+        if(c->y < darea.y)
+            c->y = c->ry = darea.y;
 
         c->border = globalconf.screens[screen].borderpx;
-
-        p_delete(&display_info);
     }
-    p_delete(&screen_info);
 
     /* set borders */
     wc.border_width = c->border;
@@ -368,7 +364,7 @@ client_resize(Client *c, int x, int y, int w, int h,
 {
     double dx, dy, max, min, ratio;
     XWindowChanges wc;
-    ScreenInfo *si;
+    Area area;
 
     if(sizehints)
     {
@@ -413,14 +409,13 @@ client_resize(Client *c, int x, int y, int w, int h,
     if(w <= 0 || h <= 0)
         return;
     /* offscreen appearance fixes */
-    si = get_display_info(c->phys_screen,
-                          NULL,
-                          &globalconf.screens[c->screen].padding);
-    if(x > si->width)
-        x = si->width - w - 2 * c->border;
-    if(y > si->height)
-        y = si->height - h - 2 * c->border;
-    p_delete(&si);
+    area = get_display_area(c->phys_screen,
+                            NULL,
+                            &globalconf.screens[c->screen].padding);
+    if(x > area.width)
+        x = area.width - w - 2 * c->border;
+    if(y > area.height)
+        y = area.height - h - 2 * c->border;
     if(x + w + 2 * c->border < 0)
         x = 0;
     if(y + h + 2 * c->border < 0)

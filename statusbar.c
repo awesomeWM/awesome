@@ -110,19 +110,17 @@ statusbar_init(int screen)
 {
     XSetWindowAttributes wa;
     int phys_screen = get_phys_screen(screen);
-    ScreenInfo *si = get_screen_info(screen,
-                                     NULL,
-                                     &globalconf.screens[screen].padding);
+    Area area = get_screen_area(screen,
+                                NULL,
+                                &globalconf.screens[screen].padding);
     Statusbar *statusbar = globalconf.screens[screen].statusbar;
 
     statusbar->height = globalconf.screens[screen].font->height * 1.5;
 
     if(statusbar->position == BarRight || statusbar->position == BarLeft)
-        statusbar->width = si[screen].height;
+        statusbar->width = area.height;
     else
-        statusbar->width = si[screen].width;
-
-    p_delete(&si);
+        statusbar->width = area.width;
 
     statusbar->screen = screen;
 
@@ -181,9 +179,9 @@ statusbar_update_position(int screen)
 {
     XEvent ev;
     Statusbar *statusbar = globalconf.screens[screen].statusbar;
-    ScreenInfo *si = get_screen_info(statusbar->screen,
-                                     NULL,
-                                     &globalconf.screens[screen].padding);
+    Area area = get_screen_area(statusbar->screen,
+                                NULL,
+                                &globalconf.screens[screen].padding);
 
     XMapRaised(globalconf.display, statusbar->window);
     switch (statusbar->position)
@@ -191,28 +189,25 @@ statusbar_update_position(int screen)
       default:
         XMoveWindow(globalconf.display,
                     statusbar->window,
-                    si[statusbar->screen].x_org,
-                    si[statusbar->screen].y_org);
+                    area.x,
+                    area.y);
         break;
       case BarRight:
         XMoveWindow(globalconf.display,
                     statusbar->window,
-                    si[statusbar->screen].x_org +
-                    (si[statusbar->screen].width -
-                    statusbar->height),
-                    si[statusbar->screen].y_org);
+                    area.x + (area.width - statusbar->height),
+                    area.y);
         break;
       case BarBot:
         XMoveWindow(globalconf.display,
                     statusbar->window,
-                    si[statusbar->screen].x_org,
-                    si[statusbar->screen].height - statusbar->height);
+                    area.x,
+                    area.height - statusbar->height);
         break;
       case BarOff:
         XUnmapWindow(globalconf.display, statusbar->window);
         break;
     }
-    p_delete(&si);
     XSync(globalconf.display, False);
     while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
 }

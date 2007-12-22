@@ -188,7 +188,7 @@ handle_event_configurenotify(XEvent * e)
 {
     XConfigureEvent *ev = &e->xconfigure;
     int screen;
-    ScreenInfo *si;
+    Area area;
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if(ev->window == RootWindow(e->xany.display, screen)
@@ -199,9 +199,8 @@ handle_event_configurenotify(XEvent * e)
             DisplayHeight(e->xany.display, screen) = ev->height;
 
             /* update statusbar */
-            si = get_screen_info(screen, NULL, &globalconf.screens[screen].padding);
-            globalconf.screens[screen].statusbar->width = si[screen].width;
-            p_delete(&si);
+            area = get_screen_area(screen, NULL, &globalconf.screens[screen].padding);
+            globalconf.screens[screen].statusbar->width = area.width;
 
             XResizeWindow(e->xany.display,
                           globalconf.screens[screen].statusbar->window,
