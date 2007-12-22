@@ -11,6 +11,7 @@ const NameFuncLink WidgetList[] =
     {"layoutinfo", layoutinfo_new},
     {"focustitle", focustitle_new},
     {"textbox", textbox_new},
+    {"iconbox", iconbox_new},
     {NULL, NULL}
 };
 
@@ -28,7 +29,8 @@ calculate_alignments(Widget *widget)
     }
 
     if(widget)
-        for(; widget; widget = widget->next){
+        for(; widget; widget = widget->next)
+        {
             if (widget->alignment == AlignFlex)
                 warn("Multiple flex widgets in panel -"
                      " ignoring flex for all but the first.");

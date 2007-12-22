@@ -332,6 +332,11 @@ config_parse(const char *confpatharg)
     {
         CFG_END()
     };
+    static cfg_opt_t widget_iconbox_opts[] =
+    {
+        CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
+        CFG_END()
+    };
     static cfg_opt_t widget_textbox_opts[] =
     {
         CFG_STR((char *) "default", (char *) NULL, CFGF_NONE),
@@ -346,6 +351,7 @@ config_parse(const char *confpatharg)
         CFG_SEC((char *) "taglist", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "focustitle", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "iconbox", widget_iconbox_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t tag_opts[] =

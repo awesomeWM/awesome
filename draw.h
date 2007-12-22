@@ -41,6 +41,8 @@ void draw_free_context(DrawCtx*);
 void drawtext(DrawCtx *, int, int, int, int, XftFont *, const char *, XColor fg, XColor bg);
 void drawrectangle(DrawCtx *, int, int, int, int, Bool, XColor);
 void drawcircle(DrawCtx *, int, int, int, Bool, XColor);
+void drawimage(DrawCtx *, int, int, const char *);
+int draw_get_image_width(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short textwidth(DrawCtx *, XftFont *, char *);
 unsigned short textwidth_primitive(Display*, XftFont*, char*);

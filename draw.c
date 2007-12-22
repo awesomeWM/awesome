@@ -149,6 +149,37 @@ drawcircle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
     cairo_surface_destroy(surface);
 }
 
+void
+drawimage(DrawCtx *ctx, int x, int y, const char *filename)
+{
+    cairo_surface_t *surface, *source;
+    cairo_t *cr;
+
+    source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_image_surface_create_from_png(filename);
+    cr = cairo_create (source);
+    cairo_set_source_surface(cr, surface, x, y);
+    cairo_paint(cr);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(source);
+    cairo_surface_destroy(surface);
+}
+
+int draw_get_image_width(const char *filename)
+{
+    int width;
+    cairo_surface_t *surface;
+
+    surface = cairo_image_surface_create_from_png(filename);
+    cairo_image_surface_get_width(surface);
+    width = cairo_image_surface_get_width(surface);
+    cairo_surface_destroy(surface);
+
+    return width;
+}
+
+
 Drawable
 draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
 {
