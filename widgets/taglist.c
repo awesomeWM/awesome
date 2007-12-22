@@ -39,9 +39,8 @@ taglist_draw(Widget *widget,
     flagsize = (vscreen.font->height + 2) / 4;
 
     for(tag = vscreen.tags; tag; tag = tag->next)
-    {
-        width  += textwidth(ctx, vscreen.font, tag->name);
-    }
+        width += textwidth(ctx, vscreen.font, tag->name);
+
     location = calculate_offset(vscreen.statusbar->width,
                                 width,
                                 offset,
