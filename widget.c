@@ -1,4 +1,25 @@
-#include  <confuse.h>
+/*
+ * widget.c - widget managing
+ *
+ * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
+
 #include "util.h"
 #include "widget.h"
 #include "statusbar.h"
@@ -46,7 +67,6 @@ calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
     return barwidth - offset - widgetwidth;
 }
 
-
 static Widget *
 find_widget(char *name, int screen)
 {
@@ -58,26 +78,23 @@ find_widget(char *name, int screen)
     return NULL;
 }
 
-
 static void
 common_tell(Widget *widget, char *command __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
 }
 
-
 void
 common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
 {
     const char *name;
-    widget->statusbar = statusbar;
 
+    widget->statusbar = statusbar;
     name = cfg_title(config);
     widget->name = p_new(char, strlen(name)+1);
     widget->tell = common_tell;
     strncpy(widget->name, name, strlen(name));
 }
-
 
 /** Send command to widget
  * \param screen Screen ID
@@ -91,19 +108,23 @@ uicb_widget_tell(int screen, char *arg)
     char *p, *command;
     int len;
 
-    if (!arg){
+    if (!arg)
+    {
         warn("Must specify a widget.\n");
         return;
     }
 
     len = strlen(arg);
     p = strtok(arg, " ");
-    if (!p){
+    if (!p)
+    {
         warn("Ignoring malformed widget command.\n");
         return;
     }
+
     widget = find_widget(p, screen);
-    if (!widget){
+    if (!widget)
+    {
         warn("No such widget: %s\n", p);
         return;
     }
@@ -118,6 +139,7 @@ uicb_widget_tell(int screen, char *arg)
     }
     else
         widget->tell(widget, NULL);
+
     statusbar_draw(screen);
     return;
 }
