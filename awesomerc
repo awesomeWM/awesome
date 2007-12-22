@@ -26,6 +26,7 @@ screen 0
         position = "top"
         taglist tl {}
         layoutinfo li {}
+        netwmicon nwi {}
         focustitle ft  {}
         textbox tb {}
     }
