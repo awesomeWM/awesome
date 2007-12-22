@@ -1,5 +1,5 @@
 /*
- * iconbox.c - icon widget
+ * netwmicon.c - NET_WM_ICON widget
  *
  * Copyright © 2007 Julien Danjou <julien@danjou.info>
  *
