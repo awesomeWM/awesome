@@ -27,6 +27,7 @@
 /** Check if a client is tiled */
 #define IS_TILED(client, screen)            (client && !client->isfloating && client_isvisible(client, screen))
 
+Tag ** get_current_tags(int );
 void tag_client(Client *, Tag *, int);
 void untag_client(Client *, Tag *, int);
 Bool is_client_tagged(Client *, Tag *, int);

@@ -137,6 +137,27 @@ tag_client_with_rules(Client *c)
         }
 }
 
+
+Tag **
+get_current_tags(int screen)
+{
+    Tag *tag, **tags = NULL;
+    int n = 0;
+
+    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+        if(tag->selected)
+        {
+            p_realloc(tags, ++n);
+            tags[n - 1] = tag;
+        }
+
+    /* finish with null */
+    p_realloc(tags, ++n);
+    tags[n - 1] = NULL;
+
+    return tags;
+}
+
 /** Tag selected window with tag
  * \param screen Screen ID
  * \param arg Tag name
