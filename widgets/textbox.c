@@ -79,8 +79,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     w->draw = textbox_draw;
     w->tell = textbox_tell;
 
-    d = p_new(Data, 1);
-    w->data = (void*) d;
+    w->data = d = p_new(Data, 1);
 
     if ((color = cfg_getstr(config, "fg")))
         d->fg = initxcolor(statusbar->screen, color);
