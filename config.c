@@ -327,6 +327,8 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "focus_border", (char *) "#6666ff", CFGF_NONE),
         CFG_STR((char *) "focus_bg", (char *) "#6666ff", CFGF_NONE),
         CFG_STR((char *) "focus_fg", (char *) "#ffffff", CFGF_NONE),
+        CFG_STR((char *) "urgent_bg", (char *) "#ff0000", CFGF_NONE),
+        CFG_STR((char *) "urgent_fg", (char *) "#ffffff", CFGF_NONE),
         CFG_STR((char *) "tab_border", (char *) "#ff0000", CFGF_NONE),
         CFG_END()
     };
@@ -551,17 +553,21 @@ config_parse(const char *confpatharg)
             eprint("awesome: cannot init font\n");
         /* Colors */
         virtscreen->colors_normal[ColBorder] = initxcolor(screen,
-                                                         cfg_getstr(cfg_colors, "normal_border"));
+                                                          cfg_getstr(cfg_colors, "normal_border"));
         virtscreen->colors_normal[ColBG] = initxcolor(screen,
-                                                     cfg_getstr(cfg_colors, "normal_bg"));
+                                                      cfg_getstr(cfg_colors, "normal_bg"));
         virtscreen->colors_normal[ColFG] = initxcolor(screen,
-                                                     cfg_getstr(cfg_colors, "normal_fg"));
+                                                      cfg_getstr(cfg_colors, "normal_fg"));
         virtscreen->colors_selected[ColBorder] = initxcolor(screen,
-                                                           cfg_getstr(cfg_colors, "focus_border"));
+                                                            cfg_getstr(cfg_colors, "focus_border"));
         virtscreen->colors_selected[ColBG] = initxcolor(screen,
-                                                       cfg_getstr(cfg_colors, "focus_bg"));
+                                                        cfg_getstr(cfg_colors, "focus_bg"));
         virtscreen->colors_selected[ColFG] = initxcolor(screen,
-                                                       cfg_getstr(cfg_colors, "focus_fg"));
+                                                        cfg_getstr(cfg_colors, "focus_fg"));
+        virtscreen->colors_urgent[ColBG] = initxcolor(screen,
+                                                      cfg_getstr(cfg_colors, "urgent_bg"));
+        virtscreen->colors_urgent[ColFG] = initxcolor(screen,
+                                                      cfg_getstr(cfg_colors, "urgent_fg"));
 
         /* Statusbar */
         virtscreen->statusbar = p_new(Statusbar, 1);

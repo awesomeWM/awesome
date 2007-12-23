@@ -508,6 +508,18 @@ client_unmanage(Client *c, long state)
 }
 
 void
+client_updatewmhints(Client *c)
+{
+    XWMHints *wmh;
+
+    if((wmh = XGetWMHints(globalconf.display, c->win)))
+    {
+        c->isurgent = (wmh->flags & XUrgencyHint);
+        XFree(wmh);
+    }
+}
+
+void
 client_updatesizehints(Client *c)
 {
     long msize;

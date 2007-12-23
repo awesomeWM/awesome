@@ -357,6 +357,10 @@ handle_event_propertynotify(XEvent * e)
           case XA_WM_NORMAL_HINTS:
             client_updatesizehints(c);
             break;
+          case XA_WM_HINTS:
+            client_updatewmhints(c);
+            statusbar_draw(c->screen);
+            break;
         }
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(c->display, "_NET_WM_NAME", False))
         {

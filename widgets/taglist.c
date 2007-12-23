@@ -39,8 +39,20 @@ isoccupied(int screen, Tag *t)
     Client *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(c->screen == screen && is_client_tagged(c, t, screen))
+        if(is_client_tagged(c, t, screen))
             return True;
+    return False;
+}
+
+static Bool
+isurgent(int screen, Tag *t)
+{
+    Client *c;
+
+    for(c = globalconf.clients; c; c = c->next)
+        if(is_client_tagged(c, t, screen) && c->isurgent)
+            return True;
+
     return False;
 }
 
@@ -73,6 +85,8 @@ taglist_draw(Widget *widget,
         w = textwidth(ctx, vscreen.font, tag->name);
         if(tag->selected)
             colors = vscreen.colors_selected;
+        else if(isurgent(widget->statusbar->screen, tag))
+            colors = vscreen.colors_urgent;
         else
             colors = vscreen.colors_normal;
         draw_text(ctx, location + width, 0, w,

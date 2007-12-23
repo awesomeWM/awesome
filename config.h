@@ -31,8 +31,9 @@
 enum
 { BarTop, BarBot, BarLeft, BarRight, BarOff };
 
+/** Common colors */
 enum
-{ ColBorder, ColFG, ColBG, ColLast };   /* color */
+{ ColBorder, ColFG, ColBG, ColLast };
 
 enum
 { CurNormal, CurResize, CurMove, CurLast };     /* cursor */
@@ -114,6 +115,8 @@ struct Client
     int minax, maxax, minay, maxay;
     long flags;
     int border, oldborder;
+    /** Has urgency hint */
+    Bool isurgent;
     /** Store previous floating state before maximizing */
     Bool wasfloating;
     /** True if the window is floating */
@@ -205,6 +208,8 @@ typedef struct
     XColor colors_normal[ColLast];
     /** Selected colors */
     XColor colors_selected[ColLast];
+    /** Urgency colors */
+    XColor colors_urgent[ColLast];
     /** Tag list */
     Tag *tags;
     TagClientLink *tclink;

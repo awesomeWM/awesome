@@ -84,6 +84,9 @@ is_client_tagged(Client *c, Tag *t, int screen)
 {
     TagClientLink *tc;
 
+    if(!c || c->screen != screen)
+        return False;
+
     for(tc = globalconf.screens[screen].tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
             return True;
