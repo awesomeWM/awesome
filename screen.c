@@ -41,7 +41,8 @@ get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
     XineramaScreenInfo *si;
     Area area;
 
-    if(XineramaIsActive(globalconf.display)){
+    if(XineramaIsActive(globalconf.display))
+    {
         si = XineramaQueryScreens(globalconf.display, &screen_number);
         if (screen_number < screen)
             eprint("Info request for unknown screen.");
@@ -50,7 +51,8 @@ get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
         area.width = si[screen].width;
         area.height = si[screen].height;
         XFree(si);
-    } else
+    }
+    else
     {
         /* emulate Xinerama info but only fill the screen we want */
         area.x = 0;
@@ -131,7 +133,8 @@ get_screen_bycoord(int x, int y)
         return DefaultScreen(globalconf.display);
 
 
-    for(i = 0; i < get_screen_count(); i++){
+    for(i = 0; i < get_screen_count(); i++)
+    {
         area = get_screen_area(i, NULL, NULL);
         if((x < 0 || (x >= area.x && x < area.x + area.width))
            && (y < 0 || (y >= area.y && y < area.y + area.height)))
