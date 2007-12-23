@@ -37,37 +37,38 @@ typedef struct
 
 static int
 progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
-             int used __attribute__ ((unused)))
+                 int used __attribute__ ((unused)))
 {
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
-    int location, width, pwidth, y, height;
+    int location, width, pwidth, margin, height;
     Data *d = widget->data;
 
-    width = d->width - 6;
-
     height = vscreen.statusbar->height / 2;
-    y = (vscreen.statusbar->height - height) / 2 - 1;
+    margin = (vscreen.statusbar->height - height) / 2 - 1;
+
+    width = d->width - (margin * 2);
 
     location = widget_calculate_offset(vscreen.statusbar->width,
                                        d->width,
                                        offset,
-                                       widget->alignment) + 1;
+                                       widget->alignment) + margin;
 
     pwidth = d->percent ? (width * d->percent) / 100 : 0;
 
     draw_rectangle(ctx,
-                   location + 1, y,
+                   location + 1, margin,
                    width, height,
                    False, d->fg);
+
     if(pwidth > 0)
         draw_rectangle(ctx,
-                       location + 1, y + 1,
+                       location + 1, margin + 1,
                        pwidth, height - 2,
                        True, d->fg);
 
     if(width - pwidth - 2 > 0)
         draw_rectangle(ctx,
-                       location + pwidth + 2, y + 1,
+                       location + pwidth + 2, margin + 1,
                        width - pwidth - 2, height - 2,
                        True, d->bg);
 
