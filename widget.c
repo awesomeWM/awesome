@@ -34,6 +34,7 @@ const NameFuncLink WidgetList[] =
     {"textbox", textbox_new},
     {"iconbox", iconbox_new},
     {"netwmicon", netwmicon_new},
+    {"progressbar", progressbar_new},
     {NULL, NULL}
 };
 

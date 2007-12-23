@@ -7,7 +7,7 @@ RELEASE = "Productivity Breaker"
 # additional layouts
 LAYOUTS = layouts/tile.c layouts/floating.c layouts/max.c layouts/fibonacci.c
 # additional widgets
-WIDGETS = widgets/taglist.c widgets/layoutinfo.c widgets/textbox.c widgets/focustitle.c widgets/iconbox.c widgets/netwmicon.c
+WIDGETS = widgets/taglist.c widgets/layoutinfo.c widgets/textbox.c widgets/focustitle.c widgets/iconbox.c widgets/netwmicon.c widgets/progressbar.c
 
 # paths
 PREFIX = /usr/local

@@ -346,6 +346,13 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
         CFG_END()
     };
+    static cfg_opt_t widget_progressbar_opts[] =
+    {
+        CFG_INT((char *) "width", 102, CFGF_NONE),
+        CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
+        CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
+        CFG_END()
+    };
     static cfg_opt_t statusbar_opts[] =
     {
         CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
@@ -355,6 +362,7 @@ config_parse(const char *confpatharg)
         CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "iconbox", widget_iconbox_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "netwmicon", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "progressbar", widget_progressbar_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t tag_opts[] =

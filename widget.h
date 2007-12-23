@@ -42,6 +42,7 @@ WidgetConstructor textbox_new;
 WidgetConstructor focustitle_new;
 WidgetConstructor iconbox_new;
 WidgetConstructor netwmicon_new;
+WidgetConstructor progressbar_new;
 
 UICB_PROTO(uicb_widget_tell);
 
