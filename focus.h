@@ -29,6 +29,7 @@ void focus_delete_client(Client *);
 Client * focus_get_latest_client_for_tag(int, Tag *);
 
 UICB_PROTO(uicb_focus_history);
+UICB_PROTO(uicb_focus_client_byname);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

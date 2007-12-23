@@ -133,4 +133,15 @@ uicb_focus_history(int screen, char *arg)
     }
 }
 
+void
+uicb_focus_client_byname(int screen, char *arg)
+{
+    Client *c;
+    Tag *curtag = get_current_tag(screen);
+
+    if(arg && (c = get_client_byname(globalconf.clients, arg))
+       && is_client_tagged(c, curtag, screen))
+        focus(c, True, screen);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

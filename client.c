@@ -147,6 +147,18 @@ get_client_bywin(Client *list, Window w)
     return c;
 }
 
+Client *
+get_client_byname(Client *list, char *name)
+{
+    Client *c;
+
+    for(c = list; c; c = c->next)
+        if(strstr(c->name, name))
+            return c;
+
+    return NULL;
+}
+
 void
 client_updatetitle(Client *c)
 {

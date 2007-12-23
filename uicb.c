@@ -80,6 +80,7 @@ const NameFuncLink UicbList[] =
     {"client_resizemouse", uicb_client_resizemouse},
     /* focus.c */
     {"focus_history", uicb_focus_history},
+    {"focus_client_byname", uicb_focus_client_byname},
     /* widgets.c */
     {"widget_tell", uicb_widget_tell},
     {NULL, NULL}
