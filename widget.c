@@ -92,9 +92,8 @@ widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
 
     widget->statusbar = statusbar;
     name = cfg_title(config);
-    widget->name = p_new(char, strlen(name)+1);
+    widget->name = a_strdup(name);
     widget->tell = widget_common_tell;
-    strncpy(widget->name, name, strlen(name));
 }
 
 /** Send command to widget
