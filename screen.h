@@ -26,7 +26,14 @@
 
 #include <X11/extensions/Xinerama.h>
 
-typedef XineramaScreenInfo ScreenInfo;
+typedef struct
+{
+    /* Co-ords of upper left corner */
+    int x;
+    int y;
+    int width;
+    int height;
+} Area;
 
 Area get_screen_area(int, Statusbar *, Padding *);
 Area get_display_area(int, Statusbar *, Padding *);

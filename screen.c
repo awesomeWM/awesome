@@ -38,7 +38,7 @@ Area
 get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
 {
     int screen_number = 0;
-    ScreenInfo *si;
+    XineramaScreenInfo *si;
     Area area;
 
     if(XineramaIsActive(globalconf.display)){
