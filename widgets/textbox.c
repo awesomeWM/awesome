@@ -91,7 +91,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
-    update(w, cfg_getstr(config, "default"));
+    update(w, cfg_getstr(config, "text"));
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -29,7 +29,7 @@ screen 0
         layoutinfo mylayoutinfo {}
         netwmicon mynetwmicon {}
         focustitle myfocustitle  {}
-        textbox mytextbox {}
+        textbox mytextbox { text = "awesome!" }
     }
 }
 

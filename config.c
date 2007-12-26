@@ -343,7 +343,7 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t widget_textbox_opts[] =
     {
-        CFG_STR((char *) "default", (char *) NULL, CFGF_NONE),
+        CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
         CFG_END()
