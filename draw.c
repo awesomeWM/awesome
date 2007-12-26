@@ -261,7 +261,7 @@ textwidth_primitive(Display *display, XftFont *font, char *text)
 unsigned short
 textwidth(DrawCtx *ctx, XftFont *font, char *text)
 {
-    if (!text)
+    if (!a_strlen(text))
         return 0;
     return textwidth_primitive(ctx->display, font, text);
 }
