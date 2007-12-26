@@ -382,7 +382,7 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t layout_opts[] =
     {
-        CFG_STR((char *) "symbol", (char *) "???", CFGF_NONE),
+        CFG_STR((char *) "image", NULL, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t layouts_opts[] =
@@ -587,10 +587,10 @@ config_parse(const char *confpatharg)
                 if(!layout->arrange)
                 {
                     warn("unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
-                    layout->symbol = NULL;
+                    layout->image = NULL;
                     continue;
                 }
-                layout->symbol = a_strdup(cfg_getstr(cfgsectmp, "symbol"));
+                layout->image = a_strdup(cfg_getstr(cfgsectmp, "image"));
 
                 if(i < cfg_size(cfg_layouts, "layout") - 1)
                     layout = layout->next = p_new(Layout, 1);

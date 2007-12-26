@@ -87,7 +87,7 @@ cleanup_screen(int screen)
     for(l = globalconf.screens[screen].layouts; l; l = ln)
     {
         ln = l->next;
-        p_delete(&l->symbol);
+        p_delete(&l->image);
         p_delete(&l);
     }
 }

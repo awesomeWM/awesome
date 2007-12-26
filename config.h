@@ -55,7 +55,7 @@ typedef struct AwesomeConf AwesomeConf;
 typedef struct Layout Layout;
 struct Layout
 {
-    char *symbol;
+    char *image;
     void (*arrange) (int);
     Layout *next;
 };

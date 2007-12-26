@@ -29,17 +29,16 @@ static int
 iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
-    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int location, width;
 
     width = draw_get_image_width(widget->data);
 
-    location = widget_calculate_offset(vscreen.statusbar->width,
+    location = widget_calculate_offset(widget->statusbar->width,
                                        width,
                                        offset,
                                        widget->alignment);
 
-    draw_image(ctx, location, 0, widget->data);
+    draw_image(ctx, location, 0, 0, widget->data);
 
     return width;
 }

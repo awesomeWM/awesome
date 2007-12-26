@@ -14,21 +14,22 @@ screen 0
     }
     layouts
     {
-        layout tile { symbol = "[]=" }
-        layout tileleft { symbol = "=[]" }
-        layout max { symbol = "[ ]" }
-        layout spiral { symbol = "(@)" }
-        layout dwindle { symbol = "[\\]" }
-        layout floating { symbol = "><>" }
+        layout tile { image = "tile.png" }
+        layout tileleft { image = "tileleft.png" }
+        layout max { image = "max.png" }
+        layout spiral { image = "spiral.png" }
+        layout dwindle { image = "dwindle.png" }
+        layout floating { image = "floating.png" }
     }
     statusbar
     {
         position = "top"
-        taglist tl {}
-        layoutinfo li {}
-        netwmicon nwi {}
-        focustitle ft  {}
-        textbox tb {}
+
+        taglist mytaglist {}
+        layoutinfo mylayoutinfo {}
+        netwmicon mynetwmicon {}
+        focustitle myfocustitle  {}
+        textbox mytextbox {}
     }
 }
 
