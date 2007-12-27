@@ -26,6 +26,7 @@
 #include "util.h"
 #include "event.h"
 #include "window.h"
+#include "statusbar.h"
 #include "layouts/floating.h"
 
 extern AwesomeConf globalconf;
@@ -71,6 +72,8 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     XQueryPointer(globalconf.display,
                   RootWindow(globalconf.display, c->phys_screen),
                   &dummy, &dummy, &x1, &y1, &di, &di, &dui);
+    c->ismax = False;
+    statusbar_draw(c->screen);
     for(;;)
     {
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
@@ -89,7 +92,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             handle_event_maprequest(&ev);
             break;
         case MotionNotify:
-            XSync(globalconf.display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
             if(abs(nx) < globalconf.screens[screen].snap + area.x && nx > area.x)
@@ -137,6 +139,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                     None, globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
+    statusbar_draw(c->screen);
     XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
     for(;;)
     {
@@ -158,7 +161,6 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             handle_event_maprequest(&ev);
             break;
         case MotionNotify:
-            XSync(globalconf.display, False);
             if((nw = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
                 nw = 1;
             if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
