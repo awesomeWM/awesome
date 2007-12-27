@@ -47,23 +47,6 @@ const NameFuncLink LayoutsList[] =
     {NULL, NULL}
 };
 
-/** Find the index of the first currently selected tag
- * \param screen the screen to search
- * \return tag
- */
-#warning this function is bugged and should be replaced
-Tag *
-get_current_tag(int screen)
-{
-    Tag *tag;
-
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        if(tag->selected)
-            return tag;
-
-    return NULL;
-}
-
 /** Arrange windows following current selected layout
  * \param screen the screen to arrange
  */
@@ -87,17 +70,6 @@ arrange(int screen)
           True, screen);
     p_delete(&curtags);
     restack(screen);
-}
-
-Layout *
-get_current_layout(int screen)
-{
-    Tag *curtag;
-
-    if ((curtag = get_current_tag(screen)))
-        return curtag->layout;
-
-    return NULL;
 }
 
 /** Send focus to next client in stack

@@ -27,8 +27,6 @@
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 
 void arrange(int);
-Layout * get_current_layout(int) __attribute__ ((deprecated));
-Tag * get_current_tag(int) __attribute__ ((deprecated));
 void restack(int);
 void loadawesomeprops(int);
 void saveawesomeprops(int);
