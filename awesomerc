@@ -14,12 +14,12 @@ screen 0
     }
     layouts
     {
-        layout tile { image = "tile.png" }
-        layout tileleft { image = "tileleft.png" }
-        layout max { image = "max.png" }
-        layout spiral { image = "spiral.png" }
-        layout dwindle { image = "dwindle.png" }
-        layout floating { image = "floating.png" }
+        layout tile { image = "/usr/local/share/icons/tile.png" }
+        layout tileleft { image = "/usr/local/share/icons/tileleft.png" }
+        layout max { image = "/usr/local/share/icons/max.png" }
+        layout spiral { image = "/usr/local/share/icons/spiral.png" }
+        layout dwindle { image = "/usr/local/share/icons/dwindle.png" }
+        layout floating { image = "/usr/local/share/icons/floating.png" }
     }
     statusbar
     {

@@ -83,12 +83,17 @@ install-unstrip: awesome awesome-client man
 	@echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
 	@install -d ${DESTDIR}${MANPREFIX}/man1
 	@install -m 644 ${DOCS:.txt=} ${DESTDIR}${MANPREFIX}/man1
+	@echo installing shared data to ${DESTDIR}${PREFIX}/share
+	@install -d ${DESTDIR}${PREFIX}/share/awesome/icons/layouts
+	@install icons/layouts/* ${DESTDIR}${PREFIX}/share/awesome/icons/layouts/
 
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	@rm ${DESTDIR}${PREFIX}/bin/awesome ${DESTDIR}${PREFIX}/bin/awesome-client
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
 	@rm ${DESTDIR}${MANPREFIX}/man1/awesome.1 ${DESTDIR}${MANPREFIX}/man1/awesome-client.1 ${DESTDIR}${MANPREFIX}/man1/awesomerc.1
+	@echo removing shared data from ${DESTDIR}${PREFIX}/share
+	@rm -rf ${DESTDIR}${PREFIX}/share/awesome
 
 doc:
 	@echo generating documentation
