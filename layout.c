@@ -71,7 +71,7 @@ void
 arrange(int screen)
 {
     Client *c;
-    Tag *curtag = get_current_tag(screen);
+    Tag **curtags = get_current_tags(screen);
 
     for(c = globalconf.clients; c; c = c->next)
     {
@@ -82,9 +82,10 @@ arrange(int screen)
             client_ban(c);
     }
 
-    curtag->layout->arrange(screen);
-    focus(focus_get_latest_client_for_tag(screen, curtag),
+    curtags[0]->layout->arrange(screen);
+    focus(focus_get_latest_client_for_tag(screen, curtags[0]),
           True, screen);
+    p_delete(&curtags);
     restack(screen);
 }
 
@@ -176,18 +177,22 @@ restack(int screen)
     Client *c, *sel = globalconf.focus->client;
     XEvent ev;
     XWindowChanges wc;
+    Tag **curtags;
 
     statusbar_draw(screen);
+
     if(!sel)
         return;
+
     if(globalconf.screens[screen].allow_lower_floats)
         XRaiseWindow(globalconf.display, sel->win);
     else
     {
+        curtags = get_current_tags(screen);
         if(sel->isfloating ||
-           get_current_layout(screen)->arrange == layout_floating)
+           curtags[0]->layout->arrange == layout_floating)
             XRaiseWindow(sel->display, sel->win);
-        if(!(get_current_layout(screen)->arrange == layout_floating))
+        if(!(curtags[0]->layout->arrange == layout_floating))
         {
             wc.stack_mode = Below;
             wc.sibling = globalconf.screens[screen].statusbar->window;
@@ -204,6 +209,7 @@ restack(int screen)
                 wc.sibling = c->win;
             }
         }
+        p_delete(&curtags);
     }
     if(globalconf.screens[screen].focus_move_pointer)
         XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0, sel->w / 2, sel->h / 2);
@@ -243,12 +249,14 @@ void
 uicb_tag_setlayout(int screen, char *arg)
 {
     Layout *l = globalconf.screens[screen].layouts;
-    Tag *tag;
+    Tag *tag, **curtags;
     int i;
 
     if(arg)
     {
-        for(i = 0; l && l != get_current_layout(screen); i++, l = l->next);
+        curtags = get_current_tags(screen);
+        for(i = 0; l && l != curtags[0]->layout; i++, l = l->next);
+        p_delete(&curtags);
         if(!l)
             i = 0;
         for(i = compute_new_value_from_arg(arg, (double) i),
