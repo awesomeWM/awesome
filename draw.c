@@ -150,7 +150,7 @@ draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
 }
 
 void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
-                               int wanted_w, unsigned char *data)
+                               int wanted_h, unsigned char *data)
 {
     double ratio;
     cairo_surface_t *surface, *source;
@@ -159,9 +159,9 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h, 0);
     cr = cairo_create (surface);
-    if(wanted_w > 0 && w > 0)
+    if(wanted_h > 0 && h > 0)
     {
-        ratio = (double) wanted_w / (double) w;
+        ratio = (double) wanted_h / (double) h;
         cairo_scale(cr, ratio, ratio);
         cairo_set_source_surface(cr, source, x / ratio, y / ratio);
     }
