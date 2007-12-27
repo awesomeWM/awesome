@@ -34,6 +34,7 @@
 #include "xutil.h"
 #include "ewmh.h"
 #include "defconfig.h"
+#include "layouts/tile.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 
@@ -377,9 +378,8 @@ config_parse_screen(cfg_t *cfg, int screen)
     create_widgets(cfg_statusbar, virtscreen->statusbar);
 
     /* Layouts */
+    virtscreen->layouts = layout = p_new(Layout, 1);
     if(cfg_size(cfg_layouts, "layout"))
-    {
-        virtscreen->layouts = layout = p_new(Layout, 1);
         for(i = 0; i < cfg_size(cfg_layouts, "layout"); i++)
         {
             cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
@@ -397,14 +397,15 @@ config_parse_screen(cfg_t *cfg, int screen)
             else
                 layout->next = NULL;
         }
-    }
     else
-        eprint("fatal: no default layout available\n");
+    {
+        warn("fatal: no default layout available\n");
+        layout->arrange = layout_tile;
+    }
 
     /* Tags */
+    virtscreen->tags = tag = p_new(Tag, 1);
     if(cfg_size(cfg_tags, "tag"))
-    {
-        virtscreen->tags = tag = p_new(Tag, 1);
         for(i = 0; i < cfg_size(cfg_tags, "tag"); i++)
         {
             cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
@@ -427,9 +428,15 @@ config_parse_screen(cfg_t *cfg, int screen)
             else
                 tag->next = NULL;
         }
-    }
     else
-        eprint("fatal: no tags found in configuration file\n");
+    {
+        warn("fatal: no tags found in configuration file\n");
+        tag->name = a_strdup("default");
+        tag->layout = virtscreen->layouts;
+        tag->nmaster = 1;
+        tag->ncol = 1;
+        tag->mwfact = 0.5;
+    }
 
     ewmh_update_net_numbers_of_desktop(get_phys_screen(screen));
     ewmh_update_net_current_desktop(get_phys_screen(screen));
