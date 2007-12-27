@@ -22,7 +22,7 @@
 #include <X11/Xatom.h> 
 
 #include "ewmh.h"
-#include "config.h"
+#include "util.h"
 
 extern AwesomeConf globalconf;
 
@@ -80,5 +80,28 @@ ewmh_set_supported_hints(int phys_screen)
                     PropModeReplace, (unsigned char *) atom, i);
 }
 
+void
+ewmh_update_net_client_list(int phys_screen)
+{
+    Window *wins;
+    Client *c;
+    int n = 0;
+
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->phys_screen == phys_screen)
+            n++;
+
+    wins = p_new(Window, n + 1);
+
+    for(n = 0, c = globalconf.clients; c; c = c->next, n++)
+        if(c->phys_screen == phys_screen)
+            wins[n] = c->win;
+
+    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
+                    net_client_list, XA_WINDOW, 32, PropModeReplace, (unsigned char *) wins, n);
+
+    p_delete(&wins);
+    XFlush(globalconf.display);
+}
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

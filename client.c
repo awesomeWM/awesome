@@ -33,6 +33,7 @@
 #include "statusbar.h"
 #include "window.h"
 #include "focus.h"
+#include "ewmh.h"
 #include "layouts/floating.h"
 
 
@@ -255,31 +256,6 @@ focus(Client *c, Bool selscreen, int screen)
         XSetInputFocus(globalconf.display,
                        RootWindow(globalconf.display, get_phys_screen(screen)),
                        RevertToPointerRoot, CurrentTime);
-}
-
-static void
-ewmh_update_net_client_list(int phys_screen)
-{
-     Window *wins;
-     Client *c;
-     int n = 0;
-
-     for(c = globalconf.clients; c; c = c->next)
-         if(c->phys_screen == phys_screen)
-             n++;
-
-     wins = p_new(Window, n + 1);
-
-     for(n = 0, c = globalconf.clients; c; c = c->next, n++)
-         if(c->phys_screen == phys_screen)
-             wins[n] = c->win;
-
-     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                     XInternAtom(globalconf.display, "_NET_CLIENT_LIST", False), XA_WINDOW, 32,
-                     PropModeReplace, (unsigned char*)wins, n);
-
-     p_delete(&wins);
-     XFlush(globalconf.display);     
 }
 
 /** Manage a new client
