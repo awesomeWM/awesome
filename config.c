@@ -406,6 +406,7 @@ config_parse(const char *confpatharg)
         CFG_SEC((char *) "colors", colors_opts, CFGF_NONE),
         CFG_SEC((char *) "layouts", layouts_opts, CFGF_NONE),
         CFG_SEC((char *) "padding", padding_opts, CFGF_NONE),
+        CFG_END()
     };
     static cfg_opt_t rule_opts[] =
     {
