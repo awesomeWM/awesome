@@ -377,6 +377,7 @@ client_resize(Client *c, int x, int y, int w, int h,
     double dx, dy, max, min, ratio;
     XWindowChanges wc;
     Area area;
+    Tag **curtags;
 
     if(sizehints)
     {
@@ -438,15 +439,17 @@ client_resize(Client *c, int x, int y, int w, int h,
         c->y = wc.y = y;
         c->w = wc.width = w;
         c->h = wc.height = h;
+        curtags = get_current_tags(c->screen);
         if(!volatile_coords
            && (c->isfloating
-               || get_current_layout(c->screen)->arrange == layout_floating))
+               || curtags[0]->layout->arrange == layout_floating))
         {
             c->rx = c->x;
             c->ry = c->y;
             c->rw = c->w;
             c->rh = c->h;
         }
+        p_delete(&curtags);
         wc.border_width = c->border;
         XConfigureWindow(c->display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
         window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
@@ -738,10 +741,15 @@ uicb_client_moveresize(int screen, char *arg)
     unsigned int dui;
     Window dummy;
     Client *sel = globalconf.focus->client;
+    Tag **curtags = get_current_tags(screen);
 
-    if(get_current_layout(screen)->arrange != layout_floating)
+    if(curtags[0]->layout->arrange != layout_floating)
         if(!sel || !sel->isfloating || sel->isfixed || !arg)
+        {
+            p_delete(&curtags);
             return;
+        }
+    p_delete(&curtags);
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
         return;
     nx = (int) compute_new_value_from_arg(x, sel->x);
