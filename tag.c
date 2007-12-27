@@ -94,17 +94,16 @@ is_client_tagged(Client *c, Tag *t, int screen)
 }
 
 void
-tag_client_with_current_selected(Client *c, int screen)
+tag_client_with_current_selected(Client *c)
 {
     Tag *tag;
-    VirtScreen vscreen;
+    VirtScreen vscreen = globalconf.screens[c->screen];
 
-    vscreen = globalconf.screens[screen];
     for(tag = vscreen.tags; tag; tag = tag->next)
         if(tag->selected)
-            tag_client(c, tag, screen);
+            tag_client(c, tag, c->screen);
         else
-            untag_client(c, tag, screen);
+            untag_client(c, tag, c->screen);
 }
 
 void
@@ -132,7 +131,7 @@ tag_client_with_rules(Client *c)
                     untag_client(c, tag, c->screen);
 
             if(!matched)
-                tag_client_with_current_selected(c, c->screen);
+                tag_client_with_current_selected(c);
             break;
         }
 }
