@@ -28,6 +28,7 @@ void ewmh_update_net_client_list(int);
 void ewmh_update_net_numbers_of_desktop(int);
 void ewmh_update_net_current_desktop(int);
 void ewmh_update_net_desktop_names(int);
+void ewmh_update_net_active_window(int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

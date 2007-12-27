@@ -25,6 +25,7 @@
 #include "ewmh.h"
 #include "util.h"
 #include "tag.h"
+#include "focus.h"
 
 extern AwesomeConf globalconf;
 
@@ -33,6 +34,7 @@ static Atom net_client_list;
 static Atom net_number_of_desktops;
 static Atom net_current_desktop;
 static Atom net_desktop_names;
+static Atom net_active_window;
 
 static Atom net_wm_name;
 static Atom net_wm_icon;
@@ -52,6 +54,7 @@ static AtomItem AtomNames[] =
     { "_NET_NUMBER_OF_DESKTOPS", &net_number_of_desktops },
     { "_NET_CURRENT_DESKTOP", &net_current_desktop },
     { "_NET_DESKTOP_NAMES", &net_desktop_names },
+    { "_NET_ACTIVE_WINDOW", &net_active_window },
 
     { "_NET_WM_NAME", &net_wm_name },
     { "_NET_WM_ICON", &net_wm_icon },
@@ -86,6 +89,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_number_of_desktops;
     atom[i++] = net_current_desktop;
     atom[i++] = net_desktop_names;
+    atom[i++] = net_active_window;
     
     atom[i++] = net_wm_name;
     atom[i++] = net_wm_icon;
@@ -165,7 +169,21 @@ ewmh_update_net_desktop_names(int phys_screen)
     }
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                    net_desktop_names, utf8_string, 8, PropModeReplace, (unsigned char *)buf, len);
+                    net_desktop_names, utf8_string, 8, PropModeReplace, (unsigned char *) buf, len);
+}
+
+void
+ewmh_update_net_active_window(int phys_screen)
+{
+    Window win;
+    Tag **curtags = get_current_tags(phys_screen);
+    Client *sel = focus_get_latest_client_for_tags(phys_screen, curtags);
+    p_delete(&curtags);
+
+    win = sel ? sel->win : None;
+
+    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
+                    net_active_window, XA_WINDOW, 32,  PropModeReplace, (unsigned char *) &win, 1);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

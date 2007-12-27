@@ -256,6 +256,7 @@ focus(Client *c, Bool selscreen, int screen)
         XSetInputFocus(globalconf.display,
                        RootWindow(globalconf.display, get_phys_screen(screen)),
                        RevertToPointerRoot, CurrentTime);
+    ewmh_update_net_active_window(get_phys_screen(screen));
 }
 
 /** Manage a new client
