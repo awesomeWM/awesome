@@ -368,6 +368,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     focus(c, True, screen);
 
+    ewmh_check_client_hints(c);
     ewmh_update_net_client_list(c->phys_screen);
 
     /* rearrange to display new window */

@@ -40,6 +40,8 @@ static Atom net_close_window;
 
 static Atom net_wm_name;
 static Atom net_wm_icon;
+static Atom net_wm_state;
+static Atom net_wm_state_sticky;
 
 static Atom utf8_string;
 
@@ -62,6 +64,8 @@ static AtomItem AtomNames[] =
 
     { "_NET_WM_NAME", &net_wm_name },
     { "_NET_WM_ICON", &net_wm_icon },
+    { "_NET_WM_STATE", &net_wm_state },
+    { "_NET_WM_STATE_STICKY", &net_wm_state_sticky },
 
     { "UTF8_STRING", &utf8_string },
 };
@@ -99,6 +103,8 @@ ewmh_set_supported_hints(int phys_screen)
     
     atom[i++] = net_wm_name;
     atom[i++] = net_wm_icon;
+    atom[i++] = net_wm_state;
+    atom[i++] = net_wm_state_sticky;
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
                     net_supported, XA_ATOM, 32,
@@ -190,14 +196,56 @@ ewmh_update_net_active_window(int phys_screen)
                     net_active_window, XA_WINDOW, 32,  PropModeReplace, (unsigned char *) &win, 1);
 }
 
+static void
+ewmh_process_state_atom(Client *c, Atom state)
+{
+    if(state == net_wm_state_sticky)
+    {
+        Tag *tag;
+        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+            tag_client(c, tag, c->screen);
+    }
+}
+
 void
 ewmh_process_client_message(XClientMessageEvent *ev)
 {
     Client *c;
 
     if(ev->message_type == net_close_window)
+    {
         if((c = get_client_bywin(globalconf.clients, ev->window)))
            client_kill(c);
+    }
+    else if(ev->message_type == net_wm_state)
+    {
+        if((c = get_client_bywin(globalconf.clients, ev->window)))
+        {
+            ewmh_process_state_atom(c, (Atom) ev->data.l[1]);
+            if(ev->data.l[2])
+                ewmh_process_state_atom(c, (Atom) ev->data.l[2]);
+        }
+    }
+}
+
+void
+ewmh_check_client_hints(Client *c)
+{
+    int format;
+    Atom real, *state;
+    unsigned char *data = NULL;
+    unsigned long i, n, extra;
+
+    if(XGetWindowProperty(globalconf.display, c->win, net_wm_state, 0L, LONG_MAX, False,
+                          XA_ATOM, &real, &format, &n, &extra,
+                          (unsigned char **) &data) != Success || !data)
+        return;
+
+    state = (Atom *) data;
+    for(i = 0; i < n; i++)
+        ewmh_process_state_atom(c, state[i]);
+
+    XFree(data);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
