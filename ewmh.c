@@ -203,7 +203,7 @@ ewmh_process_state_atom(Client *c, Atom state)
     {
         Tag *tag;
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-            tag_client(c, tag, c->screen);
+            tag_client(c, tag);
     }
 }
 

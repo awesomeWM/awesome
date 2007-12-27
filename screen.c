@@ -186,7 +186,7 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
     Area from, to;
 
     for(tag = globalconf.screens[old_screen].tags; tag; tag = tag->next)
-        untag_client(c, tag, old_screen);
+        untag_client(c, tag);
 
     c->screen = new_screen;
 

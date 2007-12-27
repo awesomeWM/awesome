@@ -63,11 +63,11 @@ client_loadprops(Client * c, int screen)
         for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
             {
-                tag_client(c, tag, screen);
+                tag_client(c, tag);
                 result = True;
             }
             else
-                untag_client(c, tag, screen);
+                untag_client(c, tag);
 
         if(i <= ntags && prop[i])
             c->isfloating = prop[i] == '1';
@@ -351,7 +351,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
        && (t = get_client_bywin(globalconf.clients, trans)))
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
             if(is_client_tagged(t, tag, c->screen))
-                tag_client(c, tag, c->screen);
+                tag_client(c, tag);
 
     /* should be floating if transsient or fixed) */
     if(!c->isfloating)
@@ -516,7 +516,7 @@ client_unmanage(Client *c, long state)
         focus(NULL, True, c->screen);
     focus_delete_client(c);
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-        untag_client(c, tag, c->screen);
+        untag_client(c, tag);
     XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
     window_setstate(c->display, c->win, state);
     XSync(c->display, False);

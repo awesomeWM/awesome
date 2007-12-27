@@ -48,21 +48,21 @@ detach_tagclientlink(int screen, TagClientLink *tc)
 }
 
 void
-tag_client(Client *c, Tag *t, int screen)
+tag_client(Client *c, Tag *t)
 {
     TagClientLink *tc, *new_tc;
 
     /* don't tag twice */
-    if(is_client_tagged(c, t, screen))
+    if(is_client_tagged(c, t, c->screen))
         return;
 
     new_tc = p_new(TagClientLink, 1);
 
-    if(!globalconf.screens[screen].tclink)
-        globalconf.screens[screen].tclink = new_tc;
+    if(!globalconf.screens[c->screen].tclink)
+        globalconf.screens[c->screen].tclink = new_tc;
     else
     {
-        for(tc = globalconf.screens[screen].tclink; tc->next; tc = tc->next);
+        for(tc = globalconf.screens[c->screen].tclink; tc->next; tc = tc->next);
         tc->next = new_tc;
     }
 
@@ -71,13 +71,13 @@ tag_client(Client *c, Tag *t, int screen)
 }
 
 void
-untag_client(Client *c, Tag *t, int screen)
+untag_client(Client *c, Tag *t)
 {
     TagClientLink *tc;
 
-    for(tc = globalconf.screens[screen].tclink; tc; tc = tc->next)
+    for(tc = globalconf.screens[c->screen].tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
-            detach_tagclientlink(screen, tc);
+            detach_tagclientlink(c->screen, tc);
 }
 
 Bool
@@ -102,9 +102,9 @@ tag_client_with_current_selected(Client *c)
 
     for(tag = vscreen.tags; tag; tag = tag->next)
         if(tag->selected)
-            tag_client(c, tag, c->screen);
+            tag_client(c, tag);
         else
-            untag_client(c, tag, c->screen);
+            untag_client(c, tag);
 }
 
 void
@@ -126,10 +126,10 @@ tag_client_with_rules(Client *c)
                 if(is_tag_match_rules(tag, r))
                 {
                     matched = True;
-                    tag_client(c, tag, c->screen);
+                    tag_client(c, tag);
                 }
                 else
-                    untag_client(c, tag, c->screen);
+                    untag_client(c, tag);
 
             if(!matched)
                 tag_client_with_current_selected(c);
@@ -183,14 +183,14 @@ uicb_client_tag(int screen, char *arg)
             if(target_tag)
             {
                 for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-                    untag_client(sel, tag, screen);
-                tag_client(sel, target_tag, screen);
+                    untag_client(sel, tag);
+                tag_client(sel, target_tag);
             }
         }
     }
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            tag_client(sel, tag, screen);
+            tag_client(sel, tag);
 
     client_saveprops(sel, screen);
     arrange(screen);
@@ -243,9 +243,9 @@ uicb_client_toggletag(int screen, char *arg)
         if(target_tag)
         {
             if(is_client_tagged(sel, target_tag, screen))
-                untag_client(sel, target_tag, screen);
+                untag_client(sel, target_tag);
             else
-                tag_client(sel, target_tag, screen);
+                tag_client(sel, target_tag);
         }
 
         /* check that there's at least one tag selected for this client*/
@@ -253,14 +253,14 @@ uicb_client_toggletag(int screen, char *arg)
             && !is_client_tagged(sel, tag, screen); tag = tag->next)
 
         if(!tag)
-            tag_client(sel, target_tag, screen);
+            tag_client(sel, target_tag);
     }
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             if(is_client_tagged(sel, tag, screen))
-                tag_client(sel, tag, screen);
+                tag_client(sel, tag);
             else
-                untag_client(sel, tag, screen);
+                untag_client(sel, tag);
 
     client_saveprops(sel, screen);
     arrange(screen);
