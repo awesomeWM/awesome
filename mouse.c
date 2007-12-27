@@ -44,15 +44,18 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     XEvent ev;
     Area area;
     Client *c = globalconf.focus->client;
+    Tag **curtags = get_current_tags(screen);
 
     if(!c)
         return;
 
-    if((get_current_layout(screen)->arrange != layout_floating)
+    if((curtags[0]->layout->arrange != layout_floating)
         && !c->isfloating)
-         uicb_client_togglefloating(screen, NULL);
-     else
-         restack(screen);
+        uicb_client_togglefloating(screen, NULL);
+    else
+        restack(screen);
+
+    p_delete(&curtags);
 
     area = get_screen_area(c->screen,
                            globalconf.screens[screen].statusbar,
@@ -114,15 +117,18 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     int ocx, ocy, nw, nh;
     XEvent ev;
     Client *c = globalconf.focus->client;
+    Tag **curtags = get_current_tags(screen);
 
     if(!c)
         return;
 
-    if((get_current_layout(screen)->arrange != layout_floating)
+    if((curtags[0]->layout->arrange != layout_floating)
        && !c->isfloating)
         uicb_client_togglefloating(screen, NULL);
     else
         restack(screen);
+
+    p_delete(&curtags);
 
     ocx = c->x;
     ocy = c->y;
