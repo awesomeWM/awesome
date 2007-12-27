@@ -220,7 +220,7 @@ setup(int screen)
                  RootWindow(globalconf.display, get_phys_screen(screen)),
                  wa.event_mask);
 
-    grabkeys(screen);
+    grabkeys(get_phys_screen(screen));
 }
 
 /** Startup Error handler to check if another window manager
