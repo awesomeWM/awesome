@@ -289,7 +289,7 @@ main(int argc, char *argv[])
     Display * dpy;
     int shape_event, randr_event_base;
     int screen;
-    enum { NetSupported, NetWMName, NetLast };   /* EWMH atoms */
+    enum { NetSupported, NetWMName, NetWMIcon, NetLast };   /* EWMH atoms */
     Atom netatom[NetLast];
     event_handler **handler;
     struct sockaddr_un *addr;
@@ -347,6 +347,7 @@ main(int argc, char *argv[])
 
     netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
     netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
+    netatom[NetWMIcon] = XInternAtom(dpy, "_NET_WM_ICON", False);
 
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
