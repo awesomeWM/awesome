@@ -23,6 +23,7 @@
 #include "util.h"
 #include "widget.h"
 #include "statusbar.h"
+#include "event.h"
 
 extern AwesomeConf globalconf;
 
@@ -81,6 +82,16 @@ widget_find(char *name, int screen)
 }
 
 static void
+widget_common_button_press(Widget *widget, XButtonPressedEvent *ev)
+{
+    Button *b;
+
+    for(b = widget->buttons; b; b = b->next)
+        if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
+            b->func(widget->statusbar->screen, b->arg);
+}
+
+static void
 widget_common_tell(Widget *widget, char *command __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
@@ -95,6 +106,7 @@ widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
     name = cfg_title(config);
     widget->name = a_strdup(name);
     widget->tell = widget_common_tell;
+    widget->button_press = widget_common_button_press;
 }
 
 /** Send command to widget

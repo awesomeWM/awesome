@@ -56,7 +56,7 @@ layoutinfo_new(Statusbar *statusbar, cfg_t* config)
     Widget *w;
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
-    w->draw = (void*) layoutinfo_draw;
+    w->draw = layoutinfo_draw;
     return w;
 }
 

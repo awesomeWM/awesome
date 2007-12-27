@@ -286,17 +286,17 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
     {
         wptr = widgets + i;
         widget_new = name_func_lookup(cfg_name(wptr), WidgetList);
-        if (widget_new)
+        if(widget_new)
+        {
             if(!widget)
-            {
-                widget = widget_new(statusbar, wptr);
-                statusbar->widgets = widget;
-            }
+                statusbar->widgets = widget = widget_new(statusbar, wptr);
             else
             {
                 widget->next = widget_new(statusbar, wptr);
                 widget = widget->next;
             }
+            widget->buttons = parse_mouse_bindings(wptr, "mouse", a_strcmp(cfg_name(wptr), "taglist"));
+        }
         else
             warn("Ignoring unknown widget: %s.\n", cfg_name(widgets + i));
     }
@@ -332,17 +332,40 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "tab_border", (char *) "#ff0000", CFGF_NONE),
         CFG_END()
     };
+    static cfg_opt_t mouse_taglist_opts[] =
+    {
+        CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
+        CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
+        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+        CFG_END()
+    };
+    static cfg_opt_t mouse_generic_opts[] =
+    {
+        CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
+        CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
+        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+        CFG_STR((char *) "arg", NULL, CFGF_NONE),
+        CFG_END()
+    };
     static cfg_opt_t widget_opts[] =
     {
+        CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
+        CFG_END()
+    };
+    static cfg_opt_t widget_taglist_opts[] =
+    {
+        CFG_SEC((char *) "mouse", mouse_taglist_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t widget_iconbox_opts[] =
     {
+        CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t widget_textbox_opts[] =
     {
+        CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
@@ -350,6 +373,7 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t widget_progressbar_opts[] =
     {
+        CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_INT((char *) "width", 102, CFGF_NONE),
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
@@ -359,7 +383,7 @@ config_parse(const char *confpatharg)
     {
         CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
         CFG_SEC((char *) "textbox", widget_textbox_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "taglist", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "taglist", widget_taglist_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "focustitle", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "iconbox", widget_iconbox_opts, CFGF_TITLE | CFGF_MULTI),
@@ -443,26 +467,8 @@ config_parse(const char *confpatharg)
         CFG_SEC((char *) "keylist", keylist_opts, CFGF_MULTI),
         CFG_END()
     };
-    static cfg_opt_t mouse_tag_opts[] =
-    {
-        CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
-        CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
-        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
-        CFG_END()
-    };
-    static cfg_opt_t mouse_generic_opts[] =
-    {
-        CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
-        CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
-        CFG_STR((char *) "command", (char *) "", CFGF_NONE),
-        CFG_STR((char *) "arg", NULL, CFGF_NONE),
-        CFG_END()
-    };
     static cfg_opt_t mouse_opts[] =
     {
-        CFG_SEC((char *) "tag", mouse_tag_opts, CFGF_MULTI),
-        CFG_SEC((char *) "layout", mouse_generic_opts, CFGF_MULTI),
-        CFG_SEC((char *) "title", mouse_generic_opts, CFGF_MULTI),
         CFG_SEC((char *) "root", mouse_generic_opts, CFGF_MULTI),
         CFG_SEC((char *) "client", mouse_generic_opts, CFGF_MULTI),
         CFG_END()
@@ -674,16 +680,6 @@ config_parse(const char *confpatharg)
         globalconf.rules = NULL;
 
     compileregs(globalconf.rules);
-
-
-    /* Mouse: tags click bindings */
-    globalconf.buttons.tag = parse_mouse_bindings(cfg_mouse, "tag", False);
-
-    /* Mouse: layout click bindings */
-    globalconf.buttons.layout = parse_mouse_bindings(cfg_mouse, "layout", True);
-
-    /* Mouse: title click bindings */
-    globalconf.buttons.title = parse_mouse_bindings(cfg_mouse, "title", True);
 
     /* Mouse: root window click bindings */
     globalconf.buttons.root = parse_mouse_bindings(cfg_mouse, "root", True);

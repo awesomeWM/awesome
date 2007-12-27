@@ -24,6 +24,8 @@
 
 #include "config.h"
 
+#define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | LockMask))
+
 void grabkeys(int);
 
 void handle_event_buttonpress(XEvent *);

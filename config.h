@@ -229,11 +229,13 @@ struct Widget
     char *name;
     int (*draw)(Widget *, DrawCtx *, int, int);
     void (*tell)(Widget *, char *);
+    void (*button_press)(Widget *, XButtonPressedEvent *);
     Statusbar *statusbar;
     int alignment;
     void *data;
     int location;
     int width;
+    Button *buttons;
     Widget *next;
 };
 
@@ -252,9 +254,6 @@ struct AwesomeConf
     /** Mouse bindings list */
     struct
     {
-           Button *tag;
-           Button *title;
-           Button *layout;
            Button *root;
            Button *client;
     } buttons;

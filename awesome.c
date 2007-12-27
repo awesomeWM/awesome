@@ -129,9 +129,6 @@ cleanup()
         p_delete(&k);
     }
 
-    cleanup_buttons(globalconf.buttons.tag);
-    cleanup_buttons(globalconf.buttons.title);
-    cleanup_buttons(globalconf.buttons.layout);
     cleanup_buttons(globalconf.buttons.root);
     cleanup_buttons(globalconf.buttons.client);
 

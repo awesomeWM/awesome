@@ -24,6 +24,7 @@
 #include "util.h"
 #include "widget.h"
 #include "tag.h"
+#include "event.h"
 
 extern AwesomeConf globalconf;
 
@@ -71,7 +72,7 @@ taglist_draw(Widget *widget,
     flagsize = (vscreen.font->height + 2) / 4;
 
     for(tag = vscreen.tags; tag; tag = tag->next)
-        widget->width += textwidth(ctx, vscreen.font, tag->name);
+        widget->width += textwidth(vscreen.font, tag->name);
 
     widget->location = widget_calculate_offset(widget->statusbar->width,
                                                widget->width,
@@ -81,7 +82,7 @@ taglist_draw(Widget *widget,
     widget->width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
-        w = textwidth(ctx, vscreen.font, tag->name);
+        w = textwidth(vscreen.font, tag->name);
         if(tag->selected)
             colors = vscreen.colors_selected;
         else if(isurgent(widget->statusbar->screen, tag))
@@ -105,6 +106,33 @@ taglist_draw(Widget *widget,
     return widget->width;
 }
 
+static void
+taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
+{
+    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
+    Button *b;
+    Tag *tag;
+    char buf[4];
+    int prev_width = 0, width = 0, i = 1;
+
+    for(b = widget->buttons; b; b = b->next)
+        if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
+            for(tag = vscreen.tags; tag; tag = tag->next, i++)
+            {
+                width = textwidth(vscreen.font, tag->name);
+                if(widget->statusbar->position == BarTop
+                   || widget->statusbar->position == BarBot)
+                    if(ev->x >= widget->location + prev_width
+                       && ev->x <= widget->location + prev_width + width)
+                    {
+                        snprintf(buf, sizeof(buf), "%d", i);
+                        b->func(widget->statusbar->screen, buf);
+                        return;
+                    }
+                prev_width += width;
+            }
+}
+
 Widget *
 taglist_new(Statusbar *statusbar, cfg_t *config)
 {
@@ -112,6 +140,7 @@ taglist_new(Statusbar *statusbar, cfg_t *config)
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
     w->draw = taglist_draw;
+    w->button_press = taglist_button_press;
     return w;
 }
 

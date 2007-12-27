@@ -45,7 +45,6 @@ void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
 int draw_get_image_width(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
-unsigned short textwidth(DrawCtx *, XftFont *, char *);
-unsigned short textwidth_primitive(Display*, XftFont*, char*);
+unsigned short textwidth(XftFont *, char *);
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

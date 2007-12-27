@@ -25,8 +25,68 @@ screen 0
     {
         position = "top"
 
-        taglist mytaglist {}
-        layoutinfo mylayoutinfo {}
+        taglist mytaglist
+        {
+            mouse
+            {
+                button = "1"
+                command = "tag_view"
+            }
+            mouse
+            {
+                button = "1"
+                modkey = {"Mod4"}
+                command = "client_tag"
+            }
+            mouse
+            {
+                button = "3"
+                command = "tag_toggleview"
+            }
+            mouse
+            {
+                button = "3"
+                modkey = {"Mod4"}
+                command = "client_toggletag"
+            }
+            mouse
+            {
+                button = "4"
+                command = "tag_viewnext"
+            }
+            mouse
+            {
+                button = "5"
+                command = "tag_viewprev"
+            }
+        }
+        layoutinfo mylayoutinfo
+        {
+            mouse
+            {
+                button = "1"
+                command = "tag_setlayout"
+                arg = "+1"
+            }
+            mouse
+            {
+                button = "4"
+                command = "tag_setlayout"
+                arg = "+1"
+            }
+            mouse
+            {
+                button = "3"
+                command = "tag_setlayout"
+                arg = "-1"
+            }
+            mouse
+            {
+                button = "5"
+                command = "tag_setlayout"
+                arg = "-1"
+            }
+        }
         netwmicon mynetwmicon {}
         focustitle myfocustitle  {}
         textbox mytextbox { text = "awesome!" }
@@ -43,62 +103,6 @@ rules
 
 mouse
 {
-    tag
-    {
-        button = "1"
-        command = "tag_view"
-    }
-    tag
-    {
-        button = "1"
-        modkey = {"Mod4"}
-        command = "client_tag"
-    }
-    tag
-    {
-        button = "3"
-        command = "tag_toggleview"
-    }
-    tag
-    {
-        button = "3"
-        modkey = {"Mod4"}
-        command = "client_toggletag"
-    }
-    tag
-    {
-        button = "4"
-        command = "tag_viewnext"
-    }
-    tag
-    {
-        button = "5"
-        command = "tag_viewprev"
-    }
-    layout
-    {
-        button = "1"
-        command = "tag_setlayout"
-        arg = "+1"
-    }
-    layout
-    {
-        button = "4"
-        command = "tag_setlayout"
-        arg = "+1"
-    }
-    layout
-    {
-        button = "3"
-        command = "tag_setlayout"
-        arg = "-1"
-    }
-    layout
-    {
-        button = "5"
-        command = "tag_setlayout"
-        arg = "-1"
-    }
     root
     {
         button = "3"

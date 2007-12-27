@@ -27,6 +27,8 @@
 #include "util.h"
 #include "draw.h"
 
+extern AwesomeConf globalconf;
+
 DrawCtx *
 draw_get_context(Display *display, int phys_screen, int width, int height)
 {
@@ -77,7 +79,7 @@ draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *t
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    while(len && (nw = textwidth(ctx, font, buf)) > w)
+    while(len && (nw = textwidth(font, buf)) > w)
         buf[--len] = 0;
     if(nw > w)
         return;                 /* too long */
@@ -244,18 +246,18 @@ draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
     return newdrawable;
 }
 
-unsigned short
-textwidth_primitive(Display *display, XftFont *font, char *text)
+static unsigned short
+textwidth_primitive(XftFont *font, char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
     cairo_font_face_t *font_face;
     cairo_text_extents_t te;
 
-    surface = cairo_xlib_surface_create(display, DefaultScreen(display),
-                                        DefaultVisual(display, DefaultScreen(display)),
-                                        DisplayWidth(display, DefaultScreen(display)),
-                                        DisplayHeight(display, DefaultScreen(display)));
+    surface = cairo_xlib_surface_create(globalconf.display, DefaultScreen(globalconf.display),
+                                        DefaultVisual(globalconf.display, DefaultScreen(globalconf.display)),
+                                        DisplayWidth(globalconf.display, DefaultScreen(globalconf.display)),
+                                        DisplayHeight(globalconf.display, DefaultScreen(globalconf.display)));
     cr = cairo_create(surface);
     font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
     cairo_set_font_face(cr, font_face);
@@ -269,11 +271,11 @@ textwidth_primitive(Display *display, XftFont *font, char *text)
 }
 
 unsigned short
-textwidth(DrawCtx *ctx, XftFont *font, char *text)
+textwidth(XftFont *font, char *text)
 {
     if (!a_strlen(text))
         return 0;
-    return textwidth_primitive(ctx->display, font, text);
+    return textwidth_primitive(font, text);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

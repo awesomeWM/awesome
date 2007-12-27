@@ -49,7 +49,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Data *d = widget->data;
 
-    widget->width = textwidth(ctx, vscreen.font, d->text);
+    widget->width = textwidth(vscreen.font, d->text);
     widget->location = widget_calculate_offset(widget->statusbar->width,
                                                widget->width,
                                                offset,

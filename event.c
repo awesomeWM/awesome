@@ -40,8 +40,6 @@
 
 extern AwesomeConf globalconf;
 
-#define CLEANMASK(mask)		(mask & ~(globalconf.numlockmask | LockMask))
-
 static void
 handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
                           Button *buttons, char *arg)
@@ -60,43 +58,44 @@ handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
 }
 
 void
-handle_event_buttonpress(XEvent * e)
+handle_event_buttonpress(XEvent *e)
 {
     int i, screen, x = 0, y = 0;
     unsigned int udummy;
     Client *c;
     Window wdummy;
-    char arg[256];
-    Tag *tag;
+    Widget *widget;
     XButtonPressedEvent *ev = &e->xbutton;
 
     for(screen = 0; screen < get_screen_count(); screen++)
         if(globalconf.screens[screen].statusbar->window == ev->window)
         {
-            for(i = 1, tag = globalconf.screens[screen].tags; tag; tag = tag->next, i++)
-            {
-                x += textwidth_primitive(e->xany.display, globalconf.screens[screen].font, tag->name);
-                if(((globalconf.screens[screen].statusbar->position == BarTop
-                     || globalconf.screens[screen].statusbar->position == BarBot)
-                   && ev->x < x)
-                   || (globalconf.screens[screen].statusbar->position == BarRight && ev->y < x)
-                   || (globalconf.screens[screen].statusbar->position == BarLeft && ev->y > globalconf.screens[screen].statusbar->width - x))
-                {
-                    snprintf(arg, sizeof(arg), "%d", i);
-                    handle_mouse_button_press(screen, ev->button, ev->state, globalconf.buttons.tag, arg);
-                    return;
-                }
-            }
-            x += globalconf.screens[screen].statusbar->txtlayoutwidth;
-            if(((globalconf.screens[screen].statusbar->position == BarTop
+            if(globalconf.screens[screen].statusbar->position == BarTop
                  || globalconf.screens[screen].statusbar->position == BarBot)
-                && ev->x < x)
-                || (globalconf.screens[screen].statusbar->position == BarRight && ev->y < x)
-                || (globalconf.screens[screen].statusbar->position == BarLeft && ev->y > globalconf.screens[screen].statusbar->width - x))
-                handle_mouse_button_press(screen, ev->button, ev->state, globalconf.buttons.layout, NULL);
-            else
-                handle_mouse_button_press(screen, ev->button, ev->state, globalconf.buttons.title, NULL);
-            return;
+                for(widget = globalconf.screens[screen].statusbar->widgets; widget; widget = widget->next)
+                    if(ev->x >= widget->location && ev->x <= widget->location + widget->width)
+                    {
+                        widget->button_press(widget, ev);
+                        return;
+                    }
+
+            if(globalconf.screens[screen].statusbar->position == BarRight)
+                for(widget = globalconf.screens[screen].statusbar->widgets; widget; widget = widget->next)
+                    if(ev->y >= widget->location && ev->y <= widget->location + widget->width)
+                    {
+                        widget->button_press(widget, ev);
+                        return;
+                    }
+            
+            if(globalconf.screens[screen].statusbar->position == BarLeft)
+                for(widget = globalconf.screens[screen].statusbar->widgets; widget; widget = widget->next)
+                    if(globalconf.screens[screen].statusbar->width - ev->y >= widget->location
+                       && globalconf.screens[screen].statusbar->width - ev->y
+                       <= widget->location + widget->width)
+                    {
+                        widget->button_press(widget, ev);
+                        return;
+                    }
         }
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
