@@ -42,6 +42,7 @@ void handle_event_propertynotify(XEvent *);
 void handle_event_unmapnotify(XEvent *);
 void handle_event_shape(XEvent *);
 void handle_event_randr_screen_change_notify(XEvent *);
+void handle_event_clientmessage(XEvent *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

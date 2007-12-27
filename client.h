@@ -39,6 +39,7 @@ void client_updatewmhints(Client *);
 void client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *, int); 
+void client_kill(Client *);
 
 UICB_PROTO(uicb_client_kill);
 UICB_PROTO(uicb_client_moveresize);

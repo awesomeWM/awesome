@@ -34,6 +34,7 @@
 #include "util.h"
 #include "window.h"
 #include "mouse.h"
+#include "ewmh.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 
@@ -401,6 +402,12 @@ void
 handle_event_randr_screen_change_notify(XEvent *e)
 {
     XRRUpdateConfiguration(e);
+}
+
+void
+handle_event_clientmessage(XEvent *e)
+{
+    ewmh_process_client_message(&e->xclient);
 }
 
 void

@@ -366,6 +366,7 @@ main(int argc, char *argv[])
     handler[MapRequest] = handle_event_maprequest;
     handler[PropertyNotify] = handle_event_propertynotify;
     handler[UnmapNotify] = handle_event_unmapnotify;
+    handler[ClientMessage] = handle_event_clientmessage;
 
     /* check for shape extension */
     if((globalconf.have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))

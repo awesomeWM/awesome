@@ -781,6 +781,26 @@ uicb_client_moveresize(int screen, char *arg)
     }
 }
 
+
+void
+client_kill(Client *c)
+{
+    XEvent ev;
+
+    if(isprotodel(c->display, c->win))
+    {
+        ev.type = ClientMessage;
+        ev.xclient.window = c->win;
+        ev.xclient.message_type = XInternAtom(globalconf.display, "WM_PROTOCOLS", False);
+        ev.xclient.format = 32;
+        ev.xclient.data.l[0] = XInternAtom(globalconf.display, "WM_DELETE_WINDOW", False);
+        ev.xclient.data.l[1] = CurrentTime;
+        XSendEvent(globalconf.display, c->win, False, NoEventMask, &ev);
+    }
+    else
+        XKillClient(globalconf.display, c->win);
+}
+
 /** Kill selected client
  * \param screen Screen ID
  * \param arg unused
@@ -789,22 +809,9 @@ uicb_client_moveresize(int screen, char *arg)
 void
 uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
-    XEvent ev;
     Client *sel = globalconf.focus->client;
 
-    if(!sel)
-        return;
-    if(isprotodel(sel->display, sel->win))
-    {
-        ev.type = ClientMessage;
-        ev.xclient.window = sel->win;
-        ev.xclient.message_type = XInternAtom(globalconf.display, "WM_PROTOCOLS", False);
-        ev.xclient.format = 32;
-        ev.xclient.data.l[0] = XInternAtom(globalconf.display, "WM_DELETE_WINDOW", False);
-        ev.xclient.data.l[1] = CurrentTime;
-        XSendEvent(globalconf.display, sel->win, False, NoEventMask, &ev);
-    }
-    else
-        XKillClient(globalconf.display, sel->win);
+    if(sel)
+        client_kill(sel);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

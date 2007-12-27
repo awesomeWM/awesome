@@ -36,6 +36,8 @@ static Atom net_current_desktop;
 static Atom net_desktop_names;
 static Atom net_active_window;
 
+static Atom net_close_window;
+
 static Atom net_wm_name;
 static Atom net_wm_icon;
 
@@ -55,6 +57,8 @@ static AtomItem AtomNames[] =
     { "_NET_CURRENT_DESKTOP", &net_current_desktop },
     { "_NET_DESKTOP_NAMES", &net_desktop_names },
     { "_NET_ACTIVE_WINDOW", &net_active_window },
+
+    { "_NET_CLOSE_WINDOW", &net_close_window },
 
     { "_NET_WM_NAME", &net_wm_name },
     { "_NET_WM_ICON", &net_wm_icon },
@@ -90,6 +94,8 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_current_desktop;
     atom[i++] = net_desktop_names;
     atom[i++] = net_active_window;
+
+    atom[i++] = net_close_window;
     
     atom[i++] = net_wm_name;
     atom[i++] = net_wm_icon;
@@ -182,6 +188,16 @@ ewmh_update_net_active_window(int phys_screen)
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
                     net_active_window, XA_WINDOW, 32,  PropModeReplace, (unsigned char *) &win, 1);
+}
+
+void
+ewmh_process_client_message(XClientMessageEvent *ev)
+{
+    Client *c;
+
+    if(ev->message_type == net_close_window)
+        if((c = get_client_bywin(globalconf.clients, ev->window)))
+           client_kill(c);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
