@@ -11,8 +11,7 @@ static int
 focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
-    Client *sel = focus_get_latest_client_for_tag(widget->statusbar->screen, 
-                                                  get_current_tag(widget->statusbar->screen));
+    Client *sel = globalconf.focus->client;
 
     widget->location = widget_calculate_offset(vscreen.statusbar->width,
                                                0,
