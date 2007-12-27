@@ -134,14 +134,16 @@ handle_event_configurerequest(XEvent * e)
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
     int old_screen;
+    Tag **curtags;
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
         c->ismax = False;
+        curtags = get_current_tags(c->screen);
         if(ev->value_mask & CWBorderWidth)
             c->border = ev->border_width;
         if(c->isfixed || c->isfloating
-           || get_current_layout(c->screen)->arrange == layout_floating)
+           || curtags[0]->layout->arrange == layout_floating)
         {
             if(ev->value_mask & CWX)
                 c->rx = c->x = ev->x;
@@ -168,6 +170,7 @@ handle_event_configurerequest(XEvent * e)
         }
         else
             window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
+        p_delete(&curtags);
     }
     else
     {
@@ -228,15 +231,17 @@ handle_event_enternotify(XEvent * e)
     Client *c;
     XCrossingEvent *ev = &e->xcrossing;
     int screen;
+    Tag **curtags;
 
     if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
         return;
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
+        curtags = get_current_tags(c->screen);
         focus(c, ev->same_screen, c->screen);
-        if (c->isfloating
-                || get_current_layout(c->screen)->arrange == layout_floating)
+        if (c->isfloating || curtags[0]->layout->arrange == layout_floating)
             window_grabbuttons(c->display, c->phys_screen, c->win, True, False);
+        p_delete(curtags);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
