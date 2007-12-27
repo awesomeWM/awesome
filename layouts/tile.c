@@ -33,14 +33,16 @@ extern AwesomeConf globalconf;
 void
 uicb_tag_setnmaster(int screen, char * arg)
 {
-    Tag *curtag = get_current_tag(screen);
-    Layout *curlay = curtag->layout;
+    Tag **curtags = get_current_tags(screen);
+    Layout *curlay = curtags[0]->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
 
-    if((curtag->nmaster = (int) compute_new_value_from_arg(arg, (double) curtag->nmaster)) < 0)
-        curtag->nmaster = 0;
+    if((curtags[0]->nmaster = (int) compute_new_value_from_arg(arg, (double) curtags[0]->nmaster)) < 0)
+        curtags[0]->nmaster = 0;
+
+    p_delete(&curtags);
 
     arrange(screen);
 }
@@ -48,14 +50,16 @@ uicb_tag_setnmaster(int screen, char * arg)
 void
 uicb_tag_setncol(int screen, char * arg)
 {
-    Tag *curtag = get_current_tag(screen);
-    Layout *curlay = curtag->layout;
+    Tag **curtags = get_current_tags(screen);
+    Layout *curlay = curtags[0]->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
 
-    if((curtag->ncol = (int) compute_new_value_from_arg(arg, (double) curtag->ncol)) < 1)
-        curtag->ncol = 1;
+    if((curtags[0]->ncol = (int) compute_new_value_from_arg(arg, (double) curtags[0]->ncol)) < 1)
+        curtags[0]->ncol = 1;
+
+    p_delete(&curtags);
 
     arrange(screen);
 }
@@ -64,8 +68,8 @@ void
 uicb_tag_setmwfact(int screen, char *arg)
 {
     char *newarg;
-    Tag *curtag = get_current_tag(screen);
-    Layout *curlay = curtag->layout;
+    Tag **curtags = get_current_tags(screen);
+    Layout *curlay = curtags[0]->layout;
 
     if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
         return;
@@ -79,13 +83,14 @@ uicb_tag_setmwfact(int screen, char *arg)
             newarg[0] = '+';
     }
 
-    if((curtag->mwfact = compute_new_value_from_arg(newarg, curtag->mwfact)) < 0.1)
-        curtag->mwfact = 0.1;
-    else if(curtag->mwfact > 0.9)
-        curtag->mwfact = 0.9;
+    if((curtags[0]->mwfact = compute_new_value_from_arg(newarg, curtags[0]->mwfact)) < 0.1)
+        curtags[0]->mwfact = 0.1;
+    else if(curtags[0]->mwfact > 0.9)
+        curtags[0]->mwfact = 0.9;
 
-    arrange(screen);
     p_delete(&newarg);
+    p_delete(&curtags);
+    arrange(screen);
 }
 
 static void
@@ -101,7 +106,7 @@ _tile(int screen, const Bool right)
     int real_ncol = 1, win_by_col = 1, current_col = 0;
     Area area;
     Client *c;
-    Tag *curtag = get_current_tag(screen);
+    Tag **curtags = get_current_tags(screen);
 
     area = get_screen_area(screen,
                            globalconf.screens[screen].statusbar,
@@ -116,22 +121,22 @@ _tile(int screen, const Bool right)
     wax = area.x;
     way = area.y;
 
-    masterwin = MIN(n, curtag->nmaster);
+    masterwin = MIN(n, curtags[0]->nmaster);
 
     otherwin = n - masterwin;
 
     if(otherwin < 0)
         otherwin = 0;
 
-    if(curtag->nmaster)
+    if(curtags[0]->nmaster)
     {
         mh = masterwin ? wah / masterwin : waw;
-        mw = otherwin ? waw * curtag->mwfact : waw;
+        mw = otherwin ? waw * curtags[0]->mwfact : waw;
     }
     else
         mh = mw = 0;
 
-    real_ncol = curtag->ncol > 0 ? MIN(otherwin, curtag->ncol) : MIN(otherwin, 1);
+    real_ncol = curtags[0]->ncol > 0 ? MIN(otherwin, curtags[0]->ncol) : MIN(otherwin, 1);
 
     for(i = 0, c = globalconf.clients; c; c = c->next)
     {
@@ -139,7 +144,7 @@ _tile(int screen, const Bool right)
             continue;
 
         c->ismax = False;
-        if(i < curtag->nmaster)
+        if(i < curtags[0]->nmaster)
         {                       /* master */
             ny = way + i * mh;
             nx = wax + (right ? 0 : waw - mw);
@@ -150,7 +155,7 @@ _tile(int screen, const Bool right)
             if(real_ncol)
                 win_by_col = otherwin / real_ncol;
 
-            if((i - curtag->nmaster) && (i - curtag->nmaster) % win_by_col == 0 && current_col < real_ncol - 1)
+            if((i - curtags[0]->nmaster) && (i - curtags[0]->nmaster) % win_by_col == 0 && current_col < real_ncol - 1)
                 current_col++;
 
             if(current_col == real_ncol - 1)
@@ -163,16 +168,18 @@ _tile(int screen, const Bool right)
 
             nw = (waw - mw) / real_ncol - 2 * c->border;
 
-            if(i == curtag->nmaster || otherwin <= real_ncol || (i - curtag->nmaster) % win_by_col == 0)
+            if(i == curtags[0]->nmaster || otherwin <= real_ncol || (i - curtags[0]->nmaster) % win_by_col == 0)
                 ny = way;
             else
-                ny = way + ((i - curtag->nmaster) % win_by_col) * (nh + 2 * c->border);
+                ny = way + ((i - curtags[0]->nmaster) % win_by_col) * (nh + 2 * c->border);
 
             nx = wax + current_col * (nw + 2 * c->border) + (right ? mw : 0);
             client_resize(c, nx, ny, nw, nh, globalconf.screens[screen].resize_hints, False);
         }
         i++;
     }
+
+    p_delete(&curtags);
 }
 
 void
