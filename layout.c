@@ -165,14 +165,14 @@ restack(int screen)
         curtags = get_current_tags(screen);
         if(sel->isfloating ||
            curtags[0]->layout->arrange == layout_floating)
-            XRaiseWindow(sel->display, sel->win);
+            XRaiseWindow(globalconf.display, sel->win);
         if(!(curtags[0]->layout->arrange == layout_floating))
         {
             wc.stack_mode = Below;
             wc.sibling = globalconf.screens[screen].statusbar->window;
             if(!sel->isfloating)
             {
-                XConfigureWindow(sel->display, sel->win, CWSibling | CWStackMode, &wc);
+                XConfigureWindow(globalconf.display, sel->win, CWSibling | CWStackMode, &wc);
                 wc.sibling = sel->win;
             }
             for(c = globalconf.clients; c; c = c->next)

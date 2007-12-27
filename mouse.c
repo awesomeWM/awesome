@@ -63,21 +63,21 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 
     ocx = nx = c->x;
     ocy = ny = c->y;
-    if(XGrabPointer(c->display,
-                    RootWindow(c->display, c->phys_screen),
+    if(XGrabPointer(globalconf.display,
+                    RootWindow(globalconf.display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
-    XQueryPointer(c->display,
-                  RootWindow(c->display, c->phys_screen),
+    XQueryPointer(globalconf.display,
+                  RootWindow(globalconf.display, c->phys_screen),
                   &dummy, &dummy, &x1, &y1, &di, &di, &dui);
     for(;;)
     {
-        XMaskEvent(c->display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
+        XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
         switch (ev.type)
         {
         case ButtonRelease:
-            XUngrabPointer(c->display, CurrentTime);
+            XUngrabPointer(globalconf.display, CurrentTime);
             return;
         case ConfigureRequest:
             handle_event_configurerequest(&ev);
@@ -89,7 +89,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             handle_event_maprequest(&ev);
             break;
         case MotionNotify:
-            XSync(c->display, False);
+            XSync(globalconf.display, False);
             nx = ocx + (ev.xmotion.x - x1);
             ny = ocy + (ev.xmotion.y - y1);
             if(abs(nx) < globalconf.screens[screen].snap + area.x && nx > area.x)
@@ -132,21 +132,21 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 
     ocx = c->x;
     ocy = c->y;
-    if(XGrabPointer(c->display, RootWindow(c->display, c->phys_screen),
+    if(XGrabPointer(globalconf.display, RootWindow(globalconf.display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
     c->ismax = False;
-    XWarpPointer(c->display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
+    XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
     for(;;)
     {
-        XMaskEvent(c->display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
+        XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
         switch (ev.type)
         {
         case ButtonRelease:
-            XWarpPointer(c->display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
-            XUngrabPointer(c->display, CurrentTime);
-            while(XCheckMaskEvent(c->display, EnterWindowMask, &ev));
+            XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
+            XUngrabPointer(globalconf.display, CurrentTime);
+            while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
             return;
         case ConfigureRequest:
             handle_event_configurerequest(&ev);
@@ -158,7 +158,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             handle_event_maprequest(&ev);
             break;
         case MotionNotify:
-            XSync(c->display, False);
+            XSync(globalconf.display, False);
             if((nw = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
                 nw = 1;
             if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)

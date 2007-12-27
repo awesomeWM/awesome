@@ -22,6 +22,8 @@
 #include "util.h"
 #include "rules.h"
 
+extern AwesomeConf globalconf;
+
 void
 compileregs(Rule *rules)
 {
@@ -57,7 +59,7 @@ client_match_rule(Client *c, Rule *r)
     XClassHint ch = { 0, 0 };
     Bool ret;
 
-    XGetClassHint(c->display, c->win, &ch);
+    XGetClassHint(globalconf.display, c->win, &ch);
 
     len = a_strlen(ch.res_class) + a_strlen(ch.res_name) + a_strlen(c->name);
     prop = p_new(char, len + 3);

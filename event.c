@@ -106,8 +106,8 @@ handle_event_buttonpress(XEvent *e)
            && ev->button == Button1)
         {
             restack(c->screen);
-            XAllowEvents(c->display, ReplayPointer, CurrentTime);
-            window_grabbuttons(c->display, c->phys_screen, c->win, True, True);
+            XAllowEvents(globalconf.display, ReplayPointer, CurrentTime);
+            window_grabbuttons(globalconf.display, c->phys_screen, c->win, True, True);
         }
         else
             handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
@@ -154,7 +154,7 @@ handle_event_configurerequest(XEvent * e)
             if(ev->value_mask & CWHeight)
                 c->rh = c->h = ev->height;
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-                window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
+                window_configure(globalconf.display, c->win, c->x, c->y, c->w, c->h, c->border);
             /* recompute screen */
             old_screen = c->screen;
             c->screen = get_screen_bycoord(c->x, c->y);
@@ -169,7 +169,7 @@ handle_event_configurerequest(XEvent * e)
             arrange(c->screen);
         }
         else
-            window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
+            window_configure(globalconf.display, c->win, c->x, c->y, c->w, c->h, c->border);
         p_delete(&curtags);
     }
     else
@@ -240,7 +240,7 @@ handle_event_enternotify(XEvent * e)
         curtags = get_current_tags(c->screen);
         focus(c, ev->same_screen, c->screen);
         if (c->isfloating || curtags[0]->layout->arrange == layout_floating)
-            window_grabbuttons(c->display, c->phys_screen, c->win, True, False);
+            window_grabbuttons(globalconf.display, c->phys_screen, c->win, True, False);
         p_delete(&curtags);
     }
     else
@@ -367,7 +367,7 @@ handle_event_propertynotify(XEvent * e)
             statusbar_draw(c->screen);
             break;
         }
-        if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(c->display, "_NET_WM_NAME", False))
+        if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(globalconf.display, "_NET_WM_NAME", False))
         {
             client_updatetitle(c);
             if(c == globalconf.focus->client)
@@ -384,7 +384,7 @@ handle_event_unmapnotify(XEvent * e)
 
     if((c = get_client_bywin(globalconf.clients, ev->window))
        && ev->event == RootWindow(e->xany.display, c->phys_screen)
-       && ev->send_event && window_getstate(c->display, c->win) == NormalState)
+       && ev->send_event && window_getstate(globalconf.display, c->win) == NormalState)
         client_unmanage(c, WithdrawnState);
 }
 
@@ -395,7 +395,7 @@ handle_event_shape(XEvent * e)
     Client *c = get_client_bywin(globalconf.clients, ev->window);
 
     if(c)
-        window_setshape(c->display, c->phys_screen, c->win);
+        window_setshape(globalconf.display, c->phys_screen, c->win);
 }
 
 void

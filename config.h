@@ -131,8 +131,6 @@ struct Client
     Client *prev;
     /** Window of the client */
     Window win;
-    /** Client display */
-    Display *display;
     /** Client logical screen */
     int screen;
     /** Client physical screen */

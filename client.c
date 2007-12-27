@@ -58,7 +58,7 @@ client_loadprops(Client * c, int screen)
 
     prop = p_new(char, ntags + 2);
 
-    if(xgettextprop(c->display, c->win, AWESOMEPROPS_ATOM(c->display), prop, ntags + 2))
+    if(xgettextprop(globalconf.display, c->win, AWESOMEPROPS_ATOM(globalconf.display), prop, ntags + 2))
     {
         for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
@@ -163,8 +163,8 @@ get_client_byname(Client *list, char *name)
 void
 client_updatetitle(Client *c)
 {
-    if(!xgettextprop(c->display, c->win, XInternAtom(c->display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
-        xgettextprop(c->display, c->win, XInternAtom(c->display, "WM_NAME", False), c->name, sizeof(c->name));
+    if(!xgettextprop(globalconf.display, c->win, XInternAtom(globalconf.display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
+        xgettextprop(globalconf.display, c->win, XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
 }
 
 /** Ban client and unmap it
@@ -173,8 +173,8 @@ client_updatetitle(Client *c)
 void
 client_ban(Client * c)
 {
-    XUnmapWindow(c->display, c->win);
-    window_setstate(c->display, c->win, IconicState);
+    XUnmapWindow(globalconf.display, c->win);
+    window_setstate(globalconf.display, c->win, IconicState);
 }
 
 /** Attach client to the beginning of the clients stack
@@ -215,11 +215,11 @@ focus(Client *c, Bool selscreen, int screen)
     /* unfocus current selected client */
     if(globalconf.focus->client)
     {
-        window_grabbuttons(globalconf.focus->client->display, globalconf.focus->client->phys_screen,
+        window_grabbuttons(globalconf.display, globalconf.focus->client->phys_screen,
                            globalconf.focus->client->win, False, True);
-        XSetWindowBorder(globalconf.focus->client->display, globalconf.focus->client->win,
+        XSetWindowBorder(globalconf.display, globalconf.focus->client->win,
                          globalconf.screens[screen].colors_normal[ColBorder].pixel);
-        window_settrans(globalconf.focus->client->display, globalconf.focus->client->win,
+        window_settrans(globalconf.display, globalconf.focus->client->win,
                         globalconf.screens[screen].opacity_unfocused);
     }
 
@@ -230,7 +230,7 @@ focus(Client *c, Bool selscreen, int screen)
     if(c)
     {
         XSetWindowBorder(globalconf.display, c->win, globalconf.screens[screen].colors_selected[ColBorder].pixel);
-        window_grabbuttons(c->display, c->phys_screen, c->win,
+        window_grabbuttons(globalconf.display, c->phys_screen, c->win,
                            True, True);
     }
 
@@ -244,7 +244,7 @@ focus(Client *c, Bool selscreen, int screen)
 
     if(globalconf.focus->client)
     {
-        XSetInputFocus(globalconf.focus->client->display,
+        XSetInputFocus(globalconf.display,
                        globalconf.focus->client->win, RevertToPointerRoot, CurrentTime);
         for(c = globalconf.clients; c; c = c->next)
             if(c != globalconf.focus->client)
@@ -283,7 +283,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->h = c->rh = wa->height;
     c->oldborder = wa->border_width;
 
-    c->display = globalconf.display;
+    globalconf.display = globalconf.display;
     c->screen = get_screen_bycoord(c->x, c->y);
     c->phys_screen = get_phys_screen(c->screen);
 
@@ -325,29 +325,29 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     /* set borders */
     wc.border_width = c->border;
-    XConfigureWindow(c->display, w, CWBorderWidth, &wc);
-    XSetWindowBorder(c->display, w, globalconf.screens[screen].colors_normal[ColBorder].pixel);
+    XConfigureWindow(globalconf.display, w, CWBorderWidth, &wc);
+    XSetWindowBorder(globalconf.display, w, globalconf.screens[screen].colors_normal[ColBorder].pixel);
 
     /* propagates border_width, if size doesn't change */
-    window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
+    window_configure(globalconf.display, c->win, c->x, c->y, c->w, c->h, c->border);
 
     /* update sizehint */
     client_updatesizehints(c);
 
-    XSelectInput(c->display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
+    XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
     /* handle xshape */
     if(globalconf.have_shape)
     {
-        XShapeSelectInput(c->display, w, ShapeNotifyMask);
-        window_setshape(c->display, c->phys_screen, c->win);
+        XShapeSelectInput(globalconf.display, w, ShapeNotifyMask);
+        window_setshape(globalconf.display, c->phys_screen, c->win);
     }
 
     /* grab buttons */
-    window_grabbuttons(c->display, c->phys_screen, c->win, False, True);
+    window_grabbuttons(globalconf.display, c->phys_screen, c->win, False, True);
 
     /* check for transient and set tags like its parent */
-    if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)
+    if((rettrans = XGetTransientForHint(globalconf.display, w, &trans) == Success)
        && (t = get_client_bywin(globalconf.clients, trans)))
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
             if(is_client_tagged(t, tag))
@@ -364,7 +364,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     client_attach(c);
 
     /* some windows require this */
-    XMoveResizeWindow(c->display, c->win, c->x, c->y, c->w, c->h);
+    XMoveResizeWindow(globalconf.display, c->win, c->x, c->y, c->w, c->h);
 
     focus(c, True, screen);
 
@@ -456,10 +456,10 @@ client_resize(Client *c, int x, int y, int w, int h,
         }
         p_delete(&curtags);
         wc.border_width = c->border;
-        XConfigureWindow(c->display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
-        window_configure(c->display, c->win, c->x, c->y, c->w, c->h, c->border);
-        XSync(c->display, False);
-        if((c->x >= 0 || c->y >= 0) && XineramaIsActive(c->display))
+        XConfigureWindow(globalconf.display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
+        window_configure(globalconf.display, c->win, c->x, c->y, c->w, c->h, c->border);
+        XSync(globalconf.display, False);
+        if((c->x >= 0 || c->y >= 0) && XineramaIsActive(globalconf.display))
         {
             int new_screen = get_screen_bycoord(c->x, c->y);
             if(c->screen != new_screen)
@@ -488,7 +488,7 @@ client_saveprops(Client * c, int screen)
 
     prop[++i] = '\0';
 
-    XChangeProperty(c->display, c->win, AWESOMEPROPS_ATOM(c->display), XA_STRING, 8,
+    XChangeProperty(globalconf.display, c->win, AWESOMEPROPS_ATOM(globalconf.display), XA_STRING, 8,
                     PropModeReplace, (unsigned char *) prop, i);
 
     p_delete(&prop);
@@ -497,8 +497,8 @@ client_saveprops(Client * c, int screen)
 void
 client_unban(Client *c)
 {
-    XMapWindow(c->display, c->win);
-    window_setstate(c->display, c->win, NormalState);
+    XMapWindow(globalconf.display, c->win);
+    window_setstate(globalconf.display, c->win, NormalState);
 }
 
 void
@@ -509,19 +509,19 @@ client_unmanage(Client *c, long state)
 
     wc.border_width = c->oldborder;
     /* The server grab construct avoids race conditions. */
-    XGrabServer(c->display);
-    XConfigureWindow(c->display, c->win, CWBorderWidth, &wc);  /* restore border */
+    XGrabServer(globalconf.display);
+    XConfigureWindow(globalconf.display, c->win, CWBorderWidth, &wc);  /* restore border */
     client_detach(c);
     if(globalconf.focus->client == c)
         focus(NULL, True, c->screen);
     focus_delete_client(c);
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
-    XUngrabButton(c->display, AnyButton, AnyModifier, c->win);
-    window_setstate(c->display, c->win, state);
-    XSync(c->display, False);
+    XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
+    window_setstate(globalconf.display, c->win, state);
+    XSync(globalconf.display, False);
     XSetErrorHandler(xerror);
-    XUngrabServer(c->display);
+    XUngrabServer(globalconf.display);
     if(state != NormalState)
         arrange(c->screen);
     p_delete(&c);
@@ -545,7 +545,7 @@ client_updatesizehints(Client *c)
     long msize;
     XSizeHints size;
 
-    if(!XGetWMNormalHints(c->display, c->win, &size, &msize) || !size.flags)
+    if(!XGetWMNormalHints(globalconf.display, c->win, &size, &msize) || !size.flags)
         size.flags = PSize;
     c->flags = size.flags;
     if(c->flags & PBaseSize)
@@ -642,7 +642,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
         return;
 
     XGetWindowProperty(globalconf.display, sel->win,
-                       XInternAtom(sel->display, "_NET_WM_WINDOW_OPACITY", False),
+                       XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False),
                        0L, 1L, False, XA_CARDINAL, &actual, &format, &n, &left,
                        (unsigned char **) &data);
     if(data)
@@ -665,9 +665,9 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
     }
 
     if(delta == 100.0 && !set_prop)
-        window_settrans(sel->display, sel->win, -1);
+        window_settrans(globalconf.display, sel->win, -1);
     else
-        window_settrans(sel->display, sel->win, delta);
+        window_settrans(globalconf.display, sel->win, delta);
 }
 
 
@@ -788,7 +788,7 @@ client_kill(Client *c)
 {
     XEvent ev;
 
-    if(isprotodel(c->display, c->win))
+    if(isprotodel(globalconf.display, c->win))
     {
         ev.type = ClientMessage;
         ev.xclient.window = c->win;
