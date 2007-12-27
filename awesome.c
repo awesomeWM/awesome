@@ -331,6 +331,8 @@ main(int argc, char *argv[])
     XSync(dpy, False);
     globalconf.display = dpy;
 
+    ewmh_init_atoms();
+
     globalconf.screens = p_new(VirtScreen, get_screen_count());
     focus_add_client(NULL);
     /* store display */
@@ -343,8 +345,6 @@ main(int argc, char *argv[])
         statusbar_init(screen);
         statusbar_draw(screen);
     }
-
-    ewmh_init_atoms();
 
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)

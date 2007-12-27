@@ -19,7 +19,8 @@
  *
  */
 
-#include <X11/Xatom.h> 
+#include <X11/Xatom.h>
+#include <X11/Xmd.h>
 
 #include "ewmh.h"
 #include "util.h"
@@ -28,6 +29,7 @@ extern AwesomeConf globalconf;
 
 static Atom net_supported;
 static Atom net_client_list;
+static Atom net_number_of_desktops;
 
 static Atom net_wm_name;
 static Atom net_wm_icon;
@@ -42,6 +44,7 @@ static AtomItem AtomNames[] =
 {
     { "_NET_SUPPORTED", &net_supported },
     { "_NET_CLIENT_LIST", &net_client_list },
+    { "_NET_NUMBER_OF_DESKTOPS", &net_number_of_desktops },
 
     { "_NET_WM_NAME", &net_wm_name },
     { "_NET_WM_ICON", &net_wm_icon },
@@ -71,6 +74,7 @@ ewmh_set_supported_hints(int phys_screen)
 
     atom[i++] = net_supported;
     atom[i++] = net_client_list;
+    atom[i++] = net_number_of_desktops;
     
     atom[i++] = net_wm_name;
     atom[i++] = net_wm_icon;
@@ -102,6 +106,19 @@ ewmh_update_net_client_list(int phys_screen)
 
     p_delete(&wins);
     XFlush(globalconf.display);
+}
+
+void
+ewmh_update_net_numbers_of_desktop(int phys_screen)
+{
+    CARD32 count = 0;
+    Tag *tag;
+
+    for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
+        count++;
+
+    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
+                    net_number_of_desktops, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &count, 1);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
