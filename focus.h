@@ -26,7 +26,7 @@
 
 void focus_add_client(Client *);
 void focus_delete_client(Client *);
-Client * focus_get_latest_client_for_tags(int, Tag **);
+Client * focus_get_current_client(int);
 
 UICB_PROTO(uicb_focus_history);
 UICB_PROTO(uicb_focus_client_byname);

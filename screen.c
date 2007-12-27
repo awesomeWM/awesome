@@ -252,7 +252,6 @@ void
 uicb_screen_focus(int screen, char *arg)
 {
     int new_screen, numscreens = get_screen_count();
-    Tag **curtags = get_current_tags(screen);
 
     if(arg)
         new_screen = compute_new_value_from_arg(arg, screen);
@@ -264,10 +263,7 @@ uicb_screen_focus(int screen, char *arg)
     if (new_screen > (numscreens - 1))
         new_screen = 0;
 
-    focus(focus_get_latest_client_for_tags(new_screen, curtags),
-          True, new_screen);
-
-    p_delete(&curtags);
+    focus(focus_get_current_client(new_screen), True, new_screen);
 
     move_mouse_pointer_to_screen(new_screen);
 }

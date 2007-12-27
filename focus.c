@@ -94,7 +94,7 @@ focus_delete_client(Client *c)
     }
 }
 
-Client *
+static Client *
 focus_get_latest_client_for_tags(int screen, Tag **t)
 {
     FocusList *fl;
@@ -105,6 +105,16 @@ focus_get_latest_client_for_tags(int screen, Tag **t)
                return fl->client;
 
     return NULL;
+}
+
+Client *
+focus_get_current_client(int screen)
+{
+    Tag **curtags = get_current_tags(screen);
+    Client *sel = focus_get_latest_client_for_tags(screen, curtags);
+    p_delete(&curtags);
+
+    return sel;
 }
 
 /** Jump in focus history stack

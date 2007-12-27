@@ -176,9 +176,7 @@ void
 ewmh_update_net_active_window(int phys_screen)
 {
     Window win;
-    Tag **curtags = get_current_tags(phys_screen);
-    Client *sel = focus_get_latest_client_for_tags(phys_screen, curtags);
-    p_delete(&curtags);
+    Client *sel = focus_get_current_client(phys_screen);
 
     win = sel ? sel->win : None;
 

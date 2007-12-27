@@ -38,10 +38,7 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
     int format, width, height, size, i;
     unsigned long items, rest;
     unsigned char *image, *imgdata;
-    Tag **curtags = get_current_tags(widget->statusbar->screen);
-    Client *sel = focus_get_latest_client_for_tags(widget->statusbar->screen, curtags);
-
-    p_delete(&curtags);
+    Client *sel = focus_get_current_client(widget->statusbar->screen);
 
     if(!sel)
         return 0;
