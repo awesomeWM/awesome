@@ -29,6 +29,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
@@ -243,6 +244,12 @@ uicb_quit(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)
     running = False;
 }
 
+static void
+exit_on_signal(int sig __attribute__ ((unused)))
+{
+    running = False;
+}
+
 /* There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
  * default error handler, which may call exit.
@@ -397,6 +404,11 @@ main(int argc, char *argv[])
         else
             perror("error binding UNIX domain socket");
     }
+
+    /* register function for signals */
+    signal(SIGINT, &exit_on_signal);
+    signal(SIGTERM, &exit_on_signal);
+    signal(SIGHUP, &exit_on_signal);
 
     /* main event loop, also reads status text from socket */
     while(running)
