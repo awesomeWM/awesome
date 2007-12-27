@@ -32,9 +32,12 @@ static Atom net_supported;
 static Atom net_client_list;
 static Atom net_number_of_desktops;
 static Atom net_current_desktop;
+static Atom net_desktop_names;
 
 static Atom net_wm_name;
 static Atom net_wm_icon;
+
+static Atom utf8_string;
 
 typedef struct
 {
@@ -48,9 +51,12 @@ static AtomItem AtomNames[] =
     { "_NET_CLIENT_LIST", &net_client_list },
     { "_NET_NUMBER_OF_DESKTOPS", &net_number_of_desktops },
     { "_NET_CURRENT_DESKTOP", &net_current_desktop },
+    { "_NET_DESKTOP_NAMES", &net_desktop_names },
 
     { "_NET_WM_NAME", &net_wm_name },
     { "_NET_WM_ICON", &net_wm_icon },
+
+    { "UTF8_STRING", &utf8_string },
 };
 
 #define ATOM_NUMBER (sizeof(AtomNames)/sizeof(AtomItem)) 
@@ -79,6 +85,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_client_list;
     atom[i++] = net_number_of_desktops;
     atom[i++] = net_current_desktop;
+    atom[i++] = net_desktop_names;
     
     atom[i++] = net_wm_name;
     atom[i++] = net_wm_icon;
@@ -138,6 +145,27 @@ ewmh_update_net_current_desktop(int phys_screen)
                     net_current_desktop, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &count, 1);
     
     p_delete(&curtags);
+}
+
+void
+ewmh_update_net_desktop_names(int phys_screen)
+{
+    char buf[1024], *pos;
+    ssize_t len, curr_size;
+    Tag *tag;
+
+    pos = buf;
+    len = 0;
+    for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
+    {
+        curr_size = a_strlen(tag->name);
+        a_strcpy(pos, sizeof(buf), tag->name);
+        pos += curr_size + 1;
+        len += curr_size + 1;
+    }
+
+    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
+                    net_desktop_names, utf8_string, 8, PropModeReplace, (unsigned char *)buf, len);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

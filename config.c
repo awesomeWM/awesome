@@ -641,6 +641,7 @@ config_parse(const char *confpatharg)
 
         ewmh_update_net_numbers_of_desktop(get_phys_screen(screen));
         ewmh_update_net_current_desktop(get_phys_screen(screen));
+        ewmh_update_net_desktop_names(get_phys_screen(screen));
 
         /* select first tag by default */
         virtscreen->tags[0].selected = True;
