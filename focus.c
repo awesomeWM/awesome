@@ -95,13 +95,13 @@ focus_delete_client(Client *c)
 }
 
 static Client *
-focus_get_latest_client_for_tags(int screen, Tag **t)
+focus_get_latest_client_for_tags(Tag **t)
 {
     FocusList *fl;
 
     for(fl = globalconf.focus; fl; fl = fl->prev)
         for(; *t; t++)
-           if(is_client_tagged(fl->client, *t, screen))
+           if(is_client_tagged(fl->client, *t))
                return fl->client;
 
     return NULL;
@@ -111,7 +111,7 @@ Client *
 focus_get_current_client(int screen)
 {
     Tag **curtags = get_current_tags(screen);
-    Client *sel = focus_get_latest_client_for_tags(screen, curtags);
+    Client *sel = focus_get_latest_client_for_tags(curtags);
     p_delete(&curtags);
 
     return sel;
@@ -138,7 +138,7 @@ uicb_focus_history(int screen, char *arg)
             curtags = get_current_tags(screen);
             for(; fl && i < 0; fl = fl->prev)
                 for(tag = curtags; *tag; tag++)
-                    if(is_client_tagged(fl->client, *tag, screen))
+                    if(is_client_tagged(fl->client, *tag))
                         i++;
             p_delete(&curtags);
             if(fl)
@@ -158,7 +158,7 @@ uicb_focus_client_byname(int screen, char *arg)
         curtags = get_current_tags(screen);
         if((c = get_client_byname(globalconf.clients, arg)))
            for(tag = curtags; *tag; tag++)
-               if(is_client_tagged(c, *tag, screen))
+               if(is_client_tagged(c, *tag))
                    focus(c, True, screen);
         p_delete(&curtags);
     }

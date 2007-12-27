@@ -53,7 +53,7 @@ tag_client(Client *c, Tag *t)
     TagClientLink *tc, *new_tc;
 
     /* don't tag twice */
-    if(is_client_tagged(c, t, c->screen))
+    if(is_client_tagged(c, t))
         return;
 
     new_tc = p_new(TagClientLink, 1);
@@ -81,14 +81,14 @@ untag_client(Client *c, Tag *t)
 }
 
 Bool
-is_client_tagged(Client *c, Tag *t, int screen)
+is_client_tagged(Client *c, Tag *t)
 {
     TagClientLink *tc;
 
-    if(!c || c->screen != screen)
+    if(!c)
         return False;
 
-    for(tc = globalconf.screens[screen].tclink; tc; tc = tc->next)
+    for(tc = globalconf.screens[c->screen].tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
             return True;
     return False;
@@ -242,7 +242,7 @@ uicb_client_toggletag(int screen, char *arg)
             target_tag = target_tag->next, i--);
         if(target_tag)
         {
-            if(is_client_tagged(sel, target_tag, screen))
+            if(is_client_tagged(sel, target_tag))
                 untag_client(sel, target_tag);
             else
                 tag_client(sel, target_tag);
@@ -250,14 +250,14 @@ uicb_client_toggletag(int screen, char *arg)
 
         /* check that there's at least one tag selected for this client*/
         for(tag = globalconf.screens[screen].tags; tag
-            && !is_client_tagged(sel, tag, screen); tag = tag->next)
+            && !is_client_tagged(sel, tag); tag = tag->next)
 
         if(!tag)
             tag_client(sel, target_tag);
     }
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            if(is_client_tagged(sel, tag, screen))
+            if(is_client_tagged(sel, tag))
                 tag_client(sel, tag);
             else
                 untag_client(sel, tag);

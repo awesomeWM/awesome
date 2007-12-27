@@ -35,23 +35,23 @@ extern AwesomeConf globalconf;
  * \return True or False
  */
 static Bool
-isoccupied(int screen, Tag *t)
+isoccupied(Tag *t)
 {
     Client *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t, screen))
+        if(is_client_tagged(c, t))
             return True;
     return False;
 }
 
 static Bool
-isurgent(int screen, Tag *t)
+isurgent(Tag *t)
 {
     Client *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t, screen) && c->isurgent)
+        if(is_client_tagged(c, t) && c->isurgent)
             return True;
 
     return False;
@@ -85,7 +85,7 @@ taglist_draw(Widget *widget,
         w = textwidth(vscreen.font, tag->name);
         if(tag->selected)
             colors = vscreen.colors_selected;
-        else if(isurgent(widget->statusbar->screen, tag))
+        else if(isurgent(tag))
             colors = vscreen.colors_urgent;
         else
             colors = vscreen.colors_normal;
@@ -95,12 +95,9 @@ taglist_draw(Widget *widget,
                   tag->name,
                   colors[ColFG],
                   colors[ColBG]);
-        if(isoccupied(widget->statusbar->screen, tag))
+        if(isoccupied(tag))
             draw_rectangle(ctx, widget->location + widget->width, 0, flagsize, flagsize,
-                           sel && is_client_tagged(sel,
-                                                   tag,
-                                                   widget->statusbar->screen),
-                           colors[ColFG]);
+                           sel && is_client_tagged(sel, tag), colors[ColFG]);
         widget->width += w;
     }
     return widget->width;

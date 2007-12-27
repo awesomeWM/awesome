@@ -30,7 +30,7 @@
 Tag ** get_current_tags(int );
 void tag_client(Client *, Tag *);
 void untag_client(Client *, Tag *);
-Bool is_client_tagged(Client *, Tag *, int);
+Bool is_client_tagged(Client *, Tag *);
 void tag_client_with_current_selected(Client *);
 void tag_client_with_rules(Client *);
 

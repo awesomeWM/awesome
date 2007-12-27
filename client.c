@@ -350,7 +350,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if((rettrans = XGetTransientForHint(c->display, w, &trans) == Success)
        && (t = get_client_bywin(globalconf.clients, trans)))
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-            if(is_client_tagged(t, tag, c->screen))
+            if(is_client_tagged(t, tag))
                 tag_client(c, tag);
 
     /* should be floating if transsient or fixed) */
@@ -481,7 +481,7 @@ client_saveprops(Client * c, int screen)
     prop = p_new(char, ntags + 2);
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next, i++)
-        prop[i] = is_client_tagged(c, tag, screen) ? '1' : '0';
+        prop[i] = is_client_tagged(c, tag) ? '1' : '0';
 
     if(i <= ntags)
         prop[i] = c->isfloating ? '1' : '0';
@@ -616,7 +616,7 @@ client_isvisible(Client *c, int screen)
         return False;
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        if(tag->selected && is_client_tagged(c, tag, screen))
+        if(tag->selected && is_client_tagged(c, tag))
             return True;
     return False;
 }
