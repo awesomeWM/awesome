@@ -95,13 +95,14 @@ focus_delete_client(Client *c)
 }
 
 Client *
-focus_get_latest_client_for_tag(int screen, Tag *t)
+focus_get_latest_client_for_tags(int screen, Tag **t)
 {
     FocusList *fl;
 
     for(fl = globalconf.focus; fl; fl = fl->prev)
-        if(is_client_tagged(fl->client, t, screen))
-           return fl->client;
+        for(; *t; t++)
+           if(is_client_tagged(fl->client, *t, screen))
+               return fl->client;
 
     return NULL;
 }

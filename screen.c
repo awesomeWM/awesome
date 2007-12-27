@@ -264,7 +264,7 @@ uicb_screen_focus(int screen, char *arg)
     if (new_screen > (numscreens - 1))
         new_screen = 0;
 
-    focus(focus_get_latest_client_for_tag(new_screen, curtags[0]),
+    focus(focus_get_latest_client_for_tags(new_screen, curtags),
           True, new_screen);
 
     p_delete(&curtags);

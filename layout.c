@@ -67,7 +67,7 @@ arrange(int screen)
     }
 
     curtags[0]->layout->arrange(screen);
-    focus(focus_get_latest_client_for_tag(screen, curtags[0]),
+    focus(focus_get_latest_client_for_tags(screen, curtags),
           True, screen);
     p_delete(&curtags);
     restack(screen);
