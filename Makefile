@@ -3,7 +3,7 @@
 
 include config.mk
 
-SRC = focus.c client.c draw.c event.c layout.c awesome.c tag.c util.c xutil.c config.c screen.c statusbar.c uicb.c window.c rules.c mouse.c awesome-client-common.c widget.c
+SRC = focus.c client.c draw.c event.c layout.c awesome.c tag.c util.c xutil.c config.c screen.c statusbar.c uicb.c window.c rules.c mouse.c awesome-client-common.c widget.c ewmh.c
 OBJ = ${SRC:.c=.o} ${LAYOUTS:.c=.o} ${WIDGETS:.c=.o}
 DOCS = awesome.1.txt awesome-client.1.txt awesomerc.1.txt
 

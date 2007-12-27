@@ -48,6 +48,7 @@
 #include "window.h"
 #include "client.h"
 #include "focus.h"
+#include "ewmh.h"
 #include "awesome-client.h"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
@@ -289,8 +290,6 @@ main(int argc, char *argv[])
     Display * dpy;
     int shape_event, randr_event_base;
     int screen;
-    enum { NetSupported, NetWMName, NetWMIcon, NetClientList, NetLast };   /* EWMH atoms */
-    Atom netatom[NetLast];
     event_handler **handler;
     struct sockaddr_un *addr;
 
@@ -345,17 +344,13 @@ main(int argc, char *argv[])
         statusbar_draw(screen);
     }
 
-    netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
-    netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
-    netatom[NetWMIcon] = XInternAtom(dpy, "_NET_WM_ICON", False);
-    netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
+    ewmh_init_atoms();
 
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
         loadawesomeprops(screen);
-        XChangeProperty(dpy, RootWindow(dpy, screen), netatom[NetSupported],
-                        XA_ATOM, 32, PropModeReplace, (unsigned char *) netatom, NetLast);
+        ewmh_set_supported_hints(screen);
     }
 
     handler = p_new(event_handler *, LASTEvent);
