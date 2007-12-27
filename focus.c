@@ -116,7 +116,7 @@ uicb_focus_history(int screen, char *arg)
 {
     int i;
     FocusList *fl = globalconf.focus;
-    Tag *curtag = get_current_tag(screen);
+    Tag **curtags, **tag;
 
     if(arg)
     {
@@ -124,9 +124,12 @@ uicb_focus_history(int screen, char *arg)
 
         if(i < 0)
         {
+            curtags = get_current_tags(screen);
             for(; fl && i < 0; fl = fl->prev)
-                if(is_client_tagged(fl->client, curtag, screen))
-                    i++;
+                for(tag = curtags; *tag; tag++)
+                    if(is_client_tagged(fl->client, *tag, screen))
+                        i++;
+            p_delete(&curtags);
             if(fl)
                 focus(fl->client, True, screen);
         }
@@ -137,11 +140,17 @@ void
 uicb_focus_client_byname(int screen, char *arg)
 {
     Client *c;
-    Tag *curtag = get_current_tag(screen);
+    Tag **curtags, **tag;
 
-    if(arg && (c = get_client_byname(globalconf.clients, arg))
-       && is_client_tagged(c, curtag, screen))
-        focus(c, True, screen);
+    if(arg)
+    {
+        curtags = get_current_tags(screen);
+        if((c = get_client_byname(globalconf.clients, arg)))
+           for(tag = curtags; *tag; tag++)
+               if(is_client_tagged(c, *tag, screen))
+                   focus(c, True, screen);
+        p_delete(&curtags);
+    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
