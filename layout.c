@@ -29,6 +29,7 @@
 #include "xutil.h"
 #include "focus.h"
 #include "statusbar.h"
+#include "ewmh.h"
 #include "layouts/tile.h"
 #include "layouts/max.h"
 #include "layouts/fibonacci.h"
@@ -141,6 +142,8 @@ loadawesomeprops(int screen)
                 tag->selected = False;
 
     p_delete(&prop);
+
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 
 void

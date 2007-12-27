@@ -26,6 +26,7 @@ void ewmh_init_atoms(void);
 void ewmh_set_supported_hints(int);
 void ewmh_update_net_client_list(int);
 void ewmh_update_net_numbers_of_desktop(int);
+void ewmh_update_net_current_desktop(int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

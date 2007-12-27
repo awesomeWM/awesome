@@ -640,6 +640,7 @@ config_parse(const char *confpatharg)
             eprint("fatal: no tags found in configuration file\n");
 
         ewmh_update_net_numbers_of_desktop(get_phys_screen(screen));
+        ewmh_update_net_current_desktop(get_phys_screen(screen));
 
         /* select first tag by default */
         virtscreen->tags[0].selected = True;

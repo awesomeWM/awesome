@@ -27,6 +27,7 @@
 #include "tag.h"
 #include "util.h"
 #include "rules.h"
+#include "ewmh.h"
 
 extern AwesomeConf globalconf;
 
@@ -296,6 +297,7 @@ uicb_tag_toggleview(int screen, char *arg)
 
     saveawesomeprops(screen);
     arrange(screen);
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 
 /** View tag
@@ -327,6 +329,7 @@ uicb_tag_view(int screen, char *arg)
 
     saveawesomeprops(screen);
     arrange(screen);
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 
 /** View previously selected tags
@@ -347,6 +350,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
         tag->was_selected = t;
     }
     arrange(screen);
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 
 /** View next tag
@@ -369,6 +373,7 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 
     saveawesomeprops(screen);
     arrange(screen);
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 
 /** View previous tag
@@ -390,5 +395,6 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
         arrange(screen);
     }
     p_delete(&curtags);
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

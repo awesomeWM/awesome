@@ -24,12 +24,14 @@
 
 #include "ewmh.h"
 #include "util.h"
+#include "tag.h"
 
 extern AwesomeConf globalconf;
 
 static Atom net_supported;
 static Atom net_client_list;
 static Atom net_number_of_desktops;
+static Atom net_current_desktop;
 
 static Atom net_wm_name;
 static Atom net_wm_icon;
@@ -45,6 +47,7 @@ static AtomItem AtomNames[] =
     { "_NET_SUPPORTED", &net_supported },
     { "_NET_CLIENT_LIST", &net_client_list },
     { "_NET_NUMBER_OF_DESKTOPS", &net_number_of_desktops },
+    { "_NET_CURRENT_DESKTOP", &net_current_desktop },
 
     { "_NET_WM_NAME", &net_wm_name },
     { "_NET_WM_ICON", &net_wm_icon },
@@ -75,6 +78,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_supported;
     atom[i++] = net_client_list;
     atom[i++] = net_number_of_desktops;
+    atom[i++] = net_current_desktop;
     
     atom[i++] = net_wm_name;
     atom[i++] = net_wm_icon;
@@ -119,6 +123,21 @@ ewmh_update_net_numbers_of_desktop(int phys_screen)
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
                     net_number_of_desktops, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &count, 1);
+}
+
+void
+ewmh_update_net_current_desktop(int phys_screen)
+{
+    CARD32 count = 0;
+    Tag *tag, **curtags = get_current_tags(phys_screen);
+
+    for(tag = globalconf.screens[phys_screen].tags; tag != curtags[0]; tag = tag->next)
+        count++;
+
+    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
+                    net_current_desktop, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &count, 1);
+    
+    p_delete(&curtags);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
