@@ -358,13 +358,15 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 {
-    Tag *curtag = get_current_tag(screen);
+    Tag **curtags = get_current_tags(screen);
 
-    if(!curtag->next)
+    if(!curtags[0]->next)
         return;
 
-    curtag->selected = False;
-    curtag->next->selected = True;
+    curtags[0]->selected = False;
+    curtags[0]->next->selected = True;
+
+    p_delete(&curtags);
 
     saveawesomeprops(screen);
     arrange(screen);
@@ -378,15 +380,16 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
 {
-    Tag *tag, *curtag = get_current_tag(screen);
+    Tag *tag, **curtags = get_current_tags(screen);
 
-    for(tag = globalconf.screens[screen].tags; tag && tag->next != curtag; tag = tag->next);
+    for(tag = globalconf.screens[screen].tags; tag && tag->next != curtags[0]; tag = tag->next);
     if(tag)
     {
         tag->selected = True;
-        curtag->selected = False;
+        curtags[0]->selected = False;
         saveawesomeprops(screen);
         arrange(screen);
     }
+    p_delete(&curtags);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
