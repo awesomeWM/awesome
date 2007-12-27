@@ -241,7 +241,7 @@ handle_event_enternotify(XEvent * e)
         focus(c, ev->same_screen, c->screen);
         if (c->isfloating || curtags[0]->layout->arrange == layout_floating)
             window_grabbuttons(c->display, c->phys_screen, c->win, True, False);
-        p_delete(curtags);
+        p_delete(&curtags);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
