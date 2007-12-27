@@ -303,6 +303,149 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
     }
 }
 
+
+
+static void
+config_parse_screen(cfg_t *cfg, int screen)
+{
+    char buf[2];
+    const char *tmp;
+    Layout *layout = NULL;
+    Tag *tag = NULL;
+    cfg_t *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
+          *cfg_layouts, *cfg_padding, *cfgsectmp;
+    VirtScreen *virtscreen = &globalconf.screens[screen];
+    unsigned int i;
+
+    snprintf(buf, sizeof(buf), "%d", screen);
+    cfg_screen = cfg_gettsec(cfg, "screen", buf);
+    if(!cfg_screen)
+        cfg_screen = cfg_getsec(cfg, "screen");
+
+    if(!cfg_screen)
+    {
+        warn("parsing configuration file failed, no screen section found\n");
+        cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
+        cfg_screen = cfg_getsec(cfg, "screen");
+    }
+
+    /* get screen specific sections */
+    cfg_statusbar = cfg_getsec(cfg_screen, "statusbar");
+    cfg_tags = cfg_getsec(cfg_screen, "tags");
+    cfg_colors = cfg_getsec(cfg_screen, "colors");
+    cfg_general = cfg_getsec(cfg_screen, "general");
+    cfg_layouts = cfg_getsec(cfg_screen, "layouts");
+    cfg_padding = cfg_getsec(cfg_screen, "padding");
+
+
+    /* General section */
+    virtscreen->borderpx = cfg_getint(cfg_general, "border");
+    virtscreen->snap = cfg_getint(cfg_general, "snap");
+    virtscreen->resize_hints = cfg_getbool(cfg_general, "resize_hints");
+    virtscreen->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
+    virtscreen->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
+    virtscreen->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
+    virtscreen->font = XftFontOpenName(globalconf.display,
+                                       get_phys_screen(screen),
+                                       cfg_getstr(cfg_general, "font"));
+    if(!virtscreen->font)
+        eprint("awesome: cannot init font\n");
+
+    /* Colors */
+    virtscreen->colors_normal[ColBorder] = initxcolor(screen,
+                                                      cfg_getstr(cfg_colors, "normal_border"));
+    virtscreen->colors_normal[ColBG] = initxcolor(screen,
+                                                  cfg_getstr(cfg_colors, "normal_bg"));
+    virtscreen->colors_normal[ColFG] = initxcolor(screen,
+                                                  cfg_getstr(cfg_colors, "normal_fg"));
+    virtscreen->colors_selected[ColBorder] = initxcolor(screen,
+                                                        cfg_getstr(cfg_colors, "focus_border"));
+    virtscreen->colors_selected[ColBG] = initxcolor(screen,
+                                                    cfg_getstr(cfg_colors, "focus_bg"));
+    virtscreen->colors_selected[ColFG] = initxcolor(screen,
+                                                    cfg_getstr(cfg_colors, "focus_fg"));
+    virtscreen->colors_urgent[ColBG] = initxcolor(screen,
+                                                  cfg_getstr(cfg_colors, "urgent_bg"));
+    virtscreen->colors_urgent[ColFG] = initxcolor(screen,
+                                                  cfg_getstr(cfg_colors, "urgent_fg"));
+
+    /* Statusbar */
+    virtscreen->statusbar = p_new(Statusbar, 1);
+    virtscreen->statusbar->position = virtscreen->statusbar->dposition =
+        statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
+
+    create_widgets(cfg_statusbar, virtscreen->statusbar);
+
+    /* Layouts */
+    if(cfg_size(cfg_layouts, "layout"))
+    {
+        virtscreen->layouts = layout = p_new(Layout, 1);
+        for(i = 0; i < cfg_size(cfg_layouts, "layout"); i++)
+        {
+            cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
+            layout->arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
+            if(!layout->arrange)
+            {
+                warn("unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
+                layout->image = NULL;
+                continue;
+            }
+            layout->image = a_strdup(cfg_getstr(cfgsectmp, "image"));
+
+            if(i < cfg_size(cfg_layouts, "layout") - 1)
+                layout = layout->next = p_new(Layout, 1);
+            else
+                layout->next = NULL;
+        }
+    }
+    else
+        eprint("fatal: no default layout available\n");
+
+    /* Tags */
+    if(cfg_size(cfg_tags, "tag"))
+    {
+        virtscreen->tags = tag = p_new(Tag, 1);
+        for(i = 0; i < cfg_size(cfg_tags, "tag"); i++)
+        {
+            cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
+            tag->name = a_strdup(cfg_title(cfgsectmp));
+            tag->selected = False;
+            tag->was_selected = False;
+            tmp = cfg_getstr(cfgsectmp, "layout");
+            for(layout = virtscreen->layouts;
+                layout && layout->arrange != name_func_lookup(tmp, LayoutsList); layout = layout->next);
+            if(!layout)
+                tag->layout = virtscreen->layouts;
+            else
+                tag->layout = layout;
+            tag->mwfact = cfg_getfloat(cfgsectmp, "mwfact");
+            tag->nmaster = cfg_getint(cfgsectmp, "nmaster");
+            tag->ncol = cfg_getint(cfgsectmp, "ncol");
+
+            if(i < cfg_size(cfg_tags, "tag") - 1)
+                tag = tag->next = p_new(Tag, 1);
+            else
+                tag->next = NULL;
+        }
+    }
+    else
+        eprint("fatal: no tags found in configuration file\n");
+
+    ewmh_update_net_numbers_of_desktop(get_phys_screen(screen));
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
+    ewmh_update_net_desktop_names(get_phys_screen(screen));
+
+    /* select first tag by default */
+    virtscreen->tags[0].selected = True;
+    virtscreen->tags[0].was_selected = True;
+
+    /* padding */
+    virtscreen->padding.top = cfg_getint(cfg_padding, "top");
+    virtscreen->padding.bottom = cfg_getint(cfg_padding, "bottom");
+    virtscreen->padding.left = cfg_getint(cfg_padding, "left");
+    virtscreen->padding.right = cfg_getint(cfg_padding, "right");
+}
+
 /** Parse configuration file and initialize some stuff
  * \param confpatharg Path to configuration file
  */
@@ -482,17 +625,13 @@ config_parse(const char *confpatharg)
         CFG_SEC((char *) "mouse", mouse_opts, CFGF_NONE),
         CFG_END()
     };
-    cfg_t *cfg, *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
-          *cfg_layouts, *cfg_rules, *cfg_keys, *cfg_mouse, *cfg_padding, *cfgsectmp;
+    cfg_t *cfg, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp;
     int ret, screen;
     unsigned int i = 0;
-    const char *tmp, *homedir;
-    char *confpath, buf[2];
+    const char *homedir;
+    char *confpath;
     ssize_t confpath_len;
     Rule *rule = NULL;
-    Layout *layout = NULL;
-    Tag *tag = NULL;
-    VirtScreen *virtscreen;
     FILE *defconfig = NULL;
 
     if(confpatharg)
@@ -524,135 +663,7 @@ config_parse(const char *confpatharg)
 
     /* get the right screen section */
     for(screen = 0; screen < get_screen_count(); screen++)
-    {
-        virtscreen = &globalconf.screens[screen]; 
-        snprintf(buf, sizeof(buf), "%d", screen);
-        cfg_screen = cfg_gettsec(cfg, "screen", buf);
-        if(!cfg_screen)
-            cfg_screen = cfg_getsec(cfg, "screen");
-
-        if(!cfg_screen)
-        {
-            warn("parsing configuration file failed, no screen section found\n");
-            cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
-            cfg_screen = cfg_getsec(cfg, "screen");
-        }
-
-        /* get screen specific sections */
-        cfg_statusbar = cfg_getsec(cfg_screen, "statusbar");
-        cfg_tags = cfg_getsec(cfg_screen, "tags");
-        cfg_colors = cfg_getsec(cfg_screen, "colors");
-        cfg_general = cfg_getsec(cfg_screen, "general");
-        cfg_layouts = cfg_getsec(cfg_screen, "layouts");
-        cfg_padding = cfg_getsec(cfg_screen, "padding");
-
-
-        /* General section */
-        virtscreen->borderpx = cfg_getint(cfg_general, "border");
-        virtscreen->snap = cfg_getint(cfg_general, "snap");
-        virtscreen->resize_hints = cfg_getbool(cfg_general, "resize_hints");
-        virtscreen->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
-        virtscreen->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
-        virtscreen->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
-        virtscreen->font = XftFontOpenName(globalconf.display,
-                                           get_phys_screen(screen),
-                                           cfg_getstr(cfg_general, "font"));
-        if(!virtscreen->font)
-            eprint("awesome: cannot init font\n");
-        /* Colors */
-        virtscreen->colors_normal[ColBorder] = initxcolor(screen,
-                                                          cfg_getstr(cfg_colors, "normal_border"));
-        virtscreen->colors_normal[ColBG] = initxcolor(screen,
-                                                      cfg_getstr(cfg_colors, "normal_bg"));
-        virtscreen->colors_normal[ColFG] = initxcolor(screen,
-                                                      cfg_getstr(cfg_colors, "normal_fg"));
-        virtscreen->colors_selected[ColBorder] = initxcolor(screen,
-                                                            cfg_getstr(cfg_colors, "focus_border"));
-        virtscreen->colors_selected[ColBG] = initxcolor(screen,
-                                                        cfg_getstr(cfg_colors, "focus_bg"));
-        virtscreen->colors_selected[ColFG] = initxcolor(screen,
-                                                        cfg_getstr(cfg_colors, "focus_fg"));
-        virtscreen->colors_urgent[ColBG] = initxcolor(screen,
-                                                      cfg_getstr(cfg_colors, "urgent_bg"));
-        virtscreen->colors_urgent[ColFG] = initxcolor(screen,
-                                                      cfg_getstr(cfg_colors, "urgent_fg"));
-
-        /* Statusbar */
-        virtscreen->statusbar = p_new(Statusbar, 1);
-        virtscreen->statusbar->position = virtscreen->statusbar->dposition =
-            statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
-
-        create_widgets(cfg_statusbar, virtscreen->statusbar);
-
-        /* Layouts */
-        if(cfg_size(cfg_layouts, "layout"))
-        {
-            virtscreen->layouts = layout = p_new(Layout, 1);
-            for(i = 0; i < cfg_size(cfg_layouts, "layout"); i++)
-            {
-                cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
-                layout->arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
-                if(!layout->arrange)
-                {
-                    warn("unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
-                    layout->image = NULL;
-                    continue;
-                }
-                layout->image = a_strdup(cfg_getstr(cfgsectmp, "image"));
-
-                if(i < cfg_size(cfg_layouts, "layout") - 1)
-                    layout = layout->next = p_new(Layout, 1);
-                else
-                    layout->next = NULL;
-            }
-        }
-        else
-            eprint("fatal: no default layout available\n");
-
-        /* Tags */
-        if(cfg_size(cfg_tags, "tag"))
-        {
-            virtscreen->tags = tag = p_new(Tag, 1);
-            for(i = 0; i < cfg_size(cfg_tags, "tag"); i++)
-            {
-                cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
-                tag->name = a_strdup(cfg_title(cfgsectmp));
-                tag->selected = False;
-                tag->was_selected = False;
-                tmp = cfg_getstr(cfgsectmp, "layout");
-                for(layout = virtscreen->layouts;
-                    layout && layout->arrange != name_func_lookup(tmp, LayoutsList); layout = layout->next);
-                if(!layout)
-                    tag->layout = virtscreen->layouts;
-                else
-                    tag->layout = layout;
-                tag->mwfact = cfg_getfloat(cfgsectmp, "mwfact");
-                tag->nmaster = cfg_getint(cfgsectmp, "nmaster");
-                tag->ncol = cfg_getint(cfgsectmp, "ncol");
-
-                if(i < cfg_size(cfg_tags, "tag") - 1)
-                    tag = tag->next = p_new(Tag, 1);
-                else
-                    tag->next = NULL;
-            }
-        }
-        else
-            eprint("fatal: no tags found in configuration file\n");
-
-        ewmh_update_net_numbers_of_desktop(get_phys_screen(screen));
-        ewmh_update_net_current_desktop(get_phys_screen(screen));
-        ewmh_update_net_desktop_names(get_phys_screen(screen));
-
-        /* select first tag by default */
-        virtscreen->tags[0].selected = True;
-        virtscreen->tags[0].was_selected = True;
-
-        /* padding */
-        virtscreen->padding.top = cfg_getint(cfg_padding, "top");
-        virtscreen->padding.bottom = cfg_getint(cfg_padding, "bottom");
-        virtscreen->padding.left = cfg_getint(cfg_padding, "left");
-        virtscreen->padding.right = cfg_getint(cfg_padding, "right");
-    }
+        config_parse_screen(cfg, screen);
 
     /* get general sections */
     cfg_rules = cfg_getsec(cfg, "rules");
