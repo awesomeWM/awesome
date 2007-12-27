@@ -35,12 +35,10 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 {
     unsigned long *data, pixel;
     Atom type;
-    int format, location, width, height, size, i;
+    int format, width, height, size, i;
     unsigned long items, rest;
     unsigned char *image, *imgdata;
-    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
-    Client *sel = focus_get_latest_client_for_tag(widget->statusbar->screen,
-                                                  get_current_tag(widget->statusbar->screen));
+    Client *sel = globalconf.focus->client;
 
     if(!sel)
         return 0;
@@ -78,17 +76,19 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
         imgdata[2] = pixel & 0xff;         /* B */
     }
 
-    location = widget_calculate_offset(vscreen.statusbar->width,
-                                       width,
-                                       offset,
-                                       widget->alignment);
+    widget->location = widget_calculate_offset(widget->statusbar->width,
+                                               width,
+                                               offset,
+                                               widget->alignment);
 
-    draw_image_from_argb_data(ctx, location, 0, width, height, vscreen.statusbar->height, image);
+    draw_image_from_argb_data(ctx, widget->location, 0, width, height, widget->statusbar->height, image);
 
     p_delete(&image);
 
     XFree(data);
-    return vscreen.statusbar->height;
+
+    widget->width = widget->statusbar->height;
+    return widget->width;
 }
 
 Widget *

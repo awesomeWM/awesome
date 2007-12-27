@@ -142,17 +142,17 @@ Tag **
 get_current_tags(int screen)
 {
     Tag *tag, **tags = NULL;
-    int n = 0;
+    int n = 1;
 
+    tags = p_new(Tag *, n);
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         if(tag->selected)
         {
-            p_realloc(tags, ++n);
-            tags[n - 1] = tag;
+            p_realloc(&tags, ++n);
+            tags[n - 2] = tag;
         }
 
     /* finish with null */
-    p_realloc(tags, ++n);
     tags[n - 1] = NULL;
 
     return tags;

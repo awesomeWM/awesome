@@ -24,7 +24,7 @@
 #include <confuse.h>
 #include "widget.h"
 #include "util.h"
-#include "layout.h"
+#include "tag.h"
 
 extern AwesomeConf globalconf;
 
@@ -34,15 +34,20 @@ layoutinfo_draw(Widget *widget,
                 int offset,
                 int used __attribute__ ((unused)))
 {
-    int location = widget_calculate_offset(widget->statusbar->width,
-                                           widget->statusbar->height,
-                                           offset,
-                                           widget->alignment);
+    Tag **curtags = get_current_tags(widget->statusbar->screen);
+    widget->location = widget_calculate_offset(widget->statusbar->width,
+                                               widget->statusbar->height,
+                                               offset,
+                                               widget->alignment);
 
-    draw_image(ctx, location, 0, widget->statusbar->height,
-               get_current_layout(widget->statusbar->screen)->image);
+    widget->width = widget->statusbar->height;
 
-    return widget->statusbar->height;
+    draw_image(ctx, widget->location, 0, widget->statusbar->height,
+               curtags[0]->layout->image);
+
+    p_delete(&curtags);
+
+    return widget->width;
 }
 
 Widget *

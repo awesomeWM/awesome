@@ -47,18 +47,18 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
-    int width, location;
     Data *d = widget->data;
 
-    width = textwidth(ctx, vscreen.font, d->text);
-    location = widget_calculate_offset(vscreen.statusbar->width,
-                                       width,
-                                       offset,
-                                       widget->alignment);
+    widget->width = textwidth(ctx, vscreen.font, d->text);
+    widget->location = widget_calculate_offset(widget->statusbar->width,
+                                               widget->width,
+                                               offset,
+                                               widget->alignment);
 
-    draw_text(ctx, location, 0, width, vscreen.statusbar->height,
+    draw_text(ctx, widget->location, 0, widget->width, widget->statusbar->height,
               vscreen.font, d->text, d->fg, d->bg);
-    return width;
+
+    return widget->width;
 }
 
 static void

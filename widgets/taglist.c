@@ -65,21 +65,20 @@ taglist_draw(Widget *widget,
     Tag *tag;
     Client *sel = globalconf.focus->client;
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
-    int w = 0, width = 0, location;
-    int flagsize;
+    int w = 0, flagsize;
     XColor *colors;
 
     flagsize = (vscreen.font->height + 2) / 4;
 
     for(tag = vscreen.tags; tag; tag = tag->next)
-        width += textwidth(ctx, vscreen.font, tag->name);
+        widget->width += textwidth(ctx, vscreen.font, tag->name);
 
-    location = widget_calculate_offset(vscreen.statusbar->width,
-                                       width,
-                                       offset,
-                                       widget->alignment);
+    widget->location = widget_calculate_offset(widget->statusbar->width,
+                                               widget->width,
+                                               offset,
+                                               widget->alignment);
 
-    width = 0;
+    widget->width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
         w = textwidth(ctx, vscreen.font, tag->name);
@@ -89,21 +88,21 @@ taglist_draw(Widget *widget,
             colors = vscreen.colors_urgent;
         else
             colors = vscreen.colors_normal;
-        draw_text(ctx, location + width, 0, w,
+        draw_text(ctx, widget->location + widget->width, 0, w,
                   vscreen.statusbar->height,
                   vscreen.font,
                   tag->name,
                   colors[ColFG],
                   colors[ColBG]);
         if(isoccupied(widget->statusbar->screen, tag))
-            draw_rectangle(ctx, location + width, 0, flagsize, flagsize,
+            draw_rectangle(ctx, widget->location + widget->width, 0, flagsize, flagsize,
                            sel && is_client_tagged(sel,
                                                    tag,
                                                    widget->statusbar->screen),
                            colors[ColFG]);
-        width += w;
+        widget->width += w;
     }
-    return width;
+    return widget->width;
 }
 
 Widget *

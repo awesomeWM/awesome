@@ -13,29 +13,33 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Client *sel = focus_get_latest_client_for_tag(widget->statusbar->screen, 
                                                   get_current_tag(widget->statusbar->screen));
-    int location = widget_calculate_offset(vscreen.statusbar->width,
-                                           0,
-                                           offset,
-                                           widget->alignment);
+
+    widget->location = widget_calculate_offset(vscreen.statusbar->width,
+                                               0,
+                                               offset,
+                                               widget->alignment);
 
     if(sel)
     {
-        draw_text(ctx, location, 0, vscreen.statusbar->width - used,
+        draw_text(ctx, widget->location, 0, vscreen.statusbar->width - used,
                   vscreen.statusbar->height, vscreen.font, sel->name,
                   vscreen.colors_selected[ColFG],
                   vscreen.colors_selected[ColBG]);
         if(sel->isfloating)
-            draw_circle(ctx, location, 0,
+            draw_circle(ctx, widget->location, 0,
                         (vscreen.font->height + 2) / 4,
                         sel->ismax,
                         vscreen.colors_selected[ColFG]);
     }
     else
-        draw_text(ctx, location, 0, vscreen.statusbar->width - used,
+        draw_text(ctx, widget->location, 0, vscreen.statusbar->width - used,
                   vscreen.statusbar->height, vscreen.font, NULL,
                   vscreen.colors_normal[ColFG],
                   vscreen.colors_normal[ColBG]);
-    return vscreen.statusbar->width - used;
+
+    widget->width = vscreen.statusbar->width - used;
+
+    return widget->width;
 }
 
 Widget *

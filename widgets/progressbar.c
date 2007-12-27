@@ -39,40 +39,40 @@ static int
 progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
-    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
-    int location, width, pwidth, margin, height;
+    int width, pwidth, margin, height;
     Data *d = widget->data;
 
-    height = vscreen.statusbar->height / 2;
-    margin = (vscreen.statusbar->height - height) / 2 - 1;
+    height = widget->statusbar->height / 2;
+    margin = (widget->statusbar->height - height) / 2 - 1;
 
     width = d->width - (margin * 2);
 
-    location = widget_calculate_offset(vscreen.statusbar->width,
-                                       d->width,
-                                       offset,
-                                       widget->alignment) + margin;
+    widget->location = widget_calculate_offset(widget->statusbar->width,
+                                               d->width,
+                                               offset,
+                                               widget->alignment) + margin;
 
     pwidth = d->percent ? (width * d->percent) / 100 : 0;
 
     draw_rectangle(ctx,
-                   location + 1, margin,
+                   widget->location + 1, margin,
                    width, height,
                    False, d->fg);
 
     if(pwidth > 0)
         draw_rectangle(ctx,
-                       location + 1, margin + 1,
+                       widget->location + 1, margin + 1,
                        pwidth, height - 2,
                        True, d->fg);
 
     if(width - pwidth - 2 > 0)
         draw_rectangle(ctx,
-                       location + pwidth + 2, margin + 1,
+                       widget->location + pwidth + 2, margin + 1,
                        width - pwidth - 2, height - 2,
                        True, d->bg);
 
-    return d->width;
+    widget->width = d->width;
+    return widget->width;
 }
 
 static void

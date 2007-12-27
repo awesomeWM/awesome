@@ -232,6 +232,8 @@ struct Widget
     Statusbar *statusbar;
     int alignment;
     void *data;
+    int location;
+    int width;
     Widget *next;
 };
 
