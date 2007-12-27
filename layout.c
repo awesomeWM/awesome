@@ -264,7 +264,7 @@ maximize(int x, int y, int w, int h, int screen)
     {
         sel->wasfloating = sel->isfloating;
         sel->isfloating = True;
-        client_resize(sel, x, y, w, h, True, !sel->isfloating);
+        client_resize(sel, x, y, w, h, True, True);
     }
     else if(sel->wasfloating)
         client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, True, False);
