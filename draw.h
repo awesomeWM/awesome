@@ -22,10 +22,7 @@
 #ifndef AWESOME_DRAW_H
 #define AWESOME_DRAW_H
 
-#include "config.h"
-
-typedef struct DrawCtx DrawCtx;
-struct DrawCtx
+typedef struct
 {
     Display *display;
     Drawable drawable;
@@ -34,7 +31,7 @@ struct DrawCtx
     int height;
     int phys_screen;
     int depth;
-};
+} DrawCtx;
 
 DrawCtx *draw_get_context(Display*, int, int, int);
 void draw_free_context(DrawCtx*);
@@ -46,5 +43,6 @@ void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char
 int draw_get_image_width(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short textwidth(XftFont *, char *);
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -25,7 +25,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 #include <regex.h>
-#include <draw.h>
+#include "draw.h"
 
 /** Bar possible position */
 enum
