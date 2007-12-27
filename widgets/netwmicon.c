@@ -34,6 +34,7 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
                     int used __attribute__ ((unused)))
 {
     unsigned long *data, pixel;
+    unsigned char *wdata;
     Atom type;
     int format, width, height, size, i;
     unsigned long items, rest;
@@ -46,15 +47,17 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
     if(XGetWindowProperty(ctx->display, sel->win, 
                           XInternAtom(ctx->display, "_NET_WM_ICON", False),
                           0L, LONG_MAX, False, XA_CARDINAL, &type, &format,
-                          &items, &rest, (unsigned char**) &data) != Success
-       || !data)
+                          &items, &rest, &wdata) != Success
+       || !wdata)
         return 0;
 
     if(type != XA_CARDINAL || format != 32 || items < 2)
     {
-        XFree(data);
+        XFree(wdata);
         return 0;
     }
+
+    data = (unsigned long *) wdata;
 
     width = data[0];
     height = data[1];
@@ -62,7 +65,7 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     if(!size)
     {
-        XFree(data);
+        XFree(wdata);
         return 0;
     }
 
@@ -85,7 +88,7 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     p_delete(&image);
 
-    XFree(data);
+    XFree(wdata);
 
     widget->width = widget->statusbar->height;
     return widget->width;
