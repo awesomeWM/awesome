@@ -210,7 +210,6 @@ typedef struct
     XColor colors_urgent[ColLast];
     /** Tag list */
     Tag *tags;
-    TagClientLink *tclink;
     /** Layout list */
     Layout *layouts;
     /** Status bar */
@@ -269,6 +268,8 @@ struct AwesomeConf
     char *configpath;
     /** Selected clients on this tag */
     FocusList *focus;
+    /** Link between tags and clients */
+    TagClientLink *tclink;
 };
 
 void config_parse(const char *);

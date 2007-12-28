@@ -32,15 +32,15 @@
 extern AwesomeConf globalconf;
 
 static void
-detach_tagclientlink(int screen, TagClientLink *tc)
+detach_tagclientlink(TagClientLink *tc)
 {
     TagClientLink *tmp;
 
-    if(globalconf.screens[screen].tclink == tc)
-        globalconf.screens[screen].tclink = tc->next;
+    if(globalconf.tclink == tc)
+        globalconf.tclink = tc->next;
     else
     {
-        for(tmp = globalconf.screens[screen].tclink; tmp && tmp->next != tc; tmp = tmp->next);
+        for(tmp = globalconf.tclink; tmp && tmp->next != tc; tmp = tmp->next);
         tmp->next = tc->next;
     }
     
@@ -58,11 +58,11 @@ tag_client(Client *c, Tag *t)
 
     new_tc = p_new(TagClientLink, 1);
 
-    if(!globalconf.screens[c->screen].tclink)
-        globalconf.screens[c->screen].tclink = new_tc;
+    if(!globalconf.tclink)
+        globalconf.tclink = new_tc;
     else
     {
-        for(tc = globalconf.screens[c->screen].tclink; tc->next; tc = tc->next);
+        for(tc = globalconf.tclink; tc->next; tc = tc->next);
         tc->next = new_tc;
     }
 
@@ -75,9 +75,9 @@ untag_client(Client *c, Tag *t)
 {
     TagClientLink *tc;
 
-    for(tc = globalconf.screens[c->screen].tclink; tc; tc = tc->next)
+    for(tc = globalconf.tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
-            detach_tagclientlink(c->screen, tc);
+            detach_tagclientlink(tc);
 }
 
 Bool
@@ -88,7 +88,7 @@ is_client_tagged(Client *c, Tag *t)
     if(!c)
         return False;
 
-    for(tc = globalconf.screens[c->screen].tclink; tc; tc = tc->next)
+    for(tc = globalconf.tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
             return True;
     return False;
