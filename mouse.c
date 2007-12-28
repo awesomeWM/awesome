@@ -50,7 +50,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     Client *c = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
 
-    if(!c)
+    if(!c || (c && c->isfixed))
         return;
 
     if((curtags[0]->layout->arrange != layout_floating)
@@ -128,7 +128,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     double mwfact;
 
     /* only handle floating and tiled layouts */
-    if(c)
+    if(c && !c->isfixed)
     {
         if((curtags[0]->layout->arrange == layout_floating) || c->isfloating)
         {

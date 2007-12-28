@@ -41,6 +41,9 @@ static Atom net_active_window;
 static Atom net_close_window;
 
 static Atom net_wm_name;
+static Atom net_wm_window_type;
+static Atom net_wm_window_type_normal;
+static Atom net_wm_window_type_dock;
 static Atom net_wm_icon;
 static Atom net_wm_state;
 static Atom net_wm_state_sticky;
@@ -66,6 +69,9 @@ static AtomItem AtomNames[] =
     { "_NET_CLOSE_WINDOW", &net_close_window },
 
     { "_NET_WM_NAME", &net_wm_name },
+    { "_NET_WM_WINDOW_TYPE", &net_wm_window_type },
+    { "_NET_WM_WINDOW_TYPE_NORMAL", &net_wm_window_type_normal },
+    { "_NET_WM_WINDOW_TYPE_DOCK", &net_wm_window_type_dock },
     { "_NET_WM_ICON", &net_wm_icon },
     { "_NET_WM_STATE", &net_wm_state },
     { "_NET_WM_STATE_STICKY", &net_wm_state_sticky },
@@ -110,6 +116,9 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_close_window;
     
     atom[i++] = net_wm_name;
+    atom[i++] = net_wm_window_type;
+    atom[i++] = net_wm_window_type_normal;
+    atom[i++] = net_wm_window_type_dock;
     atom[i++] = net_wm_icon;
     atom[i++] = net_wm_state;
     atom[i++] = net_wm_state_sticky;
@@ -224,8 +233,27 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             c->ismax = False;
         client_maximize(c, area.x, area.y, area.width, area.height);
     }
+    else
+        printf("%s received unknown window state %s\n", c->name, XGetAtomName(globalconf.display, state));
 }
 
+static void
+ewmh_process_window_type_atom(Client *c, Atom state)
+{
+    if(state == net_wm_window_type_normal)
+    {
+        /* do nothing */
+    }
+    else if(state == net_wm_window_type_dock)
+    {
+        c->border = 0;
+        c->skip = True;
+        c->isfixed = True;
+        c->isfloating = True;
+    }
+    else
+        printf("%s received unknown window type %s\n", c->name, XGetAtomName(globalconf.display, state));
+}
 void
 ewmh_process_client_message(XClientMessageEvent *ev)
 {
@@ -257,14 +285,25 @@ ewmh_check_client_hints(Client *c)
 
     if(XGetWindowProperty(globalconf.display, c->win, net_wm_state, 0L, LONG_MAX, False,
                           XA_ATOM, &real, &format, &n, &extra,
-                          (unsigned char **) &data) != Success || !data)
-        return;
+                          (unsigned char **) &data) == Success && data)
+    {
+        state = (Atom *) data;
+        for(i = 0; i < n; i++)
+            ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
 
-    state = (Atom *) data;
-    for(i = 0; i < n; i++)
-        ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
+        XFree(data);
+    }
 
-    XFree(data);
+    if(XGetWindowProperty(globalconf.display, c->win, net_wm_window_type, 0L, LONG_MAX, False,
+                          XA_ATOM, &real, &format, &n, &extra,
+                          (unsigned char **) &data) == Success && data)
+    {
+        state = (Atom *) data;
+        for(i = 0; i < n; i++)
+            ewmh_process_window_type_atom(c, state[i]);
+
+        XFree(data);
+    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

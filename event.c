@@ -134,17 +134,10 @@ handle_event_configurerequest(XEvent * e)
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
     int old_screen;
-    Tag **curtags;
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
-        return;
-        c->ismax = False;
-        curtags = get_current_tags(c->screen);
-        if(ev->value_mask & CWBorderWidth)
-            c->border = ev->border_width;
-        if(c->isfixed || c->isfloating
-           || curtags[0]->layout->arrange == layout_floating)
+        if(c->isfixed)
         {
             if(ev->value_mask & CWX)
                 c->rx = c->x = ev->x - c->border;
@@ -166,13 +159,11 @@ handle_event_configurerequest(XEvent * e)
                 statusbar_draw(c->screen);
             }
             tag_client_with_rules(c);
-            c->isfloating = True;
             XMoveResizeWindow(e->xany.display, c->win, c->rx, c->ry, c->rw, c->rh);
             arrange(c->screen);
         }
         else
             window_configure(globalconf.display, c->win, c->x, c->y, c->w, c->h, c->border);
-        p_delete(&curtags);
     }
     else
     {

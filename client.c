@@ -294,13 +294,17 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->screen = get_screen_bycoord(c->x, c->y);
     c->phys_screen = get_phys_screen(c->screen);
 
-    ewmh_check_client_hints(c);
-
     move_client_to_screen(c, screen, True);
 
     /* update window title */
     client_updatetitle(c);
 
+    if(c->w == area.width && c->h == area.height)
+        c->border = wa->border_width;
+    else
+        c->border = globalconf.screens[screen].borderpx;
+
+    ewmh_check_client_hints(c);
     /* loadprops or apply rules if no props */
     if(!client_loadprops(c, screen))
         tag_client_with_rules(c);
@@ -312,7 +316,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     {
         c->x = area.x;
         c->y = area.y;
-        c->border = wa->border_width;
     }
     else
     {
@@ -328,8 +331,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             c->x = c->rx = darea.x;
         if(c->y < darea.y)
             c->y = c->ry = darea.y;
-
-        c->border = globalconf.screens[screen].borderpx;
     }
 
     /* set borders */
@@ -363,7 +364,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             if(is_client_tagged(t, tag))
                 tag_client(c, tag);
 
-    /* should be floating if transsient or fixed) */
+    /* should be floating if transsient or fixed */
     if(!c->isfloating)
         c->isfloating = (rettrans == Success) || c->isfixed;
 
@@ -544,7 +545,8 @@ client_updatewmhints(Client *c)
     if((wmh = XGetWMHints(globalconf.display, c->win)))
     {
         c->isurgent = (wmh->flags & XUrgencyHint);
-        c->skip = (wmh->initial_state == WithdrawnState);
+        if(wmh->initial_state == WithdrawnState)
+            c->skip = True;
         XFree(wmh);
     }
 }
@@ -609,8 +611,9 @@ client_updatesizehints(Client *c)
     else
         c->minax = c->maxax = c->minay = c->maxay = 0;
 
-    c->isfixed = (c->maxw && c->minw && c->maxh && c->minh
-                  && c->maxw == c->minw && c->maxh == c->minh);
+    if(c->maxw && c->minw && c->maxh && c->minh
+       && c->maxw == c->minw && c->maxh == c->minh)
+        c->isfixed = True;
 }
 
 /** Returns True if a client is tagged
