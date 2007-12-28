@@ -294,6 +294,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->screen = get_screen_bycoord(c->x, c->y);
     c->phys_screen = get_phys_screen(c->screen);
 
+    ewmh_check_client_hints(c);
+
     move_client_to_screen(c, screen, True);
 
     /* update window title */
@@ -376,7 +378,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     focus(c, True, screen);
 
-    ewmh_check_client_hints(c);
     ewmh_update_net_client_list(c->phys_screen);
 
     /* rearrange to display new window */
