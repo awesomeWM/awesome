@@ -19,6 +19,8 @@
  *
  */
 
+#include <math.h>
+
 #include "mouse.h"
 #include "screen.h"
 #include "layout.h"
@@ -40,7 +42,7 @@ extern AwesomeConf globalconf;
 void
 uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int x1, y1, ocx, ocy, di, nx, ny;
+    int x1, y, ocx, ocy, di, nx, ny;
     unsigned int dui;
     Window dummy;
     XEvent ev;
@@ -72,7 +74,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         return;
     XQueryPointer(globalconf.display,
                   RootWindow(globalconf.display, c->phys_screen),
-                  &dummy, &dummy, &x1, &y1, &di, &di, &dui);
+                  &dummy, &dummy, &x1, &y, &di, &di, &dui);
     c->ismax = False;
     statusbar_draw(c->screen);
     for(;;)
@@ -94,7 +96,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             break;
         case MotionNotify:
             nx = ocx + (ev.xmotion.x - x1);
-            ny = ocy + (ev.xmotion.y - y1);
+            ny = ocy + (ev.xmotion.y - y);
             if(abs(nx) < globalconf.screens[screen].snap + area.x && nx > area.x)
                 nx = area.x;
             else if(abs((area.x + area.width) - (nx + c->w + 2 * c->border)) < globalconf.screens[screen].snap)
@@ -200,8 +202,13 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                     mwfact = 1 - (double) (ev.xmotion.x - area.x) / area.width;
                 if(mwfact < 0.1) mwfact = 0.1;
                 else if(mwfact > 0.9) mwfact = 0.9;
-                curtags[0]->mwfact = mwfact;
-                arrange(screen);
+                if(fabs(curtags[0]->mwfact - mwfact) >= 0.05)
+                {
+                    curtags[0]->mwfact = mwfact;
+                    arrange(screen);
+                    /* drop possibly arrived events while we where arrange()ing */
+                    while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
+                }
             }
 
             break;
