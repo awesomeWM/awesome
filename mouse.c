@@ -106,6 +106,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             else if(abs((area.y + area.height) - (ny + c->h + 2 * c->border)) < globalconf.screens[screen].snap)
                 ny = area.y + area.height - c->h - 2 * c->border;
             client_resize(c, nx, ny, c->w, c->h, False, False);
+            while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
             break;
         }
     }
