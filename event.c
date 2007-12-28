@@ -135,10 +135,10 @@ handle_event_configurerequest(XEvent * e)
     XWindowChanges wc;
     int old_screen;
     Tag **curtags;
-    return;
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
+        return;
         c->ismax = False;
         curtags = get_current_tags(c->screen);
         if(ev->value_mask & CWBorderWidth)
