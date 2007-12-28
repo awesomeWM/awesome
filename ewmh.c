@@ -265,6 +265,12 @@ void
 ewmh_process_client_message(XClientMessageEvent *ev)
 {
     Client *c;
+    int screen;
+
+    if(ev->message_type == net_current_desktop)
+        for(screen = 0; screen < ScreenCount(globalconf.display); screen++)
+            if(ev->window == RootWindow(globalconf.display, screen))
+                tag_view(screen, ev->data.l[0]);
 
     if(ev->message_type == net_close_window)
     {

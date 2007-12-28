@@ -301,6 +301,27 @@ uicb_tag_toggleview(int screen, char *arg)
     ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 
+void
+tag_view(int screen, int dindex)
+{
+    Tag *target_tag, *tag;
+
+    if(dindex < 0)
+        return;
+
+    for(target_tag = globalconf.screens[screen].tags; target_tag && dindex > 0;
+        target_tag = target_tag->next, dindex--);
+    if(target_tag)
+    {
+        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+            tag->selected = False;
+        target_tag->selected = True;
+    }
+    saveawesomeprops(screen);
+    arrange(screen);
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
+}
+
 /** View tag
  * \param screen Screen ID
  * \param arg tag to view
@@ -309,28 +330,13 @@ uicb_tag_toggleview(int screen, char *arg)
 void
 uicb_tag_view(int screen, char *arg)
 {
-    int i;
-    Tag *tag, *target_tag;
+    Tag *tag;
 
     if(arg)
-    {
-	i = atoi(arg) - 1;
-        for(target_tag = globalconf.screens[screen].tags; target_tag && i > 0;
-            target_tag = target_tag->next, i--);
-        if(target_tag)
-        {
-            for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-                tag->selected = False;
-            target_tag->selected = True;
-        }
-    }
+	tag_view(screen, atoi(arg) - 1);
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag->selected = True;
-
-    saveawesomeprops(screen);
-    arrange(screen);
-    ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 
 /** View previously selected tags
