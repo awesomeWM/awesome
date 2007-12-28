@@ -29,11 +29,11 @@ extern AwesomeConf globalconf;
 static FocusList *
 focus_get_node_by_client(Client *c)
 {
-    FocusList *fh;
+    FocusList *fl;
 
-    for(fh = globalconf.focus; fh; fh = fh->prev)
-        if(fh->client == c)
-            return fh;
+    for(fl = globalconf.focus; fl; fl = fl->prev)
+        if(fl->client == c)
+            return fl;
 
     return NULL;
 }
@@ -86,10 +86,11 @@ focus_add_client(Client *c)
 void
 focus_delete_client(Client *c)
 {
-    FocusList *fc = focus_get_node_by_client(c), *target;
-    if (fc)
+    FocusList *target = focus_get_node_by_client(c);
+
+    if(target)
     {
-        target = focus_detach_node(fc);
+        focus_detach_node(target);
         p_delete(&target);
     }
 }
