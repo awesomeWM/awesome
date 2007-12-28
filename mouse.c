@@ -28,6 +28,7 @@
 #include "window.h"
 #include "statusbar.h"
 #include "layouts/floating.h"
+#include "layouts/tile.h"
 
 extern AwesomeConf globalconf;
 
@@ -116,38 +117,59 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int ocx, ocy, nw, nh;
+    int ocx, ocy, nw, nh, n;
     XEvent ev;
     Client *c = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
+    Area area;
+    double mwfact;
 
-    if(!c)
+    /* only handle floating and tiled layouts */
+    if(c)
+    {
+        if((curtags[0]->layout->arrange == layout_floating) || c->isfloating)
+        {
+            restack(screen);
+            ocx = c->x;
+            ocy = c->y;
+            c->ismax = False;
+        }
+        else if (curtags[0]->layout->arrange == layout_tile
+                 || curtags[0]->layout->arrange == layout_tileleft)
+        {
+            for(n = 0, c = globalconf.clients; c; c = c->next)
+                if(IS_TILED(c, screen))
+                    n++;
+
+            if(n <= curtags[0]->nmaster) return;
+
+            for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
+            if(!c) return;
+
+            area = get_screen_area(screen,
+                                   globalconf.screens[c->screen].statusbar,
+                                   &globalconf.screens[c->screen].padding);
+        }
+    }
+    else
         return;
 
-    if((curtags[0]->layout->arrange != layout_floating)
-       && !c->isfloating)
-        uicb_client_togglefloating(screen, NULL);
-    else
-        restack(screen);
-
-    p_delete(&curtags);
-
-    ocx = c->x;
-    ocy = c->y;
     if(XGrabPointer(globalconf.display, RootWindow(globalconf.display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
-    c->ismax = False;
-    statusbar_draw(c->screen);
-    XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
+
+    if(curtags[0]->layout->arrange == layout_tileleft)
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, 0, c->h + c->border - 1);
+    else
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
+
     for(;;)
     {
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
         switch (ev.type)
         {
         case ButtonRelease:
-            XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
             XUngrabPointer(globalconf.display, CurrentTime);
             while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
             return;
@@ -161,14 +183,31 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             handle_event_maprequest(&ev);
             break;
         case MotionNotify:
-            if((nw = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
-                nw = 1;
-            if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
-                nh = 1;
-            client_resize(c, c->x, c->y, nw, nh, True, False);
+            if(curtags[0]->layout->arrange == layout_floating || c->isfloating)
+            {
+                if((nw = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
+                    nw = 1;
+                if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
+                    nh = 1;
+                client_resize(c, c->x, c->y, nw, nh, True, False);
+            }
+            else if(curtags[0]->layout->arrange == layout_tile
+                    || curtags[0]->layout->arrange == layout_tileleft)
+            {
+                if(curtags[0]->layout->arrange == layout_tile)
+                    mwfact = (double) (ev.xmotion.x - area.x) / area.width;
+                else
+                    mwfact = 1 - (double) (ev.xmotion.x - area.x) / area.width;
+                if(mwfact < 0.1) mwfact = 0.1;
+                else if(mwfact > 0.9) mwfact = 0.9;
+                curtags[0]->mwfact = mwfact;
+                arrange(screen);
+            }
+
             break;
         }
     }
+    p_delete(&curtags);
 }
 
 
