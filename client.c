@@ -223,9 +223,15 @@ focus(Client *c, Bool selscreen, int screen)
                         globalconf.screens[screen].opacity_unfocused);
     }
 
-    /* if c is NULL or invisible, take next client in the stack */
+
+    /* if c is NULL or invisible, take next client in the focus history */
     if((!c && selscreen) || (c && !client_isvisible(c, screen)))
-        for(c = globalconf.clients; c && !client_isvisible(c, screen); c = c->next);
+    {
+        c = focus_get_current_client(screen);
+        /* if c is still NULL take next client in the stack */
+        if(!c)
+            for(c = globalconf.clients; c && !client_isvisible(c, screen); c = c->next);
+    }
 
     if(c)
     {
@@ -237,7 +243,7 @@ focus(Client *c, Bool selscreen, int screen)
     if(!selscreen)
         return;
 
-    /* save old sel in focus history */
+    /* save sel in focus history */
     focus_add_client(c);
 
     statusbar_draw(screen);
