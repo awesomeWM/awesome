@@ -91,6 +91,7 @@ is_client_tagged(Client *c, Tag *t)
     for(tc = globalconf.tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
             return True;
+
     return False;
 }
 

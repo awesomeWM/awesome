@@ -99,9 +99,10 @@ static Client *
 focus_get_latest_client_for_tags(Tag **t)
 {
     FocusList *fl;
+    Tag **tags;
 
     for(fl = globalconf.focus; fl; fl = fl->prev)
-        for(; *t; t++)
+        for(tags = t; *tags; tags++)
             if(is_client_tagged(fl->client, *t))
                 return fl->client;
 
