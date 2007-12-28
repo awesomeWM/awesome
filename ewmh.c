@@ -26,6 +26,8 @@
 #include "util.h"
 #include "tag.h"
 #include "focus.h"
+#include "screen.h"
+#include "layout.h"
 
 extern AwesomeConf globalconf;
 
@@ -42,6 +44,7 @@ static Atom net_wm_name;
 static Atom net_wm_icon;
 static Atom net_wm_state;
 static Atom net_wm_state_sticky;
+static Atom net_wm_state_fullscreen;
 
 static Atom utf8_string;
 
@@ -66,11 +69,16 @@ static AtomItem AtomNames[] =
     { "_NET_WM_ICON", &net_wm_icon },
     { "_NET_WM_STATE", &net_wm_state },
     { "_NET_WM_STATE_STICKY", &net_wm_state_sticky },
+    { "_NET_WM_STATE_FULLSCREEN", &net_wm_state_fullscreen },
 
     { "UTF8_STRING", &utf8_string },
 };
 
 #define ATOM_NUMBER (sizeof(AtomNames)/sizeof(AtomItem)) 
+
+#define _NET_WM_STATE_REMOVE 0
+#define _NET_WM_STATE_ADD 1
+#define _NET_WM_STATE_TOGGLE 2
 
 void
 ewmh_init_atoms(void)
@@ -105,6 +113,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_icon;
     atom[i++] = net_wm_state;
     atom[i++] = net_wm_state_sticky;
+    atom[i++] = net_wm_state_fullscreen;
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
                     net_supported, XA_ATOM, 32,
@@ -197,13 +206,23 @@ ewmh_update_net_active_window(int phys_screen)
 }
 
 static void
-ewmh_process_state_atom(Client *c, Atom state)
+ewmh_process_state_atom(Client *c, Atom state, int set)
 {
     if(state == net_wm_state_sticky)
     {
         Tag *tag;
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
             tag_client(c, tag);
+    }
+    else if(state == net_wm_state_fullscreen)
+    {
+        Area area = get_screen_area(c->screen, NULL, NULL);
+        /* reset max attribute */
+        if(set == _NET_WM_STATE_REMOVE)
+            c->ismax = True;
+        else if(set == _NET_WM_STATE_ADD)
+            c->ismax = False;
+        client_maximize(c, area.x, area.y, area.width, area.height);
     }
 }
 
@@ -221,9 +240,9 @@ ewmh_process_client_message(XClientMessageEvent *ev)
     {
         if((c = get_client_bywin(globalconf.clients, ev->window)))
         {
-            ewmh_process_state_atom(c, (Atom) ev->data.l[1]);
+            ewmh_process_state_atom(c, (Atom) ev->data.l[1], ev->data.l[0]);
             if(ev->data.l[2])
-                ewmh_process_state_atom(c, (Atom) ev->data.l[2]);
+                ewmh_process_state_atom(c, (Atom) ev->data.l[2], ev->data.l[0]);
         }
     }
 }
@@ -243,7 +262,7 @@ ewmh_check_client_hints(Client *c)
 
     state = (Atom *) data;
     for(i = 0; i < n; i++)
-        ewmh_process_state_atom(c, state[i]);
+        ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
 
     XFree(data);
 }

@@ -30,6 +30,7 @@ void arrange(int);
 void restack(int);
 void loadawesomeprops(int);
 void saveawesomeprops(int);
+void client_maximize(Client *c, int, int, int, int);
 
 UICB_PROTO(uicb_client_focusnext);
 UICB_PROTO(uicb_client_focusprev);

@@ -252,26 +252,25 @@ uicb_tag_setlayout(int screen, char *arg)
     saveawesomeprops(screen);
 }
 
-static void
-maximize(int x, int y, int w, int h, int screen)
+void
+client_maximize(Client *c, int x, int y, int w, int h)
 {
-    Client *sel = globalconf.focus->client;
-
-    if(!sel)
-        return;
-
-    if((sel->ismax = !sel->ismax))
+    if((c->ismax = !c->ismax))
     {
-        sel->wasfloating = sel->isfloating;
-        sel->isfloating = True;
-        client_resize(sel, x, y, w, h, True, True);
+        c->oldborder = c->border;
+        c->border = 0;
+        c->wasfloating = c->isfloating;
+        c->isfloating = True;
+        client_resize(c, x, y, w, h, False, True);
     }
-    else if(sel->wasfloating)
-        client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, True, False);
+    else if(c->wasfloating)
+        client_resize(c, c->rx, c->ry, c->rw, c->rh, True, False);
     else
-        sel->isfloating = False;
+        c->isfloating = False;
 
-    arrange(screen);
+    c->border = c->oldborder;
+
+    arrange(c->screen);
 }
 
 /** Toggle maximize for client
@@ -282,13 +281,14 @@ maximize(int x, int y, int w, int h, int screen)
 void
 uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 {
+    Client *sel = globalconf.focus->client;
     Area area = get_screen_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
-    maximize(area.x, area.y,
-             area.width - 2 * globalconf.screens[screen].borderpx,
-             area.height - 2 * globalconf.screens[screen].borderpx,
-             screen);
+    if(sel)
+        client_maximize(sel, area.x, area.y,
+                        area.width - 2 * globalconf.screens[screen].borderpx,
+                        area.height - 2 * globalconf.screens[screen].borderpx);
 }
 
 /** Toggle vertical maximize for client
@@ -305,11 +305,9 @@ uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
                                 &globalconf.screens[screen].padding);
 
     if(sel)
-        maximize(sel->x,
-                 area.y,
-                 sel->w,
-                 area.height - 2 * globalconf.screens[screen].borderpx,
-                 screen);
+        client_maximize(sel, sel->x, area.y,
+                        sel->w,
+                        area.height - 2 * globalconf.screens[screen].borderpx);
 }
 
 
@@ -327,11 +325,9 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
                                 &globalconf.screens[screen].padding);
 
     if(sel)
-        maximize(area.x,
-                 sel->y,
-                 area.height - 2 * globalconf.screens[screen].borderpx,
-                 sel->h,
-                 screen);
+        client_maximize(sel, area.x, sel->y,
+                        area.height - 2 * globalconf.screens[screen].borderpx,
+                        sel->h);
 }
 
 /** Zoom client
