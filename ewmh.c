@@ -45,6 +45,7 @@ static Atom net_wm_icon_name;
 static Atom net_wm_window_type;
 static Atom net_wm_window_type_normal;
 static Atom net_wm_window_type_dock;
+static Atom net_wm_window_type_splash;
 static Atom net_wm_icon;
 static Atom net_wm_state;
 static Atom net_wm_state_sticky;
@@ -74,6 +75,7 @@ static AtomItem AtomNames[] =
     { "_NET_WM_WINDOW_TYPE", &net_wm_window_type },
     { "_NET_WM_WINDOW_TYPE_NORMAL", &net_wm_window_type_normal },
     { "_NET_WM_WINDOW_TYPE_DOCK", &net_wm_window_type_dock },
+    { "_NET_WM_WINDOW_TYPE_SPLASH", &net_wm_window_type_splash },
     { "_NET_WM_ICON", &net_wm_icon },
     { "_NET_WM_STATE", &net_wm_state },
     { "_NET_WM_STATE_STICKY", &net_wm_state_sticky },
@@ -122,6 +124,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_window_type;
     atom[i++] = net_wm_window_type_normal;
     atom[i++] = net_wm_window_type_dock;
+    atom[i++] = net_wm_window_type_splash;
     atom[i++] = net_wm_icon;
     atom[i++] = net_wm_state;
     atom[i++] = net_wm_state_sticky;
@@ -247,7 +250,8 @@ ewmh_process_window_type_atom(Client *c, Atom state)
     {
         /* do nothing */
     }
-    else if(state == net_wm_window_type_dock)
+    else if(state == net_wm_window_type_dock
+            || state == net_wm_window_type_splash)
     {
         c->border = 0;
         c->skip = True;
