@@ -230,7 +230,7 @@ focus(Client *c, Bool selscreen, int screen)
         c = focus_get_current_client(screen);
         /* if c is still NULL take next client in the stack */
         if(!c)
-            for(c = globalconf.clients; c && !client_isvisible(c, screen); c = c->next);
+            for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     }
 
     if(c)
