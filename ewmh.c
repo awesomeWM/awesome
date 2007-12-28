@@ -41,6 +41,7 @@ static Atom net_active_window;
 static Atom net_close_window;
 
 static Atom net_wm_name;
+static Atom net_wm_icon_name;
 static Atom net_wm_window_type;
 static Atom net_wm_window_type_normal;
 static Atom net_wm_window_type_dock;
@@ -69,6 +70,7 @@ static AtomItem AtomNames[] =
     { "_NET_CLOSE_WINDOW", &net_close_window },
 
     { "_NET_WM_NAME", &net_wm_name },
+    { "_NET_WM_ICON_NAME", &net_wm_icon_name },
     { "_NET_WM_WINDOW_TYPE", &net_wm_window_type },
     { "_NET_WM_WINDOW_TYPE_NORMAL", &net_wm_window_type_normal },
     { "_NET_WM_WINDOW_TYPE_DOCK", &net_wm_window_type_dock },
@@ -116,6 +118,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_close_window;
     
     atom[i++] = net_wm_name;
+    atom[i++] = net_wm_icon_name;
     atom[i++] = net_wm_window_type;
     atom[i++] = net_wm_window_type_normal;
     atom[i++] = net_wm_window_type_dock;
