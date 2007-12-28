@@ -262,6 +262,7 @@ focus(Client *c, Bool selscreen, int screen)
         XSetInputFocus(globalconf.display,
                        RootWindow(globalconf.display, get_phys_screen(screen)),
                        RevertToPointerRoot, CurrentTime);
+
     ewmh_update_net_active_window(get_phys_screen(screen));
 }
 
@@ -337,8 +338,9 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* propagates border_width, if size doesn't change */
     window_configure(globalconf.display, c->win, c->x, c->y, c->w, c->h, c->border);
 
-    /* update sizehint */
+    /* update hints */
     client_updatesizehints(c);
+    client_updatewmhints(c);
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
@@ -541,6 +543,7 @@ client_updatewmhints(Client *c)
     if((wmh = XGetWMHints(globalconf.display, c->win)))
     {
         c->isurgent = (wmh->flags & XUrgencyHint);
+        c->skip = (wmh->initial_state == WithdrawnState);
         XFree(wmh);
     }
 }

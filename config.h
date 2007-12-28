@@ -125,6 +125,8 @@ struct Client
     Bool isfixed;
     /** True if the window is maximized */
     Bool ismax;
+    /** True if the client must be skipped from client list */
+    Bool skip;
     /** Next client */
     Client *next;
     /** Previous client */

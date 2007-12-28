@@ -84,9 +84,9 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
 
     if(!sel)
         return;
-    for(c = sel->next; c && !client_isvisible(c, screen); c = c->next);
+    for(c = sel->next; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     if(!c)
-        for(c = globalconf.clients; c && !client_isvisible(c, screen); c = c->next);
+        for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     if(c)
     {
         focus(c, True, screen);
@@ -106,11 +106,11 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
 
     if(!sel)
         return;
-    for(c = sel->prev; c && !client_isvisible(c, screen); c = c->prev);
+    for(c = sel->prev; c && (c->skip || !client_isvisible(c, screen)); c = c->prev);
     if(!c)
     {
         for(c = globalconf.clients; c && c->next; c = c->next);
-        for(; c && !client_isvisible(c, screen); c = c->prev);
+        for(; c && (c->skip || !client_isvisible(c, screen)); c = c->prev);
     }
     if(c)
     {
