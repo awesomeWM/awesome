@@ -688,11 +688,7 @@ config_parse(const char *confpatharg)
             cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
             rule->prop = a_strdup(cfg_getstr(cfgsectmp, "name"));
             rule->tags = a_strdup(cfg_getstr(cfgsectmp, "tags"));
-            if(!a_strlen(rule->tags))
-                rule->tags = NULL;
             rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
-            if (!a_strlen(rule->icon))
-                rule->icon = NULL;
             rule->isfloating = cfg_getbool(cfgsectmp, "float");
             rule->screen = cfg_getint(cfgsectmp, "screen");
             if(rule->screen >= get_screen_count())
