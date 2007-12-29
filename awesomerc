@@ -88,7 +88,31 @@ screen 0
             }
         }
         netwmicon mynetwmicon {}
-        focustitle myfocustitle  {}
+        focustitle myfocustitle 
+        {
+            mouse
+            {
+                button = "4"
+                command = "client_focusnext"
+            }
+            mouse
+            {
+                button = "5"
+                command = "client_focusprev"
+            }
+            mouse
+            {
+                modkey = {"Mod4"}
+                button = "4"
+                command = "client_swapnext"
+            }
+            mouse
+            {
+                modkey = {"Mod4"}
+                button = "5"
+                command = "client_swapprev"
+            }
+        }
         textbox mytextbox { text = "awesome!" }
     }
 }
