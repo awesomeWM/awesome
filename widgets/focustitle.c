@@ -85,12 +85,12 @@ focustitle_new(Statusbar *statusbar, cfg_t *config)
     if((buf = cfg_getstr(config, "fg")))
         d->fg = initxcolor(statusbar->screen, buf);
     else
-        d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
+        d->fg = globalconf.screens[statusbar->screen].colors_selected[ColFG];
 
     if((buf = cfg_getstr(config, "bg")))
-        d->fg = initxcolor(statusbar->screen, buf);
+        d->bg = initxcolor(statusbar->screen, buf);
     else
-        d->fg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
+        d->bg = globalconf.screens[statusbar->screen].colors_selected[ColBG];
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
