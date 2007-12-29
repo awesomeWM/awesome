@@ -108,6 +108,7 @@ statusbar_draw(int screen)
 void
 statusbar_init(int screen)
 {
+    Widget *widget;
     XSetWindowAttributes wa;
     int phys_screen = get_phys_screen(screen);
     Area area = get_screen_area(screen,
@@ -116,6 +117,10 @@ statusbar_init(int screen)
     Statusbar *statusbar = globalconf.screens[screen].statusbar;
 
     statusbar->height = globalconf.screens[screen].font->height * 1.5;
+
+    for(widget = statusbar->widgets; widget; widget = widget->next)
+        if(widget->font)
+            statusbar->height = MAX(statusbar->height, widget->font->height);
 
     if(statusbar->position == BarRight || statusbar->position == BarLeft)
         statusbar->width = area.height;

@@ -46,17 +46,16 @@ static int
 textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
-    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Data *d = widget->data;
 
-    widget->width = textwidth(vscreen.font, d->text);
+    widget->width = textwidth(widget->font, d->text);
     widget->location = widget_calculate_offset(widget->statusbar->width,
                                                widget->width,
                                                offset,
                                                widget->alignment);
 
     draw_text(ctx, widget->location, 0, widget->width, widget->statusbar->height,
-              vscreen.font, d->text, d->fg, d->bg);
+              widget->font, d->text, d->fg, d->bg);
 
     return widget->width;
 }
@@ -72,7 +71,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
     Data *d;
-    char *color;
+    char *buf;
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
@@ -81,15 +80,21 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
 
     w->data = d = p_new(Data, 1);
 
-    if ((color = cfg_getstr(config, "fg")))
-        d->fg = initxcolor(statusbar->screen, color);
+    if((buf = cfg_getstr(config, "fg")))
+        d->fg = initxcolor(statusbar->screen, buf);
     else
         d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
-    if ((color = cfg_getstr(config, "bg")))
-        d->bg = initxcolor(statusbar->screen, color);
+    if((buf = cfg_getstr(config, "bg")))
+        d->bg = initxcolor(statusbar->screen, buf);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
+
+    if((buf = cfg_getstr(config, "font")))
+        w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
+
+    if(!w->font)
+        w->font = globalconf.screens[statusbar->screen].font;
 
     update(w, cfg_getstr(config, "text"));
     return w;

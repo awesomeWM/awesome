@@ -235,6 +235,7 @@ struct Widget
     int location;
     int width;
     Button *buttons;
+    XftFont *font;
     Widget *next;
 };
 
