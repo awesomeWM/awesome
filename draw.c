@@ -218,6 +218,20 @@ draw_get_image_width(const char *filename)
     return width;
 }
 
+int
+draw_get_image_height(const char* filename)
+{
+    int height;
+    cairo_surface_t *surface;
+
+    surface = cairo_image_surface_create_from_png(filename);
+    cairo_image_surface_get_height(surface);
+    height = cairo_image_surface_get_height(surface);
+    cairo_surface_destroy(surface);
+
+    return height;
+}
+
 Drawable
 draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
 {

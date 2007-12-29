@@ -588,6 +588,7 @@ config_parse(const char *confpatharg)
     {
         CFG_STR((char *) "name", (char *) "", CFGF_NONE),
         CFG_STR((char *) "tags", (char *) "", CFGF_NONE),
+        CFG_STR((char *) "icon", (char *) "", CFGF_NONE),
         CFG_BOOL((char *) "float", cfg_false, CFGF_NONE),
         CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
         CFG_END()
@@ -689,6 +690,9 @@ config_parse(const char *confpatharg)
             rule->tags = a_strdup(cfg_getstr(cfgsectmp, "tags"));
             if(!a_strlen(rule->tags))
                 rule->tags = NULL;
+            rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
+            if (!a_strlen(rule->icon))
+                rule->icon = NULL;
             rule->isfloating = cfg_getbool(cfgsectmp, "float");
             rule->screen = cfg_getint(cfgsectmp, "screen");
             if(rule->screen >= get_screen_count())

@@ -29,14 +29,16 @@ static int
 iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
+    int height;
     widget->width = draw_get_image_width(widget->data);
-
+    height = draw_get_image_height(widget->data);
+    widget->width = ((double) widget->statusbar->height / height) * widget->width;
     widget->location = widget_calculate_offset(widget->statusbar->width,
                                                widget->width,
                                                offset,
                                                widget->alignment);
 
-    draw_image(ctx, widget->location, 0, 0, widget->data);
+    draw_image(ctx, widget->location, 0, widget->statusbar->height, widget->data);
 
     return widget->width;
 }

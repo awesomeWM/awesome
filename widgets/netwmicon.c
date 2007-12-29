@@ -26,6 +26,7 @@
 #include "focus.h"
 #include "tag.h"
 #include "widget.h"
+#include "rules.h"
 
 extern AwesomeConf globalconf;
 
@@ -39,10 +40,30 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
     int format, width, height, size, i;
     unsigned long items, rest;
     unsigned char *image, *imgdata;
+    char* icon;
+    Rule* r;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
 
     if(!sel)
         return 0;
+
+    for(r = globalconf.rules; r; r = r->next)
+        if(client_match_rule(sel, r))
+        {
+            if(!r->icon)
+                continue;
+            icon = r->icon;
+            width = draw_get_image_width(icon);
+            height = draw_get_image_height(icon);
+            width = ((double) widget->statusbar->height / (double) height) * width;
+            widget->location = widget_calculate_offset(widget->statusbar->width,
+                                                       width,
+                                                       offset,
+                                                       widget->alignment);
+            draw_image(ctx, widget->location, 0, widget->statusbar->height, icon);
+
+            return width;
+        }
 
     if(XGetWindowProperty(ctx->display, sel->win, 
                           XInternAtom(ctx->display, "_NET_WM_ICON", False),

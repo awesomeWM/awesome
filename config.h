@@ -43,6 +43,7 @@ struct Rule
 {
     char *prop;
     char *tags;
+    char *icon;
     int screen;
     Bool isfloating;
     regex_t *propregex;
