@@ -204,32 +204,19 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 
 }
 
-int
-draw_get_image_width(const char *filename)
+Area
+draw_get_image_size(const char *filename)
 {
-    int width;
+    Area size;
     cairo_surface_t *surface;
 
     surface = cairo_image_surface_create_from_png(filename);
     cairo_image_surface_get_width(surface);
-    width = cairo_image_surface_get_width(surface);
+    size.width = cairo_image_surface_get_width(surface);
+    size.height = cairo_image_surface_get_height(surface);
     cairo_surface_destroy(surface);
 
-    return width;
-}
-
-int
-draw_get_image_height(const char* filename)
-{
-    int height;
-    cairo_surface_t *surface;
-
-    surface = cairo_image_surface_create_from_png(filename);
-    cairo_image_surface_get_height(surface);
-    height = cairo_image_surface_get_height(surface);
-    cairo_surface_destroy(surface);
-
-    return height;
+    return size;
 }
 
 Drawable

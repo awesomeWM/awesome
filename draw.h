@@ -24,6 +24,15 @@
 
 typedef struct
 {
+    /* Co-ords of upper left corner */
+    int x;
+    int y;
+    int width;
+    int height;
+} Area;
+
+typedef struct
+{
     Display *display;
     Drawable drawable;
     Visual *visual;
@@ -40,8 +49,7 @@ void draw_rectangle(DrawCtx *, int, int, int, int, Bool, XColor);
 void draw_circle(DrawCtx *, int, int, int, Bool, XColor);
 void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
-int draw_get_image_width(const char *filename);
-int draw_get_image_height(const char *filename);
+Area draw_get_image_size(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short textwidth(XftFont *, char *);
 

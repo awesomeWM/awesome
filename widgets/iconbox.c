@@ -29,10 +29,10 @@ static int
 iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
-    int height;
-    widget->width = draw_get_image_width(widget->data);
-    height = draw_get_image_height(widget->data);
-    widget->width = ((double) widget->statusbar->height / height) * widget->width;
+    Area area;
+
+    area = draw_get_image_size(widget->data);
+    widget->width = ((double) widget->statusbar->height / area.height) * area.width;
     widget->location = widget_calculate_offset(widget->statusbar->width,
                                                widget->width,
                                                offset,

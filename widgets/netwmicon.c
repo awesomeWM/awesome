@@ -38,9 +38,9 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
     unsigned char *wdata;
     Atom type;
     int format, width, height, size, i;
+    Area area;
     unsigned long items, rest;
     unsigned char *image, *imgdata;
-    char* icon;
     Rule* r;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
 
@@ -50,17 +50,15 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
     for(r = globalconf.rules; r; r = r->next)
         if(r->icon && client_match_rule(sel, r))
         {
-            icon = r->icon;
-            width = draw_get_image_width(icon);
-            height = draw_get_image_height(icon);
-            width = ((double) widget->statusbar->height / (double) height) * width;
+            area = draw_get_image_size(r->icon);
+            widget->width = ((double) widget->statusbar->height / (double) area.height) * area.width;
             widget->location = widget_calculate_offset(widget->statusbar->width,
-                                                       width,
+                                                       widget->width,
                                                        offset,
                                                        widget->alignment);
-            draw_image(ctx, widget->location, 0, widget->statusbar->height, icon);
+            draw_image(ctx, widget->location, 0, widget->statusbar->height, r->icon);
 
-            return width;
+            return widget->width;
         }
 
     if(XGetWindowProperty(ctx->display, sel->win, 
