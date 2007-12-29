@@ -48,10 +48,8 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
         return 0;
 
     for(r = globalconf.rules; r; r = r->next)
-        if(client_match_rule(sel, r))
+        if(r->icon && client_match_rule(sel, r))
         {
-            if(!r->icon)
-                continue;
             icon = r->icon;
             width = draw_get_image_width(icon);
             height = draw_get_image_height(icon);
