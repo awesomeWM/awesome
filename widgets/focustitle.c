@@ -27,13 +27,21 @@
 #include "layout.h"
 #include "tag.h"
 #include "focus.h"
+#include "xutil.h"
 
 extern AwesomeConf globalconf;
+
+typedef struct
+{
+    XColor fg;
+    XColor bg;
+} Data;
 
 static int
 focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
+    Data *d = widget->data;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
 
     widget->location = widget_calculate_offset(vscreen.statusbar->width,
@@ -44,20 +52,17 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     if(sel)
     {
         draw_text(ctx, widget->location, 0, vscreen.statusbar->width - used,
-                  vscreen.statusbar->height, vscreen.font, sel->name,
-                  vscreen.colors_selected[ColFG],
-                  vscreen.colors_selected[ColBG]);
+                  vscreen.statusbar->height, widget->font, sel->name,
+                  d->fg, d->bg);
         if(sel->isfloating)
             draw_circle(ctx, widget->location, 0,
-                        (vscreen.font->height + 2) / 4,
-                        sel->ismax,
-                        vscreen.colors_selected[ColFG]);
+                        (widget->font->height + 2) / 4,
+                        sel->ismax, d->fg);
     }
     else
         draw_text(ctx, widget->location, 0, vscreen.statusbar->width - used,
-                  vscreen.statusbar->height, vscreen.font, NULL,
-                  vscreen.colors_normal[ColFG],
-                  vscreen.colors_normal[ColBG]);
+                  vscreen.statusbar->height, widget->font, NULL,
+                  d->fg, d->bg);
 
     widget->width = vscreen.statusbar->width - used;
 
@@ -68,10 +73,31 @@ Widget *
 focustitle_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
+    Data *d;
+    char *buf;
+
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
     w->draw = focustitle_draw;
     w->alignment = AlignFlex;
+    w->data = d = p_new(Data, 1);
+
+    if((buf = cfg_getstr(config, "fg")))
+        d->fg = initxcolor(statusbar->screen, buf);
+    else
+        d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
+
+    if((buf = cfg_getstr(config, "bg")))
+        d->fg = initxcolor(statusbar->screen, buf);
+    else
+        d->fg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
+
+    if((buf = cfg_getstr(config, "font")))
+        w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
+
+    if(!w->font)
+        w->font = globalconf.screens[statusbar->screen].font;
+
     return w;
 }
 

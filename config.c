@@ -514,7 +514,7 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
         CFG_END()
     };
-    static cfg_opt_t widget_textbox_opts[] =
+    static cfg_opt_t widget_textbox_focus_opts[] =
     {
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
@@ -534,9 +534,9 @@ config_parse(const char *confpatharg)
     static cfg_opt_t statusbar_opts[] =
     {
         CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
-        CFG_SEC((char *) "textbox", widget_textbox_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "textbox", widget_textbox_focus_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "taglist", widget_taglist_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "focustitle", widget_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "focustitle", widget_textbox_focus_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "iconbox", widget_iconbox_opts, CFGF_TITLE | CFGF_MULTI),
         CFG_SEC((char *) "netwmicon", widget_opts, CFGF_TITLE | CFGF_MULTI),
