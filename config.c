@@ -517,6 +517,7 @@ config_parse(const char *confpatharg)
     static cfg_opt_t widget_textbox_focus_opts[] =
     {
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
+        CFG_INT((char *) "width", 0, CFGF_NONE),
         CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),

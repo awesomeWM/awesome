@@ -48,7 +48,9 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 {
     Data *d = widget->data;
 
-    widget->width = textwidth(widget->font, d->text);
+    if(!widget->width)
+        widget->width = textwidth(widget->font, d->text);
+
     widget->location = widget_calculate_offset(widget->statusbar->width,
                                                widget->width,
                                                offset,
@@ -90,6 +92,8 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
         d->bg = initxcolor(statusbar->screen, buf);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
+
+    w->width = cfg_getint(config, "width");
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
