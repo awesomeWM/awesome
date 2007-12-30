@@ -69,7 +69,7 @@ taglist_draw(Widget *widget,
     int w = 0, flagsize;
     XColor *colors;
 
-    flagsize = (vscreen.font->height + 2) / 4;
+    flagsize = (vscreen.font->height + 2) / 3;
 
     widget->width = 0;
 

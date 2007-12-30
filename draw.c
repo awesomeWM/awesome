@@ -115,11 +115,11 @@ draw_rectangle(DrawCtx *ctx, int x, int y, int w, int h, Bool filled, XColor col
     cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
     if(filled)
     {
-        cairo_rectangle(cr, x, y, w + 1, h + 1);
+        cairo_rectangle(cr, x, y, w, h);
         cairo_fill(cr);
     }
     else
-        cairo_rectangle(cr, x + 1, y, w, h);
+        cairo_rectangle(cr, x + 1, y, w - 1, h - 1);
 
     cairo_stroke(cr);
 
