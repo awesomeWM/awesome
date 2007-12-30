@@ -54,7 +54,7 @@ draw_free_context(DrawCtx *ctx)
 }
 
 void
-draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *text, XColor fg, XColor bg)
+draw_text(DrawCtx *ctx, int x, int y, int w, int h, int padding, XftFont *font, const char *text, XColor fg, XColor bg)
 {
     int nw = 0;
     static char buf[256];
@@ -64,7 +64,10 @@ draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *t
     cairo_t *cr;
 
     draw_rectangle(ctx, x, y, w, h, True, bg);
-    if(!a_strlen(text))
+
+    olen = len = a_strlen(text);
+
+    if(!len)
         return;
 
     surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
@@ -74,12 +77,11 @@ draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *t
     cairo_set_font_size(cr, font->height);
     cairo_set_source_rgb(cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
 
-    olen = len = a_strlen(text);
     if(len >= sizeof(buf))
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    while(len && (nw = textwidth(font, buf)) > w)
+    while(len && (nw = (textwidth(font, buf)) + padding * 2) > w)
         buf[--len] = 0;
     if(nw > w)
         return;                 /* too long */
@@ -93,7 +95,7 @@ draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *t
             buf[len - 3] = '.';
     }
 
-    cairo_move_to(cr, x + font->height / 2, y + font->ascent + (ctx->height - font->height) / 2);
+    cairo_move_to(cr, x + padding, y + font->ascent + (ctx->height - font->height) / 2);
     cairo_show_text(cr, buf);
 
     cairo_font_face_destroy(font_face);
@@ -271,7 +273,7 @@ textwidth(XftFont *font, char *text)
     cairo_surface_destroy(surface);
     cairo_font_face_destroy(font_face);
 
-    return MAX(te.x_advance, te.width) + font->height;
+    return MAX(te.x_advance, te.width);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

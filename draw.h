@@ -43,7 +43,7 @@ typedef struct
 
 DrawCtx *draw_get_context(int, int, int);
 void draw_free_context(DrawCtx *);
-void draw_text(DrawCtx *, int, int, int, int, XftFont *, const char *, XColor fg, XColor bg);
+void draw_text(DrawCtx *, int, int, int, int, int, XftFont *, const char *, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, int, int, int, int, Bool, XColor);
 void draw_circle(DrawCtx *, int, int, int, Bool, XColor);
 void draw_image(DrawCtx *, int, int, int, const char *);

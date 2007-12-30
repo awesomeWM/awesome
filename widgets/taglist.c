@@ -74,7 +74,7 @@ taglist_draw(Widget *widget,
     widget->width = 0;
 
     for(tag = vscreen.tags; tag; tag = tag->next)
-        widget->width += textwidth(vscreen.font, tag->name);
+        widget->width += textwidth(vscreen.font, tag->name) + vscreen.font->height;
 
     widget->location = widget_calculate_offset(widget->statusbar->width,
                                                widget->width,
@@ -84,15 +84,17 @@ taglist_draw(Widget *widget,
     widget->width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
-        w = textwidth(vscreen.font, tag->name);
+        w = textwidth(vscreen.font, tag->name) + vscreen.font->height;
         if(tag->selected)
             colors = vscreen.colors_selected;
         else if(isurgent(tag))
             colors = vscreen.colors_urgent;
         else
             colors = vscreen.colors_normal;
-        draw_text(ctx, widget->location + widget->width, 0, w,
-                  vscreen.statusbar->height,
+        draw_text(ctx,
+                  widget->location + widget->width, 0,
+                  w, vscreen.statusbar->height,
+                  vscreen.font->height / 2,
                   vscreen.font,
                   tag->name,
                   colors[ColFG],
@@ -119,7 +121,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
         if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
             for(tag = vscreen.tags; tag; tag = tag->next, i++)
             {
-                width = textwidth(vscreen.font, tag->name);
+                width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
                 if(widget->statusbar->position == BarTop
                    || widget->statusbar->position == BarBot)
                     if(ev->x >= widget->location + prev_width
