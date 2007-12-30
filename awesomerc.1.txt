@@ -100,6 +100,84 @@ Screen
 *setborder* relative or absolute integer::
     Set default border size in pixels for new clients.
 
+WIDGETS
+-------
+Statusbar can be customized by modifying widgets names, order and options.
+
+taglist
+~~~~~~~
+This widget shows the tag list.
+
+*mouse*::
+    Set mouse bindings.
+
+layoutinfo
+~~~~~~~~~~
+This widget shows a icon for the selected layout.
+
+*mouse*::
+    Set mouse bindings.
+
+netwmicon
+~~~~~~~~~
+This widget shows a icon for the focused window  using NET_WM_ICON or icon file set in rule.
+
+*mouse*::
+    Set mouse bindings.
+
+
+focustitle
+~~~~~~~~~~
+This widget shows the title of the focused window.
+
+*mouse*::
+    Set mouse bindings.
+*font*::
+    Font to use.
+*bg*::
+    Background color.
+*fg*::
+    Foreground color.
+
+textbox
+~~~~~~~
+This widget shows a text.
+
+*mouse*::
+    Set mouse bindings.
+*font*::
+    Font to use.
+*bg*::
+    Background color.
+*fg*::
+    Foreground color.
+*width*::
+    Set width.
+*text*::
+    Text to change.
+
+iconbox
+~~~~~~~
+This widget shows an icon.
+
+*mouse*::
+    Set mouse bindings.
+*image*::
+    Image file.
+
+progressbar
+~~~~~~~~~~~
+This widget shows a progress bar.
+
+*mouse*::
+    Set mouse bindings.
+*width*::
+    Set width.
+*fg*::
+    Foreground color.
+*bg*::
+    Background color.
+
 FILES
 -----
 For an example of an awesomerc file, see the file provided with the sources
