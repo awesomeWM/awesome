@@ -140,11 +140,15 @@ statusbar_init(int screen)
                                 &globalconf.screens[screen].padding);
     Statusbar *statusbar = globalconf.screens[screen].statusbar;
 
-    statusbar->height = globalconf.screens[screen].font->height * 1.5;
+    if(statusbar->height <= 0)
+    {
+        /* 1.5 as default factor, it fits nice but no one know why */
+        statusbar->height = globalconf.screens[screen].font->height * 1.5;
 
-    for(widget = statusbar->widgets; widget; widget = widget->next)
-        if(widget->font)
-            statusbar->height = MAX(statusbar->height, widget->font->height);
+        for(widget = statusbar->widgets; widget; widget = widget->next)
+            if(widget->font)
+                statusbar->height = MAX(statusbar->height, widget->font->height * 1.5);
+    }
 
     if(statusbar->position == BarRight || statusbar->position == BarLeft)
         statusbar->width = area.height;

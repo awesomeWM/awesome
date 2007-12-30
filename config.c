@@ -375,6 +375,8 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->statusbar->position = virtscreen->statusbar->dposition =
         statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
 
+    virtscreen->statusbar->height = cfg_getint(cfg_statusbar, "height");
+
     create_widgets(cfg_statusbar, virtscreen->statusbar);
 
     /* Layouts */
@@ -535,6 +537,7 @@ config_parse(const char *confpatharg)
     static cfg_opt_t statusbar_opts[] =
     {
         CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
+        CFG_INT((char *) "height", 0, CFGF_NONE),
         CFG_SEC((char *) "textbox", widget_textbox_focus_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
         CFG_SEC((char *) "taglist", widget_taglist_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
         CFG_SEC((char *) "focustitle", widget_textbox_focus_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
