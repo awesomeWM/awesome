@@ -554,7 +554,7 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t tags_opts[] =
     {
-        CFG_SEC((char *) "tag", tag_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "tag", tag_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
         CFG_END()
     };
     static cfg_opt_t layout_opts[] =
@@ -629,7 +629,7 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t opts[] =
     {
-        CFG_SEC((char *) "screen", screen_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "screen", screen_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
         CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
         CFG_SEC((char *) "keys", keys_opts, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_opts, CFGF_NONE),
