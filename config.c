@@ -535,13 +535,13 @@ config_parse(const char *confpatharg)
     static cfg_opt_t statusbar_opts[] =
     {
         CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
-        CFG_SEC((char *) "textbox", widget_textbox_focus_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "taglist", widget_taglist_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "focustitle", widget_textbox_focus_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "iconbox", widget_iconbox_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "netwmicon", widget_opts, CFGF_TITLE | CFGF_MULTI),
-        CFG_SEC((char *) "progressbar", widget_progressbar_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_SEC((char *) "textbox", widget_textbox_focus_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
+        CFG_SEC((char *) "taglist", widget_taglist_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
+        CFG_SEC((char *) "focustitle", widget_textbox_focus_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
+        CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
+        CFG_SEC((char *) "iconbox", widget_iconbox_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
+        CFG_SEC((char *) "netwmicon", widget_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
+        CFG_SEC((char *) "progressbar", widget_progressbar_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
         CFG_END()
     };
     static cfg_opt_t tag_opts[] =
