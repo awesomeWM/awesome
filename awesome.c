@@ -166,7 +166,7 @@ scan()
                    || wa.override_redirect
                    || XGetTransientForHint(globalconf.display, wins[i], &d1))
                     continue;
-                if(wa.map_state == IsViewable || window_getstate(globalconf.display, wins[i]) == IconicState)
+                if(wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState)
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(wa.x, wa.y);
@@ -179,7 +179,7 @@ scan()
                 if(!XGetWindowAttributes(globalconf.display, wins[i], &wa))
                     continue;
                 if(XGetTransientForHint(globalconf.display, wins[i], &d1)
-                   && (wa.map_state == IsViewable || window_getstate(globalconf.display, wins[i]) == IconicState))
+                   && (wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState))
                 {
                     if(screen == 0)
                         real_screen = get_screen_bycoord(wa.x, wa.y);

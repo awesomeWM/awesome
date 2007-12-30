@@ -183,7 +183,7 @@ void
 client_ban(Client * c)
 {
     XUnmapWindow(globalconf.display, c->win);
-    window_setstate(globalconf.display, c->win, IconicState);
+    window_setstate(c->win, IconicState);
 }
 
 /** Attach client to the beginning of the clients stack
@@ -224,11 +224,11 @@ focus(Client *c, Bool selscreen, int screen)
     /* unfocus current selected client */
     if(globalconf.focus->client)
     {
-        window_grabbuttons(globalconf.display, globalconf.focus->client->phys_screen,
+        window_grabbuttons(globalconf.focus->client->phys_screen,
                            globalconf.focus->client->win, False, True);
         XSetWindowBorder(globalconf.display, globalconf.focus->client->win,
                          globalconf.screens[screen].colors_normal[ColBorder].pixel);
-        window_settrans(globalconf.display, globalconf.focus->client->win,
+        window_settrans(globalconf.focus->client->win,
                         globalconf.screens[screen].opacity_unfocused);
     }
 
@@ -245,8 +245,7 @@ focus(Client *c, Bool selscreen, int screen)
     if(c)
     {
         XSetWindowBorder(globalconf.display, c->win, globalconf.screens[screen].colors_selected[ColBorder].pixel);
-        window_grabbuttons(globalconf.display, c->phys_screen, c->win,
-                           True, True);
+        window_grabbuttons(c->phys_screen, c->win, True, True);
     }
 
     if(!selscreen)
@@ -263,9 +262,9 @@ focus(Client *c, Bool selscreen, int screen)
                        globalconf.focus->client->win, RevertToPointerRoot, CurrentTime);
         for(c = globalconf.clients; c; c = c->next)
             if(c != globalconf.focus->client)
-                window_settrans(globalconf.display, globalconf.focus->client->win,
+                window_settrans(globalconf.focus->client->win,
                                 globalconf.screens[screen].opacity_unfocused);
-        window_settrans(globalconf.display, globalconf.focus->client->win, -1);
+        window_settrans(globalconf.focus->client->win, -1);
     }
     else
         XSetInputFocus(globalconf.display,
@@ -348,7 +347,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     XSetWindowBorder(globalconf.display, w, globalconf.screens[screen].colors_normal[ColBorder].pixel);
 
     /* propagates border_width, if size doesn't change */
-    window_configure(globalconf.display, c->win, c->x, c->y, c->w, c->h, c->border);
+    window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
 
     /* update hints */
     client_updatesizehints(c);
@@ -360,11 +359,11 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(globalconf.have_shape)
     {
         XShapeSelectInput(globalconf.display, w, ShapeNotifyMask);
-        window_setshape(globalconf.display, c->phys_screen, c->win);
+        window_setshape(c->phys_screen, c->win);
     }
 
     /* grab buttons */
-    window_grabbuttons(globalconf.display, c->phys_screen, c->win, False, True);
+    window_grabbuttons(c->phys_screen, c->win, False, True);
 
     /* check for transient and set tags like its parent */
     if((rettrans = XGetTransientForHint(globalconf.display, w, &trans) == Success)
@@ -485,7 +484,7 @@ client_resize(Client *c, int x, int y, int w, int h,
         p_delete(&curtags);
         wc.border_width = c->border;
         XConfigureWindow(globalconf.display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
-        window_configure(globalconf.display, c->win, c->x, c->y, c->w, c->h, c->border);
+        window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
         XSync(globalconf.display, False);
         if((c->x >= 0 || c->y >= 0) && XineramaIsActive(globalconf.display))
         {
@@ -529,7 +528,7 @@ void
 client_unban(Client *c)
 {
     XMapWindow(globalconf.display, c->win);
-    window_setstate(globalconf.display, c->win, NormalState);
+    window_setstate(c->win, NormalState);
 }
 
 void
@@ -549,7 +548,7 @@ client_unmanage(Client *c, long state)
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
-    window_setstate(globalconf.display, c->win, state);
+    window_setstate(c->win, state);
     XSync(globalconf.display, False);
     XSetErrorHandler(xerror);
     XUngrabServer(globalconf.display);
@@ -699,9 +698,9 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
     }
 
     if(delta == 100.0 && !set_prop)
-        window_settrans(globalconf.display, sel->win, -1);
+        window_settrans(sel->win, -1);
     else
-        window_settrans(globalconf.display, sel->win, delta);
+        window_settrans(sel->win, delta);
 }
 
 

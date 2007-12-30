@@ -27,12 +27,12 @@
 /** Mask shorthands, used in event.c and window.c */ 
 #define BUTTONMASK              (ButtonPressMask | ButtonReleaseMask) 
 
-int window_setstate(Display *, Window, long);
-long window_getstate(Display *, Window);
-Status window_configure(Display *, Window, int, int, int, int, int);
-void window_grabbuttons(Display *, int, Window, Bool, Bool);
-void window_setshape(Display *, int, Window);
-void window_settrans(Display *, Window, double);
+int window_setstate(Window, long);
+long window_getstate(Window);
+Status window_configure(Window, int, int, int, int, int);
+void window_grabbuttons(int, Window, Bool, Bool);
+void window_setshape(int, Window);
+void window_settrans(Window, double);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
