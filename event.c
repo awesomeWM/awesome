@@ -251,7 +251,7 @@ handle_event_expose(XEvent *e)
     if(!ev->count)
         for(screen = 0; screen < get_screen_count(); screen++)
             if(globalconf.screens[screen].statusbar->window == ev->window)
-                statusbar_draw(screen);
+                statusbar_display(screen);
 }
 
 void

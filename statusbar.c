@@ -45,7 +45,7 @@ statusbar_draw(int screen)
     if(vscreen.statusbar->position == BarOff)
         return;
 
-    DrawCtx *ctx = draw_get_context(vscreen.statusbar->drawable, phys_screen,
+    DrawCtx *ctx = draw_get_context(phys_screen,
                                     vscreen.statusbar->width,
                                     vscreen.statusbar->height);
     draw_rectangle(ctx,
@@ -72,8 +72,8 @@ statusbar_draw(int screen)
         if (widget->alignment == AlignFlex)
             left += widget->draw(widget, ctx, left, (left + right));
 
-    if(vscreen.statusbar->position == BarRight ||
-       vscreen.statusbar->position == BarLeft)
+    if(vscreen.statusbar->position == BarRight
+       || vscreen.statusbar->position == BarLeft)
     {
         Drawable d;
         if(vscreen.statusbar->position == BarRight)
@@ -88,21 +88,40 @@ statusbar_draw(int screen)
                             - M_PI_2,
                             0,
                             vscreen.statusbar->width);
-        XCopyArea(globalconf.display, d,
+
+        vscreen.statusbar->drawable = d;
+        draw_free_context(ctx);
+    }
+    else
+    {
+        vscreen.statusbar->drawable = ctx->drawable;
+        /* just delete the struct, don't delete the drawable */
+        p_delete(&ctx);
+    }
+
+
+    statusbar_display(screen);
+}
+
+
+void
+statusbar_display(int screen)
+{
+    VirtScreen vscreen = globalconf.screens[screen];
+    int phys_screen = get_phys_screen(screen);
+
+    if(vscreen.statusbar->position == BarRight
+       || vscreen.statusbar->position == BarLeft)
+        XCopyArea(globalconf.display, vscreen.statusbar->drawable,
                   vscreen.statusbar->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
                   vscreen.statusbar->height,
                   vscreen.statusbar->width, 0, 0);
-        XFreePixmap(globalconf.display, d);
-    }
     else
-        XCopyArea(globalconf.display, ctx->drawable,
+        XCopyArea(globalconf.display, vscreen.statusbar->drawable,
                   vscreen.statusbar->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
                   vscreen.statusbar->width, vscreen.statusbar->height, 0, 0);
-
-    p_delete(&ctx);
-    XSync(globalconf.display, False);
 }
 
 void

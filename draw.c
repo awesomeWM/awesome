@@ -30,7 +30,7 @@
 extern AwesomeConf globalconf;
 
 DrawCtx *
-draw_get_context(Drawable drawable, int phys_screen, int width, int height)
+draw_get_context(int phys_screen, int width, int height)
 {
     DrawCtx *d = p_new(DrawCtx, 1);
 
@@ -39,10 +39,19 @@ draw_get_context(Drawable drawable, int phys_screen, int width, int height)
     d->height = height;
     d->depth = DefaultDepth(globalconf.display, phys_screen);
     d->visual = DefaultVisual(globalconf.display, phys_screen);
-    d->drawable = drawable;
+    d->drawable = XCreatePixmap(globalconf.display,
+                                RootWindow(globalconf.display, phys_screen),
+                                width, height, d->depth);
 
     return d;
 };
+
+void
+draw_free_context(DrawCtx *ctx)
+{
+    XFreePixmap(globalconf.display, ctx->drawable);
+    p_delete(&ctx);
+}
 
 void
 draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *text, XColor fg, XColor bg)
