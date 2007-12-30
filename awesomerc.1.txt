@@ -102,7 +102,7 @@ Screen
 
 WIDGETS
 -------
-Statusbar can be customized by modifying widgets names, order and options.
+Statusbars can be customized by modifying widgets names, order and options.
 
 taglist
 ~~~~~~~
@@ -188,34 +188,34 @@ EXAMPLES
 The general format of the awesomerc with some examples:
 
 ....................
-screen 0    # particular settings for screen 0
-{           #
-  general   #
-  { }       # border=2 focus_move_pointer=true font="fixed-10" ...
-            #
-  colors    #
-  { }       # focus_bg="#000000" focus_border= ...
-            #
-  statusbar #
-  { }       # position="top" taglist tl {}  textbox tb {} ... 
-            # hint: tl is a identifier (you can freely choose)
-            # usage: awesome-client <<< "0 widget_tell tl some_data"
-            #
-  tags      #
-  { }       # tag identifier { layout="tile" wmfact=0.70 nmaster=2 }
-            #
-  layouts   #
-  { }       # layout max { symbol="[ ]" } (or tile, max, dwindle, floating, ...)
-}           #
-            #
-rules       #
-{ }         # rule { name="gimp" float=true tags="3" }
-            #
-mouse       #
-{ }         # tag { button="1" command="tag_view" }
-            #
-keys        #
-{ }         # key { modkey={"Mod4"} key="j" command="client_focusnext" }
+screen 0       # particular settings for screen 0
+{              #
+  general      #
+  { }          # border=2 focus_move_pointer=true font="fixed-10" ...
+               #
+  colors       #
+  { }          # focus_bg="#000000" focus_border= ...
+               #
+  statusbar sb #
+  { }          # position="top" taglist tl {}  textbox tb {} ... 
+               # hint: tl is a identifier (you can freely choose)
+               # usage: awesome-client <<< "0 widget_tell tl some_data"
+               #
+  tags         #
+  { }          # tag identifier { layout="tile" wmfact=0.70 nmaster=2 }
+               #
+  layouts      #
+  { }          # layout max { symbol="[ ]" } (or tile, max, dwindle, floating, ...)
+}              #
+               #
+rules          #
+{ }            # rule { name="gimp" float=true tags="3" }
+               #
+mouse          #
+{ }            # tag { button="1" command="tag_view" }
+               #
+keys           #
+{ }            # key { modkey={"Mod4"} key="j" command="client_focusnext" }
 ....................
 
 
