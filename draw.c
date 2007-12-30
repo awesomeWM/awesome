@@ -29,6 +29,12 @@
 
 extern AwesomeConf globalconf;
 
+/** Get a draw context
+ * \param phys_screen physical screen id
+ * \param width width
+ * \param height height
+ * \return draw context ref
+ */
 DrawCtx *
 draw_get_context(int phys_screen, int width, int height)
 {
@@ -46,6 +52,9 @@ draw_get_context(int phys_screen, int width, int height)
     return d;
 };
 
+/** Free a draw context and its drawable
+ * \param ctx the draw context to free
+ */
 void
 draw_free_context(DrawCtx *ctx)
 {
@@ -53,6 +62,17 @@ draw_free_context(DrawCtx *ctx)
     p_delete(&ctx);
 }
 
+/** Draw text into a draw context
+ * \param x x coord
+ * \param y y coord
+ * \param w width
+ * \param h height
+ * \param padding padding to add before drawing the text
+ * \param font font to use
+ * \param text text to draw
+ * \param fg foreground color
+ * \param bg background color
+ */
 void
 draw_text(DrawCtx *ctx, int x, int y, int w, int h, int padding, XftFont *font, const char *text, XColor fg, XColor bg)
 {

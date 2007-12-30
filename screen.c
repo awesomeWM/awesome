@@ -31,8 +31,8 @@ extern AwesomeConf globalconf;
 /** Get screens info
  * \param screen Screen number
  * \param statusbar statusbar
- * \return Area
  * \param padding Padding
+ * \return Area
  */
 Area
 get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
@@ -175,8 +175,8 @@ get_phys_screen(int screen)
 /** Move a client to a virtual screen
  * \param c the client
  * \param new_screen The destinatiuon screen
- * \param doresize set to True if we also move the client to the new x_org and
- *         y_org of the new screen
+ * \param doresize set to True if we also move the client to the new x and
+ *        y of the new screen
  */
 void
 move_client_to_screen(Client *c, int new_screen, Bool doresize)
