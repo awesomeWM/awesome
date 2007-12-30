@@ -193,7 +193,7 @@ uicb_client_tag(int screen, char *arg)
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag_client(sel, tag);
 
-    client_saveprops(sel, screen);
+    client_saveprops(sel);
     arrange(screen);
 }
 
@@ -217,7 +217,7 @@ uicb_client_togglefloating(int screen, char *arg __attribute__ ((unused)))
     else
         client_resize(sel, sel->x, sel->y, sel->w, sel->h, True, True);
 
-    client_saveprops(sel, screen);
+    client_saveprops(sel);
     arrange(screen);
 }
 
@@ -263,7 +263,7 @@ uicb_client_toggletag(int screen, char *arg)
             else
                 untag_client(sel, tag);
 
-    client_saveprops(sel, screen);
+    client_saveprops(sel);
     arrange(screen);
 }
 

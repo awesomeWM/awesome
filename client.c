@@ -148,6 +148,12 @@ get_client_bywin(Client *list, Window w)
     return c;
 }
 
+
+/** Get a client by its name
+ * \param list Client list
+ * \param name name to search
+ * \return first matching client
+ */
 Client *
 get_client_byname(Client *list, char *name)
 {
@@ -160,6 +166,9 @@ get_client_byname(Client *list, char *name)
     return NULL;
 }
 
+/** Update client name attribute with its title
+ * \param c the client
+ */
 void
 client_updatetitle(Client *c)
 {
@@ -369,7 +378,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
         c->isfloating = (rettrans == Success) || c->isfixed;
 
     /* save new props */
-    client_saveprops(c, c->screen);
+    client_saveprops(c);
 
     /* attach to the stack */
     client_attach(c);
@@ -385,6 +394,15 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     arrange(screen);
 }
 
+/** Resize client window
+ * \param c client to resize
+ * \param x x coord
+ * \param y y coord
+ * \param w width
+ * \param h height
+ * \param sizehints respect size hints
+ * \param volatile_coords register coords in rx/ry/rw/rh
+ */
 void
 client_resize(Client *c, int x, int y, int w, int h,
               Bool sizehints, Bool volatile_coords)
@@ -478,19 +496,22 @@ client_resize(Client *c, int x, int y, int w, int h,
     }
 }
 
+/** Save client properties as an X property
+ * \param c client
+ */
 void
-client_saveprops(Client * c, int screen)
+client_saveprops(Client *c)
 {
     int i = 0, ntags = 0;
     char *prop;
     Tag *tag;
 
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         ntags++;
 
     prop = p_new(char, ntags + 2);
 
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next, i++)
+    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
         prop[i] = is_client_tagged(c, tag) ? '1' : '0';
 
     if(i <= ntags)
