@@ -74,10 +74,13 @@ static Widget *
 widget_find(char *name, int screen)
 {
     Widget *widget;
-    widget = globalconf.screens[screen].statusbar->widgets;
-    for(; widget; widget = widget->next)
-        if (strcmp(name, widget->name) == 0)
-            return widget;
+    Statusbar *sb;
+    
+    for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
+        for(widget = sb->widgets; widget; widget = widget->next)
+            if(a_strcmp(name, widget->name) == 0)
+                return widget;
+
     return NULL;
 }
 
@@ -153,7 +156,7 @@ uicb_widget_tell(int screen, char *arg)
     else
         widget->tell(widget, NULL);
 
-    statusbar_draw(screen);
+    statusbar_draw_all(screen);
     return;
 }
 

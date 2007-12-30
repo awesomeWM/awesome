@@ -74,7 +74,6 @@ const NameFuncLink UicbList[] =
     {"quit", uicb_quit},
     /* statusbar.c */
     {"statusbar_toggle", uicb_statusbar_toggle},
-    {"statusbar_set_position", uicb_statusbar_set_position},
     /* mouse.c */
     {"client_movemouse", uicb_client_movemouse},
     {"client_resizemouse", uicb_client_resizemouse},

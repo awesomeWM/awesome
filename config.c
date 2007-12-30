@@ -313,7 +313,8 @@ config_parse_screen(cfg_t *cfg, int screen)
     const char *tmp;
     Layout *layout = NULL;
     Tag *tag = NULL;
-    cfg_t *cfg_general, *cfg_colors, *cfg_screen, *cfg_statusbar, *cfg_tags,
+    Statusbar *statusbar = NULL;
+    cfg_t *cfg_general, *cfg_colors, *cfg_screen, *cfg_tags,
           *cfg_layouts, *cfg_padding, *cfgsectmp;
     VirtScreen *virtscreen = &globalconf.screens[screen];
     unsigned int i;
@@ -331,7 +332,6 @@ config_parse_screen(cfg_t *cfg, int screen)
     }
 
     /* get screen specific sections */
-    cfg_statusbar = cfg_getsec(cfg_screen, "statusbar");
     cfg_tags = cfg_getsec(cfg_screen, "tags");
     cfg_colors = cfg_getsec(cfg_screen, "colors");
     cfg_general = cfg_getsec(cfg_screen, "general");
@@ -371,14 +371,24 @@ config_parse_screen(cfg_t *cfg, int screen)
                                                   cfg_getstr(cfg_colors, "urgent_fg"));
 
     /* Statusbar */
-    virtscreen->statusbar = p_new(Statusbar, 1);
-    virtscreen->statusbar->position = virtscreen->statusbar->dposition =
-        statusbar_get_position_from_str(cfg_getstr(cfg_statusbar, "position"));
 
-    virtscreen->statusbar->height = cfg_getint(cfg_statusbar, "height");
-    virtscreen->statusbar->width = cfg_getint(cfg_statusbar, "width");
+    if(cfg_size(cfg_screen, "statusbar"))
+    {
+        virtscreen->statusbar = statusbar = p_new(Statusbar, 1);
+        for(i = 0; i < cfg_size(cfg_screen, "statusbar"); i++)
+        {
+            cfgsectmp = cfg_getnsec(cfg_screen, "statusbar", i);
+            statusbar->position = statusbar->dposition =
+                statusbar_get_position_from_str(cfg_getstr(cfgsectmp, "position"));
+            statusbar->height = cfg_getint(cfgsectmp, "height");
+            statusbar->width = cfg_getint(cfgsectmp, "width");
+            statusbar->name = a_strdup(cfg_title(cfgsectmp));
+            create_widgets(cfgsectmp, statusbar);
 
-    create_widgets(cfg_statusbar, virtscreen->statusbar);
+            if(i < cfg_size(cfg_screen, "statusbar") - 1)
+                statusbar = statusbar->next = p_new(Statusbar, 1);
+        }
+    }
 
     /* Layouts */
     virtscreen->layouts = layout = p_new(Layout, 1);
@@ -397,12 +407,10 @@ config_parse_screen(cfg_t *cfg, int screen)
 
             if(i < cfg_size(cfg_layouts, "layout") - 1)
                 layout = layout->next = p_new(Layout, 1);
-            else
-                layout->next = NULL;
         }
     else
     {
-        warn("fatal: no default layout available\n");
+        warn("no default layout available\n");
         layout->arrange = layout_tile;
     }
 
@@ -583,7 +591,7 @@ config_parse(const char *confpatharg)
     static cfg_opt_t screen_opts[] =
     {
         CFG_SEC((char *) "general", general_opts, CFGF_NONE),
-        CFG_SEC((char *) "statusbar", statusbar_opts, CFGF_NONE),
+        CFG_SEC((char *) "statusbar", statusbar_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
         CFG_SEC((char *) "tags", tags_opts, CFGF_NONE),
         CFG_SEC((char *) "colors", colors_opts, CFGF_NONE),
         CFG_SEC((char *) "layouts", layouts_opts, CFGF_NONE),

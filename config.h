@@ -81,10 +81,42 @@ struct Button
     Button *next;
 };
 
-/** Status bar */
+/** Widget */
 typedef struct Widget Widget;
-typedef struct
+typedef struct Statusbar Statusbar;
+struct Widget
 {
+    /** Widget name */
+    char *name;
+    /** Draw function */
+    int (*draw)(Widget *, DrawCtx *, int, int);
+    /** Update function */
+    void (*tell)(Widget *, char *);
+    /** ButtonPressedEvent handler */
+    void (*button_press)(Widget *, XButtonPressedEvent *);
+    /** Statusbar */
+    Statusbar *statusbar;
+    /** Alignement */
+    int alignment;
+    /** Misc private data */
+    void *data;
+    /** Location on status bar */
+    int location;
+    /** Widget width */
+    int width;
+    /** Buttons bindings */
+    Button *buttons;
+    /** Font */
+    XftFont *font;
+    /** Next widget */
+    Widget *next;
+};
+
+/** Status bar */
+struct Statusbar
+{
+    /** Statusbar name */
+    char *name;
     /** Bar width */
     int width;
     /** Bar height */
@@ -103,7 +135,9 @@ typedef struct
     Widget *widgets;
     /** Drawable */
     Drawable drawable;
-} Statusbar;
+    /** Next statusbar */
+    Statusbar *next;
+};
 
 typedef struct Client Client; 
 struct Client
@@ -224,24 +258,6 @@ typedef struct
     /** Font */
     XftFont *font;
 } VirtScreen;
-
-
-struct Widget
-{
-    char *name;
-    int (*draw)(Widget *, DrawCtx *, int, int);
-    void (*tell)(Widget *, char *);
-    void (*button_press)(Widget *, XButtonPressedEvent *);
-    Statusbar *statusbar;
-    int alignment;
-    void *data;
-    int location;
-    int width;
-    Button *buttons;
-    XftFont *font;
-    Widget *next;
-};
-
 
 /** Main configuration structure */
 struct AwesomeConf

@@ -292,6 +292,7 @@ main(int argc, char *argv[])
     int screen;
     event_handler **handler;
     struct sockaddr_un *addr;
+    Statusbar *statusbar;
 
     if(argc >= 2)
     {
@@ -342,8 +343,8 @@ main(int argc, char *argv[])
     {
         /* set screen */
         setup(screen);
-        statusbar_init(screen);
-        statusbar_draw(screen);
+        for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+            statusbar_init(statusbar, screen);
     }
 
     /* do this only for real screen */

@@ -40,6 +40,7 @@ get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
     int screen_number = 0;
     XineramaScreenInfo *si;
     Area area;
+    Statusbar *sb;
 
     if(XineramaIsActive(globalconf.display))
     {
@@ -70,18 +71,18 @@ get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
         area.height -= padding->top + padding->bottom;
     }
 
-    if (statusbar)
-        switch(statusbar->position)
+    for(sb = statusbar; sb; sb = sb->next)
+        switch(sb->position)
         {
           case BarTop:
-            area.y += statusbar->height;
+            area.y += sb->height;
           case BarBot:
-            area.height -= statusbar->height;
+            area.height -= sb->height;
             break;
           case BarLeft:
-            area.x += statusbar->height;
+            area.x += sb->height;
           case BarRight:
-            area.width -=  statusbar->height;
+            area.width -= sb->height;
             break;
         }
 
@@ -98,13 +99,18 @@ Area
 get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 {
     Area area;
+    Statusbar *sb;
 
     area.x = 0;
-    area.y = statusbar && statusbar->position == BarTop ? statusbar->height : 0;
+    area.y = 0;
     area.width = DisplayWidth(globalconf.display, screen);
-    area.height = DisplayHeight(globalconf.display, screen) -
-                    (statusbar &&
-                     (statusbar->position == BarTop || statusbar->position == BarBot) ? statusbar->height : 0);
+    area.height = DisplayHeight(globalconf.display, screen);
+
+    for(sb = statusbar; sb; sb = sb->next)
+    {
+        area.y -= sb->position == BarTop ? statusbar->height : 0;
+        area.height -= (statusbar->position == BarTop || statusbar->position == BarBot) ? statusbar->height : 0;
+    }
 
     /* make padding corrections */
     if(padding)
@@ -217,8 +223,8 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
     focus(c, True, c->screen);
 
     /* redraw statusbar on all screens */
-    statusbar_draw(old_screen);
-    statusbar_draw(new_screen);
+    statusbar_draw_all(old_screen);
+    statusbar_draw_all(new_screen);
 }
 
 /** Move mouse pointer to x_org and y_xorg of specified screen

@@ -153,7 +153,7 @@ restack(int screen)
     XWindowChanges wc;
     Tag **curtags;
 
-    statusbar_draw(screen);
+    statusbar_draw_all(screen);
 
     if(!sel)
         return;
@@ -169,18 +169,13 @@ restack(int screen)
         if(!(curtags[0]->layout->arrange == layout_floating))
         {
             wc.stack_mode = Below;
-            wc.sibling = globalconf.screens[screen].statusbar->window;
             if(!sel->isfloating)
-            {
-                XConfigureWindow(globalconf.display, sel->win, CWSibling | CWStackMode, &wc);
-                wc.sibling = sel->win;
-            }
+                XConfigureWindow(globalconf.display, sel->win, CWStackMode, &wc);
             for(c = globalconf.clients; c; c = c->next)
             {
                 if(!IS_TILED(c, screen) || c == sel)
                     continue;
-                XConfigureWindow(globalconf.display, c->win, CWSibling | CWStackMode, &wc);
-                wc.sibling = c->win;
+                XConfigureWindow(globalconf.display, c->win, CWStackMode, &wc);
             }
         }
         p_delete(&curtags);
@@ -247,7 +242,7 @@ uicb_tag_setlayout(int screen, char *arg)
     if(globalconf.focus->client)
         arrange(screen);
     else
-        statusbar_draw(screen);
+        statusbar_draw_all(screen);
 
     saveawesomeprops(screen);
 }

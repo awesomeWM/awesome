@@ -254,7 +254,7 @@ focus(Client *c, Bool selscreen, int screen)
     /* save sel in focus history */
     focus_add_client(c);
 
-    statusbar_draw(screen);
+    statusbar_draw_all(screen);
 
     if(globalconf.focus->client)
     {

@@ -21,7 +21,7 @@ screen 0
         layout dwindle { image = "/usr/local/share/awesome/icons/layouts/dwindle.png" }
         layout floating { image = "/usr/local/share/awesome/icons/layouts/floating.png" }
     }
-    statusbar
+    statusbar mystatusbar
     {
         position = "top"
 

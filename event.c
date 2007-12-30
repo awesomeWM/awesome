@@ -66,38 +66,39 @@ handle_event_buttonpress(XEvent *e)
     Client *c;
     Window wdummy;
     Widget *widget;
+    Statusbar *statusbar;
     XButtonPressedEvent *ev = &e->xbutton;
 
     for(screen = 0; screen < get_screen_count(); screen++)
-        if(globalconf.screens[screen].statusbar->window == ev->window)
-        {
-            if(globalconf.screens[screen].statusbar->position == BarTop
-                 || globalconf.screens[screen].statusbar->position == BarBot)
-                for(widget = globalconf.screens[screen].statusbar->widgets; widget; widget = widget->next)
-                    if(ev->x >= widget->location && ev->x <= widget->location + widget->width)
-                    {
-                        widget->button_press(widget, ev);
-                        return;
-                    }
+        for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+            if(statusbar->window == ev->window)
+            {
+                if(statusbar->position == BarTop
+                     || globalconf.screens[screen].statusbar->position == BarBot)
+                    for(widget = statusbar->widgets; widget; widget = widget->next)
+                        if(ev->x >= widget->location && ev->x <= widget->location + widget->width)
+                        {
+                            widget->button_press(widget, ev);
+                            return;
+                        }
 
-            if(globalconf.screens[screen].statusbar->position == BarRight)
-                for(widget = globalconf.screens[screen].statusbar->widgets; widget; widget = widget->next)
-                    if(ev->y >= widget->location && ev->y <= widget->location + widget->width)
-                    {
-                        widget->button_press(widget, ev);
-                        return;
-                    }
+                if(statusbar->position == BarRight)
+                    for(widget = statusbar->widgets; widget; widget = widget->next)
+                        if(ev->y >= widget->location && ev->y <= widget->location + widget->width)
+                        {
+                            widget->button_press(widget, ev);
+                            return;
+                        }
             
-            if(globalconf.screens[screen].statusbar->position == BarLeft)
-                for(widget = globalconf.screens[screen].statusbar->widgets; widget; widget = widget->next)
-                    if(globalconf.screens[screen].statusbar->width - ev->y >= widget->location
-                       && globalconf.screens[screen].statusbar->width - ev->y
-                       <= widget->location + widget->width)
-                    {
-                        widget->button_press(widget, ev);
-                        return;
-                    }
-        }
+                if(statusbar->position == BarLeft)
+                    for(widget = statusbar->widgets; widget; widget = widget->next)
+                        if(statusbar->width - ev->y >= widget->location
+                           && statusbar->width - ev->y <= widget->location + widget->width)
+                        {
+                            widget->button_press(widget, ev);
+                            return;
+                        }
+            }
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
@@ -155,8 +156,8 @@ handle_event_configurerequest(XEvent * e)
             if(old_screen != c->screen)
             {
                 move_client_to_screen(c, c->screen, False);
-                statusbar_draw(old_screen);
-                statusbar_draw(c->screen);
+                statusbar_draw_all(old_screen);
+                statusbar_draw_all(c->screen);
             }
             tag_client_with_rules(c);
             XMoveResizeWindow(e->xany.display, c->win, c->rx, c->ry, c->rw, c->rh);
@@ -203,7 +204,7 @@ handle_event_configurenotify(XEvent * e)
                           globalconf.screens[screen].statusbar->width,
                           globalconf.screens[screen].statusbar->height);
 
-            statusbar_update_position(screen);
+            statusbar_draw_all(screen);
             arrange(screen);
         }
 }
@@ -247,11 +248,16 @@ handle_event_expose(XEvent *e)
 {
     XExposeEvent *ev = &e->xexpose;
     int screen;
+    Statusbar *statusbar;
 
     if(!ev->count)
         for(screen = 0; screen < get_screen_count(); screen++)
-            if(globalconf.screens[screen].statusbar->window == ev->window)
-                statusbar_display(screen);
+            for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+                if(statusbar->window == ev->window)
+                {
+                    statusbar_display(statusbar);
+                    return;
+                }
 }
 
 void
@@ -357,14 +363,14 @@ handle_event_propertynotify(XEvent * e)
             break;
           case XA_WM_HINTS:
             client_updatewmhints(c);
-            statusbar_draw(c->screen);
+            statusbar_draw_all(c->screen);
             break;
         }
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(globalconf.display, "_NET_WM_NAME", False))
         {
             client_updatetitle(c);
             if(c == globalconf.focus->client)
-                statusbar_draw(c->screen);
+                statusbar_draw_all(c->screen);
         }
     }
 }

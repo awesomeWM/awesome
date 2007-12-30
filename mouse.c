@@ -76,7 +76,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                   RootWindow(globalconf.display, c->phys_screen),
                   &dummy, &dummy, &x1, &y, &di, &di, &dui);
     c->ismax = False;
-    statusbar_draw(c->screen);
+    statusbar_draw_all(c->screen);
     for(;;)
     {
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);

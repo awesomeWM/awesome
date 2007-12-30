@@ -24,14 +24,13 @@
 
 #include "common.h"
 
-void statusbar_init(int);
-void statusbar_draw(int);
-void statusbar_display(int);
+void statusbar_draw_all(int);
+void statusbar_init(Statusbar *, int);
+void statusbar_display(Statusbar *);
 int statusbar_get_position_from_str(const char *);
-void statusbar_update_position(int);
+void statusbar_update_position(Statusbar *);
 
 UICB_PROTO(uicb_statusbar_toggle);
-UICB_PROTO(uicb_statusbar_set_position);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
