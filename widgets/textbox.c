@@ -29,6 +29,7 @@ extern AwesomeConf globalconf;
 typedef struct
 {
     char *text;
+    int width;
     XColor fg;
     XColor bg;
 } Data;
@@ -48,7 +49,9 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 {
     Data *d = widget->data;
 
-    if(!widget->width)
+    if(d->width)
+        widget->width = d->width;
+    else
         widget->width = textwidth(widget->font, d->text);
 
     widget->location = widget_calculate_offset(widget->statusbar->width,
@@ -57,8 +60,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
                                                widget->alignment);
 
     draw_text(ctx, widget->location, 0, widget->width, widget->statusbar->height,
-              0,
-              widget->font, d->text, d->fg, d->bg);
+              0, widget->font, d->text, d->fg, d->bg);
 
     return widget->width;
 }
@@ -93,7 +95,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
-    w->width = cfg_getint(config, "width");
+    d->width = cfg_getint(config, "width");
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
