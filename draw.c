@@ -247,13 +247,16 @@ draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
     return newdrawable;
 }
 
-static unsigned short
-textwidth_primitive(XftFont *font, char *text)
+unsigned short
+textwidth(XftFont *font, char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
     cairo_font_face_t *font_face;
     cairo_text_extents_t te;
+
+    if (!a_strlen(text))
+        return 0;
 
     surface = cairo_xlib_surface_create(globalconf.display, DefaultScreen(globalconf.display),
                                         DefaultVisual(globalconf.display, DefaultScreen(globalconf.display)),
@@ -269,14 +272,6 @@ textwidth_primitive(XftFont *font, char *text)
     cairo_font_face_destroy(font_face);
 
     return MAX(te.x_advance, te.width) + font->height;
-}
-
-unsigned short
-textwidth(XftFont *font, char *text)
-{
-    if (!a_strlen(text))
-        return 0;
-    return textwidth_primitive(font, text);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
