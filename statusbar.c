@@ -110,6 +110,10 @@ statusbar_display(int screen)
     VirtScreen vscreen = globalconf.screens[screen];
     int phys_screen = get_phys_screen(screen);
 
+    /* don't waste our time */
+    if(vscreen.statusbar->position == BarOff)
+        return;
+
     if(vscreen.statusbar->position == BarRight
        || vscreen.statusbar->position == BarLeft)
         XCopyArea(globalconf.display, vscreen.statusbar->drawable,
