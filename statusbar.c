@@ -150,10 +150,13 @@ statusbar_init(int screen)
                 statusbar->height = MAX(statusbar->height, widget->font->height * 1.5);
     }
 
-    if(statusbar->position == BarRight || statusbar->position == BarLeft)
-        statusbar->width = area.height;
-    else
-        statusbar->width = area.width;
+    if(statusbar->width <= 0)
+    {
+        if(statusbar->position == BarRight || statusbar->position == BarLeft)
+            statusbar->width = area.height;
+        else
+            statusbar->width = area.width;
+    }
 
     statusbar->screen = screen;
 
