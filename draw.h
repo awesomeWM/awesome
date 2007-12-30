@@ -33,7 +33,6 @@ typedef struct
 
 typedef struct
 {
-    Display *display;
     Drawable drawable;
     Visual *visual;
     int width;
@@ -42,8 +41,7 @@ typedef struct
     int depth;
 } DrawCtx;
 
-DrawCtx *draw_get_context(Display*, int, int, int);
-void draw_free_context(DrawCtx*);
+DrawCtx *draw_get_context(Drawable, int, int, int);
 void draw_text(DrawCtx *, int, int, int, int, XftFont *, const char *, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, int, int, int, int, Bool, XColor);
 void draw_circle(DrawCtx *, int, int, int, Bool, XColor);

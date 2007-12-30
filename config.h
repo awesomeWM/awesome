@@ -99,8 +99,10 @@ typedef struct
     Window window;
     /** Screen */
     int screen;
-    /** Screen */
+    /** Widget list */
     Widget *widgets;
+    /** Drawable */
+    Drawable drawable;
 } Statusbar;
 
 typedef struct Client Client; 

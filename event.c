@@ -243,7 +243,7 @@ handle_event_enternotify(XEvent * e)
 }
 
 void
-handle_event_expose(XEvent * e)
+handle_event_expose(XEvent *e)
 {
     XExposeEvent *ev = &e->xexpose;
     int screen;

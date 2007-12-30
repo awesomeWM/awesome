@@ -30,28 +30,19 @@
 extern AwesomeConf globalconf;
 
 DrawCtx *
-draw_get_context(Display *display, int phys_screen, int width, int height)
+draw_get_context(Drawable drawable, int phys_screen, int width, int height)
 {
-    DrawCtx *d;
-    d = p_new(DrawCtx, 1);
+    DrawCtx *d = p_new(DrawCtx, 1);
+
     d->phys_screen = phys_screen;
-    d->display = display;
     d->width = width;
     d->height = height;
-    d->depth = DefaultDepth(display, phys_screen);
-    d->visual = DefaultVisual(display, phys_screen);
-    d->drawable = XCreatePixmap(display,
-                                RootWindow(display, phys_screen),
-                                width, height, d->depth);
+    d->depth = DefaultDepth(globalconf.display, phys_screen);
+    d->visual = DefaultVisual(globalconf.display, phys_screen);
+    d->drawable = drawable;
+
     return d;
 };
-
-void 
-draw_free_context(DrawCtx *ctx)
-{
-    XFreePixmap(ctx->display, ctx->drawable);
-    p_delete(&ctx);
-}
 
 void
 draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *text, XColor fg, XColor bg)
@@ -67,7 +58,7 @@ draw_text(DrawCtx *ctx, int x, int y, int w, int h, XftFont *font, const char *t
     if(!a_strlen(text))
         return;
 
-    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create(surface);
     font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
     cairo_set_font_face(cr, font_face);
@@ -107,7 +98,7 @@ draw_rectangle(DrawCtx *ctx, int x, int y, int w, int h, Bool filled, XColor col
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
 
     cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
@@ -133,7 +124,7 @@ draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
     cairo_set_line_width(cr, 1.0);
     cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
@@ -158,7 +149,7 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_surface_t *surface, *source;
     cairo_t *cr;
 
-    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h, 0);
     cr = cairo_create (surface);
     if(wanted_h > 0 && h > 0)
@@ -184,7 +175,7 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
     cairo_surface_t *surface, *source;
     cairo_t *cr;
 
-    source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    source = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     surface = cairo_image_surface_create_from_png(filename);
     cr = cairo_create (source);
     if(wanted_h > 0 && (h = cairo_image_surface_get_height(surface)) > 0)
@@ -226,12 +217,12 @@ draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
     cairo_t *cr;
     Drawable newdrawable;
 
-    newdrawable = XCreatePixmap(ctx->display,
-                                RootWindow(ctx->display, screen),
+    newdrawable = XCreatePixmap(globalconf.display,
+                                RootWindow(globalconf.display, screen),
                                 ctx->height, ctx->width,
                                 ctx->depth);
-    surface = cairo_xlib_surface_create(ctx->display, newdrawable, ctx->visual, ctx->height, ctx->width);
-    source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(globalconf.display, newdrawable, ctx->visual, ctx->height, ctx->width);
+    source = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
 
     cairo_translate(cr, tx, ty);

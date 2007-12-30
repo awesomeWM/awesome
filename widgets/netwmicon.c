@@ -61,8 +61,8 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
             return widget->width;
         }
 
-    if(XGetWindowProperty(ctx->display, sel->win, 
-                          XInternAtom(ctx->display, "_NET_WM_ICON", False),
+    if(XGetWindowProperty(globalconf.display, sel->win, 
+                          XInternAtom(globalconf.display, "_NET_WM_ICON", False),
                           0L, LONG_MAX, False, XA_CARDINAL, &type, &format,
                           &items, &rest, &wdata) != Success
        || !wdata)

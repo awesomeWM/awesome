@@ -45,7 +45,7 @@ statusbar_draw(int screen)
     if(vscreen.statusbar->position == BarOff)
         return;
 
-    DrawCtx *ctx = draw_get_context(globalconf.display, phys_screen,
+    DrawCtx *ctx = draw_get_context(vscreen.statusbar->drawable, phys_screen,
                                     vscreen.statusbar->width,
                                     vscreen.statusbar->height);
     draw_rectangle(ctx,
@@ -101,7 +101,7 @@ statusbar_draw(int screen)
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
                   vscreen.statusbar->width, vscreen.statusbar->height, 0, 0);
 
-    draw_free_context(ctx);
+    p_delete(&ctx);
     XSync(globalconf.display, False);
 }
 
@@ -169,6 +169,13 @@ statusbar_init(int screen)
                                           CWBackPixmap |
                                           CWEventMask,
                                           &wa);
+
+    statusbar->drawable = XCreatePixmap(globalconf.display,
+                                        RootWindow(globalconf.display, phys_screen),
+                                        statusbar->width, statusbar->height,
+                                        DefaultDepth(globalconf.display, phys_screen));
+
+
     XDefineCursor(globalconf.display,
                   statusbar->window,
                   globalconf.cursor[CurNormal]);
