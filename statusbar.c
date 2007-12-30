@@ -45,6 +45,8 @@ statusbar_draw(int screen)
     if(vscreen.statusbar->position == BarOff)
         return;
 
+    XFreePixmap(globalconf.display, vscreen.statusbar->drawable);
+
     DrawCtx *ctx = draw_get_context(phys_screen,
                                     vscreen.statusbar->width,
                                     vscreen.statusbar->height);
@@ -98,7 +100,6 @@ statusbar_draw(int screen)
         /* just delete the struct, don't delete the drawable */
         p_delete(&ctx);
     }
-
 
     statusbar_display(screen);
 }
