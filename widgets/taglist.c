@@ -71,6 +71,8 @@ taglist_draw(Widget *widget,
 
     flagsize = (vscreen.font->height + 2) / 4;
 
+    widget->width = 0;
+
     for(tag = vscreen.tags; tag; tag = tag->next)
         widget->width += textwidth(vscreen.font, tag->name);
 
@@ -100,6 +102,7 @@ taglist_draw(Widget *widget,
                            sel && is_client_tagged(sel, tag), colors[ColFG]);
         widget->width += w;
     }
+
     return widget->width;
 }
 
