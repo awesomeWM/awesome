@@ -208,6 +208,8 @@ statusbar_init(Statusbar *statusbar, int screen)
 
     statusbar_update_position(statusbar);
     XMapRaised(globalconf.display, statusbar->window);
+
+    statusbar_draw(statusbar);
 }
 
 void
