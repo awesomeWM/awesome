@@ -108,8 +108,8 @@ get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 
     for(sb = statusbar; sb; sb = sb->next)
     {
-        area.y -= sb->position == BarTop ? statusbar->height : 0;
-        area.height -= (statusbar->position == BarTop || statusbar->position == BarBot) ? statusbar->height : 0;
+        area.y += sb->position == BarTop ? sb->height : 0;
+        area.height -= (sb->position == BarTop || sb->position == BarBot) ? sb->height : 0;
     }
 
     /* make padding corrections */
