@@ -200,6 +200,7 @@ static void
 setup(int screen)
 {
     XSetWindowAttributes wa;
+    Statusbar *statusbar;
 
     /* init cursors */
     globalconf.cursor[CurNormal] = XCreateFontCursor(globalconf.display, XC_left_ptr);
@@ -220,6 +221,9 @@ setup(int screen)
                  wa.event_mask);
 
     grabkeys(get_phys_screen(screen));
+
+    for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+        statusbar_init(statusbar, screen);
 }
 
 /** Startup Error handler to check if another window manager
@@ -292,13 +296,13 @@ main(int argc, char *argv[])
     int screen;
     event_handler **handler;
     struct sockaddr_un *addr;
-    Statusbar *statusbar;
 
+    /* check args */
     if(argc >= 2)
     {
         if(!a_strcmp("-v", argv[1]) || !a_strcmp("--version", argv[1]))
         {
-            printf("awesome-" VERSION " (" RELEASE ")\n");
+            printf("awesome " VERSION " (" RELEASE ")\n");
             return EXIT_SUCCESS;
         }
         else if(!a_strcmp("-c", argv[1]))
@@ -312,9 +316,7 @@ main(int argc, char *argv[])
             eprint("options: [-v | -c configfile]\n");
     }
 
-    /* Tag won't be printed otherwised */
-    setlocale(LC_CTYPE, "");
-
+    /* X stuff */
     if(!(dpy = XOpenDisplay(NULL)))
         eprint("cannot open display\n");
 
@@ -330,22 +332,23 @@ main(int argc, char *argv[])
     XSetErrorHandler(NULL);
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
+
+    /* store display */
     globalconf.display = dpy;
 
+    /* init EWMH atoms */
     ewmh_init_atoms();
 
+    /* init screens struct */
     globalconf.screens = p_new(VirtScreen, get_screen_count());
     focus_add_client(NULL);
-    /* store display */
+
+    /* parse config */
     config_parse(confpath);
 
+    /* for each virtual screen */
     for(screen = 0; screen < get_screen_count(); screen++)
-    {
-        /* set screen */
         setup(screen);
-        for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-            statusbar_init(statusbar, screen);
-    }
 
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
