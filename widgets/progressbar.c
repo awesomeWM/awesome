@@ -111,7 +111,7 @@ progressbar_tell(Widget *widget, char *command)
     if(!command || !d->bars)
         return;
 
-    for (tok = strtok(command, ", "); tok && i < d->bars; tok = strtok(NULL, ", "), i++)
+    for (tok = strtok(command, ","); tok && i < d->bars; tok = strtok(NULL, ","), i++)
     {
         percent = atoi(tok);
         if(percent <= 100 && percent >= 0)
@@ -138,7 +138,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
 
     if(!(d->bars = cfg_size(config, "bar")))
     {
-        warn("A progressbar-widget needs a: bar {} in the .awesomerc\n");
+        warn("progressbar widget needs at least one bar section\n");
         return w;
     }
 
