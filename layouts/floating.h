@@ -23,9 +23,9 @@
 #ifndef AWESOME_FLOATING_H
 #define AWESOME_FLOATING_H
 
-#include "common.h"
+#include "layout.h"
 
-LAYOUT_PROTO(layout_floating);
+LayoutArrange layout_floating;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

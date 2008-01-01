@@ -25,7 +25,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "common.h"
 
 /** Link a name to a function */
 typedef struct

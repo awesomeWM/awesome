@@ -22,9 +22,9 @@
 #ifndef AWESOME_MAX_H
 #define AWESOME_MAX_H
 
-#include "common.h"
+#include "layout.h"
 
-LAYOUT_PROTO(layout_max);
+LayoutArrange layout_max;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

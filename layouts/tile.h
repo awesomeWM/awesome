@@ -23,10 +23,10 @@
 #ifndef AWESOME_TILE_H
 #define AWESOME_TILE_H
 
-#include "common.h"
+#include "layout.h"
 
-LAYOUT_PROTO(layout_tile);
-LAYOUT_PROTO(layout_tileleft);
+LayoutArrange layout_tile;
+LayoutArrange layout_tileleft;
 
 Uicb uicb_tag_setnmaster;
 Uicb uicb_tag_setncol;

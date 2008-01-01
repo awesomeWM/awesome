@@ -22,7 +22,6 @@
 #ifndef AWESOME_XUTIL_H
 #define AWESOME_XUTIL_H
 
-#include "common.h"
 #include "screen.h"
 
 Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);

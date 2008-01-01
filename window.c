@@ -22,6 +22,7 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/shape.h> 
 
+#include "config.h"
 #include "window.h"
 #include "util.h"
 

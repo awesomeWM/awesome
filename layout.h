@@ -27,6 +27,8 @@
 
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 
+typedef void (LayoutArrange)(int);
+
 void arrange(int);
 void restack(int);
 void loadawesomeprops(int);

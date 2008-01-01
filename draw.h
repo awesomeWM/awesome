@@ -22,6 +22,9 @@
 #ifndef AWESOME_DRAW_H
 #define AWESOME_DRAW_H
 
+#include <X11/Xlib.h>
+#include <X11/Xft/Xft.h>
+
 typedef struct
 {
     /* Co-ords of upper left corner */
