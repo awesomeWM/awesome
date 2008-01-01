@@ -35,6 +35,7 @@
 #include "window.h"
 #include "mouse.h"
 #include "ewmh.h"
+#include "client.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 

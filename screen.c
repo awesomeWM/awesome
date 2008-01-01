@@ -19,12 +19,15 @@
  *
  */
 
+#include <X11/extensions/Xinerama.h>
+
 #include "util.h"
 #include "screen.h"
 #include "tag.h"
 #include "layout.h"
 #include "focus.h"
 #include "statusbar.h"
+#include "client.h"
 
 extern AwesomeConf globalconf;
 

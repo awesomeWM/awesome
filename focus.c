@@ -23,6 +23,7 @@
 #include "tag.h"
 #include "layout.h"
 #include "focus.h" 
+#include "client.h"
 
 extern AwesomeConf globalconf;
 

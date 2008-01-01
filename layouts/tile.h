@@ -28,9 +28,9 @@
 LAYOUT_PROTO(layout_tile);
 LAYOUT_PROTO(layout_tileleft);
 
-UICB_PROTO(uicb_tag_setnmaster);
-UICB_PROTO(uicb_tag_setncol);
-UICB_PROTO(uicb_tag_setmwfact);
+Uicb uicb_tag_setnmaster;
+Uicb uicb_tag_setncol;
+Uicb uicb_tag_setmwfact;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

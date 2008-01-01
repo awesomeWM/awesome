@@ -30,6 +30,7 @@
 #include "focus.h"
 #include "statusbar.h"
 #include "ewmh.h"
+#include "client.h"
 #include "layouts/tile.h"
 #include "layouts/max.h"
 #include "layouts/fibonacci.h"

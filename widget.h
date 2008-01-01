@@ -24,9 +24,10 @@
 #define AWESOME_WIDGET_H
 
 #include <confuse.h>
+
 #include "config.h"
 #include "draw.h"
-#include "common.h"
+#include "uicb.h"
 
 enum { AlignLeft, AlignRight, AlignFlex };
 
@@ -44,7 +45,7 @@ WidgetConstructor iconbox_new;
 WidgetConstructor netwmicon_new;
 WidgetConstructor progressbar_new;
 
-UICB_PROTO(uicb_widget_tell);
+Uicb uicb_widget_tell;
 
 #endif
 

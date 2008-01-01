@@ -22,9 +22,8 @@
 #ifndef AWESOME_SCREEN_H
 #define AWESOME_SCREEN_H
 
-#include "common.h"
-
-#include <X11/extensions/Xinerama.h>
+#include "config.h"
+#include "uicb.h"
 
 Area get_screen_area(int, Statusbar *, Padding *);
 Area get_display_area(int, Statusbar *, Padding *);
@@ -33,8 +32,8 @@ int get_screen_count(void);
 int get_phys_screen(int);
 void move_client_to_screen(Client *, int, Bool);
 
-UICB_PROTO(uicb_screen_focus);
-UICB_PROTO(uicb_client_movetoscreen);
+Uicb uicb_screen_focus;
+Uicb uicb_client_movetoscreen;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

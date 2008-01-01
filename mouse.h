@@ -22,12 +22,12 @@
 #ifndef AWESOME_MOUSE_H
 #define AWESOME_MOUSE_H
 
-#include "common.h"
+#include "uicb.h"
 
-#define MOUSEMASK                       (BUTTONMASK | PointerMotionMask)
+#define MOUSEMASK                       (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
 
-UICB_PROTO(uicb_client_movemouse);
-UICB_PROTO(uicb_client_resizemouse);
+Uicb uicb_client_movemouse;
+Uicb uicb_client_resizemouse;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

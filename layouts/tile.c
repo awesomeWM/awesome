@@ -26,6 +26,7 @@
 #include "awesome.h"
 #include "tag.h"
 #include "layout.h"
+#include "client.h"
 #include "layouts/tile.h"
 
 extern AwesomeConf globalconf;

@@ -27,8 +27,8 @@
 
 Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
 XColor initxcolor(int, const char *);
-UICB_PROTO(uicb_spawn);
-UICB_PROTO(uicb_exec);
+Uicb uicb_spawn;
+Uicb uicb_exec;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

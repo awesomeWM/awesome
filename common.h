@@ -24,9 +24,6 @@
 
 #include "config.h"
 
-/** Common prototype definition for ui_callback functions */
-#define UICB_PROTO(name)         void name(int, char *)
-
 /** Common prototype definition for layouts function */
 #define LAYOUT_PROTO(name)         void name(int)
 

@@ -22,7 +22,7 @@
 #ifndef AWESOME_UICB_H
 #define AWESOME_UICB_H
 
-#include "config.h"
+typedef void (Uicb)(int, char *);
 
 int parse_control(char *);
 

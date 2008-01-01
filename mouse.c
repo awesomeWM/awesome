@@ -29,6 +29,7 @@
 #include "event.h"
 #include "window.h"
 #include "statusbar.h"
+#include "client.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
 

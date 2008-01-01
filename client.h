@@ -22,7 +22,8 @@
 #ifndef AWESOME_CLIENT_H
 #define AWESOME_CLIENT_H
 
-#include "common.h"
+#include "config.h"
+#include "uicb.h"
 
 Bool client_isvisible(Client *, int);
 Client * get_client_bywin(Client *, Window);
@@ -41,12 +42,12 @@ void client_updatetitle(Client *);
 void client_saveprops(Client *); 
 void client_kill(Client *);
 
-UICB_PROTO(uicb_client_kill);
-UICB_PROTO(uicb_client_moveresize);
-UICB_PROTO(uicb_client_settrans);
-UICB_PROTO(uicb_setborder);
-UICB_PROTO(uicb_client_swapnext);
-UICB_PROTO(uicb_client_swapprev);
+Uicb uicb_client_kill;
+Uicb uicb_client_moveresize;
+Uicb uicb_client_settrans;
+Uicb uicb_setborder;
+Uicb uicb_client_swapnext;
+Uicb uicb_client_swapprev;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

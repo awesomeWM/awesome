@@ -23,6 +23,8 @@
 #ifndef AWESOME_FLOATING_H
 #define AWESOME_FLOATING_H
 
+#include "common.h"
+
 LAYOUT_PROTO(layout_floating);
 
 #endif

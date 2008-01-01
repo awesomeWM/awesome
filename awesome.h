@@ -22,10 +22,12 @@
 #ifndef AWESOME_AWESOME_H
 #define AWESOME_AWESOME_H
 
-#include "common.h"
+#include <X11/Xlib.h>
+#include "uicb.h"
 
 int xerror(Display *, XErrorEvent *);
-UICB_PROTO(uicb_quit);
+
+Uicb uicb_quit;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

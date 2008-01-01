@@ -22,7 +22,8 @@
 #ifndef AWESOME_LAYOUT_H
 #define AWESOME_LAYOUT_H
 
-#include "common.h"
+#include "config.h"
+#include "uicb.h"
 
 #define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
 
@@ -32,13 +33,13 @@ void loadawesomeprops(int);
 void saveawesomeprops(int);
 void client_maximize(Client *c, int, int, int, int);
 
-UICB_PROTO(uicb_client_focusnext);
-UICB_PROTO(uicb_client_focusprev);
-UICB_PROTO(uicb_tag_setlayout);
-UICB_PROTO(uicb_client_togglemax);
-UICB_PROTO(uicb_client_toggleverticalmax);
-UICB_PROTO(uicb_client_togglehorizontalmax);
-UICB_PROTO(uicb_client_zoom);
+Uicb uicb_client_focusnext;
+Uicb uicb_client_focusprev;
+Uicb uicb_tag_setlayout;
+Uicb uicb_client_togglemax;
+Uicb uicb_client_toggleverticalmax;
+Uicb uicb_client_togglehorizontalmax;
+Uicb uicb_client_zoom;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

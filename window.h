@@ -22,7 +22,7 @@
 #ifndef AWESOME_WINDOW_H
 #define AWESOME_WINDOW_H
 
-#include "config.h"
+#include <X11/Xlib.h>
 
 /** Mask shorthands, used in event.c and window.c */ 
 #define BUTTONMASK              (ButtonPressMask | ButtonReleaseMask) 

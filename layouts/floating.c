@@ -19,6 +19,7 @@
  *
  */
 
+#include "client.h"
 #include "tag.h"
 #include "layouts/floating.h"
 

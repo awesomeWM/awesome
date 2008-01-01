@@ -22,6 +22,7 @@
 #include "tag.h"
 #include "screen.h"
 #include "util.h"
+#include "client.h"
 #include "layouts/max.h"
 
 extern AwesomeConf globalconf;
