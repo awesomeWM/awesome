@@ -164,7 +164,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         if((color = cfg_getstr(cfg, "bcolor")))
             d->bcolor[i] = initxcolor(statusbar->screen, color);
         else
-            d->bcolor[i] = globalconf.screens[statusbar->screen].colors_normal[ColFG];
+            d->bcolor[i] = d->fg[i];
 
     } 
 
