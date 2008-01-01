@@ -26,6 +26,8 @@
 #include <X11/Xft/Xft.h>
 #include <regex.h>
 #include "draw.h"
+#include "uicb.h"
+#include "layout.h"
 
 /** Bar possible position */
 enum
@@ -57,7 +59,7 @@ typedef struct Layout Layout;
 struct Layout
 {
     char *image;
-    void (*arrange) (int);
+    LayoutArrange *arrange;
     Layout *next;
 };
 
@@ -66,7 +68,7 @@ struct Key
 {
     unsigned long mod;
     KeySym keysym;
-    void (*func) (int, char *);
+    Uicb *func;
     char *arg;
     Key *next;
 };
@@ -76,7 +78,7 @@ struct Button
 {
     unsigned long mod;
     unsigned int button;
-    void (*func) (int, char *);
+    Uicb *func;
     char *arg;
     Button *next;
 };

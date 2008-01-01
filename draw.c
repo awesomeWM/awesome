@@ -23,6 +23,7 @@
 #include <cairo-ft.h>
 #include <cairo-xlib.h>
 #include <math.h>
+#include "config.h"
 #include "layout.h"
 #include "util.h"
 #include "draw.h"

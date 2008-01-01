@@ -41,6 +41,7 @@ void client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *); 
 void client_kill(Client *);
+void client_maximize(Client *c, int, int, int, int);
 
 Uicb uicb_client_kill;
 Uicb uicb_client_moveresize;
@@ -48,6 +49,10 @@ Uicb uicb_client_settrans;
 Uicb uicb_setborder;
 Uicb uicb_client_swapnext;
 Uicb uicb_client_swapprev;
+Uicb uicb_client_togglemax; 
+Uicb uicb_client_toggleverticalmax; 
+Uicb uicb_client_togglehorizontalmax; 
+Uicb uicb_client_zoom;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

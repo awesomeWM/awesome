@@ -850,4 +850,106 @@ uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((
     if(sel)
         client_kill(sel);
 }
+
+void
+client_maximize(Client *c, int x, int y, int w, int h)
+{
+    if((c->ismax = !c->ismax))
+    {
+        c->oldborder = c->border;
+        c->border = 0;
+        c->wasfloating = c->isfloating;
+        c->isfloating = True;
+        client_resize(c, x, y, w, h, False, True);
+    }
+    else if(c->wasfloating)
+        client_resize(c, c->rx, c->ry, c->rw, c->rh, True, False);
+    else
+        c->isfloating = False;
+
+    c->border = c->oldborder;
+
+    arrange(c->screen);
+}
+
+/** Toggle maximize for client
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
+void
+uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
+{
+    Client *sel = globalconf.focus->client;
+    Area area = get_screen_area(screen,
+                                globalconf.screens[screen].statusbar,
+                                &globalconf.screens[screen].padding);
+    if(sel)
+        client_maximize(sel, area.x, area.y,
+                        area.width - 2 * globalconf.screens[screen].borderpx,
+                        area.height - 2 * globalconf.screens[screen].borderpx);
+}
+
+/** Toggle vertical maximize for client
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
+void
+uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
+{
+    Client *sel = globalconf.focus->client;
+    Area area = get_screen_area(screen,
+                                globalconf.screens[screen].statusbar,
+                                &globalconf.screens[screen].padding);
+
+    if(sel)
+        client_maximize(sel, sel->x, area.y,
+                        sel->w,
+                        area.height - 2 * globalconf.screens[screen].borderpx);
+}
+
+
+/** Toggle horizontal maximize for client
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
+void
+uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
+{
+    Client *sel = globalconf.focus->client;
+    Area area = get_screen_area(screen,
+                                globalconf.screens[screen].statusbar,
+                                &globalconf.screens[screen].padding);
+
+    if(sel)
+        client_maximize(sel, area.x, sel->y,
+                        area.height - 2 * globalconf.screens[screen].borderpx,
+                        sel->h);
+}
+
+/** Zoom client
+ * \param screen Screen ID
+ * \param arg Unused
+ * \ingroup ui_callback
+ */
+void
+uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
+{
+    Client *sel = globalconf.focus->client;
+
+    if(globalconf.clients == sel)
+         for(sel = sel->next; sel && !client_isvisible(sel, screen); sel = sel->next);
+
+    if(!sel)
+        return;
+
+    client_detach(sel);
+    client_attach(sel);
+
+    focus(sel, True, screen);
+    arrange(screen);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
