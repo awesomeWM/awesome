@@ -22,11 +22,8 @@
 #ifndef AWESOME_CONFIG_H
 #define AWESOME_CONFIG_H
 
-#include <X11/Xlib.h>
-#include <X11/Xft/Xft.h>
 #include <regex.h>
 #include "draw.h"
-#include "uicb.h"
 #include "layout.h"
 
 /** Bar possible position */

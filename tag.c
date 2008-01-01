@@ -23,7 +23,6 @@
 #include <X11/Xutil.h>
 
 #include "screen.h"
-#include "layout.h"
 #include "tag.h"
 #include "util.h"
 #include "rules.h"

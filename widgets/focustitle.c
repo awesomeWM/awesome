@@ -21,13 +21,13 @@
  */
 
 #include <stdio.h>
-#include <confuse.h>
 #include "util.h"
 #include "widget.h"
 #include "layout.h"
 #include "tag.h"
 #include "focus.h"
 #include "xutil.h"
+#include "screen.h"
 
 extern AwesomeConf globalconf;
 

@@ -23,7 +23,6 @@
 #define AWESOME_TAG_H
 
 #include "config.h"
-#include "uicb.h"
 
 /** Check if a client is tiled */
 #define IS_TILED(client, screen)            (client && !client->isfloating && client_isvisible(client, screen))

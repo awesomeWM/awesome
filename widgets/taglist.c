@@ -19,7 +19,6 @@
  *
  */
 
-#include <confuse.h>
 #include "config.h"
 #include "util.h"
 #include "widget.h"

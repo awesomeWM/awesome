@@ -23,7 +23,6 @@
 #define AWESOME_CLIENT_H
 
 #include "config.h"
-#include "uicb.h"
 
 Bool client_isvisible(Client *, int);
 Client * get_client_bywin(Client *, Window);

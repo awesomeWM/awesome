@@ -25,9 +25,7 @@
 #include <X11/extensions/Xinerama.h>
 
 #include "client.h"
-#include "screen.h"
 #include "awesome.h"
-#include "layout.h"
 #include "tag.h"
 #include "rules.h"
 #include "util.h"
@@ -36,6 +34,7 @@
 #include "window.h"
 #include "focus.h"
 #include "ewmh.h"
+#include "screen.h"
 #include "layouts/floating.h"
 
 

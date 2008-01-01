@@ -19,7 +19,6 @@
  *
  */
 
-#include <confuse.h>
 #include <string.h>
 #include "util.h"
 #include "draw.h"

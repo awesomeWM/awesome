@@ -21,7 +21,6 @@
 
 #include <X11/Xmd.h>
 #include <X11/Xatom.h>
-#include <confuse.h>
 #include "util.h"
 #include "focus.h"
 #include "tag.h"

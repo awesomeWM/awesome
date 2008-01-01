@@ -23,7 +23,6 @@
 #define AWESOME_STATUSBAR_H
 
 #include "config.h"
-#include "uicb.h"
 
 void statusbar_draw_all(int);
 void statusbar_init(Statusbar *, int);

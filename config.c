@@ -23,7 +23,6 @@
  * @defgroup ui_callback User Interface Callbacks
  */
 
-#include <confuse.h>
 #include <X11/keysym.h>
 
 #include "statusbar.h"

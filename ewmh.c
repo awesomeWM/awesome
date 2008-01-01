@@ -28,7 +28,6 @@
 #include "focus.h"
 #include "screen.h"
 #include "client.h"
-#include "layout.h"
 
 extern AwesomeConf globalconf;
 

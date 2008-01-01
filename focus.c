@@ -21,7 +21,6 @@
 
 #include "util.h"
 #include "tag.h"
-#include "layout.h"
 #include "focus.h" 
 #include "client.h"
 

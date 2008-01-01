@@ -22,14 +22,13 @@
 #include "awesome.h"
 #include "util.h"
 #include "xutil.h"
-#include "screen.h"
 #include "tag.h"
-#include "layout.h"
 #include "mouse.h"
 #include "statusbar.h"
 #include "widget.h"
 #include "focus.h"
 #include "client.h"
+#include "screen.h"
 #include "layouts/tile.h"
 
 extern AwesomeConf globalconf;

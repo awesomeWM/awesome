@@ -19,10 +19,10 @@
  *
  */
 
-#include <confuse.h>
 #include "util.h"
 #include "widget.h"
 #include "xutil.h"
+#include "screen.h"
 
 extern AwesomeConf globalconf;
 

@@ -23,7 +23,6 @@
 #define AWESOME_SCREEN_H
 
 #include "config.h"
-#include "uicb.h"
 
 Area get_screen_area(int, Statusbar *, Padding *);
 Area get_display_area(int, Statusbar *, Padding *);

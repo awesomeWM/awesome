@@ -27,9 +27,7 @@
 
 #include "screen.h"
 #include "event.h"
-#include "layout.h"
 #include "tag.h"
-#include "draw.h"
 #include "statusbar.h"
 #include "util.h"
 #include "window.h"

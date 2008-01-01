@@ -23,7 +23,6 @@
 #define AWESOME_FOCUS_H
 
 #include "config.h"
-#include "uicb.h"
 
 void focus_add_client(Client *);
 void focus_delete_client(Client *);

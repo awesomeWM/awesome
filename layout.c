@@ -22,8 +22,6 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#include "screen.h"
-#include "layout.h"
 #include "tag.h"
 #include "util.h"
 #include "xutil.h"
@@ -31,6 +29,7 @@
 #include "statusbar.h"
 #include "ewmh.h"
 #include "client.h"
+#include "screen.h"
 #include "layouts/tile.h"
 #include "layouts/max.h"
 #include "layouts/fibonacci.h"

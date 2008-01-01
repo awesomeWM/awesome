@@ -22,7 +22,7 @@
 #ifndef AWESOME_EVENT_H
 #define AWESOME_EVENT_H
 
-#include "config.h"
+#include <X11/Xlib.h>
 
 #define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | LockMask))
 

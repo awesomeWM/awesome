@@ -23,9 +23,10 @@
 #include <X11/extensions/Xinerama.h>
 #include <sys/wait.h>
 
+#include "config.h"
 #include "util.h"
 #include "xutil.h"
-
+#include "screen.h"
 
 extern AwesomeConf globalconf;
 

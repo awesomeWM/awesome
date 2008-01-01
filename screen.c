@@ -24,7 +24,6 @@
 #include "util.h"
 #include "screen.h"
 #include "tag.h"
-#include "layout.h"
 #include "focus.h"
 #include "statusbar.h"
 #include "client.h"

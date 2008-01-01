@@ -22,9 +22,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "layout.h"
 #include "statusbar.h"
-#include "draw.h"
 #include "screen.h"
 #include "util.h"
 #include "tag.h"

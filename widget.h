@@ -26,8 +26,6 @@
 #include <confuse.h>
 
 #include "config.h"
-#include "draw.h"
-#include "uicb.h"
 
 enum { AlignLeft, AlignRight, AlignFlex };
 

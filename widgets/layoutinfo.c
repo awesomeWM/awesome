@@ -21,7 +21,6 @@
  *
  */
 
-#include <confuse.h>
 #include "widget.h"
 #include "util.h"
 #include "tag.h"

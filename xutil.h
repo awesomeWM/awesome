@@ -22,7 +22,8 @@
 #ifndef AWESOME_XUTIL_H
 #define AWESOME_XUTIL_H
 
-#include "screen.h"
+#include <X11/Xlib.h>
+#include "uicb.h"
 
 Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
 XColor initxcolor(int, const char *);
