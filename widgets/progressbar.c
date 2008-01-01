@@ -30,15 +30,24 @@ extern AwesomeConf globalconf;
 
 typedef struct
 {
-    int *percent;   /* 0-100 */
-    int width;      /* width of the bars */
-    int lpadding;   /* padding on the left of the bars */
-    int gap;        /* pixels between bars */
-    int bars;       /* number of bars */
-    float height;   /* height 0-1 (where 1 = height of statusbar */
+    /** Percent 0 to 100 */
+    int *percent;
+    /** Width of the bars */
+    int width;
+    /** Left padding */
+    int lpadding;
+    /** Pixel between bars */
+    int gap;
+    /** Number of bars */
+    int bars;
+    /** Height 0-1, where 1 is height of statusbar */
+    float height;
+    /** Foreground color */
     XColor *fg;
+    /** Background color */
     XColor *bg;
-    XColor *bcolor; /* border color */
+    /** Border color */
+    XColor *bcolor;
 } Data;
 
 static int
@@ -58,9 +67,9 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     width = d->width - d->lpadding;
 
     widget->location = widget_calculate_offset(widget->statusbar->width,
-            d->width,
-            offset,
-            widget->alignment);
+                                               d->width,
+                                               offset,
+                                               widget->alignment);
 
     left_offset = widget->location + d->lpadding;
 
@@ -69,21 +78,21 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
         pwidth = (int) d->percent[i] ? ((width - 2) * d->percent[i]) / 100 : 0;
 
         draw_rectangle(ctx,
-                left_offset, margin_top,
-                width, pb_height,
-                False, d->bcolor[i]);
+                       left_offset, margin_top,
+                       width, pb_height,
+                       False, d->bcolor[i]);
 
         if(pwidth > 0)
             draw_rectangle(ctx,
-                    left_offset + 1, margin_top + 1,
-                    pwidth, pb_height - 2,
-                    True, d->fg[i]);
+                           left_offset + 1, margin_top + 1,
+                           pwidth, pb_height - 2,
+                           True, d->fg[i]);
 
         if(width - 2 - pwidth > 0) /* not filled area */
             draw_rectangle(ctx,
-                    left_offset + 1 + pwidth, margin_top + 1,
-                    width - 2 - pwidth, pb_height - 2,
-                    True, d->bg[i]);
+                           left_offset + 1 + pwidth, margin_top + 1,
+                           width - 2 - pwidth, pb_height - 2,
+                           True, d->bg[i]);
 
         margin_top += (pb_height + d->gap);
     }
@@ -96,24 +105,17 @@ static void
 progressbar_tell(Widget *widget, char *command)
 {
     Data *d = widget->data;
-    int i, percent;
+    int i = 0, percent;
     char * tok;
 
-    if(!command)
+    if(!command || !d->bars)
         return;
 
-    if(!d->bars)
-        return;
-
-    i = 0;
-    for (tok = strtok(command, ", "); tok != NULL; tok = strtok(NULL, ", "))
+    for (tok = strtok(command, ", "); tok && i < d->bars; tok = strtok(NULL, ", "), i++)
     {
         percent = atoi(tok);
         if(percent <= 100 && percent >= 0)
             d->percent[i] = percent;
-        if (i > d->bars )
-            break;
-        i++;
     }
 }
 
@@ -123,7 +125,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     Widget *w;
     Data *d;
     char *color;
-    int i, bars; 
+    int i; 
     cfg_t *cfg;
 
 
@@ -134,20 +136,18 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     d = w->data = p_new(Data, 1);
     d->width = cfg_getint(config, "width");
 
-    bars = cfg_size(config, "bar");
-    if (!(bars))
+    if(!(d->bars = cfg_size(config, "bar")))
     {
-        d->bars = 0;
         warn("A progressbar-widget needs a: bar {} in the .awesomerc\n");
         return w;
     }
-    d->bars = bars;
-    d->bg = p_new(XColor, bars);
-    d->fg = p_new(XColor, bars);
-    d->bcolor = p_new(XColor, bars);
-    d->percent = p_new(int, bars);
 
-    for(i = 0; i < bars; i++)
+    d->bg = p_new(XColor, d->bars);
+    d->fg = p_new(XColor, d->bars);
+    d->bcolor = p_new(XColor, d->bars);
+    d->percent = p_new(int, d->bars);
+
+    for(i = 0; i < d->bars; i++)
     {
         cfg = cfg_getnsec(config, "bar", i);
 

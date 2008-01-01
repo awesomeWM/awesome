@@ -535,7 +535,7 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
         CFG_END()
     };
-    static cfg_opt_t bar_opts[] =
+    static cfg_opt_t widget_progressbar_bar_opts[] =
     {
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
@@ -544,8 +544,8 @@ config_parse(const char *confpatharg)
     static cfg_opt_t widget_progressbar_opts[] =
     {
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-        CFG_SEC((char *) "bar", bar_opts, CFGF_MULTI),
-        CFG_INT((char *) "width", 102, CFGF_NONE),
+        CFG_SEC((char *) "bar", widget_progressbar_bar_opts, CFGF_MULTI),
+        CFG_INT((char *) "width", 100, CFGF_NONE),
         CFG_INT((char *) "gap", 2, CFGF_NONE),
         CFG_INT((char *) "lpadding", 3, CFGF_NONE),
         CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
