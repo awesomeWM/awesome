@@ -609,9 +609,9 @@ config_parse(const char *confpatharg)
     {
         CFG_STR((char *) "xproperty_name", NULL, CFGF_NONE),
         CFG_STR((char *) "xproperty_value", NULL, CFGF_NONE),
-        CFG_STR((char *) "name", (char *) "", CFGF_NONE),
-        CFG_STR((char *) "tags", (char *) "", CFGF_NONE),
-        CFG_STR((char *) "icon", (char *) "", CFGF_NONE),
+        CFG_STR((char *) "name", NULL, CFGF_NONE),
+        CFG_STR((char *) "tags", NULL, CFGF_NONE),
+        CFG_STR((char *) "icon", NULL, CFGF_NONE),
         CFG_BOOL((char *) "float", cfg_false, CFGF_NONE),
         CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
         CFG_BOOL((char *) "not_master", cfg_false, CFGF_NONE),
