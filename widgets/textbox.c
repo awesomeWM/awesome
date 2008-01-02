@@ -34,15 +34,6 @@ typedef struct
     XColor bg;
 } Data;
 
-static void
-update(Widget *widget, char *text)
-{
-    Data *d = widget->data;
-    if (d->text)
-        p_delete(&d->text);
-    d->text = a_strdup(text);
-}
-
 static int
 textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
@@ -68,7 +59,10 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 static void
 textbox_tell(Widget *widget, char *command)
 {
-    update(widget, command);
+    Data *d = widget->data;
+    if (d->text)
+        p_delete(&d->text);
+    d->text = a_strdup(command);
 }
 
 Widget *
@@ -103,7 +97,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     if(!w->font)
         w->font = globalconf.screens[statusbar->screen].font;
 
-    update(w, cfg_getstr(config, "text"));
+    d->text = a_strdup(cfg_getstr(config, "text"));
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
