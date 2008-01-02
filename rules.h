@@ -26,7 +26,7 @@
 
 #define RULE_NOSCREEN        -1
 
-void compileregs(Rule *);
+regex_t * rules_compile_regex(char *);    
 Bool client_match_rule(Client *, Rule *);
 Bool is_tag_match_rules(Tag *, Rule *);
 

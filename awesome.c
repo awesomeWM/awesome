@@ -117,10 +117,11 @@ cleanup()
     for(r = globalconf.rules; r; r = rn)
     {
         rn = r->next;
-        p_delete(&r->prop);
-        p_delete(&r->tags);
-        p_delete(&r->propregex);
-        p_delete(&r->tagregex);
+        p_delete(&r->prop_r);
+        p_delete(&r->tags_r);
+        p_delete(&r->xpropval_r);
+        p_delete(&r->icon);
+        p_delete(&r->xprop);
         p_delete(&r);
     }
 

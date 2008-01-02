@@ -25,8 +25,8 @@
 
 extern AwesomeConf globalconf;
 
-static regex_t *
-compile_regex(char *val)
+regex_t *
+rules_compile_regex(char *val)
 {
     regex_t *reg;
 
@@ -42,19 +42,6 @@ compile_regex(char *val)
     return NULL;
 }
 
-void
-compileregs(Rule *rules)
-{
-    Rule *r;
-
-    for(r = rules; r; r = r->next)
-    {
-        r->propregex = compile_regex(r->prop);
-        r->tagregex = compile_regex(r->tags);
-        r->xpropvalregex = compile_regex(r->xprop_val);
-    }
-}
-
 Bool
 client_match_rule(Client *c, Rule *r)
 {
@@ -62,35 +49,39 @@ client_match_rule(Client *c, Rule *r)
     regmatch_t tmp;
     ssize_t len;
     XClassHint ch = { 0, 0 };
-    Bool ret;
+    Bool ret = False;
 
-    /* first try to match on name */
-    XGetClassHint(globalconf.display, c->win, &ch);
+    if(r->prop_r)
+    {
+        /* first try to match on name */
+        XGetClassHint(globalconf.display, c->win, &ch);
 
-    len = a_strlen(ch.res_class) + a_strlen(ch.res_name) + a_strlen(c->name);
-    prop = p_new(char, len + 3);
+        len = a_strlen(ch.res_class) + a_strlen(ch.res_name) + a_strlen(c->name);
+        prop = p_new(char, len + 3);
 
-    /* rule matching */
-    snprintf(prop, len + 3, "%s:%s:%s",
-             ch.res_class ? ch.res_class : "", ch.res_name ? ch.res_name : "", c->name);
+        /* rule matching */
+        snprintf(prop, len + 3, "%s:%s:%s",
+                 ch.res_class ? ch.res_class : "", ch.res_name ? ch.res_name : "", c->name);
 
-    ret = (r->propregex && !regexec(r->propregex, prop, 1, &tmp, 0));
+        ret = !regexec(r->prop_r, prop, 1, &tmp, 0);
 
-    p_delete(&prop);
+        p_delete(&prop);
 
-    if(ch.res_class)
-        XFree(ch.res_class);
-    if(ch.res_name)
-        XFree(ch.res_name);
+        if(ch.res_class)
+            XFree(ch.res_class);
+        if(ch.res_name)
+            XFree(ch.res_name);
 
-    if(ret)
-        return True;
-
+        if(ret)
+            return True;
+    }
+    
     if(r->xprop
+       && r->xpropval_r
        && xgettextprop(globalconf.display, c->win,
                        XInternAtom(globalconf.display, r->xprop, False),
                        buf, ssizeof(buf)))
-        ret = (r->xpropvalregex && !regexec(r->xpropvalregex, buf, 1, &tmp, 0));
+        ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
 
     return ret;
 }
@@ -100,7 +91,7 @@ is_tag_match_rules(Tag *t, Rule *r)
 {
     regmatch_t tmp;
 
-    if(r->tagregex && !regexec(r->tagregex, t->name, 1, &tmp, 0))
+    if(r->tags_r && !regexec(r->tags_r, t->name, 1, &tmp, 0))
         return True;
 
     return False;

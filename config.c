@@ -710,14 +710,14 @@ config_parse(const char *confpatharg)
         for(i = 0; i < cfg_size(cfg_rules, "rule"); i++)
         {
             cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
-            rule->prop = a_strdup(cfg_getstr(cfgsectmp, "name"));
-            rule->tags = a_strdup(cfg_getstr(cfgsectmp, "tags"));
+            rule->prop_r = rules_compile_regex(cfg_getstr(cfgsectmp, "name"));
+            rule->tags_r = rules_compile_regex(cfg_getstr(cfgsectmp, "tags"));
+            rule->xprop = a_strdup(cfg_getstr(cfgsectmp, "xproperty_name"));
+            rule->xpropval_r = rules_compile_regex(cfg_getstr(cfgsectmp, "xproperty_value"));
             rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
             rule->isfloating = cfg_getbool(cfgsectmp, "float");
             rule->screen = cfg_getint(cfgsectmp, "screen");
             rule->not_master = cfg_getbool(cfgsectmp, "not_master");
-            rule->xprop = a_strdup(cfg_getstr(cfgsectmp, "xproperty_name"));
-            rule->xprop_val = a_strdup(cfg_getstr(cfgsectmp, "xproperty_value"));
             if(rule->screen >= get_screen_count())
                 rule->screen = 0;
 
@@ -729,8 +729,6 @@ config_parse(const char *confpatharg)
     }
     else
         globalconf.rules = NULL;
-
-    compileregs(globalconf.rules);
 
     /* Mouse: root window click bindings */
     globalconf.buttons.root = parse_mouse_bindings(cfg_mouse, "root", True);
