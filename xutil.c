@@ -129,18 +129,17 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
  * \param colstr Color specification
  */
 XColor
-initxcolor(int screen, const char *colstr)
+initxcolor(int phys_screen, const char *colstr)
 {
     XColor screenColor, exactColor;
-    int ret, physcreen = get_phys_screen(screen);
 
-    ret = XAllocNamedColor(globalconf.display, 
-                           DefaultColormap(globalconf.display, physcreen),
-                           colstr,
-                           &screenColor,
-                           &exactColor);
-    if(!ret)
+    if(!XAllocNamedColor(globalconf.display, 
+                         DefaultColormap(globalconf.display, phys_screen),
+                         colstr,
+                         &screenColor,
+                         &exactColor))
         eprint("awesome: error, cannot allocate color '%s'\n", colstr);
+
     return screenColor;
 }
 

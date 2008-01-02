@@ -317,6 +317,7 @@ config_parse_screen(cfg_t *cfg, int screen)
           *cfg_layouts, *cfg_padding, *cfgsectmp;
     VirtScreen *virtscreen = &globalconf.screens[screen];
     unsigned int i;
+    int phys_screen = get_phys_screen(screen);
 
     snprintf(buf, sizeof(buf), "%d", screen);
     cfg_screen = cfg_gettsec(cfg, "screen", buf);
@@ -346,27 +347,27 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
     virtscreen->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
     virtscreen->font = XftFontOpenName(globalconf.display,
-                                       get_phys_screen(screen),
+                                       phys_screen,
                                        cfg_getstr(cfg_general, "font"));
     if(!virtscreen->font)
         eprint("awesome: cannot init font\n");
 
     /* Colors */
-    virtscreen->colors_normal[ColBorder] = initxcolor(screen,
+    virtscreen->colors_normal[ColBorder] = initxcolor(phys_screen,
                                                       cfg_getstr(cfg_colors, "normal_border"));
-    virtscreen->colors_normal[ColBG] = initxcolor(screen,
+    virtscreen->colors_normal[ColBG] = initxcolor(phys_screen,
                                                   cfg_getstr(cfg_colors, "normal_bg"));
-    virtscreen->colors_normal[ColFG] = initxcolor(screen,
+    virtscreen->colors_normal[ColFG] = initxcolor(phys_screen,
                                                   cfg_getstr(cfg_colors, "normal_fg"));
-    virtscreen->colors_selected[ColBorder] = initxcolor(screen,
+    virtscreen->colors_selected[ColBorder] = initxcolor(phys_screen,
                                                         cfg_getstr(cfg_colors, "focus_border"));
-    virtscreen->colors_selected[ColBG] = initxcolor(screen,
+    virtscreen->colors_selected[ColBG] = initxcolor(phys_screen,
                                                     cfg_getstr(cfg_colors, "focus_bg"));
-    virtscreen->colors_selected[ColFG] = initxcolor(screen,
+    virtscreen->colors_selected[ColFG] = initxcolor(phys_screen,
                                                     cfg_getstr(cfg_colors, "focus_fg"));
-    virtscreen->colors_urgent[ColBG] = initxcolor(screen,
+    virtscreen->colors_urgent[ColBG] = initxcolor(phys_screen,
                                                   cfg_getstr(cfg_colors, "urgent_bg"));
-    virtscreen->colors_urgent[ColFG] = initxcolor(screen,
+    virtscreen->colors_urgent[ColFG] = initxcolor(phys_screen,
                                                   cfg_getstr(cfg_colors, "urgent_fg"));
 
     /* Statusbar */
@@ -448,9 +449,9 @@ config_parse_screen(cfg_t *cfg, int screen)
         tag->mwfact = 0.5;
     }
 
-    ewmh_update_net_numbers_of_desktop(get_phys_screen(screen));
-    ewmh_update_net_current_desktop(get_phys_screen(screen));
-    ewmh_update_net_desktop_names(get_phys_screen(screen));
+    ewmh_update_net_numbers_of_desktop(phys_screen);
+    ewmh_update_net_current_desktop(phys_screen);
+    ewmh_update_net_desktop_names(phys_screen);
 
     /* select first tag by default */
     virtscreen->tags[0].selected = True;

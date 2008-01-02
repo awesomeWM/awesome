@@ -75,6 +75,7 @@ focustitle_new(Statusbar *statusbar, cfg_t *config)
     Widget *w;
     Data *d;
     char *buf;
+    int phys_screen = get_phys_screen(statusbar->screen);
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
@@ -83,12 +84,12 @@ focustitle_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     if((buf = cfg_getstr(config, "fg")))
-        d->fg = initxcolor(statusbar->screen, buf);
+        d->fg = initxcolor(phys_screen, buf);
     else
         d->fg = globalconf.screens[statusbar->screen].colors_selected[ColFG];
 
     if((buf = cfg_getstr(config, "bg")))
-        d->bg = initxcolor(statusbar->screen, buf);
+        d->bg = initxcolor(phys_screen, buf);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_selected[ColBG];
 

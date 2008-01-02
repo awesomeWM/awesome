@@ -85,7 +85,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
         d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
     if((buf = cfg_getstr(config, "bg")))
-        d->bg = initxcolor(statusbar->screen, buf);
+        d->bg = initxcolor(get_phys_screen(statusbar->screen), buf);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 

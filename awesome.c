@@ -202,6 +202,7 @@ setup(int screen)
 {
     XSetWindowAttributes wa;
     Statusbar *statusbar;
+    int phys_screen = get_phys_screen(screen);
 
     /* init cursors */
     globalconf.cursor[CurNormal] = XCreateFontCursor(globalconf.display, XC_left_ptr);
@@ -214,14 +215,14 @@ setup(int screen)
     wa.cursor = globalconf.cursor[CurNormal];
 
     XChangeWindowAttributes(globalconf.display,
-                            RootWindow(globalconf.display, get_phys_screen(screen)),
+                            RootWindow(globalconf.display, phys_screen),
                             CWEventMask | CWCursor, &wa);
 
     XSelectInput(globalconf.display,
-                 RootWindow(globalconf.display, get_phys_screen(screen)),
+                 RootWindow(globalconf.display, phys_screen),
                  wa.event_mask);
 
-    grabkeys(get_phys_screen(screen));
+    grabkeys(phys_screen);
 
     for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
         statusbar_init(statusbar, screen);
