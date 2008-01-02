@@ -167,16 +167,20 @@ This widget shows an icon.
 
 progressbar
 ~~~~~~~~~~~
-This widget shows a progress bar.
+This widget shows one or more progress-bars.
 
 *mouse*::
     Set mouse bindings.
 *width*::
     Set width.
+*bar*::
+    Draws a bar; Options: fg, bg, bcolor
 *fg*::
     Foreground color.
 *bg*::
     Background color.
+*bcolor*::
+    Border color.
 
 FILES
 -----
@@ -184,38 +188,133 @@ For an example of an awesomerc file, see the file provided with the sources
 
 EXAMPLES
 --------
-
-The general format of the awesomerc with some examples:
+The general config and subconfig options for the awesomerc:
 
 ....................
-screen 0       # particular settings for screen 0
-{              #
-  general      #
-  { }          # border=2 focus_move_pointer=true font="fixed-10" ...
-               #
-  colors       #
-  { }          # focus_bg="#000000" focus_border= ...
-               #
-  statusbar sb #
-  { }          # position="top" taglist tl {}  textbox tb {} ... 
-               # hint: tl is a identifier (you can freely choose)
-               # usage: awesome-client <<< "0 widget_tell tl some_data"
-               #
-  tags         #
-  { }          # tag identifier { layout="tile" wmfact=0.70 nmaster=2 }
-               #
-  layouts      #
-  { }          # layout max { symbol="[ ]" } (or tile, max, dwindle, floating, ...)
-}              #
-               #
-rules          #
-{ }            # rule { name="gimp" float=true tags="3" }
-               #
-mouse          #
-{ }            # tag { button="1" command="tag_view" }
-               #
-keys           #
-{ }            # key { modkey={"Mod4"} key="j" command="client_focusnext" }
+screen <number>
+{
+    colors
+    {
+        focus_bg=<color> 
+        focus_border=<color>
+        focus_fg=<color> 
+        normal_bg=<color> 
+        normal_border=<color> 
+        normal_fg=<color>
+        tab_border=<color> 
+        urgent_bg=<color>
+        urgent_fg=<color>
+    }
+    general
+    {
+        allow_lower_floats=<{true,false}>
+        border=<integer> 
+        focus_move_pointer=<{true,false}>
+        font=<font> 
+        opacity_unfocused=<integer>
+        resize_hints=<{true,false}> 
+        snap=<integer> 
+    }
+    layouts
+    {
+        layout { image=<image> }
+    }
+    padding 
+    { 
+        bottom=<integer> 
+        left=<integer> 
+        right=<integer> 
+        top=<integer> 
+    }
+    statusbar
+    {
+        focustitle <identifier>
+        height=<integer>
+        iconbox <identifier>
+        {
+            image=<image>
+            mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
+        }
+        layoutinfo <identifier>
+        netwmicon <identifier> {}
+        position=<{bottom,top,left,right}>
+        progressbar <identifier>
+        {
+            bar { bcolor=<color> bg=<color> fg=<color> }
+            gap=<integer> 
+            height=<float> 
+            lpadding=<integer>
+            mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
+            width=<integer>
+        }
+        taglist <identifier>
+        {
+            mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
+        }
+        textbox <identifier>
+        {
+            bg=<color> 
+            fg=<color> 
+            font=<font>
+            mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
+            text=<string> w
+            idth=<integer>
+        }
+        width=<integer>
+    }
+    tags 
+    { 
+        tag 
+        { 
+        layout=<{dwindle,floating,max,spiral,tile,tileleft}>
+        wmfact=<float> 
+        nmaster=<integer>
+        }
+    }
+}
+rules
+{  
+    rule 
+    { 
+        float=<{true,false}> 
+        icon=<image> 
+        name=<regex> 
+        screen=<integer> 
+        tags=<integer-list,...>
+    }
+}
+keys
+{
+    key 
+    { 
+        arg=<uicb-argument> 
+        command=<uicb-cmd> 
+        key=<key> 
+        modkey=<mod> 
+    }
+    keylist 
+    { 
+        arglist={<uicb-arguments,...} 
+        command=<uicb-cmd> 
+        keylist={<key>,...} 
+        modkey=<mod> 
+    }
+}
+mouse
+{
+    client 
+    {   arg=<uicb-argument> 
+        button=<integer> 
+        command=<uicb-cmd> 
+        modkey=<mod> 
+    }
+    root
+    {   arg=<uicb-argument> 
+        button=<integer> 
+        command=<uicb-cmd> 
+        modkey=<mod> 
+    }
+}
 ....................
 
 
