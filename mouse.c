@@ -51,7 +51,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     Client *c = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
 
-    if(!c || (c && c->isfixed))
+    if(!c)
         return;
 
     if((curtags[0]->layout->arrange != layout_floating)
