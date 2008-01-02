@@ -107,7 +107,7 @@ handle_event_buttonpress(XEvent *e)
         {
             restack(c->screen);
             XAllowEvents(globalconf.display, ReplayPointer, CurrentTime);
-            window_grabbuttons(c->phys_screen, c->win, True, True);
+            window_grabbuttons(get_phys_screen(c->screen), c->win, True, True);
         }
         else
             handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
@@ -233,7 +233,7 @@ handle_event_enternotify(XEvent * e)
         curtags = get_current_tags(c->screen);
         focus(c, ev->same_screen, c->screen);
         if (c->isfloating || curtags[0]->layout->arrange == layout_floating)
-            window_grabbuttons(c->phys_screen, c->win, True, False);
+            window_grabbuttons(get_phys_screen(c->screen), c->win, True, False);
         p_delete(&curtags);
     }
     else
@@ -381,7 +381,7 @@ handle_event_unmapnotify(XEvent * e)
     XUnmapEvent *ev = &e->xunmap;
 
     if((c = get_client_bywin(globalconf.clients, ev->window))
-       && ev->event == RootWindow(e->xany.display, c->phys_screen)
+       && ev->event == RootWindow(e->xany.display, get_phys_screen(c->screen))
        && ev->send_event && window_getstate(c->win) == NormalState)
         client_unmanage(c, WithdrawnState);
 }
@@ -393,7 +393,7 @@ handle_event_shape(XEvent * e)
     Client *c = get_client_bywin(globalconf.clients, ev->window);
 
     if(c)
-        window_setshape(c->phys_screen, c->win);
+        window_setshape(get_phys_screen(c->screen), c->win);
 }
 
 void

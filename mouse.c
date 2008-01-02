@@ -43,7 +43,7 @@ extern AwesomeConf globalconf;
 void
 uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int x1, y, ocx, ocy, di, nx, ny;
+    int x1, y, ocx, ocy, di, nx, ny, phys_screen;
     unsigned int dui;
     Window dummy;
     XEvent ev;
@@ -68,13 +68,14 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 
     ocx = nx = c->x;
     ocy = ny = c->y;
+    phys_screen = get_phys_screen(c->screen);
     if(XGrabPointer(globalconf.display,
-                    RootWindow(globalconf.display, c->phys_screen),
+                    RootWindow(globalconf.display, phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
     XQueryPointer(globalconf.display,
-                  RootWindow(globalconf.display, c->phys_screen),
+                  RootWindow(globalconf.display, phys_screen),
                   &dummy, &dummy, &x1, &y, &di, &di, &dui);
     c->ismax = False;
     statusbar_draw_all(c->screen);
@@ -158,7 +159,8 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     else
         return;
 
-    if(XGrabPointer(globalconf.display, RootWindow(globalconf.display, c->phys_screen),
+    if(XGrabPointer(globalconf.display, RootWindow(globalconf.display,
+                                                   get_phys_screen(c->screen)),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
                     None, globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;

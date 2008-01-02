@@ -172,8 +172,6 @@ struct Client
     Window win;
     /** Client logical screen */
     int screen;
-    /** Client physical screen */
-    int phys_screen;
 };
 
 typedef struct FocusList FocusList;

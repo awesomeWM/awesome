@@ -238,10 +238,12 @@ client_detach(Client *c)
 void
 focus(Client *c, Bool selscreen, int screen)
 {
+    int phys_screen = get_phys_screen(screen);
+
     /* unfocus current selected client */
     if(globalconf.focus->client)
     {
-        window_grabbuttons(globalconf.focus->client->phys_screen,
+        window_grabbuttons(get_phys_screen(globalconf.focus->client->screen),
                            globalconf.focus->client->win, False, True);
         XSetWindowBorder(globalconf.display, globalconf.focus->client->win,
                          globalconf.screens[screen].colors_normal[ColBorder].pixel);
@@ -262,7 +264,7 @@ focus(Client *c, Bool selscreen, int screen)
     if(c)
     {
         XSetWindowBorder(globalconf.display, c->win, globalconf.screens[screen].colors_selected[ColBorder].pixel);
-        window_grabbuttons(c->phys_screen, c->win, True, True);
+        window_grabbuttons(phys_screen, c->win, True, True);
     }
 
     if(!selscreen)
@@ -285,10 +287,10 @@ focus(Client *c, Bool selscreen, int screen)
     }
     else
         XSetInputFocus(globalconf.display,
-                       RootWindow(globalconf.display, get_phys_screen(screen)),
+                       RootWindow(globalconf.display, phys_screen),
                        RevertToPointerRoot, CurrentTime);
 
-    ewmh_update_net_active_window(get_phys_screen(screen));
+    ewmh_update_net_active_window(phys_screen);
 }
 
 /** Manage a new client
@@ -306,6 +308,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Area area, darea;
     Tag *tag;
     Rule *rule;
+    int phys_screen = get_phys_screen(screen);
 
     c = p_new(Client, 1);
 
@@ -318,7 +321,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     globalconf.display = globalconf.display;
     c->screen = get_screen_bycoord(c->x, c->y);
-    c->phys_screen = get_phys_screen(c->screen);
 
     move_client_to_screen(c, screen, True);
 
@@ -345,7 +347,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
     else
     {
-        darea = get_display_area(c->phys_screen,
+        darea = get_display_area(phys_screen,
                                  globalconf.screens[screen].statusbar,
                                  &globalconf.screens[screen].padding);
 
@@ -377,11 +379,11 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(globalconf.have_shape)
     {
         XShapeSelectInput(globalconf.display, w, ShapeNotifyMask);
-        window_setshape(c->phys_screen, c->win);
+        window_setshape(phys_screen, c->win);
     }
 
     /* grab buttons */
-    window_grabbuttons(c->phys_screen, c->win, False, True);
+    window_grabbuttons(phys_screen, c->win, False, True);
 
     /* check for transient and set tags like its parent */
     if((rettrans = XGetTransientForHint(globalconf.display, w, &trans) == Success)
@@ -412,7 +414,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     focus(c, True, screen);
 
-    ewmh_update_net_client_list(c->phys_screen);
+    ewmh_update_net_client_list(phys_screen);
 
     /* rearrange to display new window */
     arrange(screen);
@@ -479,7 +481,7 @@ client_resize(Client *c, int x, int y, int w, int h,
     if(w <= 0 || h <= 0)
         return;
     /* offscreen appearance fixes */
-    area = get_display_area(c->phys_screen,
+    area = get_display_area(get_phys_screen(c->screen),
                             NULL,
                             &globalconf.screens[c->screen].padding);
     if(x > area.width)
