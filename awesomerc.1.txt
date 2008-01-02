@@ -303,13 +303,15 @@ keys
 mouse
 {
     client 
-    {   arg=<uicb-argument> 
+    {
+        arg=<uicb-argument> 
         button=<integer> 
         command=<uicb-cmd> 
         modkey=<mod> 
     }
     root
-    {   arg=<uicb-argument> 
+    {
+        arg=<uicb-argument> 
         button=<integer> 
         command=<uicb-cmd> 
         modkey=<mod> 
