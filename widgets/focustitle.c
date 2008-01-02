@@ -2,7 +2,7 @@
  * focustitle.c - focus title widget
  *
  * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
- * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

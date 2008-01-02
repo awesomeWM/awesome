@@ -1,7 +1,7 @@
 /*
  * awesome-client.c - awesome client, communicate with socket
  *
- * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2007 daniel@brinkers.de
  *
  * This program is free software; you can redistribute it and/or modify

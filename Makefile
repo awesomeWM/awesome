@@ -1,5 +1,5 @@
 # awesome
-# © 2007 Julien Danjou <julien@danjou.info>
+# © 2007-2008 Julien Danjou <julien@danjou.info>
 
 include config.mk
 

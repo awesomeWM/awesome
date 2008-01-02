@@ -2,7 +2,7 @@
  * layoutinfo.c - layout info widget
  *
  * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
- * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  * Aldo Cortesi <aldo@nullcube.com>
  *
  * This program is free software; you can redistribute it and/or modify

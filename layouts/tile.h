@@ -1,7 +1,7 @@
 /*
  * tile.h - tile layout
  *
- * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2007 Ross Mohn <rpmohn@waxandwane.org>
  *
  * This program is free software; you can redistribute it and/or modify
