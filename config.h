@@ -45,6 +45,7 @@ struct Rule
     char *icon;
     int screen;
     Bool isfloating;
+    Bool not_master;
     regex_t *propregex;
     regex_t *tagregex;
     Rule *next;

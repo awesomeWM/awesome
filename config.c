@@ -612,6 +612,7 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "icon", (char *) "", CFGF_NONE),
         CFG_BOOL((char *) "float", cfg_false, CFGF_NONE),
         CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
+        CFG_BOOL((char *) "not_master", cfg_false, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t rules_opts[] =
@@ -712,6 +713,7 @@ config_parse(const char *confpatharg)
             rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
             rule->isfloating = cfg_getbool(cfgsectmp, "float");
             rule->screen = cfg_getint(cfgsectmp, "screen");
+            rule->not_master = cfg_getbool(cfgsectmp, "not_master");
             if(rule->screen >= get_screen_count())
                 rule->screen = 0;
 

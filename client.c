@@ -187,6 +187,22 @@ client_ban(Client * c)
     window_setstate(c->win, IconicState);
 }
 
+
+static void
+client_attach_at_end(Client *c)
+{
+    Client *iter;
+    for(iter = globalconf.clients; iter && iter->next; iter = iter->next);
+    /* stack is empty */
+    if(!iter)
+        globalconf.clients = c;
+    else
+    {
+        c->prev = iter;
+        iter->next = c;
+    }
+}
+
 /** Attach client to the beginning of the clients stack
  * \param c the client
  */
@@ -289,6 +305,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     XWindowChanges wc;
     Area area, darea;
     Tag *tag;
+    Rule *rule;
 
     c = p_new(Client, 1);
 
@@ -381,7 +398,14 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     client_saveprops(c);
 
     /* attach to the stack */
-    client_attach(c);
+    for(rule = globalconf.rules; rule; rule = rule->next)
+        if(rule->not_master && client_match_rule(c, rule))
+        {
+            client_attach_at_end(c);
+            break;
+        }
+    if(!rule)
+        client_attach(c);
 
     /* some windows require this */
     XMoveResizeWindow(globalconf.display, c->win, c->x, c->y, c->w, c->h);
