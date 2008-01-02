@@ -889,8 +889,8 @@ uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
                                 &globalconf.screens[screen].padding);
     if(sel)
         client_maximize(sel, area.x, area.y,
-                        area.width - 2 * globalconf.screens[screen].borderpx,
-                        area.height - 2 * globalconf.screens[screen].borderpx, False);
+                        area.width - 2 * sel->border,
+                        area.height - 2 * sel->border, False);
 }
 
 /** Toggle vertical maximize for client
@@ -909,7 +909,7 @@ uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
     if(sel)
         client_maximize(sel, sel->x, area.y,
                         sel->w,
-                        area.height - 2 * globalconf.screens[screen].borderpx, False);
+                        area.height - 2 * sel->border, False);
 }
 
 
@@ -928,7 +928,7 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 
     if(sel)
         client_maximize(sel, area.x, sel->y,
-                        area.height - 2 * globalconf.screens[screen].borderpx,
+                        area.height - 2 * sel->border,
                         sel->h, False);
 }
 
