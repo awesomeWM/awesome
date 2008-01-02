@@ -237,7 +237,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             c->ismax = True;
         else if(set == _NET_WM_STATE_ADD)
             c->ismax = False;
-        client_maximize(c, area.x, area.y, area.width, area.height);
+        client_maximize(c, area.x, area.y, area.width, area.height, True);
     }
     else
         printf("%s received unknown window state %s\n", c->name, XGetAtomName(globalconf.display, state));

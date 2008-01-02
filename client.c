@@ -851,12 +851,15 @@ uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((
 }
 
 void
-client_maximize(Client *c, int x, int y, int w, int h)
+client_maximize(Client *c, int x, int y, int w, int h, Bool borders)
 {
     if((c->ismax = !c->ismax))
     {
-        c->oldborder = c->border;
-        c->border = 0;
+        if(borders)
+        {
+            c->oldborder = c->border;
+            c->border = 0;
+        }
         c->wasfloating = c->isfloating;
         c->isfloating = True;
         client_resize(c, x, y, w, h, False, True);
@@ -866,7 +869,8 @@ client_maximize(Client *c, int x, int y, int w, int h)
     else
         c->isfloating = False;
 
-    c->border = c->oldborder;
+    if(borders)
+        c->border = c->oldborder;
 
     arrange(c->screen);
 }
@@ -886,7 +890,7 @@ uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
     if(sel)
         client_maximize(sel, area.x, area.y,
                         area.width - 2 * globalconf.screens[screen].borderpx,
-                        area.height - 2 * globalconf.screens[screen].borderpx);
+                        area.height - 2 * globalconf.screens[screen].borderpx, False);
 }
 
 /** Toggle vertical maximize for client
@@ -905,7 +909,7 @@ uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
     if(sel)
         client_maximize(sel, sel->x, area.y,
                         sel->w,
-                        area.height - 2 * globalconf.screens[screen].borderpx);
+                        area.height - 2 * globalconf.screens[screen].borderpx, False);
 }
 
 
@@ -925,7 +929,7 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
     if(sel)
         client_maximize(sel, area.x, sel->y,
                         area.height - 2 * globalconf.screens[screen].borderpx,
-                        sel->h);
+                        sel->h, False);
 }
 
 /** Zoom client
