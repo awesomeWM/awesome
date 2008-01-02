@@ -54,6 +54,7 @@ const NameFuncLink UicbList[] =
     {"tag_viewprev_selected", uicb_tag_prev_selected},
     {"tag_viewprev", uicb_tag_viewprev},
     {"tag_viewnext", uicb_tag_viewnext},
+    {"tag_create", uicb_tag_create},
     /* layout.c */
     {"tag_setlayout", uicb_tag_setlayout},
     {"client_focusnext", uicb_client_focusnext},

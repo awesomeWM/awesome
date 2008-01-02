@@ -43,6 +43,7 @@ Uicb uicb_tag_view;
 Uicb uicb_tag_prev_selected;
 Uicb uicb_tag_viewnext;
 Uicb uicb_tag_viewprev;
+Uicb uicb_tag_create;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -404,4 +404,22 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
     p_delete(&curtags);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
+
+void
+uicb_tag_create(int screen, char *arg)
+{
+    Tag *last_tag, *tag;
+
+    if(!a_strlen(arg))
+        return;
+
+    for(last_tag = globalconf.screens[screen].tags; last_tag && last_tag->next; last_tag = last_tag->next);
+    last_tag->next = tag = p_new(Tag, 1);
+    tag->name = a_strdup(arg);
+    tag->layout = globalconf.screens[screen].layouts;
+    tag->mwfact = 0.5;
+    tag->nmaster = 1;
+    tag->ncol = 1;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
