@@ -43,11 +43,14 @@ struct Rule
     char *prop;
     char *tags;
     char *icon;
+    char *xprop;
+    char *xprop_val;
     int screen;
     Bool isfloating;
     Bool not_master;
     regex_t *propregex;
     regex_t *tagregex;
+    regex_t *xpropvalregex;
     Rule *next;
 };
 

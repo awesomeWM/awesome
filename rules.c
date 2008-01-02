@@ -21,44 +21,50 @@
 
 #include "util.h"
 #include "rules.h"
+#include "xutil.h"
 
 extern AwesomeConf globalconf;
+
+static regex_t *
+compile_regex(char *val)
+{
+    regex_t *reg;
+
+    if(val)
+    {
+        reg = p_new(regex_t, 1);
+        if(regcomp(reg, val, REG_EXTENDED))
+            p_delete(&reg);
+        else
+            return reg;
+    }
+
+    return NULL;
+}
 
 void
 compileregs(Rule *rules)
 {
     Rule *r;
-    regex_t *reg;
+
     for(r = rules; r; r = r->next)
     {
-        if(r->prop)
-        {
-            reg = p_new(regex_t, 1);
-            if(regcomp(reg, r->prop, REG_EXTENDED))
-                p_delete(&reg);
-            else
-                r->propregex = reg;
-        }
-        if(r->tags)
-        {
-            reg = p_new(regex_t, 1);
-            if(regcomp(reg, r->tags, REG_EXTENDED))
-                p_delete(&reg);
-            else
-                r->tagregex = reg;
-        }
+        r->propregex = compile_regex(r->prop);
+        r->tagregex = compile_regex(r->tags);
+        r->xpropvalregex = compile_regex(r->xprop_val);
     }
 }
 
 Bool
 client_match_rule(Client *c, Rule *r)
 {
-    char *prop;
+    char *prop, buf[512];
     regmatch_t tmp;
     ssize_t len;
     XClassHint ch = { 0, 0 };
     Bool ret;
 
+    /* first try to match on name */
     XGetClassHint(globalconf.display, c->win, &ch);
 
     len = a_strlen(ch.res_class) + a_strlen(ch.res_name) + a_strlen(c->name);
@@ -76,6 +82,15 @@ client_match_rule(Client *c, Rule *r)
         XFree(ch.res_class);
     if(ch.res_name)
         XFree(ch.res_name);
+
+    if(ret)
+        return True;
+
+    if(r->xprop
+       && xgettextprop(globalconf.display, c->win,
+                       XInternAtom(globalconf.display, r->xprop, False),
+                       buf, ssizeof(buf)))
+        ret = (r->xpropvalregex && !regexec(r->xpropvalregex, buf, 1, &tmp, 0));
 
     return ret;
 }

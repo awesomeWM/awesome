@@ -607,6 +607,8 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t rule_opts[] =
     {
+        CFG_STR((char *) "xproperty_name", NULL, CFGF_NONE),
+        CFG_STR((char *) "xproperty_value", NULL, CFGF_NONE),
         CFG_STR((char *) "name", (char *) "", CFGF_NONE),
         CFG_STR((char *) "tags", (char *) "", CFGF_NONE),
         CFG_STR((char *) "icon", (char *) "", CFGF_NONE),
@@ -714,6 +716,8 @@ config_parse(const char *confpatharg)
             rule->isfloating = cfg_getbool(cfgsectmp, "float");
             rule->screen = cfg_getint(cfgsectmp, "screen");
             rule->not_master = cfg_getbool(cfgsectmp, "not_master");
+            rule->xprop = a_strdup(cfg_getstr(cfgsectmp, "xproperty_name"));
+            rule->xprop_val = a_strdup(cfg_getstr(cfgsectmp, "xproperty_value"));
             if(rule->screen >= get_screen_count())
                 rule->screen = 0;
 
