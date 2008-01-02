@@ -164,6 +164,8 @@ This widget shows an icon.
     Set mouse bindings.
 *image*::
     Image file.
+*resize*::
+    Resize icon to fit into statusbar.
 
 progressbar
 ~~~~~~~~~~~
@@ -233,6 +235,7 @@ screen <number>
         iconbox <identifier>
         {
             image=<image>
+            resize=<{true,false}>
             mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
         }
         layoutinfo <identifier>

@@ -24,20 +24,30 @@
 
 extern AwesomeConf globalconf;
 
+typedef struct
+{
+    char *image;
+    Bool resize;
+} Data;
+
 static int
 iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
-    Area area;
+    Data *d = widget->data;
+    Area area = draw_get_image_size(d->image);
 
-    area = draw_get_image_size(widget->data);
-    widget->width = ((double) widget->statusbar->height / area.height) * area.width;
+    if(d->resize)
+        widget->width = ((double) widget->statusbar->height / area.height) * area.width;
+    else
+        widget->width = area.width;
+
     widget->location = widget_calculate_offset(widget->statusbar->width,
                                                widget->width,
                                                offset,
                                                widget->alignment);
 
-    draw_image(ctx, widget->location, 0, widget->statusbar->height, widget->data);
+    draw_image(ctx, widget->location, 0, d->resize ? widget->statusbar->height : 0, d->image);
 
     return widget->width;
 }
@@ -45,22 +55,26 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 static void
 iconbox_tell(Widget *widget, char *command)
 {
-    if(widget->data)
-        p_delete(&widget->data);
-    widget->data = a_strdup(command);
-    return;
+    Data *d = widget->data;
+
+    if(d->image)
+        p_delete(&d->image);
+    d->image = a_strdup(command);
 }
 
 Widget *
 iconbox_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
+    Data *d;
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
     w->draw = iconbox_draw;
     w->tell = iconbox_tell;
-    w->data = (void *) a_strdup(cfg_getstr(config, "image"));
+    w->data = d = p_new(Data, 1);
+    d->image = a_strdup(cfg_getstr(config, "image"));
+    d->resize = cfg_getbool(config, "resize");
     
     return w;
 }

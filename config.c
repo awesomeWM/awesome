@@ -522,6 +522,7 @@ config_parse(const char *confpatharg)
     {
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
+        CFG_BOOL((char *) "resize", cfg_true, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t widget_textbox_focus_opts[] =
