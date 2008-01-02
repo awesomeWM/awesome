@@ -855,8 +855,6 @@ client_maximize(Client *c, int x, int y, int w, int h)
 {
     if((c->ismax = !c->ismax))
     {
-        c->oldborder = c->border;
-        c->border = 0;
         c->wasfloating = c->isfloating;
         c->isfloating = True;
         client_resize(c, x, y, w, h, False, True);
@@ -865,8 +863,6 @@ client_maximize(Client *c, int x, int y, int w, int h)
         client_resize(c, c->rx, c->ry, c->rw, c->rh, True, False);
     else
         c->isfloating = False;
-
-    c->border = c->oldborder;
 
     arrange(c->screen);
 }
