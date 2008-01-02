@@ -335,8 +335,13 @@ uicb_tag_view(int screen, char *arg)
     if(arg)
 	tag_view(screen, atoi(arg) - 1);
     else
+    {
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag->selected = True;
+        saveawesomeprops(screen);
+        arrange(screen);
+        ewmh_update_net_current_desktop(get_phys_screen(screen));
+    }
 }
 
 /** View previously selected tags
