@@ -307,4 +307,15 @@ textwidth(XftFont *font, char *text)
     return MAX(te.x_advance, te.width);
 }
 
+int
+draw_get_align(const char *align)
+{
+    if(!a_strncmp(align, "center", 6))
+        return AlignCenter;
+    else if(!a_strncmp(align, "right", 5))
+        return AlignRight;
+
+    return AlignLeft;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
