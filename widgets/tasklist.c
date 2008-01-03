@@ -22,14 +22,11 @@
 #include <stdio.h>
 #include "util.h"
 #include "widget.h"
-#include "layout.h"
 #include "client.h"
-#include "tag.h"
 #include "focus.h"
 #include "xutil.h"
 #include "screen.h"
 #include "event.h"
-
 
 #define ISVISIBLE_ON_TB(c, screen) (client_isvisible(c, screen) && !c->skiptb)
 
