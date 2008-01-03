@@ -33,6 +33,7 @@ extern AwesomeConf globalconf;
 
 typedef struct
 {
+    int align;
     XColor fg;
     XColor bg;
 } Data;
@@ -54,7 +55,7 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
         draw_text(ctx, widget->location, 0,
                   vscreen.statusbar->width - used,
                   vscreen.statusbar->height,
-                  AlignLeft,
+                  d->align,
                   widget->font->height / 2, widget->font, sel->name,
                   d->fg, d->bg);
         if(sel->isfloating)
@@ -94,6 +95,8 @@ focustitle_new(Statusbar *statusbar, cfg_t *config)
         d->bg = initxcolor(phys_screen, buf);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_selected[ColBG];
+
+    d->align = draw_get_align(cfg_getstr(config, "align"));
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);

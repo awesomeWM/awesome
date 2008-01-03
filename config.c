@@ -543,6 +543,7 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
+        CFG_STR((char *) "align", (char *) "left", CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t widget_tasklist_opts[] =
