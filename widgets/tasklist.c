@@ -27,6 +27,8 @@
 #include "xutil.h"
 #include "screen.h"
 #include "event.h"
+#include "ewmh.h"
+#include "rules.h"
 
 #define ISVISIBLE_ON_TB(c, screen) (client_isvisible(c, screen) && !c->skiptb)
 
@@ -34,6 +36,7 @@ extern AwesomeConf globalconf;
 
 typedef struct
 {
+    Bool show_icons;
     int align;
     XColor fg_sel;
     XColor bg_sel;
@@ -47,7 +50,10 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     Client *c;
     Data *d = widget->data;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
-    int n = 0, i = 0, box_width = 0;
+    Rule *r;
+    Area area;
+    int n = 0, i = 0, box_width = 0, icon_width = 0;
+    NetWMIcon *icon;
 
     for(c = globalconf.clients; c; c = c->next)
         if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
@@ -69,26 +75,53 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     for(c = globalconf.clients; c; c = c->next)
         if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
         {
+            icon_width = 0;
+
+            if(d->show_icons)
+            {
+                for(r = globalconf.rules; r; r = r->next)
+                    if(r->icon && client_match_rule(c, r))
+                    {
+                        area = draw_get_image_size(r->icon);
+                        icon_width = ((double) widget->statusbar->height / (double) area.height) * area.width;
+                        draw_image(ctx,
+                                   widget->location + box_width * i,
+                                   0, widget->statusbar->height,
+                                   r->icon);
+                    }
+
+                if(!icon_width && (icon = ewmh_get_window_icon(c->win)))
+                {
+                    icon_width = ((double) widget->statusbar->height / (double) icon->height)
+                        * icon->width;
+                    draw_image_from_argb_data(ctx,
+                                              widget->location + box_width * i, 0,
+                                              icon->width, icon->height,
+                                              widget->statusbar->height, icon->image);
+                    p_delete(&icon);
+                }
+            }
+
             if(sel == c)
             {
-                draw_text(ctx, widget->location + box_width * i, 0,
-                          box_width,
+                draw_text(ctx, widget->location + icon_width + box_width * i, 0,
+                          box_width - icon_width,
                           widget->statusbar->height,
                           d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg_sel, d->bg_sel);
             }
             else
-                draw_text(ctx, widget->location + box_width * i, 0,
-                          box_width,
+                draw_text(ctx, widget->location + icon_width + box_width * i, 0,
+                          box_width - icon_width,
                           widget->statusbar->height,
                           d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
-            if(sel->isfloating)
-                draw_circle(ctx, widget->location + box_width * i, 0,
+            if(c->isfloating)
+                draw_circle(ctx, widget->location + icon_width + box_width * i, 0,
                             (widget->font->height + 2) / 4,
-                            sel->ismax, d->fg);
+                            c->ismax, d->fg);
             i++;
         }
 
@@ -179,6 +212,7 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
         d->fg_sel = globalconf.screens[statusbar->screen].colors_selected[ColFG];
 
     d->align = draw_get_align(cfg_getstr(config, "align"));
+    d->show_icons = cfg_getbool(config, "show_icons");
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);

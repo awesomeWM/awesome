@@ -87,7 +87,6 @@ screen 0
                 arg = "-1"
             }
         }
-        netwmicon mynetwmicon {}
         tasklist mytasklist
         {
             mouse

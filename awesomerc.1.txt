@@ -158,6 +158,8 @@ This widget shows a list of running windows.
     Foreground color for focused window.
 *align*::
     Text alignement.
+*show_icons*::
+    Show applications icons.
 
 textbox
 ~~~~~~~
@@ -291,6 +293,7 @@ screen <integer> [MULTI]
         }
         tasklist <identifier>
         {
+            show_icons=<{true,false}>
             focus_fg=<color>
             focus_bg=<color>
             fg=<color>

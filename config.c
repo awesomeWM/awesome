@@ -554,6 +554,7 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "focus_bg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "align", (char *) "left", CFGF_NONE),
+        CFG_BOOL((char *) "show_icons", cfg_true, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t widget_progressbar_bar_opts[] =
