@@ -74,6 +74,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 draw_text(ctx, widget->location + box_width * i, 0,
                           box_width,
                           vscreen.statusbar->height,
+                          AlignLeft,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg_sel, d->bg_sel);
             }
@@ -81,6 +82,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 draw_text(ctx, widget->location + box_width * i, 0,
                           box_width,
                           vscreen.statusbar->height,
+                          AlignLeft,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
             if(sel->isfloating)

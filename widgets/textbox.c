@@ -51,7 +51,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
                                                widget->alignment);
 
     draw_text(ctx, widget->location, 0, widget->width, widget->statusbar->height,
-              0, widget->font, d->text, d->fg, d->bg);
+              AlignCenter, 0, widget->font, d->text, d->fg, d->bg);
 
     return widget->width;
 }

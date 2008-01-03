@@ -51,8 +51,11 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
     if(sel)
     {
-        draw_text(ctx, widget->location, 0, vscreen.statusbar->width - used,
-                  vscreen.statusbar->height, widget->font->height / 2, widget->font, sel->name,
+        draw_text(ctx, widget->location, 0,
+                  vscreen.statusbar->width - used,
+                  vscreen.statusbar->height,
+                  AlignLeft,
+                  widget->font->height / 2, widget->font, sel->name,
                   d->fg, d->bg);
         if(sel->isfloating)
             draw_circle(ctx, widget->location, 0,

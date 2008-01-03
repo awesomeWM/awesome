@@ -27,8 +27,6 @@
 
 #include "config.h"
 
-enum { AlignLeft, AlignRight, AlignFlex };
-
 typedef Widget *(WidgetConstructor)(Statusbar *, cfg_t *);
 
 int widget_calculate_offset(int, int, int, int);

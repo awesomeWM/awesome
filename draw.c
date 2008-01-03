@@ -66,6 +66,7 @@ draw_free_context(DrawCtx *ctx)
  * \param y y coord
  * \param w width
  * \param h height
+ * \param align alignment
  * \param padding padding to add before drawing the text
  * \param font font to use
  * \param text text to draw
@@ -73,7 +74,13 @@ draw_free_context(DrawCtx *ctx)
  * \param bg background color
  */
 void
-draw_text(DrawCtx *ctx, int x, int y, int w, int h, int padding, XftFont *font, const char *text, XColor fg, XColor bg)
+draw_text(DrawCtx *ctx,
+          int x, int y,
+          int w, int h,
+          int align,
+          int padding,
+          XftFont *font, const char *text,
+          XColor fg, XColor bg)
 {
     int nw = 0;
     static char buf[256];
@@ -114,7 +121,12 @@ draw_text(DrawCtx *ctx, int x, int y, int w, int h, int padding, XftFont *font, 
             buf[len - 3] = '.';
     }
 
-    cairo_move_to(cr, x + padding, y + font->ascent + (ctx->height - font->height) / 2);
+    if(align == AlignLeft)
+        cairo_move_to(cr, x + padding, y + font->ascent + (ctx->height - font->height) / 2);
+    else if(align == AlignRight)
+        cairo_move_to(cr, x + (w - nw) + padding, y + font->ascent + (ctx->height - font->height) / 2);
+    else
+        cairo_move_to(cr, x + ((w - nw) / 2) + padding, y + font->ascent + (ctx->height - font->height) / 2);
     cairo_show_text(cr, buf);
 
     cairo_font_face_destroy(font_face);
