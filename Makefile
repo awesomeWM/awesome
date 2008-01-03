@@ -61,11 +61,14 @@ dist: clean
 	@mkdir awesome-${VERSION}
 	@mkdir awesome-${VERSION}/layouts
 	@mkdir awesome-${VERSION}/widgets
+	@mkdir awesome-${VERSION}/icons
+	@mkdir awesome-${VERSION}/icons/layouts
 	@cp -fR STYLE LICENSE AUTHORS Makefile README awesomerc config.mk \
 	    awesome-client.1.txt awesome.1.txt awesomerc.1.txt ${SRCCLIENT} ${SRCCLIENT:.c=.h} ${SRC} ${SRC:.c=.h} \
 	    awesome-${VERSION} || true
 	@cp -R ${LAYOUTS} ${LAYOUTS:.c=.h} awesome-${VERSION}/layouts
-	@cp -R ${WIDGETS} ${WIDGETS:.c=.h} awesome-${VERSION}/layouts
+	@cp -R ${WIDGETS} awesome-${VERSION}/widgets
+	@cp -R icons/layouts/* awesome-${VERSION}/icons/layouts
 	@tar -cf awesome-${VERSION}.tar awesome-${VERSION}
 	@gzip -9 awesome-${VERSION}.tar
 	@rm -rf awesome-${VERSION}
