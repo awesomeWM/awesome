@@ -42,6 +42,7 @@ WidgetConstructor focustitle_new;
 WidgetConstructor iconbox_new;
 WidgetConstructor netwmicon_new;
 WidgetConstructor progressbar_new;
+WidgetConstructor tasklist_new;
 
 Uicb uicb_widget_tell;
 

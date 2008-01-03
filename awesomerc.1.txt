@@ -138,6 +138,23 @@ This widget shows the title of the focused window.
 *fg*::
     Foreground color.
 
+tasklist
+~~~~~~~~
+This widget shows a list of running windows.
+
+*mouse*::
+    Set mouse bindings.
+*font*::
+    Font to use.
+*bg*::
+    Background color.
+*fg*::
+    Foreground color.
+*focus_bg*::
+    Background color for focused window.
+*focus_fg*::
+    Foreground color for focused window.
+
 textbox
 ~~~~~~~
 This widget shows a text.
