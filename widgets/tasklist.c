@@ -34,6 +34,7 @@ extern AwesomeConf globalconf;
 
 typedef struct
 {
+    int align;
     XColor fg_sel;
     XColor bg_sel;
     XColor fg;
@@ -74,7 +75,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 draw_text(ctx, widget->location + box_width * i, 0,
                           box_width,
                           vscreen.statusbar->height,
-                          AlignLeft,
+                          d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg_sel, d->bg_sel);
             }
@@ -82,7 +83,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 draw_text(ctx, widget->location + box_width * i, 0,
                           box_width,
                           vscreen.statusbar->height,
-                          AlignLeft,
+                          d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
             if(sel->isfloating)
@@ -177,6 +178,8 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
         d->fg_sel = initxcolor(phys_screen, buf);
     else
         d->fg_sel = globalconf.screens[statusbar->screen].colors_selected[ColFG];
+
+    d->align = draw_get_align(cfg_getstr(config, "align"));
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
