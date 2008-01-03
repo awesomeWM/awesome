@@ -125,7 +125,6 @@ This widget shows a icon for the focused window  using NET_WM_ICON or icon file 
 *mouse*::
     Set mouse bindings.
 
-
 focustitle
 ~~~~~~~~~~
 This widget shows the title of the focused window.
@@ -190,10 +189,27 @@ For an example of an awesomerc file, see the file provided with the sources
 
 EXAMPLES
 --------
+
 The general config and subconfig options for the awesomerc:
 
-....................
-screen <number>
+..............................................
+Note: when there are no whitespaces, quotes are optional.
+
+<color>         -> #ff9933 (hexadecimal color notation: #red green blue)
+<float>         -> 0.3, 0,8 (often values between 0 and 1 are useful)
+<identifier>    -> foobar (choose a free name/string)
+<image>         -> "/home/awesome/pics/icon.png" (path to image)
+<integer>       -> 1, 10, -3 (positive numbers are required mostly)
+<key>           -> a, 1, F10 (/usr/include/X11/keysymdef.h w/o XK_, 'xev')
+<mod>           -> mod1, mod2,..., mod5
+<uicb-cmd>      -> spawn, setborder (see UICB FUNCTIONS above)
+<uicb-arg>      -> prog, 3 (argument to a uicb function, where required)
+<string>        -> "foo bar"
+<{.., ...}>     -> list of available options
+
+[MULTI] means, you can use an item multiple times.
+
+screen <integer> [MULTI]
 {
     colors
     {
@@ -219,7 +235,9 @@ screen <number>
     }
     layouts
     {
-        layout { image=<image> }
+        layout <{dwindle,floating,max,
+                 spiral,tile,tileleft}> { image=<image> } [MULTI]
+            
     }
     padding 
     { 
@@ -228,100 +246,117 @@ screen <number>
         right=<integer> 
         top=<integer> 
     }
-    statusbar
+    statusbar <identifier> [MULTI]
     {
         focustitle <identifier>
         height=<integer>
-        iconbox <identifier>
+        iconbox <identifier> [MULTI]
         {
             image=<image>
             resize=<{true,false}>
-            mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
+            mouse [MULTI]
+            {   
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
+            }
         }
         layoutinfo <identifier>
         netwmicon <identifier> {}
         position=<{bottom,top,left,right}>
-        progressbar <identifier>
+        progressbar <identifier> [MULTI]
         {
-            bar { bcolor=<color> bg=<color> fg=<color> }
+            bar { bcolor=<color> bg=<color> fg=<color> } [MULTI]
             gap=<integer> 
             height=<float> 
             lpadding=<integer>
-            mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
+            mouse [MULTI]
+            {   
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
+            }
             width=<integer>
         }
-        taglist <identifier>
+        taglist <identifier> [MULTI]
         {
-            mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
+            mouse [MULTI]
+            {   
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
+            }
         }
-        textbox <identifier>
+        textbox <identifier> [MULTI]
         {
             bg=<color> 
             fg=<color> 
             font=<font>
-            mouse { button=<integer> command=<uicb-cmd> modkey=<mod> }
-            text=<string> w
+            mouse [MULTI]
+            {   
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
+            }
+            text=<string>
             idth=<integer>
         }
         width=<integer>
     }
-    tags 
+    tags
     { 
-        tag 
+        tag <identifier> [MULTI]
         { 
-        layout=<{dwindle,floating,max,spiral,tile,tileleft}>
-        wmfact=<float> 
-        nmaster=<integer>
+            layout=<{dwindle,floating,max,
+                     spiral,tile,tileleft}>
+            wmfact=<float> 
+            nmaster=<integer>
         }
     }
 }
 rules
 {  
-    rule 
+    rule [MULTI] 
     { 
         float=<{true,false}> 
         icon=<image> 
         name=<regex> 
         screen=<integer> 
-        tags=<integer-list,...>
+        tags=<integer>,<integer>,...
         not_master=<{true,false}>
     }
 }
 keys
 {
-    key 
+    key [MULTI]
     { 
-        arg=<uicb-argument> 
+        arg=<uicb-arg> 
         command=<uicb-cmd> 
         key=<key> 
         modkey=<mod> 
     }
-    keylist 
+    keylist [MULTI]
     { 
-        arglist={<uicb-arguments,...} 
+        arglist={<uicb-arg>, ...} 
         command=<uicb-cmd> 
-        keylist={<key>,...} 
+        keylist={<key>, ...} 
         modkey=<mod> 
     }
 }
 mouse
 {
-    client 
+    client [MULTI] 
     {
-        arg=<uicb-argument> 
+        arg=<uicb-arg> 
         button=<integer> 
         command=<uicb-cmd> 
         modkey=<mod> 
     }
-    root
+    root [MULTI]
     {
-        arg=<uicb-argument> 
+        arg=<uicb-arg> 
         button=<integer> 
         command=<uicb-cmd> 
         modkey=<mod> 
     }
 }
-....................
+..............................................
 
 
 SEE ALSO
