@@ -60,9 +60,8 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                         sel->ismax, d->fg);
     }
     else
-        draw_text(ctx, widget->location, 0, vscreen.statusbar->width - used,
-                  vscreen.statusbar->height, widget->font->height / 2, widget->font, NULL,
-                  d->fg, d->bg);
+        draw_rectangle(ctx, widget->location, 0,
+                       vscreen.statusbar->width - used, vscreen.statusbar->height, True, d->bg);
 
     widget->width = vscreen.statusbar->width - used;
 
