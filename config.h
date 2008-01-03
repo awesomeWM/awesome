@@ -164,6 +164,8 @@ struct Client
     Bool ismax;
     /** True if the client must be skipped from client list */
     Bool skip;
+    /** True if the client must be skipped from task bar client list */
+    Bool skiptb;
     /** Next client */
     Client *next;
     /** Previous client */

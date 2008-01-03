@@ -30,6 +30,9 @@
 #include "screen.h"
 #include "event.h"
 
+
+#define ISVISIBLE_ON_TB(c, screen) (client_isvisible(c, screen) && !c->skiptb)
+
 extern AwesomeConf globalconf;
 
 typedef struct
@@ -50,7 +53,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     int n = 0, i = 0, box_width = 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(client_isvisible(c, widget->statusbar->screen))
+        if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
             n++;
     
     if(!n)
@@ -67,7 +70,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                                                widget->alignment);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(client_isvisible(c, widget->statusbar->screen))
+        if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
         {
             if(sel == c)
             {
@@ -106,7 +109,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
     if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
     {
         for(c = globalconf.clients; c; c = c->next)
-            if(client_isvisible(c, widget->statusbar->screen))
+            if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
                 n++;
     
         if(!n)
@@ -122,11 +125,11 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
 
                 /* found first visible client */
                 for(c = globalconf.clients;
-                    c && !client_isvisible(c, widget->statusbar->screen);
+                    c && !ISVISIBLE_ON_TB(c, widget->statusbar->screen);
                     c = c->next);
                 /* found ci-th visible client */
                 for(; c && i < ci; c = c->next)
-                    if(client_isvisible(c, widget->statusbar->screen))
+                    if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
                         i++;
 
                 focus(c, True, widget->statusbar->screen);
