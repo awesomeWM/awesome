@@ -40,7 +40,10 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
     NetWMIcon *icon;
 
     if(!sel)
+    {
+        widget->width = 0;
         return 0;
+    }
 
     for(r = globalconf.rules; r; r = r->next)
         if(r->icon && client_match_rule(sel, r))
@@ -58,7 +61,10 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 
 
     if(!(icon = ewmh_get_window_icon(sel->win)))
+    {
+        widget->width = 0;
         return 0;
+    }
 
     widget->width = ((double) widget->statusbar->height / (double) icon->height) * icon->width;
 
