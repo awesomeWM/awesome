@@ -44,7 +44,6 @@ typedef struct
 static int
 tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
-    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Client *c;
     Data *d = widget->data;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
@@ -60,9 +59,9 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
         return widget->width;
     }
 
-    box_width = (vscreen.statusbar->width - used) / n;
+    box_width = (widget->statusbar->width - used) / n;
 
-    widget->location = widget_calculate_offset(vscreen.statusbar->width,
+    widget->location = widget_calculate_offset(widget->statusbar->width,
                                                0,
                                                offset,
                                                widget->alignment);
@@ -74,7 +73,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
             {
                 draw_text(ctx, widget->location + box_width * i, 0,
                           box_width,
-                          vscreen.statusbar->height,
+                          widget->statusbar->height,
                           d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg_sel, d->bg_sel);
@@ -82,7 +81,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
             else
                 draw_text(ctx, widget->location + box_width * i, 0,
                           box_width,
-                          vscreen.statusbar->height,
+                          widget->statusbar->height,
                           d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
@@ -93,7 +92,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
             i++;
         }
 
-    widget->width = vscreen.statusbar->width - used;
+    widget->width = widget->statusbar->width - used;
 
     return widget->width;
 }

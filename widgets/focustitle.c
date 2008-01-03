@@ -41,11 +41,10 @@ typedef struct
 static int
 focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
-    VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Data *d = widget->data;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
 
-    widget->location = widget_calculate_offset(vscreen.statusbar->width,
+    widget->location = widget_calculate_offset(widget->statusbar->width,
                                                0,
                                                offset,
                                                widget->alignment);
@@ -53,8 +52,8 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     if(sel)
     {
         draw_text(ctx, widget->location, 0,
-                  vscreen.statusbar->width - used,
-                  vscreen.statusbar->height,
+                  widget->statusbar->width - used,
+                  widget->statusbar->height,
                   d->align,
                   widget->font->height / 2, widget->font, sel->name,
                   d->fg, d->bg);
@@ -65,9 +64,9 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     }
     else
         draw_rectangle(ctx, widget->location, 0,
-                       vscreen.statusbar->width - used, vscreen.statusbar->height, True, d->bg);
+                       widget->statusbar->width - used, widget->statusbar->height, True, d->bg);
 
-    widget->width = vscreen.statusbar->width - used;
+    widget->width = widget->statusbar->width - used;
 
     return widget->width;
 }

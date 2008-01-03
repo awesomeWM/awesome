@@ -92,7 +92,7 @@ taglist_draw(Widget *widget,
             colors = vscreen.colors_normal;
         draw_text(ctx,
                   widget->location + widget->width, 0,
-                  w, vscreen.statusbar->height,
+                  w, widget->statusbar->height,
                   AlignCenter,
                   vscreen.font->height / 2,
                   vscreen.font,
