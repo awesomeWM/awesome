@@ -24,6 +24,13 @@
 
 #include "config.h"
 
+typedef struct
+{
+    int height;
+    int width;
+    unsigned char *image;
+} NetWMIcon;
+
 void ewmh_init_atoms(void);
 void ewmh_set_supported_hints(int);
 void ewmh_update_net_client_list(int);
@@ -33,6 +40,7 @@ void ewmh_update_net_desktop_names(int);
 void ewmh_update_net_active_window(int);
 void ewmh_process_client_message(XClientMessageEvent *);
 void ewmh_check_client_hints(Client *);
+NetWMIcon * ewmh_get_window_icon(Window);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

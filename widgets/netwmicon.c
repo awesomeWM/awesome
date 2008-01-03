@@ -26,6 +26,7 @@
 #include "tag.h"
 #include "widget.h"
 #include "rules.h"
+#include "ewmh.h"
 
 extern AwesomeConf globalconf;
 
@@ -33,15 +34,10 @@ static int
 netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
                     int used __attribute__ ((unused)))
 {
-    unsigned long *data, pixel;
-    unsigned char *wdata;
-    Atom type;
-    int format, width, height, size, i;
     Area area;
-    unsigned long items, rest;
-    unsigned char *image, *imgdata;
     Rule* r;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
+    NetWMIcon *icon;
 
     if(!sel)
         return 0;
@@ -60,53 +56,23 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
             return widget->width;
         }
 
-    if(XGetWindowProperty(globalconf.display, sel->win, 
-                          XInternAtom(globalconf.display, "_NET_WM_ICON", False),
-                          0L, LONG_MAX, False, XA_CARDINAL, &type, &format,
-                          &items, &rest, &wdata) != Success
-       || !wdata)
+
+    if(!(icon = ewmh_get_window_icon(sel->win)))
         return 0;
 
-    if(type != XA_CARDINAL || format != 32 || items < 2)
-    {
-        XFree(wdata);
-        return 0;
-    }
-
-    data = (unsigned long *) wdata;
-
-    width = data[0];
-    height = data[1];
-    size = width * height;
-
-    if(!size)
-    {
-        XFree(wdata);
-        return 0;
-    }
-
-    image = p_new(unsigned char, size * 4);
-    for(imgdata = image, i = 2; i < size + 2; i++, imgdata += 4)
-    {
-        pixel = data[i];
-        imgdata[3] = (pixel >> 24) & 0xff; /* A */
-        imgdata[0] = (pixel >> 16) & 0xff; /* R */
-        imgdata[1] = (pixel >>  8) & 0xff; /* G */
-        imgdata[2] = pixel & 0xff;         /* B */
-    }
+    widget->width = ((double) widget->statusbar->height / (double) icon->height) * icon->width;
 
     widget->location = widget_calculate_offset(widget->statusbar->width,
-                                               width,
+                                               widget->width,
                                                offset,
                                                widget->alignment);
 
-    draw_image_from_argb_data(ctx, widget->location, 0, width, height, widget->statusbar->height, image);
+    draw_image_from_argb_data(ctx,
+                              widget->location, 0,
+                              icon->width, icon->height,
+                              widget->statusbar->height, icon->image);
+    p_delete(&icon);
 
-    p_delete(&image);
-
-    XFree(wdata);
-
-    widget->width = widget->statusbar->height;
     return widget->width;
 }
 

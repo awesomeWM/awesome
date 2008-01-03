@@ -325,4 +325,55 @@ ewmh_check_client_hints(Client *c)
     }
 }
 
+NetWMIcon *
+ewmh_get_window_icon(Window w)
+{
+    NetWMIcon *icon;
+    Atom type;
+    int format, size, i;
+    unsigned long items, rest, *data, pixel;
+    unsigned char *imgdata, *wdata;
+
+    if(XGetWindowProperty(globalconf.display, w,
+                          net_wm_icon, 0L, LONG_MAX, False, XA_CARDINAL, &type, &format,
+                          &items, &rest, &wdata) != Success
+       || !wdata)
+        return NULL;
+
+    if(type != XA_CARDINAL || format != 32 || items < 2)
+    {
+        XFree(wdata);
+        return NULL;
+    }
+
+    icon = p_new(NetWMIcon, 1);
+
+    data = (unsigned long *) wdata;
+
+    icon->width = data[0];
+    icon->height = data[1];
+    size = icon->width * icon->height;
+
+    if(!size)
+    {
+        p_delete(&icon);
+        XFree(wdata);
+        return NULL;
+    }
+
+    icon->image = p_new(unsigned char, size * 4);
+    for(imgdata = icon->image, i = 2; i < size + 2; i++, imgdata += 4)
+    {
+        pixel = data[i];
+        imgdata[3] = (pixel >> 24) & 0xff; /* A */
+        imgdata[0] = (pixel >> 16) & 0xff; /* R */
+        imgdata[1] = (pixel >>  8) & 0xff; /* G */
+        imgdata[2] = pixel & 0xff;         /* B */
+    }
+
+    XFree(wdata);
+
+    return icon;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
