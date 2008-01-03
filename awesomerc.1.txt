@@ -137,6 +137,8 @@ This widget shows the title of the focused window.
     Background color.
 *fg*::
     Foreground color.
+*align*::
+    Text alignement.
 
 tasklist
 ~~~~~~~~
@@ -154,6 +156,8 @@ This widget shows a list of running windows.
     Background color for focused window.
 *focus_fg*::
     Foreground color for focused window.
+*align*::
+    Text alignement.
 
 textbox
 ~~~~~~~
@@ -171,6 +175,8 @@ This widget shows a text.
     Set width.
 *text*::
     Text to change.
+*align*::
+    Text alignement.
 
 iconbox
 ~~~~~~~
@@ -265,25 +271,77 @@ screen <integer> [MULTI]
     }
     statusbar <identifier> [MULTI]
     {
-        focustitle <identifier>
+        position=<{bottom,top,left,right}>
         height=<integer>
+        width=<integer>
+
+        focustitle <identifier>
+        {
+            fg=<color>
+            bg=<color>
+            align=<{center,left,right}>
+            font=<font>
+            mouse [MULTI]
+            {   
+                modkey=<mod> 
+                button=<integer>
+                command=<uicb-cmd>
+                arg=<uicb-arg>
+            }
+        }
+        tasklist <identifier>
+        {
+            focus_fg=<color>
+            focus_bg=<color>
+            fg=<color>
+            bg=<color>
+            align=<{center,left,right}>
+            font=<font>
+            mouse [MULTI]
+            {   
+                modkey=<mod> 
+                button=<integer>
+                command=<uicb-cmd>
+                arg=<uicb-arg>
+            }
+        }    
         iconbox <identifier> [MULTI]
         {
             image=<image>
             resize=<{true,false}>
             mouse [MULTI]
             {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
+                modkey=<mod> 
+                button=<integer>
+                command=<uicb-cmd>
+                arg=<uicb-arg>
             }
         }
         layoutinfo <identifier>
-        netwmicon <identifier> {}
-        position=<{bottom,top,left,right}>
+        {
+            mouse [MULTI]
+            {   
+                modkey=<mod> 
+                button=<integer>
+                command=<uicb-cmd>
+                arg=<uicb-arg>
+            }
+        }
+        netwmicon <identifier>
+        {
+            mouse [MULTI]
+            {   
+                modkey=<mod> 
+                button=<integer>
+                command=<uicb-cmd>
+                arg=<uicb-arg>
+            }
+        }
         progressbar <identifier> [MULTI]
         {
             bar { bcolor=<color> bg=<color> fg=<color> } [MULTI]
             gap=<integer> 
+            width=<integer>
             height=<float> 
             lpadding=<integer>
             mouse [MULTI]
@@ -291,14 +349,14 @@ screen <integer> [MULTI]
                 button=<integer> modkey=<mod> 
                 command=<uicb-cmd> arg=<uicb-arg>
             }
-            width=<integer>
         }
         taglist <identifier> [MULTI]
         {
             mouse [MULTI]
             {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
+                modkey=<mod> 
+                button=<integer>
+                command=<uicb-cmd>
             }
         }
         textbox <identifier> [MULTI]
@@ -308,13 +366,15 @@ screen <integer> [MULTI]
             font=<font>
             mouse [MULTI]
             {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
+                modkey=<mod> 
+                button=<integer>
+                command=<uicb-cmd>
+                arg=<uicb-arg>
             }
             text=<string>
-            idth=<integer>
+            width=<integer>
+            align=<{center,left,right}>
         }
-        width=<integer>
     }
     tags
     { 
@@ -322,7 +382,7 @@ screen <integer> [MULTI]
         { 
             layout=<{dwindle,floating,max,
                      spiral,tile,tileleft}>
-            wmfact=<float> 
+            mwfact=<float> 
             nmaster=<integer>
         }
     }
