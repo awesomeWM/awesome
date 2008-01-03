@@ -249,8 +249,6 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             c->ismax = False;
         client_maximize(c, area.x, area.y, area.width, area.height, True);
     }
-    else
-        printf("%s received unknown window state %s\n", c->name, XGetAtomName(globalconf.display, state));
 }
 
 static void
@@ -268,8 +266,6 @@ ewmh_process_window_type_atom(Client *c, Atom state)
         c->isfixed = True;
         c->isfloating = True;
     }
-    else
-        printf("%s received unknown window type %s\n", c->name, XGetAtomName(globalconf.display, state));
 }
 void
 ewmh_process_client_message(XClientMessageEvent *ev)
