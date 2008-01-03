@@ -105,7 +105,7 @@ focus_get_latest_client_for_tags(Tag **t, int nindex)
     for(fl = globalconf.focus; fl; fl = fl->prev)
         if(fl->client && !fl->client->skip)
             for(tags = t; *tags; tags++)
-                if(is_client_tagged(fl->client, *t))
+                if(is_client_tagged(fl->client, *tags))
                 {
                     if(i == nindex)
                         return fl->client;
