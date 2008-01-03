@@ -30,6 +30,7 @@ typedef struct
 {
     char *text;
     int width;
+    int align;
     XColor fg;
     XColor bg;
 } Data;
@@ -51,7 +52,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
                                                widget->alignment);
 
     draw_text(ctx, widget->location, 0, widget->width, widget->statusbar->height,
-              AlignCenter, 0, widget->font, d->text, d->fg, d->bg);
+              d->align, 0, widget->font, d->text, d->fg, d->bg);
 
     return widget->width;
 }
@@ -90,6 +91,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
     d->width = cfg_getint(config, "width");
+    d->align = draw_get_align(cfg_getstr(config, "align"));
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
