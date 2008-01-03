@@ -174,7 +174,8 @@ parse_mouse_bindings(cfg_t * cfg, const char *secname, Bool handle_arg)
 }
 
 
-static void set_key_info(Key *key, cfg_t *cfg)
+static void
+set_key_info(Key *key, cfg_t *cfg)
 {
     unsigned int j;
 
@@ -186,7 +187,8 @@ static void set_key_info(Key *key, cfg_t *cfg)
 }
 
 
-static Key *section_keys(cfg_t *cfg_keys)
+static Key *
+section_keys(cfg_t *cfg_keys)
 {
     Key *key, *head;
     unsigned int i, j, numkeys;
@@ -257,7 +259,6 @@ cmp_widget_cfg(const void *a, const void *b)
     return 0;
 }
 
-
 static void
 create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 {
@@ -302,8 +303,6 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
             warn("Ignoring unknown widget: %s.\n", cfg_name(widgets + i));
     }
 }
-
-
 
 static void
 config_parse_screen(cfg_t *cfg, int screen)
