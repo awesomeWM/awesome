@@ -12,13 +12,17 @@ tools.
 
 Installation
 ------------
-Edit config.mk to match your local setup (awesome is installed into
-the /usr/local namespace by default).
+If building from git sources, run "autoreconf -vis .". When autoreconf has
+finished, you can follow the following instructions for building a dist
+tarball.
 
-Afterwards enter the following command to build and install awesome (if
-necessary as root):
+After extracting the dist tarball, run "./configure --help" and figure out
+what you might want to adapt for your system. Then run ./configure with the
+proper parameters, and build and install:
 
-    make install
+  ./configure [...]
+  make
+  make install # might need root permissions
 
 Running awesome
 -----------

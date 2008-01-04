@@ -1,0 +1,13 @@
+# -*- Makefile -*-
+
+LAYOUTS += layouts/tile.c
+LAYOUTS += layouts/tile.h
+
+LAYOUTS += layouts/floating.c
+LAYOUTS += layouts/floating.h
+
+LAYOUTS += layouts/max.c
+LAYOUTS += layouts/max.h
+
+LAYOUTS += layouts/fibonacci.c
+LAYOUTS += layouts/fibonacci.h
