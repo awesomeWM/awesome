@@ -115,6 +115,8 @@ widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
     widget->name = a_strdup(name);
     widget->tell = widget_common_tell;
     widget->button_press = widget_common_button_press;
+    widget->area.x = cfg_getint(config, "x");
+    widget->area.y = cfg_getint(config, "y");
 }
 
 /** Send command to widget

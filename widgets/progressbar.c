@@ -61,19 +61,22 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     if (!(d->bars))
         return 0;
 
-    margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5;
-    pb_height = (int) (widget->statusbar->height * d->height - (d->gap * (d->bars - 1))) / d->bars + 0.5; 
-
     width = d->width - d->lpadding;
 
-    widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                             d->width,
-                                             offset,
-                                             widget->alignment);
+    if(widget->area.x < 0)
+        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                 d->width,
+                                                 offset,
+                                                 widget->alignment);
 
+    if(widget->area.y < 0)
+        widget->area.y = 0;
+
+    margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y;
+    pb_height = (int) (widget->statusbar->height * d->height - (d->gap * (d->bars - 1))) / d->bars + 0.5; 
     left_offset = widget->area.x + d->lpadding;
 
-    for (i = 0; i < d->bars; i++)
+    for(i = 0; i < d->bars; i++)
     {
         pwidth = (int) d->percent[i] ? ((width - 2) * d->percent[i]) / 100 : 0;
 

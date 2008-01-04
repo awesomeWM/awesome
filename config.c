@@ -514,16 +514,22 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t widget_opts[] =
     {
+        CFG_INT((char *) "x", -1, CFGF_NONE),
+        CFG_INT((char *) "y", -1, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t widget_taglist_opts[] =
     {
+        CFG_INT((char *) "x", -1, CFGF_NONE),
+        CFG_INT((char *) "y", -1, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_taglist_opts, CFGF_MULTI),
         CFG_END()
     };
     static cfg_opt_t widget_iconbox_opts[] =
     {
+        CFG_INT((char *) "x", -1, CFGF_NONE),
+        CFG_INT((char *) "y", -1, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
         CFG_BOOL((char *) "resize", cfg_true, CFGF_NONE),
@@ -531,6 +537,8 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t widget_textbox_opts[] =
     {
+        CFG_INT((char *) "x", -1, CFGF_NONE),
+        CFG_INT((char *) "y", -1, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_INT((char *) "width", 0, CFGF_NONE),
         CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
@@ -542,6 +550,8 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t widget_focustitle_opts[] =
     {
+        CFG_INT((char *) "x", -1, CFGF_NONE),
+        CFG_INT((char *) "y", -1, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
@@ -551,6 +561,8 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t widget_tasklist_opts[] =
     {
+        CFG_INT((char *) "x", -1, CFGF_NONE),
+        CFG_INT((char *) "y", -1, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
@@ -569,6 +581,8 @@ config_parse(const char *confpatharg)
     };
     static cfg_opt_t widget_progressbar_opts[] =
     {
+        CFG_INT((char *) "x", -1, CFGF_NONE),
+        CFG_INT((char *) "y", -1, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
         CFG_SEC((char *) "bar", widget_progressbar_bar_opts, CFGF_MULTI),
         CFG_INT((char *) "width", 100, CFGF_NONE),

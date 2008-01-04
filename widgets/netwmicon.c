@@ -51,11 +51,16 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
             area = draw_get_image_size(r->icon);
             widget->area.width = ((double) widget->statusbar->height / (double) area.height)
                 * area.width;
-            widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                                     widget->area.width,
-                                                     offset,
-                                                     widget->alignment);
-            draw_image(ctx, widget->area.x, 0, widget->statusbar->height, r->icon);
+            if(widget->area.x < 0)
+                widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                         widget->area.width,
+                                                         offset,
+                                                         widget->alignment);
+
+            if(widget->area.y < 0)
+                widget->area.y = 0;
+            draw_image(ctx, widget->area.x, widget->area.y,
+                       widget->statusbar->height, r->icon);
 
             return widget->area.width;
         }
@@ -69,13 +74,17 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     widget->area.width = ((double) widget->statusbar->height / (double) icon->height) * icon->width;
 
-    widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                             widget->area.width,
-                                             offset,
-                                             widget->alignment);
+    if(widget->area.x < 0)
+        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                 widget->area.width,
+                                                 offset,
+                                                 widget->alignment);
+
+    if(widget->area.y < 0)
+        widget->area.y = 0;
 
     draw_image_from_argb_data(ctx,
-                              widget->area.x, 0,
+                              widget->area.x, widget->area.y,
                               icon->width, icon->height,
                               widget->statusbar->height, icon->image);
 

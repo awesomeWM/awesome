@@ -75,10 +75,14 @@ taglist_draw(Widget *widget,
     for(tag = vscreen.tags; tag; tag = tag->next)
         widget->area.width += textwidth(vscreen.font, tag->name) + vscreen.font->height;
 
-    widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                             widget->area.width,
-                                             offset,
-                                             widget->alignment);
+    if(widget->area.x < 0)
+        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                 widget->area.width,
+                                                 offset,
+                                                 widget->alignment);
+
+    if(widget->area.y < 0)
+        widget->area.y = 0;
 
     widget->area.width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
@@ -91,7 +95,7 @@ taglist_draw(Widget *widget,
         else
             colors = vscreen.colors_normal;
         draw_text(ctx,
-                  widget->area.x + widget->area.width, 0,
+                  widget->area.x + widget->area.width, widget->area.y,
                   w, widget->statusbar->height,
                   AlignCenter,
                   vscreen.font->height / 2,
@@ -100,7 +104,9 @@ taglist_draw(Widget *widget,
                   colors[ColFG],
                   colors[ColBG]);
         if(isoccupied(tag))
-            draw_rectangle(ctx, widget->area.x + widget->area.width, 0, flagsize, flagsize,
+            draw_rectangle(ctx,
+                           widget->area.x + widget->area.width, widget->area.y,
+                           flagsize, flagsize,
                            sel && is_client_tagged(sel, tag), colors[ColFG]);
         widget->area.width += w;
     }

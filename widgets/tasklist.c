@@ -67,10 +67,14 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
     box_width = (widget->statusbar->width - used) / n;
 
-    widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                             0,
-                                             offset,
-                                             widget->alignment);
+    if(widget->area.x < 0)
+        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                 0,
+                                                 offset,
+                                                 widget->alignment);
+
+    if(widget->area.y < 0)
+        widget->area.y = 0;
 
     for(c = globalconf.clients; c; c = c->next)
         if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
@@ -86,7 +90,8 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                         icon_width = ((double) widget->statusbar->height / (double) area.height) * area.width;
                         draw_image(ctx,
                                    widget->area.x + box_width * i,
-                                   0, widget->statusbar->height,
+                                   widget->area.y,
+                                   widget->statusbar->height,
                                    r->icon);
                     }
 
@@ -95,7 +100,8 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                     icon_width = ((double) widget->statusbar->height / (double) icon->height)
                         * icon->width;
                     draw_image_from_argb_data(ctx,
-                                              widget->area.x + box_width * i, 0,
+                                              widget->area.x + box_width * i,
+                                              widget->area.y,
                                               icon->width, icon->height,
                                               widget->statusbar->height, icon->image);
                     p_delete(&icon->image);
@@ -105,7 +111,8 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
             if(sel == c)
             {
-                draw_text(ctx, widget->area.x + icon_width + box_width * i, 0,
+                draw_text(ctx, widget->area.x + icon_width + box_width * i,
+                          widget->area.y,
                           box_width - icon_width,
                           widget->statusbar->height,
                           d->align,
@@ -113,14 +120,16 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                           d->fg_sel, d->bg_sel);
             }
             else
-                draw_text(ctx, widget->area.x + icon_width + box_width * i, 0,
+                draw_text(ctx, widget->area.x + icon_width + box_width * i,
+                          widget->area.y,
                           box_width - icon_width,
                           widget->statusbar->height,
                           d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
             if(c->isfloating)
-                draw_circle(ctx, widget->area.x + icon_width + box_width * i, 0,
+                draw_circle(ctx, widget->area.x + icon_width + box_width * i,
+                            widget->area.y,
                             (widget->font->height + 2) / 4,
                             c->ismax, d->fg);
             i++;

@@ -42,12 +42,17 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
     else
         widget->area.width = area.width;
 
-    widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                             widget->area.width,
-                                             offset,
-                                             widget->alignment);
+    if(widget->area.x < 0)
+        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                 widget->area.width,
+                                                 offset,
+                                                 widget->alignment);
 
-    draw_image(ctx, widget->area.x, 0, d->resize ? widget->statusbar->height : 0, d->image);
+    if(widget->area.y < 0)
+        widget->area.y = 0;
+
+    draw_image(ctx, widget->area.x, widget->area.y,
+               d->resize ? widget->statusbar->height : 0, d->image);
 
     return widget->area.width;
 }
