@@ -230,6 +230,7 @@ Note: when there are no whitespaces, quotes are optional.
 <string>        -> "foo bar"
 <font>          -> Xft font: mono-10, fixed-12, sans-8, ...
 <boolean>       -> true or false
+<regex>         -> regular expression
 <{.., ...}>     -> list of available options
 
 [MULTI] means, you can use an item multiple times.
@@ -400,8 +401,10 @@ rules
         icon=<image> 
         name=<regex> 
         screen=<integer> 
-        tags=<integer>,<integer>,...
+        tags=<regex>
         not_master=<boolean>
+        xproperty_name=<string>
+        xproperty_value=<regex>
     }
 }
 keys
