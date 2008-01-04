@@ -310,6 +310,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Rule *rule;
     int phys_screen = get_phys_screen(screen);
 
+    area = get_screen_area(screen, NULL, NULL);
+
     c = p_new(Client, 1);
 
     c->win = w;
@@ -337,7 +339,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(!client_loadprops(c, screen))
         tag_client_with_rules(c);
 
-    area = get_screen_area(screen, NULL, NULL);
 
     /* if window request fullscreen mode */
     if(c->w == area.width && c->h == area.height)

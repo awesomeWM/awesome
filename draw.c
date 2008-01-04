@@ -245,6 +245,8 @@ draw_get_image_size(const char *filename)
 
     surface = cairo_image_surface_create_from_png(filename);
     cairo_image_surface_get_width(surface);
+    size.x = 0;
+    size.y = 0;
     size.width = cairo_image_surface_get_width(surface);
     size.height = cairo_image_surface_get_height(surface);
     cairo_surface_destroy(surface);

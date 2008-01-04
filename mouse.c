@@ -122,11 +122,11 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int ocx, ocy, nw, nh, n;
+    int ocx = 0, ocy = 0, nw, nh, n;
     XEvent ev;
     Client *c = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
-    Area area;
+    Area area = { 0, 0, 0, 0 };
     double mwfact;
 
     /* only handle floating and tiled layouts */
