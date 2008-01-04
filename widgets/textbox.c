@@ -42,19 +42,19 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
     Data *d = widget->data;
 
     if(d->width)
-        widget->width = d->width;
+        widget->area.width = d->width;
     else
-        widget->width = textwidth(widget->font, d->text);
+        widget->area.width = textwidth(widget->font, d->text);
 
-    widget->location = widget_calculate_offset(widget->statusbar->width,
-                                               widget->width,
-                                               offset,
-                                               widget->alignment);
+    widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                             widget->area.width,
+                                             offset,
+                                             widget->alignment);
 
-    draw_text(ctx, widget->location, 0, widget->width, widget->statusbar->height,
+    draw_text(ctx, widget->area.x, 0, widget->area.width, widget->statusbar->height,
               d->align, 0, widget->font, d->text, d->fg, d->bg);
 
-    return widget->width;
+    return widget->area.width;
 }
 
 static void

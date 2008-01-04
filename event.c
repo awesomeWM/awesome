@@ -76,7 +76,7 @@ handle_event_buttonpress(XEvent *e)
                      || globalconf.screens[screen].statusbar->position == Bottom)
                 {
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(ev->x >= widget->location && ev->x <= widget->location + widget->width)
+                        if(ev->x >= widget->area.x && ev->x <= widget->area.x + widget->area.width)
                         {
                             widget->button_press(widget, ev);
                             return;
@@ -85,7 +85,7 @@ handle_event_buttonpress(XEvent *e)
                 else if(statusbar->position == Right)
                 {
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(ev->y >= widget->location && ev->y <= widget->location + widget->width)
+                        if(ev->y >= widget->area.x && ev->y <= widget->area.x + widget->area.width)
                         {
                             widget->button_press(widget, ev);
                             return;
@@ -94,8 +94,8 @@ handle_event_buttonpress(XEvent *e)
                 else
                 {
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(statusbar->width - ev->y >= widget->location
-                           && statusbar->width - ev->y <= widget->location + widget->width)
+                        if(statusbar->width - ev->y >= widget->area.x
+                           && statusbar->width - ev->y <= widget->area.x + widget->area.width)
                         {
                             widget->button_press(widget, ev);
                             return;

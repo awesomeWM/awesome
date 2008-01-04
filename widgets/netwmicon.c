@@ -41,7 +41,7 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     if(!sel)
     {
-        widget->width = 0;
+        widget->area.width = 0;
         return 0;
     }
 
@@ -49,39 +49,40 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
         if(r->icon && client_match_rule(sel, r))
         {
             area = draw_get_image_size(r->icon);
-            widget->width = ((double) widget->statusbar->height / (double) area.height) * area.width;
-            widget->location = widget_calculate_offset(widget->statusbar->width,
-                                                       widget->width,
-                                                       offset,
-                                                       widget->alignment);
-            draw_image(ctx, widget->location, 0, widget->statusbar->height, r->icon);
+            widget->area.width = ((double) widget->statusbar->height / (double) area.height)
+                * area.width;
+            widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                     widget->area.width,
+                                                     offset,
+                                                     widget->alignment);
+            draw_image(ctx, widget->area.x, 0, widget->statusbar->height, r->icon);
 
-            return widget->width;
+            return widget->area.width;
         }
 
 
     if(!(icon = ewmh_get_window_icon(sel->win)))
     {
-        widget->width = 0;
+        widget->area.width = 0;
         return 0;
     }
 
-    widget->width = ((double) widget->statusbar->height / (double) icon->height) * icon->width;
+    widget->area.width = ((double) widget->statusbar->height / (double) icon->height) * icon->width;
 
-    widget->location = widget_calculate_offset(widget->statusbar->width,
-                                               widget->width,
-                                               offset,
-                                               widget->alignment);
+    widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                             widget->area.width,
+                                             offset,
+                                             widget->alignment);
 
     draw_image_from_argb_data(ctx,
-                              widget->location, 0,
+                              widget->area.x, 0,
                               icon->width, icon->height,
                               widget->statusbar->height, icon->image);
 
     p_delete(&icon->image);
     p_delete(&icon);
 
-    return widget->width;
+    return widget->area.width;
 }
 
 Widget *

@@ -38,18 +38,18 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
     Area area = draw_get_image_size(d->image);
 
     if(d->resize)
-        widget->width = ((double) widget->statusbar->height / area.height) * area.width;
+        widget->area.width = ((double) widget->statusbar->height / area.height) * area.width;
     else
-        widget->width = area.width;
+        widget->area.width = area.width;
 
-    widget->location = widget_calculate_offset(widget->statusbar->width,
-                                               widget->width,
-                                               offset,
-                                               widget->alignment);
+    widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                             widget->area.width,
+                                             offset,
+                                             widget->alignment);
 
-    draw_image(ctx, widget->location, 0, d->resize ? widget->statusbar->height : 0, d->image);
+    draw_image(ctx, widget->area.x, 0, d->resize ? widget->statusbar->height : 0, d->image);
 
-    return widget->width;
+    return widget->area.width;
 }
 
 static void

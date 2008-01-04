@@ -106,10 +106,8 @@ struct Widget
     Alignment alignment;
     /** Misc private data */
     void *data;
-    /** Location on status bar */
-    int location;
-    /** Widget width */
-    int width;
+    /** Area */
+    Area area;
     /** Buttons bindings */
     Button *buttons;
     /** Font */

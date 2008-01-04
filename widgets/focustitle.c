@@ -44,31 +44,31 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     Data *d = widget->data;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
 
-    widget->location = widget_calculate_offset(widget->statusbar->width,
-                                               0,
-                                               offset,
-                                               widget->alignment);
+    widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                             0,
+                                             offset,
+                                             widget->alignment);
 
     if(sel)
     {
-        draw_text(ctx, widget->location, 0,
+        draw_text(ctx, widget->area.x, 0,
                   widget->statusbar->width - used,
                   widget->statusbar->height,
                   d->align,
                   widget->font->height / 2, widget->font, sel->name,
                   d->fg, d->bg);
         if(sel->isfloating)
-            draw_circle(ctx, widget->location, 0,
+            draw_circle(ctx, widget->area.x, 0,
                         (widget->font->height + 2) / 4,
                         sel->ismax, d->fg);
     }
     else
-        draw_rectangle(ctx, widget->location, 0,
+        draw_rectangle(ctx, widget->area.x, 0,
                        widget->statusbar->width - used, widget->statusbar->height, True, d->bg);
 
-    widget->width = widget->statusbar->width - used;
+    widget->area.width = widget->statusbar->width - used;
 
-    return widget->width;
+    return widget->area.width;
 }
 
 Widget *

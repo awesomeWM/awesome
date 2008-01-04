@@ -34,19 +34,19 @@ layoutinfo_draw(Widget *widget,
                 int used __attribute__ ((unused)))
 {
     Tag **curtags = get_current_tags(widget->statusbar->screen);
-    widget->location = widget_calculate_offset(widget->statusbar->width,
-                                               widget->statusbar->height,
-                                               offset,
-                                               widget->alignment);
+    widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                             widget->statusbar->height,
+                                             offset,
+                                             widget->alignment);
 
-    widget->width = widget->statusbar->height;
+    widget->area.width = widget->statusbar->height;
 
-    draw_image(ctx, widget->location, 0, widget->statusbar->height,
+    draw_image(ctx, widget->area.x, 0, widget->statusbar->height,
                curtags[0]->layout->image);
 
     p_delete(&curtags);
 
-    return widget->width;
+    return widget->area.width;
 }
 
 Widget *

@@ -61,16 +61,16 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     
     if(!n)
     {
-        widget->width = 0;
-        return widget->width;
+        widget->area.width = 0;
+        return widget->area.width;
     }
 
     box_width = (widget->statusbar->width - used) / n;
 
-    widget->location = widget_calculate_offset(widget->statusbar->width,
-                                               0,
-                                               offset,
-                                               widget->alignment);
+    widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                             0,
+                                             offset,
+                                             widget->alignment);
 
     for(c = globalconf.clients; c; c = c->next)
         if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
@@ -85,7 +85,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                         area = draw_get_image_size(r->icon);
                         icon_width = ((double) widget->statusbar->height / (double) area.height) * area.width;
                         draw_image(ctx,
-                                   widget->location + box_width * i,
+                                   widget->area.x + box_width * i,
                                    0, widget->statusbar->height,
                                    r->icon);
                     }
@@ -95,7 +95,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                     icon_width = ((double) widget->statusbar->height / (double) icon->height)
                         * icon->width;
                     draw_image_from_argb_data(ctx,
-                                              widget->location + box_width * i, 0,
+                                              widget->area.x + box_width * i, 0,
                                               icon->width, icon->height,
                                               widget->statusbar->height, icon->image);
                     p_delete(&icon->image);
@@ -105,7 +105,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
             if(sel == c)
             {
-                draw_text(ctx, widget->location + icon_width + box_width * i, 0,
+                draw_text(ctx, widget->area.x + icon_width + box_width * i, 0,
                           box_width - icon_width,
                           widget->statusbar->height,
                           d->align,
@@ -113,22 +113,22 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                           d->fg_sel, d->bg_sel);
             }
             else
-                draw_text(ctx, widget->location + icon_width + box_width * i, 0,
+                draw_text(ctx, widget->area.x + icon_width + box_width * i, 0,
                           box_width - icon_width,
                           widget->statusbar->height,
                           d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
             if(c->isfloating)
-                draw_circle(ctx, widget->location + icon_width + box_width * i, 0,
+                draw_circle(ctx, widget->area.x + icon_width + box_width * i, 0,
                             (widget->font->height + 2) / 4,
                             c->ismax, d->fg);
             i++;
         }
 
-    widget->width = widget->statusbar->width - used;
+    widget->area.width = widget->statusbar->width - used;
 
-    return widget->width;
+    return widget->area.width;
 }
 
 static void
@@ -148,7 +148,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
         if(!n)
             return;
 
-        box_width = widget->width / n;
+        box_width = widget->area.width / n;
 
         if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
         {
@@ -156,13 +156,13 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
             {
               case Top:
               case Bottom:
-                ci = (ev->x - widget->location) / box_width;
+                ci = (ev->x - widget->area.x) / box_width;
                 break;
               case Right:
-                ci = (ev->y - widget->location) / box_width;
+                ci = (ev->y - widget->area.x) / box_width;
                 break;
               default:
-                ci = ((widget->statusbar->width - ev->y) - widget->location) / box_width;
+                ci = ((widget->statusbar->width - ev->y) - widget->area.x) / box_width;
                 break;
             }
             /* found first visible client */
