@@ -321,7 +321,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->h = c->rh = wa->height;
     c->oldborder = wa->border_width;
 
-    globalconf.display = globalconf.display;
     c->screen = get_screen_bycoord(c->x, c->y);
 
     move_client_to_screen(c, screen, True);
@@ -408,7 +407,12 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             break;
         }
     if(!rule)
-        client_attach(c);
+    {
+        if(globalconf.screens[c->screen].new_become_master)
+            client_attach(c);
+        else
+            client_attach_at_end(c);
+    }
 
     /* some windows require this */
     XMoveResizeWindow(globalconf.display, c->win, c->x, c->y, c->w, c->h);

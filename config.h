@@ -243,6 +243,8 @@ typedef struct
     Bool resize_hints;
     /** Sloppy focus: focus follow mouse */
     Bool sloppy_focus;
+    /** True if new clients should become master */
+    Bool new_become_master;
     /** Normal colors */
     XColor colors_normal[ColLast];
     /** Selected colors */

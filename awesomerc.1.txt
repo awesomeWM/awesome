@@ -252,6 +252,7 @@ screen <integer> [MULTI]
     {
         allow_lower_floats=<{true,false}>
         sloppy_focus=<{true,false}>
+        new_become_master<{true,false}>
         border=<integer> 
         focus_move_pointer=<{true,false}>
         font=<font> 
