@@ -98,6 +98,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                                               widget->location + box_width * i, 0,
                                               icon->width, icon->height,
                                               widget->statusbar->height, icon->image);
+                    p_delete(&icon->image);
                     p_delete(&icon);
                 }
             }

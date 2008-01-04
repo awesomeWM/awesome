@@ -77,6 +77,8 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
                               widget->location, 0,
                               icon->width, icon->height,
                               widget->statusbar->height, icon->image);
+
+    p_delete(&icon->image);
     p_delete(&icon);
 
     return widget->width;
