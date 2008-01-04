@@ -119,11 +119,12 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
 
     for(b = widget->buttons; b; b = b->next)
         if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
-            for(tag = vscreen.tags; tag; tag = tag->next, i++)
-            {
-                width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
-                if(widget->statusbar->position == BarTop
-                   || widget->statusbar->position == BarBot)
+        {
+            if(widget->statusbar->position == BarTop
+               || widget->statusbar->position == BarBot)
+                for(tag = vscreen.tags; tag; tag = tag->next, i++)
+                {
+                    width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
                     if(ev->x >= widget->location + prev_width
                        && ev->x <= widget->location + prev_width + width)
                     {
@@ -131,8 +132,37 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                         b->func(widget->statusbar->screen, buf);
                         return;
                     }
-                prev_width += width;
-            }
+                   prev_width += width;
+                }
+            else if(widget->statusbar->position == BarRight)
+                for(tag = vscreen.tags; tag; tag = tag->next, i++)
+                {
+                    width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
+                    if(ev->y >= widget->location + prev_width
+                       && ev->y <= widget->location + prev_width + width)
+                    {
+                        snprintf(buf, sizeof(buf), "%d", i);
+                        b->func(widget->statusbar->screen, buf);
+                        return;
+                    }
+                    prev_width += width;
+                }
+            else
+                for(tag = vscreen.tags; tag; tag = tag->next, i++)
+                {
+                    width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
+                    if(widget->statusbar->width - ev->y >= widget->location + prev_width
+                       && widget->statusbar->width - ev->y <= widget->location + prev_width + width)
+                    {
+                        snprintf(buf, sizeof(buf), "%d", i);
+                        b->func(widget->statusbar->screen, buf);
+                        return;
+                    }
+                    prev_width += width;
+                }
+        }
+
+
 }
 
 Widget *
