@@ -103,7 +103,7 @@ struct Widget
     /** Statusbar */
     Statusbar *statusbar;
     /** Alignement */
-    int alignment;
+    Alignment alignment;
     /** Misc private data */
     void *data;
     /** Location on status bar */

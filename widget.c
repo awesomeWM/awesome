@@ -66,8 +66,12 @@ widget_calculate_alignments(Widget *widget)
 int
 widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
 {
-    if (alignment == AlignLeft || alignment == AlignFlex)
+    switch(alignment)
+    {
+      case AlignLeft:
+      case AlignFlex:
         return offset;
+    }
     return barwidth - offset - widgetwidth;
 }
 

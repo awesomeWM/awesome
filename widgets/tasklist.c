@@ -37,7 +37,7 @@ extern AwesomeConf globalconf;
 typedef struct
 {
     Bool show_icons;
-    int align;
+    Alignment align;
     XColor fg_sel;
     XColor bg_sel;
     XColor fg;

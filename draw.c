@@ -121,12 +121,18 @@ draw_text(DrawCtx *ctx,
             buf[len - 3] = '.';
     }
 
-    if(align == AlignLeft)
+    switch(align)
+    {
+      case AlignLeft:
         cairo_move_to(cr, x + padding, y + font->ascent + (ctx->height - font->height) / 2);
-    else if(align == AlignRight)
+        break;
+      case AlignRight:
         cairo_move_to(cr, x + (w - nw) + padding, y + font->ascent + (ctx->height - font->height) / 2);
-    else
+        break;
+      default:
         cairo_move_to(cr, x + ((w - nw) / 2) + padding, y + font->ascent + (ctx->height - font->height) / 2);
+        break;
+    }
     cairo_show_text(cr, buf);
 
     cairo_font_face_destroy(font_face);
@@ -309,7 +315,7 @@ textwidth(XftFont *font, char *text)
     return MAX(te.x_advance, te.width);
 }
 
-int
+Alignment
 draw_get_align(const char *align)
 {
     if(!a_strncmp(align, "center", 6))

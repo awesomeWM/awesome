@@ -30,7 +30,7 @@ typedef struct
 {
     char *text;
     int width;
-    int align;
+    Alignment align;
     XColor fg;
     XColor bg;
 } Data;

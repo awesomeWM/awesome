@@ -33,7 +33,7 @@ extern AwesomeConf globalconf;
 
 typedef struct
 {
-    int align;
+    Alignment align;
     XColor fg;
     XColor bg;
 } Data;
