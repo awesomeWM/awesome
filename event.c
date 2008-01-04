@@ -74,22 +74,25 @@ handle_event_buttonpress(XEvent *e)
             {
                 if(statusbar->position == BarTop
                      || globalconf.screens[screen].statusbar->position == BarBot)
+                {
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(ev->x >= widget->location && ev->x <= widget->location + widget->width)
                         {
                             widget->button_press(widget, ev);
                             return;
                         }
-
-                if(statusbar->position == BarRight)
+                }
+                else if(statusbar->position == BarRight)
+                {
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(ev->y >= widget->location && ev->y <= widget->location + widget->width)
                         {
                             widget->button_press(widget, ev);
                             return;
                         }
-            
-                if(statusbar->position == BarLeft)
+                }
+                else
+                {
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(statusbar->width - ev->y >= widget->location
                            && statusbar->width - ev->y <= widget->location + widget->width)
@@ -97,6 +100,7 @@ handle_event_buttonpress(XEvent *e)
                             widget->button_press(widget, ev);
                             return;
                         }
+                }
             }
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
