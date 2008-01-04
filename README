@@ -24,6 +24,9 @@ proper parameters, and build and install:
   make
   make install # might need root permissions
 
+If you're using gcc as your compiler and do not want awesome's default set
+of warning flags, add AWESOME_CFLAGS="" to your "make" lines.
+
 Running awesome
 -----------
 Add the following line to your .xinitrc to start awesome using startx

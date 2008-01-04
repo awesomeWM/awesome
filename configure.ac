@@ -41,6 +41,8 @@ AM_CONDITIONAL([HAVE_ASCIIDOC], [test "x$ASCIIDOC" != "x:"])
 AM_CONDITIONAL([HAVE_XMLTO],    [test "x$XMLTO"    != "x:"])
 AM_CONDITIONAL([HAVE_DOXYGEN],  [test "x$DOXYGEN"  != "x:"])
 
+AM_CONDITIONAL([USING_GCC], [test "x$GCC" = "xyes"])
+
 # Checks for libraries.
 AC_PATH_XTRA
 PKG_CHECK_MODULES([CAIRO], [cairo],,

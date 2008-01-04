@@ -32,11 +32,15 @@ defconfig.h: $(srcdir)/awesomerc
 	@$(SED) 's,\\,\\\\,g;s/$$/ \\/;s/"/\\"/g' "$(srcdir)/awesomerc" >> defconfig.h
 	@echo "\"" >> defconfig.h
 
+if USING_GCC
+# If you are using gcc, and want to deactivate this default set of
+# compile flags, run make with AWESOME_CFLAGS="".
 AWESOME_CFLAGS = -std=gnu99 -ggdb3 -pipe \
 		 -Wall -Wextra \
 		 -Wundef -Wshadow -Wcast-align -Wwrite-strings -Wsign-compare \
 		 -Wunused -Winit-self -Wpointer-arith -Wredundant-decls \
 		 -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn
+endif
 AM_CPPFLAGS = $(XFT_CFLAGS) $(X_CFLAGS) $(CAIRO_CFLAGS) $(CONFUSE_CFLAGS) $(XRANDR_CFLAGS) $(XINERAMA_CFLAGS) $(AWESOME_CFLAGS)
 
 bin_PROGRAMS += awesome
