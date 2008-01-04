@@ -6,11 +6,32 @@ bin_PROGRAMS =
 doc_DATA =
 man_MANS =
 
-LAYOUTS =
-WIDGETS =
 
-include layouts/Makefile-files
-include widgets/Makefile-files
+LAYOUTS =
+
+LAYOUTS += layouts/tile.c
+LAYOUTS += layouts/tile.h
+
+LAYOUTS += layouts/floating.c
+LAYOUTS += layouts/floating.h
+
+LAYOUTS += layouts/max.c
+LAYOUTS += layouts/max.h
+
+LAYOUTS += layouts/fibonacci.c
+LAYOUTS += layouts/fibonacci.h
+
+
+WIDGETS =
+WIDGETS += widgets/taglist.c
+WIDGETS += widgets/layoutinfo.c
+WIDGETS += widgets/textbox.c
+WIDGETS += widgets/focustitle.c
+WIDGETS += widgets/iconbox.c
+WIDGETS += widgets/netwmicon.c
+WIDGETS += widgets/progressbar.c
+WIDGETS += widgets/tasklist.c
+
 
 EXTRA_DIST += awesomerc
 doc_DATA   += awesomerc
@@ -22,6 +43,7 @@ doc_DATA   += LICENSE
 
 EXTRA_DIST += STYLE
 doc_DATA   += STYLE
+
 
 CLEANFILES    += defconfig.h
 BUILT_SOURCES += defconfig.h
@@ -74,6 +96,7 @@ awesome_client_SOURCES = \
 	awesome-client-common.c \
 	util.c util.h
 
+
 EXTRA_DIST += awesome.1.txt
 man_MANS   += awesome.1
 
@@ -97,6 +120,7 @@ if HAVE_ASCIIDOC
 .1.txt.1.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
 endif
+
 
 EXTRA_DIST += awesome.doxygen.in
 
