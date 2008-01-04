@@ -42,7 +42,6 @@ const NameFuncLink UicbList[] =
     {"client_kill", uicb_client_kill},
     {"client_moveresize", uicb_client_moveresize},
     {"client_settrans", uicb_client_settrans},
-    {"setborder", uicb_setborder},
     {"client_swapnext", uicb_client_swapnext},
     {"client_swapprev", uicb_client_swapprev},
     /* tag.c */

@@ -45,7 +45,6 @@ void client_maximize(Client *c, int, int, int, int, Bool);
 Uicb uicb_client_kill;
 Uicb uicb_client_moveresize;
 Uicb uicb_client_settrans;
-Uicb uicb_setborder;
 Uicb uicb_client_swapnext;
 Uicb uicb_client_swapprev;
 Uicb uicb_client_togglemax; 

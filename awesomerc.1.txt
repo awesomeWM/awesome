@@ -97,8 +97,6 @@ Screen
 ~~~~~~
 *screen_focus* relative or absolute integer::
     Select Screen and focus first window and move mouse.
-*setborder* relative or absolute integer::
-    Set default border size in pixels for new clients.
 
 WIDGETS
 -------
@@ -227,7 +225,7 @@ Note: when there are no whitespaces, quotes are optional.
 <integer>       -> 1, 10, -3 (positive numbers are required mostly)
 <key>           -> a, 1, F10 (/usr/include/X11/keysymdef.h w/o XK_, 'xev')
 <mod>           -> mod1, mod2,..., mod5
-<uicb-cmd>      -> spawn, setborder (see UICB FUNCTIONS above)
+<uicb-cmd>      -> spawn, exec, client_tag... (see UICB FUNCTIONS above)
 <uicb-arg>      -> prog, 3 (argument to a uicb function, where required)
 <string>        -> "foo bar"
 <{.., ...}>     -> list of available options

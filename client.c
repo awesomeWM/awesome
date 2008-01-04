@@ -735,22 +735,6 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
         window_settrans(sel->win, delta);
 }
 
-
-/** Set border size
- * \param screen Screen ID
- * \param arg X, +X or -X
- * \ingroup ui_callback
- */
-void
-uicb_setborder(int screen, char *arg)
-{
-    if(!arg)
-        return;
-
-    if((globalconf.screens[screen].borderpx = (int) compute_new_value_from_arg(arg, (double) globalconf.screens[screen].borderpx)) < 0)
-        globalconf.screens[screen].borderpx = 0;
-}
-
 /** Swap current with next client
  * \param screen Screen ID
  * \param arg nothing
