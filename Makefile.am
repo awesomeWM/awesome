@@ -32,7 +32,12 @@ defconfig.h: $(srcdir)/awesomerc
 	@$(SED) 's,\\,\\\\,g;s/$$/ \\/;s/"/\\"/g' "$(srcdir)/awesomerc" >> defconfig.h
 	@echo "\"" >> defconfig.h
 
-AM_CPPFLAGS = $(XFT_CFLAGS) $(X_CFLAGS) $(CAIRO_CFLAGS) $(CONFUSE_CFLAGS) $(XRANDR_CFLAGS) $(XINERAMA_CFLAGS)
+AWESOME_CFLAGS = -std=gnu99 -ggdb3 -pipe \
+		 -Wall -Wextra \
+		 -Wundef -Wshadow -Wcast-align -Wwrite-strings -Wsign-compare \
+		 -Wunused -Winit-self -Wpointer-arith -Wredundant-decls \
+		 -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn
+AM_CPPFLAGS = $(XFT_CFLAGS) $(X_CFLAGS) $(CAIRO_CFLAGS) $(CONFUSE_CFLAGS) $(XRANDR_CFLAGS) $(XINERAMA_CFLAGS) $(AWESOME_CFLAGS)
 
 bin_PROGRAMS += awesome
 awesome_SOURCES = \
