@@ -222,22 +222,20 @@ statusbar_update_position(Statusbar *statusbar)
     switch(statusbar->position)
     {
       default:
-        XMoveWindow(globalconf.display,
-                    statusbar->window,
-                    area.x,
-                    area.y);
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x, area.y);
+        break;
+      case BarLeft:
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x, (area.y + area.height) - statusbar->width);
         break;
       case BarRight:
-        XMoveWindow(globalconf.display,
-                    statusbar->window,
-                    area.x + (area.width - statusbar->height),
-                    area.y);
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x + (area.width - statusbar->height), area.y);
         break;
       case BarBot:
-        XMoveWindow(globalconf.display,
-                    statusbar->window,
-                    area.x,
-                    area.height - statusbar->height);
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x, area.height - statusbar->height);
         break;
       case BarOff:
         XUnmapWindow(globalconf.display, statusbar->window);
