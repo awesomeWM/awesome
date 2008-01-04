@@ -27,8 +27,14 @@
 #include "layout.h"
 
 /** Bar possible position */
-enum
-{ BarTop, BarBot, BarLeft, BarRight, BarOff };
+typedef enum
+{
+    Top,
+    Bottom,
+    Left,
+    Right,
+    Off
+} Position;
 
 /** Common colors */
 enum
@@ -124,9 +130,9 @@ struct Statusbar
     /** Layout txt width */
     int txtlayoutwidth;
     /** Default position */
-    int dposition;
+    Position dposition;
     /** Bar position */
-    int position;
+    Position position;
     /** Window */
     Window window;
     /** Screen */

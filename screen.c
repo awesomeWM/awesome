@@ -76,15 +76,17 @@ get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
     for(sb = statusbar; sb; sb = sb->next)
         switch(sb->position)
         {
-          case BarTop:
+          case Top:
             area.y += sb->height;
-          case BarBot:
+          case Bottom:
             area.height -= sb->height;
             break;
-          case BarLeft:
+          case Left:
             area.x += sb->height;
-          case BarRight:
+          case Right:
             area.width -= sb->height;
+            break;
+          case Off:
             break;
         }
 
@@ -110,8 +112,8 @@ get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 
     for(sb = statusbar; sb; sb = sb->next)
     {
-        area.y += sb->position == BarTop ? sb->height : 0;
-        area.height -= (sb->position == BarTop || sb->position == BarBot) ? sb->height : 0;
+        area.y += sb->position == Top ? sb->height : 0;
+        area.height -= (sb->position == Top || sb->position == Bottom) ? sb->height : 0;
     }
 
     /* make padding corrections */

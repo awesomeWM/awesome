@@ -72,8 +72,8 @@ handle_event_buttonpress(XEvent *e)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             if(statusbar->window == ev->window)
             {
-                if(statusbar->position == BarTop
-                     || globalconf.screens[screen].statusbar->position == BarBot)
+                if(statusbar->position == Top
+                     || globalconf.screens[screen].statusbar->position == Bottom)
                 {
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(ev->x >= widget->location && ev->x <= widget->location + widget->width)
@@ -82,7 +82,7 @@ handle_event_buttonpress(XEvent *e)
                             return;
                         }
                 }
-                else if(statusbar->position == BarRight)
+                else if(statusbar->position == Right)
                 {
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(ev->y >= widget->location && ev->y <= widget->location + widget->width)

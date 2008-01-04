@@ -152,14 +152,19 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
 
         if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
         {
-            if(widget->statusbar->position == BarTop
-               || widget->statusbar->position == BarBot)
+            switch(widget->statusbar->position)
+            {
+              case Top:
+              case Bottom:
                 ci = (ev->x - widget->location) / box_width;
-            else if(widget->statusbar->position == BarRight)
+                break;
+              case Right:
                 ci = (ev->y - widget->location) / box_width;
-            else
+                break;
+              default:
                 ci = ((widget->statusbar->width - ev->y) - widget->location) / box_width;
-
+                break;
+            }
             /* found first visible client */
             for(c = globalconf.clients;
                 c && !ISVISIBLE_ON_TB(c, widget->statusbar->screen);

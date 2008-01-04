@@ -38,7 +38,7 @@ statusbar_draw(Statusbar *statusbar)
     int left = 0, right = 0;
     
     /* don't waste our time */
-    if(statusbar->position == BarOff)
+    if(statusbar->position == Off)
         return;
 
     XFreePixmap(globalconf.display, statusbar->drawable);
@@ -67,11 +67,11 @@ statusbar_draw(Statusbar *statusbar)
         if (widget->alignment == AlignFlex)
             left += widget->draw(widget, ctx, left, (left + right));
 
-    if(statusbar->position == BarRight
-       || statusbar->position == BarLeft)
+    if(statusbar->position == Right
+       || statusbar->position == Left)
     {
         Drawable d;
-        if(statusbar->position == BarRight)
+        if(statusbar->position == Right)
             d = draw_rotate(ctx, phys_screen, M_PI_2, statusbar->height, 0);
         else
             d = draw_rotate(ctx, phys_screen, - M_PI_2, 0, statusbar->width);
@@ -104,11 +104,11 @@ statusbar_display(Statusbar *statusbar)
     int phys_screen = get_phys_screen(statusbar->screen);
 
     /* don't waste our time */
-    if(statusbar->position == BarOff)
+    if(statusbar->position == Off)
         return;
 
-    if(statusbar->position == BarRight
-       || statusbar->position == BarLeft)
+    if(statusbar->position == Right
+       || statusbar->position == Left)
         XCopyArea(globalconf.display, statusbar->drawable,
                   statusbar->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
@@ -143,7 +143,7 @@ statusbar_init(Statusbar *statusbar, int screen)
 
     if(statusbar->width <= 0)
     {
-        if(statusbar->position == BarRight || statusbar->position == BarLeft)
+        if(statusbar->position == Right || statusbar->position == Left)
             statusbar->width = area.height;
         else
             statusbar->width = area.width;
@@ -157,7 +157,7 @@ statusbar_init(Statusbar *statusbar, int screen)
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ButtonPressMask | ExposureMask;
-    if(statusbar->dposition == BarRight || statusbar->dposition == BarLeft)
+    if(statusbar->dposition == Right || statusbar->dposition == Left)
         statusbar->window = XCreateWindow(globalconf.display,
                                           RootWindow(globalconf.display,
                                           phys_screen),
@@ -225,19 +225,19 @@ statusbar_update_position(Statusbar *statusbar)
         XMoveWindow(globalconf.display, statusbar->window,
                     area.x, area.y);
         break;
-      case BarLeft:
+      case Left:
         XMoveWindow(globalconf.display, statusbar->window,
                     area.x, (area.y + area.height) - statusbar->width);
         break;
-      case BarRight:
+      case Right:
         XMoveWindow(globalconf.display, statusbar->window,
                     area.x + (area.width - statusbar->height), area.y);
         break;
-      case BarBot:
+      case Bottom:
         XMoveWindow(globalconf.display, statusbar->window,
                     area.x, area.height - statusbar->height);
         break;
-      case BarOff:
+      case Off:
         XUnmapWindow(globalconf.display, statusbar->window);
         break;
     }
@@ -245,18 +245,18 @@ statusbar_update_position(Statusbar *statusbar)
     while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
 }
 
-int
+Position
 statusbar_get_position_from_str(const char *pos)
 {
     if(!a_strncmp(pos, "off", 3)) 
-        return BarOff;
+        return Off;
     else if(!a_strncmp(pos, "bottom", 6))
-        return BarBot;
+        return Bottom;
     else if(!a_strncmp(pos, "right", 5))
-        return BarRight;
+        return Right;
     else if(!a_strncmp(pos, "left", 4))
-        return BarLeft;
-    return BarTop;
+        return Left;
+    return Top;
 }
 
 static Statusbar *
@@ -275,10 +275,10 @@ get_statusbar_byname(int screen, const char *name)
 static void
 statusbar_toggle(Statusbar *statusbar)
 {
-    if(statusbar->position == BarOff)
-        statusbar->position = (statusbar->dposition == BarOff) ? BarTop : statusbar->dposition;
+    if(statusbar->position == Off)
+        statusbar->position = (statusbar->dposition == Off) ? Top : statusbar->dposition;
     else
-        statusbar->position = BarOff;
+        statusbar->position = Off;
 
     statusbar_update_position(statusbar);
 }

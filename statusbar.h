@@ -27,7 +27,7 @@
 void statusbar_draw_all(int);
 void statusbar_init(Statusbar *, int);
 void statusbar_display(Statusbar *);
-int statusbar_get_position_from_str(const char *);
+Position statusbar_get_position_from_str(const char *);
 void statusbar_update_position(Statusbar *);
 
 Uicb uicb_statusbar_toggle;

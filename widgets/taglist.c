@@ -119,9 +119,10 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
 
     for(b = widget->buttons; b; b = b->next)
         if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
-        {
-            if(widget->statusbar->position == BarTop
-               || widget->statusbar->position == BarBot)
+            switch(widget->statusbar->position)
+            {
+              case Top:
+              case Bottom:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
@@ -134,7 +135,8 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                     }
                    prev_width += width;
                 }
-            else if(widget->statusbar->position == BarRight)
+                break;
+              case Right:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
@@ -147,7 +149,8 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                     }
                     prev_width += width;
                 }
-            else
+                break;
+              default:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
@@ -160,9 +163,8 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                     }
                     prev_width += width;
                 }
-        }
-
-
+                break;
+            }
 }
 
 Widget *
