@@ -251,6 +251,7 @@ screen <integer> [MULTI]
     general
     {
         allow_lower_floats=<{true,false}>
+        sloppy_focus=<{true,false}>
         border=<integer> 
         focus_move_pointer=<{true,false}>
         font=<font> 

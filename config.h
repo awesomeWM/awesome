@@ -241,6 +241,8 @@ typedef struct
     Bool allow_lower_floats;
     /** Respect resize hints */
     Bool resize_hints;
+    /** Sloppy focus: focus follow mouse */
+    Bool sloppy_focus;
     /** Normal colors */
     XColor colors_normal[ColLast];
     /** Selected colors */

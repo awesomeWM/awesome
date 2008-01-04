@@ -345,6 +345,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
     virtscreen->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
     virtscreen->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
+    virtscreen->sloppy_focus = cfg_getbool(cfg_general, "sloppy_focus");
     virtscreen->font = XftFontOpenName(globalconf.display,
                                        phys_screen,
                                        cfg_getstr(cfg_general, "font"));
@@ -477,6 +478,7 @@ config_parse(const char *confpatharg)
         CFG_INT((char *) "opacity_unfocused", 100, CFGF_NONE),
         CFG_BOOL((char *) "focus_move_pointer", cfg_false, CFGF_NONE),
         CFG_BOOL((char *) "allow_lower_floats", cfg_false, CFGF_NONE),
+        CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
         CFG_STR((char *) "font", (char *) "mono-12", CFGF_NONE),
         CFG_END()
     };
