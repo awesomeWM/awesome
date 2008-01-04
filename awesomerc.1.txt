@@ -223,11 +223,13 @@ Note: when there are no whitespaces, quotes are optional.
 <identifier>    -> foobar (choose a free name/string)
 <image>         -> "/home/awesome/pics/icon.png" (path to image)
 <integer>       -> 1, 10, -3 (positive numbers are required mostly)
-<key>           -> a, 1, F10 (/usr/include/X11/keysymdef.h w/o XK_, 'xev')
-<mod>           -> mod1, mod2,..., mod5
+<key>           -> a, 1, F10 (see /usr/include/X11/keysymdef.h w/o XK_ or 'xev')
+<mod>           -> modifier list: {"Mod1"}, {"Mod4", "Control"}, ...
 <uicb-cmd>      -> spawn, exec, client_tag... (see UICB FUNCTIONS above)
 <uicb-arg>      -> prog, 3 (argument to a uicb function, where required)
 <string>        -> "foo bar"
+<font>          -> Xft font: mono-10, fixed-12, sans-8, ...
+<boolean>       -> true or false
 <{.., ...}>     -> list of available options
 
 [MULTI] means, you can use an item multiple times.
@@ -248,14 +250,14 @@ screen <integer> [MULTI]
     }
     general
     {
-        allow_lower_floats=<{true,false}>
-        sloppy_focus=<{true,false}>
-        new_become_master<{true,false}>
+        allow_lower_floats=<boolean>
+        sloppy_focus=<boolean>
+        new_become_master<boolean>
         border=<integer> 
-        focus_move_pointer=<{true,false}>
+        focus_move_pointer=<boolean>
         font=<font> 
         opacity_unfocused=<integer>
-        resize_hints=<{true,false}> 
+        resize_hints=<boolean> 
         snap=<integer> 
     }
     layouts
@@ -293,7 +295,7 @@ screen <integer> [MULTI]
         }
         tasklist <identifier>
         {
-            show_icons=<{true,false}>
+            show_icons=<boolean>
             focus_fg=<color>
             focus_bg=<color>
             fg=<color>
@@ -311,7 +313,7 @@ screen <integer> [MULTI]
         iconbox <identifier> [MULTI]
         {
             image=<image>
-            resize=<{true,false}>
+            resize=<boolean>
             mouse [MULTI]
             {   
                 modkey=<mod> 
@@ -394,12 +396,12 @@ rules
 {  
     rule [MULTI] 
     { 
-        float=<{true,false}> 
+        float=<boolean> 
         icon=<image> 
         name=<regex> 
         screen=<integer> 
         tags=<integer>,<integer>,...
-        not_master=<{true,false}>
+        not_master=<boolean>
     }
 }
 keys
