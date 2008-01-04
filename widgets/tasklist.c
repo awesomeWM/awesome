@@ -150,22 +150,27 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
         box_width = widget->width / n;
 
         if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
+        {
             if(widget->statusbar->position == BarTop
                || widget->statusbar->position == BarBot)
-            {
                 ci = (ev->x - widget->location) / box_width;
+            else if(widget->statusbar->position == BarRight)
+                ci = (ev->y - widget->location) / box_width;
+            else
+                ci = ((widget->statusbar->width - ev->y) - widget->location) / box_width;
 
-                /* found first visible client */
-                for(c = globalconf.clients;
-                    c && !ISVISIBLE_ON_TB(c, widget->statusbar->screen);
-                    c = c->next);
-                /* found ci-th visible client */
-                for(; c && i < ci; c = c->next)
-                    if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
-                        i++;
+            /* found first visible client */
+            for(c = globalconf.clients;
+                c && !ISVISIBLE_ON_TB(c, widget->statusbar->screen);
+                c = c->next);
+            /* found ci-th visible client */
+            for(; c && i < ci; c = c->next)
+                if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
+                    i++;
 
-                focus(c, True, widget->statusbar->screen);
-            }
+            focus(c, True, widget->statusbar->screen);
+            return;
+        }
     }
 
     for(b = widget->buttons; b; b = b->next)
