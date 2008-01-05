@@ -168,6 +168,8 @@ handle_event_configurerequest(XEvent * e)
             tag_client_with_rules(c);
             XMoveResizeWindow(e->xany.display, c->win, c->f_geometry.x, c->f_geometry.y,
                               c->f_geometry.width, c->f_geometry.height);
+            window_configure(c->win, c->f_geometry.x, c->f_geometry.y,
+                             c->f_geometry.width, c->f_geometry.height, c->border);
             arrange(c->screen);
         }
         else
