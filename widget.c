@@ -117,8 +117,8 @@ widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
     widget->button_press = widget_common_button_press;
     widget->area.x = cfg_getint(config, "x");
     widget->area.y = cfg_getint(config, "y");
-    widget->user_supplied_x = (widget->area.x >= 0);
-    widget->user_supplied_y = (widget->area.y >= 0);
+    widget->user_supplied_x = (widget->area.x != (int) 0xffffffff);
+    widget->user_supplied_y = (widget->area.y != (int) 0xffffffff);
 }
 
 /** Send command to widget
