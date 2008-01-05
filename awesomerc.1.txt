@@ -108,6 +108,10 @@ This widget shows the tag list.
 
 *mouse*::
     Set mouse bindings.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
 
 layoutinfo
 ~~~~~~~~~~
@@ -115,6 +119,10 @@ This widget shows a icon for the selected layout.
 
 *mouse*::
     Set mouse bindings.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
 
 netwmicon
 ~~~~~~~~~
@@ -122,6 +130,10 @@ This widget shows a icon for the focused window  using NET_WM_ICON or icon file 
 
 *mouse*::
     Set mouse bindings.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
 
 focustitle
 ~~~~~~~~~~
@@ -137,6 +149,10 @@ This widget shows the title of the focused window.
     Foreground color.
 *align*::
     Text alignement.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
 
 tasklist
 ~~~~~~~~
@@ -158,6 +174,10 @@ This widget shows a list of running windows.
     Text alignement.
 *show_icons*::
     Show applications icons.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
 
 textbox
 ~~~~~~~
@@ -177,6 +197,10 @@ This widget shows a text.
     Text to change.
 *align*::
     Text alignement.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
 
 iconbox
 ~~~~~~~
@@ -188,6 +212,10 @@ This widget shows an icon.
     Image file.
 *resize*::
     Resize icon to fit into statusbar.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
 
 progressbar
 ~~~~~~~~~~~
@@ -198,17 +226,21 @@ This widget shows one or more progress-bars.
 *width*::
     Set width.
 *bar*::
-    Draws a bar; Options: fg, bg, bcolor
+    Draws a bar; Options: fg, bg, bcolor.
 *fg*::
     Foreground color.
 *bg*::
     Background color.
 *bcolor*::
     Border color.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
 
 FILES
 -----
-For an example of an awesomerc file, see the file provided with the sources
+For an example of an awesomerc file, see the file provided with the sources.
 
 EXAMPLES
 --------
@@ -216,166 +248,174 @@ EXAMPLES
 The general config and subconfig options for the awesomerc:
 
 ..............................................
-Note: when there are no whitespaces, quotes are optional.
+Note: when there are no whitespace, quotes are optional.
 
+<boolean>       -> "true" or "false"
 <color>         -> #ff9933 (hexadecimal color notation: #red green blue)
 <float>         -> 0.3, 0,8 (often values between 0 and 1 are useful)
-<identifier>    -> foobar (choose a free name/string)
+<font>          -> Xft font: mono-10, fixed-12, sans-8, ...
+<identifier>    -> foobar (choose a name/string)
 <image>         -> "/home/awesome/pics/icon.png" (path to image)
 <integer>       -> 1, 10, -3 (positive numbers are required mostly)
 <key>           -> a, 1, F10 (see /usr/include/X11/keysymdef.h w/o XK_ or 'xev')
-<mod>           -> modifier list: {"Mod1"}, {"Mod4", "Control"}, ...
-<uicb-cmd>      -> spawn, exec, client_tag... (see UICB FUNCTIONS above)
-<uicb-arg>      -> prog, 3 (argument to a uicb function, where required)
-<string>        -> "foo bar"
-<font>          -> Xft font: mono-10, fixed-12, sans-8, ...
-<boolean>       -> true or false
+<mod>           -> "Mod1", "Mod4", "Control" (modifiers)
 <regex>         -> regular expression
+<string>        -> "foo bar"
+<uicb-arg>      -> prog, 3... (argument to a uicb function, where required)
+<uicb-cmd>      -> spawn, exec, client_tag... (see UICB FUNCTIONS above)
 <{.., ...}>     -> list of available options
 
 [MULTI] means, you can use an item multiple times.
 
 screen <integer> [MULTI]
 {
-    colors
-    {
-        focus_bg=<color> 
-        focus_border=<color>
-        focus_fg=<color> 
-        normal_bg=<color> 
-        normal_border=<color> 
-        normal_fg=<color>
-        tab_border=<color> 
-        urgent_bg=<color>
-        urgent_fg=<color>
-    }
     general
     {
-        allow_lower_floats=<boolean>
-        sloppy_focus=<boolean>
-        new_become_master=<boolean>
-        border=<integer> 
-        focus_move_pointer=<boolean>
-        font=<font> 
-        opacity_unfocused=<integer>
-        resize_hints=<boolean> 
-        snap=<integer> 
-    }
-    layouts
-    {
-        layout <{dwindle,floating,max,
-                 spiral,tile,tileleft}> { image=<image> } [MULTI]
-    }
-    padding 
-    { 
-        bottom=<integer> 
-        left=<integer> 
-        right=<integer> 
-        top=<integer> 
-    }
-    statusbar <identifier> [MULTI]
-    {
-        position=<{bottom,top,left,right}>
-        height=<integer>
-        width=<integer>
-
-        focustitle <identifier>
-        {
-            fg=<color>
-            bg=<color>
-            align=<{center,left,right}>
-            font=<font>
-            mouse [MULTI]
-            {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
-            }
-        }
-        tasklist <identifier>
-        {
-            show_icons=<boolean>
-            focus_fg=<color>
-            focus_bg=<color>
-            fg=<color>
-            bg=<color>
-            align=<{center,left,right}>
-            font=<font>
-            mouse [MULTI]
-            {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
-            }
-        }    
-        iconbox <identifier> [MULTI]
-        {
-            image=<image>
-            resize=<boolean>
-            mouse [MULTI]
-            {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
-            }
-        }
-        layoutinfo <identifier>
-        {
-            mouse [MULTI]
-            {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
-            }
-        }
-        netwmicon <identifier>
-        {
-            mouse [MULTI]
-            {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
-            }
-        }
-        progressbar <identifier> [MULTI]
-        {
-            bar { bcolor=<color> bg=<color> fg=<color> } [MULTI]
-            gap=<integer> 
-            width=<integer>
-            height=<float> 
-            lpadding=<integer>
-            mouse [MULTI]
-            {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
-            }
-        }
-        taglist <identifier> [MULTI]
-        {
-            mouse [MULTI]
-            {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
-            }
-        }
-        textbox <identifier> [MULTI]
-        {
-            bg=<color> 
-            fg=<color> 
-            font=<font>
-            mouse [MULTI]
-            {   
-                button=<integer> modkey=<mod> 
-                command=<uicb-cmd> arg=<uicb-arg>
-            }
-            text=<string>
-            width=<integer>
-            align=<{center,left,right}>
-        }
+        allow_lower_floats = <boolean>
+        border = <integer> 
+        focus_move_pointer = <boolean>
+        font = <font> 
+        new_become_master = <boolean>
+        opacity_unfocused = <integer>
+        resize_hints = <boolean> 
+        sloppy_focus = <boolean>
+        snap = <integer> 
     }
     tags
     { 
         tag <identifier> [MULTI]
         { 
-            layout=<{dwindle,floating,max,
+            layout = <{dwindle,floating,max,
                      spiral,tile,tileleft}>
-            mwfact=<float> 
-            nmaster=<integer>
+            mwfact = <float> 
+            nmaster = <integer>
+        }
+    }
+    layouts
+    {
+        layout <{dwindle,floating,max,
+                 spiral,tile,tileleft}> { image = <image> } [MULTI]
+    }
+    colors
+    {
+        tab_border = <color> 
+        normal_fg = <color>
+        normal_bg = <color> 
+        normal_border = <color> 
+        focus_fg = <color> 
+        focus_bg = <color> 
+        focus_border = <color>
+        urgent_fg = <color>
+        urgent_bg = <color>
+    }
+    padding 
+    { 
+        top = <integer> 
+        bottom = <integer> 
+        left = <integer> 
+        right = <integer> 
+    }
+    statusbar <identifier> [MULTI]
+    {
+        position = <{top,bottom,left,right}>
+        height = <integer>
+        width = <integer>
+
+        taglist <identifier> [MULTI]
+        {
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                button = <integer> modkey = {<mod>, ...}
+                command = <uicb-cmd> arg = <uicb-arg>
+            }
+        }
+        layoutinfo <identifier>
+        {
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                button = <integer> modkey = {<mod>, ...} 
+                command = <uicb-cmd> arg = <uicb-arg>
+            }
+        }
+        netwmicon <identifier>
+        {
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                button = <integer> modkey = {<mod>, ...} 
+                command = <uicb-cmd> arg = <uicb-arg>
+            }
+        }
+        focustitle <identifier>
+        {
+            fg = <color>
+            bg = <color>
+            font = <font>
+            align = <{center,left,right}>
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                button = <integer> modkey = {<mod>, ...} 
+                command = <uicb-cmd> arg = <uicb-arg>
+            }
+        }
+        tasklist <identifier>
+        {
+            fg = <color>
+            bg = <color>
+            focus_fg = <color>
+            focus_bg = <color>
+            font = <font>
+            show_icons = <boolean>
+            align = <{center,left,right}>
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                command = <uicb-cmd> arg = <uicb-arg>
+                button = <integer> modkey = {<mod>, ...} 
+            }
+        }    
+        textbox <identifier> [MULTI]
+        {
+            text = <string>
+            bg = <color> 
+            fg = <color> 
+            font = <font>
+            width = <integer>
+            align = <{center,left,right}>
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                button = <integer> modkey = {<mod>, ...} 
+                command = <uicb-cmd> arg = <uicb-arg>
+            }
+        }
+        iconbox <identifier> [MULTI]
+        {
+            image = <image>
+            resize = <boolean>
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                button = <integer> modkey = {<mod>, ...} 
+                command = <uicb-cmd> arg = <uicb-arg>
+            }
+        }
+        progressbar <identifier> [MULTI]
+        {
+            bar { bcolor = <color> bg = <color> fg = <color> } [MULTI]
+            gap = <integer> 
+            width = <integer>
+            height = <float> 
+            lpadding = <integer>
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                button = <integer> modkey = {<mod>, ...} 
+                command = <uicb-cmd> arg = <uicb-arg>
+            }
         }
     }
 }
@@ -383,48 +423,42 @@ rules
 {  
     rule [MULTI] 
     { 
-        float=<boolean> 
-        icon=<image> 
-        name=<regex> 
-        screen=<integer> 
-        tags=<regex>
-        not_master=<boolean>
-        xproperty_name=<string>
-        xproperty_value=<regex>
+        name = <regex> 
+        xproperty_name = <string>
+        xproperty_value = <regex>
+        float = <boolean> 
+        tags = <regex>
+        screen = <integer> 
+        icon = <image> 
+        not_master = <boolean>
     }
 }
 keys
 {
     key [MULTI]
     { 
-        arg=<uicb-arg> 
-        command=<uicb-cmd> 
-        key=<key> 
-        modkey=<mod> 
+        key = <key> modkey = {<mod>, ...} 
+        command = <uicb-cmd> arg = <uicb-arg> 
     }
     keylist [MULTI]
     { 
-        arglist={<uicb-arg>, ...} 
-        command=<uicb-cmd> 
-        keylist={<key>, ...} 
-        modkey=<mod> 
+        keylist = {<key>, ...} 
+        modkey = {<mod>, ...} 
+        command = <uicb-cmd> 
+        arglist = {<uicb-arg>, ...} 
     }
 }
 mouse
 {
     client [MULTI] 
     {
-        arg=<uicb-arg> 
-        button=<integer> 
-        command=<uicb-cmd> 
-        modkey=<mod> 
+        button = <integer> modkey = {<mod>, ...} 
+        command = <uicb-cmd> arg = <uicb-arg> 
     }
     root [MULTI]
     {
-        arg=<uicb-arg> 
-        button=<integer> 
-        command=<uicb-cmd> 
-        modkey=<mod> 
+        button = <integer> modkey = {<mod>, ...} 
+        command = <uicb-cmd> arg = <uicb-arg> 
     }
 }
 ..............................................
