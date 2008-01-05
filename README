@@ -12,7 +12,7 @@ tools.
 
 Installation
 ------------
-If building from git sources, run "autoreconf -vis .". When autoreconf has
+If building from git sources, run "./autogen.sh". When autoreconf has
 finished, you can follow the following instructions for building a dist
 tarball.
 
