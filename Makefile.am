@@ -6,7 +6,7 @@ bin_PROGRAMS =
 doc_DATA =
 man_MANS =
 iconslayoutsdir = ${pkgdatadir}/icons/layouts
-iconslayouts_DATA =
+dist_iconslayouts_DATA =
 
 LAYOUTS =
 
@@ -107,18 +107,18 @@ man_MANS   += awesome-client.1
 EXTRA_DIST += awesomerc.1.txt
 man_MANS   += awesomerc.1
 
-iconslayouts_DATA += icons/layouts/dwindle.png
-iconslayouts_DATA += icons/layouts/dwindlew.png
-iconslayouts_DATA += icons/layouts/floating.png
-iconslayouts_DATA += icons/layouts/floatingw.png
-iconslayouts_DATA += icons/layouts/max.png
-iconslayouts_DATA += icons/layouts/maxw.png
-iconslayouts_DATA += icons/layouts/spiral.png
-iconslayouts_DATA += icons/layouts/spiralw.png
-iconslayouts_DATA += icons/layouts/tile.png
-iconslayouts_DATA += icons/layouts/tileleft.png
-iconslayouts_DATA += icons/layouts/tileleftw.png
-iconslayouts_DATA += icons/layouts/tilew.png
+dist_iconslayouts_DATA += icons/layouts/dwindle.png
+dist_iconslayouts_DATA += icons/layouts/dwindlew.png
+dist_iconslayouts_DATA += icons/layouts/floating.png
+dist_iconslayouts_DATA += icons/layouts/floatingw.png
+dist_iconslayouts_DATA += icons/layouts/max.png
+dist_iconslayouts_DATA += icons/layouts/maxw.png
+dist_iconslayouts_DATA += icons/layouts/spiral.png
+dist_iconslayouts_DATA += icons/layouts/spiralw.png
+dist_iconslayouts_DATA += icons/layouts/tile.png
+dist_iconslayouts_DATA += icons/layouts/tileleft.png
+dist_iconslayouts_DATA += icons/layouts/tileleftw.png
+dist_iconslayouts_DATA += icons/layouts/tilew.png
 
 clean-local:
 	rm -f awesome*.1 awesome*.1.xml
