@@ -32,7 +32,7 @@ void client_detach(Client *);
 void client_ban(Client *);
 void focus(Client *, Bool, int);
 void client_manage(Window, XWindowAttributes *, int);
-void client_resize(Client *, int, int, int, int, Bool, Bool);
+void client_resize(Client *, Area, Bool, Bool);
 void client_unban(Client *);
 void client_unmanage(Client *, long);
 void client_updatewmhints(Client *);

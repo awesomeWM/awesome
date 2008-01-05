@@ -437,8 +437,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
  * \param volatile_coords register coords in rx/ry/rw/rh
  */
 void
-client_resize(Client *c, int x, int y, int w, int h,
-              Bool sizehints, Bool volatile_coords)
+client_resize(Client *c, Area geometry, Bool sizehints, Bool volatile_coords)
 {
     double dx, dy, max, min, ratio;
     Area area;
@@ -446,10 +445,11 @@ client_resize(Client *c, int x, int y, int w, int h,
 
     if(sizehints)
     {
-        if(c->minay > 0 && c->maxay > 0 && (h - c->baseh) > 0 && (w - c->basew) > 0)
+        if(c->minay > 0 && c->maxay > 0 && (geometry.height - c->baseh) > 0
+           && (geometry.width - c->basew) > 0)
         {
-            dx = (double) (w - c->basew);
-            dy = (double) (h - c->baseh);
+            dx = (double) (geometry.width - c->basew);
+            dy = (double) (geometry.height - c->baseh);
             min = (double) (c->minax) / (double) (c->minay);
             max = (double) (c->maxax) / (double) (c->maxay);
             ratio = dx / dy;
@@ -459,67 +459,69 @@ client_resize(Client *c, int x, int y, int w, int h,
                 {
                     dy = (dx * min + dy) / (min * min + 1);
                     dx = dy * min;
-                    w = (int) dx + c->basew;
-                    h = (int) dy + c->baseh;
+                    geometry.width = (int) dx + c->basew;
+                    geometry.height = (int) dy + c->baseh;
                 }
                 else if(ratio > max)
                 {
                     dy = (dx * min + dy) / (max * max + 1);
                     dx = dy * min;
-                    w = (int) dx + c->basew;
-                    h = (int) dy + c->baseh;
+                    geometry.width = (int) dx + c->basew;
+                    geometry.height = (int) dy + c->baseh;
                 }
             }
         }
-        if(c->minw && w < c->minw)
-            w = c->minw;
-        if(c->minh && h < c->minh)
-            h = c->minh;
-        if(c->maxw && w > c->maxw)
-            w = c->maxw;
-        if(c->maxh && h > c->maxh)
-            h = c->maxh;
+        if(c->minw && geometry.width < c->minw)
+            geometry.width = c->minw;
+        if(c->minh && geometry.height < c->minh)
+            geometry.height = c->minh;
+        if(c->maxw && geometry.width > c->maxw)
+            geometry.width = c->maxw;
+        if(c->maxh && geometry.height > c->maxh)
+            geometry.height = c->maxh;
         if(c->incw)
-            w -= (w - c->basew) % c->incw;
+            geometry.width -= (geometry.width - c->basew) % c->incw;
         if(c->inch)
-            h -= (h - c->baseh) % c->inch;
+            geometry.height -= (geometry.height - c->baseh) % c->inch;
     }
-    if(w <= 0 || h <= 0)
+    if(geometry.width <= 0 || geometry.height <= 0)
         return;
     /* offscreen appearance fixes */
     area = get_display_area(get_phys_screen(c->screen),
                             NULL,
                             &globalconf.screens[c->screen].padding);
-    if(x > area.width)
-        x = area.width - w - 2 * c->border;
-    if(y > area.height)
-        y = area.height - h - 2 * c->border;
-    if(x + w + 2 * c->border < 0)
-        x = 0;
-    if(y + h + 2 * c->border < 0)
-        y = 0;
-    if(c->geometry.x != x || c->geometry.y != y
-       || c->geometry.width != w || c->geometry.height != h)
+    if(geometry.x > area.width)
+        geometry.x = area.width - geometry.width - 2 * c->border;
+    if(geometry.y > area.height)
+        geometry.y = area.height - geometry.height - 2 * c->border;
+    if(geometry.x + geometry.width + 2 * c->border < 0)
+        geometry.x = 0;
+    if(geometry.y + geometry.height + 2 * c->border < 0)
+        geometry.y = 0;
+    if(c->geometry.x != geometry.x || c->geometry.y != geometry.y
+       || c->geometry.width != geometry.width || c->geometry.height != geometry.height)
     {
-        c->geometry.x = x;
-        c->geometry.y = y;
-        c->geometry.width = w;
-        c->geometry.height = h;
+        c->geometry.x = geometry.x;
+        c->geometry.y = geometry.y;
+        c->geometry.width = geometry.width;
+        c->geometry.height = geometry.height;
         curtags = get_current_tags(c->screen);
         if(!volatile_coords && (c->isfloating 
             || curtags[0]->layout->arrange == layout_floating))
         {
-            c->f_geometry.x = x;
-            c->f_geometry.y = y;
-            c->f_geometry.width = w;
-            c->f_geometry.height = h;
+            c->f_geometry.x = geometry.x;
+            c->f_geometry.y = geometry.y;
+            c->f_geometry.width = geometry.width;
+            c->f_geometry.height = geometry.height;
         }
         p_delete(&curtags);
-        XMoveResizeWindow(globalconf.display, c->win, x, y, w, h);
-        window_configure(c->win, x, y, w, h, c->border);
+        XMoveResizeWindow(globalconf.display, c->win, geometry.x, geometry.y,
+                          geometry.width, geometry.height);
+        window_configure(c->win, geometry.x, geometry.y,
+                         geometry.width, geometry.height, c->border);
         if(XineramaIsActive(globalconf.display))
         {
-            int new_screen = get_screen_bycoord(x, y);
+            int new_screen = get_screen_bycoord(geometry.x, geometry.y);
             if(c->screen != new_screen)
                 move_client_to_screen(c, new_screen, False);
         }
@@ -787,11 +789,12 @@ uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_moveresize(int screen, char *arg)
 {
-    int nx, ny, nw, nh, ox, oy, ow, oh;
+    int ox, oy, ow, oh;
     char x[8], y[8], w[8], h[8];
     int mx, my, dx, dy, nmx, nmy;
     unsigned int dui;
     Window dummy;
+    Area area;
     Client *sel = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
 
@@ -804,10 +807,10 @@ uicb_client_moveresize(int screen, char *arg)
     p_delete(&curtags);
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
         return;
-    nx = (int) compute_new_value_from_arg(x, sel->geometry.x);
-    ny = (int) compute_new_value_from_arg(y, sel->geometry.y);
-    nw = (int) compute_new_value_from_arg(w, sel->geometry.width);
-    nh = (int) compute_new_value_from_arg(h, sel->geometry.height);
+    area.x = (int) compute_new_value_from_arg(x, sel->geometry.x);
+    area.y = (int) compute_new_value_from_arg(y, sel->geometry.y);
+    area.width = (int) compute_new_value_from_arg(w, sel->geometry.width);
+    area.height = (int) compute_new_value_from_arg(h, sel->geometry.height);
 
     ox = sel->geometry.x;
     oy = sel->geometry.y;
@@ -818,7 +821,7 @@ uicb_client_moveresize(int screen, char *arg)
                              RootWindow(globalconf.display,
                                         get_phys_screen(screen)),
                              &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
-    client_resize(sel, nx, ny, nw, nh, True, False);
+    client_resize(sel, area, True, False);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
         nmx = mx - ox + sel->geometry.width - ow - 1 < 0 ? 0 : mx - ox + sel->geometry.width - ow - 1;
@@ -866,6 +869,13 @@ uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((
 void
 client_maximize(Client *c, int x, int y, int w, int h, Bool borders)
 {
+    Area area;
+
+    area.x = x;
+    area.y = y;
+    area.width = w;
+    area.height = h;
+
     if((c->ismax = !c->ismax))
     {
         if(borders)
@@ -875,11 +885,10 @@ client_maximize(Client *c, int x, int y, int w, int h, Bool borders)
         }
         c->wasfloating = c->isfloating;
         c->isfloating = True;
-        client_resize(c, x, y, w, h, False, True);
+        client_resize(c, area, False, True);
     }
     else if(c->wasfloating)
-        client_resize(c, c->f_geometry.x, c->f_geometry.y,
-                      c->f_geometry.width, c->f_geometry.height, True, False);
+        client_resize(c, c->f_geometry, True, False);
     else
         c->isfloating = False;
 

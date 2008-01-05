@@ -221,8 +221,7 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
         if(c->f_geometry.y + c->f_geometry.height >= to.y + to.height)
             c->f_geometry.y = to.y + to.height - c->f_geometry.height - 2 * c->border;
 
-        client_resize(c, c->f_geometry.x, c->f_geometry.y,
-                      c->f_geometry.width, c->f_geometry.height, True, False);
+        client_resize(c, c->f_geometry, True, False);
     }
 
     focus(c, True, c->screen);

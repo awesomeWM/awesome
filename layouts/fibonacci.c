@@ -30,16 +30,12 @@ extern AwesomeConf globalconf;
 static void
 layout_fibonacci(int screen, int shape)
 {
-    int n = 0, i = 0, nx, ny, nw, nh;
+    int n = 0, i = 0;
     Client *c;
-    Area area = get_screen_area(screen,
-                                globalconf.screens[screen].statusbar,
-                                &globalconf.screens[screen].padding);
-
-    nx = area.x;
-    ny = area.y;
-    nw = area.width;
-    nh = area.height;
+    Area geometry, area;
+    geometry = area = get_screen_area(screen,
+                                      globalconf.screens[screen].statusbar,
+                                      &globalconf.screens[screen].padding);
 
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))
@@ -48,44 +44,45 @@ layout_fibonacci(int screen, int shape)
         if(IS_TILED(c, screen))
         {
             c->ismax = False;
-            if((i % 2 && nh / 2 > 2 * c->border)
-               || (!(i % 2) && nw / 2 > 2 * c->border))
+            if((i % 2 && geometry.height / 2 > 2 * c->border)
+               || (!(i % 2) && geometry.width / 2 > 2 * c->border))
             {
                 if(i < n - 1)
                 {
                     if(i % 2)
-                        nh /= 2;
+                        geometry.height /= 2;
                     else
-                        nw /= 2;
+                        geometry.width /= 2;
                     if((i % 4) == 2 && !shape)
-                        nx += nw;
+                        geometry.x += geometry.width;
                     else if((i % 4) == 3 && !shape)
-                        ny += nh;
+                        geometry.y += geometry.height;
                 }
                 if((i % 4) == 0)
                 {
                     if(shape)
-                        ny += nh;
+                        geometry.y += geometry.height;
                     else
-                        ny -= nh;
+                        geometry.y -= geometry.height;
                 }
                 else if((i % 4) == 1)
-                    nx += nw;
+                    geometry.x += geometry.width;
                 else if((i % 4) == 2)
-                    ny += nh;
+                    geometry.y += geometry.height;
                 else if((i % 4) == 3)
                 {
                     if(shape)
-                        nx += nw;
+                        geometry.x += geometry.width;
                     else
-                        nx -= nw;
+                        geometry.x -= geometry.width;
                 }
                 if(i == 0)
-                    ny = area.y;
+                    geometry.y = area.y;
                 i++;
             }
-            client_resize(c, nx, ny, nw - 2 * c->border, nh - 2 * c->border,
-                          globalconf.screens[screen].resize_hints, False);
+            geometry.width -= 2 * c->border;
+            geometry.height -= 2 * c->border;
+            client_resize(c, geometry, globalconf.screens[screen].resize_hints, False);
         }
 }
 

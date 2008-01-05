@@ -100,12 +100,11 @@ _tile(int screen, const Bool right)
     /* windows area geometry */
     int wah = 0, waw = 0, wax = 0, way = 0;
     /* new coordinates */
-    unsigned int nx, ny, nw, nh;
     /* master size */
     unsigned int mw = 0, mh = 0;
     int n, i, masterwin = 0, otherwin = 0;
     int real_ncol = 1, win_by_col = 1, current_col = 0;
-    Area area;
+    Area area, geometry;
     Client *c;
     Tag **curtags = get_current_tags(screen);
 
@@ -147,9 +146,11 @@ _tile(int screen, const Bool right)
         c->ismax = False;
         if(i < curtags[0]->nmaster)
         {                       /* master */
-            ny = way + i * mh;
-            nx = wax + (right ? 0 : waw - mw);
-            client_resize(c, nx, ny, mw - 2 * c->border, mh - 2 * c->border, globalconf.screens[screen].resize_hints, False);
+            geometry.y = way + i * mh;
+            geometry.x = wax + (right ? 0 : waw - mw);
+            geometry.width = mw - 2 * c->border;
+            geometry.height =  mh - 2 * c->border;
+            client_resize(c, geometry, globalconf.screens[screen].resize_hints, False);
         }
         else
         {                       /* tile window */
@@ -163,19 +164,19 @@ _tile(int screen, const Bool right)
                 win_by_col += otherwin % real_ncol;
 
             if(otherwin <= real_ncol)
-                nh = wah - 2 * c->border;
+                geometry.height = wah - 2 * c->border;
             else
-                nh = (wah / win_by_col) - 2 * c->border;
+                geometry.height = (wah / win_by_col) - 2 * c->border;
 
-            nw = (waw - mw) / real_ncol - 2 * c->border;
+            geometry.width = (waw - mw) / real_ncol - 2 * c->border;
 
             if(i == curtags[0]->nmaster || otherwin <= real_ncol || (i - curtags[0]->nmaster) % win_by_col == 0)
-                ny = way;
+                geometry.y = way;
             else
-                ny = way + ((i - curtags[0]->nmaster) % win_by_col) * (nh + 2 * c->border);
+                geometry.y = way + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.height + 2 * c->border);
 
-            nx = wax + current_col * (nw + 2 * c->border) + (right ? mw : 0);
-            client_resize(c, nx, ny, nw, nh, globalconf.screens[screen].resize_hints, False);
+            geometry.x = wax + current_col * (geometry.width + 2 * c->border) + (right ? mw : 0);
+            client_resize(c, geometry, globalconf.screens[screen].resize_hints, False);
         }
         i++;
     }

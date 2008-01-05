@@ -43,11 +43,11 @@ extern AwesomeConf globalconf;
 void
 uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int x1, y, ocx, ocy, di, nx, ny, phys_screen;
+    int x1, y, ocx, ocy, di, phys_screen;
     unsigned int dui;
     Window dummy;
     XEvent ev;
-    Area area;
+    Area area, geometry;
     Client *c = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
 
@@ -66,8 +66,8 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                            globalconf.screens[screen].statusbar,
                            &globalconf.screens[screen].padding);
 
-    ocx = nx = c->geometry.x;
-    ocy = ny = c->geometry.y;
+    ocx = geometry.x = c->geometry.x;
+    ocy = geometry.y = c->geometry.y;
     phys_screen = get_phys_screen(c->screen);
     if(XGrabPointer(globalconf.display,
                     RootWindow(globalconf.display, phys_screen),
@@ -97,17 +97,19 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             handle_event_maprequest(&ev);
             break;
         case MotionNotify:
-            nx = ocx + (ev.xmotion.x - x1);
-            ny = ocy + (ev.xmotion.y - y);
-            if(abs(nx) < globalconf.screens[screen].snap + area.x && nx > area.x)
-                nx = area.x;
-            else if(abs((area.x + area.width) - (nx + c->geometry.width + 2 * c->border)) < globalconf.screens[screen].snap)
-                nx = area.x + area.width - c->geometry.width - 2 * c->border;
-            if(abs(ny) < globalconf.screens[screen].snap + area.y && ny > area.y)
-                ny = area.y;
-            else if(abs((area.y + area.height) - (ny + c->geometry.height + 2 * c->border)) < globalconf.screens[screen].snap)
-                ny = area.y + area.height - c->geometry.height - 2 * c->border;
-            client_resize(c, nx, ny, c->geometry.width, c->geometry.height, False, False);
+            geometry.x = ocx + (ev.xmotion.x - x1);
+            geometry.y = ocy + (ev.xmotion.y - y);
+            if(abs(geometry.x) < globalconf.screens[screen].snap + area.x && geometry.x > area.x)
+                geometry.x = area.x;
+            else if(abs((area.x + area.width) - (geometry.x + c->geometry.width + 2 * c->border)) < globalconf.screens[screen].snap)
+                geometry.x = area.x + area.width - c->geometry.width - 2 * c->border;
+            if(abs(geometry.y) < globalconf.screens[screen].snap + area.y && geometry.y > area.y)
+                geometry.y = area.y;
+            else if(abs((area.y + area.height) - (geometry.y + c->geometry.height + 2 * c->border)) < globalconf.screens[screen].snap)
+                geometry.y = area.y + area.height - c->geometry.height - 2 * c->border;
+            geometry.width = c->geometry.width;
+            geometry.height = c->geometry.height;
+            client_resize(c, geometry, False, False);
             while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
             break;
         }
@@ -122,11 +124,11 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int ocx = 0, ocy = 0, nw, nh, n;
+    int ocx = 0, ocy = 0, n;
     XEvent ev;
     Client *c = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
-    Area area = { 0, 0, 0, 0 };
+    Area area = { 0, 0, 0, 0 }, geometry;
     double mwfact;
 
     /* only handle floating and tiled layouts */
@@ -191,11 +193,13 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         case MotionNotify:
             if(curtags[0]->layout->arrange == layout_floating || c->isfloating)
             {
-                if((nw = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
-                    nw = 1;
-                if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
-                    nh = 1;
-                client_resize(c, c->geometry.x, c->geometry.y, nw, nh, True, False);
+                if((geometry.width = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
+                    geometry.width = 1;
+                if((geometry.height = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
+                    geometry.height = 1;
+                geometry.x = c->geometry.x;
+                geometry.y = c->geometry.y;
+                client_resize(c, geometry, True, False);
             }
             else if(curtags[0]->layout->arrange == layout_tile
                     || curtags[0]->layout->arrange == layout_tileleft)

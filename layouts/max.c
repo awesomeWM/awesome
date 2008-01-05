@@ -37,8 +37,12 @@ layout_max(int screen)
 
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))
-            client_resize(c, area.x, area.y,
-                   area.width - 2 * c->border,
-                   area.height - 2 * c->border, globalconf.screens[screen].resize_hints, False);
+        {
+            area.width -= 2 * c->border;
+            area.height -= 2 * c->border;
+            client_resize(c, area, globalconf.screens[screen].resize_hints, False);
+            area.width += 2 * c->border;
+            area.height += 2 * c->border;
+        }
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
