@@ -132,7 +132,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 {
                     width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
                     if(ev->x >= widget->area.x + prev_width
-                       && ev->x <= widget->area.x + prev_width + width)
+                       && ev->x < widget->area.x + prev_width + width)
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);
@@ -146,7 +146,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 {
                     width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
                     if(ev->y >= widget->area.x + prev_width
-                       && ev->y <= widget->area.x + prev_width + width)
+                       && ev->y < widget->area.x + prev_width + width)
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);
@@ -160,7 +160,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 {
                     width = textwidth(vscreen.font, tag->name) + vscreen.font->height;
                     if(widget->statusbar->width - ev->y >= widget->area.x + prev_width
-                       && widget->statusbar->width - ev->y <= widget->area.x + prev_width + width)
+                       && widget->statusbar->width - ev->y < widget->area.x + prev_width + width)
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);
