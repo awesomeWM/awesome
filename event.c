@@ -76,7 +76,8 @@ handle_event_buttonpress(XEvent *e)
                   case Top:
                   case Bottom:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(ev->x >= widget->area.x && ev->x < widget->area.x + widget->area.width)
+                        if(ev->x >= widget->area.x && ev->x < widget->area.x + widget->area.width
+                           && ev->y >= widget->area.y && ev->y < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
                             return;
@@ -84,7 +85,9 @@ handle_event_buttonpress(XEvent *e)
                     break;
                   case Right:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(ev->y >= widget->area.x && ev->y < widget->area.x + widget->area.width)
+                        if(ev->y >= widget->area.x && ev->y < widget->area.x + widget->area.width
+                           && statusbar->height - ev->x >= widget->area.y
+                           && statusbar->height - ev->x < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
                             return;
@@ -93,7 +96,8 @@ handle_event_buttonpress(XEvent *e)
                  default:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(statusbar->width - ev->y >= widget->area.x
-                           && statusbar->width - ev->y < widget->area.x + widget->area.width)
+                           && statusbar->width - ev->y < widget->area.x + widget->area.width
+                           && ev->x >= widget->area.y && ev->x < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
                             return;
