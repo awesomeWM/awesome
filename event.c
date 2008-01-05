@@ -154,8 +154,7 @@ handle_event_configurerequest(XEvent * e)
             if(ev->value_mask & CWHeight)
                 c->f_geometry.height = c->geometry.height = ev->height;
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-                window_configure(c->win, c->geometry.x, c->geometry.y,
-                                 c->geometry.width, c->geometry.height, c->border);
+                window_configure(c->win, c->geometry, c->border);
             /* recompute screen */
             old_screen = c->screen;
             c->screen = get_screen_bycoord(c->geometry.x, c->geometry.y);
@@ -168,13 +167,11 @@ handle_event_configurerequest(XEvent * e)
             tag_client_with_rules(c);
             XMoveResizeWindow(e->xany.display, c->win, c->f_geometry.x, c->f_geometry.y,
                               c->f_geometry.width, c->f_geometry.height);
-            window_configure(c->win, c->f_geometry.x, c->f_geometry.y,
-                             c->f_geometry.width, c->f_geometry.height, c->border);
+            window_configure(c->win, c->f_geometry, c->border);
             arrange(c->screen);
         }
         else
-            window_configure(c->win, c->geometry.x, c->geometry.y,
-                             c->geometry.width, c->geometry.height, c->border);
+            window_configure(c->win, c->geometry, c->border);
     }
     else
     {

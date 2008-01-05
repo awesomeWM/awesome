@@ -29,7 +29,7 @@
 
 int window_setstate(Window, long);
 long window_getstate(Window);
-Status window_configure(Window, int, int, int, int, int);
+Status window_configure(Window, Area, int);
 void window_grabbuttons(int, Window, Bool, Bool);
 void window_setshape(int, Window);
 void window_settrans(Window, double);

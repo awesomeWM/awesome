@@ -65,7 +65,7 @@ window_getstate(Window w)
 }
 
 Status
-window_configure(Window win, int x, int y, int w, int h, int border)
+window_configure(Window win, Area geometry, int border)
 {
     XConfigureEvent ce;
 
@@ -73,10 +73,10 @@ window_configure(Window win, int x, int y, int w, int h, int border)
     ce.display = globalconf.display;
     ce.event = win;
     ce.window = win;
-    ce.x = x;
-    ce.y = y;
-    ce.width = w;
-    ce.height = h;
+    ce.x = geometry.x;
+    ce.y = geometry.y;
+    ce.width = geometry.width;
+    ce.height = geometry.height;
     ce.border_width = border;
     ce.above = None;
     ce.override_redirect = False;

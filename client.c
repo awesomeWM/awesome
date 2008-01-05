@@ -367,8 +367,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     XConfigureWindow(globalconf.display, w, CWBorderWidth, &wc);
     XSetWindowBorder(globalconf.display, w, globalconf.screens[screen].colors_normal[ColBorder].pixel);
     /* propagates border_width, if size doesn't change */
-    window_configure(c->win, c->geometry.x, c->geometry.y,
-                     c->geometry.width, c->geometry.height, c->border);
+    window_configure(c->win, c->geometry, c->border);
 
     /* update hints */
     client_updatesizehints(c);
@@ -517,8 +516,7 @@ client_resize(Client *c, Area geometry, Bool sizehints, Bool volatile_coords)
         p_delete(&curtags);
         XMoveResizeWindow(globalconf.display, c->win, geometry.x, geometry.y,
                           geometry.width, geometry.height);
-        window_configure(c->win, geometry.x, geometry.y,
-                         geometry.width, geometry.height, c->border);
+        window_configure(c->win, geometry, c->border);
         if(XineramaIsActive(globalconf.display))
         {
             int new_screen = get_screen_bycoord(geometry.x, geometry.y);
