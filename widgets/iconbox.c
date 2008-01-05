@@ -42,6 +42,8 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
     else
         widget->area.width = area.width;
 
+    widget->area.height = widget->statusbar->height;
+
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
                                                  widget->area.width,

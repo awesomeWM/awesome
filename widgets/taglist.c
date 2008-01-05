@@ -111,6 +111,7 @@ taglist_draw(Widget *widget,
         widget->area.width += w;
     }
 
+    widget->area.height = widget->statusbar->height;
     return widget->area.width;
 }
 

@@ -136,6 +136,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
         }
 
     widget->area.width = widget->statusbar->width - used;
+    widget->area.height = widget->statusbar->height;
 
     return widget->area.width;
 }

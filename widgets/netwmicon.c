@@ -45,6 +45,8 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
         return 0;
     }
 
+    widget->area.height = widget->statusbar->height;
+
     for(r = globalconf.rules; r; r = r->next)
         if(r->icon && client_match_rule(sel, r))
         {

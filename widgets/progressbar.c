@@ -101,6 +101,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     }
 
     widget->area.width = d->width;
+    widget->area.height = widget->statusbar->height;
     return widget->area.width;
 }
 
