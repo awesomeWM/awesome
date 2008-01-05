@@ -4,3 +4,14 @@ awesome-client
 doc
 *.swp
 defconfig.h
+.deps
+.dirstamp
+configure
+config.log
+config.status
+Makefile
+Makefile.in
+auto-aux
+aclocal.m4
+autom4te.cache
+awesome.doxygen
