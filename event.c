@@ -143,33 +143,29 @@ handle_event_configurerequest(XEvent * e)
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
-        if(c->isfixed)
-        {
-            if(ev->value_mask & CWX)
-                c->rx = c->x = ev->x - c->border;
-            if(ev->value_mask & CWY)
-                c->ry = c->y = ev->y - c->border;
-            if(ev->value_mask & CWWidth)
-                c->rw = c->w = ev->width;
-            if(ev->value_mask & CWHeight)
-                c->rh = c->h = ev->height;
-            if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-                window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
-            /* recompute screen */
-            old_screen = c->screen;
-            c->screen = get_screen_bycoord(c->x, c->y);
-            if(old_screen != c->screen)
-            {
-                move_client_to_screen(c, c->screen, False);
-                statusbar_draw_all(old_screen);
-                statusbar_draw_all(c->screen);
-            }
-            tag_client_with_rules(c);
-            XMoveResizeWindow(e->xany.display, c->win, c->rx, c->ry, c->rw, c->rh);
-            arrange(c->screen);
-        }
-        else
+        if(ev->value_mask & CWX)
+            c->rx = c->x = ev->x - c->border;
+        if(ev->value_mask & CWY)
+            c->ry = c->y = ev->y - c->border;
+        if(ev->value_mask & CWWidth)
+            c->rw = c->w = ev->width;
+        if(ev->value_mask & CWHeight)
+            c->rh = c->h = ev->height;
+        if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
             window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
+        /* recompute screen */
+        old_screen = c->screen;
+        c->screen = get_screen_bycoord(c->x, c->y);
+        if(old_screen != c->screen)
+        {
+            move_client_to_screen(c, c->screen, False);
+            statusbar_draw_all(old_screen);
+            statusbar_draw_all(c->screen);
+        }
+        tag_client_with_rules(c);
+        XMoveResizeWindow(e->xany.display, c->win, c->rx, c->ry, c->rw, c->rh);
+        arrange(c->screen);
+        window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
     }
     else
     {
