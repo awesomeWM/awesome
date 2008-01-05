@@ -71,28 +71,26 @@ handle_event_buttonpress(XEvent *e)
     for(screen = 0; screen < get_screen_count(); screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             if(statusbar->window == ev->window)
-            {
-                if(statusbar->position == Top
-                     || globalconf.screens[screen].statusbar->position == Bottom)
+                switch(statusbar->position)
                 {
+                  case Top:
+                  case Bottom:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(ev->x >= widget->area.x && ev->x <= widget->area.x + widget->area.width)
                         {
                             widget->button_press(widget, ev);
                             return;
                         }
-                }
-                else if(statusbar->position == Right)
-                {
+                    break;
+                  case Right:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(ev->y >= widget->area.x && ev->y <= widget->area.x + widget->area.width)
                         {
                             widget->button_press(widget, ev);
                             return;
                         }
-                }
-                else
-                {
+                    break;
+                 default:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(statusbar->width - ev->y >= widget->area.x
                            && statusbar->width - ev->y <= widget->area.x + widget->area.width)
@@ -100,8 +98,8 @@ handle_event_buttonpress(XEvent *e)
                             widget->button_press(widget, ev);
                             return;
                         }
+                    break;
                 }
-            }
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
