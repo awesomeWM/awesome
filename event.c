@@ -146,18 +146,19 @@ handle_event_configurerequest(XEvent * e)
         if(c->isfixed)
         {
             if(ev->value_mask & CWX)
-                c->rx = c->x = ev->x - c->border;
+                c->f_geometry.x = c->geometry.x = ev->x - c->border;
             if(ev->value_mask & CWY)
-                c->ry = c->y = ev->y - c->border;
+                c->f_geometry.y = c->f_geometry.y = ev->y - c->border;
             if(ev->value_mask & CWWidth)
-                c->rw = c->w = ev->width;
+                c->f_geometry.width = c->geometry.width = ev->width;
             if(ev->value_mask & CWHeight)
-                c->rh = c->h = ev->height;
+                c->f_geometry.height = c->geometry.height = ev->height;
             if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-                window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
+                window_configure(c->win, c->geometry.x, c->geometry.y,
+                                 c->geometry.width, c->geometry.height, c->border);
             /* recompute screen */
             old_screen = c->screen;
-            c->screen = get_screen_bycoord(c->x, c->y);
+            c->screen = get_screen_bycoord(c->geometry.x, c->geometry.y);
             if(old_screen != c->screen)
             {
                 move_client_to_screen(c, c->screen, False);
@@ -165,11 +166,13 @@ handle_event_configurerequest(XEvent * e)
                 statusbar_draw_all(c->screen);
             }
             tag_client_with_rules(c);
-            XMoveResizeWindow(e->xany.display, c->win, c->rx, c->ry, c->rw, c->rh);
+            XMoveResizeWindow(e->xany.display, c->win, c->f_geometry.x, c->f_geometry.y,
+                              c->f_geometry.width, c->f_geometry.height);
             arrange(c->screen);
         }
         else
-            window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
+            window_configure(c->win, c->geometry.x, c->geometry.y,
+                             c->geometry.width, c->geometry.height, c->border);
     }
     else
     {

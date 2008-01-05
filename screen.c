@@ -209,19 +209,20 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
         from = get_screen_area(old_screen, NULL, NULL);
 
         /* compute new coords in new screen */
-        c->rx = (c->rx - from.x) + to.x;
-        c->ry = (c->ry - from.y) + to.y;
+        c->f_geometry.x = (c->f_geometry.x - from.x) + to.x;
+        c->f_geometry.y = (c->f_geometry.y - from.y) + to.y;
         /* check that new coords are still in the screen */
-        if(c->rw > to.width)
-            c->rw = to.width;
-        if(c->rh > to.height)
-            c->rh = to.height;
-        if(c->rx + c->rw >= to.x + to.width)
-            c->rx = to.x + to.width - c->rw - 2 * c->border;
-        if(c->ry + c->rh >= to.y + to.height)
-            c->ry = to.y + to.height - c->rh - 2 * c->border;
+        if(c->f_geometry.width > to.width)
+            c->f_geometry.width = to.width;
+        if(c->f_geometry.height > to.height)
+            c->f_geometry.height = to.height;
+        if(c->f_geometry.x + c->f_geometry.width >= to.x + to.width)
+            c->f_geometry.x = to.x + to.width - c->f_geometry.width - 2 * c->border;
+        if(c->f_geometry.y + c->f_geometry.height >= to.y + to.height)
+            c->f_geometry.y = to.y + to.height - c->f_geometry.height - 2 * c->border;
 
-        client_resize(c, c->rx, c->ry, c->rw, c->rh, True, False);
+        client_resize(c, c->f_geometry.x, c->f_geometry.y,
+                      c->f_geometry.width, c->f_geometry.height, True, False);
     }
 
     focus(c, True, c->screen);

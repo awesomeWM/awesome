@@ -152,9 +152,11 @@ struct Client
     /** Client name */
     char name[256];
     /** Window geometry */
-    int x, y, w, h;
-    /** Real window geometry for floating */
-    int rx, ry, rw, rh;
+    Area geometry;
+    /** Floating window geometry */
+    Area f_geometry;
+    /** Max window geometry */
+    Area m_geometry;
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
     int border, oldborder;

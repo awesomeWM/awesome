@@ -66,8 +66,8 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                            globalconf.screens[screen].statusbar,
                            &globalconf.screens[screen].padding);
 
-    ocx = nx = c->x;
-    ocy = ny = c->y;
+    ocx = nx = c->geometry.x;
+    ocy = ny = c->geometry.y;
     phys_screen = get_phys_screen(c->screen);
     if(XGrabPointer(globalconf.display,
                     RootWindow(globalconf.display, phys_screen),
@@ -101,13 +101,13 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             ny = ocy + (ev.xmotion.y - y);
             if(abs(nx) < globalconf.screens[screen].snap + area.x && nx > area.x)
                 nx = area.x;
-            else if(abs((area.x + area.width) - (nx + c->w + 2 * c->border)) < globalconf.screens[screen].snap)
-                nx = area.x + area.width - c->w - 2 * c->border;
+            else if(abs((area.x + area.width) - (nx + c->geometry.width + 2 * c->border)) < globalconf.screens[screen].snap)
+                nx = area.x + area.width - c->geometry.width - 2 * c->border;
             if(abs(ny) < globalconf.screens[screen].snap + area.y && ny > area.y)
                 ny = area.y;
-            else if(abs((area.y + area.height) - (ny + c->h + 2 * c->border)) < globalconf.screens[screen].snap)
-                ny = area.y + area.height - c->h - 2 * c->border;
-            client_resize(c, nx, ny, c->w, c->h, False, False);
+            else if(abs((area.y + area.height) - (ny + c->geometry.height + 2 * c->border)) < globalconf.screens[screen].snap)
+                ny = area.y + area.height - c->geometry.height - 2 * c->border;
+            client_resize(c, nx, ny, c->geometry.width, c->geometry.height, False, False);
             while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
             break;
         }
@@ -135,8 +135,8 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         if((curtags[0]->layout->arrange == layout_floating) || c->isfloating)
         {
             restack(screen);
-            ocx = c->x;
-            ocy = c->y;
+            ocx = c->geometry.x;
+            ocy = c->geometry.y;
             c->ismax = False;
         }
         else if (curtags[0]->layout->arrange == layout_tile
@@ -166,9 +166,9 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         return;
 
     if(curtags[0]->layout->arrange == layout_tileleft)
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, 0, c->h + c->border - 1);
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, 0, c->geometry.height + c->border - 1);
     else
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
 
     for(;;)
     {
@@ -195,7 +195,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                     nw = 1;
                 if((nh = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
                     nh = 1;
-                client_resize(c, c->x, c->y, nw, nh, True, False);
+                client_resize(c, c->geometry.x, c->geometry.y, nw, nh, True, False);
             }
             else if(curtags[0]->layout->arrange == layout_tile
                     || curtags[0]->layout->arrange == layout_tileleft)

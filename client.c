@@ -315,20 +315,20 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c = p_new(Client, 1);
 
     c->win = w;
-    c->x = c->rx = wa->x;
-    c->y = c->ry = wa->y;
-    c->w = c->rw = wa->width;
-    c->h = c->rh = wa->height;
+    c->geometry.x = c->f_geometry.x = c->m_geometry.x = wa->x;
+    c->geometry.y = c->f_geometry.y = c->m_geometry.y = wa->y;
+    c->geometry.width = c->f_geometry.width = c->m_geometry.width = wa->width;
+    c->geometry.height = c->f_geometry.height = c->m_geometry.height = wa->height;
     c->oldborder = wa->border_width;
 
-    c->screen = get_screen_bycoord(c->x, c->y);
+    c->screen = get_screen_bycoord(c->geometry.x, c->geometry.y);
 
     move_client_to_screen(c, screen, True);
 
     /* update window title */
     client_updatetitle(c);
 
-    if(c->w == area.width && c->h == area.height)
+    if(c->geometry.width == area.width && c->geometry.height == area.height)
         c->border = wa->border_width;
     else
         c->border = globalconf.screens[screen].borderpx;
@@ -340,10 +340,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
 
     /* if window request fullscreen mode */
-    if(c->w == area.width && c->h == area.height)
+    if(c->geometry.width == area.width && c->geometry.height == area.height)
     {
-        c->x = area.x;
-        c->y = area.y;
+        c->geometry.x = area.x;
+        c->geometry.y = area.y;
     }
     else
     {
@@ -351,23 +351,24 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                                  globalconf.screens[screen].statusbar,
                                  &globalconf.screens[screen].padding);
 
-        if(c->x + c->w + 2 * c->border > darea.x + darea.width)
-            c->x = c->rx = darea.x + darea.width - c->w - 2 * c->border;
-        if(c->y + c->h + 2 * c->border > darea.y + darea.height)
-            c->y = c->ry = darea.y + darea.height - c->h - 2 * c->border;
-        if(c->x < darea.x)
-            c->x = c->rx = darea.x;
-        if(c->y < darea.y)
-            c->y = c->ry = darea.y;
+        if(c->geometry.x + c->geometry.width + 2 * c->border > darea.x + darea.width)
+            c->geometry.x = c->f_geometry.x = darea.x + darea.width - c->geometry.width - 2 * c->border;
+        if(c->geometry.y + c->geometry.height + 2 * c->border > darea.y + darea.height)
+            c->geometry.y = c->f_geometry.y = darea.y + darea.height - c->geometry.height - 2 * c->border;
+        if(c->geometry.x < darea.x)
+            c->geometry.x = c->f_geometry.x = darea.x;
+        if(c->geometry.y < darea.y)
+            c->geometry.y = c->f_geometry.y = darea.y;
     }
 
+    /* XXX if this necessary ? */
     /* set borders */
     wc.border_width = c->border;
     XConfigureWindow(globalconf.display, w, CWBorderWidth, &wc);
     XSetWindowBorder(globalconf.display, w, globalconf.screens[screen].colors_normal[ColBorder].pixel);
-
     /* propagates border_width, if size doesn't change */
-    window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
+    window_configure(c->win, c->geometry.x, c->geometry.y,
+                     c->geometry.width, c->geometry.height, c->border);
 
     /* update hints */
     client_updatesizehints(c);
@@ -415,7 +416,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
 
     /* some windows require this */
-    XMoveResizeWindow(globalconf.display, c->win, c->x, c->y, c->w, c->h);
+    XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,
+                      c->geometry.width, c->geometry.height);
 
     focus(c, True, screen);
 
@@ -496,27 +498,28 @@ client_resize(Client *c, int x, int y, int w, int h,
         x = 0;
     if(y + h + 2 * c->border < 0)
         y = 0;
-    if(c->x != x || c->y != y || c->w != w || c->h != h)
+    if(c->geometry.x != x || c->geometry.y != y
+       || c->geometry.width != w || c->geometry.height != h)
     {
-        c->x = x;
-        c->y = y;
-        c->w = w;
-        c->h = h;
+        c->geometry.x = x;
+        c->geometry.y = y;
+        c->geometry.width = w;
+        c->geometry.height = h;
         curtags = get_current_tags(c->screen);
         if(!volatile_coords && (c->isfloating 
             || curtags[0]->layout->arrange == layout_floating))
         {
-            c->rx = c->x;
-            c->ry = c->y;
-            c->rw = c->w;
-            c->rh = c->h;
+            c->f_geometry.x = x;
+            c->f_geometry.y = y;
+            c->f_geometry.width = w;
+            c->f_geometry.height = h;
         }
         p_delete(&curtags);
-        XMoveResizeWindow(globalconf.display, c->win, c->x, c->y, c->w, c->h);
-        window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
+        XMoveResizeWindow(globalconf.display, c->win, x, y, w, h);
+        window_configure(c->win, x, y, w, h, c->border);
         if(XineramaIsActive(globalconf.display))
         {
-            int new_screen = get_screen_bycoord(c->x, c->y);
+            int new_screen = get_screen_bycoord(x, y);
             if(c->screen != new_screen)
                 move_client_to_screen(c, new_screen, False);
         }
@@ -801,15 +804,15 @@ uicb_client_moveresize(int screen, char *arg)
     p_delete(&curtags);
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
         return;
-    nx = (int) compute_new_value_from_arg(x, sel->x);
-    ny = (int) compute_new_value_from_arg(y, sel->y);
-    nw = (int) compute_new_value_from_arg(w, sel->w);
-    nh = (int) compute_new_value_from_arg(h, sel->h);
+    nx = (int) compute_new_value_from_arg(x, sel->geometry.x);
+    ny = (int) compute_new_value_from_arg(y, sel->geometry.y);
+    nw = (int) compute_new_value_from_arg(w, sel->geometry.width);
+    nh = (int) compute_new_value_from_arg(h, sel->geometry.height);
 
-    ox = sel->x;
-    oy = sel->y;
-    ow = sel->w;
-    oh = sel->h;
+    ox = sel->geometry.x;
+    oy = sel->geometry.y;
+    ow = sel->geometry.width;
+    oh = sel->geometry.height;
 
     Bool xqp = XQueryPointer(globalconf.display,
                              RootWindow(globalconf.display,
@@ -818,8 +821,8 @@ uicb_client_moveresize(int screen, char *arg)
     client_resize(sel, nx, ny, nw, nh, True, False);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
-        nmx = mx - ox + sel->w - ow - 1 < 0 ? 0 : mx - ox + sel->w - ow - 1;
-        nmy = my - oy + sel->h - oh - 1 < 0 ? 0 : my - oy + sel->h - oh - 1;
+        nmx = mx - ox + sel->geometry.width - ow - 1 < 0 ? 0 : mx - ox + sel->geometry.width - ow - 1;
+        nmy = my - oy + sel->geometry.height - oh - 1 < 0 ? 0 : my - oy + sel->geometry.height - oh - 1;
         XWarpPointer(globalconf.display,
                      None, sel->win,
                      0, 0, 0, 0, nmx, nmy);
@@ -875,7 +878,8 @@ client_maximize(Client *c, int x, int y, int w, int h, Bool borders)
         client_resize(c, x, y, w, h, False, True);
     }
     else if(c->wasfloating)
-        client_resize(c, c->rx, c->ry, c->rw, c->rh, True, False);
+        client_resize(c, c->f_geometry.x, c->f_geometry.y,
+                      c->f_geometry.width, c->f_geometry.height, True, False);
     else
         c->isfloating = False;
 
@@ -917,8 +921,8 @@ uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
                                 &globalconf.screens[screen].padding);
 
     if(sel)
-        client_maximize(sel, sel->x, area.y,
-                        sel->w,
+        client_maximize(sel, sel->geometry.x, area.y,
+                        sel->geometry.width,
                         area.height - 2 * sel->border, False);
 }
 
@@ -937,9 +941,9 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
                                 &globalconf.screens[screen].padding);
 
     if(sel)
-        client_maximize(sel, area.x, sel->y,
+        client_maximize(sel, area.x, sel->geometry.y,
                         area.height - 2 * sel->border,
-                        sel->h, False);
+                        sel->geometry.height, False);
 }
 
 /** Zoom client

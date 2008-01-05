@@ -181,7 +181,8 @@ restack(int screen)
         p_delete(&curtags);
     }
     if(globalconf.screens[screen].focus_move_pointer)
-        XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0, sel->w / 2, sel->h / 2);
+        XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0,
+                     sel->geometry.width / 2, sel->geometry.height / 2);
     XSync(globalconf.display, False);
     while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
 }

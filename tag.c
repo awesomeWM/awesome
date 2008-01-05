@@ -216,9 +216,11 @@ uicb_client_togglefloating(int screen, char *arg __attribute__ ((unused)))
     sel->isfloating = !sel->isfloating;
 
     if (arg == NULL)
-        client_resize(sel, sel->rx, sel->ry, sel->rw, sel->rh, True, False);
+        client_resize(sel, sel->f_geometry.x, sel->f_geometry.y,
+                      sel->f_geometry.width, sel->f_geometry.height, True, False);
     else
-        client_resize(sel, sel->x, sel->y, sel->w, sel->h, True, True);
+        client_resize(sel, sel->geometry.x, sel->geometry.y,
+                      sel->geometry.width, sel->geometry.height, True, True);
 
     client_saveprops(sel);
     arrange(screen);
