@@ -35,7 +35,7 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
     Data *d = widget->data;
-    Area area = draw_get_image_size(d->image);
+    Area area = draw_get_image_size(d->image), widget_area = widget->area;
 
     if(d->resize)
         widget->area.width = ((double) widget->statusbar->height / area.height) * area.width;
@@ -43,15 +43,15 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
         widget->area.width = area.width;
 
     if(widget->area.x < 0)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+        widget_area.x = widget_calculate_offset(widget->statusbar->width,
                                                  widget->area.width,
                                                  offset,
                                                  widget->alignment);
 
     if(widget->area.y < 0)
-        widget->area.y = 0;
+        widget_area.y = 0;
 
-    draw_image(ctx, widget->area.x, widget->area.y,
+    draw_image(ctx, widget_area.x, widget_area.y,
                d->resize ? widget->statusbar->height : 0, d->image);
 
     return widget->area.width;

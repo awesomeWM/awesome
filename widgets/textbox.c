@@ -40,6 +40,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
     Data *d = widget->data;
+    Area widget_area = widget->area;
 
     if(d->width)
         widget->area.width = d->width;
@@ -47,13 +48,16 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
         widget->area.width = textwidth(widget->font, d->text);
 
     if(widget->area.x < 0)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+        widget_area.x = widget_calculate_offset(widget->statusbar->width,
                                                  widget->area.width,
                                                  offset,
                                                  widget->alignment);
+    if(widget->area.y < 0)
+        widget_area.y = 0;
 
-    draw_text(ctx, widget->area.x, 0, widget->area.width, widget->statusbar->height,
-              d->align, 0, widget->font, d->text, d->fg, d->bg);
+    draw_text(ctx, widget_area.x, widget_area.y, widget->area.width,
+              widget->statusbar->height, d->align, 0, widget->font,
+              d->text, d->fg, d->bg);
 
     return widget->area.width;
 }

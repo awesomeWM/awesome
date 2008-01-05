@@ -75,8 +75,7 @@ taglist_draw(Widget *widget,
     for(tag = vscreen.tags; tag; tag = tag->next)
         widget->area.width += textwidth(vscreen.font, tag->name) + vscreen.font->height;
 
-    if(widget->area.x < 0)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+    widget->area.x = widget_calculate_offset(widget->statusbar->width,
                                                  widget->area.width,
                                                  offset,
                                                  widget->alignment);

@@ -55,6 +55,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     int i, width, pwidth, margin_top, pb_height, left_offset;
+    Area widget_area = widget->area;
 
     Data *d = widget->data;
 
@@ -64,17 +65,17 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     width = d->width - d->lpadding;
 
     if(widget->area.x < 0)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+        widget_area.x = widget_calculate_offset(widget->statusbar->width,
                                                  d->width,
                                                  offset,
                                                  widget->alignment);
 
     if(widget->area.y < 0)
-        widget->area.y = 0;
+        widget_area.y = 0;
 
-    margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y;
+    margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget_area.y;
     pb_height = (int) (widget->statusbar->height * d->height - (d->gap * (d->bars - 1))) / d->bars + 0.5; 
-    left_offset = widget->area.x + d->lpadding;
+    left_offset = widget_area.x + d->lpadding;
 
     for(i = 0; i < d->bars; i++)
     {
