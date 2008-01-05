@@ -253,7 +253,7 @@ screen <integer> [MULTI]
     {
         allow_lower_floats=<boolean>
         sloppy_focus=<boolean>
-        new_become_master<boolean>
+        new_become_master=<boolean>
         border=<integer> 
         focus_move_pointer=<boolean>
         font=<font> 
@@ -265,7 +265,6 @@ screen <integer> [MULTI]
     {
         layout <{dwindle,floating,max,
                  spiral,tile,tileleft}> { image=<image> } [MULTI]
-            
     }
     padding 
     { 
@@ -288,10 +287,8 @@ screen <integer> [MULTI]
             font=<font>
             mouse [MULTI]
             {   
-                modkey=<mod> 
-                button=<integer>
-                command=<uicb-cmd>
-                arg=<uicb-arg>
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
             }
         }
         tasklist <identifier>
@@ -305,10 +302,8 @@ screen <integer> [MULTI]
             font=<font>
             mouse [MULTI]
             {   
-                modkey=<mod> 
-                button=<integer>
-                command=<uicb-cmd>
-                arg=<uicb-arg>
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
             }
         }    
         iconbox <identifier> [MULTI]
@@ -317,30 +312,24 @@ screen <integer> [MULTI]
             resize=<boolean>
             mouse [MULTI]
             {   
-                modkey=<mod> 
-                button=<integer>
-                command=<uicb-cmd>
-                arg=<uicb-arg>
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
             }
         }
         layoutinfo <identifier>
         {
             mouse [MULTI]
             {   
-                modkey=<mod> 
-                button=<integer>
-                command=<uicb-cmd>
-                arg=<uicb-arg>
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
             }
         }
         netwmicon <identifier>
         {
             mouse [MULTI]
             {   
-                modkey=<mod> 
-                button=<integer>
-                command=<uicb-cmd>
-                arg=<uicb-arg>
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
             }
         }
         progressbar <identifier> [MULTI]
@@ -360,9 +349,8 @@ screen <integer> [MULTI]
         {
             mouse [MULTI]
             {   
-                modkey=<mod> 
-                button=<integer>
-                command=<uicb-cmd>
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
             }
         }
         textbox <identifier> [MULTI]
@@ -372,10 +360,8 @@ screen <integer> [MULTI]
             font=<font>
             mouse [MULTI]
             {   
-                modkey=<mod> 
-                button=<integer>
-                command=<uicb-cmd>
-                arg=<uicb-arg>
+                button=<integer> modkey=<mod> 
+                command=<uicb-cmd> arg=<uicb-arg>
             }
             text=<string>
             width=<integer>
