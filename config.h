@@ -106,6 +106,9 @@ struct Widget
     Alignment alignment;
     /** Misc private data */
     void *data;
+    /** True if user supplied coords */
+    Bool user_supplied_x;
+    Bool user_supplied_y;
     /** Area */
     Area area;
     /** Buttons bindings */

@@ -67,14 +67,14 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
     box_width = (widget->statusbar->width - used) / n;
 
-    if(widget->area.x < 0)
+    if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
                                                  0,
                                                  offset,
                                                  widget->alignment);
 
-    if(widget->area.y < 0)
-        widget->area.y = 0;
+    if(!widget->user_supplied_y)
+        widget->area.y = widget->area.y = 0;
 
     for(c = globalconf.clients; c; c = c->next)
         if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))

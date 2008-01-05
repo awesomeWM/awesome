@@ -34,7 +34,7 @@ static int
 netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
                     int used __attribute__ ((unused)))
 {
-    Area area, widget_area = widget->area;
+    Area area;
     Rule* r;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
     NetWMIcon *icon;
@@ -51,15 +51,15 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
             area = draw_get_image_size(r->icon);
             widget->area.width = ((double) widget->statusbar->height / (double) area.height)
                 * area.width;
-            if(widget->area.x < 0)
-                widget_area.x = widget_calculate_offset(widget->statusbar->width,
+            if(!widget->user_supplied_x)
+                widget->area.x = widget_calculate_offset(widget->statusbar->width,
                                                          widget->area.width,
                                                          offset,
                                                          widget->alignment);
 
-            if(widget->area.y < 0)
-                widget_area.y = 0;
-            draw_image(ctx, widget_area.x, widget_area.y,
+            if(!widget->user_supplied_y)
+                widget->area.y = 0;
+            draw_image(ctx, widget->area.x, widget->area.y,
                        widget->statusbar->height, r->icon);
 
             return widget->area.width;
@@ -74,17 +74,17 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     widget->area.width = ((double) widget->statusbar->height / (double) icon->height) * icon->width;
 
-    if(widget->area.x < 0)
-        widget_area.x = widget_calculate_offset(widget->statusbar->width,
+    if(!widget->user_supplied_x)
+        widget->area.x = widget_calculate_offset(widget->statusbar->width,
                                                  widget->area.width,
                                                  offset,
                                                  widget->alignment);
 
-    if(widget->area.y < 0)
-        widget_area.y = 0;
+    if(!widget->user_supplied_y)
+        widget->area.y = 0;
 
     draw_image_from_argb_data(ctx,
-                              widget_area.x, widget_area.y,
+                              widget->area.x, widget->area.y,
                               icon->width, icon->height,
                               widget->statusbar->height, icon->image);
 
