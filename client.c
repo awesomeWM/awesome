@@ -607,20 +607,19 @@ client_updatesizehints(Client *c)
 
     if(!XGetWMNormalHints(globalconf.display, c->win, &size, &msize) || !size.flags)
         size.flags = PSize;
-    c->flags = size.flags;
-    if(c->flags & PBaseSize)
+    if(size.flags & PBaseSize)
     {
         c->basew = size.base_width;
         c->baseh = size.base_height;
     }
-    else if(c->flags & PMinSize)
+    else if(size.flags & PMinSize)
     {
         c->basew = size.min_width;
         c->baseh = size.min_height;
     }
     else
         c->basew = c->baseh = 0;
-    if(c->flags & PResizeInc)
+    if(size.flags & PResizeInc)
     {
         c->incw = size.width_inc;
         c->inch = size.height_inc;
@@ -628,7 +627,7 @@ client_updatesizehints(Client *c)
     else
         c->incw = c->inch = 0;
 
-    if(c->flags & PMaxSize)
+    if(size.flags & PMaxSize)
     {
         c->maxw = size.max_width;
         c->maxh = size.max_height;
@@ -636,12 +635,12 @@ client_updatesizehints(Client *c)
     else
         c->maxw = c->maxh = 0;
 
-    if(c->flags & PMinSize)
+    if(size.flags & PMinSize)
     {
         c->minw = size.min_width;
         c->minh = size.min_height;
     }
-    else if(c->flags & PBaseSize)
+    else if(size.flags & PBaseSize)
     {
         c->minw = size.base_width;
         c->minh = size.base_height;
@@ -649,7 +648,7 @@ client_updatesizehints(Client *c)
     else
         c->minw = c->minh = 0;
 
-    if(c->flags & PAspect)
+    if(size.flags & PAspect)
     {
         c->minax = size.min_aspect.x;
         c->maxax = size.max_aspect.x;

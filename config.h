@@ -157,7 +157,6 @@ struct Client
     int rx, ry, rw, rh;
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
-    long flags;
     int border, oldborder;
     /** Has urgency hint */
     Bool isurgent;
