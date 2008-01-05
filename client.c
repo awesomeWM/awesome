@@ -439,7 +439,6 @@ client_resize(Client *c, int x, int y, int w, int h,
               Bool sizehints, Bool volatile_coords)
 {
     double dx, dy, max, min, ratio;
-    XWindowChanges wc;
     Area area;
     Tag **curtags;
 
@@ -499,14 +498,13 @@ client_resize(Client *c, int x, int y, int w, int h,
         y = 0;
     if(c->x != x || c->y != y || c->w != w || c->h != h)
     {
-        c->x = wc.x = x;
-        c->y = wc.y = y;
-        c->w = wc.width = w;
-        c->h = wc.height = h;
+        c->x = x;
+        c->y = y;
+        c->w = w;
+        c->h = h;
         curtags = get_current_tags(c->screen);
-        if(!volatile_coords
-           && (c->isfloating
-               || curtags[0]->layout->arrange == layout_floating))
+        if(!volatile_coords && (c->isfloating 
+            || curtags[0]->layout->arrange == layout_floating))
         {
             c->rx = c->x;
             c->ry = c->y;
@@ -514,11 +512,9 @@ client_resize(Client *c, int x, int y, int w, int h,
             c->rh = c->h;
         }
         p_delete(&curtags);
-        wc.border_width = c->border;
-        XConfigureWindow(globalconf.display, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
+        XMoveResizeWindow(globalconf.display, c->win, c->x, c->y, c->w, c->h);
         window_configure(c->win, c->x, c->y, c->w, c->h, c->border);
-        XSync(globalconf.display, False);
-        if((c->x >= 0 || c->y >= 0) && XineramaIsActive(globalconf.display))
+        if(XineramaIsActive(globalconf.display))
         {
             int new_screen = get_screen_bycoord(c->x, c->y);
             if(c->screen != new_screen)
