@@ -426,7 +426,7 @@ rules
         name = <regex> 
         xproperty_name = <string>
         xproperty_value = <regex>
-        float = <boolean>
+        float = <{auto,true,false}>
         tags = <regex>
         screen = <integer> 
         icon = <image> 

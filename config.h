@@ -36,6 +36,13 @@ typedef enum
     Off
 } Position;
 
+typedef enum
+{
+    Float,
+    Tile,
+    Auto,
+} RuleFloat;
+
 /** Common colors */
 enum
 { ColBorder, ColFG, ColBG, ColLast };
@@ -49,7 +56,7 @@ struct Rule
     char *icon;
     char *xprop;
     int screen;
-    Bool isfloating;
+    RuleFloat isfloating;
     Bool not_master;
     regex_t *prop_r;
     regex_t *tags_r;

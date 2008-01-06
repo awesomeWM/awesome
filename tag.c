@@ -121,7 +121,17 @@ tag_client_with_rules(Client *c)
     for(r = globalconf.rules; r; r = r->next)
         if(client_match_rule(c, r))
         {
-            c->isfloating = r->isfloating;
+            switch(r->isfloating)
+            {
+              case Tile:
+                c->isfloating = False;
+                break;
+              case Float:
+                c->isfloating = True;
+                break;
+              default:
+                break;
+            }
 
             if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
                 move_client_to_screen(c, r->screen, True);
