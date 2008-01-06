@@ -162,7 +162,14 @@ handle_event_configurerequest(XEvent * e)
 
             if(get_current_layout(c->screen)->arrange != layout_floating)
                 c->isfloating = True;
-            client_resize(c, geometry, False);
+
+            /* if not resized, send event anyway */
+            if(!client_resize(c, geometry, False))
+            {
+                window_configure(c->win, geometry, c->border);
+                XMoveResizeWindow(e->xany.display, c->win,
+                                  geometry.x, geometry.y, geometry.width, geometry.height);
+            }
 
             tag_client_with_rules(c);
             
