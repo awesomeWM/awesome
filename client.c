@@ -823,7 +823,7 @@ uicb_client_moveresize(int screen, char *arg)
                              RootWindow(globalconf.display,
                                         get_phys_screen(screen)),
                              &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
-    client_resize(sel, area, True);
+    client_resize(sel, area, globalconf.screens[sel->screen].resize_hints);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
         nmx = mx - ox + sel->geometry.width - ow - 1 < 0 ? 0 : mx - ox + sel->geometry.width - ow - 1;
