@@ -85,48 +85,55 @@ const NameFuncLink UicbList[] =
 };
 
 static int
-run_uicb(char *cmd, AwesomeConf *awesomeconf __attribute ((unused)))
+run_uicb(char *cmd)
 {
-    char *p;
+    char *p, *argcpy;
     const char *arg;
-    char *argcpy;
-    int screen, len;
-    void (*uicb) (int, const char *);
+    int screen;
+    ssize_t len;
+    Uicb *uicb;
 
-    len = strlen(cmd);
+    len = a_strlen(cmd);
     p = strtok(cmd, " ");
-    if (!p){
+    if (!p)
+    {
         warn("Ignoring malformed command\n");
         return -1;
     }
     screen = atoi(cmd);
-    if(screen >= get_screen_count() || screen < 0){
+    if(screen >= get_screen_count() || screen < 0)
+    {
         warn("Invalid screen specified: %i\n", screen);
         return -1;
     }
 
     p = strtok(NULL, " ");
-    if (!p){
+    if (!p)
+    {
         warn("Ignoring malformed command.\n");
         return -1;
     }
+
     uicb = name_func_lookup(p, UicbList);
-    if (!uicb){
+    if (!uicb)
+    {
         warn("Unknown UICB function: %s.\n", p);
         return -1;
     }
 
-    if (p+strlen(p) < cmd+len)
+    if (p + a_strlen(p) < cmd + len)
     {
-        arg = p + strlen(p) + 1;
+        arg = p + a_strlen(p) + 1;
+        len = a_strlen(arg);
         /* Allow our callees to modify this string. */
-        argcpy = p_new(char, strlen(arg)+1);
-        strncpy(argcpy, arg, strlen(arg));
+        argcpy = p_new(char, len + 1);
+        a_strncpy(argcpy, len + 1,  arg, len);
         uicb(screen, argcpy);
         p_delete(&argcpy);
     }
     else
         uicb(screen, NULL);
+
     return 0;
 }
 
@@ -141,9 +148,10 @@ parse_control(char *cmd)
     while((p = strchr(curcmd, '\n')))
     {
         *p = '\0';
-        run_uicb(curcmd, &globalconf);
+        run_uicb(curcmd);
         curcmd = p + 1;
     }
+
     return 0;
 }
 
