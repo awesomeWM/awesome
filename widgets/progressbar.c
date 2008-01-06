@@ -35,7 +35,7 @@ typedef struct
     /** Width of the bars */
     int width;
     /** Left padding */
-    int lpadding;
+    int padding_left;
     /** Pixel between bars */
     int gap;
     /** Number of bars */
@@ -47,7 +47,7 @@ typedef struct
     /** Background color */
     XColor *bg;
     /** Border color */
-    XColor *bcolor;
+    XColor *bordercolor;
 } Data;
 
 static int
@@ -61,7 +61,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     if (!(d->bars))
         return 0;
 
-    width = d->width - d->lpadding;
+    width = d->width - d->padding_left;
 
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
@@ -74,7 +74,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y;
     pb_height = (int) (widget->statusbar->height * d->height - (d->gap * (d->bars - 1))) / d->bars + 0.5; 
-    left_offset = widget->area.x + d->lpadding;
+    left_offset = widget->area.x + d->padding_left;
 
     for(i = 0; i < d->bars; i++)
     {
@@ -83,7 +83,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
         draw_rectangle(ctx,
                        left_offset, margin_top,
                        width, pb_height,
-                       False, d->bcolor[i]);
+                       False, d->bordercolor[i]);
 
         if(pwidth > 0)
             draw_rectangle(ctx,
@@ -148,7 +148,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
 
     d->bg = p_new(XColor, d->bars);
     d->fg = p_new(XColor, d->bars);
-    d->bcolor = p_new(XColor, d->bars);
+    d->bordercolor = p_new(XColor, d->bars);
     d->percent = p_new(int, d->bars);
 
     for(i = 0; i < d->bars; i++)
@@ -165,17 +165,17 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         else
             d->bg[i] = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
-        if((color = cfg_getstr(cfg, "bcolor")))
-            d->bcolor[i] = initxcolor(phys_screen, color);
+        if((color = cfg_getstr(cfg, "bordercolor")))
+            d->bordercolor[i] = initxcolor(phys_screen, color);
         else
-            d->bcolor[i] = d->fg[i];
+            d->bordercolor[i] = d->fg[i];
 
     } 
 
 
     d->height = cfg_getfloat(config, "height");
     d->gap = cfg_getint(config, "gap");
-    d->lpadding = cfg_getint(config, "lpadding");
+    d->padding_left = cfg_getint(config, "padding_left");
 
     return w;
 }

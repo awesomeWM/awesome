@@ -166,6 +166,42 @@ draw_rectangle(DrawCtx *ctx, int x, int y, int w, int h, Bool filled, XColor col
     cairo_surface_destroy(surface);
 }
 
+/* draws a graph; it takes the line-lengths from 'h' (w = size of h)
+ * It cycles backwards through it, beginning at position h_index, until
+ * h_index is reached again (wrapped around). */
+
+void
+draw_graph(DrawCtx *ctx, int x, int y, int w, int *h, int h_index, XColor color)
+{
+    cairo_surface_t *surface;
+    cairo_t *cr;
+    int i, i_tmp;
+
+    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    cr = cairo_create (surface);
+
+    cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
+    cairo_set_line_width(cr, 1.0);
+    cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+
+    i_tmp = h_index;
+    i = -1;
+    while(++i < w)
+    {
+        cairo_move_to(cr, x, y);
+        cairo_line_to(cr, x, y - h[i_tmp]);
+        x++;
+
+        if (--i_tmp < 0)
+            i_tmp = w - 1;
+    }
+
+    cairo_stroke(cr);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+}
+
 void
 draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
 {

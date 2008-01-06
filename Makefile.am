@@ -32,6 +32,7 @@ WIDGETS += widgets/iconbox.c
 WIDGETS += widgets/netwmicon.c
 WIDGETS += widgets/progressbar.c
 WIDGETS += widgets/tasklist.c
+WIDGETS += widgets/graph.c
 
 
 EXTRA_DIST += awesomerc
