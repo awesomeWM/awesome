@@ -27,6 +27,7 @@
 #include "focus.h"
 #include "statusbar.h"
 #include "client.h"
+#include "layouts/floating.h"
 
 extern AwesomeConf globalconf;
 
@@ -142,7 +143,6 @@ get_screen_bycoord(int x, int y)
     if(!XineramaIsActive(globalconf.display))
         return DefaultScreen(globalconf.display);
 
-
     for(i = 0; i < get_screen_count(); i++)
     {
         area = get_screen_area(i, NULL, NULL);
@@ -203,25 +203,46 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
     /* tag client with new screen tags */
     tag_client_with_current_selected(c);
 
+    /* resize the windows if it's floating */
     if(doresize && old_screen != c->screen)
     {
+        Area new_f_geometry = c->f_geometry;
+
         to = get_screen_area(c->screen, NULL, NULL);
         from = get_screen_area(old_screen, NULL, NULL);
-
+        
         /* compute new coords in new screen */
-        c->f_geometry.x = (c->f_geometry.x - from.x) + to.x;
-        c->f_geometry.y = (c->f_geometry.y - from.y) + to.y;
-        /* check that new coords are still in the screen */
-        if(c->f_geometry.width > to.width)
-            c->f_geometry.width = to.width;
-        if(c->f_geometry.height > to.height)
-            c->f_geometry.height = to.height;
-        if(c->f_geometry.x + c->f_geometry.width >= to.x + to.width)
-            c->f_geometry.x = to.x + to.width - c->f_geometry.width - 2 * c->border;
-        if(c->f_geometry.y + c->f_geometry.height >= to.y + to.height)
-            c->f_geometry.y = to.y + to.height - c->f_geometry.height - 2 * c->border;
+        new_f_geometry.x = (c->f_geometry.x - from.x) + to.x;
+        new_f_geometry.y = (c->f_geometry.y - from.y) + to.y;
 
-        client_resize(c, c->f_geometry, True, False);
+        /* check that new coords are still in the screen */
+        if(new_f_geometry.width > to.width)
+            new_f_geometry.width = to.width;
+        if(new_f_geometry.height > to.height)
+            new_f_geometry.height = to.height;
+        if(new_f_geometry.x + new_f_geometry.width >= to.x + to.width)
+            new_f_geometry.x = to.x + to.width - new_f_geometry.width - 2 * c->border;
+        if(new_f_geometry.y + new_f_geometry.height >= to.y + to.height)
+            new_f_geometry.y = to.y + to.height - new_f_geometry.height - 2 * c->border;
+
+        if(c->ismax)
+        {
+            /* compute new coords for max in new screen */
+            c->m_geometry.x = (c->m_geometry.x - from.x) + to.x;
+            c->m_geometry.y = (c->m_geometry.y - from.y) + to.y;
+
+            /* check that new coords are still in the screen */
+            if(c->m_geometry.width > to.width)
+                c->m_geometry.width = to.width;
+            if(c->m_geometry.height > to.height)
+                c->m_geometry.height = to.height;
+            if(c->m_geometry.x + c->m_geometry.width >= to.x + to.width)
+                c->m_geometry.x = to.x + to.width - c->m_geometry.width - 2 * c->border;
+            if(c->m_geometry.y + c->m_geometry.height >= to.y + to.height)
+                c->m_geometry.y = to.y + to.height - c->m_geometry.height - 2 * c->border;
+        }
+
+        client_resize(c, new_f_geometry, False);
     }
 
     focus(c, True, c->screen);

@@ -28,6 +28,7 @@
 #include "focus.h"
 #include "screen.h"
 #include "client.h"
+#include "statusbar.h"
 
 extern AwesomeConf globalconf;
 
@@ -241,13 +242,29 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
     }
     else if(state == net_wm_state_fullscreen)
     {
-        Area area = get_screen_area(c->screen, NULL, NULL);
-        /* reset max attribute */
+        Area geometry;
         if(set == _NET_WM_STATE_REMOVE)
-            c->ismax = True;
-        else if(set == _NET_WM_STATE_ADD)
+        {
+            /* restore geometry */
+            geometry = c->m_geometry;
+            c->border = c->oldborder;
             c->ismax = False;
-        client_maximize(c, area.x, area.y, area.width, area.height, True);
+            c->isfloating = c->wasfloating;
+        }
+        else if(set == _NET_WM_STATE_ADD)
+        {
+            geometry = get_screen_area(c->screen, NULL, NULL);
+            /* save geometry */
+            c->m_geometry = c->geometry;
+            c->wasfloating = c->isfloating;
+            c->oldborder = c->border;
+            c->border = 0;
+            c->ismax = True;
+            c->isfloating = True;
+        }
+        statusbar_draw_all(c->screen);
+        client_resize(c, geometry, False);
+        XRaiseWindow(globalconf.display, c->win);
     }
 }
 

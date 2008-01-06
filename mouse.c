@@ -109,7 +109,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.y = area.y + area.height - c->geometry.height - 2 * c->border;
             geometry.width = c->geometry.width;
             geometry.height = c->geometry.height;
-            client_resize(c, geometry, False, False);
+            client_resize(c, geometry, False);
             while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
             break;
         }
@@ -199,7 +199,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                     geometry.height = 1;
                 geometry.x = c->geometry.x;
                 geometry.y = c->geometry.y;
-                client_resize(c, geometry, True, False);
+                client_resize(c, geometry, True);
             }
             else if(curtags[0]->layout->arrange == layout_tile
                     || curtags[0]->layout->arrange == layout_tileleft)
@@ -224,6 +224,5 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     }
     p_delete(&curtags);
 }
-
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

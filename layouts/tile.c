@@ -145,15 +145,15 @@ _tile(int screen, const Bool right)
 
         c->ismax = False;
         if(i < curtags[0]->nmaster)
-        {                       /* master */
+        {
             geometry.y = way + i * mh;
             geometry.x = wax + (right ? 0 : waw - mw);
             geometry.width = mw - 2 * c->border;
             geometry.height =  mh - 2 * c->border;
-            client_resize(c, geometry, globalconf.screens[screen].resize_hints, False);
+            client_resize(c, geometry, globalconf.screens[screen].resize_hints);
         }
         else
-        {                       /* tile window */
+        {
             if(real_ncol)
                 win_by_col = otherwin / real_ncol;
 
@@ -176,7 +176,7 @@ _tile(int screen, const Bool right)
                 geometry.y = way + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.height + 2 * c->border);
 
             geometry.x = wax + current_col * (geometry.width + 2 * c->border) + (right ? mw : 0);
-            client_resize(c, geometry, globalconf.screens[screen].resize_hints, False);
+            client_resize(c, geometry, globalconf.screens[screen].resize_hints);
         }
         i++;
     }

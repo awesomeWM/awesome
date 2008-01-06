@@ -139,39 +139,41 @@ handle_event_configurerequest(XEvent * e)
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
-    int old_screen;
+    int old_screen, new_screen;
+    Area geometry;
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
-        if(c->isfixed)
+        geometry = c->geometry;
+
+        if(ev->value_mask & CWX)
+            geometry.x = ev->x;
+        if(ev->value_mask & CWY)
+            geometry.y = ev->y;
+        if(ev->value_mask & CWWidth)
+            geometry.width = ev->width;
+        if(ev->value_mask & CWHeight)
+            geometry.height = ev->height;
+
+        if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
+           || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
-            if(ev->value_mask & CWX)
-                c->f_geometry.x = c->geometry.x = ev->x - c->border;
-            if(ev->value_mask & CWY)
-                c->f_geometry.y = c->f_geometry.y = ev->y - c->border;
-            if(ev->value_mask & CWWidth)
-                c->f_geometry.width = c->geometry.width = ev->width;
-            if(ev->value_mask & CWHeight)
-                c->f_geometry.height = c->geometry.height = ev->height;
-            if((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight)))
-                window_configure(c->win, c->geometry, c->border);
-            /* recompute screen */
             old_screen = c->screen;
-            c->screen = get_screen_bycoord(c->geometry.x, c->geometry.y);
+
+            if(get_current_layout(c->screen)->arrange != layout_floating)
+                c->isfloating = True;
+            client_resize(c, geometry, False);
+            
             if(old_screen != c->screen)
             {
-                move_client_to_screen(c, c->screen, False);
                 statusbar_draw_all(old_screen);
-                statusbar_draw_all(c->screen);
+                arrange(old_screen);
             }
-            tag_client_with_rules(c);
-            XMoveResizeWindow(e->xany.display, c->win, c->f_geometry.x, c->f_geometry.y,
-                              c->f_geometry.width, c->f_geometry.height);
-            window_configure(c->win, c->f_geometry, c->border);
+            statusbar_draw_all(c->screen);
             arrange(c->screen);
         }
         else
-            window_configure(c->win, c->geometry, c->border);
+            window_configure(c->win, geometry, c->border);
     }
     else
     {

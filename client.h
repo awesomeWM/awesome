@@ -32,7 +32,7 @@ void client_detach(Client *);
 void client_ban(Client *);
 void focus(Client *, Bool, int);
 void client_manage(Window, XWindowAttributes *, int);
-void client_resize(Client *, Area, Bool, Bool);
+Bool client_resize(Client *, Area, Bool);
 void client_unban(Client *);
 void client_unmanage(Client *, long);
 void client_updatewmhints(Client *);
@@ -40,7 +40,6 @@ void client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *); 
 void client_kill(Client *);
-void client_maximize(Client *c, int, int, int, int, Bool);
 
 Uicb uicb_client_kill;
 Uicb uicb_client_moveresize;

@@ -206,19 +206,15 @@ uicb_client_tag(int screen, char *arg)
  * \ingroup ui_callback
  */
 void
-uicb_client_togglefloating(int screen, char *arg __attribute__ ((unused)))
+uicb_client_togglefloating(int screen, char *arg __attribute__((unused)))
 {
     Client *sel = globalconf.focus->client;
     
     if(!sel)
         return;
 
-    sel->isfloating = !sel->isfloating;
-
-    if (arg == NULL)
-        client_resize(sel, sel->f_geometry, True, False);
-    else
-        client_resize(sel, sel->geometry, True, True);
+    if((sel->isfloating = !sel->isfloating))
+        client_resize(sel, sel->f_geometry, True);
 
     client_saveprops(sel);
     arrange(screen);
