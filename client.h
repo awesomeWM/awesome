@@ -34,7 +34,7 @@ void focus(Client *, Bool, int);
 void client_manage(Window, XWindowAttributes *, int);
 Bool client_resize(Client *, Area, Bool);
 void client_unban(Client *);
-void client_unmanage(Client *, long);
+void client_unmanage(Client *);
 void client_updatewmhints(Client *);
 void client_updatesizehints(Client *);
 void client_updatetitle(Client *);

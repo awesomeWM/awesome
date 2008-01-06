@@ -171,7 +171,7 @@ exit_on_signal(int sig __attribute__ ((unused)))
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
  * default error handler, which may call exit.
  */
-int
+static int
 xerror(Display * edpy, XErrorEvent * ee)
 {
     if(ee->error_code == BadWindow

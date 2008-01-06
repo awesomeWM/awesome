@@ -25,7 +25,6 @@
 #include <X11/extensions/Xinerama.h>
 
 #include "client.h"
-#include "awesome.h"
 #include "tag.h"
 #include "rules.h"
 #include "util.h"
@@ -567,28 +566,35 @@ client_unban(Client *c)
 }
 
 void
-client_unmanage(Client *c, long state)
+client_unmanage(Client *c)
 {
     XWindowChanges wc;
     Tag *tag;
 
     wc.border_width = c->oldborder;
+
     /* The server grab construct avoids race conditions. */
     XGrabServer(globalconf.display);
+
     XConfigureWindow(globalconf.display, c->win, CWBorderWidth, &wc);  /* restore border */
+
+    /* remove client everywhere */
     client_detach(c);
-    if(globalconf.focus->client == c)
-        focus(NULL, True, c->screen);
     focus_delete_client(c);
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
+
+    if(globalconf.focus->client == c)
+        focus(NULL, True, c->screen);
+
+
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
-    window_setstate(c->win, state);
+    window_setstate(c->win, WithdrawnState);
+
     XSync(globalconf.display, False);
-    XSetErrorHandler(xerror);
     XUngrabServer(globalconf.display);
-    if(state != NormalState)
-        arrange(c->screen);
+
+    arrange(c->screen);
     p_delete(&c);
 }
 

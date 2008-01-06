@@ -227,7 +227,7 @@ handle_event_destroynotify(XEvent * e)
     XDestroyWindowEvent *ev = &e->xdestroywindow;
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
-        client_unmanage(c, WithdrawnState);
+        client_unmanage(c);
 }
 
 void
@@ -395,7 +395,7 @@ handle_event_unmapnotify(XEvent * e)
     if((c = get_client_bywin(globalconf.clients, ev->window))
        && ev->event == RootWindow(e->xany.display, get_phys_screen(c->screen))
        && ev->send_event && window_getstate(c->win) == NormalState)
-        client_unmanage(c, WithdrawnState);
+        client_unmanage(c);
 }
 
 void

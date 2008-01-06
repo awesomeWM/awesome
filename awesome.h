@@ -22,10 +22,7 @@
 #ifndef AWESOME_AWESOME_H
 #define AWESOME_AWESOME_H
 
-#include <X11/Xlib.h>
 #include "uicb.h"
-
-int xerror(Display *, XErrorEvent *);
 
 Uicb uicb_quit;
 
