@@ -25,7 +25,7 @@
 #include <X11/Xlib.h>
 #include "uicb.h"
 
-Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
+Bool xgettextprop(Window, Atom, char *, ssize_t);
 XColor initxcolor(int, const char *);
 Uicb uicb_spawn;
 Uicb uicb_exec;

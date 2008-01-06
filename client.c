@@ -58,7 +58,7 @@ client_loadprops(Client * c, int screen)
 
     prop = p_new(char, ntags + 2);
 
-    if(xgettextprop(globalconf.display, c->win, AWESOMEPROPS_ATOM(globalconf.display), prop, ntags + 2))
+    if(xgettextprop(c->win, AWESOMEPROPS_ATOM(globalconf.display), prop, ntags + 2))
     {
         for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
@@ -172,8 +172,8 @@ get_client_byname(Client *list, char *name)
 void
 client_updatetitle(Client *c)
 {
-    if(!xgettextprop(globalconf.display, c->win, XInternAtom(globalconf.display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
-        xgettextprop(globalconf.display, c->win, XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
+    if(!xgettextprop(c->win, XInternAtom(globalconf.display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
+        xgettextprop(c->win, XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
 }
 
 /** Ban client and unmap it

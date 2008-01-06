@@ -141,8 +141,7 @@ loadawesomeprops(int screen)
 
     prop = p_new(char, ntags + 1);
 
-    if(xgettextprop(globalconf.display,
-                    RootWindow(globalconf.display, get_phys_screen(screen)),
+    if(xgettextprop(RootWindow(globalconf.display, get_phys_screen(screen)),
                     AWESOMEPROPS_ATOM(globalconf.display), prop, ntags + 1))
         for(i = 0, tag = globalconf.screens[screen].tags; tag && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')

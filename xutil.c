@@ -92,7 +92,7 @@ uicb_spawn(int screen, char *arg)
 }
 
 Bool
-xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
+xgettextprop(Window w, Atom atom, char *text, ssize_t textlen)
 {
     char **list = NULL;
     int n;
@@ -103,7 +103,7 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
         return False;
 
     text[0] = '\0';
-    XGetTextProperty(disp, w, &name, atom);
+    XGetTextProperty(globalconf.display, w, &name, atom);
 
     if(!name.nitems)
         return False;
@@ -111,7 +111,7 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
     if(name.encoding == XA_STRING)
         a_strncpy(text, textlen, (char *) name.value, textlen - 1);
 
-    else if(XmbTextPropertyToTextList(disp, &name, &list, &n) >= Success && n > 0 && *list)
+    else if(XmbTextPropertyToTextList(globalconf.display, &name, &list, &n) >= Success && n > 0 && *list)
     {
         a_strncpy(text, textlen, *list, textlen - 1);
         XFreeStringList(list);

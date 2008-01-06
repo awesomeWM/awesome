@@ -78,7 +78,7 @@ client_match_rule(Client *c, Rule *r)
     
     if(r->xprop
        && r->xpropval_r
-       && xgettextprop(globalconf.display, c->win,
+       && xgettextprop(c->win,
                        XInternAtom(globalconf.display, r->xprop, False),
                        buf, ssizeof(buf)))
         ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
