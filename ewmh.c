@@ -268,6 +268,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
         statusbar_draw_all(c->screen);
         client_resize(c, geometry, False);
         XRaiseWindow(globalconf.display, c->win);
+        arrange(c->screen);
     }
 }
 
