@@ -337,7 +337,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(!client_loadprops(c, screen))
         tag_client_with_rules(c);
 
-
     /* if window request fullscreen mode */
     if(c->geometry.width == area.width && c->geometry.height == area.height)
     {
@@ -422,7 +421,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     ewmh_update_net_client_list(phys_screen);
 
     /* rearrange to display new window */
-    arrange(screen);
+    arrange(c->screen);
 }
 
 /** Resize client window
