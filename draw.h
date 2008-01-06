@@ -62,7 +62,7 @@ void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
 Area draw_get_image_size(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
-unsigned short textwidth(XftFont *, char *);
+unsigned short draw_textwidth(XftFont *, char *);
 Alignment draw_get_align(const char *);
 
 #endif

@@ -107,7 +107,7 @@ draw_text(DrawCtx *ctx,
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    while(len && (nw = (textwidth(font, buf)) + padding * 2) > w)
+    while(len && (nw = (draw_textwidth(font, buf)) + padding * 2) > w)
         buf[--len] = 0;
     if(nw > w)
         return;                 /* too long */
@@ -325,7 +325,7 @@ draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
 }
 
 unsigned short
-textwidth(XftFont *font, char *text)
+draw_textwidth(XftFont *font, char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;

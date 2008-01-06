@@ -44,7 +44,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
     if(d->width)
         widget->area.width = d->width;
     else
-        widget->area.width = textwidth(widget->font, d->text);
+        widget->area.width = draw_textwidth(widget->font, d->text);
 
     widget->area.height = widget->statusbar->height;
 
