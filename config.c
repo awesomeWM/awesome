@@ -668,7 +668,7 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "name", NULL, CFGF_NONE),
         CFG_STR((char *) "tags", NULL, CFGF_NONE),
         CFG_STR((char *) "icon", NULL, CFGF_NONE),
-        CFG_STR((char *) "float", (char *) "auto", CFGF_NONE),
+        CFG_BOOL((char *) "float", cfg_false, CFGF_NONE),
         CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
         CFG_BOOL((char *) "not_master", cfg_false, CFGF_NONE),
         CFG_END()
@@ -776,7 +776,7 @@ config_parse(const char *confpatharg)
             rule->xprop = a_strdup(cfg_getstr(cfgsectmp, "xproperty_name"));
             rule->xpropval_r = rules_compile_regex(cfg_getstr(cfgsectmp, "xproperty_value"));
             rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
-            rule->isfloating = rules_get_float_from_str(cfg_getstr(cfgsectmp, "float"));
+            rule->isfloating = cfg_getbool(cfgsectmp, "float");
             rule->screen = cfg_getint(cfgsectmp, "screen");
             rule->not_master = cfg_getbool(cfgsectmp, "not_master");
             if(rule->screen >= get_screen_count())

@@ -160,9 +160,6 @@ handle_event_configurerequest(XEvent * e)
         {
             old_screen = c->screen;
 
-            if(get_current_layout(c->screen)->arrange != layout_floating)
-                c->isfloating = True;
-
             /* if not resized, send event anyway */
             if(!client_resize(c, geometry, False))
             {

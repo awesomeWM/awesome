@@ -29,7 +29,6 @@
 regex_t * rules_compile_regex(char *);    
 Bool client_match_rule(Client *, Rule *);
 Bool is_tag_match_rules(Tag *, Rule *);
-RuleFloat rules_get_float_from_str(const char *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

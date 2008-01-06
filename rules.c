@@ -97,16 +97,4 @@ is_tag_match_rules(Tag *t, Rule *r)
     return False;
 }
 
-
-RuleFloat
-rules_get_float_from_str(const char *str)
-{
-    if(!a_strcmp(str, "true") || !a_strcmp(str, "yes"))
-        return Float;
-    else if(!a_strcmp(str, "false") || !a_strcmp(str, "no"))
-        return Tile;
-
-    return Auto;
-}
-
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
