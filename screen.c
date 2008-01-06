@@ -241,8 +241,16 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
             if(c->m_geometry.y + c->m_geometry.height >= to.y + to.height)
                 c->m_geometry.y = to.y + to.height - c->m_geometry.height - 2 * c->border;
         }
-
-        client_resize(c, new_f_geometry, False);
+        
+        /* if floating, move to this new coords */
+        if(c->isfloating)
+            client_resize(c, new_f_geometry, False);
+        /* otherwise just register them */
+        else
+        {
+            c->f_geometry = new_f_geometry;
+            arrange(c->screen);
+        }
     }
 
     focus(c, True, c->screen);
