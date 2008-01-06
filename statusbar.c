@@ -70,13 +70,11 @@ statusbar_draw(Statusbar *statusbar)
     if(statusbar->position == Right
        || statusbar->position == Left)
     {
-        Drawable d;
         if(statusbar->position == Right)
-            d = draw_rotate(ctx, phys_screen, M_PI_2, statusbar->height, 0);
+            statusbar->drawable = draw_rotate(ctx, phys_screen, M_PI_2, statusbar->height, 0);
         else
-            d = draw_rotate(ctx, phys_screen, - M_PI_2, 0, statusbar->width);
+            statusbar->drawable = draw_rotate(ctx, phys_screen, - M_PI_2, 0, statusbar->width);
 
-        statusbar->drawable = d;
         draw_free_context(ctx);
     }
     else
