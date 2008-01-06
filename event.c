@@ -160,13 +160,7 @@ handle_event_configurerequest(XEvent * e)
         {
             old_screen = c->screen;
 
-            /* if not resized, send event anyway */
-            if(!client_resize(c, geometry, False))
-            {
-                window_configure(c->win, geometry, c->border);
-                XMoveResizeWindow(e->xany.display, c->win,
-                                  geometry.x, geometry.y, geometry.width, geometry.height);
-            }
+            client_resize(c, geometry, False);
 
             tag_client_with_rules(c);
             
