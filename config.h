@@ -59,14 +59,6 @@ struct Rule
 
 typedef struct AwesomeConf AwesomeConf;
 
-typedef struct Layout Layout;
-struct Layout
-{
-    char *image;
-    LayoutArrange *arrange;
-    Layout *next;
-};
-
 typedef struct Key Key;
 struct Key
 {

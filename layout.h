@@ -28,7 +28,16 @@
 
 typedef void (LayoutArrange)(int);
 
+typedef struct Layout Layout;
+struct Layout
+{
+    char *image;
+    LayoutArrange *arrange;
+    Layout *next;
+};
+
 void arrange(int);
+Layout * get_current_layout(int);
 void restack(int);
 void loadawesomeprops(int);
 void saveawesomeprops(int);

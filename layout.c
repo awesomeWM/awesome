@@ -72,6 +72,16 @@ arrange(int screen)
     restack(screen);
 }
 
+
+Layout *
+get_current_layout(int screen)
+{
+    Tag **curtags = get_current_tags(screen);
+    Layout *l = curtags[0]->layout;
+    p_delete(&curtags);
+    return l;
+}
+
 /** Send focus to next client in stack
  * \param screen Screen ID
  * \param arg Unused
