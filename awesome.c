@@ -56,96 +56,6 @@ static Bool running = True;
 
 AwesomeConf globalconf;
 
-static inline void
-cleanup_buttons(Button *buttons)
-{
-    Button *b, *bn;
-
-    for(b = buttons; b; b = bn)
-    {
-        bn = b->next;
-        p_delete(&b->arg);
-        p_delete(&b);
-    }
-}
-
-static void
-cleanup_screen(int screen)
-{
-    Layout *l, *ln;
-    Tag *t, *tn;
-
-    XftFontClose(globalconf.display, globalconf.screens[screen].font);
-    XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, get_phys_screen(screen)));
-    XDestroyWindow(globalconf.display, globalconf.screens[screen].statusbar->window);
-
-    for(t = globalconf.screens[screen].tags; t; t = tn)
-    {
-        tn = t->next;
-        p_delete(&t->name);
-        p_delete(&t);
-    }
-
-    for(l = globalconf.screens[screen].layouts; l; l = ln)
-    {
-        ln = l->next;
-        p_delete(&l->image);
-        p_delete(&l);
-    }
-}
-
-/** Cleanup everything on quit
- * \param awesomeconf awesome config
- */
-static void
-cleanup()
-{
-    int screen;
-    Rule *r, *rn;
-    Key *k, *kn;
-
-    while(globalconf.clients)
-    {
-        client_unban(globalconf.clients);
-        client_unmanage(globalconf.clients, NormalState);
-    }
-
-    XFreeCursor(globalconf.display, globalconf.cursor[CurNormal]);
-    XFreeCursor(globalconf.display, globalconf.cursor[CurResize]);
-    XFreeCursor(globalconf.display, globalconf.cursor[CurMove]);
-
-    for(r = globalconf.rules; r; r = rn)
-    {
-        rn = r->next;
-        p_delete(&r->prop_r);
-        p_delete(&r->tags_r);
-        p_delete(&r->xpropval_r);
-        p_delete(&r->icon);
-        p_delete(&r->xprop);
-        p_delete(&r);
-    }
-
-    for(k = globalconf.keys; k; k = kn)
-    {
-        kn = k->next;
-        p_delete(&k->arg);
-        p_delete(&k);
-    }
-
-    cleanup_buttons(globalconf.buttons.root);
-    cleanup_buttons(globalconf.buttons.client);
-
-    p_delete(&globalconf.configpath);
-
-    for(screen = 0; screen < get_screen_count(); screen++)
-        cleanup_screen(screen);
-
-    XSetInputFocus(globalconf.display, PointerRoot, RevertToPointerRoot, CurrentTime);
-    XSync(globalconf.display, False);
-
-    p_delete(&globalconf.clients);
-}
-
 /** Scan X to find windows to manage
  */
 static void
@@ -457,7 +367,6 @@ main(int argc, char *argv[])
         perror("error unlinking UNIX domain socket");
     p_delete(&addr);
 
-    cleanup();
     XCloseDisplay(dpy);
 
     return EXIT_SUCCESS;
