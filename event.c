@@ -139,7 +139,7 @@ handle_event_configurerequest(XEvent * e)
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
-    int old_screen, new_screen;
+    int old_screen;
     Area geometry;
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
