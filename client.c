@@ -888,11 +888,13 @@ client_maximize(Client *c, Area geometry)
         /* set floating after resizing so it won't save
          * coords */
         c->isfloating = True;
+        restack(c->screen);
     }
     else if(c->wasfloating)
     {
         c->isfloating = True;
         client_resize(c, c->m_geometry, False);
+        restack(c->screen);
     }
     else
     {
