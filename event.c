@@ -163,6 +163,8 @@ handle_event_configurerequest(XEvent * e)
             if(get_current_layout(c->screen)->arrange != layout_floating)
                 c->isfloating = True;
             client_resize(c, geometry, False);
+
+            tag_client_with_rules(c);
             
             if(old_screen != c->screen)
             {
