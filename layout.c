@@ -142,7 +142,8 @@ loadawesomeprops(int screen)
     prop = p_new(char, ntags + 1);
 
     if(xgettextprop(RootWindow(globalconf.display, get_phys_screen(screen)),
-                    AWESOMEPROPS_ATOM(globalconf.display), prop, ntags + 1))
+                    XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
+                    prop, ntags + 1))
         for(i = 0, tag = globalconf.screens[screen].tags; tag && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
                 tag->selected = True;
@@ -214,8 +215,8 @@ saveawesomeprops(int screen)
     prop[i] = '\0';
     XChangeProperty(globalconf.display,
                     RootWindow(globalconf.display, get_phys_screen(screen)),
-                    AWESOMEPROPS_ATOM(globalconf.display), XA_STRING, 8,
-                    PropModeReplace, (unsigned char *) prop, i);
+                    XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
+                    XA_STRING, 8, PropModeReplace, (unsigned char *) prop, i);
     p_delete(&prop);
 }
 

@@ -58,7 +58,9 @@ client_loadprops(Client * c, int screen)
 
     prop = p_new(char, ntags + 2);
 
-    if(xgettextprop(c->win, AWESOMEPROPS_ATOM(globalconf.display), prop, ntags + 2))
+    if(xgettextprop(c->win,
+                    XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
+                    prop, ntags + 2))
     {
         for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
@@ -551,8 +553,9 @@ client_saveprops(Client *c)
 
     prop[++i] = '\0';
 
-    XChangeProperty(globalconf.display, c->win, AWESOMEPROPS_ATOM(globalconf.display), XA_STRING, 8,
-                    PropModeReplace, (unsigned char *) prop, i);
+    XChangeProperty(globalconf.display, c->win,
+                    XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
+                    XA_STRING, 8, PropModeReplace, (unsigned char *) prop, i);
 
     p_delete(&prop);
 }

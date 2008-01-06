@@ -24,8 +24,6 @@
 
 #include "uicb.h"
 
-#define AWESOMEPROPS_ATOM(disp)                    XInternAtom(disp, "_AWESOME_PROPERTIES", False)
-
 typedef void (LayoutArrange)(int);
 
 typedef struct Layout Layout;
