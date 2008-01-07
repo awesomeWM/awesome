@@ -772,8 +772,6 @@ uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
     {
         client_swap(&globalconf.clients, sel, next);
         arrange(screen);
-        /* restore focus */
-        focus(sel, True, screen);
     }
 }
 
@@ -795,8 +793,6 @@ uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
     {
         client_swap(&globalconf.clients, prev, sel);
         arrange(screen);
-        /* restore focus */
-        focus(sel, True, screen);
     }
 }
 
