@@ -225,13 +225,40 @@ This widget shows one or more progress-bars.
     Set mouse bindings.
 *width*::
     Set width.
+*height*::
+    Set height (i.e. 0.9 = 90%)
+*padding_left*::
+    Empty space on the left.
 *bar*::
-    Draws a bar; Options: fg, bg, bcolor.
+    Draws a bar; Options: fg, bg, bordercolor.
 *fg*::
     Foreground color.
 *bg*::
     Background color.
-*bcolor*::
+*bordercolor*::
+    Border color.
+*x*::
+    Horizontal offset (auto-alignment if not set).
+*y*::
+    Vertical offset (auto-alignment if not set).
+
+graph
+~~~~~
+This widget shows a graph.
+
+*mouse*::
+    Set mouse bindings.
+*width*::
+    Set width.
+*height*::
+    Set height (i.e. 0.9 = 90%)
+*padding_left*::
+    Empty space on the left.
+*fg*::
+    Foreground color.
+*bg*::
+    Background color.
+*bordercolor*::
     Border color.
 *x*::
     Horizontal offset (auto-alignment if not set).
@@ -248,7 +275,7 @@ EXAMPLES
 The general config and subconfig options for the awesomerc:
 
 ..............................................
-Note: when there are no whitespace, quotes are optional.
+Note: when there is no whitespace, quotes are optional.
 
 <boolean>       -> "true" or "false"
 <color>         -> #ff9933 (hexadecimal color notation: #red green blue)
@@ -405,11 +432,26 @@ screen <integer> [MULTI]
         }
         progressbar <identifier> [MULTI]
         {
-            bar { bcolor = <color> bg = <color> fg = <color> } [MULTI]
+            bar { fg = <color> bg = <color> bordercolor = <color> } [MULTI]
             gap = <integer> 
             width = <integer>
             height = <float> 
-            lpadding = <integer>
+            padding_left = <integer>
+            x = <integer> y = <integer>
+            mouse [MULTI]
+            {   
+                button = <integer> modkey = {<mod>, ...} 
+                command = <uicb-cmd> arg = <uicb-arg>
+            }
+        }
+        graph <identifier> [MULTI]
+        {
+            width = <integer>
+            height = <float>
+            padding_left = <integer>
+            fg = <color>
+            bg = <color>
+            bordercolor = <color>
             x = <integer> y = <integer>
             mouse [MULTI]
             {   
