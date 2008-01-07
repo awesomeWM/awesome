@@ -584,6 +584,8 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),
+        CFG_BOOL((char *) "scale", cfg_false, CFGF_NONE),
+        CFG_FLOAT((char *) "max", 100.0f, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t widget_progressbar_bar_opts[] =
