@@ -118,8 +118,7 @@ progressbar_tell(Widget *widget, char *command)
     for (tok = strtok(command, ","); tok && i < d->bars; tok = strtok(NULL, ","), i++)
     {
         percent = atoi(tok);
-        if(percent <= 100 && percent >= 0)
-            d->percent[i] = percent;
+        d->percent[i] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
     }
 }
 
