@@ -27,6 +27,7 @@
 #include "xutil.h"
 #include "focus.h"
 #include "widget.h"
+#include "window.h"
 #include "ewmh.h"
 #include "client.h"
 #include "screen.h"
@@ -56,6 +57,9 @@ arrange(int screen)
 {
     Client *c;
     Tag **curtags = get_current_tags(screen);
+    Window client_win, root_win;
+    int x, y, d;
+    unsigned int m;
 
     for(c = globalconf.clients; c; c = c->next)
     {
@@ -67,7 +71,13 @@ arrange(int screen)
     }
 
     curtags[0]->layout->arrange(screen);
-    focus(focus_get_current_client(screen), True, screen);
+    c = focus_get_current_client(screen);
+    focus(c, True, screen);
+    if(c && XQueryPointer(globalconf.display, RootWindow(globalconf.display, screen),
+                          &root_win, &client_win, &x, &y, &d, &d, &m) &&
+            (root_win == None || client_win == None || client_win == root_win))
+            window_grabbuttons(c->screen, c->win, False, False);
+
     p_delete(&curtags);
     restack(screen);
 }
