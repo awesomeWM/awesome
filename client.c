@@ -615,7 +615,8 @@ client_updatewmhints(Client *c)
 
     if((wmh = XGetWMHints(globalconf.display, c->win)))
     {
-        c->isurgent = (wmh->flags & XUrgencyHint);
+        if((c->isurgent = (wmh->flags & XUrgencyHint)))
+            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         if((wmh->flags & StateHint) && wmh->initial_state == WithdrawnState)
             c->skip = True;
         XFree(wmh);

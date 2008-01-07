@@ -376,7 +376,6 @@ handle_event_propertynotify(XEvent * e)
             break;
           case XA_WM_HINTS:
             client_updatewmhints(c);
-            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
             break;
         }
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(globalconf.display, "_NET_WM_NAME", False))
