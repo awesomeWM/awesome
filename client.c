@@ -993,8 +993,6 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 
     client_detach(sel);
     client_attach(sel);
-
-    focus(sel, True, screen);
     arrange(screen);
 }
 
