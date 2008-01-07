@@ -21,8 +21,8 @@ General
 ~~~~~~~
 *quit*::
     This function quits awesome.
-*statusbar_toggle*::
-    Hide or show statusbar.
+*statusbar_toggle* statusbar-identifier::
+    Hide or show statusbar (with no argument, toggle all).
 *statusbar_set_position* top, bottom, left, right::
     Set the position of the statusbar.
 *spawn* client::
