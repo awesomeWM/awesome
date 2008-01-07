@@ -210,28 +210,6 @@ uicb_client_tag(int screen, char *arg)
     arrange(screen);
 }
 
-/** Toggle floating state of a client
- * \param screen Screen ID
- * \param arg unused
- * \ingroup ui_callback
- */
-void
-uicb_client_togglefloating(int screen, char *arg __attribute__((unused)))
-{
-    Client *sel = globalconf.focus->client;
-    
-    if(!sel)
-        return;
-
-    if((sel->isfloating = !sel->isfloating))
-        client_resize(sel, sel->f_geometry, False);
-    else if(sel->ismax)
-        client_resize(sel, sel->m_geometry, False);
-
-    client_saveprops(sel);
-    arrange(screen);
-}
-
 /** Toggle a tag on client
  * \param screen Screen ID
  * \param arg Tag name

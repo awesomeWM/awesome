@@ -258,4 +258,29 @@ uicb_tag_setlayout(int screen, char *arg)
     saveawesomeprops(screen);
 }
 
+/** Toggle floating state of a client
+ * \param screen Screen ID
+ * \param arg unused
+ * \ingroup ui_callback
+ */
+void
+uicb_client_togglefloating(int screen, char *arg)
+{
+    Client *sel = globalconf.focus->client;
+    
+    if(!sel)
+        return;
+    
+    if((sel->isfloating = !sel->isfloating))
+    {
+        if(!arg)
+            client_resize(sel, sel->f_geometry, False);
+    }
+    else if(sel->ismax)
+        client_resize(sel, sel->m_geometry, False);
+
+    client_saveprops(sel);
+    arrange(screen);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

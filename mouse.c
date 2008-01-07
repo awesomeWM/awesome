@@ -56,7 +56,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 
     if((curtags[0]->layout->arrange != layout_floating)
         && !c->isfloating)
-        uicb_client_togglefloating(screen, NULL);
+        uicb_client_togglefloating(screen, (char *) "be nice");
     else
         restack(screen);
 

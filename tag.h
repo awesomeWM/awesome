@@ -36,7 +36,6 @@ void tag_client_with_rules(Client *);
 void tag_view(int, int);
 
 Uicb uicb_client_tag;
-Uicb uicb_client_togglefloating;
 Uicb uicb_client_toggletag;
 Uicb uicb_tag_toggleview;
 Uicb uicb_tag_view;
