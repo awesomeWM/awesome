@@ -983,9 +983,10 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *sel = globalconf.focus->client;
+    Client *c, *sel = globalconf.focus->client;
 
-    if(globalconf.clients == sel)
+    for(c = globalconf.clients; !client_isvisible(c, screen); c = c->next);
+    if(c == sel)
          for(sel = sel->next; sel && !client_isvisible(sel, screen); sel = sel->next);
 
     if(!sel)
