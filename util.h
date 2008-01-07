@@ -197,6 +197,25 @@ static inline ssize_t a_strcat(char *dst, ssize_t n, const char *src)
     return dlen + a_strcpy(dst + dlen, n - dlen, src);
 }
 
+/** \brief safe strncat.
+ *
+ * The m_strncat() function appends at most \c n chars from the string \c src
+ * at the end of the buffer \c dst if space is available.
+ *
+ * \param[in]  dst   destination buffer.
+ * \param[in]  n     size of the buffer, Negative sizes are allowed.
+ * \param[in]  src   the string to append.
+ * \param[in]  l     maximum number of chars of src to consider.
+ * \return the smallest value between <tt>m_strlen(dst) + m_strlen(src)</tt>
+ * and <tt>m_strlen(dst) + l</tt>
+ */
+static inline ssize_t
+a_strncat(char *dst, ssize_t n, const char *src, ssize_t l)
+{
+    ssize_t dlen = a_strnlen(dst, n - 1);
+    return dlen + a_strncpy(dst + dlen, n - dlen, src, l);
+}
+
 void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 double compute_new_value_from_arg(const char *, double);
