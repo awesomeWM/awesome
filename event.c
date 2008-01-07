@@ -236,7 +236,7 @@ handle_event_enternotify(XEvent * e)
     int screen;
     Tag **curtags;
 
-    if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
+    if(ev->mode != NotifyNormal)
         return;
     if((c = get_client_bywin(globalconf.clients, ev->window)) && globalconf.screens[c->screen].sloppy_focus)
     {
@@ -246,10 +246,13 @@ handle_event_enternotify(XEvent * e)
             window_grabbuttons(get_phys_screen(c->screen), c->win, True, False);
         p_delete(&curtags);
     }
-    else
+    else {
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
                 focus(NULL, True, screen);
+        if ((c = globalconf.focus->client))
+            window_grabbuttons(c->screen, c->win, False, False);
+    }
 }
 
 void
