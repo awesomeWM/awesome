@@ -175,7 +175,7 @@ draw_graph(DrawCtx *ctx, int x, int y, int w, int *h, int h_index, XColor color)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
-    int i, i_tmp;
+    int i;
 
     surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
@@ -184,16 +184,15 @@ draw_graph(DrawCtx *ctx, int x, int y, int w, int *h, int h_index, XColor color)
     cairo_set_line_width(cr, 1.0);
     cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
 
-    i_tmp = h_index;
     i = -1;
     while(++i < w)
     {
         cairo_move_to(cr, x, y);
-        cairo_line_to(cr, x, y - h[i_tmp]);
+        cairo_line_to(cr, x, y - h[h_index]);
         x++;
 
-        if (--i_tmp < 0)
-            i_tmp = w - 1;
+        if (--h_index < 0)
+            h_index = w - 1;
     }
 
     cairo_stroke(cr);
