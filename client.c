@@ -307,7 +307,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 {
     Client *c, *t = NULL;
     Window trans;
-    Status rettrans;
+    Bool rettrans;
     XWindowChanges wc;
     Area area, darea;
     Tag *tag;
@@ -388,8 +388,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* grab buttons */
     window_grabbuttons(phys_screen, c->win, False, True);
 
-    /* check for transient and set tags like its parent */
-    if((rettrans = XGetTransientForHint(globalconf.display, w, &trans) == Success)
+    /* check for transient and set tags like its parent,
+     * XGetTransientForHint returns 1 on success
+     */
+    if((rettrans = XGetTransientForHint(globalconf.display, w, &trans))
        && (t = get_client_bywin(globalconf.clients, trans)))
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
             if(is_client_tagged(t, tag))
@@ -397,7 +399,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     /* should be floating if transsient or fixed */
     if(!c->isfloating)
-        c->isfloating = (rettrans == Success) || c->isfixed;
+        c->isfloating = rettrans || c->isfixed;
 
     /* save new props */
     client_saveprops(c);
