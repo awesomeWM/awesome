@@ -73,6 +73,7 @@ scan()
             real_screen = screen;
             for(i = 0; i < num; i++)
             {
+                /* XGetWindowAttributes return 1 on success */
                 if(!XGetWindowAttributes(globalconf.display, wins[i], &wa)
                    || wa.override_redirect
                    || XGetTransientForHint(globalconf.display, wins[i], &d1))
