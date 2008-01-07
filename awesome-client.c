@@ -34,30 +34,18 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-int
-main(void)
+static int
+send_msg(char *msg, ssize_t msg_len)
 {
     struct sockaddr_un *addr;
-    char buf[1024], *msg;
     int csfd, ret_value = EXIT_SUCCESS;
-    ssize_t len, msg_len = 1;
-
     csfd = get_client_socket();
     addr = get_client_addr(getenv("DISPLAY"));
 
     if(!addr || csfd < 0)
         return EXIT_FAILURE;
 
-    msg = p_new(char, 1);
-    while(fgets(buf, sizeof(buf), stdin))
-    {
-        len = a_strlen(buf);
-        msg_len += len;
-        p_realloc(&msg, msg_len);
-        a_strncat(msg, msg_len, buf, len);
-    }
-
-    if(sendto(csfd, buf, a_strlen(buf), MSG_NOSIGNAL,
+    if(sendto(csfd, msg, msg_len, MSG_NOSIGNAL,
               (const struct sockaddr *) addr, sizeof(struct sockaddr_un)) == -1)
     {
         switch (errno)
@@ -73,8 +61,42 @@ main(void)
 
     close(csfd);
 
-    p_delete(&msg);
     p_delete(&addr);
+    return ret_value;
+}
+
+int
+main(void)
+{
+    char buf[1024], *msg;
+    int ret_value = EXIT_SUCCESS;
+    ssize_t len, msg_len = 1;
+
+    msg = p_new(char, 1);
+    while(fgets(buf, sizeof(buf), stdin))
+    {
+        len = a_strlen(buf);
+        if (len < 2 && msg_len > 1)
+        {
+            ret_value = send_msg(msg, msg_len);
+            p_delete(&msg);
+            if (ret_value != EXIT_SUCCESS)
+                return ret_value;
+            msg = p_new(char, 1);
+            msg_len = 1;
+        }
+        else if (len > 1)
+        {
+            msg_len += len;
+            p_realloc(&msg, msg_len);
+            a_strncat(msg, msg_len, buf, len);
+        }
+    }
+
+    if (msg_len > 1)
+        ret_value = send_msg(msg, msg_len);
+
+    p_delete(&msg);
 
     return ret_value;
 }
