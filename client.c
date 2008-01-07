@@ -176,6 +176,8 @@ client_updatetitle(Client *c)
 {
     if(!xgettextprop(c->win, XInternAtom(globalconf.display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
         xgettextprop(c->win, XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
+
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 /** Ban client and unmap it
@@ -419,7 +421,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,
                       c->geometry.width, c->geometry.height);
 
-    focus(c, True, screen);
+    if(globalconf.screens[c->screen].new_get_focus)
+        focus(c, True, screen);
+    else
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 
     ewmh_update_net_client_list(phys_screen);
 

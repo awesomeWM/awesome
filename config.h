@@ -256,6 +256,8 @@ typedef struct
     Bool resize_hints;
     /** Sloppy focus: focus follow mouse */
     Bool sloppy_focus;
+    /** Focus new clients */
+    Bool new_get_focus;
     /** True if new clients should become master */
     Bool new_become_master;
     /** Normal colors */

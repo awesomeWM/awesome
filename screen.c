@@ -251,8 +251,6 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
             arrange(c->screen);
         }
     }
-
-    focus(c, True, c->screen);
 }
 
 /** Move mouse pointer to x_org and y_xorg of specified screen
@@ -331,5 +329,6 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     move_mouse_pointer_to_screen(new_screen);
     arrange(prev_screen);
     arrange(new_screen);
+    focus(sel, True, sel->screen);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

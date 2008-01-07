@@ -347,6 +347,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->allow_lower_floats = cfg_getbool(cfg_general, "allow_lower_floats");
     virtscreen->sloppy_focus = cfg_getbool(cfg_general, "sloppy_focus");
     virtscreen->new_become_master = cfg_getbool(cfg_general, "new_become_master");
+    virtscreen->new_get_focus = cfg_getbool(cfg_general, "new_get_focus");
     virtscreen->font = XftFontOpenName(globalconf.display,
                                        phys_screen,
                                        cfg_getstr(cfg_general, "font"));
@@ -481,6 +482,7 @@ config_parse(const char *confpatharg)
         CFG_BOOL((char *) "allow_lower_floats", cfg_false, CFGF_NONE),
         CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
         CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
+        CFG_BOOL((char *) "new_get_focus", cfg_true, CFGF_NONE),
         CFG_STR((char *) "font", (char *) "mono-12", CFGF_NONE),
         CFG_END()
     };
