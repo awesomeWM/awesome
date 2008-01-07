@@ -34,6 +34,7 @@
 #include "mouse.h"
 #include "ewmh.h"
 #include "client.h"
+#include "widget.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 
@@ -166,10 +167,10 @@ handle_event_configurerequest(XEvent * e)
             
             if(old_screen != c->screen)
             {
-                statusbar_draw_all(old_screen);
+                widget_invalidate_cache(old_screen, WIDGET_CACHE_CLIENTS);
                 arrange(old_screen);
             }
-            statusbar_draw_all(c->screen);
+            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
             arrange(c->screen);
         }
         else
@@ -213,7 +214,7 @@ handle_event_configurenotify(XEvent * e)
                           globalconf.screens[screen].statusbar->width,
                           globalconf.screens[screen].statusbar->height);
 
-            statusbar_draw_all(screen);
+            widget_invalidate_cache(screen, WIDGET_CACHE_ALL);
             arrange(screen);
         }
 }
@@ -375,14 +376,14 @@ handle_event_propertynotify(XEvent * e)
             break;
           case XA_WM_HINTS:
             client_updatewmhints(c);
-            statusbar_draw_all(c->screen);
+            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
             break;
         }
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(globalconf.display, "_NET_WM_NAME", False))
         {
             client_updatetitle(c);
             if(c == globalconf.focus->client)
-                statusbar_draw_all(c->screen);
+                widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         }
     }
 }

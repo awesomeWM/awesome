@@ -341,13 +341,13 @@ main(int argc, char *argv[])
         if(csfd >= 0 && FD_ISSET(csfd, &rd))
             switch (r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
             {
-            case -1:
+              case -1:
                 perror("awesome: error reading UNIX domain socket");
                 csfd = -1;
                 break;
-            case 0:
+              case 0:
                 break;
-            default:
+              default:
                 if(r >= ssizeof(buf))
                     break;
                 buf[r] = '\0';
@@ -360,6 +360,8 @@ main(int argc, char *argv[])
             if(handler[ev.type])
                 handler[ev.type](&ev);       /* call handler */
         }
+
+        statusbar_refresh();
     }
 
     if(csfd > 0 && close(csfd))

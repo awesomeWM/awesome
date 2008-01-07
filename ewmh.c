@@ -28,7 +28,7 @@
 #include "focus.h"
 #include "screen.h"
 #include "client.h"
-#include "statusbar.h"
+#include "widget.h"
 
 extern AwesomeConf globalconf;
 
@@ -265,7 +265,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             c->ismax = True;
             c->isfloating = True;
         }
-        statusbar_draw_all(c->screen);
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, False);
         XRaiseWindow(globalconf.display, c->win);
         arrange(c->screen);

@@ -24,7 +24,8 @@
 
 #include "config.h"
 
-void statusbar_draw_all(int);
+void statusbar_refresh(void);
+void statusbar_draw(Statusbar *);
 void statusbar_init(Statusbar *, int);
 void statusbar_display(Statusbar *);
 Position statusbar_get_position_from_str(const char *);

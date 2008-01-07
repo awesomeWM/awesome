@@ -114,6 +114,12 @@ struct Widget
     Button *buttons;
     /** Font */
     XftFont *font;
+    /** Cache */
+    struct
+    {
+        Bool needs_update;
+        int flags;
+    } cache;
     /** Next widget */
     Widget *next;
 };

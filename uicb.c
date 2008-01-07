@@ -144,7 +144,7 @@ parse_control(char *cmd)
 
     if(!a_strlen(cmd))
         return -1;
-    
+
     while((p = strchr(curcmd, '\n')))
     {
         *p = '\0';

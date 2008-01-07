@@ -26,7 +26,7 @@
 #include "util.h"
 #include "xutil.h"
 #include "focus.h"
-#include "statusbar.h"
+#include "widget.h"
 #include "ewmh.h"
 #include "client.h"
 #include "screen.h"
@@ -163,8 +163,6 @@ restack(int screen)
     XWindowChanges wc;
     Tag **curtags;
 
-    statusbar_draw_all(screen);
-
     if(!sel)
         return;
 
@@ -253,7 +251,7 @@ uicb_tag_setlayout(int screen, char *arg)
     if(globalconf.focus->client)
         arrange(screen);
     else
-        statusbar_draw_all(screen);
+        widget_invalidate_cache(screen, WIDGET_CACHE_LAYOUTS);
 
     saveawesomeprops(screen);
 }
@@ -279,6 +277,7 @@ uicb_client_togglefloating(int screen, char *arg)
     else if(sel->ismax)
         client_resize(sel, sel->m_geometry, False);
 
+    widget_invalidate_cache(sel->screen, WIDGET_CACHE_CLIENTS);
     client_saveprops(sel);
     arrange(screen);
 }

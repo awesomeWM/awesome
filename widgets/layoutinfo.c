@@ -64,6 +64,10 @@ layoutinfo_new(Statusbar *statusbar, cfg_t* config)
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
     w->draw = layoutinfo_draw;
+
+    /* Set cache property */
+    w->cache.flags = WIDGET_CACHE_LAYOUTS;
+
     return w;
 }
 

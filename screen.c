@@ -25,7 +25,6 @@
 #include "screen.h"
 #include "tag.h"
 #include "focus.h"
-#include "statusbar.h"
 #include "client.h"
 #include "layouts/floating.h"
 
@@ -254,10 +253,6 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
     }
 
     focus(c, True, c->screen);
-
-    /* redraw statusbar on all screens */
-    statusbar_draw_all(old_screen);
-    statusbar_draw_all(new_screen);
 }
 
 /** Move mouse pointer to x_org and y_xorg of specified screen

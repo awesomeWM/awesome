@@ -105,6 +105,9 @@ netwmicon_new(Statusbar *statusbar, cfg_t *config)
     widget_common_new(w, statusbar, config);
     w->draw = netwmicon_draw;
     
+    /* Set cache property */
+    w->cache.flags = WIDGET_CACHE_CLIENTS;
+
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

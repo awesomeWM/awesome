@@ -253,6 +253,9 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     if(!w->font)
         w->font = globalconf.screens[statusbar->screen].font;
 
+    /* Set cache property */
+    w->cache.flags = WIDGET_CACHE_CLIENTS;
+
     return w;
 }
 

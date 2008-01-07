@@ -122,6 +122,19 @@ widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
     widget->user_supplied_y = (widget->area.y != (int) 0xffffffff);
 }
 
+void
+widget_invalidate_cache(int screen, int flags)
+{
+    Statusbar *statusbar;
+    Widget *widget;
+
+    for(statusbar = globalconf.screens[screen].statusbar;
+        statusbar;
+        statusbar = statusbar->next)
+        for(widget = statusbar->widgets; widget; widget = widget->next)
+            widget->cache.needs_update = (widget->cache.flags & flags);
+}
+
 /** Send command to widget
  * \param screen Screen ID
  * \param arg Widget command. Syntax depends on specific widget.
@@ -166,7 +179,8 @@ uicb_widget_tell(int screen, char *arg)
     else
         widget->tell(widget, NULL);
 
-    statusbar_draw_all(screen);
+    widget->cache.needs_update = True;
+
     return;
 }
 

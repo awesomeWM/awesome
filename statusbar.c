@@ -30,13 +30,13 @@
 
 extern AwesomeConf globalconf;
 
-static void
+void
 statusbar_draw(Statusbar *statusbar)
 {
     int phys_screen = get_phys_screen(statusbar->screen);
     Widget *widget, *last_drawn = NULL;
     int left = 0, right = 0;
-    
+
     /* don't waste our time */
     if(statusbar->position == Off)
         return;
@@ -52,12 +52,16 @@ statusbar_draw(Statusbar *statusbar)
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
+        {
+            widget->cache.needs_update = False;
             left += widget->draw(widget, ctx, left, (left + right));
+        }
 
     /* renders right widget from last to first */
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignRight && last_drawn == widget->next)
         {
+            widget->cache.needs_update = False;
             right += widget->draw(widget, ctx, right, (left + right));
             last_drawn = widget;
             widget = statusbar->widgets;
@@ -65,7 +69,10 @@ statusbar_draw(Statusbar *statusbar)
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignFlex)
+        {
+            widget->cache.needs_update = False;
             left += widget->draw(widget, ctx, left, (left + right));
+        }
 
     if(statusbar->position == Right
        || statusbar->position == Left)
@@ -85,15 +92,6 @@ statusbar_draw(Statusbar *statusbar)
     }
 
     statusbar_display(statusbar);
-}
-
-void
-statusbar_draw_all(int screen)
-{
-    Statusbar *statusbar;
-
-    for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-        statusbar_draw(statusbar);
 }
 
 void
@@ -243,6 +241,26 @@ statusbar_update_position(Statusbar *statusbar)
     while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
 }
 
+
+void
+statusbar_refresh()
+{
+    int screen;
+    Statusbar *statusbar;
+    Widget *widget;
+
+    for(screen = 0; screen < get_screen_count(); screen++)
+        for(statusbar = globalconf.screens[screen].statusbar;
+            statusbar;
+            statusbar = statusbar->next)
+            for(widget = statusbar->widgets; widget; widget = widget->next)
+                if(widget->cache.needs_update)
+                {
+                    statusbar_draw(statusbar);
+                    break;
+                }
+}
+
 Position
 statusbar_get_position_from_str(const char *pos)
 {
@@ -269,7 +287,6 @@ get_statusbar_byname(int screen, const char *name)
     return NULL;
 }
 
-
 static void
 statusbar_toggle(Statusbar *statusbar)
 {
@@ -283,7 +300,7 @@ statusbar_toggle(Statusbar *statusbar)
 
 /** Toggle statusbar
  * \param screen Screen ID
- * \param arg Unused
+ * \param arg statusbar name
  * \ingroup ui_callback
  */
 void

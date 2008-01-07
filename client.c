@@ -29,11 +29,11 @@
 #include "rules.h"
 #include "util.h"
 #include "xutil.h"
-#include "statusbar.h"
 #include "window.h"
 #include "focus.h"
 #include "ewmh.h"
 #include "screen.h"
+#include "widget.h"
 #include "layouts/floating.h"
 
 
@@ -244,6 +244,7 @@ focus(Client *c, Bool selscreen, int screen)
     /* unfocus current selected client */
     if(globalconf.focus->client)
     {
+        widget_invalidate_cache(globalconf.focus->client->screen, WIDGET_CACHE_CLIENTS);
         window_grabbuttons(get_phys_screen(globalconf.focus->client->screen),
                            globalconf.focus->client->win, False, True);
         XSetWindowBorder(globalconf.display, globalconf.focus->client->win,
@@ -274,7 +275,7 @@ focus(Client *c, Bool selscreen, int screen)
     /* save sel in focus history */
     focus_add_client(c);
 
-    statusbar_draw_all(screen);
+    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
 
     if(globalconf.focus->client)
     {
@@ -889,19 +890,21 @@ client_maximize(Client *c, Area geometry)
          * coords */
         c->isfloating = True;
         restack(c->screen);
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else if(c->wasfloating)
     {
         c->isfloating = True;
         client_resize(c, c->m_geometry, False);
         restack(c->screen);
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else
     {
         c->isfloating = False;
         arrange(c->screen);
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
-    statusbar_draw_all(c->screen);
 }
 
 /** Toggle maximize for client

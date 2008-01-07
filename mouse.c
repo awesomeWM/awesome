@@ -28,7 +28,6 @@
 #include "util.h"
 #include "event.h"
 #include "window.h"
-#include "statusbar.h"
 #include "client.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
@@ -78,7 +77,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                   RootWindow(globalconf.display, phys_screen),
                   &dummy, &dummy, &x1, &y, &di, &di, &dui);
     c->ismax = False;
-    statusbar_draw_all(c->screen);
     for(;;)
     {
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);

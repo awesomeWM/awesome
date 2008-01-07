@@ -182,6 +182,10 @@ taglist_new(Statusbar *statusbar, cfg_t *config)
     widget_common_new(w, statusbar, config);
     w->draw = taglist_draw;
     w->button_press = taglist_button_press;
+
+    /* Set cache property */
+    w->cache.flags = WIDGET_CACHE_TAGS;
+
     return w;
 }
 
