@@ -248,6 +248,10 @@ graph
 ~~~~~
 This widget shows a graph.
 
+*scale*::
+    Re-scales when input > max (see below).
+*max*::
+    This value prints a full graph.
 *mouse*::
     Set mouse bindings.
 *width*::
@@ -398,6 +402,7 @@ screen <integer> [MULTI]
             focus_bg = <color>
             font = <font>
             show_icons = <boolean>
+            show_all = <boolean>
             align = <{center,left,right}>
             x = <integer> y = <integer>
             mouse [MULTI]
@@ -448,6 +453,8 @@ screen <integer> [MULTI]
         }
         graph <identifier> [MULTI]
         {
+            scale = <boolean>
+            max = <float>
             width = <integer>
             height = <float>
             padding_left = <integer>
