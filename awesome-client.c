@@ -38,8 +38,9 @@ int
 main(void)
 {
     struct sockaddr_un *addr;
-    char buf[1024];
+    char buf[1024], *msg;
     int csfd, ret_value = EXIT_SUCCESS;
+    ssize_t len, msg_len = 1;
 
     csfd = get_client_socket();
     addr = get_client_addr(getenv("DISPLAY"));
@@ -47,24 +48,32 @@ main(void)
     if(!addr || csfd < 0)
         return EXIT_FAILURE;
 
+    msg = p_new(char, 1);
     while(fgets(buf, sizeof(buf), stdin))
-        if(sendto(csfd, buf, a_strlen(buf), MSG_NOSIGNAL,
-                  (const struct sockaddr *) addr, sizeof(struct sockaddr_un)) == -1)
+    {
+        len = a_strlen(buf);
+        msg_len += len;
+        p_realloc(&msg, msg_len);
+        a_strncat(msg, msg_len, buf, len);
+    }
+
+    if(sendto(csfd, buf, a_strlen(buf), MSG_NOSIGNAL,
+              (const struct sockaddr *) addr, sizeof(struct sockaddr_un)) == -1)
+    {
+        switch (errno)
         {
-            switch (errno)
-            {
-                case ENOENT:
-                    fprintf(stderr, "Can't write to %s\n", addr->sun_path);
-                    break;
-                default:
-                    perror("error sending datagram");
-            }
-            ret_value = errno;
-            break;
-        }
+          case ENOENT:
+              warn("Can't write to %s\n", addr->sun_path);
+              break;
+          default:
+              perror("error sending datagram");
+         }
+         ret_value = errno;
+    }
 
     close(csfd);
 
+    p_delete(&msg);
     p_delete(&addr);
 
     return ret_value;
