@@ -66,10 +66,42 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 static void
 textbox_tell(Widget *widget, char *command)
 {
+    char *tok;
+    int i, color;
+    ssize_t command_len = a_strlen(command) + 1;
+    char* text = p_new(char, command_len);
+
     Data *d = widget->data;
     if (d->text)
         p_delete(&d->text);
-    d->text = a_strdup(command);
+
+    for(tok = strtok(command, " "), i = color = 0; tok; tok = strtok(NULL, " "), i++)
+    {
+        if(*tok == '#' && i < 2)
+        {
+            switch(i)
+            {
+                case 0:
+                    d->fg = initxcolor(get_phys_screen(widget->statusbar->screen),
+                                       tok);
+                    break;
+                case 1:
+                    d->bg = initxcolor(get_phys_screen(widget->statusbar->screen),
+                                       tok);
+                    break;
+            };
+            color++;
+        }
+        else
+        {
+            if(i > color)
+                a_strcat(text, command_len, " ");
+            a_strcat(text, command_len, tok);
+        }
+    }
+
+    d->text = a_strdup(text);
+    p_delete(&text);
 }
 
 Widget *
