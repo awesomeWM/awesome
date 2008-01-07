@@ -29,13 +29,16 @@
 #include "event.h"
 #include "ewmh.h"
 #include "rules.h"
+#include "tag.h"
 
-#define ISVISIBLE_ON_TB(c, screen) (client_isvisible(c, screen) && !c->skiptb)
+#define ISVISIBLE_ON_TB(c, nscreen, show_all) ((!show_all && client_isvisible(c, nscreen) && !c->skiptb) \
+                                              || (show_all && c->screen == nscreen && !c->skiptb))
 
 extern AwesomeConf globalconf;
 
 typedef struct
 {
+    Bool show_all;
     Bool show_icons;
     Alignment align;
     XColor fg_sel;
@@ -56,7 +59,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     NetWMIcon *icon;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
+        if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
             n++;
     
     if(!n)
@@ -77,7 +80,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
         widget->area.y = widget->area.y = 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
+        if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
         {
             icon_width = 0;
 
@@ -146,13 +149,15 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
 {
     Button *b;
     Client *c;
+    Data *d = widget->data;
+    Tag *tag;
     int n = 0, box_width = 0, i = 0, ci = 0;
 
     /* button1 give focus */
     if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
     {
         for(c = globalconf.clients; c; c = c->next)
-            if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
+            if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
                 n++;
     
         if(!n)
@@ -177,14 +182,20 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
             }
             /* found first visible client */
             for(c = globalconf.clients;
-                c && !ISVISIBLE_ON_TB(c, widget->statusbar->screen);
+                c && !ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all);
                 c = c->next);
             /* found ci-th visible client */
             for(; c && i < ci; c = c->next)
-                if(ISVISIBLE_ON_TB(c, widget->statusbar->screen))
+                if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
                     i++;
 
+            /* first switch tag if client not visible */
+            if(!client_isvisible(c, widget->statusbar->screen))
+                for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
+                    if(is_client_tagged(c, tag))
+                        tag_view(c->screen, i);
             focus(c, True, widget->statusbar->screen);
+
             return;
         }
     }
@@ -234,6 +245,7 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
 
     d->align = draw_get_align(cfg_getstr(config, "align"));
     d->show_icons = cfg_getbool(config, "show_icons");
+    d->show_all = cfg_getbool(config, "show_all");
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);

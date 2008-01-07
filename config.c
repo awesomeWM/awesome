@@ -571,6 +571,7 @@ config_parse(const char *confpatharg)
         CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "align", (char *) "left", CFGF_NONE),
         CFG_BOOL((char *) "show_icons", cfg_true, CFGF_NONE),
+        CFG_BOOL((char *) "show_all", cfg_false, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t widget_graph_opts[] =
