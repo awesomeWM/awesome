@@ -379,11 +379,7 @@ handle_event_propertynotify(XEvent * e)
             break;
         }
         if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(globalconf.display, "_NET_WM_NAME", False))
-        {
             client_updatetitle(c);
-            if(c == globalconf.focus->client)
-                widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-        }
     }
 }
 
