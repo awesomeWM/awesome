@@ -14,12 +14,12 @@ screen 0
     }
     layouts
     {
-        layout tile { image = "/usr/local/share/awesome/icons/layouts/tilew.png" }
-        layout tileleft { image = "/usr/local/share/awesome/icons/layouts/tileleftw.png" }
-        layout max { image = "/usr/local/share/awesome/icons/layouts/maxw.png" }
-        layout spiral { image = "/usr/local/share/awesome/icons/layouts/spiralw.png" }
-        layout dwindle { image = "/usr/local/share/awesome/icons/layouts/dwindlew.png" }
-        layout floating { image = "/usr/local/share/awesome/icons/layouts/floatingw.png" }
+        layout tile { image = "@iconslayoutsdir@/tilew.png" }
+        layout tileleft { image = "@iconslayoutsdir@/tileleftw.png" }
+        layout max { image = "@iconslayoutsdir@/maxw.png" }
+        layout spiral { image = "@iconslayoutsdir@/spiralw.png" }
+        layout dwindle { image = "@iconslayoutsdir@/dwindlew.png" }
+        layout floating { image = "@iconslayoutsdir@/floatingw.png" }
     }
     statusbar mystatusbar
     {
