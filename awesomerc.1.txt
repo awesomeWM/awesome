@@ -9,13 +9,31 @@ awesomerc - Configuration file for the 'awesome window manager'
 SYNOPSIS
 --------
 
-*awesome* reads *$HOME/.awesomerc* by default. You can choose another configuration
-file with: awesome -c configuration
+<item> [<argument>]
+{
+    <option> = <value>
+
+    <item> [<argument>] { <option> = <value>, ... }
+    ....
+}
+
+<option> = <value>
+
+
+DESCRIPTION
+-----------
+
+The awesomerc file contains configuration informations for *awesome*. It can
+be used to configure the behaviour and look of awesome in a variety of ways.
+
+It is read at startup.
 
 UICB FUNCTIONS
 --------------
 
-In awesome, a lot of *functions* are available. These functions are called uicb (User Interface Call Backs). Each function can be bound to a key shortcut or a mouse button.
+In awesome, a lot of *functions* are available. These functions are called
+uicb (User Interface Call Backs). Each function can be bound to a key shortcut
+or a mouse button.
 
 General
 ~~~~~~~
@@ -271,14 +289,10 @@ This widget shows a graph.
 *y*::
     Vertical offset (auto-alignment if not set).
 
-FILES
------
-For an example of an awesomerc file, see the file provided with the sources.
-
-EXAMPLES
+OPTIONS
 --------
 
-The general config and subconfig options for the awesomerc:
+Configuration options and possible values.
 
 ..............................................
 Note: when there is no whitespace, quotes are optional.
@@ -299,6 +313,8 @@ Note: when there is no whitespace, quotes are optional.
 <{.., ...}>     -> list of available options
 
 [MULTI] means, you can use an item multiple times.
+
+
 
 screen <integer> [MULTI]
 {
@@ -514,6 +530,11 @@ mouse
     }
 }
 ..............................................
+
+EXAMPLES
+--------
+
+Check awesome's wiki: http://awesome.naquadah.org/wiki/
 
 
 SEE ALSO
