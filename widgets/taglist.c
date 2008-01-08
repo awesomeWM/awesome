@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "client.h"
 #include "util.h"
 #include "widget.h"
 #include "tag.h"
@@ -39,7 +40,7 @@ isoccupied(Tag *t)
     Client *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t))
+        if(is_client_tagged(c, t) && !c->skip)
             return True;
     return False;
 }
