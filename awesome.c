@@ -228,6 +228,8 @@ main(int argc, char *argv[])
         else
             eprint("options: [-v | -c configfile]\n");
     }
+    /* Tag won't be printed otherwised */
+    setlocale(LC_CTYPE, "");
 
     /* X stuff */
     if(!(dpy = XOpenDisplay(NULL)))
