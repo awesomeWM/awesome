@@ -5,7 +5,7 @@ SUFFIXES =
 bin_PROGRAMS =
 doc_DATA =
 man_MANS =
-iconslayoutsdir = ${pkgdatadir}/icons/layouts
+iconslayoutsdir = $(pkgdatadir)/icons/layouts
 dist_iconslayouts_DATA =
 
 LAYOUTS =
@@ -35,9 +35,6 @@ WIDGETS += widgets/tasklist.c
 WIDGETS += widgets/graph.c
 
 
-EXTRA_DIST += awesomerc
-doc_DATA   += awesomerc
-
 doc_DATA   += README
 
 EXTRA_DIST += LICENSE
@@ -47,13 +44,22 @@ EXTRA_DIST += STYLE
 doc_DATA   += STYLE
 
 
+EXTRA_DIST    += awesomerc.in
+CLEANFILES    += awesomerc
+BUILT_SOURCES += awesomerc
+doc_DATA      += awesomerc
+awesomerc: $(srcdir)/awesomerc.in
+	$(SED) -e "s|[@]iconslayoutsdir@|$(iconslayoutsdir)|" \
+		< $(srcdir)/awesomerc.in > awesomerc
+
+
 CLEANFILES    += defconfig.h
 BUILT_SOURCES += defconfig.h
-defconfig.h: $(srcdir)/awesomerc
-	@echo "generating defconfig.h from $(srcdir)/awesomerc"
+defconfig.h: awesomerc
+	@echo "generating defconfig.h from awesomerc"
 	@echo "#define AWESOME_DEFAULT_CONFIG \\" > defconfig.h
 	@echo -n "\"" >> defconfig.h
-	@$(SED) 's,\\,\\\\,g;s/$$/ \\/;s/"/\\"/g' "$(srcdir)/awesomerc" >> defconfig.h
+	@$(SED) 's,\\,\\\\,g;s/$$/ \\/;s/"/\\"/g' "awesomerc" >> defconfig.h
 	@echo "\"" >> defconfig.h
 
 if USING_GCC
