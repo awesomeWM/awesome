@@ -143,6 +143,21 @@ if HAVE_ASCIIDOC
 endif
 
 
+# Check that package version matches git version before creating dist tarballs
+dist-hook: git-version-check
+distcheck-hook: git-version-check
+
+git-version-check:
+	git_ver=`{ test -d $(top_srcdir)/.git && git --git-dir=$(top_srcdir)/.git describe 2> /dev/null; } || echo devel`; \
+	if test "x$${git_ver}" = "x$(PACKAGE_VERSION)"; then :; else \
+		echo "ERROR: The PACKAGE_VERSION and the 'git describe' version do not match:"; \
+		echo "         current git version:     $${git_ver}"; \
+		echo "         current package version: $(PACKAGE_VERSION)"; \
+		echo "You can update the PACKAGE_VERSION by running $(top_srcdir)/autogen.sh."; \
+		exit 1; \
+	fi
+
+
 EXTRA_DIST += awesome.doxygen.in
 
 # Workaround for buggy pre-1.5.3 doxygen.
