@@ -30,21 +30,20 @@ extern AwesomeConf globalconf;
 
 typedef struct
 {
-    int percent;            /* Percent 0 to 100 */
+    float max;              /* Represents a full graph */
     int width;              /* Width of the widget */
     int padding_left;       /* Left padding */
     float height;           /* Height 0-1, where 1 is height of statusbar */
     XColor fg;              /* Foreground color */
     XColor bg;              /* Background color */
     XColor bordercolor;     /* Border color */
+    int *lines;             /* Keeps the calculated values (line-length); */
+    int lines_index;        /* Pointer to current value */
+    int lines_size;         /* Size of lines-array (also innerbox-lenght) */
     int box_height;         /* Height of the innerbox */
-    int *lines;             /* keeps the calculated values (line-length); */
-    int lines_index;        /* pointer to current val */
-    int lines_size;         /* size of lines-array */
-    float *line_values;     /* actual values */
-    int line_max_index;     /* index of the current maximum value */
-    int line_max;           /* maximum value */
-    int current_max;        /* curent maximum value */
+    float *line_values;     /* Actual values */
+    float current_max;      /* Curent maximum value */
+    int line_max_index;     /* Index of the current maximum value */
 } Data;
 
 
@@ -98,7 +97,8 @@ static void
 graph_tell(Widget *widget, char *command)
 {
     Data *d = widget->data;
-    int value, i;
+    int i;
+    float value;
 
     if(!command || d->width < 1)
         return;
@@ -106,20 +106,20 @@ graph_tell(Widget *widget, char *command)
     if(++d->lines_index >= d->lines_size) /* cycle inside the array */
         d->lines_index = 0;
 
-    value = MAX(atoi(command), 0); /*TODO atofloat */
+    value = MAX(atof(command), 0); /* TODO: may allow min-option and values */
 
-    if(d->line_values) /* scale option = true */
+    if(d->line_values) /* scale option is true */
     {
         d->line_values[d->lines_index] = value;
 
         if(value > d->current_max) /* a new maximum value found */
         {
             d->line_max_index = d->lines_index; 
-            d->current_max = MAX(value, 1);
+            d->current_max = value;
 
-            /* recalculate: value * (height-2pixel) / max */
+            /* recalculate */
             for (i = 0; i < d->lines_size; i++) 
-                d->lines[i] = (int) ((float)(d->line_values[i]) * (d->box_height) / d->current_max + 0.5);    
+                d->lines[i] = (int) (d->line_values[i] * (d->box_height) / d->current_max + 0.5);
         }
         else if(d->line_max_index == d->lines_index) /* old max_index reached, re-check/generate */
         {
@@ -128,20 +128,20 @@ graph_tell(Widget *widget, char *command)
                 if (d->line_values[i] > d->line_values[d->line_max_index]) 
                     d->line_max_index = i;
 
-            d->current_max = MAX(d->line_values[d->line_max_index], d->line_max);
+            d->current_max = MAX(d->line_values[d->line_max_index], d->max);
 
             /* recalculate */
             for (i = 0; i < d->lines_size; i++) 
-                d->lines[i] = (int) ((float)(d->line_values[i]) * d->box_height / d->current_max + 0.5);    
+                d->lines[i] = (int) (d->line_values[i] * d->box_height / d->current_max + 0.5);
         }
         else
-            d->lines[d->lines_index] = (int) ((float)(value) * d->box_height / d->current_max + 0.5);
+            d->lines[d->lines_index] = (int) (value * d->box_height / d->current_max + 0.5);
 
     }
-    else /* scale option = false */
+    else /* scale option is false */
     {
         if (value < d->current_max)
-            d->lines[d->lines_index] = (int) ((float)(value) * d->box_height / d->current_max + 0.5);
+            d->lines[d->lines_index] = (int) (value * d->box_height / d->current_max + 0.5);
         else
             d->lines[d->lines_index] = d->box_height;
     }
@@ -177,8 +177,9 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
     if (cfg_getbool(config, "scale"))
         d->line_values = p_new(float, d->lines_size);
-    d->line_max = MAX(cfg_getfloat(config, "max"), 0.001); /* prevent div / 0 */
-    d->current_max = d->line_max;
+
+    /* prevent: division by zero; with a MIN option one day, check for div/0's */
+    d->current_max = d->max = MAX(cfg_getfloat(config, "max"), 0.0001);
     if((color = cfg_getstr(config, "fg")))
         d->fg = initxcolor(phys_screen, color);
     else
