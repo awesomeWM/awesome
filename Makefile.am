@@ -65,7 +65,7 @@ defconfig.h: awesomerc
 if USING_GCC
 # If you are using gcc, and want to deactivate this default set of
 # compile flags, run make with AWESOME_CFLAGS="".
-AWESOME_CFLAGS = -std=gnu99 -ggdb3 -pipe \
+AWESOME_CFLAGS = -std=gnu99 -pipe \
 		 -Wall -Wextra \
 		 -Wundef -Wshadow -Wcast-align -Wwrite-strings -Wsign-compare \
 		 -Wunused -Winit-self -Wpointer-arith -Wredundant-decls \
