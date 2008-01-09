@@ -5,13 +5,22 @@ It's based on dwm.
 
 Requirements
 ------------
+In order to build awesome itself, you need header files and libs of:
+  - Xlib, Xinerama, Xrandr, Xft
+  - libconfuse >= 2.6
+  - cairo
 
-In order to build awesome you need the Xlib header files, libconfuse and cairo.
-Creating the man pages also requires recent versions of the asciidoc and xmlto
-tools.
+In order to build the awesome man pages, you need these tools:
+  - asciidoc (recent version)
+  - xmlto (recent version)
+  - docbook XSL stylesheets
 
-Installation
-------------
+In order to build the source code reference, you need these tools:
+  - doxygen
+  - graphviz
+
+Building and Installation
+-------------------------
 If building from git sources, run "./autogen.sh". When autoreconf has
 finished, you can follow the following instructions for building a dist
 tarball.
@@ -26,6 +35,8 @@ proper parameters, and build and install:
 
 If you're using gcc as your compiler and do not want awesome's default set
 of warning flags, add AWESOME_CFLAGS="" to your "make" lines.
+
+The source code reference can be built with "make doc".
 
 Running awesome
 -----------
