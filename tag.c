@@ -28,6 +28,7 @@
 #include "rules.h"
 #include "client.h"
 #include "ewmh.h"
+#include "widget.h"
 
 extern AwesomeConf globalconf;
 
@@ -68,6 +69,8 @@ tag_client(Client *c, Tag *t)
 
     new_tc->client = c;
     new_tc->tag = t;
+
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 void
@@ -81,6 +84,8 @@ untag_client(Client *c, Tag *t)
             detach_tagclientlink(tc);
             break;
         }
+
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 Bool

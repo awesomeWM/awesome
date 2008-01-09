@@ -186,6 +186,7 @@ taglist_new(Statusbar *statusbar, cfg_t *config)
 
     /* Set cache property */
     w->cache.flags = WIDGET_CACHE_TAGS;
+    w->cache.flags = WIDGET_CACHE_CLIENTS;
 
     return w;
 }
