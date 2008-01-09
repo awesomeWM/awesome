@@ -20,12 +20,17 @@ via a socket located in the users's HOME directory.
 USAGE
 -----
 To determine which socket is to be used, it read the DISPLAY environment variable.
-awesome-client read commands from standart input. The command format is:
+awesome-client read commands from standard input.
+
+When you pipe multiple lines into awesome-client, an empty line will flush already
+collected lines into awesome with an according immediate execution.
+
+The command format is:
  screen_number command argument
 
 For example, to change statusbar text on screen 0, you can do the following:
 
-    echo 0 statusbar_set_text Hello, world | awesome-client
+    echo 0 widget_tell <widget-id> Hello, world | awesome-client
  
 To view tag number 3 on screen 1:
 
@@ -38,7 +43,7 @@ To zoom focused window on screen 0:
 
 SEE ALSO
 --------
-awesome(1)
+awesome(1) awesomerc(1)
 
 AUTHORS
 -------
