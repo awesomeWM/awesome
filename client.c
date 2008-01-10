@@ -697,7 +697,7 @@ client_isvisible(Client *c, int screen)
 {
     Tag *tag;
 
-    if(c->screen != screen)
+    if(!c || c->screen != screen)
         return False;
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)

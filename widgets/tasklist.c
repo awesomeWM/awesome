@@ -189,12 +189,15 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
                     i++;
 
-            /* first switch tag if client not visible */
-            if(!client_isvisible(c, widget->statusbar->screen))
-                for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
-                    if(is_client_tagged(c, tag))
-                        tag_view(c->screen, i);
-            focus(c, True, widget->statusbar->screen);
+            if(c)
+            {
+                /* first switch tag if client not visible */
+                if(!client_isvisible(c, widget->statusbar->screen))
+                    for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
+                        if(is_client_tagged(c, tag))
+                           tag_view(c->screen, i);
+                focus(c, True, widget->statusbar->screen);
+            }
 
             return;
         }
