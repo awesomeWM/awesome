@@ -38,7 +38,6 @@ WIDGETS += widgets/graph.c
 doc_DATA   += README
 
 EXTRA_DIST += LICENSE
-doc_DATA   += LICENSE
 
 EXTRA_DIST += STYLE
 doc_DATA   += STYLE
