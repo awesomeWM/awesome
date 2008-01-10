@@ -177,7 +177,6 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         {
         case ButtonRelease:
             XUngrabPointer(globalconf.display, CurrentTime);
-            while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
             return;
         case ConfigureRequest:
             handle_event_configurerequest(&ev);

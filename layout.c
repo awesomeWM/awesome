@@ -169,7 +169,6 @@ void
 restack(int screen)
 {
     Client *c, *sel = globalconf.focus->client;
-    XEvent ev;
     XWindowChanges wc;
     Tag **curtags;
 
@@ -202,7 +201,6 @@ restack(int screen)
         XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0,
                      sel->geometry.width / 2, sel->geometry.height / 2);
     XSync(globalconf.display, False);
-    while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
 }
 
 void

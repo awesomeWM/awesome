@@ -30,6 +30,39 @@
 
 extern AwesomeConf globalconf;
 
+static void
+statusbar_update_position(Statusbar *statusbar)
+{
+    Area area = get_screen_area(statusbar->screen,
+                                NULL,
+                                &globalconf.screens[statusbar->screen].padding);
+
+    XMapRaised(globalconf.display, statusbar->window);
+    switch(statusbar->position)
+    {
+      default:
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x, area.y);
+        break;
+      case Left:
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x, (area.y + area.height) - statusbar->width);
+        break;
+      case Right:
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x + (area.width - statusbar->height), area.y);
+        break;
+      case Bottom:
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x, area.height - statusbar->height);
+        break;
+      case Off:
+        XUnmapWindow(globalconf.display, statusbar->window);
+        break;
+    }
+    XSync(globalconf.display, False);
+}
+
 void
 statusbar_draw(Statusbar *statusbar)
 {
@@ -205,42 +238,6 @@ statusbar_init(Statusbar *statusbar, int screen)
 
     statusbar_draw(statusbar);
 }
-
-void
-statusbar_update_position(Statusbar *statusbar)
-{
-    XEvent ev;
-    Area area = get_screen_area(statusbar->screen,
-                                NULL,
-                                &globalconf.screens[statusbar->screen].padding);
-
-    XMapRaised(globalconf.display, statusbar->window);
-    switch(statusbar->position)
-    {
-      default:
-        XMoveWindow(globalconf.display, statusbar->window,
-                    area.x, area.y);
-        break;
-      case Left:
-        XMoveWindow(globalconf.display, statusbar->window,
-                    area.x, (area.y + area.height) - statusbar->width);
-        break;
-      case Right:
-        XMoveWindow(globalconf.display, statusbar->window,
-                    area.x + (area.width - statusbar->height), area.y);
-        break;
-      case Bottom:
-        XMoveWindow(globalconf.display, statusbar->window,
-                    area.x, area.height - statusbar->height);
-        break;
-      case Off:
-        XUnmapWindow(globalconf.display, statusbar->window);
-        break;
-    }
-    XSync(globalconf.display, False);
-    while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &ev));
-}
-
 
 void
 statusbar_refresh()
