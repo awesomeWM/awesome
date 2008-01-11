@@ -251,7 +251,7 @@ handle_event_enternotify(XEvent * e)
     {
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
-                focus(NULL, True, screen);
+                focus(NULL, ev->same_screen, screen);
         if((c = globalconf.focus->client))
             window_grabbuttons(c->screen, c->win, False, False);
     }
