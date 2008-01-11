@@ -327,6 +327,9 @@ main(int argc, char *argv[])
     signal(SIGTERM, &exit_on_signal);
     signal(SIGHUP, &exit_on_signal);
 
+    /* call this to at least grab root window clicks */
+    window_grabbuttons(DefaultScreen(dpy), None, False, True); 
+
     /* main event loop, also reads status text from socket */
     while(running)
     {
