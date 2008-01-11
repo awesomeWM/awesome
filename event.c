@@ -247,11 +247,12 @@ handle_event_enternotify(XEvent * e)
             window_grabbuttons(get_phys_screen(c->screen), c->win, True, False);
         p_delete(&curtags);
     }
-    else {
+    else
+    {
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
                 focus(NULL, True, screen);
-        if ((c = globalconf.focus->client))
+        if((c = globalconf.focus->client))
             window_grabbuttons(c->screen, c->win, False, False);
     }
 }

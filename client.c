@@ -598,7 +598,6 @@ client_unmanage(Client *c)
     if(globalconf.focus->client == c)
         focus(NULL, True, c->screen);
 
-
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
     window_setstate(c->win, WithdrawnState);
 
