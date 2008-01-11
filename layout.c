@@ -73,7 +73,7 @@ arrange(int screen)
     curtags[0]->layout->arrange(screen);
     c = focus_get_current_client(screen);
     focus(c, True, screen);
-    if(c && XQueryPointer(globalconf.display, RootWindow(globalconf.display, screen),
+    if(c && XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)),
                           &root_win, &client_win, &x, &y, &d, &d, &m) &&
             (root_win == None || client_win == None || client_win == root_win))
             window_grabbuttons(c->screen, c->win, False, False);
