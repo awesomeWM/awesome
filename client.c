@@ -277,10 +277,9 @@ focus(Client *c, Bool selscreen, int screen)
     /* save sel in focus history */
     focus_add_client(c);
 
-    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
-
     if(globalconf.focus->client)
     {
+        widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
         XSetInputFocus(globalconf.display,
                        globalconf.focus->client->win, RevertToPointerRoot, CurrentTime);
         for(c = globalconf.clients; c; c = c->next)
