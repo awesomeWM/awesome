@@ -419,16 +419,16 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             client_attach_at_end(c);
     }
 
+    ewmh_update_net_client_list(phys_screen);
+
     /* some windows require this */
     XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,
                       c->geometry.width, c->geometry.height);
 
     if(globalconf.screens[c->screen].new_get_focus)
         focus(c, True, screen);
-    else
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-
-    ewmh_update_net_client_list(phys_screen);
+    
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 
     /* rearrange to display new window */
     arrange(c->screen);
