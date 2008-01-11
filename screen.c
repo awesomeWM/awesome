@@ -227,7 +227,6 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
 
         if(c->ismax)
         {
-            printf("geom: x %d y %d w %d h %d\n", c->geometry.x, c->geometry.y, c->geometry.width, c->geometry.height);
             new_geometry = c->geometry;
 
             /* compute new coords in new screen */
