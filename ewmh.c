@@ -286,9 +286,13 @@ ewmh_process_window_type_atom(Client *c, Atom state)
         c->skip = True;
         c->isfixed = True;
         c->isfloating = True;
+        client_resize(c, c->f_geometry, False);
     }
     else if (state == net_wm_window_type_dialog)
+    {
         c->isfloating = True;
+        client_resize(c, c->f_geometry, False);
+    }
 }
 void
 ewmh_process_client_message(XClientMessageEvent *ev)
