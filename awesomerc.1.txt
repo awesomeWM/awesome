@@ -110,6 +110,8 @@ Tag
     Set number of columns for non-master windows.
 *tag_setnmaster* relative or absolute integer::
     Set number of master windows.
+*tag_create* name::
+    Create a new tag with that name.
 
 Screen
 ~~~~~~
