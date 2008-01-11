@@ -185,8 +185,7 @@ taglist_new(Statusbar *statusbar, cfg_t *config)
     w->button_press = taglist_button_press;
 
     /* Set cache property */
-    w->cache.flags = WIDGET_CACHE_TAGS;
-    w->cache.flags = WIDGET_CACHE_CLIENTS;
+    w->cache.flags = WIDGET_CACHE_TAGS | WIDGET_CACHE_CLIENTS;
 
     return w;
 }
