@@ -207,6 +207,7 @@ main(int argc, char *argv[])
     Display * dpy;
     int shape_event, randr_event_base;
     int screen, screen_count;
+    int i, cmdlen;
     event_handler **handler;
     struct sockaddr_un *addr;
 
@@ -234,6 +235,16 @@ main(int argc, char *argv[])
     /* X stuff */
     if(!(dpy = XOpenDisplay(NULL)))
         eprint("cannot open display\n");
+
+    for(cmdlen = 0, i = 0; i < argc; i++)
+        cmdlen += a_strlen(argv[i] + 1);
+    globalconf.argv = p_new(char, cmdlen);
+    a_strcpy(globalconf.argv, cmdlen, argv[0]);
+    for(i = 1; i < argc; i++)
+    {
+        a_strcat(globalconf.argv, cmdlen, " ");
+        a_strcat(globalconf.argv, cmdlen, argv[i]);
+    }
 
     xfd = ConnectionNumber(dpy);
 

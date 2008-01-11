@@ -313,6 +313,8 @@ struct AwesomeConf
     FocusList *focus;
     /** Link between tags and clients */
     TagClientLink *tclink;
+    /** Command line passed to awesome */
+    char *argv;
 };
 
 void config_parse(const char *);

@@ -37,7 +37,7 @@
 #include "widget.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
-
+#include "xutil.h"
 
 extern AwesomeConf globalconf;
 
@@ -410,6 +410,7 @@ void
 handle_event_randr_screen_change_notify(XEvent *e)
 {
     XRRUpdateConfiguration(e);
+    uicb_exec(0, globalconf.argv);
 }
 
 void
