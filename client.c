@@ -437,12 +437,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
 /** Resize client window
  * \param c client to resize
- * \param x x coord
- * \param y y coord
- * \param w width
- * \param h height
+ * \param geometry new window geometry
  * \param sizehints respect size hints
- * \param volatile_coords register coords in rx/ry/rw/rh
  * \param return True if resize has been done
  */
 Bool
