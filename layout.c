@@ -258,8 +258,8 @@ uicb_tag_setlayout(int screen, char *arg)
 
     if(globalconf.focus->client)
         arrange(screen);
-    else
-        widget_invalidate_cache(screen, WIDGET_CACHE_LAYOUTS);
+
+    widget_invalidate_cache(screen, WIDGET_CACHE_LAYOUTS);
 
     saveawesomeprops(screen);
 }
