@@ -243,11 +243,19 @@ uicb_tag_setlayout(int screen, char *arg)
         curtags = get_current_tags(screen);
         for(i = 0; l && l != curtags[0]->layout; i++, l = l->next);
         p_delete(&curtags);
+
         if(!l)
             i = 0;
-        for(i = compute_new_value_from_arg(arg, (double) i),
-            l = globalconf.screens[screen].layouts; l && i > 0; i--)
-            l = l->next;
+
+        i = compute_new_value_from_arg(arg, (double) i);
+
+        if(i >= 0)
+            for(l = globalconf.screens[screen].layouts; l && i > 0; i--)
+                 l = l->next;
+        else
+            for(l = globalconf.screens[screen].layouts; l && i < 0; i++)
+                 l = l->prev;
+
         if(!l)
             l = globalconf.screens[screen].layouts;
     }

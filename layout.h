@@ -31,6 +31,7 @@ struct Layout
 {
     char *image;
     LayoutArrange *arrange;
+    Layout *prev;
     Layout *next;
 };
 

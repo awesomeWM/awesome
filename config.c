@@ -395,6 +395,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     /* Layouts */
     virtscreen->layouts = layout = p_new(Layout, 1);
     if(cfg_size(cfg_layouts, "layout"))
+    {
         for(i = 0; i < cfg_size(cfg_layouts, "layout"); i++)
         {
             cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
@@ -408,8 +409,15 @@ config_parse_screen(cfg_t *cfg, int screen)
             layout->image = a_strdup(cfg_getstr(cfgsectmp, "image"));
 
             if(i < cfg_size(cfg_layouts, "layout") - 1)
-                layout = layout->next = p_new(Layout, 1);
+            {
+                layout->next = p_new(Layout, 1);
+                layout->next->prev = layout;
+                layout = layout->next;
+            }
         }
+        /* do cycling */
+        virtscreen->layouts->prev = layout;
+    }
     else
     {
         warn("no default layout available\n");
