@@ -71,7 +71,7 @@ handle_event_buttonpress(XEvent *e)
 
     for(screen = 0; screen < globalconf.nscreens; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-            if(statusbar->window == ev->window)
+            if(statusbar->window == ev->window || statusbar->window == ev->subwindow)
                 switch(statusbar->position)
                 {
                   case Top:
