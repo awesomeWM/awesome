@@ -168,8 +168,6 @@ window_settrans(Window win, double opacity)
     }
     else
         XDeleteProperty(globalconf.display, win, XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False));
-
-    XSync(globalconf.display, False);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

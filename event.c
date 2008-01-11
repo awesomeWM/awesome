@@ -187,7 +187,6 @@ handle_event_configurerequest(XEvent * e)
         wc.stack_mode = ev->detail;
         XConfigureWindow(e->xany.display, ev->window, ev->value_mask, &wc);
     }
-    XSync(e->xany.display, False);
 }
 
 void

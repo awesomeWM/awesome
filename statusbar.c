@@ -60,7 +60,6 @@ statusbar_update_position(Statusbar *statusbar)
         XUnmapWindow(globalconf.display, statusbar->window);
         break;
     }
-    XSync(globalconf.display, False);
 }
 
 void

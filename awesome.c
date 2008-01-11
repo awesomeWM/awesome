@@ -381,6 +381,9 @@ main(int argc, char *argv[])
         }
 
         statusbar_refresh();
+
+        /* need to resync */
+        XSync(dpy, False);
     }
 
     if(csfd > 0 && close(csfd))
