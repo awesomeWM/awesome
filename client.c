@@ -884,6 +884,7 @@ client_maximize(Client *c, Area geometry)
     {
         c->wasfloating = c->isfloating;
         c->m_geometry = c->geometry;
+        c->isfloating = False;
         client_resize(c, geometry, False);
         /* set floating after resizing so it won't save
          * coords */
@@ -894,6 +895,12 @@ client_maximize(Client *c, Area geometry)
     else if(c->wasfloating)
     {
         c->isfloating = True;
+        client_resize(c, c->m_geometry, False);
+        restack(c->screen);
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+    }
+    else if(get_current_layout(c->screen)->arrange == layout_floating)
+    {
         client_resize(c, c->m_geometry, False);
         restack(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
