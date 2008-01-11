@@ -229,7 +229,8 @@ main(int argc, char *argv[])
         else
             eprint("options: [-v | -c configfile]\n");
     }
-    /* Tag won't be printed otherwised */
+
+    /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
 
     /* X stuff */
