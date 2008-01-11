@@ -293,6 +293,7 @@ uicb_tag_toggleview(int screen, char *arg)
     saveawesomeprops(screen);
     arrange(screen);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
 void
@@ -314,6 +315,7 @@ tag_view(int screen, int dindex)
     saveawesomeprops(screen);
     arrange(screen);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
 /** View tag
@@ -335,6 +337,7 @@ uicb_tag_view(int screen, char *arg)
         saveawesomeprops(screen);
         arrange(screen);
         ewmh_update_net_current_desktop(get_phys_screen(screen));
+        widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
     }
 }
 
@@ -357,6 +360,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
     }
     arrange(screen);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
 /** View next tag
@@ -380,6 +384,7 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
     saveawesomeprops(screen);
     arrange(screen);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
 /** View previous tag
@@ -402,6 +407,7 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
     }
     p_delete(&curtags);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
 void
@@ -419,6 +425,7 @@ uicb_tag_create(int screen, char *arg)
     tag->mwfact = 0.5;
     tag->nmaster = 1;
     tag->ncol = 1;
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
