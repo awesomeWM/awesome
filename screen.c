@@ -142,7 +142,7 @@ get_screen_bycoord(int x, int y)
     if(!XineramaIsActive(globalconf.display))
         return DefaultScreen(globalconf.display);
 
-    for(i = 0; i < get_screen_count(); i++)
+    for(i = 0; i < globalconf.nscreens; i++)
     {
         area = get_screen_area(i, NULL, NULL);
         if((x < 0 || (x >= area.x && x < area.x + area.width))
@@ -163,7 +163,7 @@ get_screen_count(void)
     if(XineramaIsActive(globalconf.display))
         XineramaQueryScreens(globalconf.display, &screen_number);
     else
-        return ScreenCount(globalconf.display);
+        screen_number = ScreenCount(globalconf.display);
 
     return screen_number;
 }
@@ -301,7 +301,7 @@ move_mouse_pointer_to_screen(int screen)
 void
 uicb_screen_focus(int screen, char *arg)
 {
-    int new_screen, numscreens = get_screen_count();
+    int new_screen;
 
     if(arg)
         new_screen = compute_new_value_from_arg(arg, screen);
@@ -309,8 +309,8 @@ uicb_screen_focus(int screen, char *arg)
         new_screen = screen + 1;
 
     if (new_screen < 0)
-        new_screen = numscreens - 1;
-    if (new_screen > (numscreens - 1))
+        new_screen = globalconf.nscreens - 1;
+    if (new_screen > (globalconf.nscreens - 1))
         new_screen = 0;
 
     focus(focus_get_current_client(new_screen), True, new_screen);
@@ -337,10 +337,10 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     else
         new_screen = sel->screen + 1;
 
-    if(new_screen >= get_screen_count())
+    if(new_screen >= globalconf.nscreens)
         new_screen = 0;
     else if(new_screen < 0)
-        new_screen = get_screen_count() - 1;
+        new_screen = globalconf.nscreens - 1;
 
     prev_screen = sel->screen;
     move_client_to_screen(sel, new_screen, True);

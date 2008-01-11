@@ -285,6 +285,8 @@ struct AwesomeConf
     Display *display;
     /** Logical screens */
     VirtScreen *screens;
+    /** Number of logical screens */
+    int nscreens;
     /** Rules list */
     Rule *rules;
     /** Keys bindings list */

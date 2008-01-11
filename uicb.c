@@ -101,7 +101,7 @@ run_uicb(char *cmd)
         return -1;
     }
     screen = atoi(cmd);
-    if(screen >= get_screen_count() || screen < 0)
+    if(screen >= globalconf.nscreens || screen < 0)
     {
         warn("Invalid screen specified: %i\n", screen);
         return -1;
