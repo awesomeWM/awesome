@@ -161,7 +161,7 @@ get_screen_count(void)
     int screen_number;
 
     if(XineramaIsActive(globalconf.display))
-        XineramaQueryScreens(globalconf.display, &screen_number);
+        XFree(XineramaQueryScreens(globalconf.display, &screen_number));
     else
         screen_number = ScreenCount(globalconf.display);
 
