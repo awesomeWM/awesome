@@ -328,6 +328,7 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
 {
     int new_screen, prev_screen;
     Client *sel = globalconf.focus->client;
+    XEvent event;
 
     if(!sel || !XineramaIsActive(globalconf.display))
         return;
@@ -348,5 +349,7 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     arrange(prev_screen);
     arrange(new_screen);
     focus(sel, True, sel->screen);
+    /* drop EnterWindow event to keep focus */
+    XCheckMaskEvent(globalconf.display, EnterWindowMask, &event);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
