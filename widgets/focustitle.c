@@ -61,7 +61,7 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                   d->align,
                   widget->font->height / 2, widget->font, sel->name,
                   d->fg, d->bg);
-        if(sel->isfloating)
+        if(sel->isfloating || sel->ismax)
             draw_circle(ctx, widget->area.x, widget->area.y,
                         (widget->font->height + 2) / 4,
                         sel->ismax, d->fg);

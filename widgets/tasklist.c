@@ -130,7 +130,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                           d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
-            if(c->isfloating)
+            if(c->isfloating || c->ismax)
                 draw_circle(ctx, widget->area.x + icon_width + box_width * i,
                             widget->area.y,
                             (widget->font->height + 2) / 4,

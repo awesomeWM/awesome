@@ -518,8 +518,10 @@ client_resize(Client *c, Area geometry, Bool sizehints)
         c->geometry.height = wc.height = geometry.height;
         wc.border_width = c->border;
 
-        if(c->isfloating ||
-           get_current_layout(new_screen)->arrange == layout_floating)
+        /* save the floating geometry if the window is floating but not
+         * maximized */
+        if((c->isfloating ||
+           get_current_layout(new_screen)->arrange == layout_floating) && !c->ismax)
             c->f_geometry = geometry;
 
         XConfigureWindow(globalconf.display, c->win,
@@ -884,11 +886,9 @@ client_maximize(Client *c, Area geometry)
     {
         c->wasfloating = c->isfloating;
         c->m_geometry = c->geometry;
-        c->isfloating = False;
+        if(get_current_layout(c->screen)->arrange != layout_floating)
+            c->isfloating = True;
         client_resize(c, geometry, False);
-        /* set floating after resizing so it won't save
-         * coords */
-        c->isfloating = True;
         restack(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
