@@ -132,7 +132,8 @@ widget_invalidate_cache(int screen, int flags)
         statusbar;
         statusbar = statusbar->next)
         for(widget = statusbar->widgets; widget; widget = widget->next)
-            widget->cache.needs_update = (widget->cache.flags & flags);
+            if(widget->cache.flags & flags)
+                widget->cache.needs_update = True;
 }
 
 /** Send command to widget
