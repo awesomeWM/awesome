@@ -63,7 +63,7 @@ typedef struct
 
 extern const name_func_link_t UicbList[];
 extern const name_func_link_t WidgetList[];
-extern const name_func_link_t LayoutsList[];
+extern const name_func_link_t LayoutList[];
 
 static unsigned int
 get_numlockmask(Display *disp)
@@ -375,7 +375,7 @@ config_parse_screen(cfg_t *cfg, int screen)
         for(i = 0; i < cfg_size(cfg_layouts, "layout"); i++)
         {
             cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
-            layout->arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutsList);
+            layout->arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutList);
             if(!layout->arrange)
             {
                 warn("unknown layout %s in configuration file\n", cfg_title(cfgsectmp));
@@ -411,7 +411,7 @@ config_parse_screen(cfg_t *cfg, int screen)
             tag->was_selected = False;
             tmp = cfg_getstr(cfgsectmp, "layout");
             for(layout = virtscreen->layouts;
-                layout && layout->arrange != name_func_lookup(tmp, LayoutsList); layout = layout->next);
+                layout && layout->arrange != name_func_lookup(tmp, LayoutList); layout = layout->next);
             if(!layout)
                 tag->layout = virtscreen->layouts;
             else
