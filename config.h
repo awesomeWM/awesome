@@ -205,8 +205,10 @@ typedef struct FocusList FocusList;
 struct FocusList
 {
     Client *client;
-    FocusList *prev;
+    FocusList *next;
 };
+
+DO_SLIST(FocusList, focus, p_delete);
 
 /** Tag type */
 typedef struct Tag Tag;

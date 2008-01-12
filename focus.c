@@ -31,7 +31,7 @@ focus_get_node_by_client(Client *c)
 {
     FocusList *fl;
 
-    for(fl = globalconf.focus; fl; fl = fl->prev)
+    for(fl = globalconf.focus; fl; fl = fl->next)
         if(fl->client == c)
             return fl;
 
@@ -44,11 +44,11 @@ focus_detach_node(FocusList *fl)
     FocusList *tmp;
 
     if(globalconf.focus == fl)
-        globalconf.focus = fl->prev;
+        globalconf.focus = fl->next;
     else
     {
-        for(tmp = globalconf.focus; tmp && tmp->prev != fl; tmp = tmp->prev);
-        tmp->prev = fl->prev;
+        for(tmp = globalconf.focus; tmp && tmp->next != fl; tmp = tmp->next);
+        tmp->next = fl->next;
     }
 
     return fl;
@@ -61,7 +61,7 @@ focus_attach_node(FocusList *fl)
 
     old_head = globalconf.focus;
     globalconf.focus = fl;
-    fl->prev = old_head;
+    fl->next = old_head;
 
     return fl;
 }
@@ -102,7 +102,7 @@ focus_get_latest_client_for_tags(Tag **t, int nindex)
     Tag **tags;
     int i = 0;
 
-    for(fl = globalconf.focus; fl; fl = fl->prev)
+    for(fl = globalconf.focus; fl; fl = fl->next)
         if(fl->client && !fl->client->skip)
             for(tags = t; *tags; tags++)
                 if(is_client_tagged(fl->client, *tags))
