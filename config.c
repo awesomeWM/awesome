@@ -146,19 +146,17 @@ mouse_button_lookup(const char *button)
 static Button *
 parse_mouse_bindings(cfg_t * cfg, const char *secname, Bool handle_arg)
 {
-    unsigned int i, j;
+    int i, j;
     cfg_t *cfgsectmp;
     Button *b = NULL, *head = NULL;
 
     /* Mouse: layout click bindings */
-    for(i = 0; i < cfg_size(cfg, secname); i++)
+    for(i = cfg_size(cfg, secname) - 1; i >= 0; i--)
     {
-        /* init first elem */
-        if(i == 0)
-            head = b = p_new(Button, 1);
+        b = p_new(Button, 1);
 
         cfgsectmp = cfg_getnsec(cfg, secname, i);
-        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
+        for(j = cfg_size(cfgsectmp, "modkey") - 1; j >= 0; j--)
             b->mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
         b->button = mouse_button_lookup(cfg_getstr(cfgsectmp, "button"));
         b->func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList);
@@ -169,14 +167,7 @@ parse_mouse_bindings(cfg_t * cfg, const char *secname, Bool handle_arg)
         else
             b->arg = NULL;
 
-        /* switch to next elem or finalize the list */
-        if(i < cfg_size(cfg, secname) - 1)
-        {
-            b->next = p_new(Button, 1);
-            b = b->next;
-        }
-        else
-            b->next = NULL;
+        button_list_push(&head, b);
     }
 
     return head;

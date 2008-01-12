@@ -92,6 +92,8 @@ struct Button
     Button *next;
 };
 
+DO_SLIST(Button, button, p_delete);
+
 /** Widget */
 typedef struct Widget Widget;
 typedef struct Statusbar Statusbar;
