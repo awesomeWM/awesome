@@ -48,18 +48,16 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     XEvent ev;
     Area area, geometry;
     Client *c = globalconf.focus->client;
-    Tag **curtags = get_current_tags(screen);
+    Layout *layout = get_current_layout(screen);
 
     if(!c)
         return;
 
-    if((curtags[0]->layout->arrange != layout_floating)
+    if(layout->arrange != layout_floating
         && !c->isfloating)
         uicb_client_togglefloating(screen, (char *) "be nice");
     else
         restack(screen);
-
-    p_delete(&curtags);
 
     area = get_screen_area(c->screen,
                            globalconf.screens[screen].statusbar,
@@ -126,21 +124,21 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     XEvent ev;
     Client *c = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
+    Layout *layout = curtags[0]->layout;
     Area area = { 0, 0, 0, 0 }, geometry;
     double mwfact;
 
     /* only handle floating and tiled layouts */
     if(c && !c->isfixed)
     {
-        if((curtags[0]->layout->arrange == layout_floating) || c->isfloating)
+        if(layout->arrange == layout_floating || c->isfloating)
         {
             restack(screen);
             ocx = c->geometry.x;
             ocy = c->geometry.y;
             c->ismax = False;
         }
-        else if (curtags[0]->layout->arrange == layout_tile
-                 || curtags[0]->layout->arrange == layout_tileleft)
+        else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft)
         {
             for(n = 0, c = globalconf.clients; c; c = c->next)
                 if(IS_TILED(c, screen))
@@ -188,7 +186,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             handle_event_maprequest(&ev);
             break;
         case MotionNotify:
-            if(curtags[0]->layout->arrange == layout_floating || c->isfloating)
+            if(layout->arrange == layout_floating || c->isfloating)
             {
                 if((geometry.width = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
                     geometry.width = 1;
@@ -198,10 +196,9 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.y = c->geometry.y;
                 client_resize(c, geometry, True);
             }
-            else if(curtags[0]->layout->arrange == layout_tile
-                    || curtags[0]->layout->arrange == layout_tileleft)
+            else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft)
             {
-                if(curtags[0]->layout->arrange == layout_tile)
+                if(layout->arrange == layout_tile)
                     mwfact = (double) (ev.xmotion.x - area.x) / area.width;
                 else
                     mwfact = 1 - (double) (ev.xmotion.x - area.x) / area.width;
