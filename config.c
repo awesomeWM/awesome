@@ -265,19 +265,14 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 
     qsort(widgets, numwidgets, sizeof(cfg_t), cmp_widget_cfg);
 
-    for (i = 0; i < numwidgets; i++)
+    for(i = 0; i < numwidgets; i++)
     {
         wptr = widgets + i;
         widget_new = name_func_lookup(cfg_name(wptr), WidgetList);
         if(widget_new)
         {
-            if(!widget)
-                statusbar->widgets = widget = widget_new(statusbar, wptr);
-            else
-            {
-                widget->next = widget_new(statusbar, wptr);
-                widget = widget->next;
-            }
+            widget = widget_new(statusbar, wptr);
+            widget_list_append(&statusbar->widgets, widget);
             widget->buttons = parse_mouse_bindings(wptr, "mouse", a_strcmp(cfg_name(wptr), "taglist"));
         }
         else

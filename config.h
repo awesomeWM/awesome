@@ -132,6 +132,8 @@ struct Widget
     Widget *next;
 };
 
+DO_SLIST(Widget, widget, p_delete);
+
 /** Status bar */
 struct Statusbar
 {
