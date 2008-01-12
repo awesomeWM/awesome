@@ -950,6 +950,7 @@ uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
     if(sel)
     {
         area.x = sel->geometry.x;
+        area.width = sel->geometry.width;
         area.height -= 2 * sel->border;
         client_maximize(sel, area);
     }
@@ -972,6 +973,7 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
     if(sel)
     {
         area.y = sel->geometry.y;
+        area.height = sel->geometry.height;
         area.width -= 2 * sel->border;
         client_maximize(sel, area);
     }
