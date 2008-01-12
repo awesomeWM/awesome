@@ -87,7 +87,7 @@ client_match_rule(Client *c, Rule *r)
 }
 
 Bool
-is_tag_match_rules(Tag *t, Rule *r)
+tag_match_rule(Tag *t, Rule *r)
 {
     regmatch_t tmp;
 
@@ -96,7 +96,6 @@ is_tag_match_rules(Tag *t, Rule *r)
 
     return False;
 }
-
 
 RuleFloat
 rules_get_float_from_str(const char *str)

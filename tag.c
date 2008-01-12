@@ -120,7 +120,7 @@ tag_client_with_rules(Client *c)
                 move_client_to_screen(c, r->screen, True);
 
             for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-                if(is_tag_match_rules(tag, r))
+                if(tag_match_rule(tag, r))
                 {
                     matched = True;
                     tag_client(c, tag);
