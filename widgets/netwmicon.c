@@ -47,26 +47,24 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     widget->area.height = widget->statusbar->height;
 
-    for(r = globalconf.rules; r; r = r->next)
-        if(r->icon && client_match_rule(sel, r))
-        {
-            area = draw_get_image_size(r->icon);
-            widget->area.width = ((double) widget->statusbar->height / (double) area.height)
-                * area.width;
-            if(!widget->user_supplied_x)
-                widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                                         widget->area.width,
-                                                         offset,
-                                                         widget->alignment);
+    if((r = rule_matching_client(sel)) && r->icon)
+    {
+        area = draw_get_image_size(r->icon);
+        widget->area.width = ((double) widget->statusbar->height / (double) area.height)
+            * area.width;
+        if(!widget->user_supplied_x)
+            widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                     widget->area.width,
+                                                     offset,
+                                                     widget->alignment);
 
-            if(!widget->user_supplied_y)
-                widget->area.y = 0;
-            draw_image(ctx, widget->area.x, widget->area.y,
-                       widget->statusbar->height, r->icon);
+        if(!widget->user_supplied_y)
+            widget->area.y = 0;
+        draw_image(ctx, widget->area.x, widget->area.y,
+                   widget->statusbar->height, r->icon);
 
-            return widget->area.width;
-        }
-
+        return widget->area.width;
+    }
 
     if(!(icon = ewmh_get_window_icon(sel->win)))
     {

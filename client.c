@@ -327,19 +327,12 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     client_saveprops(c);
 
     /* attach to the stack */
-    for(rule = globalconf.rules; rule; rule = rule->next)
-        if(rule->not_master && client_match_rule(c, rule))
-        {
-            client_list_append(&globalconf.clients, c);
-            break;
-        }
-    if(!rule)
-    {
-        if(globalconf.screens[c->screen].new_become_master)
-            client_list_push(&globalconf.clients, c);
-        else
-            client_list_append(&globalconf.clients, c);
-    }
+    if((rule = rule_matching_client(c)) && rule->not_master)
+        client_list_append(&globalconf.clients, c);
+    else if(globalconf.screens[c->screen].new_become_master)
+        client_list_push(&globalconf.clients, c);
+    else
+        client_list_append(&globalconf.clients, c);
 
     ewmh_update_net_client_list(phys_screen);
 

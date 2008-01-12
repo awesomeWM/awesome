@@ -42,7 +42,7 @@ rules_compile_regex(char *val)
     return NULL;
 }
 
-Bool
+static Bool
 client_match_rule(Client *c, Rule *r)
 {
     char *prop, buf[512];
@@ -95,6 +95,17 @@ tag_match_rule(Tag *t, Rule *r)
         return True;
 
     return False;
+}
+
+Rule *
+rule_matching_client(Client *c)
+{
+    Rule *r;
+    for(r = globalconf.rules; r; r = r->next)
+        if(client_match_rule(c, r))
+            return r;
+
+    return NULL;
 }
 
 RuleFloat
