@@ -243,6 +243,8 @@ struct TagClientLink
     TagClientLink *next;
 };
 
+DO_SLIST(TagClientLink, tcl, p_delete);
+
 /** Padding type */
 typedef struct
 {

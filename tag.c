@@ -32,43 +32,19 @@
 
 extern AwesomeConf globalconf;
 
-static void
-detach_tagclientlink(TagClientLink *tc)
-{
-    TagClientLink *tmp;
-
-    if(globalconf.tclink == tc)
-        globalconf.tclink = tc->next;
-    else
-    {
-        for(tmp = globalconf.tclink; tmp && tmp->next != tc; tmp = tmp->next);
-        tmp->next = tc->next;
-    }
-    
-    p_delete(&tc);
-}
-
 void
 tag_client(Client *c, Tag *t)
 {
-    TagClientLink *tc, *new_tc;
+    TagClientLink *tc;
 
     /* don't tag twice */
     if(is_client_tagged(c, t))
         return;
 
-    new_tc = p_new(TagClientLink, 1);
-
-    if(!globalconf.tclink)
-        globalconf.tclink = new_tc;
-    else
-    {
-        for(tc = globalconf.tclink; tc->next; tc = tc->next);
-        tc->next = new_tc;
-    }
-
-    new_tc->client = c;
-    new_tc->tag = t;
+    tc = p_new(TagClientLink, 1);
+    tc->client = c;
+    tc->tag = t;
+    tcl_list_push(&globalconf.tclink, tc);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
@@ -81,7 +57,8 @@ untag_client(Client *c, Tag *t)
     for(tc = globalconf.tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
         {
-            detach_tagclientlink(tc);
+            tcl_list_detach(&globalconf.tclink, tc);
+            p_delete(&tc);
             break;
         }
 
