@@ -148,7 +148,7 @@ distcheck-hook: git-version-check
 
 git-version-check:
 	git_ver=`{ test -d $(top_srcdir)/.git && git --git-dir=$(top_srcdir)/.git describe 2> /dev/null; } || echo devel`; \
-	if test "x$${git_ver}" = "x$(PACKAGE_VERSION)"; then :; else \
+	if test "x$${git_ver}" = "x$(PACKAGE_VERSION)" -o "x$${git_ver}" = "xv${PACKAGE_VERSION}"; then :; else \
 		echo "ERROR: The PACKAGE_VERSION and the 'git describe' version do not match:"; \
 		echo "         current git version:     $${git_ver}"; \
 		echo "         current package version: $(PACKAGE_VERSION)"; \
