@@ -23,6 +23,8 @@
 #define AWESOME_LAYOUT_H
 
 #include "uicb.h"
+#include "list.h"
+#include "util.h"
 
 typedef void (LayoutArrange)(int);
 
@@ -31,9 +33,10 @@ struct Layout
 {
     char *image;
     LayoutArrange *arrange;
-    Layout *prev;
     Layout *next;
 };
+
+DO_SLIST(Layout, layout, p_delete);
 
 void arrange(int);
 Layout * get_current_layout(int);

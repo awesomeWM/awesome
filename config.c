@@ -291,9 +291,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     cfg_t *cfg_general, *cfg_colors, *cfg_screen, *cfg_tags,
           *cfg_layouts, *cfg_padding, *cfgsectmp;
     VirtScreen *virtscreen = &globalconf.screens[screen];
-    unsigned int i;
-    int j;
-    int phys_screen = get_phys_screen(screen);
+    int i, phys_screen = get_phys_screen(screen);
 
     snprintf(buf, sizeof(buf), "%d", screen);
     cfg_screen = cfg_gettsec(cfg, "screen", buf);
@@ -352,10 +350,10 @@ config_parse_screen(cfg_t *cfg, int screen)
     /* Statusbar */
 
     statusbar_list_init(&virtscreen->statusbar);
-    for(j = cfg_size(cfg_screen, "statusbar") - 1; j >= 0; j--)
+    for(i = cfg_size(cfg_screen, "statusbar") - 1; i >= 0; i--)
     {
         statusbar = p_new(Statusbar, 1);
-        cfgsectmp = cfg_getnsec(cfg_screen, "statusbar", j);
+        cfgsectmp = cfg_getnsec(cfg_screen, "statusbar", i);
         statusbar->position = statusbar->dposition =
             statusbar_get_position_from_str(cfg_getstr(cfgsectmp, "position"));
         statusbar->height = cfg_getint(cfgsectmp, "height");
@@ -366,11 +364,11 @@ config_parse_screen(cfg_t *cfg, int screen)
     }
 
     /* Layouts */
-    virtscreen->layouts = layout = p_new(Layout, 1);
-    if(cfg_size(cfg_layouts, "layout"))
-    {
-        for(i = 0; i < cfg_size(cfg_layouts, "layout"); i++)
+    layout_list_init(&virtscreen->layouts);
+    if((i = cfg_size(cfg_layouts, "layout")))
+        for(--i; i >= 0; i--)
         {
+            layout = p_new(Layout, 1);
             cfgsectmp = cfg_getnsec(cfg_layouts, "layout", i);
             layout->arrange = name_func_lookup(cfg_title(cfgsectmp), LayoutList);
             if(!layout->arrange)
@@ -381,16 +379,8 @@ config_parse_screen(cfg_t *cfg, int screen)
             }
             layout->image = a_strdup(cfg_getstr(cfgsectmp, "image"));
 
-            if(i < cfg_size(cfg_layouts, "layout") - 1)
-            {
-                layout->next = p_new(Layout, 1);
-                layout->next->prev = layout;
-                layout = layout->next;
-            }
+            layout_list_push(&virtscreen->layouts, layout);
         }
-        /* do cycling */
-        virtscreen->layouts->prev = layout;
-    }
     else
     {
         warn("no default layout available\n");
@@ -399,11 +389,11 @@ config_parse_screen(cfg_t *cfg, int screen)
 
     /* Tags */
     tag_list_init(&virtscreen->tags);
-    if((j = cfg_size(cfg_tags, "tag")))
-        for(--j; j >= 0; j--)
+    if((i = cfg_size(cfg_tags, "tag")))
+        for(--i; i >= 0; i--)
         {
             tag = p_new(Tag, 1);
-            cfgsectmp = cfg_getnsec(cfg_tags, "tag", j);
+            cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
             tag->name = a_strdup(cfg_title(cfgsectmp));
             tag->selected = False;
             tag->was_selected = False;

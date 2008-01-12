@@ -251,7 +251,7 @@ uicb_tag_setlayout(int screen, char *arg)
                  l = l->next;
         else
             for(l = globalconf.screens[screen].layouts; l && i < 0; i++)
-                 l = l->prev;
+                 l = layout_list_prev_cycle(&globalconf.screens[screen].layouts, l);
 
         if(!l)
             l = globalconf.screens[screen].layouts;

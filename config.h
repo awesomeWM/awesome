@@ -25,8 +25,6 @@
 #include <regex.h>
 #include "draw.h"
 #include "layout.h"
-#include "util.h"
-#include "list.h"
 
 /** Bar possible position */
 typedef enum
