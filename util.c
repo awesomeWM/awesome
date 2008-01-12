@@ -68,13 +68,13 @@ compute_new_value_from_arg(const char *arg, double current_value)
 
 
 /** Lookup for a function pointer from its name
- * in the given NameFuncLink list
+ * in the given name_func_link_t list
  * \param funcname Function name
  * \param list Function and name link list
  * \return function pointer
  */
 void *
-name_func_lookup(const char *funcname, const NameFuncLink * list)
+name_func_lookup(const char *funcname, const name_func_link_t *list)
 {
     int i;
 

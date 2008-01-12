@@ -61,10 +61,9 @@ typedef struct
     unsigned int button;
 } MouseButton;
 
-extern const NameFuncLink UicbList[];
-extern const NameFuncLink WidgetList[];
-extern const NameFuncLink LayoutsList[];
-
+extern const name_func_link_t UicbList[];
+extern const name_func_link_t WidgetList[];
+extern const name_func_link_t LayoutsList[];
 
 static unsigned int
 get_numlockmask(Display *disp)

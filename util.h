@@ -31,7 +31,7 @@ typedef struct
 {
     const char *name;
     void *func;
-} NameFuncLink;
+} name_func_link_t;
 
 /** \brief replace \c NULL strings with emtpy strings */
 #define NONULL(x)       (x ? x : "")
@@ -220,7 +220,7 @@ void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(pr
 void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
 double compute_new_value_from_arg(const char *, double);
 void warn(const char *, ...) __attribute__ ((format(printf, 1, 2)));
-void *name_func_lookup(const char *, const NameFuncLink *);
+void *name_func_lookup(const char *, const name_func_link_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

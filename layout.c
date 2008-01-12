@@ -38,7 +38,7 @@
 
 extern AwesomeConf globalconf;
 
-const NameFuncLink LayoutsList[] =
+const name_func_link_t LayoutsList[] =
 {
     {"tile", layout_tile},
     {"tileleft", layout_tileleft},

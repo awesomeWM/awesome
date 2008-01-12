@@ -27,7 +27,7 @@
 
 extern AwesomeConf globalconf;
 
-const NameFuncLink WidgetList[] =
+const name_func_link_t WidgetList[] =
 {
     {"taglist", taglist_new},
     {"layoutinfo", layoutinfo_new},

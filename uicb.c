@@ -33,7 +33,7 @@
 
 extern AwesomeConf globalconf;
 
-const NameFuncLink UicbList[] =
+const name_func_link_t UicbList[] =
 {
     /* xutil.c */
     {"spawn", uicb_spawn},
