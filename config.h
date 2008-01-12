@@ -66,6 +66,8 @@ struct Rule
     Rule *next;
 };
 
+DO_SLIST(Rule, rule, p_delete);
+
 typedef struct AwesomeConf AwesomeConf;
 
 typedef struct Key Key;
@@ -190,7 +192,6 @@ struct Client
     /** True if the client is a new one */
     Bool newcomer;
 };
-
 
 DO_SLIST(Client, client, p_delete);
 

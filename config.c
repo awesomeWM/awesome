@@ -738,8 +738,7 @@ config_parse(const char *confpatharg)
         CFG_END()
     };
     cfg_t *cfg, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp;
-    int ret, screen;
-    unsigned int i = 0;
+    int ret, screen, i;
     const char *homedir;
     char *confpath;
     ssize_t confpath_len;
@@ -788,31 +787,24 @@ config_parse(const char *confpatharg)
     cfg_mouse = cfg_getsec(cfg, "mouse");
 
     /* Rules */
-    if(cfg_size(cfg_rules, "rule"))
+    rule_list_init(&globalconf.rules);
+    for(i = cfg_size(cfg_rules, "rule") - 1; i >= 0; i--)
     {
-        globalconf.rules = rule = p_new(Rule, 1);
-        for(i = 0; i < cfg_size(cfg_rules, "rule"); i++)
-        {
-            cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
-            rule->prop_r = rules_compile_regex(cfg_getstr(cfgsectmp, "name"));
-            rule->tags_r = rules_compile_regex(cfg_getstr(cfgsectmp, "tags"));
-            rule->xprop = a_strdup(cfg_getstr(cfgsectmp, "xproperty_name"));
-            rule->xpropval_r = rules_compile_regex(cfg_getstr(cfgsectmp, "xproperty_value"));
-            rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
-            rule->isfloating = rules_get_float_from_str(cfg_getstr(cfgsectmp, "float"));
-            rule->screen = cfg_getint(cfgsectmp, "screen");
-            rule->not_master = cfg_getbool(cfgsectmp, "not_master");
-            if(rule->screen >= globalconf.nscreens)
-                rule->screen = 0;
+        rule = p_new(Rule, 1);
+        cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
+        rule->prop_r = rules_compile_regex(cfg_getstr(cfgsectmp, "name"));
+        rule->tags_r = rules_compile_regex(cfg_getstr(cfgsectmp, "tags"));
+        rule->xprop = a_strdup(cfg_getstr(cfgsectmp, "xproperty_name"));
+        rule->xpropval_r = rules_compile_regex(cfg_getstr(cfgsectmp, "xproperty_value"));
+        rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
+        rule->isfloating = rules_get_float_from_str(cfg_getstr(cfgsectmp, "float"));
+        rule->screen = cfg_getint(cfgsectmp, "screen");
+        rule->not_master = cfg_getbool(cfgsectmp, "not_master");
+        if(rule->screen >= globalconf.nscreens)
+            rule->screen = 0;
 
-            if(i < cfg_size(cfg_rules, "rule") - 1)
-                rule = rule->next = p_new(Rule, 1);
-            else
-                rule->next = NULL;
-        }
+        rule_list_push(&globalconf.rules, rule);
     }
-    else
-        globalconf.rules = NULL;
 
     /* Mouse: root window click bindings */
     globalconf.buttons.root = parse_mouse_bindings(cfg_mouse, "root", True);
