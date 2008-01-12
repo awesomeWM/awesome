@@ -38,34 +38,6 @@ focus_get_node_by_client(Client *c)
     return NULL;
 }
 
-static FocusList *
-focus_detach_node(FocusList *fl)
-{
-    FocusList *tmp;
-
-    if(globalconf.focus == fl)
-        globalconf.focus = fl->next;
-    else
-    {
-        for(tmp = globalconf.focus; tmp && tmp->next != fl; tmp = tmp->next);
-        tmp->next = fl->next;
-    }
-
-    return fl;
-}
-
-static FocusList *
-focus_attach_node(FocusList *fl)
-{
-    FocusList *old_head;
-
-    old_head = globalconf.focus;
-    globalconf.focus = fl;
-    fl->next = old_head;
-
-    return fl;
-}
-
 void
 focus_add_client(Client *c)
 {
@@ -78,9 +50,9 @@ focus_add_client(Client *c)
         new_fh->client = c;
     }
     else /* if we've got a node, detach it */
-        focus_detach_node(new_fh);
+        focus_list_detach(&globalconf.focus, new_fh);
 
-    focus_attach_node(new_fh);
+    focus_list_push(&globalconf.focus, new_fh);
 }
 
 void
@@ -90,7 +62,7 @@ focus_delete_client(Client *c)
 
     if(target)
     {
-        focus_detach_node(target);
+        focus_list_detach(&globalconf.focus, target);
         p_delete(&target);
     }
 }
