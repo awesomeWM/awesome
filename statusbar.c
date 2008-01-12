@@ -62,7 +62,7 @@ statusbar_update_position(Statusbar *statusbar)
     }
 }
 
-void
+static void
 statusbar_draw(Statusbar *statusbar)
 {
     int phys_screen = get_phys_screen(statusbar->screen);
