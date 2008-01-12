@@ -146,7 +146,7 @@ uicb_widget_tell(int screen, char *arg)
 {
     Widget *widget;
     char *p, *command;
-    int len;
+    ssize_t len;
 
     if (!arg)
     {
@@ -169,11 +169,12 @@ uicb_widget_tell(int screen, char *arg)
         return;
     }
 
-    if(p + a_strlen(p) < arg+len)
+    if(p + a_strlen(p) < arg + len)
     {
         p = p + a_strlen(p) + 1;
-        command = p_new(char, a_strlen(p) + 1);
-        strncpy(command, p, a_strlen(p));
+        len = a_strlen(p);
+        command = p_new(char, len + 1);
+        a_strncpy(command, len + 1, p, len);
         widget->tell(widget, command);
         p_delete(&command);
     }
