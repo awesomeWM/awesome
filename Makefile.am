@@ -83,6 +83,7 @@ awesome_SOURCES = \
 	tag.c tag.h \
 	util.c util.h \
 	xutil.c xutil.h \
+	list.h \
 	config.c config.h \
 	screen.c screen.h \
 	statusbar.c statusbar.h \
