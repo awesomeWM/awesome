@@ -398,11 +398,12 @@ config_parse_screen(cfg_t *cfg, int screen)
     }
 
     /* Tags */
-    virtscreen->tags = tag = p_new(Tag, 1);
-    if(cfg_size(cfg_tags, "tag"))
-        for(i = 0; i < cfg_size(cfg_tags, "tag"); i++)
+    tag_list_init(&virtscreen->tags);
+    if((j = cfg_size(cfg_tags, "tag")))
+        for(--j; j >= 0; j--)
         {
-            cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
+            tag = p_new(Tag, 1);
+            cfgsectmp = cfg_getnsec(cfg_tags, "tag", j);
             tag->name = a_strdup(cfg_title(cfgsectmp));
             tag->selected = False;
             tag->was_selected = False;
@@ -417,10 +418,7 @@ config_parse_screen(cfg_t *cfg, int screen)
             tag->nmaster = cfg_getint(cfgsectmp, "nmaster");
             tag->ncol = cfg_getint(cfgsectmp, "ncol");
 
-            if(i < cfg_size(cfg_tags, "tag") - 1)
-                tag = tag->next = p_new(Tag, 1);
-            else
-                tag->next = NULL;
+            tag_list_push(&virtscreen->tags, tag);
         }
     else
     {

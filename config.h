@@ -232,6 +232,8 @@ struct Tag
     Tag *next;
 };
 
+DO_SLIST(Tag, tag, p_delete);
+
 /** TagClientLink type */
 typedef struct TagClientLink TagClientLink;
 struct TagClientLink
