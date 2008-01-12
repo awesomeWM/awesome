@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef AWESOME_MEM_H
-#define AWESOME_MEM_H
+#ifndef AWESOME_UTIL_H
+#define AWESOME_UTIL_H
 
 #include <string.h>
 #include <stdlib.h>
