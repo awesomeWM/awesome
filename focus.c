@@ -26,14 +26,14 @@
 
 extern AwesomeConf globalconf;
 
-static FocusList *
+static client_node_t *
 focus_get_node_by_client(Client *c)
 {
-    FocusList *fl;
+    client_node_t *node;
 
-    for(fl = globalconf.focus; fl; fl = fl->next)
-        if(fl->client == c)
-            return fl;
+    for(node = globalconf.focus; node; node = node->next)
+        if(node->client == c)
+            return node;
 
     return NULL;
 }
@@ -41,46 +41,46 @@ focus_get_node_by_client(Client *c)
 void
 focus_add_client(Client *c)
 {
-    FocusList *new_fh;
+    client_node_t *node;
 
     /* if we don't find this node, create a new one */
-    if(!(new_fh = focus_get_node_by_client(c)))
+    if(!(node = focus_get_node_by_client(c)))
     {
-        new_fh = p_new(FocusList, 1);
-        new_fh->client = c;
+        node = p_new(client_node_t, 1);
+        node->client = c;
     }
     else /* if we've got a node, detach it */
-        focus_list_detach(&globalconf.focus, new_fh);
+        client_node_list_detach(&globalconf.focus, node);
 
-    focus_list_push(&globalconf.focus, new_fh);
+    client_node_list_push(&globalconf.focus, node);
 }
 
 void
 focus_delete_client(Client *c)
 {
-    FocusList *target = focus_get_node_by_client(c);
+    client_node_t *node = focus_get_node_by_client(c);
 
-    if(target)
+    if(node)
     {
-        focus_list_detach(&globalconf.focus, target);
-        p_delete(&target);
+        client_node_list_detach(&globalconf.focus, node);
+        p_delete(&node);
     }
 }
 
 static Client *
 focus_get_latest_client_for_tags(Tag **t, int nindex)
 {
-    FocusList *fl;
+    client_node_t *node;
     Tag **tags;
     int i = 0;
 
-    for(fl = globalconf.focus; fl; fl = fl->next)
-        if(fl->client && !fl->client->skip)
+    for(node = globalconf.focus; node; node = node->next)
+        if(node->client && !node->client->skip)
             for(tags = t; *tags; tags++)
-                if(is_client_tagged(fl->client, *tags))
+                if(is_client_tagged(node->client, *tags))
                 {
                     if(i == nindex)
-                        return fl->client;
+                        return node->client;
                     else
                         i--;
                 }

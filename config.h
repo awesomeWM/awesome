@@ -201,14 +201,14 @@ struct Client
 
 DO_SLIST(Client, client, p_delete);
 
-typedef struct FocusList FocusList;
-struct FocusList
+typedef struct client_node_t client_node_t;
+struct client_node_t
 {
     Client *client;
-    FocusList *next;
+    client_node_t *next;
 };
 
-DO_SLIST(FocusList, focus, p_delete);
+DO_SLIST(client_node_t, client_node, p_delete);
 
 /** Tag type */
 typedef struct Tag Tag;
@@ -327,8 +327,8 @@ struct AwesomeConf
     Client *clients;
     /** Path to config file */
     char *configpath;
-    /** Selected clients on this tag */
-    FocusList *focus;
+    /** Selected clients history */
+    client_node_t *focus;
     /** Link between tags and clients */
     TagClientLink *tclink;
     /** Command line passed to awesome */
