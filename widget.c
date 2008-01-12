@@ -154,26 +154,26 @@ uicb_widget_tell(int screen, char *arg)
         return;
     }
 
-    len = strlen(arg);
+    len = a_strlen(arg);
     p = strtok(arg, " ");
-    if (!p)
+    if(!p)
     {
         warn("Ignoring malformed widget command.\n");
         return;
     }
 
     widget = widget_find(p, screen);
-    if (!widget)
+    if(!widget)
     {
         warn("No such widget: %s\n", p);
         return;
     }
 
-    if (p+strlen(p) < arg+len)
+    if(p + a_strlen(p) < arg+len)
     {
-        p = p + strlen(p) + 1;
-        command = p_new(char, strlen(p)+1);
-        strncpy(command, p, strlen(p));
+        p = p + a_strlen(p) + 1;
+        command = p_new(char, a_strlen(p) + 1);
+        strncpy(command, p, a_strlen(p));
         widget->tell(widget, command);
         p_delete(&command);
     }
