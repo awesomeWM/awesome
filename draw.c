@@ -88,8 +88,14 @@ draw_text(DrawCtx *ctx,
     cairo_font_face_t *font_face;
     cairo_surface_t *surface;
     cairo_t *cr;
+    Area rectangle;
 
-    draw_rectangle(ctx, x, y, w, h, True, bg);
+    rectangle.x = x;
+    rectangle.y = y;
+    rectangle.width = w;
+    rectangle.height = h;
+
+    draw_rectangle(ctx, rectangle, True, bg);
 
     olen = len = a_strlen(text);
 
@@ -140,8 +146,14 @@ draw_text(DrawCtx *ctx,
     cairo_surface_destroy(surface);
 }
 
+/** Draw rectangle
+ * \param ctx Draw context
+ * \param geometry geometry
+ * \param filled filled rectangle?
+ * \param color color to use
+ */
 void
-draw_rectangle(DrawCtx *ctx, int x, int y, int w, int h, Bool filled, XColor color)
+draw_rectangle(DrawCtx *ctx, Area geometry, Bool filled, XColor color)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -154,11 +166,11 @@ draw_rectangle(DrawCtx *ctx, int x, int y, int w, int h, Bool filled, XColor col
     cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
     if(filled)
     {
-        cairo_rectangle(cr, x, y, w, h);
+        cairo_rectangle(cr, geometry.x, geometry.y, geometry.width, geometry.height);
         cairo_fill(cr);
     }
     else
-        cairo_rectangle(cr, x + 1, y, w - 1, h - 1);
+        cairo_rectangle(cr, geometry.x + 1, geometry.y, geometry.width - 1, geometry.height - 1);
 
     cairo_stroke(cr);
 
@@ -274,8 +286,6 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
     cairo_destroy(cr);
     cairo_surface_destroy(source);
     cairo_surface_destroy(surface);
-
-
 }
 
 Area

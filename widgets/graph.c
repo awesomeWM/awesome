@@ -46,14 +46,13 @@ typedef struct
     int line_max_index;     /* Index of the current maximum value */
 } Data;
 
-
-
 static int
 graph_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     int margin_top, left_offset;
     Data *d = widget->data;
+    Area rectangle;
 
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
@@ -69,16 +68,17 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     if(!(d->box_height))
         d->box_height = (int) (widget->statusbar->height * d->height + 0.5) - 2;
 
+    rectangle.x = left_offset;
+    rectangle.y = margin_top;
+    rectangle.width = d->lines_size + 2;
+    rectangle.height = d->box_height + 2;
+    draw_rectangle(ctx, rectangle, False, d->bordercolor);
 
-    draw_rectangle(ctx,
-        left_offset, margin_top,
-        d->lines_size + 2, d->box_height + 2,
-        False, d->bordercolor);
-
-    draw_rectangle(ctx,
-        left_offset + 1, margin_top + 1,
-        d->lines_size, d->box_height,
-        True, d->bg);
+    rectangle.x++;
+    rectangle.y++;
+    rectangle.width -= 2;
+    rectangle.height -= 2;
+    draw_rectangle(ctx, rectangle, True, d->bg);
 
     if(d->lines[d->lines_index] < 0)
         d->lines[d->lines_index] = 0;
@@ -125,7 +125,7 @@ graph_tell(Widget *widget, char *command)
         {
             /* find the new max */
             for (i = 0; i < d->lines_size; i++)
-                if (d->line_values[i] > d->line_values[d->line_max_index]) 
+                if (d->line_values[i] > d->line_values[d->line_max_index])
                     d->line_max_index = i;
 
             d->current_max = MAX(d->line_values[d->line_max_index], d->max);

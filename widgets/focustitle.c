@@ -67,8 +67,13 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                         sel->ismax, d->fg);
     }
     else
-        draw_rectangle(ctx, widget->area.x, widget->area.y,
-                       widget->statusbar->width - used, widget->statusbar->height, True, d->bg);
+    {
+        Area rectangle = { widget->area.x,
+                           widget->area.y,
+                           widget->statusbar->width - used,
+                           widget->statusbar->height };
+        draw_rectangle(ctx, rectangle, True, d->bg);
+    }
 
     widget->area.width = widget->statusbar->width - used;
     widget->area.height = widget->statusbar->height;

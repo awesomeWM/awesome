@@ -105,10 +105,13 @@ taglist_draw(Widget *widget,
                   colors[ColFG],
                   colors[ColBG]);
         if(isoccupied(tag))
-            draw_rectangle(ctx,
-                           widget->area.x + widget->area.width, widget->area.y,
-                           flagsize, flagsize,
-                           sel && is_client_tagged(sel, tag), colors[ColFG]);
+        {
+            Area rectangle = { widget->area.x + widget->area.width,
+                               widget->area.y,
+                               flagsize,
+                               flagsize };
+            draw_rectangle(ctx, rectangle, sel && is_client_tagged(sel, tag), colors[ColFG]);
+        }
         widget->area.width += w;
     }
 

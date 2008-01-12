@@ -55,6 +55,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     int i, width, pwidth, margin_top, pb_height, left_offset;
+    Area rectangle;
 
     Data *d = widget->data;
 
@@ -80,22 +81,30 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     {
         pwidth = (int) d->percent[i] ? ((width - 2) * d->percent[i]) / 100 : 0;
 
-        draw_rectangle(ctx,
-                       left_offset, margin_top,
-                       width, pb_height,
-                       False, d->bordercolor[i]);
+        rectangle.x = left_offset;
+        rectangle.y = margin_top;
+        rectangle.width = width;
+        rectangle.height = pb_height;
+
+        draw_rectangle(ctx, rectangle, False, d->bordercolor[i]);
 
         if(pwidth > 0)
-            draw_rectangle(ctx,
-                           left_offset + 1, margin_top + 1,
-                           pwidth, pb_height - 2,
-                           True, d->fg[i]);
+        {
+            rectangle.x = left_offset + 1;
+            rectangle.y = margin_top + 1;
+            rectangle.width = pwidth;
+            rectangle.height = pb_height - 2;
+            draw_rectangle(ctx, rectangle, True, d->fg[i]);
+        }
 
         if(width - 2 - pwidth > 0) /* not filled area */
-            draw_rectangle(ctx,
-                           left_offset + 1 + pwidth, margin_top + 1,
-                           width - 2 - pwidth, pb_height - 2,
-                           True, d->bg[i]);
+        {
+            rectangle.x = left_offset + 1 + pwidth;
+            rectangle.y = margin_top + 1;
+            rectangle.width = width - 2 - pwidth;
+            rectangle.height = pb_height - 2;
+            draw_rectangle(ctx, rectangle, True, d->bg[i]);
+        }
 
         margin_top += (pb_height + d->gap);
     }
