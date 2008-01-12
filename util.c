@@ -28,6 +28,9 @@
 
 #include "util.h"
 
+/** Print error and exit
+ * with EXIT_FAILURE code
+ */
 void
 eprint(const char *fmt, ...)
 {
@@ -40,6 +43,9 @@ eprint(const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
+/** Print error message
+ * on stderr
+ */
 void
 warn(const char *fmt, ...)
 {
@@ -50,6 +56,13 @@ warn(const char *fmt, ...)
     va_end(ap);
 }
 
+/** Compute a value from a string containing
+ * an absolute or a relative number. If relative,
+ * add it to current_value.
+ * \param arg the string with the number
+ * \param current_value value to add the number if it's relative
+ * \return new value
+ */
 double
 compute_new_value_from_arg(const char *arg, double current_value)
 {
@@ -65,7 +78,6 @@ compute_new_value_from_arg(const char *arg, double current_value)
 
     return current_value;
 }
-
 
 /** Lookup for a function pointer from its name
  * in the given name_func_link_t list
