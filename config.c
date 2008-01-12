@@ -292,6 +292,7 @@ config_parse_screen(cfg_t *cfg, int screen)
           *cfg_layouts, *cfg_padding, *cfgsectmp;
     VirtScreen *virtscreen = &globalconf.screens[screen];
     unsigned int i;
+    int j;
     int phys_screen = get_phys_screen(screen);
 
     snprintf(buf, sizeof(buf), "%d", screen);
@@ -350,22 +351,18 @@ config_parse_screen(cfg_t *cfg, int screen)
 
     /* Statusbar */
 
-    if(cfg_size(cfg_screen, "statusbar"))
+    statusbar_list_init(&virtscreen->statusbar);
+    for(j = cfg_size(cfg_screen, "statusbar") - 1; j >= 0; j--)
     {
-        virtscreen->statusbar = statusbar = p_new(Statusbar, 1);
-        for(i = 0; i < cfg_size(cfg_screen, "statusbar"); i++)
-        {
-            cfgsectmp = cfg_getnsec(cfg_screen, "statusbar", i);
-            statusbar->position = statusbar->dposition =
-                statusbar_get_position_from_str(cfg_getstr(cfgsectmp, "position"));
-            statusbar->height = cfg_getint(cfgsectmp, "height");
-            statusbar->width = cfg_getint(cfgsectmp, "width");
-            statusbar->name = a_strdup(cfg_title(cfgsectmp));
-            create_widgets(cfgsectmp, statusbar);
-
-            if(i < cfg_size(cfg_screen, "statusbar") - 1)
-                statusbar = statusbar->next = p_new(Statusbar, 1);
-        }
+        statusbar = p_new(Statusbar, 1);
+        cfgsectmp = cfg_getnsec(cfg_screen, "statusbar", j);
+        statusbar->position = statusbar->dposition =
+            statusbar_get_position_from_str(cfg_getstr(cfgsectmp, "position"));
+        statusbar->height = cfg_getint(cfgsectmp, "height");
+        statusbar->width = cfg_getint(cfgsectmp, "width");
+        statusbar->name = a_strdup(cfg_title(cfgsectmp));
+        create_widgets(cfgsectmp, statusbar);
+        statusbar_list_append(&virtscreen->statusbar, statusbar);
     }
 
     /* Layouts */

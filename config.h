@@ -161,6 +161,8 @@ struct Statusbar
     Statusbar *next;
 };
 
+DO_SLIST(Statusbar, statusbar, p_delete);
+
 typedef struct Client Client; 
 struct Client
 {
