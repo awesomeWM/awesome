@@ -32,7 +32,7 @@ long window_getstate(Window);
 Status window_configure(Window, Area, int);
 void window_grabbuttons(int, Window, Bool, Bool);
 void window_setshape(int, Window);
-void window_settrans(Window, double);
+int window_settrans(Window, double);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

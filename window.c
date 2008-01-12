@@ -31,6 +31,7 @@ extern AwesomeConf globalconf;
 /** Set client WM_STATE property
  * \param win Window
  * \param state state
+ * \return XChangeProperty result
  */
 int
 window_setstate(Window win, long state)
@@ -82,8 +83,6 @@ window_configure(Window win, Area geometry, int border)
     ce.override_redirect = False;
     return XSendEvent(globalconf.display, win, False, StructureNotifyMask, (XEvent *) & ce);
 }
-
-
 
 /** Grab or ungrab buttons on a window
  * \param screen The screen
@@ -155,19 +154,24 @@ window_setshape(int screen, Window win)
         XShapeCombineShape(globalconf.display, RootWindow(globalconf.display, screen), ShapeBounding, 0, 0, win, ShapeBounding, ShapeSet);
 }
 
-void
+int
 window_settrans(Window win, double opacity)
 {
+    int status;
     unsigned int real_opacity = 0xffffffff;
 
     if(opacity >= 0 && opacity <= 100)
     {
         real_opacity = ((opacity / 100.0) * 0xffffffff);
-        XChangeProperty(globalconf.display, win, XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False),
-                        XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &real_opacity, 1L);
+        status = XChangeProperty(globalconf.display, win,
+                                 XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False),
+                                 XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &real_opacity, 1L);
     }
     else
-        XDeleteProperty(globalconf.display, win, XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False));
+        status = XDeleteProperty(globalconf.display, win,
+                                 XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False));
+
+    return status;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
