@@ -706,16 +706,9 @@ client_find_prev_visible(Client *sel)
     if(!sel) return NULL;
 
     /* look for previous starting at sel */
-    for(prev = client_list_prev(&globalconf.clients, sel);
+    for(prev = client_list_prev_cycle(&globalconf.clients, sel);
         prev && (prev->skip || !client_isvisible(prev, sel->screen));
-        prev = client_list_prev(&globalconf.clients, prev));
-
-    /* look for previous starting at the end of the list */
-    if(!prev || prev->skip || !client_isvisible(prev, sel->screen))
-        for(prev = *client_list_last(&globalconf.clients);
-            prev && prev != sel
-            && (prev->skip || !client_isvisible(prev, sel->screen)); 
-            prev = client_list_prev(&globalconf.clients, prev));
+        prev = client_list_prev_cycle(&globalconf.clients, prev));
 
     return prev;
 }
