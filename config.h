@@ -25,6 +25,8 @@
 #include <regex.h>
 #include "draw.h"
 #include "layout.h"
+#include "util.h"
+#include "list.h"
 
 /** Bar possible position */
 typedef enum
@@ -181,8 +183,6 @@ struct Client
     Bool skiptb;
     /** Next client */
     Client *next;
-    /** Previous client */
-    Client *prev;
     /** Window of the client */
     Window win;
     /** Client logical screen */
@@ -190,6 +190,9 @@ struct Client
     /** True if the client is a new one */
     Bool newcomer;
 };
+
+
+DO_SLIST(Client, client, p_delete);
 
 typedef struct FocusList FocusList;
 struct FocusList

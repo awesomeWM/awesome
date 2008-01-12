@@ -102,40 +102,6 @@ isprotodel(Display *disp, Window win)
     return ret;
 }
 
-/** Swap two client in the linked list clients
- * \param head pointer ito the client list head
- * \param c1 first client
- * \param c2 second client
- */
-static void
-client_swap(Client **head, Client *c1, Client *c2)
-{
-    Client *tmp;
-
-    tmp = c1->next;
-    c1->next = c2->next;
-    c2->next = (tmp == c2 ? c1 : tmp);
-
-    tmp = c2->prev;
-    c2->prev = c1->prev;
-    c1->prev = (tmp == c1 ? c2 : tmp );
-
-    if(c1->next)
-        c1->next->prev = c1;
-
-    if(c1->prev)
-        c1->prev->next = c1;
-
-    if(c2->next)
-        c2->next->prev = c2;
-
-    if(c2->prev)
-        c2->prev->next = c2;
-
-    if(*head == c1)
-        *head = c2;
-}
-
 /** Get a Client by its window
  * \param list Client list to look info
  * \param w Client window to find
@@ -149,7 +115,6 @@ get_client_bywin(Client *list, Window w)
     for(c = list; c && c->win != w; c = c->next);
     return c;
 }
-
 
 /** Get a client by its name
  * \param list Client list
@@ -188,49 +153,6 @@ client_ban(Client * c)
 {
     XUnmapWindow(globalconf.display, c->win);
     window_setstate(c->win, IconicState);
-}
-
-
-static void
-client_attach_at_end(Client *c)
-{
-    Client *iter;
-    for(iter = globalconf.clients; iter && iter->next; iter = iter->next);
-    /* stack is empty */
-    if(!iter)
-        globalconf.clients = c;
-    else
-    {
-        c->prev = iter;
-        iter->next = c;
-    }
-}
-
-/** Attach client to the beginning of the clients stack
- * \param c the client
- */
-void
-client_attach(Client *c)
-{
-    if(globalconf.clients)
-        (globalconf.clients)->prev = c;
-    c->next = globalconf.clients;
-    globalconf.clients = c;
-}
-
-/** Detach client from clients list
- * \param c client to detach
- */
-void
-client_detach(Client *c)
-{
-    if(c->prev)
-        c->prev->next = c->next;
-    if(c->next)
-        c->next->prev = c->prev;
-    if(c == globalconf.clients)
-        globalconf.clients = c->next;
-    c->next = c->prev = NULL;
 }
 
 /** Give focus to client, or to first client if c is NULL
@@ -408,15 +330,15 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     for(rule = globalconf.rules; rule; rule = rule->next)
         if(rule->not_master && client_match_rule(c, rule))
         {
-            client_attach_at_end(c);
+            client_list_append(&globalconf.clients, c);
             break;
         }
     if(!rule)
     {
         if(globalconf.screens[c->screen].new_become_master)
-            client_attach(c);
+            client_list_push(&globalconf.clients, c);
         else
-            client_attach_at_end(c);
+            client_list_append(&globalconf.clients, c);
     }
 
     ewmh_update_net_client_list(phys_screen);
@@ -587,7 +509,7 @@ client_unmanage(Client *c)
     XConfigureWindow(globalconf.display, c->win, CWBorderWidth, &wc);  /* restore border */
 
     /* remove client everywhere */
-    client_detach(c);
+    client_list_detach(&globalconf.clients, c);
     focus_delete_client(c);
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
@@ -770,9 +692,32 @@ uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
     for(next = sel->next; next && !client_isvisible(next, screen); next = next->next);
     if(next)
     {
-        client_swap(&globalconf.clients, sel, next);
+        client_list_swap(&globalconf.clients, sel, next);
         arrange(screen);
     }
+}
+
+
+Client *
+client_find_prev_visible(Client *sel)
+{
+    Client *prev = NULL;
+
+    if(!sel) return NULL;
+
+    /* look for previous starting at sel */
+    for(prev = client_list_prev(&globalconf.clients, sel);
+        prev && (prev->skip || !client_isvisible(prev, sel->screen));
+        prev = client_list_prev(&globalconf.clients, prev));
+
+    /* look for previous starting at the end of the list */
+    if(!prev || prev->skip || !client_isvisible(prev, sel->screen))
+        for(prev = *client_list_last(&globalconf.clients);
+            prev && prev != sel
+            && (prev->skip || !client_isvisible(prev, sel->screen)); 
+            prev = client_list_prev(&globalconf.clients, prev));
+
+    return prev;
 }
 
 /** Swap current with previous client
@@ -783,15 +728,11 @@ uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *prev, *sel = globalconf.focus->client;
+    Client *prev;
 
-    if(!sel)
-        return;
-
-    for(prev = sel->prev; prev && !client_isvisible(prev, screen); prev = prev->prev);
-    if(prev)
+    if((prev = client_find_prev_visible(globalconf.focus->client)))
     {
-        client_swap(&globalconf.clients, prev, sel);
+        client_list_swap(&globalconf.clients, prev, globalconf.focus->client);
         arrange(screen);
     }
 }
@@ -999,8 +940,8 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
     if(!sel)
         return;
 
-    client_detach(sel);
-    client_attach(sel);
+    client_list_detach(&globalconf.clients, sel);
+    client_list_push(&globalconf.clients, sel);
     arrange(screen);
 }
 
