@@ -53,11 +53,12 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
+    widget->area.width = widget->statusbar->width - used;
+    widget->area.height = widget->statusbar->height;
+
     if(sel)
     {
-        draw_text(ctx, widget->area.x, widget->area.y,
-                  widget->statusbar->width - used,
-                  widget->statusbar->height,
+        draw_text(ctx, widget->area,
                   d->align,
                   widget->font->height / 2, widget->font, sel->name,
                   d->fg, d->bg);
@@ -67,16 +68,7 @@ focustitle_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                         sel->ismax, d->fg);
     }
     else
-    {
-        Area rectangle = { widget->area.x,
-                           widget->area.y,
-                           widget->statusbar->width - used,
-                           widget->statusbar->height };
-        draw_rectangle(ctx, rectangle, True, d->bg);
-    }
-
-    widget->area.width = widget->statusbar->width - used;
-    widget->area.height = widget->statusbar->height;
+        draw_rectangle(ctx, widget->area, True, d->bg);
 
     return widget->area.width;
 }

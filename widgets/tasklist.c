@@ -111,24 +111,19 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 }
             }
 
+            area.x = widget->area.x + icon_width + box_width * i;
+            area.y = widget->area.y;
+            area.width = box_width - icon_width;
+            area.height = widget->statusbar->height;
             if(sel == c)
-            {
-                draw_text(ctx, widget->area.x + icon_width + box_width * i,
-                          widget->area.y,
-                          box_width - icon_width,
-                          widget->statusbar->height,
-                          d->align,
+                draw_text(ctx, area, d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg_sel, d->bg_sel);
-            }
             else
-                draw_text(ctx, widget->area.x + icon_width + box_width * i,
-                          widget->area.y,
-                          box_width - icon_width,
-                          widget->statusbar->height,
-                          d->align,
+                draw_text(ctx, area, d->align,
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
+
             if(c->isfloating || c->ismax)
                 draw_circle(ctx, widget->area.x + icon_width + box_width * i,
                             widget->area.y,

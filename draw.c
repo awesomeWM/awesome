@@ -75,8 +75,7 @@ draw_free_context(DrawCtx *ctx)
  */
 void
 draw_text(DrawCtx *ctx,
-          int x, int y,
-          int w, int h,
+          Area area,
           int align,
           int padding,
           XftFont *font, const char *text,
@@ -88,14 +87,8 @@ draw_text(DrawCtx *ctx,
     cairo_font_face_t *font_face;
     cairo_surface_t *surface;
     cairo_t *cr;
-    Area rectangle;
 
-    rectangle.x = x;
-    rectangle.y = y;
-    rectangle.width = w;
-    rectangle.height = h;
-
-    draw_rectangle(ctx, rectangle, True, bg);
+    draw_rectangle(ctx, area, True, bg);
 
     olen = len = a_strlen(text);
 
@@ -113,9 +106,9 @@ draw_text(DrawCtx *ctx,
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    while(len && (nw = (draw_textwidth(font, buf)) + padding * 2) > w)
+    while(len && (nw = (draw_textwidth(font, buf)) + padding * 2) > area.width)
         buf[--len] = 0;
-    if(nw > w)
+    if(nw > area.width)
         return;                 /* too long */
     if(len < olen)
     {
@@ -130,13 +123,15 @@ draw_text(DrawCtx *ctx,
     switch(align)
     {
       case AlignLeft:
-        cairo_move_to(cr, x + padding, y + font->ascent + (ctx->height - font->height) / 2);
+        cairo_move_to(cr, area.x + padding, area.y + font->ascent + (ctx->height - font->height) / 2);
         break;
       case AlignRight:
-        cairo_move_to(cr, x + (w - nw) + padding, y + font->ascent + (ctx->height - font->height) / 2);
+        cairo_move_to(cr, area.x + (area.width - nw) + padding,
+                      area.y + font->ascent + (ctx->height - font->height) / 2);
         break;
       default:
-        cairo_move_to(cr, x + ((w - nw) / 2) + padding, y + font->ascent + (ctx->height - font->height) / 2);
+        cairo_move_to(cr, area.x + ((area.width - nw) / 2) + padding,
+                      area.y + font->ascent + (ctx->height - font->height) / 2);
         break;
     }
     cairo_show_text(cr, buf);

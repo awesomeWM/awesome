@@ -68,6 +68,7 @@ taglist_draw(Widget *widget,
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int w = 0, flagsize;
     XColor *colors;
+    Area area;
 
     flagsize = (vscreen.font->height + 2) / 3;
 
@@ -95,9 +96,11 @@ taglist_draw(Widget *widget,
             colors = vscreen.colors_urgent;
         else
             colors = vscreen.colors_normal;
-        draw_text(ctx,
-                  widget->area.x + widget->area.width, widget->area.y,
-                  w, widget->statusbar->height,
+        area.x = widget->area.x + widget->area.width;
+        area.y = widget->area.y;
+        area.width = w;
+        area.height = widget->statusbar->height;
+        draw_text(ctx, area,
                   AlignCenter,
                   vscreen.font->height / 2,
                   vscreen.font,
