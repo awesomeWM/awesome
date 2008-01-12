@@ -123,9 +123,8 @@ xgettextprop(Window w, Atom atom, char *text, ssize_t textlen)
     return True;
 }
 
-
 /** Initialize an X color
- * \param screen Screen number
+ * \param screen Physical screen number
  * \param colstr Color specification
  */
 XColor
