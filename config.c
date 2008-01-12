@@ -199,59 +199,40 @@ set_key_info(Key *key, cfg_t *cfg)
 static Key *
 section_keys(cfg_t *cfg_keys)
 {
-    Key *key, *head;
-    unsigned int i, j, numkeys;
+    Key *key = NULL, *head = NULL;
+    int i, j, numkeys;
     cfg_t *cfgkeytmp;
 
-    head = key = NULL;
-    for(i = 0; i < cfg_size(cfg_keys, "key"); i++)
+    for(i = cfg_size(cfg_keys, "key") - 1; i >= 0; i--)
     {
-        if (i == 0)
-            key = head = p_new(Key, 1);
-        else
-        {
-            key->next = p_new(Key, 1);
-            key = key->next;
-        }
+        key = p_new(Key, 1);
         cfgkeytmp = cfg_getnsec(cfg_keys, "key", i);
         set_key_info(key, cfgkeytmp);
         key->keysym = XStringToKeysym(cfg_getstr(cfgkeytmp, "key"));
         key->arg = a_strdup(cfg_getstr(cfgkeytmp, "arg"));
+        key_list_push(&head, key);
     }
 
-    for(i = 0; i < cfg_size(cfg_keys, "keylist"); i++)
+    for(i = cfg_size(cfg_keys, "keylist") - 1; i >= 0; i--)
     {
         cfgkeytmp = cfg_getnsec(cfg_keys, "keylist", i);
         numkeys = cfg_size(cfgkeytmp, "keylist");
-        if (numkeys != cfg_size(cfgkeytmp, "arglist"))
+        if(numkeys != (int) cfg_size(cfgkeytmp, "arglist"))
         {
             warn("number of keys != number of args in keylist");
             continue;
         }
-        for(j=0; j < numkeys; j++)
+
+        for(j = 0; j < numkeys; j++)
         {
-            if (head == NULL)
-            {
-                key = p_new(Key, 1);
-                head = key;
-            }
-            else
-            {
-                key->next = p_new(Key, 1);
-                key = key->next;
-            }
+            key = p_new(Key, 1);
             set_key_info(key, cfgkeytmp);
             key->keysym = XStringToKeysym(cfg_getnstr(cfgkeytmp, "keylist", j));
             key->arg = a_strdup(cfg_getnstr(cfgkeytmp, "arglist", j));
-            if(j < numkeys - 1)
-            {
-                key->next = p_new(Key, 1);
-                key = key->next;
-            }
+            key_list_push(&head, key);
         }
     }
-    if (key)
-        key->next = NULL;
+
     return head;
 }
 

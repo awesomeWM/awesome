@@ -80,6 +80,8 @@ struct Key
     Key *next;
 };
 
+DO_SLIST(Key, key, p_delete);
+
 typedef struct Button Button;
 struct Button
 {
