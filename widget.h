@@ -25,7 +25,7 @@
 
 #include <confuse.h>
 
-#include "config.h"
+#include "structs.h"
 
 #define WIDGET_CACHE_CLIENTS        1<<0
 #define WIDGET_CACHE_LAYOUTS        1<<1
@@ -50,6 +50,8 @@ WidgetConstructor graph_new;
 WidgetConstructor tasklist_new;
 
 Uicb uicb_widget_tell;
+
+DO_SLIST(Widget, widget, p_delete);
 
 #endif
 

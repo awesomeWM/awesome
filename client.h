@@ -22,7 +22,7 @@
 #ifndef AWESOME_CLIENT_H
 #define AWESOME_CLIENT_H
 
-#include "config.h"
+#include "structs.h"
 
 Bool client_isvisible(Client *, int);
 Client * get_client_bywin(Client *, Window);
@@ -49,6 +49,8 @@ Uicb uicb_client_togglemax;
 Uicb uicb_client_toggleverticalmax; 
 Uicb uicb_client_togglehorizontalmax; 
 Uicb uicb_client_zoom;
+
+DO_SLIST(Client, client, p_delete);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

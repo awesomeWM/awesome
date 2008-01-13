@@ -22,7 +22,7 @@
 #ifndef AWESOME_FOCUS_H
 #define AWESOME_FOCUS_H
 
-#include "config.h"
+#include "structs.h"
 
 void focus_add_client(Client *);
 void focus_delete_client(Client *);
@@ -30,6 +30,8 @@ Client * focus_get_current_client(int);
 
 Uicb uicb_focus_history;
 Uicb uicb_focus_client_byname;
+
+DO_SLIST(client_node_t, client_node, p_delete);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

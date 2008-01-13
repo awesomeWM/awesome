@@ -22,7 +22,7 @@
 #ifndef AWESOME_RULES_H
 #define AWESOME_RULES_H
 
-#include "config.h"
+#include "structs.h"
 
 #define RULE_NOSCREEN        -1
 
@@ -30,6 +30,8 @@ regex_t * rules_compile_regex(char *);
 Bool tag_match_rule(Tag *, Rule *);
 RuleFloat rules_get_float_from_str(const char *);
 Rule * rule_matching_client(Client *);
+
+DO_SLIST(Rule, rule, p_delete);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

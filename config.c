@@ -26,6 +26,7 @@
 #include <X11/keysym.h>
 
 #include "statusbar.h"
+#include "tag.h"
 #include "util.h"
 #include "rules.h"
 #include "screen.h"

@@ -83,7 +83,6 @@ awesome_SOURCES = \
 	tag.c tag.h \
 	util.c util.h \
 	xutil.c xutil.h \
-	list.h \
 	config.c config.h \
 	screen.c screen.h \
 	statusbar.c statusbar.h \
@@ -93,7 +92,8 @@ awesome_SOURCES = \
 	mouse.c mouse.h \
 	awesome-client-common.c \
 	widget.c widget.h \
-	ewmh.c ewmh.h
+	ewmh.c ewmh.h \
+	list.h structs.h
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XRANDR_LIBS) $(XINERAMA_LIBS)
