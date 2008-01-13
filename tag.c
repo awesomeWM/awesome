@@ -273,7 +273,7 @@ uicb_tag_toggleview(int screen, char *arg)
 }
 
 void
-tag_view(int screen, int dindex)
+tag_view_byindex(int screen, int dindex)
 {
     Tag *target_tag, *tag;
 
@@ -305,7 +305,7 @@ uicb_tag_view(int screen, char *arg)
     Tag *tag;
 
     if(arg)
-	tag_view(screen, atoi(arg) - 1);
+	tag_view_byindex(screen, atoi(arg) - 1);
     else
     {
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
