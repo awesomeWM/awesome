@@ -234,16 +234,16 @@ struct Tag
 
 DO_SLIST(Tag, tag, p_delete);
 
-/** TagClientLink type */
-typedef struct TagClientLink TagClientLink;
-struct TagClientLink
+/** tag_client_node type */
+typedef struct tag_client_node_t tag_client_node_t;
+struct tag_client_node_t
 {
     Tag *tag;
     Client *client;
-    TagClientLink *next;
+    tag_client_node_t *next;
 };
 
-DO_SLIST(TagClientLink, tcl, p_delete);
+DO_SLIST(tag_client_node_t, tag_client_node, p_delete);
 
 /** Padding type */
 typedef struct
@@ -330,7 +330,7 @@ struct AwesomeConf
     /** Selected clients history */
     client_node_t *focus;
     /** Link between tags and clients */
-    TagClientLink *tclink;
+    tag_client_node_t *tclink;
     /** Command line passed to awesome */
     char *argv;
 };
