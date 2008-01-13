@@ -33,7 +33,7 @@ void untag_client(Client *, Tag *);
 Bool is_client_tagged(Client *, Tag *);
 void tag_client_with_current_selected(Client *);
 void tag_client_with_rules(Client *);
-void tag_view_byindex(int, int);
+void tag_view_only_byindex(int, int);
 
 Uicb uicb_client_tag;
 Uicb uicb_client_toggletag;

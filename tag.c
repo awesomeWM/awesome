@@ -272,26 +272,29 @@ uicb_tag_toggleview(int screen, char *arg)
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
-void
-tag_view_byindex(int screen, int dindex)
+static void
+tag_view_only(int screen, Tag *target)
 {
-    Tag *target_tag, *tag;
+    Tag *tag;
+
+    if(!target) return;
+
+    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+        tag->selected = False;
+    target->selected = True;
+}
+
+void
+tag_view_only_byindex(int screen, int dindex)
+{
+    Tag *tag;
 
     if(dindex < 0)
         return;
 
-    for(target_tag = globalconf.screens[screen].tags; target_tag && dindex > 0;
-        target_tag = target_tag->next, dindex--);
-    if(target_tag)
-    {
-        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            tag->selected = False;
-        target_tag->selected = True;
-    }
-    saveawesomeprops(screen);
-    arrange(screen);
-    ewmh_update_net_current_desktop(get_phys_screen(screen));
-    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
+    for(tag = globalconf.screens[screen].tags; tag && dindex > 0;
+        tag = tag->next, dindex--);
+    tag_view_only(screen, tag);
 }
 
 /** View tag
@@ -305,16 +308,15 @@ uicb_tag_view(int screen, char *arg)
     Tag *tag;
 
     if(arg)
-	tag_view_byindex(screen, atoi(arg) - 1);
+	tag_view_only_byindex(screen, atoi(arg) - 1);
     else
-    {
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag->selected = True;
-        saveawesomeprops(screen);
-        arrange(screen);
-        ewmh_update_net_current_desktop(get_phys_screen(screen));
-        widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
-    }
+
+    saveawesomeprops(screen);
+    arrange(screen);
+    ewmh_update_net_current_desktop(get_phys_screen(screen));
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
 /** View previously selected tags
@@ -334,6 +336,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
         tag->selected = tag->was_selected;
         tag->was_selected = t;
     }
+    saveawesomeprops(screen);
     arrange(screen);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
@@ -382,6 +385,7 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
         arrange(screen);
     }
     p_delete(&curtags);
+    saveawesomeprops(screen);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
