@@ -124,8 +124,12 @@ dist_iconslayouts_DATA += icons/layouts/maxw.png
 dist_iconslayouts_DATA += icons/layouts/spiral.png
 dist_iconslayouts_DATA += icons/layouts/spiralw.png
 dist_iconslayouts_DATA += icons/layouts/tile.png
+dist_iconslayouts_DATA += icons/layouts/tiledown.png
+dist_iconslayouts_DATA += icons/layouts/tiledownw.png
 dist_iconslayouts_DATA += icons/layouts/tileleft.png
 dist_iconslayouts_DATA += icons/layouts/tileleftw.png
+dist_iconslayouts_DATA += icons/layouts/tileup.png
+dist_iconslayouts_DATA += icons/layouts/tileupw.png
 dist_iconslayouts_DATA += icons/layouts/tilew.png
 
 clean-local:

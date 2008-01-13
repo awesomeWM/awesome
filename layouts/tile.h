@@ -27,6 +27,8 @@
 
 LayoutArrange layout_tile;
 LayoutArrange layout_tileleft;
+LayoutArrange layout_tiledown;
+LayoutArrange layout_tileup;
 
 Uicb uicb_tag_setnmaster;
 Uicb uicb_tag_setncol;

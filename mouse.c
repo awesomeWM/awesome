@@ -138,7 +138,8 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             ocy = c->geometry.y;
             c->ismax = False;
         }
-        else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft)
+        else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
+                 || layout->arrange == layout_tiledown || layout->arrange == layout_tileup)
         {
             for(n = 0, c = globalconf.clients; c; c = c->next)
                 if(IS_TILED(c, screen))
@@ -165,6 +166,10 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 
     if(curtags[0]->layout->arrange == layout_tileleft)
         XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, 0, c->geometry.height + c->border - 1);
+    else if(curtags[0]->layout->arrange == layout_tiledown)
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
+    else if(curtags[0]->layout->arrange == layout_tileup)
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, 0);
     else
         XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
 
@@ -196,12 +201,17 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.y = c->geometry.y;
                 client_resize(c, geometry, True);
             }
-            else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft)
+            else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
+                    || layout->arrange == layout_tileup || layout->arrange == layout_tiledown)
             {
                 if(layout->arrange == layout_tile)
                     mwfact = (double) (ev.xmotion.x - area.x) / area.width;
-                else
+                else if(curtags[0]->layout->arrange == layout_tileleft)
                     mwfact = 1 - (double) (ev.xmotion.x - area.x) / area.width;
+                else if(curtags[0]->layout->arrange == layout_tiledown)
+                    mwfact = (double) (ev.xmotion.y - area.y) / area.height;
+                else
+                    mwfact = 1 - (double) (ev.xmotion.y - area.y) / area.height;
                 if(mwfact < 0.1) mwfact = 0.1;
                 else if(mwfact > 0.9) mwfact = 0.9;
                 if(fabs(curtags[0]->mwfact - mwfact) >= 0.05)

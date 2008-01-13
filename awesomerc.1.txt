@@ -343,7 +343,7 @@ screen <integer> [MULTI]
         tag <identifier> [MULTI]
         { 
             layout = <{dwindle,floating,max,
-                     spiral,tile,tileleft}>
+                     spiral,tile,tileleft,tiledown,tileup}>
             mwfact = <float> 
             nmaster = <integer>
         }
@@ -351,7 +351,8 @@ screen <integer> [MULTI]
     layouts
     {
         layout <{dwindle,floating,max,
-                 spiral,tile,tileleft}> { image = <image> } [MULTI]
+                 spiral,tile,tileleft,
+		 tiledown,tileup}> { image = <image> } [MULTI]
     }
     colors
     {

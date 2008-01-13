@@ -37,7 +37,10 @@ uicb_tag_setnmaster(int screen, char * arg)
     Tag **curtags = get_current_tags(screen);
     Layout *curlay = curtags[0]->layout;
 
-    if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
+    if(!arg || (curlay->arrange != layout_tile
+                && curlay->arrange != layout_tileleft
+                && curlay->arrange != layout_tiledown
+                && curlay->arrange != layout_tileup))
         return;
 
     if((curtags[0]->nmaster = (int) compute_new_value_from_arg(arg, (double) curtags[0]->nmaster)) < 0)
@@ -54,7 +57,10 @@ uicb_tag_setncol(int screen, char * arg)
     Tag **curtags = get_current_tags(screen);
     Layout *curlay = curtags[0]->layout;
 
-    if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
+    if(!arg || (curlay->arrange != layout_tile
+                && curlay->arrange != layout_tileleft
+                && curlay->arrange != layout_tiledown
+                && curlay->arrange != layout_tileup))
         return;
 
     if((curtags[0]->ncol = (int) compute_new_value_from_arg(arg, (double) curtags[0]->ncol)) < 1)
@@ -72,11 +78,14 @@ uicb_tag_setmwfact(int screen, char *arg)
     Tag **curtags = get_current_tags(screen);
     Layout *curlay = curtags[0]->layout;
 
-    if(!arg || (curlay->arrange != layout_tile && curlay->arrange != layout_tileleft))
+    if(!arg || (curlay->arrange != layout_tile
+                && curlay->arrange != layout_tileleft
+                && curlay->arrange != layout_tiledown
+                && curlay->arrange != layout_tileup))
         return;
 
     newarg = a_strdup(arg);
-    if(curlay->arrange == layout_tileleft)
+    if(curlay->arrange == layout_tileleft || curlay->arrange == layout_tileup)
     {
         if(newarg[0] == '+')
             newarg[0] = '-';
@@ -95,7 +104,7 @@ uicb_tag_setmwfact(int screen, char *arg)
 }
 
 static void
-_tile(int screen, const Bool right)
+_tile(int screen, const Bool right, const Bool vertical)
 {
     /* windows area geometry */
     int wah = 0, waw = 0, wax = 0, way = 0;
@@ -130,8 +139,16 @@ _tile(int screen, const Bool right)
 
     if(curtags[0]->nmaster)
     {
-        mh = masterwin ? wah / masterwin : waw;
-        mw = otherwin ? waw * curtags[0]->mwfact : waw;
+        if(vertical)
+        {
+            mh = masterwin ? wah / masterwin : wah;
+            mw = otherwin ? waw * curtags[0]->mwfact : waw;
+        }
+        else
+        {
+            mh = otherwin ? wah * curtags[0]->mwfact : wah;
+            mw = masterwin ? waw / masterwin : waw;
+        }
     }
     else
         mh = mw = 0;
@@ -146,8 +163,16 @@ _tile(int screen, const Bool right)
         c->ismax = False;
         if(i < curtags[0]->nmaster)
         {
-            geometry.y = way + i * mh;
-            geometry.x = wax + (right ? 0 : waw - mw);
+            if(vertical)
+            {
+                geometry.y = way + i * mh;
+                geometry.x = wax + (right ? 0 : waw - mw);
+            }
+            else
+            {
+                geometry.y = way + (right ? 0 : wah - mh);
+                geometry.x = wax + i * mw;
+            }
             geometry.width = mw - 2 * c->border;
             geometry.height =  mh - 2 * c->border;
             client_resize(c, geometry, globalconf.screens[screen].resize_hints);
@@ -163,19 +188,39 @@ _tile(int screen, const Bool right)
             if(current_col == real_ncol - 1)
                 win_by_col += otherwin % real_ncol;
 
-            if(otherwin <= real_ncol)
-                geometry.height = wah - 2 * c->border;
+            if(vertical)
+            {
+                if(otherwin <= real_ncol)
+                    geometry.height = wah - 2 * c->border;
+                else
+                    geometry.height = (wah / win_by_col) - 2 * c->border;
+
+                geometry.width = (waw - mw) / real_ncol - 2 * c->border;
+
+                if(i == curtags[0]->nmaster || otherwin <= real_ncol || (i - curtags[0]->nmaster) % win_by_col == 0)
+                    geometry.y = way;
+                else
+                    geometry.y = way + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.height + 2 * c->border);
+
+                geometry.x = wax + current_col * (geometry.width + 2 * c->border) + (right ? mw : 0);
+            }
             else
-                geometry.height = (wah / win_by_col) - 2 * c->border;
+            {
+                if(otherwin <= real_ncol)
+                    geometry.width = waw - 2 * c->border;
+                else
+                    geometry.width = (waw / win_by_col) - 2 * c->border;
 
-            geometry.width = (waw - mw) / real_ncol - 2 * c->border;
+                geometry.height = (wah - mh) / real_ncol - 2 * c->border;
 
-            if(i == curtags[0]->nmaster || otherwin <= real_ncol || (i - curtags[0]->nmaster) % win_by_col == 0)
-                geometry.y = way;
-            else
-                geometry.y = way + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.height + 2 * c->border);
+                if(i == curtags[0]->nmaster || otherwin <= real_ncol || (i - curtags[0]->nmaster) % win_by_col == 0)
+                    geometry.x = wax;
+                else
+                    geometry.x = wax + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.width + 2 * c->border);
 
-            geometry.x = wax + current_col * (geometry.width + 2 * c->border) + (right ? mw : 0);
+                geometry.y = way + current_col * (geometry.height + 2 * c->border) + (right ? mh : 0);
+            }
+
             client_resize(c, geometry, globalconf.screens[screen].resize_hints);
         }
         i++;
@@ -187,13 +232,25 @@ _tile(int screen, const Bool right)
 void
 layout_tile(int screen)
 {
-    _tile(screen, True);
+    _tile(screen, True, True);
 }
 
 void
 layout_tileleft(int screen)
 {
-    _tile(screen, False);
+    _tile(screen, False, True);
+}
+
+void
+layout_tiledown(int screen)
+{
+    _tile(screen, True, False);
+}
+
+void
+layout_tileup(int screen)
+{
+    _tile(screen, False, False);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
