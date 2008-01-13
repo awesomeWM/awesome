@@ -93,25 +93,28 @@ tag_client_with_current_selected(Client *c)
             untag_client(c, tag);
 }
 
-Bool
+void
 tag_client_with_rule(Client *c, Rule *r)
 {
     Tag *tag;
     Bool matched = False;
 
-    if(!r)
-        return False;
+    if(!r) return;
 
+    /* check if at least one tag match */
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         if(tag_match_rule(tag, r))
         {
             matched = True;
-            tag_client(c, tag);
+            break;
         }
-        else
-            untag_client(c, tag);
 
-    return matched;
+    if(matched)
+        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+            if(tag_match_rule(tag, r))
+                tag_client(c, tag);
+            else
+                untag_client(c, tag);
 }
 
 Tag **

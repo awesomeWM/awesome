@@ -275,8 +275,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                 move_client_to_screen(c, rule->screen, True);
             else
                 move_client_to_screen(c, screen, True);
-            if(!tag_client_with_rule(c, rule))
-                tag_client_with_current_selected(c);
+            tag_client_with_rule(c, rule);
         }
         else
             move_client_to_screen(c, screen, True);
