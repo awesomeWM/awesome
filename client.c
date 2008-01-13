@@ -230,15 +230,13 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Window trans;
     Bool rettrans;
     XWindowChanges wc;
-    Area area, darea;
     Tag *tag;
     Rule *rule;
     int phys_screen = get_phys_screen(screen);
 
-    area = get_screen_area(screen, NULL, NULL);
-
     c = p_new(Client, 1);
 
+    /* Initial values */
     c->win = w;
     c->geometry.x = c->f_geometry.x = c->m_geometry.x = wa->x;
     c->geometry.y = c->f_geometry.y = c->m_geometry.y = wa->y;
@@ -247,56 +245,54 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->oldborder = wa->border_width;
     c->newcomer = True;
 
+    c->border = globalconf.screens[screen].borderpx;
     c->screen = get_screen_bycoord(c->geometry.x, c->geometry.y);
 
-    move_client_to_screen(c, screen, True);
-
-    /* update window title */
-    client_updatetitle(c);
-
-    if(c->geometry.width == area.width && c->geometry.height == area.height)
-        c->border = wa->border_width;
-    else
-        c->border = globalconf.screens[screen].borderpx;
-
-    ewmh_check_client_hints(c);
-    /* loadprops or apply rules if no props */
-    if(!client_loadprops(c, screen))
-        tag_client_with_rules(c);
-
-    /* if window request fullscreen mode */
-    if(c->geometry.width == area.width && c->geometry.height == area.height)
-    {
-        c->geometry.x = area.x;
-        c->geometry.y = area.y;
-    }
-    else
-    {
-        darea = get_display_area(phys_screen,
-                                 globalconf.screens[screen].statusbar,
-                                 &globalconf.screens[screen].padding);
-
-        if(c->geometry.x + c->geometry.width + 2 * c->border > darea.x + darea.width)
-            c->geometry.x = c->f_geometry.x = darea.x + darea.width - c->geometry.width - 2 * c->border;
-        if(c->geometry.y + c->geometry.height + 2 * c->border > darea.y + darea.height)
-            c->geometry.y = c->f_geometry.y = darea.y + darea.height - c->geometry.height - 2 * c->border;
-        if(c->geometry.x < darea.x)
-            c->geometry.x = c->f_geometry.x = darea.x;
-        if(c->geometry.y < darea.y)
-            c->geometry.y = c->f_geometry.y = darea.y;
-    }
-
-    /* XXX if this necessary ? */
-    /* set borders */
+    /* Set windows borders */
     wc.border_width = c->border;
     XConfigureWindow(globalconf.display, w, CWBorderWidth, &wc);
     XSetWindowBorder(globalconf.display, w, globalconf.screens[screen].colors_normal[ColBorder].pixel);
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
+    /* update window title */
+    client_updatetitle(c);
+
     /* update hints */
     client_updatesizehints(c);
     client_updatewmhints(c);
+
+    /* First check clients hints */
+    ewmh_check_client_hints(c);
+
+    /* loadprops or apply rules if no props */
+    if(!client_loadprops(c, screen))
+    {
+        /* Get the client's rule */
+        if((rule = rule_matching_client(c)))
+        {
+            if(rule->screen != RULE_NOSCREEN)
+                move_client_to_screen(c, rule->screen, True);
+            else
+                move_client_to_screen(c, screen, True);
+            if(!tag_client_with_rule(c, rule))
+                tag_client_with_current_selected(c);
+        }
+        else
+            move_client_to_screen(c, screen, True);
+        /* check for transient and set tags like its parent,
+         * XGetTransientForHint returns 1 on success
+         */
+        if((rettrans = XGetTransientForHint(globalconf.display, w, &trans))
+           && (t = get_client_bywin(globalconf.clients, trans)))
+            for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+                if(is_client_tagged(t, tag))
+                    tag_client(c, tag);
+
+        /* should be floating if transsient or fixed */
+        if(!c->isfloating)
+            c->isfloating = rettrans || c->isfixed;
+    }
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
@@ -306,22 +302,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
         XShapeSelectInput(globalconf.display, w, ShapeNotifyMask);
         window_setshape(phys_screen, c->win);
     }
-
-    /* grab buttons */
-    window_grabbuttons(phys_screen, c->win, False, True);
-
-    /* check for transient and set tags like its parent,
-     * XGetTransientForHint returns 1 on success
-     */
-    if((rettrans = XGetTransientForHint(globalconf.display, w, &trans))
-       && (t = get_client_bywin(globalconf.clients, trans)))
-        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-            if(is_client_tagged(t, tag))
-                tag_client(c, tag);
-
-    /* should be floating if transsient or fixed */
-    if(!c->isfloating)
-        c->isfloating = rettrans || c->isfixed;
 
     /* save new props */
     client_saveprops(c);
@@ -334,16 +314,16 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     else
         client_list_append(&globalconf.clients, c);
 
-    ewmh_update_net_client_list(phys_screen);
+    /* focus ? */
+    if(globalconf.screens[c->screen].new_get_focus)
+        focus(c, True, c->screen);
 
     /* some windows require this */
     XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,
                       c->geometry.width, c->geometry.height);
-
-    if(globalconf.screens[c->screen].new_get_focus)
-        focus(c, True, screen);
-    
+ 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+    ewmh_update_net_client_list(phys_screen);
 
     /* rearrange to display new window */
     arrange(c->screen);

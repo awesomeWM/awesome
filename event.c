@@ -35,9 +35,10 @@
 #include "ewmh.h"
 #include "client.h"
 #include "widget.h"
+#include "xutil.h"
+#include "rules.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
-#include "xutil.h"
 
 extern AwesomeConf globalconf;
 
@@ -163,7 +164,7 @@ handle_event_configurerequest(XEvent * e)
 
             client_resize(c, geometry, False);
 
-            tag_client_with_rules(c);
+            tag_client_with_rule(c, rule_matching_client(c));
             
             if(old_screen != c->screen)
             {

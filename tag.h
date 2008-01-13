@@ -31,8 +31,8 @@ Tag ** get_current_tags(int );
 void tag_client(Client *, Tag *);
 void untag_client(Client *, Tag *);
 Bool is_client_tagged(Client *, Tag *);
+Bool tag_client_with_rule(Client *, Rule *r);
 void tag_client_with_current_selected(Client *);
-void tag_client_with_rules(Client *);
 void tag_view_only_byindex(int, int);
 
 Uicb uicb_client_tag;

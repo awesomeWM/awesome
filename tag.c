@@ -93,45 +93,26 @@ tag_client_with_current_selected(Client *c)
             untag_client(c, tag);
 }
 
-void
-tag_client_with_rules(Client *c)
+Bool
+tag_client_with_rule(Client *c, Rule *r)
 {
-    Rule *r;
     Tag *tag;
     Bool matched = False;
 
-    if((r = rule_matching_client(c)))
-    {
-        switch(r->isfloating)
+    if(!r)
+        return False;
+
+    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+        if(tag_match_rule(tag, r))
         {
-          case Tile:
-            c->isfloating = False;
-            break;
-          case Float:
-            c->isfloating = True;
-            client_resize(c, c->f_geometry, False);
-            break;
-          default:
-            break;
+            matched = True;
+            tag_client(c, tag);
         }
+        else
+            untag_client(c, tag);
 
-        if(r->screen != RULE_NOSCREEN && r->screen != c->screen)
-            move_client_to_screen(c, r->screen, True);
-
-        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-            if(tag_match_rule(tag, r))
-            {
-                matched = True;
-                tag_client(c, tag);
-            }
-            else
-                untag_client(c, tag);
-
-        if(!matched)
-            tag_client_with_current_selected(c);
-    }
+    return matched;
 }
-
 
 Tag **
 get_current_tags(int screen)
