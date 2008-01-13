@@ -276,6 +276,18 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             else
                 move_client_to_screen(c, screen, True);
             tag_client_with_rule(c, rule);
+
+            switch(rule->isfloating)
+            {
+              case Auto:
+                break;
+              case Float:
+                c->isfloating = True;
+                break;
+              case Tile:
+                c->isfloating = False;
+                break;
+            }
         }
         else
             move_client_to_screen(c, screen, True);
