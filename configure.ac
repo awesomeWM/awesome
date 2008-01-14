@@ -5,7 +5,7 @@ AC_PREREQ(2.61)
 dnl Each time you want an updated version number for your build, you need to
 dnl (re-)run autoreconf.
 AC_INIT([awesome window manager],
-        [m4_esyscmd([{ git describe 2>/dev/null || echo devel; } | tr -d '\n'])],
+        [m4_esyscmd([./build-utils/package-version . version-stamp])],
         [http://awesome.naquadah.org/bugs/],
         [awesome])
 AC_CONFIG_AUX_DIR([auto-aux])
@@ -18,6 +18,12 @@ dnl    std-options  make sure shipped executables understand --help and --versio
 AM_INIT_AUTOMAKE([-Wall -Werror 1.10 dist-bzip2 foreign filename-length-max=99 foreign subdir-objects])
 
 AC_DEFINE_UNQUOTED([RELEASE], ["Productivity Breaker"])
+
+AC_MSG_CHECKING([package version according to autoconf])
+AC_MSG_RESULT([${PACKAGE_VERSION}])
+AC_MSG_CHECKING([package version according to version script])
+version_script=`"${srcdir}/build-utils/package-version" "${srcdir}" version-stamp`
+AC_MSG_RESULT([${version_script}])
 
 # Checks for programs.
 AC_PROG_SED

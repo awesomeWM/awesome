@@ -146,9 +146,12 @@ endif
 dist-hook: git-version-check
 distcheck-hook: git-version-check
 
+# Note: We cannot run autogen.sh from here, because we would need some way to
+#       restart the whole dist process from the start and there is none.
+EXTRA_DIST += build-utils/package-version
 git-version-check:
-	git_ver=`{ test -d $(top_srcdir)/.git && git --git-dir=$(top_srcdir)/.git describe 2> /dev/null; } || echo devel`; \
-	if test "x$${git_ver}" = "x$(PACKAGE_VERSION)" -o "x$${git_ver}" = "xv${PACKAGE_VERSION}"; then :; else \
+	git_ver=`$(top_srcdir)/build-utils/package-version $(top_srcdir) version-stamp`; \
+	if test "x$${git_ver}" = "x$(PACKAGE_VERSION)"; then :; else \
 		echo "ERROR: The PACKAGE_VERSION and the 'git describe' version do not match:"; \
 		echo "         current git version:     $${git_ver}"; \
 		echo "         current package version: $(PACKAGE_VERSION)"; \
@@ -156,6 +159,12 @@ git-version-check:
 		exit 1; \
 	fi
 
+# Version stamp files can only exist in tarball source trees.
+#
+# So there is no need to generate them anywhere else or to clean them
+# up anywhere.
+dist-hook:
+	echo "$(PACKAGE_VERSION)" > "$(distdir)/version-stamp"
 
 EXTRA_DIST += awesome.doxygen.in
 
