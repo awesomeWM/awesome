@@ -615,7 +615,10 @@ client_updatewmhints(Client *c)
         if((c->isurgent = (wmh->flags & XUrgencyHint)))
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         if((wmh->flags & StateHint) && wmh->initial_state == WithdrawnState)
+        {
+            c->border = 0;
             c->skip = True;
+        }
         XFree(wmh);
     }
 }
