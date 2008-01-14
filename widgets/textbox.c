@@ -66,53 +66,34 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 static void
 textbox_tell(Widget *widget, char *command)
 {
-    char *tok, *ntok, buf[8];
-    int i = 0, color = 0;
-    ssize_t command_len = a_strlen(command) + 1;
-    char* text = p_new(char, command_len);
+    char *ntok, *tok;
+    ssize_t command_len = a_strlen(command);
+    int i = 0, phys_screen = get_phys_screen(widget->statusbar->screen);
 
     Data *d = widget->data;
     if (d->text)
         p_delete(&d->text);
 
-    for(tok = command ; tok; tok = ntok, i++)
+    for (i = 0, tok = command; tok && i < 2 && *tok == '#'; i++)
     {
-        /* get next token */
-        ntok = strchr(tok + 1, ' ');
-
-        /* if not first time in the loop, drop the space and put it in the
-         * string */
-        if(i)
+        ntok = strchr(tok, ' ');
+        if((!ntok && command_len - (tok - command) == 7) ||
+           ntok - tok == 7)
         {
-            tok++;
-            a_strcat(text, command_len, " ");
+            if (ntok)
+                *ntok = 0;
+            if (!i)
+                d->fg = initxcolor(phys_screen, tok);
+            else
+                d->bg = initxcolor(phys_screen, tok);
+            if (ntok)
+                *ntok = ' ';
+            tok = ntok + (ntok != NULL);
         }
-
-        if(*tok == '#' && i < 2)
-        {
-            if(ntok)
-                a_strncpy(buf, ssizeof(buf), tok, ntok - tok);
-            switch(i)
-            {
-                case 0:
-                    d->fg = initxcolor(get_phys_screen(widget->statusbar->screen),
-                                       buf);
-                    break;
-                case 1:
-                    d->bg = initxcolor(get_phys_screen(widget->statusbar->screen),
-                                       buf);
-                    break;
-            };
-            color++;
-        }
-        else if(ntok)
-            a_strncat(text, command_len, tok, ntok - tok);
         else
-            a_strcat(text, command_len, tok);
+            break;
     }
-
-    d->text = a_strdup(text);
-    p_delete(&text);
+    d->text = a_strdup(tok);
 }
 
 Widget *
