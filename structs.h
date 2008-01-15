@@ -277,7 +277,7 @@ typedef struct
     /** Status bar */
     Statusbar *statusbar;
     /** Padding */
-    Padding padding;	
+    Padding padding;
     /** Font */
     XftFont *font;
 } VirtScreen;

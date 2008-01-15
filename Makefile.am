@@ -61,6 +61,13 @@ defconfig.h: awesomerc
 	@$(SED) 's,\\,\\\\,g;s/$$/ \\/;s/"/\\"/g' "awesomerc" >> defconfig.h
 	@echo "\"" >> defconfig.h
 
+CLEANFILES    += uicbgen.h
+BUILT_SOURCES += uicbgen.h
+EXTRA_DIST    += uicbgen.sh
+uicbgen.h: $(awesome_SOURCES)
+	@echo "generating uicbgen.h from headers file"
+	@$(top_srcdir)/uicbgen.sh > $(top_srcdir)/uicbgen.h
+
 if USING_GCC
 # If you are using gcc, and want to deactivate this default set of
 # compile flags, run make with AWESOME_CFLAGS="".
