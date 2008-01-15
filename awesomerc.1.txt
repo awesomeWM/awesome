@@ -41,8 +41,6 @@ General
     This function quits awesome.
 *statusbar_toggle* statusbar-identifier::
     Hide or show statusbar (with no argument, toggle all).
-*statusbar_set_position* top, bottom, left, right::
-    Set the position of the statusbar.
 *spawn* client::
     Execute an external program.
 *exec* program::
@@ -112,6 +110,13 @@ Tag
     Set number of master windows.
 *tag_create* name::
     Create a new tag with that name.
+
+Focus
+~~~~~
+*focus_client_byname* string::
+    Give client focus by its name.
+*focus_history* negative number::
+    Focus the client that had focused nth focus switch earlier.
 
 Screen
 ~~~~~~
