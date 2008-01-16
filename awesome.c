@@ -136,9 +136,6 @@ setup(int screen)
     grabkeys(phys_screen);
 
     for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-        statusbar_preinit(statusbar, screen);
-
-    for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
         statusbar_init(statusbar);
 }
 

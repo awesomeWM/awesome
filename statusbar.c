@@ -162,11 +162,9 @@ statusbar_display(Statusbar *statusbar)
 }
 
 void
-statusbar_preinit(Statusbar *statusbar, int screen)
+statusbar_preinit(Statusbar *statusbar)
 {
     Widget *widget;
-    
-    statusbar->screen = screen;
 
     if(statusbar->height <= 0)
     {
