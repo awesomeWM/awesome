@@ -10,6 +10,8 @@ do
     do
         shortname=$(echo $uicb | cut -d _ -f2-)
         echo "    {\"$shortname\", $uicb},"
+        grep -q "\*$shortname\*" awesomerc.1.txt || \
+            echo "  WARNING: $uicb NOT documented" >&2
     done
 done
 
