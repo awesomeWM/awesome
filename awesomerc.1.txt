@@ -98,7 +98,7 @@ Tag
     View windows tagged with tag number.
 *tag_viewnext*::
     Show windows tagged with next tag in list.
-*tag_viewperv*::
+*tag_viewprev*::
     Show windows tagged with previous tag in list.
 *tag_viewprev_selected*::
     Switch back to the previously displayed set of tags.
