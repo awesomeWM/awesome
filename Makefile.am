@@ -68,6 +68,13 @@ uicbgen.h: $(awesome_SOURCES)
 	@echo "generating uicbgen.h from headers file"
 	@$(top_srcdir)/uicbgen.sh > $(top_srcdir)/uicbgen.h
 
+CLEANFILES    += layoutgen.h
+BUILT_SOURCES += layoutgen.h
+EXTRA_DIST    += layoutgen.sh
+layoutgen.h: $(awesome_SOURCES)
+	@echo "generating layoutgen.h from layouts headers file"
+	@$(top_srcdir)/layoutgen.sh > $(top_srcdir)/layoutgen.h
+
 CLEANFILES    += widgetgen.h
 BUILT_SOURCES += widgetgen.h
 EXTRA_DIST    += widgetgen.sh

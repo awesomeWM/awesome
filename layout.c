@@ -38,18 +38,7 @@
 
 extern AwesomeConf globalconf;
 
-const name_func_link_t LayoutList[] =
-{
-    {"tile", layout_tile},
-    {"tileleft", layout_tileleft},
-    {"tiledown", layout_tiledown},
-    {"tileup", layout_tileup},
-    {"max", layout_max},
-    {"spiral", layout_spiral},
-    {"dwindle", layout_dwindle},
-    {"floating", layout_floating},
-    {NULL, NULL}
-};
+#include "layoutgen.h"
 
 /** Arrange windows following current selected layout
  * \param screen the screen to arrange
