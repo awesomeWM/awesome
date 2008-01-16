@@ -155,7 +155,7 @@ struct Statusbar
 };
 
 /** Client type */
-typedef struct Client Client; 
+typedef struct Client Client;
 struct Client
 {
     /** Client name */
