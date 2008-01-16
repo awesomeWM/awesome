@@ -68,6 +68,13 @@ uicbgen.h: $(awesome_SOURCES)
 	@echo "generating uicbgen.h from headers file"
 	@$(top_srcdir)/uicbgen.sh > $(top_srcdir)/uicbgen.h
 
+CLEANFILES    += widgetgen.h
+BUILT_SOURCES += widgetgen.h
+EXTRA_DIST    += widgetgen.sh
+widgetgen.h: widget.h
+	@echo "generating widgetgen.h from widget.h"
+	@$(top_srcdir)/widgetgen.sh > $(top_srcdir)/widgetgen.h
+
 if USING_GCC
 # If you are using gcc, and want to deactivate this default set of
 # compile flags, run make with AWESOME_CFLAGS="".

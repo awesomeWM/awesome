@@ -27,19 +27,7 @@
 
 extern AwesomeConf globalconf;
 
-const name_func_link_t WidgetList[] =
-{
-    {"taglist", taglist_new},
-    {"layoutinfo", layoutinfo_new},
-    {"focustitle", focustitle_new},
-    {"textbox", textbox_new},
-    {"iconbox", iconbox_new},
-    {"netwmicon", netwmicon_new},
-    {"progressbar", progressbar_new},
-    {"graph", graph_new},
-    {"tasklist", tasklist_new},
-    {NULL, NULL}
-};
+#include "widgetgen.h"
 
 void
 widget_calculate_alignments(Widget *widget)
