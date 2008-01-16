@@ -33,28 +33,37 @@ extern AwesomeConf globalconf;
 static void
 statusbar_update_position(Statusbar *statusbar)
 {
-    Area area = get_screen_area(statusbar->screen,
-                                NULL,
-                                &globalconf.screens[statusbar->screen].padding);
+    Area area;
 
     XMapRaised(globalconf.display, statusbar->window);
+
+    /* Top and Bottom Statusbar have prio */
+    if(statusbar->position == Top || statusbar->position == Bottom)
+        area = get_screen_area(statusbar->screen,
+                               NULL,
+                               &globalconf.screens[statusbar->screen].padding);
+    else
+       area = get_screen_area(statusbar->screen,
+                              globalconf.screens[statusbar->screen].statusbar,
+                              &globalconf.screens[statusbar->screen].padding);
+
     switch(statusbar->position)
     {
-      default:
+      case Top:
         XMoveWindow(globalconf.display, statusbar->window,
                     area.x, area.y);
-        break;
-      case Left:
-        XMoveWindow(globalconf.display, statusbar->window,
-                    area.x, (area.y + area.height) - statusbar->width);
-        break;
-      case Right:
-        XMoveWindow(globalconf.display, statusbar->window,
-                    area.x + (area.width - statusbar->height), area.y);
         break;
       case Bottom:
         XMoveWindow(globalconf.display, statusbar->window,
                     area.x, area.height - statusbar->height);
+        break;
+      case Left:
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x - statusbar->height, (area.y + area.height) - statusbar->width);
+        break;
+      case Right:
+        XMoveWindow(globalconf.display, statusbar->window,
+                    area.x + area.width, area.y);
         break;
       case Off:
         XUnmapWindow(globalconf.display, statusbar->window);
@@ -153,24 +162,45 @@ statusbar_display(Statusbar *statusbar)
 }
 
 void
-statusbar_init(Statusbar *statusbar, int screen)
+statusbar_preinit(Statusbar *statusbar, int screen)
 {
     Widget *widget;
-    XSetWindowAttributes wa;
-    int phys_screen = get_phys_screen(screen);
-    Area area = get_screen_area(screen,
-                                globalconf.screens[screen].statusbar,
-                                &globalconf.screens[screen].padding);
+    
+    statusbar->screen = screen;
 
     if(statusbar->height <= 0)
     {
         /* 1.5 as default factor, it fits nice but no one know why */
-        statusbar->height = globalconf.screens[screen].font->height * 1.5;
+        statusbar->height = globalconf.screens[statusbar->screen].font->height * 1.5;
 
         for(widget = statusbar->widgets; widget; widget = widget->next)
             if(widget->font)
                 statusbar->height = MAX(statusbar->height, widget->font->height * 1.5);
     }
+}
+
+void
+statusbar_init(Statusbar *statusbar)
+{
+    Statusbar *sb;
+    XSetWindowAttributes wa;
+    int phys_screen = get_phys_screen(statusbar->screen);
+    Area area = get_screen_area(statusbar->screen,
+                                globalconf.screens[statusbar->screen].statusbar,
+                                &globalconf.screens[statusbar->screen].padding);
+
+    
+    /* Top and Bottom Statusbar have prio */
+    for(sb = globalconf.screens[statusbar->screen].statusbar; sb; sb = sb->next)
+        switch(sb->position)
+        {
+          case Left:
+          case Right:
+            area.width += sb->height;
+            break;
+          default:
+            break;
+        }
 
     if(statusbar->width <= 0)
     {
@@ -179,8 +209,6 @@ statusbar_init(Statusbar *statusbar, int screen)
         else
             statusbar->width = area.width;
     }
-
-    statusbar->screen = screen;
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;

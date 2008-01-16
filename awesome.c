@@ -136,7 +136,10 @@ setup(int screen)
     grabkeys(phys_screen);
 
     for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-        statusbar_init(statusbar, screen);
+        statusbar_preinit(statusbar, screen);
+
+    for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+        statusbar_init(statusbar);
 }
 
 /** Startup Error handler to check if another window manager

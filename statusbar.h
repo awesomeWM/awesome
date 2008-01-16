@@ -25,7 +25,8 @@
 #include "structs.h"
 
 void statusbar_refresh(void);
-void statusbar_init(Statusbar *, int);
+void statusbar_preinit(Statusbar *, int);
+void statusbar_init(Statusbar *);
 void statusbar_display(Statusbar *);
 Position statusbar_get_position_from_str(const char *);
 
