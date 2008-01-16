@@ -100,7 +100,7 @@ Tag
     Show windows tagged with next tag in list.
 *tag_viewprev*::
     Show windows tagged with previous tag in list.
-*tag_viewprev_selected*::
+*tag_prev_selected*::
     Switch back to the previously displayed set of tags.
 *tag_setmwfact* relative or absolute float::
     Set master width factor.
