@@ -313,7 +313,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Rule *rule;
     int phys_screen = get_phys_screen(screen);
 
-    XLowerWindow(globalconf.display, w);
     area = get_screen_area(screen, NULL, NULL);
 
     c = p_new(Client, 1);
@@ -324,6 +323,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wa->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wa->height;
     c->oldborder = wa->border_width;
+    c->newcomer = True;
 
     c->screen = get_screen_bycoord(c->geometry.x, c->geometry.y);
 

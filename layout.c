@@ -63,14 +63,20 @@ arrange(int screen)
 
     for(c = globalconf.clients; c; c = c->next)
     {
-        if(client_isvisible(c, screen))
+        if(client_isvisible(c, screen) && !c->newcomer)
             client_unban(c);
         /* we don't touch other screens windows */
-        else if(c->screen == screen)
+        else if(c->screen == screen || c->newcomer)
             client_ban(c);
     }
 
     curtags[0]->layout->arrange(screen);
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->newcomer && client_isvisible(c, screen))
+        {
+            c->newcomer = False;
+            client_unban(c);
+        }
     c = focus_get_current_client(screen);
     focus(c, True, screen);
     if(c && XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)),

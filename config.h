@@ -187,6 +187,8 @@ struct Client
     Window win;
     /** Client logical screen */
     int screen;
+    /** True if the client is a new one */
+    Bool newcomer;
 };
 
 typedef struct FocusList FocusList;
