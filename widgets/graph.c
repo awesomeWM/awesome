@@ -181,17 +181,17 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     /* prevent: division by zero; with a MIN option one day, check for div/0's */
     d->current_max = d->max = MAX(cfg_getfloat(config, "max"), 0.0001);
     if((color = cfg_getstr(config, "fg")))
-        d->fg = initxcolor(phys_screen, color);
+        d->fg = initxcolor(globalconf.display, phys_screen, color);
     else
         d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
     if((color = cfg_getstr(config, "bg")))
-        d->bg = initxcolor(phys_screen, color);
+        d->bg = initxcolor(globalconf.display, phys_screen, color);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
     if((color = cfg_getstr(config, "bordercolor")))
-        d->bordercolor = initxcolor(phys_screen, color);
+        d->bordercolor = initxcolor(globalconf.display, phys_screen, color);
     else
         d->bordercolor = d->fg;
 

@@ -66,25 +66,6 @@ extern const name_func_link_t UicbList[];
 extern const name_func_link_t WidgetList[];
 extern const name_func_link_t LayoutList[];
 
-static unsigned int
-get_numlockmask(Display *disp)
-{
-    XModifierKeymap *modmap;
-    unsigned int mask = 0;
-    int i, j;
-
-    modmap = XGetModifierMapping(disp);
-    for(i = 0; i < 8; i++)
-        for(j = 0; j < modmap->max_keypermod; j++)
-            if(modmap->modifiermap[i * modmap->max_keypermod + j]
-               == XKeysymToKeycode(disp, XK_Num_Lock))
-                mask = (1 << i);
-
-    XFreeModifiermap(modmap);
-
-    return mask;
-}
-
 /** Lookup for a key mask from its name
  * \param keyname Key name
  * \return Key mask or 0 if not found
@@ -331,21 +312,21 @@ config_parse_screen(cfg_t *cfg, int screen)
         eprint("awesome: cannot init font\n");
 
     /* Colors */
-    virtscreen->colors_normal[ColBorder] = initxcolor(phys_screen,
+    virtscreen->colors_normal[ColBorder] = initxcolor(globalconf.display, phys_screen,
                                                       cfg_getstr(cfg_colors, "normal_border"));
-    virtscreen->colors_normal[ColBG] = initxcolor(phys_screen,
+    virtscreen->colors_normal[ColBG] = initxcolor(globalconf.display, phys_screen,
                                                   cfg_getstr(cfg_colors, "normal_bg"));
-    virtscreen->colors_normal[ColFG] = initxcolor(phys_screen,
+    virtscreen->colors_normal[ColFG] = initxcolor(globalconf.display, phys_screen,
                                                   cfg_getstr(cfg_colors, "normal_fg"));
-    virtscreen->colors_selected[ColBorder] = initxcolor(phys_screen,
+    virtscreen->colors_selected[ColBorder] = initxcolor(globalconf.display, phys_screen,
                                                         cfg_getstr(cfg_colors, "focus_border"));
-    virtscreen->colors_selected[ColBG] = initxcolor(phys_screen,
+    virtscreen->colors_selected[ColBG] = initxcolor(globalconf.display, phys_screen,
                                                     cfg_getstr(cfg_colors, "focus_bg"));
-    virtscreen->colors_selected[ColFG] = initxcolor(phys_screen,
+    virtscreen->colors_selected[ColFG] = initxcolor(globalconf.display, phys_screen,
                                                     cfg_getstr(cfg_colors, "focus_fg"));
-    virtscreen->colors_urgent[ColBG] = initxcolor(phys_screen,
+    virtscreen->colors_urgent[ColBG] = initxcolor(globalconf.display, phys_screen,
                                                   cfg_getstr(cfg_colors, "urgent_bg"));
-    virtscreen->colors_urgent[ColFG] = initxcolor(phys_screen,
+    virtscreen->colors_urgent[ColFG] = initxcolor(globalconf.display, phys_screen,
                                                   cfg_getstr(cfg_colors, "urgent_fg"));
 
     /* Statusbar */

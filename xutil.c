@@ -128,18 +128,37 @@ xgettextprop(Window w, Atom atom, char *text, ssize_t textlen)
  * \param colstr Color specification
  */
 XColor
-initxcolor(int phys_screen, const char *colstr)
+initxcolor(Display *disp, int phys_screen, const char *colstr)
 {
     XColor screenColor, exactColor;
 
-    if(!XAllocNamedColor(globalconf.display, 
-                         DefaultColormap(globalconf.display, phys_screen),
+    if(!XAllocNamedColor(disp,
+                         DefaultColormap(disp, phys_screen),
                          colstr,
                          &screenColor,
                          &exactColor))
         eprint("awesome: error, cannot allocate color '%s'\n", colstr);
 
     return screenColor;
+}
+
+unsigned int
+get_numlockmask(Display *disp)
+{
+    XModifierKeymap *modmap;
+    unsigned int mask = 0;
+    int i, j;
+
+    modmap = XGetModifierMapping(disp);
+    for(i = 0; i < 8; i++)
+        for(j = 0; j < modmap->max_keypermod; j++)
+            if(modmap->modifiermap[i * modmap->max_keypermod + j]
+               == XKeysymToKeycode(disp, XK_Num_Lock))
+                mask = (1 << i);
+
+    XFreeModifiermap(modmap);
+
+    return mask;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -81,9 +81,9 @@ textbox_tell(Widget *widget, char *command)
             if (ntok)
                 *ntok = 0;
             if (!i)
-                d->fg = initxcolor(phys_screen, tok);
+                d->fg = initxcolor(globalconf.display, phys_screen, tok);
             else
-                d->bg = initxcolor(phys_screen, tok);
+                d->bg = initxcolor(globalconf.display, phys_screen, tok);
             if (ntok)
                 *ntok = ' ';
             tok = ntok + (ntok != NULL);
@@ -109,12 +109,12 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     if((buf = cfg_getstr(config, "fg")))
-        d->fg = initxcolor(statusbar->screen, buf);
+        d->fg = initxcolor(globalconf.display, statusbar->screen, buf);
     else
         d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
     if((buf = cfg_getstr(config, "bg")))
-        d->bg = initxcolor(get_phys_screen(statusbar->screen), buf);
+        d->bg = initxcolor(globalconf.display, get_phys_screen(statusbar->screen), buf);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
