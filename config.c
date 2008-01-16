@@ -37,6 +37,14 @@
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 
+/* Permit to use mouse with many more buttons */
+#ifndef Button6
+#define Button6 6
+#endif
+#ifndef Button7
+#define Button7 7
+#endif
+
 extern AwesomeConf globalconf;
 
 /** Link a name to a key symbol */
@@ -122,6 +130,8 @@ mouse_button_lookup(const char *button)
         {"3", Button3},
         {"4", Button4},
         {"5", Button5},
+        {"6", Button6},
+        {"7", Button7},
         {NULL, 0}
     };
     int i;
