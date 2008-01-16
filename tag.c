@@ -334,13 +334,15 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 {
-    Tag **curtags = get_current_tags(screen);
+    Tag *tag, **curtags = get_current_tags(screen);
 
-    if(!curtags[0]->next)
-        return;
+    if(curtags[0]->next)
+        tag = curtags[0]->next;
+    else
+        tag = globalconf.screens[screen].tags;
 
     curtags[0]->selected = False;
-    curtags[0]->next->selected = True;
+    tag->selected = True;
 
     p_delete(&curtags);
 
@@ -360,16 +362,14 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
 {
     Tag *tag, **curtags = get_current_tags(screen);
 
-    for(tag = globalconf.screens[screen].tags; tag && tag->next != curtags[0]; tag = tag->next);
-    if(tag)
-    {
-        tag->selected = True;
-        curtags[0]->selected = False;
-        saveawesomeprops(screen);
-        arrange(screen);
-    }
+    tag = tag_list_prev_cycle(&globalconf.screens[screen].tags, curtags[0]);
+
+    curtags[0]->selected = False;
+    tag->selected = True;
+
     p_delete(&curtags);
     saveawesomeprops(screen);
+    arrange(screen);
     ewmh_update_net_current_desktop(get_phys_screen(screen));
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
