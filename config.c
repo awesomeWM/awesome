@@ -342,7 +342,7 @@ config_parse_screen(cfg_t *cfg, int screen)
         statusbar->width = cfg_getint(cfgsectmp, "width");
         statusbar->name = a_strdup(cfg_title(cfgsectmp));
         create_widgets(cfgsectmp, statusbar);
-        statusbar_list_append(&virtscreen->statusbar, statusbar);
+        statusbar_list_push(&virtscreen->statusbar, statusbar);
     }
 
     /* Layouts */
