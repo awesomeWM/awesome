@@ -239,9 +239,16 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
     else if(state == net_wm_state_skip_taskbar)
     {
         if(set == _NET_WM_STATE_REMOVE)
+        {
             c->skiptb = False;
+            c->border = c->oldborder;
+        }
         else if(set == _NET_WM_STATE_ADD)
+        {
             c->skiptb = True;
+            c->oldborder = c->border;
+            c->border = 0;
+        }
     }
     else if(state == net_wm_state_fullscreen)
     {
@@ -268,8 +275,8 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, False);
         XRaiseWindow(globalconf.display, c->win);
-        arrange(c->screen);
     }
+    arrange(c->screen);
 }
 
 static void
