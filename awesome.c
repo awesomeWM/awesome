@@ -394,6 +394,8 @@ main(int argc, char *argv[])
             XNextEvent(dpy, &ev);
             if(handler[ev.type])
                 handler[ev.type](&ev);       /* call handler */
+            /* need to resync */
+            XSync(dpy, False);
         }
 
         statusbar_refresh();
