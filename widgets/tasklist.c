@@ -86,6 +86,16 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
             if(d->show_icons)
             {
+                /* draw a background for icons */
+                area.x = widget->area.x + box_width * i;
+                area.y = widget->area.y;
+                area.height = widget->statusbar->height;
+                area.width = box_width;
+                if(sel == c)
+                    draw_rectangle(ctx, area, True, d->bg_sel);
+                else
+                    draw_rectangle(ctx, area, True, d->bg);
+
                 if((r = rule_matching_client(c)) && r->icon)
                 {
                     area = draw_get_image_size(r->icon);
