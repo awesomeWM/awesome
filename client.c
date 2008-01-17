@@ -683,6 +683,8 @@ uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
         return;
 
     for(next = sel->next; next && !client_isvisible(next, screen); next = next->next);
+    if(!next)
+        for(next = globalconf.clients; next && !client_isvisible(next, screen); next = next->next);
     if(next)
     {
         client_list_swap(&globalconf.clients, sel, next);
