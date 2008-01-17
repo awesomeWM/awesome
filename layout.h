@@ -44,10 +44,7 @@ void restack(int);
 void loadawesomeprops(int);
 void saveawesomeprops(int);
 
-Uicb uicb_client_focusnext;
-Uicb uicb_client_focusprev;
 Uicb uicb_tag_setlayout;
-Uicb uicb_client_togglefloating;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

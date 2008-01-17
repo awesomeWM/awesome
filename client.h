@@ -50,6 +50,9 @@ Uicb uicb_client_togglemax;
 Uicb uicb_client_toggleverticalmax; 
 Uicb uicb_client_togglehorizontalmax; 
 Uicb uicb_client_zoom;
+Uicb uicb_client_focusnext;
+Uicb uicb_client_focusprev;
+Uicb uicb_client_togglefloating;
 
 DO_SLIST(Client, client, p_delete);
 

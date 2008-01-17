@@ -89,45 +89,6 @@ get_current_layout(int screen)
     return l;
 }
 
-/** Send focus to next client in stack
- * \param screen Screen ID
- * \param arg Unused
- * \ingroup ui_callback
- */
-void
-uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
-{
-    Client *c, *sel = globalconf.focus->client;
-
-    if(!sel)
-        return;
-    for(c = sel->next; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
-    if(!c)
-        for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
-    if(c)
-    {
-        focus(c, True, screen);
-        restack(screen);
-    }
-}
-
-/** Send focus to previous client in stack
- * \param screen Screen ID
- * \param arg Unused
- * \ingroup ui_callback
- */
-void
-uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
-{
-    Client *prev;
-
-    if((prev = client_find_prev_visible(globalconf.focus->client)))
-    {
-        focus(prev, True, screen);
-        restack(screen);
-    }
-}
-
 void
 loadawesomeprops(int screen)
 {
@@ -258,32 +219,6 @@ uicb_tag_setlayout(int screen, char *arg)
     widget_invalidate_cache(screen, WIDGET_CACHE_LAYOUTS);
 
     saveawesomeprops(screen);
-}
-
-/** Toggle floating state of a client
- * \param screen Screen ID
- * \param arg unused
- * \ingroup ui_callback
- */
-void
-uicb_client_togglefloating(int screen, char *arg)
-{
-    Client *sel = globalconf.focus->client;
-    
-    if(!sel)
-        return;
-    
-    if((sel->isfloating = !sel->isfloating))
-    {
-        if(!arg)
-            client_resize(sel, sel->f_geometry, False);
-    }
-    else if(sel->ismax)
-        client_resize(sel, sel->m_geometry, False);
-
-    widget_invalidate_cache(sel->screen, WIDGET_CACHE_CLIENTS);
-    client_saveprops(sel);
-    arrange(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
