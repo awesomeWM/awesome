@@ -86,15 +86,15 @@
     static inline void prefix##_list_swap(type **list, type *item1,          \
                                           type *item2)                       \
     {                                                                        \
-        type *i1p, *i2p;                                                     \
         if(!item1 || !item2) return;                                         \
+                                                                             \
         type *i1n = item1->next;                                             \
         type *i2n = item2->next;                                             \
+        type * i1p = prefix##_list_prev(list, item1);                        \
+        type * i2p = prefix##_list_prev(list, item2);                        \
         item1->next = i2n == item1 ? item2 : i2n;                            \
         item2->next = i1n == item2 ? item1 : i1n;                            \
                                                                              \
-        i1p = prefix##_list_prev(list, item1);                               \
-        i2p = prefix##_list_prev(list, item2);                               \
                                                                              \
         if(i1p && i1p != item2)                                              \
             i1p->next = item2;                                               \
