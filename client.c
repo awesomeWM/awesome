@@ -283,6 +283,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                 break;
               case Float:
                 c->isfloating = True;
+                client_resize(c, c->f_geometry, False);
                 break;
               case Tile:
                 c->isfloating = False;
