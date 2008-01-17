@@ -28,6 +28,7 @@
 #define IS_TILED(client, screen)            (client && !client->isfloating && client_isvisible(client, screen))
 
 Tag * tag_new(const char *, Layout *, double, int, int);
+void tag_view(Tag *, Bool, int);
 void tag_push_to_screen(Tag *, int);
 Tag ** get_current_tags(int);
 void tag_client(Client *, Tag *);
