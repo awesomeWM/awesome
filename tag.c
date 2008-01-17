@@ -372,10 +372,7 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 {
     Tag *tag, **curtags = get_current_tags(screen);
 
-    if(curtags[0]->next)
-        tag = curtags[0]->next;
-    else
-        tag = globalconf.screens[screen].tags;
+    tag = tag_list_next_cycle(&globalconf.screens[screen].tags, curtags[0]);
 
     tag_view(curtags[0], False);
     tag_view(tag, True);
