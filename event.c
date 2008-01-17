@@ -283,6 +283,7 @@ handle_event_keypress(XEvent * e)
     XKeyEvent *ev = &e->xkey;
     Window dummy;
     Key *k;
+    XEvent event;
 
     keysym = XKeycodeToKeysym(e->xany.display, (KeyCode) ev->keycode, 0);
 
@@ -306,6 +307,7 @@ handle_event_keypress(XEvent * e)
             k->func(screen, k->arg);
             break;
         }
+    while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &event));
 }
 
 void
