@@ -206,6 +206,8 @@ struct Tag
 {
     /** Tag name */
     char *name;
+    /** Screen */
+    int screen;
     /** True if selected */
     Bool selected;
     /** True if was selected before selecting others tags */

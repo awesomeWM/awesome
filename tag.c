@@ -50,6 +50,7 @@ tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
 static void
 tag_append_to_screen(Tag *tag, int screen)
 {
+    tag->screen = screen;
     tag_list_append(&globalconf.screens[screen].tags, tag);
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
@@ -57,6 +58,7 @@ tag_append_to_screen(Tag *tag, int screen)
 void
 tag_push_to_screen(Tag *tag, int screen)
 {
+    tag->screen = screen;
     tag_list_push(&globalconf.screens[screen].tags, tag);
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
@@ -286,16 +288,16 @@ uicb_tag_toggleview(int screen, char *arg)
 }
 
 static void
-tag_view_only(Tag *target, int screen)
+tag_view_only(Tag *target)
 {
     Tag *tag;
 
     if(!target) return;
 
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        tag_view(tag, False, screen);
+    for(tag = globalconf.screens[target->screen].tags; tag; tag = tag->next)
+        tag_view(tag, False);
 
-    tag_view(target, True, screen);
+    tag_view(target, True);
 }
 
 void
@@ -308,16 +310,16 @@ tag_view_only_byindex(int screen, int dindex)
 
     for(tag = globalconf.screens[screen].tags; tag && dindex > 0;
         tag = tag->next, dindex--);
-    tag_view_only(tag, screen);
+    tag_view_only(tag);
 }
 
 void
-tag_view(Tag *tag, Bool view, int screen)
+tag_view(Tag *tag, Bool view)
 {
     tag->selected = view;
-    ewmh_update_net_current_desktop(get_phys_screen(screen));
-    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
-    saveawesomeprops(screen);
+    ewmh_update_net_current_desktop(get_phys_screen(tag->screen));
+    widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
+    saveawesomeprops(tag->screen);
 }
 
 /** View tag
@@ -334,7 +336,7 @@ uicb_tag_view(int screen, char *arg)
 	tag_view_only_byindex(screen, atoi(arg) - 1);
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            tag_view(tag, True, screen);
+            tag_view(tag, True);
 
     arrange(screen);
 }
@@ -353,7 +355,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
     for(tag =  globalconf.screens[screen].tags; tag; tag = tag->next)
     {
         t = tag->selected;
-        tag_view(tag, tag->was_selected, screen);
+        tag_view(tag, tag->was_selected);
         tag->was_selected = t;
     }
 
@@ -375,8 +377,8 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
     else
         tag = globalconf.screens[screen].tags;
 
-    tag_view(curtags[0], False, screen);
-    tag_view(tag, True, screen);
+    tag_view(curtags[0], False);
+    tag_view(tag, True);
 
     p_delete(&curtags);
     arrange(screen);
@@ -394,8 +396,8 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
 
     tag = tag_list_prev_cycle(&globalconf.screens[screen].tags, curtags[0]);
 
-    tag_view(curtags[0], False, screen);
-    tag_view(tag, True, screen);
+    tag_view(curtags[0], False);
+    tag_view(tag, True);
 
     p_delete(&curtags);
     arrange(screen);
