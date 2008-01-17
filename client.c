@@ -44,6 +44,7 @@ extern AwesomeConf globalconf;
  * \todo this may bug if number of tags is != than before
  * \param c Client ref
  * \param screen Screen ID
+ * \return true if client had property
  */
 static Bool
 client_loadprops(Client * c, int screen)
