@@ -139,7 +139,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             c->ismax = False;
         }
         else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
-                 || layout->arrange == layout_tiledown || layout->arrange == layout_tileup)
+                 || layout->arrange == layout_tilebottom || layout->arrange == layout_tiletop)
         {
             for(n = 0, c = globalconf.clients; c; c = c->next)
                 if(IS_TILED(c, screen))
@@ -166,9 +166,9 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 
     if(curtags[0]->layout->arrange == layout_tileleft)
         XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, 0, c->geometry.height + c->border - 1);
-    else if(curtags[0]->layout->arrange == layout_tiledown)
+    else if(curtags[0]->layout->arrange == layout_tilebottom)
         XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
-    else if(curtags[0]->layout->arrange == layout_tileup)
+    else if(curtags[0]->layout->arrange == layout_tiletop)
         XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, 0);
     else
         XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
@@ -202,13 +202,13 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                 client_resize(c, geometry, True);
             }
             else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
-                    || layout->arrange == layout_tileup || layout->arrange == layout_tiledown)
+                    || layout->arrange == layout_tiletop || layout->arrange == layout_tilebottom)
             {
                 if(layout->arrange == layout_tile)
                     mwfact = (double) (ev.xmotion.x - area.x) / area.width;
                 else if(curtags[0]->layout->arrange == layout_tileleft)
                     mwfact = 1 - (double) (ev.xmotion.x - area.x) / area.width;
-                else if(curtags[0]->layout->arrange == layout_tiledown)
+                else if(curtags[0]->layout->arrange == layout_tilebottom)
                     mwfact = (double) (ev.xmotion.y - area.y) / area.height;
                 else
                     mwfact = 1 - (double) (ev.xmotion.y - area.y) / area.height;

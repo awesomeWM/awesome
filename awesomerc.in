@@ -16,8 +16,8 @@ screen 0
     {
         layout tile { image = "@iconslayoutsdir@/tilew.png" }
         layout tileleft { image = "@iconslayoutsdir@/tileleftw.png" }
-        layout tiledown { image = "@iconslayoutsdir@/tiledownw.png" }
-        layout tileup { image = "@iconslayoutsdir@/tileupw.png" }
+        layout tilebottom { image = "@iconslayoutsdir@/tilebottomw.png" }
+        layout tiletop { image = "@iconslayoutsdir@/tiletopw.png" }
         layout max { image = "@iconslayoutsdir@/maxw.png" }
         layout spiral { image = "@iconslayoutsdir@/spiralw.png" }
         layout dwindle { image = "@iconslayoutsdir@/dwindlew.png" }

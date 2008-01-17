@@ -39,8 +39,8 @@ uicb_tag_setnmaster(int screen, char * arg)
 
     if(!arg || (curlay->arrange != layout_tile
                 && curlay->arrange != layout_tileleft
-                && curlay->arrange != layout_tiledown
-                && curlay->arrange != layout_tileup))
+                && curlay->arrange != layout_tilebottom
+                && curlay->arrange != layout_tiletop))
         return;
 
     if((curtags[0]->nmaster = (int) compute_new_value_from_arg(arg, (double) curtags[0]->nmaster)) < 0)
@@ -59,8 +59,8 @@ uicb_tag_setncol(int screen, char * arg)
 
     if(!arg || (curlay->arrange != layout_tile
                 && curlay->arrange != layout_tileleft
-                && curlay->arrange != layout_tiledown
-                && curlay->arrange != layout_tileup))
+                && curlay->arrange != layout_tilebottom
+                && curlay->arrange != layout_tiletop))
         return;
 
     if((curtags[0]->ncol = (int) compute_new_value_from_arg(arg, (double) curtags[0]->ncol)) < 1)
@@ -80,12 +80,12 @@ uicb_tag_setmwfact(int screen, char *arg)
 
     if(!arg || (curlay->arrange != layout_tile
                 && curlay->arrange != layout_tileleft
-                && curlay->arrange != layout_tiledown
-                && curlay->arrange != layout_tileup))
+                && curlay->arrange != layout_tilebottom
+                && curlay->arrange != layout_tiletop))
         return;
 
     newarg = a_strdup(arg);
-    if(curlay->arrange == layout_tileleft || curlay->arrange == layout_tileup)
+    if(curlay->arrange == layout_tileleft || curlay->arrange == layout_tiletop)
     {
         if(newarg[0] == '+')
             newarg[0] = '-';
@@ -242,13 +242,13 @@ layout_tileleft(int screen)
 }
 
 void
-layout_tiledown(int screen)
+layout_tilebottom(int screen)
 {
     _tile(screen, True, False);
 }
 
 void
-layout_tileup(int screen)
+layout_tiletop(int screen)
 {
     _tile(screen, False, False);
 }
