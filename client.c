@@ -669,31 +669,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
         window_settrans(sel->win, delta);
 }
 
-/** Swap current with next client
- * \param screen Screen ID
- * \param arg nothing
- * \ingroup ui_callback
- */
-void
-uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
-{
-    Client *next, *sel = globalconf.focus->client;
-
-    if(!sel)
-        return;
-
-    for(next = sel->next; next && !client_isvisible(next, screen); next = next->next);
-    if(!next)
-        for(next = globalconf.clients; next && !client_isvisible(next, screen); next = next->next);
-    if(next)
-    {
-        client_list_swap(&globalconf.clients, sel, next);
-        arrange(screen);
-    }
-}
-
-
-Client *
+static Client *
 client_find_prev_visible(Client *sel)
 {
     Client *prev = NULL;
@@ -706,6 +682,20 @@ client_find_prev_visible(Client *sel)
         prev = client_list_prev_cycle(&globalconf.clients, prev));
 
     return prev;
+}
+
+static Client *
+client_find_next_visible(Client *sel)
+{
+    Client *next = NULL;
+
+    if(!sel) return NULL;
+
+    for(next = sel->next; next && !client_isvisible(next, sel->screen); next = next->next);
+    if(!next)
+        for(next = globalconf.clients; next && !client_isvisible(next, sel->screen); next = next->next);
+
+    return next;
 }
 
 /** Swap current with previous client
@@ -721,6 +711,23 @@ uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
     if((prev = client_find_prev_visible(globalconf.focus->client)))
     {
         client_list_swap(&globalconf.clients, prev, globalconf.focus->client);
+        arrange(screen);
+    }
+}
+
+/** Swap current with next client
+ * \param screen Screen ID
+ * \param arg nothing
+ * \ingroup ui_callback
+ */
+void
+uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
+{
+    Client *next;
+
+    if((next = client_find_next_visible(globalconf.focus->client)))
+    {
+        client_list_swap(&globalconf.clients, globalconf.focus->client, next);
         arrange(screen);
     }
 }
