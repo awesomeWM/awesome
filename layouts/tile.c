@@ -104,11 +104,10 @@ uicb_tag_setmwfact(int screen, char *arg)
 }
 
 static void
-_tile(int screen, const Bool right, const Bool vertical)
+_tile(int screen, const Position position)
 {
     /* windows area geometry */
     int wah = 0, waw = 0, wax = 0, way = 0;
-    /* new coordinates */
     /* master size */
     unsigned int mw = 0, mh = 0;
     int n, i, masterwin = 0, otherwin = 0;
@@ -138,18 +137,18 @@ _tile(int screen, const Bool right, const Bool vertical)
         otherwin = 0;
 
     if(curtags[0]->nmaster)
-    {
-        if(vertical)
+        switch(position)
         {
+          case Right:
+          case Left:
             mh = masterwin ? wah / masterwin : wah;
             mw = otherwin ? waw * curtags[0]->mwfact : waw;
-        }
-        else
-        {
+            break;
+          default:
             mh = otherwin ? wah * curtags[0]->mwfact : wah;
             mw = masterwin ? waw / masterwin : waw;
+            break;
         }
-    }
     else
         mh = mw = 0;
 
@@ -160,18 +159,28 @@ _tile(int screen, const Bool right, const Bool vertical)
         if(!IS_TILED(c, screen))
             continue;
 
-        c->ismax = False;
         if(i < curtags[0]->nmaster)
         {
-            if(vertical)
+            switch(position)
             {
+              case Right:
                 geometry.y = way + i * mh;
-                geometry.x = wax + (right ? 0 : waw - mw);
-            }
-            else
-            {
-                geometry.y = way + (right ? 0 : wah - mh);
+                geometry.x = wax;
+                break;
+              case Left:
+                geometry.y = way + i * mh;
+                geometry.x = wax + (waw - mw);
+                break;
+              case Top:
                 geometry.x = wax + i * mw;
+                geometry.y = way + (wah - mh);
+                break;
+              case Bottom:
+              default:
+                geometry.x = wax + i * mw;
+                geometry.y = way;
+                break;
+                break;
             }
             geometry.width = mw - 2 * c->border;
             geometry.height =  mh - 2 * c->border;
@@ -188,7 +197,7 @@ _tile(int screen, const Bool right, const Bool vertical)
             if(current_col == real_ncol - 1)
                 win_by_col += otherwin % real_ncol;
 
-            if(vertical)
+            if(position == Right || position == Left)
             {
                 if(otherwin <= real_ncol)
                     geometry.height = wah - 2 * c->border;
@@ -202,7 +211,10 @@ _tile(int screen, const Bool right, const Bool vertical)
                 else
                     geometry.y = way + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.height + 2 * c->border);
 
-                geometry.x = wax + current_col * (geometry.width + 2 * c->border) + (right ? mw : 0);
+                geometry.x = wax + current_col * (geometry.width + 2 * c->border);
+
+                if(position == Right)
+                    geometry.x += mw;
             }
             else
             {
@@ -218,9 +230,11 @@ _tile(int screen, const Bool right, const Bool vertical)
                 else
                     geometry.x = wax + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.width + 2 * c->border);
 
-                geometry.y = way + current_col * (geometry.height + 2 * c->border) + (right ? mh : 0);
-            }
+                geometry.y = way + current_col * (geometry.height + 2 * c->border);
 
+                if(position == Bottom)
+                    geometry.y += mh;
+            }
             client_resize(c, geometry, globalconf.screens[screen].resize_hints);
         }
         i++;
@@ -232,25 +246,25 @@ _tile(int screen, const Bool right, const Bool vertical)
 void
 layout_tile(int screen)
 {
-    _tile(screen, True, True);
+    _tile(screen, Right);
 }
 
 void
 layout_tileleft(int screen)
 {
-    _tile(screen, False, True);
+    _tile(screen, Left);
 }
 
 void
 layout_tilebottom(int screen)
 {
-    _tile(screen, True, False);
+    _tile(screen, Bottom);
 }
 
 void
 layout_tiletop(int screen)
 {
-    _tile(screen, False, False);
+    _tile(screen, Top);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
