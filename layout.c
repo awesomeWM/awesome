@@ -43,7 +43,7 @@ extern AwesomeConf globalconf;
 /** Arrange windows following current selected layout
  * \param screen the screen to arrange
  */
-void
+static void
 arrange(int screen)
 {
     Client *c;
@@ -77,8 +77,26 @@ arrange(int screen)
 
     p_delete(&curtags);
     restack(screen);
+
+    /* reset status */
+    globalconf.screens[screen].need_arrange = False;
 }
 
+Bool
+layout_refresh(void)
+{
+    int screen;
+    Bool arranged = False;
+
+    for(screen = 0; screen < get_screen_count(); screen++)
+        if(globalconf.screens[screen].need_arrange)
+        {
+            arrange(screen);
+            arranged = True;
+        }
+
+    return arranged;
+}
 
 Layout *
 get_current_layout(int screen)

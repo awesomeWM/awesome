@@ -338,7 +338,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     ewmh_update_net_client_list(phys_screen);
 
     /* rearrange to display new window */
-    arrange(c->screen);
+    globalconf.screens[c->screen].need_arrange = True;
 }
 
 /** Resize client window
@@ -447,8 +447,12 @@ void
 client_setfloating(Client *c, Bool floating)
 {
     if(c->isfloating != floating)
+    {
         if((c->isfloating = floating))
             client_resize(c, c->f_geometry, False);
+        globalconf.screens[c->screen].need_arrange = True;
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+    }
 }
 
 /** Save client properties as an X property
@@ -516,7 +520,8 @@ client_unmanage(Client *c)
     XSync(globalconf.display, False);
     XUngrabServer(globalconf.display);
 
-    arrange(c->screen);
+    globalconf.screens[c->screen].need_arrange = True;
+
     p_delete(&c);
 }
 
@@ -704,14 +709,15 @@ client_find_next_visible(Client *sel)
  * \ingroup ui_callback
  */
 void
-uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
+uicb_client_swapprev(int screen __attribute__ ((unused)),
+                     char *arg __attribute__ ((unused)))
 {
     Client *prev;
 
     if((prev = client_find_prev_visible(globalconf.focus->client)))
     {
         client_list_swap(&globalconf.clients, prev, globalconf.focus->client);
-        arrange(screen);
+        globalconf.screens[prev->screen].need_arrange = True;
     }
 }
 
@@ -721,14 +727,15 @@ uicb_client_swapprev(int screen, char *arg __attribute__ ((unused)))
  * \ingroup ui_callback
  */
 void
-uicb_client_swapnext(int screen, char *arg __attribute__ ((unused)))
+uicb_client_swapnext(int screen __attribute__ ((unused)),
+                     char *arg __attribute__ ((unused)))
 {
     Client *next;
 
     if((next = client_find_next_visible(globalconf.focus->client)))
     {
         client_list_swap(&globalconf.clients, globalconf.focus->client, next);
-        arrange(screen);
+        globalconf.screens[next->screen].need_arrange = True;
     }
 }
 
@@ -846,7 +853,6 @@ client_maximize(Client *c, Area geometry)
     else
     {
         client_setfloating(c, False);
-        arrange(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
 }
@@ -936,7 +942,7 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 
     client_list_detach(&globalconf.clients, sel);
     client_list_push(&globalconf.clients, sel);
-    arrange(screen);
+    globalconf.screens[screen].need_arrange = True;
 }
 
 /** Send focus to next client in stack
@@ -984,13 +990,14 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
  * \ingroup ui_callback
  */
 void
-uicb_client_togglefloating(int screen, char *arg)
+uicb_client_togglefloating(int screen __attribute__ ((unused)), char *arg)
 {
     Client *sel = globalconf.focus->client;
     
     if(!sel)
         return;
     
+    /* XXX should use client_setfloating */
     if((sel->isfloating = !sel->isfloating))
     {
         if(!arg)
@@ -998,10 +1005,8 @@ uicb_client_togglefloating(int screen, char *arg)
     }
     else if(sel->ismax)
         client_resize(sel, sel->m_geometry, False);
-
+    globalconf.screens[sel->screen].need_arrange = True;
     widget_invalidate_cache(sel->screen, WIDGET_CACHE_CLIENTS);
-    client_saveprops(sel);
-    arrange(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

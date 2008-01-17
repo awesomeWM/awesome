@@ -38,7 +38,7 @@ struct Layout
 
 DO_SLIST(Layout, layout, p_delete);
 
-void arrange(int);
+Bool layout_refresh(void);
 Layout * get_current_layout(int);
 void restack(int);
 void loadawesomeprops(int);

@@ -169,10 +169,10 @@ handle_event_configurerequest(XEvent * e)
             if(old_screen != c->screen)
             {
                 widget_invalidate_cache(old_screen, WIDGET_CACHE_CLIENTS);
-                arrange(old_screen);
+                globalconf.screens[old_screen].need_arrange = True;
             }
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-            arrange(c->screen);
+            globalconf.screens[c->screen].need_arrange = True;
         }
         else
             window_configure(c->win, geometry, c->border);
@@ -215,7 +215,7 @@ handle_event_configurenotify(XEvent * e)
                           globalconf.screens[screen].statusbar->height);
 
             widget_invalidate_cache(screen, WIDGET_CACHE_ALL);
-            arrange(screen);
+            globalconf.screens[screen].need_arrange = True;
         }
 }
 
@@ -374,8 +374,9 @@ handle_event_propertynotify(XEvent * e)
         {
           case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
-            if(!c->isfloating && (c->isfloating = (get_client_bywin(globalconf.clients, trans) != NULL)))
-                arrange(c->screen);
+            if(!c->isfloating
+               && (c->isfloating = (get_client_bywin(globalconf.clients, trans) != NULL)))
+                globalconf.screens[c->screen].need_arrange = True;
             break;
           case XA_WM_NORMAL_HINTS:
             client_updatesizehints(c);

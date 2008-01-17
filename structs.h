@@ -266,6 +266,8 @@ typedef struct
     Bool new_get_focus;
     /** True if new clients should become master */
     Bool new_become_master;
+    /** True if we need to arrange() */
+    Bool need_arrange;
     /** Normal colors */
     XColor colors_normal[ColLast];
     /** Selected colors */

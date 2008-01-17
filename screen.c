@@ -266,7 +266,8 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
         else
         {
             c->f_geometry = new_f_geometry;
-            arrange(c->screen);
+            globalconf.screens[old_screen].need_arrange = True;
+            globalconf.screens[c->screen].need_arrange = True;
         }
     }
 }
@@ -346,8 +347,6 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     prev_screen = sel->screen;
     move_client_to_screen(sel, new_screen, True);
     move_mouse_pointer_to_screen(new_screen);
-    arrange(prev_screen);
-    arrange(new_screen);
     focus(sel, True, sel->screen);
     /* drop EnterWindow event to keep focus */
     XCheckMaskEvent(globalconf.display, EnterWindowMask, &event);

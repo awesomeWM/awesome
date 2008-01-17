@@ -217,9 +217,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                 if(fabs(curtags[0]->mwfact - mwfact) >= 0.05)
                 {
                     curtags[0]->mwfact = mwfact;
-                    arrange(screen);
-                    /* drop possibly arrived events while we where arrange()ing */
-                    while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
+                    globalconf.screens[screen].need_arrange = True;
                 }
             }
 

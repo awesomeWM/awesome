@@ -399,6 +399,7 @@ main(int argc, char *argv[])
         }
 
         statusbar_refresh();
+        layout_refresh();
 
         /* need to resync */
         XSync(dpy, False);

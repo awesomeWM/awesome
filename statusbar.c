@@ -339,7 +339,7 @@ uicb_statusbar_toggle(int screen, char *arg)
         for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
             statusbar_toggle(sb);
 
-    arrange(screen);
+    globalconf.screens[screen].need_arrange = True;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

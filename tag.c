@@ -77,7 +77,9 @@ tag_client(Client *c, Tag *t)
     tc->tag = t;
     tag_client_node_list_push(&globalconf.tclink, tc);
 
+    client_saveprops(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+    globalconf.screens[c->screen].need_arrange = True;
 }
 
 void
@@ -93,7 +95,9 @@ untag_client(Client *c, Tag *t)
             break;
         }
 
+    client_saveprops(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+    globalconf.screens[c->screen].need_arrange = True;
 }
 
 Bool
@@ -201,9 +205,6 @@ uicb_client_tag(int screen, char *arg)
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag_client(sel, tag);
-
-    client_saveprops(sel);
-    arrange(screen);
 }
 
 /** Toggle a tag on client
@@ -247,9 +248,6 @@ uicb_client_toggletag(int screen, char *arg)
                 tag_client(sel, tag);
             else
                 untag_client(sel, tag);
-
-    client_saveprops(sel);
-    arrange(screen);
 }
 
 /** Add a tag to viewed tags
@@ -270,21 +268,16 @@ uicb_tag_toggleview(int screen, char *arg)
             target_tag = target_tag->next, i--);
 
         if(target_tag)
-            target_tag->selected = !target_tag->selected;
+            tag_view(target_tag, !target_tag->selected);
 
         /* check that there's at least one tag selected */
         for(tag = globalconf.screens[screen].tags; tag && !tag->selected; tag = tag->next);
         if(!tag)
-            target_tag->selected = True;
+            tag_view(target_tag, True);
     }
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            tag->selected = !tag->selected;
-
-    saveawesomeprops(screen);
-    arrange(screen);
-    ewmh_update_net_current_desktop(get_phys_screen(screen));
-    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
+            tag_view(tag, !tag->selected);
 }
 
 static void
@@ -320,6 +313,7 @@ tag_view(Tag *tag, Bool view)
     ewmh_update_net_current_desktop(get_phys_screen(tag->screen));
     widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
     saveawesomeprops(tag->screen);
+    globalconf.screens[tag->screen].need_arrange = True;
 }
 
 /** View tag
@@ -337,8 +331,6 @@ uicb_tag_view(int screen, char *arg)
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag_view(tag, True);
-
-    arrange(screen);
 }
 
 /** View previously selected tags
@@ -358,8 +350,6 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
         tag_view(tag, tag->was_selected);
         tag->was_selected = t;
     }
-
-    arrange(screen);
 }
 
 /** View next tag
@@ -378,7 +368,6 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
     tag_view(tag, True);
 
     p_delete(&curtags);
-    arrange(screen);
 }
 
 /** View previous tag
@@ -397,7 +386,6 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
     tag_view(tag, True);
 
     p_delete(&curtags);
-    arrange(screen);
 }
 
 void
