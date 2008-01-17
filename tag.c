@@ -133,6 +133,7 @@ tag_client_with_rules(Client *c)
                 break;
               case Float:
                 c->isfloating = True;
+                client_resize(c, c->f_geometry, False);
                 break;
               default:
                 break;
