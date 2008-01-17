@@ -39,6 +39,7 @@ void client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *); 
 void client_kill(Client *);
+void client_setfloating(Client *, Bool);
 
 Uicb uicb_client_kill;
 Uicb uicb_client_moveresize;

@@ -72,7 +72,7 @@ client_loadprops(Client * c, int screen)
                 untag_client(c, tag);
 
         if(i <= ntags && prop[i])
-            c->isfloating = prop[i] == '1';
+            client_setfloating(c, prop[i] == '1');
     }
 
     p_delete(&prop);
@@ -282,11 +282,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
               case Auto:
                 break;
               case Float:
-                c->isfloating = True;
-                client_resize(c, c->f_geometry, False);
+                client_setfloating(c, True);
                 break;
               case Tile:
-                c->isfloating = False;
+                client_setfloating(c, False);
                 break;
             }
         }
@@ -303,7 +302,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
         /* should be floating if transsient or fixed */
         if(!c->isfloating)
-            c->isfloating = rettrans || c->isfixed;
+            client_setfloating(c, rettrans || c->isfixed);
     }
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
@@ -441,6 +440,14 @@ client_resize(Client *c, Area geometry, Bool sizehints)
         return True;
     }
     return False;
+}
+
+void
+client_setfloating(Client *c, Bool floating)
+{
+    if(c->isfloating != floating)
+        if((c->isfloating = floating))
+            client_resize(c, c->f_geometry, False);
 }
 
 /** Save client properties as an X property
@@ -766,7 +773,6 @@ uicb_client_moveresize(int screen, char *arg)
     }
 }
 
-
 void
 client_kill(Client *c)
 {
@@ -809,14 +815,14 @@ client_maximize(Client *c, Area geometry)
         c->wasfloating = c->isfloating;
         c->m_geometry = c->geometry;
         if(get_current_layout(c->screen)->arrange != layout_floating)
-            c->isfloating = True;
+            client_setfloating(c, True);
         client_resize(c, geometry, False);
         restack(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else if(c->wasfloating)
     {
-        c->isfloating = True;
+        client_setfloating(c, True);
         client_resize(c, c->m_geometry, False);
         restack(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -829,7 +835,7 @@ client_maximize(Client *c, Area geometry)
     }
     else
     {
-        c->isfloating = False;
+        client_setfloating(c, False);
         arrange(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }

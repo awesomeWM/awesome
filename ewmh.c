@@ -259,7 +259,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             geometry = c->m_geometry;
             c->border = c->oldborder;
             c->ismax = False;
-            c->isfloating = c->wasfloating;
+            client_setfloating(c, c->wasfloating);
         }
         else if(set == _NET_WM_STATE_ADD)
         {
@@ -270,7 +270,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             c->oldborder = c->border;
             c->border = 0;
             c->ismax = True;
-            c->isfloating = True;
+            client_setfloating(c, True);
         }
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, False);
@@ -292,14 +292,10 @@ ewmh_process_window_type_atom(Client *c, Atom state)
         c->border = 0;
         c->skip = True;
         c->isfixed = True;
-        c->isfloating = True;
-        client_resize(c, c->f_geometry, False);
+        client_setfloating(c, True);
     }
     else if (state == net_wm_window_type_dialog)
-    {
-        c->isfloating = True;
-        client_resize(c, c->f_geometry, False);
-    }
+        client_setfloating(c, True);
 }
 void
 ewmh_process_client_message(XClientMessageEvent *ev)
