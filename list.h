@@ -113,6 +113,17 @@
             tmp = *prefix##_list_last(list);                                 \
         return tmp;                                                          \
     }                                                                        \
+    static inline type *prefix##_list_next_cycle(type **list, type *item)    \
+    {                                                                        \
+        if(item)                                                             \
+        {                                                                    \
+            if(item->next)                                                   \
+                return item->next;                                           \
+            else                                                             \
+                return *list;                                                \
+        }                                                                    \
+        return NULL;                                                         \
+    }                                                                        \
     static inline void prefix##_list_detach(type **list, type *item)         \
     {                                                                        \
         type *prev = prefix##_list_prev(list, item);                         \
