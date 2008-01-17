@@ -376,23 +376,22 @@ config_parse_screen(cfg_t *cfg, int screen)
     if((i = cfg_size(cfg_tags, "tag")))
         for(--i; i >= 0; i--)
         {
-            tag = p_new(Tag, 1);
             cfgsectmp = cfg_getnsec(cfg_tags, "tag", i);
-            tag->name = a_strdup(cfg_title(cfgsectmp));
-            tag->selected = False;
-            tag->was_selected = False;
+
             tmp = cfg_getstr(cfgsectmp, "layout");
             for(layout = virtscreen->layouts;
-                layout && layout->arrange != name_func_lookup(tmp, LayoutList); layout = layout->next);
+                layout && layout->arrange != name_func_lookup(tmp, LayoutList);
+                layout = layout->next);
             if(!layout)
-                tag->layout = virtscreen->layouts;
-            else
-                tag->layout = layout;
-            tag->mwfact = cfg_getfloat(cfgsectmp, "mwfact");
-            tag->nmaster = cfg_getint(cfgsectmp, "nmaster");
-            tag->ncol = cfg_getint(cfgsectmp, "ncol");
+                layout = virtscreen->layouts;
 
-            tag_list_push(&virtscreen->tags, tag);
+            tag = tag_new(cfg_title(cfgsectmp),
+                          layout,
+                          cfg_getfloat(cfgsectmp, "mwfact"),
+                          cfg_getint(cfgsectmp, "nmaster"),
+                          cfg_getint(cfgsectmp, "ncol"));
+
+            tag_push_to_screen(tag, screen);
         }
     else
     {

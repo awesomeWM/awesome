@@ -32,6 +32,35 @@
 
 extern AwesomeConf globalconf;
 
+Tag *
+tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
+{
+    Tag *tag;
+
+    tag = p_new(Tag, 1);
+    tag->name = a_strdup(name);
+    tag->layout = layout;
+    tag->mwfact = mwfact;
+    tag->nmaster = nmaster;
+    tag->ncol = ncol;
+
+    return tag;
+}
+
+static void
+tag_append_to_screen(Tag *tag, int screen)
+{
+    tag_list_append(&globalconf.screens[screen].tags, tag);
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
+}
+
+void
+tag_push_to_screen(Tag *tag, int screen)
+{
+    tag_list_push(&globalconf.screens[screen].tags, tag);
+    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
+}
+
 void
 tag_client(Client *c, Tag *t)
 {
@@ -382,14 +411,8 @@ uicb_tag_create(int screen, char *arg)
     if(!a_strlen(arg))
         return;
 
-    tag = p_new(Tag, 1);
-    tag->name = a_strdup(arg);
-    tag->layout = globalconf.screens[screen].layouts;
-    tag->mwfact = 0.5;
-    tag->nmaster = 1;
-    tag->ncol = 1;
-    tag_list_append(&globalconf.screens[screen].tags, tag);
-    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
+    tag = tag_new(arg, globalconf.screens[screen].layouts, 0.5, 1, 1);
+    tag_append_to_screen(tag, screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
