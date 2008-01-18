@@ -53,9 +53,13 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     if(!c)
         return;
 
-    if(layout->arrange != layout_floating
-        && !c->isfloating)
-        uicb_client_togglefloating(screen, (char *) "be nice");
+    if(layout->arrange != layout_floating && !c->isfloating)
+    {
+        /* ugly hack: copy current geom to be floating 
+         * because mouse will be far away from window otherwise */
+        c->f_geometry = c->geometry;
+        client_setfloating(c, True);
+    }
 
     restack(screen);
 
