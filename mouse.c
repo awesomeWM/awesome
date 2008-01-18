@@ -56,8 +56,8 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     if(layout->arrange != layout_floating
         && !c->isfloating)
         uicb_client_togglefloating(screen, (char *) "be nice");
-    else
-        restack(screen);
+
+    restack(screen);
 
     area = get_screen_area(c->screen,
                            globalconf.screens[screen].statusbar,
