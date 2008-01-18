@@ -252,7 +252,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
     }
     else if(state == net_wm_state_fullscreen)
     {
-        Area geometry;
+        Area geometry = c->geometry;
         if(set == _NET_WM_STATE_REMOVE)
         {
             /* restore geometry */
@@ -275,7 +275,6 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, False);
         XRaiseWindow(globalconf.display, c->win);
-        globalconf.screens[c->screen].need_arrange = True;
     }
 }
 
