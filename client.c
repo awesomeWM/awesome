@@ -986,7 +986,8 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
  * \ingroup ui_callback
  */
 void
-uicb_client_togglefloating(int screen __attribute__ ((unused)), char *arg)
+uicb_client_togglefloating(int screen __attribute__ ((unused)),
+                           char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
     
@@ -995,10 +996,7 @@ uicb_client_togglefloating(int screen __attribute__ ((unused)), char *arg)
     
     /* XXX should use client_setfloating */
     if((sel->isfloating = !sel->isfloating))
-    {
-        if(!arg)
-            client_resize(sel, sel->f_geometry, False);
-    }
+        client_resize(sel, sel->f_geometry, False);
     else if(sel->ismax)
         client_resize(sel, sel->m_geometry, False);
     globalconf.screens[sel->screen].need_arrange = True;
