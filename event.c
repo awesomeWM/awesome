@@ -275,7 +275,6 @@ handle_event_keypress(XEvent * e)
     XKeyEvent *ev = &e->xkey;
     Window dummy;
     Key *k;
-    XEvent event;
 
     keysym = XKeycodeToKeysym(e->xany.display, (KeyCode) ev->keycode, 0);
 
@@ -299,7 +298,6 @@ handle_event_keypress(XEvent * e)
             k->func(screen, k->arg);
             break;
         }
-    while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &event));
 }
 
 void
@@ -333,7 +331,6 @@ handle_event_maprequest(XEvent *e)
     int screen, x, y, d;
     unsigned int m;
     Window dummy;
-    XEvent event;
 
     if(!XGetWindowAttributes(e->xany.display, ev->window, &wa))
         return;
@@ -346,8 +343,6 @@ handle_event_maprequest(XEvent *e)
                                         &dummy, &dummy, &x, &y, &d, &d, &m))
             screen = get_screen_bycoord(x, y);
         client_manage(ev->window, &wa, screen);
-        /* do this to keep focused client */
-        while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &event));
     }
 }
 
@@ -387,14 +382,11 @@ handle_event_unmapnotify(XEvent * e)
 {
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
-    XEvent event;
 
     if((c = get_client_bywin(globalconf.clients, ev->window))
        && ev->event == RootWindow(e->xany.display, get_phys_screen(c->screen))
        && ev->send_event && window_getstate(c->win) == NormalState)
         client_unmanage(c);
-    /* do this to keep focused client */
-    while(XCheckMaskEvent(globalconf.display, EnterWindowMask, &event));
 }
 
 void

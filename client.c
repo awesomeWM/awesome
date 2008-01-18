@@ -217,6 +217,7 @@ focus(Client *c, Bool selscreen, int screen)
                        RevertToPointerRoot, CurrentTime);
 
     ewmh_update_net_active_window(phys_screen);
+    globalconf.drop_events |= EnterWindowMask;
 }
 
 /** Manage a new client

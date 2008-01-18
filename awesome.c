@@ -394,6 +394,16 @@ main(int argc, char *argv[])
             XNextEvent(dpy, &ev);
             if(handler[ev.type])
                 handler[ev.type](&ev);       /* call handler */
+
+            /* drop events requested to */
+            if(globalconf.drop_events)
+            {
+                /* need to resync */
+                XSync(dpy, False);
+                while(XCheckMaskEvent(dpy, globalconf.drop_events, &ev));
+                globalconf.drop_events = NoEventMask;
+            }
+
             /* need to resync */
             XSync(dpy, False);
         }
