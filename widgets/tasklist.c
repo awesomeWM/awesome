@@ -151,7 +151,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
     Client *c;
     Data *d = widget->data;
     Tag *tag;
-    int n = 0, box_width = 0, i = 0, ci = 0;
+    int n = 0, box_width = 0, i, ci = 0;
 
     /* button1 give focus */
     if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
@@ -185,9 +185,10 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 c && !ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all);
                 c = c->next);
             /* found ci-th visible client */
-            for(; c && i < ci; c = c->next)
+            for(i = 0; c ; c = c->next)
                 if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
-                    i++;
+                    if(i++ >= ci)
+                        break;
 
             if(c)
             {
