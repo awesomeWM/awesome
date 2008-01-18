@@ -165,14 +165,6 @@ handle_event_configurerequest(XEvent * e)
             client_resize(c, geometry, False);
 
             tag_client_with_rule(c, rule_matching_client(c));
-            
-            if(old_screen != c->screen)
-            {
-                widget_invalidate_cache(old_screen, WIDGET_CACHE_CLIENTS);
-                globalconf.screens[old_screen].need_arrange = True;
-            }
-            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-            globalconf.screens[c->screen].need_arrange = True;
         }
         else
             window_configure(c->win, geometry, c->border);

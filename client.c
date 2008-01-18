@@ -336,9 +336,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
  
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_client_list(phys_screen);
-
-    /* rearrange to display new window */
-    globalconf.screens[c->screen].need_arrange = True;
 }
 
 /** Resize client window
@@ -450,7 +447,8 @@ client_setfloating(Client *c, Bool floating)
     {
         if((c->isfloating = floating))
             client_resize(c, c->f_geometry, False);
-        globalconf.screens[c->screen].need_arrange = True;
+        if(client_isvisible(c, c->screen))
+            globalconf.screens[c->screen].need_arrange = True;
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
 }
@@ -519,8 +517,6 @@ client_unmanage(Client *c)
 
     XSync(globalconf.display, False);
     XUngrabServer(globalconf.display);
-
-    globalconf.screens[c->screen].need_arrange = True;
 
     p_delete(&c);
 }
