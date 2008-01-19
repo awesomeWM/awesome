@@ -155,7 +155,7 @@ statusbar_init(Statusbar *statusbar, int screen)
     Widget *widget;
     XSetWindowAttributes wa;
     int phys_screen = get_phys_screen(screen);
-    Area area = get_screen_area(statusbar->screen,
+    Area area = get_screen_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
 
