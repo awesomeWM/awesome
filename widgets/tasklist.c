@@ -55,7 +55,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     Client *sel = focus_get_current_client(widget->statusbar->screen);
     Rule *r;
     Area area;
-    int n = 0, i = 0, box_width = 0, icon_width = 0;
+    int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;
 
     for(c = globalconf.clients; c; c = c->next)
@@ -69,6 +69,8 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     }
 
     box_width = (widget->statusbar->width - used) / n;
+    /* compute how many pixel we left empty */
+    box_width_rest = (widget->statusbar->width - used) % n;
 
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
@@ -125,6 +127,11 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
             area.y = widget->area.y;
             area.width = box_width - icon_width;
             area.height = widget->statusbar->height;
+
+            /* if we're on last elem, it has the last pixels left */
+            if(i == n - 1)
+                area.width += box_width_rest;
+
             if(sel == c)
                 draw_text(ctx, area, d->align,
                           widget->font->height / 2, widget->font, c->name,
