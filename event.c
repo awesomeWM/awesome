@@ -113,7 +113,6 @@ handle_event_buttonpress(XEvent *e)
         if(CLEANMASK(ev->state) == NoSymbol
            && ev->button == Button1)
         {
-            restack(c->screen);
             XAllowEvents(globalconf.display, ReplayPointer, CurrentTime);
             window_grabbuttons(get_phys_screen(c->screen), c->win, True, True);
         }

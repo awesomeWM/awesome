@@ -210,6 +210,7 @@ focus(Client *c, Bool selscreen, int screen)
                 window_settrans(globalconf.focus->client->win,
                                 globalconf.screens[screen].opacity_unfocused);
         window_settrans(globalconf.focus->client->win, -1);
+        restack(screen);
     }
     else
         XSetInputFocus(globalconf.display,
@@ -308,6 +309,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
+    window_grabbuttons(phys_screen, c->win, False, True);
 
     /* handle xshape */
     if(globalconf.have_shape)
@@ -831,20 +833,17 @@ client_maximize(Client *c, Area geometry)
         if(get_current_layout(c->screen)->arrange != layout_floating)
             client_setfloating(c, True);
         client_resize(c, geometry, False);
-        restack(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else if(c->wasfloating)
     {
         client_setfloating(c, True);
         client_resize(c, c->m_geometry, False);
-        restack(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else if(get_current_layout(c->screen)->arrange == layout_floating)
     {
         client_resize(c, c->m_geometry, False);
-        restack(c->screen);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else
@@ -958,10 +957,7 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
     if(!c)
         for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     if(c)
-    {
         focus(c, True, screen);
-        restack(screen);
-    }
 }
 
 /** Send focus to previous client in stack
@@ -975,10 +971,7 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
     Client *prev;
 
     if((prev = client_find_prev_visible(globalconf.focus->client)))
-    {
         focus(prev, True, screen);
-        restack(screen);
-    }
 }
 
 /** Toggle floating state of a client

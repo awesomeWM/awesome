@@ -61,8 +61,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         client_setfloating(c, True);
     }
 
-    restack(screen);
-
     area = get_screen_area(c->screen,
                            globalconf.screens[screen].statusbar,
                            &globalconf.screens[screen].padding);
@@ -137,7 +135,6 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     {
         if(layout->arrange == layout_floating || c->isfloating)
         {
-            restack(screen);
             ocx = c->geometry.x;
             ocy = c->geometry.y;
             c->ismax = False;

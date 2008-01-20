@@ -76,7 +76,6 @@ arrange(int screen)
             window_grabbuttons(c->screen, c->win, False, False);
 
     p_delete(&curtags);
-    restack(screen);
 
     /* reset status */
     globalconf.screens[screen].need_arrange = False;
