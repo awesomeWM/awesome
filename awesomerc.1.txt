@@ -312,6 +312,7 @@ Note: when there is no whitespace, quotes are optional.
 <image>         -> "/home/awesome/pics/icon.png" (path to image)
 <integer>       -> 1, 10, -3 (positive numbers are required mostly)
 <key>           -> a, 1, F10 (see /usr/include/X11/keysymdef.h w/o XK_ or 'xev')
+                   or a keycode beginning with #
 <mod>           -> "Mod1", "Mod4", "Control" (modifiers)
 <regex>         -> regular expression
 <string>        -> "foo bar"
