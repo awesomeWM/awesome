@@ -138,7 +138,7 @@ restack(int screen)
 {
     Client *c, *sel = globalconf.focus->client;
     XWindowChanges wc;
-    Tag **curtags;
+    Layout *curlay = get_current_layout(screen);
 
     if(!sel)
         return;
@@ -147,11 +147,9 @@ restack(int screen)
         XRaiseWindow(globalconf.display, sel->win);
     else
     {
-        curtags = get_current_tags(screen);
-        if(sel->isfloating ||
-           curtags[0]->layout->arrange == layout_floating)
+        if(sel->isfloating || curlay->arrange == layout_floating)
             XRaiseWindow(globalconf.display, sel->win);
-        if(!(curtags[0]->layout->arrange == layout_floating))
+        if(curlay->arrange != layout_floating)
         {
             wc.stack_mode = Below;
             if(!sel->isfloating)
@@ -163,7 +161,6 @@ restack(int screen)
                 XConfigureWindow(globalconf.display, c->win, CWStackMode, &wc);
             }
         }
-        p_delete(&curtags);
     }
     if(globalconf.screens[screen].focus_move_pointer)
         XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0,
