@@ -136,8 +136,7 @@ loadawesomeprops(int screen)
 void
 restack(int screen)
 {
-    Client *c, *sel = globalconf.focus->client;
-    XWindowChanges wc;
+    Client *sel = globalconf.focus->client;
     Layout *curlay = get_current_layout(screen);
 
     if(!sel)
@@ -146,22 +145,9 @@ restack(int screen)
     if(globalconf.screens[screen].allow_lower_floats)
         XRaiseWindow(globalconf.display, sel->win);
     else
-    {
         if(sel->isfloating || curlay->arrange == layout_floating)
             XRaiseWindow(globalconf.display, sel->win);
-        if(curlay->arrange != layout_floating)
-        {
-            wc.stack_mode = Below;
-            if(!sel->isfloating)
-                XConfigureWindow(globalconf.display, sel->win, CWStackMode, &wc);
-            for(c = globalconf.clients; c; c = c->next)
-            {
-                if(!IS_TILED(c, screen) || c == sel)
-                    continue;
-                XConfigureWindow(globalconf.display, c->win, CWStackMode, &wc);
-            }
-        }
-    }
+
     if(globalconf.screens[screen].focus_move_pointer)
         XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0,
                      sel->geometry.width / 2, sel->geometry.height / 2);
