@@ -40,6 +40,16 @@ extern AwesomeConf globalconf;
 
 #include "layoutgen.h"
 
+static void
+layout_raise_floatings(int screen)
+{
+    Client *c;
+
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->isfloating && client_isvisible(c, screen))
+            XRaiseWindow(globalconf.display, c->win);
+}
+
 /** Arrange windows following current selected layout
  * \param screen the screen to arrange
  */
@@ -62,12 +72,17 @@ arrange(int screen)
     }
 
     curtags[0]->layout->arrange(screen);
+
     for(c = globalconf.clients; c; c = c->next)
         if(c->newcomer && client_isvisible(c, screen))
         {
             c->newcomer = False;
             client_unban(c);
         }
+
+    if(!globalconf.screens[screen].allow_lower_floats)
+        layout_raise_floatings(screen);
+
     c = focus_get_current_client(screen);
     focus(c, True, screen);
     if(c && XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)),
