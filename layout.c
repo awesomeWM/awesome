@@ -57,7 +57,7 @@ static void
 arrange(int screen)
 {
     Client *c;
-    Tag **curtags = get_current_tags(screen);
+    Layout *curlay = get_current_layout(screen);
     Window client_win, root_win;
     int x, y, d;
     unsigned int m;
@@ -71,7 +71,7 @@ arrange(int screen)
             client_ban(c);
     }
 
-    curtags[0]->layout->arrange(screen);
+    curlay->arrange(screen);
 
     for(c = globalconf.clients; c; c = c->next)
         if(c->newcomer && client_isvisible(c, screen))
@@ -89,8 +89,6 @@ arrange(int screen)
                           &root_win, &client_win, &x, &y, &d, &d, &m) &&
             (root_win == None || client_win == None || client_win == root_win))
             window_grabbuttons(c->screen, c->win, False, False);
-
-    p_delete(&curtags);
 
     /* reset status */
     globalconf.screens[screen].need_arrange = False;
