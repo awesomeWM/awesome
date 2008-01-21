@@ -190,17 +190,15 @@ xerror(Display * edpy, XErrorEvent * ee)
     return xerrorxlib(edpy, ee);        /* may call exit */
 }
 
-
 /** Print help and exit(2) with given exit_code.
  */
-static void
-exit_help(int exit_code) __attribute__ ((noreturn))
+static void __attribute__ ((noreturn))
+exit_help(int exit_code)
 {
     FILE *outfile = (exit_code == EXIT_SUCCESS)?stdout:stderr;
     fprintf(outfile, "Usage: awesome [-v | -h | -c configfile]\n");
     exit(exit_code);
 }
-
 
 /** Hello, this is main
  * \param argc who knows
