@@ -29,7 +29,6 @@
 #include "event.h"
 #include "tag.h"
 #include "statusbar.h"
-#include "util.h"
 #include "window.h"
 #include "mouse.h"
 #include "ewmh.h"
@@ -39,6 +38,7 @@
 #include "rules.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

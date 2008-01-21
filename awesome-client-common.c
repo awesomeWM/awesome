@@ -25,7 +25,7 @@
 #include <sys/un.h>
 
 #include "awesome-client.h"
-#include "util.h"
+#include "common/util.h"
 
 #define CONTROL_UNIX_SOCKET_PATH ".awesome_ctl."
 

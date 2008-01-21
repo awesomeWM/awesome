@@ -24,11 +24,11 @@
 
 #include "screen.h"
 #include "tag.h"
-#include "util.h"
 #include "rules.h"
 #include "client.h"
 #include "ewmh.h"
 #include "widget.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

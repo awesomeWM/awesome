@@ -19,8 +19,6 @@
  *
  */
 
-#include <stdio.h>
-#include "util.h"
 #include "widget.h"
 #include "client.h"
 #include "focus.h"
@@ -30,6 +28,7 @@
 #include "ewmh.h"
 #include "rules.h"
 #include "tag.h"
+#include "common/util.h"
 
 #define ISVISIBLE_ON_TB(c, nscreen, show_all) ((!show_all && client_isvisible(c, nscreen) && !c->skiptb) \
                                               || (show_all && c->screen == nscreen && !c->skiptb))

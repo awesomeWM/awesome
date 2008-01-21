@@ -21,12 +21,12 @@
 
 #include <X11/Xmd.h>
 #include <X11/Xatom.h>
-#include "util.h"
 #include "focus.h"
 #include "tag.h"
 #include "widget.h"
 #include "rules.h"
 #include "ewmh.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

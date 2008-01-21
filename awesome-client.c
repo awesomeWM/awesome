@@ -27,7 +27,7 @@
 #include <sys/un.h>
 
 #include "awesome-client.h"
-#include "util.h"
+#include "common/util.h"
 
 /* GNU/Hurd workaround */
 #ifndef MSG_NOSIGNAL

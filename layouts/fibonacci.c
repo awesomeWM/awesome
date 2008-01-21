@@ -21,9 +21,9 @@
 
 #include "screen.h"
 #include "tag.h"
-#include "util.h"
 #include "client.h"
 #include "layouts/fibonacci.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

@@ -21,10 +21,10 @@
 
 #include "config.h"
 #include "client.h"
-#include "util.h"
 #include "widget.h"
 #include "tag.h"
 #include "event.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

@@ -27,7 +27,6 @@
 
 #include "statusbar.h"
 #include "tag.h"
-#include "util.h"
 #include "rules.h"
 #include "screen.h"
 #include "widget.h"
@@ -35,6 +34,7 @@
 #include "ewmh.h"
 #include "defconfig.h"
 #include "layouts/tile.h"
+#include "common/util.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 

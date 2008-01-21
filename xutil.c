@@ -24,9 +24,9 @@
 #include <sys/wait.h>
 
 #include "config.h"
-#include "util.h"
 #include "xutil.h"
 #include "screen.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

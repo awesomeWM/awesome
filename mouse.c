@@ -25,12 +25,12 @@
 #include "screen.h"
 #include "layout.h"
 #include "tag.h"
-#include "util.h"
 #include "event.h"
 #include "window.h"
 #include "client.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

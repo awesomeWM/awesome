@@ -23,8 +23,8 @@
 #define AWESOME_LAYOUT_H
 
 #include "uicb.h"
-#include "list.h"
-#include "util.h"
+#include "common/list.h"
+#include "common/util.h"
 
 typedef void (LayoutArrange)(int);
 

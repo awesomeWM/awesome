@@ -20,7 +20,6 @@
  */
 
 #include "awesome.h"
-#include "util.h"
 #include "xutil.h"
 #include "tag.h"
 #include "mouse.h"
@@ -30,6 +29,7 @@
 #include "client.h"
 #include "screen.h"
 #include "layouts/tile.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

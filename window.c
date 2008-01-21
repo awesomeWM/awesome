@@ -24,7 +24,7 @@
 
 #include "config.h"
 #include "window.h"
-#include "util.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

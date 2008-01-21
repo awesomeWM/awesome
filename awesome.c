@@ -42,7 +42,6 @@
 #include "event.h"
 #include "layout.h"
 #include "screen.h"
-#include "util.h"
 #include "statusbar.h"
 #include "uicb.h"
 #include "window.h"
@@ -50,6 +49,7 @@
 #include "focus.h"
 #include "ewmh.h"
 #include "awesome-client.h"
+#include "common/util.h"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;

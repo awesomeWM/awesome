@@ -22,8 +22,8 @@
  */
 
 #include "widget.h"
-#include "util.h"
 #include "tag.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

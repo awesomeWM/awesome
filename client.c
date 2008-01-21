@@ -27,7 +27,6 @@
 #include "client.h"
 #include "tag.h"
 #include "rules.h"
-#include "util.h"
 #include "xutil.h"
 #include "window.h"
 #include "focus.h"

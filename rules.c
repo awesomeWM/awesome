@@ -19,9 +19,9 @@
  *
  */
 
-#include "util.h"
 #include "rules.h"
 #include "xutil.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

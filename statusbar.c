@@ -24,9 +24,9 @@
 
 #include "statusbar.h"
 #include "screen.h"
-#include "util.h"
 #include "tag.h"
 #include "widget.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

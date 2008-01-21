@@ -20,11 +20,11 @@
  */
 
 #include <string.h>
-#include "util.h"
 #include "draw.h"
 #include "widget.h"
 #include "xutil.h"
 #include "screen.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

@@ -19,7 +19,7 @@
  *
  */
 
-#include "util.h"
+#include "common/util.h"
 #include "tag.h"
 #include "focus.h" 
 #include "client.h"

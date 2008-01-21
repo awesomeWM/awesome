@@ -23,12 +23,12 @@
 #include <X11/Xmd.h>
 
 #include "ewmh.h"
-#include "util.h"
 #include "tag.h"
 #include "focus.h"
 #include "screen.h"
 #include "client.h"
 #include "widget.h"
+#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

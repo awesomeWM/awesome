@@ -23,7 +23,7 @@
 #include <cairo-ft.h>
 #include <cairo-xlib.h>
 #include <math.h>
-#include "util.h"
+#include "common/util.h"
 #include "config.h"
 
 extern AwesomeConf globalconf;
