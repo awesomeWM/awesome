@@ -111,7 +111,7 @@ awesome_SOURCES = \
 	window.c window.h \
 	rules.c rules.h \
 	mouse.c mouse.h \
-	awesome-client-common.c \
+	common/awclient.c \
 	widget.c widget.h \
 	ewmh.c ewmh.h \
 	common/list.h structs.h
@@ -123,7 +123,7 @@ bin_PROGRAMS += awesome-client
 AM_INSTALLCHECK_STD_OPTIONS_EXEMPT = awesome-client$(EXEEXT)
 awesome_client_SOURCES = \
 	awesome-client.c awesome-client.h \
-	awesome-client-common.c \
+	common/awclient.c \
 	common/util.c common/util.h
 
 
