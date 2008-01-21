@@ -152,10 +152,10 @@ EXTRA_DIST += build-utils/package-version
 git-version-check:
 	git_ver=`$(top_srcdir)/build-utils/package-version $(top_srcdir) version-stamp`; \
 	if test "x$${git_ver}" = "x$(PACKAGE_VERSION)"; then :; else \
-		echo "ERROR: The PACKAGE_VERSION and the 'git describe' version do not match:"; \
-		echo "         current git version:     $${git_ver}"; \
-		echo "         current package version: $(PACKAGE_VERSION)"; \
-		echo "You can update the PACKAGE_VERSION by running $(top_srcdir)/autogen.sh."; \
+		echo "ERROR: PACKAGE_VERSION and 'git describe' version do not match:"; \
+		echo "         current 'git describe' version: $${git_ver}"; \
+		echo "         current PACKAGE_VERSION:        $(PACKAGE_VERSION)"; \
+		echo "You can update PACKAGE_VERSION by running $(top_srcdir)/autogen.sh."; \
 		exit 1; \
 	fi
 
