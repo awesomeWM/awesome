@@ -150,7 +150,7 @@ distcheck-hook: git-version-check
 #       restart the whole dist process from the start and there is none.
 EXTRA_DIST += build-utils/package-version
 git-version-check:
-	git_ver=`$(top_srcdir)/build-utils/package-version $(top_srcdir) version-stamp`; \
+	@git_ver=`$(top_srcdir)/build-utils/package-version $(top_srcdir) version-stamp`; \
 	if test "x$${git_ver}" = "x$(PACKAGE_VERSION)"; then :; else \
 		echo "ERROR: PACKAGE_VERSION and 'git describe' version do not match:"; \
 		echo "         current 'git describe' version: $${git_ver}"; \
