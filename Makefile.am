@@ -98,6 +98,7 @@ awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XRANDR_LIBS) $(XINERAMA_LIBS)
 
 bin_PROGRAMS += awesome-client
+AM_INSTALLCHECK_STD_OPTIONS_EXEMPT = awesome-client$(EXEEXT)
 awesome_client_SOURCES = \
 	awesome-client.c awesome-client.h \
 	awesome-client-common.c \
