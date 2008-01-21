@@ -15,7 +15,14 @@ dnl AC_CONFIG_HEADER([config.h])
 dnl Other options:
 dnl    check-news   to check that NEWS has been adapted to current version
 dnl    std-options  make sure shipped executables understand --help and --version
-AM_INIT_AUTOMAKE([-Wall -Werror 1.10 dist-bzip2 foreign filename-length-max=99 foreign subdir-objects])
+AM_INIT_AUTOMAKE([
+-Wall -Werror
+1.10
+dist-bzip2
+filename-length-max=99
+foreign
+subdir-objects
+])
 
 AC_DEFINE_UNQUOTED([RELEASE], ["Productivity Breaker"])
 
