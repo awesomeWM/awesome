@@ -190,6 +190,18 @@ xerror(Display * edpy, XErrorEvent * ee)
     return xerrorxlib(edpy, ee);        /* may call exit */
 }
 
+
+/** Print help and exit(2) with given exit_code.
+ */
+static void
+exit_help(int exit_code) __attribute__ ((noreturn))
+{
+    FILE *outfile = (exit_code == EXIT_SUCCESS)?stdout:stderr;
+    fprintf(outfile, "Usage: awesome [-v | -h | -c configfile]\n");
+    exit(exit_code);
+}
+
+
 /** Hello, this is main
  * \param argc who knows
  * \param argv who knows
@@ -210,25 +222,31 @@ main(int argc, char *argv[])
     int i, cmdlen;
     event_handler **handler;
     struct sockaddr_un *addr;
+    int args_ok = 1;
 
     /* check args */
     if(argc >= 2)
     {
+        args_ok = 0;
         if(!a_strcmp("-v", argv[1]) || !a_strcmp("--version", argv[1]))
         {
             printf("awesome " VERSION " (" RELEASE ")\n");
             return EXIT_SUCCESS;
         }
+        else if(!a_strcmp("-h", argv[1]) || !a_strcmp("--help", argv[1]))
+            exit_help(EXIT_SUCCESS);
         else if(!a_strcmp("-c", argv[1]))
         {
             if(a_strlen(argv[2]))
-                confpath = argv[2];
+                confpath = argv[2], args_ok = 1;
             else
-                eprint("-c require a file\n");
+                eprint("-c option requires a file name\n");
         }
         else
-            eprint("options: [-v | -c configfile]\n");
+            exit_help(EXIT_FAILURE);
     }
+    if(!args_ok)
+        exit_help(EXIT_FAILURE);
 
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
