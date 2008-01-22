@@ -234,21 +234,26 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     XWindowChanges wc;
     Tag *tag;
     Rule *rule;
+    Area screen_geom;
     int phys_screen = get_phys_screen(screen);
 
     c = p_new(Client, 1);
 
+    c->screen = get_screen_bycoord(wa->x, wa->y);
+
+    screen_geom = get_display_area(phys_screen,
+                                   globalconf.screens[c->screen].statusbar,
+                                   &globalconf.screens[c->screen].padding);
     /* Initial values */
     c->win = w;
-    c->geometry.x = c->f_geometry.x = c->m_geometry.x = wa->x;
-    c->geometry.y = c->f_geometry.y = c->m_geometry.y = wa->y;
+    c->geometry.x = c->f_geometry.x = c->m_geometry.x = MAX(wa->x, screen_geom.x);
+    c->geometry.y = c->f_geometry.y = c->m_geometry.y = MAX(wa->y, screen_geom.y);
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wa->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wa->height;
     c->oldborder = wa->border_width;
     c->newcomer = True;
 
     c->border = globalconf.screens[screen].borderpx;
-    c->screen = get_screen_bycoord(c->geometry.x, c->geometry.y);
 
     /* Set windows borders */
     wc.border_width = c->border;
