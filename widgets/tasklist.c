@@ -57,15 +57,15 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;
 
+    if(used >= widget->statusbar->width)
+        return (widget->area.width = 0);
+
     for(c = globalconf.clients; c; c = c->next)
         if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
             n++;
     
     if(!n)
-    {
-        widget->area.width = 0;
-        return widget->area.width;
-    }
+        return (widget->area.width = 0);
 
     box_width = (widget->statusbar->width - used) / n;
     /* compute how many pixel we left empty */
