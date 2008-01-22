@@ -216,7 +216,7 @@ main(int argc, char *argv[])
     XEvent ev;
     Display * dpy;
     int shape_event, randr_event_base;
-    int screen, screen_count;
+    int screen;
     int i, cmdlen;
     event_handler **handler;
     struct sockaddr_un *addr;
@@ -283,16 +283,15 @@ main(int argc, char *argv[])
     ewmh_init_atoms();
 
     /* init screens struct */
-    screen_count = get_screen_count();
-    globalconf.screens = p_new(VirtScreen, screen_count);
-    globalconf.nscreens = screen_count;
+    globalconf.nscreens = get_screen_count();
+    globalconf.screens = p_new(VirtScreen, globalconf.nscreens);
     focus_add_client(NULL);
 
     /* parse config */
     config_parse(confpath);
 
     /* for each virtual screen */
-    for(screen = 0; screen < get_screen_count(); screen++)
+    for(screen = 0; screen < globalconf.nscreens; screen++)
         setup(screen);
 
     /* do this only for real screen */
