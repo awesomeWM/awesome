@@ -180,7 +180,6 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
 
     } 
 
-
     d->height = cfg_getfloat(config, "height");
     d->gap = cfg_getint(config, "gap");
     d->padding_left = cfg_getint(config, "padding_left");

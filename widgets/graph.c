@@ -54,6 +54,9 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     Data *d = widget->data;
     Area rectangle;
 
+    if(d->width < 1 || !(d->max > 0))
+        return 0;
+
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
                                                  d->width,
@@ -100,7 +103,7 @@ graph_tell(Widget *widget, char *command)
     int i;
     float value;
 
-    if(!command || d->width < 1)
+    if(!command || d->width < 1 || !(d->max > 0))
         return;
 
     if(++d->lines_index >= d->lines_size) /* cycle inside the array */
@@ -172,14 +175,19 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         warn("graph widget needs: (width - padding_left) >= 3\n");
         return w;
     }
+    /* prevent: division by zero */
+    d->current_max = d->max = cfg_getfloat(config, "max");
+    if(!(d->max > 0))
+    {
+        warn("graph widget needs a 'max' value greater than zero\n");
+        return w;
+    }
 
     d->lines = p_new(int, d->lines_size);
 
     if (cfg_getbool(config, "scale"))
         d->line_values = p_new(float, d->lines_size);
 
-    /* prevent: division by zero; with a MIN option one day, check for div/0's */
-    d->current_max = d->max = MAX(cfg_getfloat(config, "max"), 0.0001);
     if((color = cfg_getstr(config, "fg")))
         d->fg = initxcolor(globalconf.display, phys_screen, color);
     else
