@@ -39,32 +39,12 @@ extern AwesomeConf globalconf;
 Area
 get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
 {
-    int screen_number = 0;
-    XineramaScreenInfo *si;
     Area area;
     Statusbar *sb;
 
-    if(XineramaIsActive(globalconf.display))
-    {
-        si = XineramaQueryScreens(globalconf.display, &screen_number);
-        if (screen_number < screen)
-            eprint("Info request for unknown screen.");
-        area.x = si[screen].x_org;
-        area.y = si[screen].y_org;
-        area.width = si[screen].width;
-        area.height = si[screen].height;
-        XFree(si);
-    }
-    else
-    {
-        /* emulate Xinerama info but only fill the screen we want */
-        area.x = 0;
-        area.y = 0;
-        area.width = DisplayWidth(globalconf.display, screen);
-        area.height = DisplayHeight(globalconf.display, screen);
-    }
+    area = globalconf.screens[screen].geometry;
 
-     /* make padding corrections */
+    /* make padding corrections */
     if(padding)
     {
         area.x += padding->left;
@@ -152,20 +132,79 @@ get_screen_bycoord(int x, int y)
     return DefaultScreen(globalconf.display);
 }
 
-/** Return the actual screen count
- * \return the number of screen available
- */
-int
-get_screen_count(void)
+
+static inline Area
+screen_xsi_to_area(XineramaScreenInfo si)
 {
-    int screen_number;
+    Area a;
+
+    a.x = si.x_org;
+    a.y = si.y_org;
+    a.width = si.width;
+    a.height = si.height;
+
+    return a;
+}
+
+void
+screen_build_screens(void)
+{
+    XineramaScreenInfo *si;
+    int xinerama_screen_number, screen, screen_to_test;
+    Bool drop;
 
     if(XineramaIsActive(globalconf.display))
-        XFree(XineramaQueryScreens(globalconf.display, &screen_number));
-    else
-        screen_number = ScreenCount(globalconf.display);
+    {
+        si = XineramaQueryScreens(globalconf.display, &xinerama_screen_number);
+        globalconf.screens = p_new(VirtScreen, xinerama_screen_number);
+        globalconf.nscreens = 0;
 
-    return screen_number;
+        /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
+        for(screen = 0; screen < xinerama_screen_number; screen++)
+        {
+            drop = False;
+            for(screen_to_test = 0; screen_to_test < globalconf.nscreens; screen_to_test++)
+                if(si[screen].x_org == globalconf.screens[screen_to_test].geometry.x
+                   && si[screen].y_org == globalconf.screens[screen_to_test].geometry.y)
+                    {
+                        /* we already have a screen for this area, just check if
+                         * it's not bigger and drop it */
+                        drop = True;
+                        globalconf.screens[screen_to_test].geometry.width =
+                            MAX(si[screen].width, si[screen_to_test].width);
+                        globalconf.screens[screen_to_test].geometry.height =
+                            MAX(si[screen].height, si[screen_to_test].height);
+                    }
+            if(!drop)
+                globalconf.screens[globalconf.nscreens++].geometry = screen_xsi_to_area(si[screen]);
+        }
+
+        printf("nscreens %d\n", globalconf.nscreens);
+        for(screen = 0; screen < globalconf.nscreens; screen++)
+            printf("x %d y %d w %d h %d\n",
+                   globalconf.screens[screen].geometry.x,
+                   globalconf.screens[screen].geometry.y,
+                   globalconf.screens[screen].geometry.width,
+                   globalconf.screens[screen].geometry.height);
+
+        /* XXX realloc smaller if xinerama_screen_number != screen registered */
+        XFree(si);
+    }
+    else
+    {
+        globalconf.nscreens = ScreenCount(globalconf.display);
+        globalconf.screens = p_new(VirtScreen, globalconf.nscreens);
+        for(screen = 0; screen < globalconf.nscreens; screen++)
+        {
+            globalconf.screens[screen].geometry.x = 0;
+            globalconf.screens[screen].geometry.y = 0;
+            globalconf.screens[screen].geometry.width =
+                DisplayWidth(globalconf.display, screen);
+            globalconf.screens[screen].geometry.height =
+                DisplayHeight(globalconf.display, screen);
+        }
+    }
+
 }
 
 /** This returns the real X screen number for a logical

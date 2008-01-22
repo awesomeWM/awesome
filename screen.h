@@ -27,7 +27,7 @@
 Area get_screen_area(int, Statusbar *, Padding *);
 Area get_display_area(int, Statusbar *, Padding *);
 int get_screen_bycoord(int, int);
-int get_screen_count(void);
+void screen_build_screens(void);
 int get_phys_screen(int);
 void move_client_to_screen(Client *, int, Bool);
 

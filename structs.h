@@ -248,6 +248,8 @@ typedef struct
 
 typedef struct
 {
+    /** Screen geometry */
+    Area geometry;
     /** Number of pixels to snap windows */
     int snap;
     /** Border size */

@@ -283,8 +283,7 @@ main(int argc, char *argv[])
     ewmh_init_atoms();
 
     /* init screens struct */
-    globalconf.nscreens = get_screen_count();
-    globalconf.screens = p_new(VirtScreen, globalconf.nscreens);
+    screen_build_screens();
     focus_add_client(NULL);
 
     /* parse config */
