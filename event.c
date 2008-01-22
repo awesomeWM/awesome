@@ -164,6 +164,9 @@ handle_event_configurerequest(XEvent * e)
             client_resize(c, geometry, False);
 
             tag_client_with_rule(c, rule_matching_client(c));
+
+            if(!c->isfloating)
+                globalconf.screens[c->screen].need_arrange = True;
         }
         else
             window_configure(c->win, geometry, c->border);
