@@ -294,6 +294,19 @@ tag_view_only(Tag *target)
 }
 
 void
+tag_view_byindex(int screen, int dindex, Bool view)
+{
+    Tag *tag;
+
+    if(dindex < 0)
+        return;
+
+    for(tag = globalconf.screens[screen].tags; tag && dindex > 0;
+        tag = tag->next, dindex--);
+    tag_view(tag, view);
+}
+
+void
 tag_view_only_byindex(int screen, int dindex)
 {
     Tag *tag;
