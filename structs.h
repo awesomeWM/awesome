@@ -132,6 +132,7 @@ typedef struct SimpleWindow
 {
     Window window;
     Drawable drawable;
+    Area geometry;
 } SimpleWindow;
 
 /** Status bar */

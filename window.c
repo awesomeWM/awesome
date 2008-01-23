@@ -185,6 +185,12 @@ simplewindow_new(int phys_screen, int x, int y, unsigned int w, unsigned int h,
     SimpleWindow *sw;
 
     sw = p_new(SimpleWindow, 1);
+
+    sw->geometry.x = x;
+    sw->geometry.y = y;
+    sw->geometry.width = w;
+    sw->geometry.height = h;
+
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = globalconf.cursor[CurNormal];

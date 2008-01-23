@@ -88,8 +88,9 @@ handle_event_buttonpress(XEvent *e)
                   case Right:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(ev->y >= widget->area.x && ev->y < widget->area.x + widget->area.width
-                           && statusbar->height - ev->x >= widget->area.y
-                           && statusbar->height - ev->x < widget->area.y + widget->area.height)
+                           && statusbar->sw->geometry.height - ev->x >= widget->area.y
+                           && statusbar->sw->geometry.height - ev->x
+                              < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
                             return;
@@ -97,8 +98,9 @@ handle_event_buttonpress(XEvent *e)
                     break;
                  default:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(statusbar->width - ev->y >= widget->area.x
-                           && statusbar->width - ev->y < widget->area.x + widget->area.width
+                        if(statusbar->sw->geometry.width - ev->y >= widget->area.x
+                           && statusbar->sw->geometry.width - ev->y
+                              < widget->area.x + widget->area.width
                            && ev->x >= widget->area.y && ev->x < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
@@ -191,6 +193,7 @@ handle_event_configurenotify(XEvent * e)
     int screen;
     Area area;
 
+    /* XXX this is all crap -- need to rewrite everything */
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if(ev->window == RootWindow(e->xany.display, screen)
            && (ev->width != DisplayWidth(e->xany.display, screen)
@@ -201,12 +204,7 @@ handle_event_configurenotify(XEvent * e)
 
             /* update statusbar */
             area = get_screen_area(screen, NULL, &globalconf.screens[screen].padding);
-            globalconf.screens[screen].statusbar->width = area.width;
-
-            XResizeWindow(e->xany.display,
-                          globalconf.screens[screen].statusbar->sw->window,
-                          globalconf.screens[screen].statusbar->width,
-                          globalconf.screens[screen].statusbar->height);
+            globalconf.screens[screen].statusbar->sw->geometry.width = area.width;
 
             widget_invalidate_cache(screen, WIDGET_CACHE_ALL);
             globalconf.screens[screen].need_arrange = True;
