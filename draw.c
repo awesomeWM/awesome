@@ -298,10 +298,7 @@ draw_get_image_size(const char *filename)
 
     surface = cairo_image_surface_create_from_png(filename);
     if((cairo_st = cairo_surface_status(surface)))
-    {
         warn("failed to get image size %s: %s\n", filename, cairo_status_to_string(cairo_st));
-        return;
-    }
     else
     {
         cairo_image_surface_get_width(surface);
