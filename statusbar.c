@@ -26,6 +26,7 @@
 #include "screen.h"
 #include "tag.h"
 #include "widget.h"
+#include "window.h"
 #include "common/util.h"
 
 extern AwesomeConf globalconf;
@@ -35,7 +36,7 @@ statusbar_update_position(Statusbar *statusbar)
 {
     Area area;
 
-    XMapRaised(globalconf.display, statusbar->window);
+    XMapRaised(globalconf.display, statusbar->sw->window);
 
     /* Top and Bottom Statusbar have prio */
     if(statusbar->position == Top || statusbar->position == Bottom)
@@ -50,23 +51,23 @@ statusbar_update_position(Statusbar *statusbar)
     switch(statusbar->position)
     {
       case Top:
-        XMoveWindow(globalconf.display, statusbar->window,
+        XMoveWindow(globalconf.display, statusbar->sw->window,
                     area.x, area.y);
         break;
       case Bottom:
-        XMoveWindow(globalconf.display, statusbar->window,
+        XMoveWindow(globalconf.display, statusbar->sw->window,
                     area.x, area.height - statusbar->height);
         break;
       case Left:
-        XMoveWindow(globalconf.display, statusbar->window,
+        XMoveWindow(globalconf.display, statusbar->sw->window,
                     area.x - statusbar->height, (area.y + area.height) - statusbar->width);
         break;
       case Right:
-        XMoveWindow(globalconf.display, statusbar->window,
+        XMoveWindow(globalconf.display, statusbar->sw->window,
                     area.x + area.width, area.y);
         break;
       case Off:
-        XUnmapWindow(globalconf.display, statusbar->window);
+        XUnmapWindow(globalconf.display, statusbar->sw->window);
         break;
     }
 }
@@ -83,7 +84,7 @@ statusbar_draw(Statusbar *statusbar)
     if(statusbar->position == Off)
         return;
 
-    XFreePixmap(globalconf.display, statusbar->drawable);
+    XFreePixmap(globalconf.display, statusbar->sw->drawable);
 
     DrawCtx *ctx = draw_get_context(phys_screen,
                                     statusbar->width,
@@ -122,15 +123,15 @@ statusbar_draw(Statusbar *statusbar)
        || statusbar->position == Left)
     {
         if(statusbar->position == Right)
-            statusbar->drawable = draw_rotate(ctx, phys_screen, M_PI_2, statusbar->height, 0);
+            statusbar->sw->drawable = draw_rotate(ctx, phys_screen, M_PI_2, statusbar->height, 0);
         else
-            statusbar->drawable = draw_rotate(ctx, phys_screen, - M_PI_2, 0, statusbar->width);
+            statusbar->sw->drawable = draw_rotate(ctx, phys_screen, - M_PI_2, 0, statusbar->width);
 
         draw_free_context(ctx);
     }
     else
     {
-        statusbar->drawable = ctx->drawable;
+        statusbar->sw->drawable = ctx->drawable;
         /* just delete the struct, don't delete the drawable */
         p_delete(&ctx);
     }
@@ -149,14 +150,14 @@ statusbar_display(Statusbar *statusbar)
 
     if(statusbar->position == Right
        || statusbar->position == Left)
-        XCopyArea(globalconf.display, statusbar->drawable,
-                  statusbar->window,
+        XCopyArea(globalconf.display, statusbar->sw->drawable,
+                  statusbar->sw->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
                   statusbar->height,
                   statusbar->width, 0, 0);
     else
-        XCopyArea(globalconf.display, statusbar->drawable,
-                  statusbar->window,
+        XCopyArea(globalconf.display, statusbar->sw->drawable,
+                  statusbar->sw->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
                   statusbar->width, statusbar->height, 0, 0);
 }
@@ -181,7 +182,6 @@ void
 statusbar_init(Statusbar *statusbar)
 {
     Statusbar *sb;
-    XSetWindowAttributes wa;
     int phys_screen = get_phys_screen(statusbar->screen);
     Area area = get_screen_area(statusbar->screen,
                                 globalconf.screens[statusbar->screen].statusbar,
@@ -208,61 +208,16 @@ statusbar_init(Statusbar *statusbar)
             statusbar->width = area.width;
     }
 
-    wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
-    wa.cursor = globalconf.cursor[CurNormal];
-    wa.override_redirect = 1;
-    wa.background_pixmap = ParentRelative;
-    wa.event_mask = ButtonPressMask | ExposureMask;
     if(statusbar->dposition == Right || statusbar->dposition == Left)
-        statusbar->window = XCreateWindow(globalconf.display,
-                                          RootWindow(globalconf.display,
-                                          phys_screen),
-                                          0, 0,
-                                          statusbar->height,
-                                          statusbar->width,
-                                          0,
-                                          DefaultDepth(globalconf.display,
-                                                       phys_screen),
-                                          CopyFromParent,
-                                          DefaultVisual(globalconf.display,
-                                                        phys_screen),
-                                          CWOverrideRedirect |
-                                          CWBackPixmap |
-                                          CWEventMask,
-                                          &wa);
+        statusbar->sw =
+            simplewindow_new(phys_screen, 0, 0, statusbar->height, statusbar->width, 0);
     else
-        statusbar->window = XCreateWindow(globalconf.display,
-                                          RootWindow(globalconf.display,
-                                                     phys_screen),
-                                          0, 0,
-                                          statusbar->width,
-                                          statusbar->height,
-                                          0,
-                                          DefaultDepth(globalconf.display,
-                                                       phys_screen),
-                                          CopyFromParent,
-                                          DefaultVisual(globalconf.display,
-                                                        phys_screen),
-                                          CWOverrideRedirect |
-                                          CWBackPixmap |
-                                          CWEventMask,
-                                          &wa);
-
-    statusbar->drawable = XCreatePixmap(globalconf.display,
-                                        RootWindow(globalconf.display, phys_screen),
-                                        statusbar->width, statusbar->height,
-                                        DefaultDepth(globalconf.display, phys_screen));
-
-
-    XDefineCursor(globalconf.display,
-                  statusbar->window,
-                  globalconf.cursor[CurNormal]);
+        statusbar->sw =
+            simplewindow_new(phys_screen, 0, 0, statusbar->width, statusbar->height, 0);
 
     widget_calculate_alignments(statusbar->widgets);
 
     statusbar_update_position(statusbar);
-    XMapRaised(globalconf.display, statusbar->window);
 
     statusbar_draw(statusbar);
 }

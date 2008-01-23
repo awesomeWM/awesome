@@ -72,7 +72,7 @@ handle_event_buttonpress(XEvent *e)
 
     for(screen = 0; screen < globalconf.nscreens; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-            if(statusbar->window == ev->window || statusbar->window == ev->subwindow)
+            if(statusbar->sw->window == ev->window || statusbar->sw->window == ev->subwindow)
                 switch(statusbar->position)
                 {
                   case Top:
@@ -204,7 +204,7 @@ handle_event_configurenotify(XEvent * e)
             globalconf.screens[screen].statusbar->width = area.width;
 
             XResizeWindow(e->xany.display,
-                          globalconf.screens[screen].statusbar->window,
+                          globalconf.screens[screen].statusbar->sw->window,
                           globalconf.screens[screen].statusbar->width,
                           globalconf.screens[screen].statusbar->height);
 
@@ -261,7 +261,7 @@ handle_event_expose(XEvent *e)
     if(!ev->count)
         for(screen = 0; screen < globalconf.nscreens; screen++)
             for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-                if(statusbar->window == ev->window)
+                if(statusbar->sw->window == ev->window)
                 {
                     statusbar_display(statusbar);
                     return;

@@ -22,7 +22,7 @@
 #ifndef AWESOME_WINDOW_H
 #define AWESOME_WINDOW_H
 
-#include <X11/Xlib.h>
+#include "structs.h"
 
 int window_setstate(Window, long);
 long window_getstate(Window);
@@ -30,6 +30,8 @@ Status window_configure(Window, Area, int);
 void window_grabbuttons(int, Window, Bool, Bool);
 void window_setshape(int, Window);
 int window_settrans(Window, double);
+SimpleWindow * simplewindow_new(int, int, int, unsigned int, unsigned int, unsigned int);
+void simplewindow_delete(SimpleWindow *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

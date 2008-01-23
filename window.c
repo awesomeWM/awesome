@@ -177,4 +177,48 @@ window_settrans(Window win, double opacity)
     return status;
 }
 
+SimpleWindow *
+simplewindow_new(int phys_screen, int x, int y, unsigned int w, unsigned int h,
+                  unsigned int border_width)
+{
+    XSetWindowAttributes wa;
+    SimpleWindow *sw;
+
+    sw = p_new(SimpleWindow, 1);
+    wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
+        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
+    wa.cursor = globalconf.cursor[CurNormal];
+    wa.override_redirect = 1;
+    wa.background_pixmap = ParentRelative;
+    wa.event_mask = ButtonPressMask | ExposureMask;
+    sw->window = XCreateWindow(globalconf.display,
+                               RootWindow(globalconf.display, phys_screen),
+                               x, y, w, h,
+                               border_width,
+                               DefaultDepth(globalconf.display, phys_screen),
+                               CopyFromParent,
+                               DefaultVisual(globalconf.display, phys_screen),
+                               CWOverrideRedirect | CWBackPixmap | CWEventMask,
+                               &wa);
+
+    sw->drawable = XCreatePixmap(globalconf.display,
+                                 RootWindow(globalconf.display, phys_screen),
+                                 w, h,
+                                 DefaultDepth(globalconf.display, phys_screen));
+
+    XDefineCursor(globalconf.display,
+                  sw->window,
+                  globalconf.cursor[CurNormal]);
+
+    return sw;
+}
+
+void
+simplewindow_delete(SimpleWindow *sw)
+{
+    XDestroyWindow(globalconf.display, sw->window);
+    XFreePixmap(globalconf.display, sw->drawable);
+    p_delete(&sw);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

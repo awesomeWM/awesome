@@ -127,9 +127,18 @@ struct Widget
     Widget *next;
 };
 
+/** A simple window */
+typedef struct SimpleWindow
+{
+    Window window;
+    Drawable drawable;
+} SimpleWindow;
+
 /** Status bar */
 struct Statusbar
 {
+    /** Window */
+    SimpleWindow *sw;
     /** Statusbar name */
     char *name;
     /** Bar width */
@@ -142,14 +151,10 @@ struct Statusbar
     Position dposition;
     /** Bar position */
     Position position;
-    /** Window */
-    Window window;
     /** Screen */
     int screen;
     /** Widget list */
     Widget *widgets;
-    /** Drawable */
-    Drawable drawable;
     /** Next statusbar */
     Statusbar *next;
 };
