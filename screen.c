@@ -179,14 +179,6 @@ screen_build_screens(void)
                 globalconf.screens[globalconf.nscreens++].geometry = screen_xsi_to_area(si[screen]);
         }
 
-        printf("nscreens %d\n", globalconf.nscreens);
-        for(screen = 0; screen < globalconf.nscreens; screen++)
-            printf("x %d y %d w %d h %d\n",
-                   globalconf.screens[screen].geometry.x,
-                   globalconf.screens[screen].geometry.y,
-                   globalconf.screens[screen].geometry.width,
-                   globalconf.screens[screen].geometry.height);
-
         /* XXX realloc smaller if xinerama_screen_number != screen registered */
         XFree(si);
     }
