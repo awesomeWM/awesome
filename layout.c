@@ -27,7 +27,6 @@
 #include "focus.h"
 #include "widget.h"
 #include "window.h"
-#include "ewmh.h"
 #include "client.h"
 #include "screen.h"
 #include "layouts/tile.h"
@@ -135,14 +134,9 @@ loadawesomeprops(int screen)
                     XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
                     prop, ntags + 1))
         for(i = 0, tag = globalconf.screens[screen].tags; tag && prop[i]; i++, tag = tag->next)
-            if(prop[i] == '1')
-                tag->selected = True;
-            else
-                tag->selected = False;
+            tag_view_byindex(screen, i, prop[i] == '1');
 
     p_delete(&prop);
-
-    ewmh_update_net_current_desktop(get_phys_screen(screen));
 }
 
 void
