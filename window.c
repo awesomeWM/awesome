@@ -240,4 +240,15 @@ simplewindow_move(SimpleWindow *sw, int x, int y)
     return XMoveWindow(globalconf.display, sw->window, x, y);
 }
 
+int
+simplewindow_refresh_drawable(SimpleWindow *sw, int phys_screen)
+{
+    return XCopyArea(globalconf.display, sw->drawable,
+                     sw->window,
+                     DefaultGC(globalconf.display, phys_screen), 0, 0,
+                     sw->geometry.width,
+                     sw->geometry.height,
+                     0, 0);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
