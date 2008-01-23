@@ -289,6 +289,8 @@ main(int argc, char *argv[])
     /* parse config */
     config_parse(confpath);
 
+    scan();
+
     /* for each virtual screen */
     for(screen = 0; screen < globalconf.nscreens; screen++)
         setup(screen);
@@ -331,8 +333,6 @@ main(int argc, char *argv[])
         handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
     }
 
-    scan();
-
     XSync(dpy, False);
 
     /* get socket fd */
@@ -357,6 +357,10 @@ main(int argc, char *argv[])
     signal(SIGTERM, &exit_on_signal);
     signal(SIGHUP, &exit_on_signal);
 
+    /* refresh everything before waiting events */
+    statusbar_refresh();
+    layout_refresh();
+    
     /* main event loop, also reads status text from socket */
     while(running)
     {
