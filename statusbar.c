@@ -116,21 +116,23 @@ statusbar_draw(Statusbar *statusbar)
             left += widget->draw(widget, ctx, left, (left + right));
         }
 
-    if(statusbar->position == Right
-       || statusbar->position == Left)
+    switch(statusbar->position)
     {
-        if(statusbar->position == Right)
-            statusbar->sw->drawable = draw_rotate(ctx, phys_screen, M_PI_2, statusbar->height, 0);
-        else
-            statusbar->sw->drawable = draw_rotate(ctx, phys_screen, - M_PI_2, 0, statusbar->width);
-
-        draw_free_context(ctx);
-    }
-    else
-    {
-        statusbar->sw->drawable = ctx->drawable;
-        /* just delete the struct, don't delete the drawable */
-        p_delete(&ctx);
+        case Right:
+          statusbar->sw->drawable = draw_rotate(ctx, phys_screen, M_PI_2,
+                                                statusbar->height, 0);
+          draw_free_context(ctx);
+          break;
+        case Left:
+          statusbar->sw->drawable = draw_rotate(ctx, phys_screen, - M_PI_2,
+                                                0, statusbar->width);
+          draw_free_context(ctx);
+          break;
+        default:
+          statusbar->sw->drawable = ctx->drawable;
+          /* just delete the struct, don't delete the drawable */
+          p_delete(&ctx);
+          break;
     }
 
     statusbar_display(statusbar);
@@ -150,13 +152,13 @@ statusbar_display(Statusbar *statusbar)
         XCopyArea(globalconf.display, statusbar->sw->drawable,
                   statusbar->sw->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
-                  statusbar->height,
-                  statusbar->width, 0, 0);
+                  statusbar->sw->geometry.height,
+                  statusbar->sw->geometry.width, 0, 0);
     else
         XCopyArea(globalconf.display, statusbar->sw->drawable,
                   statusbar->sw->window,
                   DefaultGC(globalconf.display, phys_screen), 0, 0,
-                  statusbar->width, statusbar->height, 0, 0);
+                  statusbar->sw->geometry.width, statusbar->sw->geometry.height, 0, 0);
 }
 
 void
@@ -207,10 +209,10 @@ statusbar_init(Statusbar *statusbar)
 
     if(statusbar->dposition == Right || statusbar->dposition == Left)
         statusbar->sw =
-            simplewindow_new(phys_screen, 0, 0, statusbar->height, statusbar->width, 0);
+            simplewindow_new(phys_screen, 0, 0, statusbar->height, statusbar->width, 0, True);
     else
         statusbar->sw =
-            simplewindow_new(phys_screen, 0, 0, statusbar->width, statusbar->height, 0);
+            simplewindow_new(phys_screen, 0, 0, statusbar->width, statusbar->height, 0, False);
 
     widget_calculate_alignments(statusbar->widgets);
 

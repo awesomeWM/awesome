@@ -178,7 +178,7 @@ window_settrans(Window win, double opacity)
 
 SimpleWindow *
 simplewindow_new(int phys_screen, int x, int y, unsigned int w, unsigned int h,
-                  unsigned int border_width)
+                  unsigned int border_width, Bool rotate_drawable)
 {
     XSetWindowAttributes wa;
     SimpleWindow *sw;
@@ -206,10 +206,16 @@ simplewindow_new(int phys_screen, int x, int y, unsigned int w, unsigned int h,
                                CWOverrideRedirect | CWBackPixmap | CWEventMask,
                                &wa);
 
-    sw->drawable = XCreatePixmap(globalconf.display,
-                                 RootWindow(globalconf.display, phys_screen),
-                                 w, h,
-                                 DefaultDepth(globalconf.display, phys_screen));
+    if(rotate_drawable)
+        sw->drawable = XCreatePixmap(globalconf.display,
+                                     RootWindow(globalconf.display, phys_screen),
+                                     h, w,
+                                     DefaultDepth(globalconf.display, phys_screen));
+    else
+        sw->drawable = XCreatePixmap(globalconf.display,
+                                     RootWindow(globalconf.display, phys_screen),
+                                     w, h,
+                                     DefaultDepth(globalconf.display, phys_screen));
 
     XDefineCursor(globalconf.display,
                   sw->window,
