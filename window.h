@@ -32,6 +32,7 @@ void window_setshape(int, Window);
 int window_settrans(Window, double);
 SimpleWindow * simplewindow_new(int, int, int, unsigned int, unsigned int, unsigned int);
 void simplewindow_delete(SimpleWindow *);
+int simplewindow_move(SimpleWindow *, int, int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

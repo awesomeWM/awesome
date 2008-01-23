@@ -51,20 +51,17 @@ statusbar_update_position(Statusbar *statusbar)
     switch(statusbar->position)
     {
       case Top:
-        XMoveWindow(globalconf.display, statusbar->sw->window,
-                    area.x, area.y);
+        simplewindow_move(statusbar->sw, area.x, area.y);
         break;
       case Bottom:
-        XMoveWindow(globalconf.display, statusbar->sw->window,
-                    area.x, area.height - statusbar->height);
+        simplewindow_move(statusbar->sw, area.x, area.height - statusbar->sw->geometry.height);
         break;
       case Left:
-        XMoveWindow(globalconf.display, statusbar->sw->window,
-                    area.x - statusbar->height, (area.y + area.height) - statusbar->width);
+        simplewindow_move(statusbar->sw, area.x - statusbar->sw->geometry.height,
+                          (area.y + area.height) - statusbar->sw->geometry.width);
         break;
       case Right:
-        XMoveWindow(globalconf.display, statusbar->sw->window,
-                    area.x + area.width, area.y);
+        simplewindow_move(statusbar->sw, area.x + area.width, area.y);
         break;
       case Off:
         XUnmapWindow(globalconf.display, statusbar->sw->window);
