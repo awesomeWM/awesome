@@ -76,16 +76,16 @@ statusbar_draw(Statusbar *statusbar)
     Widget *widget, *last_drawn = NULL;
     int left = 0, right = 0;
     Area rectangle = { 0, 0, 0, 0 };
+    Drawable d;
 
     /* don't waste our time */
     if(statusbar->position == Off)
         return;
 
-    XFreePixmap(globalconf.display, statusbar->sw->drawable);
-
     DrawCtx *ctx = draw_get_context(phys_screen,
                                     statusbar->width,
-                                    statusbar->height);
+                                    statusbar->height,
+                                    statusbar->sw->drawable);
 
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
@@ -119,21 +119,22 @@ statusbar_draw(Statusbar *statusbar)
     switch(statusbar->position)
     {
         case Right:
-          statusbar->sw->drawable = draw_rotate(ctx, phys_screen, M_PI_2,
-                                                statusbar->height, 0);
-          draw_free_context(ctx);
+          d = draw_rotate(ctx, phys_screen, M_PI_2,
+                          statusbar->height, 0);
+          XFreePixmap(globalconf.display, statusbar->sw->drawable);
+          statusbar->sw->drawable = d;
           break;
         case Left:
-          statusbar->sw->drawable = draw_rotate(ctx, phys_screen, - M_PI_2,
-                                                0, statusbar->width);
-          draw_free_context(ctx);
+          d = draw_rotate(ctx, phys_screen, - M_PI_2,
+                          0, statusbar->width);
+          XFreePixmap(globalconf.display, statusbar->sw->drawable);
+          statusbar->sw->drawable = d;
           break;
         default:
-          statusbar->sw->drawable = ctx->drawable;
-          /* just delete the struct, don't delete the drawable */
-          p_delete(&ctx);
           break;
     }
+
+    p_delete(&ctx);
 
     statusbar_display(statusbar);
 }

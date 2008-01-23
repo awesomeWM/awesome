@@ -35,7 +35,7 @@ extern AwesomeConf globalconf;
  * \return draw context ref
  */
 DrawCtx *
-draw_get_context(int phys_screen, int width, int height)
+draw_get_context(int phys_screen, int width, int height, Drawable dw)
 {
     DrawCtx *d = p_new(DrawCtx, 1);
 
@@ -44,22 +44,10 @@ draw_get_context(int phys_screen, int width, int height)
     d->height = height;
     d->depth = DefaultDepth(globalconf.display, phys_screen);
     d->visual = DefaultVisual(globalconf.display, phys_screen);
-    d->drawable = XCreatePixmap(globalconf.display,
-                                RootWindow(globalconf.display, phys_screen),
-                                width, height, d->depth);
+    d->drawable = dw;
 
     return d;
 };
-
-/** Free a draw context and its drawable
- * \param ctx the draw context to free
- */
-void
-draw_free_context(DrawCtx *ctx)
-{
-    XFreePixmap(globalconf.display, ctx->drawable);
-    p_delete(&ctx);
-}
 
 /** Draw text into a draw context
  * \param x x coord
