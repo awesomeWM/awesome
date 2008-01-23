@@ -145,8 +145,6 @@ struct Statusbar
     int width;
     /** Bar height */
     int height;
-    /** Layout txt width */
-    int txtlayoutwidth;
     /** Default position */
     Position dposition;
     /** Bar position */
