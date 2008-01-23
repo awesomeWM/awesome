@@ -85,7 +85,10 @@ widget_common_button_press(Widget *widget, XButtonPressedEvent *ev)
 
     for(b = widget->buttons; b; b = b->next)
         if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
+        {
             b->func(widget->statusbar->screen, b->arg);
+            break;
+        }
 }
 
 static void
