@@ -298,6 +298,8 @@ main(int argc, char *argv[])
     {
         loadawesomeprops(screen);
         ewmh_set_supported_hints(screen);
+        /* call this to at least grab root window clicks */
+        window_grabbuttons(screen, None, False, True); 
     }
 
     handler = p_new(event_handler *, LASTEvent);
@@ -354,9 +356,6 @@ main(int argc, char *argv[])
     signal(SIGINT, &exit_on_signal);
     signal(SIGTERM, &exit_on_signal);
     signal(SIGHUP, &exit_on_signal);
-
-    /* call this to at least grab root window clicks */
-    window_grabbuttons(DefaultScreen(dpy), None, False, True); 
 
     /* main event loop, also reads status text from socket */
     while(running)
