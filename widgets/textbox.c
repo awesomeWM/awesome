@@ -36,15 +36,15 @@ typedef struct
 } Data;
 
 static int
-textbox_draw(Widget *widget, DrawCtx *ctx, int offset,
-             int used __attribute__ ((unused)))
+textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
     Data *d = widget->data;
 
     if(d->width)
         widget->area.width = d->width;
     else
-        widget->area.width = draw_textwidth(widget->font, d->text);
+        widget->area.width = MIN(draw_textwidth(widget->font, d->text),
+                                 widget->statusbar->width - used);
 
     widget->area.height = widget->statusbar->height;
 
