@@ -264,11 +264,15 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
     int h;
     cairo_surface_t *surface, *source;
     cairo_t *cr;
+    cairo_status_t cairo_st;
 
     source = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     surface = cairo_image_surface_create_from_png(filename);
-    if(cairo_surface_status(surface))
+    if((cairo_st = cairo_surface_status(surface)))
+    {
+        warn("failed to draw image %s: %s\n", filename, cairo_status_to_string(cairo_st));
         return;
+    }
     cr = cairo_create (source);
     if(wanted_h > 0 && (h = cairo_image_surface_get_height(surface)) > 0)
     {
@@ -290,9 +294,15 @@ draw_get_image_size(const char *filename)
 {
     Area size = { -1, -1, -1, -1 };
     cairo_surface_t *surface;
+    cairo_status_t cairo_st;
 
     surface = cairo_image_surface_create_from_png(filename);
-    if(!cairo_surface_status(surface))
+    if((cairo_st = cairo_surface_status(surface)))
+    {
+        warn("failed to get image size %s: %s\n", filename, cairo_status_to_string(cairo_st));
+        return;
+    }
+    else
     {
         cairo_image_surface_get_width(surface);
         size.x = 0;
