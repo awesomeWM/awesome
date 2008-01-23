@@ -28,6 +28,9 @@
 
 extern AwesomeConf globalconf;
 
+/** Mask shorthands, used in event.c and window.c */
+#define BUTTONMASK     (ButtonPressMask | ButtonReleaseMask)
+
 /** Set client WM_STATE property
  * \param win Window
  * \param state state

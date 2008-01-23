@@ -24,9 +24,6 @@
 
 #include <X11/Xlib.h>
 
-/** Mask shorthands, used in event.c and window.c */ 
-#define BUTTONMASK              (ButtonPressMask | ButtonReleaseMask) 
-
 int window_setstate(Window, long);
 long window_getstate(Window);
 Status window_configure(Window, Area, int);
