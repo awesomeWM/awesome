@@ -22,7 +22,6 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/shape.h> 
 
-#include "config.h"
 #include "window.h"
 #include "common/util.h"
 
@@ -232,7 +231,7 @@ simplewindow_move(SimpleWindow *sw, int x, int y)
 {
     sw->geometry.x = x;
     sw->geometry.y = y;
-    XMoveWindow(globalconf.display, sw->window, x, y);
+    return XMoveWindow(globalconf.display, sw->window, x, y);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
