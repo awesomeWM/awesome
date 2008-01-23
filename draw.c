@@ -267,6 +267,8 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 
     source = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     surface = cairo_image_surface_create_from_png(filename);
+    if(cairo_surface_status(surface))
+        return;
     cr = cairo_create (source);
     if(wanted_h > 0 && (h = cairo_image_surface_get_height(surface)) > 0)
     {
@@ -286,16 +288,19 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 Area
 draw_get_image_size(const char *filename)
 {
-    Area size;
+    Area size = { -1, -1, -1, -1 };
     cairo_surface_t *surface;
 
     surface = cairo_image_surface_create_from_png(filename);
-    cairo_image_surface_get_width(surface);
-    size.x = 0;
-    size.y = 0;
-    size.width = cairo_image_surface_get_width(surface);
-    size.height = cairo_image_surface_get_height(surface);
-    cairo_surface_destroy(surface);
+    if(!cairo_surface_status(surface))
+    {
+        cairo_image_surface_get_width(surface);
+        size.x = 0;
+        size.y = 0;
+        size.width = cairo_image_surface_get_width(surface);
+        size.height = cairo_image_surface_get_height(surface);
+        cairo_surface_destroy(surface);
+    }
 
     return size;
 }
