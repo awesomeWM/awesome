@@ -100,12 +100,15 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 if((r = rule_matching_client(c)) && r->icon)
                 {
                     area = draw_get_image_size(r->icon);
-                    icon_width = ((double) widget->statusbar->height / (double) area.height) * area.width;
-                    draw_image(ctx,
-                               widget->area.x + box_width * i,
-                               widget->area.y,
-                               widget->statusbar->height,
-                               r->icon);
+                    if(area.width > 0 && area.height > 0)
+                    {
+                        icon_width = ((double) widget->statusbar->height / (double) area.height) * area.width;
+                        draw_image(ctx,
+                                   widget->area.x + box_width * i,
+                                   widget->area.y,
+                                   widget->statusbar->height,
+                                   r->icon);
+                    }
                 }
 
                 if(!icon_width && (icon = ewmh_get_window_icon(c->win)))
