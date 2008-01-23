@@ -79,8 +79,24 @@ statusbar_draw(Statusbar *statusbar)
     Drawable d;
 
     /* don't waste our time */
-    if(statusbar->position == Off)
+    switch(statusbar->position)
+    {
+      case Off:
         return;
+        break;
+      case Right:
+      case Left:
+        /* we need a new pixmap this way [     ] to render */
+        XFreePixmap(globalconf.display, statusbar->sw->drawable);
+        d = XCreatePixmap(globalconf.display,
+                          RootWindow(globalconf.display, phys_screen),
+                          statusbar->width, statusbar->height,
+                          DefaultDepth(globalconf.display, phys_screen));
+        statusbar->sw->drawable = d;
+        break;
+      default:
+        break;
+    }
 
     DrawCtx *ctx = draw_get_context(phys_screen,
                                     statusbar->width,
@@ -142,24 +158,11 @@ statusbar_draw(Statusbar *statusbar)
 void
 statusbar_display(Statusbar *statusbar)
 {
-    int phys_screen = get_phys_screen(statusbar->screen);
-
     /* don't waste our time */
     if(statusbar->position == Off)
         return;
 
-    if(statusbar->position == Right
-       || statusbar->position == Left)
-        XCopyArea(globalconf.display, statusbar->sw->drawable,
-                  statusbar->sw->window,
-                  DefaultGC(globalconf.display, phys_screen), 0, 0,
-                  statusbar->sw->geometry.height,
-                  statusbar->sw->geometry.width, 0, 0);
-    else
-        XCopyArea(globalconf.display, statusbar->sw->drawable,
-                  statusbar->sw->window,
-                  DefaultGC(globalconf.display, phys_screen), 0, 0,
-                  statusbar->sw->geometry.width, statusbar->sw->geometry.height, 0, 0);
+    simplewindow_refresh_drawable(statusbar->sw, get_phys_screen(statusbar->screen));
 }
 
 void
