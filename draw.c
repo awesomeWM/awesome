@@ -23,8 +23,8 @@
 #include <cairo-ft.h>
 #include <cairo-xlib.h>
 #include <math.h>
+#include "structs.h"
 #include "common/util.h"
-#include "config.h"
 
 extern AwesomeConf globalconf;
 
@@ -76,7 +76,7 @@ draw_free_context(DrawCtx *ctx)
 void
 draw_text(DrawCtx *ctx,
           Area area,
-          int align,
+          Alignment align,
           int padding,
           XftFont *font, const char *text,
           XColor fg, XColor bg)
