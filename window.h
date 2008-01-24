@@ -30,7 +30,7 @@ Status window_configure(Window, Area, int);
 void window_grabbuttons(int, Window, Bool, Bool);
 void window_setshape(int, Window);
 int window_settrans(Window, double);
-SimpleWindow * simplewindow_new(int, int, int, unsigned int, unsigned int, unsigned int, Bool);
+SimpleWindow * simplewindow_new(int, int, int, unsigned int, unsigned int, unsigned int);
 void simplewindow_delete(SimpleWindow *);
 int simplewindow_move(SimpleWindow *, int, int);
 int simplewindow_refresh_drawable(SimpleWindow *, int);

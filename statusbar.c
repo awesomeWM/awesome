@@ -211,12 +211,18 @@ statusbar_init(Statusbar *statusbar)
             statusbar->width = area.width;
     }
 
-    if(statusbar->dposition == Right || statusbar->dposition == Left)
-        statusbar->sw =
-            simplewindow_new(phys_screen, 0, 0, statusbar->height, statusbar->width, 0, True);
-    else
-        statusbar->sw =
-            simplewindow_new(phys_screen, 0, 0, statusbar->width, statusbar->height, 0, False);
+    switch(statusbar->dposition)
+    {
+      case Right:
+      case Left:
+            statusbar->sw =
+                 simplewindow_new(phys_screen, 0, 0, statusbar->height, statusbar->width, 0);
+            break;
+      default:
+            statusbar->sw =
+                simplewindow_new(phys_screen, 0, 0, statusbar->width, statusbar->height, 0);
+            break;
+    }
 
     widget_calculate_alignments(statusbar->widgets);
 
