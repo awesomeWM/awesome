@@ -23,10 +23,8 @@
 #include <cairo-ft.h>
 #include <cairo-xlib.h>
 #include <math.h>
-#include "structs.h"
+#include "draw.h"
 #include "common/util.h"
-
-extern AwesomeConf globalconf;
 
 /** Get a draw context
  * \param phys_screen physical screen id
@@ -35,15 +33,16 @@ extern AwesomeConf globalconf;
  * \return draw context ref
  */
 DrawCtx *
-draw_get_context(int phys_screen, int width, int height, Drawable dw)
+draw_get_context(Display *disp, int phys_screen, int width, int height, Drawable dw)
 {
     DrawCtx *d = p_new(DrawCtx, 1);
 
+    d->display = disp;
     d->phys_screen = phys_screen;
     d->width = width;
     d->height = height;
-    d->depth = DefaultDepth(globalconf.display, phys_screen);
-    d->visual = DefaultVisual(globalconf.display, phys_screen);
+    d->depth = DefaultDepth(disp, phys_screen);
+    d->visual = DefaultVisual(disp, phys_screen);
     d->drawable = dw;
 
     return d;
@@ -83,7 +82,7 @@ draw_text(DrawCtx *ctx,
     if(!len)
         return;
 
-    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create(surface);
     font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
     cairo_set_font_face(cr, font_face);
@@ -94,7 +93,7 @@ draw_text(DrawCtx *ctx,
         len = sizeof(buf) - 1;
     memcpy(buf, text, len);
     buf[len] = 0;
-    while(len && (nw = (draw_textwidth(font, buf)) + padding * 2) > area.width)
+    while(len && (nw = (draw_textwidth(ctx->display, font, buf)) + padding * 2) > area.width)
         buf[--len] = 0;
     if(nw > area.width)
         return;                 /* too long */
@@ -141,7 +140,7 @@ draw_rectangle(DrawCtx *ctx, Area geometry, Bool filled, XColor color)
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
 
     cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
@@ -172,7 +171,7 @@ draw_graph(DrawCtx *ctx, int x, int y, int w, int *h, int h_index, XColor color)
     cairo_t *cr;
     int i;
 
-    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
 
     cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
@@ -202,7 +201,7 @@ draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
     cairo_set_line_width(cr, 1.0);
     cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
@@ -227,7 +226,7 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_surface_t *surface, *source;
     cairo_t *cr;
 
-    surface = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h, 0);
     cr = cairo_create (surface);
     if(wanted_h > 0 && h > 0)
@@ -254,7 +253,7 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
     cairo_t *cr;
     cairo_status_t cairo_st;
 
-    source = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     surface = cairo_image_surface_create_from_png(filename);
     if((cairo_st = cairo_surface_status(surface)))
     {
@@ -307,12 +306,12 @@ draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
     cairo_t *cr;
     Drawable newdrawable;
 
-    newdrawable = XCreatePixmap(globalconf.display,
-                                RootWindow(globalconf.display, screen),
+    newdrawable = XCreatePixmap(ctx->display,
+                                RootWindow(ctx->display, screen),
                                 ctx->height, ctx->width,
                                 ctx->depth);
-    surface = cairo_xlib_surface_create(globalconf.display, newdrawable, ctx->visual, ctx->height, ctx->width);
-    source = cairo_xlib_surface_create(globalconf.display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(ctx->display, newdrawable, ctx->visual, ctx->height, ctx->width);
+    source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
 
     cairo_translate(cr, tx, ty);
@@ -329,7 +328,7 @@ draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
 }
 
 unsigned short
-draw_textwidth(XftFont *font, char *text)
+draw_textwidth(Display *disp, XftFont *font, char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -339,10 +338,10 @@ draw_textwidth(XftFont *font, char *text)
     if (!a_strlen(text))
         return 0;
 
-    surface = cairo_xlib_surface_create(globalconf.display, DefaultScreen(globalconf.display),
-                                        DefaultVisual(globalconf.display, DefaultScreen(globalconf.display)),
-                                        DisplayWidth(globalconf.display, DefaultScreen(globalconf.display)),
-                                        DisplayHeight(globalconf.display, DefaultScreen(globalconf.display)));
+    surface = cairo_xlib_surface_create(disp, DefaultScreen(disp),
+                                        DefaultVisual(disp, DefaultScreen(disp)),
+                                        DisplayWidth(disp, DefaultScreen(disp)),
+                                        DisplayHeight(disp, DefaultScreen(disp)));
     cr = cairo_create(surface);
     font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
     cairo_set_font_face(cr, font_face);

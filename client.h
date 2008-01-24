@@ -27,11 +27,11 @@
 Bool client_isvisible(Client *, int);
 Client * get_client_bywin(Client *, Window);
 Client * get_client_byname(Client *, char *);
-void client_ban(Client *);
 void focus(Client *, Bool, int);
+void client_ban(Client *);
+void client_unban(Client *);
 void client_manage(Window, XWindowAttributes *, int);
 Bool client_resize(Client *, Area, Bool);
-void client_unban(Client *);
 void client_unmanage(Client *);
 void client_updatewmhints(Client *);
 void client_updatesizehints(Client *);

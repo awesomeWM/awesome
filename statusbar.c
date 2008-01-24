@@ -98,7 +98,8 @@ statusbar_draw(Statusbar *statusbar)
         break;
     }
 
-    DrawCtx *ctx = draw_get_context(phys_screen,
+    DrawCtx *ctx = draw_get_context(globalconf.display,
+                                    phys_screen,
                                     statusbar->width,
                                     statusbar->height,
                                     statusbar->sw->drawable);

@@ -43,7 +43,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     if(d->width)
         widget->area.width = d->width;
     else
-        widget->area.width = MIN(draw_textwidth(widget->font, d->text),
+        widget->area.width = MIN(draw_textwidth(ctx->display, widget->font, d->text),
                                  widget->statusbar->width - used);
 
     widget->area.height = widget->statusbar->height;

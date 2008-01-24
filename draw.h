@@ -44,6 +44,7 @@ typedef struct
 
 typedef struct
 {
+    Display *display;
     Drawable drawable;
     Visual *visual;
     int width;
@@ -52,7 +53,7 @@ typedef struct
     int depth;
 } DrawCtx;
 
-DrawCtx *draw_get_context(int, int, int, Drawable);
+DrawCtx *draw_get_context(Display *, int, int, int, Drawable);
 void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, const char *, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
 void draw_graph(DrawCtx *, int, int, int, int *, int, XColor);
@@ -61,7 +62,7 @@ void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
 Area draw_get_image_size(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
-unsigned short draw_textwidth(XftFont *, char *);
+unsigned short draw_textwidth(Display *, XftFont *, char *);
 Alignment draw_get_align(const char *);
 
 #endif

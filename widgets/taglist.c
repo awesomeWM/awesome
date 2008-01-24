@@ -75,7 +75,8 @@ taglist_draw(Widget *widget,
     widget->area.width = 0;
 
     for(tag = vscreen.tags; tag; tag = tag->next)
-        widget->area.width += draw_textwidth(vscreen.font, tag->name) + vscreen.font->height;
+        widget->area.width += draw_textwidth(ctx->display, vscreen.font, tag->name)
+            + vscreen.font->height;
 
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
@@ -89,7 +90,7 @@ taglist_draw(Widget *widget,
     widget->area.width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
-        w = draw_textwidth(vscreen.font, tag->name) + vscreen.font->height;
+        w = draw_textwidth(ctx->display, vscreen.font, tag->name) + vscreen.font->height;
         if(tag->selected)
             colors = vscreen.colors_selected;
         else if(isurgent(tag))
@@ -139,7 +140,8 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
               case Bottom:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
-                    width = draw_textwidth(vscreen.font, tag->name) + vscreen.font->height;
+                    width = draw_textwidth(globalconf.display, vscreen.font, tag->name)
+                        + vscreen.font->height;
                     if(ev->x >= widget->area.x + prev_width
                        && ev->x < widget->area.x + prev_width + width)
                     {
@@ -153,7 +155,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
               case Right:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
-                    width = draw_textwidth(vscreen.font, tag->name) + vscreen.font->height;
+                    width = draw_textwidth(globalconf.display, vscreen.font, tag->name) + vscreen.font->height;
                     if(ev->y >= widget->area.x + prev_width
                        && ev->y < widget->area.x + prev_width + width)
                     {
@@ -167,7 +169,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
               default:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
-                    width = draw_textwidth(vscreen.font, tag->name) + vscreen.font->height;
+                    width = draw_textwidth(globalconf.display, vscreen.font, tag->name) + vscreen.font->height;
                     if(widget->statusbar->width - ev->y >= widget->area.x + prev_width
                        && widget->statusbar->width - ev->y < widget->area.x + prev_width + width)
                     {
