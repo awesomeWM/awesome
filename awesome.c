@@ -175,6 +175,7 @@ exit_on_signal(int sig __attribute__ ((unused)))
 static int
 xerror(Display * edpy, XErrorEvent * ee)
 {
+    warn("an XError occured, this may be bad\n");
     if(ee->error_code == BadWindow
        || (ee->request_code == X_SetInputFocus && ee->error_code == BadMatch)
        || (ee->request_code == X_PolyText8 && ee->error_code == BadDrawable)
