@@ -20,7 +20,6 @@
  *
  */
 
-#include "draw.h"
 #include "widget.h"
 #include "xutil.h"
 #include "screen.h"

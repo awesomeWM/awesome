@@ -97,7 +97,7 @@ bin_PROGRAMS += awesome
 awesome_SOURCES = \
 	client.c client.h \
 	focus.c focus.h \
-	draw.c draw.h \
+	common/draw.c common/draw.h \
 	event.c event.h \
 	layout.c layout.h \
 	awesome.c awesome.h \

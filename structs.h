@@ -23,8 +23,8 @@
 #define AWESOME_STRUCTS_H
 
 #include <regex.h>
-#include "draw.h"
 #include "layout.h"
+#include "common/draw.h"
 
 /** Bar possible position */
 typedef enum
