@@ -150,9 +150,8 @@ restack(int screen)
 
     if(globalconf.screens[screen].allow_lower_floats)
         XRaiseWindow(globalconf.display, sel->win);
-    else
-        if(sel->isfloating || curlay->arrange == layout_floating)
-            XRaiseWindow(globalconf.display, sel->win);
+    else if(sel->isfloating || curlay->arrange == layout_floating)
+        XRaiseWindow(globalconf.display, sel->win);
 
     if(globalconf.screens[screen].focus_move_pointer)
         XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0,
