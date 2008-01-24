@@ -231,7 +231,10 @@ handle_event_enternotify(XEvent * e)
 
     if(ev->mode != NotifyNormal)
         return;
-    if((c = get_client_bywin(globalconf.clients, ev->window)) && globalconf.screens[c->screen].sloppy_focus)
+
+    if((c = get_client_bywin(globalconf.clients, ev->window))
+       && globalconf.screens[c->screen].sloppy_focus
+       && c != globalconf.focus->client)
     {
         focus(c, ev->same_screen, c->screen);
         curtags = get_current_tags(c->screen);
