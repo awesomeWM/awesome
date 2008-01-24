@@ -96,7 +96,7 @@ handle_event_buttonpress(XEvent *e)
                             return;
                         }
                     break;
-                 default:
+                  case Left:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
                         if(statusbar->sw->geometry.width - ev->y >= widget->area.x
                            && statusbar->sw->geometry.width - ev->y
@@ -106,6 +106,8 @@ handle_event_buttonpress(XEvent *e)
                             widget->button_press(widget, ev);
                             return;
                         }
+                    break;
+                  case Off:
                     break;
                 }
 

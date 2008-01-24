@@ -160,10 +160,8 @@ void
 statusbar_display(Statusbar *statusbar)
 {
     /* don't waste our time */
-    if(statusbar->position == Off)
-        return;
-
-    simplewindow_refresh_drawable(statusbar->sw, get_phys_screen(statusbar->screen));
+    if(statusbar->position != Off)
+        simplewindow_refresh_drawable(statusbar->sw, get_phys_screen(statusbar->screen));
 }
 
 void
