@@ -447,9 +447,15 @@ client_setfloating(Client *c, Bool floating)
     {
         if((c->isfloating = floating))
             client_resize(c, c->f_geometry, False);
+        else if(c->ismax)
+        {
+            c->ismax = False;
+            client_resize(c, c->m_geometry, False);
+        }
         if(client_isvisible(c, c->screen))
             globalconf.screens[c->screen].need_arrange = True;
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+        client_saveprops(c);
     }
 }
 
@@ -980,19 +986,8 @@ void
 uicb_client_togglefloating(int screen __attribute__ ((unused)),
                            char *arg __attribute__ ((unused)))
 {
-    Client *sel = globalconf.focus->client;
-    
-    if(!sel)
-        return;
-    
-    /* XXX should use client_setfloating */
-    if((sel->isfloating = !sel->isfloating))
-        client_resize(sel, sel->f_geometry, False);
-    else if(sel->ismax)
-        client_resize(sel, sel->m_geometry, False);
-    client_saveprops(sel);
-    globalconf.screens[sel->screen].need_arrange = True;
-    widget_invalidate_cache(sel->screen, WIDGET_CACHE_CLIENTS);
+    if(globalconf.focus->client)
+        client_setfloating(globalconf.focus->client, !globalconf.focus->client->isfloating);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
