@@ -321,9 +321,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
         window_setshape(phys_screen, c->win);
     }
 
-    /* save new props */
-    client_saveprops(c);
-
     /* attach to the stack */
     if((rule = rule_matching_client(c)) && rule->not_master)
         client_list_append(&globalconf.clients, c);
@@ -993,6 +990,7 @@ uicb_client_togglefloating(int screen __attribute__ ((unused)),
         client_resize(sel, sel->f_geometry, False);
     else if(sel->ismax)
         client_resize(sel, sel->m_geometry, False);
+    client_saveprops(sel);
     globalconf.screens[sel->screen].need_arrange = True;
     widget_invalidate_cache(sel->screen, WIDGET_CACHE_CLIENTS);
 }
