@@ -388,6 +388,8 @@ main(int argc, char *argv[])
                     break;
                 buf[r] = '\0';
                 parse_control(buf);
+                statusbar_refresh();
+                layout_refresh();
             }
         /* two level XPending:
          * we need to first check we have XEvent to handle
