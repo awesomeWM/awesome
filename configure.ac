@@ -25,6 +25,8 @@ subdir-objects
 ])
 
 AC_DEFINE_UNQUOTED([RELEASE], ["Productivity Breaker"])
+AC_DEFINE_UNQUOTED([AWESOME_COMPILE_HOST], ["`hostname`"])
+AC_DEFINE_UNQUOTED([AWESOME_COMPILE_BY], ["`whoami`"])
 
 AC_MSG_CHECKING([package version according to autoconf])
 AC_MSG_RESULT([${PACKAGE_VERSION}])
