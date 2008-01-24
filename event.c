@@ -73,6 +73,7 @@ handle_event_buttonpress(XEvent *e)
     for(screen = 0; screen < globalconf.nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             if(statusbar->sw->window == ev->window || statusbar->sw->window == ev->subwindow)
+            {
                 switch(statusbar->position)
                 {
                   case Top:
@@ -110,6 +111,9 @@ handle_event_buttonpress(XEvent *e)
                   case Off:
                     break;
                 }
+                /* return if no widget match */
+                return;
+            }
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
