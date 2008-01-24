@@ -389,31 +389,40 @@ main(int argc, char *argv[])
                 buf[r] = '\0';
                 parse_control(buf);
             }
-
+        /* two level XPending:
+         * we need to first check we have XEvent to handle
+         * and if so, we handle them all in a round.
+         * Then when we have refresh()'ed stuff so maybe new XEvent
+         * are available and select() won't tell us, so let's check
+         * with XPending() again.
+         */
         while(XPending(dpy))
         {
-            XNextEvent(dpy, &ev);
-            if(handler[ev.type])
-                handler[ev.type](&ev);       /* call handler */
-
-            /* drop events requested to */
-            if(globalconf.drop_events)
+            while(XPending(dpy))
             {
+                XNextEvent(dpy, &ev);
+                if(handler[ev.type])
+                    handler[ev.type](&ev);       /* call handler */
+    
+                /* drop events requested to */
+                if(globalconf.drop_events)
+                {
+                    /* need to resync */
+                    XSync(dpy, False);
+                    while(XCheckMaskEvent(dpy, globalconf.drop_events, &ev));
+                    globalconf.drop_events = NoEventMask;
+                }
+    
                 /* need to resync */
                 XSync(dpy, False);
-                while(XCheckMaskEvent(dpy, globalconf.drop_events, &ev));
-                globalconf.drop_events = NoEventMask;
             }
-
+    
+            statusbar_refresh();
+            layout_refresh();
+    
             /* need to resync */
             XSync(dpy, False);
         }
-
-        statusbar_refresh();
-        layout_refresh();
-
-        /* need to resync */
-        XSync(dpy, False);
     }
 
     if(csfd > 0 && close(csfd))
