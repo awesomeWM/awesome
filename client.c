@@ -163,16 +163,6 @@ focus(Client *c, int screen)
 {
     int phys_screen = get_phys_screen(screen);
 
-    /* unfocus current selected client */
-    if(globalconf.focus->client)
-    {
-        widget_invalidate_cache(globalconf.focus->client->screen, WIDGET_CACHE_CLIENTS);
-        window_grabbuttons(get_phys_screen(globalconf.focus->client->screen),
-                           globalconf.focus->client->win, False, True);
-        XSetWindowBorder(globalconf.display, globalconf.focus->client->win,
-                         globalconf.screens[screen].colors_normal[ColBorder].pixel);
-    }
-
 
     /* if c is NULL or invisible, take next client in the focus history */
     if(!c || (c && !client_isvisible(c, screen)))
@@ -183,10 +173,17 @@ focus(Client *c, int screen)
             for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     }
 
-    if(c)
+    if(c == globalconf.focus->client)
+        return;
+
+    /* unfocus current selected client */
+    if(globalconf.focus->client)
     {
-        XSetWindowBorder(globalconf.display, c->win, globalconf.screens[screen].colors_selected[ColBorder].pixel);
-        window_grabbuttons(phys_screen, c->win, True, True);
+        widget_invalidate_cache(globalconf.focus->client->screen, WIDGET_CACHE_CLIENTS);
+        window_grabbuttons(get_phys_screen(globalconf.focus->client->screen),
+                           globalconf.focus->client->win, False, True);
+        XSetWindowBorder(globalconf.display, globalconf.focus->client->win,
+                         globalconf.screens[screen].colors_normal[ColBorder].pixel);
     }
 
     /* save sel in focus history */
@@ -194,9 +191,11 @@ focus(Client *c, int screen)
 
     if(globalconf.focus->client)
     {
-        widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
+        XSetWindowBorder(globalconf.display, c->win,
+                         globalconf.screens[screen].colors_selected[ColBorder].pixel);
         XSetInputFocus(globalconf.display,
                        globalconf.focus->client->win, RevertToPointerRoot, CurrentTime);
+        window_grabbuttons(phys_screen, c->win, True, True);
         restack(screen);
     }
     else
@@ -204,6 +203,7 @@ focus(Client *c, int screen)
                        RootWindow(globalconf.display, phys_screen),
                        RevertToPointerRoot, CurrentTime);
 
+    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_active_window(phys_screen);
 }
 
