@@ -163,19 +163,6 @@ focus(Client *c, int screen)
 {
     int phys_screen = get_phys_screen(screen);
 
-
-    /* if c is NULL or invisible, take next client in the focus history */
-    if(!c || (c && !client_isvisible(c, screen)))
-    {
-        c = focus_get_current_client(screen);
-        /* if c is still NULL take next client in the stack */
-        if(!c)
-            for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
-    }
-
-    if(c == globalconf.focus->client)
-        return;
-
     /* unfocus current selected client */
     if(globalconf.focus->client)
     {
@@ -186,16 +173,30 @@ focus(Client *c, int screen)
                          globalconf.screens[screen].colors_normal[ColBorder].pixel);
     }
 
+
+    /* if c is NULL or invisible, take next client in the focus history */
+    if(!c || (c && !client_isvisible(c, screen)))
+    {
+        c = focus_get_current_client(screen);
+        /* if c is still NULL take next client in the stack */
+        if(!c)
+            for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
+    }
+
+    if(c)
+    {
+        XSetWindowBorder(globalconf.display, c->win, globalconf.screens[screen].colors_selected[ColBorder].pixel);
+        window_grabbuttons(phys_screen, c->win, True, True);
+    }
+
     /* save sel in focus history */
     focus_add_client(c);
 
     if(globalconf.focus->client)
     {
-        XSetWindowBorder(globalconf.display, c->win,
-                         globalconf.screens[screen].colors_selected[ColBorder].pixel);
+        widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
         XSetInputFocus(globalconf.display,
                        globalconf.focus->client->win, RevertToPointerRoot, CurrentTime);
-        window_grabbuttons(phys_screen, c->win, True, True);
         restack(screen);
     }
     else
@@ -203,7 +204,6 @@ focus(Client *c, int screen)
                        RootWindow(globalconf.display, phys_screen),
                        RevertToPointerRoot, CurrentTime);
 
-    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_active_window(phys_screen);
 }
 
