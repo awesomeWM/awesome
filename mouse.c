@@ -61,6 +61,9 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         client_setfloating(c, True);
     }
 
+    /* go above everybody */
+    XMapRaised(globalconf.display, c->win);
+
     area = get_screen_area(c->screen,
                            globalconf.screens[screen].statusbar,
                            &globalconf.screens[screen].padding);
