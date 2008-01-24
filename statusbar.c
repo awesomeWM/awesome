@@ -57,8 +57,8 @@ statusbar_update_position(Statusbar *statusbar)
         simplewindow_move(statusbar->sw, area.x, (area.y + area.height) - statusbar->sw->geometry.height);
         break;
       case Left:
-        simplewindow_move(statusbar->sw, area.x - statusbar->sw->geometry.height,
-                          (area.y + area.height) - statusbar->sw->geometry.width);
+        simplewindow_move(statusbar->sw, area.x - statusbar->sw->geometry.width,
+                          (area.y + area.height) - statusbar->sw->geometry.height);
         break;
       case Right:
         simplewindow_move(statusbar->sw, area.x + area.width, area.y);
