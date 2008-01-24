@@ -70,7 +70,7 @@ handle_event_buttonpress(XEvent *e)
     Statusbar *statusbar;
     XButtonPressedEvent *ev = &e->xbutton;
 
-    for(screen = 0; screen < globalconf.nscreens; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             if(statusbar->sw->window == ev->window || statusbar->sw->window == ev->subwindow)
                 switch(statusbar->position)
@@ -257,7 +257,7 @@ handle_event_expose(XEvent *e)
     Statusbar *statusbar;
 
     if(!ev->count)
-        for(screen = 0; screen < globalconf.nscreens; screen++)
+        for(screen = 0; screen < globalconf.nscreen; screen++)
             for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
                 if(statusbar->sw->window == ev->window)
                 {

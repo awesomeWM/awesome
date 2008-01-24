@@ -122,7 +122,7 @@ get_screen_bycoord(int x, int y)
     if(!XineramaIsActive(globalconf.display))
         return DefaultScreen(globalconf.display);
 
-    for(i = 0; i < globalconf.nscreens; i++)
+    for(i = 0; i < globalconf.nscreen; i++)
     {
         area = get_screen_area(i, NULL, NULL);
         if((x < 0 || (x >= area.x && x < area.x + area.width))
@@ -157,13 +157,13 @@ screen_build_screens(void)
     {
         si = XineramaQueryScreens(globalconf.display, &xinerama_screen_number);
         globalconf.screens = p_new(VirtScreen, xinerama_screen_number);
-        globalconf.nscreens = 0;
+        globalconf.nscreen = 0;
 
         /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
         for(screen = 0; screen < xinerama_screen_number; screen++)
         {
             drop = False;
-            for(screen_to_test = 0; screen_to_test < globalconf.nscreens; screen_to_test++)
+            for(screen_to_test = 0; screen_to_test < globalconf.nscreen; screen_to_test++)
                 if(si[screen].x_org == globalconf.screens[screen_to_test].geometry.x
                    && si[screen].y_org == globalconf.screens[screen_to_test].geometry.y)
                     {
@@ -176,14 +176,14 @@ screen_build_screens(void)
                             MAX(si[screen].height, si[screen_to_test].height);
                     }
             if(!drop)
-                globalconf.screens[globalconf.nscreens++].geometry = screen_xsi_to_area(si[screen]);
+                globalconf.screens[globalconf.nscreen++].geometry = screen_xsi_to_area(si[screen]);
         }
 
         /* realloc smaller if xinerama_screen_number != screen registered */
-        if(xinerama_screen_number != globalconf.nscreens)
+        if(xinerama_screen_number != globalconf.nscreen)
         {
-            VirtScreen *newscreens = p_new(VirtScreen, globalconf.nscreens);
-            memcpy(newscreens, globalconf.screens, globalconf.nscreens * sizeof(VirtScreen));
+            VirtScreen *newscreens = p_new(VirtScreen, globalconf.nscreen);
+            memcpy(newscreens, globalconf.screens, globalconf.nscreen * sizeof(VirtScreen));
             p_delete(&globalconf.screens);
             globalconf.screens = newscreens;
         }
@@ -192,9 +192,9 @@ screen_build_screens(void)
     }
     else
     {
-        globalconf.nscreens = ScreenCount(globalconf.display);
-        globalconf.screens = p_new(VirtScreen, globalconf.nscreens);
-        for(screen = 0; screen < globalconf.nscreens; screen++)
+        globalconf.nscreen = ScreenCount(globalconf.display);
+        globalconf.screens = p_new(VirtScreen, globalconf.nscreen);
+        for(screen = 0; screen < globalconf.nscreen; screen++)
         {
             globalconf.screens[screen].geometry.x = 0;
             globalconf.screens[screen].geometry.y = 0;
@@ -349,8 +349,8 @@ uicb_screen_focus(int screen, char *arg)
         new_screen = screen + 1;
 
     if (new_screen < 0)
-        new_screen = globalconf.nscreens - 1;
-    if (new_screen > (globalconf.nscreens - 1))
+        new_screen = globalconf.nscreen - 1;
+    if (new_screen > (globalconf.nscreen - 1))
         new_screen = 0;
 
     focus(focus_get_current_client(new_screen), True, new_screen);
@@ -377,10 +377,10 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     else
         new_screen = sel->screen + 1;
 
-    if(new_screen >= globalconf.nscreens)
+    if(new_screen >= globalconf.nscreen)
         new_screen = 0;
     else if(new_screen < 0)
-        new_screen = globalconf.nscreens - 1;
+        new_screen = globalconf.nscreen - 1;
 
     prev_screen = sel->screen;
     move_client_to_screen(sel, new_screen, True);

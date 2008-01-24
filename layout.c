@@ -99,7 +99,7 @@ layout_refresh(void)
     int screen;
     Bool arranged = False;
 
-    for(screen = 0; screen < globalconf.nscreens; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         if(globalconf.screens[screen].need_arrange)
         {
             arrange(screen);

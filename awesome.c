@@ -292,7 +292,7 @@ main(int argc, char *argv[])
     scan();
 
     /* for each virtual screen */
-    for(screen = 0; screen < globalconf.nscreens; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         setup(screen);
 
     /* do this only for real screen */

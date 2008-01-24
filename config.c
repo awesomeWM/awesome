@@ -732,7 +732,7 @@ config_parse(const char *confpatharg)
     }
 
     /* get the right screen section */
-    for(screen = 0; screen < globalconf.nscreens; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         config_parse_screen(cfg, screen);
 
     /* get general sections */
@@ -754,7 +754,7 @@ config_parse(const char *confpatharg)
         rule->isfloating = rules_get_float_from_str(cfg_getstr(cfgsectmp, "float"));
         rule->screen = cfg_getint(cfgsectmp, "screen");
         rule->not_master = cfg_getbool(cfgsectmp, "not_master");
-        if(rule->screen >= globalconf.nscreens)
+        if(rule->screen >= globalconf.nscreen)
             rule->screen = 0;
 
         rule_list_push(&globalconf.rules, rule);

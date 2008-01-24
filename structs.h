@@ -301,7 +301,7 @@ struct AwesomeConf
     /** Logical screens */
     VirtScreen *screens;
     /** Number of logical screens */
-    int nscreens;
+    int nscreen;
     /** Rules list */
     Rule *rules;
     /** Keys bindings list */
