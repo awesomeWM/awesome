@@ -172,8 +172,6 @@ focus(Client *c, Bool selscreen, int screen)
                            globalconf.focus->client->win, False, True);
         XSetWindowBorder(globalconf.display, globalconf.focus->client->win,
                          globalconf.screens[screen].colors_normal[ColBorder].pixel);
-        window_settrans(globalconf.focus->client->win,
-                        globalconf.screens[screen].opacity_unfocused);
     }
 
 
@@ -203,11 +201,6 @@ focus(Client *c, Bool selscreen, int screen)
         widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
         XSetInputFocus(globalconf.display,
                        globalconf.focus->client->win, RevertToPointerRoot, CurrentTime);
-        for(c = globalconf.clients; c; c = c->next)
-            if(c != globalconf.focus->client)
-                window_settrans(globalconf.focus->client->win,
-                                globalconf.screens[screen].opacity_unfocused);
-        window_settrans(globalconf.focus->client->win, -1);
         restack(screen);
     }
     else

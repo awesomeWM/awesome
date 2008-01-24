@@ -258,8 +258,6 @@ typedef struct
     int snap;
     /** Border size */
     int borderpx;
-    /** Transparency of unfocused clients */
-    int opacity_unfocused;
     /** Focus move pointer */
     Bool focus_move_pointer;
     /** Allow floats to be lowered on focus change */
