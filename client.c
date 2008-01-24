@@ -156,11 +156,10 @@ client_ban(Client * c)
 
 /** Give focus to client, or to first client if c is NULL
  * \param c client
- * \param selscreen True if current screen is selected
  * \param screen Screen ID
  */
 void
-focus(Client *c, Bool selscreen, int screen)
+focus(Client *c, int screen)
 {
     int phys_screen = get_phys_screen(screen);
 
@@ -176,7 +175,7 @@ focus(Client *c, Bool selscreen, int screen)
 
 
     /* if c is NULL or invisible, take next client in the focus history */
-    if((!c && selscreen) || (c && !client_isvisible(c, screen)))
+    if(!c || (c && !client_isvisible(c, screen)))
     {
         c = focus_get_current_client(screen);
         /* if c is still NULL take next client in the stack */
@@ -189,9 +188,6 @@ focus(Client *c, Bool selscreen, int screen)
         XSetWindowBorder(globalconf.display, c->win, globalconf.screens[screen].colors_selected[ColBorder].pixel);
         window_grabbuttons(phys_screen, c->win, True, True);
     }
-
-    if(!selscreen)
-        return;
 
     /* save sel in focus history */
     focus_add_client(c);
@@ -323,7 +319,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     /* focus ? */
     if(globalconf.screens[c->screen].new_get_focus)
-        focus(c, True, c->screen);
+        focus(c, c->screen);
 
     /* some windows require this */
     XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,
@@ -508,7 +504,7 @@ client_unmanage(Client *c)
         untag_client(c, tag);
 
     if(globalconf.focus->client == c)
-        focus(NULL, True, c->screen);
+        focus(NULL, c->screen);
 
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
     window_setstate(c->win, WithdrawnState);
@@ -952,7 +948,7 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
     if(!c)
         for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     if(c)
-        focus(c, True, screen);
+        focus(c, screen);
 }
 
 /** Send focus to previous client in stack
@@ -966,7 +962,7 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
     Client *prev;
 
     if((prev = client_find_prev_visible(globalconf.focus->client)))
-        focus(prev, True, screen);
+        focus(prev, screen);
 }
 
 /** Toggle floating state of a client

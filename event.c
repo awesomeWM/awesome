@@ -117,7 +117,7 @@ handle_event_buttonpress(XEvent *e)
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
-        focus(c, ev->same_screen, c->screen);
+        focus(c, c->screen);
         if(CLEANMASK(ev->state) == NoSymbol
            && ev->button == Button1)
         {
@@ -242,7 +242,7 @@ handle_event_enternotify(XEvent * e)
        && globalconf.screens[c->screen].sloppy_focus
        && c != globalconf.focus->client)
     {
-        focus(c, ev->same_screen, c->screen);
+        focus(c, c->screen);
         curtags = get_current_tags(c->screen);
         if (c->isfloating || curtags[0]->layout->arrange == layout_floating)
             window_grabbuttons(get_phys_screen(c->screen), c->win, True, False);
@@ -252,7 +252,7 @@ handle_event_enternotify(XEvent * e)
     {
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
-                focus(NULL, ev->same_screen, screen);
+                focus(NULL, screen);
         if((c = globalconf.focus->client))
             window_grabbuttons(c->screen, c->win, False, False);
     }
@@ -317,7 +317,7 @@ handle_event_leavenotify(XEvent * e)
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if((ev->window == RootWindow(e->xany.display, screen)) && !ev->same_screen)
-            focus(NULL, ev->same_screen, screen);
+            focus(NULL, screen);
 }
 
 void
