@@ -710,16 +710,22 @@ config_parse(const char *confpatharg)
     cfg = cfg_init(opts, CFGF_NONE);
 
     ret = cfg_parse(cfg, confpath);
-    if(ret == CFG_FILE_ERROR)
+
+    switch(ret)
     {
+      case CFG_FILE_ERROR:
         perror("awesome: parsing configuration file failed");
         if(!(defconfig = fopen(confpath, "w")))
            perror("awesome: unable to create default configuration file");
-    }
-    else if(ret == CFG_PARSE_ERROR)
+        break;
+      case CFG_PARSE_ERROR:
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
-    if(ret != CFG_SUCCESS) {
-        fprintf(stderr, "Using default compile-time configuration\n");
+        break;
+    }
+
+    if(ret != CFG_SUCCESS)
+    {
+        warn("using default compile-time configuration\n");
         cfg_free(cfg);
         cfg = cfg_init(opts, CFGF_NONE);
         cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
