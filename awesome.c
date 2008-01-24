@@ -229,8 +229,12 @@ main(int argc, char *argv[])
         if(!a_strcmp("-v", argv[1]) || !a_strcmp("--version", argv[1]))
         {
             printf("awesome version " VERSION " (" RELEASE ")\ncompiled on "__DATE__" "__TIME__);
-#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
-            printf(" by gcc version %d.%d.%d", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#if defined(__GNUC__) \
+            && defined(__GNUC_MINOR__) \
+            && defined(__GNUC_PATCHLEVEL__) \
+            && defined(AWESOME_COMPILE_MACHINE)
+            printf(" for %s by gcc version %d.%d.%d",
+                   AWESOME_COMPILE_MACHINE, __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #endif
 #if defined(AWESOME_COMPILE_HOST) && defined(AWESOME_COMPILE_BY)
             printf(" (" AWESOME_COMPILE_BY "@" AWESOME_COMPILE_HOST ")");
