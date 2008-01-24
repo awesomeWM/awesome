@@ -179,7 +179,15 @@ screen_build_screens(void)
                 globalconf.screens[globalconf.nscreens++].geometry = screen_xsi_to_area(si[screen]);
         }
 
-        /* XXX realloc smaller if xinerama_screen_number != screen registered */
+        /* realloc smaller if xinerama_screen_number != screen registered */
+        if(xinerama_screen_number != globalconf.nscreens)
+        {
+            VirtScreen *newscreens = p_new(VirtScreen, globalconf.nscreens);
+            memcpy(newscreens, globalconf.screens, globalconf.nscreens * sizeof(VirtScreen));
+            p_delete(&globalconf.screens);
+            globalconf.screens = newscreens;
+        }
+
         XFree(si);
     }
     else
