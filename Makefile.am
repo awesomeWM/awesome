@@ -82,17 +82,18 @@ widgetgen.h: widget.h
 	@echo "generating widgetgen.h from widget.h"
 	$(top_srcdir)/build-utils/widgetgen.sh "$(top_srcdir)" > widgetgen.h
 
-CLEANFILES    += awesome-version.h
-BUILT_SOURCES += awesome-version.h.stamp
-awesome-version.h.stamp:
+A_V = awesome-version-internal
+CLEANFILES    += $(A_V).h
+BUILT_SOURCES += $(A_V).h.stamp
+$(A_V).h.stamp:
 	@current_ver=`$(SHELL) $(top_srcdir)/build-utils/package-version $(top_srcdir) version-stamp`; \
-	{ echo '#ifndef AWESOME_VERSION_H'; \
-	  echo "#define AWESOME_VERSION \"$${current_ver}\""; \
-	  echo "#endif"; } > "awesome-version.h.new"
-	@if test -f "awesome-version.h" \
-        && cmp "awesome-version.h.new" "awesome-version.h"; then :; \
-	else cat "awesome-version.h.new" > "awesome-version.h"; fi; \
-	rm -f "awesome-version.h.new"
+	{ echo '#ifndef AWESOME_VERSION_INTERNAL_H'; \
+	  echo "#define AWESOME_VERSION_INTERNAL \"$${current_ver}\""; \
+	  echo "#endif"; } > "$(A_V).h.new"
+	@if test -f "$(A_V).h" \
+        && cmp "$(A_V).h.new" "$(A_V).h"; then :; \
+	else cat "$(A_V).h.new" > "$(A_V).h"; fi; \
+	rm -f "$(A_V).h.new"
 
 if USING_GCC
 # If you are using gcc, and want to deactivate this default set of
@@ -108,6 +109,7 @@ AM_CPPFLAGS = $(XFT_CFLAGS) $(X_CFLAGS) $(CAIRO_CFLAGS) $(CONFUSE_CFLAGS) $(XRAN
 bin_PROGRAMS += awesome
 awesome_SOURCES = \
 	client.c client.h \
+	common/awesome-version.c common/awesome-version.h \
 	focus.c focus.h \
 	common/draw.c common/draw.h \
 	event.c event.h \
@@ -132,9 +134,9 @@ awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XRANDR_LIBS) $(XINERAMA_LIBS)
 
 bin_PROGRAMS += awesome-client
-AM_INSTALLCHECK_STD_OPTIONS_EXEMPT = awesome-client$(EXEEXT)
 awesome_client_SOURCES = \
 	awesome-client.c awesome-client.h \
+	common/awesome-version.c common/awesome-version.h \
 	common/awclient.c \
 	common/util.c common/util.h
 

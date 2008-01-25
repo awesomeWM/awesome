@@ -27,6 +27,7 @@
 #include <sys/un.h>
 
 #include "awesome-client.h"
+#include "common/awesome-version.h"
 #include "common/util.h"
 
 /* GNU/Hurd workaround */
@@ -65,12 +66,42 @@ send_msg(char *msg, ssize_t msg_len)
     return ret_value;
 }
 
+
+/** Print help and exit(2) with given exit_code.
+ */
+static void __attribute__ ((noreturn))
+exit_help(int exit_code)
+{
+    FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
+    fprintf(outfile, "Usage: awesome-client [--version|--help]\n"
+	    "In normal operation, give no parameters and issue commands "
+	    "on standard input.\n");
+    exit(exit_code);
+}
+
+
 int
-main(void)
+main(int argc, char *argv[])
 {
     char buf[1024], *msg;
     int ret_value = EXIT_SUCCESS;
     ssize_t len, msg_len = 1;
+
+    if (argc < 2)
+    {
+        /* no args to parse, nothing to do */
+    }
+    else if (argc == 2)
+    {
+        if(!a_strcmp("-v", argv[1]) || !a_strcmp("--version", argv[1]))
+	    eprint_version("awesome-client");
+        else if(!a_strcmp("-h", argv[1]) || !a_strcmp("--help", argv[1]))
+            exit_help(EXIT_SUCCESS);
+    }
+    else
+    {
+        exit_help(EXIT_SUCCESS);
+    }
 
     msg = p_new(char, 1);
     while(fgets(buf, sizeof(buf), stdin))

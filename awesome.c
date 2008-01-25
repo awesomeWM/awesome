@@ -38,7 +38,7 @@
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xrandr.h>
 
-#include "awesome-version.h"
+#include "common/awesome-version.h"
 #include "awesome.h"
 #include "event.h"
 #include "layout.h"
@@ -219,21 +219,7 @@ main(int argc, char *argv[])
     {
         args_ok = 0;
         if(!a_strcmp("-v", argv[1]) || !a_strcmp("--version", argv[1]))
-        {
-            printf("awesome version " AWESOME_VERSION " (" AWESOME_RELEASE ")\ncompiled");
-#if defined(__DATE__) && defined(__TIME__)
-            printf(" at " __DATE__ " " __TIME__);
-#endif
-            printf(" for %s", AWESOME_COMPILE_MACHINE);
-#if defined(__GNUC__) \
-            && defined(__GNUC_MINOR__) \
-            && defined(__GNUC_PATCHLEVEL__)
-            printf(" by gcc version %d.%d.%d",
-                   __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#endif
-            printf(" (%s@%s)\n", AWESOME_COMPILE_BY, AWESOME_COMPILE_HOSTNAME);
-            return EXIT_SUCCESS;
-        }
+	    eprint_version("awesome");
         else if(!a_strcmp("-h", argv[1]) || !a_strcmp("--help", argv[1]))
             exit_help(EXIT_SUCCESS);
         else if(!a_strcmp("-c", argv[1]))
