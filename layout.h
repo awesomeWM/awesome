@@ -42,7 +42,6 @@ DO_SLIST(Layout, layout, p_delete);
 
 int layout_refresh(void);
 Layout * get_current_layout(int);
-void restack(int);
 void loadawesomeprops(int);
 void saveawesomeprops(int);
 

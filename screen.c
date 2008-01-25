@@ -353,7 +353,7 @@ uicb_screen_focus(int screen, char *arg)
     if (new_screen > (globalconf.nscreen - 1))
         new_screen = 0;
 
-    focus(focus_get_current_client(new_screen), new_screen);
+    focus(NULL, new_screen, False);
 
     move_mouse_pointer_to_screen(new_screen);
 }
@@ -385,6 +385,6 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     prev_screen = sel->screen;
     move_client_to_screen(sel, new_screen, True);
     move_mouse_pointer_to_screen(new_screen);
-    focus(sel, sel->screen);
+    focus(sel, sel->screen, False);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

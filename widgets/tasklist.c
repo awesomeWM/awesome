@@ -210,7 +210,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
                     for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
                         if(is_client_tagged(c, tag))
                            tag_view_only_byindex(c->screen, i);
-                focus(c, widget->statusbar->screen);
+                focus(c, widget->statusbar->screen, False);
             }
 
             return;

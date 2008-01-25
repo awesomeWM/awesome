@@ -170,7 +170,7 @@ client_ban(Client *c)
  * \param screen Screen ID
  */
 void
-focus(Client *c, int screen)
+focus(Client *c, int screen, Bool from_mouse)
 {
     int phys_screen = get_phys_screen(screen);
 
@@ -187,15 +187,18 @@ focus(Client *c, int screen)
     if(globalconf.focus->client)
         client_unfocus(globalconf.focus->client);
 
-    /* save sel in focus history */
 
     if(c)
     {
+        /* save sel in focus history */
         focus_add_client(c);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].colors_selected[ColBorder].pixel);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
-        restack(screen);
+        if(!from_mouse
+           || !globalconf.screens[screen].sloppy_focus
+           || globalconf.screens[screen].sloppy_focus_raise)
+            XRaiseWindow(globalconf.display, c->win);
     }
     else
         XSetInputFocus(globalconf.display,
@@ -499,7 +502,7 @@ client_unmanage(Client *c)
         untag_client(c, tag);
 
     if(globalconf.focus->client == c)
-        focus(NULL, c->screen);
+        focus(NULL, c->screen, False);
 
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
     window_setstate(c->win, WithdrawnState);
@@ -943,7 +946,7 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
     if(!c)
         for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     if(c)
-        focus(c, screen);
+        focus(c, screen, False);
 }
 
 /** Send focus to previous client in stack
@@ -957,7 +960,7 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
     Client *prev;
 
     if((prev = client_find_prev_visible(globalconf.focus->client)))
-        focus(prev, screen);
+        focus(prev, screen, False);
 }
 
 /** Toggle floating state of a client
