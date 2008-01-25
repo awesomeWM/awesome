@@ -332,7 +332,6 @@ screen <integer> [MULTI]
 {
     general
     {
-        allow_lower_floats = <boolean>
         border = <integer>
         focus_move_pointer = <boolean>
         font = <font>
@@ -340,6 +339,7 @@ screen <integer> [MULTI]
         new_get_focus = <boolean>
         resize_hints = <boolean>
         sloppy_focus = <boolean>
+        sloppy_focus_raise = <boolean>
         snap = <integer>
     }
     tags

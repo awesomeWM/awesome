@@ -143,7 +143,9 @@ restack(int screen)
     if(!sel)
         return;
 
-    XRaiseWindow(globalconf.display, sel->win);
+    if(!globalconf.screens[screen].sloppy_focus
+       || globalconf.screens[screen].sloppy_focus_raise)
+        XRaiseWindow(globalconf.display, sel->win);
 
     if(globalconf.screens[screen].focus_move_pointer)
         XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0,
