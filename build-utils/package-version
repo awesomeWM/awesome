@@ -12,10 +12,15 @@ test -d "$top_srcdir" || { \
 }
 version_stamp="${2-version-stamp}"
 
+# If GIT_DIR is set, use it. If not, try top_srcdir/.git.
+if test -n "$GIT_DIR"; then :;
+else GIT_DIR="$top_srcdir/.git"; export GIT_DIR
+fi
+
 if test -f "$top_srcdir/$version_stamp"; then # dist source tree
 	cat "$top_srcdir/$version_stamp" | ${TR-tr} -d '\012'
-elif test -d "$top_srcdir/.git"; then # git source tree
-	git_describe=`${GIT-git} --git-dir="$top_srcdir/.git" describe 2>/dev/null || echo devel`
+elif test -d "$GIT_DIR"; then # git source tree
+	git_describe=`${GIT-git} describe 2>/dev/null || echo devel`
 	echo "$git_describe" | ${SED-sed} -e 's/^v//' -e 's/-/./g' | ${TR-tr} -d '\012'
 else # ???
 	echo "devel" | ${TR-tr} -d '\012'

@@ -7,8 +7,13 @@ srcdir=`dirname "$0"`
 # sed program
 SED=${SED-sed}
 
+# If GIT_DIR is set, use it. If not, try ".git".
+if test -n "$GIT_DIR"; then :;
+else GIT_DIR=".git"; export GIT_DIR
+fi
+
 # Check whether the version needs to be updated from VCS/version-stamp
-if [ -d ".git" ] && [ -d "autom4te.cache" ]; then
+if [ -d "$GIT_DIR" ] && [ -d "autom4te.cache" ]; then
   git_describe=`./build-utils/package-version . version-stamp`
   for f in autom4te.cache/output.*; do
     [ -f "$f" ] || continue
