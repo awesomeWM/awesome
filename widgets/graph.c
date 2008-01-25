@@ -20,6 +20,8 @@
  *
  */
 
+#include <cairo.h>
+#include "common/draw.h"
 #include "widget.h"
 #include "xutil.h"
 #include "screen.h"
@@ -29,20 +31,40 @@ extern AwesomeConf globalconf;
 
 typedef struct
 {
-    float max;              /* Represents a full graph */
-    int width;              /* Width of the widget */
-    int padding_left;       /* Left padding */
-    float height;           /* Height 0-1, where 1 is height of statusbar */
-    XColor fg;              /* Foreground color */
-    XColor bg;              /* Background color */
-    XColor bordercolor;     /* Border color */
-    int *lines;             /* Keeps the calculated values (line-length); */
-    int lines_index;        /* Pointer to current value */
-    int lines_size;         /* Size of lines-array (also innerbox-lenght) */
-    int box_height;         /* Height of the innerbox */
-    float *line_values;     /* Actual values */
-    float current_max;      /* Curent maximum value */
-    int line_max_index;     /* Index of the current maximum value */
+    /* general layout */
+    float *max;                 /* Represents a full graph */
+    int width;                  /* Width of the widget */
+    float height;               /* Height of graph (0-1, where 1 is height of statusbar) */
+    int box_height;             /* Height of the innerbox in pixels */
+    int padding_left;           /* Left padding */
+    int size;                   /* Size of lines-array (also innerbox-lenght) */
+    XColor bg;                  /* Background color */
+    XColor bordercolor;         /* Border color */
+
+    /* markers... */
+    int index;                  /* Index of current (new) value */
+    int *max_index;             /* Index of the actual maximum value */
+    float *current_max;         /* Pointer to current maximum value itself */
+
+    /* all data is stored here */
+    int data_items;             /* Number of data-input items */
+    int **lines;                /* Keeps the calculated values (line-length); */
+    float **values;             /* Actual values */
+
+    /* additional data + a pointer to **lines accordingly */
+    int **fillbottom;           /* datatypes holder (same as some **lines pointer) */
+    int fillbottom_total;       /* total of them */
+    XColor *fillbottom_color;   /* color of them */
+    int **filltop;              /* datatypes holder */
+    int filltop_total;          /* total of them */
+    XColor *filltop_color;      /* color of them */
+    int **drawline;             /* datatypes holder */
+    int drawline_total;         /* total of them */
+    XColor *drawline_color;     /* color of them */
+
+    int *draw_from;             /* Preparation/tmp array for draw_graph(); */
+    int *draw_to;               /* Preparation/tmp array for draw_graph(); */
+
 } Data;
 
 static int
@@ -50,10 +72,13 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     int margin_top, left_offset;
+    int z, y, x, tmp;
     Data *d = widget->data;
     Area rectangle;
+    cairo_surface_t *surface;
+    cairo_t *cr;
 
-    if(d->width < 1 || !(d->max > 0))
+    if(d->width < 1 || !d->data_items)
         return 0;
 
     if(!widget->user_supplied_x)
@@ -72,7 +97,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     rectangle.x = left_offset;
     rectangle.y = margin_top;
-    rectangle.width = d->lines_size + 2;
+    rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
     draw_rectangle(ctx, rectangle, False, d->bordercolor);
 
@@ -82,13 +107,62 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     rectangle.height -= 2;
     draw_rectangle(ctx, rectangle, True, d->bg);
 
-    if(d->lines[d->lines_index] < 0)
-        d->lines[d->lines_index] = 0;
+    draw_graph_init(ctx, &surface, &cr); /* setup drawing surface etc */
 
-    draw_graph(ctx,
-               left_offset + 2, margin_top + d->box_height + 1,
-               d->lines_size, d->lines, d->lines_index,
-               d->fg);
+    /* draw style = top */
+    for(z = 0; z < d->filltop_total; z++)
+    {
+        for(y = 0; y < d->size; y++)
+        {
+            for(tmp = 0, x = 0; x < d->filltop_total; x++) /* find largest smaller value */
+            {
+                if (x == z)
+                    continue;
+
+                if(d->filltop[x][y] > tmp && d->filltop[x][y] < d->filltop[z][y])
+                    tmp = d->filltop[x][y];
+            }
+            d->draw_from[y] = d->box_height - tmp;
+            d->draw_to[y] = d->box_height - d->filltop[z][y];
+        }
+        draw_graph(cr,
+                left_offset + 2, margin_top + d->box_height + 1,
+                d->size, d->draw_from, d->draw_to, d->index,
+                d->filltop_color[z]);
+    }
+
+    /* draw style = bottom */
+    for(z = 0; z < d->fillbottom_total; z++)
+    {
+        for(y = 0; y < d->size; y++)
+        {
+            for(tmp = 0, x = 0; x < d->fillbottom_total; x++) /* find largest smaller value */
+            {
+                if (x == z)
+                    continue;
+
+                if(d->fillbottom[x][y] > tmp && d->fillbottom[x][y] < d->fillbottom[z][y])
+                    tmp = d->fillbottom[x][y];
+            }
+            d->draw_from[y] = tmp;
+        }
+
+        draw_graph(cr,
+                left_offset + 2, margin_top + d->box_height + 1,
+                d->size, d->draw_from, d->fillbottom[z], d->index,
+                d->fillbottom_color[z]);
+    }
+
+    /* draw style = line */
+    for(z = 0; z < d->drawline_total; z++)
+    {
+        draw_graph_line(cr,
+                left_offset + 2, margin_top + d->box_height + 1,
+                d->size, d->drawline[z], d->index,
+                d->drawline_color[z]);
+    }
+
+    draw_graph_end(surface, cr);
 
     widget->area.width = d->width;
     widget->area.height = widget->statusbar->height;
@@ -99,53 +173,61 @@ static void
 graph_tell(Widget *widget, char *command)
 {
     Data *d = widget->data;
-    int i;
-    float value;
+    int i, z;
+    float *value;
+    char *tok;
 
-    if(!command || d->width < 1 || !(d->max > 0))
+    if(!command || d->width < 1 || !(d->data_items > 0))
         return;
 
-    if(++d->lines_index >= d->lines_size) /* cycle inside the array */
-        d->lines_index = 0;
+    value = p_new(float, d->data_items);
 
-    value = MAX(atof(command), 0); /* TODO: may allow min-option and values */
+    for (i = 0, tok = strtok(command, ","); tok && i < d->data_items; tok = strtok(NULL, ","), i++)
+        value[i] = MAX(atof(tok), 0);
 
-    if(d->line_values) /* scale option is true */
+    if(++d->index >= d->size) /* cycle inside the arrays (all-in-one) */
+        d->index = 0;
+
+    /* add according values and to-draw-line-lenghts to the according data_items */
+    for(z = 0; z < d->data_items; z++)
     {
-        d->line_values[d->lines_index] = value;
-
-        if(value > d->current_max) /* a new maximum value found */
+        if(d->values[z]) /* scale option is true */
         {
-            d->line_max_index = d->lines_index; 
-            d->current_max = value;
+            d->values[z][d->index] = value[z];
 
-            /* recalculate */
-            for (i = 0; i < d->lines_size; i++) 
-                d->lines[i] = (int) (d->line_values[i] * (d->box_height) / d->current_max + 0.5);
+            if(value[z] > d->current_max[z]) /* a new maximum value found */
+            {
+                d->max_index[z] = d->index;
+                d->current_max[z] = value[z];
+
+                /* recalculate */
+                for (i = 0; i < d->size; i++)
+                    d->lines[z][i] = (int) (d->values[z][i] * (d->box_height) / d->current_max[z] + 0.5);
+            }
+            else if(d->max_index[z] == d->index) /* old max_index reached, re-check/generate */
+            {
+                /* find the new max */
+                for (i = 0; i < d->size; i++)
+                    if (d->values[z][i] > d->values[z][d->max_index[z]])
+                        d->max_index[z] = i;
+
+                d->current_max[z] = MAX(d->values[z][d->max_index[z]], d->max[z]);
+
+                /* recalculate */
+                for (i = 0; i < d->size; i++)
+                    d->lines[z][i] = (int) (d->values[z][i] * d->box_height / d->current_max[z] + 0.5);
+            }
+            else
+                d->lines[z][d->index] = (int) (value[z] * d->box_height / d->current_max[z] + 0.5);
+
         }
-        else if(d->line_max_index == d->lines_index) /* old max_index reached, re-check/generate */
+        else /* scale option is false - limit to d->box_height */
         {
-            /* find the new max */
-            for (i = 0; i < d->lines_size; i++)
-                if (d->line_values[i] > d->line_values[d->line_max_index])
-                    d->line_max_index = i;
-
-            d->current_max = MAX(d->line_values[d->line_max_index], d->max);
-
-            /* recalculate */
-            for (i = 0; i < d->lines_size; i++) 
-                d->lines[i] = (int) (d->line_values[i] * d->box_height / d->current_max + 0.5);
+            if (value[z] < d->current_max[z])
+                d->lines[z][d->index] = (int) (value[z] * d->box_height / d->current_max[z] + 0.5);
+            else
+                d->lines[z][d->index] = d->box_height;
         }
-        else
-            d->lines[d->lines_index] = (int) (value * d->box_height / d->current_max + 0.5);
-
-    }
-    else /* scale option is false */
-    {
-        if (value < d->current_max)
-            d->lines[d->lines_index] = (int) (value * d->box_height / d->current_max + 0.5);
-        else
-            d->lines[d->lines_index] = d->box_height;
     }
 }
 
@@ -154,8 +236,12 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
     Data *d;
+    cfg_t *cfg;
     char *color;
     int phys_screen = get_phys_screen(statusbar->screen);
+    int i;
+    char *type;
+    XColor tmp_color;
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
@@ -167,30 +253,86 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     d->width = cfg_getint(config, "width");
     d->height = cfg_getfloat(config, "height");
     d->padding_left = cfg_getint(config, "padding_left");
-    d->lines_size = d->width - d->padding_left - 2;
+    d->size = d->width - d->padding_left - 2;
 
-    if(d->lines_size < 1)
+    if(d->size < 1)
     {
         warn("graph widget needs: (width - padding_left) >= 3\n");
         return w;
     }
-    /* prevent: division by zero */
-    d->current_max = d->max = cfg_getfloat(config, "max");
-    if(!(d->max > 0))
+
+    if(!(d->data_items = cfg_size(config, "data")))
     {
-        warn("graph widget needs a 'max' value greater than zero\n");
+        warn("graph widget needs at least one data section\n");
         return w;
     }
 
-    d->lines = p_new(int, d->lines_size);
+    d->draw_from = p_new(int, d->size);
+    d->draw_to = p_new(int, d->size);
 
-    if (cfg_getbool(config, "scale"))
-        d->line_values = p_new(float, d->lines_size);
+    d->fillbottom = p_new(int *, d->size);
+    d->filltop = p_new(int *, d->size);
+    d->drawline = p_new(int *, d->size);
 
-    if((color = cfg_getstr(config, "fg")))
-        d->fg = initxcolor(globalconf.display, phys_screen, color);
-    else
-        d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
+    d->values = p_new(float *, d->data_items);
+    d->lines = p_new(int *, d->data_items);
+
+    d->filltop_color = p_new(XColor, d->data_items);
+    d->fillbottom_color = p_new(XColor, d->data_items);
+    d->drawline_color = p_new(XColor, d->data_items);
+
+    d->max_index = p_new(int, d->data_items);
+
+    d->current_max = p_new(float, d->data_items);
+    d->max = p_new(float, d->data_items);
+
+    for(i = 0; i < d->data_items; i++)
+    {
+        cfg = cfg_getnsec(config, "data", i);
+
+        if((color = cfg_getstr(cfg, "fg")))
+            tmp_color = initxcolor(globalconf.display, phys_screen, color);
+        else
+            tmp_color = globalconf.screens[statusbar->screen].colors_normal[ColFG];
+
+        if (cfg_getbool(cfg, "scale"))
+            d->values[i] = p_new(float, d->size); /* not null -> scale = true */
+
+        /* prevent: division by zero */
+        d->current_max[i] = d->max[i] = cfg_getfloat(cfg, "max");
+        if(!(d->max[i] > 0))
+        {
+            warn("all graph widget needs a 'max' value greater than zero\n");
+            d->data_items = 0;
+            return w;
+        }
+
+        d->lines[i] = p_new(int, d->size);
+
+        /* filter each style-typ into it's own array (for easy looping later)*/
+
+        if ((type = cfg_getstr(cfg, "style")))
+        {
+            if(!strncmp(type, "bottom", sizeof("bottom")))
+            {
+                d->fillbottom[d->fillbottom_total] = d->lines[i];
+                d->fillbottom_color[d->fillbottom_total] = tmp_color;
+                d->fillbottom_total++;
+            }
+            else if (!strncmp(type, "top", sizeof("top")))
+            {
+                d->filltop[d->filltop_total] = d->lines[i];
+                d->filltop_color[d->filltop_total] = tmp_color;
+                d->filltop_total++;
+            }
+            else if (!strncmp(type, "line", sizeof("line")))
+            {
+                d->drawline[d->drawline_total] = d->lines[i];
+                d->drawline_color[d->drawline_total] = tmp_color;
+                d->drawline_total++;
+            }
+        }
+    }
 
     if((color = cfg_getstr(config, "bg")))
         d->bg = initxcolor(globalconf.display, phys_screen, color);
@@ -200,7 +342,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     if((color = cfg_getstr(config, "bordercolor")))
         d->bordercolor = initxcolor(globalconf.display, phys_screen, color);
     else
-        d->bordercolor = d->fg;
+        d->bordercolor = tmp_color;
 
     return w;
 }

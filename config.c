@@ -539,19 +539,25 @@ config_parse(const char *confpatharg)
         CFG_BOOL((char *) "show_all", cfg_false, CFGF_NONE),
         CFG_END()
     };
+    static cfg_opt_t widget_graph_data_opts[] =
+    {
+        CFG_FLOAT((char *) "max", 100.0f, CFGF_NONE),
+        CFG_BOOL((char *) "scale", cfg_false, CFGF_NONE),
+        CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
+        CFG_STR((char *) "style", (char *) "bottom", CFGF_NONE),
+        CFG_END()
+    };
     static cfg_opt_t widget_graph_opts[] =
     {
         CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
         CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
         CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
+        CFG_SEC((char *) "data", widget_graph_data_opts, CFGF_MULTI),
         CFG_INT((char *) "width", 100, CFGF_NONE),
         CFG_INT((char *) "padding_left", 0, CFGF_NONE),
         CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
-        CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
         CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),
-        CFG_BOOL((char *) "scale", cfg_false, CFGF_NONE),
-        CFG_FLOAT((char *) "max", 100.0f, CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t widget_progressbar_bar_opts[] =
