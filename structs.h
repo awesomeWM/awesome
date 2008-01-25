@@ -258,8 +258,6 @@ typedef struct
     int snap;
     /** Border size */
     int borderpx;
-    /** Focus move pointer */
-    Bool focus_move_pointer;
     /** Respect resize hints */
     Bool resize_hints;
     /** Sloppy focus: focus follow mouse */

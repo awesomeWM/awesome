@@ -312,7 +312,6 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->borderpx = cfg_getint(cfg_general, "border");
     virtscreen->snap = cfg_getint(cfg_general, "snap");
     virtscreen->resize_hints = cfg_getbool(cfg_general, "resize_hints");
-    virtscreen->focus_move_pointer = cfg_getbool(cfg_general, "focus_move_pointer");
     virtscreen->sloppy_focus = cfg_getbool(cfg_general, "sloppy_focus");
     virtscreen->sloppy_focus_raise = cfg_getbool(cfg_general, "sloppy_focus_raise");
     virtscreen->new_become_master = cfg_getbool(cfg_general, "new_become_master");
@@ -441,7 +440,6 @@ config_parse(const char *confpatharg)
         CFG_INT((char *) "border", 1, CFGF_NONE),
         CFG_INT((char *) "snap", 8, CFGF_NONE),
         CFG_BOOL((char *) "resize_hints", cfg_true, CFGF_NONE),
-        CFG_BOOL((char *) "focus_move_pointer", cfg_false, CFGF_NONE),
         CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
         CFG_BOOL((char *) "sloppy_focus_raise", cfg_true, CFGF_NONE),
         CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
