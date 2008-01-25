@@ -81,6 +81,11 @@ arrange(int screen)
     if(!globalconf.screens[screen].allow_lower_floats)
         layout_raise_floatings(screen);
 
+    /* if we have a valid client that could be focused but currently no window
+     * are focused, then set the focus on this window */
+    if((c = focus_get_current_client(screen)) && !globalconf.focus->client)
+        focus(c, screen);
+
     /* reset status */
     globalconf.screens[screen].need_arrange = False;
 }

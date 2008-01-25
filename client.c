@@ -150,6 +150,7 @@ client_unfocus(Client *c)
     XSetWindowBorder(globalconf.display, c->win,
                      globalconf.screens[c->screen].colors_normal[ColBorder].pixel);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+    focus_add_client(NULL);
 }
 
 /** Ban client and unmap it
@@ -187,10 +188,10 @@ focus(Client *c, int screen)
         client_unfocus(globalconf.focus->client);
 
     /* save sel in focus history */
-    focus_add_client(c);
 
     if(c)
     {
+        focus_add_client(c);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].colors_selected[ColBorder].pixel);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
