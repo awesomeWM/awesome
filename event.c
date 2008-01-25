@@ -197,7 +197,6 @@ handle_event_configurenotify(XEvent * e)
 {
     XConfigureEvent *ev = &e->xconfigure;
     int screen;
-    Area area;
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if(ev->window == RootWindow(e->xany.display, screen)
