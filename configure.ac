@@ -24,7 +24,7 @@ std-options
 subdir-objects
 ])
 
-AC_DEFINE_UNQUOTED([RELEASE], ["Productivity Breaker"], [release code name])
+AC_DEFINE_UNQUOTED([AWESOME_RELEASE], ["Productivity Breaker"], [release code name])
 
 AC_MSG_CHECKING([package version according to autoconf])
 AC_MSG_RESULT([${PACKAGE_VERSION}])

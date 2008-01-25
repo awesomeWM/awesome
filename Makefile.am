@@ -82,6 +82,18 @@ widgetgen.h: widget.h
 	@echo "generating widgetgen.h from widget.h"
 	$(top_srcdir)/build-utils/widgetgen.sh "$(top_srcdir)" > widgetgen.h
 
+CLEANFILES    += awesome-version.h
+BUILT_SOURCES += awesome-version.h.stamp
+awesome-version.h.stamp:
+	@current_ver=`$(SHELL) $(top_srcdir)/build-utils/package-version $(top_srcdir) version-stamp`; \
+	{ echo '#ifndef AWESOME_VERSION_H'; \
+	  echo "#define AWESOME_VERSION \"$${current_ver}\""; \
+	  echo "#endif"; } > "awesome-version.h.new"
+	@if test -f "awesome-version.h" \
+        && cmp "awesome-version.h.new" "awesome-version.h"; then :; \
+	else cat "awesome-version.h.new" > "awesome-version.h"; fi; \
+	rm -f "awesome-version.h.new"
+
 if USING_GCC
 # If you are using gcc, and want to deactivate this default set of
 # compile flags, run make with AWESOME_CFLAGS="".

@@ -38,6 +38,7 @@
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xrandr.h>
 
+#include "awesome-version.h"
 #include "awesome.h"
 #include "event.h"
 #include "layout.h"
@@ -219,7 +220,7 @@ main(int argc, char *argv[])
         args_ok = 0;
         if(!a_strcmp("-v", argv[1]) || !a_strcmp("--version", argv[1]))
         {
-            printf("awesome version " VERSION " (" RELEASE ")\ncompiled");
+            printf("awesome version " AWESOME_VERSION " (" AWESOME_RELEASE ")\ncompiled");
 #if defined(__DATE__) && defined(__TIME__)
             printf(" at " __DATE__ " " __TIME__);
 #endif
