@@ -317,10 +317,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     else
         client_list_append(&globalconf.clients, c);
 
-    /* focus ? */
-    if(globalconf.screens[c->screen].new_get_focus)
-        focus(c, c->screen);
-
     /* some windows require this */
     XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,
                       c->geometry.width, c->geometry.height);
