@@ -248,14 +248,6 @@ progressbar
 ~~~~~~~~~~~
 This widget shows one or more progress-bars.
 
-*mouse*::
-    Set mouse bindings.
-*width*::
-    Set width.
-*height*::
-    Set height (i.e. 0.9 = 90%)
-*padding_left*::
-    Empty space on the left.
 *bar*::
     Draws a bar; Options: fg, bg, bordercolor.
 *fg*::
@@ -264,6 +256,14 @@ This widget shows one or more progress-bars.
     Background color.
 *bordercolor*::
     Border color.
+*mouse*::
+    Set mouse bindings.
+*width*::
+    Set width.
+*height*::
+    Set height (i.e. 0.9 = 90%)
+*padding_left*::
+    Empty space on the left.
 *x*::
     Horizontal offset (auto-alignment if not set).
 *y*::
@@ -273,10 +273,16 @@ graph
 ~~~~~
 This widget shows a graph.
 
+*data*::
+    Defines a data-stream section; Options: max, scale, fg and style.
+*max*::
+    This value prints a full graph (default = 100)
 *scale*::
     Re-scales when input > max (see below).
-*max*::
-    This value prints a full graph.
+*fg*::
+    Foreground color.
+*style*::
+    bottom (fills to bottom with fg), top, or line.
 *mouse*::
     Set mouse bindings.
 *width*::
@@ -285,8 +291,6 @@ This widget shows a graph.
     Set height (i.e. 0.9 = 90%)
 *padding_left*::
     Empty space on the left.
-*fg*::
-    Foreground color.
 *bg*::
     Background color.
 *bordercolor*::
@@ -329,22 +333,22 @@ screen <integer> [MULTI]
     general
     {
         allow_lower_floats = <boolean>
-        border = <integer> 
+        border = <integer>
         focus_move_pointer = <boolean>
-        font = <font> 
+        font = <font>
         new_become_master = <boolean>
         new_get_focus = <boolean>
-        resize_hints = <boolean> 
+        resize_hints = <boolean>
         sloppy_focus = <boolean>
-        snap = <integer> 
+        snap = <integer>
     }
     tags
-    { 
+    {
         tag <identifier> [MULTI]
-        { 
+        {
             layout = <{dwindle,floating,max,
                      spiral,tile,tileleft,tilebottom,tiletop}>
-            mwfact = <float> 
+            mwfact = <float>
             nmaster = <integer>
         }
     }
@@ -356,22 +360,22 @@ screen <integer> [MULTI]
     }
     colors
     {
-        tab_border = <color> 
+        tab_border = <color>
         normal_fg = <color>
-        normal_bg = <color> 
-        normal_border = <color> 
-        focus_fg = <color> 
-        focus_bg = <color> 
+        normal_bg = <color>
+        normal_border = <color>
+        focus_fg = <color>
+        focus_bg = <color>
         focus_border = <color>
         urgent_fg = <color>
         urgent_bg = <color>
     }
-    padding 
-    { 
-        top = <integer> 
-        bottom = <integer> 
-        left = <integer> 
-        right = <integer> 
+    padding
+    {
+        top = <integer>
+        bottom = <integer>
+        left = <integer>
+        right = <integer>
     }
     statusbar <identifier> [MULTI]
     {
@@ -383,7 +387,7 @@ screen <integer> [MULTI]
         {
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
+            {
                 button = <integer> modkey = {<mod>, ...}
                 command = <uicb-cmd> arg = <uicb-arg>
             }
@@ -392,8 +396,8 @@ screen <integer> [MULTI]
         {
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
-                button = <integer> modkey = {<mod>, ...} 
+            {
+                button = <integer> modkey = {<mod>, ...}
                 command = <uicb-cmd> arg = <uicb-arg>
             }
         }
@@ -401,8 +405,8 @@ screen <integer> [MULTI]
         {
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
-                button = <integer> modkey = {<mod>, ...} 
+            {
+                button = <integer> modkey = {<mod>, ...}
                 command = <uicb-cmd> arg = <uicb-arg>
             }
         }
@@ -414,8 +418,8 @@ screen <integer> [MULTI]
             align = <{center,left,right}>
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
-                button = <integer> modkey = {<mod>, ...} 
+            {
+                button = <integer> modkey = {<mod>, ...}
                 command = <uicb-cmd> arg = <uicb-arg>
             }
         }
@@ -431,23 +435,23 @@ screen <integer> [MULTI]
             align = <{center,left,right}>
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
+            {
                 command = <uicb-cmd> arg = <uicb-arg>
-                button = <integer> modkey = {<mod>, ...} 
+                button = <integer> modkey = {<mod>, ...}
             }
-        }    
+        }
         textbox <identifier> [MULTI]
         {
             text = <string>
-            bg = <color> 
-            fg = <color> 
+            bg = <color>
+            fg = <color>
             font = <font>
             width = <integer>
             align = <{center,left,right}>
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
-                button = <integer> modkey = {<mod>, ...} 
+            {
+                button = <integer> modkey = {<mod>, ...}
                 command = <uicb-cmd> arg = <uicb-arg>
             }
         }
@@ -457,84 +461,86 @@ screen <integer> [MULTI]
             resize = <boolean>
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
-                button = <integer> modkey = {<mod>, ...} 
+            {
+                button = <integer> modkey = {<mod>, ...}
                 command = <uicb-cmd> arg = <uicb-arg>
             }
         }
         progressbar <identifier> [MULTI]
         {
             bar { fg = <color> bg = <color> bordercolor = <color> } [MULTI]
-            gap = <integer> 
+            gap = <integer>
             width = <integer>
-            height = <float> 
+            height = <float>
             padding_left = <integer>
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
-                button = <integer> modkey = {<mod>, ...} 
+            {
+                button = <integer> modkey = {<mod>, ...}
                 command = <uicb-cmd> arg = <uicb-arg>
             }
         }
         graph <identifier> [MULTI]
         {
-            scale = <boolean>
-            max = <float>
+            data [MULTI]
+            {
+                scale = <boolean> max = <float> fg = <color>
+                style = <{bottom, top, line}>
+            }
             width = <integer>
             height = <float>
             padding_left = <integer>
-            fg = <color>
             bg = <color>
             bordercolor = <color>
             x = <integer> y = <integer>
             mouse [MULTI]
-            {   
-                button = <integer> modkey = {<mod>, ...} 
+            {
+                button = <integer> modkey = {<mod>, ...}
                 command = <uicb-cmd> arg = <uicb-arg>
             }
         }
     }
 }
 rules
-{  
-    rule [MULTI] 
-    { 
-        name = <regex> 
+{
+    rule [MULTI]
+    {
+        name = <regex>
         xproperty_name = <string>
         xproperty_value = <regex>
         float = <{auto,true,false}>
         tags = <regex>
-        screen = <integer> 
-        icon = <image> 
+        screen = <integer>
+        icon = <image>
         not_master = <boolean>
     }
 }
 keys
 {
     key [MULTI]
-    { 
-        key = <key> modkey = {<mod>, ...} 
-        command = <uicb-cmd> arg = <uicb-arg> 
+    {
+        key = <key> modkey = {<mod>, ...}
+        command = <uicb-cmd> arg = <uicb-arg>
     }
     keylist [MULTI]
-    { 
-        keylist = {<key>, ...} 
-        modkey = {<mod>, ...} 
-        command = <uicb-cmd> 
-        arglist = {<uicb-arg>, ...} 
+    {
+        keylist = {<key>, ...}
+        modkey = {<mod>, ...}
+        command = <uicb-cmd>
+        arglist = {<uicb-arg>, ...}
     }
 }
 mouse
 {
-    client [MULTI] 
+    client [MULTI]
     {
-        button = <integer> modkey = {<mod>, ...} 
-        command = <uicb-cmd> arg = <uicb-arg> 
+        button = <integer> modkey = {<mod>, ...}
+        command = <uicb-cmd> arg = <uicb-arg>
     }
     root [MULTI]
     {
-        button = <integer> modkey = {<mod>, ...} 
-        command = <uicb-cmd> arg = <uicb-arg> 
+        button = <integer> modkey = {<mod>, ...}
+        command = <uicb-cmd> arg = <uicb-arg>
     }
 }
 ..............................................
