@@ -78,8 +78,7 @@ arrange(int screen)
                 focus(c, screen);
         }
 
-    if(!globalconf.screens[screen].allow_lower_floats)
-        layout_raise_floatings(screen);
+    layout_raise_floatings(screen);
 
     /* if we have a valid client that could be focused but currently no window
      * are focused, then set the focus on this window */
@@ -140,15 +139,11 @@ void
 restack(int screen)
 {
     Client *sel = globalconf.focus->client;
-    Layout *curlay = get_current_layout(screen);
 
     if(!sel)
         return;
 
-    if(globalconf.screens[screen].allow_lower_floats)
-        XRaiseWindow(globalconf.display, sel->win);
-    else if(sel->isfloating || curlay->arrange == layout_floating)
-        XRaiseWindow(globalconf.display, sel->win);
+    XRaiseWindow(globalconf.display, sel->win);
 
     if(globalconf.screens[screen].focus_move_pointer)
         XWarpPointer(globalconf.display, None, sel->win, 0, 0, 0, 0,

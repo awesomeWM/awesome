@@ -260,8 +260,6 @@ typedef struct
     int borderpx;
     /** Focus move pointer */
     Bool focus_move_pointer;
-    /** Allow floats to be lowered on focus change */
-    Bool allow_lower_floats;
     /** Respect resize hints */
     Bool resize_hints;
     /** Sloppy focus: focus follow mouse */
