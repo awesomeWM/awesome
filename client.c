@@ -144,12 +144,22 @@ client_updatetitle(Client *c)
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
+static void
+client_unfocus(Client *c)
+{
+    XSetWindowBorder(globalconf.display, c->win,
+                     globalconf.screens[c->screen].colors_normal[ColBorder].pixel);
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+}
+
 /** Ban client and unmap it
  * \param c the client
  */
 void
-client_ban(Client * c)
+client_ban(Client *c)
 {
+    if(globalconf.focus->client == c)
+        client_unfocus(c);
     XUnmapWindow(globalconf.display, c->win);
     window_setstate(c->win, IconicState);
 }
@@ -163,17 +173,6 @@ focus(Client *c, int screen)
 {
     int phys_screen = get_phys_screen(screen);
 
-    /* unfocus current selected client */
-    if(globalconf.focus->client)
-    {
-        widget_invalidate_cache(globalconf.focus->client->screen, WIDGET_CACHE_CLIENTS);
-        window_grabbuttons(get_phys_screen(globalconf.focus->client->screen),
-                           globalconf.focus->client->win, False, True);
-        XSetWindowBorder(globalconf.display, globalconf.focus->client->win,
-                         globalconf.screens[screen].colors_normal[ColBorder].pixel);
-    }
-
-
     /* if c is NULL or invisible, take next client in the focus history */
     if(!c || (c && !client_isvisible(c, screen)))
     {
@@ -183,20 +182,18 @@ focus(Client *c, int screen)
             for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     }
 
-    if(c)
-    {
-        XSetWindowBorder(globalconf.display, c->win, globalconf.screens[screen].colors_selected[ColBorder].pixel);
-        window_grabbuttons(phys_screen, c->win, True, True);
-    }
+    /* unfocus current selected client */
+    if(globalconf.focus->client)
+        client_unfocus(globalconf.focus->client);
 
     /* save sel in focus history */
     focus_add_client(c);
 
-    if(globalconf.focus->client)
+    if(c)
     {
-        widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
-        XSetInputFocus(globalconf.display,
-                       globalconf.focus->client->win, RevertToPointerRoot, CurrentTime);
+        XSetWindowBorder(globalconf.display, c->win,
+                         globalconf.screens[screen].colors_selected[ColBorder].pixel);
+        XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
         restack(screen);
     }
     else
@@ -204,7 +201,9 @@ focus(Client *c, int screen)
                        RootWindow(globalconf.display, phys_screen),
                        RevertToPointerRoot, CurrentTime);
 
+    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_active_window(phys_screen);
+    globalconf.drop_events |= EnterWindowMask;
 }
 
 /** Manage a new client
@@ -300,7 +299,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
-    window_grabbuttons(phys_screen, c->win, False, True);
 
     /* handle xshape */
     if(globalconf.have_shape)

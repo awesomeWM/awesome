@@ -122,7 +122,7 @@ handle_event_buttonpress(XEvent *e)
            && ev->button == Button1)
         {
             XAllowEvents(globalconf.display, ReplayPointer, CurrentTime);
-            window_grabbuttons(get_phys_screen(c->screen), c->win, True, True);
+            window_grabbuttons(get_phys_screen(c->screen), c->win, True);
         }
         else
             handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
@@ -233,29 +233,20 @@ handle_event_enternotify(XEvent * e)
     Client *c;
     XCrossingEvent *ev = &e->xcrossing;
     int screen;
-    Tag **curtags;
 
     if(ev->mode != NotifyNormal)
         return;
 
-    if((c = get_client_bywin(globalconf.clients, ev->window))
-       && globalconf.screens[c->screen].sloppy_focus
-       && c != globalconf.focus->client)
+    if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
-        focus(c, c->screen);
-        curtags = get_current_tags(c->screen);
-        if (c->isfloating || curtags[0]->layout->arrange == layout_floating)
-            window_grabbuttons(get_phys_screen(c->screen), c->win, True, False);
-        p_delete(&curtags);
+        window_grabbuttons(get_phys_screen(c->screen), c->win, False);
+        if(globalconf.screens[c->screen].sloppy_focus)
+            focus(c, c->screen);
     }
     else
-    {
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
-                focus(NULL, screen);
-        if((c = globalconf.focus->client))
-            window_grabbuttons(c->screen, c->win, False, False);
-    }
+                window_root_grabbuttons(screen);
 }
 
 void

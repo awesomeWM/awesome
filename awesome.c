@@ -290,7 +290,7 @@ main(int argc, char *argv[])
         loadawesomeprops(screen);
         ewmh_set_supported_hints(screen);
         /* call this to at least grab root window clicks */
-        window_grabbuttons(screen, None, False, True); 
+        window_root_grabbuttons(screen);
     }
 
     handler = p_new(event_handler *, LASTEvent);
@@ -393,7 +393,18 @@ main(int argc, char *argv[])
             {
                 XNextEvent(dpy, &ev);
                 if(handler[ev.type])
-                    handler[ev.type](&ev);
+                    handler[ev.type](&ev);       /* call handler */
+    
+                /* drop events requested to */
+                if(globalconf.drop_events)
+                {
+                    /* need to resync */
+                    XSync(dpy, False);
+                    while(XCheckMaskEvent(dpy, globalconf.drop_events, &ev));
+                    globalconf.drop_events = NoEventMask;
+                }
+    
+                /* need to resync */
                 XSync(dpy, False);
             }
     

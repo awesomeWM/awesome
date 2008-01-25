@@ -57,9 +57,6 @@ arrange(int screen)
 {
     Client *c;
     Layout *curlay = get_current_layout(screen);
-    Window client_win, root_win;
-    int x, y, d;
-    unsigned int m;
 
     for(c = globalconf.clients; c; c = c->next)
     {
@@ -77,33 +74,28 @@ arrange(int screen)
         {
             c->newcomer = False;
             client_unban(c);
+            if(globalconf.screens[screen].new_get_focus)
+                focus(c, screen);
         }
 
     if(!globalconf.screens[screen].allow_lower_floats)
         layout_raise_floatings(screen);
 
-    c = focus_get_current_client(screen);
-    focus(c, screen);
-    if(c && XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)),
-                          &root_win, &client_win, &x, &y, &d, &d, &m) &&
-            (root_win == None || client_win == None || client_win == root_win))
-            window_grabbuttons(c->screen, c->win, False, False);
-
     /* reset status */
     globalconf.screens[screen].need_arrange = False;
 }
 
-Bool
+int
 layout_refresh(void)
 {
     int screen;
-    Bool arranged = False;
+    int arranged = 0;
 
     for(screen = 0; screen < globalconf.nscreen; screen++)
         if(globalconf.screens[screen].need_arrange)
         {
             arrange(screen);
-            arranged = True;
+            arranged++;
         }
 
     return arranged;

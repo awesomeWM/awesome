@@ -40,7 +40,7 @@ struct Layout
 
 DO_SLIST(Layout, layout, p_delete);
 
-Bool layout_refresh(void);
+int layout_refresh(void);
 Layout * get_current_layout(int);
 void restack(int);
 void loadawesomeprops(int);
