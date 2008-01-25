@@ -285,6 +285,9 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                 client_setfloating(c, False);
                 break;
             }
+
+            if(rule->opacity >= 0.0f)
+                window_settrans(c->win, rule->opacity);
         }
         else
             move_client_to_screen(c, screen, True);

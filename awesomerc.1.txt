@@ -512,6 +512,7 @@ rules
         screen = <integer>
         icon = <image>
         not_master = <boolean>
+        opacity = <float>
     }
 }
 keys

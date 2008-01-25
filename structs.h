@@ -61,6 +61,7 @@ struct Rule
     int screen;
     RuleFloat isfloating;
     Bool not_master;
+    double opacity;
     regex_t *prop_r;
     regex_t *tags_r;
     regex_t *xpropval_r;
