@@ -24,10 +24,7 @@ std-options
 subdir-objects
 ])
 
-AC_DEFINE_UNQUOTED([RELEASE], ["Productivity Breaker"])
-AC_DEFINE_UNQUOTED([AWESOME_COMPILE_HOST], ["`type hostname > /dev/null && hostname`"])
-AC_DEFINE_UNQUOTED([AWESOME_COMPILE_BY], ["`type whoami > /dev/null && whoami`"])
-AC_DEFINE_UNQUOTED([AWESOME_COMPILE_MACHINE], ["`type uname > /dev/null && uname -m`"])
+AC_DEFINE_UNQUOTED([RELEASE], ["Productivity Breaker"], [release code name])
 
 AC_MSG_CHECKING([package version according to autoconf])
 AC_MSG_RESULT([${PACKAGE_VERSION}])
@@ -58,6 +55,16 @@ AM_CONDITIONAL([HAVE_XMLTO],    [test "x$XMLTO"    != "x:"])
 AM_CONDITIONAL([HAVE_DOXYGEN],  [test "x$DOXYGEN"  != "x:"])
 
 AM_CONDITIONAL([USING_GCC], [test "x$GCC" = "xyes"])
+
+AC_CANONICAL_HOST
+AC_DEFINE_UNQUOTED([AWESOME_COMPILE_MACHINE], ["$host"], [build for this machine])
+
+AC_DEFINE_UNQUOTED([AWESOME_COMPILE_HOSTNAME], ["${ac_hostname}"], [build host])
+
+AC_ARG_VAR([WHOAMI], [whoami(1) command])
+AC_PATH_PROG([WHOAMI], [whoami], [false])
+AS_IF([test "x$WHOAMI" = "xfalse"], [aw_whoami="???"], [aw_whoami=`$WHOAMI`])
+AC_DEFINE_UNQUOTED([AWESOME_COMPILE_BY], ["$aw_whoami"], [build user])
 
 # Checks for libraries.
 AC_PATH_XTRA
