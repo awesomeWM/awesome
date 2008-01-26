@@ -441,7 +441,7 @@ config_parse(const char *confpatharg)
         CFG_INT((char *) "snap", 8, CFGF_NONE),
         CFG_BOOL((char *) "resize_hints", cfg_true, CFGF_NONE),
         CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
-        CFG_BOOL((char *) "sloppy_focus_raise", cfg_true, CFGF_NONE),
+        CFG_BOOL((char *) "sloppy_focus_raise", cfg_false, CFGF_NONE),
         CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
         CFG_BOOL((char *) "new_get_focus", cfg_true, CFGF_NONE),
         CFG_STR((char *) "font", (char *) "mono-12", CFGF_NONE),
