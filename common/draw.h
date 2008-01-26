@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_DRAW_H
-#define AWESOME_DRAW_H
+#ifndef AWESOME_COMMON_DRAW_H
+#define AWESOME_COMMON_DRAW_H
 
 #include <cairo.h>
 #include <X11/Xlib.h>

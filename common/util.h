@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef AWESOME_UTIL_H
-#define AWESOME_UTIL_H
+#ifndef AWESOME_COMMON_UTIL_H
+#define AWESOME_COMMON_UTIL_H
 
 #include <string.h>
 #include <stdlib.h>

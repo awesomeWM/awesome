@@ -1,5 +1,7 @@
-/* awesome-version.c - version message utility functions
+/*
+ * awesome-version.h - version message utility functions header
  *
+ * Copyright © 2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef AWESOME_VERSION_H
-#define AWESOME_VERSION_H
+#ifndef AWESOME_COMMON_VERSION_H
+#define AWESOME_COMMON_VERSION_H
 
 void
 eprint_version(const char *const executable)

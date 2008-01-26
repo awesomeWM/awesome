@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef AWESOME_LIST_H
-#define AWESOME_LIST_H
+#ifndef AWESOME_COMMON_LIST_H
+#define AWESOME_COMMON_LIST_H
 
 #define DO_SLIST(type, prefix, dtor)                                         \
     static inline type *prefix##_list_pop(type **list)                       \

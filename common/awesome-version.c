@@ -1,4 +1,5 @@
-/* awesome-version.c - version message utility functions
+/*
+ * awesome-version.c - version message utility functions
  *
  * Copyright © 2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
