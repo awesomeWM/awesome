@@ -89,25 +89,20 @@ window_configure(Window win, Area geometry, int border)
 /** Grab or ungrab buttons on a window
  * \param screen The screen
  * \param win The window
- * \param focused True if client is focused
- * \param raised True if the client is above other clients
  */
 void
-window_grabbuttons(int screen, Window win, Bool raised)
+window_grabbuttons(int screen, Window win)
 {
     Button *b;
 
-    if(!raised)
-    {
-        XGrabButton(globalconf.display, Button1, NoSymbol,
-                    win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-        XGrabButton(globalconf.display, Button1, NoSymbol | LockMask,
-                    win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-        XGrabButton(globalconf.display, Button1, NoSymbol | globalconf.numlockmask,
-                    win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-        XGrabButton(globalconf.display, Button1, NoSymbol | globalconf.numlockmask | LockMask,
-                    win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-    }
+    XGrabButton(globalconf.display, Button1, NoSymbol,
+                win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
+    XGrabButton(globalconf.display, Button1, NoSymbol | LockMask,
+                win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
+    XGrabButton(globalconf.display, Button1, NoSymbol | globalconf.numlockmask,
+                win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
+    XGrabButton(globalconf.display, Button1, NoSymbol | globalconf.numlockmask | LockMask,
+                win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
 
     for(b = globalconf.buttons.client; b; b = b->next)
     {

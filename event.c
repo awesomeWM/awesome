@@ -122,7 +122,7 @@ handle_event_buttonpress(XEvent *e)
            && ev->button == Button1)
         {
             XAllowEvents(globalconf.display, ReplayPointer, CurrentTime);
-            window_grabbuttons(get_phys_screen(c->screen), c->win, True);
+            window_grabbuttons(get_phys_screen(c->screen), c->win);
         }
         else
             handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
@@ -228,7 +228,7 @@ handle_event_enternotify(XEvent * e)
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
-        window_grabbuttons(get_phys_screen(c->screen), c->win, False);
+        window_grabbuttons(get_phys_screen(c->screen), c->win);
         if(globalconf.screens[c->screen].sloppy_focus)
             focus(c, c->screen, True);
     }

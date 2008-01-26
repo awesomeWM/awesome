@@ -187,7 +187,6 @@ focus(Client *c, int screen, Bool from_mouse)
     if(globalconf.focus->client)
         client_unfocus(globalconf.focus->client);
 
-
     if(c)
     {
         /* save sel in focus history */
@@ -199,6 +198,9 @@ focus(Client *c, int screen, Bool from_mouse)
            || !globalconf.screens[screen].sloppy_focus
            || globalconf.screens[screen].sloppy_focus_raise)
             XRaiseWindow(globalconf.display, c->win);
+        /* since we're dropping EnterWindow events and sometimes the window
+         * will appear under the mouse, grabbuttons */
+        window_grabbuttons(phys_screen, c->win);
     }
     else
         XSetInputFocus(globalconf.display,
