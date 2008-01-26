@@ -141,6 +141,15 @@ awesome_client_SOURCES = \
 	common/awclient.c \
 	common/util.c common/util.h
 
+bin_PROGRAMS += awmessage
+awmessage_SOURCES = \
+        common/swindow.c common/swindow.h \
+        common/draw.c common/draw.h \
+	common/util.h common/util.c \
+	common/awesome-version.h common/awesome-version.c \
+	awmessage.c
+
+awmessage_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS)
 
 EXTRA_DIST += awesome.1.txt
 man_MANS   += awesome.1
