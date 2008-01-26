@@ -169,6 +169,8 @@ draw_graph_init(DrawCtx *ctx, cairo_surface_t **pp_surface, cairo_t **pp_cr)
 
     cairo_set_antialias(*pp_cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(*pp_cr, 1.0);
+    /* without it, it can draw over the path on sharp angles (...too long lines) */
+    cairo_set_line_join (*pp_cr, CAIRO_LINE_JOIN_ROUND);
 }
 
 void
@@ -179,9 +181,8 @@ draw_graph_end(cairo_surface_t *surface, cairo_t *cr)
 }
 
 /* draws a graph; it takes the line-lengths from *from and *to.  It cycles
- * backwards through those arrays (what have the lenght of w), beginning at
- * position cur_index, until h_index is reached again (wrapped around). */
-
+ * backwards through those arrays (what have the length of w), beginning at
+ * position cur_index, until cur_index is reached again (wrapped around). */
 void
 draw_graph(cairo_t *cr, int x, int y, int w, int *from, int *to, int cur_index, XColor color)
 {
@@ -207,12 +208,13 @@ draw_graph_line(cairo_t *cr, int x, int y, int w, int *to, int cur_index, XColor
     int flag = 0; /* used to prevent drawing a line from 0 to 0 values */
     cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
 
-    /* XXX x - 1 (on the border actually), for whatever reason... */
+    /* x-1 (on the border), paints *from* the last point (... not included itself) */
+    /* makes sense when you assume there is already some line drawn to it. */
     cairo_move_to(cr, x - 1, y - to[cur_index]);
 
     for (i = 0; i < w; i++)
     {
-        if (to[cur_index] >= 1)
+        if (to[cur_index] > 0)
         {
             cairo_line_to(cr, x, y - to[cur_index]);
             flag = 1;
