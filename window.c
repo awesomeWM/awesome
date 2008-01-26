@@ -1,7 +1,7 @@
 /*
  * window.c - window handling functions
  *
- * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/shape.h> 
 
+#include "structs.h"
 #include "window.h"
 #include "common/util.h"
 
@@ -170,75 +171,6 @@ window_settrans(Window win, double opacity)
                                  XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False));
 
     return status;
-}
-
-SimpleWindow *
-simplewindow_new(int phys_screen, int x, int y, unsigned int w, unsigned int h,
-                  unsigned int border_width)
-{
-    XSetWindowAttributes wa;
-    SimpleWindow *sw;
-
-    sw = p_new(SimpleWindow, 1);
-
-    sw->geometry.x = x;
-    sw->geometry.y = y;
-    sw->geometry.width = w;
-    sw->geometry.height = h;
-
-    wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
-    wa.cursor = globalconf.cursor[CurNormal];
-    wa.override_redirect = 1;
-    wa.background_pixmap = ParentRelative;
-    wa.event_mask = ButtonPressMask | ExposureMask;
-    sw->window = XCreateWindow(globalconf.display,
-                               RootWindow(globalconf.display, phys_screen),
-                               x, y, w, h,
-                               border_width,
-                               DefaultDepth(globalconf.display, phys_screen),
-                               CopyFromParent,
-                               DefaultVisual(globalconf.display, phys_screen),
-                               CWOverrideRedirect | CWBackPixmap | CWEventMask,
-                               &wa);
-
-    sw->drawable = XCreatePixmap(globalconf.display,
-                                 RootWindow(globalconf.display, phys_screen),
-                                 w, h,
-                                 DefaultDepth(globalconf.display, phys_screen));
-
-    XDefineCursor(globalconf.display,
-                  sw->window,
-                  globalconf.cursor[CurNormal]);
-
-    return sw;
-}
-
-void
-simplewindow_delete(SimpleWindow *sw)
-{
-    XDestroyWindow(globalconf.display, sw->window);
-    XFreePixmap(globalconf.display, sw->drawable);
-    p_delete(&sw);
-}
-
-int
-simplewindow_move(SimpleWindow *sw, int x, int y)
-{
-    sw->geometry.x = x;
-    sw->geometry.y = y;
-    return XMoveWindow(globalconf.display, sw->window, x, y);
-}
-
-int
-simplewindow_refresh_drawable(SimpleWindow *sw, int phys_screen)
-{
-    return XCopyArea(globalconf.display, sw->drawable,
-                     sw->window,
-                     DefaultGC(globalconf.display, phys_screen), 0, 0,
-                     sw->geometry.width,
-                     sw->geometry.height,
-                     0, 0);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

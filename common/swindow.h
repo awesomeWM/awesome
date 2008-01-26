@@ -1,5 +1,5 @@
 /*
- * window.h - window handling functions header
+ * swindow.h - simple window handling functions header
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -19,18 +19,22 @@
  *
  */
 
-#ifndef AWESOME_WINDOW_H
-#define AWESOME_WINDOW_H
+#ifndef AWESOME_COMMON_SWINDOW_H
+#define AWESOME_COMMON_SWINDOW_H
 
-#include "common/draw.h"
+/** A simple window */
+typedef struct SimpleWindow
+{
+    Display *display;
+    Window window;
+    Drawable drawable;
+    Area geometry;
+} SimpleWindow;
 
-int window_setstate(Window, long);
-long window_getstate(Window);
-Status window_configure(Window, Area, int);
-void window_grabbuttons(int, Window);
-void window_root_grabbuttons(int);
-void window_setshape(int, Window);
-int window_settrans(Window, double);
+SimpleWindow * simplewindow_new(Display *, int, int, int, unsigned int, unsigned int, unsigned int);
+void simplewindow_delete(SimpleWindow *);
+int simplewindow_move(SimpleWindow *, int, int);
+int simplewindow_refresh_drawable(SimpleWindow *, int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

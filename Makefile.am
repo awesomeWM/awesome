@@ -126,6 +126,7 @@ awesome_SOURCES = \
 	rules.c rules.h \
 	mouse.c mouse.h \
 	common/awclient.c \
+	common/swindow.c common/swindow.h \
 	widget.c widget.h \
 	ewmh.c ewmh.h \
 	common/list.h structs.h

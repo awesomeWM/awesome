@@ -215,11 +215,13 @@ statusbar_init(Statusbar *statusbar)
       case Right:
       case Left:
             statusbar->sw =
-                 simplewindow_new(phys_screen, 0, 0, statusbar->height, statusbar->width, 0);
+                 simplewindow_new(globalconf.display, phys_screen, 0, 0,
+                                  statusbar->height, statusbar->width, 0);
             break;
       default:
             statusbar->sw =
-                simplewindow_new(phys_screen, 0, 0, statusbar->width, statusbar->height, 0);
+                simplewindow_new(globalconf.display, phys_screen, 0, 0,
+                                 statusbar->width, statusbar->height, 0);
             break;
     }
 

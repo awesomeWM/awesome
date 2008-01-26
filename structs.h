@@ -25,6 +25,7 @@
 #include <regex.h>
 #include "layout.h"
 #include "common/draw.h"
+#include "common/swindow.h"
 
 /** Bar possible position */
 typedef enum
@@ -127,14 +128,6 @@ struct Widget
     /** Next widget */
     Widget *next;
 };
-
-/** A simple window */
-typedef struct SimpleWindow
-{
-    Window window;
-    Drawable drawable;
-    Area geometry;
-} SimpleWindow;
 
 /** Status bar */
 struct Statusbar
