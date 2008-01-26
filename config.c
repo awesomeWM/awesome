@@ -444,7 +444,7 @@ config_parse(const char *confpatharg)
         CFG_BOOL((char *) "sloppy_focus_raise", cfg_false, CFGF_NONE),
         CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
         CFG_BOOL((char *) "new_get_focus", cfg_true, CFGF_NONE),
-        CFG_STR((char *) "font", (char *) "mono-12", CFGF_NONE),
+        CFG_STR((char *) "font", (char *) "vera-10", CFGF_NONE),
         CFG_END()
     };
     static cfg_opt_t colors_opts[] =
