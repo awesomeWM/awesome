@@ -22,6 +22,8 @@
 #ifndef AWESOME_COMMON_SWINDOW_H
 #define AWESOME_COMMON_SWINDOW_H
 
+#include "common/draw.h"
+
 /** A simple window */
 typedef struct SimpleWindow
 {

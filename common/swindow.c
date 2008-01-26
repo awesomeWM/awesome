@@ -19,9 +19,7 @@
  *
  */
 
-#include <X11/Xlib.h>
 
-#include "common/draw.h"
 #include "common/swindow.h"
 #include "common/util.h"
 
