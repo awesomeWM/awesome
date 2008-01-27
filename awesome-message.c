@@ -19,6 +19,8 @@
  *
  */
 
+#define _GNU_SOURCE
+#include <getopt.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <X11/Xlib.h>
@@ -50,13 +52,25 @@ main(int argc, char **argv)
     Area geometry = { 0, 0, 200, 50, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL };
     XftFont *font = NULL;
+    int option_index = 0;
+    static struct option long_options[] = {
+        {"help", 0, NULL, 0},
+        {"version", 0, NULL, 0},
+        {NULL, 0, NULL, 0}
+    };
 
     if(!(disp = XOpenDisplay(NULL)))
         eprint("unable to open display");
 
-    while((opt = getopt(argc, argv, "vhf:b:x:y:n:")) != -1)
+    while((opt = getopt_long(argc, argv, "vhf:b:x:y:n:",
+                             long_options, &option_index)) != -1)
         switch(opt)
         {
+          case 0:
+            if (!a_strcmp("help", long_options[option_index].name))
+                exit_help(EXIT_SUCCESS);
+            else if (!a_strcmp("version", long_options[option_index].name))
+                eprint_version("awmessage");
           case 'v':
             eprint_version("awmessage");
             break;
@@ -88,7 +102,7 @@ main(int argc, char **argv)
 
     geometry.width = draw_textwidth(disp, font, argv[optind]);
     geometry.height = font->height * 1.5;
-    
+
     if(argc - optind >= 2)
     {
         icon_geometry = draw_get_image_size(argv[optind + 1]);
