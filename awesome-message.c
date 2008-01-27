@@ -1,5 +1,5 @@
 /*
- * awmessage.c - message window for awesome
+ * awesome-message.c - message window for awesome
  *
  * Copyright © 2008 Julien Danjou <julien@danjou.info>
  *
