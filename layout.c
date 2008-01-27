@@ -75,7 +75,7 @@ arrange(int screen)
             c->newcomer = False;
             client_unban(c);
             if(globalconf.screens[screen].new_get_focus)
-                focus(c, screen, False);
+                client_focus(c, screen, False);
         }
 
     layout_raise_floatings(screen);
@@ -83,7 +83,7 @@ arrange(int screen)
     /* if we have a valid client that could be focused but currently no window
      * are focused, then set the focus on this window */
     if((c = focus_get_current_client(screen)) && !globalconf.focus->client)
-        focus(c, screen, False);
+        client_focus(c, screen, False);
 
     /* reset status */
     globalconf.screens[screen].need_arrange = False;

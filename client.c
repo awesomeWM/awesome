@@ -169,7 +169,7 @@ client_ban(Client *c)
  * \param screen Screen ID
  */
 void
-focus(Client *c, int screen, Bool from_mouse)
+client_focus(Client *c, int screen, Bool from_mouse)
 {
     int phys_screen = get_phys_screen(screen);
 
@@ -506,7 +506,7 @@ client_unmanage(Client *c)
         untag_client(c, tag);
 
     if(globalconf.focus->client == c)
-        focus(NULL, c->screen, False);
+        client_focus(NULL, c->screen, False);
 
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
     window_setstate(c->win, WithdrawnState);
@@ -950,7 +950,7 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
     if(!c)
         for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     if(c)
-        focus(c, screen, False);
+        client_focus(c, screen, False);
 }
 
 /** Send focus to previous client in stack
@@ -964,7 +964,7 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
     Client *prev;
 
     if((prev = client_find_prev_visible(globalconf.focus->client)))
-        focus(prev, screen, False);
+        client_focus(prev, screen, False);
 }
 
 /** Toggle floating state of a client

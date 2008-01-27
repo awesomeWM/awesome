@@ -117,7 +117,7 @@ handle_event_buttonpress(XEvent *e)
 
     if((c = get_client_bywin(globalconf.clients, ev->window)))
     {
-        focus(c, c->screen, False);
+        client_focus(c, c->screen, False);
         if(CLEANMASK(ev->state) == NoSymbol
            && ev->button == Button1)
         {
@@ -230,7 +230,7 @@ handle_event_enternotify(XEvent * e)
     {
         window_grabbuttons(get_phys_screen(c->screen), c->win);
         if(globalconf.screens[c->screen].sloppy_focus)
-            focus(c, c->screen, True);
+            client_focus(c, c->screen, True);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
@@ -297,7 +297,7 @@ handle_event_leavenotify(XEvent * e)
 
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
         if((ev->window == RootWindow(e->xany.display, screen)) && !ev->same_screen)
-            focus(NULL, screen, False);
+            client_focus(NULL, screen, False);
 }
 
 void
