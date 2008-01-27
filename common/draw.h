@@ -54,7 +54,7 @@ typedef struct
     int depth;
 } DrawCtx;
 
-DrawCtx *draw_get_context(Display *, int, int, int, Drawable);
+DrawCtx *draw_context_new(Display *, int, int, int, Drawable);
 void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, const char *, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
 

@@ -102,7 +102,7 @@ main(int argc, char **argv)
 
     XStoreName(disp, sw->window, "awmessage");
 
-    ctx = draw_get_context(disp, DefaultScreen(disp),
+    ctx = draw_context_new(disp, DefaultScreen(disp),
                            geometry.width, geometry.height, sw->drawable);
 
 

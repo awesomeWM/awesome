@@ -33,7 +33,7 @@
  * \return draw context ref
  */
 DrawCtx *
-draw_get_context(Display *disp, int phys_screen, int width, int height, Drawable dw)
+draw_context_new(Display *disp, int phys_screen, int width, int height, Drawable dw)
 {
     DrawCtx *d = p_new(DrawCtx, 1);
 
