@@ -26,7 +26,6 @@
 #include "uicb.h"
 
 Bool xgettextprop(Window, Atom, char *, ssize_t);
-XColor initxcolor(Display *, int, const char *);
 unsigned int get_numlockmask(Display *);
 Uicb uicb_spawn;
 Uicb uicb_exec;

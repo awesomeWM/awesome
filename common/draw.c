@@ -407,4 +407,25 @@ draw_get_align(const char *align)
     return AlignLeft;
 }
 
+/** Initialize an X color
+ * \param disp display ref
+ * \param screen Physical screen number
+ * \param colstr Color specification
+ * \return XColor struct
+ */
+XColor
+draw_color_new(Display *disp, int phys_screen, const char *colstr)
+{
+    XColor screenColor, exactColor;
+
+    if(!XAllocNamedColor(disp,
+                         DefaultColormap(disp, phys_screen),
+                         colstr,
+                         &screenColor,
+                         &exactColor))
+        eprint("awesome: error, cannot allocate color '%s'\n", colstr);
+
+    return screenColor;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

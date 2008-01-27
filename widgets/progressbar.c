@@ -21,7 +21,6 @@
 
 #include <string.h>
 #include "widget.h"
-#include "xutil.h"
 #include "screen.h"
 #include "common/util.h"
 
@@ -163,17 +162,17 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         cfg = cfg_getnsec(config, "bar", i);
 
         if((color = cfg_getstr(cfg, "fg")))
-            d->fg[i] = initxcolor(globalconf.display, phys_screen, color);
+            d->fg[i] = draw_color_new(globalconf.display, phys_screen, color);
         else
             d->fg[i] = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
         if((color = cfg_getstr(cfg, "bg")))
-            d->bg[i] = initxcolor(globalconf.display, phys_screen, color);
+            d->bg[i] = draw_color_new(globalconf.display, phys_screen, color);
         else
             d->bg[i] = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
         if((color = cfg_getstr(cfg, "bordercolor")))
-            d->bordercolor[i] = initxcolor(globalconf.display, phys_screen, color);
+            d->bordercolor[i] = draw_color_new(globalconf.display, phys_screen, color);
         else
             d->bordercolor[i] = d->fg[i];
 

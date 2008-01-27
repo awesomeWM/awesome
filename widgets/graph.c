@@ -23,7 +23,6 @@
 #include <cairo.h>
 #include "common/draw.h"
 #include "widget.h"
-#include "xutil.h"
 #include "screen.h"
 #include "common/util.h"
 
@@ -291,7 +290,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         cfg = cfg_getnsec(config, "data", i);
 
         if((color = cfg_getstr(cfg, "fg")))
-            tmp_color = initxcolor(globalconf.display, phys_screen, color);
+            tmp_color = draw_color_new(globalconf.display, phys_screen, color);
         else
             tmp_color = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
@@ -335,12 +334,12 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     }
 
     if((color = cfg_getstr(config, "bg")))
-        d->bg = initxcolor(globalconf.display, phys_screen, color);
+        d->bg = draw_color_new(globalconf.display, phys_screen, color);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
     if((color = cfg_getstr(config, "bordercolor")))
-        d->bordercolor = initxcolor(globalconf.display, phys_screen, color);
+        d->bordercolor = draw_color_new(globalconf.display, phys_screen, color);
     else
         d->bordercolor = tmp_color;
 

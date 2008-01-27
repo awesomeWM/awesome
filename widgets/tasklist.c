@@ -22,7 +22,6 @@
 #include "widget.h"
 #include "client.h"
 #include "focus.h"
-#include "xutil.h"
 #include "screen.h"
 #include "event.h"
 #include "ewmh.h"
@@ -241,22 +240,22 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     if((buf = cfg_getstr(config, "fg")))
-        d->fg = initxcolor(globalconf.display, phys_screen, buf);
+        d->fg = draw_color_new(globalconf.display, phys_screen, buf);
     else
         d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
     if((buf = cfg_getstr(config, "bg")))
-        d->bg = initxcolor(globalconf.display, phys_screen, buf);
+        d->bg = draw_color_new(globalconf.display, phys_screen, buf);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
     if((buf = cfg_getstr(config, "focus_bg")))
-        d->bg_sel = initxcolor(globalconf.display, phys_screen, buf);
+        d->bg_sel = draw_color_new(globalconf.display, phys_screen, buf);
     else
         d->bg_sel = globalconf.screens[statusbar->screen].colors_selected[ColBG];
 
     if((buf = cfg_getstr(config, "focus_fg")))
-        d->fg_sel = initxcolor(globalconf.display, phys_screen, buf);
+        d->fg_sel = draw_color_new(globalconf.display, phys_screen, buf);
     else
         d->fg_sel = globalconf.screens[statusbar->screen].colors_selected[ColFG];
 

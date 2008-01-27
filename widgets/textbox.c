@@ -20,7 +20,6 @@
  */
 
 #include "widget.h"
-#include "xutil.h"
 #include "screen.h"
 #include "common/util.h"
 
@@ -81,9 +80,9 @@ textbox_tell(Widget *widget, char *command)
             if (ntok)
                 *ntok = 0;
             if (!i)
-                d->fg = initxcolor(globalconf.display, phys_screen, tok);
+                d->fg = draw_color_new(globalconf.display, phys_screen, tok);
             else
-                d->bg = initxcolor(globalconf.display, phys_screen, tok);
+                d->bg = draw_color_new(globalconf.display, phys_screen, tok);
             if (ntok)
                 *ntok = ' ';
             tok = ntok + (ntok != NULL);
@@ -109,12 +108,12 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     if((buf = cfg_getstr(config, "fg")))
-        d->fg = initxcolor(globalconf.display, statusbar->screen, buf);
+        d->fg = draw_color_new(globalconf.display, statusbar->screen, buf);
     else
         d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
     if((buf = cfg_getstr(config, "bg")))
-        d->bg = initxcolor(globalconf.display, get_phys_screen(statusbar->screen), buf);
+        d->bg = draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 

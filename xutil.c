@@ -123,25 +123,6 @@ xgettextprop(Window w, Atom atom, char *text, ssize_t textlen)
     return True;
 }
 
-/** Initialize an X color
- * \param screen Physical screen number
- * \param colstr Color specification
- */
-XColor
-initxcolor(Display *disp, int phys_screen, const char *colstr)
-{
-    XColor screenColor, exactColor;
-
-    if(!XAllocNamedColor(disp,
-                         DefaultColormap(disp, phys_screen),
-                         colstr,
-                         &screenColor,
-                         &exactColor))
-        eprint("awesome: error, cannot allocate color '%s'\n", colstr);
-
-    return screenColor;
-}
-
 unsigned int
 get_numlockmask(Display *disp)
 {
