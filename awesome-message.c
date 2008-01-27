@@ -43,6 +43,7 @@ main(int argc, char **argv)
     DrawCtx *ctx;
     XColor fg, bg, c;
     XEvent ev;
+    Bool running = True;
     const char *fg_color = "#000000";
     const char *bg_color = "#ffffff";
     int opt;
@@ -127,14 +128,14 @@ main(int argc, char **argv)
     XMapRaised(disp, sw->window);
     XSync(disp, False);
 
-    while (1)
+    while (running)
     {
        XNextEvent(disp, &ev);
        switch (ev.type)
        {
          case ButtonPress:
          case KeyPress:
-           return EXIT_SUCCESS;
+           running = False;
          case Expose:
            simplewindow_refresh_drawable(sw, DefaultScreen(disp));
            break;
