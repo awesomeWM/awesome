@@ -23,3 +23,4 @@ uicbgen.h
 widgetgen.h
 layoutgen.h
 awesome-version-internal.h
+awesome-message
