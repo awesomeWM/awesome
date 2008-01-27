@@ -31,6 +31,7 @@
 #include "ewmh.h"
 #include "screen.h"
 #include "widget.h"
+#include "xutil.h"
 #include "layouts/floating.h"
 
 
