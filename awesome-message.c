@@ -41,7 +41,7 @@ main(int argc, char **argv)
     Display *disp;
     SimpleWindow *sw;
     DrawCtx *ctx;
-    XColor fg, bg, c;
+    XColor fg, bg;
     XEvent ev;
     Bool running = True;
     const char *fg_color = "#000000";
@@ -105,12 +105,9 @@ main(int argc, char **argv)
     ctx = draw_get_context(disp, DefaultScreen(disp),
                            geometry.width, geometry.height, sw->drawable);
 
-    /* XXX replace by initxcolor() */
-    XAllocNamedColor(disp, DefaultColormap(disp, DefaultScreen(disp)),
-                     bg_color, &bg, &c);
 
-    XAllocNamedColor(disp, DefaultColormap(disp, DefaultScreen(disp)),
-                     fg_color, &fg, &c);
+    bg = draw_color_new(disp, DefaultScreen(disp), bg_color);
+    fg = draw_color_new(disp, DefaultScreen(disp), fg_color);
 
     geometry.x = geometry.y = 0;
     draw_text(ctx, geometry, AlignRight,
