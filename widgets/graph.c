@@ -285,6 +285,8 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     d->current_max = p_new(float, d->data_items);
     d->max = p_new(float, d->data_items);
 
+    tmp_color = globalconf.screens[statusbar->screen].colors_normal[ColFG];
+
     for(i = 0; i < d->data_items; i++)
     {
         cfg = cfg_getnsec(config, "data", i);
