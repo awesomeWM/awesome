@@ -42,7 +42,7 @@ extern AwesomeConf globalconf;
 void
 uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int x, y, ocx, ocy, di, phys_screen;
+    int x, y, ocx, ocy, di, phys_screen, newscreen;
     unsigned int dui;
     Window dummy, child;
     XEvent ev;
@@ -83,6 +83,12 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             {
                 XQueryPointer(globalconf.display, RootWindow(globalconf.display, phys_screen),
                               &dummy, &child, &x, &y, &di, &di, &dui);
+                if((newscreen = get_screen_bycoord(x, y)) != screen)
+                {
+                    move_client_to_screen(c, newscreen, True);
+                    globalconf.screens[screen].need_arrange = True;
+                    globalconf.screens[newscreen].need_arrange = True;
+                }
                 if((target = get_client_bywin(globalconf.clients, child)) && target != c)
                 {
                     client_list_swap(&globalconf.clients, c, target);
