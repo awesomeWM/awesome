@@ -42,24 +42,16 @@ extern AwesomeConf globalconf;
 void
 uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int x1, y, ocx, ocy, di, phys_screen;
+    int x, y, ocx, ocy, di, phys_screen;
     unsigned int dui;
-    Window dummy;
+    Window dummy, child;
     XEvent ev;
     Area area, geometry;
-    Client *c = globalconf.focus->client;
+    Client *c = globalconf.focus->client, *target;
     Layout *layout = get_current_layout(screen);
 
     if(!c)
         return;
-
-    if(layout->arrange != layout_floating && !c->isfloating)
-    {
-        /* ugly hack: copy current geom to be floating 
-         * because mouse will be far away from window otherwise */
-        c->f_geometry = c->geometry;
-        client_setfloating(c, True);
-    }
 
     /* go above everybody */
     XMapRaised(globalconf.display, c->win);
@@ -74,44 +66,63 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     if(XGrabPointer(globalconf.display,
                     RootWindow(globalconf.display, phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
+                    RootWindow(globalconf.display, phys_screen),
+                    globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
     XQueryPointer(globalconf.display,
                   RootWindow(globalconf.display, phys_screen),
-                  &dummy, &dummy, &x1, &y, &di, &di, &dui);
+                  &dummy, &dummy, &x, &y, &di, &di, &dui);
     c->ismax = False;
     for(;;)
     {
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
         switch (ev.type)
         {
-        case ButtonRelease:
+          case ButtonRelease:
+            if(!c->isfloating && layout->arrange != layout_floating)
+            {
+                XQueryPointer(globalconf.display, RootWindow(globalconf.display, phys_screen),
+                              &dummy, &child, &x, &y, &di, &di, &dui);
+                if((target = get_client_bywin(globalconf.clients, child)) && target != c)
+                {
+                    client_list_swap(&globalconf.clients, c, target);
+                    globalconf.screens[screen].need_arrange = True;
+                }
+            }
             XUngrabPointer(globalconf.display, CurrentTime);
             return;
-        case ConfigureRequest:
+          case ConfigureRequest:
             handle_event_configurerequest(&ev);
             break;
-        case Expose:
+          case Expose:
             handle_event_expose(&ev);
             break;
-        case MapRequest:
+          case MapRequest:
             handle_event_maprequest(&ev);
             break;
-        case MotionNotify:
-            geometry.x = ocx + (ev.xmotion.x - x1);
-            geometry.y = ocy + (ev.xmotion.y - y);
-            if(abs(geometry.x) < globalconf.screens[screen].snap + area.x && geometry.x > area.x)
-                geometry.x = area.x;
-            else if(abs((area.x + area.width) - (geometry.x + c->geometry.width + 2 * c->border)) < globalconf.screens[screen].snap)
-                geometry.x = area.x + area.width - c->geometry.width - 2 * c->border;
-            if(abs(geometry.y) < globalconf.screens[screen].snap + area.y && geometry.y > area.y)
-                geometry.y = area.y;
-            else if(abs((area.y + area.height) - (geometry.y + c->geometry.height + 2 * c->border)) < globalconf.screens[screen].snap)
-                geometry.y = area.y + area.height - c->geometry.height - 2 * c->border;
-            geometry.width = c->geometry.width;
-            geometry.height = c->geometry.height;
-            client_resize(c, geometry, False);
-            while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
+          case EnterNotify:
+            handle_event_enternotify(&ev);
+            break;
+          case MotionNotify:
+            if(c->isfloating || layout->arrange == layout_floating)
+            {
+                geometry.x = ocx + (ev.xmotion.x - x);
+                geometry.y = ocy + (ev.xmotion.y - y);
+                if(abs(geometry.x) < globalconf.screens[screen].snap + area.x && geometry.x > area.x)
+                    geometry.x = area.x;
+                else if(abs((area.x + area.width) - (geometry.x + c->geometry.width + 2 * c->border))
+                        < globalconf.screens[screen].snap)
+                    geometry.x = area.x + area.width - c->geometry.width - 2 * c->border;
+                if(abs(geometry.y) < globalconf.screens[screen].snap + area.y && geometry.y > area.y)
+                    geometry.y = area.y;
+                else if(abs((area.y + area.height) - (geometry.y + c->geometry.height + 2 * c->border))
+                        < globalconf.screens[screen].snap)
+                    geometry.y = area.y + area.height - c->geometry.height - 2 * c->border;
+                geometry.width = c->geometry.width;
+                geometry.height = c->geometry.height;
+                client_resize(c, geometry, False);
+                while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
+            }
             break;
         }
     }
@@ -165,7 +176,8 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     if(XGrabPointer(globalconf.display, RootWindow(globalconf.display,
                                                    get_phys_screen(c->screen)),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    None, globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
+                    RootWindow(globalconf.display,get_phys_screen(c->screen)),
+                    globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
 
     if(curtags[0]->layout->arrange == layout_tileleft)
@@ -182,19 +194,19 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
         switch (ev.type)
         {
-        case ButtonRelease:
+          case ButtonRelease:
             XUngrabPointer(globalconf.display, CurrentTime);
             return;
-        case ConfigureRequest:
+          case ConfigureRequest:
             handle_event_configurerequest(&ev);
             break;
-        case Expose:
+          case Expose:
             handle_event_expose(&ev);
             break;
-        case MapRequest:
+          case MapRequest:
             handle_event_maprequest(&ev);
             break;
-        case MotionNotify:
+          case MotionNotify:
             if(layout->arrange == layout_floating || c->isfloating)
             {
                 if((geometry.width = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
