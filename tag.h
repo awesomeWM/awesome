@@ -25,7 +25,7 @@
 #include "structs.h"
 
 /** Check if a client is tiled */
-#define IS_TILED(client, screen)            (client && !client->isfloating && client_isvisible(client, screen))
+#define IS_TILED(client, screen)            (client && !client->isfloating && !client->ismax && client_isvisible(client, screen))
 
 Tag * tag_new(const char *, Layout *, double, int, int);
 void tag_view(Tag *, Bool);
