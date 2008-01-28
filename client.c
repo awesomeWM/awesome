@@ -233,9 +233,9 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     c->screen = get_screen_bycoord(wa->x, wa->y);
 
-    screen_geom = get_display_area(phys_screen,
-                                   globalconf.screens[c->screen].statusbar,
-                                   &globalconf.screens[c->screen].padding);
+    screen_geom = get_screen_area(phys_screen,
+                                  globalconf.screens[screen].statusbar,
+                                  &globalconf.screens[screen].padding);
     /* Initial values */
     c->win = w;
     c->geometry.x = c->f_geometry.x = c->m_geometry.x = MAX(wa->x, screen_geom.x);
