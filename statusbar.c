@@ -75,7 +75,7 @@ statusbar_draw(Statusbar *statusbar)
     int phys_screen = get_phys_screen(statusbar->screen);
     Widget *widget, *last_drawn = NULL;
     int left = 0, right = 0;
-    Area rectangle = { 0, 0, 0, 0 };
+    Area rectangle = { 0, 0, 0, 0, NULL };
     Drawable d;
 
     /* don't waste our time */

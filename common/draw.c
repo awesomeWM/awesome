@@ -321,7 +321,7 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 Area
 draw_get_image_size(const char *filename)
 {
-    Area size = { -1, -1, -1, -1 };
+    Area size = { -1, -1, -1, -1, NULL };
     cairo_surface_t *surface;
     cairo_status_t cairo_st;
 
@@ -426,6 +426,69 @@ draw_color_new(Display *disp, int phys_screen, const char *colstr)
         eprint("awesome: error, cannot allocate color '%s'\n", colstr);
 
     return screenColor;
+}
+
+/** Remove a area from a list of them,
+ * spliting the space between several area that
+ * can overlaps
+ * \param head list head
+ * \param elem area to remove
+ */
+void
+area_list_remove(Area **head, Area *elem)
+{
+    Area *r, inter, *extra;
+
+    area_list_detach(head, elem);
+
+    for(r = *head; r; r = r->next)
+        if(area_intersect_area(*r, *elem))
+        {
+            /* remove it from the list */
+            area_list_detach(head, r);
+
+            inter = area_get_intersect_area(*r, *elem);
+
+            if(AREA_LEFT(inter) > AREA_LEFT(*r))
+            {
+                extra = p_new(Area, 1);
+                extra->x = r->x;
+                extra->y = r->y;
+                extra->width = AREA_LEFT(inter) - r->x;
+                extra->height = r->height;
+                area_list_push(head, extra);
+            }
+
+            if(AREA_TOP(inter) > AREA_TOP(*r))
+            {
+                extra = p_new(Area, 1);
+                extra->x = r->x;
+                extra->y = r->y;
+                extra->width = r->width;
+                extra->height = AREA_TOP(inter) - r->y;
+                area_list_push(head, extra);
+            }
+
+            if(AREA_RIGHT(inter) < AREA_RIGHT(*r))
+            {
+                extra = p_new(Area, 1);
+                extra->x = AREA_RIGHT(inter);
+                extra->y = r->y;
+                extra->width = AREA_RIGHT(*r) - AREA_RIGHT(inter);
+                extra->height = r->height;
+                area_list_push(head, extra);
+            }
+
+            if(AREA_BOTTOM(inter) < AREA_BOTTOM(*r))
+            {
+                extra = p_new(Area, 1);
+                extra->x = r->x;
+                extra->y = AREA_BOTTOM(inter);
+                extra->width = r->width;
+                extra->height = AREA_BOTTOM(*r) - AREA_BOTTOM(inter);
+                area_list_push(head, extra);
+            }
+        }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

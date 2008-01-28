@@ -113,7 +113,8 @@ taglist_draw(Widget *widget,
             Area rectangle = { widget->area.x + widget->area.width,
                                widget->area.y,
                                flagsize,
-                               flagsize };
+                               flagsize,
+                               NULL };
             draw_rectangle(ctx, rectangle, sel && is_client_tagged(sel, tag), colors[ColFG]);
         }
         widget->area.width += w;

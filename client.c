@@ -212,6 +212,47 @@ client_focus(Client *c, int screen, Bool from_mouse)
     globalconf.drop_events |= EnterWindowMask;
 }
 
+/** Compute smart coordinates for a client window
+ * \param geometry current/requested client geometry
+ * \param screen screen used
+ * \return new geometry
+ */
+static Area
+client_get_smart_geometry(Area geometry, int screen)
+{
+    Client *c;
+    Area newgeometry = { 0, 0, 0, 0, NULL };
+    Area *screen_geometry, *arealist = NULL, *r;
+
+    screen_geometry = p_new(Area, 1);
+
+    *screen_geometry = get_screen_area(screen,
+                                       globalconf.screens[screen].statusbar,
+                                       &globalconf.screens[screen].padding);
+
+    area_list_push(&arealist, screen_geometry);
+
+    for(c = globalconf.clients; c; c = c->next)
+        if(client_isvisible(c, screen))
+            area_list_remove(&arealist, &c->f_geometry);
+
+    newgeometry.x = geometry.x;
+    newgeometry.y = geometry.y;
+
+    for(r = arealist; r; r = r->next)
+        if(r->width >= geometry.width && r->height >= geometry.height
+           && r->width * r->height > newgeometry.width * newgeometry.height)
+            newgeometry = *r;
+
+    area_list_wipe(&arealist);
+
+    /* restore height and width */
+    newgeometry.width = geometry.width;
+    newgeometry.height = geometry.height;
+
+    return newgeometry;
+}
+
 /** Manage a new client
  * \param w The window
  * \param wa Window attributes
@@ -307,6 +348,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             client_setfloating(c, rettrans || c->isfixed);
     }
 
+    c->f_geometry = client_get_smart_geometry(c->f_geometry, c->screen);
+    
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
     /* handle xshape */

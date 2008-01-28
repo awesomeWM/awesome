@@ -26,6 +26,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
+#include "common/util.h"
+#include "common/list.h"
+
 typedef enum
 {
     AlignLeft,
@@ -34,14 +37,23 @@ typedef enum
     AlignCenter
 } Alignment;
 
-typedef struct
+typedef struct Area Area;
+struct Area
 {
-    /* Co-ords of upper left corner */
+    /** Co-ords of upper left corner */
     int x;
     int y;
     int width;
     int height;
-} Area;
+    Area *next;
+};
+
+DO_SLIST(Area, area, p_delete);
+
+#define AREA_LEFT(a)    ((a).x)
+#define AREA_TOP(a)     ((a).y)
+#define AREA_RIGHT(a)   ((a).x + (a).width)
+#define AREA_BOTTOM(a)    ((a).y + (a).height)
 
 /** Check if coordinates matches given area */
 static inline Bool
@@ -54,10 +66,25 @@ area_match_coords(Area geometry, int x, int y)
 }
 
 static inline Bool
-area_match_area(Area a, Area b)
+area_intersect_area(Area a, Area b)
 {
-    return (area_match_coords(a, b.x, b.y)
-            && area_match_coords(a, b.x + b.width, b.y + b.height));
+    return (b.x < a.x + a.width
+            && b.x + b.width > a.x
+            && b.y < a.y + a.height
+            && b.y + b.height > a.y);
+}
+
+static inline Area
+area_get_intersect_area(Area a, Area b)
+{
+    Area g;
+
+    g.x = MAX(a.x, b.x);
+    g.y = MAX(a.y, b.y);
+    g.width = MIN(a.x + a.width, b.x + b.width) - g.x;
+    g.height = MIN(a.y + a.height, b.y + b.height) - g.y;
+
+    return g;
 }
 
 typedef struct
@@ -88,6 +115,8 @@ Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short draw_textwidth(Display *, XftFont *, char *);
 Alignment draw_get_align(const char *);
 XColor draw_color_new(Display *, int, const char *);
+
+void area_list_remove(Area **, Area *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

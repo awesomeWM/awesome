@@ -82,11 +82,9 @@ get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
 Area
 get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 {
-    Area area;
+    Area area = { 0, 0, 0, 0, NULL };
     Statusbar *sb;
 
-    area.x = 0;
-    area.y = 0;
     area.width = DisplayWidth(globalconf.display, screen);
     area.height = DisplayHeight(globalconf.display, screen);
 
@@ -142,6 +140,7 @@ screen_xsi_to_area(XineramaScreenInfo si)
     a.y = si.y_org;
     a.width = si.width;
     a.height = si.height;
+    a.next = NULL;
 
     return a;
 }

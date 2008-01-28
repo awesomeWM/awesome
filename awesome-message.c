@@ -47,7 +47,8 @@ main(int argc, char **argv)
     const char *fg_color = "#000000";
     const char *bg_color = "#ffffff";
     int opt;
-    Area geometry = { 0, 0, 200, 50 }, icon_geometry = { -1, -1, -1, -1 };
+    Area geometry = { 0, 0, 200, 50, NULL },
+         icon_geometry = { -1, -1, -1, -1, NULL };
     XftFont *font = NULL;
 
     if(!(disp = XOpenDisplay(NULL)))

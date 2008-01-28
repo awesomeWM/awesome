@@ -151,7 +151,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     Client *c = globalconf.focus->client;
     Tag **curtags = get_current_tags(screen);
     Layout *layout = curtags[0]->layout;
-    Area area = { 0, 0, 0, 0 }, geometry;
+    Area area = { 0, 0, 0, 0 , NULL}, geometry;
     double mwfact;
 
     /* only handle floating and tiled layouts */
