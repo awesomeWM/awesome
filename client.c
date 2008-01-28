@@ -234,10 +234,17 @@ client_get_smart_geometry(Area geometry, int screen)
 
     for(c = globalconf.clients; c; c = c->next)
         if(client_isvisible(c, screen))
-            area_list_remove(&arealist, &c->f_geometry);
+        {
+            newgeometry = c->f_geometry;
+            newgeometry.width += 2 * c->border;
+            newgeometry.height += 2 * c->border;
+            area_list_remove(&arealist, &newgeometry);
+        }
 
     newgeometry.x = geometry.x;
     newgeometry.y = geometry.y;
+    newgeometry.width = 0;
+    newgeometry.height = 0;
 
     for(r = arealist; r; r = r->next)
         if(r->width >= geometry.width && r->height >= geometry.height
