@@ -128,7 +128,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 if((target = get_client_bywin(globalconf.clients, child))
                    && target != c)
                 {
-                    printf("swapping 0x%x 0x%d [%s] [%s]\n", c, target, c->name, target->name);
                     client_list_swap(&globalconf.clients, c, target);
                     globalconf.screens[c->screen].need_arrange = True;
                     layout_refresh();
