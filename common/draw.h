@@ -43,6 +43,23 @@ typedef struct
     int height;
 } Area;
 
+/** Check if coordinates matches given area */
+static inline Bool
+area_match_coords(Area geometry, int x, int y)
+{
+    return (x >= geometry.x
+            && y >= geometry.y
+            && x < geometry.x + geometry.width
+            && y < geometry.y + geometry.height);
+}
+
+static inline Bool
+area_match_area(Area a, Area b)
+{
+    return (area_match_coords(a, b.x, b.y)
+            && area_match_coords(a, b.x + b.width, b.y + b.height));
+}
+
 typedef struct
 {
     Display *display;
