@@ -236,10 +236,12 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                     mwfact = 1 - (double) (ev.xmotion.y - area.y) / area.height;
                 if(mwfact < 0.1) mwfact = 0.1;
                 else if(mwfact > 0.9) mwfact = 0.9;
-                if(fabs(curtags[0]->mwfact - mwfact) >= 0.05)
+                if(fabs(curtags[0]->mwfact - mwfact) >= 0.01)
                 {
                     curtags[0]->mwfact = mwfact;
                     globalconf.screens[screen].need_arrange = True;
+                    layout_refresh();
+                    while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
                 }
             }
 
