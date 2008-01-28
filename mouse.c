@@ -79,22 +79,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         switch (ev.type)
         {
           case ButtonRelease:
-            if(!c->isfloating && layout->arrange != layout_floating)
-            {
-                XQueryPointer(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                              &dummy, &child, &x, &y, &di, &di, &dui);
-                if((newscreen = get_screen_bycoord(x, y)) != screen)
-                {
-                    move_client_to_screen(c, newscreen, True);
-                    globalconf.screens[screen].need_arrange = True;
-                    globalconf.screens[newscreen].need_arrange = True;
-                }
-                if((target = get_client_bywin(globalconf.clients, child)) && target != c)
-                {
-                    client_list_swap(&globalconf.clients, c, target);
-                    globalconf.screens[screen].need_arrange = True;
-                }
-            }
             XUngrabPointer(globalconf.display, CurrentTime);
             return;
           case ConfigureRequest:
@@ -128,6 +112,27 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.height = c->geometry.height;
                 client_resize(c, geometry, False);
                 while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
+            }
+            else
+            {
+                XQueryPointer(globalconf.display,
+                              RootWindow(globalconf.display, phys_screen),
+                              &dummy, &child, &x, &y, &di, &di, &dui);
+                if((newscreen = get_screen_bycoord(x, y)) != c->screen)
+                {
+                    move_client_to_screen(c, newscreen, True);
+                    globalconf.screens[c->screen].need_arrange = True;
+                    globalconf.screens[newscreen].need_arrange = True;
+                    layout_refresh();
+                }
+                if((target = get_client_bywin(globalconf.clients, child))
+                   && target != c)
+                {
+                    printf("swapping 0x%x 0x%d [%s] [%s]\n", c, target, c->name, target->name);
+                    client_list_swap(&globalconf.clients, c, target);
+                    globalconf.screens[c->screen].need_arrange = True;
+                    layout_refresh();
+                }
             }
             break;
         }
