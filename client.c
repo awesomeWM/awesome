@@ -233,7 +233,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     c->screen = get_screen_bycoord(wa->x, wa->y);
 
-    screen_geom = get_screen_area(screen,
+    screen_geom = get_screen_area(c->screen,
                                   globalconf.screens[screen].statusbar,
                                   &globalconf.screens[screen].padding);
     /* Initial values */
