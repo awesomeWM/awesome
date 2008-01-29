@@ -54,9 +54,9 @@ main(int argc, char **argv)
     XftFont *font = NULL;
     int option_index = 0;
     static struct option long_options[] = {
-        {"help", 0, NULL, 0},
-        {"version", 0, NULL, 0},
-        {NULL, 0, NULL, 0}
+        {"help",    0, NULL, 'h'},
+        {"version", 0, NULL, 'v'},
+        {NULL,      0, NULL, 0}
     };
 
     if(!(disp = XOpenDisplay(NULL)))
@@ -66,11 +66,6 @@ main(int argc, char **argv)
                              long_options, &option_index)) != -1)
         switch(opt)
         {
-          case 0:
-            if (!a_strcmp("help", long_options[option_index].name))
-                exit_help(EXIT_SUCCESS);
-            else if (!a_strcmp("version", long_options[option_index].name))
-                eprint_version("awmessage");
           case 'v':
             eprint_version("awmessage");
             break;
