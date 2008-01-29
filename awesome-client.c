@@ -26,7 +26,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "awesome-client.h"
+#include "common/awclient.h"
 #include "common/awesome-version.h"
 #include "common/util.h"
 

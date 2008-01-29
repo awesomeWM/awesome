@@ -38,7 +38,7 @@
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xrandr.h>
 
-#include "common/awesome-version.h"
+#include "config.h"
 #include "awesome.h"
 #include "event.h"
 #include "layout.h"
@@ -49,8 +49,9 @@
 #include "client.h"
 #include "focus.h"
 #include "ewmh.h"
-#include "awesome-client.h"
+#include "common/awclient.h"
 #include "common/util.h"
+#include "common/awesome-version.h"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;

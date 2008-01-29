@@ -30,7 +30,6 @@
 #include "client.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
-#include "common/util.h"
 
 #define MOUSEMASK                       (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
 

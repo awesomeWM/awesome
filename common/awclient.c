@@ -24,7 +24,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "awesome-client.h"
+#include "common/awclient.h"
 #include "common/util.h"
 
 #define CONTROL_UNIX_SOCKET_PATH ".awesome_ctl."

@@ -18,15 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
  */
+
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/Xinerama.h>
 #include <sys/wait.h>
 
-#include "config.h"
+#include "structs.h"
 #include "xutil.h"
-#include "screen.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

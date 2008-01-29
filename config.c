@@ -25,6 +25,7 @@
 
 #include <X11/keysym.h>
 
+#include "config.h"
 #include "statusbar.h"
 #include "tag.h"
 #include "rules.h"
@@ -34,7 +35,6 @@
 #include "ewmh.h"
 #include "defconfig.h"
 #include "layouts/tile.h"
-#include "common/util.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc" 
 

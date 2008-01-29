@@ -29,7 +29,6 @@
 #include "client.h"
 #include "screen.h"
 #include "layouts/tile.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

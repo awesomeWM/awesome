@@ -23,7 +23,6 @@
 #include "widget.h"
 #include "statusbar.h"
 #include "event.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

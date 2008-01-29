@@ -38,7 +38,6 @@
 #include "rules.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

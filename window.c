@@ -24,7 +24,6 @@
 
 #include "structs.h"
 #include "window.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

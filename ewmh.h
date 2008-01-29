@@ -22,7 +22,7 @@
 #ifndef AWESOME_EWMH_H
 #define AWESOME_EWMH_H
 
-#include "config.h"
+#include "structs.h"
 
 typedef struct
 {

@@ -33,7 +33,6 @@
 #include "layouts/max.h"
 #include "layouts/fibonacci.h"
 #include "layouts/floating.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 
