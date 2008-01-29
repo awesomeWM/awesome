@@ -55,16 +55,6 @@ DO_SLIST(Area, area, p_delete);
 #define AREA_RIGHT(a)   ((a).x + (a).width)
 #define AREA_BOTTOM(a)    ((a).y + (a).height)
 
-/** Check if coordinates matches given area */
-static inline Bool
-area_match_coords(Area geometry, int x, int y)
-{
-    return (x >= geometry.x
-            && y >= geometry.y
-            && x < geometry.x + geometry.width
-            && y < geometry.y + geometry.height);
-}
-
 static inline Bool
 area_intersect_area(Area a, Area b)
 {
