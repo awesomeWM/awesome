@@ -218,11 +218,12 @@ client_focus(Client *c, int screen, Bool from_mouse)
  * \return new geometry
  */
 static Area
-client_get_smart_geometry(Area geometry, int screen)
+client_get_smart_geometry(Area geometry, int border, int screen)
 {
     Client *c;
     Area newgeometry = { 0, 0, 0, 0, NULL };
     Area *screen_geometry, *arealist = NULL, *r;
+    Bool found = False;
 
     screen_geometry = p_new(Area, 1);
 
@@ -249,13 +250,30 @@ client_get_smart_geometry(Area geometry, int screen)
     for(r = arealist; r; r = r->next)
         if(r->width >= geometry.width && r->height >= geometry.height
            && r->width * r->height > newgeometry.width * newgeometry.height)
+        {
+            found = True;
             newgeometry = *r;
+        }
 
-    area_list_wipe(&arealist);
+    /* we did not found a space with enough space for our size:
+     * just take the biggest available and go in */
+    if(!found)
+        for(r = arealist; r; r = r->next)
+           if(r->width * r->height > newgeometry.width * newgeometry.height)
+               newgeometry = *r;
 
     /* restore height and width */
     newgeometry.width = geometry.width;
     newgeometry.height = geometry.height;
+
+    /* fix offscreen */
+    if(AREA_RIGHT(newgeometry) > AREA_RIGHT(*screen_geometry))
+        newgeometry.x = screen_geometry->x + screen_geometry->width - newgeometry.width - 2 * border;
+
+    if(AREA_BOTTOM(newgeometry) > AREA_BOTTOM(*screen_geometry))
+        newgeometry.y = screen_geometry->y + screen_geometry->height - newgeometry.height - 2 * border;
+
+    area_list_wipe(&arealist);
 
     return newgeometry;
 }
@@ -355,7 +373,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             client_setfloating(c, rettrans || c->isfixed);
     }
 
-    c->f_geometry = client_get_smart_geometry(c->f_geometry, c->screen);
+    c->f_geometry = client_get_smart_geometry(c->f_geometry, c->border, c->screen);
     
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
