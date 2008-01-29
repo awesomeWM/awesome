@@ -29,11 +29,14 @@
 #include "common/util.h"
 #include "common/awesome-version.h"
 
+#define PROGNAME "awesome-message"
+
 static void __attribute__ ((noreturn))
 exit_help(int exit_code)
 {
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
-    fprintf(outfile, "Usage: awmessage [-x xcoord] [-y ycoord] [-f fgcolor] [-b bgcolor] <message> <icon>\n");
+    fprintf(outfile, "Usage: %s [-x xcoord] [-y ycoord] [-f fgcolor] [-b bgcolor] <message> <icon>\n",
+            PROGNAME);
     exit(exit_code);
 }
 
@@ -67,7 +70,7 @@ main(int argc, char **argv)
         switch(opt)
         {
           case 'v':
-            eprint_version("awmessage");
+            eprint_version(PROGNAME);
             break;
           case 'f':
             fg_color = a_strdup(optarg);
