@@ -262,8 +262,8 @@ This widget shows one or more progress-bars.
     Set width.
 *height*::
     Set height (i.e. 0.9 = 90%)
-*padding_left*::
-    Empty space on the left.
+*padding*::
+    Empty space on both sides.
 *x*::
     Horizontal offset (auto-alignment if not set).
 *y*::
@@ -471,7 +471,7 @@ screen <integer> [MULTI]
             gap = <integer>
             width = <integer>
             height = <float>
-            padding_left = <integer>
+            padding = <integer>
             x = <integer> y = <integer>
             mouse [MULTI]
             {

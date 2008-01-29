@@ -573,7 +573,7 @@ config_parse(const char *confpatharg)
         CFG_SEC((char *) "bar", widget_progressbar_bar_opts, CFGF_MULTI),
         CFG_INT((char *) "width", 100, CFGF_NONE),
         CFG_INT((char *) "gap", 2, CFGF_NONE),
-        CFG_INT((char *) "padding_left", 0, CFGF_NONE),
+        CFG_INT((char *) "padding", 0, CFGF_NONE),
         CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
         CFG_END()
     };

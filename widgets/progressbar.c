@@ -32,8 +32,8 @@ typedef struct
     int *percent;
     /** Width of the bars */
     int width;
-    /** Left padding */
-    int padding_left;
+    /** Padding */
+    int padding;
     /** Pixel between bars */
     int gap;
     /** Number of bars */
@@ -60,7 +60,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     if (!(d->bars))
         return 0;
 
-    width = d->width - d->padding_left;
+    width = d->width - 2 * d->padding;
 
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
@@ -73,7 +73,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y;
     pb_height = (int) ((widget->statusbar->height * d->height - (d->gap * (d->bars - 1))) / d->bars + 0.5); 
-    left_offset = widget->area.x + d->padding_left;
+    left_offset = widget->area.x + d->padding;
 
     for(i = 0; i < d->bars; i++)
     {
@@ -180,7 +180,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
 
     d->height = cfg_getfloat(config, "height");
     d->gap = cfg_getint(config, "gap");
-    d->padding_left = cfg_getint(config, "padding_left");
+    d->padding = cfg_getint(config, "padding");
 
     return w;
 }
