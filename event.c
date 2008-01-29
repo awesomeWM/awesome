@@ -115,7 +115,7 @@ handle_event_buttonpress(XEvent *e)
                 return;
             }
 
-    if((c = get_client_bywin(globalconf.clients, ev->window)))
+    if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
         client_focus(c, c->screen, False);
         if(CLEANMASK(ev->state) == NoSymbol
@@ -151,7 +151,7 @@ handle_event_configurerequest(XEvent * e)
     int old_screen;
     Area geometry;
 
-    if((c = get_client_bywin(globalconf.clients, ev->window)))
+    if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
         geometry = c->geometry;
 
@@ -212,7 +212,7 @@ handle_event_destroynotify(XEvent * e)
     Client *c;
     XDestroyWindowEvent *ev = &e->xdestroywindow;
 
-    if((c = get_client_bywin(globalconf.clients, ev->window)))
+    if((c = client_get_bywin(globalconf.clients, ev->window)))
         client_unmanage(c);
 }
 
@@ -226,7 +226,7 @@ handle_event_enternotify(XEvent * e)
     if(ev->mode != NotifyNormal)
         return;
 
-    if((c = get_client_bywin(globalconf.clients, ev->window)))
+    if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
         window_grabbuttons(get_phys_screen(c->screen), c->win);
         if(globalconf.screens[c->screen].sloppy_focus)
@@ -325,7 +325,7 @@ handle_event_maprequest(XEvent *e)
         return;
     if(wa.override_redirect)
         return;
-    if(!get_client_bywin(globalconf.clients, ev->window))
+    if(!client_get_bywin(globalconf.clients, ev->window))
     {
         for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
         if(screen == 0 && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
@@ -344,14 +344,14 @@ handle_event_propertynotify(XEvent * e)
 
     if(ev->state == PropertyDelete)
         return;                 /* ignore */
-    if((c = get_client_bywin(globalconf.clients, ev->window)))
+    if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
         switch (ev->atom)
         {
           case XA_WM_TRANSIENT_FOR:
             XGetTransientForHint(e->xany.display, c->win, &trans);
             if(!c->isfloating
-               && (c->isfloating = (get_client_bywin(globalconf.clients, trans) != NULL)))
+               && (c->isfloating = (client_get_bywin(globalconf.clients, trans) != NULL)))
                 globalconf.screens[c->screen].need_arrange = True;
             break;
           case XA_WM_NORMAL_HINTS:
@@ -372,7 +372,7 @@ handle_event_unmapnotify(XEvent * e)
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
 
-    if((c = get_client_bywin(globalconf.clients, ev->window))
+    if((c = client_get_bywin(globalconf.clients, ev->window))
        && ev->event == RootWindow(e->xany.display, get_phys_screen(c->screen))
        && ev->send_event && window_getstate(c->win) == NormalState)
         client_unmanage(c);
@@ -382,7 +382,7 @@ void
 handle_event_shape(XEvent * e)
 {
     XShapeEvent *ev = (XShapeEvent *) e;
-    Client *c = get_client_bywin(globalconf.clients, ev->window);
+    Client *c = client_get_bywin(globalconf.clients, ev->window);
 
     if(c)
         window_setshape(get_phys_screen(c->screen), c->win);

@@ -25,8 +25,8 @@
 #include "structs.h"
 
 Bool client_isvisible(Client *, int);
-Client * get_client_bywin(Client *, Window);
-Client * get_client_byname(Client *, char *);
+Client * client_get_bywin(Client *, Window);
+Client * client_get_byname(Client *, char *);
 void client_focus(Client *, int, Bool);
 void client_ban(Client *);
 void client_unban(Client *);

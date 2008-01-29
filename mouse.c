@@ -125,7 +125,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                     globalconf.screens[newscreen].need_arrange = True;
                     layout_refresh();
                 }
-                if((target = get_client_bywin(globalconf.clients, child))
+                if((target = client_get_bywin(globalconf.clients, child))
                    && target != c)
                 {
                     client_list_swap(&globalconf.clients, c, target);

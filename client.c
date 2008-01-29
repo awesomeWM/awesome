@@ -85,7 +85,7 @@ client_loadprops(Client * c, int screen)
  * \return True if client has WM_DELETE_WINDOW
  */
 static Bool
-isprotodel(Display *disp, Window win)
+client_isprotodel(Display *disp, Window win)
 {
     int i, n;
     Atom *protocols;
@@ -107,7 +107,7 @@ isprotodel(Display *disp, Window win)
  * \return client
  */
 Client *
-get_client_bywin(Client *list, Window w)
+client_get_bywin(Client *list, Window w)
 {
     Client *c;
 
@@ -121,7 +121,7 @@ get_client_bywin(Client *list, Window w)
  * \return first matching client
  */
 Client *
-get_client_byname(Client *list, char *name)
+client_get_byname(Client *list, char *name)
 {
     Client *c;
 
@@ -345,7 +345,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
          * XGetTransientForHint returns 1 on success
          */
         if((rettrans = XGetTransientForHint(globalconf.display, w, &trans))
-           && (t = get_client_bywin(globalconf.clients, trans)))
+           && (t = client_get_bywin(globalconf.clients, trans)))
             for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
                 if(is_client_tagged(t, tag))
                     tag_client(c, tag);
@@ -840,7 +840,7 @@ client_kill(Client *c)
 {
     XEvent ev;
 
-    if(isprotodel(globalconf.display, c->win))
+    if(client_isprotodel(globalconf.display, c->win))
     {
         ev.type = ClientMessage;
         ev.xclient.window = c->win;

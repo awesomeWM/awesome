@@ -134,7 +134,7 @@ uicb_focus_client_byname(int screen, char *arg)
     if(arg)
     {
         curtags = get_current_tags(screen);
-        if((c = get_client_byname(globalconf.clients, arg)))
+        if((c = client_get_byname(globalconf.clients, arg)))
            for(tag = curtags; *tag; tag++)
                if(is_client_tagged(c, *tag))
                    client_focus(c, screen, False);
