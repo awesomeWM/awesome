@@ -108,7 +108,7 @@ layout_refresh(void)
 Layout *
 get_current_layout(int screen)
 {
-    Tag **curtags = get_current_tags(screen);
+    Tag **curtags = tags_get_current(screen);
     Layout *l = curtags[0]->layout;
     p_delete(&curtags);
     return l;
@@ -172,7 +172,7 @@ uicb_tag_setlayout(int screen, char *arg)
 
     if(arg)
     {
-        curtags = get_current_tags(screen);
+        curtags = tags_get_current(screen);
         for(i = 0; l && l != curtags[0]->layout; i++, l = l->next);
         p_delete(&curtags);
 

@@ -31,7 +31,7 @@ Tag * tag_new(const char *, Layout *, double, int, int);
 void tag_view(Tag *, Bool);
 void tag_view_byindex(int, int, Bool);
 void tag_push_to_screen(Tag *, int);
-Tag ** get_current_tags(int);
+Tag ** tags_get_current(int);
 void tag_client(Client *, Tag *);
 void untag_client(Client *, Tag *);
 Bool is_client_tagged(Client *, Tag *);

@@ -799,7 +799,7 @@ uicb_client_moveresize(int screen, char *arg)
     Window dummy;
     Area area;
     Client *sel = globalconf.focus->client;
-    Tag **curtags = get_current_tags(screen);
+    Tag **curtags = tags_get_current(screen);
 
     if(curtags[0]->layout->arrange != layout_floating)
         if(!sel || !sel->isfloating || sel->isfixed || !arg)

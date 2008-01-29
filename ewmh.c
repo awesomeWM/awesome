@@ -183,7 +183,7 @@ void
 ewmh_update_net_current_desktop(int phys_screen)
 {
     CARD32 count = 0;
-    Tag *tag, **curtags = get_current_tags(phys_screen);
+    Tag *tag, **curtags = tags_get_current(phys_screen);
 
     for(tag = globalconf.screens[phys_screen].tags; tag != curtags[0]; tag = tag->next)
         count++;

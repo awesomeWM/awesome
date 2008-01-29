@@ -153,7 +153,7 @@ tag_client_with_rule(Client *c, Rule *r)
 }
 
 Tag **
-get_current_tags(int screen)
+tags_get_current(int screen)
 {
     Tag *tag, **tags = NULL;
     int n = 1;
@@ -373,7 +373,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 {
-    Tag *tag, **curtags = get_current_tags(screen);
+    Tag *tag, **curtags = tags_get_current(screen);
 
     tag = tag_list_next_cycle(&globalconf.screens[screen].tags, curtags[0]);
 
@@ -391,7 +391,7 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
 {
-    Tag *tag, **curtags = get_current_tags(screen);
+    Tag *tag, **curtags = tags_get_current(screen);
 
     tag = tag_list_prev_cycle(&globalconf.screens[screen].tags, curtags[0]);
 

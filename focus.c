@@ -91,7 +91,7 @@ focus_get_latest_client_for_tags(Tag **t, int nindex)
 Client *
 focus_get_current_client(int screen)
 {
-    Tag **curtags = get_current_tags(screen);
+    Tag **curtags = tags_get_current(screen);
     Client *sel = focus_get_latest_client_for_tags(curtags, 0);
     p_delete(&curtags);
 
@@ -116,7 +116,7 @@ uicb_focus_history(int screen, char *arg)
 
         if(i < 0)
         {
-            curtags = get_current_tags(screen);
+            curtags = tags_get_current(screen);
             c = focus_get_latest_client_for_tags(curtags, i);
             p_delete(&curtags);
             if(c)
@@ -133,7 +133,7 @@ uicb_focus_client_byname(int screen, char *arg)
 
     if(arg)
     {
-        curtags = get_current_tags(screen);
+        curtags = tags_get_current(screen);
         if((c = client_get_byname(globalconf.clients, arg)))
            for(tag = curtags; *tag; tag++)
                if(is_client_tagged(c, *tag))
