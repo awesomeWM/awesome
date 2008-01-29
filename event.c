@@ -134,7 +134,7 @@ handle_event_buttonpress(XEvent *e)
                                 &wdummy, &x, &y, &i,
                                 &i, &udummy))
             {
-                screen = get_screen_bycoord(x, y);
+                screen = screen_get_bycoord(x, y);
                 handle_mouse_button_press(screen, ev->button, ev->state,
                                           globalconf.buttons.root, NULL);
                 return;
@@ -272,10 +272,10 @@ handle_event_keypress(XEvent * e)
         {
             /* if screen is 0, we are on first Zaphod screen or on the
              * only screen in Xinerama, so we can ask for a better screen
-             * number with get_screen_bycoord: we'll get 0 in Zaphod mode
+             * number with screen_get_bycoord: we'll get 0 in Zaphod mode
              * so it's the same, or maybe the real Xinerama screen */
             if(screen == 0)
-                screen = get_screen_bycoord(x, y);
+                screen = screen_get_bycoord(x, y);
             break;
         }
 
@@ -329,7 +329,7 @@ handle_event_maprequest(XEvent *e)
         for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
         if(screen == 0 && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
                                         &dummy, &dummy, &x, &y, &d, &d, &m))
-            screen = get_screen_bycoord(x, y);
+            screen = screen_get_bycoord(x, y);
         client_manage(ev->window, &wa, screen);
     }
 }

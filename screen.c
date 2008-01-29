@@ -36,7 +36,7 @@ extern AwesomeConf globalconf;
  * \return Area
  */
 Area
-get_screen_area(int screen, Statusbar *statusbar, Padding *padding)
+screen_get_area(int screen, Statusbar *statusbar, Padding *padding)
 {
     Area area;
     Statusbar *sb;
@@ -110,7 +110,7 @@ get_display_area(int screen, Statusbar *statusbar, Padding *padding)
  * \return screen number or DefaultScreen of disp on no match
  */
 int
-get_screen_bycoord(int x, int y)
+screen_get_bycoord(int x, int y)
 {
     int i;
     Area area;
@@ -121,7 +121,7 @@ get_screen_bycoord(int x, int y)
 
     for(i = 0; i < globalconf.nscreen; i++)
     {
-        area = get_screen_area(i, NULL, NULL);
+        area = screen_get_area(i, NULL, NULL);
         if((x < 0 || (x >= area.x && x < area.x + area.width))
            && (y < 0 || (y >= area.y && y < area.y + area.height)))
             return i;
@@ -245,8 +245,8 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
         Area new_geometry, new_f_geometry;
         new_f_geometry = c->f_geometry;
 
-        to = get_screen_area(c->screen, NULL, NULL);
-        from = get_screen_area(old_screen, NULL, NULL);
+        to = screen_get_area(c->screen, NULL, NULL);
+        from = screen_get_area(old_screen, NULL, NULL);
 
         /* compute new coords in new screen */
         new_f_geometry.x = (c->f_geometry.x - from.x) + to.x;
@@ -317,7 +317,7 @@ move_mouse_pointer_to_screen(int screen)
 {
     if(XineramaIsActive(globalconf.display))
     {
-        Area area = get_screen_area(screen, NULL, NULL);
+        Area area = screen_get_area(screen, NULL, NULL);
         XWarpPointer(globalconf.display,
                      None,
                      DefaultRootWindow(globalconf.display),

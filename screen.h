@@ -1,7 +1,7 @@
 /*
  * screen.h - screen management header
  *
- * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@
 
 #include "structs.h"
 
-Area get_screen_area(int, Statusbar *, Padding *);
+Area screen_get_area(int, Statusbar *, Padding *);
 Area get_display_area(int, Statusbar *, Padding *);
-int get_screen_bycoord(int, int);
+int screen_get_bycoord(int, int);
 void screen_build_screens(void);
 int get_phys_screen(int);
 void move_client_to_screen(Client *, int, Bool);

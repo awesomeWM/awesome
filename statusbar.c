@@ -39,11 +39,11 @@ statusbar_update_position(Statusbar *statusbar)
 
     /* Top and Bottom Statusbar have prio */
     if(statusbar->position == Top || statusbar->position == Bottom)
-        area = get_screen_area(statusbar->screen,
+        area = screen_get_area(statusbar->screen,
                                NULL,
                                &globalconf.screens[statusbar->screen].padding);
     else
-       area = get_screen_area(statusbar->screen,
+       area = screen_get_area(statusbar->screen,
                               globalconf.screens[statusbar->screen].statusbar,
                               &globalconf.screens[statusbar->screen].padding);
 
@@ -184,7 +184,7 @@ statusbar_init(Statusbar *statusbar)
 {
     Statusbar *sb;
     int phys_screen = get_phys_screen(statusbar->screen);
-    Area area = get_screen_area(statusbar->screen,
+    Area area = screen_get_area(statusbar->screen,
                                 globalconf.screens[statusbar->screen].statusbar,
                                 &globalconf.screens[statusbar->screen].padding);
 

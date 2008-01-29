@@ -116,7 +116,7 @@ _tile(int screen, const Position position)
     Client *c;
     Tag **curtags = tags_get_current(screen);
 
-    area = get_screen_area(screen,
+    area = screen_get_area(screen,
                            globalconf.screens[screen].statusbar,
                             &globalconf.screens[screen].padding);
 

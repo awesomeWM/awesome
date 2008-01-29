@@ -83,7 +83,7 @@ scan()
                 if(wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState)
                 {
                     if(screen == 0)
-                        real_screen = get_screen_bycoord(wa.x, wa.y);
+                        real_screen = screen_get_bycoord(wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }
@@ -96,7 +96,7 @@ scan()
                    && (wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState))
                 {
                     if(screen == 0)
-                        real_screen = get_screen_bycoord(wa.x, wa.y);
+                        real_screen = screen_get_bycoord(wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }

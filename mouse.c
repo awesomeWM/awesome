@@ -57,7 +57,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     /* go above everybody */
     XMapRaised(globalconf.display, c->win);
 
-    area = get_screen_area(c->screen,
+    area = screen_get_area(c->screen,
                            globalconf.screens[screen].statusbar,
                            &globalconf.screens[screen].padding);
 
@@ -119,7 +119,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 XQueryPointer(globalconf.display,
                               RootWindow(globalconf.display, phys_screen),
                               &dummy, &child, &x, &y, &di, &di, &dui);
-                if((newscreen = get_screen_bycoord(x, y)) != c->screen)
+                if((newscreen = screen_get_bycoord(x, y)) != c->screen)
                 {
                     move_client_to_screen(c, newscreen, True);
                     globalconf.screens[c->screen].need_arrange = True;
@@ -176,7 +176,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
             if(!c) return;
 
-            area = get_screen_area(screen,
+            area = screen_get_area(screen,
                                    globalconf.screens[c->screen].statusbar,
                                    &globalconf.screens[c->screen].padding);
         }
