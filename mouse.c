@@ -32,6 +32,8 @@
 #include "layouts/tile.h"
 #include "common/util.h"
 
+#define MOUSEMASK                       (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
+
 extern AwesomeConf globalconf;
 
 /** Move client with mouse

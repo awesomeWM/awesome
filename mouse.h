@@ -24,8 +24,6 @@
 
 #include "uicb.h"
 
-#define MOUSEMASK                       (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
-
 Uicb uicb_client_movemouse;
 Uicb uicb_client_resizemouse;
 
