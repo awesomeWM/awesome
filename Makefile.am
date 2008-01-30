@@ -36,6 +36,7 @@ WIDGETS += widgets/graph.c
 
 
 doc_DATA   += README
+doc_DATA   += UPGRADE
 
 EXTRA_DIST += LICENSE
 
@@ -130,7 +131,8 @@ awesome_SOURCES = \
 	widget.c widget.h \
 	ewmh.c ewmh.h \
 	common/list.h structs.h \
-	common/awclient.h
+	common/awclient.h \
+	common/configopts.h
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XRANDR_LIBS) $(XINERAMA_LIBS)
@@ -151,6 +153,14 @@ awesome_message_SOURCES = \
 	awesome-message.c
 
 awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS)
+
+bin_PROGRAMS += awesome-check
+awesome_check_SOURCES = \
+	awesome-check.c common/configopts.h \
+	common/util.h common/util.c \
+	common/awesome-version.h common/awesome-version.c
+
+awesome_check_LDADD = $(CONFUSE_LIBS)
 
 EXTRA_DIST += awesome.1.txt
 man_MANS   += awesome.1
