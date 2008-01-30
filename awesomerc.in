@@ -283,7 +283,7 @@ keys
     {
         modkey = {"Mod4"}
         key = "Escape"
-        command = "tag_view_prev_selected"
+        command = "tag_prev_selected"
     }
     key
     {
