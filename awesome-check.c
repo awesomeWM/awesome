@@ -87,6 +87,9 @@ main(int argc, char *argv[])
       case CFG_PARSE_ERROR:
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
         break;
+      case CFG_SUCCESS:
+        printf("Configuration file OK.\n");
+        break;
     }
 
     return ret;
