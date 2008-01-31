@@ -230,6 +230,9 @@ draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
 {
     cairo_set_line_width(ctx->cr, 1.0);
     cairo_set_source_rgb(ctx->cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+
+    cairo_new_sub_path(ctx->cr); /* don't draw from the old reference point to.. */
+
     if(filled)
     {
         cairo_arc (ctx->cr, x + r, y + r, r, 0, 2 * M_PI);
