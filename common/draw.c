@@ -44,9 +44,19 @@ draw_context_new(Display *disp, int phys_screen, int width, int height, Drawable
     d->depth = DefaultDepth(disp, phys_screen);
     d->visual = DefaultVisual(disp, phys_screen);
     d->drawable = dw;
+    d->surface = cairo_xlib_surface_create(disp, dw, d->visual, width, height);
+    d->cr = cairo_create(d->surface);
 
     return d;
 };
+
+void
+draw_context_delete(DrawCtx *ctx)
+{
+    cairo_surface_destroy(ctx->surface);
+    cairo_destroy(ctx->cr);
+    p_delete(&ctx);
+}
 
 /** Draw text into a draw context
  * \param x x coord
@@ -72,8 +82,6 @@ draw_text(DrawCtx *ctx,
     static char buf[256];
     size_t len, olen;
     cairo_font_face_t *font_face;
-    cairo_surface_t *surface;
-    cairo_t *cr;
 
     draw_rectangle(ctx, area, True, bg);
 
@@ -82,12 +90,10 @@ draw_text(DrawCtx *ctx,
     if(!len)
         return;
 
-    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
-    cr = cairo_create(surface);
     font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
-    cairo_set_font_face(cr, font_face);
-    cairo_set_font_size(cr, font->height);
-    cairo_set_source_rgb(cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
+    cairo_set_font_face(ctx->cr, font_face);
+    cairo_set_font_size(ctx->cr, font->height);
+    cairo_set_source_rgb(ctx->cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
 
     if(len >= sizeof(buf))
         len = sizeof(buf) - 1;
@@ -110,22 +116,21 @@ draw_text(DrawCtx *ctx,
     switch(align)
     {
       case AlignLeft:
-        cairo_move_to(cr, area.x + padding, area.y + font->ascent + (ctx->height - font->height) / 2);
+        cairo_move_to(ctx->cr, area.x + padding, area.y + font->ascent + (ctx->height - font->height) / 2);
         break;
       case AlignRight:
-        cairo_move_to(cr, area.x + (area.width - nw) + padding,
+        cairo_move_to(ctx->cr, area.x + (area.width - nw) + padding,
                       area.y + font->ascent + (ctx->height - font->height) / 2);
         break;
       default:
-        cairo_move_to(cr, area.x + ((area.width - nw) / 2) + padding,
+        cairo_move_to(ctx->cr, area.x + ((area.width - nw) / 2) + padding,
                       area.y + font->ascent + (ctx->height - font->height) / 2);
         break;
     }
-    cairo_show_text(cr, buf);
+
+    cairo_show_text(ctx->cr, buf);
 
     cairo_font_face_destroy(font_face);
-    cairo_destroy(cr);
-    cairo_surface_destroy(surface);
 }
 
 /** Draw rectangle
@@ -137,27 +142,18 @@ draw_text(DrawCtx *ctx,
 void
 draw_rectangle(DrawCtx *ctx, Area geometry, Bool filled, XColor color)
 {
-    cairo_surface_t *surface;
-    cairo_t *cr;
-
-    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
-    cr = cairo_create (surface);
-
-    cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
-    cairo_set_line_width(cr, 1.0);
-    cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+    cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
+    cairo_set_line_width(ctx->cr, 1.0);
+    cairo_set_source_rgb(ctx->cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
     if(filled)
     {
-        cairo_rectangle(cr, geometry.x, geometry.y, geometry.width, geometry.height);
-        cairo_fill(cr);
+        cairo_rectangle(ctx->cr, geometry.x, geometry.y, geometry.width, geometry.height);
+        cairo_fill(ctx->cr);
     }
     else
-        cairo_rectangle(cr, geometry.x + 1, geometry.y, geometry.width - 1, geometry.height - 1);
+        cairo_rectangle(ctx->cr, geometry.x + 1, geometry.y, geometry.width - 1, geometry.height - 1);
 
-    cairo_stroke(cr);
-
-    cairo_destroy(cr);
-    cairo_surface_destroy(surface);
+    cairo_stroke(ctx->cr);
 }
 
 /* draw_graph functions */
@@ -187,6 +183,7 @@ void
 draw_graph(cairo_t *cr, int x, int y, int w, int *from, int *to, int cur_index, XColor color)
 {
     int i;
+
     cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
 
     i = -1;
@@ -199,6 +196,7 @@ draw_graph(cairo_t *cr, int x, int y, int w, int *from, int *to, int cur_index, 
         if (--cur_index < 0)
             cur_index = w - 1;
     }
+
     cairo_stroke(cr);
 }
 void
@@ -240,38 +238,59 @@ draw_graph_line(cairo_t *cr, int x, int y, int w, int *to, int cur_index, XColor
 void
 draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
 {
-    cairo_surface_t *surface;
-    cairo_t *cr;
-
-    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
-    cr = cairo_create (surface);
-    cairo_set_line_width(cr, 1.0);
-    cairo_set_source_rgb(cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+    cairo_set_line_width(ctx->cr, 1.0);
+    cairo_set_source_rgb(ctx->cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
     if(filled)
     {
-        cairo_arc (cr, x + r, y + r, r, 0, 2 * M_PI);
-        cairo_fill(cr);
+        cairo_arc (ctx->cr, x + r, y + r, r, 0, 2 * M_PI);
+        cairo_fill(ctx->cr);
     }
     else
-        cairo_arc (cr, x + r, y + r, r - 1, 0, 2 * M_PI);
+        cairo_arc (ctx->cr, x + r, y + r, r - 1, 0, 2 * M_PI);
 
-    cairo_stroke(cr);
-
-    cairo_destroy(cr);
-    cairo_surface_destroy(surface);
+    cairo_stroke(ctx->cr);
 }
 
 void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
                                int wanted_h, unsigned char *data)
 {
     double ratio;
-    cairo_surface_t *surface, *source;
     cairo_t *cr;
+    cairo_surface_t *source;
 
-    surface = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h, 0);
-    cr = cairo_create (surface);
+    cr = cairo_create(ctx->surface);
     if(wanted_h > 0 && h > 0)
+    {
+        ratio = (double) wanted_h / (double) h;
+        cairo_scale(cr, ratio, ratio);
+        cairo_set_source_surface(cr, source, x / ratio, y / ratio);
+    }
+    else
+        cairo_set_source_surface(cr, source, x, y);
+
+    cairo_paint(cr);
+
+    cairo_surface_destroy(source);
+}
+
+void
+draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
+{
+    double ratio;
+    int h;
+    cairo_surface_t *source;
+    cairo_t *cr;
+    cairo_status_t cairo_st;
+
+    source = cairo_image_surface_create_from_png(filename);
+    if((cairo_st = cairo_surface_status(source)))
+    {
+        warn("failed to draw image %s: %s\n", filename, cairo_status_to_string(cairo_st));
+        return;
+    }
+    cr = cairo_create (ctx->surface);
+    if(wanted_h > 0 && (h = cairo_image_surface_get_height(source)) > 0)
     {
         ratio = (double) wanted_h / (double) h;
         cairo_scale(cr, ratio, ratio);
@@ -283,39 +302,6 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
 
     cairo_destroy(cr);
     cairo_surface_destroy(source);
-    cairo_surface_destroy(surface);
-}
-
-void
-draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
-{
-    double ratio;
-    int h;
-    cairo_surface_t *surface, *source;
-    cairo_t *cr;
-    cairo_status_t cairo_st;
-
-    source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
-    surface = cairo_image_surface_create_from_png(filename);
-    if((cairo_st = cairo_surface_status(surface)))
-    {
-        warn("failed to draw image %s: %s\n", filename, cairo_status_to_string(cairo_st));
-        return;
-    }
-    cr = cairo_create (source);
-    if(wanted_h > 0 && (h = cairo_image_surface_get_height(surface)) > 0)
-    {
-        ratio = (double) wanted_h / (double) h;
-        cairo_scale(cr, ratio, ratio);
-        cairo_set_source_surface(cr, surface, x / ratio, y / ratio);
-    }
-    else
-        cairo_set_source_surface(cr, surface, x, y);
-    cairo_paint(cr);
-
-    cairo_destroy(cr);
-    cairo_surface_destroy(source);
-    cairo_surface_destroy(surface);
 }
 
 Area

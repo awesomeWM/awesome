@@ -150,7 +150,7 @@ statusbar_draw(Statusbar *statusbar)
           break;
     }
 
-    p_delete(&ctx);
+    draw_context_delete(ctx);
 
     statusbar_display(statusbar);
 }

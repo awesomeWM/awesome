@@ -86,9 +86,13 @@ typedef struct
     int height;
     int phys_screen;
     int depth;
+    cairo_t *cr;
+    cairo_surface_t *surface;
 } DrawCtx;
 
 DrawCtx *draw_context_new(Display *, int, int, int, Drawable);
+void draw_context_delete(DrawCtx *);
+
 void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, const char *, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
 
