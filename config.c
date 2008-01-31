@@ -36,6 +36,7 @@
 #include "defconfig.h"
 #include "layouts/tile.h"
 #include "common/configopts.h"
+#include "common/configopts.h"
 
 /* Permit to use mouse with many more buttons */
 #ifndef Button6
@@ -46,6 +47,7 @@
 #endif
 
 extern AwesomeConf globalconf;
+extern cfg_opt_t awesome_opts[];
 
 /** Link a name to a key symbol */
 typedef struct
@@ -426,55 +428,6 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->padding.bottom = cfg_getint(cfg_padding, "bottom");
     virtscreen->padding.left = cfg_getint(cfg_padding, "left");
     virtscreen->padding.right = cfg_getint(cfg_padding, "right");
-}
-
-static char *
-config_file(void)
-{
-    const char *homedir;
-    char * confpath;
-    ssize_t confpath_len;
-
-    homedir = getenv("HOME");
-    confpath_len = a_strlen(homedir) + a_strlen(AWESOME_CONFIG_FILE) + 2;
-    confpath = p_new(char, confpath_len);
-    a_strcpy(confpath, confpath_len, homedir);
-    a_strcat(confpath, confpath_len, "/");
-    a_strcat(confpath, confpath_len, AWESOME_CONFIG_FILE);
-
-    return confpath;
-}
-
-int
-config_check(const char *confpatharg)
-{
-    cfg_t *cfg;
-    int ret;
-    char *confpath;
-
-    cfg = cfg_init(awesome_opts, CFGF_NONE);
-
-    if(confpatharg)
-        confpath = a_strdup(confpatharg);
-    else
-        confpath = config_file();
-
-    switch((ret = cfg_parse(cfg, confpath)))
-    {
-      case CFG_FILE_ERROR:
-        perror("awesome: parsing configuration file failed");
-        break;
-      case CFG_PARSE_ERROR:
-        cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
-        break;
-      case CFG_SUCCESS:
-        printf("Configuration file OK.\n");
-        break;
-    }
-
-    p_delete(&confpath);
-
-    return ret;
 }
 
 /** Parse configuration file and initialize some stuff

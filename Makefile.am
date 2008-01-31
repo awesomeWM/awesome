@@ -132,7 +132,7 @@ awesome_SOURCES = \
 	ewmh.c ewmh.h \
 	common/list.h structs.h \
 	common/awclient.h \
-	common/configopts.h
+	common/configopts.h common/configopts.c
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XRANDR_LIBS) $(XINERAMA_LIBS)
