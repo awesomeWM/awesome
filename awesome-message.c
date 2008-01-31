@@ -21,6 +21,7 @@
 
 #define _GNU_SOURCE
 #include <getopt.h>
+
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -122,7 +123,7 @@ main(int argc, char **argv)
     Bool running = True;
     Area geometry = { 0, 0, 200, 50, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL };
-    int opt, option_index = 0;
+    int opt;
     char *configfile = NULL;
     static struct option long_options[] =
     {
@@ -137,7 +138,7 @@ main(int argc, char **argv)
     globalconf.display = disp;
 
     while((opt = getopt_long(argc, argv, "vhf:b:x:y:n:c:",
-                             long_options, &option_index)) != -1)
+                             long_options, NULL)) != -1)
         switch(opt)
         {
           case 'v':

@@ -19,6 +19,9 @@
  *
  */
 
+#define _GNU_SOURCE
+#include <getopt.h>
+
 #include <errno.h>
 #include <locale.h>
 #include <stdio.h>
@@ -214,30 +217,36 @@ main(int argc, char *argv[])
     int i, cmdlen;
     event_handler **handler;
     struct sockaddr_un *addr;
-    int args_ok = 1;
+    int opt;
+    static struct option long_options[] = {
+        {"help",    0, NULL, 'h'},
+        {"version", 0, NULL, 'v'},
+        {NULL,      0, NULL, 0}
+    };
 
     /* check args */
-    /* XXX switch to getopt */
-    if(argc >= 2)
-    {
-        args_ok = 0;
-        if(!a_strcmp("-v", argv[1]) || !a_strcmp("--version", argv[1]))
-	    eprint_version("awesome");
-        else if(!a_strcmp("-h", argv[1]) || !a_strcmp("--help", argv[1]))
-            exit_help(EXIT_SUCCESS);
-        else if(!a_strcmp("-c", argv[1]))
+    while((opt = getopt_long(argc, argv, "vhkc:",
+                             long_options, NULL)) != -1)
+        switch(opt)
         {
-            if(a_strlen(argv[2]))
-                confpath = argv[2], args_ok = 1;
+          case 'v':
+            eprint_version("awesome");
+            break;
+          case 'h':
+            exit_help(EXIT_SUCCESS);
+            break;
+          case 'c':
+            if(a_strlen(optarg))
+                confpath = optarg;
             else
                 eprint("-c option requires a file name\n");
-        }
-        else if(!a_strcmp("-k", argv[1]))
+            break;
+          case 'k':
             return config_check(confpath);
-        else
-            exit_help(EXIT_FAILURE);
-    }
-    if(!args_ok)
+            break;
+        }
+
+    if(argc - optind < 1)
         exit_help(EXIT_FAILURE);
 
     /* Text won't be printed correctly otherwise */
