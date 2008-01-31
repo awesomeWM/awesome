@@ -20,7 +20,6 @@
  *
  */
 
-#include <cairo.h>
 #include "common/draw.h"
 #include "widget.h"
 #include "screen.h"
@@ -74,8 +73,6 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     int z, y, x, tmp;
     Data *d = widget->data;
     Area rectangle;
-    cairo_surface_t *surface;
-    cairo_t *cr;
 
     if(d->width < 1 || !d->data_items)
         return 0;
@@ -106,7 +103,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     rectangle.height -= 2;
     draw_rectangle(ctx, rectangle, True, d->bg);
 
-    draw_graph_init(ctx, &surface, &cr); /* setup drawing surface etc */
+    draw_graph_setup(ctx); /* setup some drawing options */
 
     /* draw style = top */
     for(z = 0; z < d->filltop_total; z++)
@@ -124,7 +121,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
             d->draw_from[y] = d->box_height - tmp;
             d->draw_to[y] = d->box_height - d->filltop[z][y];
         }
-        draw_graph(cr,
+        draw_graph(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->draw_from, d->draw_to, d->index,
                 d->filltop_color[z]);
@@ -146,7 +143,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
             d->draw_from[y] = tmp;
         }
 
-        draw_graph(cr,
+        draw_graph(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->draw_from, d->fillbottom[z], d->index,
                 d->fillbottom_color[z]);
@@ -155,13 +152,11 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     /* draw style = line */
     for(z = 0; z < d->drawline_total; z++)
     {
-        draw_graph_line(cr,
+        draw_graph_line(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->drawline[z], d->index,
                 d->drawline_color[z]);
     }
-
-    draw_graph_end(surface, cr);
 
     widget->area.width = d->width;
     widget->area.height = widget->statusbar->height;
@@ -314,19 +309,19 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
         if ((type = cfg_getstr(cfg, "style")))
         {
-            if(!strncmp(type, "bottom", sizeof("bottom")))
+            if(!a_strncmp(type, "bottom", sizeof("bottom")))
             {
                 d->fillbottom[d->fillbottom_total] = d->lines[i];
                 d->fillbottom_color[d->fillbottom_total] = tmp_color;
                 d->fillbottom_total++;
             }
-            else if (!strncmp(type, "top", sizeof("top")))
+            else if (!a_strncmp(type, "top", sizeof("top")))
             {
                 d->filltop[d->filltop_total] = d->lines[i];
                 d->filltop_color[d->filltop_total] = tmp_color;
                 d->filltop_total++;
             }
-            else if (!strncmp(type, "line", sizeof("line")))
+            else if (!a_strncmp(type, "line", sizeof("line")))
             {
                 d->drawline[d->drawline_total] = d->lines[i];
                 d->drawline_color[d->drawline_total] = tmp_color;

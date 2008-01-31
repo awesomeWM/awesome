@@ -96,10 +96,9 @@ void draw_context_delete(DrawCtx *);
 void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, const char *, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
 
-void draw_graph_init(DrawCtx *, cairo_surface_t **, cairo_t **);
-void draw_graph(cairo_t *, int, int, int, int *, int *, int, XColor);
-void draw_graph_end(cairo_surface_t *, cairo_t *);
-void draw_graph_line(cairo_t *, int, int, int, int *, int, XColor);
+void draw_graph_setup(DrawCtx *);
+void draw_graph(DrawCtx *, int, int, int, int *, int *, int, XColor);
+void draw_graph_line(DrawCtx *, int, int, int, int *, int, XColor);
 
 void draw_circle(DrawCtx *, int, int, int, Bool, XColor);
 void draw_image(DrawCtx *, int, int, int, const char *);
