@@ -452,7 +452,7 @@ config_check(const char *confpatharg)
     int ret;
     char *confpath;
 
-    cfg = cfg_init(opts, CFGF_NONE);
+    cfg = cfg_init(awesome_opts, CFGF_NONE);
 
     if(confpatharg)
         confpath = a_strdup(confpatharg);
@@ -496,7 +496,7 @@ config_parse(const char *confpatharg)
 
     globalconf.configpath = a_strdup(confpath);
 
-    cfg = cfg_init(opts, CFGF_NONE);
+    cfg = cfg_init(awesome_opts, CFGF_NONE);
 
     ret = cfg_parse(cfg, confpath);
 
@@ -516,7 +516,7 @@ config_parse(const char *confpatharg)
     {
         warn("using default compile-time configuration\n");
         cfg_free(cfg);
-        cfg = cfg_init(opts, CFGF_NONE);
+        cfg = cfg_init(awesome_opts, CFGF_NONE);
         cfg_parse_buf(cfg, AWESOME_DEFAULT_CONFIG);
     }
 

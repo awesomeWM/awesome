@@ -1,3 +1,4 @@
+#include <confuse.h>
 #include "rules.h"
 
 #define AWESOME_CONFIG_FILE ".awesomerc"
@@ -247,7 +248,7 @@ static cfg_opt_t mouse_opts[] =
     CFG_SEC((char *) "client", mouse_generic_opts, CFGF_MULTI),
     CFG_END()
 };
-static cfg_opt_t opts[] =
+static cfg_opt_t awesome_opts[] =
 {
     CFG_SEC((char *) "screen", screen_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
