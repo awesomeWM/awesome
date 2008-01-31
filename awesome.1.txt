@@ -43,8 +43,12 @@ OPTIONS
 -------
 -v | --version::
     prints version information to standard output, then exits.
+-h | --help::
+    prints help information, then exits.
 -c::
     use an alternate configuration file instead of $HOME/.awesomerc.
+-k::
+    check configuration file syntax.
 
 DEFAULTS MOUSE BINDINGS
 -----------------------

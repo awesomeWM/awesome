@@ -154,14 +154,6 @@ awesome_message_SOURCES = \
 
 awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS)
 
-bin_PROGRAMS += awesome-check
-awesome_check_SOURCES = \
-	awesome-check.c common/configopts.h \
-	common/util.h common/util.c \
-	common/awesome-version.h common/awesome-version.c
-
-awesome_check_LDADD = $(CONFUSE_LIBS)
-
 EXTRA_DIST += awesome.1.txt
 man_MANS   += awesome.1
 

@@ -189,7 +189,7 @@ static void __attribute__ ((noreturn))
 exit_help(int exit_code)
 {
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
-    fprintf(outfile, "Usage: awesome [-v | -h | -c configfile]\n");
+    fprintf(outfile, "Usage: awesome [ -v | -h | -c configfile | -k ]\n");
     exit(exit_code);
 }
 
@@ -216,6 +216,7 @@ main(int argc, char *argv[])
     int args_ok = 1;
 
     /* check args */
+    /* XXX switch to getopt */
     if(argc >= 2)
     {
         args_ok = 0;
@@ -230,6 +231,8 @@ main(int argc, char *argv[])
             else
                 eprint("-c option requires a file name\n");
         }
+        else if(!a_strcmp("-k", argv[1]))
+            return config_check(confpath);
         else
             exit_help(EXIT_FAILURE);
     }

@@ -26,6 +26,8 @@
 
 DO_SLIST(Key, key, p_delete);
 DO_SLIST(Button, button, p_delete);
+
+int config_check(const char *);
 void config_parse(const char *);
 
 #endif
