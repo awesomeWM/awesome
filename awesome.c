@@ -246,9 +246,6 @@ main(int argc, char *argv[])
             break;
         }
 
-    if(argc - optind < 1)
-        exit_help(EXIT_FAILURE);
-
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
 
