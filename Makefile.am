@@ -150,9 +150,10 @@ awesome_message_SOURCES = \
         common/draw.c common/draw.h \
 	common/util.h common/util.c \
 	common/awesome-version.h common/awesome-version.c \
+	common/configopts.h common/configopts.c \
 	awesome-message.c
 
-awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS)
+awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS)
 
 EXTRA_DIST += awesome.1.txt
 man_MANS   += awesome.1

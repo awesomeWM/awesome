@@ -23,21 +23,93 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+#include <confuse.h>
+
 #include <X11/Xlib.h>
 
 #include "common/swindow.h"
 #include "common/util.h"
 #include "common/awesome-version.h"
+#include "common/configopts.h"
 
 #define PROGNAME "awesome-message"
+
+/** Import awesome config file format */
+extern cfg_opt_t awesome_opts[];
+
+/** awesome-run global configuration structure */
+typedef struct
+{
+    /** Display ref */
+    Display *display;
+    /** Font to use */
+    XftFont *font;
+    /** Foreground color */
+    XColor fg;
+    /** Background color */
+    XColor bg;
+} AwesomeMsgConf;
+
+static AwesomeMsgConf globalconf;
 
 static void __attribute__ ((noreturn))
 exit_help(int exit_code)
 {
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
-    fprintf(outfile, "Usage: %s [-x xcoord] [-y ycoord] [-f fgcolor] [-b bgcolor] <message> <icon>\n",
+    fprintf(outfile, "Usage: %s [-x xcoord] [-y ycoord] <message> <icon>\n",
             PROGNAME);
     exit(exit_code);
+}
+
+static void
+config_parse(const char *confpatharg)
+{
+    int ret;
+    char *confpath;
+    cfg_t *cfg, *cfg_screen, *cfg_general, *cfg_colors;
+
+    if(!confpatharg)
+        confpath = config_file();
+    else
+        confpath = a_strdup(confpatharg);
+
+    cfg = cfg_init(awesome_opts, CFGF_NONE);
+
+    switch((ret = cfg_parse(cfg, confpath)))
+    {
+      case CFG_FILE_ERROR:
+        perror("awesome-message: parsing configuration file failed");
+        break;
+      case CFG_PARSE_ERROR:
+        cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
+        break;
+    }
+
+    if(ret)
+        exit(ret);
+
+    /* get global screen section */
+    cfg_screen = cfg_getsec(cfg, "screen");
+
+    if(!cfg_screen)
+        eprint("parsing configuration file failed, no screen section found\n");
+
+    /* get colors and general section */
+    cfg_general = cfg_getsec(cfg_screen, "general");
+    cfg_colors = cfg_getsec(cfg_screen, "colors");
+
+    /* colors */
+    globalconf.fg = draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
+                                   cfg_getstr(cfg_colors, "normal_fg"));
+    globalconf.bg = draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
+                                   cfg_getstr(cfg_colors, "normal_bg"));
+
+    /* font */
+    globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),
+                                      cfg_getstr(cfg_general, "font"));
+
+    p_delete(&confpath);
 }
 
 int
@@ -46,17 +118,14 @@ main(int argc, char **argv)
     Display *disp;
     SimpleWindow *sw;
     DrawCtx *ctx;
-    XColor fg, bg;
     XEvent ev;
     Bool running = True;
-    const char *fg_color = "#000000";
-    const char *bg_color = "#ffffff";
-    int opt;
     Area geometry = { 0, 0, 200, 50, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL };
-    XftFont *font = NULL;
-    int option_index = 0;
-    static struct option long_options[] = {
+    int opt, option_index = 0;
+    char *configfile = NULL;
+    static struct option long_options[] =
+    {
         {"help",    0, NULL, 'h'},
         {"version", 0, NULL, 'v'},
         {NULL,      0, NULL, 0}
@@ -65,18 +134,14 @@ main(int argc, char **argv)
     if(!(disp = XOpenDisplay(NULL)))
         eprint("unable to open display");
 
-    while((opt = getopt_long(argc, argv, "vhf:b:x:y:n:",
+    globalconf.display = disp;
+
+    while((opt = getopt_long(argc, argv, "vhf:b:x:y:n:c:",
                              long_options, &option_index)) != -1)
         switch(opt)
         {
           case 'v':
             eprint_version(PROGNAME);
-            break;
-          case 'f':
-            fg_color = a_strdup(optarg);
-            break;
-          case 'b':
-            bg_color = a_strdup(optarg);
             break;
           case 'x':
             geometry.x = atoi(optarg);
@@ -87,19 +152,18 @@ main(int argc, char **argv)
           case 'h':
             exit_help(EXIT_SUCCESS);
             break;
-          case 'n':
-            font = XftFontOpenName(disp, DefaultScreen(disp), optarg);
+          case 'c':
+            configfile = a_strdup(optarg);
             break;
         }
 
     if(argc - optind < 1)
         exit_help(EXIT_FAILURE);
 
-    if(!font)
-        font = XftFontOpenName(disp, DefaultScreen(disp), "vera-12");
+    config_parse(configfile);
 
-    geometry.width = draw_textwidth(disp, font, argv[optind]);
-    geometry.height = font->height * 1.5;
+    geometry.width = draw_textwidth(disp, globalconf.font, argv[optind]);
+    geometry.height = globalconf.font->height * 1.5;
 
     if(argc - optind >= 2)
     {
@@ -107,7 +171,8 @@ main(int argc, char **argv)
         if(icon_geometry.width <= 0 || icon_geometry.height <= 0)
             eprint("invalid image\n");
         else
-            geometry.width += icon_geometry.width * ((double) font->height / (double) icon_geometry.height);
+            geometry.width += icon_geometry.width
+                * ((double) globalconf.font->height / (double) icon_geometry.height);
     }
 
     sw = simplewindow_new(disp, DefaultScreen(disp),
@@ -118,17 +183,13 @@ main(int argc, char **argv)
     ctx = draw_context_new(disp, DefaultScreen(disp),
                            geometry.width, geometry.height, sw->drawable);
 
-
-    bg = draw_color_new(disp, DefaultScreen(disp), bg_color);
-    fg = draw_color_new(disp, DefaultScreen(disp), fg_color);
-
     geometry.x = geometry.y = 0;
     draw_text(ctx, geometry, AlignRight,
-              0, font, argv[optind], fg, bg);
+              0, globalconf.font, argv[optind], globalconf.fg, globalconf.bg);
 
     if(icon_geometry.width > 0 && icon_geometry.height > 0)
-        draw_image(ctx, 0, (geometry.height / 2) - (font->height / 2),
-                   font->height,
+        draw_image(ctx, 0, (geometry.height / 2) - (globalconf.font->height / 2),
+                   globalconf.font->height,
                    argv[optind + 1]);
 
     p_delete(&ctx);
