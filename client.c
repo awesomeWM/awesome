@@ -374,7 +374,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             client_setfloating(c, rettrans || c->isfixed);
     }
 
-    if(!(flags & (USSize | PSize)))
+    if(!(flags & (USPosition | PPosition)))
         c->f_geometry = client_get_smart_geometry(c->f_geometry, c->border, c->screen);
     
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
