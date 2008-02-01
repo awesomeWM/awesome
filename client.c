@@ -294,6 +294,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Rule *rule;
     Area screen_geom;
     int phys_screen = get_phys_screen(screen);
+    long flags;
 
     c = p_new(Client, 1);
 
@@ -324,7 +325,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     client_updatetitle(c);
 
     /* update hints */
-    client_updatesizehints(c);
+    flags = client_updatesizehints(c);
     client_updatewmhints(c);
 
     /* First check clients hints */
@@ -373,7 +374,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             client_setfloating(c, rettrans || c->isfixed);
     }
 
-    c->f_geometry = client_get_smart_geometry(c->f_geometry, c->border, c->screen);
+    if(!(flags & (USSize | PSize)))
+        c->f_geometry = client_get_smart_geometry(c->f_geometry, c->border, c->screen);
     
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
@@ -604,14 +606,15 @@ client_updatewmhints(Client *c)
     }
 }
 
-void
+long
 client_updatesizehints(Client *c)
 {
     long msize;
     XSizeHints size;
 
-    if(!XGetWMNormalHints(globalconf.display, c->win, &size, &msize) || !size.flags)
-        size.flags = PSize;
+    if(!XGetWMNormalHints(globalconf.display, c->win, &size, &msize))
+        return 0L;
+
     if(size.flags & PBaseSize)
     {
         c->basew = size.base_width;
@@ -666,6 +669,8 @@ client_updatesizehints(Client *c)
     if(c->maxw && c->minw && c->maxh && c->minh
        && c->maxw == c->minw && c->maxh == c->minh)
         c->isfixed = True;
+
+    return size.flags;
 }
 
 /** Returns True if a client is tagged

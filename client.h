@@ -34,7 +34,7 @@ void client_manage(Window, XWindowAttributes *, int);
 Bool client_resize(Client *, Area, Bool);
 void client_unmanage(Client *);
 void client_updatewmhints(Client *);
-void client_updatesizehints(Client *);
+long client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *); 
 void client_kill(Client *);
