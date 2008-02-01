@@ -402,9 +402,18 @@ main(int argc, char *argv[])
         {
             while(XPending(dpy))
             {
-                XNextEvent(dpy, &ev);
-                if(handler[ev.type])
-                    handler[ev.type](&ev);       /* call handler */
+                /* Unmap are prio otherwise we risk to SetInputFocus on unmapped
+                 * windows */
+                while(XCheckMaskEvent(dpy, UnmapNotify, &ev))
+                    if(handler[ev.type])
+                        handler[ev.type](&ev);
+
+                if(XPending(dpy))
+                {
+                    XNextEvent(dpy, &ev);
+                    if(handler[ev.type])
+                        handler[ev.type](&ev);
+                }
     
                 /* drop events requested to */
                 if(globalconf.drop_events)
