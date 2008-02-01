@@ -179,9 +179,10 @@ exit_on_signal(int sig __attribute__ ((unused)))
  * default error handler, which may call exit.
  */
 static int
-xerror(Display * edpy, XErrorEvent * ee)
+xerror(Display *edpy, XErrorEvent *ee)
 {
-    if(ee->error_code == BadWindow)
+    if(ee->error_code == BadWindow
+       || (ee->error_code == BadMatch && ee->request_code == X_SetInputFocus))
         return 0;
     warn("fatal error: request code=%d, error code=%d\n", ee->request_code, ee->error_code);
     return xerrorxlib(edpy, ee);        /* may call exit */
@@ -402,18 +403,9 @@ main(int argc, char *argv[])
         {
             while(XPending(dpy))
             {
-                /* Unmap are prio otherwise we risk to SetInputFocus on unmapped
-                 * windows */
-                while(XCheckMaskEvent(dpy, UnmapNotify, &ev))
-                    if(handler[ev.type])
-                        handler[ev.type](&ev);
-
-                if(XPending(dpy))
-                {
-                    XNextEvent(dpy, &ev);
-                    if(handler[ev.type])
-                        handler[ev.type](&ev);
-                }
+                XNextEvent(dpy, &ev);
+                if(handler[ev.type])
+                    handler[ev.type](&ev);
     
                 /* drop events requested to */
                 if(globalconf.drop_events)
