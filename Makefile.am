@@ -35,7 +35,9 @@ WIDGETS += widgets/graph.c
 
 
 doc_DATA   += README
+
 doc_DATA   += UPGRADE
+EXTRA_DIST += UPGRADE
 
 EXTRA_DIST += LICENSE
 EXTRA_DIST += UPGRADE
