@@ -245,7 +245,7 @@ cfg_opt_t rules_opts[] =
 };
 cfg_opt_t key_opts[] =
 {
-    CFG_STR_LIST((char *) "modkey", (char *) "{Mod4}", CFGF_NONE),
+    CFG_STR_LIST((char *) "modkey", (char *) "", CFGF_NONE),
     CFG_STR((char *) "key", (char *) "None", CFGF_NONE),
     CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     CFG_STR((char *) "arg", NULL, CFGF_NONE),
@@ -253,7 +253,7 @@ cfg_opt_t key_opts[] =
 };
 cfg_opt_t keylist_opts[] =
 {
-    CFG_STR_LIST((char *) "modkey", (char *) "{Mod4}", CFGF_NONE),
+    CFG_STR_LIST((char *) "modkey", (char *) "", CFGF_NONE),
     CFG_STR_LIST((char *) "keylist", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     CFG_STR_LIST((char *) "arglist", NULL, CFGF_NONE),
