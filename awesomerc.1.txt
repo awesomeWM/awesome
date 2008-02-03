@@ -252,6 +252,8 @@ This widget shows one or more progress-bars.
     Draws a bar; Options: fg, bg, bordercolor.
 *fg*::
     Foreground color.
+*fg_full*::
+    Foreground color of a full bar (as gradient).
 *bg*::
     Background color.
 *bordercolor*::
@@ -467,7 +469,7 @@ screen <integer> [MULTI]
         }
         progressbar <identifier> [MULTI]
         {
-            bar { fg = <color> bg = <color> bordercolor = <color> } [MULTI]
+            bar { fg = <color> fg_full = <color> bg = <color> bordercolor = <color> } [MULTI]
             gap = <integer>
             width = <integer>
             height = <float>
