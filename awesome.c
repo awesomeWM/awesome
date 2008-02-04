@@ -194,7 +194,12 @@ static void __attribute__ ((noreturn))
 exit_help(int exit_code)
 {
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
-    fprintf(outfile, "Usage: awesome [ -v | -h | -c configfile | -k ]\n");
+    fprintf(outfile,
+"Usage: awesome [OPTION]\n\
+  -h, --help             show help\n\
+  -v, --version          show version\n\
+  -c, --config FILE      configuration file to use\n\
+  -k, --check            check configuration file syntax\n");
     exit(exit_code);
 }
 
@@ -224,6 +229,8 @@ main(int argc, char *argv[])
     {
         {"help",    0, NULL, 'h'},
         {"version", 0, NULL, 'v'},
+        {"check",   0, NULL, 'k'},
+        {"config",  0, NULL, 'c'},
         {NULL,      0, NULL, 0}
     };
 
