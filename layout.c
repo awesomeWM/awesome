@@ -56,6 +56,9 @@ arrange(int screen)
 {
     Client *c;
     Layout *curlay = get_current_layout(screen);
+    unsigned int dui;
+    int di, x, y;
+    Window rootwin, childwin;
 
     for(c = globalconf.clients; c; c = c->next)
     {
@@ -83,6 +86,13 @@ arrange(int screen)
      * are focused, then set the focus on this window */
     if((c = focus_get_current_client(screen)) && !globalconf.focus->client)
         client_focus(c, screen, False);
+
+    /* check that the mouse is on a window or not */
+    if(XQueryPointer(globalconf.display, RootWindow(globalconf.display,
+                                                    get_phys_screen(screen)),
+                     &rootwin, &childwin, &x, &y, &di, &di, &dui)
+       && (rootwin == None || childwin == None || childwin == rootwin))
+        window_root_grabbuttons(screen);
 
     /* reset status */
     globalconf.screens[screen].need_arrange = False;
