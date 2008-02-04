@@ -22,9 +22,55 @@
 #include <cairo.h>
 #include <cairo-ft.h>
 #include <cairo-xlib.h>
+
+#include <langinfo.h>
+#include <iconv.h>
+#include <errno.h>
+
 #include <math.h>
+
 #include "draw.h"
 #include "common/util.h"
+
+static char *
+draw_iso2utf8(char *iso)
+{
+    iconv_t iso2utf8;
+    size_t len, utf8len;
+    char *utf8;
+
+    if(!(len = a_strlen(iso)))
+        return NULL;
+
+    if(!a_strcmp(nl_langinfo(CODESET), "UTF-8"))
+        return iso;
+
+    iso2utf8 = iconv_open("UTF-8", nl_langinfo(CODESET));
+    if(iso2utf8 == (iconv_t) -1)
+    {
+        if(errno == EINVAL)
+            warn("unable to convert text from %s to UTF-8, not available",
+                 nl_langinfo(CODESET));
+        else
+            perror("awesome: unable to convert text");
+
+        return NULL;
+    }
+
+    utf8len = (3 * len) / 2 + 1;
+    utf8 = p_new(char, utf8len);
+
+    if(iconv(iso2utf8, &iso, &len, &utf8, &utf8len) == (size_t) -1)
+    {
+        perror("awesome: text conversion failed");
+        return NULL;
+    }
+
+    if(iconv_close(iso2utf8))
+        warn("error closing iconv");
+
+    return utf8;
+}
 
 /** Get a draw context
  * \param phys_screen physical screen id
@@ -75,7 +121,7 @@ draw_text(DrawCtx *ctx,
           Area area,
           Alignment align,
           int padding,
-          XftFont *font, const char *text,
+          XftFont *font, char *text,
           XColor fg, XColor bg)
 {
     int nw = 0;
@@ -89,6 +135,9 @@ draw_text(DrawCtx *ctx,
 
     if(!len)
         return;
+
+    /* try to convert text to UTF-8 */
+    text = draw_iso2utf8(text);
 
     font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
     cairo_set_font_face(ctx->cr, font_face);

@@ -93,7 +93,7 @@ typedef struct
 DrawCtx *draw_context_new(Display *, int, int, int, Drawable);
 void draw_context_delete(DrawCtx *);
 
-void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, const char *, XColor fg, XColor bg);
+void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, char *, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
 void draw_rectangle_gradient(DrawCtx *, Area, int, Bool, XColor, XColor);
 
