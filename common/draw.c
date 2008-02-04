@@ -151,9 +151,42 @@ draw_rectangle(DrawCtx *ctx, Area geometry, Bool filled, XColor color)
         cairo_fill(ctx->cr);
     }
     else
+    {
         cairo_rectangle(ctx->cr, geometry.x + 1, geometry.y, geometry.width - 1, geometry.height - 1);
+        cairo_stroke(ctx->cr);
+    }
+}
 
-    cairo_stroke(ctx->cr);
+/* 'fullwidth' represents a full color-pattern range */
+void
+draw_rectangle_gradient(DrawCtx *ctx, Area geometry, int fullwidth, Bool filled,
+                        XColor color, XColor color_full)
+{
+    cairo_pattern_t *pat;
+
+    cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
+    cairo_set_line_width(ctx->cr, 1.0);
+
+    pat = cairo_pattern_create_linear(geometry.x, geometry.y, geometry.x + fullwidth, geometry.y);
+    cairo_pattern_add_color_stop_rgb(pat, 0, color.red / 65535.0,
+                                     color.green / 65535.0, color.blue / 65535.0);
+    cairo_pattern_add_color_stop_rgb(pat, 1, color_full.red / 65535.0,
+                                     color_full.green / 65535.0, color_full.blue / 65535.0);
+
+    cairo_set_source(ctx->cr, pat);
+
+    if(filled)
+    {
+        cairo_rectangle(ctx->cr, geometry.x, geometry.y, geometry.width, geometry.height);
+        cairo_fill(ctx->cr);
+    }
+    else
+    {
+        cairo_rectangle(ctx->cr, geometry.x + 1, geometry.y, geometry.width - 1, geometry.height - 1);
+        cairo_set_source(ctx->cr, pat);
+    }
+
+    cairo_pattern_destroy(pat);
 }
 
 /* draw_graph functions */
