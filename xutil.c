@@ -24,8 +24,8 @@
 #include <X11/extensions/Xinerama.h>
 #include <sys/wait.h>
 
-#include "structs.h"
 #include "xutil.h"
+#include "client.h"
 
 extern AwesomeConf globalconf;
 
@@ -37,7 +37,15 @@ extern AwesomeConf globalconf;
 void
 uicb_exec(int screen __attribute__ ((unused)), char *arg)
 {
+    Client *c;
     char path[PATH_MAX];
+
+    /* remap all clients since some WM won't handle them otherwise */
+    for(c = globalconf.clients; c; c = c->next)
+        client_unban(c);
+
+    XSync(globalconf.display, False);
+
     if(globalconf.display)
         close(ConnectionNumber(globalconf.display));
 

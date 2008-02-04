@@ -219,7 +219,9 @@ main(int argc, char *argv[])
     event_handler **handler;
     struct sockaddr_un *addr;
     int opt;
-    static struct option long_options[] = {
+    Client *c;
+    static struct option long_options[] =
+    {
         {"help",    0, NULL, 'h'},
         {"version", 0, NULL, 'v'},
         {NULL,      0, NULL, 0}
@@ -428,11 +430,18 @@ main(int argc, char *argv[])
         }
     }
 
+
     if(csfd > 0 && close(csfd))
         perror("error closing UNIX domain socket");
     if(unlink(addr->sun_path))
         perror("error unlinking UNIX domain socket");
     p_delete(&addr);
+
+    /* remap all clients since some WM won't handle them otherwise */
+    for(c = globalconf.clients; c; c = c->next)
+        client_unban(c);
+
+    XSync(globalconf.display, False);
 
     XCloseDisplay(dpy);
 
