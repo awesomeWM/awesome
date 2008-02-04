@@ -321,6 +321,7 @@ tag_view_only_byindex(int screen, int dindex)
 void
 tag_view(Tag *tag, Bool view)
 {
+    tag->was_selected = tag->selected;
     tag->selected = view;
     ewmh_update_net_current_desktop(get_phys_screen(tag->screen));
     widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
@@ -354,14 +355,9 @@ void
 uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
 {
     Tag *tag;
-    Bool t;
 
-    for(tag =  globalconf.screens[screen].tags; tag; tag = tag->next)
-    {
-        t = tag->selected;
+    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         tag_view(tag, tag->was_selected);
-        tag->was_selected = t;
-    }
 }
 
 /** View next tag
