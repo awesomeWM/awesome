@@ -147,6 +147,8 @@ client_updatetitle(Client *c)
 static void
 client_unfocus(Client *c)
 {
+    if(globalconf.screens[c->screen].opacity_unfocused != -1)
+        window_settrans(c->win, globalconf.screens[c->screen].opacity_unfocused);
     XSetWindowBorder(globalconf.display, c->win,
                      globalconf.screens[c->screen].colors_normal[ColBorder].pixel);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -191,6 +193,8 @@ client_focus(Client *c, int screen, Bool from_mouse)
     {
         /* save sel in focus history */
         focus_add_client(c);
+        if(globalconf.screens[c->screen].opacity_unfocused != -1)
+            window_settrans(c->win, globalconf.screens[screen].opacity_unfocused);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].colors_selected[ColBorder].pixel);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);

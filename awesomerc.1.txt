@@ -338,6 +338,7 @@ screen <integer> [MULTI]
         font = <font>
         new_become_master = <boolean>
         new_get_focus = <boolean>
+        opacity_unfocused = <integer>
         resize_hints = <boolean>
         sloppy_focus = <boolean>
         sloppy_focus_raise = <boolean>

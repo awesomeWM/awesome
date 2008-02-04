@@ -270,6 +270,8 @@ typedef struct
     XColor colors_selected[ColLast];
     /** Urgency colors */
     XColor colors_urgent[ColLast];
+    /** Transparency of unfocused clients */
+    int opacity_unfocused;
     /** Tag list */
     Tag *tags;
     /** Layout list */
