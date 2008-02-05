@@ -283,6 +283,10 @@ This widget shows a graph.
     Re-scales when input > max (see below).
 *fg*::
     Foreground color.
+*fg_middle*::
+    Color at the middle of the graph
+*fg_end*::
+    Color at the end of the graph
 *style*::
     bottom (fills to bottom with fg), top, or line.
 *mouse*::
@@ -490,8 +494,8 @@ screen <integer> [MULTI]
         {
             data [MULTI]
             {
-                scale = <boolean> max = <float> fg = <color>
-                style = <{bottom, top, line}>
+                scale = <boolean> max = <float> style = <{bottom, top, line}>
+                fg = <color> fg_middle = <color> fg_end = <color>
             }
             width = <integer>
             height = <float>
