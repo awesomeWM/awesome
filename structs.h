@@ -40,8 +40,8 @@ typedef enum
 /** Rules for floating rule */
 typedef enum
 {
-    Yes,
-    No,
+    No = False,
+    Yes = True,
     Auto
 } Fuzzy;
 
