@@ -153,6 +153,7 @@ cfg_opt_t widget_graph_opts[] =
 cfg_opt_t widget_progressbar_bar_opts[] =
 {
     CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
+    CFG_STR((char *) "fg_half", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "fg_full", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),

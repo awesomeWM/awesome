@@ -206,10 +206,18 @@ draw_rectangle(DrawCtx *ctx, Area geometry, Bool filled, XColor color)
     }
 }
 
-/* 'fullwidth' represents a full color-pattern range */
+/** Draw rectangle with gradient colors
+ * \param ctx Draw context
+ * \param geometry geometry
+ * \param fullwidth width of full bar in pixels
+ * \param filled filled rectangle?
+ * \param color color to use from 0%
+ * \param color_half color at 50%
+ * \param color_full color at 100%
+ */
 void
 draw_rectangle_gradient(DrawCtx *ctx, Area geometry, int fullwidth, Bool filled,
-                        XColor color, XColor color_full)
+                        XColor color, XColor * color_half, XColor * color_full)
 {
     cairo_pattern_t *pat;
 
@@ -219,8 +227,15 @@ draw_rectangle_gradient(DrawCtx *ctx, Area geometry, int fullwidth, Bool filled,
     pat = cairo_pattern_create_linear(geometry.x, geometry.y, geometry.x + fullwidth, geometry.y);
     cairo_pattern_add_color_stop_rgb(pat, 0, color.red / 65535.0,
                                      color.green / 65535.0, color.blue / 65535.0);
-    cairo_pattern_add_color_stop_rgb(pat, 1, color_full.red / 65535.0,
-                                     color_full.green / 65535.0, color_full.blue / 65535.0);
+    if(color_half)
+        cairo_pattern_add_color_stop_rgb(pat, 0.5, color_half->red / 65535.0,
+                                         color_half->green / 65535.0, color_half->blue / 65535.0);
+    if(color_full)
+        cairo_pattern_add_color_stop_rgb(pat, 1, color_full->red / 65535.0,
+                                         color_full->green / 65535.0, color_full->blue / 65535.0);
+    else
+        cairo_pattern_add_color_stop_rgb(pat, 1, color.red / 65535.0,
+                                         color.green / 65535.0, color.blue / 65535.0);
 
     cairo_set_source(ctx->cr, pat);
 
@@ -232,7 +247,7 @@ draw_rectangle_gradient(DrawCtx *ctx, Area geometry, int fullwidth, Bool filled,
     else
     {
         cairo_rectangle(ctx->cr, geometry.x + 1, geometry.y, geometry.width - 1, geometry.height - 1);
-        cairo_set_source(ctx->cr, pat);
+        cairo_stroke(ctx->cr);
     }
 
     cairo_pattern_destroy(pat);

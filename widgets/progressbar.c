@@ -42,8 +42,10 @@ typedef struct
     float height;
     /** Foreground color */
     XColor *fg;
+    /** Foreground color when bar is half-full */
+    XColor **pfg_half;
     /** Foreground color when bar is full */
-    XColor *fg_full;
+    XColor **pfg_full;
     /** Background color */
     XColor *bg;
     /** Border color */
@@ -74,7 +76,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
         widget->area.y = 0;
 
     margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y;
-    pb_height = (int) ((widget->statusbar->height * d->height - (d->gap * (d->bars - 1))) / d->bars + 0.5); 
+    pb_height = (int) ((widget->statusbar->height * d->height - (d->gap * (d->bars - 1))) / d->bars + 0.5);
     left_offset = widget->area.x + d->padding;
 
     for(i = 0; i < d->bars; i++)
@@ -94,7 +96,8 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             rectangle.y = margin_top + 1;
             rectangle.width = pwidth;
             rectangle.height = pb_height - 2;
-            draw_rectangle_gradient(ctx, rectangle, width - 2, True, d->fg[i], d->fg_full[i]);
+            draw_rectangle_gradient(ctx, rectangle, width - 2, True, d->fg[i],
+                                    d->pfg_half[i], d->pfg_full[i]);
         }
 
         if(width - 2 - pwidth > 0) /* not filled area */
@@ -155,7 +158,8 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     }
 
     d->fg = p_new(XColor, d->bars);
-    d->fg_full = p_new(XColor, d->bars);
+    d->pfg_full = p_new(XColor *, d->bars);
+    d->pfg_half = p_new(XColor *, d->bars);
     d->bg = p_new(XColor, d->bars);
     d->bordercolor = p_new(XColor, d->bars);
     d->percent = p_new(int, d->bars);
@@ -169,10 +173,17 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         else
             d->fg[i] = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
+        if((color = cfg_getstr(cfg, "fg_half")))
+        {
+            d->pfg_half[i] = p_new(XColor, 1);
+            *(d->pfg_half[i]) = draw_color_new(globalconf.display, phys_screen, color);
+        }
+
         if((color = cfg_getstr(cfg, "fg_full")))
-            d->fg_full[i] = draw_color_new(globalconf.display, phys_screen, color);
-        else
-            d->fg_full[i] = d->fg[i];
+        {
+            d->pfg_full[i] = p_new(XColor, 1);
+            *(d->pfg_full[i]) = draw_color_new(globalconf.display, phys_screen, color);
+        }
 
         if((color = cfg_getstr(cfg, "bg")))
             d->bg[i] = draw_color_new(globalconf.display, phys_screen, color);
@@ -183,8 +194,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
             d->bordercolor[i] = draw_color_new(globalconf.display, phys_screen, color);
         else
             d->bordercolor[i] = d->fg[i];
-
-    } 
+    }
 
     d->height = cfg_getfloat(config, "height");
     d->gap = cfg_getint(config, "gap");
