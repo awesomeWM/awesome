@@ -1002,17 +1002,20 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 {
     Client *c, *sel = globalconf.focus->client;
 
+    if(!sel)
+        return;
+
     for(c = globalconf.clients; !client_isvisible(c, screen); c = c->next);
     if(c == sel)
          for(sel = sel->next; sel && !client_isvisible(sel, screen); sel = sel->next);
 
-    if(!sel)
-        return;
-
-    client_list_detach(&globalconf.clients, sel);
-    client_list_push(&globalconf.clients, sel);
-    globalconf.screens[screen].need_arrange = True;
-    globalconf.drop_events |= EnterWindowMask;
+    if(sel)
+    {
+        client_list_detach(&globalconf.clients, sel);
+        client_list_push(&globalconf.clients, sel);
+        globalconf.screens[screen].need_arrange = True;
+        globalconf.drop_events |= EnterWindowMask;
+    }
 }
 
 /** Send focus to next client in stack
