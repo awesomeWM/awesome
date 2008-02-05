@@ -519,10 +519,10 @@ rules
         xproperty_name = <string>
         xproperty_value = <regex>
         float = <{auto,true,false}>
+        master = <{auto,true,false}>
         tags = <regex>
         screen = <integer>
         icon = <image>
-        not_master = <boolean>
         opacity = <float>
     }
 }

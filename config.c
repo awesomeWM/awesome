@@ -494,9 +494,9 @@ config_parse(const char *confpatharg)
         rule->xprop = a_strdup(cfg_getstr(cfgsectmp, "xproperty_name"));
         rule->xpropval_r = rules_compile_regex(cfg_getstr(cfgsectmp, "xproperty_value"));
         rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
-        rule->isfloating = rules_get_float_from_str(cfg_getstr(cfgsectmp, "float"));
+        rule->isfloating = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "float"));
         rule->screen = cfg_getint(cfgsectmp, "screen");
-        rule->not_master = cfg_getbool(cfgsectmp, "not_master");
+        rule->ismaster = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "master"));
         rule->opacity = cfg_getfloat(cfgsectmp, "opacity");
         if(rule->screen >= globalconf.nscreen)
             rule->screen = 0;

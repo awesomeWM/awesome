@@ -107,13 +107,13 @@ rule_matching_client(Client *c)
     return NULL;
 }
 
-RuleFloat
-rules_get_float_from_str(const char *str)
+Fuzzy
+rules_get_fuzzy_from_str(const char *str)
 {
     if(!a_strcmp(str, "true") || !a_strcmp(str, "yes"))
-        return Float;
+        return Yes;
     else if(!a_strcmp(str, "false") || !a_strcmp(str, "no"))
-        return Tile;
+        return No;
 
     return Auto;
 }

@@ -351,10 +351,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             {
               case Auto:
                 break;
-              case Float:
+              case Yes:
                 client_setfloating(c, True);
                 break;
-              case Tile:
+              case No:
                 client_setfloating(c, False);
                 break;
             }
@@ -391,12 +391,27 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
 
     /* attach to the stack */
-    if((rule = rule_matching_client(c)) && rule->not_master)
-        client_list_append(&globalconf.clients, c);
-    else if(globalconf.screens[c->screen].new_become_master)
-        client_list_push(&globalconf.clients, c);
-    else
-        client_list_append(&globalconf.clients, c);
+    if((rule = rule_matching_client(c)))
+        switch(rule->ismaster)
+        {
+          case Yes:
+            client_list_push(&globalconf.clients, c);
+            break;
+          case No:
+            client_list_append(&globalconf.clients, c);
+            break;
+          case Auto:
+            rule = NULL;
+            break;
+        }
+
+    if(!rule)
+    {
+        if(globalconf.screens[c->screen].new_become_master)
+            client_list_push(&globalconf.clients, c);
+        else
+            client_list_append(&globalconf.clients, c);
+    }
 
     /* some windows require this */
     XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,

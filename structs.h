@@ -40,10 +40,10 @@ typedef enum
 /** Rules for floating rule */
 typedef enum
 {
-    Float,
-    Tile,
-    Auto,
-} RuleFloat;
+    Yes,
+    No,
+    Auto
+} Fuzzy;
 
 /** Common colors */
 enum
@@ -60,8 +60,8 @@ struct Rule
     char *icon;
     char *xprop;
     int screen;
-    RuleFloat isfloating;
-    Bool not_master;
+    Fuzzy isfloating;
+    Fuzzy ismaster;
     double opacity;
     regex_t *prop_r;
     regex_t *tags_r;
