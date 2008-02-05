@@ -36,6 +36,8 @@ uicb_tag_setnmaster(int screen, char * arg)
 {
     Tag **curtags = tags_get_current(screen);
     Layout *curlay = curtags[0]->layout;
+    Client *c;
+    int n;
 
     if(!arg || (curlay->arrange != layout_tile
                 && curlay->arrange != layout_tileleft
@@ -45,6 +47,13 @@ uicb_tag_setnmaster(int screen, char * arg)
 
     if((curtags[0]->nmaster = (int) compute_new_value_from_arg(arg, (double) curtags[0]->nmaster)) < 0)
         curtags[0]->nmaster = 0;
+
+    for(n = 0, c = globalconf.clients; c; c = c->next)
+        if(IS_TILED(c, screen))
+            n++;
+
+    if(curtags[0]->nmaster > n - 1)
+        curtags[0]->nmaster = n;
 
     p_delete(&curtags);
 
@@ -56,6 +65,8 @@ uicb_tag_setncol(int screen, char * arg)
 {
     Tag **curtags = tags_get_current(screen);
     Layout *curlay = curtags[0]->layout;
+    Client *c;
+    int n;
 
     if(!arg || (curlay->arrange != layout_tile
                 && curlay->arrange != layout_tileleft
@@ -63,8 +74,16 @@ uicb_tag_setncol(int screen, char * arg)
                 && curlay->arrange != layout_tiletop))
         return;
 
+
     if((curtags[0]->ncol = (int) compute_new_value_from_arg(arg, (double) curtags[0]->ncol)) < 1)
         curtags[0]->ncol = 1;
+
+    for(n = 0, c = globalconf.clients; c; c = c->next)
+        if(IS_TILED(c, screen))
+            n++;
+
+    if(curtags[0]->ncol > n - 1)
+    	curtags[0]->ncol = n - 1;
 
     p_delete(&curtags);
 
