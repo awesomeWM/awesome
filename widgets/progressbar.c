@@ -143,7 +143,6 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     int i, phys_screen = get_phys_screen(statusbar->screen);
     cfg_t *cfg;
 
-
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
     w->draw = progressbar_draw;
