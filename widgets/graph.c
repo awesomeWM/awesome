@@ -241,7 +241,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     int phys_screen = get_phys_screen(statusbar->screen);
     int i;
     char *type;
-    XColor tmp_color;
+    XColor tmp_color = { 0, 0, 0, 0, 0, 0 };
     XColor *ptmp_color_middle;
     XColor *ptmp_color_end;
 
