@@ -43,9 +43,9 @@ typedef struct
     /** Foreground color */
     XColor *fg;
     /** Foreground color when bar is half-full */
-    XColor **pfg_half;
+    XColor **pfg_center;
     /** Foreground color when bar is full */
-    XColor **pfg_full;
+    XColor **pfg_end;
     /** Background color */
     XColor *bg;
     /** Border color */
@@ -97,7 +97,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             rectangle.width = pwidth;
             rectangle.height = pb_height - 2;
             draw_rectangle_gradient(ctx, rectangle, width - 2, True, d->fg[i],
-                                    d->pfg_half[i], d->pfg_full[i]);
+                                    d->pfg_center[i], d->pfg_end[i]);
         }
 
         if(width - 2 - pwidth > 0) /* not filled area */
@@ -157,8 +157,8 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     }
 
     d->fg = p_new(XColor, d->bars);
-    d->pfg_full = p_new(XColor *, d->bars);
-    d->pfg_half = p_new(XColor *, d->bars);
+    d->pfg_end = p_new(XColor *, d->bars);
+    d->pfg_center = p_new(XColor *, d->bars);
     d->bg = p_new(XColor, d->bars);
     d->bordercolor = p_new(XColor, d->bars);
     d->percent = p_new(int, d->bars);
@@ -172,16 +172,16 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         else
             d->fg[i] = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
-        if((color = cfg_getstr(cfg, "fg_half")))
+        if((color = cfg_getstr(cfg, "fg_center")))
         {
-            d->pfg_half[i] = p_new(XColor, 1);
-            *(d->pfg_half[i]) = draw_color_new(globalconf.display, phys_screen, color);
+            d->pfg_center[i] = p_new(XColor, 1);
+            *(d->pfg_center[i]) = draw_color_new(globalconf.display, phys_screen, color);
         }
 
-        if((color = cfg_getstr(cfg, "fg_full")))
+        if((color = cfg_getstr(cfg, "fg_end")))
         {
-            d->pfg_full[i] = p_new(XColor, 1);
-            *(d->pfg_full[i]) = draw_color_new(globalconf.display, phys_screen, color);
+            d->pfg_end[i] = p_new(XColor, 1);
+            *(d->pfg_end[i]) = draw_color_new(globalconf.display, phys_screen, color);
         }
 
         if((color = cfg_getstr(cfg, "bg")))

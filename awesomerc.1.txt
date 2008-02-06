@@ -252,8 +252,10 @@ This widget shows one or more progress-bars.
     Draws a bar; Options: fg, bg, bordercolor.
 *fg*::
     Foreground color.
-*fg_full*::
-    Foreground color of a full bar (as gradient).
+*fg_center*::
+    Foreground color in the center of the bar (as gradient).
+*fg_end*::
+    Foreground color at the end of a bar (as gradient).
 *bg*::
     Background color.
 *bordercolor*::
@@ -283,10 +285,10 @@ This widget shows a graph.
     Re-scales when input > max (see below).
 *fg*::
     Foreground color.
-*fg_middle*::
-    Color at the middle of the graph
+*fg_center*::
+    Foreground color in the center of the bar (as gradient).
 *fg_end*::
-    Color at the end of the graph
+    Foreground color at the end of a bar (as gradient).
 *style*::
     bottom (fills to bottom with fg), top, or line.
 *mouse*::
@@ -476,7 +478,7 @@ screen <integer> [MULTI]
         {
             bar [MULTI]
             {
-                fg = <color> fg_full = <color> fg_half = <color>
+                fg = <color> fg_center = <color> fg_end = <color>
                 bg = <color> bordercolor = <color>
             }
             gap = <integer>
@@ -495,7 +497,7 @@ screen <integer> [MULTI]
             data [MULTI]
             {
                 scale = <boolean> max = <float> style = <{bottom, top, line}>
-                fg = <color> fg_middle = <color> fg_end = <color>
+                fg = <color> fg_center = <color> fg_end = <color>
             }
             width = <integer>
             height = <float>

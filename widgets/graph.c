@@ -53,17 +53,17 @@ typedef struct
     int **fillbottom;                   /** Datatypes holder (data equal to **lines) */
     int fillbottom_total;               /** Total of them */
     XColor *fillbottom_color;           /** Color of them */
-    XColor **fillbottom_pcolor_middle;  /** Color at middle of graph */
+    XColor **fillbottom_pcolor_center;  /** Color at middle of graph */
     XColor **fillbottom_pcolor_end;     /** Color at end of graph */
     int **filltop;                      /** Datatypes holder */
     int filltop_total;                  /** Total of them */
     XColor *filltop_color;              /** Color of them */
-    XColor **filltop_pcolor_middle;     /** Color at middle of graph */
+    XColor **filltop_pcolor_center;     /** Color at center of graph */
     XColor **filltop_pcolor_end;        /** Color at end of graph */
     int **drawline;                     /** Datatypes holder */
     int drawline_total;                 /** Total of them */
     XColor *drawline_color;             /** Color of them */
-    XColor **drawline_pcolor_middle;    /** Color at middle of graph */
+    XColor **drawline_pcolor_center;    /** Color at middle of graph */
     XColor **drawline_pcolor_end;       /** Color at end of graph */
 
     int *draw_from;                     /** Preparation/tmp array for draw_graph(); */
@@ -130,7 +130,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         draw_graph(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->draw_from, d->draw_to, d->index,
-                d->filltop_color[z], d->filltop_pcolor_middle[z], d->filltop_pcolor_end[z]);
+                d->filltop_color[z], d->filltop_pcolor_center[z], d->filltop_pcolor_end[z]);
     }
 
     /* draw style = bottom */
@@ -152,7 +152,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         draw_graph(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->draw_from, d->fillbottom[z], d->index,
-                d->fillbottom_color[z], d->fillbottom_pcolor_middle[z], d->fillbottom_pcolor_end[z]);
+                d->fillbottom_color[z], d->fillbottom_pcolor_center[z], d->fillbottom_pcolor_end[z]);
     }
 
     /* draw style = line */
@@ -161,7 +161,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         draw_graph_line(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->drawline[z], d->index,
-                d->drawline_color[z], d->drawline_pcolor_middle[z], d->drawline_pcolor_end[z]);
+                d->drawline_color[z], d->drawline_pcolor_center[z], d->drawline_pcolor_end[z]);
     }
 
     widget->area.width = d->width;
@@ -242,7 +242,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     int i;
     char *type;
     XColor tmp_color = { 0, 0, 0, 0, 0, 0 };
-    XColor *ptmp_color_middle;
+    XColor *ptmp_color_center;
     XColor *ptmp_color_end;
 
     w = p_new(Widget, 1);
@@ -280,13 +280,13 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     d->lines = p_new(int *, d->data_items);
 
     d->filltop_color = p_new(XColor, d->data_items);
-    d->filltop_pcolor_middle = p_new(XColor *, d->data_items);
+    d->filltop_pcolor_center = p_new(XColor *, d->data_items);
     d->filltop_pcolor_end = p_new(XColor *, d->data_items);
     d->fillbottom_color = p_new(XColor, d->data_items);
-    d->fillbottom_pcolor_middle = p_new(XColor *, d->data_items);
+    d->fillbottom_pcolor_center = p_new(XColor *, d->data_items);
     d->fillbottom_pcolor_end = p_new(XColor *, d->data_items);
     d->drawline_color = p_new(XColor, d->data_items);
-    d->drawline_pcolor_middle = p_new(XColor *, d->data_items);
+    d->drawline_pcolor_center = p_new(XColor *, d->data_items);
     d->drawline_pcolor_end = p_new(XColor *, d->data_items);
 
     d->max_index = p_new(int, d->data_items);
@@ -296,7 +296,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
     for(i = 0; i < d->data_items; i++)
     {
-        ptmp_color_middle = ptmp_color_end = NULL;
+        ptmp_color_center = ptmp_color_end = NULL;
 
         cfg = cfg_getnsec(config, "data", i);
 
@@ -305,10 +305,10 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         else
             tmp_color = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
-        if((color = cfg_getstr(cfg, "fg_middle")))
+        if((color = cfg_getstr(cfg, "fg_center")))
         {
-            ptmp_color_middle = p_new(XColor, 1);
-            *ptmp_color_middle = draw_color_new(globalconf.display, phys_screen, color);
+            ptmp_color_center = p_new(XColor, 1);
+            *ptmp_color_center = draw_color_new(globalconf.display, phys_screen, color);
         }
 
         if((color = cfg_getstr(cfg, "fg_end")))
@@ -339,7 +339,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
             {
                 d->fillbottom[d->fillbottom_total] = d->lines[i];
                 d->fillbottom_color[d->fillbottom_total] = tmp_color;
-                d->fillbottom_pcolor_middle[d->fillbottom_total] = ptmp_color_middle;
+                d->fillbottom_pcolor_center[d->fillbottom_total] = ptmp_color_center;
                 d->fillbottom_pcolor_end[d->fillbottom_total] = ptmp_color_end;
                 d->fillbottom_total++;
             }
@@ -347,7 +347,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
             {
                 d->filltop[d->filltop_total] = d->lines[i];
                 d->filltop_color[d->filltop_total] = tmp_color;
-                d->filltop_pcolor_middle[d->fillbottom_total] = ptmp_color_middle;
+                d->filltop_pcolor_center[d->fillbottom_total] = ptmp_color_center;
                 d->filltop_pcolor_end[d->fillbottom_total] = ptmp_color_end;
                 d->filltop_total++;
             }
@@ -355,7 +355,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
             {
                 d->drawline[d->drawline_total] = d->lines[i];
                 d->drawline_color[d->drawline_total] = tmp_color;
-                d->drawline_pcolor_middle[d->fillbottom_total] = ptmp_color_middle;
+                d->drawline_pcolor_center[d->fillbottom_total] = ptmp_color_center;
                 d->drawline_pcolor_end[d->fillbottom_total] = ptmp_color_end;
                 d->drawline_total++;
             }

@@ -188,25 +188,25 @@ draw_text(DrawCtx *ctx,
  * \param y y-offset of widget
  * \param width width in pixels
  * \param color color to use from 0%
- * \param pcolor_middle color at 50% of width
+ * \param pcolor_center color at 50% of width
  * \param pcolor_end color at 100% of width
  * \return pat pattern or NULL; needs to get cairo_pattern_destroy()'ed;
  */
 cairo_pattern_t *
 setup_cairo_color_source(DrawCtx *ctx, int x, int y, int width,
-                         XColor color, XColor *pcolor_middle, XColor *pcolor_end)
+                         XColor color, XColor *pcolor_center, XColor *pcolor_end)
 {
     cairo_pattern_t *pat;
 
-    if(pcolor_middle || pcolor_end) /* draw a gradient */
+    if(pcolor_center || pcolor_end) /* draw a gradient */
     {
         pat = cairo_pattern_create_linear(x, y, x + width, y);
 
         cairo_pattern_add_color_stop_rgb(pat, 0, color.red / 65535.0,
                                          color.green / 65535.0, color.blue / 65535.0);
-        if(pcolor_middle)
-            cairo_pattern_add_color_stop_rgb(pat, 0.5, pcolor_middle->red / 65535.0,
-                                             pcolor_middle->green / 65535.0, pcolor_middle->blue / 65535.0);
+        if(pcolor_center)
+            cairo_pattern_add_color_stop_rgb(pat, 0.5, pcolor_center->red / 65535.0,
+                                             pcolor_center->green / 65535.0, pcolor_center->blue / 65535.0);
         if(pcolor_end)
             cairo_pattern_add_color_stop_rgb(pat, 1, pcolor_end->red / 65535.0,
                                              pcolor_end->green / 65535.0, pcolor_end->blue / 65535.0);
@@ -252,12 +252,12 @@ draw_rectangle(DrawCtx *ctx, Area geometry, Bool filled, XColor color)
  * \param fullwidth width of full bar in pixels
  * \param filled filled rectangle?
  * \param color color to use from 0%
- * \param pcolor_half color at 50%
- * \param pcolor_full color at 100%
+ * \param pcolor_center color at 50%
+ * \param pcolor_end color at 100%
  */
 void
 draw_rectangle_gradient(DrawCtx *ctx, Area geometry, int fullwidth, Bool filled,
-                        XColor color, XColor *pcolor_half, XColor *pcolor_full)
+                        XColor color, XColor *pcolor_center, XColor *pcolor_end)
 {
     cairo_pattern_t *pat;
 
@@ -265,7 +265,7 @@ draw_rectangle_gradient(DrawCtx *ctx, Area geometry, int fullwidth, Bool filled,
     cairo_set_line_width(ctx->cr, 1.0);
 
     pat = setup_cairo_color_source(ctx, geometry.x, geometry.y, fullwidth,
-                                   color, pcolor_half, pcolor_full);
+                                   color, pcolor_center, pcolor_end);
 
     if(filled)
     {
@@ -302,16 +302,16 @@ draw_graph_setup(DrawCtx *ctx)
  * \param to array of end-point offsets to draw a graph-lines
  * \param cur_index current position in data-array (cycles around)
  * \param color color to use from 0%
- * \param pcolor_middle color at 50%
+ * \param pcolor_center color at 50%
  * \param pcolor_end color at 100%
  */
 void
 draw_graph(DrawCtx *ctx, int x, int y, int w, int *from, int *to, int cur_index,
-           XColor color, XColor *pcolor_middle, XColor *pcolor_end)
+           XColor color, XColor *pcolor_center, XColor *pcolor_end)
 {
     int i;
     cairo_pattern_t *pat;
-    pat = setup_cairo_color_source(ctx, x, y, w, color, pcolor_middle, pcolor_end);
+    pat = setup_cairo_color_source(ctx, x, y, w, color, pcolor_center, pcolor_end);
 
     i = -1;
     while(++i < w)
@@ -337,18 +337,18 @@ draw_graph(DrawCtx *ctx, int x, int y, int w, int *from, int *to, int cur_index,
  * \param to array of offsets to draw the line through...
  * \param cur_index current position in data-array (cycles around)
  * \param color color to use from 0%
- * \param pcolor_middle color at 50%
+ * \param pcolor_center color at 50%
  * \param pcolor_end color at 100%
  */
 void
 draw_graph_line(DrawCtx *ctx, int x, int y, int w, int *to, int cur_index,
-           XColor color, XColor *pcolor_middle, XColor *pcolor_end)
+           XColor color, XColor *pcolor_center, XColor *pcolor_end)
 {
     int i;
     int flag = 0; /* used to prevent drawing a line from 0 to 0 values */
     cairo_pattern_t *pat;
 
-    pat = setup_cairo_color_source(ctx, x, y, w, color, pcolor_middle, pcolor_end);
+    pat = setup_cairo_color_source(ctx, x, y, w, color, pcolor_center, pcolor_end);
 
     /* x-1 (on the border), paints *from* the last point (... not included itself) */
     /* makes sense when you assume there is already some line drawn to it. */
