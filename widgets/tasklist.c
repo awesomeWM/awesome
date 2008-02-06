@@ -29,14 +29,18 @@
 #include "tag.h"
 #include "common/util.h"
 
-#define ISVISIBLE_ON_TB(c, nscreen, show_all) ((!show_all && client_isvisible(c, nscreen) && !c->skiptb) \
-                                              || (show_all && c->screen == nscreen && !c->skiptb))
-
 extern AwesomeConf globalconf;
+
+typedef enum
+{
+    ShowFocus,
+    ShowTags,
+    ShowAll,
+} ShowClient;
 
 typedef struct
 {
-    Bool show_all;
+    ShowClient show;
     Bool show_icons;
     Alignment align;
     XColor fg_sel;
@@ -44,6 +48,31 @@ typedef struct
     XColor fg;
     XColor bg;
 } Data;
+
+static inline Bool
+tasklist_isvisible(Client *c, int screen, ShowClient show)
+{
+    if(c->skiptb)
+        return False;
+
+    switch(show)
+    {
+      case ShowAll:
+        if(c->screen == screen)
+            return True;
+        break;
+      case ShowTags:
+        if(client_isvisible(c, screen))
+            return True;
+        break;
+      case ShowFocus:
+        if(c == globalconf.focus->client)
+            return True;
+        break;
+    }
+
+    return False;
+}
 
 static int
 tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
@@ -60,7 +89,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
         return (widget->area.width = 0);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
+        if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
             n++;
     
     if(!n)
@@ -80,7 +109,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
         widget->area.y = widget->area.y = 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
+        if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
         {
             icon_width = 0;
 
@@ -177,7 +206,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
     if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
     {
         for(c = globalconf.clients; c; c = c->next)
-            if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
+            if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
                 n++;
     
         if(!n)
@@ -202,11 +231,11 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
             }
             /* found first visible client */
             for(c = globalconf.clients;
-                c && !ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all);
+                c && !tasklist_isvisible(c, widget->statusbar->screen, d->show);
                 c = c->next);
             /* found ci-th visible client */
             for(i = 0; c ; c = c->next)
-                if(ISVISIBLE_ON_TB(c, widget->statusbar->screen, d->show_all))
+                if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
                     if(i++ >= ci)
                         break;
 
@@ -269,7 +298,14 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
 
     d->align = draw_get_align(cfg_getstr(config, "align"));
     d->show_icons = cfg_getbool(config, "show_icons");
-    d->show_all = cfg_getbool(config, "show_all");
+
+    buf = cfg_getstr(config, "show");
+    if(!a_strcmp(buf, "all"))
+        d->show = ShowAll;
+    else if(!a_strcmp(buf, "tags"))
+        d->show = ShowTags;
+    else
+        d->show = ShowFocus;
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);

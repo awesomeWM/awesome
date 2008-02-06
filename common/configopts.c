@@ -125,8 +125,8 @@ cfg_opt_t widget_tasklist_opts[] =
     CFG_STR((char *) "focus_bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "align", (char *) "left", CFGF_NONE),
+    CFG_STR((char *) "show", (char *) "tags", CFGF_NONE),
     CFG_BOOL((char *) "show_icons", cfg_true, CFGF_NONE),
-    CFG_BOOL((char *) "show_all", cfg_false, CFGF_NONE),
     CFG_END()
 };
 cfg_opt_t widget_graph_data_opts[] =

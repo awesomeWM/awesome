@@ -203,8 +203,8 @@ This widget shows a list of running windows.
     Text alignement.
 *show_icons*::
     Show applications icons.
-*show_all*::
-    Show all windows from all tags.
+*show*::
+    Show all windows from all tags, tags clients only or focused client.
 *x*::
     Horizontal offset (auto-alignment if not set).
 *y*::
@@ -443,7 +443,7 @@ screen <integer> [MULTI]
             focus_bg = <color>
             font = <font>
             show_icons = <boolean>
-            show_all = <boolean>
+            show = <{all,tags,focus}>
             align = <{center,left,right}>
             x = <integer> y = <integer>
             mouse [MULTI]
