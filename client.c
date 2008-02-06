@@ -199,8 +199,7 @@ client_focus(Client *c, int screen, Bool from_mouse)
                          globalconf.screens[screen].colors_selected[ColBorder].pixel);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
         if(!from_mouse
-           || !globalconf.screens[screen].sloppy_focus
-           || globalconf.screens[screen].sloppy_focus_raise)
+           || (globalconf.screens[screen].sloppy_focus && globalconf.screens[screen].sloppy_focus_raise))
             XRaiseWindow(globalconf.display, c->win);
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */

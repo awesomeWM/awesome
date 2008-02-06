@@ -38,16 +38,6 @@ extern AwesomeConf globalconf;
 
 #include "layoutgen.h"
 
-static void
-layout_raise_floatings(int screen)
-{
-    Client *c;
-
-    for(c = globalconf.clients; c; c = c->next)
-        if(c->isfloating && client_isvisible(c, screen))
-            XRaiseWindow(globalconf.display, c->win);
-}
-
 /** Arrange windows following current selected layout
  * \param screen the screen to arrange
  */
@@ -79,8 +69,6 @@ arrange(int screen)
             if(globalconf.screens[screen].new_get_focus)
                 client_focus(c, screen, False);
         }
-
-    layout_raise_floatings(screen);
 
     /* if we have a valid client that could be focused but currently no window
      * are focused, then set the focus on this window */
