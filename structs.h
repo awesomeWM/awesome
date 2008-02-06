@@ -314,6 +314,12 @@ struct AwesomeConf
     Cursor cursor[CurLast];
     /** Clients list */
     Client *clients;
+    /** Scratch client */
+    struct
+    {
+        Client *client;
+        Bool isvisible;
+    } scratch;
     /** Path to config file */
     char *configpath;
     /** Selected clients history */

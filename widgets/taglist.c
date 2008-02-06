@@ -40,8 +40,9 @@ isoccupied(Tag *t)
     Client *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t) && !c->skip)
+        if(is_client_tagged(c, t) && !c->skip && c != globalconf.scratch.client)
             return True;
+
     return False;
 }
 

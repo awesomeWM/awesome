@@ -52,6 +52,8 @@ Uicb uicb_client_zoom;
 Uicb uicb_client_focusnext;
 Uicb uicb_client_focusprev;
 Uicb uicb_client_togglefloating;
+Uicb uicb_client_togglescratch;
+Uicb uicb_client_setscratch;
 
 DO_SLIST(Client, client, p_delete);
 

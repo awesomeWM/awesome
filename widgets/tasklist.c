@@ -142,7 +142,15 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                           widget->font->height / 2, widget->font, c->name,
                           d->fg, d->bg);
 
-            if(c->isfloating || c->ismax)
+            if(c == globalconf.scratch.client)
+            {
+                area.x = widget->area.x + icon_width + box_width * i;
+                area.y = widget->area.y;
+                area.width = (widget->font->height + 2) / 3;
+                area.height = (widget->font->height + 2) / 3;
+                draw_rectangle(ctx, area, c->isfloating, d->fg);
+            }
+            else if(c->isfloating || c->ismax)
                 draw_circle(ctx, widget->area.x + icon_width + box_width * i,
                             widget->area.y,
                             (widget->font->height + 2) / 4,

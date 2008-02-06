@@ -19,6 +19,10 @@
  *
  */
 
+/**
+ * @defgroup ui_callback User Interface Callbacks
+ */
+
 #include "awesome.h"
 #include "xutil.h"
 #include "tag.h"

@@ -19,10 +19,6 @@
  *
  */
 
-/**
- * @defgroup ui_callback User Interface Callbacks
- */
-
 #include <X11/keysym.h>
 
 #include "config.h"

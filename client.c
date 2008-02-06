@@ -704,6 +704,9 @@ client_isvisible(Client *c, int screen)
     if(!c || c->screen != screen)
         return False;
 
+    if(globalconf.scratch.client == c)
+        return globalconf.scratch.isvisible;
+
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         if(tag->selected && is_client_tagged(c, tag))
             return True;
@@ -1079,4 +1082,41 @@ uicb_client_togglefloating(int screen __attribute__ ((unused)),
         client_setfloating(globalconf.focus->client, !globalconf.focus->client->isfloating);
 }
 
+/** Toggle scratch client attribute
+ * \param screen screen number
+ * \param arg unused argument
+ * \ingroup ui_callback
+ */
+void
+uicb_client_setscratch(int screen,
+                       char *arg __attribute__ ((unused)))
+{
+    if(!globalconf.focus->client)
+        return;
+
+    if(globalconf.scratch.client == globalconf.focus->client)
+        globalconf.scratch.client = NULL;
+    else
+        globalconf.scratch.client = globalconf.focus->client;
+
+    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS | WIDGET_CACHE_TAGS);
+    globalconf.screens[screen].need_arrange = True;
+}
+
+/** Toggle scratch client visibility
+ * \param screen screen number
+ * \param arg unused argument
+ * \ingroup ui_callback
+ */
+void
+uicb_client_togglescratch(int screen __attribute__ ((unused)),
+                          char *arg __attribute__ ((unused)))
+{
+    if(globalconf.scratch.client)
+    {
+        globalconf.scratch.isvisible = !globalconf.scratch.isvisible;
+        globalconf.screens[globalconf.scratch.client->screen].need_arrange = True;
+        widget_invalidate_cache(globalconf.scratch.client->screen, WIDGET_CACHE_CLIENTS);
+    }
+}
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

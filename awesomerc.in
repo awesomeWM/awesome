@@ -317,6 +317,18 @@ keys
     }
     key
     {
+        modkey = {"Mod4"}
+        key = "s"
+        command = "client_togglescratch"
+    }
+    key
+    {
+        modkey = {"Mod4", "Control"}
+        key = "s"
+        command = "client_setscratch"
+    }
+    key
+    {
         modkey = {"Mod4", "Shift"}
         key = "c"
         command = "client_kill"
