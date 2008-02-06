@@ -43,7 +43,7 @@ WidgetConstructor layoutinfo_new;
 WidgetConstructor taglist_new;
 WidgetConstructor textbox_new;
 WidgetConstructor iconbox_new;
-WidgetConstructor netwmicon_new;
+WidgetConstructor focusicon_new;
 WidgetConstructor progressbar_new;
 WidgetConstructor graph_new;
 WidgetConstructor tasklist_new;

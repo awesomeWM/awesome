@@ -1,5 +1,5 @@
 /*
- * netwmicon.c - NET_WM_ICON widget
+ * focusicon.c - focused window icon widget
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -19,19 +19,17 @@
  *
  */
 
-#include <X11/Xmd.h>
-#include <X11/Xatom.h>
+
 #include "focus.h"
 #include "tag.h"
 #include "widget.h"
 #include "rules.h"
 #include "ewmh.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 
 static int
-netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
+focusicon_draw(Widget *widget, DrawCtx *ctx, int offset,
                     int used __attribute__ ((unused)))
 {
     Area area;
@@ -95,13 +93,13 @@ netwmicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 }
 
 Widget *
-netwmicon_new(Statusbar *statusbar, cfg_t *config)
+focusicon_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
-    w->draw = netwmicon_draw;
+    w->draw = focusicon_draw;
     
     /* Set cache property */
     w->cache.flags = WIDGET_CACHE_CLIENTS;

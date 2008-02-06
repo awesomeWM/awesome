@@ -153,7 +153,7 @@ This widget shows a icon for the selected layout.
 *y*::
     Vertical offset (auto-alignment if not set).
 
-netwmicon
+focusicon
 ~~~~~~~~~
 This widget shows a icon for the focused window  using NET_WM_ICON or icon file set in rule.
 
@@ -394,7 +394,7 @@ screen <integer> [MULTI]
                 command = <uicb-cmd> arg = <uicb-arg>
             }
         }
-        netwmicon <identifier>
+        focusicon <identifier>
         {
             x = <integer> y = <integer>
             mouse [MULTI]
