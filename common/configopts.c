@@ -103,17 +103,6 @@ cfg_opt_t widget_textbox_opts[] =
     CFG_STR((char *) "align", (char *) "center", CFGF_NONE),
     CFG_END()
 };
-cfg_opt_t widget_focustitle_opts[] =
-{
-    CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
-    CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
-    CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "left", CFGF_NONE),
-    CFG_END()
-};
 cfg_opt_t widget_tasklist_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
@@ -180,7 +169,6 @@ cfg_opt_t statusbar_opts[] =
     CFG_INT((char *) "width", 0, CFGF_NONE),
     CFG_SEC((char *) "textbox", widget_textbox_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "taglist", widget_taglist_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
-    CFG_SEC((char *) "focustitle", widget_focustitle_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "layoutinfo", widget_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "iconbox", widget_iconbox_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "netwmicon", widget_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),

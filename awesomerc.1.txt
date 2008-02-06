@@ -164,25 +164,6 @@ This widget shows a icon for the focused window  using NET_WM_ICON or icon file 
 *y*::
     Vertical offset (auto-alignment if not set).
 
-focustitle
-~~~~~~~~~~
-This widget shows the title of the focused window.
-
-*mouse*::
-    Set mouse bindings.
-*font*::
-    Font to use.
-*bg*::
-    Background color.
-*fg*::
-    Foreground color.
-*align*::
-    Text alignement.
-*x*::
-    Horizontal offset (auto-alignment if not set).
-*y*::
-    Vertical offset (auto-alignment if not set).
-
 tasklist
 ~~~~~~~~
 This widget shows a list of running windows.
@@ -415,19 +396,6 @@ screen <integer> [MULTI]
         }
         netwmicon <identifier>
         {
-            x = <integer> y = <integer>
-            mouse [MULTI]
-            {
-                button = <integer> modkey = {<mod>, ...}
-                command = <uicb-cmd> arg = <uicb-arg>
-            }
-        }
-        focustitle <identifier>
-        {
-            fg = <color>
-            bg = <color>
-            font = <font>
-            align = <{center,left,right}>
             x = <integer> y = <integer>
             mouse [MULTI]
             {

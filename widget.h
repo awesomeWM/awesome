@@ -42,7 +42,6 @@ void widget_common_new(Widget*, Statusbar *, cfg_t *);
 WidgetConstructor layoutinfo_new;
 WidgetConstructor taglist_new;
 WidgetConstructor textbox_new;
-WidgetConstructor focustitle_new;
 WidgetConstructor iconbox_new;
 WidgetConstructor netwmicon_new;
 WidgetConstructor progressbar_new;

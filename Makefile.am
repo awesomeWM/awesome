@@ -27,7 +27,6 @@ WIDGETS =
 WIDGETS += widgets/taglist.c
 WIDGETS += widgets/layoutinfo.c
 WIDGETS += widgets/textbox.c
-WIDGETS += widgets/focustitle.c
 WIDGETS += widgets/iconbox.c
 WIDGETS += widgets/netwmicon.c
 WIDGETS += widgets/progressbar.c
