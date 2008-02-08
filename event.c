@@ -259,12 +259,9 @@ handle_event_keypress(XEvent * e)
 {
     int screen, x, y, d;
     unsigned int m;
-    KeySym keysym;
     XKeyEvent *ev = &e->xkey;
     Window dummy;
     Key *k;
-
-    keysym = XKeycodeToKeysym(e->xany.display, (KeyCode) ev->keycode, 0);
 
     /* find the right screen for this event */
     for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
@@ -280,8 +277,8 @@ handle_event_keypress(XEvent * e)
         }
 
     for(k = globalconf.keys; k; k = k->next)
-        if(keysym == k->keysym && k->func
-           && CLEANMASK(k->mod) == CLEANMASK(ev->state))
+        if(ev->keycode == k->keycode &&
+	  k->func && CLEANMASK(k->mod) == CLEANMASK(ev->state))
         {
             k->func(screen, k->arg);
             break;
@@ -409,8 +406,8 @@ grabkeys(int phys_screen)
     XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
     for(k = globalconf.keys; k; k = k->next)
     {
-        if((code = XKeysymToKeycode(globalconf.display, k->keysym)) == NoSymbol)
-            continue;
+	if((code = k->keycode) == 0)
+	    continue;
         XGrabKey(globalconf.display, code, k->mod, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
         XGrabKey(globalconf.display, code, k->mod | LockMask, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
         XGrabKey(globalconf.display, code, k->mod | globalconf.numlockmask, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);

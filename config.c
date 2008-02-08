@@ -49,7 +49,7 @@ extern cfg_opt_t awesome_opts[];
 typedef struct
 {
     const char *name;
-    KeySym keysym;
+    KeyCode keycode;
 } KeyMod;
 
 /** Link a name to a mouse button symbol */
@@ -67,7 +67,7 @@ extern const name_func_link_t LayoutList[];
  * \param keyname Key name
  * \return Key mask or 0 if not found
  */
-static KeySym
+static KeyCode
 key_mask_lookup(const char *keyname)
 {
     /** List of keyname and corresponding X11 mask codes */
@@ -88,9 +88,9 @@ key_mask_lookup(const char *keyname)
     if(keyname)
         for(i = 0; KeyModList[i].name; i++)
             if(!a_strcmp(keyname, KeyModList[i].name))
-                return KeyModList[i].keysym;
+                return KeyModList[i].keycode;
 
-    return NoSymbol;
+    return 0;
 }
 
 /** Lookup for a mouse button from its name
@@ -165,18 +165,18 @@ set_key_info(Key *key, cfg_t *cfg)
         warn("unknown command %s\n", cfg_getstr(cfg, "command"));
 }
 
-static KeySym
-key_to_keysym(char *str)
+static KeyCode
+key_to_keycode(char *str)
 {
     KeyCode kc;
     int ikc;
 
     if(a_strncmp(str, "#", 1))
-        return XStringToKeysym(str);
+        return XKeysymToKeycode(globalconf.display, XStringToKeysym(str));
 
     ikc = atoi(str + 1);
     memcpy(&kc, &ikc, sizeof(KeyCode));
-    return XKeycodeToKeysym(globalconf.display, kc, 0);
+    return kc;
 }
 
 static Key *
@@ -191,7 +191,7 @@ section_keys(cfg_t *cfg_keys)
         key = p_new(Key, 1);
         cfgkeytmp = cfg_getnsec(cfg_keys, "key", i);
         set_key_info(key, cfgkeytmp);
-        key->keysym = key_to_keysym(cfg_getstr(cfgkeytmp, "key"));
+        key->keycode = key_to_keycode(cfg_getstr(cfgkeytmp, "key"));
         key->arg = a_strdup(cfg_getstr(cfgkeytmp, "arg"));
         key_list_push(&head, key);
     }
@@ -210,7 +210,7 @@ section_keys(cfg_t *cfg_keys)
         {
             key = p_new(Key, 1);
             set_key_info(key, cfgkeytmp);
-            key->keysym = key_to_keysym(cfg_getnstr(cfgkeytmp, "keylist", j));
+            key->keycode = key_to_keycode(cfg_getnstr(cfgkeytmp, "keylist", j));
             key->arg = a_strdup(cfg_getnstr(cfgkeytmp, "arglist", j));
             key_list_push(&head, key);
         }

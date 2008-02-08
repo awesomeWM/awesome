@@ -74,7 +74,7 @@ typedef struct Key Key;
 struct Key
 {
     unsigned long mod;
-    KeySym keysym;
+    KeyCode keycode;
     Uicb *func;
     char *arg;
     Key *next;
