@@ -182,7 +182,8 @@ static int
 xerror(Display *edpy, XErrorEvent *ee)
 {
     if(ee->error_code == BadWindow
-       || (ee->error_code == BadMatch && ee->request_code == X_SetInputFocus))
+       || (ee->error_code == BadMatch && ee->request_code == X_SetInputFocus)
+       || (ee->error_code == BadValue && ee->request_code == X_KillClient))
         return 0;
     warn("fatal error: request code=%d, error code=%d\n", ee->request_code, ee->error_code);
     return xerrorxlib(edpy, ee);        /* may call exit */
