@@ -191,6 +191,8 @@ client_focus(Client *c, int screen, Bool from_mouse)
 
     if(c)
     {
+        /* unban the client before focusing or it will fail */
+        client_unban(c);
         /* save sel in focus history */
         focus_add_client(c);
         if(globalconf.screens[c->screen].opacity_unfocused != -1)
@@ -1108,12 +1110,14 @@ uicb_client_setscratch(int screen,
  * \ingroup ui_callback
  */
 void
-uicb_client_togglescratch(int screen __attribute__ ((unused)),
+uicb_client_togglescratch(int screen,
                           char *arg __attribute__ ((unused)))
 {
     if(globalconf.scratch.client)
     {
         globalconf.scratch.isvisible = !globalconf.scratch.isvisible;
+        if(globalconf.scratch.isvisible)
+            client_focus(globalconf.scratch.client, screen, False);
         globalconf.screens[globalconf.scratch.client->screen].need_arrange = True;
         widget_invalidate_cache(globalconf.scratch.client->screen, WIDGET_CACHE_CLIENTS);
     }

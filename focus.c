@@ -74,7 +74,7 @@ focus_get_latest_client_for_tags(Tag **t, int nindex)
     int i = 0;
 
     for(node = globalconf.focus; node; node = node->next)
-        if(node->client && !node->client->skip)
+        if(node->client && !node->client->skip && node->client != globalconf.scratch.client)
             for(tags = t; *tags; tags++)
                 if(is_client_tagged(node->client, *tags))
                 {
