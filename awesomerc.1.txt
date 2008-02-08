@@ -180,7 +180,7 @@ This widget shows a list of running windows.
     Background color for focused window.
 *focus_fg*::
     Foreground color for focused window.
-*align*::
+*text_align*::
     Text alignement.
 *show_icons*::
     Show applications icons.
@@ -207,7 +207,7 @@ This widget shows a text.
     Set width.
 *text*::
     Text to change.
-*align*::
+*text_align*::
     Text alignement.
 *x*::
     Horizontal offset (auto-alignment if not set).

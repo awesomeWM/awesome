@@ -118,7 +118,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
     d->width = cfg_getint(config, "width");
-    d->align = draw_get_align(cfg_getstr(config, "align"));
+    d->align = draw_get_align(cfg_getstr(config, "text_align"));
 
     if((buf = cfg_getstr(config, "font")))
         w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);

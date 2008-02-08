@@ -100,7 +100,7 @@ cfg_opt_t widget_textbox_opts[] =
     CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "center", CFGF_NONE),
+    CFG_STR((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_END()
 };
 cfg_opt_t widget_tasklist_opts[] =
@@ -113,7 +113,7 @@ cfg_opt_t widget_tasklist_opts[] =
     CFG_STR((char *) "focus_fg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "focus_bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "left", CFGF_NONE),
+    CFG_STR((char *) "text_align", (char *) "left", CFGF_NONE),
     CFG_STR((char *) "show", (char *) "tags", CFGF_NONE),
     CFG_BOOL((char *) "show_icons", cfg_true, CFGF_NONE),
     CFG_END()

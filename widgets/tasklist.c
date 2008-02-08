@@ -296,7 +296,7 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     else
         d->fg_sel = globalconf.screens[statusbar->screen].colors_selected[ColFG];
 
-    d->align = draw_get_align(cfg_getstr(config, "align"));
+    d->align = draw_get_align(cfg_getstr(config, "text_align"));
     d->show_icons = cfg_getbool(config, "show_icons");
 
     buf = cfg_getstr(config, "show");
