@@ -179,7 +179,7 @@ main(int argc, char **argv)
     sw = simplewindow_new(disp, DefaultScreen(disp),
                           geometry.x, geometry.y, geometry.width, geometry.height, 0);
 
-    XStoreName(disp, sw->window, "awmessage");
+    XStoreName(disp, sw->window, "awesome-message");
 
     ctx = draw_context_new(disp, DefaultScreen(disp),
                            geometry.width, geometry.height, sw->drawable);
