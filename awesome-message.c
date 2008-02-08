@@ -22,6 +22,7 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 
+#include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -35,6 +36,8 @@
 #include "common/configopts.h"
 
 #define PROGNAME "awesome-message"
+
+static Bool running = True;
 
 /** Import awesome config file format */
 extern cfg_opt_t awesome_opts[];
@@ -58,7 +61,7 @@ static void __attribute__ ((noreturn))
 exit_help(int exit_code)
 {
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
-    fprintf(outfile, "Usage: %s [-x xcoord] [-y ycoord] <message> <icon>\n",
+    fprintf(outfile, "Usage: %s [-x xcoord] [-y ycoord] [-d delay] <message> <icon>\n",
             PROGNAME);
     exit(exit_code);
 }
@@ -113,6 +116,12 @@ config_parse(const char *confpatharg)
     p_delete(&confpath);
 }
 
+static void
+exit_on_signal(int sig __attribute__ ((unused)))
+{
+    running = False;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -120,10 +129,10 @@ main(int argc, char **argv)
     SimpleWindow *sw;
     DrawCtx *ctx;
     XEvent ev;
-    Bool running = True;
     Area geometry = { 0, 0, 200, 50, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL };
     int opt;
+    int delay = 0;
     char *configfile = NULL;
     static struct option long_options[] =
     {
@@ -137,10 +146,13 @@ main(int argc, char **argv)
 
     globalconf.display = disp;
 
-    while((opt = getopt_long(argc, argv, "vhf:b:x:y:n:c:",
+    while((opt = getopt_long(argc, argv, "vhf:b:x:y:n:c:d:",
                              long_options, NULL)) != -1)
         switch(opt)
         {
+	  case 'd':
+	    delay = atoi(optarg);
+	    break;
           case 'v':
             eprint_version(PROGNAME);
             break;
@@ -200,20 +212,27 @@ main(int argc, char **argv)
     XMapRaised(disp, sw->window);
     XSync(disp, False);
 
-    while (running)
+    signal(SIGALRM, &exit_on_signal);
+    alarm(delay);
+
+    while(running)
     {
-       XNextEvent(disp, &ev);
-       switch (ev.type)
+       if(XPending(disp))
        {
-         case ButtonPress:
-         case KeyPress:
-           running = False;
-         case Expose:
-           simplewindow_refresh_drawable(sw, DefaultScreen(disp));
-           break;
-         default:
-           break;
+           XNextEvent(disp, &ev);
+           switch(ev.type)
+           {
+             case ButtonPress:
+             case KeyPress:
+               running = False;
+             case Expose:
+               simplewindow_refresh_drawable(sw, DefaultScreen(disp));
+               break;
+             default:
+               break;
+           }
        }
+       sleep(0.1);
     }
 
     simplewindow_delete(sw);
