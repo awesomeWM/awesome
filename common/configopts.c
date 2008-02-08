@@ -71,6 +71,7 @@ cfg_opt_t widget_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
+    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_END()
 };
@@ -78,6 +79,7 @@ cfg_opt_t widget_taglist_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
+    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_taglist_opts, CFGF_MULTI),
     CFG_END()
 };
@@ -85,6 +87,7 @@ cfg_opt_t widget_iconbox_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
+    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
     CFG_BOOL((char *) "resize", cfg_true, CFGF_NONE),
@@ -94,6 +97,7 @@ cfg_opt_t widget_textbox_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
+    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_INT((char *) "width", 0, CFGF_NONE),
     CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
@@ -132,6 +136,7 @@ cfg_opt_t widget_graph_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
+    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "data", widget_graph_data_opts, CFGF_MULTI),
     CFG_INT((char *) "width", 100, CFGF_NONE),
@@ -154,6 +159,7 @@ cfg_opt_t widget_progressbar_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
+    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "bar", widget_progressbar_bar_opts, CFGF_MULTI),
     CFG_INT((char *) "width", 100, CFGF_NONE),

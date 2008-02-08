@@ -141,6 +141,8 @@ This widget shows the tag list.
     Horizontal offset (auto-alignment if not set).
 *y*::
     Vertical offset (auto-alignment if not set).
+*align*::
+    Widget alignment.
 
 layoutinfo
 ~~~~~~~~~~
@@ -152,6 +154,8 @@ This widget shows a icon for the selected layout.
     Horizontal offset (auto-alignment if not set).
 *y*::
     Vertical offset (auto-alignment if not set).
+*align*::
+    Widget alignment.
 
 focusicon
 ~~~~~~~~~
@@ -163,6 +167,8 @@ This widget shows a icon for the focused window  using NET_WM_ICON or icon file 
     Horizontal offset (auto-alignment if not set).
 *y*::
     Vertical offset (auto-alignment if not set).
+*align*::
+    Widget alignment.
 
 tasklist
 ~~~~~~~~
@@ -213,6 +219,8 @@ This widget shows a text.
     Horizontal offset (auto-alignment if not set).
 *y*::
     Vertical offset (auto-alignment if not set).
+*align*::
+    Widget alignment.
 
 iconbox
 ~~~~~~~
@@ -228,6 +236,8 @@ This widget shows an icon.
     Horizontal offset (auto-alignment if not set).
 *y*::
     Vertical offset (auto-alignment if not set).
+*align*::
+    Widget alignment.
 
 progressbar
 ~~~~~~~~~~~
@@ -257,6 +267,8 @@ This widget shows one or more progress-bars.
     Horizontal offset (auto-alignment if not set).
 *y*::
     Vertical offset (auto-alignment if not set).
+*align*::
+    Widget alignment.
 
 graph
 ~~~~~
@@ -292,6 +304,8 @@ This widget shows a graph.
     Horizontal offset (auto-alignment if not set).
 *y*::
     Vertical offset (auto-alignment if not set).
+*align*::
+    Widget alignment.
 
 OPTIONS
 --------
@@ -379,6 +393,7 @@ screen <integer> [MULTI]
         taglist <identifier> [MULTI]
         {
             x = <integer> y = <integer>
+            align = <{auto,right,left}>
             mouse [MULTI]
             {
                 button = <integer> modkey = {<mod>, ...}
@@ -388,6 +403,7 @@ screen <integer> [MULTI]
         layoutinfo <identifier>
         {
             x = <integer> y = <integer>
+            align = <{auto,right,left}>
             mouse [MULTI]
             {
                 button = <integer> modkey = {<mod>, ...}
@@ -397,6 +413,7 @@ screen <integer> [MULTI]
         focusicon <identifier>
         {
             x = <integer> y = <integer>
+            align = <{auto,right,left}>
             mouse [MULTI]
             {
                 button = <integer> modkey = {<mod>, ...}
@@ -412,7 +429,7 @@ screen <integer> [MULTI]
             font = <font>
             show_icons = <boolean>
             show = <{all,tags,focus}>
-            align = <{center,left,right}>
+            text_align = <{center,left,right}>
             x = <integer> y = <integer>
             mouse [MULTI]
             {
@@ -427,8 +444,9 @@ screen <integer> [MULTI]
             fg = <color>
             font = <font>
             width = <integer>
-            align = <{center,left,right}>
+            text_align = <{center,left,right}>
             x = <integer> y = <integer>
+            align = <{auto,right,left}>
             mouse [MULTI]
             {
                 button = <integer> modkey = {<mod>, ...}
@@ -440,6 +458,7 @@ screen <integer> [MULTI]
             image = <image>
             resize = <boolean>
             x = <integer> y = <integer>
+            align = <{auto,right,left}>
             mouse [MULTI]
             {
                 button = <integer> modkey = {<mod>, ...}
@@ -458,6 +477,7 @@ screen <integer> [MULTI]
             height = <float>
             padding = <integer>
             x = <integer> y = <integer>
+            align = <{auto,right,left}>
             mouse [MULTI]
             {
                 button = <integer> modkey = {<mod>, ...}
@@ -477,6 +497,7 @@ screen <integer> [MULTI]
             bg = <color>
             bordercolor = <color>
             x = <integer> y = <integer>
+            align = <{auto,right,left}>
             mouse [MULTI]
             {
                 button = <integer> modkey = {<mod>, ...}

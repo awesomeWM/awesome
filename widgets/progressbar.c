@@ -149,6 +149,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     w->tell = progressbar_tell;
     d = w->data = p_new(Data, 1);
     d->width = cfg_getint(config, "width");
+    w->alignment = draw_get_align(cfg_getstr(config, "align"));
 
     if(!(d->bars = cfg_size(config, "bar")))
     {

@@ -33,8 +33,9 @@ typedef enum
 {
     AlignLeft,
     AlignRight,
+    AlignCenter,
     AlignFlex,
-    AlignCenter
+    AlignAuto
 } Alignment;
 
 typedef struct Area Area;

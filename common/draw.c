@@ -535,12 +535,14 @@ draw_textwidth(Display *disp, XftFont *font, char *text)
 Alignment
 draw_get_align(const char *align)
 {
-    if(!a_strncmp(align, "center", 6))
+    if(!a_strncmp(align, "left", 4))
+        return AlignLeft;
+    else if(!a_strncmp(align, "center", 6))
         return AlignCenter;
     else if(!a_strncmp(align, "right", 5))
         return AlignRight;
 
-    return AlignLeft;
+    return AlignAuto;
 }
 
 /** Initialize an X color

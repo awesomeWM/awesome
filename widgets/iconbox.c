@@ -81,6 +81,7 @@ iconbox_new(Statusbar *statusbar, cfg_t *config)
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
+    w->alignment = draw_get_align(cfg_getstr(config, "align"));
     w->draw = iconbox_draw;
     w->tell = iconbox_tell;
     w->data = d = p_new(Data, 1);

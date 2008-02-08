@@ -104,6 +104,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     widget_common_new(w, statusbar, config);
     w->draw = textbox_draw;
     w->tell = textbox_tell;
+    w->alignment = draw_get_align(cfg_getstr(config, "align"));
 
     w->data = d = p_new(Data, 1);
 
@@ -127,6 +128,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
         w->font = globalconf.screens[statusbar->screen].font;
 
     d->text = a_strdup(cfg_getstr(config, "text"));
+
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -72,7 +72,7 @@ static void
 statusbar_draw(Statusbar *statusbar)
 {
     int phys_screen = get_phys_screen(statusbar->screen);
-    Widget *widget, *last_drawn = NULL;
+    Widget *widget;
     int left = 0, right = 0;
     Area rectangle = { 0, 0, 0, 0, NULL };
     Drawable d;
@@ -116,13 +116,13 @@ statusbar_draw(Statusbar *statusbar)
         }
 
     /* renders right widget from last to first */
-    for(widget = statusbar->widgets; widget; widget = widget->next)
-        if (widget->alignment == AlignRight && last_drawn == widget->next)
+    for(widget = *widget_list_last(&statusbar->widgets);
+        widget;
+        widget = widget_list_prev(&statusbar->widgets, widget))
+        if (widget->alignment == AlignRight)
         {
             widget->cache.needs_update = False;
             right += widget->draw(widget, ctx, right, (left + right));
-            last_drawn = widget;
-            widget = statusbar->widgets;
         }
 
     for(widget = statusbar->widgets; widget; widget = widget->next)

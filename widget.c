@@ -31,23 +31,18 @@ extern AwesomeConf globalconf;
 void
 widget_calculate_alignments(Widget *widget)
 {
-    for(; widget; widget = widget->next)
-    {
-        if(widget->alignment == AlignFlex)
-        {
-            widget = widget->next;
-            break;
-        }
-        widget->alignment = AlignLeft;
-    }
+    for(; widget && widget->alignment != AlignFlex; widget = widget->next)
+        if(widget->alignment == AlignAuto)
+            widget->alignment = AlignLeft;
 
     if(widget)
-        for(; widget; widget = widget->next)
+        for(widget = widget->next; widget; widget = widget->next)
         {
-            if (widget->alignment == AlignFlex)
+            if(widget->alignment == AlignFlex)
                 warn("Multiple flex widgets in panel -"
                      " ignoring flex for all but the first.");
-            widget->alignment = AlignRight;
+            if(widget->alignment == AlignAuto)
+                widget->alignment = AlignRight;
         }
 }
 
