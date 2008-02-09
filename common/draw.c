@@ -125,31 +125,31 @@ draw_text(DrawCtx *ctx,
           XColor fg, XColor bg)
 {
     int nw = 0;
-    static char buf[256];
-    size_t len, olen;
+    ssize_t len, olen;
+    char *buf;
     cairo_font_face_t *font_face;
 
     draw_rectangle(ctx, area, True, bg);
 
-    olen = len = a_strlen(text);
-
-    if(!len)
+    if(!(len = olen = a_strlen(text)))
         return;
 
-    /* try to convert text to UTF-8 */
-    text = draw_iso2utf8(text);
+    /* copy text to buffer */
+    buf = a_strdup(text);
+    /* try to convert it to UTF-8 */
+    buf = draw_iso2utf8(buf);
 
-    font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
-    cairo_set_font_face(ctx->cr, font_face);
-    cairo_set_font_size(ctx->cr, font->height);
-    cairo_set_source_rgb(ctx->cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
-
-    if(len >= sizeof(buf))
-        len = sizeof(buf) - 1;
-    memcpy(buf, text, len);
-    buf[len] = 0;
+    /* check that the text is not too long */
     while(len && (nw = (draw_textwidth(ctx->display, font, buf)) + padding * 2) > area.width)
-        buf[--len] = 0;
+    {
+        len--;
+        /* we can't blindly null the char, we need to check if it's not part of
+         * a multi byte char: if mbtowc return -1, we know that we must go back
+         * in the string to find the beginning of the multi byte char */
+        while(mbtowc(NULL, buf + len, a_strlen(buf + len)) < 0)
+            len--;
+        buf[len] = '\0';
+    }
     if(nw > area.width)
         return;                 /* too long */
     if(len < olen)
@@ -161,6 +161,11 @@ draw_text(DrawCtx *ctx,
         if(len > 3)
             buf[len - 3] = '.';
     }
+
+    font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
+    cairo_set_font_face(ctx->cr, font_face);
+    cairo_set_font_size(ctx->cr, font->height);
+    cairo_set_source_rgb(ctx->cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
 
     switch(align)
     {
@@ -180,6 +185,7 @@ draw_text(DrawCtx *ctx,
     cairo_show_text(ctx->cr, buf);
 
     cairo_font_face_destroy(font_face);
+    p_delete(&buf);
 }
 
 /** Setup color-source for cairo (gradient or mono)
