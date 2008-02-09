@@ -924,6 +924,7 @@ client_maximize(Client *c, Area geometry)
         c->m_geometry = c->geometry;
         if(get_current_layout(c->screen)->arrange != layout_floating)
             client_setfloating(c, True);
+        client_focus(c, c->screen, False);
         client_resize(c, geometry, False);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
