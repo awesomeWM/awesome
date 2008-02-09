@@ -119,7 +119,7 @@ uicb_focus_history(int screen, char *arg)
             c = focus_get_latest_client_for_tags(curtags, i);
             p_delete(&curtags);
             if(c)
-                client_focus(c, screen, False);
+                client_focus(c, screen, True);
         }
     }
 }
@@ -136,7 +136,7 @@ uicb_focus_client_byname(int screen, char *arg)
         if((c = client_get_byname(globalconf.clients, arg)))
            for(tag = curtags; *tag; tag++)
                if(is_client_tagged(c, *tag))
-                   client_focus(c, screen, False);
+                   client_focus(c, screen, True);
         p_delete(&curtags);
     }
 }

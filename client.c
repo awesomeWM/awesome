@@ -172,7 +172,7 @@ client_ban(Client *c)
  * \param screen Screen ID
  */
 void
-client_focus(Client *c, int screen, Bool from_mouse)
+client_focus(Client *c, int screen, Bool raise)
 {
     int phys_screen = get_phys_screen(screen);
 
@@ -200,8 +200,7 @@ client_focus(Client *c, int screen, Bool from_mouse)
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].colors_selected[ColBorder].pixel);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
-        if(!from_mouse
-           || (globalconf.screens[screen].sloppy_focus && globalconf.screens[screen].sloppy_focus_raise))
+        if(raise)
             XRaiseWindow(globalconf.display, c->win);
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
@@ -597,7 +596,7 @@ client_unmanage(Client *c)
         untag_client(c, tag);
 
     if(globalconf.focus->client == c)
-        client_focus(NULL, c->screen, False);
+        client_focus(NULL, c->screen, True);
 
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
     window_setstate(c->win, WithdrawnState);
@@ -924,7 +923,7 @@ client_maximize(Client *c, Area geometry)
         c->m_geometry = c->geometry;
         if(get_current_layout(c->screen)->arrange != layout_floating)
             client_setfloating(c, True);
-        client_focus(c, c->screen, False);
+        client_focus(c, c->screen, True);
         client_resize(c, geometry, False);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
@@ -1054,7 +1053,7 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
     if(!c)
         for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     if(c)
-        client_focus(c, screen, False);
+        client_focus(c, screen, True);
 }
 
 /** Send focus to previous client in stack
@@ -1068,7 +1067,7 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
     Client *prev;
 
     if((prev = client_find_prev_visible(globalconf.focus->client)))
-        client_focus(prev, screen, False);
+        client_focus(prev, screen, True);
 }
 
 /** Toggle floating state of a client
@@ -1118,7 +1117,7 @@ uicb_client_togglescratch(int screen,
     {
         globalconf.scratch.isvisible = !globalconf.scratch.isvisible;
         if(globalconf.scratch.isvisible)
-            client_focus(globalconf.scratch.client, screen, False);
+            client_focus(globalconf.scratch.client, screen, True);
         globalconf.screens[globalconf.scratch.client->screen].need_arrange = True;
         widget_invalidate_cache(globalconf.scratch.client->screen, WIDGET_CACHE_CLIENTS);
     }

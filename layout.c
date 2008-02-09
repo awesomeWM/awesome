@@ -67,13 +67,13 @@ arrange(int screen)
             c->newcomer = False;
             client_unban(c);
             if(globalconf.screens[screen].new_get_focus)
-                client_focus(c, screen, False);
+                client_focus(c, screen, True);
         }
 
     /* if we have a valid client that could be focused but currently no window
      * are focused, then set the focus on this window */
     if((c = focus_get_current_client(screen)) && !globalconf.focus->client)
-        client_focus(c, screen, False);
+        client_focus(c, screen, True);
 
     /* check that the mouse is on a window or not */
     if(XQueryPointer(globalconf.display, RootWindow(globalconf.display,
