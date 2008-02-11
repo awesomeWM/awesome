@@ -80,7 +80,7 @@ arrange(int screen)
                                                     get_phys_screen(screen)),
                      &rootwin, &childwin, &x, &y, &di, &di, &dui)
        && (rootwin == None || childwin == None || childwin == rootwin))
-        window_root_grabbuttons(screen);
+        window_root_grabbuttons(get_phys_screen(screen));
 
     /* reset status */
     globalconf.screens[screen].need_arrange = False;
