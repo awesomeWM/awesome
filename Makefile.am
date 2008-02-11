@@ -159,9 +159,11 @@ awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS)
 
 if HAVE_XMLTO
 if HAVE_ASCIIDOC
+if XMLTO_MAN_WORKS
 man_MANS   += awesome.1
 man_MANS   += awesome-client.1
 man_MANS   += awesomerc.1
+endif
 endif
 endif
 

@@ -54,6 +54,44 @@ AM_CONDITIONAL([HAVE_ASCIIDOC], [test "x$ASCIIDOC" != "x:"])
 AM_CONDITIONAL([HAVE_XMLTO],    [test "x$XMLTO"    != "x:"])
 AM_CONDITIONAL([HAVE_DOXYGEN],  [test "x$DOXYGEN"  != "x:"])
 
+xmlto_man_works=no
+if test ="x$XMLTO" != "x:"; then dnl try generating an example man page
+	rm -f conf-example.1
+	cat>conf-example.1.xml<<MANEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+          "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<refentry>
+<refmeta>
+<refentrytitle>conf-example</refentrytitle>
+<manvolnum>1</manvolnum>
+</refmeta>
+<refnamediv>
+<refname>conf-example</refname>
+<refpurpose>'configure' time test for working 'xmlto man'</refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+<simpara>foo</simpara>
+</refsynopsisdiv>
+<refsect1>
+<title>DESCRIPTION</title>
+<simpara>bar</simpara>
+</refsect1>
+</refentry>
+MANEOF
+	AC_MSG_CHECKING([whether xmlto can create a man page])
+	if ${XMLTO} man conf-example.1.xml >/dev/null 2>&1 && test -s conf-example.1; then
+		xmlto_man_works=yes
+		AC_MSG_RESULT([yes])
+		rm -f conf-example.1 conf-example.1.xml
+	else
+		AC_MSG_RESULT([no])
+		AC_MSG_WARN([awesome man page generation requires 'xmlto man', but it does not work.
+Do you need to (properly) install http://docbook.sourceforge.net/projects/xsl/?])
+	fi
+fi
+AM_CONDITIONAL([XMLTO_MAN_WORKS], [test "x$xmlto_man_works" = "xyes"])
+
 AM_CONDITIONAL([USING_GCC], [test "x$GCC" = "xyes"])
 
 AC_CANONICAL_HOST
