@@ -43,7 +43,7 @@ draw_iso2utf8(char *iso)
         return NULL;
 
     if(!a_strcmp(nl_langinfo(CODESET), "UTF-8"))
-        return iso;
+        return NULL;
 
     iso2utf8 = iconv_open("UTF-8", nl_langinfo(CODESET));
     if(iso2utf8 == (iconv_t) -1)
@@ -63,6 +63,7 @@ draw_iso2utf8(char *iso)
     if(iconv(iso2utf8, &iso, &len, &utf8, &utf8len) == (size_t) -1)
     {
         perror("awesome: text conversion failed");
+        p_delete(&utf8);
         return NULL;
     }
 
@@ -126,7 +127,7 @@ draw_text(DrawCtx *ctx,
 {
     int nw = 0;
     ssize_t len, olen;
-    char *buf;
+    char *buf, *utf8;
     cairo_font_face_t *font_face;
 
     draw_rectangle(ctx, area, True, bg);
@@ -136,9 +137,15 @@ draw_text(DrawCtx *ctx,
 
     /* copy text to buffer */
     buf = a_strdup(text);
+
     /* try to convert it to UTF-8 */
-    if(!(buf = draw_iso2utf8(buf)))
-        return;
+    if((utf8 = draw_iso2utf8(buf)))
+    {
+        /* conversion success */
+        p_delete(&buf);
+        buf = utf8;
+        len = olen = a_strlen(buf);
+    }
 
     /* check that the text is not too long */
     while(len && (nw = (draw_textwidth(ctx->display, font, buf)) + padding * 2) > area.width)
