@@ -226,16 +226,19 @@ client_get_smart_geometry(Area geometry, int border, int screen)
 {
     Client *c;
     Area newgeometry = { 0, 0, 0, 0, NULL };
-    Area *screen_geometry, *arealist = NULL, *r;
+    Area *screen_geometry, *tmp, *arealist = NULL, *r;
     Bool found = False;
 
     screen_geometry = p_new(Area, 1);
+    tmp = p_new(Area, 1);
 
-    *screen_geometry = screen_get_area(screen,
-                                       globalconf.screens[screen].statusbar,
-                                       &globalconf.screens[screen].padding);
+    /* we need tmp because it may be free'd by in
+     * the area_list_remove process */
+    *screen_geometry = *tmp = screen_get_area(screen,
+                                             globalconf.screens[screen].statusbar,
+                                             &globalconf.screens[screen].padding);
 
-    area_list_push(&arealist, screen_geometry);
+    area_list_push(&arealist, tmp);
 
     for(c = globalconf.clients; c; c = c->next)
         if(client_isvisible(c, screen))
@@ -272,12 +275,12 @@ client_get_smart_geometry(Area geometry, int border, int screen)
 
     /* fix offscreen */
     if(AREA_RIGHT(newgeometry) > AREA_RIGHT(*screen_geometry))
-        newgeometry.x = screen_geometry->x + screen_geometry->width - newgeometry.width - 2 * border;
+        newgeometry.x = screen_geometry->x + screen_geometry->width - (newgeometry.width + 2 * border);
 
     if(AREA_BOTTOM(newgeometry) > AREA_BOTTOM(*screen_geometry))
-        newgeometry.y = screen_geometry->y + screen_geometry->height - newgeometry.height - 2 * border;
-
+        newgeometry.y = screen_geometry->y + screen_geometry->height - (newgeometry.height + 2 * border);
     area_list_wipe(&arealist);
+    p_delete(&screen_geometry);
 
     return newgeometry;
 }

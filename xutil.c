@@ -103,7 +103,6 @@ xgettextprop(Window w, Atom atom, char *text, ssize_t textlen)
 {
     char **list = NULL;
     int n;
-
     XTextProperty name;
 
     if(!text || !textlen)

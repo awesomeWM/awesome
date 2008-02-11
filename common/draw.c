@@ -587,11 +587,11 @@ draw_color_new(Display *disp, int phys_screen, const char *colstr)
 void
 area_list_remove(Area **head, Area *elem)
 {
-    Area *r, inter, *extra;
+    Area *r, inter, *extra, *rnext;
 
-    area_list_detach(head, elem);
-
-    for(r = *head; r; r = r->next)
+    for(r = *head; r; r = rnext)
+    {
+        rnext = r->next;
         if(area_intersect_area(*r, *elem))
         {
             /* remove it from the list */
@@ -606,7 +606,7 @@ area_list_remove(Area **head, Area *elem)
                 extra->y = r->y;
                 extra->width = AREA_LEFT(inter) - r->x;
                 extra->height = r->height;
-                area_list_push(head, extra);
+                area_list_append(head, extra);
             }
 
             if(AREA_TOP(inter) > AREA_TOP(*r))
@@ -616,7 +616,7 @@ area_list_remove(Area **head, Area *elem)
                 extra->y = r->y;
                 extra->width = r->width;
                 extra->height = AREA_TOP(inter) - r->y;
-                area_list_push(head, extra);
+                area_list_append(head, extra);
             }
 
             if(AREA_RIGHT(inter) < AREA_RIGHT(*r))
@@ -626,7 +626,7 @@ area_list_remove(Area **head, Area *elem)
                 extra->y = r->y;
                 extra->width = AREA_RIGHT(*r) - AREA_RIGHT(inter);
                 extra->height = r->height;
-                area_list_push(head, extra);
+                area_list_append(head, extra);
             }
 
             if(AREA_BOTTOM(inter) < AREA_BOTTOM(*r))
@@ -636,9 +636,13 @@ area_list_remove(Area **head, Area *elem)
                 extra->y = AREA_BOTTOM(inter);
                 extra->width = r->width;
                 extra->height = AREA_BOTTOM(*r) - AREA_BOTTOM(inter);
-                area_list_push(head, extra);
+                area_list_append(head, extra);
             }
+
+            /* delete the elem since we removed it from the list */
+            p_delete(&r);
         }
+    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
