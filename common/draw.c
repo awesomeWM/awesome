@@ -137,7 +137,8 @@ draw_text(DrawCtx *ctx,
     /* copy text to buffer */
     buf = a_strdup(text);
     /* try to convert it to UTF-8 */
-    buf = draw_iso2utf8(buf);
+    if(!(buf = draw_iso2utf8(buf)))
+        return;
 
     /* check that the text is not too long */
     while(len && (nw = (draw_textwidth(ctx->display, font, buf)) + padding * 2) > area.width)
