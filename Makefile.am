@@ -157,14 +157,17 @@ awesome_message_SOURCES = \
 
 awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS)
 
-EXTRA_DIST += awesome.1.txt
+if HAVE_XMLTO
+if HAVE_ASCIIDOC
 man_MANS   += awesome.1
-
-EXTRA_DIST += awesome-client.1.txt
 man_MANS   += awesome-client.1
-
-EXTRA_DIST += awesomerc.1.txt
 man_MANS   += awesomerc.1
+endif
+endif
+
+EXTRA_DIST += awesome.1.txt
+EXTRA_DIST += awesome-client.1.txt
+EXTRA_DIST += awesomerc.1.txt
 
 dist_iconslayouts_DATA += icons/layouts/dwindle.png
 dist_iconslayouts_DATA += icons/layouts/dwindlew.png
