@@ -46,9 +46,9 @@ test "x$ASCIIDOC" = "x"  && AC_PATH_PROG([ASCIIDOC], [asciidoc], [:])
 test "x$XMLTO"    = "x"  && AC_PATH_PROG([XMLTO], [xmlto], [:])
 test "x$DOXYGEN"  = "x"  && AC_PATH_PROG([DOXYGEN], [doxygen], [:])
 
-test "x$ASCIIDOC" = "x:" && AC_MSG_WARN([awesome requires asciidoc])
-test "x$XMLTO"    = "x:" && AC_MSG_WARN([awesome requires xmlto])
-test "x$DOXYGEN"  = "x:" && AC_MSG_WARN([awesome requires doxygen])
+test "x$ASCIIDOC" = "x:" && AC_MSG_WARN([awesome man page generation requires asciidoc])
+test "x$XMLTO"    = "x:" && AC_MSG_WARN([awesome man page generation requires xmlto])
+test "x$DOXYGEN"  = "x:" && AC_MSG_WARN([awesome developer doc generation requires doxygen])
 
 AM_CONDITIONAL([HAVE_ASCIIDOC], [test "x$ASCIIDOC" != "x:"])
 AM_CONDITIONAL([HAVE_XMLTO],    [test "x$XMLTO"    != "x:"])
