@@ -127,7 +127,7 @@ draw_text(DrawCtx *ctx,
 {
     int nw = 0;
     ssize_t len, olen;
-    char *buf, *utf8;
+    char *buf = NULL, *utf8 = NULL;
     cairo_font_face_t *font_face;
 
     draw_rectangle(ctx, area, True, bg);
@@ -135,17 +135,14 @@ draw_text(DrawCtx *ctx,
     if(!(len = olen = a_strlen(text)))
         return;
 
-    /* copy text to buffer */
-    buf = a_strdup(text);
-
     /* try to convert it to UTF-8 */
-    if((utf8 = draw_iso2utf8(buf)))
+    if((utf8 = draw_iso2utf8(text)))
     {
-        /* conversion success */
-        p_delete(&buf);
         buf = utf8;
         len = olen = a_strlen(buf);
     }
+    else
+        buf = a_strdup(text);
 
     /* check that the text is not too long */
     while(len && (nw = (draw_textwidth(ctx->display, font, buf)) + padding * 2) > area.width)
@@ -193,6 +190,7 @@ draw_text(DrawCtx *ctx,
     cairo_show_text(ctx->cr, buf);
 
     cairo_font_face_destroy(font_face);
+
     p_delete(&buf);
 }
 
