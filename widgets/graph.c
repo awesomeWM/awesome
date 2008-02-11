@@ -250,6 +250,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
     w->draw = graph_draw;
     w->tell = graph_tell;
+    w->alignment = draw_get_align(cfg_getstr(config, "align"));
     d = w->data = p_new(Data, 1);
 
     d->width = cfg_getint(config, "width");
