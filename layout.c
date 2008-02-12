@@ -111,12 +111,13 @@ layout_get_current(int screen)
     return l;
 }
 
-void
+Bool
 loadawesomeprops(int screen)
 {
     int i, ntags = 0;
     char *prop;
     Tag *tag;
+    Bool ret = False;
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         ntags++;
@@ -127,9 +128,15 @@ loadawesomeprops(int screen)
                     XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
                     prop, ntags + 1))
         for(i = 0, tag = globalconf.screens[screen].tags; tag && prop[i]; i++, tag = tag->next)
-            tag_view_byindex(screen, i, prop[i] == '1');
+            if(prop[i] == '1')
+            {
+                tag_view_byindex(screen, i, prop[i] == '1');
+                ret = True;
+            }
 
     p_delete(&prop);
+
+    return ret;
 }
 
 void

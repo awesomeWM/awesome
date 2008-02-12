@@ -52,6 +52,7 @@
 #include "client.h"
 #include "focus.h"
 #include "ewmh.h"
+#include "tag.h"
 #include "common/awclient.h"
 #include "common/util.h"
 #include "common/awesome-version.h"
@@ -309,7 +310,9 @@ main(int argc, char *argv[])
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
-        loadawesomeprops(screen);
+        /* if loadawesomeprops fails, set view on first tag */
+        if(!loadawesomeprops(screen))
+            tag_view(globalconf.screens[screen].tags, True);
         ewmh_set_supported_hints(screen);
         /* call this to at least grab root window clicks */
         window_root_grabbuttons(screen);

@@ -42,7 +42,7 @@ DO_SLIST(Layout, layout, p_delete);
 
 int layout_refresh(void);
 Layout * layout_get_current(int);
-void loadawesomeprops(int);
+Bool loadawesomeprops(int);
 void saveawesomeprops(int);
 
 Uicb uicb_tag_setlayout;
