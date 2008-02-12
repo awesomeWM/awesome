@@ -367,19 +367,20 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
         }
         else
             move_client_to_screen(c, screen, True);
-        /* check for transient and set tags like its parent,
-         * XGetTransientForHint returns 1 on success
-         */
-        if((rettrans = XGetTransientForHint(globalconf.display, w, &trans))
-           && (t = client_get_bywin(globalconf.clients, trans)))
-            for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-                if(is_client_tagged(t, tag))
-                    tag_client(c, tag);
-
-        /* should be floating if transsient or fixed */
-        if(!c->isfloating)
-            client_setfloating(c, rettrans || c->isfixed);
     }
+
+    /* check for transient and set tags like its parent,
+     * XGetTransientForHint returns 1 on success
+     */
+    if((rettrans = XGetTransientForHint(globalconf.display, w, &trans))
+       && (t = client_get_bywin(globalconf.clients, trans)))
+        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+            if(is_client_tagged(t, tag))
+                tag_client(c, tag);
+
+    /* should be floating if transsient or fixed */
+    if(!c->isfloating)
+        client_setfloating(c, rettrans || c->isfixed);
 
     if(!(flags & (USPosition | PPosition)))
         c->f_geometry = client_get_smart_geometry(c->f_geometry, c->border, c->screen);
