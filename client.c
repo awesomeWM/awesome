@@ -847,17 +847,15 @@ uicb_client_moveresize(int screen, char *arg)
     Window dummy;
     Area area;
     Client *sel = globalconf.focus->client;
-    Tag **curtags = tags_get_current(screen);
+    Layout *curlay = get_current_layout(screen);
 
-    if(curtags[0]->layout->arrange != layout_floating)
-        if(!sel || !sel->isfloating || sel->isfixed || !arg)
-        {
-            p_delete(&curtags);
+    if(curlay->arrange != layout_floating ||
+        !sel || !sel->isfloating || sel->isfixed || !arg)
             return;
-        }
-    p_delete(&curtags);
+
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
         return;
+
     area.x = (int) compute_new_value_from_arg(x, sel->geometry.x);
     area.y = (int) compute_new_value_from_arg(y, sel->geometry.y);
     area.width = (int) compute_new_value_from_arg(w, sel->geometry.width);
