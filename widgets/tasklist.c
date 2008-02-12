@@ -52,7 +52,7 @@ typedef struct
 static inline Bool
 tasklist_isvisible(Client *c, int screen, ShowClient show)
 {
-    if(c->skiptb)
+    if(c->skip || c->skiptb)
         return False;
 
     switch(show)
