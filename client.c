@@ -508,7 +508,7 @@ client_resize(Client *c, Area geometry, Bool sizehints)
         /* save the floating geometry if the window is floating but not
          * maximized */
         if((c->isfloating ||
-           get_current_layout(new_screen)->arrange == layout_floating) && !c->ismax)
+           layout_get_current(new_screen)->arrange == layout_floating) && !c->ismax)
             c->f_geometry = geometry;
 
         XConfigureWindow(globalconf.display, c->win,
@@ -847,7 +847,7 @@ uicb_client_moveresize(int screen, char *arg)
     Window dummy;
     Area area;
     Client *sel = globalconf.focus->client;
-    Layout *curlay = get_current_layout(screen);
+    Layout *curlay = layout_get_current(screen);
 
     if(curlay->arrange != layout_floating ||
         !sel || !sel->isfloating || sel->isfixed || !arg)
@@ -922,7 +922,7 @@ client_maximize(Client *c, Area geometry)
     {
         c->wasfloating = c->isfloating;
         c->m_geometry = c->geometry;
-        if(get_current_layout(c->screen)->arrange != layout_floating)
+        if(layout_get_current(c->screen)->arrange != layout_floating)
             client_setfloating(c, True);
         client_focus(c, c->screen, True);
         client_resize(c, geometry, False);
@@ -934,7 +934,7 @@ client_maximize(Client *c, Area geometry)
         client_resize(c, c->m_geometry, False);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
-    else if(get_current_layout(c->screen)->arrange == layout_floating)
+    else if(layout_get_current(c->screen)->arrange == layout_floating)
     {
         client_resize(c, c->m_geometry, False);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);

@@ -49,7 +49,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     XEvent ev;
     Area area, geometry;
     Client *c = globalconf.focus->client, *target;
-    Layout *layout = get_current_layout(screen);
+    Layout *layout = layout_get_current(screen);
 
     if(!c)
         return;

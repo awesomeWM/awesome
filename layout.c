@@ -45,7 +45,7 @@ static void
 arrange(int screen)
 {
     Client *c;
-    Layout *curlay = get_current_layout(screen);
+    Layout *curlay = layout_get_current(screen);
     unsigned int dui;
     int di, x, y;
     Window rootwin, childwin;
@@ -103,7 +103,7 @@ layout_refresh(void)
 }
 
 Layout *
-get_current_layout(int screen)
+layout_get_current(int screen)
 {
     Tag **curtags = tags_get_current(screen);
     Layout *l = curtags[0]->layout;
