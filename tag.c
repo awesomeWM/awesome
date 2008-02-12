@@ -325,7 +325,6 @@ tag_view(Tag *tag, Bool view)
     tag->selected = view;
     ewmh_update_net_current_desktop(get_phys_screen(tag->screen));
     widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
-    saveawesomeprops(tag->screen);
     globalconf.screens[tag->screen].need_arrange = True;
 }
 

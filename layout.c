@@ -111,57 +111,6 @@ layout_get_current(int screen)
     return l;
 }
 
-Bool
-loadawesomeprops(int screen)
-{
-    int i, ntags = 0;
-    char *prop;
-    Tag *tag;
-    Bool ret = False;
-
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        ntags++;
-
-    prop = p_new(char, ntags + 1);
-
-    if(xgettextprop(RootWindow(globalconf.display, get_phys_screen(screen)),
-                    XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
-                    prop, ntags + 1))
-        for(i = 0, tag = globalconf.screens[screen].tags; tag && prop[i]; i++, tag = tag->next)
-            if(prop[i] == '1')
-            {
-                tag_view_byindex(screen, i, prop[i] == '1');
-                ret = True;
-            }
-
-    p_delete(&prop);
-
-    return ret;
-}
-
-void
-saveawesomeprops(int screen)
-{
-    int i, ntags = 0;
-    char *prop;
-    Tag *tag;
-
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        ntags++;
-
-    prop = p_new(char, ntags + 1);
-
-    for(i = 0, tag = globalconf.screens[screen].tags; tag; tag = tag->next, i++)
-        prop[i] = tag->selected ? '1' : '0';
-
-    prop[i] = '\0';
-    XChangeProperty(globalconf.display,
-                    RootWindow(globalconf.display, get_phys_screen(screen)),
-                    XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
-                    XA_STRING, 8, PropModeReplace, (unsigned char *) prop, i);
-    p_delete(&prop);
-}
-
 /** Set layout for tag
  * \param screen Screen ID
  * \param arg Layout specifier
@@ -204,8 +153,6 @@ uicb_tag_setlayout(int screen, char *arg)
         arrange(screen);
 
     widget_invalidate_cache(screen, WIDGET_CACHE_LAYOUTS);
-
-    saveawesomeprops(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

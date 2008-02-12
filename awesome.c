@@ -142,6 +142,9 @@ setup(int screen)
 
     grabkeys(phys_screen);
 
+    /* view at least one tag */
+    tag_view(globalconf.screens[screen].tags, True);
+
     for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
         statusbar_init(statusbar);
 }
@@ -310,9 +313,6 @@ main(int argc, char *argv[])
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
-        /* if loadawesomeprops fails, set view on first tag */
-        if(!loadawesomeprops(screen))
-            tag_view(globalconf.screens[screen].tags, True);
         ewmh_set_supported_hints(screen);
         /* call this to at least grab root window clicks */
         window_root_grabbuttons(screen);
