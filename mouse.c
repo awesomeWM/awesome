@@ -54,9 +54,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     if(!c)
         return;
 
-    /* go above everybody */
-    XMapRaised(globalconf.display, c->win);
-
     area = screen_get_area(c->screen,
                            globalconf.screens[screen].statusbar,
                            &globalconf.screens[screen].padding);
@@ -127,7 +124,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                     layout_refresh();
                 }
                 if((target = client_get_bywin(globalconf.clients, child))
-                   && target != c)
+                   && target != c && !target->isfloating)
                 {
                     client_list_swap(&globalconf.clients, c, target);
                     globalconf.screens[c->screen].need_arrange = True;

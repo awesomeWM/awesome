@@ -201,7 +201,24 @@ client_focus(Client *c, int screen, Bool raise)
                          globalconf.screens[screen].colors_selected[ColBorder].pixel);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
         if(raise)
-            XRaiseWindow(globalconf.display, c->win);
+        {
+            XWindowChanges wc;
+            Layout *curlay = layout_get_current(screen);
+            if(c->isfloating || curlay->arrange == layout_floating)
+                XRaiseWindow(globalconf.display, c->win);
+            else
+            {
+                Client *client;
+                wc.stack_mode = Below;
+                wc.sibling = c->win;
+                for(client = globalconf.clients; client; client = client->next)
+                    if(client != c && IS_TILED(client, c->screen))
+                    {
+                        XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
+                        wc.sibling = client->win;
+                    }
+            }
+        }
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
         window_grabbuttons(phys_screen, c->win);
@@ -530,11 +547,18 @@ client_setfloating(Client *c, Bool floating)
     if(c->isfloating != floating)
     {
         if((c->isfloating = floating))
-            client_resize(c, c->f_geometry, False);
-        else if(c->ismax)
         {
-            c->ismax = False;
-            client_resize(c, c->m_geometry, False);
+            client_resize(c, c->f_geometry, False);
+            XRaiseWindow(globalconf.display, c->win);
+        }
+        else
+        {
+            XLowerWindow(globalconf.display, c->win);
+            if(c->ismax)
+            {
+                c->ismax = False;
+                client_resize(c, c->m_geometry, False);
+            }
         }
         if(client_isvisible(c, c->screen))
             globalconf.screens[c->screen].need_arrange = True;
