@@ -229,6 +229,7 @@ graph_tell(Widget *widget, char *command)
                 d->lines[z][d->index] = d->box_height;
         }
     }
+    p_delete(&value);
 }
 
 Widget *
