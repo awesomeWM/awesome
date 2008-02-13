@@ -233,75 +233,6 @@ client_focus(Client *c, int screen, Bool raise)
     globalconf.drop_events |= EnterWindowMask;
 }
 
-/** Compute smart coordinates for a client window
- * \param geometry current/requested client geometry
- * \param screen screen used
- * \return new geometry
- */
-static Area
-client_get_smart_geometry(Area geometry, int border, int screen)
-{
-    Client *c;
-    Area newgeometry = { 0, 0, 0, 0, NULL };
-    Area *screen_geometry, *tmp, *arealist = NULL, *r;
-    Bool found = False;
-
-    screen_geometry = p_new(Area, 1);
-    tmp = p_new(Area, 1);
-
-    /* we need tmp because it may be free'd by in
-     * the area_list_remove process */
-    *screen_geometry = *tmp = screen_get_area(screen,
-                                             globalconf.screens[screen].statusbar,
-                                             &globalconf.screens[screen].padding);
-
-    area_list_push(&arealist, tmp);
-
-    for(c = globalconf.clients; c; c = c->next)
-        if(client_isvisible(c, screen))
-        {
-            newgeometry = c->f_geometry;
-            newgeometry.width += 2 * c->border;
-            newgeometry.height += 2 * c->border;
-            area_list_remove(&arealist, &newgeometry);
-        }
-
-    newgeometry.x = geometry.x;
-    newgeometry.y = geometry.y;
-    newgeometry.width = 0;
-    newgeometry.height = 0;
-
-    for(r = arealist; r; r = r->next)
-        if(r->width >= geometry.width && r->height >= geometry.height
-           && r->width * r->height > newgeometry.width * newgeometry.height)
-        {
-            found = True;
-            newgeometry = *r;
-        }
-
-    /* we did not found a space with enough space for our size:
-     * just take the biggest available and go in */
-    if(!found)
-        for(r = arealist; r; r = r->next)
-           if(r->width * r->height > newgeometry.width * newgeometry.height)
-               newgeometry = *r;
-
-    /* restore height and width */
-    newgeometry.width = geometry.width;
-    newgeometry.height = geometry.height;
-
-    /* fix offscreen */
-    if(AREA_RIGHT(newgeometry) > AREA_RIGHT(*screen_geometry))
-        newgeometry.x = screen_geometry->x + screen_geometry->width - (newgeometry.width + 2 * border);
-
-    if(AREA_BOTTOM(newgeometry) > AREA_BOTTOM(*screen_geometry))
-        newgeometry.y = screen_geometry->y + screen_geometry->height - (newgeometry.height + 2 * border);
-    area_list_wipe(&arealist);
-    p_delete(&screen_geometry);
-
-    return newgeometry;
-}
-
 /** Manage a new client
  * \param w The window
  * \param wa Window attributes
@@ -400,7 +331,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
         client_setfloating(c, rettrans || c->isfixed);
 
     if(!(flags & (USPosition | PPosition)))
-        c->f_geometry = client_get_smart_geometry(c->f_geometry, c->border, c->screen);
+        c->f_geometry =
+            globalconf.screens[c->screen].floating_placement(c->f_geometry, c->border, c->screen);
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 

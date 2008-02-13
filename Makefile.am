@@ -112,6 +112,7 @@ AM_CPPFLAGS = $(XFT_CFLAGS) $(X_CFLAGS) $(CAIRO_CFLAGS) $(CONFUSE_CFLAGS) $(XRAN
 bin_PROGRAMS += awesome
 awesome_SOURCES = \
 	client.c client.h \
+	placement.c placement.h \
 	common/awesome-version.c common/awesome-version.h \
 	focus.c focus.h \
 	common/draw.c common/draw.h \

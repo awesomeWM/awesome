@@ -244,6 +244,7 @@ typedef struct
     int right;
 } Padding;
 
+typedef Area (FloatingPlacement)(Area, int, int);
 typedef struct
 {
     /** Screen geometry */
@@ -252,6 +253,8 @@ typedef struct
     int snap;
     /** Border size */
     int borderpx;
+    /** Floating window placement algo */
+    FloatingPlacement *floating_placement;
     /** Respect resize hints */
     Bool resize_hints;
     /** Sloppy focus: focus follow mouse */

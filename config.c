@@ -62,6 +62,7 @@ typedef struct
 extern const name_func_link_t UicbList[];
 extern const name_func_link_t WidgetList[];
 extern const name_func_link_t LayoutList[];
+extern const name_func_link_t FloatingPlacementList[];
 
 /** Lookup for a key mask from its name
  * \param keyname Key name
@@ -317,6 +318,9 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->font = XftFontOpenName(globalconf.display,
                                        phys_screen,
                                        cfg_getstr(cfg_general, "font"));
+    virtscreen->floating_placement =
+        name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
+                                    FloatingPlacementList);
     if(!virtscreen->font)
         eprint("awesome: cannot init font\n");
 
