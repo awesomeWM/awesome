@@ -348,6 +348,7 @@ screen <integer> [MULTI]
         sloppy_focus = <boolean>
         sloppy_focus_raise = <boolean>
         snap = <integer>
+        floating_placement = <{smart,under_mouse}>
     }
     tags
     {

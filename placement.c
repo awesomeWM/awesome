@@ -28,7 +28,27 @@ extern AwesomeConf globalconf;
 name_func_link_t FloatingPlacementList[] =
 {
     { "smart", placement_smart },
+    { "under_mouse", placement_under_mouse },
 };
+
+static Area
+placement_fix_offscreen(Area geometry, int screen, int border)
+{
+    Area screen_geometry, newgeometry = geometry;
+
+    screen_geometry = screen_get_area(screen,
+                                      globalconf.screens[screen].statusbar,
+                                      &globalconf.screens[screen].padding);
+
+    /* fix offscreen */
+    if(AREA_RIGHT(newgeometry) > AREA_RIGHT(screen_geometry))
+        newgeometry.x = screen_geometry.x + screen_geometry.width - (newgeometry.width + 2 * border);
+
+    if(AREA_BOTTOM(newgeometry) > AREA_BOTTOM(screen_geometry))
+        newgeometry.y = screen_geometry.y + screen_geometry.height - (newgeometry.height + 2 * border);
+
+    return newgeometry;
+}
 
 /** Compute smart coordinates for a client window
  * \param geometry current/requested client geometry
@@ -40,19 +60,16 @@ placement_smart(Area geometry, int border, int screen)
 {
     Client *c;
     Area newgeometry = { 0, 0, 0, 0, NULL };
-    Area *screen_geometry, *tmp, *arealist = NULL, *r;
+    Area *screen_geometry, *arealist = NULL, *r;
     Bool found = False;
 
     screen_geometry = p_new(Area, 1);
-    tmp = p_new(Area, 1);
 
-    /* we need tmp because it may be free'd by in
-     * the area_list_remove process */
-    *screen_geometry = *tmp = screen_get_area(screen,
-                                             globalconf.screens[screen].statusbar,
-                                             &globalconf.screens[screen].padding);
+    *screen_geometry = screen_get_area(screen,
+                                       globalconf.screens[screen].statusbar,
+                                       &globalconf.screens[screen].padding);
 
-    area_list_push(&arealist, tmp);
+    area_list_push(&arealist, screen_geometry);
 
     for(c = globalconf.clients; c; c = c->next)
         if(client_isvisible(c, screen))
@@ -87,16 +104,30 @@ placement_smart(Area geometry, int border, int screen)
     newgeometry.width = geometry.width;
     newgeometry.height = geometry.height;
 
-    /* fix offscreen */
-    if(AREA_RIGHT(newgeometry) > AREA_RIGHT(*screen_geometry))
-        newgeometry.x = screen_geometry->x + screen_geometry->width - (newgeometry.width + 2 * border);
+    newgeometry = placement_fix_offscreen(newgeometry, screen, border);
 
-    if(AREA_BOTTOM(newgeometry) > AREA_BOTTOM(*screen_geometry))
-        newgeometry.y = screen_geometry->y + screen_geometry->height - (newgeometry.height + 2 * border);
     area_list_wipe(&arealist);
-    p_delete(&screen_geometry);
 
     return newgeometry;
 }
 
+Area
+placement_under_mouse(Area geometry, int border, int screen)
+{
+    Window dummy;
+    unsigned int m;
+    int x, y, d;
+    Area finalgeometry = geometry;
+
+    if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)),
+                     &dummy, &dummy, &x, &y, &d, &d, &m))
+    {
+        finalgeometry.x = x - geometry.width / 2;
+        finalgeometry.y = y - geometry.height / 2;
+    }
+
+    finalgeometry = placement_fix_offscreen(finalgeometry, screen, border);
+
+    return finalgeometry;
+}
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
