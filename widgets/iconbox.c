@@ -87,7 +87,7 @@ iconbox_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
     d->image = a_strdup(cfg_getstr(config, "image"));
     d->resize = cfg_getbool(config, "resize");
-    
+
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

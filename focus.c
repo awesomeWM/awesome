@@ -20,7 +20,7 @@
  */
 
 #include "tag.h"
-#include "focus.h" 
+#include "focus.h"
 #include "client.h"
 
 extern AwesomeConf globalconf;

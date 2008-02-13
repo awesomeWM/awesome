@@ -74,7 +74,7 @@ client_match_rule(Client *c, Rule *r)
         if(ret)
             return True;
     }
-    
+
     if(r->xprop
        && r->xpropval_r
        && xgettextprop(c->win,

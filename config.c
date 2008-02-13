@@ -113,7 +113,7 @@ mouse_button_lookup(const char *button)
         {NULL, 0}
     };
     int i;
-    
+
     if(button)
         for(i = 0; MouseButtonList[i].name; i++)
             if(!a_strcmp(button, MouseButtonList[i].name))

@@ -101,7 +101,7 @@ focusicon_new(Statusbar *statusbar, cfg_t *config)
     widget_common_new(w, statusbar, config);
     w->draw = focusicon_draw;
     w->alignment = draw_get_align(cfg_getstr(config, "align"));
-    
+
     /* Set cache property */
     w->cache.flags = WIDGET_CACHE_CLIENTS;
 

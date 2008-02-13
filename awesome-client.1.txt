@@ -31,11 +31,11 @@ The command format is:
 For example, to change statusbar text on screen 0, you can do the following:
 
     echo 0 widget_tell <widget-id> Hello, world | awesome-client
- 
+
 To view tag number 3 on screen 1:
 
     echo 1 tag_view 3 | awesome-client
- 
+
 To zoom focused window on screen 0:
 
     echo 0 client_zoom | awesome-client

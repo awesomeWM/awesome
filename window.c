@@ -20,7 +20,7 @@
  */
 
 #include <X11/Xatom.h>
-#include <X11/extensions/shape.h> 
+#include <X11/extensions/shape.h>
 
 #include "structs.h"
 #include "window.h"
@@ -115,7 +115,7 @@ window_grabbuttons(int screen, Window win)
         XGrabButton(globalconf.display, b->button, b->mod | globalconf.numlockmask | LockMask,
                     win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
     }
-    
+
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, RootWindow(globalconf.display, screen));
 }
 

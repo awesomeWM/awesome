@@ -374,7 +374,7 @@ main(int argc, char *argv[])
     /* refresh everything before waiting events */
     statusbar_refresh();
     layout_refresh();
-    
+
     /* main event loop, also reads status text from socket */
     while(running)
     {
@@ -419,7 +419,7 @@ main(int argc, char *argv[])
                 XNextEvent(dpy, &ev);
                 if(handler[ev.type])
                     handler[ev.type](&ev);
-    
+
                 /* drop events requested to */
                 if(globalconf.drop_events)
                 {
@@ -428,14 +428,14 @@ main(int argc, char *argv[])
                     while(XCheckMaskEvent(dpy, globalconf.drop_events, &ev));
                     globalconf.drop_events = NoEventMask;
                 }
-    
+
                 /* need to resync */
                 XSync(dpy, False);
             }
-    
+
             statusbar_refresh();
             layout_refresh();
-    
+
             /* need to resync */
             XSync(dpy, False);
         }

@@ -401,7 +401,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     if(!(flags & (USPosition | PPosition)))
         c->f_geometry = client_get_smart_geometry(c->f_geometry, c->border, c->screen);
-    
+
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
     /* handle xshape */
@@ -437,7 +437,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* some windows require this */
     XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,
                       c->geometry.width, c->geometry.height);
- 
+
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_client_list(phys_screen);
 }
@@ -942,7 +942,7 @@ uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((
 static void
 client_maximize(Client *c, Area geometry)
 {
-    
+
     if((c->ismax = !c->ismax))
     {
         c->wasfloating = c->isfloating;

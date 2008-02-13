@@ -63,7 +63,7 @@ widget_find(char *name, int screen)
 {
     Widget *widget;
     Statusbar *sb;
-    
+
     for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
         for(widget = sb->widgets; widget; widget = widget->next)
             if(a_strcmp(name, widget->name) == 0)

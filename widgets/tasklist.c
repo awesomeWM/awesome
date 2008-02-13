@@ -91,7 +91,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     for(c = globalconf.clients; c; c = c->next)
         if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
             n++;
-    
+
     if(!n)
         return (widget->area.width = 0);
 
@@ -208,7 +208,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
         for(c = globalconf.clients; c; c = c->next)
             if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
                 n++;
-    
+
         if(!n)
             return;
 

@@ -88,7 +88,7 @@ static AtomItem AtomNames[] =
     { "UTF8_STRING", &utf8_string },
 };
 
-#define ATOM_NUMBER (sizeof(AtomNames)/sizeof(AtomItem)) 
+#define ATOM_NUMBER (sizeof(AtomNames)/sizeof(AtomItem))
 
 #define _NET_WM_STATE_REMOVE 0
 #define _NET_WM_STATE_ADD 1
@@ -100,7 +100,7 @@ ewmh_init_atoms(void)
     unsigned int i;
     char *names[ATOM_NUMBER];
     Atom atoms[ATOM_NUMBER];
-    
+
     for(i = 0; i < ATOM_NUMBER; i++)
         names[i] = (char *) AtomNames[i].name;
     XInternAtoms(globalconf.display, names, ATOM_NUMBER, False, atoms);
@@ -122,7 +122,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_active_window;
 
     atom[i++] = net_close_window;
-    
+
     atom[i++] = net_wm_name;
     atom[i++] = net_wm_icon_name;
     atom[i++] = net_wm_window_type;
@@ -189,7 +189,7 @@ ewmh_update_net_current_desktop(int phys_screen)
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
                     net_current_desktop, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &count, 1);
-    
+
     p_delete(&curtags);
 }
 

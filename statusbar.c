@@ -188,7 +188,7 @@ statusbar_init(Statusbar *statusbar)
                                 globalconf.screens[statusbar->screen].statusbar,
                                 &globalconf.screens[statusbar->screen].padding);
 
-    
+
     /* Top and Bottom Statusbar have prio */
     for(sb = globalconf.screens[statusbar->screen].statusbar; sb; sb = sb->next)
         switch(sb->position)
@@ -253,7 +253,7 @@ statusbar_refresh()
 Position
 statusbar_get_position_from_str(const char *pos)
 {
-    if(!a_strncmp(pos, "off", 3)) 
+    if(!a_strncmp(pos, "off", 3))
         return Off;
     else if(!a_strncmp(pos, "bottom", 6))
         return Bottom;
