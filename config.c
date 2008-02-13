@@ -278,6 +278,7 @@ config_parse_screen(cfg_t *cfg, int screen)
 {
     char buf[2];
     const char *tmp;
+    FloatingPlacement flpl;
     Layout *layout = NULL;
     Tag *tag = NULL;
     Statusbar *statusbar = NULL;
@@ -321,6 +322,13 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->floating_placement =
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);
+
+    if(!virtscreen->floating_placement)
+    {
+        warn("unknown floating placement: %s\n", cfg_getstr(cfg_general, "floating_placement"));
+        virtscreen->floating_placement = FloatingPlacementList[0].func;
+    }
+
     if(!virtscreen->font)
         eprint("awesome: cannot init font\n");
 
