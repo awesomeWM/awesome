@@ -29,6 +29,7 @@ name_func_link_t FloatingPlacementList[] =
 {
     { "smart", placement_smart },
     { "under_mouse", placement_under_mouse },
+    { NULL, NULL }
 };
 
 static Area
