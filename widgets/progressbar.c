@@ -169,29 +169,29 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         cfg = cfg_getnsec(config, "bar", i);
 
         if((color = cfg_getstr(cfg, "fg")))
-            d->fg[i] = draw_color_new(globalconf.display, phys_screen, color);
+            draw_color_new(globalconf.display, phys_screen, color, &d->fg[i]);
         else
             d->fg[i] = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
         if((color = cfg_getstr(cfg, "fg_center")))
         {
             d->pfg_center[i] = p_new(XColor, 1);
-            *(d->pfg_center[i]) = draw_color_new(globalconf.display, phys_screen, color);
+            draw_color_new(globalconf.display, phys_screen, color, d->pfg_center[i]);
         }
 
         if((color = cfg_getstr(cfg, "fg_end")))
         {
             d->pfg_end[i] = p_new(XColor, 1);
-            *(d->pfg_end[i]) = draw_color_new(globalconf.display, phys_screen, color);
+            draw_color_new(globalconf.display, phys_screen, color, d->pfg_end[i]);
         }
 
         if((color = cfg_getstr(cfg, "bg")))
-            d->bg[i] = draw_color_new(globalconf.display, phys_screen, color);
+            draw_color_new(globalconf.display, phys_screen, color, &d->bg[i]);
         else
             d->bg[i] = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 
         if((color = cfg_getstr(cfg, "bordercolor")))
-            d->bordercolor[i] = draw_color_new(globalconf.display, phys_screen, color);
+            draw_color_new(globalconf.display, phys_screen, color, &d->bordercolor[i]);
         else
             d->bordercolor[i] = d->fg[i];
     }

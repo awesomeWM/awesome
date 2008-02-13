@@ -563,19 +563,20 @@ draw_get_align(const char *align)
  * \param colstr Color specification
  * \return XColor struct
  */
-XColor
-draw_color_new(Display *disp, int phys_screen, const char *colstr)
+Bool
+draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color)
 {
-    XColor screenColor, exactColor;
+    Bool ret;
+    XColor exactColor;
 
-    if(!XAllocNamedColor(disp,
-                         DefaultColormap(disp, phys_screen),
-                         colstr,
-                         &screenColor,
-                         &exactColor))
-        eprint("awesome: error, cannot allocate color '%s'\n", colstr);
+    if(!(ret = XAllocNamedColor(disp,
+                                DefaultColormap(disp, phys_screen),
+                                colstr,
+                                color,
+                                &exactColor)))
+        warn("awesome: error, cannot allocate color '%s'\n", colstr);
 
-    return screenColor;
+    return ret;
 }
 
 /** Remove a area from a list of them,

@@ -321,22 +321,30 @@ config_parse_screen(cfg_t *cfg, int screen)
         eprint("awesome: cannot init font\n");
 
     /* Colors */
-    virtscreen->colors_normal[ColBorder] = draw_color_new(globalconf.display, phys_screen,
-                                                          cfg_getstr(cfg_colors, "normal_border"));
-    virtscreen->colors_normal[ColBG] = draw_color_new(globalconf.display, phys_screen,
-                                                      cfg_getstr(cfg_colors, "normal_bg"));
-    virtscreen->colors_normal[ColFG] = draw_color_new(globalconf.display, phys_screen,
-                                                      cfg_getstr(cfg_colors, "normal_fg"));
-    virtscreen->colors_selected[ColBorder] = draw_color_new(globalconf.display, phys_screen,
-                                                            cfg_getstr(cfg_colors, "focus_border"));
-    virtscreen->colors_selected[ColBG] = draw_color_new(globalconf.display, phys_screen,
-                                                        cfg_getstr(cfg_colors, "focus_bg"));
-    virtscreen->colors_selected[ColFG] = draw_color_new(globalconf.display, phys_screen,
-                                                        cfg_getstr(cfg_colors, "focus_fg"));
-    virtscreen->colors_urgent[ColBG] = draw_color_new(globalconf.display, phys_screen,
-                                                      cfg_getstr(cfg_colors, "urgent_bg"));
-    virtscreen->colors_urgent[ColFG] = draw_color_new(globalconf.display, phys_screen,
-                                                      cfg_getstr(cfg_colors, "urgent_fg"));
+    draw_color_new(globalconf.display, phys_screen,
+                   cfg_getstr(cfg_colors, "normal_border"),
+                   &virtscreen->colors_normal[ColBorder]);
+    draw_color_new(globalconf.display, phys_screen,
+                   cfg_getstr(cfg_colors, "normal_bg"),
+                   &virtscreen->colors_normal[ColBG]);
+    draw_color_new(globalconf.display, phys_screen,
+                   cfg_getstr(cfg_colors, "normal_fg"),
+                   &virtscreen->colors_normal[ColFG]);
+    draw_color_new(globalconf.display, phys_screen,
+                   cfg_getstr(cfg_colors, "focus_border"),
+                   &virtscreen->colors_selected[ColBorder]);
+    draw_color_new(globalconf.display, phys_screen,
+                   cfg_getstr(cfg_colors, "focus_bg"),
+                   &virtscreen->colors_selected[ColBG]);
+    draw_color_new(globalconf.display, phys_screen,
+                   cfg_getstr(cfg_colors, "focus_fg"),
+                   &virtscreen->colors_selected[ColFG]);
+    draw_color_new(globalconf.display, phys_screen,
+                   cfg_getstr(cfg_colors, "urgent_bg"),
+                   &virtscreen->colors_urgent[ColBG]);
+    draw_color_new(globalconf.display, phys_screen,
+                   cfg_getstr(cfg_colors, "urgent_fg"),
+                   &virtscreen->colors_urgent[ColFG]);
 
     /* Statusbar */
 

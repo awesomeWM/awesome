@@ -77,12 +77,12 @@ textbox_tell(Widget *widget, char *command)
         if((!ntok && command_len - (tok - command) == 7) ||
            ntok - tok == 7)
         {
-            if (ntok)
+            if(ntok)
                 *ntok = 0;
-            if (!i)
-                d->fg = draw_color_new(globalconf.display, phys_screen, tok);
+            if(!i)
+                draw_color_new(globalconf.display, phys_screen, tok, &d->fg);
             else
-                d->bg = draw_color_new(globalconf.display, phys_screen, tok);
+                draw_color_new(globalconf.display, phys_screen, tok, &d->bg);
             if (ntok)
                 *ntok = ' ';
             tok = ntok + (ntok != NULL);
@@ -109,12 +109,12 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     if((buf = cfg_getstr(config, "fg")))
-        d->fg = draw_color_new(globalconf.display, statusbar->screen, buf);
+        draw_color_new(globalconf.display, statusbar->screen, buf, &d->fg);
     else
         d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
     if((buf = cfg_getstr(config, "bg")))
-        d->bg = draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf);
+        draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf, &d->bg);
     else
         d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
 

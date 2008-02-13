@@ -109,7 +109,7 @@ Area draw_get_image_size(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short draw_textwidth(Display *, XftFont *, char *);
 Alignment draw_get_align(const char *);
-XColor draw_color_new(Display *, int, const char *);
+Bool draw_color_new(Display *, int, const char *, XColor *);
 
 void area_list_remove(Area **, Area *);
 

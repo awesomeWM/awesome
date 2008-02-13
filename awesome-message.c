@@ -104,10 +104,12 @@ config_parse(const char *confpatharg)
     cfg_colors = cfg_getsec(cfg_screen, "colors");
 
     /* colors */
-    globalconf.fg = draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                                   cfg_getstr(cfg_colors, "normal_fg"));
-    globalconf.bg = draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                                   cfg_getstr(cfg_colors, "normal_bg"));
+    draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
+                   cfg_getstr(cfg_colors, "normal_fg"),
+                   &globalconf.fg);
+    draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
+                   cfg_getstr(cfg_colors, "normal_bg"),
+                   &globalconf.bg);
 
     /* font */
     globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),
