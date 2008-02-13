@@ -43,9 +43,13 @@ placement_fix_offscreen(Area geometry, int screen, int border)
     /* fix offscreen */
     if(AREA_RIGHT(newgeometry) > AREA_RIGHT(screen_geometry))
         newgeometry.x = screen_geometry.x + screen_geometry.width - (newgeometry.width + 2 * border);
+    else if(AREA_LEFT(newgeometry) < AREA_LEFT(screen_geometry))
+        newgeometry.x = screen_geometry.x;
 
     if(AREA_BOTTOM(newgeometry) > AREA_BOTTOM(screen_geometry))
         newgeometry.y = screen_geometry.y + screen_geometry.height - (newgeometry.height + 2 * border);
+    else if(AREA_TOP(newgeometry) < AREA_TOP(screen_geometry))
+        newgeometry.y = screen_geometry.y;
 
     return newgeometry;
 }
