@@ -251,3 +251,14 @@ doc: doc/html/index.html
 doc/html/index.html: awesome.doxygen$(DOXYGEN_SEGFAULT) $(awesome_SOURCES) $(awesome_client_SOURCES)
 	$(DOXYGEN) awesome.doxygen$(DOXYGEN_SEGFAULT)
 endif
+
+
+# Presuming we are running awesome on this screen, and this is screen 0, ...
+# ...we replace the running awesome instance by a freshly compiled one.
+restart-uninstalled: awesome awesome-client
+	echo 0 exec "$${PWD}/awesome" | "$${PWD}/awesome-client"
+
+# ...we replace the running awesome instance by the last installed one.
+restart-installed:
+	echo 0 exec "$(DESTDIR)$(bindir)/awesome" | "$(DESTDIR)$(bindir)/awesome-client"
+
