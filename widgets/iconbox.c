@@ -71,9 +71,31 @@ iconbox_tell(Widget *widget, char *property, char *command)
     if(!property || !command)
         return;
 
-    if(d->image)
-        p_delete(&d->image);
-    d->image = a_strdup(command);
+    if(!a_strcmp(property, "image"))
+    {
+        if(d->image)
+            p_delete(&d->image);
+        d->image = a_strdup(command);
+    }
+    else if(!a_strcmp(property, "resize")) /* XXX how to ignorecase compare? */
+    {
+        if(!a_strcmp(command, "true") || !a_strcmp(command, "1"))
+            d->resize = True;
+        else if (!a_strcmp(command, "false") || !a_strcmp(command, "0"))
+            d->resize = False;
+        else
+            warn("Resize value must be (case-sensitive) \"true\", \"false\",\
+                  \"1\" or \"0\". But is: %s.\n", command);
+    }
+    else if(!a_strcmp(property, "align") || !a_strcmp(property, "mouse") ||
+            !a_strcmp(property, "x") || !a_strcmp(property, "y"))
+        warn("Property \"%s\" can't get changed.\n", property);
+
+    else
+    {
+        warn("No such property: %s\n", property);
+        return;
+    }
 }
 
 Widget *
