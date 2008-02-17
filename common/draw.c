@@ -433,6 +433,7 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
 
     cairo_paint(cr);
 
+    cairo_destroy(cr);
     cairo_surface_destroy(source);
 }
 
