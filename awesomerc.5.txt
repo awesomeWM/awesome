@@ -456,8 +456,9 @@ progressbar
 ~~~~~~~~~~~
 This widget shows one or more progress-bars.
 
-*bar*::
-    Draws a bar; Options: fg, bg, bordercolor.
+*data*::
+    Draws a bar for each data section;
+    Options: fg, fg_center, fg_end, bg, bordercolor.
 *fg*::
     Foreground color.
 *fg_center*::
@@ -488,7 +489,8 @@ graph
 This widget shows a graph.
 
 *data*::
-    Defines a data-stream section; Options: max, scale, fg and style.
+    Defines a data-stream section;
+    Options: max, scale, fg, fg_center, fg_end and style.
 *max*::
     This value prints a full graph (default = 100)
 *scale*::
@@ -684,7 +686,7 @@ screen <integer> [MULTI]
         }
         progressbar <identifier> [MULTI]
         {
-            bar [MULTI]
+            data [MULTI]
             {
                 fg = <color> fg_center = <color> fg_end = <color>
                 bg = <color> bordercolor = <color>
