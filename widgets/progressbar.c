@@ -30,14 +30,16 @@ typedef struct
 {
     /** Percent 0 to 100 */
     int *percent;
-    /** Width of the bars */
+    /** data_title of the data */
+    char **data_title;
+    /** Width of the data_items */
     int width;
     /** Padding */
     int padding;
-    /** Pixel between bars */
+    /** Pixel between data_items (bars) */
     int gap;
-    /** Number of bars */
-    int bars;
+    /** Number of data_items (bars) */
+    int data_items;
     /** Height 0-1, where 1 is height of statusbar */
     float height;
     /** Foreground color */
@@ -61,7 +63,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     Data *d = widget->data;
 
-    if (!(d->bars))
+    if (!(d->data_items) || (d->width - d->padding < 3))
         return 0;
 
     width = d->width - 2 * d->padding;
@@ -76,10 +78,10 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
         widget->area.y = 0;
 
     margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y;
-    pb_height = (int) ((widget->statusbar->height * d->height - (d->gap * (d->bars - 1))) / d->bars + 0.5);
+    pb_height = (int) ((widget->statusbar->height * d->height - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
     left_offset = widget->area.x + d->padding;
 
-    for(i = 0; i < d->bars; i++)
+    for(i = 0; i < d->data_items; i++)
     {
         pwidth = (int) d->percent[i] ? ((width - 2) * d->percent[i]) / 100 : 0;
 
@@ -122,16 +124,136 @@ progressbar_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
     int i = 0, percent;
-    char * tok;
+    Bool flag;
+    char *title, *setting;
 
-    if(!property || !command || !d->bars)
+    if(!property || !command || !d->data_items)
         return;
 
-    for (tok = strtok(command, ","); tok && i < d->bars; tok = strtok(NULL, ","), i++)
+    if(!a_strcmp(property, "data"))
     {
-        percent = atoi(tok);
-        d->percent[i] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
+        title = strtok(command, " ");
+        setting = strtok(NULL, " ");
+        for(i = 0; i < d->data_items; i++)
+            if(!a_strcmp(title, d->data_title[i]))
+            {
+                percent = atoi(setting);
+                d->percent[i] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
+                return;
+            }
+        warn("No such data section title: %s\n", title);
     }
+    else if(!a_strcmp(property, "fg"))
+    {
+        title = strtok(command, " ");
+        setting = strtok(NULL, " ");
+        for(i = 0; i < d->data_items; i++)
+            if(!a_strcmp(title, d->data_title[i]))
+            {
+                draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                               setting, &d->fg[i]);
+                return;
+            }
+        warn("No such data section title: %s\n", title);
+    }
+    else if(!a_strcmp(property, "bg"))
+    {
+        title = strtok(command, " ");
+        setting = strtok(NULL, " ");
+        for(i = 0; i < d->data_items; i++)
+            if(!a_strcmp(title, d->data_title[i]))
+            {
+                draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                               setting, &d->bg[i]);
+                return;
+            }
+        warn("No such data section title: %s\n", title);
+    }
+    else if(!a_strcmp(property, "fg_center"))
+    {
+        title = strtok(command, " ");
+        setting = strtok(NULL, " ");
+        for(i = 0; i < d->data_items; i++)
+            if(!a_strcmp(title, d->data_title[i]))
+            {
+                flag = False;
+                if(!d->pfg_center[i])
+                {
+                    flag = True; /* restore to NULL & p_delete */
+                    d->pfg_center[i] = p_new(XColor, 1);
+                }
+                if(!(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                               setting, d->pfg_center[i])))
+                    if(flag) /* restore */
+                    {
+                        p_delete(&d->pfg_center[i]);
+                        d->pfg_center[i] = NULL;
+                    }
+                return;
+            }
+        warn("No such data section title: %s\n", title);
+    }
+    else if(!a_strcmp(property, "fg_end"))
+    {
+        title = strtok(command, " ");
+        setting = strtok(NULL, " ");
+        for(i = 0; i < d->data_items; i++)
+            if(!a_strcmp(title, d->data_title[i]))
+            {
+                flag = False;
+                if(!d->pfg_end[i])
+                {
+                    flag = True; /* restore to NULL & p_delete */
+                    d->pfg_end[i] = p_new(XColor, 1);
+                }
+                if(!(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                               setting, d->pfg_end[i])))
+                    if(flag) /* restore */
+                    {
+                        p_delete(&d->pfg_end[i]);
+                        d->pfg_end[i] = NULL;
+                    }
+                return;
+            }
+        warn("No such data section title: %s\n", title);
+    }
+    else if(!a_strcmp(property, "bordercolor"))
+    {
+        title = strtok(command, " ");
+        setting = strtok(NULL, " ");
+        for(i = 0; i < d->data_items; i++)
+            if(!a_strcmp(title, d->data_title[i]))
+            {
+                draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                               setting, &d->bordercolor[i]);
+                return;
+            }
+        warn("No such data section title: %s\n", title);
+    }
+
+    else if(!a_strcmp(property, "gap"))
+        d->gap = atoi(command);
+
+    else if(!a_strcmp(property, "width"))
+    {
+        d->width = atoi(command);
+        if(d->width - d->padding < 3)
+        warn("Progressbar widget needs: (width - padding) >= 3\n");
+    }
+
+    else if(!a_strcmp(property, "height"))
+        d->height = atof(command);
+
+    else if(!a_strcmp(property, "padding"))
+        d->padding = atoi(command);
+
+    else if(!a_strcmp(property, "align") || !a_strcmp(property, "mouse") ||
+            !a_strcmp(property, "x") || !a_strcmp(property, "y"))
+        warn("Property \"%s\" can't get changed.\n", property);
+
+    else
+        warn("No such property: %s\n", property);
+    return;
 }
 
 Widget *
@@ -149,24 +271,32 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     w->tell = progressbar_tell;
     d = w->data = p_new(Data, 1);
     d->width = cfg_getint(config, "width");
+    d->height = cfg_getfloat(config, "height");
+    d->gap = cfg_getint(config, "gap");
+    d->padding = cfg_getint(config, "padding");
+
     w->alignment = draw_get_align(cfg_getstr(config, "align"));
 
-    if(!(d->bars = cfg_size(config, "bar")))
+
+    if(!(d->data_items = cfg_size(config, "data")))
     {
-        warn("progressbar widget needs at least one bar section\n");
+        warn("Progressbar widget needs at least one bar section\n");
         return w;
     }
 
-    d->fg = p_new(XColor, d->bars);
-    d->pfg_end = p_new(XColor *, d->bars);
-    d->pfg_center = p_new(XColor *, d->bars);
-    d->bg = p_new(XColor, d->bars);
-    d->bordercolor = p_new(XColor, d->bars);
-    d->percent = p_new(int, d->bars);
+    d->fg = p_new(XColor, d->data_items);
+    d->pfg_end = p_new(XColor *, d->data_items);
+    d->pfg_center = p_new(XColor *, d->data_items);
+    d->bg = p_new(XColor, d->data_items);
+    d->bordercolor = p_new(XColor, d->data_items);
+    d->percent = p_new(int, d->data_items);
+    d->data_title = p_new(char *, d->data_items);
 
-    for(i = 0; i < d->bars; i++)
+    for(i = 0; i < d->data_items; i++)
     {
-        cfg = cfg_getnsec(config, "bar", i);
+        cfg = cfg_getnsec(config, "data", i);
+
+        d->data_title[i] = a_strdup(cfg_title(cfg));
 
         if((color = cfg_getstr(cfg, "fg")))
             draw_color_new(globalconf.display, phys_screen, color, &d->fg[i]);
@@ -196,9 +326,12 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
             d->bordercolor[i] = d->fg[i];
     }
 
-    d->height = cfg_getfloat(config, "height");
-    d->gap = cfg_getint(config, "gap");
-    d->padding = cfg_getint(config, "padding");
+    /* complete setup, since someone might 'enable' it with increasing the width with widget_tell */
+    if(d->width - d->padding < 3)
+    {
+        warn("Progressbar widget needs: (width - padding) >= 3\n");
+        return w;
+    }
 
     return w;
 }
