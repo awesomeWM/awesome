@@ -182,7 +182,7 @@ cfg_opt_t widget_graph_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    CFG_SEC((char *) "data", widget_graph_data_opts, CFGF_MULTI),
+    CFG_SEC((char *) "data", widget_graph_data_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_INT((char *) "width", 100, CFGF_NONE),
     CFG_INT((char *) "padding_left", 0, CFGF_NONE),
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
@@ -190,7 +190,7 @@ cfg_opt_t widget_graph_opts[] =
     CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
-cfg_opt_t widget_progressbar_bar_opts[] =
+cfg_opt_t widget_progressbar_data_opts[] =
 {
     CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "fg_center", (char *) NULL, CFGF_NONE),
@@ -205,7 +205,7 @@ cfg_opt_t widget_progressbar_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    CFG_SEC((char *) "bar", widget_progressbar_bar_opts, CFGF_MULTI),
+    CFG_SEC((char *) "data", widget_progressbar_data_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_INT((char *) "width", 100, CFGF_NONE),
     CFG_INT((char *) "gap", 2, CFGF_NONE),
     CFG_INT((char *) "padding", 0, CFGF_NONE),
