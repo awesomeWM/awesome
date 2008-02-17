@@ -30,6 +30,8 @@ extern AwesomeConf globalconf;
 typedef struct
 {
     /* general layout */
+
+    char **data_title;                  /** data_title of the data sections */
     float *max;                         /** Represents a full graph */
     int width;                          /** Width of the widget */
     float height;                       /** Height of graph (0-1; 1 = height of statusbar) */
@@ -40,7 +42,7 @@ typedef struct
     XColor bordercolor;                 /** Border color */
 
     /* markers... */
-    int index;                          /** Index of current (new) value */
+    int *index;                         /** Index of current (new) value */
     int *max_index;                     /** Index of the actual maximum value */
     float *current_max;                 /** Pointer to current maximum value itself */
 
@@ -50,17 +52,20 @@ typedef struct
     float **values;                     /** Actual values */
 
     /* additional data + a pointer to **lines accordingly */
-    int **fillbottom;                   /** Datatypes holder (data equal to **lines) */
+    int **fillbottom;                   /** Data array pointer (like *lines) */
+    int **fillbottom_index;             /** Points to some index[i] */
     int fillbottom_total;               /** Total of them */
     XColor *fillbottom_color;           /** Color of them */
     XColor **fillbottom_pcolor_center;  /** Color at middle of graph */
     XColor **fillbottom_pcolor_end;     /** Color at end of graph */
-    int **filltop;                      /** Datatypes holder */
+    int **filltop;                      /** Data array pointer (like *lines) */
+    int **filltop_index;                /** Points to some index[i] */
     int filltop_total;                  /** Total of them */
     XColor *filltop_color;              /** Color of them */
     XColor **filltop_pcolor_center;     /** Color at center of graph */
     XColor **filltop_pcolor_end;        /** Color at end of graph */
-    int **drawline;                     /** Datatypes holder */
+    int **drawline;                     /** Data array pointer (like *lines) */
+    int **drawline_index;               /** Points to some index[i] */
     int drawline_total;                 /** Total of them */
     XColor *drawline_color;             /** Color of them */
     XColor **drawline_pcolor_center;    /** Color at middle of graph */
@@ -129,7 +134,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         }
         draw_graph(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
-                d->size, d->draw_from, d->draw_to, d->index,
+                d->size, d->draw_from, d->draw_to, *(d->filltop_index[z]),
                 d->filltop_color[z], d->filltop_pcolor_center[z], d->filltop_pcolor_end[z]);
     }
 
@@ -151,7 +156,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 
         draw_graph(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
-                d->size, d->draw_from, d->fillbottom[z], d->index,
+                d->size, d->draw_from, d->fillbottom[z], *(d->fillbottom_index[z]),
                 d->fillbottom_color[z], d->fillbottom_pcolor_center[z], d->fillbottom_pcolor_end[z]);
     }
 
@@ -160,7 +165,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     {
         draw_graph_line(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
-                d->size, d->drawline[z], d->index,
+                d->size, d->drawline[z], *(d->drawline_index[z]),
                 d->drawline_color[z], d->drawline_pcolor_center[z], d->drawline_pcolor_end[z]);
     }
 
@@ -173,63 +178,97 @@ static void
 graph_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
-    int i, z;
-    float *value;
-    char *tok;
+    int i, u;
+    float value;
+    char *title, *setting;
 
     if(!property || !command || d->width < 1 || !(d->data_items > 0))
         return;
 
-    value = p_new(float, d->data_items);
-
-    for (i = 0, tok = strtok(command, ","); tok && i < d->data_items; tok = strtok(NULL, ","), i++)
-        value[i] = MAX(atof(tok), 0);
-
-    if(++d->index >= d->size) /* cycle inside the arrays (all-in-one) */
-        d->index = 0;
-
-    /* add according values and to-draw-line-lenghts to the according data_items */
-    for(z = 0; z < d->data_items; z++)
+    if(!a_strcmp(property, "data"))
     {
-        if(d->values[z]) /* scale option is true */
+        title = strtok(command, " ");
+        setting = strtok(NULL, " ");
+
+        for(i = 0; i < d->data_items; i++)
         {
-            d->values[z][d->index] = value[z];
-
-            if(value[z] > d->current_max[z]) /* a new maximum value found */
+            if(!a_strcmp(title, d->data_title[i]))
             {
-                d->max_index[z] = d->index;
-                d->current_max[z] = value[z];
+                value = MAX(atof(setting), 0);
 
-                /* recalculate */
-                for (i = 0; i < d->size; i++)
-                    d->lines[z][i] = (int) (d->values[z][i] * (d->box_height) / d->current_max[z] + 0.5);
+                if(++d->index[i] >= d->size) /* cycle inside the array */
+                    d->index[i] = 0;
+
+                if(d->values[i]) /* scale option is true */
+                {
+                    d->values[i][d->index[i]] = value;
+
+                    if(value > d->current_max[i]) /* a new maximum value found */
+                    {
+                        d->max_index[i] = d->index[i];
+                        d->current_max[i] = value;
+
+                        /* recalculate */
+                        for (u = 0; u < d->size; u++)
+                            d->lines[i][u] = (int) (d->values[i][u] * (d->box_height) / d->current_max[i] + 0.5);
+                    }
+                    /* old max_index reached + current_max > normal, re-check/generate */
+                    else if(d->max_index[i] == d->index[i] && d->current_max[i] > d->max[i])
+                    {
+                        /* find the new max */
+                        for (u = 0; u < d->size; u++)
+                            if (d->values[i][u] > d->values[i][d->max_index[i]])
+                                d->max_index[i] = u;
+
+                        d->current_max[i] = MAX(d->values[i][d->max_index[i]], d->max[i]);
+
+                        /* recalculate */
+                        for (u = 0; u < d->size; u++)
+                            d->lines[i][u] = (int) (d->values[i][u] * d->box_height / d->current_max[i] + 0.5);
+                    }
+                    else
+                        d->lines[i][d->index[i]] = (int) (value * d->box_height / d->current_max[i] + 0.5);
+
+                }
+                else /* scale option is false - limit to d->box_height */
+                {
+                    if (value < d->current_max[i])
+                        d->lines[i][d->index[i]] = (int) (value * d->box_height / d->current_max[i] + 0.5);
+                    else
+                        d->lines[i][d->index[i]] = d->box_height;
+                }
+                return;
             }
-            else if(d->max_index[z] == d->index) /* old max_index reached, re-check/generate */
-            {
-                /* find the new max */
-                for (i = 0; i < d->size; i++)
-                    if (d->values[z][i] > d->values[z][d->max_index[z]])
-                        d->max_index[z] = i;
-
-                d->current_max[z] = MAX(d->values[z][d->max_index[z]], d->max[z]);
-
-                /* recalculate */
-                for (i = 0; i < d->size; i++)
-                    d->lines[z][i] = (int) (d->values[z][i] * d->box_height / d->current_max[z] + 0.5);
-            }
-            else
-                d->lines[z][d->index] = (int) (value[z] * d->box_height / d->current_max[z] + 0.5);
-
         }
-        else /* scale option is false - limit to d->box_height */
-        {
-            if (value[z] < d->current_max[z])
-                d->lines[z][d->index] = (int) (value[z] * d->box_height / d->current_max[z] + 0.5);
-            else
-                d->lines[z][d->index] = d->box_height;
-        }
+        warn("No such data-section title: %s\n", title);
     }
-    p_delete(&value);
+    else if(!a_strcmp(property, "width"))
+        d->width = atoi(command);
+
+    else if(!a_strcmp(property, "height"))
+        d->height = atof(command);
+
+    else if(!a_strcmp(property, "padding_left"))
+        d->padding_left = atoi(command);
+
+    else if(!a_strcmp(property, "bg"))
+        draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                       command, &d->bg);
+
+    else if(!a_strcmp(property, "bordercolor"))
+        draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                       command, &d->bordercolor);
+
+    else if(!a_strcmp(property, "fg") || !a_strcmp(property, "fg_center") ||
+            !a_strcmp(property, "fg_end") || !a_strcmp(property, "scale") ||
+            !a_strcmp(property, "max") || !a_strcmp(property, "style") ||
+            !a_strcmp(property, "align") || !a_strcmp(property, "mouse") ||
+            !a_strcmp(property, "x") || !a_strcmp(property, "y"))
+        warn("Property \"%s\" can't get changed.\n", property);
+    else
+        warn("No such property: %s\n", property);
+
+    return;
 }
 
 Widget *
@@ -275,9 +314,13 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     d->draw_to = p_new(int, d->size);
 
     d->fillbottom = p_new(int *, d->size);
+    d->fillbottom_index = p_new(int *, d->size);
     d->filltop = p_new(int *, d->size);
+    d->filltop_index = p_new(int *, d->size);
     d->drawline = p_new(int *, d->size);
+    d->drawline_index = p_new(int *, d->size);
 
+    d->data_title = p_new(char *, d->data_items);
     d->values = p_new(float *, d->data_items);
     d->lines = p_new(int *, d->data_items);
 
@@ -292,6 +335,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     d->drawline_pcolor_end = p_new(XColor *, d->data_items);
 
     d->max_index = p_new(int, d->data_items);
+    d->index = p_new(int, d->data_items);
 
     d->current_max = p_new(float, d->data_items);
     d->max = p_new(float, d->data_items);
@@ -301,6 +345,8 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         ptmp_color_center = ptmp_color_end = NULL;
 
         cfg = cfg_getnsec(config, "data", i);
+
+        d->data_title[i] = a_strdup(cfg_title(cfg));
 
         if((color = cfg_getstr(cfg, "fg")))
             draw_color_new(globalconf.display, phys_screen, color, &tmp_color);
@@ -316,7 +362,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         if((color = cfg_getstr(cfg, "fg_end")))
         {
             ptmp_color_end = p_new(XColor, 1);
-            draw_color_new(globalconf.display, phys_screen, color, ptmp_color_center);
+            draw_color_new(globalconf.display, phys_screen, color, ptmp_color_end);
         }
 
         if (cfg_getbool(cfg, "scale"))
@@ -340,6 +386,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
             if(!a_strncmp(type, "bottom", sizeof("bottom")))
             {
                 d->fillbottom[d->fillbottom_total] = d->lines[i];
+                d->fillbottom_index[d->fillbottom_total] = &d->index[i];
                 d->fillbottom_color[d->fillbottom_total] = tmp_color;
                 d->fillbottom_pcolor_center[d->fillbottom_total] = ptmp_color_center;
                 d->fillbottom_pcolor_end[d->fillbottom_total] = ptmp_color_end;
@@ -348,17 +395,19 @@ graph_new(Statusbar *statusbar, cfg_t *config)
             else if (!a_strncmp(type, "top", sizeof("top")))
             {
                 d->filltop[d->filltop_total] = d->lines[i];
+                d->filltop_index[d->filltop_total] = &d->index[i];
                 d->filltop_color[d->filltop_total] = tmp_color;
-                d->filltop_pcolor_center[d->fillbottom_total] = ptmp_color_center;
-                d->filltop_pcolor_end[d->fillbottom_total] = ptmp_color_end;
+                d->filltop_pcolor_center[d->filltop_total] = ptmp_color_center;
+                d->filltop_pcolor_end[d->filltop_total] = ptmp_color_end;
                 d->filltop_total++;
             }
             else if (!a_strncmp(type, "line", sizeof("line")))
             {
                 d->drawline[d->drawline_total] = d->lines[i];
+                d->drawline_index[d->drawline_total] = &d->index[i];
                 d->drawline_color[d->drawline_total] = tmp_color;
-                d->drawline_pcolor_center[d->fillbottom_total] = ptmp_color_center;
-                d->drawline_pcolor_end[d->fillbottom_total] = ptmp_color_end;
+                d->drawline_pcolor_center[d->drawline_total] = ptmp_color_center;
+                d->drawline_pcolor_end[d->drawline_total] = ptmp_color_end;
                 d->drawline_total++;
             }
         }
