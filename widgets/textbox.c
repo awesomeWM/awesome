@@ -67,37 +67,51 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 static void
 textbox_tell(Widget *widget, char *property, char *command)
 {
-    char *ntok, *tok;
-    ssize_t command_len = a_strlen(command);
-    int i = 0, phys_screen = get_phys_screen(widget->statusbar->screen);
+    Data *d = widget->data;
 
     if(!property || !command)
         return;
 
-    Data *d = widget->data;
-    if (d->text)
-        p_delete(&d->text);
-
-    for (i = 0, tok = command; tok && i < 2 && *tok == '#'; i++)
+    if(!a_strcmp(property, "text"))
     {
-        ntok = strchr(tok, ' ');
-        if((!ntok && command_len - (tok - command) == 7) ||
-           ntok - tok == 7)
-        {
-            if(ntok)
-                *ntok = 0;
-            if(!i)
-                draw_color_new(globalconf.display, phys_screen, tok, &d->fg);
-            else
-                draw_color_new(globalconf.display, phys_screen, tok, &d->bg);
-            if (ntok)
-                *ntok = ' ';
-            tok = ntok + (ntok != NULL);
-        }
-        else
-            break;
+        if (d->text)
+            p_delete(&d->text);
+        d->text = a_strdup(command);
     }
-    d->text = a_strdup(tok);
+    else if(!a_strcmp(property, "fg"))
+        draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->fg);
+
+    else if(!a_strcmp(property, "bg"))
+        draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->bg);
+
+    else if(!a_strcmp(property, "font"))
+    {
+        widget->font = XftFontOpenName(globalconf.display,
+                       get_phys_screen(widget->statusbar->screen), command);
+        if(!widget->font)
+            widget->font = globalconf.screens[widget->statusbar->screen].font;
+    }
+
+    else if(!a_strcmp(property, "width"))
+        d->width = atoi(command);
+
+    else if(!a_strcmp(property, "text_align"))
+    {
+        if(!a_strcmp(command, "center") || !a_strcmp(command, "left") ||
+           !a_strcmp(command, "right"))
+            d->align = draw_get_align(command);
+        else
+            warn("text_align value must be (case-sensitive) \"center\", \"left\",\
+                  or \"right\". But is: %s.\n", command);
+    }
+
+    else if(!a_strcmp(property, "align") || !a_strcmp(property, "mouse") ||
+            !a_strcmp(property, "x") || !a_strcmp(property, "y"))
+        warn("Property \"%s\" can't get changed.\n", property);
+
+    else
+        warn("No such property: %s\n", property);
+    return;
 }
 
 Widget *
