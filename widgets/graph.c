@@ -170,14 +170,14 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 }
 
 static void
-graph_tell(Widget *widget, char *command)
+graph_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
     int i, z;
     float *value;
     char *tok;
 
-    if(!command || d->width < 1 || !(d->data_items > 0))
+    if(!property || !command || d->width < 1 || !(d->data_items > 0))
         return;
 
     value = p_new(float, d->data_items);

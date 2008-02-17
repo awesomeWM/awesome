@@ -130,7 +130,8 @@ widget_common_button_press(Widget *widget, XButtonPressedEvent *ev)
  * \param command unused argument
  */
 static void
-widget_common_tell(Widget *widget, char *command __attribute__ ((unused)))
+widget_common_tell(Widget *widget, char *property __attribute__ ((unused)),
+                   char *command __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
 }
@@ -182,7 +183,7 @@ void
 uicb_widget_tell(int screen, char *arg)
 {
     Widget *widget;
-    char *p, *command;
+    char *p, *property = NULL, *command;
     ssize_t len;
 
     if (!arg)
@@ -206,17 +207,26 @@ uicb_widget_tell(int screen, char *arg)
         return;
     }
 
+    p = strtok(NULL, " ");
+    if(!p)
+    {
+        warn("Ignoring malformed widget command.\n");
+        return;
+    }
+
+    property = p;
+
     if(p + a_strlen(p) < arg + len)
     {
         p = p + a_strlen(p) + 1;
         len = a_strlen(p);
         command = p_new(char, len + 1);
         a_strncpy(command, len + 1, p, len);
-        widget->tell(widget, command);
+        widget->tell(widget, property, command);
         p_delete(&command);
     }
     else
-        widget->tell(widget, NULL);
+        widget->tell(widget, property, NULL);
 
     widget->cache.needs_update = True;
 

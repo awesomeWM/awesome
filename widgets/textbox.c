@@ -65,11 +65,14 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 }
 
 static void
-textbox_tell(Widget *widget, char *command)
+textbox_tell(Widget *widget, char *property, char *command)
 {
     char *ntok, *tok;
     ssize_t command_len = a_strlen(command);
     int i = 0, phys_screen = get_phys_screen(widget->statusbar->screen);
+
+    if(!property || !command)
+        return;
 
     Data *d = widget->data;
     if (d->text)

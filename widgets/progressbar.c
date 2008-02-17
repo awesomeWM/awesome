@@ -118,13 +118,13 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 }
 
 static void
-progressbar_tell(Widget *widget, char *command)
+progressbar_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
     int i = 0, percent;
     char * tok;
 
-    if(!command || !d->bars)
+    if(!property || !command || !d->bars)
         return;
 
     for (tok = strtok(command, ","); tok && i < d->bars; tok = strtok(NULL, ","), i++)

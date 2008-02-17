@@ -64,9 +64,12 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 }
 
 static void
-iconbox_tell(Widget *widget, char *command)
+iconbox_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
+
+    if(!property || !command)
+        return;
 
     if(d->image)
         p_delete(&d->image);

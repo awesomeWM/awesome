@@ -101,7 +101,7 @@ struct Widget
     /** Draw function */
     int (*draw)(Widget *, DrawCtx *, int, int);
     /** Update function */
-    void (*tell)(Widget *, char *);
+    void (*tell)(Widget *, char *, char *);
     /** ButtonPressedEvent handler */
     void (*button_press)(Widget *, XButtonPressedEvent *);
     /** Statusbar */
