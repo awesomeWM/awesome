@@ -32,18 +32,36 @@ void
 widget_calculate_alignments(Widget *widget)
 {
     for(; widget && widget->alignment != AlignFlex; widget = widget->next)
-        if(widget->alignment == AlignAuto)
+    {
+        switch(widget->alignment)
+        {
+          case AlignCenter:
+            warn("widgets cannot be center aligned\n");
+          case AlignAuto:
             widget->alignment = AlignLeft;
+            break;
+          default:
+            break;
+        }
+    }
 
     if(widget)
         for(widget = widget->next; widget; widget = widget->next)
-        {
-            if(widget->alignment == AlignFlex)
-                warn("Multiple flex widgets in panel -"
-                     " ignoring flex for all but the first.");
-            if(widget->alignment == AlignAuto)
+            switch(widget->alignment)
+            {
+              case AlignFlex:
+                warn("multiple flex widgets in panel -"
+                     " ignoring flex for all but the first.\n");
                 widget->alignment = AlignRight;
-        }
+                break;
+              case AlignCenter:
+                warn("widgets cannot be center aligned\n");
+              case AlignAuto:
+                widget->alignment = AlignRight;
+                break;
+              default:
+                break;
+            }
 }
 
 int

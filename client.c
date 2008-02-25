@@ -35,7 +35,6 @@
 #include "xutil.h"
 #include "layouts/floating.h"
 
-
 extern AwesomeConf globalconf;
 
 /** Load windows properties, restoring client's tag
