@@ -24,6 +24,7 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xrandr.h>
+#include <X11/extensions/Xinerama.h>
 
 #include "screen.h"
 #include "event.h"
@@ -134,7 +135,7 @@ handle_event_buttonpress(XEvent *e)
                                 &wdummy, &x, &y, &i,
                                 &i, &udummy))
             {
-                screen = screen_get_bycoord(x, y);
+                screen = screen_get_bycoord(screen, x, y);
                 handle_mouse_button_press(screen, ev->button, ev->state,
                                           globalconf.buttons.root, NULL);
                 return;
@@ -273,8 +274,7 @@ handle_event_keypress(XEvent * e)
              * only screen in Xinerama, so we can ask for a better screen
              * number with screen_get_bycoord: we'll get 0 in Zaphod mode
              * so it's the same, or maybe the real Xinerama screen */
-            if(screen == 0)
-                screen = screen_get_bycoord(x, y);
+            screen = screen_get_bycoord(screen, x, y);
             break;
         }
 
@@ -315,7 +315,7 @@ handle_event_maprequest(XEvent *e)
 {
     static XWindowAttributes wa;
     XMapRequestEvent *ev = &e->xmaprequest;
-    int screen, x, y, d;
+    int screen = 0, x, y, d;
     unsigned int m;
     Window dummy;
 
@@ -325,10 +325,13 @@ handle_event_maprequest(XEvent *e)
         return;
     if(!client_get_bywin(globalconf.clients, ev->window))
     {
-        for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
-        if(screen == 0 && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
-                                        &dummy, &dummy, &x, &y, &d, &d, &m))
-            screen = screen_get_bycoord(x, y);
+        if(XineramaIsActive(globalconf.display)
+           && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
+                            &dummy, &dummy, &x, &y, &d, &d, &m))
+            screen = screen_get_bycoord(screen, x, y);
+        else
+             for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
+
         client_manage(ev->window, &wa, screen);
     }
 }

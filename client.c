@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/shape.h>
+#include <X11/extensions/Xinerama.h>
 
 #include "client.h"
 #include "tag.h"
@@ -253,7 +254,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     c = p_new(Client, 1);
 
-    c->screen = screen_get_bycoord(wa->x, wa->y);
+    c->screen = screen_get_bycoord(screen, wa->x, wa->y);
 
     screen_geom = screen_get_area(c->screen,
                                   globalconf.screens[screen].statusbar,
@@ -447,7 +448,7 @@ client_resize(Client *c, Area geometry, Bool sizehints)
     if(c->geometry.x != geometry.x || c->geometry.y != geometry.y
        || c->geometry.width != geometry.width || c->geometry.height != geometry.height)
     {
-        new_screen = screen_get_bycoord(geometry.x, geometry.y);
+        new_screen = screen_get_bycoord(c->screen, geometry.x, geometry.y);
 
         c->geometry.x = wc.x = geometry.x;
         c->geometry.y = wc.y = geometry.y;

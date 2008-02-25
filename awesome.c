@@ -77,7 +77,6 @@ scan()
     {
         if(XQueryTree(globalconf.display, RootWindow(globalconf.display, screen), &d1, &d2, &wins, &num))
         {
-            real_screen = screen;
             for(i = 0; i < num; i++)
             {
                 /* XGetWindowAttributes return 1 on success */
@@ -87,8 +86,7 @@ scan()
                     continue;
                 if(wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState)
                 {
-                    if(screen == 0)
-                        real_screen = screen_get_bycoord(wa.x, wa.y);
+                    real_screen = screen_get_bycoord(screen, wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }
@@ -100,8 +98,7 @@ scan()
                 if(XGetTransientForHint(globalconf.display, wins[i], &d1)
                    && (wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState))
                 {
-                    if(screen == 0)
-                        real_screen = screen_get_bycoord(wa.x, wa.y);
+                    real_screen = screen_get_bycoord(screen, wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }

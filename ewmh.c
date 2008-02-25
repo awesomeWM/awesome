@@ -149,10 +149,9 @@ ewmh_update_net_client_list(int phys_screen)
     int n = 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(get_phys_screen(c->screen) == phys_screen)
-            n++;
+        n++;
 
-    wins = p_new(Window, n + 1);
+    wins = p_new(Window, n);
 
     for(n = 0, c = globalconf.clients; c; c = c->next, n++)
         if(get_phys_screen(c->screen) == phys_screen)
@@ -162,7 +161,6 @@ ewmh_update_net_client_list(int phys_screen)
                     net_client_list, XA_WINDOW, 32, PropModeReplace, (unsigned char *) wins, n);
 
     p_delete(&wins);
-    XFlush(globalconf.display);
 }
 
 void

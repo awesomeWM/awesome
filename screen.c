@@ -110,14 +110,14 @@ get_display_area(int screen, Statusbar *statusbar, Padding *padding)
  * \return screen number or DefaultScreen of disp on no match
  */
 int
-screen_get_bycoord(int x, int y)
+screen_get_bycoord(int screen, int x, int y)
 {
     int i;
     Area area;
 
     /* don't waste our time */
     if(!XineramaIsActive(globalconf.display))
-        return DefaultScreen(globalconf.display);
+        return screen;
 
     for(i = 0; i < globalconf.nscreen; i++)
     {
