@@ -91,7 +91,7 @@ window_configure(Window win, Area geometry, int border)
  * \param win The window
  */
 void
-window_grabbuttons(int screen, Window win)
+window_grabbuttons(int phys_screen, Window win)
 {
     Button *b;
 
@@ -116,27 +116,27 @@ window_grabbuttons(int screen, Window win)
                     win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
     }
 
-    XUngrabButton(globalconf.display, AnyButton, AnyModifier, RootWindow(globalconf.display, screen));
+    XUngrabButton(globalconf.display, AnyButton, AnyModifier, RootWindow(globalconf.display, phys_screen));
 }
 
 void
-window_root_grabbuttons(int screen)
+window_root_grabbuttons(int phys_screen)
 {
     Button *b;
 
     for(b = globalconf.buttons.root; b; b = b->next)
     {
         XGrabButton(globalconf.display, b->button, b->mod,
-                    RootWindow(globalconf.display, screen), False, BUTTONMASK,
+                    RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
         XGrabButton(globalconf.display, b->button, b->mod | LockMask,
-                    RootWindow(globalconf.display, screen), False, BUTTONMASK,
+                    RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
         XGrabButton(globalconf.display, b->button, b->mod | globalconf.numlockmask,
-                    RootWindow(globalconf.display, screen), False, BUTTONMASK,
+                    RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
         XGrabButton(globalconf.display, b->button, b->mod | globalconf.numlockmask | LockMask,
-                    RootWindow(globalconf.display, screen), False, BUTTONMASK,
+                    RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
     }
 }

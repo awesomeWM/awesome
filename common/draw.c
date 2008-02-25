@@ -491,14 +491,14 @@ draw_get_image_size(const char *filename)
 }
 
 Drawable
-draw_rotate(DrawCtx *ctx, int screen, double angle, int tx, int ty)
+draw_rotate(DrawCtx *ctx, int phys_screen, double angle, int tx, int ty)
 {
     cairo_surface_t *surface, *source;
     cairo_t *cr;
     Drawable newdrawable;
 
     newdrawable = XCreatePixmap(ctx->display,
-                                RootWindow(ctx->display, screen),
+                                RootWindow(ctx->display, phys_screen),
                                 ctx->height, ctx->width,
                                 ctx->depth);
     surface = cairo_xlib_surface_create(ctx->display, newdrawable, ctx->visual, ctx->height, ctx->width);

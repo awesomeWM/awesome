@@ -313,11 +313,11 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
  * \param screen screen number
  */
 static void
-move_mouse_pointer_to_screen(int screen)
+move_mouse_pointer_to_screen(int phys_screen)
 {
     if(XineramaIsActive(globalconf.display))
     {
-        Area area = screen_get_area(screen, NULL, NULL);
+        Area area = screen_get_area(phys_screen, NULL, NULL);
         XWarpPointer(globalconf.display,
                      None,
                      DefaultRootWindow(globalconf.display),
@@ -326,7 +326,7 @@ move_mouse_pointer_to_screen(int screen)
     else
         XWarpPointer(globalconf.display,
                      None,
-                     RootWindow(globalconf.display, screen),
+                     RootWindow(globalconf.display, phys_screen),
                      0, 0, 0, 0, 0, 0);
 }
 
