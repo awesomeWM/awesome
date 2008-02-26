@@ -216,16 +216,13 @@ main(int argc, char *argv[])
 {
     char buf[1024];
     const char *confpath = NULL;
-    int r, xfd, e_dummy, csfd;
+    int r, xfd, e_dummy, csfd, shape_event, randr_event_base, i, screen, opt;
+    ssize_t cmdlen = 1;
     fd_set rd;
     XEvent ev;
     Display * dpy;
-    int shape_event, randr_event_base;
-    int screen;
-    int i, cmdlen;
     event_handler **handler;
     struct sockaddr_un *addr;
-    int opt;
     Client *c;
     static struct option long_options[] =
     {
@@ -235,6 +232,19 @@ main(int argc, char *argv[])
         {"config",  0, NULL, 'c'},
         {NULL,      0, NULL, 0}
     };
+
+    /* save argv */
+    for(i = 0; i < argc; i++)
+        cmdlen += a_strlen(argv[i]) + 1;
+
+    globalconf.argv = p_new(char, cmdlen);
+    a_strcpy(globalconf.argv, cmdlen, argv[0]);
+
+    for(i = 1; i < argc; i++)
+    {
+        a_strcat(globalconf.argv, cmdlen, " ");
+        a_strcat(globalconf.argv, cmdlen, argv[i]);
+    }
 
     /* check args */
     while((opt = getopt_long(argc, argv, "vhkc:",
@@ -264,16 +274,6 @@ main(int argc, char *argv[])
     /* X stuff */
     if(!(dpy = XOpenDisplay(NULL)))
         eprint("cannot open display\n");
-
-    for(cmdlen = 0, i = 0; i < argc; i++)
-        cmdlen += a_strlen(argv[i] + 1);
-    globalconf.argv = p_new(char, cmdlen);
-    a_strcpy(globalconf.argv, cmdlen, argv[0]);
-    for(i = 1; i < argc; i++)
-    {
-        a_strcat(globalconf.argv, cmdlen, " ");
-        a_strcat(globalconf.argv, cmdlen, argv[i]);
-    }
 
     xfd = ConnectionNumber(dpy);
 
