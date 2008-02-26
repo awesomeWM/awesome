@@ -109,7 +109,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     if((buf = cfg_getstr(config, "fg")))
-        draw_color_new(globalconf.display, statusbar->screen, buf, &d->fg);
+        draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf, &d->fg);
     else
         d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
 
