@@ -552,6 +552,8 @@ client_unmanage(Client *c)
     /* remove client everywhere */
     client_list_detach(&globalconf.clients, c);
     focus_delete_client(c);
+    if(globalconf.scratch.client == c)
+        globalconf.scratch.client = NULL;
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
 
