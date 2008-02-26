@@ -287,9 +287,7 @@ tag_view_only(Tag *target)
     if(!target) return;
 
     for(tag = globalconf.screens[target->screen].tags; tag; tag = tag->next)
-        tag_view(tag, False);
-
-    tag_view(target, True);
+        tag_view(tag, tag == target);
 }
 
 void
