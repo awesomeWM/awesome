@@ -32,6 +32,10 @@
 #include "draw.h"
 #include "common/util.h"
 
+/** Convert text from any charset to UTF-8 using iconv
+ * \param iso the ISO string to convert
+ * \return NULL if error, otherwise pointer to the new converted string
+ */
 static char *
 draw_iso2utf8(char *iso)
 {
@@ -74,9 +78,11 @@ draw_iso2utf8(char *iso)
 }
 
 /** Get a draw context
+ * \param disp Display ref
  * \param phys_screen physical screen id
  * \param width width
  * \param height height
+ * \param dw Drawable object to store in DrawCtx
  * \return draw context ref
  */
 DrawCtx *
@@ -97,6 +103,9 @@ draw_context_new(Display *disp, int phys_screen, int width, int height, Drawable
     return d;
 };
 
+/** Delete a draw context
+ * \param ctx DrawCtx to delete
+ */
 void
 draw_context_delete(DrawCtx *ctx)
 {
@@ -106,10 +115,8 @@ draw_context_delete(DrawCtx *ctx)
 }
 
 /** Draw text into a draw context
- * \param x x coord
- * \param y y coord
- * \param w width
- * \param h height
+ * \param ctx DrawCtx to draw to
+ * \param area area to draw to
  * \param align alignment
  * \param padding padding to add before drawing the text
  * \param font font to use
@@ -204,11 +211,11 @@ draw_text(DrawCtx *ctx,
  * \param pcolor_end color at 100% of width
  * \return pat pattern or NULL; needs to get cairo_pattern_destroy()'ed;
  */
-cairo_pattern_t *
-setup_cairo_color_source(DrawCtx *ctx, int x, int y, int width,
+static cairo_pattern_t *
+draw_setup_cairo_color_source(DrawCtx *ctx, int x, int y, int width,
                          XColor color, XColor *pcolor_center, XColor *pcolor_end)
 {
-    cairo_pattern_t *pat;
+    cairo_pattern_t *pat = NULL;
 
     if(pcolor_center || pcolor_end) /* draw a gradient */
     {
@@ -226,19 +233,17 @@ setup_cairo_color_source(DrawCtx *ctx, int x, int y, int width,
             cairo_pattern_add_color_stop_rgb(pat, 1, color.red / 65535.0,
                                              color.green / 65535.0, color.blue / 65535.0);
         cairo_set_source(ctx->cr, pat);
-        return pat;
     }
-    else /* no gradient */
-    {
+    else
         cairo_set_source_rgb(ctx->cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
-        return NULL;
-    }
+
+    return pat;
 }
 
 /** Draw rectangle
  * \param ctx Draw context
  * \param geometry geometry
- * \param filled filled rectangle?
+ * \param filled fill rectangle?
  * \param color color to use
  */
 void
@@ -276,8 +281,8 @@ draw_rectangle_gradient(DrawCtx *ctx, Area geometry, int fullwidth, Bool filled,
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, 1.0);
 
-    pat = setup_cairo_color_source(ctx, geometry.x, geometry.y, fullwidth,
-                                   color, pcolor_center, pcolor_end);
+    pat = draw_setup_cairo_color_source(ctx, geometry.x, geometry.y, fullwidth,
+                                        color, pcolor_center, pcolor_end);
 
     if(filled)
     {
@@ -305,6 +310,7 @@ draw_graph_setup(DrawCtx *ctx)
     /* without it, it can draw over the path on sharp angles (...too long lines) */
     cairo_set_line_join (ctx->cr, CAIRO_LINE_JOIN_ROUND);
 }
+
 /** Draw a graph
  * \param ctx Draw context
  * \param x x-offset of widget
@@ -323,7 +329,7 @@ draw_graph(DrawCtx *ctx, int x, int y, int w, int *from, int *to, int cur_index,
 {
     int i;
     cairo_pattern_t *pat;
-    pat = setup_cairo_color_source(ctx, x, y, w, color, pcolor_center, pcolor_end);
+    pat = draw_setup_cairo_color_source(ctx, x, y, w, color, pcolor_center, pcolor_end);
 
     i = -1;
     while(++i < w)
@@ -341,6 +347,7 @@ draw_graph(DrawCtx *ctx, int x, int y, int w, int *from, int *to, int cur_index,
     if(pat)
         cairo_pattern_destroy(pat);
 }
+
 /** Draw a line into a graph-widget
  * \param ctx Draw context
  * \param x x-offset of widget
@@ -360,7 +367,7 @@ draw_graph_line(DrawCtx *ctx, int x, int y, int w, int *to, int cur_index,
     int flag = 0; /* used to prevent drawing a line from 0 to 0 values */
     cairo_pattern_t *pat;
 
-    pat = setup_cairo_color_source(ctx, x, y, w, color, pcolor_center, pcolor_end);
+    pat = draw_setup_cairo_color_source(ctx, x, y, w, color, pcolor_center, pcolor_end);
 
     /* x-1 (on the border), paints *from* the last point (... not included itself) */
     /* makes sense when you assume there is already some line drawn to it. */
@@ -394,6 +401,14 @@ draw_graph_line(DrawCtx *ctx, int x, int y, int w, int *to, int cur_index,
         cairo_pattern_destroy(pat);
 }
 
+/** Draw a circle
+ * \param ctx Draw context to draw to
+ * \param x x coordinate
+ * \param y y coordinate
+ * \param r size of the circle
+ * \param filled fill circle?
+ * \param color color to use
+ */
 void
 draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
 {
@@ -413,6 +428,17 @@ draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
     cairo_stroke(ctx->cr);
 }
 
+/** Draw an image from ARGB data to a draw context.
+ * Data should be stored as an array of alpha, red, blue, green for each pixel
+ * and the array size should be w * h elements long.
+ * \param ctx Draw context to draw to
+ * \param x x coordinate
+ * \param y y coordinate
+ * \param w width
+ * \param h height
+ * \param wanted_h wanted height: if > 0, image will be resized
+ * \param data the image pixels array
+ */
 void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
                                int wanted_h, unsigned char *data)
 {
@@ -437,6 +463,13 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
+/** Draw an image (PNG format only) from a file to a draw context
+ * \param ctx Draw context to draw to
+ * \param x x coordinate
+ * \param y y coordinate
+ * \param wanted_h wanted height: if > 0, image will be resized
+ * \param filename file name to draw
+ */
 void
 draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 {
@@ -450,6 +483,7 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
     if((cairo_st = cairo_surface_status(source)))
     {
         warn("failed to draw image %s: %s\n", filename, cairo_status_to_string(cairo_st));
+        cairo_surface_destroy(source);
         return;
     }
     cr = cairo_create (ctx->surface);
@@ -467,6 +501,10 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
     cairo_surface_destroy(source);
 }
 
+/** Get an imag size (PNG format only)
+ * \param filename file name
+ * \return Area structure with width and height set to image size
+ */
 Area
 draw_get_image_size(const char *filename)
 {
@@ -484,12 +522,21 @@ draw_get_image_size(const char *filename)
         size.y = 0;
         size.width = cairo_image_surface_get_width(surface);
         size.height = cairo_image_surface_get_height(surface);
-        cairo_surface_destroy(surface);
     }
+
+    cairo_surface_destroy(surface);
 
     return size;
 }
 
+/** Rotate a drawable
+ * \param ctx Draw context to draw to
+ * \param phys_screen physical screen id
+ * \param angle angle to rotate
+ * \param tx translate to this x coordinate
+ * \param ty translate to this y coordinate
+ * \return new rotated drawable
+ */
 Drawable
 draw_rotate(DrawCtx *ctx, int phys_screen, double angle, int tx, int ty)
 {
@@ -518,6 +565,12 @@ draw_rotate(DrawCtx *ctx, int phys_screen, double angle, int tx, int ty)
     return newdrawable;
 }
 
+/** Return the width of a text in pixel
+ * \param disp Display ref
+ * \param font font to use
+ * \param text the text
+ * \return text width
+ */
 unsigned short
 draw_textwidth(Display *disp, XftFont *font, char *text)
 {
@@ -545,6 +598,12 @@ draw_textwidth(Display *disp, XftFont *font, char *text)
     return MAX(te.x_advance, te.width);
 }
 
+/** Transform a string to a Alignment type.
+ * Recognized string are left, center or right. Everything else will be
+ * recognized as AlignAuto.
+ * \param align string with align text
+ * \return Alignment type
+ */
 Alignment
 draw_get_align(const char *align)
 {
@@ -560,9 +619,10 @@ draw_get_align(const char *align)
 
 /** Initialize an X color
  * \param disp display ref
- * \param screen Physical screen number
+ * \param phys_screen Physical screen number
  * \param colstr Color specification
- * \return XColor struct
+ * \param color XColor struct to store color to
+ * \return true if color allocation was successfull
  */
 Bool
 draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color)
@@ -581,8 +641,7 @@ draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color
 }
 
 /** Remove a area from a list of them,
- * spliting the space between several area that
- * can overlaps
+ * spliting the space between several area that can overlaps
  * \param head list head
  * \param elem area to remove
  */

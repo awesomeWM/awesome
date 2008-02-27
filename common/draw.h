@@ -98,7 +98,6 @@ void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, char *, XColor fg, XC
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
 void draw_rectangle_gradient(DrawCtx *, Area, int, Bool, XColor, XColor *, XColor *);
 
-cairo_pattern_t * setup_cairo_color_source(DrawCtx *, int, int, int, XColor, XColor *, XColor *);
 void draw_graph_setup(DrawCtx *);
 void draw_graph(DrawCtx *, int, int, int, int *, int *, int, XColor, XColor *, XColor *);
 void draw_graph_line(DrawCtx *, int, int, int, int *, int, XColor, XColor *, XColor *);

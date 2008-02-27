@@ -280,6 +280,9 @@ cfg_opt_t awesome_opts[] =
     CFG_END()
 };
 
+/** Return default configuration file path
+ * \return path to the default configuration file
+ */
 char *
 config_file(void)
 {
@@ -297,6 +300,10 @@ config_file(void)
     return confpath;
 }
 
+/** Check configuration file syntax in regard of libconfuse parsing
+ * \param path to config file
+ * \return status returned by cfg_parse()
+ */
 int
 config_check(const char *confpatharg)
 {
