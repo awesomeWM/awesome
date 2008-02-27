@@ -90,7 +90,7 @@ CLEANFILES    += $(A_V).h
 BUILT_SOURCES += $(A_V).h.stamp
 $(A_V).h.stamp:
 	@current_ver=`$(SHELL) $(top_srcdir)/build-utils/package-version $(top_srcdir) version-stamp`; \
-	{ echo '#ifndef AWESOME_VERSION_INTERNAL_H'; \
+	{ echo '#ifndef AWESOME_VERSION_INTERNAL'; \
 	  echo "#define AWESOME_VERSION_INTERNAL \"$${current_ver}\""; \
 	  echo "#endif"; } > "$(A_V).h.new"
 	@if test -f "$(A_V).h" \
