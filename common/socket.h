@@ -1,5 +1,5 @@
 /*
- * awclient.h - awesome client header
+ * socket.h - awesome socket client header
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_COMMON_AWCLIENT_H
-#define AWESOME_COMMON_AWCLIENT_H
+#ifndef AWESOME_COMMON_SOCKET_H
+#define AWESOME_COMMON_SOCKET_H
 
 struct sockaddr_un * get_client_addr(const char *);
 int get_client_socket(void);

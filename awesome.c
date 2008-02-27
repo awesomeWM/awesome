@@ -53,7 +53,7 @@
 #include "focus.h"
 #include "ewmh.h"
 #include "tag.h"
-#include "common/awclient.h"
+#include "common/socket.h"
 #include "common/util.h"
 #include "common/version.h"
 #include "common/configopts.h"

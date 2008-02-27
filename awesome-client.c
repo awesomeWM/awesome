@@ -26,7 +26,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "common/awclient.h"
+#include "common/socket.h"
 #include "common/version.h"
 #include "common/util.h"
 

@@ -1,5 +1,5 @@
 /*
- * awclient.c - awesome client, communicate with socket, common functions
+ * socket.c - awesome client, communicate with socket, common functions
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2007 daniel@brinkers.de
@@ -24,7 +24,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "common/awclient.h"
+#include "common/socket.h"
 #include "common/util.h"
 
 #define CONTROL_UNIX_SOCKET_PATH ".awesome_ctl."

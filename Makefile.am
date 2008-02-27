@@ -129,12 +129,11 @@ awesome_SOURCES = \
 	window.c window.h \
 	rules.c rules.h \
 	mouse.c mouse.h \
-	common/awclient.c \
+	common/socket.c common/socket.h \
 	common/swindow.c common/swindow.h \
 	widget.c widget.h \
 	ewmh.c ewmh.h \
 	common/list.h structs.h \
-	common/awclient.h \
 	common/configopts.h common/configopts.c
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
@@ -142,9 +141,9 @@ awesome_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XRANDR_LIB
 
 bin_PROGRAMS += awesome-client
 awesome_client_SOURCES = \
-	awesome-client.c common/awclient.h \
+	awesome-client.c \
+	common/socket.c common/socket.h \
 	common/version.c common/version.h \
-	common/awclient.c \
 	common/util.c common/util.h
 
 bin_PROGRAMS += awesome-message
