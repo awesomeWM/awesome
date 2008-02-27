@@ -55,7 +55,7 @@
 #include "tag.h"
 #include "common/awclient.h"
 #include "common/util.h"
-#include "common/awesome-version.h"
+#include "common/version.h"
 #include "common/configopts.h"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);

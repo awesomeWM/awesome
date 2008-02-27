@@ -32,7 +32,7 @@
 
 #include "common/swindow.h"
 #include "common/util.h"
-#include "common/awesome-version.h"
+#include "common/version.h"
 #include "common/configopts.h"
 
 #define PROGNAME "awesome-message"

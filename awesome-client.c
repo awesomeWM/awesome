@@ -27,7 +27,7 @@
 #include <sys/un.h>
 
 #include "common/awclient.h"
-#include "common/awesome-version.h"
+#include "common/version.h"
 #include "common/util.h"
 
 /* GNU/Hurd workaround */

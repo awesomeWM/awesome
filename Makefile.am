@@ -113,7 +113,7 @@ bin_PROGRAMS += awesome
 awesome_SOURCES = \
 	client.c client.h \
 	placement.c placement.h \
-	common/awesome-version.c common/awesome-version.h \
+	common/version.c common/version.h \
 	focus.c focus.h \
 	common/draw.c common/draw.h \
 	event.c event.h \
@@ -143,7 +143,7 @@ awesome_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XRANDR_LIB
 bin_PROGRAMS += awesome-client
 awesome_client_SOURCES = \
 	awesome-client.c common/awclient.h \
-	common/awesome-version.c common/awesome-version.h \
+	common/version.c common/version.h \
 	common/awclient.c \
 	common/util.c common/util.h
 
@@ -152,7 +152,7 @@ awesome_message_SOURCES = \
         common/swindow.c common/swindow.h \
         common/draw.c common/draw.h \
 	common/util.h common/util.c \
-	common/awesome-version.h common/awesome-version.c \
+	common/version.h common/version.c \
 	common/configopts.h common/configopts.c \
 	awesome-message.c
 
