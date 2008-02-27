@@ -1,5 +1,5 @@
 /*
- * awesome-client-common.c - awesome client, communicate with socket, common functions
+ * awclient.c - awesome client, communicate with socket, common functions
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2007 daniel@brinkers.de
@@ -29,6 +29,11 @@
 
 #define CONTROL_UNIX_SOCKET_PATH ".awesome_ctl."
 
+/** Get a sockaddr_un struct with information feeded for opening a
+ * communication to the awesome socket for given display
+ * \param display the display number
+ * \return sockaddr_un struct ready to be used or NULL if a problem occured
+ */
 struct sockaddr_un *
 get_client_addr(const char *display)
 {
@@ -72,6 +77,9 @@ get_client_addr(const char *display)
     return addr;
 }
 
+/** Get a AF_UNIX socket for communicating with awesome
+ * \return the socket file descriptor
+ */
 int
 get_client_socket(void)
 {

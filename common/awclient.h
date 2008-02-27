@@ -1,5 +1,5 @@
 /*
- * awesome-client.h - awesome client header
+ * awclient.h - awesome client header
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *

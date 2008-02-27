@@ -26,8 +26,8 @@
 #include "awesome-version-internal.h"
 
 /** \brief Print version message and quit program.
+ * \param executable program name
  */
-
 void
 eprint_version(const char *const executable)
 {
