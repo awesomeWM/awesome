@@ -43,7 +43,7 @@ To zoom focused window on screen 0:
 
 SEE ALSO
 --------
-awesome(1) awesomerc(1)
+awesome(1) awesomerc(5)
 
 AUTHORS
 -------

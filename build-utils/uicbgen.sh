@@ -11,7 +11,7 @@ do
     do
         shortname=$(echo $uicb | cut -d _ -f2-)
         echo "    {\"$shortname\", $uicb},"
-        grep -q "\*$shortname\*" ${top_srcdir}/awesomerc.1.txt || \
+        grep -q "\*$shortname\*" ${top_srcdir}/awesomerc.5.txt || \
             echo "  WARNING: $uicb NOT documented" >&2
     done
 done

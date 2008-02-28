@@ -162,14 +162,14 @@ if HAVE_ASCIIDOC
 if XMLTO_MAN_WORKS
 man_MANS   += awesome.1
 man_MANS   += awesome-client.1
-man_MANS   += awesomerc.1
+man_MANS   += awesomerc.5
 endif
 endif
 endif
 
 EXTRA_DIST += awesome.1.txt
 EXTRA_DIST += awesome-client.1.txt
-EXTRA_DIST += awesomerc.1.txt
+EXTRA_DIST += awesomerc.5.txt
 
 dist_iconslayouts_DATA += icons/layouts/dwindle.png
 dist_iconslayouts_DATA += icons/layouts/dwindlew.png
@@ -189,17 +189,23 @@ dist_iconslayouts_DATA += icons/layouts/tiletopw.png
 dist_iconslayouts_DATA += icons/layouts/tilew.png
 
 clean-local:
-	rm -f awesome*.1 awesome*.1.xml
+	rm -f awesome*.1 awesome*.1.xml awesome*.5 awesome*.5.xml
 
 SUFFIXES += .1.xml .1
+SUFFIXES += .5.xml .5
 if HAVE_XMLTO
 .1.xml.1:
+	$(XMLTO) man $<
+.5.xml.5:
 	$(XMLTO) man $<
 endif
 
 SUFFIXES += .1.txt .1.xml
+SUFFIXES += .5.txt .5.xml
 if HAVE_ASCIIDOC
 .1.txt.1.xml:
+	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
+.5.txt.5.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
 endif
 

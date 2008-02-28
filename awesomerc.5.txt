@@ -1,4 +1,4 @@
-awesomerc(1)
+awesomerc(5)
 ===========
 
 NAME
