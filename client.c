@@ -799,7 +799,7 @@ uicb_client_swapnext(int screen __attribute__ ((unused)),
 void
 uicb_client_moveresize(int screen, char *arg)
 {
-    int ox, oy, ow, oh;
+    int ox, oy, ow, oh; /* old geometry */
     char x[8], y[8], w[8], h[8];
     int mx, my, dx, dy, nmx, nmy;
     unsigned int dui;
@@ -832,8 +832,12 @@ uicb_client_moveresize(int screen, char *arg)
     client_resize(sel, area, globalconf.screens[sel->screen].resize_hints);
     if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
     {
-        nmx = mx - ox + sel->geometry.width - ow - 1 < 0 ? 0 : mx - ox + sel->geometry.width - ow - 1;
-        nmy = my - oy + sel->geometry.height - oh - 1 < 0 ? 0 : my - oy + sel->geometry.height - oh - 1;
+        nmx = mx - (ox + sel->border) + sel->geometry.width - ow;
+        if(nmx < 0)
+            nmx = 0;
+        nmy = my - (oy + sel->border) + sel->geometry.height - oh;
+        if(nmy < 0)
+            nmy = 0;
         XWarpPointer(globalconf.display,
                      None, sel->win,
                      0, 0, 0, 0, nmx, nmy);
