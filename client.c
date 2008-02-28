@@ -808,9 +808,9 @@ uicb_client_moveresize(int screen, char *arg)
     Client *sel = globalconf.focus->client;
     Layout *curlay = layout_get_current(screen);
 
-    if(curlay->arrange != layout_floating ||
-        !sel || !sel->isfloating || sel->isfixed || !arg)
-            return;
+    if(!sel || sel->isfixed || !arg ||
+       (curlay->arrange != layout_floating && !sel->isfloating))
+        return;
 
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
         return;
