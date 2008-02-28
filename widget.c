@@ -50,12 +50,12 @@ widget_calculate_alignments(Widget *widget)
             switch(widget->alignment)
             {
               case AlignFlex:
-                warn("multiple flex widgets in panel -"
-                     " ignoring flex for all but the first.\n");
+                warn("multiple flex widgets (%s) in panel -"
+                     " ignoring flex for all but the first.\n", widget->name);
                 widget->alignment = AlignRight;
                 break;
               case AlignCenter:
-                warn("widgets cannot be center aligned\n");
+                warn("widget %s cannot be center aligned\n", widget->name);
               case AlignAuto:
                 widget->alignment = AlignRight;
                 break;
