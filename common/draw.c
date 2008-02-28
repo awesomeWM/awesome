@@ -613,6 +613,8 @@ draw_get_align(const char *align)
         return AlignCenter;
     else if(!a_strncmp(align, "right", 5))
         return AlignRight;
+    else if(!a_strncmp(align, "flex", 4))
+        return AlignFlex;
 
     return AlignAuto;
 }
