@@ -41,6 +41,8 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
     if(d->width)
         widget->area.width = d->width;
+    else if(widget->alignment == AlignFlex)
+        widget->area.width = widget->statusbar->width - used;
     else
         widget->area.width = MIN(draw_textwidth(ctx->display, widget->font, d->text),
                                  widget->statusbar->width - used);
