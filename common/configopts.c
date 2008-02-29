@@ -26,6 +26,10 @@
 
 #define AWESOME_CONFIG_FILE ".awesomerc"
 
+#define CFG_AWESOME_END() \
+        CFG_FUNC((char *) "include", cfg_include), \
+        CFG_END()
+
 cfg_opt_t general_opts[] =
 {
     CFG_INT((char *) "border", 1, CFGF_NONE),
@@ -38,7 +42,7 @@ cfg_opt_t general_opts[] =
     CFG_STR((char *) "font", (char *) "vera-10", CFGF_NONE),
     CFG_INT((char *) "opacity_unfocused", -1, CFGF_NONE),
     CFG_STR((char *) "floating_placement", (char *) "smart", CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t colors_opts[] =
 {
@@ -51,14 +55,14 @@ cfg_opt_t colors_opts[] =
     CFG_STR((char *) "urgent_bg", (char *) "#ff0000", CFGF_NONE),
     CFG_STR((char *) "urgent_fg", (char *) "#ffffff", CFGF_NONE),
     CFG_STR((char *) "tab_border", (char *) "#ff0000", CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t mouse_taglist_opts[] =
 {
     CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
     CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
     CFG_STR((char *) "command", (char *) "", CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t mouse_generic_opts[] =
 {
@@ -66,7 +70,7 @@ cfg_opt_t mouse_generic_opts[] =
     CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
     CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     CFG_STR((char *) "arg", NULL, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_opts[] =
 {
@@ -74,7 +78,7 @@ cfg_opt_t widget_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_taglist_opts[] =
 {
@@ -82,7 +86,7 @@ cfg_opt_t widget_taglist_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_taglist_opts, CFGF_MULTI),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_iconbox_opts[] =
 {
@@ -92,7 +96,7 @@ cfg_opt_t widget_iconbox_opts[] =
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
     CFG_BOOL((char *) "resize", cfg_true, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_textbox_opts[] =
 {
@@ -106,7 +110,7 @@ cfg_opt_t widget_textbox_opts[] =
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "text_align", (char *) "center", CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_tasklist_opts[] =
 {
@@ -121,7 +125,7 @@ cfg_opt_t widget_tasklist_opts[] =
     CFG_STR((char *) "text_align", (char *) "left", CFGF_NONE),
     CFG_STR((char *) "show", (char *) "tags", CFGF_NONE),
     CFG_BOOL((char *) "show_icons", cfg_true, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_graph_data_opts[] =
 {
@@ -131,7 +135,7 @@ cfg_opt_t widget_graph_data_opts[] =
     CFG_STR((char *) "fg_center", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "fg_end", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "style", (char *) "bottom", CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_graph_opts[] =
 {
@@ -145,7 +149,7 @@ cfg_opt_t widget_graph_opts[] =
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_progressbar_bar_opts[] =
 {
@@ -154,7 +158,7 @@ cfg_opt_t widget_progressbar_bar_opts[] =
     CFG_STR((char *) "fg_end", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t widget_progressbar_opts[] =
 {
@@ -167,7 +171,7 @@ cfg_opt_t widget_progressbar_opts[] =
     CFG_INT((char *) "gap", 2, CFGF_NONE),
     CFG_INT((char *) "padding", 0, CFGF_NONE),
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t statusbar_opts[] =
 {
@@ -182,7 +186,7 @@ cfg_opt_t statusbar_opts[] =
     CFG_SEC((char *) "progressbar", widget_progressbar_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "graph", widget_graph_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "tasklist", widget_tasklist_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t tag_opts[] =
 {
@@ -190,22 +194,22 @@ cfg_opt_t tag_opts[] =
     CFG_FLOAT((char *) "mwfact", 0.5, CFGF_NONE),
     CFG_INT((char *) "nmaster", 1, CFGF_NONE),
     CFG_INT((char *) "ncol", 1, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t tags_opts[] =
 {
     CFG_SEC((char *) "tag", tag_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t layout_opts[] =
 {
     CFG_STR((char *) "image", NULL, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t layouts_opts[] =
 {
     CFG_SEC((char *) "layout", layout_opts, CFGF_TITLE | CFGF_MULTI),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t padding_opts[] =
 {
@@ -213,7 +217,7 @@ cfg_opt_t padding_opts[] =
     CFG_INT((char *) "bottom", 0, CFGF_NONE),
     CFG_INT((char *) "right", 0, CFGF_NONE),
     CFG_INT((char *) "left", 0, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t screen_opts[] =
 {
@@ -223,7 +227,7 @@ cfg_opt_t screen_opts[] =
     CFG_SEC((char *) "colors", colors_opts, CFGF_NONE),
     CFG_SEC((char *) "layouts", layouts_opts, CFGF_NONE),
     CFG_SEC((char *) "padding", padding_opts, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t rule_opts[] =
 {
@@ -236,12 +240,12 @@ cfg_opt_t rule_opts[] =
     CFG_STR((char *) "master", (char *) "auto", CFGF_NONE),
     CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
     CFG_FLOAT((char *) "opacity", -1.0f, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t rules_opts[] =
 {
     CFG_SEC((char *) "rule", rule_opts, CFGF_MULTI),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t key_opts[] =
 {
@@ -249,7 +253,7 @@ cfg_opt_t key_opts[] =
     CFG_STR((char *) "key", (char *) "None", CFGF_NONE),
     CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     CFG_STR((char *) "arg", NULL, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t keylist_opts[] =
 {
@@ -257,19 +261,19 @@ cfg_opt_t keylist_opts[] =
     CFG_STR_LIST((char *) "keylist", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     CFG_STR_LIST((char *) "arglist", NULL, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t keys_opts[] =
 {
     CFG_SEC((char *) "key", key_opts, CFGF_MULTI),
     CFG_SEC((char *) "keylist", keylist_opts, CFGF_MULTI),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t mouse_opts[] =
 {
     CFG_SEC((char *) "root", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "client", mouse_generic_opts, CFGF_MULTI),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 cfg_opt_t awesome_opts[] =
 {
@@ -277,7 +281,7 @@ cfg_opt_t awesome_opts[] =
     CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
     CFG_SEC((char *) "keys", keys_opts, CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_opts, CFGF_NONE),
-    CFG_END()
+    CFG_AWESOME_END()
 };
 
 /** Return default configuration file path
