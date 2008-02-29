@@ -19,6 +19,7 @@ SYNOPSIS
 
 <option> = <value>
 
+include(file.conf)
 
 DESCRIPTION
 -----------
