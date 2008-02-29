@@ -533,7 +533,7 @@ config_parse(const char *confpatharg)
 
     if(defconfig)
     {
-        cfg_print(cfg, defconfig);
+        fwrite(AWESOME_DEFAULT_CONFIG, a_strlen(AWESOME_DEFAULT_CONFIG), 1, defconfig);
         fclose(defconfig);
     }
 

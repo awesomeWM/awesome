@@ -59,10 +59,10 @@ CLEANFILES    += defconfig.h
 BUILT_SOURCES += defconfig.h
 defconfig.h: awesomerc
 	@echo "generating defconfig.h from awesomerc"
-	@echo "#define AWESOME_DEFAULT_CONFIG \\" > defconfig.h
+	@echo "static const char *AWESOME_DEFAULT_CONFIG = " > defconfig.h
 	@echo -n "\"" >> defconfig.h
-	@$(SED) 's,\\,\\\\,g;s/$$/ \\/;s/"/\\"/g' "awesomerc" >> defconfig.h
-	@echo "\"" >> defconfig.h
+	@$(SED) 's,\\,\\\\,g;s/$$/ \\n\\/;s/"/\\"/g' "awesomerc" >> defconfig.h
+	@echo "\";" >> defconfig.h
 
 CLEANFILES    += uicbgen.h
 BUILT_SOURCES += uicbgen.h
