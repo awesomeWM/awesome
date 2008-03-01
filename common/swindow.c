@@ -23,6 +23,16 @@
 #include "common/swindow.h"
 #include "common/util.h"
 
+/** Create a simple window
+ * \param disp Display ref
+ * \param phys_screen physical screen id
+ * \param x x coordinate
+ * \param y y coordinate
+ * \param w width
+ * \param h height
+ * \param border_width window's border width
+ * \return pointer to a SimpleWindow
+ */
 SimpleWindow *
 simplewindow_new(Display *disp, int phys_screen, int x, int y,
                  unsigned int w, unsigned int h,
@@ -61,6 +71,9 @@ simplewindow_new(Display *disp, int phys_screen, int x, int y,
     return sw;
 }
 
+/** Destroy a simple window and all its resources
+ * \param sw the SimpleWindow to delete
+ */
 void
 simplewindow_delete(SimpleWindow *sw)
 {
@@ -69,6 +82,12 @@ simplewindow_delete(SimpleWindow *sw)
     p_delete(&sw);
 }
 
+/** Move a simple window
+ * \param sw the SimpleWindow to move
+ * \param x x coordinate
+ * \param y y coordinate
+ * \return status
+ */
 int
 simplewindow_move(SimpleWindow *sw, int x, int y)
 {
@@ -77,6 +96,11 @@ simplewindow_move(SimpleWindow *sw, int x, int y)
     return XMoveWindow(sw->display, sw->window, x, y);
 }
 
+/** Refresh the window content
+ * \param sw the SimpleWindow to refresh
+ * \param phys_screen physical screen id
+ * \return status
+ */
 int
 simplewindow_refresh_drawable(SimpleWindow *sw, int phys_screen)
 {
