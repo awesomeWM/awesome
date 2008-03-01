@@ -830,14 +830,17 @@ uicb_client_moveresize(int screen, char *arg)
                                         get_phys_screen(screen)),
                              &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
     client_resize(sel, area, globalconf.screens[sel->screen].resize_hints);
-    if (xqp && ox <= mx && (ox + ow) >= mx && oy <= my && (oy + oh) >= my)
+    if (xqp && ox <= mx && (ox + 2 * sel->border + ow) >= mx &&
+        oy <= my && (oy + 2 * sel->border + oh) >= my)
     {
         nmx = mx - (ox + sel->border) + sel->geometry.width - ow;
-        if(nmx < 0)
-            nmx = 0;
         nmy = my - (oy + sel->border) + sel->geometry.height - oh;
-        if(nmy < 0)
-            nmy = 0;
+
+        if(nmx < -sel->border) /* can happen on a resize */
+            nmx = -sel->border;
+        if(nmy < -sel->border)
+            nmy = -sel->border;
+
         XWarpPointer(globalconf.display,
                      None, sel->win,
                      0, 0, 0, 0, nmx, nmy);
