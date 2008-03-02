@@ -40,6 +40,8 @@ typedef struct
     int gap;
     /** reverse drawing */
     Bool *reverse;
+    /** 90 Degree's turned */
+    Bool vertical;
     /** Number of data_items (bars) */
     int data_items;
     /** Height 0-1, where 1 is height of statusbar */
@@ -60,15 +62,13 @@ static int
 progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
-    int i, width, pwidth, margin_top, pb_height, left_offset;
-    Area rectangle;
+    int i, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset = 0;
+    Area rectangle, pattern_rect;
 
     Data *d = widget->data;
 
     if (!d->data_items)
         return 0;
-
-    width = d->width - 2 * d->padding;
 
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,
@@ -79,51 +79,158 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y;
-    pb_height = (int) ((widget->statusbar->height * d->height - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
-    left_offset = widget->area.x + d->padding;
-
-    for(i = 0; i < d->data_items; i++)
+    /* data for the first rectangle (data-bar) to draw */
+    if(d->vertical)
     {
-        if(d->reverse[i])
-            pwidth = (int)(((width - 2) * (100 - d->percent[i])) / 100);
-        else
-            pwidth = (int)(((width - 2) * d->percent[i]) / 100);
+        pb_width = (int) ((d->width - d->padding - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
+        pb_height = (int) (widget->statusbar->height * d->height);
+        pb_y = widget->area.y + (int)((widget->statusbar->height - pb_height) / 2 + 0.5);
+    }
+    else /* horizontal */
+    {
+        pb_width = d->width - d->padding;
+        pb_height = (int) ((widget->statusbar->height * d->height - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
+        pb_y = widget->area.y + (int)((widget->statusbar->height - widget->statusbar->height * d->height) / 2 + 0.5);
+    }
 
-        rectangle.x = left_offset;
-        rectangle.y = margin_top;
-        rectangle.width = width;
-        rectangle.height = pb_height;
+    pb_x = widget->area.x + d->padding;
 
-        draw_rectangle(ctx, rectangle, False, d->bordercolor[i]);
-
-        if(pwidth > 0) /* filled area */
+    /* for a 'reversed' progressbar:
+     * 1. the full space gets the size of the formerly empty one
+     * 2. the pattern must be mirrored
+     * 3. the formerly 'empty' side gets drawed with fg colors, the 'full' with bg-color
+     *
+     * Might could be put into a single function (removing same/similar code) - feel free
+     */
+    if(d->vertical)
+    {
+        for(i = 0; i < d->data_items; i++)
         {
-            rectangle.x = left_offset + 1;
-            rectangle.y = margin_top + 1;
-            rectangle.width = pwidth;
-            rectangle.height = pb_height - 2;
-            if(d->reverse[i])
-                draw_rectangle(ctx, rectangle, True, d->bg[i]);
-            else
-                draw_rectangle_gradient(ctx, rectangle, True, left_offset + 1, width - 2,
-                                        &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
-        }
+            /* border rectangle */
+            rectangle.x = pb_x + pb_offset;
+            rectangle.y = pb_y;
+            rectangle.width = pb_width;
+            rectangle.height = pb_height;
+            draw_rectangle(ctx, rectangle, False, d->bordercolor[i]);
 
-        if(width - 2 - pwidth > 0) /* not filled area */
+            /* new value/progress in px + pattern setup */
+            if(!d->reverse[i])
+            {
+                pb_progress = (int)(((pb_height  - 2) * d->percent[i]) / 100 + 0.5);
+                /* bottom to top */
+                pattern_rect.x = pb_x;
+                pattern_rect.y = pb_y + 1 + pb_height ;
+                pattern_rect.width =  0;
+                pattern_rect.height = -pb_height;
+            }
+            else
+            {
+                pb_progress = (int)(((pb_height - 2) * (100 - d->percent[i])) / 100 + 0.5);
+                /* top to bottom */
+                pattern_rect.x = pb_x + 1;
+                pattern_rect.y = pb_y + 1;
+                pattern_rect.width =  0;
+                pattern_rect.height = pb_height;
+            }
+
+            /* bottom part */
+            if(pb_progress > 0)
+            {
+                rectangle.x = pb_x + pb_offset + 1;
+                rectangle.y = pb_y + 1 + (pb_height - 2) - pb_progress;
+                rectangle.width = pb_width - 2;
+                rectangle.height = pb_progress;
+
+                /* fg color */
+                if(!d->reverse[i])
+                    draw_rectangle_gradient(ctx, rectangle, True, pattern_rect,
+                                            &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
+                else /*REV: bg */
+                    draw_rectangle(ctx, rectangle, True, d->bg[i]);
+            }
+
+            /* top part */
+            if((pb_height - 2) - pb_progress > 0) /* not filled area */
+            {
+                rectangle.x = pb_x + 1 + pb_offset;
+                rectangle.y = pb_y + 1;
+                rectangle.width = pb_width - 2;
+                rectangle.height = pb_height - 2 - pb_progress;
+
+                /* bg color */
+                if(!d->reverse[i])
+                    draw_rectangle(ctx, rectangle, True, d->bg[i]);
+                else /* REV: bg */
+                    draw_rectangle_gradient(ctx, rectangle, True, pattern_rect,
+                                            &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
+            }
+            pb_offset += pb_width + d->gap;
+        }
+    }
+    else /* a horizontal progressbar */
+    {
+        for(i = 0; i < d->data_items; i++)
         {
-            rectangle.x = left_offset + 1 + pwidth;
-            rectangle.y = margin_top + 1;
-            rectangle.width = width - 2 - pwidth;
-            rectangle.height = pb_height - 2;
-            if(d->reverse[i])
-                draw_rectangle_gradient(ctx, rectangle, True, left_offset + 1, width - 2,
-                                        d->pfg_end[i], d->pfg_center[i], &(d->fg[i]));
-            else
-                draw_rectangle(ctx, rectangle, True, d->bg[i]);
-        }
+            /* border rectangle */
+            rectangle.x = pb_x;
+            rectangle.y = pb_y + pb_offset;
+            rectangle.width = pb_width;
+            rectangle.height = pb_height;
+            draw_rectangle(ctx, rectangle, False, d->bordercolor[i]);
 
-        margin_top += (pb_height + d->gap);
+            /* new value/progress in px + pattern setup */
+            if(!d->reverse[i])
+            {
+                pb_progress = (int)(((pb_width - 2) * d->percent[i]) / 100 + 0.5);
+                /* left to right */
+                pattern_rect.x = pb_x + 1;
+                pattern_rect.y = pb_y + 1;
+                pattern_rect.width =  pb_width;
+                pattern_rect.height = 0;
+            }
+            else
+            {
+                pb_progress = (int)(((pb_width - 2) * (100 - d->percent[i])) / 100 + 0.5);
+                /* REV: right to left */
+                pattern_rect.x = pb_x + 1 + pb_width;
+                pattern_rect.y = pb_y + 1;
+                pattern_rect.width =  -pb_width;
+                pattern_rect.height = 0;
+            }
+
+            /* left part */
+            if(pb_progress > 0)
+            {
+                rectangle.x = pb_x + 1;
+                rectangle.y = pb_y + 1 + pb_offset;
+                rectangle.width = pb_progress;
+                rectangle.height = pb_height - 2;
+
+                /* fg color */
+                if(!d->reverse[i])
+                    draw_rectangle_gradient(ctx, rectangle, True, pattern_rect,
+                                            &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
+                else /* REV: bg */
+                    draw_rectangle(ctx, rectangle, True, d->bg[i]);
+            }
+
+            /* right part */
+            if(pb_width - 2 - pb_progress > 0)
+            {
+                rectangle.x = pb_x + 1 + pb_progress;
+                rectangle.y = pb_y + 1 +  pb_offset;
+                rectangle.width = pb_width - 2 - pb_progress;
+                rectangle.height = pb_height - 2;
+
+                /* bg color */
+                if(!d->reverse[i])
+                    draw_rectangle(ctx, rectangle, True, d->bg[i]);
+                else /* REV: fg */
+                    draw_rectangle_gradient(ctx, rectangle, True, pattern_rect,
+                                            &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
+            }
+            pb_offset += pb_height + d->gap;
+        }
     }
 
     widget->area.width = d->width;
@@ -319,6 +426,9 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
 
     d->height = cfg_getfloat(config, "height");
     d->gap = cfg_getint(config, "gap");
+    d->padding = cfg_getint(config, "padding");
+    if(!(d->vertical = cfg_getbool(config, "vertical")))
+        d->vertical = False;
 
     w->alignment = draw_get_align(cfg_getstr(config, "align"));
 

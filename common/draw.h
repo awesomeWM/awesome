@@ -96,7 +96,7 @@ void draw_context_delete(DrawCtx *);
 
 void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, char *, int, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
-void draw_rectangle_gradient(DrawCtx *, Area, Bool, int, int, XColor *, XColor *, XColor *);
+void draw_rectangle_gradient(DrawCtx *, Area, Bool, Area, XColor *, XColor *, XColor *);
 
 void draw_graph_setup(DrawCtx *);
 void draw_graph(DrawCtx *, int, int, int, int *, int *, int, XColor *, XColor *, XColor *);

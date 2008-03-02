@@ -211,6 +211,7 @@ cfg_opt_t widget_progressbar_opts[] =
     CFG_INT((char *) "gap", 2, CFGF_NONE),
     CFG_INT((char *) "padding", 0, CFGF_NONE),
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
+    CFG_BOOL((char *) "vertical", cfg_false, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t statusbar_opts[] =
