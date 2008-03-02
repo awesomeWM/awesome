@@ -458,7 +458,9 @@ This widget shows one or more progress-bars.
 
 *data*::
     Draws a bar for each data section;
-    Options: fg, fg_center, fg_end, bg, bordercolor.
+    Options: reverse, fg, fg_center, fg_end, bg, bordercolor.
+*reverse*::
+    Reverse/mirror the bar.
 *fg*::
     Foreground color.
 *fg_center*::
@@ -688,8 +690,8 @@ screen <integer> [MULTI]
         {
             data [MULTI]
             {
+                reverse = <boolean> bg = <color> bordercolor = <color>
                 fg = <color> fg_center = <color> fg_end = <color>
-                bg = <color> bordercolor = <color>
             }
             gap = <integer>
             width = <integer>
