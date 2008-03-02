@@ -197,6 +197,7 @@ cfg_opt_t widget_progressbar_data_opts[] =
     CFG_STR((char *) "fg_end", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),
+    CFG_BOOL((char *) "reverse", cfg_false, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t widget_progressbar_opts[] =

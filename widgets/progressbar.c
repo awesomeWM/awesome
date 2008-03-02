@@ -38,6 +38,8 @@ typedef struct
     int padding;
     /** Pixel between data_items (bars) */
     int gap;
+    /** reverse drawing */
+    Bool *reverse;
     /** Number of data_items (bars) */
     int data_items;
     /** Height 0-1, where 1 is height of statusbar */
@@ -83,7 +85,10 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     for(i = 0; i < d->data_items; i++)
     {
-        pwidth = (int) d->percent[i] ? ((width - 2) * d->percent[i]) / 100 : 0;
+        if(d->reverse[i])
+            pwidth = (int)(((width - 2) * (100 - d->percent[i])) / 100);
+        else
+            pwidth = (int)(((width - 2) * d->percent[i]) / 100);
 
         rectangle.x = left_offset;
         rectangle.y = margin_top;
@@ -92,14 +97,17 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
         draw_rectangle(ctx, rectangle, False, d->bordercolor[i]);
 
-        if(pwidth > 0)
+        if(pwidth > 0) /* filled area */
         {
             rectangle.x = left_offset + 1;
             rectangle.y = margin_top + 1;
             rectangle.width = pwidth;
             rectangle.height = pb_height - 2;
-            draw_rectangle_gradient(ctx, rectangle, width - 2, True, d->fg[i],
-                                    d->pfg_center[i], d->pfg_end[i]);
+            if(d->reverse[i])
+                draw_rectangle(ctx, rectangle, True, d->bg[i]);
+            else
+                draw_rectangle_gradient(ctx, rectangle, True, left_offset + 1, width - 2,
+                                        &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
         }
 
         if(width - 2 - pwidth > 0) /* not filled area */
@@ -108,7 +116,11 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             rectangle.y = margin_top + 1;
             rectangle.width = width - 2 - pwidth;
             rectangle.height = pb_height - 2;
-            draw_rectangle(ctx, rectangle, True, d->bg[i]);
+            if(d->reverse[i])
+                draw_rectangle_gradient(ctx, rectangle, True, left_offset + 1, width - 2,
+                                        d->pfg_end[i], d->pfg_center[i], &(d->fg[i]));
+            else
+                draw_rectangle(ctx, rectangle, True, d->bg[i]);
         }
 
         margin_top += (pb_height + d->gap);
@@ -322,6 +334,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     d->bg = p_new(XColor, d->data_items);
     d->bordercolor = p_new(XColor, d->data_items);
     d->percent = p_new(int, d->data_items);
+    d->reverse = p_new(Bool, d->data_items);
     d->data_title = p_new(char *, d->data_items);
 
     for(i = 0; i < d->data_items; i++)
@@ -329,6 +342,9 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         cfg = cfg_getnsec(config, "data", i);
 
         d->data_title[i] = a_strdup(cfg_title(cfg));
+
+        if(!(d->reverse[i] = cfg_getbool(cfg, "reverse")))
+            d->reverse[i] = False;
 
         if((color = cfg_getstr(cfg, "fg")))
             draw_color_new(globalconf.display, phys_screen, color, &d->fg[i]);

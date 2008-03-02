@@ -135,7 +135,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         draw_graph(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->draw_from, d->draw_to, *(d->filltop_index[z]),
-                d->filltop_color[z], d->filltop_pcolor_center[z], d->filltop_pcolor_end[z]);
+                &(d->filltop_color[z]), d->filltop_pcolor_center[z], d->filltop_pcolor_end[z]);
     }
 
     /* draw style = bottom */
@@ -157,7 +157,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         draw_graph(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->draw_from, d->fillbottom[z], *(d->fillbottom_index[z]),
-                d->fillbottom_color[z], d->fillbottom_pcolor_center[z], d->fillbottom_pcolor_end[z]);
+                &(d->fillbottom_color[z]), d->fillbottom_pcolor_center[z], d->fillbottom_pcolor_end[z]);
     }
 
     /* draw style = line */
@@ -166,7 +166,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         draw_graph_line(ctx,
                 left_offset + 2, margin_top + d->box_height + 1,
                 d->size, d->drawline[z], *(d->drawline_index[z]),
-                d->drawline_color[z], d->drawline_pcolor_center[z], d->drawline_pcolor_end[z]);
+                &(d->drawline_color[z]), d->drawline_pcolor_center[z], d->drawline_pcolor_end[z]);
     }
 
     widget->area.width = d->width;

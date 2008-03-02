@@ -96,11 +96,11 @@ void draw_context_delete(DrawCtx *);
 
 void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, char *, int, XColor fg, XColor bg);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
-void draw_rectangle_gradient(DrawCtx *, Area, int, Bool, XColor, XColor *, XColor *);
+void draw_rectangle_gradient(DrawCtx *, Area, Bool, int, int, XColor *, XColor *, XColor *);
 
 void draw_graph_setup(DrawCtx *);
-void draw_graph(DrawCtx *, int, int, int, int *, int *, int, XColor, XColor *, XColor *);
-void draw_graph_line(DrawCtx *, int, int, int, int *, int, XColor, XColor *, XColor *);
+void draw_graph(DrawCtx *, int, int, int, int *, int *, int, XColor *, XColor *, XColor *);
+void draw_graph_line(DrawCtx *, int, int, int, int *, int, XColor *, XColor *, XColor *);
 void draw_circle(DrawCtx *, int, int, int, Bool, XColor);
 void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
