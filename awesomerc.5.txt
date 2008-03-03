@@ -479,6 +479,8 @@ This widget shows one or more progress-bars.
     Set height (i.e. 0.9 = 90%)
 *padding*::
     Empty space on both sides.
+*vertical*::
+    Draw the bar(s) vertically/standing up.
 *x*::
     Horizontal offset (auto-alignment if not set).
 *y*::
@@ -697,6 +699,7 @@ screen <integer> [MULTI]
             width = <integer>
             height = <float>
             padding = <integer>
+            vertical = <boolean>
             x = <integer> y = <integer>
             align = <{auto,right,left}>
             mouse [MULTI]
