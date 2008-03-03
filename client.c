@@ -210,6 +210,14 @@ client_focus(Client *c, int screen, Bool raise)
             {
                 Client *client;
                 wc.stack_mode = Below;
+                wc.sibling = None;
+                for(client = globalconf.clients; client; client = client->next)
+                    if(client != c && client_isvisible(client, c->screen) && client->isfloating)
+                    {
+                        XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
+                        wc.sibling = client->win;
+                    }
+                XConfigureWindow(globalconf.display, c->win, CWSibling | CWStackMode, &wc);
                 wc.sibling = c->win;
                 for(client = globalconf.clients; client; client = client->next)
                     if(client != c && IS_TILED(client, c->screen))
