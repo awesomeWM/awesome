@@ -63,13 +63,14 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
     return widget->area.width;
 }
 
-static void
+static widget_tell_status_t
 iconbox_tell(Widget *widget, char *property, char *command)
 {
+    Bool b;
     Data *d = widget->data;
 
     if(!property || !command)
-        return;
+        return WIDGET_ERROR;
 
     if(!a_strcmp(property, "image"))
     {
@@ -77,25 +78,17 @@ iconbox_tell(Widget *widget, char *property, char *command)
             p_delete(&d->image);
         d->image = a_strdup(command);
     }
-    else if(!a_strcmp(property, "resize")) /* XXX how to ignorecase compare? */
+    else if(!a_strcmp(property, "resize"))
     {
-        if(!a_strcmp(command, "true") || !a_strcmp(command, "1"))
-            d->resize = True;
-        else if (!a_strcmp(command, "false") || !a_strcmp(command, "0"))
-            d->resize = False;
+        if((b = cfg_parse_boolean(command)) != -1)
+            d->resize = b;
         else
-            warn("Resize value must be (case-sensitive) \"true\", \"false\",\
-                  \"1\" or \"0\". But is: %s.\n", command);
+            return WIDGET_ERROR_FORMAT_BOOL;
     }
-    else if(!a_strcmp(property, "align") || !a_strcmp(property, "mouse") ||
-            !a_strcmp(property, "x") || !a_strcmp(property, "y"))
-        warn("Property \"%s\" can't get changed.\n", property);
-
     else
-    {
-        warn("No such property: %s\n", property);
-        return;
-    }
+       return WIDGET_ERROR;
+
+    return WIDGET_NOERROR;
 }
 
 Widget *

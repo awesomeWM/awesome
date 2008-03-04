@@ -128,12 +128,14 @@ widget_common_button_press(Widget *widget, XButtonPressedEvent *ev)
  * cannot be told anything
  * \param widget the widget
  * \param command unused argument
+ * \return widget_tell_status_t enum (strucs.h)
  */
-static void
+static widget_tell_status_t
 widget_common_tell(Widget *widget, char *property __attribute__ ((unused)),
                    char *command __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
+    return WIDGET_ERROR_CUSTOM;
 }
 
 /** Common function for creating a widget
@@ -222,7 +224,28 @@ uicb_widget_tell(int screen, char *arg)
         len = a_strlen(p);
         command = p_new(char, len + 1);
         a_strncpy(command, len + 1, p, len);
-        widget->tell(widget, property, command);
+        switch(widget->tell(widget, property, command))
+        {
+          case WIDGET_ERROR:
+            warn("error changing property %s of widget %s\n",
+                 property, widget->name);
+            break;
+          case WIDGET_ERROR_FORMAT_BOOL:
+            warn("error changing property %s of widget %s, must is boolean (0 or 1)\n",
+                 property, widget->name);
+            break;
+          case WIDGET_ERROR_FORMAT_FONT:
+            warn("error changing property %s of widget %s, must be a valid font\n",
+                 property, widget->name);
+            break;
+          case WIDGET_ERROR_FORMAT_SECTION:
+            warn("error changing property %s of widget %s, section not found\n",
+                 property, widget->name);
+            break;
+          case WIDGET_NOERROR:
+          case WIDGET_ERROR_CUSTOM:
+            break;
+        }
         p_delete(&command);
     }
     else

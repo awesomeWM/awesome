@@ -91,6 +91,17 @@ struct Button
     Button *next;
 };
 
+/** Widget tell status code */
+typedef enum
+{
+    WIDGET_NOERROR = 0,
+    WIDGET_ERROR,
+    WIDGET_ERROR_CUSTOM,
+    WIDGET_ERROR_FORMAT_BOOL,
+    WIDGET_ERROR_FORMAT_FONT,
+    WIDGET_ERROR_FORMAT_SECTION
+} widget_tell_status_t;
+
 /** Widget */
 typedef struct Widget Widget;
 typedef struct Statusbar Statusbar;
@@ -101,7 +112,7 @@ struct Widget
     /** Draw function */
     int (*draw)(Widget *, DrawCtx *, int, int);
     /** Update function */
-    void (*tell)(Widget *, char *, char *);
+    widget_tell_status_t (*tell)(Widget *, char *, char *);
     /** ButtonPressedEvent handler */
     void (*button_press)(Widget *, XButtonPressedEvent *);
     /** Statusbar */

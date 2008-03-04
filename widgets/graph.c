@@ -174,7 +174,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     return widget->area.width;
 }
 
-static void
+static widget_tell_status_t
 graph_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
@@ -183,7 +183,7 @@ graph_tell(Widget *widget, char *property, char *command)
     char *title, *setting;
 
     if(!property || !command || d->width < 1 || !(d->data_items > 0))
-        return;
+        return WIDGET_ERROR;
 
     if(!a_strcmp(property, "data"))
     {
@@ -237,38 +237,28 @@ graph_tell(Widget *widget, char *property, char *command)
                     else
                         d->lines[i][d->index[i]] = d->box_height;
                 }
-                return;
+                return WIDGET_NOERROR;
             }
         }
-        warn("No such data-section title: %s\n", title);
+        warn("no such data-section title: %s\n", title);
+        return WIDGET_ERROR;
     }
     else if(!a_strcmp(property, "width"))
         d->width = atoi(command);
-
     else if(!a_strcmp(property, "height"))
         d->height = atof(command);
-
     else if(!a_strcmp(property, "padding_left"))
         d->padding_left = atoi(command);
-
     else if(!a_strcmp(property, "bg"))
         draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
                        command, &d->bg);
-
     else if(!a_strcmp(property, "bordercolor"))
         draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
                        command, &d->bordercolor);
-
-    else if(!a_strcmp(property, "fg") || !a_strcmp(property, "fg_center") ||
-            !a_strcmp(property, "fg_end") || !a_strcmp(property, "scale") ||
-            !a_strcmp(property, "max") || !a_strcmp(property, "style") ||
-            !a_strcmp(property, "align") || !a_strcmp(property, "mouse") ||
-            !a_strcmp(property, "x") || !a_strcmp(property, "y"))
-        warn("Property \"%s\" can't get changed.\n", property);
     else
-        warn("No such property: %s\n", property);
+        return WIDGET_ERROR;
 
-    return;
+    return WIDGET_NOERROR;;
 }
 
 Widget *

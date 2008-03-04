@@ -119,7 +119,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     return widget->area.width;
 }
 
-static void
+static widget_tell_status_t
 progressbar_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
@@ -128,7 +128,7 @@ progressbar_tell(Widget *widget, char *property, char *command)
     char *title, *setting;
 
     if(!property || !command || !d->data_items)
-        return;
+        return WIDGET_ERROR;
 
     if(!a_strcmp(property, "data"))
     {
@@ -139,9 +139,9 @@ progressbar_tell(Widget *widget, char *property, char *command)
             {
                 percent = atoi(setting);
                 d->percent[i] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
-                return;
+                return WIDGET_NOERROR;
             }
-        warn("No such data section title: %s\n", title);
+        return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "fg"))
     {
@@ -152,9 +152,9 @@ progressbar_tell(Widget *widget, char *property, char *command)
             {
                 draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
                                setting, &d->fg[i]);
-                return;
+                return WIDGET_NOERROR;
             }
-        warn("No such data section title: %s\n", title);
+        return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "bg"))
     {
@@ -165,9 +165,9 @@ progressbar_tell(Widget *widget, char *property, char *command)
             {
                 draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
                                setting, &d->bg[i]);
-                return;
+                return WIDGET_NOERROR;
             }
-        warn("No such data section title: %s\n", title);
+        return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "fg_center"))
     {
@@ -189,9 +189,9 @@ progressbar_tell(Widget *widget, char *property, char *command)
                         p_delete(&d->pfg_center[i]);
                         d->pfg_center[i] = NULL;
                     }
-                return;
+                return WIDGET_NOERROR;
             }
-        warn("No such data section title: %s\n", title);
+        return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "fg_end"))
     {
@@ -213,9 +213,8 @@ progressbar_tell(Widget *widget, char *property, char *command)
                         p_delete(&d->pfg_end[i]);
                         d->pfg_end[i] = NULL;
                     }
-                return;
+                return WIDGET_NOERROR;
             }
-        warn("No such data section title: %s\n", title);
     }
     else if(!a_strcmp(property, "bordercolor"))
     {
@@ -226,34 +225,27 @@ progressbar_tell(Widget *widget, char *property, char *command)
             {
                 draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
                                setting, &d->bordercolor[i]);
-                return;
+                return WIDGET_NOERROR;
             }
-        warn("No such data section title: %s\n", title);
+        return WIDGET_ERROR_FORMAT_SECTION;
     }
-
     else if(!a_strcmp(property, "gap"))
         d->gap = atoi(command);
-
     else if(!a_strcmp(property, "width"))
     {
         d->width = atoi(command);
         if(d->width - d->padding < 3)
-        warn("Progressbar widget needs: (width - padding) >= 3\n");
+        warn("progressbar widget needs: (width - padding) >= 3\n");
+        return WIDGET_ERROR_CUSTOM;
     }
-
     else if(!a_strcmp(property, "height"))
         d->height = atof(command);
-
     else if(!a_strcmp(property, "padding"))
         d->padding = atoi(command);
-
-    else if(!a_strcmp(property, "align") || !a_strcmp(property, "mouse") ||
-            !a_strcmp(property, "x") || !a_strcmp(property, "y"))
-        warn("Property \"%s\" can't get changed.\n", property);
-
     else
-        warn("No such property: %s\n", property);
-    return;
+        return WIDGET_ERROR;
+
+    return WIDGET_NOERROR;
 }
 
 Widget *
@@ -280,7 +272,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
 
     if(!(d->data_items = cfg_size(config, "data")))
     {
-        warn("Progressbar widget needs at least one bar section\n");
+        warn("progressbar widget needs at least one bar section\n");
         return w;
     }
 
@@ -329,7 +321,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     /* complete setup, since someone might 'enable' it with increasing the width with widget_tell */
     if(d->width - d->padding < 3)
     {
-        warn("Progressbar widget needs: (width - padding) >= 3\n");
+        warn("progressbar widget needs: (width - padding) >= 3\n");
         return w;
     }
 
