@@ -175,16 +175,21 @@ exit_on_signal(int sig __attribute__ ((unused)))
     running = False;
 }
 
-/* There's no way to check accesses to destroyed windows, thus those cases are
+/** \brief awesome xerror function
+ * There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
  * default error handler, which may call exit.
+ * \param edpy display ref
+ * \param ee XErrorEvent event
+ * \return 0 if no error, or xerror's xlib return status
  */
 static int
 xerror(Display *edpy, XErrorEvent *ee)
 {
     if(ee->error_code == BadWindow
        || (ee->error_code == BadMatch && ee->request_code == X_SetInputFocus)
-       || (ee->error_code == BadValue && ee->request_code == X_KillClient))
+       || (ee->error_code == BadValue && ee->request_code == X_KillClient)
+       || (ee->request_code == X_ConfigureWindow && ee->error_code == BadMatch))
         return 0;
     warn("fatal error: request code=%d, error code=%d\n", ee->request_code, ee->error_code);
     return xerrorxlib(edpy, ee);        /* may call exit */
