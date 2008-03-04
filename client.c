@@ -230,7 +230,6 @@ client_focus(Client *c, int screen, Bool raise)
 
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_active_window(phys_screen);
-    globalconf.drop_events |= EnterWindowMask;
 }
 
 /** Manage a new client
@@ -768,7 +767,6 @@ uicb_client_swapprev(int screen __attribute__ ((unused)),
     {
         client_list_swap(&globalconf.clients, prev, globalconf.focus->client);
         globalconf.screens[prev->screen].need_arrange = True;
-        globalconf.drop_events |= EnterWindowMask;
     }
 }
 
@@ -787,7 +785,6 @@ uicb_client_swapnext(int screen __attribute__ ((unused)),
     {
         client_list_swap(&globalconf.clients, globalconf.focus->client, next);
         globalconf.screens[next->screen].need_arrange = True;
-        globalconf.drop_events |= EnterWindowMask;
     }
 }
 
@@ -1000,7 +997,6 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
         client_list_detach(&globalconf.clients, sel);
         client_list_push(&globalconf.clients, sel);
         globalconf.screens[screen].need_arrange = True;
-        globalconf.drop_events |= EnterWindowMask;
     }
 }
 

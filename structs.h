@@ -331,8 +331,8 @@ struct AwesomeConf
     tag_client_node_t *tclink;
     /** Command line passed to awesome */
     char *argv;
-    /** EventMask to drop before each XEvent treatement */
-    long drop_events;
+    /** Last XMotionEvent coords */
+    int pointer_x, pointer_y;
 };
 
 #endif

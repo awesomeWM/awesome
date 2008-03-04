@@ -207,7 +207,7 @@ handle_event_configurenotify(XEvent * e)
 }
 
 void
-handle_event_destroynotify(XEvent * e)
+handle_event_destroynotify(XEvent *e)
 {
     Client *c;
     XDestroyWindowEvent *ev = &e->xdestroywindow;
@@ -216,15 +216,24 @@ handle_event_destroynotify(XEvent * e)
         client_unmanage(c);
 }
 
+/** Handle event enternotify
+ * \param e XEvent
+ */
 void
-handle_event_enternotify(XEvent * e)
+handle_event_enternotify(XEvent *e)
 {
     Client *c;
     XCrossingEvent *ev = &e->xcrossing;
     int screen;
 
-    if(ev->mode != NotifyNormal)
+    if(ev->mode != NotifyNormal
+       || (ev->x_root == globalconf.pointer_x
+           && ev->y_root == globalconf.pointer_y))
         return;
+
+    /* the idea behing saving pointer_x and pointer_y is Bob Marley powered */
+    globalconf.pointer_x = ev->x_root;
+    globalconf.pointer_y = ev->y_root;
 
     if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
@@ -238,6 +247,16 @@ handle_event_enternotify(XEvent * e)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
                 window_root_grabbuttons(screen);
+
+}
+
+void
+handle_event_motionnotify(XEvent *e)
+{
+    XMotionEvent *ev = &e->xmotion;
+
+    globalconf.pointer_x = ev->x_root;
+    globalconf.pointer_y = ev->y_root;
 }
 
 void
@@ -258,7 +277,7 @@ handle_event_expose(XEvent *e)
 }
 
 void
-handle_event_keypress(XEvent * e)
+handle_event_keypress(XEvent *e)
 {
     int screen, x, y, d;
     unsigned int m;

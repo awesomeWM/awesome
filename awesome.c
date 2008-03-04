@@ -126,7 +126,7 @@ setup(int screen)
 
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
+        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PointerMotionMask;
     wa.cursor = globalconf.cursor[CurNormal];
 
     XChangeWindowAttributes(globalconf.display,
@@ -322,6 +322,7 @@ main(int argc, char *argv[])
     handler[DestroyNotify] = handle_event_destroynotify;
     handler[EnterNotify] = handle_event_enternotify;
     handler[LeaveNotify] = handle_event_leavenotify;
+    handler[MotionNotify] = handle_event_motionnotify;
     handler[Expose] = handle_event_expose;
     handler[KeyPress] = handle_event_keypress;
     handler[MappingNotify] = handle_event_mappingnotify;
@@ -416,15 +417,6 @@ main(int argc, char *argv[])
                 XNextEvent(dpy, &ev);
                 if(handler[ev.type])
                     handler[ev.type](&ev);
-
-                /* drop events requested to */
-                if(globalconf.drop_events)
-                {
-                    /* need to resync */
-                    XSync(dpy, False);
-                    while(XCheckMaskEvent(dpy, globalconf.drop_events, &ev));
-                    globalconf.drop_events = NoEventMask;
-                }
 
                 /* need to resync */
                 XSync(dpy, False);
