@@ -1,7 +1,7 @@
 /*
- * xutil.h - X-related useful functions header
+ * common/xutil.h - X-related useful functions header
  *
- * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,16 +19,13 @@
  *
  */
 
-#ifndef AWESOME_XUTIL_H
-#define AWESOME_XUTIL_H
+#ifndef AWESOME_COMMON_XUTIL_H
+#define AWESOME_COMMON_XUTIL_H
 
 #include <X11/Xlib.h>
-#include "uicb.h"
 
-Bool xgettextprop(Window, Atom, char *, ssize_t);
+Bool xgettextprop(Display *, Window, Atom, char *, ssize_t);
 unsigned int get_numlockmask(Display *);
-Uicb uicb_spawn;
-Uicb uicb_exec;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

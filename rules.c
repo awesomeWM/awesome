@@ -20,7 +20,7 @@
  */
 
 #include "rules.h"
-#include "xutil.h"
+#include "common/xutil.h"
 
 extern AwesomeConf globalconf;
 
@@ -77,7 +77,7 @@ client_match_rule(Client *c, Rule *r)
 
     if(r->xprop
        && r->xpropval_r
-       && xgettextprop(c->win,
+       && xgettextprop(globalconf.display, c->win,
                        XInternAtom(globalconf.display, r->xprop, False),
                        buf, ssizeof(buf)))
         ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);

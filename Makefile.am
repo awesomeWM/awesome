@@ -121,7 +121,7 @@ awesome_SOURCES = \
 	awesome.c awesome.h \
 	tag.c tag.h \
 	common/util.c common/util.h \
-	xutil.c xutil.h \
+	common/xutil.c common/xutil.h \
 	config.c config.h \
 	screen.c screen.h \
 	statusbar.c statusbar.h \
@@ -156,6 +156,18 @@ awesome_message_SOURCES = \
 	awesome-message.c
 
 awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS)
+
+bin_PROGRAMS += awesome-menu
+awesome_menu_SOURCES = \
+        common/swindow.c common/swindow.h \
+        common/draw.c common/draw.h \
+	common/util.h common/util.c \
+	common/version.h common/version.c \
+	common/configopts.h common/configopts.c \
+	common/xutil.h common/xutil.c \
+	awesome-menu.c
+
+awesome_menu_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS)
 
 if HAVE_XMLTO
 if HAVE_ASCIIDOC

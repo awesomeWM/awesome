@@ -27,12 +27,11 @@
 #include "rules.h"
 #include "screen.h"
 #include "widget.h"
-#include "xutil.h"
 #include "ewmh.h"
 #include "defconfig.h"
 #include "layouts/tile.h"
 #include "common/configopts.h"
-#include "common/configopts.h"
+#include "common/xutil.h"
 
 /* Permit to use mouse with many more buttons */
 #ifndef Button6

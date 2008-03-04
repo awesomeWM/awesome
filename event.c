@@ -35,7 +35,6 @@
 #include "ewmh.h"
 #include "client.h"
 #include "widget.h"
-#include "xutil.h"
 #include "rules.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"

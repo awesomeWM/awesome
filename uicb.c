@@ -23,8 +23,10 @@
  * @defgroup ui_callback User Interface Callbacks
  */
 
+#include <X11/extensions/Xinerama.h>
+#include <sys/wait.h>
+
 #include "awesome.h"
-#include "xutil.h"
 #include "tag.h"
 #include "mouse.h"
 #include "statusbar.h"
@@ -37,6 +39,76 @@
 extern AwesomeConf globalconf;
 
 #include "uicbgen.h"
+
+/** Execute another process, replacing the current instance of Awesome
+ * \param screen Screen ID
+ * \param arg Command
+ * \ingroup ui_callback
+ */
+void
+uicb_exec(int screen __attribute__ ((unused)), char *arg)
+{
+    Client *c;
+    char path[PATH_MAX];
+
+    /* remap all clients since some WM won't handle them otherwise */
+    for(c = globalconf.clients; c; c = c->next)
+        client_unban(c);
+
+    XSync(globalconf.display, False);
+
+    if(globalconf.display)
+        close(ConnectionNumber(globalconf.display));
+
+    sscanf(arg, "%s", path);
+    execlp(path, arg, NULL);
+}
+
+/** Spawn another process
+ * \param screen Screen ID
+ * \param arg Command
+ * \ingroup ui_callback
+ */
+void
+uicb_spawn(int screen, char *arg)
+{
+    static char *shell = NULL;
+    char *display = NULL;
+    char *tmp, newdisplay[128];
+
+    if(!arg)
+        return;
+
+    if(!shell && !(shell = getenv("SHELL")))
+        shell = a_strdup("/bin/sh");
+
+    if(!XineramaIsActive(globalconf.display) && (tmp = getenv("DISPLAY")))
+    {
+        display = a_strdup(tmp);
+        if((tmp = strrchr(display, '.')))
+            *tmp = '\0';
+        snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, screen);
+        setenv("DISPLAY", newdisplay, 1);
+    }
+
+
+    /* The double-fork construct avoids zombie processes and keeps the code
+     * clean from stupid signal handlers. */
+    if(fork() == 0)
+    {
+        if(fork() == 0)
+        {
+            if(globalconf.display)
+                close(ConnectionNumber(globalconf.display));
+            setsid();
+            execl(shell, shell, "-c", arg, NULL);
+            warn("execl '%s -c %s'", shell, arg);
+            perror(" failed");
+        }
+        exit(EXIT_SUCCESS);
+    }
+    wait(0);
+}
 
 static int
 run_uicb(char *cmd)

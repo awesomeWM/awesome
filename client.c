@@ -32,7 +32,7 @@
 #include "ewmh.h"
 #include "screen.h"
 #include "widget.h"
-#include "xutil.h"
+#include "common/xutil.h"
 #include "layouts/floating.h"
 
 extern AwesomeConf globalconf;
@@ -57,7 +57,7 @@ client_loadprops(Client * c, int screen)
 
     prop = p_new(char, ntags + 2);
 
-    if(xgettextprop(c->win,
+    if(xgettextprop(globalconf.display, c->win,
                     XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
                     prop, ntags + 2))
     {
@@ -138,8 +138,10 @@ client_get_byname(Client *list, char *name)
 void
 client_updatetitle(Client *c)
 {
-    if(!xgettextprop(c->win, XInternAtom(globalconf.display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
-        xgettextprop(c->win, XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
+    if(!xgettextprop(globalconf.display, c->win,
+                     XInternAtom(globalconf.display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
+        xgettextprop(globalconf.display, c->win,
+                     XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
