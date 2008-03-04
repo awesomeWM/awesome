@@ -66,7 +66,7 @@ exit_help(int exit_code)
     exit(exit_code);
 }
 
-static void
+static int
 config_parse(const char *confpatharg)
 {
     int ret;
@@ -91,7 +91,7 @@ config_parse(const char *confpatharg)
     }
 
     if(ret)
-        exit(ret);
+        return ret;
 
     /* get global screen section */
     cfg_screen = cfg_getsec(cfg, "screen");
@@ -116,6 +116,8 @@ config_parse(const char *confpatharg)
                                       cfg_getstr(cfg_general, "font"));
 
     p_delete(&confpath);
+
+    return ret;
 }
 
 static void
@@ -133,7 +135,7 @@ main(int argc, char **argv)
     XEvent ev;
     Area geometry = { 0, 0, 200, 50, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL };
-    int opt;
+    int opt, ret;
     int delay = 0;
     char *configfile = NULL;
     static struct option long_options[] =
@@ -175,7 +177,8 @@ main(int argc, char **argv)
     if(argc - optind < 1)
         exit_help(EXIT_FAILURE);
 
-    config_parse(configfile);
+    if((ret = config_parse(configfile)))
+        return ret;
 
     geometry.width = draw_textwidth(disp, globalconf.font, argv[optind]);
     geometry.height = globalconf.font->height * 1.5;
