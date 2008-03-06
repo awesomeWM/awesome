@@ -480,17 +480,20 @@ void
 grabkeys(int phys_screen)
 {
     Key *k;
-    KeyCode code;
 
     XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
+
     for(k = globalconf.keys; k; k = k->next)
-    {
-	if((code = k->keycode) == 0)
-	    continue;
-        XGrabKey(globalconf.display, code, k->mod, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(globalconf.display, code, k->mod | LockMask, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(globalconf.display, code, k->mod | globalconf.numlockmask, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(globalconf.display, code, k->mod | globalconf.numlockmask | LockMask, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-    }
+	if(k->keycode)
+        {
+             XGrabKey(globalconf.display, k->keycode, k->mod,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | LockMask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask | LockMask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+        }
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
