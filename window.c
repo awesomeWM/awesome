@@ -125,7 +125,7 @@ window_grabbuttons(int phys_screen, Window win)
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, RootWindow(globalconf.display, phys_screen));
 }
 
-/** Grab button on root window
+/** Grab buttons on root window
  * \param phys_screen physical screen id
  */
 void
@@ -148,6 +148,30 @@ window_root_grabbuttons(int phys_screen)
                     RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
     }
+}
+
+/** Grab keys on root window
+ * \param phys_screen physical screen id
+ */
+void
+window_root_grabkeys(int phys_screen)
+{
+    Key *k;
+
+    XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
+
+    for(k = globalconf.keys; k; k = k->next)
+	if(k->keycode)
+        {
+             XGrabKey(globalconf.display, k->keycode, k->mod,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | LockMask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask | LockMask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+        }
 }
 
 void
