@@ -42,6 +42,13 @@
 
 extern AwesomeConf globalconf;
 
+/** Handle mouse button click
+ * \param screen screen number
+ * \param button button number
+ * \param state modkeys state
+ * \param buttons buttons list to check for
+ * \param arg optional arg passed to uicb, otherwise buttons' arg are used
+ */
 static void
 handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
                           Button *buttons, char *arg)
@@ -59,6 +66,9 @@ handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
         }
 }
 
+/** Handle XButtonPressed events
+ * \param e XEvent
+ */
 void
 handle_event_buttonpress(XEvent *e)
 {
@@ -142,6 +152,9 @@ handle_event_buttonpress(XEvent *e)
             }
 }
 
+/** Handle XConfigureRequest events
+ * \param e XEvent
+ */
 void
 handle_event_configurerequest(XEvent * e)
 {
@@ -192,6 +205,9 @@ handle_event_configurerequest(XEvent * e)
     }
 }
 
+/** Handle XConfigure events
+ * \param e XEvent
+ */
 void
 handle_event_configurenotify(XEvent * e)
 {
@@ -206,6 +222,9 @@ handle_event_configurenotify(XEvent * e)
             uicb_exec(0, globalconf.argv);
 }
 
+/** Handle XDestroyWindow events
+ * \param e XEvent
+ */
 void
 handle_event_destroynotify(XEvent *e)
 {
@@ -216,7 +235,7 @@ handle_event_destroynotify(XEvent *e)
         client_unmanage(c);
 }
 
-/** Handle event enternotify
+/** Handle XCrossing events on enter
  * \param e XEvent
  */
 void
@@ -250,6 +269,9 @@ handle_event_enternotify(XEvent *e)
 
 }
 
+/** Handle XMotion events
+ * \param e XEvent
+ */
 void
 handle_event_motionnotify(XEvent *e)
 {
@@ -259,6 +281,9 @@ handle_event_motionnotify(XEvent *e)
     globalconf.pointer_y = ev->y_root;
 }
 
+/** Handle XExpose events
+ * \param e XEvent
+ */
 void
 handle_event_expose(XEvent *e)
 {
@@ -276,6 +301,9 @@ handle_event_expose(XEvent *e)
                 }
 }
 
+/** Handle XKey events
+ * \param e XEvent
+ */
 void
 handle_event_keypress(XEvent *e)
 {
@@ -306,6 +334,9 @@ handle_event_keypress(XEvent *e)
         }
 }
 
+/** Handle XCrossing events on leave
+ * \param e XEvent
+ */
 void
 handle_event_leavenotify(XEvent * e)
 {
@@ -317,6 +348,9 @@ handle_event_leavenotify(XEvent * e)
             client_focus(NULL, screen, True);
 }
 
+/** Handle XMapping events
+ * \param e XEvent
+ */
 void
 handle_event_mappingnotify(XEvent *e)
 {
@@ -329,6 +363,9 @@ handle_event_mappingnotify(XEvent *e)
             grabkeys(get_phys_screen(screen));
 }
 
+/** Handle XMapRequest events
+ * \param e XEvent
+ */
 void
 handle_event_maprequest(XEvent *e)
 {
@@ -355,6 +392,9 @@ handle_event_maprequest(XEvent *e)
     }
 }
 
+/** Handle XProperty events
+ * \param e XEvent
+ */
 void
 handle_event_propertynotify(XEvent * e)
 {
@@ -386,6 +426,9 @@ handle_event_propertynotify(XEvent * e)
     }
 }
 
+/** Handle XUnmap events
+ * \param e XEvent
+ */
 void
 handle_event_unmapnotify(XEvent * e)
 {
@@ -398,6 +441,9 @@ handle_event_unmapnotify(XEvent * e)
         client_unmanage(c);
 }
 
+/** Handle XShape events
+ * \param e XEvent
+ */
 void
 handle_event_shape(XEvent * e)
 {
@@ -408,6 +454,9 @@ handle_event_shape(XEvent * e)
         window_setshape(get_phys_screen(c->screen), c->win);
 }
 
+/** Handle XRandR events
+ * \param e XEvent
+ */
 void
 handle_event_randr_screen_change_notify(XEvent *e)
 {
@@ -415,12 +464,18 @@ handle_event_randr_screen_change_notify(XEvent *e)
     uicb_exec(0, globalconf.argv);
 }
 
+/** Handle XClientMessage events
+ * \param e XEvent
+ */
 void
 handle_event_clientmessage(XEvent *e)
 {
     ewmh_process_client_message(&e->xclient);
 }
 
+/** Grab keys on root window
+ * \param phys_screen physical screen id
+ */
 void
 grabkeys(int phys_screen)
 {
