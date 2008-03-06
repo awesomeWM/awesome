@@ -360,7 +360,7 @@ event_handle_mappingnotify(XEvent *e)
     XRefreshKeyboardMapping(ev);
     if(ev->request == MappingKeyboard)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-            grabkeys(get_phys_screen(screen));
+            grabkeys(screen);
 }
 
 /** Handle XMapRequest events
