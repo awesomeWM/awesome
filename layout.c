@@ -86,6 +86,9 @@ arrange(int screen)
     globalconf.screens[screen].need_arrange = False;
 }
 
+/** Refresh the screen disposition
+ * \return true if the screen was arranged, false otherwise
+ */
 int
 layout_refresh(void)
 {
@@ -102,6 +105,10 @@ layout_refresh(void)
     return arranged;
 }
 
+/** Get current layout used on screen
+ * \param screen screen id
+ * \return layout used on that screen
+ */
 Layout *
 layout_get_current(int screen)
 {
