@@ -28,22 +28,22 @@
 
 void grabkeys(int);
 
-void handle_event_buttonpress(XEvent *);
-void handle_event_configurerequest(XEvent *);
-void handle_event_configurenotify(XEvent *);
-void handle_event_destroynotify(XEvent *);
-void handle_event_enternotify(XEvent *);
-void handle_event_motionnotify(XEvent *);
-void handle_event_expose(XEvent *);
-void handle_event_keypress(XEvent *);
-void handle_event_leavenotify(XEvent *);
-void handle_event_mappingnotify(XEvent *);
-void handle_event_maprequest(XEvent *);
-void handle_event_propertynotify(XEvent *);
-void handle_event_unmapnotify(XEvent *);
-void handle_event_shape(XEvent *);
-void handle_event_randr_screen_change_notify(XEvent *);
-void handle_event_clientmessage(XEvent *);
+void event_handle_buttonpress(XEvent *);
+void event_handle_configurerequest(XEvent *);
+void event_handle_configurenotify(XEvent *);
+void event_handle_destroynotify(XEvent *);
+void event_handle_enternotify(XEvent *);
+void event_handle_motionnotify(XEvent *);
+void event_handle_expose(XEvent *);
+void event_handle_keypress(XEvent *);
+void event_handle_leavenotify(XEvent *);
+void event_handle_mappingnotify(XEvent *);
+void event_handle_maprequest(XEvent *);
+void event_handle_propertynotify(XEvent *);
+void event_handle_unmapnotify(XEvent *);
+void event_handle_shape(XEvent *);
+void event_handle_randr_screen_change_notify(XEvent *);
+void event_handle_clientmessage(XEvent *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
