@@ -42,8 +42,15 @@
 
 extern AwesomeConf globalconf;
 
+/** Handle mouse button click
+ * \param screen screen number
+ * \param button button number
+ * \param state modkeys state
+ * \param buttons buttons list to check for
+ * \param arg optional arg passed to uicb, otherwise buttons' arg are used
+ */
 static void
-handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
+event_handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
                           Button *buttons, char *arg)
 {
     Button *b;
@@ -59,8 +66,11 @@ handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
         }
 }
 
+/** Handle XButtonPressed events
+ * \param e XEvent
+ */
 void
-handle_event_buttonpress(XEvent *e)
+event_handle_buttonpress(XEvent *e)
 {
     int i, screen, x = 0, y = 0;
     unsigned int udummy;
@@ -125,7 +135,7 @@ handle_event_buttonpress(XEvent *e)
             window_grabbuttons(get_phys_screen(c->screen), c->win);
         }
         else
-            handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
+            event_handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
@@ -136,14 +146,17 @@ handle_event_buttonpress(XEvent *e)
                                 &i, &udummy))
             {
                 screen = screen_get_bycoord(screen, x, y);
-                handle_mouse_button_press(screen, ev->button, ev->state,
+                event_handle_mouse_button_press(screen, ev->button, ev->state,
                                           globalconf.buttons.root, NULL);
                 return;
             }
 }
 
+/** Handle XConfigureRequest events
+ * \param e XEvent
+ */
 void
-handle_event_configurerequest(XEvent * e)
+event_handle_configurerequest(XEvent * e)
 {
     Client *c;
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
@@ -192,8 +205,11 @@ handle_event_configurerequest(XEvent * e)
     }
 }
 
+/** Handle XConfigure events
+ * \param e XEvent
+ */
 void
-handle_event_configurenotify(XEvent * e)
+event_handle_configurenotify(XEvent * e)
 {
     XConfigureEvent *ev = &e->xconfigure;
     int screen;
@@ -206,8 +222,11 @@ handle_event_configurenotify(XEvent * e)
             uicb_exec(0, globalconf.argv);
 }
 
+/** Handle XDestroyWindow events
+ * \param e XEvent
+ */
 void
-handle_event_destroynotify(XEvent *e)
+event_handle_destroynotify(XEvent *e)
 {
     Client *c;
     XDestroyWindowEvent *ev = &e->xdestroywindow;
@@ -216,11 +235,11 @@ handle_event_destroynotify(XEvent *e)
         client_unmanage(c);
 }
 
-/** Handle event enternotify
+/** Handle XCrossing events on enter
  * \param e XEvent
  */
 void
-handle_event_enternotify(XEvent *e)
+event_handle_enternotify(XEvent *e)
 {
     Client *c;
     XCrossingEvent *ev = &e->xcrossing;
@@ -250,8 +269,11 @@ handle_event_enternotify(XEvent *e)
 
 }
 
+/** Handle XMotion events
+ * \param e XEvent
+ */
 void
-handle_event_motionnotify(XEvent *e)
+event_handle_motionnotify(XEvent *e)
 {
     XMotionEvent *ev = &e->xmotion;
 
@@ -259,8 +281,11 @@ handle_event_motionnotify(XEvent *e)
     globalconf.pointer_y = ev->y_root;
 }
 
+/** Handle XExpose events
+ * \param e XEvent
+ */
 void
-handle_event_expose(XEvent *e)
+event_handle_expose(XEvent *e)
 {
     XExposeEvent *ev = &e->xexpose;
     int screen;
@@ -276,8 +301,11 @@ handle_event_expose(XEvent *e)
                 }
 }
 
+/** Handle XKey events
+ * \param e XEvent
+ */
 void
-handle_event_keypress(XEvent *e)
+event_handle_keypress(XEvent *e)
 {
     int screen, x, y, d;
     unsigned int m;
@@ -306,8 +334,11 @@ handle_event_keypress(XEvent *e)
         }
 }
 
+/** Handle XCrossing events on leave
+ * \param e XEvent
+ */
 void
-handle_event_leavenotify(XEvent * e)
+event_handle_leavenotify(XEvent * e)
 {
     XCrossingEvent *ev = &e->xcrossing;
     int screen;
@@ -317,8 +348,11 @@ handle_event_leavenotify(XEvent * e)
             client_focus(NULL, screen, True);
 }
 
+/** Handle XMapping events
+ * \param e XEvent
+ */
 void
-handle_event_mappingnotify(XEvent *e)
+event_handle_mappingnotify(XEvent *e)
 {
     XMappingEvent *ev = &e->xmapping;
     int screen;
@@ -329,8 +363,11 @@ handle_event_mappingnotify(XEvent *e)
             grabkeys(get_phys_screen(screen));
 }
 
+/** Handle XMapRequest events
+ * \param e XEvent
+ */
 void
-handle_event_maprequest(XEvent *e)
+event_handle_maprequest(XEvent *e)
 {
     static XWindowAttributes wa;
     XMapRequestEvent *ev = &e->xmaprequest;
@@ -355,8 +392,11 @@ handle_event_maprequest(XEvent *e)
     }
 }
 
+/** Handle XProperty events
+ * \param e XEvent
+ */
 void
-handle_event_propertynotify(XEvent * e)
+event_handle_propertynotify(XEvent * e)
 {
     Client *c;
     Window trans;
@@ -386,8 +426,11 @@ handle_event_propertynotify(XEvent * e)
     }
 }
 
+/** Handle XUnmap events
+ * \param e XEvent
+ */
 void
-handle_event_unmapnotify(XEvent * e)
+event_handle_unmapnotify(XEvent * e)
 {
     Client *c;
     XUnmapEvent *ev = &e->xunmap;
@@ -398,8 +441,11 @@ handle_event_unmapnotify(XEvent * e)
         client_unmanage(c);
 }
 
+/** Handle XShape events
+ * \param e XEvent
+ */
 void
-handle_event_shape(XEvent * e)
+event_handle_shape(XEvent * e)
 {
     XShapeEvent *ev = (XShapeEvent *) e;
     Client *c = client_get_bywin(globalconf.clients, ev->window);
@@ -408,34 +454,46 @@ handle_event_shape(XEvent * e)
         window_setshape(get_phys_screen(c->screen), c->win);
 }
 
+/** Handle XRandR events
+ * \param e XEvent
+ */
 void
-handle_event_randr_screen_change_notify(XEvent *e)
+event_handle_randr_screen_change_notify(XEvent *e)
 {
     XRRUpdateConfiguration(e);
     uicb_exec(0, globalconf.argv);
 }
 
+/** Handle XClientMessage events
+ * \param e XEvent
+ */
 void
-handle_event_clientmessage(XEvent *e)
+event_handle_clientmessage(XEvent *e)
 {
     ewmh_process_client_message(&e->xclient);
 }
 
+/** Grab keys on root window
+ * \param phys_screen physical screen id
+ */
 void
 grabkeys(int phys_screen)
 {
     Key *k;
-    KeyCode code;
 
     XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
+
     for(k = globalconf.keys; k; k = k->next)
-    {
-	if((code = k->keycode) == 0)
-	    continue;
-        XGrabKey(globalconf.display, code, k->mod, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(globalconf.display, code, k->mod | LockMask, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(globalconf.display, code, k->mod | globalconf.numlockmask, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(globalconf.display, code, k->mod | globalconf.numlockmask | LockMask, RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-    }
+	if(k->keycode)
+        {
+             XGrabKey(globalconf.display, k->keycode, k->mod,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | LockMask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask | LockMask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+        }
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -321,33 +321,33 @@ main(int argc, char *argv[])
     }
 
     handler = p_new(event_handler *, LASTEvent);
-    handler[ButtonPress] = handle_event_buttonpress;
-    handler[ConfigureRequest] = handle_event_configurerequest;
-    handler[ConfigureNotify] = handle_event_configurenotify;
-    handler[DestroyNotify] = handle_event_destroynotify;
-    handler[EnterNotify] = handle_event_enternotify;
-    handler[LeaveNotify] = handle_event_leavenotify;
-    handler[MotionNotify] = handle_event_motionnotify;
-    handler[Expose] = handle_event_expose;
-    handler[KeyPress] = handle_event_keypress;
-    handler[MappingNotify] = handle_event_mappingnotify;
-    handler[MapRequest] = handle_event_maprequest;
-    handler[PropertyNotify] = handle_event_propertynotify;
-    handler[UnmapNotify] = handle_event_unmapnotify;
-    handler[ClientMessage] = handle_event_clientmessage;
+    handler[ButtonPress] = event_handle_buttonpress;
+    handler[ConfigureRequest] = event_handle_configurerequest;
+    handler[ConfigureNotify] = event_handle_configurenotify;
+    handler[DestroyNotify] = event_handle_destroynotify;
+    handler[EnterNotify] = event_handle_enternotify;
+    handler[LeaveNotify] = event_handle_leavenotify;
+    handler[MotionNotify] = event_handle_motionnotify;
+    handler[Expose] = event_handle_expose;
+    handler[KeyPress] = event_handle_keypress;
+    handler[MappingNotify] = event_handle_mappingnotify;
+    handler[MapRequest] = event_handle_maprequest;
+    handler[PropertyNotify] = event_handle_propertynotify;
+    handler[UnmapNotify] = event_handle_unmapnotify;
+    handler[ClientMessage] = event_handle_clientmessage;
 
     /* check for shape extension */
     if((globalconf.have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
     {
         p_realloc(&handler, shape_event + 1);
-        handler[shape_event] = handle_event_shape;
+        handler[shape_event] = event_handle_shape;
     }
 
     /* check for randr extension */
     if((globalconf.have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
     {
         p_realloc(&handler, randr_event_base + RRScreenChangeNotify + 1);
-        handler[randr_event_base + RRScreenChangeNotify] = handle_event_randr_screen_change_notify;
+        handler[randr_event_base + RRScreenChangeNotify] = event_handle_randr_screen_change_notify;
     }
 
     XSync(dpy, False);

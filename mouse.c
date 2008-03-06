@@ -80,16 +80,16 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             XUngrabPointer(globalconf.display, CurrentTime);
             return;
           case ConfigureRequest:
-            handle_event_configurerequest(&ev);
+            event_handle_configurerequest(&ev);
             break;
           case Expose:
-            handle_event_expose(&ev);
+            event_handle_expose(&ev);
             break;
           case MapRequest:
-            handle_event_maprequest(&ev);
+            event_handle_maprequest(&ev);
             break;
           case EnterNotify:
-            handle_event_enternotify(&ev);
+            event_handle_enternotify(&ev);
             break;
           case MotionNotify:
             if(c->isfloating || layout->arrange == layout_floating)
@@ -206,13 +206,13 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             XUngrabPointer(globalconf.display, CurrentTime);
             return;
           case ConfigureRequest:
-            handle_event_configurerequest(&ev);
+            event_handle_configurerequest(&ev);
             break;
           case Expose:
-            handle_event_expose(&ev);
+            event_handle_expose(&ev);
             break;
           case MapRequest:
-            handle_event_maprequest(&ev);
+            event_handle_maprequest(&ev);
             break;
           case MotionNotify:
             if(layout->arrange == layout_floating || c->isfloating)
