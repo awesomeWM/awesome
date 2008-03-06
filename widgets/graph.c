@@ -85,7 +85,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     Data *d = widget->data;
     Area rectangle;
 
-    if(d->width < 1 || !d->data_items)
+    if(!d->data_items)
         return 0;
 
     if(!widget->user_supplied_x)
@@ -182,13 +182,17 @@ graph_tell(Widget *widget, char *property, char *command)
     float value;
     char *title, *setting;
 
-    if(!property || !command || d->width < 1 || !(d->data_items > 0))
-        return WIDGET_ERROR;
+    if(!d->data_items)
+        return WIDGET_ERROR_CUSTOM; /* error already printed on _new */
+
+    if(!command)
+        return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "data"))
     {
         title = strtok(command, " ");
-        setting = strtok(NULL, " ");
+        if(!(setting = strtok(NULL, " ")))
+            return WIDGET_ERROR_NOVALUE;
 
         for(i = 0; i < d->data_items; i++)
         {
@@ -240,25 +244,26 @@ graph_tell(Widget *widget, char *property, char *command)
                 return WIDGET_NOERROR;
             }
         }
-        warn("no such data-section title: %s\n", title);
-        return WIDGET_ERROR;
+        return WIDGET_ERROR_FORMAT_SECTION;
     }
-    else if(!a_strcmp(property, "width"))
-        d->width = atoi(command);
     else if(!a_strcmp(property, "height"))
         d->height = atof(command);
-    else if(!a_strcmp(property, "padding_left"))
-        d->padding_left = atoi(command);
     else if(!a_strcmp(property, "bg"))
-        draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
-                       command, &d->bg);
+    {
+        if(!draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                           command, &d->bg))
+            return WIDGET_ERROR_FORMAT_COLOR;
+    }
     else if(!a_strcmp(property, "bordercolor"))
-        draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
-                       command, &d->bordercolor);
+    {
+        if(!draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                           command, &d->bordercolor))
+            return WIDGET_ERROR_FORMAT_COLOR;
+    }
     else
         return WIDGET_ERROR;
 
-    return WIDGET_NOERROR;;
+    return WIDGET_NOERROR;
 }
 
 Widget *

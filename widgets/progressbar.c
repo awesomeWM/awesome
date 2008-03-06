@@ -63,7 +63,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     Data *d = widget->data;
 
-    if (!(d->data_items) || (d->width - d->padding < 3))
+    if (!d->data_items)
         return 0;
 
     width = d->width - 2 * d->padding;
@@ -123,17 +123,21 @@ static widget_tell_status_t
 progressbar_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
-    int i = 0, percent;
+    int i = 0, percent, tmp;
     Bool flag;
     char *title, *setting;
 
-    if(!property || !command || !d->data_items)
-        return WIDGET_ERROR;
+    if(!d->data_items)
+        return WIDGET_ERROR_CUSTOM; /* error already printed on _new */
+
+    if(!command)
+        return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "data"))
     {
         title = strtok(command, " ");
-        setting = strtok(NULL, " ");
+        if(!(setting = strtok(NULL, " ")))
+            return WIDGET_ERROR_NOVALUE;
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
@@ -146,49 +150,59 @@ progressbar_tell(Widget *widget, char *property, char *command)
     else if(!a_strcmp(property, "fg"))
     {
         title = strtok(command, " ");
-        setting = strtok(NULL, " ");
+        if(!(setting = strtok(NULL, " ")))
+            return WIDGET_ERROR_NOVALUE;
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
-                draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
-                               setting, &d->fg[i]);
-                return WIDGET_NOERROR;
+                if(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                                  setting, &d->fg[i]))
+                    return WIDGET_NOERROR;
+                else
+                    return WIDGET_ERROR_FORMAT_COLOR;
             }
         return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "bg"))
     {
         title = strtok(command, " ");
-        setting = strtok(NULL, " ");
+        if(!(setting = strtok(NULL, " ")))
+            return WIDGET_ERROR_NOVALUE;
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
-                draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
-                               setting, &d->bg[i]);
-                return WIDGET_NOERROR;
+                if(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                                  setting, &d->bg[i]))
+                    return WIDGET_NOERROR;
+                else
+                    return WIDGET_ERROR_FORMAT_COLOR;
             }
         return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "fg_center"))
     {
         title = strtok(command, " ");
-        setting = strtok(NULL, " ");
+        if(!(setting = strtok(NULL, " ")))
+            return WIDGET_ERROR_NOVALUE;
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
                 flag = False;
                 if(!d->pfg_center[i])
                 {
-                    flag = True; /* restore to NULL & p_delete */
+                    flag = True; /* p_delete && restore to NULL, if draw_color_new unsuccessful */
                     d->pfg_center[i] = p_new(XColor, 1);
                 }
                 if(!(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
-                               setting, d->pfg_center[i])))
+                                    setting, d->pfg_center[i])))
+                {
                     if(flag) /* restore */
                     {
                         p_delete(&d->pfg_center[i]);
                         d->pfg_center[i] = NULL;
                     }
+                    return WIDGET_ERROR_FORMAT_COLOR;
+                }
                 return WIDGET_NOERROR;
             }
         return WIDGET_ERROR_FORMAT_SECTION;
@@ -196,36 +210,43 @@ progressbar_tell(Widget *widget, char *property, char *command)
     else if(!a_strcmp(property, "fg_end"))
     {
         title = strtok(command, " ");
-        setting = strtok(NULL, " ");
+        if(!(setting = strtok(NULL, " ")))
+            return WIDGET_ERROR_NOVALUE;
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
                 flag = False;
                 if(!d->pfg_end[i])
                 {
-                    flag = True; /* restore to NULL & p_delete */
+                    flag = True;
                     d->pfg_end[i] = p_new(XColor, 1);
                 }
                 if(!(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
-                               setting, d->pfg_end[i])))
+                                    setting, d->pfg_end[i])))
+                {
                     if(flag) /* restore */
                     {
                         p_delete(&d->pfg_end[i]);
                         d->pfg_end[i] = NULL;
                     }
+                    return WIDGET_ERROR_FORMAT_COLOR;
+                }
                 return WIDGET_NOERROR;
             }
     }
     else if(!a_strcmp(property, "bordercolor"))
     {
         title = strtok(command, " ");
-        setting = strtok(NULL, " ");
+        if(!(setting = strtok(NULL, " ")))
+            return WIDGET_ERROR_NOVALUE;
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
-                draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
-                               setting, &d->bordercolor[i]);
-                return WIDGET_NOERROR;
+                if(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                                  setting, &d->bordercolor[i]))
+                    return WIDGET_NOERROR;
+                else
+                    return WIDGET_ERROR_FORMAT_COLOR;
             }
         return WIDGET_ERROR_FORMAT_SECTION;
     }
@@ -233,15 +254,28 @@ progressbar_tell(Widget *widget, char *property, char *command)
         d->gap = atoi(command);
     else if(!a_strcmp(property, "width"))
     {
-        d->width = atoi(command);
-        if(d->width - d->padding < 3)
-        warn("progressbar widget needs: (width - padding) >= 3\n");
-        return WIDGET_ERROR_CUSTOM;
+        tmp = atoi(command);
+        if(tmp - d->padding < 3)
+        {
+            warn("progressbar widget needs: (width - padding) >= 3. Ignoring command.\n");
+            return WIDGET_ERROR_CUSTOM;
+        }
+        else
+            d->width = tmp;
     }
     else if(!a_strcmp(property, "height"))
         d->height = atof(command);
     else if(!a_strcmp(property, "padding"))
-        d->padding = atoi(command);
+    {
+        tmp = atoi(command);
+        if(d->width - tmp < 3)
+        {
+            warn("progressbar widget needs: (width - padding) >= 3. Ignoring command.\n");
+            return WIDGET_ERROR_CUSTOM;
+        }
+        else
+            d->padding = tmp;
+    }
     else
         return WIDGET_ERROR;
 
@@ -263,12 +297,18 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     w->tell = progressbar_tell;
     d = w->data = p_new(Data, 1);
     d->width = cfg_getint(config, "width");
-    d->height = cfg_getfloat(config, "height");
-    d->gap = cfg_getint(config, "gap");
     d->padding = cfg_getint(config, "padding");
 
-    w->alignment = draw_get_align(cfg_getstr(config, "align"));
+    if(d->width - d->padding < 3)
+    {
+        warn("progressbar widget needs: (width - padding) >= 3\n");
+        return w;
+    }
 
+    d->height = cfg_getfloat(config, "height");
+    d->gap = cfg_getint(config, "gap");
+
+    w->alignment = draw_get_align(cfg_getstr(config, "align"));
 
     if(!(d->data_items = cfg_size(config, "data")))
     {
@@ -316,13 +356,6 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
             draw_color_new(globalconf.display, phys_screen, color, &d->bordercolor[i]);
         else
             d->bordercolor[i] = d->fg[i];
-    }
-
-    /* complete setup, since someone might 'enable' it with increasing the width with widget_tell */
-    if(d->width - d->padding < 3)
-    {
-        warn("progressbar widget needs: (width - padding) >= 3\n");
-        return w;
     }
 
     return w;

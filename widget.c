@@ -230,6 +230,10 @@ uicb_widget_tell(int screen, char *arg)
             warn("error changing property %s of widget %s\n",
                  property, widget->name);
             break;
+          case WIDGET_ERROR_NOVALUE:
+            warn("error changing property %s of widget %s, no value given\n",
+                 property, widget->name);
+            break;
           case WIDGET_ERROR_FORMAT_BOOL:
             warn("error changing property %s of widget %s, must is boolean (0 or 1)\n",
                  property, widget->name);
@@ -238,8 +242,12 @@ uicb_widget_tell(int screen, char *arg)
             warn("error changing property %s of widget %s, must be a valid font\n",
                  property, widget->name);
             break;
+          case WIDGET_ERROR_FORMAT_COLOR:
+            warn("error changing property %s of widget %s, must be a valid color\n",
+                 property, widget->name);
+            break;
           case WIDGET_ERROR_FORMAT_SECTION:
-            warn("error changing property %s of widget %s, section not found\n",
+            warn("error changing property %s of widget %s, section/title not found\n",
                  property, widget->name);
             break;
           case WIDGET_NOERROR:

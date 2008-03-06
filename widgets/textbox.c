@@ -69,8 +69,8 @@ textbox_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
 
-    if(!property || !command)
-        return WIDGET_ERROR;
+    if(!command)
+        return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "text"))
     {
@@ -79,9 +79,15 @@ textbox_tell(Widget *widget, char *property, char *command)
         d->text = a_strdup(command);
     }
     else if(!a_strcmp(property, "fg"))
-        draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->fg);
+        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->fg))
+            return WIDGET_NOERROR;
+        else
+            return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "bg"))
-        draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->bg);
+        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->bg))
+            return WIDGET_NOERROR;
+        else
+            return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "font"))
     {
         widget->font = XftFontOpenName(globalconf.display,
