@@ -165,21 +165,27 @@ config_parse(const char *confpatharg)
 }
 
 static void
-complete(void)
+complete(Bool reverse)
 {
     item_t *item = NULL;
+    item_t *(*item_iter)(item_t **, item_t *);
+
+    if(reverse)
+        item_iter = item_list_prev;
+    else
+        item_iter = item_list_next;
 
     if(globalconf.item_selected)
-        item = globalconf.item_selected->next;
+        item = item_iter(&globalconf.items, globalconf.item_selected);
     else
-        for(item = globalconf.items; item; item = item->next)
+        for(item = globalconf.items; item; item = item_iter(&globalconf.items, item))
             if(item->match)
             {
                 globalconf.item_selected = item;
                 break;
             }
 
-    for(; item; item = item->next)
+    for(; item; item = item_iter(&globalconf.items, item))
         if(item->match)
         {
             a_strcpy(globalconf.text, ssizeof(globalconf.text), item->data);
@@ -342,9 +348,13 @@ handle_kpress(XKeyEvent *e)
             redraw();
         }
         break;
+      case XK_Left:
+        complete(True);
+        redraw();
+        break;
       case XK_Right:
       case XK_Tab:
-        complete();
+        complete(False);
         redraw();
         break;
       case XK_Escape:
