@@ -218,6 +218,8 @@ redraw(void)
     item_t *item;
     Area geometry = globalconf.sw->geometry;
     unsigned int len;
+    Bool selected_item_is_drawn = False;
+    int prompt_len, x_of_previous_item;
 
     draw_text(globalconf.ctx, geometry, AlignLeft,
               MARGIN, globalconf.font, globalconf.prompt, globalconf.fg_focus, globalconf.bg_focus);
@@ -233,13 +235,17 @@ redraw(void)
                            geometry.width / 20);
     geometry.x += len;
     geometry.width -= len;
+    prompt_len = geometry.x;
 
     for(item = globalconf.items; item && geometry.width > 0; item = item->next)
         if(item->match)
         {
             if(item == globalconf.item_selected)
+            {
                 draw_text(globalconf.ctx, geometry, AlignLeft,
                           MARGIN / 2, globalconf.font, item->data, globalconf.fg_focus, globalconf.bg_focus);
+                selected_item_is_drawn = True;
+            }
             else
                 draw_text(globalconf.ctx, geometry, AlignLeft,
                           MARGIN / 2, globalconf.font, item->data, globalconf.fg, globalconf.bg);
@@ -248,7 +254,40 @@ redraw(void)
             geometry.width -= len;
         }
 
-    if(geometry.width)
+
+    /* we have an item selected but not drawn, so redraw in the other side */
+    if(globalconf.item_selected && !selected_item_is_drawn)
+    {
+        geometry.x = globalconf.sw->geometry.width;
+        item = globalconf.item_selected;
+
+        while(item)
+        {
+            x_of_previous_item = geometry.x;
+            geometry.width = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
+            geometry.x -= geometry.width;
+
+            if(geometry.x < prompt_len)
+                break;
+
+            if(item == globalconf.item_selected)
+                draw_text(globalconf.ctx, geometry, AlignLeft,
+                          MARGIN / 2, globalconf.font, item->data, globalconf.fg_focus, globalconf.bg_focus);
+            else
+                draw_text(globalconf.ctx, geometry, AlignLeft,
+                          MARGIN / 2, globalconf.font, item->data, globalconf.fg, globalconf.bg);
+
+            item = item_list_prev(&globalconf.items, item);
+        }
+
+        if(item)
+        {
+            geometry.x = prompt_len;
+            geometry.width = x_of_previous_item - prompt_len;
+            draw_rectangle(globalconf.ctx, geometry, True, globalconf.bg);
+        }
+    }
+    else if(geometry.width)
         draw_rectangle(globalconf.ctx, geometry, True, globalconf.bg);
 
     simplewindow_refresh_drawable(globalconf.sw, DefaultScreen(globalconf.display));
@@ -502,6 +541,7 @@ main(int argc, char **argv)
         }
     }
 
+    draw_context_delete(globalconf.ctx);
     simplewindow_delete(globalconf.sw);
     XCloseDisplay(disp);
 
