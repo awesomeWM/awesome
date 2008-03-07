@@ -108,44 +108,6 @@ scan()
     }
 }
 
-/** Setup everything before running
- * \param screen Screen number
- * \todo clean things...
- */
-static void
-setup(int screen)
-{
-    XSetWindowAttributes wa;
-    Statusbar *statusbar;
-    int phys_screen = get_phys_screen(screen);
-
-    /* init cursors */
-    globalconf.cursor[CurNormal] = XCreateFontCursor(globalconf.display, XC_left_ptr);
-    globalconf.cursor[CurResize] = XCreateFontCursor(globalconf.display, XC_sizing);
-    globalconf.cursor[CurMove] = XCreateFontCursor(globalconf.display, XC_fleur);
-
-    /* select for events */
-    wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PointerMotionMask;
-    wa.cursor = globalconf.cursor[CurNormal];
-
-    XChangeWindowAttributes(globalconf.display,
-                            RootWindow(globalconf.display, phys_screen),
-                            CWEventMask | CWCursor, &wa);
-
-    XSelectInput(globalconf.display,
-                 RootWindow(globalconf.display, phys_screen),
-                 wa.event_mask);
-
-    grabkeys(phys_screen);
-
-    /* view at least one tag */
-    tag_view(globalconf.screens[screen].tags, True);
-
-    for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-        statusbar_init(statusbar);
-}
-
 /** Startup Error handler to check if another window manager
  * is already running.
  * \param disp Display
@@ -223,12 +185,14 @@ main(int argc, char *argv[])
     const char *confpath = NULL;
     int r, xfd, e_dummy, csfd, shape_event, randr_event_base, i, screen, opt;
     ssize_t cmdlen = 1;
+    Statusbar *statusbar;
     fd_set rd;
     XEvent ev;
     Display * dpy;
     event_handler **handler;
     struct sockaddr_un *addr;
     Client *c;
+    XSetWindowAttributes wa;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -306,18 +270,42 @@ main(int argc, char *argv[])
     /* parse config */
     config_parse(confpath);
 
+    /* scan existing windows */
     scan();
+
+    /* init cursors */
+    globalconf.cursor[CurNormal] = XCreateFontCursor(globalconf.display, XC_left_ptr);
+    globalconf.cursor[CurResize] = XCreateFontCursor(globalconf.display, XC_sizing);
+    globalconf.cursor[CurMove] = XCreateFontCursor(globalconf.display, XC_fleur);
 
     /* for each virtual screen */
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        setup(screen);
+    {
+        /* view at least one tag */
+        tag_view(globalconf.screens[screen].tags, True);
+
+        for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+            statusbar_init(statusbar);
+    }
+
+    /* select for events */
+    wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
+        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PointerMotionMask;
+    wa.cursor = globalconf.cursor[CurNormal];
 
     /* do this only for real screen */
     for(screen = 0; screen < ScreenCount(dpy); screen++)
     {
+        XChangeWindowAttributes(globalconf.display,
+                                RootWindow(globalconf.display, screen),
+                                CWEventMask | CWCursor, &wa);
+        XSelectInput(globalconf.display,
+                     RootWindow(globalconf.display, screen),
+                     wa.event_mask);
         ewmh_set_supported_hints(screen);
         /* call this to at least grab root window clicks */
         window_root_grabbuttons(screen);
+        window_root_grabkeys(screen);
     }
 
     handler = p_new(event_handler *, LASTEvent);

@@ -26,8 +26,6 @@
 
 #define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | LockMask))
 
-void grabkeys(int);
-
 void event_handle_buttonpress(XEvent *);
 void event_handle_configurerequest(XEvent *);
 void event_handle_configurenotify(XEvent *);

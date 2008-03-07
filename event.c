@@ -360,7 +360,7 @@ event_handle_mappingnotify(XEvent *e)
     XRefreshKeyboardMapping(ev);
     if(ev->request == MappingKeyboard)
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-            grabkeys(get_phys_screen(screen));
+            window_root_grabkeys(screen);
 }
 
 /** Handle XMapRequest events
@@ -473,27 +473,4 @@ event_handle_clientmessage(XEvent *e)
     ewmh_process_client_message(&e->xclient);
 }
 
-/** Grab keys on root window
- * \param phys_screen physical screen id
- */
-void
-grabkeys(int phys_screen)
-{
-    Key *k;
-
-    XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
-
-    for(k = globalconf.keys; k; k = k->next)
-	if(k->keycode)
-        {
-             XGrabKey(globalconf.display, k->keycode, k->mod,
-                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-             XGrabKey(globalconf.display, k->keycode, k->mod | LockMask,
-                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask,
-                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask | LockMask,
-                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-        }
-}
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

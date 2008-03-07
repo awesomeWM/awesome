@@ -1,7 +1,7 @@
 /*
  * widget.c - widget managing
  *
- * Copyright © 2007 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,11 @@ extern AwesomeConf globalconf;
 
 #include "widgetgen.h"
 
+/** Compute widget alignment.
+ * This will process all widget starting at `widget' and will check their
+ * alignment and guess it if set to AlignAuto.
+ * \param widget a linked list of all widgets
+ */
 void
 widget_calculate_alignments(Widget *widget)
 {
@@ -64,6 +69,12 @@ widget_calculate_alignments(Widget *widget)
             }
 }
 
+/** Compute offset for drawing the first pixel of a widget.
+ * \param barwidth the statusbar width
+ * \param widgetwidth the widget width
+ * \param alignment the widget alignment on statusbar
+ * \return the x coordinate to draw at
+ */
 int
 widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
 {
@@ -76,6 +87,11 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
     return barwidth - offset - widgetwidth;
 }
 
+/** Find a widget on a screen by its name
+ * \param name the widget name
+ * \param screen the screen to look into
+ * \return a widget
+ */
 static Widget *
 widget_find(char *name, int screen)
 {
@@ -90,6 +106,11 @@ widget_find(char *name, int screen)
     return NULL;
 }
 
+/** Common function for button press event on widget.
+ * It will look into configuration to find the callback function to call.
+ * \param widget the widget
+ * \param ev the XButtonPressedEvent the widget received
+ */
 static void
 widget_common_button_press(Widget *widget, XButtonPressedEvent *ev)
 {
@@ -103,20 +124,27 @@ widget_common_button_press(Widget *widget, XButtonPressedEvent *ev)
         }
 }
 
+/** Common tell function for widget, which only warn user that widget
+ * cannot be told anything
+ * \param widget the widget
+ * \param command unused argument
+ */
 static void
 widget_common_tell(Widget *widget, char *command __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
 }
 
+/** Common function for creating a widget
+ * \param widget The allocated widget
+ * \param statusbar the statusbar the widget is on
+ * \param config the cfg_t structure we will parse to set common info
+ */
 void
-widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
+widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t *config)
 {
-    const char *name;
-
     widget->statusbar = statusbar;
-    name = cfg_title(config);
-    widget->name = a_strdup(name);
+    widget->name = a_strdup(cfg_title(config));
     widget->tell = widget_common_tell;
     widget->button_press = widget_common_button_press;
     widget->area.x = cfg_getint(config, "x");
@@ -125,6 +153,12 @@ widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t* config)
     widget->user_supplied_y = (widget->area.y != (int) 0xffffffff);
 }
 
+/** Invalidate widgets which should be refresh upon
+ * external modifications. Widget who watch flags will
+ * be set to be refreshed.
+ * \param screen screen id
+ * \param flags cache flags
+ */
 void
 widget_invalidate_cache(int screen, int flags)
 {

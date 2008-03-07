@@ -27,7 +27,7 @@
 
 extern AwesomeConf globalconf;
 
-/** Mask shorthands, used in event.c and window.c */
+/** Mask shorthands */
 #define BUTTONMASK     (ButtonPressMask | ButtonReleaseMask)
 
 /** Set client WM_STATE property
@@ -67,6 +67,12 @@ window_getstate(Window w)
     return result;
 }
 
+/** Configure a window with its new geometry and border
+ * \param win the X window id
+ * \param geometry the new window geometry
+ * \param border new border size
+ * \return the XSendEvent() status
+ */
 Status
 window_configure(Window win, Area geometry, int border)
 {
@@ -119,6 +125,9 @@ window_grabbuttons(int phys_screen, Window win)
     XUngrabButton(globalconf.display, AnyButton, AnyModifier, RootWindow(globalconf.display, phys_screen));
 }
 
+/** Grab buttons on root window
+ * \param phys_screen physical screen id
+ */
 void
 window_root_grabbuttons(int phys_screen)
 {
@@ -139,6 +148,30 @@ window_root_grabbuttons(int phys_screen)
                     RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
                     GrabModeAsync, GrabModeSync, None, None);
     }
+}
+
+/** Grab keys on root window
+ * \param phys_screen physical screen id
+ */
+void
+window_root_grabkeys(int phys_screen)
+{
+    Key *k;
+
+    XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
+
+    for(k = globalconf.keys; k; k = k->next)
+	if(k->keycode)
+        {
+             XGrabKey(globalconf.display, k->keycode, k->mod,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | LockMask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask | LockMask,
+                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+        }
 }
 
 void
