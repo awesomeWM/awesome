@@ -77,6 +77,7 @@ cfg_opt_t general_opts[] =
     CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
     CFG_BOOL((char *) "new_get_focus", cfg_true, CFGF_NONE),
     CFG_STR((char *) "font", (char *) "vera-10", CFGF_NONE),
+    CFG_INT((char *) "text_shadow_offset", 1, CFGF_NONE),
     CFG_INT((char *) "opacity_unfocused", -1, CFGF_NONE),
     CFG_STR((char *) "floating_placement", (char *) "smart", CFGF_NONE),
     CFG_AWESOME_END()

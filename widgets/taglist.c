@@ -107,6 +107,7 @@ taglist_draw(Widget *widget,
                   vscreen.font->height / 2,
                   vscreen.font,
                   tag->name,
+                  vscreen.shadow_offset,
                   colors[ColFG],
                   colors[ColBG]);
         if(isoccupied(tag))

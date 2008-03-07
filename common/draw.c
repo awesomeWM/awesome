@@ -121,6 +121,7 @@ draw_context_delete(DrawCtx *ctx)
  * \param padding padding to add before drawing the text
  * \param font font to use
  * \param text text to draw
+ * \param enable shadow
  * \param fg foreground color
  * \param bg background color
  */
@@ -130,9 +131,10 @@ draw_text(DrawCtx *ctx,
           Alignment align,
           int padding,
           XftFont *font, char *text,
+          int shadow_offset,
           XColor fg, XColor bg)
 {
-    int nw = 0;
+    int nw = 0, x, y;
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
     cairo_font_face_t *font_face;
@@ -177,23 +179,31 @@ draw_text(DrawCtx *ctx,
     font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
     cairo_set_font_face(ctx->cr, font_face);
     cairo_set_font_size(ctx->cr, font->height);
-    cairo_set_source_rgb(ctx->cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
+
+    x = area.x + padding;
+    y = area.y + font->ascent + (ctx->height - font->height) / 2;
 
     switch(align)
     {
-      case AlignLeft:
-        cairo_move_to(ctx->cr, area.x + padding, area.y + font->ascent + (ctx->height - font->height) / 2);
+      case AlignCenter:
+        x += (area.width - nw) / 2;
         break;
       case AlignRight:
-        cairo_move_to(ctx->cr, area.x + (area.width - nw) + padding,
-                      area.y + font->ascent + (ctx->height - font->height) / 2);
+        x += area.width - nw;
         break;
       default:
-        cairo_move_to(ctx->cr, area.x + ((area.width - nw) / 2) + padding,
-                      area.y + font->ascent + (ctx->height - font->height) / 2);
         break;
     }
 
+    if(shadow_offset > 0)
+    {
+        cairo_set_source_rgb(ctx->cr, 0.0, 0.0, 0.0);
+        cairo_move_to(ctx->cr, x + shadow_offset, y + shadow_offset);
+        cairo_show_text(ctx->cr, buf);
+    }
+
+    cairo_set_source_rgb(ctx->cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
+    cairo_move_to(ctx->cr, x, y);
     cairo_show_text(ctx->cr, buf);
 
     cairo_font_face_destroy(font_face);

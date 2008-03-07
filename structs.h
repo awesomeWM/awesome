@@ -285,6 +285,8 @@ typedef struct
     Padding padding;
     /** Font */
     XftFont *font;
+    /** Draw shadow under text */
+    int shadow_offset;
 } VirtScreen;
 
 /** Main configuration structure */

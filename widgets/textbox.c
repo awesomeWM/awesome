@@ -57,7 +57,9 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    draw_text(ctx, widget->area, d->align, 0, widget->font, d->text, d->fg, d->bg);
+    draw_text(ctx, widget->area, d->align, 0, widget->font, d->text,
+              globalconf.screens[widget->statusbar->screen].shadow_offset,
+              d->fg, d->bg);
 
     return widget->area.width;
 }

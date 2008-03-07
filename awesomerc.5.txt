@@ -391,6 +391,8 @@ This widget shows a list of running windows.
     Set mouse bindings.
 *font*::
     Font to use.
+*text_shadow_offset*::
+    Draw a shadow under the text, with that number of pixel as offset.
 *bg*::
     Background color.
 *fg*::

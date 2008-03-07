@@ -74,6 +74,8 @@ typedef struct
     DrawCtx *ctx;
     /** Font to use */
     XftFont *font;
+    /** Draw shadow_offset under text */
+    Bool shadow_offset;
     /** Foreground color */
     XColor fg;
     /** Background color */
@@ -159,6 +161,7 @@ config_parse(const char *confpatharg)
     /* font */
     globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),
                                       cfg_getstr(cfg_general, "font"));
+    globalconf.shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
 
     p_delete(&confpath);
 
@@ -219,10 +222,12 @@ draw_item(item_t *item, Area geometry)
     if(item == globalconf.item_selected)
         draw_text(globalconf.ctx, geometry, AlignLeft,
                   MARGIN / 2, globalconf.font, item->data,
+                  globalconf.shadow_offset,
                   globalconf.fg_focus, globalconf.bg_focus);
     else
         draw_text(globalconf.ctx, geometry, AlignLeft,
                   MARGIN / 2, globalconf.font, item->data,
+                  globalconf.shadow_offset,
                   globalconf.fg, globalconf.bg);
 }
 
@@ -239,14 +244,18 @@ redraw(void)
     geometry.height = globalconf.sw->geometry.height;
 
     draw_text(globalconf.ctx, geometry, AlignLeft,
-              MARGIN, globalconf.font, globalconf.prompt, globalconf.fg_focus, globalconf.bg_focus);
+              MARGIN, globalconf.font, globalconf.prompt,
+              globalconf.shadow_offset,
+              globalconf.fg_focus, globalconf.bg_focus);
 
     len = MARGIN * 2 + draw_textwidth(globalconf.display, globalconf.font, globalconf.prompt);
     geometry.x += len;
     geometry.width -= len;
 
     draw_text(globalconf.ctx, geometry, AlignLeft,
-              MARGIN, globalconf.font, globalconf.text, globalconf.fg, globalconf.bg);
+              MARGIN, globalconf.font, globalconf.text,
+              globalconf.shadow_offset,
+              globalconf.fg, globalconf.bg);
 
     len = MARGIN * 2 + MAX(draw_textwidth(globalconf.display, globalconf.font, globalconf.text),
                            geometry.width / 20);

@@ -165,10 +165,12 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
             if(sel == c)
                 draw_text(ctx, area, d->align,
                           widget->font->height / 2, widget->font, c->name,
+                          globalconf.screens[widget->statusbar->screen].shadow_offset,
                           d->fg_sel, d->bg_sel);
             else
                 draw_text(ctx, area, d->align,
                           widget->font->height / 2, widget->font, c->name,
+                          globalconf.screens[widget->statusbar->screen].shadow_offset,
                           d->fg, d->bg);
 
             if(c == globalconf.scratch.client)

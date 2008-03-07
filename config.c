@@ -318,6 +318,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->font = XftFontOpenName(globalconf.display,
                                        phys_screen,
                                        cfg_getstr(cfg_general, "font"));
+    virtscreen->shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
     virtscreen->floating_placement =
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);
