@@ -214,6 +214,19 @@ compute_match(void)
 #define MARGIN 10
 
 static void
+draw_item(item_t *item, Area geometry)
+{
+    if(item == globalconf.item_selected)
+        draw_text(globalconf.ctx, geometry, AlignLeft,
+                  MARGIN / 2, globalconf.font, item->data,
+                  globalconf.fg_focus, globalconf.bg_focus);
+    else
+        draw_text(globalconf.ctx, geometry, AlignLeft,
+                  MARGIN / 2, globalconf.font, item->data,
+                  globalconf.fg, globalconf.bg);
+}
+
+static void
 redraw(void)
 {
     item_t *item;
@@ -244,15 +257,7 @@ redraw(void)
     for(item = globalconf.items; item && geometry.width > 0; item = item->next)
         if(item->match)
         {
-            if(item == globalconf.item_selected)
-            {
-                draw_text(globalconf.ctx, geometry, AlignLeft,
-                          MARGIN / 2, globalconf.font, item->data, globalconf.fg_focus, globalconf.bg_focus);
-                selected_item_is_drawn = True;
-            }
-            else
-                draw_text(globalconf.ctx, geometry, AlignLeft,
-                          MARGIN / 2, globalconf.font, item->data, globalconf.fg, globalconf.bg);
+            draw_item(item, geometry);
             len = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
             geometry.x += len;
             geometry.width -= len;
@@ -274,14 +279,7 @@ redraw(void)
                 if(geometry.x < prompt_len)
                     break;
 
-                /* XXX need factorizing */
-                if(item == globalconf.item_selected)
-                    draw_text(globalconf.ctx, geometry, AlignLeft,
-                              MARGIN / 2, globalconf.font, item->data, globalconf.fg_focus, globalconf.bg_focus);
-                else
-                    draw_text(globalconf.ctx, geometry, AlignLeft,
-                              MARGIN / 2, globalconf.font, item->data, globalconf.fg, globalconf.bg);
-
+                draw_item(item, geometry);
             }
 
         if(item)
