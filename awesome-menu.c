@@ -29,6 +29,7 @@
 #include <confuse.h>
 
 #include <X11/Xlib.h>
+#include <X11/extensions/Xinerama.h>
 
 #include "common/swindow.h"
 #include "common/util.h"
@@ -216,10 +217,13 @@ static void
 redraw(void)
 {
     item_t *item;
-    Area geometry = globalconf.sw->geometry;
+    Area geometry = { 0, 0, 0, 0, NULL };
     unsigned int len;
     Bool selected_item_is_drawn = False;
     int prompt_len, x_of_previous_item;
+
+    geometry.width = globalconf.sw->geometry.width;
+    geometry.height = globalconf.sw->geometry.height;
 
     draw_text(globalconf.ctx, geometry, AlignLeft,
               MARGIN, globalconf.font, globalconf.prompt, globalconf.fg_focus, globalconf.bg_focus);
@@ -259,26 +263,26 @@ redraw(void)
     if(globalconf.item_selected && !selected_item_is_drawn)
     {
         geometry.x = globalconf.sw->geometry.width;
-        item = globalconf.item_selected;
 
-        while(item)
-        {
-            x_of_previous_item = geometry.x;
-            geometry.width = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
-            geometry.x -= geometry.width;
+        for(item = globalconf.item_selected; item; item = item_list_prev(&globalconf.items, item))
+            if(item->match)
+            {
+                x_of_previous_item = geometry.x;
+                geometry.width = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
+                geometry.x -= geometry.width;
 
-            if(geometry.x < prompt_len)
-                break;
+                if(geometry.x < prompt_len)
+                    break;
 
-            if(item == globalconf.item_selected)
-                draw_text(globalconf.ctx, geometry, AlignLeft,
-                          MARGIN / 2, globalconf.font, item->data, globalconf.fg_focus, globalconf.bg_focus);
-            else
-                draw_text(globalconf.ctx, geometry, AlignLeft,
-                          MARGIN / 2, globalconf.font, item->data, globalconf.fg, globalconf.bg);
+                /* XXX need factorizing */
+                if(item == globalconf.item_selected)
+                    draw_text(globalconf.ctx, geometry, AlignLeft,
+                              MARGIN / 2, globalconf.font, item->data, globalconf.fg_focus, globalconf.bg_focus);
+                else
+                    draw_text(globalconf.ctx, geometry, AlignLeft,
+                              MARGIN / 2, globalconf.font, item->data, globalconf.fg, globalconf.bg);
 
-            item = item_list_prev(&globalconf.items, item);
-        }
+            }
 
         if(item)
         {
@@ -481,7 +485,34 @@ main(int argc, char **argv)
 
     /* Init the geometry */
     geometry.height = globalconf.font->height * 1.5;
-    geometry.width = DisplayWidth(globalconf.display, DefaultScreen(globalconf.display));
+
+    /* XXX this must be replace with a common/ infra */
+    if(XineramaIsActive(disp))
+    {
+        XineramaScreenInfo *si;
+        int xinerama_screen_number, i, x, y;
+        unsigned int ui;
+        Window dummy;
+
+        XQueryPointer(disp, RootWindow(disp, DefaultScreen(disp)),
+                      &dummy, &dummy, &x, &y, &i, &i, &ui);
+
+        si = XineramaQueryScreens(disp, &xinerama_screen_number);
+
+        /* XXX use screen_get_bycoord() !!! */
+        for(i = 0; i < xinerama_screen_number; i++)
+            if((x < 0 || (x >= si[i].x_org && x < si[i].x_org + si[i].width))
+               && (y < 0 || (y >= si[i].y_org && y < si[i].y_org + si[i].height)))
+                break;
+
+        geometry.x = si[i].x_org;
+        geometry.y = si[i].y_org;
+        geometry.width = si[i].width;
+
+        XFree(si);
+    }
+    else
+        geometry.width = DisplayWidth(disp, DefaultScreen(disp));
 
     /* Create the window */
     globalconf.sw = simplewindow_new(disp, DefaultScreen(disp),

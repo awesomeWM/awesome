@@ -167,7 +167,7 @@ awesome_menu_SOURCES = \
 	common/xutil.h common/xutil.c \
 	awesome-menu.c
 
-awesome_menu_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS)
+awesome_menu_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XINERAMA_LIBS)
 
 if HAVE_XMLTO
 if HAVE_ASCIIDOC
