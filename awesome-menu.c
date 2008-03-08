@@ -266,12 +266,13 @@ redraw(void)
     for(item = globalconf.items; item && geometry.width > 0; item = item->next)
         if(item->match)
         {
+            if(item == globalconf.item_selected)
+                selected_item_is_drawn = True;
             draw_item(item, geometry);
             len = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
             geometry.x += len;
             geometry.width -= len;
         }
-
 
     /* we have an item selected but not drawn, so redraw in the other side */
     if(globalconf.item_selected && !selected_item_is_drawn)
