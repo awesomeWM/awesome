@@ -172,12 +172,10 @@ static void
 complete(Bool reverse)
 {
     item_t *item = NULL;
-    item_t *(*item_iter)(item_t **, item_t *);
+    item_t *(*item_iter)(item_t **, item_t *) = item_list_next;
 
     if(reverse)
         item_iter = item_list_prev;
-    else
-        item_iter = item_list_next;
 
     if(globalconf.item_selected)
         item = item_iter(&globalconf.items, globalconf.item_selected);
