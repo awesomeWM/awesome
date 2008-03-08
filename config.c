@@ -323,6 +323,30 @@ config_parse_screen(cfg_t *cfg, int screen)
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);
 
+    virtscreen->mwfact_lower_limit = cfg_getfloat(cfg_general, "mwfact_lower_limit");
+    virtscreen->mwfact_upper_limit = cfg_getfloat(cfg_general, "mwfact_upper_limit");
+
+    if(virtscreen->mwfact_lower_limit < 0 || virtscreen->mwfact_lower_limit > 1)
+    {
+        warn("incorrect value %f for mwfact_lower_limit, must be between 0 and 1\n",
+             virtscreen->mwfact_lower_limit);
+        virtscreen->mwfact_lower_limit = 0.1;
+    }
+
+    if(virtscreen->mwfact_upper_limit < 0 || virtscreen->mwfact_upper_limit > 1)
+    {
+        warn("incorrect value %f for mwfact_upper_limit, must be between 0 and 1\n",
+             virtscreen->mwfact_lower_limit);
+        virtscreen->mwfact_upper_limit = 0.9;
+    }
+
+    if(virtscreen->mwfact_upper_limit < virtscreen->mwfact_lower_limit)
+    {
+        warn("mwfact_upper_limit must be greater than mwfact_lower_limit\n");
+        virtscreen->mwfact_upper_limit = 0.9;
+        virtscreen->mwfact_lower_limit = 0.1;
+    }
+
     if(!virtscreen->floating_placement)
     {
         warn("unknown floating placement: %s\n", cfg_getstr(cfg_general, "floating_placement"));

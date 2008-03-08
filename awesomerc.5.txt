@@ -564,6 +564,8 @@ screen <integer> [MULTI]
         sloppy_focus_raise = <boolean>
         snap = <integer>
         floating_placement = <{smart,under_mouse}>
+        mwfact_lower_limit = <float>
+        mwfact_upper_limit = <float>
     }
     tags
     {

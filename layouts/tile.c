@@ -112,10 +112,12 @@ uicb_tag_setmwfact(int screen, char *arg)
             newarg[0] = '+';
     }
 
-    if((curtags[0]->mwfact = compute_new_value_from_arg(newarg, curtags[0]->mwfact)) < 0.1)
-        curtags[0]->mwfact = 0.1;
-    else if(curtags[0]->mwfact > 0.9)
-        curtags[0]->mwfact = 0.9;
+    curtags[0]->mwfact = compute_new_value_from_arg(newarg, curtags[0]->mwfact);
+
+    if(curtags[0]->mwfact < globalconf.screens[screen].mwfact_lower_limit)
+        curtags[0]->mwfact = globalconf.screens[screen].mwfact_lower_limit;
+    else if(curtags[0]->mwfact > globalconf.screens[screen].mwfact_upper_limit)
+        curtags[0]->mwfact = globalconf.screens[screen].mwfact_upper_limit;
 
     p_delete(&newarg);
     p_delete(&curtags);

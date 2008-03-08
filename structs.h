@@ -253,6 +253,8 @@ typedef struct
     int snap;
     /** Border size */
     int borderpx;
+    /** Mwfact limits */
+    float mwfact_upper_limit, mwfact_lower_limit;
     /** Floating window placement algo */
     FloatingPlacement *floating_placement;
     /** Respect resize hints */

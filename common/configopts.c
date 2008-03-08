@@ -80,6 +80,8 @@ cfg_opt_t general_opts[] =
     CFG_INT((char *) "text_shadow_offset", 1, CFGF_NONE),
     CFG_INT((char *) "opacity_unfocused", -1, CFGF_NONE),
     CFG_STR((char *) "floating_placement", (char *) "smart", CFGF_NONE),
+    CFG_FLOAT((char *) "mwfact_lower_limit", 0.1, CFGF_NONE),
+    CFG_FLOAT((char *) "mwfact_upper_limit", 0.9, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t colors_opts[] =
