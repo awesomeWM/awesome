@@ -180,45 +180,52 @@ config_parse(const char *confpatharg)
 static void
 item_list_fill_file(void)
 {
-    char cwd[PATH_MAX];
+    char cwd[PATH_MAX], *fcwd;
     DIR *dir;
     struct dirent *dirinfo;
     item_t *item;
+    ssize_t len;
 
     item_list_wipe(&globalconf.items);
 
-    if(!getcwd(cwd, sizeof(cwd)))
-    {
-        warn("cannot get current directory ");
-        perror(NULL);
-        return;
-    }
+    if(a_strlen(globalconf.text)
+       && (fcwd = strrchr(globalconf.text, ' ')))
+        a_strcpy(cwd, sizeof(cwd), ++fcwd);
+    else
+        a_strcpy(cwd, sizeof(cwd), ".");
 
     if(!(dir = opendir(cwd)))
-    {
-        warn("unable to open current directory ");
-        perror(NULL);
         return;
-    }
 
     while((dirinfo = readdir(dir)))
     {
         item = p_new(item_t, 1);
-        item->data = a_strdup(dirinfo->d_name);
+        len = a_strlen(dirinfo->d_name) + a_strlen(cwd) + 1;
+        item->data = p_new(char, len);
+        if(a_strcmp(cwd, "."))
+            a_strcpy(item->data, len, cwd);
+        a_strcat(item->data, len, dirinfo->d_name);
         item_list_push(&globalconf.items, item);
     }
 
     closedir(dir);
 }
 
+static char *
+get_last_word(char *text)
+{
+    char *last_word = text;
+
+    if((last_word = strrchr(text, ' ')))
+        last_word++;
+
+    return last_word;
+}
 static void
 complete(Bool reverse)
 {
     item_t *item = NULL;
     item_t *(*item_iter)(item_t **, item_t *) = item_list_next;
-
-    if(!globalconf.items)
-        item_list_fill_file();
 
     if(reverse)
         item_iter = item_list_prev;
@@ -236,7 +243,8 @@ complete(Bool reverse)
     for(; item; item = item_iter(&globalconf.items, item))
         if(item->match)
         {
-            a_strcpy(globalconf.text, ssizeof(globalconf.text), item->data);
+            /* XXX sizeof wrong */
+            a_strcpy(get_last_word(globalconf.text), ssizeof(globalconf.text), item->data);
             globalconf.item_selected = item;
             return;
         }
@@ -245,16 +253,29 @@ complete(Bool reverse)
 static void
 compute_match(void)
 {
+    ssize_t len = a_strlen(globalconf.text);
     item_t *item;
+    char *last_word;
 
     /* reset the selected item to NULL */
     globalconf.item_selected = NULL;
 
-    for(item = globalconf.items; item; item = item->next)
-        if(!a_strncmp(globalconf.text, item->data, a_strlen(globalconf.text)))
-            item->match = True;
-        else
-            item->match = False;
+    if(globalconf.text[len - 1] == '/')
+        item_list_fill_file();
+
+    last_word = get_last_word(globalconf.text);
+
+    if(a_strlen(last_word))
+    {
+        for(item = globalconf.items; item; item = item->next)
+            if(!a_strncmp(last_word, item->data, a_strlen(last_word)))
+                item->match = True;
+            else
+                item->match = False;
+    }
+    else
+        for(item = globalconf.items; item; item = item->next)
+                item->match = True;
 }
 
 /* Why not? */
