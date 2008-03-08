@@ -25,6 +25,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <sys/types.h>
 
 #include <confuse.h>
 
@@ -61,7 +63,14 @@ struct item_t
     Bool match;
 };
 
-DO_SLIST(item_t, item, p_delete);
+static void
+item_delete(item_t **item)
+{
+    p_delete(&(*item)->data);
+    p_delete(item);
+}
+
+DO_SLIST(item_t, item, item_delete);
 
 /** awesome-run global configuration structure */
 typedef struct
@@ -169,10 +178,47 @@ config_parse(const char *confpatharg)
 }
 
 static void
+item_list_fill_file(void)
+{
+    char cwd[PATH_MAX];
+    DIR *dir;
+    struct dirent *dirinfo;
+    item_t *item;
+
+    item_list_wipe(&globalconf.items);
+
+    if(!getcwd(cwd, sizeof(cwd)))
+    {
+        warn("cannot get current directory ");
+        perror(NULL);
+        return;
+    }
+
+    if(!(dir = opendir(cwd)))
+    {
+        warn("unable to open current directory ");
+        perror(NULL);
+        return;
+    }
+
+    while((dirinfo = readdir(dir)))
+    {
+        item = p_new(item_t, 1);
+        item->data = a_strdup(dirinfo->d_name);
+        item_list_push(&globalconf.items, item);
+    }
+
+    closedir(dir);
+}
+
+static void
 complete(Bool reverse)
 {
     item_t *item = NULL;
     item_t *(*item_iter)(item_t **, item_t *) = item_list_next;
+
+    if(!globalconf.items)
+        item_list_fill_file();
 
     if(reverse)
         item_iter = item_list_prev;
@@ -415,22 +461,30 @@ handle_kpress(XKeyEvent *e)
     }
 }
 
-static void
-item_list_fill(void)
+static Bool
+item_list_fill_stdin(void)
 {
     char buf[PATH_MAX];
     item_t *newitem;
+    Bool has_entry = False;
 
     item_list_init(&globalconf.items);
 
-    while(fgets(buf, sizeof(buf), stdin))
-    {
-        buf[a_strlen(buf) - 1] = '\0';
-        newitem = p_new(item_t, 1);
-        newitem->data = a_strdup(buf);
-        newitem->match = True;
-        item_list_append(&globalconf.items, newitem);
-    }
+    if(fgets(buf, sizeof(buf), stdin))
+        has_entry = True;
+
+    if(has_entry)
+        do
+        {
+            buf[a_strlen(buf) - 1] = '\0';
+            newitem = p_new(item_t, 1);
+            newitem->data = a_strdup(buf);
+            newitem->match = True;
+            item_list_append(&globalconf.items, newitem);
+        }
+        while(fgets(buf, sizeof(buf), stdin));
+
+    return has_entry;
 }
 
 int
@@ -534,7 +588,10 @@ main(int argc, char **argv)
 
 
 
-    item_list_fill();
+    if(!item_list_fill_stdin())
+        item_list_fill_file();
+
+    compute_match();
 
     if(XGrabKeyboard(disp, DefaultRootWindow(disp), True,
                      GrabModeAsync, GrabModeAsync, CurrentTime) != GrabSuccess)
