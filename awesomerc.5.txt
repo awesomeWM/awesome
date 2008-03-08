@@ -391,8 +391,6 @@ This widget shows a list of running windows.
     Set mouse bindings.
 *font*::
     Font to use.
-*text_shadow_offset*::
-    Draw a shadow under the text, with that number of pixel as offset.
 *bg*::
     Background color.
 *fg*::
@@ -564,6 +562,7 @@ screen <integer> [MULTI]
         sloppy_focus_raise = <boolean>
         snap = <integer>
         floating_placement = <{smart,under_mouse}>
+        text_shadow_offset = <int>
         mwfact_lower_limit = <float>
         mwfact_upper_limit = <float>
     }
