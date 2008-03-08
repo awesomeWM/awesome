@@ -39,9 +39,16 @@ tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
     tag = p_new(Tag, 1);
     tag->name = a_strdup(name);
     tag->layout = layout;
+
     tag->mwfact = mwfact;
-    tag->nmaster = nmaster;
-    tag->ncol = ncol;
+    if(tag->mwfact <= 0 || tag->mwfact >= 1)
+        tag->mwfact = 0.5;
+
+    if((tag->nmaster = nmaster) < 0)
+        tag->nmaster = 1;
+
+    if((tag->ncol = ncol) < 1)
+        tag->ncol = 1;
 
     return tag;
 }
