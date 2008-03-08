@@ -177,10 +177,23 @@ config_parse(const char *confpatharg)
     return ret;
 }
 
+static char *
+get_last_word(char *text)
+{
+    char *last_word;
+
+    if((last_word = strrchr(text, ' ')))
+        last_word++;
+    else
+        last_word = text;
+
+    return last_word;
+}
+
 static void
 item_list_fill_file(void)
 {
-    char cwd[PATH_MAX], *fcwd;
+    char cwd[PATH_MAX], *last_word;
     DIR *dir;
     struct dirent *dirinfo;
     item_t *item;
@@ -188,9 +201,10 @@ item_list_fill_file(void)
 
     item_list_wipe(&globalconf.items);
 
-    if(a_strlen(globalconf.text)
-       && (fcwd = strrchr(globalconf.text, ' ')))
-        a_strcpy(cwd, sizeof(cwd), ++fcwd);
+    last_word = get_last_word(globalconf.text);
+
+    if(a_strlen(last_word))
+        a_strcpy(cwd, sizeof(cwd), last_word);
     else
         a_strcpy(cwd, sizeof(cwd), ".");
 
@@ -211,16 +225,6 @@ item_list_fill_file(void)
     closedir(dir);
 }
 
-static char *
-get_last_word(char *text)
-{
-    char *last_word = text;
-
-    if((last_word = strrchr(text, ' ')))
-        last_word++;
-
-    return last_word;
-}
 static void
 complete(Bool reverse)
 {
@@ -260,7 +264,9 @@ compute_match(void)
     /* reset the selected item to NULL */
     globalconf.item_selected = NULL;
 
-    if(globalconf.text[len - 1] == '/')
+    if(len >= 1
+       && (globalconf.text[len - 1] == '/'
+           || globalconf.text[len - 1] == ' '))
         item_list_fill_file();
 
     last_word = get_last_word(globalconf.text);
