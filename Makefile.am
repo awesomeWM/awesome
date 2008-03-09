@@ -256,9 +256,11 @@ endif
 # Presuming we are running awesome on this screen, and this is screen 0, ...
 # ...we replace the running awesome instance by a freshly compiled one.
 restart-uninstalled: awesome awesome-client
-	echo 0 exec "$${PWD}/awesome" | "$${PWD}/awesome-client"
+	screen=`echo "$${DISPLAY}" | sed 's/.*:[0-9]\.\([0-9]*\)$$/\1/; s/.*:\([0-9]*\)$$/0/'`; \
+	echo "$${screen}" exec "$${PWD}/awesome" | "$${PWD}/awesome-client"
 
 # ...we replace the running awesome instance by the last installed one.
 restart-installed:
-	echo 0 exec "$(DESTDIR)$(bindir)/awesome" | "$(DESTDIR)$(bindir)/awesome-client"
+	screen=`echo "$${DISPLAY}" | sed 's/.*:[0-9]\.\([0-9]*\)$$/\1/; s/.*:\([0-9]*\)$$/0/'`; \
+	echo "$${screen}" exec "$(DESTDIR)$(bindir)/awesome" | "$(DESTDIR)$(bindir)/awesome-client"
 
