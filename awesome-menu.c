@@ -193,7 +193,7 @@ get_last_word(char *text)
 static Bool
 item_list_fill_file(const char *directory)
 {
-    char cwd[PATH_MAX], *special_opendir_name = NULL;
+    char cwd[PATH_MAX], *home;
     DIR *dir;
     struct dirent *dirinfo;
     item_t *item;
@@ -203,19 +203,19 @@ item_list_fill_file(const char *directory)
 
     if(a_strlen(directory))
     {
-        if(directory[0] == '~')
-            special_opendir_name = getenv("HOME");
-        a_strcpy(cwd, sizeof(cwd), directory);
+        if(!a_strncmp(directory, "~/", 2)
+           && (home = getenv("HOME")))
+        {
+            a_strcpy(cwd, sizeof(cwd), home);
+            a_strcat(cwd, sizeof(cwd), directory + 1);
+        }
+        else
+            a_strcpy(cwd, sizeof(cwd), directory);
     }
     else
         a_strcpy(cwd, sizeof(cwd), ".");
 
-    if(special_opendir_name)
-    {
-        if(!(dir = opendir(special_opendir_name)))
-            return False;
-    }
-    else if(!(dir = opendir(cwd)))
+    if(!(dir = opendir(cwd)))
         return False;
 
     while((dirinfo = readdir(dir)))
@@ -224,7 +224,7 @@ item_list_fill_file(const char *directory)
         len = a_strlen(dirinfo->d_name) + a_strlen(cwd) + 1;
         item->data = p_new(char, len);
         if(a_strcmp(cwd, "."))
-            a_strcpy(item->data, len, cwd);
+            a_strcpy(item->data, len, directory);
         a_strcat(item->data, len, dirinfo->d_name);
         item_list_push(&globalconf.items, item);
     }
