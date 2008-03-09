@@ -253,33 +253,31 @@ complete(Bool reverse)
 }
 
 static void
-compute_match(void)
+compute_match(const char *word)
 {
-    ssize_t len = a_strlen(globalconf.text);
+    ssize_t len = a_strlen(word);
     item_t *item;
-    char *last_word;
 
     /* reset the selected item to NULL */
     globalconf.item_selected = NULL;
 
-    if(len >= 1
-       && (globalconf.text[len - 1] == '/'
-           || globalconf.text[len - 1] == ' '))
-        item_list_fill_file(get_last_word(globalconf.text));
-
-    last_word = get_last_word(globalconf.text);
-
-    if(a_strlen(last_word))
+    if(len)
     {
+        if(word[len - 1] == '/'
+           || word[len - 1] == ' ')
+            item_list_fill_file(word);
         for(item = globalconf.items; item; item = item->next)
-            if(!a_strncmp(last_word, item->data, a_strlen(last_word)))
+            if(!a_strncmp(word, item->data, a_strlen(word)))
                 item->match = True;
             else
                 item->match = False;
     }
     else
+    {
+        item_list_fill_file(NULL);
         for(item = globalconf.items; item; item = item->next)
                 item->match = True;
+    }
 }
 
 /* Why not? */
@@ -419,7 +417,7 @@ handle_kpress(XKeyEvent *e)
                     globalconf.text[i--] = '\0';
                 while(i >= 0 && globalconf.text[i] != ' ')
                     globalconf.text[i--] = '\0';
-                compute_match();
+                compute_match(get_last_word(globalconf.text));
                 redraw();
             }
             return;
@@ -456,7 +454,7 @@ handle_kpress(XKeyEvent *e)
         {
             buf[num] = '\0';
             a_strncat(globalconf.text, sizeof(globalconf.text), buf, num);
-            compute_match();
+            compute_match(get_last_word(globalconf.text));
             redraw();
         }
         break;
@@ -464,7 +462,7 @@ handle_kpress(XKeyEvent *e)
         if(len)
         {
             globalconf.text[--len] = '\0';
-            compute_match();
+            compute_match(get_last_word(globalconf.text));
             redraw();
         }
         break;
@@ -615,7 +613,7 @@ main(int argc, char **argv)
     if(!item_list_fill_stdin())
         item_list_fill_file(".");
 
-    compute_match();
+    compute_match(NULL);
 
     for(opt = 1000; opt; opt--)
     {
