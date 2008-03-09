@@ -620,8 +620,14 @@ main(int argc, char **argv)
 
     compute_match();
 
-    if(XGrabKeyboard(disp, DefaultRootWindow(disp), True,
-                     GrabModeAsync, GrabModeAsync, CurrentTime) != GrabSuccess)
+    for(opt = 1000; opt; opt--)
+    {
+        if(XGrabKeyboard(disp, DefaultRootWindow(disp), True,
+                         GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess)
+            break;
+        usleep(1000);
+    }
+    if(!opt)
         eprint("cannot grab keyboard");
 
     redraw();
