@@ -354,9 +354,8 @@ redraw(void)
 {
     item_t *item;
     Area geometry = { 0, 0, 0, 0, NULL };
-    unsigned int len;
     Bool selected_item_is_drawn = False;
-    int prompt_len, x_of_previous_item;
+    int len, prompt_len, x_of_previous_item;
 
     geometry.width = globalconf.sw->geometry.width;
     geometry.height = globalconf.sw->geometry.height;
@@ -384,13 +383,18 @@ redraw(void)
     geometry.width -= len;
     prompt_len = geometry.x;
 
-    for(item = globalconf.items; item && geometry.width > 0; item = item->next)
+    for(item = globalconf.items; item; item = item->next)
         if(item->match)
         {
-            if(item == globalconf.item_selected)
-                selected_item_is_drawn = True;
-            draw_item(item, geometry);
             len = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
+            if(item == globalconf.item_selected)
+            {
+                if(len > geometry.width)
+                    break;
+                else
+                    selected_item_is_drawn = True;
+            }
+            draw_item(item, geometry);
             geometry.x += len;
             geometry.width -= len;
         }
