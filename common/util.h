@@ -216,10 +216,19 @@ a_strncat(char *dst, ssize_t n, const char *src, ssize_t l)
     return dlen + a_strncpy(dst + dlen, n - dlen, src, l);
 }
 
-void die(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
-void eprint(const char *, ...) __attribute__ ((noreturn)) __attribute__ ((format(printf, 1, 2)));
+#define eprint(string, ...) _eprint(__LINE__, \
+                                    __FUNCTION__, \
+                                    string, ## __VA_ARGS__)
+void _eprint(int, const char *, const char *, ...)
+    __attribute__ ((noreturn)) __attribute__ ((format(printf, 3, 4)));
+
+#define warn(string, ...) _warn(__LINE__, \
+                                __FUNCTION__, \
+                                string, ## __VA_ARGS__)
+void _warn(int, const char *, const char *, ...)
+    __attribute__ ((format(printf, 3, 4)));
+
 double compute_new_value_from_arg(const char *, double);
-void warn(const char *, ...) __attribute__ ((format(printf, 1, 2)));
 void *name_func_lookup(const char *, const name_func_link_t *);
 
 #endif

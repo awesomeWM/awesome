@@ -28,30 +28,28 @@
 
 #include "util.h"
 
-/** Print error and exit
- * with EXIT_FAILURE code
+/** Print error and exit with EXIT_FAILURE code
  */
 void
-eprint(const char *fmt, ...)
+_eprint(int line, const char *fct, const char *fmt, ...)
 {
     va_list ap;
 
     va_start(ap, fmt);
-    fprintf(stderr, "awesome: ");
+    fprintf(stderr, "E: awesome: %s:%d: ", fct, line);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
     exit(EXIT_FAILURE);
 }
 
-/** Print error message
- * on stderr
+/** Print error message on stderr
  */
 void
-warn(const char *fmt, ...)
+_warn(int line, const char *fct, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    fprintf(stderr, "awesome: ");
+    fprintf(stderr, "W: awesome: %s:%d: ", fct, line);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
 }
