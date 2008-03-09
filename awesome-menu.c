@@ -383,7 +383,7 @@ redraw(void)
     geometry.width -= len;
     prompt_len = geometry.x;
 
-    for(item = globalconf.items; item; item = item->next)
+    for(item = globalconf.items; item && geometry.width > 0; item = item->next)
         if(item->match)
         {
             len = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
