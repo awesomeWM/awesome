@@ -19,6 +19,12 @@
  *
  */
 
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <confuse.h>
 
 #include "rules.h"
@@ -27,8 +33,34 @@
 #define AWESOME_CONFIG_FILE ".awesomerc"
 
 #define CFG_AWESOME_END() \
-        CFG_FUNC((char *) "include", cfg_include), \
+        CFG_FUNC((char *) "include", cfg_awesome_include), \
         CFG_END()
+
+/** This is a better writing of cfg_include coming from libconfuse.
+ * With this one, we do not treat errors as fatal.
+ */
+static int
+cfg_awesome_include(cfg_t *cfg, cfg_opt_t *opt,
+                    int argc, const char **argv)
+{
+    FILE *fp;
+
+    if(argc != 1 || !a_strlen(argv[0]))
+    {
+        cfg_error(cfg, "wrong number of arguments to cfg_awesome_include()");
+        return 0;
+    }
+
+    if(!(fp = fopen(argv[0], "r")))
+    {
+        cfg_error(cfg, "cannot include configuration file %s: %s", argv[0], strerror(errno));
+        return 0;
+    }
+
+    fclose(fp);
+
+    return cfg_include(cfg, opt, argc, argv);
+}
 
 cfg_opt_t general_opts[] =
 {
