@@ -225,13 +225,14 @@ get_last_word(char *text)
 static Bool
 item_list_fill_file(const char *directory)
 {
-    char cwd[PATH_MAX], *home, *user;
+    char cwd[PATH_MAX], *home, *user, *filename;
     const char *file;
     DIR *dir;
     struct dirent *dirinfo;
     item_t *item;
-    ssize_t len;
+    ssize_t len, lenfile;
     struct passwd *passwd = NULL;
+    struct stat st;
 
     item_list_wipe(&globalconf.items);
 
@@ -272,11 +273,26 @@ item_list_fill_file(const char *directory)
     while((dirinfo = readdir(dir)))
     {
         item = p_new(item_t, 1);
-        len = a_strlen(dirinfo->d_name) + a_strlen(cwd) + 1;
+
+        /* + 1 for \0 + 1 for / if directory */
+        len = a_strlen(directory) + a_strlen(dirinfo->d_name) + 2;
+
         item->data = p_new(char, len);
-        if(a_strcmp(cwd, "."))
+        if(a_strlen(directory))
             a_strcpy(item->data, len, directory);
         a_strcat(item->data, len, dirinfo->d_name);
+
+        lenfile = a_strlen(cwd) + a_strlen(dirinfo->d_name) + 2;
+
+        filename = p_new(char, lenfile);
+        a_strcpy(filename, lenfile, cwd);
+        a_strcat(filename, lenfile, dirinfo->d_name);
+
+        if(!stat(filename, &st) && S_ISDIR(st.st_mode))
+            a_strcat(item->data, len, "/");
+
+        p_delete(&filename);
+
         item_list_push(&globalconf.items, item);
     }
 
@@ -535,11 +551,13 @@ handle_kpress(XKeyEvent *e)
       case XK_ISO_Left_Tab:
       case XK_Left:
         complete(True);
+        compute_match(get_last_word(globalconf.text));
         redraw();
         break;
       case XK_Right:
       case XK_Tab:
         complete(False);
+        compute_match(get_last_word(globalconf.text));
         redraw();
         break;
       case XK_Escape:
