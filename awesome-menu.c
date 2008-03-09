@@ -190,10 +190,10 @@ get_last_word(char *text)
     return last_word;
 }
 
-static void
+static Bool
 item_list_fill_file(const char *directory)
 {
-    char cwd[PATH_MAX];
+    char cwd[PATH_MAX], *special_opendir_name = NULL;
     DIR *dir;
     struct dirent *dirinfo;
     item_t *item;
@@ -202,12 +202,21 @@ item_list_fill_file(const char *directory)
     item_list_wipe(&globalconf.items);
 
     if(a_strlen(directory))
+    {
+        if(directory[0] == '~')
+            special_opendir_name = getenv("HOME");
         a_strcpy(cwd, sizeof(cwd), directory);
+    }
     else
         a_strcpy(cwd, sizeof(cwd), ".");
 
-    if(!(dir = opendir(cwd)))
-        return;
+    if(special_opendir_name)
+    {
+        if(!(dir = opendir(special_opendir_name)))
+            return False;
+    }
+    else if(!(dir = opendir(cwd)))
+        return False;
 
     while((dirinfo = readdir(dir)))
     {
@@ -221,6 +230,8 @@ item_list_fill_file(const char *directory)
     }
 
     closedir(dir);
+
+    return True;
 }
 
 static void
@@ -266,6 +277,7 @@ compute_match(const char *word)
         if(word[len - 1] == '/'
            || word[len - 1] == ' ')
             item_list_fill_file(word);
+
         for(item = globalconf.items; item; item = item->next)
             if(!a_strncmp(word, item->data, a_strlen(word)))
                 item->match = True;
