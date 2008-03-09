@@ -486,18 +486,6 @@ handle_kpress(XKeyEvent *e)
           case XK_l:
             ksym = XK_Right;
             break;
-          case XK_j:
-            ksym = XK_Next;
-            break;
-          case XK_k:
-            ksym = XK_Prior;
-            break;
-          case XK_g:
-            ksym = XK_Home;
-            break;
-          case XK_G:
-            ksym = XK_End;
-            break;
         }
 
     switch(ksym)
@@ -519,6 +507,7 @@ handle_kpress(XKeyEvent *e)
             redraw();
         }
         break;
+      case XK_ISO_Left_Tab:
       case XK_Left:
         complete(True);
         redraw();
