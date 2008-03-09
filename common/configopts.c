@@ -43,6 +43,7 @@ static int
 cfg_awesome_include(cfg_t *cfg, cfg_opt_t *opt,
                     int argc, const char **argv)
 {
+    char *filename;
     FILE *fp;
 
     if(argc != 1 || !a_strlen(argv[0]))
@@ -51,12 +52,16 @@ cfg_awesome_include(cfg_t *cfg, cfg_opt_t *opt,
         return 0;
     }
 
-    if(!(fp = fopen(argv[0], "r")))
+    filename = cfg_tilde_expand(argv[0]);
+
+    if(!(fp = fopen(filename, "r")))
     {
-        cfg_error(cfg, "cannot include configuration file %s: %s", argv[0], strerror(errno));
+        cfg_error(cfg, "cannot include configuration file %s: %s",
+                  filename, strerror(errno));
         return 0;
     }
 
+    p_delete(&filename);
     fclose(fp);
 
     return cfg_include(cfg, opt, argc, argv);
