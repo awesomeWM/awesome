@@ -268,6 +268,7 @@ item_list_fill_file(const char *directory)
 static void
 complete(Bool reverse)
 {
+    int loop = 2;
     item_t *item = NULL;
     item_t *(*item_iter)(item_t **, item_t *) = item_list_next_cycle;
 
@@ -277,14 +278,10 @@ complete(Bool reverse)
     if(globalconf.item_selected)
         item = item_iter(&globalconf.items, globalconf.item_selected);
     else
-        for(item = globalconf.items; item; item = item_iter(&globalconf.items, item))
-            if(item->match)
-            {
-                globalconf.item_selected = item;
-                break;
-            }
+        item = globalconf.items;
 
-    for(; item; item = item_iter(&globalconf.items, item))
+    for(; item && loop; item = item_iter(&globalconf.items, item))
+    {
         if(item->match)
         {
             /* XXX sizeof wrong */
@@ -292,6 +289,15 @@ complete(Bool reverse)
             globalconf.item_selected = item;
             return;
         }
+        /*
+         * Since loop is 2, it will be 1 at first iter, and then 0 if we
+         * get back before matching an item (i.e. no items match) to the
+         * first elem: so it will break the loop, otherwise it loops for
+         * ever
+         */
+        if(item == globalconf.items)
+            loop--;
+    }
 }
 
 static void
