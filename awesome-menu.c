@@ -144,7 +144,7 @@ config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
     if(ret)
         return ret;
 
-    if(!(cfg_menu = cfg_gettsec(cfg, "menu", menu_title)))
+    if(menu_title && !(cfg_menu = cfg_gettsec(cfg, "menu", menu_title)))
         warn("no definition for menu %s in configuration file: using default\n", menu_title);
 
     /* get global screen section */
@@ -353,14 +353,17 @@ redraw(void)
     geometry.width = globalconf.sw->geometry.width;
     geometry.height = globalconf.sw->geometry.height;
 
-    draw_text(globalconf.ctx, geometry, AlignLeft,
-              MARGIN, globalconf.font, globalconf.prompt,
-              globalconf.shadow_offset,
-              globalconf.fg_focus, globalconf.bg_focus);
+    if(a_strlen(globalconf.prompt))
+    {
+        draw_text(globalconf.ctx, geometry, AlignLeft,
+                  MARGIN, globalconf.font, globalconf.prompt,
+                  globalconf.shadow_offset,
+                  globalconf.fg_focus, globalconf.bg_focus);
 
-    len = MARGIN * 2 + draw_textwidth(globalconf.display, globalconf.font, globalconf.prompt);
-    geometry.x += len;
-    geometry.width -= len;
+        len = MARGIN * 2 + draw_textwidth(globalconf.display, globalconf.font, globalconf.prompt);
+        geometry.x += len;
+        geometry.width -= len;
+    }
 
     draw_text(globalconf.ctx, geometry, AlignLeft,
               MARGIN, globalconf.font, globalconf.text,
