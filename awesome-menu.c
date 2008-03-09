@@ -111,17 +111,18 @@ static void __attribute__ ((noreturn))
 exit_help(int exit_code)
 {
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
-    fprintf(outfile, "Usage: %s [-x xcoord] [-y ycoord] [-e command] <message>\n",
+    fprintf(outfile, "Usage: %s [-e command] <message>\n",
             PROGNAME);
     exit(exit_code);
 }
 
 static int
-config_parse(const char *confpatharg)
+config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
 {
-    int ret;
-    char *confpath;
-    cfg_t *cfg, *cfg_screen, *cfg_general, *cfg_colors;
+    int ret, i;
+    char *confpath, *opt;
+    cfg_t *cfg, *cfg_menu = NULL, *cfg_screen, *cfg_general,
+          *cfg_colors, *cfg_menu_colors = NULL;
 
     if(!confpatharg)
         confpath = config_file();
@@ -143,34 +144,64 @@ config_parse(const char *confpatharg)
     if(ret)
         return ret;
 
-    /* get global screen section */
-    cfg_screen = cfg_getsec(cfg, "screen");
+    if(!(cfg_menu = cfg_gettsec(cfg, "menu", menu_title)))
+        warn("no definition for menu %s in configuration file: using default\n", menu_title);
 
-    if(!cfg_screen)
+    /* get global screen section */
+    if(!(cfg_screen = cfg_getsec(cfg, "screen")))
         eprint("parsing configuration file failed, no screen section found\n");
 
     /* get colors and general section */
+    if(cfg_menu)
+        cfg_menu_colors = cfg_getsec(cfg_menu, "colors");
     cfg_general = cfg_getsec(cfg_screen, "general");
     cfg_colors = cfg_getsec(cfg_screen, "colors");
 
     /* colors */
+    if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "normal_fg")))
+       opt = cfg_getstr(cfg_colors, "normal_fg");
+
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   cfg_getstr(cfg_colors, "normal_fg"),
-                   &globalconf.fg);
+                   opt, &globalconf.fg);
+
+    if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "normal_bg")))
+       opt = cfg_getstr(cfg_colors, "normal_bg");
+
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   cfg_getstr(cfg_colors, "normal_bg"),
-                   &globalconf.bg);
+                   opt, &globalconf.bg);
+
+    if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "focus_fg")))
+       opt = cfg_getstr(cfg_colors, "focus_fg");
+
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   cfg_getstr(cfg_colors, "focus_fg"),
-                   &globalconf.fg_focus);
+                   opt, &globalconf.fg_focus);
+
+    if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "focus_bg")))
+       opt = cfg_getstr(cfg_colors, "focus_bg");
+
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   cfg_getstr(cfg_colors, "focus_bg"),
-                   &globalconf.bg_focus);
+                   opt, &globalconf.bg_focus);
 
     /* font */
+    if(!cfg_menu || !(opt = cfg_getstr(cfg_menu, "font")))
+        opt = cfg_getstr(cfg_general, "font");
+
     globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),
-                                      cfg_getstr(cfg_general, "font"));
+                                      opt);
+
     globalconf.shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
+
+    if(cfg_menu)
+    {
+        if((i = cfg_getint(cfg_menu, "x")) != (int) 0xffffffff)
+           geometry->x = i;
+        if((i = cfg_getint(cfg_menu, "y")) != (int) 0xffffffff)
+           geometry->y = i;
+        if((i = cfg_getint(cfg_menu, "width")) > 0)
+           geometry->width = i;
+        if((i = cfg_getint(cfg_menu, "height")) > 0)
+           geometry->height = i;
+    }
 
     p_delete(&confpath);
 
@@ -552,12 +583,6 @@ main(int argc, char **argv)
           case 'v':
             eprint_version(PROGNAME);
             break;
-          case 'x':
-            geometry.x = atoi(optarg);
-            break;
-          case 'y':
-            geometry.y = atoi(optarg);
-            break;
           case 'h':
             exit_help(EXIT_SUCCESS);
             break;
@@ -572,14 +597,15 @@ main(int argc, char **argv)
     if(argc - optind >= 1)
         globalconf.prompt = a_strdup(argv[optind]);
 
-    if((ret = config_parse(configfile)))
+    if((ret = config_parse(configfile, globalconf.prompt, &geometry)))
         return ret;
 
     /* Get the numlock mask */
     globalconf.numlockmask = get_numlockmask(disp);
 
     /* Init the geometry */
-    geometry.height = globalconf.font->height * 1.5;
+    if(!geometry.height)
+        geometry.height = globalconf.font->height * 1.5;
 
     /* XXX this must be replace with a common/ infra */
     if(XineramaIsActive(disp))
@@ -600,13 +626,16 @@ main(int argc, char **argv)
                && (y < 0 || (y >= si[i].y_org && y < si[i].y_org + si[i].height)))
                 break;
 
-        geometry.x = si[i].x_org;
-        geometry.y = si[i].y_org;
-        geometry.width = si[i].width;
+        if(!geometry.x)
+            geometry.x = si[i].x_org;
+        if(!geometry.y)
+            geometry.y = si[i].y_org;
+        if(!geometry.width)
+            geometry.width = si[i].width;
 
         XFree(si);
     }
-    else
+    else if(!geometry.width)
         geometry.width = DisplayWidth(disp, DefaultScreen(disp));
 
     /* Create the window */

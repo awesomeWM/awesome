@@ -316,12 +316,31 @@ cfg_opt_t mouse_opts[] =
     CFG_SEC((char *) "client", mouse_generic_opts, CFGF_MULTI),
     CFG_AWESOME_END()
 };
+cfg_opt_t menu_colors_opts[] =
+{
+    CFG_STR((char *) "normal_bg", NULL, CFGF_NONE),
+    CFG_STR((char *) "normal_fg", NULL, CFGF_NONE),
+    CFG_STR((char *) "focus_bg", NULL, CFGF_NONE),
+    CFG_STR((char *) "focus_fg", NULL, CFGF_NONE),
+    CFG_AWESOME_END()
+};
+cfg_opt_t menu_opts[] =
+{
+    CFG_INT((char *) "width", 0, CFGF_NONE),
+    CFG_INT((char *) "height", 0, CFGF_NONE),
+    CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
+    CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
+    CFG_STR((char *) "font", NULL, CFGF_NONE),
+    CFG_SEC((char *) "colors", menu_colors_opts, CFGF_NONE),
+    CFG_AWESOME_END()
+};
 cfg_opt_t awesome_opts[] =
 {
     CFG_SEC((char *) "screen", screen_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
     CFG_SEC((char *) "keys", keys_opts, CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_opts, CFGF_NONE),
+    CFG_SEC((char *) "menu", menu_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_AWESOME_END()
 };
 
