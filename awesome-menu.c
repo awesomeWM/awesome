@@ -191,9 +191,9 @@ get_last_word(char *text)
 }
 
 static void
-item_list_fill_file(void)
+item_list_fill_file(const char *directory)
 {
-    char cwd[PATH_MAX], *last_word;
+    char cwd[PATH_MAX];
     DIR *dir;
     struct dirent *dirinfo;
     item_t *item;
@@ -201,10 +201,8 @@ item_list_fill_file(void)
 
     item_list_wipe(&globalconf.items);
 
-    last_word = get_last_word(globalconf.text);
-
-    if(a_strlen(last_word))
-        a_strcpy(cwd, sizeof(cwd), last_word);
+    if(a_strlen(directory))
+        a_strcpy(cwd, sizeof(cwd), directory);
     else
         a_strcpy(cwd, sizeof(cwd), ".");
 
@@ -267,7 +265,7 @@ compute_match(void)
     if(len >= 1
        && (globalconf.text[len - 1] == '/'
            || globalconf.text[len - 1] == ' '))
-        item_list_fill_file();
+        item_list_fill_file(get_last_word(globalconf.text));
 
     last_word = get_last_word(globalconf.text);
 
@@ -614,9 +612,8 @@ main(int argc, char **argv)
                                       globalconf.sw->drawable);
 
 
-
     if(!item_list_fill_stdin())
-        item_list_fill_file();
+        item_list_fill_file(".");
 
     compute_match();
 
