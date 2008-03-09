@@ -324,7 +324,8 @@ compute_match(const char *word)
     }
     else
     {
-        item_list_fill_file(NULL);
+        if(a_strlen(globalconf.text))
+            item_list_fill_file(NULL);
         for(item = globalconf.items; item; item = item->next)
                 item->match = True;
     }
