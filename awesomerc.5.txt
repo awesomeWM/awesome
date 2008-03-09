@@ -780,6 +780,62 @@ EXAMPLES
 
 Check awesome's wiki: http://awesome.naquadah.org/wiki/
 
+Simple textbox example
+~~~~~~~~~~~~~~~~~~~~~~
+..............................................
+1. Add an include directive into ~/.awesomerc
+
+    screen 0 {
+        include(~/.awesome/bottom-status-bar)
+
+2. Create ~/.awesome/bottom-status-bar
+
+    statusbar "bottom" {
+        position = "bottom"
+
+        textbox "clock" {
+        }
+    }
+
+3. Check the configuration file for errors
+
+    $ awesome -k
+    Configuration file OK.
+
+    Note: If you see anything other than "Configuration file OK." you have a
+    typo somewhere.
+
+4. Create ~/bin/awesome-clock
+
+    #!/bin/bash
+    emitClock()
+    {
+        ctime=`date '+%A %d %B %Y %H:%M:%S'`;
+        echo "0 widget_tell clock text ${ctime}" | awesome-client
+    }
+    while true; do
+        emitClock
+        sleep 1;
+    done
+
+    Note: What we're saying is "awesome-client, tell widget 'clock' to set
+    it's 'text' property to '${ctime}'".
+
+5. Make your ~/bin/awesome-clock executable
+
+   $ chmod a+x ~/bin/awesome-clock
+
+6. Modify ~/.xinitrc
+
+    ~/bin/awesome-clock &
+    exec awesome
+
+7. Restart awesome
+
+8. If your didn't get what you were expecting, take a look at
+   ~/.xsession-errors
+..............................................
+
 
 SEE ALSO
 --------
@@ -789,6 +845,9 @@ awesome(1) awesome-client(1)
 AUTHORS
 -------
 This man page was written by Julien Danjou <julien@danjou.info> and Marco Candrian <mac@calmar.ws>.
+
+Chris Ciulla <chris dot ciulla at gmail dot com> modified and "enhanced" the
+"Simple Clock" example by anonymous for the "Simple Textbox Example".
 
 WWW
 ---
