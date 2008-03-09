@@ -505,6 +505,8 @@ This widget shows a graph.
     Foreground color in the center of the bar (as gradient).
 *fg_end*::
     Foreground color at the end of a bar (as gradient).
+*vertical_gradient*
+    If true, create a gradient from 0 > full instead of new > old values
 *style*::
     bottom (fills to bottom with fg), top, or line.
 *mouse*::
@@ -714,6 +716,7 @@ screen <integer> [MULTI]
             {
                 scale = <boolean> max = <float> style = <{bottom, top, line}>
                 fg = <color> fg_center = <color> fg_end = <color>
+                vertical_gradient = <boolean>
             }
             width = <integer>
             height = <float>

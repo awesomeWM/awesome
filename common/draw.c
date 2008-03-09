@@ -340,18 +340,17 @@ draw_graph_setup(DrawCtx *ctx)
  * \param pcolor_end color at the right
  */
 void
-draw_graph(DrawCtx *ctx, int x, int y, int w, int *from, int *to, int cur_index,
-           XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+draw_graph(DrawCtx *ctx, Area rect, int *from, int *to, int cur_index,
+           Area patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
-    int i;
+    int i, x, y, w;
     cairo_pattern_t *pat;
-    Area rect;
-    rect.x = x;
-    rect.y = y;
-    rect.width = w;
-    rect.height = 0;
 
-    pat = draw_setup_cairo_color_source(ctx, rect, pcolor, pcolor_center, pcolor_end);
+    pat = draw_setup_cairo_color_source(ctx, patt_rect, pcolor, pcolor_center, pcolor_end);
+
+    x = rect.x;
+    y = rect.y;
+    w = rect.width;
 
     i = -1;
     while(++i < w)
@@ -382,20 +381,18 @@ draw_graph(DrawCtx *ctx, int x, int y, int w, int *from, int *to, int cur_index,
  * \param pcolor_end color at the right
  */
 void
-draw_graph_line(DrawCtx *ctx, int x, int y, int w, int *to, int cur_index,
-           XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+draw_graph_line(DrawCtx *ctx, Area rect, int *to, int cur_index,
+                Area patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
-    int i;
+    int i, x, y, w;
     int flag = 0; /* used to prevent drawing a line from 0 to 0 values */
     cairo_pattern_t *pat;
 
-    Area rect;
-    rect.x = x;
-    rect.y = y;
-    rect.width = w;
-    rect.height = 0;
+    pat = draw_setup_cairo_color_source(ctx, patt_rect, pcolor, pcolor_center, pcolor_end);
 
-    pat = draw_setup_cairo_color_source(ctx, rect, pcolor, pcolor_center, pcolor_end);
+    x = rect.x;
+    y = rect.y;
+    w = rect.width;
 
     /* x-1 (on the border), paints *from* the last point (... not included itself) */
     /* makes sense when you assume there is already some line drawn to it. */
