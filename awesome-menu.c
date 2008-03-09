@@ -268,6 +268,7 @@ item_list_fill_file(const char *directory)
 static void
 complete(Bool reverse)
 {
+    char *word;
     int loop = 2;
     item_t *item = NULL;
     item_t *(*item_iter)(item_t **, item_t *) = item_list_next_cycle;
@@ -284,8 +285,8 @@ complete(Bool reverse)
     {
         if(item->match)
         {
-            /* XXX sizeof wrong */
-            a_strcpy(get_last_word(globalconf.text), ssizeof(globalconf.text), item->data);
+            word = get_last_word(globalconf.text);
+            a_strcpy(word, sizeof(globalconf.text) - (word - globalconf.text), item->data);
             globalconf.item_selected = item;
             return;
         }
