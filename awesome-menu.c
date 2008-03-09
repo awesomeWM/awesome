@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <pwd.h>
 #include <sys/types.h>
 
 #include <confuse.h>
@@ -224,24 +225,43 @@ get_last_word(char *text)
 static Bool
 item_list_fill_file(const char *directory)
 {
-    char cwd[PATH_MAX], *home;
+    char cwd[PATH_MAX], *home, *user;
+    const char *file;
     DIR *dir;
     struct dirent *dirinfo;
     item_t *item;
     ssize_t len;
+    struct passwd *passwd = NULL;
 
     item_list_wipe(&globalconf.items);
 
-    if(a_strlen(directory))
+    if(a_strlen(directory) > 1 && directory[0] == '~')
     {
-        if(!a_strncmp(directory, "~/", 2)
-           && (home = getenv("HOME")))
+        if(directory[1] == '/')
         {
-            a_strcpy(cwd, sizeof(cwd), home);
+            if((home = getenv("HOME")))
+                a_strcpy(cwd, sizeof(cwd), home);
             a_strcat(cwd, sizeof(cwd), directory + 1);
         }
         else
-            a_strcpy(cwd, sizeof(cwd), directory);
+        {
+            if(!(file = strchr(directory, '/')))
+                file = directory + a_strlen(directory);
+            len = (file - directory) + 1;
+            user = p_new(char, len);
+            a_strncpy(user, len, directory + 1, (file - directory) - 1);
+            if((passwd = getpwnam(user)))
+            {
+                a_strcpy(cwd, sizeof(cwd), passwd->pw_dir);
+                a_strcat(cwd, sizeof(cwd), file);
+                p_delete(&user);
+            }
+            else
+            {
+                p_delete(&user);
+                return False;
+            }
+        }
     }
     else
         a_strcpy(cwd, sizeof(cwd), ".");
@@ -656,7 +676,7 @@ main(int argc, char **argv)
 
 
     if(!item_list_fill_stdin())
-        item_list_fill_file(".");
+        item_list_fill_file(NULL);
 
     compute_match(NULL);
 
