@@ -193,6 +193,7 @@ main(int argc, char *argv[])
     struct sockaddr_un *addr;
     Client *c;
     XSetWindowAttributes wa;
+    ScreensInfo *si;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -264,14 +265,13 @@ main(int argc, char *argv[])
     ewmh_init_atoms();
 
     /* init screens struct */
-    screen_build_screens();
+    si = screensinfo_new(dpy);
+    globalconf.nscreen = si->nscreen;
+    globalconf.screens = p_new(VirtScreen, si->nscreen);
     focus_add_client(NULL);
 
     /* parse config */
     config_parse(confpath);
-
-    /* scan existing windows */
-    scan();
 
     /* init cursors */
     globalconf.cursor[CurNormal] = XCreateFontCursor(globalconf.display, XC_left_ptr);
@@ -281,12 +281,15 @@ main(int argc, char *argv[])
     /* for each virtual screen */
     for(screen = 0; screen < globalconf.nscreen; screen++)
     {
+        globalconf.screens[screen].geometry = si->geometry[screen];
         /* view at least one tag */
         tag_view(globalconf.screens[screen].tags, True);
 
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             statusbar_init(statusbar);
     }
+
+    screensinfo_delete(&si);
 
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
@@ -307,6 +310,9 @@ main(int argc, char *argv[])
         window_root_grabbuttons(screen);
         window_root_grabkeys(screen);
     }
+
+    /* scan existing windows */
+    scan();
 
     handler = p_new(event_handler *, LASTEvent);
     handler[ButtonPress] = event_handle_buttonpress;

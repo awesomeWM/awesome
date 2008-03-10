@@ -24,10 +24,17 @@
 
 #include "structs.h"
 
+typedef struct
+{
+    int nscreen;
+    Area *geometry;
+} ScreensInfo;
+
 Area screen_get_area(int, Statusbar *, Padding *);
 Area get_display_area(int, Statusbar *, Padding *);
 int screen_get_bycoord(int, int, int);
-void screen_build_screens(void);
+void screensinfo_delete(ScreensInfo **);
+ScreensInfo *screensinfo_new(Display *);
 int get_phys_screen(int);
 void move_client_to_screen(Client *, int, Bool);
 

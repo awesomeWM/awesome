@@ -145,64 +145,73 @@ screen_xsi_to_area(XineramaScreenInfo si)
 }
 
 void
-screen_build_screens(void)
+screensinfo_delete(ScreensInfo **si)
 {
-    XineramaScreenInfo *si;
+    p_delete(&(*si)->geometry);
+    p_delete(si);
+}
+
+ScreensInfo *
+screensinfo_new(Display *disp)
+{
+    ScreensInfo *si;
+    XineramaScreenInfo *xsi;
     int xinerama_screen_number, screen, screen_to_test;
     Bool drop;
 
-    if(XineramaIsActive(globalconf.display))
+    si = p_new(ScreensInfo, 1);
+
+    if(XineramaIsActive(disp))
     {
-        si = XineramaQueryScreens(globalconf.display, &xinerama_screen_number);
-        globalconf.screens = p_new(VirtScreen, xinerama_screen_number);
-        globalconf.nscreen = 0;
+        xsi = XineramaQueryScreens(disp, &xinerama_screen_number);
+        si->geometry = p_new(Area, xinerama_screen_number);
+        si->nscreen = 0;
 
         /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
         for(screen = 0; screen < xinerama_screen_number; screen++)
         {
             drop = False;
-            for(screen_to_test = 0; screen_to_test < globalconf.nscreen; screen_to_test++)
-                if(si[screen].x_org == globalconf.screens[screen_to_test].geometry.x
-                   && si[screen].y_org == globalconf.screens[screen_to_test].geometry.y)
+            for(screen_to_test = 0; screen_to_test < si->nscreen; screen_to_test++)
+                if(xsi[screen].x_org == si->geometry[screen_to_test].x
+                   && xsi[screen].y_org == si->geometry[screen_to_test].y)
                     {
                         /* we already have a screen for this area, just check if
                          * it's not bigger and drop it */
                         drop = True;
-                        globalconf.screens[screen_to_test].geometry.width =
-                            MAX(si[screen].width, si[screen_to_test].width);
-                        globalconf.screens[screen_to_test].geometry.height =
-                            MAX(si[screen].height, si[screen_to_test].height);
+                        si->geometry[screen_to_test].width =
+                            MAX(xsi[screen].width, xsi[screen_to_test].width);
+                        si->geometry[screen_to_test].height =
+                            MAX(xsi[screen].height, xsi[screen_to_test].height);
                     }
             if(!drop)
-                globalconf.screens[globalconf.nscreen++].geometry = screen_xsi_to_area(si[screen]);
+                si->geometry[si->nscreen++] = screen_xsi_to_area(xsi[screen]);
         }
 
         /* realloc smaller if xinerama_screen_number != screen registered */
-        if(xinerama_screen_number != globalconf.nscreen)
+        if(xinerama_screen_number != si->nscreen)
         {
-            VirtScreen *newscreens = p_new(VirtScreen, globalconf.nscreen);
-            memcpy(newscreens, globalconf.screens, globalconf.nscreen * sizeof(VirtScreen));
-            p_delete(&globalconf.screens);
-            globalconf.screens = newscreens;
+            Area *newgeometry = p_new(Area, si->nscreen);
+            memcpy(newgeometry, si->geometry, si->nscreen * sizeof(Area));
+            p_delete(&si->geometry);
+            si->geometry = newgeometry;
         }
 
-        XFree(si);
+        XFree(xsi);
     }
     else
     {
-        globalconf.nscreen = ScreenCount(globalconf.display);
-        globalconf.screens = p_new(VirtScreen, globalconf.nscreen);
-        for(screen = 0; screen < globalconf.nscreen; screen++)
+        si->nscreen = ScreenCount(disp);
+        si->geometry = p_new(Area, si->nscreen);
+        for(screen = 0; screen < si->nscreen; screen++)
         {
-            globalconf.screens[screen].geometry.x = 0;
-            globalconf.screens[screen].geometry.y = 0;
-            globalconf.screens[screen].geometry.width =
-                DisplayWidth(globalconf.display, screen);
-            globalconf.screens[screen].geometry.height =
-                DisplayHeight(globalconf.display, screen);
+            si->geometry[screen].x = 0;
+            si->geometry[screen].y = 0;
+            si->geometry[screen].width = DisplayWidth(disp, screen);
+            si->geometry[screen].height = DisplayHeight(disp, screen);
         }
     }
 
+    return si;
 }
 
 /** This returns the real X screen number for a logical
