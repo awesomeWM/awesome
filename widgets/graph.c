@@ -84,7 +84,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     int margin_top, left_offset;
-    int z, y, x, tmp;
+    int z, y, x, tmp, cur_index, test_index;
     Data *d = widget->data;
     Area rectangle, pattern_area;
 
@@ -99,7 +99,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    margin_top = (int) (widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y;
+    margin_top = (int) ((widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y);
     left_offset = widget->area.x + d->padding_left;
 
     if(!(d->box_height))
@@ -143,26 +143,41 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         /* draw style = top */
         for(z = 0; z < d->filltop_total; z++)
         {
+            cur_index = *(d->filltop_index[z]);
+
             for(y = 0; y < d->size; y++)
             {
                 /* draw this filltop data thing [z]. But figure out the part
                  * what shall be visible. Therefore find the next smaller value
-                 * on this index (draw_from) and to the point what the value
-                 * represents */
+                 * on this index (draw_from) - might be 0 (then draw from start) */
                 for(tmp = 0, x = 0; x < d->filltop_total; x++)
                 {
                     if (x == z) /* no need to compare with itself */
                         continue;
 
-                    /* FIXME index's can be seperate now (since widget_tell) - so
-                     * compare according offsets of the indexes.
-                     * so use 2 seperate indexes instead of y */
-                    if(d->filltop[x][y] > tmp && d->filltop[x][y] < d->filltop[z][y])
-                        tmp = d->filltop[x][y];
+                    /* current index's can be different (widget_tell might shift
+                     * some with a different frequenzy), so calculate
+                     * offset and compare accordingly finally */
+                    test_index = cur_index + (*(d->filltop_index[x]) - *(d->filltop_index[z]));
+
+                    if (test_index < 0)
+                        test_index = d->size + test_index; /* text_index is minus, since < 0 */
+                    else if(test_index >= d->size)
+                        test_index -= d->size;
+
+                    /* ... (test_)index to test for a smaller value found. */
+
+                    /* if such a smaller value (to not overdraw!) is there, store into 'tmp' */
+                    if(d->filltop[x][test_index] > tmp && d->filltop[x][test_index] < d->filltop[z][cur_index])
+                        tmp = d->filltop[x][test_index];
+
                 }
-                /* reverse values and draw also accordingly */
-                d->draw_from[y] = d->box_height - tmp; /* i.e. no smaller value -> from top of box */
-                d->draw_to[y] = d->box_height - d->filltop[z][y]; /* i.e. on full graph -> 0 = bottom */
+                /* reverse values (because drawing from top) */
+                d->draw_from[cur_index] = d->box_height - tmp; /* i.e. no smaller value -> from top of box */
+                d->draw_to[cur_index] = d->box_height - d->filltop[z][cur_index]; /* i.e. on full graph -> 0 = bottom */
+
+                if (--cur_index < 0) /* next index to compare to other values */
+                    cur_index = d->size - 1;
             }
             draw_graph(ctx, rectangle , d->draw_from, d->draw_to, *(d->filltop_index[z]), pattern_area,
                        &(d->filltop_color[z]), d->filltop_pcolor_center[z], d->filltop_pcolor_end[z]);
@@ -189,21 +204,28 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         /* draw style = bottom */
         for(z = 0; z < d->fillbottom_total; z++)
         {
+            cur_index = *(d->fillbottom_index[z]);
+
             for(y = 0; y < d->size; y++)
             {
-                /* draw this fillbottom data thing [z]. To the value what is is,
-                 * but from the next lower value of the other values to draw */
                 for(tmp = 0, x = 0; x < d->fillbottom_total; x++)
                 {
                     if (x == z)
                         continue;
 
-                    /* FIXME index's are seperate now (since widget_tell) - so
-                     * compare according offsets of the indexes. */
-                    if(d->fillbottom[x][y] > tmp && d->fillbottom[x][y] < d->fillbottom[z][y])
-                        tmp = d->fillbottom[x][y];
+                    test_index = cur_index + (*(d->fillbottom_index[x]) - *(d->fillbottom_index[z]));
+
+                    if (test_index < 0)
+                        test_index = d->size + test_index;
+                    else if(test_index >= d->size)
+                        test_index -= d->size;
+
+                    if(d->fillbottom[x][test_index] > tmp && d->fillbottom[x][test_index] < d->fillbottom[z][cur_index])
+                        tmp = d->fillbottom[x][test_index];
                 }
-                d->draw_from[y] = tmp;
+                d->draw_from[cur_index] = tmp;
+                if (--cur_index < 0)
+                    cur_index = d->size - 1;
             }
             draw_graph(ctx, rectangle, d->draw_from, d->fillbottom[z], *(d->fillbottom_index[z]), pattern_area,
                     &(d->fillbottom_color[z]), d->fillbottom_pcolor_center[z], d->fillbottom_pcolor_end[z]);
