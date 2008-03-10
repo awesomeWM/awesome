@@ -349,12 +349,12 @@ main(int argc, char *argv[])
         if(errno == EADDRINUSE)
         {
             if(unlink(addr->sun_path))
-                perror("error unlinking existing file");
+                warn("error unlinking existing file: %s\n", strerror(errno));
             if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
-                perror("error binding UNIX domain socket");
+                warn("error binding UNIX domain socket: %s\n", strerror(errno));
         }
         else
-            perror("error binding UNIX domain socket");
+            warn("error binding UNIX domain socket: %s\n", strerror(errno));
     }
 
     /* register function for signals */
