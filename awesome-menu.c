@@ -236,7 +236,9 @@ item_list_fill_file(const char *directory)
 
     item_list_wipe(&globalconf.items);
 
-    if(a_strlen(directory) > 1 && directory[0] == '~')
+    if(!directory)
+        a_strcpy(cwd, sizeof(cwd), "./");
+    else if(a_strlen(directory) > 1 && directory[0] == '~')
     {
         if(directory[1] == '/')
         {
@@ -265,7 +267,7 @@ item_list_fill_file(const char *directory)
         }
     }
     else
-        a_strcpy(cwd, sizeof(cwd), ".");
+        a_strcpy(cwd, sizeof(cwd), directory);
 
     if(!(dir = opendir(cwd)))
         return False;
@@ -534,8 +536,11 @@ handle_kpress(XKeyEvent *e)
       default:
         if(num && !iscntrl((int) buf[0]))
         {
-            buf[num] = '\0';
-            a_strncat(globalconf.text, sizeof(globalconf.text), buf, num);
+            if(buf[0] != '/' || globalconf.text[len - 1] != '/')
+            {
+                buf[num] = '\0';
+                a_strncat(globalconf.text, sizeof(globalconf.text), buf, num);
+            }
             compute_match(get_last_word(globalconf.text));
             redraw();
         }
@@ -551,13 +556,11 @@ handle_kpress(XKeyEvent *e)
       case XK_ISO_Left_Tab:
       case XK_Left:
         complete(True);
-        compute_match(get_last_word(globalconf.text));
         redraw();
         break;
       case XK_Right:
       case XK_Tab:
         complete(False);
-        compute_match(get_last_word(globalconf.text));
         redraw();
         break;
       case XK_Escape:
