@@ -66,7 +66,8 @@ struct Rule
     regex_t *prop_r;
     regex_t *tags_r;
     regex_t *xpropval_r;
-    Rule *next;
+    /** Next and previous rules */
+    Rule *prev, *next;
 };
 
 /** Key bindings */
@@ -77,7 +78,8 @@ struct Key
     KeyCode keycode;
     Uicb *func;
     char *arg;
-    Key *next;
+    /** Next and previous keys */
+    Key *prev, *next;
 };
 
 /** Mouse buttons bindings */
@@ -88,7 +90,8 @@ struct Button
     unsigned int button;
     Uicb *func;
     char *arg;
-    Button *next;
+    /** Next and previous buttons */
+    Button *prev, *next;
 };
 
 /** Widget tell status code */
@@ -138,8 +141,8 @@ struct Widget
         Bool needs_update;
         int flags;
     } cache;
-    /** Next widget */
-    Widget *next;
+    /** Next and previous widgets */
+    Widget *prev, *next;
 };
 
 /** Status bar */
@@ -161,8 +164,8 @@ struct Statusbar
     int screen;
     /** Widget list */
     Widget *widgets;
-    /** Next statusbar */
-    Statusbar *next;
+    /** Next and previous statusbars */
+    Statusbar *prev, *next;
 };
 
 /** Client type */
@@ -194,8 +197,8 @@ struct Client
     Bool skip;
     /** True if the client must be skipped from task bar client list */
     Bool skiptb;
-    /** Next client */
-    Client *next;
+    /** Next and previous clients */
+    Client *prev, *next;
     /** Window of the client */
     Window win;
     /** Client logical screen */
@@ -208,7 +211,8 @@ typedef struct client_node_t client_node_t;
 struct client_node_t
 {
     Client *client;
-    client_node_t *next;
+    /** Next and previous client_nodes */
+    client_node_t *prev, *next;
 };
 
 /** Tag type */
@@ -231,8 +235,8 @@ struct Tag
     int nmaster;
     /** Number of columns in tile layout */
     int ncol;
-    /** Next tag */
-    Tag *next;
+    /** Next and previous tags */
+    Tag *prev, *next;
 };
 
 /** tag_client_node type */
@@ -241,7 +245,8 @@ struct tag_client_node_t
 {
     Tag *tag;
     Client *client;
-    tag_client_node_t *next;
+    /** Next and previous tag_client_nodes */
+    tag_client_node_t *prev, *next;
 };
 
 /** Padding type */

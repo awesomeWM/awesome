@@ -35,7 +35,7 @@ struct Layout
 {
     char *image;
     LayoutArrange *arrange;
-    Layout *next;
+    Layout *prev, *next;
 };
 
 DO_SLIST(Layout, layout, p_delete);

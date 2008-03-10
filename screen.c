@@ -81,7 +81,7 @@ screen_get_area(int screen, Statusbar *statusbar, Padding *padding)
 Area
 get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 {
-    Area area = { 0, 0, 0, 0, NULL };
+    Area area = { 0, 0, 0, 0, NULL, NULL };
     Statusbar *sb;
 
     area.width = DisplayWidth(globalconf.display, screen);

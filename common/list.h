@@ -29,19 +29,25 @@
     {                                                                            \
         return item->next;                                                       \
     }                                                                            \
+                                                                                 \
     static inline type *prefix##_list_pop(type **list)                           \
     {                                                                            \
         if (*list)                                                               \
         {                                                                        \
             type *res = *list;                                                   \
             *list = res->next;                                                   \
+            if(res->next)                                                        \
+                res->next->prev = NULL;                                          \
             res->next = NULL;                                                    \
             return res;                                                          \
         }                                                                        \
         return NULL;                                                             \
     }                                                                            \
+                                                                                 \
     static inline void prefix##_list_push(type **list, type *item)               \
     {                                                                            \
+        if(*list)                                                                \
+            (*list)->prev = item;                                                \
         item->next = *list;                                                      \
         *list = item;                                                            \
     }                                                                            \
@@ -56,10 +62,14 @@
     static inline void prefix##_list_append(type **list, type *item)             \
     {                                                                            \
         if(*(list = prefix##_list_last(list)))                                   \
+        {                                                                        \
             (*list)->next = item;                                                \
+            item->prev = *list;                                                  \
+        }                                                                        \
         else                                                                     \
             (*list) = item;                                                      \
     }                                                                            \
+                                                                                 \
     static inline type *prefix##_list_rev(type *list)                            \
     {                                                                            \
         type *l = NULL;                                                          \
@@ -73,6 +83,7 @@
         *list = NULL;                                                            \
         return list;                                                             \
     }                                                                            \
+                                                                                 \
     static inline void prefix##_list_wipe(type **list)                           \
     {                                                                            \
         while (*list)                                                            \
@@ -81,62 +92,83 @@
             dtor(&item);                                                         \
         }                                                                        \
     }                                                                            \
-    static inline type *prefix##_list_prev(type **list, type *item)              \
+                                                                                 \
+    static inline type *prefix##_list_prev(type **list __attribute__ ((unused)), \
+                                           type *item)                           \
     {                                                                            \
-        type *tmp;                                                               \
-        if(*list == item) return NULL;                                           \
-        for(tmp = *list; tmp && tmp->next != item; tmp = tmp->next);             \
-        return tmp;                                                              \
+        return item->prev;                                                       \
     }                                                                            \
-    static inline void prefix##_list_swap(type **list, type *item1,              \
-                                          type *item2)                           \
+                                                                                 \
+    static inline void prefix##_list_swap(type **list, type *item1, type *item2) \
     {                                                                            \
         if(!item1 || !item2) return;                                             \
                                                                                  \
         type *i1n = item1->next;                                                 \
         type *i2n = item2->next;                                                 \
-        type * i1p = prefix##_list_prev(list, item1);                            \
-        type * i2p = prefix##_list_prev(list, item2);                            \
-        item1->next = i2n == item1 ? item2 : i2n;                                \
-        item2->next = i1n == item2 ? item1 : i1n;                                \
+        type *i1p = item1->prev;                                                 \
+        type *i2p = item2->prev;                                                 \
                                                                                  \
-                                                                                 \
-        if(i1p && i1p != item2)                                                  \
-            i1p->next = item2;                                                   \
-        if(i2p && i2p != item1)                                                  \
-            i2p->next = item1;                                                   \
-                                                                                 \
+        if(item1 == i2n)                                                         \
+        {                                                                        \
+            item1->next = item2;                                                 \
+            item2->prev = item1;                                                 \
+            if((item1->prev = i2p))                                              \
+                i2p->next = item1;                                               \
+            if((item2->next = i1n))                                              \
+                i1n->prev = item2;                                               \
+        }                                                                        \
+        else if(item2 == i1n)                                                    \
+        {                                                                        \
+            item2->next = item1;                                                 \
+            item1->prev = item2;                                                 \
+            if((item2->prev = i1p))                                              \
+                i1p->next = item2;                                               \
+            if((item1->next = i2n))                                              \
+                i2n->prev = item1;                                               \
+        }                                                                        \
+        else                                                                     \
+        {                                                                        \
+            if((item1->next = i2n))                                              \
+                item1->next->prev = item1;                                       \
+            if((item1->prev = i2p))                                              \
+                item1->prev->next = item1;                                       \
+            if((item2->prev = i1p))                                              \
+                item2->prev->next = item2;                                       \
+            if((item2->next = i1n))                                              \
+                item2->next->prev = item2;                                       \
+        }                                                                        \
         if(*list == item1)                                                       \
             *list = item2;                                                       \
         else if(*list == item2)                                                  \
             *list = item1;                                                       \
     }                                                                            \
+                                                                                 \
     static inline type *prefix##_list_prev_cycle(type **list, type *item)        \
     {                                                                            \
-        type *tmp = prefix##_list_prev(list, item);                              \
-        if(!tmp)                                                                 \
-            tmp = *prefix##_list_last(list);                                     \
-        return tmp;                                                              \
+        if(!item->prev)                                                          \
+            return *prefix##_list_last(list);                                    \
+        return item->prev;                                                       \
     }                                                                            \
+                                                                                 \
     static inline type *prefix##_list_next_cycle(type **list, type *item)        \
     {                                                                            \
-        if(item)                                                                 \
-        {                                                                        \
-            if(item->next)                                                       \
-                return item->next;                                               \
-            else                                                                 \
-                return *list;                                                    \
-        }                                                                        \
+        if(item->next)                                                           \
+            return item->next;                                                   \
+        else                                                                     \
+            return *list;                                                        \
         return NULL;                                                             \
     }                                                                            \
+                                                                                 \
     static inline void prefix##_list_detach(type **list, type *item)             \
     {                                                                            \
-        type *prev = prefix##_list_prev(list, item);                             \
-        if(prev)                                                                 \
-             prev->next = item->next;                                            \
         if(item == *list)                                                        \
             *list = item->next;                                                  \
+        else if(item->prev)                                                      \
+             item->prev->next = item->next;                                      \
+        if(item->next)                                                           \
+             item->next->prev = item->prev;                                      \
         item->next = NULL;                                                       \
+        item->prev = NULL;                                                       \
     }                                                                            \
 
 #endif

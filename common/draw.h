@@ -46,7 +46,7 @@ struct Area
     int y;
     int width;
     int height;
-    Area *next;
+    Area *prev, *next;
 };
 
 DO_SLIST(Area, area, p_delete);

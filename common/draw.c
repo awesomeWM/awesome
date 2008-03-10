@@ -531,7 +531,7 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 Area
 draw_get_image_size(const char *filename)
 {
-    Area size = { -1, -1, -1, -1, NULL };
+    Area size = { -1, -1, -1, -1, NULL, NULL };
     cairo_surface_t *surface;
     cairo_status_t cairo_st;
 

@@ -60,7 +60,7 @@ typedef struct item_t item_t;
 struct item_t
 {
     char *data;
-    item_t *next;
+    item_t *prev, *next;
     Bool match;
 };
 
@@ -363,7 +363,7 @@ compute_match(const char *word)
         if(a_strlen(globalconf.text))
             item_list_fill_file(NULL);
         for(item = globalconf.items; item; item = item->next)
-                item->match = True;
+            item->match = True;
     }
 }
 
@@ -389,7 +389,7 @@ static void
 redraw(void)
 {
     item_t *item;
-    Area geometry = { 0, 0, 0, 0, NULL };
+    Area geometry = { 0, 0, 0, 0, NULL, NULL };
     Bool selected_item_is_drawn = False;
     int len, prompt_len, x_of_previous_item;
 
@@ -604,7 +604,7 @@ main(int argc, char **argv)
     char *configfile = NULL, *cmd;
     ssize_t len;
     const char *shell = getenv("SHELL");
-    Area geometry = { 0, 0, 0, 0, NULL };
+    Area geometry = { 0, 0, 0, 0, NULL, NULL };
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},

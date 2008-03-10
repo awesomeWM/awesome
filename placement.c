@@ -64,7 +64,7 @@ Area
 placement_smart(Area geometry, int border, int screen)
 {
     Client *c;
-    Area newgeometry = { 0, 0, 0, 0, NULL };
+    Area newgeometry = { 0, 0, 0, 0, NULL, NULL };
     Area *screen_geometry, *arealist = NULL, *r;
     Bool found = False;
 
