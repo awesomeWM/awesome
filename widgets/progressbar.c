@@ -75,15 +75,15 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                                                  d->width,
                                                  offset,
                                                  widget->alignment);
-
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
+    /* TODO: maybe prevent (use Data-values) to calculate that stuff below over and over again */
     /* data for the first rectangle (data-bar) to draw */
     if(d->vertical)
     {
         pb_width = (int) ((d->width - d->padding - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
-        pb_height = (int) (widget->statusbar->height * d->height);
+        pb_height = (int) (widget->statusbar->height * d->height + 0.5);
         pb_y = widget->area.y + (int)((widget->statusbar->height - pb_height) / 2 + 0.5);
     }
     else /* horizontal */

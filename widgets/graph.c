@@ -99,11 +99,13 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    margin_top = (int) ((widget->statusbar->height * (1 - d->height)) / 2 + 0.5 + widget->area.y);
     left_offset = widget->area.x + d->padding_left;
 
+    /* box = the graph inside the rectangle */
     if(!(d->box_height))
         d->box_height = (int) (widget->statusbar->height * d->height + 0.5) - 2;
+
+    margin_top = (int)((widget->statusbar->height - (d->box_height + 2)) / 2 + 0.5) + widget->area.y;
 
     rectangle.x = left_offset;
     rectangle.y = margin_top;
