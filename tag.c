@@ -243,7 +243,7 @@ uicb_client_toggletag(int screen, char *arg)
 
         /* check that there's at least one tag selected for this client*/
         for(tag = globalconf.screens[screen].tags; tag
-            && !is_client_tagged(sel, tag); tag = tag->next)
+            && !is_client_tagged(sel, tag); tag = tag->next);
 
         if(!tag)
             tag_client(sel, target_tag);
