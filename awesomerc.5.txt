@@ -810,7 +810,7 @@ Simple textbox example
     while true
     do
       echo "0 widget_tell clock text `date`"
-      echo "" # a empty line flushes data inside awesome
+      echo "" # an empty line flushes data inside awesome
       sleep 1
     done | awesome-client
 
@@ -832,6 +832,70 @@ Simple textbox example
    ~/.xsession-errors or the terminal where X got started.
 ..............................................
 
+Simple progressbar example
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+..............................................
+
+1. Add an include directive into ~/.awesomerc
+
+    screen 0
+    {
+        include(~/.awesome/bottom-status-bar)
+    }
+
+2. Create ~/.awesome/bottom-status-bar
+
+    progressbar diskusage
+    {
+        data "disk"
+        {
+            bordercolor = "#006e96"
+            bg          = "#000000"
+            fg          = "#ff0000"
+            fg_center   = "#daaf0a"
+            fg_end      = "#00ff00"
+        }
+        width = 100
+        align = "left"
+    }
+
+3. Check the configuration file for errors
+
+    $ awesome -k
+    Configuration file OK.
+
+    Note: If you see anything other than "Configuration file OK," you have a
+    typo somewhere.
+
+4. Create ~/bin/awesome-diskusage
+
+    #!/bin/sh
+    while true; do
+        usage = `df /dev/sda5 | awk '/\/dev\/sda5/ { print 100-$5 }'`
+        echo "0 widget_tell diskusage data disk ${usage}"
+        echo "" # an empty line flushes data inside awesome
+        sleep 600;
+    done | awesome-client
+
+
+    Note: What we're saying is "awesome-client, tell widget 'diskusage' to
+    set it's 'data' property named 'disk' to ${usage}."
+
+5. Make ~/bin/awesome-diskusage executable
+
+$ chmod a+x ~/bin/awesome-diskusage
+
+6. Modify ~/.xinitrc
+
+    ~/bin/awesome-diskusage &
+    exec awesome
+
+7. Restart awesome
+
+8. If your didn't get what you were expecting, take a look at
+   ~/.xsession-errors or the terminal where X got started.
+..............................................
+
 
 SEE ALSO
 --------
@@ -841,7 +905,7 @@ awesome(1) awesome-client(1)
 AUTHORS
 -------
 This man page was written by Julien Danjou <julien@danjou.info>, Marco Candrian <mac@calmar.ws>
-and Chris Ciulla <chris.ciulla at gmail.com> (Simple textbox example).
+and Chris Ciulla <chris.ciulla@gmail.com> (Simple Examples).
 
 WWW
 ---
