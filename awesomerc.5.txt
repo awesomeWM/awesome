@@ -790,11 +790,10 @@ Simple textbox example
 
 2. Create ~/.awesome/bottom-status-bar
 
-    statusbar "bottom" {
+    statusbar "bottom"
+    {
         position = "bottom"
-
-        textbox "clock" {
-        }
+        textbox "clock" { }
     }
 
 3. Check the configuration file for errors
@@ -807,19 +806,16 @@ Simple textbox example
 
 4. Create ~/bin/awesome-clock
 
-    #!/bin/bash
-    emitClock()
-    {
-        ctime=`date '+%A %d %B %Y %H:%M:%S'`;
-        echo "0 widget_tell clock text ${ctime}" | awesome-client
-    }
-    while true; do
-        emitClock
-        sleep 1;
-    done
+    #!/bin/sh
+    while true
+    do
+      echo "0 widget_tell clock text `date`"
+      echo "" # a empty line flushes data inside awesome
+      sleep 1
+    done | awesome-client
 
     Note: What we're saying is "awesome-client, tell widget 'clock' to set
-    it's 'text' property to '${ctime}'".
+    it's 'text' property to date's output".
 
 5. Make your ~/bin/awesome-clock executable
 
@@ -833,7 +829,7 @@ Simple textbox example
 7. Restart awesome
 
 8. If your didn't get what you were expecting, take a look at
-   ~/.xsession-errors
+   ~/.xsession-errors or the terminal where X got started.
 ..............................................
 
 
@@ -844,10 +840,8 @@ awesome(1) awesome-client(1)
 
 AUTHORS
 -------
-This man page was written by Julien Danjou <julien@danjou.info> and Marco Candrian <mac@calmar.ws>.
-
-Chris Ciulla <chris dot ciulla at gmail dot com> modified and "enhanced" the
-"Simple Clock" example by anonymous for the "Simple Textbox Example".
+This man page was written by Julien Danjou <julien@danjou.info>, Marco Candrian <mac@calmar.ws>
+and Chris Ciulla <chris.ciulla at gmail.com> (Simple textbox example).
 
 WWW
 ---
