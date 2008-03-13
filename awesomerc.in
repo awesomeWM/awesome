@@ -168,6 +168,27 @@ keys
     key
     {
         modkey = {"Mod4"}
+        key = "F1"
+        command = "spawn"
+        arg = "for i in /usr/share/man/man?;do ls $i; done | cut -d. -f1 | awesome-menu -e 'xterm -e man ' 'See manual page for:'"
+    }
+    key
+    {
+        modkey = {"Mod4"}
+        key = "F2"
+        command = "spawn"
+        arg = "ls /usr/bin | awesome-menu -e 'exec ' Execute:"
+    }
+    key
+    {
+        modkey = {"Mod4"}
+        key = "F3"
+        command = "spawn"
+        arg = "cut -d' ' -f1 ~/.ssh/known_hosts | cut -d, -f1 | awesome-menu -e 'xterm -e ssh ' 'ssh to:'"
+    }
+    key
+    {
+        modkey = {"Mod4"}
         key = "Return"
         command = "spawn"
         arg = "exec xterm"

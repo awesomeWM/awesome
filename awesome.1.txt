@@ -75,8 +75,14 @@ DEFAULTS MOUSE BINDINGS
 
 DEFAULTS KEY BINDINGS
 ---------------------
+*Mod4 + F1*::
+    Spawn awesome-menu to read manual pages.
+*Mod4 + F2*::
+    Spawn awesome-menu to execute a program.
+*Mod4 + F3*::
+    Spawn awesome-menu to ssh to an host.
 *Mod4 + Return*::
-    Spawn xterm.
+    Spawn terminal emulator.
 *Mod4 + space*::
     Switch to next layout.
 *Mod4 \+ Shift \+ space*::
