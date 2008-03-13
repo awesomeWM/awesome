@@ -31,14 +31,12 @@
 
 #include <confuse.h>
 
-#include <X11/Xlib.h>
-#include <X11/extensions/Xinerama.h>
-
 #include "common/swindow.h"
 #include "common/util.h"
 #include "common/version.h"
 #include "common/configopts.h"
 #include "common/xutil.h"
+#include "common/xscreen.c"
 
 #define PROGNAME "awesome-menu"
 
@@ -603,11 +601,14 @@ main(int argc, char **argv)
 {
     Display *disp;
     XEvent ev;
-    int opt, ret;
+    int opt, ret, x, y, i;
     char *configfile = NULL, *cmd;
     ssize_t len;
     const char *shell = getenv("SHELL");
     Area geometry = { 0, 0, 0, 0, NULL, NULL };
+    ScreensInfo *si;
+    unsigned int ui;
+    Window dummy;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -652,36 +653,25 @@ main(int argc, char **argv)
     if(!geometry.height)
         geometry.height = globalconf.font->height * 1.5;
 
-    /* XXX this must be replace with a common/ infra */
-    if(XineramaIsActive(disp))
+    si = screensinfo_new(disp);
+    if(si->xinerama_is_active)
     {
-        XineramaScreenInfo *si;
-        int xinerama_screen_number, i, x, y;
-        unsigned int ui;
-        Window dummy;
-
         XQueryPointer(disp, RootWindow(disp, DefaultScreen(disp)),
                       &dummy, &dummy, &x, &y, &i, &i, &ui);
 
-        si = XineramaQueryScreens(disp, &xinerama_screen_number);
-
-        /* XXX use screen_get_bycoord() !!! */
-        for(i = 0; i < xinerama_screen_number; i++)
-            if((x < 0 || (x >= si[i].x_org && x < si[i].x_org + si[i].width))
-               && (y < 0 || (y >= si[i].y_org && y < si[i].y_org + si[i].height)))
-                break;
+        i = screen_get_bycoord(si, 0, x, y);
 
         if(!geometry.x)
-            geometry.x = si[i].x_org;
+            geometry.x = si->geometry[i].x;
         if(!geometry.y)
-            geometry.y = si[i].y_org;
+            geometry.y = si->geometry[i].y;
         if(!geometry.width)
-            geometry.width = si[i].width;
-
-        XFree(si);
+            geometry.width = si->geometry[i].width;
     }
     else if(!geometry.width)
         geometry.width = DisplayWidth(disp, DefaultScreen(disp));
+
+    screensinfo_delete(&si);
 
     /* Create the window */
     globalconf.sw = simplewindow_new(disp, DefaultScreen(disp),
