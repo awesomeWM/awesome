@@ -69,7 +69,7 @@ item_delete(item_t **item)
     p_delete(item);
 }
 
-DO_SLIST(item_t, item, item_delete);
+DO_SLIST(item_t, item, item_delete)
 
 /** awesome-run global configuration structure */
 typedef struct

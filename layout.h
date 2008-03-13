@@ -38,7 +38,7 @@ struct Layout
     Layout *prev, *next;
 };
 
-DO_SLIST(Layout, layout, p_delete);
+DO_SLIST(Layout, layout, p_delete)
 
 int layout_refresh(void);
 Layout * layout_get_current(int);

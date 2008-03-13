@@ -31,7 +31,7 @@ Bool tag_match_rule(Tag *, Rule *);
 Fuzzy rules_get_fuzzy_from_str(const char *);
 Rule * rule_matching_client(Client *);
 
-DO_SLIST(Rule, rule, p_delete);
+DO_SLIST(Rule, rule, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

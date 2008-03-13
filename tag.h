@@ -48,8 +48,8 @@ Uicb uicb_tag_viewnext;
 Uicb uicb_tag_viewprev;
 Uicb uicb_tag_create;
 
-DO_SLIST(Tag, tag, p_delete);
-DO_SLIST(tag_client_node_t, tag_client_node, p_delete);
+DO_SLIST(Tag, tag, p_delete)
+DO_SLIST(tag_client_node_t, tag_client_node, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

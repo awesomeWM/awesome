@@ -31,7 +31,7 @@ Client * focus_get_current_client(int);
 Uicb uicb_focus_history;
 Uicb uicb_focus_client_byname;
 
-DO_SLIST(client_node_t, client_node, p_delete);
+DO_SLIST(client_node_t, client_node, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

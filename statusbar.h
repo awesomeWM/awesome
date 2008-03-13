@@ -32,7 +32,7 @@ Position statusbar_get_position_from_str(const char *);
 
 Uicb uicb_statusbar_toggle;
 
-DO_SLIST(Statusbar, statusbar, p_delete);
+DO_SLIST(Statusbar, statusbar, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

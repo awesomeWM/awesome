@@ -50,7 +50,7 @@ WidgetConstructor tasklist_new;
 
 Uicb uicb_widget_tell;
 
-DO_SLIST(Widget, widget, p_delete);
+DO_SLIST(Widget, widget, p_delete)
 
 #endif
 

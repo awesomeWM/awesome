@@ -49,7 +49,7 @@ struct Area
     Area *prev, *next;
 };
 
-DO_SLIST(Area, area, p_delete);
+DO_SLIST(Area, area, p_delete)
 
 #define AREA_LEFT(a)    ((a).x)
 #define AREA_TOP(a)     ((a).y)

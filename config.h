@@ -24,8 +24,8 @@
 
 #include "structs.h"
 
-DO_SLIST(Key, key, p_delete);
-DO_SLIST(Button, button, p_delete);
+DO_SLIST(Key, key, p_delete)
+DO_SLIST(Button, button, p_delete)
 
 void config_parse(const char *);
 

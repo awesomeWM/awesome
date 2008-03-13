@@ -55,7 +55,7 @@ Uicb uicb_client_togglefloating;
 Uicb uicb_client_togglescratch;
 Uicb uicb_client_setscratch;
 
-DO_SLIST(Client, client, p_delete);
+DO_SLIST(Client, client, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
