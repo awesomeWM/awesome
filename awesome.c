@@ -57,6 +57,7 @@
 #include "common/util.h"
 #include "common/version.h"
 #include "common/configopts.h"
+#include "common/xscreen.h"
 
 static int (*xerrorxlib) (Display *, XErrorEvent *);
 static Bool running = True;
@@ -86,7 +87,7 @@ scan()
                     continue;
                 if(wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState)
                 {
-                    real_screen = screen_get_bycoord(screen, wa.x, wa.y);
+                    real_screen = screen_get_bycoord(globalconf.display, screen, wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }
@@ -98,7 +99,7 @@ scan()
                 if(XGetTransientForHint(globalconf.display, wins[i], &d1)
                    && (wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState))
                 {
-                    real_screen = screen_get_bycoord(screen, wa.x, wa.y);
+                    real_screen = screen_get_bycoord(globalconf.display, screen, wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }

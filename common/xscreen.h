@@ -1,5 +1,5 @@
 /*
- * screen.h - screen management header
+ * commeon/xscreen.h - commeon X screen management header
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -19,18 +19,20 @@
  *
  */
 
-#ifndef AWESOME_SCREEN_H
-#define AWESOME_SCREEN_H
+#ifndef AWESOME_COMMON_XSCREEN_H
+#define AWESOME_COMMON_XSCREEN_H
 
-#include "structs.h"
+#include "common/draw.h"
 
-Area screen_get_area(int, Statusbar *, Padding *);
-Area get_display_area(int, Statusbar *, Padding *);
-int get_phys_screen(int);
-void move_client_to_screen(Client *, int, Bool);
+typedef struct
+{
+    int nscreen;
+    Area *geometry;
+} ScreensInfo;
 
-Uicb uicb_screen_focus;
-Uicb uicb_client_movetoscreen;
+int screen_get_bycoord(Display *, int, int, int);
+void screensinfo_delete(ScreensInfo **);
+ScreensInfo *screensinfo_new(Display *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

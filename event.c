@@ -38,6 +38,7 @@
 #include "rules.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
+#include "common/xscreen.h"
 
 extern AwesomeConf globalconf;
 
@@ -144,7 +145,7 @@ event_handle_buttonpress(XEvent *e)
                                 &wdummy, &x, &y, &i,
                                 &i, &udummy))
             {
-                screen = screen_get_bycoord(screen, x, y);
+                screen = screen_get_bycoord(globalconf.display, screen, x, y);
                 event_handle_mouse_button_press(screen, ev->button, ev->state,
                                           globalconf.buttons.root, NULL);
                 return;
@@ -320,7 +321,7 @@ event_handle_keypress(XEvent *e)
              * only screen in Xinerama, so we can ask for a better screen
              * number with screen_get_bycoord: we'll get 0 in Zaphod mode
              * so it's the same, or maybe the real Xinerama screen */
-            screen = screen_get_bycoord(screen, x, y);
+            screen = screen_get_bycoord(globalconf.display, screen, x, y);
             break;
         }
 
@@ -383,7 +384,7 @@ event_handle_maprequest(XEvent *e)
         if(XineramaIsActive(globalconf.display)
            && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
                             &dummy, &dummy, &x, &y, &d, &d, &m))
-            screen = screen_get_bycoord(screen, x, y);
+            screen = screen_get_bycoord(globalconf.display, screen, x, y);
         else
              for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
 

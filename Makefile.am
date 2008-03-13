@@ -111,17 +111,23 @@ AM_CPPFLAGS = $(XFT_CFLAGS) $(X_CFLAGS) $(CAIRO_CFLAGS) $(CONFUSE_CFLAGS) $(XRAN
 
 bin_PROGRAMS += awesome
 awesome_SOURCES = \
+	common/socket.c common/socket.h \
+	common/swindow.c common/swindow.h \
+	common/version.c common/version.h \
+	common/util.c common/util.h \
+	common/xutil.c common/xutil.h \
+	common/configopts.h common/configopts.c \
+	common/xscreen.h common/xscreen.c \
+	common/list.h \
+	structs.h \
 	client.c client.h \
 	placement.c placement.h \
-	common/version.c common/version.h \
 	focus.c focus.h \
 	common/draw.c common/draw.h \
 	event.c event.h \
 	layout.c layout.h \
 	awesome.c awesome.h \
 	tag.c tag.h \
-	common/util.c common/util.h \
-	common/xutil.c common/xutil.h \
 	config.c config.h \
 	screen.c screen.h \
 	statusbar.c statusbar.h \
@@ -129,12 +135,8 @@ awesome_SOURCES = \
 	window.c window.h \
 	rules.c rules.h \
 	mouse.c mouse.h \
-	common/socket.c common/socket.h \
-	common/swindow.c common/swindow.h \
 	widget.c widget.h \
-	ewmh.c ewmh.h \
-	common/list.h structs.h \
-	common/configopts.h common/configopts.c
+	ewmh.c ewmh.h
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XRANDR_LIBS) $(XINERAMA_LIBS)
