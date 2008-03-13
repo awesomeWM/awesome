@@ -46,10 +46,6 @@ typedef enum
     Auto
 } Fuzzy;
 
-/** Common colors */
-enum
-{ ColBorder, ColFG, ColBG, ColLast };
-
 /** Cursors */
 enum
 { CurNormal, CurResize, CurMove, CurLast };
@@ -286,12 +282,13 @@ typedef struct
     Bool new_become_master;
     /** True if we need to arrange() */
     Bool need_arrange;
-    /** Normal colors */
-    XColor colors_normal[ColLast];
-    /** Selected colors */
-    XColor colors_selected[ColLast];
-    /** Urgency colors */
-    XColor colors_urgent[ColLast];
+    /** Colors */
+    struct
+    {
+        colors_ctx_t normal;
+        colors_ctx_t focus;
+        colors_ctx_t urgent;
+    } colors;
     /** Transparency of unfocused clients */
     int opacity_unfocused;
     /** Tag list */
@@ -304,8 +301,6 @@ typedef struct
     Padding padding;
     /** Font */
     XftFont *font;
-    /** Draw shadow under text */
-    int shadow_offset;
 } VirtScreen;
 
 /** Main configuration structure */

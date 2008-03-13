@@ -152,7 +152,7 @@ client_unfocus(Client *c)
     if(globalconf.screens[c->screen].opacity_unfocused != -1)
         window_settrans(c->win, globalconf.screens[c->screen].opacity_unfocused);
     XSetWindowBorder(globalconf.display, c->win,
-                     globalconf.screens[c->screen].colors_normal[ColBorder].pixel);
+                     globalconf.screens[c->screen].colors.normal.border.pixel);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     focus_add_client(NULL);
 }
@@ -200,7 +200,7 @@ client_focus(Client *c, int screen, Bool raise)
         if(globalconf.screens[c->screen].opacity_unfocused != -1)
             window_settrans(c->win, -1);
         XSetWindowBorder(globalconf.display, c->win,
-                         globalconf.screens[screen].colors_selected[ColBorder].pixel);
+                         globalconf.screens[screen].colors.focus.border.pixel);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
         if(raise)
         {
@@ -281,7 +281,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* Set windows borders */
     wc.border_width = c->border;
     XConfigureWindow(globalconf.display, w, CWBorderWidth, &wc);
-    XSetWindowBorder(globalconf.display, w, globalconf.screens[screen].colors_normal[ColBorder].pixel);
+    XSetWindowBorder(globalconf.display, w, globalconf.screens[screen].colors.normal.border.pixel);
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 

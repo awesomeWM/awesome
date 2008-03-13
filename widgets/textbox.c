@@ -30,8 +30,7 @@ typedef struct
     char *text;
     int width;
     Alignment align;
-    XColor fg;
-    XColor bg;
+    colors_ctx_t colors;
 } Data;
 
 static int
@@ -57,9 +56,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    draw_text(ctx, widget->area, d->align, 0, widget->font, d->text,
-              globalconf.screens[widget->statusbar->screen].shadow_offset,
-              d->fg, d->bg);
+    draw_text(ctx, widget->area, d->align, 0, widget->font, d->text, d->colors);
 
     return widget->area.width;
 }
@@ -80,12 +77,12 @@ textbox_tell(Widget *widget, char *property, char *command)
         d->text = a_strdup(command);
     }
     else if(!a_strcmp(property, "fg"))
-        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->fg))
+        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->colors.fg))
             return WIDGET_NOERROR;
         else
             return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "bg"))
-        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->bg))
+        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->colors.bg))
             return WIDGET_NOERROR;
         else
             return WIDGET_ERROR_FORMAT_COLOR;
@@ -128,14 +125,14 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     if((buf = cfg_getstr(config, "fg")))
-        draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf, &d->fg);
+        draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf, &d->colors.fg);
     else
-        d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
+        d->colors.fg = globalconf.screens[statusbar->screen].colors.normal.fg;
 
     if((buf = cfg_getstr(config, "bg")))
-        draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf, &d->bg);
+        draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf, &d->colors.bg);
     else
-        d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
+        d->colors.bg = globalconf.screens[statusbar->screen].colors.normal.bg;
 
     d->width = cfg_getint(config, "width");
     d->align = draw_get_align(cfg_getstr(config, "text_align"));

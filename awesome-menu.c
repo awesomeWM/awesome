@@ -82,14 +82,12 @@ typedef struct
     DrawCtx *ctx;
     /** Font to use */
     XftFont *font;
-    /** Draw shadow_offset under text */
-    Bool shadow_offset;
-    /** Foreground color */
-    XColor fg;
-    /** Background color */
-    XColor bg;
-    /** List background */
-    XColor fg_focus, bg_focus;
+    /** Colors */
+    struct
+    {
+        colors_ctx_t normal;
+        colors_ctx_t focus;
+    } colors;
     /** Numlock mask */
     unsigned int numlockmask;
     /** The text */
@@ -161,25 +159,25 @@ config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
        opt = cfg_getstr(cfg_colors, "normal_fg");
 
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   opt, &globalconf.fg);
+                   opt, &globalconf.colors.normal.fg);
 
     if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "normal_bg")))
        opt = cfg_getstr(cfg_colors, "normal_bg");
 
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   opt, &globalconf.bg);
+                   opt, &globalconf.colors.normal.bg);
 
     if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "focus_fg")))
        opt = cfg_getstr(cfg_colors, "focus_fg");
 
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   opt, &globalconf.fg_focus);
+                   opt, &globalconf.colors.focus.fg);
 
     if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "focus_bg")))
        opt = cfg_getstr(cfg_colors, "focus_bg");
 
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   opt, &globalconf.bg_focus);
+                   opt, &globalconf.colors.focus.bg);
 
     /* font */
     if(!cfg_menu || !(opt = cfg_getstr(cfg_menu, "font")))
@@ -188,7 +186,8 @@ config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
     globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),
                                       opt);
 
-    globalconf.shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
+    globalconf.colors.normal.shadow_offset =
+        globalconf.colors.focus.shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
 
     if(cfg_menu)
     {
@@ -376,13 +375,11 @@ draw_item(item_t *item, Area geometry)
     if(item == globalconf.item_selected)
         draw_text(globalconf.ctx, geometry, AlignLeft,
                   MARGIN / 2, globalconf.font, item->data,
-                  globalconf.shadow_offset,
-                  globalconf.fg_focus, globalconf.bg_focus);
+                  globalconf.colors.focus);
     else
         draw_text(globalconf.ctx, geometry, AlignLeft,
                   MARGIN / 2, globalconf.font, item->data,
-                  globalconf.shadow_offset,
-                  globalconf.fg, globalconf.bg);
+                  globalconf.colors.normal);
 }
 
 static void
@@ -400,8 +397,7 @@ redraw(void)
     {
         draw_text(globalconf.ctx, geometry, AlignLeft,
                   MARGIN, globalconf.font, globalconf.prompt,
-                  globalconf.shadow_offset,
-                  globalconf.fg_focus, globalconf.bg_focus);
+                  globalconf.colors.focus);
 
         len = MARGIN * 2 + draw_textwidth(globalconf.display, globalconf.font, globalconf.prompt);
         geometry.x += len;
@@ -410,8 +406,7 @@ redraw(void)
 
     draw_text(globalconf.ctx, geometry, AlignLeft,
               MARGIN, globalconf.font, globalconf.text,
-              globalconf.shadow_offset,
-              globalconf.fg, globalconf.bg);
+              globalconf.colors.normal);
 
     len = MARGIN * 2 + MAX(draw_textwidth(globalconf.display, globalconf.font, globalconf.text),
                            geometry.width / 20);
@@ -457,11 +452,11 @@ redraw(void)
         {
             geometry.x = prompt_len;
             geometry.width = x_of_previous_item - prompt_len;
-            draw_rectangle(globalconf.ctx, geometry, True, globalconf.bg);
+            draw_rectangle(globalconf.ctx, geometry, True, globalconf.colors.normal.bg);
         }
     }
     else if(geometry.width)
-        draw_rectangle(globalconf.ctx, geometry, True, globalconf.bg);
+        draw_rectangle(globalconf.ctx, geometry, True, globalconf.colors.normal.bg);
 
     simplewindow_refresh_drawable(globalconf.sw, DefaultScreen(globalconf.display));
     XSync(globalconf.display, False);

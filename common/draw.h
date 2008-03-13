@@ -80,6 +80,20 @@ area_get_intersect_area(Area a, Area b)
 
 typedef struct
 {
+    /** Foreground color */
+    XColor fg;
+    /** Background color */
+    XColor bg;
+    /** Shadow color */
+    XColor shadow;
+    /** Border color */
+    XColor border;
+    /** Shadow offset */
+    int shadow_offset;
+} colors_ctx_t;
+
+typedef struct
+{
     Display *display;
     Drawable drawable;
     Visual *visual;
@@ -94,7 +108,7 @@ typedef struct
 DrawCtx *draw_context_new(Display *, int, int, int, Drawable);
 void draw_context_delete(DrawCtx *);
 
-void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, char *, int, XColor fg, XColor bg);
+void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, char *, colors_ctx_t);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
 void draw_rectangle_gradient(DrawCtx *, Area, Bool, Area, XColor *, XColor *, XColor *);
 

@@ -131,15 +131,14 @@ draw_text(DrawCtx *ctx,
           Alignment align,
           int padding,
           XftFont *font, char *text,
-          int shadow_offset,
-          XColor fg, XColor bg)
+          colors_ctx_t colors_ctx)
 {
     int nw = 0, x, y;
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
     cairo_font_face_t *font_face;
 
-    draw_rectangle(ctx, area, True, bg);
+    draw_rectangle(ctx, area, True, colors_ctx.bg);
 
     if(!(len = olen = a_strlen(text)))
         return;
@@ -195,14 +194,20 @@ draw_text(DrawCtx *ctx,
         break;
     }
 
-    if(shadow_offset > 0)
+    if(colors_ctx.shadow_offset > 0)
     {
-        cairo_set_source_rgb(ctx->cr, 0.0, 0.0, 0.0);
-        cairo_move_to(ctx->cr, x + shadow_offset, y + shadow_offset);
+        cairo_set_source_rgb(ctx->cr,
+                             colors_ctx.shadow.red / 65535.0,
+                             colors_ctx.shadow.green / 65535.0,
+                             colors_ctx.shadow.blue / 65535.0);
+        cairo_move_to(ctx->cr, x + colors_ctx.shadow_offset, y + colors_ctx.shadow_offset);
         cairo_show_text(ctx->cr, buf);
     }
 
-    cairo_set_source_rgb(ctx->cr, fg.red / 65535.0, fg.green / 65535.0, fg.blue / 65535.0);
+    cairo_set_source_rgb(ctx->cr,
+                         colors_ctx.fg.red / 65535.0,
+                         colors_ctx.fg.green / 65535.0,
+                         colors_ctx.fg.blue / 65535.0);
     cairo_move_to(ctx->cr, x, y);
     cairo_show_text(ctx->cr, buf);
 

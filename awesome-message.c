@@ -49,12 +49,8 @@ typedef struct
     Display *display;
     /** Font to use */
     XftFont *font;
-    /** Foreground color */
-    XColor fg;
-    /** Background color */
-    XColor bg;
-    /** Draw shadow_offset under text */
-    Bool shadow_offset;
+    /** Colors */
+    colors_ctx_t colors;
 } AwesomeMsgConf;
 
 static AwesomeMsgConf globalconf;
@@ -108,12 +104,12 @@ config_parse(const char *confpatharg)
     /* colors */
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
                    cfg_getstr(cfg_colors, "normal_fg"),
-                   &globalconf.fg);
+                   &globalconf.colors.fg);
     draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
                    cfg_getstr(cfg_colors, "normal_bg"),
-                   &globalconf.bg);
+                   &globalconf.colors.bg);
 
-    globalconf.shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
+    globalconf.colors.shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
 
     /* font */
     globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),
@@ -208,7 +204,7 @@ main(int argc, char **argv)
     geometry.x = geometry.y = 0;
     draw_text(ctx, geometry, AlignRight,
               0, globalconf.font, argv[optind],
-              globalconf.shadow_offset, globalconf.fg, globalconf.bg);
+              globalconf.colors);
 
     if(icon_geometry.width > 0 && icon_geometry.height > 0)
         draw_image(ctx, 0, (geometry.height / 2) - (globalconf.font->height / 2),

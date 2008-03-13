@@ -106,7 +106,7 @@ statusbar_draw(Statusbar *statusbar)
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
     draw_rectangle(ctx, rectangle, True,
-                   globalconf.screens[statusbar->screen].colors_normal[ColBG]);
+                   globalconf.screens[statusbar->screen].colors.normal.bg);
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)

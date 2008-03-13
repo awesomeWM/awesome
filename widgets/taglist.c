@@ -68,7 +68,7 @@ taglist_draw(Widget *widget,
     Client *sel = globalconf.focus->client;
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int w = 0, flagsize;
-    XColor *colors;
+    colors_ctx_t colors;
     Area area;
 
     flagsize = (vscreen.font->height + 2) / 3;
@@ -93,11 +93,11 @@ taglist_draw(Widget *widget,
     {
         w = draw_textwidth(ctx->display, vscreen.font, tag->name) + vscreen.font->height;
         if(tag->selected)
-            colors = vscreen.colors_selected;
+            colors = vscreen.colors.focus;
         else if(isurgent(tag))
-            colors = vscreen.colors_urgent;
+            colors = vscreen.colors.urgent;
         else
-            colors = vscreen.colors_normal;
+            colors = vscreen.colors.normal;
         area.x = widget->area.x + widget->area.width;
         area.y = widget->area.y;
         area.width = w;
@@ -107,9 +107,8 @@ taglist_draw(Widget *widget,
                   vscreen.font->height / 2,
                   vscreen.font,
                   tag->name,
-                  vscreen.shadow_offset,
-                  colors[ColFG],
-                  colors[ColBG]);
+                  colors);
+
         if(isoccupied(tag))
         {
             Area rectangle = { widget->area.x + widget->area.width,
@@ -117,7 +116,7 @@ taglist_draw(Widget *widget,
                                flagsize,
                                flagsize,
                                NULL, NULL };
-            draw_rectangle(ctx, rectangle, sel && is_client_tagged(sel, tag), colors[ColFG]);
+            draw_rectangle(ctx, rectangle, sel && is_client_tagged(sel, tag), colors.fg);
         }
         widget->area.width += w;
     }

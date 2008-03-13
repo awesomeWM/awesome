@@ -43,10 +43,11 @@ typedef struct
     ShowClient show;
     Bool show_icons;
     Alignment align;
-    XColor fg_sel;
-    XColor bg_sel;
-    XColor fg;
-    XColor bg;
+    struct
+    {
+        colors_ctx_t normal;
+        colors_ctx_t focus;
+    } colors;
 } Data;
 
 static inline Bool
@@ -121,9 +122,9 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 area.height = widget->statusbar->height;
                 area.width = box_width;
                 if(sel == c)
-                    draw_rectangle(ctx, area, True, d->bg_sel);
+                    draw_rectangle(ctx, area, True, d->colors.focus.bg);
                 else
-                    draw_rectangle(ctx, area, True, d->bg);
+                    draw_rectangle(ctx, area, True, d->colors.normal.bg);
 
                 if((r = rule_matching_client(c)) && r->icon)
                 {
@@ -165,13 +166,11 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
             if(sel == c)
                 draw_text(ctx, area, d->align,
                           widget->font->height / 2, widget->font, c->name,
-                          globalconf.screens[widget->statusbar->screen].shadow_offset,
-                          d->fg_sel, d->bg_sel);
+                          d->colors.focus);
             else
                 draw_text(ctx, area, d->align,
                           widget->font->height / 2, widget->font, c->name,
-                          globalconf.screens[widget->statusbar->screen].shadow_offset,
-                          d->fg, d->bg);
+                          d->colors.normal);
 
             if(c == globalconf.scratch.client)
             {
@@ -179,13 +178,13 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 area.y = widget->area.y;
                 area.width = (widget->font->height + 2) / 3;
                 area.height = (widget->font->height + 2) / 3;
-                draw_rectangle(ctx, area, c->isfloating, d->fg);
+                draw_rectangle(ctx, area, c->isfloating, d->colors.normal.fg);
             }
             else if(c->isfloating || c->ismax)
                 draw_circle(ctx, widget->area.x + icon_width + box_width * i,
                             widget->area.y,
                             (widget->font->height + 2) / 4,
-                            c->ismax, d->fg);
+                            c->ismax, d->colors.normal.fg);
             i++;
         }
 
@@ -279,24 +278,24 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     if((buf = cfg_getstr(config, "fg")))
-        draw_color_new(globalconf.display, phys_screen, buf, &d->fg);
+        draw_color_new(globalconf.display, phys_screen, buf, &d->colors.normal.fg);
     else
-        d->fg = globalconf.screens[statusbar->screen].colors_normal[ColFG];
+        d->colors.normal.fg = globalconf.screens[statusbar->screen].colors.normal.fg;
 
     if((buf = cfg_getstr(config, "bg")))
-        draw_color_new(globalconf.display, phys_screen, buf, &d->bg);
+        draw_color_new(globalconf.display, phys_screen, buf, &d->colors.normal.bg);
     else
-        d->bg = globalconf.screens[statusbar->screen].colors_normal[ColBG];
+        d->colors.normal.bg = globalconf.screens[statusbar->screen].colors.normal.bg;
 
     if((buf = cfg_getstr(config, "focus_bg")))
-        draw_color_new(globalconf.display, phys_screen, buf, &d->bg_sel);
+        draw_color_new(globalconf.display, phys_screen, buf, &d->colors.focus.bg);
     else
-        d->bg_sel = globalconf.screens[statusbar->screen].colors_selected[ColBG];
+        d->colors.focus.bg = globalconf.screens[statusbar->screen].colors.focus.bg;
 
     if((buf = cfg_getstr(config, "focus_fg")))
-        draw_color_new(globalconf.display, phys_screen, buf, &d->fg_sel);
+        draw_color_new(globalconf.display, phys_screen, buf, &d->colors.focus.fg);
     else
-        d->fg_sel = globalconf.screens[statusbar->screen].colors_selected[ColFG];
+        d->colors.focus.fg = globalconf.screens[statusbar->screen].colors.focus.fg;
 
     d->align = draw_get_align(cfg_getstr(config, "text_align"));
     d->show_icons = cfg_getbool(config, "show_icons");
