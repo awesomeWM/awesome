@@ -66,7 +66,7 @@ uicb_exec(int screen __attribute__ ((unused)), char *cmd)
 
     /* Ignore the leading spaces if any */
     for(args_pos = 0;
-        args_pos < strlen(cmd) && cmd[args_pos] == ' ';
+        args_pos < a_strlen(cmd) && cmd[args_pos] == ' ';
         ++args_pos);
 
     /* Get the beginning of the arguments */
