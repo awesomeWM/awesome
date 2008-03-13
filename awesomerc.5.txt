@@ -29,6 +29,65 @@ be used to configure the behaviour and look of awesome in a variety of ways.
 
 It is read at startup.
 
+OPTIONS
+--------
+Global sections
+~~~~~~~~~~~~~~~
+awesomerc contains 4 global sections: *screen*, *rules*, *keys* and *mouse*.
+
+screen section
+~~~~~~~~~~~~~~
+general
+^^^^^^^
+General is a section containing some general option for this screen.
+It must have a title with screen number, starting at 0.
+
+border::
+    This defines the windows borders size in pixel.
+font::
+    This defines the general font used in awesome.
+new_become_master::
+    If this is set to true, new windows will become master window.
+new_get_focus::
+    If this is set to true, new windows will get focus.
+opacity_unfocused::
+    If this is set to true, non-focused windows will have this opacity.
+    This require an external XComposite manager.
+resize_hints::
+    If this is set to true, resize hints given by the window will be respected.
+    If this is set to false, window size will be forced.
+    If you dislike gaps between windows, you should try to set it to false.
+sloppy_focus::
+    If this is set to true, focus will be set to the window under the mouse. If not,
+    you will have to click on a window to set it focused.
+sloppy_focus_raise::
+    If this is set to true with sloppy_focus, when a window is focused with the mouse
+    it will be raised on top of the windows stack.
+snap::
+    Snap windows to the screen border when it is this pixel away only from the border.
+floating_placement::
+    Select the floating placement algorithm to use when placing window.
+    
+tags
+^^^^
+    Tags is a section containing tag section, which defines tags.
+
+layouts
+^^^^^^^
+    Layouts is a section containing the layouts list.
+
+colors
+^^^^^^
+    Colors is a section containing the colors parameters.
+
+padding
+^^^^^^^
+   Padding is a section containing screen padding parameters.
+
+statusbar
+^^^^^^^^^
+   Statusbar are sections containing statusbars parameters.
+
 UICB FUNCTIONS
 --------------
 
@@ -308,10 +367,10 @@ This widget shows a graph.
 *align*::
     Widget alignment.
 
-OPTIONS
---------
-
-Configuration options and possible values.
+FORMAT
+------
+Here is the global configuration file format, with a list of options
+and possible values.
 
 ..............................................
 Note: when there is no whitespace, quotes are optional.
