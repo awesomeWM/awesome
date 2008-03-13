@@ -55,7 +55,7 @@ screen_xsi_to_area(XineramaScreenInfo si)
     a.y = si.y_org;
     a.width = si.width;
     a.height = si.height;
-    a.next = NULL;
+    a.next = a.prev = NULL;
 
     return a;
 }
