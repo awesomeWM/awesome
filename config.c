@@ -354,12 +354,18 @@ config_parse_screen(cfg_t *cfg, int screen)
     }
 
     if(!virtscreen->font)
-        eprint("awesome: cannot init font\n");
+        eprint("cannot init font\n");
 
     /* Colors */
-    cfg_colors_normal = cfg_getsec(cfg_colors, "normal");
-    cfg_colors_focus = cfg_getsec(cfg_colors, "focus");
-    cfg_colors_urgent = cfg_getsec(cfg_colors, "urgent");
+    if(!cfg_colors)
+        eprint("no colors section found");
+
+    if(!(cfg_colors_normal = cfg_getsec(cfg_colors, "normal")))
+       eprint("no normal colors section found");
+    if(!(cfg_colors_focus = cfg_getsec(cfg_colors, "focus")))
+       eprint("no focus colors section found");
+    if(!(cfg_colors_urgent = cfg_getsec(cfg_colors, "urgent")))
+       eprint("no urgent colors section found");
 
     draw_colors_ctx_init(globalconf.display, phys_screen,
                          cfg_colors_normal, &virtscreen->colors.normal, NULL);
