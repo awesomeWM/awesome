@@ -26,6 +26,7 @@
 #include "layout.h"
 #include "common/draw.h"
 #include "common/swindow.h"
+#include "common/xscreen.h"
 
 /** Bar possible position */
 typedef enum
@@ -265,8 +266,6 @@ typedef struct
 typedef Area (FloatingPlacement)(Area, int, int);
 typedef struct
 {
-    /** Screen geometry */
-    Area geometry;
     /** Number of pixels to snap windows */
     int snap;
     /** Border size */
@@ -317,8 +316,8 @@ struct AwesomeConf
     Display *display;
     /** Logical screens */
     VirtScreen *screens;
-    /** Number of logical screens */
-    int nscreen;
+    /** Screens info */
+    ScreensInfo *screens_info;
     /** Rules list */
     Rule *rules;
     /** Keys bindings list */

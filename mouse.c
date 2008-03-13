@@ -117,7 +117,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 XQueryPointer(globalconf.display,
                               RootWindow(globalconf.display, phys_screen),
                               &dummy, &child, &x, &y, &di, &di, &dui);
-                if((newscreen = screen_get_bycoord(globalconf.display, c->screen, x, y)) != c->screen)
+                if((newscreen = screen_get_bycoord(globalconf.screens_info, c->screen, x, y)) != c->screen)
                 {
                     move_client_to_screen(c, newscreen, True);
                     globalconf.screens[c->screen].need_arrange = True;

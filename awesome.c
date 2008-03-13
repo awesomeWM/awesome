@@ -87,7 +87,7 @@ scan()
                     continue;
                 if(wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState)
                 {
-                    real_screen = screen_get_bycoord(globalconf.display, screen, wa.x, wa.y);
+                    real_screen = screen_get_bycoord(globalconf.screens_info, screen, wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }
@@ -99,7 +99,7 @@ scan()
                 if(XGetTransientForHint(globalconf.display, wins[i], &d1)
                    && (wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState))
                 {
-                    real_screen = screen_get_bycoord(globalconf.display, screen, wa.x, wa.y);
+                    real_screen = screen_get_bycoord(globalconf.screens_info, screen, wa.x, wa.y);
                     client_manage(wins[i], &wa, real_screen);
                 }
             }
@@ -194,7 +194,6 @@ main(int argc, char *argv[])
     struct sockaddr_un *addr;
     Client *c;
     XSetWindowAttributes wa;
-    ScreensInfo *si;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -266,9 +265,8 @@ main(int argc, char *argv[])
     ewmh_init_atoms();
 
     /* init screens struct */
-    si = screensinfo_new(dpy);
-    globalconf.nscreen = si->nscreen;
-    globalconf.screens = p_new(VirtScreen, si->nscreen);
+    globalconf.screens_info = screensinfo_new(dpy);
+    globalconf.screens = p_new(VirtScreen, globalconf.screens_info->nscreen);
     focus_add_client(NULL);
 
     /* parse config */
@@ -280,17 +278,15 @@ main(int argc, char *argv[])
     globalconf.cursor[CurMove] = XCreateFontCursor(globalconf.display, XC_fleur);
 
     /* for each virtual screen */
-    for(screen = 0; screen < globalconf.nscreen; screen++)
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
     {
-        globalconf.screens[screen].geometry = si->geometry[screen];
         /* view at least one tag */
         tag_view(globalconf.screens[screen].tags, True);
 
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             statusbar_init(statusbar);
     }
-
-    screensinfo_delete(&si);
+    printf("100 %p\n", globalconf.screens_info->geometry);
 
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
@@ -312,6 +308,7 @@ main(int argc, char *argv[])
         window_root_grabkeys(screen);
     }
 
+    printf("200 %p %d\n", globalconf.screens_info->geometry, globalconf.screens_info->nscreen);
     /* scan existing windows */
     scan();
 

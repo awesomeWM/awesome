@@ -38,10 +38,8 @@ extern AwesomeConf globalconf;
 Area
 screen_get_area(int screen, Statusbar *statusbar, Padding *padding)
 {
-    Area area;
+    Area area = globalconf.screens_info->geometry[screen];
     Statusbar *sb;
-
-    area = globalconf.screens[screen].geometry;
 
     /* make padding corrections */
     if(padding)
@@ -246,8 +244,8 @@ uicb_screen_focus(int screen, char *arg)
         new_screen = screen + 1;
 
     if (new_screen < 0)
-        new_screen = globalconf.nscreen - 1;
-    if (new_screen > (globalconf.nscreen - 1))
+        new_screen = globalconf.screens_info->nscreen - 1;
+    if (new_screen > (globalconf.screens_info->nscreen - 1))
         new_screen = 0;
 
     client_focus(NULL, new_screen, True);
@@ -274,10 +272,10 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     else
         new_screen = sel->screen + 1;
 
-    if(new_screen >= globalconf.nscreen)
+    if(new_screen >= globalconf.screens_info->nscreen)
         new_screen = 0;
     else if(new_screen < 0)
-        new_screen = globalconf.nscreen - 1;
+        new_screen = globalconf.screens_info->nscreen - 1;
 
     prev_screen = sel->screen;
     move_client_to_screen(sel, new_screen, True);

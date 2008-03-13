@@ -30,27 +30,20 @@
  * \return screen number or DefaultScreen of disp on no match
  */
 int
-screen_get_bycoord(Display *disp, int screen, int x, int y)
+screen_get_bycoord(ScreensInfo *si, int screen, int x, int y)
 {
     int i;
-    ScreensInfo *si;
 
     /* don't waste our time */
-    if(!XineramaIsActive(disp))
+    if(!si->xinerama_is_active)
         return screen;
 
-    /* XXX si should be an arg instead of disp */
-    si = screensinfo_new(disp);
     for(i = 0; i < si->nscreen; i++)
         if((x < 0 || (x >= si->geometry[i].x && x < si->geometry[i].x + si->geometry[i].width))
            && (y < 0 || (y >= si->geometry[i].y && y < si->geometry[i].y + si->geometry[i].height)))
-        {
-            screensinfo_delete(&si);
             return i;
-        }
 
-    screensinfo_delete(&si);
-    return DefaultScreen(disp);
+    return screen;
 }
 
 static inline Area
@@ -84,7 +77,7 @@ screensinfo_new(Display *disp)
 
     si = p_new(ScreensInfo, 1);
 
-    if(XineramaIsActive(disp))
+    if((si->xinerama_is_active = XineramaIsActive(disp)))
     {
         xsi = XineramaQueryScreens(disp, &xinerama_screen_number);
         si->geometry = p_new(Area, xinerama_screen_number);

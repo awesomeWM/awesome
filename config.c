@@ -514,7 +514,7 @@ config_parse(const char *confpatharg)
     }
 
     /* get the right screen section */
-    for(screen = 0; screen < globalconf.nscreen; screen++)
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         config_parse_screen(cfg, screen);
 
     /* get general sections */
@@ -537,7 +537,7 @@ config_parse(const char *confpatharg)
         rule->screen = cfg_getint(cfgsectmp, "screen");
         rule->ismaster = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "master"));
         rule->opacity = cfg_getfloat(cfgsectmp, "opacity");
-        if(rule->screen >= globalconf.nscreen)
+        if(rule->screen >= globalconf.screens_info->nscreen)
             rule->screen = 0;
 
         rule_list_push(&globalconf.rules, rule);

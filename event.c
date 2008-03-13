@@ -80,7 +80,7 @@ event_handle_buttonpress(XEvent *e)
     Statusbar *statusbar;
     XButtonPressedEvent *ev = &e->xbutton;
 
-    for(screen = 0; screen < globalconf.nscreen; screen++)
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             if(statusbar->sw->window == ev->window || statusbar->sw->window == ev->subwindow)
             {
@@ -145,7 +145,7 @@ event_handle_buttonpress(XEvent *e)
                                 &wdummy, &x, &y, &i,
                                 &i, &udummy))
             {
-                screen = screen_get_bycoord(globalconf.display, screen, x, y);
+                screen = screen_get_bycoord(globalconf.screens_info, screen, x, y);
                 event_handle_mouse_button_press(screen, ev->button, ev->state,
                                           globalconf.buttons.root, NULL);
                 return;
@@ -292,7 +292,7 @@ event_handle_expose(XEvent *e)
     Statusbar *statusbar;
 
     if(!ev->count)
-        for(screen = 0; screen < globalconf.nscreen; screen++)
+        for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
             for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
                 if(statusbar->sw->window == ev->window)
                 {
@@ -321,7 +321,7 @@ event_handle_keypress(XEvent *e)
              * only screen in Xinerama, so we can ask for a better screen
              * number with screen_get_bycoord: we'll get 0 in Zaphod mode
              * so it's the same, or maybe the real Xinerama screen */
-            screen = screen_get_bycoord(globalconf.display, screen, x, y);
+            screen = screen_get_bycoord(globalconf.screens_info, screen, x, y);
             break;
         }
 
@@ -384,7 +384,7 @@ event_handle_maprequest(XEvent *e)
         if(XineramaIsActive(globalconf.display)
            && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
                             &dummy, &dummy, &x, &y, &d, &d, &m))
-            screen = screen_get_bycoord(globalconf.display, screen, x, y);
+            screen = screen_get_bycoord(globalconf.screens_info, screen, x, y);
         else
              for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
 

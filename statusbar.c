@@ -238,7 +238,7 @@ statusbar_refresh()
     Statusbar *statusbar;
     Widget *widget;
 
-    for(screen = 0; screen < globalconf.nscreen; screen++)
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar;
             statusbar;
             statusbar = statusbar->next)

@@ -263,7 +263,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     c = p_new(Client, 1);
 
-    c->screen = screen_get_bycoord(globalconf.display, screen, wa->x, wa->y);
+    c->screen = screen_get_bycoord(globalconf.screens_info, screen, wa->x, wa->y);
 
     screen_geom = screen_get_area(c->screen,
                                   globalconf.screens[screen].statusbar,
@@ -460,7 +460,7 @@ client_resize(Client *c, Area geometry, Bool sizehints)
     if(c->geometry.x != geometry.x || c->geometry.y != geometry.y
        || c->geometry.width != geometry.width || c->geometry.height != geometry.height)
     {
-        new_screen = screen_get_bycoord(globalconf.display, c->screen, geometry.x, geometry.y);
+        new_screen = screen_get_bycoord(globalconf.screens_info, c->screen, geometry.x, geometry.y);
 
         c->geometry.x = wc.x = geometry.x;
         c->geometry.y = wc.y = geometry.y;
