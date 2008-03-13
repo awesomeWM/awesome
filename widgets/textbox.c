@@ -67,15 +67,15 @@ textbox_tell(Widget *widget, char *property, char *command)
     Data *d = widget->data;
     XftFont *newfont;
 
-    if(!command)
-        return WIDGET_ERROR_NOVALUE;
-
     if(!a_strcmp(property, "text"))
     {
         if (d->text)
             p_delete(&d->text);
         d->text = a_strdup(command);
     }
+    /* !command means a not existing string. So return here */
+    else if(!command)
+        return WIDGET_ERROR_NOVALUE;
     else if(!a_strcmp(property, "fg"))
         if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->colors.fg))
             return WIDGET_NOERROR;
@@ -88,9 +88,8 @@ textbox_tell(Widget *widget, char *property, char *command)
             return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "font"))
     {
-        if(a_strlen(command)
-           && (newfont = XftFontOpenName(globalconf.display,
-                                         get_phys_screen(widget->statusbar->screen), command)))
+        if((newfont = XftFontOpenName(globalconf.display,
+                                      get_phys_screen(widget->statusbar->screen), command)))
         {
             if(widget->font != globalconf.screens[widget->statusbar->screen].font)
                 XftFontClose(globalconf.display, widget->font);

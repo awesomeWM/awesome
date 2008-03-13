@@ -217,10 +217,14 @@ uicb_widget_tell(int screen, char *arg)
     }
 
     property = p;
+    p = p + a_strlen(p) + 1; /* could be out of 'arg' now */
 
-    if(p + a_strlen(p) < arg + len)
+    /* arg + len points to the finishing \0.
+     * p to the char right of the first space (strtok delimiter)
+     *
+     * \0 is on the right(>) of p pointer => some text (command) */
+    if(arg + len > p)
     {
-        p = p + a_strlen(p) + 1;
         len = a_strlen(p);
         command = p_new(char, len + 1);
         a_strncpy(command, len + 1, p, len);
