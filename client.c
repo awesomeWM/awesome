@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/shape.h>
-#include <X11/extensions/Xinerama.h>
 
 #include "client.h"
 #include "tag.h"

@@ -19,8 +19,6 @@
  *
  */
 
-#include <X11/extensions/Xinerama.h>
-
 #include "screen.h"
 #include "tag.h"
 #include "focus.h"
@@ -110,7 +108,7 @@ get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 int
 get_phys_screen(int screen)
 {
-    if(XineramaIsActive(globalconf.display))
+    if(globalconf.screens_info->xinerama_is_active)
         return DefaultScreen(globalconf.display);
     return screen;
 }
@@ -212,7 +210,7 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
 static void
 move_mouse_pointer_to_screen(int phys_screen)
 {
-    if(XineramaIsActive(globalconf.display))
+    if(globalconf.screens_info->xinerama_is_active)
     {
         Area area = screen_get_area(phys_screen, NULL, NULL);
         XWarpPointer(globalconf.display,
@@ -264,7 +262,7 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
     int new_screen, prev_screen;
     Client *sel = globalconf.focus->client;
 
-    if(!sel || !XineramaIsActive(globalconf.display))
+    if(!sel || !globalconf.screens_info->xinerama_is_active)
         return;
 
     if(arg)

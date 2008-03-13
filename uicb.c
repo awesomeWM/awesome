@@ -23,7 +23,6 @@
  * @defgroup ui_callback User Interface Callbacks
  */
 
-#include <X11/extensions/Xinerama.h>
 #include <sys/wait.h>
 
 #include "awesome.h"
@@ -82,7 +81,7 @@ uicb_spawn(int screen, char *arg)
     if(!shell && !(shell = getenv("SHELL")))
         shell = a_strdup("/bin/sh");
 
-    if(!XineramaIsActive(globalconf.display) && (tmp = getenv("DISPLAY")))
+    if(!globalconf.screens_info->xinerama_is_active && (tmp = getenv("DISPLAY")))
     {
         display = a_strdup(tmp);
         if((tmp = strrchr(display, '.')))

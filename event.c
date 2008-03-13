@@ -24,7 +24,6 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xrandr.h>
-#include <X11/extensions/Xinerama.h>
 
 #include "screen.h"
 #include "event.h"
@@ -381,7 +380,7 @@ event_handle_maprequest(XEvent *e)
         return;
     if(!client_get_bywin(globalconf.clients, ev->window))
     {
-        if(XineramaIsActive(globalconf.display)
+        if(globalconf.screens_info->xinerama_is_active
            && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
                             &dummy, &dummy, &x, &y, &d, &d, &m))
             screen = screen_get_bycoord(globalconf.screens_info, screen, x, y);
