@@ -91,7 +91,6 @@ cfg_opt_t colors_opts[] =
     CFG_STR((char *) "focus_fg", (char *) "#ffffff", CFGF_NONE),
     CFG_STR((char *) "urgent_bg", (char *) "#ff0000", CFGF_NONE),
     CFG_STR((char *) "urgent_fg", (char *) "#ffffff", CFGF_NONE),
-    CFG_STR((char *) "tab_border", (char *) "#ff0000", CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t mouse_taglist_opts[] =
