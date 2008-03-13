@@ -1,0 +1,49 @@
+awesome-message(1)
+=================
+
+NAME
+----
+
+awesome-message - awesome message window
+
+SYNOPSIS
+--------
+
+awesome-message [-x xcoord] [-y ycoord] [-d delay] <message> <icon>
+
+DESCRIPTION
+-----------
+
+awesome-message is a tool which will pop up a simple X window with a message
+and optionnaly an icon in front of it.
+
+USAGE
+-----
+To have a popup when you have new mail, you can do something like that:
+
+    awesome-message "You have new mails!" ~/.awesome/icons/newmail.png
+
+OPTIONS
+-------
+-x xcoord::
+    Set x coordinate of the window.
+-y ycoord::
+    Set y coordinate of the window.
+-d delay::
+    Close the window after <delay> seconds.
+<message>::
+    Print this message in the window.
+<icon>::
+    Draw this icon file in the window.
+   
+SEE ALSO
+--------
+awesome(1)
+
+AUTHORS
+-------
+Julien Danjou <julien@danjou.info>
+
+WWW
+---
+http://awesome.naquadah.org

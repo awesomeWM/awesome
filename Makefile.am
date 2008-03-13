@@ -162,6 +162,7 @@ if HAVE_ASCIIDOC
 if XMLTO_MAN_WORKS
 man_MANS   += awesome.1
 man_MANS   += awesome-client.1
+man_MANS   += awesome-message.1
 man_MANS   += awesomerc.5
 endif
 endif
@@ -169,6 +170,7 @@ endif
 
 EXTRA_DIST += awesome.1.txt
 EXTRA_DIST += awesome-client.1.txt
+EXTRA_DIST += awesome-message.1.txt
 EXTRA_DIST += awesomerc.5.txt
 
 dist_iconslayouts_DATA += icons/layouts/dwindle.png

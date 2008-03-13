@@ -16,6 +16,7 @@ aclocal.m4
 autom4te.cache
 awesome.doxygen
 awesome-client.1
+awesome-message.1
 awesome.1
 awesomerc.5
 awesomerc
