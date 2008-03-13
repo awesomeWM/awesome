@@ -68,6 +68,7 @@ static widget_tell_status_t
 textbox_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
+    XftFont *newfont;
 
     if(!command)
         return WIDGET_ERROR_NOVALUE;
@@ -90,13 +91,16 @@ textbox_tell(Widget *widget, char *property, char *command)
             return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "font"))
     {
-        widget->font = XftFontOpenName(globalconf.display,
-                       get_phys_screen(widget->statusbar->screen), command);
-        if(!widget->font)
+        if(a_strlen(command)
+           && (newfont = XftFontOpenName(globalconf.display,
+                                         get_phys_screen(widget->statusbar->screen), command)))
         {
-            widget->font = globalconf.screens[widget->statusbar->screen].font;
-            return WIDGET_ERROR_FORMAT_FONT;
+            if(widget->font != globalconf.screens[widget->statusbar->screen].font)
+                XftFontClose(globalconf.display, widget->font);
+            widget->font = newfont;
         }
+        else
+            return WIDGET_ERROR_FORMAT_FONT;
     }
     else if(!a_strcmp(property, "width"))
         d->width = atoi(command);
