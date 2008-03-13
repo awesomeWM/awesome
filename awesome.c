@@ -286,7 +286,6 @@ main(int argc, char *argv[])
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             statusbar_init(statusbar);
     }
-    printf("100 %p\n", globalconf.screens_info->geometry);
 
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
@@ -308,7 +307,6 @@ main(int argc, char *argv[])
         window_root_grabkeys(screen);
     }
 
-    printf("200 %p %d\n", globalconf.screens_info->geometry, globalconf.screens_info->nscreen);
     /* scan existing windows */
     scan();
 
