@@ -128,7 +128,7 @@ widget_common_button_press(Widget *widget, XButtonPressedEvent *ev)
  * cannot be told anything
  * \param widget the widget
  * \param command unused argument
- * \return widget_tell_status_t enum (strucs.h)
+ * \return widget_tell_status_t enum (see structs.h)
  */
 static widget_tell_status_t
 widget_common_tell(Widget *widget, char *property __attribute__ ((unused)),
