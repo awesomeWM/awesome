@@ -102,14 +102,9 @@ config_parse(const char *confpatharg)
     cfg_colors = cfg_getsec(cfg_screen, "colors");
 
     /* colors */
-    draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   cfg_getstr(cfg_colors, "normal_fg"),
-                   &globalconf.colors.fg);
-    draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   cfg_getstr(cfg_colors, "normal_bg"),
-                   &globalconf.colors.bg);
-
-    globalconf.colors.shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
+    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
+                             cfg_getsec(cfg_colors, "normal"),
+                             &globalconf.colors, NULL);
 
     /* font */
     globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),

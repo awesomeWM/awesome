@@ -282,7 +282,8 @@ config_parse_screen(cfg_t *cfg, int screen)
     Tag *tag = NULL;
     Statusbar *statusbar = NULL;
     cfg_t *cfg_general, *cfg_colors, *cfg_screen, *cfg_tags,
-          *cfg_layouts, *cfg_padding, *cfgsectmp;
+          *cfg_layouts, *cfg_padding, *cfgsectmp,
+          *cfg_colors_normal, *cfg_colors_focus, *cfg_colors_urgent;
     VirtScreen *virtscreen = &globalconf.screens[screen];
     int i, phys_screen = get_phys_screen(screen);
 
@@ -318,10 +319,6 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->font = XftFontOpenName(globalconf.display,
                                        phys_screen,
                                        cfg_getstr(cfg_general, "font"));
-    virtscreen->colors.normal.shadow_offset =
-        virtscreen->colors.focus.shadow_offset =
-        virtscreen->colors.urgent.shadow_offset =
-        cfg_getint(cfg_general, "text_shadow_offset");
     virtscreen->floating_placement =
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);
@@ -360,30 +357,16 @@ config_parse_screen(cfg_t *cfg, int screen)
         eprint("awesome: cannot init font\n");
 
     /* Colors */
-    draw_color_new(globalconf.display, phys_screen,
-                   cfg_getstr(cfg_colors, "normal_border"),
-                   &virtscreen->colors.normal.border);
-    draw_color_new(globalconf.display, phys_screen,
-                   cfg_getstr(cfg_colors, "normal_bg"),
-                   &virtscreen->colors.normal.bg);
-    draw_color_new(globalconf.display, phys_screen,
-                   cfg_getstr(cfg_colors, "normal_fg"),
-                   &virtscreen->colors.normal.fg);
-    draw_color_new(globalconf.display, phys_screen,
-                   cfg_getstr(cfg_colors, "focus_border"),
-                   &virtscreen->colors.focus.border);
-    draw_color_new(globalconf.display, phys_screen,
-                   cfg_getstr(cfg_colors, "focus_bg"),
-                   &virtscreen->colors.focus.bg);
-    draw_color_new(globalconf.display, phys_screen,
-                   cfg_getstr(cfg_colors, "focus_fg"),
-                   &virtscreen->colors.focus.fg);
-    draw_color_new(globalconf.display, phys_screen,
-                   cfg_getstr(cfg_colors, "urgent_bg"),
-                   &virtscreen->colors.urgent.bg);
-    draw_color_new(globalconf.display, phys_screen,
-                   cfg_getstr(cfg_colors, "urgent_fg"),
-                   &virtscreen->colors.urgent.fg);
+    cfg_colors_normal = cfg_getsec(cfg_colors, "normal");
+    cfg_colors_focus = cfg_getsec(cfg_colors, "focus");
+    cfg_colors_urgent = cfg_getsec(cfg_colors, "urgent");
+
+    draw_colors_ctx_init(globalconf.display, phys_screen,
+                         cfg_colors_normal, &virtscreen->colors.normal, NULL);
+    draw_colors_ctx_init(globalconf.display, phys_screen,
+                         cfg_colors_focus, &virtscreen->colors.focus, NULL);
+    draw_colors_ctx_init(globalconf.display, phys_screen,
+                         cfg_colors_urgent, &virtscreen->colors.urgent, NULL);
 
     /* Statusbar */
 

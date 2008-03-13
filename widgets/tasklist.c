@@ -268,6 +268,7 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     Widget *w;
     Data *d;
     char *buf;
+    cfg_t *cfg_colors;
     int phys_screen = get_phys_screen(statusbar->screen);
 
     w = p_new(Widget, 1);
@@ -277,25 +278,17 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     w->alignment = AlignFlex;
     w->data = d = p_new(Data, 1);
 
-    if((buf = cfg_getstr(config, "fg")))
-        draw_color_new(globalconf.display, phys_screen, buf, &d->colors.normal.fg);
-    else
-        d->colors.normal.fg = globalconf.screens[statusbar->screen].colors.normal.fg;
+    cfg_colors = cfg_getsec(config, "colors");
 
-    if((buf = cfg_getstr(config, "bg")))
-        draw_color_new(globalconf.display, phys_screen, buf, &d->colors.normal.bg);
-    else
-        d->colors.normal.bg = globalconf.screens[statusbar->screen].colors.normal.bg;
+    draw_colors_ctx_init(globalconf.display, phys_screen,
+                         cfg_getsec(cfg_colors, "normal"),
+                         &d->colors.normal,
+                         &globalconf.screens[statusbar->screen].colors.normal);
 
-    if((buf = cfg_getstr(config, "focus_bg")))
-        draw_color_new(globalconf.display, phys_screen, buf, &d->colors.focus.bg);
-    else
-        d->colors.focus.bg = globalconf.screens[statusbar->screen].colors.focus.bg;
-
-    if((buf = cfg_getstr(config, "focus_fg")))
-        draw_color_new(globalconf.display, phys_screen, buf, &d->colors.focus.fg);
-    else
-        d->colors.focus.fg = globalconf.screens[statusbar->screen].colors.focus.fg;
+    draw_colors_ctx_init(globalconf.display, phys_screen,
+                         cfg_getsec(cfg_colors, "focus"),
+                         &d->colors.focus,
+                         &globalconf.screens[statusbar->screen].colors.focus);
 
     d->align = draw_get_align(cfg_getstr(config, "text_align"));
     d->show_icons = cfg_getbool(config, "show_icons");

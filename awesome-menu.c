@@ -123,6 +123,7 @@ config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
     char *confpath, *opt;
     cfg_t *cfg, *cfg_menu = NULL, *cfg_screen, *cfg_general,
           *cfg_colors, *cfg_menu_colors = NULL;
+    colors_ctx_t colors_normal, colors_focus;
 
     if(!confpatharg)
         confpath = config_file();
@@ -157,40 +158,33 @@ config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
     cfg_general = cfg_getsec(cfg_screen, "general");
     cfg_colors = cfg_getsec(cfg_screen, "colors");
 
-    /* colors */
-    if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "normal_fg")))
-       opt = cfg_getstr(cfg_colors, "normal_fg");
+    /* Colors */
 
-    draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   opt, &globalconf.colors.normal.fg);
+    /* Grab default colors */
+    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
+                         cfg_getsec(cfg_colors, "normal"),
+                         &colors_normal, NULL);
 
-    if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "normal_bg")))
-       opt = cfg_getstr(cfg_colors, "normal_bg");
+    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
+                         cfg_getsec(cfg_colors, "normal"),
+                         &colors_normal, NULL);
 
-    draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   opt, &globalconf.colors.normal.bg);
+    /* Now grab menu colors if any */
+    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
+                         cfg_getsec(cfg_colors, "normal"),
+                         &globalconf.colors.normal, &colors_normal);
 
-    if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "focus_fg")))
-       opt = cfg_getstr(cfg_colors, "focus_fg");
-
-    draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   opt, &globalconf.colors.focus.fg);
-
-    if(!cfg_menu_colors || !(opt = cfg_getstr(cfg_menu_colors, "focus_bg")))
-       opt = cfg_getstr(cfg_colors, "focus_bg");
-
-    draw_color_new(globalconf.display, DefaultScreen(globalconf.display),
-                   opt, &globalconf.colors.focus.bg);
+    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
+                         cfg_getsec(cfg_colors, "focus"),
+                         &globalconf.colors.focus, &colors_focus);
 
     /* font */
     if(!cfg_menu || !(opt = cfg_getstr(cfg_menu, "font")))
         opt = cfg_getstr(cfg_general, "font");
 
-    globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),
+    globalconf.font = XftFontOpenName(globalconf.display,
+                                      DefaultScreen(globalconf.display),
                                       opt);
-
-    globalconf.colors.normal.shadow_offset =
-        globalconf.colors.focus.shadow_offset = cfg_getint(cfg_general, "text_shadow_offset");
 
     if(cfg_menu)
     {

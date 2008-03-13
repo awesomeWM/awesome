@@ -114,6 +114,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     Widget *w;
     Data *d;
     char *buf;
+    int phys_screen = get_phys_screen(statusbar->screen);
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
@@ -123,21 +124,16 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
 
     w->data = d = p_new(Data, 1);
 
-    if((buf = cfg_getstr(config, "fg")))
-        draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf, &d->colors.fg);
-    else
-        d->colors.fg = globalconf.screens[statusbar->screen].colors.normal.fg;
-
-    if((buf = cfg_getstr(config, "bg")))
-        draw_color_new(globalconf.display, get_phys_screen(statusbar->screen), buf, &d->colors.bg);
-    else
-        d->colors.bg = globalconf.screens[statusbar->screen].colors.normal.bg;
+    draw_colors_ctx_init(globalconf.display, phys_screen,
+                         cfg_getsec(config, "colors"),
+                         &d->colors,
+                         &globalconf.screens[statusbar->screen].colors.normal);
 
     d->width = cfg_getint(config, "width");
     d->align = draw_get_align(cfg_getstr(config, "text_align"));
 
     if((buf = cfg_getstr(config, "font")))
-        w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
+        w->font = XftFontOpenName(globalconf.display, phys_screen, buf);
 
     if(!w->font)
         w->font = globalconf.screens[statusbar->screen].font;

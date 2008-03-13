@@ -23,6 +23,9 @@
 #define AWESOME_COMMON_DRAW_H
 
 #include <cairo.h>
+
+#include <confuse.h>
+
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
@@ -123,6 +126,7 @@ Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short draw_textwidth(Display *, XftFont *, char *);
 Alignment draw_get_align(const char *);
 Bool draw_color_new(Display *, int, const char *, XColor *);
+void draw_colors_ctx_init(Display *, int, cfg_t *, colors_ctx_t *, colors_ctx_t *);
 
 void area_list_remove(Area **, Area *);
 

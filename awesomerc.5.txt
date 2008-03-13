@@ -100,26 +100,19 @@ image::
 
 colors
 ^^^^^^
-Colors is a section containing the color parameters.
+Colors is a section containing the colors parameters which is composed of a normal, focus and urgent
+subsection each ones containing:
 
-normal_fg::
-    Set the normal foreground color.
-normal_bg::
-    Set the normal background color.
-normal_border::
-    Set the unfocused window's border color.
-focus_fg::
-    Set the focused foreground color.
-focus_bg::
-    Set the focused background color.
-focus_border::
-    Set the focused window's border color.
-urgent_fg::
-    Set the foreground color to use for urgent flag. This is mostly useful
-    with the taglist widget which will use this color whenever a window sets its
-    XUrgencyHint on a non-visible tag.
-urgent_bg::
-   Set the background color to use for urgent flag.
+fg::
+    Set the foreground color.
+bg::
+    Set the background color.
+border::
+    Set the window's border color.
+shadow::
+    Set the shadow color.
+shadow_offset::
+    Set the shadow offset in pixel.
 
 padding
 ^^^^^^^
@@ -393,12 +386,8 @@ This widget shows a list of running windows.
     Font to use.
 *bg*::
     Background color.
-*fg*::
-    Foreground color.
-*focus_bg*::
-    Background color for focused window.
-*focus_fg*::
-    Foreground color for focused window.
+*colors*::
+    Colors section with a focus and normal subsection.
 *text_align*::
     Text alignement.
 *show_icons*::
@@ -418,12 +407,10 @@ This widget shows a text.
     Set mouse bindings.
 *font*::
     Font to use.
-*bg*::
-    Background color.
-*fg*::
-    Foreground color.
 *width*::
     Set width.
+*colors*::
+    Colors section with a focus and normal subsection.
 *text*::
     Text to change.
 *text_align*::
@@ -551,9 +538,9 @@ Note: when there is no whitespace, quotes are optional.
 <uicb-arg>      -> prog, 3... (argument to a uicb function, where required)
 <uicb-cmd>      -> spawn, exec, client_tag... (see UICB FUNCTIONS above)
 <{.., ...}>     -> list of available options
+<color section> -> a section with fg, bg, border, shadow and shadow_offset options.
 
 [MULTI] means, you can use an item multiple times.
-
 
 
 screen <integer> [MULTI]
@@ -570,7 +557,6 @@ screen <integer> [MULTI]
         sloppy_focus_raise = <boolean>
         snap = <integer>
         floating_placement = <{smart,under_mouse}>
-        text_shadow_offset = <int>
         mwfact_lower_limit = <float>
         mwfact_upper_limit = <float>
     }
@@ -593,14 +579,9 @@ screen <integer> [MULTI]
     }
     colors
     {
-        normal_fg = <color>
-        normal_bg = <color>
-        normal_border = <color>
-        focus_fg = <color>
-        focus_bg = <color>
-        focus_border = <color>
-        urgent_fg = <color>
-        urgent_bg = <color>
+        normal { <color section> }
+        focus { <color section> }
+        urgent { <color section> }
     }
     padding
     {
@@ -647,10 +628,11 @@ screen <integer> [MULTI]
         }
         tasklist <identifier>
         {
-            fg = <color>
-            bg = <color>
-            focus_fg = <color>
-            focus_bg = <color>
+            colors
+            {
+                normal { <color section> }
+                focus { <color section> }
+            }
             font = <font>
             show_icons = <boolean>
             show = <{all,tags,focus}>

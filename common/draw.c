@@ -657,6 +657,9 @@ draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color
     Bool ret;
     XColor exactColor;
 
+    if(!a_strlen(colstr))
+        return False;
+
     if(!(ret = XAllocNamedColor(disp,
                                 DefaultColormap(disp, phys_screen),
                                 colstr,
@@ -665,6 +668,25 @@ draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color
         warn("awesome: error, cannot allocate color '%s'\n", colstr);
 
     return ret;
+}
+
+void
+draw_colors_ctx_init(Display *disp, int phys_screen, cfg_t *cfg_colors,
+                     colors_ctx_t *c, colors_ctx_t *m)
+{
+    if(m)
+        *c = *m;
+
+    draw_color_new(disp, phys_screen,
+                   cfg_getstr(cfg_colors, "fg"), &c->fg);
+    draw_color_new(disp, phys_screen,
+                   cfg_getstr(cfg_colors, "bg"), &c->bg);
+    draw_color_new(disp, phys_screen,
+                   cfg_getstr(cfg_colors, "border"), &c->border);
+    draw_color_new(disp, phys_screen,
+                   cfg_getstr(cfg_colors, "shadow"), &c->shadow);
+
+    c->shadow_offset = cfg_getint(cfg_colors, "shadow_offset");
 }
 
 /** Remove a area from a list of them,
