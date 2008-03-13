@@ -23,7 +23,11 @@
  * @defgroup ui_callback User Interface Callbacks
  */
 
+/* strndup() */
+#define _GNU_SOURCE
+
 #include <sys/wait.h>
+#include <string.h>
 
 #include "awesome.h"
 #include "tag.h"
@@ -45,10 +49,11 @@ extern AwesomeConf globalconf;
  * \ingroup ui_callback
  */
 void
-uicb_exec(int screen __attribute__ ((unused)), char *arg)
+uicb_exec(int screen __attribute__ ((unused)), char *cmd)
 {
     Client *c;
-    char path[PATH_MAX];
+    int args_pos;
+    char *args, *path;
 
     /* remap all clients since some WM won't handle them otherwise */
     for(c = globalconf.clients; c; c = c->next)
@@ -59,8 +64,21 @@ uicb_exec(int screen __attribute__ ((unused)), char *arg)
     if(globalconf.display)
         close(ConnectionNumber(globalconf.display));
 
-    sscanf(arg, "%s", path);
-    execlp(path, arg, NULL);
+    /* Ignore the leading spaces if any */
+    for(args_pos = 0;
+        args_pos < strlen(cmd) && cmd[args_pos] == ' ';
+        ++args_pos);
+
+    /* Get the beginning of the arguments */
+    if((args = strchr(cmd + args_pos, ' ')) == NULL)
+    {
+        warn("Invalid command %s\n", cmd);
+        return;
+    }
+
+    path = strndup(cmd + args_pos, args - (cmd + args_pos));
+    execlp(path, cmd, NULL);
+    p_delete(&path);
 }
 
 /** Spawn another process

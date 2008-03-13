@@ -19,7 +19,9 @@
  *
  */
 
+/* getline(), asprintf() */
 #define _GNU_SOURCE
+
 #include <getopt.h>
 
 #include <signal.h>
@@ -28,6 +30,7 @@
 #include <dirent.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <string.h>
 
 #include <confuse.h>
 
@@ -222,7 +225,7 @@ get_last_word(char *text)
 static Bool
 item_list_fill_file(const char *directory)
 {
-    char cwd[PATH_MAX], *home, *user, *filename;
+    char *cwd, *home, *user, *filename;
     const char *file;
     DIR *dir;
     struct dirent *dirinfo;
@@ -234,14 +237,13 @@ item_list_fill_file(const char *directory)
     item_list_wipe(&globalconf.items);
 
     if(!directory)
-        a_strcpy(cwd, sizeof(cwd), "./");
+        cwd = a_strdup("./");
     else if(a_strlen(directory) > 1 && directory[0] == '~')
     {
         if(directory[1] == '/')
         {
-            if((home = getenv("HOME")))
-                a_strcpy(cwd, sizeof(cwd), home);
-            a_strcat(cwd, sizeof(cwd), directory + 1);
+            home = getenv("HOME");
+            asprintf(&cwd, "%s%s", (home ? home : ""), directory + 1);
         }
         else
         {
@@ -252,8 +254,7 @@ item_list_fill_file(const char *directory)
             a_strncpy(user, len, directory + 1, (file - directory) - 1);
             if((passwd = getpwnam(user)))
             {
-                a_strcpy(cwd, sizeof(cwd), passwd->pw_dir);
-                a_strcat(cwd, sizeof(cwd), file);
+                asprintf(&cwd, "%s%s", passwd->pw_dir, file);
                 p_delete(&user);
             }
             else
@@ -264,10 +265,13 @@ item_list_fill_file(const char *directory)
         }
     }
     else
-        a_strcpy(cwd, sizeof(cwd), directory);
+        cwd = a_strdup(directory);
 
     if(!(dir = opendir(cwd)))
+    {
+        p_delete(&cwd);
         return False;
+    }
 
     while((dirinfo = readdir(dir)))
     {
@@ -296,6 +300,7 @@ item_list_fill_file(const char *directory)
     }
 
     closedir(dir);
+    p_delete(&cwd);
 
     return True;
 }
@@ -568,25 +573,31 @@ handle_kpress(XKeyEvent *e)
 static Bool
 item_list_fill_stdin(void)
 {
-    char buf[PATH_MAX];
+    char *buf = NULL;
+    size_t len = 0;
+    ssize_t line_len;
+
     item_t *newitem;
     Bool has_entry = False;
 
     item_list_init(&globalconf.items);
 
-    if(fgets(buf, sizeof(buf), stdin))
+    if((line_len = getline(&buf, &len, stdin)) != -1)
         has_entry = True;
 
     if(has_entry)
         do
         {
-            buf[a_strlen(buf) - 1] = '\0';
+            buf[line_len - 1] = '\0';
             newitem = p_new(item_t, 1);
             newitem->data = a_strdup(buf);
             newitem->match = True;
             item_list_append(&globalconf.items, newitem);
         }
-        while(fgets(buf, sizeof(buf), stdin));
+        while((line_len = getline(&buf, &len, stdin)) != -1);
+
+    if(buf)
+        p_delete(&buf);
 
     return has_entry;
 }
