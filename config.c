@@ -427,11 +427,8 @@ config_parse_screen(cfg_t *cfg, int screen)
     else
     {
         warn("fatal: no tags found in configuration file\n");
-        tag->name = a_strdup("default");
-        tag->layout = virtscreen->layouts;
-        tag->nmaster = 1;
-        tag->ncol = 1;
-        tag->mwfact = 0.5;
+        tag = tag_new("default", virtscreen->layouts, 0.5, 1, 1);
+        tag_push_to_screen(tag, screen);
     }
 
     ewmh_update_net_numbers_of_desktop(phys_screen);
