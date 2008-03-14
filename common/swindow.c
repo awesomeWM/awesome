@@ -48,6 +48,7 @@ simplewindow_new(Display *disp, int phys_screen, int x, int y,
     sw->geometry.width = w;
     sw->geometry.height = h;
     sw->display = disp;
+    sw->phys_screen = phys_screen;
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
         | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
@@ -107,6 +108,11 @@ simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
 {
     sw->geometry.width = w;
     sw->geometry.height = h;
+    XFreePixmap(sw->display, sw->drawable);
+    sw->drawable = XCreatePixmap(sw->display,
+                                 RootWindow(sw->display, sw->phys_screen),
+                                 w, h,
+                                 DefaultDepth(sw->display, sw->phys_screen));
     return XResizeWindow(sw->display, sw->window, w, h);
 }
 

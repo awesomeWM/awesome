@@ -28,6 +28,7 @@
 typedef struct SimpleWindow
 {
     Display *display;
+    int phys_screen;
     Window window;
     Drawable drawable;
     area_t geometry;
