@@ -738,30 +738,21 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
 }
 
 static Client *
-client_find_prev_visible(Client *sel)
+client_find_visible(Client *sel, Bool reverse)
 {
-    Client *prev = NULL;
+    Client *next;
+    Client *(*client_iter)(Client **, Client *) = client_list_next_cycle;
 
     if(!sel) return NULL;
 
-    /* look for previous starting at sel */
-    for(prev = client_list_prev_cycle(&globalconf.clients, sel);
-        prev && (prev->skip || !client_isvisible(prev, sel->screen));
-        prev = client_list_prev_cycle(&globalconf.clients, prev));
+    if(reverse)
+        client_iter = client_list_prev_cycle;
 
-    return prev;
-}
+    /* look for previous or next starting at sel */
 
-static Client *
-client_find_next_visible(Client *sel)
-{
-    Client *next = NULL;
-
-    if(!sel) return NULL;
-
-    for(next = sel->next; next && !client_isvisible(next, sel->screen); next = next->next);
-    if(!next)
-        for(next = globalconf.clients; next && !client_isvisible(next, sel->screen); next = next->next);
+    for(next = client_iter(&globalconf.clients, sel);
+        next && (next->skip || !client_isvisible(next, sel->screen));
+        next = client_iter(&globalconf.clients, next));
 
     return next;
 }
@@ -777,7 +768,7 @@ uicb_client_swapprev(int screen __attribute__ ((unused)),
 {
     Client *prev;
 
-    if((prev = client_find_prev_visible(globalconf.focus->client)))
+    if((prev = client_find_visible(globalconf.focus->client, True)))
     {
         client_list_swap(&globalconf.clients, prev, globalconf.focus->client);
         globalconf.screens[prev->screen].need_arrange = True;
@@ -795,7 +786,7 @@ uicb_client_swapnext(int screen __attribute__ ((unused)),
 {
     Client *next;
 
-    if((next = client_find_next_visible(globalconf.focus->client)))
+    if((next = client_find_visible(globalconf.focus->client, False)))
     {
         client_list_swap(&globalconf.clients, globalconf.focus->client, next);
         globalconf.screens[next->screen].need_arrange = True;
@@ -1022,15 +1013,10 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *c, *sel = globalconf.focus->client;
+    Client *next;
 
-    if(!sel)
-        return;
-    for(c = sel->next; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
-    if(!c)
-        for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
-    if(c)
-        client_focus(c, screen, True);
+    if((next = client_find_visible(globalconf.focus->client, False)))
+        client_focus(next, screen, True);
 }
 
 /** Send focus to previous client in stack
@@ -1043,7 +1029,7 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
 {
     Client *prev;
 
-    if((prev = client_find_prev_visible(globalconf.focus->client)))
+    if((prev = client_find_visible(globalconf.focus->client, True)))
         client_focus(prev, screen, True);
 }
 
