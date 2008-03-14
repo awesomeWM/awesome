@@ -132,7 +132,7 @@ client_get_byname(Client *list, char *name)
     return NULL;
 }
 
-static void
+void
 client_updatetitlebar(Client *c)
 {
     DrawCtx *ctx;
@@ -466,6 +466,25 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 }
 
 area_t
+client_titlebar_update_position(Client *c, area_t geometry)
+{
+    if(!c->titlebar)
+        return geometry;;
+
+    simplewindow_move_resize(c->titlebar,
+                             geometry.x,
+                             geometry.y,
+                             geometry.width,
+                             c->titlebar->geometry.height);
+
+    client_updatetitlebar(c);
+    geometry.y += c->titlebar->geometry.height;
+    geometry.height -= c->titlebar->geometry.height;
+
+    return geometry;
+}
+
+area_t
 client_geometry_hints(Client *c, area_t geometry)
 {
     double dx, dy, max, min, ratio;
@@ -524,12 +543,6 @@ client_resize(Client *c, area_t geometry)
     area_t area;
     XWindowChanges wc;
 
-    if(c->titlebar)
-    {
-        geometry.y += c->titlebar->geometry.height;
-        geometry.height -= c->titlebar->geometry.height;
-    }
-
     if(geometry.width <= 0 || geometry.height <= 0)
         return False;
 
@@ -556,24 +569,25 @@ client_resize(Client *c, area_t geometry)
         c->geometry.y = wc.y = geometry.y;
         c->geometry.height = wc.height = geometry.height;
 
-        if(c->titlebar)
-        {
-            simplewindow_move_resize(c->titlebar,
-                                     geometry.x,
-                                     geometry.y - c->titlebar->geometry.height,
-                                     geometry.width,
-                                     c->titlebar->geometry.height);
-            client_updatetitlebar(c);
-
-            c->geometry.y -= c->titlebar->geometry.height;
-            c->geometry.height += c->titlebar->geometry.height;
-        }
-
         /* save the floating geometry if the window is floating but not
          * maximized */
-        if((c->isfloating ||
-           layout_get_current(new_screen)->arrange == layout_floating) && !c->ismax)
-            c->f_geometry = geometry;
+        if(c->isfloating
+           || layout_get_current(new_screen)->arrange == layout_floating)
+        {
+            if(!c->ismax)
+                c->f_geometry = geometry;
+
+            if(c->titlebar)
+            {
+                simplewindow_move_resize(c->titlebar,
+                                         geometry.x,
+                                         geometry.y - c->titlebar->geometry.height,
+                                         geometry.width,
+                                         c->titlebar->geometry.height);
+
+                client_updatetitlebar(c);
+            }
+        }
 
         XConfigureWindow(globalconf.display, c->win,
                          CWX | CWY | CWWidth | CWHeight, &wc);
