@@ -31,12 +31,12 @@ extern AwesomeConf globalconf;
  * \param screen Screen number
  * \param statusbar statusbar
  * \param padding Padding
- * \return Area
+ * \return area_t
  */
-Area
+area_t
 screen_get_area(int screen, Statusbar *statusbar, Padding *padding)
 {
-    Area area = globalconf.screens_info->geometry[screen];
+    area_t area = globalconf.screens_info->geometry[screen];
     Statusbar *sb;
 
     /* make padding corrections */
@@ -72,12 +72,12 @@ screen_get_area(int screen, Statusbar *statusbar, Padding *padding)
  * \param screen Screen number
  * \param statusbar the statusbar
  * \param padding Padding
- * \return Area
+ * \return area_t
  */
-Area
+area_t
 get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 {
-    Area area = { 0, 0, 0, 0, NULL, NULL };
+    area_t area = { 0, 0, 0, 0, NULL, NULL };
     Statusbar *sb;
 
     area.width = DisplayWidth(globalconf.display, screen);
@@ -124,7 +124,7 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
 {
     Tag *tag;
     int old_screen = c->screen;
-    Area from, to;
+    area_t from, to;
 
     for(tag = globalconf.screens[old_screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
@@ -137,7 +137,7 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
     /* resize the windows if it's floating */
     if(doresize && old_screen != c->screen)
     {
-        Area new_geometry, new_f_geometry;
+        area_t new_geometry, new_f_geometry;
         new_f_geometry = c->f_geometry;
 
         to = screen_get_area(c->screen, NULL, NULL);
@@ -212,7 +212,7 @@ move_mouse_pointer_to_screen(int phys_screen)
 {
     if(globalconf.screens_info->xinerama_is_active)
     {
-        Area area = screen_get_area(phys_screen, NULL, NULL);
+        area_t area = screen_get_area(phys_screen, NULL, NULL);
         XWarpPointer(globalconf.display,
                      None,
                      DefaultRootWindow(globalconf.display),

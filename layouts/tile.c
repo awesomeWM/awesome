@@ -133,7 +133,7 @@ _tile(int screen, const Position position)
     unsigned int mw = 0, mh = 0;
     int n, i, masterwin = 0, otherwin = 0;
     int real_ncol = 1, win_by_col = 1, current_col = 0;
-    Area area, geometry = { 0, 0, 0, 0, NULL, NULL };
+    area_t area, geometry = { 0, 0, 0, 0, NULL, NULL };
     Client *c;
     Tag **curtags = tags_get_current(screen);
 

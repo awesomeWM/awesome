@@ -28,7 +28,7 @@ typedef struct
 {
     int nscreen;
     Bool xinerama_is_active;
-    Area *geometry;
+    area_t *geometry;
 } ScreensInfo;
 
 int screen_get_bycoord(ScreensInfo *, int, int, int);

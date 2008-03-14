@@ -35,7 +35,7 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
     Data *d = widget->data;
-    Area area = draw_get_image_size(d->image);
+    area_t area = draw_get_image_size(d->image);
 
     /* image not valid */
     if(area.width < 0 || area.height < 0)

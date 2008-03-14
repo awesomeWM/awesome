@@ -32,10 +32,10 @@ name_func_link_t FloatingPlacementList[] =
     { NULL, NULL }
 };
 
-static Area
-placement_fix_offscreen(Area geometry, int screen, int border)
+static area_t
+placement_fix_offscreen(area_t geometry, int screen, int border)
 {
-    Area screen_geometry, newgeometry = geometry;
+    area_t screen_geometry, newgeometry = geometry;
 
     screen_geometry = screen_get_area(screen,
                                       globalconf.screens[screen].statusbar,
@@ -60,15 +60,15 @@ placement_fix_offscreen(Area geometry, int screen, int border)
  * \param screen screen used
  * \return new geometry
  */
-Area
-placement_smart(Area geometry, int border, int screen)
+area_t
+placement_smart(area_t geometry, int border, int screen)
 {
     Client *c;
-    Area newgeometry = { 0, 0, 0, 0, NULL, NULL };
-    Area *screen_geometry, *arealist = NULL, *r;
+    area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
+    area_t *screen_geometry, *arealist = NULL, *r;
     Bool found = False;
 
-    screen_geometry = p_new(Area, 1);
+    screen_geometry = p_new(area_t, 1);
 
     *screen_geometry = screen_get_area(screen,
                                        globalconf.screens[screen].statusbar,
@@ -116,13 +116,13 @@ placement_smart(Area geometry, int border, int screen)
     return newgeometry;
 }
 
-Area
-placement_under_mouse(Area geometry, int border, int screen)
+area_t
+placement_under_mouse(area_t geometry, int border, int screen)
 {
     Window dummy;
     unsigned int m;
     int x, y, d;
-    Area finalgeometry = geometry;
+    area_t finalgeometry = geometry;
 
     if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)),
                      &dummy, &dummy, &x, &y, &d, &d, &m))

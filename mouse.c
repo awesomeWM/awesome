@@ -48,7 +48,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     unsigned int dui;
     Window dummy, child;
     XEvent ev;
-    Area area, geometry;
+    area_t area, geometry;
     Client *c = globalconf.focus->client, *target;
     Layout *layout = layout_get_current(screen);
 
@@ -150,7 +150,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     Client *c = globalconf.focus->client;
     Tag **curtags = tags_get_current(screen);
     Layout *layout = curtags[0]->layout;
-    Area area = { 0, 0, 0, 0, NULL, NULL }, geometry;
+    area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry;
     double mwfact;
 
     /* only handle floating and tiled layouts */

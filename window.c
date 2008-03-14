@@ -74,7 +74,7 @@ window_getstate(Window w)
  * \return the XSendEvent() status
  */
 Status
-window_configure(Window win, Area geometry, int border)
+window_configure(Window win, area_t geometry, int border)
 {
     XConfigureEvent ce;
 

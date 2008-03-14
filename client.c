@@ -256,7 +256,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     XWindowChanges wc;
     Tag *tag;
     Rule *rule;
-    Area screen_geom;
+    area_t screen_geom;
     int phys_screen = get_phys_screen(screen);
     long flags;
 
@@ -394,11 +394,11 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
  * \param return True if resize has been done
  */
 Bool
-client_resize(Client *c, Area geometry, Bool sizehints)
+client_resize(Client *c, area_t geometry, Bool sizehints)
 {
     int new_screen;
     double dx, dy, max, min, ratio;
-    Area area;
+    area_t area;
     XWindowChanges wc;
 
     if(sizehints)
@@ -815,7 +815,7 @@ uicb_client_moveresize(int screen, char *arg)
     int mx, my, dx, dy, nmx, nmy;
     unsigned int dui;
     Window dummy;
-    Area area;
+    area_t area;
     Client *sel = globalconf.focus->client;
     Layout *curlay = layout_get_current(screen);
 
@@ -892,7 +892,7 @@ uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((
 }
 
 static void
-client_maximize(Client *c, Area geometry)
+client_maximize(Client *c, area_t geometry)
 {
 
     if((c->ismax = !c->ismax))
@@ -932,7 +932,7 @@ void
 uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    Area area = screen_get_area(screen,
+    area_t area = screen_get_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
 
@@ -953,7 +953,7 @@ void
 uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    Area area = screen_get_area(screen,
+    area_t area = screen_get_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
 
@@ -976,7 +976,7 @@ void
 uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 {
     Client *sel = globalconf.focus->client;
-    Area area = screen_get_area(screen,
+    area_t area = screen_get_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
 

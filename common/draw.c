@@ -127,7 +127,7 @@ draw_context_delete(DrawCtx *ctx)
  */
 void
 draw_text(DrawCtx *ctx,
-          Area area,
+          area_t area,
           Alignment align,
           int padding,
           char *text,
@@ -225,7 +225,7 @@ draw_text(DrawCtx *ctx,
  * \return pat pattern or NULL; needs to get cairo_pattern_destroy()'ed;
  */
 static cairo_pattern_t *
-draw_setup_cairo_color_source(DrawCtx *ctx, Area rect,
+draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
                          XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
     cairo_pattern_t *pat = NULL;
@@ -263,7 +263,7 @@ draw_setup_cairo_color_source(DrawCtx *ctx, Area rect,
  * \param color color to use
  */
 void
-draw_rectangle(DrawCtx *ctx, Area geometry, Bool filled, XColor color)
+draw_rectangle(DrawCtx *ctx, area_t geometry, Bool filled, XColor color)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, 1.0);
@@ -290,8 +290,8 @@ draw_rectangle(DrawCtx *ctx, Area geometry, Bool filled, XColor color)
  * \param pcolor_end color at pattern_start + pattern_width
  */
 void
-draw_rectangle_gradient(DrawCtx *ctx, Area geometry, Bool filled,
-                        Area pattern_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, Bool filled,
+                        area_t pattern_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
     cairo_pattern_t *pat;
 
@@ -340,8 +340,8 @@ draw_graph_setup(DrawCtx *ctx)
  * \param pcolor_end color at the right
  */
 void
-draw_graph(DrawCtx *ctx, Area rect, int *from, int *to, int cur_index,
-           Area patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
+           area_t patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
     int i, x, y, w;
     cairo_pattern_t *pat;
@@ -381,8 +381,8 @@ draw_graph(DrawCtx *ctx, Area rect, int *from, int *to, int cur_index,
  * \param pcolor_end color at the right
  */
 void
-draw_graph_line(DrawCtx *ctx, Area rect, int *to, int cur_index,
-                Area patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
+                area_t patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
     int i, x, y, w;
     int flag = 0; /* used to prevent drawing a line from 0 to 0 values */
@@ -528,12 +528,12 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 
 /** Get an imag size (PNG format only)
  * \param filename file name
- * \return Area structure with width and height set to image size
+ * \return area_t structure with width and height set to image size
  */
-Area
+area_t
 draw_get_image_size(const char *filename)
 {
-    Area size = { -1, -1, -1, -1, NULL, NULL };
+    area_t size = { -1, -1, -1, -1, NULL, NULL };
     cairo_surface_t *surface;
     cairo_status_t cairo_st;
 
@@ -706,9 +706,9 @@ draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
  * \param elem area to remove
  */
 void
-area_list_remove(Area **head, Area *elem)
+area_list_remove(area_t **head, area_t *elem)
 {
-    Area *r, inter, *extra, *rnext;
+    area_t *r, inter, *extra, *rnext;
 
     for(r = *head; r; r = rnext)
     {
@@ -722,7 +722,7 @@ area_list_remove(Area **head, Area *elem)
 
             if(AREA_LEFT(inter) > AREA_LEFT(*r))
             {
-                extra = p_new(Area, 1);
+                extra = p_new(area_t, 1);
                 extra->x = r->x;
                 extra->y = r->y;
                 extra->width = AREA_LEFT(inter) - r->x;
@@ -732,7 +732,7 @@ area_list_remove(Area **head, Area *elem)
 
             if(AREA_TOP(inter) > AREA_TOP(*r))
             {
-                extra = p_new(Area, 1);
+                extra = p_new(area_t, 1);
                 extra->x = r->x;
                 extra->y = r->y;
                 extra->width = r->width;
@@ -742,7 +742,7 @@ area_list_remove(Area **head, Area *elem)
 
             if(AREA_RIGHT(inter) < AREA_RIGHT(*r))
             {
-                extra = p_new(Area, 1);
+                extra = p_new(area_t, 1);
                 extra->x = AREA_RIGHT(inter);
                 extra->y = r->y;
                 extra->width = AREA_RIGHT(*r) - AREA_RIGHT(inter);
@@ -752,7 +752,7 @@ area_list_remove(Area **head, Area *elem)
 
             if(AREA_BOTTOM(inter) < AREA_BOTTOM(*r))
             {
-                extra = p_new(Area, 1);
+                extra = p_new(area_t, 1);
                 extra->x = r->x;
                 extra->y = AREA_BOTTOM(inter);
                 extra->width = r->width;

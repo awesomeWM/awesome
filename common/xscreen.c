@@ -46,10 +46,10 @@ screen_get_bycoord(ScreensInfo *si, int screen, int x, int y)
     return screen;
 }
 
-static inline Area
+static inline area_t
 screen_xsi_to_area(XineramaScreenInfo si)
 {
-    Area a;
+    area_t a;
 
     a.x = si.x_org;
     a.y = si.y_org;
@@ -80,7 +80,7 @@ screensinfo_new(Display *disp)
     if((si->xinerama_is_active = XineramaIsActive(disp)))
     {
         xsi = XineramaQueryScreens(disp, &xinerama_screen_number);
-        si->geometry = p_new(Area, xinerama_screen_number);
+        si->geometry = p_new(area_t, xinerama_screen_number);
         si->nscreen = 0;
 
         /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
@@ -106,8 +106,8 @@ screensinfo_new(Display *disp)
         /* realloc smaller if xinerama_screen_number != screen registered */
         if(xinerama_screen_number != si->nscreen)
         {
-            Area *newgeometry = p_new(Area, si->nscreen);
-            memcpy(newgeometry, si->geometry, si->nscreen * sizeof(Area));
+            area_t *newgeometry = p_new(area_t, si->nscreen);
+            memcpy(newgeometry, si->geometry, si->nscreen * sizeof(area_t));
             p_delete(&si->geometry);
             si->geometry = newgeometry;
         }
@@ -117,7 +117,7 @@ screensinfo_new(Display *disp)
     else
     {
         si->nscreen = ScreenCount(disp);
-        si->geometry = p_new(Area, si->nscreen);
+        si->geometry = p_new(area_t, si->nscreen);
         for(screen = 0; screen < si->nscreen; screen++)
         {
             si->geometry[screen].x = 0;

@@ -33,7 +33,7 @@ extern AwesomeConf globalconf;
 static void
 statusbar_update_position(Statusbar *statusbar)
 {
-    Area area;
+    area_t area;
 
     XMapRaised(globalconf.display, statusbar->sw->window);
 
@@ -74,7 +74,7 @@ statusbar_draw(Statusbar *statusbar)
     int phys_screen = get_phys_screen(statusbar->screen);
     Widget *widget;
     int left = 0, right = 0;
-    Area rectangle = { 0, 0, 0, 0, NULL, NULL };
+    area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
     Drawable d;
 
     /* don't waste our time */
@@ -178,7 +178,7 @@ statusbar_init(Statusbar *statusbar)
 {
     Statusbar *sb;
     int phys_screen = get_phys_screen(statusbar->screen);
-    Area area = screen_get_area(statusbar->screen,
+    area_t area = screen_get_area(statusbar->screen,
                                 globalconf.screens[statusbar->screen].statusbar,
                                 &globalconf.screens[statusbar->screen].padding);
 

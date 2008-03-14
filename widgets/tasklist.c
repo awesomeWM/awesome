@@ -82,7 +82,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     Data *d = widget->data;
     Client *sel = focus_get_current_client(widget->statusbar->screen);
     Rule *r;
-    Area area;
+    area_t area;
     style_t style;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;

@@ -41,18 +41,18 @@ typedef enum
     AlignAuto
 } Alignment;
 
-typedef struct Area Area;
-struct Area
+typedef struct area_t area_t;
+struct area_t
 {
     /** Co-ords of upper left corner */
     int x;
     int y;
     int width;
     int height;
-    Area *prev, *next;
+    area_t *prev, *next;
 };
 
-DO_SLIST(Area, area, p_delete)
+DO_SLIST(area_t, area, p_delete)
 
 #define AREA_LEFT(a)    ((a).x)
 #define AREA_TOP(a)     ((a).y)
@@ -60,7 +60,7 @@ DO_SLIST(Area, area, p_delete)
 #define AREA_BOTTOM(a)    ((a).y + (a).height)
 
 static inline Bool
-area_intersect_area(Area a, Area b)
+area_intersect_area(area_t a, area_t b)
 {
     return (b.x < a.x + a.width
             && b.x + b.width > a.x
@@ -68,10 +68,10 @@ area_intersect_area(Area a, Area b)
             && b.y + b.height > a.y);
 }
 
-static inline Area
-area_get_intersect_area(Area a, Area b)
+static inline area_t
+area_get_intersect_area(area_t a, area_t b)
 {
-    Area g;
+    area_t g;
 
     g.x = MAX(a.x, b.x);
     g.y = MAX(a.y, b.y);
@@ -113,24 +113,24 @@ typedef struct
 DrawCtx *draw_context_new(Display *, int, int, int, Drawable);
 void draw_context_delete(DrawCtx *);
 
-void draw_text(DrawCtx *, Area, Alignment, int, char *, style_t);
-void draw_rectangle(DrawCtx *, Area, Bool, XColor);
-void draw_rectangle_gradient(DrawCtx *, Area, Bool, Area, XColor *, XColor *, XColor *);
+void draw_text(DrawCtx *, area_t, Alignment, int, char *, style_t);
+void draw_rectangle(DrawCtx *, area_t, Bool, XColor);
+void draw_rectangle_gradient(DrawCtx *, area_t, Bool, area_t, XColor *, XColor *, XColor *);
 
 void draw_graph_setup(DrawCtx *);
-void draw_graph(DrawCtx *, Area, int *, int *, int, Area, XColor *, XColor *, XColor *);
-void draw_graph_line(DrawCtx *, Area, int *, int, Area, XColor *, XColor *, XColor *);
+void draw_graph(DrawCtx *, area_t, int *, int *, int, area_t, XColor *, XColor *, XColor *);
+void draw_graph_line(DrawCtx *, area_t, int *, int, area_t, XColor *, XColor *, XColor *);
 void draw_circle(DrawCtx *, int, int, int, Bool, XColor);
 void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
-Area draw_get_image_size(const char *filename);
+area_t draw_get_image_size(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short draw_textwidth(Display *, XftFont *, char *);
 Alignment draw_get_align(const char *);
 Bool draw_color_new(Display *, int, const char *, XColor *);
 void draw_style_init(Display *, int, cfg_t *, style_t *, style_t *);
 
-void area_list_remove(Area **, Area *);
+void area_list_remove(area_t **, area_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

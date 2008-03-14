@@ -126,8 +126,8 @@ struct Widget
     /** True if user supplied coords */
     Bool user_supplied_x;
     Bool user_supplied_y;
-    /** Area */
-    Area area;
+    /** area_t */
+    area_t area;
     /** Buttons bindings */
     Button *buttons;
     /** Cache */
@@ -170,11 +170,11 @@ struct Client
     /** Client name */
     char name[256];
     /** Window geometry */
-    Area geometry;
+    area_t geometry;
     /** Floating window geometry */
-    Area f_geometry;
+    area_t f_geometry;
     /** Max window geometry */
-    Area m_geometry;
+    area_t m_geometry;
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
     int border, oldborder;
@@ -257,7 +257,7 @@ typedef struct
     int right;
 } Padding;
 
-typedef Area (FloatingPlacement)(Area, int, int);
+typedef area_t (FloatingPlacement)(area_t, int, int);
 typedef struct
 {
     /** Number of pixels to snap windows */

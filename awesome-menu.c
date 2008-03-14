@@ -116,7 +116,7 @@ exit_help(int exit_code)
 
 static int
 config_parse(int screen, const char *confpatharg,
-             const char *menu_title, Area *geometry)
+             const char *menu_title, area_t *geometry)
 {
     int ret, i;
     char *confpath;
@@ -366,7 +366,7 @@ static void
 redraw(void)
 {
     item_t *item;
-    Area geometry = { 0, 0, 0, 0, NULL, NULL };
+    area_t geometry = { 0, 0, 0, 0, NULL, NULL };
     Bool selected_item_is_drawn = False;
     int len, prompt_len, x_of_previous_item;
     style_t style;
@@ -589,7 +589,7 @@ main(int argc, char **argv)
     char *configfile = NULL, *cmd;
     ssize_t len;
     const char *shell = getenv("SHELL");
-    Area geometry = { 0, 0, 0, 0, NULL, NULL };
+    area_t geometry = { 0, 0, 0, 0, NULL, NULL };
     ScreensInfo *si;
     unsigned int ui;
     Window dummy;

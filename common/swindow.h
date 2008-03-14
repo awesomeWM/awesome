@@ -30,7 +30,7 @@ typedef struct SimpleWindow
     Display *display;
     Window window;
     Drawable drawable;
-    Area geometry;
+    area_t geometry;
 } SimpleWindow;
 
 SimpleWindow * simplewindow_new(Display *, int, int, int, unsigned int, unsigned int, unsigned int);

@@ -31,7 +31,7 @@ void
 layout_max(int screen)
 {
     Client *c;
-    Area area = screen_get_area(screen,
+    area_t area = screen_get_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
 

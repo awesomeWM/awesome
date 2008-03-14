@@ -80,7 +80,7 @@ taglist_draw(Widget *widget,
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int w = 0, flagsize;
     style_t style;
-    Area area;
+    area_t area;
 
     flagsize = (vscreen.styles.normal.font->height + 2) / 3;
 
@@ -119,7 +119,7 @@ taglist_draw(Widget *widget,
 
         if(isoccupied(tag))
         {
-            Area rectangle = { widget->area.x + widget->area.width,
+            area_t rectangle = { widget->area.x + widget->area.width,
                                widget->area.y,
                                flagsize,
                                flagsize,

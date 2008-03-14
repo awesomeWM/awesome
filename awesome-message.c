@@ -121,7 +121,7 @@ main(int argc, char **argv)
     SimpleWindow *sw;
     DrawCtx *ctx;
     XEvent ev;
-    Area geometry = { 0, 0, 200, 50, NULL, NULL },
+    area_t geometry = { 0, 0, 200, 50, NULL, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL, NULL };
     int opt, i, x, y, ret, screen = 0, delay = 0;
     unsigned int ui;

@@ -161,7 +161,7 @@ event_handle_configurerequest(XEvent * e)
     XConfigureRequestEvent *ev = &e->xconfigurerequest;
     XWindowChanges wc;
     int old_screen;
-    Area geometry;
+    area_t geometry;
 
     if((c = client_get_bywin(globalconf.clients, ev->window)))
     {

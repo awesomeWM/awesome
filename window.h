@@ -26,7 +26,7 @@
 
 int window_setstate(Window, long);
 long window_getstate(Window);
-Status window_configure(Window, Area, int);
+Status window_configure(Window, area_t, int);
 void window_grabbuttons(int, Window);
 void window_root_grabbuttons(int);
 void window_root_grabkeys(int);

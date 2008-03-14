@@ -63,7 +63,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     int i, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset = 0;
-    Area rectangle, pattern_rect;
+    area_t rectangle, pattern_rect;
 
     Data *d = widget->data;
 

@@ -251,7 +251,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
     }
     else if(state == net_wm_state_fullscreen)
     {
-        Area geometry = c->geometry;
+        area_t geometry = c->geometry;
         if(set == _NET_WM_STATE_REMOVE)
         {
             /* restore geometry */

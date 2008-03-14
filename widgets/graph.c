@@ -86,7 +86,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     int margin_top, left_offset;
     int z, y, x, tmp, cur_index, test_index;
     Data *d = widget->data;
-    Area rectangle, pattern_area;
+    area_t rectangle, pattern_area;
 
     if(!d->data_items)
         return 0;
