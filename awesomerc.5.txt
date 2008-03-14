@@ -44,6 +44,8 @@ general
 ^^^^^^^
 General is a section containing some general options for this screen.
 
+titlebar::
+    This option defines the position of window titlebar.
 border::
     This defines the window borders size in pixel.
 font::

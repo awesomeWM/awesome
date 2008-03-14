@@ -28,16 +28,6 @@
 #include "common/swindow.h"
 #include "common/xscreen.h"
 
-/** Bar possible position */
-typedef enum
-{
-    Top,
-    Bottom,
-    Left,
-    Right,
-    Off
-} Position;
-
 /** Rules for floating rule */
 typedef enum
 {
@@ -200,6 +190,8 @@ struct Client
     int screen;
     /** True if the client is a new one */
     Bool newcomer;
+    /** Titlebar */
+    SimpleWindow *titlebar;
 };
 
 typedef struct client_node_t client_node_t;
@@ -260,6 +252,8 @@ typedef struct
 typedef area_t (FloatingPlacement)(area_t, int, int);
 typedef struct
 {
+    /** Titlebar position */
+    Position titlebar;
     /** Number of pixels to snap windows */
     int snap;
     /** Border size */

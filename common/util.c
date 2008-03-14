@@ -96,6 +96,20 @@ name_func_lookup(const char *funcname, const name_func_link_t *list)
     return NULL;
 }
 
+Position
+position_get_from_str(const char *pos)
+{
+    if(!a_strncmp(pos, "top", 3))
+        return Top;
+    else if(!a_strncmp(pos, "bottom", 6))
+        return Bottom;
+    else if(!a_strncmp(pos, "right", 5))
+        return Right;
+    else if(!a_strncmp(pos, "left", 4))
+        return Left;
+    return Off;
+}
+
 /** \brief safe limited strcpy.
  *
  * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into \c dst,

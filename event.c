@@ -289,8 +289,10 @@ event_handle_expose(XEvent *e)
     XExposeEvent *ev = &e->xexpose;
     int screen;
     Statusbar *statusbar;
+    Client *c;
 
     if(!ev->count)
+    {
         for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
             for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
                 if(statusbar->sw->window == ev->window)
@@ -298,6 +300,14 @@ event_handle_expose(XEvent *e)
                     statusbar_display(statusbar);
                     return;
                 }
+
+        for(c = globalconf.clients; c; c = c->next)
+            if(c->titlebar && c->titlebar->window == ev->window)
+            {
+                simplewindow_refresh_drawable(c->titlebar, get_phys_screen(c->screen));
+                return;
+            }
+    }
 }
 
 /** Handle XKey events

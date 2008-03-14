@@ -132,6 +132,39 @@ client_get_byname(Client *list, char *name)
     return NULL;
 }
 
+static void
+client_updatetitlebar(Client *c)
+{
+    DrawCtx *ctx;
+    int phys_screen;
+    style_t style;
+    area_t geometry;
+
+    if(!c->titlebar)
+        return;
+
+    phys_screen = get_phys_screen(c->screen);
+
+    ctx = draw_context_new(globalconf.display, phys_screen,
+                           c->titlebar->geometry.width,
+                           c->titlebar->geometry.height,
+                           c->titlebar->drawable);
+
+    style = globalconf.focus->client == c ?
+        globalconf.screens[c->screen].styles.focus :
+        globalconf.screens[c->screen].styles.normal;
+
+    geometry = c->titlebar->geometry;
+    geometry.x = geometry.y = 0;
+
+    draw_text(ctx, geometry, AlignCenter, 0,
+              c->name, style);
+
+    simplewindow_refresh_drawable(c->titlebar, phys_screen);
+
+    draw_context_delete(ctx);
+}
+
 /** Update client name attribute with its title
  * \param c the client
  */
@@ -143,6 +176,8 @@ client_updatetitle(Client *c)
         xgettextprop(globalconf.display, c->win,
                      XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
 
+    client_updatetitlebar(c);
+
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
@@ -151,10 +186,11 @@ client_unfocus(Client *c)
 {
     if(globalconf.screens[c->screen].opacity_unfocused != -1)
         window_settrans(c->win, globalconf.screens[c->screen].opacity_unfocused);
+    focus_add_client(NULL);
     XSetWindowBorder(globalconf.display, c->win,
                      globalconf.screens[c->screen].styles.normal.border.pixel);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    focus_add_client(NULL);
+    client_updatetitlebar(c);
 }
 
 /** Ban client and unmap it
@@ -167,6 +203,8 @@ client_ban(Client *c)
         client_unfocus(c);
     XUnmapWindow(globalconf.display, c->win);
     window_setstate(c->win, IconicState);
+    if(c->titlebar)
+        XUnmapWindow(globalconf.display, c->titlebar->window);
 }
 
 /** Give focus to client, or to first client if c is NULL
@@ -201,13 +239,18 @@ client_focus(Client *c, int screen, Bool raise)
             window_settrans(c->win, -1);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].styles.focus.border.pixel);
+        client_updatetitlebar(c);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
         if(raise)
         {
             XWindowChanges wc;
             Layout *curlay = layout_get_current(screen);
             if(c->isfloating || curlay->arrange == layout_floating)
+            {
                 XRaiseWindow(globalconf.display, c->win);
+                if(c->titlebar)
+                    XRaiseWindow(globalconf.display, c->titlebar->window);
+            }
             else
             {
                 Client *client;
@@ -216,14 +259,32 @@ client_focus(Client *c, int screen, Bool raise)
                 for(client = globalconf.clients; client; client = client->next)
                     if(client != c && client_isvisible(client, c->screen) && client->isfloating)
                     {
+                        if(client->titlebar)
+                        {
+                            XConfigureWindow(globalconf.display, client->titlebar->window,
+                                             CWSibling | CWStackMode, &wc);
+                            wc.sibling = client->titlebar->window;
+                        }
                         XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
                         wc.sibling = client->win;
                     }
+                if(c->titlebar)
+                {
+                     XConfigureWindow(globalconf.display, c->titlebar->window,
+                                      CWSibling | CWStackMode, &wc);
+                     wc.sibling = c->titlebar->window;
+                }
                 XConfigureWindow(globalconf.display, c->win, CWSibling | CWStackMode, &wc);
                 wc.sibling = c->win;
                 for(client = globalconf.clients; client; client = client->next)
                     if(client != c && IS_TILED(client, c->screen))
                     {
+                        if(client->titlebar)
+                        {
+                            XConfigureWindow(globalconf.display, client->titlebar->window,
+                                             CWSibling | CWStackMode, &wc);
+                            wc.sibling = client->titlebar->window;
+                        }
                         XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
                         wc.sibling = client->win;
                     }
@@ -257,7 +318,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Tag *tag;
     Rule *rule;
     area_t screen_geom;
-    int phys_screen = get_phys_screen(screen);
+    int phys_screen = get_phys_screen(screen), titlebar_height;
     long flags;
 
     c = p_new(Client, 1);
@@ -286,6 +347,23 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
+    switch(globalconf.screens[c->screen].titlebar)
+    {
+      case Top:
+        titlebar_height = 1.5 * MAX(globalconf.screens[c->screen].styles.normal.font->height,
+                                    MAX(globalconf.screens[c->screen].styles.focus.font->height,
+                                        globalconf.screens[c->screen].styles.urgent.font->height)),
+        c->titlebar = simplewindow_new(globalconf.display,
+                                       phys_screen,
+                                       c->geometry.x,
+                                       c->geometry.y - titlebar_height,
+                                       c->geometry.width,
+                                       titlebar_height,
+                                       0);
+        break;
+      default:
+        break;
+    }
     /* update window title */
     client_updatetitle(c);
 
@@ -387,6 +465,53 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     ewmh_update_net_client_list(phys_screen);
 }
 
+static area_t
+client_geometry_sizehint(Client *c, area_t geometry)
+{
+    double dx, dy, max, min, ratio;
+
+    if(c->minay > 0 && c->maxay > 0 && (geometry.height - c->baseh) > 0
+       && (geometry.width - c->basew) > 0)
+    {
+        dx = (double) (geometry.width - c->basew);
+        dy = (double) (geometry.height - c->baseh);
+        min = (double) (c->minax) / (double) (c->minay);
+        max = (double) (c->maxax) / (double) (c->maxay);
+        ratio = dx / dy;
+        if(max > 0 && min > 0 && ratio > 0)
+        {
+            if(ratio < min)
+            {
+                dy = (dx * min + dy) / (min * min + 1);
+                dx = dy * min;
+                geometry.width = (int) dx + c->basew;
+                geometry.height = (int) dy + c->baseh;
+            }
+            else if(ratio > max)
+            {
+                dy = (dx * min + dy) / (max * max + 1);
+                dx = dy * min;
+                geometry.width = (int) dx + c->basew;
+                geometry.height = (int) dy + c->baseh;
+            }
+        }
+    }
+    if(c->minw && geometry.width < c->minw)
+        geometry.width = c->minw;
+    if(c->minh && geometry.height < c->minh)
+        geometry.height = c->minh;
+    if(c->maxw && geometry.width > c->maxw)
+        geometry.width = c->maxw;
+    if(c->maxh && geometry.height > c->maxh)
+        geometry.height = c->maxh;
+    if(c->incw)
+        geometry.width -= (geometry.width - c->basew) % c->incw;
+    if(c->inch)
+        geometry.height -= (geometry.height - c->baseh) % c->inch;
+
+    return geometry;
+}
+
 /** Resize client window
  * \param c client to resize
  * \param geometry new window geometry
@@ -397,53 +522,21 @@ Bool
 client_resize(Client *c, area_t geometry, Bool sizehints)
 {
     int new_screen;
-    double dx, dy, max, min, ratio;
     area_t area;
     XWindowChanges wc;
 
-    if(sizehints)
+    if(c->titlebar)
     {
-        if(c->minay > 0 && c->maxay > 0 && (geometry.height - c->baseh) > 0
-           && (geometry.width - c->basew) > 0)
-        {
-            dx = (double) (geometry.width - c->basew);
-            dy = (double) (geometry.height - c->baseh);
-            min = (double) (c->minax) / (double) (c->minay);
-            max = (double) (c->maxax) / (double) (c->maxay);
-            ratio = dx / dy;
-            if(max > 0 && min > 0 && ratio > 0)
-            {
-                if(ratio < min)
-                {
-                    dy = (dx * min + dy) / (min * min + 1);
-                    dx = dy * min;
-                    geometry.width = (int) dx + c->basew;
-                    geometry.height = (int) dy + c->baseh;
-                }
-                else if(ratio > max)
-                {
-                    dy = (dx * min + dy) / (max * max + 1);
-                    dx = dy * min;
-                    geometry.width = (int) dx + c->basew;
-                    geometry.height = (int) dy + c->baseh;
-                }
-            }
-        }
-        if(c->minw && geometry.width < c->minw)
-            geometry.width = c->minw;
-        if(c->minh && geometry.height < c->minh)
-            geometry.height = c->minh;
-        if(c->maxw && geometry.width > c->maxw)
-            geometry.width = c->maxw;
-        if(c->maxh && geometry.height > c->maxh)
-            geometry.height = c->maxh;
-        if(c->incw)
-            geometry.width -= (geometry.width - c->basew) % c->incw;
-        if(c->inch)
-            geometry.height -= (geometry.height - c->baseh) % c->inch;
+        geometry.y += c->titlebar->geometry.height;
+        geometry.height -= c->titlebar->geometry.height;
     }
+
+    if(sizehints)
+        geometry = client_geometry_sizehint(c, geometry);
+
     if(geometry.width <= 0 || geometry.height <= 0)
         return False;
+
     /* offscreen appearance fixes */
     area = get_display_area(get_phys_screen(c->screen),
                             NULL,
@@ -463,10 +556,22 @@ client_resize(Client *c, area_t geometry, Bool sizehints)
         new_screen = screen_get_bycoord(globalconf.screens_info, c->screen, geometry.x, geometry.y);
 
         c->geometry.x = wc.x = geometry.x;
-        c->geometry.y = wc.y = geometry.y;
         c->geometry.width = wc.width = geometry.width;
+        c->geometry.y = wc.y = geometry.y;
         c->geometry.height = wc.height = geometry.height;
-        wc.border_width = c->border;
+
+        if(c->titlebar)
+        {
+            simplewindow_move_resize(c->titlebar,
+                                     geometry.x,
+                                     geometry.y - c->titlebar->geometry.height,
+                                     geometry.width,
+                                     c->titlebar->geometry.height);
+            client_updatetitlebar(c);
+
+            c->geometry.y -= c->titlebar->geometry.height;
+            c->geometry.height += c->titlebar->geometry.height;
+        }
 
         /* save the floating geometry if the window is floating but not
          * maximized */
@@ -474,8 +579,10 @@ client_resize(Client *c, area_t geometry, Bool sizehints)
            layout_get_current(new_screen)->arrange == layout_floating) && !c->ismax)
             c->f_geometry = geometry;
 
+        printf("moving client %s to %d\n", c->name, c->geometry.y);
+
         XConfigureWindow(globalconf.display, c->win,
-                         CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
+                         CWX | CWY | CWWidth | CWHeight, &wc);
         window_configure(c->win, geometry, c->border);
 
         if(c->screen != new_screen)
@@ -547,6 +654,8 @@ client_unban(Client *c)
 {
     XMapWindow(globalconf.display, c->win);
     window_setstate(c->win, NormalState);
+    if(c->titlebar)
+        XMapWindow(globalconf.display, c->titlebar->window);
 }
 
 void
@@ -578,6 +687,9 @@ client_unmanage(Client *c)
 
     XSync(globalconf.display, False);
     XUngrabServer(globalconf.display);
+
+    if(c->titlebar)
+        simplewindow_delete(c->titlebar);
 
     p_delete(&c);
 }

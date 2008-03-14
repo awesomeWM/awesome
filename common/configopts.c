@@ -70,6 +70,7 @@ cfg_awesome_include(cfg_t *cfg, cfg_opt_t *opt,
 cfg_opt_t general_opts[] =
 {
     CFG_INT((char *) "border", 1, CFGF_NONE),
+    CFG_STR((char *) "titlebar", (char *) "off", CFGF_NONE),
     CFG_INT((char *) "snap", 8, CFGF_NONE),
     CFG_BOOL((char *) "resize_hints", cfg_true, CFGF_NONE),
     CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
