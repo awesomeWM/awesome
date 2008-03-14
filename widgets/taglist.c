@@ -58,6 +58,17 @@ isurgent(Tag *t)
     return False;
 }
 
+static style_t
+taglist_style_get(VirtScreen vscreen, Tag *tag)
+{
+    if(tag->selected)
+        return vscreen.styles.focus;
+    else if(isurgent(tag))
+        return vscreen.styles.urgent;
+
+    return vscreen.styles.normal;
+}
+
 static int
 taglist_draw(Widget *widget,
              DrawCtx *ctx,
@@ -94,12 +105,7 @@ taglist_draw(Widget *widget,
     widget->area.width = 0;
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
-        if(tag->selected)
-            style = vscreen.styles.focus;
-        else if(isurgent(tag))
-            style = vscreen.styles.urgent;
-        else
-            style = vscreen.styles.normal;
+        style = taglist_style_get(vscreen, tag);
         w = draw_textwidth(ctx->display, style.font, tag->name) + style.font->height;
         area.x = widget->area.x + widget->area.width;
         area.y = widget->area.y;
@@ -140,14 +146,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
     for(b = widget->buttons; b; b = b->next)
         if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
         {
-            /* XXX this should be in a function */
-            if(tag->selected)
-                style = vscreen.styles.focus;
-            else if(isurgent(tag))
-                style = vscreen.styles.urgent;
-            else
-                style = vscreen.styles.normal;
-
+            style = taglist_style_get(vscreen, tag);
             switch(widget->statusbar->position)
             {
               case Top:
