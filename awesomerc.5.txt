@@ -42,19 +42,19 @@ starting at 0. It contains several subsections, which are *general*, *tags*, *la
 
 general
 ^^^^^^^
-General is a section containing some general option for this screen.
+General is a section containing some general options for this screen.
 
 border::
-    This defines the windows borders size in pixel.
+    This defines the window borders size in pixel.
 font::
     This defines the general font used in awesome.
 new_become_master::
-    If this is set to true, new windows will become master window.
+    If this is set to true, new windows will become the master window.
 new_get_focus::
     If this is set to true, new windows will get focus.
 opacity_unfocused::
     If this is set to true, non-focused windows will have this opacity.
-    This require an external XComposite manager.
+    This requires an external XComposite manager.
 resize_hints::
     If this is set to true, resize hints given by the window will be respected.
     If this is set to false, window size will be forced.
@@ -76,16 +76,16 @@ Tags is a section containing one or more tag sections, which defines a tag.
 
 tag
 +++
-Tag is a section which contains several options definining a tag.
+Tag is a section which contains several options defining a tag.
 
 layout::
     Layout is a name of an available layout which will be set by default on this tag.
 mwfact::
     Set the default master width factor for this tag.
 ncol::
-    Set the default number of column for non-master window for this tag.
+    Set the default number of columns for non-master windows for this tag.
 nmaster::
-    Set the default number of window which will be treated as master for this tag.
+    Set the default number of windows which will be treated as master for this tag.
 
 layouts
 ^^^^^^^
@@ -100,7 +100,7 @@ image::
 
 colors
 ^^^^^^
-Colors is a section containing the colors parameters.
+Colors is a section containing the color parameters.
 
 normal_fg::
     Set the normal foreground color.
@@ -116,7 +116,7 @@ focus_border::
     Set the focused window's border color.
 urgent_fg::
     Set the foreground color to use for urgent flag. This is mostly useful
-    with the taglist widget which will use this color whenever a window set its
+    with the taglist widget which will use this color whenever a window sets its
     XUrgencyHint on a non-visible tag.
 urgent_bg::
    Set the background color to use for urgent flag.
@@ -150,16 +150,96 @@ width::
 
 rules
 ~~~~~
+Rules is a section containing a rule list to automatically configure windows.
 
-No documentation yet.
+rule
+^^^^
+Rule are sections containing the auto-configuration options for one window.
+
+name::
+    Set the window name for name matching as a regular expression.
+xproperty_name::
+    Set the name of the XProperty for XProperty matching.
+xproperty_value::
+    Set the regular expression to match against the named XProperty's value.
+float::
+    Set the window to be floating. One of auto, true or false. Defaults to auto.
+master::
+    Set the window to be the master. One of auto, true or false. Defaults to
+    auto.
+tags::
+    Set the tags to be assigned to the window as a regular expression.
+screen::
+    Set the screen the window should show up on.
+icon::
+    Set the window's icon.
+opacity::
+    Set the window's opacity.
 
 keys
 ~~~~
-No documentation yet.
+Keys is the section to define your keybindings in. It may consist of multiple
+key and keylist entries.
+
+key
+^^^
+In a key section you define a single keybinding.
+
+key::
+    The keysym you want to bind.
+mod::
+    Modifiers that need to be pressed for this binding.
+command::
+    The *uicb function* to call.
+arg::
+    The argument to the *uicb function*, if needed.
+
+keylist
+^^^^^^^
+In a keylist you can define multiple very similar keybindings at once. For
+example you can define <Mod1>-{1..9} to switch the view to tag 1..9
+respectively.
+
+keylist::
+    The list of keysyms to bind.
+modkey::
+    Modifiers that need to be pressed for these bindings.
+command::
+    The *uicb function* to call.
+arglist::
+    The list of arguments to the *uicb function*, if needed. *Must* match the
+    length of *keylist*.
 
 mouse
 ~~~~~
-No documentation yet.
+In the mouse section you may define mouse button bindings for the root and
+client windows.
+
+client
+^^^^^^
+Defines a mouse button binding for events on clients.
+
+button::
+    The mouse button you want to bind.
+modkey::
+    Modifiers that need to be pressed for this binding.
+command::
+    The *uicb function* to call.
+arg::
+    The argument to the *uicb function*, if needed.
+
+root
+^^^^
+Defines a mouse button binding for events on the root window.
+
+button::
+    The mouse button you want to bind.
+modkey::
+    Modifiers that need to be pressed for this binding.
+command::
+    The *uicb function* to call.
+arg::
+    The argument to the *uicb function*, if needed.
 
 UICB FUNCTIONS
 --------------
