@@ -51,10 +51,10 @@ simplewindow_new(Display *disp, int phys_screen, int x, int y,
     sw->phys_screen = phys_screen;
 
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
+        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask
+        | ButtonPressMask | ExposureMask;
     wa.override_redirect = 1;
     wa.background_pixmap = ParentRelative;
-    wa.event_mask = ButtonPressMask | ExposureMask;
     sw->window = XCreateWindow(disp,
                                RootWindow(disp, phys_screen),
                                x, y, w, h,
@@ -64,6 +64,8 @@ simplewindow_new(Display *disp, int phys_screen, int x, int y,
                                DefaultVisual(disp, phys_screen),
                                CWOverrideRedirect | CWBackPixmap | CWEventMask,
                                &wa);
+
+    XSelectInput(disp, sw->window, wa.event_mask);
 
     sw->drawable = XCreatePixmap(disp,
                                  RootWindow(disp, phys_screen),
