@@ -253,7 +253,11 @@ event_handle_enternotify(XEvent *e)
     globalconf.pointer_x = ev->x_root;
     globalconf.pointer_y = ev->y_root;
 
-    if((c = client_get_bywin(globalconf.clients, ev->window)))
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
+            break;
+
+    if(c || (c = client_get_bywin(globalconf.clients, ev->window)))
     {
         window_grabbuttons(get_phys_screen(c->screen), c->win);
         if(globalconf.screens[c->screen].sloppy_focus)
@@ -264,8 +268,10 @@ event_handle_enternotify(XEvent *e)
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(ev->window == RootWindow(e->xany.display, screen))
+            {
                 window_root_grabbuttons(screen);
-
+                return;
+            }
 }
 
 /** Handle XMotion events
