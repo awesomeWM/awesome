@@ -72,7 +72,7 @@ uicb_exec(int screen __attribute__ ((unused)), char *cmd)
     /* Get the beginning of the arguments */
     if((args = strchr(cmd + args_pos, ' ')) == NULL)
     {
-        warn("Invalid command %s\n", cmd);
+        warn("invalid command %s\n", cmd);
         return;
     }
 
@@ -140,27 +140,27 @@ run_uicb(char *cmd)
     p = strtok(cmd, " ");
     if (!p)
     {
-        warn("Ignoring malformed command\n");
+        warn("ignoring malformed command\n");
         return -1;
     }
     screen = atoi(cmd);
     if(screen >= globalconf.screens_info->nscreen || screen < 0)
     {
-        warn("Invalid screen specified: %i\n", screen);
+        warn("invalid screen specified: %i\n", screen);
         return -1;
     }
 
     p = strtok(NULL, " ");
     if (!p)
     {
-        warn("Ignoring malformed command.\n");
+        warn("ignoring malformed command.\n");
         return -1;
     }
 
     uicb = name_func_lookup(p, UicbList);
     if (!uicb)
     {
-        warn("Unknown UICB function: %s.\n", p);
+        warn("unknown uicb function: %s.\n", p);
         return -1;
     }
 
