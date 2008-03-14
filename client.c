@@ -601,14 +601,20 @@ client_resize(Client *c, area_t geometry)
             if(!c->ismax)
                 c->f_geometry = geometry;
 
-            if(c->titlebar.position)
+            if(c->titlebar.sw)
             {
-                simplewindow_move_resize(c->titlebar.sw,
-                                         geometry.x,
-                                         geometry.y - c->titlebar.sw->geometry.height,
-                                         geometry.width,
-                                         c->titlebar.sw->geometry.height);
-
+                switch(c->titlebar.position)
+                {
+                  case Top:
+                    simplewindow_move_resize(c->titlebar.sw,
+                                             geometry.x,
+                                             geometry.y - c->titlebar.sw->geometry.height,
+                                             geometry.width,
+                                             c->titlebar.sw->geometry.height);
+                    break;
+                  default:
+                    break;
+                }
                 client_updatetitlebar(c);
             }
         }
