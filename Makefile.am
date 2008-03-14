@@ -155,9 +155,10 @@ awesome_message_SOURCES = \
 	common/util.h common/util.c \
 	common/version.h common/version.c \
 	common/configopts.h common/configopts.c \
+	common/xscreen.h common/xscreen.c \
 	awesome-message.c
 
-awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS)
+awesome_message_LDADD = $(XFT_LIBS) $(X_LIBS) $(CAIRO_LIBS) $(CONFUSE_LIBS) $(XINERAMA_LIBS)
 
 bin_PROGRAMS += awesome-menu
 awesome_menu_SOURCES = \

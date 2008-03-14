@@ -34,6 +34,7 @@
 #include "common/util.h"
 #include "common/version.h"
 #include "common/configopts.h"
+#include "common/xscreen.h"
 
 #define PROGNAME "awesome-message"
 
@@ -63,7 +64,7 @@ exit_help(int exit_code)
 }
 
 static int
-config_parse(const char *confpatharg)
+config_parse(int screen, const char *confpatharg)
 {
     int ret;
     char *confpath;
@@ -90,11 +91,9 @@ config_parse(const char *confpatharg)
         return ret;
 
     /* get global screen section */
-    /* XXX need to get the screen according to coords */
-    cfg_screen = cfg_getsec(cfg, "screen");
-
-    if(!cfg_screen)
-        eprint("parsing configuration file failed, no screen section found\n");
+    if(!(cfg_screen = cfg_getnsec(cfg, "screen", screen)))
+        if(!(cfg_screen = cfg_getsec(cfg, "screen")))
+            eprint("parsing configuration file failed, no screen section found\n");
 
     /* style */
     draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
@@ -124,9 +123,11 @@ main(int argc, char **argv)
     XEvent ev;
     Area geometry = { 0, 0, 200, 50, NULL, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL, NULL };
-    int opt, ret;
-    int delay = 0;
+    int opt, i, x, y, ret, screen = 0, delay = 0;
+    unsigned int ui;
     char *configfile = NULL;
+    ScreensInfo *si;
+    Window dummy;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -166,7 +167,17 @@ main(int argc, char **argv)
     if(argc - optind < 1)
         exit_help(EXIT_FAILURE);
 
-    if((ret = config_parse(configfile)))
+    si = screensinfo_new(disp);
+    if(si->xinerama_is_active)
+    {
+        if(XQueryPointer(disp, RootWindow(disp, DefaultScreen(disp)),
+                         &dummy, &dummy, &x, &y, &i, &i, &ui))
+            screen = screen_get_bycoord(si, 0, x, y);
+    }
+    else
+        screen = DefaultScreen(disp);
+
+    if((ret = config_parse(screen, configfile)))
         return ret;
 
     geometry.width = draw_textwidth(disp, globalconf.style.font, argv[optind]);

@@ -115,11 +115,13 @@ exit_help(int exit_code)
 }
 
 static int
-config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
+config_parse(int screen, const char *confpatharg,
+             const char *menu_title, Area *geometry)
 {
     int ret, i;
     char *confpath;
-    cfg_t *cfg, *cfg_menu = NULL, *cfg_screen = NULL, *cfg_styles, *cfg_menu_styles = NULL;
+    cfg_t *cfg, *cfg_menu = NULL, *cfg_screen = NULL,
+          *cfg_styles, *cfg_menu_styles = NULL;
 
     if(!confpatharg)
         confpath = config_file();
@@ -142,10 +144,12 @@ config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
         return ret;
 
     if(menu_title && !(cfg_menu = cfg_gettsec(cfg, "menu", menu_title)))
-        warn("no definition for menu %s in configuration file: using default\n", menu_title);
+        warn("no definition for menu %s in configuration file: using default\n",
+             menu_title);
         
     /* get global screen section */
-    cfg_screen = cfg_getsec(cfg, "screen");
+    if(!(cfg_screen = cfg_getnsec(cfg, "screen", screen)))
+        cfg_screen = cfg_getsec(cfg, "screen");
 
     if(cfg_menu)
     {
@@ -581,7 +585,7 @@ main(int argc, char **argv)
 {
     Display *disp;
     XEvent ev;
-    int opt, ret, x, y, i;
+    int opt, ret, x, y, i, screen = 0;
     char *configfile = NULL, *cmd;
     ssize_t len;
     const char *shell = getenv("SHELL");
@@ -623,34 +627,36 @@ main(int argc, char **argv)
     if(argc - optind >= 1)
         globalconf.prompt = a_strdup(argv[optind]);
 
-    if((ret = config_parse(configfile, globalconf.prompt, &geometry)))
-        return ret;
-
     /* Get the numlock mask */
     globalconf.numlockmask = get_numlockmask(disp);
+
+    si = screensinfo_new(disp);
+    if(si->xinerama_is_active)
+    {
+        if(XQueryPointer(disp, RootWindow(disp, DefaultScreen(disp)),
+                         &dummy, &dummy, &x, &y, &i, &i, &ui))
+        {
+            screen = screen_get_bycoord(si, 0, x, y);
+
+            geometry.x = si->geometry[screen].x;
+            geometry.y = si->geometry[screen].y;
+            geometry.width = si->geometry[screen].width;
+        }
+    }
+    else
+    {
+        screen = DefaultScreen(disp);
+        if(!geometry.width)
+            geometry.width = DisplayWidth(disp, DefaultScreen(disp));
+    }
+
+    if((ret = config_parse(screen, configfile, globalconf.prompt, &geometry)))
+        return ret;
 
     /* Init the geometry */
     if(!geometry.height)
         geometry.height = 1.5 * MAX(globalconf.styles.normal.font->height,
                                     globalconf.styles.focus.font->height);
-
-    si = screensinfo_new(disp);
-    if(si->xinerama_is_active)
-    {
-        XQueryPointer(disp, RootWindow(disp, DefaultScreen(disp)),
-                      &dummy, &dummy, &x, &y, &i, &i, &ui);
-
-        i = screen_get_bycoord(si, 0, x, y);
-
-        if(!geometry.x)
-            geometry.x = si->geometry[i].x;
-        if(!geometry.y)
-            geometry.y = si->geometry[i].y;
-        if(!geometry.width)
-            geometry.width = si->geometry[i].width;
-    }
-    else if(!geometry.width)
-        geometry.width = DisplayWidth(disp, DefaultScreen(disp));
 
     screensinfo_delete(&si);
 
