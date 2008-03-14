@@ -30,7 +30,7 @@ typedef struct
     char *text;
     int width;
     Alignment align;
-    colors_ctx_t colors;
+    style_t style;
 } Data;
 
 static int
@@ -43,7 +43,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     else if(widget->alignment == AlignFlex)
         widget->area.width = widget->statusbar->width - used;
     else
-        widget->area.width = MIN(draw_textwidth(ctx->display, widget->font, d->text),
+        widget->area.width = MIN(draw_textwidth(ctx->display, d->style.font, d->text),
                                  widget->statusbar->width - used);
 
     widget->area.height = widget->statusbar->height;
@@ -56,7 +56,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    draw_text(ctx, widget->area, d->align, 0, widget->font, d->text, d->colors);
+    draw_text(ctx, widget->area, d->align, 0, d->text, d->style);
 
     return widget->area.width;
 }
@@ -77,12 +77,12 @@ textbox_tell(Widget *widget, char *property, char *command)
     else if(!command)
         return WIDGET_ERROR_NOVALUE;
     else if(!a_strcmp(property, "fg"))
-        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->colors.fg))
+        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->style.fg))
             return WIDGET_NOERROR;
         else
             return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "bg"))
-        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->colors.bg))
+        if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->style.bg))
             return WIDGET_NOERROR;
         else
             return WIDGET_ERROR_FORMAT_COLOR;
@@ -91,9 +91,9 @@ textbox_tell(Widget *widget, char *property, char *command)
         if((newfont = XftFontOpenName(globalconf.display,
                                       get_phys_screen(widget->statusbar->screen), command)))
         {
-            if(widget->font != globalconf.screens[widget->statusbar->screen].font)
-                XftFontClose(globalconf.display, widget->font);
-            widget->font = newfont;
+            if(d->style.font != globalconf.screens[widget->statusbar->screen].styles.normal.font)
+                XftFontClose(globalconf.display, d->style.font);
+            d->style.font = newfont;
         }
         else
             return WIDGET_ERROR_FORMAT_FONT;
@@ -113,7 +113,6 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
     Data *d;
-    char *buf;
     int phys_screen = get_phys_screen(statusbar->screen);
 
     w = p_new(Widget, 1);
@@ -124,19 +123,13 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
 
     w->data = d = p_new(Data, 1);
 
-    draw_colors_ctx_init(globalconf.display, phys_screen,
-                         cfg_getsec(config, "colors"),
-                         &d->colors,
-                         &globalconf.screens[statusbar->screen].colors.normal);
+    draw_style_init(globalconf.display, phys_screen,
+                   cfg_getsec(config, "style"),
+                   &d->style,
+                   &globalconf.screens[statusbar->screen].styles.normal);
 
     d->width = cfg_getint(config, "width");
     d->align = draw_get_align(cfg_getstr(config, "text_align"));
-
-    if((buf = cfg_getstr(config, "font")))
-        w->font = XftFontOpenName(globalconf.display, phys_screen, buf);
-
-    if(!w->font)
-        w->font = globalconf.screens[statusbar->screen].font;
 
     d->text = a_strdup(cfg_getstr(config, "text"));
 

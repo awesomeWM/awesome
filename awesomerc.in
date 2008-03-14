@@ -1,28 +1,26 @@
 screen 0
 {
-    general
+    styles
     {
-        colors
+        normal
         {
-            normal
-            {
-                fg = "#eeeeee"
-                bg = "#111111"
-                border = "#6666ff"
-            }
-            focus
-            {
-                fg = "#ffffff"
-                bg = "#6666ff"
-                border = "#6666ff"
-            }
-            urgent
-            {
-                fg = "#ffffff"
-                bg = "#ff0000"
-            }
-         }
-    }
+            font = "vera-10"
+            fg = "#eeeeee"
+            bg = "#111111"
+            border = "#6666ff"
+        }
+        focus
+        {
+            fg = "#ffffff"
+            bg = "#6666ff"
+            border = "#6666ff"
+        }
+        urgent
+        {
+            fg = "#ffffff"
+            bg = "#ff0000"
+        }
+     }
     tags
     {
         tag one { }

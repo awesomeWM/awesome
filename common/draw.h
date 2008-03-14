@@ -93,7 +93,9 @@ typedef struct
     XColor border;
     /** Shadow offset */
     int shadow_offset;
-} colors_ctx_t;
+    /** Font */
+    XftFont *font;
+} style_t;
 
 typedef struct
 {
@@ -111,7 +113,7 @@ typedef struct
 DrawCtx *draw_context_new(Display *, int, int, int, Drawable);
 void draw_context_delete(DrawCtx *);
 
-void draw_text(DrawCtx *, Area, Alignment, int, XftFont *, char *, colors_ctx_t);
+void draw_text(DrawCtx *, Area, Alignment, int, char *, style_t);
 void draw_rectangle(DrawCtx *, Area, Bool, XColor);
 void draw_rectangle_gradient(DrawCtx *, Area, Bool, Area, XColor *, XColor *, XColor *);
 
@@ -126,7 +128,7 @@ Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short draw_textwidth(Display *, XftFont *, char *);
 Alignment draw_get_align(const char *);
 Bool draw_color_new(Display *, int, const char *, XColor *);
-void draw_colors_ctx_init(Display *, int, cfg_t *, colors_ctx_t *, colors_ctx_t *);
+void draw_style_init(Display *, int, cfg_t *, style_t *, style_t *);
 
 void area_list_remove(Area **, Area *);
 

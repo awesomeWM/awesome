@@ -435,7 +435,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         if((color = cfg_getstr(cfg, "fg")))
             draw_color_new(globalconf.display, phys_screen, color, &tmp_color);
         else
-            tmp_color = globalconf.screens[statusbar->screen].colors.normal.fg;
+            tmp_color = globalconf.screens[statusbar->screen].styles.normal.fg;
 
         if((color = cfg_getstr(cfg, "fg_center")))
         {
@@ -503,7 +503,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     if((color = cfg_getstr(config, "bg")))
         draw_color_new(globalconf.display, phys_screen, color, &d->bg);
     else
-        d->bg = globalconf.screens[statusbar->screen].colors.normal.bg;
+        d->bg = globalconf.screens[statusbar->screen].styles.normal.bg;
 
     if((color = cfg_getstr(config, "bordercolor")))
         draw_color_new(globalconf.display, phys_screen, color, &d->bordercolor);

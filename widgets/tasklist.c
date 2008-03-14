@@ -45,9 +45,9 @@ typedef struct
     Alignment align;
     struct
     {
-        colors_ctx_t normal;
-        colors_ctx_t focus;
-    } colors;
+        style_t normal;
+        style_t focus;
+    } styles;
 } Data;
 
 static inline Bool
@@ -83,6 +83,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
     Client *sel = focus_get_current_client(widget->statusbar->screen);
     Rule *r;
     Area area;
+    style_t style;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;
 
@@ -114,6 +115,8 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
         {
             icon_width = 0;
 
+            style = sel == c ? d->styles.focus : d->styles.normal;
+
             if(d->show_icons)
             {
                 /* draw a background for icons */
@@ -121,10 +124,8 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 area.y = widget->area.y;
                 area.height = widget->statusbar->height;
                 area.width = box_width;
-                if(sel == c)
-                    draw_rectangle(ctx, area, True, d->colors.focus.bg);
-                else
-                    draw_rectangle(ctx, area, True, d->colors.normal.bg);
+
+                draw_rectangle(ctx, area, True, style.fg);
 
                 if((r = rule_matching_client(c)) && r->icon)
                 {
@@ -163,28 +164,23 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            if(sel == c)
-                draw_text(ctx, area, d->align,
-                          widget->font->height / 2, widget->font, c->name,
-                          d->colors.focus);
-            else
-                draw_text(ctx, area, d->align,
-                          widget->font->height / 2, widget->font, c->name,
-                          d->colors.normal);
+            draw_text(ctx, area, d->align,
+                      style.font->height / 2, c->name,
+                      style);
 
             if(c == globalconf.scratch.client)
             {
                 area.x = widget->area.x + icon_width + box_width * i;
                 area.y = widget->area.y;
-                area.width = (widget->font->height + 2) / 3;
-                area.height = (widget->font->height + 2) / 3;
-                draw_rectangle(ctx, area, c->isfloating, d->colors.normal.fg);
+                area.width = (style.font->height + 2) / 3;
+                area.height = (style.font->height + 2) / 3;
+                draw_rectangle(ctx, area, c->isfloating, style.fg);
             }
             else if(c->isfloating || c->ismax)
                 draw_circle(ctx, widget->area.x + icon_width + box_width * i,
                             widget->area.y,
-                            (widget->font->height + 2) / 4,
-                            c->ismax, d->colors.normal.fg);
+                            (style.font->height + 2) / 4,
+                            c->ismax, style.fg);
             i++;
         }
 
@@ -268,7 +264,7 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     Widget *w;
     Data *d;
     char *buf;
-    cfg_t *cfg_colors;
+    cfg_t *cfg_styles;
     int phys_screen = get_phys_screen(statusbar->screen);
 
     w = p_new(Widget, 1);
@@ -278,17 +274,17 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     w->alignment = AlignFlex;
     w->data = d = p_new(Data, 1);
 
-    cfg_colors = cfg_getsec(config, "colors");
+    cfg_styles = cfg_getsec(config, "styles");
 
-    draw_colors_ctx_init(globalconf.display, phys_screen,
-                         cfg_getsec(cfg_colors, "normal"),
-                         &d->colors.normal,
-                         &globalconf.screens[statusbar->screen].colors.normal);
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_getsec(cfg_styles, "normal"),
+                    &d->styles.normal,
+                    &globalconf.screens[statusbar->screen].styles.normal);
 
-    draw_colors_ctx_init(globalconf.display, phys_screen,
-                         cfg_getsec(cfg_colors, "focus"),
-                         &d->colors.focus,
-                         &globalconf.screens[statusbar->screen].colors.focus);
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_getsec(cfg_styles, "focus"),
+                    &d->styles.focus,
+                    &globalconf.screens[statusbar->screen].styles.focus);
 
     d->align = draw_get_align(cfg_getstr(config, "text_align"));
     d->show_icons = cfg_getbool(config, "show_icons");
@@ -300,12 +296,6 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
         d->show = ShowTags;
     else
         d->show = ShowFocus;
-
-    if((buf = cfg_getstr(config, "font")))
-        w->font = XftFontOpenName(globalconf.display, get_phys_screen(statusbar->screen), buf);
-
-    if(!w->font)
-        w->font = globalconf.screens[statusbar->screen].font;
 
     /* Set cache property */
     w->cache.flags = WIDGET_CACHE_CLIENTS;

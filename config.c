@@ -281,9 +281,9 @@ config_parse_screen(cfg_t *cfg, int screen)
     Layout *layout = NULL;
     Tag *tag = NULL;
     Statusbar *statusbar = NULL;
-    cfg_t *cfg_general, *cfg_colors, *cfg_screen, *cfg_tags,
+    cfg_t *cfg_general, *cfg_styles, *cfg_screen, *cfg_tags,
           *cfg_layouts, *cfg_padding, *cfgsectmp,
-          *cfg_colors_normal, *cfg_colors_focus, *cfg_colors_urgent;
+          *cfg_styles_normal, *cfg_styles_focus, *cfg_styles_urgent;
     VirtScreen *virtscreen = &globalconf.screens[screen];
     int i, phys_screen = get_phys_screen(screen);
 
@@ -301,7 +301,7 @@ config_parse_screen(cfg_t *cfg, int screen)
 
     /* get screen specific sections */
     cfg_tags = cfg_getsec(cfg_screen, "tags");
-    cfg_colors = cfg_getsec(cfg_screen, "colors");
+    cfg_styles = cfg_getsec(cfg_screen, "styles");
     cfg_general = cfg_getsec(cfg_screen, "general");
     cfg_layouts = cfg_getsec(cfg_screen, "layouts");
     cfg_padding = cfg_getsec(cfg_screen, "padding");
@@ -316,9 +316,6 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->new_become_master = cfg_getbool(cfg_general, "new_become_master");
     virtscreen->new_get_focus = cfg_getbool(cfg_general, "new_get_focus");
     virtscreen->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
-    virtscreen->font = XftFontOpenName(globalconf.display,
-                                       phys_screen,
-                                       cfg_getstr(cfg_general, "font"));
     virtscreen->floating_placement =
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);
@@ -353,29 +350,28 @@ config_parse_screen(cfg_t *cfg, int screen)
         virtscreen->floating_placement = FloatingPlacementList[0].func;
     }
 
-    if(!virtscreen->font)
-        eprint("cannot init font\n");
-
     /* Colors */
-    if(!cfg_colors)
+    if(!cfg_styles)
         eprint("no colors section found");
 
-    if(!(cfg_colors_normal = cfg_getsec(cfg_colors, "normal")))
-       eprint("no normal colors section found");
-    if(!(cfg_colors_focus = cfg_getsec(cfg_colors, "focus")))
-       eprint("no focus colors section found");
-    if(!(cfg_colors_urgent = cfg_getsec(cfg_colors, "urgent")))
-       eprint("no urgent colors section found");
+    if(!(cfg_styles_normal = cfg_getsec(cfg_styles, "normal")))
+       eprint("no normal colors section found\n");
+    if(!(cfg_styles_focus = cfg_getsec(cfg_styles, "focus")))
+       eprint("no focus colors section found\n");
+    if(!(cfg_styles_urgent = cfg_getsec(cfg_styles, "urgent")))
+       eprint("no urgent colors section found\n");
 
-    draw_colors_ctx_init(globalconf.display, phys_screen,
-                         cfg_colors_normal, &virtscreen->colors.normal, NULL);
-    draw_colors_ctx_init(globalconf.display, phys_screen,
-                         cfg_colors_focus, &virtscreen->colors.focus, NULL);
-    draw_colors_ctx_init(globalconf.display, phys_screen,
-                         cfg_colors_urgent, &virtscreen->colors.urgent, NULL);
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_styles_normal, &virtscreen->styles.normal, NULL);
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_styles_focus, &virtscreen->styles.focus, &virtscreen->styles.normal);
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_styles_urgent, &virtscreen->styles.urgent, &virtscreen->styles.normal);
+
+    if(!virtscreen->styles.normal.font)
+        eprint("no font available\n");
 
     /* Statusbar */
-
     statusbar_list_init(&virtscreen->statusbar);
     for(i = cfg_size(cfg_screen, "statusbar") - 1; i >= 0; i--)
     {

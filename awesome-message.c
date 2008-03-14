@@ -47,10 +47,8 @@ typedef struct
 {
     /** Display ref */
     Display *display;
-    /** Font to use */
-    XftFont *font;
-    /** Colors */
-    colors_ctx_t colors;
+    /** Style */
+    style_t style;
 } AwesomeMsgConf;
 
 static AwesomeMsgConf globalconf;
@@ -69,7 +67,7 @@ config_parse(const char *confpatharg)
 {
     int ret;
     char *confpath;
-    cfg_t *cfg, *cfg_screen, *cfg_general, *cfg_colors;
+    cfg_t *cfg, *cfg_screen;
 
     if(!confpatharg)
         confpath = config_file();
@@ -92,23 +90,19 @@ config_parse(const char *confpatharg)
         return ret;
 
     /* get global screen section */
+    /* XXX need to get the screen according to coords */
     cfg_screen = cfg_getsec(cfg, "screen");
 
     if(!cfg_screen)
         eprint("parsing configuration file failed, no screen section found\n");
 
-    /* get colors and general section */
-    cfg_general = cfg_getsec(cfg_screen, "general");
-    cfg_colors = cfg_getsec(cfg_screen, "colors");
+    /* style */
+    draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+                    cfg_getsec(cfg_getsec(cfg_screen, "styles"), "normal"),
+                    &globalconf.style, NULL);
 
-    /* colors */
-    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
-                             cfg_getsec(cfg_colors, "normal"),
-                             &globalconf.colors, NULL);
-
-    /* font */
-    globalconf.font = XftFontOpenName(globalconf.display, DefaultScreen(globalconf.display),
-                                      cfg_getstr(cfg_general, "font"));
+    if(!globalconf.style.font)
+        eprint("no default font available\n");
 
     p_delete(&confpath);
 
@@ -175,8 +169,8 @@ main(int argc, char **argv)
     if((ret = config_parse(configfile)))
         return ret;
 
-    geometry.width = draw_textwidth(disp, globalconf.font, argv[optind]);
-    geometry.height = globalconf.font->height * 1.5;
+    geometry.width = draw_textwidth(disp, globalconf.style.font, argv[optind]);
+    geometry.height = globalconf.style.font->height * 1.5;
 
     if(argc - optind >= 2)
     {
@@ -185,7 +179,7 @@ main(int argc, char **argv)
             eprint("invalid image\n");
         else
             geometry.width += icon_geometry.width
-                * ((double) globalconf.font->height / (double) icon_geometry.height);
+                * ((double) globalconf.style.font->height / (double) icon_geometry.height);
     }
 
     sw = simplewindow_new(disp, DefaultScreen(disp),
@@ -197,14 +191,11 @@ main(int argc, char **argv)
                            geometry.width, geometry.height, sw->drawable);
 
     geometry.x = geometry.y = 0;
-    draw_text(ctx, geometry, AlignRight,
-              0, globalconf.font, argv[optind],
-              globalconf.colors);
+    draw_text(ctx, geometry, AlignRight, 0,argv[optind], globalconf.style);
 
     if(icon_geometry.width > 0 && icon_geometry.height > 0)
-        draw_image(ctx, 0, (geometry.height / 2) - (globalconf.font->height / 2),
-                   globalconf.font->height,
-                   argv[optind + 1]);
+        draw_image(ctx, 0, (geometry.height / 2) - (globalconf.style.font->height / 2),
+                   globalconf.style.font->height, argv[optind + 1]);
 
     p_delete(&ctx);
 

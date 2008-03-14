@@ -130,15 +130,15 @@ draw_text(DrawCtx *ctx,
           Area area,
           Alignment align,
           int padding,
-          XftFont *font, char *text,
-          colors_ctx_t colors_ctx)
+          char *text,
+          style_t style)
 {
     int nw = 0, x, y;
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
     cairo_font_face_t *font_face;
 
-    draw_rectangle(ctx, area, True, colors_ctx.bg);
+    draw_rectangle(ctx, area, True, style.bg);
 
     if(!(len = olen = a_strlen(text)))
         return;
@@ -153,7 +153,7 @@ draw_text(DrawCtx *ctx,
         buf = a_strdup(text);
 
     /* check that the text is not too long */
-    while(len && (nw = (draw_textwidth(ctx->display, font, buf)) + padding * 2) > area.width)
+    while(len && (nw = (draw_textwidth(ctx->display, style.font, buf)) + padding * 2) > area.width)
     {
         len--;
         /* we can't blindly null the char, we need to check if it's not part of
@@ -175,12 +175,12 @@ draw_text(DrawCtx *ctx,
             buf[len - 3] = '.';
     }
 
-    font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
+    font_face = cairo_ft_font_face_create_for_pattern(style.font->pattern);
     cairo_set_font_face(ctx->cr, font_face);
-    cairo_set_font_size(ctx->cr, font->height);
+    cairo_set_font_size(ctx->cr, style.font->height);
 
     x = area.x + padding;
-    y = area.y + font->ascent + (ctx->height - font->height) / 2;
+    y = area.y + style.font->ascent + (ctx->height - style.font->height) / 2;
 
     switch(align)
     {
@@ -194,20 +194,20 @@ draw_text(DrawCtx *ctx,
         break;
     }
 
-    if(colors_ctx.shadow_offset > 0)
+    if(style.shadow_offset > 0)
     {
         cairo_set_source_rgb(ctx->cr,
-                             colors_ctx.shadow.red / 65535.0,
-                             colors_ctx.shadow.green / 65535.0,
-                             colors_ctx.shadow.blue / 65535.0);
-        cairo_move_to(ctx->cr, x + colors_ctx.shadow_offset, y + colors_ctx.shadow_offset);
+                             style.shadow.red / 65535.0,
+                             style.shadow.green / 65535.0,
+                             style.shadow.blue / 65535.0);
+        cairo_move_to(ctx->cr, x + style.shadow_offset, y + style.shadow_offset);
         cairo_show_text(ctx->cr, buf);
     }
 
     cairo_set_source_rgb(ctx->cr,
-                         colors_ctx.fg.red / 65535.0,
-                         colors_ctx.fg.green / 65535.0,
-                         colors_ctx.fg.blue / 65535.0);
+                         style.fg.red / 65535.0,
+                         style.fg.green / 65535.0,
+                         style.fg.blue / 65535.0);
     cairo_move_to(ctx->cr, x, y);
     cairo_show_text(ctx->cr, buf);
 
@@ -671,22 +671,33 @@ draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color
 }
 
 void
-draw_colors_ctx_init(Display *disp, int phys_screen, cfg_t *cfg_colors,
-                     colors_ctx_t *c, colors_ctx_t *m)
+draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
+                style_t *c, style_t *m)
 {
+    char *buf;
+
     if(m)
         *c = *m;
 
-    draw_color_new(disp, phys_screen,
-                   cfg_getstr(cfg_colors, "fg"), &c->fg);
-    draw_color_new(disp, phys_screen,
-                   cfg_getstr(cfg_colors, "bg"), &c->bg);
-    draw_color_new(disp, phys_screen,
-                   cfg_getstr(cfg_colors, "border"), &c->border);
-    draw_color_new(disp, phys_screen,
-                   cfg_getstr(cfg_colors, "shadow"), &c->shadow);
+    if(!cfg)
+        return;
 
-    c->shadow_offset = cfg_getint(cfg_colors, "shadow_offset");
+    if((buf = cfg_getstr(cfg, "font")))
+        c->font = XftFontOpenName(disp, phys_screen, buf);
+
+    draw_color_new(disp, phys_screen,
+                   cfg_getstr(cfg, "fg"), &c->fg);
+
+    draw_color_new(disp, phys_screen,
+                       cfg_getstr(cfg, "bg"), &c->bg);
+
+    draw_color_new(disp, phys_screen,
+                      cfg_getstr(cfg, "border"), &c->border);
+
+    draw_color_new(disp, phys_screen,
+                      cfg_getstr(cfg, "shadow"), &c->shadow);
+
+    c->shadow_offset = cfg_getint(cfg, "shadow_offset");
 }
 
 /** Remove a area from a list of them,

@@ -76,27 +76,27 @@ cfg_opt_t general_opts[] =
     CFG_BOOL((char *) "sloppy_focus_raise", cfg_false, CFGF_NONE),
     CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
     CFG_BOOL((char *) "new_get_focus", cfg_true, CFGF_NONE),
-    CFG_STR((char *) "font", (char *) "vera-10", CFGF_NONE),
     CFG_INT((char *) "opacity_unfocused", -1, CFGF_NONE),
     CFG_STR((char *) "floating_placement", (char *) "smart", CFGF_NONE),
     CFG_FLOAT((char *) "mwfact_lower_limit", 0.1, CFGF_NONE),
     CFG_FLOAT((char *) "mwfact_upper_limit", 0.9, CFGF_NONE),
     CFG_AWESOME_END()
 };
-cfg_opt_t colors_opts[] =
+cfg_opt_t style_opts[] =
 {
     CFG_STR((char *) "border", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "shadow", (char *) NULL, CFGF_NONE),
     CFG_INT((char *) "shadow_offset", 0, CFGF_NONE),
+    CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
-cfg_opt_t screen_colors_opts[] =
+cfg_opt_t styles_opts[] =
 {
-    CFG_SEC((char *) "normal", colors_opts, CFGF_NONE),
-    CFG_SEC((char *) "focus", colors_opts, CFGF_NONE),
-    CFG_SEC((char *) "urgent", colors_opts, CFGF_NONE),
+    CFG_SEC((char *) "normal", style_opts, CFGF_NONE),
+    CFG_SEC((char *) "focus", style_opts, CFGF_NONE),
+    CFG_SEC((char *) "urgent", style_opts, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t mouse_taglist_opts[] =
@@ -150,7 +150,7 @@ cfg_opt_t widget_textbox_opts[] =
     CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "text_align", (char *) "center", CFGF_NONE),
-    CFG_SEC((char *) "colors", colors_opts, CFGF_NONE),
+    CFG_SEC((char *) "style", style_opts, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t widget_tasklist_opts[] =
@@ -158,7 +158,7 @@ cfg_opt_t widget_tasklist_opts[] =
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    CFG_SEC((char *) "colors", screen_colors_opts, CFGF_NONE),
+    CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
     CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "text_align", (char *) "left", CFGF_NONE),
     CFG_STR((char *) "show", (char *) "tags", CFGF_NONE),
@@ -265,7 +265,7 @@ cfg_opt_t screen_opts[] =
     CFG_SEC((char *) "general", general_opts, CFGF_NONE),
     CFG_SEC((char *) "statusbar", statusbar_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "tags", tags_opts, CFGF_NONE),
-    CFG_SEC((char *) "colors", screen_colors_opts, CFGF_NONE),
+    CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
     CFG_SEC((char *) "layouts", layouts_opts, CFGF_NONE),
     CFG_SEC((char *) "padding", padding_opts, CFGF_NONE),
     CFG_AWESOME_END()
@@ -323,7 +323,7 @@ cfg_opt_t menu_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_STR((char *) "font", NULL, CFGF_NONE),
-    CFG_SEC((char *) "colors", screen_colors_opts, CFGF_NONE),
+    CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t awesome_opts[] =

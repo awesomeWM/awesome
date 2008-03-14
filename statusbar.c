@@ -106,7 +106,7 @@ statusbar_draw(Statusbar *statusbar)
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
     draw_rectangle(ctx, rectangle, True,
-                   globalconf.screens[statusbar->screen].colors.normal.bg);
+                   globalconf.screens[statusbar->screen].styles.normal.bg);
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
@@ -166,17 +166,11 @@ statusbar_display(Statusbar *statusbar)
 void
 statusbar_preinit(Statusbar *statusbar)
 {
-    Widget *widget;
-
     if(statusbar->height <= 0)
-    {
-        /* 1.5 as default factor, it fits nice but no one know why */
-        statusbar->height = globalconf.screens[statusbar->screen].font->height * 1.5;
-
-        for(widget = statusbar->widgets; widget; widget = widget->next)
-            if(widget->font)
-                statusbar->height = MAX(statusbar->height, widget->font->height * 1.5);
-    }
+        /* 1.5 as default factor, it fits nice but no one knows why */
+        statusbar->height = 1.5 * MAX(globalconf.screens[statusbar->screen].styles.normal.font->height,
+                                      MAX(globalconf.screens[statusbar->screen].styles.focus.font->height,
+                                          globalconf.screens[statusbar->screen].styles.urgent.font->height));
 }
 
 void

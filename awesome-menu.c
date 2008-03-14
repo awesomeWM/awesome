@@ -83,14 +83,12 @@ typedef struct
     SimpleWindow *sw;
     /** The draw contet */
     DrawCtx *ctx;
-    /** Font to use */
-    XftFont *font;
     /** Colors */
     struct
     {
-        colors_ctx_t normal;
-        colors_ctx_t focus;
-    } colors;
+        style_t normal;
+        style_t focus;
+    } styles;
     /** Numlock mask */
     unsigned int numlockmask;
     /** The text */
@@ -120,10 +118,8 @@ static int
 config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
 {
     int ret, i;
-    char *confpath, *opt;
-    cfg_t *cfg, *cfg_menu = NULL, *cfg_screen, *cfg_general,
-          *cfg_colors, *cfg_menu_colors = NULL;
-    colors_ctx_t colors_normal, colors_focus;
+    char *confpath;
+    cfg_t *cfg, *cfg_menu = NULL, *cfg_screen = NULL, *cfg_styles, *cfg_menu_styles = NULL;
 
     if(!confpatharg)
         confpath = config_file();
@@ -147,47 +143,13 @@ config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
 
     if(menu_title && !(cfg_menu = cfg_gettsec(cfg, "menu", menu_title)))
         warn("no definition for menu %s in configuration file: using default\n", menu_title);
-
+        
     /* get global screen section */
-    if(!(cfg_screen = cfg_getsec(cfg, "screen")))
-        eprint("parsing configuration file failed, no screen section found\n");
-
-    /* get colors and general section */
-    if(cfg_menu)
-        cfg_menu_colors = cfg_getsec(cfg_menu, "colors");
-    cfg_general = cfg_getsec(cfg_screen, "general");
-    cfg_colors = cfg_getsec(cfg_screen, "colors");
-
-    /* Colors */
-
-    /* Grab default colors */
-    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
-                         cfg_getsec(cfg_colors, "normal"),
-                         &colors_normal, NULL);
-
-    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
-                         cfg_getsec(cfg_colors, "normal"),
-                         &colors_normal, NULL);
-
-    /* Now grab menu colors if any */
-    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
-                         cfg_getsec(cfg_colors, "normal"),
-                         &globalconf.colors.normal, &colors_normal);
-
-    draw_colors_ctx_init(globalconf.display, DefaultScreen(globalconf.display),
-                         cfg_getsec(cfg_colors, "focus"),
-                         &globalconf.colors.focus, &colors_focus);
-
-    /* font */
-    if(!cfg_menu || !(opt = cfg_getstr(cfg_menu, "font")))
-        opt = cfg_getstr(cfg_general, "font");
-
-    globalconf.font = XftFontOpenName(globalconf.display,
-                                      DefaultScreen(globalconf.display),
-                                      opt);
+    cfg_screen = cfg_getsec(cfg, "screen");
 
     if(cfg_menu)
     {
+        cfg_menu_styles = cfg_getsec(cfg_menu, "styles");
         if((i = cfg_getint(cfg_menu, "x")) != (int) 0xffffffff)
            geometry->x = i;
         if((i = cfg_getint(cfg_menu, "y")) != (int) 0xffffffff)
@@ -197,6 +159,34 @@ config_parse(const char *confpatharg, const char *menu_title, Area *geometry)
         if((i = cfg_getint(cfg_menu, "height")) > 0)
            geometry->height = i;
     }
+
+    if(cfg_screen
+       && (cfg_styles = cfg_getsec(cfg_screen, "styles")))
+    {
+        /* Grab default styles */
+        draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+                        cfg_getsec(cfg_styles, "normal"),
+                        &globalconf.styles.normal, NULL);
+    
+        draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+                        cfg_getsec(cfg_styles, "focus"),
+                        &globalconf.styles.focus, &globalconf.styles.normal);
+    }
+
+    /* Now grab menu styles if any */
+    if(cfg_menu_styles)
+    {
+        draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+                        cfg_getsec(cfg_menu_styles, "normal"),
+                        &globalconf.styles.normal, NULL);
+
+        draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+                        cfg_getsec(cfg_menu_styles, "focus"),
+                        &globalconf.styles.focus, &globalconf.styles.normal);
+    }
+
+    if(!globalconf.styles.normal.font)
+        eprint("no default font available\n");
 
     p_delete(&confpath);
 
@@ -369,25 +359,13 @@ compute_match(const char *word)
 #define MARGIN 10
 
 static void
-draw_item(item_t *item, Area geometry)
-{
-    if(item == globalconf.item_selected)
-        draw_text(globalconf.ctx, geometry, AlignLeft,
-                  MARGIN / 2, globalconf.font, item->data,
-                  globalconf.colors.focus);
-    else
-        draw_text(globalconf.ctx, geometry, AlignLeft,
-                  MARGIN / 2, globalconf.font, item->data,
-                  globalconf.colors.normal);
-}
-
-static void
 redraw(void)
 {
     item_t *item;
     Area geometry = { 0, 0, 0, 0, NULL, NULL };
     Bool selected_item_is_drawn = False;
     int len, prompt_len, x_of_previous_item;
+    style_t style;
 
     geometry.width = globalconf.sw->geometry.width;
     geometry.height = globalconf.sw->geometry.height;
@@ -395,19 +373,17 @@ redraw(void)
     if(a_strlen(globalconf.prompt))
     {
         draw_text(globalconf.ctx, geometry, AlignLeft,
-                  MARGIN, globalconf.font, globalconf.prompt,
-                  globalconf.colors.focus);
+                  MARGIN, globalconf.prompt, globalconf.styles.focus);
 
-        len = MARGIN * 2 + draw_textwidth(globalconf.display, globalconf.font, globalconf.prompt);
+        len = MARGIN * 2 + draw_textwidth(globalconf.display, globalconf.styles.focus.font, globalconf.prompt);
         geometry.x += len;
         geometry.width -= len;
     }
 
     draw_text(globalconf.ctx, geometry, AlignLeft,
-              MARGIN, globalconf.font, globalconf.text,
-              globalconf.colors.normal);
+              MARGIN, globalconf.text, globalconf.styles.normal);
 
-    len = MARGIN * 2 + MAX(draw_textwidth(globalconf.display, globalconf.font, globalconf.text),
+    len = MARGIN * 2 + MAX(draw_textwidth(globalconf.display, globalconf.styles.normal.font, globalconf.text),
                            geometry.width / 20);
     geometry.x += len;
     geometry.width -= len;
@@ -416,7 +392,8 @@ redraw(void)
     for(item = globalconf.items; item && geometry.width > 0; item = item->next)
         if(item->match)
         {
-            len = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
+            style = item == globalconf.item_selected ? globalconf.styles.focus : globalconf.styles.normal;
+            len = MARGIN + draw_textwidth(globalconf.display, style.font, item->data);
             if(item == globalconf.item_selected)
             {
                 if(len > geometry.width)
@@ -424,7 +401,8 @@ redraw(void)
                 else
                     selected_item_is_drawn = True;
             }
-            draw_item(item, geometry);
+            draw_text(globalconf.ctx, geometry, AlignLeft,
+                      MARGIN / 2, item->data, style);
             geometry.x += len;
             geometry.width -= len;
         }
@@ -437,25 +415,27 @@ redraw(void)
         for(item = globalconf.item_selected; item; item = item_list_prev(&globalconf.items, item))
             if(item->match)
             {
+                style = item == globalconf.item_selected ? globalconf.styles.focus : globalconf.styles.normal;
                 x_of_previous_item = geometry.x;
-                geometry.width = MARGIN + draw_textwidth(globalconf.display, globalconf.font, item->data);
+                geometry.width = MARGIN + draw_textwidth(globalconf.display, style.font, item->data);
                 geometry.x -= geometry.width;
 
                 if(geometry.x < prompt_len)
                     break;
 
-                draw_item(item, geometry);
+                draw_text(globalconf.ctx, geometry, AlignLeft,
+                          MARGIN / 2, item->data, style);
             }
 
         if(item)
         {
             geometry.x = prompt_len;
             geometry.width = x_of_previous_item - prompt_len;
-            draw_rectangle(globalconf.ctx, geometry, True, globalconf.colors.normal.bg);
+            draw_rectangle(globalconf.ctx, geometry, True, globalconf.styles.normal.bg);
         }
     }
     else if(geometry.width)
-        draw_rectangle(globalconf.ctx, geometry, True, globalconf.colors.normal.bg);
+        draw_rectangle(globalconf.ctx, geometry, True, globalconf.styles.normal.bg);
 
     simplewindow_refresh_drawable(globalconf.sw, DefaultScreen(globalconf.display));
     XSync(globalconf.display, False);
@@ -651,7 +631,8 @@ main(int argc, char **argv)
 
     /* Init the geometry */
     if(!geometry.height)
-        geometry.height = globalconf.font->height * 1.5;
+        geometry.height = 1.5 * MAX(globalconf.styles.normal.font->height,
+                                    globalconf.styles.focus.font->height);
 
     si = screensinfo_new(disp);
     if(si->xinerama_is_active)

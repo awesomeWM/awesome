@@ -37,7 +37,7 @@ are described here.
 screen
 ~~~~~~
 This is the global section for a physical screen. It must have a title with screen number,
-starting at 0. It contains several subsections, which are *general*, *tags*, *layouts*, *colors*,
+starting at 0. It contains several subsections, which are *general*, *tags*, *layouts*, *styles*,
 *padding* and *statusbar*.
 
 general
@@ -98,11 +98,13 @@ Layout is a section which define a layout. It has a title which is the algorithm
 image::
     Set the image path used to describe this layouts, useful in layoutinfo widget.
 
-colors
+styles
 ^^^^^^
-Colors is a section containing the colors parameters which is composed of a normal, focus and urgent
+Styles is a section containing the style parameters which is composed of a normal, focus and urgent
 subsection each ones containing:
 
+font::
+    The font to use.
 fg::
     Set the foreground color.
 bg::
@@ -382,12 +384,8 @@ This widget shows a list of running windows.
 
 *mouse*::
     Set mouse bindings.
-*font*::
-    Font to use.
-*bg*::
-    Background color.
-*colors*::
-    Colors section with a focus and normal subsection.
+*styles*::
+    Style section with a focus and normal subsection.
 *text_align*::
     Text alignement.
 *show_icons*::
@@ -409,8 +407,8 @@ This widget shows a text.
     Font to use.
 *width*::
     Set width.
-*colors*::
-    Colors section with a focus and normal subsection.
+*styles*::
+    Styles section with a focus and normal subsection.
 *text*::
     Text to change.
 *text_align*::
@@ -538,7 +536,9 @@ Note: when there is no whitespace, quotes are optional.
 <uicb-arg>      -> prog, 3... (argument to a uicb function, where required)
 <uicb-cmd>      -> spawn, exec, client_tag... (see UICB FUNCTIONS above)
 <{.., ...}>     -> list of available options
-<color section> -> a section with fg, bg, border, shadow and shadow_offset options.
+<style section> -> a section with font, fg, bg, border, shadow and shadow_offset options.
+                   { font = <font> fg = <color> bg = <color> border = <color>
+                     shadow = <color> shadow_offset = <integer> }
 
 [MULTI] means, you can use an item multiple times.
 
@@ -577,11 +577,11 @@ screen <integer> [MULTI]
                  spiral,tile,tileleft,
 		 tilebottom,tiletop}> { image = <image> } [MULTI]
     }
-    colors
+    styles
     {
-        normal { <color section> }
-        focus { <color section> }
-        urgent { <color section> }
+        normal { <style section> }
+        focus { <style section> }
+        urgent { <style section> }
     }
     padding
     {
@@ -628,10 +628,10 @@ screen <integer> [MULTI]
         }
         tasklist <identifier>
         {
-            colors
+            styles
             {
-                normal { <color section> }
-                focus { <color section> }
+                normal { <style section> }
+                focus { <style section> }
             }
             font = <font>
             show_icons = <boolean>
@@ -646,10 +646,8 @@ screen <integer> [MULTI]
         }
         textbox <identifier> [MULTI]
         {
+            style { <style section> }
             text = <string>
-            bg = <color>
-            fg = <color>
-            font = <font>
             width = <integer>
             text_align = <{center,left,right}>
             x = <integer> y = <integer>

@@ -130,8 +130,6 @@ struct Widget
     Area area;
     /** Buttons bindings */
     Button *buttons;
-    /** Font */
-    XftFont *font;
     /** Cache */
     struct
     {
@@ -285,10 +283,10 @@ typedef struct
     /** Colors */
     struct
     {
-        colors_ctx_t normal;
-        colors_ctx_t focus;
-        colors_ctx_t urgent;
-    } colors;
+        style_t normal;
+        style_t focus;
+        style_t urgent;
+    } styles;
     /** Transparency of unfocused clients */
     int opacity_unfocused;
     /** Tag list */
@@ -299,8 +297,6 @@ typedef struct
     Statusbar *statusbar;
     /** Padding */
     Padding padding;
-    /** Font */
-    XftFont *font;
 } VirtScreen;
 
 /** Main configuration structure */

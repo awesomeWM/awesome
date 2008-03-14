@@ -459,7 +459,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         if((color = cfg_getstr(cfg, "fg")))
             draw_color_new(globalconf.display, phys_screen, color, &d->fg[i]);
         else
-            d->fg[i] = globalconf.screens[statusbar->screen].colors.normal.fg;
+            d->fg[i] = globalconf.screens[statusbar->screen].styles.normal.fg;
 
         if((color = cfg_getstr(cfg, "fg_center")))
         {
@@ -476,7 +476,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         if((color = cfg_getstr(cfg, "bg")))
             draw_color_new(globalconf.display, phys_screen, color, &d->bg[i]);
         else
-            d->bg[i] = globalconf.screens[statusbar->screen].colors.normal.fg;
+            d->bg[i] = globalconf.screens[statusbar->screen].styles.normal.bg;
 
         if((color = cfg_getstr(cfg, "bordercolor")))
             draw_color_new(globalconf.display, phys_screen, color, &d->bordercolor[i]);
