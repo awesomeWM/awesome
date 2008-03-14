@@ -526,6 +526,7 @@ config_parse(const char *confpatharg)
         rule->isfloating = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "float"));
         rule->screen = cfg_getint(cfgsectmp, "screen");
         rule->ismaster = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "master"));
+        rule->titlebar = position_get_from_str(cfg_getstr(cfgsectmp, "titlebar"));
         rule->opacity = cfg_getfloat(cfgsectmp, "opacity");
         if(rule->screen >= globalconf.screens_info->nscreen)
             rule->screen = 0;

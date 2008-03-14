@@ -61,7 +61,7 @@ screen_get_area(int screen, Statusbar *statusbar, Padding *padding)
           case Right:
             area.width -= sb->height;
             break;
-          case Off:
+          default:
             break;
         }
 

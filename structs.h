@@ -33,7 +33,7 @@ typedef enum
 {
     No = False,
     Yes = True,
-    Auto
+    Maybe
 } Fuzzy;
 
 /** Cursors */
@@ -49,6 +49,7 @@ struct Rule
     int screen;
     Fuzzy isfloating;
     Fuzzy ismaster;
+    Position titlebar;
     double opacity;
     regex_t *prop_r;
     regex_t *tags_r;

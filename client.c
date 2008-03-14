@@ -347,7 +347,56 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
+    /* update window title */
+    client_updatetitle(c);
+
+    /* update hints */
+    flags = client_updatesizehints(c);
+    client_updatewmhints(c);
+
+    /* Try to load props if any */
+    retloadprops = client_loadprops(c, screen);
+
+    /* Then check clients hints */
+    ewmh_check_client_hints(c);
+
+    /* default titlebar position */
     c->titlebar.position = globalconf.screens[screen].titlebar_default_position;
+
+    /* Then apply rules if no props */
+    if(!retloadprops)
+    {
+        /* Get the client's rule */
+        if((rule = rule_matching_client(c)))
+        {
+            if(rule->screen != RULE_NOSCREEN)
+                move_client_to_screen(c, rule->screen, True);
+            else
+                move_client_to_screen(c, screen, True);
+            tag_client_with_rule(c, rule);
+
+            switch(rule->isfloating)
+            {
+              case Maybe:
+                break;
+              case Yes:
+                client_setfloating(c, True);
+                break;
+              case No:
+                client_setfloating(c, False);
+                break;
+            }
+
+            if(rule->opacity >= 0.0f)
+                window_settrans(c->win, rule->opacity);
+
+            if(rule->titlebar != Auto)
+                c->titlebar.position = rule->titlebar;
+        }
+        else
+            move_client_to_screen(c, screen, True);
+    }
+
 
     switch(c->titlebar.position)
     {
@@ -365,49 +414,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
         break;
       default:
         break;
-    }
-    /* update window title */
-    client_updatetitle(c);
-
-    /* update hints */
-    flags = client_updatesizehints(c);
-    client_updatewmhints(c);
-
-    /* Try to load props if any */
-    retloadprops = client_loadprops(c, screen);
-
-    /* Then check clients hints */
-    ewmh_check_client_hints(c);
-
-    /* Then apply rules if no props */
-    if(!retloadprops)
-    {
-        /* Get the client's rule */
-        if((rule = rule_matching_client(c)))
-        {
-            if(rule->screen != RULE_NOSCREEN)
-                move_client_to_screen(c, rule->screen, True);
-            else
-                move_client_to_screen(c, screen, True);
-            tag_client_with_rule(c, rule);
-
-            switch(rule->isfloating)
-            {
-              case Auto:
-                break;
-              case Yes:
-                client_setfloating(c, True);
-                break;
-              case No:
-                client_setfloating(c, False);
-                break;
-            }
-
-            if(rule->opacity >= 0.0f)
-                window_settrans(c->win, rule->opacity);
-        }
-        else
-            move_client_to_screen(c, screen, True);
     }
 
     /* check for transient and set tags like its parent,
@@ -446,7 +452,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
           case No:
             client_list_append(&globalconf.clients, c);
             break;
-          case Auto:
+          case Maybe:
             rule = NULL;
             break;
         }

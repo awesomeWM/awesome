@@ -280,6 +280,7 @@ cfg_opt_t rule_opts[] =
     CFG_STR((char *) "icon", NULL, CFGF_NONE),
     CFG_STR((char *) "float", (char *) "auto", CFGF_NONE),
     CFG_STR((char *) "master", (char *) "auto", CFGF_NONE),
+    CFG_STR((char *) "titlebar", (char *) "auto", CFGF_NONE),
     CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
     CFG_FLOAT((char *) "opacity", -1.0f, CFGF_NONE),
     CFG_AWESOME_END()

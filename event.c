@@ -117,7 +117,7 @@ event_handle_buttonpress(XEvent *e)
                             return;
                         }
                     break;
-                  case Off:
+                  default:
                     break;
                 }
                 /* return if no widget match */

@@ -62,7 +62,7 @@ statusbar_update_position(Statusbar *statusbar)
       case Right:
         simplewindow_move(statusbar->sw, area.x + area.width, area.y);
         break;
-      case Off:
+      default:
         XUnmapWindow(globalconf.display, statusbar->sw->window);
         break;
     }
