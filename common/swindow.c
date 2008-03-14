@@ -110,6 +110,13 @@ simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
     return XResizeWindow(sw->display, sw->window, w, h);
 }
 
+int simplewindow_move_resize(SimpleWindow *sw, int x, int y,
+                             unsigned int w, unsigned int h)
+{
+    return (simplewindow_move(sw, x, y)
+            && simplewindow_resize(sw, w, h));
+}
+
 /** Refresh the window content
  * \param sw the SimpleWindow to refresh
  * \param phys_screen physical screen id

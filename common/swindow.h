@@ -38,6 +38,7 @@ void simplewindow_delete(SimpleWindow *);
 int simplewindow_move(SimpleWindow *, int, int);
 int simplewindow_resize(SimpleWindow *, unsigned int, unsigned int);
 int simplewindow_refresh_drawable(SimpleWindow *, int);
+int simplewindow_move_resize(SimpleWindow *, int, int, unsigned int, unsigned int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
