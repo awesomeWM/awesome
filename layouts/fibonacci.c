@@ -85,10 +85,10 @@ layout_fibonacci(int screen, int shape)
             if(globalconf.screens[screen].resize_hints)
                 client_resize(c,
                               client_geometry_hints(c,
-                                                    client_titlebar_update_position(c,
+                                                    client_titlebar_update_geometry(c,
                                                                                     geometry)));
             else
-                client_resize(c, client_titlebar_update_position(c, geometry));
+                client_resize(c, client_titlebar_update_geometry(c, geometry));
             geometry.width += 2 * c->border;
             geometry.height += 2 * c->border;
         }

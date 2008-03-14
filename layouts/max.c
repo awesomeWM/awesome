@@ -43,10 +43,10 @@ layout_max(int screen)
             if(globalconf.screens[screen].resize_hints)
                 client_resize(c,
                               client_geometry_hints(c,
-                                                    client_titlebar_update_position(c,
+                                                    client_titlebar_update_geometry(c,
                                                                                     area)));
             else
-                client_resize(c, client_titlebar_update_position(c, area));
+                client_resize(c, client_titlebar_update_geometry(c, area));
             area.width += 2 * c->border;
             area.height += 2 * c->border;
         }

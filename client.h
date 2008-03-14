@@ -31,7 +31,7 @@ void client_focus(Client *, int, Bool);
 void client_ban(Client *);
 void client_unban(Client *);
 void client_manage(Window, XWindowAttributes *, int);
-area_t client_titlebar_update_position(Client *, area_t);
+area_t client_titlebar_update_geometry(Client *, area_t);
 area_t client_geometry_hints(Client *, area_t);
 Bool client_resize(Client *, area_t);
 void client_unmanage(Client *);

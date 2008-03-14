@@ -207,7 +207,7 @@ _tile(int screen, const Position position)
             geometry.width = mw - 2 * c->border;
             geometry.height =  mh - 2 * c->border;
 
-            geometry = client_titlebar_update_position(c, geometry);
+            geometry = client_titlebar_update_geometry(c, geometry);
 
             if(globalconf.screens[screen].resize_hints)
                 geometry = client_geometry_hints(c, geometry);
@@ -263,7 +263,7 @@ _tile(int screen, const Position position)
                     geometry.y += mh;
             }
 
-            geometry = client_titlebar_update_position(c, geometry);
+            geometry = client_titlebar_update_geometry(c, geometry);
 
             if(globalconf.screens[screen].resize_hints)
                 geometry = client_geometry_hints(c, geometry);

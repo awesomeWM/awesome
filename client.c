@@ -490,7 +490,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 }
 
 area_t
-client_titlebar_update_position(Client *c, area_t geometry)
+client_titlebar_update_geometry(Client *c, area_t geometry)
 {
     if(!c->titlebar.position)
         return geometry;;
