@@ -67,10 +67,15 @@ cfg_awesome_include(cfg_t *cfg, cfg_opt_t *opt,
     return cfg_include(cfg, opt, argc, argv);
 }
 
+cfg_opt_t titlebar_opts[] =
+{
+    CFG_STR((char *) "position", (char *) "off", CFGF_NONE),
+    CFG_STR((char *) "icon", (char *) "left", CFGF_NONE),
+    CFG_AWESOME_END()
+};
 cfg_opt_t general_opts[] =
 {
     CFG_INT((char *) "border", 1, CFGF_NONE),
-    CFG_STR((char *) "titlebar", (char *) "off", CFGF_NONE),
     CFG_INT((char *) "snap", 8, CFGF_NONE),
     CFG_BOOL((char *) "resize_hints", cfg_true, CFGF_NONE),
     CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
@@ -264,6 +269,7 @@ cfg_opt_t padding_opts[] =
 cfg_opt_t screen_opts[] =
 {
     CFG_SEC((char *) "general", general_opts, CFGF_NONE),
+    CFG_SEC((char *) "titlebar", titlebar_opts, CFGF_NONE),
     CFG_SEC((char *) "statusbar", statusbar_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_SEC((char *) "tags", tags_opts, CFGF_NONE),
     CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
@@ -280,7 +286,7 @@ cfg_opt_t rule_opts[] =
     CFG_STR((char *) "icon", NULL, CFGF_NONE),
     CFG_STR((char *) "float", (char *) "auto", CFGF_NONE),
     CFG_STR((char *) "master", (char *) "auto", CFGF_NONE),
-    CFG_STR((char *) "titlebar", (char *) "auto", CFGF_NONE),
+    CFG_SEC((char *) "titlebar", titlebar_opts, CFGF_NONE),
     CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
     CFG_FLOAT((char *) "opacity", -1.0f, CFGF_NONE),
     CFG_AWESOME_END()

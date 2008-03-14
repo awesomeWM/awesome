@@ -273,6 +273,18 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 }
 
 static void
+config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb)
+{
+    if(cfg_titlebar)
+    {
+        tb->position = position_get_from_str(cfg_getstr(cfg_titlebar, "position"));
+        tb->icon = position_get_from_str(cfg_getstr(cfg_titlebar, "icon"));
+    }
+    else
+        tb->position = Auto;
+}
+
+static void
 config_parse_screen(cfg_t *cfg, int screen)
 {
     char buf[2];
@@ -282,7 +294,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     Tag *tag = NULL;
     Statusbar *statusbar = NULL;
     cfg_t *cfg_general, *cfg_styles, *cfg_screen, *cfg_tags,
-          *cfg_layouts, *cfg_padding, *cfgsectmp,
+          *cfg_layouts, *cfg_padding, *cfgsectmp, *cfg_titlebar,
           *cfg_styles_normal, *cfg_styles_focus, *cfg_styles_urgent;
     VirtScreen *virtscreen = &globalconf.screens[screen];
     int i, phys_screen = get_phys_screen(screen);
@@ -303,6 +315,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     cfg_tags = cfg_getsec(cfg_screen, "tags");
     cfg_styles = cfg_getsec(cfg_screen, "styles");
     cfg_general = cfg_getsec(cfg_screen, "general");
+    cfg_titlebar = cfg_getsec(cfg_screen, "titlebar");
     cfg_layouts = cfg_getsec(cfg_screen, "layouts");
     cfg_padding = cfg_getsec(cfg_screen, "padding");
 
@@ -319,8 +332,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->floating_placement =
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);
-    virtscreen->titlebar_default_position =
-        position_get_from_str(cfg_getstr(cfg_general, "titlebar"));
+    config_section_titlebar_init(cfg_titlebar, &virtscreen->titlebar_default);
 
     virtscreen->mwfact_lower_limit = cfg_getfloat(cfg_general, "mwfact_lower_limit");
     virtscreen->mwfact_upper_limit = cfg_getfloat(cfg_general, "mwfact_upper_limit");
@@ -526,8 +538,8 @@ config_parse(const char *confpatharg)
         rule->isfloating = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "float"));
         rule->screen = cfg_getint(cfgsectmp, "screen");
         rule->ismaster = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "master"));
-        rule->titlebar = position_get_from_str(cfg_getstr(cfgsectmp, "titlebar"));
         rule->opacity = cfg_getfloat(cfgsectmp, "opacity");
+        config_section_titlebar_init(cfg_getsec(cfgsectmp, "titlebar"), &rule->titlebar);
         if(rule->screen >= globalconf.screens_info->nscreen)
             rule->screen = 0;
 

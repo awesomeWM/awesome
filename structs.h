@@ -40,6 +40,13 @@ typedef enum
 enum
 { CurNormal, CurResize, CurMove, CurLast };
 
+typedef struct
+{
+    SimpleWindow *sw;
+    Position position;
+    Position icon;
+} Titlebar;
+
 /** Rule type */
 typedef struct Rule Rule;
 struct Rule
@@ -49,7 +56,7 @@ struct Rule
     int screen;
     Fuzzy isfloating;
     Fuzzy ismaster;
-    Position titlebar;
+    Titlebar titlebar;
     double opacity;
     regex_t *prop_r;
     regex_t *tags_r;
@@ -192,11 +199,7 @@ struct Client
     /** True if the client is a new one */
     Bool newcomer;
     /** Titlebar */
-    struct
-    {
-        SimpleWindow *sw;
-        Position position;
-    } titlebar;
+    Titlebar titlebar;
 };
 
 typedef struct client_node_t client_node_t;
@@ -257,8 +260,8 @@ typedef struct
 typedef area_t (FloatingPlacement)(area_t, int, int);
 typedef struct
 {
-    /** Titlebar position */
-    Position titlebar_default_position;
+    /** Titlebar default parameters */
+    Titlebar titlebar_default;
     /** Number of pixels to snap windows */
     int snap;
     /** Border size */

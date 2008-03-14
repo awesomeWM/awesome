@@ -358,7 +358,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     ewmh_check_client_hints(c);
 
     /* default titlebar position */
-    c->titlebar.position = globalconf.screens[screen].titlebar_default_position;
+    c->titlebar.position = globalconf.screens[screen].titlebar_default.position;
 
     /* First check clients hints */
     ewmh_check_client_hints(c);
@@ -393,8 +393,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             if(rule->opacity >= 0.0f)
                 window_settrans(c->win, rule->opacity);
 
-            if(rule->titlebar != Auto)
-                c->titlebar.position = rule->titlebar;
+            if(rule->titlebar.position != Auto)
+                c->titlebar.position = rule->titlebar.position;
         }
         else
             move_client_to_screen(c, screen, True);

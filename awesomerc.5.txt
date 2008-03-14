@@ -45,7 +45,7 @@ general
 General is a section containing some general options for this screen.
 
 titlebar::
-    This option defines the position of window titlebar.
+    This section defines the parameters of the windows titlebar.
 border::
     This defines the window borders size in pixel.
 font::
@@ -537,10 +537,13 @@ Note: when there is no whitespace, quotes are optional.
 <string>        -> "foo bar"
 <uicb-arg>      -> prog, 3... (argument to a uicb function, where required)
 <uicb-cmd>      -> spawn, exec, client_tag... (see UICB FUNCTIONS above)
+<position>      -> list of position: off, top, right, left, bottom, auto
 <{.., ...}>     -> list of available options
 <style section> -> a section with font, fg, bg, border, shadow and shadow_offset options.
                    { font = <font> fg = <color> bg = <color> border = <color>
                      shadow = <color> shadow_offset = <integer> }
+<titlebar>      -> a section with position and icon position.
+                   { position = <position> icon = <position> }
 
 [MULTI] means, you can use an item multiple times.
 
@@ -561,6 +564,10 @@ screen <integer> [MULTI]
         floating_placement = <{smart,under_mouse}>
         mwfact_lower_limit = <float>
         mwfact_upper_limit = <float>
+    }
+    titlebar
+    {
+        <titlebar>
     }
     tags
     {
@@ -594,7 +601,7 @@ screen <integer> [MULTI]
     }
     statusbar <identifier> [MULTI]
     {
-        position = <{top,bottom,left,right}>
+        position = <{top,bottom,left,right,off}>
         height = <integer>
         width = <integer>
 
@@ -728,6 +735,10 @@ rules
         screen = <integer>
         icon = <image>
         opacity = <float>
+        titlebar
+        {
+            <titlebar>
+        }
     }
 }
 keys
