@@ -82,6 +82,15 @@ placement_smart(area_t geometry, int border, int screen)
             newgeometry = c->f_geometry;
             newgeometry.width += 2 * c->border;
             newgeometry.height += 2 * c->border;
+            switch(c->titlebar.position)
+            {
+              case Top:
+                newgeometry.height += c->titlebar.sw->geometry.height;
+                newgeometry.y -= c->titlebar.sw->geometry.height;
+                break;
+              default:
+                break;
+            }
             area_list_remove(&arealist, &newgeometry);
         }
 
