@@ -125,7 +125,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 area.height = widget->statusbar->height;
                 area.width = box_width;
 
-                draw_rectangle(ctx, area, True, style.fg);
+                draw_rectangle(ctx, area, True, style.bg);
 
                 if((r = rule_matching_client(c)) && r->icon)
                 {
