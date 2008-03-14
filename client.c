@@ -414,7 +414,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                                           phys_screen,
                                           c->geometry.x,
                                           c->geometry.y - titlebar_height,
-                                          c->geometry.width,
+                                          c->geometry.width + 2 * c->border,
                                           titlebar_height,
                                           0);
         break;
