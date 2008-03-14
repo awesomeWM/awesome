@@ -308,7 +308,7 @@ event_handle_expose(XEvent *e)
                 }
 
         for(c = globalconf.clients; c; c = c->next)
-            if(c->titlebar.position && c->titlebar.sw->window == ev->window)
+            if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
             {
                 simplewindow_refresh_drawable(c->titlebar.sw, get_phys_screen(c->screen));
                 return;

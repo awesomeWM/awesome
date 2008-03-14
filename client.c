@@ -203,7 +203,7 @@ client_ban(Client *c)
         client_unfocus(c);
     XUnmapWindow(globalconf.display, c->win);
     window_setstate(c->win, IconicState);
-    if(c->titlebar.position)
+    if(c->titlebar.sw)
         XUnmapWindow(globalconf.display, c->titlebar.sw->window);
 }
 
@@ -692,7 +692,7 @@ client_unban(Client *c)
 {
     XMapWindow(globalconf.display, c->win);
     window_setstate(c->win, NormalState);
-    if(c->titlebar.position)
+    if(c->titlebar.sw && c->titlebar.position != Off)
         XMapWindow(globalconf.display, c->titlebar.sw->window);
 }
 
