@@ -33,7 +33,8 @@ typedef enum
     Top,
     Bottom,
     Right,
-    Left
+    Left,
+    Auto
 } Position;
 
 /** Link a name to a function */

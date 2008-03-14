@@ -107,6 +107,8 @@ position_get_from_str(const char *pos)
         return Right;
     else if(!a_strncmp(pos, "left", 4))
         return Left;
+    else if(!a_strncmp(pos, "auto", 4))
+        return Auto;
     return Off;
 }
 
