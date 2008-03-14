@@ -36,6 +36,7 @@ typedef struct SimpleWindow
 SimpleWindow * simplewindow_new(Display *, int, int, int, unsigned int, unsigned int, unsigned int);
 void simplewindow_delete(SimpleWindow *);
 int simplewindow_move(SimpleWindow *, int, int);
+int simplewindow_resize(SimpleWindow *, unsigned int, unsigned int);
 int simplewindow_refresh_drawable(SimpleWindow *, int);
 
 #endif

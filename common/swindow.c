@@ -96,6 +96,20 @@ simplewindow_move(SimpleWindow *sw, int x, int y)
     return XMoveWindow(sw->display, sw->window, x, y);
 }
 
+/** Resize a simple window
+ * \param sw the SimpleWindow to resize
+ * \param w new width
+ * \param h new height
+ * \return status
+ */
+int
+simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
+{
+    sw->geometry.width = w;
+    sw->geometry.height = h;
+    return XResizeWindow(sw->display, sw->window, w, h);
+}
+
 /** Refresh the window content
  * \param sw the SimpleWindow to refresh
  * \param phys_screen physical screen id
