@@ -52,7 +52,6 @@ void
 uicb_exec(int screen __attribute__ ((unused)), char *cmd)
 {
     Client *c;
-    int args_pos;
     char *args, *path;
 
     /* remap all clients since some WM won't handle them otherwise */
@@ -61,23 +60,20 @@ uicb_exec(int screen __attribute__ ((unused)), char *cmd)
 
     XSync(globalconf.display, False);
 
-    if(globalconf.display)
-        close(ConnectionNumber(globalconf.display));
-
     /* Ignore the leading spaces if any */
-    for(args_pos = 0;
-        args_pos < a_strlen(cmd) && cmd[args_pos] == ' ';
-        ++args_pos);
+    while(cmd[0] && cmd[0] == ' ')
+        cmd++;
 
     /* Get the beginning of the arguments */
-    if((args = strchr(cmd + args_pos, ' ')) == NULL)
-    {
-        warn("invalid command %s\n", cmd);
-        return;
-    }
+    args = strchr(cmd, ' ');
 
-    path = strndup(cmd + args_pos, args - (cmd + args_pos));
+    if(args)
+        path = strndup(cmd, args - cmd);
+    else
+        path = strndup(cmd, a_strlen(cmd));
+
     execlp(path, cmd, NULL);
+
     p_delete(&path);
 }
 
