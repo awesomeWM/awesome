@@ -363,11 +363,14 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* default titlebar position */
     c->titlebar.position = globalconf.screens[screen].titlebar_default_position;
 
+    /* get the matching rule if any */
+    rule = rule_matching_client(c);
+
     /* Then apply rules if no props */
     if(!retloadprops)
     {
         /* Get the client's rule */
-        if((rule = rule_matching_client(c)))
+        if(rule)
         {
             if(rule->screen != RULE_NOSCREEN)
                 move_client_to_screen(c, rule->screen, True);
@@ -443,7 +446,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
 
     /* attach to the stack */
-    if((rule = rule_matching_client(c)))
+    if(rule)
         switch(rule->ismaster)
         {
           case Yes:
