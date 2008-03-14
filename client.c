@@ -347,7 +347,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
-    switch(globalconf.screens[c->screen].titlebar)
+    switch(globalconf.screens[screen].titlebar)
     {
       case Top:
         titlebar_height = 1.5 * MAX(globalconf.screens[c->screen].styles.normal.font->height,
