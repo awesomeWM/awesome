@@ -465,8 +465,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     ewmh_update_net_client_list(phys_screen);
 }
 
-static area_t
-client_geometry_sizehint(Client *c, area_t geometry)
+area_t
+client_geometry_hints(Client *c, area_t geometry)
 {
     double dx, dy, max, min, ratio;
 
@@ -515,11 +515,10 @@ client_geometry_sizehint(Client *c, area_t geometry)
 /** Resize client window
  * \param c client to resize
  * \param geometry new window geometry
- * \param sizehints respect size hints
  * \param return True if resize has been done
  */
 Bool
-client_resize(Client *c, area_t geometry, Bool sizehints)
+client_resize(Client *c, area_t geometry)
 {
     int new_screen;
     area_t area;
@@ -530,9 +529,6 @@ client_resize(Client *c, area_t geometry, Bool sizehints)
         geometry.y += c->titlebar->geometry.height;
         geometry.height -= c->titlebar->geometry.height;
     }
-
-    if(sizehints)
-        geometry = client_geometry_sizehint(c, geometry);
 
     if(geometry.width <= 0 || geometry.height <= 0)
         return False;
@@ -579,8 +575,6 @@ client_resize(Client *c, area_t geometry, Bool sizehints)
            layout_get_current(new_screen)->arrange == layout_floating) && !c->ismax)
             c->f_geometry = geometry;
 
-        printf("moving client %s to %d\n", c->name, c->geometry.y);
-
         XConfigureWindow(globalconf.display, c->win,
                          CWX | CWY | CWWidth | CWHeight, &wc);
         window_configure(c->win, geometry, c->border);
@@ -600,7 +594,7 @@ client_setfloating(Client *c, Bool floating)
     {
         if((c->isfloating = floating))
         {
-            client_resize(c, c->f_geometry, False);
+            client_resize(c, c->f_geometry);
             XRaiseWindow(globalconf.display, c->win);
         }
         else
@@ -609,7 +603,7 @@ client_setfloating(Client *c, Bool floating)
             if(c->ismax)
             {
                 c->ismax = False;
-                client_resize(c, c->m_geometry, False);
+                client_resize(c, c->m_geometry);
             }
         }
         if(client_isvisible(c, c->screen))
@@ -918,7 +912,7 @@ uicb_client_moveresize(int screen, char *arg)
     int mx, my, dx, dy, nmx, nmy;
     unsigned int dui;
     Window dummy;
-    area_t area;
+    area_t geometry;
     Client *sel = globalconf.focus->client;
     Layout *curlay = layout_get_current(screen);
 
@@ -929,10 +923,10 @@ uicb_client_moveresize(int screen, char *arg)
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
         return;
 
-    area.x = (int) compute_new_value_from_arg(x, sel->geometry.x);
-    area.y = (int) compute_new_value_from_arg(y, sel->geometry.y);
-    area.width = (int) compute_new_value_from_arg(w, sel->geometry.width);
-    area.height = (int) compute_new_value_from_arg(h, sel->geometry.height);
+    geometry.x = (int) compute_new_value_from_arg(x, sel->geometry.x);
+    geometry.y = (int) compute_new_value_from_arg(y, sel->geometry.y);
+    geometry.width = (int) compute_new_value_from_arg(w, sel->geometry.width);
+    geometry.height = (int) compute_new_value_from_arg(h, sel->geometry.height);
 
     ox = sel->geometry.x;
     oy = sel->geometry.y;
@@ -943,7 +937,9 @@ uicb_client_moveresize(int screen, char *arg)
                              RootWindow(globalconf.display,
                                         get_phys_screen(screen)),
                              &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
-    client_resize(sel, area, globalconf.screens[sel->screen].resize_hints);
+    if(globalconf.screens[sel->screen].resize_hints)
+        geometry = client_geometry_hints(sel, geometry);
+    client_resize(sel, geometry);
     if (xqp && ox <= mx && (ox + 2 * sel->border + ow) >= mx &&
         oy <= my && (oy + 2 * sel->border + oh) >= my)
     {
@@ -1005,18 +1001,18 @@ client_maximize(Client *c, area_t geometry)
         if(layout_get_current(c->screen)->arrange != layout_floating)
             client_setfloating(c, True);
         client_focus(c, c->screen, True);
-        client_resize(c, geometry, False);
+        client_resize(c, geometry);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else if(c->wasfloating)
     {
         client_setfloating(c, True);
-        client_resize(c, c->m_geometry, False);
+        client_resize(c, c->m_geometry);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else if(layout_get_current(c->screen)->arrange == layout_floating)
     {
-        client_resize(c, c->m_geometry, False);
+        client_resize(c, c->m_geometry);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else

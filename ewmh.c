@@ -272,7 +272,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             client_setfloating(c, True);
         }
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-        client_resize(c, geometry, False);
+        client_resize(c, geometry);
         XRaiseWindow(globalconf.display, c->win);
     }
 }

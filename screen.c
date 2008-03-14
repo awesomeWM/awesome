@@ -189,11 +189,11 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
             if(c->m_geometry.y + c->m_geometry.height >= to.y + to.height)
                 c->m_geometry.y = to.y + to.height - c->m_geometry.height - 2 * c->border;
 
-            client_resize(c, new_geometry, False);
+            client_resize(c, new_geometry);
         }
         /* if floating, move to this new coords */
         else if(c->isfloating)
-            client_resize(c, new_f_geometry, False);
+            client_resize(c, new_f_geometry);
         /* otherwise just register them */
         else
         {

@@ -82,7 +82,10 @@ layout_fibonacci(int screen, int shape)
             }
             geometry.width -= 2 * c->border;
             geometry.height -= 2 * c->border;
-            client_resize(c, geometry, globalconf.screens[screen].resize_hints);
+            if(globalconf.screens[screen].resize_hints)
+                client_resize(c, client_geometry_hints(c, geometry));
+            else
+                client_resize(c, geometry);
             geometry.width += 2 * c->border;
             geometry.height += 2 * c->border;
         }
