@@ -363,6 +363,9 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* default titlebar position */
     c->titlebar.position = globalconf.screens[screen].titlebar_default_position;
 
+    /* First check clients hints */
+    ewmh_check_client_hints(c);
+
     /* get the matching rule if any */
     rule = rule_matching_client(c);
 

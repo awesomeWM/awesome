@@ -290,6 +290,7 @@ ewmh_process_window_type_atom(Client *c, Atom state)
         c->border = 0;
         c->skip = True;
         c->isfixed = True;
+        c->titlebar.position = Off;
         client_setfloating(c, True);
     }
     else if (state == net_wm_window_type_dialog)
