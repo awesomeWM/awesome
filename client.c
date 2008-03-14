@@ -140,27 +140,27 @@ client_updatetitlebar(Client *c)
     style_t style;
     area_t geometry;
 
-    if(!c->titlebar)
+    if(!c->titlebar.position)
         return;
 
     phys_screen = get_phys_screen(c->screen);
 
     ctx = draw_context_new(globalconf.display, phys_screen,
-                           c->titlebar->geometry.width,
-                           c->titlebar->geometry.height,
-                           c->titlebar->drawable);
+                           c->titlebar.sw->geometry.width,
+                           c->titlebar.sw->geometry.height,
+                           c->titlebar.sw->drawable);
 
     style = globalconf.focus->client == c ?
         globalconf.screens[c->screen].styles.focus :
         globalconf.screens[c->screen].styles.normal;
 
-    geometry = c->titlebar->geometry;
+    geometry = c->titlebar.sw->geometry;
     geometry.x = geometry.y = 0;
 
     draw_text(ctx, geometry, AlignCenter, 0,
               c->name, style);
 
-    simplewindow_refresh_drawable(c->titlebar, phys_screen);
+    simplewindow_refresh_drawable(c->titlebar.sw, phys_screen);
 
     draw_context_delete(ctx);
 }
@@ -203,8 +203,8 @@ client_ban(Client *c)
         client_unfocus(c);
     XUnmapWindow(globalconf.display, c->win);
     window_setstate(c->win, IconicState);
-    if(c->titlebar)
-        XUnmapWindow(globalconf.display, c->titlebar->window);
+    if(c->titlebar.position)
+        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
 }
 
 /** Give focus to client, or to first client if c is NULL
@@ -248,8 +248,8 @@ client_focus(Client *c, int screen, Bool raise)
             if(c->isfloating || curlay->arrange == layout_floating)
             {
                 XRaiseWindow(globalconf.display, c->win);
-                if(c->titlebar)
-                    XRaiseWindow(globalconf.display, c->titlebar->window);
+                if(c->titlebar.position)
+                    XRaiseWindow(globalconf.display, c->titlebar.sw->window);
             }
             else
             {
@@ -259,31 +259,31 @@ client_focus(Client *c, int screen, Bool raise)
                 for(client = globalconf.clients; client; client = client->next)
                     if(client != c && client_isvisible(client, c->screen) && client->isfloating)
                     {
-                        if(client->titlebar)
+                        if(client->titlebar.position)
                         {
-                            XConfigureWindow(globalconf.display, client->titlebar->window,
+                            XConfigureWindow(globalconf.display, client->titlebar.sw->window,
                                              CWSibling | CWStackMode, &wc);
-                            wc.sibling = client->titlebar->window;
+                            wc.sibling = client->titlebar.sw->window;
                         }
                         XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
                         wc.sibling = client->win;
                     }
-                if(c->titlebar)
+                if(c->titlebar.position)
                 {
-                     XConfigureWindow(globalconf.display, c->titlebar->window,
+                     XConfigureWindow(globalconf.display, c->titlebar.sw->window,
                                       CWSibling | CWStackMode, &wc);
-                     wc.sibling = c->titlebar->window;
+                     wc.sibling = c->titlebar.sw->window;
                 }
                 XConfigureWindow(globalconf.display, c->win, CWSibling | CWStackMode, &wc);
                 wc.sibling = c->win;
                 for(client = globalconf.clients; client; client = client->next)
                     if(client != c && IS_TILED(client, c->screen))
                     {
-                        if(client->titlebar)
+                        if(client->titlebar.position)
                         {
-                            XConfigureWindow(globalconf.display, client->titlebar->window,
+                            XConfigureWindow(globalconf.display, client->titlebar.sw->window,
                                              CWSibling | CWStackMode, &wc);
-                            wc.sibling = client->titlebar->window;
+                            wc.sibling = client->titlebar.sw->window;
                         }
                         XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
                         wc.sibling = client->win;
@@ -347,19 +347,21 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
-    switch(globalconf.screens[screen].titlebar)
+    c->titlebar.position = globalconf.screens[screen].titlebar_default_position;
+
+    switch(c->titlebar.position)
     {
       case Top:
         titlebar_height = 1.5 * MAX(globalconf.screens[c->screen].styles.normal.font->height,
                                     MAX(globalconf.screens[c->screen].styles.focus.font->height,
                                         globalconf.screens[c->screen].styles.urgent.font->height)),
-        c->titlebar = simplewindow_new(globalconf.display,
-                                       phys_screen,
-                                       c->geometry.x,
-                                       c->geometry.y - titlebar_height,
-                                       c->geometry.width,
-                                       titlebar_height,
-                                       0);
+        c->titlebar.sw = simplewindow_new(globalconf.display,
+                                          phys_screen,
+                                          c->geometry.x,
+                                          c->geometry.y - titlebar_height,
+                                          c->geometry.width,
+                                          titlebar_height,
+                                          0);
         break;
       default:
         break;
@@ -468,18 +470,18 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 area_t
 client_titlebar_update_position(Client *c, area_t geometry)
 {
-    if(!c->titlebar)
+    if(!c->titlebar.position)
         return geometry;;
 
-    simplewindow_move_resize(c->titlebar,
+    simplewindow_move_resize(c->titlebar.sw,
                              geometry.x,
                              geometry.y,
                              geometry.width,
-                             c->titlebar->geometry.height);
+                             c->titlebar.sw->geometry.height);
 
     client_updatetitlebar(c);
-    geometry.y += c->titlebar->geometry.height;
-    geometry.height -= c->titlebar->geometry.height;
+    geometry.y += c->titlebar.sw->geometry.height;
+    geometry.height -= c->titlebar.sw->geometry.height;
 
     return geometry;
 }
@@ -577,13 +579,13 @@ client_resize(Client *c, area_t geometry)
             if(!c->ismax)
                 c->f_geometry = geometry;
 
-            if(c->titlebar)
+            if(c->titlebar.position)
             {
-                simplewindow_move_resize(c->titlebar,
+                simplewindow_move_resize(c->titlebar.sw,
                                          geometry.x,
-                                         geometry.y - c->titlebar->geometry.height,
+                                         geometry.y - c->titlebar.sw->geometry.height,
                                          geometry.width,
-                                         c->titlebar->geometry.height);
+                                         c->titlebar.sw->geometry.height);
 
                 client_updatetitlebar(c);
             }
@@ -662,8 +664,8 @@ client_unban(Client *c)
 {
     XMapWindow(globalconf.display, c->win);
     window_setstate(c->win, NormalState);
-    if(c->titlebar)
-        XMapWindow(globalconf.display, c->titlebar->window);
+    if(c->titlebar.position)
+        XMapWindow(globalconf.display, c->titlebar.sw->window);
 }
 
 void
@@ -696,8 +698,8 @@ client_unmanage(Client *c)
     XSync(globalconf.display, False);
     XUngrabServer(globalconf.display);
 
-    if(c->titlebar)
-        simplewindow_delete(c->titlebar);
+    if(c->titlebar.sw)
+        simplewindow_delete(c->titlebar.sw);
 
     p_delete(&c);
 }

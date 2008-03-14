@@ -191,7 +191,11 @@ struct Client
     /** True if the client is a new one */
     Bool newcomer;
     /** Titlebar */
-    SimpleWindow *titlebar;
+    struct
+    {
+        SimpleWindow *sw;
+        Position position;
+    } titlebar;
 };
 
 typedef struct client_node_t client_node_t;
@@ -253,7 +257,7 @@ typedef area_t (FloatingPlacement)(area_t, int, int);
 typedef struct
 {
     /** Titlebar position */
-    Position titlebar;
+    Position titlebar_default_position;
     /** Number of pixels to snap windows */
     int snap;
     /** Border size */

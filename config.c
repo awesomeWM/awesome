@@ -319,7 +319,8 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->floating_placement =
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);
-    virtscreen->titlebar = position_get_from_str(cfg_getstr(cfg_general, "titlebar"));
+    virtscreen->titlebar_default_position =
+        position_get_from_str(cfg_getstr(cfg_general, "titlebar"));
 
     virtscreen->mwfact_lower_limit = cfg_getfloat(cfg_general, "mwfact_lower_limit");
     virtscreen->mwfact_upper_limit = cfg_getfloat(cfg_general, "mwfact_upper_limit");
