@@ -337,13 +337,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->oldborder = wa->border_width;
     c->newcomer = True;
 
-    c->border = globalconf.screens[screen].borderpx;
-
     /* Set windows borders */
-    wc.border_width = c->border;
+    wc.border_width = c->border = globalconf.screens[screen].borderpx;
     XConfigureWindow(globalconf.display, w, CWBorderWidth, &wc);
-    XSetWindowBorder(globalconf.display, w,
-                     globalconf.screens[screen].styles.normal.border.pixel);
+    XSetWindowBorder(globalconf.display, w, c->border);
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
