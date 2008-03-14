@@ -397,7 +397,9 @@ config_parse_screen(cfg_t *cfg, int screen)
     else
     {
         warn("no default layout available\n");
+        layout = p_new(Layout, 1);
         layout->arrange = layout_tile;
+        layout_list_push(&virtscreen->layouts, layout);
     }
 
     /* Tags */
