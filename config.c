@@ -275,13 +275,8 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 static void
 config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb)
 {
-    if(cfg_titlebar)
-    {
-        tb->position = position_get_from_str(cfg_getstr(cfg_titlebar, "position"));
-        tb->icon = position_get_from_str(cfg_getstr(cfg_titlebar, "icon"));
-    }
-    else
-        tb->position = Auto;
+    tb->position = position_get_from_str(cfg_getstr(cfg_titlebar, "position"));
+    tb->icon = position_get_from_str(cfg_getstr(cfg_titlebar, "icon"));
 }
 
 static void
