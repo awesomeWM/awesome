@@ -374,15 +374,27 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     switch(c->titlebar.position)
     {
-      default:
+      case Top:
         c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen, 0, 0,
+                                          phys_screen,
+                                          c->geometry.x,
+                                          c->geometry.y - titlebar_height,
                                           c->geometry.width + 2 * c->border,
                                           titlebar_height,
                                           0);
         break;
-      case Auto:
+      case Bottom:
+        c->titlebar.sw = simplewindow_new(globalconf.display,
+                                          phys_screen,
+                                          c->geometry.x,
+                                          c->geometry.y + c->geometry.height + 2 * c->border,
+                                          c->geometry.width + 2 * c->border,
+                                          titlebar_height,
+                                          0);
+        break;
       case Off:
+        break;
+      default:
         c->titlebar.position = Off;
         break;
     }

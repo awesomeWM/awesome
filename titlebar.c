@@ -70,14 +70,14 @@ titlebar_update_geometry_floating(Client *c)
         simplewindow_move_resize(c->titlebar.sw,
                                  c->geometry.x,
                                  c->geometry.y - c->titlebar.sw->geometry.height,
-                                 c->geometry.width,
+                                 c->geometry.width + 2 * c->border,
                                  c->titlebar.sw->geometry.height);
         break;
       case Bottom:
         simplewindow_move_resize(c->titlebar.sw,
                                  c->geometry.x,
                                  c->geometry.y + c->geometry.height + 2 * c->border,
-                                 c->geometry.width,
+                                 c->geometry.width + 2 * c->border,
                                  c->titlebar.sw->geometry.height);
         break;
     }
@@ -96,7 +96,7 @@ titlebar_update_geometry(Client *c, area_t geometry)
         simplewindow_move_resize(c->titlebar.sw,
                                  geometry.x,
                                  geometry.y,
-                                 geometry.width,
+                                 geometry.width + 2 * c->border,
                                  c->titlebar.sw->geometry.height);
         geometry.y += c->titlebar.sw->geometry.height;
         geometry.height -= c->titlebar.sw->geometry.height;
@@ -106,7 +106,7 @@ titlebar_update_geometry(Client *c, area_t geometry)
         simplewindow_move_resize(c->titlebar.sw,
                                  geometry.x,
                                  geometry.y + geometry.height + 2 * c->border,
-                                 geometry.width,
+                                 geometry.width + 2 * c->border,
                                  c->titlebar.sw->geometry.height);
         break;
     }
