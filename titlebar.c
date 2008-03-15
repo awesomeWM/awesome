@@ -56,6 +56,32 @@ titlebar_update(Client *c)
     draw_context_delete(ctx);
 }
 
+void
+titlebar_update_geometry_floating(Client *c)
+{
+    switch(c->titlebar.position)
+    {
+      default:
+        return;
+      case Top:
+        simplewindow_move_resize(c->titlebar.sw,
+                                 c->geometry.x,
+                                 c->geometry.y - c->titlebar.sw->geometry.height,
+                                 c->geometry.width,
+                                 c->titlebar.sw->geometry.height);
+        break;
+      case Bottom:
+        simplewindow_move_resize(c->titlebar.sw,
+                                 c->geometry.x,
+                                 c->geometry.y + c->geometry.height + 2 * c->border,
+                                 c->geometry.width,
+                                 c->titlebar.sw->geometry.height);
+        break;
+    }
+
+    titlebar_update(c);
+}
+
 area_t
 titlebar_update_geometry(Client *c, area_t geometry)
 {

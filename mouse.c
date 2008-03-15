@@ -28,6 +28,7 @@
 #include "event.h"
 #include "window.h"
 #include "client.h"
+#include "titlebar.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
 #include "common/xscreen.h"
@@ -97,6 +98,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             {
                 geometry.x = ocx + (ev.xmotion.x - x);
                 geometry.y = ocy + (ev.xmotion.y - y);
+
                 if(abs(geometry.x) < globalconf.screens[screen].snap + area.x && geometry.x > area.x)
                     geometry.x = area.x;
                 else if(abs((area.x + area.width) - (geometry.x + c->geometry.width + 2 * c->border))
@@ -107,9 +109,14 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 else if(abs((area.y + area.height) - (geometry.y + c->geometry.height + 2 * c->border))
                         < globalconf.screens[screen].snap)
                     geometry.y = area.y + area.height - c->geometry.height - 2 * c->border;
+
                 geometry.width = c->geometry.width;
                 geometry.height = c->geometry.height;
+
                 client_resize(c, geometry);
+
+                titlebar_update_geometry_floating(c);
+
                 while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
             }
             else

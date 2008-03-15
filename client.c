@@ -546,27 +546,7 @@ client_resize(Client *c, area_t geometry)
         {
             if(!c->ismax)
                 c->f_geometry = geometry;
-
-            switch(c->titlebar.position)
-            {
-              case Top:
-                simplewindow_move_resize(c->titlebar.sw,
-                                         geometry.x,
-                                         geometry.y - c->titlebar.sw->geometry.height,
-                                         geometry.width,
-                                         c->titlebar.sw->geometry.height);
-                break;
-              case Bottom:
-                simplewindow_move_resize(c->titlebar.sw,
-                                         geometry.x,
-                                         geometry.y + geometry.height + 2 * c->border,
-                                         geometry.width,
-                                         c->titlebar.sw->geometry.height);
-                break;
-              default:
-                break;
-            }
-            titlebar_update(c);
+            titlebar_update_geometry_floating(c);
         }
 
         XConfigureWindow(globalconf.display, c->win,
