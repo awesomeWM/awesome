@@ -9,7 +9,7 @@ awesome-menu - awesome menu system
 SYNOPSIS
 --------
 
-awesome-menu [-e command] <title>
+awesome-menu [-c config] [-e command] <title>
 
 DESCRIPTION
 -----------
@@ -42,6 +42,8 @@ You can do things like that:
 
 OPTIONS
 -------
+-c config::
+    Use an alternate configuration file instead of $HOME/.awesomerc. 
 -e command::
     Command to execute. The result is appended to the end of this command (like xargs).
 <title>::

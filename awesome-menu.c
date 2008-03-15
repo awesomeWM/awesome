@@ -109,7 +109,7 @@ static void __attribute__ ((noreturn))
 exit_help(int exit_code)
 {
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
-    fprintf(outfile, "Usage: %s [-e command] <message>\n",
+    fprintf(outfile, "Usage: %s [-c config] [-e command] <message>\n",
             PROGNAME);
     exit(exit_code);
 }
