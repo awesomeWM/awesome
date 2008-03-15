@@ -538,6 +538,7 @@ client_resize(Client *c, area_t geometry)
         c->geometry.width = wc.width = geometry.width;
         c->geometry.y = wc.y = geometry.y;
         c->geometry.height = wc.height = geometry.height;
+        wc.border_width = c->border;
 
         /* save the floating geometry if the window is floating but not
          * maximized */
@@ -550,7 +551,7 @@ client_resize(Client *c, area_t geometry)
         }
 
         XConfigureWindow(globalconf.display, c->win,
-                         CWX | CWY | CWWidth | CWHeight, &wc);
+                         CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
         window_configure(c->win, geometry, c->border);
 
         if(c->screen != new_screen)
