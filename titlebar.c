@@ -59,19 +59,30 @@ titlebar_update(Client *c)
 area_t
 titlebar_update_geometry(Client *c, area_t geometry)
 {
-    if(!c->titlebar.position)
-        return geometry;;
-
-    simplewindow_move_resize(c->titlebar.sw,
-                             geometry.x,
-                             geometry.y,
-                             geometry.width,
-                             c->titlebar.sw->geometry.height);
+    switch(c->titlebar.position)
+    {
+      default:
+        return geometry;
+      case Top:
+        simplewindow_move_resize(c->titlebar.sw,
+                                 geometry.x,
+                                 geometry.y,
+                                 geometry.width,
+                                 c->titlebar.sw->geometry.height);
+        geometry.y += c->titlebar.sw->geometry.height;
+        geometry.height -= c->titlebar.sw->geometry.height;
+        break;
+      case Bottom:
+        geometry.height -= c->titlebar.sw->geometry.height;
+        simplewindow_move_resize(c->titlebar.sw,
+                                 geometry.x,
+                                 geometry.y + geometry.height + 2 * c->border,
+                                 geometry.width,
+                                 c->titlebar.sw->geometry.height);
+        break;
+    }
 
     titlebar_update(c);
-
-    geometry.y += c->titlebar.sw->geometry.height;
-    geometry.height -= c->titlebar.sw->geometry.height;
 
     return geometry;
 }

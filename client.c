@@ -171,7 +171,7 @@ client_ban(Client *c)
         client_unfocus(c);
     XUnmapWindow(globalconf.display, c->win);
     window_setstate(c->win, IconicState);
-    if(c->titlebar.sw)
+    if(c->titlebar.position)
         XUnmapWindow(globalconf.display, c->titlebar.sw->window);
 }
 
@@ -368,16 +368,26 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(rule && rule->titlebar.position != Auto)
         c->titlebar = rule->titlebar;
 
+    titlebar_height = 1.5 * MAX(globalconf.screens[c->screen].styles.normal.font->height,
+                                MAX(globalconf.screens[c->screen].styles.focus.font->height,
+                                    globalconf.screens[c->screen].styles.urgent.font->height));
+
     switch(c->titlebar.position)
     {
       case Top:
-        titlebar_height = 1.5 * MAX(globalconf.screens[c->screen].styles.normal.font->height,
-                                    MAX(globalconf.screens[c->screen].styles.focus.font->height,
-                                        globalconf.screens[c->screen].styles.urgent.font->height)),
         c->titlebar.sw = simplewindow_new(globalconf.display,
                                           phys_screen,
                                           c->geometry.x,
                                           c->geometry.y - titlebar_height,
+                                          c->geometry.width + 2 * c->border,
+                                          titlebar_height,
+                                          0);
+        break;
+      case Bottom:
+        c->titlebar.sw = simplewindow_new(globalconf.display,
+                                          phys_screen,
+                                          c->geometry.x,
+                                          c->geometry.y + c->geometry.height,
                                           c->geometry.width + 2 * c->border,
                                           titlebar_height,
                                           0);
@@ -547,22 +557,26 @@ client_resize(Client *c, area_t geometry)
             if(!c->ismax)
                 c->f_geometry = geometry;
 
-            if(c->titlebar.sw)
+            switch(c->titlebar.position)
             {
-                switch(c->titlebar.position)
-                {
-                  case Top:
-                    simplewindow_move_resize(c->titlebar.sw,
-                                             geometry.x,
-                                             geometry.y - c->titlebar.sw->geometry.height,
-                                             geometry.width,
-                                             c->titlebar.sw->geometry.height);
-                    break;
-                  default:
-                    break;
-                }
-                titlebar_update(c);
+              case Top:
+                simplewindow_move_resize(c->titlebar.sw,
+                                         geometry.x,
+                                         geometry.y - c->titlebar.sw->geometry.height,
+                                         geometry.width,
+                                         c->titlebar.sw->geometry.height);
+                break;
+              case Bottom:
+                simplewindow_move_resize(c->titlebar.sw,
+                                         geometry.x,
+                                         geometry.y + geometry.height + 2 * c->border,
+                                         geometry.width,
+                                         c->titlebar.sw->geometry.height);
+                break;
+              default:
+                break;
             }
+            titlebar_update(c);
         }
 
         XConfigureWindow(globalconf.display, c->win,
