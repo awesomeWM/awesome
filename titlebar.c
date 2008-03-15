@@ -30,7 +30,7 @@ titlebar_update(Client *c)
     style_t style;
     area_t geometry;
 
-    if(!c->titlebar.position)
+    if(!c->titlebar.position || !c->titlebar.sw)
         return;
 
     ctx = draw_context_new(globalconf.display, c->titlebar.sw->phys_screen,
@@ -59,6 +59,9 @@ titlebar_update(Client *c)
 void
 titlebar_update_geometry_floating(Client *c)
 {
+    if(!c->titlebar.sw)
+        return;
+
     switch(c->titlebar.position)
     {
       default:
