@@ -250,7 +250,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 {
     Client *c, *t = NULL;
     Window trans;
-    Bool rettrans;
+    Bool rettrans, retloadprops;
     XWindowChanges wc;
     Tag *tag;
     Rule *rule;
@@ -290,11 +290,14 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     flags = client_updatesizehints(c);
     client_updatewmhints(c);
 
-    /* First check clients hints */
+    /* Try to load props if any */
+    retloadprops = client_loadprops(c, screen);
+
+    /* Then check clients hints */
     ewmh_check_client_hints(c);
 
-    /* loadprops or apply rules if no props */
-    if(!client_loadprops(c, screen))
+    /* Then apply rules if no props */
+    if(!retloadprops)
     {
         /* Get the client's rule */
         if((rule = rule_matching_client(c)))
