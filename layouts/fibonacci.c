@@ -22,6 +22,7 @@
 #include "screen.h"
 #include "tag.h"
 #include "client.h"
+#include "titlebar.h"
 #include "layouts/fibonacci.h"
 #include "common/util.h"
 
@@ -85,10 +86,10 @@ layout_fibonacci(int screen, int shape)
             if(globalconf.screens[screen].resize_hints)
                 client_resize(c,
                               client_geometry_hints(c,
-                                                    client_titlebar_update_geometry(c,
-                                                                                    geometry)));
+                                                    titlebar_update_geometry(c,
+                                                                             geometry)));
             else
-                client_resize(c, client_titlebar_update_geometry(c, geometry));
+                client_resize(c, titlebar_update_geometry(c, geometry));
             geometry.width += 2 * c->border;
             geometry.height += 2 * c->border;
         }

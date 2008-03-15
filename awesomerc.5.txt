@@ -301,6 +301,8 @@ Client
     Set or unset client as being the scratch window.
 *client_togglescratch*::
     Toggle scratch window.
+*client_toggletitlebar*::
+    Toggle window titlebar.
 
 Tag
 ~~~

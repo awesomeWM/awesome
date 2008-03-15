@@ -121,6 +121,7 @@ awesome_SOURCES = \
 	common/list.h \
 	structs.h \
 	client.c client.h \
+	titlebar.c titlebar.h \
 	placement.c placement.h \
 	focus.c focus.h \
 	common/draw.c common/draw.h \

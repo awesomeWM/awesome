@@ -31,6 +31,7 @@
 #include "ewmh.h"
 #include "widget.h"
 #include "screen.h"
+#include "titlebar.h"
 #include "layouts/floating.h"
 #include "common/xutil.h"
 #include "common/xscreen.h"
@@ -132,39 +133,6 @@ client_get_byname(Client *list, char *name)
     return NULL;
 }
 
-void
-client_updatetitlebar(Client *c)
-{
-    DrawCtx *ctx;
-    int phys_screen;
-    style_t style;
-    area_t geometry;
-
-    if(!c->titlebar.position)
-        return;
-
-    phys_screen = get_phys_screen(c->screen);
-
-    ctx = draw_context_new(globalconf.display, phys_screen,
-                           c->titlebar.sw->geometry.width,
-                           c->titlebar.sw->geometry.height,
-                           c->titlebar.sw->drawable);
-
-    style = globalconf.focus->client == c ?
-        globalconf.screens[c->screen].styles.focus :
-        globalconf.screens[c->screen].styles.normal;
-
-    geometry = c->titlebar.sw->geometry;
-    geometry.x = geometry.y = 0;
-
-    draw_text(ctx, geometry, c->titlebar.text_align, style.font->height / 2,
-              c->name, style);
-
-    simplewindow_refresh_drawable(c->titlebar.sw, phys_screen);
-
-    draw_context_delete(ctx);
-}
-
 /** Update client name attribute with its title
  * \param c the client
  */
@@ -176,7 +144,7 @@ client_updatetitle(Client *c)
         xgettextprop(globalconf.display, c->win,
                      XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
 
-    client_updatetitlebar(c);
+    titlebar_update(c);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
@@ -190,7 +158,7 @@ client_unfocus(Client *c)
     XSetWindowBorder(globalconf.display, c->win,
                      globalconf.screens[c->screen].styles.normal.border.pixel);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    client_updatetitlebar(c);
+    titlebar_update(c);
 }
 
 /** Ban client and unmap it
@@ -239,7 +207,7 @@ client_focus(Client *c, int screen, Bool raise)
             window_settrans(c->win, -1);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].styles.focus.border.pixel);
-        client_updatetitlebar(c);
+        titlebar_update(c);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
         if(raise)
         {
@@ -487,25 +455,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 }
 
 area_t
-client_titlebar_update_geometry(Client *c, area_t geometry)
-{
-    if(!c->titlebar.position)
-        return geometry;;
-
-    simplewindow_move_resize(c->titlebar.sw,
-                             geometry.x,
-                             geometry.y,
-                             geometry.width,
-                             c->titlebar.sw->geometry.height);
-
-    client_updatetitlebar(c);
-    geometry.y += c->titlebar.sw->geometry.height;
-    geometry.height -= c->titlebar.sw->geometry.height;
-
-    return geometry;
-}
-
-area_t
 client_geometry_hints(Client *c, area_t geometry)
 {
     double dx, dy, max, min, ratio;
@@ -612,7 +561,7 @@ client_resize(Client *c, area_t geometry)
                   default:
                     break;
                 }
-                client_updatetitlebar(c);
+                titlebar_update(c);
             }
         }
 
@@ -1234,4 +1183,5 @@ uicb_client_togglescratch(int screen,
         widget_invalidate_cache(globalconf.scratch.client->screen, WIDGET_CACHE_CLIENTS);
     }
 }
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

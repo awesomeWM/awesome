@@ -275,7 +275,8 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 static void
 config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb)
 {
-    tb->position = position_get_from_str(cfg_getstr(cfg_titlebar, "position"));
+    tb->position = tb->dposition =
+        position_get_from_str(cfg_getstr(cfg_titlebar, "position"));
     tb->icon = position_get_from_str(cfg_getstr(cfg_titlebar, "icon"));
     tb->text_align = draw_get_align(cfg_getstr(cfg_titlebar, "text_align"));
 }
