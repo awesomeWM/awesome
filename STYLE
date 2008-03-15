@@ -3,6 +3,7 @@ If you intend to patch and contribute awesome, please respect the following codi
 - Place braces alone on new lines;
 - No space before if, for, while statements or function call;
 - The preferred line length is 80 characters;
-- Be clear in what you do.
+- Be clear in what you do;
+- Write documentation for any new functions, options, whatever.
 
 A vim modeline is set in each file to respect this.
