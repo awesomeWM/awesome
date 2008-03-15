@@ -48,8 +48,6 @@ titlebar::
     This section defines the parameters of the windows titlebar.
 border::
     This defines the window borders size in pixel.
-font::
-    This defines the general font used in awesome.
 new_become_master::
     If this is set to true, new windows will become the master window.
 new_get_focus::
@@ -407,12 +405,10 @@ This widget shows a text.
 
 *mouse*::
     Set mouse bindings.
-*font*::
-    Font to use.
 *width*::
     Set width.
-*styles*::
-    Styles section with a focus and normal subsection.
+*style*::
+    Style section with <style section>
 *text*::
     Text to change.
 *text_align*::
@@ -555,7 +551,6 @@ screen <integer> [MULTI]
     general
     {
         border = <integer>
-        font = <font>
         new_become_master = <boolean>
         new_get_focus = <boolean>
         opacity_unfocused = <integer>
@@ -644,7 +639,6 @@ screen <integer> [MULTI]
                 normal { <style section> }
                 focus { <style section> }
             }
-            font = <font>
             show_icons = <boolean>
             show = <{all,tags,focus}>
             text_align = <{center,left,right}>

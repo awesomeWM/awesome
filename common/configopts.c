@@ -155,7 +155,6 @@ cfg_opt_t widget_textbox_opts[] =
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_INT((char *) "width", 0, CFGF_NONE),
     CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_SEC((char *) "style", style_opts, CFGF_NONE),
     CFG_AWESOME_END()
@@ -166,7 +165,6 @@ cfg_opt_t widget_tasklist_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
-    CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
     CFG_STR((char *) "text_align", (char *) "left", CFGF_NONE),
     CFG_STR((char *) "show", (char *) "tags", CFGF_NONE),
     CFG_BOOL((char *) "show_icons", cfg_true, CFGF_NONE),
@@ -331,7 +329,6 @@ cfg_opt_t menu_opts[] =
     CFG_INT((char *) "height", 0, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
-    CFG_STR((char *) "font", NULL, CFGF_NONE),
     CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
     CFG_AWESOME_END()
 };
