@@ -343,10 +343,7 @@ event_handle_keypress(XEvent *e)
     for(k = globalconf.keys; k; k = k->next)
         if(ev->keycode == k->keycode &&
 	  k->func && CLEANMASK(k->mod) == CLEANMASK(ev->state))
-        {
             k->func(screen, k->arg);
-            break;
-        }
 }
 
 /** Handle XCrossing events on leave
