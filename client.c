@@ -392,14 +392,13 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
             if(rule->opacity >= 0.0f)
                 window_settrans(c->win, rule->opacity);
-
-            if(rule->titlebar.position != Auto)
-                c->titlebar.position = rule->titlebar.position;
         }
         else
             move_client_to_screen(c, screen, True);
     }
 
+    if(rule && rule->titlebar.position != Auto)
+        c->titlebar.position = rule->titlebar.position;
 
     switch(c->titlebar.position)
     {
@@ -416,6 +415,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                                           0);
         break;
       default:
+        c->titlebar.position = Off;
         break;
     }
 
