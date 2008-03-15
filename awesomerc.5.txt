@@ -479,7 +479,7 @@ This widget shows a graph.
 
 *data*::
     Defines a data-stream section;
-    Options: max, scale, fg, fg_center, fg_end and style.
+    Options: max, scale, fg, fg_center, fg_end and draw_style.
 *max*::
     This value prints a full graph (default = 100)
 *scale*::
@@ -492,8 +492,8 @@ This widget shows a graph.
     Foreground color at the end of a bar (as gradient).
 *vertical_gradient*
     If true, create a gradient from 0 > full instead of new > old values
-*style*::
-    bottom (fills to bottom with fg), top, or line.
+*draw_style*::
+    bottom (fills from bottom to top), top, or line.
 *mouse*::
     Set mouse bindings.
 *width*::
@@ -699,7 +699,7 @@ screen <integer> [MULTI]
         {
             data [MULTI]
             {
-                scale = <boolean> max = <float> style = <{bottom, top, line}>
+                scale = <boolean> max = <float> draw_style = <{bottom, top, line}>
                 fg = <color> fg_center = <color> fg_end = <color>
                 vertical_gradient = <boolean>
             }
