@@ -35,6 +35,7 @@
 #include "client.h"
 #include "widget.h"
 #include "rules.h"
+#include "titlebar.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "common/xscreen.h"
@@ -189,7 +190,10 @@ event_handle_configurerequest(XEvent * e)
                 globalconf.screens[c->screen].need_arrange = True;
         }
         else
+        {
+            titlebar_update_geometry_floating(c);
             window_configure(c->win, geometry, c->border);
+        }
     }
     else
     {
