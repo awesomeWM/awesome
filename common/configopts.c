@@ -70,6 +70,7 @@ cfg_awesome_include(cfg_t *cfg, cfg_opt_t *opt,
 cfg_opt_t titlebar_opts[] =
 {
     CFG_STR((char *) "position", (char *) "auto", CFGF_NONE),
+    CFG_STR((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_STR((char *) "icon", (char *) "left", CFGF_NONE),
     CFG_AWESOME_END()
 };

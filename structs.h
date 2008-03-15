@@ -44,6 +44,7 @@ typedef struct
 {
     SimpleWindow *sw;
     Position position;
+    Alignment text_align;
     Position icon;
 } Titlebar;
 

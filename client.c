@@ -157,7 +157,7 @@ client_updatetitlebar(Client *c)
     geometry = c->titlebar.sw->geometry;
     geometry.x = geometry.y = 0;
 
-    draw_text(ctx, geometry, AlignCenter, 0,
+    draw_text(ctx, geometry, c->titlebar.text_align, style.font->height / 2,
               c->name, style);
 
     simplewindow_refresh_drawable(c->titlebar.sw, phys_screen);
@@ -358,7 +358,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     ewmh_check_client_hints(c);
 
     /* default titlebar position */
-    c->titlebar.position = globalconf.screens[screen].titlebar_default.position;
+    c->titlebar = globalconf.screens[screen].titlebar_default;
 
     /* First check clients hints */
     ewmh_check_client_hints(c);
@@ -398,7 +398,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
 
     if(rule && rule->titlebar.position != Auto)
-        c->titlebar.position = rule->titlebar.position;
+        c->titlebar = rule->titlebar;
 
     switch(c->titlebar.position)
     {
