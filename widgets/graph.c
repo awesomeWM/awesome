@@ -465,7 +465,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
         /* filter each style-typ into it's own array (for easy looping later)*/
 
-        if ((type = cfg_getstr(cfg, "style")))
+        if ((type = cfg_getstr(cfg, "draw_style")))
         {
             if(!a_strncmp(type, "bottom", sizeof("bottom")))
             {
