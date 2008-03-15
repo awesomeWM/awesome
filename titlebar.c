@@ -19,6 +19,8 @@
  *
  */
 
+#include <math.h>
+
 #include "titlebar.h"
 
 extern AwesomeConf globalconf;
@@ -26,17 +28,43 @@ extern AwesomeConf globalconf;
 void
 titlebar_update(Client *c)
 {
+    Drawable d;
     DrawCtx *ctx;
     style_t style;
     area_t geometry;
 
-    if(!c->titlebar.position || !c->titlebar.sw)
+    if(!c->titlebar.sw)
         return;
 
-    ctx = draw_context_new(globalconf.display, c->titlebar.sw->phys_screen,
-                           c->titlebar.sw->geometry.width,
-                           c->titlebar.sw->geometry.height,
-                           c->titlebar.sw->drawable);
+    switch(c->titlebar.position)
+    {
+      case Off:
+        return;
+      case Right:
+      case Left:
+        XFreePixmap(globalconf.display, c->titlebar.sw->drawable);
+        c->titlebar.sw->drawable =
+            XCreatePixmap(globalconf.display,
+                          RootWindow(globalconf.display, c->titlebar.sw->phys_screen),
+                          c->titlebar.sw->geometry.height,
+                          c->titlebar.sw->geometry.width,
+                          DefaultDepth(globalconf.display, c->titlebar.sw->phys_screen));
+        ctx = draw_context_new(globalconf.display, c->titlebar.sw->phys_screen,
+                               c->titlebar.sw->geometry.height,
+                               c->titlebar.sw->geometry.width,
+                               c->titlebar.sw->drawable);
+        geometry.width = c->titlebar.sw->geometry.height;
+        geometry.height = c->titlebar.sw->geometry.width;
+        break;
+      default:
+        ctx = draw_context_new(globalconf.display, c->titlebar.sw->phys_screen,
+                               c->titlebar.sw->geometry.width,
+                               c->titlebar.sw->geometry.height,
+                               c->titlebar.sw->drawable);
+        geometry = c->titlebar.sw->geometry;
+        break;
+    }
+
 
     if(c->isurgent)
         style = globalconf.screens[c->screen].styles.urgent;
@@ -45,11 +73,22 @@ titlebar_update(Client *c)
     else
         style = globalconf.screens[c->screen].styles.normal;
 
-    geometry = c->titlebar.sw->geometry;
     geometry.x = geometry.y = 0;
 
     draw_text(ctx, geometry, c->titlebar.text_align, style.font->height / 2,
               c->name, style);
+
+    switch(c->titlebar.position)
+    {
+      case Left:
+        d = draw_rotate(ctx, c->titlebar.sw->phys_screen, - M_PI_2,
+                        0, c->titlebar.sw->geometry.height);
+        XFreePixmap(globalconf.display, c->titlebar.sw->drawable);
+        c->titlebar.sw->drawable = d;
+        break;
+      default:
+        break;
+    }
 
     simplewindow_refresh_drawable(c->titlebar.sw, c->titlebar.sw->phys_screen);
 
@@ -80,6 +119,13 @@ titlebar_update_geometry_floating(Client *c)
                                  c->geometry.width + 2 * c->border,
                                  c->titlebar.sw->geometry.height);
         break;
+      case Left:
+        simplewindow_move_resize(c->titlebar.sw,
+                                 c->geometry.x - c->titlebar.sw->geometry.width,
+                                 c->geometry.y,
+                                 c->titlebar.sw->geometry.width,
+                                 c->geometry.height + 2 * c->border);
+        break;
     }
 
     titlebar_update(c);
@@ -108,6 +154,15 @@ titlebar_update_geometry(Client *c, area_t geometry)
                                  geometry.y + geometry.height + 2 * c->border,
                                  geometry.width + 2 * c->border,
                                  c->titlebar.sw->geometry.height);
+        break;
+      case Left:
+        simplewindow_move_resize(c->titlebar.sw,
+                                 geometry.x,
+                                 geometry.y,
+                                 c->titlebar.sw->geometry.width,
+                                 geometry.height + 2 * c->border);
+        geometry.width -= c->titlebar.sw->geometry.width;
+        geometry.x += c->titlebar.sw->geometry.width;
         break;
     }
 
