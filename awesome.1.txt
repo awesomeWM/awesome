@@ -149,7 +149,7 @@ awesome is customized by creating a custom $HOME/.awesomerc file.
 
 SEE ALSO
 --------
-awesomerc(5) dmenu(1) dzen2(1)
+awesomerc(5) awesome-menu(1) awesome-client(1) awesome-message(1)
 
 BUGS
 ----
