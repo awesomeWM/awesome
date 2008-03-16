@@ -86,6 +86,11 @@ titlebar_update(Client *c)
         XFreePixmap(globalconf.display, c->titlebar.sw->drawable);
         c->titlebar.sw->drawable = d;
         break;
+      case Right:
+        d = draw_rotate(ctx, c->titlebar.sw->phys_screen, M_PI_2,
+                        c->titlebar.sw->geometry.width, 0);
+        XFreePixmap(globalconf.display, c->titlebar.sw->drawable);
+        c->titlebar.sw->drawable = d;
       default:
         break;
     }
@@ -122,6 +127,13 @@ titlebar_update_geometry_floating(Client *c)
       case Left:
         simplewindow_move_resize(c->titlebar.sw,
                                  c->geometry.x - c->titlebar.sw->geometry.width,
+                                 c->geometry.y,
+                                 c->titlebar.sw->geometry.width,
+                                 c->geometry.height + 2 * c->border);
+        break;
+      case Right:
+        simplewindow_move_resize(c->titlebar.sw,
+                                 c->geometry.x + c->geometry.width + 2 * c->border,
                                  c->geometry.y,
                                  c->titlebar.sw->geometry.width,
                                  c->geometry.height + 2 * c->border);
@@ -166,6 +178,14 @@ titlebar_update_geometry(Client *c, area_t geometry)
                                  geometry.height + 2 * c->border);
         geometry.width -= c->titlebar.sw->geometry.width;
         geometry.x += c->titlebar.sw->geometry.width;
+        break;
+      case Right:
+        geometry.width -= c->titlebar.sw->geometry.width;
+        simplewindow_move_resize(c->titlebar.sw,
+                                 geometry.x + geometry.width + 2 * c->border,
+                                 geometry.y,
+                                 c->titlebar.sw->geometry.width,
+                                 geometry.height + 2 * c->border);
         break;
     }
 

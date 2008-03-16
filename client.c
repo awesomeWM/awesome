@@ -401,6 +401,15 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                                           c->geometry.width + 2 * c->border,
                                           0);
         break;
+      case Right:
+        c->titlebar.sw = simplewindow_new(globalconf.display,
+                                          phys_screen,
+                                          c->geometry.x + c->geometry.width + 2 * c->border,
+                                          c->geometry.y,
+                                          titlebar_height,
+                                          c->geometry.width + 2 * c->border,
+                                          0);
+        break;
       case Off:
         break;
       default:
