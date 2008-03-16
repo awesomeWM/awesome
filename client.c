@@ -546,9 +546,9 @@ client_resize(Client *c, area_t geometry, Bool hints)
         return False;
 
     /* offscreen appearance fixes */
-    area = get_display_area(get_phys_screen(c->screen),
-                            NULL,
+    area = get_display_area(get_phys_screen(c->screen), NULL,
                             &globalconf.screens[c->screen].padding);
+
     if(geometry.x > area.width)
         geometry.x = area.width - geometry.width - 2 * c->border;
     if(geometry.y > area.height)
@@ -577,7 +577,11 @@ client_resize(Client *c, area_t geometry, Bool hints)
         {
             if(!c->ismax)
                 c->f_geometry = geometry;
-            titlebar_update_geometry_floating(c);
+            geometry = titlebar_update_geometry(c, geometry);
+            wc.x = geometry.x;
+            wc.y = geometry.y;
+            wc.width = geometry.width;
+            wc.height = geometry.height;
         }
 
         XConfigureWindow(globalconf.display, c->win,
