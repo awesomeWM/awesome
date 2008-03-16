@@ -55,6 +55,35 @@ placement_fix_offscreen(area_t geometry, int screen, int border)
     return newgeometry;
 }
 
+static area_t
+placement_geometry_add_titlebar(Titlebar *t, area_t geometry)
+{
+    if(!t->sw)
+        return geometry;
+
+    switch(t->position)
+    {
+      default:
+        break;
+      case Top:
+        geometry.y -= t->sw->geometry.height;
+        geometry.height += t->sw->geometry.height;
+        break;
+      case Bottom:
+        geometry.y += t->sw->geometry.height;
+        break;
+      case Left:
+        geometry.x -= t->sw->geometry.width;
+        geometry.width += t->sw->geometry.width;
+        break;
+      case Right:
+        geometry.width += t->sw->geometry.width;
+        break;
+    }
+
+    return geometry;
+}
+
 /** Compute smart coordinates for a client window
  * \param geometry current/requested client geometry
  * \param screen screen used
@@ -82,6 +111,7 @@ placement_smart(area_t geometry, int border, int screen)
             newgeometry = c->f_geometry;
             newgeometry.width += 2 * c->border;
             newgeometry.height += 2 * c->border;
+            newgeometry = placement_geometry_add_titlebar(&c->titlebar, newgeometry);
             area_list_remove(&arealist, &newgeometry);
         }
 

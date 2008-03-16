@@ -422,8 +422,23 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
         client_setfloating(c, rettrans || c->isfixed);
 
     if(!(flags & (USPosition | PPosition)))
-        c->f_geometry =
-            globalconf.screens[c->screen].floating_placement(c->f_geometry, c->border, c->screen);
+    {
+        c->f_geometry = globalconf.screens[c->screen].floating_placement(c->f_geometry,
+                                                                         c->border,
+                                                                         c->screen);
+        /* remove effects of the titlebar */
+        switch(c->titlebar.position)
+        {
+          case Top:
+            c->f_geometry.y += c->titlebar.sw->geometry.height;
+            break;
+          case Left:
+            c->f_geometry.x += c->titlebar.sw->geometry.width;
+            break;
+          default:
+            break;
+        }
+    }
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
@@ -567,7 +582,7 @@ client_resize(Client *c, area_t geometry, Bool hints)
         {
             if(!c->ismax)
                 c->f_geometry = geometry;
-                titlebar_update_geometry_floating(c);
+            titlebar_update_geometry_floating(c);
         }
 
         XConfigureWindow(globalconf.display, c->win,
