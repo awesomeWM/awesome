@@ -30,9 +30,12 @@
 #include <dirent.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <string.h>
 
 #include <confuse.h>
+
+#include <X11/Xutil.h>
 
 #include "common/swindow.h"
 #include "common/util.h"

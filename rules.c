@@ -19,6 +19,8 @@
  *
  */
 
+#include <X11/Xutil.h>
+
 #include "rules.h"
 #include "common/xutil.h"
 
