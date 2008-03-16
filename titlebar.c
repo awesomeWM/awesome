@@ -135,7 +135,7 @@ area_t
 titlebar_update_geometry(Client *c, area_t geometry)
 {
     if(!c->titlebar.sw)
-        return;
+        return geometry;
 
     switch(c->titlebar.position)
     {
