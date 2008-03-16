@@ -422,18 +422,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
         client_setfloating(c, rettrans || c->isfixed);
 
     if(!(flags & (USPosition | PPosition)))
-    {
         c->f_geometry =
             globalconf.screens[c->screen].floating_placement(c->f_geometry, c->border, c->screen);
-        switch(c->titlebar.position)
-        {
-          case Top:
-            c->f_geometry.y += c->titlebar.sw->geometry.height;
-            break;
-          default:
-            break;
-        }
-    }
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
