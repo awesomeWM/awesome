@@ -9,13 +9,7 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-awesome [ -v | --version ]
-
-awesome [ -h | --help ]
-
-awesome [ -k | --check ] [ -c configuration file ]
-
-awesome [ -s | --sync ] [ -c configuration file ]
+awesome [ -v | --version ] [ -h | --help ] [ -k | --check ] [ -s | --sync ] [ --config | -c configuration file ]
 
 DESCRIPTION
 -----------
@@ -51,7 +45,7 @@ OPTIONS
     Prints version information to standard output, then exits.
 -h | --help::
     Prints help information, then exits.
---config || -c::
+--config | -c::
     Use an alternate configuration file instead of $HOME/.awesomerc.
 --check | -k::
     Check configuration file syntax.
