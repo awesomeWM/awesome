@@ -145,14 +145,13 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
 
     for(b = widget->buttons; b; b = b->next)
         if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
-        {
-            style = taglist_style_get(vscreen, tag);
             switch(widget->statusbar->position)
             {
               case Top:
               case Bottom:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
+                    style = taglist_style_get(vscreen, tag);
                     width = draw_textwidth(globalconf.display, style.font, tag->name)
                         + style.font->height;
                     if(ev->x >= widget->area.x + prev_width
@@ -168,6 +167,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
               case Right:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
+                    style = taglist_style_get(vscreen, tag);
                     width = draw_textwidth(globalconf.display, style.font, tag->name) + style.font->height;
                     if(ev->y >= widget->area.x + prev_width
                        && ev->y < widget->area.x + prev_width + width)
@@ -182,6 +182,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
               default:
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
+                    style = taglist_style_get(vscreen, tag);
                     width = draw_textwidth(globalconf.display, style.font, tag->name) + style.font->height;
                     if(widget->statusbar->width - ev->y >= widget->area.x + prev_width
                        && widget->statusbar->width - ev->y < widget->area.x + prev_width + width)
@@ -194,7 +195,6 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 }
                 break;
             }
-        }
 }
 
 Widget *
