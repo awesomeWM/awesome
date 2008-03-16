@@ -9,9 +9,12 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-awesome [ -v | --version ] 
-awesome [ -h | --help ] 
+awesome [ -v | --version ]
+
+awesome [ -h | --help ]
+
 awesome [ -k | --check ] [ -c configuration file ]
+
 awesome [ -s | --sync ] [ -c configuration file ]
 
 DESCRIPTION
