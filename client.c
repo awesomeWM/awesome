@@ -193,6 +193,9 @@ client_focus(Client *c, int screen, Bool raise)
             for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
     }
 
+    if(c == globalconf.focus->client)
+        return;
+
     /* unfocus current selected client */
     if(globalconf.focus->client)
         client_unfocus(globalconf.focus->client);
