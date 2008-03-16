@@ -113,9 +113,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.width = c->geometry.width;
                 geometry.height = c->geometry.height;
 
-                client_resize(c, geometry);
-
-                titlebar_update_geometry_floating(c);
+                client_resize(c, geometry, False);
 
                 while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
             }
@@ -231,7 +229,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                     geometry.height = 1;
                 geometry.x = c->geometry.x;
                 geometry.y = c->geometry.y;
-                client_resize(c, client_geometry_hints(c, geometry));
+                client_resize(c, geometry, True);
             }
             else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
                     || layout->arrange == layout_tiletop || layout->arrange == layout_tilebottom)

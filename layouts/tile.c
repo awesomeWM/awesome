@@ -208,11 +208,7 @@ _tile(int screen, const Position position)
             geometry.width = mw - 2 * c->border;
             geometry.height =  mh - 2 * c->border;
 
-            geometry = titlebar_update_geometry(c, geometry);
-
-            if(globalconf.screens[screen].resize_hints)
-                geometry = client_geometry_hints(c, geometry);
-            client_resize(c, geometry);
+            client_resize(c, geometry, globalconf.screens[screen].resize_hints);
         }
         else
         {
@@ -263,12 +259,7 @@ _tile(int screen, const Position position)
                 if(position == Bottom)
                     geometry.y += mh;
             }
-
-            geometry = titlebar_update_geometry(c, geometry);
-
-            if(globalconf.screens[screen].resize_hints)
-                geometry = client_geometry_hints(c, geometry);
-            client_resize(c, geometry);
+            client_resize(c, geometry, globalconf.screens[screen].resize_hints);
         }
         i++;
     }

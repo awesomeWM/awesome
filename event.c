@@ -182,7 +182,7 @@ event_handle_configurerequest(XEvent * e)
         {
             old_screen = c->screen;
 
-            client_resize(c, geometry);
+            client_resize(c, geometry, False);
 
             tag_client_with_rule(c, rule_matching_client(c));
 
