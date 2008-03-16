@@ -544,7 +544,7 @@ client_resize(Client *c, area_t geometry, Bool hints)
     if(hints)
         geometry = client_geometry_hints(c, geometry);
 
-    if(!c->isfloating && layout->arrange != layout_floating)
+    if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating)
         geometry = titlebar_update_geometry(c, geometry);
 
     if(geometry.width <= 0 || geometry.height <= 0)
@@ -577,7 +577,7 @@ client_resize(Client *c, area_t geometry, Bool hints)
 
         /* save the floating geometry if the window is floating but not
          * maximized */
-        if(c->isfloating
+        if(c->ismoving || c->isfloating
            || layout_get_current(new_screen)->arrange == layout_floating)
         {
             if(!c->ismax)

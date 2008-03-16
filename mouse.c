@@ -73,6 +73,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                   RootWindow(globalconf.display, phys_screen),
                   &dummy, &dummy, &x, &y, &di, &di, &dui);
     c->ismax = False;
+    c->ismoving = True;
     for(;;)
     {
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
@@ -114,8 +115,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.height = c->geometry.height;
 
                 client_resize(c, geometry, False);
-
-                while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
             }
             else
             {
@@ -126,7 +125,8 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 {
                     move_client_to_screen(c, newscreen, True);
                     globalconf.screens[c->screen].need_arrange = True;
-                    globalconf.screens[newscreen].need_arrange = True;
+                    if(layout_get_current(newscreen)->arrange != layout_floating)
+                        globalconf.screens[newscreen].need_arrange = True;
                     layout_refresh();
                 }
                 if((target = client_get_bywin(globalconf.clients, child))
@@ -137,9 +137,11 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                     layout_refresh();
                 }
             }
+            while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
             break;
         }
     }
+    c->ismoving = False;
 }
 
 /** Resize client with mouse
