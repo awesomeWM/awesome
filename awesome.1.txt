@@ -9,7 +9,10 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-awesome [-v | --version] [-c configuration file]
+awesome [ -v | --version ] 
+awesome [ -h | --help ] 
+awesome [ -k | --check ] [ -c configuration file ]
+awesome [ -s | --sync ] [ -c configuration file ]
 
 DESCRIPTION
 -----------
@@ -42,13 +45,16 @@ awesome can draw a small border around windows to indicate the focus state.
 OPTIONS
 -------
 -v | --version::
-    prints version information to standard output, then exits.
+    Prints version information to standard output, then exits.
 -h | --help::
-    prints help information, then exits.
--c::
-    use an alternate configuration file instead of $HOME/.awesomerc.
--k::
-    check configuration file syntax.
+    Prints help information, then exits.
+--config || -c::
+    Use an alternate configuration file instead of $HOME/.awesomerc.
+--check | -k::
+    Check configuration file syntax.
+--sync | -s::
+    Enable X11 synchronization mode. All X11 calls will be synchronized,
+    so you can break on exit to retrieve a backtrace of X errors.
 
 DEFAULTS MOUSE BINDINGS
 -----------------------

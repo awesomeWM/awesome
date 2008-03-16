@@ -169,7 +169,8 @@ exit_help(int exit_code)
   -h, --help             show help\n\
   -v, --version          show version\n\
   -c, --config FILE      configuration file to use\n\
-  -k, --check            check configuration file syntax\n");
+  -k, --check            check configuration file syntax\n\
+  -s  --sync             enable synchronization (X debug)\n");
     exit(exit_code);
 }
 
@@ -194,12 +195,14 @@ main(int argc, char *argv[])
     struct sockaddr_un *addr;
     Client *c;
     XSetWindowAttributes wa;
+    Bool xsync = False;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
         {"version", 0, NULL, 'v'},
         {"check",   0, NULL, 'k'},
-        {"config",  0, NULL, 'c'},
+        {"config",  1, NULL, 'c'},
+        {"sync",    0, NULL, 's'},
         {NULL,      0, NULL, 0}
     };
 
@@ -217,7 +220,7 @@ main(int argc, char *argv[])
     }
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkc:",
+    while((opt = getopt_long(argc, argv, "vhkcs:",
                              long_options, NULL)) != -1)
         switch(opt)
         {
@@ -235,6 +238,9 @@ main(int argc, char *argv[])
             break;
           case 'k':
             return config_check(confpath);
+            break;
+          case 's':
+            xsync = True;
             break;
         }
 
@@ -257,6 +263,9 @@ main(int argc, char *argv[])
     XSetErrorHandler(NULL);
     xerrorxlib = XSetErrorHandler(xerror);
     XSync(dpy, False);
+
+    if(xsync)
+        XSynchronize(dpy, True);
 
     /* store display */
     globalconf.display = dpy;
