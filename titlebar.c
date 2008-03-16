@@ -134,6 +134,9 @@ titlebar_update_geometry_floating(Client *c)
 area_t
 titlebar_update_geometry(Client *c, area_t geometry)
 {
+    if(!c->titlebar.sw)
+        return;
+
     switch(c->titlebar.position)
     {
       default:
