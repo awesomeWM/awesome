@@ -576,12 +576,14 @@ client_resize(Client *c, area_t geometry, Bool hints)
            || layout_get_current(new_screen)->arrange == layout_floating)
         {
             if(!c->ismax)
+            {
                 c->f_geometry = geometry;
-            geometry = titlebar_update_geometry(c, geometry);
-            wc.x = geometry.x;
-            wc.y = geometry.y;
-            wc.width = geometry.width;
-            wc.height = geometry.height;
+                geometry = titlebar_update_geometry(c, geometry);
+                wc.x = geometry.x;
+                wc.y = geometry.y;
+                wc.width = geometry.width;
+                wc.height = geometry.height;
+            }
         }
 
         XConfigureWindow(globalconf.display, c->win,
