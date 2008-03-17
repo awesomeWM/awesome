@@ -35,24 +35,24 @@ name_func_link_t FloatingPlacementList[] =
 static area_t
 placement_fix_offscreen(area_t geometry, int screen, int border)
 {
-    area_t screen_geometry, newgeometry = geometry;
+    area_t screen_geometry;
 
     screen_geometry = screen_get_area(screen,
                                       globalconf.screens[screen].statusbar,
                                       &globalconf.screens[screen].padding);
 
     /* fix offscreen */
-    if(AREA_RIGHT(newgeometry) > AREA_RIGHT(screen_geometry))
-        newgeometry.x = screen_geometry.x + screen_geometry.width - (newgeometry.width + 2 * border);
-    else if(AREA_LEFT(newgeometry) < AREA_LEFT(screen_geometry))
-        newgeometry.x = screen_geometry.x;
+    if(AREA_RIGHT(geometry) > AREA_RIGHT(screen_geometry))
+        geometry.x = screen_geometry.x + screen_geometry.width - (geometry.width + 2 * border);
+    else if(AREA_LEFT(geometry) < AREA_LEFT(screen_geometry))
+        geometry.x = screen_geometry.x;
 
-    if(AREA_BOTTOM(newgeometry) > AREA_BOTTOM(screen_geometry))
-        newgeometry.y = screen_geometry.y + screen_geometry.height - (newgeometry.height + 2 * border);
-    else if(AREA_TOP(newgeometry) < AREA_TOP(screen_geometry))
-        newgeometry.y = screen_geometry.y;
+    if(AREA_BOTTOM(geometry) > AREA_BOTTOM(screen_geometry))
+        geometry.y = screen_geometry.y + screen_geometry.height - (geometry.height + 2 * border);
+    else if(AREA_TOP(geometry) < AREA_TOP(screen_geometry))
+        geometry.y = screen_geometry.y;
 
-    return newgeometry;
+    return geometry;
 }
 
 static area_t
@@ -63,14 +63,12 @@ placement_geometry_add_titlebar(Titlebar *t, area_t geometry)
 
     switch(t->position)
     {
-      default:
-        break;
       case Top:
         geometry.y -= t->sw->geometry.height;
         geometry.height += t->sw->geometry.height;
         break;
       case Bottom:
-        geometry.y += t->sw->geometry.height;
+        geometry.height += t->sw->geometry.height;
         break;
       case Left:
         geometry.x -= t->sw->geometry.width;
@@ -78,6 +76,8 @@ placement_geometry_add_titlebar(Titlebar *t, area_t geometry)
         break;
       case Right:
         geometry.width += t->sw->geometry.width;
+        break;
+      default:
         break;
     }
 
@@ -90,38 +90,38 @@ placement_geometry_add_titlebar(Titlebar *t, area_t geometry)
  * \return new geometry
  */
 area_t
-placement_smart(area_t geometry, int border, int screen)
+placement_smart(Client *c)
 {
-    Client *c;
+    Client *client;
     area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
     area_t *screen_geometry, *arealist = NULL, *r;
     Bool found = False;
 
     screen_geometry = p_new(area_t, 1);
 
-    *screen_geometry = screen_get_area(screen,
-                                       globalconf.screens[screen].statusbar,
-                                       &globalconf.screens[screen].padding);
+    *screen_geometry = screen_get_area(c->screen,
+                                       globalconf.screens[c->screen].statusbar,
+                                       &globalconf.screens[c->screen].padding);
 
     area_list_push(&arealist, screen_geometry);
 
-    for(c = globalconf.clients; c; c = c->next)
-        if(client_isvisible(c, screen))
+    for(client = globalconf.clients; client; client = client->next)
+        if(client_isvisible(client, c->screen))
         {
-            newgeometry = c->f_geometry;
-            newgeometry.width += 2 * c->border;
-            newgeometry.height += 2 * c->border;
-            newgeometry = placement_geometry_add_titlebar(&c->titlebar, newgeometry);
+            newgeometry = client->f_geometry;
+            newgeometry.width += 2 * client->border;
+            newgeometry.height += 2 * client->border;
+            newgeometry = placement_geometry_add_titlebar(&client->titlebar, newgeometry);
             area_list_remove(&arealist, &newgeometry);
         }
 
-    newgeometry.x = geometry.x;
-    newgeometry.y = geometry.y;
+    newgeometry.x = c->f_geometry.x;
+    newgeometry.y = c->f_geometry.y;
     newgeometry.width = 0;
     newgeometry.height = 0;
 
     for(r = arealist; r; r = r->next)
-        if(r->width >= geometry.width && r->height >= geometry.height
+        if(r->width >= c->f_geometry.width && r->height >= c->f_geometry.height
            && r->width * r->height > newgeometry.width * newgeometry.height)
         {
             found = True;
@@ -136,10 +136,15 @@ placement_smart(area_t geometry, int border, int screen)
                newgeometry = *r;
 
     /* restore height and width */
-    newgeometry.width = geometry.width;
-    newgeometry.height = geometry.height;
+    newgeometry.width = c->f_geometry.width;
+    newgeometry.height = c->f_geometry.height;
 
-    newgeometry = placement_fix_offscreen(newgeometry, screen, border);
+    newgeometry = placement_geometry_add_titlebar(&c->titlebar, newgeometry);
+    newgeometry = placement_fix_offscreen(newgeometry, c->screen, c->border);
+
+    /* restore height and width again */
+    newgeometry.width = c->f_geometry.width;
+    newgeometry.height = c->f_geometry.height;
 
     area_list_wipe(&arealist);
 
@@ -147,21 +152,26 @@ placement_smart(area_t geometry, int border, int screen)
 }
 
 area_t
-placement_under_mouse(area_t geometry, int border, int screen)
+placement_under_mouse(Client *c)
 {
     Window dummy;
     unsigned int m;
     int x, y, d;
-    area_t finalgeometry = geometry;
+    area_t finalgeometry = c->f_geometry;
 
-    if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(screen)),
+    if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(c->screen)),
                      &dummy, &dummy, &x, &y, &d, &d, &m))
     {
-        finalgeometry.x = x - geometry.width / 2;
-        finalgeometry.y = y - geometry.height / 2;
+        finalgeometry.x = x - c->f_geometry.width / 2;
+        finalgeometry.y = y - c->f_geometry.height / 2;
     }
 
-    finalgeometry = placement_fix_offscreen(finalgeometry, screen, border);
+    finalgeometry = placement_geometry_add_titlebar(&c->titlebar, finalgeometry);
+    finalgeometry = placement_fix_offscreen(finalgeometry, c->screen, c->border);
+
+    /* restore height and width */
+    finalgeometry.height = c->f_geometry.height;
+    finalgeometry.width = c->f_geometry.width;
 
     return finalgeometry;
 }

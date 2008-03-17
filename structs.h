@@ -261,7 +261,7 @@ typedef struct
     int right;
 } Padding;
 
-typedef area_t (FloatingPlacement)(area_t, int, int);
+typedef area_t (FloatingPlacement)(Client *);
 typedef struct
 {
     /** Titlebar default parameters */
