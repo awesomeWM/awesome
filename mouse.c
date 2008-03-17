@@ -72,7 +72,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                   RootWindow(globalconf.display, phys_screen),
                   &dummy, &dummy, &x, &y, &di, &di, &dui);
     c->ismax = False;
-    c->ismoving = True;
     for(;;)
     {
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
@@ -80,7 +79,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         {
           case ButtonRelease:
             XUngrabPointer(globalconf.display, CurrentTime);
-            c->ismoving = False;
             return;
           case ConfigureRequest:
             event_handle_configurerequest(&ev);
@@ -114,7 +112,9 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.width = c->geometry.width;
                 geometry.height = c->geometry.height;
 
+                c->ismoving = True;
                 client_resize(c, geometry, False);
+                c->ismoving = False;
             }
             else
             {
