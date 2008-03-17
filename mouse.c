@@ -80,6 +80,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         {
           case ButtonRelease:
             XUngrabPointer(globalconf.display, CurrentTime);
+            c->ismoving = False;
             return;
           case ConfigureRequest:
             event_handle_configurerequest(&ev);
@@ -140,7 +141,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             break;
         }
     }
-    c->ismoving = False;
 }
 
 /** Resize client with mouse
