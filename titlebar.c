@@ -205,7 +205,7 @@ uicb_client_toggletitlebar(int screen __attribute__ ((unused)),
 {
     Client *c = globalconf.focus->client;
 
-    if(!c->titlebar.sw)
+    if(!c || !c->titlebar.sw)
         return;
 
     if(!c->titlebar.position)
