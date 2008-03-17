@@ -28,7 +28,6 @@
 #include "event.h"
 #include "window.h"
 #include "client.h"
-#include "titlebar.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
 #include "common/xscreen.h"

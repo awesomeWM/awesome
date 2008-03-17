@@ -22,7 +22,6 @@
 #include "tag.h"
 #include "screen.h"
 #include "client.h"
-#include "titlebar.h"
 #include "layouts/max.h"
 #include "common/util.h"
 

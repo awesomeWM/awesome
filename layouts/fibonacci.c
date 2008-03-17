@@ -22,7 +22,6 @@
 #include "screen.h"
 #include "tag.h"
 #include "client.h"
-#include "titlebar.h"
 #include "layouts/fibonacci.h"
 #include "common/util.h"
 

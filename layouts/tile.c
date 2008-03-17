@@ -26,7 +26,6 @@
 #include "tag.h"
 #include "layout.h"
 #include "client.h"
-#include "titlebar.h"
 #include "layouts/tile.h"
 #include "common/util.h"
 
