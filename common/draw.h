@@ -85,8 +85,6 @@ typedef struct
 {
     PangoFontDescription *desc;
     int height;
-    int ascent;
-    int descent;
 } font_t;
 
 typedef struct

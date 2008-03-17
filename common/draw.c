@@ -126,8 +126,6 @@ draw_font_new(Display *disp, char *fontname)
     cairo_t *cr;
     PangoLayout *layout;
     font_t *font = p_new(font_t, 1);
-    PangoContext *context;
-    PangoFontMetrics *font_metrics;
 
     /* Create a dummy cairo surface, cairo context and pango layout in
      * order to get font informations */
@@ -147,6 +145,12 @@ draw_font_new(Display *disp, char *fontname)
     /* Get height */
     pango_layout_get_pixel_size(layout, NULL, &font->height);
 
+    /* At the moment, we don't need ascent/descent but maybe it could
+     * be useful in the future... */
+#if 0
+    PangoContext *context;
+    PangoFontMetrics *font_metrics;
+
     /* Get ascent and descent */
     context = pango_layout_get_context(layout);
     font_metrics = pango_context_get_metrics(context, font->desc, NULL);
@@ -156,6 +160,8 @@ draw_font_new(Display *disp, char *fontname)
     font->descent = PANGO_PIXELS(pango_font_metrics_get_descent(font_metrics));
 
     pango_font_metrics_unref(font_metrics);
+#endif
+
     g_object_unref(layout);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
