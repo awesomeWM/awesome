@@ -289,7 +289,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Tag *tag;
     Rule *rule;
     area_t screen_geom;
-    int phys_screen = get_phys_screen(screen), titlebar_height;
+    int phys_screen = get_phys_screen(screen);
     long flags;
 
     c = p_new(Client, 1);
@@ -368,58 +368,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             move_client_to_screen(c, screen, True);
     }
 
-    if(rule && rule->titlebar.position != Auto)
-        c->titlebar = rule->titlebar;
-
-    titlebar_height = 1.5 * MAX(globalconf.screens[c->screen].styles.normal.font->height,
-                                MAX(globalconf.screens[c->screen].styles.focus.font->height,
-                                    globalconf.screens[c->screen].styles.urgent.font->height));
-
-    switch(c->titlebar.position)
-    {
-      case Top:
-        c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen,
-                                          c->geometry.x,
-                                          c->geometry.y - titlebar_height,
-                                          c->geometry.width + 2 * c->border,
-                                          titlebar_height,
-                                          0);
-        break;
-      case Bottom:
-        c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen,
-                                          c->geometry.x,
-                                          c->geometry.y + c->geometry.height + 2 * c->border,
-                                          c->geometry.width + 2 * c->border,
-                                          titlebar_height,
-                                          0);
-        break;
-      case Left:
-        c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen,
-                                          c->geometry.x - titlebar_height,
-                                          c->geometry.y,
-                                          titlebar_height,
-                                          c->geometry.width + 2 * c->border,
-                                          0);
-        break;
-      case Right:
-        c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen,
-                                          c->geometry.x + c->geometry.width + 2 * c->border,
-                                          c->geometry.y,
-                                          titlebar_height,
-                                          c->geometry.width + 2 * c->border,
-                                          0);
-        break;
-      case Off:
-        break;
-      default:
-        c->titlebar.position = Off;
-        break;
-    }
-
     /* check for transient and set tags like its parent,
      * XGetTransientForHint returns 1 on success
      */
@@ -432,6 +380,12 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* should be floating if transsient or fixed */
     if(!c->isfloating)
         client_setfloating(c, rettrans || c->isfixed);
+
+    /* titlebar init */
+    if(rule && rule->titlebar.position != Auto)
+        c->titlebar = rule->titlebar;
+
+    titlebar_init(c);
 
     if(!(flags & (USPosition | PPosition)))
     {

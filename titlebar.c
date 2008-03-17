@@ -22,8 +22,63 @@
 #include <math.h>
 
 #include "titlebar.h"
+#include "screen.h"
 
 extern AwesomeConf globalconf;
+
+void
+titlebar_init(Client *c)
+{
+    int titlebar_height = 1.5 * MAX(globalconf.screens[c->screen].styles.normal.font->height,
+                                    MAX(globalconf.screens[c->screen].styles.focus.font->height,
+                                        globalconf.screens[c->screen].styles.urgent.font->height));
+    int phys_screen = get_phys_screen(c->screen);
+
+    switch(c->titlebar.position)
+    {
+      case Top:
+        c->titlebar.sw = simplewindow_new(globalconf.display,
+                                          phys_screen,
+                                          c->geometry.x,
+                                          c->geometry.y - titlebar_height,
+                                          c->geometry.width + 2 * c->border,
+                                          titlebar_height,
+                                          0);
+        break;
+      case Bottom:
+        c->titlebar.sw = simplewindow_new(globalconf.display,
+                                          phys_screen,
+                                          c->geometry.x,
+                                          c->geometry.y + c->geometry.height + 2 * c->border,
+                                          c->geometry.width + 2 * c->border,
+                                          titlebar_height,
+                                          0);
+        break;
+      case Left:
+        c->titlebar.sw = simplewindow_new(globalconf.display,
+                                          phys_screen,
+                                          c->geometry.x - titlebar_height,
+                                          c->geometry.y,
+                                          titlebar_height,
+                                          c->geometry.width + 2 * c->border,
+                                          0);
+        break;
+      case Right:
+        c->titlebar.sw = simplewindow_new(globalconf.display,
+                                          phys_screen,
+                                          c->geometry.x + c->geometry.width + 2 * c->border,
+                                          c->geometry.y,
+                                          titlebar_height,
+                                          c->geometry.width + 2 * c->border,
+                                          0);
+        break;
+      case Off:
+        break;
+      default:
+        c->titlebar.position = Off;
+        break;
+    }
+}
 
 void
 titlebar_update(Client *c)
