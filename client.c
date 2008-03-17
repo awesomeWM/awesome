@@ -387,7 +387,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     titlebar_init(c);
 
-    if(!(flags & (USPosition | PPosition)))
+    if(!retloadprops && !(flags & (USPosition | PPosition)))
         c->f_geometry = globalconf.screens[c->screen].floating_placement(c);
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
