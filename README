@@ -5,7 +5,7 @@ awesome is an extremely fast, small, and dynamic window manager for X.
 Requirements
 ------------
 In order to build awesome itself, you need header files and libs of:
-  - Xlib, Xinerama, Xrandr, Xft
+  - Xlib, Xinerama, Xrandr, Pango
   - libconfuse >= 2.6
   - cairo
 

@@ -20,7 +20,6 @@
  */
 
 #include <cairo.h>
-#include <cairo-ft.h>
 #include <cairo-xlib.h>
 
 #include <langinfo.h>
@@ -99,6 +98,7 @@ draw_context_new(Display *disp, int phys_screen, int width, int height, Drawable
     d->drawable = dw;
     d->surface = cairo_xlib_surface_create(disp, dw, d->visual, width, height);
     d->cr = cairo_create(d->surface);
+    d->layout = pango_cairo_create_layout(d->cr);
 
     return d;
 };
@@ -109,9 +109,68 @@ draw_context_new(Display *disp, int phys_screen, int width, int height, Drawable
 void
 draw_context_delete(DrawCtx *ctx)
 {
+    g_object_unref(ctx->layout);
     cairo_surface_destroy(ctx->surface);
     cairo_destroy(ctx->cr);
     p_delete(&ctx);
+}
+
+/** Create a new Pango font
+ * \param disp Display ref
+ * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE])
+ */
+font_t *
+draw_font_new(Display *disp, char *fontname)
+{
+    cairo_surface_t *surface;
+    cairo_t *cr;
+    PangoLayout *layout;
+    font_t *font = p_new(font_t, 1);
+    PangoContext *context;
+    PangoFontMetrics *font_metrics;
+
+    /* Create a dummy cairo surface, cairo context and pango layout in
+     * order to get font informations */
+    surface = cairo_xlib_surface_create(disp,
+                                        DefaultScreen(disp),
+                                        DefaultVisual(disp, DefaultScreen(disp)),
+                                        DisplayWidth(disp, DefaultScreen(disp)),
+                                        DisplayHeight(disp, DefaultScreen(disp)));
+
+    cr = cairo_create(surface);
+    layout = pango_cairo_create_layout(cr);
+
+    /* Get the font description used to set text on a PangoLayout */
+    font->desc = pango_font_description_from_string(fontname);
+    pango_layout_set_font_description(layout, font->desc);
+
+    /* Get height */
+    pango_layout_get_pixel_size(layout, NULL, &font->height);
+
+    /* Get ascent and descent */
+    context = pango_layout_get_context(layout);
+    font_metrics = pango_context_get_metrics(context, font->desc, NULL);
+
+    /* Values in PangoFontMetrics are given in Pango units */
+    font->ascent = PANGO_PIXELS(pango_font_metrics_get_ascent(font_metrics));
+    font->descent = PANGO_PIXELS(pango_font_metrics_get_descent(font_metrics));
+
+    pango_font_metrics_unref(font_metrics);
+    g_object_unref(layout);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+
+    return font;
+}
+
+/** Delete a font
+ * \param font font_t to delete
+ */
+void
+draw_font_free(font_t *font)
+{
+    pango_font_description_free(font->desc);
+    p_delete(&font);
 }
 
 /** Draw text into a draw context
@@ -136,7 +195,6 @@ draw_text(DrawCtx *ctx,
     int nw = 0, x, y;
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
-    cairo_font_face_t *font_face;
 
     draw_rectangle(ctx, area, True, style.bg);
 
@@ -175,12 +233,11 @@ draw_text(DrawCtx *ctx,
             buf[len - 3] = '.';
     }
 
-    font_face = cairo_ft_font_face_create_for_pattern(style.font->pattern);
-    cairo_set_font_face(ctx->cr, font_face);
-    cairo_set_font_size(ctx->cr, style.font->height);
+    pango_layout_set_text(ctx->layout, text, -1);
+    pango_layout_set_font_description(ctx->layout, style.font->desc);
 
     x = area.x + padding;
-    y = area.y + style.font->ascent + (ctx->height - style.font->height) / 2;
+    y = area.y + (ctx->height - style.font->height) / 2;
 
     switch(align)
     {
@@ -201,7 +258,8 @@ draw_text(DrawCtx *ctx,
                              style.shadow.green / 65535.0,
                              style.shadow.blue / 65535.0);
         cairo_move_to(ctx->cr, x + style.shadow_offset, y + style.shadow_offset);
-        cairo_show_text(ctx->cr, buf);
+        pango_cairo_update_layout(ctx->cr, ctx->layout);
+        pango_cairo_show_layout(ctx->cr, ctx->layout);
     }
 
     cairo_set_source_rgb(ctx->cr,
@@ -209,9 +267,8 @@ draw_text(DrawCtx *ctx,
                          style.fg.green / 65535.0,
                          style.fg.blue / 65535.0);
     cairo_move_to(ctx->cr, x, y);
-    cairo_show_text(ctx->cr, buf);
-
-    cairo_font_face_destroy(font_face);
+    pango_cairo_update_layout(ctx->cr, ctx->layout);
+    pango_cairo_show_layout(ctx->cr, ctx->layout);
 
     p_delete(&buf);
 }
@@ -597,12 +654,12 @@ draw_rotate(DrawCtx *ctx, int phys_screen, double angle, int tx, int ty)
  * \return text width
  */
 unsigned short
-draw_textwidth(Display *disp, XftFont *font, char *text)
+draw_textwidth(Display *disp, font_t *font, char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
-    cairo_font_face_t *font_face;
-    cairo_text_extents_t te;
+    PangoLayout *layout;
+    PangoRectangle ext;
 
     if (!a_strlen(text))
         return 0;
@@ -612,15 +669,15 @@ draw_textwidth(Display *disp, XftFont *font, char *text)
                                         DisplayWidth(disp, DefaultScreen(disp)),
                                         DisplayHeight(disp, DefaultScreen(disp)));
     cr = cairo_create(surface);
-    font_face = cairo_ft_font_face_create_for_pattern(font->pattern);
-    cairo_set_font_face(cr, font_face);
-    cairo_set_font_size(cr, font->height);
-    cairo_text_extents(cr, text, &te);
+    layout = pango_cairo_create_layout(cr);
+    pango_layout_set_text(layout, text, -1);
+    pango_layout_set_font_description(layout, font->desc);
+    pango_layout_get_pixel_extents(layout, NULL, &ext);
+    g_object_unref(layout);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
-    cairo_font_face_destroy(font_face);
 
-    return MAX(te.x_advance, te.width);
+    return ext.width;
 }
 
 /** Transform a string to a Alignment type.
@@ -683,7 +740,7 @@ draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
         return;
 
     if((buf = cfg_getstr(cfg, "font")))
-        c->font = XftFontOpenName(disp, phys_screen, buf);
+        c->font = draw_font_new(disp, buf);
 
     draw_color_new(disp, phys_screen,
                    cfg_getstr(cfg, "fg"), &c->fg);

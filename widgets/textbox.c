@@ -65,7 +65,7 @@ static widget_tell_status_t
 textbox_tell(Widget *widget, char *property, char *command)
 {
     Data *d = widget->data;
-    XftFont *newfont;
+    font_t *newfont;
 
     if(!a_strcmp(property, "text"))
     {
@@ -88,11 +88,10 @@ textbox_tell(Widget *widget, char *property, char *command)
             return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "font"))
     {
-        if((newfont = XftFontOpenName(globalconf.display,
-                                      get_phys_screen(widget->statusbar->screen), command)))
+        if((newfont = draw_font_new(globalconf.display, command)))
         {
             if(d->style.font != globalconf.screens[widget->statusbar->screen].styles.normal.font)
-                XftFontClose(globalconf.display, d->style.font);
+                draw_font_free(d->style.font);
             d->style.font = newfont;
         }
         else

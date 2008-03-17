@@ -524,7 +524,7 @@ Note: when there is no whitespace, quotes are optional.
 <boolean>       -> "true" or "false"
 <color>         -> #ff9933 (hexadecimal color notation: #red green blue)
 <float>         -> 0.3, 0,8 (often values between 0 and 1 are useful)
-<font>          -> Xft font: mono-10, fixed-12, sans-8, ...
+<font>          -> Pango font: sans 10, sans italic 10, fixed 12, ...
 <identifier>    -> foobar (choose a name/string)
 <image>         -> "/home/awesome/pics/icon.png" (path to image)
 <integer>       -> 1, 10, -3 (positive numbers are required mostly)
