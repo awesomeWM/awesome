@@ -377,6 +377,34 @@ config_validate_unsigned_int(cfg_t *cfg, cfg_opt_t *opt)
     return 0;
 }
 
+static int
+config_validate_supone_int(cfg_t *cfg, cfg_opt_t *opt)
+{
+    int value = cfg_opt_getnint(opt, cfg_opt_size(opt) - 1);
+
+    if(value < 1)
+    {
+        cfg_error(cfg, "integer option '%s' must be at least 1 in section '%s'",
+                  opt->name, cfg->name);
+        return -1;
+    }
+    return 0;
+}
+
+static int
+config_validate_zero_one_float(cfg_t *cfg, cfg_opt_t *opt)
+{
+    float value = cfg_opt_getnfloat(opt, cfg_opt_size(opt) - 1);
+
+    if(value < 0.0 || value > 1.0)
+    {
+        cfg_error(cfg, "integer option '%s' must be at least 0.0 and less than 1.0 in section '%s'",
+                  opt->name, cfg->name);
+        return -1;
+    }
+    return 0;
+}
+
 cfg_t *
 cfg_new(void)
 {
@@ -384,8 +412,18 @@ cfg_new(void)
 
     cfg = cfg_init(awesome_opts, CFGF_NONE);
 
+    /* Check integers values */
     cfg_set_validate_func(cfg, "screen|general|snap", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|general|border", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|general|opacity_unfocused", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|height", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|textbox|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|tags|tag|nmaster", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|tags|tag|ncol", config_validate_supone_int);
+
+    /* Check float values */
+    cfg_set_validate_func(cfg, "screen|tags|tag|mwfact", config_validate_zero_one_float);
 
     return cfg;
 }
