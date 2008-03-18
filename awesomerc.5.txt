@@ -387,7 +387,7 @@ This widget shows a list of running windows.
 *mouse*::
     Set mouse bindings.
 *styles*::
-    Style section with a focus and normal subsection.
+    Style section with normal, focus and urgent subsections.
 *text_align*::
     Text alignement.
 *show_icons*::

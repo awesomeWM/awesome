@@ -47,6 +47,7 @@ typedef struct
     {
         style_t normal;
         style_t focus;
+        style_t urgent;
     } styles;
 } Data;
 
@@ -115,7 +116,12 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
         {
             icon_width = 0;
 
-            style = sel == c ? d->styles.focus : d->styles.normal;
+            if(c->isurgent)
+                style = d->styles.urgent;
+            else if(sel == c)
+                style = d->styles.focus;
+            else
+                style = d->styles.normal;
 
             if(d->show_icons)
             {
@@ -285,6 +291,11 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
                     cfg_getsec(cfg_styles, "focus"),
                     &d->styles.focus,
                     &globalconf.screens[statusbar->screen].styles.focus);
+
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_getsec(cfg_styles, "urgent"),
+                    &d->styles.urgent,
+                    &globalconf.screens[statusbar->screen].styles.urgent);
 
     d->align = draw_get_align(cfg_getstr(config, "text_align"));
     d->show_icons = cfg_getbool(config, "show_icons");
