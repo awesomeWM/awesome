@@ -239,7 +239,7 @@ draw_text(DrawCtx *ctx,
             buf[len - 3] = '.';
     }
 
-    pango_layout_set_text(ctx->layout, text, -1);
+    pango_layout_set_text(ctx->layout, buf, -1);
     pango_layout_set_font_description(ctx->layout, style.font->desc);
 
     x = area.x + padding;
