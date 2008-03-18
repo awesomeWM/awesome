@@ -390,6 +390,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(!retloadprops && !(flags & (USPosition | PPosition)))
         c->f_geometry = globalconf.screens[c->screen].floating_placement(c);
 
+    /* update titlebar with real floating info now */
+    if(c->isfloating)
+        titlebar_update_geometry_floating(c);
+
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
     /* handle xshape */
