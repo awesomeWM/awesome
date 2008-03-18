@@ -319,7 +319,7 @@ complete(Bool reverse)
         if(item->match)
         {
             word = get_last_word(globalconf.text);
-            a_strcpy(word, sizeof(globalconf.text) - (word - globalconf.text), item->data);
+            a_strcpy(word, globalconf.text_size - (word - globalconf.text), item->data);
             globalconf.item_selected = item;
             return;
         }
@@ -529,7 +529,7 @@ handle_kpress(XKeyEvent *e)
                     globalconf.text_size += ((int) (text_dst_len / globalconf.text_size)) * CHUNK_SIZE;
                     p_realloc(&globalconf.text, globalconf.text_size);
                 }
-                a_strncat(globalconf.text, sizeof(globalconf.text), buf, num);
+                a_strncat(globalconf.text, globalconf.text_size, buf, num);
             }
             compute_match(get_last_word(globalconf.text));
             redraw();
