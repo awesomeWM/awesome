@@ -22,6 +22,8 @@
 /* getline(), asprintf() */
 #define _GNU_SOURCE
 
+#define CHUNK_SIZE 4096
+
 #include <getopt.h>
 
 #include <signal.h>
@@ -93,7 +95,9 @@ typedef struct
     /** Numlock mask */
     unsigned int numlockmask;
     /** The text */
-    char text[PATH_MAX];
+    char *text;
+    /** The text length */
+    size_t text_size;
     /** Item list */
     item_t *items;
     /** Selected item */
@@ -453,6 +457,7 @@ handle_kpress(XKeyEvent *e)
     KeySym ksym;
     int num;
     ssize_t len;
+    size_t text_dst_len;
 
     len = a_strlen(globalconf.text);
     num = XLookupString(e, buf, sizeof(buf), &ksym, 0);
@@ -516,6 +521,14 @@ handle_kpress(XKeyEvent *e)
             if(buf[0] != '/' || globalconf.text[len - 1] != '/')
             {
                 buf[num] = '\0';
+
+                /* Reallocate text string if needed to hold
+                 * concatenation of text and buf */
+                if((text_dst_len = (a_strlen(globalconf.text) + num - 1)) > globalconf.text_size)
+                {
+                    globalconf.text_size += ((int) (text_dst_len / globalconf.text_size)) * CHUNK_SIZE;
+                    p_realloc(&globalconf.text, globalconf.text_size);
+                }
                 a_strncat(globalconf.text, sizeof(globalconf.text), buf, num);
             }
             compute_match(get_last_word(globalconf.text));
@@ -677,6 +690,12 @@ main(int argc, char **argv)
     if(!item_list_fill_stdin())
         item_list_fill_file(NULL);
 
+    /* Allocate a default size for the text on the heap instead of
+     * using stack allocation with PATH_MAX (may not been defined
+     * according to POSIX). This string size may be increased if
+     * needed */
+    globalconf.text = p_new(char, CHUNK_SIZE);
+    globalconf.text_size = CHUNK_SIZE;
     compute_match(NULL);
 
     for(opt = 1000; opt; opt--)
@@ -727,6 +746,7 @@ main(int argc, char **argv)
         }
     }
 
+    p_delete(&globalconf.text);
     draw_context_delete(globalconf.ctx);
     simplewindow_delete(globalconf.sw);
     XCloseDisplay(disp);
