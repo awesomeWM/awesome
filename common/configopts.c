@@ -363,6 +363,33 @@ config_file(void)
     return confpath;
 }
 
+static int
+config_validate_unsigned_int(cfg_t *cfg, cfg_opt_t *opt)
+{
+    int value = cfg_opt_getnint(opt, cfg_opt_size(opt) - 1);
+
+    if(value < 0)
+    {
+        cfg_error(cfg, "integer option '%s' must be positive in section '%s'",
+                  opt->name, cfg->name);
+        return -1;
+    }
+    return 0;
+}
+
+cfg_t *
+cfg_new(void)
+{
+    cfg_t *cfg;
+
+    cfg = cfg_init(awesome_opts, CFGF_NONE);
+
+    cfg_set_validate_func(cfg, "screen|general|snap", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|general|border", config_validate_unsigned_int);
+
+    return cfg;
+}
+
 /** Check configuration file syntax in regard of libconfuse parsing
  * \param path to config file
  * \return status returned by cfg_parse()
@@ -374,7 +401,7 @@ config_check(const char *confpatharg)
     int ret;
     char *confpath;
 
-    cfg = cfg_init(awesome_opts, CFGF_NONE);
+    cfg = cfg_new();
 
     if(confpatharg)
         confpath = a_strdup(confpatharg);
@@ -395,6 +422,7 @@ config_check(const char *confpatharg)
     }
 
     p_delete(&confpath);
+    cfg_free(cfg);
 
     return ret;
 }

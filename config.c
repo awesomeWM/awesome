@@ -488,7 +488,7 @@ config_parse(const char *confpatharg)
 
     globalconf.configpath = a_strdup(confpath);
 
-    cfg = cfg_init(awesome_opts, CFGF_NONE);
+    cfg = cfg_new();
 
     ret = cfg_parse(cfg, confpath);
 

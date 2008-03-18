@@ -33,8 +33,6 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#include <confuse.h>
-
 #include <X11/Xutil.h>
 
 #include "common/swindow.h"
@@ -131,7 +129,7 @@ config_parse(int screen, const char *confpatharg,
     else
         confpath = a_strdup(confpatharg);
 
-    cfg = cfg_init(awesome_opts, CFGF_NONE);
+    cfg = cfg_new();
 
     switch((ret = cfg_parse(cfg, confpath)))
     {

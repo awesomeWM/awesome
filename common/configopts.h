@@ -22,6 +22,9 @@
 #ifndef AWESOME_COMMON_CONFIGOPTS_H
 #define AWESOME_COMMON_CONFIGOPTS_H
 
+#include <confuse.h>
+
+cfg_t * cfg_new(void);
 char * config_file(void);
 int config_check(const char *);
 
