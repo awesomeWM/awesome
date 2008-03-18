@@ -481,7 +481,7 @@ This widget shows a graph.
     Defines a data-stream section;
     Options: max, scale, fg, fg_center, fg_end and draw_style.
 *max*::
-    This value prints a full graph (default = 100)
+    This value prints a full graph (default = 100).
 *scale*::
     Re-scales when input > max (see below).
 *fg*::
@@ -499,9 +499,11 @@ This widget shows a graph.
 *width*::
     Set width.
 *height*::
-    Set height (i.e. 0.9 = 90%)
+    Set height (i.e. 0.9 = 90%).
 *padding_left*::
     Empty space on the left.
+*grow*::
+    Put new values onto the 'left' or 'right'.
 *bg*::
     Background color.
 *bordercolor*::
@@ -706,6 +708,7 @@ screen <integer> [MULTI]
             width = <integer>
             height = <float>
             padding_left = <integer>
+            grow = <{left, right}>
             bg = <color>
             bordercolor = <color>
             x = <integer> y = <integer>

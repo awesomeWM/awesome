@@ -189,6 +189,7 @@ cfg_opt_t widget_graph_opts[] =
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "data", widget_graph_data_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_INT((char *) "width", 100, CFGF_NONE),
+    CFG_STR((char *) "grow", (char *) "left", CFGF_NONE),
     CFG_INT((char *) "padding_left", 0, CFGF_NONE),
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),

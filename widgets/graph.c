@@ -40,6 +40,7 @@ typedef struct
     int size;                           /** Size of lines-array (also innerbox-lenght) */
     XColor bg;                          /** Background color */
     XColor bordercolor;                 /** Border color */
+    Position grow;                      /** grow: Left or Right */
 
     /* markers... */
     int *index;                         /** Index of current (new) value */
@@ -181,7 +182,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
                 if (--cur_index < 0) /* next index to compare to other values */
                     cur_index = d->size - 1;
             }
-            draw_graph(ctx, rectangle , d->draw_from, d->draw_to, *(d->filltop_index[z]), pattern_area,
+            draw_graph(ctx, rectangle , d->draw_from, d->draw_to, *(d->filltop_index[z]), d->grow, pattern_area,
                        &(d->filltop_color[z]), d->filltop_pcolor_center[z], d->filltop_pcolor_end[z]);
         }
     }
@@ -229,8 +230,8 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
                 if (--cur_index < 0)
                     cur_index = d->size - 1;
             }
-            draw_graph(ctx, rectangle, d->draw_from, d->fillbottom[z], *(d->fillbottom_index[z]), pattern_area,
-                    &(d->fillbottom_color[z]), d->fillbottom_pcolor_center[z], d->fillbottom_pcolor_end[z]);
+            draw_graph(ctx, rectangle, d->draw_from, d->fillbottom[z], *(d->fillbottom_index[z]), d->grow,
+                       pattern_area, &(d->fillbottom_color[z]), d->fillbottom_pcolor_center[z], d->fillbottom_pcolor_end[z]);
         }
     }
 
@@ -251,8 +252,8 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         /* draw style = line */
         for(z = 0; z < d->drawline_total; z++)
         {
-            draw_graph_line(ctx, rectangle, d->drawline[z], *(d->drawline_index[z]), pattern_area,
-                    &(d->drawline_color[z]), d->drawline_pcolor_center[z], d->drawline_pcolor_end[z]);
+            draw_graph_line(ctx, rectangle, d->drawline[z], *(d->drawline_index[z]), d->grow, pattern_area,
+                            &(d->drawline_color[z]), d->drawline_pcolor_center[z], d->drawline_pcolor_end[z]);
         }
     }
 
@@ -346,6 +347,19 @@ graph_tell(Widget *widget, char *property, char *command)
                            command, &d->bordercolor))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
+    else if(!a_strcmp(property, "grow"))
+    {
+        if(!a_strcmp(command, "left"))
+            d->grow = Left;
+        else if(!a_strcmp(command, "right"))
+            d->grow = Right;
+        else
+        {
+            warn("error changing property %s of widget %s, must be 'left' or 'right'\n",
+                 property, widget->name);
+            return WIDGET_ERROR_CUSTOM;
+        }
+    }
     else
         return WIDGET_ERROR;
 
@@ -388,6 +402,14 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     if(!(d->data_items = cfg_size(config, "data")))
     {
         warn("graph widget needs at least one data section\n");
+        return w;
+    }
+
+    d->grow = position_get_from_str(cfg_getstr(config, "grow"));
+    if(d->grow != Left && d->grow != Right)
+    {
+        warn("graph widget: 'grow' argument must be 'left' or 'right'\n");
+        d->data_items = 0; /* disable widget drawing */
         return w;
     }
 

@@ -398,12 +398,13 @@ draw_graph_setup(DrawCtx *ctx)
  * \param from array of starting-point offsets to draw a graph-lines
  * \param to array of end-point offsets to draw a graph-lines
  * \param cur_index current position in data-array (cycles around)
+ * \param grow put new values to the left or to the right
  * \param pcolor color at the left
  * \param pcolor_center color in the center
  * \param pcolor_end color at the right
  */
 void
-draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
+draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index, Position grow,
            area_t patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
     int i, x, y, w;
@@ -416,14 +417,30 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
     w = rect.width;
 
     i = -1;
-    while(++i < w)
+    if(grow == Right) /* draw from right to left */
     {
-        cairo_move_to(ctx->cr, x, y - from[cur_index]);
-        cairo_line_to(ctx->cr, x, y - to[cur_index]);
-        x++;
+        x += w - 1;
+        while(++i < w)
+        {
+            cairo_move_to(ctx->cr, x, y - from[cur_index]);
+            cairo_line_to(ctx->cr, x, y - to[cur_index]);
+            x--;
 
-        if (--cur_index < 0)
-            cur_index = w - 1;
+            if (--cur_index < 0)
+                cur_index = w - 1;
+        }
+    }
+    else /* draw from left to right */
+    {
+        while(++i < w)
+        {
+            cairo_move_to(ctx->cr, x, y - from[cur_index]);
+            cairo_line_to(ctx->cr, x, y - to[cur_index]);
+            x++;
+
+            if (--cur_index < 0)
+                cur_index = w - 1;
+        }
     }
 
     cairo_stroke(ctx->cr);
@@ -439,12 +456,13 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
  * \param w width in pixels
  * \param to array of offsets to draw the line through...
  * \param cur_index current position in data-array (cycles around)
+ * \param grow put new values to the left or to the right
  * \param pcolor color at the left
  * \param pcolor_center color in the center
  * \param pcolor_end color at the right
  */
 void
-draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
+draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index, Position grow,
                 area_t patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
     int i, x, y, w;
@@ -457,9 +475,17 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
     y = rect.y;
     w = rect.width;
 
-    /* x-1 (on the border), paints *from* the last point (... not included itself) */
-    /* makes sense when you assume there is already some line drawn to it. */
-    cairo_move_to(ctx->cr, x - 1, y - to[cur_index]);
+    if(grow == Right) /* draw from right to left */
+    {
+        x += w - 1;
+        cairo_move_to(ctx->cr, x, y - to[cur_index]);
+    }
+    else
+    {
+        /* x-1 (on the border), paints *from* the last point (... not included itself) */
+        /* may makes sense when you assume there is already some line drawn to it - anyway */
+        cairo_move_to(ctx->cr, x - 1, y - to[cur_index]);
+    }
 
     for (i = 0; i < w; i++)
     {
@@ -481,7 +507,11 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
 
         if (--cur_index < 0) /* cycles around the index */
             cur_index = w - 1;
-        x++;
+
+        if(grow == Right)
+            x--;
+        else
+            x++;
     }
     cairo_stroke(ctx->cr);
 
