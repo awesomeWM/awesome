@@ -239,14 +239,11 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
         {
             c->skiptb = False;
             c->skip = False;
-            c->border = c->oldborder;
         }
         else if(set == _NET_WM_STATE_ADD)
         {
             c->skiptb = True;
             c->skip = True;
-            c->oldborder = c->border;
-            c->border = 0;
         }
     }
     else if(state == net_wm_state_fullscreen)
