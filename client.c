@@ -196,7 +196,7 @@ client_focus(Client *c, int screen, Bool raise)
         /* save sel in focus history */
         focus_add_client(c);
         if(globalconf.screens[c->screen].opacity_unfocused != -1)
-            window_settrans(c->win, globalconf.screens[screen].opacity_unfocused);
+            window_settrans(c->win, -1);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].colors_selected[ColBorder].pixel);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
