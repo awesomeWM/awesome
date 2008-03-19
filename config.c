@@ -268,7 +268,7 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
             widget->buttons = parse_mouse_bindings(wptr, "mouse", a_strcmp(cfg_name(wptr), "taglist"));
         }
         else
-            warn("Ignoring unknown widget: %s.\n", cfg_name(widgets + i));
+            warn("ignoring unknown widget: %s.\n", cfg_name(widgets + i));
     }
 }
 
