@@ -430,7 +430,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     if(!(d->vertical = cfg_getbool(config, "vertical")))
         d->vertical = False;
 
-    w->alignment = draw_get_align(cfg_getstr(config, "align"));
+    w->alignment = * (Alignment *) cfg_getptr(config, "align");
 
     if(!(d->data_items = cfg_size(config, "data")))
     {

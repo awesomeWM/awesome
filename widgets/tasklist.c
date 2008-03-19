@@ -297,7 +297,7 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
                     &d->styles.urgent,
                     &globalconf.screens[statusbar->screen].styles.urgent);
 
-    d->align = draw_get_align(cfg_getstr(config, "text_align"));
+    d->align = * (Alignment *) cfg_getptr(config, "text_align");
     d->show_icons = cfg_getbool(config, "show_icons");
 
     buf = cfg_getstr(config, "show");

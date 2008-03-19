@@ -100,7 +100,7 @@ textbox_tell(Widget *widget, char *property, char *command)
     else if(!a_strcmp(property, "width"))
         d->width = atoi(command);
     else if(!a_strcmp(property, "text_align"))
-        d->align = draw_get_align(command);
+        d->align = draw_align_get_from_str(command);
     else
         return WIDGET_ERROR;
 
@@ -118,7 +118,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     widget_common_new(w, statusbar, config);
     w->draw = textbox_draw;
     w->tell = textbox_tell;
-    w->alignment = draw_get_align(cfg_getstr(config, "align"));
+    w->alignment = * (Alignment *) cfg_getptr(config, "align");
 
     w->data = d = p_new(Data, 1);
 
@@ -128,7 +128,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
                    &globalconf.screens[statusbar->screen].styles.normal);
 
     d->width = cfg_getint(config, "width");
-    d->align = draw_get_align(cfg_getstr(config, "text_align"));
+    d->align = * (Alignment *) cfg_getptr(config, "text_align");
 
     d->text = a_strdup(cfg_getstr(config, "text"));
 

@@ -135,7 +135,7 @@ void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char
 area_t draw_get_image_size(const char *filename);
 Drawable draw_rotate(DrawCtx *, int, double, int, int);
 unsigned short draw_textwidth(Display *, font_t *, char *);
-Alignment draw_get_align(const char *);
+Alignment draw_align_get_from_str(const char *);
 Bool draw_color_new(Display *, int, const char *, XColor *);
 void draw_style_init(Display *, int, cfg_t *, style_t *, style_t *);
 

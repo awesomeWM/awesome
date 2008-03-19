@@ -723,7 +723,7 @@ draw_textwidth(Display *disp, font_t *font, char *text)
  * \return Alignment type
  */
 Alignment
-draw_get_align(const char *align)
+draw_align_get_from_str(const char *align)
 {
     if(!a_strncmp(align, "left", 4))
         return AlignLeft;

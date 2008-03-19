@@ -40,6 +40,10 @@
     CFG_PTR_CB(name, value, flags, \
                cfg_position_parse, cfg_value_free)
 
+#define CFG_ALIGNMENT(name, value, flags) \
+    CFG_PTR_CB(name, value, flags, \
+               cfg_alignment_parse, cfg_value_free)
+
 /** This is a better writing of cfg_include coming from libconfuse.
  * With this one, we do not treat errors as fatal.
  */
@@ -90,6 +94,25 @@ cfg_position_parse(cfg_t *cfg, cfg_opt_t *opt,
     return 0;
 }
 
+static int
+cfg_alignment_parse(cfg_t *cfg, cfg_opt_t *opt,
+                    const char *value, void *result)
+{
+    Alignment *p = p_new(Alignment, 1);
+    
+    if((*p = draw_align_get_from_str(value)) == Auto
+       && a_strcmp(value, "auto"))
+    {
+        cfg_error(cfg,
+                  "alignment option '%s' must be left, center, right, flex or auto in section '%s'",
+                  opt->name, cfg->name);
+        p_delete(&p);
+        return -1;
+    }
+    *(void **) result = p;
+    return 0;
+}
+
 static void
 cfg_value_free(void *value)
 {
@@ -99,7 +122,7 @@ cfg_value_free(void *value)
 cfg_opt_t titlebar_opts[] =
 {
     CFG_POSITION((char *) "position", (char *) "auto", CFGF_NONE),
-    CFG_STR((char *) "text_align", (char *) "center", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_STR((char *) "icon", (char *) "left", CFGF_NONE),
     CFG_AWESOME_END()
 };
@@ -154,7 +177,7 @@ cfg_opt_t widget_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_AWESOME_END()
 };
@@ -162,7 +185,7 @@ cfg_opt_t widget_taglist_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_taglist_opts, CFGF_MULTI),
     CFG_AWESOME_END()
 };
@@ -170,7 +193,7 @@ cfg_opt_t widget_iconbox_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
     CFG_BOOL((char *) "resize", cfg_true, CFGF_NONE),
@@ -180,11 +203,11 @@ cfg_opt_t widget_textbox_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_INT((char *) "width", 0, CFGF_NONE),
     CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "text_align", (char *) "center", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_SEC((char *) "style", style_opts, CFGF_NONE),
     CFG_AWESOME_END()
 };
@@ -194,7 +217,7 @@ cfg_opt_t widget_tasklist_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
-    CFG_STR((char *) "text_align", (char *) "left", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "text_align", (char *) "left", CFGF_NONE),
     CFG_STR((char *) "show", (char *) "tags", CFGF_NONE),
     CFG_BOOL((char *) "show_icons", cfg_true, CFGF_NONE),
     CFG_AWESOME_END()
@@ -214,7 +237,7 @@ cfg_opt_t widget_graph_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "data", widget_graph_data_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_INT((char *) "width", 100, CFGF_NONE),
@@ -239,7 +262,7 @@ cfg_opt_t widget_progressbar_opts[] =
 {
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
-    CFG_STR((char *) "align", (char *) "auto", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "data", widget_progressbar_data_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_INT((char *) "width", 100, CFGF_NONE),
@@ -434,22 +457,6 @@ config_validate_zero_one_float(cfg_t *cfg, cfg_opt_t *opt)
     return 0;
 }
 
-static int
-config_validate_alignment(cfg_t *cfg, cfg_opt_t *opt)
-{
-    char *value = cfg_opt_getnstr(opt, cfg_opt_size(opt) - 1);
-
-    if(draw_get_align(value) == Auto
-       && a_strcmp(value, "auto"))
-    {
-        cfg_error(cfg,
-                  "alignment option '%s' must be left, center, right, flex or auto in section '%s'",
-                  opt->name, cfg->name);
-        return -1;
-    }
-    return 0;
-}
-
 cfg_t *
 cfg_new(void)
 {
@@ -471,10 +478,6 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|general|mwfact_lower_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|general|mwfact_upper_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|tags|tag|mwfact", config_validate_zero_one_float);
-
-    /* Check alignment values */
-    cfg_set_validate_func(cfg, "screen|titlebar|text_align", config_validate_alignment);
-    cfg_set_validate_func(cfg, "rules|rule|titlebar|text_align", config_validate_alignment);
 
     return cfg;
 }
