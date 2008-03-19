@@ -398,7 +398,23 @@ config_validate_zero_one_float(cfg_t *cfg, cfg_opt_t *opt)
 
     if(value < 0.0 || value > 1.0)
     {
-        cfg_error(cfg, "integer option '%s' must be at least 0.0 and less than 1.0 in section '%s'",
+        cfg_error(cfg, "float option '%s' must be at least 0.0 and less than 1.0 in section '%s'",
+                  opt->name, cfg->name);
+        return -1;
+    }
+    return 0;
+}
+
+static int
+config_validate_position(cfg_t *cfg, cfg_opt_t *opt)
+{
+    char *value = cfg_opt_getnstr(opt, cfg_opt_size(opt) - 1);
+
+    if(position_get_from_str(value) == Off
+       && !a_strncmp(value, "off", 3))
+    {
+        cfg_error(cfg,
+                  "position option '%s' must be top, bottom, right, left, auto or off in section '%s'",
                   opt->name, cfg->name);
         return -1;
     }
@@ -426,6 +442,10 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|general|mwfact_lower_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|general|mwfact_upper_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|tags|tag|mwfact", config_validate_zero_one_float);
+
+    /* Check position values */
+    cfg_set_validate_func(cfg, "screen|titlebar|position", config_validate_position);
+    cfg_set_validate_func(cfg, "screen|statusbar|position", config_validate_position);
 
     return cfg;
 }
