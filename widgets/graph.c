@@ -348,18 +348,16 @@ graph_tell(Widget *widget, char *property, char *command)
             return WIDGET_ERROR_FORMAT_COLOR;
     }
     else if(!a_strcmp(property, "grow"))
-    {
-        if(!a_strcmp(command, "left"))
-            d->grow = Left;
-        else if(!a_strcmp(command, "right"))
-            d->grow = Right;
-        else
+        switch((d->grow = position_get_from_str(command)))
         {
+          case Left:
+          case Right:
+            break;
+          default:
             warn("error changing property %s of widget %s, must be 'left' or 'right'\n",
                  property, widget->name);
             return WIDGET_ERROR_CUSTOM;
         }
-    }
     else
         return WIDGET_ERROR;
 
@@ -405,7 +403,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         return w;
     }
 
-    d->grow = position_get_from_str(cfg_getstr(config, "grow"));
+    d->grow = *(Position *) cfg_getptr(config, "grow");
     if(d->grow != Left && d->grow != Right)
     {
         warn("graph widget: 'grow' argument must be 'left' or 'right'\n");

@@ -36,6 +36,10 @@
         CFG_FUNC((char *) "include", cfg_awesome_include), \
         CFG_END()
 
+#define CFG_POSITION(name, value, flags) \
+    CFG_PTR_CB(name, value, flags, \
+               cfg_position_parse, cfg_value_free)
+
 /** This is a better writing of cfg_include coming from libconfuse.
  * With this one, we do not treat errors as fatal.
  */
@@ -67,9 +71,34 @@ cfg_awesome_include(cfg_t *cfg, cfg_opt_t *opt,
     return cfg_include(cfg, opt, argc, argv);
 }
 
+static int
+cfg_position_parse(cfg_t *cfg, cfg_opt_t *opt,
+                   const char *value, void *result)
+{
+    Position *p = p_new(Position, 1);
+    
+    if((*p = position_get_from_str(value)) == Off
+       && a_strcmp(value, "off"))
+    {
+        cfg_error(cfg,
+                  "position option '%s' must be top, bottom, right, left, auto or off in section '%s'",
+                  opt->name, cfg->name);
+        p_delete(&p);
+        return -1;
+    }
+    *(void **) result = p;
+    return 0;
+}
+
+static void
+cfg_value_free(void *value)
+{
+    p_delete(&value);
+}
+
 cfg_opt_t titlebar_opts[] =
 {
-    CFG_STR((char *) "position", (char *) "auto", CFGF_NONE),
+    CFG_POSITION((char *) "position", (char *) "auto", CFGF_NONE),
     CFG_STR((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_STR((char *) "icon", (char *) "left", CFGF_NONE),
     CFG_AWESOME_END()
@@ -189,7 +218,7 @@ cfg_opt_t widget_graph_opts[] =
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "data", widget_graph_data_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     CFG_INT((char *) "width", 100, CFGF_NONE),
-    CFG_STR((char *) "grow", (char *) "left", CFGF_NONE),
+    CFG_POSITION((char *) "grow", (char *) "left", CFGF_NONE),
     CFG_INT((char *) "padding_left", 0, CFGF_NONE),
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
     CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
@@ -222,7 +251,7 @@ cfg_opt_t widget_progressbar_opts[] =
 };
 cfg_opt_t statusbar_opts[] =
 {
-    CFG_STR((char *) "position", (char *) "top", CFGF_NONE),
+    CFG_POSITION((char *) "position", (char *) "top", CFGF_NONE),
     CFG_INT((char *) "height", 0, CFGF_NONE),
     CFG_INT((char *) "width", 0, CFGF_NONE),
     CFG_SEC((char *) "textbox", widget_textbox_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
@@ -406,22 +435,6 @@ config_validate_zero_one_float(cfg_t *cfg, cfg_opt_t *opt)
 }
 
 static int
-config_validate_position(cfg_t *cfg, cfg_opt_t *opt)
-{
-    char *value = cfg_opt_getnstr(opt, cfg_opt_size(opt) - 1);
-
-    if(position_get_from_str(value) == Off
-       && a_strcmp(value, "off"))
-    {
-        cfg_error(cfg,
-                  "position option '%s' must be top, bottom, right, left, auto or off in section '%s'",
-                  opt->name, cfg->name);
-        return -1;
-    }
-    return 0;
-}
-
-static int
 config_validate_alignment(cfg_t *cfg, cfg_opt_t *opt)
 {
     char *value = cfg_opt_getnstr(opt, cfg_opt_size(opt) - 1);
@@ -458,11 +471,6 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|general|mwfact_lower_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|general|mwfact_upper_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|tags|tag|mwfact", config_validate_zero_one_float);
-
-    /* Check position values */
-    cfg_set_validate_func(cfg, "screen|titlebar|position", config_validate_position);
-    cfg_set_validate_func(cfg, "rules|rule|titlebar|position", config_validate_position);
-    cfg_set_validate_func(cfg, "screen|statusbar|position", config_validate_position);
 
     /* Check alignment values */
     cfg_set_validate_func(cfg, "screen|titlebar|text_align", config_validate_alignment);

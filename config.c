@@ -275,9 +275,7 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 static void
 config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb)
 {
-    tb->position = tb->dposition =
-        position_get_from_str(cfg_getstr(cfg_titlebar, "position"));
-    tb->icon = position_get_from_str(cfg_getstr(cfg_titlebar, "icon"));
+    tb->position = tb->dposition = *(Position *) cfg_getptr(cfg_titlebar, "position");
     tb->text_align = draw_get_align(cfg_getstr(cfg_titlebar, "text_align"));
 }
 
@@ -375,7 +373,7 @@ config_parse_screen(cfg_t *cfg, int screen)
         statusbar = p_new(Statusbar, 1);
         cfgsectmp = cfg_getnsec(cfg_screen, "statusbar", i);
         statusbar->position = statusbar->dposition =
-            position_get_from_str(cfg_getstr(cfgsectmp, "position"));
+            * (Position *) cfg_getptr(cfgsectmp, "position");
         statusbar->height = cfg_getint(cfgsectmp, "height");
         statusbar->width = cfg_getint(cfgsectmp, "width");
         statusbar->name = a_strdup(cfg_title(cfgsectmp));
