@@ -21,8 +21,10 @@
 
 #include <string.h>
 #include "widget.h"
+
 #include "screen.h"
 #include "common/util.h"
+#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 
@@ -430,7 +432,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     if(!(d->vertical = cfg_getbool(config, "vertical")))
         d->vertical = False;
 
-    w->alignment = * (Alignment *) cfg_getptr(config, "align");
+    w->alignment = cfg_getalignment(config, "align");
 
     if(!(d->data_items = cfg_size(config, "data")))
     {

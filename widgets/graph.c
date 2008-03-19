@@ -384,7 +384,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
     w->draw = graph_draw;
     w->tell = graph_tell;
-    w->alignment = * (Alignment *) cfg_getptr(config, "align");
+    w->alignment = cfg_getalignment(config, "align");
     d = w->data = p_new(Data, 1);
 
     d->width = cfg_getint(config, "width");

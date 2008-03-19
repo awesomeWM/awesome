@@ -28,6 +28,7 @@
 #include "rules.h"
 #include "tag.h"
 #include "common/util.h"
+#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 
@@ -297,7 +298,7 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
                     &d->styles.urgent,
                     &globalconf.screens[statusbar->screen].styles.urgent);
 
-    d->align = * (Alignment *) cfg_getptr(config, "text_align");
+    d->align = cfg_getalignment(config, "text_align");
     d->show_icons = cfg_getbool(config, "show_icons");
 
     buf = cfg_getstr(config, "show");

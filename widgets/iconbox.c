@@ -21,6 +21,7 @@
 
 #include "widget.h"
 #include "common/util.h"
+#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 
@@ -99,7 +100,7 @@ iconbox_new(Statusbar *statusbar, cfg_t *config)
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
-    w->alignment = * (Alignment *) cfg_getptr(config, "align");
+    w->alignment = cfg_getalignment(config, "align");
     w->draw = iconbox_draw;
     w->tell = iconbox_tell;
     w->data = d = p_new(Data, 1);

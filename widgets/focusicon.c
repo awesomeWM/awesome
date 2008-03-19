@@ -25,6 +25,7 @@
 #include "widget.h"
 #include "rules.h"
 #include "ewmh.h"
+#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 
@@ -100,7 +101,7 @@ focusicon_new(Statusbar *statusbar, cfg_t *config)
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
     w->draw = focusicon_draw;
-    w->alignment = * (Alignment *) cfg_getptr(config, "align");
+    w->alignment = cfg_getalignment(config, "align");
 
     /* Set cache property */
     w->cache.flags = WIDGET_CACHE_CLIENTS;

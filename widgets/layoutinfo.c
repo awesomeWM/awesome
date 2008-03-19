@@ -24,6 +24,7 @@
 #include "widget.h"
 #include "tag.h"
 #include "common/util.h"
+#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 
@@ -64,7 +65,7 @@ layoutinfo_new(Statusbar *statusbar, cfg_t* config)
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
     w->draw = layoutinfo_draw;
-    w->alignment = * (Alignment *) cfg_getptr(config, "align");
+    w->alignment = cfg_getalignment(config, "align");
 
     /* Set cache property */
     w->cache.flags = WIDGET_CACHE_LAYOUTS;

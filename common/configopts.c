@@ -119,6 +119,24 @@ cfg_value_free(void *value)
     p_delete(&value);
 }
 
+Alignment
+cfg_opt_getnalignment(cfg_opt_t *opt, unsigned int oindex)
+{
+    return * (Alignment *) cfg_opt_getnptr(opt, oindex);
+}
+
+Alignment
+cfg_getnalignment(cfg_t *cfg, const char *name, unsigned int oindex)
+{
+    return cfg_opt_getnalignment(cfg_getopt(cfg, name), oindex);
+}
+
+Alignment
+cfg_getalignment(cfg_t *cfg, const char *name)
+{
+    return cfg_getnalignment(cfg, name, 0);
+}
+
 Position
 cfg_opt_getnposition(cfg_opt_t *opt, unsigned int oindex)
 {

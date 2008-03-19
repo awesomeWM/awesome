@@ -276,7 +276,7 @@ static void
 config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb)
 {
     tb->position = tb->dposition = cfg_getposition(cfg_titlebar, "position");
-    tb->text_align = * (Alignment *) cfg_getptr(cfg_titlebar, "text_align");
+    tb->text_align = cfg_getalignment(cfg_titlebar, "text_align");
 }
 
 static void

@@ -22,6 +22,7 @@
 #include "widget.h"
 #include "screen.h"
 #include "common/util.h"
+#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 
@@ -118,7 +119,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     widget_common_new(w, statusbar, config);
     w->draw = textbox_draw;
     w->tell = textbox_tell;
-    w->alignment = * (Alignment *) cfg_getptr(config, "align");
+    w->alignment = cfg_getalignment(config, "align");
 
     w->data = d = p_new(Data, 1);
 
@@ -128,7 +129,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
                    &globalconf.screens[statusbar->screen].styles.normal);
 
     d->width = cfg_getint(config, "width");
-    d->align = * (Alignment *) cfg_getptr(config, "text_align");
+    d->align = cfg_getalignment(config, "text_align");
 
     d->text = a_strdup(cfg_getstr(config, "text"));
 
