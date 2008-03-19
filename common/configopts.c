@@ -423,6 +423,8 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|tags|tag|ncol", config_validate_supone_int);
 
     /* Check float values */
+    cfg_set_validate_func(cfg, "screen|general|mwfact_lower_limit", config_validate_zero_one_float);
+    cfg_set_validate_func(cfg, "screen|general|mwfact_upper_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|tags|tag|mwfact", config_validate_zero_one_float);
 
     return cfg;
