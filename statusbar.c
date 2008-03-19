@@ -31,9 +31,16 @@
 extern AwesomeConf globalconf;
 
 static void
-statusbar_update_position(Statusbar *statusbar)
+statusbar_position_update(Statusbar *statusbar)
 {
+    Statusbar *sb;
     area_t area;
+
+    if(statusbar->position == Off)
+    {
+        XUnmapWindow(globalconf.display, statusbar->sw->window);
+        return;
+    }
 
     XMapRaised(globalconf.display, statusbar->sw->window);
 
@@ -43,9 +50,39 @@ statusbar_update_position(Statusbar *statusbar)
                                NULL,
                                &globalconf.screens[statusbar->screen].padding);
     else
-       area = screen_get_area(statusbar->screen,
-                              globalconf.screens[statusbar->screen].statusbar,
-                              &globalconf.screens[statusbar->screen].padding);
+        area = screen_get_area(statusbar->screen,
+                               globalconf.screens[statusbar->screen].statusbar,
+                               &globalconf.screens[statusbar->screen].padding);
+
+    for(sb = globalconf.screens[statusbar->screen].statusbar; sb && sb != statusbar; sb = sb->next)
+        switch(sb->position)
+        {
+          case Top:
+            if(sb->position == statusbar->position)
+                area.y += sb->height;
+            break;
+          case Bottom:
+            if(sb->position == statusbar->position)
+                area.height -= sb->height;
+            break;
+          case Left:
+            /* we need to re-add our own value removed in the
+            * screen_get_area computation */
+            if(statusbar->position == Left
+               || statusbar->position == Right)
+            {
+                area.x -= statusbar->sw->geometry.width;
+                area.width += statusbar->sw->geometry.width;
+            }
+            break;
+          case Right:
+            if(statusbar->position == Left
+               || statusbar->position == Right)
+                area.width += statusbar->sw->geometry.width;
+            break;
+          default:
+            break;
+        }
 
     switch(statusbar->position)
     {
@@ -63,7 +100,6 @@ statusbar_update_position(Statusbar *statusbar)
         simplewindow_move(statusbar->sw, area.x + area.width, area.y);
         break;
       default:
-        XUnmapWindow(globalconf.display, statusbar->sw->window);
         break;
     }
 }
@@ -203,7 +239,7 @@ statusbar_init(Statusbar *statusbar)
             statusbar->width = area.width;
     }
 
-    switch(statusbar->dposition)
+    switch(statusbar->position)
     {
       case Right:
       case Left:
@@ -220,7 +256,7 @@ statusbar_init(Statusbar *statusbar)
 
     widget_calculate_alignments(statusbar->widgets);
 
-    statusbar_update_position(statusbar);
+    statusbar_position_update(statusbar);
 
     statusbar_draw(statusbar);
 }
@@ -245,7 +281,7 @@ statusbar_refresh()
 }
 
 static Statusbar *
-get_statusbar_byname(int screen, const char *name)
+statusbar_get_byname(int screen, const char *name)
 {
     Statusbar *sb;
 
@@ -263,8 +299,7 @@ statusbar_toggle(Statusbar *statusbar)
         statusbar->position = (statusbar->dposition == Off) ? Top : statusbar->dposition;
     else
         statusbar->position = Off;
-
-    statusbar_update_position(statusbar);
+    
     globalconf.screens[statusbar->screen].need_arrange = True;
 }
 
@@ -276,13 +311,17 @@ statusbar_toggle(Statusbar *statusbar)
 void
 uicb_statusbar_toggle(int screen, char *arg)
 {
-    Statusbar *sb = get_statusbar_byname(screen, arg);
+    Statusbar *sb = statusbar_get_byname(screen, arg);
 
     if(sb)
         statusbar_toggle(sb);
     else
         for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
             statusbar_toggle(sb);
+
+    for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
+        statusbar_position_update(sb);
 }
+
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
