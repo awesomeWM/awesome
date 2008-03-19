@@ -114,6 +114,8 @@ PKG_CHECK_MODULES([XINERAMA], [xinerama],,
    [AC_MSG_ERROR([awesome requires Xinerama.])])
 PKG_CHECK_MODULES([XRANDR], [xrandr],,
    [AC_MSG_ERROR([awesome requires Xrandr.])])
+PKG_CHECK_MODULES([XPM], [xpm],,
+   [AC_MSG_ERROR([awesome requires XPM.])])
 
 # Checks for header files.
 AC_PATH_X

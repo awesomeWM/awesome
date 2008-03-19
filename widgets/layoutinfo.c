@@ -35,7 +35,7 @@ layoutinfo_draw(Widget *widget,
                 int used __attribute__ ((unused)))
 {
     Tag **curtags = tags_get_current(widget->statusbar->screen);
-    area_t area = draw_get_image_size(curtags[0]->layout->image);
+    area_t area = draw_image_size_format_png(curtags[0]->layout->image);
 
     if(!widget->user_supplied_x)
         widget->area.x = widget_calculate_offset(widget->statusbar->width,

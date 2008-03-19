@@ -184,7 +184,7 @@ main(int argc, char **argv)
 
     if(argc - optind >= 2)
     {
-        icon_geometry = draw_get_image_size(argv[optind + 1]);
+        icon_geometry = draw_image_size_format_png(argv[optind + 1]);
         if(icon_geometry.width <= 0 || icon_geometry.height <= 0)
             eprint("invalid image\n");
         else
