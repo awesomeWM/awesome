@@ -138,6 +138,10 @@ event_handle_buttonpress(XEvent *e)
             event_handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
     }
     else
+    {
+        for(c = globalconf.clients; c; c = c->next)
+            if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
+                event_handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.titlebar, NULL);
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window
                && XQueryPointer(e->xany.display,
@@ -150,6 +154,7 @@ event_handle_buttonpress(XEvent *e)
                                           globalconf.buttons.root, NULL);
                 return;
             }
+    }
 }
 
 /** Handle XConfigureRequest events

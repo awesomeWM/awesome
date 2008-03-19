@@ -266,7 +266,7 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
         {
             widget = widget_new(statusbar, wptr);
             widget_list_append(&statusbar->widgets, widget);
-            widget->buttons = parse_mouse_bindings(wptr, "mouse", a_strcmp(cfg_name(wptr), "taglist"));
+            widget->buttons = parse_mouse_bindings(wptr, "mouse", a_strcmp(cfg_name(wptr), "taglist") ? True : False);
         }
         else
             warn("ignoring unknown widget: %s.\n", cfg_name(widgets + i));
@@ -533,6 +533,9 @@ config_parse(const char *confpatharg)
 
     /* Mouse: client windows click bindings */
     globalconf.buttons.client = parse_mouse_bindings(cfg_mouse, "client", True);
+
+    /* Mouse: titlebar windows click bindings */
+    globalconf.buttons.titlebar = parse_mouse_bindings(cfg_mouse, "titlebar", True);
 
     /* Keys */
     globalconf.numlockmask = get_numlockmask(globalconf.display);

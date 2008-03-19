@@ -324,6 +324,7 @@ struct AwesomeConf
     {
            Button *root;
            Button *client;
+           Button *titlebar;
     } buttons;
     /** Numlock mask */
     unsigned int numlockmask;

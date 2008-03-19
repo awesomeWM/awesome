@@ -182,6 +182,16 @@ mouse
         button = "3"
         command = "client_resizemouse"
     }
+    titlebar
+    {
+        button = "1"
+        command = "client_movemouse"
+    }
+    titlebar
+    {
+        button = "3"
+        command = "client_resizemouse"
+    }
 }
 
 keys

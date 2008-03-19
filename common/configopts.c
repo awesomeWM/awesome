@@ -410,6 +410,7 @@ cfg_opt_t mouse_opts[] =
 {
     CFG_SEC((char *) "root", mouse_generic_opts, CFGF_MULTI),
     CFG_SEC((char *) "client", mouse_generic_opts, CFGF_MULTI),
+    CFG_SEC((char *) "titlebar", mouse_generic_opts, CFGF_MULTI),
     CFG_AWESOME_END()
 };
 cfg_opt_t menu_opts[] =
