@@ -221,15 +221,15 @@ static inline ssize_t a_strcat(char *dst, ssize_t n, const char *src)
 
 /** \brief safe strncat.
  *
- * The m_strncat() function appends at most \c n chars from the string \c src
+ * The a_strncat() function appends at most \c n chars from the string \c src
  * at the end of the buffer \c dst if space is available.
  *
  * \param[in]  dst   destination buffer.
  * \param[in]  n     size of the buffer, Negative sizes are allowed.
  * \param[in]  src   the string to append.
  * \param[in]  l     maximum number of chars of src to consider.
- * \return the smallest value between <tt>m_strlen(dst) + m_strlen(src)</tt>
- * and <tt>m_strlen(dst) + l</tt>
+ * \return the smallest value between <tt>a_strlen(dst) + a_strlen(src)</tt>
+ * and <tt>a_strlen(dst) + l</tt>
  */
 static inline ssize_t
 a_strncat(char *dst, ssize_t n, const char *src, ssize_t l)
