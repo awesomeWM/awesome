@@ -539,7 +539,7 @@ config_check(const char *confpatharg)
     switch((ret = cfg_parse(cfg, confpath)))
     {
       case CFG_FILE_ERROR:
-        perror("awesome: parsing configuration file failed");
+        warn("parsing configuration file failed: %s\n", strerror(errno));
         break;
       case CFG_PARSE_ERROR:
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);

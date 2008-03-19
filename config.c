@@ -19,6 +19,7 @@
  *
  */
 
+#include <errno.h>
 #include <X11/keysym.h>
 
 #include "config.h"
@@ -479,12 +480,12 @@ config_parse(const char *confpatharg)
     switch(ret)
     {
       case CFG_FILE_ERROR:
-        perror("awesome: parsing configuration file failed");
+        warn("parsing configuration file failed: %s\n", strerror(errno));
         if(!(defconfig = fopen(confpath, "w")))
-           perror("awesome: unable to create default configuration file");
+           warn("unable to create default configuration file: %s\n", strerror(errno));
         break;
       case CFG_PARSE_ERROR:
-        cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);
+        cfg_error(cfg, "W: awesome: parsing configuration file %s failed.\n", confpath);
         break;
     }
 

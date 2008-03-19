@@ -29,6 +29,7 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "awesome.h"
 #include "tag.h"
@@ -117,8 +118,7 @@ uicb_spawn(int screen, char *arg)
                 close(ConnectionNumber(globalconf.display));
             setsid();
             execl(shell, shell, "-c", arg, NULL);
-            warn("execl '%s -c %s'", shell, arg);
-            perror(" failed");
+            warn("execl '%s -c %s' failed: %s\n", shell, arg, strerror(errno));
         }
         exit(EXIT_SUCCESS);
     }

@@ -394,7 +394,7 @@ main(int argc, char *argv[])
             switch (r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
             {
               case -1:
-                perror("awesome: error reading UNIX domain socket");
+                warn("error reading UNIX domain socket: %s\n", strerror(errno));
                 csfd = -1;
                 break;
               case 0:
@@ -436,9 +436,9 @@ main(int argc, char *argv[])
 
 
     if(csfd > 0 && close(csfd))
-        perror("error closing UNIX domain socket");
+        warn("error closing UNIX domain socket: %s\n", strerror(errno));
     if(unlink(addr->sun_path))
-        perror("error unlinking UNIX domain socket");
+        warn("error unlinking UNIX domain socket: %s\n", strerror(errno));
     p_delete(&addr);
 
     /* remap all clients since some WM won't handle them otherwise */

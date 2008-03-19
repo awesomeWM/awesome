@@ -25,6 +25,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <X11/Xlib.h>
 
@@ -78,7 +79,7 @@ config_parse(int screen, const char *confpatharg)
     switch((ret = cfg_parse(cfg, confpath)))
     {
       case CFG_FILE_ERROR:
-        perror("awesome-message: parsing configuration file failed");
+        warn("parsing configuration file failed: %s\n", strerror(errno));
         break;
       case CFG_PARSE_ERROR:
         cfg_error(cfg, "awesome: parsing configuration file %s failed.\n", confpath);

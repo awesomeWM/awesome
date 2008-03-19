@@ -52,10 +52,10 @@ send_msg(char *msg, ssize_t msg_len)
         switch (errno)
         {
           case ENOENT:
-              warn("Can't write to %s\n", addr->sun_path);
+              warn("can't write to %s\n", addr->sun_path);
               break;
           default:
-              perror("error sending datagram");
+              warn("error sending datagram: %s\n", strerror(errno));
          }
          ret_value = errno;
     }

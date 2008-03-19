@@ -21,6 +21,7 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 
@@ -88,7 +89,7 @@ get_client_socket(void)
     csfd = socket(AF_UNIX, SOCK_DGRAM, 0);
 
     if(csfd < 0)
-        perror("error opening UNIX domain socket");
+        warn("error opening UNIX domain socket: %s\n", strerror(errno));
 
     return csfd;
 }

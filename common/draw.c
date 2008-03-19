@@ -55,7 +55,7 @@ draw_iso2utf8(char *iso)
             warn("unable to convert text from %s to UTF-8, not available",
                  nl_langinfo(CODESET));
         else
-            perror("awesome: unable to convert text");
+            warn("unable to convert text: %s\n", strerror(errno));
 
         return NULL;
     }
@@ -65,7 +65,7 @@ draw_iso2utf8(char *iso)
 
     if(iconv(iso2utf8, &iso, &len, &utf8, &utf8len) == (size_t) -1)
     {
-        perror("awesome: text conversion failed");
+        warn("text conversion failed: %s\n", strerror(errno));
         p_delete(&utf8p);
         return NULL;
     }
