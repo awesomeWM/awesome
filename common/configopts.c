@@ -179,12 +179,12 @@ cfg_opt_t general_opts[] =
 };
 cfg_opt_t style_opts[] =
 {
-    CFG_STR((char *) "border", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "shadow", (char *) NULL, CFGF_NONE),
+    CFG_STR((char *) "border", NULL, CFGF_NONE),
+    CFG_STR((char *) "bg", NULL, CFGF_NONE),
+    CFG_STR((char *) "fg", NULL, CFGF_NONE),
+    CFG_STR((char *) "shadow", NULL, CFGF_NONE),
     CFG_INT((char *) "shadow_offset", 0, CFGF_NONE),
-    CFG_STR((char *) "font", (char *) NULL, CFGF_NONE),
+    CFG_STR((char *) "font", NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t styles_opts[] =
@@ -231,7 +231,7 @@ cfg_opt_t widget_iconbox_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    CFG_STR((char *) "image", (char *) NULL, CFGF_NONE),
+    CFG_STR((char *) "image", NULL, CFGF_NONE),
     CFG_BOOL((char *) "resize", cfg_true, CFGF_NONE),
     CFG_AWESOME_END()
 };
@@ -242,7 +242,7 @@ cfg_opt_t widget_textbox_opts[] =
     CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     CFG_INT((char *) "width", 0, CFGF_NONE),
-    CFG_STR((char *) "text", (char *) NULL, CFGF_NONE),
+    CFG_STR((char *) "text", NULL, CFGF_NONE),
     CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_SEC((char *) "style", style_opts, CFGF_NONE),
     CFG_AWESOME_END()
@@ -262,9 +262,9 @@ cfg_opt_t widget_graph_data_opts[] =
 {
     CFG_FLOAT((char *) "max", 100.0f, CFGF_NONE),
     CFG_BOOL((char *) "scale", cfg_false, CFGF_NONE),
-    CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "fg_center", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "fg_end", (char *) NULL, CFGF_NONE),
+    CFG_STR((char *) "fg", NULL, CFGF_NONE),
+    CFG_STR((char *) "fg_center", NULL, CFGF_NONE),
+    CFG_STR((char *) "fg_end", NULL, CFGF_NONE),
     CFG_BOOL((char *) "vertical_gradient", cfg_false, CFGF_NONE),
     CFG_STR((char *) "draw_style", (char *) "bottom", CFGF_NONE),
     CFG_AWESOME_END()
@@ -280,17 +280,17 @@ cfg_opt_t widget_graph_opts[] =
     CFG_POSITION((char *) "grow", (char *) "left", CFGF_NONE),
     CFG_INT((char *) "padding_left", 0, CFGF_NONE),
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
-    CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),
+    CFG_STR((char *) "bg", NULL, CFGF_NONE),
+    CFG_STR((char *) "bordercolor", NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t widget_progressbar_data_opts[] =
 {
-    CFG_STR((char *) "fg", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "fg_center", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "fg_end", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "bg", (char *) NULL, CFGF_NONE),
-    CFG_STR((char *) "bordercolor", (char *) NULL, CFGF_NONE),
+    CFG_STR((char *) "fg", NULL, CFGF_NONE),
+    CFG_STR((char *) "fg_center", NULL, CFGF_NONE),
+    CFG_STR((char *) "fg_end", NULL, CFGF_NONE),
+    CFG_STR((char *) "bg", NULL, CFGF_NONE),
+    CFG_STR((char *) "bordercolor", NULL, CFGF_NONE),
     CFG_BOOL((char *) "reverse", cfg_false, CFGF_NONE),
     CFG_AWESOME_END()
 };
@@ -508,6 +508,8 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|statusbar|height", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|textbox|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|tags|tag|nmaster", config_validate_unsigned_int);
+
+    /* Check integers values > 1 */
     cfg_set_validate_func(cfg, "screen|tags|tag|ncol", config_validate_supone_int);
 
     /* Check float values */
