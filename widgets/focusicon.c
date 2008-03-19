@@ -48,7 +48,7 @@ focusicon_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     if((r = rule_matching_client(sel)) && r->icon)
     {
-        area = draw_image_size_format_png(r->icon);
+        area = draw_get_image_size(r->icon);
         widget->area.width = ((double) widget->statusbar->height / (double) area.height)
             * area.width;
         if(!widget->user_supplied_x)

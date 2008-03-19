@@ -136,7 +136,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
                 if((r = rule_matching_client(c)) && r->icon)
                 {
-                    area = draw_image_size_format_png(r->icon);
+                    area = draw_get_image_size(r->icon);
                     if(area.width > 0 && area.height > 0)
                     {
                         icon_width = ((double) widget->statusbar->height / (double) area.height) * area.width;

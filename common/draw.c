@@ -22,8 +22,6 @@
 #include <cairo.h>
 #include <cairo-xlib.h>
 
-#include <X11/xpm.h>
-
 #include <langinfo.h>
 #include <iconv.h>
 #include <errno.h>
@@ -583,26 +581,6 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
-static void
-draw_image_format_xpm(DrawCtx *ctx, int x, int y, char *filename)
-{
-    Pixmap pxm, shapemask;
-    XpmAttributes attr;
-
-    if(XpmReadFileToPixmap(ctx->display, ctx->drawable,
-                           filename,
-                           &pxm, &shapemask,
-                           &attr))
-        return warn("cannot load image %s\n", filename);
-
-    XCopyArea(ctx->display, pxm, ctx->drawable,
-              DefaultGC(ctx->display, ctx->phys_screen),
-              0, 0, attr.width, attr.height,
-              x, y);
-
-    XFreePixmap(ctx->display, pxm);
-}
-
 /** Draw an image (PNG format only) from a file to a draw context
  * \param ctx Draw context to draw to
  * \param x x coordinate
@@ -610,8 +588,8 @@ draw_image_format_xpm(DrawCtx *ctx, int x, int y, char *filename)
  * \param wanted_h wanted height: if > 0, image will be resized
  * \param filename file name to draw
  */
-static void
-draw_image_format_png(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
+void
+draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 {
     double ratio;
     int h;
@@ -641,29 +619,12 @@ draw_image_format_png(DrawCtx *ctx, int x, int y, int wanted_h, const char *file
     cairo_surface_destroy(source);
 }
 
-void
-draw_image(DrawCtx *ctx, int x, int y, int wanted_h, char *filename)
-{
-    char *dot;
-
-    if(!a_strlen(filename))
-        return;
-
-    if(!(dot = strrchr(filename, '.')))
-        return warn("cannot determine file type for %s\n", filename);
-
-    if(!a_strcasecmp(++dot, "png"))
-        draw_image_format_png(ctx, x, y, wanted_h, filename);
-    else if(!a_strcasecmp(dot, "xpm"))
-        draw_image_format_xpm(ctx, x, y, filename);
-}
-
 /** Get an imag size (PNG format only)
  * \param filename file name
  * \return area_t structure with width and height set to image size
  */
 area_t
-draw_image_size_format_png(const char *filename)
+draw_get_image_size(const char *filename)
 {
     area_t size = { -1, -1, -1, -1, NULL, NULL };
     cairo_surface_t *surface;
