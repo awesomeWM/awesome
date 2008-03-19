@@ -20,10 +20,11 @@
  *
  */
 
-#include "common/draw.h"
 #include "widget.h"
 #include "screen.h"
 #include "common/util.h"
+#include "common/draw.h"
+#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 
@@ -403,7 +404,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         return w;
     }
 
-    d->grow = *(Position *) cfg_getptr(config, "grow");
+    d->grow = cfg_getposition(config, "grow");
     if(d->grow != Left && d->grow != Right)
     {
         warn("graph widget: 'grow' argument must be 'left' or 'right'\n");

@@ -28,6 +28,10 @@ cfg_t * cfg_new(void);
 char * config_file(void);
 int config_check(const char *);
 
+Position cfg_opt_getnposition(cfg_opt_t *, unsigned int);
+Position cfg_getnposition(cfg_t *, const char *, unsigned int);
+Position cfg_getposition(cfg_t *, const char *);
+
 #endif
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

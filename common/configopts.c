@@ -119,6 +119,24 @@ cfg_value_free(void *value)
     p_delete(&value);
 }
 
+Position
+cfg_opt_getnposition(cfg_opt_t *opt, unsigned int oindex)
+{
+    return * (Position *) cfg_opt_getnptr(opt, oindex);
+}
+
+Position
+cfg_getnposition(cfg_t *cfg, const char *name, unsigned int oindex)
+{
+    return cfg_opt_getnposition(cfg_getopt(cfg, name), oindex);
+}
+
+Position
+cfg_getposition(cfg_t *cfg, const char *name)
+{
+    return cfg_getnposition(cfg, name, 0);
+}
+
 cfg_opt_t titlebar_opts[] =
 {
     CFG_POSITION((char *) "position", (char *) "auto", CFGF_NONE),

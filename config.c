@@ -275,7 +275,7 @@ create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
 static void
 config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb)
 {
-    tb->position = tb->dposition = *(Position *) cfg_getptr(cfg_titlebar, "position");
+    tb->position = tb->dposition = cfg_getposition(cfg_titlebar, "position");
     tb->text_align = * (Alignment *) cfg_getptr(cfg_titlebar, "text_align");
 }
 
@@ -373,7 +373,7 @@ config_parse_screen(cfg_t *cfg, int screen)
         statusbar = p_new(Statusbar, 1);
         cfgsectmp = cfg_getnsec(cfg_screen, "statusbar", i);
         statusbar->position = statusbar->dposition =
-            * (Position *) cfg_getptr(cfgsectmp, "position");
+            cfg_getposition(cfgsectmp, "position");
         statusbar->height = cfg_getint(cfgsectmp, "height");
         statusbar->width = cfg_getint(cfgsectmp, "width");
         statusbar->name = a_strdup(cfg_title(cfgsectmp));
