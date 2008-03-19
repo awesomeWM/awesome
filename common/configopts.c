@@ -411,10 +411,26 @@ config_validate_position(cfg_t *cfg, cfg_opt_t *opt)
     char *value = cfg_opt_getnstr(opt, cfg_opt_size(opt) - 1);
 
     if(position_get_from_str(value) == Off
-       && !a_strncmp(value, "off", 3))
+       && a_strcmp(value, "off"))
     {
         cfg_error(cfg,
                   "position option '%s' must be top, bottom, right, left, auto or off in section '%s'",
+                  opt->name, cfg->name);
+        return -1;
+    }
+    return 0;
+}
+
+static int
+config_validate_alignment(cfg_t *cfg, cfg_opt_t *opt)
+{
+    char *value = cfg_opt_getnstr(opt, cfg_opt_size(opt) - 1);
+
+    if(draw_get_align(value) == Auto
+       && a_strcmp(value, "auto"))
+    {
+        cfg_error(cfg,
+                  "alignment option '%s' must be left, center, right, flex or auto in section '%s'",
                   opt->name, cfg->name);
         return -1;
     }
@@ -445,7 +461,12 @@ cfg_new(void)
 
     /* Check position values */
     cfg_set_validate_func(cfg, "screen|titlebar|position", config_validate_position);
+    cfg_set_validate_func(cfg, "rules|rule|titlebar|position", config_validate_position);
     cfg_set_validate_func(cfg, "screen|statusbar|position", config_validate_position);
+
+    /* Check alignment values */
+    cfg_set_validate_func(cfg, "screen|titlebar|text_align", config_validate_alignment);
+    cfg_set_validate_func(cfg, "rules|rule|titlebar|text_align", config_validate_alignment);
 
     return cfg;
 }
