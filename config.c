@@ -234,7 +234,7 @@ cmp_widget_cfg(const void *a, const void *b)
 }
 
 static void
-create_widgets(cfg_t* cfg_statusbar, Statusbar *statusbar)
+statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
 {
     cfg_t* widgets, *wptr;
     Widget *widget = NULL;
@@ -380,7 +380,7 @@ config_parse_screen(cfg_t *cfg, int screen)
         statusbar->name = a_strdup(cfg_title(cfgsectmp));
         statusbar->screen = screen;
         statusbar_preinit(statusbar);
-        create_widgets(cfgsectmp, statusbar);
+        statusbar_widgets_create(cfgsectmp, statusbar);
         statusbar_list_push(&virtscreen->statusbar, statusbar);
     }
 
