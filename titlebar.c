@@ -83,6 +83,7 @@ titlebar_init(Client *c)
 void
 titlebar_update(Client *c)
 {
+    Drawable dw = 0;
     DrawCtx *ctx;
     style_t style;
     area_t geometry;
@@ -96,17 +97,15 @@ titlebar_update(Client *c)
         return;
       case Right:
       case Left:
-        XFreePixmap(globalconf.display, c->titlebar.sw->drawable);
-        c->titlebar.sw->drawable =
-            XCreatePixmap(globalconf.display,
-                          RootWindow(globalconf.display, c->titlebar.sw->phys_screen),
-                          c->titlebar.sw->geometry.height,
-                          c->titlebar.sw->geometry.width,
-                          DefaultDepth(globalconf.display, c->titlebar.sw->phys_screen));
+        dw = XCreatePixmap(globalconf.display,
+                           RootWindow(globalconf.display, c->titlebar.sw->phys_screen),
+                           c->titlebar.sw->geometry.height,
+                           c->titlebar.sw->geometry.width,
+                           DefaultDepth(globalconf.display, c->titlebar.sw->phys_screen));
         ctx = draw_context_new(globalconf.display, c->titlebar.sw->phys_screen,
                                c->titlebar.sw->geometry.height,
                                c->titlebar.sw->geometry.width,
-                               c->titlebar.sw->drawable);
+                               dw);
         geometry.width = c->titlebar.sw->geometry.height;
         geometry.height = c->titlebar.sw->geometry.width;
         break;
@@ -137,10 +136,12 @@ titlebar_update(Client *c)
       case Left:
         draw_rotate(ctx, c->titlebar.sw->drawable, ctx->height, ctx->width,
                     - M_PI_2, 0, c->titlebar.sw->geometry.height);
+        XFreePixmap(globalconf.display, dw);
         break;
       case Right:
         draw_rotate(ctx, c->titlebar.sw->drawable, ctx->height, ctx->width,
                     M_PI_2, c->titlebar.sw->geometry.width, 0);
+        XFreePixmap(globalconf.display, dw);
       default:
         break;
     }
