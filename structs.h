@@ -46,6 +46,13 @@ typedef struct
     Position position;
     Position dposition;
     Alignment text_align;
+    /** Colors */
+    struct
+    {
+        style_t normal;
+        style_t focus;
+        style_t urgent;
+    } styles;
 } Titlebar;
 
 /** Rule type */

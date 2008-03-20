@@ -29,10 +29,19 @@ extern AwesomeConf globalconf;
 void
 titlebar_init(Client *c)
 {
-    int titlebar_height = 1.5 * MAX(globalconf.screens[c->screen].styles.normal.font->height,
-                                    MAX(globalconf.screens[c->screen].styles.focus.font->height,
-                                        globalconf.screens[c->screen].styles.urgent.font->height));
+    int titlebar_height;
     int phys_screen = get_phys_screen(c->screen);
+
+    if(c->titlebar.position == Off
+       || c->titlebar.position == Auto)
+    {
+        c->titlebar.position = Off;
+        return;
+    }
+
+    titlebar_height = 1.5 * MAX(c->titlebar.styles.normal.font->height,
+                                MAX(c->titlebar.styles.focus.font->height,
+                                    c->titlebar.styles.urgent.font->height));
 
     switch(c->titlebar.position)
     {
@@ -72,10 +81,7 @@ titlebar_init(Client *c)
                                           c->geometry.width + 2 * c->border,
                                           0);
         break;
-      case Off:
-        break;
       default:
-        c->titlebar.position = Off;
         break;
     }
 }
@@ -120,11 +126,11 @@ titlebar_update(Client *c)
 
 
     if(c->isurgent)
-        style = globalconf.screens[c->screen].styles.urgent;
+        style = c->titlebar.styles.urgent;
     else if(globalconf.focus->client == c)
-        style = globalconf.screens[c->screen].styles.focus;
+        style = c->titlebar.styles.focus;
     else
-        style = globalconf.screens[c->screen].styles.normal;
+        style = c->titlebar.styles.normal;
 
     geometry.x = geometry.y = 0;
 

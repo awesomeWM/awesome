@@ -155,27 +155,6 @@ cfg_getposition(cfg_t *cfg, const char *name)
     return cfg_getnposition(cfg, name, 0);
 }
 
-cfg_opt_t titlebar_opts[] =
-{
-    CFG_POSITION((char *) "position", (char *) "auto", CFGF_NONE),
-    CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
-    CFG_AWESOME_END()
-};
-cfg_opt_t general_opts[] =
-{
-    CFG_INT((char *) "border", 1, CFGF_NONE),
-    CFG_INT((char *) "snap", 8, CFGF_NONE),
-    CFG_BOOL((char *) "resize_hints", cfg_true, CFGF_NONE),
-    CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
-    CFG_BOOL((char *) "sloppy_focus_raise", cfg_false, CFGF_NONE),
-    CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
-    CFG_BOOL((char *) "new_get_focus", cfg_true, CFGF_NONE),
-    CFG_INT((char *) "opacity_unfocused", -1, CFGF_NONE),
-    CFG_STR((char *) "floating_placement", (char *) "smart", CFGF_NONE),
-    CFG_FLOAT((char *) "mwfact_lower_limit", 0.1, CFGF_NONE),
-    CFG_FLOAT((char *) "mwfact_upper_limit", 0.9, CFGF_NONE),
-    CFG_AWESOME_END()
-};
 cfg_opt_t style_opts[] =
 {
     CFG_STR((char *) "border", NULL, CFGF_NONE),
@@ -191,6 +170,28 @@ cfg_opt_t styles_opts[] =
     CFG_SEC((char *) "normal", style_opts, CFGF_NONE),
     CFG_SEC((char *) "focus", style_opts, CFGF_NONE),
     CFG_SEC((char *) "urgent", style_opts, CFGF_NONE),
+    CFG_AWESOME_END()
+};
+cfg_opt_t titlebar_opts[] =
+{
+    CFG_POSITION((char *) "position", (char *) "auto", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
+    CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
+    CFG_AWESOME_END()
+};
+cfg_opt_t general_opts[] =
+{
+    CFG_INT((char *) "border", 1, CFGF_NONE),
+    CFG_INT((char *) "snap", 8, CFGF_NONE),
+    CFG_BOOL((char *) "resize_hints", cfg_true, CFGF_NONE),
+    CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
+    CFG_BOOL((char *) "sloppy_focus_raise", cfg_false, CFGF_NONE),
+    CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
+    CFG_BOOL((char *) "new_get_focus", cfg_true, CFGF_NONE),
+    CFG_INT((char *) "opacity_unfocused", -1, CFGF_NONE),
+    CFG_STR((char *) "floating_placement", (char *) "smart", CFGF_NONE),
+    CFG_FLOAT((char *) "mwfact_lower_limit", 0.1, CFGF_NONE),
+    CFG_FLOAT((char *) "mwfact_upper_limit", 0.9, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t mouse_taglist_opts[] =

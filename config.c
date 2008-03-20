@@ -266,7 +266,8 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
         {
             widget = widget_new(statusbar, wptr);
             widget_list_append(&statusbar->widgets, widget);
-            widget->buttons = parse_mouse_bindings(wptr, "mouse", a_strcmp(cfg_name(wptr), "taglist") ? True : False);
+            widget->buttons = parse_mouse_bindings(wptr, "mouse",
+                                                   a_strcmp(cfg_name(wptr), "taglist") ? True : False);
         }
         else
             warn("ignoring unknown widget: %s.\n", cfg_name(widgets + i));
@@ -274,10 +275,25 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
 }
 
 static void
-config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb)
+config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb, int screen)
 {
+    int phys_screen = get_phys_screen(screen);
+    cfg_t *cfg_styles = cfg_getsec(cfg_titlebar, "styles");
+
     tb->position = tb->dposition = cfg_getposition(cfg_titlebar, "position");
     tb->text_align = cfg_getalignment(cfg_titlebar, "text_align");
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_getsec(cfg_styles, "normal"),
+                    &tb->styles.normal,
+                    &globalconf.screens[screen].styles.normal);
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_getsec(cfg_styles, "focus"),
+                    &tb->styles.focus,
+                    &globalconf.screens[screen].styles.focus);
+    draw_style_init(globalconf.display, phys_screen,
+                    cfg_getsec(cfg_styles, "urgent"),
+                    &tb->styles.urgent,
+                    &globalconf.screens[screen].styles.urgent);
 }
 
 static void
@@ -328,8 +344,6 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->floating_placement =
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);
-    config_section_titlebar_init(cfg_titlebar, &virtscreen->titlebar_default);
-
     virtscreen->mwfact_lower_limit = cfg_getfloat(cfg_general, "mwfact_lower_limit");
     virtscreen->mwfact_upper_limit = cfg_getfloat(cfg_general, "mwfact_upper_limit");
 
@@ -366,6 +380,9 @@ config_parse_screen(cfg_t *cfg, int screen)
 
     if(!virtscreen->styles.normal.font)
         eprint("no font available\n");
+
+    /* Titlebar */
+    config_section_titlebar_init(cfg_titlebar, &virtscreen->titlebar_default, screen);
 
     /* Statusbar */
     statusbar_list_init(&virtscreen->statusbar);
@@ -521,7 +538,7 @@ config_parse(const char *confpatharg)
         rule->screen = cfg_getint(cfgsectmp, "screen");
         rule->ismaster = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "master"));
         rule->opacity = cfg_getfloat(cfgsectmp, "opacity");
-        config_section_titlebar_init(cfg_getsec(cfgsectmp, "titlebar"), &rule->titlebar);
+        config_section_titlebar_init(cfg_getsec(cfgsectmp, "titlebar"), &rule->titlebar, 0);
         if(rule->screen >= globalconf.screens_info->nscreen)
             rule->screen = 0;
 
