@@ -46,7 +46,6 @@ typedef struct
     Position position;
     Position dposition;
     Alignment text_align;
-    Position icon;
 } Titlebar;
 
 /** Rule type */
