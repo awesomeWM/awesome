@@ -113,42 +113,16 @@ statusbar_draw(Statusbar *statusbar)
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
     Drawable d;
 
-    /* don't waste our time */
-    switch(statusbar->position)
-    {
-      case Off:
-        return;
-        break;
-      case Right:
-      case Left:
-        /* we need a new pixmap this way [     ] to render */
-        XFreePixmap(globalconf.display, statusbar->sw->drawable);
-        d = XCreatePixmap(globalconf.display,
-                          RootWindow(globalconf.display, phys_screen),
-                          statusbar->width, statusbar->height,
-                          DefaultDepth(globalconf.display, phys_screen));
-        statusbar->sw->drawable = d;
-        break;
-      default:
-        break;
-    }
-
-    DrawCtx *ctx = draw_context_new(globalconf.display,
-                                    phys_screen,
-                                    statusbar->width,
-                                    statusbar->height,
-                                    statusbar->sw->drawable);
-
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
-    draw_rectangle(ctx, rectangle, True,
+    draw_rectangle(statusbar->ctx, rectangle, True,
                    globalconf.screens[statusbar->screen].styles.normal.bg);
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
         {
             widget->cache.needs_update = False;
-            left += widget->draw(widget, ctx, left, (left + right));
+            left += widget->draw(widget, statusbar->ctx, left, (left + right));
         }
 
     /* renders right widget from last to first */
@@ -158,26 +132,26 @@ statusbar_draw(Statusbar *statusbar)
         if (widget->alignment == AlignRight)
         {
             widget->cache.needs_update = False;
-            right += widget->draw(widget, ctx, right, (left + right));
+            right += widget->draw(widget, statusbar->ctx, right, (left + right));
         }
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignFlex)
         {
             widget->cache.needs_update = False;
-            left += widget->draw(widget, ctx, left, (left + right));
+            left += widget->draw(widget, statusbar->ctx, left, (left + right));
         }
 
     switch(statusbar->position)
     {
         case Right:
-          d = draw_rotate(ctx, phys_screen, M_PI_2,
+          d = draw_rotate(statusbar->ctx, phys_screen, M_PI_2,
                           statusbar->height, 0);
           XFreePixmap(globalconf.display, statusbar->sw->drawable);
           statusbar->sw->drawable = d;
           break;
         case Left:
-          d = draw_rotate(ctx, phys_screen, - M_PI_2,
+          d = draw_rotate(statusbar->ctx, phys_screen, - M_PI_2,
                           0, statusbar->width);
           XFreePixmap(globalconf.display, statusbar->sw->drawable);
           statusbar->sw->drawable = d;
@@ -185,8 +159,6 @@ statusbar_draw(Statusbar *statusbar)
         default:
           break;
     }
-
-    draw_context_delete(ctx);
 
     statusbar_display(statusbar);
 }
@@ -213,6 +185,7 @@ void
 statusbar_init(Statusbar *statusbar)
 {
     Statusbar *sb;
+    Drawable dw;
     int phys_screen = get_phys_screen(statusbar->screen);
     area_t area = screen_get_area(statusbar->screen,
                                 globalconf.screens[statusbar->screen].statusbar,
@@ -257,6 +230,33 @@ statusbar_init(Statusbar *statusbar)
     widget_calculate_alignments(statusbar->widgets);
 
     statusbar_position_update(statusbar);
+
+    switch(statusbar->position)
+    {
+      case Off:
+        return;
+      case Right:
+      case Left:
+        /* we need a new pixmap this way [     ] to render */
+        dw = XCreatePixmap(globalconf.display,
+                           RootWindow(globalconf.display, phys_screen),
+                           statusbar->width, statusbar->height,
+                           DefaultDepth(globalconf.display, phys_screen));
+        statusbar->ctx = draw_context_new(globalconf.display,
+                                          phys_screen,
+                                          statusbar->width,
+                                          statusbar->height,
+                                          dw);
+        break;
+      default:
+        statusbar->ctx = draw_context_new(globalconf.display,
+                                          phys_screen,
+                                          statusbar->width,
+                                          statusbar->height,
+                                          statusbar->sw->drawable);
+        break;
+    }
+    
 
     statusbar_draw(statusbar);
 }

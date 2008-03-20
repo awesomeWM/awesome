@@ -159,6 +159,8 @@ struct Statusbar
     int screen;
     /** Widget list */
     Widget *widgets;
+    /** Draw context */
+    DrawCtx *ctx;
     /** Next and previous statusbars */
     Statusbar *prev, *next;
 };
