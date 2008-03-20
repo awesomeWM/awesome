@@ -237,7 +237,7 @@ main(int argc, char **argv)
                break;
            }
        }
-       sleep(0.1);
+       usleep(100000);
     }
 
     simplewindow_delete(sw);
