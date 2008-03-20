@@ -83,7 +83,6 @@ titlebar_init(Client *c)
 void
 titlebar_update(Client *c)
 {
-    Drawable d;
     DrawCtx *ctx;
     style_t style;
     area_t geometry;
@@ -136,16 +135,12 @@ titlebar_update(Client *c)
     switch(c->titlebar.position)
     {
       case Left:
-        d = draw_rotate(ctx, c->titlebar.sw->phys_screen, - M_PI_2,
-                        0, c->titlebar.sw->geometry.height);
-        XFreePixmap(globalconf.display, c->titlebar.sw->drawable);
-        c->titlebar.sw->drawable = d;
+        draw_rotate(ctx, c->titlebar.sw->drawable, ctx->height, ctx->width,
+                    - M_PI_2, 0, c->titlebar.sw->geometry.height);
         break;
       case Right:
-        d = draw_rotate(ctx, c->titlebar.sw->phys_screen, M_PI_2,
-                        c->titlebar.sw->geometry.width, 0);
-        XFreePixmap(globalconf.display, c->titlebar.sw->drawable);
-        c->titlebar.sw->drawable = d;
+        draw_rotate(ctx, c->titlebar.sw->drawable, ctx->height, ctx->width,
+                    M_PI_2, c->titlebar.sw->geometry.width, 0);
       default:
         break;
     }

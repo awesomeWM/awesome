@@ -649,24 +649,22 @@ draw_get_image_size(const char *filename)
 
 /** Rotate a drawable
  * \param ctx Draw context to draw to
- * \param phys_screen physical screen id
+ * \param dest Drawable to draw the result
+ * \param dest_w Drawable width
+ * \param dest_h Drawable height
  * \param angle angle to rotate
  * \param tx translate to this x coordinate
  * \param ty translate to this y coordinate
  * \return new rotated drawable
  */
-Drawable
-draw_rotate(DrawCtx *ctx, int phys_screen, double angle, int tx, int ty)
+void
+draw_rotate(DrawCtx *ctx, Drawable dest, int dest_w, int dest_h,
+            double angle, int tx, int ty)
 {
     cairo_surface_t *surface, *source;
     cairo_t *cr;
-    Drawable newdrawable;
 
-    newdrawable = XCreatePixmap(ctx->display,
-                                RootWindow(ctx->display, phys_screen),
-                                ctx->height, ctx->width,
-                                ctx->depth);
-    surface = cairo_xlib_surface_create(ctx->display, newdrawable, ctx->visual, ctx->height, ctx->width);
+    surface = cairo_xlib_surface_create(ctx->display, dest, ctx->visual, dest_w, dest_h);
     source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
 
@@ -679,8 +677,6 @@ draw_rotate(DrawCtx *ctx, int phys_screen, double angle, int tx, int ty)
     cairo_destroy(cr);
     cairo_surface_destroy(source);
     cairo_surface_destroy(surface);
-
-    return newdrawable;
 }
 
 /** Return the width of a text in pixel

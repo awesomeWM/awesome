@@ -107,11 +107,9 @@ statusbar_position_update(Statusbar *statusbar)
 static void
 statusbar_draw(Statusbar *statusbar)
 {
-    int phys_screen = get_phys_screen(statusbar->screen);
     Widget *widget;
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
-    Drawable d;
 
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
@@ -145,16 +143,14 @@ statusbar_draw(Statusbar *statusbar)
     switch(statusbar->position)
     {
         case Right:
-          d = draw_rotate(statusbar->ctx, phys_screen, M_PI_2,
-                          statusbar->height, 0);
-          XFreePixmap(globalconf.display, statusbar->sw->drawable);
-          statusbar->sw->drawable = d;
+          draw_rotate(statusbar->ctx, statusbar->sw->drawable,
+                      statusbar->ctx->height, statusbar->ctx->width,
+                      M_PI_2, statusbar->height, 0);
           break;
         case Left:
-          d = draw_rotate(statusbar->ctx, phys_screen, - M_PI_2,
-                          0, statusbar->width);
-          XFreePixmap(globalconf.display, statusbar->sw->drawable);
-          statusbar->sw->drawable = d;
+          draw_rotate(statusbar->ctx, statusbar->sw->drawable,
+                      statusbar->ctx->height, statusbar->ctx->width,
+                      - M_PI_2, 0, statusbar->width);
           break;
         default:
           break;
