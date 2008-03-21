@@ -103,7 +103,7 @@ x_select_input(xcb_connection_t *c, xcb_window_t w,
 	       uint32_t event_mask)
 {
     const uint32_t config_win_val[] = { event_mask };
-    xcb_change_window_attributes_checked(c, w, XCB_CW_EVENT_MASK, config_win_val);
+    xcb_change_window_attributes(c, w, XCB_CW_EVENT_MASK, config_win_val);
 }
 
 /** Equivalent to 'XGetTransientForHint' which is actually a
