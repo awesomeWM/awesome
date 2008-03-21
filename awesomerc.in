@@ -4,21 +4,21 @@ screen 0
     {
         normal
         {
-            font = "sans 10"
-            fg = "#eeeeee"
-            bg = "#111111"
-            border = "#6666ff"
+            font = "sans 8"
+            fg = "#dddddd"
+            bg = "#444444"
+            border = "#555555"
         }
         focus
         {
-            fg = "#ffffff"
-            bg = "#6666ff"
-            border = "#6666ff"
+            fg = "#000000"
+            bg = "#00bfff"
+            border = "#00bfff"
         }
         urgent
         {
-            fg = "#ffffff"
-            bg = "#ff0000"
+            fg = "#111111"
+            bg = "#ff4500"
         }
      }
     tags
