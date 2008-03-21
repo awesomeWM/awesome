@@ -61,7 +61,7 @@ defconfig.h: awesomerc
 	@echo "generating defconfig.h from awesomerc"
 	@echo "static const char *AWESOME_DEFAULT_CONFIG = " > defconfig.h
 	@echo -n "\"" >> defconfig.h
-	@$(SED) 's,\\,\\\\,g;s/$$/ \\n\\/;s/"/\\"/g' "awesomerc" >> defconfig.h
+	@$(SED) 's,\\,\\\\,g;s/$$/\\n\\/;s/"/\\"/g' "awesomerc" >> defconfig.h
 	@echo "\";" >> defconfig.h
 
 CLEANFILES    += uicbgen.h
