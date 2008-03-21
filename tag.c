@@ -53,11 +53,15 @@ tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
     return tag;
 }
 
-static void
+void
 tag_append_to_screen(Tag *tag, int screen)
 {
+    int phys_screen = screen_virttophys(screen);
+
     tag->screen = screen;
     tag_list_append(&globalconf.screens[screen].tags, tag);
+    ewmh_update_net_numbers_of_desktop(phys_screen);
+    ewmh_update_net_desktop_names(phys_screen);
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 

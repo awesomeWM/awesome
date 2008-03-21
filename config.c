@@ -28,7 +28,6 @@
 #include "rules.h"
 #include "screen.h"
 #include "widget.h"
-#include "ewmh.h"
 #include "defconfig.h"
 #include "layouts/tile.h"
 #include "common/configopts.h"
@@ -455,10 +454,6 @@ config_parse_screen(cfg_t *cfg, int screen)
         tag = tag_new("default", virtscreen->layouts, 0.5, 1, 1);
         tag_push_to_screen(tag, screen);
     }
-
-    ewmh_update_net_numbers_of_desktop(phys_screen);
-    ewmh_update_net_current_desktop(phys_screen);
-    ewmh_update_net_desktop_names(phys_screen);
 
     /* select first tag by default */
     virtscreen->tags[0].selected = True;
