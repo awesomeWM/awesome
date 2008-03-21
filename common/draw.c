@@ -107,17 +107,18 @@ draw_context_new(Display *disp, int phys_screen, int width, int height, Drawable
  * \param ctx DrawCtx to delete
  */
 void
-draw_context_delete(DrawCtx *ctx)
+draw_context_delete(DrawCtx **ctx)
 {
-    g_object_unref(ctx->layout);
-    cairo_surface_destroy(ctx->surface);
-    cairo_destroy(ctx->cr);
-    p_delete(&ctx);
+    g_object_unref((*ctx)->layout);
+    cairo_surface_destroy((*ctx)->surface);
+    cairo_destroy((*ctx)->cr);
+    p_delete(ctx);
 }
 
 /** Create a new Pango font
  * \param disp Display ref
  * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE])
+ * \return a new font
  */
 font_t *
 draw_font_new(Display *disp, char *fontname)
@@ -173,10 +174,10 @@ draw_font_new(Display *disp, char *fontname)
  * \param font font_t to delete
  */
 void
-draw_font_free(font_t *font)
+draw_font_delete(font_t **font)
 {
-    pango_font_description_free(font->desc);
-    p_delete(&font);
+    pango_font_description_free((*font)->desc);
+    p_delete(font);
 }
 
 /** Draw text into a draw context
@@ -289,7 +290,8 @@ draw_text(DrawCtx *ctx,
  */
 static cairo_pattern_t *
 draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
-                         XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+                              XColor *pcolor, XColor *pcolor_center,
+                              XColor *pcolor_end)
 {
     cairo_pattern_t *pat = NULL;
 
@@ -330,18 +332,24 @@ draw_rectangle(DrawCtx *ctx, area_t geometry, Bool filled, XColor color)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, 1.0);
-    cairo_set_source_rgb(ctx->cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+    cairo_set_source_rgb(ctx->cr,
+                         color.red / 65535.0,
+                         color.green / 65535.0,
+                         color.blue / 65535.0);
     if(filled)
     {
-        cairo_rectangle(ctx->cr, geometry.x, geometry.y, geometry.width, geometry.height);
+        cairo_rectangle(ctx->cr, geometry.x, geometry.y,
+                        geometry.width, geometry.height);
         cairo_fill(ctx->cr);
     }
     else
     {
-        cairo_rectangle(ctx->cr, geometry.x + 1, geometry.y, geometry.width - 1, geometry.height - 1);
+        cairo_rectangle(ctx->cr, geometry.x + 1, geometry.y,
+                        geometry.width - 1, geometry.height - 1);
         cairo_stroke(ctx->cr);
     }
 }
+
 /** Draw rectangle with gradient colors
  * \param ctx Draw context
  * \param geometry geometry
@@ -354,7 +362,8 @@ draw_rectangle(DrawCtx *ctx, area_t geometry, Bool filled, XColor color)
  */
 void
 draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, Bool filled,
-                        area_t pattern_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+                        area_t pattern_rect, XColor *pcolor,
+                        XColor *pcolor_center, XColor *pcolor_end)
 {
     cairo_pattern_t *pat;
 
@@ -404,13 +413,15 @@ draw_graph_setup(DrawCtx *ctx)
  * \param pcolor_end color at the right
  */
 void
-draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index, Position grow,
-           area_t patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
+           Position grow, area_t patt_rect,
+           XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
     int i, x, y, w;
     cairo_pattern_t *pat;
 
-    pat = draw_setup_cairo_color_source(ctx, patt_rect, pcolor, pcolor_center, pcolor_end);
+    pat = draw_setup_cairo_color_source(ctx, patt_rect,
+                                        pcolor, pcolor_center, pcolor_end);
 
     x = rect.x;
     y = rect.y;
@@ -462,8 +473,9 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index, Positio
  * \param pcolor_end color at the right
  */
 void
-draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index, Position grow,
-                area_t patt_rect, XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
+                Position grow, area_t patt_rect,
+                XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
     int i, x, y, w;
     int flag = 0; /* used to prevent drawing a line from 0 to 0 values */
@@ -664,8 +676,10 @@ draw_rotate(DrawCtx *ctx, Drawable dest, int dest_w, int dest_h,
     cairo_surface_t *surface, *source;
     cairo_t *cr;
 
-    surface = cairo_xlib_surface_create(ctx->display, dest, ctx->visual, dest_w, dest_h);
-    source = cairo_xlib_surface_create(ctx->display, ctx->drawable, ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xlib_surface_create(ctx->display, dest,
+                                        ctx->visual, dest_w, dest_h);
+    source = cairo_xlib_surface_create(ctx->display, ctx->drawable,
+                                       ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
 
     cairo_translate(cr, tx, ty);
@@ -693,7 +707,7 @@ draw_textwidth(Display *disp, font_t *font, char *text)
     PangoLayout *layout;
     PangoRectangle ext;
 
-    if (!a_strlen(text))
+    if(!a_strlen(text))
         return 0;
 
     surface = cairo_xlib_surface_create(disp, DefaultScreen(disp),
@@ -721,13 +735,13 @@ draw_textwidth(Display *disp, font_t *font, char *text)
 Alignment
 draw_align_get_from_str(const char *align)
 {
-    if(!a_strncmp(align, "left", 4))
+    if(!a_strcmp(align, "left"))
         return AlignLeft;
-    else if(!a_strncmp(align, "center", 6))
+    else if(!a_strcmp(align, "center"))
         return AlignCenter;
-    else if(!a_strncmp(align, "right", 5))
+    else if(!a_strcmp(align, "right"))
         return AlignRight;
-    else if(!a_strncmp(align, "flex", 4))
+    else if(!a_strcmp(align, "flex"))
         return AlignFlex;
 
     return AlignAuto;
@@ -759,6 +773,14 @@ draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color
     return ret;
 }
 
+/** Init a style struct. Every value will be inherited from m
+ * if they are not set in the configuration section cfg.
+ * \param disp Display ref
+ * \param phys_screen Physical screen number
+ * \param cfg style configuration section
+ * \param c style to fill
+ * \param m style to use as template
+ */
 void
 draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
                 style_t *c, style_t *m)
@@ -790,7 +812,7 @@ draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
 }
 
 /** Remove a area from a list of them,
- * spliting the space between several area that can overlaps
+ * spliting the space between several area that can overlap
  * \param head list head
  * \param elem area to remove
  */

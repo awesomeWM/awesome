@@ -643,7 +643,7 @@ main(int argc, char **argv)
         globalconf.prompt = a_strdup(argv[optind]);
 
     /* Get the numlock mask */
-    globalconf.numlockmask = get_numlockmask(disp);
+    globalconf.numlockmask = xgetnumlockmask(disp);
 
     si = screensinfo_new(disp);
     if(si->xinerama_is_active)
@@ -748,8 +748,8 @@ main(int argc, char **argv)
     }
 
     p_delete(&globalconf.text);
-    draw_context_delete(globalconf.ctx);
-    simplewindow_delete(globalconf.sw);
+    draw_context_delete(&globalconf.ctx);
+    simplewindow_delete(&globalconf.sw);
     XCloseDisplay(disp);
 
     return EXIT_SUCCESS;

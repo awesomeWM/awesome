@@ -649,7 +649,7 @@ client_unmanage(Client *c)
     XUngrabServer(globalconf.display);
 
     if(c->titlebar.sw)
-        simplewindow_delete(c->titlebar.sw);
+        simplewindow_delete(&c->titlebar.sw);
 
     p_delete(&c);
 }

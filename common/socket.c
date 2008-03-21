@@ -36,7 +36,7 @@
  * \return sockaddr_un struct ready to be used or NULL if a problem occured
  */
 struct sockaddr_un *
-get_client_addr(const char *display)
+socket_getaddr(const char *display)
 {
     char *homedir, *tmp;
     const char *real_display = NULL;
@@ -82,7 +82,7 @@ get_client_addr(const char *display)
  * \return the socket file descriptor
  */
 int
-get_client_socket(void)
+socket_getclient(void)
 {
     int csfd;
 

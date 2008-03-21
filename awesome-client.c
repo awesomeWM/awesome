@@ -40,8 +40,8 @@ send_msg(char *msg, ssize_t msg_len)
 {
     struct sockaddr_un *addr;
     int csfd, ret_value = EXIT_SUCCESS;
-    csfd = get_client_socket();
-    addr = get_client_addr(getenv("DISPLAY"));
+    csfd = socket_getclient();
+    addr = socket_getaddr(getenv("DISPLAY"));
 
     if(!addr || csfd < 0)
         return EXIT_FAILURE;

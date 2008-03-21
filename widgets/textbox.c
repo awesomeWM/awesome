@@ -92,7 +92,7 @@ textbox_tell(Widget *widget, char *property, char *command)
         if((newfont = draw_font_new(globalconf.display, command)))
         {
             if(d->style.font != globalconf.screens[widget->statusbar->screen].styles.normal.font)
-                draw_font_free(d->style.font);
+                draw_font_delete(&d->style.font);
             d->style.font = newfont;
         }
         else

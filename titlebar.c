@@ -153,7 +153,7 @@ titlebar_update(Client *c)
 
     simplewindow_refresh_drawable(c->titlebar.sw, c->titlebar.sw->phys_screen);
 
-    draw_context_delete(ctx);
+    draw_context_delete(&ctx);
 }
 
 void

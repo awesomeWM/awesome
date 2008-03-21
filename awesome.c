@@ -334,8 +334,8 @@ main(int argc, char *argv[])
     XSync(dpy, False);
 
     /* get socket fd */
-    csfd = get_client_socket();
-    addr = get_client_addr(getenv("DISPLAY"));
+    csfd = socket_getclient();
+    addr = socket_getaddr(getenv("DISPLAY"));
 
     if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
     {

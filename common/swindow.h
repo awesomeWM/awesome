@@ -35,11 +35,18 @@ typedef struct SimpleWindow
 } SimpleWindow;
 
 SimpleWindow * simplewindow_new(Display *, int, int, int, unsigned int, unsigned int, unsigned int);
-void simplewindow_delete(SimpleWindow *);
+void simplewindow_delete(SimpleWindow **);
 int simplewindow_move(SimpleWindow *, int, int);
 int simplewindow_resize(SimpleWindow *, unsigned int, unsigned int);
 int simplewindow_refresh_drawable(SimpleWindow *, int);
-int simplewindow_move_resize(SimpleWindow *, int, int, unsigned int, unsigned int);
+
+static inline int
+simplewindow_move_resize(SimpleWindow *sw, int x, int y,
+                         unsigned int w, unsigned int h)
+{
+    return (simplewindow_move(sw, x, y)
+            && simplewindow_resize(sw, w, h));
+}
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

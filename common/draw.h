@@ -118,10 +118,11 @@ typedef struct
 } DrawCtx;
 
 DrawCtx *draw_context_new(Display *, int, int, int, Drawable);
-void draw_context_delete(DrawCtx *);
+void draw_context_delete(DrawCtx **);
 
 font_t *draw_font_new(Display *disp, char *fontname);
-void draw_font_free(font_t *);
+void draw_font_delete(font_t **);
+
 void draw_text(DrawCtx *, area_t, Alignment, int, char *, style_t);
 void draw_rectangle(DrawCtx *, area_t, Bool, XColor);
 void draw_rectangle_gradient(DrawCtx *, area_t, Bool, area_t, XColor *, XColor *, XColor *);

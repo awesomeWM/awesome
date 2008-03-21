@@ -57,7 +57,7 @@ xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
 }
 
 unsigned int
-get_numlockmask(Display *disp)
+xgetnumlockmask(Display *disp)
 {
     XModifierKeymap *modmap;
     unsigned int mask = 0;

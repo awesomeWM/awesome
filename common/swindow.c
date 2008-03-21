@@ -78,11 +78,11 @@ simplewindow_new(Display *disp, int phys_screen, int x, int y,
  * \param sw the SimpleWindow to delete
  */
 void
-simplewindow_delete(SimpleWindow *sw)
+simplewindow_delete(SimpleWindow **sw)
 {
-    XDestroyWindow(sw->display, sw->window);
-    XFreePixmap(sw->display, sw->drawable);
-    p_delete(&sw);
+    XDestroyWindow((*sw)->display, (*sw)->window);
+    XFreePixmap((*sw)->display, (*sw)->drawable);
+    p_delete(sw);
 }
 
 /** Move a simple window
@@ -116,13 +116,6 @@ simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
                                  w, h,
                                  DefaultDepth(sw->display, sw->phys_screen));
     return XResizeWindow(sw->display, sw->window, w, h);
-}
-
-int simplewindow_move_resize(SimpleWindow *sw, int x, int y,
-                             unsigned int w, unsigned int h)
-{
-    return (simplewindow_move(sw, x, y)
-            && simplewindow_resize(sw, w, h));
 }
 
 /** Refresh the window content

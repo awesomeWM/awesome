@@ -550,7 +550,7 @@ config_parse(const char *confpatharg)
     globalconf.buttons.titlebar = parse_mouse_bindings(cfg_mouse, "titlebar", True);
 
     /* Keys */
-    globalconf.numlockmask = get_numlockmask(globalconf.display);
+    globalconf.numlockmask = xgetnumlockmask(globalconf.display);
 
     globalconf.keys = section_keys(cfg_keys);
 

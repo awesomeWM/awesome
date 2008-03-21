@@ -237,7 +237,7 @@ main(int argc, char **argv)
        usleep(100000);
     }
 
-    simplewindow_delete(sw);
+    simplewindow_delete(&sw);
     XCloseDisplay(disp);
 
     return EXIT_SUCCESS;

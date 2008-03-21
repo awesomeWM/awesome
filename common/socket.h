@@ -22,8 +22,8 @@
 #ifndef AWESOME_COMMON_SOCKET_H
 #define AWESOME_COMMON_SOCKET_H
 
-struct sockaddr_un * get_client_addr(const char *);
-int get_client_socket(void);
+struct sockaddr_un * socket_getaddr(const char *);
+int socket_getclient(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

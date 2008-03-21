@@ -47,7 +47,7 @@ screen_get_bycoord(ScreensInfo *si, int screen, int x, int y)
 }
 
 static inline area_t
-screen_xsi_to_area(XineramaScreenInfo si)
+screen_xsitoarea(XineramaScreenInfo si)
 {
     area_t a;
 
@@ -100,7 +100,7 @@ screensinfo_new(Display *disp)
                             MAX(xsi[screen].height, xsi[screen_to_test].height);
                     }
             if(!drop)
-                si->geometry[si->nscreen++] = screen_xsi_to_area(xsi[screen]);
+                si->geometry[si->nscreen++] = screen_xsitoarea(xsi[screen]);
         }
 
         /* realloc smaller if xinerama_screen_number != screen registered */
