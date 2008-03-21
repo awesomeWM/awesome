@@ -19,60 +19,208 @@
  *
  */
 
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
+/* strndup() */
+#define _GNU_SOURCE
+
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+#include <xcb/xcb_atom.h>
+#include <xcb/xinerama.h>
+#include <xcb/xcb_keysyms.h>
 
 #include "common/util.h"
 #include "common/xutil.h"
 
-Bool
-xgettextprop(Display *disp, Window w, Atom atom, char *text, ssize_t textlen)
+bool
+xgettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
+             char *text, ssize_t textlen)
 {
-    char **list = NULL;
-    int n;
-    XTextProperty name;
+    xcb_get_property_reply_t *name = NULL;
+    char *prop_val = NULL;
 
     if(!text || !textlen)
-        return False;
+        return false;
 
     text[0] = '\0';
-    XGetTextProperty(disp, w, &name, atom);
+    name = xcb_get_property_reply(conn,
+                                  xcb_get_property_unchecked(conn, false,
+                                                             w, atom,
+                                                             XCB_GET_PROPERTY_TYPE_ANY,
+                                                             0L, 1000000L),
+                                  NULL);
 
-    if(!name.nitems)
-        return False;
+    if(!name->value_len)
+        return false;
 
-    if(name.encoding == XA_STRING)
-        a_strncpy(text, textlen, (char *) name.value, textlen - 1);
+    prop_val = (char *) xcb_get_property_value(name);
+    if(name->type == STRING)
+        a_strncpy(text, textlen, prop_val, textlen - 1);
 
-    else if(XmbTextPropertyToTextList(disp, &name, &list, &n) >= Success && n > 0 && *list)
-    {
-        a_strncpy(text, textlen, *list, textlen - 1);
-        XFreeStringList(list);
-    }
+    /* TODO: XCB doesn't  provide a XmbTextPropertyToTextList(), check
+     * whether this code is correct (locales) */
+    else if(name->format == 8)
+        a_strncpy(text, textlen, prop_val, textlen - 1);
 
     text[textlen - 1] = '\0';
-    XFree(name.value);
+    p_delete(&name);
 
-    return True;
+    return true;
 }
 
 unsigned int
-xgetnumlockmask(Display *disp)
+xgetnumlockmask(xcb_connection_t *conn)
 {
-    XModifierKeymap *modmap;
+    xcb_get_modifier_mapping_reply_t *modmap_r;
+    xcb_keycode_t *modmap;
+    xcb_key_symbols_t *keysyms = xcb_key_symbols_alloc(conn);
     unsigned int mask = 0;
     int i, j;
 
-    modmap = XGetModifierMapping(disp);
+    modmap_r = xcb_get_modifier_mapping_reply(conn,
+                                              xcb_get_modifier_mapping_unchecked(conn),
+                                              NULL);
+
+    modmap = xcb_get_modifier_mapping_keycodes(modmap_r);
+
     for(i = 0; i < 8; i++)
-        for(j = 0; j < modmap->max_keypermod; j++)
-            if(modmap->modifiermap[i * modmap->max_keypermod + j]
-               == XKeysymToKeycode(disp, XK_Num_Lock))
+        for(j = 0; j < modmap_r->keycodes_per_modifier; j++)
+            if(modmap[i * modmap_r->keycodes_per_modifier + j]
+               == xcb_key_symbols_get_keycode(keysyms, XK_Num_Lock))
                 mask = (1 << i);
 
-    XFreeModifiermap(modmap);
+    p_delete(&modmap_r);
+    xcb_key_symbols_free(keysyms);
 
     return mask;
+}
+
+/** 'XSelectInput' from Xlib is only a function around
+ * 'ChangeWindowAttributes' which set the value mask to 'CWEventMask'
+ * \param c X connection
+ */
+void
+x_select_input(xcb_connection_t *c, xcb_window_t w,
+	       uint32_t event_mask)
+{
+    const uint32_t config_win_val[] = { event_mask };
+    xcb_change_window_attributes_checked(c, w, XCB_CW_EVENT_MASK, config_win_val);
+}
+
+/** Equivalent to 'XGetTransientForHint' which is actually a
+ * 'XGetWindowProperty' which gets the WM_TRANSIENT_FOR property of
+ * the specified window
+ *
+ * \param c X connection
+ * \param win get the property from this window
+ * \param prop_win returns the WM_TRANSIENT_FOR property of win
+ * \return return true if successfull
+ */
+bool
+x_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
+			 xcb_window_t *prop_win)
+{
+    xcb_get_property_reply_t *r;
+
+    /* Use checked because the error handler should not take care of
+     * this error as we only return a boolean */
+    r = xcb_get_property_reply(c,
+                               xcb_get_property(c, false, win,
+                                                WM_TRANSIENT_FOR,
+                                                WINDOW, 0, 1),
+                               NULL);
+
+    if(!r)
+        return false;
+
+    *prop_win = *((xcb_window_t *) xcb_get_property_value(r));
+    p_delete(&r);
+
+    return true;
+}
+
+bool
+xinerama_is_active(xcb_connection_t *c)
+{
+    bool ret;
+    xcb_xinerama_is_active_reply_t *r = NULL;
+
+    r = xcb_xinerama_is_active_reply(c, xcb_xinerama_is_active(c), NULL);
+    if(!r)
+        return false;
+
+    ret = r->state;
+    p_delete(&r);
+
+    return ret;
+}
+
+xcb_window_t
+root_window(xcb_connection_t *c, int screen_number)
+{
+    return xcb_aux_get_screen(c, screen_number)->root;
+}
+
+xcb_atom_t
+x_intern_atom(xcb_connection_t *c, const char *property)
+{
+    xcb_atom_t atom;
+    xcb_intern_atom_reply_t *r_atom;
+
+    r_atom = xcb_intern_atom_reply(c,
+				   xcb_intern_atom_unchecked(c, false, strlen(property), property),
+				   NULL);
+
+    if(!r_atom)
+	return 0;
+
+    atom = r_atom->atom;
+    p_delete(&r_atom);
+
+    return atom;
+}
+
+class_hint_t *
+x_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
+{
+    xcb_get_property_reply_t *r = NULL;
+    char *data = NULL;
+
+    int len_name, len_class;
+
+    class_hint_t *ch = p_new(class_hint_t, 1);
+
+    /* TODO: 2048? (BUFINC is declared as private in xcb.c) */
+    r = xcb_get_property_reply(conn,
+			       xcb_get_property_unchecked(conn,
+							  false, win, WM_CLASS,
+							  STRING, 0L, 2048),
+			       NULL);
+
+    if(!r || r->type != STRING || r->format == 8)
+	return NULL;
+
+    data = xcb_get_property_value(r);
+
+    len_name = strlen((char *) data);
+    len_class = strlen((char *) (data + len_name + 1));
+
+    ch->res_name = strndup(data, len_name);
+    ch->res_class = strndup(data + len_name + 1, len_class);
+
+    p_delete(&r);
+
+    return ch;
+}
+
+void
+xutil_map_raised(xcb_connection_t *conn, xcb_window_t win)
+{
+    const uint32_t map_raised_val = XCB_STACK_MODE_ABOVE;
+
+    xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_STACK_MODE,
+                         &map_raised_val);
+
+    xcb_map_window(conn, win);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

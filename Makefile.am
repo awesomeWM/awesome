@@ -110,7 +110,12 @@ AWESOME_CFLAGS = -std=gnu99 -pipe \
 		 -Wunused -Winit-self -Wpointer-arith -Wredundant-decls \
 		 -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn
 endif
-AM_CPPFLAGS = $(X_CFLAGS) $(pangocairo_CFLAGS) $(confuse_CFLAGS) $(xrandr_CFLAGS) $(xinerama_CFLAGS) $(AWESOME_CFLAGS) $(GTK_CFLAGS) $(imlib2_CFLAGS)
+AM_CPPFLAGS = $(pangocairo_CFLAGS) $(confuse_CFLAGS)  $(AWESOME_CFLAGS) \
+	$(GTK_CFLAGS) $(imlib2_CFLAGS) \
+	$(xcb_CFLAGS) $(xcb_event_CFLAGS) \
+	$(xcb_randr_CFLAGS) $(xcb_xinerama_CFLAGS) $(xcb_shape_CFLAGS) \
+	$(xcb_aux_CFLAGS) $(xcb_atom_CFLAGS) $(xcb_keysyms_CFLAGS) \
+	$(xcb_icccm_CFLAGS)
 
 bin_PROGRAMS += awesome
 awesome_SOURCES = \
@@ -140,10 +145,14 @@ awesome_SOURCES = \
 	rules.c rules.h \
 	mouse.c mouse.h \
 	widget.c widget.h \
+	xcb_event_handler.c xcb_event_handler.h \
 	ewmh.c ewmh.h
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
-awesome_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xrandr_LIBS) $(xinerama_LIBS) $(GTK_LIBS) $(imlib2_LIBS)
+awesome_LDADD = $(pangocairo_LIBS) $(confuse_LIBS) $(xcb_LIBS) $(xcb_event_LIBS) \
+	$(xcb_randr_LIBS) $(xcb_xinerama_LIBS) $(xcb_shape_LIBS) $(xcb_aux_LIBS) \
+	$(xcb_atom_LIBS) $(xcb_keysyms_LIBS) $(xcb_icccm_LIBS) \
+	$(imlib2_LIBS) $(GTK_LIBS)
 
 bin_PROGRAMS += awesome-client
 awesome_client_SOURCES = \
@@ -160,9 +169,10 @@ awesome_message_SOURCES = \
 	common/version.h common/version.c \
 	common/configopts.h common/configopts.c \
 	common/xscreen.h common/xscreen.c \
+	common/xutil.h common/xutil.c \
 	awesome-message.c
-
-awesome_message_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xinerama_LIBS) $(GTK_LIBS) $(imlib2_LIBS)
+awesome_message_LDADD = $(xcb_LIBS) $(xcb_atom_LIBS) $(xcb_keysyms_LIBS) $(xcb_aux_LIBS) \
+	$(pangocairo_LIBS) $(confuse_LIBS) $(xcb_xinerama_LIBS) $(imlib2_LIBS) $(GTK_LIBS)
 
 bin_PROGRAMS += awesome-menu
 awesome_menu_SOURCES = \
@@ -173,8 +183,8 @@ awesome_menu_SOURCES = \
 	common/configopts.h common/configopts.c \
 	common/xutil.h common/xutil.c \
 	awesome-menu.c
-
-awesome_menu_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xinerama_LIBS) $(GTK_LIBS) $(imlib2_LIBS)
+awesome_menu_LDADD = $(xcb_LIBS) $(xcb_atom_LIBS) $(xcb_keysyms_LIBS) $(xcb_aux_LIBS) \
+	$(pangocairo_LIBS) $(confuse_LIBS) $(xcb_xinerama_LIBS) $(imlib2_LIBS) $(GTK_LIBS)
 
 if HAVE_XMLTO
 if HAVE_ASCIIDOC

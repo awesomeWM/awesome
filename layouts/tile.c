@@ -57,7 +57,7 @@ uicb_tag_setnmaster(int screen, char * arg)
 
     p_delete(&curtags);
 
-    globalconf.screens[screen].need_arrange = True;
+    globalconf.screens[screen].need_arrange = true;
 }
 
 void
@@ -87,7 +87,7 @@ uicb_tag_setncol(int screen, char * arg)
 
     p_delete(&curtags);
 
-    globalconf.screens[screen].need_arrange = True;
+    globalconf.screens[screen].need_arrange = true;
 }
 
 void
@@ -121,7 +121,7 @@ uicb_tag_setmwfact(int screen, char *arg)
 
     p_delete(&newarg);
     p_delete(&curtags);
-    globalconf.screens[screen].need_arrange = True;
+    globalconf.screens[screen].need_arrange = true;
 }
 
 static void

@@ -22,24 +22,28 @@
 #ifndef AWESOME_CLIENT_H
 #define AWESOME_CLIENT_H
 
+#include <stdbool.h>
+
+#include <xcb/xcb_icccm.h>
+
 #include "structs.h"
 
-Bool client_isvisible(Client *, int);
-Client * client_get_bywin(Client *, Window);
+bool client_isvisible(Client *, int);
+Client * client_get_bywin(Client *, xcb_window_t);
 Client * client_get_byname(Client *, char *);
-Bool client_focus(Client *, int, Bool);
+bool client_focus(Client *, int, bool);
 void client_stack(Client *);
 void client_ban(Client *);
 void client_unban(Client *);
-void client_manage(Window, XWindowAttributes *, int);
-Bool client_resize(Client *, area_t, Bool);
+void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int);
+bool client_resize(Client *, area_t, bool);
 void client_unmanage(Client *);
 void client_updatewmhints(Client *);
-long client_updatesizehints(Client *);
+xcb_size_hints_t *client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *);
 void client_kill(Client *);
-void client_setfloating(Client *, Bool, Layer);
+void client_setfloating(Client *, bool, Layer);
 
 Uicb uicb_client_kill;
 Uicb uicb_client_moveresize;

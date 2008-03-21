@@ -23,14 +23,15 @@
 #define AWESOME_COMMON_DRAW_H
 
 #include <cairo.h>
+#include <pango/pangocairo.h>
 
 #include <confuse.h>
 
-#include <X11/Xlib.h>
-#include <pango/pangocairo.h>
+#include <xcb/xcb.h>
 
 #include "common/util.h"
 #include "common/list.h"
+#include "common/xutil.h"
 
 typedef enum
 {
@@ -59,7 +60,7 @@ DO_SLIST(area_t, area, p_delete)
 #define AREA_RIGHT(a)   ((a).x + (a).width)
 #define AREA_BOTTOM(a)    ((a).y + (a).height)
 
-static inline Bool
+static inline bool
 area_intersect_area(area_t a, area_t b)
 {
     return (b.x < a.x + a.width
@@ -90,13 +91,13 @@ typedef struct
 typedef struct
 {
     /** Foreground color */
-    XColor fg;
+    xcolor_t fg;
     /** Background color */
-    XColor bg;
+    xcolor_t bg;
     /** Shadow color */
-    XColor shadow;
+    xcolor_t shadow;
     /** Border color */
-    XColor border;
+    xcolor_t border;
     /** Shadow offset */
     int shadow_offset;
     /** Font */
@@ -105,9 +106,10 @@ typedef struct
 
 typedef struct
 {
-    Display *display;
-    Drawable drawable;
-    Visual *visual;
+    xcb_connection_t *connection;
+    int default_screen;
+    xcb_drawable_t drawable;
+    xcb_visualtype_t *visual;
     int width;
     int height;
     int phys_screen;
@@ -117,28 +119,28 @@ typedef struct
     PangoLayout *layout;
 } DrawCtx;
 
-DrawCtx *draw_context_new(Display *, int, int, int, Drawable);
+DrawCtx *draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t);
 void draw_context_delete(DrawCtx **);
 
-font_t *draw_font_new(Display *disp, char *fontname);
+font_t *draw_font_new(xcb_connection_t *, int, char *);
 void draw_font_delete(font_t **);
 
 void draw_text(DrawCtx *, area_t, Alignment, int, char *, style_t);
-void draw_rectangle(DrawCtx *, area_t, float, Bool, XColor);
-void draw_rectangle_gradient(DrawCtx *, area_t, float, Bool, area_t, XColor *, XColor *, XColor *);
+void draw_rectangle(DrawCtx *, area_t, float, bool, xcolor_t);
+void draw_rectangle_gradient(DrawCtx *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 
 void draw_graph_setup(DrawCtx *);
-void draw_graph(DrawCtx *, area_t, int *, int *, int, Position, area_t, XColor *, XColor *, XColor *);
-void draw_graph_line(DrawCtx *, area_t, int *, int, Position, area_t, XColor *, XColor *, XColor *);
-void draw_circle(DrawCtx *, int, int, int, Bool, XColor);
+void draw_graph(DrawCtx *, area_t, int *, int *, int, Position, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
+void draw_graph_line(DrawCtx *, area_t, int *, int, Position, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
+void draw_circle(DrawCtx *, int, int, int, bool, xcolor_t);
 void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
 area_t draw_get_image_size(const char *filename);
-void draw_rotate(DrawCtx *, Drawable, int, int, double, int, int);
-unsigned short draw_textwidth(Display *, font_t *, const char *);
+void draw_rotate(DrawCtx *, xcb_drawable_t, int, int, double, int, int);
+unsigned short draw_textwidth(xcb_connection_t *, int, font_t *, const char *);
 Alignment draw_align_get_from_str(const char *);
-Bool draw_color_new(Display *, int, const char *, XColor *);
-void draw_style_init(Display *, int, cfg_t *, style_t *, style_t *);
+bool draw_color_new(xcb_connection_t *, int, const char *, xcolor_t *);
+void draw_style_init(xcb_connection_t *, int, cfg_t *, style_t *, style_t *);
 
 void area_list_remove(area_t **, area_t *);
 

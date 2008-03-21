@@ -43,7 +43,7 @@ layout_fibonacci(int screen, int shape)
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))
         {
-            c->ismax = False;
+            c->ismax = false;
             if((i % 2 && geometry.height / 2 > 2 * c->border)
                || (!(i % 2) && geometry.width / 2 > 2 * c->border))
             {

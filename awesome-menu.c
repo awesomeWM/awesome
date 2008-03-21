@@ -36,7 +36,12 @@
 #include <string.h>
 #include <errno.h>
 
-#include <X11/Xutil.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_atom.h>
+#include <xcb/xcb_keysyms.h>
+
+/* XKeysymToString() */
+#include <X11/Xlib.h>
 
 #include "common/swindow.h"
 #include "common/util.h"
@@ -47,7 +52,7 @@
 
 #define PROGNAME "awesome-menu"
 
-#define CLEANMASK(mask) (mask & ~(globalconf.numlockmask | LockMask))
+#define CLEANMASK(mask) (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
 
 /** awesome-menu run status */
 typedef enum
@@ -76,7 +81,7 @@ struct item_t
     /** Previous and next elems in item_t list */
     item_t *prev, *next;
     /** True if the item currently matches */
-    Bool match;
+    bool match;
 };
 
 /** Destructor for item structure
@@ -94,8 +99,10 @@ DO_SLIST(item_t, item, item_delete)
 /** awesome-run global configuration structure */
 typedef struct
 {
-    /** Display ref */
-    Display *display;
+    /** Connection ref */
+    xcb_connection_t *connection;
+    /** Default screen number */
+    int default_screen;
     /** The window */
     SimpleWindow *sw;
     /** The draw contet */
@@ -202,11 +209,11 @@ config_parse(int screen, const char *confpatharg,
        && (cfg_styles = cfg_getsec(cfg_screen, "styles")))
     {
         /* Grab default styles */
-        draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+        draw_style_init(globalconf.connection, globalconf.default_screen,
                         cfg_getsec(cfg_styles, "normal"),
                         &globalconf.styles.normal, NULL);
     
-        draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+        draw_style_init(globalconf.connection, globalconf.default_screen,
                         cfg_getsec(cfg_styles, "focus"),
                         &globalconf.styles.focus, &globalconf.styles.normal);
     }
@@ -214,11 +221,11 @@ config_parse(int screen, const char *confpatharg,
     /* Now grab menu styles if any */
     if(cfg_menu_styles)
     {
-        draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+        draw_style_init(globalconf.connection, globalconf.default_screen,
                         cfg_getsec(cfg_menu_styles, "normal"),
                         &globalconf.styles.normal, NULL);
 
-        draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+        draw_style_init(globalconf.connection, globalconf.default_screen,
                         cfg_getsec(cfg_menu_styles, "focus"),
                         &globalconf.styles.focus, &globalconf.styles.normal);
     }
@@ -252,7 +259,7 @@ get_last_word(char *text)
  * \param directory directory to look into
  * \return always true
  */
-static Bool
+static bool
 item_list_fill_file(const char *directory)
 {
     char *cwd, *home, *user, *filename;
@@ -290,7 +297,7 @@ item_list_fill_file(const char *directory)
             else
             {
                 p_delete(&user);
-                return False;
+                return false;
             }
         }
     }
@@ -300,7 +307,7 @@ item_list_fill_file(const char *directory)
     if(!(dir = opendir(cwd)))
     {
         p_delete(&cwd);
-        return False;
+        return false;
     }
 
     while((dirinfo = readdir(dir)))
@@ -332,11 +339,11 @@ item_list_fill_file(const char *directory)
     closedir(dir);
     p_delete(&cwd);
 
-    return True;
+    return true;
 }
 
 static void
-complete(Bool reverse)
+complete(bool reverse)
 {
     int loop = 2;
     item_t *item = NULL;
@@ -390,16 +397,16 @@ compute_match(const char *word)
 
         for(item = globalconf.items; item; item = item->next)
             if(!a_strncmp(word, item->data, a_strlen(word)))
-                item->match = True;
+                item->match = true;
             else
-                item->match = False;
+                item->match = false;
     }
     else
     {
         if(a_strlen(globalconf.text))
             item_list_fill_file(NULL);
         for(item = globalconf.items; item; item = item->next)
-            item->match = True;
+            item->match = true;
     }
 }
 
@@ -412,7 +419,7 @@ redraw(void)
 {
     item_t *item;
     area_t geometry = { 0, 0, 0, 0, NULL, NULL };
-    Bool selected_item_is_drawn = False;
+    bool selected_item_is_drawn = false;
     int len, prompt_len, x_of_previous_item;
     style_t style;
 
@@ -424,7 +431,8 @@ redraw(void)
         draw_text(globalconf.ctx, geometry, AlignLeft,
                   MARGIN, globalconf.prompt, globalconf.styles.focus);
 
-        len = MARGIN * 2 + draw_textwidth(globalconf.display, globalconf.styles.focus.font, globalconf.prompt);
+        len = MARGIN * 2 + draw_textwidth(globalconf.connection, globalconf.default_screen,
+                                          globalconf.styles.focus.font, globalconf.prompt);
         geometry.x += len;
         geometry.width -= len;
     }
@@ -432,7 +440,8 @@ redraw(void)
     draw_text(globalconf.ctx, geometry, AlignLeft,
               MARGIN, globalconf.text, globalconf.styles.normal);
 
-    len = MARGIN * 2 + MAX(draw_textwidth(globalconf.display, globalconf.styles.normal.font, globalconf.text),
+    len = MARGIN * 2 + MAX(draw_textwidth(globalconf.connection, globalconf.default_screen,
+                                          globalconf.styles.normal.font, globalconf.text),
                            geometry.width / 20);
     geometry.x += len;
     geometry.width -= len;
@@ -442,13 +451,14 @@ redraw(void)
         if(item->match)
         {
             style = item == globalconf.item_selected ? globalconf.styles.focus : globalconf.styles.normal;
-            len = MARGIN + draw_textwidth(globalconf.display, style.font, item->data);
+            len = MARGIN + draw_textwidth(globalconf.connection, globalconf.default_screen,
+                                          style.font, item->data);
             if(item == globalconf.item_selected)
             {
                 if(len > geometry.width)
                     break;
                 else
-                    selected_item_is_drawn = True;
+                    selected_item_is_drawn = true;
             }
             draw_text(globalconf.ctx, geometry, AlignLeft,
                       MARGIN / 2, item->data, style);
@@ -466,7 +476,8 @@ redraw(void)
             {
                 style = item == globalconf.item_selected ? globalconf.styles.focus : globalconf.styles.normal;
                 x_of_previous_item = geometry.x;
-                geometry.width = MARGIN + draw_textwidth(globalconf.display, style.font, item->data);
+                geometry.width = MARGIN + draw_textwidth(globalconf.connection, globalconf.default_screen,
+                                                         style.font, item->data);
                 geometry.x -= geometry.width;
 
                 if(geometry.x < prompt_len)
@@ -480,31 +491,37 @@ redraw(void)
         {
             geometry.x = prompt_len;
             geometry.width = x_of_previous_item - prompt_len;
-            draw_rectangle(globalconf.ctx, geometry, 1.0, True, globalconf.styles.normal.bg);
+            draw_rectangle(globalconf.ctx, geometry, 1.0, true, globalconf.styles.normal.bg);
         }
     }
     else if(geometry.width)
-        draw_rectangle(globalconf.ctx, geometry, 1.0, True, globalconf.styles.normal.bg);
+        draw_rectangle(globalconf.ctx, geometry, 1.0, true, globalconf.styles.normal.bg);
 
-    simplewindow_refresh_drawable(globalconf.sw, DefaultScreen(globalconf.display));
-    XSync(globalconf.display, False);
+    simplewindow_refresh_drawable(globalconf.sw, globalconf.default_screen);
+    xcb_aux_sync(globalconf.connection);
 }
 
 /** Handle keypress event in awesome-menu.
  * \param e received XKeyEvent
  */
 static void
-handle_kpress(XKeyEvent *e)
+handle_kpress(xcb_key_press_event_t *e)
 {
-    char buf[32];
-    KeySym ksym;
+    char *buf;
+    xcb_key_symbols_t *keysyms = xcb_key_symbols_alloc(globalconf.connection);
+    xcb_keysym_t ksym;
     int num;
     ssize_t len;
     size_t text_dst_len;
 
     len = a_strlen(globalconf.text);
-    num = XLookupString(e, buf, sizeof(buf), &ksym, 0);
-    if(e->state & ControlMask)
+    /* TODO: check whether 'col' (last parameter) is correct */
+    ksym = xcb_key_press_lookup_keysym(keysyms, e, 1);
+
+    /* TODO: remove this call in favor of XCB */
+    buf = XKeysymToString(ksym);
+    num = strlen(buf);
+    if(e->state & XCB_MOD_MASK_CONTROL)
         switch(ksym)
         {
           default:
@@ -543,7 +560,7 @@ handle_kpress(XKeyEvent *e)
             }
             return;
         }
-    else if(CLEANMASK(e->state) & Mod1Mask)
+    else if(CLEANMASK(e->state) & XCB_MOD_MASK_1)
         switch(ksym)
         {
           default:
@@ -590,12 +607,12 @@ handle_kpress(XKeyEvent *e)
         break;
       case XK_ISO_Left_Tab:
       case XK_Left:
-        complete(True);
+        complete(true);
         redraw();
         break;
       case XK_Right:
       case XK_Tab:
-        complete(False);
+        complete(false);
         redraw();
         break;
       case XK_Escape:
@@ -638,7 +655,7 @@ getline(char ** buf, size_t* len, FILE* in)
 /** Fill the completion by reading on stdin.
  * \return true if something has been filled up, false otherwise.
  */
-static Bool
+static bool
 item_list_fill_stdin(void)
 {
     char *buf = NULL;
@@ -646,12 +663,12 @@ item_list_fill_stdin(void)
     ssize_t line_len;
 
     item_t *newitem;
-    Bool has_entry = False;
+    bool has_entry = false;
 
     item_list_init(&globalconf.items);
 
     if((line_len = getline(&buf, &len, stdin)) != -1)
-        has_entry = True;
+        has_entry = true;
 
     if(has_entry)
         do
@@ -659,7 +676,7 @@ item_list_fill_stdin(void)
             buf[line_len - 1] = '\0';
             newitem = p_new(item_t, 1);
             newitem->data = a_strdup(buf);
-            newitem->match = True;
+            newitem->match = true;
             item_list_append(&globalconf.items, newitem);
         }
         while((line_len = getline(&buf, &len, stdin)) != -1);
@@ -676,11 +693,19 @@ static void
 keyboard_grab(void)
 {
     int i;
+    xcb_grab_keyboard_reply_t *xgb = NULL;
     for(i = 1000; i; i--)
     {
-        if(XGrabKeyboard(globalconf.display, DefaultRootWindow(globalconf.display), True,
-                         GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess)
+        if((xgb = xcb_grab_keyboard_reply(globalconf.connection,
+                                          xcb_grab_keyboard(globalconf.connection, true,
+                                                            xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root,
+                                                            XCB_CURRENT_TIME, XCB_GRAB_MODE_ASYNC,
+                                                            XCB_GRAB_MODE_ASYNC),
+                                          NULL)) != NULL)
+        {
+            p_delete(&xgb);
             break;
+        }
         usleep(1000);
     }
     if(!i)
@@ -695,15 +720,14 @@ keyboard_grab(void)
 int
 main(int argc, char **argv)
 {
-    XEvent ev;
-    int opt, ret, x, y, i, screen = 0;
+    xcb_generic_event_t *ev;
+    int opt, ret, screen = 0;
+    xcb_query_pointer_reply_t *xqp = NULL;
     char *configfile = NULL, *cmd;
     ssize_t len;
     const char *shell = getenv("SHELL");
     area_t geometry = { 0, 0, 0, 0, NULL, NULL };
     ScreensInfo *si;
-    unsigned int ui;
-    Window dummy;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -733,19 +757,24 @@ main(int argc, char **argv)
     if(argc - optind >= 1)
         globalconf.prompt = a_strdup(argv[optind]);
 
-    if(!(globalconf.display = XOpenDisplay(NULL)))
+    globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
+    if(xcb_connection_has_error(globalconf.connection))
         eprint("unable to open display");
 
     /* Get the numlock mask */
-    globalconf.numlockmask = xgetnumlockmask(globalconf.display);
+    globalconf.numlockmask = xgetnumlockmask(globalconf.connection);
 
-    si = screensinfo_new(globalconf.display);
+    si = screensinfo_new(globalconf.connection);
     if(si->xinerama_is_active)
     {
-        if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, DefaultScreen(globalconf.display)),
-                         &dummy, &dummy, &x, &y, &i, &i, &ui))
+        if((xqp = xcb_query_pointer_reply(globalconf.connection,
+                                          xcb_query_pointer(globalconf.connection,
+                                                            root_window(globalconf.connection,
+                                                                        globalconf.default_screen)),
+                                          NULL)) != NULL)
         {
-            screen = screen_get_bycoord(si, 0, x, y);
+            screen = screen_get_bycoord(si, 0, xqp->root_x, xqp->root_y);
+            p_delete(&xqp);
 
             geometry.x = si->geometry[screen].x;
             geometry.y = si->geometry[screen].y;
@@ -754,9 +783,9 @@ main(int argc, char **argv)
     }
     else
     {
-        screen = DefaultScreen(globalconf.display);
+        screen = globalconf.default_screen;
         if(!geometry.width)
-            geometry.width = DisplayWidth(globalconf.display, DefaultScreen(globalconf.display));
+            geometry.width = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->width_in_pixels;
     }
 
     if((ret = config_parse(screen, configfile, globalconf.prompt, &geometry)))
@@ -770,13 +799,15 @@ main(int argc, char **argv)
     screensinfo_delete(&si);
 
     /* Create the window */
-    globalconf.sw = simplewindow_new(globalconf.display, DefaultScreen(globalconf.display),
+    globalconf.sw = simplewindow_new(globalconf.connection, globalconf.default_screen,
                                      geometry.x, geometry.y, geometry.width, geometry.height, 0);
 
-    XStoreName(globalconf.display, globalconf.sw->window, PROGNAME);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        globalconf.sw->window, WM_NAME, STRING, 8,
+                        strlen(PROGNAME), PROGNAME);
 
     /* Create the drawing context */
-    globalconf.ctx = draw_context_new(globalconf.display, DefaultScreen(globalconf.display),
+    globalconf.ctx = draw_context_new(globalconf.connection, globalconf.default_screen,
                                       geometry.width, geometry.height,
                                       globalconf.sw->drawable);
 
@@ -804,25 +835,33 @@ main(int argc, char **argv)
 
     redraw();
 
-    XMapRaised(globalconf.display, globalconf.sw->window);
+    xutil_map_raised(globalconf.connection, globalconf.sw->window);
 
     while(status == RUN)
     {
-        XNextEvent(globalconf.display, &ev);
-        switch(ev.type)
+        while((ev = xcb_poll_for_event(globalconf.connection)))
         {
-          case ButtonPress:
-            status = CANCEL;
-            break;
-          case KeyPress:
-            handle_kpress(&ev.xkey);
-            break;
-          case Expose:
-            if(!ev.xexpose.count)
-                simplewindow_refresh_drawable(globalconf.sw, DefaultScreen(globalconf.display));
-            break;
-          default:
-            break;
+            /* Skip errors */
+            if(ev->response_type == 0)
+                continue;
+
+            switch(ev->response_type & 0x7f)
+            {
+              case XCB_BUTTON_PRESS:
+                status = CANCEL;
+                break;
+              case XCB_KEY_PRESS:
+                handle_kpress((xcb_key_press_event_t *) ev);
+                break;
+              case XCB_EXPOSE:
+                if(!((xcb_expose_event_t *) ev)->count)
+                    simplewindow_refresh_drawable(globalconf.sw, globalconf.default_screen);
+                break;
+              default:
+                break;
+            }
+
+            p_delete(&ev);
         }
     }
 
@@ -845,7 +884,7 @@ main(int argc, char **argv)
     p_delete(&globalconf.text);
     draw_context_delete(&globalconf.ctx);
     simplewindow_delete(&globalconf.sw);
-    XCloseDisplay(globalconf.display);
+    xcb_disconnect(globalconf.connection);
 
     return EXIT_SUCCESS;
 }

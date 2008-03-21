@@ -19,8 +19,6 @@
  *
  */
 
-#include <X11/Xutil.h>
-
 #include "rules.h"
 #include "common/xutil.h"
 
@@ -43,59 +41,63 @@ rules_compile_regex(char *val)
     return NULL;
 }
 
-static Bool
+static bool
 client_match_rule(Client *c, Rule *r)
 {
     char *prop, buf[512];
     regmatch_t tmp;
     ssize_t len;
-    XClassHint ch = { 0, 0 };
-    Bool ret = False;
+    class_hint_t *ch = NULL;
+    bool ret = false;
 
     if(r->prop_r)
     {
         /* first try to match on name */
-        XGetClassHint(globalconf.display, c->win, &ch);
+	ch = x_get_class_hint(globalconf.connection, c->win);
+	if (!ch)
+	    return false;
 
-        len = a_strlen(ch.res_class) + a_strlen(ch.res_name) + a_strlen(c->name);
+        len = a_strlen(ch->res_class) + a_strlen(ch->res_name) + a_strlen(c->name);
         prop = p_new(char, len + 3);
 
         /* rule matching */
         snprintf(prop, len + 3, "%s:%s:%s",
-                 ch.res_class ? ch.res_class : "", ch.res_name ? ch.res_name : "", c->name);
+                 ch->res_class ? ch->res_class : "", ch->res_name ? ch->res_name : "", c->name);
 
         ret = !regexec(r->prop_r, prop, 1, &tmp, 0);
 
         p_delete(&prop);
 
-        if(ch.res_class)
-            XFree(ch.res_class);
-        if(ch.res_name)
-            XFree(ch.res_name);
+        if(ch->res_class)
+           p_delete(&ch->res_class);
+        if(ch->res_name)
+           p_delete(&ch->res_name);
+
+        p_delete(&ch);
 
         if(ret)
-            return True;
+            return true;
     }
 
     if(r->xprop
        && r->xpropval_r
-       && xgettextprop(globalconf.display, c->win,
-                       XInternAtom(globalconf.display, r->xprop, False),
+       && xgettextprop(globalconf.connection, c->win,
+                       x_intern_atom(globalconf.connection, r->xprop),
                        buf, ssizeof(buf)))
         ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
 
     return ret;
 }
 
-Bool
+bool
 tag_match_rule(Tag *t, Rule *r)
 {
     regmatch_t tmp;
 
     if(r->tags_r && !regexec(r->tags_r, t->name, 1, &tmp, 0))
-        return True;
+        return true;
 
-    return False;
+    return false;
 }
 
 Rule *

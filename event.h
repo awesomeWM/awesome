@@ -22,24 +22,26 @@
 #ifndef AWESOME_EVENT_H
 #define AWESOME_EVENT_H
 
-#include <X11/Xlib.h>
+#include <xcb/xcb.h>
+#include <xcb/randr.h>
+#include <xcb/shape.h>
 
-#define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | LockMask))
+#define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
 
-void event_handle_buttonpress(XEvent *);
-void event_handle_configurerequest(XEvent *);
-void event_handle_configurenotify(XEvent *);
-void event_handle_destroynotify(XEvent *);
-void event_handle_enternotify(XEvent *);
-void event_handle_expose(XEvent *);
-void event_handle_keypress(XEvent *);
-void event_handle_mappingnotify(XEvent *);
-void event_handle_maprequest(XEvent *);
-void event_handle_propertynotify(XEvent *);
-void event_handle_unmapnotify(XEvent *);
-void event_handle_shape(XEvent *);
-void event_handle_randr_screen_change_notify(XEvent *);
-void event_handle_clientmessage(XEvent *);
+int event_handle_buttonpress(void *, xcb_connection_t *, xcb_button_press_event_t *);
+int event_handle_configurerequest(void *, xcb_connection_t *, xcb_configure_request_event_t *);
+int event_handle_configurenotify(void *, xcb_connection_t *, xcb_configure_notify_event_t *);
+int event_handle_destroynotify(void *, xcb_connection_t *, xcb_destroy_notify_event_t *);
+int event_handle_enternotify(void *, xcb_connection_t *, xcb_enter_notify_event_t *);
+int event_handle_expose(void *, xcb_connection_t *, xcb_expose_event_t *);
+int event_handle_keypress(void *, xcb_connection_t *, xcb_key_press_event_t *);
+int event_handle_mappingnotify(void *, xcb_connection_t *, xcb_mapping_notify_event_t *);
+int event_handle_maprequest(void *, xcb_connection_t *, xcb_map_request_event_t *);
+int event_handle_propertynotify(void *, xcb_connection_t *, xcb_property_notify_event_t *);
+int event_handle_unmapnotify(void *, xcb_connection_t *, xcb_unmap_notify_event_t *);
+int event_handle_shape(void *, xcb_connection_t *, xcb_shape_notify_event_t *);
+int event_handle_randr_screen_change_notify(void *, xcb_connection_t *, xcb_randr_screen_change_notify_event_t *);
+int event_handle_clientmessage(void *, xcb_connection_t *, xcb_client_message_event_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

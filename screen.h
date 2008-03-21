@@ -27,7 +27,7 @@
 area_t screen_get_area(int, Statusbar *, Padding *);
 area_t get_display_area(int, Statusbar *, Padding *);
 int screen_virttophys(int);
-void move_client_to_screen(Client *, int, Bool);
+void move_client_to_screen(Client *, int, bool);
 
 Uicb uicb_screen_focus;
 Uicb uicb_client_movetoscreen;

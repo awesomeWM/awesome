@@ -28,6 +28,9 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include "awesome.h"
 #include "tag.h"
 #include "mouse.h"
@@ -69,8 +72,8 @@ uicb_exec(int screen __attribute__ ((unused)), char *cmd)
     for(c = globalconf.clients; c; c = c->next)
         client_unban(c);
 
-    XSync(globalconf.display, False);
-    XCloseDisplay(globalconf.display);
+    xcb_aux_sync(globalconf.connection);
+    xcb_disconnect(globalconf.connection);
 
     /* Ignore the leading spaces if any */
     while(cmd[0] && cmd[0] == ' ')
@@ -123,8 +126,8 @@ uicb_spawn(int screen, char *arg)
     {
         if(fork() == 0)
         {
-            if(globalconf.display)
-                close(ConnectionNumber(globalconf.display));
+            if(globalconf.connection)
+                close(xcb_get_file_descriptor(globalconf.connection));
             setsid();
             execl(shell, shell, "-c", arg, NULL);
             warn("execl '%s -c %s' failed: %s\n", shell, arg, strerror(errno));

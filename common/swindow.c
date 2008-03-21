@@ -19,12 +19,14 @@
  *
  */
 
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
 
 #include "common/swindow.h"
 #include "common/util.h"
 
 /** Create a simple window
- * \param disp Display ref
+ * \param conn Connection ref
  * \param phys_screen physical screen id
  * \param x x coordinate
  * \param y y coordinate
@@ -34,12 +36,13 @@
  * \return pointer to a SimpleWindow
  */
 SimpleWindow *
-simplewindow_new(Display *disp, int phys_screen, int x, int y,
+simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
                  unsigned int w, unsigned int h,
                  unsigned int border_width)
 {
-    XSetWindowAttributes wa;
     SimpleWindow *sw;
+    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
+    uint32_t create_win_val[3];
 
     sw = p_new(SimpleWindow, 1);
 
@@ -47,30 +50,31 @@ simplewindow_new(Display *disp, int phys_screen, int x, int y,
     sw->geometry.y = y;
     sw->geometry.width = w;
     sw->geometry.height = h;
-    sw->display = disp;
+    sw->connection = conn;
     sw->phys_screen = phys_screen;
 
-    wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask
-        | ButtonPressMask | ExposureMask;
-    wa.override_redirect = 1;
-    wa.background_pixmap = ParentRelative;
-    sw->window = XCreateWindow(disp,
-                               RootWindow(disp, phys_screen),
-                               x, y, w, h,
-                               border_width,
-                               DefaultDepth(disp, phys_screen),
-                               CopyFromParent,
-                               DefaultVisual(disp, phys_screen),
-                               CWOverrideRedirect | CWBackPixmap | CWEventMask,
-                               &wa);
+    create_win_val[0] = XCB_BACK_PIXMAP_PARENT_RELATIVE;
+    create_win_val[1] = 1;
+    create_win_val[2] = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+        XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW |
+        XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+        XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
 
-    XSelectInput(disp, sw->window, wa.event_mask);
+    sw->window = xcb_generate_id(conn);
+    xcb_create_window(conn, s->root_depth, sw->window,
+                      root_window(conn, phys_screen),
+                      x, y, w, h, border_width,
+                      XCB_COPY_FROM_PARENT,
+                      s->root_visual,
+                      XCB_CW_BACK_PIXMAP | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
+                      create_win_val);
 
-    sw->drawable = XCreatePixmap(disp,
-                                 RootWindow(disp, phys_screen),
-                                 w, h,
-                                 DefaultDepth(disp, phys_screen));
+    x_select_input(conn, sw->window, create_win_val[2]);
+
+    sw->drawable = xcb_generate_id(conn);
+    xcb_create_pixmap(conn, s->root_depth, sw->drawable,
+                      root_window(conn, phys_screen), w, h);
+
     return sw;
 }
 
@@ -80,8 +84,8 @@ simplewindow_new(Display *disp, int phys_screen, int x, int y,
 void
 simplewindow_delete(SimpleWindow **sw)
 {
-    XDestroyWindow((*sw)->display, (*sw)->window);
-    XFreePixmap((*sw)->display, (*sw)->drawable);
+    xcb_destroy_window((*sw)->connection, (*sw)->window);
+    xcb_free_pixmap((*sw)->connection, (*sw)->drawable);
     p_delete(sw);
 }
 
@@ -89,49 +93,63 @@ simplewindow_delete(SimpleWindow **sw)
  * \param sw the SimpleWindow to move
  * \param x x coordinate
  * \param y y coordinate
- * \return status
  */
-int
+void
 simplewindow_move(SimpleWindow *sw, int x, int y)
 {
+    const uint32_t move_win_vals[] = { x, y };
+
     sw->geometry.x = x;
     sw->geometry.y = y;
-    return XMoveWindow(sw->display, sw->window, x, y);
+    xcb_configure_window(sw->connection, sw->window,
+                         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                         move_win_vals);
 }
 
 /** Resize a simple window
  * \param sw the SimpleWindow to resize
  * \param w new width
  * \param h new height
- * \return status
  */
-int
+void
 simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
 {
+    xcb_screen_t *s = xcb_aux_get_screen(sw->connection, sw->phys_screen);
+    const uint32_t resize_win_vals[] = { w, h };
+
     sw->geometry.width = w;
     sw->geometry.height = h;
-    XFreePixmap(sw->display, sw->drawable);
-    sw->drawable = XCreatePixmap(sw->display,
-                                 RootWindow(sw->display, sw->phys_screen),
-                                 w, h,
-                                 DefaultDepth(sw->display, sw->phys_screen));
-    return XResizeWindow(sw->display, sw->window, w, h);
+    xcb_free_pixmap(sw->connection, sw->drawable);
+    sw->drawable = xcb_generate_id(sw->connection);
+    xcb_create_pixmap(sw->connection, s->root_depth, sw->drawable,
+                      root_window(sw->connection, sw->phys_screen), w, h);
+    xcb_configure_window(sw->connection, sw->window,
+                         XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                         resize_win_vals);
 }
 
 /** Refresh the window content
  * \param sw the SimpleWindow to refresh
  * \param phys_screen physical screen id
- * \return status
  */
-int
+void
 simplewindow_refresh_drawable(SimpleWindow *sw, int phys_screen)
 {
-    return XCopyArea(sw->display, sw->drawable,
-                     sw->window,
-                     DefaultGC(sw->display, phys_screen), 0, 0,
-                     sw->geometry.width,
-                     sw->geometry.height,
-                     0, 0);
+    xcb_screen_t *s = xcb_aux_get_screen(sw->connection, phys_screen);
+
+    /* The default GC is just a newly created associated to the root
+     * window */
+    xcb_drawable_t gc_draw = s->root;
+    xcb_gcontext_t gc = xcb_generate_id(sw->connection);
+
+    const uint32_t gc_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
+    const uint32_t gc_values[2] = { s->black_pixel, s->white_pixel };
+
+    xcb_create_gc(sw->connection, gc, gc_draw, gc_mask, gc_values);
+    xcb_copy_area(sw->connection, sw->drawable,
+                  sw->window, gc, 0, 0, 0, 0,
+                  sw->geometry.width,
+                  sw->geometry.height);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

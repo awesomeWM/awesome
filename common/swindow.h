@@ -27,25 +27,25 @@
 /** A simple window */
 typedef struct SimpleWindow
 {
-    Display *display;
+    xcb_connection_t *connection;
     int phys_screen;
-    Window window;
-    Drawable drawable;
+    xcb_window_t window;
+    xcb_drawable_t drawable;
     area_t geometry;
 } SimpleWindow;
 
-SimpleWindow * simplewindow_new(Display *, int, int, int, unsigned int, unsigned int, unsigned int);
+SimpleWindow * simplewindow_new(xcb_connection_t *, int, int, int, unsigned int, unsigned int, unsigned int);
 void simplewindow_delete(SimpleWindow **);
-int simplewindow_move(SimpleWindow *, int, int);
-int simplewindow_resize(SimpleWindow *, unsigned int, unsigned int);
-int simplewindow_refresh_drawable(SimpleWindow *, int);
+void simplewindow_move(SimpleWindow *, int, int);
+void simplewindow_resize(SimpleWindow *, unsigned int, unsigned int);
+void simplewindow_refresh_drawable(SimpleWindow *, int);
 
-static inline int
+static inline void
 simplewindow_move_resize(SimpleWindow *sw, int x, int y,
                          unsigned int w, unsigned int h)
 {
-    return (simplewindow_move(sw, x, y)
-            && simplewindow_resize(sw, w, h));
+  simplewindow_move(sw, x, y);
+  simplewindow_resize(sw, w, h);
 }
 
 #endif

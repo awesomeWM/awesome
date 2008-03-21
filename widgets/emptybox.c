@@ -43,7 +43,7 @@ emptybox_draw(Widget *widget, DrawCtx *ctx, int offset,
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    draw_rectangle(ctx, widget->area, 1.0, True, d->style.bg);
+    draw_rectangle(ctx, widget->area, 1.0, true, d->style.bg);
 
     return widget->area.width;
 }
@@ -61,7 +61,7 @@ emptybox_new(Statusbar *statusbar, cfg_t *config)
 
     w->data = d = p_new(Data, 1);
 
-    draw_style_init(globalconf.display, statusbar->phys_screen,
+    draw_style_init(globalconf.connection, statusbar->phys_screen,
                     cfg_getsec(config, "style"),
                     &d->style,
                     &globalconf.screens[statusbar->screen].styles.normal);

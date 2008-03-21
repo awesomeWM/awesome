@@ -19,11 +19,12 @@
  *
  */
 
-#include <X11/keysym.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#include <X11/extensions/shape.h>
-#include <X11/extensions/Xrandr.h>
+#include <xcb/xcb_keysyms.h>
+#include <xcb/xcb_icccm.h>
+#include <xcb/xcb_atom.h>
+#include <xcb/xcb_aux.h>
+#include <xcb/shape.h>
+#include <xcb/randr.h>
 
 #include "screen.h"
 #include "event.h"
@@ -39,6 +40,7 @@
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "common/xscreen.h"
+#include "common/xutil.h"
 
 extern AwesomeConf globalconf;
 
@@ -51,7 +53,7 @@ extern AwesomeConf globalconf;
  */
 static void
 event_handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
-                          Button *buttons, char *arg)
+                                Button *buttons, char *arg)
 {
     Button *b;
 
@@ -66,139 +68,140 @@ event_handle_mouse_button_press(int screen, unsigned int button, unsigned int st
 }
 
 /** Handle XButtonPressed events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev ButtonPress event
  */
-void
-event_handle_buttonpress(XEvent *e)
+int
+event_handle_buttonpress(void *data __attribute__ ((unused)),
+                         xcb_connection_t *connection, xcb_button_press_event_t *ev)
 {
-    int i, screen, x = 0, y = 0;
-    unsigned int udummy;
+    int screen;
     Client *c;
-    Window wdummy;
     Widget *widget;
     Statusbar *statusbar;
-    XButtonPressedEvent *ev = &e->xbutton;
+    xcb_query_pointer_reply_t *qr;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-            if(statusbar->sw->window == ev->window || statusbar->sw->window == ev->subwindow)
+            if(statusbar->sw->window == ev->event || statusbar->sw->window == ev->child)
             {
                 switch(statusbar->position)
                 {
                   case Top:
                   case Bottom:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(ev->x >= widget->area.x && ev->x < widget->area.x + widget->area.width
-                           && ev->y >= widget->area.y && ev->y < widget->area.y + widget->area.height)
+                        if(ev->event_x >= widget->area.x && ev->event_x < widget->area.x + widget->area.width
+                           && ev->event_y >= widget->area.y && ev->event_y < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
-                            return;
+                            return 0;
                         }
                     break;
                   case Right:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(ev->y >= widget->area.x && ev->y < widget->area.x + widget->area.width
-                           && statusbar->sw->geometry.width - ev->x >= widget->area.y
-                           && statusbar->sw->geometry.width - ev->x
+                        if(ev->event_y >= widget->area.x && ev->event_y < widget->area.x + widget->area.width
+                           && statusbar->sw->geometry.width - ev->event_x >= widget->area.y
+                           && statusbar->sw->geometry.width - ev->event_x
                               < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
-                            return;
+                            return 0;
                         }
                     break;
                   case Left:
                     for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(statusbar->sw->geometry.height - ev->y >= widget->area.x
-                           && statusbar->sw->geometry.height - ev->y
+                        if(statusbar->sw->geometry.height - ev->event_y >= widget->area.x
+                           && statusbar->sw->geometry.height - ev->event_y
                               < widget->area.x + widget->area.width
-                           && ev->x >= widget->area.y && ev->x < widget->area.y + widget->area.height)
+                           && ev->event_x >= widget->area.y && ev->event_x < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
-                            return;
+                            return 0;
                         }
                     break;
                   default:
                     break;
                 }
                 /* return if no widget match */
-                return;
+                return 0;
             }
 
     for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
+        if(c->titlebar.sw && c->titlebar.sw->window == ev->event)
         {
-            if(!client_focus(c, c->screen, True))
+            if(!client_focus(c, c->screen, true))
                 client_stack(c);
-            if(CLEANMASK(ev->state) == NoSymbol
-               && ev->button == Button1)
+            if(CLEANMASK(ev->state) == XCB_NO_SYMBOL
+               && ev->detail == XCB_BUTTON_INDEX_1)
                 window_grabbuttons(c->win, c->phys_screen);
-            event_handle_mouse_button_press(c->screen, ev->button, ev->state,
+            event_handle_mouse_button_press(c->screen, ev->detail, ev->state,
                                             globalconf.buttons.titlebar, NULL);
-            return;
+            return 0;
         }
 
-    if((c = client_get_bywin(globalconf.clients, ev->window)))
+    if((c = client_get_bywin(globalconf.clients, ev->event)))
     {
-        if(!client_focus(c, c->screen, True))
+        if(!client_focus(c, c->screen, true))
             client_stack(c);
-        if(CLEANMASK(ev->state) == NoSymbol
-           && ev->button == Button1)
+        if(CLEANMASK(ev->state) == XCB_NO_SYMBOL
+           && ev->detail == XCB_BUTTON_INDEX_1)
         {
-            XAllowEvents(globalconf.display, ReplayPointer, CurrentTime);
+            xcb_allow_events(globalconf.connection, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
             window_grabbuttons(c->win, c->phys_screen);
         }
         else
-            event_handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
+            event_handle_mouse_button_press(c->screen, ev->detail, ev->state, globalconf.buttons.client, NULL);
     }
     else
-    {
-        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-            if(RootWindow(e->xany.display, screen) == ev->window
-               && XQueryPointer(e->xany.display,
-                                ev->window, &wdummy,
-                                &wdummy, &x, &y, &i,
-                                &i, &udummy))
+        for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup (connection)); screen++)
+            if(root_window(connection, screen) == ev->event
+               && (qr = xcb_query_pointer_reply(connection,
+                                                xcb_query_pointer(connection, ev->event),
+                                                NULL)) != NULL)
             {
-                screen = screen_get_bycoord(globalconf.screens_info, screen, x, y);
-                event_handle_mouse_button_press(screen, ev->button, ev->state,
-                                          globalconf.buttons.root, NULL);
-                return;
+                screen = screen_get_bycoord(globalconf.screens_info, screen, qr->root_x, qr->root_y);
+                event_handle_mouse_button_press(screen, ev->detail, ev->state,
+                                                globalconf.buttons.root, NULL);
+
+                p_delete(&qr);
+                return 0;
             }
-    }
+
+    return 0;
 }
 
 /** Handle XConfigureRequest events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev ConfigureRequest event
  */
-void
-event_handle_configurerequest(XEvent * e)
+int
+event_handle_configurerequest(void *data __attribute__ ((unused)),
+                              xcb_connection_t *connection, xcb_configure_request_event_t *ev)
 {
     Client *c;
-    XConfigureRequestEvent *ev = &e->xconfigurerequest;
-    XWindowChanges wc;
     area_t geometry;
 
     if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
         geometry = c->geometry;
 
-        if(ev->value_mask & CWX)
+        if(ev->value_mask & XCB_CONFIG_WINDOW_X)
             geometry.x = ev->x;
-        if(ev->value_mask & CWY)
+        if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
             geometry.y = ev->y;
-        if(ev->value_mask & CWWidth)
+        if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
             geometry.width = ev->width;
-        if(ev->value_mask & CWHeight)
+        if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
             geometry.height = ev->height;
 
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
             if(c->isfloating || layout_get_current(c->screen)->arrange == layout_floating)
-                client_resize(c, geometry, False);
+                client_resize(c, geometry, false);
             else
             {
-                globalconf.screens[c->screen].need_arrange = True;
+                globalconf.screens[c->screen].need_arrange = true;
                 /* If we do not resize the client, at least tell it that it
                  * has its new configuration. That fixes at least
                  * gnome-terminal */
@@ -213,95 +216,108 @@ event_handle_configurerequest(XEvent * e)
     }
     else
     {
-        wc.x = ev->x;
-        wc.y = ev->y;
-        wc.width = ev->width;
-        wc.height = ev->height;
-        wc.border_width = ev->border_width;
-        wc.sibling = ev->above;
-        wc.stack_mode = ev->detail;
-        XConfigureWindow(e->xany.display, ev->window, ev->value_mask, &wc);
+        const uint32_t configure_values[] = {
+            ev->x, ev->y, ev->width, ev->height, ev->border_width,
+            ev->sibling, ev->stack_mode };
+
+        xcb_configure_window(connection, ev->window, ev->value_mask,
+                             configure_values);
     }
+
+    return 0;
 }
 
 /** Handle XConfigure events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev ConfigureNotify event
  */
-void
-event_handle_configurenotify(XEvent * e)
+int
+event_handle_configurenotify(void *data __attribute__ ((unused)),
+                             xcb_connection_t *connection, xcb_configure_notify_event_t *ev)
 {
-    XConfigureEvent *ev = &e->xconfigure;
-    int screen;
+    int screen_nbr;
+    const xcb_screen_t *screen;
 
-    for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-        if(ev->window == RootWindow(e->xany.display, screen)
-           && (ev->width != DisplayWidth(e->xany.display, screen)
-               || ev->height != DisplayHeight(e->xany.display, screen)))
+    for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length (xcb_get_setup (connection)); screen_nbr++)
+        if(ev->window == root_window(connection, screen_nbr)
+           && (screen = xcb_aux_get_screen(connection, screen_nbr)) != NULL
+           && (ev->width != screen->width_in_pixels
+               || ev->height != screen->height_in_pixels))
             /* it's not that we panic, but restart */
             uicb_restart(0, NULL);
+
+    return 0;
 }
 
 /** Handle XDestroyWindow events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev DestroyNotify event
  */
-void
-event_handle_destroynotify(XEvent *e)
+int
+event_handle_destroynotify(void *data __attribute__ ((unused)),
+                           xcb_connection_t *connection __attribute__ ((unused)),
+                           xcb_destroy_notify_event_t *ev)
 {
     Client *c;
-    XDestroyWindowEvent *ev = &e->xdestroywindow;
 
     if((c = client_get_bywin(globalconf.clients, ev->window)))
         client_unmanage(c);
+
+    return 0;
 }
 
-/** Handle XCrossing events on enter
- * \param e XEvent
+/** Handle XCrossing events
+ * \param connection connection to the X server
+ * \param ev Crossing event
  */
-void
-event_handle_enternotify(XEvent *e)
+int
+event_handle_enternotify(void *data __attribute__ ((unused)),
+                         xcb_connection_t *connection, xcb_enter_notify_event_t *ev)
 {
     Client *c;
-    XCrossingEvent *ev = &e->xcrossing;
     int screen;
 
-    if(ev->mode != NotifyNormal
-       || (ev->x_root == globalconf.pointer_x
-           && ev->y_root == globalconf.pointer_y))
-        return;
+    if(ev->mode != XCB_NOTIFY_MODE_NORMAL
+       || (ev->root_x == globalconf.pointer_x
+           && ev->root_y == globalconf.pointer_y))
+        return 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
+        if(c->titlebar.sw && c->titlebar.sw->window == ev->event)
             break;
 
-    if(c || (c = client_get_bywin(globalconf.clients, ev->window)))
+    if(c || (c = client_get_bywin(globalconf.clients, ev->event)))
     {
         window_grabbuttons(c->win, c->phys_screen);
         /* the idea behind saving pointer_x and pointer_y is Bob Marley powered
          * this will allow us top drop some EnterNotify events and thus not giving
          * focus to windows appering under the cursor without a cursor move */
-        globalconf.pointer_x = ev->x_root;
-        globalconf.pointer_y = ev->y_root;
+        globalconf.pointer_x = ev->root_x;
+        globalconf.pointer_y = ev->root_y;
 
         if(globalconf.screens[c->screen].sloppy_focus)
             client_focus(c, c->screen,
                          globalconf.screens[c->screen].sloppy_focus_raise);
     }
     else
-        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-            if(ev->window == RootWindow(e->xany.display, screen))
+        for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
+            if(ev->event == root_window(connection, screen))
             {
                 window_root_grabbuttons(screen);
-                return;
+                return 0;
             }
+
+    return 0;
 }
 
 /** Handle XExpose events
- * \param e XEvent
+ * \param ev Expose event
  */
-void
-event_handle_expose(XEvent *e)
+int
+event_handle_expose(void *data __attribute__ ((unused)),
+                    xcb_connection_t *connection __attribute__ ((unused)),
+                    xcb_expose_event_t *ev)
 {
-    XExposeEvent *ev = &e->xexpose;
     int screen;
     Statusbar *statusbar;
     Client *c;
@@ -313,174 +329,249 @@ event_handle_expose(XEvent *e)
                 if(statusbar->sw->window == ev->window)
                 {
                     statusbar_display(statusbar);
-                    return;
+                    return 0;
                 }
 
         for(c = globalconf.clients; c; c = c->next)
             if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
             {
                 simplewindow_refresh_drawable(c->titlebar.sw, c->phys_screen);
-                return;
+                return 0;
             }
     }
+
+    return 0;
 }
 
 /** Handle XKey events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev KeyPress event
  */
-void
-event_handle_keypress(XEvent *e)
+int
+event_handle_keypress(void *data __attribute__ ((unused)),
+                      xcb_connection_t *connection, xcb_key_press_event_t *ev)
 {
-    int screen, x, y, d;
-    unsigned int m;
-    XKeyEvent *ev = &e->xkey;
-    KeySym keysym;
-    Window dummy;
+    int screen;
+    xcb_query_pointer_reply_t *qpr = NULL;
+    xcb_key_symbols_t *keysyms;
+    xcb_keysym_t keysym;
     Key *k;
 
     /* find the right screen for this event */
-    for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-        if(XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen), &dummy, &dummy, &x, &y, &d, &d, &m))
+    for(screen = 0; screen < xcb_setup_roots_length (xcb_get_setup (connection)); screen++)
+        if((qpr = xcb_query_pointer_reply(connection,
+                                          xcb_query_pointer(connection,
+                                                            root_window(connection, screen)),
+                                          NULL)) != NULL)
         {
             /* if screen is 0, we are on first Zaphod screen or on the
              * only screen in Xinerama, so we can ask for a better screen
              * number with screen_get_bycoord: we'll get 0 in Zaphod mode
              * so it's the same, or maybe the real Xinerama screen */
-            screen = screen_get_bycoord(globalconf.screens_info, screen, x, y);
+            screen = screen_get_bycoord(globalconf.screens_info, screen, qpr->root_x, qpr->root_y);
             break;
         }
 
-    keysym = XKeycodeToKeysym(globalconf.display, (KeyCode) ev->keycode, 0);
+    keysyms = xcb_key_symbols_alloc(globalconf.connection);
+    keysym = xcb_key_symbols_get_keysym(keysyms, ev->detail, 0);
 
     for(k = globalconf.keys; k; k = k->next)
-        if(((k->keycode && ev->keycode == k->keycode) || (k->keysym && keysym == k->keysym)) &&
-	  k->func && CLEANMASK(k->mod) == CLEANMASK(ev->state))
+        if(((k->keycode && ev->detail == k->keycode) || (k->keysym && keysym == k->keysym))
+           && k->func && CLEANMASK(k->mod) == CLEANMASK(ev->state))
             k->func(screen, k->arg);
+
+    xcb_key_symbols_free(keysyms);
+
+    return 0;
 }
 
 /** Handle XMapping events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev MappingNotify event
  */
-void
-event_handle_mappingnotify(XEvent *e)
+int
+event_handle_mappingnotify(void *data __attribute__ ((unused)),
+                           xcb_connection_t *connection, xcb_mapping_notify_event_t *ev)
 {
-    XMappingEvent *ev = &e->xmapping;
     int screen;
+    xcb_key_symbols_t *keysyms = xcb_key_symbols_alloc(connection);
 
-    XRefreshKeyboardMapping(ev);
-    if(ev->request == MappingKeyboard)
-        for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
+    xcb_refresh_keyboard_mapping(keysyms, ev);
+    xcb_key_symbols_free(keysyms);
+
+    if(ev->request == XCB_MAPPING_KEYBOARD)
+        for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
             window_root_grabkeys(screen);
+
+    return 0;
 }
 
 /** Handle XMapRequest events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev MapRequest event
  */
-void
-event_handle_maprequest(XEvent *e)
+int
+event_handle_maprequest(void *data __attribute__ ((unused)),
+                        xcb_connection_t *connection, xcb_map_request_event_t *ev)
 {
-    static XWindowAttributes wa;
-    XMapRequestEvent *ev = &e->xmaprequest;
-    int screen = 0, x, y, d;
-    unsigned int m;
-    Window dummy;
+    static xcb_get_window_attributes_reply_t *wa;
+    int screen_nbr = 0;
+    xcb_query_pointer_reply_t *qpr = NULL;
+    xcb_get_geometry_reply_t *wgeom;
+    xcb_screen_iterator_t iter;
 
-    if(!XGetWindowAttributes(e->xany.display, ev->window, &wa))
-        return;
-    if(wa.override_redirect)
-        return;
+    if((wa = xcb_get_window_attributes_reply(connection,
+                                             xcb_get_window_attributes(connection, ev->window),
+                                             NULL)) == NULL)
+        return -1;
+    if(wa->override_redirect)
+    {
+        p_delete(&wa);
+        return 0;
+    }
     if(!client_get_bywin(globalconf.clients, ev->window))
     {
-        if(globalconf.screens_info->xinerama_is_active
-           && XQueryPointer(e->xany.display, RootWindow(e->xany.display, screen),
-                            &dummy, &dummy, &x, &y, &d, &d, &m))
-            screen = screen_get_bycoord(globalconf.screens_info, screen, x, y);
-        else
-             for(screen = 0; wa.screen != ScreenOfDisplay(e->xany.display, screen); screen++);
+        if((wgeom = xcb_get_geometry_reply(connection,
+                                           xcb_get_geometry(connection, ev->window), NULL)) == NULL)
+            return -1;
 
-        client_manage(ev->window, &wa, screen);
+        if(globalconf.screens_info->xinerama_is_active
+           && (qpr = xcb_query_pointer_reply(connection,
+                                             xcb_query_pointer(connection,
+                                                               root_window(globalconf.connection, screen_nbr)),
+                                             NULL)) != NULL)
+            screen_nbr = screen_get_bycoord(globalconf.screens_info, screen_nbr, qpr->root_x, qpr->root_y);
+        else
+            for (iter = xcb_setup_roots_iterator (xcb_get_setup (connection)), screen_nbr = 0;
+                 iter.rem && iter.data->root != wgeom->root; xcb_screen_next (&iter), ++screen_nbr);
+
+        if(qpr)
+            p_delete(&qpr);
+
+        client_manage(ev->window, wgeom, screen_nbr);
+        p_delete(&wgeom);
     }
+
+    return 0;
 }
 
 /** Handle XProperty events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev PropertyNotify event
  */
-void
-event_handle_propertynotify(XEvent * e)
+int
+event_handle_propertynotify(void *data __attribute__ ((unused)),
+                            xcb_connection_t *connection, xcb_property_notify_event_t *ev)
 {
     Client *c;
-    Window trans;
-    XPropertyEvent *ev = &e->xproperty;
+    xcb_window_t trans;
 
-    if(ev->state == PropertyDelete)
-        return;                 /* ignore */
+    if(ev->state == XCB_PROPERTY_DELETE)
+        return 0; /* ignore */
     if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
-        switch (ev->atom)
+        if(ev->atom == WM_TRANSIENT_FOR)
         {
-          case XA_WM_TRANSIENT_FOR:
-            XGetTransientForHint(e->xany.display, c->win, &trans);
+            x_get_transient_for_hint(connection, c->win, &trans);
             if(!c->isfloating
                && (c->isfloating = (client_get_bywin(globalconf.clients, trans) != NULL)))
-                globalconf.screens[c->screen].need_arrange = True;
-            break;
-          case XA_WM_NORMAL_HINTS:
-            client_updatesizehints(c);
-            break;
-          case XA_WM_HINTS:
-            client_updatewmhints(c);
-            break;
+                globalconf.screens[c->screen].need_arrange = true;
         }
-        if(ev->atom == XA_WM_NAME || ev->atom == XInternAtom(globalconf.display, "_NET_WM_NAME", False))
+        else if (ev->atom == WM_NORMAL_HINTS)
+            client_updatesizehints(c);
+        else if (ev->atom == WM_HINTS)
+            client_updatewmhints(c);
+
+        if(ev->atom == WM_NAME || ev->atom == x_intern_atom(globalconf.connection, "_NET_WM_NAME"))
             client_updatetitle(c);
     }
+
+    return 0;
 }
 
 /** Handle XUnmap events
- * \param e XEvent
+ * \param connection connection to the X server
+ * \param ev UnmapNotify event
  */
-void
-event_handle_unmapnotify(XEvent * e)
+int
+event_handle_unmapnotify(void *data __attribute__ ((unused)),
+                         xcb_connection_t *connection, xcb_unmap_notify_event_t *ev)
 {
     Client *c;
-    XUnmapEvent *ev = &e->xunmap;
+
+    /*
+     * event->send_event (Xlib)  is quivalent to  (ev->response_type &
+     * 0x80)  in XCB  because the  SendEvent bit  is available  in the
+     * response_type field
+     */
+    bool send_event = ((ev->response_type & 0x80) >> 7);
 
     if((c = client_get_bywin(globalconf.clients, ev->window))
-       && ev->event == RootWindow(e->xany.display, c->phys_screen)
-       && ev->send_event && window_getstate(c->win) == NormalState)
+       && ev->event == root_window(connection, c->phys_screen)
+       && send_event && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
         client_unmanage(c);
+
+    return 0;
 }
 
 /** Handle XShape events
- * \param e XEvent
+ * \param ev Shape event
  */
-void
-event_handle_shape(XEvent * e)
+int
+event_handle_shape(void *data __attribute__ ((unused)),
+                   xcb_connection_t *connection __attribute__ ((unused)),
+                   xcb_shape_notify_event_t *ev)
 {
-    XShapeEvent *ev = (XShapeEvent *) e;
-    Client *c = client_get_bywin(globalconf.clients, ev->window);
+    Client *c = client_get_bywin(globalconf.clients, ev->affected_window);
 
     if(c)
         window_setshape(c->win, c->phys_screen);
+
+    return 0;
 }
 
 /** Handle XRandR events
- * \param e XEvent
+ * \param ev RandrScreenChangeNotify event
  */
-void
-event_handle_randr_screen_change_notify(XEvent *e)
+int
+event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
+                                        xcb_connection_t *connection __attribute__ ((unused)),
+                                        xcb_randr_screen_change_notify_event_t *ev)
 {
-    XRRUpdateConfiguration(e);
+    if(!globalconf.have_randr)
+        return -1;
+
+    /* Code  of  XRRUpdateConfiguration Xlib  function  ported to  XCB
+     * (only the code relevant  to RRScreenChangeNotify) as the latter
+     * doesn't provide this kind of function */
+    if(ev->rotation & (XCB_RANDR_ROTATION_ROTATE_90 | XCB_RANDR_ROTATION_ROTATE_270))
+        xcb_randr_set_screen_size(connection, ev->root, ev->height, ev->width,
+                                  ev->mheight, ev->mwidth);
+    else
+        xcb_randr_set_screen_size(connection, ev->root, ev->width, ev->height,
+                                  ev->mwidth, ev->mheight);
+
+    /* TODO:
+     * XRRUpdateConfiguration also  executes the following instruction
+     * but I don't know yet how to port it to XCB
+     *
+     * XRenderSetSubpixelOrder(dpy, snum, scevent->subpixel_order);
+     */
+
     uicb_restart(0, NULL);
+    return 0;
 }
 
 /** Handle XClientMessage events
- * \param e XEvent
+ * \param ev ClientMessage event
  */
-void
-event_handle_clientmessage(XEvent *e)
+int
+event_handle_clientmessage(void *data __attribute__ ((unused)),
+                           xcb_connection_t *connection __attribute__ ((unused)),
+                           xcb_client_message_event_t *ev)
 {
-    ewmh_process_client_message(&e->xclient);
+    ewmh_process_client_message(ev);
+    return 0;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

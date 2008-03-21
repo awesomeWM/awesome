@@ -19,7 +19,9 @@
  *
  */
 
-#include <X11/extensions/Xinerama.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+#include <xcb/xinerama.h>
 
 #include "common/xscreen.h"
 
@@ -47,7 +49,7 @@ screen_get_bycoord(ScreensInfo *si, int screen, int x, int y)
 }
 
 static inline area_t
-screen_xsitoarea(XineramaScreenInfo si)
+screen_xsitoarea(xcb_xinerama_screen_info_t si)
 {
     area_t a;
 
@@ -67,33 +69,57 @@ screensinfo_delete(ScreensInfo **si)
     p_delete(si);
 }
 
+static xcb_xinerama_screen_info_t *
+xinerama_query_screens(xcb_connection_t *c, int *screen_number)
+{
+    xcb_xinerama_query_screens_reply_t *reply;
+    xcb_xinerama_screen_info_t *si;
+
+    reply = xcb_xinerama_query_screens_reply(c,
+                                             xcb_xinerama_query_screens_unchecked(c),
+                                             NULL);
+
+    if(!reply)
+    {
+        *screen_number = 0;
+        return NULL;
+    }
+
+    *screen_number = xcb_xinerama_query_screens_screen_info_length(reply);
+    si = xcb_xinerama_query_screens_screen_info(reply);
+    p_delete(&reply);
+
+    return si;
+}
+
 ScreensInfo *
-screensinfo_new(Display *disp)
+screensinfo_new(xcb_connection_t *conn)
 {
     ScreensInfo *si;
-    XineramaScreenInfo *xsi;
+    xcb_xinerama_screen_info_t *xsi;
     int xinerama_screen_number, screen, screen_to_test;
-    Bool drop;
+    xcb_screen_t *s;
+    bool drop;
 
     si = p_new(ScreensInfo, 1);
 
-    if((si->xinerama_is_active = XineramaIsActive(disp)))
+    if((si->xinerama_is_active = xinerama_is_active(conn)))
     {
-        xsi = XineramaQueryScreens(disp, &xinerama_screen_number);
+        xsi = xinerama_query_screens(conn, &xinerama_screen_number);
         si->geometry = p_new(area_t, xinerama_screen_number);
         si->nscreen = 0;
 
         /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
         for(screen = 0; screen < xinerama_screen_number; screen++)
         {
-            drop = False;
+            drop = false;
             for(screen_to_test = 0; screen_to_test < si->nscreen; screen_to_test++)
                 if(xsi[screen].x_org == si->geometry[screen_to_test].x
                    && xsi[screen].y_org == si->geometry[screen_to_test].y)
                     {
                         /* we already have a screen for this area, just check if
                          * it's not bigger and drop it */
-                        drop = True;
+                        drop = true;
                         si->geometry[screen_to_test].width =
                             MAX(xsi[screen].width, xsi[screen_to_test].width);
                         si->geometry[screen_to_test].height =
@@ -112,18 +138,19 @@ screensinfo_new(Display *disp)
             si->geometry = newgeometry;
         }
 
-        XFree(xsi);
+        p_delete(&xsi);
     }
     else
     {
-        si->nscreen = ScreenCount(disp);
+        si->nscreen = xcb_setup_roots_length(xcb_get_setup(conn));
         si->geometry = p_new(area_t, si->nscreen);
         for(screen = 0; screen < si->nscreen; screen++)
         {
+            s = xcb_aux_get_screen(conn, screen);
             si->geometry[screen].x = 0;
             si->geometry[screen].y = 0;
-            si->geometry[screen].width = DisplayWidth(disp, screen);
-            si->geometry[screen].height = DisplayHeight(disp, screen);
+            si->geometry[screen].width = s->width_in_pixels;
+            si->geometry[screen].height = s->height_in_pixels;
         }
     }
 

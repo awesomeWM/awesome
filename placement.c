@@ -68,7 +68,7 @@ placement_smart(Client *c)
     Client *client;
     area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
     area_t *screen_geometry, *arealist = NULL, *r;
-    Bool found = False;
+    bool found = false;
     Layout *layout;
 
     screen_geometry = p_new(area_t, 1);
@@ -101,7 +101,7 @@ placement_smart(Client *c)
         if(r->width >= c->f_geometry.width && r->height >= c->f_geometry.height
            && r->width * r->height > newgeometry.width * newgeometry.height)
         {
-            found = True;
+            found = true;
             newgeometry = *r;
         }
 
@@ -128,16 +128,16 @@ placement_smart(Client *c)
 area_t
 placement_under_mouse(Client *c)
 {
-    Window dummy;
-    unsigned int m;
-    int x, y, d;
+    xcb_query_pointer_reply_t *xqp;
     area_t finalgeometry = c->f_geometry;
 
-    if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, c->phys_screen),
-                     &dummy, &dummy, &x, &y, &d, &d, &m))
+    if((xqp = xcb_query_pointer_reply(globalconf.connection,
+                                      xcb_query_pointer(globalconf.connection,
+                                                        root_window(globalconf.connection, c->phys_screen)),
+                                      NULL)) != NULL)
     {
-        finalgeometry.x = x - c->f_geometry.width / 2;
-        finalgeometry.y = y - c->f_geometry.height / 2;
+        finalgeometry.x = xqp->root_x - c->f_geometry.width / 2;
+        finalgeometry.y = xqp->root_y - c->f_geometry.height / 2;
     }
 
     finalgeometry = titlebar_geometry_add(&c->titlebar, finalgeometry);

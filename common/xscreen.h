@@ -27,13 +27,13 @@
 typedef struct
 {
     int nscreen;
-    Bool xinerama_is_active;
+    bool xinerama_is_active;
     area_t *geometry;
 } ScreensInfo;
 
 int screen_get_bycoord(ScreensInfo *, int, int, int);
 void screensinfo_delete(ScreensInfo **);
-ScreensInfo * screensinfo_new(Display *);
+ScreensInfo * screensinfo_new(xcb_connection_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

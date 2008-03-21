@@ -113,10 +113,6 @@ PKG_CHECK_MODULES([pangocairo], [pangocairo],,
    [AC_MSG_ERROR([awesome requires pangocairo.])])
 PKG_CHECK_MODULES([confuse], [libconfuse >= 2.6],,
    [AC_MSG_ERROR([awesome requires libconfuse >= 2.6.])])
-PKG_CHECK_MODULES([xinerama], [xinerama],,
-   [AC_MSG_ERROR([awesome requires Xinerama.])])
-PKG_CHECK_MODULES([xrandr], [xrandr],,
-   [AC_MSG_ERROR([awesome requires Xrandr.])])
 AC_ARG_WITH([gtk], AS_HELP_STRING([--with-gtk], [Build with gtk library (default: disabled)]))
 
 if test "x$with_gtk" == "xyes"; then
@@ -127,9 +123,28 @@ else
     PKG_CHECK_MODULES([imlib2], [imlib2],,
        [AC_MSG_ERROR([awesome requires Imlib2.])])
 fi
+PKG_CHECK_MODULES([xcb], [xcb],,
+   [AC_MSG_ERROR([awesome requires xcb.])])
+PKG_CHECK_MODULES([xcb_event], [xcb-event],,
+   [AC_MSG_ERROR([awesome requires xcb-event.])])
+PKG_CHECK_MODULES([xcb_randr], [xcb-randr],,
+   [AC_MSG_ERROR([awesome requires xcb-randr.])])
+PKG_CHECK_MODULES([xcb_xinerama], [xcb-xinerama],,
+   [AC_MSG_ERROR([awesome requires xcb-xinerama.])])
+PKG_CHECK_MODULES([xcb_shape], [xcb-shape],,
+   [AC_MSG_ERROR([awesome requires xcb-shape.])])
+PKG_CHECK_MODULES([xcb_aux], [xcb-aux],,
+   [AC_MSG_ERROR([awesome requires xcb-aux.])])
+PKG_CHECK_MODULES([xcb_atom], [xcb-atom],,
+   [AC_MSG_ERROR([awesome requires xcb-atom.])])
+PKG_CHECK_MODULES([xcb_keysyms], [xcb-keysyms],,
+   [AC_MSG_ERROR([awesome requires xcb-keysyms.])])
+PKG_CHECK_MODULES([xcb_render], [xcb-render],,
+   [AC_MSG_ERROR([awesome requires xcb-render.])])
+PKG_CHECK_MODULES([xcb_icccm], [xcb-icccm],,
+   [AC_MSG_ERROR([awesome requires xcb-icccm.])])
 
 # Checks for header files.
-AC_PATH_X
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([fcntl.h limits.h locale.h stdlib.h string.h sys/socket.h unistd.h])

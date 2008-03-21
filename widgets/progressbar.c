@@ -50,28 +50,28 @@ typedef struct
     /**  total number of ticks */
     int ticks_count;
     /** reverse drawing */
-    Bool *reverse;
+    bool *reverse;
     /** 90 Degree's turned */
-    Bool vertical;
+    bool vertical;
     /** Number of data_items (bars) */
     int data_items;
     /** Height 0-1, where 1 is height of statusbar */
     float height;
     /** Foreground color */
-    XColor *fg;
+    xcolor_t *fg;
     /** Foreground color of turned-off ticks */
-    XColor *fg_off;
+    xcolor_t *fg_off;
     /** Foreground color when bar is half-full */
-    XColor **pfg_center;
+    xcolor_t **pfg_center;
     /** Foreground color when bar is full */
-    XColor **pfg_end;
+    xcolor_t **pfg_end;
     /** Background color */
-    XColor *bg;
+    xcolor_t *bg;
     /** Border color */
-    XColor *bordercolor;
+    xcolor_t *bordercolor;
 } Data;
 
-static Bool
+static bool
 check_settings(Data *d, int status_height)
 {
     int tmp, h_total;
@@ -85,14 +85,14 @@ check_settings(Data *d, int status_height)
            || (!d->ticks_count && tmp < 0))
         {
             warn("progressbar's 'width' is too small for the given configuration options\n");
-            return False;
+            return false;
         }
         tmp = h_total - d->data_items * (2 * (d->border_width + d->border_padding) + 1)
               - (d->data_items - 1) * d->gap;
         if(tmp < 0)
         {
             warn("progressbar's 'height' is too small for the given configuration options\n");
-            return False;
+            return false;
         }
     }
     else /* vertical / standing up */
@@ -102,17 +102,17 @@ check_settings(Data *d, int status_height)
            || (!d->ticks_count && tmp < 0))
         {
             warn("progressbar's 'height' is too small for the given configuration options\n");
-            return False;
+            return false;
         }
         tmp = d->width - d->data_items * (2 * (d->border_width + d->border_padding) + 1)
               - (d->data_items - 1) * d->gap;
         if(tmp < 0)
         {
             warn("progressbar's 'width' is too small for the given configuration options\n");
-            return False;
+            return false;
         }
     }
-    return True;
+    return true;
 }
 
 
@@ -208,8 +208,8 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                 rectangle.height = pb_height + 2 * (d->border_padding + d->border_width);
 
                 if(d->border_padding)
-                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
-                draw_rectangle(ctx, rectangle, d->border_width, False, d->bordercolor[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
+                draw_rectangle(ctx, rectangle, d->border_width, false, d->bordercolor[i]);
             }
 
             /* new value/progress in px + pattern setup */
@@ -241,10 +241,10 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 /* fg color */
                 if(!d->reverse[i])
-                    draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
                 else /*REV: bg */
-                    draw_rectangle(ctx, rectangle, 1.0, True, d->fg_off[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, d->fg_off[i]);
             }
 
             /* top part */
@@ -257,9 +257,9 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 /* bg color */
                 if(!d->reverse[i])
-                    draw_rectangle(ctx, rectangle, 1.0, True, d->fg_off[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, d->fg_off[i]);
                 else /* REV: fg */
-                    draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
             }
             /* draw gaps TODO: improve e.g all in one */
@@ -272,7 +272,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                         pb_y + pb_height - d->ticks_gap >= rectangle.y;
                         rectangle.y += unit)
                 {
-                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
                 }
             }
             pb_offset += pb_width + d->gap + 2 * (d->border_width + d->border_padding);
@@ -309,8 +309,8 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                 rectangle.height = pb_height + 2 * (d->border_padding + d->border_width);
 
                 if(d->border_padding)
-                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
-                draw_rectangle(ctx, rectangle, d->border_width, False, d->bordercolor[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
+                draw_rectangle(ctx, rectangle, d->border_width, false, d->bordercolor[i]);
             }
             /* new value/progress in px + pattern setup */
             if(!d->reverse[i])
@@ -341,10 +341,10 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 /* fg color */
                 if(!d->reverse[i])
-                    draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
                 else /* reverse: bg */
-                    draw_rectangle(ctx, rectangle, 1.0, True, d->fg_off[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, d->fg_off[i]);
             }
 
             /* right part */
@@ -357,9 +357,9 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 /* bg color */
                 if(!d->reverse[i])
-                    draw_rectangle(ctx, rectangle, 1.0, True, d->fg_off[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, d->fg_off[i]);
                 else /* reverse: fg */
-                    draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
             }
             /* draw gaps TODO: improve e.g all in one */
@@ -371,7 +371,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                 for(rectangle.x = pb_x + (unit - d->ticks_gap);
                         pb_x + pb_width - d->ticks_gap >= rectangle.x;
                         rectangle.x += unit)
-                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
             }
 
             pb_offset += pb_height + d->gap + 2 * (d->border_width + d->border_padding);
@@ -475,7 +475,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     d->border_width = cfg_getint(config, "border_width");
 
     if(!(d->vertical = cfg_getbool(config, "vertical")))
-        d->vertical = False;
+        d->vertical = false;
 
     d->gap = cfg_getint(config, "gap");
 
@@ -493,14 +493,14 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         return w;
     }
 
-    d->fg = p_new(XColor, d->data_items);
-    d->pfg_end = p_new(XColor *, d->data_items);
-    d->pfg_center = p_new(XColor *, d->data_items);
-    d->fg_off = p_new(XColor, d->data_items);
-    d->bg = p_new(XColor, d->data_items);
-    d->bordercolor = p_new(XColor, d->data_items);
+    d->fg = p_new(xcolor_t, d->data_items);
+    d->pfg_end = p_new(xcolor_t *, d->data_items);
+    d->pfg_center = p_new(xcolor_t *, d->data_items);
+    d->fg_off = p_new(xcolor_t, d->data_items);
+    d->bg = p_new(xcolor_t, d->data_items);
+    d->bordercolor = p_new(xcolor_t, d->data_items);
     d->percent = p_new(int, d->data_items);
-    d->reverse = p_new(Bool, d->data_items);
+    d->reverse = p_new(bool, d->data_items);
     d->data_title = p_new(char *, d->data_items);
 
     for(i = 0; i < d->data_items; i++)
@@ -510,37 +510,37 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         d->data_title[i] = a_strdup(cfg_title(cfg));
 
         if(!(d->reverse[i] = cfg_getbool(cfg, "reverse")))
-            d->reverse[i] = False;
+            d->reverse[i] = false;
 
         if((color = cfg_getstr(cfg, "fg")))
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->fg[i]);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->fg[i]);
         else
             d->fg[i] = globalconf.screens[statusbar->screen].styles.normal.fg;
 
         if((color = cfg_getstr(cfg, "fg_center")))
         {
-            d->pfg_center[i] = p_new(XColor, 1);
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, d->pfg_center[i]);
+            d->pfg_center[i] = p_new(xcolor_t, 1);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, d->pfg_center[i]);
         }
 
         if((color = cfg_getstr(cfg, "fg_end")))
         {
-            d->pfg_end[i] = p_new(XColor, 1);
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, d->pfg_end[i]);
+            d->pfg_end[i] = p_new(xcolor_t, 1);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, d->pfg_end[i]);
         }
 
         if((color = cfg_getstr(cfg, "fg_off")))
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->fg_off[i]);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->fg_off[i]);
         else
             d->fg_off[i] = globalconf.screens[statusbar->screen].styles.normal.bg;
 
         if((color = cfg_getstr(cfg, "bg")))
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->bg[i]);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bg[i]);
         else
             d->bg[i] = globalconf.screens[statusbar->screen].styles.normal.bg;
 
         if((color = cfg_getstr(cfg, "bordercolor")))
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->bordercolor[i]);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bordercolor[i]);
         else
             d->bordercolor[i] = d->fg[i];
     }

@@ -22,6 +22,8 @@
 #ifndef AWESOME_STRUCTS_H
 #define AWESOME_STRUCTS_H
 
+#include <xcb/xcb_event.h>
+
 #include <regex.h>
 #include "layout.h"
 #include "common/draw.h"
@@ -42,8 +44,8 @@ typedef enum
 /** Rules for floating rule */
 typedef enum
 {
-    No = False,
-    Yes = True,
+    No = false,
+    Yes = true,
     Maybe
 } Fuzzy;
 
@@ -91,8 +93,8 @@ typedef struct Key Key;
 struct Key
 {
     unsigned long mod;
-    KeySym keysym;
-    KeyCode keycode;
+    xcb_keysym_t keysym;
+    xcb_keycode_t keycode;
     Uicb *func;
     char *arg;
     /** Next and previous keys */
@@ -136,16 +138,16 @@ struct Widget
     /** Update function */
     widget_tell_status_t (*tell)(Widget *, char *, char *);
     /** ButtonPressedEvent handler */
-    void (*button_press)(Widget *, XButtonPressedEvent *);
+    void (*button_press)(Widget *, xcb_button_press_event_t *);
     /** Statusbar */
     Statusbar *statusbar;
     /** Alignement */
     Alignment alignment;
     /** Misc private data */
     void *data;
-    /** True if user supplied coords */
-    Bool user_supplied_x;
-    Bool user_supplied_y;
+    /** true if user supplied coords */
+    bool user_supplied_x;
+    bool user_supplied_y;
     /** area_t */
     area_t area;
     /** Buttons bindings */
@@ -153,7 +155,7 @@ struct Widget
     /** Cache */
     struct
     {
-        Bool needs_update;
+        bool needs_update;
         int flags;
     } cache;
     /** Next and previous widgets */
@@ -203,31 +205,31 @@ struct Client
     int minax, maxax, minay, maxay;
     int border, oldborder;
     /** Has urgency hint */
-    Bool isurgent;
+    bool isurgent;
     /** Store previous floating state before maximizing */
-    Bool wasfloating;
-    /** True if the window is floating */
-    Bool isfloating;
-    /** True if the window is fixed */
-    Bool isfixed;
-    /** True if the window is maximized */
-    Bool ismax;
-    /** True if the client must be skipped from client list */
-    Bool skip;
-    /** True if the client is moving */
-    Bool ismoving;
-    /** True if the client must be skipped from task bar client list */
-    Bool skiptb;
+    bool wasfloating;
+    /** true if the window is floating */
+    bool isfloating;
+    /** true if the window is fixed */
+    bool isfixed;
+    /** true if the window is maximized */
+    bool ismax;
+    /** true if the client must be skipped from client list */
+    bool skip;
+    /** true if the client is moving */
+    bool ismoving;
+    /** true if the client must be skipped from task bar client list */
+    bool skiptb;
     /** Next and previous clients */
     Client *prev, *next;
     /** Window of the client */
-    Window win;
+    xcb_window_t win;
     /** Client logical screen */
     int screen;
     /** Client physical screen */
     int phys_screen;
     /** True if the client is a new one */
-    Bool newcomer;
+    bool newcomer;
     /** Titlebar */
     Titlebar titlebar;
     /** layer in the stacking order */
@@ -251,10 +253,10 @@ struct Tag
     char *name;
     /** Screen */
     int screen;
-    /** True if selected */
-    Bool selected;
-    /** True if was selected before selecting others tags */
-    Bool was_selected;
+    /** true if selected */
+    bool selected;
+    /** true if was selected before selecting others tags */
+    bool was_selected;
     /** Current tag layout */
     Layout *layout;
     /** Master width factor */
@@ -304,17 +306,17 @@ typedef struct
     /** Floating window placement algo */
     FloatingPlacement *floating_placement;
     /** Respect resize hints */
-    Bool resize_hints;
+    bool resize_hints;
     /** Sloppy focus: focus follow mouse */
-    Bool sloppy_focus;
-    /** True if we should raise windows on focus */
-    Bool sloppy_focus_raise;
+    bool sloppy_focus;
+    /** true if we should raise windows on focus */
+    bool sloppy_focus_raise;
     /** Focus new clients */
-    Bool new_get_focus;
-    /** True if new clients should become master */
-    Bool new_become_master;
-    /** True if we need to arrange() */
-    Bool need_arrange;
+    bool new_get_focus;
+    /** true if new clients should become master */
+    bool new_become_master;
+    /** true if we need to arrange() */
+    bool need_arrange;
     /** Colors */
     struct
     {
@@ -340,8 +342,12 @@ typedef struct
 typedef struct AwesomeConf AwesomeConf;
 struct AwesomeConf
 {
-    /** Display ref */
-    Display *display;
+    /** Connection ref */
+    xcb_connection_t *connection;
+    /** Event and error handlers */
+    xcb_event_handlers_t *evenths;
+    /** Default screen number */
+    int default_screen;
     /** Logical screens */
     VirtScreen *screens;
     /** Screens info */
@@ -360,18 +366,18 @@ struct AwesomeConf
     /** Numlock mask */
     unsigned int numlockmask;
     /** Check for XShape extension */
-    Bool have_shape;
+    bool have_shape;
     /** Check for XRandR extension */
-    Bool have_randr;
+    bool have_randr;
     /** Cursors */
-    Cursor cursor[CurLast];
+    xcb_cursor_t cursor[CurLast];
     /** Clients list */
     Client *clients;
     /** Scratch client */
     struct
     {
         Client *client;
-        Bool isvisible;
+        bool isvisible;
     } scratch;
     /** Path to config file */
     char *configpath;

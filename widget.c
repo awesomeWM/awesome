@@ -110,12 +110,12 @@ widget_getbyname(Statusbar *sb, char *name)
  * \param ev the XButtonPressedEvent the widget received
  */
 static void
-widget_common_button_press(Widget *widget, XButtonPressedEvent *ev)
+widget_common_button_press(Widget *widget, xcb_button_press_event_t *ev)
 {
     Button *b;
 
     for(b = widget->buttons; b; b = b->next)
-        if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
+        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->func)
         {
             b->func(widget->statusbar->screen, b->arg);
             break;
@@ -171,7 +171,7 @@ widget_invalidate_cache(int screen, int flags)
         statusbar = statusbar->next)
         for(widget = statusbar->widgets; widget; widget = widget->next)
             if(widget->cache.flags & flags)
-                widget->cache.needs_update = True;
+                widget->cache.needs_update = true;
 }
 
 /** Send commands to widgets.
@@ -251,7 +251,7 @@ uicb_widget_tell(int screen, char *arg)
              property, widget->name);
         break;
       case WIDGET_NOERROR:
-          widget->cache.needs_update = True;
+          widget->cache.needs_update = true;
           break;
       case WIDGET_ERROR_CUSTOM:
         break;

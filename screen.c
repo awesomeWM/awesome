@@ -19,6 +19,11 @@
  *
  */
 
+#include <stdio.h>
+
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include "screen.h"
 #include "tag.h"
 #include "focus.h"
@@ -79,9 +84,10 @@ get_display_area(int screen, Statusbar *statusbar, Padding *padding)
 {
     area_t area = { 0, 0, 0, 0, NULL, NULL };
     Statusbar *sb;
+    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, screen);
 
-    area.width = DisplayWidth(globalconf.display, screen);
-    area.height = DisplayHeight(globalconf.display, screen);
+    area.width = s->width_in_pixels;
+    area.height = s->height_in_pixels;
 
     for(sb = statusbar; sb; sb = sb->next)
     {
@@ -109,18 +115,18 @@ int
 screen_virttophys(int screen)
 {
     if(globalconf.screens_info->xinerama_is_active)
-        return DefaultScreen(globalconf.display);
+        return globalconf.default_screen;
     return screen;
 }
 
 /** Move a client to a virtual screen
  * \param c the client
  * \param new_screen The destinatiuon screen
- * \param doresize set to True if we also move the client to the new x and
+ * \param doresize set to true if we also move the client to the new x and
  *        y of the new screen
  */
 void
-move_client_to_screen(Client *c, int new_screen, Bool doresize)
+move_client_to_screen(Client *c, int new_screen, bool doresize)
 {
     Tag *tag;
     int old_screen = c->screen;
@@ -189,17 +195,17 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
             if(c->m_geometry.y + c->m_geometry.height >= to.y + to.height)
                 c->m_geometry.y = to.y + to.height - c->m_geometry.height - 2 * c->border;
 
-            client_resize(c, new_geometry, False);
+            client_resize(c, new_geometry, false);
         }
         /* if floating, move to this new coords */
         else if(c->isfloating)
-            client_resize(c, new_f_geometry, False);
+            client_resize(c, new_f_geometry, false);
         /* otherwise just register them */
         else
         {
             c->f_geometry = new_f_geometry;
-            globalconf.screens[old_screen].need_arrange = True;
-            globalconf.screens[c->screen].need_arrange = True;
+            globalconf.screens[old_screen].need_arrange = true;
+            globalconf.screens[c->screen].need_arrange = true;
         }
     }
 }
@@ -210,19 +216,21 @@ move_client_to_screen(Client *c, int new_screen, Bool doresize)
 static void
 move_mouse_pointer_to_screen(int phys_screen)
 {
+    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, phys_screen);
+
     if(globalconf.screens_info->xinerama_is_active)
     {
         area_t area = screen_get_area(phys_screen, NULL, NULL);
-        XWarpPointer(globalconf.display,
-                     None,
-                     DefaultRootWindow(globalconf.display),
-                     0, 0, 0, 0, area.x, area.y);
+        xcb_warp_pointer(globalconf.connection,
+                         XCB_NONE,
+                         s->root,
+                         0, 0, 0, 0, area.x, area.y);
     }
     else
-        XWarpPointer(globalconf.display,
-                     None,
-                     RootWindow(globalconf.display, phys_screen),
-                     0, 0, 0, 0, 0, 0);
+        xcb_warp_pointer(globalconf.connection,
+                         XCB_NONE,
+                         root_window(globalconf.connection, phys_screen),
+                         0, 0, 0, 0, 0, 0);
 }
 
 
@@ -247,7 +255,7 @@ uicb_screen_focus(int screen, char *arg)
     if (new_screen > (globalconf.screens_info->nscreen - 1))
         new_screen = 0;
 
-    client_focus(NULL, new_screen, True);
+    client_focus(NULL, new_screen, true);
 
     move_mouse_pointer_to_screen(new_screen);
 }
@@ -278,8 +286,8 @@ uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
         new_screen = globalconf.screens_info->nscreen - 1;
 
     prev_screen = sel->screen;
-    move_client_to_screen(sel, new_screen, True);
+    move_client_to_screen(sel, new_screen, true);
     move_mouse_pointer_to_screen(new_screen);
-    client_focus(sel, sel->screen, True);
+    client_focus(sel, sel->screen, true);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

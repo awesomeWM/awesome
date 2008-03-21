@@ -24,14 +24,14 @@
 
 #include "common/draw.h"
 
-int window_setstate(Window, long);
-long window_getstate(Window);
-Status window_configure(Window, area_t, int);
-void window_grabbuttons(Window, int);
+void window_setstate(xcb_window_t, long);
+long window_getstate(xcb_window_t);
+void window_configure(xcb_window_t, area_t, int);
+void window_grabbuttons(xcb_window_t, int);
 void window_root_grabbuttons(int);
 void window_root_grabkeys(int);
-void window_setshape(Window, int);
-int window_settrans(Window, double);
+void window_setshape(xcb_window_t, int);
+void window_settrans(xcb_window_t, double);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

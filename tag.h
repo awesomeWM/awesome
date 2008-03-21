@@ -28,13 +28,13 @@
 #define IS_TILED(client, screen)            (client && !client->isfloating && !client->ismax && client_isvisible(client, screen))
 
 Tag * tag_new(const char *, Layout *, double, int, int);
-void tag_view(Tag *, Bool);
-void tag_view_byindex(int, int, Bool);
+void tag_view(Tag *, bool);
+void tag_view_byindex(int, int, bool);
 void tag_push_to_screen(Tag *, int);
 Tag ** tags_get_current(int);
 void tag_client(Client *, Tag *);
 void untag_client(Client *, Tag *);
-Bool is_client_tagged(Client *, Tag *);
+bool is_client_tagged(Client *, Tag *);
 void tag_client_with_rule(Client *, Rule *r);
 void tag_client_with_current_selected(Client *);
 void tag_view_only_byindex(int, int);

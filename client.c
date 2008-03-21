@@ -20,8 +20,12 @@
  */
 
 #include <stdio.h>
-#include <X11/Xatom.h>
-#include <X11/extensions/shape.h>
+#include <stdbool.h>
+
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+#include <xcb/xcb_atom.h>
+#include <xcb/shape.h>
 
 #include "client.h"
 #include "tag.h"
@@ -45,28 +49,28 @@ extern AwesomeConf globalconf;
  * \param screen Screen ID
  * \return true if client had property
  */
-static Bool
+static bool
 client_loadprops(Client * c, int screen)
 {
     int i, ntags = 0;
     Tag *tag;
     char *prop;
-    Bool result = False;
+    bool result = false;
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         ntags++;
 
     prop = p_new(char, ntags + 3);
 
-    if(xgettextprop(globalconf.display, c->win,
-                    XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
+    if(xgettextprop(globalconf.connection, c->win,
+                    x_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
                     prop, ntags + 3))
     {
         for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
             {
                 tag_client(c, tag);
-                result = True;
+                result = true;
             }
             else
                 untag_client(c, tag);
@@ -83,21 +87,21 @@ client_loadprops(Client * c, int screen)
 /** Check if client supports protocol WM_DELETE_WINDOW
  * \param disp the display
  * \param win the Window
- * \return True if client has WM_DELETE_WINDOW
+ * \return true if client has WM_DELETE_WINDOW
  */
-static Bool
-client_isprotodel(Display *disp, Window win)
+static bool
+client_isprotodel(xcb_connection_t *c, xcb_window_t win)
 {
-    int i, n;
-    Atom *protocols;
-    Bool ret = False;
+    uint32_t i, n;
+    xcb_atom_t *protocols;
+    bool ret = false;
 
-    if(XGetWMProtocols(disp, win, &protocols, &n))
+    if(xcb_get_wm_protocols(c, win, &n, &protocols))
     {
         for(i = 0; !ret && i < n; i++)
-            if(protocols[i] == XInternAtom(disp, "WM_DELETE_WINDOW", False))
-                ret = True;
-        XFree(protocols);
+            if(protocols[i] == x_intern_atom(c, "WM_DELETE_WINDOW"))
+                ret = true;
+        p_delete(&protocols);
     }
     return ret;
 }
@@ -108,7 +112,7 @@ client_isprotodel(Display *disp, Window win)
  * \return client
  */
 Client *
-client_get_bywin(Client *list, Window w)
+client_get_bywin(Client *list, xcb_window_t w)
 {
     Client *c;
 
@@ -139,10 +143,10 @@ client_get_byname(Client *list, char *name)
 void
 client_updatetitle(Client *c)
 {
-    if(!xgettextprop(globalconf.display, c->win,
-                     XInternAtom(globalconf.display, "_NET_WM_NAME", False), c->name, sizeof(c->name)))
-        xgettextprop(globalconf.display, c->win,
-                     XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
+    if(!xgettextprop(globalconf.connection, c->win,
+                     x_intern_atom(globalconf.connection, "_NET_WM_NAME"), c->name, sizeof(c->name)))
+        xgettextprop(globalconf.connection, c->win,
+                     x_intern_atom(globalconf.connection, "WM_NAME"), c->name, sizeof(c->name));
 
     titlebar_draw(c);
 
@@ -157,8 +161,8 @@ client_unfocus(Client *c)
     else if(globalconf.screens[c->screen].opacity_focused != -1)
         window_settrans(c->win, -1);
     focus_add_client(NULL);
-    XSetWindowBorder(globalconf.display, c->win,
-                     globalconf.screens[c->screen].styles.normal.border.pixel);
+    xcb_change_window_attributes(globalconf.connection, c->win, XCB_CW_BORDER_PIXEL,
+                                 &globalconf.screens[c->screen].styles.normal.border.pixel);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     titlebar_draw(c);
 }
@@ -171,10 +175,10 @@ client_ban(Client *c)
 {
     if(globalconf.focus->client == c)
         client_unfocus(c);
-    XUnmapWindow(globalconf.display, c->win);
-    window_setstate(c->win, IconicState);
+    xcb_unmap_window(globalconf.connection, c->win);
+    window_setstate(c->win, XCB_WM_ICONIC_STATE);
     if(c->titlebar.position && c->titlebar.sw)
-        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
+        xcb_unmap_window(globalconf.connection, c->titlebar.sw->window);
 }
 
 /** Give focus to client, or to first client if c is NULL
@@ -183,8 +187,8 @@ client_ban(Client *c)
  * \param raise raise window if true
  * \return true if a window (even root) has received focus, false otherwise
  */
-Bool
-client_focus(Client *c, int screen, Bool raise)
+bool
+client_focus(Client *c, int screen, bool raise)
 {
     int phys_screen;
 
@@ -196,7 +200,7 @@ client_focus(Client *c, int screen, Bool raise)
 
     /* if c is already the focused window, then stop */
     if(c == globalconf.focus->client)
-        return False;
+        return false;
 
     /* unfocus current selected client */
     if(globalconf.focus->client)
@@ -212,10 +216,11 @@ client_focus(Client *c, int screen, Bool raise)
             window_settrans(c->win, globalconf.screens[c->screen].opacity_focused);
         else if(globalconf.screens[c->screen].opacity_unfocused != -1)
             window_settrans(c->win, -1);
-        XSetWindowBorder(globalconf.display, c->win,
-                         globalconf.screens[screen].styles.focus.border.pixel);
+        xcb_change_window_attributes(globalconf.connection, c->win, XCB_CW_BORDER_PIXEL,
+                                     &globalconf.screens[screen].styles.focus.border.pixel);
         titlebar_draw(c);
-        XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+                            c->win, XCB_CURRENT_TIME);
         if(raise)
             client_stack(c);
         /* since we're dropping EnterWindow events and sometimes the window
@@ -226,27 +231,28 @@ client_focus(Client *c, int screen, Bool raise)
     else
     {
         phys_screen = screen_virttophys(screen);
-        XSetInputFocus(globalconf.display,
-                       RootWindow(globalconf.display, phys_screen),
-                       RevertToPointerRoot, CurrentTime);
+        xcb_set_input_focus(globalconf.connection,
+                            XCB_INPUT_FOCUS_POINTER_ROOT,
+                            root_window(globalconf.connection, phys_screen),
+                            XCB_CURRENT_TIME);
     }
 
     ewmh_update_net_active_window(phys_screen);
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
 
-    return True;
+    return true;
 }
 
 void
 client_stack(Client *c)
 {
-    XWindowChanges wc;
+    uint32_t config_win_vals[2];
     Client *client;
     unsigned int layer;
     Layer maxlayer = LAYER_FULLSCREEN;
 
-    wc.stack_mode = Above;
-    wc.sibling = None;
+    config_win_vals[0] = XCB_NONE;
+    config_win_vals[1] = XCB_STACK_MODE_ABOVE;
 
     for(layer = 0; layer < maxlayer; layer++)
     {
@@ -256,24 +262,31 @@ client_stack(Client *c)
             {
                 if(client->titlebar.position && client->titlebar.sw)
                 {
-                    XConfigureWindow(globalconf.display, client->titlebar.sw->window,
-                            CWSibling | CWStackMode, &wc);
-                    wc.sibling = client->titlebar.sw->window;
+                    xcb_configure_window(globalconf.connection,
+                                         client->titlebar.sw->window,
+                                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                         config_win_vals);
+                    config_win_vals[0] = client->titlebar.sw->window;
                 }
-                XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
-                wc.sibling = client->win;
+                xcb_configure_window(globalconf.connection, client->win,
+                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                     config_win_vals);
+                config_win_vals[0] = client->win;
             }
         }
         if(c->layer == layer)
         {
             if(c->titlebar.position && c->titlebar.sw)
             {
-                XConfigureWindow(globalconf.display, c->titlebar.sw->window,
-                        CWSibling | CWStackMode, &wc);
-                wc.sibling = c->titlebar.sw->window;
+                xcb_configure_window(globalconf.connection, c->titlebar.sw->window,
+                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                     config_win_vals);
+                config_win_vals[0] = c->titlebar.sw->window;
             }
-            XConfigureWindow(globalconf.display, c->win, CWSibling | CWStackMode, &wc);
-            wc.sibling = c->win;
+            xcb_configure_window(globalconf.connection, c->win,
+                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                 config_win_vals);
+            config_win_vals[0] = c->win;
         }
     }
 }
@@ -284,22 +297,22 @@ client_stack(Client *c)
  * \param screen Screen ID
  */
 void
-client_manage(Window w, XWindowAttributes *wa, int screen)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wa, int screen)
 {
     Client *c, *t = NULL;
-    Window trans;
-    Bool rettrans, retloadprops;
-    XWindowChanges wc;
+    xcb_window_t trans;
+    bool rettrans, retloadprops;
+    uint32_t config_win_val;
     Tag *tag;
     Rule *rule;
-    long flags;
+    xcb_size_hints_t *u_size_hints;
 
     c = p_new(Client, 1);
 
     c->screen = screen_get_bycoord(globalconf.screens_info, screen, wa->x, wa->y);
 
     if(globalconf.screens_info->xinerama_is_active)
-        c->phys_screen = DefaultScreen(globalconf.display);
+        c->phys_screen = globalconf.default_screen;
     else
         c->phys_screen = c->screen;
 
@@ -310,13 +323,15 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wa->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wa->height;
     c->oldborder = wa->border_width;
-    c->newcomer = True;
+    c->newcomer = true;
     c->layer = c->oldlayer = LAYER_TILE;
 
     /* Set windows borders */
-    wc.border_width = c->border = globalconf.screens[screen].borderpx;
-    XConfigureWindow(globalconf.display, w, CWBorderWidth, &wc);
-    XSetWindowBorder(globalconf.display, w, c->border);
+    config_win_val = c->border = globalconf.screens[screen].borderpx;
+    xcb_configure_window(globalconf.connection, w, XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                         &config_win_val);
+    xcb_configure_window(globalconf.connection, w, XCB_CONFIG_WINDOW_STACK_MODE,
+                         &config_win_val);
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
@@ -324,12 +339,12 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     client_updatetitle(c);
 
     /* update hints */
-    flags = client_updatesizehints(c);
+    u_size_hints = client_updatesizehints(c);
     client_updatewmhints(c);
 
     /* Try to load props if any */
     if(!(retloadprops = client_loadprops(c, screen)))
-        move_client_to_screen(c, screen, True);
+        move_client_to_screen(c, screen, true);
 
     /* Then check clients hints */
     ewmh_check_client_hints(c);
@@ -344,7 +359,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(!retloadprops && rule)
     {
         if(rule->screen != RULE_NOSCREEN)
-            move_client_to_screen(c, rule->screen, True);
+            move_client_to_screen(c, rule->screen, true);
         tag_client_with_rule(c, rule);
 
         switch(rule->isfloating)
@@ -352,10 +367,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
           case Maybe:
             break;
           case Yes:
-            client_setfloating(c, True, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
+            client_setfloating(c, true, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
             break;
           case No:
-            client_setfloating(c, False, LAYER_TILE);
+            client_setfloating(c, false, LAYER_TILE);
             break;
         }
 
@@ -363,10 +378,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             window_settrans(c->win, rule->opacity);
     }
 
-    /* check for transient and set tags like its parent,
-     * XGetTransientForHint returns 1 on success
-     */
-    if((rettrans = XGetTransientForHint(globalconf.display, w, &trans))
+    /* check for transient and set tags like its parent */
+    if((rettrans = x_get_transient_for_hint(globalconf.connection, w, &trans))
        && (t = client_get_bywin(globalconf.clients, trans)))
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
             if(is_client_tagged(t, tag))
@@ -374,7 +387,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     /* should be floating if transsient or fixed */
     if(rettrans || c->isfixed)
-        client_setfloating(c, True, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
+        client_setfloating(c, true, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
 
     /* titlebar init */
     if(rule && rule->titlebar.position != Auto)
@@ -382,23 +395,27 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     titlebar_init(c);
 
-    if(!retloadprops && !(flags & (USPosition | PPosition)))
+    if(!retloadprops
+       && u_size_hints
+       && !(xcb_size_hints_is_us_position(u_size_hints) | xcb_size_hints_is_p_position(u_size_hints)))
     {
         if(c->isfloating && !c->ismax)
-            client_resize(c, globalconf.screens[c->screen].floating_placement(c), False);
+            client_resize(c, globalconf.screens[c->screen].floating_placement(c), false);
         else
             c->f_geometry = globalconf.screens[c->screen].floating_placement(c);
+
+        xcb_free_size_hints(u_size_hints);
     }
 
     /* update titlebar with real floating info now */
     titlebar_update_geometry_floating(c);
 
-    XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
+    x_select_input(globalconf.connection, w, XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW);
 
     /* handle xshape */
     if(globalconf.have_shape)
     {
-        XShapeSelectInput(globalconf.display, w, ShapeNotifyMask);
+        xcb_shape_select_input(globalconf.connection, w, true);
         window_setshape(c->win, c->phys_screen);
     }
 
@@ -480,16 +497,15 @@ client_geometry_hints(Client *c, area_t geometry)
  * \param c client to resize
  * \param geometry new window geometry
  * \param hints use resize hints
- * \param return True if resize has been done
+ * \param return true if resize has been done
  */
-Bool
-client_resize(Client *c, area_t geometry, Bool hints)
+bool
+client_resize(Client *c, area_t geometry, bool hints)
 {
     int new_screen;
     area_t area;
-    XWindowChanges wc;
     Layout *layout = layout_get_current(c->screen);
-    Bool resized = False;
+    bool resized = false;
 
     if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating)
     {
@@ -497,11 +513,15 @@ client_resize(Client *c, area_t geometry, Bool hints)
         geometry = titlebar_geometry_remove(&c->titlebar, geometry);
     }
 
+    /* Values to configure a window is an array where values are
+     * stored according to 'value_mask' */
+    uint32_t values[5];
+
     if(hints)
         geometry = client_geometry_hints(c, geometry);
 
     if(geometry.width <= 0 || geometry.height <= 0)
-        return False;
+        return false;
 
     /* offscreen appearance fixes */
     area = get_display_area(c->phys_screen, NULL,
@@ -522,11 +542,11 @@ client_resize(Client *c, area_t geometry, Bool hints)
         new_screen =
             screen_get_bycoord(globalconf.screens_info, c->screen, geometry.x, geometry.y);
 
-        c->geometry.x = wc.x = geometry.x;
-        c->geometry.width = wc.width = geometry.width;
-        c->geometry.y = wc.y = geometry.y;
-        c->geometry.height = wc.height = geometry.height;
-        wc.border_width = c->border;
+        c->geometry.x = values[0] = geometry.x;
+        c->geometry.width = values[2] = geometry.width;
+        c->geometry.y = values[1] = geometry.y;
+        c->geometry.height = values[3] = geometry.height;
+        values[4] = c->border;
 
         /* save the floating geometry if the window is floating but not
          * maximized */
@@ -538,14 +558,17 @@ client_resize(Client *c, area_t geometry, Bool hints)
             titlebar_update_geometry_floating(c);
         }
 
-        XConfigureWindow(globalconf.display, c->win,
-                         CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
+        xcb_configure_window(globalconf.connection, c->win,
+                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y |
+                             XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT |
+                             XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                             values);
         window_configure(c->win, geometry, c->border);
 
         if(c->screen != new_screen)
-            move_client_to_screen(c, new_screen, False);
+            move_client_to_screen(c, new_screen, false);
 
-        resized = True;
+        resized = true;
     }
 
     /* call it again like it was floating,
@@ -557,21 +580,19 @@ client_resize(Client *c, area_t geometry, Bool hints)
 }
 
 void
-client_setfloating(Client *c, Bool floating, Layer layer)
+client_setfloating(Client *c, bool floating, Layer layer)
 {
     if(c->isfloating != floating)
     {
         if((c->isfloating = floating))
-        {
-            client_resize(c, c->f_geometry, False);
-        }
+            client_resize(c, c->f_geometry, false);
         else if(c->ismax)
         {
-            c->ismax = False;
-            client_resize(c, c->m_geometry, False);
+            c->ismax = false;
+            client_resize(c, c->m_geometry, false);
         }
         if(client_isvisible(c, c->screen))
-            globalconf.screens[c->screen].need_arrange = True;
+            globalconf.screens[c->screen].need_arrange = true;
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         if(floating)
         {
@@ -611,9 +632,9 @@ client_saveprops(Client *c)
 
     prop[++i] = '\0';
 
-    XChangeProperty(globalconf.display, c->win,
-                    XInternAtom(globalconf.display, "_AWESOME_PROPERTIES", False),
-                    XA_STRING, 8, PropModeReplace, (unsigned char *) prop, i);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win,
+                        x_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
+                        STRING, 8, i, (unsigned char *) prop);
 
     p_delete(&prop);
 }
@@ -621,24 +642,23 @@ client_saveprops(Client *c)
 void
 client_unban(Client *c)
 {
-    XMapWindow(globalconf.display, c->win);
-    window_setstate(c->win, NormalState);
+    xcb_map_window(globalconf.connection, c->win);
+    window_setstate(c->win, XCB_WM_NORMAL_STATE);
     if(c->titlebar.sw && c->titlebar.position != Off)
-        XMapWindow(globalconf.display, c->titlebar.sw->window);
+        xcb_map_window(globalconf.connection, c->titlebar.sw->window);
 }
 
 void
 client_unmanage(Client *c)
 {
-    XWindowChanges wc;
     Tag *tag;
 
-    wc.border_width = c->oldborder;
-
     /* The server grab construct avoids race conditions. */
-    XGrabServer(globalconf.display);
+    xcb_grab_server(globalconf.connection);
 
-    XConfigureWindow(globalconf.display, c->win, CWBorderWidth, &wc);  /* restore border */
+    xcb_configure_window(globalconf.connection, c->win,
+                         XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                         (uint32_t *) &c->oldborder);
 
     /* remove client everywhere */
     client_list_detach(&globalconf.clients, c);
@@ -649,13 +669,13 @@ client_unmanage(Client *c)
         untag_client(c, tag);
 
     if(globalconf.focus->client == c)
-        client_focus(NULL, c->screen, True);
+        client_focus(NULL, c->screen, true);
 
-    XUngrabButton(globalconf.display, AnyButton, AnyModifier, c->win);
-    window_setstate(c->win, WithdrawnState);
+    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win, ANY_MODIFIER);
+    window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
 
-    XSync(globalconf.display, False);
-    XUngrabServer(globalconf.display);
+    xcb_aux_sync(globalconf.connection);
+    xcb_ungrab_server(globalconf.connection);
 
     if(c->titlebar.sw)
         simplewindow_delete(&c->titlebar.sw);
@@ -666,110 +686,91 @@ client_unmanage(Client *c)
 void
 client_updatewmhints(Client *c)
 {
-    XWMHints *wmh;
+    xcb_wm_hints_t *wmh;
 
-    if((wmh = XGetWMHints(globalconf.display, c->win)))
+    if((wmh = xcb_get_wm_hints(globalconf.connection, c->win)))
     {
-        if((c->isurgent = ((wmh->flags & XUrgencyHint) && globalconf.focus->client != c)))
+        if((c->isurgent = (xcb_wm_hints_is_x_urgency_hint(wmh) && globalconf.focus->client != c)))
         {
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
             titlebar_draw(c);
         }
-        if((wmh->flags & StateHint) && wmh->initial_state == WithdrawnState)
+        if(xcb_wm_hints_is_state_hint(wmh) && xcb_wm_hints_state_is_withdrawn(wmh))
         {
             c->border = 0;
-            c->skip = True;
+            c->skip = true;
         }
-        XFree(wmh);
+        free(wmh);
     }
 }
 
-long
+xcb_size_hints_t *
 client_updatesizehints(Client *c)
 {
     long msize;
-    XSizeHints size;
+    xcb_size_hints_t *size = NULL;
 
-    if(!XGetWMNormalHints(globalconf.display, c->win, &size, &msize))
-        return 0L;
+    if(!xcb_get_wm_normal_hints(globalconf.connection, c->win, size, &msize) ||
+        size == NULL)
+        return NULL;
 
-    if(size.flags & PBaseSize)
-    {
-        c->basew = size.base_width;
-        c->baseh = size.base_height;
-    }
-    else if(size.flags & PMinSize)
-    {
-        c->basew = size.min_width;
-        c->baseh = size.min_height;
-    }
+    if(xcb_size_hints_is_p_size(size))
+        xcb_size_hints_get_base_size(size, &c->basew, &c->baseh);
+    else if(xcb_size_hints_is_p_min_size(size))
+        xcb_size_hints_get_min_size(size, &c->basew, &c->baseh);
     else
         c->basew = c->baseh = 0;
-    if(size.flags & PResizeInc)
-    {
-        c->incw = size.width_inc;
-        c->inch = size.height_inc;
-    }
+    if(xcb_size_hints_is_p_resize_inc(size))
+        xcb_size_hints_get_increase(size, &c->incw, &c->inch);
     else
         c->incw = c->inch = 0;
 
-    if(size.flags & PMaxSize)
-    {
-        c->maxw = size.max_width;
-        c->maxh = size.max_height;
-    }
+    if(xcb_size_hints_is_p_max_size(size))
+        xcb_size_hints_get_max_size(size, &c->maxw, &c->maxh);
     else
         c->maxw = c->maxh = 0;
 
-    if(size.flags & PMinSize)
-    {
-        c->minw = size.min_width;
-        c->minh = size.min_height;
-    }
-    else if(size.flags & PBaseSize)
-    {
-        c->minw = size.base_width;
-        c->minh = size.base_height;
-    }
+    if(xcb_size_hints_is_p_min_size(size))
+        xcb_size_hints_get_min_size(size, &c->minw, &c->minh);
+    else if(xcb_size_hints_is_p_base_size(size))
+        xcb_size_hints_get_base_size(size, &c->minw, &c->minh);
     else
         c->minw = c->minh = 0;
 
-    if(size.flags & PAspect)
+    if(xcb_size_hints_is_p_aspect(size))
     {
-        c->minax = size.min_aspect.x;
-        c->maxax = size.max_aspect.x;
-        c->minay = size.min_aspect.y;
-        c->maxay = size.max_aspect.y;
+        xcb_size_hints_get_min_aspect(size, &c->minax, &c->minay);
+        xcb_size_hints_get_max_aspect(size, &c->maxax, &c->maxay);
     }
     else
         c->minax = c->maxax = c->minay = c->maxay = 0;
 
     if(c->maxw && c->minw && c->maxh && c->minh
        && c->maxw == c->minw && c->maxh == c->minh)
-        c->isfixed = True;
+        c->isfixed = true;
 
-    return size.flags;
+    return size;
 }
 
-/** Returns True if a client is tagged
+/** Returns true if a client is tagged
  * with one of the tags
- * \return True or False
+ * \return true or false
  */
-Bool
+bool
 client_isvisible(Client *c, int screen)
 {
     Tag *tag;
 
     if(!c || c->screen != screen)
-        return False;
+        return false;
 
     if(globalconf.scratch.client == c)
         return globalconf.scratch.isvisible;
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         if(tag->selected && is_client_tagged(c, tag))
-            return True;
-    return False;
+            return true;
+    return false;
 }
 
 /** Set the transparency of the selected client.
@@ -781,27 +782,28 @@ client_isvisible(Client *c, int screen)
 void
 uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
 {
-    double delta = 1.0, current_opacity = 1.0;
-    unsigned char *data;
-    Atom actual;
-    int format;
-    unsigned long n, left;
+    double delta = 1.0, current_opacity = 100.0;
     unsigned int current_opacity_raw = 0;
     int set_prop = 0;
     Client *sel = globalconf.focus->client;
+    xcb_get_property_reply_t *prop_r;
 
     if(!sel)
         return;
 
-    XGetWindowProperty(globalconf.display, sel->win,
-                       XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False),
-                       0L, 1L, False, XA_CARDINAL, &actual, &format, &n, &left,
-                       (unsigned char **) &data);
-    if(data)
+    prop_r = xcb_get_property_reply(globalconf.connection,
+                                    xcb_get_property_unchecked(globalconf.connection,
+                                                               false, sel->win,
+                                                               x_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"),
+                                                               CARDINAL,
+                                                               0, 1),
+                                    NULL);
+
+    if(prop_r)
     {
-        memcpy(&current_opacity_raw, data, sizeof(unsigned int));
-        XFree(data);
+        memcpy(&current_opacity_raw, xcb_get_property_value(prop_r), sizeof(unsigned int));
         current_opacity = (double) current_opacity_raw / 0xffffffff;
+        p_delete(&prop_r);
     }
     else
         set_prop = 1;
@@ -829,7 +831,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
  * \return next or previous client
  */
 static Client *
-client_find_visible(Client *sel, Bool reverse)
+client_find_visible(Client *sel, bool reverse)
 {
     Client *next;
     Client *(*client_iter)(Client **, Client *) = client_list_next_cycle;
@@ -858,10 +860,10 @@ uicb_client_swapprev(int screen __attribute__ ((unused)), char *arg __attribute_
 {
     Client *prev;
 
-    if((prev = client_find_visible(globalconf.focus->client, True)))
+    if((prev = client_find_visible(globalconf.focus->client, true)))
     {
         client_list_swap(&globalconf.clients, prev, globalconf.focus->client);
-        globalconf.screens[prev->screen].need_arrange = True;
+        globalconf.screens[prev->screen].need_arrange = true;
         widget_invalidate_cache(prev->screen, WIDGET_CACHE_CLIENTS);
     }
 }
@@ -876,10 +878,10 @@ uicb_client_swapnext(int screen __attribute__ ((unused)), char *arg __attribute_
 {
     Client *next;
 
-    if((next = client_find_visible(globalconf.focus->client, False)))
+    if((next = client_find_visible(globalconf.focus->client, false)))
     {
         client_list_swap(&globalconf.clients, globalconf.focus->client, next);
-        globalconf.screens[next->screen].need_arrange = True;
+        globalconf.screens[next->screen].need_arrange = true;
         widget_invalidate_cache(next->screen, WIDGET_CACHE_CLIENTS);
     }
 }
@@ -895,11 +897,10 @@ uicb_client_moveresize(int screen, char *arg)
 {
     int ox, oy, ow, oh; /* old geometry */
     char x[8], y[8], w[8], h[8];
-    int mx, my, dx, dy, nmx, nmy;
-    unsigned int dui;
-    Window dummy;
+    int nmx, nmy;
     area_t geometry;
     Client *sel = globalconf.focus->client;
+    xcb_query_pointer_reply_t *xqp;
     Layout *curlay = layout_get_current(screen);
 
     if(!sel || sel->isfixed || !arg ||
@@ -919,27 +920,27 @@ uicb_client_moveresize(int screen, char *arg)
     ow = sel->geometry.width;
     oh = sel->geometry.height;
 
-    Bool xqp = XQueryPointer(globalconf.display,
-                             RootWindow(globalconf.display,
-                                        sel->phys_screen),
-                             &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
+    xqp = xcb_query_pointer_reply(globalconf.connection,
+                                  xcb_query_pointer_unchecked(globalconf.connection,
+                                                              root_window(globalconf.connection, sel->phys_screen)),
+                                  NULL);
     if(globalconf.screens[sel->screen].resize_hints)
         geometry = client_geometry_hints(sel, geometry);
-    client_resize(sel, geometry, False);
-    if (xqp && ox <= mx && (ox + 2 * sel->border + ow) >= mx &&
-        oy <= my && (oy + 2 * sel->border + oh) >= my)
+    client_resize(sel, geometry, false);
+    if (xqp && ox <= xqp->root_x && (ox + 2 * sel->border + ow) >= xqp->root_x &&
+        oy <= xqp->root_y && (oy + 2 * sel->border + oh) >= xqp->root_y)
     {
-        nmx = mx - (ox + sel->border) + sel->geometry.width - ow;
-        nmy = my - (oy + sel->border) + sel->geometry.height - oh;
+        nmx = xqp->root_x - (ox + sel->border) + sel->geometry.width - ow;
+        nmy = xqp->root_y - (oy + sel->border) + sel->geometry.height - oh;
 
         if(nmx < -sel->border) /* can happen on a resize */
             nmx = -sel->border;
         if(nmy < -sel->border)
             nmy = -sel->border;
 
-        XWarpPointer(globalconf.display,
-                     None, sel->win,
-                     0, 0, 0, 0, nmx, nmy);
+        xcb_warp_pointer(globalconf.connection,
+                         XCB_NONE, sel->win,
+                         0, 0, 0, 0, nmx, nmy);
     }
 }
 
@@ -950,20 +951,24 @@ uicb_client_moveresize(int screen, char *arg)
 void
 client_kill(Client *c)
 {
-    XEvent ev;
+    xcb_client_message_event_t ev;
 
-    if(client_isprotodel(globalconf.display, c->win))
+    if(client_isprotodel(globalconf.connection, c->win))
     {
-        ev.type = ClientMessage;
-        ev.xclient.window = c->win;
-        ev.xclient.message_type = XInternAtom(globalconf.display, "WM_PROTOCOLS", False);
-        ev.xclient.format = 32;
-        ev.xclient.data.l[0] = XInternAtom(globalconf.display, "WM_DELETE_WINDOW", False);
-        ev.xclient.data.l[1] = CurrentTime;
-        XSendEvent(globalconf.display, c->win, False, NoEventMask, &ev);
+        ev.window = c->win;
+        ev.type = x_intern_atom(globalconf.connection, "WM_PROTOCOLS");
+
+        ev.data.data32[0] = x_intern_atom(globalconf.connection, "WM_DELETE_WINDOW");
+        ev.data.data32[1] = XCB_CURRENT_TIME;
+
+        /* TODO: really useful? */
+        ev.data.data32[2] = ev.data.data32[3] = ev.data.data32[4] = 0;
+
+        xcb_send_event(globalconf.connection, false, c->win,
+                       XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
     }
     else
-        XKillClient(globalconf.display, c->win);
+        xcb_kill_client(globalconf.connection, c->win);
 }
 
 /** Kill the currently focused client.
@@ -994,25 +999,26 @@ client_maximize(Client *c, area_t geometry)
         c->wasfloating = c->isfloating;
         c->m_geometry = c->geometry;
         if(layout_get_current(c->screen)->arrange != layout_floating)
-            client_setfloating(c, True, LAYER_FULLSCREEN);
-        client_focus(c, c->screen, True);
-        client_resize(c, geometry, False);
+            client_setfloating(c, true, LAYER_FULLSCREEN);
+        client_focus(c, c->screen, true);
+        client_resize(c, geometry, false);
     }
     else if(c->wasfloating)
     {
         c->titlebar.position = c->titlebar.dposition;
-        client_setfloating(c, True, LAYER_FULLSCREEN);
-        client_resize(c, c->m_geometry, False);
+        client_setfloating(c, true, LAYER_FULLSCREEN);
+        client_resize(c, c->m_geometry, false);
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else if(layout_get_current(c->screen)->arrange == layout_floating)
     {
         c->titlebar.position = c->titlebar.dposition;
-        client_resize(c, c->m_geometry, False);
+        client_resize(c, c->m_geometry, false);
     }
     else
     {
         c->titlebar.position = c->titlebar.dposition;
-        client_setfloating(c, False, LAYER_TILE);
+        client_setfloating(c, false, LAYER_TILE);
     }
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
@@ -1104,7 +1110,7 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
     {
         client_list_detach(&globalconf.clients, sel);
         client_list_push(&globalconf.clients, sel);
-        globalconf.screens[screen].need_arrange = True;
+        globalconf.screens[screen].need_arrange = true;
     }
 }
 
@@ -1118,8 +1124,8 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
 {
     Client *next;
 
-    if((next = client_find_visible(globalconf.focus->client, False)))
-        client_focus(next, screen, True);
+    if((next = client_find_visible(globalconf.focus->client, false)))
+        client_focus(next, screen, true);
 }
 
 /** Give focus to the previous visible client in the stack.
@@ -1132,8 +1138,8 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
 {
     Client *prev;
 
-    if((prev = client_find_visible(globalconf.focus->client, True)))
-        client_focus(prev, screen, True);
+    if((prev = client_find_visible(globalconf.focus->client, true)))
+        client_focus(prev, screen, true);
 }
 
 /** Toggle the floating state of the focused client.
@@ -1166,7 +1172,7 @@ uicb_client_setscratch(int screen, char *arg __attribute__ ((unused)))
         globalconf.scratch.client = globalconf.focus->client;
 
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS | WIDGET_CACHE_TAGS);
-    globalconf.screens[screen].need_arrange = True;
+    globalconf.screens[screen].need_arrange = true;
 }
 
 /** Toggle the scratch client's visibility.
@@ -1181,8 +1187,8 @@ uicb_client_togglescratch(int screen, char *arg __attribute__ ((unused)))
     {
         globalconf.scratch.isvisible = !globalconf.scratch.isvisible;
         if(globalconf.scratch.isvisible)
-            client_focus(globalconf.scratch.client, screen, True);
-        globalconf.screens[globalconf.scratch.client->screen].need_arrange = True;
+            client_focus(globalconf.scratch.client, screen, true);
+        globalconf.screens[globalconf.scratch.client->screen].need_arrange = true;
         widget_invalidate_cache(globalconf.scratch.client->screen, WIDGET_CACHE_CLIENTS);
     }
 }

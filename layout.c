@@ -19,8 +19,8 @@
  *
  */
 
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_atom.h>
 
 #include "tag.h"
 #include "focus.h"
@@ -45,9 +45,8 @@ arrange(int screen)
 {
     Client *c;
     Layout *curlay = layout_get_current(screen);
-    unsigned int dui;
-    int di, x, y, phys_screen = screen_virttophys(screen);
-    Window rootwin, childwin;
+    int phys_screen = screen_virttophys(screen);
+    xcb_query_pointer_reply_t *xqp;
 
     for(c = globalconf.clients; c; c = c->next)
     {
@@ -63,12 +62,12 @@ arrange(int screen)
     for(c = globalconf.clients; c; c = c->next)
         if(c->newcomer && client_isvisible(c, screen))
         {
-            c->newcomer = False;
+            c->newcomer = false;
             client_unban(c);
             if(globalconf.screens[screen].new_get_focus
                && !c->skip
                && (!globalconf.focus->client || !globalconf.focus->client->ismax))
-                client_focus(c, screen, True);
+                client_focus(c, screen, true);
             else if(globalconf.focus->client && globalconf.focus->client->ismax)
                 client_stack(globalconf.focus->client);
         }
@@ -76,22 +75,23 @@ arrange(int screen)
     /* if we have a valid client that could be focused but currently no window
      * are focused, then set the focus on this window */
     if((c = focus_get_current_client(screen)) && globalconf.focus->client != c)
-        client_focus(c, screen, True);
+        client_focus(c, screen, true);
 
     /* check that the mouse is on a window or not */
-    if(XQueryPointer(globalconf.display,
-                     RootWindow(globalconf.display, phys_screen),
-                     &rootwin, &childwin, &x, &y, &di, &di, &dui))
+    if((xqp = xcb_query_pointer_reply(globalconf.connection,
+                                      xcb_query_pointer_unchecked(globalconf.connection,
+                                                                  root_window(globalconf.connection,
+                                                                              phys_screen)),
+                                      NULL)) != NULL
+       && (xqp->root == XCB_NONE || xqp->child == XCB_NONE || xqp->root == xqp->child))
     {
-       if(rootwin == None || childwin == None || childwin == rootwin)
-           window_root_grabbuttons(phys_screen);
-
-       globalconf.pointer_x = x;
-       globalconf.pointer_y = y;
+        window_root_grabbuttons(phys_screen);
+        globalconf.pointer_x = xqp->root_x;
+        globalconf.pointer_y = xqp->root_y;
     }
 
     /* reset status */
-    globalconf.screens[screen].need_arrange = False;
+    globalconf.screens[screen].need_arrange = false;
 }
 
 /** Refresh the screen disposition

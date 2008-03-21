@@ -21,6 +21,8 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
 
 #include "statusbar.h"
 #include "screen.h"
@@ -38,11 +40,11 @@ statusbar_position_update(Statusbar *statusbar)
 
     if(statusbar->position == Off)
     {
-        XUnmapWindow(globalconf.display, statusbar->sw->window);
+        xcb_unmap_window(globalconf.connection, statusbar->sw->window);
         return;
     }
 
-    XMapRaised(globalconf.display, statusbar->sw->window);
+    xutil_map_raised(globalconf.connection, statusbar->sw->window);
 
     /* Top and Bottom Statusbar have prio */
     if(statusbar->position == Top || statusbar->position == Bottom)
@@ -113,13 +115,13 @@ statusbar_draw(Statusbar *statusbar)
 
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
-    draw_rectangle(statusbar->ctx, rectangle, 1.0, True,
+    draw_rectangle(statusbar->ctx, rectangle, 1.0, true,
                    globalconf.screens[statusbar->screen].styles.normal.bg);
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
         {
-            widget->cache.needs_update = False;
+            widget->cache.needs_update = false;
             left += widget->draw(widget, statusbar->ctx, left, (left + right));
         }
 
@@ -129,14 +131,14 @@ statusbar_draw(Statusbar *statusbar)
         widget = widget_list_prev(&statusbar->widgets, widget))
         if (widget->alignment == AlignRight)
         {
-            widget->cache.needs_update = False;
+            widget->cache.needs_update = false;
             right += widget->draw(widget, statusbar->ctx, right, (left + right));
         }
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignFlex)
         {
-            widget->cache.needs_update = False;
+            widget->cache.needs_update = false;
             left += widget->draw(widget, statusbar->ctx, left, (left + right));
         }
 
@@ -181,11 +183,12 @@ void
 statusbar_init(Statusbar *statusbar)
 {
     Statusbar *sb;
-    Drawable dw;
+    xcb_drawable_t dw;
+    xcb_screen_t *s = NULL;
     int phys_screen = screen_virttophys(statusbar->screen);
     area_t area = screen_get_area(statusbar->screen,
-                                globalconf.screens[statusbar->screen].statusbar,
-                                &globalconf.screens[statusbar->screen].padding);
+                                  globalconf.screens[statusbar->screen].statusbar,
+                                  &globalconf.screens[statusbar->screen].padding);
 
     statusbar->phys_screen = phys_screen;
 
@@ -214,12 +217,12 @@ statusbar_init(Statusbar *statusbar)
       case Right:
       case Left:
             statusbar->sw =
-                 simplewindow_new(globalconf.display, phys_screen, 0, 0,
+                 simplewindow_new(globalconf.connection, phys_screen, 0, 0,
                                   statusbar->height, statusbar->width, 0);
             break;
       default:
             statusbar->sw =
-                simplewindow_new(globalconf.display, phys_screen, 0, 0,
+                simplewindow_new(globalconf.connection, phys_screen, 0, 0,
                                  statusbar->width, statusbar->height, 0);
             break;
     }
@@ -234,19 +237,22 @@ statusbar_init(Statusbar *statusbar)
         return;
       case Right:
       case Left:
+        s = xcb_aux_get_screen(globalconf.connection, phys_screen);
+
         /* we need a new pixmap this way [     ] to render */
-        dw = XCreatePixmap(globalconf.display,
-                           RootWindow(globalconf.display, phys_screen),
-                           statusbar->width, statusbar->height,
-                           DefaultDepth(globalconf.display, phys_screen));
-        statusbar->ctx = draw_context_new(globalconf.display,
+        dw = xcb_generate_id(globalconf.connection);
+        xcb_create_pixmap(globalconf.connection,
+                          s->root_depth, dw,
+                          root_window(globalconf.connection, phys_screen),
+                          statusbar->width, statusbar->height);
+        statusbar->ctx = draw_context_new(globalconf.connection,
                                           phys_screen,
                                           statusbar->width,
                                           statusbar->height,
                                           dw);
         break;
       default:
-        statusbar->ctx = draw_context_new(globalconf.display,
+        statusbar->ctx = draw_context_new(globalconf.connection,
                                           phys_screen,
                                           statusbar->width,
                                           statusbar->height,
@@ -297,7 +303,7 @@ statusbar_toggle(Statusbar *statusbar)
     else
         statusbar->position = Off;
     
-    globalconf.screens[statusbar->screen].need_arrange = True;
+    globalconf.screens[statusbar->screen].need_arrange = true;
 }
 
 /** Toggle the statusbar on or off.

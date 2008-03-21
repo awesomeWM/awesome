@@ -26,8 +26,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <stdbool.h>
 
-#include <X11/Xlib.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+#include <xcb/xcb_atom.h>
 
 #include "common/swindow.h"
 #include "common/util.h"
@@ -37,7 +40,7 @@
 
 #define PROGNAME "awesome-message"
 
-static Bool running = True;
+static bool running = true;
 
 /** Import awesome config file format */
 extern cfg_opt_t awesome_opts[];
@@ -46,7 +49,9 @@ extern cfg_opt_t awesome_opts[];
 typedef struct
 {
     /** Display ref */
-    Display *display;
+    xcb_connection_t *connection;
+    /** Default screen number */
+    int default_screen;
     /** Style */
     style_t style;
 } AwesomeMsgConf;
@@ -95,7 +100,7 @@ config_parse(int screen, const char *confpatharg)
             eprint("parsing configuration file failed, no screen section found\n");
 
     /* style */
-    draw_style_init(globalconf.display, DefaultScreen(globalconf.display),
+    draw_style_init(globalconf.connection, globalconf.default_screen,
                     cfg_getsec(cfg_getsec(cfg_screen, "styles"), "normal"),
                     &globalconf.style, NULL);
 
@@ -110,7 +115,7 @@ config_parse(int screen, const char *confpatharg)
 static void
 exit_on_signal(int sig __attribute__ ((unused)))
 {
-    running = False;
+    running = false;
 }
 
 int
@@ -118,14 +123,13 @@ main(int argc, char **argv)
 {
     SimpleWindow *sw;
     DrawCtx *ctx;
-    XEvent ev;
+    xcb_generic_event_t *ev;
     area_t geometry = { 0, 0, 200, 50, NULL, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL, NULL };
-    int opt, i, x, y, ret, screen = 0, delay = 0;
-    unsigned int ui;
+    int opt, ret, screen = 0, delay = 0;
+    xcb_query_pointer_reply_t *xqp = NULL;
     char *configfile = NULL;
     ScreensInfo *si;
-    Window dummy;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -161,23 +165,31 @@ main(int argc, char **argv)
     if(argc - optind < 1)
         exit_help(EXIT_FAILURE);
 
-    if(!(globalconf.display = XOpenDisplay(NULL)))
+    globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
+    if(xcb_connection_has_error(globalconf.connection))
         eprint("unable to open display");
 
-    si = screensinfo_new(globalconf.display);
+    si = screensinfo_new(globalconf.connection);
     if(si->xinerama_is_active)
     {
-        if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, DefaultScreen(globalconf.display)),
-                         &dummy, &dummy, &x, &y, &i, &i, &ui))
-            screen = screen_get_bycoord(si, 0, x, y);
+        if((xqp = xcb_query_pointer_reply(globalconf.connection,
+                                          xcb_query_pointer(globalconf.connection,
+                                                            root_window(globalconf.connection,
+                                                                        globalconf.default_screen)),
+                                          NULL)) != NULL)
+        {
+            screen = screen_get_bycoord(si, 0, xqp->root_x, xqp->root_y);
+            p_delete(&xqp);
+        }
     }
     else
-        screen = DefaultScreen(globalconf.display);
+        screen = globalconf.default_screen;
 
     if((ret = config_parse(screen, configfile)))
         return ret;
 
-    geometry.width = draw_textwidth(globalconf.display, globalconf.style.font, argv[optind]);
+    geometry.width = draw_textwidth(globalconf.connection, globalconf.default_screen,
+                                    globalconf.style.font, argv[optind]);
     geometry.height = globalconf.style.font->height * 1.5;
 
     if(argc - optind >= 2)
@@ -190,12 +202,13 @@ main(int argc, char **argv)
                 * ((double) globalconf.style.font->height / (double) icon_geometry.height);
     }
 
-    sw = simplewindow_new(globalconf.display, DefaultScreen(globalconf.display),
+    sw = simplewindow_new(globalconf.connection, globalconf.default_screen,
                           geometry.x, geometry.y, geometry.width, geometry.height, 0);
 
-    XStoreName(globalconf.display, sw->window, PROGNAME);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, sw->window,
+                        WM_NAME, STRING, 8, strlen(PROGNAME), PROGNAME);
 
-    ctx = draw_context_new(globalconf.display, DefaultScreen(globalconf.display),
+    ctx = draw_context_new(globalconf.connection, globalconf.default_screen,
                            geometry.width, geometry.height, sw->drawable);
 
     geometry.x = geometry.y = 0;
@@ -207,36 +220,41 @@ main(int argc, char **argv)
 
     p_delete(&ctx);
 
-    simplewindow_refresh_drawable(sw, DefaultScreen(globalconf.display));
+    simplewindow_refresh_drawable(sw, globalconf.default_screen);
 
-    XMapRaised(globalconf.display, sw->window);
-    XSync(globalconf.display, False);
+    xutil_map_raised(globalconf.connection, sw->window);
+    xcb_aux_sync(globalconf.connection);
 
     signal(SIGALRM, &exit_on_signal);
     alarm(delay);
 
     while(running)
     {
-       if(XPending(globalconf.display))
+       while((ev = xcb_poll_for_event(globalconf.connection)))
        {
-           XNextEvent(globalconf.display, &ev);
-           switch(ev.type)
+           /* Skip errors */
+           if(ev->response_type == 0)
+               continue;
+
+           switch(ev->response_type & 0x7f)
            {
-             case ButtonPress:
-             case KeyPress:
-               running = False;
-             case Expose:
-               simplewindow_refresh_drawable(sw, DefaultScreen(globalconf.display));
+             case XCB_BUTTON_PRESS:
+             case XCB_KEY_PRESS:
+               running = false;
+             case XCB_EXPOSE:
+               simplewindow_refresh_drawable(sw, globalconf.default_screen);
                break;
              default:
                break;
            }
+
+           p_delete(&ev);
        }
        usleep(100000);
     }
 
     simplewindow_delete(&sw);
-    XCloseDisplay(globalconf.display);
+    xcb_disconnect(globalconf.connection);
 
     return EXIT_SUCCESS;
 }

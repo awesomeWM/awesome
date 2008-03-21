@@ -25,7 +25,7 @@
 extern AwesomeConf globalconf;
 
 widget_tell_status_t
-widget_set_color_for_data(Widget *widget, XColor *color, char *command, int data_items, char ** data_title)
+widget_set_color_for_data(Widget *widget, xcolor_t *color, char *command, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;
@@ -35,7 +35,7 @@ widget_set_color_for_data(Widget *widget, XColor *color, char *command, int data
     for(i = 0; i < data_items; i++)
         if(!a_strcmp(title, data_title[i]))
         {
-            if(draw_color_new(globalconf.display,
+            if(draw_color_new(globalconf.connection,
                               widget->statusbar->phys_screen,
                               setting, &color[i]))
                 return WIDGET_NOERROR;
@@ -45,24 +45,24 @@ widget_set_color_for_data(Widget *widget, XColor *color, char *command, int data
     return WIDGET_ERROR_FORMAT_SECTION;
 }
 widget_tell_status_t
-widget_set_color_pointer_for_data(Widget *widget, XColor **color, char *command, int data_items, char ** data_title)
+widget_set_color_pointer_for_data(Widget *widget, xcolor_t **color, char *command, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;
-    Bool flag;
+    bool flag;
     title = strtok(command, " ");
     if(!(setting = strtok(NULL, " ")))
         return WIDGET_ERROR_NOVALUE;
     for(i = 0; i < data_items; i++)
         if(!a_strcmp(title, data_title[i]))
         {
-            flag = False;
+            flag = false;
             if(!color[i])
             {
-                flag = True; /* p_delete && restore to NULL, if draw_color_new unsuccessful */
-                color[i] = p_new(XColor, 1);
+                flag = true; /* p_delete && restore to NULL, if draw_color_new unsuccessful */
+                color[i] = p_new(xcolor_t, 1);
             }
-            if(!(draw_color_new(globalconf.display,
+            if(!(draw_color_new(globalconf.connection,
                             widget->statusbar->phys_screen,
                             setting, color[i])))
             {

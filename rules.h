@@ -27,7 +27,7 @@
 #define RULE_NOSCREEN        -1
 
 regex_t * rules_compile_regex(char *);
-Bool tag_match_rule(Tag *, Rule *);
+bool tag_match_rule(Tag *, Rule *);
 Fuzzy rules_get_fuzzy_from_str(const char *);
 Rule * rule_matching_client(Client *);
 

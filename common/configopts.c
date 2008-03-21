@@ -235,7 +235,7 @@ cfg_opt_t mouse_taglist_opts[] =
     /** Modifier keys. */
     CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
     /** Mouse button. */
-    CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
+    CFG_STR((char *) "button", (char *) "XCB_NONE", CFGF_NONE),
     /** Uicb command to run. */
     CFG_STR((char *) "command", NULL, CFGF_NONE),
     CFG_AWESOME_END()
@@ -246,7 +246,7 @@ cfg_opt_t mouse_generic_opts[] =
     /** Modifier keys. */
     CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
     /** Mouse button. */
-    CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
+    CFG_STR((char *) "button", (char *) "XCB_NONE", CFGF_NONE),
     /** Uicb command to run. */
     CFG_STR((char *) "command", NULL, CFGF_NONE),
     /** Argument to use for command. */
@@ -580,7 +580,7 @@ cfg_opt_t key_opts[] =
     /** Modifier keys. */
     CFG_STR_LIST((char *) "modkey", (char *) "", CFGF_NONE),
     /** Key to press. */
-    CFG_STR((char *) "key", (char *) "None", CFGF_NONE),
+    CFG_STR((char *) "key", (char *) "XCB_NONE", CFGF_NONE),
     /** Uicb command to run. */
     CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     /** Argument to use for command. */

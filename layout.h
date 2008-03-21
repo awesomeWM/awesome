@@ -22,8 +22,6 @@
 #ifndef AWESOME_LAYOUT_H
 #define AWESOME_LAYOUT_H
 
-#include <X11/Xlib.h>
-
 #include "uicb.h"
 #include "common/list.h"
 #include "common/util.h"

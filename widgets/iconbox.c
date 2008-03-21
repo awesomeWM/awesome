@@ -28,7 +28,7 @@ extern AwesomeConf globalconf;
 typedef struct
 {
     char *image;
-    Bool resize;
+    bool resize;
 } Data;
 
 static int
@@ -67,7 +67,7 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 static widget_tell_status_t
 iconbox_tell(Widget *widget, char *property, char *command)
 {
-    Bool b;
+    bool b;
     Data *d = widget->data;
 
     if(command == NULL)

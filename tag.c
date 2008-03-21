@@ -109,7 +109,7 @@ tag_client(Client *c, Tag *t)
 
     client_saveprops(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    globalconf.screens[c->screen].need_arrange = True;
+    globalconf.screens[c->screen].need_arrange = true;
 }
 
 /** Untag a client with specified tag.
@@ -138,19 +138,19 @@ untag_client(Client *c, Tag *t)
  * \param t the tag
  * \return true if the client is tagged with the tag, false otherwise.
  */
-Bool
+bool
 is_client_tagged(Client *c, Tag *t)
 {
     tag_client_node_t *tc;
 
     if(!c)
-        return False;
+        return false;
 
     for(tc = globalconf.tclink; tc; tc = tc->next)
         if(tc->client == c && tc->tag == t)
-            return True;
+            return true;
 
-    return False;
+    return false;
 }
 
 /** Tag the client with the currently selected (visible) tags.
@@ -177,7 +177,7 @@ void
 tag_client_with_rule(Client *c, Rule *r)
 {
     Tag *tag;
-    Bool matched = False;
+    bool matched = false;
 
     if(!r) return;
 
@@ -185,7 +185,7 @@ tag_client_with_rule(Client *c, Rule *r)
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         if(tag_match_rule(tag, r))
         {
-            matched = True;
+            matched = true;
             break;
         }
 
@@ -360,7 +360,7 @@ tag_view_only(Tag *target)
  * \param view the view value
  */
 void
-tag_view_byindex(int screen, int dindex, Bool view)
+tag_view_byindex(int screen, int dindex, bool view)
 {
     Tag *tag;
 
@@ -394,13 +394,13 @@ tag_view_only_byindex(int screen, int dindex)
  * \param view set visible or not
  */
 void
-tag_view(Tag *tag, Bool view)
+tag_view(Tag *tag, bool view)
 {
     tag->was_selected = tag->selected;
     tag->selected = view;
     ewmh_update_net_current_desktop(screen_virttophys(tag->screen));
     widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
-    globalconf.screens[tag->screen].need_arrange = True;
+    globalconf.screens[tag->screen].need_arrange = true;
 }
 
 /** View only this tag.
@@ -417,7 +417,7 @@ uicb_tag_view(int screen, char *arg)
 	tag_view_only_byindex(screen, atoi(arg) - 1);
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            tag_view(tag, True);
+            tag_view(tag, true);
 }
 
 /** View the previously selected tags.
@@ -446,8 +446,8 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 
     tag = tag_list_next_cycle(&globalconf.screens[screen].tags, curtags[0]);
 
-    tag_view(curtags[0], False);
-    tag_view(tag, True);
+    tag_view(curtags[0], false);
+    tag_view(tag, true);
 
     p_delete(&curtags);
 }
@@ -464,8 +464,8 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
 
     tag = tag_list_prev_cycle(&globalconf.screens[screen].tags, curtags[0]);
 
-    tag_view(curtags[0], False);
-    tag_view(tag, True);
+    tag_view(curtags[0], false);
+    tag_view(tag, true);
 
     p_delete(&curtags);
 }

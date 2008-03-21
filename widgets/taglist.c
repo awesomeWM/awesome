@@ -33,30 +33,30 @@ extern AwesomeConf globalconf;
  * screen
  * \param screen screen number
  * \param t tag
- * \return True or False
+ * \return true or false
  */
-static Bool
+static bool
 isoccupied(Tag *t)
 {
     Client *c;
 
     for(c = globalconf.clients; c; c = c->next)
         if(is_client_tagged(c, t) && !c->skip && c != globalconf.scratch.client)
-            return True;
+            return true;
 
-    return False;
+    return false;
 }
 
-static Bool
+static bool
 isurgent(Tag *t)
 {
     Client *c;
 
     for(c = globalconf.clients; c; c = c->next)
         if(is_client_tagged(c, t) && c->isurgent)
-            return True;
+            return true;
 
-    return False;
+    return false;
 }
 
 static style_t
@@ -90,7 +90,8 @@ taglist_draw(Widget *widget,
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
         style = tag->selected ? vscreen.styles.focus : vscreen.styles.normal;
-        widget->area.width += draw_textwidth(ctx->display, style.font, tag->name)
+        widget->area.width += draw_textwidth(ctx->connection, ctx->default_screen,
+                                             style.font, tag->name)
             + style.font->height;
     }
 
@@ -107,7 +108,8 @@ taglist_draw(Widget *widget,
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
         style = taglist_style_get(vscreen, tag);
-        w = draw_textwidth(ctx->display, style.font, tag->name) + style.font->height;
+        w = draw_textwidth(ctx->connection, ctx->default_screen,
+                           style.font, tag->name) + style.font->height;
         area.x = widget->area.x + widget->area.width;
         area.y = widget->area.y;
         area.width = w;
@@ -135,7 +137,7 @@ taglist_draw(Widget *widget,
 }
 
 static void
-taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
+taglist_button_press(Widget *widget, xcb_button_press_event_t *ev)
 {
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Button *b;
@@ -145,7 +147,7 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
     style_t style;
 
     for(b = widget->buttons; b; b = b->next)
-        if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
+        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->func)
             switch(widget->statusbar->position)
             {
               case Top:
@@ -153,10 +155,11 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     style = taglist_style_get(vscreen, tag);
-                    width = draw_textwidth(globalconf.display, style.font, tag->name)
+                    width = draw_textwidth(globalconf.connection, globalconf.default_screen,
+                                           style.font, tag->name)
                         + style.font->height;
-                    if(ev->x >= widget->area.x + prev_width
-                       && ev->x < widget->area.x + prev_width + width)
+                    if(ev->event_x >= widget->area.x + prev_width
+                       && ev->event_x < widget->area.x + prev_width + width)
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);
@@ -169,9 +172,10 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     style = taglist_style_get(vscreen, tag);
-                    width = draw_textwidth(globalconf.display, style.font, tag->name) + style.font->height;
-                    if(ev->y >= widget->area.x + prev_width
-                       && ev->y < widget->area.x + prev_width + width)
+                    width = draw_textwidth(globalconf.connection, globalconf.default_screen,
+                                           style.font, tag->name) + style.font->height;
+                    if(ev->event_y >= widget->area.x + prev_width
+                       && ev->event_y < widget->area.x + prev_width + width)
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);
@@ -184,9 +188,10 @@ taglist_button_press(Widget *widget, XButtonPressedEvent *ev)
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     style = taglist_style_get(vscreen, tag);
-                    width = draw_textwidth(globalconf.display, style.font, tag->name) + style.font->height;
-                    if(widget->statusbar->width - ev->y >= widget->area.x + prev_width
-                       && widget->statusbar->width - ev->y < widget->area.x + prev_width + width)
+                    width = draw_textwidth(globalconf.connection, globalconf.default_screen,
+                                           style.font, tag->name) + style.font->height;
+                    if(widget->statusbar->width - ev->event_y >= widget->area.x + prev_width
+                       && widget->statusbar->width - ev->event_y < widget->area.x + prev_width + width)
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);

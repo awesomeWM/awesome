@@ -19,8 +19,10 @@
  *
  */
 
-#include <X11/Xatom.h>
-#include <X11/extensions/shape.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_atom.h>
+#include <xcb/shape.h>
+#include <xcb/xcb_keysyms.h>
 
 #include "structs.h"
 #include "window.h"
@@ -28,21 +30,22 @@
 extern AwesomeConf globalconf;
 
 /** Mask shorthands */
-#define BUTTONMASK     (ButtonPressMask | ButtonReleaseMask)
+#define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
 /** Set client WM_STATE property
  * \param win Window
  * \param state state
  * \return XChangeProperty result
  */
-int
-window_setstate(Window win, long state)
+void
+window_setstate(xcb_window_t win, long state)
 {
-    long data[] = { state, None };
+    long data[] = { state, XCB_NONE };
 
-    return XChangeProperty(globalconf.display, win, XInternAtom(globalconf.display, "WM_STATE", False),
-                           XInternAtom(globalconf.display, "WM_STATE", False),  32,
-                           PropModeReplace, (unsigned char *) data, 2);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
+                        x_intern_atom(globalconf.connection, "WM_STATE"),
+                        x_intern_atom(globalconf.connection, "WM_STATE"), 32,
+                        2, data);
 }
 
 /** Get a window state (WM_STATE)
@@ -50,20 +53,27 @@ window_setstate(Window win, long state)
  * \return state
  */
 long
-window_getstate(Window w)
+window_getstate(xcb_window_t w)
 {
-    int format;
     long result = -1;
     unsigned char *p = NULL;
-    unsigned long n, extra;
-    Atom real;
-    if(XGetWindowProperty(globalconf.display, w, XInternAtom(globalconf.display, "WM_STATE", False),
-                          0L, 2L, False, XInternAtom(globalconf.display, "WM_STATE", False),
-                          &real, &format, &n, &extra, (unsigned char **) &p) != Success)
+    xcb_get_property_cookie_t prop_c;
+    xcb_atom_t wm_state_atom = x_intern_atom(globalconf.connection, "WM_STATE");
+    xcb_get_property_reply_t *prop_r;
+
+    prop_c = xcb_get_property_unchecked(globalconf.connection, false, w,
+                                        wm_state_atom, wm_state_atom,
+                                        0L, 2L);
+
+    if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)) == NULL)
         return -1;
-    if(n != 0)
+
+    p = xcb_get_property_value(prop_r);
+    if(xcb_get_property_value_length(prop_r) != 0)
         result = *p;
-    p_delete(&p);
+
+    p_delete(&prop_r);
+
     return result;
 }
 
@@ -73,13 +83,12 @@ window_getstate(Window w)
  * \param border new border size
  * \return the XSendEvent() status
  */
-Status
-window_configure(Window win, area_t geometry, int border)
+void
+window_configure(xcb_window_t win, area_t geometry, int border)
 {
-    XConfigureEvent ce;
+    xcb_configure_notify_event_t ce;
 
-    ce.type = ConfigureNotify;
-    ce.display = globalconf.display;
+    ce.response_type = XCB_CONFIGURE_NOTIFY;
     ce.event = win;
     ce.window = win;
     ce.x = geometry.x;
@@ -87,9 +96,9 @@ window_configure(Window win, area_t geometry, int border)
     ce.width = geometry.width;
     ce.height = geometry.height;
     ce.border_width = border;
-    ce.above = None;
-    ce.override_redirect = False;
-    return XSendEvent(globalconf.display, win, False, StructureNotifyMask, (XEvent *) & ce);
+    ce.above_sibling = XCB_NONE;
+    ce.override_redirect = false;
+    xcb_send_event(globalconf.connection, false, win, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *) &ce);
 }
 
 /** Grab or ungrab buttons on a window
@@ -97,32 +106,41 @@ window_configure(Window win, area_t geometry, int border)
  * \param phys_screen Physical screen number
  */
 void
-window_grabbuttons(Window win, int phys_screen)
+window_grabbuttons(xcb_window_t win, int phys_screen)
 {
     Button *b;
 
-    XGrabButton(globalconf.display, Button1, NoSymbol,
-                win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-    XGrabButton(globalconf.display, Button1, NoSymbol | LockMask,
-                win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-    XGrabButton(globalconf.display, Button1, NoSymbol | globalconf.numlockmask,
-                win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
-    XGrabButton(globalconf.display, Button1, NoSymbol | globalconf.numlockmask | LockMask,
-                win, False, BUTTONMASK, GrabModeSync, GrabModeAsync, None, None);
+    xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
+                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
+                    XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL);
+    xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
+                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
+                    XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL | XCB_MOD_MASK_LOCK);
+    xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
+                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
+                    XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL | globalconf.numlockmask);
+    xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
+                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
+                    XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
 
     for(b = globalconf.buttons.client; b; b = b->next)
     {
-        XGrabButton(globalconf.display, b->button, b->mod,
-                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(globalconf.display, b->button, b->mod | LockMask,
-                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(globalconf.display, b->button, b->mod | globalconf.numlockmask,
-                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(globalconf.display, b->button, b->mod | globalconf.numlockmask | LockMask,
-                    win, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+        xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
+                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        b->button, b->mod);
+        xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
+                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        b->button, b->mod | XCB_MOD_MASK_LOCK);
+        xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
+                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        b->button, b->mod | globalconf.numlockmask);
+        xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
+                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
     }
 
-    XUngrabButton(globalconf.display, AnyButton, AnyModifier, RootWindow(globalconf.display, phys_screen));
+    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
+                      root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
 }
 
 /** Grab buttons on root window
@@ -135,18 +153,22 @@ window_root_grabbuttons(int phys_screen)
 
     for(b = globalconf.buttons.root; b; b = b->next)
     {
-        XGrabButton(globalconf.display, b->button, b->mod,
-                    RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(globalconf.display, b->button, b->mod | LockMask,
-                    RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(globalconf.display, b->button, b->mod | globalconf.numlockmask,
-                    RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
-        XGrabButton(globalconf.display, b->button, b->mod | globalconf.numlockmask | LockMask,
-                    RootWindow(globalconf.display, phys_screen), False, BUTTONMASK,
-                    GrabModeAsync, GrabModeSync, None, None);
+        xcb_grab_button(globalconf.connection, false,
+                        root_window(globalconf.connection, phys_screen), BUTTONMASK,
+                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        b->button, b->mod);
+        xcb_grab_button(globalconf.connection, false,
+                        root_window(globalconf.connection, phys_screen), BUTTONMASK,
+                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        b->button, b->mod | XCB_MOD_MASK_LOCK);
+        xcb_grab_button(globalconf.connection, false,
+                        root_window(globalconf.connection, phys_screen), BUTTONMASK,
+                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        b->button, b->mod | globalconf.numlockmask);
+        xcb_grab_button(globalconf.connection, false,
+                        root_window(globalconf.connection, phys_screen), BUTTONMASK,
+                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
     }
 }
 
@@ -157,56 +179,65 @@ void
 window_root_grabkeys(int phys_screen)
 {
     Key *k;
-    KeyCode kc;
+    xcb_keycode_t kc;
+    xcb_key_symbols_t *keysyms;
 
-    XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
+    xcb_ungrab_key(globalconf.connection, ANY_KEY,
+                   root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
+
+    keysyms = xcb_key_symbols_alloc(globalconf.connection);
 
     for(k = globalconf.keys; k; k = k->next)
-	if((kc = k->keycode) || (k->keysym && (kc = XKeysymToKeycode(globalconf.display, k->keysym))))
+	if((kc = k->keycode) || (k->keysym && (kc = xcb_key_symbols_get_keycode(keysyms, k->keysym))))
         {
-            XGrabKey(globalconf.display, kc, k->mod,
-                     RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-            XGrabKey(globalconf.display, kc, k->mod | LockMask,
-                     RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-            XGrabKey(globalconf.display, kc, k->mod | globalconf.numlockmask,
-                     RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-            XGrabKey(globalconf.display, kc, k->mod | globalconf.numlockmask | LockMask,
-                     RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+            xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
+                         k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+            xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
+                         k->mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+            xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
+                         k->mod | globalconf.numlockmask, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+            xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
+                         k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
+                         XCB_GRAB_MODE_ASYNC);
         }
+
+    xcb_key_symbols_free(keysyms);
 }
 
 void
-window_setshape(Window win, int phys_screen)
+window_setshape(xcb_window_t win, int phys_screen)
 {
-    int bounding_shaped, i, b;
-    unsigned int u;  /* dummies */
+    xcb_shape_query_extents_reply_t *r;
 
     /* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10. */
-    if(XShapeQueryExtents(globalconf.display, win, &bounding_shaped, &i, &i,
-                          &u, &u, &b, &i, &i, &u, &u) && bounding_shaped)
-        XShapeCombineShape(globalconf.display,
-                           RootWindow(globalconf.display, phys_screen),
-                           ShapeBounding, 0, 0, win, ShapeBounding, ShapeSet);
+    if((r = xcb_shape_query_extents_reply(globalconf.connection,
+                                          xcb_shape_query_extents_unchecked(globalconf.connection, win),
+                                          NULL)) && r->bounding_shaped)
+    {
+        xcb_shape_combine(globalconf.connection, XCB_SHAPE_SO_SET,
+                          XCB_SHAPE_SK_BOUNDING, XCB_SHAPE_SK_BOUNDING,
+                          root_window(globalconf.connection, phys_screen),
+                          0, 0, win);
+
+        p_delete(&r);
+    }
 }
 
-int
-window_settrans(Window win, double opacity)
+void
+window_settrans(xcb_window_t win, double opacity)
 {
-    int status;
     unsigned int real_opacity = 0xffffffff;
 
     if(opacity >= 0 && opacity <= 1)
     {
         real_opacity = opacity * 0xffffffff;
-        status = XChangeProperty(globalconf.display, win,
-                                 XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False),
-                                 XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &real_opacity, 1L);
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
+                            x_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"),
+                            CARDINAL, 32, 1L, &real_opacity);
     }
     else
-        status = XDeleteProperty(globalconf.display, win,
-                                 XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False));
-
-    return status;
+        xcb_delete_property(globalconf.connection, win,
+                            x_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"));
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

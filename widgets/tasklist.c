@@ -42,7 +42,7 @@ typedef enum
 typedef struct
 {
     ShowClient show;
-    Bool show_icons;
+    bool show_icons;
     Alignment align;
     struct
     {
@@ -52,11 +52,11 @@ typedef struct
     } styles;
 } Data;
 
-static inline Bool
+static inline bool
 tasklist_isvisible(Client *c, int screen, ShowClient show)
 {
     if(c->skip || c->skiptb)
-        return False;
+        return false;
 
     switch(show)
     {
@@ -67,7 +67,7 @@ tasklist_isvisible(Client *c, int screen, ShowClient show)
       case ShowFocus:
         return (c == focus_get_current_client(screen));
     }
-    return False;
+    return false;
 }
 
 static int
@@ -124,7 +124,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 area.height = widget->statusbar->height;
                 area.width = box_width;
 
-                draw_rectangle(ctx, area, 1.0, True, style.bg);
+                draw_rectangle(ctx, area, 1.0, true, style.bg);
 
                 if((r = rule_matching_client(c)) && r->icon)
                 {
@@ -190,7 +190,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 }
 
 static void
-tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
+tasklist_button_press(Widget *widget, xcb_button_press_event_t *ev)
 {
     Button *b;
     Client *c;
@@ -199,7 +199,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
     int n = 0, box_width = 0, i, ci = 0;
 
     /* button1 give focus */
-    if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
+    if(ev->detail == XCB_BUTTON_INDEX_1 && CLEANMASK(ev->state) == XCB_NO_SYMBOL)
     {
         for(c = globalconf.clients; c; c = c->next)
             if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
@@ -210,19 +210,19 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
 
         box_width = widget->area.width / n;
 
-        if(ev->button == Button1 && CLEANMASK(ev->state) == NoSymbol)
+        if(ev->detail == XCB_BUTTON_INDEX_1 && CLEANMASK(ev->state) == XCB_NO_SYMBOL)
         {
             switch(widget->statusbar->position)
             {
               case Top:
               case Bottom:
-                ci = (ev->x - widget->area.x) / box_width;
+                ci = (ev->event_x - widget->area.x) / box_width;
                 break;
               case Right:
-                ci = (ev->y - widget->area.x) / box_width;
+                ci = (ev->event_y - widget->area.x) / box_width;
                 break;
               default:
-                ci = ((widget->statusbar->width - ev->y) - widget->area.x) / box_width;
+                ci = ((widget->statusbar->width - ev->event_y) - widget->area.x) / box_width;
                 break;
             }
             /* found first visible client */
@@ -242,7 +242,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
                     for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
                         if(is_client_tagged(c, tag))
                            tag_view_only_byindex(c->screen, i);
-                client_focus(c, widget->statusbar->screen, True);
+                client_focus(c, widget->statusbar->screen, true);
             }
 
             return;
@@ -250,7 +250,7 @@ tasklist_button_press(Widget *widget, XButtonPressedEvent *ev)
     }
 
     for(b = widget->buttons; b; b = b->next)
-        if(ev->button == b->button && CLEANMASK(ev->state) == b->mod && b->func)
+        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->func)
         {
             b->func(widget->statusbar->screen, b->arg);
             return;
@@ -274,17 +274,17 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
 
     cfg_styles = cfg_getsec(config, "styles");
 
-    draw_style_init(globalconf.display, statusbar->phys_screen,
+    draw_style_init(globalconf.connection, statusbar->phys_screen,
                     cfg_getsec(cfg_styles, "normal"),
                     &d->styles.normal,
                     &globalconf.screens[statusbar->screen].styles.normal);
 
-    draw_style_init(globalconf.display, statusbar->phys_screen,
+    draw_style_init(globalconf.connection, statusbar->phys_screen,
                     cfg_getsec(cfg_styles, "focus"),
                     &d->styles.focus,
                     &globalconf.screens[statusbar->screen].styles.focus);
 
-    draw_style_init(globalconf.display, statusbar->phys_screen,
+    draw_style_init(globalconf.connection, statusbar->phys_screen,
                     cfg_getsec(cfg_styles, "urgent"),
                     &d->styles.urgent,
                     &globalconf.screens[statusbar->screen].styles.urgent);

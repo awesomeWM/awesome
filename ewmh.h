@@ -38,9 +38,9 @@ void ewmh_update_net_numbers_of_desktop(int);
 void ewmh_update_net_current_desktop(int);
 void ewmh_update_net_desktop_names(int);
 void ewmh_update_net_active_window(int);
-void ewmh_process_client_message(XClientMessageEvent *);
+void ewmh_process_client_message(xcb_client_message_event_t *);
 void ewmh_check_client_hints(Client *);
-NetWMIcon * ewmh_get_window_icon(Window);
+NetWMIcon * ewmh_get_window_icon(xcb_window_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

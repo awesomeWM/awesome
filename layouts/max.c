@@ -40,7 +40,7 @@ layout_max(int screen)
         {
             area.width -= 2 * c->border;
             area.height -= 2 * c->border;
-            client_resize(c, area, False);
+            client_resize(c, area, false);
             area.width += 2 * c->border;
             area.height += 2 * c->border;
         }

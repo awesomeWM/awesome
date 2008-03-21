@@ -19,6 +19,9 @@
  *
  */
 
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include <math.h>
 
 #include "titlebar.h"
@@ -54,7 +57,7 @@ titlebar_init(Client *c)
             width = c->geometry.width + 2 * c->border;
         else
             width = MIN(c->titlebar.width, c->geometry.width);
-        c->titlebar.sw = simplewindow_new(globalconf.display,
+        c->titlebar.sw = simplewindow_new(globalconf.connection,
                                           c->phys_screen, 0, 0,
                                           width, c->titlebar.height, 0);
         break;
@@ -64,14 +67,14 @@ titlebar_init(Client *c)
             width = c->geometry.height + 2 * c->border;
         else
             width = MIN(c->titlebar.width, c->geometry.height);
-        c->titlebar.sw = simplewindow_new(globalconf.display,
+        c->titlebar.sw = simplewindow_new(globalconf.connection,
                                           c->phys_screen, 0, 0,
                                           c->titlebar.height, width, 0);
         break;
       default:
         break;
     }
-    XMapWindow(globalconf.display, c->titlebar.sw->window);
+    xcb_map_window(globalconf.connection, c->titlebar.sw->window);
 }
 
 /** Add the titlebar geometry to a geometry.
@@ -148,13 +151,17 @@ titlebar_geometry_remove(Titlebar *t, area_t geometry)
 void
 titlebar_draw(Client *c)
 {
-    Drawable dw = 0;
+    xcb_drawable_t dw = 0;
     DrawCtx *ctx;
     style_t style;
     area_t geometry;
+    xcb_screen_t *s;
 
     if(!c->titlebar.sw)
         return;
+
+    s = xcb_aux_get_screen(globalconf.connection,
+                           c->titlebar.sw->phys_screen);
 
     switch(c->titlebar.position)
     {
@@ -162,12 +169,13 @@ titlebar_draw(Client *c)
         return;
       case Right:
       case Left:
-        dw = XCreatePixmap(globalconf.display,
-                           RootWindow(globalconf.display, c->titlebar.sw->phys_screen),
-                           c->titlebar.sw->geometry.height,
-                           c->titlebar.sw->geometry.width,
-                           DefaultDepth(globalconf.display, c->titlebar.sw->phys_screen));
-        ctx = draw_context_new(globalconf.display, c->titlebar.sw->phys_screen,
+        dw = xcb_generate_id(globalconf.connection);
+        xcb_create_pixmap(globalconf.connection, s->root_depth,
+                          dw,
+                          root_window(globalconf.connection, c->titlebar.sw->phys_screen),
+                          c->titlebar.sw->geometry.height,
+                          c->titlebar.sw->geometry.width);
+        ctx = draw_context_new(globalconf.connection, c->titlebar.sw->phys_screen,
                                c->titlebar.sw->geometry.height,
                                c->titlebar.sw->geometry.width,
                                dw);
@@ -175,7 +183,7 @@ titlebar_draw(Client *c)
         geometry.height = c->titlebar.sw->geometry.width;
         break;
       default:
-        ctx = draw_context_new(globalconf.display, c->titlebar.sw->phys_screen,
+        ctx = draw_context_new(globalconf.connection, c->titlebar.sw->phys_screen,
                                c->titlebar.sw->geometry.width,
                                c->titlebar.sw->geometry.height,
                                c->titlebar.sw->drawable);
@@ -201,12 +209,12 @@ titlebar_draw(Client *c)
       case Left:
         draw_rotate(ctx, c->titlebar.sw->drawable, ctx->height, ctx->width,
                     - M_PI_2, 0, c->titlebar.sw->geometry.height);
-        XFreePixmap(globalconf.display, dw);
+        xcb_free_pixmap(globalconf.connection, dw);
         break;
       case Right:
         draw_rotate(ctx, c->titlebar.sw->drawable, ctx->height, ctx->width,
                     M_PI_2, c->titlebar.sw->geometry.width, 0);
-        XFreePixmap(globalconf.display, dw);
+        xcb_free_pixmap(globalconf.connection, dw);
       default:
         break;
     }
@@ -447,9 +455,9 @@ titlebar_position_set(Titlebar *t, Position p)
         return;
 
     if((t->position = p))
-        XMapWindow(globalconf.display, t->sw->window);
+        xcb_map_window(globalconf.connection, t->sw->window);
     else
-        XUnmapWindow(globalconf.display, t->sw->window);
+        xcb_unmap_window(globalconf.connection, t->sw->window);
 }
 
 /** Toggle the visibility of the focused window's titlebar.
@@ -473,7 +481,7 @@ uicb_client_toggletitlebar(int screen __attribute__ ((unused)), char *arg __attr
     if(c->isfloating || layout_get_current(screen)->arrange == layout_floating)
         titlebar_update_geometry_floating(c);
     else
-        globalconf.screens[c->screen].need_arrange = True;
+        globalconf.screens[c->screen].need_arrange = true;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

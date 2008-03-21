@@ -25,6 +25,7 @@
 #include "common/util.h"
 #include "common/draw.h"
 #include "common/configopts.h"
+#include "common/xutil.h"
 
 extern AwesomeConf globalconf;
 
@@ -38,8 +39,8 @@ typedef struct
     float height;                       /** Height of graph (0-1; 1 = height of statusbar) */
     int box_height;                     /** Height of the innerbox in pixels */
     int size;                           /** Size of lines-array (also innerbox-lenght) */
-    XColor bg;                          /** Background color */
-    XColor bordercolor;                 /** Border color */
+    xcolor_t bg;                        /** Background color */
+    xcolor_t bordercolor;               /** Border color */
     Position grow;                      /** grow: Left or Right */
 
     /* markers... */
@@ -56,24 +57,24 @@ typedef struct
     int **fillbottom;                   /** Data array pointer (like *lines) */
     int **fillbottom_index;             /** Points to some index[i] */
     int fillbottom_total;               /** Total of them */
-    Bool *fillbottom_vertical_grad;     /** Create a vertical color gradient */
-    XColor *fillbottom_color;           /** Color of them */
-    XColor **fillbottom_pcolor_center;  /** Color at middle of graph */
-    XColor **fillbottom_pcolor_end;     /** Color at end of graph */
+    bool *fillbottom_vertical_grad;     /** Create a vertical color gradient */
+    xcolor_t *fillbottom_color;           /** Color of them */
+    xcolor_t **fillbottom_pcolor_center;  /** Color at middle of graph */
+    xcolor_t **fillbottom_pcolor_end;     /** Color at end of graph */
     int **filltop;                      /** Data array pointer (like *lines) */
     int **filltop_index;                /** Points to some index[i] */
     int filltop_total;                  /** Total of them */
-    Bool *filltop_vertical_grad;        /** Create a vertical color gradient */
-    XColor *filltop_color;              /** Color of them */
-    XColor **filltop_pcolor_center;     /** Color at center of graph */
-    XColor **filltop_pcolor_end;        /** Color at end of graph */
+    bool *filltop_vertical_grad;        /** Create a vertical color gradient */
+    xcolor_t *filltop_color;              /** Color of them */
+    xcolor_t **filltop_pcolor_center;     /** Color at center of graph */
+    xcolor_t **filltop_pcolor_end;        /** Color at end of graph */
     int **drawline;                     /** Data array pointer (like *lines) */
     int **drawline_index;               /** Points to some index[i] */
     int drawline_total;                 /** Total of them */
-    Bool *drawline_vertical_grad;       /** Create a vertical color gradient */
-    XColor *drawline_color;             /** Color of them */
-    XColor **drawline_pcolor_center;    /** Color at middle of graph */
-    XColor **drawline_pcolor_end;       /** Color at end of graph */
+    bool *drawline_vertical_grad;       /** Create a vertical color gradient */
+    xcolor_t *drawline_color;             /** Color of them */
+    xcolor_t **drawline_pcolor_center;    /** Color at middle of graph */
+    xcolor_t **drawline_pcolor_end;       /** Color at end of graph */
 
     int *draw_from;                     /** Preparation/tmp array for draw_graph(); */
     int *draw_to;                       /** Preparation/tmp array for draw_graph(); */
@@ -111,7 +112,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     rectangle.y = margin_top + 1;
     rectangle.width = d->size;
     rectangle.height = d->box_height;
-    draw_rectangle(ctx, rectangle, 1.0, True, d->bg);
+    draw_rectangle(ctx, rectangle, 1.0, true, d->bg);
 
     /* for graph drawing */
     rectangle.y = margin_top + d->box_height + 1; /* bottom left corner as starting point */
@@ -267,7 +268,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
-    draw_rectangle(ctx, rectangle, 1.0, False, d->bordercolor);
+    draw_rectangle(ctx, rectangle, 1.0, false, d->bordercolor);
 
     widget->area.width = d->width;
     widget->area.height = widget->statusbar->height;
@@ -349,14 +350,14 @@ graph_tell(Widget *widget, char *property, char *command)
         d->height = atof(command);
     else if(!a_strcmp(property, "bg"))
     {
-        if(!draw_color_new(globalconf.display,
+        if(!draw_color_new(globalconf.connection,
                            widget->statusbar->phys_screen,
                            command, &d->bg))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
     else if(!a_strcmp(property, "bordercolor"))
     {
-        if(!draw_color_new(globalconf.display,
+        if(!draw_color_new(globalconf.connection,
                            widget->statusbar->phys_screen,
                            command, &d->bordercolor))
             return WIDGET_ERROR_FORMAT_COLOR;
@@ -387,9 +388,9 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     char *color;
     int i;
     char *type;
-    XColor tmp_color = { 0, 0, 0, 0, 0, 0 };
-    XColor *ptmp_color_center;
-    XColor *ptmp_color_end;
+    xcolor_t tmp_color = { 0, 0, 0, 0 };
+    xcolor_t *ptmp_color_center;
+    xcolor_t *ptmp_color_end;
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
@@ -431,18 +432,18 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     d->values = p_new(float *, d->data_items);
     d->lines = p_new(int *, d->data_items);
 
-    d->filltop_color = p_new(XColor, d->data_items);
-    d->filltop_pcolor_center = p_new(XColor *, d->data_items);
-    d->filltop_pcolor_end = p_new(XColor *, d->data_items);
-    d->filltop_vertical_grad = p_new(Bool, d->data_items);
-    d->fillbottom_color = p_new(XColor, d->data_items);
-    d->fillbottom_pcolor_center = p_new(XColor *, d->data_items);
-    d->fillbottom_pcolor_end = p_new(XColor *, d->data_items);
-    d->fillbottom_vertical_grad = p_new(Bool, d->data_items);
-    d->drawline_color = p_new(XColor, d->data_items);
-    d->drawline_pcolor_center = p_new(XColor *, d->data_items);
-    d->drawline_pcolor_end = p_new(XColor *, d->data_items);
-    d->drawline_vertical_grad = p_new(Bool, d->data_items);
+    d->filltop_color = p_new(xcolor_t, d->data_items);
+    d->filltop_pcolor_center = p_new(xcolor_t *, d->data_items);
+    d->filltop_pcolor_end = p_new(xcolor_t *, d->data_items);
+    d->filltop_vertical_grad = p_new(bool, d->data_items);
+    d->fillbottom_color = p_new(xcolor_t, d->data_items);
+    d->fillbottom_pcolor_center = p_new(xcolor_t *, d->data_items);
+    d->fillbottom_pcolor_end = p_new(xcolor_t *, d->data_items);
+    d->fillbottom_vertical_grad = p_new(bool, d->data_items);
+    d->drawline_color = p_new(xcolor_t, d->data_items);
+    d->drawline_pcolor_center = p_new(xcolor_t *, d->data_items);
+    d->drawline_pcolor_end = p_new(xcolor_t *, d->data_items);
+    d->drawline_vertical_grad = p_new(bool, d->data_items);
 
     d->max_index = p_new(int, d->data_items);
     d->index = p_new(int, d->data_items);
@@ -459,20 +460,20 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         d->data_title[i] = a_strdup(cfg_title(cfg));
 
         if((color = cfg_getstr(cfg, "fg")))
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, &tmp_color);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &tmp_color);
         else
             tmp_color = globalconf.screens[statusbar->screen].styles.normal.fg;
 
         if((color = cfg_getstr(cfg, "fg_center")))
         {
-            ptmp_color_center = p_new(XColor, 1);
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, ptmp_color_center);
+            ptmp_color_center = p_new(xcolor_t, 1);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, ptmp_color_center);
         }
 
         if((color = cfg_getstr(cfg, "fg_end")))
         {
-            ptmp_color_end = p_new(XColor, 1);
-            draw_color_new(globalconf.display, statusbar->phys_screen, color, ptmp_color_end);
+            ptmp_color_end = p_new(xcolor_t, 1);
+            draw_color_new(globalconf.connection, statusbar->phys_screen, color, ptmp_color_end);
         }
 
         if (cfg_getbool(cfg, "scale"))
@@ -520,12 +521,12 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     }
 
     if((color = cfg_getstr(config, "bg")))
-        draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->bg);
+        draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bg);
     else
         d->bg = globalconf.screens[statusbar->screen].styles.normal.bg;
 
     if((color = cfg_getstr(config, "bordercolor")))
-        draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->bordercolor);
+        draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bordercolor);
     else
         d->bordercolor = tmp_color;
 

@@ -33,13 +33,14 @@
 #include <sys/un.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <X11/cursorfont.h>
-#include <X11/keysym.h>
-#include <X11/Xatom.h>
-#include <X11/Xproto.h>
-#include <X11/Xutil.h>
-#include <X11/extensions/shape.h>
-#include <X11/extensions/Xrandr.h>
+#include <alloca.h>
+
+#include <xcb/xcb.h>
+#include <xcb/shape.h>
+#include <xcb/randr.h>
+#include <xcb/xcb_aux.h>
+#include <xcb/xcb_atom.h>
+#include <xcb/xcb_icccm.h>
 
 #include "config.h"
 #include "awesome.h"
@@ -52,53 +53,174 @@
 #include "client.h"
 #include "focus.h"
 #include "ewmh.h"
+#include "xcb_event_handler.h"
 #include "tag.h"
 #include "common/socket.h"
 #include "common/util.h"
 #include "common/version.h"
 #include "common/configopts.h"
 #include "common/xscreen.h"
+#include "common/xutil.h"
 
-static int (*xerrorxlib) (Display *, XErrorEvent *);
-static Bool running = True;
+static bool running = true;
 
 AwesomeConf globalconf;
+
+/** Get geometry informations like XCB version, and also set 'x' and
+ * 'y' parameter on its parent window like Xlib does
+ *
+ * TODO: improve round-trip time?
+ */
+static xcb_get_geometry_reply_t *
+x_get_geometry(xcb_connection_t *c, xcb_window_t w, xcb_get_geometry_reply_t *parent)
+{
+    xcb_get_geometry_reply_t *win_geom;
+
+    win_geom = xcb_get_geometry_reply(c, xcb_get_geometry(c, w), NULL);
+
+    if(win_geom)
+        return NULL;
+
+    /* Unlike XCB, Xlib set 'x' and 'y' as parent window position */
+    win_geom->x = parent->x;
+    win_geom->y = parent->y;
+
+    return win_geom;
+}
+
+typedef struct
+{
+    xcb_get_geometry_cookie_t geom;
+    xcb_query_tree_cookie_t tree;
+} screen_win_t;
 
 /** Scan X to find windows to manage
  */
 static void
 scan()
 {
-    unsigned int i, num;
+    unsigned int i;
     int screen, real_screen;
-    Window *wins = NULL, d1, d2;
-    XWindowAttributes wa;
+    xcb_window_t w;
+    xcb_window_t *wins = NULL;
+    xcb_query_tree_reply_t *r_query_tree;
+    xcb_get_geometry_reply_t *parent_geom, *win_geom;
+    xcb_get_window_attributes_reply_t *reply_win;
+    xcb_get_window_attributes_cookie_t *cookies_win;
+    const int screen_max = xcb_setup_roots_length (xcb_get_setup (globalconf.connection));
+    screen_win_t *parents = alloca(sizeof(screen_win_t) * screen_max);
 
-    for(screen = 0; screen < ScreenCount(globalconf.display); screen++)
+    for(screen = 0; screen < screen_max; screen++)
     {
-        if(XQueryTree(globalconf.display, RootWindow(globalconf.display, screen), &d1, &d2, &wins, &num))
-            for(i = 0; i < num; i++)
-                /* XGetWindowAttributes return 1 on success */
-                if(XGetWindowAttributes(globalconf.display, wins[i], &wa)
-                   && !wa.override_redirect
-                   && (wa.map_state == IsViewable || window_getstate(wins[i]) == IconicState))
-                {
-                    real_screen = screen_get_bycoord(globalconf.screens_info, screen, wa.x, wa.y);
-                    client_manage(wins[i], &wa, real_screen);
-                }
-        if(wins)
-            XFree(wins);
+        w = root_window(globalconf.connection, screen);
+
+        /* Get parent  geometry informations,  useful to get  the real
+         * coordinates  of the  window because  Xlib set  'x'  and 'y'
+         * fields to the relative position within the parent window */
+        parents[screen].geom = xcb_get_geometry(globalconf.connection, w);
+
+        /* Get the window tree */
+        parents[screen].tree = xcb_query_tree_unchecked(globalconf.connection, w);
     }
+
+    for(screen = 0; screen < screen_max; screen++)
+    {
+        parent_geom = xcb_get_geometry_reply (globalconf.connection,
+                                              parents[screen].geom, NULL);
+
+        if(!parent_geom)
+            continue;
+
+        r_query_tree = xcb_query_tree_reply(globalconf.connection,
+                                            parents[screen].tree, NULL);
+
+        if(!r_query_tree)
+        {
+            p_delete(&parent_geom);
+            continue;
+        }
+
+        wins = xcb_query_tree_children(r_query_tree);
+
+        /* Store the answers of 'xcb_get_window_attributes' for all
+         * child windows */
+        cookies_win = p_new(xcb_get_window_attributes_cookie_t,
+                            r_query_tree->children_len);
+
+        /* Send all the requests at the same time */
+        for(i = 0; i < r_query_tree->children_len; i++)
+            cookies_win[i] = xcb_get_window_attributes(globalconf.connection, wins[i]);
+
+        /* Now process the answers */
+        for(i = 0; i < r_query_tree->children_len; i++)
+        {
+            reply_win = xcb_get_window_attributes_reply(globalconf.connection,
+                                                        cookies_win[i],
+                                                        NULL);
+
+            if(reply_win && !reply_win->override_redirect &&
+               (reply_win->map_state == XCB_MAP_STATE_VIEWABLE ||
+                window_getstate(wins[i]) == XCB_WM_ICONIC_STATE))
+            {
+                /* TODO: should maybe be asynchronous */
+                win_geom = x_get_geometry(globalconf.connection, w, parent_geom);
+                if(!win_geom)
+                {
+                    p_delete(&reply_win);
+                    continue;
+                }
+
+                real_screen = screen_get_bycoord(globalconf.screens_info, screen, win_geom->x, win_geom->y);
+                client_manage(wins[i], win_geom, real_screen);
+
+                /* win_geom is not useful anymore */
+                p_delete(&win_geom);
+            }
+
+            if(reply_win)
+                p_delete(&reply_win);
+        }
+
+        p_delete(&parent_geom);
+        p_delete(&r_query_tree);
+        p_delete(&cookies_win);
+    }
+}
+
+/** Equivalent to 'XCreateFontCursor()', error are handled by the
+ * default current error handler
+ * \param cursor_font type of cursor to use
+ * \return allocated cursor font
+ */
+static xcb_cursor_t
+create_font_cursor(unsigned int cursor_font)
+{
+    xcb_font_t           font;
+    xcb_cursor_t         cursor;
+
+    /* Get the font for the cursor*/
+    font = xcb_generate_id(globalconf.connection);
+    xcb_open_font(globalconf.connection, font, strlen ("cursor"), "cursor");
+
+    cursor = xcb_generate_id(globalconf.connection);
+    xcb_create_glyph_cursor (globalconf.connection, cursor, font, font,
+                             cursor_font, cursor_font + 1,
+                             0, 0, 0,
+                             0, 0, 0);
+
+    return cursor;
 }
 
 /** Startup Error handler to check if another window manager
  * is already running.
- * \param disp Display
- * \param ee Error event
+ * \param data Additional optional parameters data
+ * \param c X connection
+ * \param error Error event
  */
 static int __attribute__ ((noreturn))
-xerrorstart(Display * disp __attribute__ ((unused)),
-            XErrorEvent * ee __attribute__ ((unused)))
+xerrorstart(void * data __attribute__ ((unused)),
+            xcb_connection_t * c  __attribute__ ((unused)),
+            xcb_generic_error_t * error __attribute__ ((unused)))
 {
     eprint("another window manager is already running\n");
 }
@@ -111,13 +233,13 @@ xerrorstart(Display * disp __attribute__ ((unused)),
 void
 uicb_quit(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
-    running = False;
+    running = false;
 }
 
 static void
 exit_on_signal(int sig __attribute__ ((unused)))
 {
-    running = False;
+    running = false;
 }
 
 /** \brief awesome xerror function
@@ -129,15 +251,39 @@ exit_on_signal(int sig __attribute__ ((unused)))
  * \return 0 if no error, or xerror's xlib return status
  */
 static int
-xerror(Display *edpy, XErrorEvent *ee)
+xerror(void *data __attribute__ ((unused)),
+       xcb_connection_t *c __attribute__ ((unused)),
+       xcb_generic_error_t *e)
 {
-    if(ee->error_code == BadWindow
-       || (ee->error_code == BadMatch && ee->request_code == X_SetInputFocus)
-       || (ee->error_code == BadValue && ee->request_code == X_KillClient)
-       || (ee->request_code == X_ConfigureWindow && ee->error_code == BadMatch))
+    /*
+     * Get the request code,  taken from 'xcb-util/wm'. I can't figure
+     * out  how it  works BTW,  seems to  get a  byte in  'pad' member
+     * (second byte in second element of the array)
+     */
+    uint8_t request_code = (e->response_type == 0 ? *((uint8_t *) e + 10) : e->response_type);
+
+    if(e->error_code == BadWindow
+       || (e->error_code == BadMatch && request_code == XCB_SET_INPUT_FOCUS)
+       || (e->error_code == BadValue && request_code == XCB_KILL_CLIENT)
+       || (request_code == XCB_CONFIGURE_WINDOW && e->error_code == BadMatch))
         return 0;
-    warn("fatal error: request code=%d, error code=%d\n", ee->request_code, ee->error_code);
-    return xerrorxlib(edpy, ee);        /* may call exit */
+
+    warn("fatal error: request=%s, error=%s\n",
+         x_label_request[request_code], x_label_error[e->error_code]);
+
+    /*
+     * Xlib code was using default X error handler, namely
+     * '_XDefaultError()', which displays more informations about the
+     * error and also exit if 'error_code'' equals to
+     * 'BadImplementation'
+     *
+     * TODO: display more informations about the error (like the Xlib
+     *       default error handler)
+     */
+    if(e->error_code == BadImplementation)
+        exit(1);
+
+    return 0;
 }
 
 /** Print help and exit(2) with given exit_code.
@@ -161,23 +307,21 @@ exit_help(int exit_code)
  * \param argv who knows
  * \return EXIT_SUCCESS I hope
  */
-typedef void event_handler (XEvent *);
 int
 main(int argc, char *argv[])
 {
     char buf[1024];
     const char *confpath = NULL;
-    int r, xfd, e_dummy, csfd, shape_event, randr_event_base, i, screen, opt;
+    int r, xfd, csfd, i, screen_nbr, opt;
     ssize_t cmdlen = 1;
+    const xcb_query_extension_reply_t *shape_query, *randr_query;
     Statusbar *statusbar;
     fd_set rd;
-    XEvent ev;
-    Display * dpy;
-    event_handler **handler;
+    xcb_generic_event_t *ev;
+    xcb_connection_t *conn;
     struct sockaddr_un *addr;
     Client *c;
-    XSetWindowAttributes wa;
-    Bool xsync = False, confcheck = False;
+    bool confcheck = false;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -219,10 +363,7 @@ main(int argc, char *argv[])
                 eprint("-c option requires a file name\n");
             break;
           case 'k':
-            confcheck = True;
-            break;
-          case 's':
-            xsync = True;
+            confcheck = true;
             break;
         }
 
@@ -233,33 +374,48 @@ main(int argc, char *argv[])
         return config_check(confpath);
 
     /* X stuff */
-    if(!(dpy = XOpenDisplay(NULL)))
+    conn = xcb_connect(NULL, &(globalconf.default_screen));
+    if(xcb_connection_has_error(conn))
         eprint("cannot open display\n");
 
-    xfd = ConnectionNumber(dpy);
+    xfd = xcb_get_file_descriptor(conn);
 
-    XSetErrorHandler(xerrorstart);
-    for(screen = 0; screen < ScreenCount(dpy); screen++)
-        /* this causes an error if some other window manager is running */
-        XSelectInput(dpy, RootWindow(dpy, screen), SubstructureRedirectMask);
+    /* Allocate a handler which will holds all errors and events */
+    globalconf.evenths = xcb_alloc_event_handlers(conn);
+    xcb_set_error_handler_catch_all(globalconf.evenths, xerrorstart, NULL);
 
-    /* need to XSync to validate errorhandler */
-    XSync(dpy, False);
-    XSetErrorHandler(NULL);
-    xerrorxlib = XSetErrorHandler(xerror);
-    XSync(dpy, False);
+    for(screen_nbr = 0;
+        screen_nbr < xcb_setup_roots_length(xcb_get_setup(conn));
+        screen_nbr++)
+    {
+        /* this causes an error if some other window manager is
+         * running */
+        x_select_input(conn, root_window(conn, screen_nbr),
+                       XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT);
+    }
 
+    /* need to xcb_flush to validate error handler */
+    xcb_aux_sync(conn);
+
+    /* process all errors in the queue if any */
+    xcb_poll_for_event_loop(globalconf.evenths);
+
+    /* set the default xerror handler */
+    xcb_set_error_handler_catch_all(globalconf.evenths, xerror, NULL);
+
+    /* TODO
     if(xsync)
-        XSynchronize(dpy, True);
+        XSynchronize(dpy, true);
+    */
 
     /* store display */
-    globalconf.display = dpy;
+    globalconf.connection = conn;
 
     /* init EWMH atoms */
     ewmh_init_atoms();
 
     /* init screens struct */
-    globalconf.screens_info = screensinfo_new(dpy);
+    globalconf.screens_info = screensinfo_new(conn);
     globalconf.screens = p_new(VirtScreen, globalconf.screens_info->nscreen);
     focus_add_client(NULL);
 
@@ -267,72 +423,80 @@ main(int argc, char *argv[])
     config_parse(confpath);
 
     /* init cursors */
-    globalconf.cursor[CurNormal] = XCreateFontCursor(globalconf.display, XC_left_ptr);
-    globalconf.cursor[CurResize] = XCreateFontCursor(globalconf.display, XC_sizing);
-    globalconf.cursor[CurMove] = XCreateFontCursor(globalconf.display, XC_fleur);
+    globalconf.cursor[CurNormal] = create_font_cursor(CURSOR_LEFT_PTR);
+    globalconf.cursor[CurResize] = create_font_cursor(CURSOR_SIZING);
+    globalconf.cursor[CurMove] = create_font_cursor(CURSOR_FLEUR);
 
     /* for each virtual screen */
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+    for(screen_nbr = 0; screen_nbr < globalconf.screens_info->nscreen; screen_nbr++)
     {
         /* view at least one tag */
-        tag_view(globalconf.screens[screen].tags, True);
+        tag_view(globalconf.screens[screen_nbr].tags, true);
 
-        for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+        for(statusbar = globalconf.screens[screen_nbr].statusbar; statusbar; statusbar = statusbar->next)
             statusbar_init(statusbar);
     }
 
     /* select for events */
-    wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
-    wa.cursor = globalconf.cursor[CurNormal];
+    const uint32_t change_win_vals[] =
+    {
+        XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+            | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW
+            | XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+        globalconf.cursor[CurNormal]
+    };
 
     /* do this only for real screen */
-    for(screen = 0; screen < ScreenCount(dpy); screen++)
+    for(screen_nbr = 0;
+        screen_nbr < xcb_setup_roots_length(xcb_get_setup(conn));
+        screen_nbr++)
     {
-        XChangeWindowAttributes(globalconf.display,
-                                RootWindow(globalconf.display, screen),
-                                CWEventMask | CWCursor, &wa);
-        XSelectInput(globalconf.display,
-                     RootWindow(globalconf.display, screen),
-                     wa.event_mask);
-        ewmh_set_supported_hints(screen);
+        xcb_change_window_attributes(globalconf.connection,
+                                     root_window(globalconf.connection, screen_nbr),
+                                     XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
+                                     change_win_vals);
+        x_select_input(globalconf.connection,
+                       root_window(globalconf.connection, screen_nbr),
+                       change_win_vals[0]);
+        ewmh_set_supported_hints(screen_nbr);
         /* call this to at least grab root window clicks */
-        window_root_grabbuttons(screen);
-        window_root_grabkeys(screen);
+        window_root_grabbuttons(screen_nbr);
+        window_root_grabkeys(screen_nbr);
     }
 
     /* scan existing windows */
     scan();
 
-    handler = p_new(event_handler *, LASTEvent);
-    handler[ButtonPress] = event_handle_buttonpress;
-    handler[ConfigureRequest] = event_handle_configurerequest;
-    handler[ConfigureNotify] = event_handle_configurenotify;
-    handler[DestroyNotify] = event_handle_destroynotify;
-    handler[EnterNotify] = event_handle_enternotify;
-    handler[Expose] = event_handle_expose;
-    handler[KeyPress] = event_handle_keypress;
-    handler[MappingNotify] = event_handle_mappingnotify;
-    handler[MapRequest] = event_handle_maprequest;
-    handler[PropertyNotify] = event_handle_propertynotify;
-    handler[UnmapNotify] = event_handle_unmapnotify;
-    handler[ClientMessage] = event_handle_clientmessage;
+    /* process all errors in the queue if any */
+    xcb_poll_for_event_loop(globalconf.evenths);
+
+    set_button_press_event_handler(globalconf.evenths, event_handle_buttonpress, NULL);
+    set_configure_request_event_handler(globalconf.evenths, event_handle_configurerequest, NULL);
+    set_configure_notify_event_handler(globalconf.evenths, event_handle_configurenotify, NULL);
+    set_destroy_notify_event_handler(globalconf.evenths, event_handle_destroynotify, NULL);
+    set_enter_notify_event_handler(globalconf.evenths, event_handle_enternotify, NULL);
+    set_expose_event_handler(globalconf.evenths, event_handle_expose, NULL);
+    set_key_press_event_handler(globalconf.evenths, event_handle_keypress, NULL);
+    set_mapping_notify_event_handler(globalconf.evenths, event_handle_mappingnotify, NULL);
+    set_map_request_event_handler(globalconf.evenths, event_handle_maprequest, NULL);
+    set_property_notify_event_handler(globalconf.evenths, event_handle_propertynotify, NULL);
+    set_unmap_notify_event_handler(globalconf.evenths, event_handle_unmapnotify, NULL);
+    set_client_message_event_handler(globalconf.evenths, event_handle_clientmessage, NULL);
 
     /* check for shape extension */
-    if((globalconf.have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy)))
-    {
-        p_realloc(&handler, shape_event + 1);
-        handler[shape_event] = event_handle_shape;
-    }
+    shape_query = xcb_get_extension_data(conn, &xcb_shape_id);
+    if((globalconf.have_shape = shape_query->present))
+        xcb_set_event_handler(globalconf.evenths, (shape_query->first_event + XCB_SHAPE_NOTIFY),
+                              (xcb_generic_event_handler_t) event_handle_shape, NULL);
 
     /* check for randr extension */
-    if((globalconf.have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy)))
-    {
-        p_realloc(&handler, randr_event_base + RRScreenChangeNotify + 1);
-        handler[randr_event_base + RRScreenChangeNotify] = event_handle_randr_screen_change_notify;
-    }
+    randr_query = xcb_get_extension_data(conn, &xcb_randr_id);
+    if((globalconf.have_randr = randr_query->present))
+        xcb_set_event_handler(globalconf.evenths, (randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY),
+                              (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,
+                              NULL);
 
-    XSync(dpy, False);
+    xcb_aux_sync(conn);
 
     /* get socket fd */
     csfd = socket_getclient();
@@ -397,23 +561,21 @@ main(int argc, char *argv[])
          * are available and select() won't tell us, so let's check
          * with XPending() again.
          */
-        while(XPending(dpy))
+        while((ev = xcb_poll_for_event(conn)))
         {
-            while(XPending(dpy))
+            do
             {
-                XNextEvent(dpy, &ev);
-                if(handler[ev.type])
-                    handler[ev.type](&ev);
+                xcb_handle_event(globalconf.evenths, ev);
 
                 /* need to resync */
-                XSync(dpy, False);
-            }
+                xcb_aux_sync(conn);
+            } while((ev = xcb_poll_for_event(conn)));
 
             statusbar_refresh();
             layout_refresh();
 
             /* need to resync */
-            XSync(dpy, False);
+            xcb_aux_sync(conn);
         }
     }
 
@@ -428,9 +590,9 @@ main(int argc, char *argv[])
     for(c = globalconf.clients; c; c = c->next)
         client_unban(c);
 
-    XSync(globalconf.display, False);
+    xcb_aux_sync(globalconf.connection);
 
-    XCloseDisplay(dpy);
+    xcb_disconnect(conn);
 
     return EXIT_SUCCESS;
 }

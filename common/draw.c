@@ -19,7 +19,8 @@
  *
  */
 
-#include <cairo-xlib.h>
+#include <cairo-xcb.h>
+
 #ifdef HAVE_GTK
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -27,14 +28,19 @@
 #include <Imlib2.h>
 #endif
 
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include <langinfo.h>
 #include <iconv.h>
 #include <errno.h>
+#include <string.h>
 
 #include <math.h>
 
 #include "draw.h"
 #include "common/util.h"
+#include "common/xutil.h"
 
 /** Convert text from any charset to UTF-8 using iconv
  * \param iso the ISO string to convert
@@ -80,8 +86,27 @@ draw_iso2utf8(char *iso)
     return utf8p;
 }
 
+static xcb_visualtype_t *
+default_visual_from_screen(xcb_screen_t *s)
+{
+    xcb_depth_iterator_t depth_iter;
+    xcb_visualtype_iterator_t visual_iter;
+
+    if(!s)
+        return NULL;
+
+    for(depth_iter = xcb_screen_allowed_depths_iterator(s);
+        depth_iter.rem; xcb_depth_next (&depth_iter))
+        for(visual_iter = xcb_depth_visuals_iterator (depth_iter.data);
+             visual_iter.rem; xcb_visualtype_next (&visual_iter))
+            if (s->root_visual == visual_iter.data->visual_id)
+                return visual_iter.data;
+
+    return NULL;
+}
+
 /** Get a draw context
- * \param disp Display ref
+ * \param conn Connection ref
  * \param phys_screen physical screen id
  * \param width width
  * \param height height
@@ -89,18 +114,19 @@ draw_iso2utf8(char *iso)
  * \return draw context ref
  */
 DrawCtx *
-draw_context_new(Display *disp, int phys_screen, int width, int height, Drawable dw)
+draw_context_new(xcb_connection_t *conn, int phys_screen, int width, int height, xcb_drawable_t dw)
 {
     DrawCtx *d = p_new(DrawCtx, 1);
+    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
 
-    d->display = disp;
+    d->connection = conn;
     d->phys_screen = phys_screen;
     d->width = width;
     d->height = height;
-    d->depth = DefaultDepth(disp, phys_screen);
-    d->visual = DefaultVisual(disp, phys_screen);
+    d->depth = s->root_depth;
+    d->visual = default_visual_from_screen(s);
     d->drawable = dw;
-    d->surface = cairo_xlib_surface_create(disp, dw, d->visual, width, height);
+    d->surface = cairo_xcb_surface_create(conn, dw, d->visual, width, height);
     d->cr = cairo_create(d->surface);
     d->layout = pango_cairo_create_layout(d->cr);
 
@@ -120,25 +146,26 @@ draw_context_delete(DrawCtx **ctx)
 }
 
 /** Create a new Pango font
- * \param disp Display ref
+ * \param conn Connection ref
  * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE])
  * \return a new font
  */
 font_t *
-draw_font_new(Display *disp, char *fontname)
+draw_font_new(xcb_connection_t *conn, int phys_screen, char *fontname)
 {
     cairo_surface_t *surface;
+    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
     cairo_t *cr;
     PangoLayout *layout;
     font_t *font = p_new(font_t, 1);
 
     /* Create a dummy cairo surface, cairo context and pango layout in
      * order to get font informations */
-    surface = cairo_xlib_surface_create(disp,
-                                        DefaultScreen(disp),
-                                        DefaultVisual(disp, DefaultScreen(disp)),
-                                        DisplayWidth(disp, DefaultScreen(disp)),
-                                        DisplayHeight(disp, DefaultScreen(disp)));
+    surface = cairo_xcb_surface_create(conn,
+                                       phys_screen,
+                                       default_visual_from_screen(s),
+                                       s->width_in_pixels,
+                                       s->height_in_pixels);
 
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);
@@ -207,7 +234,7 @@ draw_text(DrawCtx *ctx,
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
 
-    draw_rectangle(ctx, area, 1.0, True, style.bg);
+    draw_rectangle(ctx, area, 1.0, true, style.bg);
 
     if(!(len = olen = a_strlen(text)))
         return;
@@ -222,7 +249,7 @@ draw_text(DrawCtx *ctx,
         buf = a_strdup(text);
 
     /* check that the text is not too long */
-    while(len && (nw = (draw_textwidth(ctx->display, style.font, buf)) + padding * 2) > area.width)
+    while(len && (nw = (draw_textwidth(ctx->connection, ctx->default_screen, style.font, buf)) + padding * 2) > area.width)
     {
         len--;
         /* we can't blindly null the char, we need to check if it's not part of
@@ -297,8 +324,8 @@ draw_text(DrawCtx *ctx,
  */
 static cairo_pattern_t *
 draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
-                              XColor *pcolor, XColor *pcolor_center,
-                              XColor *pcolor_end)
+                              xcolor_t *pcolor, xcolor_t *pcolor_center,
+                              xcolor_t *pcolor_end)
 {
     cairo_pattern_t *pat = NULL;
 
@@ -336,7 +363,7 @@ draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
  * \param color color to use
  */
 void
-draw_rectangle(DrawCtx *ctx, area_t geometry, float line_width, Bool filled, XColor color)
+draw_rectangle(DrawCtx *ctx, area_t geometry, float line_width, bool filled, xcolor_t color)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, line_width);
@@ -372,9 +399,9 @@ draw_rectangle(DrawCtx *ctx, area_t geometry, float line_width, Bool filled, XCo
  * \param pcolor_end color at pattern_start + pattern_width
  */
 void
-draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, float line_width, Bool filled,
-                        area_t pattern_rect, XColor *pcolor,
-                        XColor *pcolor_center, XColor *pcolor_end)
+draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, float line_width, bool filled,
+                        area_t pattern_rect, xcolor_t *pcolor,
+                        xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
     cairo_pattern_t *pat;
 
@@ -430,7 +457,7 @@ draw_graph_setup(DrawCtx *ctx)
 void
 draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
            Position grow, area_t patt_rect,
-           XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+           xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
     int i, y, w;
     float x;
@@ -492,7 +519,7 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
 void
 draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
                 Position grow, area_t patt_rect,
-                XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
+                xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
     int i, w;
     float x, y;
@@ -564,7 +591,7 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
  * \param color color to use
  */
 void
-draw_circle(DrawCtx *ctx, int x, int y, int r, Bool filled, XColor color)
+draw_circle(DrawCtx *ctx, int x, int y, int r, bool filled, xcolor_t color)
 {
     cairo_set_line_width(ctx->cr, 1.0);
     cairo_set_source_rgb(ctx->cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
@@ -811,16 +838,16 @@ draw_get_image_size(const char *filename)
  * \return new rotated drawable
  */
 void
-draw_rotate(DrawCtx *ctx, Drawable dest, int dest_w, int dest_h,
+draw_rotate(DrawCtx *ctx, xcb_drawable_t dest, int dest_w, int dest_h,
             double angle, int tx, int ty)
 {
     cairo_surface_t *surface, *source;
     cairo_t *cr;
 
-    surface = cairo_xlib_surface_create(ctx->display, dest,
-                                        ctx->visual, dest_w, dest_h);
-    source = cairo_xlib_surface_create(ctx->display, ctx->drawable,
-                                       ctx->visual, ctx->width, ctx->height);
+    surface = cairo_xcb_surface_create(ctx->connection, dest,
+                                       ctx->visual, dest_w, dest_h);
+    source = cairo_xcb_surface_create(ctx->connection, ctx->drawable,
+                                      ctx->visual, ctx->width, ctx->height);
     cr = cairo_create (surface);
 
     cairo_translate(cr, tx, ty);
@@ -835,26 +862,27 @@ draw_rotate(DrawCtx *ctx, Drawable dest, int dest_w, int dest_h,
 }
 
 /** Return the width of a text in pixel
- * \param disp Display ref
+ * \param conn Connection ref
  * \param font font to use
  * \param text the text
  * \return text width
  */
 unsigned short
-draw_textwidth(Display *disp, font_t *font, const char *text)
+draw_textwidth(xcb_connection_t *conn, int default_screen, font_t *font, const char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
     PangoLayout *layout;
     PangoRectangle ext;
+    xcb_screen_t *s = xcb_aux_get_screen(conn, default_screen);
 
     if(!a_strlen(text))
         return 0;
 
-    surface = cairo_xlib_surface_create(disp, DefaultScreen(disp),
-                                        DefaultVisual(disp, DefaultScreen(disp)),
-                                        DisplayWidth(disp, DefaultScreen(disp)),
-                                        DisplayHeight(disp, DefaultScreen(disp)));
+    surface = cairo_xcb_surface_create(conn, default_screen,
+                                       default_visual_from_screen(s),
+                                       s->width_in_pixels,
+                                       s->height_in_pixels);
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);
     pango_layout_set_text(layout, text, -1);
@@ -889,29 +917,40 @@ draw_align_get_from_str(const char *align)
 }
 
 /** Initialize an X color
- * \param disp display ref
+ * \param conn Connection ref
  * \param phys_screen Physical screen number
  * \param colstr Color specification
- * \param color XColor struct to store color to
+ * \param color xcolor_t struct to store color to
  * \return true if color allocation was successfull
  */
-Bool
-draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color)
+bool
+draw_color_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t *color)
 {
-    Bool ret;
-    XColor exactColor;
+    xcb_alloc_named_color_reply_t *c;
+    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
 
     if(!a_strlen(colstr))
-        return False;
+        return false;
 
-    if(!(ret = XAllocNamedColor(disp,
-                                DefaultColormap(disp, phys_screen),
-                                colstr,
-                                color,
-                                &exactColor)))
+    if((c = xcb_alloc_named_color_reply(conn,
+                                        xcb_alloc_named_color(conn,
+                                                              s->default_colormap,
+                                                              strlen(colstr),
+                                                              colstr),
+                                        NULL)) == NULL)
+    {
         warn("awesome: error, cannot allocate color '%s'\n", colstr);
+        return false;
+    }
 
-    return ret;
+    color->pixel = c->pixel;
+    color->red = c->visual_red;
+    color->green = c->visual_green;
+    color->blue = c->visual_blue;
+
+    p_delete(&c);
+
+    return true;
 }
 
 /** Init a style struct. Every value will be inherited from m
@@ -923,7 +962,7 @@ draw_color_new(Display *disp, int phys_screen, const char *colstr, XColor *color
  * \param m style to use as template
  */
 void
-draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
+draw_style_init(xcb_connection_t *conn, int phys_screen, cfg_t *cfg,
                 style_t *c, style_t *m)
 {
     char *buf;
@@ -936,18 +975,18 @@ draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
         return;
 
     if((buf = cfg_getstr(cfg, "font")))
-        c->font = draw_font_new(disp, buf);
+        c->font = draw_font_new(conn, phys_screen, buf);
 
-    draw_color_new(disp, phys_screen,
+    draw_color_new(conn, phys_screen,
                    cfg_getstr(cfg, "fg"), &c->fg);
 
-    draw_color_new(disp, phys_screen,
+    draw_color_new(conn, phys_screen,
                    cfg_getstr(cfg, "bg"), &c->bg);
 
-    draw_color_new(disp, phys_screen,
+    draw_color_new(conn, phys_screen,
                    cfg_getstr(cfg, "border"), &c->border);
 
-    draw_color_new(disp, phys_screen,
+    draw_color_new(conn, phys_screen,
                    cfg_getstr(cfg, "shadow"), &c->shadow);
 
     if((shadow = cfg_getint(cfg, "shadow_offset")) != (int) 0xffffffff)

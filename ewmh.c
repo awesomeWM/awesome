@@ -19,8 +19,8 @@
  *
  */
 
-#include <X11/Xatom.h>
-#include <X11/Xmd.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_atom.h>
 
 #include "ewmh.h"
 #include "tag.h"
@@ -32,36 +32,34 @@
 
 extern AwesomeConf globalconf;
 
-static Atom net_supported;
-static Atom net_client_list;
-static Atom net_number_of_desktops;
-static Atom net_current_desktop;
-static Atom net_desktop_names;
-static Atom net_active_window;
+static xcb_atom_t net_supported;
+static xcb_atom_t net_client_list;
+static xcb_atom_t net_number_of_desktops;
+static xcb_atom_t net_current_desktop;
+static xcb_atom_t net_desktop_names;
+static xcb_atom_t net_active_window;
+static xcb_atom_t net_close_window;
+static xcb_atom_t net_wm_name;
+static xcb_atom_t net_wm_icon_name;
+static xcb_atom_t net_wm_window_type;
+static xcb_atom_t net_wm_window_type_normal;
+static xcb_atom_t net_wm_window_type_dock;
+static xcb_atom_t net_wm_window_type_splash;
+static xcb_atom_t net_wm_window_type_dialog;
+static xcb_atom_t net_wm_icon;
+static xcb_atom_t net_wm_state;
+static xcb_atom_t net_wm_state_sticky;
+static xcb_atom_t net_wm_state_skip_taskbar;
+static xcb_atom_t net_wm_state_fullscreen;
+static xcb_atom_t net_wm_state_above;
+static xcb_atom_t net_wm_state_below;
 
-static Atom net_close_window;
-
-static Atom net_wm_name;
-static Atom net_wm_icon_name;
-static Atom net_wm_window_type;
-static Atom net_wm_window_type_normal;
-static Atom net_wm_window_type_dock;
-static Atom net_wm_window_type_splash;
-static Atom net_wm_window_type_dialog;
-static Atom net_wm_icon;
-static Atom net_wm_state;
-static Atom net_wm_state_sticky;
-static Atom net_wm_state_skip_taskbar;
-static Atom net_wm_state_fullscreen;
-static Atom net_wm_state_above;
-static Atom net_wm_state_below;
-
-static Atom utf8_string;
+static xcb_atom_t utf8_string;
 
 typedef struct
 {
     const char *name;
-    Atom *atom;
+    xcb_atom_t *atom;
 } AtomItem;
 
 static AtomItem AtomNames[] =
@@ -103,20 +101,35 @@ void
 ewmh_init_atoms(void)
 {
     unsigned int i;
-    char *names[ATOM_NUMBER];
-    Atom atoms[ATOM_NUMBER];
+    xcb_intern_atom_cookie_t cs[ATOM_NUMBER];
+    xcb_intern_atom_reply_t *r;
+
+    /*
+     * Create the atom and get the reply in a XCB way (e.g. send all
+     * the requests at the same time and then get the replies)
+     */
+    for(i = 0; i < ATOM_NUMBER; i++)
+	cs[i] = xcb_intern_atom_unchecked(globalconf.connection,
+					  false,
+					  strlen(AtomNames[i].name),
+					  AtomNames[i].name);
 
     for(i = 0; i < ATOM_NUMBER; i++)
-        names[i] = (char *) AtomNames[i].name;
-    XInternAtoms(globalconf.display, names, ATOM_NUMBER, False, atoms);
-    for(i = 0; i < ATOM_NUMBER; i++)
-        *AtomNames[i].atom = atoms[i];
+    {
+	r = xcb_intern_atom_reply(globalconf.connection, cs[i], NULL);
+	if(!r)
+	    /* An error occured, get reply for next atom */
+	    continue;
+
+	*AtomNames[i].atom = r->atom;
+        p_delete(&r);
+    }
 }
 
 void
 ewmh_set_supported_hints(int phys_screen)
 {
-    Atom atom[ATOM_NUMBER];
+    xcb_atom_t atom[ATOM_NUMBER];
     int i = 0;
 
     atom[i++] = net_supported;
@@ -143,29 +156,30 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_above;
     atom[i++] = net_wm_state_below;
 
-    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                    net_supported, XA_ATOM, 32,
-                    PropModeReplace, (unsigned char *) atom, i);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+			root_window(globalconf.connection, phys_screen),
+			net_supported, ATOM, 32, i, atom);
 }
 
 void
 ewmh_update_net_client_list(int phys_screen)
 {
-    Window *wins;
+    xcb_window_t *wins;
     Client *c;
     int n = 0;
 
     for(c = globalconf.clients; c; c = c->next)
         n++;
 
-    wins = p_new(Window, n);
+    wins = p_new(xcb_window_t, n);
 
     for(n = 0, c = globalconf.clients; c; c = c->next, n++)
         if(c->phys_screen == phys_screen)
             wins[n] = c->win;
 
-    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                    net_client_list, XA_WINDOW, 32, PropModeReplace, (unsigned char *) wins, n);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+			root_window(globalconf.connection, phys_screen),
+			net_client_list, WINDOW, 32, n, wins);
 
     p_delete(&wins);
 }
@@ -173,27 +187,29 @@ ewmh_update_net_client_list(int phys_screen)
 void
 ewmh_update_net_numbers_of_desktop(int phys_screen)
 {
-    CARD32 count = 0;
+    uint32_t count = 0;
     Tag *tag;
 
     for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
         count++;
 
-    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                    net_number_of_desktops, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &count, 1);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+			root_window(globalconf.connection, phys_screen),
+			net_number_of_desktops, CARDINAL, 32, 1, &count);
 }
 
 void
 ewmh_update_net_current_desktop(int phys_screen)
 {
-    CARD32 count = 0;
+    uint32_t count = 0;
     Tag *tag, **curtags = tags_get_current(phys_screen);
 
     for(tag = globalconf.screens[phys_screen].tags; tag != curtags[0]; tag = tag->next)
         count++;
 
-    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                    net_current_desktop, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &count, 1);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        root_window(globalconf.connection, phys_screen),
+                        net_current_desktop, CARDINAL, 32, 1, &count);
 
     p_delete(&curtags);
 }
@@ -215,25 +231,29 @@ ewmh_update_net_desktop_names(int phys_screen)
         len += curr_size + 1;
     }
 
-    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                    net_desktop_names, utf8_string, 8, PropModeReplace, (unsigned char *) buf, len);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+			root_window(globalconf.connection, phys_screen),
+			net_desktop_names, utf8_string, 8, len, buf);
 }
 
 void
 ewmh_update_net_active_window(int phys_screen)
 {
-    Window win;
+    xcb_window_t win;
     Client *sel = focus_get_current_client(phys_screen);
 
-    win = sel ? sel->win : None;
+    win = sel ? sel->win : XCB_NONE;
 
-    XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
-                    net_active_window, XA_WINDOW, 32,  PropModeReplace, (unsigned char *) &win, 1);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+			root_window(globalconf.connection, phys_screen),
+			net_active_window, WINDOW, 32, 1, &win);
 }
 
 static void
-ewmh_process_state_atom(Client *c, Atom state, int set)
+ewmh_process_state_atom(Client *c, xcb_atom_t state, int set)
 {
+    const uint32_t raise_window_val = XCB_STACK_MODE_ABOVE;
+
     if(state == net_wm_state_sticky)
     {
         Tag *tag;
@@ -244,13 +264,13 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
     {
         if(set == _NET_WM_STATE_REMOVE)
         {
-            c->skiptb = False;
-            c->skip = False;
+            c->skiptb = false;
+            c->skip = false;
         }
         else if(set == _NET_WM_STATE_ADD)
         {
-            c->skiptb = True;
-            c->skip = True;
+            c->skiptb = true;
+            c->skip = true;
         }
     }
     else if(state == net_wm_state_fullscreen)
@@ -263,7 +283,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             /* restore borders and titlebar */
             titlebar_position_set(&c->titlebar, c->titlebar.dposition);
             c->border = c->oldborder;
-            c->ismax = False;
+            c->ismax = false;
             client_setfloating(c, c->wasfloating, c->oldlayer);
         }
         else if(set == _NET_WM_STATE_ADD)
@@ -276,12 +296,12 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             titlebar_position_set(&c->titlebar, Off);
             c->oldborder = c->border;
             c->border = 0;
-            c->ismax = True;
-            client_setfloating(c, True, LAYER_FULLSCREEN);
+            c->ismax = true;
+            client_setfloating(c, true, LAYER_FULLSCREEN);
         }
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-        client_resize(c, geometry, False);
-        XRaiseWindow(globalconf.display, c->win);
+        client_resize(c, geometry, false);
+	xcb_configure_window(globalconf.connection, c->win, XCB_CONFIG_WINDOW_STACK_MODE, &raise_window_val);
     }
     else if(state == net_wm_state_above)
     {
@@ -311,7 +331,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
 }
 
 static void
-ewmh_process_window_type_atom(Client *c, Atom state)
+ewmh_process_window_type_atom(Client *c, xcb_atom_t state)
 {
     if(state == net_wm_window_type_normal)
     {
@@ -321,40 +341,47 @@ ewmh_process_window_type_atom(Client *c, Atom state)
             || state == net_wm_window_type_splash)
     {
         c->border = 0;
-        c->skip = True;
-        c->isfixed = True;
+        c->skip = true;
+        c->isfixed = true;
         titlebar_position_set(&c->titlebar, Off);
-        client_setfloating(c, True, LAYER_ABOVE);
+        client_setfloating(c, true, LAYER_ABOVE);
     }
     else if (state == net_wm_window_type_dialog)
-    {
-        client_setfloating(c, True, LAYER_ABOVE);
-    }
+        client_setfloating(c, true, LAYER_ABOVE);
 }
 
 void
-ewmh_process_client_message(XClientMessageEvent *ev)
+ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
     Client *c;
     int screen;
 
-    if(ev->message_type == net_current_desktop)
-        for(screen = 0; screen < ScreenCount(globalconf.display); screen++)
-            if(ev->window == RootWindow(globalconf.display, screen))
-                tag_view_only_byindex(screen, ev->data.l[0]);
+    /* TODO: check whether it's correct to use 'type' this way */
+    if(ev->type == net_current_desktop)
+        for(screen = 0;
+            screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+            screen++)
+        {
+            if(ev->window == root_window(globalconf.connection, screen))
+                tag_view_only_byindex(screen, ev->data.data32[0]);
+        }
 
-    if(ev->message_type == net_close_window)
+    if(ev->type == net_close_window)
     {
         if((c = client_get_bywin(globalconf.clients, ev->window)))
            client_kill(c);
     }
-    else if(ev->message_type == net_wm_state)
+    else if(ev->type == net_wm_state)
     {
         if((c = client_get_bywin(globalconf.clients, ev->window)))
         {
-            ewmh_process_state_atom(c, (Atom) ev->data.l[1], ev->data.l[0]);
-            if(ev->data.l[2])
-                ewmh_process_state_atom(c, (Atom) ev->data.l[2], ev->data.l[0]);
+            ewmh_process_state_atom(c, (xcb_atom_t) ev->data.data32[1], ev->data.data32[0]);
+            /* TODO: is data32[2] really useful because it doesn't
+             * seem to be used when sending a ClientMessage in
+             * event.c:897 */
+            if(ev->data.data32[2])
+                ewmh_process_state_atom(c, (xcb_atom_t) ev->data.data32[2],
+                                        ev->data.data32[0]);
         }
     }
 }
@@ -362,53 +389,66 @@ ewmh_process_client_message(XClientMessageEvent *ev)
 void
 ewmh_check_client_hints(Client *c)
 {
-    int format;
-    Atom real, *state;
-    unsigned char *data = NULL;
-    unsigned long i, n, extra;
+    xcb_atom_t *state;
+    void *data = NULL;
+    int i;
 
-    if(XGetWindowProperty(globalconf.display, c->win, net_wm_state, 0L, LONG_MAX, False,
-                          XA_ATOM, &real, &format, &n, &extra,
-                          (unsigned char **) &data) == Success && data)
+    xcb_get_property_cookie_t c1, c2;
+    xcb_get_property_reply_t *reply;
+
+    /* Send the GetProperty requests which will be processed later */
+    c1 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+                                    net_wm_state, ATOM, 0, UINT32_MAX);
+
+    c2 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+                                    net_wm_window_type, ATOM, 0, UINT32_MAX);
+
+    reply = xcb_get_property_reply(globalconf.connection, c1, NULL);
+    if(reply && (data = xcb_get_property_value(reply)))
     {
-        state = (Atom *) data;
-        for(i = 0; i < n; i++)
+        state = (xcb_atom_t *) data;
+        for(i = 0; i < xcb_get_property_value_length(reply); i++)
             ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
-
-        XFree(data);
     }
 
-    if(XGetWindowProperty(globalconf.display, c->win, net_wm_window_type, 0L, LONG_MAX, False,
-                          XA_ATOM, &real, &format, &n, &extra,
-                          (unsigned char **) &data) == Success && data)
+    p_delete(&reply);
+
+    reply = xcb_get_property_reply(globalconf.connection, c2, NULL);
+    if(reply && (data = xcb_get_property_value(reply)))
     {
-        state = (Atom *) data;
-        for(i = 0; i < n; i++)
+        state = (xcb_atom_t *) data;
+        for(i = 0; i < xcb_get_property_value_length(reply); i++)
             ewmh_process_window_type_atom(c, state[i]);
-
-        XFree(data);
     }
+
+    p_delete(&reply);
 }
 
 NetWMIcon *
-ewmh_get_window_icon(Window w)
+ewmh_get_window_icon(xcb_window_t w)
 {
     double alpha;
     NetWMIcon *icon;
-    Atom type;
-    int format, size, i;
-    unsigned long items, rest, *data;
+    int size, i;
+    unsigned long *data;
     unsigned char *imgdata, *wdata;
+    xcb_get_property_reply_t *r;
 
-    if(XGetWindowProperty(globalconf.display, w,
-                          net_wm_icon, 0L, LONG_MAX, False, XA_CARDINAL, &type, &format,
-                          &items, &rest, &wdata) != Success
-       || !wdata)
-        return NULL;
-
-    if(type != XA_CARDINAL || format != 32 || items < 2)
+    r = xcb_get_property_reply(globalconf.connection,
+                               xcb_get_property_unchecked(globalconf.connection, false, w,
+                                                          net_wm_icon, CARDINAL, 0, UINT32_MAX),
+                               NULL);
+    if(!r || !(wdata = (unsigned char *) xcb_get_property_value(r)))
     {
-        XFree(wdata);
+        if(r)
+            p_delete(&r);
+
+        return NULL;
+    }
+
+    if(r->type != CARDINAL || r->format != 32 || r->length < 2)
+    {
+        p_delete(&r);
         return NULL;
     }
 
@@ -423,7 +463,7 @@ ewmh_get_window_icon(Window w)
     if(!size)
     {
         p_delete(&icon);
-        XFree(wdata);
+        p_delete(&r);
         return NULL;
     }
 
@@ -437,7 +477,7 @@ ewmh_get_window_icon(Window w)
         imgdata[0] = (data[i]         & 0xff) * alpha; /* B */
     }
 
-    XFree(wdata);
+    p_delete(&r);
 
     return icon;
 }

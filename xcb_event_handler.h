@@ -1,8 +1,7 @@
 /*
- * widgets/common.h - some functions headers used by widgets
+ * xcb_event_handler.c - xcb event handler header
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
- * Copyright © 2008 Marco Candrian <mac@calmar.ws>
+ * Copyright © 2007-2008 Arnaud Fontaine <arnaud@andesi.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +19,27 @@
  *
  */
 
-#ifndef AWESOME_WIDGETS_COMMON_H
-#define AWESOME_WIDGETS_COMMON_H
-#include "widget.h"
+#ifndef XCB_EVENT_HANDLER_H
+#define XCB_EVENT_HANDLER_H
 
-widget_tell_status_t widget_set_color_for_data(Widget *, xcolor_t *, char *, int, char **);
-widget_tell_status_t widget_set_color_pointer_for_data(Widget *, xcolor_t **, char *, int, char **);
+#include <xcb/xcb.h>
+#include <xcb/xcb_event.h>
+
+/* Set the same handler for all errors */
+void xcb_set_error_handler_catch_all(xcb_event_handlers_t *,
+                                     xcb_generic_error_handler_t,
+                                     void *);
+
+/* Number of different errors */
+#define ERRORS_NBR 256
+
+/* Number of different events */
+#define EVENTS_NBR 126
+
+/* Get the error name from its code */
+extern const char *x_label_error[];
+
+/* Get a request name from its code */
+extern const char *x_label_request[];
 
 #endif
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

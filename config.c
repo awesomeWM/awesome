@@ -19,8 +19,11 @@
  *
  */
 
+/* XStringToKeysym() */
+#include <X11/Xlib.h>
+
+#include <xcb/xcb_keysyms.h>
 #include <errno.h>
-#include <X11/keysym.h>
 
 #include "config.h"
 #include "statusbar.h"
@@ -34,11 +37,11 @@
 #include "common/xutil.h"
 
 /* Permit to use mouse with many more buttons */
-#ifndef Button6
-#define Button6 6
+#ifndef XCB_BUTTON_INDEX_6
+#define XCB_BUTTON_INDEX_6 6
 #endif
-#ifndef Button7
-#define Button7 7
+#ifndef XCB_BUTTON_INDEX_7
+#define XCB_BUTTON_INDEX_7 7
 #endif
 
 extern AwesomeConf globalconf;
@@ -48,7 +51,7 @@ extern cfg_opt_t awesome_opts[];
 typedef struct
 {
     const char *name;
-    KeySym keysym;
+    xcb_keysym_t keysym;
 } KeyMod;
 
 /** Link a name to a mouse button symbol */
@@ -67,21 +70,21 @@ extern const name_func_link_t FloatingPlacementList[];
  * \param keyname Key name
  * \return Key mask or 0 if not found
  */
-static KeySym
+static xcb_keysym_t
 key_mask_lookup(const char *keyname)
 {
     /** List of keyname and corresponding X11 mask codes */
     static const KeyMod KeyModList[] =
     {
-        {"Shift", ShiftMask},
-        {"Lock", LockMask},
-        {"Control", ControlMask},
-        {"Mod1", Mod1Mask},
-        {"Mod2", Mod2Mask},
-        {"Mod3", Mod3Mask},
-        {"Mod4", Mod4Mask},
-        {"Mod5", Mod5Mask},
-        {NULL, NoSymbol}
+        {"Shift", XCB_MOD_MASK_SHIFT},
+        {"Lock", XCB_MOD_MASK_LOCK},
+        {"Control", XCB_MOD_MASK_CONTROL},
+        {"Mod1", XCB_MOD_MASK_1},
+        {"Mod2", XCB_MOD_MASK_2},
+        {"Mod3", XCB_MOD_MASK_3},
+        {"Mod4", XCB_MOD_MASK_4},
+        {"Mod5", XCB_MOD_MASK_5},
+        {NULL, XCB_NO_SYMBOL}
     };
     int i;
 
@@ -103,13 +106,13 @@ mouse_button_lookup(const char *button)
     /** List of button name and corresponding X11 mask codes */
     static const MouseButton MouseButtonList[] =
     {
-        {"1", Button1},
-        {"2", Button2},
-        {"3", Button3},
-        {"4", Button4},
-        {"5", Button5},
-        {"6", Button6},
-        {"7", Button7},
+        {"1", XCB_BUTTON_INDEX_1},
+        {"2", XCB_BUTTON_INDEX_2},
+        {"3", XCB_BUTTON_INDEX_3},
+        {"4", XCB_BUTTON_INDEX_4},
+        {"5", XCB_BUTTON_INDEX_5},
+        {"6", XCB_BUTTON_INDEX_6},
+        {"7", XCB_BUTTON_INDEX_7},
         {NULL, 0}
     };
     int i;
@@ -123,7 +126,7 @@ mouse_button_lookup(const char *button)
 }
 
 static Button *
-parse_mouse_bindings(cfg_t * cfg, const char *secname, Bool handle_arg)
+parse_mouse_bindings(cfg_t * cfg, const char *secname, bool handle_arg)
 {
     int i, j;
     cfg_t *cfgsectmp;
@@ -168,7 +171,8 @@ set_key_info(Key *key, cfg_t *cfg)
 static void
 config_key_store(Key *key, char *str)
 {
-    KeyCode kc;
+    xcb_keycode_t kc;
+    xcb_keysym_t ks;
     int ikc;
 
     if(!a_strlen(str))
@@ -269,7 +273,7 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
             widget = widget_new(statusbar, wptr);
             widget_list_append(&statusbar->widgets, widget);
             widget->buttons = parse_mouse_bindings(wptr, "mouse",
-                                                   a_strcmp(cfg_name(wptr), "taglist") ? True : False);
+                                                   a_strcmp(cfg_name(wptr), "taglist") ? true : false);
         }
         else
             warn("ignoring unknown widget: %s.\n", cfg_name(widgets + i));
@@ -288,15 +292,15 @@ config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb, int screen)
     tb->text_align = cfg_getalignment(cfg_titlebar, "text_align");
     tb->width = cfg_getint(cfg_titlebar, "width");
     tb->height = cfg_getint(cfg_titlebar, "height");
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.connection, phys_screen,
                     cfg_getsec(cfg_styles, "normal"),
                     &tb->styles.normal,
                     &globalconf.screens[screen].styles.normal);
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.connection, phys_screen,
                     cfg_getsec(cfg_styles, "focus"),
                     &tb->styles.focus,
                     &globalconf.screens[screen].styles.focus);
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.connection, phys_screen,
                     cfg_getsec(cfg_styles, "urgent"),
                     &tb->styles.urgent,
                     &globalconf.screens[screen].styles.urgent);
@@ -378,11 +382,11 @@ config_parse_screen(cfg_t *cfg, int screen)
     if(!(cfg_styles_urgent = cfg_getsec(cfg_styles, "urgent")))
        eprint("no urgent colors section found\n");
 
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.connection, phys_screen,
                     cfg_styles_normal, &virtscreen->styles.normal, NULL);
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.connection, phys_screen,
                     cfg_styles_focus, &virtscreen->styles.focus, &virtscreen->styles.normal);
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.connection, phys_screen,
                     cfg_styles_urgent, &virtscreen->styles.urgent, &virtscreen->styles.normal);
 
     if(!virtscreen->styles.normal.font)
@@ -464,8 +468,8 @@ config_parse_screen(cfg_t *cfg, int screen)
     }
 
     /* select first tag by default */
-    virtscreen->tags[0].selected = True;
-    virtscreen->tags[0].was_selected = True;
+    virtscreen->tags[0].selected = true;
+    virtscreen->tags[0].was_selected = true;
 
     /* padding */
     virtscreen->padding.top = cfg_getint(cfg_padding, "top");
@@ -549,16 +553,16 @@ config_parse(const char *confpatharg)
     }
 
     /* Mouse: root window click bindings */
-    globalconf.buttons.root = parse_mouse_bindings(cfg_mouse, "root", True);
+    globalconf.buttons.root = parse_mouse_bindings(cfg_mouse, "root", true);
 
     /* Mouse: client windows click bindings */
-    globalconf.buttons.client = parse_mouse_bindings(cfg_mouse, "client", True);
+    globalconf.buttons.client = parse_mouse_bindings(cfg_mouse, "client", true);
 
     /* Mouse: titlebar windows click bindings */
-    globalconf.buttons.titlebar = parse_mouse_bindings(cfg_mouse, "titlebar", True);
+    globalconf.buttons.titlebar = parse_mouse_bindings(cfg_mouse, "titlebar", true);
 
     /* Keys */
-    globalconf.numlockmask = xgetnumlockmask(globalconf.display);
+    globalconf.numlockmask = xgetnumlockmask(globalconf.connection);
 
     globalconf.keys = section_keys(cfg_keys);
 

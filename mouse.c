@@ -31,7 +31,7 @@
 #include "layouts/tile.h"
 #include "common/xscreen.h"
 
-#define MOUSEMASK      (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
+#define MOUSEMASK      (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION)
 
 extern AwesomeConf globalconf;
 
@@ -133,115 +133,141 @@ mouse_resizebar_draw(DrawCtx *ctx, style_t style, SimpleWindow *sw, area_t geome
 void
 uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int x, y, ocx, ocy, di, newscreen;
-    unsigned int dui;
-    Window dummy, child;
-    XEvent ev;
+    int ocx, ocy, newscreen;
     area_t geometry;
     Client *c = globalconf.focus->client, *target;
     Layout *layout = layout_get_current(screen);
     SimpleWindow *sw = NULL;
     DrawCtx *ctx;
     style_t style;
+    bool ignore_motion_events = false;
+    xcb_generic_event_t *ev = NULL;
+    xcb_motion_notify_event_t *ev_motion = NULL;
+    xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
+    xcb_query_pointer_reply_t *query_pointer_r = NULL, *mquery_pointer_r = NULL;
 
     if(!c
-       || XGrabPointer(globalconf.display,
-                       RootWindow(globalconf.display, c->phys_screen),
-                       False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                       RootWindow(globalconf.display, c->phys_screen),
-                       globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
+       || xcb_grab_pointer_reply(globalconf.connection,
+                                 xcb_grab_pointer(globalconf.connection, false,
+                                                  root_window(globalconf.connection, c->phys_screen),
+                                                  MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
+                                                  root_window(globalconf.connection, c->phys_screen),
+                                                  globalconf.cursor[CurMove], XCB_CURRENT_TIME),
+                                 NULL))
         return;
 
-    XQueryPointer(globalconf.display,
-                  RootWindow(globalconf.display, c->phys_screen),
-                  &dummy, &dummy, &x, &y, &di, &di, &dui);
+    query_pointer_r = xcb_query_pointer_reply(globalconf.connection,
+                                              xcb_query_pointer_unchecked(globalconf.connection,
+                                                                          root_window(globalconf.connection, c->phys_screen)),
+                                              NULL);
 
     geometry = c->geometry;
     ocx = geometry.x;
     ocy = geometry.y;
-    c->ismax = False;
+    c->ismax = false;
 
     style = globalconf.screens[c->screen].styles.focus;
 
     if(c->isfloating || layout->arrange == layout_floating)
     {
-        sw = simplewindow_new(globalconf.display, c->phys_screen, 0, 0,
-                              draw_textwidth(globalconf.display,
+        sw = simplewindow_new(globalconf.connection, c->phys_screen, 0, 0,
+                              draw_textwidth(globalconf.connection,
+                                             globalconf.default_screen,
                                              globalconf.screens[c->screen].styles.focus.font,
                                              "0000x0000+0000+0000") + style.font->height,
                               1.5 * style.font->height, 0);
 
-        ctx = draw_context_new(globalconf.display, sw->phys_screen,
+        ctx = draw_context_new(globalconf.connection, sw->phys_screen,
                                sw->geometry.width, sw->geometry.height,
                                sw->drawable);
-        XMapRaised(globalconf.display, sw->window);
+        xutil_map_raised(globalconf.connection, sw->window);
         mouse_resizebar_draw(ctx, style, sw, geometry, c->border);
     }
 
+    p_delete(&grab_pointer_r);
+
     for(;;)
     {
-        XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
-        switch (ev.type)
+        /* TODO: need a review
+         *
+         * XMaskEvent  allows to retrieve  only specified  events from
+         * the queue and requeue the other events...
+         */
+        while((ev = xcb_poll_for_event(globalconf.connection)))
         {
-          case ButtonRelease:
-            XUngrabPointer(globalconf.display, CurrentTime);
-            if(sw)
+            switch((ev->response_type & 0x7f))
             {
-                draw_context_delete(&ctx);
-                simplewindow_delete(&sw);
-            }
-            return;
-          case ConfigureRequest:
-            event_handle_configurerequest(&ev);
-            break;
-          case Expose:
-            event_handle_expose(&ev);
-            break;
-          case MapRequest:
-            event_handle_maprequest(&ev);
-            break;
-          case EnterNotify:
-            event_handle_enternotify(&ev);
-            break;
-          case MotionNotify:
-            if(c->isfloating || layout->arrange == layout_floating)
-            {
-                geometry.x = ocx + (ev.xmotion.x - x);
-                geometry.y = ocy + (ev.xmotion.y - y);
-
-                geometry = mouse_snapclient(c, geometry);
-
-                c->ismoving = True;
-                client_resize(c, geometry, False);
-                c->ismoving = False;
+            case XCB_BUTTON_RELEASE:
+                xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
                 if(sw)
-                    mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
-            }
-            else
-            {
-                XQueryPointer(globalconf.display,
-                              RootWindow(globalconf.display, c->phys_screen),
-                              &dummy, &child, &x, &y, &di, &di, &dui);
-                if((newscreen = screen_get_bycoord(globalconf.screens_info, c->screen, x, y)) != c->screen)
                 {
-                    move_client_to_screen(c, newscreen, True);
-                    globalconf.screens[c->screen].need_arrange = True;
-                    if(layout_get_current(newscreen)->arrange != layout_floating)
-                        globalconf.screens[newscreen].need_arrange = True;
-                    layout_refresh();
+                    draw_context_delete(&ctx);
+                    simplewindow_delete(&sw);
                 }
-                if((target = client_get_bywin(globalconf.clients, child))
-                   && target != c && !target->isfloating)
+
+                p_delete(&query_pointer_r);
+                p_delete(&ev);
+                return;
+            case XCB_MOTION_NOTIFY:
+                if(ignore_motion_events)
+                    break;
+
+                if(c->isfloating || layout->arrange == layout_floating)
                 {
-                    client_list_swap(&globalconf.clients, c, target);
-                    globalconf.screens[c->screen].need_arrange = True;
-                    layout_refresh();
+                    ev_motion = (xcb_motion_notify_event_t *) ev;
+
+                    geometry.x = ocx + (ev_motion->event_x - query_pointer_r->root_x);
+                    geometry.y = ocy + (ev_motion->event_y - query_pointer_r->root_y);
+
+                    geometry = mouse_snapclient(c, geometry);
+
+                    if(sw)
+                        mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
+
+                    p_delete(&ev);
                 }
+                else
+                {
+                    mquery_pointer_r = xcb_query_pointer_reply(globalconf.connection,
+                                                               xcb_query_pointer_unchecked(globalconf.connection,
+                                                                                           root_window(globalconf.connection, c->phys_screen)),
+                                                               NULL);
+                    if((newscreen = screen_get_bycoord(globalconf.screens_info, c->screen,
+                                                       mquery_pointer_r->root_x,
+                                                       mquery_pointer_r->root_y)) != c->screen)
+                    {
+                        move_client_to_screen(c, newscreen, true);
+                        globalconf.screens[c->screen].need_arrange = true;
+                        globalconf.screens[newscreen].need_arrange = true;
+                        layout_refresh();
+                    }
+                    if((target = client_get_bywin(globalconf.clients, mquery_pointer_r->child))
+                       && target != c && !target->isfloating)
+                    {
+                        client_list_swap(&globalconf.clients, c, target);
+                        globalconf.screens[c->screen].need_arrange = true;
+                        layout_refresh();
+                    }
+
+                    p_delete(&mquery_pointer_r);
+                }
+                ignore_motion_events = true;
+                break;
+            case XCB_CONFIGURE_REQUEST:
+            case XCB_EXPOSE:
+            case XCB_MAP_REQUEST:
+            case XCB_ENTER_NOTIFY:
+            /* Handle errors */
+            case 0:
+                xcb_handle_event(globalconf.evenths, ev);
+                break;
             }
-            while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
-            break;
+
+            p_delete(&ev);
         }
     }
+
+    p_delete(&query_pointer_r);
 }
 
 /** Resize the focused window with the mouse.
@@ -253,7 +279,9 @@ void
 uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 {
     int ocx = 0, ocy = 0, n;
-    XEvent ev;
+    xcb_generic_event_t *ev = NULL;
+    xcb_motion_notify_event_t *ev_motion = NULL;
+    bool ignore_motion_events = false;
     Client *c = globalconf.focus->client;
     Tag **curtags = tags_get_current(screen);
     Layout *layout = curtags[0]->layout;
@@ -262,6 +290,8 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     SimpleWindow *sw = NULL;
     DrawCtx *ctx = NULL;
     style_t style;
+    xcb_grab_pointer_cookie_t grab_pointer_c;
+    xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
 
     /* only handle floating and tiled layouts */
     if(!c || c->isfixed)
@@ -273,19 +303,20 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     {
         ocx = c->geometry.x;
         ocy = c->geometry.y;
-        c->ismax = False;
+        c->ismax = false;
 
-        sw = simplewindow_new(globalconf.display, c->phys_screen, 0, 0,
-                              draw_textwidth(globalconf.display,
+        sw = simplewindow_new(globalconf.connection, c->phys_screen, 0, 0,
+                              draw_textwidth(globalconf.connection,
+                                             globalconf.default_screen,
                                              globalconf.screens[c->screen].styles.focus.font,
                                              "0000x0000+0000+0000") + style.font->height,
                               1.5 * style.font->height, 0);
 
-        ctx = draw_context_new(globalconf.display, sw->phys_screen,
+        ctx = draw_context_new(globalconf.connection, sw->phys_screen,
                                sw->geometry.width, sw->geometry.height,
                                sw->drawable);
-        XMapRaised(globalconf.display, sw->window);
-        mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
+        xutil_map_raised(globalconf.connection, sw->window);
+        mouse_resizebar_draw(ctx, style, sw, geometry, c->border);
     }
     else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
              || layout->arrange == layout_tilebottom || layout->arrange == layout_tiletop)
@@ -306,84 +337,104 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     else
         return;
 
-    if(XGrabPointer(globalconf.display,
-                    RootWindow(globalconf.display, c->phys_screen),
-                    False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    RootWindow(globalconf.display, c->phys_screen),
-                    globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
+    grab_pointer_c = xcb_grab_pointer(globalconf.connection, false,
+                                      root_window(globalconf.connection, c->phys_screen),
+                                      MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
+                                      root_window(globalconf.connection, c->phys_screen),
+                                      globalconf.cursor[CurResize], XCB_CURRENT_TIME);
+
+    if((grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection,
+                                                grab_pointer_c, NULL)) == NULL)
         return;
 
+    p_delete(&grab_pointer_r);
+
     if(curtags[0]->layout->arrange == layout_tileleft)
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, 0,
-                     c->geometry.height + c->border - 1);
+        xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0,
+                         0, 0, 0, c->geometry.height + c->border - 1);
     else if(curtags[0]->layout->arrange == layout_tilebottom)
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0,
-                     c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
+        xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win,
+                         0, 0, 0, 0, c->geometry.width + c->border - 1,
+                         c->geometry.height + c->border - 1);
     else if(curtags[0]->layout->arrange == layout_tiletop)
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0,
-                     c->geometry.width + c->border - 1, 0);
+        xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0,
+                         0, 0, c->geometry.width + c->border - 1, 0);
     else
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0,
-                     c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
+        xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0,
+                         0, 0, c->geometry.width + c->border - 1,
+                         c->geometry.height + c->border - 1);
 
     for(;;)
     {
-        XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
-        switch (ev.type)
+        /* TODO: need a review
+         *
+         * XMaskEvent  allows to retrieve  only specified  events from
+         * the queue and requeue the other events...
+         */
+        while((ev = xcb_poll_for_event(globalconf.connection)))
         {
-          case ButtonRelease:
-            XUngrabPointer(globalconf.display, CurrentTime);
-            if(sw)
+            switch((ev->response_type & 0x7f))
             {
-                draw_context_delete(&ctx);
-                simplewindow_delete(&sw);
-            }
-            return;
-          case ConfigureRequest:
-            event_handle_configurerequest(&ev);
-            break;
-          case Expose:
-            event_handle_expose(&ev);
-            break;
-          case MapRequest:
-            event_handle_maprequest(&ev);
-            break;
-          case MotionNotify:
-            if(layout->arrange == layout_floating || c->isfloating)
-            {
-                if((geometry.width = ev.xmotion.x - ocx - 2 * c->border + 1) <= 0)
-                    geometry.width = 1;
-                if((geometry.height = ev.xmotion.y - ocy - 2 * c->border + 1) <= 0)
-                    geometry.height = 1;
-                geometry.x = c->geometry.x;
-                geometry.y = c->geometry.y;
-                client_resize(c, geometry, True);
+            case XCB_BUTTON_RELEASE:
                 if(sw)
-                    mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
-            }
-            else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
-                    || layout->arrange == layout_tiletop || layout->arrange == layout_tilebottom)
-            {
-                if(layout->arrange == layout_tile)
-                    mwfact = (double) (ev.xmotion.x - area.x) / area.width;
-                else if(curtags[0]->layout->arrange == layout_tileleft)
-                    mwfact = 1 - (double) (ev.xmotion.x - area.x) / area.width;
-                else if(curtags[0]->layout->arrange == layout_tilebottom)
-                    mwfact = (double) (ev.xmotion.y - area.y) / area.height;
-                else
-                    mwfact = 1 - (double) (ev.xmotion.y - area.y) / area.height;
-                mwfact = MAX(globalconf.screens[screen].mwfact_lower_limit,
-                             MIN(globalconf.screens[screen].mwfact_upper_limit, mwfact));
-                if(fabs(curtags[0]->mwfact - mwfact) >= 0.01)
                 {
-                    curtags[0]->mwfact = mwfact;
-                    globalconf.screens[screen].need_arrange = True;
-                    layout_refresh();
-                    while(XCheckMaskEvent(globalconf.display, PointerMotionMask, &ev));
+                    draw_context_delete(&ctx);
+                    simplewindow_delete(&sw);
                 }
+                xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
+                p_delete(&ev);
+                return;
+            case XCB_MOTION_NOTIFY:
+                if(ignore_motion_events)
+                    break;
+
+                ev_motion = (xcb_motion_notify_event_t *) ev;
+
+                if(layout->arrange == layout_floating || c->isfloating)
+                {
+                    if((geometry.width = ev_motion->event_x - ocx - 2 * c->border + 1) <= 0)
+                        geometry.width = 1;
+                    if((geometry.height = ev_motion->event_y - ocy - 2 * c->border + 1) <= 0)
+                        geometry.height = 1;
+                    geometry.x = c->geometry.x;
+                    geometry.y = c->geometry.y;
+                    client_resize(c, geometry, true);
+                    if(sw)
+                        mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
+                }
+                else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
+                        || layout->arrange == layout_tiletop || layout->arrange == layout_tilebottom)
+                {
+                    if(layout->arrange == layout_tile)
+                        mwfact = (double) (ev_motion->event_x - area.x) / area.width;
+                    else if(curtags[0]->layout->arrange == layout_tileleft)
+                        mwfact = 1 - (double) (ev_motion->event_x - area.x) / area.width;
+                    else if(curtags[0]->layout->arrange == layout_tilebottom)
+                        mwfact = (double) (ev_motion->event_y - area.y) / area.height;
+                    else
+                        mwfact = 1 - (double) (ev_motion->event_y - area.y) / area.height;
+                    mwfact = MAX(globalconf.screens[screen].mwfact_lower_limit,
+                                 MIN(globalconf.screens[screen].mwfact_upper_limit, mwfact));
+                    if(fabs(curtags[0]->mwfact - mwfact) >= 0.01)
+                    {
+                        curtags[0]->mwfact = mwfact;
+                        globalconf.screens[screen].need_arrange = true;
+                        layout_refresh();
+                        ignore_motion_events = true;
+                    }
+                }
+
+                break;
+            case XCB_CONFIGURE_REQUEST:
+            case XCB_EXPOSE:
+            case XCB_MAP_REQUEST:
+            /* Handle errors */
+            case 0:
+                xcb_handle_event(globalconf.evenths, ev);
+                break;
             }
 
-            break;
+            p_delete(&ev);
         }
     }
     p_delete(&curtags);
