@@ -778,13 +778,13 @@ draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
                    cfg_getstr(cfg, "fg"), &c->fg);
 
     draw_color_new(disp, phys_screen,
-                       cfg_getstr(cfg, "bg"), &c->bg);
+                   cfg_getstr(cfg, "bg"), &c->bg);
 
     draw_color_new(disp, phys_screen,
-                      cfg_getstr(cfg, "border"), &c->border);
+                   cfg_getstr(cfg, "border"), &c->border);
 
     draw_color_new(disp, phys_screen,
-                      cfg_getstr(cfg, "shadow"), &c->shadow);
+                   cfg_getstr(cfg, "shadow"), &c->shadow);
 
     c->shadow_offset = cfg_getint(cfg, "shadow_offset");
 }

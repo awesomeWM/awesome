@@ -124,9 +124,9 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     draw_style_init(globalconf.display, phys_screen,
-                   cfg_getsec(config, "style"),
-                   &d->style,
-                   &globalconf.screens[statusbar->screen].styles.normal);
+                    cfg_getsec(config, "style"),
+                    &d->style,
+                    &globalconf.screens[statusbar->screen].styles.normal);
 
     d->width = cfg_getint(config, "width");
     d->align = cfg_getalignment(config, "text_align");
