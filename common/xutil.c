@@ -54,12 +54,12 @@ xgettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
 
     prop_val = (char *) xcb_get_property_value(name);
     if(name->type == STRING)
-        a_strncpy(text, textlen, prop_val, textlen - 1);
+        a_strncpy(text, name->value_len + 1, prop_val, textlen - 1);
 
     /* TODO: XCB doesn't  provide a XmbTextPropertyToTextList(), check
      * whether this code is correct (locales) */
     else if(name->format == 8)
-        a_strncpy(text, textlen, prop_val, textlen - 1);
+        a_strncpy(text, name->value_len + 1, prop_val, textlen - 1);
 
     text[textlen - 1] = '\0';
     p_delete(&name);
