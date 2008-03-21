@@ -163,6 +163,8 @@ struct Statusbar
     Position position;
     /** Screen */
     int screen;
+    /** Physical screen id */
+    int phys_screen;
     /** Widget list */
     Widget *widgets;
     /** Draw context */
@@ -208,6 +210,8 @@ struct Client
     Window win;
     /** Client logical screen */
     int screen;
+    /** Client physical screen */
+    int phys_screen;
     /** True if the client is a new one */
     Bool newcomer;
     /** Titlebar */

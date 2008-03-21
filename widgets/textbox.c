@@ -113,7 +113,6 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
 {
     Widget *w;
     Data *d;
-    int phys_screen = get_phys_screen(statusbar->screen);
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
@@ -123,7 +122,7 @@ textbox_new(Statusbar *statusbar, cfg_t *config)
 
     w->data = d = p_new(Data, 1);
 
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.display, statusbar->phys_screen,
                     cfg_getsec(config, "style"),
                     &d->style,
                     &globalconf.screens[statusbar->screen].styles.normal);

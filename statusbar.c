@@ -164,7 +164,7 @@ statusbar_display(Statusbar *statusbar)
 {
     /* don't waste our time */
     if(statusbar->position != Off)
-        simplewindow_refresh_drawable(statusbar->sw, get_phys_screen(statusbar->screen));
+        simplewindow_refresh_drawable(statusbar->sw, statusbar->phys_screen);
 }
 
 void
@@ -182,11 +182,12 @@ statusbar_init(Statusbar *statusbar)
 {
     Statusbar *sb;
     Drawable dw;
-    int phys_screen = get_phys_screen(statusbar->screen);
+    int phys_screen = screen_virttophys(statusbar->screen);
     area_t area = screen_get_area(statusbar->screen,
                                 globalconf.screens[statusbar->screen].statusbar,
                                 &globalconf.screens[statusbar->screen].padding);
 
+    statusbar->phys_screen = phys_screen;
 
     /* Top and Bottom Statusbar have prio */
     for(sb = globalconf.screens[statusbar->screen].statusbar; sb; sb = sb->next)

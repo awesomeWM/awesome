@@ -30,7 +30,6 @@ void
 titlebar_init(Client *c)
 {
     int titlebar_height;
-    int phys_screen = get_phys_screen(c->screen);
 
     if(c->titlebar.position == Off
        || c->titlebar.position == Auto)
@@ -47,7 +46,7 @@ titlebar_init(Client *c)
     {
       case Top:
         c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen,
+                                          c->phys_screen,
                                           c->geometry.x,
                                           c->geometry.y - titlebar_height,
                                           c->geometry.width + 2 * c->border,
@@ -56,7 +55,7 @@ titlebar_init(Client *c)
         break;
       case Bottom:
         c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen,
+                                          c->phys_screen,
                                           c->geometry.x,
                                           c->geometry.y + c->geometry.height + 2 * c->border,
                                           c->geometry.width + 2 * c->border,
@@ -65,7 +64,7 @@ titlebar_init(Client *c)
         break;
       case Left:
         c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen,
+                                          c->phys_screen,
                                           c->geometry.x - titlebar_height,
                                           c->geometry.y,
                                           titlebar_height,
@@ -74,7 +73,7 @@ titlebar_init(Client *c)
         break;
       case Right:
         c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          phys_screen,
+                                          c->phys_screen,
                                           c->geometry.x + c->geometry.width + 2 * c->border,
                                           c->geometry.y,
                                           titlebar_height,

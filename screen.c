@@ -106,7 +106,7 @@ get_display_area(int screen, Statusbar *statusbar, Padding *padding)
  * \return the X screen
  */
 int
-get_phys_screen(int screen)
+screen_virttophys(int screen)
 {
     if(globalconf.screens_info->xinerama_is_active)
         return DefaultScreen(globalconf.display);

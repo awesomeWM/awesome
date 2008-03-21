@@ -154,7 +154,7 @@ ewmh_update_net_client_list(int phys_screen)
     wins = p_new(Window, n);
 
     for(n = 0, c = globalconf.clients; c; c = c->next, n++)
-        if(get_phys_screen(c->screen) == phys_screen)
+        if(c->phys_screen == phys_screen)
             wins[n] = c->win;
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),

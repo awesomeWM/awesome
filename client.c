@@ -182,8 +182,6 @@ client_ban(Client *c)
 void
 client_focus(Client *c, int screen, Bool raise)
 {
-    int phys_screen = get_phys_screen(screen);
-
     /* if c is NULL or invisible, take next client in the focus history */
     if(!c || (c && !client_isvisible(c, screen)))
     {
@@ -263,15 +261,15 @@ client_focus(Client *c, int screen, Bool raise)
         }
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
-        window_grabbuttons(phys_screen, c->win);
+        window_grabbuttons(c->phys_screen, c->win);
     }
     else
         XSetInputFocus(globalconf.display,
-                       RootWindow(globalconf.display, phys_screen),
+                       RootWindow(globalconf.display, c->phys_screen),
                        RevertToPointerRoot, CurrentTime);
 
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
-    ewmh_update_net_active_window(phys_screen);
+    ewmh_update_net_active_window(c->phys_screen);
 }
 
 /** Manage a new client
@@ -289,12 +287,16 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     Tag *tag;
     Rule *rule;
     area_t screen_geom;
-    int phys_screen = get_phys_screen(screen);
     long flags;
 
     c = p_new(Client, 1);
 
     c->screen = screen_get_bycoord(globalconf.screens_info, screen, wa->x, wa->y);
+
+    if(globalconf.screens_info->xinerama_is_active)
+        c->phys_screen = DefaultScreen(globalconf.display);
+    else
+        c->phys_screen = c->screen;
 
     screen_geom = screen_get_area(c->screen,
                                   globalconf.screens[screen].statusbar,
@@ -400,7 +402,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(globalconf.have_shape)
     {
         XShapeSelectInput(globalconf.display, w, ShapeNotifyMask);
-        window_setshape(phys_screen, c->win);
+        window_setshape(c->phys_screen, c->win);
     }
 
     /* attach to the stack */
@@ -431,7 +433,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                       c->geometry.width, c->geometry.height);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    ewmh_update_net_client_list(phys_screen);
+    ewmh_update_net_client_list(c->phys_screen);
 }
 
 static area_t
@@ -505,7 +507,7 @@ client_resize(Client *c, area_t geometry, Bool hints)
         return False;
 
     /* offscreen appearance fixes */
-    area = get_display_area(get_phys_screen(c->screen), NULL,
+    area = get_display_area(c->phys_screen, NULL,
                             &globalconf.screens[c->screen].padding);
 
     if(geometry.x > area.width)
@@ -899,7 +901,7 @@ uicb_client_moveresize(int screen, char *arg)
 
     Bool xqp = XQueryPointer(globalconf.display,
                              RootWindow(globalconf.display,
-                                        get_phys_screen(screen)),
+                                        sel->phys_screen),
                              &dummy, &dummy, &mx, &my, &dx, &dy, &dui);
     if(globalconf.screens[sel->screen].resize_hints)
         geometry = client_geometry_hints(sel, geometry);

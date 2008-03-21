@@ -46,7 +46,7 @@ arrange(int screen)
     Client *c;
     Layout *curlay = layout_get_current(screen);
     unsigned int dui;
-    int di, x, y;
+    int di, x, y, phys_screen = screen_virttophys(screen);
     Window rootwin, childwin;
 
     for(c = globalconf.clients; c; c = c->next)
@@ -75,11 +75,11 @@ arrange(int screen)
         client_focus(c, screen, True);
 
     /* check that the mouse is on a window or not */
-    if(XQueryPointer(globalconf.display, RootWindow(globalconf.display,
-                                                    get_phys_screen(screen)),
+    if(XQueryPointer(globalconf.display,
+                     RootWindow(globalconf.display, phys_screen),
                      &rootwin, &childwin, &x, &y, &di, &di, &dui)
        && (rootwin == None || childwin == None || childwin == rootwin))
-        window_root_grabbuttons(get_phys_screen(screen));
+        window_root_grabbuttons(phys_screen);
 
     /* reset status */
     globalconf.screens[screen].need_arrange = False;

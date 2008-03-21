@@ -277,7 +277,7 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
 static void
 config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb, int screen)
 {
-    int phys_screen = get_phys_screen(screen);
+    int phys_screen = screen_virttophys(screen);
     cfg_t *cfg_styles = cfg_getsec(cfg_titlebar, "styles");
 
     tb->position = tb->dposition = cfg_getposition(cfg_titlebar, "position");
@@ -309,7 +309,7 @@ config_parse_screen(cfg_t *cfg, int screen)
           *cfg_layouts, *cfg_padding, *cfgsectmp, *cfg_titlebar,
           *cfg_styles_normal, *cfg_styles_focus, *cfg_styles_urgent;
     VirtScreen *virtscreen = &globalconf.screens[screen];
-    int i, phys_screen = get_phys_screen(screen);
+    int i, phys_screen = screen_virttophys(screen);
 
     snprintf(buf, sizeof(buf), "%d", screen);
     cfg_screen = cfg_gettsec(cfg, "screen", buf);

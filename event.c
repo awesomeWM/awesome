@@ -132,7 +132,7 @@ event_handle_buttonpress(XEvent *e)
            && ev->button == Button1)
         {
             XAllowEvents(globalconf.display, ReplayPointer, CurrentTime);
-            window_grabbuttons(get_phys_screen(c->screen), c->win);
+            window_grabbuttons(c->phys_screen, c->win);
         }
         else
             event_handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
@@ -268,7 +268,7 @@ event_handle_enternotify(XEvent *e)
 
     if(c || (c = client_get_bywin(globalconf.clients, ev->window)))
     {
-        window_grabbuttons(get_phys_screen(c->screen), c->win);
+        window_grabbuttons(c->phys_screen, c->win);
         if(globalconf.screens[c->screen].sloppy_focus)
             client_focus(c, c->screen,
                          (globalconf.screens[c->screen].sloppy_focus
@@ -319,7 +319,7 @@ event_handle_expose(XEvent *e)
         for(c = globalconf.clients; c; c = c->next)
             if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
             {
-                simplewindow_refresh_drawable(c->titlebar.sw, get_phys_screen(c->screen));
+                simplewindow_refresh_drawable(c->titlebar.sw, c->phys_screen);
                 return;
             }
     }
@@ -457,7 +457,7 @@ event_handle_unmapnotify(XEvent * e)
     XUnmapEvent *ev = &e->xunmap;
 
     if((c = client_get_bywin(globalconf.clients, ev->window))
-       && ev->event == RootWindow(e->xany.display, get_phys_screen(c->screen))
+       && ev->event == RootWindow(e->xany.display, c->phys_screen)
        && ev->send_event && window_getstate(c->win) == NormalState)
         client_unmanage(c);
 }
@@ -472,7 +472,7 @@ event_handle_shape(XEvent * e)
     Client *c = client_get_bywin(globalconf.clients, ev->window);
 
     if(c)
-        window_setshape(get_phys_screen(c->screen), c->win);
+        window_setshape(c->phys_screen, c->win);
 }
 
 /** Handle XRandR events

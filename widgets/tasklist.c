@@ -272,7 +272,6 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
     Data *d;
     char *buf;
     cfg_t *cfg_styles;
-    int phys_screen = get_phys_screen(statusbar->screen);
 
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
@@ -283,17 +282,17 @@ tasklist_new(Statusbar *statusbar, cfg_t *config)
 
     cfg_styles = cfg_getsec(config, "styles");
 
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.display, statusbar->phys_screen,
                     cfg_getsec(cfg_styles, "normal"),
                     &d->styles.normal,
                     &globalconf.screens[statusbar->screen].styles.normal);
 
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.display, statusbar->phys_screen,
                     cfg_getsec(cfg_styles, "focus"),
                     &d->styles.focus,
                     &globalconf.screens[statusbar->screen].styles.focus);
 
-    draw_style_init(globalconf.display, phys_screen,
+    draw_style_init(globalconf.display, statusbar->phys_screen,
                     cfg_getsec(cfg_styles, "urgent"),
                     &d->styles.urgent,
                     &globalconf.screens[statusbar->screen].styles.urgent);

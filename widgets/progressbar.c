@@ -276,7 +276,8 @@ progressbar_tell(Widget *widget, char *property, char *command)
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
-                if(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                if(draw_color_new(globalconf.display,
+                                  widget->statusbar->phys_screen,
                                   setting, &d->fg[i]))
                     return WIDGET_NOERROR;
                 else
@@ -292,7 +293,8 @@ progressbar_tell(Widget *widget, char *property, char *command)
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
-                if(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                if(draw_color_new(globalconf.display,
+                                  widget->statusbar->phys_screen,
                                   setting, &d->bg[i]))
                     return WIDGET_NOERROR;
                 else
@@ -314,7 +316,8 @@ progressbar_tell(Widget *widget, char *property, char *command)
                     flag = True; /* p_delete && restore to NULL, if draw_color_new unsuccessful */
                     d->pfg_center[i] = p_new(XColor, 1);
                 }
-                if(!(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                if(!(draw_color_new(globalconf.display,
+                                    widget->statusbar->phys_screen,
                                     setting, d->pfg_center[i])))
                 {
                     if(flag) /* restore */
@@ -342,7 +345,8 @@ progressbar_tell(Widget *widget, char *property, char *command)
                     flag = True;
                     d->pfg_end[i] = p_new(XColor, 1);
                 }
-                if(!(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                if(!(draw_color_new(globalconf.display,
+                                    widget->statusbar->phys_screen,
                                     setting, d->pfg_end[i])))
                 {
                     if(flag) /* restore */
@@ -363,7 +367,8 @@ progressbar_tell(Widget *widget, char *property, char *command)
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
-                if(draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+                if(draw_color_new(globalconf.display,
+                                  widget->statusbar->phys_screen,
                                   setting, &d->bordercolor[i]))
                     return WIDGET_NOERROR;
                 else
@@ -409,7 +414,7 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     Widget *w;
     Data *d;
     char *color;
-    int i, phys_screen = get_phys_screen(statusbar->screen);
+    int i;
     cfg_t *cfg;
 
     w = p_new(Widget, 1);
@@ -459,29 +464,29 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
             d->reverse[i] = False;
 
         if((color = cfg_getstr(cfg, "fg")))
-            draw_color_new(globalconf.display, phys_screen, color, &d->fg[i]);
+            draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->fg[i]);
         else
             d->fg[i] = globalconf.screens[statusbar->screen].styles.normal.fg;
 
         if((color = cfg_getstr(cfg, "fg_center")))
         {
             d->pfg_center[i] = p_new(XColor, 1);
-            draw_color_new(globalconf.display, phys_screen, color, d->pfg_center[i]);
+            draw_color_new(globalconf.display, statusbar->phys_screen, color, d->pfg_center[i]);
         }
 
         if((color = cfg_getstr(cfg, "fg_end")))
         {
             d->pfg_end[i] = p_new(XColor, 1);
-            draw_color_new(globalconf.display, phys_screen, color, d->pfg_end[i]);
+            draw_color_new(globalconf.display, statusbar->phys_screen, color, d->pfg_end[i]);
         }
 
         if((color = cfg_getstr(cfg, "bg")))
-            draw_color_new(globalconf.display, phys_screen, color, &d->bg[i]);
+            draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->bg[i]);
         else
             d->bg[i] = globalconf.screens[statusbar->screen].styles.normal.bg;
 
         if((color = cfg_getstr(cfg, "bordercolor")))
-            draw_color_new(globalconf.display, phys_screen, color, &d->bordercolor[i]);
+            draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->bordercolor[i]);
         else
             d->bordercolor[i] = d->fg[i];
     }

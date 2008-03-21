@@ -159,7 +159,7 @@ placement_under_mouse(Client *c)
     int x, y, d;
     area_t finalgeometry = c->f_geometry;
 
-    if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, get_phys_screen(c->screen)),
+    if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, c->phys_screen),
                      &dummy, &dummy, &x, &y, &d, &d, &m))
     {
         finalgeometry.x = x - c->f_geometry.width / 2;

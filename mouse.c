@@ -44,7 +44,7 @@ extern AwesomeConf globalconf;
 void
 uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
-    int x, y, ocx, ocy, di, phys_screen, newscreen;
+    int x, y, ocx, ocy, di, newscreen;
     unsigned int dui;
     Window dummy, child;
     XEvent ev;
@@ -61,15 +61,14 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 
     ocx = geometry.x = c->geometry.x;
     ocy = geometry.y = c->geometry.y;
-    phys_screen = get_phys_screen(c->screen);
     if(XGrabPointer(globalconf.display,
-                    RootWindow(globalconf.display, phys_screen),
+                    RootWindow(globalconf.display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    RootWindow(globalconf.display, phys_screen),
+                    RootWindow(globalconf.display, c->phys_screen),
                     globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
     XQueryPointer(globalconf.display,
-                  RootWindow(globalconf.display, phys_screen),
+                  RootWindow(globalconf.display, c->phys_screen),
                   &dummy, &dummy, &x, &y, &di, &di, &dui);
     c->ismax = False;
     for(;;)
@@ -119,7 +118,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
             else
             {
                 XQueryPointer(globalconf.display,
-                              RootWindow(globalconf.display, phys_screen),
+                              RootWindow(globalconf.display, c->phys_screen),
                               &dummy, &child, &x, &y, &di, &di, &dui);
                 if((newscreen = screen_get_bycoord(globalconf.screens_info, c->screen, x, y)) != c->screen)
                 {
@@ -188,10 +187,10 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     else
         return;
 
-    if(XGrabPointer(globalconf.display, RootWindow(globalconf.display,
-                                                   get_phys_screen(c->screen)),
+    if(XGrabPointer(globalconf.display,
+                    RootWindow(globalconf.display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    RootWindow(globalconf.display,get_phys_screen(c->screen)),
+                    RootWindow(globalconf.display, c->phys_screen),
                     globalconf.cursor[CurResize], CurrentTime) != GrabSuccess)
         return;
 

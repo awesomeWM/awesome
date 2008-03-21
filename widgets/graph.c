@@ -338,13 +338,15 @@ graph_tell(Widget *widget, char *property, char *command)
         d->height = atof(command);
     else if(!a_strcmp(property, "bg"))
     {
-        if(!draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+        if(!draw_color_new(globalconf.display,
+                           widget->statusbar->phys_screen,
                            command, &d->bg))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
     else if(!a_strcmp(property, "bordercolor"))
     {
-        if(!draw_color_new(globalconf.display, get_phys_screen(widget->statusbar->screen),
+        if(!draw_color_new(globalconf.display,
+                           widget->statusbar->phys_screen,
                            command, &d->bordercolor))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
@@ -372,7 +374,6 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     Data *d;
     cfg_t *cfg;
     char *color;
-    int phys_screen = get_phys_screen(statusbar->screen);
     int i;
     char *type;
     XColor tmp_color = { 0, 0, 0, 0, 0, 0 };
@@ -454,20 +455,20 @@ graph_new(Statusbar *statusbar, cfg_t *config)
         d->data_title[i] = a_strdup(cfg_title(cfg));
 
         if((color = cfg_getstr(cfg, "fg")))
-            draw_color_new(globalconf.display, phys_screen, color, &tmp_color);
+            draw_color_new(globalconf.display, statusbar->phys_screen, color, &tmp_color);
         else
             tmp_color = globalconf.screens[statusbar->screen].styles.normal.fg;
 
         if((color = cfg_getstr(cfg, "fg_center")))
         {
             ptmp_color_center = p_new(XColor, 1);
-            draw_color_new(globalconf.display, phys_screen, color, ptmp_color_center);
+            draw_color_new(globalconf.display, statusbar->phys_screen, color, ptmp_color_center);
         }
 
         if((color = cfg_getstr(cfg, "fg_end")))
         {
             ptmp_color_end = p_new(XColor, 1);
-            draw_color_new(globalconf.display, phys_screen, color, ptmp_color_end);
+            draw_color_new(globalconf.display, statusbar->phys_screen, color, ptmp_color_end);
         }
 
         if (cfg_getbool(cfg, "scale"))
@@ -522,12 +523,12 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     }
 
     if((color = cfg_getstr(config, "bg")))
-        draw_color_new(globalconf.display, phys_screen, color, &d->bg);
+        draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->bg);
     else
         d->bg = globalconf.screens[statusbar->screen].styles.normal.bg;
 
     if((color = cfg_getstr(config, "bordercolor")))
-        draw_color_new(globalconf.display, phys_screen, color, &d->bordercolor);
+        draw_color_new(globalconf.display, statusbar->phys_screen, color, &d->bordercolor);
     else
         d->bordercolor = tmp_color;
 
