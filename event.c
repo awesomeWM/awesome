@@ -132,7 +132,7 @@ event_handle_buttonpress(XEvent *e)
            && ev->button == Button1)
         {
             XAllowEvents(globalconf.display, ReplayPointer, CurrentTime);
-            window_grabbuttons(c->phys_screen, c->win);
+            window_grabbuttons(c->win, c->phys_screen);
         }
         else
             event_handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.client, NULL);
@@ -268,7 +268,7 @@ event_handle_enternotify(XEvent *e)
 
     if(c || (c = client_get_bywin(globalconf.clients, ev->window)))
     {
-        window_grabbuttons(c->phys_screen, c->win);
+        window_grabbuttons(c->win, c->phys_screen);
         if(globalconf.screens[c->screen].sloppy_focus)
             client_focus(c, c->screen,
                          (globalconf.screens[c->screen].sloppy_focus
@@ -472,7 +472,7 @@ event_handle_shape(XEvent * e)
     Client *c = client_get_bywin(globalconf.clients, ev->window);
 
     if(c)
-        window_setshape(c->phys_screen, c->win);
+        window_setshape(c->win, c->phys_screen);
 }
 
 /** Handle XRandR events

@@ -27,10 +27,10 @@
 int window_setstate(Window, long);
 long window_getstate(Window);
 Status window_configure(Window, area_t, int);
-void window_grabbuttons(int, Window);
+void window_grabbuttons(Window, int);
 void window_root_grabbuttons(int);
 void window_root_grabkeys(int);
-void window_setshape(int, Window);
+void window_setshape(Window, int);
 int window_settrans(Window, double);
 
 #endif

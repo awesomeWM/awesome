@@ -261,7 +261,7 @@ client_focus(Client *c, int screen, Bool raise)
         }
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
-        window_grabbuttons(c->phys_screen, c->win);
+        window_grabbuttons(c->win, c->phys_screen);
     }
     else
         XSetInputFocus(globalconf.display,
@@ -402,7 +402,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     if(globalconf.have_shape)
     {
         XShapeSelectInput(globalconf.display, w, ShapeNotifyMask);
-        window_setshape(c->phys_screen, c->win);
+        window_setshape(c->win, c->phys_screen);
     }
 
     /* attach to the stack */

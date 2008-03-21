@@ -93,11 +93,11 @@ window_configure(Window win, area_t geometry, int border)
 }
 
 /** Grab or ungrab buttons on a window
- * \param screen The screen
  * \param win The window
+ * \param phys_screen Physical screen number
  */
 void
-window_grabbuttons(int phys_screen, Window win)
+window_grabbuttons(Window win, int phys_screen)
 {
     Button *b;
 
@@ -175,14 +175,17 @@ window_root_grabkeys(int phys_screen)
 }
 
 void
-window_setshape(int screen, Window win)
+window_setshape(Window win, int phys_screen)
 {
-    int bounding_shaped;
-    int i, b;  unsigned int u;  /* dummies */
+    int bounding_shaped, i, b;
+    unsigned int u;  /* dummies */
+
     /* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10. */
     if(XShapeQueryExtents(globalconf.display, win, &bounding_shaped, &i, &i,
                           &u, &u, &b, &i, &i, &u, &u) && bounding_shaped)
-        XShapeCombineShape(globalconf.display, RootWindow(globalconf.display, screen), ShapeBounding, 0, 0, win, ShapeBounding, ShapeSet);
+        XShapeCombineShape(globalconf.display,
+                           RootWindow(globalconf.display, phys_screen),
+                           ShapeBounding, 0, 0, win, ShapeBounding, ShapeSet);
 }
 
 int
