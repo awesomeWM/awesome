@@ -132,7 +132,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 area.height = widget->statusbar->height;
                 area.width = box_width;
 
-                draw_rectangle(ctx, area, True, style.bg);
+                draw_rectangle(ctx, area, 1.0, True, style.bg);
 
                 if((r = rule_matching_client(c)) && r->icon)
                 {
@@ -181,7 +181,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
                 area.y = widget->area.y;
                 area.width = (style.font->height + 2) / 3;
                 area.height = (style.font->height + 2) / 3;
-                draw_rectangle(ctx, area, c->isfloating, style.fg);
+                draw_rectangle(ctx, area, 1.0, c->isfloating, style.fg);
             }
             else if(c->isfloating || c->ismax)
                 draw_circle(ctx, widget->area.x + icon_width + box_width * i,

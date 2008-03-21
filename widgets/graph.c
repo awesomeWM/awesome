@@ -113,13 +113,13 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
-    draw_rectangle(ctx, rectangle, False, d->bordercolor);
+    draw_rectangle(ctx, rectangle, 1.0, False, d->bordercolor);
 
     rectangle.x++;
     rectangle.y++;
     rectangle.width = d->size;
     rectangle.height -= 2;
-    draw_rectangle(ctx, rectangle, True, d->bg);
+    draw_rectangle(ctx, rectangle, 1.0, True, d->bg);
 
     /* for graph drawing */
     rectangle.x = left_offset + 2;

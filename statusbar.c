@@ -113,7 +113,7 @@ statusbar_draw(Statusbar *statusbar)
 
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
-    draw_rectangle(statusbar->ctx, rectangle, True,
+    draw_rectangle(statusbar->ctx, rectangle, 1.0, True,
                    globalconf.screens[statusbar->screen].styles.normal.bg);
 
     for(widget = statusbar->widgets; widget; widget = widget->next)

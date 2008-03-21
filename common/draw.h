@@ -124,8 +124,8 @@ font_t *draw_font_new(Display *disp, char *fontname);
 void draw_font_delete(font_t **);
 
 void draw_text(DrawCtx *, area_t, Alignment, int, char *, style_t);
-void draw_rectangle(DrawCtx *, area_t, Bool, XColor);
-void draw_rectangle_gradient(DrawCtx *, area_t, Bool, area_t, XColor *, XColor *, XColor *);
+void draw_rectangle(DrawCtx *, area_t, float, Bool, XColor);
+void draw_rectangle_gradient(DrawCtx *, area_t, float, Bool, area_t, XColor *, XColor *, XColor *);
 
 void draw_graph_setup(DrawCtx *);
 void draw_graph(DrawCtx *, area_t, int *, int *, int, Position, area_t, XColor *, XColor *, XColor *);

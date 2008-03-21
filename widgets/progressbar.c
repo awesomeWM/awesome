@@ -113,7 +113,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             rectangle.y = pb_y;
             rectangle.width = pb_width;
             rectangle.height = pb_height;
-            draw_rectangle(ctx, rectangle, False, d->bordercolor[i]);
+            draw_rectangle(ctx, rectangle, 1.0, False, d->bordercolor[i]);
 
             /* new value/progress in px + pattern setup */
             if(!d->reverse[i])
@@ -145,10 +145,10 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 /* fg color */
                 if(!d->reverse[i])
-                    draw_rectangle_gradient(ctx, rectangle, True, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
                 else /*REV: bg */
-                    draw_rectangle(ctx, rectangle, True, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
             }
 
             /* top part */
@@ -161,9 +161,9 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 /* bg color */
                 if(!d->reverse[i])
-                    draw_rectangle(ctx, rectangle, True, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
                 else /* REV: bg */
-                    draw_rectangle_gradient(ctx, rectangle, True, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
             }
             pb_offset += pb_width + d->gap;
@@ -178,7 +178,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             rectangle.y = pb_y + pb_offset;
             rectangle.width = pb_width;
             rectangle.height = pb_height;
-            draw_rectangle(ctx, rectangle, False, d->bordercolor[i]);
+            draw_rectangle(ctx, rectangle, 1.0, False, d->bordercolor[i]);
 
             /* new value/progress in px + pattern setup */
             if(!d->reverse[i])
@@ -210,10 +210,10 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 /* fg color */
                 if(!d->reverse[i])
-                    draw_rectangle_gradient(ctx, rectangle, True, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
                 else /* REV: bg */
-                    draw_rectangle(ctx, rectangle, True, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
             }
 
             /* right part */
@@ -226,9 +226,9 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 /* bg color */
                 if(!d->reverse[i])
-                    draw_rectangle(ctx, rectangle, True, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
                 else /* REV: fg */
-                    draw_rectangle_gradient(ctx, rectangle, True, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
             }
             pb_offset += pb_height + d->gap;

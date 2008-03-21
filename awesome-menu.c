@@ -441,11 +441,11 @@ redraw(void)
         {
             geometry.x = prompt_len;
             geometry.width = x_of_previous_item - prompt_len;
-            draw_rectangle(globalconf.ctx, geometry, True, globalconf.styles.normal.bg);
+            draw_rectangle(globalconf.ctx, geometry, 1.0, True, globalconf.styles.normal.bg);
         }
     }
     else if(geometry.width)
-        draw_rectangle(globalconf.ctx, geometry, True, globalconf.styles.normal.bg);
+        draw_rectangle(globalconf.ctx, geometry, 1.0, True, globalconf.styles.normal.bg);
 
     simplewindow_refresh_drawable(globalconf.sw, DefaultScreen(globalconf.display));
     XSync(globalconf.display, False);

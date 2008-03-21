@@ -203,7 +203,7 @@ draw_text(DrawCtx *ctx,
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
 
-    draw_rectangle(ctx, area, True, style.bg);
+    draw_rectangle(ctx, area, 1.0, True, style.bg);
 
     if(!(len = olen = a_strlen(text)))
         return;
@@ -324,14 +324,15 @@ draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
 /** Draw rectangle
  * \param ctx Draw context
  * \param geometry geometry
+ * \param line_width line width
  * \param filled fill rectangle?
  * \param color color to use
  */
 void
-draw_rectangle(DrawCtx *ctx, area_t geometry, Bool filled, XColor color)
+draw_rectangle(DrawCtx *ctx, area_t geometry, float line_width, Bool filled, XColor color)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
-    cairo_set_line_width(ctx->cr, 1.0);
+    cairo_set_line_width(ctx->cr, line_width);
     cairo_set_source_rgb(ctx->cr,
                          color.red / 65535.0,
                          color.green / 65535.0,
@@ -353,6 +354,7 @@ draw_rectangle(DrawCtx *ctx, area_t geometry, Bool filled, XColor color)
 /** Draw rectangle with gradient colors
  * \param ctx Draw context
  * \param geometry geometry
+ * \param line_width line width
  * \param filled filled rectangle?
  * \param pattern__x pattern start x coord
  * \param pattern_width pattern width
@@ -361,14 +363,14 @@ draw_rectangle(DrawCtx *ctx, area_t geometry, Bool filled, XColor color)
  * \param pcolor_end color at pattern_start + pattern_width
  */
 void
-draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, Bool filled,
+draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, float line_width, Bool filled,
                         area_t pattern_rect, XColor *pcolor,
                         XColor *pcolor_center, XColor *pcolor_end)
 {
     cairo_pattern_t *pat;
 
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
-    cairo_set_line_width(ctx->cr, 1.0);
+    cairo_set_line_width(ctx->cr, line_width);
 
     pat = draw_setup_cairo_color_source(ctx, pattern_rect, pcolor, pcolor_center, pcolor_end);
 
