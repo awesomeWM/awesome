@@ -46,9 +46,21 @@ extern AwesomeConf globalconf;
 
 #include "uicbgen.h"
 
+/** Restart awesome with the current command line
+ * \param screen ID (unused)
+ * \param arg arg (unused)
+ * \ingroup ui_callback
+ */
+void
+uicb_restart(int screen __attribute__ ((unused)),
+             char *arg __attribute__ ((unused)))
+{
+    uicb_exec(0, globalconf.argv);
+}
+
 /** Execute another process, replacing the current instance of Awesome
  * \param screen Screen ID
- * \param arg Command
+ * \param cmd Command
  * \ingroup ui_callback
  */
 void

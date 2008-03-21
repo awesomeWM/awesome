@@ -26,6 +26,7 @@ typedef void (Uicb)(int, char *);
 
 int parse_control(char *);
 
+Uicb uicb_restart;
 Uicb uicb_exec;
 Uicb uicb_spawn;
 

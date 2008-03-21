@@ -252,7 +252,9 @@ General
 *spawn* client::
     Execute an external program.
 *exec* program::
-    Replace awesome with another window manager (or itself; i.e. reload config).
+    Replace awesome with another window manager.
+*restart*::
+    Restart awesome.
 *widget_tell* widget-identifier data::
     Feed information to your widgets.
 

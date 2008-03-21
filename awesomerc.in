@@ -395,8 +395,7 @@ keys
     {
         modkey = {"Mod4", "Control"}
         key = "r"
-        command = "exec"
-        arg = "awesome"
+        command = "restart"
     }
     key
     {
