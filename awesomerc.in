@@ -4,7 +4,7 @@ screen 0
     {
         normal
         {
-            font = "vera 10"
+            font = "sans 10"
             fg = "#eeeeee"
             bg = "#111111"
             border = "#6666ff"
