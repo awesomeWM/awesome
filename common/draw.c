@@ -19,8 +19,8 @@
  *
  */
 
-#include <cairo.h>
 #include <cairo-xlib.h>
+#include <Imlib2.h>
 
 #include <langinfo.h>
 #include <iconv.h>
@@ -593,6 +593,46 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
+static const char *
+draw_imlib_load_strerror(Imlib_Load_Error e)
+{
+    switch(e)
+    {
+      case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST:
+        return "no such file or directory";
+      case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY:
+        return "file is a directory";
+      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ:
+        return "read permission denied";
+      case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:
+        return "no loader for file format";
+      case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
+        return "path too long";
+      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
+        return "path component non existant";
+      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
+        return "path compoment not a directory";
+      case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
+        return "path points oustide address space";
+      case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
+        return "too many symbolic links";
+      case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:
+        return "out of memory";
+      case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:
+        return "out of file descriptors";
+      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:
+        return "write permission denied";
+      case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE:
+        return "out of disk space";
+      case IMLIB_LOAD_ERROR_UNKNOWN:
+        return "unknown error, that's really bad";
+      case IMLIB_LOAD_ERROR_NONE:
+        return "no error, oops";
+    }
+
+    return "unknown error";
+}
+
 /** Draw an image (PNG format only) from a file to a draw context
  * \param ctx Draw context to draw to
  * \param x x coordinate
@@ -603,35 +643,45 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
 void
 draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 {
-    double ratio;
-    int h;
-    cairo_surface_t *source;
-    cairo_t *cr;
-    cairo_status_t cairo_st;
+    int w, h, size;
+    DATA32 *data;
+    unsigned char *dataimg;
+    Imlib_Image image;
+    Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
 
-    source = cairo_image_surface_create_from_png(filename);
-    if((cairo_st = cairo_surface_status(source)))
-    {
-        warn("failed to draw image %s: %s\n", filename, cairo_status_to_string(cairo_st));
-        cairo_surface_destroy(source);
-        return;
-    }
-    cr = cairo_create (ctx->surface);
-    if(wanted_h > 0 && (h = cairo_image_surface_get_height(source)) > 0)
-    {
-        ratio = (double) wanted_h / (double) h;
-        cairo_scale(cr, ratio, ratio);
-        cairo_set_source_surface(cr, source, x / ratio, y / ratio);
-    }
-    else
-        cairo_set_source_surface(cr, source, x, y);
-    cairo_paint(cr);
+    if(!(image = imlib_load_image_with_error_return(filename, &e)))
+        return warn("cannot load image %s: %s\n", filename, draw_imlib_load_strerror(e));
 
-    cairo_destroy(cr);
-    cairo_surface_destroy(source);
+    imlib_context_set_image(image);
+    h = imlib_image_get_height();
+    w = imlib_image_get_width();
+
+    size = w * h;
+
+    data = imlib_image_get_data_for_reading_only();
+
+    dataimg = p_new(unsigned char, size * 4);
+
+    memcpy(dataimg, data, size * 4);
+
+#if 0
+    /* Alternate method */
+    for(i = 0; i < size; i++, dataimg += 4)
+    {
+        dataimg[3] = (data[i] >> 24) & 0xff; /* A */
+        dataimg[2] = (data[i] >> 16) & 0xff; /* R */
+        dataimg[1] = (data[i] >>  8) & 0xff; /* G */
+        dataimg[0] = data[i] & 0xff; /* B */
+    }
+#endif
+
+    draw_image_from_argb_data(ctx, x, y, w, h, wanted_h, dataimg);
+
+    imlib_free_image();
+    p_delete(&dataimg);
 }
 
-/** Get an imag size (PNG format only)
+/** Get an image size
  * \param filename file name
  * \return area_t structure with width and height set to image size
  */
@@ -639,22 +689,20 @@ area_t
 draw_get_image_size(const char *filename)
 {
     area_t size = { -1, -1, -1, -1, NULL, NULL };
-    cairo_surface_t *surface;
-    cairo_status_t cairo_st;
+    Imlib_Image image;
+    Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
 
-    surface = cairo_image_surface_create_from_png(filename);
-    if((cairo_st = cairo_surface_status(surface)))
-        warn("failed to get image size %s: %s\n", filename, cairo_status_to_string(cairo_st));
-    else
+    if((image = imlib_load_image_with_error_return(filename, &e)))
     {
-        cairo_image_surface_get_width(surface);
-        size.x = 0;
-        size.y = 0;
-        size.width = cairo_image_surface_get_width(surface);
-        size.height = cairo_image_surface_get_height(surface);
-    }
+        imlib_context_set_image(image);
 
-    cairo_surface_destroy(surface);
+        size.width = imlib_image_get_width();
+        size.height = imlib_image_get_height();
+
+        imlib_free_image();
+    }
+    else
+        warn("cannot load image %s: %s\n", filename, draw_imlib_load_strerror(e));
 
     return size;
 }
