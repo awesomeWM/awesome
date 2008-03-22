@@ -129,8 +129,14 @@ x_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
                                                 WINDOW, 0, 1),
                                NULL);
 
-    if(!r)
+    if(!r || r->type != WINDOW || r->format != 32 || r->length == 0)
+    {
+        *prop_win = XCB_NONE;
+        if(r)
+            p_delete(&r);
+
         return false;
+    }
 
     *prop_win = *((xcb_window_t *) xcb_get_property_value(r));
     p_delete(&r);
