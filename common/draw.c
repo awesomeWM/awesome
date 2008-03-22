@@ -916,6 +916,8 @@ draw_align_get_from_str(const char *align)
     return AlignAuto;
 }
 
+#define RGB_COLOR_8_TO_16(i) (65535 * ((i) & 0xff) / 255)
+
 /** Initialize an X color
  * \param conn Connection ref
  * \param phys_screen Physical screen number
@@ -926,31 +928,68 @@ draw_align_get_from_str(const char *align)
 bool
 draw_color_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t *color)
 {
-    xcb_alloc_named_color_reply_t *c;
     xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
+    xcb_alloc_color_reply_t *hexa_color = NULL;
+    xcb_alloc_named_color_reply_t *named_color = NULL;
 
     if(!a_strlen(colstr))
         return false;
 
-    if((c = xcb_alloc_named_color_reply(conn,
-                                        xcb_alloc_named_color(conn,
-                                                              s->default_colormap,
-                                                              strlen(colstr),
-                                                              colstr),
-                                        NULL)) == NULL)
+    /* The color is given in RGB value */
+    if(colstr[0] == '#' && a_strlen(colstr) == 7)
     {
-        warn("awesome: error, cannot allocate color '%s'\n", colstr);
-        return false;
+        errno = 0;
+        unsigned long colnum = strtoul(&colstr[1], NULL, 16);
+        if(errno != 0)
+        {
+            warn("awesome: error, invalid color '%s'\n", colstr);
+            return false;
+        }
+
+        uint16_t red = RGB_COLOR_8_TO_16(colnum >> 16);
+        uint16_t green = RGB_COLOR_8_TO_16(colnum >> 8);
+        uint16_t blue = RGB_COLOR_8_TO_16(colnum);
+
+        hexa_color = xcb_alloc_color_reply(conn,
+                                           xcb_alloc_color(conn,
+                                                           s->default_colormap,
+                                                           red, green, blue),
+                                           NULL);
+
+        if(hexa_color)
+        {
+            color->pixel = hexa_color->pixel;
+            color->red = hexa_color->red;
+            color->green = hexa_color->green;
+            color->blue = hexa_color->blue;
+
+            p_delete(&hexa_color);
+            return true;
+        }
+    }
+    else
+    {
+        named_color = xcb_alloc_named_color_reply(conn,
+                                                  xcb_alloc_named_color(conn,
+                                                                        s->default_colormap,
+                                                                        strlen(colstr),
+                                                                        colstr),
+                                                  NULL);
+
+        if(named_color)
+        {
+            color->pixel = named_color->pixel;
+            color->red = named_color->visual_red;
+            color->green = named_color->visual_green;
+            color->blue = named_color->visual_blue;
+
+            p_delete(&named_color);
+            return true;
+        }
     }
 
-    color->pixel = c->pixel;
-    color->red = c->visual_red;
-    color->green = c->visual_green;
-    color->blue = c->visual_blue;
-
-    p_delete(&c);
-
-    return true;
+    warn("awesome: error, cannot allocate color '%s'\n", colstr);
+    return false;
 }
 
 /** Init a style struct. Every value will be inherited from m
