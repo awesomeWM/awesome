@@ -384,14 +384,17 @@ main(int argc, char *argv[])
     globalconf.evenths = xcb_alloc_event_handlers(conn);
     xcb_set_error_handler_catch_all(globalconf.evenths, xerrorstart, NULL);
 
+    const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
+
     for(screen_nbr = 0;
         screen_nbr < xcb_setup_roots_length(xcb_get_setup(conn));
         screen_nbr++)
     {
         /* this causes an error if some other window manager is
          * running */
-        x_select_input(conn, root_window(conn, screen_nbr),
-                       XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT);
+        xcb_change_window_attributes(conn,
+                                     root_window(conn, screen_nbr),
+                                     XCB_CW_EVENT_MASK, &select_input_val);
     }
 
     /* need to xcb_flush to validate error handler */
@@ -455,9 +458,6 @@ main(int argc, char *argv[])
                                      root_window(globalconf.connection, screen_nbr),
                                      XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
                                      change_win_vals);
-        x_select_input(globalconf.connection,
-                       root_window(globalconf.connection, screen_nbr),
-                       change_win_vals[0]);
         ewmh_set_supported_hints(screen_nbr);
         /* call this to at least grab root window clicks */
         window_root_grabbuttons(screen_nbr);

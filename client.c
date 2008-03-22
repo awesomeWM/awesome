@@ -410,7 +410,12 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* update titlebar with real floating info now */
     titlebar_update_geometry_floating(c);
 
-    x_select_input(globalconf.connection, w, XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW);
+    const uint32_t select_input_val[] = {
+        XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE |
+        XCB_EVENT_MASK_ENTER_WINDOW };
+
+    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK,
+                                 select_input_val);
 
     /* handle xshape */
     if(globalconf.have_shape)

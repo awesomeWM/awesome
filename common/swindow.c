@@ -69,8 +69,6 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
                       XCB_CW_BACK_PIXMAP | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       create_win_val);
 
-    x_select_input(conn, sw->window, create_win_val[2]);
-
     sw->drawable = xcb_generate_id(conn);
     xcb_create_pixmap(conn, s->root_depth, sw->drawable,
                       root_window(conn, phys_screen), w, h);

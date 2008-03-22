@@ -94,18 +94,6 @@ xgetnumlockmask(xcb_connection_t *conn)
     return mask;
 }
 
-/** 'XSelectInput' from Xlib is only a function around
- * 'ChangeWindowAttributes' which set the value mask to 'CWEventMask'
- * \param c X connection
- */
-void
-x_select_input(xcb_connection_t *c, xcb_window_t w,
-	       uint32_t event_mask)
-{
-    const uint32_t config_win_val[] = { event_mask };
-    xcb_change_window_attributes(c, w, XCB_CW_EVENT_MASK, config_win_val);
-}
-
 /** Equivalent to 'XGetTransientForHint' which is actually a
  * 'XGetWindowProperty' which gets the WM_TRANSIENT_FOR property of
  * the specified window
