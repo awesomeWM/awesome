@@ -73,7 +73,8 @@ uicb_spawn(int screen, char *arg)
     if(!XineramaIsActive(globalconf.display) && (tmp = getenv("DISPLAY")))
     {
         display = a_strdup(tmp);
-        if((tmp = strrchr(display, '.')))
+        tmp = strchr(display, ':');
+        if(tmp && (tmp = strrchr(tmp, '.')))
             *tmp = '\0';
         snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, screen);
         setenv("DISPLAY", newdisplay, 1);
