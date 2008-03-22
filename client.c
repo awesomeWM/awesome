@@ -330,8 +330,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wa, int screen)
     config_win_val = c->border = globalconf.screens[screen].borderpx;
     xcb_configure_window(globalconf.connection, w, XCB_CONFIG_WINDOW_BORDER_WIDTH,
                          &config_win_val);
-    xcb_configure_window(globalconf.connection, w, XCB_CONFIG_WINDOW_STACK_MODE,
-                         &config_win_val);
+    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_BORDER_PIXEL,
+                                 &config_win_val);
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
@@ -708,7 +708,7 @@ xcb_size_hints_t *
 client_updatesizehints(Client *c)
 {
     long msize;
-    xcb_size_hints_t *size = NULL;
+    xcb_size_hints_t *size = xcb_alloc_size_hints();
 
     if(!xcb_get_wm_normal_hints(globalconf.connection, c->win, size, &msize) ||
         size == NULL)
