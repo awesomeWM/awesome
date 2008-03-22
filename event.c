@@ -220,8 +220,11 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             ev->x, ev->y, ev->width, ev->height, ev->border_width,
             ev->sibling, ev->stack_mode };
 
-        xcb_configure_window(connection, ev->window, ev->value_mask,
-                             configure_values);
+         xcb_configure_window(connection, ev->window,
+                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH |
+                              XCB_CONFIG_WINDOW_HEIGHT | XCB_CONFIG_WINDOW_BORDER_WIDTH |
+                              XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                              configure_values);
     }
 
     return 0;
@@ -238,7 +241,7 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
     int screen_nbr;
     const xcb_screen_t *screen;
 
-    for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length (xcb_get_setup (connection)); screen_nbr++)
+    for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length(xcb_get_setup (connection)); screen_nbr++)
         if(ev->window == root_window(connection, screen_nbr)
            && (screen = xcb_aux_get_screen(connection, screen_nbr)) != NULL
            && (ev->width != screen->width_in_pixels
@@ -414,7 +417,7 @@ int
 event_handle_maprequest(void *data __attribute__ ((unused)),
                         xcb_connection_t *connection, xcb_map_request_event_t *ev)
 {
-    static xcb_get_window_attributes_reply_t *wa;
+    xcb_get_window_attributes_reply_t *wa;
     int screen_nbr = 0;
     xcb_query_pointer_reply_t *qpr = NULL;
     xcb_get_geometry_reply_t *wgeom;
