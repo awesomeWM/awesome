@@ -293,11 +293,11 @@ client_stack(Client *c)
 
 /** Manage a new client
  * \param w The window
- * \param wa Window attributes
+ * \param wgeom Window geometry
  * \param screen Screen ID
  */
 void
-client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wa, int screen)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 {
     Client *c, *t = NULL;
     xcb_window_t trans;
@@ -309,7 +309,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wa, int screen)
 
     c = p_new(Client, 1);
 
-    c->screen = screen_get_bycoord(globalconf.screens_info, screen, wa->x, wa->y);
+    c->screen = screen_get_bycoord(globalconf.screens_info, screen, wgeom->x, wgeom->y);
 
     if(globalconf.screens_info->xinerama_is_active)
         c->phys_screen = globalconf.default_screen;
@@ -318,11 +318,11 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wa, int screen)
 
     /* Initial values */
     c->win = w;
-    c->geometry.x = c->f_geometry.x = c->m_geometry.x = wa->x;
-    c->geometry.y = c->f_geometry.y = c->m_geometry.y = wa->y;
-    c->geometry.width = c->f_geometry.width = c->m_geometry.width = wa->width;
-    c->geometry.height = c->f_geometry.height = c->m_geometry.height = wa->height;
-    c->oldborder = wa->border_width;
+    c->geometry.x = c->f_geometry.x = c->m_geometry.x = wgeom->x;
+    c->geometry.y = c->f_geometry.y = c->m_geometry.y = wgeom->y;
+    c->geometry.width = c->f_geometry.width = c->m_geometry.width = wgeom->width;
+    c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
+    c->oldborder = wgeom->border_width;
     c->newcomer = true;
     c->layer = c->oldlayer = LAYER_TILE;
 
