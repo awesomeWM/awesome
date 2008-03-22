@@ -69,33 +69,11 @@ screensinfo_delete(ScreensInfo **si)
     p_delete(si);
 }
 
-static xcb_xinerama_screen_info_t *
-xinerama_query_screens(xcb_connection_t *c, int *screen_number)
-{
-    xcb_xinerama_query_screens_reply_t *reply;
-    xcb_xinerama_screen_info_t *si;
-
-    reply = xcb_xinerama_query_screens_reply(c,
-                                             xcb_xinerama_query_screens_unchecked(c),
-                                             NULL);
-
-    if(!reply)
-    {
-        *screen_number = 0;
-        return NULL;
-    }
-
-    *screen_number = xcb_xinerama_query_screens_screen_info_length(reply);
-    si = xcb_xinerama_query_screens_screen_info(reply);
-    p_delete(&reply);
-
-    return si;
-}
-
 ScreensInfo *
 screensinfo_new(xcb_connection_t *conn)
 {
     ScreensInfo *si;
+    xcb_xinerama_query_screens_reply_t *xsq;
     xcb_xinerama_screen_info_t *xsi;
     int xinerama_screen_number, screen, screen_to_test;
     xcb_screen_t *s;
@@ -103,9 +81,15 @@ screensinfo_new(xcb_connection_t *conn)
 
     si = p_new(ScreensInfo, 1);
 
-    if((si->xinerama_is_active = xinerama_is_active(conn)))
+    xsq = xcb_xinerama_query_screens_reply(conn,
+                                           xcb_xinerama_query_screens_unchecked(conn),
+                                           NULL);
+
+    if((si->xinerama_is_active = xinerama_is_active(conn)) && xsq)
     {
-        xsi = xinerama_query_screens(conn, &xinerama_screen_number);
+        xsi = xcb_xinerama_query_screens_screen_info(xsq);
+        xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
+
         si->geometry = p_new(area_t, xinerama_screen_number);
         si->nscreen = 0;
 
@@ -137,8 +121,6 @@ screensinfo_new(xcb_connection_t *conn)
             p_delete(&si->geometry);
             si->geometry = newgeometry;
         }
-
-        p_delete(&xsi);
     }
     else
     {
@@ -153,6 +135,9 @@ screensinfo_new(xcb_connection_t *conn)
             si->geometry[screen].height = s->height_in_pixels;
         }
     }
+
+    if(xsq)
+        p_delete(&xsq);
 
     return si;
 }
