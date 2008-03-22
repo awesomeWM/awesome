@@ -216,15 +216,47 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
     }
     else
     {
-        const uint32_t configure_values[] = {
-            ev->x, ev->y, ev->width, ev->height, ev->border_width,
-            ev->sibling, ev->stack_mode };
+        uint16_t config_win_mask = 0;
+        uint32_t config_win_vals[7];
+        unsigned short i = 0;
 
-         xcb_configure_window(connection, ev->window,
-                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH |
-                              XCB_CONFIG_WINDOW_HEIGHT | XCB_CONFIG_WINDOW_BORDER_WIDTH |
-                              XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                              configure_values);
+        if(ev->value_mask & XCB_CONFIG_WINDOW_X)
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_X;
+            config_win_vals[i++] = ev->x;
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_Y;
+            config_win_vals[i++] = ev->y;
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_WIDTH;
+            config_win_vals[i++] = ev->width;
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_HEIGHT;
+            config_win_vals[i++] = ev->height;
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_BORDER_WIDTH;
+            config_win_vals[i++] = ev->border_width;
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_SIBLING)
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_SIBLING;
+            config_win_vals[i++] = ev->sibling;
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_STACK_MODE)
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_STACK_MODE;
+            config_win_vals[i++] = ev->stack_mode;
+        }
+
+         xcb_configure_window(connection, ev->window, config_win_mask, config_win_vals);
     }
 
     return 0;
