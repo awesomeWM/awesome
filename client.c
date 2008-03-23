@@ -325,7 +325,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     client_updatewmhints(c);
 
     /* Try to load props if any */
-    retloadprops = client_loadprops(c, screen);
+    if(!(retloadprops = client_loadprops(c, screen)))
+        move_client_to_screen(c, screen, True);
 
     /* Then check clients hints */
     ewmh_check_client_hints(c);
@@ -333,41 +334,30 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     /* default titlebar position */
     c->titlebar = globalconf.screens[screen].titlebar_default;
 
-    /* First check clients hints */
-    ewmh_check_client_hints(c);
-
     /* get the matching rule if any */
     rule = rule_matching_client(c);
 
     /* Then apply rules if no props */
-    if(!retloadprops)
+    if(!retloadprops && rule)
     {
-        /* Get the client's rule */
-        if(rule)
+        if(rule->screen != RULE_NOSCREEN)
+            move_client_to_screen(c, rule->screen, True);
+        tag_client_with_rule(c, rule);
+
+        switch(rule->isfloating)
         {
-            if(rule->screen != RULE_NOSCREEN)
-                move_client_to_screen(c, rule->screen, True);
-            else
-                move_client_to_screen(c, screen, True);
-            tag_client_with_rule(c, rule);
-
-            switch(rule->isfloating)
-            {
-              case Maybe:
-                break;
-              case Yes:
-                client_setfloating(c, True);
-                break;
-              case No:
-                client_setfloating(c, False);
-                break;
-            }
-
-            if(rule->opacity >= 0.0f)
-                window_settrans(c->win, rule->opacity);
+          case Maybe:
+            break;
+          case Yes:
+            client_setfloating(c, True);
+            break;
+          case No:
+            client_setfloating(c, False);
+            break;
         }
-        else
-            move_client_to_screen(c, screen, True);
+
+        if(rule->opacity >= 0.0f)
+            window_settrans(c->win, rule->opacity);
     }
 
     /* check for transient and set tags like its parent,
