@@ -205,7 +205,7 @@ client_focus(Client *c, int screen, Bool raise)
         /* save sel in focus history */
         focus_add_client(c);
         if(globalconf.screens[c->screen].opacity_unfocused != -1)
-            window_settrans(c->win, -1);
+            window_settrans(c->win, globalconf.screens[c->screen].opacity_focused);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].styles.focus.border.pixel);
         titlebar_update(c);

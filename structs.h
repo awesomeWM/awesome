@@ -307,6 +307,8 @@ typedef struct
     } styles;
     /** Transparency of unfocused clients */
     int opacity_unfocused;
+    /** Transparency of focused clients */
+    int opacity_focused;
     /** Tag list */
     Tag *tags;
     /** Layout list */
