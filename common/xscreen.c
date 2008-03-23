@@ -78,15 +78,24 @@ screensinfo_new(xcb_connection_t *conn)
     int xinerama_screen_number, screen, screen_to_test;
     xcb_screen_t *s;
     bool drop;
+    xcb_xinerama_is_active_reply_t *r = NULL;
 
     si = p_new(ScreensInfo, 1);
 
-    xsq = xcb_xinerama_query_screens_reply(conn,
-                                           xcb_xinerama_query_screens_unchecked(conn),
-                                           NULL);
-
-    if((si->xinerama_is_active = xinerama_is_active(conn)) && xsq)
+    /* Check for extension before checking for Xinerama */
+    if(xcb_get_extension_data(conn, &xcb_xinerama_id)->present)
     {
+        r = xcb_xinerama_is_active_reply(conn, xcb_xinerama_is_active(conn), NULL);
+        si->xinerama_is_active = r->state;
+        p_delete(&r);
+    }
+
+    if(si->xinerama_is_active)
+    {
+        xsq = xcb_xinerama_query_screens_reply(conn,
+                                               xcb_xinerama_query_screens_unchecked(conn),
+                                               NULL);
+
         xsi = xcb_xinerama_query_screens_screen_info(xsq);
         xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
 
@@ -121,6 +130,8 @@ screensinfo_new(xcb_connection_t *conn)
             p_delete(&si->geometry);
             si->geometry = newgeometry;
         }
+
+        p_delete(&xsq);
     }
     else
     {
@@ -135,9 +146,6 @@ screensinfo_new(xcb_connection_t *conn)
             si->geometry[screen].height = s->height_in_pixels;
         }
     }
-
-    if(xsq)
-        p_delete(&xsq);
 
     return si;
 }

@@ -132,22 +132,6 @@ x_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
     return true;
 }
 
-bool
-xinerama_is_active(xcb_connection_t *c)
-{
-    bool ret;
-    xcb_xinerama_is_active_reply_t *r = NULL;
-
-    r = xcb_xinerama_is_active_reply(c, xcb_xinerama_is_active(c), NULL);
-    if(!r)
-        return false;
-
-    ret = r->state;
-    p_delete(&r);
-
-    return ret;
-}
-
 xcb_window_t
 root_window(xcb_connection_t *c, int screen_number)
 {

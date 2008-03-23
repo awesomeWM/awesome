@@ -77,7 +77,6 @@ unsigned int xgetnumlockmask(xcb_connection_t *);
 
 /* Common function defined in Xlib but not in XCB */
 bool x_get_transient_for_hint(xcb_connection_t *, xcb_window_t, xcb_window_t *);
-bool xinerama_is_active(xcb_connection_t *);
 xcb_window_t root_window(xcb_connection_t *, int);
 
 typedef struct _class_hint_t
