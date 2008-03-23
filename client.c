@@ -265,7 +265,7 @@ client_focus(Client *c, int screen, Bool raise)
     }
     else
         XSetInputFocus(globalconf.display,
-                       RootWindow(globalconf.display, c->phys_screen),
+                       RootWindow(globalconf.display, screen_virttophys(screen)),
                        RevertToPointerRoot, CurrentTime);
 
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
