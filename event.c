@@ -227,7 +227,7 @@ event_handle_configurenotify(XEvent * e)
            && (ev->width != DisplayWidth(e->xany.display, screen)
                || ev->height != DisplayHeight(e->xany.display, screen)))
             /* it's not that we panic, but restart */
-            uicb_exec(0, globalconf.argv);
+            uicb_restart(0, NULL);
 }
 
 /** Handle XDestroyWindow events
@@ -482,7 +482,7 @@ void
 event_handle_randr_screen_change_notify(XEvent *e)
 {
     XRRUpdateConfiguration(e);
-    uicb_exec(0, globalconf.argv);
+    uicb_restart(0, NULL);
 }
 
 /** Handle XClientMessage events
