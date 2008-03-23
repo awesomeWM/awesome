@@ -339,8 +339,8 @@ config_parse_screen(cfg_t *cfg, int screen)
     virtscreen->sloppy_focus_raise = cfg_getbool(cfg_general, "sloppy_focus_raise");
     virtscreen->new_become_master = cfg_getbool(cfg_general, "new_become_master");
     virtscreen->new_get_focus = cfg_getbool(cfg_general, "new_get_focus");
-    virtscreen->opacity_unfocused = cfg_getint(cfg_general, "opacity_unfocused");
-    virtscreen->opacity_focused = cfg_getint(cfg_general, "opacity_focused");
+    virtscreen->opacity_unfocused = cfg_getfloat(cfg_general, "opacity_unfocused");
+    virtscreen->opacity_focused = cfg_getfloat(cfg_general, "opacity_focused");
     virtscreen->floating_placement =
         name_func_lookup(cfg_getstr(cfg_general, "floating_placement"),
                                     FloatingPlacementList);

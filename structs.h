@@ -306,9 +306,9 @@ typedef struct
         style_t urgent;
     } styles;
     /** Transparency of unfocused clients */
-    int opacity_unfocused;
+    double opacity_unfocused;
     /** Transparency of focused clients */
-    int opacity_focused;
+    double opacity_focused;
     /** Tag list */
     Tag *tags;
     /** Layout list */
