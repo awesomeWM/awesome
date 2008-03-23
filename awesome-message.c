@@ -144,7 +144,8 @@ main(int argc, char **argv)
         switch(opt)
         {
 	  case 'd':
-	    delay = atoi(optarg);
+	    if((delay = atoi(optarg)) <= 0)
+                delay = 1;
 	    break;
           case 'v':
             eprint_version(PROGNAME);

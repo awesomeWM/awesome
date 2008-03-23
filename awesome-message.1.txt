@@ -30,7 +30,7 @@ OPTIONS
 -y ycoord::
     Set y coordinate of the window.
 -d delay::
-    Close the window after <delay> seconds.
+    Close the window after <delay> seconds. Must be an integer greater than 0.
 <message>::
     Print this message in the window.
 <icon>::
