@@ -348,6 +348,8 @@ struct AwesomeConf
     xcb_event_handlers_t *evenths;
     /** Default screen number */
     int default_screen;
+    /** Keys symbol table */
+    xcb_key_symbols_t *keysyms;
     /** Logical screens */
     VirtScreen *screens;
     /** Screens info */
@@ -365,6 +367,10 @@ struct AwesomeConf
     } buttons;
     /** Numlock mask */
     unsigned int numlockmask;
+    /** Numlock mask */
+    unsigned int shiftlockmask;
+    /** Numlock mask */
+    unsigned int capslockmask;
     /** Check for XShape extension */
     bool have_shape;
     /** Check for XRandR extension */

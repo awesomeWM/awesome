@@ -25,12 +25,14 @@
 #include <stdbool.h>
 
 #include <xcb/xcb.h>
+#include <xcb/xcb_keysyms.h>
 
 /* XCB doesn't provide keysyms definition */
 #include <X11/keysym.h>
 
 bool xgettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char *, ssize_t);
-unsigned int xgetnumlockmask(xcb_connection_t *);
+void xutil_get_lock_mask(xcb_connection_t *, xcb_key_symbols_t *,
+                         unsigned int *, unsigned int *, unsigned int *);
 
 /* See http://tronche.com/gui/x/xlib/appendix/b/ for values */
 #define CURSOR_FLEUR    52

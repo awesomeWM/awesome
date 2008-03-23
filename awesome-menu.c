@@ -103,10 +103,6 @@ typedef struct
     xcb_connection_t *connection;
     /** Default screen number */
     int default_screen;
-    /** Is the caps lock enabled? */
-    bool caps_lock;
-    /** Is the shift lock enabled? */
-    bool shift_lock;
     /** The window */
     SimpleWindow *sw;
     /** The draw contet */
@@ -117,8 +113,14 @@ typedef struct
         style_t normal;
         style_t focus;
     } styles;
+    /** Key symbols */
+    xcb_key_symbols_t *keysyms;
     /** Numlock mask */
     unsigned int numlockmask;
+    /** Shiftlock mask */
+    unsigned int shiftlockmask;
+    /** Capslock mask */
+    unsigned int capslockmask;
     /** The text */
     char *text;
     /** The text when we asked to complete */
@@ -510,29 +512,17 @@ redraw(void)
  * \todo use XKB!
  */
 static void
-x_lookup_string(xcb_key_press_event_t *e, char **buf, size_t *buf_len, xcb_keysym_t *ksym)
+key_press_lookup_string(xcb_key_press_event_t *e,
+                        char **buf, size_t *buf_len,
+                        xcb_keysym_t *ksym)
 {
-    xcb_key_symbols_t *keysyms = xcb_key_symbols_alloc(globalconf.connection);
     xcb_keysym_t k0, k1;
 
     /* 'col' (third parameter) is used to get the proper KeySym
      * according to modifier (XCB doesn't provide an equivalent to
      * XLookupString()) */
-    k0 = xcb_key_press_lookup_keysym(keysyms, e, 0);
-    k1 = xcb_key_press_lookup_keysym(keysyms, e, 1);
-
-    xcb_key_symbols_free(keysyms);
-
-    if(xcb_is_modifier_key(k0) && !k1)
-    {
-        /* The Caps_Lock is now enabled */ 
-        if(k0 == XK_Caps_Lock)
-            globalconf.caps_lock = true;
-
-        /* The Shift lock is now enabled */
-        if(k0 == XK_Shift_Lock)
-            globalconf.shift_lock = true;
-    }
+    k0 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 0);
+    k1 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 1);
 
     /* The numlock modifier is on and the second KeySym is a keypad
      * KeySym */
@@ -541,7 +531,7 @@ x_lookup_string(xcb_key_press_event_t *e, char **buf, size_t *buf_len, xcb_keysy
         /* The Shift modifier is on, or if the Lock modifier is on and
          * is interpreted as ShiftLock, use the first KeySym */ 
         if((e->state & XCB_MOD_MASK_SHIFT) ||
-           (e->state & XCB_MOD_MASK_LOCK && globalconf.shift_lock))
+           (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.shiftlockmask)))
             *ksym = k0;
         else
             *ksym = k1;
@@ -555,25 +545,25 @@ x_lookup_string(xcb_key_press_event_t *e, char **buf, size_t *buf_len, xcb_keysy
     /* The Shift modifier is off and the Lock modifier is on and is
      * interpreted as CapsLock */
     else if(!(e->state & XCB_MOD_MASK_SHIFT) && 
-            (e->state & XCB_MOD_MASK_LOCK && globalconf.caps_lock))
-        /* TODO: The first Keysym is used but if that KeySym is
-         * lowercase alphabetic, then the corresponding uppercase
-         * KeySym is used instead */
-        *ksym = k0;
+            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.capslockmask)))
+        /* The first Keysym is used but if that KeySym is lowercase
+         * alphabetic, then the corresponding uppercase KeySym is used
+         * instead */
+        *ksym = k1;
 
     /* The Shift modifier is on, and the Lock modifier is on and is
      * interpreted as CapsLock */
     else if((e->state & XCB_MOD_MASK_SHIFT) &&
-            (e->state & XCB_MOD_MASK_LOCK && globalconf.caps_lock))
-        /* TODO: The second Keysym is used but if that KeySym is
-         * lowercase alphabetic, then the corresponding uppercase
-         * KeySym is used instead */
+            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.capslockmask)))
+        /* The second Keysym is used but if that KeySym is lowercase
+         * alphabetic, then the corresponding uppercase KeySym is used
+         * instead */
         *ksym = k1;
 
     /* The Shift modifer is on, or the Lock modifier is on and is
      * interpreted as ShiftLock, or both */
     else if((e->state & XCB_MOD_MASK_SHIFT) ||
-            (e->state & XCB_MOD_MASK_LOCK && globalconf.shift_lock))
+            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.shiftlockmask)))
         *ksym = k1;
 
     if(xcb_is_modifier_key(*ksym) || xcb_is_function_key(*ksym) ||
@@ -607,7 +597,7 @@ handle_kpress(xcb_key_press_event_t *e)
 
     len = a_strlen(globalconf.text);
 
-    x_lookup_string(e, &buf, &num, &ksym);
+    key_press_lookup_string(e, &buf, &num, &ksym);
     /* Got a special key, see x_lookup_string() */
     if(!num)
         return;        
@@ -931,10 +921,11 @@ main(int argc, char **argv)
 
     redraw();
 
-    /* TODO: do we need to check at startup that the Caps_Lock and
-     * Shift_Lock keys are pressed? */
-    globalconf.caps_lock = false;
-    globalconf.shift_lock = false;
+    globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
+
+    /* Get the numlock, capslock and shiftlock mask */
+    xutil_get_lock_mask(conn, globalconf.keysyms, &globalconf.numlockmask,
+                        &globalconf.shiftlockmask, &globalconf.capslockmask);
 
     xutil_map_raised(globalconf.connection, globalconf.sw->window);
 
@@ -982,6 +973,7 @@ main(int argc, char **argv)
         }
     }
 
+    xcb_key_symbols_free(globalconf.keysyms);
     p_delete(&globalconf.text);
     draw_context_delete(&globalconf.ctx);
     simplewindow_delete(&globalconf.sw);

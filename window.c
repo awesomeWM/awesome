@@ -180,15 +180,12 @@ window_root_grabkeys(int phys_screen)
 {
     Key *k;
     xcb_keycode_t kc;
-    xcb_key_symbols_t *keysyms;
 
     xcb_ungrab_key(globalconf.connection, ANY_KEY,
                    root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
 
-    keysyms = xcb_key_symbols_alloc(globalconf.connection);
-
     for(k = globalconf.keys; k; k = k->next)
-	if((kc = k->keycode) || (k->keysym && (kc = xcb_key_symbols_get_keycode(keysyms, k->keysym))))
+	if((kc = k->keycode) || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         {
             xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
                          k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
@@ -200,8 +197,6 @@ window_root_grabkeys(int phys_screen)
                          k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
                          XCB_GRAB_MODE_ASYNC);
         }
-
-    xcb_key_symbols_free(keysyms);
 }
 
 void

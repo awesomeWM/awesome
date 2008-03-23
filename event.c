@@ -388,7 +388,6 @@ event_handle_keypress(void *data __attribute__ ((unused)),
 {
     int screen;
     xcb_query_pointer_reply_t *qpr = NULL;
-    xcb_key_symbols_t *keysyms;
     xcb_keysym_t keysym;
     Key *k;
 
@@ -407,15 +406,12 @@ event_handle_keypress(void *data __attribute__ ((unused)),
             break;
         }
 
-    keysyms = xcb_key_symbols_alloc(globalconf.connection);
-    keysym = xcb_key_symbols_get_keysym(keysyms, ev->detail, 0);
+    keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
 
     for(k = globalconf.keys; k; k = k->next)
         if(((k->keycode && ev->detail == k->keycode) || (k->keysym && keysym == k->keysym))
            && k->func && CLEANMASK(k->mod) == CLEANMASK(ev->state))
             k->func(screen, k->arg);
-
-    xcb_key_symbols_free(keysyms);
 
     return 0;
 }
@@ -429,11 +425,8 @@ event_handle_mappingnotify(void *data __attribute__ ((unused)),
                            xcb_connection_t *connection, xcb_mapping_notify_event_t *ev)
 {
     int screen;
-    xcb_key_symbols_t *keysyms = xcb_key_symbols_alloc(connection);
 
-    xcb_refresh_keyboard_mapping(keysyms, ev);
-    xcb_key_symbols_free(keysyms);
-
+    xcb_refresh_keyboard_mapping(globalconf.keysyms, ev);
     if(ev->request == XCB_MAPPING_KEYBOARD)
         for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
             window_root_grabkeys(screen);

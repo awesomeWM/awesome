@@ -26,7 +26,6 @@
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_atom.h>
 #include <xcb/xinerama.h>
-#include <xcb/xcb_keysyms.h>
 
 #include "common/util.h"
 #include "common/xutil.h"
@@ -67,13 +66,14 @@ xgettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
     return true;
 }
 
-unsigned int
-xgetnumlockmask(xcb_connection_t *conn)
+void
+xutil_get_lock_mask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
+                    unsigned int *numlockmask, unsigned int *shiftlockmask,
+                    unsigned int *capslockmask)
 {
     xcb_get_modifier_mapping_reply_t *modmap_r;
-    xcb_keycode_t *modmap;
-    xcb_key_symbols_t *keysyms = xcb_key_symbols_alloc(conn);
-    unsigned int mask = 0;
+    xcb_keycode_t *modmap, kc;
+    unsigned int mask;
     int i, j;
 
     modmap_r = xcb_get_modifier_mapping_reply(conn,
@@ -84,14 +84,22 @@ xgetnumlockmask(xcb_connection_t *conn)
 
     for(i = 0; i < 8; i++)
         for(j = 0; j < modmap_r->keycodes_per_modifier; j++)
-            if(modmap[i * modmap_r->keycodes_per_modifier + j]
-               == xcb_key_symbols_get_keycode(keysyms, XK_Num_Lock))
-                mask = (1 << i);
+        {
+            kc = modmap[i * modmap_r->keycodes_per_modifier + j];
+            mask = (1 << i);
+
+            if(numlockmask != NULL && 
+               kc == xcb_key_symbols_get_keycode(keysyms, XK_Num_Lock))
+                *numlockmask = mask;
+            else if(shiftlockmask != NULL &&
+                    kc == xcb_key_symbols_get_keycode(keysyms, XK_Shift_Lock))
+                *shiftlockmask = mask;
+            else if(capslockmask != NULL &&
+                    kc == xcb_key_symbols_get_keycode(keysyms, XK_Caps_Lock))
+                *capslockmask = mask;
+        }
 
     p_delete(&modmap_r);
-    xcb_key_symbols_free(keysyms);
-
-    return mask;
 }
 
 /** Equivalent to 'XGetTransientForHint' which is actually a

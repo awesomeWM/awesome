@@ -411,7 +411,14 @@ main(int argc, char *argv[])
         XSynchronize(dpy, true);
     */
 
-    /* store display */
+    /* Allocate the key symbols */
+    globalconf.keysyms = xcb_key_symbols_alloc(conn);
+
+    /* Get the NumLock, ShiftLock and CapsLock masks */
+    xutil_get_lock_mask(conn, globalconf.keysyms, &globalconf.numlockmask,
+                        &globalconf.shiftlockmask, &globalconf.capslockmask);
+
+    /* store connection */
     globalconf.connection = conn;
 
     /* init EWMH atoms */

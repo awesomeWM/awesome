@@ -22,7 +22,6 @@
 /* XStringToKeysym() */
 #include <X11/Xlib.h>
 
-#include <xcb/xcb_keysyms.h>
 #include <errno.h>
 
 #include "config.h"
@@ -560,9 +559,6 @@ config_parse(const char *confpatharg)
 
     /* Mouse: titlebar windows click bindings */
     globalconf.buttons.titlebar = parse_mouse_bindings(cfg_mouse, "titlebar", true);
-
-    /* Keys */
-    globalconf.numlockmask = xgetnumlockmask(globalconf.connection);
 
     globalconf.keys = section_keys(cfg_keys);
 
