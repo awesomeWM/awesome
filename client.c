@@ -823,7 +823,7 @@ client_find_visible(Client *sel, Bool reverse)
     /* look for previous or next starting at sel */
 
     for(next = client_iter(&globalconf.clients, sel);
-        next && (next->skip || !client_isvisible(next, sel->screen));
+        next && next != sel && (next->skip || !client_isvisible(next, sel->screen));
         next = client_iter(&globalconf.clients, next));
 
     return next;
