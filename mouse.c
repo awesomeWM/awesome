@@ -21,6 +21,9 @@
 
 #include <math.h>
 
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include "mouse.h"
 #include "screen.h"
 #include "tag.h"
@@ -140,7 +143,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     SimpleWindow *sw = NULL;
     DrawCtx *ctx;
     style_t style;
-    bool ignore_motion_events = false;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
@@ -209,9 +211,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 p_delete(&ev);
                 return;
             case XCB_MOTION_NOTIFY:
-                if(ignore_motion_events)
-                    break;
-
                 if(c->isfloating || layout->arrange == layout_floating)
                 {
                     ev_motion = (xcb_motion_notify_event_t *) ev;
@@ -224,6 +223,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                     if(sw)
                         mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
 
+                    xcb_aux_sync(globalconf.connection);
                     p_delete(&ev);
                 }
                 else
@@ -251,7 +251,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 
                     p_delete(&mquery_pointer_r);
                 }
-                ignore_motion_events = true;
                 break;
             case XCB_CONFIGURE_REQUEST:
             case XCB_EXPOSE:
@@ -281,7 +280,6 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     int ocx = 0, ocy = 0, n;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
-    bool ignore_motion_events = false;
     Client *c = globalconf.focus->client;
     Tag **curtags = tags_get_current(screen);
     Layout *layout = curtags[0]->layout;
@@ -342,6 +340,29 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                                       MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
                                       root_window(globalconf.connection, c->phys_screen),
                                       globalconf.cursor[CurResize], XCB_CURRENT_TIME);
+    
+    if(layout->arrange == layout_floating || c->isfloating)
+    {
+        ocx = c->geometry.x;
+        ocy = c->geometry.y;
+        c->ismax = false;
+    }
+    else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
+             || layout->arrange == layout_tilebottom || layout->arrange == layout_tiletop)
+    {
+        for(n = 0, c = globalconf.clients; c; c = c->next)
+            if(IS_TILED(c, screen))
+                n++;
+
+        if(n <= curtags[0]->nmaster) return;
+        
+        for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
+        if(!c) return;
+
+        area = screen_get_area(screen,
+                               globalconf.screens[c->screen].statusbar,
+                               &globalconf.screens[c->screen].padding);
+    }
 
     if((grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection,
                                                 grab_pointer_c, NULL)) == NULL)
@@ -364,6 +385,8 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                          0, 0, c->geometry.width + c->border - 1,
                          c->geometry.height + c->border - 1);
 
+    xcb_aux_sync(globalconf.connection);
+
     for(;;)
     {
         /* TODO: need a review
@@ -385,9 +408,6 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                 p_delete(&ev);
                 return;
             case XCB_MOTION_NOTIFY:
-                if(ignore_motion_events)
-                    break;
-
                 ev_motion = (xcb_motion_notify_event_t *) ev;
 
                 if(layout->arrange == layout_floating || c->isfloating)
@@ -401,6 +421,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                     client_resize(c, geometry, true);
                     if(sw)
                         mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
+                    xcb_aux_sync(globalconf.connection);
                 }
                 else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
                         || layout->arrange == layout_tiletop || layout->arrange == layout_tilebottom)
@@ -420,7 +441,6 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                         curtags[0]->mwfact = mwfact;
                         globalconf.screens[screen].need_arrange = true;
                         layout_refresh();
-                        ignore_motion_events = true;
                     }
                 }
 
