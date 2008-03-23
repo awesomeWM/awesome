@@ -177,7 +177,7 @@ main(int argc, char *argv[])
     struct sockaddr_un *addr;
     Client *c;
     XSetWindowAttributes wa;
-    Bool xsync = False;
+    Bool xsync = False, confcheck = False;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -202,7 +202,7 @@ main(int argc, char *argv[])
     }
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkcs:",
+    while((opt = getopt_long(argc, argv, "vhkc:s",
                              long_options, NULL)) != -1)
         switch(opt)
         {
@@ -214,12 +214,12 @@ main(int argc, char *argv[])
             break;
           case 'c':
             if(a_strlen(optarg))
-                confpath = optarg;
+                confpath = a_strdup(optarg);
             else
                 eprint("-c option requires a file name\n");
             break;
           case 'k':
-            return config_check(confpath);
+            confcheck = True;
             break;
           case 's':
             xsync = True;
@@ -228,6 +228,9 @@ main(int argc, char *argv[])
 
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
+
+    if(confcheck)
+        return config_check(confpath);
 
     /* X stuff */
     if(!(dpy = XOpenDisplay(NULL)))
