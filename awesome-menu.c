@@ -103,6 +103,10 @@ typedef struct
     xcb_connection_t *connection;
     /** Default screen number */
     int default_screen;
+    /** Is the caps lock enabled? */
+    bool caps_lock;
+    /** Is the shift lock enabled? */
+    bool shift_lock;
     /** The window */
     SimpleWindow *sw;
     /** The draw contet */
@@ -501,6 +505,95 @@ redraw(void)
     xcb_aux_sync(globalconf.connection);
 }
 
+/** XCB equivalent of XLookupString which translate the keycode given
+ * by PressEvent to a KeySym and a string
+ * \todo use XKB!
+ */
+static void
+x_lookup_string(xcb_key_press_event_t *e, char **buf, size_t *buf_len, xcb_keysym_t *ksym)
+{
+    xcb_key_symbols_t *keysyms = xcb_key_symbols_alloc(globalconf.connection);
+    xcb_keysym_t k0, k1;
+
+    /* 'col' (third parameter) is used to get the proper KeySym
+     * according to modifier (XCB doesn't provide an equivalent to
+     * XLookupString()) */
+    k0 = xcb_key_press_lookup_keysym(keysyms, e, 0);
+    k1 = xcb_key_press_lookup_keysym(keysyms, e, 1);
+
+    xcb_key_symbols_free(keysyms);
+
+    if(xcb_is_modifier_key(k0) && !k1)
+    {
+        /* The Caps_Lock is now enabled */ 
+        if(k0 == XK_Caps_Lock)
+            globalconf.caps_lock = true;
+
+        /* The Shift lock is now enabled */
+        if(k0 == XK_Shift_Lock)
+            globalconf.shift_lock = true;
+    }
+
+    /* The numlock modifier is on and the second KeySym is a keypad
+     * KeySym */
+    if((e->state & globalconf.numlockmask) && xcb_is_keypad_key(k1))
+    {
+        /* The Shift modifier is on, or if the Lock modifier is on and
+         * is interpreted as ShiftLock, use the first KeySym */ 
+        if((e->state & XCB_MOD_MASK_SHIFT) ||
+           (e->state & XCB_MOD_MASK_LOCK && globalconf.shift_lock))
+            *ksym = k0;
+        else
+            *ksym = k1;
+    }
+
+    /* The Shift and Lock modifers are both off, use the first
+     * KeySym */
+    else if(!(e->state & XCB_MOD_MASK_SHIFT) && !(e->state & XCB_MOD_MASK_LOCK))
+        *ksym = k0;
+
+    /* The Shift modifier is off and the Lock modifier is on and is
+     * interpreted as CapsLock */
+    else if(!(e->state & XCB_MOD_MASK_SHIFT) && 
+            (e->state & XCB_MOD_MASK_LOCK && globalconf.caps_lock))
+        /* TODO: The first Keysym is used but if that KeySym is
+         * lowercase alphabetic, then the corresponding uppercase
+         * KeySym is used instead */
+        *ksym = k0;
+
+    /* The Shift modifier is on, and the Lock modifier is on and is
+     * interpreted as CapsLock */
+    else if((e->state & XCB_MOD_MASK_SHIFT) &&
+            (e->state & XCB_MOD_MASK_LOCK && globalconf.caps_lock))
+        /* TODO: The second Keysym is used but if that KeySym is
+         * lowercase alphabetic, then the corresponding uppercase
+         * KeySym is used instead */
+        *ksym = k1;
+
+    /* The Shift modifer is on, or the Lock modifier is on and is
+     * interpreted as ShiftLock, or both */
+    else if((e->state & XCB_MOD_MASK_SHIFT) ||
+            (e->state & XCB_MOD_MASK_LOCK && globalconf.shift_lock))
+        *ksym = k1;
+
+    if(xcb_is_modifier_key(*ksym) || xcb_is_function_key(*ksym) ||
+       xcb_is_pf_key(*ksym) || xcb_is_cursor_key(*ksym) ||
+       xcb_is_misc_function_key(*ksym))
+    {
+        *buf_len = 0;
+        return;
+    }
+
+    /* Latin1 keysym */
+    if(*ksym < 0x80)
+        asprintf(buf, "%c", (char) *ksym);
+    else
+        /* TODO: remove this call in favor of XCB */
+        *buf = a_strdup(XKeysymToString(*ksym));
+
+    *buf_len = a_strlen(*buf);
+}
+
 /** Handle keypress event in awesome-menu.
  * \param e received XKeyEvent
  */
@@ -508,23 +601,22 @@ static void
 handle_kpress(xcb_key_press_event_t *e)
 {
     char *buf;
-    xcb_key_symbols_t *keysyms = xcb_key_symbols_alloc(globalconf.connection);
     xcb_keysym_t ksym;
-    int num;
     ssize_t len;
-    size_t text_dst_len;
+    size_t text_dst_len, num;
 
     len = a_strlen(globalconf.text);
-    /* TODO: check whether 'col' (last parameter) is correct */
-    ksym = xcb_key_press_lookup_keysym(keysyms, e, 1);
 
-    /* TODO: remove this call in favor of XCB */
-    buf = XKeysymToString(ksym);
-    num = strlen(buf);
+    x_lookup_string(e, &buf, &num, &ksym);
+    /* Got a special key, see x_lookup_string() */
+    if(!num)
+        return;        
+
     if(e->state & XCB_MOD_MASK_CONTROL)
         switch(ksym)
         {
           default:
+            p_delete(&buf);
             return;
           case XK_bracketleft:
             ksym = XK_Escape;
@@ -558,12 +650,14 @@ handle_kpress(xcb_key_press_event_t *e)
                 compute_match(get_last_word(globalconf.text));
                 redraw();
             }
+            p_delete(&buf);
             return;
         }
     else if(CLEANMASK(e->state) & XCB_MOD_MASK_1)
         switch(ksym)
         {
           default:
+            p_delete(&buf);
             return;
           case XK_h:
             ksym = XK_Left;
@@ -582,8 +676,6 @@ handle_kpress(xcb_key_press_event_t *e)
         {
             if(buf[0] != '/' || globalconf.text[len - 1] != '/')
             {
-                buf[num] = '\0';
-
                 /* Reallocate text string if needed to hold
                  * concatenation of text and buf */
                 if((text_dst_len = (a_strlen(globalconf.text) + num - 1)) > globalconf.text_size)
@@ -596,6 +688,8 @@ handle_kpress(xcb_key_press_event_t *e)
             compute_match(get_last_word(globalconf.text));
             redraw();
         }
+
+        p_delete(&buf);
         break;
       case XK_BackSpace:
         if(len)
@@ -622,6 +716,8 @@ handle_kpress(xcb_key_press_event_t *e)
         status = STOP;
         break;
     }
+
+    p_delete(&buf);
 }
 
 #ifndef HAVE_GETLINE
@@ -834,6 +930,11 @@ main(int argc, char **argv)
     compute_match(NULL);
 
     redraw();
+
+    /* TODO: do we need to check at startup that the Caps_Lock and
+     * Shift_Lock keys are pressed? */
+    globalconf.caps_lock = false;
+    globalconf.shift_lock = false;
 
     xutil_map_raised(globalconf.connection, globalconf.sw->window);
 
