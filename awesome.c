@@ -78,7 +78,7 @@ x_get_geometry(xcb_connection_t *c, xcb_window_t w, xcb_get_geometry_reply_t *pa
 
     win_geom = xcb_get_geometry_reply(c, xcb_get_geometry(c, w), NULL);
 
-    if(win_geom)
+    if(!win_geom)
         return NULL;
 
     /* Unlike XCB, Xlib set 'x' and 'y' as parent window position */
