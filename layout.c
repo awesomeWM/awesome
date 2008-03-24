@@ -65,7 +65,7 @@ arrange(int screen)
         {
             c->newcomer = False;
             client_unban(c);
-            if(globalconf.screens[screen].new_get_focus)
+            if(globalconf.screens[screen].new_get_focus && !c->skip)
                 client_focus(c, screen, True);
         }
 

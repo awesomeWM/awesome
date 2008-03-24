@@ -183,7 +183,7 @@ void
 client_focus(Client *c, int screen, Bool raise)
 {
     /* if c is NULL or invisible, take next client in the focus history */
-    if(!c || (c && (!client_isvisible(c, screen) || c->skip)))
+    if(!c || (c && (!client_isvisible(c, screen))))
     {
         c = focus_get_current_client(screen);
         /* if c is still NULL take next client in the stack */
