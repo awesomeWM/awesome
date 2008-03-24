@@ -949,33 +949,35 @@ uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((
 static void
 client_maximize(Client *c, area_t geometry)
 {
-
     if((c->ismax = !c->ismax))
     {
+        /* disable titlebar */
+        c->titlebar.position = Off;
         c->wasfloating = c->isfloating;
         c->m_geometry = c->geometry;
         if(layout_get_current(c->screen)->arrange != layout_floating)
             client_setfloating(c, True);
         client_focus(c, c->screen, True);
         client_resize(c, geometry, False);
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+        return;
     }
     else if(c->wasfloating)
     {
+        c->titlebar.position = c->titlebar.dposition;
         client_setfloating(c, True);
         client_resize(c, c->m_geometry, False);
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else if(layout_get_current(c->screen)->arrange == layout_floating)
     {
+        c->titlebar.position = c->titlebar.dposition;
         client_resize(c, c->m_geometry, False);
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     else
     {
+        c->titlebar.position = c->titlebar.dposition;
         client_setfloating(c, False);
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 /** Toggle maximize for client
