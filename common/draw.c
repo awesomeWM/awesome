@@ -578,7 +578,8 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_t *cr;
     cairo_surface_t *source;
 
-    source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h, 0);
+    source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h,
+                                                 cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, w));
     cr = cairo_create(ctx->surface);
     if(wanted_h > 0 && h > 0)
     {
@@ -645,9 +646,10 @@ draw_imlib_load_strerror(Imlib_Load_Error e)
 void
 draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 {
-    int w, h, size;
+    int w, h, size, i;
     DATA32 *data;
-    unsigned char *dataimg;
+    double alpha;
+    unsigned char *dataimg, *rdataimg;
     Imlib_Image image;
     Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
 
@@ -662,25 +664,22 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
 
     data = imlib_image_get_data_for_reading_only();
 
-    dataimg = p_new(unsigned char, size * 4);
+    rdataimg = dataimg = p_new(unsigned char, size * 4);
 
-    memcpy(dataimg, data, size * 4);
-
-#if 0
-    /* Alternate method */
     for(i = 0; i < size; i++, dataimg += 4)
     {
-        dataimg[3] = (data[i] >> 24) & 0xff; /* A */
-        dataimg[2] = (data[i] >> 16) & 0xff; /* R */
-        dataimg[1] = (data[i] >>  8) & 0xff; /* G */
-        dataimg[0] = data[i] & 0xff; /* B */
+        dataimg[3] = (data[i] >> 24) & 0xff;           /* A */
+        /* cairo wants pre-multiplied alpha */
+        alpha = dataimg[3] / 255.0;
+        dataimg[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
+        dataimg[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
+        dataimg[0] = (data[i]         & 0xff) * alpha; /* B */
     }
-#endif
 
-    draw_image_from_argb_data(ctx, x, y, w, h, wanted_h, dataimg);
+    draw_image_from_argb_data(ctx, x, y, w, h, wanted_h, rdataimg);
 
     imlib_free_image();
-    p_delete(&dataimg);
+    p_delete(&rdataimg);
 }
 
 /** Get an image size
