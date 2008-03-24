@@ -1,7 +1,7 @@
 If you intend to patch and contribute awesome, please respect the following coding style:
-- Use 4 space tabs instead of tabs;
+- Use 4 space indentation, do not use tabulator characters
 - Place braces alone on new lines;
-- No space before if, for, while statements or function call;
+- Do not put a space after if, for, while or function call statements;
 - The preferred line length is 80 characters;
 - Be clear in what you do;
 - Write documentation for any new functions, options, whatever.
