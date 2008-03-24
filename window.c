@@ -194,9 +194,9 @@ window_settrans(Window win, double opacity)
     int status;
     unsigned int real_opacity = 0xffffffff;
 
-    if(opacity >= 0 && opacity <= 100)
+    if(opacity >= 0 && opacity <= 1)
     {
-        real_opacity = ((opacity / 100.0) * 0xffffffff);
+        real_opacity = opacity * 0xffffffff;
         status = XChangeProperty(globalconf.display, win,
                                  XInternAtom(globalconf.display, "_NET_WM_WINDOW_OPACITY", False),
                                  XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &real_opacity, 1L);

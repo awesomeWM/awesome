@@ -53,10 +53,10 @@ new_become_master::
 new_get_focus::
     If this is set to true, new windows will get focus.
 opacity_unfocused::
-    If this is set to a float value between 0 and 100, non-focused windows will have this opacity.
+    If this is set to a float value between 0 and 1, non-focused windows will have this opacity.
     This requires an external XComposite manager.
 opacity_focused::
-    If this is set to a float value between 0 and 100, focused windows will have this opacity.
+    If this is set to a float value between 0 and 1, focused windows will have this opacity.
     This requires an external XComposite manager.
 resize_hints::
     If this is set to true, resize hints given by the window will be respected.

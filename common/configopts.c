@@ -377,7 +377,7 @@ cfg_opt_t rule_opts[] =
     CFG_STR((char *) "master", (char *) "auto", CFGF_NONE),
     CFG_SEC((char *) "titlebar", titlebar_opts, CFGF_NONE),
     CFG_INT((char *) "screen", RULE_NOSCREEN, CFGF_NONE),
-    CFG_FLOAT((char *) "opacity", -1.0f, CFGF_NONE),
+    CFG_FLOAT((char *) "opacity", -1, CFGF_NONE),
     CFG_AWESOME_END()
 };
 cfg_opt_t rules_opts[] =
@@ -505,7 +505,6 @@ cfg_new(void)
     /* Check integers values */
     cfg_set_validate_func(cfg, "screen|general|snap", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|general|border", config_validate_unsigned_int);
-    cfg_set_validate_func(cfg, "screen|general|opacity_unfocused", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|height", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|textbox|width", config_validate_unsigned_int);
@@ -518,6 +517,9 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|general|mwfact_lower_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|general|mwfact_upper_limit", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|tags|tag|mwfact", config_validate_zero_one_float);
+    cfg_set_validate_func(cfg, "screen|general|opacity_unfocused", config_validate_zero_one_float);
+    cfg_set_validate_func(cfg, "screen|general|opacity_focused", config_validate_zero_one_float);
+    cfg_set_validate_func(cfg, "rules|rule|opacity", config_validate_zero_one_float);
 
     return cfg;
 }
