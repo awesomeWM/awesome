@@ -106,16 +106,16 @@ AC_DEFINE_UNQUOTED([AWESOME_COMPILE_BY], ["$aw_whoami"], [build user])
 
 # Checks for libraries.
 AC_PATH_XTRA
-PKG_CHECK_MODULES([PANGOCAIRO], [pangocairo],,
+PKG_CHECK_MODULES([pangocairo], [pangocairo],,
    [AC_MSG_ERROR([awesome requires pangocairo.])])
-PKG_CHECK_MODULES([CONFUSE], [libconfuse >= 2.6],,
+PKG_CHECK_MODULES([confuse], [libconfuse >= 2.6],,
    [AC_MSG_ERROR([awesome requires libconfuse >= 2.6.])])
-PKG_CHECK_MODULES([XINERAMA], [xinerama],,
+PKG_CHECK_MODULES([xinerama], [xinerama],,
    [AC_MSG_ERROR([awesome requires Xinerama.])])
-PKG_CHECK_MODULES([XRANDR], [xrandr],,
+PKG_CHECK_MODULES([xrandr], [xrandr],,
    [AC_MSG_ERROR([awesome requires Xrandr.])])
 PKG_CHECK_MODULES([imlib2], [imlib2],,
-   [AC_MSG_ERROR([awesome requires Imbli2.])])
+   [AC_MSG_ERROR([awesome requires Imlib2.])])
 
 # Checks for header files.
 AC_PATH_X
