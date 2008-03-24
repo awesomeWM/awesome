@@ -211,54 +211,7 @@ client_focus(Client *c, int screen, Bool raise)
         titlebar_update(c);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
         if(raise)
-        {
-            XWindowChanges wc;
-            Layout *curlay = layout_get_current(screen);
-            if(c->isfloating || curlay->arrange == layout_floating)
-            {
-                XRaiseWindow(globalconf.display, c->win);
-                if(c->titlebar.position && c->titlebar.sw)
-                    XRaiseWindow(globalconf.display, c->titlebar.sw->window);
-            }
-            else
-            {
-                Client *client;
-                wc.stack_mode = Below;
-                wc.sibling = None;
-                for(client = globalconf.clients; client; client = client->next)
-                    if(client != c && client_isvisible(client, c->screen) && client->isfloating)
-                    {
-                        if(client->titlebar.position && client->titlebar.sw)
-                        {
-                            XConfigureWindow(globalconf.display, client->titlebar.sw->window,
-                                             CWSibling | CWStackMode, &wc);
-                            wc.sibling = client->titlebar.sw->window;
-                        }
-                        XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
-                        wc.sibling = client->win;
-                    }
-                if(c->titlebar.position && c->titlebar.sw)
-                {
-                     XConfigureWindow(globalconf.display, c->titlebar.sw->window,
-                                      CWSibling | CWStackMode, &wc);
-                     wc.sibling = c->titlebar.sw->window;
-                }
-                XConfigureWindow(globalconf.display, c->win, CWSibling | CWStackMode, &wc);
-                wc.sibling = c->win;
-                for(client = globalconf.clients; client; client = client->next)
-                    if(client != c && IS_TILED(client, c->screen))
-                    {
-                        if(client->titlebar.position && client->titlebar.sw)
-                        {
-                            XConfigureWindow(globalconf.display, client->titlebar.sw->window,
-                                             CWSibling | CWStackMode, &wc);
-                            wc.sibling = client->titlebar.sw->window;
-                        }
-                        XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
-                        wc.sibling = client->win;
-                    }
-            }
-        }
+            client_stack(c);
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
         window_grabbuttons(c->win, c->phys_screen);
@@ -270,6 +223,58 @@ client_focus(Client *c, int screen, Bool raise)
 
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_active_window(c->phys_screen);
+}
+
+void
+client_stack(Client *c)
+{
+    XWindowChanges wc;
+    Layout *curlay = layout_get_current(c->screen);
+
+    if(c->isfloating || curlay->arrange == layout_floating)
+    {
+        XRaiseWindow(globalconf.display, c->win);
+        if(c->titlebar.position && c->titlebar.sw)
+            XRaiseWindow(globalconf.display, c->titlebar.sw->window);
+    }
+    else
+    {
+        Client *client;
+        wc.stack_mode = Below;
+        wc.sibling = None;
+        for(client = globalconf.clients; client; client = client->next)
+            if(client != c && client_isvisible(client, c->screen) && client->isfloating)
+            {
+                if(client->titlebar.position && client->titlebar.sw)
+                {
+                    XConfigureWindow(globalconf.display, client->titlebar.sw->window,
+                                     CWSibling | CWStackMode, &wc);
+                    wc.sibling = client->titlebar.sw->window;
+                }
+                XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
+                wc.sibling = client->win;
+            }
+        if(c->titlebar.position && c->titlebar.sw)
+        {
+             XConfigureWindow(globalconf.display, c->titlebar.sw->window,
+                              CWSibling | CWStackMode, &wc);
+             wc.sibling = c->titlebar.sw->window;
+        }
+        XConfigureWindow(globalconf.display, c->win, CWSibling | CWStackMode, &wc);
+        wc.sibling = c->win;
+        for(client = globalconf.clients; client; client = client->next)
+            if(client != c && IS_TILED(client, c->screen))
+            {
+                if(client->titlebar.position && client->titlebar.sw)
+                {
+                    XConfigureWindow(globalconf.display, client->titlebar.sw->window,
+                                     CWSibling | CWStackMode, &wc);
+                    wc.sibling = client->titlebar.sw->window;
+                }
+                XConfigureWindow(globalconf.display, client->win, CWSibling | CWStackMode, &wc);
+                wc.sibling = client->win;
+            }
+    }
 }
 
 /** Manage a new client

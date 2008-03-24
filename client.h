@@ -28,6 +28,7 @@ Bool client_isvisible(Client *, int);
 Client * client_get_bywin(Client *, Window);
 Client * client_get_byname(Client *, char *);
 void client_focus(Client *, int, Bool);
+void client_stack(Client *);
 void client_ban(Client *);
 void client_unban(Client *);
 void client_manage(Window, XWindowAttributes *, int);

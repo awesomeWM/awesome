@@ -127,7 +127,7 @@ event_handle_buttonpress(XEvent *e)
 
     if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
-        client_focus(c, c->screen, True);
+        client_stack(c);
         if(CLEANMASK(ev->state) == NoSymbol
            && ev->button == Button1)
         {
@@ -266,8 +266,7 @@ event_handle_enternotify(XEvent *e)
         window_grabbuttons(c->win, c->phys_screen);
         if(globalconf.screens[c->screen].sloppy_focus)
             client_focus(c, c->screen,
-                         (globalconf.screens[c->screen].sloppy_focus
-                          && globalconf.screens[c->screen].sloppy_focus_raise));
+                         globalconf.screens[c->screen].sloppy_focus_raise);
     }
     else
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
