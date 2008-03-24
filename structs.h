@@ -46,6 +46,7 @@ typedef struct
     Position position;
     Position dposition;
     Alignment text_align;
+    int width, height;
     /** Colors */
     struct
     {

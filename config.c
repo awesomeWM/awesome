@@ -281,6 +281,8 @@ config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb, int screen)
 
     tb->position = tb->dposition = cfg_getposition(cfg_titlebar, "position");
     tb->text_align = cfg_getalignment(cfg_titlebar, "text_align");
+    tb->width = cfg_getint(cfg_titlebar, "width");
+    tb->height = cfg_getint(cfg_titlebar, "height");
     draw_style_init(globalconf.display, phys_screen,
                     cfg_getsec(cfg_styles, "normal"),
                     &tb->styles.normal,

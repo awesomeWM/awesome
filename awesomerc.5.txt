@@ -548,7 +548,8 @@ Note: when there is no whitespace, quotes are optional.
                    { font = <font> fg = <color> bg = <color> border = <color>
                      shadow = <color> shadow_offset = <integer> }
 <titlebar>      -> a section with position and icon position.
-                   { position = <position> icon = <position> text_align = <{center,right,left}> }
+                   { position = <position> icon = <position> text_align = <{center,right,left}>
+                     height = <integer> width = <integer> styles { } }
 
 [MULTI] means, you can use an item multiple times.
 

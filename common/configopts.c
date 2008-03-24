@@ -175,6 +175,8 @@ cfg_opt_t styles_opts[] =
 cfg_opt_t titlebar_opts[] =
 {
     CFG_POSITION((char *) "position", (char *) "auto", CFGF_NONE),
+    CFG_INT((char *) "width", 0, CFGF_NONE),
+    CFG_INT((char *) "height", 0, CFGF_NONE),
     CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
     CFG_AWESOME_END()
@@ -509,6 +511,10 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|statusbar|height", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|textbox|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|tags|tag|nmaster", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|titlebar|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|titlebar|height", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "rules|rule|titlebar|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "rules|rule|titlebar|height", config_validate_unsigned_int);
 
     /* Check integers values > 1 */
     cfg_set_validate_func(cfg, "screen|tags|tag|ncol", config_validate_supone_int);

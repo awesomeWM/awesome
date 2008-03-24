@@ -29,7 +29,7 @@ extern AwesomeConf globalconf;
 void
 titlebar_init(Client *c)
 {
-    int titlebar_height;
+    int width;
 
     if(c->titlebar.position == Off
        || c->titlebar.position == Auto)
@@ -38,46 +38,63 @@ titlebar_init(Client *c)
         return;
     }
 
-    titlebar_height = 1.5 * MAX(c->titlebar.styles.normal.font->height,
-                                MAX(c->titlebar.styles.focus.font->height,
-                                    c->titlebar.styles.urgent.font->height));
+    if(!c->titlebar.height)
+        c->titlebar.height = 1.5 * MAX(c->titlebar.styles.normal.font->height,
+                                       MAX(c->titlebar.styles.focus.font->height,
+                                           c->titlebar.styles.urgent.font->height));
 
     switch(c->titlebar.position)
     {
       case Top:
+        if(!c->titlebar.width)
+            width = c->geometry.width + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.width);
         c->titlebar.sw = simplewindow_new(globalconf.display,
                                           c->phys_screen,
                                           c->geometry.x,
-                                          c->geometry.y - titlebar_height,
-                                          c->geometry.width + 2 * c->border,
-                                          titlebar_height,
+                                          c->geometry.y - c->titlebar.height,
+                                          width,
+                                          c->titlebar.height,
                                           0);
         break;
       case Bottom:
+        if(!c->titlebar.width)
+            width = c->geometry.width + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.width);
         c->titlebar.sw = simplewindow_new(globalconf.display,
                                           c->phys_screen,
                                           c->geometry.x,
                                           c->geometry.y + c->geometry.height + 2 * c->border,
-                                          c->geometry.width + 2 * c->border,
-                                          titlebar_height,
+                                          width,
+                                          c->titlebar.height,
                                           0);
         break;
       case Left:
+        if(!c->titlebar.width)
+            width = c->geometry.height + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.height);
         c->titlebar.sw = simplewindow_new(globalconf.display,
                                           c->phys_screen,
-                                          c->geometry.x - titlebar_height,
+                                          c->geometry.x - c->titlebar.height,
                                           c->geometry.y,
-                                          titlebar_height,
-                                          c->geometry.width + 2 * c->border,
+                                          c->titlebar.height,
+                                          width,
                                           0);
         break;
       case Right:
+        if(!c->titlebar.width)
+            width = c->geometry.height + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.height);
         c->titlebar.sw = simplewindow_new(globalconf.display,
                                           c->phys_screen,
                                           c->geometry.x + c->geometry.width + 2 * c->border,
                                           c->geometry.y,
-                                          titlebar_height,
-                                          c->geometry.width + 2 * c->border,
+                                          c->titlebar.height,
+                                          width,
                                           0);
         break;
       default:
@@ -159,6 +176,8 @@ titlebar_update(Client *c)
 void
 titlebar_update_geometry_floating(Client *c)
 {
+    int width;
+
     if(!c->titlebar.sw)
         return;
 
@@ -167,32 +186,48 @@ titlebar_update_geometry_floating(Client *c)
       default:
         return;
       case Top:
+        if(!c->titlebar.width)
+            width = c->geometry.width + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.width);
         simplewindow_move_resize(c->titlebar.sw,
                                  c->geometry.x,
                                  c->geometry.y - c->titlebar.sw->geometry.height,
-                                 c->geometry.width + 2 * c->border,
+                                 width,
                                  c->titlebar.sw->geometry.height);
         break;
       case Bottom:
+        if(!c->titlebar.width)
+            width = c->geometry.width + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.width);
         simplewindow_move_resize(c->titlebar.sw,
                                  c->geometry.x,
                                  c->geometry.y + c->geometry.height + 2 * c->border,
-                                 c->geometry.width + 2 * c->border,
+                                 width,
                                  c->titlebar.sw->geometry.height);
         break;
       case Left:
+        if(!c->titlebar.width)
+            width = c->geometry.height + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.height);
         simplewindow_move_resize(c->titlebar.sw,
                                  c->geometry.x - c->titlebar.sw->geometry.width,
                                  c->geometry.y,
                                  c->titlebar.sw->geometry.width,
-                                 c->geometry.height + 2 * c->border);
+                                 width);
         break;
       case Right:
+        if(!c->titlebar.width)
+            width = c->geometry.height + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.height);
         simplewindow_move_resize(c->titlebar.sw,
                                  c->geometry.x + c->geometry.width + 2 * c->border,
                                  c->geometry.y,
                                  c->titlebar.sw->geometry.width,
-                                 c->geometry.height + 2 * c->border);
+                                 width);
         break;
     }
 
@@ -202,6 +237,8 @@ titlebar_update_geometry_floating(Client *c)
 area_t
 titlebar_update_geometry(Client *c, area_t geometry)
 {
+    int width;
+
     if(!c->titlebar.sw)
         return geometry;
 
@@ -210,38 +247,54 @@ titlebar_update_geometry(Client *c, area_t geometry)
       default:
         return geometry;
       case Top:
+        if(!c->titlebar.width)
+            width = c->geometry.width + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.width);
         simplewindow_move_resize(c->titlebar.sw,
                                  geometry.x,
                                  geometry.y,
-                                 geometry.width + 2 * c->border,
+                                 width,
                                  c->titlebar.sw->geometry.height);
         geometry.y += c->titlebar.sw->geometry.height;
         geometry.height -= c->titlebar.sw->geometry.height;
         break;
       case Bottom:
+        if(!c->titlebar.width)
+            width = c->geometry.width + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.width);
         geometry.height -= c->titlebar.sw->geometry.height;
         simplewindow_move_resize(c->titlebar.sw,
                                  geometry.x,
                                  geometry.y + geometry.height + 2 * c->border,
-                                 geometry.width + 2 * c->border,
+                                 width,
                                  c->titlebar.sw->geometry.height);
         break;
       case Left:
+        if(!c->titlebar.width)
+            width = c->geometry.height + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.height);
         simplewindow_move_resize(c->titlebar.sw,
                                  geometry.x,
                                  geometry.y,
                                  c->titlebar.sw->geometry.width,
-                                 geometry.height + 2 * c->border);
+                                 width);
         geometry.width -= c->titlebar.sw->geometry.width;
         geometry.x += c->titlebar.sw->geometry.width;
         break;
       case Right:
+        if(!c->titlebar.width)
+            width = c->geometry.height + 2 * c->border;
+        else
+            width = MIN(c->titlebar.width, c->geometry.height);
         geometry.width -= c->titlebar.sw->geometry.width;
         simplewindow_move_resize(c->titlebar.sw,
                                  geometry.x + geometry.width + 2 * c->border,
                                  geometry.y,
                                  c->titlebar.sw->geometry.width,
-                                 geometry.height + 2 * c->border);
+                                 width);
         break;
     }
 
