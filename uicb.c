@@ -74,6 +74,7 @@ uicb_exec(int screen __attribute__ ((unused)), char *cmd)
         client_unban(c);
 
     XSync(globalconf.display, False);
+    XCloseDisplay(globalconf.display);
 
     /* Ignore the leading spaces if any */
     while(cmd[0] && cmd[0] == ' ')
