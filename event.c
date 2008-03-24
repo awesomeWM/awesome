@@ -185,13 +185,9 @@ event_handle_configurerequest(XEvent * e)
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
-            old_screen = c->screen;
-
-            client_resize(c, geometry, False);
-
-            tag_client_with_rule(c, rule_matching_client(c));
-
-            if(!c->isfloating)
+            if(c->isfloating)
+                client_resize(c, geometry, False);
+            else
                 globalconf.screens[c->screen].need_arrange = True;
         }
         else
