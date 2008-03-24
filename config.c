@@ -280,6 +280,7 @@ config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb, int screen)
     cfg_t *cfg_styles = cfg_getsec(cfg_titlebar, "styles");
 
     tb->position = tb->dposition = cfg_getposition(cfg_titlebar, "position");
+    tb->align = cfg_getalignment(cfg_titlebar, "align");
     tb->text_align = cfg_getalignment(cfg_titlebar, "text_align");
     tb->width = cfg_getint(cfg_titlebar, "width");
     tb->height = cfg_getint(cfg_titlebar, "height");

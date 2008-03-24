@@ -175,6 +175,7 @@ cfg_opt_t styles_opts[] =
 cfg_opt_t titlebar_opts[] =
 {
     CFG_POSITION((char *) "position", (char *) "auto", CFGF_NONE),
+    CFG_ALIGNMENT((char *) "align", (char *) "left", CFGF_NONE),
     CFG_INT((char *) "width", 0, CFGF_NONE),
     CFG_INT((char *) "height", 0, CFGF_NONE),
     CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),

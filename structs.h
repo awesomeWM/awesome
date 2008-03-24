@@ -45,6 +45,7 @@ typedef struct
     SimpleWindow *sw;
     Position position;
     Position dposition;
+    Alignment align;
     Alignment text_align;
     int width, height;
     /** Colors */
