@@ -36,27 +36,77 @@
 extern AwesomeConf globalconf;
 
 static area_t
+mouse_snapclienttogeometry_outside(area_t geometry, area_t snap_geometry, int snap)
+{
+    if(geometry.x < snap + snap_geometry.x + snap_geometry.width
+       && geometry.x > snap_geometry.x + snap_geometry.width)
+        geometry.x = snap_geometry.x + snap_geometry.width;
+    else if(geometry.x + geometry.width < snap_geometry.x
+            && geometry.x + geometry.width > snap_geometry.x - snap)
+        geometry.x = snap_geometry.x - geometry.width;
+
+
+    if(geometry.y < snap + snap_geometry.y + snap_geometry.height
+       && geometry.y > snap_geometry.y + snap_geometry.height)
+        geometry.y = snap_geometry.y + snap_geometry.height;
+    else if(geometry.y + geometry.height < snap_geometry.y
+            && geometry.y + geometry.height > snap_geometry.y - snap)
+        geometry.y = snap_geometry.y - geometry.height;
+
+    return geometry;
+}
+
+static area_t
+mouse_snapclienttogeometry_inside(area_t geometry, area_t snap_geometry, int snap)
+{
+    if(abs(geometry.x) < snap + snap_geometry.x && geometry.x > snap_geometry.x)
+        geometry.x = snap_geometry.x;
+    else if(abs((snap_geometry.x + snap_geometry.width) - (geometry.x + geometry.width))
+            < snap)
+        geometry.x = snap_geometry.x + snap_geometry.width - geometry.width;
+    if(abs(geometry.y) < snap + snap_geometry.y && geometry.y > snap_geometry.y)
+        geometry.y = snap_geometry.y;
+    else if(abs((snap_geometry.y + snap_geometry.height) - (geometry.y + geometry.height))
+            < snap)
+        geometry.y = snap_geometry.y + snap_geometry.height - geometry.height;
+
+    return geometry;
+}
+
+static area_t
 mouse_snapclient(Client *c, area_t geometry)
 {
+    Client *snapper;
     int snap = globalconf.screens[c->screen].snap;
+    area_t snapper_geometry;
     area_t screen_geometry =
         screen_get_area(c->screen,
                         globalconf.screens[c->screen].statusbar,
                         &globalconf.screens[c->screen].padding);
 
     geometry = titlebar_geometry_add(&c->titlebar, geometry);
+    geometry.width += 2 * c->border;
+    geometry.height += 2 * c->border;
 
-    if(abs(geometry.x) < snap + screen_geometry.x && geometry.x > screen_geometry.x)
-        geometry.x = screen_geometry.x;
-    else if(abs((screen_geometry.x + screen_geometry.width) - (geometry.x + geometry.width + 2 * c->border))
-            < snap)
-        geometry.x = screen_geometry.x + screen_geometry.width - geometry.width - 2 * c->border;
-    if(abs(geometry.y) < snap + screen_geometry.y && geometry.y > screen_geometry.y)
-        geometry.y = screen_geometry.y;
-    else if(abs((screen_geometry.y + screen_geometry.height) - (geometry.y + geometry.height + 2 * c->border))
-            < snap)
-        geometry.y = screen_geometry.y + screen_geometry.height - geometry.height - 2 * c->border;
+    geometry =
+        mouse_snapclienttogeometry_inside(geometry, screen_geometry, snap);
 
+    for(snapper = globalconf.clients; snapper; snapper = snapper->next)
+        if(snapper != c && client_isvisible(c, c->screen))
+        {
+            snapper_geometry = snapper->geometry;
+            snapper_geometry.width += 2 * c->border;
+            snapper_geometry.height += 2 * c->border;
+            snapper_geometry = titlebar_geometry_add(&snapper->titlebar,
+                                                     snapper_geometry);
+            geometry =
+                mouse_snapclienttogeometry_outside(geometry,
+                                                   snapper_geometry,
+                                                   snap);
+        }
+
+    geometry.width -= 2 * c->border;
+    geometry.height -= 2 * c->border;
     return titlebar_geometry_remove(&c->titlebar, geometry);
 }
 
