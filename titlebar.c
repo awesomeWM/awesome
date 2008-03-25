@@ -102,6 +102,35 @@ titlebar_init(Client *c)
     }
 }
 
+area_t
+titlebar_geometry_add(Titlebar *t, area_t geometry)
+{
+    if(!t->sw)
+        return geometry;
+
+    switch(t->position)
+    {
+      case Top:
+        geometry.y -= t->sw->geometry.height;
+        geometry.height += t->sw->geometry.height;
+        break;
+      case Bottom:
+        geometry.height += t->sw->geometry.height;
+        break;
+      case Left:
+        geometry.x -= t->sw->geometry.width;
+        geometry.width += t->sw->geometry.width;
+        break;
+      case Right:
+        geometry.width += t->sw->geometry.width;
+        break;
+      default:
+        break;
+    }
+
+    return geometry;
+}
+
 void
 titlebar_update(Client *c)
 {

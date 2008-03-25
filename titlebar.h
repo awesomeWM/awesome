@@ -28,6 +28,7 @@ void titlebar_init(Client *);
 void titlebar_update(Client *);
 void titlebar_update_geometry_floating(Client *);
 area_t titlebar_update_geometry(Client *, area_t);
+area_t titlebar_geometry_add(Titlebar *, area_t);
 
 Uicb uicb_client_toggletitlebar;
 

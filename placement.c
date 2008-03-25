@@ -22,6 +22,7 @@
 #include "placement.h"
 #include "screen.h"
 #include "client.h"
+#include "titlebar.h"
 
 extern AwesomeConf globalconf;
 
@@ -55,35 +56,6 @@ placement_fix_offscreen(area_t geometry, int screen, int border)
     return geometry;
 }
 
-static area_t
-placement_geometry_add_titlebar(Titlebar *t, area_t geometry)
-{
-    if(!t->sw)
-        return geometry;
-
-    switch(t->position)
-    {
-      case Top:
-        geometry.y -= t->sw->geometry.height;
-        geometry.height += t->sw->geometry.height;
-        break;
-      case Bottom:
-        geometry.height += t->sw->geometry.height;
-        break;
-      case Left:
-        geometry.x -= t->sw->geometry.width;
-        geometry.width += t->sw->geometry.width;
-        break;
-      case Right:
-        geometry.width += t->sw->geometry.width;
-        break;
-      default:
-        break;
-    }
-
-    return geometry;
-}
-
 /** Compute smart coordinates for a client window
  * \param geometry current/requested client geometry
  * \param screen screen used
@@ -111,7 +83,7 @@ placement_smart(Client *c)
             newgeometry = client->f_geometry;
             newgeometry.width += 2 * client->border;
             newgeometry.height += 2 * client->border;
-            newgeometry = placement_geometry_add_titlebar(&client->titlebar, newgeometry);
+            newgeometry = titlebar_geometry_add(&client->titlebar, newgeometry);
             area_list_remove(&arealist, &newgeometry);
         }
 
@@ -139,7 +111,7 @@ placement_smart(Client *c)
     newgeometry.width = c->f_geometry.width;
     newgeometry.height = c->f_geometry.height;
 
-    newgeometry = placement_geometry_add_titlebar(&c->titlebar, newgeometry);
+    newgeometry = titlebar_geometry_add(&c->titlebar, newgeometry);
     newgeometry = placement_fix_offscreen(newgeometry, c->screen, c->border);
 
     /* restore height and width again */
@@ -166,7 +138,7 @@ placement_under_mouse(Client *c)
         finalgeometry.y = y - c->f_geometry.height / 2;
     }
 
-    finalgeometry = placement_geometry_add_titlebar(&c->titlebar, finalgeometry);
+    finalgeometry = titlebar_geometry_add(&c->titlebar, finalgeometry);
     finalgeometry = placement_fix_offscreen(finalgeometry, c->screen, c->border);
 
     /* restore height and width */
