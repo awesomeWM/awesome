@@ -5,7 +5,9 @@ SUFFIXES =
 bin_PROGRAMS =
 doc_DATA =
 man_MANS =
-iconslayoutsdir = $(pkgdatadir)/icons/layouts
+iconsdir = $(pkgdatadir)/icons
+dist_icons_DATA =
+iconslayoutsdir = $(iconsdir)/layouts
 dist_iconslayouts_DATA =
 
 LAYOUTS =
@@ -51,9 +53,8 @@ CLEANFILES    += awesomerc
 BUILT_SOURCES += awesomerc
 doc_DATA      += awesomerc
 awesomerc: $(srcdir)/awesomerc.in
-	$(SED) -e "s|[@]iconslayoutsdir@|$(iconslayoutsdir)|" \
+	$(SED) -e "s|[@]iconslayoutsdir@|$(iconslayoutsdir)|;s|[@]iconsdir@|$(iconsdir)|" \
 		< $(srcdir)/awesomerc.in > awesomerc
-
 
 CLEANFILES    += defconfig.h
 BUILT_SOURCES += defconfig.h
@@ -191,6 +192,10 @@ EXTRA_DIST += awesome-message.1.txt
 EXTRA_DIST += awesome-menu.1.txt
 EXTRA_DIST += awesomerc.5.txt
 
+dist_icons_DATA += icons/awesome16.png
+dist_icons_DATA += icons/awesome32.png
+dist_icons_DATA += icons/awesome48.png
+dist_icons_DATA += icons/awesome64.png
 dist_iconslayouts_DATA += icons/layouts/dwindle.png
 dist_iconslayouts_DATA += icons/layouts/dwindlew.png
 dist_iconslayouts_DATA += icons/layouts/floating.png

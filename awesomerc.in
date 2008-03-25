@@ -12,8 +12,8 @@ screen 0
         focus
         {
             fg = "#000000"
-            bg = "#00bfff"
-            border = "#00bfff"
+            bg = "#535d6c"
+            border = "#535d6c"
         }
         urgent
         {
@@ -133,6 +133,16 @@ screen 0
                 modkey = {"Mod4"}
                 button = "5"
                 command = "client_swapprev"
+            }
+        }
+        iconbox logo
+        {
+            image = "@iconsdir@/awesome16.png"
+            mouse
+            {
+                button = "1"
+                command = "spawn"
+                arg = "exec xterm -e man awesome"
             }
         }
     }
