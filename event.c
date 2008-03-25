@@ -127,7 +127,8 @@ event_handle_buttonpress(XEvent *e)
 
     if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
-        client_stack(c);
+        if(!client_focus(c, c->screen, True))
+            client_stack(c);
         if(CLEANMASK(ev->state) == NoSymbol
            && ev->button == Button1)
         {
