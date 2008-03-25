@@ -116,7 +116,6 @@ exit_on_signal(int sig __attribute__ ((unused)))
 int
 main(int argc, char **argv)
 {
-    Display *disp;
     SimpleWindow *sw;
     DrawCtx *ctx;
     XEvent ev;
@@ -133,11 +132,6 @@ main(int argc, char **argv)
         {"version", 0, NULL, 'v'},
         {NULL,      0, NULL, 0}
     };
-
-    if(!(disp = XOpenDisplay(NULL)))
-        eprint("unable to open display");
-
-    globalconf.display = disp;
 
     while((opt = getopt_long(argc, argv, "vhf:b:x:y:n:c:d:",
                              long_options, NULL)) != -1)
@@ -167,20 +161,23 @@ main(int argc, char **argv)
     if(argc - optind < 1)
         exit_help(EXIT_FAILURE);
 
-    si = screensinfo_new(disp);
+    if(!(globalconf.display = XOpenDisplay(NULL)))
+        eprint("unable to open display");
+
+    si = screensinfo_new(globalconf.display);
     if(si->xinerama_is_active)
     {
-        if(XQueryPointer(disp, RootWindow(disp, DefaultScreen(disp)),
+        if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, DefaultScreen(globalconf.display)),
                          &dummy, &dummy, &x, &y, &i, &i, &ui))
             screen = screen_get_bycoord(si, 0, x, y);
     }
     else
-        screen = DefaultScreen(disp);
+        screen = DefaultScreen(globalconf.display);
 
     if((ret = config_parse(screen, configfile)))
         return ret;
 
-    geometry.width = draw_textwidth(disp, globalconf.style.font, argv[optind]);
+    geometry.width = draw_textwidth(globalconf.display, globalconf.style.font, argv[optind]);
     geometry.height = globalconf.style.font->height * 1.5;
 
     if(argc - optind >= 2)
@@ -193,12 +190,12 @@ main(int argc, char **argv)
                 * ((double) globalconf.style.font->height / (double) icon_geometry.height);
     }
 
-    sw = simplewindow_new(disp, DefaultScreen(disp),
+    sw = simplewindow_new(globalconf.display, DefaultScreen(globalconf.display),
                           geometry.x, geometry.y, geometry.width, geometry.height, 0);
 
-    XStoreName(disp, sw->window, PROGNAME);
+    XStoreName(globalconf.display, sw->window, PROGNAME);
 
-    ctx = draw_context_new(disp, DefaultScreen(disp),
+    ctx = draw_context_new(globalconf.display, DefaultScreen(globalconf.display),
                            geometry.width, geometry.height, sw->drawable);
 
     geometry.x = geometry.y = 0;
@@ -210,26 +207,26 @@ main(int argc, char **argv)
 
     p_delete(&ctx);
 
-    simplewindow_refresh_drawable(sw, DefaultScreen(disp));
+    simplewindow_refresh_drawable(sw, DefaultScreen(globalconf.display));
 
-    XMapRaised(disp, sw->window);
-    XSync(disp, False);
+    XMapRaised(globalconf.display, sw->window);
+    XSync(globalconf.display, False);
 
     signal(SIGALRM, &exit_on_signal);
     alarm(delay);
 
     while(running)
     {
-       if(XPending(disp))
+       if(XPending(globalconf.display))
        {
-           XNextEvent(disp, &ev);
+           XNextEvent(globalconf.display, &ev);
            switch(ev.type)
            {
              case ButtonPress:
              case KeyPress:
                running = False;
              case Expose:
-               simplewindow_refresh_drawable(sw, DefaultScreen(disp));
+               simplewindow_refresh_drawable(sw, DefaultScreen(globalconf.display));
                break;
              default:
                break;
@@ -239,7 +236,7 @@ main(int argc, char **argv)
     }
 
     simplewindow_delete(&sw);
-    XCloseDisplay(disp);
+    XCloseDisplay(globalconf.display);
 
     return EXIT_SUCCESS;
 }

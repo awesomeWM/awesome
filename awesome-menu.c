@@ -598,7 +598,6 @@ item_list_fill_stdin(void)
 int
 main(int argc, char **argv)
 {
-    Display *disp;
     XEvent ev;
     int opt, ret, x, y, i, screen = 0;
     char *configfile = NULL, *cmd;
@@ -615,11 +614,6 @@ main(int argc, char **argv)
         {"exec",    0, NULL, 'e'},
         {NULL,      0, NULL, 0}
     };
-
-    if(!(disp = XOpenDisplay(NULL)))
-        eprint("unable to open display");
-
-    globalconf.display = disp;
 
     while((opt = getopt_long(argc, argv, "vhf:b:x:y:n:c:e:",
                              long_options, NULL)) != -1)
@@ -642,13 +636,16 @@ main(int argc, char **argv)
     if(argc - optind >= 1)
         globalconf.prompt = a_strdup(argv[optind]);
 
-    /* Get the numlock mask */
-    globalconf.numlockmask = xgetnumlockmask(disp);
+    if(!(globalconf.display = XOpenDisplay(NULL)))
+        eprint("unable to open display");
 
-    si = screensinfo_new(disp);
+    /* Get the numlock mask */
+    globalconf.numlockmask = xgetnumlockmask(globalconf.display);
+
+    si = screensinfo_new(globalconf.display);
     if(si->xinerama_is_active)
     {
-        if(XQueryPointer(disp, RootWindow(disp, DefaultScreen(disp)),
+        if(XQueryPointer(globalconf.display, RootWindow(globalconf.display, DefaultScreen(globalconf.display)),
                          &dummy, &dummy, &x, &y, &i, &i, &ui))
         {
             screen = screen_get_bycoord(si, 0, x, y);
@@ -660,9 +657,9 @@ main(int argc, char **argv)
     }
     else
     {
-        screen = DefaultScreen(disp);
+        screen = DefaultScreen(globalconf.display);
         if(!geometry.width)
-            geometry.width = DisplayWidth(disp, DefaultScreen(disp));
+            geometry.width = DisplayWidth(globalconf.display, DefaultScreen(globalconf.display));
     }
 
     if((ret = config_parse(screen, configfile, globalconf.prompt, &geometry)))
@@ -676,14 +673,14 @@ main(int argc, char **argv)
     screensinfo_delete(&si);
 
     /* Create the window */
-    globalconf.sw = simplewindow_new(disp, DefaultScreen(disp),
+    globalconf.sw = simplewindow_new(globalconf.display, DefaultScreen(globalconf.display),
                                      geometry.x, geometry.y, geometry.width, geometry.height, 0);
 
-    XStoreName(disp, globalconf.sw->window, PROGNAME);
-    XMapRaised(disp, globalconf.sw->window);
+    XStoreName(globalconf.display, globalconf.sw->window, PROGNAME);
+    XMapRaised(globalconf.display, globalconf.sw->window);
 
     /* Create the drawing context */
-    globalconf.ctx = draw_context_new(disp, DefaultScreen(disp),
+    globalconf.ctx = draw_context_new(globalconf.display, DefaultScreen(globalconf.display),
                                       geometry.width, geometry.height,
                                       globalconf.sw->drawable);
 
@@ -701,7 +698,7 @@ main(int argc, char **argv)
 
     for(opt = 1000; opt; opt--)
     {
-        if(XGrabKeyboard(disp, DefaultRootWindow(disp), True,
+        if(XGrabKeyboard(globalconf.display, DefaultRootWindow(globalconf.display), True,
                          GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess)
             break;
         usleep(1000);
@@ -713,7 +710,7 @@ main(int argc, char **argv)
 
     while(status == RUN)
     {
-        XNextEvent(disp, &ev);
+        XNextEvent(globalconf.display, &ev);
         switch(ev.type)
         {
           case ButtonPress:
@@ -724,7 +721,7 @@ main(int argc, char **argv)
             break;
           case Expose:
             if(!ev.xexpose.count)
-                simplewindow_refresh_drawable(globalconf.sw, DefaultScreen(disp));
+                simplewindow_refresh_drawable(globalconf.sw, DefaultScreen(globalconf.display));
             break;
           default:
             break;
@@ -750,7 +747,7 @@ main(int argc, char **argv)
     p_delete(&globalconf.text);
     draw_context_delete(&globalconf.ctx);
     simplewindow_delete(&globalconf.sw);
-    XCloseDisplay(disp);
+    XCloseDisplay(globalconf.display);
 
     return EXIT_SUCCESS;
 }
