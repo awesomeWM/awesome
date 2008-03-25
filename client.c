@@ -184,6 +184,8 @@ client_ban(Client *c)
 Bool
 client_focus(Client *c, int screen, Bool raise)
 {
+    int phys_screen;
+
     /* if c is NULL or invisible, take next client in the focus history */
     if((!c || (c && (!client_isvisible(c, screen))))
        && !(c = focus_get_current_client(screen)))
@@ -215,14 +217,18 @@ client_focus(Client *c, int screen, Bool raise)
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
         window_grabbuttons(c->win, c->phys_screen);
+        phys_screen = c->phys_screen;
     }
     else
+    {
+        phys_screen = screen_virttophys(screen);
         XSetInputFocus(globalconf.display,
-                       RootWindow(globalconf.display, screen_virttophys(screen)),
+                       RootWindow(globalconf.display, phys_screen),
                        RevertToPointerRoot, CurrentTime);
+    }
 
+    ewmh_update_net_active_window(phys_screen);
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
-    ewmh_update_net_active_window(c->phys_screen);
 
     return True;
 }
