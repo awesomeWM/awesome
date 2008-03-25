@@ -23,11 +23,10 @@
 
 #include "mouse.h"
 #include "screen.h"
-#include "layout.h"
 #include "tag.h"
 #include "event.h"
-#include "window.h"
 #include "client.h"
+#include "titlebar.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
 #include "common/xscreen.h"
@@ -45,18 +44,20 @@ mouse_snapclient(Client *c, area_t geometry)
                         globalconf.screens[c->screen].statusbar,
                         &globalconf.screens[c->screen].padding);
 
+    geometry = titlebar_geometry_add(&c->titlebar, geometry);
+
     if(abs(geometry.x) < snap + screen_geometry.x && geometry.x > screen_geometry.x)
         geometry.x = screen_geometry.x;
-    else if(abs((screen_geometry.x + screen_geometry.width) - (geometry.x + c->geometry.width + 2 * c->border))
+    else if(abs((screen_geometry.x + screen_geometry.width) - (geometry.x + geometry.width + 2 * c->border))
             < snap)
-        geometry.x = screen_geometry.x + screen_geometry.width - c->geometry.width - 2 * c->border;
+        geometry.x = screen_geometry.x + screen_geometry.width - geometry.width - 2 * c->border;
     if(abs(geometry.y) < snap + screen_geometry.y && geometry.y > screen_geometry.y)
         geometry.y = screen_geometry.y;
-    else if(abs((screen_geometry.y + screen_geometry.height) - (geometry.y + c->geometry.height + 2 * c->border))
+    else if(abs((screen_geometry.y + screen_geometry.height) - (geometry.y + geometry.height + 2 * c->border))
             < snap)
-        geometry.y = screen_geometry.y + screen_geometry.height - c->geometry.height - 2 * c->border;
+        geometry.y = screen_geometry.y + screen_geometry.height - geometry.height - 2 * c->border;
 
-    return geometry;
+    return titlebar_geometry_remove(&c->titlebar, geometry);
 }
 
 /** Move client with mouse
