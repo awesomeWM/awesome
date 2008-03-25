@@ -199,10 +199,10 @@ titlebar_update(Client *c)
     }
 
 
-    if(c->isurgent)
-        style = c->titlebar.styles.urgent;
-    else if(globalconf.focus->client == c)
+    if(globalconf.focus->client == c)
         style = c->titlebar.styles.focus;
+    else if(c->isurgent)
+        style = c->titlebar.styles.urgent;
     else
         style = c->titlebar.styles.normal;
 
