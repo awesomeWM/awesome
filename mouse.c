@@ -110,6 +110,21 @@ mouse_snapclient(Client *c, area_t geometry)
     return titlebar_geometry_remove(&c->titlebar, geometry);
 }
 
+static void
+mouse_resizebar_update(DrawCtx *ctx, style_t style, SimpleWindow *sw, area_t geometry, int border)
+{
+    area_t draw_geometry = { 0, 0, ctx->width, ctx->height, NULL, NULL };
+    char size[64];
+
+    snprintf(size, sizeof(size), "%dx%d+%d+%d",
+             geometry.x, geometry.y, geometry.width, geometry.height);
+    draw_text(ctx, draw_geometry, AlignCenter, style.font->height / 2, size, style);
+    simplewindow_move(sw,
+                      geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
+                      geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
+    simplewindow_refresh_drawable(sw, sw->phys_screen);
+}
+
 /** Move client with mouse
  * \param screen Screen ID
  * \param arg Unused
@@ -125,24 +140,44 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     area_t geometry;
     Client *c = globalconf.focus->client, *target;
     Layout *layout = layout_get_current(screen);
+    SimpleWindow *sw = NULL;
+    DrawCtx *ctx;
+    style_t style;
 
-    if(!c)
+    if(!c
+       || XGrabPointer(globalconf.display,
+                       RootWindow(globalconf.display, c->phys_screen),
+                       False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+                       RootWindow(globalconf.display, c->phys_screen),
+                       globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
         return;
+
+    XQueryPointer(globalconf.display,
+                  RootWindow(globalconf.display, c->phys_screen),
+                  &dummy, &dummy, &x, &y, &di, &di, &dui);
 
     geometry = c->geometry;
     ocx = geometry.x;
     ocy = geometry.y;
-
-    if(XGrabPointer(globalconf.display,
-                    RootWindow(globalconf.display, c->phys_screen),
-                    False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
-                    RootWindow(globalconf.display, c->phys_screen),
-                    globalconf.cursor[CurMove], CurrentTime) != GrabSuccess)
-        return;
-    XQueryPointer(globalconf.display,
-                  RootWindow(globalconf.display, c->phys_screen),
-                  &dummy, &dummy, &x, &y, &di, &di, &dui);
     c->ismax = False;
+
+    if(c->isfloating || layout->arrange == layout_floating)
+    {
+        style = globalconf.screens[c->screen].styles.focus;
+
+        sw = simplewindow_new(globalconf.display, c->phys_screen, 0, 0,
+                              draw_textwidth(globalconf.display,
+                                             globalconf.screens[c->screen].styles.focus.font,
+                                             "0000x0000+0000+0000") + style.font->height,
+                              1.5 * style.font->height, 0);
+
+        ctx = draw_context_new(globalconf.display, sw->phys_screen,
+                               sw->geometry.width, sw->geometry.height,
+                               sw->drawable);
+        XMapRaised(globalconf.display, sw->window);
+        mouse_resizebar_update(ctx, style, sw, geometry, c->border);
+    }
+
     for(;;)
     {
         XMaskEvent(globalconf.display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
@@ -150,6 +185,11 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         {
           case ButtonRelease:
             XUngrabPointer(globalconf.display, CurrentTime);
+            if(sw)
+            {
+                draw_context_delete(&ctx);
+                simplewindow_delete(&sw);
+            }
             return;
           case ConfigureRequest:
             event_handle_configurerequest(&ev);
@@ -174,6 +214,8 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 c->ismoving = True;
                 client_resize(c, geometry, False);
                 c->ismoving = False;
+                if(sw)
+                    mouse_resizebar_update(ctx, style, sw, c->geometry, c->border);
             }
             else
             {
@@ -217,6 +259,9 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     Layout *layout = curtags[0]->layout;
     area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry;
     double mwfact;
+    SimpleWindow *sw = NULL;
+    DrawCtx *ctx = NULL;
+    style_t style;
 
     /* only handle floating and tiled layouts */
     if(c && !c->isfixed)
@@ -226,6 +271,19 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
             ocx = c->geometry.x;
             ocy = c->geometry.y;
             c->ismax = False;
+            style = globalconf.screens[c->screen].styles.focus;
+
+            sw = simplewindow_new(globalconf.display, c->phys_screen, 0, 0,
+                                  draw_textwidth(globalconf.display,
+                                                 globalconf.screens[c->screen].styles.focus.font,
+                                                 "0000x0000+0000+0000") + style.font->height,
+                                  1.5 * style.font->height, 0);
+
+            ctx = draw_context_new(globalconf.display, sw->phys_screen,
+                                   sw->geometry.width, sw->geometry.height,
+                                   sw->drawable);
+            XMapRaised(globalconf.display, sw->window);
+            mouse_resizebar_update(ctx, style, sw, geometry, c->border);
         }
         else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
                  || layout->arrange == layout_tilebottom || layout->arrange == layout_tiletop)
@@ -270,6 +328,11 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         {
           case ButtonRelease:
             XUngrabPointer(globalconf.display, CurrentTime);
+            if(sw)
+            {
+                draw_context_delete(&ctx);
+                simplewindow_delete(&sw);
+            }
             return;
           case ConfigureRequest:
             event_handle_configurerequest(&ev);
@@ -290,6 +353,8 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.x = c->geometry.x;
                 geometry.y = c->geometry.y;
                 client_resize(c, geometry, True);
+                if(sw)
+                    mouse_resizebar_update(ctx, style, sw, c->geometry, c->border);
             }
             else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
                     || layout->arrange == layout_tiletop || layout->arrange == layout_tilebottom)
