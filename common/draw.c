@@ -753,7 +753,7 @@ draw_rotate(DrawCtx *ctx, Drawable dest, int dest_w, int dest_h,
  * \return text width
  */
 unsigned short
-draw_textwidth(Display *disp, font_t *font, char *text)
+draw_textwidth(Display *disp, font_t *font, const char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
