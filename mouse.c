@@ -32,9 +32,32 @@
 #include "layouts/tile.h"
 #include "common/xscreen.h"
 
-#define MOUSEMASK                       (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
+#define MOUSEMASK      (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
 
 extern AwesomeConf globalconf;
+
+static area_t
+mouse_snapclient(Client *c, area_t geometry)
+{
+    int snap = globalconf.screens[c->screen].snap;
+    area_t screen_geometry =
+        screen_get_area(c->screen,
+                        globalconf.screens[c->screen].statusbar,
+                        &globalconf.screens[c->screen].padding);
+
+    if(abs(geometry.x) < snap + screen_geometry.x && geometry.x > screen_geometry.x)
+        geometry.x = screen_geometry.x;
+    else if(abs((screen_geometry.x + screen_geometry.width) - (geometry.x + c->geometry.width + 2 * c->border))
+            < snap)
+        geometry.x = screen_geometry.x + screen_geometry.width - c->geometry.width - 2 * c->border;
+    if(abs(geometry.y) < snap + screen_geometry.y && geometry.y > screen_geometry.y)
+        geometry.y = screen_geometry.y;
+    else if(abs((screen_geometry.y + screen_geometry.height) - (geometry.y + c->geometry.height + 2 * c->border))
+            < snap)
+        geometry.y = screen_geometry.y + screen_geometry.height - c->geometry.height - 2 * c->border;
+
+    return geometry;
+}
 
 /** Move client with mouse
  * \param screen Screen ID
@@ -48,19 +71,17 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     unsigned int dui;
     Window dummy, child;
     XEvent ev;
-    area_t area, geometry;
+    area_t geometry;
     Client *c = globalconf.focus->client, *target;
     Layout *layout = layout_get_current(screen);
 
     if(!c)
         return;
 
-    area = screen_get_area(c->screen,
-                           globalconf.screens[screen].statusbar,
-                           &globalconf.screens[screen].padding);
+    geometry = c->geometry;
+    ocx = geometry.x;
+    ocy = geometry.y;
 
-    ocx = geometry.x = c->geometry.x;
-    ocy = geometry.y = c->geometry.y;
     if(XGrabPointer(globalconf.display,
                     RootWindow(globalconf.display, c->phys_screen),
                     False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
@@ -97,19 +118,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.x = ocx + (ev.xmotion.x - x);
                 geometry.y = ocy + (ev.xmotion.y - y);
 
-                if(abs(geometry.x) < globalconf.screens[screen].snap + area.x && geometry.x > area.x)
-                    geometry.x = area.x;
-                else if(abs((area.x + area.width) - (geometry.x + c->geometry.width + 2 * c->border))
-                        < globalconf.screens[screen].snap)
-                    geometry.x = area.x + area.width - c->geometry.width - 2 * c->border;
-                if(abs(geometry.y) < globalconf.screens[screen].snap + area.y && geometry.y > area.y)
-                    geometry.y = area.y;
-                else if(abs((area.y + area.height) - (geometry.y + c->geometry.height + 2 * c->border))
-                        < globalconf.screens[screen].snap)
-                    geometry.y = area.y + area.height - c->geometry.height - 2 * c->border;
-
-                geometry.width = c->geometry.width;
-                geometry.height = c->geometry.height;
+                geometry = mouse_snapclient(c, geometry);
 
                 c->ismoving = True;
                 client_resize(c, geometry, False);
