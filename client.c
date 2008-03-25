@@ -178,21 +178,21 @@ client_ban(Client *c)
 /** Give focus to client, or to first client if c is NULL
  * \param c client
  * \param screen Screen ID
+ * \param raise raise window if true
+ * \return true if a window (even root) has received focus, false otherwise
  */
-void
+Bool
 client_focus(Client *c, int screen, Bool raise)
 {
     /* if c is NULL or invisible, take next client in the focus history */
-    if(!c || (c && (!client_isvisible(c, screen))))
-    {
-        c = focus_get_current_client(screen);
+    if((!c || (c && (!client_isvisible(c, screen))))
+       && !(c = focus_get_current_client(screen)))
         /* if c is still NULL take next client in the stack */
-        if(!c)
-            for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
-    }
+        for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
 
+    /* if c is already the focused window, then stop */
     if(c == globalconf.focus->client)
-        return;
+        return False;
 
     /* unfocus current selected client */
     if(globalconf.focus->client)
@@ -223,6 +223,8 @@ client_focus(Client *c, int screen, Bool raise)
 
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_active_window(c->phys_screen);
+
+    return True;
 }
 
 void
