@@ -396,9 +396,9 @@ ewmh_get_window_icon(Window w)
     {
         pixel = data[i];
         imgdata[3] = (pixel >> 24) & 0xff; /* A */
-        imgdata[0] = (pixel >> 16) & 0xff; /* R */
+        imgdata[2] = (pixel >> 16) & 0xff; /* R */
         imgdata[1] = (pixel >>  8) & 0xff; /* G */
-        imgdata[2] = pixel & 0xff;         /* B */
+        imgdata[0] = pixel & 0xff;         /* B */
     }
 
     XFree(wdata);
