@@ -31,6 +31,14 @@
 
 extern AwesomeConf globalconf;
 
+/** Create a new tag. Parameteres values are checked.
+ * \param name tag name
+ * \param layout layout to use
+ * \param mwfact master width factor
+ * \param nmaster number of master windows
+ * \param ncol number of columns for slaves windows
+ * \return a new tag with all these parameters
+ */
 Tag *
 tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
 {
