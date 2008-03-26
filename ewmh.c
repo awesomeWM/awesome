@@ -358,10 +358,11 @@ ewmh_check_client_hints(Client *c)
 NetWMIcon *
 ewmh_get_window_icon(Window w)
 {
+    double alpha;
     NetWMIcon *icon;
     Atom type;
     int format, size, i;
-    unsigned long items, rest, *data, pixel;
+    unsigned long items, rest, *data;
     unsigned char *imgdata, *wdata;
 
     if(XGetWindowProperty(globalconf.display, w,
@@ -394,11 +395,11 @@ ewmh_get_window_icon(Window w)
     icon->image = p_new(unsigned char, size * 4);
     for(imgdata = icon->image, i = 2; i < size + 2; i++, imgdata += 4)
     {
-        pixel = data[i];
-        imgdata[3] = (pixel >> 24) & 0xff; /* A */
-        imgdata[2] = (pixel >> 16) & 0xff; /* R */
-        imgdata[1] = (pixel >>  8) & 0xff; /* G */
-        imgdata[0] = pixel & 0xff;         /* B */
+        imgdata[3] = (data[i] >> 24) & 0xff;           /* A */
+        alpha = imgdata[3] / 255.0;
+        imgdata[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
+        imgdata[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
+        imgdata[0] = (data[i]         & 0xff) * alpha; /* B */
     }
 
     XFree(wdata);
