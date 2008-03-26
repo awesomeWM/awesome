@@ -226,8 +226,8 @@ uicb_client_tag(int screen, char *arg)
 }
 
 /** Toggle a tag on client
- * \param screen Screen ID
- * \param arg Tag name
+ * \param screen virtual screen id
+ * \param arg tag number
  * \ingroup ui_callback
  */
 void
@@ -235,6 +235,7 @@ uicb_client_toggletag(int screen, char *arg)
 {
     Client *sel = globalconf.focus->client;
     int i;
+    Bool is_sticky = True;
     Tag *tag, *target_tag;
 
     if(!sel)
@@ -261,11 +262,16 @@ uicb_client_toggletag(int screen, char *arg)
             tag_client(sel, target_tag);
     }
     else
+    {
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            if(is_client_tagged(sel, tag))
+            if(!is_client_tagged(sel, tag))
+            {
+                is_sticky = False;
                 tag_client(sel, tag);
-            else
-                untag_client(sel, tag);
+            }
+        if(is_sticky)
+            tag_client_with_current_selected(sel);
+    }
 }
 
 /** Add a tag to viewed tags
