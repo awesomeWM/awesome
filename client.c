@@ -500,11 +500,14 @@ client_resize(Client *c, area_t geometry, Bool hints)
     XWindowChanges wc;
     Layout *layout = layout_get_current(c->screen);
 
+    if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating)
+    {
+        titlebar_update_geometry(c, geometry);
+        geometry = titlebar_geometry_remove(&c->titlebar, geometry);
+    }
+
     if(hints)
         geometry = client_geometry_hints(c, geometry);
-
-    if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating)
-        geometry = titlebar_update_geometry(c, geometry);
 
     if(geometry.width <= 0 || geometry.height <= 0)
         return False;
@@ -543,6 +546,12 @@ client_resize(Client *c, area_t geometry, Bool hints)
                 c->f_geometry = geometry;
             titlebar_update_geometry_floating(c);
         }
+        /* call it again like it was floating,
+         * because for right or bottom titlebar,
+         * we want it to be sticked to the window */
+        else if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating
+                && (c->titlebar.position == Right || c->titlebar.position == Bottom))
+            titlebar_update_geometry_floating(c);
 
         XConfigureWindow(globalconf.display, c->win,
                          CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);

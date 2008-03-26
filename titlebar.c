@@ -336,18 +336,18 @@ titlebar_update_geometry_floating(Client *c)
     titlebar_update(c);
 }
 
-area_t
+void
 titlebar_update_geometry(Client *c, area_t geometry)
 {
     int width, x_offset = 0 , y_offset = 0;
 
     if(!c->titlebar.sw)
-        return geometry;
+        return;
 
     switch(c->titlebar.position)
     {
       default:
-        return geometry;
+        return;
       case Top:
         if(!c->titlebar.width)
             width = geometry.width + 2 * c->border;
@@ -441,8 +441,6 @@ titlebar_update_geometry(Client *c, area_t geometry)
     }
 
     titlebar_update(c);
-
-    return titlebar_geometry_remove(&c->titlebar, geometry);
 }
 
 /** Toggle window titlebar visibility
