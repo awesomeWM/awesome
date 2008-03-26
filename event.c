@@ -260,7 +260,9 @@ event_handle_enternotify(XEvent *e)
            && ev->y_root == globalconf.pointer_y))
         return;
 
-    /* the idea behing saving pointer_x and pointer_y is Bob Marley powered */
+    /* the idea behind saving pointer_x and pointer_y is Bob Marley powered
+     * this will allow us top drop some EnterNotify events and thus not giving
+     * focus to windows appering under the cursor without a cursor move */
     globalconf.pointer_x = ev->x_root;
     globalconf.pointer_y = ev->y_root;
 
