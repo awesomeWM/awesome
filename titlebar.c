@@ -369,8 +369,6 @@ titlebar_update_geometry(Client *c, area_t geometry)
                                  geometry.y,
                                  width,
                                  c->titlebar.sw->geometry.height);
-        geometry.y += c->titlebar.sw->geometry.height;
-        geometry.height -= c->titlebar.sw->geometry.height;
         break;
       case Bottom:
         if(!c->titlebar.width)
@@ -388,10 +386,10 @@ titlebar_update_geometry(Client *c, area_t geometry)
             x_offset = (geometry.width - width) / 2;
             break;
         }
-        geometry.height -= c->titlebar.sw->geometry.height;
         simplewindow_move_resize(c->titlebar.sw,
                                  geometry.x + x_offset,
-                                 geometry.y + geometry.height + 2 * c->border,
+                                 geometry.y + geometry.height
+                                     - c->titlebar.sw->geometry.height + 2 * c->border,
                                  width,
                                  c->titlebar.sw->geometry.height);
         break;
@@ -416,8 +414,6 @@ titlebar_update_geometry(Client *c, area_t geometry)
                                  geometry.y + y_offset,
                                  c->titlebar.sw->geometry.width,
                                  width);
-        geometry.width -= c->titlebar.sw->geometry.width;
-        geometry.x += c->titlebar.sw->geometry.width;
         break;
       case Right:
         if(!c->titlebar.width)
@@ -435,9 +431,9 @@ titlebar_update_geometry(Client *c, area_t geometry)
             y_offset = (geometry.height - width) / 2;
             break;
         }
-        geometry.width -= c->titlebar.sw->geometry.width;
         simplewindow_move_resize(c->titlebar.sw,
-                                 geometry.x + geometry.width + 2 * c->border,
+                                 geometry.x + geometry.width
+                                     - c->titlebar.sw->geometry.width + 2 * c->border,
                                  geometry.y + y_offset,
                                  c->titlebar.sw->geometry.width,
                                  width);
@@ -446,7 +442,7 @@ titlebar_update_geometry(Client *c, area_t geometry)
 
     titlebar_update(c);
 
-    return geometry;
+    return titlebar_geometry_remove(&c->titlebar, geometry);
 }
 
 /** Toggle window titlebar visibility
