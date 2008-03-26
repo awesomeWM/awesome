@@ -333,6 +333,8 @@ draw_rectangle(DrawCtx *ctx, area_t geometry, float line_width, Bool filled, XCo
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, line_width);
+    cairo_set_miter_limit(ctx->cr, 0.0);
+    cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
     cairo_set_source_rgb(ctx->cr,
                          color.red / 65535.0,
                          color.green / 65535.0,
@@ -371,6 +373,8 @@ draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, float line_width, Bool fi
 
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, line_width);
+    cairo_set_miter_limit(ctx->cr, 0.0);
+    cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
 
     pat = draw_setup_cairo_color_source(ctx, pattern_rect, pcolor, pcolor_center, pcolor_end);
 
@@ -398,7 +402,8 @@ draw_graph_setup(DrawCtx *ctx)
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, 1.0);
     /* without it, it can draw over the path on sharp angles (...too long lines) */
-    cairo_set_line_join (ctx->cr, CAIRO_LINE_JOIN_ROUND);
+    cairo_set_miter_limit(ctx->cr, 0.0);
+    cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
 }
 
 /** Draw a graph

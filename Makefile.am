@@ -34,6 +34,7 @@ WIDGETS += widgets/focusicon.c
 WIDGETS += widgets/progressbar.c
 WIDGETS += widgets/tasklist.c
 WIDGETS += widgets/graph.c
+WIDGETS += widgets/common.c
 
 
 doc_DATA   += README
