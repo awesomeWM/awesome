@@ -125,7 +125,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 {
     /* pb_.. values points to the widget inside a potential border */
     int i, percent_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
-    int unit; /* tick + gap */
+    int unit = 0; /* tick + gap */
     int border_offset;
     area_t rectangle, pattern_rect;
 
