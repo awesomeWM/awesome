@@ -559,10 +559,8 @@ client_resize(Client *c, area_t geometry, Bool hints)
     }
 
     /* call it again like it was floating,
-     * because for right or bottom titlebar,
      * we want it to be sticked to the window */
-    if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating
-            && (c->titlebar.position == Right || c->titlebar.position == Bottom))
+    if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating)
        titlebar_update_geometry_floating(c);
 
     return resized;
