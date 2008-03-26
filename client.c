@@ -499,6 +499,7 @@ client_resize(Client *c, area_t geometry, Bool hints)
     area_t area;
     XWindowChanges wc;
     Layout *layout = layout_get_current(c->screen);
+    Bool resized = False;
 
     if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating)
     {
@@ -546,12 +547,6 @@ client_resize(Client *c, area_t geometry, Bool hints)
                 c->f_geometry = geometry;
             titlebar_update_geometry_floating(c);
         }
-        /* call it again like it was floating,
-         * because for right or bottom titlebar,
-         * we want it to be sticked to the window */
-        else if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating
-                && (c->titlebar.position == Right || c->titlebar.position == Bottom))
-            titlebar_update_geometry_floating(c);
 
         XConfigureWindow(globalconf.display, c->win,
                          CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
@@ -560,9 +555,17 @@ client_resize(Client *c, area_t geometry, Bool hints)
         if(c->screen != new_screen)
             move_client_to_screen(c, new_screen, False);
 
-        return True;
+        resized = True;
     }
-    return False;
+
+    /* call it again like it was floating,
+     * because for right or bottom titlebar,
+     * we want it to be sticked to the window */
+    if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating
+            && (c->titlebar.position == Right || c->titlebar.position == Bottom))
+       titlebar_update_geometry_floating(c);
+
+    return resized;
 }
 
 void
