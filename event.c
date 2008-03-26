@@ -185,10 +185,16 @@ event_handle_configurerequest(XEvent * e)
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
-            if(c->isfloating)
+            if(c->isfloating || layout_get_current(c->screen)->arrange == layout_floating)
                 client_resize(c, geometry, False);
             else
+            {
                 globalconf.screens[c->screen].need_arrange = True;
+                /* If we do not resize the client, at least tell it that it
+                 * has its new configuration. That fixes at least
+                 * gnome-terminal */
+                window_configure(c->win, c->geometry, c->border);
+            }
         }
         else
         {
