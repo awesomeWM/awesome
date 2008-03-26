@@ -62,7 +62,7 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
 
     sw->window = xcb_generate_id(conn);
     xcb_create_window(conn, s->root_depth, sw->window,
-                      root_window(conn, phys_screen),
+                      xutil_root_window(conn, phys_screen),
                       x, y, w, h, border_width,
                       XCB_COPY_FROM_PARENT,
                       s->root_visual,
@@ -71,7 +71,7 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
 
     sw->drawable = xcb_generate_id(conn);
     xcb_create_pixmap(conn, s->root_depth, sw->drawable,
-                      root_window(conn, phys_screen), w, h);
+                      xutil_root_window(conn, phys_screen), w, h);
 
     return sw;
 }
@@ -120,7 +120,7 @@ simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
     xcb_free_pixmap(sw->connection, sw->drawable);
     sw->drawable = xcb_generate_id(sw->connection);
     xcb_create_pixmap(sw->connection, s->root_depth, sw->drawable,
-                      root_window(sw->connection, sw->phys_screen), w, h);
+                      xutil_root_window(sw->connection, sw->phys_screen), w, h);
     xcb_configure_window(sw->connection, sw->window,
                          XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                          resize_win_vals);

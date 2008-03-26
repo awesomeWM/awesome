@@ -80,8 +80,8 @@ arrange(int screen)
     /* check that the mouse is on a window or not */
     if((xqp = xcb_query_pointer_reply(globalconf.connection,
                                       xcb_query_pointer_unchecked(globalconf.connection,
-                                                                  root_window(globalconf.connection,
-                                                                              phys_screen)),
+                                                                  xutil_root_window(globalconf.connection,
+                                                                                    phys_screen)),
                                       NULL)) != NULL
        && (xqp->root == XCB_NONE || xqp->child == XCB_NONE || xqp->root == xqp->child))
     {

@@ -63,7 +63,7 @@ client_loadprops(Client * c, int screen)
     prop = p_new(char, ntags + 3);
 
     if(xgettextprop(globalconf.connection, c->win,
-                    x_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
+                    xutil_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
                     prop, ntags + 3))
     {
         for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
@@ -99,7 +99,7 @@ client_isprotodel(xcb_connection_t *c, xcb_window_t win)
     if(xcb_get_wm_protocols(c, win, &n, &protocols))
     {
         for(i = 0; !ret && i < n; i++)
-            if(protocols[i] == x_intern_atom(c, "WM_DELETE_WINDOW"))
+            if(protocols[i] == xutil_intern_atom(c, "WM_DELETE_WINDOW"))
                 ret = true;
         p_delete(&protocols);
     }
@@ -144,9 +144,9 @@ void
 client_updatetitle(Client *c)
 {
     if(!xgettextprop(globalconf.connection, c->win,
-                     x_intern_atom(globalconf.connection, "_NET_WM_NAME"), c->name, sizeof(c->name)))
+                     xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"), c->name, sizeof(c->name)))
         xgettextprop(globalconf.connection, c->win,
-                     x_intern_atom(globalconf.connection, "WM_NAME"), c->name, sizeof(c->name));
+                     xutil_intern_atom(globalconf.connection, "WM_NAME"), c->name, sizeof(c->name));
 
     titlebar_draw(c);
 
@@ -233,7 +233,7 @@ client_focus(Client *c, int screen, bool raise)
         phys_screen = screen_virttophys(screen);
         xcb_set_input_focus(globalconf.connection,
                             XCB_INPUT_FOCUS_POINTER_ROOT,
-                            root_window(globalconf.connection, phys_screen),
+                            xutil_root_window(globalconf.connection, phys_screen),
                             XCB_CURRENT_TIME);
     }
 
@@ -379,7 +379,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     }
 
     /* check for transient and set tags like its parent */
-    if((rettrans = x_get_transient_for_hint(globalconf.connection, w, &trans))
+    if((rettrans = xutil_get_transient_for_hint(globalconf.connection, w, &trans))
        && (t = client_get_bywin(globalconf.clients, trans)))
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
             if(is_client_tagged(t, tag))
@@ -638,7 +638,7 @@ client_saveprops(Client *c)
     prop[++i] = '\0';
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win,
-                        x_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
+                        xutil_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
                         STRING, 8, i, (unsigned char *) prop);
 
     p_delete(&prop);
@@ -691,7 +691,7 @@ client_unmanage(Client *c)
 void
 client_updatewmhints(Client *c)
 {
-    xcb_wm_hints_t *wmh;
+    xcb_wm_hints_t *wmh = NULL;
 
     if((wmh = xcb_get_wm_hints(globalconf.connection, c->win)))
     {
@@ -799,7 +799,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
     prop_r = xcb_get_property_reply(globalconf.connection,
                                     xcb_get_property_unchecked(globalconf.connection,
                                                                false, sel->win,
-                                                               x_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"),
+                                                               xutil_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"),
                                                                CARDINAL,
                                                                0, 1),
                                     NULL);
@@ -927,7 +927,7 @@ uicb_client_moveresize(int screen, char *arg)
 
     xqp = xcb_query_pointer_reply(globalconf.connection,
                                   xcb_query_pointer_unchecked(globalconf.connection,
-                                                              root_window(globalconf.connection, sel->phys_screen)),
+                                                              xutil_root_window(globalconf.connection, sel->phys_screen)),
                                   NULL);
     if(globalconf.screens[sel->screen].resize_hints)
         geometry = client_geometry_hints(sel, geometry);
@@ -961,9 +961,9 @@ client_kill(Client *c)
     if(client_isprotodel(globalconf.connection, c->win))
     {
         ev.window = c->win;
-        ev.type = x_intern_atom(globalconf.connection, "WM_PROTOCOLS");
+        ev.type = xutil_intern_atom(globalconf.connection, "WM_PROTOCOLS");
 
-        ev.data.data32[0] = x_intern_atom(globalconf.connection, "WM_DELETE_WINDOW");
+        ev.data.data32[0] = xutil_intern_atom(globalconf.connection, "WM_DELETE_WINDOW");
         ev.data.data32[1] = XCB_CURRENT_TIME;
 
         /* TODO: really useful? */

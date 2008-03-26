@@ -847,16 +847,13 @@ main(int argc, char **argv)
     if(xcb_connection_has_error(globalconf.connection))
         eprint("unable to open display");
 
-    /* Get the numlock mask */
-    globalconf.numlockmask = xgetnumlockmask(globalconf.connection);
-
     si = screensinfo_new(globalconf.connection);
     if(si->xinerama_is_active)
     {
         if((xqp = xcb_query_pointer_reply(globalconf.connection,
                                           xcb_query_pointer(globalconf.connection,
-                                                            root_window(globalconf.connection,
-                                                                        globalconf.default_screen)),
+                                                            xutil_root_window(globalconf.connection,
+                                                                              globalconf.default_screen)),
                                           NULL)) != NULL)
         {
             screen = screen_get_bycoord(si, 0, xqp->root_x, xqp->root_y);
@@ -924,7 +921,7 @@ main(int argc, char **argv)
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
 
     /* Get the numlock, capslock and shiftlock mask */
-    xutil_get_lock_mask(conn, globalconf.keysyms, &globalconf.numlockmask,
+    xutil_get_lock_mask(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
                         &globalconf.shiftlockmask, &globalconf.capslockmask);
 
     xutil_map_raised(globalconf.connection, globalconf.sw->window);

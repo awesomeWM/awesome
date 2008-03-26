@@ -112,7 +112,7 @@ scan()
 
     for(screen = 0; screen < screen_max; screen++)
     {
-        w = root_window(globalconf.connection, screen);
+        w = xutil_root_window(globalconf.connection, screen);
 
         /* Get parent  geometry informations,  useful to get  the real
          * coordinates  of the  window because  Xlib set  'x'  and 'y'
@@ -389,13 +389,10 @@ main(int argc, char *argv[])
     for(screen_nbr = 0;
         screen_nbr < xcb_setup_roots_length(xcb_get_setup(conn));
         screen_nbr++)
-    {
-        /* this causes an error if some other window manager is
-         * running */
+        /* this causes an error if some other window manager is running */
         xcb_change_window_attributes(conn,
-                                     root_window(conn, screen_nbr),
+                                     xutil_root_window(conn, screen_nbr),
                                      XCB_CW_EVENT_MASK, &select_input_val);
-    }
 
     /* need to xcb_flush to validate error handler */
     xcb_aux_sync(conn);
@@ -462,7 +459,7 @@ main(int argc, char *argv[])
         screen_nbr++)
     {
         xcb_change_window_attributes(globalconf.connection,
-                                     root_window(globalconf.connection, screen_nbr),
+                                     xutil_root_window(globalconf.connection, screen_nbr),
                                      XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
                                      change_win_vals);
         ewmh_set_supported_hints(screen_nbr);

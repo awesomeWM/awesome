@@ -154,7 +154,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     }
     else
         for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup (connection)); screen++)
-            if(root_window(connection, screen) == ev->event
+            if(xutil_root_window(connection, screen) == ev->event
                && (qr = xcb_query_pointer_reply(connection,
                                                 xcb_query_pointer(connection, ev->event),
                                                 NULL)) != NULL)
@@ -274,7 +274,7 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
     const xcb_screen_t *screen;
 
     for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length(xcb_get_setup (connection)); screen_nbr++)
-        if(ev->window == root_window(connection, screen_nbr)
+        if(ev->window == xutil_root_window(connection, screen_nbr)
            && (screen = xcb_aux_get_screen(connection, screen_nbr)) != NULL
            && (ev->width != screen->width_in_pixels
                || ev->height != screen->height_in_pixels))
@@ -336,7 +336,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     }
     else
         for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
-            if(ev->event == root_window(connection, screen))
+            if(ev->event == xutil_root_window(connection, screen))
             {
                 window_root_grabbuttons(screen);
                 return 0;
@@ -395,7 +395,7 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     for(screen = 0; screen < xcb_setup_roots_length (xcb_get_setup (connection)); screen++)
         if((qpr = xcb_query_pointer_reply(connection,
                                           xcb_query_pointer(connection,
-                                                            root_window(connection, screen)),
+                                                            xutil_root_window(connection, screen)),
                                           NULL)) != NULL)
         {
             /* if screen is 0, we are on first Zaphod screen or on the
@@ -466,7 +466,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         if(globalconf.screens_info->xinerama_is_active
            && (qpr = xcb_query_pointer_reply(connection,
                                              xcb_query_pointer(connection,
-                                                               root_window(globalconf.connection, screen_nbr)),
+                                                               xutil_root_window(globalconf.connection, screen_nbr)),
                                              NULL)) != NULL)
             screen_nbr = screen_get_bycoord(globalconf.screens_info, screen_nbr, qpr->root_x, qpr->root_y);
         else
@@ -500,7 +500,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
     {
         if(ev->atom == WM_TRANSIENT_FOR)
         {
-            x_get_transient_for_hint(connection, c->win, &trans);
+            xutil_get_transient_for_hint(connection, c->win, &trans);
             if(!c->isfloating
                && (c->isfloating = (client_get_bywin(globalconf.clients, trans) != NULL)))
                 globalconf.screens[c->screen].need_arrange = true;
@@ -510,7 +510,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
         else if (ev->atom == WM_HINTS)
             client_updatewmhints(c);
 
-        if(ev->atom == WM_NAME || ev->atom == x_intern_atom(globalconf.connection, "_NET_WM_NAME"))
+        if(ev->atom == WM_NAME || ev->atom == xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"))
             client_updatetitle(c);
     }
 
@@ -535,7 +535,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     bool send_event = ((ev->response_type & 0x80) >> 7);
 
     if((c = client_get_bywin(globalconf.clients, ev->window))
-       && ev->event == root_window(connection, c->phys_screen)
+       && ev->event == xutil_root_window(connection, c->phys_screen)
        && send_event && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
         client_unmanage(c);
 

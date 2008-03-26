@@ -53,7 +53,7 @@ client_match_rule(Client *c, Rule *r)
     if(r->prop_r)
     {
         /* first try to match on name */
-	ch = x_get_class_hint(globalconf.connection, c->win);
+	ch = xutil_get_class_hint(globalconf.connection, c->win);
 	if (!ch)
 	    return false;
 
@@ -82,7 +82,7 @@ client_match_rule(Client *c, Rule *r)
     if(r->xprop
        && r->xpropval_r
        && xgettextprop(globalconf.connection, c->win,
-                       x_intern_atom(globalconf.connection, r->xprop),
+                       xutil_intern_atom(globalconf.connection, r->xprop),
                        buf, ssizeof(buf)))
         ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
 

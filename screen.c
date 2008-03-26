@@ -229,7 +229,7 @@ move_mouse_pointer_to_screen(int phys_screen)
     else
         xcb_warp_pointer(globalconf.connection,
                          XCB_NONE,
-                         root_window(globalconf.connection, phys_screen),
+                         xutil_root_window(globalconf.connection, phys_screen),
                          0, 0, 0, 0, 0, 0);
 }
 

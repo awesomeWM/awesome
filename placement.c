@@ -133,7 +133,7 @@ placement_under_mouse(Client *c)
 
     if((xqp = xcb_query_pointer_reply(globalconf.connection,
                                       xcb_query_pointer(globalconf.connection,
-                                                        root_window(globalconf.connection, c->phys_screen)),
+                                                        xutil_root_window(globalconf.connection, c->phys_screen)),
                                       NULL)) != NULL)
     {
         finalgeometry.x = xqp->root_x - c->f_geometry.width / 2;

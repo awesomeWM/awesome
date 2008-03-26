@@ -151,16 +151,16 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     if(!c
        || xcb_grab_pointer_reply(globalconf.connection,
                                  xcb_grab_pointer(globalconf.connection, false,
-                                                  root_window(globalconf.connection, c->phys_screen),
+                                                  xutil_root_window(globalconf.connection, c->phys_screen),
                                                   MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                                  root_window(globalconf.connection, c->phys_screen),
+                                                  xutil_root_window(globalconf.connection, c->phys_screen),
                                                   globalconf.cursor[CurMove], XCB_CURRENT_TIME),
                                  NULL))
         return;
 
     query_pointer_r = xcb_query_pointer_reply(globalconf.connection,
                                               xcb_query_pointer_unchecked(globalconf.connection,
-                                                                          root_window(globalconf.connection, c->phys_screen)),
+                                                                          xutil_root_window(globalconf.connection, c->phys_screen)),
                                               NULL);
 
     geometry = c->geometry;
@@ -230,7 +230,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 {
                     mquery_pointer_r = xcb_query_pointer_reply(globalconf.connection,
                                                                xcb_query_pointer_unchecked(globalconf.connection,
-                                                                                           root_window(globalconf.connection, c->phys_screen)),
+                                                                                           xutil_root_window(globalconf.connection, c->phys_screen)),
                                                                NULL);
                     if((newscreen = screen_get_bycoord(globalconf.screens_info, c->screen,
                                                        mquery_pointer_r->root_x,
@@ -336,9 +336,9 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         return;
 
     grab_pointer_c = xcb_grab_pointer(globalconf.connection, false,
-                                      root_window(globalconf.connection, c->phys_screen),
+                                      xutil_root_window(globalconf.connection, c->phys_screen),
                                       MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                      root_window(globalconf.connection, c->phys_screen),
+                                      xutil_root_window(globalconf.connection, c->phys_screen),
                                       globalconf.cursor[CurResize], XCB_CURRENT_TIME);
     
     if(layout->arrange == layout_floating || c->isfloating)

@@ -78,8 +78,8 @@ void xutil_get_lock_mask(xcb_connection_t *, xcb_key_symbols_t *,
 /* End of macros not defined in XCB */
 
 /* Common function defined in Xlib but not in XCB */
-bool x_get_transient_for_hint(xcb_connection_t *, xcb_window_t, xcb_window_t *);
-xcb_window_t root_window(xcb_connection_t *, int);
+bool xutil_get_transient_for_hint(xcb_connection_t *, xcb_window_t, xcb_window_t *);
+xcb_window_t xutil_root_window(xcb_connection_t *, int);
 
 typedef struct _class_hint_t
 {
@@ -95,14 +95,14 @@ typedef struct
     uint16_t blue;
 } xcolor_t;
 
-class_hint_t *x_get_class_hint(xcb_connection_t *, xcb_window_t);
+class_hint_t *xutil_get_class_hint(xcb_connection_t *, xcb_window_t);
 
 /* Equivalent call to XInternAtom
  *
  * WARNING: should not be used in loop, in this case, it should send
  * the queries first and then treat the answer as late as possible)
  */
-xcb_atom_t x_intern_atom(xcb_connection_t *, const char *);
+xcb_atom_t xutil_intern_atom(xcb_connection_t *, const char *);
 
 /* Equivalent XCB call to XMapRaised, which actually raises the
    specified window to the top of the stack and maps it */

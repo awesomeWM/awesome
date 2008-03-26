@@ -172,7 +172,7 @@ titlebar_draw(Client *c)
         dw = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection, s->root_depth,
                           dw,
-                          root_window(globalconf.connection, c->titlebar.sw->phys_screen),
+                          xutil_root_window(globalconf.connection, c->titlebar.sw->phys_screen),
                           c->titlebar.sw->geometry.height,
                           c->titlebar.sw->geometry.width);
         ctx = draw_context_new(globalconf.connection, c->titlebar.sw->phys_screen,

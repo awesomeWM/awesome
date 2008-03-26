@@ -157,7 +157,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_below;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			root_window(globalconf.connection, phys_screen),
+			xutil_root_window(globalconf.connection, phys_screen),
 			net_supported, ATOM, 32, i, atom);
 }
 
@@ -178,7 +178,7 @@ ewmh_update_net_client_list(int phys_screen)
             wins[n] = c->win;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			root_window(globalconf.connection, phys_screen),
+			xutil_root_window(globalconf.connection, phys_screen),
 			net_client_list, WINDOW, 32, n, wins);
 
     p_delete(&wins);
@@ -194,7 +194,7 @@ ewmh_update_net_numbers_of_desktop(int phys_screen)
         count++;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			root_window(globalconf.connection, phys_screen),
+			xutil_root_window(globalconf.connection, phys_screen),
 			net_number_of_desktops, CARDINAL, 32, 1, &count);
 }
 
@@ -208,7 +208,7 @@ ewmh_update_net_current_desktop(int phys_screen)
         count++;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        root_window(globalconf.connection, phys_screen),
+                        xutil_root_window(globalconf.connection, phys_screen),
                         net_current_desktop, CARDINAL, 32, 1, &count);
 
     p_delete(&curtags);
@@ -232,7 +232,7 @@ ewmh_update_net_desktop_names(int phys_screen)
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			root_window(globalconf.connection, phys_screen),
+			xutil_root_window(globalconf.connection, phys_screen),
 			net_desktop_names, utf8_string, 8, len, buf);
 }
 
@@ -245,7 +245,7 @@ ewmh_update_net_active_window(int phys_screen)
     win = sel ? sel->win : XCB_NONE;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			root_window(globalconf.connection, phys_screen),
+			xutil_root_window(globalconf.connection, phys_screen),
 			net_active_window, WINDOW, 32, 1, &win);
 }
 
@@ -362,7 +362,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
             screen++)
         {
-            if(ev->window == root_window(globalconf.connection, screen))
+            if(ev->window == xutil_root_window(globalconf.connection, screen))
                 tag_view_only_byindex(screen, ev->data.data32[0]);
         }
 

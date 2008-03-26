@@ -112,7 +112,7 @@ xutil_get_lock_mask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
  * \return return true if successfull
  */
 bool
-x_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
+xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
 			 xcb_window_t *prop_win)
 {
     xcb_get_property_reply_t *r;
@@ -141,13 +141,13 @@ x_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
 }
 
 xcb_window_t
-root_window(xcb_connection_t *c, int screen_number)
+xutil_root_window(xcb_connection_t *c, int screen_number)
 {
     return xcb_aux_get_screen(c, screen_number)->root;
 }
 
 xcb_atom_t
-x_intern_atom(xcb_connection_t *c, const char *property)
+xutil_intern_atom(xcb_connection_t *c, const char *property)
 {
     xcb_atom_t atom;
     xcb_intern_atom_reply_t *r_atom;
@@ -166,7 +166,7 @@ x_intern_atom(xcb_connection_t *c, const char *property)
 }
 
 class_hint_t *
-x_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
+xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
 {
     xcb_get_property_reply_t *r = NULL;
     char *data = NULL;
@@ -182,7 +182,7 @@ x_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
 							  STRING, 0L, 2048),
 			       NULL);
 
-    if(!r || r->type != STRING || r->format == 8)
+    if(!r || r->type != STRING || r->format != 8)
 	return NULL;
 
     data = xcb_get_property_value(r);

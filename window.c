@@ -43,8 +43,8 @@ window_setstate(xcb_window_t win, long state)
     long data[] = { state, XCB_NONE };
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
-                        x_intern_atom(globalconf.connection, "WM_STATE"),
-                        x_intern_atom(globalconf.connection, "WM_STATE"), 32,
+                        xutil_intern_atom(globalconf.connection, "WM_STATE"),
+                        xutil_intern_atom(globalconf.connection, "WM_STATE"), 32,
                         2, data);
 }
 
@@ -58,7 +58,7 @@ window_getstate(xcb_window_t w)
     long result = -1;
     unsigned char *p = NULL;
     xcb_get_property_cookie_t prop_c;
-    xcb_atom_t wm_state_atom = x_intern_atom(globalconf.connection, "WM_STATE");
+    xcb_atom_t wm_state_atom = xutil_intern_atom(globalconf.connection, "WM_STATE");
     xcb_get_property_reply_t *prop_r;
 
     prop_c = xcb_get_property_unchecked(globalconf.connection, false, w,
@@ -140,7 +140,7 @@ window_grabbuttons(xcb_window_t win, int phys_screen)
     }
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
-                      root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
+                      xutil_root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
 }
 
 /** Grab buttons on root window
@@ -154,19 +154,19 @@ window_root_grabbuttons(int phys_screen)
     for(b = globalconf.buttons.root; b; b = b->next)
     {
         xcb_grab_button(globalconf.connection, false,
-                        root_window(globalconf.connection, phys_screen), BUTTONMASK,
+                        xutil_root_window(globalconf.connection, phys_screen), BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod);
         xcb_grab_button(globalconf.connection, false,
-                        root_window(globalconf.connection, phys_screen), BUTTONMASK,
+                        xutil_root_window(globalconf.connection, phys_screen), BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | XCB_MOD_MASK_LOCK);
         xcb_grab_button(globalconf.connection, false,
-                        root_window(globalconf.connection, phys_screen), BUTTONMASK,
+                        xutil_root_window(globalconf.connection, phys_screen), BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask);
         xcb_grab_button(globalconf.connection, false,
-                        root_window(globalconf.connection, phys_screen), BUTTONMASK,
+                        xutil_root_window(globalconf.connection, phys_screen), BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
     }
@@ -182,18 +182,18 @@ window_root_grabkeys(int phys_screen)
     xcb_keycode_t kc;
 
     xcb_ungrab_key(globalconf.connection, ANY_KEY,
-                   root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
+                   xutil_root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
 
     for(k = globalconf.keys; k; k = k->next)
 	if((kc = k->keycode) || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         {
-            xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
+            xcb_grab_key(globalconf.connection, true, xutil_root_window(globalconf.connection, phys_screen),
                          k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
+            xcb_grab_key(globalconf.connection, true, xutil_root_window(globalconf.connection, phys_screen),
                          k->mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
+            xcb_grab_key(globalconf.connection, true, xutil_root_window(globalconf.connection, phys_screen),
                          k->mod | globalconf.numlockmask, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, root_window(globalconf.connection, phys_screen),
+            xcb_grab_key(globalconf.connection, true, xutil_root_window(globalconf.connection, phys_screen),
                          k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
                          XCB_GRAB_MODE_ASYNC);
         }
@@ -211,7 +211,7 @@ window_setshape(xcb_window_t win, int phys_screen)
     {
         xcb_shape_combine(globalconf.connection, XCB_SHAPE_SO_SET,
                           XCB_SHAPE_SK_BOUNDING, XCB_SHAPE_SK_BOUNDING,
-                          root_window(globalconf.connection, phys_screen),
+                          xutil_root_window(globalconf.connection, phys_screen),
                           0, 0, win);
 
         p_delete(&r);
@@ -227,12 +227,12 @@ window_settrans(xcb_window_t win, double opacity)
     {
         real_opacity = opacity * 0xffffffff;
         xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
-                            x_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"),
+                            xutil_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"),
                             CARDINAL, 32, 1L, &real_opacity);
     }
     else
         xcb_delete_property(globalconf.connection, win,
-                            x_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"));
+                            xutil_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"));
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
