@@ -165,13 +165,13 @@ create_font_cursor(unsigned int cursor_font)
 
     /* Get the font for the cursor*/
     font = xcb_generate_id(globalconf.connection);
-    xcb_open_font(globalconf.connection, font, strlen ("cursor"), "cursor");
+    xcb_open_font(globalconf.connection, font, strlen("cursor"), "cursor");
 
     cursor = xcb_generate_id(globalconf.connection);
     xcb_create_glyph_cursor (globalconf.connection, cursor, font, font,
                              cursor_font, cursor_font + 1,
                              0, 0, 0,
-                             0, 0, 0);
+                             65535, 65535, 65535);
 
     return cursor;
 }
