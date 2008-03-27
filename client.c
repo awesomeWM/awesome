@@ -848,8 +848,7 @@ client_find_visible(Client *sel, Bool reverse)
  * \ingroup ui_callback
  */
 void
-uicb_client_swapprev(int screen __attribute__ ((unused)),
-                     char *arg __attribute__ ((unused)))
+uicb_client_swapprev(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
     Client *prev;
 
@@ -866,8 +865,7 @@ uicb_client_swapprev(int screen __attribute__ ((unused)),
  * \ingroup ui_callback
  */
 void
-uicb_client_swapnext(int screen __attribute__ ((unused)),
-                     char *arg __attribute__ ((unused)))
+uicb_client_swapnext(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
     Client *next;
 
@@ -1128,8 +1126,7 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
  * \ingroup ui_callback
  */
 void
-uicb_client_togglefloating(int screen __attribute__ ((unused)),
-                           char *arg __attribute__ ((unused)))
+uicb_client_togglefloating(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
     if(globalconf.focus->client)
         client_setfloating(globalconf.focus->client, !globalconf.focus->client->isfloating);
@@ -1141,8 +1138,7 @@ uicb_client_togglefloating(int screen __attribute__ ((unused)),
  * \ingroup ui_callback
  */
 void
-uicb_client_setscratch(int screen,
-                       char *arg __attribute__ ((unused)))
+uicb_client_setscratch(int screen, char *arg __attribute__ ((unused)))
 {
     if(!globalconf.focus->client)
         return;
@@ -1162,8 +1158,7 @@ uicb_client_setscratch(int screen,
  * \ingroup ui_callback
  */
 void
-uicb_client_togglescratch(int screen,
-                          char *arg __attribute__ ((unused)))
+uicb_client_togglescratch(int screen, char *arg __attribute__ ((unused)))
 {
     if(globalconf.scratch.client)
     {

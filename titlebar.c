@@ -449,8 +449,7 @@ titlebar_update_geometry(Client *c, area_t geometry)
  * \ingroup ui_callback
  */
 void
-uicb_client_toggletitlebar(int screen __attribute__ ((unused)),
-                            char *arg __attribute__ ((unused)))
+uicb_client_toggletitlebar(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
     Client *c = globalconf.focus->client;
 

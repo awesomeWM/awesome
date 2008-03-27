@@ -219,6 +219,7 @@ clean-local:
 
 SUFFIXES += .1.xml .1
 SUFFIXES += .5.xml .5
+EXTRA_DIST += build-utils/extractdoc.py
 if HAVE_XMLTO
 .1.xml.1:
 	$(XMLTO) man $<
@@ -229,9 +230,11 @@ endif
 SUFFIXES += .1.txt .1.xml
 SUFFIXES += .5.txt .5.xml
 if HAVE_ASCIIDOC
+uicbdocgen.txt:
+	$(top_srcdir)/build-utils/extractdoc.py $(top_srcdir)/*.c > uicbdocgen.txt
 .1.txt.1.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
-.5.txt.5.xml:
+.5.txt.5.xml: uicbdocgen.txt
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
 endif
 
