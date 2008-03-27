@@ -231,17 +231,19 @@ endif
 SUFFIXES += .1.txt .1.xml
 SUFFIXES += .5.txt .5.xml
 if HAVE_ASCIIDOC
+if HAVE_PYTHON
 optsdocgen.txt:
-	$(top_srcdir)/build-utils/extractoptsdoc.py \
+	$(PYTHON) $(top_srcdir)/build-utils/extractoptsdoc.py \
 	    $(top_srcdir)/common/configopts.c > optsdocgen.txt
 uicbdocgen.txt:
-	$(top_srcdir)/build-utils/extractuicbdoc.py \
+	$(PYTHON) $(top_srcdir)/build-utils/extractuicbdoc.py \
 	    $(top_srcdir)/*.c > uicbdocgen.txt
 .1.txt.1.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
 awesomerc.5.xml: optsdocgen.txt uicbdocgen.txt
 .5.txt.5.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
+endif
 endif
 
 
