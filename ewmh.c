@@ -430,7 +430,7 @@ ewmh_get_window_icon(xcb_window_t w)
     double alpha;
     NetWMIcon *icon;
     int size, i;
-    unsigned long *data;
+    uint32_t *data;
     unsigned char *imgdata, *wdata;
     xcb_get_property_reply_t *r;
 
@@ -454,7 +454,7 @@ ewmh_get_window_icon(xcb_window_t w)
 
     icon = p_new(NetWMIcon, 1);
 
-    data = (unsigned long *) wdata;
+    data = (uint32_t *) wdata;
 
     icon->width = data[0];
     icon->height = data[1];
