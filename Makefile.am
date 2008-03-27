@@ -145,7 +145,6 @@ awesome_SOURCES = \
 	rules.c rules.h \
 	mouse.c mouse.h \
 	widget.c widget.h \
-	xcb_event_handler.c xcb_event_handler.h \
 	ewmh.c ewmh.h
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
@@ -172,7 +171,7 @@ awesome_message_SOURCES = \
 	common/xutil.h common/xutil.c \
 	awesome-message.c
 awesome_message_LDADD = $(xcb_LIBS) $(xcb_atom_LIBS) $(xcb_keysyms_LIBS) $(xcb_aux_LIBS) \
-	$(pangocairo_LIBS) $(confuse_LIBS) $(xcb_xinerama_LIBS) $(imlib2_LIBS) $(GTK_LIBS)
+	$(pangocairo_LIBS) $(confuse_LIBS) $(xcb_xinerama_LIBS) $(xcb_event_LIBS) $(imlib2_LIBS) $(GTK_LIBS)
 
 bin_PROGRAMS += awesome-menu
 awesome_menu_SOURCES = \
@@ -184,7 +183,7 @@ awesome_menu_SOURCES = \
 	common/xutil.h common/xutil.c \
 	awesome-menu.c
 awesome_menu_LDADD = $(xcb_LIBS) $(xcb_atom_LIBS) $(xcb_keysyms_LIBS) $(xcb_aux_LIBS) \
-	$(pangocairo_LIBS) $(confuse_LIBS) $(xcb_xinerama_LIBS) $(imlib2_LIBS) $(GTK_LIBS)
+	$(pangocairo_LIBS) $(confuse_LIBS) $(xcb_xinerama_LIBS) $(xcb_event_LIBS) $(imlib2_LIBS) $(GTK_LIBS)
 
 if HAVE_XMLTO
 if HAVE_ASCIIDOC

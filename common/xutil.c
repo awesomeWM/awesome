@@ -200,4 +200,201 @@ xutil_map_raised(xcb_connection_t *conn, xcb_window_t win)
     xcb_map_window(conn, win);
 }
 
+/* Number of different errors */
+#define ERRORS_NBR 256
+
+/* Number of different events */
+#define EVENTS_NBR 126
+
+void
+xutil_set_error_handler_catch_all(xcb_event_handlers_t *evenths,
+                                  xcb_generic_error_handler_t handler,
+                                  void *data)
+{
+    int err_num;
+    for(err_num = 0; err_num < ERRORS_NBR; err_num++)
+	xcb_set_error_handler(evenths, err_num, handler, data);
+}
+
+const char *
+xutil_error_label[] =
+{
+    "Success",
+    "BadRequest",
+    "BadValue",
+    "BadWindow",
+    "BadPixmap",
+    "BadAtom",
+    "BadCursor",
+    "BadFont",
+    "BadMatch",
+    "BadDrawable",
+    "BadAccess",
+    "BadAlloc",
+    "BadColor",
+    "BadGC",
+    "BadIDChoice",
+    "BadName",
+    "BadLength",
+    "BadImplementation",
+};
+
+const char *
+xutil_request_label[] =
+{
+    "XCB_NONE",
+    "CreateWindow",
+    "ChangeWindowAttributes",
+    "GetWindowAttributes",
+    "DestroyWindow",
+    "DestroySubwindows",
+    "ChangeSaveSet",
+    "ReparentWindow",
+    "MapWindow",
+    "MapSubwindows",
+    "UnmapWindow",
+    "UnmapSubwindows",
+    "ConfigureWindow",
+    "CirculateWindow",
+    "GetGeometry",
+    "QueryTree",
+    "InternAtom",
+    "GetAtomName",
+    "ChangeProperty",
+    "DeleteProperty",
+    "GetProperty",
+    "ListProperties",
+    "SetSelectionOwner",
+    "GetSelectionOwner",
+    "ConvertSelection",
+    "SendEvent",
+    "GrabPointer",
+    "UngrabPointer",
+    "GrabButton",
+    "UngrabButton",
+    "ChangeActivePointerGrab",
+    "GrabKeyboard",
+    "UngrabKeyboard",
+    "GrabKey",
+    "UngrabKey",
+    "AllowEvents",
+    "GrabServer",
+    "UngrabServer",
+    "QueryPointer",
+    "GetMotionEvents",
+    "TranslateCoords",
+    "WarpPointer",
+    "SetInputFocus",
+    "GetInputFocus",
+    "QueryKeymap",
+    "OpenFont",
+    "CloseFont",
+    "QueryFont",
+    "QueryTextExtents",
+    "ListFonts",
+    "ListFontsWithInfo",
+    "SetFontPath",
+    "GetFontPath",
+    "CreatePixmap",
+    "FreePixmap",
+    "CreateGC",
+    "ChangeGC",
+    "CopyGC",
+    "SetDashes",
+    "SetClipRectangles",
+    "FreeGC",
+    "ClearArea",
+    "CopyArea",
+    "CopyPlane",
+    "PolyPoint",
+    "PolyLine",
+    "PolySegment",
+    "PolyRectangle",
+    "PolyArc",
+    "FillPoly",
+    "PolyFillRectangle",
+    "PolyFillArc",
+    "PutImage",
+    "GetImage",
+    "PolyText",
+    "PolyText",
+    "ImageText",
+    "ImageText",
+    "CreateColormap",
+    "FreeColormap",
+    "CopyColormapAndFree",
+    "InstallColormap",
+    "UninstallColormap",
+    "ListInstalledColormaps",
+    "AllocColor",
+    "AllocNamedColor",
+    "AllocColorCells",
+    "AllocColorPlanes",
+    "FreeColors",
+    "StoreColors",
+    "StoreNamedColor",
+    "QueryColors",
+    "LookupColor",
+    "CreateCursor",
+    "CreateGlyphCursor",
+    "FreeCursor",
+    "RecolorCursor",
+    "QueryBestSize",
+    "QueryExtension",
+    "ListExtensions",
+    "ChangeKeyboardMapping",
+    "GetKeyboardMapping",
+    "ChangeKeyboardControl",
+    "GetKeyboardControl",
+    "Bell",
+    "ChangePointerControl",
+    "GetPointerControl",
+    "SetScreenSaver",
+    "GetScreenSaver",
+    "ChangeHosts",
+    "ListHosts",
+    "SetAccessControl",
+    "SetCloseDownMode",
+    "KillClient",
+    "RotateProperties",
+    "ForceScreenSaver",
+    "SetPointerMapping",
+    "GetPointerMapping",
+    "SetModifierMapping",
+    "GetModifierMapping",
+    "major 120",
+    "major 121",
+    "major 122",
+    "major 123",
+    "major 124",
+    "major 125",
+    "major 126",
+    "NoOperation",
+};
+
+xutil_error_t *
+xutil_get_error(const xcb_generic_error_t *e)
+{
+    xutil_error_t *err = p_new(xutil_error_t, 1);
+
+    /*
+     * Get the request code,  taken from 'xcb-util/wm'. I can't figure
+     * out  how it  works BTW,  seems to  get a  byte in  'pad' member
+     * (second byte in second element of the array)
+     */
+    err->request_code = (e->response_type == 0 ? *((uint8_t *) e + 10) : e->response_type);
+    err->request_label = a_strdup(xutil_request_label[err->request_code]);
+    err->error_label = a_strdup(xutil_error_label[e->error_code]);
+
+    return err;
+}
+
+void
+xutil_delete_error(xutil_error_t *err)
+{
+    p_delete(&err->error_label);
+    p_delete(&err->request_label);
+    p_delete(&err);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

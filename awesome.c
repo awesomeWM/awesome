@@ -53,7 +53,6 @@
 #include "client.h"
 #include "focus.h"
 #include "ewmh.h"
-#include "xcb_event_handler.h"
 #include "tag.h"
 #include "common/socket.h"
 #include "common/util.h"
@@ -220,21 +219,19 @@ xerror(void *data __attribute__ ((unused)),
        xcb_connection_t *c __attribute__ ((unused)),
        xcb_generic_error_t *e)
 {
-    /*
-     * Get the request code,  taken from 'xcb-util/wm'. I can't figure
-     * out  how it  works BTW,  seems to  get a  byte in  'pad' member
-     * (second byte in second element of the array)
-     */
-    uint8_t request_code = (e->response_type == 0 ? *((uint8_t *) e + 10) : e->response_type);
+    xutil_error_t *err = xutil_get_error(e);
 
     if(e->error_code == BadWindow
-       || (e->error_code == BadMatch && request_code == XCB_SET_INPUT_FOCUS)
-       || (e->error_code == BadValue && request_code == XCB_KILL_CLIENT)
-       || (request_code == XCB_CONFIGURE_WINDOW && e->error_code == BadMatch))
+       || (e->error_code == BadMatch && err->request_code == XCB_SET_INPUT_FOCUS)
+       || (e->error_code == BadValue && err->request_code == XCB_KILL_CLIENT)
+       || (err->request_code == XCB_CONFIGURE_WINDOW && e->error_code == BadMatch))
+    {
+        xutil_delete_error(err);
         return 0;
-
-    warn("fatal error: request=%s, error=%s\n",
-         x_label_request[request_code], x_label_error[e->error_code]);
+    }
+    
+    warn("fatal error: request=%s, error=%s\n", err->request_label, err->error_label);
+    xutil_delete_error(err);
 
     /*
      * Xlib code was using default X error handler, namely
@@ -347,7 +344,7 @@ main(int argc, char *argv[])
 
     /* Allocate a handler which will holds all errors and events */
     globalconf.evenths = xcb_alloc_event_handlers(conn);
-    xcb_set_error_handler_catch_all(globalconf.evenths, xerrorstart, NULL);
+    xutil_set_error_handler_catch_all(globalconf.evenths, xerrorstart, NULL);
 
     const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
 
@@ -366,7 +363,7 @@ main(int argc, char *argv[])
     xcb_poll_for_event_loop(globalconf.evenths);
 
     /* set the default xerror handler */
-    xcb_set_error_handler_catch_all(globalconf.evenths, xerror, NULL);
+    xutil_set_error_handler_catch_all(globalconf.evenths, xerror, NULL);
 
     /* TODO
     if(xsync)

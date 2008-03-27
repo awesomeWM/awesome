@@ -26,6 +26,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
+#include <xcb/xcb_event.h>
 
 /* XCB doesn't provide keysyms definition */
 #include <X11/keysym.h>
@@ -106,6 +107,20 @@ xcb_atom_t xutil_intern_atom(xcb_connection_t *, const char *);
 /* Equivalent XCB call to XMapRaised, which actually raises the
    specified window to the top of the stack and maps it */
 void xutil_map_raised(xcb_connection_t *, xcb_window_t);
+
+/** Set the same handler for all errors */
+void xutil_set_error_handler_catch_all(xcb_event_handlers_t *,
+                                       xcb_generic_error_handler_t, void *);
+
+typedef struct xutil_error_t
+{
+    uint8_t request_code;
+    char *request_label;
+    char *error_label;
+} xutil_error_t;
+
+xutil_error_t *xutil_get_error(const xcb_generic_error_t *);
+void xutil_delete_error(xutil_error_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
