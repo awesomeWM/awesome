@@ -61,6 +61,8 @@ def sections_get(file):
                 section_doc[option_title] += "This option must be an alignment value."
             elif line.startswith("    CFG_POSITION"):
                 section_doc[option_title] += "This option must be a position value."
+            elif line.startswith("    CFG_STR_LIST"):
+                section_doc[option_title] += "This option must be string list."
             elif line.startswith("    CFG_STR"):
                 section_doc[option_title] += "This option must be string value."
             elif line.startswith("    CFG_SEC"):
