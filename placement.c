@@ -113,10 +113,7 @@ placement_smart(Client *c)
 
     newgeometry = titlebar_geometry_add(&c->titlebar, newgeometry);
     newgeometry = placement_fix_offscreen(newgeometry, c->screen, c->border);
-
-    /* restore height and width again */
-    newgeometry.width = c->f_geometry.width;
-    newgeometry.height = c->f_geometry.height;
+    newgeometry = titlebar_geometry_remove(&c->titlebar, newgeometry);
 
     area_list_wipe(&arealist);
 
@@ -140,10 +137,7 @@ placement_under_mouse(Client *c)
 
     finalgeometry = titlebar_geometry_add(&c->titlebar, finalgeometry);
     finalgeometry = placement_fix_offscreen(finalgeometry, c->screen, c->border);
-
-    /* restore height and width */
-    finalgeometry.height = c->f_geometry.height;
-    finalgeometry.width = c->f_geometry.width;
+    finalgeometry = titlebar_geometry_remove(&c->titlebar, finalgeometry);
 
     return finalgeometry;
 }
