@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # extractuicbdoc.py - extract uicb documentation from awesome sour code
 # Copyright (C) 2008 Julien Danjou <julien@danjou.info>
