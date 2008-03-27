@@ -66,124 +66,89 @@ static bool running = true;
 
 AwesomeConf globalconf;
 
-/** Get geometry informations like XCB version, and also set 'x' and
- * 'y' parameter on its parent window like Xlib does
- *
- * TODO: improve round-trip time?
- */
-static xcb_get_geometry_reply_t *
-x_get_geometry(xcb_connection_t *c, xcb_window_t w, xcb_get_geometry_reply_t *parent)
-{
-    xcb_get_geometry_reply_t *win_geom;
-
-    win_geom = xcb_get_geometry_reply(c, xcb_get_geometry(c, w), NULL);
-
-    if(!win_geom)
-        return NULL;
-
-    /* Unlike XCB, Xlib set 'x' and 'y' as parent window position */
-    win_geom->x = parent->x;
-    win_geom->y = parent->y;
-
-    return win_geom;
-}
-
 typedef struct
 {
-    xcb_get_geometry_cookie_t geom;
-    xcb_query_tree_cookie_t tree;
-} screen_win_t;
+    xcb_window_t id;
+    xcb_query_tree_cookie_t tree_cookie;
+} root_win_t;
 
 /** Scan X to find windows to manage
  */
 static void
 scan()
 {
-    unsigned int i;
-    int screen, real_screen;
-    xcb_window_t w;
+    int i, screen, real_screen;
+    const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+    root_win_t *root_wins = alloca(sizeof(root_win_t) * screen_max);
+    xcb_query_tree_reply_t *tree_r;
     xcb_window_t *wins = NULL;
-    xcb_query_tree_reply_t *r_query_tree;
-    xcb_get_geometry_reply_t *parent_geom, *win_geom;
-    xcb_get_window_attributes_reply_t *reply_win;
-    xcb_get_window_attributes_cookie_t *cookies_win;
-    const int screen_max = xcb_setup_roots_length (xcb_get_setup (globalconf.connection));
-    screen_win_t *parents = alloca(sizeof(screen_win_t) * screen_max);
+    xcb_get_window_attributes_cookie_t *attr_wins = NULL;
+    xcb_get_window_attributes_reply_t *attr_r;
+    xcb_get_geometry_reply_t *geom_r;
 
     for(screen = 0; screen < screen_max; screen++)
     {
-        w = xutil_root_window(globalconf.connection, screen);
-
-        /* Get parent  geometry informations,  useful to get  the real
-         * coordinates  of the  window because  Xlib set  'x'  and 'y'
-         * fields to the relative position within the parent window */
-        parents[screen].geom = xcb_get_geometry(globalconf.connection, w);
+        root_wins[screen].id = xutil_root_window(globalconf.connection, screen);
 
         /* Get the window tree */
-        parents[screen].tree = xcb_query_tree_unchecked(globalconf.connection, w);
+        root_wins[screen].tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
+                                                                 root_wins[screen].id);
     }
 
     for(screen = 0; screen < screen_max; screen++)
     {
-        parent_geom = xcb_get_geometry_reply (globalconf.connection,
-                                              parents[screen].geom, NULL);
+        tree_r = xcb_query_tree_reply(globalconf.connection,
+                                      root_wins[screen].tree_cookie,
+                                      NULL);
 
-        if(!parent_geom)
+        if(!tree_r)
             continue;
+        
+        wins = xcb_query_tree_children(tree_r);
+        attr_wins = p_new(xcb_get_window_attributes_cookie_t,
+                          xcb_query_tree_children_length(tree_r));
 
-        r_query_tree = xcb_query_tree_reply(globalconf.connection,
-                                            parents[screen].tree, NULL);
+        for(i = 0; i < xcb_query_tree_children_length(tree_r); i++)
+            attr_wins[i] = xcb_get_window_attributes_unchecked(globalconf.connection,
+                                                               wins[i]);
 
-        if(!r_query_tree)
+        for(i = 0; i < xcb_query_tree_children_length(tree_r); i++)
         {
-            p_delete(&parent_geom);
-            continue;
-        }
+            attr_r = xcb_get_window_attributes_reply(globalconf.connection,
+                                                     attr_wins[i],
+                                                     NULL);
 
-        wins = xcb_query_tree_children(r_query_tree);
-
-        /* Store the answers of 'xcb_get_window_attributes' for all
-         * child windows */
-        cookies_win = p_new(xcb_get_window_attributes_cookie_t,
-                            r_query_tree->children_len);
-
-        /* Send all the requests at the same time */
-        for(i = 0; i < r_query_tree->children_len; i++)
-            cookies_win[i] = xcb_get_window_attributes(globalconf.connection, wins[i]);
-
-        /* Now process the answers */
-        for(i = 0; i < r_query_tree->children_len; i++)
-        {
-            reply_win = xcb_get_window_attributes_reply(globalconf.connection,
-                                                        cookies_win[i],
-                                                        NULL);
-
-            if(reply_win && !reply_win->override_redirect &&
-               (reply_win->map_state == XCB_MAP_STATE_VIEWABLE ||
-                window_getstate(wins[i]) == XCB_WM_ICONIC_STATE))
+            if(!attr_r || attr_r->override_redirect ||
+               !(attr_r->map_state == XCB_MAP_STATE_VIEWABLE ||
+                 window_getstate(wins[i]) == XCB_WM_ICONIC_STATE))
             {
-                /* TODO: should maybe be asynchronous */
-                win_geom = x_get_geometry(globalconf.connection, w, parent_geom);
-                if(!win_geom)
-                {
-                    p_delete(&reply_win);
-                    continue;
-                }
+                if(attr_r)
+                    p_delete(&attr_r);
 
-                real_screen = screen_get_bycoord(globalconf.screens_info, screen, win_geom->x, win_geom->y);
-                client_manage(wins[i], win_geom, real_screen);
-
-                /* win_geom is not useful anymore */
-                p_delete(&win_geom);
+                continue;
             }
 
-            if(reply_win)
-                p_delete(&reply_win);
+            p_delete(&attr_r);
+
+            /* TODO: should maybe be asynchronous... */
+            geom_r = xcb_get_geometry_reply(globalconf.connection,
+                                            xcb_get_geometry_unchecked(globalconf.connection,
+                                                                       wins[i]),
+                                            NULL);
+
+            if(!geom_r)
+                continue;
+
+            real_screen = screen_get_bycoord(globalconf.screens_info, screen, geom_r->x,
+                                             geom_r->y);
+
+            client_manage(wins[i], geom_r, real_screen);
+
+            p_delete(&geom_r);
         }
 
-        p_delete(&parent_geom);
-        p_delete(&r_query_tree);
-        p_delete(&cookies_win);
+        p_delete(&tree_r);
+        p_delete(&attr_wins);
     }
 }
 
