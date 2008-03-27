@@ -431,14 +431,15 @@ ewmh_get_window_icon(xcb_window_t w)
     NetWMIcon *icon;
     int size, i;
     uint32_t *data;
-    unsigned char *imgdata, *wdata;
+    unsigned char *imgdata;
     xcb_get_property_reply_t *r;
 
     r = xcb_get_property_reply(globalconf.connection,
                                xcb_get_property_unchecked(globalconf.connection, false, w,
                                                           net_wm_icon, CARDINAL, 0, UINT32_MAX),
                                NULL);
-    if(!r || !(wdata = (unsigned char *) xcb_get_property_value(r)))
+    if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 || 
+       !(data = (uint32_t *) xcb_get_property_value(r)))
     {
         if(r)
             p_delete(&r);
@@ -446,15 +447,7 @@ ewmh_get_window_icon(xcb_window_t w)
         return NULL;
     }
 
-    if(r->type != CARDINAL || r->format != 32 || r->length < 2)
-    {
-        p_delete(&r);
-        return NULL;
-    }
-
     icon = p_new(NetWMIcon, 1);
-
-    data = (uint32_t *) wdata;
 
     icon->width = data[0];
     icon->height = data[1];
