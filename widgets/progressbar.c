@@ -152,7 +152,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
      * 4. finally draw the gaps
      */
 
-    pb_x = widget->area.x + d->padding;
+    pb_x = widget->area.x + d->padding + 1;
     border_offset = d->border_width / 2;
     pb_offset = 0;
 
@@ -166,8 +166,8 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             pb_height = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
         }
 
-        pb_width = (int) ((d->width - d->padding - (d->border_width + d->border_padding) * 2 * d->data_items -
-                   d->gap * (d->data_items - 1)) / d->data_items + 0.5);
+        pb_width = (int) ((d->width - d->padding - 2 * (d->border_width + d->border_padding) * d->data_items -
+                   d->gap * (d->data_items - 1)) / d->data_items);
 
         pb_y = widget->area.y + ((int) (widget->statusbar->height * (1 - d->height)) / 2) + d->border_width + d->border_padding;
 
@@ -196,6 +196,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 rectangle.width = pb_width + d->border_width + 2 * d->border_padding - 1 + 2;
                 rectangle.height = pb_height + d->border_width + 2 * d->border_padding + 1;
+                draw_rectangle(ctx, rectangle, d->border_width, True, d->bg[i]);
                 draw_rectangle(ctx, rectangle, d->border_width, False, d->bordercolor[i]);
             }
 
@@ -304,6 +305,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 rectangle.width = pb_width + d->border_width + 2 * d->border_padding - 1 + 2;
                 rectangle.height = pb_height + d->border_width + 2 * d->border_padding + 1;
+                draw_rectangle(ctx, rectangle, d->border_width, True, d->bg[i]);
                 draw_rectangle(ctx, rectangle, d->border_width, False, d->bordercolor[i]);
             }
             /* new value/progress in px + pattern setup */
@@ -552,7 +554,6 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
         else
             d->bordercolor[i] = d->fg[i];
     }
-
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
