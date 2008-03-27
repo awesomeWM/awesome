@@ -79,7 +79,6 @@ void xutil_get_lock_mask(xcb_connection_t *, xcb_key_symbols_t *,
 
 /* Common function defined in Xlib but not in XCB */
 bool xutil_get_transient_for_hint(xcb_connection_t *, xcb_window_t, xcb_window_t *);
-xcb_window_t xutil_root_window(xcb_connection_t *, int);
 
 typedef struct _class_hint_t
 {

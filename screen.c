@@ -216,21 +216,18 @@ move_client_to_screen(Client *c, int new_screen, bool doresize)
 static void
 move_mouse_pointer_to_screen(int phys_screen)
 {
-    xcb_screen_t *s;
-
     if(globalconf.screens_info->xinerama_is_active)
     {
-        s = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
         area_t area = screen_get_area(phys_screen, NULL, NULL);
         xcb_warp_pointer(globalconf.connection,
                          XCB_NONE,
-                         s->root,
+                         xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root,
                          0, 0, 0, 0, area.x, area.y);
     }
     else
         xcb_warp_pointer(globalconf.connection,
                          XCB_NONE,
-                         xutil_root_window(globalconf.connection, phys_screen),
+                         xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
                          0, 0, 0, 0, 0, 0);
 }
 

@@ -153,8 +153,8 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
             event_handle_mouse_button_press(c->screen, ev->detail, ev->state, globalconf.buttons.client, NULL);
     }
     else
-        for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup (connection)); screen++)
-            if(xutil_root_window(connection, screen) == ev->event
+        for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
+            if(xcb_aux_get_screen(connection, screen)->root == ev->event
                && (qr = xcb_query_pointer_reply(connection,
                                                 xcb_query_pointer(connection, ev->event),
                                                 NULL)) != NULL)
@@ -274,8 +274,8 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
     const xcb_screen_t *screen;
 
     for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length(xcb_get_setup (connection)); screen_nbr++)
-        if(ev->window == xutil_root_window(connection, screen_nbr)
-           && (screen = xcb_aux_get_screen(connection, screen_nbr)) != NULL
+        if((screen = xcb_aux_get_screen(connection, screen_nbr)) != NULL
+           && ev->window == screen->root
            && (ev->width != screen->width_in_pixels
                || ev->height != screen->height_in_pixels))
             /* it's not that we panic, but restart */
@@ -336,7 +336,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     }
     else
         for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
-            if(ev->event == xutil_root_window(connection, screen))
+            if(ev->event == xcb_aux_get_screen(connection, screen)->root)
             {
                 window_root_grabbuttons(screen);
                 return 0;
@@ -395,7 +395,7 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     for(screen = 0; screen < xcb_setup_roots_length (xcb_get_setup (connection)); screen++)
         if((qpr = xcb_query_pointer_reply(connection,
                                           xcb_query_pointer(connection,
-                                                            xutil_root_window(connection, screen)),
+                                                            xcb_aux_get_screen(connection, screen)->root),
                                           NULL)) != NULL)
         {
             /* if screen is 0, we are on first Zaphod screen or on the
@@ -466,7 +466,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         if(globalconf.screens_info->xinerama_is_active
            && (qpr = xcb_query_pointer_reply(connection,
                                              xcb_query_pointer(connection,
-                                                               xutil_root_window(globalconf.connection, screen_nbr)),
+                                                               xcb_aux_get_screen(globalconf.connection, screen_nbr)->root),
                                              NULL)) != NULL)
             screen_nbr = screen_get_bycoord(globalconf.screens_info, screen_nbr, qpr->root_x, qpr->root_y);
         else
@@ -535,7 +535,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     bool send_event = ((ev->response_type & 0x80) >> 7);
 
     if((c = client_get_bywin(globalconf.clients, ev->window))
-       && ev->event == xutil_root_window(connection, c->phys_screen)
+       && ev->event == xcb_aux_get_screen(connection, c->phys_screen)->root
        && send_event && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
         client_unmanage(c);
 

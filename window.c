@@ -23,6 +23,7 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/shape.h>
 #include <xcb/xcb_keysyms.h>
+#include <xcb/xcb_aux.h> 
 
 #include "structs.h"
 #include "window.h"
@@ -140,7 +141,8 @@ window_grabbuttons(xcb_window_t win, int phys_screen)
     }
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
-                      xutil_root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
+                      xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
+                      ANY_MODIFIER);
 }
 
 /** Grab buttons on root window
@@ -150,23 +152,20 @@ void
 window_root_grabbuttons(int phys_screen)
 {
     Button *b;
+    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, phys_screen);
 
     for(b = globalconf.buttons.root; b; b = b->next)
     {
-        xcb_grab_button(globalconf.connection, false,
-                        xutil_root_window(globalconf.connection, phys_screen), BUTTONMASK,
+        xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod);
-        xcb_grab_button(globalconf.connection, false,
-                        xutil_root_window(globalconf.connection, phys_screen), BUTTONMASK,
+        xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | XCB_MOD_MASK_LOCK);
-        xcb_grab_button(globalconf.connection, false,
-                        xutil_root_window(globalconf.connection, phys_screen), BUTTONMASK,
+        xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask);
-        xcb_grab_button(globalconf.connection, false,
-                        xutil_root_window(globalconf.connection, phys_screen), BUTTONMASK,
+        xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
     }
@@ -178,22 +177,22 @@ window_root_grabbuttons(int phys_screen)
 void
 window_root_grabkeys(int phys_screen)
 {
+    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, phys_screen);
     Key *k;
     xcb_keycode_t kc;
 
-    xcb_ungrab_key(globalconf.connection, ANY_KEY,
-                   xutil_root_window(globalconf.connection, phys_screen), ANY_MODIFIER);
+    xcb_ungrab_key(globalconf.connection, ANY_KEY, s->root, ANY_MODIFIER);
 
     for(k = globalconf.keys; k; k = k->next)
 	if((kc = k->keycode) || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         {
-            xcb_grab_key(globalconf.connection, true, xutil_root_window(globalconf.connection, phys_screen),
+            xcb_grab_key(globalconf.connection, true, s->root,
                          k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, xutil_root_window(globalconf.connection, phys_screen),
+            xcb_grab_key(globalconf.connection, true, s->root,
                          k->mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, xutil_root_window(globalconf.connection, phys_screen),
+            xcb_grab_key(globalconf.connection, true, s->root,
                          k->mod | globalconf.numlockmask, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, xutil_root_window(globalconf.connection, phys_screen),
+            xcb_grab_key(globalconf.connection, true, s->root,
                          k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
                          XCB_GRAB_MODE_ASYNC);
         }
@@ -211,7 +210,7 @@ window_setshape(xcb_window_t win, int phys_screen)
     {
         xcb_shape_combine(globalconf.connection, XCB_SHAPE_SO_SET,
                           XCB_SHAPE_SK_BOUNDING, XCB_SHAPE_SK_BOUNDING,
-                          xutil_root_window(globalconf.connection, phys_screen),
+                          xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
                           0, 0, win);
 
         p_delete(&r);

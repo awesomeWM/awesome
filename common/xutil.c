@@ -23,7 +23,6 @@
 #define _GNU_SOURCE
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 #include <xcb/xcb_atom.h>
 #include <xcb/xinerama.h>
 
@@ -136,12 +135,6 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
     p_delete(&r);
 
     return true;
-}
-
-xcb_window_t
-xutil_root_window(xcb_connection_t *c, int screen_number)
-{
-    return xcb_aux_get_screen(c, screen_number)->root;
 }
 
 xcb_atom_t

@@ -19,6 +19,9 @@
  *
  */
 
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include "placement.h"
 #include "screen.h"
 #include "client.h"
@@ -133,7 +136,7 @@ placement_under_mouse(Client *c)
 
     if((xqp = xcb_query_pointer_reply(globalconf.connection,
                                       xcb_query_pointer(globalconf.connection,
-                                                        xutil_root_window(globalconf.connection, c->phys_screen)),
+                                                        xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root),
                                       NULL)) != NULL)
     {
         finalgeometry.x = xqp->root_x - c->f_geometry.width / 2;

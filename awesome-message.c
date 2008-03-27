@@ -174,8 +174,8 @@ main(int argc, char **argv)
     {
         if((xqp = xcb_query_pointer_reply(globalconf.connection,
                                           xcb_query_pointer(globalconf.connection,
-                                                            xutil_root_window(globalconf.connection,
-                                                                              globalconf.default_screen)),
+                                                            xcb_aux_get_screen(globalconf.connection,
+                                                                               globalconf.default_screen)->root),
                                           NULL)) != NULL)
         {
             screen = screen_get_bycoord(si, 0, xqp->root_x, xqp->root_y);

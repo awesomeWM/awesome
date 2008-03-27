@@ -21,6 +21,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
+#include <xcb/xcb_aux.h>
 
 #include "ewmh.h"
 #include "tag.h"
@@ -157,7 +158,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_below;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_root_window(globalconf.connection, phys_screen),
+			xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
 			net_supported, ATOM, 32, i, atom);
 }
 
@@ -178,7 +179,7 @@ ewmh_update_net_client_list(int phys_screen)
             wins[n] = c->win;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_root_window(globalconf.connection, phys_screen),
+			xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
 			net_client_list, WINDOW, 32, n, wins);
 
     p_delete(&wins);
@@ -194,7 +195,7 @@ ewmh_update_net_numbers_of_desktop(int phys_screen)
         count++;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_root_window(globalconf.connection, phys_screen),
+			xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
 			net_number_of_desktops, CARDINAL, 32, 1, &count);
 }
 
@@ -208,7 +209,7 @@ ewmh_update_net_current_desktop(int phys_screen)
         count++;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        xutil_root_window(globalconf.connection, phys_screen),
+                        xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
                         net_current_desktop, CARDINAL, 32, 1, &count);
 
     p_delete(&curtags);
@@ -232,7 +233,7 @@ ewmh_update_net_desktop_names(int phys_screen)
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_root_window(globalconf.connection, phys_screen),
+			xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
 			net_desktop_names, utf8_string, 8, len, buf);
 }
 
@@ -245,7 +246,7 @@ ewmh_update_net_active_window(int phys_screen)
     win = sel ? sel->win : XCB_NONE;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_root_window(globalconf.connection, phys_screen),
+			xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
 			net_active_window, WINDOW, 32, 1, &win);
 }
 
@@ -362,7 +363,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
             screen++)
         {
-            if(ev->window == xutil_root_window(globalconf.connection, screen))
+            if(ev->window == xcb_aux_get_screen(globalconf.connection, screen)->root)
                 tag_view_only_byindex(screen, ev->data.data32[0]);
         }
 

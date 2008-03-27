@@ -233,7 +233,7 @@ client_focus(Client *c, int screen, bool raise)
         phys_screen = screen_virttophys(screen);
         xcb_set_input_focus(globalconf.connection,
                             XCB_INPUT_FOCUS_POINTER_ROOT,
-                            xutil_root_window(globalconf.connection, phys_screen),
+                            xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
                             XCB_CURRENT_TIME);
     }
 
@@ -927,7 +927,7 @@ uicb_client_moveresize(int screen, char *arg)
 
     xqp = xcb_query_pointer_reply(globalconf.connection,
                                   xcb_query_pointer_unchecked(globalconf.connection,
-                                                              xutil_root_window(globalconf.connection, sel->phys_screen)),
+                                                              xcb_aux_get_screen(globalconf.connection, sel->phys_screen)->root),
                                   NULL);
     if(globalconf.screens[sel->screen].resize_hints)
         geometry = client_geometry_hints(sel, geometry);

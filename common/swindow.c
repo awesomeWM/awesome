@@ -23,7 +23,6 @@
 #include <xcb/xcb_aux.h>
 
 #include "common/swindow.h"
-#include "common/util.h"
 
 /** Create a simple window
  * \param conn Connection ref
@@ -61,17 +60,13 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
         XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE;
 
     sw->window = xcb_generate_id(conn);
-    xcb_create_window(conn, s->root_depth, sw->window,
-                      xutil_root_window(conn, phys_screen),
-                      x, y, w, h, border_width,
-                      XCB_COPY_FROM_PARENT,
-                      s->root_visual,
+    xcb_create_window(conn, s->root_depth, sw->window, s->root, x, y, w, h,
+                      border_width, XCB_COPY_FROM_PARENT, s->root_visual,
                       XCB_CW_BACK_PIXMAP | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       create_win_val);
 
     sw->drawable = xcb_generate_id(conn);
-    xcb_create_pixmap(conn, s->root_depth, sw->drawable,
-                      xutil_root_window(conn, phys_screen), w, h);
+    xcb_create_pixmap(conn, s->root_depth, sw->drawable, s->root, w, h);
 
     return sw;
 }
@@ -119,8 +114,7 @@ simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
     sw->geometry.height = h;
     xcb_free_pixmap(sw->connection, sw->drawable);
     sw->drawable = xcb_generate_id(sw->connection);
-    xcb_create_pixmap(sw->connection, s->root_depth, sw->drawable,
-                      xutil_root_window(sw->connection, sw->phys_screen), w, h);
+    xcb_create_pixmap(sw->connection, s->root_depth, sw->drawable, s->root, w, h);
     xcb_configure_window(sw->connection, sw->window,
                          XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                          resize_win_vals);

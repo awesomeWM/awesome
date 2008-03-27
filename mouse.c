@@ -147,20 +147,21 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     xcb_motion_notify_event_t *ev_motion = NULL;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
     xcb_query_pointer_reply_t *query_pointer_r = NULL, *mquery_pointer_r = NULL;
+    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
     if(!c
        || xcb_grab_pointer_reply(globalconf.connection,
                                  xcb_grab_pointer(globalconf.connection, false,
-                                                  xutil_root_window(globalconf.connection, c->phys_screen),
+                                                  s->root,
                                                   MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                                  xutil_root_window(globalconf.connection, c->phys_screen),
+                                                  s->root,
                                                   globalconf.cursor[CurMove], XCB_CURRENT_TIME),
                                  NULL))
         return;
 
     query_pointer_r = xcb_query_pointer_reply(globalconf.connection,
                                               xcb_query_pointer_unchecked(globalconf.connection,
-                                                                          xutil_root_window(globalconf.connection, c->phys_screen)),
+                                                                          s->root),
                                               NULL);
 
     geometry = c->geometry;
@@ -230,7 +231,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 {
                     mquery_pointer_r = xcb_query_pointer_reply(globalconf.connection,
                                                                xcb_query_pointer_unchecked(globalconf.connection,
-                                                                                           xutil_root_window(globalconf.connection, c->phys_screen)),
+                                                                                           s->root),
                                                                NULL);
                     if((newscreen = screen_get_bycoord(globalconf.screens_info, c->screen,
                                                        mquery_pointer_r->root_x,
@@ -290,6 +291,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     style_t style;
     xcb_grab_pointer_cookie_t grab_pointer_c;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
+    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
     /* only handle floating and tiled layouts */
     if(!c || c->isfixed)
@@ -335,11 +337,9 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     else
         return;
 
-    grab_pointer_c = xcb_grab_pointer(globalconf.connection, false,
-                                      xutil_root_window(globalconf.connection, c->phys_screen),
+    grab_pointer_c = xcb_grab_pointer(globalconf.connection, false, s->root,
                                       MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                      xutil_root_window(globalconf.connection, c->phys_screen),
-                                      globalconf.cursor[CurResize], XCB_CURRENT_TIME);
+                                      s->root, globalconf.cursor[CurResize], XCB_CURRENT_TIME);
     
     if(layout->arrange == layout_floating || c->isfloating)
     {

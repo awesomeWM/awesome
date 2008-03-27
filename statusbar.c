@@ -242,8 +242,7 @@ statusbar_init(Statusbar *statusbar)
         /* we need a new pixmap this way [     ] to render */
         dw = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection,
-                          s->root_depth, dw,
-                          xutil_root_window(globalconf.connection, phys_screen),
+                          s->root_depth, dw, s->root,
                           statusbar->width, statusbar->height);
         statusbar->ctx = draw_context_new(globalconf.connection,
                                           phys_screen,

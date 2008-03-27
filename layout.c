@@ -21,6 +21,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
+#include <xcb/xcb_aux.h>
 
 #include "tag.h"
 #include "focus.h"
@@ -80,8 +81,8 @@ arrange(int screen)
     /* check that the mouse is on a window or not */
     if((xqp = xcb_query_pointer_reply(globalconf.connection,
                                       xcb_query_pointer_unchecked(globalconf.connection,
-                                                                  xutil_root_window(globalconf.connection,
-                                                                                    phys_screen)),
+                                                                  xcb_aux_get_screen(globalconf.connection,
+                                                                                     phys_screen)->root),
                                       NULL)) != NULL
        && (xqp->root == XCB_NONE || xqp->child == XCB_NONE || xqp->root == xqp->child))
     {
