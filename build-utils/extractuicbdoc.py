@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
-# extractdoc.py - extract uicb documentation from awesome sour code
-# Copyright ® 2008 Julien Danjou <julien@danjou.info>
+# extractuicbdoc.py - extract uicb documentation from awesome sour code
+# Copyright (C) 2008 Julien Danjou <julien@danjou.info>
 #
 # This indeed crappy. Any better version, even with awk, would be welcome.
 #

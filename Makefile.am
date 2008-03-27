@@ -215,11 +215,12 @@ dist_iconslayouts_DATA += icons/layouts/tiletopw.png
 dist_iconslayouts_DATA += icons/layouts/tilew.png
 
 clean-local:
-	rm -f awesome*.1 awesome*.1.xml awesome*.5 awesome*.5.xml
+	rm -f awesome*.1 awesome*.1.xml awesome*.5 awesome*.5.xml optsdocgen.txt uicbdocgen.txt
 
 SUFFIXES += .1.xml .1
 SUFFIXES += .5.xml .5
-EXTRA_DIST += build-utils/extractdoc.py
+EXTRA_DIST += build-utils/extractuicbdoc.py
+EXTRA_DIST += build-utils/extractoptsdoc.py
 if HAVE_XMLTO
 .1.xml.1:
 	$(XMLTO) man $<
@@ -230,11 +231,16 @@ endif
 SUFFIXES += .1.txt .1.xml
 SUFFIXES += .5.txt .5.xml
 if HAVE_ASCIIDOC
+optsdocgen.txt:
+	$(top_srcdir)/build-utils/extractoptsdoc.py \
+	    $(top_srcdir)/common/configopts.c > optsdocgen.txt
 uicbdocgen.txt:
-	$(top_srcdir)/build-utils/extractdoc.py $(top_srcdir)/*.c > uicbdocgen.txt
+	$(top_srcdir)/build-utils/extractuicbdoc.py \
+	    $(top_srcdir)/*.c > uicbdocgen.txt
 .1.txt.1.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
-.5.txt.5.xml: uicbdocgen.txt
+awesomerc.5.xml: optsdocgen.txt uicbdocgen.txt
+.5.txt.5.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
 endif
 

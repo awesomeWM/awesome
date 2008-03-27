@@ -155,20 +155,31 @@ cfg_getposition(cfg_t *cfg, const char *name)
     return cfg_getnposition(cfg, name, 0);
 }
 
+/** This section is used to defined a style. */
 cfg_opt_t style_opts[] =
 {
+    /** This defines the border color. */
     CFG_STR((char *) "border", NULL, CFGF_NONE),
+    /** This defines the background color. */
     CFG_STR((char *) "bg", NULL, CFGF_NONE),
+    /** This defines the foreground color. */
     CFG_STR((char *) "fg", NULL, CFGF_NONE),
+    /** This defines the shadow color. */
     CFG_STR((char *) "shadow", NULL, CFGF_NONE),
+    /** This defines the shadow offset in pixel. */
     CFG_INT((char *) "shadow_offset", 0, CFGF_NONE),
+    /** This defines the font being used */
     CFG_STR((char *) "font", NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
+/** This section is used to defined several styles in a row */
 cfg_opt_t styles_opts[] =
 {
+    /** This defines a normal style. */
     CFG_SEC((char *) "normal", style_opts, CFGF_NONE),
+    /** This defines a focus style. */
     CFG_SEC((char *) "focus", style_opts, CFGF_NONE),
+    /** This defines an urgent style. */
     CFG_SEC((char *) "urgent", style_opts, CFGF_NONE),
     CFG_AWESOME_END()
 };

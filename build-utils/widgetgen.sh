@@ -11,8 +11,6 @@ do
     do
         shortname=$(echo $widget | cut -d_ -f1)
         echo "    {\"$shortname\", $widget},"
-        grep -q "^$shortname" ${top_srcdir}/awesomerc.5.txt || \
-            echo "  WARNING: $uicb NOT documented" >&2
     done
 done
 
