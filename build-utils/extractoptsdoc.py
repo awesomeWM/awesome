@@ -16,18 +16,19 @@ def section_print(section, options):
         underline += "~"
         i += 1
     print underline
+    if options.has_key("comments"):
+        print "%s\n" % options.pop("comments")
     for option, format in options.items():
         print "%s::" % option
         print "    %s" % format
     print
 
 def sections_print(sections):
-    section_print("Base sections", sections['awesome'])
+    section_print("Base sections", sections.pop("awesome"))
     keylist = sections.keys()
     keylist.sort()
     for key in keylist:
-        if key != "awesome":
-            section_print(key, sections[key])
+        section_print(key, sections[key])
 
 def sections_get(file):
     sections = {}
@@ -36,14 +37,13 @@ def sections_get(file):
     for line in file.readlines():
         if line.startswith("cfg_opt_t"):
             section_name = (line.split(" ", 1)[1]).split("_opts")[0]
+            section_doc['comments'] = lastline[4:-3]
             section_begin = True
-            continue
-        if section_begin and line.startswith("};"):
+        elif section_begin and line.startswith("};"):
             section_begin = False
             sections[section_name] = section_doc
             section_doc = {}
-            continue
-        if section_begin and line.startswith("    CFG_"):
+        elif section_begin and line.startswith("    CFG_"):
             if line.startswith("    CFG_AWESOME_END"):
                 continue
             option_title = line.split("\"")[1].split("\"")[0]
