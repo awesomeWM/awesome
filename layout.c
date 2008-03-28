@@ -81,6 +81,9 @@ arrange(int screen)
        && (rootwin == None || childwin == None || childwin == rootwin))
         window_root_grabbuttons(phys_screen);
 
+    globalconf.pointer_x = x;
+    globalconf.pointer_y = y;
+
     /* reset status */
     globalconf.screens[screen].need_arrange = False;
 }
