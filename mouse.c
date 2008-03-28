@@ -161,10 +161,10 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     ocy = geometry.y;
     c->ismax = False;
 
+    style = globalconf.screens[c->screen].styles.focus;
+
     if(c->isfloating || layout->arrange == layout_floating)
     {
-        style = globalconf.screens[c->screen].styles.focus;
-
         sw = simplewindow_new(globalconf.display, c->phys_screen, 0, 0,
                               draw_textwidth(globalconf.display,
                                              globalconf.screens[c->screen].styles.focus.font,
@@ -257,50 +257,51 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     Client *c = globalconf.focus->client;
     Tag **curtags = tags_get_current(screen);
     Layout *layout = curtags[0]->layout;
-    area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry;
+    area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry = { 0, 0, 0, 0, NULL, NULL };
     double mwfact;
     SimpleWindow *sw = NULL;
     DrawCtx *ctx = NULL;
     style_t style;
 
     /* only handle floating and tiled layouts */
-    if(c && !c->isfixed)
+    if(!c || c->isfixed)
+        return;
+
+    style = globalconf.screens[c->screen].styles.focus;
+
+    if(layout->arrange == layout_floating || c->isfloating)
     {
-        if(layout->arrange == layout_floating || c->isfloating)
-        {
-            ocx = c->geometry.x;
-            ocy = c->geometry.y;
-            c->ismax = False;
-            style = globalconf.screens[c->screen].styles.focus;
+        ocx = c->geometry.x;
+        ocy = c->geometry.y;
+        c->ismax = False;
 
-            sw = simplewindow_new(globalconf.display, c->phys_screen, 0, 0,
-                                  draw_textwidth(globalconf.display,
-                                                 globalconf.screens[c->screen].styles.focus.font,
-                                                 "0000x0000+0000+0000") + style.font->height,
-                                  1.5 * style.font->height, 0);
+        sw = simplewindow_new(globalconf.display, c->phys_screen, 0, 0,
+                              draw_textwidth(globalconf.display,
+                                             globalconf.screens[c->screen].styles.focus.font,
+                                             "0000x0000+0000+0000") + style.font->height,
+                              1.5 * style.font->height, 0);
 
-            ctx = draw_context_new(globalconf.display, sw->phys_screen,
-                                   sw->geometry.width, sw->geometry.height,
-                                   sw->drawable);
-            XMapRaised(globalconf.display, sw->window);
-            mouse_resizebar_update(ctx, style, sw, geometry, c->border);
-        }
-        else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
-                 || layout->arrange == layout_tilebottom || layout->arrange == layout_tiletop)
-        {
-            for(n = 0, c = globalconf.clients; c; c = c->next)
-                if(IS_TILED(c, screen))
-                    n++;
+        ctx = draw_context_new(globalconf.display, sw->phys_screen,
+                               sw->geometry.width, sw->geometry.height,
+                               sw->drawable);
+        XMapRaised(globalconf.display, sw->window);
+        mouse_resizebar_update(ctx, style, sw, geometry, c->border);
+    }
+    else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
+             || layout->arrange == layout_tilebottom || layout->arrange == layout_tiletop)
+    {
+        for(n = 0, c = globalconf.clients; c; c = c->next)
+            if(IS_TILED(c, screen))
+                n++;
 
-            if(n <= curtags[0]->nmaster) return;
+        if(n <= curtags[0]->nmaster) return;
 
-            for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
-            if(!c) return;
+        for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
+        if(!c) return;
 
-            area = screen_get_area(screen,
-                                   globalconf.screens[c->screen].statusbar,
-                                   &globalconf.screens[c->screen].padding);
-        }
+        area = screen_get_area(screen,
+                               globalconf.screens[c->screen].statusbar,
+                               &globalconf.screens[c->screen].padding);
     }
     else
         return;
@@ -313,13 +314,17 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         return;
 
     if(curtags[0]->layout->arrange == layout_tileleft)
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, 0, c->geometry.height + c->border - 1);
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, 0,
+                     c->geometry.height + c->border - 1);
     else if(curtags[0]->layout->arrange == layout_tilebottom)
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0,
+                     c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
     else if(curtags[0]->layout->arrange == layout_tiletop)
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, 0);
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0,
+                     c->geometry.width + c->border - 1, 0);
     else
-        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0, c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
+        XWarpPointer(globalconf.display, None, c->win, 0, 0, 0, 0,
+                     c->geometry.width + c->border - 1, c->geometry.height + c->border - 1);
 
     for(;;)
     {
