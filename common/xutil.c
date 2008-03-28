@@ -166,32 +166,37 @@ xutil_intern_atom(xcb_connection_t *c, const char *property)
 class_hint_t *
 xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
 {
-    xcb_get_property_reply_t *r = NULL;
+    xcb_get_property_reply_t *class_hint_r = NULL;
     char *data = NULL;
 
     int len_name, len_class;
 
     class_hint_t *ch = p_new(class_hint_t, 1);
 
-    /* TODO: 2048? (BUFINC is declared as private in xcb.c) */
-    r = xcb_get_property_reply(conn,
-			       xcb_get_property_unchecked(conn,
-							  false, win, WM_CLASS,
-							  STRING, 0L, 2048),
-			       NULL);
+    class_hint_r = xcb_get_property_reply(conn,
+                                          xcb_get_property_unchecked(conn,
+                                                                     false, win, WM_CLASS,
+                                                                     STRING, 0L, 2048L),
+                                          NULL);
 
-    if(!r || r->type != STRING || r->format != 8)
+    if(!class_hint_r || class_hint_r->type != STRING ||
+       class_hint_r->format != 8)
+    {
+        if(class_hint_r)
+            p_delete(&class_hint_r);
+
 	return NULL;
+    }
 
-    data = xcb_get_property_value(r);
+    data = xcb_get_property_value(class_hint_r);
 
-    len_name = strlen((char *) data);
-    len_class = strlen((char *) (data + len_name + 1));
+    len_name = strlen(data);
+    len_class = strlen(data + len_name + 1);
 
     ch->res_name = strndup(data, len_name);
     ch->res_class = strndup(data + len_name + 1, len_class);
 
-    p_delete(&r);
+    p_delete(&class_hint_r);
 
     return ch;
 }
