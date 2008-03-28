@@ -167,7 +167,7 @@ cfg_opt_t style_opts[] =
     /** Shadow color. */
     CFG_STR((char *) "shadow", NULL, CFGF_NONE),
     /** Shadow offset in pixel. */
-    CFG_INT((char *) "shadow_offset", 0, CFGF_NONE),
+    CFG_INT((char *) "shadow_offset", 0xffffffff, CFGF_NONE),
     /** Font being used */
     CFG_STR((char *) "font", NULL, CFGF_NONE),
     CFG_AWESOME_END()
