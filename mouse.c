@@ -150,14 +150,16 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
     if(!c
-       || xcb_grab_pointer_reply(globalconf.connection,
-                                 xcb_grab_pointer(globalconf.connection, false,
-                                                  s->root,
-                                                  MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                                  s->root,
-                                                  globalconf.cursor[CurMove], XCB_CURRENT_TIME),
-                                 NULL))
+       || !(grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection,
+                                                    xcb_grab_pointer(globalconf.connection, false,
+                                                                     s->root,
+                                                                     MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
+                                                                     s->root,
+                                                                     globalconf.cursor[CurMove], XCB_CURRENT_TIME),
+                                                    NULL)))
         return;
+
+    p_delete(&grab_pointer_r);
 
     query_pointer_r = xcb_query_pointer_reply(globalconf.connection,
                                               xcb_query_pointer_unchecked(globalconf.connection,
@@ -186,8 +188,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         xutil_map_raised(globalconf.connection, sw->window);
         mouse_resizebar_draw(ctx, style, sw, geometry, c->border);
     }
-
-    p_delete(&grab_pointer_r);
 
     for(;;)
     {
