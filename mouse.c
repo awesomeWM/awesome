@@ -191,11 +191,8 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 
     for(;;)
     {
-        /* TODO: need a review
-         *
-         * XMaskEvent  allows to retrieve  only specified  events from
-         * the queue and requeue the other events...
-         */
+        /* XMaskEvent allows to retrieve only specified events from
+         * the queue and requeue the other events... */
         while((ev = xcb_poll_for_event(globalconf.connection)))
         {
             switch((ev->response_type & 0x7f))
@@ -389,11 +386,8 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 
     for(;;)
     {
-        /* TODO: need a review
-         *
-         * XMaskEvent  allows to retrieve  only specified  events from
-         * the queue and requeue the other events...
-         */
+        /* XMaskEvent allows to retrieve only specified events from
+         * the queue and requeue the other events... */
         while((ev = xcb_poll_for_event(globalconf.connection)))
         {
             switch((ev->response_type & 0x7f))

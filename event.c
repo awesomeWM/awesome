@@ -579,9 +579,9 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
         xcb_randr_set_screen_size(connection, ev->root, ev->width, ev->height,
                                   ev->mwidth, ev->mheight);
 
-    /* TODO:
-     * XRRUpdateConfiguration also  executes the following instruction
-     * but I don't know yet how to port it to XCB
+    /* XRRUpdateConfiguration also executes the following instruction
+     * but it's not useful because SubpixelOrder is not used at all at
+     * the moment
      *
      * XRenderSetSubpixelOrder(dpy, snum, scevent->subpixel_order);
      */

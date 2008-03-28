@@ -357,7 +357,6 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     Client *c;
     int screen;
 
-    /* TODO: check whether it's correct to use 'type' this way */
     if(ev->type == net_current_desktop)
         for(screen = 0;
             screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
@@ -377,9 +376,6 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
         if((c = client_get_bywin(globalconf.clients, ev->window)))
         {
             ewmh_process_state_atom(c, (xcb_atom_t) ev->data.data32[1], ev->data.data32[0]);
-            /* TODO: is data32[2] really useful because it doesn't
-             * seem to be used when sending a ClientMessage in
-             * event.c:897 */
             if(ev->data.data32[2])
                 ewmh_process_state_atom(c, (xcb_atom_t) ev->data.data32[2],
                                         ev->data.data32[0]);
