@@ -260,12 +260,6 @@ event_handle_enternotify(XEvent *e)
            && ev->y_root == globalconf.pointer_y))
         return;
 
-    /* the idea behind saving pointer_x and pointer_y is Bob Marley powered
-     * this will allow us top drop some EnterNotify events and thus not giving
-     * focus to windows appering under the cursor without a cursor move */
-    globalconf.pointer_x = ev->x_root;
-    globalconf.pointer_y = ev->y_root;
-
     for(c = globalconf.clients; c; c = c->next)
         if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
             break;
@@ -273,6 +267,12 @@ event_handle_enternotify(XEvent *e)
     if(c || (c = client_get_bywin(globalconf.clients, ev->window)))
     {
         window_grabbuttons(c->win, c->phys_screen);
+        /* the idea behind saving pointer_x and pointer_y is Bob Marley powered
+         * this will allow us top drop some EnterNotify events and thus not giving
+         * focus to windows appering under the cursor without a cursor move */
+        globalconf.pointer_x = ev->x_root;
+        globalconf.pointer_y = ev->y_root;
+
         if(globalconf.screens[c->screen].sloppy_focus)
             client_focus(c, c->screen,
                          globalconf.screens[c->screen].sloppy_focus_raise);
