@@ -960,8 +960,13 @@ client_kill(Client *c)
 
     if(client_isprotodel(globalconf.connection, c->win))
     {
+        /* Initialize all of event's fields first */
+        memset(&ev, 0, sizeof(ev));
+
+        ev.response_type = XCB_CLIENT_MESSAGE;
         ev.window = c->win;
         ev.type = xutil_intern_atom(globalconf.connection, "WM_PROTOCOLS");
+        ev.format = 32;
 
         ev.data.data32[0] = xutil_intern_atom(globalconf.connection, "WM_DELETE_WINDOW");
         ev.data.data32[1] = XCB_CURRENT_TIME;
