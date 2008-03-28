@@ -591,7 +591,7 @@ static void
 handle_kpress(xcb_key_press_event_t *e)
 {
     char *buf;
-    xcb_keysym_t ksym;
+    xcb_keysym_t ksym = 0;
     ssize_t len;
     size_t text_dst_len, num;
 
