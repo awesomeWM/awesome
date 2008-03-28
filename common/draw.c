@@ -869,6 +869,8 @@ draw_style_init(Display *disp, int phys_screen, cfg_t *cfg,
 
     if((shadow = cfg_getint(cfg, "shadow_offset")) != (int) 0xffffffff)
         c->shadow_offset = shadow;
+    else if(!m)
+        c->shadow_offset = 0;
 }
 
 /** Remove a area from a list of them,
