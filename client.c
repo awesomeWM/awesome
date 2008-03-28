@@ -980,7 +980,6 @@ client_maximize(Client *c, area_t geometry)
             client_setfloating(c, True);
         client_focus(c, c->screen, True);
         client_resize(c, geometry, False);
-        return;
     }
     else if(c->wasfloating)
     {
