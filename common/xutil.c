@@ -33,32 +33,39 @@ bool
 xgettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
              char *text, ssize_t textlen)
 {
-    xcb_get_property_reply_t *name = NULL;
-    char *prop_val = NULL;
+    xcb_get_property_reply_t *prop_r = NULL;
+    void *prop_val;
 
     if(!text || !textlen)
         return false;
 
     text[0] = '\0';
-    name = xcb_get_property_reply(conn,
-                                  xcb_get_property_unchecked(conn, false,
-                                                             w, atom,
-                                                             XCB_GET_PROPERTY_TYPE_ANY,
-                                                             0L, 1000000L),
-                                  NULL);
+    prop_r = xcb_get_property_reply(conn,
+                                    xcb_get_property_unchecked(conn, false,
+                                                               w, atom,
+                                                               XCB_GET_PROPERTY_TYPE_ANY,
+                                                               0L, 1000000L),
+                                    NULL);
 
-    if(!name->value_len)
+
+    if(!prop_r || !prop_r->value_len || prop_r->format != 8)
+    {
+        if(prop_r)
+            p_delete(&prop_r);
+
         return false;
+    }
 
-    prop_val = (char *) xcb_get_property_value(name);
+    prop_val = xcb_get_property_value(prop_r);
 
-    /* TODO: XCB doesn't provide a XmbTextPropertyToTextList(), check 
-     * whether this code is correct (locales) */
-    if(name->type == STRING || name->format == 8)
-        a_strncpy(text, name->value_len + 1, prop_val, textlen - 1);
+    /* Check whether the returned property value is just an ascii
+     * string or utf8 string.  At the moment it doesn't handle
+     * COMPOUND_TEXT and multibyte but it's not needed...  */
+    if(prop_r->type == STRING ||
+       prop_r->type == xutil_intern_atom(conn, "UTF8_STRING"))
+        a_strncpy(text, prop_r->value_len + 1, prop_val, textlen - 1);
 
-    text[textlen - 1] = '\0';
-    p_delete(&name);
+    p_delete(&prop_r);
 
     return true;
 }
