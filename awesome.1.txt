@@ -9,7 +9,7 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-awesome [ -v | --version ] [ -h | --help ] [ -k | --check ] [ -s | --sync ] [ --config | -c configuration file ]
+awesome [ -v | --version ] [ -h | --help ] [ -k | --check ] [ --config | -c configuration file ]
 
 DESCRIPTION
 -----------
@@ -49,9 +49,6 @@ OPTIONS
     Use an alternate configuration file instead of $HOME/.awesomerc.
 --check | -k::
     Check configuration file syntax.
---sync | -s::
-    Enable X11 synchronization mode. All X11 calls will be synchronized,
-    so you can break on exit to retrieve a backtrace of X errors.
 
 DEFAULTS MOUSE BINDINGS
 -----------------------

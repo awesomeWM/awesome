@@ -259,8 +259,7 @@ exit_help(int exit_code)
   -h, --help             show help\n\
   -v, --version          show version\n\
   -c, --config FILE      configuration file to use\n\
-  -k, --check            check configuration file syntax\n\
-  -s  --sync             enable synchronization (X debug)\n");
+  -k, --check            check configuration file syntax\n");
     exit(exit_code);
 }
 
@@ -290,7 +289,6 @@ main(int argc, char *argv[])
         {"version", 0, NULL, 'v'},
         {"check",   0, NULL, 'k'},
         {"config",  1, NULL, 'c'},
-        {"sync",    0, NULL, 's'},
         {NULL,      0, NULL, 0}
     };
 
@@ -364,11 +362,6 @@ main(int argc, char *argv[])
 
     /* set the default xerror handler */
     xutil_set_error_handler_catch_all(globalconf.evenths, xerror, NULL);
-
-    /* TODO
-    if(xsync)
-        XSynchronize(dpy, true);
-    */
 
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(conn);
