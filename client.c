@@ -383,8 +383,8 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
                 tag_client(c, tag);
 
     /* should be floating if transsient or fixed */
-    if(!c->isfloating)
-        client_setfloating(c, rettrans || c->isfixed);
+    if(rettrans || c->isfixed)
+        client_setfloating(c, True);
 
     /* titlebar init */
     if(rule && rule->titlebar.position != Auto)
