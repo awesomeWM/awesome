@@ -247,10 +247,10 @@ cfg_opt_t mouse_generic_opts[] =
     CFG_STR_LIST((char *) "modkey", (char *) "{}", CFGF_NONE),
     /** Mouse button. */
     CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
-    CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     /** Uicb command to run. */
-    CFG_STR((char *) "arg", NULL, CFGF_NONE),
+    CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     /** Argument to use for command. */
+    CFG_STR((char *) "arg", NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines common widgets options. */
@@ -339,12 +339,19 @@ cfg_opt_t widget_tasklist_opts[] =
 /** This section defines graph data widget options. */
 cfg_opt_t widget_graph_data_opts[] =
 {
+    /** Value of a full graph. */
     CFG_FLOAT((char *) "max", 100.0f, CFGF_NONE),
+    /** Scale graph when values are bigger than 'max' */
     CFG_BOOL((char *) "scale", cfg_false, CFGF_NONE),
+    /** Foreground color. */
     CFG_STR((char *) "fg", NULL, CFGF_NONE),
+    /** Foreground color in the center of the bar (as gradient). */
     CFG_STR((char *) "fg_center", NULL, CFGF_NONE),
+    /** Foreground color at the end of a bar (as gradient). */
     CFG_STR((char *) "fg_end", NULL, CFGF_NONE),
+    /** fg, fg_center and fg_end defines a vertical gradient */
     CFG_BOOL((char *) "vertical_gradient", cfg_false, CFGF_NONE),
+    /**  Draw style. */
     CFG_STR((char *) "draw_style", (char *) "bottom", CFGF_NONE),
     CFG_AWESOME_END()
 };
@@ -384,7 +391,7 @@ cfg_opt_t widget_progressbar_data_opts[] =
     CFG_STR((char *) "fg_center", NULL, CFGF_NONE),
     /** Foreground color at the end of a bar (as gradient). */
     CFG_STR((char *) "fg_end", NULL, CFGF_NONE),
-    /** Foreground color of not filled bar. */
+    /** Foreground color of not filled bar/ticks. */
     CFG_STR((char *) "fg_off", NULL, CFGF_NONE),
     /** Background color. */
     CFG_STR((char *) "bg", NULL, CFGF_NONE),
@@ -409,6 +416,7 @@ cfg_opt_t widget_progressbar_opts[] =
     CFG_SEC((char *) "data", widget_progressbar_data_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     /** Widget width. */
     CFG_INT((char *) "width", 100, CFGF_NONE),
+    /** Distance between individual bars. */
     CFG_INT((char *) "gap", 2, CFGF_NONE),
     /** Border width in pixels. */
     CFG_INT((char *) "border_width", 1, CFGF_NONE),
