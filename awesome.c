@@ -76,20 +76,23 @@ typedef struct
 static void
 scan()
 {
-    int i, screen, real_screen;
+    int i, screen, real_screen, tree_c_len;
     const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
     root_win_t *root_wins = alloca(sizeof(root_win_t) * screen_max);
     xcb_query_tree_reply_t *tree_r;
     xcb_window_t *wins = NULL;
     xcb_get_window_attributes_cookie_t *attr_wins = NULL;
+    xcb_get_geometry_cookie_t **geom_wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
+    xcb_get_geometry_cookie_t *geom_c;
     xcb_get_geometry_reply_t *geom_r;
 
     for(screen = 0; screen < screen_max; screen++)
     {
+        /* Get the root window ID associated to this screen */
         root_wins[screen].id = xcb_aux_get_screen(globalconf.connection, screen)->root;
 
-        /* Get the window tree */
+        /* Get the window tree associated to this screen */
         root_wins[screen].tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
                                                                  root_wins[screen].id);
     }
@@ -102,16 +105,20 @@ scan()
 
         if(!tree_r)
             continue;
-        
-        wins = xcb_query_tree_children(tree_r);
-        attr_wins = p_new(xcb_get_window_attributes_cookie_t,
-                          xcb_query_tree_children_length(tree_r));
 
-        for(i = 0; i < xcb_query_tree_children_length(tree_r); i++)
+        /* Get the tree of the children Windows of the current root
+         * Window */
+        wins = xcb_query_tree_children(tree_r);
+        tree_c_len = xcb_query_tree_children_length(tree_r);
+        attr_wins = p_new(xcb_get_window_attributes_cookie_t, tree_c_len);
+
+        for(i = 0; i < tree_c_len; i++)
             attr_wins[i] = xcb_get_window_attributes_unchecked(globalconf.connection,
                                                                wins[i]);
 
-        for(i = 0; i < xcb_query_tree_children_length(tree_r); i++)
+        geom_wins = p_new(xcb_get_geometry_cookie_t *, tree_c_len);
+
+        for(i = 0; i < tree_c_len; i++)
         {
             attr_r = xcb_get_window_attributes_reply(globalconf.connection,
                                                      attr_wins[i],
@@ -124,17 +131,27 @@ scan()
                 if(attr_r)
                     p_delete(&attr_r);
 
+                geom_wins[i] = NULL;
                 continue;
             }
 
             p_delete(&attr_r);
 
-            /* TODO: should maybe be asynchronous... */
-            geom_r = xcb_get_geometry_reply(globalconf.connection,
-                                            xcb_get_geometry_unchecked(globalconf.connection,
-                                                                       wins[i]),
-                                            NULL);
+            /* Get the geometry of the current window */
+            geom_c = p_new(xcb_get_geometry_cookie_t, 1);
+            *geom_c = xcb_get_geometry_unchecked(globalconf.connection, wins[i]);
+            
+            geom_wins[i] = geom_c;
+        }
 
+        p_delete(&attr_wins);
+
+        for(i = 0; i < tree_c_len; i++)
+        {
+            if(geom_wins[i] == NULL)
+                continue;
+
+            geom_r = xcb_get_geometry_reply(globalconf.connection, *(geom_wins[i]), NULL);
             if(!geom_r)
                 continue;
 
@@ -144,10 +161,11 @@ scan()
             client_manage(wins[i], geom_r, real_screen);
 
             p_delete(&geom_r);
+            p_delete(&geom_wins[i]);
         }
 
+        p_delete(&geom_wins);
         p_delete(&tree_r);
-        p_delete(&attr_wins);
     }
 }
 
@@ -528,6 +546,8 @@ main(int argc, char *argv[])
 
                 /* need to resync */
                 xcb_aux_sync(conn);
+
+                p_delete(&ev);
             } while((ev = xcb_poll_for_event(conn)));
 
             statusbar_refresh();
