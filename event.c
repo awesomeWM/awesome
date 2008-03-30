@@ -403,6 +403,7 @@ event_handle_keypress(void *data __attribute__ ((unused)),
              * number with screen_get_bycoord: we'll get 0 in Zaphod mode
              * so it's the same, or maybe the real Xinerama screen */
             screen = screen_get_bycoord(globalconf.screens_info, screen, qpr->root_x, qpr->root_y);
+            p_delete(&qpr);
             break;
         }
 
@@ -457,6 +458,9 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         p_delete(&wa);
         return 0;
     }
+
+    p_delete(&wa);
+
     if(!client_get_bywin(globalconf.clients, ev->window))
     {
         if((wgeom = xcb_get_geometry_reply(connection,
@@ -468,13 +472,14 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
                                              xcb_query_pointer(connection,
                                                                xcb_aux_get_screen(globalconf.connection, screen_nbr)->root),
                                              NULL)) != NULL)
-            screen_nbr = screen_get_bycoord(globalconf.screens_info, screen_nbr, qpr->root_x, qpr->root_y);
-        else
-            for (iter = xcb_setup_roots_iterator (xcb_get_setup (connection)), screen_nbr = 0;
-                 iter.rem && iter.data->root != wgeom->root; xcb_screen_next (&iter), ++screen_nbr);
-
-        if(qpr)
+        {
+            screen_nbr = screen_get_bycoord(globalconf.screens_info, screen_nbr,
+                                            qpr->root_x, qpr->root_y);
             p_delete(&qpr);
+        }
+        else
+            for(iter = xcb_setup_roots_iterator (xcb_get_setup (connection)), screen_nbr = 0;
+                iter.rem && iter.data->root != wgeom->root; xcb_screen_next (&iter), ++screen_nbr);
 
         client_manage(ev->window, wgeom, screen_nbr);
         p_delete(&wgeom);

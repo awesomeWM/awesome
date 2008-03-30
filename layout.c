@@ -83,12 +83,14 @@ arrange(int screen)
                                       xcb_query_pointer_unchecked(globalconf.connection,
                                                                   xcb_aux_get_screen(globalconf.connection,
                                                                                      phys_screen)->root),
-                                      NULL)) != NULL
-       && (xqp->root == XCB_NONE || xqp->child == XCB_NONE || xqp->root == xqp->child))
+                                      NULL)) != NULL)
     {
-        window_root_grabbuttons(phys_screen);
+        if(xqp->root == XCB_NONE || xqp->child == XCB_NONE || xqp->root == xqp->child)
+            window_root_grabbuttons(phys_screen);
+
         globalconf.pointer_x = xqp->root_x;
         globalconf.pointer_y = xqp->root_y;
+        p_delete(&xqp);
     }
 
     /* reset status */

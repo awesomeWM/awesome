@@ -222,7 +222,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                         mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
 
                     xcb_aux_sync(globalconf.connection);
-                    p_delete(&ev);
                 }
                 else
                 {

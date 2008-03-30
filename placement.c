@@ -141,6 +141,8 @@ placement_under_mouse(Client *c)
     {
         finalgeometry.x = xqp->root_x - c->f_geometry.width / 2;
         finalgeometry.y = xqp->root_y - c->f_geometry.height / 2;
+
+        p_delete(&xqp);
     }
 
     finalgeometry = titlebar_geometry_add(&c->titlebar, finalgeometry);

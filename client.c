@@ -932,20 +932,25 @@ uicb_client_moveresize(int screen, char *arg)
     if(globalconf.screens[sel->screen].resize_hints)
         geometry = client_geometry_hints(sel, geometry);
     client_resize(sel, geometry, false);
-    if (xqp && ox <= xqp->root_x && (ox + 2 * sel->border + ow) >= xqp->root_x &&
-        oy <= xqp->root_y && (oy + 2 * sel->border + oh) >= xqp->root_y)
+    if (xqp)
     {
-        nmx = xqp->root_x - (ox + sel->border) + sel->geometry.width - ow;
-        nmy = xqp->root_y - (oy + sel->border) + sel->geometry.height - oh;
+        if(ox <= xqp->root_x && (ox + 2 * sel->border + ow) >= xqp->root_x &&
+           oy <= xqp->root_y && (oy + 2 * sel->border + oh) >= xqp->root_y)
+        {
+            nmx = xqp->root_x - (ox + sel->border) + sel->geometry.width - ow;
+            nmy = xqp->root_y - (oy + sel->border) + sel->geometry.height - oh;
 
-        if(nmx < -sel->border) /* can happen on a resize */
-            nmx = -sel->border;
-        if(nmy < -sel->border)
-            nmy = -sel->border;
+            if(nmx < -sel->border) /* can happen on a resize */
+                nmx = -sel->border;
+            if(nmy < -sel->border)
+                nmy = -sel->border;
 
-        xcb_warp_pointer(globalconf.connection,
-                         XCB_NONE, sel->win,
-                         0, 0, 0, 0, nmx, nmy);
+            xcb_warp_pointer(globalconf.connection,
+                             XCB_NONE, sel->win,
+                             0, 0, 0, 0, nmx, nmy);
+        }
+
+        p_delete(&xqp);
     }
 }
 
