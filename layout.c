@@ -77,12 +77,14 @@ arrange(int screen)
     /* check that the mouse is on a window or not */
     if(XQueryPointer(globalconf.display,
                      RootWindow(globalconf.display, phys_screen),
-                     &rootwin, &childwin, &x, &y, &di, &di, &dui)
-       && (rootwin == None || childwin == None || childwin == rootwin))
-        window_root_grabbuttons(phys_screen);
+                     &rootwin, &childwin, &x, &y, &di, &di, &dui))
+    {
+       if(rootwin == None || childwin == None || childwin == rootwin)
+           window_root_grabbuttons(phys_screen);
 
-    globalconf.pointer_x = x;
-    globalconf.pointer_y = y;
+       globalconf.pointer_x = x;
+       globalconf.pointer_y = y;
+    }
 
     /* reset status */
     globalconf.screens[screen].need_arrange = False;
