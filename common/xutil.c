@@ -119,27 +119,28 @@ bool
 xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
 			 xcb_window_t *prop_win)
 {
-    xcb_get_property_reply_t *r;
+    xcb_get_property_reply_t *t_hint_r;
 
     /* Use checked because the error handler should not take care of
      * this error as we only return a boolean */
-    r = xcb_get_property_reply(c,
-                               xcb_get_property(c, false, win,
-                                                WM_TRANSIENT_FOR,
-                                                WINDOW, 0, 1),
-                               NULL);
+    t_hint_r = xcb_get_property_reply(c,
+                                      xcb_get_property(c, false, win,
+                                                       WM_TRANSIENT_FOR,
+                                                       WINDOW, 0, 1),
+                                      NULL);
 
-    if(!r || r->type != WINDOW || r->format != 32 || r->length == 0)
+    if(!t_hint_r || t_hint_r->type != WINDOW || t_hint_r->format != 32 ||
+       t_hint_r->length == 0)
     {
         *prop_win = XCB_NONE;
-        if(r)
-            p_delete(&r);
+        if(t_hint_r)
+            p_delete(&t_hint_r);
 
         return false;
     }
 
-    *prop_win = *((xcb_window_t *) xcb_get_property_value(r));
-    p_delete(&r);
+    *prop_win = *((xcb_window_t *) xcb_get_property_value(t_hint_r));
+    p_delete(&t_hint_r);
 
     return true;
 }
@@ -167,7 +168,7 @@ class_hint_t *
 xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
 {
     xcb_get_property_reply_t *class_hint_r = NULL;
-    char *data = NULL;
+    char *data;
 
     int len_name, len_class;
 

@@ -78,16 +78,16 @@ screensinfo_new(xcb_connection_t *conn)
     int xinerama_screen_number, screen, screen_to_test;
     xcb_screen_t *s;
     bool drop;
-    xcb_xinerama_is_active_reply_t *r = NULL;
+    xcb_xinerama_is_active_reply_t *xia = NULL;
 
     si = p_new(ScreensInfo, 1);
 
     /* Check for extension before checking for Xinerama */
     if(xcb_get_extension_data(conn, &xcb_xinerama_id)->present)
     {
-        r = xcb_xinerama_is_active_reply(conn, xcb_xinerama_is_active(conn), NULL);
-        si->xinerama_is_active = r->state;
-        p_delete(&r);
+        xia = xcb_xinerama_is_active_reply(conn, xcb_xinerama_is_active(conn), NULL);
+        si->xinerama_is_active = xia->state;
+        p_delete(&xia);
     }
 
     if(si->xinerama_is_active)
