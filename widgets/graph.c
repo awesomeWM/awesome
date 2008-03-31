@@ -387,6 +387,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
     d->width = cfg_getint(config, "width");
     d->height = cfg_getfloat(config, "height");
+    d->size = d->width - 2;
 
     if(!(d->data_items = cfg_size(config, "data")))
     {
