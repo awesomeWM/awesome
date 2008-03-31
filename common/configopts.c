@@ -372,8 +372,6 @@ cfg_opt_t widget_graph_opts[] =
     CFG_INT((char *) "width", 100, CFGF_NONE),
     /** Put new values onto the 'left' or 'right'. */
     CFG_POSITION((char *) "grow", (char *) "left", CFGF_NONE),
-    /** Empty space on the left in pixel. */
-    CFG_INT((char *) "padding_left", 0, CFGF_NONE),
     /** Set height (i.e. 0.9 = 90%). */
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
     /** Background color. */
@@ -426,8 +424,6 @@ cfg_opt_t widget_progressbar_opts[] =
     CFG_INT((char *) "ticks_gap", 1, CFGF_NONE),
     /** Number of 'ticks' to draw. */
     CFG_INT((char *) "ticks_count", 0, CFGF_NONE),
-    /** Empty space on both sides. */
-    CFG_INT((char *) "padding", 0, CFGF_NONE),
     /** Set height (i.e. 0.9 = 90%). */
     CFG_FLOAT((char *) "height", 0.67, CFGF_NONE),
     /** Draw the bar(s) vertically. */

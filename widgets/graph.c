@@ -37,7 +37,6 @@ typedef struct
     int width;                          /** Width of the widget */
     float height;                       /** Height of graph (0-1; 1 = height of statusbar) */
     int box_height;                     /** Height of the innerbox in pixels */
-    int padding_left;                   /** Left padding */
     int size;                           /** Size of lines-array (also innerbox-lenght) */
     XColor bg;                          /** Background color */
     XColor bordercolor;                 /** Border color */
@@ -85,7 +84,7 @@ static int
 graph_draw(Widget *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
-    int margin_top, left_offset;
+    int margin_top;
     int z, y, x, tmp, cur_index, test_index;
     Data *d = widget->data;
     area_t rectangle, pattern_area;
@@ -101,15 +100,13 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    left_offset = widget->area.x + d->padding_left;
-
     /* box = the graph inside the rectangle */
     if(!(d->box_height))
         d->box_height = (int) (widget->statusbar->height * d->height + 0.5) - 2;
 
     margin_top = (int)((widget->statusbar->height - (d->box_height + 2)) / 2 + 0.5) + widget->area.y;
 
-    rectangle.x = left_offset;
+    rectangle.x = widget->area.x;
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
@@ -122,7 +119,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     draw_rectangle(ctx, rectangle, 1.0, True, d->bg);
 
     /* for graph drawing */
-    rectangle.x = left_offset + 2;
+    rectangle.x = widget->area.x + 2;
     rectangle.y = margin_top + d->box_height + 1; /* bottom left corner as starting point */
     rectangle.width = d->size; /* rectangle.height is not used */
 
@@ -390,14 +387,6 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
     d->width = cfg_getint(config, "width");
     d->height = cfg_getfloat(config, "height");
-    d->padding_left = cfg_getint(config, "padding_left");
-    d->size = d->width - d->padding_left - 2;
-
-    if(d->size < 1)
-    {
-        warn("graph widget needs: (width - padding_left) >= 3\n");
-        return w;
-    }
 
     if(!(d->data_items = cfg_size(config, "data")))
     {
