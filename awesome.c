@@ -103,7 +103,7 @@ xerrorstart(Display * disp __attribute__ ((unused)),
     eprint("another window manager is already running\n");
 }
 
-/** Quit awesome
+/** Quits awesome.
  * \param screen Screen ID
  * \param arg nothing
  * \ingroup ui_callback

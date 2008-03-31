@@ -773,7 +773,8 @@ client_isvisible(Client *c, int screen)
     return False;
 }
 
-/** Set selected client transparency
+/** Set selected client transparency.
+ * Argument should be a floating between 0 and 100, -1 to disable.
  * \param screen Screen ID
  * \param arg unused arg
  * \ingroup ui_callback
@@ -781,7 +782,7 @@ client_isvisible(Client *c, int screen)
 void
 uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
 {
-    double delta = 100.0, current_opacity = 100.0;
+    double delta = 1.0, current_opacity = 1.0;
     unsigned char *data;
     Atom actual;
     int format;
@@ -801,7 +802,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
     {
         memcpy(&current_opacity_raw, data, sizeof(unsigned int));
         XFree(data);
-        current_opacity = (current_opacity_raw * 100.0) / 0xffffffff;
+        current_opacity = current_opacity_raw / 0xffffffff;
     }
     else
         set_prop = 1;
@@ -810,18 +811,24 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
 
     if(delta <= 0.0)
         delta = 0.0;
-    else if(delta > 100.0)
+    else if(delta > 1.0)
     {
-        delta = 100.0;
+        delta = 1.0;
         set_prop = 1;
     }
 
-    if(delta == 100.0 && !set_prop)
+    if(delta == 1.0 && !set_prop)
         window_settrans(sel->win, -1);
     else
         window_settrans(sel->win, delta);
 }
 
+/** Find a visible client on screen. Return next client or previous client if
+ * reverse is true.
+ * \param sel current selected client
+ * \param reverse return previous instead of next if true
+ * \return next or previous client
+ */
 static Client *
 client_find_visible(Client *sel, Bool reverse)
 {
@@ -842,7 +849,7 @@ client_find_visible(Client *sel, Bool reverse)
     return next;
 }
 
-/** Swap current with previous client
+/** Swap currently focused client with previous visible.
  * \param screen Screen ID
  * \param arg nothing
  * \ingroup ui_callback
@@ -859,7 +866,7 @@ uicb_client_swapprev(int screen __attribute__ ((unused)), char *arg __attribute_
     }
 }
 
-/** Swap current with next client
+/** Swap currently focused client with next visible.
  * \param screen Screen ID
  * \param arg nothing
  * \ingroup ui_callback
@@ -876,7 +883,8 @@ uicb_client_swapnext(int screen __attribute__ ((unused)), char *arg __attribute_
     }
 }
 
-/** Move and resize client
+/** Move and resize a client. Argument should be in format "x y w h" with
+ * absolute (1, 20, 300, ...) or relatives (+10, -200, ...) values.
  * \param screen Screen ID
  * \param arg x y w h
  * \ingroup ui_callback
@@ -934,6 +942,10 @@ uicb_client_moveresize(int screen, char *arg)
     }
 }
 
+/** Kill a client via a WM_DELETE_WINDOW request or XKillClient if not
+ * supported.
+ * \param c the client to kill
+ */
 void
 client_kill(Client *c)
 {
@@ -953,7 +965,7 @@ client_kill(Client *c)
         XKillClient(globalconf.display, c->win);
 }
 
-/** Kill selected client
+/** Kill the currently focused client.
  * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
@@ -967,6 +979,10 @@ uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((
         client_kill(sel);
 }
 
+/** Maximize the client to the given geometry.
+ * \param c the client to maximize
+ * \param geometry the geometry to use for maximizing
+ */
 static void
 client_maximize(Client *c, area_t geometry)
 {
@@ -1000,7 +1016,7 @@ client_maximize(Client *c, area_t geometry)
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
-/** Toggle maximize for client
+/** Toggle maximization state for the focused client.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1021,7 +1037,7 @@ uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
-/** Toggle vertical maximize for client
+/** Toggle vertical maximization for the focused client.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1044,7 +1060,7 @@ uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 }
 
 
-/** Toggle horizontal maximize for client
+/** Toggle horizontal maximization for the focused client.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1066,7 +1082,7 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
-/** Zoom client
+/** Set the client the master window.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1091,7 +1107,7 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
-/** Send focus to next client in stack
+/** Setfocus to the next visible client in the stack.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1105,7 +1121,7 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
         client_focus(next, screen, True);
 }
 
-/** Send focus to previous client in stack
+/** Setfocus to the previous visible client in the stack.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1119,7 +1135,7 @@ uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
         client_focus(prev, screen, True);
 }
 
-/** Toggle floating state of a client
+/** Toggle the floating state of the focused client.
  * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
@@ -1131,7 +1147,7 @@ uicb_client_togglefloating(int screen __attribute__ ((unused)), char *arg __attr
         client_setfloating(globalconf.focus->client, !globalconf.focus->client->isfloating);
 }
 
-/** Toggle scratch client attribute
+/** Toggle the scratch client attribute on the focused client.
  * \param screen screen number
  * \param arg unused argument
  * \ingroup ui_callback
@@ -1151,7 +1167,7 @@ uicb_client_setscratch(int screen, char *arg __attribute__ ((unused)))
     globalconf.screens[screen].need_arrange = True;
 }
 
-/** Toggle scratch client visibility
+/** Toggle scratch client visibility.
  * \param screen screen number
  * \param arg unused argument
  * \ingroup ui_callback
