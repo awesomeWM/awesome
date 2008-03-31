@@ -49,26 +49,39 @@
 
 #define CLEANMASK(mask) (mask & ~(globalconf.numlockmask | LockMask))
 
+/** awesome-menu run status */
 typedef enum
 {
+    /** Stop awesome-menu */
     STOP = 0,
+    /** Run awesome-menu */
     RUN = 1,
+    /** Stop awesome-menu and cancel any operation */
     CANCEL = 2
 } status_t;
 
+/** Is awesome-menu running ? */
 static status_t status = RUN;
 
 /** Import awesome config file format */
 extern cfg_opt_t awesome_opts[];
 
+/** Item_t typedef */
 typedef struct item_t item_t;
+/** Item_t structure */
 struct item_t
 {
+    /** Data */
     char *data;
+    /** Previous and next elems in item_t list */
     item_t *prev, *next;
+    /** True if the item currently matches */
     Bool match;
 };
 
+/** Destructor for item structure
+ * \param item item pointer
+ */
 static void
 item_delete(item_t **item)
 {
@@ -111,6 +124,10 @@ typedef struct
 
 static AwesomeMenuConf globalconf;
 
+/** Exit with given exit code
+ * \param exit_code exit code
+ * \return never returns
+ */
 static void __attribute__ ((noreturn))
 exit_help(int exit_code)
 {
@@ -120,6 +137,15 @@ exit_help(int exit_code)
     exit(exit_code);
 }
 
+/** Parse configuration file and fill up AwesomeMenuConf
+ * data structures with configuration directives.
+ * \param screen screen number
+ * \param confpatharg configuration file pathname, or NULL if auto
+ * \param menu_title menu title
+ * \param geometry geometry to fill up with supplied information from
+ *        configuration file
+ * \return cfg_parse status
+ */
 static int
 config_parse(int screen, const char *confpatharg,
              const char *menu_title, area_t *geometry)
@@ -203,6 +229,10 @@ config_parse(int screen, const char *confpatharg,
     return ret;
 }
 
+/** Return the last word for a text.
+ * \param text the text to look into
+ * \return a pointer to the last word position in text
+ */
 static char *
 get_last_word(char *text)
 {
@@ -216,6 +246,10 @@ get_last_word(char *text)
     return last_word;
 }
 
+/** Fill the completion list for awesome-menu with file list.
+ * \param directory directory to look into
+ * \return always true
+ */
 static Bool
 item_list_fill_file(const char *directory)
 {
@@ -324,8 +358,7 @@ complete(Bool reverse)
             globalconf.item_selected = item;
             return;
         }
-        /*
-         * Since loop is 2, it will be 1 at first iter, and then 0 if we
+        /* Since loop is 2, it will be 1 at first iter, and then 0 if we
          * get back before matching an item (i.e. no items match) to the
          * first elem: so it will break the loop, otherwise it loops for
          * ever
@@ -335,6 +368,9 @@ complete(Bool reverse)
     }
 }
 
+/** Compute a match from completion list for word.
+ * \param word the word to match
+ */
 static void
 compute_match(const char *word)
 {
@@ -368,6 +404,7 @@ compute_match(const char *word)
 /* Why not? */
 #define MARGIN 10
 
+/** Redraw the menu. */
 static void
 redraw(void)
 {
@@ -451,6 +488,9 @@ redraw(void)
     XSync(globalconf.display, False);
 }
 
+/** Handle keypress event in awesome-menu.
+ * \param e received XKeyEvent
+ */
 static void
 handle_kpress(XKeyEvent *e)
 {
@@ -563,6 +603,9 @@ handle_kpress(XKeyEvent *e)
     }
 }
 
+/** Fill the completion by reading on stdin.
+ * \return true if something has been filled up, false otherwise.
+ */
 static Bool
 item_list_fill_stdin(void)
 {
@@ -595,6 +638,11 @@ item_list_fill_stdin(void)
     return has_entry;
 }
 
+/** Main function of awesome-menu.
+ * \param argc number of elements in argv
+ * \param argv arguments array
+ * \return EXIT_SUCCESS
+ */
 int
 main(int argc, char **argv)
 {
