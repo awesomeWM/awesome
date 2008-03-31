@@ -233,10 +233,12 @@ SUFFIXES += .1.txt .1.xml
 SUFFIXES += .5.txt .5.xml
 if HAVE_ASCIIDOC
 if HAVE_PYTHON
-optsdocgen.txt:
+CLEANFILES += optsdocgen.txt
+CLEANFILES += uicbdocgen.txt
+optsdocgen.txt: common/configopts.c
 	$(PYTHON) $(top_srcdir)/build-utils/extractoptsdoc.py \
 	    $(top_srcdir)/common/configopts.c > optsdocgen.txt
-uicbdocgen.txt:
+uicbdocgen.txt: $(awesome_SOURCES)
 	$(PYTHON) $(top_srcdir)/build-utils/extractuicbdoc.py \
 	    $(top_srcdir)/*.c > uicbdocgen.txt
 .1.txt.1.xml:
