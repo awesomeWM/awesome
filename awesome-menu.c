@@ -729,7 +729,6 @@ main(int argc, char **argv)
                                      geometry.x, geometry.y, geometry.width, geometry.height, 0);
 
     XStoreName(globalconf.display, globalconf.sw->window, PROGNAME);
-    XMapRaised(globalconf.display, globalconf.sw->window);
 
     /* Create the drawing context */
     globalconf.ctx = draw_context_new(globalconf.display, DefaultScreen(globalconf.display),
@@ -759,6 +758,8 @@ main(int argc, char **argv)
         eprint("cannot grab keyboard");
 
     redraw();
+
+    XMapRaised(globalconf.display, globalconf.sw->window);
 
     while(status == RUN)
     {
