@@ -110,6 +110,8 @@ typedef struct
     unsigned int numlockmask;
     /** The text */
     char *text;
+    /** The text when we asked to complete */
+    char *text_complete;
     /** The text length */
     size_t text_size;
     /** Item list */
@@ -336,7 +338,6 @@ item_list_fill_file(const char *directory)
 static void
 complete(Bool reverse)
 {
-    char *word;
     int loop = 2;
     item_t *item = NULL;
     item_t *(*item_iter)(item_t **, item_t *) = item_list_next_cycle;
@@ -353,8 +354,9 @@ complete(Bool reverse)
     {
         if(item->match)
         {
-            word = get_last_word(globalconf.text);
-            a_strcpy(word, globalconf.text_size - (word - globalconf.text), item->data);
+            a_strcpy(globalconf.text_complete,
+                     globalconf.text_size - (globalconf.text_complete - globalconf.text),
+                     item->data);
             globalconf.item_selected = item;
             return;
         }
@@ -556,6 +558,8 @@ handle_kpress(XKeyEvent *e)
 
     switch(ksym)
     {
+      case XK_space:
+        globalconf.text_complete = globalconf.text + a_strlen(globalconf.text) + 1;
       default:
         if(num && !iscntrl((int) buf[0]))
         {
@@ -740,7 +744,7 @@ main(int argc, char **argv)
      * using stack allocation with PATH_MAX (may not been defined
      * according to POSIX). This string size may be increased if
      * needed */
-    globalconf.text = p_new(char, CHUNK_SIZE);
+    globalconf.text_complete = globalconf.text = p_new(char, CHUNK_SIZE);
     globalconf.text_size = CHUNK_SIZE;
     compute_match(NULL);
 
