@@ -35,6 +35,11 @@
 #define MSG_NOSIGNAL 0
 #endif
 
+/** Send a message to awesome.
+ * \param msg the message
+ * \param msg_len the message length
+ * \return errno of sendto()
+ */
 static int
 send_msg(char *msg, ssize_t msg_len)
 {
@@ -68,6 +73,8 @@ send_msg(char *msg, ssize_t msg_len)
 
 
 /** Print help and exit(2) with given exit_code.
+ * \param exit_code exit code
+ * \return never return
  */
 static void __attribute__ ((noreturn))
 exit_help(int exit_code)
@@ -79,9 +86,13 @@ exit_help(int exit_code)
     exit(exit_code);
 }
 
-
+/** Main function of awesome-client.
+ * \param argc number of args
+ * \param argv args array
+ * \return value returned by send_msg()
+ */
 int
-main(int argc, char *argv[])
+main(int argc, char **argv)
 {
     char buf[1024], *msg;
     int ret_value = EXIT_SUCCESS;
