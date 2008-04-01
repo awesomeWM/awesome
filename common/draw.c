@@ -244,7 +244,10 @@ draw_text(DrawCtx *ctx,
     pango_layout_set_font_description(ctx->layout, style.font->desc);
 
     x = area.x + padding;
-    y = area.y + (ctx->height - style.font->height) / 2;
+    /* + 1 is added for rounding, so that in any case of doubt we rather draw
+     * the text 1px lower than too high which usually results in a better type
+     * face */
+    y = area.y + (ctx->height - style.font->height + 1) / 2;
 
     switch(align)
     {
