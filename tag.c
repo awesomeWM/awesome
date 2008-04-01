@@ -283,7 +283,8 @@ void
 uicb_tag_toggleview(int screen, char *arg)
 {
     int i;
-    Tag *tag, *target_tag;
+    Tag *tag, *target_tag,
+        **backtag, **curtags = tags_get_current(screen);
 
     if(arg)
     {
@@ -293,15 +294,18 @@ uicb_tag_toggleview(int screen, char *arg)
 
         if(target_tag)
             tag_view(target_tag, !target_tag->selected);
-
-        /* check that there's at least one tag selected */
-        for(tag = globalconf.screens[screen].tags; tag && !tag->selected; tag = tag->next);
-        if(!tag)
-            tag_view(target_tag, True);
     }
     else
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             tag_view(tag, !tag->selected);
+
+    /* check that there's at least one tag selected */
+    for(tag = globalconf.screens[screen].tags; tag && !tag->selected; tag = tag->next);
+    if(!tag)
+        for(backtag = curtags; *backtag; backtag++)
+            tag_view(*backtag, True);
+
+    p_delete(&curtags);
 }
 
 static void
