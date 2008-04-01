@@ -57,6 +57,7 @@ emptybox_new(Statusbar *statusbar, cfg_t *config)
     w = p_new(Widget, 1);
     widget_common_new(w, statusbar, config);
     w->draw = emptybox_draw;
+    w->alignment = cfg_getalignment(config, "align");
 
     w->data = d = p_new(Data, 1);
 

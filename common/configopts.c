@@ -324,6 +324,8 @@ cfg_opt_t widget_emptybox_opts[] =
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
     /** Y coordinate, do not set for auto. */
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
+    /** Widget alignment. */
+    CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     /** Mouse bindings. */
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     /** Widget width. Set to 0 for auto. */
