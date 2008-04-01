@@ -642,6 +642,23 @@ item_list_fill_stdin(void)
     return has_entry;
 }
 
+/** Grab the keyboard.
+ */
+static void
+keyboard_grab(void)
+{
+    int i;
+    for(i = 1000; i; i--)
+    {
+        if(XGrabKeyboard(globalconf.display, DefaultRootWindow(globalconf.display), True,
+                         GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess)
+            break;
+        usleep(1000);
+    }
+    if(!i)
+        eprint("cannot grab keyboard");
+}
+
 /** Main function of awesome-menu.
  * \param argc number of elements in argv
  * \param argv arguments array
@@ -735,27 +752,27 @@ main(int argc, char **argv)
                                       geometry.width, geometry.height,
                                       globalconf.sw->drawable);
 
-
-    if(!item_list_fill_stdin())
-        item_list_fill_file(NULL);
-
     /* Allocate a default size for the text on the heap instead of
      * using stack allocation with PATH_MAX (may not been defined
      * according to POSIX). This string size may be increased if
      * needed */
     globalconf.text_complete = globalconf.text = p_new(char, CHUNK_SIZE);
     globalconf.text_size = CHUNK_SIZE;
-    compute_match(NULL);
 
-    for(opt = 1000; opt; opt--)
+    if(isatty(STDIN_FILENO))
     {
-        if(XGrabKeyboard(globalconf.display, DefaultRootWindow(globalconf.display), True,
-                         GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess)
-            break;
-        usleep(1000);
+        if(!item_list_fill_stdin())
+            item_list_fill_file(NULL);
+        keyboard_grab();
     }
-    if(!opt)
-        eprint("cannot grab keyboard");
+    else
+    {
+        keyboard_grab();
+        if(!item_list_fill_stdin())
+            item_list_fill_file(NULL);
+    }
+
+    compute_match(NULL);
 
     redraw();
 
