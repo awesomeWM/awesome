@@ -194,7 +194,8 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 rectangle.width = pb_width + d->border_width + 2 * d->border_padding - 1 + 2;
                 rectangle.height = pb_height + d->border_width + 2 * d->border_padding + 1;
-                draw_rectangle(ctx, rectangle, d->border_width, True, d->bg[i]);
+                if(d->border_padding)
+                    draw_rectangle(ctx, rectangle, 1, True, d->bg[i]);
                 draw_rectangle(ctx, rectangle, d->border_width, False, d->bordercolor[i]);
             }
 
@@ -303,7 +304,8 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
                 rectangle.width = pb_width + d->border_width + 2 * d->border_padding - 1 + 2;
                 rectangle.height = pb_height + d->border_width + 2 * d->border_padding + 1;
-                draw_rectangle(ctx, rectangle, d->border_width, True, d->bg[i]);
+                if(d->border_padding)
+                    draw_rectangle(ctx, rectangle, 1, True, d->bg[i]);
                 draw_rectangle(ctx, rectangle, d->border_width, False, d->bordercolor[i]);
             }
             /* new value/progress in px + pattern setup */
