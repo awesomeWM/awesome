@@ -74,21 +74,21 @@ typedef struct
 static Bool
 check_settings(Data *d, int status_height)
 {
-    int simple, h_total;
+    int tmp, h_total;
 
     h_total = (int)(status_height * d->height + 0.5);
 
     if(!d->vertical) /* horizontal */
     {
-        simple = d->width - 2 * (d->border_width + d->border_padding) - 1;
-        if((d->ticks_count && simple - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0) ||
-           (!d->ticks_count && simple < 0))
+        tmp = d->width - 2 * (d->border_width + d->border_padding) - 1;
+        if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0) ||
+           (!d->ticks_count && tmp < 0))
         {
             warn("progressbar's 'width' is too small for the given configuration options\n");
             return False;
         }
-        simple = h_total - d->data_items * (d->border_width + d->border_padding + 1) - (d->data_items - 1) * d->gap;
-        if(simple < 0)
+        tmp = h_total - d->data_items * (2 * (d->border_width + d->border_padding) + 1) - (d->data_items - 1) * d->gap;
+        if(tmp < 0)
         {
             warn("progressbar's 'height' is too small for the given configuration options\n");
             return False;
@@ -96,15 +96,15 @@ check_settings(Data *d, int status_height)
     }
     else /* vertical / standing up */
     {
-        simple = h_total - 2 * (d->border_width + d->border_padding) - 1;
-        if((d->ticks_count && simple - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0) ||
-           (!d->ticks_count && simple < 0))
+        tmp = h_total - 2 * (d->border_width + d->border_padding) - 1;
+        if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0) ||
+           (!d->ticks_count && tmp < 0))
         {
             warn("progressbar's 'height' is too small for the given configuration options\n");
             return False;
         }
-        simple = d->width - d->data_items * (d->border_width + d->border_padding + 1) - (d->data_items - 1) * d->gap;
-        if(simple < 0)
+        tmp = d->width - d->data_items * (2 * (d->border_width + d->border_padding) + 1) - (d->data_items - 1) * d->gap;
+        if(tmp < 0)
         {
             warn("progressbar's 'width' is too small for the given configuration options\n");
             return False;
@@ -265,7 +265,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     }
     else /* a horizontal progressbar */
     {
-        pb_width = d->width - d->border_width - 2 * d->border_padding;
+        pb_width = d->width - 2 * (d->border_width + d->border_padding);
         if(d->ticks_count && d->ticks_gap)
         {
             unit = (pb_width + d->ticks_gap) / d->ticks_count;
@@ -458,8 +458,6 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     w->tell = progressbar_tell;
     d = w->data = p_new(Data, 1);
 
-    d->data_items = 0; /* XXX: need to initialise or for sure 0? */
-
     d->height = cfg_getfloat(config, "height");
     d->width = cfg_getint(config, "width");
 
@@ -471,9 +469,6 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     if(!(d->vertical = cfg_getbool(config, "vertical")))
         d->vertical = False;
 
-    if(!check_settings(d, statusbar->height))
-        return w;
-
     d->gap = cfg_getint(config, "gap");
 
     w->alignment = cfg_getalignment(config, "align");
@@ -481,6 +476,12 @@ progressbar_new(Statusbar *statusbar, cfg_t *config)
     if(!(d->data_items = cfg_size(config, "data")))
     {
         warn("progressbar widget needs at least one bar section\n");
+        return w;
+    }
+
+    if(!check_settings(d, statusbar->height))
+    {
+        d->data_items = 0;
         return w;
     }
 
