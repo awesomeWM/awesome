@@ -576,14 +576,10 @@ client_setfloating(Client *c, Bool floating)
             client_resize(c, c->f_geometry, False);
             XRaiseWindow(globalconf.display, c->win);
         }
-        else
+        else if(c->ismax)
         {
-            XLowerWindow(globalconf.display, c->win);
-            if(c->ismax)
-            {
-                c->ismax = False;
-                client_resize(c, c->m_geometry, False);
-            }
+            c->ismax = False;
+            client_resize(c, c->m_geometry, False);
         }
         if(client_isvisible(c, c->screen))
             globalconf.screens[c->screen].need_arrange = True;
