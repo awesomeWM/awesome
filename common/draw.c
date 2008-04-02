@@ -587,7 +587,7 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_surface_t *source;
 
     source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h,
-#if CAIRO_VERSION_MAJOR < 1 || (CAIRO_VERSION_MAJOR == 1 && CAIRO_VERSION_MINOR < 5)
+#if CAIRO_VERSION_MAJOR < 1 || (CAIRO_VERSION_MAJOR == 1 && CAIRO_VERSION_MINOR < 5) || (CAIRO_VERSION_MAJOR == 1 && CAIRO_VERSION_MINOR == 5 && CAIRO_VERSION_MICRO < 8)
                                                  sizeof(unsigned char) * 4 * w);
 #else
                                                  cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, w));
