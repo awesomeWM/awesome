@@ -71,9 +71,7 @@ typedef struct
     XColor *bordercolor;
 } Data;
 
-Bool check_settings(Data *, int);
-
-Bool
+static Bool
 check_settings(Data *d, int status_height)
 {
     int simple, h_total;
@@ -367,9 +365,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                 for(rectangle.x = pb_x + (unit - d->ticks_gap);
                         pb_x + pb_width - d->ticks_gap >= rectangle.x;
                         rectangle.x += unit)
-                {
                     draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
-                }
             }
 
             pb_offset += pb_height + d->gap + 2 * (d->border_width + d->border_padding);
