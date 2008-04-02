@@ -144,12 +144,13 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
      * 1. the full space gets the size of the formerly empty one
      * 2. the pattern must be mirrored
      * 3. the formerly 'empty' side gets drawed with fg colors, the 'full' with bg-color
-     * ticks special:
-     * round the values to a full tick accordingly
-     * 4. finally draw the gaps
+     *
+     * ticks:
+     * 1. round the values to a full tick accordingly
+     * 2. finally draw the gaps
      */
 
-    pb_x = widget->area.x + 1;
+    pb_x = widget->area.x + d->border_width + d->border_padding;
     border_offset = d->border_width / 2;
     pb_offset = 0;
 
