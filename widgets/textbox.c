@@ -74,9 +74,6 @@ textbox_tell(Widget *widget, char *property, char *command)
             p_delete(&d->text);
         d->text = a_strdup(command);
     }
-    /* !command means a not existing string. So return here */
-    else if(!command)
-        return WIDGET_ERROR_NOVALUE;
     else if(!a_strcmp(property, "fg"))
         if(draw_color_new(globalconf.display, widget->statusbar->screen, command, &d->style.fg))
             return WIDGET_NOERROR;

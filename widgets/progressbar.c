@@ -388,9 +388,6 @@ progressbar_tell(Widget *widget, char *property, char *command)
     if(!d->data_items)
         return WIDGET_ERROR_CUSTOM; /* error already printed on _new */
 
-    if(!command)
-        return WIDGET_ERROR_NOVALUE;
-
     if(!a_strcmp(property, "data"))
     {
         title = strtok(command, " ");

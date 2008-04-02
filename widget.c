@@ -187,6 +187,7 @@ uicb_widget_tell(int screen, char *arg)
     Widget *widget;
     char *p, *property = NULL, *command;
     ssize_t len;
+    widget_tell_status_t status;
 
     if (!arg)
     {
@@ -228,44 +229,44 @@ uicb_widget_tell(int screen, char *arg)
         len = a_strlen(p);
         command = p_new(char, len + 1);
         a_strncpy(command, len + 1, p, len);
-        switch(widget->tell(widget, property, command))
-        {
-          case WIDGET_ERROR:
-            warn("error changing property %s of widget %s\n",
-                 property, widget->name);
-            break;
-          case WIDGET_ERROR_NOVALUE:
-            warn("error changing property %s of widget %s, no value given\n",
-                 property, widget->name);
-            break;
-          case WIDGET_ERROR_FORMAT_BOOL:
-            warn("error changing property %s of widget %s, must is boolean (0 or 1)\n",
-                 property, widget->name);
-            break;
-          case WIDGET_ERROR_FORMAT_FONT:
-            warn("error changing property %s of widget %s, must be a valid font\n",
-                 property, widget->name);
-            break;
-          case WIDGET_ERROR_FORMAT_COLOR:
-            warn("error changing property %s of widget %s, must be a valid color\n",
-                 property, widget->name);
-            break;
-          case WIDGET_ERROR_FORMAT_SECTION:
-            warn("error changing property %s of widget %s, section/title not found\n",
-                 property, widget->name);
-            break;
-          case WIDGET_NOERROR:
-          case WIDGET_ERROR_CUSTOM:
-            break;
-        }
+        status = widget->tell(widget, property, command);
         p_delete(&command);
     }
     else
-        widget->tell(widget, property, NULL);
+        status = WIDGET_ERROR_NOVALUE;
 
-    widget->cache.needs_update = True;
-
-    return;
+    switch(status)
+    {
+      case WIDGET_ERROR:
+        warn("error changing property %s of widget %s\n",
+             property, widget->name);
+        break;
+      case WIDGET_ERROR_NOVALUE:
+          warn("error changing property %s of widget %s, no value given\n",
+                property, widget->name);
+        break;
+      case WIDGET_ERROR_FORMAT_BOOL:
+        warn("error changing property %s of widget %s, must is boolean (0 or 1)\n",
+             property, widget->name);
+        break;
+      case WIDGET_ERROR_FORMAT_FONT:
+        warn("error changing property %s of widget %s, must be a valid font\n",
+             property, widget->name);
+        break;
+      case WIDGET_ERROR_FORMAT_COLOR:
+        warn("error changing property %s of widget %s, must be a valid color\n",
+             property, widget->name);
+        break;
+      case WIDGET_ERROR_FORMAT_SECTION:
+        warn("error changing property %s of widget %s, section/title not found\n",
+             property, widget->name);
+        break;
+      case WIDGET_NOERROR:
+          widget->cache.needs_update = True;
+          break;
+      case WIDGET_ERROR_CUSTOM:
+        break;
+    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
