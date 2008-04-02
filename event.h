@@ -31,7 +31,6 @@ void event_handle_configurerequest(XEvent *);
 void event_handle_configurenotify(XEvent *);
 void event_handle_destroynotify(XEvent *);
 void event_handle_enternotify(XEvent *);
-void event_handle_motionnotify(XEvent *);
 void event_handle_expose(XEvent *);
 void event_handle_keypress(XEvent *);
 void event_handle_leavenotify(XEvent *);

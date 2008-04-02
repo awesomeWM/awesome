@@ -283,7 +283,7 @@ main(int argc, char *argv[])
 
     /* select for events */
     wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PointerMotionMask;
+        | EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
     wa.cursor = globalconf.cursor[CurNormal];
 
     /* do this only for real screen */
@@ -311,7 +311,6 @@ main(int argc, char *argv[])
     handler[DestroyNotify] = event_handle_destroynotify;
     handler[EnterNotify] = event_handle_enternotify;
     handler[LeaveNotify] = event_handle_leavenotify;
-    handler[MotionNotify] = event_handle_motionnotify;
     handler[Expose] = event_handle_expose;
     handler[KeyPress] = event_handle_keypress;
     handler[MappingNotify] = event_handle_mappingnotify;

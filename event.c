@@ -286,18 +286,6 @@ event_handle_enternotify(XEvent *e)
             }
 }
 
-/** Handle XMotion events
- * \param e XEvent
- */
-void
-event_handle_motionnotify(XEvent *e)
-{
-    XMotionEvent *ev = &e->xmotion;
-
-    globalconf.pointer_x = ev->x_root;
-    globalconf.pointer_y = ev->y_root;
-}
-
 /** Handle XExpose events
  * \param e XEvent
  */
