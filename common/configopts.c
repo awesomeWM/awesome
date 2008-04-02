@@ -748,7 +748,6 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|statusbar|textbox|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|emptybox|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|graph|width", config_validate_unsigned_int);
-    cfg_set_validate_func(cfg, "screen|statusbar|progressbar|gap", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|progressbar|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|progressbar|border_width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|progressbar|border_padding", config_validate_unsigned_int);
