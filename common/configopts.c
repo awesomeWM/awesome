@@ -217,9 +217,9 @@ cfg_opt_t general_opts[] =
     CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
     /** New windows get focus. */
     CFG_BOOL((char *) "new_get_focus", cfg_true, CFGF_NONE),
-    /** Opacity of windows when unfocused. Set to -1 to disable. */
+    /** Opacity of windows when unfocused. */
     CFG_FLOAT((char *) "opacity_unfocused", -1, CFGF_NONE),
-    /** Opacity of windows when focused. Set to -1 to disable. */
+    /** Opacity of windows when focused. */
     CFG_FLOAT((char *) "opacity_focused", -1, CFGF_NONE),
     /** How to dispose floating windows. Can be smart or under_mouse. */
     CFG_STR((char *) "floating_placement", (char *) "smart", CFGF_NONE),
@@ -237,7 +237,7 @@ cfg_opt_t mouse_taglist_opts[] =
     /** Mouse button. */
     CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
     /** Uicb command to run. */
-    CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+    CFG_STR((char *) "command", NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines generic mouse bindings. */
@@ -248,7 +248,7 @@ cfg_opt_t mouse_generic_opts[] =
     /** Mouse button. */
     CFG_STR((char *) "button", (char *) "None", CFGF_NONE),
     /** Uicb command to run. */
-    CFG_STR((char *) "command", (char *) "", CFGF_NONE),
+    CFG_STR((char *) "command", NULL, CFGF_NONE),
     /** Argument to use for command. */
     CFG_STR((char *) "arg", NULL, CFGF_NONE),
     CFG_AWESOME_END()
@@ -713,6 +713,20 @@ config_validate_zero_one_float(cfg_t *cfg, cfg_opt_t *opt)
     return 0;
 }
 
+static int
+config_validate_supzero_float(cfg_t *cfg, cfg_opt_t *opt)
+{
+    float value = cfg_opt_getnfloat(opt, cfg_opt_size(opt) - 1);
+
+    if(value <= 0.0)
+    {
+        cfg_error(cfg, "float option '%s' must be greater than 0.0 section '%s'",
+                  opt->name, cfg->name);
+        return -1;
+    }
+    return 0;
+}
+
 cfg_t *
 cfg_new(void)
 {
@@ -725,16 +739,26 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|general|border", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|height", config_validate_unsigned_int);
-    cfg_set_validate_func(cfg, "screen|statusbar|textbox|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|tags|tag|nmaster", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|titlebar|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|titlebar|height", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "rules|rule|titlebar|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "rules|rule|titlebar|height", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "rules|rule|screen", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|textbox|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|emptybox|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|graph|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|progressbar|gap", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|progressbar|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|progressbar|border_width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|progressbar|border_padding", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|progressbar|ticks_gap", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "screen|statusbar|progressbar|ticks_count", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "menu|width", config_validate_unsigned_int);
+    cfg_set_validate_func(cfg, "menu|height", config_validate_unsigned_int);
 
     /* Check integers values > 1 */
     cfg_set_validate_func(cfg, "screen|tags|tag|ncol", config_validate_supone_int);
-    cfg_set_validate_func(cfg, "screen|statusbar|emptybox|width", config_validate_supone_int);
 
     /* Check float values */
     cfg_set_validate_func(cfg, "screen|general|mwfact_lower_limit", config_validate_zero_one_float);
@@ -743,6 +767,11 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "screen|general|opacity_unfocused", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "screen|general|opacity_focused", config_validate_zero_one_float);
     cfg_set_validate_func(cfg, "rules|rule|opacity", config_validate_zero_one_float);
+    cfg_set_validate_func(cfg, "screen|statusbar|graph|height", config_validate_zero_one_float);
+    cfg_set_validate_func(cfg, "screen|statusbar|progressbar|height", config_validate_zero_one_float);
+
+    /* Check float values > 0.0 */
+    cfg_set_validate_func(cfg, "screen|statusbar|graph|data|max", config_validate_supzero_float);
 
     return cfg;
 }

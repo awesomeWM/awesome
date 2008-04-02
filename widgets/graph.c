@@ -466,13 +466,6 @@ graph_new(Statusbar *statusbar, cfg_t *config)
 
         /* prevent: division by zero */
         d->current_max[i] = d->max[i] = cfg_getfloat(cfg, "max");
-        if(!(d->max[i] > 0))
-        {
-            warn("all graph widget needs a 'max' value greater than zero\n");
-            d->data_items = 0;
-            return w;
-        }
-
         d->lines[i] = p_new(int, d->size);
 
         /* filter each style-typ into it's own array (for easy looping later)*/
