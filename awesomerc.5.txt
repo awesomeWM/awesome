@@ -86,13 +86,13 @@ Simple textbox example
     #!/bin/sh
     while true
     do
-      echo "0 widget_tell clock text `date`"
+      echo "0 widget_tell bottom clock text `date`"
       echo "" # an empty line flushes data inside awesome
       sleep 1
     done | awesome-client
 
-    Note: What we're saying is "awesome-client, tell widget 'clock' to set
-    it's 'text' property to date's output".
+    Note: What we're saying is "awesome-client, tell the bottom status bar's
+    widget named 'clock' to set it's 'text' property to date's output".
 
 5. Make your ~/bin/awesome-clock executable
 
@@ -119,18 +119,22 @@ Simple progressbar example
 
 2. Create ~/.awesome/bottom-status-bar
 
-    progressbar diskusage
+    statusbar "bottom"
     {
-        data "disk"
+        position = "bottom"
+        progressbar "diskusage"
         {
-            bordercolor = "#006e96"
-            bg          = "#000000"
-            fg          = "#ff0000"
-            fg_center   = "#daaf0a"
-            fg_end      = "#00ff00"
+            data "disk"
+            {
+                bordercolor = "#006e96"
+                bg          = "#000000"
+                fg          = "#ff0000"
+                fg_center   = "#daaf0a"
+                fg_end      = "#00ff00"
+            }
+            width = 100
+            align = "left"
         }
-        width = 100
-        align = "left"
     }
 
 3. Check the configuration file for errors
@@ -146,14 +150,15 @@ Simple progressbar example
     #!/bin/sh
     while true; do
         usage = `df /dev/sda5 | awk '/\/dev\/sda5/ { print 100-$5 }'`
-        echo "0 widget_tell diskusage data disk ${usage}"
+        echo "0 widget_tell bottom diskusage data disk ${usage}"
         echo "" # an empty line flushes data inside awesome
         sleep 600;
     done | awesome-client
 
 
-    Note: What we're saying is "awesome-client, tell widget 'diskusage' to
-    set it's 'data' property named 'disk' to ${usage}."
+    Note: What we're saying is "awesome-client, tell the bottom status bar's
+    widget named 'diskusage' to set it's 'data' property named 'disk' to
+    ${usage}."
 
 5. Make ~/bin/awesome-diskusage executable
 
