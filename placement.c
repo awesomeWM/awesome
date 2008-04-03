@@ -23,6 +23,7 @@
 #include "screen.h"
 #include "client.h"
 #include "titlebar.h"
+#include "layouts/floating.h"
 
 extern AwesomeConf globalconf;
 
@@ -68,6 +69,7 @@ placement_smart(Client *c)
     area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
     area_t *screen_geometry, *arealist = NULL, *r;
     Bool found = False;
+    Layout *layout;
 
     screen_geometry = p_new(area_t, 1);
 
@@ -75,10 +77,13 @@ placement_smart(Client *c)
                                        globalconf.screens[c->screen].statusbar,
                                        &globalconf.screens[c->screen].padding);
 
+    layout = layout_get_current(c->screen);
+
     area_list_push(&arealist, screen_geometry);
 
     for(client = globalconf.clients; client; client = client->next)
-        if(client_isvisible(client, c->screen))
+        if((client->isfloating || layout->arrange == layout_floating)
+            && client_isvisible(client, c->screen))
         {
             newgeometry = client->f_geometry;
             newgeometry.width += 2 * client->border;
