@@ -28,6 +28,7 @@ void statusbar_refresh(void);
 void statusbar_preinit(Statusbar *);
 void statusbar_init(Statusbar *);
 void statusbar_display(Statusbar *);
+Statusbar * statusbar_getbyname(int, const char *);
 
 Uicb uicb_statusbar_toggle;
 

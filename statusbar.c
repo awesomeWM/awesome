@@ -277,8 +277,8 @@ statusbar_refresh()
                 }
 }
 
-static Statusbar *
-statusbar_get_byname(int screen, const char *name)
+Statusbar *
+statusbar_getbyname(int screen, const char *name)
 {
     Statusbar *sb;
 
@@ -308,7 +308,7 @@ statusbar_toggle(Statusbar *statusbar)
 void
 uicb_statusbar_toggle(int screen, char *arg)
 {
-    Statusbar *sb = statusbar_get_byname(screen, arg);
+    Statusbar *sb = statusbar_getbyname(screen, arg);
 
     if(sb)
         statusbar_toggle(sb);

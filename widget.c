@@ -88,20 +88,18 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
 }
 
 /** Find a widget on a screen by its name
+ * \param statusbar the statusbar to look into
  * \param name the widget name
- * \param screen the screen to look into
  * \return a widget
  */
 static Widget *
-widget_find(char *name, int screen)
+widget_getbyname(Statusbar *sb, char *name)
 {
     Widget *widget;
-    Statusbar *sb;
 
-    for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
-        for(widget = sb->widgets; widget; widget = widget->next)
-            if(a_strcmp(name, widget->name) == 0)
-                return widget;
+    for(widget = sb->widgets; widget; widget = widget->next)
+        if(!a_strcmp(name, widget->name))
+            return widget;
 
     return NULL;
 }
@@ -184,41 +182,32 @@ widget_invalidate_cache(int screen, int flags)
 void
 uicb_widget_tell(int screen, char *arg)
 {
+    Statusbar *statusbar;
     Widget *widget;
     char *p, *property = NULL, *command;
     ssize_t len;
     widget_tell_status_t status;
 
-    if (!arg)
-    {
-        warn("Must specify a widget.\n");
-        return;
-    }
+    if(!(len = a_strlen(arg)))
+        return warn("must specify a statusbar and a widget.\n");
 
-    len = a_strlen(arg);
-    p = strtok(arg, " ");
-    if(!p)
-    {
-        warn("Ignoring malformed widget command.\n");
-        return;
-    }
+    if(!(p = strtok(arg, " ")))
+        return warn("ignoring malformed widget command (missing statusbar name).\n");
 
-    widget = widget_find(p, screen);
-    if(!widget)
-    {
-        warn("No such widget: %s\n", p);
-        return;
-    }
+    if(!(statusbar = statusbar_getbyname(screen, p)))
+        return warn("no such statusbar: %s\n", p);
 
-    p = strtok(NULL, " ");
-    if(!p)
-    {
-        warn("Ignoring malformed widget command.\n");
-        return;
-    }
+    if(!(p = strtok(NULL, " ")))
+        return warn("ignoring malformed widget command (missing widget name).\n");
+
+    if(!(widget = widget_getbyname(statusbar, p)))
+        return warn("no such widget: %s in statusbar %s.\n", p, statusbar->name);
+
+    if(!(p = strtok(NULL, " ")))
+        return warn("ignoring malformed widget command (missing property name).\n");
 
     property = p;
-    p = p + a_strlen(p) + 1; /* could be out of 'arg' now */
+    p += a_strlen(property) + 1; /* could be out of 'arg' now */
 
     /* arg + len points to the finishing \0.
      * p to the char right of the first space (strtok delimiter)

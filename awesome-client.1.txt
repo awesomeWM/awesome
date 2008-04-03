@@ -28,9 +28,13 @@ collected lines into awesome with an according immediate execution.
 The command format is:
  screen_number command argument
 
-For example, to change statusbar text on screen 0, you can do the following:
+For example, to change a statusbar textbox text on screen 0, you can do the following:
 
-    echo 0 widget_tell <widget-id> text Hello, world | awesome-client
+    echo 0 widget_tell <statusbar-name> <textbox-name> text Hello, world | awesome-client
+
+To change an iconbox image on screen 1, you can do the following:
+
+    echo 0 widget_tell <statusbar-name> <iconbox-name> image /home/user/image.jpg | awesome-client
 
 To view tag number 3 on screen 1:
 
