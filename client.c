@@ -393,7 +393,11 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     titlebar_init(c);
 
     if(!retloadprops && !(flags & (USPosition | PPosition)))
+    {
         c->f_geometry = globalconf.screens[c->screen].floating_placement(c);
+        if(c->isfloating)
+            client_resize(c, c->f_geometry, False);
+    }
 
     /* update titlebar with real floating info now */
     if(c->isfloating)
