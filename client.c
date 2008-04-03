@@ -299,7 +299,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     XWindowChanges wc;
     Tag *tag;
     Rule *rule;
-    area_t screen_geom;
     long flags;
 
     c = p_new(Client, 1);
@@ -311,13 +310,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     else
         c->phys_screen = c->screen;
 
-    screen_geom = screen_get_area(c->screen,
-                                  globalconf.screens[screen].statusbar,
-                                  &globalconf.screens[screen].padding);
     /* Initial values */
     c->win = w;
-    c->geometry.x = c->f_geometry.x = c->m_geometry.x = MAX(wa->x, screen_geom.x);
-    c->geometry.y = c->f_geometry.y = c->m_geometry.y = MAX(wa->y, screen_geom.y);
+    c->geometry.x = c->f_geometry.x = c->m_geometry.x = wa->x;
+    c->geometry.y = c->f_geometry.y = c->m_geometry.y = wa->y;
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wa->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wa->height;
     c->oldborder = wa->border_width;
@@ -394,9 +390,10 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     if(!retloadprops && !(flags & (USPosition | PPosition)))
     {
-        c->f_geometry = globalconf.screens[c->screen].floating_placement(c);
         if(c->isfloating)
-            client_resize(c, c->f_geometry, False);
+            client_resize(c, globalconf.screens[c->screen].floating_placement(c), False);
+        else
+            c->f_geometry = globalconf.screens[c->screen].floating_placement(c);
     }
 
     /* update titlebar with real floating info now */
