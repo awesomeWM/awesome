@@ -435,10 +435,6 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
             client_list_append(&globalconf.clients, c);
     }
 
-    /* some windows require this */
-    XMoveResizeWindow(globalconf.display, c->win, c->geometry.x, c->geometry.y,
-                      c->geometry.width, c->geometry.height);
-
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_client_list(c->phys_screen);
 }
