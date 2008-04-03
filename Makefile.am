@@ -110,7 +110,7 @@ AWESOME_CFLAGS = -std=gnu99 -pipe \
 		 -Wunused -Winit-self -Wpointer-arith -Wredundant-decls \
 		 -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn
 endif
-AM_CPPFLAGS = $(X_CFLAGS) $(pangocairo_CFLAGS) $(confuse_CFLAGS) $(xrandr_CFLAGS) $(xinerama_CFLAGS) $(AWESOME_CFLAGS) $(imlib2_CFLAGS)
+AM_CPPFLAGS = $(X_CFLAGS) $(pangocairo_CFLAGS) $(confuse_CFLAGS) $(xrandr_CFLAGS) $(xinerama_CFLAGS) $(AWESOME_CFLAGS) $(image_CFLAGS)
 
 bin_PROGRAMS += awesome
 awesome_SOURCES = \
@@ -143,7 +143,7 @@ awesome_SOURCES = \
 	ewmh.c ewmh.h
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
-awesome_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xrandr_LIBS) $(xinerama_LIBS) $(imlib2_LIBS)
+awesome_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xrandr_LIBS) $(xinerama_LIBS) $(image_LIBS)
 
 bin_PROGRAMS += awesome-client
 awesome_client_SOURCES = \
@@ -162,7 +162,7 @@ awesome_message_SOURCES = \
 	common/xscreen.h common/xscreen.c \
 	awesome-message.c
 
-awesome_message_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xinerama_LIBS) $(imlib2_LIBS)
+awesome_message_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xinerama_LIBS) $(image_LIBS)
 
 bin_PROGRAMS += awesome-menu
 awesome_menu_SOURCES = \
@@ -174,7 +174,7 @@ awesome_menu_SOURCES = \
 	common/xutil.h common/xutil.c \
 	awesome-menu.c
 
-awesome_menu_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xinerama_LIBS) $(imlib2_LIBS)
+awesome_menu_LDADD = $(X_LIBS) $(pangocairo_LIBS) $(confuse_LIBS) $(xinerama_LIBS) $(image_LIBS)
 
 if HAVE_XMLTO
 if HAVE_ASCIIDOC

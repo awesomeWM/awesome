@@ -20,7 +20,12 @@
  */
 
 #include <cairo-xlib.h>
+#ifdef HAVE_GTK
+#include <gtk/gtk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#else
 #include <Imlib2.h>
+#endif
 
 #include <langinfo.h>
 #include <iconv.h>
@@ -608,6 +613,71 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
+#ifdef HAVE_GTK
+
+/** Draw an image (PNG format only) from a file to a draw context
+ * \param ctx Draw context to draw to
+ * \param x x coordinate
+ * \param y y coordinate
+ * \param wanted_h wanted height: if > 0, image will be resized
+ * \param filename file name to draw
+ */
+void
+draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
+{
+
+    double ratio;
+    int w, h;
+    cairo_t *cr;
+    GdkPixbuf *pixbuf;
+    GError *error=NULL;
+
+    if(!(pixbuf = gdk_pixbuf_new_from_file(filename,&error)))
+        return warn("cannot load image %s: %s\n", filename, error->message);
+
+    w = gdk_pixbuf_get_width(pixbuf);
+    h = gdk_pixbuf_get_height(pixbuf);
+
+    cr = cairo_create(ctx->surface);
+    if(wanted_h > 0 && h > 0)
+    {
+        ratio = (double) wanted_h / (double) h;
+        cairo_scale(cr, ratio, ratio);
+        gdk_cairo_set_source_pixbuf(cr, pixbuf, x/ratio, y/ratio);
+    }
+    else
+        gdk_cairo_set_source_pixbuf(cr, pixbuf, (double) x, (double) y);
+
+    cairo_paint(cr);
+
+    gdk_pixbuf_unref(pixbuf);
+
+    cairo_destroy(cr);
+}
+
+/** get an image size
+ * \param filename file name
+ * \return area_t structure with width and height set to image size
+ */
+area_t
+draw_get_image_size(const char *filename)
+{
+    area_t size = { -1, -1, -1, -1, NULL, NULL };
+    gint width, height;
+
+    if(gdk_pixbuf_get_file_info(filename, &width, &height))
+    {
+        size.width = width;
+        size.height = height;
+    }
+    else
+        warn("cannot load image %s: %s\n", filename, "format unrecognized");
+
+    return size;
+}
+
+#else /* HAVE_GTK */
+
 static const char *
 draw_imlib_load_strerror(Imlib_Load_Error e)
 {
@@ -719,6 +789,7 @@ draw_get_image_size(const char *filename)
 
     return size;
 }
+#endif /* HAVE_GTK */
 
 /** Rotate a drawable
  * \param ctx Draw context to draw to
