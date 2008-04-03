@@ -310,7 +310,6 @@ main(int argc, char *argv[])
     handler[ConfigureNotify] = event_handle_configurenotify;
     handler[DestroyNotify] = event_handle_destroynotify;
     handler[EnterNotify] = event_handle_enternotify;
-    handler[LeaveNotify] = event_handle_leavenotify;
     handler[Expose] = event_handle_expose;
     handler[KeyPress] = event_handle_keypress;
     handler[MappingNotify] = event_handle_mappingnotify;

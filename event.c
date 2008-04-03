@@ -346,20 +346,6 @@ event_handle_keypress(XEvent *e)
             k->func(screen, k->arg);
 }
 
-/** Handle XCrossing events on leave
- * \param e XEvent
- */
-void
-event_handle_leavenotify(XEvent * e)
-{
-    XCrossingEvent *ev = &e->xcrossing;
-    int screen;
-
-    for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
-        if((ev->window == RootWindow(e->xany.display, screen)) && !ev->same_screen)
-            client_focus(NULL, screen, True);
-}
-
 /** Handle XMapping events
  * \param e XEvent
  */

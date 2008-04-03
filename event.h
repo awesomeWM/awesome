@@ -33,7 +33,6 @@ void event_handle_destroynotify(XEvent *);
 void event_handle_enternotify(XEvent *);
 void event_handle_expose(XEvent *);
 void event_handle_keypress(XEvent *);
-void event_handle_leavenotify(XEvent *);
 void event_handle_mappingnotify(XEvent *);
 void event_handle_maprequest(XEvent *);
 void event_handle_propertynotify(XEvent *);
