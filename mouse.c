@@ -111,7 +111,7 @@ mouse_snapclient(Client *c, area_t geometry)
 }
 
 static void
-mouse_resizebar_update(DrawCtx *ctx, style_t style, SimpleWindow *sw, area_t geometry, int border)
+mouse_resizebar_draw(DrawCtx *ctx, style_t style, SimpleWindow *sw, area_t geometry, int border)
 {
     area_t draw_geometry = { 0, 0, ctx->width, ctx->height, NULL, NULL };
     char size[64];
@@ -175,7 +175,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                                sw->geometry.width, sw->geometry.height,
                                sw->drawable);
         XMapRaised(globalconf.display, sw->window);
-        mouse_resizebar_update(ctx, style, sw, geometry, c->border);
+        mouse_resizebar_draw(ctx, style, sw, geometry, c->border);
     }
 
     for(;;)
@@ -215,7 +215,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 client_resize(c, geometry, False);
                 c->ismoving = False;
                 if(sw)
-                    mouse_resizebar_update(ctx, style, sw, c->geometry, c->border);
+                    mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
             }
             else
             {
@@ -285,7 +285,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                                sw->geometry.width, sw->geometry.height,
                                sw->drawable);
         XMapRaised(globalconf.display, sw->window);
-        mouse_resizebar_update(ctx, style, sw, geometry, c->border);
+        mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
     }
     else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
              || layout->arrange == layout_tilebottom || layout->arrange == layout_tiletop)
@@ -359,7 +359,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                 geometry.y = c->geometry.y;
                 client_resize(c, geometry, True);
                 if(sw)
-                    mouse_resizebar_update(ctx, style, sw, c->geometry, c->border);
+                    mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
             }
             else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
                     || layout->arrange == layout_tiletop || layout->arrange == layout_tilebottom)
