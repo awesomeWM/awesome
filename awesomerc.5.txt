@@ -86,10 +86,19 @@ Simple textbox example
     #!/bin/sh
     while true
     do
-      echo "0 widget_tell bottom clock text `date`"
-      echo "" # an empty line flushes data inside awesome
-      sleep 1
-    done | awesome-client
+        # if you start this from .xinitrc, the script will start before
+        # awesome, and will fail.
+        if [ -S ~/.awesome_ctl.0 ]; then
+            while true
+            do
+              echo "0 widget_tell bottom clock text `date`"
+              echo "" # an empty line flushes data inside awesome
+              sleep 1
+            done | awesome-client
+        else
+            sleep 1
+        fi
+    done
 
     Note: What we're saying is "awesome-client, tell the bottom status bar's
     widget named 'clock' to set it's 'text' property to date's output".
@@ -148,12 +157,21 @@ Simple progressbar example
 4. Create ~/bin/awesome-diskusage
 
     #!/bin/sh
-    while true; do
-        usage = `df /dev/sda5 | awk '/\/dev\/sda5/ { print 100-$5 }'`
-        echo "0 widget_tell bottom diskusage data disk ${usage}"
-        echo "" # an empty line flushes data inside awesome
-        sleep 600;
-    done | awesome-client
+    while true
+    do
+        # if you start this from .xinitrc, the script will start before
+        # awesome, and will fail.
+        if [ -S ~/.awesome_ctl.0 ]; then
+            while true; do
+                usage = `df /dev/sda5 | awk '/\/dev\/sda5/ { print 100-$5 }'`
+                echo "0 widget_tell bottom diskusage data disk ${usage}"
+                echo "" # an empty line flushes data inside awesome
+                sleep 600;
+            done | awesome-client
+        else
+            sleep 1
+        fi
+    done
 
 
     Note: What we're saying is "awesome-client, tell the bottom status bar's
