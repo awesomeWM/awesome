@@ -65,14 +65,13 @@ draw_iso2utf8(char *iso)
         return NULL;
     }
 
-    utf8len = (3 * len) / 2 + 1;
+    utf8len = 2 * len + 1;
     utf8 = utf8p = p_new(char, utf8len);
 
     if(iconv(iso2utf8, &iso, &len, &utf8, &utf8len) == (size_t) -1)
     {
         warn("text conversion failed: %s\n", strerror(errno));
         p_delete(&utf8p);
-        return NULL;
     }
 
     if(iconv_close(iso2utf8))
