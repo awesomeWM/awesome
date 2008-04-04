@@ -397,8 +397,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
     }
 
     /* update titlebar with real floating info now */
-    if(c->isfloating)
-        titlebar_update_geometry_floating(c);
+    titlebar_update_geometry_floating(c);
 
     XSelectInput(globalconf.display, w, StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 
