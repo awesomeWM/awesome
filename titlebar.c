@@ -23,20 +23,18 @@
 
 #include "titlebar.h"
 #include "screen.h"
+#include "layouts/floating.h"
 
 extern AwesomeConf globalconf;
 
+/** Initialize a titlebar: create the SimpleWindow.
+ * We still need to update its geometry to have it placed correctly.
+ * \param c the client
+ */
 void
 titlebar_init(Client *c)
 {
     int width;
-
-    if(c->titlebar.position == Off
-       || c->titlebar.position == Auto)
-    {
-        c->titlebar.position = Off;
-        return;
-    }
 
     if(!c->titlebar.height)
         c->titlebar.height = 1.5 * MAX(c->titlebar.styles.normal.font->height,
@@ -45,63 +43,41 @@ titlebar_init(Client *c)
 
     switch(c->titlebar.position)
     {
+      case Off:
+        return;
+      case Auto:
+        c->titlebar.position = Off;
+        return;
       case Top:
-        if(!c->titlebar.width)
-            width = c->geometry.width + 2 * c->border;
-        else
-            width = MIN(c->titlebar.width, c->geometry.width);
-        c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          c->phys_screen,
-                                          c->geometry.x,
-                                          c->geometry.y - c->titlebar.height,
-                                          width,
-                                          c->titlebar.height,
-                                          0);
-        break;
       case Bottom:
         if(!c->titlebar.width)
             width = c->geometry.width + 2 * c->border;
         else
             width = MIN(c->titlebar.width, c->geometry.width);
         c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          c->phys_screen,
-                                          c->geometry.x,
-                                          c->geometry.y + c->geometry.height + 2 * c->border,
-                                          width,
-                                          c->titlebar.height,
-                                          0);
+                                          c->phys_screen, 0, 0,
+                                          width, c->titlebar.height, 0);
         break;
       case Left:
-        if(!c->titlebar.width)
-            width = c->geometry.height + 2 * c->border;
-        else
-            width = MIN(c->titlebar.width, c->geometry.height);
-        c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          c->phys_screen,
-                                          c->geometry.x - c->titlebar.height,
-                                          c->geometry.y,
-                                          c->titlebar.height,
-                                          width,
-                                          0);
-        break;
       case Right:
         if(!c->titlebar.width)
             width = c->geometry.height + 2 * c->border;
         else
             width = MIN(c->titlebar.width, c->geometry.height);
         c->titlebar.sw = simplewindow_new(globalconf.display,
-                                          c->phys_screen,
-                                          c->geometry.x + c->geometry.width + 2 * c->border,
-                                          c->geometry.y,
-                                          c->titlebar.height,
-                                          width,
-                                          0);
+                                          c->phys_screen, 0, 0,
+                                          c->titlebar.height, width, 0);
         break;
       default:
         break;
     }
 }
 
+/** Add the titlebar geometry to a geometry.
+ * \param t the titlebar
+ * \param geometry the geometry
+ * \return a new geometry bigger if the titlebar is visible
+ */
 area_t
 titlebar_geometry_add(Titlebar *t, area_t geometry)
 {
@@ -131,6 +107,11 @@ titlebar_geometry_add(Titlebar *t, area_t geometry)
     return geometry;
 }
 
+/** Remove the titlebar geometry to a geometry.
+ * \param t the titlebar
+ * \param geometry the geometry
+ * \return a new geometry smaller if the titlebar is visible
+ */
 area_t
 titlebar_geometry_remove(Titlebar *t, area_t geometry)
 {
@@ -160,8 +141,11 @@ titlebar_geometry_remove(Titlebar *t, area_t geometry)
     return geometry;
 }
 
+/** Draw the titlebar content.
+ * \param c the client
+ */
 void
-titlebar_update(Client *c)
+titlebar_draw(Client *c)
 {
     Drawable dw = 0;
     DrawCtx *ctx;
@@ -198,7 +182,7 @@ titlebar_update(Client *c)
         break;
     }
 
-
+    /* Check if the client is focused/urgent/normal */
     if(globalconf.focus->client == c)
         style = c->titlebar.styles.focus;
     else if(c->isurgent)
@@ -231,6 +215,9 @@ titlebar_update(Client *c)
     draw_context_delete(&ctx);
 }
 
+/** Update the titlebar geometry for a floating client.
+ * \param c the client
+ */
 void
 titlebar_update_geometry_floating(Client *c)
 {
@@ -242,6 +229,9 @@ titlebar_update_geometry_floating(Client *c)
     switch(c->titlebar.position)
     {
       default:
+        return;
+      case Off:
+        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
         return;
       case Top:
         if(!c->titlebar.width)
@@ -333,9 +323,15 @@ titlebar_update_geometry_floating(Client *c)
         break;
     }
 
-    titlebar_update(c);
+    XMapWindow(globalconf.display, c->titlebar.sw->window);
+    titlebar_draw(c);
 }
 
+
+/** Update the titlebar geometry for a tiled client.
+ * \param c the client
+ * \param geometry the geometry the client will receive
+ */
 void
 titlebar_update_geometry(Client *c, area_t geometry)
 {
@@ -347,6 +343,9 @@ titlebar_update_geometry(Client *c, area_t geometry)
     switch(c->titlebar.position)
     {
       default:
+        return;
+      case Off:
+        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
         return;
       case Top:
         if(!c->titlebar.width)
@@ -440,7 +439,8 @@ titlebar_update_geometry(Client *c, area_t geometry)
         break;
     }
 
-    titlebar_update(c);
+    XMapWindow(globalconf.display, c->titlebar.sw->window);
+    titlebar_draw(c);
 }
 
 /** Toggle window titlebar visibility
@@ -459,12 +459,12 @@ uicb_client_toggletitlebar(int screen __attribute__ ((unused)), char *arg __attr
     if(!c->titlebar.position)
         c->titlebar.position = c->titlebar.dposition;
     else
-    {
         c->titlebar.position = Off;
-        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
-    }
 
-    globalconf.screens[c->screen].need_arrange = True;
+    if(c->isfloating || layout_get_current(screen)->arrange == layout_floating)
+        titlebar_update_geometry_floating(c);
+    else
+        globalconf.screens[c->screen].need_arrange = True;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

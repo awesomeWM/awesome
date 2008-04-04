@@ -144,7 +144,7 @@ client_updatetitle(Client *c)
         xgettextprop(globalconf.display, c->win,
                      XInternAtom(globalconf.display, "WM_NAME", False), c->name, sizeof(c->name));
 
-    titlebar_update(c);
+    titlebar_draw(c);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
@@ -158,7 +158,7 @@ client_unfocus(Client *c)
     XSetWindowBorder(globalconf.display, c->win,
                      globalconf.screens[c->screen].styles.normal.border.pixel);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    titlebar_update(c);
+    titlebar_draw(c);
 }
 
 /** Ban client and unmap it
@@ -210,7 +210,7 @@ client_focus(Client *c, int screen, Bool raise)
             window_settrans(c->win, globalconf.screens[c->screen].opacity_focused);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].styles.focus.border.pixel);
-        titlebar_update(c);
+        titlebar_draw(c);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
         if(raise)
             client_stack(c);
@@ -668,7 +668,10 @@ client_updatewmhints(Client *c)
     if((wmh = XGetWMHints(globalconf.display, c->win)))
     {
         if((c->isurgent = ((wmh->flags & XUrgencyHint) && globalconf.focus->client != c)))
+        {
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+            titlebar_draw(c);
+        }
         if((wmh->flags & StateHint) && wmh->initial_state == WithdrawnState)
         {
             c->border = 0;
