@@ -61,19 +61,12 @@ tasklist_isvisible(Client *c, int screen, ShowClient show)
     switch(show)
     {
       case ShowAll:
-        if(c->screen == screen)
-            return True;
-        break;
+        return (c->screen == screen);
       case ShowTags:
-        if(client_isvisible(c, screen))
-            return True;
-        break;
+        return client_isvisible(c, screen);
       case ShowFocus:
-        if(c == globalconf.focus->client)
-            return True;
-        break;
+        return (c == focus_get_current_client(screen));
     }
-
     return False;
 }
 
@@ -82,7 +75,6 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
     Client *c;
     Data *d = widget->data;
-    Client *sel = focus_get_current_client(widget->statusbar->screen);
     Rule *r;
     area_t area;
     style_t style;
@@ -119,7 +111,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 
             if(c->isurgent)
                 style = d->styles.urgent;
-            else if(sel == c)
+            else if(globalconf.focus->client == c)
                 style = d->styles.focus;
             else
                 style = d->styles.normal;
