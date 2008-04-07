@@ -120,11 +120,11 @@ PKG_CHECK_MODULES([xrandr], [xrandr],,
 AC_ARG_WITH([gtk], AS_HELP_STRING([--with-gtk], [Build with gtk library (default: disabled)]))
 
 if test "x$with_gtk" == "xyes"; then
-    PKG_CHECK_MODULES([image], [gtk+-2.0 >= 2.2],,
+    PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.2],,
         [AC_MSG_ERROR([Cannot find gtk+-2.0 >= 2.2])])
     AC_DEFINE([HAVE_GTK],1,[Defined to use gtk])
 else
-    PKG_CHECK_MODULES([image], [imlib2],,
+    PKG_CHECK_MODULES([imlib2], [imlib2],,
        [AC_MSG_ERROR([awesome requires Imlib2.])])
 fi
 
