@@ -61,6 +61,10 @@ tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
     return tag;
 }
 
+/** Append a tag to a screen.
+ * \param tag the tag to append
+ * \param screen the screen id
+ */
 void
 tag_append_to_screen(Tag *tag, int screen)
 {
@@ -73,6 +77,10 @@ tag_append_to_screen(Tag *tag, int screen)
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
+/** Push a tag to a screen tag list.
+ * \param tag the tag to push
+ * \param screen the screen
+ */
 void
 tag_push_to_screen(Tag *tag, int screen)
 {
@@ -81,6 +89,10 @@ tag_push_to_screen(Tag *tag, int screen)
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
+/** Tag a client with specified tag.
+ * \param c the client to tag
+ * \param t the tag to tag the client with
+ */
 void
 tag_client(Client *c, Tag *t)
 {
@@ -100,6 +112,10 @@ tag_client(Client *c, Tag *t)
     globalconf.screens[c->screen].need_arrange = True;
 }
 
+/** Untag a client with specified tag.
+ * \param c the client to tag
+ * \param t the tag to tag the client with
+ */
 void
 untag_client(Client *c, Tag *t)
 {
@@ -110,14 +126,18 @@ untag_client(Client *c, Tag *t)
         {
             tag_client_node_list_detach(&globalconf.tclink, tc);
             p_delete(&tc);
+            client_saveprops(c);
+            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+            globalconf.screens[c->screen].need_arrange = True;
             break;
         }
-
-    client_saveprops(c);
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    globalconf.screens[c->screen].need_arrange = True;
 }
 
+/** Check if a client is tagged with the specified tag.
+ * \param c the client
+ * \param t the tag
+ * \return true if the client is tagged with the tag, false otherwise.
+ */
 Bool
 is_client_tagged(Client *c, Tag *t)
 {
@@ -133,6 +153,9 @@ is_client_tagged(Client *c, Tag *t)
     return False;
 }
 
+/** Tag the client with the currently selected (visible) tags.
+ * \param c the client
+ */
 void
 tag_client_with_current_selected(Client *c)
 {
@@ -146,6 +169,10 @@ tag_client_with_current_selected(Client *c)
             untag_client(c, tag);
 }
 
+/** Tag the client according to a rule.
+ * \param c the client
+ * \param r the rule
+ */
 void
 tag_client_with_rule(Client *c, Rule *r)
 {
@@ -170,6 +197,11 @@ tag_client_with_rule(Client *c, Rule *r)
                 untag_client(c, tag);
 }
 
+/** Get the current tags for the specified screen.
+ * Returned pointer must be p_delete'd after.
+ * \param screen screen id
+ * \return a double pointer of tag list finished with a NULL element
+ */
 Tag **
 tags_get_current(int screen)
 {
@@ -190,7 +222,7 @@ tags_get_current(int screen)
     return tags;
 }
 
-/** Tag selected window with tag
+/** Tag focused client with tag.
  * \param screen Screen ID
  * \param arg Tag name
  * \ingroup ui_callback
@@ -225,7 +257,7 @@ uicb_client_tag(int screen, char *arg)
             tag_client(sel, tag);
 }
 
-/** Toggle a tag on client
+/** Toggle a tag on focused client.
  * \param screen virtual screen id
  * \param arg tag number
  * \ingroup ui_callback
@@ -274,7 +306,7 @@ uicb_client_toggletag(int screen, char *arg)
     }
 }
 
-/** Add a tag to viewed tags
+/** Add a tag to the list of viewed tags.
  * \param screen Screen ID
  * \param arg Tag name
  * \ingroup ui_callback
@@ -308,6 +340,9 @@ uicb_tag_toggleview(int screen, char *arg)
     p_delete(&curtags);
 }
 
+/** Set a tag to be the only one viewed.
+ * \param target the tag to see
+ */
 static void
 tag_view_only(Tag *target)
 {
@@ -319,6 +354,11 @@ tag_view_only(Tag *target)
         tag_view(tag, tag == target);
 }
 
+/** Use an index to set a tag viewable.
+ * \param screen the screen id
+ * \param dindex the index
+ * \param view the view value
+ */
 void
 tag_view_byindex(int screen, int dindex, Bool view)
 {
@@ -332,6 +372,10 @@ tag_view_byindex(int screen, int dindex, Bool view)
     tag_view(tag, view);
 }
 
+/** View only a tag, selected by its index.
+ * \param screen screen id
+ * \param dindex the index
+ */
 void
 tag_view_only_byindex(int screen, int dindex)
 {
@@ -345,6 +389,10 @@ tag_view_only_byindex(int screen, int dindex)
     tag_view_only(tag);
 }
 
+/** View or unview a tag.
+ * \param tag the tag
+ * \param view set visible or not
+ */
 void
 tag_view(Tag *tag, Bool view)
 {
@@ -355,7 +403,7 @@ tag_view(Tag *tag, Bool view)
     globalconf.screens[tag->screen].need_arrange = True;
 }
 
-/** View tag
+/** View tag.
  * \param screen Screen ID
  * \param arg tag to view
  * \ingroup ui_callback
@@ -386,7 +434,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
         tag_view(tag, tag->was_selected);
 }
 
-/** View next tag
+/** View next tag.
  * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
@@ -404,7 +452,7 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
     p_delete(&curtags);
 }
 
-/** View previous tag
+/** View previous tag.
  * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
@@ -422,6 +470,10 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
     p_delete(&curtags);
 }
 
+/** Create a new tag. Argument must be the tag name.
+ * \param screen the screen id
+ * \param arg the tag name
+ */
 void
 uicb_tag_create(int screen, char *arg)
 {

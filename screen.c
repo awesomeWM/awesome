@@ -226,7 +226,8 @@ move_mouse_pointer_to_screen(int phys_screen)
 }
 
 
-/** Switch focus to a specified screen
+/** Switch focus to a specified screen.
+ * Argument must be an absolute or relative screen number.
  * \param screen Screen ID
  * \param arg screen number
  * \ingroup ui_callback
@@ -251,7 +252,8 @@ uicb_screen_focus(int screen, char *arg)
     move_mouse_pointer_to_screen(new_screen);
 }
 
-/** Move client to a virtual screen (if Xinerama is active)
+/** Move client to a screen.
+ * Argument must be an absolute or relative screen number.
  * \param screen Screen ID
  * \param arg screen number
  * \ingroup ui_callback

@@ -300,7 +300,8 @@ statusbar_toggle(Statusbar *statusbar)
     globalconf.screens[statusbar->screen].need_arrange = True;
 }
 
-/** Toggle statusbar
+/** Toggle statusbar on or off.
+ * Argument must be a statusbar name, or no argument for all statusbars.
  * \param screen Screen ID
  * \param arg statusbar name
  * \ingroup ui_callback
@@ -319,6 +320,5 @@ uicb_statusbar_toggle(int screen, char *arg)
     for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
         statusbar_position_update(sb);
 }
-
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

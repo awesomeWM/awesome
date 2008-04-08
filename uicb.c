@@ -137,8 +137,12 @@ uicb_spawn(int screen, char *arg)
     wait(0);
 }
 
+/** Run the uicb
+ * \param cmd the uicb command to parse
+ * \return 0 on succes, -1 on failure
+ */
 static int
-run_uicb(char *cmd)
+uicb_run(char *cmd)
 {
     char *p, *argcpy;
     const char *arg;
@@ -190,6 +194,10 @@ run_uicb(char *cmd)
     return 0;
 }
 
+/** Parse the control buffer.
+ * \param cmd the control buffer
+ * \return 0 on succes, -1 on failure
+ */
 int
 parse_control(char *cmd)
 {
@@ -201,7 +209,7 @@ parse_control(char *cmd)
     while((p = strchr(curcmd, '\n')))
     {
         *p = '\0';
-        run_uicb(curcmd);
+        uicb_run(curcmd);
         curcmd = p + 1;
     }
 
