@@ -390,7 +390,7 @@ client_manage(Window w, XWindowAttributes *wa, int screen)
 
     if(!retloadprops && !(flags & (USPosition | PPosition)))
     {
-        if(c->isfloating)
+        if(c->isfloating && !c->ismax)
             client_resize(c, globalconf.screens[c->screen].floating_placement(c), False);
         else
             c->f_geometry = globalconf.screens[c->screen].floating_placement(c);
