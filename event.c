@@ -125,6 +125,19 @@ event_handle_buttonpress(XEvent *e)
                 return;
             }
 
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
+        {
+            if(!client_focus(c, c->screen, True))
+                client_stack(c);
+            if(CLEANMASK(ev->state) == NoSymbol
+               && ev->button == Button1)
+                window_grabbuttons(c->win, c->phys_screen);
+            event_handle_mouse_button_press(c->screen, ev->button, ev->state,
+                                            globalconf.buttons.titlebar, NULL);
+            return;
+        }
+
     if((c = client_get_bywin(globalconf.clients, ev->window)))
     {
         if(!client_focus(c, c->screen, True))
@@ -140,9 +153,6 @@ event_handle_buttonpress(XEvent *e)
     }
     else
     {
-        for(c = globalconf.clients; c; c = c->next)
-            if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
-                event_handle_mouse_button_press(c->screen, ev->button, ev->state, globalconf.buttons.titlebar, NULL);
         for(screen = 0; screen < ScreenCount(e->xany.display); screen++)
             if(RootWindow(e->xany.display, screen) == ev->window
                && XQueryPointer(e->xany.display,
