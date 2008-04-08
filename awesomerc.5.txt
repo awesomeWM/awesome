@@ -193,11 +193,17 @@ $ chmod a+x ~/bin/awesome-diskusage
    ~/.xsession-errors or the terminal where X got started.
 ..............................................
 
+AWESOMERC SKELETON
+------------------
+Following skeleton lists all available configuration options in *awesomerc*.
+
+..........................
+include::rcskeletongen.txt[]
+..........................
 
 SEE ALSO
 --------
 awesome(1) awesome-client(1) awesome-menu(1) awesome-message(1)
-
 
 AUTHORS
 -------

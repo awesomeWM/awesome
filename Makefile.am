@@ -222,6 +222,7 @@ SUFFIXES += .1.xml .1
 SUFFIXES += .5.xml .5
 EXTRA_DIST += build-utils/extractuicbdoc.py
 EXTRA_DIST += build-utils/extractoptsdoc.py
+EXTRA_DIST += build-utils/extractrcskeleton.py
 if HAVE_XMLTO
 .1.xml.1:
 	$(XMLTO) man $<
@@ -234,16 +235,20 @@ SUFFIXES += .5.txt .5.xml
 if HAVE_ASCIIDOC
 if HAVE_PYTHON
 CLEANFILES += optsdocgen.txt
+CLEANFILES += rcskeletongen.txt
 CLEANFILES += uicbdocgen.txt
 optsdocgen.txt: common/configopts.c
 	$(PYTHON) $(top_srcdir)/build-utils/extractoptsdoc.py \
 	    $(top_srcdir)/common/configopts.c > optsdocgen.txt
+rcskeletongen.txt: common/configopts.c
+	$(PYTHON) $(top_srcdir)/build-utils/extractrcskeleton.py \
+	    $(top_srcdir)/common/configopts.c > rcskeletongen.txt
 uicbdocgen.txt: $(awesome_SOURCES)
 	$(PYTHON) $(top_srcdir)/build-utils/extractuicbdoc.py \
 	    $(top_srcdir)/*.c > uicbdocgen.txt
 .1.txt.1.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
-awesomerc.5.xml: optsdocgen.txt uicbdocgen.txt
+awesomerc.5.xml: optsdocgen.txt rcskeletongen.txt uicbdocgen.txt
 .5.txt.5.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
 endif
