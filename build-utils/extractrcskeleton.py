@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # extractuicbdoc.py - extract uicb documentation from awesome source code
+# Copyright (C) 2008 Julien Danjou <julien@danjou.info>
 # Copyright (C) 2008 Marco Candrian <mac@calmar.ws>
 #
 # This indeed crappy. Any better version, even with awk, would be welcome.
@@ -8,32 +9,25 @@
 
 print """Note: when there is no whitespace, quotes are optional.
 
-<boolean>       -> "true" or "false"
-<color>         -> #ff9933 (hexadecimal color notation: #red green blue)
-<float>         -> 0.3, 0,8 (often values between 0 and 1 are useful)
-<font>          -> Pango font: sans 10, sans italic 10, fixed 12, ...
-<identifier>    -> foobar (choose a name/string)
-<image>         -> "/home/awesome/pics/icon.png" (path to image)
-<integer>       -> 1, 10, -3 (positive numbers are required mostly)
-<key>           -> a, 1, F10 (see /usr/include/X11/keysymdef.h w/o XK_ or 'xev')
-                   or a keycode beginning with #
-<mod>           -> "Mod1", "Mod4", "Control" (modifiers)
-<regex>         -> regular expression
-<string>        -> "foo bar"
-<uicb-arg>      -> prog, 3... (argument to a uicb function, where required)
-<uicb-cmd>      -> spawn, exec, client_tag... (see UICB FUNCTIONS above)
-<position>      -> list of position: off, top, right, left, bottom, auto
-<style section> -> a section with font, fg, bg, border, shadow and shadow_offset options.
-                   { font = <font> fg = <color> bg = <color> border = <color>
-                     shadow = <color> shadow_offset = <integer> }
-<titlebar sec>  -> a section with position and icon position.
-                   { position = <position> icon = <position> text_align = <{center,right,left}>
-                     height = <integer> width = <integer> styles { } }
-<{.., ...}>     -> list of available options
-
-[MULTI] means, you can use an item multiple times.
+<boolean>       -> true or false
+<color>         -> Color in X format or hexadecimal (e.g. #aabbcc)
+<float>         -> Floating numbers (e.g 0.2)
+<font>          -> Pango font: [FAMILY-LIST] [STYLE-OPTIONS] [SIZE] (e.g Sans Italic 12)
+<identifier>    -> A name used to identify (e.g foobar)
+<image>         -> A path to an image (e.g. /home/user/image.jpg)
+<integer>       -> A signed integer
+<key>           -> A KeySym (e.g. F10) or a KeyCodea (e.g #120)
+<mod>           -> A key modifier list (e.g. Mod1)
+<regex>         -> Regular expression
+<string>        -> A string
+<uicb-arg>      -> Argument to an uicb function
+<uicb-cmd>      -> Uicb function, see UICB FUNCTIONS
+<position>      -> A position: off, top, right, left, bottom, auto
+<style section> -> A style section
+<titlebar sec>  -> A titlebar section
+<{.., ...}>     -> List of available options
+[MULTI]         -> This item can be defines multiple times
 """
-#<layout>        -> dwindle, floating, max, spiral, tile, tileleft, tilebottom, tiletop
 
 import sys
 
