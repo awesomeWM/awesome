@@ -99,7 +99,8 @@ focus_get_current_client(int screen)
     return sel;
 }
 
-/** Jump in focus history stack
+/** Jump back in focus history stack.
+ * Set arg to 0 for previous, -1 for previous of previous, etc.
  * \param screen Screen ID
  * \param arg Integer argument
  * \ingroup ui_callback
@@ -126,6 +127,11 @@ uicb_focus_history(int screen, char *arg)
     }
 }
 
+/** Focus visible client by its name.
+ * \param screen screen id
+ * \param arg client's name
+ * \ingroup ui_callback
+ */
 void
 uicb_focus_client_byname(int screen, char *arg)
 {
