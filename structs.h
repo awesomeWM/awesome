@@ -28,6 +28,17 @@
 #include "common/swindow.h"
 #include "common/xscreen.h"
 
+/** stacking layout */
+typedef enum
+{
+    LAYER_DESKTOP,
+    LAYER_BELOW,
+    LAYER_TILE,
+    LAYER_FLOAT,
+    LAYER_ABOVE,
+    LAYER_FULLSCREEN
+} Layer;
+
 /** Rules for floating rule */
 typedef enum
 {
@@ -219,6 +230,9 @@ struct Client
     Bool newcomer;
     /** Titlebar */
     Titlebar titlebar;
+    /** layer in the stacking order */
+    Layer layer;
+    Layer oldlayer;
 };
 
 typedef struct client_node_t client_node_t;

@@ -39,7 +39,7 @@ long client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *);
 void client_kill(Client *);
-void client_setfloating(Client *, Bool);
+void client_setfloating(Client *, Bool, Layer);
 
 Uicb uicb_client_kill;
 Uicb uicb_client_moveresize;

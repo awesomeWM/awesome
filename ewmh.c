@@ -53,6 +53,8 @@ static Atom net_wm_state;
 static Atom net_wm_state_sticky;
 static Atom net_wm_state_skip_taskbar;
 static Atom net_wm_state_fullscreen;
+static Atom net_wm_state_above;
+static Atom net_wm_state_below;
 
 static Atom utf8_string;
 
@@ -85,6 +87,8 @@ static AtomItem AtomNames[] =
     { "_NET_WM_STATE_STICKY", &net_wm_state_sticky },
     { "_NET_WM_STATE_SKIP_TASKBAR", &net_wm_state_skip_taskbar },
     { "_NET_WM_STATE_FULLSCREEN", &net_wm_state_fullscreen },
+    { "_NET_WM_STATE_ABOVE", &net_wm_state_above },
+    { "_NET_WM_STATE_BELOW", &net_wm_state_below },
 
     { "UTF8_STRING", &utf8_string },
 };
@@ -136,6 +140,8 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_sticky;
     atom[i++] = net_wm_state_skip_taskbar;
     atom[i++] = net_wm_state_fullscreen;
+    atom[i++] = net_wm_state_above;
+    atom[i++] = net_wm_state_below;
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
                     net_supported, XA_ATOM, 32,
@@ -258,7 +264,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             titlebar_position_set(&c->titlebar, c->titlebar.dposition);
             c->border = c->oldborder;
             c->ismax = False;
-            client_setfloating(c, c->wasfloating);
+            client_setfloating(c, c->wasfloating, c->oldlayer);
         }
         else if(set == _NET_WM_STATE_ADD)
         {
@@ -271,12 +277,37 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             c->oldborder = c->border;
             c->border = 0;
             c->ismax = True;
-            client_setfloating(c, True);
+            client_setfloating(c, True, LAYER_FULLSCREEN);
         }
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, False);
         XRaiseWindow(globalconf.display, c->win);
     }
+    else if(state == net_wm_state_above)
+    {
+        if(set == _NET_WM_STATE_REMOVE)
+        {
+            c->layer = c->oldlayer;
+        }
+        else if(set == _NET_WM_STATE_ADD)
+        {
+            c->oldlayer = c->layer;
+            c->layer = LAYER_ABOVE;
+        }
+    }
+    else if(state == net_wm_state_below)
+    {
+        if(set == _NET_WM_STATE_REMOVE)
+        {
+            c->layer = c->oldlayer;
+        }
+        else if(set == _NET_WM_STATE_ADD)
+        {
+            c->oldlayer = c->layer;
+            c->layer = LAYER_BELOW;
+        }
+    }
+
 }
 
 static void
@@ -293,11 +324,14 @@ ewmh_process_window_type_atom(Client *c, Atom state)
         c->skip = True;
         c->isfixed = True;
         titlebar_position_set(&c->titlebar, Off);
-        client_setfloating(c, True);
+        client_setfloating(c, True, LAYER_ABOVE);
     }
     else if (state == net_wm_window_type_dialog)
-        client_setfloating(c, True);
+    {
+        client_setfloating(c, True, LAYER_ABOVE);
+    }
 }
+
 void
 ewmh_process_client_message(XClientMessageEvent *ev)
 {
