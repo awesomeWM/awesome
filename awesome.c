@@ -407,8 +407,8 @@ main(int argc, char **argv)
     {
         /* view at least one tag */
         tag_view(globalconf.screens[screen_nbr].tags, true);
-
-        for(statusbar = globalconf.screens[screen_nbr].statusbar; statusbar; statusbar = statusbar->next)
+        for(statusbar = globalconf.screens[screen_nbr].statusbar;
+            statusbar; statusbar = statusbar->next)
             statusbar_init(statusbar);
     }
 
@@ -458,13 +458,16 @@ main(int argc, char **argv)
     /* check for shape extension */
     shape_query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
     if((globalconf.have_shape = shape_query->present))
-        xcb_set_event_handler(globalconf.evenths, (shape_query->first_event + XCB_SHAPE_NOTIFY),
-                              (xcb_generic_event_handler_t) event_handle_shape, NULL);
+        xcb_set_event_handler(globalconf.evenths,
+                              (shape_query->first_event + XCB_SHAPE_NOTIFY),
+                              (xcb_generic_event_handler_t) event_handle_shape,
+                              NULL);
 
     /* check for randr extension */
     randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
     if((globalconf.have_randr = randr_query->present))
-        xcb_set_event_handler(globalconf.evenths, (randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY),
+        xcb_set_event_handler(globalconf.evenths,
+                              (randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY),
                               (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,
                               NULL);
 

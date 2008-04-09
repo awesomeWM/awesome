@@ -117,8 +117,7 @@ ewmh_init_atoms(void)
 
     for(i = 0; i < ATOM_NUMBER; i++)
     {
-	r = xcb_intern_atom_reply(globalconf.connection, cs[i], NULL);
-	if(!r)
+	if(!(r = xcb_intern_atom_reply(globalconf.connection, cs[i], NULL)))
 	    /* An error occured, get reply for next atom */
 	    continue;
 
@@ -435,7 +434,7 @@ ewmh_get_window_icon(xcb_window_t w)
                                xcb_get_property_unchecked(globalconf.connection, false, w,
                                                           net_wm_icon, CARDINAL, 0, UINT32_MAX),
                                NULL);
-    if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 || 
+    if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 ||
        !(data = (uint32_t *) xcb_get_property_value(r)))
     {
         if(r)
