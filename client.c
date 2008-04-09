@@ -705,7 +705,7 @@ client_updatewmhints(Client *c)
             c->border = 0;
             c->skip = true;
         }
-        free(wmh);
+        xcb_free_wm_hints(wmh);
     }
 }
 
@@ -713,10 +713,9 @@ xcb_size_hints_t *
 client_updatesizehints(Client *c)
 {
     long msize;
-    xcb_size_hints_t *size = xcb_alloc_size_hints();
+    xcb_size_hints_t *size = NULL;
 
-    if(!xcb_get_wm_normal_hints(globalconf.connection, c->win, size, &msize) ||
-        size == NULL)
+    if(!(size = xcb_get_wm_normal_hints(globalconf.connection, c->win, &msize)))
         return NULL;
 
     if(xcb_size_hints_is_p_size(size))
