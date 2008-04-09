@@ -72,7 +72,7 @@ client_loadprops(Client * c, int screen)
                 untag_client(c, tag);
 
         if(prop[i])
-            client_setfloating(c, prop[i] == '1', prop[i + 1] ? atoi(&prop[i + 1]) : prop[i] == '1' ? LAYER_FLOAT : LAYER_TILE);
+            client_setfloating(c, prop[i] == '1', (prop[i + 1] >= 0 && prop[i + 1] <= LAYER_FULLSCREEN) ? atoi(&prop[i + 1]) : prop[i] == '1' ? LAYER_FLOAT : LAYER_TILE);
     }
 
     p_delete(&prop);
