@@ -22,8 +22,6 @@
 #ifndef AWESOME_CLIENT_H
 #define AWESOME_CLIENT_H
 
-#include <stdbool.h>
-
 #include <xcb/xcb_icccm.h>
 
 #include "structs.h"

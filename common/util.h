@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /** A list of possible position, not sex related */
 typedef enum
@@ -36,6 +37,14 @@ typedef enum
     Left,
     Auto
 } Position;
+
+/** Fuzzy logic */
+typedef enum
+{
+    No = false,
+    Yes = true,
+    Maybe
+} Fuzzy;
 
 /** Link a name to a function */
 typedef struct
@@ -252,6 +261,7 @@ void _warn(int, const char *, const char *, ...)
     __attribute__ ((format(printf, 3, 4)));
 
 Position position_get_from_str(const char *);
+Fuzzy fuzzy_get_from_str(const char *);
 double compute_new_value_from_arg(const char *, double);
 void *name_func_lookup(const char *, const name_func_link_t *);
 

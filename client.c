@@ -20,7 +20,6 @@
  */
 
 #include <stdio.h>
-#include <stdbool.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>

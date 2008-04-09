@@ -111,15 +111,4 @@ rule_matching_client(Client *c)
     return NULL;
 }
 
-Fuzzy
-rules_get_fuzzy_from_str(const char *str)
-{
-    if(!a_strcmp(str, "true") || !a_strcmp(str, "yes"))
-        return Yes;
-    else if(!a_strcmp(str, "false") || !a_strcmp(str, "no"))
-        return No;
-
-    return Maybe;
-}
-
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

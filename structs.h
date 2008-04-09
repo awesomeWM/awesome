@@ -41,14 +41,6 @@ typedef enum
     LAYER_FULLSCREEN
 } Layer;
 
-/** Rules for floating rule */
-typedef enum
-{
-    No = false,
-    Yes = true,
-    Maybe
-} Fuzzy;
-
 /** Cursors */
 enum
 { CurNormal, CurResize, CurMove, CurLast };

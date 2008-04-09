@@ -540,9 +540,9 @@ config_parse(const char *confpatharg)
         rule->xprop = a_strdup(cfg_getstr(cfgsectmp, "xproperty_name"));
         rule->xpropval_r = rules_compile_regex(cfg_getstr(cfgsectmp, "xproperty_value"));
         rule->icon = a_strdup(cfg_getstr(cfgsectmp, "icon"));
-        rule->isfloating = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "float"));
+        rule->isfloating = fuzzy_get_from_str(cfg_getstr(cfgsectmp, "float"));
         rule->screen = cfg_getint(cfgsectmp, "screen");
-        rule->ismaster = rules_get_fuzzy_from_str(cfg_getstr(cfgsectmp, "master"));
+        rule->ismaster = fuzzy_get_from_str(cfg_getstr(cfgsectmp, "master"));
         rule->opacity = cfg_getfloat(cfgsectmp, "opacity");
         config_section_titlebar_init(cfg_getsec(cfgsectmp, "titlebar"), &rule->titlebar, 0);
         if(rule->screen >= globalconf.screens_info->nscreen)

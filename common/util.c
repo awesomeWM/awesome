@@ -133,6 +133,16 @@ char* a_strndup(const char* src, ssize_t l)
     return _tmpStr;
 }
 
+Fuzzy
+fuzzy_get_from_str(const char *str)
+{
+    if(!a_strcmp(str, "true") || !a_strcmp(str, "yes"))
+        return Yes;
+    else if(!a_strcmp(str, "false") || !a_strcmp(str, "no"))
+        return No;
+    return Maybe;
+}
+
 /** \brief safe limited strcpy.
  *
  * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into \c dst,

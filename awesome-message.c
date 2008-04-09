@@ -26,7 +26,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <stdbool.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
