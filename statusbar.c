@@ -113,6 +113,9 @@ statusbar_draw(Statusbar *statusbar)
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
 
+    if(!statusbar->position)
+        return;
+
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
     draw_rectangle(statusbar->ctx, rectangle, 1.0, true,
@@ -158,15 +161,7 @@ statusbar_draw(Statusbar *statusbar)
           break;
     }
 
-    statusbar_display(statusbar);
-}
-
-void
-statusbar_display(Statusbar *statusbar)
-{
-    /* don't waste our time */
-    if(statusbar->position != Off)
-        simplewindow_refresh_drawable(statusbar->sw);
+    simplewindow_refresh_drawable(statusbar->sw);
 }
 
 void

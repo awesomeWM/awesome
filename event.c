@@ -365,9 +365,10 @@ event_handle_expose(void *data __attribute__ ((unused)),
     {
         for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
             for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-                if(statusbar->sw->window == ev->window)
+                if(statusbar->sw->window == ev->window
+                   && statusbar->position)
                 {
-                    statusbar_display(statusbar);
+                    simplewindow_refresh_drawable(statusbar->sw);
                     return 0;
                 }
 
