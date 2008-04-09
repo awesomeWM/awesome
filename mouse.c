@@ -299,12 +299,16 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                     }
                     p_delete(&mquery_pointer_r);
                 }
+                p_delete(&ev);
+                while((ev = xcb_poll_for_event(globalconf.connection))
+                      && (ev->response_type & 0x7f) == XCB_MOTION_NOTIFY)
+                    p_delete(&ev);
                 break;
             default:
                 xcb_handle_event(globalconf.evenths, ev);
+                p_delete(&ev);
                 break;
             }
-            p_delete(&ev);
         }
     }
 }
@@ -392,11 +396,11 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     {
         /* XMaskEvent allows to retrieve only specified events from
          * the queue and requeue the other events... */
-        while((ev = xcb_wait_for_event(globalconf.connection)))
+        while(ev || (ev = xcb_wait_for_event(globalconf.connection)))
         {
             switch((ev->response_type & 0x7f))
             {
-            case XCB_BUTTON_RELEASE:
+              case XCB_BUTTON_RELEASE:
                 if(sw)
                 {
                     draw_context_delete(&ctx);
@@ -406,7 +410,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                 p_delete(&ev);
                 p_delete(&curtags);
                 return;
-            case XCB_MOTION_NOTIFY:
+              case XCB_MOTION_NOTIFY:
                 ev_motion = (xcb_motion_notify_event_t *) ev;
 
                 if(layout->arrange == layout_floating || c->isfloating)
@@ -442,13 +446,16 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                         layout_refresh();
                     }
                 }
-
+                p_delete(&ev);
+                while((ev = xcb_poll_for_event(globalconf.connection))
+                      && (ev->response_type & 0x7f) == XCB_MOTION_NOTIFY)
+                    p_delete(&ev);
                 break;
-            default:
+              default:
                 xcb_handle_event(globalconf.evenths, ev);
+                p_delete(&ev);
                 break;
             }
-            p_delete(&ev);
         }
     }
 }
