@@ -41,54 +41,6 @@ rules_compile_regex(char *val)
     return NULL;
 }
 
-static bool
-client_match_rule(Client *c, Rule *r)
-{
-    char *prop, buf[512];
-    regmatch_t tmp;
-    ssize_t len;
-    class_hint_t *ch = NULL;
-    bool ret = false;
-
-    if(r->prop_r)
-    {
-        /* first try to match on name */
-	ch = xutil_get_class_hint(globalconf.connection, c->win);
-	if (!ch)
-	    return false;
-
-        len = a_strlen(ch->res_class) + a_strlen(ch->res_name) + a_strlen(c->name);
-        prop = p_new(char, len + 3);
-
-        /* rule matching */
-        snprintf(prop, len + 3, "%s:%s:%s",
-                 ch->res_class ? ch->res_class : "", ch->res_name ? ch->res_name : "", c->name);
-
-        ret = !regexec(r->prop_r, prop, 1, &tmp, 0);
-
-        p_delete(&prop);
-
-        if(ch->res_class)
-           p_delete(&ch->res_class);
-        if(ch->res_name)
-           p_delete(&ch->res_name);
-
-        p_delete(&ch);
-
-        if(ret)
-            return true;
-    }
-
-    if(r->xprop
-       && r->xpropval_r
-       && xutil_gettextprop(globalconf.connection, c->win,
-                            xutil_intern_atom(globalconf.connection, r->xprop),
-                            buf, ssizeof(buf)))
-        ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
-
-    return ret;
-}
-
 bool
 tag_match_rule(Tag *t, Rule *r)
 {
@@ -104,9 +56,48 @@ Rule *
 rule_matching_client(Client *c)
 {
     Rule *r;
+    char *prop = NULL, buf[512];
+    regmatch_t tmp;
+    ssize_t len;
+    class_hint_t *ch = NULL;
+    bool ret = false;
+
+    if(!(ch = xutil_get_class_hint(globalconf.connection, c->win)))
+        return NULL;
+
+    len = a_strlen(ch->res_class) + a_strlen(ch->res_name) + a_strlen(c->name);
+    prop = p_new(char, len + 3);
+
+    snprintf(prop, len + 3, "%s:%s:%s",
+             ch->res_class ? ch->res_class : "", ch->res_name ? ch->res_name : "", c->name);
+
+    if(ch->res_class)
+        p_delete(&ch->res_class);
+    if(ch->res_name)
+        p_delete(&ch->res_name);
+    p_delete(&ch);
+
     for(r = globalconf.rules; r; r = r->next)
-        if(client_match_rule(c, r))
+    {
+        if(r->prop_r && prop)
+            ret = !regexec(r->prop_r, prop, 1, &tmp, 0);
+
+        if(!ret
+           && r->xprop
+           && r->xpropval_r
+           && xutil_gettextprop(globalconf.connection, c->win,
+                                xutil_intern_atom(globalconf.connection, r->xprop),
+                                buf, ssizeof(buf)))
+            ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
+
+        if(ret)
+        {
+            p_delete(&prop);
             return r;
+        }
+    }
+
+    p_delete(&prop);
 
     return NULL;
 }
