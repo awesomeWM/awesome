@@ -245,11 +245,11 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     {
         /* XMaskEvent allows to retrieve only specified events from
          * the queue and requeue the other events... */
-        while((ev = xcb_wait_for_event(globalconf.connection)))
+        while(ev || (ev = xcb_wait_for_event(globalconf.connection)))
         {
             switch((ev->response_type & 0x7f))
             {
-            case XCB_BUTTON_RELEASE:
+              case XCB_BUTTON_RELEASE:
                 xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
                 if(sw)
                 {
@@ -259,7 +259,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 p_delete(&query_pointer_r);
                 p_delete(&ev);
                 return;
-            case XCB_MOTION_NOTIFY:
+              case XCB_MOTION_NOTIFY:
                 if(c->isfloating || layout->arrange == layout_floating)
                 {
                     ev_motion = (xcb_motion_notify_event_t *) ev;
@@ -304,7 +304,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                       && (ev->response_type & 0x7f) == XCB_MOTION_NOTIFY)
                     p_delete(&ev);
                 break;
-            default:
+              default:
                 xcb_handle_event(globalconf.evenths, ev);
                 p_delete(&ev);
                 break;
