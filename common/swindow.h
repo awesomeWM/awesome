@@ -25,7 +25,7 @@
 #include "common/draw.h"
 
 /** A simple window */
-typedef struct SimpleWindow
+typedef struct simple_window_t
 {
     xcb_connection_t *connection;
     int phys_screen;
@@ -33,16 +33,16 @@ typedef struct SimpleWindow
     xcb_drawable_t drawable;
     xcb_gcontext_t gc;
     area_t geometry;
-} SimpleWindow;
+} simple_window_t;
 
-SimpleWindow * simplewindow_new(xcb_connection_t *, int, int, int, unsigned int, unsigned int, unsigned int);
-void simplewindow_delete(SimpleWindow **);
-void simplewindow_move(SimpleWindow *, int, int);
-void simplewindow_resize(SimpleWindow *, unsigned int, unsigned int);
-void simplewindow_refresh_drawable(SimpleWindow *);
+simple_window_t * simplewindow_new(xcb_connection_t *, int, int, int, unsigned int, unsigned int, unsigned int);
+void simplewindow_delete(simple_window_t **);
+void simplewindow_move(simple_window_t *, int, int);
+void simplewindow_resize(simple_window_t *, unsigned int, unsigned int);
+void simplewindow_refresh_drawable(simple_window_t *);
 
 static inline void
-simplewindow_move_resize(SimpleWindow *sw, int x, int y,
+simplewindow_move_resize(simple_window_t *sw, int x, int y,
                          unsigned int w, unsigned int h)
 {
   simplewindow_move(sw, x, y);

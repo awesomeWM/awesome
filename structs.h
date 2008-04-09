@@ -55,7 +55,7 @@ enum
 
 typedef struct
 {
-    SimpleWindow *sw;
+    simple_window_t *sw;
     Position position;
     Position dposition;
     Alignment align;
@@ -166,7 +166,7 @@ struct Widget
 struct Statusbar
 {
     /** Window */
-    SimpleWindow *sw;
+    simple_window_t *sw;
     /** Statusbar name */
     char *name;
     /** Bar width */

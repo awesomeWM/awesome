@@ -32,14 +32,14 @@
  * \param w width
  * \param h height
  * \param border_width window's border width
- * \return pointer to a SimpleWindow
+ * \return pointer to a simple_window_t
  */
-SimpleWindow *
+simple_window_t *
 simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
                  unsigned int w, unsigned int h,
                  unsigned int border_width)
 {
-    SimpleWindow *sw;
+    simple_window_t *sw;
     xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
     uint32_t create_win_val[3];
     const uint32_t gc_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
@@ -48,7 +48,7 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
      * window */
     xcb_drawable_t gc_draw = s->root;
 
-    sw = p_new(SimpleWindow, 1);
+    sw = p_new(simple_window_t, 1);
 
     sw->geometry.x = x;
     sw->geometry.y = y;
@@ -80,10 +80,10 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
 }
 
 /** Destroy a simple window and all its resources
- * \param sw the SimpleWindow to delete
+ * \param sw the simple_window_t to delete
  */
 void
-simplewindow_delete(SimpleWindow **sw)
+simplewindow_delete(simple_window_t **sw)
 {
     xcb_destroy_window((*sw)->connection, (*sw)->window);
     xcb_free_pixmap((*sw)->connection, (*sw)->drawable);
@@ -91,12 +91,12 @@ simplewindow_delete(SimpleWindow **sw)
 }
 
 /** Move a simple window
- * \param sw the SimpleWindow to move
+ * \param sw the simple_window_t to move
  * \param x x coordinate
  * \param y y coordinate
  */
 void
-simplewindow_move(SimpleWindow *sw, int x, int y)
+simplewindow_move(simple_window_t *sw, int x, int y)
 {
     const uint32_t move_win_vals[] = { x, y };
 
@@ -108,12 +108,12 @@ simplewindow_move(SimpleWindow *sw, int x, int y)
 }
 
 /** Resize a simple window
- * \param sw the SimpleWindow to resize
+ * \param sw the simple_window_t to resize
  * \param w new width
  * \param h new height
  */
 void
-simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
+simplewindow_resize(simple_window_t *sw, unsigned int w, unsigned int h)
 {
     xcb_screen_t *s = xcb_aux_get_screen(sw->connection, sw->phys_screen);
     const uint32_t resize_win_vals[] = { w, h };
@@ -129,11 +129,11 @@ simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
 }
 
 /** Refresh the window content
- * \param sw the SimpleWindow to refresh
+ * \param sw the simple_window_t to refresh
  * \param phys_screen physical screen id
  */
 void
-simplewindow_refresh_drawable(SimpleWindow *sw)
+simplewindow_refresh_drawable(simple_window_t *sw)
 {
     xcb_copy_area(sw->connection, sw->drawable,
                   sw->window, sw->gc, 0, 0, 0, 0,

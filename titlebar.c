@@ -30,7 +30,7 @@
 
 extern AwesomeConf globalconf;
 
-/** Initialize a titlebar: create the SimpleWindow.
+/** Initialize a titlebar: create the simple_window_t.
  * We still need to update its geometry to have it placed correctly.
  * \param c the client
  */

@@ -121,7 +121,7 @@ exit_on_signal(int sig __attribute__ ((unused)))
 int
 main(int argc, char **argv)
 {
-    SimpleWindow *sw;
+    simple_window_t *sw;
     DrawCtx *ctx;
     xcb_generic_event_t *ev;
     area_t geometry = { 0, 0, 200, 50, NULL, NULL },

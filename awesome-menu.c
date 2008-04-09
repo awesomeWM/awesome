@@ -101,7 +101,7 @@ typedef struct
     /** Default screen number */
     int default_screen;
     /** The window */
-    SimpleWindow *sw;
+    simple_window_t *sw;
     /** The draw contet */
     DrawCtx *ctx;
     /** Colors */
