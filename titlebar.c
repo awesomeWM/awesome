@@ -219,7 +219,7 @@ titlebar_draw(Client *c)
         break;
     }
 
-    simplewindow_refresh_drawable(c->titlebar.sw, c->titlebar.sw->phys_screen);
+    simplewindow_refresh_drawable(c->titlebar.sw);
 
     draw_context_delete(&ctx);
 }

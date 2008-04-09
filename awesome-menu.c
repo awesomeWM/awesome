@@ -500,7 +500,7 @@ redraw(void)
     else if(geometry.width)
         draw_rectangle(globalconf.ctx, geometry, 1.0, true, globalconf.styles.normal.bg);
 
-    simplewindow_refresh_drawable(globalconf.sw, globalconf.default_screen);
+    simplewindow_refresh_drawable(globalconf.sw);
     xcb_aux_sync(globalconf.connection);
 }
 
@@ -1374,7 +1374,7 @@ main(int argc, char **argv)
             break;
           case XCB_EXPOSE:
             if(!((xcb_expose_event_t *) ev)->count)
-                simplewindow_refresh_drawable(globalconf.sw, globalconf.default_screen);
+                simplewindow_refresh_drawable(globalconf.sw);
             break;
           default:
             break;

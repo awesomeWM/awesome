@@ -42,6 +42,11 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
     SimpleWindow *sw;
     xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
     uint32_t create_win_val[3];
+    const uint32_t gc_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
+    const uint32_t gc_values[2] = { s->black_pixel, s->white_pixel };
+    /* The default GC is just a newly created associated to the root
+     * window */
+    xcb_drawable_t gc_draw = s->root;
 
     sw = p_new(SimpleWindow, 1);
 
@@ -67,6 +72,9 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
 
     sw->drawable = xcb_generate_id(conn);
     xcb_create_pixmap(conn, s->root_depth, sw->drawable, s->root, w, h);
+
+    sw->gc = xcb_generate_id(sw->connection);
+    xcb_create_gc(sw->connection, sw->gc, gc_draw, gc_mask, gc_values);
 
     return sw;
 }
@@ -125,21 +133,10 @@ simplewindow_resize(SimpleWindow *sw, unsigned int w, unsigned int h)
  * \param phys_screen physical screen id
  */
 void
-simplewindow_refresh_drawable(SimpleWindow *sw, int phys_screen)
+simplewindow_refresh_drawable(SimpleWindow *sw)
 {
-    xcb_screen_t *s = xcb_aux_get_screen(sw->connection, phys_screen);
-
-    /* The default GC is just a newly created associated to the root
-     * window */
-    xcb_drawable_t gc_draw = s->root;
-    xcb_gcontext_t gc = xcb_generate_id(sw->connection);
-
-    const uint32_t gc_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
-    const uint32_t gc_values[2] = { s->black_pixel, s->white_pixel };
-
-    xcb_create_gc(sw->connection, gc, gc_draw, gc_mask, gc_values);
     xcb_copy_area(sw->connection, sw->drawable,
-                  sw->window, gc, 0, 0, 0, 0,
+                  sw->window, sw->gc, 0, 0, 0, 0,
                   sw->geometry.width,
                   sw->geometry.height);
 }

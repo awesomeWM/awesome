@@ -149,7 +149,7 @@ mouse_resizebar_draw(DrawCtx *ctx, style_t style, SimpleWindow *sw, area_t geome
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
-    simplewindow_refresh_drawable(sw, sw->phys_screen);
+    simplewindow_refresh_drawable(sw);
 }
 
 /** Initialize the resizebar window.

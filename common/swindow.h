@@ -31,6 +31,7 @@ typedef struct SimpleWindow
     int phys_screen;
     xcb_window_t window;
     xcb_drawable_t drawable;
+    xcb_gcontext_t gc;
     area_t geometry;
 } SimpleWindow;
 
@@ -38,7 +39,7 @@ SimpleWindow * simplewindow_new(xcb_connection_t *, int, int, int, unsigned int,
 void simplewindow_delete(SimpleWindow **);
 void simplewindow_move(SimpleWindow *, int, int);
 void simplewindow_resize(SimpleWindow *, unsigned int, unsigned int);
-void simplewindow_refresh_drawable(SimpleWindow *, int);
+void simplewindow_refresh_drawable(SimpleWindow *);
 
 static inline void
 simplewindow_move_resize(SimpleWindow *sw, int x, int y,

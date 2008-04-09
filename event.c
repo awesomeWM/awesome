@@ -374,7 +374,7 @@ event_handle_expose(void *data __attribute__ ((unused)),
         for(c = globalconf.clients; c; c = c->next)
             if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
             {
-                simplewindow_refresh_drawable(c->titlebar.sw, c->phys_screen);
+                simplewindow_refresh_drawable(c->titlebar.sw);
                 return 0;
             }
     }
