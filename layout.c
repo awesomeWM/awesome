@@ -47,7 +47,12 @@ arrange(int screen)
     Client *c;
     Layout *curlay = layout_get_current(screen);
     int phys_screen = screen_virttophys(screen);
-    xcb_query_pointer_reply_t *xqp;
+    xcb_query_pointer_cookie_t qp_c;
+    xcb_query_pointer_reply_t *qp_r;
+
+    qp_c = xcb_query_pointer_unchecked(globalconf.connection,
+                                       xcb_aux_get_screen(globalconf.connection,
+                                                          phys_screen)->root);
 
     for(c = globalconf.clients; c; c = c->next)
     {
@@ -79,18 +84,14 @@ arrange(int screen)
         client_focus(c, screen, true);
 
     /* check that the mouse is on a window or not */
-    if((xqp = xcb_query_pointer_reply(globalconf.connection,
-                                      xcb_query_pointer_unchecked(globalconf.connection,
-                                                                  xcb_aux_get_screen(globalconf.connection,
-                                                                                     phys_screen)->root),
-                                      NULL)) != NULL)
+    if((qp_r = xcb_query_pointer_reply(globalconf.connection, qp_c, NULL)))
     {
-        if(xqp->root == XCB_NONE || xqp->child == XCB_NONE || xqp->root == xqp->child)
+        if(qp_r->root == XCB_NONE || qp_r->child == XCB_NONE || qp_r->root == qp_r->child)
             window_root_grabbuttons(phys_screen);
 
-        globalconf.pointer_x = xqp->root_x;
-        globalconf.pointer_y = xqp->root_y;
-        p_delete(&xqp);
+        globalconf.pointer_x = qp_r->root_x;
+        globalconf.pointer_y = qp_r->root_y;
+        p_delete(&qp_r);
     }
 
     /* reset status */
