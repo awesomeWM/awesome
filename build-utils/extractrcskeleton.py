@@ -20,13 +20,12 @@ print """Note: when there is no whitespace, quotes are optional.
 <mod>           -> A key modifier list (e.g. Mod1)
 <regex>         -> Regular expression
 <string>        -> A string
+<string-list>   -> A string list (e.g. {a, b, c, ...})
 <uicb-arg>      -> Argument to an uicb function
 <uicb-cmd>      -> Uicb function, see UICB FUNCTIONS
-<position>      -> A position: off, top, right, left, bottom, auto
-<style section> -> A style section
-<titlebar sec>  -> A titlebar section
+<style section> -> A style section: {fg= bg= border= font= shadow= shadow_offset= }
 <{.., ...}>     -> List of available options
-[MULTI]         -> This item can be defines multiple times
+[MULTI]         -> This item can be defined multiple times
 """
 
 import sys
@@ -46,8 +45,6 @@ def sections_print(sec):
             indent += "    "
             if sections[sec][opt][9:] == "style_opts":
                 print indent + "<style section>"
-            elif sections[sec][opt][9:] == "titlebar_opts":
-                print indent + "<titlebar section>"
             else:
                 sections_print(sections[sec][opt][9:])
             indent = indent[0:-4]
@@ -69,6 +66,10 @@ def sections_print(sec):
                 print indent + opt + " = <key, ...>"
             elif opt in ["modkey"]:
                 print indent + opt + " = <mod>"
+            elif opt in ["align"]:
+                print indent + opt + " = <{auto, left, right}>"
+            elif opt in ["text_align"]:
+                print indent + opt + " = <{left, center, right}>"
             elif opt in ["arg"]:
                 print indent + opt + " = <uicb-arg>"
             elif opt in ["command"]:
@@ -79,8 +80,6 @@ def sections_print(sec):
                 print indent + opt + " = <{all,tags,focus}>"
             elif opt in ["floating_placement"]:
                 print indent + opt + " = <{smart,under_mouse}>"
-            elif opt in ["layout"]:
-                print indent + opt + " = <layout>"
             else:
                 print indent + opt + " = " + sections[sec][opt]
 
@@ -108,9 +107,9 @@ def sections_get(file):
             elif line.startswith("    CFG_FLOAT"):
                 section_doc[option_title] = "<float>"
             elif line.startswith("    CFG_ALIGNMENT"):
-                section_doc[option_title] = "<alignment>"
+                section_doc[option_title] = "<{left, center, right, flex, auto}>"
             elif line.startswith("    CFG_POSITION"):
-                section_doc[option_title] = "<position>"
+                section_doc[option_title] = "<{top, bottom, left, right, auto, off}>"
             elif line.startswith("    CFG_STR_LIST"):
                 section_doc[option_title] = "<string-list>"
             elif line.startswith("    CFG_STR"):
