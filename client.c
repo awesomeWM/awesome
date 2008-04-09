@@ -106,6 +106,52 @@ client_isprotodel(xcb_connection_t *c, xcb_window_t win)
     return ret;
 }
 
+/** Returns true if a client is tagged
+ * with one of the tags in any screen.
+ * \return true or false
+ */
+static bool
+client_isvisible_anyscreen(Client *c)
+{
+    Tag *tag;
+    int screen;
+
+    if(!c)
+        return false;
+
+    if(globalconf.scratch.client == c)
+        return globalconf.scratch.isvisible;
+
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+            if(tag->selected && is_client_tagged(c, tag))
+                return true;
+
+    return false;
+}
+
+/** Returns true if a client is tagged
+ * with one of the tags.
+ * \param c the client
+ * \param screen number
+ * \return true or false
+ */
+bool
+client_isvisible(Client *c, int screen)
+{
+    Tag *tag;
+
+    if(!c || c->screen != screen)
+        return false;
+
+    if(globalconf.scratch.client == c)
+        return globalconf.scratch.isvisible;
+
+    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+        if(tag->selected && is_client_tagged(c, tag))
+            return true;
+    return false;
+}
 /** Get a Client by its window
  * \param list Client list to look info
  * \param w Client window to find
@@ -248,17 +294,18 @@ client_stack(Client *c)
 {
     uint32_t config_win_vals[2];
     Client *client;
-    unsigned int layer;
-    Layer maxlayer = LAYER_FULLSCREEN;
+    Layer layer;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_ABOVE;
 
-    for(layer = 0; layer < maxlayer; layer++)
+    for(layer = LAYER_DESKTOP; layer < LAYER_FULLSCREEN; layer++)
     {
+        /* \todo we need to maintain a separate stack list */
         for(client = globalconf.clients; client; client = client->next)
         {
-            if(client->layer == layer && client != c && client_isvisible(client, c->screen))
+            if(client->layer == layer && client != c
+               && client_isvisible_anyscreen(client))
             {
                 if(client->titlebar.position && client->titlebar.sw)
                 {
@@ -754,27 +801,6 @@ client_updatesizehints(Client *c)
         c->isfixed = true;
 
     return size;
-}
-
-/** Returns true if a client is tagged
- * with one of the tags
- * \return true or false
- */
-bool
-client_isvisible(Client *c, int screen)
-{
-    Tag *tag;
-
-    if(!c || c->screen != screen)
-        return false;
-
-    if(globalconf.scratch.client == c)
-        return globalconf.scratch.isvisible;
-
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        if(tag->selected && is_client_tagged(c, tag))
-            return true;
-    return false;
 }
 
 /** Set the transparency of the selected client.
