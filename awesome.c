@@ -33,7 +33,6 @@
 #include <sys/un.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <alloca.h>
 
 #include <xcb/xcb.h>
 #include <xcb/shape.h>
@@ -78,13 +77,12 @@ scan()
 {
     int i, screen, real_screen, tree_c_len;
     const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-    root_win_t *root_wins = alloca(sizeof(root_win_t) * screen_max);
+    root_win_t *root_wins = p_new(root_win_t, screen_max);
     xcb_query_tree_reply_t *tree_r;
     xcb_window_t *wins = NULL;
     xcb_get_window_attributes_cookie_t *attr_wins = NULL;
     xcb_get_geometry_cookie_t **geom_wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
-    xcb_get_geometry_cookie_t *geom_c;
     xcb_get_geometry_reply_t *geom_r;
 
     for(screen = 0; screen < screen_max; screen++)
@@ -130,33 +128,29 @@ scan()
             {
                 if(attr_r)
                     p_delete(&attr_r);
-
-                geom_wins[i] = NULL;
                 continue;
             }
 
             p_delete(&attr_r);
 
             /* Get the geometry of the current window */
-            geom_c = p_new(xcb_get_geometry_cookie_t, 1);
-            *geom_c = xcb_get_geometry_unchecked(globalconf.connection, wins[i]);
-            
-            geom_wins[i] = geom_c;
+            geom_wins[i] = p_new(xcb_get_geometry_cookie_t, 1);
+            *(geom_wins[i]) = xcb_get_geometry_unchecked(globalconf.connection, wins[i]);
         }
 
         p_delete(&attr_wins);
 
         for(i = 0; i < tree_c_len; i++)
         {
-            if(geom_wins[i] == NULL)
+            if(!geom_wins[i])
                 continue;
 
-            geom_r = xcb_get_geometry_reply(globalconf.connection, *(geom_wins[i]), NULL);
-            if(!geom_r)
+            if(!(geom_r = xcb_get_geometry_reply(globalconf.connection,
+                                                 *(geom_wins[i]), NULL)))
                 continue;
 
-            real_screen = screen_get_bycoord(globalconf.screens_info, screen, geom_r->x,
-                                             geom_r->y);
+            real_screen = screen_get_bycoord(globalconf.screens_info, screen,
+                                             geom_r->x, geom_r->y);
 
             client_manage(wins[i], geom_r, real_screen);
 
@@ -167,6 +161,7 @@ scan()
         p_delete(&geom_wins);
         p_delete(&tree_r);
     }
+    p_delete(&root_wins);
 }
 
 /** Equivalent to 'XCreateFontCursor()', error are handled by the
