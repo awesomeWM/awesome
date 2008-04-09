@@ -52,7 +52,8 @@ extern AwesomeConf globalconf;
  * \param arg optional arg passed to uicb, otherwise buttons' arg are used
  */
 static void
-event_handle_mouse_button_press(int screen, unsigned int button, unsigned int state,
+event_handle_mouse_button_press(int screen, unsigned int button,
+                                unsigned int state,
                                 Button *buttons, char *arg)
 {
     Button *b;
@@ -79,7 +80,10 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     Client *c;
     Widget *widget;
     Statusbar *statusbar;
+    xcb_query_pointer_cookie_t qc;
     xcb_query_pointer_reply_t *qr;
+
+    qc = xcb_query_pointer(connection, ev->event);
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
@@ -113,7 +117,8 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                         if(statusbar->sw->geometry.height - ev->event_y >= widget->area.x
                            && statusbar->sw->geometry.height - ev->event_y
                               < widget->area.x + widget->area.width
-                           && ev->event_x >= widget->area.y && ev->event_x < widget->area.y + widget->area.height)
+                           && ev->event_x >= widget->area.y
+                           && ev->event_x < widget->area.y + widget->area.height)
                         {
                             widget->button_press(widget, ev);
                             return 0;
@@ -126,6 +131,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                 return 0;
             }
 
+    /* Check for titlebar first */
     for(c = globalconf.clients; c; c = c->next)
         if(c->titlebar.sw && c->titlebar.sw->window == ev->event)
         {
@@ -155,9 +161,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     else
         for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
             if(xcb_aux_get_screen(connection, screen)->root == ev->event
-               && (qr = xcb_query_pointer_reply(connection,
-                                                xcb_query_pointer(connection, ev->event),
-                                                NULL)) != NULL)
+               && (qr = xcb_query_pointer_reply(connection, qc, NULL)))
             {
                 screen = screen_get_bycoord(globalconf.screens_info, screen, qr->root_x, qr->root_y);
                 event_handle_mouse_button_press(screen, ev->detail, ev->state,
@@ -256,7 +260,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             config_win_vals[i++] = ev->stack_mode;
         }
 
-         xcb_configure_window(connection, ev->window, config_win_mask, config_win_vals);
+        xcb_configure_window(connection, ev->window, config_win_mask, config_win_vals);
     }
 
     return 0;
@@ -443,46 +447,48 @@ int
 event_handle_maprequest(void *data __attribute__ ((unused)),
                         xcb_connection_t *connection, xcb_map_request_event_t *ev)
 {
-    xcb_get_window_attributes_reply_t *wa;
     int screen_nbr = 0;
-    xcb_query_pointer_reply_t *qpr = NULL;
-    xcb_get_geometry_reply_t *wgeom;
+    xcb_get_window_attributes_cookie_t wa_c;
+    xcb_get_window_attributes_reply_t *wa_r;
+    xcb_query_pointer_cookie_t qp_c;
+    xcb_query_pointer_reply_t *qp_r = NULL;
+    xcb_get_geometry_cookie_t geom_c;
+    xcb_get_geometry_reply_t *geom_r;
     xcb_screen_iterator_t iter;
 
-    if((wa = xcb_get_window_attributes_reply(connection,
-                                             xcb_get_window_attributes(connection, ev->window),
-                                             NULL)) == NULL)
+    wa_c = xcb_get_window_attributes(connection, ev->window);
+    geom_c = xcb_get_geometry(connection, ev->window);
+    qp_c = xcb_query_pointer(connection, xcb_aux_get_screen(globalconf.connection, screen_nbr)->root);
+
+    if(!(wa_r = xcb_get_window_attributes_reply(connection, wa_c, NULL)))
         return -1;
-    if(wa->override_redirect)
+
+    if(wa_r->override_redirect)
     {
-        p_delete(&wa);
+        p_delete(&wa_r);
         return 0;
     }
 
-    p_delete(&wa);
+    p_delete(&wa_r);
 
     if(!client_get_bywin(globalconf.clients, ev->window))
     {
-        if((wgeom = xcb_get_geometry_reply(connection,
-                                           xcb_get_geometry(connection, ev->window), NULL)) == NULL)
+        if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
             return -1;
 
         if(globalconf.screens_info->xinerama_is_active
-           && (qpr = xcb_query_pointer_reply(connection,
-                                             xcb_query_pointer(connection,
-                                                               xcb_aux_get_screen(globalconf.connection, screen_nbr)->root),
-                                             NULL)) != NULL)
+           && (qp_r = xcb_query_pointer_reply(connection, qp_c, NULL)))
         {
             screen_nbr = screen_get_bycoord(globalconf.screens_info, screen_nbr,
-                                            qpr->root_x, qpr->root_y);
-            p_delete(&qpr);
+                                            qp_r->root_x, qp_r->root_y);
+            p_delete(&qp_r);
         }
         else
-            for(iter = xcb_setup_roots_iterator (xcb_get_setup (connection)), screen_nbr = 0;
-                iter.rem && iter.data->root != wgeom->root; xcb_screen_next (&iter), ++screen_nbr);
+            for(iter = xcb_setup_roots_iterator(xcb_get_setup(connection)), screen_nbr = 0;
+                iter.rem && iter.data->root != geom_r->root; xcb_screen_next (&iter), ++screen_nbr);
 
-        client_manage(ev->window, wgeom, screen_nbr);
-        p_delete(&wgeom);
+        client_manage(ev->window, geom_r, screen_nbr);
+        p_delete(&geom_r);
     }
 
     return 0;
@@ -515,7 +521,8 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
         else if (ev->atom == WM_HINTS)
             client_updatewmhints(c);
 
-        if(ev->atom == WM_NAME || ev->atom == xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"))
+        if(ev->atom == WM_NAME
+           || ev->atom == xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"))
             client_updatetitle(c);
     }
 
