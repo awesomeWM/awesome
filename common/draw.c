@@ -87,7 +87,7 @@ draw_iso2utf8(char *iso)
 }
 
 static xcb_visualtype_t *
-default_visual_from_screen(xcb_screen_t *s)
+draw_screen_default_visual(xcb_screen_t *s)
 {
     xcb_depth_iterator_t depth_iter;
     xcb_visualtype_iterator_t visual_iter;
@@ -124,7 +124,7 @@ draw_context_new(xcb_connection_t *conn, int phys_screen, int width, int height,
     d->width = width;
     d->height = height;
     d->depth = s->root_depth;
-    d->visual = default_visual_from_screen(s);
+    d->visual = draw_screen_default_visual(s);
     d->drawable = dw;
     d->surface = cairo_xcb_surface_create(conn, dw, d->visual, width, height);
     d->cr = cairo_create(d->surface);
@@ -163,7 +163,7 @@ draw_font_new(xcb_connection_t *conn, int phys_screen, char *fontname)
      * order to get font informations */
     surface = cairo_xcb_surface_create(conn,
                                        phys_screen,
-                                       default_visual_from_screen(s),
+                                       draw_screen_default_visual(s),
                                        s->width_in_pixels,
                                        s->height_in_pixels);
 
@@ -486,7 +486,6 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
         }
     }
     else /* draw from left to right */
-    {
         while(++i < w)
         {
             cairo_move_to(ctx->cr, x, y - from[cur_index]);
@@ -496,7 +495,6 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
             if (--cur_index < 0)
                 cur_index = w - 1;
         }
-    }
 
     cairo_stroke(ctx->cr);
 
@@ -880,7 +878,7 @@ draw_textwidth(xcb_connection_t *conn, int default_screen, font_t *font, const c
         return 0;
 
     surface = cairo_xcb_surface_create(conn, default_screen,
-                                       default_visual_from_screen(s),
+                                       draw_screen_default_visual(s),
                                        s->width_in_pixels,
                                        s->height_in_pixels);
     cr = cairo_create(surface);

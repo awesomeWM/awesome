@@ -80,7 +80,7 @@ cfg_position_parse(cfg_t *cfg, cfg_opt_t *opt,
                    const char *value, void *result)
 {
     Position *p = p_new(Position, 1);
-    
+
     if((*p = position_get_from_str(value)) == Off
        && a_strcmp(value, "off"))
     {
@@ -99,7 +99,7 @@ cfg_alignment_parse(cfg_t *cfg, cfg_opt_t *opt,
                     const char *value, void *result)
 {
     Alignment *p = p_new(Alignment, 1);
-    
+
     if((*p = draw_align_get_from_str(value)) == Auto
        && a_strcmp(value, "auto"))
     {
