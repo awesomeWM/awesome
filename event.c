@@ -62,7 +62,6 @@ event_handle_mouse_button_press(int screen, unsigned int button, unsigned int st
                 b->func(screen, arg);
             else
                 b->func(screen, b->arg);
-            return;
         }
 }
 
