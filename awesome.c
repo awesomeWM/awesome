@@ -525,7 +525,7 @@ main(int argc, char **argv)
                 if(r >= ssizeof(buf))
                     break;
                 buf[r] = '\0';
-                parse_control(buf);
+                __uicb_parsecmd(buf);
                 statusbar_refresh();
                 layout_refresh();
             }

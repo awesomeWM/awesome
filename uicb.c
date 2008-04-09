@@ -194,12 +194,12 @@ __uicb_run(char *cmd)
     return 0;
 }
 
-/** Parse the control buffer.
- * \param cmd the control buffer
+/** Parse a command.
+ * \param cmd the buffer
  * \return 0 on succes, -1 on failure
  */
 int
-parse_control(char *cmd)
+__uicb_parsecmd(char *cmd)
 {
     char *p, *curcmd = cmd;
 
