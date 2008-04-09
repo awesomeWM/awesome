@@ -87,6 +87,7 @@ simplewindow_delete(simple_window_t **sw)
 {
     xcb_destroy_window((*sw)->connection, (*sw)->window);
     xcb_free_pixmap((*sw)->connection, (*sw)->drawable);
+    xcb_free_gc((*sw)->connection, (*sw)->gc);
     p_delete(sw);
 }
 
@@ -126,19 +127,6 @@ simplewindow_resize(simple_window_t *sw, unsigned int w, unsigned int h)
     xcb_configure_window(sw->connection, sw->window,
                          XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                          resize_win_vals);
-}
-
-/** Refresh the window content
- * \param sw the simple_window_t to refresh
- * \param phys_screen physical screen id
- */
-void
-simplewindow_refresh_drawable(simple_window_t *sw)
-{
-    xcb_copy_area(sw->connection, sw->drawable,
-                  sw->window, sw->gc, 0, 0, 0, 0,
-                  sw->geometry.width,
-                  sw->geometry.height);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

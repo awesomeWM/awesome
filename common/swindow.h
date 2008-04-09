@@ -39,7 +39,6 @@ simple_window_t * simplewindow_new(xcb_connection_t *, int, int, int, unsigned i
 void simplewindow_delete(simple_window_t **);
 void simplewindow_move(simple_window_t *, int, int);
 void simplewindow_resize(simple_window_t *, unsigned int, unsigned int);
-void simplewindow_refresh_drawable(simple_window_t *);
 
 static inline void
 simplewindow_move_resize(simple_window_t *sw, int x, int y,
@@ -47,6 +46,19 @@ simplewindow_move_resize(simple_window_t *sw, int x, int y,
 {
   simplewindow_move(sw, x, y);
   simplewindow_resize(sw, w, h);
+}
+
+/** Refresh the window content
+ * \param sw the simple_window_t to refresh
+ * \param phys_screen physical screen id
+ */
+static inline void
+simplewindow_refresh_drawable(simple_window_t *sw)
+{
+    xcb_copy_area(sw->connection, sw->drawable,
+                  sw->window, sw->gc, 0, 0, 0, 0,
+                  sw->geometry.width,
+                  sw->geometry.height);
 }
 
 #endif
