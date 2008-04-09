@@ -145,6 +145,7 @@ PKG_CHECK_MODULES([xcb_icccm], [xcb-icccm],,
    [AC_MSG_ERROR([awesome requires xcb-icccm.])])
 
 # Checks for header files.
+AC_PATH_X
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([fcntl.h limits.h locale.h stdlib.h string.h sys/socket.h unistd.h])
