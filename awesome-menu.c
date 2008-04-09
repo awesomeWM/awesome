@@ -1132,7 +1132,7 @@ handle_kpress(xcb_key_press_event_t *e)
         redraw();
         break;
       case XK_Escape:
-        status= CANCEL;
+        status = CANCEL;
         break;
       case XK_Return:
         status = STOP;
@@ -1359,30 +1359,27 @@ main(int argc, char **argv)
 
     while(status == RUN)
     {
-        while((ev = xcb_wait_for_event(globalconf.connection)))
+        ev = xcb_wait_for_event(globalconf.connection);
+        /* Skip errors */
+        if(ev->response_type == 0)
+            continue;
+
+        switch(ev->response_type & 0x7f)
         {
-            /* Skip errors */
-            if(ev->response_type == 0)
-                continue;
-
-            switch(ev->response_type & 0x7f)
-            {
-              case XCB_BUTTON_PRESS:
-                status = CANCEL;
-                break;
-              case XCB_KEY_PRESS:
-                handle_kpress((xcb_key_press_event_t *) ev);
-                break;
-              case XCB_EXPOSE:
-                if(!((xcb_expose_event_t *) ev)->count)
-                    simplewindow_refresh_drawable(globalconf.sw, globalconf.default_screen);
-                break;
-              default:
-                break;
-            }
-
-            p_delete(&ev);
+          case XCB_BUTTON_PRESS:
+            status = CANCEL;
+            break;
+          case XCB_KEY_PRESS:
+            handle_kpress((xcb_key_press_event_t *) ev);
+            break;
+          case XCB_EXPOSE:
+            if(!((xcb_expose_event_t *) ev)->count)
+                simplewindow_refresh_drawable(globalconf.sw, globalconf.default_screen);
+            break;
+          default:
+            break;
         }
+        p_delete(&ev);
     }
 
     if(status != CANCEL)
