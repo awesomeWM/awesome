@@ -113,15 +113,15 @@ PKG_CHECK_MODULES([pangocairo], [pangocairo],,
    [AC_MSG_ERROR([awesome requires pangocairo.])])
 PKG_CHECK_MODULES([confuse], [libconfuse >= 2.6],,
    [AC_MSG_ERROR([awesome requires libconfuse >= 2.6.])])
-AC_ARG_WITH([gtk], AS_HELP_STRING([--with-gtk], [Build with gtk library (default: disabled)]))
+AC_ARG_WITH([imlib2], AS_HELP_STRING([--with-imlib2], [Build with Imlib2 (default: disabled)]))
 
-if test "x$with_gtk" == "xyes"; then
+if test "x$with_imlib2" == "xyes"; then
+    PKG_CHECK_MODULES([imlib2], [imlib2],,
+        [AC_MSG_ERROR([Cannot fined Imlib2.])])
+    AC_DEFINE([WITH_IMLIB2],1,[Defined to use Imlib2])
+else
     PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.2],,
         [AC_MSG_ERROR([Cannot find gtk+-2.0 >= 2.2])])
-    AC_DEFINE([HAVE_GTK],1,[Defined to use gtk])
-else
-    PKG_CHECK_MODULES([imlib2], [imlib2],,
-       [AC_MSG_ERROR([awesome requires Imlib2.])])
 fi
 PKG_CHECK_MODULES([xcb], [xcb],,
    [AC_MSG_ERROR([awesome requires xcb.])])

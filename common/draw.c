@@ -21,11 +21,11 @@
 
 #include <cairo-xcb.h>
 
-#ifdef HAVE_GTK
+#ifdef HAVE_IMLIB2
+#include <Imlib2.h>
+#else
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
-#else
-#include <Imlib2.h>
 #endif
 
 #include <xcb/xcb.h>
@@ -647,7 +647,7 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
-#ifdef HAVE_GTK
+#ifndef HAVE_IMLIB2
 
 /** Draw an image (PNG format only) from a file to a draw context
  * \param ctx Draw context to draw to
@@ -710,7 +710,7 @@ draw_get_image_size(const char *filename)
     return size;
 }
 
-#else /* HAVE_GTK */
+#else /* HAVE_IMLIB2 */
 
 static const char *
 draw_imlib_load_strerror(Imlib_Load_Error e)
@@ -823,7 +823,7 @@ draw_get_image_size(const char *filename)
 
     return size;
 }
-#endif /* HAVE_GTK */
+#endif /* HAVE_IMLIB2 */
 
 /** Rotate a drawable
  * \param ctx Draw context to draw to
