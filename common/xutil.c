@@ -24,14 +24,21 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-#include <xcb/xinerama.h>
 
 #include "common/util.h"
 #include "common/xutil.h"
 
+/** Get the string value of an atom.
+ * \param conn X connection
+ * \param w window
+ * \param atom the atom
+ * \param text buffer to fill
+ * \param textlen buffer lenght
+ * \return true on sucess, falsse on failure
+ */
 bool
-xgettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
-             char *text, ssize_t textlen)
+xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
+                  char *text, ssize_t textlen)
 {
     xcb_get_property_reply_t *prop_r = NULL;
     void *prop_val;
@@ -39,7 +46,6 @@ xgettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
     if(!text || !textlen)
         return false;
 
-    text[0] = '\0';
     prop_r = xcb_get_property_reply(conn,
                                     xcb_get_property_unchecked(conn, false,
                                                                w, atom,
@@ -52,7 +58,6 @@ xgettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
     {
         if(prop_r)
             p_delete(&prop_r);
-
         return false;
     }
 
@@ -92,7 +97,7 @@ xutil_getlockmask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
             kc = modmap[i * modmap_r->keycodes_per_modifier + j];
             mask = (1 << i);
 
-            if(numlockmask != NULL && 
+            if(numlockmask != NULL &&
                kc == xcb_key_symbols_get_keycode(keysyms, XK_Num_Lock))
                 *numlockmask = mask;
             else if(shiftlockmask != NULL &&
@@ -109,7 +114,6 @@ xutil_getlockmask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
 /** Equivalent to 'XGetTransientForHint' which is actually a
  * 'XGetWindowProperty' which gets the WM_TRANSIENT_FOR property of
  * the specified window
- *
  * \param c X connection
  * \param win get the property from this window
  * \param prop_win returns the WM_TRANSIENT_FOR property of win
@@ -117,7 +121,7 @@ xutil_getlockmask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
  */
 bool
 xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
-			 xcb_window_t *prop_win)
+                             xcb_window_t *prop_win)
 {
     xcb_get_property_reply_t *t_hint_r;
 
@@ -145,21 +149,27 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
     return true;
 }
 
+/** Get an internal atom.
+ * \param c X connection
+ * \param property atom name
+ * \return an brand new xcb_atom_t
+ */
 xcb_atom_t
 xutil_intern_atom(xcb_connection_t *c, const char *property)
 {
-    xcb_atom_t atom;
+    xcb_atom_t atom = 0;
     xcb_intern_atom_reply_t *r_atom;
 
-    r_atom = xcb_intern_atom_reply(c,
-				   xcb_intern_atom_unchecked(c, false, strlen(property), property),
-				   NULL);
-
-    if(!r_atom)
-	return 0;
-
-    atom = r_atom->atom;
-    p_delete(&r_atom);
+    if((r_atom = xcb_intern_atom_reply(c,
+	                               xcb_intern_atom_unchecked(c,
+                                                                 false,
+                                                                 a_strlen(property),
+                                                                 property),
+                                       NULL)))
+    {
+        atom = r_atom->atom;
+        p_delete(&r_atom);
+    }
 
     return atom;
 }
@@ -167,18 +177,17 @@ xutil_intern_atom(xcb_connection_t *c, const char *property)
 class_hint_t *
 xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
 {
-    xcb_get_property_reply_t *class_hint_r = NULL;
+    xcb_get_property_reply_t *class_hint_r;
+    xcb_get_property_cookie_t class_hint_c;
     char *data;
-
     int len_name, len_class;
+    class_hint_t *ch;
 
-    class_hint_t *ch = p_new(class_hint_t, 1);
+    class_hint_c = xcb_get_property_unchecked(conn, false, win, WM_CLASS,
+                                              STRING, 0L, 2048L);
+    ch = p_new(class_hint_t, 1);
 
-    class_hint_r = xcb_get_property_reply(conn,
-                                          xcb_get_property_unchecked(conn,
-                                                                     false, win, WM_CLASS,
-                                                                     STRING, 0L, 2048L),
-                                          NULL);
+    class_hint_r = xcb_get_property_reply(conn, class_hint_c, NULL);
 
     if(!class_hint_r || class_hint_r->type != STRING ||
        class_hint_r->format != 8)
@@ -191,8 +200,8 @@ xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
 
     data = xcb_get_property_value(class_hint_r);
 
-    len_name = strlen(data);
-    len_class = strlen(data + len_name + 1);
+    len_name = a_strlen(data);
+    len_class = a_strlen(data + len_name + 1);
 
     ch->res_name = strndup(data, len_name);
     ch->res_class = strndup(data + len_name + 1, len_class);

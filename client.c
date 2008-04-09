@@ -62,9 +62,9 @@ client_loadprops(Client * c, int screen)
 
     prop = p_new(char, ntags + 3);
 
-    if(xgettextprop(globalconf.connection, c->win,
-                    xutil_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
-                    prop, ntags + 3))
+    if(xutil_gettextprop(globalconf.connection, c->win,
+                         xutil_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
+                         prop, ntags + 3))
     {
         for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
@@ -143,13 +143,13 @@ client_get_byname(Client *list, char *name)
 void
 client_updatetitle(Client *c)
 {
-    if(!xgettextprop(globalconf.connection, c->win,
-                     xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"), c->name, sizeof(c->name)))
-        xgettextprop(globalconf.connection, c->win,
-                     xutil_intern_atom(globalconf.connection, "WM_NAME"), c->name, sizeof(c->name));
-
+    if(!xutil_gettextprop(globalconf.connection, c->win,
+                          xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"),
+                          c->name, sizeof(c->name)))
+        xutil_gettextprop(globalconf.connection, c->win,
+                          xutil_intern_atom(globalconf.connection, "WM_NAME"),
+                          c->name, sizeof(c->name));
     titlebar_draw(c);
-
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 

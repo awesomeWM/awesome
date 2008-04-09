@@ -81,9 +81,9 @@ client_match_rule(Client *c, Rule *r)
 
     if(r->xprop
        && r->xpropval_r
-       && xgettextprop(globalconf.connection, c->win,
-                       xutil_intern_atom(globalconf.connection, r->xprop),
-                       buf, ssizeof(buf)))
+       && xutil_gettextprop(globalconf.connection, c->win,
+                            xutil_intern_atom(globalconf.connection, r->xprop),
+                            buf, ssizeof(buf)))
         ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
 
     return ret;
