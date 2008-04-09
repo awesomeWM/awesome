@@ -142,7 +142,7 @@ uicb_spawn(int screen, char *arg)
  * \return 0 on succes, -1 on failure
  */
 static int
-uicb_run(char *cmd)
+__uicb_run(char *cmd)
 {
     char *p, *argcpy;
     const char *arg;
@@ -209,7 +209,7 @@ parse_control(char *cmd)
     while((p = strchr(curcmd, '\n')))
     {
         *p = '\0';
-        uicb_run(curcmd);
+        __uicb_run(curcmd);
         curcmd = p + 1;
     }
 
