@@ -44,7 +44,7 @@ statusbar_position_update(Statusbar *statusbar)
         return;
     }
 
-    xutil_map_raised(globalconf.connection, statusbar->sw->window);
+    xcb_map_window(globalconf.connection, statusbar->sw->window);
 
     /* Top and Bottom Statusbar have prio */
     if(statusbar->position == Top || statusbar->position == Bottom)

@@ -104,10 +104,6 @@ class_hint_t *xutil_get_class_hint(xcb_connection_t *, xcb_window_t);
  */
 xcb_atom_t xutil_intern_atom(xcb_connection_t *, const char *);
 
-/* Equivalent XCB call to XMapRaised, which actually raises the
-   specified window to the top of the stack and maps it */
-void xutil_map_raised(xcb_connection_t *, xcb_window_t);
-
 /** Set the same handler for all errors */
 void xutil_set_error_handler_catch_all(xcb_event_handlers_t *,
                                        xcb_generic_error_handler_t, void *);

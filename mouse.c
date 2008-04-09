@@ -185,7 +185,8 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
         ctx = draw_context_new(globalconf.connection, sw->phys_screen,
                                sw->geometry.width, sw->geometry.height,
                                sw->drawable);
-        xutil_map_raised(globalconf.connection, sw->window);
+
+        xcb_map_window(globalconf.connection, sw->window);
         mouse_resizebar_draw(ctx, style, sw, geometry, c->border);
     }
 
@@ -311,7 +312,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         ctx = draw_context_new(globalconf.connection, sw->phys_screen,
                                sw->geometry.width, sw->geometry.height,
                                sw->drawable);
-        xutil_map_raised(globalconf.connection, sw->window);
+        xcb_map_window(globalconf.connection, sw->window);
         mouse_resizebar_draw(ctx, style, sw, geometry, c->border);
     }
     else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft

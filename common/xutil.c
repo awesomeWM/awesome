@@ -211,17 +211,6 @@ xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
     return ch;
 }
 
-void
-xutil_map_raised(xcb_connection_t *conn, xcb_window_t win)
-{
-    const uint32_t map_raised_val = XCB_STACK_MODE_ABOVE;
-
-    xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_STACK_MODE,
-                         &map_raised_val);
-
-    xcb_map_window(conn, win);
-}
-
 /* Number of different errors */
 #define ERRORS_NBR 256
 

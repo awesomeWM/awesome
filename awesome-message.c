@@ -220,9 +220,8 @@ main(int argc, char **argv)
 
     p_delete(&ctx);
 
+    xcb_map_window(globalconf.connection, sw->window);
     simplewindow_refresh_drawable(sw, globalconf.default_screen);
-
-    xutil_map_raised(globalconf.connection, sw->window);
     xcb_aux_sync(globalconf.connection);
 
     signal(SIGALRM, &exit_on_signal);
