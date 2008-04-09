@@ -172,8 +172,8 @@ scan()
 static xcb_cursor_t
 create_font_cursor(unsigned int cursor_font)
 {
-    xcb_font_t           font;
-    xcb_cursor_t         cursor;
+    xcb_font_t font;
+    xcb_cursor_t cursor;
 
     /* Get the font for the cursor*/
     font = xcb_generate_id(globalconf.connection);
@@ -213,6 +213,9 @@ uicb_quit(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)
     running = false;
 }
 
+/** Function to exit on some signals.
+ * \param sig the signal received, unused
+ */
 static void
 exit_on_signal(int sig __attribute__ ((unused)))
 {
@@ -242,7 +245,7 @@ xerror(void *data __attribute__ ((unused)),
         xutil_delete_error(err);
         return 0;
     }
-    
+
     warn("fatal error: request=%s, error=%s\n", err->request_label, err->error_label);
     xutil_delete_error(err);
 
@@ -252,8 +255,7 @@ xerror(void *data __attribute__ ((unused)),
      * error and also exit if 'error_code'' equals to
      * 'BadImplementation'
      *
-     * TODO: display more informations about the error (like the Xlib
-     *       default error handler)
+     * \todo display more informations about the error (like the Xlib default error handler)
      */
     if(e->error_code == BadImplementation)
         exit(1);
@@ -262,6 +264,7 @@ xerror(void *data __attribute__ ((unused)),
 }
 
 /** Print help and exit(2) with given exit_code.
+ * \param exit_code the exit code
  */
 static void __attribute__ ((noreturn))
 exit_help(int exit_code)
@@ -276,13 +279,13 @@ exit_help(int exit_code)
     exit(exit_code);
 }
 
-/** Hello, this is main
+/** Hello, this is main.
  * \param argc who knows
  * \param argv who knows
  * \return EXIT_SUCCESS I hope
  */
 int
-main(int argc, char *argv[])
+main(int argc, char **argv)
 {
     char buf[1024];
     const char *confpath = NULL;
@@ -292,7 +295,6 @@ main(int argc, char *argv[])
     Statusbar *statusbar;
     fd_set rd;
     xcb_generic_event_t *ev;
-    xcb_connection_t *conn;
     struct sockaddr_un *addr;
     Client *c;
     bool confcheck = false;
@@ -347,50 +349,48 @@ main(int argc, char *argv[])
         return config_check(confpath);
 
     /* X stuff */
-    conn = xcb_connect(NULL, &(globalconf.default_screen));
-    if(xcb_connection_has_error(conn))
+    globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
+    if(xcb_connection_has_error(globalconf.connection))
         eprint("cannot open display\n");
 
-    xfd = xcb_get_file_descriptor(conn);
+    /* Get the file descriptor corresponding to the X connection */
+    xfd = xcb_get_file_descriptor(globalconf.connection);
 
     /* Allocate a handler which will holds all errors and events */
-    globalconf.evenths = xcb_alloc_event_handlers(conn);
+    globalconf.evenths = xcb_alloc_event_handlers(globalconf.connection);
     xutil_set_error_handler_catch_all(globalconf.evenths, xerrorstart, NULL);
 
     const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
 
     for(screen_nbr = 0;
-        screen_nbr < xcb_setup_roots_length(xcb_get_setup(conn));
+        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
         screen_nbr++)
-        /* this causes an error if some other window manager is running */
-        xcb_change_window_attributes(conn,
-                                     xcb_aux_get_screen(conn, screen_nbr)->root,
+        /* This causes an error if some other window manager is running */
+        xcb_change_window_attributes(globalconf.connection,
+                                     xcb_aux_get_screen(globalconf.connection, screen_nbr)->root,
                                      XCB_CW_EVENT_MASK, &select_input_val);
 
-    /* need to xcb_flush to validate error handler */
-    xcb_aux_sync(conn);
+    /* Need to xcb_flush to validate error handler */
+    xcb_aux_sync(globalconf.connection);
 
-    /* process all errors in the queue if any */
+    /* Process all errors in the queue if any */
     xcb_poll_for_event_loop(globalconf.evenths);
 
-    /* set the default xerror handler */
+    /* Set the default xerror handler */
     xutil_set_error_handler_catch_all(globalconf.evenths, xerror, NULL);
 
     /* Allocate the key symbols */
-    globalconf.keysyms = xcb_key_symbols_alloc(conn);
+    globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
 
     /* Get the NumLock, ShiftLock and CapsLock masks */
-    xutil_get_lock_mask(conn, globalconf.keysyms, &globalconf.numlockmask,
-                        &globalconf.shiftlockmask, &globalconf.capslockmask);
-
-    /* store connection */
-    globalconf.connection = conn;
+    xutil_getlockmask(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
+                      &globalconf.shiftlockmask, &globalconf.capslockmask);
 
     /* init EWMH atoms */
     ewmh_init_atoms();
 
     /* init screens struct */
-    globalconf.screens_info = screensinfo_new(conn);
+    globalconf.screens_info = screensinfo_new(globalconf.connection);
     globalconf.screens = p_new(VirtScreen, globalconf.screens_info->nscreen);
     focus_add_client(NULL);
 
@@ -423,7 +423,7 @@ main(int argc, char *argv[])
 
     /* do this only for real screen */
     for(screen_nbr = 0;
-        screen_nbr < xcb_setup_roots_length(xcb_get_setup(conn));
+        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
         screen_nbr++)
     {
         xcb_change_window_attributes(globalconf.connection,
@@ -456,19 +456,19 @@ main(int argc, char *argv[])
     set_client_message_event_handler(globalconf.evenths, event_handle_clientmessage, NULL);
 
     /* check for shape extension */
-    shape_query = xcb_get_extension_data(conn, &xcb_shape_id);
+    shape_query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
     if((globalconf.have_shape = shape_query->present))
         xcb_set_event_handler(globalconf.evenths, (shape_query->first_event + XCB_SHAPE_NOTIFY),
                               (xcb_generic_event_handler_t) event_handle_shape, NULL);
 
     /* check for randr extension */
-    randr_query = xcb_get_extension_data(conn, &xcb_randr_id);
+    randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
     if((globalconf.have_randr = randr_query->present))
         xcb_set_event_handler(globalconf.evenths, (randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY),
                               (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,
                               NULL);
 
-    xcb_aux_sync(conn);
+    xcb_aux_sync(globalconf.connection);
 
     /* get socket fd */
     csfd = socket_getclient();
@@ -533,23 +533,23 @@ main(int argc, char *argv[])
          * are available and select() won't tell us, so let's check
          * with XPending() again.
          */
-        while((ev = xcb_poll_for_event(conn)))
+        while((ev = xcb_poll_for_event(globalconf.connection)))
         {
             do
             {
                 xcb_handle_event(globalconf.evenths, ev);
 
                 /* need to resync */
-                xcb_aux_sync(conn);
+                xcb_aux_sync(globalconf.connection);
 
                 p_delete(&ev);
-            } while((ev = xcb_poll_for_event(conn)));
+            } while((ev = xcb_poll_for_event(globalconf.connection)));
 
             statusbar_refresh();
             layout_refresh();
 
             /* need to resync */
-            xcb_aux_sync(conn);
+            xcb_aux_sync(globalconf.connection);
         }
     }
 
@@ -566,8 +566,9 @@ main(int argc, char *argv[])
 
     xcb_aux_sync(globalconf.connection);
 
-    xcb_disconnect(conn);
+    xcb_disconnect(globalconf.connection);
 
     return EXIT_SUCCESS;
 }
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

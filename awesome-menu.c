@@ -1353,8 +1353,8 @@ main(int argc, char **argv)
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
 
     /* Get the numlock, capslock and shiftlock mask */
-    xutil_get_lock_mask(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
-                        &globalconf.shiftlockmask, &globalconf.capslockmask);
+    xutil_getlockmask(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
+                      &globalconf.shiftlockmask, &globalconf.capslockmask);
 
     xutil_map_raised(globalconf.connection, globalconf.sw->window);
 

@@ -71,9 +71,9 @@ xgettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
 }
 
 void
-xutil_get_lock_mask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
-                    unsigned int *numlockmask, unsigned int *shiftlockmask,
-                    unsigned int *capslockmask)
+xutil_getlockmask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
+                  unsigned int *numlockmask, unsigned int *shiftlockmask,
+                  unsigned int *capslockmask)
 {
     xcb_get_modifier_mapping_reply_t *modmap_r;
     xcb_keycode_t *modmap, kc;
