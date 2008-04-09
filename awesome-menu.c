@@ -1359,7 +1359,7 @@ main(int argc, char **argv)
 
     while(status == RUN)
     {
-        while((ev = xcb_poll_for_event(globalconf.connection)))
+        while((ev = xcb_wait_for_event(globalconf.connection)))
         {
             /* Skip errors */
             if(ev->response_type == 0)
