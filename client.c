@@ -1000,9 +1000,6 @@ client_kill(Client *c)
         ev.data.data32[0] = xutil_intern_atom(globalconf.connection, "WM_DELETE_WINDOW");
         ev.data.data32[1] = XCB_CURRENT_TIME;
 
-        /* TODO: really useful? */
-        ev.data.data32[2] = ev.data.data32[3] = ev.data.data32[4] = 0;
-
         xcb_send_event(globalconf.connection, false, c->win,
                        XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
     }
