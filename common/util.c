@@ -99,15 +99,15 @@ name_func_lookup(const char *funcname, const name_func_link_t *list)
 Position
 position_get_from_str(const char *pos)
 {
-    if(!a_strncmp(pos, "top", 3))
+    if(!a_strcmp(pos, "top"))
         return Top;
-    else if(!a_strncmp(pos, "bottom", 6))
+    else if(!a_strcmp(pos, "bottom"))
         return Bottom;
-    else if(!a_strncmp(pos, "right", 5))
+    else if(!a_strcmp(pos, "right"))
         return Right;
-    else if(!a_strncmp(pos, "left", 4))
+    else if(!a_strcmp(pos, "left"))
         return Left;
-    else if(!a_strncmp(pos, "auto", 4))
+    else if(!a_strcmp(pos, "auto"))
         return Auto;
     return Off;
 }
