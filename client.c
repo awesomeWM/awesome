@@ -154,6 +154,8 @@ client_unfocus(Client *c)
 {
     if(globalconf.screens[c->screen].opacity_unfocused != -1)
         window_settrans(c->win, globalconf.screens[c->screen].opacity_unfocused);
+    else if(globalconf.screens[c->screen].opacity_focused != -1)
+        window_settrans(c->win, -1);
     focus_add_client(NULL);
     XSetWindowBorder(globalconf.display, c->win,
                      globalconf.screens[c->screen].styles.normal.border.pixel);
@@ -208,6 +210,8 @@ client_focus(Client *c, int screen, Bool raise)
         focus_add_client(c);
         if(globalconf.screens[c->screen].opacity_focused != -1)
             window_settrans(c->win, globalconf.screens[c->screen].opacity_focused);
+        else if(globalconf.screens[c->screen].opacity_unfocused != -1)
+            window_settrans(c->win, -1);
         XSetWindowBorder(globalconf.display, c->win,
                          globalconf.screens[screen].styles.focus.border.pixel);
         titlebar_draw(c);
