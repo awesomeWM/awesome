@@ -394,7 +394,9 @@ xutil_get_error(const xcb_generic_error_t *e)
      * out  how it  works BTW,  seems to  get a  byte in  'pad' member
      * (second byte in second element of the array)
      */
-    err->request_code = (e->response_type == 0 ? *((uint8_t *) e + 10) : e->response_type);
+    err->request_code = (e->response_type == 0 ?
+                         *((uint8_t *) e + 10) : (e->response_type & 0x7f));
+
     err->request_label = a_strdup(xutil_request_label[err->request_code]);
     err->error_label = a_strdup(xutil_error_label[e->error_code]);
 
