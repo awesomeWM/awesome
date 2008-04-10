@@ -293,7 +293,7 @@ client_stack(Client *c)
 {
     uint32_t config_win_vals[2];
     Client *client;
-    Layer layer;
+    layer_t layer;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_ABOVE;
@@ -631,7 +631,7 @@ client_resize(Client *c, area_t geometry, bool hints)
 }
 
 void
-client_setfloating(Client *c, bool floating, Layer layer)
+client_setfloating(Client *c, bool floating, layer_t layer)
 {
     if(c->isfloating != floating)
     {

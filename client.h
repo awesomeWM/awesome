@@ -41,7 +41,7 @@ xcb_size_hints_t *client_updatesizehints(Client *);
 void client_updatetitle(Client *);
 void client_saveprops(Client *);
 void client_kill(Client *);
-void client_setfloating(Client *, bool, Layer);
+void client_setfloating(Client *, bool, layer_t);
 
 Uicb uicb_client_kill;
 Uicb uicb_client_moveresize;

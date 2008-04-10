@@ -39,7 +39,7 @@ typedef enum
     LAYER_FLOAT,
     LAYER_ABOVE,
     LAYER_FULLSCREEN
-} Layer;
+} layer_t;
 
 /** Cursors */
 enum
@@ -225,8 +225,8 @@ struct Client
     /** Titlebar */
     Titlebar titlebar;
     /** layer in the stacking order */
-    Layer layer;
-    Layer oldlayer;
+    layer_t layer;
+    layer_t oldlayer;
 };
 
 typedef struct client_node_t client_node_t;
