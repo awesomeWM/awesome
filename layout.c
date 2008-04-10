@@ -50,10 +50,6 @@ arrange(int screen)
     xcb_query_pointer_cookie_t qp_c;
     xcb_query_pointer_reply_t *qp_r;
 
-    qp_c = xcb_query_pointer_unchecked(globalconf.connection,
-                                       xcb_aux_get_screen(globalconf.connection,
-                                                          phys_screen)->root);
-
     for(c = globalconf.clients; c; c = c->next)
     {
         if(client_isvisible(c, screen) && !c->newcomer)
@@ -82,6 +78,10 @@ arrange(int screen)
      * are focused, then set the focus on this window */
     if((c = focus_get_current_client(screen)) && globalconf.focus->client != c)
         client_focus(c, screen, true);
+
+    qp_c = xcb_query_pointer_unchecked(globalconf.connection,
+                                       xcb_aux_get_screen(globalconf.connection,
+                                                          phys_screen)->root);
 
     /* check that the mouse is on a window or not */
     if((qp_r = xcb_query_pointer_reply(globalconf.connection, qp_c, NULL)))
