@@ -174,7 +174,7 @@ widget_invalidate_cache(int screen, int flags)
                 widget->cache.needs_update = True;
 }
 
-/** Send command to widgets.
+/** Send commands to widgets.
  * \param screen Screen ID
  * \param arg Widget command. Syntax depends on specific widget.
  * \ingroup ui_callback

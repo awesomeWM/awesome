@@ -300,7 +300,7 @@ statusbar_toggle(Statusbar *statusbar)
     globalconf.screens[statusbar->screen].need_arrange = True;
 }
 
-/** Toggle statusbar on or off.
+/** Toggle the statusbar on or off.
  * Argument must be a statusbar name, or no argument for all statusbars.
  * \param screen Screen ID
  * \param arg statusbar name

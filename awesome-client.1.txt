@@ -19,8 +19,8 @@ via a socket located in the users's HOME directory.
 
 USAGE
 -----
-To determine which socket is to be used, it read the DISPLAY environment variable.
-awesome-client read commands from standard input.
+To determine which socket is to be used, it reads the DISPLAY environment variable.
+awesome-client reads commands from standard input.
 
 When you pipe multiple lines into awesome-client, an empty line will flush already
 collected lines into awesome with an according immediate execution.

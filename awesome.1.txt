@@ -19,7 +19,7 @@ floating or tiled. Either layout can be applied dynamically, optimizing the
 environment for the application in use and the task performed.
 
 In tiled layout windows are managed in a master and stacking area. The master
-area contains windows which currently need most attention, whereas the
+area contains the windows which currently need most attention, whereas the
 stacking area contains all other windows. In floating layout windows can be
 resized and moved freely. Dialog windows are always managed floating,
 regardless of the layout applied. The spiral and dwindle layout are special cases
@@ -42,9 +42,9 @@ awesome can draw a small border around windows to indicate the focus state.
 OPTIONS
 -------
 -v | --version::
-    Prints version information to standard output, then exits.
+    Print version information to standard output, then exit.
 -h | --help::
-    Prints help information, then exits.
+    Print help information, then exit.
 --config | -c::
     Use an alternate configuration file instead of $HOME/.awesomerc.
 --check | -k::
@@ -113,9 +113,9 @@ DEFAULTS KEY BINDINGS
 *Mod4 \+ Shift \+ l*::
     Decrease number of master windows by 1.
 *Mod4 \+ Control \+ h*::
-    Increase number of column for non-master windows by 1.
+    Increase number of columns for non-master windows by 1.
 *Mod4 \+ Control \+ l*::
-    Decrease number of column for non-master windows by 1.
+    Decrease number of columns for non-master windows by 1.
 *Mod4 + Escape*::
     View previously selected tag.
 *Mod4 + Left*::

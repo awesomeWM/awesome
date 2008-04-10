@@ -222,7 +222,7 @@ tags_get_current(int screen)
     return tags;
 }
 
-/** Tag focused client with tag.
+/** Tag the focused client with the given tag.
  * \param screen Screen ID
  * \param arg Tag name
  * \ingroup ui_callback
@@ -257,7 +257,7 @@ uicb_client_tag(int screen, char *arg)
             tag_client(sel, tag);
 }
 
-/** Toggle a tag on focused client.
+/** Toggle a tag on the focused client.
  * \param screen virtual screen id
  * \param arg tag number
  * \ingroup ui_callback
@@ -306,7 +306,7 @@ uicb_client_toggletag(int screen, char *arg)
     }
 }
 
-/** Add a tag to the list of viewed tags.
+/** Toggle the visibility of a tag.
  * \param screen Screen ID
  * \param arg Tag name
  * \ingroup ui_callback
@@ -403,7 +403,7 @@ tag_view(Tag *tag, Bool view)
     globalconf.screens[tag->screen].need_arrange = True;
 }
 
-/** View tag.
+/** View only this tag.
  * \param screen Screen ID
  * \param arg tag to view
  * \ingroup ui_callback
@@ -420,7 +420,7 @@ uicb_tag_view(int screen, char *arg)
             tag_view(tag, True);
 }
 
-/** View previously selected tags
+/** View the previously selected tags.
  * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
@@ -434,7 +434,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
         tag_view(tag, tag->was_selected);
 }
 
-/** View next tag.
+/** View the next tag.
  * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback
@@ -452,7 +452,7 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
     p_delete(&curtags);
 }
 
-/** View previous tag.
+/** View the previous tag.
  * \param screen Screen ID
  * \param arg unused
  * \ingroup ui_callback

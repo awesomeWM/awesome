@@ -15,7 +15,7 @@ DESCRIPTION
 -----------
 
 awesome-message is a tool which will pop up a simple X window with a message
-and optionnaly an icon in front of it.
+and optionally an icon in front of it.
 
 USAGE
 -----

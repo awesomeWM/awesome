@@ -122,7 +122,7 @@ layout_get_current(int screen)
     return l;
 }
 
-/** Set layout for current tag.
+/** Set the layout of the current tag.
  * Argument must be a relative or absolute integer of available layouts.
  * \param screen Screen ID
  * \param arg Layout specifier

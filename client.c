@@ -772,7 +772,7 @@ client_isvisible(Client *c, int screen)
     return False;
 }
 
-/** Set selected client transparency.
+/** Set the transparency of the selected client.
  * Argument should be a floating between 0 and 100, -1 to disable.
  * \param screen Screen ID
  * \param arg unused arg
@@ -848,7 +848,7 @@ client_find_visible(Client *sel, Bool reverse)
     return next;
 }
 
-/** Swap currently focused client with previous visible.
+/** Swap the currently focused client with the previous visible one.
  * \param screen Screen ID
  * \param arg nothing
  * \ingroup ui_callback
@@ -865,7 +865,7 @@ uicb_client_swapprev(int screen __attribute__ ((unused)), char *arg __attribute_
     }
 }
 
-/** Swap currently focused client with next visible.
+/** Swap the currently focused client with the next visible one.
  * \param screen Screen ID
  * \param arg nothing
  * \ingroup ui_callback
@@ -883,7 +883,7 @@ uicb_client_swapnext(int screen __attribute__ ((unused)), char *arg __attribute_
 }
 
 /** Move and resize a client. Argument should be in format "x y w h" with
- * absolute (1, 20, 300, ...) or relatives (+10, -200, ...) values.
+ * absolute (1, 20, 300, ...) or relative (+10, -200, ...) values.
  * \param screen Screen ID
  * \param arg x y w h
  * \ingroup ui_callback
@@ -1081,7 +1081,7 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
-/** Set the client the master window.
+/** Move the client to the master area.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1106,7 +1106,7 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
-/** Setfocus to the next visible client in the stack.
+/** Give focus to the next visible client in the stack.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1120,7 +1120,7 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
         client_focus(next, screen, True);
 }
 
-/** Setfocus to the previous visible client in the stack.
+/** Give focus to the previous visible client in the stack.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -1166,7 +1166,7 @@ uicb_client_setscratch(int screen, char *arg __attribute__ ((unused)))
     globalconf.screens[screen].need_arrange = True;
 }
 
-/** Toggle scratch client visibility.
+/** Toggle the scratch client's visibility.
  * \param screen screen number
  * \param arg unused argument
  * \ingroup ui_callback

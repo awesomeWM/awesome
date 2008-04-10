@@ -443,7 +443,7 @@ titlebar_update_geometry(Client *c, area_t geometry)
     titlebar_draw(c);
 }
 
-/** Toggle window titlebar visibility.
+/** Toggle the visibility of the focused window's titlebar.
  * \param screen screen number (unused)
  * \param arg unused argument
  * \ingroup ui_callback

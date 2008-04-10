@@ -20,14 +20,14 @@ using your files as completion.
 
 USAGE
 -----
-By default, awesome-menu read completion from standard input. If nothing is
+By default, awesome-menu reads completion from standard input. If nothing is
 read, the completion list is built from the current working directory files.
 
-To build a menu with executable program:
+To build a menu with all the executable files of /usr/bin:
 
     ls /usr/bin | awesome-menu -e 'exec ' 'Execute'
 
-To build the same menu with executable run in a terminal window:
+To build the same menu and run the programs in a terminal window:
 
     ls /usr/bin | awesome-menu -e 'xterm -e exec ' 'Execute in terminal'
 
@@ -35,7 +35,7 @@ To build an ssh connection prompt:
 
     cut -d' ' -f1 ~/.ssh/known_hosts | cut -d, -f1 | awesome-menu -e 'xterm -e ssh ' 'ssh to:'
 
-If you do not specify the -e option, result will be printed to standard output.
+If you do not specify the -e option, the result will be sent to standard output.
 You can do things like that:
 
     gzip "$(awesome-menu '"File to gzip')"

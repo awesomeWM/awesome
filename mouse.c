@@ -125,7 +125,7 @@ mouse_resizebar_draw(DrawCtx *ctx, style_t style, SimpleWindow *sw, area_t geome
     simplewindow_refresh_drawable(sw, sw->phys_screen);
 }
 
-/** Move client with the mouse.
+/** Move the focused window with the mouse.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback
@@ -244,7 +244,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
-/** Resize client with the mouse.
+/** Resize the focused window with the mouse.
  * \param screen Screen ID
  * \param arg Unused
  * \ingroup ui_callback

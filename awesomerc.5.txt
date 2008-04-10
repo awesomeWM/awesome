@@ -39,7 +39,8 @@ OPTIONS
 *awesomerc* contains 5 global sections: *screen*, *rules*, *keys*, *mouse* and *menu* which
 are described here.
 
-All this sections contain options which may be string, integer, float, or even sections again.
+All these sections contain options which may be strings, integers, floats, or
+even sections again.
 
 include::optsdocgen.txt[]
 
@@ -100,7 +101,7 @@ Simple textbox example
         fi
     done
 
-    Note: What we're saying is "awesome-client, tell the bottom status bar's
+    Note: What we are saying is "awesome-client, tell the bottom status bar's
     widget named 'clock' to set it's 'text' property to date's output".
 
 5. Make your ~/bin/awesome-clock executable
@@ -114,7 +115,7 @@ Simple textbox example
 
 7. Restart awesome
 
-8. If your didn't get what you were expecting, take a look at
+8. If you did not get what you were expecting, take a look at
    ~/.xsession-errors or the terminal where X got started.
 ..............................................
 
@@ -174,7 +175,7 @@ Simple progressbar example
     done
 
 
-    Note: What we're saying is "awesome-client, tell the bottom status bar's
+    Note: What we are saying is "awesome-client, tell the bottom status bar's
     widget named 'diskusage' to set it's 'data' property named 'disk' to
     ${usage}."
 
@@ -189,13 +190,13 @@ $ chmod a+x ~/bin/awesome-diskusage
 
 7. Restart awesome
 
-8. If your didn't get what you were expecting, take a look at
+8. If you did not get what you were expecting, take a look at
    ~/.xsession-errors or the terminal where X got started.
 ..............................................
 
 AWESOMERC SKELETON
 ------------------
-Following skeleton lists all available configuration options in *awesomerc*.
+The following skeleton lists all available configuration options in *awesomerc*.
 
 ..........................
 include::rcskeletongen.txt[]

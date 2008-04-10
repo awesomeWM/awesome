@@ -166,9 +166,9 @@ cfg_opt_t style_opts[] =
     CFG_STR((char *) "fg", NULL, CFGF_NONE),
     /** Shadow color. */
     CFG_STR((char *) "shadow", NULL, CFGF_NONE),
-    /** Shadow offset in pixel. */
+    /** Shadow offset in pixels. */
     CFG_INT((char *) "shadow_offset", 0xffffffff, CFGF_NONE),
-    /** Font being used */
+    /** Font to use. */
     CFG_STR((char *) "font", NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
@@ -177,7 +177,7 @@ cfg_opt_t styles_opts[] =
 {
     /** Normal style. */
     CFG_SEC((char *) "normal", style_opts, CFGF_NONE),
-    /** Style used for window which has focus. */
+    /** Style used for the focused window. */
     CFG_SEC((char *) "focus", style_opts, CFGF_NONE),
     /** Style used for windows with urgency hint. */
     CFG_SEC((char *) "urgent", style_opts, CFGF_NONE),
@@ -203,15 +203,15 @@ cfg_opt_t titlebar_opts[] =
 /** This section defines general options. */
 cfg_opt_t general_opts[] =
 {
-    /** The border size of windows in pixel. */
+    /** The border size of windows in pixels. */
     CFG_INT((char *) "border", 1, CFGF_NONE),
-    /** The number of pixel to snap when moving floating windows. */
+    /** The number of pixels to snap when moving floating windows. */
     CFG_INT((char *) "snap", 8, CFGF_NONE),
     /** Use resize hints when resizing tiled windows. Can produce gaps between windows. */
     CFG_BOOL((char *) "resize_hints", cfg_true, CFGF_NONE),
-    /** Enable sloppy focus, also known as focus follow mouse. */
+    /** Enable sloppy focus, also known as focus follows mouse. */
     CFG_BOOL((char *) "sloppy_focus", cfg_true, CFGF_NONE),
-    /** Enable raise if mouse give focus. */
+    /** Raise the window if it is given focus with the mouse. */
     CFG_BOOL((char *) "sloppy_focus_raise", cfg_false, CFGF_NONE),
     /** New windows become master windows. */
     CFG_BOOL((char *) "new_become_master", cfg_true, CFGF_NONE),
@@ -358,7 +358,7 @@ cfg_opt_t widget_graph_data_opts[] =
 {
     /** Value of a full graph. */
     CFG_FLOAT((char *) "max", 100.0f, CFGF_NONE),
-    /** Scale graph when values are bigger than 'max' */
+    /** Scale graph when values are bigger than 'max'. */
     CFG_BOOL((char *) "scale", cfg_false, CFGF_NONE),
     /** Foreground color. */
     CFG_STR((char *) "fg", NULL, CFGF_NONE),
@@ -366,7 +366,7 @@ cfg_opt_t widget_graph_data_opts[] =
     CFG_STR((char *) "fg_center", NULL, CFGF_NONE),
     /** Foreground color at the end of a bar (as gradient). */
     CFG_STR((char *) "fg_end", NULL, CFGF_NONE),
-    /** fg, fg_center and fg_end defines a vertical gradient */
+    /** fg, fg_center and fg_end define a vertical gradient. */
     CFG_BOOL((char *) "vertical_gradient", cfg_false, CFGF_NONE),
     /**  Draw style. */
     CFG_STR((char *) "draw_style", (char *) "bottom", CFGF_NONE),
@@ -452,9 +452,9 @@ cfg_opt_t statusbar_opts[] =
 {
     /** Statusbar position. */
     CFG_POSITION((char *) "position", (char *) "top", CFGF_NONE),
-    /** Statusbar height. Set 0 for auto. */
+    /** Statusbar height. Set to 0 for auto. */
     CFG_INT((char *) "height", 0, CFGF_NONE),
-    /** Statusbar width. Set 0 for auto. */
+    /** Statusbar width. Set to 0 for auto. */
     CFG_INT((char *) "width", 0, CFGF_NONE),
     /** Textbox widget(s). */
     CFG_SEC((char *) "textbox", widget_textbox_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
@@ -483,13 +483,13 @@ cfg_opt_t tag_opts[] =
     CFG_STR((char *) "layout", (char *) "tile", CFGF_NONE),
     /** Default master width factor for this tag. */
     CFG_FLOAT((char *) "mwfact", 0.5, CFGF_NONE),
-    /** Default number of master window for this tag. */
+    /** Default number of master windows for this tag. */
     CFG_INT((char *) "nmaster", 1, CFGF_NONE),
-    /** Default number of window column for this tag. */
+    /** Default number of window columns for this tag. */
     CFG_INT((char *) "ncol", 1, CFGF_NONE),
     CFG_AWESOME_END()
 };
-/** This section define tags options. */
+/** This section defines tags options. */
 cfg_opt_t tags_opts[] =
 {
     /** Available tag(s). */
@@ -614,18 +614,18 @@ cfg_opt_t mouse_opts[] =
 {
     /** Mouse bindings for the root window. */
     CFG_SEC((char *) "root", mouse_generic_opts, CFGF_MULTI),
-    /** Mouse bindings for the clients window. */
+    /** Mouse bindings for the clients' window. */
     CFG_SEC((char *) "client", mouse_generic_opts, CFGF_MULTI),
-    /** Mouse bindings for the clients titlebar. */
+    /** Mouse bindings for the clients' titlebar. */
     CFG_SEC((char *) "titlebar", mouse_generic_opts, CFGF_MULTI),
     CFG_AWESOME_END()
 };
 /** This section defines menu options. */
 cfg_opt_t menu_opts[] =
 {
-    /** Width of the menu. Set 0 for auto. */
+    /** Width of the menu. Set to 0 for auto. */
     CFG_INT((char *) "width", 0, CFGF_NONE),
-    /** Height of the menu. Set 0 for auto. */
+    /** Height of the menu. Set to 0 for auto. */
     CFG_INT((char *) "height", 0, CFGF_NONE),
     /** X coordinate, do not set for auto. */
     CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
@@ -638,7 +638,7 @@ cfg_opt_t menu_opts[] =
 /** This section defines global awesome options. */
 cfg_opt_t awesome_opts[] =
 {
-    /** The screens section. Make one for each of your screen. */
+    /** The screens section. Make one for each of your screens. */
     CFG_SEC((char *) "screen", screen_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     /** The rules section. This allows specific options for specific windows. */
     CFG_SEC((char *) "rules", rules_opts, CFGF_NONE),
