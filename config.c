@@ -51,14 +51,14 @@ typedef struct
 {
     const char *name;
     xcb_keysym_t keysym;
-} KeyMod;
+} keymod_t;
 
 /** Link a name to a mouse button symbol */
 typedef struct
 {
     const char *name;
     unsigned int button;
-} MouseButton;
+} mouse_button_t;
 
 extern const name_func_link_t UicbList[];
 extern const name_func_link_t WidgetList[];
@@ -73,7 +73,7 @@ static xcb_keysym_t
 key_mask_lookup(const char *keyname)
 {
     /** List of keyname and corresponding X11 mask codes */
-    static const KeyMod KeyModList[] =
+    static const keymod_t KeyModList[] =
     {
         {"Shift", XCB_MOD_MASK_SHIFT},
         {"Lock", XCB_MOD_MASK_LOCK},
@@ -103,7 +103,7 @@ static unsigned int
 mouse_button_lookup(const char *button)
 {
     /** List of button name and corresponding X11 mask codes */
-    static const MouseButton MouseButtonList[] =
+    static const mouse_button_t mouse_button_tList[] =
     {
         {"1", XCB_BUTTON_INDEX_1},
         {"2", XCB_BUTTON_INDEX_2},
@@ -117,9 +117,9 @@ mouse_button_lookup(const char *button)
     int i;
 
     if(button)
-        for(i = 0; MouseButtonList[i].name; i++)
-            if(!a_strcmp(button, MouseButtonList[i].name))
-                return MouseButtonList[i].button;
+        for(i = 0; mouse_button_tList[i].name; i++)
+            if(!a_strcmp(button, mouse_button_tList[i].name))
+                return mouse_button_tList[i].button;
 
     return 0;
 }
