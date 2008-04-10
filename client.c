@@ -350,7 +350,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     bool rettrans, retloadprops;
     uint32_t config_win_val;
     Tag *tag;
-    Rule *rule;
+    rule_t *rule;
     xcb_size_hints_t *u_size_hints;
 
     c = p_new(Client, 1);

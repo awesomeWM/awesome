@@ -174,7 +174,7 @@ tag_client_with_current_selected(Client *c)
  * \param r the rule
  */
 void
-tag_client_with_rule(Client *c, Rule *r)
+tag_client_with_rule(Client *c, rule_t *r)
 {
     Tag *tag;
     bool matched = false;

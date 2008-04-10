@@ -42,7 +42,7 @@ rules_compile_regex(char *val)
 }
 
 bool
-tag_match_rule(Tag *t, Rule *r)
+tag_match_rule(Tag *t, rule_t *r)
 {
     regmatch_t tmp;
 
@@ -52,10 +52,10 @@ tag_match_rule(Tag *t, Rule *r)
     return false;
 }
 
-Rule *
+rule_t *
 rule_matching_client(Client *c)
 {
-    Rule *r;
+    rule_t *r;
     char *prop = NULL, buf[512];
     regmatch_t tmp;
     ssize_t len;

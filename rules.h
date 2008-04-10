@@ -27,10 +27,10 @@
 #define RULE_NOSCREEN        -1
 
 regex_t * rules_compile_regex(char *);
-bool tag_match_rule(Tag *, Rule *);
-Rule * rule_matching_client(Client *);
+bool tag_match_rule(Tag *, rule_t *);
+rule_t * rule_matching_client(Client *);
 
-DO_SLIST(Rule, rule, p_delete)
+DO_SLIST(rule_t, rule, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -75,7 +75,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 {
     Client *c;
     Data *d = widget->data;
-    Rule *r;
+    rule_t *r;
     area_t area;
     style_t style;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;

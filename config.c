@@ -486,7 +486,7 @@ config_parse(const char *confpatharg)
     cfg_t *cfg, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp;
     int ret, screen, i;
     char *confpath;
-    Rule *rule = NULL;
+    rule_t *rule = NULL;
     FILE *defconfig = NULL;
 
     if(confpatharg)
@@ -533,7 +533,7 @@ config_parse(const char *confpatharg)
     rule_list_init(&globalconf.rules);
     for(i = cfg_size(cfg_rules, "rule") - 1; i >= 0; i--)
     {
-        rule = p_new(Rule, 1);
+        rule = p_new(rule_t, 1);
         cfgsectmp = cfg_getnsec(cfg_rules, "rule", i);
         rule->prop_r = rules_compile_regex(cfg_getstr(cfgsectmp, "name"));
         rule->tags_r = rules_compile_regex(cfg_getstr(cfgsectmp, "tags"));

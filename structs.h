@@ -63,8 +63,8 @@ typedef struct
 } titlebar_t;
 
 /** Rule type */
-typedef struct Rule Rule;
-struct Rule
+typedef struct rule_t rule_t;
+struct rule_t
 {
     char *icon;
     char *xprop;
@@ -77,7 +77,7 @@ struct Rule
     regex_t *tags_r;
     regex_t *xpropval_r;
     /** Next and previous rules */
-    Rule *prev, *next;
+    rule_t *prev, *next;
 };
 
 /** Key bindings */
@@ -347,7 +347,7 @@ struct AwesomeConf
     /** Screens info */
     ScreensInfo *screens_info;
     /** Rules list */
-    Rule *rules;
+    rule_t *rules;
     /** Keys bindings list */
     Key *keys;
     /** Mouse bindings list */
