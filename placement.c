@@ -131,18 +131,18 @@ placement_smart(Client *c)
 area_t
 placement_under_mouse(Client *c)
 {
-    xcb_query_pointer_reply_t *xqp;
+    xcb_query_pointer_cookie_t qp_c;
+    xcb_query_pointer_reply_t *qp_r;
     area_t finalgeometry = c->f_geometry;
 
-    if((xqp = xcb_query_pointer_reply(globalconf.connection,
-                                      xcb_query_pointer(globalconf.connection,
-                                                        xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root),
-                                      NULL)) != NULL)
+    qp_c = xcb_query_pointer(globalconf.connection,
+                             xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root);
+    if((qp_r = xcb_query_pointer_reply(globalconf.connection, qp_c, NULL)))
     {
-        finalgeometry.x = xqp->root_x - c->f_geometry.width / 2;
-        finalgeometry.y = xqp->root_y - c->f_geometry.height / 2;
+        finalgeometry.x = qp_r->root_x - c->f_geometry.width / 2;
+        finalgeometry.y = qp_r->root_y - c->f_geometry.height / 2;
 
-        p_delete(&xqp);
+        p_delete(&qp_r);
     }
 
     finalgeometry = titlebar_geometry_add(&c->titlebar, finalgeometry);
