@@ -60,7 +60,7 @@ typedef struct
         style_t focus;
         style_t urgent;
     } styles;
-} Titlebar;
+} titlebar_t;
 
 /** Rule type */
 typedef struct Rule Rule;
@@ -71,7 +71,7 @@ struct Rule
     int screen;
     Fuzzy isfloating;
     Fuzzy ismaster;
-    Titlebar titlebar;
+    titlebar_t titlebar;
     double opacity;
     regex_t *prop_r;
     regex_t *tags_r;
@@ -222,8 +222,8 @@ struct Client
     int phys_screen;
     /** True if the client is a new one */
     bool newcomer;
-    /** Titlebar */
-    Titlebar titlebar;
+    /** titlebar_t */
+    titlebar_t titlebar;
     /** layer in the stacking order */
     layer_t layer;
     layer_t oldlayer;
@@ -287,8 +287,8 @@ typedef struct
 typedef area_t (FloatingPlacement)(Client *);
 typedef struct
 {
-    /** Titlebar default parameters */
-    Titlebar titlebar_default;
+    /** titlebar_t default parameters */
+    titlebar_t titlebar_default;
     /** Number of pixels to snap windows */
     int snap;
     /** Border size */

@@ -281,7 +281,7 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
 }
 
 static void
-config_section_titlebar_init(cfg_t *cfg_titlebar, Titlebar *tb, int screen)
+config_section_titlebar_init(cfg_t *cfg_titlebar, titlebar_t *tb, int screen)
 {
     int phys_screen = screen_virttophys(screen);
     cfg_t *cfg_styles = cfg_getsec(cfg_titlebar, "styles");

@@ -28,9 +28,9 @@ void titlebar_init(Client *);
 void titlebar_draw(Client *);
 void titlebar_update_geometry_floating(Client *);
 void titlebar_update_geometry(Client *, area_t);
-area_t titlebar_geometry_add(Titlebar *, area_t);
-area_t titlebar_geometry_remove(Titlebar *, area_t);
-void titlebar_position_set(Titlebar *, Position);
+area_t titlebar_geometry_add(titlebar_t *, area_t);
+area_t titlebar_geometry_remove(titlebar_t *, area_t);
+void titlebar_position_set(titlebar_t *, Position);
 
 Uicb uicb_client_toggletitlebar;
 

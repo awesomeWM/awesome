@@ -83,7 +83,7 @@ titlebar_init(Client *c)
  * \return a new geometry bigger if the titlebar is visible
  */
 area_t
-titlebar_geometry_add(Titlebar *t, area_t geometry)
+titlebar_geometry_add(titlebar_t *t, area_t geometry)
 {
     if(!t->sw)
         return geometry;
@@ -117,7 +117,7 @@ titlebar_geometry_add(Titlebar *t, area_t geometry)
  * \return a new geometry smaller if the titlebar is visible
  */
 area_t
-titlebar_geometry_remove(Titlebar *t, area_t geometry)
+titlebar_geometry_remove(titlebar_t *t, area_t geometry)
 {
     if(!t->sw)
         return geometry;
@@ -449,7 +449,7 @@ titlebar_update_geometry(Client *c, area_t geometry)
 }
 
 void
-titlebar_position_set(Titlebar *t, Position p)
+titlebar_position_set(titlebar_t *t, Position p)
 {
     if(!t->sw)
         return;
