@@ -109,7 +109,7 @@ statusbar_position_update(Statusbar *statusbar)
 static void
 statusbar_draw(Statusbar *statusbar)
 {
-    Widget *widget;
+    widget_t *widget;
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
 
@@ -263,7 +263,7 @@ statusbar_refresh()
 {
     int screen;
     Statusbar *statusbar;
-    Widget *widget;
+    widget_t *widget;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar;

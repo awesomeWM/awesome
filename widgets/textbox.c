@@ -35,7 +35,7 @@ typedef struct
 } Data;
 
 static int
-textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
+textbox_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
 {
     Data *d = widget->data;
 
@@ -64,7 +64,7 @@ textbox_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 }
 
 static widget_tell_status_t
-textbox_tell(Widget *widget, char *property, char *command)
+textbox_tell(widget_t *widget, char *property, char *command)
 {
     Data *d = widget->data;
     font_t *newfont;
@@ -106,13 +106,13 @@ textbox_tell(Widget *widget, char *property, char *command)
     return WIDGET_NOERROR;
 }
 
-Widget *
+widget_t *
 textbox_new(Statusbar *statusbar, cfg_t *config)
 {
-    Widget *w;
+    widget_t *w;
     Data *d;
 
-    w = p_new(Widget, 1);
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->draw = textbox_draw;
     w->tell = textbox_tell;

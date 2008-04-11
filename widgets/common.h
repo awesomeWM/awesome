@@ -24,8 +24,8 @@
 #define AWESOME_WIDGETS_COMMON_H
 #include "widget.h"
 
-widget_tell_status_t widget_set_color_for_data(Widget *, xcolor_t *, char *, int, char **);
-widget_tell_status_t widget_set_color_pointer_for_data(Widget *, xcolor_t **, char *, int, char **);
+widget_tell_status_t widget_set_color_for_data(widget_t *, xcolor_t *, char *, int, char **);
+widget_tell_status_t widget_set_color_pointer_for_data(widget_t *, xcolor_t **, char *, int, char **);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -71,7 +71,7 @@ taglist_style_get(VirtScreen vscreen, Tag *tag)
 }
 
 static int
-taglist_draw(Widget *widget,
+taglist_draw(widget_t *widget,
              DrawCtx *ctx,
              int offset,
              int used __attribute__ ((unused)))
@@ -137,7 +137,7 @@ taglist_draw(Widget *widget,
 }
 
 static void
-taglist_button_press(Widget *widget, xcb_button_press_event_t *ev)
+taglist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 {
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Button *b;
@@ -203,11 +203,11 @@ taglist_button_press(Widget *widget, xcb_button_press_event_t *ev)
             }
 }
 
-Widget *
+widget_t *
 taglist_new(Statusbar *statusbar, cfg_t *config)
 {
-    Widget *w;
-    w = p_new(Widget, 1);
+    widget_t *w;
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->draw = taglist_draw;
     w->button_press = taglist_button_press;

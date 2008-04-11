@@ -34,7 +34,7 @@ extern AwesomeConf globalconf;
  * \param widget a linked list of all widgets
  */
 void
-widget_calculate_alignments(Widget *widget)
+widget_calculate_alignments(widget_t *widget)
 {
     for(; widget && widget->alignment != AlignFlex; widget = widget->next)
     {
@@ -92,10 +92,10 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
  * \param name the widget name
  * \return a widget
  */
-static Widget *
+static widget_t *
 widget_getbyname(Statusbar *sb, char *name)
 {
-    Widget *widget;
+    widget_t *widget;
 
     for(widget = sb->widgets; widget; widget = widget->next)
         if(!a_strcmp(name, widget->name))
@@ -110,7 +110,7 @@ widget_getbyname(Statusbar *sb, char *name)
  * \param ev the XButtonPressedEvent the widget received
  */
 static void
-widget_common_button_press(Widget *widget, xcb_button_press_event_t *ev)
+widget_common_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 {
     Button *b;
 
@@ -129,7 +129,7 @@ widget_common_button_press(Widget *widget, xcb_button_press_event_t *ev)
  * \return widget_tell_status_t enum (see structs.h)
  */
 static widget_tell_status_t
-widget_common_tell(Widget *widget, char *property __attribute__ ((unused)),
+widget_common_tell(widget_t *widget, char *property __attribute__ ((unused)),
                    char *command __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
@@ -142,7 +142,7 @@ widget_common_tell(Widget *widget, char *property __attribute__ ((unused)),
  * \param config the cfg_t structure we will parse to set common info
  */
 void
-widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t *config)
+widget_common_new(widget_t *widget, Statusbar *statusbar, cfg_t *config)
 {
     widget->statusbar = statusbar;
     widget->name = a_strdup(cfg_title(config));
@@ -155,7 +155,7 @@ widget_common_new(Widget *widget, Statusbar *statusbar, cfg_t *config)
 }
 
 /** Invalidate widgets which should be refresh upon
- * external modifications. Widget who watch flags will
+ * external modifications. widget_t who watch flags will
  * be set to be refreshed.
  * \param screen screen id
  * \param flags cache flags
@@ -164,7 +164,7 @@ void
 widget_invalidate_cache(int screen, int flags)
 {
     Statusbar *statusbar;
-    Widget *widget;
+    widget_t *widget;
 
     for(statusbar = globalconf.screens[screen].statusbar;
         statusbar;
@@ -176,14 +176,14 @@ widget_invalidate_cache(int screen, int flags)
 
 /** Send commands to widgets.
  * \param screen Screen ID
- * \param arg Widget command. Syntax depends on specific widget.
+ * \param arg widget_t command. Syntax depends on specific widget.
  * \ingroup ui_callback
  */
 void
 uicb_widget_tell(int screen, char *arg)
 {
     Statusbar *statusbar;
-    Widget *widget;
+    widget_t *widget;
     char *p, *property = NULL, *command;
     ssize_t len;
     widget_tell_status_t status;

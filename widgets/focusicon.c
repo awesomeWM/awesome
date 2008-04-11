@@ -30,7 +30,7 @@
 extern AwesomeConf globalconf;
 
 static int
-focusicon_draw(Widget *widget, DrawCtx *ctx, int offset,
+focusicon_draw(widget_t *widget, DrawCtx *ctx, int offset,
                     int used __attribute__ ((unused)))
 {
     area_t area;
@@ -93,12 +93,12 @@ focusicon_draw(Widget *widget, DrawCtx *ctx, int offset,
     return widget->area.width;
 }
 
-Widget *
+widget_t *
 focusicon_new(Statusbar *statusbar, cfg_t *config)
 {
-    Widget *w;
+    widget_t *w;
 
-    w = p_new(Widget, 1);
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->draw = focusicon_draw;
     w->alignment = cfg_getalignment(config, "align");

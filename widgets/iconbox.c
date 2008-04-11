@@ -32,7 +32,7 @@ typedef struct
 } Data;
 
 static int
-iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
+iconbox_draw(widget_t *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
     Data *d = widget->data;
@@ -65,7 +65,7 @@ iconbox_draw(Widget *widget, DrawCtx *ctx, int offset,
 }
 
 static widget_tell_status_t
-iconbox_tell(Widget *widget, char *property, char *command)
+iconbox_tell(widget_t *widget, char *property, char *command)
 {
     bool b;
     Data *d = widget->data;
@@ -92,13 +92,13 @@ iconbox_tell(Widget *widget, char *property, char *command)
     return WIDGET_NOERROR;
 }
 
-Widget *
+widget_t *
 iconbox_new(Statusbar *statusbar, cfg_t *config)
 {
-    Widget *w;
+    widget_t *w;
     Data *d;
 
-    w = p_new(Widget, 1);
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->alignment = cfg_getalignment(config, "align");
     w->draw = iconbox_draw;

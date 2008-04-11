@@ -25,7 +25,7 @@
 extern AwesomeConf globalconf;
 
 widget_tell_status_t
-widget_set_color_for_data(Widget *widget, xcolor_t *color, char *command, int data_items, char ** data_title)
+widget_set_color_for_data(widget_t *widget, xcolor_t *color, char *command, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;
@@ -45,7 +45,7 @@ widget_set_color_for_data(Widget *widget, xcolor_t *color, char *command, int da
     return WIDGET_ERROR_FORMAT_SECTION;
 }
 widget_tell_status_t
-widget_set_color_pointer_for_data(Widget *widget, xcolor_t **color, char *command, int data_items, char ** data_title)
+widget_set_color_pointer_for_data(widget_t *widget, xcolor_t **color, char *command, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;

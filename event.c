@@ -78,7 +78,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
 {
     int screen;
     Client *c;
-    Widget *widget;
+    widget_t *widget;
     Statusbar *statusbar;
     xcb_query_pointer_cookie_t qc;
     xcb_query_pointer_reply_t *qr;

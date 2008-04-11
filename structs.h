@@ -105,7 +105,7 @@ struct Button
     Button *prev, *next;
 };
 
-/** Widget tell status code */
+/** widget_t tell status code */
 typedef enum
 {
     WIDGET_NOERROR = 0,
@@ -118,19 +118,19 @@ typedef enum
     WIDGET_ERROR_FORMAT_SECTION
 } widget_tell_status_t;
 
-/** Widget */
-typedef struct Widget Widget;
+/** widget_t */
+typedef struct widget_t widget_t;
 typedef struct Statusbar Statusbar;
-struct Widget
+struct widget_t
 {
-    /** Widget name */
+    /** widget_t name */
     char *name;
     /** Draw function */
-    int (*draw)(Widget *, DrawCtx *, int, int);
+    int (*draw)(widget_t *, DrawCtx *, int, int);
     /** Update function */
-    widget_tell_status_t (*tell)(Widget *, char *, char *);
+    widget_tell_status_t (*tell)(widget_t *, char *, char *);
     /** ButtonPressedEvent handler */
-    void (*button_press)(Widget *, xcb_button_press_event_t *);
+    void (*button_press)(widget_t *, xcb_button_press_event_t *);
     /** Statusbar */
     Statusbar *statusbar;
     /** Alignement */
@@ -151,7 +151,7 @@ struct Widget
         int flags;
     } cache;
     /** Next and previous widgets */
-    Widget *prev, *next;
+    widget_t *prev, *next;
 };
 
 /** Status bar */
@@ -173,8 +173,8 @@ struct Statusbar
     int screen;
     /** Physical screen id */
     int phys_screen;
-    /** Widget list */
-    Widget *widgets;
+    /** widget_t list */
+    widget_t *widgets;
     /** Draw context */
     DrawCtx *ctx;
     /** Next and previous statusbars */

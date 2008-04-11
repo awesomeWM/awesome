@@ -82,7 +82,7 @@ typedef struct
 } Data;
 
 static int
-graph_draw(Widget *widget, DrawCtx *ctx, int offset,
+graph_draw(widget_t *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     int margin_top;
@@ -276,7 +276,7 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 }
 
 static widget_tell_status_t
-graph_tell(Widget *widget, char *property, char *command)
+graph_tell(widget_t *widget, char *property, char *command)
 {
     Data *d = widget->data;
     int i, u;
@@ -379,10 +379,10 @@ graph_tell(Widget *widget, char *property, char *command)
     return WIDGET_NOERROR;
 }
 
-Widget *
+widget_t *
 graph_new(Statusbar *statusbar, cfg_t *config)
 {
-    Widget *w;
+    widget_t *w;
     Data *d;
     cfg_t *cfg;
     char *color;
@@ -392,7 +392,7 @@ graph_new(Statusbar *statusbar, cfg_t *config)
     xcolor_t *ptmp_color_center;
     xcolor_t *ptmp_color_end;
 
-    w = p_new(Widget, 1);
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
 
     w->draw = graph_draw;

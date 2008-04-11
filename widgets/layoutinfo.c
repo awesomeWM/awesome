@@ -29,7 +29,7 @@
 extern AwesomeConf globalconf;
 
 static int
-layoutinfo_draw(Widget *widget,
+layoutinfo_draw(widget_t *widget,
                 DrawCtx *ctx,
                 int offset,
                 int used __attribute__ ((unused)))
@@ -58,11 +58,11 @@ layoutinfo_draw(Widget *widget,
     return widget->area.width;
 }
 
-Widget *
+widget_t *
 layoutinfo_new(Statusbar *statusbar, cfg_t* config)
 {
-    Widget *w;
-    w = p_new(Widget, 1);
+    widget_t *w;
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->draw = layoutinfo_draw;
     w->alignment = cfg_getalignment(config, "align");

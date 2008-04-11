@@ -71,7 +71,7 @@ tasklist_isvisible(Client *c, int screen, ShowClient show)
 }
 
 static int
-tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
+tasklist_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
 {
     Client *c;
     Data *d = widget->data;
@@ -190,7 +190,7 @@ tasklist_draw(Widget *widget, DrawCtx *ctx, int offset, int used)
 }
 
 static void
-tasklist_button_press(Widget *widget, xcb_button_press_event_t *ev)
+tasklist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 {
     Button *b;
     Client *c;
@@ -257,15 +257,15 @@ tasklist_button_press(Widget *widget, xcb_button_press_event_t *ev)
         }
 }
 
-Widget *
+widget_t *
 tasklist_new(Statusbar *statusbar, cfg_t *config)
 {
-    Widget *w;
+    widget_t *w;
     Data *d;
     char *buf;
     cfg_t *cfg_styles;
 
-    w = p_new(Widget, 1);
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->draw = tasklist_draw;
     w->button_press = tasklist_button_press;

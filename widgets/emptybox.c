@@ -30,7 +30,7 @@ typedef struct
 } Data;
 
 static int
-emptybox_draw(Widget *widget, DrawCtx *ctx, int offset,
+emptybox_draw(widget_t *widget, DrawCtx *ctx, int offset,
              int used __attribute__ ((unused)))
 {
     Data *d = widget->data;
@@ -48,13 +48,13 @@ emptybox_draw(Widget *widget, DrawCtx *ctx, int offset,
     return widget->area.width;
 }
 
-Widget *
+widget_t *
 emptybox_new(Statusbar *statusbar, cfg_t *config)
 {
-    Widget *w;
+    widget_t *w;
     Data *d;
 
-    w = p_new(Widget, 1);
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->draw = emptybox_draw;
     w->alignment = cfg_getalignment(config, "align");

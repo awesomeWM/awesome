@@ -243,7 +243,7 @@ static void
 statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
 {
     cfg_t* widgets, *wptr;
-    Widget *widget = NULL;
+    widget_t *widget = NULL;
     unsigned int i, j, numwidgets = 0;
     WidgetConstructor *widget_new;
 

@@ -117,7 +117,7 @@ check_settings(Data *d, int status_height)
 
 
 static int
-progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
+progressbar_draw(widget_t *widget, DrawCtx *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     /* pb_.. values points to the widget inside a potential border */
@@ -383,7 +383,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 }
 
 static widget_tell_status_t
-progressbar_tell(Widget *widget, char *property, char *command)
+progressbar_tell(widget_t *widget, char *property, char *command)
 {
     Data *d = widget->data;
     int i = 0, percent, tmp;
@@ -450,17 +450,17 @@ progressbar_tell(Widget *widget, char *property, char *command)
     return WIDGET_NOERROR;
 }
 
-Widget *
+widget_t *
 progressbar_new(Statusbar *statusbar, cfg_t *config)
 {
-    Widget *w;
+    widget_t *w;
     Data *d;
     char *color;
     int i;
     cfg_t *cfg;
 
 
-    w = p_new(Widget, 1);
+    w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->draw = progressbar_draw;
     w->tell = progressbar_tell;
