@@ -50,7 +50,7 @@ window_setstate(xcb_window_t win, long state)
 }
 
 /** Get a window state (WM_STATE)
- * \param w Client window
+ * \param w client_t window
  * \return state
  */
 long

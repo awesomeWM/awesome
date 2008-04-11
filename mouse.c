@@ -95,9 +95,9 @@ mouse_snapclienttogeometry_inside(area_t geometry, area_t snap_geometry, int sna
  * \return geometry to set to the client
  */
 static area_t
-mouse_snapclient(Client *c, area_t geometry)
+mouse_snapclient(client_t *c, area_t geometry)
 {
-    Client *snapper;
+    client_t *snapper;
     int snap = globalconf.screens[c->screen].snap;
     area_t snapper_geometry;
     area_t screen_geometry =
@@ -197,7 +197,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 {
     int ocx, ocy, newscreen;
     area_t geometry;
-    Client *c = globalconf.focus->client, *target;
+    client_t *c = globalconf.focus->client, *target;
     Layout *layout = layout_get_current(screen);
     simple_window_t *sw = NULL;
     DrawCtx *ctx;
@@ -324,7 +324,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     int ocx = 0, ocy = 0, n;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
-    Client *c = globalconf.focus->client;
+    client_t *c = globalconf.focus->client;
     Tag **curtags = tags_get_current(screen);
     Layout *layout = curtags[0]->layout;
     area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry = { 0, 0, 0, 0, NULL, NULL };

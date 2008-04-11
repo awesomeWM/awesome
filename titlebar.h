@@ -24,10 +24,10 @@
 
 #include "structs.h"
 
-void titlebar_init(Client *);
-void titlebar_draw(Client *);
-void titlebar_update_geometry_floating(Client *);
-void titlebar_update_geometry(Client *, area_t);
+void titlebar_init(client_t *);
+void titlebar_draw(client_t *);
+void titlebar_update_geometry_floating(client_t *);
+void titlebar_update_geometry(client_t *, area_t);
 area_t titlebar_geometry_add(titlebar_t *, area_t);
 area_t titlebar_geometry_remove(titlebar_t *, area_t);
 void titlebar_position_set(titlebar_t *, position_t);

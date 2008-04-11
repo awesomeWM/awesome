@@ -36,7 +36,7 @@ uicb_tag_setnmaster(int screen, char * arg)
 {
     Tag **curtags = tags_get_current(screen);
     Layout *curlay = curtags[0]->layout;
-    Client *c;
+    client_t *c;
     int n;
 
     if(!arg || (curlay->arrange != layout_tile
@@ -65,7 +65,7 @@ uicb_tag_setncol(int screen, char * arg)
 {
     Tag **curtags = tags_get_current(screen);
     Layout *curlay = curtags[0]->layout;
-    Client *c;
+    client_t *c;
     int n;
 
     if(!arg || (curlay->arrange != layout_tile
@@ -134,7 +134,7 @@ _tile(int screen, const position_t position)
     int n, i, masterwin = 0, otherwin = 0;
     int real_ncol = 1, win_by_col = 1, current_col = 0;
     area_t area, geometry = { 0, 0, 0, 0, NULL, NULL };
-    Client *c;
+    client_t *c;
     Tag **curtags = tags_get_current(screen);
 
     area = screen_get_area(screen,

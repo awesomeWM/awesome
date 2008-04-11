@@ -35,7 +35,7 @@ extern AwesomeConf globalconf;
  * \param c the client
  */
 void
-titlebar_init(Client *c)
+titlebar_init(client_t *c)
 {
     int width;
 
@@ -149,7 +149,7 @@ titlebar_geometry_remove(titlebar_t *t, area_t geometry)
  * \param c the client
  */
 void
-titlebar_draw(Client *c)
+titlebar_draw(client_t *c)
 {
     xcb_drawable_t dw = 0;
     DrawCtx *ctx;
@@ -228,7 +228,7 @@ titlebar_draw(Client *c)
  * \param c the client
  */
 void
-titlebar_update_geometry_floating(Client *c)
+titlebar_update_geometry_floating(client_t *c)
 {
     int width, x_offset = 0, y_offset = 0;
 
@@ -340,7 +340,7 @@ titlebar_update_geometry_floating(Client *c)
  * \param geometry the geometry the client will receive
  */
 void
-titlebar_update_geometry(Client *c, area_t geometry)
+titlebar_update_geometry(client_t *c, area_t geometry)
 {
     int width, x_offset = 0 , y_offset = 0;
 
@@ -468,7 +468,7 @@ titlebar_position_set(titlebar_t *t, position_t p)
 void
 uicb_client_toggletitlebar(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
-    Client *c = globalconf.focus->client;
+    client_t *c = globalconf.focus->client;
 
     if(!c || !c->titlebar.sw)
         return;

@@ -181,9 +181,9 @@ struct statusbar_t
     statusbar_t *prev, *next;
 };
 
-/** Client type */
-typedef struct Client Client;
-struct Client
+/** client_t type */
+typedef struct client_t client_t;
+struct client_t
 {
     /** Client name */
     char name[256];
@@ -213,7 +213,7 @@ struct Client
     /** true if the client must be skipped from task bar client list */
     bool skiptb;
     /** Next and previous clients */
-    Client *prev, *next;
+    client_t *prev, *next;
     /** Window of the client */
     xcb_window_t win;
     /** Client logical screen */
@@ -232,7 +232,7 @@ struct Client
 typedef struct client_node_t client_node_t;
 struct client_node_t
 {
-    Client *client;
+    client_t *client;
     /** Next and previous client_nodes */
     client_node_t *prev, *next;
 };
@@ -266,7 +266,7 @@ typedef struct tag_client_node_t tag_client_node_t;
 struct tag_client_node_t
 {
     Tag *tag;
-    Client *client;
+    client_t *client;
     /** Next and previous tag_client_nodes */
     tag_client_node_t *prev, *next;
 };
@@ -284,7 +284,7 @@ typedef struct
     int right;
 } Padding;
 
-typedef area_t (FloatingPlacement)(Client *);
+typedef area_t (FloatingPlacement)(client_t *);
 typedef struct
 {
     /** titlebar_t default parameters */
@@ -369,12 +369,12 @@ struct AwesomeConf
     bool have_randr;
     /** Cursors */
     xcb_cursor_t cursor[CurLast];
-    /** Clients list */
-    Client *clients;
+    /** client_ts list */
+    client_t *clients;
     /** Scratch client */
     struct
     {
-        Client *client;
+        client_t *client;
         bool isvisible;
     } scratch;
     /** Path to config file */

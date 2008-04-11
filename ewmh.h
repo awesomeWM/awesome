@@ -39,7 +39,7 @@ void ewmh_update_net_current_desktop(int);
 void ewmh_update_net_desktop_names(int);
 void ewmh_update_net_active_window(int);
 void ewmh_process_client_message(xcb_client_message_event_t *);
-void ewmh_check_client_hints(Client *);
+void ewmh_check_client_hints(client_t *);
 NetWMIcon * ewmh_get_window_icon(xcb_window_t);
 
 #endif

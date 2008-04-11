@@ -77,7 +77,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_button_press_event_t *ev)
 {
     int screen;
-    Client *c;
+    client_t *c;
     widget_t *widget;
     statusbar_t *statusbar;
     xcb_query_pointer_cookie_t qc;
@@ -182,7 +182,7 @@ int
 event_handle_configurerequest(void *data __attribute__ ((unused)),
                               xcb_connection_t *connection, xcb_configure_request_event_t *ev)
 {
-    Client *c;
+    client_t *c;
     area_t geometry;
 
     if((c = client_get_bywin(globalconf.clients, ev->window)))
@@ -297,7 +297,7 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
                            xcb_connection_t *connection __attribute__ ((unused)),
                            xcb_destroy_notify_event_t *ev)
 {
-    Client *c;
+    client_t *c;
 
     if((c = client_get_bywin(globalconf.clients, ev->window)))
         client_unmanage(c);
@@ -313,7 +313,7 @@ int
 event_handle_enternotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_enter_notify_event_t *ev)
 {
-    Client *c;
+    client_t *c;
     int screen;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
@@ -359,7 +359,7 @@ event_handle_expose(void *data __attribute__ ((unused)),
 {
     int screen;
     statusbar_t *statusbar;
-    Client *c;
+    client_t *c;
 
     if(!ev->count)
     {
@@ -503,7 +503,7 @@ int
 event_handle_propertynotify(void *data __attribute__ ((unused)),
                             xcb_connection_t *connection, xcb_property_notify_event_t *ev)
 {
-    Client *c;
+    client_t *c;
     xcb_window_t trans;
 
     if(ev->state == XCB_PROPERTY_DELETE)
@@ -538,7 +538,7 @@ int
 event_handle_unmapnotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_unmap_notify_event_t *ev)
 {
-    Client *c;
+    client_t *c;
 
     /*
      * event->send_event (Xlib)  is quivalent to  (ev->response_type &
@@ -563,7 +563,7 @@ event_handle_shape(void *data __attribute__ ((unused)),
                    xcb_connection_t *connection __attribute__ ((unused)),
                    xcb_shape_notify_event_t *ev)
 {
-    Client *c = client_get_bywin(globalconf.clients, ev->affected_window);
+    client_t *c = client_get_bywin(globalconf.clients, ev->affected_window);
 
     if(c)
         window_setshape(c->win, c->phys_screen);

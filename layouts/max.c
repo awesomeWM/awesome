@@ -30,7 +30,7 @@ extern AwesomeConf globalconf;
 void
 layout_max(int screen)
 {
-    Client *c;
+    client_t *c;
     area_t area = screen_get_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);

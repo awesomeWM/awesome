@@ -53,7 +53,7 @@ tag_match_rule(Tag *t, rule_t *r)
 }
 
 rule_t *
-rule_matching_client(Client *c)
+rule_matching_client(client_t *c)
 {
     rule_t *r;
     char *prop = NULL, buf[512];

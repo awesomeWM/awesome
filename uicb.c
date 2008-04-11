@@ -65,7 +65,7 @@ uicb_restart(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_exec(int screen __attribute__ ((unused)), char *cmd)
 {
-    Client *c;
+    client_t *c;
     char *args, *path;
 
     /* remap all clients since some WM won't handle them otherwise */

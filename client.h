@@ -26,22 +26,22 @@
 
 #include "structs.h"
 
-bool client_isvisible(Client *, int);
-Client * client_get_bywin(Client *, xcb_window_t);
-Client * client_get_byname(Client *, char *);
-bool client_focus(Client *, int, bool);
-void client_stack(Client *);
-void client_ban(Client *);
-void client_unban(Client *);
+bool client_isvisible(client_t *, int);
+client_t * client_get_bywin(client_t *, xcb_window_t);
+client_t * client_get_byname(client_t *, char *);
+bool client_focus(client_t *, int, bool);
+void client_stack(client_t *);
+void client_ban(client_t *);
+void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int);
-bool client_resize(Client *, area_t, bool);
-void client_unmanage(Client *);
-void client_updatewmhints(Client *);
-xcb_size_hints_t *client_updatesizehints(Client *);
-void client_updatetitle(Client *);
-void client_saveprops(Client *);
-void client_kill(Client *);
-void client_setfloating(Client *, bool, layer_t);
+bool client_resize(client_t *, area_t, bool);
+void client_unmanage(client_t *);
+void client_updatewmhints(client_t *);
+xcb_size_hints_t *client_updatesizehints(client_t *);
+void client_updatetitle(client_t *);
+void client_saveprops(client_t *);
+void client_kill(client_t *);
+void client_setfloating(client_t *, bool, layer_t);
 
 uicb_t uicb_client_kill;
 uicb_t uicb_client_moveresize;
@@ -58,7 +58,7 @@ uicb_t uicb_client_togglefloating;
 uicb_t uicb_client_togglescratch;
 uicb_t uicb_client_setscratch;
 
-DO_SLIST(Client, client, p_delete)
+DO_SLIST(client_t, client, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -37,11 +37,11 @@ typedef enum
     ShowFocus,
     ShowTags,
     ShowAll,
-} ShowClient;
+} Showclient_t;
 
 typedef struct
 {
-    ShowClient show;
+    Showclient_t show;
     bool show_icons;
     alignment_t align;
     struct
@@ -53,7 +53,7 @@ typedef struct
 } Data;
 
 static inline bool
-tasklist_isvisible(Client *c, int screen, ShowClient show)
+tasklist_isvisible(client_t *c, int screen, Showclient_t show)
 {
     if(c->skip || c->skiptb)
         return false;
@@ -73,7 +73,7 @@ tasklist_isvisible(Client *c, int screen, ShowClient show)
 static int
 tasklist_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
 {
-    Client *c;
+    client_t *c;
     Data *d = widget->data;
     rule_t *r;
     area_t area;
@@ -193,7 +193,7 @@ static void
 tasklist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 {
     Button *b;
-    Client *c;
+    client_t *c;
     Data *d = widget->data;
     Tag *tag;
     int n = 0, box_width = 0, i, ci = 0;

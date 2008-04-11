@@ -94,7 +94,7 @@ tag_push_to_screen(Tag *tag, int screen)
  * \param t the tag to tag the client with
  */
 void
-tag_client(Client *c, Tag *t)
+tag_client(client_t *c, Tag *t)
 {
     tag_client_node_t *tc;
 
@@ -117,7 +117,7 @@ tag_client(Client *c, Tag *t)
  * \param t the tag to tag the client with
  */
 void
-untag_client(Client *c, Tag *t)
+untag_client(client_t *c, Tag *t)
 {
     tag_client_node_t *tc;
 
@@ -139,7 +139,7 @@ untag_client(Client *c, Tag *t)
  * \return true if the client is tagged with the tag, false otherwise.
  */
 bool
-is_client_tagged(Client *c, Tag *t)
+is_client_tagged(client_t *c, Tag *t)
 {
     tag_client_node_t *tc;
 
@@ -157,7 +157,7 @@ is_client_tagged(Client *c, Tag *t)
  * \param c the client
  */
 void
-tag_client_with_current_selected(Client *c)
+tag_client_with_current_selected(client_t *c)
 {
     Tag *tag;
     VirtScreen vscreen = globalconf.screens[c->screen];
@@ -174,7 +174,7 @@ tag_client_with_current_selected(Client *c)
  * \param r the rule
  */
 void
-tag_client_with_rule(Client *c, rule_t *r)
+tag_client_with_rule(client_t *c, rule_t *r)
 {
     Tag *tag;
     bool matched = false;
@@ -232,7 +232,7 @@ uicb_client_tag(int screen, char *arg)
 {
     int tag_id = -1;
     Tag *tag, *target_tag;
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
 
     if(!sel)
         return;
@@ -265,7 +265,7 @@ uicb_client_tag(int screen, char *arg)
 void
 uicb_client_toggletag(int screen, char *arg)
 {
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
     int i;
     Bool is_sticky = True;
     Tag *tag, *target_tag;

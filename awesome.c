@@ -296,7 +296,7 @@ main(int argc, char **argv)
     fd_set rd;
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
-    Client *c;
+    client_t *c;
     bool confcheck = false;
     static struct option long_options[] =
     {

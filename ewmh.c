@@ -165,7 +165,7 @@ void
 ewmh_update_net_client_list(int phys_screen)
 {
     xcb_window_t *wins;
-    Client *c;
+    client_t *c;
     int n = 0;
 
     for(c = globalconf.clients; c; c = c->next)
@@ -240,7 +240,7 @@ void
 ewmh_update_net_active_window(int phys_screen)
 {
     xcb_window_t win;
-    Client *sel = focus_get_current_client(phys_screen);
+    client_t *sel = focus_get_current_client(phys_screen);
 
     win = sel ? sel->win : XCB_NONE;
 
@@ -250,7 +250,7 @@ ewmh_update_net_active_window(int phys_screen)
 }
 
 static void
-ewmh_process_state_atom(Client *c, xcb_atom_t state, int set)
+ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
     const uint32_t raise_window_val = XCB_STACK_MODE_ABOVE;
 
@@ -331,7 +331,7 @@ ewmh_process_state_atom(Client *c, xcb_atom_t state, int set)
 }
 
 static void
-ewmh_process_window_type_atom(Client *c, xcb_atom_t state)
+ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
 {
     if(state == net_wm_window_type_normal)
     {
@@ -353,7 +353,7 @@ ewmh_process_window_type_atom(Client *c, xcb_atom_t state)
 void
 ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
-    Client *c;
+    client_t *c;
     int screen;
 
     if(ev->type == net_current_desktop)
@@ -383,7 +383,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
 }
 
 void
-ewmh_check_client_hints(Client *c)
+ewmh_check_client_hints(client_t *c)
 {
     xcb_atom_t *state;
     void *data = NULL;

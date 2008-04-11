@@ -35,7 +35,7 @@ focusicon_draw(widget_t *widget, DrawCtx *ctx, int offset,
 {
     area_t area;
     rule_t *r;
-    Client *sel = focus_get_current_client(widget->statusbar->screen);
+    client_t *sel = focus_get_current_client(widget->statusbar->screen);
     NetWMIcon *icon;
 
     if(!sel)

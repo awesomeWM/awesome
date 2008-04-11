@@ -126,7 +126,7 @@ screen_virttophys(int screen)
  *        y of the new screen
  */
 void
-move_client_to_screen(Client *c, int new_screen, bool doresize)
+move_client_to_screen(client_t *c, int new_screen, bool doresize)
 {
     Tag *tag;
     int old_screen = c->screen;
@@ -268,7 +268,7 @@ void
 uicb_client_movetoscreen(int screen __attribute__ ((unused)), char *arg)
 {
     int new_screen, prev_screen;
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
 
     if(!sel || !globalconf.screens_info->xinerama_is_active)
         return;

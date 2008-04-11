@@ -28,7 +28,7 @@ extern AwesomeConf globalconf;
 void
 layout_floating(int screen)
 {
-    Client *c;
+    client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
         if(client_isvisible(c, screen) && !c->ismax)

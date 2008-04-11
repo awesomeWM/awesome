@@ -44,12 +44,12 @@ extern AwesomeConf globalconf;
 /** Load windows properties, restoring client's tag
  * and floating state before awesome was restarted if any
  * \todo this may bug if number of tags is != than before
- * \param c Client ref
+ * \param c client ref
  * \param screen Screen ID
  * \return true if client had property
  */
 static bool
-client_loadprops(Client * c, int screen)
+client_loadprops(client_t * c, int screen)
 {
     int i, ntags = 0;
     Tag *tag;
@@ -110,7 +110,7 @@ client_isprotodel(xcb_connection_t *c, xcb_window_t win)
  * \return true or false
  */
 static bool
-client_isvisible_anyscreen(Client *c)
+client_isvisible_anyscreen(client_t *c)
 {
     Tag *tag;
     int screen;
@@ -136,7 +136,7 @@ client_isvisible_anyscreen(Client *c)
  * \return true or false
  */
 bool
-client_isvisible(Client *c, int screen)
+client_isvisible(client_t *c, int screen)
 {
     Tag *tag;
 
@@ -151,29 +151,29 @@ client_isvisible(Client *c, int screen)
             return true;
     return false;
 }
-/** Get a Client by its window
- * \param list Client list to look info
- * \param w Client window to find
+/** Get a client by its window
+ * \param list client_t list to look info
+ * \param w client_t window to find
  * \return client
  */
-Client *
-client_get_bywin(Client *list, xcb_window_t w)
+client_t *
+client_get_bywin(client_t *list, xcb_window_t w)
 {
-    Client *c;
+    client_t *c;
 
     for(c = list; c && c->win != w; c = c->next);
     return c;
 }
 
 /** Get a client by its name
- * \param list Client list
+ * \param list client_t list
  * \param name name to search
  * \return first matching client
  */
-Client *
-client_get_byname(Client *list, char *name)
+client_t *
+client_get_byname(client_t *list, char *name)
 {
-    Client *c;
+    client_t *c;
 
     for(c = list; c; c = c->next)
         if(strstr(c->name, name))
@@ -186,7 +186,7 @@ client_get_byname(Client *list, char *name)
  * \param c the client
  */
 void
-client_updatetitle(Client *c)
+client_updatetitle(client_t *c)
 {
     if(!xutil_gettextprop(globalconf.connection, c->win,
                           xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"),
@@ -199,7 +199,7 @@ client_updatetitle(Client *c)
 }
 
 static void
-client_unfocus(Client *c)
+client_unfocus(client_t *c)
 {
     if(globalconf.screens[c->screen].opacity_unfocused != -1)
         window_settrans(c->win, globalconf.screens[c->screen].opacity_unfocused);
@@ -216,7 +216,7 @@ client_unfocus(Client *c)
  * \param c the client
  */
 void
-client_ban(Client *c)
+client_ban(client_t *c)
 {
     if(globalconf.focus->client == c)
         client_unfocus(c);
@@ -233,7 +233,7 @@ client_ban(Client *c)
  * \return true if a window (even root) has received focus, false otherwise
  */
 bool
-client_focus(Client *c, int screen, bool raise)
+client_focus(client_t *c, int screen, bool raise)
 {
     int phys_screen;
 
@@ -289,10 +289,10 @@ client_focus(Client *c, int screen, bool raise)
 }
 
 void
-client_stack(Client *c)
+client_stack(client_t *c)
 {
     uint32_t config_win_vals[2];
-    Client *client;
+    client_t *client;
     layer_t layer;
 
     config_win_vals[0] = XCB_NONE;
@@ -345,7 +345,7 @@ client_stack(Client *c)
 void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 {
-    Client *c, *t = NULL;
+    client_t *c, *t = NULL;
     xcb_window_t trans;
     bool rettrans, retloadprops;
     uint32_t config_win_val;
@@ -353,7 +353,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     rule_t *rule;
     xcb_size_hints_t *u_size_hints;
 
-    c = p_new(Client, 1);
+    c = p_new(client_t, 1);
 
     c->screen = screen_get_bycoord(globalconf.screens_info, screen, wgeom->x, wgeom->y);
 
@@ -498,7 +498,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 }
 
 static area_t
-client_geometry_hints(Client *c, area_t geometry)
+client_geometry_hints(client_t *c, area_t geometry)
 {
     double dx, dy, max, min, ratio;
 
@@ -551,7 +551,7 @@ client_geometry_hints(Client *c, area_t geometry)
  * \param return true if resize has been done
  */
 bool
-client_resize(Client *c, area_t geometry, bool hints)
+client_resize(client_t *c, area_t geometry, bool hints)
 {
     int new_screen;
     area_t area;
@@ -631,7 +631,7 @@ client_resize(Client *c, area_t geometry, bool hints)
 }
 
 void
-client_setfloating(Client *c, bool floating, layer_t layer)
+client_setfloating(client_t *c, bool floating, layer_t layer)
 {
     if(c->isfloating != floating)
     {
@@ -663,7 +663,7 @@ client_setfloating(Client *c, bool floating, layer_t layer)
  * \param c client
  */
 void
-client_saveprops(Client *c)
+client_saveprops(client_t *c)
 {
     int i = 0, ntags = 0;
     char *prop;
@@ -691,7 +691,7 @@ client_saveprops(Client *c)
 }
 
 void
-client_unban(Client *c)
+client_unban(client_t *c)
 {
     xcb_map_window(globalconf.connection, c->win);
     window_setstate(c->win, XCB_WM_NORMAL_STATE);
@@ -700,7 +700,7 @@ client_unban(Client *c)
 }
 
 void
-client_unmanage(Client *c)
+client_unmanage(client_t *c)
 {
     Tag *tag;
 
@@ -735,7 +735,7 @@ client_unmanage(Client *c)
 }
 
 void
-client_updatewmhints(Client *c)
+client_updatewmhints(client_t *c)
 {
     xcb_wm_hints_t *wmh = NULL;
 
@@ -756,7 +756,7 @@ client_updatewmhints(Client *c)
 }
 
 xcb_size_hints_t *
-client_updatesizehints(Client *c)
+client_updatesizehints(client_t *c)
 {
     long msize;
     xcb_size_hints_t *size = NULL;
@@ -814,7 +814,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
     double delta = 1.0, current_opacity = 100.0;
     unsigned int current_opacity_raw = 0;
     int set_prop = 0;
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
     xcb_get_property_reply_t *prop_r;
 
     if(!sel)
@@ -859,11 +859,11 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
  * \param reverse return previous instead of next if true
  * \return next or previous client
  */
-static Client *
-client_find_visible(Client *sel, bool reverse)
+static client_t *
+client_find_visible(client_t *sel, bool reverse)
 {
-    Client *next;
-    Client *(*client_iter)(Client **, Client *) = client_list_next_cycle;
+    client_t *next;
+    client_t *(*client_iter)(client_t **, client_t *) = client_list_next_cycle;
 
     if(!sel) return NULL;
 
@@ -887,7 +887,7 @@ client_find_visible(Client *sel, bool reverse)
 void
 uicb_client_swapprev(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
-    Client *prev;
+    client_t *prev;
 
     if((prev = client_find_visible(globalconf.focus->client, true)))
     {
@@ -905,7 +905,7 @@ uicb_client_swapprev(int screen __attribute__ ((unused)), char *arg __attribute_
 void
 uicb_client_swapnext(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
-    Client *next;
+    client_t *next;
 
     if((next = client_find_visible(globalconf.focus->client, false)))
     {
@@ -928,7 +928,7 @@ uicb_client_moveresize(int screen, char *arg)
     char x[8], y[8], w[8], h[8];
     int nmx, nmy;
     area_t geometry;
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
     xcb_query_pointer_reply_t *xqp;
     Layout *curlay = layout_get_current(screen);
 
@@ -983,7 +983,7 @@ uicb_client_moveresize(int screen, char *arg)
  * \param c the client to kill
  */
 void
-client_kill(Client *c)
+client_kill(client_t *c)
 {
     xcb_client_message_event_t ev;
 
@@ -1015,7 +1015,7 @@ client_kill(Client *c)
 void
 uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
 {
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
 
     if(sel)
         client_kill(sel);
@@ -1026,7 +1026,7 @@ uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((
  * \param geometry the geometry to use for maximizing
  */
 static void
-client_maximize(Client *c, area_t geometry)
+client_maximize(client_t *c, area_t geometry)
 {
     if((c->ismax = !c->ismax))
     {
@@ -1067,7 +1067,7 @@ client_maximize(Client *c, area_t geometry)
 void
 uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
     area_t area = screen_get_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
@@ -1088,7 +1088,7 @@ uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
     area_t area = screen_get_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
@@ -1111,7 +1111,7 @@ uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
     area_t area = screen_get_area(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
@@ -1133,7 +1133,7 @@ uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *c, *sel = globalconf.focus->client;
+    client_t *c, *sel = globalconf.focus->client;
 
     if(!sel)
         return;
@@ -1158,7 +1158,7 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *next;
+    client_t *next;
 
     if((next = client_find_visible(globalconf.focus->client, false)))
         client_focus(next, screen, true);
@@ -1172,7 +1172,7 @@ uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
 {
-    Client *prev;
+    client_t *prev;
 
     if((prev = client_find_visible(globalconf.focus->client, true)))
         client_focus(prev, screen, true);

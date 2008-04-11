@@ -44,7 +44,7 @@ extern AwesomeConf globalconf;
 static void
 arrange(int screen)
 {
-    Client *c;
+    client_t *c;
     Layout *curlay = layout_get_current(screen);
     int phys_screen = screen_virttophys(screen);
     xcb_query_pointer_cookie_t qp_c;

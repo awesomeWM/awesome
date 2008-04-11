@@ -66,9 +66,9 @@ placement_fix_offscreen(area_t geometry, int screen, int border)
  * \return new geometry
  */
 area_t
-placement_smart(Client *c)
+placement_smart(client_t *c)
 {
-    Client *client;
+    client_t *client;
     area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
     area_t *screen_geometry, *arealist = NULL, *r;
     bool found = false;
@@ -129,7 +129,7 @@ placement_smart(Client *c)
 }
 
 area_t
-placement_under_mouse(Client *c)
+placement_under_mouse(client_t *c)
 {
     xcb_query_pointer_cookie_t qp_c;
     xcb_query_pointer_reply_t *qp_r;

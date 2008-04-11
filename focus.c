@@ -26,7 +26,7 @@
 extern AwesomeConf globalconf;
 
 static client_node_t *
-focus_get_node_by_client(Client *c)
+focus_get_node_by_client(client_t *c)
 {
     client_node_t *node;
 
@@ -38,7 +38,7 @@ focus_get_node_by_client(Client *c)
 }
 
 void
-focus_add_client(Client *c)
+focus_add_client(client_t *c)
 {
     client_node_t *node;
 
@@ -55,7 +55,7 @@ focus_add_client(Client *c)
 }
 
 void
-focus_delete_client(Client *c)
+focus_delete_client(client_t *c)
 {
     client_node_t *node = focus_get_node_by_client(c);
 
@@ -66,7 +66,7 @@ focus_delete_client(Client *c)
     }
 }
 
-static Client *
+static client_t *
 focus_get_latest_client_for_tags(Tag **t, int nindex)
 {
     client_node_t *node;
@@ -89,11 +89,11 @@ focus_get_latest_client_for_tags(Tag **t, int nindex)
     return NULL;
 }
 
-Client *
+client_t *
 focus_get_current_client(int screen)
 {
     Tag **curtags = tags_get_current(screen);
-    Client *sel = focus_get_latest_client_for_tags(curtags, 0);
+    client_t *sel = focus_get_latest_client_for_tags(curtags, 0);
     p_delete(&curtags);
 
     return sel;
@@ -110,7 +110,7 @@ uicb_focus_history(int screen, char *arg)
 {
     int i;
     Tag **curtags;
-    Client *c;
+    client_t *c;
 
     if(arg)
     {
@@ -135,7 +135,7 @@ uicb_focus_history(int screen, char *arg)
 void
 uicb_focus_client_byname(int screen, char *arg)
 {
-    Client *c;
+    client_t *c;
     Tag **curtags, **tag;
 
     if(arg)

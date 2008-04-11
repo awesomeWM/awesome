@@ -38,7 +38,7 @@ extern AwesomeConf globalconf;
 static bool
 isoccupied(Tag *t)
 {
-    Client *c;
+    client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
         if(is_client_tagged(c, t) && !c->skip && c != globalconf.scratch.client)
@@ -50,7 +50,7 @@ isoccupied(Tag *t)
 static bool
 isurgent(Tag *t)
 {
-    Client *c;
+    client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
         if(is_client_tagged(c, t) && c->isurgent)
@@ -77,7 +77,7 @@ taglist_draw(widget_t *widget,
              int used __attribute__ ((unused)))
 {
     Tag *tag;
-    Client *sel = globalconf.focus->client;
+    client_t *sel = globalconf.focus->client;
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int w = 0, flagsize;
     style_t style;

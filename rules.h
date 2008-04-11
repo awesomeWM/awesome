@@ -28,7 +28,7 @@
 
 regex_t * rules_compile_regex(char *);
 bool tag_match_rule(Tag *, rule_t *);
-rule_t * rule_matching_client(Client *);
+rule_t * rule_matching_client(client_t *);
 
 DO_SLIST(rule_t, rule, p_delete)
 
