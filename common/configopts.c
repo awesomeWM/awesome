@@ -98,7 +98,7 @@ static int
 cfg_alignment_parse(cfg_t *cfg, cfg_opt_t *opt,
                     const char *value, void *result)
 {
-    Alignment *p = p_new(Alignment, 1);
+    alignment_t *p = p_new(alignment_t, 1);
 
     if((*p = draw_align_get_from_str(value)) == Auto
        && a_strcmp(value, "auto"))
@@ -119,19 +119,19 @@ cfg_value_free(void *value)
     p_delete(&value);
 }
 
-Alignment
+alignment_t
 cfg_opt_getnalignment(cfg_opt_t *opt, unsigned int oindex)
 {
-    return * (Alignment *) cfg_opt_getnptr(opt, oindex);
+    return * (alignment_t *) cfg_opt_getnptr(opt, oindex);
 }
 
-Alignment
+alignment_t
 cfg_getnalignment(cfg_t *cfg, const char *name, unsigned int oindex)
 {
     return cfg_opt_getnalignment(cfg_getopt(cfg, name), oindex);
 }
 
-Alignment
+alignment_t
 cfg_getalignment(cfg_t *cfg, const char *name)
 {
     return cfg_getnalignment(cfg, name, 0);

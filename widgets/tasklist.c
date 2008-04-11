@@ -43,7 +43,7 @@ typedef struct
 {
     ShowClient show;
     bool show_icons;
-    Alignment align;
+    alignment_t align;
     struct
     {
         style_t normal;

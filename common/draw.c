@@ -225,7 +225,7 @@ draw_font_delete(font_t **font)
 void
 draw_text(DrawCtx *ctx,
           area_t area,
-          Alignment align,
+          alignment_t align,
           int padding,
           char *text,
           style_t style)
@@ -893,13 +893,13 @@ draw_textwidth(xcb_connection_t *conn, int default_screen, font_t *font, const c
     return ext.width;
 }
 
-/** Transform a string to a Alignment type.
+/** Transform a string to a alignment_t type.
  * Recognized string are left, center or right. Everything else will be
  * recognized as AlignAuto.
  * \param align string with align text
- * \return Alignment type
+ * \return alignment_t type
  */
-Alignment
+alignment_t
 draw_align_get_from_str(const char *align)
 {
     if(!a_strcmp(align, "left"))

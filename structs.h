@@ -50,8 +50,8 @@ typedef struct
     simple_window_t *sw;
     Position position;
     Position dposition;
-    Alignment align;
-    Alignment text_align;
+    alignment_t align;
+    alignment_t text_align;
     int width, height;
     /** Colors */
     struct
@@ -134,7 +134,7 @@ struct Widget
     /** Statusbar */
     Statusbar *statusbar;
     /** Alignement */
-    Alignment alignment;
+    alignment_t alignment;
     /** Misc private data */
     void *data;
     /** true if user supplied coords */

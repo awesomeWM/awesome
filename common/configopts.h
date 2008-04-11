@@ -28,9 +28,9 @@ cfg_t * cfg_new(void);
 char * config_file(void);
 int config_check(const char *);
 
-Alignment cfg_opt_getnalignment(cfg_opt_t *, unsigned int);
-Alignment cfg_getnalignment(cfg_t *, const char *, unsigned int);
-Alignment cfg_getalignment(cfg_t *, const char *);
+alignment_t cfg_opt_getnalignment(cfg_opt_t *, unsigned int);
+alignment_t cfg_getnalignment(cfg_t *, const char *, unsigned int);
+alignment_t cfg_getalignment(cfg_t *, const char *);
 
 Position cfg_opt_getnposition(cfg_opt_t *, unsigned int);
 Position cfg_getnposition(cfg_t *, const char *, unsigned int);
