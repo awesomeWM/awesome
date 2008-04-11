@@ -22,13 +22,13 @@
 #ifndef AWESOME_UICB_H
 #define AWESOME_UICB_H
 
-typedef void (Uicb)(int, char *);
+typedef void (uicb_t)(int, char *);
 
 int __uicb_parsecmd(char *);
 
-Uicb uicb_restart;
-Uicb uicb_exec;
-Uicb uicb_spawn;
+uicb_t uicb_restart;
+uicb_t uicb_exec;
+uicb_t uicb_spawn;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

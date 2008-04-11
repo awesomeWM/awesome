@@ -24,7 +24,7 @@
 
 #include "uicb.h"
 
-Uicb uicb_quit;
+uicb_t uicb_quit;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

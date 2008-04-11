@@ -43,20 +43,20 @@ void client_saveprops(Client *);
 void client_kill(Client *);
 void client_setfloating(Client *, bool, layer_t);
 
-Uicb uicb_client_kill;
-Uicb uicb_client_moveresize;
-Uicb uicb_client_settrans;
-Uicb uicb_client_swapnext;
-Uicb uicb_client_swapprev;
-Uicb uicb_client_togglemax;
-Uicb uicb_client_toggleverticalmax;
-Uicb uicb_client_togglehorizontalmax;
-Uicb uicb_client_zoom;
-Uicb uicb_client_focusnext;
-Uicb uicb_client_focusprev;
-Uicb uicb_client_togglefloating;
-Uicb uicb_client_togglescratch;
-Uicb uicb_client_setscratch;
+uicb_t uicb_client_kill;
+uicb_t uicb_client_moveresize;
+uicb_t uicb_client_settrans;
+uicb_t uicb_client_swapnext;
+uicb_t uicb_client_swapprev;
+uicb_t uicb_client_togglemax;
+uicb_t uicb_client_toggleverticalmax;
+uicb_t uicb_client_togglehorizontalmax;
+uicb_t uicb_client_zoom;
+uicb_t uicb_client_focusnext;
+uicb_t uicb_client_focusprev;
+uicb_t uicb_client_togglefloating;
+uicb_t uicb_client_togglescratch;
+uicb_t uicb_client_setscratch;
 
 DO_SLIST(Client, client, p_delete)
 

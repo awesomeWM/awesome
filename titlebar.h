@@ -32,7 +32,7 @@ area_t titlebar_geometry_add(titlebar_t *, area_t);
 area_t titlebar_geometry_remove(titlebar_t *, area_t);
 void titlebar_position_set(titlebar_t *, position_t);
 
-Uicb uicb_client_toggletitlebar;
+uicb_t uicb_client_toggletitlebar;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

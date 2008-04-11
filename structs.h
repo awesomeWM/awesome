@@ -87,7 +87,7 @@ struct Key
     unsigned long mod;
     xcb_keysym_t keysym;
     xcb_keycode_t keycode;
-    Uicb *func;
+    uicb_t *func;
     char *arg;
     /** Next and previous keys */
     Key *prev, *next;
@@ -99,7 +99,7 @@ struct Button
 {
     unsigned long mod;
     unsigned int button;
-    Uicb *func;
+    uicb_t *func;
     char *arg;
     /** Next and previous buttons */
     Button *prev, *next;

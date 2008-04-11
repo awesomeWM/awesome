@@ -40,14 +40,14 @@ void tag_client_with_current_selected(Client *);
 void tag_view_only_byindex(int, int);
 void tag_append_to_screen(Tag *, int);
 
-Uicb uicb_client_tag;
-Uicb uicb_client_toggletag;
-Uicb uicb_tag_toggleview;
-Uicb uicb_tag_view;
-Uicb uicb_tag_prev_selected;
-Uicb uicb_tag_viewnext;
-Uicb uicb_tag_viewprev;
-Uicb uicb_tag_create;
+uicb_t uicb_client_tag;
+uicb_t uicb_client_toggletag;
+uicb_t uicb_tag_toggleview;
+uicb_t uicb_tag_view;
+uicb_t uicb_tag_prev_selected;
+uicb_t uicb_tag_viewnext;
+uicb_t uicb_tag_viewprev;
+uicb_t uicb_tag_create;
 
 DO_SLIST(Tag, tag, p_delete)
 DO_SLIST(tag_client_node_t, tag_client_node, p_delete)

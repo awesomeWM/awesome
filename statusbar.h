@@ -29,7 +29,7 @@ void statusbar_preinit(Statusbar *);
 void statusbar_init(Statusbar *);
 Statusbar * statusbar_getbyname(int, const char *);
 
-Uicb uicb_statusbar_toggle;
+uicb_t uicb_statusbar_toggle;
 
 DO_SLIST(Statusbar, statusbar, p_delete)
 

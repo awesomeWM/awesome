@@ -148,7 +148,7 @@ __uicb_run(char *cmd)
     const char *arg;
     int screen;
     ssize_t len;
-    Uicb *uicb;
+    uicb_t *uicb;
 
     len = a_strlen(cmd);
     p = strtok(cmd, " ");

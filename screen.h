@@ -29,8 +29,8 @@ area_t get_display_area(int, Statusbar *, Padding *);
 int screen_virttophys(int);
 void move_client_to_screen(Client *, int, bool);
 
-Uicb uicb_screen_focus;
-Uicb uicb_client_movetoscreen;
+uicb_t uicb_screen_focus;
+uicb_t uicb_client_movetoscreen;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

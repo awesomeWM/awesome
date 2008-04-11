@@ -24,8 +24,8 @@
 
 #include "uicb.h"
 
-Uicb uicb_client_movemouse;
-Uicb uicb_client_resizemouse;
+uicb_t uicb_client_movemouse;
+uicb_t uicb_client_resizemouse;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

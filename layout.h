@@ -41,7 +41,7 @@ DO_SLIST(Layout, layout, p_delete)
 int layout_refresh(void);
 Layout * layout_get_current(int);
 
-Uicb uicb_tag_setlayout;
+uicb_t uicb_tag_setlayout;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
