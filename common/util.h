@@ -38,13 +38,13 @@ typedef enum
     Auto
 } position_t;
 
-/** Fuzzy logic */
+/** fuzzy_t logic */
 typedef enum
 {
     No = false,
     Yes = true,
     Maybe
-} Fuzzy;
+} fuzzy_t;
 
 /** Link a name to a function */
 typedef struct
@@ -261,7 +261,7 @@ void _warn(int, const char *, const char *, ...)
     __attribute__ ((format(printf, 3, 4)));
 
 position_t position_get_from_str(const char *);
-Fuzzy fuzzy_get_from_str(const char *);
+fuzzy_t fuzzy_get_from_str(const char *);
 double compute_new_value_from_arg(const char *, double);
 void *name_func_lookup(const char *, const name_func_link_t *);
 

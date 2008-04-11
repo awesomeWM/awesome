@@ -69,8 +69,8 @@ struct rule_t
     char *icon;
     char *xprop;
     int screen;
-    Fuzzy isfloating;
-    Fuzzy ismaster;
+    fuzzy_t isfloating;
+    fuzzy_t ismaster;
     titlebar_t titlebar;
     double opacity;
     regex_t *prop_r;

@@ -133,7 +133,7 @@ char* a_strndup(const char* src, ssize_t l)
     return _tmpStr;
 }
 
-Fuzzy
+fuzzy_t
 fuzzy_get_from_str(const char *str)
 {
     if(!a_strcmp(str, "true") || !a_strcmp(str, "yes"))
