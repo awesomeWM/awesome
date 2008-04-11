@@ -236,6 +236,8 @@ xerror(void *data __attribute__ ((unused)),
        xcb_generic_error_t *e)
 {
     xutil_error_t *err = xutil_get_error(e);
+    if(!err)
+        return 0;
 
     if(e->error_code == BadWindow
        || (e->error_code == BadMatch && err->request_code == XCB_SET_INPUT_FOCUS)

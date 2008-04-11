@@ -19,8 +19,10 @@
  *
  */
 
-/* strndup() */
+/* strndup(), asprintf() */
 #define _GNU_SOURCE
+
+#include <stdio.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
@@ -254,7 +256,7 @@ xutil_error_label[] =
 const char *
 xutil_request_label[] =
 {
-    "XCB_NONE",
+    "None",
     "CreateWindow",
     "ChangeWindowAttributes",
     "GetWindowAttributes",
@@ -387,6 +389,10 @@ xutil_request_label[] =
 xutil_error_t *
 xutil_get_error(const xcb_generic_error_t *e)
 {
+    if(e->response_type != 0)
+        /* This is not an error, this _should_ not happen */
+        return NULL;
+
     xutil_error_t *err = p_new(xutil_error_t, 1);
 
     /*
@@ -394,11 +400,21 @@ xutil_get_error(const xcb_generic_error_t *e)
      * out  how it  works BTW,  seems to  get a  byte in  'pad' member
      * (second byte in second element of the array)
      */
-    err->request_code = (e->response_type == 0 ?
-                         *((uint8_t *) e + 10) : (e->response_type & 0x7f));
+    err->request_code = *((uint8_t *) e + 10);
 
-    err->request_label = a_strdup(xutil_request_label[err->request_code]);
-    err->error_label = a_strdup(xutil_error_label[e->error_code]);
+    /* Extensions  generally provide  their  own requests  so we  just
+     * store the request code */
+    if(err->request_code >= (sizeof(xutil_request_label) / sizeof(char *)))
+        asprintf(&err->request_label, "%d", err->request_code);
+    else
+        err->request_label = a_strdup(xutil_request_label[err->request_code]);
+
+    /* Extensions may also define their  own errors, so just store the
+     * error_code */
+    if(e->error_code >= (sizeof(xutil_error_label) / sizeof(char *)))
+        asprintf(&err->error_label, "%d", e->error_code);
+    else
+        err->error_label = a_strdup(xutil_error_label[e->error_code]);
 
     return err;
 }
