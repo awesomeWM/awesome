@@ -93,7 +93,7 @@ iconbox_tell(widget_t *widget, char *property, char *command)
 }
 
 widget_t *
-iconbox_new(Statusbar *statusbar, cfg_t *config)
+iconbox_new(statusbar_t *statusbar, cfg_t *config)
 {
     widget_t *w;
     Data *d;

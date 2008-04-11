@@ -33,9 +33,9 @@
 extern AwesomeConf globalconf;
 
 static void
-statusbar_position_update(Statusbar *statusbar)
+statusbar_position_update(statusbar_t *statusbar)
 {
-    Statusbar *sb;
+    statusbar_t *sb;
     area_t area;
 
     if(statusbar->position == Off)
@@ -46,7 +46,7 @@ statusbar_position_update(Statusbar *statusbar)
 
     xcb_map_window(globalconf.connection, statusbar->sw->window);
 
-    /* Top and Bottom Statusbar have prio */
+    /* Top and Bottom statusbar_t have prio */
     if(statusbar->position == Top || statusbar->position == Bottom)
         area = screen_get_area(statusbar->screen,
                                NULL,
@@ -107,7 +107,7 @@ statusbar_position_update(Statusbar *statusbar)
 }
 
 static void
-statusbar_draw(Statusbar *statusbar)
+statusbar_draw(statusbar_t *statusbar)
 {
     widget_t *widget;
     int left = 0, right = 0;
@@ -165,7 +165,7 @@ statusbar_draw(Statusbar *statusbar)
 }
 
 void
-statusbar_preinit(Statusbar *statusbar)
+statusbar_preinit(statusbar_t *statusbar)
 {
     if(statusbar->height <= 0)
         /* 1.5 as default factor, it fits nice but no one knows why */
@@ -175,9 +175,9 @@ statusbar_preinit(Statusbar *statusbar)
 }
 
 void
-statusbar_init(Statusbar *statusbar)
+statusbar_init(statusbar_t *statusbar)
 {
-    Statusbar *sb;
+    statusbar_t *sb;
     xcb_drawable_t dw;
     xcb_screen_t *s = NULL;
     int phys_screen = screen_virttophys(statusbar->screen);
@@ -187,7 +187,7 @@ statusbar_init(Statusbar *statusbar)
 
     statusbar->phys_screen = phys_screen;
 
-    /* Top and Bottom Statusbar have prio */
+    /* Top and Bottom statusbar_t have prio */
     for(sb = globalconf.screens[statusbar->screen].statusbar; sb; sb = sb->next)
         switch(sb->position)
         {
@@ -262,7 +262,7 @@ void
 statusbar_refresh()
 {
     int screen;
-    Statusbar *statusbar;
+    statusbar_t *statusbar;
     widget_t *widget;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
@@ -277,10 +277,10 @@ statusbar_refresh()
                 }
 }
 
-Statusbar *
+statusbar_t *
 statusbar_getbyname(int screen, const char *name)
 {
-    Statusbar *sb;
+    statusbar_t *sb;
 
     for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
         if(!a_strcmp(sb->name, name))
@@ -290,7 +290,7 @@ statusbar_getbyname(int screen, const char *name)
 }
 
 static void
-statusbar_toggle(Statusbar *statusbar)
+statusbar_toggle(statusbar_t *statusbar)
 {
     if(statusbar->position == Off)
         statusbar->position = (statusbar->dposition == Off) ? Top : statusbar->dposition;
@@ -309,7 +309,7 @@ statusbar_toggle(Statusbar *statusbar)
 void
 uicb_statusbar_toggle(int screen, char *arg)
 {
-    Statusbar *sb = statusbar_getbyname(screen, arg);
+    statusbar_t *sb = statusbar_getbyname(screen, arg);
 
     if(sb)
         statusbar_toggle(sb);

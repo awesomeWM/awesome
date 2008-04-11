@@ -240,7 +240,7 @@ cmp_widget_cfg(const void *a, const void *b)
 }
 
 static void
-statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
+statusbar_widgets_create(cfg_t *cfg_statusbar, statusbar_t *statusbar)
 {
     cfg_t* widgets, *wptr;
     widget_t *widget = NULL;
@@ -313,7 +313,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     FloatingPlacement flpl;
     Layout *layout = NULL;
     Tag *tag = NULL;
-    Statusbar *statusbar = NULL;
+    statusbar_t *statusbar = NULL;
     cfg_t *cfg_general, *cfg_styles, *cfg_screen, *cfg_tags,
           *cfg_layouts, *cfg_padding, *cfgsectmp, *cfg_titlebar,
           *cfg_styles_normal, *cfg_styles_focus, *cfg_styles_urgent;
@@ -394,11 +394,11 @@ config_parse_screen(cfg_t *cfg, int screen)
     /* Titlebar */
     config_section_titlebar_init(cfg_titlebar, &virtscreen->titlebar_default, screen);
 
-    /* Statusbar */
+    /* statusbar_t */
     statusbar_list_init(&virtscreen->statusbar);
     for(i = cfg_size(cfg_screen, "statusbar") - 1; i >= 0; i--)
     {
-        statusbar = p_new(Statusbar, 1);
+        statusbar = p_new(statusbar_t, 1);
         cfgsectmp = cfg_getnsec(cfg_screen, "statusbar", i);
         statusbar->position = statusbar->dposition =
             cfg_getposition(cfgsectmp, "position");

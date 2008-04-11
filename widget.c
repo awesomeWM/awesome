@@ -93,7 +93,7 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
  * \return a widget
  */
 static widget_t *
-widget_getbyname(Statusbar *sb, char *name)
+widget_getbyname(statusbar_t *sb, char *name)
 {
     widget_t *widget;
 
@@ -142,7 +142,7 @@ widget_common_tell(widget_t *widget, char *property __attribute__ ((unused)),
  * \param config the cfg_t structure we will parse to set common info
  */
 void
-widget_common_new(widget_t *widget, Statusbar *statusbar, cfg_t *config)
+widget_common_new(widget_t *widget, statusbar_t *statusbar, cfg_t *config)
 {
     widget->statusbar = statusbar;
     widget->name = a_strdup(cfg_title(config));
@@ -163,7 +163,7 @@ widget_common_new(widget_t *widget, Statusbar *statusbar, cfg_t *config)
 void
 widget_invalidate_cache(int screen, int flags)
 {
-    Statusbar *statusbar;
+    statusbar_t *statusbar;
     widget_t *widget;
 
     for(statusbar = globalconf.screens[screen].statusbar;
@@ -182,7 +182,7 @@ widget_invalidate_cache(int screen, int flags)
 void
 uicb_widget_tell(int screen, char *arg)
 {
-    Statusbar *statusbar;
+    statusbar_t *statusbar;
     widget_t *widget;
     char *p, *property = NULL, *command;
     ssize_t len;

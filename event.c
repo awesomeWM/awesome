@@ -79,7 +79,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     int screen;
     Client *c;
     widget_t *widget;
-    Statusbar *statusbar;
+    statusbar_t *statusbar;
     xcb_query_pointer_cookie_t qc;
     xcb_query_pointer_reply_t *qr;
 
@@ -358,7 +358,7 @@ event_handle_expose(void *data __attribute__ ((unused)),
                     xcb_expose_event_t *ev)
 {
     int screen;
-    Statusbar *statusbar;
+    statusbar_t *statusbar;
     Client *c;
 
     if(!ev->count)

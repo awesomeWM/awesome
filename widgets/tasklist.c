@@ -258,7 +258,7 @@ tasklist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 }
 
 widget_t *
-tasklist_new(Statusbar *statusbar, cfg_t *config)
+tasklist_new(statusbar_t *statusbar, cfg_t *config)
 {
     widget_t *w;
     Data *d;

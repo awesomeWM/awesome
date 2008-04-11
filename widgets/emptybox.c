@@ -49,7 +49,7 @@ emptybox_draw(widget_t *widget, DrawCtx *ctx, int offset,
 }
 
 widget_t *
-emptybox_new(Statusbar *statusbar, cfg_t *config)
+emptybox_new(statusbar_t *statusbar, cfg_t *config)
 {
     widget_t *w;
     Data *d;

@@ -120,7 +120,7 @@ typedef enum
 
 /** widget_t */
 typedef struct widget_t widget_t;
-typedef struct Statusbar Statusbar;
+typedef struct statusbar_t statusbar_t;
 struct widget_t
 {
     /** widget_t name */
@@ -131,8 +131,8 @@ struct widget_t
     widget_tell_status_t (*tell)(widget_t *, char *, char *);
     /** ButtonPressedEvent handler */
     void (*button_press)(widget_t *, xcb_button_press_event_t *);
-    /** Statusbar */
-    Statusbar *statusbar;
+    /** statusbar_t */
+    statusbar_t *statusbar;
     /** Alignement */
     alignment_t alignment;
     /** Misc private data */
@@ -155,11 +155,11 @@ struct widget_t
 };
 
 /** Status bar */
-struct Statusbar
+struct statusbar_t
 {
     /** Window */
     simple_window_t *sw;
-    /** Statusbar name */
+    /** statusbar_t name */
     char *name;
     /** Bar width */
     int width;
@@ -178,7 +178,7 @@ struct Statusbar
     /** Draw context */
     DrawCtx *ctx;
     /** Next and previous statusbars */
-    Statusbar *prev, *next;
+    statusbar_t *prev, *next;
 };
 
 /** Client type */
@@ -325,7 +325,7 @@ typedef struct
     /** Layout list */
     Layout *layouts;
     /** Status bar */
-    Statusbar *statusbar;
+    statusbar_t *statusbar;
     /** Padding */
     Padding padding;
 } VirtScreen;

@@ -25,13 +25,13 @@
 #include "structs.h"
 
 void statusbar_refresh(void);
-void statusbar_preinit(Statusbar *);
-void statusbar_init(Statusbar *);
-Statusbar * statusbar_getbyname(int, const char *);
+void statusbar_preinit(statusbar_t *);
+void statusbar_init(statusbar_t *);
+statusbar_t * statusbar_getbyname(int, const char *);
 
 uicb_t uicb_statusbar_toggle;
 
-DO_SLIST(Statusbar, statusbar, p_delete)
+DO_SLIST(statusbar_t, statusbar, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

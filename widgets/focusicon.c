@@ -94,7 +94,7 @@ focusicon_draw(widget_t *widget, DrawCtx *ctx, int offset,
 }
 
 widget_t *
-focusicon_new(Statusbar *statusbar, cfg_t *config)
+focusicon_new(statusbar_t *statusbar, cfg_t *config)
 {
     widget_t *w;
 

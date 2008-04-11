@@ -380,7 +380,7 @@ graph_tell(widget_t *widget, char *property, char *command)
 }
 
 widget_t *
-graph_new(Statusbar *statusbar, cfg_t *config)
+graph_new(statusbar_t *statusbar, cfg_t *config)
 {
     widget_t *w;
     Data *d;

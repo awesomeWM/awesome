@@ -59,7 +59,7 @@ layoutinfo_draw(widget_t *widget,
 }
 
 widget_t *
-layoutinfo_new(Statusbar *statusbar, cfg_t* config)
+layoutinfo_new(statusbar_t *statusbar, cfg_t* config)
 {
     widget_t *w;
     w = p_new(widget_t, 1);

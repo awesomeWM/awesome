@@ -204,7 +204,7 @@ taglist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 }
 
 widget_t *
-taglist_new(Statusbar *statusbar, cfg_t *config)
+taglist_new(statusbar_t *statusbar, cfg_t *config)
 {
     widget_t *w;
     w = p_new(widget_t, 1);

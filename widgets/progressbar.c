@@ -451,7 +451,7 @@ progressbar_tell(widget_t *widget, char *property, char *command)
 }
 
 widget_t *
-progressbar_new(Statusbar *statusbar, cfg_t *config)
+progressbar_new(statusbar_t *statusbar, cfg_t *config)
 {
     widget_t *w;
     Data *d;

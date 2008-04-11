@@ -292,7 +292,7 @@ main(int argc, char **argv)
     int r, xfd, csfd, i, screen_nbr, opt;
     ssize_t cmdlen = 1;
     const xcb_query_extension_reply_t *shape_query, *randr_query;
-    Statusbar *statusbar;
+    statusbar_t *statusbar;
     fd_set rd;
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;

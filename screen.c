@@ -39,10 +39,10 @@ extern AwesomeConf globalconf;
  * \return area_t
  */
 area_t
-screen_get_area(int screen, Statusbar *statusbar, Padding *padding)
+screen_get_area(int screen, statusbar_t *statusbar, Padding *padding)
 {
     area_t area = globalconf.screens_info->geometry[screen];
-    Statusbar *sb;
+    statusbar_t *sb;
 
     /* make padding corrections */
     if(padding)
@@ -80,10 +80,10 @@ screen_get_area(int screen, Statusbar *statusbar, Padding *padding)
  * \return area_t
  */
 area_t
-get_display_area(int screen, Statusbar *statusbar, Padding *padding)
+get_display_area(int screen, statusbar_t *statusbar, Padding *padding)
 {
     area_t area = { 0, 0, 0, 0, NULL, NULL };
-    Statusbar *sb;
+    statusbar_t *sb;
     xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, screen);
 
     area.width = s->width_in_pixels;
