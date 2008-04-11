@@ -96,7 +96,7 @@ name_func_lookup(const char *funcname, const name_func_link_t *list)
     return NULL;
 }
 
-Position
+position_t
 position_get_from_str(const char *pos)
 {
     if(!a_strcmp(pos, "top"))

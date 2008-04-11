@@ -48,8 +48,8 @@ enum
 typedef struct
 {
     simple_window_t *sw;
-    Position position;
-    Position dposition;
+    position_t position;
+    position_t dposition;
     alignment_t align;
     alignment_t text_align;
     int width, height;
@@ -166,9 +166,9 @@ struct Statusbar
     /** Bar height */
     int height;
     /** Default position */
-    Position dposition;
+    position_t dposition;
     /** Bar position */
-    Position position;
+    position_t position;
     /** Screen */
     int screen;
     /** Physical screen id */

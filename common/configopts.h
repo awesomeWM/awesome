@@ -32,9 +32,9 @@ alignment_t cfg_opt_getnalignment(cfg_opt_t *, unsigned int);
 alignment_t cfg_getnalignment(cfg_t *, const char *, unsigned int);
 alignment_t cfg_getalignment(cfg_t *, const char *);
 
-Position cfg_opt_getnposition(cfg_opt_t *, unsigned int);
-Position cfg_getnposition(cfg_t *, const char *, unsigned int);
-Position cfg_getposition(cfg_t *, const char *);
+position_t cfg_opt_getnposition(cfg_opt_t *, unsigned int);
+position_t cfg_getnposition(cfg_t *, const char *, unsigned int);
+position_t cfg_getposition(cfg_t *, const char *);
 
 #endif
 

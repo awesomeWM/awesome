@@ -41,7 +41,7 @@ typedef struct
     int size;                           /** Size of lines-array (also innerbox-lenght) */
     xcolor_t bg;                        /** Background color */
     xcolor_t bordercolor;               /** Border color */
-    Position grow;                      /** grow: Left or Right */
+    position_t grow;                      /** grow: Left or Right */
 
     /* markers... */
     int *index;                         /** Index of current (new) value */

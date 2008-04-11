@@ -130,8 +130,8 @@ void draw_rectangle(DrawCtx *, area_t, float, bool, xcolor_t);
 void draw_rectangle_gradient(DrawCtx *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 
 void draw_graph_setup(DrawCtx *);
-void draw_graph(DrawCtx *, area_t, int *, int *, int, Position, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
-void draw_graph_line(DrawCtx *, area_t, int *, int, Position, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
+void draw_graph(DrawCtx *, area_t, int *, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
+void draw_graph_line(DrawCtx *, area_t, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 void draw_circle(DrawCtx *, int, int, int, bool, xcolor_t);
 void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);

@@ -125,7 +125,7 @@ uicb_tag_setmwfact(int screen, char *arg)
 }
 
 static void
-_tile(int screen, const Position position)
+_tile(int screen, const position_t position)
 {
     /* windows area geometry */
     int wah = 0, waw = 0, wax = 0, way = 0;

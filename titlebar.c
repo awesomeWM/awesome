@@ -449,7 +449,7 @@ titlebar_update_geometry(Client *c, area_t geometry)
 }
 
 void
-titlebar_position_set(titlebar_t *t, Position p)
+titlebar_position_set(titlebar_t *t, position_t p)
 {
     if(!t->sw)
         return;

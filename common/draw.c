@@ -456,7 +456,7 @@ draw_graph_setup(DrawCtx *ctx)
  */
 void
 draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
-           Position grow, area_t patt_rect,
+           position_t grow, area_t patt_rect,
            xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
     int i, y, w;
@@ -516,7 +516,7 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
  */
 void
 draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
-                Position grow, area_t patt_rect,
+                position_t grow, area_t patt_rect,
                 xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
     int i, w;

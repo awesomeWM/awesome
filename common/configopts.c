@@ -79,7 +79,7 @@ static int
 cfg_position_parse(cfg_t *cfg, cfg_opt_t *opt,
                    const char *value, void *result)
 {
-    Position *p = p_new(Position, 1);
+    position_t *p = p_new(position_t, 1);
 
     if((*p = position_get_from_str(value)) == Off
        && a_strcmp(value, "off"))
@@ -137,19 +137,19 @@ cfg_getalignment(cfg_t *cfg, const char *name)
     return cfg_getnalignment(cfg, name, 0);
 }
 
-Position
+position_t
 cfg_opt_getnposition(cfg_opt_t *opt, unsigned int oindex)
 {
-    return * (Position *) cfg_opt_getnptr(opt, oindex);
+    return * (position_t *) cfg_opt_getnptr(opt, oindex);
 }
 
-Position
+position_t
 cfg_getnposition(cfg_t *cfg, const char *name, unsigned int oindex)
 {
     return cfg_opt_getnposition(cfg_getopt(cfg, name), oindex);
 }
 
-Position
+position_t
 cfg_getposition(cfg_t *cfg, const char *name)
 {
     return cfg_getnposition(cfg, name, 0);
