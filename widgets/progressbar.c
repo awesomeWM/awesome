@@ -122,20 +122,13 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     int i, percent_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
     int unit = 0; /* tick + gap */
     int border_offset;
+    int widget_width;
     area_t rectangle, pattern_rect;
 
     Data *d = widget->data;
 
     if (!d->data_items)
         return 0;
-
-    if(!widget->user_supplied_x)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                                 d->width,
-                                                 offset,
-                                                 widget->alignment);
-    if(!widget->user_supplied_y)
-        widget->area.y = 0;
 
     /* for a 'reversed' progressbar:
      * basic progressbar:
@@ -154,10 +147,12 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     if(d->vertical)
     {
-        /* TODO: maybe prevent to calculate that stuff below over and over again (->use Data-values) */
-        pb_height = (int) (widget->statusbar->height * d->height + 0.5) - 2 * (d->border_width + d->border_padding);
+        /* TODO: maybe prevent to calculate that stuff below over and over again (->use static-values) */
+        pb_height = (int) (widget->statusbar->height * d->height + 0.5) -
+                    2 * (d->border_width + d->border_padding);
         if(d->ticks_count && d->ticks_gap)
         {
+            /* '+ d->ticks_gap' because a unit includes a ticks + ticks_gap */
             unit = (pb_height + d->ticks_gap) / d->ticks_count;
             pb_height = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
         }
@@ -165,7 +160,11 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
         pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->data_items -
                    d->gap * (d->data_items - 1)) / d->data_items);
 
-        pb_y = widget->area.y + ((int) (widget->statusbar->height * (1 - d->height)) / 2) + d->border_width + d->border_padding;
+        pb_y = widget->area.y + ((int) (widget->statusbar->height * (1 - d->height)) / 2) +
+               d->border_width + d->border_padding;
+
+        widget_width = d->data_items * (pb_width +
+                       2 * (d->border_width + d->border_padding) + d->gap) - d->gap;
 
         for(i = 0; i < d->data_items; i++)
         {
@@ -190,7 +189,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                 else
                     rectangle.y = pb_y - border_offset - d->border_padding - 1;
 
-                rectangle.width = pb_width + d->border_width + 2 * d->border_padding - 1 + 2;
+                rectangle.width = pb_width + 2 * d->border_padding + d->border_width + 1;
                 rectangle.height = pb_height + d->border_width + 2 * d->border_padding + 1;
                 if(d->border_padding)
                     draw_rectangle(ctx, rectangle, 1, True, d->bg[i]);
@@ -269,12 +268,16 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
         if(d->ticks_count && d->ticks_gap)
         {
             unit = (pb_width + d->ticks_gap) / d->ticks_count;
-            pb_width = (int)unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
+            pb_width = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
         }
 
-        pb_height = (int) ((widget->statusbar->height * d->height - d->data_items * 2 * (d->border_width + d->border_padding) -
+        pb_height = (int) ((widget->statusbar->height * d->height -
+                    d->data_items * 2 * (d->border_width + d->border_padding) -
                     (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
-        pb_y = widget->area.y + ((int) (widget->statusbar->height * (1 - d->height)) / 2) + d->border_width + d->border_padding;
+        pb_y = widget->area.y + ((int) (widget->statusbar->height * (1 - d->height)) / 2) +
+               d->border_width + d->border_padding;
+
+        widget_width = pb_width + 2 * (d->border_width + d->border_padding);
 
         for(i = 0; i < d->data_items; i++)
         {
@@ -300,7 +303,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                 else
                     rectangle.y = pb_y + pb_offset - border_offset - d->border_padding - 1;
 
-                rectangle.width = pb_width + d->border_width + 2 * d->border_padding - 1 + 2;
+                rectangle.width = pb_width + 2 * d->border_padding + d->border_width + 1;
                 rectangle.height = pb_height + d->border_width + 2 * d->border_padding + 1;
                 if(d->border_padding)
                     draw_rectangle(ctx, rectangle, 1, True, d->bg[i]);
@@ -372,7 +375,15 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
         }
     }
 
-    widget->area.width = d->width;
+    if(!widget->user_supplied_x)
+        widget->area.x = widget_calculate_offset(widget->statusbar->width,
+                                                 widget_width,
+                                                 offset,
+                                                 widget->alignment);
+    if(!widget->user_supplied_y)
+        widget->area.y = 0;
+
+    widget->area.width = widget_width;
     widget->area.height = widget->statusbar->height;
     return widget->area.width;
 }
