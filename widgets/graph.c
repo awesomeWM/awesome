@@ -115,11 +115,11 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     rectangle.x++;
     rectangle.y++;
     rectangle.width = d->size;
-    rectangle.height -= 2;
+    rectangle.height = d->box_height;
     draw_rectangle(ctx, rectangle, 1.0, True, d->bg);
 
     /* for graph drawing */
-    rectangle.x = widget->area.x + 2;
+    rectangle.x++; /* I won't know why */
     rectangle.y = margin_top + d->box_height + 1; /* bottom left corner as starting point */
     rectangle.width = d->size; /* rectangle.height is not used */
 
