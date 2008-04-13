@@ -307,9 +307,7 @@ draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
         cairo_set_source_rgb(ctx->cr, pcolor->red / 65535.0, pcolor->green / 65535.0, pcolor->blue / 65535.0);
     else
     {
-        /* rext.x + 1 -> else will draw 1 pixel too much to the right or
-         * similar - cairo bug? */
-        pat = cairo_pattern_create_linear(rect.x - 1, rect.y, rect.x + 1 + rect.width, rect.y + rect.height);
+        pat = cairo_pattern_create_linear(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
 
         /* pcolor is always set (so far in awesome) */
         cairo_pattern_add_color_stop_rgb(pat, 0.0, pcolor->red / 65535.0,
