@@ -501,20 +501,23 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
     y = rect.y;
     w = rect.width;
 
-    if(grow == Right) /* draw from right to left */
-    {
-        x += w - 1;
-        cairo_move_to(ctx->cr, x, y - to[cur_index]);
-    }
-    else
-    {
-        /* x-1 (on the border), paints *from* the last point (... not included itself) */
-        /* may makes sense when you assume there is already some line drawn to it - anyway */
-        cairo_move_to(ctx->cr, x - 1, y - to[cur_index]);
-    }
+    /* NOTE: think about about the cairo coordinates pointing to the upper left
+     * corner of a single pixel (what itself is a square) - and it draws from
+     * there! It fills the pixels placed on the bottom/right of that, or so */
 
-    for (i = 0; i < w; i++)
+    if(grow == Right) /* draw from right to left */
+        x += w;
+
+    /* initial point */
+    cairo_move_to(ctx->cr, x, y - to[cur_index]);
+
+    for(i = 0; i < w; i++)
     {
+        if(grow == Right)
+            x--;
+        else
+            x++;
+
         if (to[cur_index] > 0)
         {
             cairo_line_to(ctx->cr, x, y - to[cur_index]);
@@ -534,11 +537,8 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
         if (--cur_index < 0) /* cycles around the index */
             cur_index = w - 1;
 
-        if(grow == Right)
-            x--;
-        else
-            x++;
     }
+
     cairo_stroke(ctx->cr);
 
     if(pat)

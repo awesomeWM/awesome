@@ -119,7 +119,6 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
     draw_rectangle(ctx, rectangle, 1.0, True, d->bg);
 
     /* for graph drawing */
-    rectangle.x++; /* I won't know why */
     rectangle.y = margin_top + d->box_height + 1; /* bottom left corner as starting point */
     rectangle.width = d->size; /* rectangle.height is not used */
 
