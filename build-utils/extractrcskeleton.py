@@ -46,6 +46,8 @@ def sections_print(sec, indent):
                 print indent + opt + " = <{auto, left, right}>"
             elif opt in ["text_align"]:
                 print indent + opt + " = <{left, center, right}>"
+            elif opt in ["grow"]:
+                print indent + opt + " = <{left, right}>"
             elif opt in ["arg"]:
                 print indent + opt + " = <uicb-arg>"
             elif opt in ["command"]:
