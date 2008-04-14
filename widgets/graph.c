@@ -124,11 +124,17 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     draw_graph_setup(ctx); /* setup some drawing options */
 
+    /* gradient begin either left or on the right of the rectangle */
+    if(d->grow == Right)
+        pattern_area.x = rectangle.x + rectangle.width;
+    else
+        pattern_area.x = rectangle.x;
+
     if(d->filltop_total)
     {
         /* all these filltop's have the same setting */
-        pattern_area.x = rectangle.x;
         pattern_area.y = rectangle.y - rectangle.height;
+
         if(d->filltop_vertical_grad[0])
         {
             pattern_area.width = 0;
@@ -136,8 +142,12 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         }
         else
         {
-            pattern_area.width = rectangle.width;
             pattern_area.height = 0;
+
+            if(d->grow == Right)
+                pattern_area.width = -rectangle.width;
+            else
+                pattern_area.width = rectangle.width;
         }
 
         /* draw style = top */
@@ -184,7 +194,6 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         }
     }
 
-    pattern_area.x = rectangle.x;
     pattern_area.y = rectangle.y;
 
     if(d->fillbottom_total)
@@ -197,8 +206,12 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         }
         else
         {
-            pattern_area.width = rectangle.width;
             pattern_area.height = 0;
+
+            if(d->grow == Right)
+                pattern_area.width = -rectangle.width;
+            else
+                pattern_area.width = rectangle.width;
         }
 
         /* draw style = bottom */
@@ -242,8 +255,12 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
         }
         else
         {
-            pattern_area.width = rectangle.width;
             pattern_area.height = 0;
+
+            if(d->grow == Right)
+                pattern_area.width = -rectangle.width;
+            else
+                pattern_area.width = rectangle.width;
         }
 
         /* draw style = line */
