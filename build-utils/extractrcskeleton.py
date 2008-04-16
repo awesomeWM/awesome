@@ -44,6 +44,8 @@ def sections_print(sec, indent):
                 print indent + opt + " = <mod>"
             elif opt in ["align"]:
                 print indent + opt + " = <{auto, left, right}>"
+            elif opt in ["draw_style"]:
+                print indent + opt + " = <{bottom, top, line}>"
             elif opt in ["text_align"]:
                 print indent + opt + " = <{left, center, right}>"
             elif opt in ["grow"]:
