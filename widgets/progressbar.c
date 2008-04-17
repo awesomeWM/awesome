@@ -201,16 +201,16 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             {
                 /* bottom to top */
                 pattern_rect.x = pb_x;
-                pattern_rect.y = pb_y + pb_height ;
+                pattern_rect.y = pb_y + pb_height;
                 pattern_rect.width =  0;
                 pattern_rect.height = -pb_height;
             }
             else
             {
-                /* top to bottom */
-                pb_progress = pb_width - pb_progress;
-                pattern_rect.x = pb_x ;
-                pattern_rect.y = pb_y ;
+                /* invert: top with bottom part */
+                pb_progress = pb_height - pb_progress;
+                pattern_rect.x = pb_x;
+                pattern_rect.y = pb_y;
                 pattern_rect.width =  0;
                 pattern_rect.height = pb_height;
             }
@@ -242,7 +242,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                 /* bg color */
                 if(!d->reverse[i])
                     draw_rectangle(ctx, rectangle, 1.0, True, d->fg_off[i]);
-                else /* REV: bg */
+                else /* REV: fg */
                     draw_rectangle_gradient(ctx, rectangle, 1.0, True, pattern_rect,
                                             &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
             }
