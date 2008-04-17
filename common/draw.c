@@ -493,51 +493,39 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
                 Position grow, area_t patt_rect,
                 XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
-    int i, x, y, w;
-    int flag = 0; /* used to prevent drawing a line from 0 to 0 values */
+    int i, x, w;
+    float y;
     cairo_pattern_t *pat;
+
+    /* some stuff below is based on 'try and error' */
 
     pat = draw_setup_cairo_color_source(ctx, patt_rect, pcolor, pcolor_center, pcolor_end);
 
     x = rect.x;
-    y = rect.y;
+    y = rect.y + 0.5; /* center of a pixel */
     w = rect.width;
 
-    /* NOTE: think about about the cairo coordinates pointing to the upper left
-     * corner of a single pixel (what itself is a square) - and it draws from
-     * there! It fills the pixels placed on the bottom/right of that, or so */
+    /* if grow == Right, go through the values from old to new. Setup the oldest below */
+    if(grow == Right && ++cur_index > w - 1)
+            cur_index = 0;
 
-    if(grow == Right) /* draw from right to left */
-        x += w;
-
-    /* initial point */
     cairo_move_to(ctx->cr, x, y - to[cur_index]);
 
     for(i = 0; i < w; i++)
     {
+        cairo_line_to(ctx->cr, ++x, y - to[cur_index]);
+
+        /* cycles around the index */
         if(grow == Right)
-            x--;
-        else
-            x++;
-
-        if (to[cur_index] > 0)
         {
-            cairo_line_to(ctx->cr, x, y - to[cur_index]);
-            flag = 1;
+            if (++cur_index > w-1)
+                cur_index = 0;
         }
         else
         {
-            if(flag) /* only draw from values > 0 to 0-values */
-            {
-                cairo_line_to(ctx->cr, x, y);
-                flag = 0;
-            }
-            else
-                cairo_move_to(ctx->cr, x, y);
+            if(--cur_index < 0)
+                cur_index = w - 1;
         }
-
-        if (--cur_index < 0) /* cycles around the index */
-            cur_index = w - 1;
     }
 
     cairo_stroke(ctx->cr);

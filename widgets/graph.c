@@ -106,14 +106,9 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     margin_top = (int)((widget->statusbar->height - (d->box_height + 2)) / 2 + 0.5) + widget->area.y;
 
-    rectangle.x = widget->area.x;
-    rectangle.y = margin_top;
-    rectangle.width = d->size + 2;
-    rectangle.height = d->box_height + 2;
-    draw_rectangle(ctx, rectangle, 1.0, False, d->bordercolor);
-
-    rectangle.x++;
-    rectangle.y++;
+    /* draw background */
+    rectangle.x = widget->area.x + 1;
+    rectangle.y = margin_top + 1;
     rectangle.width = d->size;
     rectangle.height = d->box_height;
     draw_rectangle(ctx, rectangle, 1.0, True, d->bg);
@@ -270,6 +265,13 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
                             &(d->drawline_color[z]), d->drawline_pcolor_center[z], d->drawline_pcolor_end[z]);
         }
     }
+
+    /* draw border (after line-drawing, what paints 0-values to the border) */
+    rectangle.x = widget->area.x;
+    rectangle.y = margin_top;
+    rectangle.width = d->size + 2;
+    rectangle.height = d->box_height + 2;
+    draw_rectangle(ctx, rectangle, 1.0, False, d->bordercolor);
 
     widget->area.width = d->width;
     widget->area.height = widget->statusbar->height;
