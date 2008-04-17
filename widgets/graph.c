@@ -127,27 +127,26 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     if(d->filltop_total)
     {
-        /* all these filltop's have the same setting */
         pattern_area.y = rectangle.y - rectangle.height;
-
-        if(d->filltop_vertical_grad[0])
-        {
-            pattern_area.width = 0;
-            pattern_area.height = rectangle.height;
-        }
-        else
-        {
-            pattern_area.height = 0;
-
-            if(d->grow == Right)
-                pattern_area.width = -rectangle.width;
-            else
-                pattern_area.width = rectangle.width;
-        }
 
         /* draw style = top */
         for(z = 0; z < d->filltop_total; z++)
         {
+            if(d->filltop_vertical_grad[z])
+            {
+                pattern_area.width = 0;
+                pattern_area.height = rectangle.height;
+            }
+            else
+            {
+                pattern_area.height = 0;
+
+                if(d->grow == Right)
+                    pattern_area.width = -rectangle.width;
+                else
+                    pattern_area.width = rectangle.width;
+            }
+
             cur_index = *(d->filltop_index[z]);
 
             for(y = 0; y < d->size; y++)
@@ -193,25 +192,24 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     if(d->fillbottom_total)
     {
-        /* all these fillbottom's have the same setting */
-        if(d->fillbottom_vertical_grad[0])
-        {
-            pattern_area.width = 0;
-            pattern_area.height = -rectangle.height;
-        }
-        else
-        {
-            pattern_area.height = 0;
-
-            if(d->grow == Right)
-                pattern_area.width = -rectangle.width;
-            else
-                pattern_area.width = rectangle.width;
-        }
-
         /* draw style = bottom */
         for(z = 0; z < d->fillbottom_total; z++)
         {
+            if(d->fillbottom_vertical_grad[z])
+            {
+                pattern_area.width = 0;
+                pattern_area.height = -rectangle.height;
+            }
+            else
+            {
+                pattern_area.height = 0;
+
+                if(d->grow == Right)
+                    pattern_area.width = -rectangle.width;
+                else
+                    pattern_area.width = rectangle.width;
+            }
+
             cur_index = *(d->fillbottom_index[z]);
 
             for(y = 0; y < d->size; y++)
@@ -242,25 +240,23 @@ graph_draw(Widget *widget, DrawCtx *ctx, int offset,
 
     if(d->drawline_total)
     {
-        /* all these drawline's have the same setting */
-        if(d->drawline_vertical_grad[0])
-        {
-            pattern_area.width = 0;
-            pattern_area.height = -rectangle.height;
-        }
-        else
-        {
-            pattern_area.height = 0;
-
-            if(d->grow == Right)
-                pattern_area.width = -rectangle.width;
-            else
-                pattern_area.width = rectangle.width;
-        }
-
         /* draw style = line */
         for(z = 0; z < d->drawline_total; z++)
         {
+            if(d->drawline_vertical_grad[z])
+            {
+                pattern_area.width = 0;
+                pattern_area.height = -rectangle.height;
+            }
+            else
+            {
+                pattern_area.height = 0;
+                if(d->grow == Right)
+                    pattern_area.width = -rectangle.width;
+                else
+                    pattern_area.width = rectangle.width;
+            }
+
             draw_graph_line(ctx, rectangle, d->drawline[z], *(d->drawline_index[z]), d->grow, pattern_area,
                             &(d->drawline_color[z]), d->drawline_pcolor_center[z], d->drawline_pcolor_end[z]);
         }
