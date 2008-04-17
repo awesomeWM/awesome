@@ -929,6 +929,8 @@ draw_color_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcol
     xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
     xcb_alloc_color_reply_t *hexa_color = NULL;
     xcb_alloc_named_color_reply_t *named_color = NULL;
+    unsigned long colnum;
+    uint16_t red, green, blue;
 
     if(!a_strlen(colstr))
         return false;
@@ -937,16 +939,16 @@ draw_color_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcol
     if(colstr[0] == '#' && a_strlen(colstr) == 7)
     {
         errno = 0;
-        unsigned long colnum = strtoul(&colstr[1], NULL, 16);
+        colnum = strtoul(&colstr[1], NULL, 16);
         if(errno != 0)
         {
             warn("awesome: error, invalid color '%s'\n", colstr);
             return false;
         }
 
-        uint16_t red = RGB_COLOR_8_TO_16(colnum >> 16);
-        uint16_t green = RGB_COLOR_8_TO_16(colnum >> 8);
-        uint16_t blue = RGB_COLOR_8_TO_16(colnum);
+        red = RGB_COLOR_8_TO_16(colnum >> 16);
+        green = RGB_COLOR_8_TO_16(colnum >> 8);
+        blue = RGB_COLOR_8_TO_16(colnum);
 
         hexa_color = xcb_alloc_color_reply(conn,
                                            xcb_alloc_color(conn,
