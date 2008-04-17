@@ -154,7 +154,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
         {
             /* '+ d->ticks_gap' because a unit includes a ticks + ticks_gap */
             unit = (pb_height + d->ticks_gap) / d->ticks_count;
-            pb_height = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
+            pb_height = unit * d->ticks_count - d->ticks_gap;
         }
 
         pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->data_items -
@@ -286,7 +286,7 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
                 /* +0.5 rounds up ticks -> turn on a tick when half of it is reached */
                 percent_ticks = (int)(d->ticks_count * (float)d->percent[i] / 100 + 0.5);
                 if(percent_ticks)
-                    pb_progress = (int)(percent_ticks * unit - d->ticks_gap + 0.5);
+                    pb_progress = percent_ticks * unit - d->ticks_gap;
                 else
                     pb_progress = 0;
                 }
