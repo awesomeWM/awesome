@@ -121,7 +121,6 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
     /* pb_.. values points to the widget inside a potential border */
     int i, percent_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
     int unit = 0; /* tick + gap */
-    int border_offset;
     int widget_width;
     area_t rectangle, pattern_rect;
 
@@ -142,7 +141,6 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
      */
 
     pb_x = widget->area.x + d->border_width + d->border_padding;
-    border_offset = d->border_width / 2;
     pb_offset = 0;
 
     if(d->vertical)
@@ -182,17 +180,13 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             if(d->border_width)
             {
                 /* border rectangle */
-                rectangle.x = pb_x + pb_offset - border_offset - d->border_padding - 1;
+                rectangle.x = pb_x + pb_offset - d->border_width - d->border_padding;
+                rectangle.y = pb_y - d->border_width - d->border_padding;
+                rectangle.width = pb_width + 2 * (d->border_padding + d->border_width);
+                rectangle.height = pb_height + 2 * (d->border_padding + d->border_width);
 
-                if(2 * border_offset == d->border_width)
-                    rectangle.y = pb_y - border_offset - d->border_padding;
-                else
-                    rectangle.y = pb_y - border_offset - d->border_padding - 1;
-
-                rectangle.width = pb_width + 2 * d->border_padding + d->border_width + 1;
-                rectangle.height = pb_height + d->border_width + 2 * d->border_padding + 1;
                 if(d->border_padding)
-                    draw_rectangle(ctx, rectangle, 1, True, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
                 draw_rectangle(ctx, rectangle, d->border_width, False, d->bordercolor[i]);
             }
 
@@ -296,17 +290,13 @@ progressbar_draw(Widget *widget, DrawCtx *ctx, int offset,
             if(d->border_width)
             {
                 /* border rectangle */
-                rectangle.x = pb_x - border_offset - d->border_padding - 1;
+                rectangle.x = pb_x - d->border_width - d->border_padding;
+                rectangle.y = pb_y + pb_offset - d->border_width - d->border_padding;
+                rectangle.width = pb_width + 2 * (d->border_padding + d->border_width);
+                rectangle.height = pb_height + 2 * (d->border_padding + d->border_width);
 
-                if(2 * border_offset == d->border_width)
-                    rectangle.y = pb_y + pb_offset - border_offset - d->border_padding;
-                else
-                    rectangle.y = pb_y + pb_offset - border_offset - d->border_padding - 1;
-
-                rectangle.width = pb_width + 2 * d->border_padding + d->border_width + 1;
-                rectangle.height = pb_height + d->border_width + 2 * d->border_padding + 1;
                 if(d->border_padding)
-                    draw_rectangle(ctx, rectangle, 1, True, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, True, d->bg[i]);
                 draw_rectangle(ctx, rectangle, d->border_width, False, d->bordercolor[i]);
             }
             /* new value/progress in px + pattern setup */
