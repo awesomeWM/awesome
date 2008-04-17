@@ -328,7 +328,7 @@ draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
     return pat;
 }
 
-/** Draw rectangle
+/** Draw rectangle inside the coordinates
  * \param ctx Draw context
  * \param geometry geometry
  * \param line_width line width
@@ -354,8 +354,8 @@ draw_rectangle(DrawCtx *ctx, area_t geometry, float line_width, Bool filled, XCo
     }
     else
     {
-        cairo_rectangle(ctx->cr, geometry.x + 1, geometry.y,
-                        geometry.width - 1, geometry.height - 1);
+        cairo_rectangle(ctx->cr, geometry.x + line_width / 2.0, geometry.y + line_width / 2.0,
+                        geometry.width - line_width, geometry.height - line_width);
         cairo_stroke(ctx->cr);
     }
 }
