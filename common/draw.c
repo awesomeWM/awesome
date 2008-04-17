@@ -431,13 +431,15 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
            Position grow, area_t patt_rect,
            XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
-    int i, x, y, w;
+    int i, y, w;
+    float x;
     cairo_pattern_t *pat;
 
     pat = draw_setup_cairo_color_source(ctx, patt_rect,
                                         pcolor, pcolor_center, pcolor_end);
 
-    x = rect.x;
+    /* middle of a pixel */
+    x = rect.x + 0.5;
     y = rect.y;
     w = rect.width;
 
@@ -449,7 +451,7 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
         {
             cairo_move_to(ctx->cr, x, y - from[cur_index]);
             cairo_line_to(ctx->cr, x, y - to[cur_index]);
-            x--;
+            x -= 1.0;
 
             if (--cur_index < 0)
                 cur_index = w - 1;
@@ -461,7 +463,7 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
         {
             cairo_move_to(ctx->cr, x, y - from[cur_index]);
             cairo_line_to(ctx->cr, x, y - to[cur_index]);
-            x++;
+            x += 1.0;
 
             if (--cur_index < 0)
                 cur_index = w - 1;
@@ -536,7 +538,6 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
 
         if (--cur_index < 0) /* cycles around the index */
             cur_index = w - 1;
-
     }
 
     cairo_stroke(ctx->cr);
