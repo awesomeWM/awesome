@@ -408,7 +408,8 @@ draw_graph_setup(DrawCtx *ctx)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, 1.0);
-    /* without it, it can draw over the path on sharp angles (...too long lines) */
+    /* without it, it can draw over the path on sharp angles
+     * ...too long lines * (...graph_line) */
     cairo_set_miter_limit(ctx->cr, 0.0);
     cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
 }
@@ -493,32 +494,44 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
                 Position grow, area_t patt_rect,
                 XColor *pcolor, XColor *pcolor_center, XColor *pcolor_end)
 {
-    int i, x, w;
-    float y;
+    int i, w;
+    float x, y;
     cairo_pattern_t *pat;
 
-    /* some stuff below is based on 'try and error' */
+    /* NOTE: without, it sometimes won't draw to some path (centered in a pixel)
+     * ... it won't fill some pixels! It also looks much nicer so.
+     * (since line-drawing is the last on the graph, no need to reset to _NONE) */
+    /* Not much difference to CAIRO_ANTIALIAS_DEFAULT, but recommend for LCD */
+    cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_SUBPIXEL);
 
     pat = draw_setup_cairo_color_source(ctx, patt_rect, pcolor, pcolor_center, pcolor_end);
 
-    x = rect.x;
-    y = rect.y + 0.5; /* center of a pixel */
+    /* path through the centers of pixels */
+    x = rect.x + 0.5;
+    y = rect.y + 0.5;
     w = rect.width;
 
-    /* if grow == Right, go through the values from old to new. Setup the oldest below */
-    if(grow == Right && ++cur_index > w - 1)
+    if(grow == Right)
+    {
+        /* go through the values from old to new. Begin with the oldest. */
+        if(++cur_index > w - 1)
             cur_index = 0;
 
-    cairo_move_to(ctx->cr, x, y - to[cur_index]);
+        cairo_move_to(ctx->cr, x, y - to[cur_index]);
+    }
+    else
+        /* on the left border: fills a pixel also when there's only one value */
+        cairo_move_to(ctx->cr, x - 1.0, y - to[cur_index]);
 
     for(i = 0; i < w; i++)
     {
-        cairo_line_to(ctx->cr, ++x, y - to[cur_index]);
+        cairo_line_to(ctx->cr, x, y - to[cur_index]);
+        x += 1.0;
 
         /* cycles around the index */
         if(grow == Right)
         {
-            if (++cur_index > w-1)
+            if (++cur_index > w - 1)
                 cur_index = 0;
         }
         else
@@ -527,6 +540,10 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
                 cur_index = w - 1;
         }
     }
+
+    /* onto the right border: fills a pixel also when there's only one value */
+    if(grow == Right)
+        cairo_line_to(ctx->cr, x, y - to[cur_index]);
 
     cairo_stroke(ctx->cr);
 
