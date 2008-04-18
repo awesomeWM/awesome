@@ -157,20 +157,21 @@ void
 window_root_grabkeys(int phys_screen)
 {
     Key *k;
+    KeyCode kc;
 
     XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
 
     for(k = globalconf.keys; k; k = k->next)
-	if(k->keycode)
+	if(k->keysym && (kc = XKeysymToKeycode(globalconf.display, k->keysym)))
         {
-             XGrabKey(globalconf.display, k->keycode, k->mod,
-                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-             XGrabKey(globalconf.display, k->keycode, k->mod | LockMask,
-                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask,
-                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
-             XGrabKey(globalconf.display, k->keycode, k->mod | globalconf.numlockmask | LockMask,
-                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+            XGrabKey(globalconf.display, kc, k->mod,
+                     RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+            XGrabKey(globalconf.display, kc, k->mod | LockMask,
+                     RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+            XGrabKey(globalconf.display, kc, k->mod | globalconf.numlockmask,
+                     RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
+            XGrabKey(globalconf.display, kc, k->mod | globalconf.numlockmask | LockMask,
+                     RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
         }
 }
 

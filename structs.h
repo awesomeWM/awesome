@@ -80,7 +80,7 @@ typedef struct Key Key;
 struct Key
 {
     unsigned long mod;
-    KeyCode keycode;
+    KeySym keysym;
     Uicb *func;
     char *arg;
     /** Next and previous keys */

@@ -334,6 +334,7 @@ event_handle_keypress(XEvent *e)
     int screen, x, y, d;
     unsigned int m;
     XKeyEvent *ev = &e->xkey;
+    KeySym keysym;
     Window dummy;
     Key *k;
 
@@ -349,8 +350,10 @@ event_handle_keypress(XEvent *e)
             break;
         }
 
+    keysym = XKeycodeToKeysym(globalconf.display, (KeyCode) ev->keycode, 0);
+
     for(k = globalconf.keys; k; k = k->next)
-        if(ev->keycode == k->keycode &&
+        if(keysym == k->keysym &&
 	  k->func && CLEANMASK(k->mod) == CLEANMASK(ev->state))
             k->func(screen, k->arg);
 }
