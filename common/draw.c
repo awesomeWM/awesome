@@ -503,6 +503,8 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
      * (since line-drawing is the last on the graph, no need to reset to _NONE) */
     /* Not much difference to CAIRO_ANTIALIAS_DEFAULT, but recommend for LCD */
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_SUBPIXEL);
+    /* a nicer, better visible line compared to 1.0 */
+    cairo_set_line_width(ctx->cr, 1.25);
 
     pat = draw_setup_cairo_color_source(ctx, patt_rect, pcolor, pcolor_center, pcolor_end);
 
@@ -549,6 +551,8 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
 
     if(pat)
         cairo_pattern_destroy(pat);
+    /* reset line-width */
+    cairo_set_line_width(ctx->cr, 1.0);
 }
 
 /** Draw a circle
