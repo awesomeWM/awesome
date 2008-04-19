@@ -112,6 +112,27 @@ position_get_from_str(const char *pos)
     return Off;
 }
 
+/** \brief safe limited strdup.
+ *
+ * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into a newly
+ * allocated buffer, always adding a final \c \\0, and returns that buffer.
+ *
+ * \param[in]  src      source string.
+ * \param[in]  l        maximum number of chars to copy.
+ *
+ * \return a newly allocated buffer containing the first \c l chars of \c src.
+*/
+char* a_strndup(const char* src, ssize_t l)
+{
+    char* _tmpStr = p_new(char, l + 1);
+    if (_tmpStr)
+    {
+        a_strncpy(_tmpStr, l + 1, src, l);
+        _tmpStr[l] = 0;
+    }
+    return _tmpStr;
+}
+
 /** \brief safe limited strcpy.
  *
  * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into \c dst,

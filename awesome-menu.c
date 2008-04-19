@@ -19,7 +19,7 @@
  *
  */
 
-/* getline(), asprintf() */
+/* asprintf() */
 #define _GNU_SOURCE
 
 #define CHUNK_SIZE 4096
@@ -606,6 +606,34 @@ handle_kpress(XKeyEvent *e)
         break;
     }
 }
+
+#ifndef HAVE_GETLINE
+static int
+getline(char ** buf, size_t* len, FILE* in)
+{
+    int i;
+    if (*buf) {
+        p_delete(buf);
+        (*buf) = NULL;
+    }
+    if (*len)
+        *len = 0;
+
+    do {
+        p_realloc(buf, *len + 10);
+        (*len) += 10;
+        for (i = 0; i < 10 && !feof(in); i++) {
+            (*buf)[*len - 10 + i] = getchar();
+            if ((*buf)[*len - 10 + i] == '\n' ||
+                (*buf)[*len - 10 + i] == '\r') {
+                return (*len - 10 + i + 1);
+            }
+        }
+    }
+    while(!feof(in));
+    return -1;
+}
+#endif
 
 /** Fill the completion by reading on stdin.
  * \return true if something has been filled up, false otherwise.

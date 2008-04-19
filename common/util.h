@@ -202,6 +202,7 @@ static inline int a_strncmp(const char *a, const char *b, ssize_t n)
 
 ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l) __attribute__((nonnull(1)));
 ssize_t a_strcpy(char *dst, ssize_t n, const char *src) __attribute__((nonnull(1)));
+char* a_strndup(const char *src, ssize_t l) __attribute__((nonnull(1)));
 
 /** \brief safe strcat.
  *

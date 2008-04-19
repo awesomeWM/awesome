@@ -146,7 +146,7 @@ AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([memchr regcomp select setenv socket strchr strrchr strstr])
+AC_CHECK_FUNCS([getline memchr regcomp select setenv socket strchr strrchr strstr])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([awesome.doxygen])

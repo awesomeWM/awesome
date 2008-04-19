@@ -23,9 +23,6 @@
  * @defgroup ui_callback User Interface Callbacks
  */
 
-/* strndup() */
-#define _GNU_SOURCE
-
 #include <sys/wait.h>
 #include <string.h>
 #include <unistd.h>
@@ -83,9 +80,9 @@ uicb_exec(int screen __attribute__ ((unused)), char *cmd)
     args = strchr(cmd, ' ');
 
     if(args)
-        path = strndup(cmd, args - cmd);
+        path = a_strndup(cmd, args - cmd);
     else
-        path = strndup(cmd, a_strlen(cmd));
+        path = a_strndup(cmd, a_strlen(cmd));
 
     execlp(path, cmd, NULL);
 
