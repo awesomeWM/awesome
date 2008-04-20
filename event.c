@@ -545,7 +545,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
      * 0x80)  in XCB  because the  SendEvent bit  is available  in the
      * response_type field
      */
-    bool send_event = ((ev->response_type & 0x7f) >> 7);
+    bool send_event = ((ev->response_type & 0x80) >> 7);
 
     if((c = client_get_bywin(globalconf.clients, ev->window))
        && ev->event == xcb_aux_get_screen(connection, c->phys_screen)->root
