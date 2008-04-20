@@ -773,7 +773,7 @@ client_isvisible(Client *c, int screen)
 }
 
 /** Set the transparency of the selected client.
- * Argument should be a floating between 0 and 100, -1 to disable.
+ * Argument should be an absolut or relativ floating between 0.0 and 1.0
  * \param screen Screen ID
  * \param arg unused arg
  * \ingroup ui_callback
