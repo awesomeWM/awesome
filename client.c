@@ -801,7 +801,7 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
     {
         memcpy(&current_opacity_raw, data, sizeof(unsigned int));
         XFree(data);
-        current_opacity = current_opacity_raw / 0xffffffff;
+        current_opacity = (double) current_opacity_raw / 0xffffffff;
     }
     else
         set_prop = 1;
