@@ -556,6 +556,7 @@ main(int argc, char **argv)
             /* need to resync */
             xcb_aux_sync(globalconf.connection);
         }
+        xcb_aux_sync(globalconf.connection);
     }
 
 
