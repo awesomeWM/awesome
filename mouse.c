@@ -325,7 +325,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
     client_t *c = globalconf.focus->client;
-    Tag **curtags = tags_get_current(screen);
+    tag_t **curtags = tags_get_current(screen);
     Layout *layout = curtags[0]->layout;
     area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry = { 0, 0, 0, 0, NULL, NULL };
     double mwfact;

@@ -36,7 +36,7 @@ extern AwesomeConf globalconf;
  * \return true or false
  */
 static bool
-isoccupied(Tag *t)
+isoccupied(tag_t *t)
 {
     client_t *c;
 
@@ -48,7 +48,7 @@ isoccupied(Tag *t)
 }
 
 static bool
-isurgent(Tag *t)
+isurgent(tag_t *t)
 {
     client_t *c;
 
@@ -60,7 +60,7 @@ isurgent(Tag *t)
 }
 
 static style_t
-taglist_style_get(VirtScreen vscreen, Tag *tag)
+taglist_style_get(VirtScreen vscreen, tag_t *tag)
 {
     if(tag->selected)
         return vscreen.styles.focus;
@@ -76,7 +76,7 @@ taglist_draw(widget_t *widget,
              int offset,
              int used __attribute__ ((unused)))
 {
-    Tag *tag;
+    tag_t *tag;
     client_t *sel = globalconf.focus->client;
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     int w = 0, flagsize;
@@ -141,7 +141,7 @@ taglist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 {
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
     Button *b;
-    Tag *tag;
+    tag_t *tag;
     char buf[4];
     int prev_width = 0, width = 0, i = 1;
     style_t style;

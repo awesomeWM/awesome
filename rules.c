@@ -42,7 +42,7 @@ rules_compile_regex(char *val)
 }
 
 bool
-tag_match_rule(Tag *t, rule_t *r)
+tag_match_rule(tag_t *t, rule_t *r)
 {
     regmatch_t tmp;
 

@@ -67,10 +67,10 @@ focus_delete_client(client_t *c)
 }
 
 static client_t *
-focus_get_latest_client_for_tags(Tag **t, int nindex)
+focus_get_latest_client_for_tags(tag_t **t, int nindex)
 {
     client_node_t *node;
-    Tag **tags;
+    tag_t **tags;
     int i = 0;
 
     for(node = globalconf.focus; node; node = node->next)
@@ -92,7 +92,7 @@ focus_get_latest_client_for_tags(Tag **t, int nindex)
 client_t *
 focus_get_current_client(int screen)
 {
-    Tag **curtags = tags_get_current(screen);
+    tag_t **curtags = tags_get_current(screen);
     client_t *sel = focus_get_latest_client_for_tags(curtags, 0);
     p_delete(&curtags);
 
@@ -109,7 +109,7 @@ void
 uicb_focus_history(int screen, char *arg)
 {
     int i;
-    Tag **curtags;
+    tag_t **curtags;
     client_t *c;
 
     if(arg)
@@ -136,7 +136,7 @@ void
 uicb_focus_client_byname(int screen, char *arg)
 {
     client_t *c;
-    Tag **curtags, **tag;
+    tag_t **curtags, **tag;
 
     if(arg)
     {

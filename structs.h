@@ -238,8 +238,8 @@ struct client_node_t
 };
 
 /** Tag type */
-typedef struct Tag Tag;
-struct Tag
+typedef struct _tag_t tag_t;
+struct _tag_t
 {
     /** Tag name */
     char *name;
@@ -258,14 +258,14 @@ struct Tag
     /** Number of columns in tile layout */
     int ncol;
     /** Next and previous tags */
-    Tag *prev, *next;
+    tag_t *prev, *next;
 };
 
 /** tag_client_node type */
 typedef struct tag_client_node_t tag_client_node_t;
 struct tag_client_node_t
 {
-    Tag *tag;
+    tag_t *tag;
     client_t *client;
     /** Next and previous tag_client_nodes */
     tag_client_node_t *prev, *next;
@@ -321,7 +321,7 @@ typedef struct
     /** Transparency of focused clients */
     double opacity_focused;
     /** Tag list */
-    Tag *tags;
+    tag_t *tags;
     /** Layout list */
     Layout *layouts;
     /** Status bar */

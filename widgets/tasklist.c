@@ -195,7 +195,7 @@ tasklist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
     Button *b;
     client_t *c;
     Data *d = widget->data;
-    Tag *tag;
+    tag_t *tag;
     int n = 0, box_width = 0, i, ci = 0;
 
     /* button1 give focus */

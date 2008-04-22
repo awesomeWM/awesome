@@ -312,7 +312,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     const char *tmp;
     FloatingPlacement flpl;
     Layout *layout = NULL;
-    Tag *tag = NULL;
+    tag_t *tag = NULL;
     statusbar_t *statusbar = NULL;
     cfg_t *cfg_general, *cfg_styles, *cfg_screen, *cfg_tags,
           *cfg_layouts, *cfg_padding, *cfgsectmp, *cfg_titlebar,

@@ -39,12 +39,12 @@ extern AwesomeConf globalconf;
  * \param ncol number of columns for slaves windows
  * \return a new tag with all these parameters
  */
-Tag *
+tag_t *
 tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
 {
-    Tag *tag;
+    tag_t *tag;
 
-    tag = p_new(Tag, 1);
+    tag = p_new(tag_t, 1);
     tag->name = a_strdup(name);
     tag->layout = layout;
 
@@ -66,7 +66,7 @@ tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
  * \param screen the screen id
  */
 void
-tag_append_to_screen(Tag *tag, int screen)
+tag_append_to_screen(tag_t *tag, int screen)
 {
     int phys_screen = screen_virttophys(screen);
 
@@ -82,7 +82,7 @@ tag_append_to_screen(Tag *tag, int screen)
  * \param screen the screen
  */
 void
-tag_push_to_screen(Tag *tag, int screen)
+tag_push_to_screen(tag_t *tag, int screen)
 {
     tag->screen = screen;
     tag_list_push(&globalconf.screens[screen].tags, tag);
@@ -94,7 +94,7 @@ tag_push_to_screen(Tag *tag, int screen)
  * \param t the tag to tag the client with
  */
 void
-tag_client(client_t *c, Tag *t)
+tag_client(client_t *c, tag_t *t)
 {
     tag_client_node_t *tc;
 
@@ -117,7 +117,7 @@ tag_client(client_t *c, Tag *t)
  * \param t the tag to tag the client with
  */
 void
-untag_client(client_t *c, Tag *t)
+untag_client(client_t *c, tag_t *t)
 {
     tag_client_node_t *tc;
 
@@ -139,7 +139,7 @@ untag_client(client_t *c, Tag *t)
  * \return true if the client is tagged with the tag, false otherwise.
  */
 bool
-is_client_tagged(client_t *c, Tag *t)
+is_client_tagged(client_t *c, tag_t *t)
 {
     tag_client_node_t *tc;
 
@@ -159,7 +159,7 @@ is_client_tagged(client_t *c, Tag *t)
 void
 tag_client_with_current_selected(client_t *c)
 {
-    Tag *tag;
+    tag_t *tag;
     VirtScreen vscreen = globalconf.screens[c->screen];
 
     for(tag = vscreen.tags; tag; tag = tag->next)
@@ -176,7 +176,7 @@ tag_client_with_current_selected(client_t *c)
 void
 tag_client_with_rule(client_t *c, rule_t *r)
 {
-    Tag *tag;
+    tag_t *tag;
     bool matched = false;
 
     if(!r) return;
@@ -202,13 +202,13 @@ tag_client_with_rule(client_t *c, rule_t *r)
  * \param screen screen id
  * \return a double pointer of tag list finished with a NULL element
  */
-Tag **
+tag_t **
 tags_get_current(int screen)
 {
-    Tag *tag, **tags = NULL;
+    tag_t *tag, **tags = NULL;
     int n = 1;
 
-    tags = p_new(Tag *, n);
+    tags = p_new(tag_t *, n);
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         if(tag->selected)
         {
@@ -224,14 +224,14 @@ tags_get_current(int screen)
 
 /** Tag the focused client with the given tag.
  * \param screen Screen ID
- * \param arg Tag name
+ * \param arg tag name
  * \ingroup ui_callback
  */
 void
 uicb_client_tag(int screen, char *arg)
 {
     int tag_id = -1;
-    Tag *tag, *target_tag;
+    tag_t *tag, *target_tag;
     client_t *sel = globalconf.focus->client;
 
     if(!sel)
@@ -268,7 +268,7 @@ uicb_client_toggletag(int screen, char *arg)
     client_t *sel = globalconf.focus->client;
     int i;
     Bool is_sticky = True;
-    Tag *tag, *target_tag;
+    tag_t *tag, *target_tag;
 
     if(!sel)
         return;
@@ -308,14 +308,14 @@ uicb_client_toggletag(int screen, char *arg)
 
 /** Toggle the visibility of a tag.
  * \param screen Screen ID
- * \param arg Tag name
+ * \param arg tag_t name
  * \ingroup ui_callback
  */
 void
 uicb_tag_toggleview(int screen, char *arg)
 {
     int i;
-    Tag *tag, *target_tag,
+    tag_t *tag, *target_tag,
         **backtag, **curtags = tags_get_current(screen);
 
     if(arg)
@@ -344,9 +344,9 @@ uicb_tag_toggleview(int screen, char *arg)
  * \param target the tag to see
  */
 static void
-tag_view_only(Tag *target)
+tag_view_only(tag_t *target)
 {
-    Tag *tag;
+    tag_t *tag;
 
     if(!target) return;
 
@@ -362,7 +362,7 @@ tag_view_only(Tag *target)
 void
 tag_view_byindex(int screen, int dindex, bool view)
 {
-    Tag *tag;
+    tag_t *tag;
 
     if(dindex < 0)
         return;
@@ -379,7 +379,7 @@ tag_view_byindex(int screen, int dindex, bool view)
 void
 tag_view_only_byindex(int screen, int dindex)
 {
-    Tag *tag;
+    tag_t *tag;
 
     if(dindex < 0)
         return;
@@ -394,7 +394,7 @@ tag_view_only_byindex(int screen, int dindex)
  * \param view set visible or not
  */
 void
-tag_view(Tag *tag, bool view)
+tag_view(tag_t *tag, bool view)
 {
     tag->was_selected = tag->selected;
     tag->selected = view;
@@ -411,7 +411,7 @@ tag_view(Tag *tag, bool view)
 void
 uicb_tag_view(int screen, char *arg)
 {
-    Tag *tag;
+    tag_t *tag;
 
     if(arg)
 	tag_view_only_byindex(screen, atoi(arg) - 1);
@@ -428,7 +428,7 @@ uicb_tag_view(int screen, char *arg)
 void
 uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
 {
-    Tag *tag;
+    tag_t *tag;
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         tag_view(tag, tag->was_selected);
@@ -442,7 +442,7 @@ uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 {
-    Tag *tag, **curtags = tags_get_current(screen);
+    tag_t *tag, **curtags = tags_get_current(screen);
 
     tag = tag_list_next_cycle(&globalconf.screens[screen].tags, curtags[0]);
 
@@ -460,7 +460,7 @@ uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
 {
-    Tag *tag, **curtags = tags_get_current(screen);
+    tag_t *tag, **curtags = tags_get_current(screen);
 
     tag = tag_list_prev_cycle(&globalconf.screens[screen].tags, curtags[0]);
 
@@ -477,7 +477,7 @@ uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
 void
 uicb_tag_create(int screen, char *arg)
 {
-    Tag *tag;
+    tag_t *tag;
 
     if(!a_strlen(arg))
         return;

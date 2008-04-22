@@ -128,7 +128,7 @@ screen_virttophys(int screen)
 void
 move_client_to_screen(client_t *c, int new_screen, bool doresize)
 {
-    Tag *tag;
+    tag_t *tag;
     int old_screen = c->screen;
     area_t from, to;
 

@@ -188,7 +188,7 @@ void
 ewmh_update_net_numbers_of_desktop(int phys_screen)
 {
     uint32_t count = 0;
-    Tag *tag;
+    tag_t *tag;
 
     for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
         count++;
@@ -202,7 +202,7 @@ void
 ewmh_update_net_current_desktop(int phys_screen)
 {
     uint32_t count = 0;
-    Tag *tag, **curtags = tags_get_current(phys_screen);
+    tag_t *tag, **curtags = tags_get_current(phys_screen);
 
     for(tag = globalconf.screens[phys_screen].tags; tag != curtags[0]; tag = tag->next)
         count++;
@@ -219,7 +219,7 @@ ewmh_update_net_desktop_names(int phys_screen)
 {
     char buf[1024], *pos;
     ssize_t len, curr_size;
-    Tag *tag;
+    tag_t *tag;
 
     pos = buf;
     len = 0;
@@ -256,7 +256,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 
     if(state == net_wm_state_sticky)
     {
-        Tag *tag;
+        tag_t *tag;
         for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
             tag_client(c, tag);
     }

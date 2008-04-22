@@ -52,7 +52,7 @@ static bool
 client_loadprops(client_t * c, int screen)
 {
     int i, ntags = 0;
-    Tag *tag;
+    tag_t *tag;
     char *prop;
     bool result = false;
 
@@ -112,7 +112,7 @@ client_isprotodel(xcb_connection_t *c, xcb_window_t win)
 static bool
 client_isvisible_anyscreen(client_t *c)
 {
-    Tag *tag;
+    tag_t *tag;
     int screen;
 
     if(!c)
@@ -138,7 +138,7 @@ client_isvisible_anyscreen(client_t *c)
 bool
 client_isvisible(client_t *c, int screen)
 {
-    Tag *tag;
+    tag_t *tag;
 
     if(!c || c->screen != screen)
         return false;
@@ -349,7 +349,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     xcb_window_t trans;
     bool rettrans, retloadprops;
     uint32_t config_win_val;
-    Tag *tag;
+    tag_t *tag;
     rule_t *rule;
     xcb_size_hints_t *u_size_hints;
 
@@ -667,7 +667,7 @@ client_saveprops(client_t *c)
 {
     int i = 0, ntags = 0;
     char *prop;
-    Tag *tag;
+    tag_t *tag;
 
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         ntags++;
@@ -702,7 +702,7 @@ client_unban(client_t *c)
 void
 client_unmanage(client_t *c)
 {
-    Tag *tag;
+    tag_t *tag;
 
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);

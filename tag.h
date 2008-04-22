@@ -27,18 +27,18 @@
 /** Check if a client is tiled */
 #define IS_TILED(client, screen)            (client && !client->isfloating && !client->ismax && client_isvisible(client, screen))
 
-Tag * tag_new(const char *, Layout *, double, int, int);
-void tag_view(Tag *, bool);
+tag_t * tag_new(const char *, Layout *, double, int, int);
+void tag_view(tag_t *, bool);
 void tag_view_byindex(int, int, bool);
-void tag_push_to_screen(Tag *, int);
-Tag ** tags_get_current(int);
-void tag_client(client_t *, Tag *);
-void untag_client(client_t *, Tag *);
-bool is_client_tagged(client_t *, Tag *);
+void tag_push_to_screen(tag_t *, int);
+tag_t ** tags_get_current(int);
+void tag_client(client_t *, tag_t *);
+void untag_client(client_t *, tag_t *);
+bool is_client_tagged(client_t *, tag_t *);
 void tag_client_with_rule(client_t *, rule_t *r);
 void tag_client_with_current_selected(client_t *);
 void tag_view_only_byindex(int, int);
-void tag_append_to_screen(Tag *, int);
+void tag_append_to_screen(tag_t *, int);
 
 uicb_t uicb_client_tag;
 uicb_t uicb_client_toggletag;
@@ -49,7 +49,7 @@ uicb_t uicb_tag_viewnext;
 uicb_t uicb_tag_viewprev;
 uicb_t uicb_tag_create;
 
-DO_SLIST(Tag, tag, p_delete)
+DO_SLIST(tag_t, tag, p_delete)
 DO_SLIST(tag_client_node_t, tag_client_node, p_delete)
 
 #endif
