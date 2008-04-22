@@ -20,7 +20,7 @@ screen 0
             fg = "#111111"
             bg = "#ff4500"
         }
-     }
+    }
     tags
     {
         tag one { }
