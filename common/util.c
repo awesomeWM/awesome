@@ -112,6 +112,25 @@ position_get_from_str(const char *pos)
     return Off;
 }
 
+char *
+position_to_str(position_t p)
+{
+    switch(p)
+    {
+      case Top:
+        return a_strdup("top");
+      case Bottom:
+        return a_strdup("bottom");
+      case Right:
+        return a_strdup("right");
+      case Left:
+        return a_strdup("left");
+      case Auto:
+        return a_strdup("auto");
+    }
+    return a_strdup("off");
+}
+
 /** \brief safe limited strdup.
  *
  * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into a newly
