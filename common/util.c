@@ -127,8 +127,9 @@ position_to_str(position_t p)
         return a_strdup("left");
       case Auto:
         return a_strdup("auto");
+      default:
+        return a_strdup("off");
     }
-    return a_strdup("off");
 }
 
 /** \brief safe limited strdup.
