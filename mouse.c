@@ -165,11 +165,10 @@ mouse_resizebar_new(int phys_screen, int border, area_t geometry, style_t style,
     simple_window_t *sw;
     area_t geom;
 
-    geom.width = draw_textwidth(globalconf.connection,
-                                globalconf.default_screen,
-                                style.font,
-                                "0000x0000+0000+0000") + style.font->height;
-    geom.height = 1.5 * style.font->height;
+    geom = draw_text_extents(globalconf.connection,
+                             globalconf.default_screen,
+                             style.font,
+                             "0000x0000+0000+0000");
     geom.x = geometry.x + ((2 * border + geometry.width) - geom.width) / 2;
     geom.y = geometry.y + ((2 * border + geometry.height) - geom.height) / 2;
 

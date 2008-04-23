@@ -221,6 +221,7 @@ draw_font_delete(font_t **font)
  * \param enable shadow
  * \param fg foreground color
  * \param bg background color
+ * \return area_t with width and height are set to what used
  */
 void
 draw_text(DrawCtx *ctx,
@@ -249,7 +250,7 @@ draw_text(DrawCtx *ctx,
         buf = a_strdup(text);
 
     /* check that the text is not too long */
-    while(len && (nw = (draw_textwidth(ctx->connection, ctx->default_screen, style.font, buf)) + padding * 2) > area.width)
+    while(len && (nw = (draw_text_extents(ctx->connection, ctx->default_screen, style.font, buf).width) + padding * 2) > area.width)
     {
         len--;
         /* we can't blindly null the char, we need to check if it's not part of
@@ -866,18 +867,19 @@ draw_rotate(DrawCtx *ctx, xcb_drawable_t dest, int dest_w, int dest_h,
  * \param text the text
  * \return text width
  */
-unsigned short
-draw_textwidth(xcb_connection_t *conn, int default_screen, font_t *font, const char *text)
+area_t
+draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, const char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
     PangoLayout *layout;
     PangoRectangle ext;
     xcb_screen_t *s = xcb_aux_get_screen(conn, default_screen);
+    area_t geom = { 0, 0, 0, 0, NULL, NULL };
     ssize_t len;
 
     if(!(len = a_strlen(text)))
-        return 0;
+        return geom;
 
     surface = cairo_xcb_surface_create(conn, default_screen,
                                        draw_screen_default_visual(s),
@@ -892,7 +894,10 @@ draw_textwidth(xcb_connection_t *conn, int default_screen, font_t *font, const c
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
 
-    return ext.width;
+    geom.width = ext.width;
+    geom.height = ext.height * 1.5;
+
+    return geom;
 }
 
 /** Transform a string to a alignment_t type.

@@ -53,13 +53,7 @@ typedef struct
     alignment_t align;
     alignment_t text_align;
     int width, height;
-    /** Colors */
-    struct
-    {
-        style_t normal;
-        style_t focus;
-        style_t urgent;
-    } styles;
+    char *text_normal, *text_focus, *text_urgent;
 } titlebar_t;
 
 /** Rule type */

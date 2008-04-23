@@ -30,6 +30,61 @@
 
 extern AwesomeConf globalconf;
 
+static char *
+titlebar_markup_parse(client_t *c, const char *str, ssize_t len)
+{
+    const char *ps;
+    char *new;
+    int i = 0;
+    ssize_t clen;
+   
+    new = p_new(char, len++);
+
+    for(ps = str; *ps; ps++, i++)
+    {
+        if(*ps == '%')
+        {
+            ps++;
+            if(*ps == '%')
+                new[i] = '%';
+            else if(*ps == 't')
+            {
+                clen = a_strlen(c->name);
+                len += clen;
+                p_realloc(&new, len);
+                a_strcat(new + i, len - i,  c->name);
+                i += clen - 1;
+            }
+        }
+        else
+            new[i] = *ps;
+    }
+
+    return new;
+}
+
+static char *
+titlebar_text(client_t *c)
+{
+    char *text;
+
+    if(globalconf.focus->client == c)
+        text = c->titlebar.text_focus;
+    else if(c->isurgent)
+        text = c->titlebar.text_urgent;
+    else
+        text = c->titlebar.text_normal;
+
+    return titlebar_markup_parse(c, text, a_strlen(text));
+}
+
+static inline area_t
+titlebar_size(client_t *c)
+{
+    return draw_text_extents(globalconf.connection, globalconf.default_screen,
+                             globalconf.screens[c->screen].styles.normal.font, titlebar_text(c));
+}
+
 /** Initialize a titlebar: create the simple_window_t.
  * We still need to update its geometry to have it placed correctly.
  * \param c the client
@@ -37,18 +92,21 @@ extern AwesomeConf globalconf;
 void
 titlebar_init(client_t *c)
 {
-    int width;
+    int width = 0, height = 0;
 
     if(!c->titlebar.height)
-        c->titlebar.height = 1.5 * MAX(c->titlebar.styles.normal.font->height,
-                                       MAX(c->titlebar.styles.focus.font->height,
-                                           c->titlebar.styles.urgent.font->height));
+        c->titlebar.height = MAX(MAX(draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                                       globalconf.screens[c->screen].styles.normal.font, c->titlebar.text_focus).height,
+                                     draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                           globalconf.screens[c->screen].styles.normal.font, c->titlebar.text_normal).height),
+                                 draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                                   globalconf.screens[c->screen].styles.normal.font, c->titlebar.text_urgent).height);
 
     switch(c->titlebar.position)
     {
       case Off:
         return;
-      case Auto:
+      default:
         c->titlebar.position = Off;
         return;
       case Top:
@@ -57,23 +115,20 @@ titlebar_init(client_t *c)
             width = c->geometry.width + 2 * c->border;
         else
             width = MIN(c->titlebar.width, c->geometry.width);
-        c->titlebar.sw = simplewindow_new(globalconf.connection,
-                                          c->phys_screen, 0, 0,
-                                          width, c->titlebar.height, 0);
+        height = c->titlebar.height;
         break;
       case Left:
       case Right:
         if(!c->titlebar.width)
-            width = c->geometry.height + 2 * c->border;
+            height = c->geometry.height + 2 * c->border;
         else
-            width = MIN(c->titlebar.width, c->geometry.height);
-        c->titlebar.sw = simplewindow_new(globalconf.connection,
-                                          c->phys_screen, 0, 0,
-                                          c->titlebar.height, width, 0);
-        break;
-      default:
+            height = MIN(c->titlebar.width, c->geometry.height);
+        width = c->titlebar.height;
         break;
     }
+    c->titlebar.sw = simplewindow_new(globalconf.connection,
+                                      c->phys_screen, 0, 0,
+                                      width, height, 0);
     xcb_map_window(globalconf.connection, c->titlebar.sw->window);
 }
 
@@ -153,9 +208,9 @@ titlebar_draw(client_t *c)
 {
     xcb_drawable_t dw = 0;
     DrawCtx *ctx;
-    style_t style;
     area_t geometry;
     xcb_screen_t *s;
+    char *text;
 
     if(!c->titlebar.sw)
         return;
@@ -191,18 +246,11 @@ titlebar_draw(client_t *c)
         break;
     }
 
-    /* Check if the client is focused/urgent/normal */
-    if(globalconf.focus->client == c)
-        style = c->titlebar.styles.focus;
-    else if(c->isurgent)
-        style = c->titlebar.styles.urgent;
-    else
-        style = c->titlebar.styles.normal;
-
+    text = titlebar_text(c);
     geometry.x = geometry.y = 0;
-
-    draw_text(ctx, geometry, c->titlebar.text_align, style.font->height / 2,
-              c->name, style);
+    draw_text(ctx, geometry, c->titlebar.text_align, 0,
+              text, globalconf.screens[c->screen].styles.normal);
+    p_delete(&text);
 
     switch(c->titlebar.position)
     {

@@ -137,7 +137,7 @@ void draw_image(DrawCtx *, int, int, int, const char *);
 void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
 area_t draw_get_image_size(const char *filename);
 void draw_rotate(DrawCtx *, xcb_drawable_t, int, int, double, int, int);
-unsigned short draw_textwidth(xcb_connection_t *, int, font_t *, const char *);
+area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *);
 alignment_t draw_align_get_from_str(const char *);
 bool draw_color_new(xcb_connection_t *, int, const char *, xcolor_t *);
 void draw_style_init(xcb_connection_t *, int, cfg_t *, style_t *, style_t *);

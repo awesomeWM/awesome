@@ -44,8 +44,8 @@ textbox_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
     else if(widget->alignment == AlignFlex)
         widget->area.width = widget->statusbar->width - used;
     else
-        widget->area.width = MIN(draw_textwidth(ctx->connection, ctx->default_screen,
-                                                d->style.font, d->text),
+        widget->area.width = MIN(draw_text_extents(ctx->connection, ctx->default_screen,
+                                                   d->style.font, d->text).width,
                                  widget->statusbar->width - used);
 
     widget->area.height = widget->statusbar->height;

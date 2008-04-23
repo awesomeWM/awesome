@@ -196,8 +196,12 @@ cfg_opt_t titlebar_opts[] =
     CFG_INT((char *) "height", 0, CFGF_NONE),
     /** Text alignment. */
     CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
-    /** Titlebar styles. */
-    CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
+    /** Titlebar markup string for focused windows. */
+    CFG_STR((char *) "text_focus", (char *) "%t", CFGF_NONE),
+    /** Titlebar markup string for normal windows. */
+    CFG_STR((char *) "text_normal", (char *) "%t", CFGF_NONE),
+    /** Titlebar markup string for urgent windows. */
+    CFG_STR((char *) "text_urgent", (char *) "%t", CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines general options. */

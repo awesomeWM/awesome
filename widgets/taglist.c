@@ -90,9 +90,8 @@ taglist_draw(widget_t *widget,
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
         style = tag->selected ? vscreen.styles.focus : vscreen.styles.normal;
-        widget->area.width += draw_textwidth(ctx->connection, ctx->default_screen,
-                                             style.font, tag->name)
-            + style.font->height;
+        widget->area.width += draw_text_extents(ctx->connection, ctx->default_screen,
+                                                style.font, tag->name).width + style.font->height;
     }
 
     if(!widget->user_supplied_x)
@@ -108,8 +107,8 @@ taglist_draw(widget_t *widget,
     for(tag = vscreen.tags; tag; tag = tag->next)
     {
         style = taglist_style_get(vscreen, tag);
-        w = draw_textwidth(ctx->connection, ctx->default_screen,
-                           style.font, tag->name) + style.font->height;
+        w = draw_text_extents(ctx->connection, ctx->default_screen,
+                              style.font, tag->name).width + style.font->height;
         area.x = widget->area.x + widget->area.width;
         area.y = widget->area.y;
         area.width = w;
@@ -155,8 +154,8 @@ taglist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     style = taglist_style_get(vscreen, tag);
-                    width = draw_textwidth(globalconf.connection, globalconf.default_screen,
-                                           style.font, tag->name)
+                    width = draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                              style.font, tag->name).width
                         + style.font->height;
                     if(ev->event_x >= widget->area.x + prev_width
                        && ev->event_x < widget->area.x + prev_width + width)
@@ -172,8 +171,8 @@ taglist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     style = taglist_style_get(vscreen, tag);
-                    width = draw_textwidth(globalconf.connection, globalconf.default_screen,
-                                           style.font, tag->name) + style.font->height;
+                    width = draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                              style.font, tag->name).width + style.font->height;
                     if(ev->event_y >= widget->area.x + prev_width
                        && ev->event_y < widget->area.x + prev_width + width)
                     {
@@ -188,8 +187,8 @@ taglist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
                 for(tag = vscreen.tags; tag; tag = tag->next, i++)
                 {
                     style = taglist_style_get(vscreen, tag);
-                    width = draw_textwidth(globalconf.connection, globalconf.default_screen,
-                                           style.font, tag->name) + style.font->height;
+                    width = draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                              style.font, tag->name).width + style.font->height;
                     if(widget->statusbar->width - ev->event_y >= widget->area.x + prev_width
                        && widget->statusbar->width - ev->event_y < widget->area.x + prev_width + width)
                     {

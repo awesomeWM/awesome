@@ -187,8 +187,8 @@ main(int argc, char **argv)
     if((ret = config_parse(screen, configfile)))
         return ret;
 
-    geometry.width = draw_textwidth(globalconf.connection, globalconf.default_screen,
-                                    globalconf.style.font, argv[optind]);
+    geometry.width = draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                       globalconf.style.font, argv[optind]).width;
     geometry.height = globalconf.style.font->height * 1.5;
 
     if(argc - optind >= 2)

@@ -281,28 +281,16 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, statusbar_t *statusbar)
 }
 
 static void
-config_section_titlebar_init(cfg_t *cfg_titlebar, titlebar_t *tb, int screen)
+config_section_titlebar_init(cfg_t *cfg_titlebar, titlebar_t *tb)
 {
-    int phys_screen = screen_virttophys(screen);
-    cfg_t *cfg_styles = cfg_getsec(cfg_titlebar, "styles");
-
     tb->position = tb->dposition = cfg_getposition(cfg_titlebar, "position");
     tb->align = cfg_getalignment(cfg_titlebar, "align");
     tb->text_align = cfg_getalignment(cfg_titlebar, "text_align");
     tb->width = cfg_getint(cfg_titlebar, "width");
     tb->height = cfg_getint(cfg_titlebar, "height");
-    draw_style_init(globalconf.connection, phys_screen,
-                    cfg_getsec(cfg_styles, "normal"),
-                    &tb->styles.normal,
-                    &globalconf.screens[screen].styles.normal);
-    draw_style_init(globalconf.connection, phys_screen,
-                    cfg_getsec(cfg_styles, "focus"),
-                    &tb->styles.focus,
-                    &globalconf.screens[screen].styles.focus);
-    draw_style_init(globalconf.connection, phys_screen,
-                    cfg_getsec(cfg_styles, "urgent"),
-                    &tb->styles.urgent,
-                    &globalconf.screens[screen].styles.urgent);
+    tb->text_normal = a_strdup(cfg_getstr(cfg_titlebar, "text_normal"));
+    tb->text_focus = a_strdup(cfg_getstr(cfg_titlebar, "text_focus"));
+    tb->text_urgent = a_strdup(cfg_getstr(cfg_titlebar, "text_urgent"));
 }
 
 static void
@@ -392,7 +380,7 @@ config_parse_screen(cfg_t *cfg, int screen)
         eprint("no font available\n");
 
     /* Titlebar */
-    config_section_titlebar_init(cfg_titlebar, &virtscreen->titlebar_default, screen);
+    config_section_titlebar_init(cfg_titlebar, &virtscreen->titlebar_default);
 
     /* statusbar_t */
     statusbar_list_init(&virtscreen->statusbar);
@@ -544,7 +532,7 @@ config_parse(const char *confpatharg)
         rule->screen = cfg_getint(cfgsectmp, "screen");
         rule->ismaster = fuzzy_get_from_str(cfg_getstr(cfgsectmp, "master"));
         rule->opacity = cfg_getfloat(cfgsectmp, "opacity");
-        config_section_titlebar_init(cfg_getsec(cfgsectmp, "titlebar"), &rule->titlebar, 0);
+        config_section_titlebar_init(cfg_getsec(cfgsectmp, "titlebar"), &rule->titlebar);
         if(rule->screen >= globalconf.screens_info->nscreen)
             rule->screen = 0;
 

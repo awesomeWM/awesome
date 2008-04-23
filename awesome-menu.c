@@ -434,8 +434,8 @@ redraw(void)
         draw_text(globalconf.ctx, geometry, AlignLeft,
                   MARGIN, globalconf.prompt, globalconf.styles.focus);
 
-        len = MARGIN * 2 + draw_textwidth(globalconf.connection, globalconf.default_screen,
-                                          globalconf.styles.focus.font, globalconf.prompt);
+        len = MARGIN * 2 + draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                             globalconf.styles.focus.font, globalconf.prompt).width;
         geometry.x += len;
         geometry.width -= len;
     }
@@ -443,8 +443,8 @@ redraw(void)
     draw_text(globalconf.ctx, geometry, AlignLeft,
               MARGIN, globalconf.text, globalconf.styles.normal);
 
-    len = MARGIN * 2 + MAX(draw_textwidth(globalconf.connection, globalconf.default_screen,
-                                          globalconf.styles.normal.font, globalconf.text),
+    len = MARGIN * 2 + MAX(draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                             globalconf.styles.normal.font, globalconf.text).width,
                            geometry.width / 20);
     geometry.x += len;
     geometry.width -= len;
@@ -454,8 +454,8 @@ redraw(void)
         if(item->match)
         {
             style = item == globalconf.item_selected ? globalconf.styles.focus : globalconf.styles.normal;
-            len = MARGIN + draw_textwidth(globalconf.connection, globalconf.default_screen,
-                                          style.font, item->data);
+            len = MARGIN + draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                             style.font, item->data).width;
             if(item == globalconf.item_selected)
             {
                 if(len > geometry.width)
@@ -479,8 +479,8 @@ redraw(void)
             {
                 style = item == globalconf.item_selected ? globalconf.styles.focus : globalconf.styles.normal;
                 x_of_previous_item = geometry.x;
-                geometry.width = MARGIN + draw_textwidth(globalconf.connection, globalconf.default_screen,
-                                                         style.font, item->data);
+                geometry.width = MARGIN + draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                                            style.font, item->data).width;
                 geometry.x -= geometry.width;
 
                 if(geometry.x < prompt_len)
