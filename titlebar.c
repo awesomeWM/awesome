@@ -71,6 +71,7 @@ titlebar_init(Client *c)
       default:
         break;
     }
+    XMapWindow(globalconf.display, c->titlebar.sw->window);
 }
 
 /** Add the titlebar geometry to a geometry.
@@ -231,7 +232,6 @@ titlebar_update_geometry_floating(Client *c)
       default:
         return;
       case Off:
-        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
         return;
       case Top:
         if(!c->titlebar.width)
@@ -323,7 +323,6 @@ titlebar_update_geometry_floating(Client *c)
         break;
     }
 
-    XMapWindow(globalconf.display, c->titlebar.sw->window);
     titlebar_draw(c);
 }
 
@@ -345,7 +344,6 @@ titlebar_update_geometry(Client *c, area_t geometry)
       default:
         return;
       case Off:
-        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
         return;
       case Top:
         if(!c->titlebar.width)
@@ -439,7 +437,6 @@ titlebar_update_geometry(Client *c, area_t geometry)
         break;
     }
 
-    XMapWindow(globalconf.display, c->titlebar.sw->window);
     titlebar_draw(c);
 }
 
@@ -457,9 +454,15 @@ uicb_client_toggletitlebar(int screen __attribute__ ((unused)), char *arg __attr
         return;
 
     if(!c->titlebar.position)
-        c->titlebar.position = c->titlebar.dposition;
+    {
+        if((c->titlebar.position = c->titlebar.dposition))
+            XMapWindow(globalconf.display, c->titlebar.sw->window);
+    }
     else
+    {
         c->titlebar.position = Off;
+        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
+    }
 
     if(c->isfloating || layout_get_current(screen)->arrange == layout_floating)
         titlebar_update_geometry_floating(c);
