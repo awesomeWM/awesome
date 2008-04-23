@@ -186,7 +186,7 @@ typedef struct client_t client_t;
 struct client_t
 {
     /** Client name */
-    char name[256];
+    char *name;
     /** Window geometry */
     area_t geometry;
     /** Floating window geometry */

@@ -188,12 +188,17 @@ client_get_byname(client_t *list, char *name)
 void
 client_updatetitle(client_t *c)
 {
+    char buf[512];
+
     if(!xutil_gettextprop(globalconf.connection, c->win,
                           xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"),
-                          c->name, sizeof(c->name)))
+                          buf, sizeof(buf)))
         xutil_gettextprop(globalconf.connection, c->win,
                           xutil_intern_atom(globalconf.connection, "WM_NAME"),
-                          c->name, sizeof(c->name));
+                          buf, sizeof(buf));
+    if(c->name)
+        p_delete(&c->name);
+    c->name = g_markup_escape_text(buf, -1);
     titlebar_draw(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
