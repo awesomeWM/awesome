@@ -222,7 +222,7 @@ uicb_widget_tell(int screen, char *arg)
         p_delete(&command);
     }
     else
-        status = WIDGET_ERROR_NOVALUE;
+        status = widget->tell(widget, property, NULL);
 
     switch(status)
     {

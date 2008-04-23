@@ -70,8 +70,8 @@ iconbox_tell(Widget *widget, char *property, char *command)
     Bool b;
     Data *d = widget->data;
 
-    if(!property || !command)
-        return WIDGET_ERROR;
+    if(command == NULL)
+        return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "image"))
     {
