@@ -65,23 +65,23 @@ iconbox_draw(widget_t *widget, DrawCtx *ctx, int offset,
 }
 
 static widget_tell_status_t
-iconbox_tell(widget_t *widget, char *property, char *command)
+iconbox_tell(widget_t *widget, char *property, char *new_value)
 {
     bool b;
     Data *d = widget->data;
 
-    if(command == NULL)
+    if(new_value == NULL)
         return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "image"))
     {
         if(d->image)
             p_delete(&d->image);
-        d->image = a_strdup(command);
+        d->image = a_strdup(new_value);
     }
     else if(!a_strcmp(property, "resize"))
     {
-        if((b = cfg_parse_boolean(command)) != -1)
+        if((b = cfg_parse_boolean(new_value)) != -1)
             d->resize = b;
         else
             return WIDGET_ERROR_FORMAT_BOOL;

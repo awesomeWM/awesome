@@ -276,7 +276,7 @@ graph_draw(widget_t *widget, DrawCtx *ctx, int offset,
 }
 
 static widget_tell_status_t
-graph_tell(widget_t *widget, char *property, char *command)
+graph_tell(widget_t *widget, char *property, char *new_value)
 {
     Data *d = widget->data;
     int i, u;
@@ -286,12 +286,12 @@ graph_tell(widget_t *widget, char *property, char *command)
     if(!d->data_items)
         return WIDGET_ERROR_CUSTOM; /* error already printed on _new */
 
-    if(command == NULL)
+    if(new_value == NULL)
         return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "data"))
     {
-        title = strtok(command, " ");
+        title = strtok(new_value, " ");
         if(!(setting = strtok(NULL, " ")))
             return WIDGET_ERROR_NOVALUE;
 
@@ -347,23 +347,23 @@ graph_tell(widget_t *widget, char *property, char *command)
         return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "height"))
-        d->height = atof(command);
+        d->height = atof(new_value);
     else if(!a_strcmp(property, "bg"))
     {
         if(!draw_color_new(globalconf.connection,
                            widget->statusbar->phys_screen,
-                           command, &d->bg))
+                           new_value, &d->bg))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
     else if(!a_strcmp(property, "bordercolor"))
     {
         if(!draw_color_new(globalconf.connection,
                            widget->statusbar->phys_screen,
-                           command, &d->bordercolor))
+                           new_value, &d->bordercolor))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
     else if(!a_strcmp(property, "grow"))
-        switch((d->grow = position_get_from_str(command)))
+        switch((d->grow = position_get_from_str(new_value)))
         {
           case Left:
           case Right:

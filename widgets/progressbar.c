@@ -383,7 +383,7 @@ progressbar_draw(widget_t *widget, DrawCtx *ctx, int offset,
 }
 
 static widget_tell_status_t
-progressbar_tell(widget_t *widget, char *property, char *command)
+progressbar_tell(widget_t *widget, char *property, char *new_value)
 {
     Data *d = widget->data;
     int i = 0, percent, tmp;
@@ -393,12 +393,12 @@ progressbar_tell(widget_t *widget, char *property, char *command)
     if(!d->data_items)
         return WIDGET_ERROR_CUSTOM; /* error already printed on _new */
 
-    if(command == NULL)
+    if(new_value == NULL)
         return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "data"))
     {
-        title = strtok(command, " ");
+        title = strtok(new_value, " ");
         if(!(setting = strtok(NULL, " ")))
             return WIDGET_ERROR_NOVALUE;
         for(i = 0; i < d->data_items; i++)
@@ -411,23 +411,23 @@ progressbar_tell(widget_t *widget, char *property, char *command)
         return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "fg"))
-        return widget_set_color_for_data(widget, d->fg, command, d->data_items, d->data_title);
+        return widget_set_color_for_data(widget, d->fg, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "fg_off"))
-        return widget_set_color_for_data(widget, d->fg_off, command, d->data_items, d->data_title);
+        return widget_set_color_for_data(widget, d->fg_off, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "bg"))
-        return widget_set_color_for_data(widget, d->bg, command, d->data_items, d->data_title);
+        return widget_set_color_for_data(widget, d->bg, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "bordercolor"))
-        return widget_set_color_for_data(widget, d->bordercolor, command, d->data_items, d->data_title);
+        return widget_set_color_for_data(widget, d->bordercolor, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "fg_center"))
-        return widget_set_color_pointer_for_data(widget, d->pfg_center, command, d->data_items, d->data_title);
+        return widget_set_color_pointer_for_data(widget, d->pfg_center, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "fg_end"))
-        return widget_set_color_pointer_for_data(widget, d->pfg_end, command, d->data_items, d->data_title);
+        return widget_set_color_pointer_for_data(widget, d->pfg_end, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "gap"))
-        d->gap = atoi(command);
+        d->gap = atoi(new_value);
     else if(!a_strcmp(property, "width"))
     {
         tmp = d->width;
-        d->width = atoi(command);
+        d->width = atoi(new_value);
         if(!check_settings(d, widget->statusbar->height))
         {
             d->width = tmp; /* restore */
@@ -437,7 +437,7 @@ progressbar_tell(widget_t *widget, char *property, char *command)
     else if(!a_strcmp(property, "height"))
     {
         tmpf = d->height;
-        d->height = atof(command);
+        d->height = atof(new_value);
         if(!check_settings(d, widget->statusbar->height))
         {
             d->height = tmpf; /* restore */

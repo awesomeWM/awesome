@@ -125,12 +125,12 @@ widget_common_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 /** Common tell function for widget, which only warn user that widget
  * cannot be told anything
  * \param widget the widget
- * \param command unused argument
+ * \param new_value unused argument
  * \return widget_tell_status_t enum (see structs.h)
  */
 static widget_tell_status_t
 widget_common_tell(widget_t *widget, char *property __attribute__ ((unused)),
-                   char *command __attribute__ ((unused)))
+                   char *new_value __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
     return WIDGET_ERROR_CUSTOM;
@@ -184,7 +184,7 @@ uicb_widget_tell(int screen, char *arg)
 {
     statusbar_t *statusbar;
     widget_t *widget;
-    char *p, *property = NULL, *command;
+    char *p, *property = NULL, *new_value;
     ssize_t len;
     widget_tell_status_t status;
 
@@ -212,14 +212,14 @@ uicb_widget_tell(int screen, char *arg)
     /* arg + len points to the finishing \0.
      * p to the char right of the first space (strtok delimiter)
      *
-     * \0 is on the right(>) of p pointer => some text (command) */
+     * \0 is on the right(>) of p pointer => some text (new_value) */
     if(arg + len > p)
     {
         len = a_strlen(p);
-        command = p_new(char, len + 1);
-        a_strncpy(command, len + 1, p, len);
-        status = widget->tell(widget, property, command);
-        p_delete(&command);
+        new_value = p_new(char, len + 1);
+        a_strncpy(new_value, len + 1, p, len);
+        status = widget->tell(widget, property, new_value);
+        p_delete(&new_value);
     }
     else
         status = widget->tell(widget, property, NULL);

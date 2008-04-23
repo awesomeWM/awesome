@@ -25,11 +25,11 @@
 extern AwesomeConf globalconf;
 
 widget_tell_status_t
-widget_set_color_for_data(widget_t *widget, xcolor_t *color, char *command, int data_items, char ** data_title)
+widget_set_color_for_data(widget_t *widget, xcolor_t *color, char *new_value, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;
-    title = strtok(command, " ");
+    title = strtok(new_value, " ");
     if(!(setting = strtok(NULL, " ")))
         return WIDGET_ERROR_NOVALUE;
     for(i = 0; i < data_items; i++)
@@ -45,12 +45,12 @@ widget_set_color_for_data(widget_t *widget, xcolor_t *color, char *command, int 
     return WIDGET_ERROR_FORMAT_SECTION;
 }
 widget_tell_status_t
-widget_set_color_pointer_for_data(widget_t *widget, xcolor_t **color, char *command, int data_items, char ** data_title)
+widget_set_color_pointer_for_data(widget_t *widget, xcolor_t **color, char *new_value, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;
     bool flag;
-    title = strtok(command, " ");
+    title = strtok(new_value, " ");
     if(!(setting = strtok(NULL, " ")))
         return WIDGET_ERROR_NOVALUE;
     for(i = 0; i < data_items; i++)

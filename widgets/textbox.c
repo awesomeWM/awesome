@@ -64,7 +64,7 @@ textbox_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
 }
 
 static widget_tell_status_t
-textbox_tell(widget_t *widget, char *property, char *command)
+textbox_tell(widget_t *widget, char *property, char *new_value)
 {
     Data *d = widget->data;
     font_t *newfont;
@@ -73,21 +73,21 @@ textbox_tell(widget_t *widget, char *property, char *command)
     {
         if (d->text)
             p_delete(&d->text);
-        d->text = a_strdup(command);
+        d->text = a_strdup(new_value);
     }
     else if(!a_strcmp(property, "fg"))
-        if(draw_color_new(globalconf.connection, widget->statusbar->screen, command, &d->style.fg))
+        if(draw_color_new(globalconf.connection, widget->statusbar->screen, new_value, &d->style.fg))
             return WIDGET_NOERROR;
         else
             return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "bg"))
-        if(draw_color_new(globalconf.connection, widget->statusbar->screen, command, &d->style.bg))
+        if(draw_color_new(globalconf.connection, widget->statusbar->screen, new_value, &d->style.bg))
             return WIDGET_NOERROR;
         else
             return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "font"))
     {
-        if((newfont = draw_font_new(globalconf.connection, globalconf.default_screen, command)))
+        if((newfont = draw_font_new(globalconf.connection, globalconf.default_screen, new_value)))
         {
             if(d->style.font != globalconf.screens[widget->statusbar->screen].styles.normal.font)
                 draw_font_delete(&d->style.font);
@@ -97,9 +97,9 @@ textbox_tell(widget_t *widget, char *property, char *command)
             return WIDGET_ERROR_FORMAT_FONT;
     }
     else if(!a_strcmp(property, "width"))
-        d->width = atoi(command);
+        d->width = atoi(new_value);
     else if(!a_strcmp(property, "text_align"))
-        d->align = draw_align_get_from_str(command);
+        d->align = draw_align_get_from_str(new_value);
     else
         return WIDGET_ERROR;
 
