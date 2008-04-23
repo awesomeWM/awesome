@@ -56,7 +56,6 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
 
     prop_r = xcb_get_property_reply(conn, prop_c, NULL);
 
-
     if(!prop_r || !prop_r->value_len || prop_r->format != 8)
     {
         if(prop_r)
@@ -71,7 +70,19 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
      * COMPOUND_TEXT and multibyte but it's not needed...  */
     if(prop_r->type == STRING ||
        prop_r->type == xutil_intern_atom(conn, "UTF8_STRING"))
-        a_strncpy(text, prop_r->value_len + 1, prop_val, textlen - 1);
+    {
+        if(prop_r->value_len < textlen - 1)
+        {
+            /* use memcpy() because prop_val may not be \0 terminated */
+            memcpy(text, prop_val, prop_r->value_len);
+            text[prop_r->value_len] = '\0';
+        }
+        else
+        {
+            memcpy(text, prop_val, textlen - 2);
+            text[textlen - 1] = '\0';
+        }
+    }
 
     p_delete(&prop_r);
 
