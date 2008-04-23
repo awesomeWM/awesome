@@ -259,8 +259,9 @@ draw_text(DrawCtx *ctx,
             len--;
         buf[len] = '\0';
     }
+    /* check that text is not too long */
     if(nw > area.width)
-        return;                 /* too long */
+        return;
     if(len < olen)
     {
         if(len > 1)
@@ -271,7 +272,7 @@ draw_text(DrawCtx *ctx,
             buf[len - 3] = '.';
     }
 
-    pango_layout_set_text(ctx->layout, buf, -1);
+    pango_layout_set_markup(ctx->layout, buf, len);
     pango_layout_set_font_description(ctx->layout, style.font->desc);
 
     x = area.x + padding;
@@ -873,8 +874,9 @@ draw_textwidth(xcb_connection_t *conn, int default_screen, font_t *font, const c
     PangoLayout *layout;
     PangoRectangle ext;
     xcb_screen_t *s = xcb_aux_get_screen(conn, default_screen);
+    ssize_t len;
 
-    if(!a_strlen(text))
+    if(!(len = a_strlen(text)))
         return 0;
 
     surface = cairo_xcb_surface_create(conn, default_screen,
@@ -883,7 +885,7 @@ draw_textwidth(xcb_connection_t *conn, int default_screen, font_t *font, const c
                                        s->height_in_pixels);
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);
-    pango_layout_set_text(layout, text, -1);
+    pango_layout_set_markup(layout, text, len);
     pango_layout_set_font_description(layout, font->desc);
     pango_layout_get_pixel_extents(layout, NULL, &ext);
     g_object_unref(layout);
