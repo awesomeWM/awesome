@@ -53,6 +53,7 @@
 #include "focus.h"
 #include "ewmh.h"
 #include "tag.h"
+#include "dbus.h"
 #include "common/socket.h"
 #include "common/util.h"
 #include "common/version.h"
@@ -491,6 +492,8 @@ main(int argc, char **argv)
         else
             warn("error binding UNIX domain socket: %s\n", strerror(errno));
     }
+    
+    a_dbus_init();
 
     /* register function for signals */
     signal(SIGINT, &exit_on_signal);
@@ -531,6 +534,9 @@ main(int argc, char **argv)
                 statusbar_refresh();
                 layout_refresh();
             }
+
+        /* a_dbus_process_requests(); */
+
         /* two level XPending:
          * we need to first check we have XEvent to handle
          * and if so, we handle them all in a round.
@@ -559,6 +565,7 @@ main(int argc, char **argv)
         xcb_aux_sync(globalconf.connection);
     }
 
+    a_dbus_cleanup();
 
     if(csfd > 0 && close(csfd))
         warn("error closing UNIX domain socket: %s\n", strerror(errno));
