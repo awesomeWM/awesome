@@ -440,6 +440,18 @@ titlebar_update_geometry(Client *c, area_t geometry)
     titlebar_draw(c);
 }
 
+void
+titlebar_position_set(Titlebar *t, Position p)
+{
+    if(!t->sw)
+        return;
+
+    if((t->position = p))
+        XMapWindow(globalconf.display, t->sw->window);
+    else
+        XUnmapWindow(globalconf.display, t->sw->window);
+}
+
 /** Toggle the visibility of the focused window's titlebar.
  * \param screen screen number (unused)
  * \param arg unused argument
@@ -454,15 +466,9 @@ uicb_client_toggletitlebar(int screen __attribute__ ((unused)), char *arg __attr
         return;
 
     if(!c->titlebar.position)
-    {
-        if((c->titlebar.position = c->titlebar.dposition))
-            XMapWindow(globalconf.display, c->titlebar.sw->window);
-    }
+        titlebar_position_set(&c->titlebar, c->titlebar.dposition);
     else
-    {
-        c->titlebar.position = Off;
-        XUnmapWindow(globalconf.display, c->titlebar.sw->window);
-    }
+        titlebar_position_set(&c->titlebar, Off);
 
     if(c->isfloating || layout_get_current(screen)->arrange == layout_floating)
         titlebar_update_geometry_floating(c);

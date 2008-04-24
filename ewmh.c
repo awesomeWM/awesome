@@ -28,6 +28,7 @@
 #include "screen.h"
 #include "client.h"
 #include "widget.h"
+#include "titlebar.h"
 
 extern AwesomeConf globalconf;
 
@@ -254,7 +255,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             /* restore geometry */
             geometry = c->m_geometry;
             /* restore borders and titlebar */
-            c->titlebar.position = c->titlebar.dposition;
+            titlebar_position_set(&c->titlebar, c->titlebar.dposition);
             c->border = c->oldborder;
             c->ismax = False;
             client_setfloating(c, c->wasfloating);
@@ -266,7 +267,7 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             c->m_geometry = c->geometry;
             c->wasfloating = c->isfloating;
             /* disable titlebar and borders */
-            c->titlebar.position = Off;
+            titlebar_position_set(&c->titlebar, Off);
             c->oldborder = c->border;
             c->border = 0;
             c->ismax = True;
@@ -291,7 +292,7 @@ ewmh_process_window_type_atom(Client *c, Atom state)
         c->border = 0;
         c->skip = True;
         c->isfixed = True;
-        c->titlebar.position = Off;
+        titlebar_position_set(&c->titlebar, Off);
         client_setfloating(c, True);
     }
     else if (state == net_wm_window_type_dialog)
