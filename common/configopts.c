@@ -317,8 +317,6 @@ cfg_opt_t widget_textbox_opts[] =
     CFG_STR((char *) "text", NULL, CFGF_NONE),
     /** Text alignment. */
     CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
-    /** Style to use for drawing. */
-    CFG_SEC((char *) "style", style_opts, CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines emptybox widget options. */

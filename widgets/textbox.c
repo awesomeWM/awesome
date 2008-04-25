@@ -31,7 +31,6 @@ typedef struct
     char *text;
     int width;
     alignment_t align;
-    style_t style;
 } Data;
 
 static int
@@ -45,7 +44,7 @@ textbox_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
         widget->area.width = widget->statusbar->width - used;
     else
         widget->area.width = MIN(draw_text_extents(ctx->connection, ctx->default_screen,
-                                                   d->style.font, d->text).width,
+                                                   globalconf.screens[widget->statusbar->screen].styles.normal.font, d->text).width,
                                  widget->statusbar->width - used);
 
     widget->area.height = widget->statusbar->height;
@@ -58,7 +57,7 @@ textbox_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    draw_text(ctx, widget->area, d->align, 0, d->text, d->style);
+    draw_text(ctx, widget->area, d->align, 0, d->text, globalconf.screens[widget->statusbar->screen].styles.normal);
 
     return widget->area.width;
 }
@@ -67,29 +66,12 @@ static widget_tell_status_t
 textbox_tell(widget_t *widget, char *property, char *new_value)
 {
     Data *d = widget->data;
-    font_t *newfont;
 
     if(!a_strcmp(property, "text"))
     {
         if (d->text)
             p_delete(&d->text);
         d->text = a_strdup(new_value);
-    }
-    else if(!a_strcmp(property, "fg"))
-        if(draw_color_new(globalconf.connection, widget->statusbar->screen, new_value, &d->style.fg))
-            return WIDGET_NOERROR;
-        else
-            return WIDGET_ERROR_FORMAT_COLOR;
-    else if(!a_strcmp(property, "font"))
-    {
-        if((newfont = draw_font_new(globalconf.connection, globalconf.default_screen, new_value)))
-        {
-            if(d->style.font != globalconf.screens[widget->statusbar->screen].styles.normal.font)
-                draw_font_delete(&d->style.font);
-            d->style.font = newfont;
-        }
-        else
-            return WIDGET_ERROR_FORMAT_FONT;
     }
     else if(!a_strcmp(property, "width"))
         d->width = atoi(new_value);
@@ -114,11 +96,6 @@ textbox_new(statusbar_t *statusbar, cfg_t *config)
     w->alignment = cfg_getalignment(config, "align");
 
     w->data = d = p_new(Data, 1);
-
-    draw_style_init(globalconf.connection, statusbar->phys_screen,
-                    cfg_getsec(config, "style"),
-                    &d->style,
-                    &globalconf.screens[statusbar->screen].styles.normal);
 
     d->width = cfg_getint(config, "width");
     d->align = cfg_getalignment(config, "text_align");
