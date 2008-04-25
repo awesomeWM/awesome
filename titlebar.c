@@ -38,10 +38,9 @@ titlebar_markup_parse(client_t *c, const char *str, ssize_t len)
     int i = 0;
     ssize_t clen;
    
-    new = p_new(char, len++);
+    new = p_new(char, ++len);
 
     for(ps = str; *ps; ps++, i++)
-    {
         if(*ps == '%')
         {
             ps++;
@@ -58,7 +57,6 @@ titlebar_markup_parse(client_t *c, const char *str, ssize_t len)
         }
         else
             new[i] = *ps;
-    }
 
     return new;
 }
