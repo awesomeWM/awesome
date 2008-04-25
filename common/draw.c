@@ -35,7 +35,7 @@
 #include <iconv.h>
 #include <errno.h>
 #include <string.h>
-
+#include <ctype.h>
 #include <math.h>
 
 #include "draw.h"
@@ -47,7 +47,7 @@
  * \return NULL if error, otherwise pointer to the new converted string
  */
 static char *
-draw_iso2utf8(char *iso)
+draw_iso2utf8(const char *iso)
 {
     iconv_t iso2utf8;
     size_t len, utf8len;
@@ -74,7 +74,7 @@ draw_iso2utf8(char *iso)
     utf8len = 2 * len + 1;
     utf8 = utf8p = p_new(char, utf8len);
 
-    if(iconv(iso2utf8, &iso, &len, &utf8, &utf8len) == (size_t) -1)
+    if(iconv(iso2utf8, (char **) &iso, &len, &utf8, &utf8len) == (size_t) -1)
     {
         warn("text conversion failed: %s\n", strerror(errno));
         p_delete(&utf8p);
@@ -211,6 +211,60 @@ draw_font_delete(font_t **font)
     p_delete(font);
 }
 
+static char *
+draw_text_markup_expand(xcb_connection_t *conn,
+                        int phys_screen,
+                        const char *str, ssize_t slen,
+                        xcolor_t **bg_color)
+{
+    const char *ps;
+    char *bg, *bg_end, *bg_str, *color, *col_end, *col_str, *new;
+    ssize_t len;
+    int i = 0;
+
+    if((bg = strstr(str, "<bg "))
+       && ((bg_end = strstr(bg, "/>"))))
+    {
+        len = bg_end - bg + 1;
+        bg_str = p_new(char, len);
+        /* strncpy(bg_str, len, bg + len of '<bg ', everything * exclude >) */
+        a_strncpy(bg_str, len, bg + 4, len - 5);
+
+        if(bg_color && (color = strstr(bg_str, "color=")))
+        {
+            color += 6;
+            if(color[0] == '"')
+                color++;
+            for(col_end = color; *col_end && (*col_end == '#' || isalnum(*col_end)); col_end++);
+
+            col_str = a_strndup(color, col_end - color);
+                
+            if((len = a_strlen(col_str)))
+            {
+                if(col_str[len - 1] == '"')
+                    col_str[--len] = '\0';
+                *bg_color = p_new(xcolor_t, 1);
+                if(!draw_color_new(conn, phys_screen, col_str, *bg_color))
+                    p_delete(bg_color);
+            }
+            p_delete(&col_str);
+        }
+
+        /* copy string without <bg> */
+        new = p_new(char, slen - (bg_end - bg));
+        for(ps = str; *ps; ps++)
+            /* if before <bg and after /> */
+            if(ps < bg || ps > (bg_end + 1))
+                new[i++] = *ps;
+
+        p_delete(&bg_str);
+    }
+    else
+        new = a_strdup(str);
+
+    return new;
+}
+
 /** Draw text into a draw context
  * \param ctx DrawCtx to draw to
  * \param area area to draw to
@@ -228,53 +282,41 @@ draw_text(DrawCtx *ctx,
           area_t area,
           alignment_t align,
           int padding,
-          char *text,
+          const char *text,
           style_t style)
 {
-    int nw = 0, x, y;
+    int x, y;
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
+    xcolor_t *bg_color = NULL;
+    PangoRectangle ext;
 
-    draw_rectangle(ctx, area, 1.0, true, style.bg);
-
-    if(!(len = olen = a_strlen(text)))
+    if(!(len = a_strlen(text)))
         return;
 
     /* try to convert it to UTF-8 */
     if((utf8 = draw_iso2utf8(text)))
-    {
-        buf = utf8;
-        len = olen = a_strlen(buf);
-    }
+        len = a_strlen(utf8);
     else
-        buf = a_strdup(text);
+        utf8 = a_strdup(text);
+    
+    buf = draw_text_markup_expand(ctx->connection, ctx->phys_screen,
+                                  utf8, len, &bg_color);
+    p_delete(&utf8);
 
-    /* check that the text is not too long */
-    while(len && (nw = (draw_text_extents(ctx->connection, ctx->default_screen, style.font, buf).width) + padding * 2) > area.width)
+    len = olen = a_strlen(buf);
+
+    if(bg_color)
     {
-        len--;
-        /* we can't blindly null the char, we need to check if it's not part of
-         * a multi byte char: if mbtowc return -1, we know that we must go back
-         * in the string to find the beginning of the multi byte char */
-        while(len && mbtowc(NULL, buf + len, a_strlen(buf + len)) < 0)
-            len--;
-        buf[len] = '\0';
-    }
-    /* check that text is not too long */
-    if(nw > area.width)
-        return;
-    if(len < olen)
-    {
-        if(len > 1)
-            buf[len - 1] = '.';
-        if(len > 2)
-            buf[len - 2] = '.';
-        if(len > 3)
-            buf[len - 3] = '.';
+        draw_rectangle(ctx, area, 1.0, true, *bg_color);
+        p_delete(&bg_color);
     }
 
+    pango_layout_set_width(ctx->layout, pango_units_from_double(area.width));
+    pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
     pango_layout_set_markup(ctx->layout, buf, len);
     pango_layout_set_font_description(ctx->layout, style.font->desc);
+    pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
     x = area.x + padding;
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
@@ -285,14 +327,16 @@ draw_text(DrawCtx *ctx,
     switch(align)
     {
       case AlignCenter:
-        x += (area.width - nw) / 2;
+        x += (area.width - ext.width) / 2;
         break;
       case AlignRight:
-        x += area.width - nw;
+        x += area.width - ext.width;
         break;
       default:
         break;
     }
+
+    cairo_move_to(ctx->cr, x, y);
 
     if(style.shadow_offset > 0)
     {
@@ -309,7 +353,6 @@ draw_text(DrawCtx *ctx,
                          style.fg.red / 65535.0,
                          style.fg.green / 65535.0,
                          style.fg.blue / 65535.0);
-    cairo_move_to(ctx->cr, x, y);
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 
@@ -877,17 +920,30 @@ draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, cons
     xcb_screen_t *s = xcb_aux_get_screen(conn, default_screen);
     area_t geom = { 0, 0, 0, 0, NULL, NULL };
     ssize_t len;
+    char *buf, *utf8;
 
     if(!(len = a_strlen(text)))
         return geom;
+
+    /* try to convert it to UTF-8 */
+    if((utf8 = draw_iso2utf8(text)))
+        len = a_strlen(utf8);
+    else
+        utf8 = a_strdup(text);
+    
+    buf = draw_text_markup_expand(conn, default_screen, utf8, len, NULL);
+    p_delete(&utf8);
+
+    len = a_strlen(buf);
 
     surface = cairo_xcb_surface_create(conn, default_screen,
                                        draw_screen_default_visual(s),
                                        s->width_in_pixels,
                                        s->height_in_pixels);
+
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);
-    pango_layout_set_markup(layout, text, len);
+    pango_layout_set_markup(layout, buf, len);
     pango_layout_set_font_description(layout, font->desc);
     pango_layout_get_pixel_extents(layout, NULL, &ext);
     g_object_unref(layout);
@@ -896,6 +952,8 @@ draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, cons
 
     geom.width = ext.width;
     geom.height = ext.height * 1.5;
+
+    p_delete(&buf);
 
     return geom;
 }

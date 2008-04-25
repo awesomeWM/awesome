@@ -113,11 +113,7 @@ taglist_draw(widget_t *widget,
         area.y = widget->area.y;
         area.width = w;
         area.height = widget->statusbar->height;
-        draw_text(ctx, area,
-                  AlignCenter,
-                  style.font->height / 2,
-                  tag->name,
-                  style);
+        draw_text(ctx, area, AlignCenter, 0, tag->name, style);
 
         if(isoccupied(tag))
         {
