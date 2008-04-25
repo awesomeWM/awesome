@@ -311,6 +311,8 @@ draw_text(DrawCtx *ctx,
         draw_rectangle(ctx, area, 1.0, true, *bg_color);
         p_delete(&bg_color);
     }
+    else
+        draw_rectangle(ctx, area, 1.0, true, style.bg);
 
     pango_layout_set_width(ctx->layout, pango_units_from_double(area.width - padding));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
