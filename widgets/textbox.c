@@ -80,11 +80,6 @@ textbox_tell(widget_t *widget, char *property, char *new_value)
             return WIDGET_NOERROR;
         else
             return WIDGET_ERROR_FORMAT_COLOR;
-    else if(!a_strcmp(property, "bg"))
-        if(draw_color_new(globalconf.connection, widget->statusbar->screen, new_value, &d->style.bg))
-            return WIDGET_NOERROR;
-        else
-            return WIDGET_ERROR_FORMAT_COLOR;
     else if(!a_strcmp(property, "font"))
     {
         if((newfont = draw_font_new(globalconf.connection, globalconf.default_screen, new_value)))
