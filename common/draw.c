@@ -312,7 +312,7 @@ draw_text(DrawCtx *ctx,
         p_delete(&bg_color);
     }
 
-    pango_layout_set_width(ctx->layout, pango_units_from_double(area.width));
+    pango_layout_set_width(ctx->layout, pango_units_from_double(area.width - padding));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
     pango_layout_set_markup(ctx->layout, buf, len);
     pango_layout_set_font_description(ctx->layout, style.font->desc);
