@@ -211,58 +211,96 @@ draw_font_delete(font_t **font)
     p_delete(font);
 }
 
-static char *
-draw_text_markup_expand(xcb_connection_t *conn,
-                        int phys_screen,
-                        const char *str, ssize_t slen,
-                        xcolor_t **bg_color)
+typedef struct
 {
-    const char *ps;
-    char *bg, *bg_end, *bg_str, *color, *col_end, *col_str, *new;
-    ssize_t len;
+    xcb_connection_t *connection;
+    int phys_screen;
+    char *text;
+    bool has_bg_color;
+    xcolor_t bg_color;
+} draw_parser_data_t;
+
+static void
+draw_text_markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused)),
+                                     const gchar *element_name,
+                                     const gchar **attribute_names,
+                                     const gchar **attribute_values,
+                                     gpointer user_data,
+                                     GError **error __attribute__ ((unused)))
+{
+    draw_parser_data_t *p = (draw_parser_data_t *) user_data;
+    const char **tmp;
     int i = 0;
 
-    if((bg = strstr(str, "<bg "))
-       && ((bg_end = strstr(bg, "/>"))))
-    {
-        len = bg_end - bg + 1;
-        bg_str = p_new(char, len);
-        /* strncpy(bg_str, len, bg + len of '<bg ', everything * exclude >) */
-        a_strncpy(bg_str, len, bg + 4, len - 5);
+    if(!a_strcmp(element_name, "bg"))
+        for(tmp = attribute_names; *tmp; tmp++, i++)
+            if(!p->has_bg_color && !a_strcmp(*tmp, "color"))
+                p->has_bg_color = draw_color_new(p->connection, p->phys_screen,
+                                                 attribute_values[i], &p->bg_color);
+}
 
-        if(bg_color && (color = strstr(bg_str, "color=")))
-        {
-            color += 6;
-            if(color[0] == '"')
-                color++;
-            for(col_end = color; *col_end && (*col_end == '#' || isalnum(*col_end)); col_end++);
+static void
+draw_text_markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
+                            const gchar *text,
+                            gsize text_len,
+                            gpointer user_data,
+                            GError **error __attribute__ ((unused)))
+{
+    draw_parser_data_t *p = (draw_parser_data_t *) user_data;
+    ssize_t len, rlen;
 
-            col_str = a_strndup(color, col_end - color);
-                
-            if((len = a_strlen(col_str)))
-            {
-                if(col_str[len - 1] == '"')
-                    col_str[--len] = '\0';
-                *bg_color = p_new(xcolor_t, 1);
-                if(!draw_color_new(conn, phys_screen, col_str, *bg_color))
-                    p_delete(bg_color);
-            }
-            p_delete(&col_str);
-        }
-
-        /* copy string without <bg> */
-        new = p_new(char, slen - (bg_end - bg));
-        for(ps = str; *ps; ps++)
-            /* if before <bg and after /> */
-            if(ps < bg || ps > (bg_end + 1))
-                new[i++] = *ps;
-
-        p_delete(&bg_str);
-    }
+    len = a_strlen(p->text);
+    rlen = len + 1 + text_len;
+    p_realloc(&p->text, rlen);
+    if(len)
+        a_strncat(p->text, rlen, text, len);
     else
-        new = a_strdup(str);
+        a_strncpy(p->text, rlen, text, text_len);
+}
 
-    return new;
+static bool
+draw_text_markup_expand(draw_parser_data_t *data,
+                        const char *str, ssize_t slen)
+{
+    GMarkupParseContext *mkp_ctx;
+    GMarkupParser parser =
+    {
+        /* start_element */
+        draw_text_markup_parse_start_element,
+        /* end_element */
+        NULL,
+        /* text */
+        draw_text_markup_parse_text,
+        /* passthrough */
+        NULL,
+        /* error */
+        NULL
+    };
+    GError *error = NULL;
+    char *text;
+    ssize_t len = 18 + slen;
+
+    /* parsed text must begin with an element */
+    text = p_new(char, len);
+    a_strcpy(text, len, "<markup>");
+    a_strcat(text, len, str);
+    a_strcat(text, len, "</markup>");
+
+    mkp_ctx = g_markup_parse_context_new(&parser, 0, data, NULL);
+
+    if(!g_markup_parse_context_parse(mkp_ctx, text, len - 1, &error))
+    {
+        warn("unable to parse text: %s\n", error->message);
+        g_error_free(error);
+        return false;
+    }
+
+    g_markup_parse_context_end_parse(mkp_ctx, &error);
+
+    g_markup_parse_context_free(mkp_ctx);
+    p_delete(&text);
+
+    return true;
 }
 
 /** Draw text into a draw context
@@ -290,6 +328,7 @@ draw_text(DrawCtx *ctx,
     char *buf = NULL, *utf8 = NULL;
     xcolor_t *bg_color = NULL;
     PangoRectangle ext;
+    draw_parser_data_t parser_data;
 
     if(!(len = a_strlen(text)))
         return;
@@ -300,15 +339,22 @@ draw_text(DrawCtx *ctx,
     else
         utf8 = a_strdup(text);
     
-    buf = draw_text_markup_expand(ctx->connection, ctx->phys_screen,
-                                  utf8, len, &bg_color);
-    p_delete(&utf8);
+    bzero(&parser_data, sizeof(parser_data));
+    parser_data.connection = ctx->connection;
+    parser_data.phys_screen = ctx->phys_screen;
+    if(draw_text_markup_expand(&parser_data, utf8, len))
+    {
+        buf = parser_data.text;
+        p_delete(&utf8);
+    }
+    else
+        buf = utf8;
 
     len = olen = a_strlen(buf);
 
-    if(bg_color)
+    if(parser_data.has_bg_color)
     {
-        draw_rectangle(ctx, area, 1.0, true, *bg_color);
+        draw_rectangle(ctx, area, 1.0, true, parser_data.bg_color);
         p_delete(&bg_color);
     }
     else
@@ -923,6 +969,7 @@ draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, cons
     area_t geom = { 0, 0, 0, 0, NULL, NULL };
     ssize_t len;
     char *buf, *utf8;
+    draw_parser_data_t parser_data;
 
     if(!(len = a_strlen(text)))
         return geom;
@@ -933,8 +980,16 @@ draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, cons
     else
         utf8 = a_strdup(text);
     
-    buf = draw_text_markup_expand(conn, default_screen, utf8, len, NULL);
-    p_delete(&utf8);
+    bzero(&parser_data, sizeof(parser_data));
+    parser_data.connection = conn;
+    parser_data.phys_screen = default_screen;
+    if(draw_text_markup_expand(&parser_data, utf8, len))
+    {
+        buf = parser_data.text;
+        p_delete(&utf8);
+    }
+    else
+        buf = utf8;
 
     len = a_strlen(buf);
 
