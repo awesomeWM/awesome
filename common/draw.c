@@ -288,14 +288,13 @@ draw_text_markup_expand(draw_parser_data_t *data,
 
     mkp_ctx = g_markup_parse_context_new(&parser, 0, data, NULL);
 
-    if(!g_markup_parse_context_parse(mkp_ctx, text, len - 1, &error))
+    if(!g_markup_parse_context_parse(mkp_ctx, text, len - 1, &error)
+        || !g_markup_parse_context_end_parse(mkp_ctx, &error))
     {
         warn("unable to parse text: %s\n", error->message);
         g_error_free(error);
         return false;
     }
-
-    g_markup_parse_context_end_parse(mkp_ctx, &error);
 
     g_markup_parse_context_free(mkp_ctx);
     p_delete(&text);
