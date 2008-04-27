@@ -449,7 +449,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     if(!retloadprops
        && u_size_hints
-       && !(xcb_size_hints_is_us_position(u_size_hints) | xcb_size_hints_is_p_position(u_size_hints)))
+       && !(xcb_size_hints_get_flags(u_size_hints) & (XCB_SIZE_US_POSITION_HINT |
+                                                      XCB_SIZE_P_POSITION_HINT)))
     {
         if(c->isfloating && !c->ismax)
             client_resize(c, globalconf.screens[c->screen].floating_placement(c), false);
@@ -747,12 +748,15 @@ client_updatewmhints(client_t *c)
 
     if((wmh = xcb_get_wm_hints(globalconf.connection, c->win)))
     {
-        if((c->isurgent = (xcb_wm_hints_is_x_urgency_hint(wmh) && globalconf.focus->client != c)))
+        const uint32_t wm_hints_flags = xcb_wm_hints_get_flags(wmh);
+        if((c->isurgent = ((wm_hints_flags & XCB_WM_X_URGENCY_HINT) &&
+                           globalconf.focus->client != c)))
         {
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
             titlebar_draw(c);
         }
-        if(xcb_wm_hints_is_state_hint(wmh) && xcb_wm_hints_state_is_withdrawn(wmh))
+        if((wm_hints_flags & XCB_WM_STATE_HINT) &&
+           (xcb_wm_hints_get_initial_state(wmh) == XCB_WM_WITHDRAWN_STATE))
         {
             c->border = 0;
             c->skip = true;
@@ -770,30 +774,32 @@ client_updatesizehints(client_t *c)
     if(!(size = xcb_get_wm_normal_hints(globalconf.connection, c->win, &msize)))
         return NULL;
 
-    if(xcb_size_hints_is_p_size(size))
+    const uint32_t size_flags = xcb_size_hints_get_flags(size);
+
+    if((size_flags & XCB_SIZE_P_SIZE_HINT))
         xcb_size_hints_get_base_size(size, &c->basew, &c->baseh);
-    else if(xcb_size_hints_is_p_min_size(size))
+    else if((size_flags & XCB_SIZE_P_MIN_SIZE_HINT))
         xcb_size_hints_get_min_size(size, &c->basew, &c->baseh);
     else
         c->basew = c->baseh = 0;
-    if(xcb_size_hints_is_p_resize_inc(size))
+    if((size_flags & XCB_SIZE_P_RESIZE_INC_HINT))
         xcb_size_hints_get_increase(size, &c->incw, &c->inch);
     else
         c->incw = c->inch = 0;
 
-    if(xcb_size_hints_is_p_max_size(size))
+    if((size_flags & XCB_SIZE_P_MAX_SIZE_HINT))
         xcb_size_hints_get_max_size(size, &c->maxw, &c->maxh);
     else
         c->maxw = c->maxh = 0;
 
-    if(xcb_size_hints_is_p_min_size(size))
+    if((size_flags & XCB_SIZE_P_MIN_SIZE_HINT))
         xcb_size_hints_get_min_size(size, &c->minw, &c->minh);
-    else if(xcb_size_hints_is_p_base_size(size))
+    else if((size_flags & XCB_SIZE_BASE_SIZE_HINT))
         xcb_size_hints_get_base_size(size, &c->minw, &c->minh);
     else
         c->minw = c->minh = 0;
 
-    if(xcb_size_hints_is_p_aspect(size))
+    if((size_flags & XCB_SIZE_P_ASPECT_HINT))
     {
         xcb_size_hints_get_min_aspect(size, &c->minax, &c->minay);
         xcb_size_hints_get_max_aspect(size, &c->maxax, &c->maxay);
