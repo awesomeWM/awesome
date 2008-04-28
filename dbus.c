@@ -30,7 +30,7 @@ static DBusConnection *conn = NULL;
 static void
 a_dbus_process_widget_tell(DBusMessage *req)
 {
-    char *arg, *path;
+    char *arg, *path = NULL;
     DBusMessageIter iter;
     
     if(!dbus_message_iter_init(req, &iter))
