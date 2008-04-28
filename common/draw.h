@@ -90,16 +90,21 @@ typedef struct
 
 typedef struct
 {
+    int offset;
+    xcolor_t color;
+} shadow_t;
+
+/** Style structure */
+typedef struct
+{
     /** Foreground color */
     xcolor_t fg;
     /** Background color */
     xcolor_t bg;
     /** Shadow color */
-    xcolor_t shadow;
+    shadow_t shadow;
     /** Border color */
     xcolor_t border;
-    /** Shadow offset */
-    int shadow_offset;
     /** Font */
     font_t *font;
 } style_t;

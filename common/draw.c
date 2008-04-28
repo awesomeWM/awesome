@@ -227,6 +227,7 @@ typedef struct
     } margin;
     bool has_bg_color;
     xcolor_t bg_color;
+    shadow_t shadow;
 } draw_parser_data_t;
 
 static bool
@@ -252,8 +253,15 @@ draw_text_markup_expand(draw_parser_data_t *data,
     /* text */
     if(p->attribute_names[1])
         for(i = 0; p->attribute_names[1][i]; i++)
+        {
             if(!a_strcmp(p->attribute_names[1][i], "align"))
                 data->align = draw_align_get_from_str(p->attribute_values[1][i]);
+            else if(!a_strcmp(p->attribute_names[1][i], "shadow"))
+                draw_color_new(data->connection, data->phys_screen,
+                               p->attribute_values[1][i], &data->shadow.color);
+            else if(!a_strcmp(p->attribute_names[1][i], "shadow_offset"))
+                data->shadow.offset = atoi(p->attribute_values[1][i]);
+        }
 
     /* margin */
     if(p->attribute_names[2])
@@ -286,8 +294,8 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
     int x, y;
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
-    xcolor_t *bg_color = NULL;
     PangoRectangle ext;
+    shadow_t shadow;
     draw_parser_data_t parser_data;
 
     if(!(len = a_strlen(text)))
@@ -313,10 +321,7 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
     len = olen = a_strlen(buf);
 
     if(parser_data.has_bg_color)
-    {
         draw_rectangle(ctx, area, 1.0, true, parser_data.bg_color);
-        p_delete(&bg_color);
-    }
     else
         draw_rectangle(ctx, area, 1.0, true, style.bg);
 
@@ -347,18 +352,25 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
         break;
     }
 
-    cairo_move_to(ctx->cr, x, y);
 
-    if(style.shadow_offset > 0)
+    p_clear(&shadow, 1);
+    if(parser_data.shadow.offset)
+        shadow = parser_data.shadow;
+    else if(style.shadow.offset)
+        shadow = style.shadow;
+
+    if(shadow.offset)
     {
         cairo_set_source_rgb(ctx->cr,
-                             style.shadow.red / 65535.0,
-                             style.shadow.green / 65535.0,
-                             style.shadow.blue / 65535.0);
-        cairo_move_to(ctx->cr, x + style.shadow_offset, y + style.shadow_offset);
+                             shadow.color.red / 65535.0,
+                             shadow.color.green / 65535.0,
+                             shadow.color.blue / 65535.0);
+        cairo_move_to(ctx->cr, x + shadow.offset, y + shadow.offset);
         pango_cairo_update_layout(ctx->cr, ctx->layout);
         pango_cairo_show_layout(ctx->cr, ctx->layout);
     }
+
+    cairo_move_to(ctx->cr, x, y);
 
     cairo_set_source_rgb(ctx->cr,
                          style.fg.red / 65535.0,
@@ -1111,12 +1123,12 @@ draw_style_init(xcb_connection_t *conn, int phys_screen, cfg_t *cfg,
                    cfg_getstr(cfg, "border"), &c->border);
 
     draw_color_new(conn, phys_screen,
-                   cfg_getstr(cfg, "shadow"), &c->shadow);
+                   cfg_getstr(cfg, "shadow_color"), &c->shadow.color);
 
     if((shadow = cfg_getint(cfg, "shadow_offset")) != (int) 0xffffffff)
-        c->shadow_offset = shadow;
+        c->shadow.offset = shadow;
     else if(!m)
-        c->shadow_offset = 0;
+        c->shadow.offset = 0;
 }
 
 /** Remove a area from a list of them,
