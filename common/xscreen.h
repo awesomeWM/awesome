@@ -29,11 +29,11 @@ typedef struct
     int nscreen;
     bool xinerama_is_active;
     area_t *geometry;
-} ScreensInfo;
+} screens_info_t;
 
-int screen_get_bycoord(ScreensInfo *, int, int, int);
-void screensinfo_delete(ScreensInfo **);
-ScreensInfo * screensinfo_new(xcb_connection_t *);
+int screen_get_bycoord(screens_info_t *, int, int, int);
+void screensinfo_delete(screens_info_t **);
+screens_info_t * screensinfo_new(xcb_connection_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

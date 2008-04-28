@@ -338,7 +338,7 @@ struct AwesomeConf
     /** Logical screens */
     VirtScreen *screens;
     /** Screens info */
-    ScreensInfo *screens_info;
+    screens_info_t *screens_info;
     /** Rules list */
     rule_t *rules;
     /** Keys bindings list */

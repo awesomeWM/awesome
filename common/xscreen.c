@@ -32,7 +32,7 @@
  * \return screen number or DefaultScreen of disp on no match
  */
 int
-screen_get_bycoord(ScreensInfo *si, int screen, int x, int y)
+screen_get_bycoord(screens_info_t *si, int screen, int x, int y)
 {
     int i;
 
@@ -63,16 +63,16 @@ screen_xsitoarea(xcb_xinerama_screen_info_t si)
 }
 
 void
-screensinfo_delete(ScreensInfo **si)
+screensinfo_delete(screens_info_t **si)
 {
     p_delete(&(*si)->geometry);
     p_delete(si);
 }
 
-ScreensInfo *
+screens_info_t *
 screensinfo_new(xcb_connection_t *conn)
 {
-    ScreensInfo *si;
+    screens_info_t *si;
     xcb_xinerama_query_screens_reply_t *xsq;
     xcb_xinerama_screen_info_t *xsi;
     int xinerama_screen_number, screen, screen_to_test;
@@ -80,7 +80,7 @@ screensinfo_new(xcb_connection_t *conn)
     bool drop;
     xcb_xinerama_is_active_reply_t *xia = NULL;
 
-    si = p_new(ScreensInfo, 1);
+    si = p_new(screens_info_t, 1);
 
     /* Check for extension before checking for Xinerama */
     if(xcb_get_extension_data(conn, &xcb_xinerama_id)->present)

@@ -1241,7 +1241,7 @@ main(int argc, char **argv)
     ssize_t len;
     const char *shell = getenv("SHELL");
     area_t geometry = { 0, 0, 0, 0, NULL, NULL };
-    ScreensInfo *si;
+    screens_info_t *si;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},

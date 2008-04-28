@@ -128,7 +128,7 @@ main(int argc, char **argv)
     int opt, ret, screen = 0, delay = 0;
     xcb_query_pointer_reply_t *xqp = NULL;
     char *configfile = NULL;
-    ScreensInfo *si;
+    screens_info_t *si;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
