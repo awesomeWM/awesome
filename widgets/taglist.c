@@ -94,7 +94,7 @@ taglist_text_get(tag_t *tag, taglist_data_t *data)
 
 static int
 taglist_draw(widget_t *widget,
-             DrawCtx *ctx,
+             draw_context_t *ctx,
              int offset,
              int used __attribute__ ((unused)))
 {

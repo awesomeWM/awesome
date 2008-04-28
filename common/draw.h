@@ -117,26 +117,26 @@ typedef struct
     cairo_t *cr;
     cairo_surface_t *surface;
     PangoLayout *layout;
-} DrawCtx;
+} draw_context_t;
 
-DrawCtx *draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t);
-void draw_context_delete(DrawCtx **);
+draw_context_t *draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t);
+void draw_context_delete(draw_context_t **);
 
 font_t *draw_font_new(xcb_connection_t *, int, char *);
 void draw_font_delete(font_t **);
 
-void draw_text(DrawCtx *, area_t, const char *, style_t);
-void draw_rectangle(DrawCtx *, area_t, float, bool, xcolor_t);
-void draw_rectangle_gradient(DrawCtx *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
+void draw_text(draw_context_t *, area_t, const char *, style_t);
+void draw_rectangle(draw_context_t *, area_t, float, bool, xcolor_t);
+void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 
-void draw_graph_setup(DrawCtx *);
-void draw_graph(DrawCtx *, area_t, int *, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
-void draw_graph_line(DrawCtx *, area_t, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
-void draw_circle(DrawCtx *, int, int, int, bool, xcolor_t);
-void draw_image(DrawCtx *, int, int, int, const char *);
-void draw_image_from_argb_data(DrawCtx *, int, int, int, int, int, unsigned char *);
+void draw_graph_setup(draw_context_t *);
+void draw_graph(draw_context_t *, area_t, int *, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
+void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
+void draw_circle(draw_context_t *, int, int, int, bool, xcolor_t);
+void draw_image(draw_context_t *, int, int, int, const char *);
+void draw_image_from_argb_data(draw_context_t *, int, int, int, int, int, unsigned char *);
 area_t draw_get_image_size(const char *filename);
-void draw_rotate(DrawCtx *, xcb_drawable_t, int, int, double, int, int);
+void draw_rotate(draw_context_t *, xcb_drawable_t, int, int, double, int, int);
 area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *);
 alignment_t draw_align_get_from_str(const char *);
 bool draw_color_new(xcb_connection_t *, int, const char *, xcolor_t *);

@@ -65,7 +65,7 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
 }
 
 static int
-tasklist_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
+tasklist_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
 {
     client_t *c;
     Data *d = widget->data;

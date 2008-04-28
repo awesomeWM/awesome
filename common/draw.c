@@ -114,13 +114,13 @@ draw_screen_default_visual(xcb_screen_t *s)
  * \param phys_screen physical screen id
  * \param width width
  * \param height height
- * \param dw Drawable object to store in DrawCtx
+ * \param dw Drawable object to store in draw_context_t
  * \return draw context ref
  */
-DrawCtx *
+draw_context_t *
 draw_context_new(xcb_connection_t *conn, int phys_screen, int width, int height, xcb_drawable_t dw)
 {
-    DrawCtx *d = p_new(DrawCtx, 1);
+    draw_context_t *d = p_new(draw_context_t, 1);
     xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
 
     d->connection = conn;
@@ -138,10 +138,10 @@ draw_context_new(xcb_connection_t *conn, int phys_screen, int width, int height,
 };
 
 /** Delete a draw context
- * \param ctx DrawCtx to delete
+ * \param ctx draw_context_t to delete
  */
 void
-draw_context_delete(DrawCtx **ctx)
+draw_context_delete(draw_context_t **ctx)
 {
     g_object_unref((*ctx)->layout);
     cairo_surface_destroy((*ctx)->surface);
@@ -275,13 +275,13 @@ draw_text_markup_expand(draw_parser_data_t *data,
 }
 
 /** Draw text into a draw context
- * \param ctx DrawCtx to draw to
+ * \param ctx draw_context_t to draw to
  * \param area area to draw to
  * \param text text to draw
  * \return area_t with width and height are set to what used
  */
 void
-draw_text(DrawCtx *ctx, area_t area, const char *text, style_t style)
+draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
 {
     int x, y;
     ssize_t len, olen;
@@ -379,7 +379,7 @@ draw_text(DrawCtx *ctx, area_t area, const char *text, style_t style)
  * \return pat pattern or NULL; needs to get cairo_pattern_destroy()'ed;
  */
 static cairo_pattern_t *
-draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
+draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
                               xcolor_t *pcolor, xcolor_t *pcolor_center,
                               xcolor_t *pcolor_end)
 {
@@ -419,7 +419,7 @@ draw_setup_cairo_color_source(DrawCtx *ctx, area_t rect,
  * \param color color to use
  */
 void
-draw_rectangle(DrawCtx *ctx, area_t geometry, float line_width, bool filled, xcolor_t color)
+draw_rectangle(draw_context_t *ctx, area_t geometry, float line_width, bool filled, xcolor_t color)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, line_width);
@@ -455,7 +455,7 @@ draw_rectangle(DrawCtx *ctx, area_t geometry, float line_width, bool filled, xco
  * \param pcolor_end color at pattern_start + pattern_width
  */
 void
-draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, float line_width, bool filled,
+draw_rectangle_gradient(draw_context_t *ctx, area_t geometry, float line_width, bool filled,
                         area_t pattern_rect, xcolor_t *pcolor,
                         xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
@@ -487,7 +487,7 @@ draw_rectangle_gradient(DrawCtx *ctx, area_t geometry, float line_width, bool fi
  * \param ctx Draw context
  */
 void
-draw_graph_setup(DrawCtx *ctx)
+draw_graph_setup(draw_context_t *ctx)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, 1.0);
@@ -511,7 +511,7 @@ draw_graph_setup(DrawCtx *ctx)
  * \param pcolor_end color at the right
  */
 void
-draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
+draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
            position_t grow, area_t patt_rect,
            xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
@@ -571,7 +571,7 @@ draw_graph(DrawCtx *ctx, area_t rect, int *from, int *to, int cur_index,
  * \param pcolor_end color at the right
  */
 void
-draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
+draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
                 position_t grow, area_t patt_rect,
                 xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
@@ -645,7 +645,7 @@ draw_graph_line(DrawCtx *ctx, area_t rect, int *to, int cur_index,
  * \param color color to use
  */
 void
-draw_circle(DrawCtx *ctx, int x, int y, int r, bool filled, xcolor_t color)
+draw_circle(draw_context_t *ctx, int x, int y, int r, bool filled, xcolor_t color)
 {
     cairo_set_line_width(ctx->cr, 1.0);
     cairo_set_source_rgb(ctx->cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
@@ -674,7 +674,7 @@ draw_circle(DrawCtx *ctx, int x, int y, int r, bool filled, xcolor_t color)
  * \param wanted_h wanted height: if > 0, image will be resized
  * \param data the image pixels array
  */
-void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
+void draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
                                int wanted_h, unsigned char *data)
 {
     double ratio;
@@ -713,7 +713,7 @@ void draw_image_from_argb_data(DrawCtx *ctx, int x, int y, int w, int h,
  * \param filename file name to draw
  */
 void
-draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
+draw_image(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
 {
 
     double ratio;
@@ -816,7 +816,7 @@ draw_imlib_load_strerror(Imlib_Load_Error e)
  * \param filename file name to draw
  */
 void
-draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
+draw_image(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
 {
     int w, h, size, i;
     DATA32 *data;
@@ -892,7 +892,7 @@ draw_get_image_size(const char *filename)
  * \return new rotated drawable
  */
 void
-draw_rotate(DrawCtx *ctx, xcb_drawable_t dest, int dest_w, int dest_h,
+draw_rotate(draw_context_t *ctx, xcb_drawable_t dest, int dest_w, int dest_h,
             double angle, int tx, int ty)
 {
     cairo_surface_t *surface, *source;

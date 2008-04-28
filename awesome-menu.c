@@ -103,7 +103,7 @@ typedef struct
     /** The window */
     simple_window_t *sw;
     /** The draw contet */
-    DrawCtx *ctx;
+    draw_context_t *ctx;
     /** Colors */
     struct
     {

@@ -121,7 +121,7 @@ int
 main(int argc, char **argv)
 {
     simple_window_t *sw;
-    DrawCtx *ctx;
+    draw_context_t *ctx;
     xcb_generic_event_t *ev;
     area_t geometry = { 0, 0, 200, 50, NULL, NULL },
          icon_geometry = { -1, -1, -1, -1, NULL, NULL };

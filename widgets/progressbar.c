@@ -117,7 +117,7 @@ check_settings(Data *d, int status_height)
 
 
 static int
-progressbar_draw(widget_t *widget, DrawCtx *ctx, int offset,
+progressbar_draw(widget_t *widget, draw_context_t *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     /* pb_.. values points to the widget inside a potential border */

@@ -30,7 +30,7 @@ extern AwesomeConf globalconf;
 
 static int
 layoutinfo_draw(widget_t *widget,
-                DrawCtx *ctx,
+                draw_context_t *ctx,
                 int offset,
                 int used __attribute__ ((unused)))
 {

@@ -119,7 +119,7 @@ struct widget_t
     /** widget_t name */
     char *name;
     /** Draw function */
-    int (*draw)(widget_t *, DrawCtx *, int, int);
+    int (*draw)(widget_t *, draw_context_t *, int, int);
     /** Update function */
     widget_tell_status_t (*tell)(widget_t *, char *, char *);
     /** ButtonPressedEvent handler */
@@ -169,7 +169,7 @@ struct statusbar_t
     /** widget_t list */
     widget_t *widgets;
     /** Draw context */
-    DrawCtx *ctx;
+    draw_context_t *ctx;
     /** Next and previous statusbars */
     statusbar_t *prev, *next;
 };

@@ -82,7 +82,7 @@ typedef struct
 } Data;
 
 static int
-graph_draw(widget_t *widget, DrawCtx *ctx, int offset,
+graph_draw(widget_t *widget, draw_context_t *ctx, int offset,
                  int used __attribute__ ((unused)))
 {
     int margin_top;

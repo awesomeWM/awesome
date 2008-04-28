@@ -175,7 +175,7 @@ void
 titlebar_draw(client_t *c)
 {
     xcb_drawable_t dw = 0;
-    DrawCtx *ctx;
+    draw_context_t *ctx;
     area_t geometry;
     xcb_screen_t *s;
     char *text;

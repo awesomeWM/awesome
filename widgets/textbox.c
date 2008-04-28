@@ -33,7 +33,7 @@ typedef struct
 } Data;
 
 static int
-textbox_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
+textbox_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
 {
     Data *d = widget->data;
 

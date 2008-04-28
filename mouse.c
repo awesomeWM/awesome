@@ -138,7 +138,7 @@ mouse_snapclient(client_t *c, area_t geometry)
  * \param border the client border size
  */
 static void
-mouse_resizebar_draw(DrawCtx *ctx, style_t style, simple_window_t *sw, area_t geometry, int border)
+mouse_resizebar_draw(draw_context_t *ctx, style_t style, simple_window_t *sw, area_t geometry, int border)
 {
     area_t draw_geometry = { 0, 0, ctx->width, ctx->height, NULL, NULL };
     char size[64];
@@ -160,7 +160,7 @@ mouse_resizebar_draw(DrawCtx *ctx, style_t style, simple_window_t *sw, area_t ge
  * \param ctx drawctx to create
  */
 static simple_window_t *
-mouse_resizebar_new(int phys_screen, int border, area_t geometry, style_t style, DrawCtx **ctx)
+mouse_resizebar_new(int phys_screen, int border, area_t geometry, style_t style, draw_context_t **ctx)
 {
     simple_window_t *sw;
     area_t geom;
@@ -199,7 +199,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     client_t *c = globalconf.focus->client, *target;
     Layout *layout = layout_get_current(screen);
     simple_window_t *sw = NULL;
-    DrawCtx *ctx;
+    draw_context_t *ctx;
     style_t style;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
@@ -329,7 +329,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry = { 0, 0, 0, 0, NULL, NULL };
     double mwfact;
     simple_window_t *sw = NULL;
-    DrawCtx *ctx = NULL;
+    draw_context_t *ctx = NULL;
     style_t style;
     xcb_grab_pointer_cookie_t grab_pointer_c;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
