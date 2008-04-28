@@ -228,7 +228,7 @@ draw_text(DrawCtx *ctx,
         /* we can't blindly null the char, we need to check if it's not part of
          * a multi byte char: if mbtowc return -1, we know that we must go back
          * in the string to find the beginning of the multi byte char */
-        while(mbtowc(NULL, buf + len, a_strlen(buf + len)) < 0)
+        while(len && mbtowc(NULL, buf + len, a_strlen(buf + len)) < 0)
             len--;
         buf[len] = '\0';
     }
