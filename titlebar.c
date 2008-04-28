@@ -64,11 +64,14 @@ titlebar_init(client_t *c)
 
     if(!c->titlebar.height)
         c->titlebar.height = MAX(MAX(draw_text_extents(globalconf.connection, globalconf.default_screen,
-                                                       globalconf.screens[c->screen].styles.normal.font, c->titlebar.text_focus).height,
+                                                       globalconf.screens[c->screen].styles.focus.font,
+                                                       client_markup_parse(c, c->titlebar.text_focus, a_strlen(c->titlebar.text_focus))).height,
                                      draw_text_extents(globalconf.connection, globalconf.default_screen,
-                                           globalconf.screens[c->screen].styles.normal.font, c->titlebar.text_normal).height),
+                                                       globalconf.screens[c->screen].styles.normal.font,
+                                                       client_markup_parse(c, c->titlebar.text_normal, a_strlen(c->titlebar.text_normal))).height),
                                  draw_text_extents(globalconf.connection, globalconf.default_screen,
-                                                   globalconf.screens[c->screen].styles.normal.font, c->titlebar.text_urgent).height);
+                                                   globalconf.screens[c->screen].styles.urgent.font,
+                                                   client_markup_parse(c, c->titlebar.text_urgent, a_strlen(c->titlebar.text_urgent))).height);
 
     switch(c->titlebar.position)
     {
