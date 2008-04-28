@@ -193,10 +193,10 @@ client_updatetitle(client_t *c)
 
     if(!xutil_gettextprop(globalconf.connection, c->win,
                           xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"),
-                          buf, sizeof(buf)))
+                          buf, ssizeof(buf)))
         xutil_gettextprop(globalconf.connection, c->win,
                           xutil_intern_atom(globalconf.connection, "WM_NAME"),
-                          buf, sizeof(buf));
+                          buf, ssizeof(buf));
     if(c->name)
         p_delete(&c->name);
     c->name = g_markup_escape_text(buf, -1);
