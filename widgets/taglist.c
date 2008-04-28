@@ -40,15 +40,25 @@ static char *
 tag_markup_parse(tag_t *t, const char *str, ssize_t len)
 {
     const char *elements[] = { "title", NULL };
-    const char *elements_sub[] = { t->name , NULL };
+    char *title_esc = g_markup_escape_text(t->name, -1);
+    const char *elements_sub[] = { title_esc , NULL };
     markup_parser_data_t *p;
+    char *ret;
 
     p = markup_parser_data_new(elements, elements_sub, countof(elements));
 
-    if(!markup_parse(p, str, len))
-        return a_strdup(str);
+    if(markup_parse(p, str, len))
+    {
+        ret = p->text;
+        p->text = NULL;
+    }
+    else
+        ret = a_strdup(str);
 
-    return p->text;
+    markup_parser_data_delete(&p);
+    p_delete(&title_esc);
+
+    return ret;
 }
 
 /** Check if at least one client is tagged with tag number t and is on screen
