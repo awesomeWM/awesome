@@ -243,8 +243,7 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
     for(i = 0; WidgetList[i].name; i++)
         numwidgets += cfg_size(cfg_statusbar, WidgetList[i].name);
 
-    widgets = p_new(cfg_t, numwidgets);
-    wptr = widgets;
+    wptr = widgets = p_new(cfg_t, numwidgets);
 
     for(i = 0; WidgetList[i].name; i++)
         for (j = 0; j < cfg_size(cfg_statusbar, WidgetList[i].name); j++)
@@ -259,7 +258,7 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
 
     for(i = 0; i < numwidgets; i++)
     {
-        wptr = widgets + i;
+        wptr = &widgets[i];
         widget_new = name_func_lookup(cfg_name(wptr), WidgetList);
         if(widget_new)
         {
@@ -271,6 +270,7 @@ statusbar_widgets_create(cfg_t *cfg_statusbar, Statusbar *statusbar)
         else
             warn("ignoring unknown widget: %s.\n", cfg_name(widgets + i));
     }
+    p_delete(&widgets);
 }
 
 static void
