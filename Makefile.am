@@ -126,13 +126,14 @@ awesome_SOURCES = \
 	common/xutil.c common/xutil.h \
 	common/configopts.h common/configopts.c \
 	common/xscreen.h common/xscreen.c \
+	common/draw.c common/draw.h \
+	common/markup.c common/markup.h \
 	common/list.h \
 	structs.h \
 	client.c client.h \
 	titlebar.c titlebar.h \
 	placement.c placement.h \
 	focus.c focus.h \
-	common/draw.c common/draw.h \
 	event.c event.h \
 	layout.c layout.h \
 	awesome.c awesome.h \
@@ -165,6 +166,7 @@ bin_PROGRAMS += awesome-message
 awesome_message_SOURCES = \
         common/swindow.c common/swindow.h \
         common/draw.c common/draw.h \
+	common/markup.c common/markup.h \
 	common/util.h common/util.c \
 	common/version.h common/version.c \
 	common/configopts.h common/configopts.c \
@@ -178,6 +180,7 @@ bin_PROGRAMS += awesome-menu
 awesome_menu_SOURCES = \
         common/swindow.c common/swindow.h \
         common/draw.c common/draw.h \
+	common/markup.c common/markup.h \
 	common/util.h common/util.c \
 	common/version.h common/version.c \
 	common/configopts.h common/configopts.c \

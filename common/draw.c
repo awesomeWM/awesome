@@ -44,6 +44,7 @@
 #include "common/draw.h"
 #include "common/util.h"
 #include "common/xutil.h"
+#include "common/markup.h"
 
 /** Convert text from any charset to UTF-8 using iconv
  * \param iso the ISO string to convert
@@ -223,117 +224,31 @@ typedef struct
     xcolor_t bg_color;
 } draw_parser_data_t;
 
-static void
-draw_text_markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused)),
-                                     const gchar *element_name,
-                                     const gchar **attribute_names,
-                                     const gchar **attribute_values,
-                                     gpointer user_data,
-                                     GError **error __attribute__ ((unused)))
-{
-    draw_parser_data_t *p = (draw_parser_data_t *) user_data;
-    char *newtext;
-    int i = 0;
-    ssize_t len;
-
-    if(!a_strcmp(element_name, "bg"))
-    {
-        for(i = 0; attribute_names[i]; i++)
-            if(!p->has_bg_color && !a_strcmp(attribute_names[i], "color"))
-                p->has_bg_color = draw_color_new(p->connection, p->phys_screen,
-                                                 attribute_values[i], &p->bg_color);
-    }
-    else if(a_strcmp(element_name, "markup"))
-    {
-        if(!(len = asprintf(&newtext, "%s<%s ", NONULL(p->text), element_name)))
-            return;
-        len++; /* add \0 that asprintf does not return in len */
-        for(i = 0; attribute_names[i]; i++)
-        {
-            len += a_strlen(attribute_names[i]) + a_strlen(attribute_values[i]) + 5;
-            p_realloc(&newtext, len);
-            a_strcat(newtext, len, attribute_names[i]);
-            a_strcat(newtext, len, "=\"");
-            a_strcat(newtext, len, attribute_values[i]);
-            a_strcat(newtext, len, "\" ");
-        }
-        p_realloc(&newtext, ++len);
-        a_strcat(newtext, len, ">");
-        p_delete(&p->text);
-        p->text = newtext;
-    }
-}
-
-static void
-draw_text_markup_parse_end_element(GMarkupParseContext *context __attribute__ ((unused)),
-                                   const gchar *element_name,
-                                   gpointer user_data,
-                                   GError **error __attribute__ ((unused)))
-{
-    draw_parser_data_t *p = (draw_parser_data_t *) user_data;
-    char *newtext;
-
-    if(a_strcmp(element_name, "markup")
-       && a_strcmp(element_name, "bg"))
-    {
-        asprintf(&newtext, "%s</%s>", p->text, element_name);
-        p_delete(&p->text);
-        p->text = newtext;
-    }
-}
-
-static void
-draw_text_markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
-                            const gchar *text,
-                            gsize text_len,
-                            gpointer user_data,
-                            GError **error __attribute__ ((unused)))
-{
-    draw_parser_data_t *p = (draw_parser_data_t *) user_data;
-    ssize_t len, rlen;
-
-    len = a_strlen(p->text);
-    rlen = len + 1 + text_len;
-    p_realloc(&p->text, rlen);
-    if(len)
-        a_strncat(p->text, rlen, text, len);
-    else
-        a_strncpy(p->text, rlen, text, text_len);
-}
-
 static bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
-    GMarkupParseContext *mkp_ctx;
-    GMarkupParser parser =
-    {
-        /* start_element */
-        draw_text_markup_parse_start_element,
-        /* end_element */
-        draw_text_markup_parse_end_element,
-        /* text */
-        draw_text_markup_parse_text,
-        /* passthrough */
-        NULL,
-        /* error */
-        NULL
-    };
-    GError *error = NULL;
+    const char *elements[] = { "bg", NULL};
+    markup_parser_data_t *p;
+    int i;
 
-    mkp_ctx = g_markup_parse_context_new(&parser, 0, data, NULL);
+    p = markup_parser_data_new(elements, countof(elements));
 
-    if(!g_markup_parse_context_parse(mkp_ctx, "<markup>", -1, &error)
-       || !g_markup_parse_context_parse(mkp_ctx, str, slen, &error)
-       || !g_markup_parse_context_parse(mkp_ctx, "</markup>", -1, &error)
-       || !g_markup_parse_context_end_parse(mkp_ctx, &error))
-    {
-        warn("unable to parse text: %s\n", error->message);
-        g_error_free(error);
+    if(!markup_parse(p, str, slen))
         return false;
-    }
 
-    g_markup_parse_context_free(mkp_ctx);
+    /* bg */
+    if(p->attribute_values[0])
+        for(i = 0; p->attribute_values[0][i]; i++)
+            if(!strcmp(p->attribute_values[0][i], "color"))
+                data->has_bg_color = draw_color_new(data->connection, data->phys_screen,
+                                                    p->attribute_values[0][i], &data->bg_color);
+
+    /* stole text */
+    data->text = p->text;
+    p->text = NULL;
+
+    markup_parser_data_delete(&p);
 
     return true;
 }
@@ -343,11 +258,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
  * \param area area to draw to
  * \param align alignment
  * \param padding padding to add before drawing the text
- * \param font font to use
  * \param text text to draw
- * \param enable shadow
- * \param fg foreground color
- * \param bg background color
  * \return area_t with width and height are set to what used
  */
 void
@@ -373,8 +284,8 @@ draw_text(DrawCtx *ctx,
         len = a_strlen(utf8);
     else
         utf8 = a_strdup(text);
-    
-    bzero(&parser_data, sizeof(parser_data));
+
+    p_clear(&parser_data, 1);
     parser_data.connection = ctx->connection;
     parser_data.phys_screen = ctx->phys_screen;
     if(draw_text_markup_expand(&parser_data, utf8, len))
@@ -1014,8 +925,8 @@ draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, cons
         len = a_strlen(utf8);
     else
         utf8 = a_strdup(text);
-    
-    bzero(&parser_data, sizeof(parser_data));
+
+    p_clear(&parser_data, 1);
     parser_data.connection = conn;
     parser_data.phys_screen = default_screen;
     if(draw_text_markup_expand(&parser_data, utf8, len))
