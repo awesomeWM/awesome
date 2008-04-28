@@ -56,7 +56,7 @@ markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused))
         if(!a_strcmp(element_name, p->elements[i]))
         {
             for(j = 0; attribute_names[j]; j++);
-            p->attribute_names[i] = p_new(char *, j);
+            p->attribute_names[i] = p_new(char *, ++j);
             p->attribute_values[i] = p_new(char *, j);
 
             for(j = 0; attribute_names[j]; j++)
