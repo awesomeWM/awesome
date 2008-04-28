@@ -320,19 +320,13 @@ draw_text_markup_expand(draw_parser_data_t *data,
         NULL
     };
     GError *error = NULL;
-    char *text;
-    ssize_t len = 18 + slen;
-
-    /* parsed text must begin with an element */
-    text = p_new(char, len);
-    a_strcpy(text, len, "<markup>");
-    a_strcat(text, len, str);
-    a_strcat(text, len, "</markup>");
 
     mkp_ctx = g_markup_parse_context_new(&parser, 0, data, NULL);
 
-    if(!g_markup_parse_context_parse(mkp_ctx, text, len - 1, &error)
-        || !g_markup_parse_context_end_parse(mkp_ctx, &error))
+    if(!g_markup_parse_context_parse(mkp_ctx, "<markup>", -1, &error)
+       || !g_markup_parse_context_parse(mkp_ctx, str, slen, &error)
+       || !g_markup_parse_context_parse(mkp_ctx, "</markup>", -1, &error)
+       || !g_markup_parse_context_end_parse(mkp_ctx, &error))
     {
         warn("unable to parse text: %s\n", error->message);
         g_error_free(error);
@@ -340,7 +334,6 @@ draw_text_markup_expand(draw_parser_data_t *data,
     }
 
     g_markup_parse_context_free(mkp_ctx);
-    p_delete(&text);
 
     return true;
 }
