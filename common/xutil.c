@@ -19,7 +19,7 @@
  *
  */
 
-/* strndup(), asprintf() */
+/* asprintf() */
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -217,8 +217,8 @@ xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
     len_name = a_strlen(data);
     len_class = a_strlen(data + len_name + 1);
 
-    ch->res_name = strndup(data, len_name);
-    ch->res_class = strndup(data + len_name + 1, len_class);
+    ch->res_name = a_strndup(data, len_name);
+    ch->res_class = a_strndup(data + len_name + 1, len_class);
 
     p_delete(&class_hint_r);
 
