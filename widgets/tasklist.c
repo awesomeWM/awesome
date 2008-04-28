@@ -43,7 +43,6 @@ typedef struct
 {
     Showclient_t show;
     bool show_icons;
-    alignment_t align;
     char *text_normal, *text_urgent, *text_focus;
 } Data;
 
@@ -170,9 +169,7 @@ tasklist_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            draw_text(ctx, area, d->align,
-                      style.font->height / 2, text,
-                      style);
+            draw_text(ctx, area, style.font->height / 2, text, style);
 
             p_delete(&text);
 
@@ -283,7 +280,6 @@ tasklist_new(statusbar_t *statusbar, cfg_t *config)
     d->text_normal = a_strdup(cfg_getstr(config, "text_normal"));
     d->text_focus = a_strdup(cfg_getstr(config, "text_focus"));
     d->text_urgent = a_strdup(cfg_getstr(config, "text_urgent"));
-    d->align = cfg_getalignment(config, "text_align");
     d->show_icons = cfg_getbool(config, "show_icons");
 
     buf = cfg_getstr(config, "show");

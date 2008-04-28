@@ -30,7 +30,6 @@ typedef struct
 {
     char *text;
     int width;
-    alignment_t align;
 } Data;
 
 static int
@@ -57,7 +56,7 @@ textbox_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    draw_text(ctx, widget->area, d->align, 0, d->text, globalconf.screens[widget->statusbar->screen].styles.normal);
+    draw_text(ctx, widget->area, 0, d->text, globalconf.screens[widget->statusbar->screen].styles.normal);
 
     return widget->area.width;
 }
@@ -75,8 +74,6 @@ textbox_tell(widget_t *widget, char *property, char *new_value)
     }
     else if(!a_strcmp(property, "width"))
         d->width = atoi(new_value);
-    else if(!a_strcmp(property, "text_align"))
-        d->align = draw_align_get_from_str(new_value);
     else
         return WIDGET_ERROR;
 
@@ -98,7 +95,6 @@ textbox_new(statusbar_t *statusbar, cfg_t *config)
     w->data = d = p_new(Data, 1);
 
     d->width = cfg_getint(config, "width");
-    d->align = cfg_getalignment(config, "text_align");
 
     d->text = a_strdup(cfg_getstr(config, "text"));
 

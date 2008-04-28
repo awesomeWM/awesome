@@ -51,7 +51,6 @@ typedef struct
     position_t position;
     position_t dposition;
     alignment_t align;
-    alignment_t text_align;
     int width, height;
     char *text_normal, *text_focus, *text_urgent;
 } titlebar_t;

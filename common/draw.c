@@ -220,6 +220,7 @@ typedef struct
     xcb_connection_t *connection;
     int phys_screen;
     char *text;
+    alignment_t align;
     bool has_bg_color;
     xcolor_t bg_color;
 } draw_parser_data_t;
@@ -228,7 +229,7 @@ static bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
-    const char *elements[] = { "bg", NULL };
+    const char *elements[] = { "bg", "text", NULL };
     markup_parser_data_t *p;
     int i;
 
@@ -244,6 +245,12 @@ draw_text_markup_expand(draw_parser_data_t *data,
                 data->has_bg_color = draw_color_new(data->connection, data->phys_screen,
                                                     p->attribute_values[0][i], &data->bg_color);
 
+    /* text */
+    if(p->attribute_names[1])
+        for(i = 0; p->attribute_names[1][i]; i++)
+            if(!a_strcmp(p->attribute_names[1][i], "align"))
+                data->align = draw_align_get_from_str(p->attribute_values[1][i]);
+
     /* stole text */
     data->text = p->text;
     p->text = NULL;
@@ -256,7 +263,6 @@ draw_text_markup_expand(draw_parser_data_t *data,
 /** Draw text into a draw context
  * \param ctx DrawCtx to draw to
  * \param area area to draw to
- * \param align alignment
  * \param padding padding to add before drawing the text
  * \param text text to draw
  * \return area_t with width and height are set to what used
@@ -264,7 +270,6 @@ draw_text_markup_expand(draw_parser_data_t *data,
 void
 draw_text(DrawCtx *ctx,
           area_t area,
-          alignment_t align,
           int padding,
           const char *text,
           style_t style)
@@ -318,7 +323,7 @@ draw_text(DrawCtx *ctx,
      * face */
     y = area.y + (ctx->height - style.font->height + 1) / 2;
 
-    switch(align)
+    switch(parser_data.align)
     {
       case AlignCenter:
         x += (area.width - ext.width) / 2;
