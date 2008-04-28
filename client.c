@@ -831,7 +831,7 @@ client_markup_parse(client_t *c, const char *str, ssize_t len)
         p->text = NULL;
     }
     else
-        return a_strdup(str);
+        ret = a_strdup(str);
 
     markup_parser_data_delete(&p);
     p_delete(&title_esc);
