@@ -241,7 +241,10 @@ draw_text_markup_expand(draw_parser_data_t *data,
     p = markup_parser_data_new(elements, NULL, countof(elements));
 
     if(!markup_parse(p, str, slen))
-        return a_strdup(str);
+    {
+        markup_parser_data_delete(&p);
+        return false;
+    }
 
     /* bg */
     if(p->attribute_names[0])
