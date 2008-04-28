@@ -233,7 +233,7 @@ markup_parse(markup_parser_data_t *data, const char *str, ssize_t slen)
        || !g_markup_parse_context_parse(mkp_ctx, "</markup>", -1, &error)
        || !g_markup_parse_context_end_parse(mkp_ctx, &error))
     {
-        warn("unable to parse text: %s\n", error->message);
+        warn("unable to parse text \"%s\": %s\n", str, error->message);
         g_error_free(error);
         return false;
     }
