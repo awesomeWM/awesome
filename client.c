@@ -199,7 +199,7 @@ client_updatetitle(client_t *c)
                           buf, ssizeof(buf));
     if(c->name)
         p_delete(&c->name);
-    c->name = g_markup_escape_text(buf, -1);
+    c->name = a_strndup(buf, ssizeof(buf));
     titlebar_draw(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
@@ -818,7 +818,8 @@ char *
 client_markup_parse(client_t *c, const char *str, ssize_t len)
 {
     const char *elements[] = { "title", NULL };
-    const char *elements_sub[] = { c->name , NULL };
+    char *title_esc = g_markup_escape_text(c->name, -1);
+    const char *elements_sub[] = { title_esc , NULL };
     markup_parser_data_t *p;
     char *ret;
 
@@ -833,6 +834,7 @@ client_markup_parse(client_t *c, const char *str, ssize_t len)
         return a_strdup(str);
 
     markup_parser_data_delete(&p);
+    p_delete(&title_esc);
 
     return ret;
 }
