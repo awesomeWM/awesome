@@ -25,6 +25,7 @@
 #include <math.h>
 
 #include "titlebar.h"
+#include "client.h"
 #include "screen.h"
 #include "layouts/floating.h"
 
