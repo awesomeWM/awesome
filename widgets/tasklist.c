@@ -44,12 +44,7 @@ typedef struct
     Showclient_t show;
     bool show_icons;
     alignment_t align;
-    struct
-    {
-        style_t normal;
-        style_t focus;
-        style_t urgent;
-    } styles;
+    char *text_normal, *text_urgent, *text_focus;
 } Data;
 
 static inline bool
@@ -77,9 +72,10 @@ tasklist_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
     Data *d = widget->data;
     rule_t *r;
     area_t area;
-    style_t style;
+    char *text;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;
+    style_t style;
 
     if(used >= widget->statusbar->width)
         return (widget->area.width = 0);
@@ -110,11 +106,22 @@ tasklist_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
             icon_width = 0;
 
             if(c->isurgent)
-                style = d->styles.urgent;
+            {
+                text = d->text_urgent;
+                style = globalconf.screens[c->screen].styles.urgent;
+            }
             else if(globalconf.focus->client == c)
-                style = d->styles.focus;
+            {
+                text = d->text_focus;
+                style = globalconf.screens[c->screen].styles.focus;
+            }
             else
-                style = d->styles.normal;
+            {
+                text = d->text_normal;
+                style = globalconf.screens[c->screen].styles.normal;
+            }
+
+            text = client_markup_parse(c, text, a_strlen(text));
 
             if(d->show_icons)
             {
@@ -164,8 +171,10 @@ tasklist_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
                 area.width += box_width_rest;
 
             draw_text(ctx, area, d->align,
-                      style.font->height / 2, c->name,
+                      style.font->height / 2, text,
                       style);
+
+            p_delete(&text);
 
             if(c == globalconf.scratch.client)
             {
@@ -263,7 +272,6 @@ tasklist_new(statusbar_t *statusbar, cfg_t *config)
     widget_t *w;
     Data *d;
     char *buf;
-    cfg_t *cfg_styles;
 
     w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
@@ -272,23 +280,9 @@ tasklist_new(statusbar_t *statusbar, cfg_t *config)
     w->alignment = AlignFlex;
     w->data = d = p_new(Data, 1);
 
-    cfg_styles = cfg_getsec(config, "styles");
-
-    draw_style_init(globalconf.connection, statusbar->phys_screen,
-                    cfg_getsec(cfg_styles, "normal"),
-                    &d->styles.normal,
-                    &globalconf.screens[statusbar->screen].styles.normal);
-
-    draw_style_init(globalconf.connection, statusbar->phys_screen,
-                    cfg_getsec(cfg_styles, "focus"),
-                    &d->styles.focus,
-                    &globalconf.screens[statusbar->screen].styles.focus);
-
-    draw_style_init(globalconf.connection, statusbar->phys_screen,
-                    cfg_getsec(cfg_styles, "urgent"),
-                    &d->styles.urgent,
-                    &globalconf.screens[statusbar->screen].styles.urgent);
-
+    d->text_normal = a_strdup(cfg_getstr(config, "text_normal"));
+    d->text_focus = a_strdup(cfg_getstr(config, "text_focus"));
+    d->text_urgent = a_strdup(cfg_getstr(config, "text_urgent"));
     d->align = cfg_getalignment(config, "text_align");
     d->show_icons = cfg_getbool(config, "show_icons");
 

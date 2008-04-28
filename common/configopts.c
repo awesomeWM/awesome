@@ -328,8 +328,12 @@ cfg_opt_t widget_tasklist_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     /** Mouse bindings. */
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    /** Styles to use for drawing. */
-    CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
+    /** Markup title string for normal window */
+    CFG_STR((char *) "text_normal", (char *) "<bg color=\"#444444\"/><title/>", CFGF_NONE),
+    /** Markup title string for focused windows. */
+    CFG_STR((char *) "text_focus", (char *) "<bg color=\"#535d6c\"/><title/>", CFGF_NONE),
+    /** Markup title string for urgent windows. */
+    CFG_STR((char *) "text_urgent", (char *) "<bg color=\"#ff4500\"/><title/>", CFGF_NONE),
     /** Text alignment. */
     CFG_ALIGNMENT((char *) "text_align", (char *) "left", CFGF_NONE),
     /** Which windows to show: tags, all or focus. */

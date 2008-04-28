@@ -36,6 +36,7 @@
 #include "screen.h"
 #include "titlebar.h"
 #include "layouts/floating.h"
+#include "common/markup.h"
 #include "common/xutil.h"
 #include "common/xscreen.h"
 
@@ -805,6 +806,21 @@ client_updatesizehints(client_t *c)
         c->isfixed = true;
 
     return size;
+}
+
+char *
+client_markup_parse(client_t *c, const char *str, ssize_t len)
+{
+    const char *elements[] = { "title", NULL };
+    const char *elements_sub[] = { c->name , NULL };
+    markup_parser_data_t *p;
+
+    p = markup_parser_data_new(elements, elements_sub, countof(elements));
+
+    if(!markup_parse(p, str, len))
+        return a_strdup(str);
+
+    return p->text;
 }
 
 /** Set the transparency of the selected client.

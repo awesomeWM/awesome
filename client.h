@@ -42,6 +42,7 @@ void client_updatetitle(client_t *);
 void client_saveprops(client_t *);
 void client_kill(client_t *);
 void client_setfloating(client_t *, bool, layer_t);
+char * client_markup_parse(client_t *, const char *, ssize_t);
 
 uicb_t uicb_client_kill;
 uicb_t uicb_client_moveresize;
