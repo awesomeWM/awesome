@@ -195,11 +195,11 @@ cfg_opt_t titlebar_opts[] =
     /** Titlebar height. Set to 0 for auto. */
     CFG_INT((char *) "height", 0, CFGF_NONE),
     /** Titlebar markup string for normal windows. */
-    CFG_STR((char *) "text_normal", (char *) "<bg color=\"#444444\"/><title/>", CFGF_NONE),
+    CFG_STR((char *) "text_normal", (char *) "<title/>", CFGF_NONE),
     /** Titlebar markup string for focused windows. */
-    CFG_STR((char *) "text_focus", (char *) "<bg color=\"#535d6c\"/><title/>", CFGF_NONE),
+    CFG_STR((char *) "text_focus", (char *) "<title/>", CFGF_NONE),
     /** Titlebar markup string for urgent windows. */
-    CFG_STR((char *) "text_urgent", (char *) "<bg color=\"#ff4500\"/><title/>", CFGF_NONE),
+    CFG_STR((char *) "text_urgent", (char *) "<title/>", CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines general options. */
@@ -280,11 +280,11 @@ cfg_opt_t widget_taglist_opts[] =
     /** Mouse bindings. */
     CFG_SEC((char *) "mouse", mouse_taglist_opts, CFGF_MULTI),
     /** Markup title string for normal tags */
-    CFG_STR((char *) "text_normal", (char *) " <text align=\"center\"/><bg color=\"#444444\"/><title/> ", CFGF_NONE),
+    CFG_STR((char *) "text_normal", (char *) " <text align=\"center\"/><title/> ", CFGF_NONE),
     /** Markup title string for selected tags. */
-    CFG_STR((char *) "text_focus", (char *) " <text align=\"center\"/><bg color=\"#535d6c\"/><title/> ", CFGF_NONE),
+    CFG_STR((char *) "text_focus", (char *) " <text align=\"center\"/><title/> ", CFGF_NONE),
     /** Markup title string for tags with urgent windows. */
-    CFG_STR((char *) "text_urgent", (char *) " <text align=\"center\"/><bg color=\"#ff4500\"/><title/> ", CFGF_NONE),
+    CFG_STR((char *) "text_urgent", (char *) " <text align=\"center\"/><title/> ", CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines iconbox widget options. */
@@ -331,11 +331,11 @@ cfg_opt_t widget_tasklist_opts[] =
     /** Mouse bindings. */
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
     /** Markup title string for normal window. */
-    CFG_STR((char *) "text_normal", (char *) "<bg color=\"#444444\"/><title/>", CFGF_NONE),
+    CFG_STR((char *) "text_normal", (char *) "<title/>", CFGF_NONE),
     /** Markup title string for focused windows. */
-    CFG_STR((char *) "text_focus", (char *) "<bg color=\"#535d6c\"/><title/>", CFGF_NONE),
+    CFG_STR((char *) "text_focus", (char *) "<title/>", CFGF_NONE),
     /** Markup title string for urgent windows. */
-    CFG_STR((char *) "text_urgent", (char *) "<bg color=\"#ff4500\"/><title/>", CFGF_NONE),
+    CFG_STR((char *) "text_urgent", (char *) "<title/>", CFGF_NONE),
     /** Which windows to show: tags, all or focus. */
     CFG_STR((char *) "show", (char *) "tags", CFGF_NONE),
     /** Show icons of windows. */
