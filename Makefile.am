@@ -34,7 +34,6 @@ WIDGETS += widgets/focusicon.c
 WIDGETS += widgets/progressbar.c
 WIDGETS += widgets/tasklist.c
 WIDGETS += widgets/graph.c
-WIDGETS += widgets/emptybox.c
 WIDGETS += widgets/common.c widgets/common.h
 
 

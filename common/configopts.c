@@ -319,23 +319,6 @@ cfg_opt_t widget_textbox_opts[] =
     CFG_ALIGNMENT((char *) "text_align", (char *) "center", CFGF_NONE),
     CFG_AWESOME_END()
 };
-/** This section defines emptybox widget options. */
-cfg_opt_t widget_emptybox_opts[] =
-{
-    /** X coordinate, do not set for auto. */
-    CFG_INT((char *) "x", 0xffffffff, CFGF_NONE),
-    /** Y coordinate, do not set for auto. */
-    CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
-    /** Widget alignment. */
-    CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
-    /** Mouse bindings. */
-    CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    /** Widget width. Set to 0 for auto. */
-    CFG_INT((char *) "width", 0, CFGF_NONE),
-    /** Style to use for drawing. */
-    CFG_SEC((char *) "style", style_opts, CFGF_NONE),
-    CFG_AWESOME_END()
-};
 /** This section defines tasklist widget options */
 cfg_opt_t widget_tasklist_opts[] =
 {
@@ -460,8 +443,6 @@ cfg_opt_t statusbar_opts[] =
     CFG_INT((char *) "width", 0, CFGF_NONE),
     /** Textbox widget(s). */
     CFG_SEC((char *) "textbox", widget_textbox_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
-    /** Emptybox widget(s). */
-    CFG_SEC((char *) "emptybox", widget_emptybox_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     /** Taglist widget(s). */
     CFG_SEC((char *) "taglist", widget_taglist_opts, CFGF_TITLE | CFGF_MULTI | CFGF_NO_TITLE_DUPES),
     /** Layoutinfo widget(s). */
@@ -748,7 +729,6 @@ cfg_new(void)
     cfg_set_validate_func(cfg, "rules|rule|titlebar|height", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "rules|rule|screen", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|textbox|width", config_validate_unsigned_int);
-    cfg_set_validate_func(cfg, "screen|statusbar|emptybox|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|graph|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|progressbar|width", config_validate_unsigned_int);
     cfg_set_validate_func(cfg, "screen|statusbar|progressbar|border_width", config_validate_unsigned_int);
