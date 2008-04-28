@@ -56,7 +56,7 @@ rule_t *
 rule_matching_client(client_t *c)
 {
     rule_t *r;
-    char *prop = NULL, buf[512];
+    char *prop = NULL, *buf = NULL;
     regmatch_t tmp;
     ssize_t len;
     class_hint_t *ch = NULL;
@@ -87,8 +87,10 @@ rule_matching_client(client_t *c)
            && r->xpropval_r
            && xutil_gettextprop(globalconf.connection, c->win,
                                 xutil_intern_atom(globalconf.connection, r->xprop),
-                                buf, ssizeof(buf)))
+                                &buf))
             ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
+
+        p_delete(&buf);
 
         if(ret)
         {

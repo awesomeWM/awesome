@@ -31,7 +31,7 @@
 /* XCB doesn't provide keysyms definition */
 #include <X11/keysym.h>
 
-bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char *, ssize_t);
+bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **);
 void xutil_getlockmask(xcb_connection_t *, xcb_key_symbols_t *,
                        unsigned int *, unsigned int *, unsigned int *);
 

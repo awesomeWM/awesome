@@ -107,7 +107,8 @@ scan()
 
         /* Get the tree of the children Windows of the current root
          * Window */
-        wins = xcb_query_tree_children(tree_r);
+        if(!(wins = xcb_query_tree_children(tree_r)))
+            eprint("E: cannot get tree children\n");
         tree_c_len = xcb_query_tree_children_length(tree_r);
         attr_wins = p_new(xcb_get_window_attributes_cookie_t, tree_c_len);
 

@@ -35,12 +35,11 @@
  * \param w window
  * \param atom the atom
  * \param text buffer to fill
- * \param textlen buffer lenght
  * \return true on sucess, falsse on failure
  */
 bool
 xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
-                  char *text, ssize_t textlen)
+                  char **text)
 {
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r;
@@ -51,7 +50,7 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
                                         XCB_GET_PROPERTY_TYPE_ANY,
                                         0L, 1000000L);
 
-    if(!text || !textlen)
+    if(!text)
         return false;
 
     prop_r = xcb_get_property_reply(conn, prop_c, NULL);
@@ -71,17 +70,10 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
     if(prop_r->type == STRING ||
        prop_r->type == xutil_intern_atom(conn, "UTF8_STRING"))
     {
-        if((ssize_t) prop_r->value_len < textlen - 1)
-        {
-            /* use memcpy() because prop_val may not be \0 terminated */
-            memcpy(text, prop_val, prop_r->value_len);
-            text[prop_r->value_len] = '\0';
-        }
-        else
-        {
-            memcpy(text, prop_val, textlen - 2);
-            text[textlen - 1] = '\0';
-        }
+        *text = p_new(char, prop_r->value_len + 1);
+        /* use memcpy() because prop_val may not be \0 terminated */
+        memcpy(*text, prop_val, prop_r->value_len);
+        (*text)[prop_r->value_len] = '\0';
     }
 
     p_delete(&prop_r);
@@ -111,14 +103,14 @@ xutil_getlockmask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
             kc = modmap[i * modmap_r->keycodes_per_modifier + j];
             mask = (1 << i);
 
-            if(numlockmask != NULL &&
-               kc == xcb_key_symbols_get_keycode(keysyms, XK_Num_Lock))
+            if(numlockmask != NULL
+               && kc == xcb_key_symbols_get_keycode(keysyms, XK_Num_Lock))
                 *numlockmask = mask;
-            else if(shiftlockmask != NULL &&
-                    kc == xcb_key_symbols_get_keycode(keysyms, XK_Shift_Lock))
+            else if(shiftlockmask != NULL
+                    && kc == xcb_key_symbols_get_keycode(keysyms, XK_Shift_Lock))
                 *shiftlockmask = mask;
-            else if(capslockmask != NULL &&
-                    kc == xcb_key_symbols_get_keycode(keysyms, XK_Caps_Lock))
+            else if(capslockmask != NULL
+                    && kc == xcb_key_symbols_get_keycode(keysyms, XK_Caps_Lock))
                 *capslockmask = mask;
         }
 
