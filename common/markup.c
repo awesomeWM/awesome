@@ -144,11 +144,13 @@ markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
 {
     markup_parser_data_t *p = (markup_parser_data_t *) user_data;
     ssize_t len, rlen;
+    char *esctext;
 
     len = a_strlen(p->text);
     rlen = len + 1 + text_len;
     p_realloc(&p->text, rlen);
-    a_strncat(p->text, rlen, text, text_len);
+    esctext = g_markup_escape_text(text, text_len);
+    a_strncat(p->text, rlen, esctext, a_strlen(esctext));
 }
 
 /** Create a markup_parser_data_t structure with elements list.
