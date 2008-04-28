@@ -37,17 +37,17 @@ typedef enum
     ShowFocus,
     ShowTags,
     ShowAll,
-} Showclient_t;
+} showclient_t;
 
 typedef struct
 {
-    Showclient_t show;
+    showclient_t show;
     bool show_icons;
     char *text_normal, *text_urgent, *text_focus;
 } Data;
 
 static inline bool
-tasklist_isvisible(client_t *c, int screen, Showclient_t show)
+tasklist_isvisible(client_t *c, int screen, showclient_t show)
 {
     if(c->skip || c->skiptb)
         return false;
