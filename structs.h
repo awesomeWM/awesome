@@ -73,9 +73,9 @@ struct rule_t
     rule_t *prev, *next;
 };
 
-/** Key bindings */
-typedef struct Key Key;
-struct Key
+/** Keys bindings */
+typedef struct keybinding_t keybinding_t;
+struct keybinding_t
 {
     unsigned long mod;
     xcb_keysym_t keysym;
@@ -83,7 +83,7 @@ struct Key
     uicb_t *func;
     char *arg;
     /** Next and previous keys */
-    Key *prev, *next;
+    keybinding_t *prev, *next;
 };
 
 /** Mouse buttons bindings */
@@ -342,7 +342,7 @@ struct AwesomeConf
     /** Rules list */
     rule_t *rules;
     /** Keys bindings list */
-    Key *keys;
+    keybinding_t *keys;
     /** Mouse bindings list */
     struct
     {

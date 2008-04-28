@@ -178,7 +178,7 @@ void
 window_root_grabkeys(int phys_screen)
 {
     xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, phys_screen);
-    Key *k;
+    keybinding_t *k;
     xcb_keycode_t kc;
 
     xcb_ungrab_key(globalconf.connection, ANY_KEY, s->root, ANY_MODIFIER);

@@ -394,7 +394,7 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     int screen;
     xcb_query_pointer_reply_t *qpr = NULL;
     xcb_keysym_t keysym;
-    Key *k;
+    keybinding_t *k;
 
     /* find the right screen for this event */
     for(screen = 0; screen < xcb_setup_roots_length (xcb_get_setup (connection)); screen++)

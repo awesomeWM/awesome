@@ -156,7 +156,7 @@ parse_mouse_bindings(cfg_t * cfg, const char *secname, bool handle_arg)
 
 
 static void
-set_key_info(Key *key, cfg_t *cfg)
+set_key_info(keybinding_t *key, cfg_t *cfg)
 {
     unsigned int j;
 
@@ -168,10 +168,9 @@ set_key_info(Key *key, cfg_t *cfg)
 }
 
 static void
-config_key_store(Key *key, char *str)
+config_key_store(keybinding_t *key, char *str)
 {
     xcb_keycode_t kc;
-    xcb_keysym_t ks;
     int ikc;
 
     if(!a_strlen(str))
@@ -186,21 +185,21 @@ config_key_store(Key *key, char *str)
     }
 }
 
-static Key *
+static keybinding_t *
 section_keys(cfg_t *cfg_keys)
 {
-    Key *key = NULL, *head = NULL;
+    keybinding_t *key = NULL, *head = NULL;
     int i, j, numkeys;
     cfg_t *cfgkeytmp;
 
     for(i = cfg_size(cfg_keys, "key") - 1; i >= 0; i--)
     {
-        key = p_new(Key, 1);
+        key = p_new(keybinding_t, 1);
         cfgkeytmp = cfg_getnsec(cfg_keys, "key", i);
         set_key_info(key, cfgkeytmp);
         config_key_store(key, cfg_getstr(cfgkeytmp, "key"));
         key->arg = a_strdup(cfg_getstr(cfgkeytmp, "arg"));
-        key_list_push(&head, key);
+        keybinding_list_push(&head, key);
     }
 
     for(i = cfg_size(cfg_keys, "keylist") - 1; i >= 0; i--)
@@ -215,11 +214,11 @@ section_keys(cfg_t *cfg_keys)
 
         for(j = 0; j < numkeys; j++)
         {
-            key = p_new(Key, 1);
+            key = p_new(keybinding_t, 1);
             set_key_info(key, cfgkeytmp);
             config_key_store(key, cfg_getnstr(cfgkeytmp, "keylist", j));
             key->arg = a_strdup(cfg_getnstr(cfgkeytmp, "arglist", j));
-            key_list_push(&head, key);
+            keybinding_list_push(&head, key);
         }
     }
 
