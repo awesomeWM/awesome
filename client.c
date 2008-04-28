@@ -820,13 +820,21 @@ client_markup_parse(client_t *c, const char *str, ssize_t len)
     const char *elements[] = { "title", NULL };
     const char *elements_sub[] = { c->name , NULL };
     markup_parser_data_t *p;
+    char *ret;
 
     p = markup_parser_data_new(elements, elements_sub, countof(elements));
 
-    if(!markup_parse(p, str, len))
+    if(markup_parse(p, str, len))
+    {
+        ret = p->text;
+        p->text = NULL;
+    }
+    else
         return a_strdup(str);
 
-    return p->text;
+    markup_parser_data_delete(&p);
+
+    return ret;
 }
 
 /** Set the transparency of the selected client.
