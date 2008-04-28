@@ -71,7 +71,7 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
     if(prop_r->type == STRING ||
        prop_r->type == xutil_intern_atom(conn, "UTF8_STRING"))
     {
-        if(prop_r->value_len < textlen - 1)
+        if((ssize_t) prop_r->value_len < textlen - 1)
         {
             /* use memcpy() because prop_val may not be \0 terminated */
             memcpy(text, prop_val, prop_r->value_len);
