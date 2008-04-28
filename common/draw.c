@@ -228,19 +228,19 @@ static bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
-    const char *elements[] = { "bg", NULL};
+    const char *elements[] = { "bg", NULL };
     markup_parser_data_t *p;
     int i;
 
-    p = markup_parser_data_new(elements, countof(elements));
+    p = markup_parser_data_new(elements, NULL, countof(elements));
 
     if(!markup_parse(p, str, slen))
         return false;
 
     /* bg */
-    if(p->attribute_values[0])
-        for(i = 0; p->attribute_values[0][i]; i++)
-            if(!strcmp(p->attribute_values[0][i], "color"))
+    if(p->attribute_names[0])
+        for(i = 0; p->attribute_names[0][i]; i++)
+            if(!a_strcmp(p->attribute_names[0][i], "color"))
                 data->has_bg_color = draw_color_new(data->connection, data->phys_screen,
                                                     p->attribute_values[0][i], &data->bg_color);
 

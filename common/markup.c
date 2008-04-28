@@ -64,6 +64,12 @@ markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused))
                 p->attribute_names[i][j] = a_strdup(attribute_names[j]);
                 p->attribute_values[i][j] = a_strdup(attribute_values[j]);
             }
+            if(p->elements_sub && p->elements_sub[i])
+            {
+                asprintf(&newtext, "%s%s", NONULL(p->text), p->elements_sub[i]);
+                p_delete(&p->text);
+                p->text = newtext;
+            }
             return;
         }
 
@@ -150,18 +156,21 @@ markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
 
 /** Create a markup_parser_data_t structure with elements list.
  * \param elements an array of elements to look for, NULL terminated
- * \param number of elements in the array (without NULL)
+ * \param elements_sub an optionnal array of values to substitude to elements, NULL
+ *        terminated, or NULL if not needed
+ * \param nelem number of elements in the array (without NULL)
  * \return a pointer to an allocated markup_parser_data_t which must be freed
- * with markup_parser_data_delete()
+ *         with markup_parser_data_delete()
  */
 markup_parser_data_t *
-markup_parser_data_new(const char **elements, ssize_t nelem)
+markup_parser_data_new(const char **elements, const char **elements_sub, ssize_t nelem)
 {
     markup_parser_data_t *p;
 
     p = p_new(markup_parser_data_t, 1);
 
     p->elements = elements;
+    p->elements_sub = elements_sub;
     p->attribute_names = p_new(char **, nelem);
     p->attribute_values = p_new(char **, nelem);
 

@@ -27,38 +27,23 @@
 #include "titlebar.h"
 #include "screen.h"
 #include "layouts/floating.h"
+#include "common/markup.h"
 
 extern AwesomeConf globalconf;
 
 static char *
 titlebar_markup_parse(client_t *c, const char *str, ssize_t len)
 {
-    const char *ps;
-    char *new;
-    int i = 0;
-    ssize_t clen;
-   
-    new = p_new(char, ++len);
+    const char *elements[] = { "title", NULL };
+    const char *elements_sub[] = { c->name , NULL };
+    markup_parser_data_t *p;
 
-    for(ps = str; *ps; ps++, i++)
-        if(*ps == '%')
-        {
-            ps++;
-            if(*ps == '%')
-                new[i] = '%';
-            else if(*ps == 't')
-            {
-                clen = a_strlen(c->name);
-                len += clen;
-                p_realloc(&new, len);
-                a_strcat(new + i, len - i,  c->name);
-                i += clen - 1;
-            }
-        }
-        else
-            new[i] = *ps;
+    p = markup_parser_data_new(elements, elements_sub, countof(elements));
 
-    return new;
+    if(!markup_parse(p, str, len))
+        return a_strdup(str);
+
+    return p->text;
 }
 
 static char *

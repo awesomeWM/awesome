@@ -28,11 +28,12 @@ typedef struct
 {
     char *text;
     const char **elements;
+    const char **elements_sub;
     char ***attribute_names;
     char ***attribute_values;
 } markup_parser_data_t;
 
-markup_parser_data_t * markup_parser_data_new(const char **, ssize_t);
+markup_parser_data_t * markup_parser_data_new(const char **, const char **, ssize_t);
 void markup_parser_data_delete(markup_parser_data_t **);
 bool markup_parse(markup_parser_data_t *data, const char *, ssize_t);
 
