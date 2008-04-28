@@ -36,7 +36,7 @@ extern AwesomeConf globalconf;
  * \return true or false
  */
 static bool
-isoccupied(tag_t *t)
+tag_isoccupied(tag_t *t)
 {
     client_t *c;
 
@@ -48,7 +48,7 @@ isoccupied(tag_t *t)
 }
 
 static bool
-isurgent(tag_t *t)
+tag_isurgent(tag_t *t)
 {
     client_t *c;
 
@@ -64,7 +64,7 @@ taglist_style_get(VirtScreen vscreen, tag_t *tag)
 {
     if(tag->selected)
         return vscreen.styles.focus;
-    else if(isurgent(tag))
+    else if(tag_isurgent(tag))
         return vscreen.styles.urgent;
 
     return vscreen.styles.normal;
@@ -115,7 +115,7 @@ taglist_draw(widget_t *widget,
         area.height = widget->statusbar->height;
         draw_text(ctx, area, 0, tag->name, style);
 
-        if(isoccupied(tag))
+        if(tag_isoccupied(tag))
         {
             area_t rectangle = { widget->area.x + widget->area.width,
                                widget->area.y,
