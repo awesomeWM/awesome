@@ -19,6 +19,9 @@
  *
  */
 
+/* asprintf */
+#define _GNU_SOURCE
+
 #include <cairo-xcb.h>
 
 #ifdef HAVE_IMLIB2
@@ -38,7 +41,7 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "draw.h"
+#include "common/draw.h"
 #include "common/util.h"
 #include "common/xutil.h"
 
@@ -229,14 +232,54 @@ draw_text_markup_parse_start_element(GMarkupParseContext *context __attribute__ 
                                      GError **error __attribute__ ((unused)))
 {
     draw_parser_data_t *p = (draw_parser_data_t *) user_data;
-    const char **tmp;
+    char *newtext;
     int i = 0;
+    ssize_t len;
 
     if(!a_strcmp(element_name, "bg"))
-        for(tmp = attribute_names; *tmp; tmp++, i++)
-            if(!p->has_bg_color && !a_strcmp(*tmp, "color"))
+    {
+        for(i = 0; attribute_names[i]; i++)
+            if(!p->has_bg_color && !a_strcmp(attribute_names[i], "color"))
                 p->has_bg_color = draw_color_new(p->connection, p->phys_screen,
                                                  attribute_values[i], &p->bg_color);
+    }
+    else if(a_strcmp(element_name, "markup"))
+    {
+        if(!(len = asprintf(&newtext, "%s<%s ", NONULL(p->text), element_name)))
+            return;
+        len++; /* add \0 that asprintf does not return in len */
+        for(i = 0; attribute_names[i]; i++)
+        {
+            len += a_strlen(attribute_names[i]) + a_strlen(attribute_values[i]) + 5;
+            p_realloc(&newtext, len);
+            a_strcat(newtext, len, attribute_names[i]);
+            a_strcat(newtext, len, "=\"");
+            a_strcat(newtext, len, attribute_values[i]);
+            a_strcat(newtext, len, "\" ");
+        }
+        p_realloc(&newtext, ++len);
+        a_strcat(newtext, len, ">");
+        p_delete(&p->text);
+        p->text = newtext;
+    }
+}
+
+static void
+draw_text_markup_parse_end_element(GMarkupParseContext *context __attribute__ ((unused)),
+                                   const gchar *element_name,
+                                   gpointer user_data,
+                                   GError **error __attribute__ ((unused)))
+{
+    draw_parser_data_t *p = (draw_parser_data_t *) user_data;
+    char *newtext;
+
+    if(a_strcmp(element_name, "markup")
+       && a_strcmp(element_name, "bg"))
+    {
+        asprintf(&newtext, "%s</%s>", p->text, element_name);
+        p_delete(&p->text);
+        p->text = newtext;
+    }
 }
 
 static void
@@ -268,7 +311,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
         /* start_element */
         draw_text_markup_parse_start_element,
         /* end_element */
-        NULL,
+        draw_text_markup_parse_end_element,
         /* text */
         draw_text_markup_parse_text,
         /* passthrough */
