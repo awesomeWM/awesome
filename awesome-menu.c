@@ -431,8 +431,7 @@ redraw(void)
 
     if(a_strlen(globalconf.prompt))
     {
-        draw_text(globalconf.ctx, geometry,
-                  MARGIN, globalconf.prompt, globalconf.styles.focus);
+        draw_text(globalconf.ctx, geometry, globalconf.prompt, globalconf.styles.focus);
 
         len = MARGIN * 2 + draw_text_extents(globalconf.connection, globalconf.default_screen,
                                              globalconf.styles.focus.font, globalconf.prompt).width;
@@ -440,8 +439,7 @@ redraw(void)
         geometry.width -= len;
     }
 
-    draw_text(globalconf.ctx, geometry,
-              MARGIN, globalconf.text, globalconf.styles.normal);
+    draw_text(globalconf.ctx, geometry, globalconf.text, globalconf.styles.normal);
 
     len = MARGIN * 2 + MAX(draw_text_extents(globalconf.connection, globalconf.default_screen,
                                              globalconf.styles.normal.font, globalconf.text).width,
@@ -463,7 +461,7 @@ redraw(void)
                 else
                     selected_item_is_drawn = true;
             }
-            draw_text(globalconf.ctx, geometry, MARGIN / 2, item->data, style);
+            draw_text(globalconf.ctx, geometry, item->data, style);
             geometry.x += len;
             geometry.width -= len;
         }
@@ -485,7 +483,7 @@ redraw(void)
                 if(geometry.x < prompt_len)
                     break;
 
-                draw_text(globalconf.ctx, geometry, MARGIN / 2, item->data, style);
+                draw_text(globalconf.ctx, geometry, item->data, style);
             }
 
         if(item)

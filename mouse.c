@@ -145,7 +145,7 @@ mouse_resizebar_draw(DrawCtx *ctx, style_t style, simple_window_t *sw, area_t ge
 
     snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
              geometry.x, geometry.y, geometry.width, geometry.height);
-    draw_text(ctx, draw_geometry, style.font->height / 2, size, style);
+    draw_text(ctx, draw_geometry, size, style);
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);

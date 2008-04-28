@@ -221,6 +221,10 @@ typedef struct
     int phys_screen;
     char *text;
     alignment_t align;
+    struct
+    {
+        int left, right;
+    } margin;
     bool has_bg_color;
     xcolor_t bg_color;
 } draw_parser_data_t;
@@ -229,14 +233,14 @@ static bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
-    const char *elements[] = { "bg", "text", NULL };
+    const char *elements[] = { "bg", "text", "margin", NULL };
     markup_parser_data_t *p;
     int i;
 
     p = markup_parser_data_new(elements, NULL, countof(elements));
 
     if(!markup_parse(p, str, slen))
-        return false;
+        return a_strdup(str);
 
     /* bg */
     if(p->attribute_names[0])
@@ -251,6 +255,16 @@ draw_text_markup_expand(draw_parser_data_t *data,
             if(!a_strcmp(p->attribute_names[1][i], "align"))
                 data->align = draw_align_get_from_str(p->attribute_values[1][i]);
 
+    /* margin */
+    if(p->attribute_names[2])
+        for(i = 0; p->attribute_names[2][i]; i++)
+        {
+            if(!a_strcmp(p->attribute_names[2][i], "left"))
+                data->margin.left = atoi(p->attribute_values[2][i]);
+            else if(!a_strcmp(p->attribute_names[2][i], "right"))
+                data->margin.right = atoi(p->attribute_values[2][i]);
+        }
+
     /* stole text */
     data->text = p->text;
     p->text = NULL;
@@ -263,16 +277,11 @@ draw_text_markup_expand(draw_parser_data_t *data,
 /** Draw text into a draw context
  * \param ctx DrawCtx to draw to
  * \param area area to draw to
- * \param padding padding to add before drawing the text
  * \param text text to draw
  * \return area_t with width and height are set to what used
  */
 void
-draw_text(DrawCtx *ctx,
-          area_t area,
-          int padding,
-          const char *text,
-          style_t style)
+draw_text(DrawCtx *ctx, area_t area, const char *text, style_t style)
 {
     int x, y;
     ssize_t len, olen;
@@ -311,13 +320,16 @@ draw_text(DrawCtx *ctx,
     else
         draw_rectangle(ctx, area, 1.0, true, style.bg);
 
-    pango_layout_set_width(ctx->layout, pango_units_from_double(area.width - padding));
+    pango_layout_set_width(ctx->layout,
+                           pango_units_from_double(area.width
+                                                   - (parser_data.margin.left
+                                                      + parser_data.margin.right)));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
     pango_layout_set_markup(ctx->layout, buf, len);
     pango_layout_set_font_description(ctx->layout, style.font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
-    x = area.x + padding;
+    x = area.x + parser_data.margin.left;
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
      * the text 1px lower than too high which usually results in a better type
      * face */

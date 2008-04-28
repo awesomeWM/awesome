@@ -123,7 +123,6 @@ taglist_draw(widget_t *widget,
         *area = draw_text_extents(ctx->connection, ctx->default_screen,
                                   style.font, text[i]);
         area->x = widget->area.width;
-        area->width += style.font->height;
         area->height = widget->statusbar->height;
         area_list_append(&data->draw_area, area);
         widget->area.width += area->width;
@@ -142,7 +141,7 @@ taglist_draw(widget_t *widget,
         tag && area;
         tag = tag->next, area = area->next, i++)
     {
-        draw_text(ctx, *area, 0, text[i], style);
+        draw_text(ctx, *area, text[i], style);
 
         if(tag_isoccupied(tag))
         {

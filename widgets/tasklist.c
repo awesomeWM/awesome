@@ -169,7 +169,7 @@ tasklist_draw(widget_t *widget, DrawCtx *ctx, int offset, int used)
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            draw_text(ctx, area, style.font->height / 2, text, style);
+            draw_text(ctx, area, text, style);
 
             p_delete(&text);
 

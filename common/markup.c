@@ -148,10 +148,7 @@ markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
     len = a_strlen(p->text);
     rlen = len + 1 + text_len;
     p_realloc(&p->text, rlen);
-    if(len)
-        a_strncat(p->text, rlen, text, len);
-    else
-        a_strncpy(p->text, rlen, text, text_len);
+    a_strncat(p->text, rlen, text, text_len);
 }
 
 /** Create a markup_parser_data_t structure with elements list.
@@ -169,6 +166,7 @@ markup_parser_data_new(const char **elements, const char **elements_sub, ssize_t
 
     p = p_new(markup_parser_data_t, 1);
 
+    p->text = p_new(char, 1);
     p->elements = elements;
     p->elements_sub = elements_sub;
     p->attribute_names = p_new(char **, nelem);

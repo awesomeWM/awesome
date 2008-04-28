@@ -216,8 +216,7 @@ titlebar_draw(client_t *c)
 
     text = titlebar_text(c);
     geometry.x = geometry.y = 0;
-    draw_text(ctx, geometry, 0,
-              text, globalconf.screens[c->screen].styles.normal);
+    draw_text(ctx, geometry, text, globalconf.screens[c->screen].styles.normal);
     p_delete(&text);
 
     switch(c->titlebar.position)
