@@ -279,6 +279,12 @@ cfg_opt_t widget_taglist_opts[] =
     CFG_ALIGNMENT((char *) "align", (char *) "auto", CFGF_NONE),
     /** Mouse bindings. */
     CFG_SEC((char *) "mouse", mouse_taglist_opts, CFGF_MULTI),
+    /** Markup title string for normal tags */
+    CFG_STR((char *) "text_normal", (char *) "<text align=\"center\"/><bg color=\"#444444\"/><title/>", CFGF_NONE),
+    /** Markup title string for selected tags. */
+    CFG_STR((char *) "text_focus", (char *) "<text align=\"center\"/><bg color=\"#535d6c\"/><title/>", CFGF_NONE),
+    /** Markup title string for tags with urgent windows. */
+    CFG_STR((char *) "text_urgent", (char *) "<text align=\"center\"/><bg color=\"#ff4500\"/><title/>", CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines iconbox widget options. */
@@ -324,7 +330,7 @@ cfg_opt_t widget_tasklist_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     /** Mouse bindings. */
     CFG_SEC((char *) "mouse", mouse_generic_opts, CFGF_MULTI),
-    /** Markup title string for normal window */
+    /** Markup title string for normal window. */
     CFG_STR((char *) "text_normal", (char *) "<bg color=\"#444444\"/><title/>", CFGF_NONE),
     /** Markup title string for focused windows. */
     CFG_STR((char *) "text_focus", (char *) "<bg color=\"#535d6c\"/><title/>", CFGF_NONE),

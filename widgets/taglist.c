@@ -24,10 +24,32 @@
 #include "widget.h"
 #include "tag.h"
 #include "event.h"
+#include "common/markup.h"
 #include "common/util.h"
 #include "common/configopts.h"
 
 extern AwesomeConf globalconf;
+
+typedef struct
+{
+    char *text_normal, *text_focus, *text_urgent;
+    area_t *draw_area;
+} taglist_data_t;
+
+static char *
+tag_markup_parse(tag_t *t, const char *str, ssize_t len)
+{
+    const char *elements[] = { "title", NULL };
+    const char *elements_sub[] = { t->name , NULL };
+    markup_parser_data_t *p;
+
+    p = markup_parser_data_new(elements, elements_sub, countof(elements));
+
+    if(!markup_parse(p, str, len))
+        return a_strdup(str);
+
+    return p->text;
+}
 
 /** Check if at least one client is tagged with tag number t and is on screen
  * screen
@@ -59,15 +81,15 @@ tag_isurgent(tag_t *t)
     return false;
 }
 
-static style_t
-taglist_style_get(VirtScreen vscreen, tag_t *tag)
+static char *
+taglist_text_get(tag_t *tag, taglist_data_t *data)
 {
     if(tag->selected)
-        return vscreen.styles.focus;
+        return data->text_focus;
     else if(tag_isurgent(tag))
-        return vscreen.styles.urgent;
+        return data->text_urgent;
 
-    return vscreen.styles.normal;
+    return data->text_normal;
 }
 
 static int
@@ -77,21 +99,34 @@ taglist_draw(widget_t *widget,
              int used __attribute__ ((unused)))
 {
     tag_t *tag;
+    taglist_data_t *data = widget->data;
     client_t *sel = globalconf.focus->client;
     VirtScreen vscreen = globalconf.screens[widget->statusbar->screen];
-    int w = 0, flagsize;
-    style_t style;
-    area_t area;
+    int i = 0;
+    style_t style = vscreen.styles.normal;
+    area_t *area, rectangle = { 0, 0, 0, 0, NULL, NULL };
+    char **text;
 
-    flagsize = (vscreen.styles.normal.font->height + 2) / 3;
+    rectangle.width = rectangle.height = (style.font->height + 2) / 3;
 
     widget->area.width = 0;
 
-    for(tag = vscreen.tags; tag; tag = tag->next)
+    area_list_wipe(&data->draw_area);
+
+    text = p_new(char *, 1);
+    for(tag = vscreen.tags; tag; tag = tag->next, i++)
     {
-        style = tag->selected ? vscreen.styles.focus : vscreen.styles.normal;
-        widget->area.width += draw_text_extents(ctx->connection, ctx->default_screen,
-                                                style.font, tag->name).width + style.font->height;
+        area = p_new(area_t, 1);
+        p_realloc(&text, i + 1);
+        text[i] = taglist_text_get(tag, data);
+        text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
+        *area = draw_text_extents(ctx->connection, ctx->default_screen,
+                                  style.font, text[i]);
+        area->x = widget->area.width;
+        area->width += style.font->height;
+        area->height = widget->statusbar->height;
+        area_list_append(&data->draw_area, area);
+        widget->area.width += area->width;
     }
 
     if(!widget->user_supplied_x)
@@ -103,28 +138,19 @@ taglist_draw(widget_t *widget,
     if(!widget->user_supplied_y)
         widget->area.y = 0;
 
-    widget->area.width = 0;
-    for(tag = vscreen.tags; tag; tag = tag->next)
+    for(area = data->draw_area, tag = vscreen.tags, i = 0;
+        tag && area;
+        tag = tag->next, area = area->next, i++)
     {
-        style = taglist_style_get(vscreen, tag);
-        w = draw_text_extents(ctx->connection, ctx->default_screen,
-                              style.font, tag->name).width + style.font->height;
-        area.x = widget->area.x + widget->area.width;
-        area.y = widget->area.y;
-        area.width = w;
-        area.height = widget->statusbar->height;
-        draw_text(ctx, area, 0, tag->name, style);
+        draw_text(ctx, *area, 0, text[i], style);
 
         if(tag_isoccupied(tag))
         {
-            area_t rectangle = { widget->area.x + widget->area.width,
-                               widget->area.y,
-                               flagsize,
-                               flagsize,
-                               NULL, NULL };
-            draw_rectangle(ctx, rectangle, 1.0, sel && is_client_tagged(sel, tag), style.fg);
+            rectangle.x = area->x;
+            rectangle.y = area->y;
+            draw_rectangle(ctx, rectangle, 1.0,
+                           sel && is_client_tagged(sel, tag), style.fg);
         }
-        widget->area.width += w;
     }
 
     widget->area.height = widget->statusbar->height;
@@ -138,62 +164,43 @@ taglist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
     Button *b;
     tag_t *tag;
     char buf[4];
-    int prev_width = 0, width = 0, i = 1;
-    style_t style;
+    int i = 1;
+    taglist_data_t *data = widget->data;
+    area_t *area = data->draw_area;
 
     for(b = widget->buttons; b; b = b->next)
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->func)
             switch(widget->statusbar->position)
             {
-              case Top:
-              case Bottom:
-                for(tag = vscreen.tags; tag; tag = tag->next, i++)
-                {
-                    style = taglist_style_get(vscreen, tag);
-                    width = draw_text_extents(globalconf.connection, globalconf.default_screen,
-                                              style.font, tag->name).width
-                        + style.font->height;
-                    if(ev->event_x >= widget->area.x + prev_width
-                       && ev->event_x < widget->area.x + prev_width + width)
+              default:
+                for(tag = vscreen.tags; tag; tag = tag->next, i++, area = area->next)
+                    if(ev->event_x >= AREA_LEFT(*area)
+                       && ev->event_x < AREA_RIGHT(*area))
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);
                         return;
                     }
-                   prev_width += width;
-                }
                 break;
               case Right:
-                for(tag = vscreen.tags; tag; tag = tag->next, i++)
-                {
-                    style = taglist_style_get(vscreen, tag);
-                    width = draw_text_extents(globalconf.connection, globalconf.default_screen,
-                                              style.font, tag->name).width + style.font->height;
-                    if(ev->event_y >= widget->area.x + prev_width
-                       && ev->event_y < widget->area.x + prev_width + width)
+                for(tag = vscreen.tags; tag; tag = tag->next, i++, area = area->next)
+                    if(ev->event_y >= AREA_LEFT(*area)
+                       && ev->event_y < AREA_RIGHT(*area))
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);
                         return;
                     }
-                    prev_width += width;
-                }
                 break;
-              default:
-                for(tag = vscreen.tags; tag; tag = tag->next, i++)
-                {
-                    style = taglist_style_get(vscreen, tag);
-                    width = draw_text_extents(globalconf.connection, globalconf.default_screen,
-                                              style.font, tag->name).width + style.font->height;
-                    if(widget->statusbar->width - ev->event_y >= widget->area.x + prev_width
-                       && widget->statusbar->width - ev->event_y < widget->area.x + prev_width + width)
+              case Left:
+                for(tag = vscreen.tags; tag; tag = tag->next, i++, area = area->next)
+                    if(widget->statusbar->width - ev->event_y >= AREA_LEFT(*area)
+                       && widget->statusbar->width - ev->event_y < AREA_RIGHT(*area))
                     {
                         snprintf(buf, sizeof(buf), "%d", i);
                         b->func(widget->statusbar->screen, buf);
                         return;
                     }
-                    prev_width += width;
-                }
                 break;
             }
 }
@@ -202,11 +209,18 @@ widget_t *
 taglist_new(statusbar_t *statusbar, cfg_t *config)
 {
     widget_t *w;
+    taglist_data_t *d;
+
     w = p_new(widget_t, 1);
     widget_common_new(w, statusbar, config);
     w->draw = taglist_draw;
     w->button_press = taglist_button_press;
     w->alignment = cfg_getalignment(config, "align");
+
+    w->data = d = p_new(taglist_data_t, 1);
+    d->text_normal = a_strdup(cfg_getstr(config, "text_normal"));
+    d->text_focus = a_strdup(cfg_getstr(config, "text_focus"));
+    d->text_urgent = a_strdup(cfg_getstr(config, "text_urgent"));
 
     /* Set cache property */
     w->cache.flags = WIDGET_CACHE_TAGS | WIDGET_CACHE_CLIENTS;
