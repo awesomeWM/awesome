@@ -23,7 +23,7 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/shape.h>
 #include <xcb/xcb_keysyms.h>
-#include <xcb/xcb_aux.h> 
+#include <xcb/xcb_aux.h>
 
 #include "structs.h"
 #include "window.h"
@@ -33,10 +33,9 @@ extern AwesomeConf globalconf;
 /** Mask shorthands */
 #define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
-/** Set client WM_STATE property
- * \param win Window
- * \param state state
- * \return XChangeProperty result
+/** Set client state (WM_STATE) property.
+ * \param win The window to set state.
+ * \param state The state to set.
  */
 void
 window_setstate(xcb_window_t win, long state)
@@ -49,9 +48,9 @@ window_setstate(xcb_window_t win, long state)
                         2, data);
 }
 
-/** Get a window state (WM_STATE)
- * \param w client_t window
- * \return state
+/** Get a window state (WM_STATE).
+ * \param w A client window.
+ * \return The current state of the window.
  */
 long
 window_getstate(xcb_window_t w)
@@ -66,7 +65,7 @@ window_getstate(xcb_window_t w)
                                         wm_state_atom, wm_state_atom,
                                         0L, 2L);
 
-    if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)) == NULL)
+    if(!(prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
         return -1;
 
     p = xcb_get_property_value(prop_r);
@@ -78,11 +77,10 @@ window_getstate(xcb_window_t w)
     return result;
 }
 
-/** Configure a window with its new geometry and border
- * \param win the X window id
- * \param geometry the new window geometry
- * \param border new border size
- * \return the XSendEvent() status
+/** Configure a window with its new geometry and border size.
+ * \param win Tthe X window id to configure.
+ * \param geometry The new window geometry.
+ * \param border The new border size.
  */
 void
 window_configure(xcb_window_t win, area_t geometry, int border)
@@ -102,15 +100,16 @@ window_configure(xcb_window_t win, area_t geometry, int border)
     xcb_send_event(globalconf.connection, false, win, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *) &ce);
 }
 
-/** Grab or ungrab buttons on a window
- * \param win The window
- * \param phys_screen Physical screen number
+/** Grab or ungrab buttons on a window.
+ * \param win The window.
+ * \param phys_screen Physical screen number.
  */
 void
 window_grabbuttons(xcb_window_t win, int phys_screen)
 {
     Button *b;
 
+    /* Always grab the first mouse button. */
     xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
                     XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
                     XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL);
@@ -145,7 +144,7 @@ window_grabbuttons(xcb_window_t win, int phys_screen)
                       ANY_MODIFIER);
 }
 
-/** Grab buttons on root window
+/** Grab buttons on the root window.
  * \param phys_screen physical screen id
  */
 void
@@ -171,8 +170,8 @@ window_root_grabbuttons(int phys_screen)
     }
 }
 
-/** Grab keys on root window
- * \param phys_screen physical screen id
+/** Grab keys on the root window.
+ * \param phys_screen Physical screen number.
  */
 void
 window_root_grabkeys(int phys_screen)
@@ -181,6 +180,7 @@ window_root_grabkeys(int phys_screen)
     keybinding_t *k;
     xcb_keycode_t kc;
 
+    /* Ungrab everything */
     xcb_ungrab_key(globalconf.connection, ANY_KEY, s->root, ANY_MODIFIER);
 
     for(k = globalconf.keys; k; k = k->next)
@@ -198,6 +198,10 @@ window_root_grabkeys(int phys_screen)
         }
 }
 
+/** Set shape property on window.
+ * \param win The window.
+ * \param phys_screen Physical screen number.
+ */
 void
 window_setshape(xcb_window_t win, int phys_screen)
 {
@@ -217,6 +221,10 @@ window_setshape(xcb_window_t win, int phys_screen)
     }
 }
 
+/** Set transparency of a window.
+ * \param win The window.
+ * \param opacity Opacity of the window, between 0 and 1.
+ */
 void
 window_settrans(xcb_window_t win, double opacity)
 {
