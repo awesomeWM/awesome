@@ -74,7 +74,7 @@ tasklist_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
     char *text;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;
-    style_t style;
+    style_t *style;
 
     if(used >= widget->statusbar->width)
         return (widget->area.width = 0);
@@ -104,21 +104,14 @@ tasklist_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
         {
             icon_width = 0;
 
-            if(c->isurgent)
-            {
-                text = d->text_urgent;
-                style = globalconf.screens[c->screen].styles.urgent;
-            }
-            else if(globalconf.focus->client == c)
-            {
+            style = client_style_get(c);
+
+            if(globalconf.focus->client == c)
                 text = d->text_focus;
-                style = globalconf.screens[c->screen].styles.focus;
-            }
+            else if(c->isurgent)
+                text = d->text_urgent;
             else
-            {
                 text = d->text_normal;
-                style = globalconf.screens[c->screen].styles.normal;
-            }
 
             text = client_markup_parse(c, text, a_strlen(text));
 
@@ -130,7 +123,7 @@ tasklist_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
                 area.height = widget->statusbar->height;
                 area.width = box_width;
 
-                draw_rectangle(ctx, area, 1.0, true, style.bg);
+                draw_rectangle(ctx, area, 1.0, true, style->bg);
 
                 if((r = rule_matching_client(c)) && r->icon)
                 {
@@ -169,7 +162,7 @@ tasklist_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            draw_text(ctx, area, text, style);
+            draw_text(ctx, area, text, *style);
 
             p_delete(&text);
 
@@ -177,15 +170,15 @@ tasklist_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
             {
                 area.x = widget->area.x + icon_width + box_width * i;
                 area.y = widget->area.y;
-                area.width = (style.font->height + 2) / 3;
-                area.height = (style.font->height + 2) / 3;
-                draw_rectangle(ctx, area, 1.0, c->isfloating, style.fg);
+                area.width = (style->font->height + 2) / 3;
+                area.height = (style->font->height + 2) / 3;
+                draw_rectangle(ctx, area, 1.0, c->isfloating, style->fg);
             }
             else if(c->isfloating || c->ismax)
                 draw_circle(ctx, widget->area.x + icon_width + box_width * i,
                             widget->area.y,
-                            (style.font->height + 2) / 4,
-                            c->ismax, style.fg);
+                            (style->font->height + 2) / 4,
+                            c->ismax, style->fg);
             i++;
         }
 

@@ -182,6 +182,7 @@ titlebar_draw(client_t *c)
     area_t geometry;
     xcb_screen_t *s;
     char *text;
+    style_t *style;
 
     if(!c->titlebar.sw)
         return;
@@ -219,7 +220,8 @@ titlebar_draw(client_t *c)
 
     text = titlebar_text(c);
     geometry.x = geometry.y = 0;
-    draw_text(ctx, geometry, text, globalconf.screens[c->screen].styles.normal);
+    style = client_style_get(c);
+    draw_text(ctx, geometry, text, *style);
     p_delete(&text);
 
     switch(c->titlebar.position)

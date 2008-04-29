@@ -812,6 +812,21 @@ client_updatesizehints(client_t *c)
     return size;
 }
 
+/** Get the style related to a client: focus, urgent, normal.
+ * \param c The client.
+ * \return The style to apply for this client.
+ */
+style_t *
+client_style_get(client_t *c)
+{
+    if(globalconf.focus->client == c)
+        return &globalconf.screens[c->screen].styles.focus;
+    else if(c->isurgent)
+        return &globalconf.screens[c->screen].styles.urgent;
+
+    return &globalconf.screens[c->screen].styles.normal;
+}
+
 char *
 client_markup_parse(client_t *c, const char *str, ssize_t len)
 {
