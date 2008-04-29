@@ -47,8 +47,8 @@ extern AwesomeConf globalconf;
 #include "uicbgen.h"
 
 /** Restart awesome with the current command line.
- * \param screen ID
- * \param arg arg (unused)
+ * \param screen The virtual screen number.
+ * \param arg An unused argument.
  * \ingroup ui_callback
  */
 void
@@ -58,8 +58,8 @@ uicb_restart(int screen, char *arg __attribute__ ((unused)))
 }
 
 /** Execute another process, replacing the current instance of awesome.
- * \param screen Screen ID
- * \param cmd Command
+ * \param screen The virtual screen number.
+ * \param cmd The command to start.
  * \ingroup ui_callback
  */
 void
@@ -93,8 +93,8 @@ uicb_exec(int screen __attribute__ ((unused)), char *cmd)
 }
 
 /** Spawn another process.
- * \param screen Screen ID
- * \param arg Command
+ * \param screen The virtual screen number.
+ * \param arg The command to run.
  * \ingroup ui_callback
  */
 void
@@ -119,7 +119,6 @@ uicb_spawn(int screen, char *arg)
         setenv("DISPLAY", newdisplay, 1);
     }
 
-
     /* The double-fork construct avoids zombie processes and keeps the code
      * clean from stupid signal handlers. */
     if(fork() == 0)
@@ -137,9 +136,9 @@ uicb_spawn(int screen, char *arg)
     wait(0);
 }
 
-/** Run the uicb
- * \param cmd the uicb command to parse
- * \return 0 on succes, -1 on failure
+/** Run the uicb.
+ * \param cmd The uicb command to parse.
+ * \return 0 on succes, -1 on failure.
  */
 static int
 __uicb_run(char *cmd)
