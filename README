@@ -9,6 +9,7 @@ In order to build awesome itself, you need header files and libs of:
   - libconfuse >= 2.6
   - cairo
   - pango and pangocairo
+  - glib
   - GTK+ or Imlib2 (use --with-imlib2 with ./configure)
   - dbus
 

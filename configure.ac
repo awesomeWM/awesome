@@ -113,6 +113,8 @@ PKG_CHECK_MODULES([pangocairo], [pangocairo],,
    [AC_MSG_ERROR([awesome requires pangocairo.])])
 PKG_CHECK_MODULES([confuse], [libconfuse >= 2.6],,
    [AC_MSG_ERROR([awesome requires libconfuse >= 2.6.])])
+PKG_CHECK_MODULES([glib], [glib-2.0],,
+   [AC_MSG_ERROR([awesome requires glib-2.0.])])
 PKG_CHECK_MODULES([dbus], [dbus-1],,
    [AC_MSG_ERROR([awesome requires dbus-1.])])
 AC_ARG_WITH([imlib2], AS_HELP_STRING([--with-imlib2], [Build with Imlib2 (default: disabled)]))
