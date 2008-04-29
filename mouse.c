@@ -131,14 +131,15 @@ mouse_snapclient(client_t *c, area_t geometry)
     return titlebar_geometry_remove(&c->titlebar, geometry);
 }
 
-/** Redraw the resizebar
- * \param ctx draw context
- * \param style the style to use for drawing
- * \param geometry the geometry to use for the box
- * \param border the client border size
+/** Redraw the resizebar.
+ * \param ctx Draw context.
+ * \param style The style pointer to use for drawing.
+ * \param geometry The geometry to use for the box.
+ * \param border The client border size.
  */
 static void
-mouse_resizebar_draw(draw_context_t *ctx, style_t style, simple_window_t *sw, area_t geometry, int border)
+mouse_resizebar_draw(draw_context_t *ctx, style_t *style,
+                     simple_window_t *sw, area_t geometry, int border)
 {
     area_t draw_geometry = { 0, 0, ctx->width, ctx->height, NULL, NULL };
     char size[64];
@@ -153,21 +154,23 @@ mouse_resizebar_draw(draw_context_t *ctx, style_t style, simple_window_t *sw, ar
 }
 
 /** Initialize the resizebar window.
- * \param phys_screen physical screen id
- * \param border border size of the client
- * \param geometry client geometry
- * \param style style used to draw
- * \param ctx drawctx to create
+ * \param phys_screen Physical screen number.
+ * \param border Border size of the client.
+ * \param geometry Client geometry.
+ * \param style Style used to draw.
+ * \param ctx Draw context to create.
+ * \return The simple window.
  */
 static simple_window_t *
-mouse_resizebar_new(int phys_screen, int border, area_t geometry, style_t style, draw_context_t **ctx)
+mouse_resizebar_new(int phys_screen, int border, area_t geometry,
+                    style_t *style, draw_context_t **ctx)
 {
     simple_window_t *sw;
     area_t geom;
 
     geom = draw_text_extents(globalconf.connection,
                              globalconf.default_screen,
-                             style.font,
+                             style->font,
                              "0000x0000+0000+0000");
     geom.x = geometry.x + ((2 * border + geometry.width) - geom.width) / 2;
     geom.y = geometry.y + ((2 * border + geometry.height) - geom.height) / 2;
@@ -200,7 +203,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     Layout *layout = layout_get_current(screen);
     simple_window_t *sw = NULL;
     draw_context_t *ctx;
-    style_t style;
+    style_t *style;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
@@ -222,7 +225,7 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     geometry = c->geometry;
     ocx = geometry.x;
     ocy = geometry.y;
-    style = globalconf.screens[c->screen].styles.focus;
+    style = &globalconf.screens[c->screen].styles.focus;
 
     /* Get responses */
     if(!(grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection, grab_pointer_c, NULL)))
@@ -330,7 +333,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     double mwfact;
     simple_window_t *sw = NULL;
     draw_context_t *ctx = NULL;
-    style_t style;
+    style_t *style;
     xcb_grab_pointer_cookie_t grab_pointer_c;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
     xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
@@ -339,7 +342,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
     if(!c || c->isfixed)
         return;
 
-    style = globalconf.screens[c->screen].styles.focus;
+    style = &globalconf.screens[c->screen].styles.focus;
 
     if(layout->arrange == layout_floating || c->isfloating)
     {

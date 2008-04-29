@@ -163,7 +163,7 @@ taglist_draw(widget_t *widget,
         tag && area;
         tag = tag->next, area = area->next, i++)
     {
-        draw_text(ctx, *area, text[i], *styles[i]);
+        draw_text(ctx, *area, text[i], styles[i]);
         p_delete(&text[i]);
 
         if(tag_isoccupied(tag))

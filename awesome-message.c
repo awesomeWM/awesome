@@ -211,7 +211,7 @@ main(int argc, char **argv)
                            geometry.width, geometry.height, sw->drawable);
 
     geometry.x = geometry.y = 0;
-    draw_text(ctx, geometry, argv[optind], globalconf.style);
+    draw_text(ctx, geometry, argv[optind], &globalconf.style);
 
     if(icon_geometry.width > 0 && icon_geometry.height > 0)
         draw_image(ctx, 0, (geometry.height / 2) - (globalconf.style.font->height / 2),

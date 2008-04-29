@@ -130,7 +130,7 @@ void draw_context_delete(draw_context_t **);
 font_t *draw_font_new(xcb_connection_t *, int, char *);
 void draw_font_delete(font_t **);
 
-void draw_text(draw_context_t *, area_t, const char *, style_t);
+void draw_text(draw_context_t *, area_t, const char *, const style_t *);
 void draw_rectangle(draw_context_t *, area_t, float, bool, xcolor_t);
 void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 

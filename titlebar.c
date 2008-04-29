@@ -221,7 +221,7 @@ titlebar_draw(client_t *c)
     text = titlebar_text(c);
     geometry.x = geometry.y = 0;
     style = client_style_get(c);
-    draw_text(ctx, geometry, text, *style);
+    draw_text(ctx, geometry, text, style);
     p_delete(&text);
 
     switch(c->titlebar.position)

@@ -285,14 +285,14 @@ draw_text_markup_expand(draw_parser_data_t *data,
     return true;
 }
 
-/** Draw text into a draw context
- * \param ctx draw_context_t to draw to
- * \param area area to draw to
- * \param text text to draw
- * \return area_t with width and height are set to what used
+/** Draw text into a draw context.
+ * \param ctx Draw context  to draw to.
+ * \param area Area to draw to.
+ * \param text Text to draw.
+ * \param style A pointer to the style to use.
  */
 void
-draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
+draw_text(draw_context_t *ctx, area_t area, const char *text, const style_t *style)
 {
     int x, y;
     ssize_t len, olen;
@@ -326,7 +326,7 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
     if(parser_data.has_bg_color)
         draw_rectangle(ctx, area, 1.0, true, parser_data.bg_color);
     else
-        draw_rectangle(ctx, area, 1.0, true, style.bg);
+        draw_rectangle(ctx, area, 1.0, true, style->bg);
 
     pango_layout_set_width(ctx->layout,
                            pango_units_from_double(area.width
@@ -334,14 +334,14 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
                                                       + parser_data.margin.right)));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
     pango_layout_set_markup(ctx->layout, buf, len);
-    pango_layout_set_font_description(ctx->layout, style.font->desc);
+    pango_layout_set_font_description(ctx->layout, style->font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
     x = area.x + parser_data.margin.left;
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
      * the text 1px lower than too high which usually results in a better type
      * face */
-    y = area.y + (ctx->height - style.font->height + 1) / 2;
+    y = area.y + (ctx->height - style->font->height + 1) / 2;
 
     switch(parser_data.align)
     {
@@ -359,8 +359,8 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
     p_clear(&shadow, 1);
     if(parser_data.shadow.offset)
         shadow = parser_data.shadow;
-    else if(style.shadow.offset)
-        shadow = style.shadow;
+    else if(style->shadow.offset)
+        shadow = style->shadow;
 
     if(shadow.offset)
     {
@@ -376,9 +376,9 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, style_t style)
     cairo_move_to(ctx->cr, x, y);
 
     cairo_set_source_rgb(ctx->cr,
-                         style.fg.red / 65535.0,
-                         style.fg.green / 65535.0,
-                         style.fg.blue / 65535.0);
+                         style->fg.red / 65535.0,
+                         style->fg.green / 65535.0,
+                         style->fg.blue / 65535.0);
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 
