@@ -43,11 +43,11 @@
 extern AwesomeConf globalconf;
 
 /** Load windows properties, restoring client's tag
- * and floating state before awesome was restarted if any
- * \todo this may bug if number of tags is != than before
- * \param c client ref
- * \param screen Screen ID
- * \return true if client had property
+ * and floating state before awesome was restarted if any,
+ * \todo This may bug if number of tags is != than before,
+ * \param c A client pointer
+ * \param screen A virtual screen number.
+ * \return true if client had property, false otherwise.
  */
 static bool
 client_loadprops(client_t * c, int screen)
@@ -82,22 +82,21 @@ client_loadprops(client_t * c, int screen)
     return result;
 }
 
-/** Check if client supports protocol WM_DELETE_WINDOW
- * \param disp the display
- * \param win the Window
- * \return true if client has WM_DELETE_WINDOW
+/** Check if client supports protocol WM_DELETE_WINDOW,
+ * \param win The window.
+ * \return true if client has WM_DELETE_WINDOW, false otherwise.
  */
 static bool
-client_isprotodel(xcb_connection_t *c, xcb_window_t win)
+client_isprotodel(xcb_window_t win)
 {
     uint32_t i, n;
     xcb_atom_t *protocols;
     bool ret = false;
 
-    if(xcb_get_wm_protocols(c, win, &n, &protocols))
+    if(xcb_get_wm_protocols(globalconf.connection, win, &n, &protocols))
     {
         for(i = 0; !ret && i < n; i++)
-            if(protocols[i] == xutil_intern_atom(c, "WM_DELETE_WINDOW"))
+            if(protocols[i] == xutil_intern_atom(globalconf.connection, "WM_DELETE_WINDOW"))
                 ret = true;
         p_delete(&protocols);
     }
@@ -106,7 +105,7 @@ client_isprotodel(xcb_connection_t *c, xcb_window_t win)
 
 /** Returns true if a client is tagged
  * with one of the tags in any screen.
- * \return true or false
+ * \return true if client is tagged, false otherwise.
  */
 static bool
 client_isvisible_anyscreen(client_t *c)
@@ -129,10 +128,10 @@ client_isvisible_anyscreen(client_t *c)
 }
 
 /** Returns true if a client is tagged
- * with one of the tags.
- * \param c the client
- * \param screen number
- * \return true or false
+ * with one of the tags of the specified screen.
+ * \param c The client to check.
+ * \param screen Virtual screen number.
+ * \return true if the client is visible, false otherwise.
  */
 bool
 client_isvisible(client_t *c, int screen)
@@ -150,10 +149,10 @@ client_isvisible(client_t *c, int screen)
             return true;
     return false;
 }
-/** Get a client by its window
- * \param list client_t list to look info
- * \param w client_t window to find
- * \return client
+/** Get a client by its window ID.
+ * \param list A client_t list to look into.
+ * \param w The client_t window to find.
+ * \return A client pointer if found, NULL otherwise.
  */
 client_t *
 client_get_bywin(client_t *list, xcb_window_t w)
@@ -164,10 +163,10 @@ client_get_bywin(client_t *list, xcb_window_t w)
     return c;
 }
 
-/** Get a client by its name
- * \param list client_t list
- * \param name name to search
- * \return first matching client
+/** Get a client by its name.
+ * \param list The client_t list to look into.
+ * \param name Name to search.
+ * \return First matching client.
  */
 client_t *
 client_get_byname(client_t *list, char *name)
@@ -181,8 +180,8 @@ client_get_byname(client_t *list, char *name)
     return NULL;
 }
 
-/** Update client name attribute with its title
- * \param c the client
+/** Update client name attribute with its new title.
+ * \param c The client.
  */
 void
 client_updatetitle(client_t *c)
@@ -1023,7 +1022,7 @@ client_kill(client_t *c)
 {
     xcb_client_message_event_t ev;
 
-    if(client_isprotodel(globalconf.connection, c->win))
+    if(client_isprotodel(c->win))
     {
         /* Initialize all of event's fields first */
         memset(&ev, 0, sizeof(ev));
