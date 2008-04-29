@@ -31,13 +31,12 @@ extern AwesomeConf globalconf;
 /** Compute widget alignment.
  * This will process all widget starting at `widget' and will check their
  * alignment and guess it if set to AlignAuto.
- * \param widget a linked list of all widgets
+ * \param widget A linked list of all widgets.
  */
 void
 widget_calculate_alignments(widget_t *widget)
 {
     for(; widget && widget->alignment != AlignFlex; widget = widget->next)
-    {
         switch(widget->alignment)
         {
           case AlignCenter:
@@ -48,7 +47,6 @@ widget_calculate_alignments(widget_t *widget)
           default:
             break;
         }
-    }
 
     if(widget)
         for(widget = widget->next; widget; widget = widget->next)
@@ -70,10 +68,10 @@ widget_calculate_alignments(widget_t *widget)
 }
 
 /** Compute offset for drawing the first pixel of a widget.
- * \param barwidth the statusbar width
- * \param widgetwidth the widget width
- * \param alignment the widget alignment on statusbar
- * \return the x coordinate to draw at
+ * \param barwidth The statusbar width.
+ * \param widgetwidth The widget width.
+ * \param alignment The widget alignment on statusbar.
+ * \return The x coordinate to draw at.
  */
 int
 widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
@@ -87,10 +85,10 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
     return barwidth - offset - widgetwidth;
 }
 
-/** Find a widget on a screen by its name
- * \param statusbar the statusbar to look into
- * \param name the widget name
- * \return a widget
+/** Find a widget on a screen by its name.
+ * \param statusbar The statusbar to look into.
+ * \param name The widget name.
+ * \return A widget pointer.
  */
 static widget_t *
 widget_getbyname(statusbar_t *sb, char *name)
@@ -106,8 +104,8 @@ widget_getbyname(statusbar_t *sb, char *name)
 
 /** Common function for button press event on widget.
  * It will look into configuration to find the callback function to call.
- * \param widget the widget
- * \param ev the XButtonPressedEvent the widget received
+ * \param widget The widget.
+ * \param ev The button press event the widget received.
  */
 static void
 widget_common_button_press(widget_t *widget, xcb_button_press_event_t *ev)
@@ -115,18 +113,16 @@ widget_common_button_press(widget_t *widget, xcb_button_press_event_t *ev)
     Button *b;
 
     for(b = widget->buttons; b; b = b->next)
-        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->func)
-        {
+        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod
+           && b->func)
             b->func(widget->statusbar->screen, b->arg);
-            break;
-        }
 }
 
 /** Common tell function for widget, which only warn user that widget
- * cannot be told anything
- * \param widget the widget
- * \param new_value unused argument
- * \return widget_tell_status_t enum (see structs.h)
+ * cannot be told anything.
+ * \param widget The widget.
+ * \param new_value Unused argument.
+ * \return The status of the command, which is always an error in this case.
  */
 static widget_tell_status_t
 widget_common_tell(widget_t *widget, char *property __attribute__ ((unused)),
@@ -136,10 +132,10 @@ widget_common_tell(widget_t *widget, char *property __attribute__ ((unused)),
     return WIDGET_ERROR_CUSTOM;
 }
 
-/** Common function for creating a widget
- * \param widget The allocated widget
- * \param statusbar the statusbar the widget is on
- * \param config the cfg_t structure we will parse to set common info
+/** Common function for creating a widget.
+ * \param widget The allocated widget.
+ * \param statusbar The statusbar the widget is on.
+ * \param config The cfg_t structure we will parse to set common info.
  */
 void
 widget_common_new(widget_t *widget, statusbar_t *statusbar, cfg_t *config)
@@ -157,8 +153,8 @@ widget_common_new(widget_t *widget, statusbar_t *statusbar, cfg_t *config)
 /** Invalidate widgets which should be refresh upon
  * external modifications. widget_t who watch flags will
  * be set to be refreshed.
- * \param screen screen id
- * \param flags cache flags
+ * \param screen Virtual screen number.
+ * \param flags Cache flags to invalidate.
  */
 void
 widget_invalidate_cache(int screen, int flags)
@@ -175,8 +171,8 @@ widget_invalidate_cache(int screen, int flags)
 }
 
 /** Send commands to widgets.
- * \param screen Screen ID
- * \param arg widget_t command. Syntax depends on specific widget.
+ * \param screen Virtual screen number.
+ * \param arg Widget command. Syntax depends on specific widget.
  * \ingroup ui_callback
  */
 void
