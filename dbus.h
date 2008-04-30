@@ -24,8 +24,8 @@
 
 #include <stdbool.h>
 
-void a_dbus_process_requests(void);
-bool a_dbus_init(void);
+void a_dbus_process_requests(int *);
+bool a_dbus_init(int *);
 void a_dbus_cleanup(void);
 
 #endif

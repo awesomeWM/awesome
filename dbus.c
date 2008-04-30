@@ -32,7 +32,7 @@ a_dbus_process_widget_tell(DBusMessage *req)
 {
     char *arg, *path = NULL;
     DBusMessageIter iter;
-    
+
     if(!dbus_message_iter_init(req, &iter))
     {
         warn("message has no argument: %s\n", err.message);
@@ -52,12 +52,12 @@ a_dbus_process_widget_tell(DBusMessage *req)
 }
 
 void
-a_dbus_process_requests(void)
+a_dbus_process_requests(int *fd)
 {
     DBusMessage *msg;
     int nmsg = 0;
 
-    if(!dbus_connection && !a_dbus_init())
+    if(!dbus_connection && !a_dbus_init(fd))
         return;
 
     while(true)
@@ -87,7 +87,7 @@ a_dbus_process_requests(void)
 }
 
 bool
-a_dbus_init(void)
+a_dbus_init(int *fd)
 {
     bool ret;
 
@@ -97,11 +97,8 @@ a_dbus_init(void)
     if(dbus_error_is_set(&err))
     {
         warn("DBus system bus connection failed: %s\n", err.message);
-
         dbus_connection = NULL;
-
         dbus_error_free(&err);
-
         return false;
     }
 
@@ -112,18 +109,21 @@ a_dbus_init(void)
     if(dbus_error_is_set(&err))
     {
         warn("failed to request DBus name: %s\n", err.message);
-
         a_dbus_cleanup();
-
         return false;
     }
 
     if(ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
     {
         warn("not primary DBus name owner\n");
-
         a_dbus_cleanup();
+        return false;
+    }
 
+    if(!dbus_connection_get_unix_fd(dbus_connection, fd))
+    {
+        warn("cannot get DBus connection file descriptor\n");
+        a_dbus_cleanup();
         return false;
     }
 

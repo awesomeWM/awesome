@@ -293,7 +293,7 @@ main(int argc, char **argv)
 {
     char buf[1024];
     const char *confpath = NULL;
-    int r, xfd, csfd, i, screen_nbr, opt;
+    int r, xfd, csfd, dbusfd, i, screen_nbr, opt;
     ssize_t cmdlen = 1;
     const xcb_query_extension_reply_t *shape_query, *randr_query;
     statusbar_t *statusbar;
@@ -494,7 +494,8 @@ main(int argc, char **argv)
             warn("error binding UNIX domain socket: %s\n", strerror(errno));
     }
     
-    a_dbus_init();
+    if(!a_dbus_init(&dbusfd))
+        dbusfd = -1;
 
     /* register function for signals */
     signal(SIGINT, &exit_on_signal);
@@ -511,8 +512,10 @@ main(int argc, char **argv)
         FD_ZERO(&rd);
         if(csfd >= 0)
             FD_SET(csfd, &rd);
+        if(dbusfd >= 0)
+            FD_SET(dbusfd, &rd);
         FD_SET(xfd, &rd);
-        if(select(MAX(xfd, csfd) + 1, &rd, NULL, NULL, NULL) == -1)
+        if(select(MAX(MAX(xfd, csfd), dbusfd) + 1, &rd, NULL, NULL, NULL) == -1)
         {
             if(errno == EINTR)
                 continue;
@@ -536,7 +539,8 @@ main(int argc, char **argv)
                 layout_refresh();
             }
 
-        /* a_dbus_process_requests(); */
+        if(dbusfd >= 0 && FD_ISSET(dbusfd, &rd))
+            a_dbus_process_requests(&dbusfd);
 
         /* two level XPending:
          * we need to first check we have XEvent to handle
