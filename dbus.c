@@ -25,7 +25,7 @@
 #include "common/util.h"
 
 static DBusError err;
-static DBusConnection *conn = NULL;
+static DBusConnection *dbus_connection = NULL;
 
 static void
 a_dbus_process_widget_tell(DBusMessage *req)
@@ -57,14 +57,14 @@ a_dbus_process_requests(void)
     DBusMessage *msg;
     int nmsg = 0;
 
-    if(!conn && !a_dbus_init())
+    if(!dbus_connection && !a_dbus_init())
         return;
 
     while(true)
     {
-        dbus_connection_read_write(conn, 0);
+        dbus_connection_read_write(dbus_connection, 0);
 
-        if(!(msg = dbus_connection_pop_message(conn)))
+        if(!(msg = dbus_connection_pop_message(dbus_connection)))
             break;
 
 
@@ -83,7 +83,7 @@ a_dbus_process_requests(void)
     }
 
     if(nmsg)
-        dbus_connection_flush(conn);
+        dbus_connection_flush(dbus_connection);
 }
 
 bool
@@ -93,21 +93,21 @@ a_dbus_init(void)
 
     dbus_error_init(&err);
 
-    conn = dbus_bus_get(DBUS_BUS_SESSION, &err);
+    dbus_connection = dbus_bus_get(DBUS_BUS_SESSION, &err);
     if(dbus_error_is_set(&err))
     {
         warn("DBus system bus connection failed: %s\n", err.message);
 
-        conn = NULL;
+        dbus_connection = NULL;
 
         dbus_error_free(&err);
 
         return false;
     }
 
-    dbus_connection_set_exit_on_disconnect(conn, FALSE);
+    dbus_connection_set_exit_on_disconnect(dbus_connection, FALSE);
 
-    ret = dbus_bus_request_name(conn, "org.awesome", 0, &err);
+    ret = dbus_bus_request_name(dbus_connection, "org.awesome", 0, &err);
 
     if(dbus_error_is_set(&err))
     {
@@ -133,7 +133,7 @@ a_dbus_init(void)
 void
 a_dbus_cleanup(void)
 {
-    if(!conn)
+    if(!dbus_connection)
         return;
 
     dbus_error_free(&err);
@@ -141,8 +141,8 @@ a_dbus_cleanup(void)
     /* This is a shared connection owned by libdbus
      * Do not close it, only unref
      */
-    dbus_connection_unref(conn);
-    conn = NULL;
+    dbus_connection_unref(dbus_connection);
+    dbus_connection = NULL;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
