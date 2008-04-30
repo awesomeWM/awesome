@@ -64,12 +64,14 @@ markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused))
                 p->attribute_names[i][j] = a_strdup(attribute_names[j]);
                 p->attribute_values[i][j] = a_strdup(attribute_values[j]);
             }
+
             if(p->elements_sub && p->elements_sub[i])
             {
                 asprintf(&newtext, "%s%s", NONULL(p->text), p->elements_sub[i]);
                 p_delete(&p->text);
                 p->text = newtext;
             }
+
             return;
         }
 
@@ -189,14 +191,17 @@ markup_parser_data_delete(markup_parser_data_t **p)
     for(i = 0; (*p)->elements[i]; i++)
         if((*p)->attribute_names[i])
         {
-            for(j = 0; (*p)->attribute_names[i][j]; j++);
+            for(j = 0; (*p)->attribute_names[i][j]; j++)
             {
-                p_delete(&(*p)->attribute_names[i][j]);
-                p_delete(&(*p)->attribute_values[i][j]);
+                p_delete(&((*p)->attribute_names[i][j]));
+                p_delete(&((*p)->attribute_values[i][j]));
             }
-            p_delete(&(*p)->attribute_names[i]);
-            p_delete(&(*p)->attribute_values[i]);
+            p_delete(&((*p)->attribute_names[i]));
+            p_delete(&((*p)->attribute_values[i]));
         }
+
+    p_delete(&(*p)->attribute_names);
+    p_delete(&(*p)->attribute_values);
 
     p_delete(&(*p)->text);
     p_delete(p);
@@ -236,6 +241,7 @@ markup_parse(markup_parser_data_t *data, const char *str, ssize_t slen)
     {
         warn("unable to parse text \"%s\": %s\n", str, error->message);
         g_error_free(error);
+        g_markup_parse_context_free(mkp_ctx);
         return false;
     }
 
