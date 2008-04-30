@@ -38,6 +38,7 @@ void widget_invalidate_cache(int, int);
 int widget_calculate_offset(int, int, int, int);
 void widget_calculate_alignments(widget_t *);
 void widget_common_new(widget_t*, statusbar_t *, cfg_t *);
+widget_t * widget_getbyname(statusbar_t *, char *);
 
 WidgetConstructor layoutinfo_new;
 WidgetConstructor taglist_new;

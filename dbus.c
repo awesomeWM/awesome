@@ -22,16 +22,55 @@
 #include <dbus/dbus.h>
 
 #include "dbus.h"
+#include "statusbar.h"
+#include "widget.h"
 #include "common/util.h"
+
+extern AwesomeConf globalconf;
 
 static DBusError err;
 static DBusConnection *dbus_connection = NULL;
 
-static void
-a_dbus_process_widget_tell(DBusMessage *req)
+/** Check a dbus object path format and its number of element.
+ * \param path The path.
+ * \param nelem The number of element it should have.
+ * \return true if the path is ok, false otherwise.
+ */
+static bool
+a_dbus_path_check(char **path, int nelem)
 {
-    char *arg, *path = NULL;
+    int i;
+
+    for(i = 0; path[i]; i++);
+    if(i != nelem)
+        return false;
+
+    return (!a_strcmp(path[0], "org")&& !a_strcmp(path[1], "awesome"));
+}
+
+/** Process widget.set method call.
+ * \param req The dbus message.
+ */
+static void
+a_dbus_process_widget_set(DBusMessage *req)
+{
+    char *arg, **path;
+    int i, screen;
     DBusMessageIter iter;
+    statusbar_t *statusbar;
+    widget_t *widget;
+
+    if(!dbus_message_get_path_decomposed(req, &path)
+       || !a_dbus_path_check(path, 10)
+       || a_strcmp(path[2], "screen")
+       || a_strcmp(path[4], "statusbar")
+       || a_strcmp(path[6], "widget")
+       || a_strcmp(path[8], "property"))
+    {
+        warn("invalid object path 2\n");
+        dbus_error_free(&err);
+        return;
+    }
 
     if(!dbus_message_iter_init(req, &iter))
     {
@@ -41,13 +80,26 @@ a_dbus_process_widget_tell(DBusMessage *req)
     }
     else if(DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&iter))
     {
-        warn("argument must be a string");
+        warn("argument must be a string\n");
         dbus_error_free(&err);
         return;
     }
     else
         dbus_message_iter_get_basic(&iter, &arg);
 
+    if((screen = atoi(path[3])) >= globalconf.screens_info->nscreen)
+        return warn("bad screen number\n");
+
+    if(!(statusbar = statusbar_getbyname(screen, path[5])))
+        return warn("no such statusbar: %s\n", path[5]);
+
+    if(!(widget = widget_getbyname(statusbar, path[7])))
+        return warn("no such widget: %s in statusbar %s.\n", path[7], statusbar->name);
+
+    widget->tell(widget, path[9], arg);
+
+    for(i = 0; path[i]; i++)
+        p_delete(&path[i]);
     p_delete(&path);
 }
 
@@ -68,8 +120,8 @@ a_dbus_process_requests(int *fd)
             break;
 
 
-        if(dbus_message_is_method_call(msg, "org.awesome.statusbar.widget", "tell"))
-            a_dbus_process_widget_tell(msg);
+        if(dbus_message_is_method_call(msg, "org.awesome.statusbar.widget", "set"))
+            a_dbus_process_widget_set(msg);
         else if(dbus_message_is_signal(msg, DBUS_INTERFACE_LOCAL, "Disconnected"))
         {
             a_dbus_cleanup();

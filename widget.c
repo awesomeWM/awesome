@@ -90,7 +90,7 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
  * \param name The widget name.
  * \return A widget pointer.
  */
-static widget_t *
+widget_t *
 widget_getbyname(statusbar_t *sb, char *name)
 {
     widget_t *widget;
