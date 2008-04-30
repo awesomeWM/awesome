@@ -50,7 +50,7 @@ window_setstate(xcb_window_t win, long state)
 
 /** Get a window state (WM_STATE).
  * \param w A client window.
- * \return The current state of the window.
+ * \return The current state of the window, or -1 on error.
  */
 long
 window_getstate(xcb_window_t w)
@@ -180,9 +180,6 @@ window_root_grabkeys(int phys_screen)
     keybinding_t *k;
     xcb_keycode_t kc;
 
-    /* Ungrab everything */
-    xcb_ungrab_key(globalconf.connection, ANY_KEY, s->root, ANY_MODIFIER);
-
     for(k = globalconf.keys; k; k = k->next)
 	if((kc = k->keycode) || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         {
@@ -211,14 +208,12 @@ window_setshape(xcb_window_t win, int phys_screen)
     if((r = xcb_shape_query_extents_reply(globalconf.connection,
                                           xcb_shape_query_extents_unchecked(globalconf.connection, win),
                                           NULL)) && r->bounding_shaped)
-    {
         xcb_shape_combine(globalconf.connection, XCB_SHAPE_SO_SET,
                           XCB_SHAPE_SK_BOUNDING, XCB_SHAPE_SK_BOUNDING,
                           xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
                           0, 0, win);
 
-        p_delete(&r);
-    }
+    p_delete(&r);
 }
 
 /** Set transparency of a window.
