@@ -547,11 +547,11 @@ cfg_opt_t rule_opts[] =
 {
     /** Name of the xproperty to match. */
     CFG_STR((char *) "xproperty_name", NULL, CFGF_NONE),
-    /** Value of the xproperty above to match. */
+    /** Regexp value of the xproperty above to match. */
     CFG_STR((char *) "xproperty_value", NULL, CFGF_NONE),
-    /** Name of the window. */
+    /** Regexp to match the window against a string formatted like: class:name:title. */
     CFG_STR((char *) "name", NULL, CFGF_NONE),
-    /** Tags matching that regexp to put windows in. */
+    /** Tags matching that regexp to tag windows with. */
     CFG_STR((char *) "tags", NULL, CFGF_NONE),
     /** Icon to use for that window. */
     CFG_STR((char *) "icon", NULL, CFGF_NONE),
