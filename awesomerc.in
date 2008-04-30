@@ -115,24 +115,28 @@ screen 0
             mouse
             {
                 button = "4"
-                command = "client_focusnext"
+                command = "client_focus"
+                arg = "+1"
             }
             mouse
             {
                 button = "5"
-                command = "client_focusprev"
+                command = "client_focus"
+                arg = "-1"
             }
             mouse
             {
                 modkey = {"Mod4"}
                 button = "4"
-                command = "client_swapnext"
+                command = "client_swap"
+                arg = "+1"
             }
             mouse
             {
                 modkey = {"Mod4"}
                 button = "5"
-                command = "client_swapprev"
+                command = "client_swap"
+                arg = "-1"
             }
         }
         iconbox logo
@@ -258,13 +262,15 @@ keys
     {
         modkey = {"Mod4"}
         key = "j"
-        command = "client_focusnext"
+        command = "client_focus"
+        arg = "+1"
     }
     key
     {
         modkey = {"Mod4"}
         key = "k"
-        command = "client_focusprev"
+        command = "client_focus"
+        arg = "-1"
     }
     key
     {
@@ -277,13 +283,15 @@ keys
     {
         modkey = {"Mod4", "Shift"}
         key = "j"
-        command = "client_swapnext"
+        command = "client_swap"
+        arg = "+1"
     }
     key
     {
         modkey = {"Mod4", "Shift"}
         key = "k"
-        command = "client_swapprev"
+        command = "client_swap"
+        arg = "-1"
     }
     key
     {

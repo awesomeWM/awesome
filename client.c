@@ -195,7 +195,7 @@ client_updatetitle(client_t *c)
                               xutil_intern_atom(globalconf.connection, "WM_NAME"),
                               &name))
             return;
-    
+
     p_delete(&c->name);
     c->name = name;
     titlebar_draw(c);
@@ -910,58 +910,49 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
  * \return next or previous client
  */
 static client_t *
-client_find_visible(client_t *sel, bool reverse)
+client_find_visible(client_t *sel, int nindex)
 {
+    int i = 0;
     client_t *next;
     client_t *(*client_iter)(client_t **, client_t *) = client_list_next_cycle;
 
-    if(!sel) return NULL;
-
-    if(reverse)
+    if(!sel || nindex == 0)
+        return NULL;
+    else if(nindex < 0)
         client_iter = client_list_prev_cycle;
 
+    nindex = abs(nindex);
+
     /* look for previous or next starting at sel */
-
     for(next = client_iter(&globalconf.clients, sel);
-        next && next != sel && (next->skip || !client_isvisible(next, sel->screen));
-        next = client_iter(&globalconf.clients, next));
-
-    return next;
-}
-
-/** Swap the currently focused client with the previous visible one.
- * \param screen Screen ID
- * \param arg nothing
- * \ingroup ui_callback
- */
-void
-uicb_client_swapprev(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
-{
-    client_t *prev;
-
-    if((prev = client_find_visible(globalconf.focus->client, true)))
+        next && next != sel;
+        next = client_iter(&globalconf.clients, next))
     {
-        client_list_swap(&globalconf.clients, prev, globalconf.focus->client);
-        globalconf.screens[prev->screen].need_arrange = true;
-        widget_invalidate_cache(prev->screen, WIDGET_CACHE_CLIENTS);
+        if(!next->skip && client_isvisible(next, sel->screen))
+            i++;
+        if(i >= nindex)
+            return next;
     }
+
+    return NULL;
 }
 
-/** Swap the currently focused client with the next visible one.
- * \param screen Screen ID
- * \param arg nothing
+/** Swap the currently focused client with another one.
+ * \param screen Virtual screen number.
+ * \param arg Relative number in the client stack.
  * \ingroup ui_callback
  */
 void
-uicb_client_swapnext(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
+uicb_client_swap(int screen, char *arg)
 {
     client_t *next;
+    int i = atoi(arg);
 
-    if((next = client_find_visible(globalconf.focus->client, false)))
+    if((next = client_find_visible(globalconf.focus->client, i)))
     {
-        client_list_swap(&globalconf.clients, globalconf.focus->client, next);
-        globalconf.screens[next->screen].need_arrange = true;
-        widget_invalidate_cache(next->screen, WIDGET_CACHE_CLIENTS);
+        client_list_swap(&globalconf.clients, next, globalconf.focus->client);
+        globalconf.screens[screen].need_arrange = true;
+        widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
     }
 }
 
@@ -1200,32 +1191,19 @@ uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
     }
 }
 
-/** Give focus to the next visible client in the stack.
- * \param screen Screen ID
- * \param arg Unused
+/** Give focus to the next or previous visible client in the stack.
+ * \param screen Virtual screen number.
+ * \param arg Relative number in the client stack.
  * \ingroup ui_callback
  */
 void
-uicb_client_focusnext(int screen, char *arg __attribute__ ((unused)))
+uicb_client_focus(int screen, char *arg)
 {
     client_t *next;
+    int i = atoi(arg);
 
-    if((next = client_find_visible(globalconf.focus->client, false)))
+    if((next = client_find_visible(globalconf.focus->client, i)))
         client_focus(next, screen, true);
-}
-
-/** Give focus to the previous visible client in the stack.
- * \param screen Screen ID
- * \param arg Unused
- * \ingroup ui_callback
- */
-void
-uicb_client_focusprev(int screen, char *arg __attribute__ ((unused)))
-{
-    client_t *prev;
-
-    if((prev = client_find_visible(globalconf.focus->client, true)))
-        client_focus(prev, screen, true);
 }
 
 /** Toggle the floating state of the focused client.
