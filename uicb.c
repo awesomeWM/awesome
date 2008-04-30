@@ -138,9 +138,9 @@ uicb_spawn(int screen, char *arg)
 
 /** Run the uicb.
  * \param cmd The uicb command to parse.
- * \return 0 on succes, -1 on failure.
+ * \return true on succes, false on failure.
  */
-static int
+static bool
 __uicb_run(char *cmd)
 {
     char *p, *argcpy;
@@ -154,27 +154,27 @@ __uicb_run(char *cmd)
     if (!p)
     {
         warn("ignoring malformed command\n");
-        return -1;
+        return false;
     }
     screen = atoi(cmd);
     if(screen >= globalconf.screens_info->nscreen || screen < 0)
     {
         warn("invalid screen specified: %i\n", screen);
-        return -1;
+        return false;
     }
 
     p = strtok(NULL, " ");
     if (!p)
     {
         warn("ignoring malformed command.\n");
-        return -1;
+        return false;
     }
 
     uicb = name_func_lookup(p, UicbList);
     if (!uicb)
     {
         warn("unknown uicb function: %s.\n", p);
-        return -1;
+        return false;
     }
 
     if (p + a_strlen(p) < cmd + len)
@@ -190,29 +190,28 @@ __uicb_run(char *cmd)
     else
         uicb(screen, NULL);
 
-    return 0;
+    return true;
 }
 
 /** Parse a command.
- * \param cmd the buffer
- * \return 0 on succes, -1 on failure
+ * \param cmd The buffer to parse.
+ * \return true on succes, false on failure.
  */
-int
+bool
 __uicb_parsecmd(char *cmd)
 {
     char *p, *curcmd = cmd;
+    bool ret = false;
 
-    if(!a_strlen(cmd))
-        return -1;
+    if(a_strlen(cmd))
+        while((p = strchr(curcmd, '\n')))
+        {
+            *p = '\0';
+            ret = __uicb_run(curcmd);
+            curcmd = p + 1;
+        }
 
-    while((p = strchr(curcmd, '\n')))
-    {
-        *p = '\0';
-        __uicb_run(curcmd);
-        curcmd = p + 1;
-    }
-
-    return 0;
+    return ret;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

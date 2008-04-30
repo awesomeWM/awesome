@@ -22,9 +22,11 @@
 #ifndef AWESOME_UICB_H
 #define AWESOME_UICB_H
 
+#include <stdbool.h>
+
 typedef void (uicb_t)(int, char *);
 
-int __uicb_parsecmd(char *);
+bool __uicb_parsecmd(char *);
 
 uicb_t uicb_restart;
 uicb_t uicb_exec;
