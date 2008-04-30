@@ -65,10 +65,10 @@ rule_matching_client(client_t *c)
     if(!(ch = xutil_get_class_hint(globalconf.connection, c->win)))
         return NULL;
 
-    len = a_strlen(ch->res_class) + a_strlen(ch->res_name) + a_strlen(c->name);
-    prop = p_new(char, len + 3);
+    len = a_strlen(ch->res_class) + a_strlen(ch->res_name) + a_strlen(c->name) + 3;
+    prop = p_new(char, len);
 
-    snprintf(prop, len + 3, "%s:%s:%s",
+    snprintf(prop, len, "%s:%s:%s",
              ch->res_class ? ch->res_class : "", ch->res_name ? ch->res_name : "", c->name);
 
     if(ch->res_class)
