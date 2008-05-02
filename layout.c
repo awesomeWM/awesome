@@ -65,8 +65,12 @@ arrange(int screen)
         {
             c->newcomer = False;
             client_unban(c);
-            if(globalconf.screens[screen].new_get_focus && !c->skip)
+            if(globalconf.screens[screen].new_get_focus
+               && !c->skip
+               && (!globalconf.focus->client || !globalconf.focus->client->ismax))
                 client_focus(c, screen, True);
+            else if(globalconf.focus->client && globalconf.focus->client->ismax)
+                client_stack(globalconf.focus->client);
         }
 
     /* if we have a valid client that could be focused but currently no window
