@@ -250,10 +250,7 @@ tasklist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
 
     for(b = widget->buttons; b; b = b->next)
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->func)
-        {
             b->func(widget->statusbar->screen, b->arg);
-            return;
-        }
 }
 
 widget_t *

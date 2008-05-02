@@ -39,10 +39,7 @@ focusicon_draw(widget_t *widget, draw_context_t *ctx, int offset,
     NetWMIcon *icon;
 
     if(!sel)
-    {
-        widget->area.width = 0;
-        return 0;
-    }
+        return (widget->area.width = 0);
 
     widget->area.height = widget->statusbar->height;
 
@@ -66,10 +63,7 @@ focusicon_draw(widget_t *widget, draw_context_t *ctx, int offset,
     }
 
     if(!(icon = ewmh_get_window_icon(sel->win)))
-    {
-        widget->area.width = 0;
-        return 0;
-    }
+        return (widget->area.width = 0);
 
     widget->area.width = ((double) widget->statusbar->height / (double) icon->height) * icon->width;
 

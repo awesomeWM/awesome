@@ -69,8 +69,7 @@ textbox_tell(widget_t *widget, char *property, char *new_value)
 
     if(!a_strcmp(property, "text"))
     {
-        if (d->text)
-            p_delete(&d->text);
+        p_delete(&d->text);
         d->text = a_strdup(new_value);
     }
     else if(!a_strcmp(property, "width"))
