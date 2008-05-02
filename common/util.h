@@ -248,6 +248,25 @@ a_strncat(char *dst, ssize_t n, const char *src, ssize_t l)
     return dlen + a_strncpy(dst + dlen, n - dlen, src, l);
 }
 
+/** \brief convert a string to a boolean value.
+ *
+ * The a_strtobool() function converts a string \c s into a boolean.
+ * It recognizes the strings "true", "on", "yes" and "1".
+ *
+ * \param[in]  s     the string to convert
+ * \return true if the string is recognized as possibly true, false otherwise.
+ */
+static inline bool
+a_strtobool(const char *s)
+{
+    if(!strcasecmp(s, "true")
+       || !strcasecmp(s, "on")
+       || !strcasecmp(s, "yes")
+       || !strcasecmp(s, "1"))
+        return true;
+    return false;
+}
+
 #define eprint(string, ...) _eprint(__LINE__, \
                                     __FUNCTION__, \
                                     string, ## __VA_ARGS__)
