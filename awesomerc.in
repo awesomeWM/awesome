@@ -377,13 +377,14 @@ keys
     {
         modkey = {"Mod4", "Control"}
         key = "Return"
-        command = "client_zoom"
+        command = "client_swap"
+        arg = "0"
     }
     key
     {
         modkey = {"Mod4", "Control"}
         key = "space"
-        command = "client_togglefloating"
+        command = "client_setfloating"
     }
     key
     {

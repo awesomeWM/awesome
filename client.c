@@ -938,6 +938,8 @@ client_find_visible(client_t *sel, int nindex)
 }
 
 /** Swap the currently focused client with another one.
+ * The argument must be an integer 1 for next, 2 for next of next, -1 for
+ * previous, etc. 0 will swap with the visible master window.
  * \param screen Virtual screen number.
  * \param arg Relative number in the client stack.
  * \ingroup ui_callback
@@ -945,12 +947,19 @@ client_find_visible(client_t *sel, int nindex)
 void
 uicb_client_swap(int screen, char *arg)
 {
-    client_t *next;
+    client_t *swap = NULL;
     int i = atoi(arg);
 
-    if((next = client_find_visible(globalconf.focus->client, i)))
+    if(i)
+        swap = client_find_visible(globalconf.focus->client, i);
+    else if(globalconf.focus->client == globalconf.clients)
+        swap = client_find_visible(globalconf.focus->client, 1);
+    else
+        swap = globalconf.clients;
+
+    if(swap)
     {
-        client_list_swap(&globalconf.clients, next, globalconf.focus->client);
+        client_list_swap(&globalconf.clients, swap, globalconf.focus->client);
         globalconf.screens[screen].need_arrange = true;
         widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
     }
@@ -1116,13 +1125,13 @@ uicb_client_togglemax(int screen, char *arg)
     area = screen_get_area(screen,
                            globalconf.screens[screen].statusbar,
                            &globalconf.screens[screen].padding);
-    if(arg[0] == 'v')
+    if(arg && arg[0] == 'v')
     {
         area.x = globalconf.focus->client->geometry.x;
         area.width = globalconf.focus->client->geometry.width;
         area.height -= 2 * globalconf.focus->client->border;
     }
-    else if(arg[0] == 'h')
+    else if(arg && arg[0] == 'h')
     {
         area.y = globalconf.focus->client->geometry.y;
         area.height = globalconf.focus->client->geometry.height;
@@ -1134,31 +1143,6 @@ uicb_client_togglemax(int screen, char *arg)
         area.height -= 2 * globalconf.focus->client->border;
     }
     client_maximize(globalconf.focus->client, area);
-}
-
-/** Move the client to the master area.
- * \param screen Screen ID
- * \param arg Unused
- * \ingroup ui_callback
- */
-void
-uicb_client_zoom(int screen, char *arg __attribute__ ((unused)))
-{
-    client_t *c, *sel = globalconf.focus->client;
-
-    if(!sel)
-        return;
-
-    for(c = globalconf.clients; !client_isvisible(c, screen); c = c->next);
-    if(c == sel)
-         for(sel = sel->next; sel && !client_isvisible(sel, screen); sel = sel->next);
-
-    if(sel)
-    {
-        client_list_detach(&globalconf.clients, sel);
-        client_list_push(&globalconf.clients, sel);
-        globalconf.screens[screen].need_arrange = true;
-    }
 }
 
 /** Give focus to the next or previous visible client in the stack.
@@ -1176,17 +1160,27 @@ uicb_client_focus(int screen, char *arg)
         client_focus(next, screen, true);
 }
 
-/** Toggle the floating state of the focused client.
- * \param screen Screen ID
- * \param arg unused
+/** Set or toggle the floating state of the focused client.
+ * Argument must be none to toggle, or a boolean value to set.
+ * \param screen Virtual screen number.
+ * \param arg 
  * \ingroup ui_callback
  */
 void
-uicb_client_togglefloating(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
+uicb_client_setfloating(int screen __attribute__ ((unused)), char *arg)
 {
-    if(globalconf.focus->client)
-        client_setfloating(globalconf.focus->client, !globalconf.focus->client->isfloating,
-                globalconf.focus->client->layer == LAYER_FLOAT ? LAYER_TILE : LAYER_FLOAT);
+    bool floating;
+
+    if(!globalconf.focus->client)
+        return;
+    
+    if(!arg)
+        floating = !globalconf.focus->client->isfloating;
+    else
+        floating = a_strtobool(arg);
+
+    client_setfloating(globalconf.focus->client, !globalconf.focus->client->isfloating,
+                       globalconf.focus->client->layer == LAYER_FLOAT ? LAYER_TILE : LAYER_FLOAT);
 }
 
 /** Toggle the scratch client attribute on the focused client.
