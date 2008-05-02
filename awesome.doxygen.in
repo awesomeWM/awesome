@@ -84,6 +84,12 @@ INPUT                  = @top_srcdir@ @top_builddir@
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.h \
+                         common/*.c \
+                         common/*.h \
+                         widgets/*.c \
+                         widgets/*.h \
+                         layouts/*.c \
+                         layouts/*.h
 RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
