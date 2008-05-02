@@ -1101,69 +1101,39 @@ client_maximize(client_t *c, area_t geometry)
 }
 
 /** Toggle maximization state for the focused client.
- * \param screen Screen ID
- * \param arg Unused
+ * \param screen Virtual screen number.
+ * \param arg Either "vertical", "horizontal" or nothing for both.
  * \ingroup ui_callback
  */
 void
-uicb_client_togglemax(int screen, char *arg __attribute__ ((unused)))
+uicb_client_togglemax(int screen, char *arg)
 {
-    client_t *sel = globalconf.focus->client;
-    area_t area = screen_get_area(screen,
-                                globalconf.screens[screen].statusbar,
-                                &globalconf.screens[screen].padding);
+    area_t area;
+   
+    if(!globalconf.focus->client)
+        return;
 
-    if(sel)
+    area = screen_get_area(screen,
+                           globalconf.screens[screen].statusbar,
+                           &globalconf.screens[screen].padding);
+    if(arg[0] == 'v')
     {
-        area.width -= 2 * sel->border;
-        area.height -= 2 * sel->border;
-        client_maximize(sel, area);
+        area.x = globalconf.focus->client->geometry.x;
+        area.width = globalconf.focus->client->geometry.width;
+        area.height -= 2 * globalconf.focus->client->border;
     }
-}
-
-/** Toggle vertical maximization for the focused client.
- * \param screen Screen ID
- * \param arg Unused
- * \ingroup ui_callback
- */
-void
-uicb_client_toggleverticalmax(int screen, char *arg __attribute__ ((unused)))
-{
-    client_t *sel = globalconf.focus->client;
-    area_t area = screen_get_area(screen,
-                                globalconf.screens[screen].statusbar,
-                                &globalconf.screens[screen].padding);
-
-    if(sel)
+    else if(arg[0] == 'h')
     {
-        area.x = sel->geometry.x;
-        area.width = sel->geometry.width;
-        area.height -= 2 * sel->border;
-        client_maximize(sel, area);
+        area.y = globalconf.focus->client->geometry.y;
+        area.height = globalconf.focus->client->geometry.height;
+        area.width -= 2 * globalconf.focus->client->border;
     }
-}
-
-
-/** Toggle horizontal maximization for the focused client.
- * \param screen Screen ID
- * \param arg Unused
- * \ingroup ui_callback
- */
-void
-uicb_client_togglehorizontalmax(int screen, char *arg __attribute__ ((unused)))
-{
-    client_t *sel = globalconf.focus->client;
-    area_t area = screen_get_area(screen,
-                                globalconf.screens[screen].statusbar,
-                                &globalconf.screens[screen].padding);
-
-    if(sel)
+    else
     {
-        area.y = sel->geometry.y;
-        area.height = sel->geometry.height;
-        area.width -= 2 * sel->border;
-        client_maximize(sel, area);
+        area.width -= 2 * globalconf.focus->client->border;
+        area.height -= 2 * globalconf.focus->client->border;
     }
+    client_maximize(globalconf.focus->client, area);
 }
 
 /** Move the client to the master area.

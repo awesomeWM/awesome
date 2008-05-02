@@ -50,8 +50,6 @@ uicb_t uicb_client_moveresize;
 uicb_t uicb_client_settrans;
 uicb_t uicb_client_swap;
 uicb_t uicb_client_togglemax;
-uicb_t uicb_client_toggleverticalmax;
-uicb_t uicb_client_togglehorizontalmax;
 uicb_t uicb_client_zoom;
 uicb_t uicb_client_focus;
 uicb_t uicb_client_togglefloating;
