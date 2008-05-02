@@ -284,7 +284,7 @@ graph_tell(widget_t *widget, char *property, char *new_value)
     if(!d->data_items)
         return WIDGET_ERROR_CUSTOM; /* error already printed on _new */
 
-    if(new_value == NULL)
+    if(!new_value)
         return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "data"))
@@ -294,7 +294,6 @@ graph_tell(widget_t *widget, char *property, char *new_value)
             return WIDGET_ERROR_NOVALUE;
 
         for(i = 0; i < d->data_items; i++)
-        {
             if(!a_strcmp(title, d->data_title[i]))
             {
                 value = MAX(atof(setting), 0);
@@ -319,14 +318,14 @@ graph_tell(widget_t *widget, char *property, char *new_value)
                     else if(d->max_index[i] == d->index[i] && d->current_max[i] > d->max[i])
                     {
                         /* find the new max */
-                        for (u = 0; u < d->size; u++)
-                            if (d->values[i][u] > d->values[i][d->max_index[i]])
+                        for(u = 0; u < d->size; u++)
+                            if(d->values[i][u] > d->values[i][d->max_index[i]])
                                 d->max_index[i] = u;
 
                         d->current_max[i] = MAX(d->values[i][d->max_index[i]], d->max[i]);
 
                         /* recalculate */
-                        for (u = 0; u < d->size; u++)
+                        for(u = 0; u < d->size; u++)
                             d->lines[i][u] = (int) (d->values[i][u] * d->box_height / d->current_max[i] + 0.5);
                     }
                     else
@@ -341,7 +340,6 @@ graph_tell(widget_t *widget, char *property, char *new_value)
                 }
                 return WIDGET_NOERROR;
             }
-        }
         return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "height"))
