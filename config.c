@@ -165,18 +165,22 @@ set_key_info(Key *key, cfg_t *cfg)
         warn("unknown command %s\n", cfg_getstr(cfg, "command"));
 }
 
-static KeySym
-key_to_keysym(char *str)
+static void
+config_key_store(Key *key, char *str)
 {
     KeyCode kc;
     int ikc;
 
-    if(a_strncmp(str, "#", 1))
-        return XStringToKeysym(str);
-
-    ikc = atoi(str + 1);
-    memcpy(&kc, &ikc, sizeof(KeyCode));
-    return XKeycodeToKeysym(globalconf.display, kc, 0);
+    if(!a_strlen(str))
+        return;
+    else if(a_strncmp(str, "#", 1))
+        key->keysym = XStringToKeysym(str);
+    else
+    {
+        ikc = atoi(str + 1);
+        memcpy(&kc, &ikc, sizeof(KeyCode));
+        key->keycode = kc;
+    }
 }
 
 static Key *
@@ -191,7 +195,7 @@ section_keys(cfg_t *cfg_keys)
         key = p_new(Key, 1);
         cfgkeytmp = cfg_getnsec(cfg_keys, "key", i);
         set_key_info(key, cfgkeytmp);
-        key->keysym = key_to_keysym(cfg_getstr(cfgkeytmp, "key"));
+        config_key_store(key, cfg_getstr(cfgkeytmp, "key"));
         key->arg = a_strdup(cfg_getstr(cfgkeytmp, "arg"));
         key_list_push(&head, key);
     }
@@ -210,7 +214,7 @@ section_keys(cfg_t *cfg_keys)
         {
             key = p_new(Key, 1);
             set_key_info(key, cfgkeytmp);
-            key->keysym = key_to_keysym(cfg_getnstr(cfgkeytmp, "keylist", j));
+            config_key_store(key, cfg_getnstr(cfgkeytmp, "keylist", j));
             key->arg = a_strdup(cfg_getnstr(cfgkeytmp, "arglist", j));
             key_list_push(&head, key);
         }

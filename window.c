@@ -162,7 +162,7 @@ window_root_grabkeys(int phys_screen)
     XUngrabKey(globalconf.display, AnyKey, AnyModifier, RootWindow(globalconf.display, phys_screen));
 
     for(k = globalconf.keys; k; k = k->next)
-	if(k->keysym && (kc = XKeysymToKeycode(globalconf.display, k->keysym)))
+	if((kc = k->keycode) || (k->keysym && (kc = XKeysymToKeycode(globalconf.display, k->keysym))))
         {
             XGrabKey(globalconf.display, kc, k->mod,
                      RootWindow(globalconf.display, phys_screen), True, GrabModeAsync, GrabModeAsync);
