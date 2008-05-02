@@ -47,7 +47,6 @@
 #include "layout.h"
 #include "screen.h"
 #include "statusbar.h"
-#include "uicb.h"
 #include "window.h"
 #include "client.h"
 #include "focus.h"
@@ -55,10 +54,8 @@
 #include "tag.h"
 #include "dbus.h"
 #include "common/socket.h"
-#include "common/util.h"
 #include "common/version.h"
 #include "common/configopts.h"
-#include "common/xscreen.h"
 #include "common/xutil.h"
 
 static bool running = true;

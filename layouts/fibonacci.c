@@ -23,7 +23,6 @@
 #include "tag.h"
 #include "client.h"
 #include "layouts/fibonacci.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

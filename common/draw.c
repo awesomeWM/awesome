@@ -42,8 +42,6 @@
 #include <math.h>
 
 #include "common/draw.h"
-#include "common/util.h"
-#include "common/xutil.h"
 #include "common/markup.h"
 
 /** Convert text from any charset to UTF-8 using iconv

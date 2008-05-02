@@ -23,7 +23,6 @@
 #include "screen.h"
 #include "client.h"
 #include "layouts/max.h"
-#include "common/util.h"
 
 extern AwesomeConf globalconf;
 

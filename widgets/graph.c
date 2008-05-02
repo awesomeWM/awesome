@@ -22,10 +22,8 @@
 
 #include "widget.h"
 #include "screen.h"
-#include "common/util.h"
 #include "common/draw.h"
 #include "common/configopts.h"
-#include "common/xutil.h"
 
 extern AwesomeConf globalconf;
 

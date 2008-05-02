@@ -25,7 +25,6 @@
 #include "tag.h"
 #include "event.h"
 #include "common/markup.h"
-#include "common/util.h"
 #include "common/configopts.h"
 
 extern AwesomeConf globalconf;

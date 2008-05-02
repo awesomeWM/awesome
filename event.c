@@ -20,11 +20,8 @@
  */
 
 #include <xcb/xcb_keysyms.h>
-#include <xcb/xcb_icccm.h>
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
-#include <xcb/shape.h>
-#include <xcb/randr.h>
 
 #include "screen.h"
 #include "event.h"

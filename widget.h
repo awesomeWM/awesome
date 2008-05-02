@@ -23,8 +23,6 @@
 #ifndef AWESOME_WIDGET_H
 #define AWESOME_WIDGET_H
 
-#include <confuse.h>
-
 #include "structs.h"
 
 #define WIDGET_CACHE_CLIENTS        1<<0

@@ -27,7 +27,6 @@
 #include "ewmh.h"
 #include "rules.h"
 #include "tag.h"
-#include "common/util.h"
 #include "common/configopts.h"
 
 extern AwesomeConf globalconf;

@@ -32,7 +32,6 @@
 #include "titlebar.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
-#include "common/xscreen.h"
 
 #define MOUSEMASK      (XCB_EVENT_MASK_BUTTON_PRESS \
                         | XCB_EVENT_MASK_BUTTON_RELEASE \

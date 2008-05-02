@@ -20,14 +20,9 @@
  *
  */
 
-#include <string.h>
-#include "widget.h"
-
-#include "widgets/common.h"
 #include "screen.h"
-#include "common/util.h"
+#include "widgets/common.h"
 #include "common/configopts.h"
-
 
 extern AwesomeConf globalconf;
 
