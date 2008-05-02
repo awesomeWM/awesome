@@ -353,7 +353,7 @@ event_handle_keypress(XEvent *e)
     keysym = XKeycodeToKeysym(globalconf.display, (KeyCode) ev->keycode, 0);
 
     for(k = globalconf.keys; k; k = k->next)
-        if((ev->keycode == k->keycode || keysym == k->keysym) &&
+        if(((k->keycode && ev->keycode == k->keycode) || (k->keysym && keysym == k->keysym)) &&
 	  k->func && CLEANMASK(k->mod) == CLEANMASK(ev->state))
             k->func(screen, k->arg);
 }
