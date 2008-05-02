@@ -1140,28 +1140,29 @@ handle_kpress(xcb_key_press_event_t *e)
 
 #ifndef HAVE_GETLINE
 static int
-getline(char ** buf, size_t* len, FILE* in)
+getline(char **buf, size_t *len, FILE* in)
 {
     int i;
-    if (*buf) {
+
+    if (*buf)
         p_delete(buf);
-        (*buf) = NULL;
-    }
     if (*len)
         *len = 0;
 
-    do {
+    do
+    {
         p_realloc(buf, *len + 10);
         (*len) += 10;
-        for (i = 0; i < 10 && !feof(in); i++) {
+        for (i = 0; i < 10 && !feof(in); i++)
+        {
             (*buf)[*len - 10 + i] = getchar();
-            if ((*buf)[*len - 10 + i] == '\n' ||
-                (*buf)[*len - 10 + i] == '\r') {
+            if ((*buf)[*len - 10 + i] == '\n'
+                || (*buf)[*len - 10 + i] == '\r')
                 return (*len - 10 + i + 1);
-            }
         }
     }
     while(!feof(in));
+
     return -1;
 }
 #endif
@@ -1195,8 +1196,7 @@ item_list_fill_stdin(void)
         }
         while((line_len = getline(&buf, &len, stdin)) != -1);
 
-    if(buf)
-        p_delete(&buf);
+    p_delete(&buf);
 
     return has_entry;
 }

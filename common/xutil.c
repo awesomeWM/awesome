@@ -57,8 +57,7 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
 
     if(!prop_r || !prop_r->value_len || prop_r->format != 8)
     {
-        if(prop_r)
-            p_delete(&prop_r);
+        p_delete(&prop_r);
         return false;
     }
 
@@ -143,9 +142,7 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
        t_hint_r->length == 0)
     {
         *prop_win = XCB_NONE;
-        if(t_hint_r)
-            p_delete(&t_hint_r);
-
+        p_delete(&t_hint_r);
         return false;
     }
 
@@ -198,9 +195,7 @@ xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
     if(!class_hint_r || class_hint_r->type != STRING ||
        class_hint_r->format != 8)
     {
-        if(class_hint_r)
-            p_delete(&class_hint_r);
-
+        p_delete(&class_hint_r);
 	return NULL;
     }
 

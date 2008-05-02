@@ -71,10 +71,8 @@ rule_matching_client(client_t *c)
     snprintf(prop, len, "%s:%s:%s",
              ch->res_class ? ch->res_class : "", ch->res_name ? ch->res_name : "", c->name);
 
-    if(ch->res_class)
-        p_delete(&ch->res_class);
-    if(ch->res_name)
-        p_delete(&ch->res_name);
+    p_delete(&ch->res_class);
+    p_delete(&ch->res_name);
     p_delete(&ch);
 
     for(r = globalconf.rules; r; r = r->next)

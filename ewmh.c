@@ -437,9 +437,7 @@ ewmh_get_window_icon(xcb_window_t w)
     if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 ||
        !(data = (uint32_t *) xcb_get_property_value(r)))
     {
-        if(r)
-            p_delete(&r);
-
+        p_delete(&r);
         return NULL;
     }
 

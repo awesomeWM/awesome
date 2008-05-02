@@ -128,8 +128,7 @@ scan()
                !(attr_r->map_state == XCB_MAP_STATE_VIEWABLE ||
                  window_getstate(wins[i]) == XCB_WM_ICONIC_STATE))
             {
-                if(attr_r)
-                    p_delete(&attr_r);
+                p_delete(&attr_r);
                 continue;
             }
 

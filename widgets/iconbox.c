@@ -75,8 +75,7 @@ iconbox_tell(widget_t *widget, char *property, char *new_value)
 
     if(!a_strcmp(property, "image"))
     {
-        if(d->image)
-            p_delete(&d->image);
+        p_delete(&d->image);
         d->image = a_strdup(new_value);
     }
     else if(!a_strcmp(property, "resize"))
