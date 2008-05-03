@@ -904,22 +904,28 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
 }
 
 /** Find a visible client on screen. Return next client or previous client if
- * reverse is true.
- * \param sel current selected client
- * \param reverse return previous instead of next if true
- * \return next or previous client
+ * nindex is less than 0. If nindex is 0, then sel itself can be returned if
+ * visible.
+ * \param sel Current selected client.
+ * \param nindex Number of windows to match before returning.
+ * \return Next or previous visible client.
  */
 static client_t *
 client_find_visible(client_t *sel, int nindex)
 {
-    int i = 0;
+    int i = 0, screen;
     client_t *next;
     client_t *(*client_iter)(client_t **, client_t *) = client_list_next_cycle;
 
-    if(!sel || nindex == 0)
+    if(!sel)
         return NULL;
-    else if(nindex < 0)
+
+    screen = sel->screen;
+
+    if(nindex < 0)
         client_iter = client_list_prev_cycle;
+    else if(nindex == 0)
+        sel = client_list_prev_cycle(&globalconf.clients, sel);
 
     nindex = abs(nindex);
 
@@ -928,7 +934,7 @@ client_find_visible(client_t *sel, int nindex)
         next && next != sel;
         next = client_iter(&globalconf.clients, next))
     {
-        if(!next->skip && client_isvisible(next, sel->screen))
+        if(!next->skip && client_isvisible(next, screen))
             i++;
         if(i >= nindex)
             return next;
@@ -948,9 +954,9 @@ void
 uicb_client_swap(int screen, char *arg)
 {
     client_t *swap = NULL;
-    int i = atoi(arg);
+    int i;
 
-    if(i)
+    if(arg && (i = atoi(arg)))
         swap = client_find_visible(globalconf.focus->client, i);
     else if(globalconf.focus->client == globalconf.clients)
         swap = client_find_visible(globalconf.focus->client, 1);
@@ -1146,6 +1152,9 @@ uicb_client_togglemax(int screen, char *arg)
 }
 
 /** Give focus to the next or previous visible client in the stack.
+ * Argument mus be a relative number of windows to give focus after current one.
+ * Giving 1 as argument will focus next visible window, -2 will focus previous
+ * of previous visible window. Giving 0 as argument will focus master window.
  * \param screen Virtual screen number.
  * \param arg Relative number in the client stack.
  * \ingroup ui_callback
@@ -1153,10 +1162,15 @@ uicb_client_togglemax(int screen, char *arg)
 void
 uicb_client_focus(int screen, char *arg)
 {
-    client_t *next;
-    int i = atoi(arg);
+    client_t *next = NULL;
+    int i;
 
-    if((next = client_find_visible(globalconf.focus->client, i)))
+    if(arg && (i = atoi(arg)))
+        next = client_find_visible(globalconf.focus->client, i);
+    else if(globalconf.clients)
+        next = client_find_visible(globalconf.clients, 0);
+
+    if(next)
         client_focus(next, screen, true);
 }
 
