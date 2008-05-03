@@ -33,6 +33,7 @@ typedef struct simple_window_t
     xcb_drawable_t drawable;
     xcb_gcontext_t gc;
     area_t geometry;
+    int border;
 } simple_window_t;
 
 simple_window_t * simplewindow_new(xcb_connection_t *, int, int, int, unsigned int, unsigned int, unsigned int);

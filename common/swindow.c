@@ -76,6 +76,8 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
     sw->gc = xcb_generate_id(sw->connection);
     xcb_create_gc(sw->connection, sw->gc, gc_draw, gc_mask, gc_values);
 
+    sw->border = border_width;
+
     return sw;
 }
 
