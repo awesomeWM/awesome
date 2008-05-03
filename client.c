@@ -380,8 +380,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     config_win_val = c->border = globalconf.screens[screen].borderpx;
     xcb_configure_window(globalconf.connection, w, XCB_CONFIG_WINDOW_BORDER_WIDTH,
                          &config_win_val);
-    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_BORDER_PIXEL,
-                                 &config_win_val);
     /* propagates border_width, if size doesn't change */
     window_configure(c->win, c->geometry, c->border);
 
