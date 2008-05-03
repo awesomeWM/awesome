@@ -258,7 +258,7 @@ xerror(void *data __attribute__ ((unused)),
      * \todo display more informations about the error (like the Xlib default error handler)
      */
     if(e->error_code == BadImplementation)
-        exit(1);
+        exit(EXIT_FAILURE);
 
     return 0;
 }
