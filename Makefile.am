@@ -66,13 +66,6 @@ defconfig.h: awesomerc
 	@$(SED) 's,\\,\\\\,g;s/$$/\\n\\/;s/"/\\"/g' "awesomerc" >> defconfig.h
 	@echo "\";" >> defconfig.h
 
-CLEANFILES    += uicbgen.h
-BUILT_SOURCES += uicbgen.h
-EXTRA_DIST    += build-utils/uicbgen.sh
-uicbgen.h: $(awesome_SOURCES)
-	@echo "generating uicbgen.h from headers file"
-	$(top_srcdir)/build-utils/uicbgen.sh "$(top_srcdir)" > uicbgen.h
-
 CLEANFILES    += layoutgen.h
 BUILT_SOURCES += layoutgen.h
 EXTRA_DIST    += build-utils/layoutgen.sh

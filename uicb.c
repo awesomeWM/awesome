@@ -44,7 +44,56 @@
 
 extern AwesomeConf globalconf;
 
-#include "uicbgen.h"
+const name_func_link_t UicbList[] =
+{
+    /* awesome.h */
+    { "quit", uicb_quit },
+    /* client.h */
+    { "client_kill", uicb_client_kill },
+    { "client_moveresize", uicb_client_moveresize },
+    { "client_settrans", uicb_client_settrans },
+    { "client_swap", uicb_client_swap },
+    { "client_togglemax", uicb_client_togglemax },
+    { "client_focus", uicb_client_focus },
+    { "client_setfloating", uicb_client_setfloating },
+    { "client_togglescratch", uicb_client_togglescratch },
+    { "client_setscratch", uicb_client_setscratch },
+    /* focus.h */
+    { "focus_history", uicb_focus_history },
+    { "focus_client_byname", uicb_focus_client_byname },
+    /* layout.h */
+    { "tag_setlayout", uicb_tag_setlayout },
+    /* mouse.h */
+    { "client_movemouse", uicb_client_movemouse },
+    { "client_resizemouse", uicb_client_resizemouse },
+    /* screen.h */
+    { "screen_focus", uicb_screen_focus },
+    { "client_movetoscreen", uicb_client_movetoscreen },
+    /* statusbar.h */
+    { "statusbar_toggle", uicb_statusbar_toggle },
+    /* tag.h */
+    { "client_tag", uicb_client_tag },
+    { "client_toggletag", uicb_client_toggletag },
+    { "tag_toggleview", uicb_tag_toggleview },
+    { "tag_view", uicb_tag_view },
+    { "tag_prev_selected", uicb_tag_prev_selected },
+    { "tag_viewnext", uicb_tag_viewnext },
+    { "tag_viewprev", uicb_tag_viewprev },
+    { "tag_create", uicb_tag_create },
+    /* titlebar.h */
+    { "client_toggletitlebar", uicb_client_toggletitlebar },
+    /* uicb.h */
+    { "restart", uicb_restart },
+    { "exec", uicb_exec },
+    { "spawn", uicb_spawn },
+    /* widget.h */
+    { "widget_tell", uicb_widget_tell },
+    /* layouts/tile.h */
+    { "tag_setnmaster", uicb_tag_setnmaster},
+    { "tag_setncol", uicb_tag_setncol },
+    { "tag_setmwfact", uicb_tag_setmwfact },
+    { NULL, NULL }
+};
 
 /** Restart awesome with the current command line.
  * \param screen The virtual screen number.
