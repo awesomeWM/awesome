@@ -862,6 +862,7 @@ uicb_client_swapprev(int screen __attribute__ ((unused)), char *arg __attribute_
     {
         client_list_swap(&globalconf.clients, prev, globalconf.focus->client);
         globalconf.screens[prev->screen].need_arrange = True;
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
 }
 
@@ -879,6 +880,7 @@ uicb_client_swapnext(int screen __attribute__ ((unused)), char *arg __attribute_
     {
         client_list_swap(&globalconf.clients, globalconf.focus->client, next);
         globalconf.screens[next->screen].need_arrange = True;
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
 }
 
