@@ -24,15 +24,16 @@
 
 #include "common/swindow.h"
 
-/** Create a simple window
- * \param conn Connection ref
- * \param phys_screen physical screen id
- * \param x x coordinate
- * \param y y coordinate
- * \param w width
- * \param h height
- * \param border_width window's border width
- * \return pointer to a simple_window_t
+/** Create a simple window.
+ * \param conn Connection ref.
+ * \param phys_screen Physical screen number.
+ * \param x x coordinate.
+ * \param y y coordinate.
+ * \param w Width.
+ * \param h Height.
+ * \param border_width Window border width.
+ * \return A pointer to a newly allocated simple window, which must be deleted
+ *         with simplewindow_delete().
  */
 simple_window_t *
 simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
@@ -76,13 +77,13 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
     sw->gc = xcb_generate_id(sw->connection);
     xcb_create_gc(sw->connection, sw->gc, gc_draw, gc_mask, gc_values);
 
-    sw->border = border_width;
+    sw->border_width = border_width;
 
     return sw;
 }
 
-/** Destroy a simple window and all its resources
- * \param sw the simple_window_t to delete
+/** Destroy a simple window and all its resources.
+ * \param sw The simple_window_t to delete.
  */
 void
 simplewindow_delete(simple_window_t **sw)
@@ -93,10 +94,10 @@ simplewindow_delete(simple_window_t **sw)
     p_delete(sw);
 }
 
-/** Move a simple window
- * \param sw the simple_window_t to move
- * \param x x coordinate
- * \param y y coordinate
+/** Move a simple window.
+ * \param sw The simple window to move.
+ * \param x New x coordinate.
+ * \param y New y coordinate.
  */
 void
 simplewindow_move(simple_window_t *sw, int x, int y)
@@ -110,10 +111,10 @@ simplewindow_move(simple_window_t *sw, int x, int y)
                          move_win_vals);
 }
 
-/** Resize a simple window
- * \param sw the simple_window_t to resize
- * \param w new width
- * \param h new height
+/** Resize a simple window.
+ * \param sw The simple_window_t to resize.
+ * \param w New width.
+ * \param h New height.
  */
 void
 simplewindow_resize(simple_window_t *sw, unsigned int w, unsigned int h)

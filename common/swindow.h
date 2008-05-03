@@ -24,16 +24,23 @@
 
 #include "common/draw.h"
 
-/** A simple window */
+/** A simple window. */
 typedef struct simple_window_t
 {
+    /** The display connection. */
     xcb_connection_t *connection;
+    /** The physical screen number the window is on. */
     int phys_screen;
+    /** The window object. */
     xcb_window_t window;
+    /** The drawable copied to the window object. */
     xcb_drawable_t drawable;
+    /** The graphic context. */
     xcb_gcontext_t gc;
+    /** The window geometry. */
     area_t geometry;
-    int border;
+    /** The window border width */
+    int border_width;
 } simple_window_t;
 
 simple_window_t * simplewindow_new(xcb_connection_t *, int, int, int, unsigned int, unsigned int, unsigned int);
@@ -41,6 +48,13 @@ void simplewindow_delete(simple_window_t **);
 void simplewindow_move(simple_window_t *, int, int);
 void simplewindow_resize(simple_window_t *, unsigned int, unsigned int);
 
+/** Move and resize a window in one call.
+ * \param sw The simple window to move and resize.
+ * \param x The new x coordinate.
+ * \param y The new y coordinate.
+ * \param w The new width.
+ * \param h The new height.
+ */
 static inline void
 simplewindow_move_resize(simple_window_t *sw, int x, int y,
                          unsigned int w, unsigned int h)
@@ -49,9 +63,8 @@ simplewindow_move_resize(simple_window_t *sw, int x, int y,
   simplewindow_resize(sw, w, h);
 }
 
-/** Refresh the window content
- * \param sw the simple_window_t to refresh
- * \param phys_screen physical screen id
+/** Refresh the window content by copying its drawable data to its window.
+ * \param sw The simple window to refresh.
  */
 static inline void
 simplewindow_refresh_drawable(simple_window_t *sw)
@@ -60,6 +73,29 @@ simplewindow_refresh_drawable(simple_window_t *sw)
                   sw->window, sw->gc, 0, 0, 0, 0,
                   sw->geometry.width,
                   sw->geometry.height);
+}
+
+/** Set a simple window border width.
+ * \param sw The simple window to change border width.
+ * \param border_width The border width in pixel.
+ */
+static inline void
+simplewindow_border_width_set(simple_window_t *sw, uint32_t border_width)
+{
+    xcb_configure_window(sw->connection, sw->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                         &border_width);
+    sw->border_width = border_width;
+}
+
+/** Set a simple window border color.
+ * \param sw The simple window to change border width.
+ * \param border_color The border color.
+ */
+static inline void
+simplewindow_border_color_set(simple_window_t *sw, xcolor_t *color)
+{
+    xcb_change_window_attributes(sw->connection, sw->window,
+                                 XCB_CW_BORDER_PIXEL, &color->pixel);
 }
 
 #endif
