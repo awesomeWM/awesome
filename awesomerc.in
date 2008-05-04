@@ -188,7 +188,8 @@ mouse
     {
         modkey = {"Mod4"}
         button = "2"
-        command = "client_zoom"
+        command = "client_swap"
+        arg = "0"
     }
     client
     {
