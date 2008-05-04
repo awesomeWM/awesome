@@ -144,7 +144,7 @@ parse_mouse_bindings(cfg_t * cfg, const char *secname, bool handle_arg)
         if(!b->func)
             warn("unknown command %s\n", cfg_getstr(cfgsectmp, "command"));
         if(handle_arg)
-            b->arg = a_strdup(cfg_getstr(cfgsectmp, "arg"));
+            b->arg = a_strdup(cfg_getnstr(cfgsectmp, "args", 0));
         else
             b->arg = NULL;
 
@@ -152,19 +152,6 @@ parse_mouse_bindings(cfg_t * cfg, const char *secname, bool handle_arg)
     }
 
     return head;
-}
-
-
-static void
-set_key_info(keybinding_t *key, cfg_t *cfg)
-{
-    unsigned int j;
-
-    for(j = 0; j < cfg_size(cfg, "modkey"); j++)
-        key->mod |= key_mask_lookup(cfg_getnstr(cfg, "modkey", j));
-    key->func = name_func_lookup(cfg_getstr(cfg, "command"), UicbList);
-    if(!key->func)
-        warn("unknown command %s\n", cfg_getstr(cfg, "command"));
 }
 
 static void
@@ -184,47 +171,6 @@ config_key_store(keybinding_t *key, char *str)
         key->keycode = kc;
     }
 }
-
-static keybinding_t *
-section_keys(cfg_t *cfg_keys)
-{
-    keybinding_t *key = NULL, *head = NULL;
-    int i, j, numkeys;
-    cfg_t *cfgkeytmp;
-
-    for(i = cfg_size(cfg_keys, "key") - 1; i >= 0; i--)
-    {
-        key = p_new(keybinding_t, 1);
-        cfgkeytmp = cfg_getnsec(cfg_keys, "key", i);
-        set_key_info(key, cfgkeytmp);
-        config_key_store(key, cfg_getstr(cfgkeytmp, "key"));
-        key->arg = a_strdup(cfg_getstr(cfgkeytmp, "arg"));
-        keybinding_list_push(&head, key);
-    }
-
-    for(i = cfg_size(cfg_keys, "keylist") - 1; i >= 0; i--)
-    {
-        cfgkeytmp = cfg_getnsec(cfg_keys, "keylist", i);
-        numkeys = cfg_size(cfgkeytmp, "keylist");
-        if(numkeys != (int) cfg_size(cfgkeytmp, "arglist"))
-        {
-            warn("number of keys != number of args in keylist");
-            continue;
-        }
-
-        for(j = 0; j < numkeys; j++)
-        {
-            key = p_new(keybinding_t, 1);
-            set_key_info(key, cfgkeytmp);
-            config_key_store(key, cfg_getnstr(cfgkeytmp, "keylist", j));
-            key->arg = a_strdup(cfg_getnstr(cfgkeytmp, "arglist", j));
-            keybinding_list_push(&head, key);
-        }
-    }
-
-    return head;
-}
-
 
 static int
 cmp_widget_cfg(const void *a, const void *b)
@@ -471,8 +417,10 @@ config_parse(const char *confpatharg)
 {
     cfg_t *cfg, *cfg_rules, *cfg_keys, *cfg_mouse, *cfgsectmp;
     int ret, screen, i;
+    unsigned int j;
     char *confpath;
     rule_t *rule = NULL;
+    keybinding_t *key;
     FILE *defconfig = NULL;
 
     if(confpatharg)
@@ -537,6 +485,22 @@ config_parse(const char *confpatharg)
         rule_list_push(&globalconf.rules, rule);
     }
 
+    /* Key bindings */
+    keybinding_list_init(&globalconf.keys);
+    for(i = cfg_size(cfg_keys, "key") - 1; i >= 0; i--)
+    {
+        key = p_new(keybinding_t, 1);
+        cfgsectmp = cfg_getnsec(cfg_keys, "key", i);
+        config_key_store(key, cfg_getstr(cfgsectmp, "key"));
+        for(j = 0; j < cfg_size(cfgsectmp, "modkey"); j++)
+            key->mod |= key_mask_lookup(cfg_getnstr(cfgsectmp, "modkey", j));
+        if(!(key->func = name_func_lookup(cfg_getstr(cfgsectmp, "command"), UicbList)))
+            warn("unknown command %s\n", cfg_getstr(cfgsectmp, "command"));
+        key->arg = a_strdup(cfg_getnstr(cfgsectmp, "args", 0));
+        printf("key %s %s %d\n", cfg_getstr(cfgsectmp, "command"), key->arg, key->keysym);
+        keybinding_list_push(&globalconf.keys, key);
+    }
+
     /* Mouse: root window click bindings */
     globalconf.buttons.root = parse_mouse_bindings(cfg_mouse, "root", true);
 
@@ -545,8 +509,6 @@ config_parse(const char *confpatharg)
 
     /* Mouse: titlebar windows click bindings */
     globalconf.buttons.titlebar = parse_mouse_bindings(cfg_mouse, "titlebar", true);
-
-    globalconf.keys = section_keys(cfg_keys);
 
     if(defconfig)
     {

@@ -248,8 +248,8 @@ cfg_opt_t mouse_generic_opts[] =
     CFG_STR((char *) "button", (char *) "XCB_NONE", CFGF_NONE),
     /** Uicb command to run. */
     CFG_STR((char *) "command", NULL, CFGF_NONE),
-    /** Argument to use for command. */
-    CFG_STR((char *) "arg", NULL, CFGF_NONE),
+    /** Arguments to use for command. */
+    CFG_STR_LIST((char *) "args", NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines common widgets options. */
@@ -568,20 +568,7 @@ cfg_opt_t key_opts[] =
     /** Uicb command to run. */
     CFG_STR((char *) "command", (char *) "", CFGF_NONE),
     /** Argument to use for command. */
-    CFG_STR((char *) "arg", NULL, CFGF_NONE),
-    CFG_AWESOME_END()
-};
-/** This section defines keylist options. */
-cfg_opt_t keylist_opts[] =
-{
-    /** Modifier keys. */
-    CFG_STR_LIST((char *) "modkey", (char *) "", CFGF_NONE),
-    /** List of keys, order matters. */
-    CFG_STR_LIST((char *) "keylist", (char *) NULL, CFGF_NONE),
-    /** Uicb command to run. */
-    CFG_STR((char *) "command", (char *) "", CFGF_NONE),
-    /** List of arguments for command, order matters. */
-    CFG_STR_LIST((char *) "arglist", NULL, CFGF_NONE),
+    CFG_STR_LIST((char *) "args", NULL, CFGF_NONE),
     CFG_AWESOME_END()
 };
 /** This section defines keys options. */
@@ -589,8 +576,6 @@ cfg_opt_t keys_opts[] =
 {
     /** A key binding. */
     CFG_SEC((char *) "key", key_opts, CFGF_MULTI),
-    /** A list of key bindings. */
-    CFG_SEC((char *) "keylist", keylist_opts, CFGF_MULTI),
     CFG_AWESOME_END()
 };
 /** This section defines mouse options. */
