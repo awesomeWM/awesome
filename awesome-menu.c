@@ -1139,31 +1139,36 @@ handle_kpress(xcb_key_press_event_t *e)
 }
 
 #ifndef HAVE_GETLINE
-static int
-getline(char **buf, size_t *len, FILE* in)
+static ssize_t
+my_getline(char **lineptr, size_t *n, FILE *stream)
 {
-    int i;
-
-    if (*buf)
-        p_delete(buf);
-    if (*len)
-        *len = 0;
-
-    do
+    char *ret = NULL;
+    
+    if(lineptr == NULL || n == NULL)
     {
-        p_realloc(buf, *len + 10);
-        (*len) += 10;
-        for (i = 0; i < 10 && !feof(in); i++)
-        {
-            (*buf)[*len - 10 + i] = getchar();
-            if ((*buf)[*len - 10 + i] == '\n'
-                || (*buf)[*len - 10 + i] == '\r')
-                return (*len - 10 + i + 1);
-        }
+        errno = EINVAL;
+        return -1;
     }
-    while(!feof(in));
 
-    return -1;
+    if(*n == 0)
+    {
+        *lineptr = p_new(char, CHUNK_SIZE);
+        *n = CHUNK_SIZE;
+    }
+
+    ret = fgets(*lineptr, *n, stream);
+    while(ret != NULL && (*lineptr)[a_strlen (*lineptr) - 1] != '\n')
+    {
+        *n += CHUNK_SIZE;
+        *lineptr = realloc(*lineptr, *n);
+
+        ret = fgets(*lineptr + a_strlen(*lineptr), CHUNK_SIZE, stream);
+    }
+
+    if (ret == NULL)
+        return -1;
+
+    return a_strlen(*lineptr);
 }
 #endif
 
