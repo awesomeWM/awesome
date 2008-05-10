@@ -380,6 +380,8 @@ struct AwesomeConf
     char *argv;
     /** Last XMotionEvent coords */
     int pointer_x, pointer_y;
+    /** Atoms cache */
+    xutil_atom_cache_t *atoms;
 };
 
 #endif

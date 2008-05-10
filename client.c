@@ -60,8 +60,11 @@ client_loadprops(client_t * c, int screen)
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         ntags++;
 
-    if(xutil_gettextprop(globalconf.connection, c->win,
-                         xutil_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
+    if(xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
+                         xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                                 xutil_intern_atom(globalconf.connection,
+                                                                   &globalconf.atoms,
+                                                                   "_AWESOME_PROPERTIES")),
                          &prop))
     {
         for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
@@ -90,13 +93,19 @@ static bool
 client_isprotodel(xcb_window_t win)
 {
     uint32_t i, n;
+    xcb_atom_t wm_delete_win_atom;
     xcb_atom_t *protocols;
     bool ret = false;
 
     if(xcb_get_wm_protocols(globalconf.connection, win, &n, &protocols))
     {
+        wm_delete_win_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                                     xutil_intern_atom(globalconf.connection,
+                                                                       &globalconf.atoms,
+                                                                       "WM_DELETE_WINDOW"));
+
         for(i = 0; !ret && i < n; i++)
-            if(protocols[i] == xutil_intern_atom(globalconf.connection, "WM_DELETE_WINDOW"))
+            if(protocols[i] == wm_delete_win_atom)
                 ret = true;
         p_delete(&protocols);
     }
@@ -188,11 +197,18 @@ client_updatetitle(client_t *c)
 {
     char *name;
 
-    if(!xutil_gettextprop(globalconf.connection, c->win,
-                          xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"),
+    if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
+                          xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                                  xutil_intern_atom(globalconf.connection,
+                                                                    &globalconf.atoms,
+                                                                    "_NET_WM_NAME")),
                           &name))
-        if(!xutil_gettextprop(globalconf.connection, c->win,
-                              xutil_intern_atom(globalconf.connection, "WM_NAME"),
+        if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
+                              xutil_intern_atom_reply(globalconf.connection,
+                                                      &globalconf.atoms,
+                                                      xutil_intern_atom(globalconf.connection,
+                                                                        &globalconf.atoms,
+                                                                        "WM_NAME")),
                               &name))
             return;
 
@@ -687,7 +703,10 @@ client_saveprops(client_t *c)
     prop[++i] = '\0';
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win,
-                        xutil_intern_atom(globalconf.connection, "_AWESOME_PROPERTIES"),
+                        xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                                xutil_intern_atom(globalconf.connection,
+                                                                  &globalconf.atoms,
+                                                                  "_AWESOME_PROPERTIES")),
                         STRING, 8, i, (unsigned char *) prop);
 
     p_delete(&prop);
@@ -871,7 +890,11 @@ uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
     prop_r = xcb_get_property_reply(globalconf.connection,
                                     xcb_get_property_unchecked(globalconf.connection,
                                                                false, sel->win,
-                                                               xutil_intern_atom(globalconf.connection, "_NET_WM_WINDOW_OPACITY"),
+                                                               xutil_intern_atom_reply(globalconf.connection,
+                                                                                       &globalconf.atoms,
+                                                                                       xutil_intern_atom(globalconf.connection,
+                                                                                                         &globalconf.atoms,
+                                                                                                         "_NET_WM_WINDOW_OPACITY")),
                                                                CARDINAL,
                                                                0, 1),
                                     NULL);
@@ -1048,10 +1071,16 @@ client_kill(client_t *c)
 
         ev.response_type = XCB_CLIENT_MESSAGE;
         ev.window = c->win;
-        ev.type = xutil_intern_atom(globalconf.connection, "WM_PROTOCOLS");
+        ev.type = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                          xutil_intern_atom(globalconf.connection,
+                                                            &globalconf.atoms,
+                                                            "WM_PROTOCOLS"));
         ev.format = 32;
 
-        ev.data.data32[0] = xutil_intern_atom(globalconf.connection, "WM_DELETE_WINDOW");
+        ev.data.data32[0] = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                                    xutil_intern_atom(globalconf.connection,
+                                                                      &globalconf.atoms, 
+                                                                      "WM_DELETE_WINDOW"));
         ev.data.data32[1] = XCB_CURRENT_TIME;
 
         xcb_send_event(globalconf.connection, false, c->win,

@@ -386,7 +386,8 @@ main(int argc, char **argv)
     xutil_getlockmask(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
                       &globalconf.shiftlockmask, &globalconf.capslockmask);
 
-    /* init EWMH atoms */
+    /* init Atoms cache and then EWMH atoms */
+    atom_cache_list_init(&globalconf.atoms);
     ewmh_init_atoms();
 
     /* init screens struct */

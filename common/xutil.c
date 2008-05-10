@@ -33,13 +33,14 @@
 /** Get the string value of an atom.
  * \param conn X connection
  * \param w window
+ * \param atoms atoms cache
  * \param atom the atom
  * \param text buffer to fill
  * \return true on sucess, falsse on failure
  */
 bool
-xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
-                  char **text)
+xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xutil_atom_cache_t **atoms,
+                  xcb_atom_t atom, char **text)
 {
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r;
@@ -67,7 +68,9 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
      * string or utf8 string.  At the moment it doesn't handle
      * COMPOUND_TEXT and multibyte but it's not needed...  */
     if(prop_r->type == STRING ||
-       prop_r->type == xutil_intern_atom(conn, "UTF8_STRING"))
+       prop_r->type == xutil_intern_atom_reply(conn, atoms,
+                                               xutil_intern_atom(conn, atoms,
+                                                                 "UTF8_STRING")))
     {
         *text = p_new(char, prop_r->value_len + 1);
         /* use memcpy() because prop_val may not be \0 terminated */
@@ -152,29 +155,106 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
     return true;
 }
 
-/** Get an internal atom.
+/** Send an unchecked InternAtom request if it is not already in the
+ * cache, in the second case it stores the cache entry (an ordered
+ * linked-list)
  * \param c X connection
+ * \param atoms atoms cache
  * \param property atom name
- * \return an brand new xcb_atom_t
+ * \return a request structure
+ */
+xutil_intern_atom_request_t
+xutil_intern_atom(xcb_connection_t *c, xutil_atom_cache_t **atoms,
+                  const char *name)
+{
+    xutil_intern_atom_request_t atom_req;
+    xutil_atom_cache_t *atom_next;
+    int cmp_cache;
+
+    atom_req.name = strdup(name);
+
+    /* Check if this atom is present in the cache ordered
+     * linked-list */
+    for(atom_next = *atoms;
+        atom_next && (cmp_cache = a_strcmp(name, atom_next->name)) >= 0;
+        atom_next = atom_cache_list_next(NULL, atom_next))
+        if(cmp_cache == 0)
+        {
+            atom_req.cache_hit = true;
+            atom_req.cache = atom_next;
+            return atom_req;
+        }
+
+    /* Otherwise send an InternAtom request to the server */
+    atom_req.cache_hit = false;
+    atom_req.cookie = xcb_intern_atom_unchecked(c, false, a_strlen(name),
+                                                name);
+
+    return atom_req;
+}
+
+/** Treat the reply which may be a cache entry or a reply from
+ * InternAtom request (cookie), in the second case, add the atom to
+ * the cache
+ * \param c X connection
+ * \param atoms atoms cache
+ * \param atom_req atom request
+ * \return a brand new xcb_atom_t
  */
 xcb_atom_t
-xutil_intern_atom(xcb_connection_t *c, const char *property)
+xutil_intern_atom_reply(xcb_connection_t *c, xutil_atom_cache_t **atoms,
+                        xutil_intern_atom_request_t atom_req)
 {
-    xcb_atom_t atom = 0;
-    xcb_intern_atom_reply_t *r_atom;
+    xcb_intern_atom_reply_t *atom_rep;
+    xutil_atom_cache_t *atom_cache, *atom_next;
 
-    if((r_atom = xcb_intern_atom_reply(c,
-	                               xcb_intern_atom_unchecked(c,
-                                                                 false,
-                                                                 a_strlen(property),
-                                                                 property),
-                                       NULL)))
+    /* If the atom is present in the cache, just returns the
+     * atom... */ 
+    if(atom_req.cache_hit)
+        return atom_req.cache->atom;
+
+    /* Get the reply from InternAtom request */
+    if((atom_rep = xcb_intern_atom_reply(c, atom_req.cookie, NULL)) == NULL)
+        return 0;
+
+    /* Create a new atom cache entry */
+    atom_cache = p_new(xutil_atom_cache_t, 1);
+    atom_cache->atom = atom_rep->atom;
+    atom_cache->name = atom_req.name;
+
+    /* Add the entry in the list at the beginning of the cache list */
+    if(*atoms == NULL || a_strcmp(atom_req.name, (*atoms)->name) < 0)
+        atom_cache_list_push(atoms, atom_cache);
+    /* Otherwise insert it at the proper position in the cache list
+     * according to its name */
+    else
     {
-        atom = r_atom->atom;
-        p_delete(&r_atom);
+        for(atom_next = *atoms;
+            atom_next && atom_next->next && a_strcmp(atom_req.name, atom_next->next->name) > 0;
+            atom_next = atom_cache_list_next(NULL, atom_next));
+
+        atom_cache->prev = atom_next;
+        atom_cache->next = atom_next->next;
+
+        if(atom_next->next)
+            atom_next->next->prev = atom_cache;
+
+        atom_next->next = atom_cache;
     }
 
-    return atom;
+    p_delete(&atom_rep);
+
+    return atom_cache->atom;
+}
+
+/* Delete a cache entry
+ * \param entry cache entry
+ */
+void
+xutil_atom_cache_delete(xutil_atom_cache_t **entry)
+{
+    p_delete(&(*entry)->name);
+    p_delete(entry);
 }
 
 class_hint_t *

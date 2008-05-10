@@ -31,9 +31,7 @@
 /* XCB doesn't provide keysyms definition */
 #include <X11/keysym.h>
 
-bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **);
-void xutil_getlockmask(xcb_connection_t *, xcb_key_symbols_t *,
-                       unsigned int *, unsigned int *, unsigned int *);
+#include "common/list.h"
 
 /* See http://tronche.com/gui/x/xlib/appendix/b/ for values */
 #define CURSOR_FLEUR    52
@@ -81,7 +79,7 @@ void xutil_getlockmask(xcb_connection_t *, xcb_key_symbols_t *,
 /* Common function defined in Xlib but not in XCB */
 bool xutil_get_transient_for_hint(xcb_connection_t *, xcb_window_t, xcb_window_t *);
 
-typedef struct _class_hint_t
+typedef struct
 {
     char *res_name;
     char *res_class;
@@ -97,18 +95,61 @@ typedef struct
 
 class_hint_t *xutil_get_class_hint(xcb_connection_t *, xcb_window_t);
 
-/* Equivalent call to XInternAtom
- *
- * WARNING: should not be used in loop, in this case, it should send
- * the queries first and then treat the answer as late as possible)
- */
-xcb_atom_t xutil_intern_atom(xcb_connection_t *, const char *);
+/** Cache entry */
+typedef struct xutil_atom_cache_t xutil_atom_cache_t;
+struct xutil_atom_cache_t
+{
+    /** Atom X identifier */
+    xcb_atom_t atom;
+    /** Atom name */
+    char *name;
+    /** Next and previous atom cache entries */
+    xutil_atom_cache_t *prev, *next;
+};
+
+/** InternAtom request data structure which may hold the cookie if the
+ * atom is not already present in the cache */
+typedef struct
+{
+    /* Cache hit */
+    bool cache_hit;
+    /* Atom string name */
+    char *name;
+    union
+    {
+        /* Cookie of the InternAtom request */ 
+        xcb_intern_atom_cookie_t cookie;
+        /* Cache entry */
+        xutil_atom_cache_t *cache;
+    };
+} xutil_intern_atom_request_t;
+
+/* InternATom request which relies on a cache stored as a ordered
+ * linked-list */
+xutil_intern_atom_request_t xutil_intern_atom(xcb_connection_t *, xutil_atom_cache_t **,
+                                              const char *);
+
+/** Treat reply from InternAtom request */
+xcb_atom_t xutil_intern_atom_reply(xcb_connection_t *, xutil_atom_cache_t **,
+                                   xutil_intern_atom_request_t);
+
+/** Delete a entry in the cache */
+void xutil_atom_cache_delete(xutil_atom_cache_t **);
+
+/** Cache list utils functions */
+DO_SLIST(xutil_atom_cache_t, atom_cache, xutil_atom_cache_delete)
+
+bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xutil_atom_cache_t **,
+                       xcb_atom_t, char **);
+
+void xutil_getlockmask(xcb_connection_t *, xcb_key_symbols_t *,
+                       unsigned int *, unsigned int *, unsigned int *);
 
 /** Set the same handler for all errors */
 void xutil_set_error_handler_catch_all(xcb_event_handlers_t *,
                                        xcb_generic_error_handler_t, void *);
 
-typedef struct xutil_error_t
+typedef struct
 {
     uint8_t request_code;
     char *request_label;

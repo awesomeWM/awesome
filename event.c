@@ -520,7 +520,10 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
             client_updatewmhints(c);
 
         if(ev->atom == WM_NAME
-           || ev->atom == xutil_intern_atom(globalconf.connection, "_NET_WM_NAME"))
+           || ev->atom == xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                                  xutil_intern_atom(globalconf.connection,
+                                                                    &globalconf.atoms,
+                                                                    "_NET_WM_NAME")))
             client_updatetitle(c);
     }
 

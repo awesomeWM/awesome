@@ -83,8 +83,12 @@ rule_matching_client(client_t *c)
         if(!ret
            && r->xprop
            && r->xpropval_r
-           && xutil_gettextprop(globalconf.connection, c->win,
-                                xutil_intern_atom(globalconf.connection, r->xprop),
+           && xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
+                                xutil_intern_atom_reply(globalconf.connection,
+                                                        &globalconf.atoms,
+                                                        xutil_intern_atom(globalconf.connection,
+                                                                          &globalconf.atoms,
+                                                                          r->xprop)),
                                 &buf))
             ret = !regexec(r->xpropval_r, buf, 1, &tmp, 0);
 
