@@ -230,10 +230,6 @@ uicb_widget_tell(int screen, char *arg)
           warn("error changing property %s of widget %s, no value given\n",
                 property, widget->name);
         break;
-      case WIDGET_ERROR_FORMAT_BOOL:
-        warn("error changing property %s of widget %s, must is boolean (0 or 1)\n",
-             property, widget->name);
-        break;
       case WIDGET_ERROR_FORMAT_FONT:
         warn("error changing property %s of widget %s, must be a valid font\n",
              property, widget->name);

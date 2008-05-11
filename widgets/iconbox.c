@@ -79,12 +79,7 @@ iconbox_tell(widget_t *widget, char *property, char *new_value)
         d->image = a_strdup(new_value);
     }
     else if(!a_strcmp(property, "resize"))
-    {
-        if((b = cfg_parse_boolean(new_value)) != -1)
-            d->resize = b;
-        else
-            return WIDGET_ERROR_FORMAT_BOOL;
-    }
+        d->resize = a_strtobool(new_value);
     else
        return WIDGET_ERROR;
 
