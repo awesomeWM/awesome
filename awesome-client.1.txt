@@ -42,7 +42,7 @@ To view tag number 3 on screen 1:
 
 To zoom focused window on screen 0:
 
-    echo 0 client_zoom | awesome-client
+    echo 0 client_swap 0 | awesome-client
 
 
 SEE ALSO
