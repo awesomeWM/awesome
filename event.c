@@ -51,18 +51,13 @@ extern AwesomeConf globalconf;
 static void
 event_handle_mouse_button_press(int screen, unsigned int button,
                                 unsigned int state,
-                                Button *buttons, char *arg)
+                                Button *buttons)
 {
     Button *b;
 
     for(b = buttons; b; b = b->next)
         if(button == b->button && CLEANMASK(state) == b->mod && b->func)
-        {
-            if(arg)
-                b->func(screen, arg);
-            else
-                b->func(screen, b->arg);
-        }
+            b->func(screen, b->arg);
 }
 
 /** Handle XButtonPressed events
@@ -138,7 +133,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                && ev->detail == XCB_BUTTON_INDEX_1)
                 window_grabbuttons(c->win, c->phys_screen);
             event_handle_mouse_button_press(c->screen, ev->detail, ev->state,
-                                            globalconf.buttons.titlebar, NULL);
+                                            globalconf.buttons.titlebar);
             return 0;
         }
 
@@ -153,7 +148,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
             window_grabbuttons(c->win, c->phys_screen);
         }
         else
-            event_handle_mouse_button_press(c->screen, ev->detail, ev->state, globalconf.buttons.client, NULL);
+            event_handle_mouse_button_press(c->screen, ev->detail, ev->state, globalconf.buttons.client);
     }
     else
         for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
@@ -162,7 +157,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
             {
                 screen = screen_get_bycoord(globalconf.screens_info, screen, qr->root_x, qr->root_y);
                 event_handle_mouse_button_press(screen, ev->detail, ev->state,
-                                                globalconf.buttons.root, NULL);
+                                                globalconf.buttons.root);
 
                 p_delete(&qr);
                 return 0;
