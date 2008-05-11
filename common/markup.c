@@ -231,6 +231,9 @@ markup_parse(markup_parser_data_t *data, const char *str, ssize_t slen)
     };
     GError *error = NULL;
 
+    if(!a_strlen(str))
+        return false;
+
     mkp_ctx = g_markup_parse_context_new(&parser, 0, data, NULL);
 
     if(!g_markup_parse_context_parse(mkp_ctx, "<markup>", -1, &error)
