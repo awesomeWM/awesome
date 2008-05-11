@@ -1006,7 +1006,8 @@ uicb_client_moveresize(int screen, char *arg)
     int nmx, nmy;
     area_t geometry;
     client_t *sel = globalconf.focus->client;
-    xcb_query_pointer_reply_t *xqp;
+    xcb_query_pointer_cookie_t xqc;
+    xcb_query_pointer_reply_t *xqr;
     Layout *curlay = layout_get_current(screen);
 
     if(!sel || sel->isfixed || !arg ||
@@ -1015,6 +1016,9 @@ uicb_client_moveresize(int screen, char *arg)
 
     if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
         return;
+
+    xqc = xcb_query_pointer_unchecked(globalconf.connection,
+                                      xcb_aux_get_screen(globalconf.connection, sel->phys_screen)->root);
 
     geometry.x = (int) compute_new_value_from_arg(x, sel->geometry.x);
     geometry.y = (int) compute_new_value_from_arg(y, sel->geometry.y);
@@ -1026,20 +1030,16 @@ uicb_client_moveresize(int screen, char *arg)
     ow = sel->geometry.width;
     oh = sel->geometry.height;
 
-    xqp = xcb_query_pointer_reply(globalconf.connection,
-                                  xcb_query_pointer_unchecked(globalconf.connection,
-                                                              xcb_aux_get_screen(globalconf.connection, sel->phys_screen)->root),
-                                  NULL);
     if(globalconf.screens[sel->screen].resize_hints)
         geometry = client_geometry_hints(sel, geometry);
     client_resize(sel, geometry, false);
-    if (xqp)
+    if ((xqr = xcb_query_pointer_reply(globalconf.connection, xqc, NULL)))
     {
-        if(ox <= xqp->root_x && (ox + 2 * sel->border + ow) >= xqp->root_x &&
-           oy <= xqp->root_y && (oy + 2 * sel->border + oh) >= xqp->root_y)
+        if(ox <= xqr->root_x && (ox + 2 * sel->border + ow) >= xqr->root_x &&
+           oy <= xqr->root_y && (oy + 2 * sel->border + oh) >= xqr->root_y)
         {
-            nmx = xqp->root_x - (ox + sel->border) + sel->geometry.width - ow;
-            nmy = xqp->root_y - (oy + sel->border) + sel->geometry.height - oh;
+            nmx = xqr->root_x - (ox + sel->border) + sel->geometry.width - ow;
+            nmy = xqr->root_y - (oy + sel->border) + sel->geometry.height - oh;
 
             if(nmx < -sel->border) /* can happen on a resize */
                 nmx = -sel->border;
@@ -1051,7 +1051,7 @@ uicb_client_moveresize(int screen, char *arg)
                              0, 0, 0, 0, nmx, nmy);
         }
 
-        p_delete(&xqp);
+        p_delete(&xqr);
     }
 }
 
