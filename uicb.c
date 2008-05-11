@@ -58,6 +58,7 @@ const name_func_link_t UicbList[] =
     { "client_setfloating", uicb_client_setfloating },
     { "client_togglescratch", uicb_client_togglescratch },
     { "client_setscratch", uicb_client_setscratch },
+    { "client_redraw", uicb_client_redraw },
     /* focus.h */
     { "focus_history", uicb_focus_history },
     { "focus_client_byname", uicb_focus_client_byname },

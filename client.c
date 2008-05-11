@@ -1244,6 +1244,19 @@ uicb_client_setscratch(int screen, char *arg __attribute__ ((unused)))
     globalconf.screens[screen].need_arrange = true;
 }
 
+void
+uicb_client_redraw(int screen __attribute__ ((unused)),
+                   char *arg __attribute__ ((unused)))
+{
+    if(!globalconf.focus->client)
+        return;
+
+    /* Use unmap/map ATM but it would be better to used SendEvent,
+     * however the client doesn't seem to handle it... */
+    xcb_unmap_window(globalconf.connection, globalconf.focus->client->win);
+    xcb_map_window(globalconf.connection, globalconf.focus->client->win);
+}
+
 /** Toggle the scratch client's visibility.
  * \param screen screen number
  * \param arg unused argument

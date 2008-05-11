@@ -54,6 +54,7 @@ uicb_t uicb_client_focus;
 uicb_t uicb_client_setfloating;
 uicb_t uicb_client_togglescratch;
 uicb_t uicb_client_setscratch;
+uicb_t uicb_client_redraw;
 
 DO_SLIST(client_t, client, p_delete)
 

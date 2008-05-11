@@ -129,6 +129,7 @@ keys
     key { modkey = {"Mod4", "Control"} key = "space" command = "client_setfloating" }
     key { modkey = {"Mod4"} key = "s" command = "client_togglescratch" }
     key { modkey = {"Mod4", "Control"} key = "s" command = "client_setscratch" }
+    key { modkey = {"Mod4"} key = "r" command = "client_redraw" }
     key { modkey = {"Mod4", "Shift"} key = "c" command = "client_kill" }
     key { modkey = {"Mod4", "Shift"} key = "q" command = "quit" }
     key { modkey = {"Mod4", "Control"} key = "r" command = "restart" }

@@ -125,6 +125,8 @@ DEFAULTS KEY BINDINGS
     Zoom client.
 *Mod4 \+ Control \+ space*::
     Set client floating.
+*Mod4 \+ s*::
+    Redraw the client.
 *Mod4 \+ Shift \+ c*::
     Kill client.
 *Mod4 \+ Shift \+ q*::
