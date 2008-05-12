@@ -67,7 +67,6 @@ iconbox_draw(widget_t *widget, draw_context_t *ctx, int offset,
 static widget_tell_status_t
 iconbox_tell(widget_t *widget, char *property, char *new_value)
 {
-    bool b;
     Data *d = widget->data;
 
     if(new_value == NULL)
