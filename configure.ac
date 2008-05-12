@@ -147,6 +147,8 @@ PKG_CHECK_MODULES([xcb_render], [xcb-render],,
    [AC_MSG_ERROR([awesome requires xcb-render.])])
 PKG_CHECK_MODULES([xcb_icccm], [xcb-icccm],,
    [AC_MSG_ERROR([awesome requires xcb-icccm.])])
+PKG_CHECK_MODULES([cairo_xcb], [cairo-xcb],,
+   [AC_MSG_ERROR([awesome requires cairo-xcb.])])
 
 # Checks for header files.
 AC_PATH_X
