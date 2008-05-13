@@ -248,7 +248,7 @@ taglist_new(statusbar_t *statusbar, cfg_t *config)
     d->text_urgent = a_strdup(cfg_getstr(config, "text_urgent"));
 
     /* Set cache property */
-    w->cache.flags = WIDGET_CACHE_TAGS | WIDGET_CACHE_CLIENTS;
+    w->cache_flags = WIDGET_CACHE_TAGS | WIDGET_CACHE_CLIENTS;
 
     return w;
 }

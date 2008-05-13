@@ -166,8 +166,8 @@ widget_invalidate_cache(int screen, int flags)
         statusbar;
         statusbar = statusbar->next)
         for(widget = statusbar->widgets; widget; widget = widget->next)
-            if(widget->cache.flags & flags)
-                widget->cache.needs_update = true;
+            if(widget->cache_flags & flags)
+                statusbar->need_update = true;
 }
 
 /** Send commands to widgets.
@@ -243,7 +243,7 @@ uicb_widget_tell(int screen, char *arg)
              property, widget->name);
         break;
       case WIDGET_NOERROR:
-          widget->cache.needs_update = true;
+          widget->statusbar->need_update = true;
           break;
       case WIDGET_ERROR_CUSTOM:
         break;

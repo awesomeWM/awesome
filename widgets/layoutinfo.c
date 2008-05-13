@@ -67,7 +67,7 @@ layoutinfo_new(statusbar_t *statusbar, cfg_t* config)
     w->alignment = cfg_getalignment(config, "align");
 
     /* Set cache property */
-    w->cache.flags = WIDGET_CACHE_LAYOUTS;
+    w->cache_flags = WIDGET_CACHE_LAYOUTS;
 
     return w;
 }

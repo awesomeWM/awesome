@@ -98,7 +98,7 @@ focusicon_new(statusbar_t *statusbar, cfg_t *config)
     w->alignment = cfg_getalignment(config, "align");
 
     /* Set cache property */
-    w->cache.flags = WIDGET_CACHE_CLIENTS;
+    w->cache_flags = WIDGET_CACHE_CLIENTS;
 
     return w;
 }

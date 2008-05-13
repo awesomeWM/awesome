@@ -136,12 +136,8 @@ struct widget_t
     area_t area;
     /** Buttons bindings */
     Button *buttons;
-    /** Cache */
-    struct
-    {
-        bool needs_update;
-        int flags;
-    } cache;
+    /** Cache flags */
+    int cache_flags;
     /** Next and previous widgets */
     widget_t *prev, *next;
 };
@@ -169,6 +165,8 @@ struct statusbar_t
     widget_t *widgets;
     /** Draw context */
     draw_context_t *ctx;
+    /** Need update */
+    bool need_update;
     /** Next and previous statusbars */
     statusbar_t *prev, *next;
 };

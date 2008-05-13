@@ -113,6 +113,8 @@ statusbar_draw(statusbar_t *statusbar)
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
 
+    statusbar->need_update = false;
+
     if(!statusbar->position)
         return;
 
@@ -123,27 +125,18 @@ statusbar_draw(statusbar_t *statusbar)
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignLeft)
-        {
-            widget->cache.needs_update = false;
             left += widget->draw(widget, statusbar->ctx, left, (left + right));
-        }
 
     /* renders right widget from last to first */
     for(widget = *widget_list_last(&statusbar->widgets);
         widget;
         widget = widget_list_prev(&statusbar->widgets, widget))
         if (widget->alignment == AlignRight)
-        {
-            widget->cache.needs_update = false;
             right += widget->draw(widget, statusbar->ctx, right, (left + right));
-        }
 
     for(widget = statusbar->widgets; widget; widget = widget->next)
         if (widget->alignment == AlignFlex)
-        {
-            widget->cache.needs_update = false;
             left += widget->draw(widget, statusbar->ctx, left, (left + right));
-        }
 
     switch(statusbar->position)
     {
@@ -263,18 +256,16 @@ statusbar_refresh()
 {
     int screen;
     statusbar_t *statusbar;
-    widget_t *widget;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar;
             statusbar;
             statusbar = statusbar->next)
-            for(widget = statusbar->widgets; widget; widget = widget->next)
-                if(widget->cache.needs_update)
-                {
-                    statusbar_draw(statusbar);
-                    break;
-                }
+            if(statusbar->need_update)
+            {
+                statusbar_draw(statusbar);
+                break;
+            }
 }
 
 statusbar_t *

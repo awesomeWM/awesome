@@ -280,7 +280,7 @@ tasklist_new(statusbar_t *statusbar, cfg_t *config)
         d->show = ShowFocus;
 
     /* Set cache property */
-    w->cache.flags = WIDGET_CACHE_CLIENTS;
+    w->cache_flags = WIDGET_CACHE_CLIENTS;
 
     return w;
 }
