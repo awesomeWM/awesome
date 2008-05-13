@@ -112,7 +112,6 @@ typedef struct
 typedef struct
 {
     xcb_connection_t *connection;
-    int default_screen;
     xcb_drawable_t drawable;
     xcb_visualtype_t *visual;
     int width;

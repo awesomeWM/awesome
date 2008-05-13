@@ -141,7 +141,7 @@ taglist_draw(widget_t *widget,
         area = p_new(area_t, 1);
         text[i] = taglist_text_get(tag, data);
         text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
-        *area = draw_text_extents(ctx->connection, ctx->default_screen,
+        *area = draw_text_extents(ctx->connection, ctx->phys_screen,
                                   styles[i]->font, text[i]);
         area->x = widget->area.width;
         area->height = widget->statusbar->height;
