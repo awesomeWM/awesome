@@ -82,18 +82,6 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
     return sw;
 }
 
-/** Destroy a simple window and all its resources.
- * \param sw The simple_window_t to delete.
- */
-void
-simplewindow_delete(simple_window_t **sw)
-{
-    xcb_destroy_window((*sw)->connection, (*sw)->window);
-    xcb_free_pixmap((*sw)->connection, (*sw)->drawable);
-    xcb_free_gc((*sw)->connection, (*sw)->gc);
-    p_delete(sw);
-}
-
 /** Move a simple window.
  * \param sw The simple window to move.
  * \param x New x coordinate.

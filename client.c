@@ -750,8 +750,7 @@ client_unmanage(client_t *c)
     xcb_aux_sync(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);
 
-    if(c->titlebar.sw)
-        simplewindow_delete(&c->titlebar.sw);
+    simplewindow_delete(&c->titlebar.sw);
 
     p_delete(&c);
 }

@@ -44,7 +44,22 @@ typedef struct simple_window_t
 } simple_window_t;
 
 simple_window_t * simplewindow_new(xcb_connection_t *, int, int, int, unsigned int, unsigned int, unsigned int);
-void simplewindow_delete(simple_window_t **);
+
+/** Destroy a simple window and all its resources.
+ * \param sw The simple_window_t to delete.
+ */
+static inline void
+simplewindow_delete(simple_window_t **sw)
+{
+    if(*sw)
+    {
+        xcb_destroy_window((*sw)->connection, (*sw)->window);
+        xcb_free_pixmap((*sw)->connection, (*sw)->drawable);
+        xcb_free_gc((*sw)->connection, (*sw)->gc);
+        p_delete(sw);
+    }
+}
+
 void simplewindow_move(simple_window_t *, int, int);
 void simplewindow_resize(simple_window_t *, unsigned int, unsigned int);
 
