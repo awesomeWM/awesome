@@ -135,18 +135,6 @@ draw_context_new(xcb_connection_t *conn, int phys_screen, int width, int height,
     return d;
 };
 
-/** Delete a draw context
- * \param ctx draw_context_t to delete
- */
-void
-draw_context_delete(draw_context_t **ctx)
-{
-    g_object_unref((*ctx)->layout);
-    cairo_surface_destroy((*ctx)->surface);
-    cairo_destroy((*ctx)->cr);
-    p_delete(ctx);
-}
-
 /** Create a new Pango font
  * \param conn Connection ref
  * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE])
