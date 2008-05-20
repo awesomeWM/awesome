@@ -141,6 +141,7 @@ widget_invalidate_statusbar_bywidget(widget_t *widget)
     statusbar_t *statusbar;
     widget_node_t *witer;
 
+    warn("invalidate %p\n", widget);
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar;
             statusbar;
@@ -219,6 +220,39 @@ luaA_widget_mouse(lua_State *L)
     return 0;
 }
 
+void
+widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const char *property)
+{
+    switch(status)
+    {
+      case WIDGET_ERROR:
+        warn("error changing property %s of widget %s\n",
+             property, widget->name);
+        break;
+      case WIDGET_ERROR_NOVALUE:
+        warn("error changing property %s of widget %s, no value given\n",
+              property, widget->name);
+        break;
+      case WIDGET_ERROR_FORMAT_FONT:
+        warn("error changing property %s of widget %s, must be a valid font\n",
+             property, widget->name);
+        break;
+      case WIDGET_ERROR_FORMAT_COLOR:
+        warn("error changing property %s of widget %s, must be a valid color\n",
+             property, widget->name);
+        break;
+      case WIDGET_ERROR_FORMAT_SECTION:
+        warn("error changing property %s of widget %s, section/title not found\n",
+             property, widget->name);
+        break;
+      case WIDGET_NOERROR:
+        widget_invalidate_statusbar_bywidget(widget);
+        break;
+      case WIDGET_ERROR_CUSTOM:
+        break;
+    }
+}
+
 static int
 luaA_widget_set(lua_State *L)
 {
@@ -229,35 +263,8 @@ luaA_widget_set(lua_State *L)
     property = luaL_checkstring(L, 2);
     value = luaL_checkstring(L, 3);
 
-    switch((status = (*widget)->tell(*widget, property, value)))
-    {
-      case WIDGET_ERROR:
-        warn("error changing property %s of widget %s\n",
-             property, (*widget)->name);
-        break;
-      case WIDGET_ERROR_NOVALUE:
-        warn("error changing property %s of widget %s, no value given\n",
-              property, (*widget)->name);
-        break;
-      case WIDGET_ERROR_FORMAT_FONT:
-        warn("error changing property %s of widget %s, must be a valid font\n",
-             property, (*widget)->name);
-        break;
-      case WIDGET_ERROR_FORMAT_COLOR:
-        warn("error changing property %s of widget %s, must be a valid color\n",
-             property, (*widget)->name);
-        break;
-      case WIDGET_ERROR_FORMAT_SECTION:
-        warn("error changing property %s of widget %s, section/title not found\n",
-             property, (*widget)->name);
-        break;
-      case WIDGET_NOERROR:
-        widget_invalidate_statusbar_bywidget(*widget);
-        break;
-      case WIDGET_ERROR_CUSTOM:
-        break;
-    }
-
+    status = (*widget)->tell(*widget, property, value);
+    widget_tell_managestatus(*widget, status, property);
     return 0;
 }
 

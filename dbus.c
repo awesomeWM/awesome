@@ -57,6 +57,7 @@ a_dbus_process_widget_set(DBusMessage *req)
     int i;
     DBusMessageIter iter;
     widget_t *widget;
+    widget_tell_status_t status;
 
     if(!dbus_message_get_path_decomposed(req, &path)
        || !a_dbus_path_check(path, 6)
@@ -86,7 +87,8 @@ a_dbus_process_widget_set(DBusMessage *req)
     if(!(widget = widget_getbyname(path[3])))
         return warn("no such widget: %s.\n", path[3]);
 
-    widget->tell(widget, path[5], arg);
+    status = widget->tell(widget, path[5], arg);
+    widget_tell_managestatus(widget, status, path[5]);
 
     for(i = 0; path[i]; i++)
         p_delete(&path[i]);
