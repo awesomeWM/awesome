@@ -141,7 +141,6 @@ widget_invalidate_statusbar_bywidget(widget_t *widget)
     statusbar_t *statusbar;
     widget_node_t *witer;
 
-    warn("invalidate %p\n", widget);
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar;
             statusbar;
