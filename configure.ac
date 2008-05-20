@@ -113,8 +113,9 @@ AC_DEFINE_UNQUOTED([AWESOME_LUA_LIB_PATH], "${awesomelibdir}", [awesome lib path
 AC_PATH_XTRA
 PKG_CHECK_MODULES([pangocairo], [pangocairo],,
    [AC_MSG_ERROR([awesome requires pangocairo.])])
-PKG_CHECK_MODULES([Lua], [lua5.1],,
-   [AC_MSG_ERROR([awesome requires Lua >= 5.1.])])
+PKG_CHECK_MODULES([Lua], [lua >= 5.1],,
+   [PKG_CHECK_MODULES([Lua], [lua5.1],,
+                      [AC_MSG_ERROR([awesome requires Lua >= 5.1.])])])
 PKG_CHECK_MODULES([glib], [glib-2.0],,
    [AC_MSG_ERROR([awesome requires glib-2.0.])])
 PKG_CHECK_MODULES([dbus], [dbus-1],,
