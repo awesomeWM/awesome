@@ -107,7 +107,7 @@ AS_IF([test "x$WHOAMI" = "xfalse"], [aw_whoami="???"], [aw_whoami=`$WHOAMI`])
 AC_DEFINE_UNQUOTED([AWESOME_COMPILE_BY], ["$aw_whoami"], [build user])
 
 AS_AC_EXPAND(awesomelibdir, "$datarootdir/awesome/lib")
-AC_DEFINE_UNQUOTED([AWESOME_LIB_PATH], "${awesomelibdir}", [awesome lib path])
+AC_DEFINE_UNQUOTED([AWESOME_LUA_LIB_PATH], "${awesomelibdir}", [awesome lib path])
 
 # Checks for libraries.
 AC_PATH_XTRA

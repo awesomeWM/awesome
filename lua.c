@@ -348,7 +348,7 @@ luaA_parserc(const char *rcfile)
     draw_color_new(globalconf.connection, globalconf.default_screen, "black", &globalconf.colors.fg);
     draw_color_new(globalconf.connection, globalconf.default_screen, "white", &globalconf.colors.bg);
 
-    luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LIB_PATH  "?.lua\"");
+    luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
 
     if(luaL_dofile(L, rcfile))
     {
