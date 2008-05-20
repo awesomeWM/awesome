@@ -83,7 +83,7 @@ tag_isoccupied(tag_t *t)
     client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t) && !c->skip && c != globalconf.scratch.client)
+        if(is_client_tagged(c, t) && !c->skip)
             return true;
 
     return false;

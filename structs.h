@@ -33,7 +33,7 @@
 #include "common/xscreen.h"
 #include "common/refcount.h"
 
-/** stacking layout */
+/** Stacking layout layers */
 typedef enum
 {
     LAYER_DESKTOP,
@@ -48,16 +48,24 @@ typedef enum
 enum
 { CurNormal, CurResize, CurMove, CurLast };
 
+/** Titlebar template structure */
 typedef struct
 {
     /** Ref count */
     int refcount;
+    /** Position */
     position_t position;
+    /** Alignment on window */
     alignment_t align;
+    /** Width and height */
     int width, height;
+    /** Various text used for rendering */
     char *text_normal, *text_focus, *text_urgent;
 } titlebar_t;
 
+/** Delete a titlebar structure.
+ * \param t The titlebar to destroy.
+ */
 static inline void
 titlebar_delete(titlebar_t **t)
 {
@@ -151,6 +159,9 @@ struct widget_node_t
     widget_node_t *prev, *next;
 };
 
+/** Delete a widget structure.
+ * \param widget The widget to destroy.
+ */
 static inline void
 widget_delete(widget_t **widget)
 {
@@ -162,6 +173,9 @@ widget_delete(widget_t **widget)
 
 DO_RCNT(widget_t, widget, widget_delete)
 
+/** Delete a widget node structure.
+ * \param node The node to destroy.
+ */
 static inline void
 widget_node_delete(widget_node_t **node)
 {
@@ -259,6 +273,7 @@ struct client_t
 typedef struct client_node_t client_node_t;
 struct client_node_t
 {
+    /** The client */
     client_t *client;
     /** Next and previous client_nodes */
     client_node_t *prev, *next;
@@ -288,7 +303,7 @@ struct _tag_t
     tag_t *prev, *next;
 };
 
-/** tag_client_node type */
+/** Tag client link type */
 typedef struct tag_client_node_t tag_client_node_t;
 struct tag_client_node_t
 {
@@ -312,6 +327,7 @@ typedef struct
 } Padding;
 
 typedef area_t (FloatingPlacement)(client_t *);
+
 typedef struct
 {
     /** true if we need to arrange() */
@@ -363,12 +379,6 @@ struct AwesomeConf
     xcb_cursor_t cursor[CurLast];
     /** client_ts list */
     client_t *clients;
-    /** Scratch client */
-    struct
-    {
-        client_t *client;
-        bool isvisible;
-    } scratch;
     /** Path to config file */
     char *configpath;
     /** Floating window placement algo */

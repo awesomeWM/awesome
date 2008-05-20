@@ -125,9 +125,6 @@ client_isvisible_anyscreen(client_t *c)
     if(!c)
         return false;
 
-    if(globalconf.scratch.client == c)
-        return globalconf.scratch.isvisible;
-
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
             if(tag->selected && is_client_tagged(c, tag))
@@ -149,9 +146,6 @@ client_isvisible(client_t *c, int screen)
 
     if(!c || c->screen != screen)
         return false;
-
-    if(globalconf.scratch.client == c)
-        return globalconf.scratch.isvisible;
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
         if(tag->selected && is_client_tagged(c, tag))
@@ -676,8 +670,6 @@ client_unmanage(client_t *c)
     /* remove client everywhere */
     client_list_detach(&globalconf.clients, c);
     focus_delete_client(c);
-    if(globalconf.scratch.client == c)
-        globalconf.scratch.client = NULL;
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
 

@@ -160,15 +160,7 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
 
             p_delete(&text);
 
-            if(c == globalconf.scratch.client)
-            {
-                area.x = w->area.x + icon_width + box_width * i;
-                area.y = w->area.y;
-                area.width = (globalconf.font->height + 2) / 3;
-                area.height = (globalconf.font->height + 2) / 3;
-                draw_rectangle(statusbar->ctx, area, 1.0, c->isfloating, statusbar->colors.fg);
-            }
-            else if(c->isfloating || c->ismax)
+            if(c->isfloating || c->ismax)
                 draw_circle(statusbar->ctx, w->area.x + icon_width + box_width * i,
                             w->area.y,
                             (globalconf.font->height + 2) / 4,
