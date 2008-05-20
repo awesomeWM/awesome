@@ -54,19 +54,16 @@ static void
 a_dbus_process_widget_set(DBusMessage *req)
 {
     char *arg, **path;
-    int i, screen;
+    int i;
     DBusMessageIter iter;
-    statusbar_t *statusbar;
     widget_t *widget;
 
     if(!dbus_message_get_path_decomposed(req, &path)
-       || !a_dbus_path_check(path, 10)
-       || a_strcmp(path[2], "screen")
-       || a_strcmp(path[4], "statusbar")
-       || a_strcmp(path[6], "widget")
-       || a_strcmp(path[8], "property"))
+       || !a_dbus_path_check(path, 6)
+       || a_strcmp(path[2], "widget")
+       || a_strcmp(path[4], "property"))
     {
-        warn("invalid object path 2\n");
+        warn("invalid object path.\n");
         dbus_error_free(&err);
         return;
     }
@@ -86,16 +83,10 @@ a_dbus_process_widget_set(DBusMessage *req)
     else
         dbus_message_iter_get_basic(&iter, &arg);
 
-    if((screen = atoi(path[3])) >= globalconf.screens_info->nscreen)
-        return warn("bad screen number\n");
+    if(!(widget = widget_getbyname(path[3])))
+        return warn("no such widget: %s.\n", path[3]);
 
-    if(!(statusbar = statusbar_getbyname(screen, path[5])))
-        return warn("no such statusbar: %s\n", path[5]);
-
-    if(!(widget = widget_getbyname(statusbar, path[7])))
-        return warn("no such widget: %s in statusbar %s.\n", path[7], statusbar->name);
-
-    widget->tell(widget, path[9], arg);
+    widget->tell(widget, path[5], arg);
 
     for(i = 0; path[i]; i++)
         p_delete(&path[i]);
@@ -119,7 +110,7 @@ a_dbus_process_requests(int *fd)
             break;
 
 
-        if(dbus_message_is_method_call(msg, "org.awesome.statusbar.widget", "set"))
+        if(dbus_message_is_method_call(msg, "org.awesome.widget", "set"))
             a_dbus_process_widget_set(msg);
         else if(dbus_message_is_signal(msg, DBUS_INTERFACE_LOCAL, "Disconnected"))
         {

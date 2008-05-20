@@ -48,18 +48,21 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
 }
 
 /** Find a widget on a screen by its name.
- * \param statusbar The statusbar to look into.
  * \param name The widget name.
  * \return A widget pointer.
  */
 widget_t *
-widget_getbyname(statusbar_t *sb, char *name)
+widget_getbyname(const char *name)
 {
     widget_node_t *widget;
+    statusbar_t *sb;
+    int screen;
 
-    for(widget = sb->widgets; widget; widget = widget->next)
-        if(!a_strcmp(name, widget->widget->name))
-            return widget->widget;
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+        for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
+            for(widget = sb->widgets; widget; widget = widget->next)
+                if(!a_strcmp(name, widget->widget->name))
+                    return widget->widget;
 
     return NULL;
 }

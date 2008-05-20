@@ -35,7 +35,7 @@ typedef widget_t *(WidgetConstructor)(alignment_t);
 void widget_invalidate_cache(int, int);
 int widget_calculate_offset(int, int, int, int);
 void widget_common_new(widget_t *);
-widget_t * widget_getbyname(statusbar_t *, char *);
+widget_t * widget_getbyname(const char *);
 void widget_invalidate_statusbar_bywidget(widget_t *);
 
 WidgetConstructor taglist_new;
