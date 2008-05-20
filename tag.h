@@ -38,8 +38,6 @@ tag_delete(tag_t **tag)
     p_delete(tag);
 }
 
-void tag_view(tag_t *, bool);
-void tag_view_byindex(int, int, bool);
 tag_t ** tags_get_current(int);
 void tag_client(client_t *, tag_t *);
 void untag_client(client_t *, tag_t *);

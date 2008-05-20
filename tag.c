@@ -37,6 +37,19 @@
 
 extern AwesomeConf globalconf;
 
+/** View or unview a tag.
+ * \param tag the tag
+ * \param view set visible or not
+ */
+static void
+tag_view(tag_t *tag, bool view)
+{
+    tag->selected = view;
+    ewmh_update_net_current_desktop(screen_virttophys(tag->screen));
+    widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
+    globalconf.screens[tag->screen].need_arrange = true;
+}
+
 /** Create a new tag. Parameteres values are checked.
  * \param name tag name
  * \param layout layout to use
@@ -206,24 +219,6 @@ tag_view_only(tag_t *target)
         tag_view(tag, tag == target);
 }
 
-/** Use an index to set a tag viewable.
- * \param screen the screen id
- * \param dindex the index
- * \param view the view value
- */
-void
-tag_view_byindex(int screen, int dindex, bool view)
-{
-    tag_t *tag;
-
-    if(dindex < 0)
-        return;
-
-    for(tag = globalconf.screens[screen].tags; tag && dindex > 0;
-        tag = tag->next, dindex--);
-    tag_view(tag, view);
-}
-
 /** View only a tag, selected by its index.
  * \param screen screen id
  * \param dindex the index
@@ -239,19 +234,6 @@ tag_view_only_byindex(int screen, int dindex)
     for(tag = globalconf.screens[screen].tags; tag && dindex > 0;
         tag = tag->next, dindex--);
     tag_view_only(tag);
-}
-
-/** View or unview a tag.
- * \param tag the tag
- * \param view set visible or not
- */
-void
-tag_view(tag_t *tag, bool view)
-{
-    tag->selected = view;
-    ewmh_update_net_current_desktop(screen_virttophys(tag->screen));
-    widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
-    globalconf.screens[tag->screen].need_arrange = true;
 }
 
 static int
