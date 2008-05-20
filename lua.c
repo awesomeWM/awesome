@@ -277,8 +277,8 @@ luaA_openlib(lua_State *L, const char *name,
     lua_pushvalue(L, -2); /* dup metatable*/
     lua_settable(L, -3);  /* metatable.__index = metatable */
 
-    luaL_openlib(L, NULL, meta, 0);
-    luaL_openlib(L, name, methods, 0);
+    luaL_register(L, NULL, meta);
+    luaL_register(L, name, methods);
 }
 
 bool
