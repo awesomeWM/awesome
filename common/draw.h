@@ -29,6 +29,7 @@
 
 #include <xcb/xcb.h>
 
+#include "config.h"
 #include "common/util.h"
 #include "common/list.h"
 #include "common/xutil.h"

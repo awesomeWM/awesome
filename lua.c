@@ -11,22 +11,13 @@
 /* XStringToKeysym() */
 #include <X11/Xlib.h>
 
+#include "config.h"
 #include "structs.h"
 #include "lua.h"
-#include "tag.h"
-#include "statusbar.h"
-#include "widget.h"
-#include "placement.h"
-#include "client.h"
 #include "window.h"
-#include "mouse.h"
-#include "statusbar.h"
-#include "screen.h"
-#include "titlebar.h"
+#include "tag.h"
+#include "client.h"
 #include "layouts/tile.h"
-#include "layouts/floating.h"
-#include "common/util.h"
-#include "common/xutil.h"
 
 extern AwesomeConf globalconf;
 extern bool running;

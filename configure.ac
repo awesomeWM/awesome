@@ -25,6 +25,7 @@ foreign
 std-options
 subdir-objects
 ])
+AC_CONFIG_HEADER([config.h])
 
 AC_DEFINE_UNQUOTED([AWESOME_RELEASE], [m4_esyscmd([./build-utils/package-codename . codename-stamp])], [release code name])
 
