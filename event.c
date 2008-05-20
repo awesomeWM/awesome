@@ -68,6 +68,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_button_press_event_t *ev)
 {
     int screen;
+    const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
     client_t *c;
     widget_node_t *w;
     statusbar_t *statusbar;
@@ -146,7 +147,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
             event_handle_mouse_button_press(ev->detail, ev->state, globalconf.buttons.client);
     }
     else
-        for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
+        for(screen = 0; screen < nb_screen; screen++)
             if(xcb_aux_get_screen(connection, screen)->root == ev->event)
             {
                 event_handle_mouse_button_press(ev->detail, ev->state,
@@ -393,6 +394,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
                         xcb_connection_t *connection, xcb_map_request_event_t *ev)
 {
     int screen_nbr = 0;
+    client_t *c;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
     xcb_query_pointer_cookie_t qp_c;
@@ -402,8 +404,6 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     xcb_screen_iterator_t iter;
 
     wa_c = xcb_get_window_attributes(connection, ev->window);
-    geom_c = xcb_get_geometry(connection, ev->window);
-    qp_c = xcb_query_pointer(connection, xcb_aux_get_screen(globalconf.connection, screen_nbr)->root);
 
     if(!(wa_r = xcb_get_window_attributes_reply(connection, wa_c, NULL)))
         return -1;
@@ -414,12 +414,29 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         return 0;
     }
 
+    if(!(c = client_get_bywin(globalconf.clients, ev->window)))
+    {
+        geom_c = xcb_get_geometry(connection, ev->window);
+
+        if(globalconf.screens_info->xinerama_is_active)
+            qp_c = xcb_query_pointer(connection, xcb_aux_get_screen(globalconf.connection,
+                                                                    screen_nbr)->root);
+    }
+
     p_delete(&wa_r);
 
-    if(!client_get_bywin(globalconf.clients, ev->window))
+    if(!c)
     {
         if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
+        {
+            if(globalconf.screens_info->xinerama_is_active)
+            {
+                qp_r = xcb_query_pointer_reply(connection, qp_c, NULL);
+                p_delete(&qp_r);
+            }
+
             return -1;
+        }
 
         if(globalconf.screens_info->xinerama_is_active
            && (qp_r = xcb_query_pointer_reply(connection, qp_c, NULL)))
