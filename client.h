@@ -28,7 +28,6 @@
 
 bool client_isvisible(client_t *, int);
 client_t * client_get_bywin(client_t *, xcb_window_t);
-client_t * client_get_byname(client_t *, char *);
 bool client_focus(client_t *, int, bool);
 void client_stack(client_t *);
 void client_ban(client_t *);

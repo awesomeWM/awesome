@@ -166,23 +166,6 @@ client_get_bywin(client_t *list, xcb_window_t w)
     return c;
 }
 
-/** Get a client by its name.
- * \param list The client_t list to look into.
- * \param name Name to search.
- * \return First matching client.
- */
-client_t *
-client_get_byname(client_t *list, char *name)
-{
-    client_t *c;
-
-    for(c = list; c; c = c->next)
-        if(strstr(c->name, name))
-            return c;
-
-    return NULL;
-}
-
 /** Update client name attribute with its new title.
  * \param c The client.
  */
