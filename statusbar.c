@@ -33,83 +33,9 @@
 extern AwesomeConf globalconf;
 
 static void
-statusbar_position_update(statusbar_t *statusbar)
-{
-    statusbar_t *sb;
-    area_t area;
-
-    if(statusbar->position == Off)
-    {
-        xcb_unmap_window(globalconf.connection, statusbar->sw->window);
-        return;
-    }
-
-    xcb_map_window(globalconf.connection, statusbar->sw->window);
-
-    /* Top and Bottom statusbar_t have prio */
-    if(statusbar->position == Top || statusbar->position == Bottom)
-        area = screen_get_area(statusbar->screen,
-                               NULL,
-                               &globalconf.screens[statusbar->screen].padding);
-    else
-        area = screen_get_area(statusbar->screen,
-                               globalconf.screens[statusbar->screen].statusbar,
-                               &globalconf.screens[statusbar->screen].padding);
-
-    for(sb = globalconf.screens[statusbar->screen].statusbar; sb && sb != statusbar; sb = sb->next)
-        switch(sb->position)
-        {
-          case Top:
-            if(sb->position == statusbar->position)
-                area.y += sb->height;
-            break;
-          case Bottom:
-            if(sb->position == statusbar->position)
-                area.height -= sb->height;
-            break;
-          case Left:
-            /* we need to re-add our own value removed in the
-            * screen_get_area computation */
-            if(statusbar->position == Left
-               || statusbar->position == Right)
-            {
-                area.x -= statusbar->sw->geometry.width;
-                area.width += statusbar->sw->geometry.width;
-            }
-            break;
-          case Right:
-            if(statusbar->position == Left
-               || statusbar->position == Right)
-                area.width += statusbar->sw->geometry.width;
-            break;
-          default:
-            break;
-        }
-
-    switch(statusbar->position)
-    {
-      case Top:
-        simplewindow_move(statusbar->sw, area.x, area.y);
-        break;
-      case Bottom:
-        simplewindow_move(statusbar->sw, area.x, (area.y + area.height) - statusbar->sw->geometry.height);
-        break;
-      case Left:
-        simplewindow_move(statusbar->sw, area.x - statusbar->sw->geometry.width,
-                          (area.y + area.height) - statusbar->sw->geometry.height);
-        break;
-      case Right:
-        simplewindow_move(statusbar->sw, area.x + area.width, area.y);
-        break;
-      default:
-        break;
-    }
-}
-
-static void
 statusbar_draw(statusbar_t *statusbar)
 {
-    widget_t *widget;
+    widget_node_t *w;
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
 
@@ -121,22 +47,20 @@ statusbar_draw(statusbar_t *statusbar)
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
     draw_rectangle(statusbar->ctx, rectangle, 1.0, true,
-                   globalconf.screens[statusbar->screen].styles.normal.bg);
+                   statusbar->colors.bg);
 
-    for(widget = statusbar->widgets; widget; widget = widget->next)
-        if (widget->alignment == AlignLeft)
-            left += widget->draw(widget, statusbar->ctx, left, (left + right));
+    for(w = statusbar->widgets; w; w = w->next)
+        if(w->widget->align == AlignLeft)
+            left += w->widget->draw(w, statusbar, left, (left + right));
 
     /* renders right widget from last to first */
-    for(widget = *widget_list_last(&statusbar->widgets);
-        widget;
-        widget = widget_list_prev(&statusbar->widgets, widget))
-        if (widget->alignment == AlignRight)
-            right += widget->draw(widget, statusbar->ctx, right, (left + right));
+    for(w = *widget_node_list_last(&statusbar->widgets); w; w = w->prev)
+        if(w->widget->align == AlignRight)
+            right += w->widget->draw(w, statusbar, right, (left + right));
 
-    for(widget = statusbar->widgets; widget; widget = widget->next)
-        if (widget->alignment == AlignFlex)
-            left += widget->draw(widget, statusbar->ctx, left, (left + right));
+    for(w = statusbar->widgets; w; w = w->next)
+        if(w->widget->align == AlignFlex)
+            left += w->widget->draw(w, statusbar, left, (left + right));
 
     switch(statusbar->position)
     {
@@ -158,96 +82,145 @@ statusbar_draw(statusbar_t *statusbar)
 }
 
 void
-statusbar_preinit(statusbar_t *statusbar)
-{
-    if(statusbar->height <= 0)
-        /* 1.5 as default factor, it fits nice but no one knows why */
-        statusbar->height = 1.5 * MAX(globalconf.screens[statusbar->screen].styles.normal.font->height,
-                                      MAX(globalconf.screens[statusbar->screen].styles.focus.font->height,
-                                          globalconf.screens[statusbar->screen].styles.urgent.font->height));
-}
-
-void
-statusbar_init(statusbar_t *statusbar)
+statusbar_position_update(statusbar_t *statusbar, position_t position)
 {
     statusbar_t *sb;
+    area_t area;
     xcb_drawable_t dw;
     xcb_screen_t *s = NULL;
-    int phys_screen = screen_virttophys(statusbar->screen);
-    area_t area = screen_get_area(statusbar->screen,
-                                  globalconf.screens[statusbar->screen].statusbar,
-                                  &globalconf.screens[statusbar->screen].padding);
+    bool ignore = false;
 
-    statusbar->phys_screen = phys_screen;
+    simplewindow_delete(&statusbar->sw);
+    draw_context_delete(&statusbar->ctx);
+
+    if((statusbar->position = position) == Off)
+        return;
+
+    area = screen_get_area(statusbar->screen,
+                           NULL,
+                           &globalconf.screens[statusbar->screen].padding);
 
     /* Top and Bottom statusbar_t have prio */
     for(sb = globalconf.screens[statusbar->screen].statusbar; sb; sb = sb->next)
+    {
+        /* Ignore every statusbar after me that is in the same position */
+        if(statusbar == sb)
+        {
+            ignore = true;
+            continue;
+        }
+        else if(ignore && statusbar->position == sb->position)
+            continue;
         switch(sb->position)
         {
           case Left:
+            switch(statusbar->position)
+            {
+              case Left:
+                area.x += statusbar->height;
+                break;
+              default:
+                break;
+            }
+            break;
           case Right:
-            area.width += sb->height;
+            switch(statusbar->position)
+            {
+              case Right:
+                area.x -= statusbar->height;
+                break;
+              default:
+                break;
+            }
+            break;
+          case Top:
+            switch(statusbar->position)
+            {
+              case Top:
+                area.y += sb->height;
+                break;
+              case Left:
+              case Right:
+                area.height -= sb->height;
+                area.y += sb->height;
+                break;
+              default:
+                break;
+            }
+            break;
+          case Bottom:
+            switch(statusbar->position)
+            {
+              case Bottom:
+                area.y -= sb->height;
+                break;
+              case Left:
+              case Right:
+                area.height -= sb->height;
+                break;
+              default:
+                break;
+            }
             break;
           default:
             break;
         }
-
-    if(statusbar->width <= 0)
-    {
-        if(statusbar->position == Right || statusbar->position == Left)
-            statusbar->width = area.height;
-        else
-            statusbar->width = area.width;
     }
 
     switch(statusbar->position)
     {
       case Right:
       case Left:
-            statusbar->sw =
-                 simplewindow_new(globalconf.connection, phys_screen, 0, 0,
-                                  statusbar->height, statusbar->width, 0);
-            break;
-      default:
-            statusbar->sw =
-                simplewindow_new(globalconf.connection, phys_screen, 0, 0,
-                                 statusbar->width, statusbar->height, 0);
-            break;
-    }
-
-    widget_calculate_alignments(statusbar->widgets);
-
-    statusbar_position_update(statusbar);
-
-    switch(statusbar->position)
-    {
-      case Off:
-        return;
-      case Right:
-      case Left:
-        s = xcb_aux_get_screen(globalconf.connection, phys_screen);
-
+        statusbar->width = area.height;
+        statusbar->sw =
+            simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
+                             statusbar->height, statusbar->width, 0);
+        s = xcb_aux_get_screen(globalconf.connection, statusbar->phys_screen);
         /* we need a new pixmap this way [     ] to render */
         dw = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection,
                           s->root_depth, dw, s->root,
                           statusbar->width, statusbar->height);
         statusbar->ctx = draw_context_new(globalconf.connection,
-                                          phys_screen,
+                                          statusbar->phys_screen,
                                           statusbar->width,
                                           statusbar->height,
                                           dw);
         break;
       default:
+        statusbar->width = area.width;
+        statusbar->sw =
+            simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
+                             statusbar->width, statusbar->height, 0);
         statusbar->ctx = draw_context_new(globalconf.connection,
-                                          phys_screen,
+                                          statusbar->phys_screen,
                                           statusbar->width,
                                           statusbar->height,
                                           statusbar->sw->drawable);
         break;
     }
-    
 
+    switch(statusbar->position)
+    {
+      case Top:
+        simplewindow_move(statusbar->sw, area.x, area.y);
+        break;
+      case Bottom:
+        simplewindow_move(statusbar->sw, area.x, (area.y + area.height) - statusbar->height);
+        break;
+      case Left:
+        simplewindow_move(statusbar->sw, area.x,
+                          (area.y + area.height) - statusbar->sw->geometry.height);
+        break;
+      case Right:
+        simplewindow_move(statusbar->sw, area.x + area.width - statusbar->height, area.y);
+        break;
+      default:
+        break;
+    }
+
+    globalconf.screens[statusbar->screen].need_arrange = true;
+    xcb_map_window(globalconf.connection, statusbar->sw->window);
     statusbar_draw(statusbar);
 }
 
@@ -262,10 +235,7 @@ statusbar_refresh()
             statusbar;
             statusbar = statusbar->next)
             if(statusbar->need_update)
-            {
                 statusbar_draw(statusbar);
-                break;
-            }
 }
 
 statusbar_t *
@@ -280,36 +250,140 @@ statusbar_getbyname(int screen, const char *name)
     return NULL;
 }
 
-static void
-statusbar_toggle(statusbar_t *statusbar)
+static int
+luaA_statusbar_eq(lua_State *L)
 {
-    if(statusbar->position == Off)
-        statusbar->position = (statusbar->dposition == Off) ? Top : statusbar->dposition;
-    else
-        statusbar->position = Off;
-    
-    globalconf.screens[statusbar->screen].need_arrange = true;
+    statusbar_t **t1 = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t **t2 = luaL_checkudata(L, 2, "statusbar");
+    lua_pushboolean(L, (*t1 == *t2));
+    return 1;
 }
 
-/** Toggle the statusbar on or off.
- * Argument must be a statusbar name, or no argument for all statusbars.
- * \param screen Screen ID
- * \param arg statusbar name
- * \ingroup ui_callback
- */
-void
-uicb_statusbar_toggle(int screen, char *arg)
+static int
+luaA_statusbar_position_set(lua_State *L)
 {
-    statusbar_t *sb = statusbar_getbyname(screen, arg);
+    statusbar_t *s, **sb = luaL_checkudata(L, 1, "statusbar");
+    const char *pos = luaL_checkstring(L, 2);
+    position_t position = position_get_from_str(pos);
 
-    if(sb)
-        statusbar_toggle(sb);
-    else
-        for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
-            statusbar_toggle(sb);
+    if(position != (*sb)->position)
+    {
+        (*sb)->position = position;
+        for(s = globalconf.screens[(*sb)->screen].statusbar; s; s = s->next)
+            statusbar_position_update(s, s->position);
+    }
 
-    for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
-        statusbar_position_update(sb);
+    return 0;
 }
+
+static int
+luaA_statusbar_tostring(lua_State *L)
+{
+    statusbar_t **p = luaL_checkudata(L, 1, "statusbar");
+    lua_pushfstring(L, "[statusbar udata(%p) name(%s)]", *p, (*p)->name);
+    return 1;
+}
+
+static int
+luaA_statusbar_widget_add(lua_State *L)
+{
+    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
+    widget_t **widget = luaL_checkudata(L, 2, "widget");
+    widget_node_t *w = p_new(widget_node_t, 1);
+
+    (*sb)->need_update = true;
+    w->widget = *widget;
+    widget_node_list_append(&(*sb)->widgets, w);
+    widget_ref(widget);
+
+    return 0;
+}
+
+static int
+luaA_statusbar_add(lua_State *L)
+{
+    statusbar_t *s, **sb = luaL_checkudata(L, 1, "statusbar");
+    int screen = luaL_checknumber(L, 2) - 1;
+
+    luaA_checkscreen(screen);
+
+    (*sb)->screen = screen;
+
+    /* \todo check for uniq name */
+    statusbar_list_append(&globalconf.screens[screen].statusbar, *sb);
+    for(s = globalconf.screens[(*sb)->screen].statusbar; s; s = s->next)
+        statusbar_position_update(s, s->position);
+    statusbar_ref(sb);
+    (*sb)->screen = screen;
+    (*sb)->phys_screen = screen_virttophys(screen);
+
+    return 0;
+}
+
+static int
+luaA_statusbar_new(lua_State *L)
+{
+    statusbar_t **sb = lua_newuserdata(L, sizeof(statusbar_t *));
+    int objpos = lua_gettop(L);
+    const char *color;
+
+    luaA_checktable(L, 1);
+
+    *sb = p_new(statusbar_t, 1);
+
+    /* \todo check that the name is unique */
+    (*sb)->name = luaA_name_init(L);
+
+    lua_getfield(L, 1, "fg");
+    if((color = luaL_optstring(L, -1, NULL)))
+        draw_color_new(globalconf.connection, globalconf.default_screen,
+                       color, &(*sb)->colors.fg);
+    else
+        (*sb)->colors.fg = globalconf.colors.fg;
+
+    lua_getfield(L, 1, "bg");
+    if((color = luaL_optstring(L, -1, NULL)))
+        draw_color_new(globalconf.connection, globalconf.default_screen,
+                       color, &(*sb)->colors.bg);
+    else
+        (*sb)->colors.bg = globalconf.colors.bg;
+
+    (*sb)->width = luaA_getopt_number(L, 1, "width", 0);
+    (*sb)->height = luaA_getopt_number(L, 1, "height", 0);
+    if((*sb)->height <= 0)
+        /* 1.5 as default factor, it fits nice but no one knows why */
+        (*sb)->height = 1.5 * globalconf.font->height;
+
+    (*sb)->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
+
+    statusbar_ref(sb);
+
+    lua_pushvalue(L, objpos);
+    return luaA_settype(L, "statusbar");
+}
+
+static int
+luaA_statusbar_gc(lua_State *L)
+{
+    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
+    statusbar_unref(sb);
+    return 0;
+}
+
+const struct luaL_reg awesome_statusbar_methods[] =
+{
+    { "new", luaA_statusbar_new },
+    { NULL, NULL }
+};
+const struct luaL_reg awesome_statusbar_meta[] =
+{
+    { "widget_add", luaA_statusbar_widget_add },
+    { "position_set", luaA_statusbar_position_set },
+    { "add", luaA_statusbar_add },
+    { "__gc", luaA_statusbar_gc },
+    { "__eq", luaA_statusbar_eq },
+    { "__tostring", luaA_statusbar_tostring },
+    { NULL, NULL },
+};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -28,9 +28,6 @@ void focus_add_client(client_t *);
 void focus_delete_client(client_t *);
 client_t * focus_get_current_client(int);
 
-uicb_t uicb_focus_history;
-uicb_t uicb_focus_client_byname;
-
 DO_SLIST(client_node_t, client_node, p_delete)
 
 #endif

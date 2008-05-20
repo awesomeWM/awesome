@@ -22,10 +22,8 @@
 #ifndef AWESOME_MOUSE_H
 #define AWESOME_MOUSE_H
 
-#include "uicb.h"
-
-uicb_t uicb_client_movemouse;
-uicb_t uicb_client_resizemouse;
+void mouse_client_move(int);
+void mouse_client_resize(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

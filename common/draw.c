@@ -141,7 +141,7 @@ draw_context_new(xcb_connection_t *conn, int phys_screen, int width, int height,
  * \return a new font
  */
 font_t *
-draw_font_new(xcb_connection_t *conn, int phys_screen, char *fontname)
+draw_font_new(xcb_connection_t *conn, int phys_screen, const char *fontname)
 {
     cairo_surface_t *surface;
     xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
@@ -213,7 +213,11 @@ typedef struct
     } margin;
     bool has_bg_color;
     xcolor_t bg_color;
-    shadow_t shadow;
+    struct
+    {
+        int offset;
+        xcolor_t color;
+    } shadow;
 } draw_parser_data_t;
 
 static bool
@@ -278,13 +282,13 @@ draw_text_markup_expand(draw_parser_data_t *data,
  * \param style A pointer to the style to use.
  */
 void
-draw_text(draw_context_t *ctx, area_t area, const char *text, const style_t *style)
+draw_text(draw_context_t *ctx, font_t *font,
+          xcolor_t *fg, area_t area, const char *text)
 {
     int x, y;
     ssize_t len, olen;
     char *buf = NULL, *utf8 = NULL;
     PangoRectangle ext;
-    shadow_t shadow;
     draw_parser_data_t parser_data;
 
     if(!(len = a_strlen(text)))
@@ -311,8 +315,6 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, const style_t *sty
 
     if(parser_data.has_bg_color)
         draw_rectangle(ctx, area, 1.0, true, parser_data.bg_color);
-    else
-        draw_rectangle(ctx, area, 1.0, true, style->bg);
 
     pango_layout_set_width(ctx->layout,
                            pango_units_from_double(area.width
@@ -320,14 +322,14 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, const style_t *sty
                                                       + parser_data.margin.right)));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
     pango_layout_set_markup(ctx->layout, buf, len);
-    pango_layout_set_font_description(ctx->layout, style->font->desc);
+    pango_layout_set_font_description(ctx->layout, font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
     x = area.x + parser_data.margin.left;
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
      * the text 1px lower than too high which usually results in a better type
      * face */
-    y = area.y + (ctx->height - style->font->height + 1) / 2;
+    y = area.y + (ctx->height - font->height + 1) / 2;
 
     switch(parser_data.align)
     {
@@ -341,20 +343,13 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, const style_t *sty
         break;
     }
 
-
-    p_clear(&shadow, 1);
     if(parser_data.shadow.offset)
-        shadow = parser_data.shadow;
-    else if(style->shadow.offset)
-        shadow = style->shadow;
-
-    if(shadow.offset)
     {
         cairo_set_source_rgb(ctx->cr,
-                             shadow.color.red / 65535.0,
-                             shadow.color.green / 65535.0,
-                             shadow.color.blue / 65535.0);
-        cairo_move_to(ctx->cr, x + shadow.offset, y + shadow.offset);
+                             parser_data.shadow.color.red / 65535.0,
+                             parser_data.shadow.color.green / 65535.0,
+                             parser_data.shadow.color.blue / 65535.0);
+        cairo_move_to(ctx->cr, x + parser_data.shadow.offset, y + parser_data.shadow.offset);
         pango_cairo_update_layout(ctx->cr, ctx->layout);
         pango_cairo_show_layout(ctx->cr, ctx->layout);
     }
@@ -362,9 +357,9 @@ draw_text(draw_context_t *ctx, area_t area, const char *text, const style_t *sty
     cairo_move_to(ctx->cr, x, y);
 
     cairo_set_source_rgb(ctx->cr,
-                         style->fg.red / 65535.0,
-                         style->fg.green / 65535.0,
-                         style->fg.blue / 65535.0);
+                         fg->red / 65535.0,
+                         fg->green / 65535.0,
+                         fg->blue / 65535.0);
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 
@@ -1076,48 +1071,6 @@ draw_color_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcol
 
     warn("awesome: error, cannot allocate color '%s'\n", colstr);
     return false;
-}
-
-/** Init a style struct. Every value will be inherited from m
- * if they are not set in the configuration section cfg.
- * \param disp Display ref
- * \param phys_screen Physical screen number
- * \param cfg style configuration section
- * \param c style to fill
- * \param m style to use as template
- */
-void
-draw_style_init(xcb_connection_t *conn, int phys_screen, cfg_t *cfg,
-                style_t *c, style_t *m)
-{
-    char *buf;
-    int shadow;
-
-    if(m)
-        *c = *m;
-
-    if(!cfg)
-        return;
-
-    if((buf = cfg_getstr(cfg, "font")))
-        c->font = draw_font_new(conn, phys_screen, buf);
-
-    draw_color_new(conn, phys_screen,
-                   cfg_getstr(cfg, "fg"), &c->fg);
-
-    draw_color_new(conn, phys_screen,
-                   cfg_getstr(cfg, "bg"), &c->bg);
-
-    draw_color_new(conn, phys_screen,
-                   cfg_getstr(cfg, "border"), &c->border);
-
-    draw_color_new(conn, phys_screen,
-                   cfg_getstr(cfg, "shadow_color"), &c->shadow.color);
-
-    if((shadow = cfg_getint(cfg, "shadow_offset")) != (int) 0xffffffff)
-        c->shadow.offset = shadow;
-    else if(!m)
-        c->shadow.offset = 0;
 }
 
 /** Remove a area from a list of them,

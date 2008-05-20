@@ -20,11 +20,17 @@
  *
  */
 
+#define _GNU_SOURCE
+
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+
+#include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "common/socket.h"
 #include "common/version.h"
@@ -41,7 +47,7 @@
  * \return errno of sendto()
  */
 static int
-send_msg(char *msg, ssize_t msg_len)
+send_msg(const char *msg, ssize_t msg_len)
 {
     struct sockaddr_un *addr;
     int csfd, ret_value = EXIT_SUCCESS;
@@ -94,51 +100,58 @@ exit_help(int exit_code)
 int
 main(int argc, char **argv)
 {
-    char buf[1024], *msg;
+    char buf[1024], *msg, *prompt;
     int ret_value = EXIT_SUCCESS;
     ssize_t len, msg_len = 1;
 
-    if (argc < 2)
-    {
-        /* no args to parse, nothing to do */
-    }
-    else if (argc == 2)
+    if(argc == 2)
     {
         if(!a_strcmp("-v", argv[1]) || !a_strcmp("--version", argv[1]))
 	    eprint_version("awesome-client");
         else if(!a_strcmp("-h", argv[1]) || !a_strcmp("--help", argv[1]))
             exit_help(EXIT_SUCCESS);
     }
+    else if(argc > 2)
+        exit_help(EXIT_SUCCESS);
+
+    if(isatty(STDIN_FILENO))
+    {
+        asprintf(&prompt, "awesome@%s%% ", getenv("DISPLAY"));
+        while((msg = readline(prompt)))
+            if((msg_len = a_strlen(msg)))
+            {
+                p_realloc(&msg, msg_len + 2);
+                msg[msg_len] = '\n';
+                msg[msg_len + 1] = '\0';
+                send_msg(msg, msg_len + 2);
+            }
+    }
     else
     {
-        exit_help(EXIT_SUCCESS);
-    }
-
-    msg = p_new(char, 1);
-    while(fgets(buf, sizeof(buf), stdin))
-    {
-        len = a_strlen(buf);
-        if (len < 2 && msg_len > 1)
+        msg = p_new(char, 1);
+        while(fgets(buf, sizeof(buf), stdin))
         {
+            len = a_strlen(buf);
+            if(len < 2 && msg_len > 1)
+            {
+                ret_value = send_msg(msg, msg_len);
+                p_delete(&msg);
+                if (ret_value != EXIT_SUCCESS)
+                    return ret_value;
+                msg = p_new(char, 1);
+                msg_len = 1;
+            }
+            else if (len > 1)
+            {
+                msg_len += len;
+                p_realloc(&msg, msg_len);
+                a_strncat(msg, msg_len, buf, len);
+            }
+        }
+        if(msg_len > 1)
             ret_value = send_msg(msg, msg_len);
-            p_delete(&msg);
-            if (ret_value != EXIT_SUCCESS)
-                return ret_value;
-            msg = p_new(char, 1);
-            msg_len = 1;
-        }
-        else if (len > 1)
-        {
-            msg_len += len;
-            p_realloc(&msg, msg_len);
-            a_strncat(msg, msg_len, buf, len);
-        }
+        p_delete(&msg);
     }
-
-    if (msg_len > 1)
-        ret_value = send_msg(msg, msg_len);
-
-    p_delete(&msg);
 
     return ret_value;
 }

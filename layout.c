@@ -36,8 +36,6 @@
 
 extern AwesomeConf globalconf;
 
-#include "layoutgen.h"
-
 /** Arrange windows following current selected layout
  * \param screen the screen to arrange
  */
@@ -45,7 +43,7 @@ static void
 arrange(int screen)
 {
     client_t *c;
-    Layout *curlay = layout_get_current(screen);
+    LayoutArrange *curlay = layout_get_current(screen);
     int phys_screen = screen_virttophys(screen);
     xcb_query_pointer_cookie_t qp_c;
     xcb_query_pointer_reply_t *qp_r;
@@ -59,24 +57,19 @@ arrange(int screen)
             client_ban(c);
     }
 
-    curlay->arrange(screen);
+    if(curlay)
+        curlay(screen);
 
     for(c = globalconf.clients; c; c = c->next)
         if(c->newcomer && client_isvisible(c, screen))
         {
             c->newcomer = false;
             client_unban(c);
-            if(globalconf.screens[screen].new_get_focus
-               && !c->skip
-               && (!globalconf.focus->client || !globalconf.focus->client->ismax))
-                client_focus(c, screen, true);
-            else if(globalconf.focus->client && globalconf.focus->client->ismax)
-                client_stack(globalconf.focus->client);
         }
 
     /* if we have a valid client that could be focused but currently no window
      * are focused, then set the focus on this window */
-    if((c = focus_get_current_client(screen)) && globalconf.focus->client != c)
+    if((c = focus_get_current_client(screen)) && !globalconf.focus->client)
         client_focus(c, screen, true);
 
     qp_c = xcb_query_pointer_unchecked(globalconf.connection,
@@ -87,7 +80,7 @@ arrange(int screen)
     if((qp_r = xcb_query_pointer_reply(globalconf.connection, qp_c, NULL)))
     {
         if(qp_r->root == XCB_NONE || qp_r->child == XCB_NONE || qp_r->root == qp_r->child)
-            window_root_grabbuttons(phys_screen);
+            window_root_grabbuttons();
 
         globalconf.pointer_x = qp_r->root_x;
         globalconf.pointer_y = qp_r->root_y;
@@ -117,62 +110,21 @@ layout_refresh(void)
     return arranged;
 }
 
-/** Get current layout used on screen
- * \param screen screen id
+/** Get current layout used on screen.
+ * \param screen Virtual screen number.
  * \return layout used on that screen
  */
-Layout *
+LayoutArrange *
 layout_get_current(int screen)
 {
+    LayoutArrange *l = NULL;
     tag_t **curtags = tags_get_current(screen);
-    Layout *l = curtags[0]->layout;
+
+    if(curtags[0])
+        l = curtags[0]->layout;
     p_delete(&curtags);
+
     return l;
-}
-
-/** Set the layout of the current tag.
- * Argument must be a relative or absolute integer of available layouts.
- * \param screen Screen ID
- * \param arg Layout specifier
- * \ingroup ui_callback
- */
-void
-uicb_tag_setlayout(int screen, char *arg)
-{
-    Layout *l = globalconf.screens[screen].layouts;
-    tag_t *tag, **curtags;
-    int i;
-
-    if(arg)
-    {
-        curtags = tags_get_current(screen);
-        for(i = 0; l && l != curtags[0]->layout; i++, l = l->next);
-        p_delete(&curtags);
-
-        if(!l)
-            i = 0;
-
-        i = compute_new_value_from_arg(arg, (double) i);
-
-        if(i >= 0)
-            for(l = globalconf.screens[screen].layouts; l && i > 0; i--)
-                 l = l->next;
-        else
-            for(l = globalconf.screens[screen].layouts; l && i < 0; i++)
-                 l = layout_list_prev_cycle(&globalconf.screens[screen].layouts, l);
-
-        if(!l)
-            l = globalconf.screens[screen].layouts;
-    }
-
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        if(tag->selected)
-            tag->layout = l;
-
-    if(globalconf.focus->client)
-        arrange(screen);
-
-    widget_invalidate_cache(screen, WIDGET_CACHE_LAYOUTS);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

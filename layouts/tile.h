@@ -30,9 +30,5 @@ LayoutArrange layout_tileleft;
 LayoutArrange layout_tilebottom;
 LayoutArrange layout_tiletop;
 
-uicb_t uicb_tag_setnmaster;
-uicb_t uicb_tag_setncol;
-uicb_t uicb_tag_setmwfact;
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

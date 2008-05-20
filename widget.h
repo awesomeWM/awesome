@@ -30,26 +30,20 @@
 #define WIDGET_CACHE_TAGS           1<<2
 #define WIDGET_CACHE_ALL            (WIDGET_CACHE_CLIENTS | WIDGET_CACHE_LAYOUTS | WIDGET_CACHE_TAGS)
 
-typedef widget_t *(WidgetConstructor)(statusbar_t *, cfg_t *);
+typedef widget_t *(WidgetConstructor)(alignment_t);
 
 void widget_invalidate_cache(int, int);
 int widget_calculate_offset(int, int, int, int);
-void widget_calculate_alignments(widget_t *);
-void widget_common_new(widget_t*, statusbar_t *, cfg_t *);
+void widget_common_new(widget_t *);
 widget_t * widget_getbyname(statusbar_t *, char *);
+void widget_invalidate_statusbar_bywidget(widget_t *);
 
-WidgetConstructor layoutinfo_new;
 WidgetConstructor taglist_new;
 WidgetConstructor textbox_new;
 WidgetConstructor iconbox_new;
-WidgetConstructor focusicon_new;
 WidgetConstructor progressbar_new;
 WidgetConstructor graph_new;
 WidgetConstructor tasklist_new;
-
-uicb_t uicb_widget_tell;
-
-DO_SLIST(widget_t, widget, p_delete)
 
 #endif
 

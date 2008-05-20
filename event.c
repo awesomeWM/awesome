@@ -32,8 +32,8 @@
 #include "ewmh.h"
 #include "client.h"
 #include "widget.h"
-#include "rules.h"
 #include "titlebar.h"
+#include "lua.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "common/xscreen.h"
@@ -46,18 +46,17 @@ extern AwesomeConf globalconf;
  * \param button button number
  * \param state modkeys state
  * \param buttons buttons list to check for
- * \param arg optional arg passed to uicb, otherwise buttons' arg are used
  */
 static void
-event_handle_mouse_button_press(int screen, unsigned int button,
+event_handle_mouse_button_press(unsigned int button,
                                 unsigned int state,
                                 Button *buttons)
 {
     Button *b;
 
     for(b = buttons; b; b = b->next)
-        if(button == b->button && CLEANMASK(state) == b->mod && b->func)
-            b->func(screen, b->arg);
+        if(button == b->button && CLEANMASK(state) == b->mod && b->fct)
+            luaA_dofunction(globalconf.L, b->fct, 0);
 }
 
 /** Handle XButtonPressed events
@@ -70,12 +69,8 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
 {
     int screen;
     client_t *c;
-    widget_t *widget;
+    widget_node_t *w;
     statusbar_t *statusbar;
-    xcb_query_pointer_cookie_t qc;
-    xcb_query_pointer_reply_t *qr;
-
-    qc = xcb_query_pointer(connection, ev->event);
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
@@ -85,34 +80,34 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                 {
                   case Top:
                   case Bottom:
-                    for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(ev->event_x >= widget->area.x && ev->event_x < widget->area.x + widget->area.width
-                           && ev->event_y >= widget->area.y && ev->event_y < widget->area.y + widget->area.height)
+                    for(w = statusbar->widgets; w; w = w->next)
+                        if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
+                           && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
                         {
-                            widget->button_press(widget, ev);
+                            w->widget->button_press(w, statusbar, ev);
                             return 0;
                         }
                     break;
                   case Right:
-                    for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(ev->event_y >= widget->area.x && ev->event_y < widget->area.x + widget->area.width
-                           && statusbar->sw->geometry.width - ev->event_x >= widget->area.y
+                    for(w = statusbar->widgets; w; w = w->next)
+                        if(ev->event_y > w->area.x && ev->event_y < w->area.x + w->area.width
+                           && statusbar->sw->geometry.width - ev->event_x >= w->area.y
                            && statusbar->sw->geometry.width - ev->event_x
-                              < widget->area.y + widget->area.height)
+                              < w->area.y + w->area.height)
                         {
-                            widget->button_press(widget, ev);
+                            w->widget->button_press(w, statusbar, ev);
                             return 0;
                         }
                     break;
                   case Left:
-                    for(widget = statusbar->widgets; widget; widget = widget->next)
-                        if(statusbar->sw->geometry.height - ev->event_y >= widget->area.x
+                    for(w = statusbar->widgets; w; w = w->next)
+                        if(statusbar->sw->geometry.height - ev->event_y >= w->area.x
                            && statusbar->sw->geometry.height - ev->event_y
-                              < widget->area.x + widget->area.width
-                           && ev->event_x >= widget->area.y
-                           && ev->event_x < widget->area.y + widget->area.height)
+                              < w->area.x + w->area.width
+                           && ev->event_x >= w->area.y
+                           && ev->event_x < w->area.y + w->area.height)
                         {
-                            widget->button_press(widget, ev);
+                            w->widget->button_press(w, statusbar, ev);
                             return 0;
                         }
                     break;
@@ -125,14 +120,14 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
 
     /* Check for titlebar first */
     for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar.sw && c->titlebar.sw->window == ev->event)
+        if(c->titlebar_sw && c->titlebar_sw->window == ev->event)
         {
             if(!client_focus(c, c->screen, true))
                 client_stack(c);
             if(CLEANMASK(ev->state) == XCB_NO_SYMBOL
                && ev->detail == XCB_BUTTON_INDEX_1)
                 window_grabbuttons(c->win, c->phys_screen);
-            event_handle_mouse_button_press(c->screen, ev->detail, ev->state,
+            event_handle_mouse_button_press(ev->detail, ev->state,
                                             globalconf.buttons.titlebar);
             return 0;
         }
@@ -148,18 +143,14 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
             window_grabbuttons(c->win, c->phys_screen);
         }
         else
-            event_handle_mouse_button_press(c->screen, ev->detail, ev->state, globalconf.buttons.client);
+            event_handle_mouse_button_press(ev->detail, ev->state, globalconf.buttons.client);
     }
     else
         for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
-            if(xcb_aux_get_screen(connection, screen)->root == ev->event
-               && (qr = xcb_query_pointer_reply(connection, qc, NULL)))
+            if(xcb_aux_get_screen(connection, screen)->root == ev->event)
             {
-                screen = screen_get_bycoord(globalconf.screens_info, screen, qr->root_x, qr->root_y);
-                event_handle_mouse_button_press(screen, ev->detail, ev->state,
+                event_handle_mouse_button_press(ev->detail, ev->state,
                                                 globalconf.buttons.root);
-
-                p_delete(&qr);
                 return 0;
             }
 
@@ -193,7 +184,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
-            if(c->isfloating || layout_get_current(c->screen)->arrange == layout_floating)
+            if(c->isfloating || layout_get_current(c->screen) == layout_floating)
                 client_resize(c, geometry, false);
             else
             {
@@ -275,7 +266,7 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
            && (ev->width != screen->width_in_pixels
                || ev->height != screen->height_in_pixels))
             /* it's not that we panic, but restart */
-            uicb_restart(0, NULL);
+            a_exec(globalconf.argv);
 
     return 0;
 }
@@ -303,10 +294,10 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
  */
 int
 event_handle_enternotify(void *data __attribute__ ((unused)),
-                         xcb_connection_t *connection, xcb_enter_notify_event_t *ev)
+                         xcb_connection_t *connection __attribute__ ((unused)),
+                         xcb_enter_notify_event_t *ev)
 {
-    client_t *c;
-    int screen;
+    client_t *c, **lc;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
        || (ev->root_x == globalconf.pointer_x
@@ -314,7 +305,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         return 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar.sw && c->titlebar.sw->window == ev->event)
+        if(c->titlebar_sw && c->titlebar_sw->window == ev->event)
             break;
 
     if(c || (c = client_get_bywin(globalconf.clients, ev->event)))
@@ -326,17 +317,13 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         globalconf.pointer_x = ev->root_x;
         globalconf.pointer_y = ev->root_y;
 
-        if(globalconf.screens[c->screen].sloppy_focus)
-            client_focus(c, c->screen,
-                         globalconf.screens[c->screen].sloppy_focus_raise);
+        lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
+        *lc = c;
+        luaA_settype(globalconf.L, "client");
+        luaA_dofunction(globalconf.L, globalconf.hooks.mouseover, 1);
     }
     else
-        for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
-            if(ev->event == xcb_aux_get_screen(connection, screen)->root)
-            {
-                window_root_grabbuttons(screen);
-                return 0;
-            }
+        window_root_grabbuttons();
 
     return 0;
 }
@@ -365,9 +352,9 @@ event_handle_expose(void *data __attribute__ ((unused)),
                 }
 
         for(c = globalconf.clients; c; c = c->next)
-            if(c->titlebar.sw && c->titlebar.sw->window == ev->window)
+            if(c->titlebar_sw && c->titlebar_sw->window == ev->window)
             {
-                simplewindow_refresh_drawable(c->titlebar.sw);
+                simplewindow_refresh_drawable(c->titlebar_sw);
                 return 0;
             }
     }
@@ -381,53 +368,18 @@ event_handle_expose(void *data __attribute__ ((unused)),
  */
 int
 event_handle_keypress(void *data __attribute__ ((unused)),
-                      xcb_connection_t *connection, xcb_key_press_event_t *ev)
+                      xcb_connection_t *connection __attribute__ ((unused)),
+                      xcb_key_press_event_t *ev)
 {
-    int screen;
-    xcb_query_pointer_reply_t *qpr = NULL;
     xcb_keysym_t keysym;
     keybinding_t *k;
-
-    /* find the right screen for this event */
-    for(screen = 0; screen < xcb_setup_roots_length (xcb_get_setup (connection)); screen++)
-        if((qpr = xcb_query_pointer_reply(connection,
-                                          xcb_query_pointer(connection,
-                                                            xcb_aux_get_screen(connection, screen)->root),
-                                          NULL)) != NULL)
-        {
-            /* if screen is 0, we are on first Zaphod screen or on the
-             * only screen in Xinerama, so we can ask for a better screen
-             * number with screen_get_bycoord: we'll get 0 in Zaphod mode
-             * so it's the same, or maybe the real Xinerama screen */
-            screen = screen_get_bycoord(globalconf.screens_info, screen, qpr->root_x, qpr->root_y);
-            p_delete(&qpr);
-            break;
-        }
 
     keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
 
     for(k = globalconf.keys; k; k = k->next)
         if(((k->keycode && ev->detail == k->keycode) || (k->keysym && keysym == k->keysym))
-           && k->func && CLEANMASK(k->mod) == CLEANMASK(ev->state))
-            k->func(screen, k->arg);
-
-    return 0;
-}
-
-/** Handle XMapping events
- * \param connection connection to the X server
- * \param ev MappingNotify event
- */
-int
-event_handle_mappingnotify(void *data __attribute__ ((unused)),
-                           xcb_connection_t *connection, xcb_mapping_notify_event_t *ev)
-{
-    int screen;
-
-    xcb_refresh_keyboard_mapping(globalconf.keysyms, ev);
-    if(ev->request == XCB_MAPPING_KEYBOARD)
-        for(screen = 0; screen < xcb_setup_roots_length(xcb_get_setup(connection)); screen++)
-            window_root_grabkeys(screen);
+           && k->fct && CLEANMASK(k->mod) == CLEANMASK(ev->state))
+            luaA_dofunction(globalconf.L, k->fct, 0);
 
     return 0;
 }
@@ -594,7 +546,7 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
      * XRenderSetSubpixelOrder(dpy, snum, scevent->subpixel_order);
      */
 
-    uicb_restart(0, NULL);
+    a_exec(globalconf.argv);
     return 0;
 }
 

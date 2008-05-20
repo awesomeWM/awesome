@@ -149,17 +149,51 @@ window_grabbuttons(xcb_window_t win, int phys_screen)
                       ANY_MODIFIER);
 }
 
-/** Grab buttons on the root window.
- * \param phys_screen physical screen id
+/** Grab all buttons on the root window.
+ * \param b The button binding.
  */
 void
-window_root_grabbuttons(int phys_screen)
+window_root_grabbuttons(void)
 {
     Button *b;
-    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, phys_screen);
+    xcb_screen_t *s;
+    int phys_screen = globalconf.default_screen;
 
-    for(b = globalconf.buttons.root; b; b = b->next)
+    do
     {
+        s = xcb_aux_get_screen(globalconf.connection, phys_screen);
+        for(b = globalconf.buttons.root; b; b = b->next)
+        {
+            xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
+                            XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                            b->button, b->mod);
+            xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
+                            XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                            b->button, b->mod | XCB_MOD_MASK_LOCK);
+            xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
+                            XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                            b->button, b->mod | globalconf.numlockmask);
+            xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
+                            XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                            b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
+        }
+        phys_screen++;
+    } while(!globalconf.screens_info->xinerama_is_active
+            && phys_screen < globalconf.screens_info->nscreen);
+}
+
+/** Grab button on the root window.
+ * \param b The button binding.
+ */
+void
+window_root_grabbutton(Button *b)
+{
+    xcb_screen_t *s;
+    int phys_screen = globalconf.default_screen;
+
+    do
+    {
+        s = xcb_aux_get_screen(globalconf.connection, phys_screen);
         xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod);
@@ -172,22 +206,27 @@ window_root_grabbuttons(int phys_screen)
         xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
-    }
+        phys_screen++;
+    } while(!globalconf.screens_info->xinerama_is_active
+            && phys_screen < globalconf.screens_info->nscreen);
 }
 
-/** Grab keys on the root window.
- * \param phys_screen Physical screen number.
+/** Grab key on the root windows.
+ * \param k The keybinding.
  */
 void
-window_root_grabkeys(int phys_screen)
+window_root_grabkey(keybinding_t *k)
 {
-    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, phys_screen);
-    keybinding_t *k;
+    int phys_screen = globalconf.default_screen;
+    xcb_screen_t *s;
     xcb_keycode_t kc;
-
-    for(k = globalconf.keys; k; k = k->next)
-	if((kc = k->keycode) || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
+    
+    if((kc = k->keycode)
+       || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
+    {
+        do
         {
+            s = xcb_aux_get_screen(globalconf.connection, phys_screen);
             xcb_grab_key(globalconf.connection, true, s->root,
                          k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
             xcb_grab_key(globalconf.connection, true, s->root,
@@ -197,7 +236,10 @@ window_root_grabkeys(int phys_screen)
             xcb_grab_key(globalconf.connection, true, s->root,
                          k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
                          XCB_GRAB_MODE_ASYNC);
-        }
+        phys_screen++;
+        } while(!globalconf.screens_info->xinerama_is_active
+                && phys_screen < globalconf.screens_info->nscreen);
+    }
 }
 
 /** Set shape property on window.

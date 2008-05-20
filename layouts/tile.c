@@ -22,106 +22,12 @@
 #include <stdio.h>
 
 #include "screen.h"
-#include "awesome.h"
 #include "tag.h"
 #include "client.h"
 #include "layouts/tile.h"
 #include "common/util.h"
 
 extern AwesomeConf globalconf;
-
-void
-uicb_tag_setnmaster(int screen, char * arg)
-{
-    tag_t **curtags = tags_get_current(screen);
-    Layout *curlay = curtags[0]->layout;
-    client_t *c;
-    int n;
-
-    if(!arg || (curlay->arrange != layout_tile
-                && curlay->arrange != layout_tileleft
-                && curlay->arrange != layout_tilebottom
-                && curlay->arrange != layout_tiletop))
-        return;
-
-    if((curtags[0]->nmaster = (int) compute_new_value_from_arg(arg, (double) curtags[0]->nmaster)) < 0)
-        curtags[0]->nmaster = 0;
-
-    for(n = 0, c = globalconf.clients; c; c = c->next)
-        if(IS_TILED(c, screen))
-            n++;
-
-    if(curtags[0]->nmaster > n - 1)
-        curtags[0]->nmaster = n;
-
-    p_delete(&curtags);
-
-    globalconf.screens[screen].need_arrange = true;
-}
-
-void
-uicb_tag_setncol(int screen, char * arg)
-{
-    tag_t **curtags = tags_get_current(screen);
-    Layout *curlay = curtags[0]->layout;
-    client_t *c;
-    int n;
-
-    if(!arg || (curlay->arrange != layout_tile
-                && curlay->arrange != layout_tileleft
-                && curlay->arrange != layout_tilebottom
-                && curlay->arrange != layout_tiletop))
-        return;
-
-
-    if((curtags[0]->ncol = (int) compute_new_value_from_arg(arg, (double) curtags[0]->ncol)) < 1)
-        curtags[0]->ncol = 1;
-
-    for(n = 0, c = globalconf.clients; c; c = c->next)
-        if(IS_TILED(c, screen))
-            n++;
-
-    if(curtags[0]->ncol > n - 1)
-    	curtags[0]->ncol = n - 1;
-
-    p_delete(&curtags);
-
-    globalconf.screens[screen].need_arrange = true;
-}
-
-void
-uicb_tag_setmwfact(int screen, char *arg)
-{
-    char *newarg;
-    tag_t **curtags = tags_get_current(screen);
-    Layout *curlay = curtags[0]->layout;
-
-    if(!arg || (curlay->arrange != layout_tile
-                && curlay->arrange != layout_tileleft
-                && curlay->arrange != layout_tilebottom
-                && curlay->arrange != layout_tiletop))
-        return;
-
-    newarg = a_strdup(arg);
-    if(curlay->arrange == layout_tileleft || curlay->arrange == layout_tiletop)
-    {
-        if(newarg[0] == '+')
-            newarg[0] = '-';
-        else if(arg[0] == '-')
-            newarg[0] = '+';
-    }
-
-    curtags[0]->mwfact = compute_new_value_from_arg(newarg, curtags[0]->mwfact);
-
-    if(curtags[0]->mwfact < globalconf.screens[screen].mwfact_lower_limit)
-        curtags[0]->mwfact = globalconf.screens[screen].mwfact_lower_limit;
-    else if(curtags[0]->mwfact > globalconf.screens[screen].mwfact_upper_limit)
-        curtags[0]->mwfact = globalconf.screens[screen].mwfact_upper_limit;
-
-    p_delete(&newarg);
-    p_delete(&curtags);
-    globalconf.screens[screen].need_arrange = true;
-}
 
 static void
 _tile(int screen, const position_t position)
@@ -206,7 +112,7 @@ _tile(int screen, const position_t position)
             geometry.width = mw - 2 * c->border;
             geometry.height =  mh - 2 * c->border;
 
-            client_resize(c, geometry, globalconf.screens[screen].resize_hints);
+            client_resize(c, geometry, globalconf.resize_hints);
         }
         else
         {
@@ -257,7 +163,7 @@ _tile(int screen, const position_t position)
                 if(position == Bottom)
                     geometry.y += mh;
             }
-            client_resize(c, geometry, globalconf.screens[screen].resize_hints);
+            client_resize(c, geometry, globalconf.resize_hints);
         }
         i++;
     }

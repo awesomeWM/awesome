@@ -158,6 +158,8 @@ typedef struct
 
 xutil_error_t *xutil_get_error(const xcb_generic_error_t *);
 void xutil_delete_error(xutil_error_t *);
+xcb_keysym_t xutil_keymask_fromstr(const char *);
+unsigned int xutil_button_fromint(int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

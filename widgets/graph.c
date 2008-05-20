@@ -80,33 +80,31 @@ typedef struct
 } Data;
 
 static int
-graph_draw(widget_t *widget, draw_context_t *ctx, int offset,
-                 int used __attribute__ ((unused)))
+graph_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
+           int used __attribute__ ((unused)))
 {
     int margin_top;
     int z, y, x, tmp, cur_index, test_index;
-    Data *d = widget->data;
+    Data *d = w->widget->data;
     area_t rectangle, pattern_area;
+    draw_context_t *ctx = statusbar->ctx;
 
     if(!d->data_items)
         return 0;
 
-    if(!widget->user_supplied_x)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                                 d->width,
-                                                 offset,
-                                                 widget->alignment);
-    if(!widget->user_supplied_y)
-        widget->area.y = 0;
+    w->area.x = widget_calculate_offset(statusbar->width,
+                                        d->width, offset,
+                                        w->widget->align);
+    w->area.y = 0;
 
     /* box = the graph inside the rectangle */
     if(!(d->box_height))
-        d->box_height = (int) (widget->statusbar->height * d->height + 0.5) - 2;
+        d->box_height = (int) (statusbar->height * d->height + 0.5) - 2;
 
-    margin_top = (int)((widget->statusbar->height - (d->box_height + 2)) / 2 + 0.5) + widget->area.y;
+    margin_top = (int)((statusbar->height - (d->box_height + 2)) / 2 + 0.5) + w->area.y;
 
     /* draw background */
-    rectangle.x = widget->area.x + 1;
+    rectangle.x = w->area.x + 1;
     rectangle.y = margin_top + 1;
     rectangle.width = d->size;
     rectangle.height = d->box_height;
@@ -262,19 +260,19 @@ graph_draw(widget_t *widget, draw_context_t *ctx, int offset,
     }
 
     /* draw border (after line-drawing, what paints 0-values to the border) */
-    rectangle.x = widget->area.x;
+    rectangle.x = w->area.x;
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
     draw_rectangle(ctx, rectangle, 1.0, false, d->bordercolor);
 
-    widget->area.width = d->width;
-    widget->area.height = widget->statusbar->height;
-    return widget->area.width;
+    w->area.width = d->width;
+    w->area.height = statusbar->height;
+    return w->area.width;
 }
 
 static widget_tell_status_t
-graph_tell(widget_t *widget, char *property, char *new_value)
+graph_tell(widget_t *widget, const char *property, const char *new_value)
 {
     Data *d = widget->data;
     int i, u;
@@ -347,14 +345,14 @@ graph_tell(widget_t *widget, char *property, char *new_value)
     else if(!a_strcmp(property, "bg"))
     {
         if(!draw_color_new(globalconf.connection,
-                           widget->statusbar->phys_screen,
+                           globalconf.default_screen,
                            new_value, &d->bg))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
     else if(!a_strcmp(property, "bordercolor"))
     {
         if(!draw_color_new(globalconf.connection,
-                           widget->statusbar->phys_screen,
+                           globalconf.default_screen,
                            new_value, &d->bordercolor))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
@@ -376,7 +374,7 @@ graph_tell(widget_t *widget, char *property, char *new_value)
 }
 
 widget_t *
-graph_new(statusbar_t *statusbar, cfg_t *config)
+graph_new(alignment_t align)
 {
     widget_t *w;
     Data *d;
@@ -389,17 +387,18 @@ graph_new(statusbar_t *statusbar, cfg_t *config)
     xcolor_t *ptmp_color_end;
 
     w = p_new(widget_t, 1);
-    widget_common_new(w, statusbar, config);
+    widget_common_new(w);
 
     w->draw = graph_draw;
     w->tell = graph_tell;
-    w->alignment = cfg_getalignment(config, "align");
+    w->align = align;
     d = w->data = p_new(Data, 1);
 
-    d->width = cfg_getint(config, "width");
-    d->height = cfg_getfloat(config, "height");
+    d->width = 100;
+    d->height = 0.67;
     d->size = d->width - 2;
 
+    /*
     if(!(d->data_items = cfg_size(config, "data")))
     {
         warn("graph widget needs at least one data section\n");
@@ -410,8 +409,10 @@ graph_new(statusbar_t *statusbar, cfg_t *config)
     if(d->grow != Left && d->grow != Right)
     {
         warn("graph widget: 'grow' argument must be 'left' or 'right'\n");
+        */
+    /*
         d->data_items = 0; /* disable widget drawing */
-        return w;
+      /*  return w;
     }
 
     d->draw_from = p_new(int, d->size);
@@ -476,11 +477,12 @@ graph_new(statusbar_t *statusbar, cfg_t *config)
             d->values[i] = p_new(float, d->size); /* not null -> scale = true */
 
         /* prevent: division by zero */
+    /*
         d->current_max[i] = d->max[i] = cfg_getfloat(cfg, "max");
         d->lines[i] = p_new(int, d->size);
 
         /* filter each style-typ into it's own array (for easy looping later)*/
-
+/*
         if ((type = cfg_getstr(cfg, "draw_style")))
         {
             if(!a_strncmp(type, "bottom", sizeof("bottom")))
@@ -525,7 +527,7 @@ graph_new(statusbar_t *statusbar, cfg_t *config)
         draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bordercolor);
     else
         d->bordercolor = tmp_color;
-
+*/
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

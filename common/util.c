@@ -175,7 +175,8 @@ fuzzy_get_from_str(const char *str)
  *
  * \return minimum of  \c src \e length and \c l.
 */
-ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l)
+ssize_t
+a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l)
 {
     ssize_t len = MIN(a_strlen(src), l);
 
@@ -200,7 +201,8 @@ ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l)
  * \return \c src \e length. If this value is \>= \c n then the copy was
  *         truncated.
  */
-ssize_t a_strcpy(char *dst, ssize_t n, const char *src)
+ssize_t
+a_strcpy(char *dst, ssize_t n, const char *src)
 {
     ssize_t len = a_strlen(src);
 
@@ -213,4 +215,28 @@ ssize_t a_strcpy(char *dst, ssize_t n, const char *src)
 
     return len;
 }
+
+/** Execute a command and replace the current process.
+ * \param cmd The command to execute.
+ */
+void
+a_exec(const char *cmd)
+{
+    char *args, *path;
+
+    /* Ignore the leading spaces if any */
+    while(cmd[0] && cmd[0] == ' ') cmd++;
+
+    /* Get the beginning of the arguments */
+    args = strchr(cmd, ' ');
+    if(args)
+        path = a_strndup(cmd, args - cmd);
+    else
+        path = a_strndup(cmd, a_strlen(cmd));
+
+    execlp(path, cmd, NULL);
+
+    p_delete(&path);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -41,8 +41,7 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_icccm.h>
 
-#include "config.h"
-#include "awesome.h"
+#include "lua.h"
 #include "event.h"
 #include "layout.h"
 #include "screen.h"
@@ -58,7 +57,7 @@
 #include "common/configopts.h"
 #include "common/xutil.h"
 
-static bool running = true;
+bool running = true;
 
 AwesomeConf globalconf;
 
@@ -200,17 +199,6 @@ xerrorstart(void * data __attribute__ ((unused)),
     eprint("another window manager is already running\n");
 }
 
-/** Quit awesome.
- * \param screen Screen ID
- * \param arg nothing
- * \ingroup ui_callback
- */
-void
-uicb_quit(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
-{
-    running = false;
-}
-
 /** Function to exit on some signals.
  * \param sig the signal received, unused
  */
@@ -292,20 +280,20 @@ main(int argc, char **argv)
     int r, xfd, csfd, dbusfd, i, screen_nbr, opt;
     ssize_t cmdlen = 1;
     const xcb_query_extension_reply_t *shape_query, *randr_query;
-    statusbar_t *statusbar;
     fd_set rd;
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
-    bool confcheck = false;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
         {"version", 0, NULL, 'v'},
-        {"check",   0, NULL, 'k'},
         {"config",  1, NULL, 'c'},
         {NULL,      0, NULL, 0}
     };
+
+    /* clear the globalconf structure */
+    p_clear(&globalconf, 1);
 
     /* save argv */
     for(i = 0; i < argc; i++)
@@ -337,16 +325,10 @@ main(int argc, char **argv)
             else
                 eprint("-c option requires a file name\n");
             break;
-          case 'k':
-            confcheck = true;
-            break;
         }
 
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
-
-    if(confcheck)
-        return config_check(confpath);
 
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
@@ -396,22 +378,14 @@ main(int argc, char **argv)
     focus_add_client(NULL);
 
     /* parse config */
-    config_parse(confpath);
+    if(!confpath)
+        confpath = config_file();
+    luaA_parserc(confpath);
 
     /* init cursors */
     globalconf.cursor[CurNormal] = create_font_cursor(CURSOR_LEFT_PTR);
     globalconf.cursor[CurResize] = create_font_cursor(CURSOR_SIZING);
     globalconf.cursor[CurMove] = create_font_cursor(CURSOR_FLEUR);
-
-    /* for each virtual screen */
-    for(screen_nbr = 0; screen_nbr < globalconf.screens_info->nscreen; screen_nbr++)
-    {
-        /* view at least one tag */
-        tag_view(globalconf.screens[screen_nbr].tags, true);
-        for(statusbar = globalconf.screens[screen_nbr].statusbar;
-            statusbar; statusbar = statusbar->next)
-            statusbar_init(statusbar);
-    }
 
     /* select for events */
     const uint32_t change_win_vals[] =
@@ -433,8 +407,7 @@ main(int argc, char **argv)
                                      change_win_vals);
         ewmh_set_supported_hints(screen_nbr);
         /* call this to at least grab root window clicks */
-        window_root_grabbuttons(screen_nbr);
-        window_root_grabkeys(screen_nbr);
+        window_root_grabbuttons();
     }
 
     /* scan existing windows */
@@ -450,7 +423,6 @@ main(int argc, char **argv)
     set_enter_notify_event_handler(globalconf.evenths, event_handle_enternotify, NULL);
     set_expose_event_handler(globalconf.evenths, event_handle_expose, NULL);
     set_key_press_event_handler(globalconf.evenths, event_handle_keypress, NULL);
-    set_mapping_notify_event_handler(globalconf.evenths, event_handle_mappingnotify, NULL);
     set_map_request_event_handler(globalconf.evenths, event_handle_maprequest, NULL);
     set_property_notify_event_handler(globalconf.evenths, event_handle_propertynotify, NULL);
     set_unmap_notify_event_handler(globalconf.evenths, event_handle_unmapnotify, NULL);
@@ -490,7 +462,7 @@ main(int argc, char **argv)
         else
             warn("error binding UNIX domain socket: %s\n", strerror(errno));
     }
-    
+
     if(!a_dbus_init(&dbusfd))
         dbusfd = -1;
 
@@ -519,7 +491,7 @@ main(int argc, char **argv)
             eprint("select failed\n");
         }
         if(csfd >= 0 && FD_ISSET(csfd, &rd))
-            switch (r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
+            switch(r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
             {
               case -1:
                 warn("error reading UNIX domain socket: %s\n", strerror(errno));
@@ -531,7 +503,7 @@ main(int argc, char **argv)
                 if(r >= ssizeof(buf))
                     break;
                 buf[r] = '\0';
-                __uicb_parsecmd(buf);
+                luaA_docmd(buf);
                 statusbar_refresh();
                 layout_refresh();
             }

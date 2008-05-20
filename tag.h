@@ -23,33 +23,35 @@
 #define AWESOME_TAG_H
 
 #include "structs.h"
+#include "common/refcount.h"
 
 /** Check if a client is tiled */
 #define IS_TILED(client, screen)            (client && !client->isfloating && !client->ismax && client_isvisible(client, screen))
 
-tag_t * tag_new(const char *, Layout *, double, int, int);
+/* Contructor, destructor and referencors */
+tag_t * tag_new(const char *, LayoutArrange *, double, int, int);
+
+static inline void
+tag_delete(tag_t **tag)
+{
+    p_delete(&(*tag)->name);
+    p_delete(tag);
+}
+
 void tag_view(tag_t *, bool);
 void tag_view_byindex(int, int, bool);
-void tag_push_to_screen(tag_t *, int);
 tag_t ** tags_get_current(int);
 void tag_client(client_t *, tag_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
-void tag_client_with_rule(client_t *, rule_t *r);
 void tag_client_with_current_selected(client_t *);
 void tag_view_only_byindex(int, int);
 void tag_append_to_screen(tag_t *, int);
 
-uicb_t uicb_client_tag;
-uicb_t uicb_client_toggletag;
-uicb_t uicb_tag_toggleview;
-uicb_t uicb_tag_view;
-uicb_t uicb_tag_prev_selected;
-uicb_t uicb_tag_viewnext;
-uicb_t uicb_tag_viewprev;
-uicb_t uicb_tag_create;
+DO_RCNT(tag_t, tag, tag_delete)
+DO_SLIST(tag_t, tag, tag_delete)
+DO_SLIST_UNREF(tag_t, tag, tag_delete)
 
-DO_SLIST(tag_t, tag, p_delete)
 DO_SLIST(tag_client_node_t, tag_client_node, p_delete)
 
 #endif

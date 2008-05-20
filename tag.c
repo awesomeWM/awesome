@@ -24,10 +24,16 @@
 
 #include "screen.h"
 #include "tag.h"
-#include "rules.h"
 #include "client.h"
 #include "ewmh.h"
 #include "widget.h"
+
+#include "layouts/tile.h"
+#include "layouts/max.h"
+#include "layouts/floating.h"
+#include "layouts/fibonacci.h"
+
+#include "layoutgen.h"
 
 extern AwesomeConf globalconf;
 
@@ -40,7 +46,7 @@ extern AwesomeConf globalconf;
  * \return a new tag with all these parameters
  */
 tag_t *
-tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
+tag_new(const char *name, LayoutArrange *layout, double mwfact, int nmaster, int ncol)
 {
     tag_t *tag;
 
@@ -58,6 +64,8 @@ tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
     if((tag->ncol = ncol) < 1)
         tag->ncol = 1;
 
+    tag_ref(&tag);
+
     return tag;
 }
 
@@ -72,22 +80,7 @@ tag_append_to_screen(tag_t *tag, int screen)
 
     tag->screen = screen;
     tag_list_append(&globalconf.screens[screen].tags, tag);
-    ewmh_update_net_numbers_of_desktop(phys_screen);
-    ewmh_update_net_desktop_names(phys_screen);
-    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
-}
-
-/** Push a tag to a screen tag list.
- * \param tag the tag to push
- * \param screen the screen
- */
-void
-tag_push_to_screen(tag_t *tag, int screen)
-{
-    int phys_screen = screen_virttophys(screen);
-
-    tag->screen = screen;
-    tag_list_push(&globalconf.screens[screen].tags, tag);
+    tag_ref(&tag);
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
@@ -173,34 +166,6 @@ tag_client_with_current_selected(client_t *c)
             untag_client(c, tag);
 }
 
-/** Tag the client according to a rule.
- * \param c the client
- * \param r the rule
- */
-void
-tag_client_with_rule(client_t *c, rule_t *r)
-{
-    tag_t *tag;
-    bool matched = false;
-
-    if(!r) return;
-
-    /* check if at least one tag match */
-    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-        if(tag_match_rule(tag, r))
-        {
-            matched = true;
-            break;
-        }
-
-    if(matched)
-        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-            if(tag_match_rule(tag, r))
-                tag_client(c, tag);
-            else
-                untag_client(c, tag);
-}
-
 /** Get the current tags for the specified screen.
  * Returned pointer must be p_delete'd after.
  * \param screen screen id
@@ -226,123 +191,6 @@ tags_get_current(int screen)
     return tags;
 }
 
-/** Tag the focused client with the given tag.
- * \param screen Screen ID
- * \param arg tag name
- * \ingroup ui_callback
- */
-void
-uicb_client_tag(int screen, char *arg)
-{
-    int tag_id = -1;
-    tag_t *tag, *target_tag;
-    client_t *sel = globalconf.focus->client;
-
-    if(!sel)
-        return;
-
-    if(arg)
-    {
-	tag_id = atoi(arg) - 1;
-        if(tag_id != -1)
-        {
-            for(target_tag = globalconf.screens[screen].tags; target_tag && tag_id > 0;
-                target_tag = target_tag->next, tag_id--);
-            if(target_tag)
-            {
-                for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-                    untag_client(sel, tag);
-                tag_client(sel, target_tag);
-            }
-        }
-    }
-    else
-        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            tag_client(sel, tag);
-}
-
-/** Toggle a tag on the focused client.
- * \param screen virtual screen id
- * \param arg tag number
- * \ingroup ui_callback
- */
-void
-uicb_client_toggletag(int screen, char *arg)
-{
-    client_t *sel = globalconf.focus->client;
-    int i;
-    Bool is_sticky = True;
-    tag_t *tag, *target_tag;
-
-    if(!sel)
-        return;
-
-    if(arg)
-    {
-        i = atoi(arg) - 1;
-        for(target_tag = globalconf.screens[screen].tags; target_tag && i > 0;
-            target_tag = target_tag->next, i--);
-        if(target_tag)
-        {
-            if(is_client_tagged(sel, target_tag))
-                untag_client(sel, target_tag);
-            else
-                tag_client(sel, target_tag);
-        }
-
-        /* check that there's at least one tag selected for this client*/
-        for(tag = globalconf.screens[screen].tags; tag
-            && !is_client_tagged(sel, tag); tag = tag->next);
-
-        if(!tag)
-            tag_client(sel, target_tag);
-    }
-    else
-    {
-        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            if(!is_client_tagged(sel, tag))
-            {
-                is_sticky = False;
-                tag_client(sel, tag);
-            }
-        if(is_sticky)
-            tag_client_with_current_selected(sel);
-    }
-}
-
-/** Toggle the visibility of a tag.
- * \param screen Screen ID
- * \param arg tag_t name
- * \ingroup ui_callback
- */
-void
-uicb_tag_toggleview(int screen, char *arg)
-{
-    int i;
-    tag_t *tag, *target_tag,
-        **backtag, **curtags = tags_get_current(screen);
-
-    if(arg)
-    {
-        i = atoi(arg) - 1;
-        for(target_tag = globalconf.screens[screen].tags; target_tag && i > 0;
-            target_tag = target_tag->next, i--);
-
-        if(target_tag)
-            tag_view(target_tag, !target_tag->selected);
-    }
-    else
-        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            tag_view(tag, !tag->selected);
-
-    /* check that there's at least one tag selected */
-    for(tag = globalconf.screens[screen].tags; tag && !tag->selected; tag = tag->next);
-    if(!tag)
-        for(backtag = curtags; *backtag; backtag++)
-            tag_view(*backtag, True);
-
-    p_delete(&curtags);
-}
 
 /** Set a tag to be the only one viewed.
  * \param target the tag to see
@@ -400,94 +248,226 @@ tag_view_only_byindex(int screen, int dindex)
 void
 tag_view(tag_t *tag, bool view)
 {
-    tag->was_selected = tag->selected;
     tag->selected = view;
     ewmh_update_net_current_desktop(screen_virttophys(tag->screen));
     widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
     globalconf.screens[tag->screen].need_arrange = true;
 }
 
-/** View only this tag.
- * \param screen Screen ID
- * \param arg tag to view
- * \ingroup ui_callback
- */
-void
-uicb_tag_view(int screen, char *arg)
+static int
+luaA_tag_eq(lua_State *L)
 {
-    tag_t *tag;
-
-    if(arg)
-	tag_view_only_byindex(screen, atoi(arg) - 1);
-    else
-        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            tag_view(tag, true);
+    tag_t **t1 = luaL_checkudata(L, 1, "tag");
+    tag_t **t2 = luaL_checkudata(L, 2, "tag");
+    lua_pushboolean(L, (*t1 == *t2));
+    return 1;
 }
 
-/** View the previously selected tags.
- * \param screen Screen ID
- * \param arg unused
- * \ingroup ui_callback
- */
-void
-uicb_tag_prev_selected(int screen, char *arg __attribute__ ((unused)))
+static int
+luaA_tag_tostring(lua_State *L)
 {
-    tag_t *tag;
+    tag_t **p = luaL_checkudata(L, 1, "tag");
+    lua_pushfstring(L, "[tag udata(%p) name(%s)]", *p, (*p)->name);
+    return 1;
+}
+
+static int
+luaA_tag_add(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    int screen = luaL_checknumber(L, 2) - 1;
+    luaA_checkscreen(screen);
+    /* \todo check tag is not already in another screen */
+    tag_append_to_screen(*tag, screen);
+    return 0;
+}
+
+static int
+luaA_tag_get(lua_State *L)
+{
+    int screen = luaL_checknumber(L, 1) - 1;
+    const char *name = luaL_checkstring(L, 2);
+    tag_t *tag, **tobj;
+    int ret, i = 1;
+    regex_t r;
+    regmatch_t match;
+    char error[512];
+
+    luaA_checkscreen(screen);
+
+    if((ret = regcomp(&r, name, REG_EXTENDED)))
+    {
+        regerror(ret, &r, error, sizeof(error));
+        luaL_error(L, "regex compilation error: %s\n", error);
+    }
+
+    lua_newtable(L);
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        tag_view(tag, tag->was_selected);
+        if(!regexec(&r, tag->name, 1, &match, 0))
+        {
+            tobj = lua_newuserdata(L, sizeof(tag_t *));
+            *tobj = tag;
+            tag_ref(&tag);
+            luaA_settype(L, "tag");
+            lua_rawseti(L, -2, i++);
+        }
+
+    return 1;
 }
 
-/** View the next tag.
- * \param screen Screen ID
- * \param arg unused
- * \ingroup ui_callback
+/** Create a new tag.
+ * \param L Lua state.
+ * \return One because there's one element, a user data.
  */
-void
-uicb_tag_viewnext(int screen, char *arg __attribute__ ((unused)))
+static int
+luaA_tag_new(lua_State *L)
 {
-    tag_t *tag, **curtags = tags_get_current(screen);
+    tag_t **tag;
+    int ncol, nmaster;
+    const char *name, *lay;
+    double mwfact;
+    LayoutArrange *layout;
 
-    tag = tag_list_next_cycle(&globalconf.screens[screen].tags, curtags[0]);
+    luaA_checktable(L, 1);
 
-    tag_view(curtags[0], false);
-    tag_view(tag, true);
+    name = luaA_name_init(L);
+    mwfact = luaA_getopt_number(L, 1, "mwfact", 0.5);
+    ncol = luaA_getopt_number(L, 1, "ncol", 1);
+    nmaster = luaA_getopt_number(L, 1, "nmaster", 1);
+    lay = luaA_getopt_string(L, 1, "layout", "tile");
 
-    p_delete(&curtags);
+    layout = name_func_lookup(lay, LayoutList);
+
+    tag = lua_newuserdata(L, sizeof(tag_t *));
+
+    *tag = tag_new(name,
+                   layout,
+                   mwfact, nmaster, ncol);
+
+    return luaA_settype(L, "tag");
 }
 
-/** View the previous tag.
- * \param screen Screen ID
- * \param arg unused
- * \ingroup ui_callback
- */
-void
-uicb_tag_viewprev(int screen, char *arg __attribute__ ((unused)))
+static int
+luaA_tag_view(lua_State *L)
 {
-    tag_t *tag, **curtags = tags_get_current(screen);
-
-    tag = tag_list_prev_cycle(&globalconf.screens[screen].tags, curtags[0]);
-
-    tag_view(curtags[0], false);
-    tag_view(tag, true);
-
-    p_delete(&curtags);
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    bool view = luaA_checkboolean(L, 2);
+    tag_view(*tag, view);
+    return 0;
 }
 
-/** Create a new tag. Argument must be the tag name.
- * \param screen the screen id
- * \param arg the tag name
- */
-void
-uicb_tag_create(int screen, char *arg)
+static int
+luaA_tag_isselected(lua_State *L)
 {
-    tag_t *tag;
-
-    if(!a_strlen(arg))
-        return;
-
-    tag = tag_new(arg, globalconf.screens[screen].layouts, 0.5, 1, 1);
-    tag_append_to_screen(tag, screen);
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    lua_pushboolean(L, (*tag)->selected);
+    return 1;
 }
 
+static int
+luaA_tag_mwfact_set(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    double mwfact = luaL_checknumber(L, 2);
+
+    if(mwfact < 1 && mwfact > 0)
+    {
+        (*tag)->mwfact = mwfact;
+        globalconf.screens[(*tag)->screen].need_arrange = true;
+    }
+    else
+        luaL_error(L, "bad value, must be between 0 and 1");
+
+    return 0;
+}
+
+static int
+luaA_tag_mwfact_get(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    lua_pushnumber(L, (*tag)->mwfact);
+    return 1;
+}
+
+static int
+luaA_tag_ncol_set(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    int ncol = luaL_checknumber(L, 2);
+
+    if(ncol >= 1)
+    {
+        (*tag)->ncol = ncol;
+        globalconf.screens[(*tag)->screen].need_arrange = true;
+    }
+    else
+        luaL_error(L, "bad value, must be greater than 1");
+
+    return 0;
+}
+
+static int
+luaA_tag_ncol_get(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    lua_pushnumber(L, (*tag)->ncol);
+    return 1;
+}
+
+static int
+luaA_tag_nmaster_set(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    int nmaster = luaL_checknumber(L, 2);
+
+    if(nmaster >= 0)
+    {
+        (*tag)->nmaster = nmaster;
+        globalconf.screens[(*tag)->screen].need_arrange = true;
+    }
+    else
+        luaL_error(L, "bad value, must be greater than 0");
+
+    return 0;
+}
+
+static int
+luaA_tag_nmaster_get(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    lua_pushnumber(L, (*tag)->nmaster);
+    return 1;
+}
+
+static int
+luaA_tag_gc(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_unref(tag);
+    return 0;
+}
+
+const struct luaL_reg awesome_tag_methods[] =
+{
+    { "new", luaA_tag_new },
+    { "get", luaA_tag_get},
+    { NULL, NULL }
+};
+const struct luaL_reg awesome_tag_meta[] =
+{
+    { "add", luaA_tag_add },
+    { "view", luaA_tag_view },
+    { "isselected", luaA_tag_isselected },
+    { "mwfact_set", luaA_tag_mwfact_set },
+    { "mwfact_get", luaA_tag_mwfact_get },
+    { "ncol_set", luaA_tag_ncol_set },
+    { "ncol_get", luaA_tag_ncol_get },
+    { "nmaster_set", luaA_tag_nmaster_set },
+    { "nmaster_get", luaA_tag_nmaster_get },
+    { "__eq", luaA_tag_eq },
+    { "__gc", luaA_tag_gc },
+    { "__tostring", luaA_tag_tostring },
+    { NULL, NULL },
+};
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

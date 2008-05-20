@@ -28,13 +28,13 @@
 
 #include "client.h"
 #include "tag.h"
-#include "rules.h"
 #include "window.h"
 #include "focus.h"
 #include "ewmh.h"
 #include "widget.h"
 #include "screen.h"
 #include "titlebar.h"
+#include "lua.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
 #include "common/xutil.h"
@@ -221,13 +221,13 @@ client_updatetitle(client_t *c)
 static void
 client_unfocus(client_t *c)
 {
-    if(globalconf.screens[c->screen].opacity_unfocused != -1)
-        window_settrans(c->win, globalconf.screens[c->screen].opacity_unfocused);
-    else if(globalconf.screens[c->screen].opacity_focused != -1)
-        window_settrans(c->win, -1);
+    /* Call hook */
+    client_t **lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
+    *lc = c;
+    luaA_settype(globalconf.L, "client");
+    luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1);
+
     focus_add_client(NULL);
-    xcb_change_window_attributes(globalconf.connection, c->win, XCB_CW_BORDER_PIXEL,
-                                 &globalconf.screens[c->screen].styles.normal.border.pixel);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     titlebar_draw(c);
 }
@@ -242,8 +242,8 @@ client_ban(client_t *c)
         client_unfocus(c);
     xcb_unmap_window(globalconf.connection, c->win);
     window_setstate(c->win, XCB_WM_ICONIC_STATE);
-    if(c->titlebar.position && c->titlebar.sw)
-        xcb_unmap_window(globalconf.connection, c->titlebar.sw->window);
+    if(c->titlebar.position && c->titlebar_sw)
+        xcb_unmap_window(globalconf.connection, c->titlebar_sw->window);
 }
 
 /** Give focus to client, or to first client if c is NULL
@@ -255,6 +255,7 @@ client_ban(client_t *c)
 bool
 client_focus(client_t *c, int screen, bool raise)
 {
+    client_t **lc;
     int phys_screen;
 
     /* if c is NULL or invisible, take next client in the focus history */
@@ -277,12 +278,6 @@ client_focus(client_t *c, int screen, bool raise)
         client_unban(c);
         /* save sel in focus history */
         focus_add_client(c);
-        if(globalconf.screens[c->screen].opacity_focused != -1)
-            window_settrans(c->win, globalconf.screens[c->screen].opacity_focused);
-        else if(globalconf.screens[c->screen].opacity_unfocused != -1)
-            window_settrans(c->win, -1);
-        xcb_change_window_attributes(globalconf.connection, c->win, XCB_CW_BORDER_PIXEL,
-                                     &globalconf.screens[screen].styles.focus.border.pixel);
         titlebar_draw(c);
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
                             c->win, XCB_CURRENT_TIME);
@@ -305,6 +300,11 @@ client_focus(client_t *c, int screen, bool raise)
     ewmh_update_net_active_window(phys_screen);
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
 
+    lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
+    *lc = c;
+    luaA_settype(globalconf.L, "client");
+    luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
+
     return true;
 }
 
@@ -326,13 +326,13 @@ client_stack(client_t *c)
             if(client->layer == layer && client != c
                && client_isvisible_anyscreen(client))
             {
-                if(client->titlebar.position && client->titlebar.sw)
+                if(client->titlebar.position && client->titlebar_sw)
                 {
                     xcb_configure_window(globalconf.connection,
-                                         client->titlebar.sw->window,
+                                         client->titlebar_sw->window,
                                          XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                                          config_win_vals);
-                    config_win_vals[0] = client->titlebar.sw->window;
+                    config_win_vals[0] = client->titlebar_sw->window;
                 }
                 xcb_configure_window(globalconf.connection, client->win,
                                      XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
@@ -342,12 +342,12 @@ client_stack(client_t *c)
         }
         if(c->layer == layer)
         {
-            if(c->titlebar.position && c->titlebar.sw)
+            if(c->titlebar.position && c->titlebar_sw)
             {
-                xcb_configure_window(globalconf.connection, c->titlebar.sw->window,
+                xcb_configure_window(globalconf.connection, c->titlebar_sw->window,
                                      XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                                      config_win_vals);
-                config_win_vals[0] = c->titlebar.sw->window;
+                config_win_vals[0] = c->titlebar_sw->window;
             }
             xcb_configure_window(globalconf.connection, c->win,
                                  XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
@@ -365,12 +365,10 @@ client_stack(client_t *c)
 void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 {
-    client_t *c, *t = NULL;
+    client_t **lc, *c, *t = NULL;
     xcb_window_t trans;
     bool rettrans, retloadprops;
-    uint32_t config_win_val;
     tag_t *tag;
-    rule_t *rule;
     xcb_size_hints_t *u_size_hints;
 
     c = p_new(client_t, 1);
@@ -392,13 +390,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->newcomer = true;
     c->layer = c->oldlayer = LAYER_TILE;
 
-    /* Set windows borders */
-    config_win_val = c->border = globalconf.screens[screen].borderpx;
-    xcb_configure_window(globalconf.connection, w, XCB_CONFIG_WINDOW_BORDER_WIDTH,
-                         &config_win_val);
-    /* propagates border_width, if size doesn't change */
-    window_configure(c->win, c->geometry, c->border);
-
     /* update window title */
     client_updatetitle(c);
 
@@ -413,35 +404,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* Then check clients hints */
     ewmh_check_client_hints(c);
 
-    /* default titlebar position */
-    c->titlebar = globalconf.screens[screen].titlebar_default;
-
-    /* get the matching rule if any */
-    rule = rule_matching_client(c);
-
-    /* Then apply rules if no props */
-    if(!retloadprops && rule)
-    {
-        if(rule->screen != RULE_NOSCREEN)
-            move_client_to_screen(c, rule->screen, true);
-        tag_client_with_rule(c, rule);
-
-        switch(rule->isfloating)
-        {
-          case Maybe:
-            break;
-          case Yes:
-            client_setfloating(c, true, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
-            break;
-          case No:
-            client_setfloating(c, false, LAYER_TILE);
-            break;
-        }
-
-        if(rule->opacity >= 0.0f)
-            window_settrans(c->win, rule->opacity);
-    }
-
     /* check for transient and set tags like its parent */
     if((rettrans = xutil_get_transient_for_hint(globalconf.connection, w, &trans))
        && (t = client_get_bywin(globalconf.clients, trans)))
@@ -453,27 +415,19 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     if(rettrans || c->isfixed)
         client_setfloating(c, true, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
 
-    /* titlebar init */
-    if(rule && rule->titlebar.position != Auto)
-        c->titlebar = rule->titlebar;
-
-    titlebar_init(c);
-
-    if(!retloadprops
+    if(globalconf.floating_placement
+       && !retloadprops
        && u_size_hints
        && !(xcb_size_hints_get_flags(u_size_hints) & (XCB_SIZE_US_POSITION_HINT |
                                                       XCB_SIZE_P_POSITION_HINT)))
     {
         if(c->isfloating && !c->ismax)
-            client_resize(c, globalconf.screens[c->screen].floating_placement(c), false);
+            client_resize(c, globalconf.floating_placement(c), false);
         else
-            c->f_geometry = globalconf.screens[c->screen].floating_placement(c);
+            c->f_geometry = globalconf.floating_placement(c);
 
         xcb_free_size_hints(u_size_hints);
     }
-
-    /* update titlebar with real floating info now */
-    titlebar_update_geometry_floating(c);
 
     const uint32_t select_input_val[] = {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE |
@@ -489,31 +443,16 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
         window_setshape(c->win, c->phys_screen);
     }
 
-    /* attach to the stack */
-    if(rule)
-        switch(rule->ismaster)
-        {
-          case Yes:
-            client_list_push(&globalconf.clients, c);
-            break;
-          case No:
-            client_list_append(&globalconf.clients, c);
-            break;
-          case Maybe:
-            rule = NULL;
-            break;
-        }
-
-    if(!rule)
-    {
-        if(globalconf.screens[c->screen].new_become_master)
-            client_list_push(&globalconf.clients, c);
-        else
-            client_list_append(&globalconf.clients, c);
-    }
+    client_list_push(&globalconf.clients, c);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_client_list(c->phys_screen);
+
+    /* call hook */
+    lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
+    *lc = c;
+    luaA_settype(globalconf.L, "client");
+    luaA_dofunction(globalconf.L, globalconf.hooks.newclient, 1);
 }
 
 static area_t
@@ -574,10 +513,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
 {
     int new_screen;
     area_t area;
-    Layout *layout = layout_get_current(c->screen);
+    LayoutArrange *layout = layout_get_current(c->screen);
     bool resized = false;
 
-    if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating)
+    if(!c->ismoving && !c->isfloating && layout != layout_floating)
     {
         titlebar_update_geometry(c, geometry);
         geometry = titlebar_geometry_remove(&c->titlebar, geometry);
@@ -621,7 +560,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         /* save the floating geometry if the window is floating but not
          * maximized */
         if(c->ismoving || c->isfloating
-           || layout_get_current(new_screen)->arrange == layout_floating)
+           || layout_get_current(new_screen) == layout_floating)
         {
             if(!c->ismax)
                 c->f_geometry = geometry;
@@ -643,7 +582,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
     /* call it again like it was floating,
      * we want it to be sticked to the window */
-    if(!c->ismoving && !c->isfloating && layout->arrange != layout_floating)
+    if(!c->ismoving && !c->isfloating && layout != layout_floating)
        titlebar_update_geometry_floating(c);
 
     return resized;
@@ -717,8 +656,8 @@ client_unban(client_t *c)
 {
     xcb_map_window(globalconf.connection, c->win);
     window_setstate(c->win, XCB_WM_NORMAL_STATE);
-    if(c->titlebar.sw && c->titlebar.position != Off)
-        xcb_map_window(globalconf.connection, c->titlebar.sw->window);
+    if(c->titlebar_sw && c->titlebar.position != Off)
+        xcb_map_window(globalconf.connection, c->titlebar_sw->window);
 }
 
 void
@@ -750,7 +689,7 @@ client_unmanage(client_t *c)
     xcb_aux_sync(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);
 
-    simplewindow_delete(&c->titlebar.sw);
+    simplewindow_delete(&c->titlebar_sw);
 
     p_delete(&c);
 }
@@ -828,21 +767,6 @@ client_updatesizehints(client_t *c)
     return size;
 }
 
-/** Get the style related to a client: focus, urgent, normal.
- * \param c The client.
- * \return The style to apply for this client.
- */
-style_t *
-client_style_get(client_t *c)
-{
-    if(globalconf.focus->client == c)
-        return &globalconf.screens[c->screen].styles.focus;
-    else if(c->isurgent)
-        return &globalconf.screens[c->screen].styles.urgent;
-
-    return &globalconf.screens[c->screen].styles.normal;
-}
-
 char *
 client_markup_parse(client_t *c, const char *str, ssize_t len)
 {
@@ -866,192 +790,6 @@ client_markup_parse(client_t *c, const char *str, ssize_t len)
     p_delete(&title_esc);
 
     return ret;
-}
-
-/** Set the transparency of the selected client.
- * Argument should be an absolut or relativ floating between 0.0 and 1.0
- * \param screen Screen ID
- * \param arg unused arg
- * \ingroup ui_callback
- */
-void
-uicb_client_settrans(int screen __attribute__ ((unused)), char *arg)
-{
-    double delta = 1.0, current_opacity = 100.0;
-    unsigned int current_opacity_raw = 0;
-    int set_prop = 0;
-    client_t *sel = globalconf.focus->client;
-    xcb_get_property_reply_t *prop_r;
-
-    if(!sel)
-        return;
-
-    prop_r = xcb_get_property_reply(globalconf.connection,
-                                    xcb_get_property_unchecked(globalconf.connection,
-                                                               false, sel->win,
-                                                               xutil_intern_atom_reply(globalconf.connection,
-                                                                                       &globalconf.atoms,
-                                                                                       xutil_intern_atom(globalconf.connection,
-                                                                                                         &globalconf.atoms,
-                                                                                                         "_NET_WM_WINDOW_OPACITY")),
-                                                               CARDINAL,
-                                                               0, 1),
-                                    NULL);
-
-    if(prop_r)
-    {
-        memcpy(&current_opacity_raw, xcb_get_property_value(prop_r), sizeof(unsigned int));
-        current_opacity = (double) current_opacity_raw / 0xffffffff;
-        p_delete(&prop_r);
-    }
-    else
-        set_prop = 1;
-
-    delta = compute_new_value_from_arg(arg, current_opacity);
-
-    if(delta <= 0.0)
-        delta = 0.0;
-    else if(delta > 1.0)
-    {
-        delta = 1.0;
-        set_prop = 1;
-    }
-
-    if(delta == 1.0 && !set_prop)
-        window_settrans(sel->win, -1);
-    else
-        window_settrans(sel->win, delta);
-}
-
-/** Find a visible client on screen. Return next client or previous client if
- * nindex is less than 0. If nindex is 0, then sel itself can be returned if
- * visible.
- * \param sel Current selected client.
- * \param nindex Number of windows to match before returning.
- * \return Next or previous visible client.
- */
-static client_t *
-client_find_visible(client_t *sel, int nindex)
-{
-    int i = 0, screen;
-    client_t *next;
-    client_t *(*client_iter)(client_t **, client_t *) = client_list_next_cycle;
-
-    if(!sel)
-        return NULL;
-
-    screen = sel->screen;
-
-    if(nindex < 0)
-        client_iter = client_list_prev_cycle;
-    else if(nindex == 0)
-        sel = client_list_prev_cycle(&globalconf.clients, sel);
-
-    nindex = abs(nindex);
-
-    /* look for previous or next starting at sel */
-    for(next = client_iter(&globalconf.clients, sel);
-        next && next != sel;
-        next = client_iter(&globalconf.clients, next))
-    {
-        if(!next->skip && client_isvisible(next, screen))
-            i++;
-        if(i >= nindex)
-            return next;
-    }
-
-    return NULL;
-}
-
-/** Swap the currently focused client with another one.
- * The argument must be an integer 1 for next, 2 for next of next, -1 for
- * previous, etc. 0 will swap with the visible master window.
- * \param screen Virtual screen number.
- * \param arg Relative number in the client stack.
- * \ingroup ui_callback
- */
-void
-uicb_client_swap(int screen, char *arg)
-{
-    client_t *swap = NULL;
-    int i;
-
-    if(arg && (i = atoi(arg)))
-        swap = client_find_visible(globalconf.focus->client, i);
-    else if(globalconf.focus->client == globalconf.clients)
-        swap = client_find_visible(globalconf.focus->client, 1);
-    else
-        swap = globalconf.clients;
-
-    if(swap)
-    {
-        client_list_swap(&globalconf.clients, swap, globalconf.focus->client);
-        globalconf.screens[screen].need_arrange = true;
-        widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
-    }
-}
-
-/** Move and resize a client. Argument should be in format "x y w h" with
- * absolute (1, 20, 300, ...) or relative (+10, -200, ...) values.
- * \param screen Screen ID
- * \param arg x y w h
- * \ingroup ui_callback
- */
-void
-uicb_client_moveresize(int screen, char *arg)
-{
-    int ox, oy, ow, oh; /* old geometry */
-    char x[8], y[8], w[8], h[8];
-    int nmx, nmy;
-    area_t geometry;
-    client_t *sel = globalconf.focus->client;
-    xcb_query_pointer_cookie_t xqc;
-    xcb_query_pointer_reply_t *xqr;
-    Layout *curlay = layout_get_current(screen);
-
-    if(!sel || sel->isfixed || !arg ||
-       (curlay->arrange != layout_floating && !sel->isfloating))
-        return;
-
-    if(sscanf(arg, "%s %s %s %s", x, y, w, h) != 4)
-        return;
-
-    xqc = xcb_query_pointer_unchecked(globalconf.connection,
-                                      xcb_aux_get_screen(globalconf.connection, sel->phys_screen)->root);
-
-    geometry.x = (int) compute_new_value_from_arg(x, sel->geometry.x);
-    geometry.y = (int) compute_new_value_from_arg(y, sel->geometry.y);
-    geometry.width = (int) compute_new_value_from_arg(w, sel->geometry.width);
-    geometry.height = (int) compute_new_value_from_arg(h, sel->geometry.height);
-
-    ox = sel->geometry.x;
-    oy = sel->geometry.y;
-    ow = sel->geometry.width;
-    oh = sel->geometry.height;
-
-    if(globalconf.screens[sel->screen].resize_hints)
-        geometry = client_geometry_hints(sel, geometry);
-    client_resize(sel, geometry, false);
-    if ((xqr = xcb_query_pointer_reply(globalconf.connection, xqc, NULL)))
-    {
-        if(ox <= xqr->root_x && (ox + 2 * sel->border + ow) >= xqr->root_x &&
-           oy <= xqr->root_y && (oy + 2 * sel->border + oh) >= xqr->root_y)
-        {
-            nmx = xqr->root_x - (ox + sel->border) + sel->geometry.width - ow;
-            nmy = xqr->root_y - (oy + sel->border) + sel->geometry.height - oh;
-
-            if(nmx < -sel->border) /* can happen on a resize */
-                nmx = -sel->border;
-            if(nmy < -sel->border)
-                nmy = -sel->border;
-
-            xcb_warp_pointer(globalconf.connection,
-                             XCB_NONE, sel->win,
-                             0, 0, 0, 0, nmx, nmy);
-        }
-
-        p_delete(&xqr);
-    }
 }
 
 /** Kill a client via a WM_DELETE_WINDOW request or XKillClient if not
@@ -1089,189 +827,343 @@ client_kill(client_t *c)
         xcb_kill_client(globalconf.connection, c->win);
 }
 
-/** Kill the currently focused client.
- * \param screen Screen ID
- * \param arg unused
- * \ingroup ui_callback
- */
-void
-uicb_client_kill(int screen __attribute__ ((unused)), char *arg __attribute__ ((unused)))
+static int
+luaA_client_get(lua_State *L)
 {
-    client_t *sel = globalconf.focus->client;
+    int ret, i = 1;
+    regex_t r;
+    regmatch_t match;
+    client_t *c, **cobj;
+    const char *name = luaL_checkstring(L, 1);
+    char error[512];
 
-    if(sel)
-        client_kill(sel);
-}
-
-/** Maximize the client to the given geometry.
- * \param c the client to maximize
- * \param geometry the geometry to use for maximizing
- */
-static void
-client_maximize(client_t *c, area_t geometry)
-{
-    if((c->ismax = !c->ismax))
+    if((ret = regcomp(&r, name, REG_EXTENDED)))
     {
-        /* disable titlebar */
-        c->titlebar.position = Off;
-        c->wasfloating = c->isfloating;
-        c->m_geometry = c->geometry;
-        if(layout_get_current(c->screen)->arrange != layout_floating)
-            client_setfloating(c, true, LAYER_FULLSCREEN);
-        client_focus(c, c->screen, true);
-        client_resize(c, geometry, false);
+        regerror(ret, &r, error, sizeof(error));
+        luaL_error(L, "regex compilation error: %s\n", error);
     }
-    else if(c->wasfloating)
-    {
-        c->titlebar.position = c->titlebar.dposition;
-        client_setfloating(c, true, LAYER_FULLSCREEN);
-        client_resize(c, c->m_geometry, false);
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    }
-    else if(layout_get_current(c->screen)->arrange == layout_floating)
-    {
-        c->titlebar.position = c->titlebar.dposition;
-        client_resize(c, c->m_geometry, false);
-    }
-    else
-    {
-        c->titlebar.position = c->titlebar.dposition;
-        client_setfloating(c, false, LAYER_TILE);
-    }
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-}
 
-/** Toggle maximization state for the focused client.
- * \param screen Virtual screen number.
- * \param arg Either "vertical", "horizontal" or nothing for both.
- * \ingroup ui_callback
- */
-void
-uicb_client_togglemax(int screen, char *arg)
-{
-    area_t area;
-   
-    if(!globalconf.focus->client)
-        return;
+    lua_newtable(L);
 
-    area = screen_get_area(screen,
-                           globalconf.screens[screen].statusbar,
-                           &globalconf.screens[screen].padding);
-    if(arg && arg[0] == 'v')
-    {
-        area.x = globalconf.focus->client->geometry.x;
-        area.width = globalconf.focus->client->geometry.width;
-        area.height -= 2 * globalconf.focus->client->border;
-    }
-    else if(arg && arg[0] == 'h')
-    {
-        area.y = globalconf.focus->client->geometry.y;
-        area.height = globalconf.focus->client->geometry.height;
-        area.width -= 2 * globalconf.focus->client->border;
-    }
-    else
-    {
-        area.width -= 2 * globalconf.focus->client->border;
-        area.height -= 2 * globalconf.focus->client->border;
-    }
-    client_maximize(globalconf.focus->client, area);
-}
-
-/** Give focus to the next or previous visible client in the stack.
- * Argument mus be a relative number of windows to give focus after current one.
- * Giving 1 as argument will focus next visible window, -2 will focus previous
- * of previous visible window. Giving 0 as argument will focus master window.
- * \param screen Virtual screen number.
- * \param arg Relative number in the client stack.
- * \ingroup ui_callback
- */
-void
-uicb_client_focus(int screen, char *arg)
-{
-    client_t *next = NULL;
-    int i;
-
-    if(arg && (i = atoi(arg)))
-        next = client_find_visible(globalconf.focus->client, i);
-    else if(globalconf.clients)
-        next = client_find_visible(globalconf.clients, 0);
-
-    if(next)
-        client_focus(next, screen, true);
-}
-
-/** Set or toggle the floating state of the focused client.
- * Argument must be none to toggle, or a boolean value to set.
- * \param screen Virtual screen number.
- * \param arg 
- * \ingroup ui_callback
- */
-void
-uicb_client_setfloating(int screen __attribute__ ((unused)), char *arg)
-{
-    bool floating;
-
-    if(!globalconf.focus->client)
-        return;
+    for(c = globalconf.clients; c; c = c->next)
+        if(!regexec(&r, c->name, 1, &match, 0))
+        {
+            cobj = lua_newuserdata(L, sizeof(client_t *));
+            *cobj = c;
+            luaA_settype(L, "client");
+            lua_rawseti(L, -2, i++);
+        }
     
-    if(!arg)
-        floating = !globalconf.focus->client->isfloating;
-    else
-        floating = a_strtobool(arg);
-
-    client_setfloating(globalconf.focus->client, !globalconf.focus->client->isfloating,
-                       globalconf.focus->client->layer == LAYER_FLOAT ? LAYER_TILE : LAYER_FLOAT);
+    return 1;
 }
 
-/** Toggle the scratch client attribute on the focused client.
- * \param screen screen number
- * \param arg unused argument
- * \ingroup ui_callback
- */
-void
-uicb_client_setscratch(int screen, char *arg __attribute__ ((unused)))
+static int
+luaA_client_mouse(lua_State *L)
 {
-    if(!globalconf.focus->client)
-        return;
+    size_t i, len;
+    int b;
+    Button *button;
 
-    if(globalconf.scratch.client == globalconf.focus->client)
-        globalconf.scratch.client = NULL;
-    else
-        globalconf.scratch.client = globalconf.focus->client;
+    /* arg 2 is modkey table */
+    luaA_checktable(L, 1);
+    /* arg 3 is mouse button */
+    b = luaL_checknumber(L, 2);
+    /* arg 4 is cmd to run */
+    luaA_checkfunction(L, 3);
 
-    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS | WIDGET_CACHE_TAGS);
-    globalconf.screens[screen].need_arrange = true;
-}
+    button = p_new(Button, 1);
+    button->button = xutil_button_fromint(b);
+    button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
 
-void
-uicb_client_redraw(int screen __attribute__ ((unused)),
-                   char *arg __attribute__ ((unused)))
-{
-    if(!globalconf.focus->client)
-        return;
-
-    /* Use unmap/map ATM but it would be better to used SendEvent,
-     * however the client doesn't seem to handle it... */
-    xcb_unmap_window(globalconf.connection, globalconf.focus->client->win);
-    xcb_map_window(globalconf.connection, globalconf.focus->client->win);
-}
-
-/** Toggle the scratch client's visibility.
- * \param screen screen number
- * \param arg unused argument
- * \ingroup ui_callback
- */
-void
-uicb_client_togglescratch(int screen, char *arg __attribute__ ((unused)))
-{
-    if(globalconf.scratch.client)
+    len = lua_objlen(L, 1);
+    for(i = 1; i <= len; i++)
     {
-        globalconf.scratch.isvisible = !globalconf.scratch.isvisible;
-        if(globalconf.scratch.isvisible)
-            client_focus(globalconf.scratch.client, screen, true);
-        globalconf.screens[globalconf.scratch.client->screen].need_arrange = true;
-        widget_invalidate_cache(globalconf.scratch.client->screen, WIDGET_CACHE_CLIENTS);
+        lua_rawgeti(L, 1, i);
+        button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
     }
+
+    button_list_push(&globalconf.buttons.client, button);
+
+    return 0;
 }
+
+static int
+luaA_client_visible_get(lua_State *L)
+{
+    int ret, i = 1;
+    regex_t r;
+    regmatch_t match;
+    client_t *c, **cobj;
+    char error[512];
+    int screen = luaL_checknumber(L, 1) - 1;
+    const char *name = luaL_checkstring(L, 2);
+
+    luaA_checkscreen(screen);
+
+    if((ret = regcomp(&r, name, REG_EXTENDED)))
+    {
+        regerror(ret, &r, error, sizeof(error));
+        luaL_error(L, "regex compilation error: %s\n", error);
+    }
+
+    lua_newtable(L);
+
+    for(c = globalconf.clients; c; c = c->next)
+        if(!c->skip && client_isvisible(c, screen)
+           && !regexec(&r, c->name, 1, &match, 0))
+        {
+            cobj = lua_newuserdata(L, sizeof(client_t *));
+            *cobj = c;
+            luaA_settype(L, "client");
+            lua_rawseti(L, -2, i++);
+        }
+    
+    return 1;
+}
+
+static int
+luaA_client_focus_get(lua_State *L)
+{
+    client_t **cobj;
+
+    if(!globalconf.focus->client)
+        return 0;
+
+    cobj = lua_newuserdata(L, sizeof(client_t *));
+    *cobj = globalconf.focus->client;
+    luaA_settype(L, "client");
+    return 1;
+}
+
+static int
+luaA_client_border_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    int width = luaA_getopt_number(L, 2, "width", -1);
+    const char *colorstr = luaA_getopt_string(L, 2, "color", NULL);
+    xcolor_t color;
+
+    if(width >= 0)
+    {
+        (*c)->border = width;
+        globalconf.screens[(*c)->screen].need_arrange = true;
+        xcb_configure_window(globalconf.connection, (*c)->win,
+                             XCB_CONFIG_WINDOW_BORDER_WIDTH, (uint32_t *) &width);
+    }
+
+    if(colorstr
+        && draw_color_new(globalconf.connection, (*c)->phys_screen, colorstr, &color))
+        xcb_change_window_attributes(globalconf.connection, (*c)->win, XCB_CW_BORDER_PIXEL,
+                                     &color.pixel);
+
+    return 0;
+}
+
+static int
+luaA_client_titlebar_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    titlebar_t **t = luaL_checkudata(L, 2, "titlebar");
+
+    /* Copy titlebar info */
+    (*c)->titlebar = **t;
+    titlebar_init(*c);
+
+    if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
+        titlebar_update_geometry_floating(*c);
+    else
+        globalconf.screens[(*c)->screen].need_arrange = true;
+
+    return 0;
+}
+
+static int
+luaA_client_screen_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    int screen = luaL_checknumber(L, 2) - 1;
+    luaA_checkscreen(screen);
+    move_client_to_screen(*c, screen, true);
+    return 0;
+}
+
+static int
+luaA_client_screen_get(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    lua_pushnumber(L, 1 + (*c)->screen);
+    return 1;
+}
+
+
+static int
+luaA_client_tag(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    tag_t **tag = luaL_checkudata(L, 2, "tag");
+    bool tag_the_client = luaA_checkboolean(L, 3);
+    if(tag_the_client)
+        tag_client(*c, *tag);
+    else
+        untag_client(*c, *tag);
+    return 0;
+}
+
+static int
+luaA_client_istagged(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    tag_t **tag = luaL_checkudata(L, 2, "tag");
+    lua_pushboolean(L, is_client_tagged(*c, *tag));
+    return 1;
+}
+
+static int
+luaA_client_coords_get(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    lua_newtable(L);
+    lua_pushnumber(L, (*c)->geometry.width);
+    lua_setfield(L, -2, "width");
+    lua_pushnumber(L, (*c)->geometry.height);
+    lua_setfield(L, -2, "height");
+    lua_pushnumber(L, (*c)->geometry.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, (*c)->geometry.y);
+    lua_setfield(L, -2, "y");
+    return 1;
+}
+
+static int
+luaA_client_coords_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    area_t geometry;
+    
+    if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
+    {
+        luaA_checktable(L, 2);
+        geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
+        geometry.y = luaA_getopt_number(L, 2, "y", (*c)->geometry.y);
+        geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
+        geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
+        client_resize(*c, geometry, false);
+    }
+
+    return 0;
+}
+
+static int
+luaA_client_opacity_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    double opacity = luaL_checknumber(L, 2);
+
+    if(opacity == -1 || (opacity >= 0 && opacity <= 100))
+        window_settrans((*c)->win, opacity);
+    return 0;
+}
+
+static int
+luaA_client_kill(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    client_kill(*c);
+    return 0;
+}
+
+static int
+luaA_client_swap(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **swap = luaL_checkudata(L, 2, "client");
+    client_list_swap(&globalconf.clients, *swap, *c);
+    globalconf.screens[(*c)->screen].need_arrange = true;
+    globalconf.screens[(*swap)->screen].need_arrange = true;
+    widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
+    widget_invalidate_cache((*swap)->screen, WIDGET_CACHE_CLIENTS);
+    return 0;
+}
+
+static int
+luaA_client_focus_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    client_focus(*c, (*c)->screen, false);
+    return 0;
+}
+
+static int
+luaA_client_floating_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    bool f = luaA_checkboolean(L, 2);
+    client_setfloating(*c, f, (*c)->layer == LAYER_FLOAT ? LAYER_TILE : LAYER_FLOAT);
+    return 0;
+}
+
+static int
+luaA_client_floating_get(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    lua_pushboolean(L, (*c)->isfloating);
+    return 1;
+}
+
+static int
+luaA_client_eq(lua_State *L)
+{
+    client_t **c1 = luaL_checkudata(L, 1, "client");
+    client_t **c2 = luaL_checkudata(L, 2, "client");
+    lua_pushboolean(L, (*c1 == *c2));
+    return 1;
+}
+
+static int
+luaA_client_redraw(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    xcb_unmap_window(globalconf.connection, (*c)->win);
+    xcb_map_window(globalconf.connection, (*c)->win);
+    return 0;
+}
+
+static int
+luaA_client_tostring(lua_State *L)
+{
+    client_t **p = luaL_checkudata(L, 1, "client");
+    lua_pushfstring(L, "[client udata(%p) name(%s)]", *p, (*p)->name);
+    return 1;
+}
+
+const struct luaL_reg awesome_client_methods[] =
+{
+    { "get", luaA_client_get },
+    { "focus_get", luaA_client_focus_get },
+    { "visible_get", luaA_client_visible_get },
+    { "mouse", luaA_client_mouse },
+    { NULL, NULL }
+};
+const struct luaL_reg awesome_client_meta[] =
+{
+    { "titlebar_set", luaA_client_titlebar_set },
+    { "screen_set", luaA_client_screen_set },
+    { "screen_get", luaA_client_screen_get },
+    { "border_set", luaA_client_border_set },
+    { "tag", luaA_client_tag },
+    { "istagged", luaA_client_istagged },
+    { "coords_get", luaA_client_coords_get },
+    { "coords_set", luaA_client_coords_set },
+    { "opacity_set", luaA_client_opacity_set },
+    { "kill", luaA_client_kill },
+    { "swap", luaA_client_swap },
+    { "focus_set", luaA_client_focus_set  },
+    { "redraw", luaA_client_redraw },
+    { "floating_set", luaA_client_floating_set },
+    { "floating_get", luaA_client_floating_get },
+    { "__eq", luaA_client_eq },
+    { "__tostring", luaA_client_tostring },
+    { NULL, NULL }
+};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

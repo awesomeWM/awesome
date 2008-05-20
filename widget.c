@@ -23,49 +23,11 @@
 #include "widget.h"
 #include "statusbar.h"
 #include "event.h"
+#include "lua.h"
 
 extern AwesomeConf globalconf;
 
 #include "widgetgen.h"
-
-/** Compute widget alignment.
- * This will process all widget starting at `widget' and will check their
- * alignment and guess it if set to AlignAuto.
- * \param widget A linked list of all widgets.
- */
-void
-widget_calculate_alignments(widget_t *widget)
-{
-    for(; widget && widget->alignment != AlignFlex; widget = widget->next)
-        switch(widget->alignment)
-        {
-          case AlignCenter:
-            warn("widgets cannot be center aligned\n");
-          case AlignAuto:
-            widget->alignment = AlignLeft;
-            break;
-          default:
-            break;
-        }
-
-    if(widget)
-        for(widget = widget->next; widget; widget = widget->next)
-            switch(widget->alignment)
-            {
-              case AlignFlex:
-                warn("multiple flex widgets (%s) in panel -"
-                     " ignoring flex for all but the first.\n", widget->name);
-                widget->alignment = AlignRight;
-                break;
-              case AlignCenter:
-                warn("widget %s cannot be center aligned\n", widget->name);
-              case AlignAuto:
-                widget->alignment = AlignRight;
-                break;
-              default:
-                break;
-            }
-}
 
 /** Compute offset for drawing the first pixel of a widget.
  * \param barwidth The statusbar width.
@@ -93,29 +55,31 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
 widget_t *
 widget_getbyname(statusbar_t *sb, char *name)
 {
-    widget_t *widget;
+    widget_node_t *widget;
 
     for(widget = sb->widgets; widget; widget = widget->next)
-        if(!a_strcmp(name, widget->name))
-            return widget;
+        if(!a_strcmp(name, widget->widget->name))
+            return widget->widget;
 
     return NULL;
 }
 
 /** Common function for button press event on widget.
  * It will look into configuration to find the callback function to call.
- * \param widget The widget.
+ * \param w The widget node.
+ * \param statusbar The statusbar.
  * \param ev The button press event the widget received.
  */
 static void
-widget_common_button_press(widget_t *widget, xcb_button_press_event_t *ev)
+widget_common_button_press(widget_node_t *w,
+                           statusbar_t *statusbar __attribute__ ((unused)),
+                           xcb_button_press_event_t *ev)
 {
     Button *b;
 
-    for(b = widget->buttons; b; b = b->next)
-        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod
-           && b->func)
-            b->func(widget->statusbar->screen, b->arg);
+    for(b = w->widget->buttons; b; b = b->next)
+        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
+            luaA_dofunction(globalconf.L, b->fct, 0);
 }
 
 /** Common tell function for widget, which only warn user that widget
@@ -125,8 +89,9 @@ widget_common_button_press(widget_t *widget, xcb_button_press_event_t *ev)
  * \return The status of the command, which is always an error in this case.
  */
 static widget_tell_status_t
-widget_common_tell(widget_t *widget, char *property __attribute__ ((unused)),
-                   char *new_value __attribute__ ((unused)))
+widget_common_tell(widget_t *widget,
+                   const char *property __attribute__ ((unused)),
+                   const char *new_value __attribute__ ((unused)))
 {
     warn("%s widget does not accept commands.\n", widget->name);
     return WIDGET_ERROR_CUSTOM;
@@ -134,20 +99,13 @@ widget_common_tell(widget_t *widget, char *property __attribute__ ((unused)),
 
 /** Common function for creating a widget.
  * \param widget The allocated widget.
- * \param statusbar The statusbar the widget is on.
- * \param config The cfg_t structure we will parse to set common info.
  */
 void
-widget_common_new(widget_t *widget, statusbar_t *statusbar, cfg_t *config)
+widget_common_new(widget_t *widget)
 {
-    widget->statusbar = statusbar;
-    widget->name = a_strdup(cfg_title(config));
+    widget->align = AlignLeft;
     widget->tell = widget_common_tell;
     widget->button_press = widget_common_button_press;
-    widget->area.x = cfg_getint(config, "x");
-    widget->area.y = cfg_getint(config, "y");
-    widget->user_supplied_x = (widget->area.x != (int) 0xffffffff);
-    widget->user_supplied_y = (widget->area.y != (int) 0xffffffff);
 }
 
 /** Invalidate widgets which should be refresh upon
@@ -160,94 +118,238 @@ void
 widget_invalidate_cache(int screen, int flags)
 {
     statusbar_t *statusbar;
-    widget_t *widget;
+    widget_node_t *widget;
 
     for(statusbar = globalconf.screens[screen].statusbar;
         statusbar;
         statusbar = statusbar->next)
         for(widget = statusbar->widgets; widget; widget = widget->next)
-            if(widget->cache_flags & flags)
+            if(widget->widget->cache_flags & flags)
+            {
                 statusbar->need_update = true;
+                break;
+            }
 }
 
-/** Send commands to widgets.
- * \param screen Virtual screen number.
- * \param arg Widget command. Syntax depends on specific widget.
- * \ingroup ui_callback
- */
 void
-uicb_widget_tell(int screen, char *arg)
+widget_invalidate_statusbar_bywidget(widget_t *widget)
 {
+    int screen;
     statusbar_t *statusbar;
-    widget_t *widget;
-    char *p, *property = NULL, *new_value;
-    ssize_t len;
+    widget_node_t *witer;
+
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+        for(statusbar = globalconf.screens[screen].statusbar;
+            statusbar;
+            statusbar = statusbar->next)
+            for(witer = statusbar->widgets; witer; witer = witer->next)
+                if(witer->widget == widget)
+                {
+                    statusbar->need_update = true;
+                    break;
+                }
+}
+
+static int
+luaA_widget_new(lua_State *L)
+{
+    const char *type;
+    widget_t **widget, *w;
+    WidgetConstructor *wc;
+    int objpos;
+    alignment_t align;
+
+    luaA_checktable(L, 1);
+    align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
+
+    type = luaA_getopt_string(L, 1, "type", NULL);
+
+    /* \todo use type to call the WidgetConstructor and set ->tell*/
+    if((wc = name_func_lookup(type, WidgetList)))
+        w = wc(align);
+    else
+        return 0;
+
+    widget = lua_newuserdata(L, sizeof(widget_t *));
+    objpos = lua_gettop(L);
+    *widget = w;
+
+    /* \todo check that the name is unique */
+    (*widget)->name = luaA_name_init(L);
+
+    widget_ref(widget);
+
+    /* repush obj on top */
+    lua_pushvalue(L, objpos);
+    return luaA_settype(L, "widget");
+}
+
+static int
+luaA_widget_mouse(lua_State *L)
+{
+    size_t i, len;
+    /* arg 1 is object */
+    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    int b;
+    Button *button;
+
+    /* arg 2 is modkey table */
+    luaA_checktable(L, 2);
+    /* arg 3 is mouse button */
+    b = luaL_checknumber(L, 3);
+    /* arg 4 is cmd to run */
+    luaA_checkfunction(L, 4);
+
+    button = p_new(Button, 1);
+    button->button = xutil_button_fromint(b);
+    button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    len = lua_objlen(L, 2);
+    for(i = 1; i <= len; i++)
+    {
+        lua_rawgeti(L, 2, i);
+        button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
+    }
+
+    button_list_push(&(*widget)->buttons, button);
+
+    return 0;
+}
+
+static int
+luaA_widget_set(lua_State *L)
+{
+    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    const char *property, *value;
     widget_tell_status_t status;
 
-    if(!(len = a_strlen(arg)))
-        return warn("must specify a statusbar and a widget.\n");
+    property = luaL_checkstring(L, 2);
+    value = luaL_checkstring(L, 3);
 
-    if(!(p = strtok(arg, " ")))
-        return warn("ignoring malformed widget command (missing statusbar name).\n");
-
-    if(!(statusbar = statusbar_getbyname(screen, p)))
-        return warn("no such statusbar: %s\n", p);
-
-    if(!(p = strtok(NULL, " ")))
-        return warn("ignoring malformed widget command (missing widget name).\n");
-
-    if(!(widget = widget_getbyname(statusbar, p)))
-        return warn("no such widget: %s in statusbar %s.\n", p, statusbar->name);
-
-    if(!(p = strtok(NULL, " ")))
-        return warn("ignoring malformed widget command (missing property name).\n");
-
-    property = p;
-    p += a_strlen(property) + 1; /* could be out of 'arg' now */
-
-    /* arg + len points to the finishing \0.
-     * p to the char right of the first space (strtok delimiter)
-     *
-     * \0 is on the right(>) of p pointer => some text (new_value) */
-    if(arg + len > p)
-    {
-        len = a_strlen(p);
-        new_value = p_new(char, len + 1);
-        a_strncpy(new_value, len + 1, p, len);
-        status = widget->tell(widget, property, new_value);
-        p_delete(&new_value);
-    }
-    else
-        status = widget->tell(widget, property, NULL);
-
-    switch(status)
+    switch((status = (*widget)->tell(*widget, property, value)))
     {
       case WIDGET_ERROR:
         warn("error changing property %s of widget %s\n",
-             property, widget->name);
+             property, (*widget)->name);
         break;
       case WIDGET_ERROR_NOVALUE:
-          warn("error changing property %s of widget %s, no value given\n",
-                property, widget->name);
+        warn("error changing property %s of widget %s, no value given\n",
+              property, (*widget)->name);
         break;
       case WIDGET_ERROR_FORMAT_FONT:
         warn("error changing property %s of widget %s, must be a valid font\n",
-             property, widget->name);
+             property, (*widget)->name);
         break;
       case WIDGET_ERROR_FORMAT_COLOR:
         warn("error changing property %s of widget %s, must be a valid color\n",
-             property, widget->name);
+             property, (*widget)->name);
         break;
       case WIDGET_ERROR_FORMAT_SECTION:
         warn("error changing property %s of widget %s, section/title not found\n",
-             property, widget->name);
+             property, (*widget)->name);
         break;
       case WIDGET_NOERROR:
-          widget->statusbar->need_update = true;
-          break;
+        widget_invalidate_statusbar_bywidget(*widget);
+        break;
       case WIDGET_ERROR_CUSTOM:
         break;
     }
+
+    return 0;
 }
+
+static int
+luaA_widget_gc(lua_State *L)
+{
+    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    widget_unref(widget);
+    return 0;
+}
+
+static int
+luaA_widget_tostring(lua_State *L)
+{
+    widget_t **p = luaL_checkudata(L, 1, "widget");
+    lua_pushfstring(L, "[widget udata(%p) name(%s)]", *p, (*p)->name);
+    return 1;
+}
+
+static int
+luaA_widget_eq(lua_State *L)
+{
+    widget_t **t1 = luaL_checkudata(L, 1, "widget");
+    widget_t **t2 = luaL_checkudata(L, 2, "widget");
+    lua_pushboolean(L, (*t1 == *t2));
+    return 1;
+}
+
+static int
+luaA_widget_get(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    statusbar_t *sb;
+    widget_t **wobj;
+    widget_node_t *widget;
+    int ret, i = 1, screen;
+    regex_t r;
+    regmatch_t match;
+    char error[512];
+    bool add = true;
+    widget_node_t *wlist = NULL, *witer;
+
+    if((ret = regcomp(&r, name, REG_EXTENDED)))
+    {
+        regerror(ret, &r, error, sizeof(error));
+        luaL_error(L, "regex compilation error: %s\n", error);
+    }
+
+    lua_newtable(L);
+
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+        for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
+            for(widget = sb->widgets; widget; widget = widget->next)
+                if(!regexec(&r, widget->widget->name, 1, &match, 0))
+                {
+                    for(witer = wlist; witer; witer = witer->next)
+                        if(witer->widget == widget->widget)
+                        {
+                            add = false;
+                            break;
+                        }
+                    if(add)
+                    {
+                        witer = p_new(widget_node_t, 1);
+                        wobj = lua_newuserdata(L, sizeof(tag_t *));
+                        witer->widget = *wobj = widget->widget;
+                        widget_ref(&widget->widget);
+                        widget_node_list_push(&wlist, witer);
+                        /* ref again for the list */
+                        widget_ref(&widget->widget);
+                        luaA_settype(L, "widget");
+                        lua_rawseti(L, -2, i++);
+                    }
+                    add = true;
+                }
+
+    widget_node_list_wipe(&wlist);
+
+    return 1;
+}
+
+const struct luaL_reg awesome_widget_methods[] =
+{
+    { "new", luaA_widget_new },
+    { "get", luaA_widget_get },
+    { NULL, NULL }
+};
+const struct luaL_reg awesome_widget_meta[] =
+{
+    { "mouse", luaA_widget_mouse },
+    { "set", luaA_widget_set },
+    { "__gc", luaA_widget_gc },
+    { "__eq", luaA_widget_eq },
+    { "__tostring", luaA_widget_tostring },
+    { NULL, NULL }
+};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

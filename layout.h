@@ -22,26 +22,13 @@
 #ifndef AWESOME_LAYOUT_H
 #define AWESOME_LAYOUT_H
 
-#include "uicb.h"
 #include "common/list.h"
 #include "common/util.h"
 
 typedef void (LayoutArrange)(int);
 
-typedef struct Layout Layout;
-struct Layout
-{
-    char *image;
-    LayoutArrange *arrange;
-    Layout *prev, *next;
-};
-
-DO_SLIST(Layout, layout, p_delete)
-
+LayoutArrange * layout_get_current(int);
 int layout_refresh(void);
-Layout * layout_get_current(int);
-
-uicb_t uicb_tag_setlayout;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

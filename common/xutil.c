@@ -505,4 +505,79 @@ xutil_delete_error(xutil_error_t *err)
     p_delete(&err);
 }
 
+/** Link a name to a key symbol */
+typedef struct
+{
+    const char *name;
+    xcb_keysym_t keysym;
+} keymod_t;
+
+xcb_keysym_t
+xutil_keymask_fromstr(const char *keyname)
+{
+    /** List of keyname and corresponding X11 mask codes */
+    static const keymod_t KeyModList[] =
+    {
+        { "Shift", XCB_MOD_MASK_SHIFT },
+        { "Lock", XCB_MOD_MASK_LOCK },
+        { "Control", XCB_MOD_MASK_CONTROL },
+        { "Ctrl", XCB_MOD_MASK_CONTROL },
+        { "Mod1", XCB_MOD_MASK_1 },
+        { "Mod2", XCB_MOD_MASK_2 },
+        { "Mod3", XCB_MOD_MASK_3 },
+        { "Mod4", XCB_MOD_MASK_4 },
+        { "Mod5", XCB_MOD_MASK_5 },
+        { NULL, XCB_NO_SYMBOL }
+    };
+    int i;
+
+    if(keyname)
+        for(i = 0; KeyModList[i].name; i++)
+            if(!a_strcmp(keyname, KeyModList[i].name))
+                 return KeyModList[i].keysym;
+
+    return XCB_NO_SYMBOL;
+
+}
+
+/** Permit to use mouse with many more buttons */
+#ifndef XCB_BUTTON_INDEX_6
+#define XCB_BUTTON_INDEX_6 6
+#endif
+#ifndef XCB_BUTTON_INDEX_7
+#define XCB_BUTTON_INDEX_7 7
+#endif
+
+/** Link a name to a mouse button symbol */
+typedef struct
+{
+    int id;
+    unsigned int button;
+} mouse_button_t;
+
+/** Lookup for a mouse button from its index.
+ * \param button Mouse button index.
+ * \return Mouse button or 0 if not found.
+ */
+unsigned int
+xutil_button_fromint(int button)
+{
+    /** List of button name and corresponding X11 mask codes */
+    static const mouse_button_t mouse_button_list[] =
+    {
+        { 1, XCB_BUTTON_INDEX_1 },
+        { 2, XCB_BUTTON_INDEX_2 },
+        { 3, XCB_BUTTON_INDEX_3 },
+        { 4, XCB_BUTTON_INDEX_4 },
+        { 5, XCB_BUTTON_INDEX_5 },
+        { 6, XCB_BUTTON_INDEX_6 },
+        { 7, XCB_BUTTON_INDEX_7 }
+    };
+
+    if(button >= 1 && button <= countof(mouse_button_list))
+        return mouse_button_list[button - 1].button;
+
+    return 0;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

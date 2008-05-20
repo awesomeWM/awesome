@@ -1,6 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoreconf to produce a configure script.
 
+m4_include(as_ac_expand.m4)
+
 AC_PREREQ(2.61)
 dnl Each time you want an updated version number for your build, you need to
 dnl (re-)run autoreconf.
@@ -44,17 +46,14 @@ AC_ARG_VAR([DOXYGEN], [doxygen source documentation system])
 
 test "x$ASCIIDOC" = "x"  && AC_PATH_PROG([ASCIIDOC], [asciidoc], [:])
 test "x$XMLTO"    = "x"  && AC_PATH_PROG([XMLTO], [xmlto], [:])
-test "x$DOXYGEN"  = "x"  && AC_PATH_PROG([PYTHON], [python], [:])
 test "x$DOXYGEN"  = "x"  && AC_PATH_PROG([DOXYGEN], [doxygen], [:])
 
 test "x$ASCIIDOC" = "x:" && AC_MSG_WARN([awesome man page generation requires asciidoc])
 test "x$XMLTO"    = "x:" && AC_MSG_WARN([awesome man page generation requires xmlto])
-test "x$PYTHON"   = "x:" && AC_MSG_WARN([awesome man page generation requires python])
 test "x$DOXYGEN"  = "x:" && AC_MSG_WARN([awesome developer doc generation requires doxygen])
 
 AM_CONDITIONAL([HAVE_ASCIIDOC], [test "x$ASCIIDOC" != "x:"])
 AM_CONDITIONAL([HAVE_XMLTO],    [test "x$XMLTO"    != "x:"])
-AM_CONDITIONAL([HAVE_PYTHON],   [test "x$PYTHON"   != "x:"])
 AM_CONDITIONAL([HAVE_DOXYGEN],  [test "x$DOXYGEN"  != "x:"])
 
 xmlto_man_works=no
@@ -107,12 +106,15 @@ AC_PATH_PROG([WHOAMI], [whoami], [false])
 AS_IF([test "x$WHOAMI" = "xfalse"], [aw_whoami="???"], [aw_whoami=`$WHOAMI`])
 AC_DEFINE_UNQUOTED([AWESOME_COMPILE_BY], ["$aw_whoami"], [build user])
 
+AS_AC_EXPAND(awesomelibdir, "$datarootdir/awesome/lib")
+AC_DEFINE_UNQUOTED([AWESOME_LIB_PATH], "${awesomelibdir}", [awesome lib path])
+
 # Checks for libraries.
 AC_PATH_XTRA
 PKG_CHECK_MODULES([pangocairo], [pangocairo],,
    [AC_MSG_ERROR([awesome requires pangocairo.])])
-PKG_CHECK_MODULES([confuse], [libconfuse >= 2.6],,
-   [AC_MSG_ERROR([awesome requires libconfuse >= 2.6.])])
+PKG_CHECK_MODULES([Lua], [lua5.1],,
+   [AC_MSG_ERROR([awesome requires Lua >= 5.1.])])
 PKG_CHECK_MODULES([glib], [glib-2.0],,
    [AC_MSG_ERROR([awesome requires glib-2.0.])])
 PKG_CHECK_MODULES([dbus], [dbus-1],,

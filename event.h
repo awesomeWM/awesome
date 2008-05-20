@@ -35,7 +35,6 @@ int event_handle_destroynotify(void *, xcb_connection_t *, xcb_destroy_notify_ev
 int event_handle_enternotify(void *, xcb_connection_t *, xcb_enter_notify_event_t *);
 int event_handle_expose(void *, xcb_connection_t *, xcb_expose_event_t *);
 int event_handle_keypress(void *, xcb_connection_t *, xcb_key_press_event_t *);
-int event_handle_mappingnotify(void *, xcb_connection_t *, xcb_mapping_notify_event_t *);
 int event_handle_maprequest(void *, xcb_connection_t *, xcb_map_request_event_t *);
 int event_handle_propertynotify(void *, xcb_connection_t *, xcb_property_notify_event_t *);
 int event_handle_unmapnotify(void *, xcb_connection_t *, xcb_unmap_notify_event_t *);

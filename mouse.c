@@ -94,10 +94,9 @@ mouse_snapclienttogeometry_inside(area_t geometry, area_t snap_geometry, int sna
  * \return geometry to set to the client
  */
 static area_t
-mouse_snapclient(client_t *c, area_t geometry)
+mouse_snapclient(client_t *c, area_t geometry, int snap)
 {
     client_t *snapper;
-    int snap = globalconf.screens[c->screen].snap;
     area_t snapper_geometry;
     area_t screen_geometry =
         screen_get_area(c->screen,
@@ -117,8 +116,7 @@ mouse_snapclient(client_t *c, area_t geometry)
             snapper_geometry = snapper->geometry;
             snapper_geometry.width += 2 * c->border;
             snapper_geometry.height += 2 * c->border;
-            snapper_geometry = titlebar_geometry_add(&snapper->titlebar,
-                                                     snapper_geometry);
+            snapper_geometry = titlebar_geometry_add(&snapper->titlebar, snapper_geometry);
             geometry =
                 mouse_snapclienttogeometry_outside(geometry,
                                                    snapper_geometry,
@@ -137,15 +135,17 @@ mouse_snapclient(client_t *c, area_t geometry)
  * \param border The client border size.
  */
 static void
-mouse_resizebar_draw(draw_context_t *ctx, style_t *style,
-                     simple_window_t *sw, area_t geometry, int border)
+mouse_resizebar_draw(draw_context_t *ctx,
+                     simple_window_t *sw,
+                     area_t geometry, int border)
 {
     area_t draw_geometry = { 0, 0, ctx->width, ctx->height, NULL, NULL };
     char size[64];
 
     snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
              geometry.x, geometry.y, geometry.width, geometry.height);
-    draw_text(ctx, draw_geometry, size, style);
+    draw_rectangle(ctx, draw_geometry, 1.0, true, globalconf.colors.bg);
+    draw_text(ctx, globalconf.font, &globalconf.colors.fg, draw_geometry, size);
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
@@ -162,14 +162,14 @@ mouse_resizebar_draw(draw_context_t *ctx, style_t *style,
  */
 static simple_window_t *
 mouse_resizebar_new(int phys_screen, int border, area_t geometry,
-                    style_t *style, draw_context_t **ctx)
+                    draw_context_t **ctx)
 {
     simple_window_t *sw;
     area_t geom;
 
     geom = draw_text_extents(globalconf.connection,
                              globalconf.default_screen,
-                             style->font,
+                             globalconf.font,
                              "0000x0000+0000+0000");
     geom.x = geometry.x + ((2 * border + geometry.width) - geom.width) / 2;
     geom.y = geometry.y + ((2 * border + geometry.height) - geom.height) / 2;
@@ -183,36 +183,35 @@ mouse_resizebar_new(int phys_screen, int border, area_t geometry,
                             sw->drawable);
 
     xcb_map_window(globalconf.connection, sw->window);
-    mouse_resizebar_draw(*ctx, style, sw, geometry, border);
+    mouse_resizebar_draw(*ctx, sw, geometry, border);
 
     return sw;
 }
 
 /** Move the focused window with the mouse.
- * \param screen Screen ID
- * \param arg Unused
- * \ingroup ui_callback
  */
 void
-uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
+mouse_client_move(int snap)
 {
     int ocx, ocy, newscreen;
     area_t geometry;
     client_t *c = globalconf.focus->client, *target;
-    Layout *layout = layout_get_current(screen);
+    LayoutArrange *layout;
     simple_window_t *sw = NULL;
     draw_context_t *ctx;
-    style_t *style;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
     xcb_grab_pointer_cookie_t grab_pointer_c;
     xcb_query_pointer_reply_t *query_pointer_r = NULL, *mquery_pointer_r = NULL;
     xcb_query_pointer_cookie_t query_pointer_c;
-    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    xcb_screen_t *s;
 
     if(!c)
         return;
+
+    layout = layout_get_current(c->screen);
+    s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
     /* Send pointer requests */
     grab_pointer_c = xcb_grab_pointer(globalconf.connection, false, s->root,
@@ -224,7 +223,6 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
     geometry = c->geometry;
     ocx = geometry.x;
     ocy = geometry.y;
-    style = &globalconf.screens[c->screen].styles.focus;
 
     /* Get responses */
     if(!(grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection, grab_pointer_c, NULL)))
@@ -236,9 +234,9 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 
     query_pointer_r = xcb_query_pointer_reply(globalconf.connection, query_pointer_c, NULL);
 
-    if(c->isfloating || layout->arrange == layout_floating)
+    if(c->isfloating || layout == layout_floating)
     {
-        sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, style, &ctx);
+        sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
         xcb_aux_sync(globalconf.connection);
     }
 
@@ -261,20 +259,20 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
                 p_delete(&ev);
                 return;
               case XCB_MOTION_NOTIFY:
-                if(c->isfloating || layout->arrange == layout_floating)
+                if(c->isfloating || layout == layout_floating)
                 {
                     ev_motion = (xcb_motion_notify_event_t *) ev;
 
                     geometry.x = ocx + (ev_motion->event_x - query_pointer_r->root_x);
                     geometry.y = ocy + (ev_motion->event_y - query_pointer_r->root_y);
 
-                    geometry = mouse_snapclient(c, geometry);
+                    geometry = mouse_snapclient(c, geometry, snap);
                     c->ismoving = true;
                     client_resize(c, geometry, false);
                     c->ismoving = false;
 
                     if(sw)
-                        mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
+                        mouse_resizebar_draw(ctx, sw, c->geometry, c->border);
 
                     xcb_aux_sync(globalconf.connection);
                 }
@@ -317,53 +315,53 @@ uicb_client_movemouse(int screen, char *arg __attribute__ ((unused)))
 /** Resize the focused window with the mouse.
  * \param screen Screen ID
  * \param arg Unused
- * \ingroup ui_callback
  */
 void
-uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
+mouse_client_resize(void)
 {
     int ocx = 0, ocy = 0, n;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
     client_t *c = globalconf.focus->client;
-    tag_t **curtags = tags_get_current(screen);
-    Layout *layout = curtags[0]->layout;
+    tag_t **curtags;
+    LayoutArrange *layout;
     area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry = { 0, 0, 0, 0, NULL, NULL };
     double mwfact;
     simple_window_t *sw = NULL;
     draw_context_t *ctx = NULL;
-    style_t *style;
     xcb_grab_pointer_cookie_t grab_pointer_c;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
-    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    xcb_screen_t *s;
 
     /* only handle floating and tiled layouts */
     if(!c || c->isfixed)
         return;
 
-    style = &globalconf.screens[c->screen].styles.focus;
+    curtags = tags_get_current(c->screen);
+    layout = curtags[0]->layout;
+    s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
-    if(layout->arrange == layout_floating || c->isfloating)
+    if(layout == layout_floating || c->isfloating)
     {
         ocx = c->geometry.x;
         ocy = c->geometry.y;
         c->ismax = false;
 
-        sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, style, &ctx);
+        sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
     }
-    else if (layout->arrange == layout_tile || layout->arrange == layout_tileleft
-             || layout->arrange == layout_tilebottom || layout->arrange == layout_tiletop)
+    else if (layout == layout_tile || layout == layout_tileleft
+             || layout == layout_tilebottom || layout == layout_tiletop)
     {
         for(n = 0, c = globalconf.clients; c; c = c->next)
-            if(IS_TILED(c, screen))
+            if(IS_TILED(c, c->screen))
                 n++;
 
         if(n <= curtags[0]->nmaster) return;
 
-        for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
+        for(c = globalconf.clients; c && !IS_TILED(c, c->screen); c = c->next);
         if(!c) return;
 
-        area = screen_get_area(screen,
+        area = screen_get_area(c->screen,
                                globalconf.screens[c->screen].statusbar,
                                &globalconf.screens[c->screen].padding);
     }
@@ -380,10 +378,10 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
 
     p_delete(&grab_pointer_r);
 
-    if(curtags[0]->layout->arrange == layout_tileleft)
+    if(curtags[0]->layout == layout_tileleft)
         xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0, 0, 0,
                          0, c->geometry.height + c->border - 1);
-    else if(curtags[0]->layout->arrange == layout_tiletop)
+    else if(curtags[0]->layout == layout_tiletop)
         xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0, 0, 0,
                          c->geometry.width + c->border - 1, 0);
     else
@@ -414,7 +412,7 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
               case XCB_MOTION_NOTIFY:
                 ev_motion = (xcb_motion_notify_event_t *) ev;
 
-                if(layout->arrange == layout_floating || c->isfloating)
+                if(layout == layout_floating || c->isfloating)
                 {
                     if((geometry.width = ev_motion->event_x - ocx - 2 * c->border + 1) <= 0)
                         geometry.width = 1;
@@ -424,26 +422,24 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
                     geometry.y = c->geometry.y;
                     client_resize(c, geometry, true);
                     if(sw)
-                        mouse_resizebar_draw(ctx, style, sw, c->geometry, c->border);
+                        mouse_resizebar_draw(ctx, sw, c->geometry, c->border);
                     xcb_aux_sync(globalconf.connection);
                 }
-                else if(layout->arrange == layout_tile || layout->arrange == layout_tileleft
-                        || layout->arrange == layout_tiletop || layout->arrange == layout_tilebottom)
+                else if(layout == layout_tile || layout == layout_tileleft
+                        || layout == layout_tiletop || layout == layout_tilebottom)
                 {
-                    if(layout->arrange == layout_tile)
+                    if(layout == layout_tile)
                         mwfact = (double) (ev_motion->event_x - area.x) / area.width;
-                    else if(curtags[0]->layout->arrange == layout_tileleft)
+                    else if(curtags[0]->layout == layout_tileleft)
                         mwfact = 1 - (double) (ev_motion->event_x - area.x) / area.width;
-                    else if(curtags[0]->layout->arrange == layout_tilebottom)
+                    else if(curtags[0]->layout == layout_tilebottom)
                         mwfact = (double) (ev_motion->event_y - area.y) / area.height;
                     else
                         mwfact = 1 - (double) (ev_motion->event_y - area.y) / area.height;
-                    mwfact = MAX(globalconf.screens[screen].mwfact_lower_limit,
-                                 MIN(globalconf.screens[screen].mwfact_upper_limit, mwfact));
                     if(fabs(curtags[0]->mwfact - mwfact) >= 0.01)
                     {
                         curtags[0]->mwfact = mwfact;
-                        globalconf.screens[screen].need_arrange = true;
+                        globalconf.screens[c->screen].need_arrange = true;
                         layout_refresh();
                     }
                 }
@@ -460,5 +456,64 @@ uicb_client_resizemouse(int screen, char *arg __attribute__ ((unused)))
         }
     }
 }
+
+static int
+luaA_mouse_coords_set(lua_State *L)
+{
+    int x, y;
+    x = luaL_checknumber(L, 1);
+    y = luaL_checknumber(L, 2);
+    xcb_warp_pointer(globalconf.connection, XCB_NONE,
+                     xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root,
+                     0, 0, 0, 0, x, y);
+    return 0;
+}
+
+static int
+luaA_mouse_client_resize(lua_State *L __attribute__ ((unused)))
+{
+    mouse_client_resize();
+    return 0;
+}
+
+static int
+luaA_mouse_client_move(lua_State *L)
+{
+    int snap = luaL_optnumber(L, 1, 8);
+    mouse_client_move(snap);
+    return 0;
+}
+
+static int
+luaA_mouse_screen_get(lua_State *L)
+{
+    int screen;
+    xcb_query_pointer_cookie_t qc; 
+    xcb_query_pointer_reply_t *qr; 
+
+    qc = xcb_query_pointer(globalconf.connection,
+                           xcb_aux_get_screen(globalconf.connection,
+                                              globalconf.default_screen)->root);
+
+    if(!(qr = xcb_query_pointer_reply(globalconf.connection, qc, NULL)))
+        return 0;
+
+    screen = screen_get_bycoord(globalconf.screens_info,
+                                globalconf.default_screen,
+                                qr->root_x, qr->root_y);
+    p_delete(&qr);
+    lua_pushnumber(L, screen + 1);
+
+    return 1;
+}
+
+const struct luaL_reg awesome_mouse_lib[] =
+{
+    { "screen_get", luaA_mouse_screen_get },
+    { "coords_set", luaA_mouse_coords_set },
+    { "client_resize", luaA_mouse_client_resize },
+    { "client_move", luaA_mouse_client_move },
+    { NULL, NULL }
+};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

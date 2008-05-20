@@ -1,0 +1,191 @@
+-- awesome 3 configuration file
+
+-- Include awesome library, with lots of useful function!
+require("awful")
+
+-- {{{ Variables definitions
+-- This is used later as the default terminal to run.
+terminal = "xterm"
+-- Default modkey.
+-- Usually, Mod4 is the key with a logo between Control and Alt.
+-- If you do not like this or do not have such a key,
+-- I suggest you to remap Mod4 to another key using xmodmap or other tools.
+-- However, you can use another modifier like Mod1, but it may interact with others.
+modkey = "Mod4"
+-- }}}
+
+-- {{{ Tags
+-- Define tags
+tags = {}
+for s = 1, awesome.screen_count() do
+    tags[s] =
+    {
+        tag.new({ name = "1" }),
+        tag.new({ name = "2" }),
+        tag.new({ name = "3" }),
+        tag.new({ name = "4" }),
+        tag.new({ name = "5" }),
+        tag.new({ name = "6" }),
+        tag.new({ name = "7" }),
+        tag.new({ name = "8" }),
+        tag.new({ name = "9" })
+    }
+    -- Add tags to screen 0 one by one
+    for index, tag in ipairs(tags[s]) do
+        tag:add(s)
+    end
+    -- I'm sure you want to see at least one tag.
+    tags[s][1]:view(true)
+end
+-- }}}
+
+-- {{{ Statusbar
+-- Create a taglist widget
+mytaglist = widget.new({ type = "taglist", name = "mytaglist" })
+mytaglist:mouse({}, 1, awful.tag.viewonly)
+mytaglist:mouse({ modkey }, 1, awful.client.toggletag)
+mytaglist:mouse({}, 3,
+                function (tag)
+                    tag:view(not tag:isselected())
+                end)
+mytaglist:mouse({ modkey }, 3, awful.client.toggletag)
+mytaglist:mouse({ }, 4, awful.tag.viewprev)
+mytaglist:mouse({ }, 5, awful.tag.viewnext)
+mytaglist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
+
+-- Create a tasklist widget
+mytasklist = widget.new({ type = "tasklist", name = "mytasklist" })
+mytasklist:mouse({ }, 1, function (c) c:focus_set() end)
+mytasklist:mouse({ }, 4, function () awful.client.focus(1) end)
+mytasklist:mouse({ }, 5, function () awful.client.focus(-1) end)
+mytasklist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
+
+-- Create a textbox widget
+mytextbox = widget.new({ type = "textbox", name = "mytextbox", align = "right" })
+-- Set the default text in textbox
+mytextbox:set("text", "<i><small>awesome " .. AWESOME_VERSION .. "</small></i>")
+
+-- Create an iconbox widget
+myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
+myiconbox:set("image", "@iconsdir@/awesome16.png")
+
+-- Create a statusbar for each screen and add it
+for s = 1, awesome.screen_count() do
+    mystatusbar = statusbar.new({ position = "top", name = "mystatusbar" .. s,
+                                fg = "lightblue", bg = "black" })
+    -- Add widgets to the statusbar - order matters
+    mystatusbar:widget_add(mytaglist)
+    mystatusbar:widget_add(mytasklist)
+    mystatusbar:widget_add(mytextbox)
+    mystatusbar:add(s)
+end
+-- }}}
+
+-- {{{ Mouse bindings
+awesome.mouse({ }, 3, function () awful.spawn(terminal) end)
+client.mouse({ modkey }, 1, mouse.client_move)
+client.mouse({ modkey }, 3, mouse.client_resize)
+-- }}}
+
+-- {{{ Key bindings
+
+-- Bind keyboard digits
+-- Compute the maximum number of digit we need, limited to 9
+keynumber = 0
+for s = 1, awesome.screen_count() do
+   keynumber = math.min(9, math.max(#tags[s], keynumber));
+end
+
+for i = 1, keynumber do
+    awesome.key({ modkey }, i,
+                function ()
+                    local screen = mouse.screen_get()
+                    if tags[screen][i] then
+                        awful.tag.viewonly(tags[screen][i])
+                    end
+                end)
+    awesome.key({ modkey, "Control" }, i,
+                function ()
+                    local screen = mouse.screen_get()
+                    if tags[screen][i] then
+                        tags[i]:view(not tags[screen][i]:isselected())
+                    end
+                end)
+    awesome.key({ modkey, "Shift" }, i,
+                function ()
+                    local screen = mouse.screen_get()
+                    if tags[screen][i] then
+                        awful.client.movetotag(tags[screen][i])
+                    end
+                end)
+    awesome.key({ modkey, "Control", "Shift" }, i,
+                function ()
+                    local screen = mouse.screen_get()
+                    if tags[screen][i] then
+                        awful.client.toggletag(tags[screen][i])
+                    end
+                end)
+end
+
+awesome.key({ modkey }, "Left", awful.tag.viewprev)
+awesome.key({ modkey }, "Right", awful.tag.viewnext)
+
+-- Standard program
+awesome.key({ modkey }, "Return", function () awful.spawn(terminal) end)
+
+awesome.key({ modkey, "Control" }, "r", awesome.restart)
+awesome.key({ modkey, "Shift" }, "q", awesome.quit)
+
+-- Client manipulation
+awesome.key({ modkey, "Shift" }, "c", function () client.focus_get():kill() end)
+awesome.key({ modkey }, "j", function () awful.client.focus(1) end)
+awesome.key({ modkey }, "k", function () awful.client.focus(-1) end)
+awesome.key({ modkey, "Shift" }, "j", function () awful.client.swap(1) end)
+awesome.key({ modkey, "Shift" }, "k", function () awful.client.swap(-1) end)
+awesome.key({ modkey, "Control" }, "j", function () awful.screen.focus(1) end)
+awesome.key({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end)
+awesome.key({ modkey, "Control" }, "space", function () awful.client.togglefloating() end)
+
+-- Statubar manipulation
+awesome.key({ modkey }, "b", function () mystatusbar:position_set("off") end)
+
+-- Layout manipulation
+awesome.key({ modkey }, "l", function () awful.tag.incmwfact(0.05) end)
+awesome.key({ modkey }, "h", function () awful.tag.incmwfact(-0.05) end)
+awesome.key({ modkey, "Shift" }, "h", function () awful.tag.incnmaster(1) end)
+awesome.key({ modkey, "Shift" }, "l", function () awful.tag.incnmaster(-1) end)
+awesome.key({ modkey, "Control" }, "h", function () awful.tag.incncol(1) end)
+awesome.key({ modkey, "Control" }, "l", function () awful.tag.incncol(1) end)
+-- }}}
+
+-- {{{ Hooks
+-- Hook function to execute when focusing a client.
+function hook_focus(c)
+    c:border_set({ width = 1, color = "white" })
+end
+
+-- Hook function to execute when unfocusing a client.
+function hook_unfocus(c)
+    c:border_set({ width = 1, color = "black" })
+end
+
+-- Hook function to exeucte when the mouse is over a client.
+function hook_mouseover(c)
+    -- Sloppy focus
+    c:focus_set()
+end
+
+-- Hook function to execute when a new client appears.
+function hook_newclient(c)
+    c:focus_set()
+end
+
+-- Set up some hooks
+hooks.focus(hook_focus)
+hooks.unfocus(hook_unfocus)
+hooks.newclient(hook_newclient)
+hooks.mouseover(hook_mouseover)
+-- }}}
+
+-- Respect size hints
+awesome.resizehints_set(true)

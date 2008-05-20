@@ -3,7 +3,6 @@ awesome
 awesome-client
 doc
 *.swp
-defconfig.h
 .deps
 .dirstamp
 configure
@@ -16,16 +15,10 @@ aclocal.m4
 autom4te.cache
 awesome.doxygen
 awesome-client.1
-awesome-message.1
 awesome-menu.1
 awesome.1
 awesomerc.5
-awesomerc
+awesomerc.lua
 widgetgen.h
 layoutgen.h
 awesome-version-internal.h
-awesome-message
-awesome-menu
-uicbdocgen.txt
-optsdocgen.txt
-rcskeletongen.txt

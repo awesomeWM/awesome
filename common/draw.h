@@ -35,7 +35,7 @@
 
 typedef enum
 {
-    AlignLeft,
+    AlignLeft = 0,
     AlignRight,
     AlignCenter,
     AlignFlex,
@@ -90,27 +90,6 @@ typedef struct
 
 typedef struct
 {
-    int offset;
-    xcolor_t color;
-} shadow_t;
-
-/** Style structure */
-typedef struct
-{
-    /** Foreground color */
-    xcolor_t fg;
-    /** Background color */
-    xcolor_t bg;
-    /** Shadow color */
-    shadow_t shadow;
-    /** Border color */
-    xcolor_t border;
-    /** Font */
-    font_t *font;
-} style_t;
-
-typedef struct
-{
     xcb_connection_t *connection;
     xcb_drawable_t drawable;
     xcb_visualtype_t *visual;
@@ -132,17 +111,20 @@ draw_context_delete(draw_context_t **ctx)
 {
     if(*ctx)
     {
-        g_object_unref((*ctx)->layout);
-        cairo_surface_destroy((*ctx)->surface);
-        cairo_destroy((*ctx)->cr);
+        if((*ctx)->layout)
+            g_object_unref((*ctx)->layout);
+        if((*ctx)->surface)
+            cairo_surface_destroy((*ctx)->surface);
+        if((*ctx)->cr)
+            cairo_destroy((*ctx)->cr);
         p_delete(ctx);
     }
 }
 
-font_t *draw_font_new(xcb_connection_t *, int, char *);
+font_t *draw_font_new(xcb_connection_t *, int, const char *);
 void draw_font_delete(font_t **);
 
-void draw_text(draw_context_t *, area_t, const char *, const style_t *);
+void draw_text(draw_context_t *, font_t *, xcolor_t *, area_t, const char *);
 void draw_rectangle(draw_context_t *, area_t, float, bool, xcolor_t);
 void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 
@@ -157,7 +139,6 @@ void draw_rotate(draw_context_t *, xcb_drawable_t, int, int, double, int, int);
 area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *);
 alignment_t draw_align_get_from_str(const char *);
 bool draw_color_new(xcb_connection_t *, int, const char *, xcolor_t *);
-void draw_style_init(xcb_connection_t *, int, cfg_t *, style_t *, style_t *);
 
 void area_list_remove(area_t **, area_t *);
 

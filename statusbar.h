@@ -23,15 +23,26 @@
 #define AWESOME_STATUSBAR_H
 
 #include "structs.h"
+#include "widget.h"
+#include "common/refcount.h"
+#include "common/swindow.h"
 
+static inline void
+statusbar_delete(statusbar_t **statusbar)
+{
+    simplewindow_delete(&(*statusbar)->sw);
+    widget_node_list_wipe(&(*statusbar)->widgets);
+    p_delete(&(*statusbar)->name);
+    p_delete(statusbar);
+}
+
+void statusbar_position_update(statusbar_t *, position_t);
 void statusbar_refresh(void);
-void statusbar_preinit(statusbar_t *);
-void statusbar_init(statusbar_t *);
 statusbar_t * statusbar_getbyname(int, const char *);
 
-uicb_t uicb_statusbar_toggle;
-
-DO_SLIST(statusbar_t, statusbar, p_delete)
+DO_RCNT(statusbar_t, statusbar, statusbar_delete)
+DO_SLIST(statusbar_t, statusbar, statusbar_delete)
+DO_SLIST_UNREF(statusbar_t, statusbar, statusbar_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

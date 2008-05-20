@@ -72,7 +72,7 @@ placement_smart(client_t *c)
     area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
     area_t *screen_geometry, *arealist = NULL, *r;
     bool found = false;
-    Layout *layout;
+    LayoutArrange *layout;
 
     screen_geometry = p_new(area_t, 1);
 
@@ -85,7 +85,7 @@ placement_smart(client_t *c)
     area_list_push(&arealist, screen_geometry);
 
     for(client = globalconf.clients; client; client = client->next)
-        if((client->isfloating || layout->arrange == layout_floating)
+        if((client->isfloating || layout == layout_floating)
             && client_isvisible(client, c->screen))
         {
             newgeometry = client->f_geometry;

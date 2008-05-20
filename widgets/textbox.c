@@ -1,6 +1,7 @@
 /*
  * textbox.c - text box widget
  *
+ * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,37 +34,37 @@ typedef struct
 } Data;
 
 static int
-textbox_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
+textbox_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
 {
-    Data *d = widget->data;
+    Data *d = w->widget->data;
 
     if(d->width)
-        widget->area.width = d->width;
-    else if(widget->alignment == AlignFlex)
-        widget->area.width = widget->statusbar->width - used;
+        w->area.width = d->width;
+    else if(w->widget->align == AlignFlex)
+        w->area.width = statusbar->width - used;
     else
-        widget->area.width = MIN(draw_text_extents(ctx->connection, ctx->phys_screen,
-                                                   globalconf.screens[widget->statusbar->screen].styles.normal.font, d->text).width,
-                                 widget->statusbar->width - used);
+        w->area.width = MIN(draw_text_extents(statusbar->ctx->connection,
+                                              statusbar->ctx->phys_screen,
+                                              globalconf.font, d->text).width,
+                            statusbar->width - used);
 
-    widget->area.height = widget->statusbar->height;
+    w->area.height = statusbar->height;
 
-    if(!widget->user_supplied_x)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                                 widget->area.width,
-                                                 offset,
-                                                 widget->alignment);
-    if(!widget->user_supplied_y)
-        widget->area.y = 0;
+    w->area.x = widget_calculate_offset(statusbar->width,
+                                        w->area.width,
+                                        offset,
+                                        w->widget->align);
+    w->area.y = 0;
 
-    draw_text(ctx, widget->area, d->text,
-              &globalconf.screens[widget->statusbar->screen].styles.normal);
+    draw_text(statusbar->ctx, globalconf.font,
+              &statusbar->colors.fg,
+              w->area, d->text);
 
-    return widget->area.width;
+    return w->area.width;
 }
 
 static widget_tell_status_t
-textbox_tell(widget_t *widget, char *property, char *new_value)
+textbox_tell(widget_t *widget, const char *property, const char *new_value)
 {
     Data *d = widget->data;
 
@@ -81,22 +82,17 @@ textbox_tell(widget_t *widget, char *property, char *new_value)
 }
 
 widget_t *
-textbox_new(statusbar_t *statusbar, cfg_t *config)
+textbox_new(alignment_t align)
 {
     widget_t *w;
     Data *d;
 
     w = p_new(widget_t, 1);
-    widget_common_new(w, statusbar, config);
+    widget_common_new(w);
+    w->align = align;
     w->draw = textbox_draw;
     w->tell = textbox_tell;
-    w->alignment = cfg_getalignment(config, "align");
-
     w->data = d = p_new(Data, 1);
-
-    d->width = cfg_getint(config, "width");
-
-    d->text = a_strdup(cfg_getstr(config, "text"));
 
     return w;
 }

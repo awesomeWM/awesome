@@ -25,10 +25,13 @@
 #include <xcb/xcb_event.h>
 
 #include <regex.h>
+
+#include "lua.h"
 #include "layout.h"
 #include "common/draw.h"
 #include "common/swindow.h"
 #include "common/xscreen.h"
+#include "common/refcount.h"
 
 /** stacking layout */
 typedef enum
@@ -47,58 +50,60 @@ enum
 
 typedef struct
 {
-    simple_window_t *sw;
+    /** Ref count */
+    int refcount;
     position_t position;
-    position_t dposition;
     alignment_t align;
     int width, height;
     char *text_normal, *text_focus, *text_urgent;
 } titlebar_t;
 
-/** Rule type */
-typedef struct rule_t rule_t;
-struct rule_t
+static inline void
+titlebar_delete(titlebar_t **t)
 {
-    char *icon;
-    char *xprop;
-    int screen;
-    fuzzy_t isfloating;
-    fuzzy_t ismaster;
-    titlebar_t titlebar;
-    double opacity;
-    regex_t *prop_r;
-    regex_t *tags_r;
-    regex_t *xpropval_r;
-    /** Next and previous rules */
-    rule_t *prev, *next;
-};
+    p_delete(&(*t)->text_normal);
+    p_delete(&(*t)->text_focus);
+    p_delete(&(*t)->text_urgent);
+    p_delete(t);
+}
+
+DO_RCNT(titlebar_t, titlebar, titlebar_delete)
 
 /** Keys bindings */
 typedef struct keybinding_t keybinding_t;
 struct keybinding_t
 {
+    /** Key modifier */
     unsigned long mod;
+    /** Keysym */
     xcb_keysym_t keysym;
+    /** Keycode */
     xcb_keycode_t keycode;
-    uicb_t *func;
-    char *arg;
+    /** Lua function to execute. */
+    luaA_function fct;
     /** Next and previous keys */
     keybinding_t *prev, *next;
 };
+
+DO_SLIST(keybinding_t, keybinding, p_delete)
 
 /** Mouse buttons bindings */
 typedef struct Button Button;
 struct Button
 {
+    /** Key modifiers */
     unsigned long mod;
+    /** Mouse button number */
     unsigned int button;
-    uicb_t *func;
-    char *arg;
+    /** Lua function to execute. */
+    luaA_function fct;
     /** Next and previous buttons */
     Button *prev, *next;
 };
 
-/** widget_t tell status code */
+DO_SLIST(Button, button, p_delete)
+
+/** Widget tell status code */
 typedef enum
 {
     WIDGET_NOERROR = 0,
@@ -110,41 +115,67 @@ typedef enum
     WIDGET_ERROR_FORMAT_SECTION
 } widget_tell_status_t;
 
-/** widget_t */
+/** Widget */
 typedef struct widget_t widget_t;
+typedef struct widget_node_t widget_node_t;
 typedef struct statusbar_t statusbar_t;
 struct widget_t
 {
+    /** Ref count */
+    int refcount;
     /** widget_t name */
     char *name;
     /** Draw function */
-    int (*draw)(widget_t *, draw_context_t *, int, int);
+    int (*draw)(widget_node_t *, statusbar_t *, int, int);
     /** Update function */
-    widget_tell_status_t (*tell)(widget_t *, char *, char *);
+    widget_tell_status_t (*tell)(widget_t *, const char *, const char *);
     /** ButtonPressedEvent handler */
-    void (*button_press)(widget_t *, xcb_button_press_event_t *);
-    /** statusbar_t */
-    statusbar_t *statusbar;
+    void (*button_press)(widget_node_t *, statusbar_t *, xcb_button_press_event_t *);
     /** Alignement */
-    alignment_t alignment;
+    alignment_t align;
     /** Misc private data */
     void *data;
-    /** true if user supplied coords */
-    bool user_supplied_x;
-    bool user_supplied_y;
-    /** area_t */
-    area_t area;
     /** Buttons bindings */
     Button *buttons;
     /** Cache flags */
     int cache_flags;
-    /** Next and previous widgets */
-    widget_t *prev, *next;
 };
+
+struct widget_node_t
+{
+    /** The widget */
+    widget_t *widget;
+    /** The area where the widget was drawn */
+    area_t area;
+    /** Next and previous widget in the list */
+    widget_node_t *prev, *next;
+};
+
+static inline void
+widget_delete(widget_t **widget)
+{
+    button_list_wipe(&(*widget)->buttons);
+    p_delete(&(*widget)->data);
+    p_delete(&(*widget)->name);
+    p_delete(widget);
+}
+
+DO_RCNT(widget_t, widget, widget_delete)
+
+static inline void
+widget_node_delete(widget_node_t **node)
+{
+    widget_unref(&(*node)->widget);
+    p_delete(node);
+}
+
+DO_SLIST(widget_node_t, widget_node, widget_node_delete)
 
 /** Status bar */
 struct statusbar_t
 {
+    /** Ref count */
+    int refcount;
     /** Window */
     simple_window_t *sw;
     /** statusbar_t name */
@@ -153,20 +184,23 @@ struct statusbar_t
     int width;
     /** Bar height */
     int height;
-    /** Default position */
-    position_t dposition;
     /** Bar position */
     position_t position;
     /** Screen */
     int screen;
     /** Physical screen id */
     int phys_screen;
-    /** widget_t list */
-    widget_t *widgets;
+    /** Widget list */
+    widget_node_t *widgets;
     /** Draw context */
     draw_context_t *ctx;
     /** Need update */
     bool need_update;
+    /** Default colors */
+    struct
+    {
+        xcolor_t fg, bg;
+    } colors;
     /** Next and previous statusbars */
     statusbar_t *prev, *next;
 };
@@ -212,11 +246,14 @@ struct client_t
     int phys_screen;
     /** True if the client is a new one */
     bool newcomer;
-    /** titlebar_t */
+    /** Titlebar */
     titlebar_t titlebar;
-    /** layer in the stacking order */
-    layer_t layer;
-    layer_t oldlayer;
+    /** Titlebar window */
+    simple_window_t *titlebar_sw;
+    /** Old position */
+    position_t titlebar_oldposition;
+    /** Layer in the stacking order */
+    layer_t layer, oldlayer;
 };
 
 typedef struct client_node_t client_node_t;
@@ -231,16 +268,16 @@ struct client_node_t
 typedef struct _tag_t tag_t;
 struct _tag_t
 {
+    /** Ref count */
+    int refcount;
     /** Tag name */
     char *name;
     /** Screen */
     int screen;
     /** true if selected */
     bool selected;
-    /** true if was selected before selecting others tags */
-    bool was_selected;
     /** Current tag layout */
-    Layout *layout;
+    LayoutArrange *layout;
     /** Master width factor */
     double mwfact;
     /** Number of master windows */
@@ -277,43 +314,10 @@ typedef struct
 typedef area_t (FloatingPlacement)(client_t *);
 typedef struct
 {
-    /** titlebar_t default parameters */
-    titlebar_t titlebar_default;
-    /** Number of pixels to snap windows */
-    int snap;
-    /** Border size */
-    int borderpx;
-    /** Mwfact limits */
-    float mwfact_upper_limit, mwfact_lower_limit;
-    /** Floating window placement algo */
-    FloatingPlacement *floating_placement;
-    /** Respect resize hints */
-    bool resize_hints;
-    /** Sloppy focus: focus follow mouse */
-    bool sloppy_focus;
-    /** true if we should raise windows on focus */
-    bool sloppy_focus_raise;
-    /** Focus new clients */
-    bool new_get_focus;
-    /** true if new clients should become master */
-    bool new_become_master;
     /** true if we need to arrange() */
     bool need_arrange;
-    /** Colors */
-    struct
-    {
-        style_t normal;
-        style_t focus;
-        style_t urgent;
-    } styles;
-    /** Transparency of unfocused clients */
-    double opacity_unfocused;
-    /** Transparency of focused clients */
-    double opacity_focused;
     /** Tag list */
     tag_t *tags;
-    /** Layout list */
-    Layout *layouts;
     /** Status bar */
     statusbar_t *statusbar;
     /** Padding */
@@ -336,8 +340,6 @@ struct AwesomeConf
     VirtScreen *screens;
     /** Screens info */
     screens_info_t *screens_info;
-    /** Rules list */
-    rule_t *rules;
     /** Keys bindings list */
     keybinding_t *keys;
     /** Mouse bindings list */
@@ -369,6 +371,8 @@ struct AwesomeConf
     } scratch;
     /** Path to config file */
     char *configpath;
+    /** Floating window placement algo */
+    FloatingPlacement *floating_placement;
     /** Selected clients history */
     client_node_t *focus;
     /** Link between tags and clients */
@@ -379,6 +383,28 @@ struct AwesomeConf
     int pointer_x, pointer_y;
     /** Atoms cache */
     xutil_atom_cache_t *atoms;
+    /** Lua VM state */
+    lua_State *L;
+    /** Default colors */
+    struct
+    {
+        xcolor_t fg, bg;
+    } colors;
+    /** Default font */
+    font_t *font;
+    /** Respect resize hints */
+    bool resize_hints;
+    struct
+    {
+        /** Command to execute when spawning a new client */
+        luaA_function newclient;
+        /** Command to execute when giving focus to a client */
+        luaA_function focus;
+        /** Command to execute when removing focus to a client */
+        luaA_function unfocus;
+        /** Command to run when mouse is over */
+        luaA_function mouseover;
+    } hooks;
 };
 
 #endif

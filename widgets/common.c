@@ -25,7 +25,7 @@
 extern AwesomeConf globalconf;
 
 widget_tell_status_t
-widget_set_color_for_data(widget_t *widget, xcolor_t *color, char *new_value, int data_items, char ** data_title)
+widget_set_color_for_data(xcolor_t *color, char *new_value, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;
@@ -36,7 +36,7 @@ widget_set_color_for_data(widget_t *widget, xcolor_t *color, char *new_value, in
         if(!a_strcmp(title, data_title[i]))
         {
             if(draw_color_new(globalconf.connection,
-                              widget->statusbar->phys_screen,
+                              globalconf.default_screen,
                               setting, &color[i]))
                 return WIDGET_NOERROR;
             else
@@ -45,7 +45,7 @@ widget_set_color_for_data(widget_t *widget, xcolor_t *color, char *new_value, in
     return WIDGET_ERROR_FORMAT_SECTION;
 }
 widget_tell_status_t
-widget_set_color_pointer_for_data(widget_t *widget, xcolor_t **color, char *new_value, int data_items, char ** data_title)
+widget_set_color_pointer_for_data(xcolor_t **color, char *new_value, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;
@@ -63,8 +63,8 @@ widget_set_color_pointer_for_data(widget_t *widget, xcolor_t **color, char *new_
                 color[i] = p_new(xcolor_t, 1);
             }
             if(!(draw_color_new(globalconf.connection,
-                            widget->statusbar->phys_screen,
-                            setting, color[i])))
+                                globalconf.default_screen,
+                                setting, color[i])))
             {
                 if(flag) /* restore */
                 {

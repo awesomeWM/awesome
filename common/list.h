@@ -159,7 +159,7 @@
         return NULL;                                                             \
     }                                                                            \
                                                                                  \
-    static inline void prefix##_list_detach(type **list, type *item)             \
+    static inline type *prefix##_list_detach(type **list, type *item)            \
     {                                                                            \
         if(item == *list)                                                        \
             *list = item->next;                                                  \
@@ -169,7 +169,27 @@
              item->next->prev = item->prev;                                      \
         item->next = NULL;                                                       \
         item->prev = NULL;                                                       \
-    }                                                                            \
+        return item;                                                             \
+    }
+
+#define DO_SLIST_UNREF(type, prefix, dtor)                                     \
+    static inline void prefix##_list_unref(type **list)                        \
+    {                                                                          \
+        type *next, *item = *list;                                             \
+        printf("list_unref\n");\
+        while(item)                                                            \
+        {                                                                      \
+            printf(" item %p refcount %d", item, item->refcount);\
+            next = item->next;                                                 \
+            if(--(item->refcount) <= 0)                                        \
+            {                                                                  \
+                prefix##_list_detach(list, item);                              \
+                dtor(&item);                                                   \
+            }                                                                  \
+            item = next;                                                       \
+        }                                                                      \
+        printf("end list_unref\n");\
+    }
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

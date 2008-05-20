@@ -25,7 +25,6 @@
 #include "screen.h"
 #include "event.h"
 #include "ewmh.h"
-#include "rules.h"
 #include "tag.h"
 #include "common/configopts.h"
 
@@ -64,46 +63,38 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
 }
 
 static int
-tasklist_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
+tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
 {
     client_t *c;
-    Data *d = widget->data;
-    rule_t *r;
+    Data *d = w->widget->data;
     area_t area;
     char *text;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;
-    style_t *style;
 
-    if(used >= widget->statusbar->width)
-        return (widget->area.width = 0);
+    if(used >= statusbar->width)
+        return (w->area.width = 0);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
+        if(tasklist_isvisible(c, statusbar->screen, d->show))
             n++;
 
     if(!n)
-        return (widget->area.width = 0);
+        return (w->area.width = 0);
 
-    box_width = (widget->statusbar->width - used) / n;
+    box_width = (statusbar->width - used) / n;
     /* compute how many pixel we left empty */
-    box_width_rest = (widget->statusbar->width - used) % n;
+    box_width_rest = (statusbar->width - used) % n;
 
-    if(!widget->user_supplied_x)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                                 0,
-                                                 offset,
-                                                 widget->alignment);
+    w->area.x = widget_calculate_offset(statusbar->width,
+                                        0, offset, w->widget->align);
 
-    if(!widget->user_supplied_y)
-        widget->area.y = widget->area.y = 0;
+    w->area.y = 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
+        if(tasklist_isvisible(c, statusbar->screen, d->show))
         {
             icon_width = 0;
-
-            style = client_style_get(c);
 
             if(globalconf.focus->client == c)
                 text = d->text_focus;
@@ -117,167 +108,177 @@ tasklist_draw(widget_t *widget, draw_context_t *ctx, int offset, int used)
             if(d->show_icons)
             {
                 /* draw a background for icons */
-                area.x = widget->area.x + box_width * i;
-                area.y = widget->area.y;
-                area.height = widget->statusbar->height;
+                area.x = w->area.x + box_width * i;
+                area.y = w->area.y;
+                area.height = statusbar->height;
                 area.width = box_width;
 
-                draw_rectangle(ctx, area, 1.0, true, style->bg);
+                draw_rectangle(statusbar->ctx, area, 1.0, true,
+                               statusbar->colors.bg);
 
-                if((r = rule_matching_client(c)) && r->icon)
+                if(0)
                 {
-                    area = draw_get_image_size(r->icon);
+//                    area = draw_get_image_size(r->icon);
                     if(area.width > 0 && area.height > 0)
                     {
-                        icon_width = ((double) widget->statusbar->height / (double) area.height) * area.width;
-                        draw_image(ctx,
-                                   widget->area.x + box_width * i,
-                                   widget->area.y,
-                                   widget->statusbar->height,
-                                   r->icon);
+                        icon_width = ((double) statusbar->height / (double) area.height) * area.width;
+                        draw_image(statusbar->ctx,
+                                   w->area.x + box_width * i,
+                                   w->area.y,
+                                   statusbar->height,
+                                   NULL);
+//                                   r->icon);
                     }
                 }
 
                 if(!icon_width && (icon = ewmh_get_window_icon(c->win)))
                 {
-                    icon_width = ((double) widget->statusbar->height / (double) icon->height)
+                    icon_width = ((double) statusbar->height / (double) icon->height)
                         * icon->width;
-                    draw_image_from_argb_data(ctx,
-                                              widget->area.x + box_width * i,
-                                              widget->area.y,
+                    draw_image_from_argb_data(statusbar->ctx,
+                                              w->area.x + box_width * i,
+                                              w->area.y,
                                               icon->width, icon->height,
-                                              widget->statusbar->height, icon->image);
+                                              statusbar->height, icon->image);
                     p_delete(&icon->image);
                     p_delete(&icon);
                 }
             }
 
-            area.x = widget->area.x + icon_width + box_width * i;
-            area.y = widget->area.y;
+            area.x = w->area.x + icon_width + box_width * i;
+            area.y = w->area.y;
             area.width = box_width - icon_width;
-            area.height = widget->statusbar->height;
+            area.height = statusbar->height;
 
             /* if we're on last elem, it has the last pixels left */
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            draw_text(ctx, area, text, style);
+            draw_text(statusbar->ctx, globalconf.font,
+                      &statusbar->colors.fg,
+                      area, text);
 
             p_delete(&text);
 
             if(c == globalconf.scratch.client)
             {
-                area.x = widget->area.x + icon_width + box_width * i;
-                area.y = widget->area.y;
-                area.width = (style->font->height + 2) / 3;
-                area.height = (style->font->height + 2) / 3;
-                draw_rectangle(ctx, area, 1.0, c->isfloating, style->fg);
+                area.x = w->area.x + icon_width + box_width * i;
+                area.y = w->area.y;
+                area.width = (globalconf.font->height + 2) / 3;
+                area.height = (globalconf.font->height + 2) / 3;
+                draw_rectangle(statusbar->ctx, area, 1.0, c->isfloating, statusbar->colors.fg);
             }
             else if(c->isfloating || c->ismax)
-                draw_circle(ctx, widget->area.x + icon_width + box_width * i,
-                            widget->area.y,
-                            (style->font->height + 2) / 4,
-                            c->ismax, style->fg);
+                draw_circle(statusbar->ctx, w->area.x + icon_width + box_width * i,
+                            w->area.y,
+                            (globalconf.font->height + 2) / 4,
+                            c->ismax, statusbar->colors.fg);
             i++;
         }
 
-    widget->area.width = widget->statusbar->width - used;
-    widget->area.height = widget->statusbar->height;
+    w->area.width = statusbar->width - used;
+    w->area.height = statusbar->height;
 
-    return widget->area.width;
+    return w->area.width;
 }
 
 static void
-tasklist_button_press(widget_t *widget, xcb_button_press_event_t *ev)
+tasklist_button_press(widget_node_t *w, statusbar_t *statusbar,
+                      xcb_button_press_event_t *ev)
 {
     Button *b;
-    client_t *c;
-    Data *d = widget->data;
-    tag_t *tag;
+    client_t *c, **lc;
+    Data *d = w->widget->data;
     int n = 0, box_width = 0, i, ci = 0;
 
-    /* button1 give focus */
-    if(ev->detail == XCB_BUTTON_INDEX_1 && CLEANMASK(ev->state) == XCB_NO_SYMBOL)
+    for(c = globalconf.clients; c; c = c->next)
+        if(tasklist_isvisible(c, statusbar->screen, d->show))
+            n++;
+
+    if(!n)
+        return;
+
+    box_width = w->area.width / n;
+
+    switch(statusbar->position)
     {
-        for(c = globalconf.clients; c; c = c->next)
-            if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
-                n++;
-
-        if(!n)
-            return;
-
-        box_width = widget->area.width / n;
-
-        if(ev->detail == XCB_BUTTON_INDEX_1 && CLEANMASK(ev->state) == XCB_NO_SYMBOL)
-        {
-            switch(widget->statusbar->position)
-            {
-              case Top:
-              case Bottom:
-                ci = (ev->event_x - widget->area.x) / box_width;
-                break;
-              case Right:
-                ci = (ev->event_y - widget->area.x) / box_width;
-                break;
-              default:
-                ci = ((widget->statusbar->width - ev->event_y) - widget->area.x) / box_width;
-                break;
-            }
-            /* found first visible client */
-            for(c = globalconf.clients;
-                c && !tasklist_isvisible(c, widget->statusbar->screen, d->show);
-                c = c->next);
-            /* found ci-th visible client */
-            for(i = 0; c ; c = c->next)
-                if(tasklist_isvisible(c, widget->statusbar->screen, d->show))
-                    if(i++ >= ci)
-                        break;
-
-            if(c)
-            {
-                /* first switch tag if client not visible */
-                if(!client_isvisible(c, widget->statusbar->screen))
-                    for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
-                        if(is_client_tagged(c, tag))
-                           tag_view_only_byindex(c->screen, i);
-                client_focus(c, widget->statusbar->screen, true);
-            }
-
-            return;
-        }
+      case Top:
+      case Bottom:
+        ci = (ev->event_x - w->area.x) / box_width;
+        break;
+      case Right:
+        ci = (ev->event_y - w->area.x) / box_width;
+        break;
+      default:
+         ci = ((statusbar->width - ev->event_y) - w->area.x) / box_width;
+         break;
     }
+    /* found first visible client */
+    for(c = globalconf.clients;
+        c && !tasklist_isvisible(c, statusbar->screen, d->show);
+        c = c->next);
+    /* found ci-th visible client */
+    for(i = 0; c ; c = c->next)
+        if(tasklist_isvisible(c, statusbar->screen, d->show))
+            if(i++ >= ci)
+                break;
 
-    for(b = widget->buttons; b; b = b->next)
-        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->func)
-            b->func(widget->statusbar->screen, b->arg);
+    if(c)
+        for(b = w->widget->buttons; b; b = b->next)
+            if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
+            {
+                lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
+                *lc = c;
+                luaA_settype(globalconf.L, "client");
+                luaA_dofunction(globalconf.L, b->fct, 1);
+            }
+}
+
+static widget_tell_status_t
+tasklist_tell(widget_t *widget, const char *property, const char *new_value)
+{
+    Data *d = widget->data;
+
+    if(!a_strcmp(property, "text_normal"))
+    {
+        p_delete(&d->text_normal);
+        d->text_normal = a_strdup(new_value);
+    }
+    else if(!a_strcmp(property, "text_focus"))
+    {
+        p_delete(&d->text_focus);
+        d->text_focus = a_strdup(new_value);
+    }
+    else if(!a_strcmp(property, "text_urgent"))
+    {
+        p_delete(&d->text_urgent);
+        d->text_urgent = a_strdup(new_value);
+    }
+    else
+        return WIDGET_ERROR;
+
+    return WIDGET_NOERROR;
 }
 
 widget_t *
-tasklist_new(statusbar_t *statusbar, cfg_t *config)
+tasklist_new(alignment_t align __attribute__ ((unused)))
 {
     widget_t *w;
     Data *d;
-    char *buf;
 
     w = p_new(widget_t, 1);
-    widget_common_new(w, statusbar, config);
+    widget_common_new(w);
     w->draw = tasklist_draw;
     w->button_press = tasklist_button_press;
-    w->alignment = AlignFlex;
+    w->align = AlignFlex;
     w->data = d = p_new(Data, 1);
+    w->tell = tasklist_tell;
 
-    d->text_normal = a_strdup(cfg_getstr(config, "text_normal"));
-    d->text_focus = a_strdup(cfg_getstr(config, "text_focus"));
-    d->text_urgent = a_strdup(cfg_getstr(config, "text_urgent"));
-    d->show_icons = cfg_getbool(config, "show_icons");
-
-    buf = cfg_getstr(config, "show");
-    if(!a_strcmp(buf, "all"))
-        d->show = ShowAll;
-    else if(!a_strcmp(buf, "tags"))
-        d->show = ShowTags;
-    else
-        d->show = ShowFocus;
+    d->text_normal = a_strdup(" <title/> ");
+    d->text_focus = a_strdup(" <title/> ");
+    d->text_urgent = a_strdup(" <title/> ");
+    d->show_icons = true;
+    d->show = ShowTags;
 
     /* Set cache property */
     w->cache_flags = WIDGET_CACHE_CLIENTS;

@@ -112,14 +112,15 @@ check_settings(Data *d, int status_height)
 
 
 static int
-progressbar_draw(widget_t *widget, draw_context_t *ctx, int offset,
+progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
                  int used __attribute__ ((unused)))
 {
     /* pb_.. values points to the widget inside a potential border */
     int i, percent_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
     int unit = 0; /* tick + gap */
     area_t rectangle, pattern_rect;
-    Data *d = widget->data;
+    draw_context_t *ctx = statusbar->ctx;
+    Data *d = w->widget->data;
 
     if(!d->data_items)
         return 0;
@@ -128,9 +129,9 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, int offset,
     {
         pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->data_items
                    - d->gap * (d->data_items - 1)) / d->data_items);
-        widget->area.width = d->data_items
-                             * (pb_width + 2 * (d->border_width + d->border_padding)
-                             + d->gap) - d->gap;
+        w->area.width = d->data_items
+                        * (pb_width + 2 * (d->border_width + d->border_padding)
+                        + d->gap) - d->gap;
     }
     else
     {
@@ -140,16 +141,14 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, int offset,
             unit = (pb_width + d->ticks_gap) / d->ticks_count;
             pb_width = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
         }
-        widget->area.width = pb_width + 2 * (d->border_width + d->border_padding);
+        w->area.width = pb_width + 2 * (d->border_width + d->border_padding);
     }
 
-    if(!widget->user_supplied_x)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                                 widget->area.width,
-                                                 offset,
-                                                 widget->alignment);
-    if(!widget->user_supplied_y)
-        widget->area.y = 0;
+    w->area.x = widget_calculate_offset(statusbar->width,
+                                        w->area.width,
+                                        offset,
+                                        w->widget->align);
+    w->area.y = 0;
 
     /* for a 'reversed' progressbar:
      * basic progressbar:
@@ -162,14 +161,14 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, int offset,
      * 2. finally draw the gaps
      */
 
-    pb_x = widget->area.x + d->border_width + d->border_padding;
+    pb_x = w->area.x + d->border_width + d->border_padding;
     pb_offset = 0;
 
     if(d->vertical)
     {
         /* TODO: maybe prevent to calculate that stuff below over and over again
          * (->use static-values) */
-        pb_height = (int) (widget->statusbar->height * d->height + 0.5)
+        pb_height = (int) (statusbar->height * d->height + 0.5)
                     - 2 * (d->border_width + d->border_padding);
         if(d->ticks_count && d->ticks_gap)
         {
@@ -178,7 +177,7 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, int offset,
             pb_height = unit * d->ticks_count - d->ticks_gap;
         }
 
-        pb_y = widget->area.y + ((int) (widget->statusbar->height * (1 - d->height)) / 2)
+        pb_y = w->area.y + ((int) (statusbar->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
         for(i = 0; i < d->data_items; i++)
@@ -275,10 +274,10 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, int offset,
     }
     else /* a horizontal progressbar */
     {
-        pb_height = (int) ((widget->statusbar->height * d->height
+        pb_height = (int) ((statusbar->height * d->height
                     - d->data_items * 2 * (d->border_width + d->border_padding)
                     - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
-        pb_y = widget->area.y + ((int) (widget->statusbar->height * (1 - d->height)) / 2)
+        pb_y = w->area.y + ((int) (statusbar->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
         for(i = 0; i < d->data_items; i++)
@@ -373,12 +372,12 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, int offset,
         }
     }
 
-    widget->area.height = widget->statusbar->height;
-    return widget->area.width;
+    w->area.height = statusbar->height;
+    return w->area.width;
 }
 
 static widget_tell_status_t
-progressbar_tell(widget_t *widget, char *property, char *new_value)
+progressbar_tell(widget_t *widget, const char *property, const char *new_value)
 {
     Data *d = widget->data;
     int i = 0, percent, tmp;
@@ -406,39 +405,23 @@ progressbar_tell(widget_t *widget, char *property, char *new_value)
         return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "fg"))
-        return widget_set_color_for_data(widget, d->fg, new_value, d->data_items, d->data_title);
+        return widget_set_color_for_data(d->fg, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "fg_off"))
-        return widget_set_color_for_data(widget, d->fg_off, new_value, d->data_items, d->data_title);
+        return widget_set_color_for_data(d->fg_off, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "bg"))
-        return widget_set_color_for_data(widget, d->bg, new_value, d->data_items, d->data_title);
+        return widget_set_color_for_data(d->bg, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "bordercolor"))
-        return widget_set_color_for_data(widget, d->bordercolor, new_value, d->data_items, d->data_title);
+        return widget_set_color_for_data(d->bordercolor, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "fg_center"))
-        return widget_set_color_pointer_for_data(widget, d->pfg_center, new_value, d->data_items, d->data_title);
+        return widget_set_color_pointer_for_data(d->pfg_center, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "fg_end"))
-        return widget_set_color_pointer_for_data(widget, d->pfg_end, new_value, d->data_items, d->data_title);
+        return widget_set_color_pointer_for_data(d->pfg_end, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "gap"))
         d->gap = atoi(new_value);
     else if(!a_strcmp(property, "width"))
-    {
-        tmp = d->width;
         d->width = atoi(new_value);
-        if(!check_settings(d, widget->statusbar->height))
-        {
-            d->width = tmp; /* restore */
-            return WIDGET_ERROR_CUSTOM;
-        }
-    }
     else if(!a_strcmp(property, "height"))
-    {
-        tmpf = d->height;
         d->height = atof(new_value);
-        if(!check_settings(d, widget->statusbar->height))
-        {
-            d->height = tmpf; /* restore */
-            return WIDGET_ERROR_CUSTOM;
-        }
-    }
     else
         return WIDGET_ERROR;
 
@@ -446,7 +429,7 @@ progressbar_tell(widget_t *widget, char *property, char *new_value)
 }
 
 widget_t *
-progressbar_new(statusbar_t *statusbar, cfg_t *config)
+progressbar_new(alignment_t align)
 {
     widget_t *w;
     Data *d;
@@ -456,26 +439,20 @@ progressbar_new(statusbar_t *statusbar, cfg_t *config)
 
 
     w = p_new(widget_t, 1);
-    widget_common_new(w, statusbar, config);
+    widget_common_new(w);
+    w->align = align;
     w->draw = progressbar_draw;
     w->tell = progressbar_tell;
     d = w->data = p_new(Data, 1);
 
-    d->height = cfg_getfloat(config, "height");
-    d->width = cfg_getint(config, "width");
+    d->height = 0.67;
+    d->width = 100;
 
-    d->border_padding = cfg_getint(config, "border_padding");
-    d->ticks_gap = cfg_getint(config, "ticks_gap");
-    d->ticks_count = cfg_getint(config, "ticks_count");
-    d->border_width = cfg_getint(config, "border_width");
+    d->ticks_gap = 1;
+    d->border_width = 1;
+    d->gap = 2;
 
-    if(!(d->vertical = cfg_getbool(config, "vertical")))
-        d->vertical = false;
-
-    d->gap = cfg_getint(config, "gap");
-
-    w->alignment = cfg_getalignment(config, "align");
-
+    /*
     if(!(d->data_items = cfg_size(config, "data")))
     {
         warn("progressbar widget needs at least one bar section\n");
@@ -539,6 +516,7 @@ progressbar_new(statusbar_t *statusbar, cfg_t *config)
         else
             d->bordercolor[i] = d->fg[i];
     }
+    */
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

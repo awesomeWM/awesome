@@ -9,7 +9,7 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-awesome [ -v | --version ] [ -h | --help ] [ -k | --check ] [ --config | -c configuration file ]
+awesome [ -v | --version ] [ -h | --help ] [ --config | -c configuration file ]
 
 DESCRIPTION
 -----------
@@ -47,8 +47,6 @@ OPTIONS
     Print help information, then exit.
 --config | -c::
     Use an alternate configuration file instead of $HOME/.awesomerc.
---check | -k::
-    Check configuration file syntax.
 
 DEFAULTS MOUSE BINDINGS
 -----------------------

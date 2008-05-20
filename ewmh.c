@@ -281,7 +281,11 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             /* restore geometry */
             geometry = c->m_geometry;
             /* restore borders and titlebar */
-            titlebar_position_set(&c->titlebar, c->titlebar.dposition);
+            if((c->titlebar.position = c->titlebar_oldposition))
+            {
+                c->titlebar.position = c->titlebar_oldposition;
+                xcb_map_window(globalconf.connection, c->titlebar_sw->window);
+            }
             c->border = c->oldborder;
             c->ismax = false;
             client_setfloating(c, c->wasfloating, c->oldlayer);
@@ -293,7 +297,11 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->m_geometry = c->geometry;
             c->wasfloating = c->isfloating;
             /* disable titlebar and borders */
-            titlebar_position_set(&c->titlebar, Off);
+            if((c->titlebar_oldposition = c->titlebar.position))
+            {
+                xcb_unmap_window(globalconf.connection, c->titlebar_sw->window);
+                c->titlebar.position = Off;
+            }
             c->oldborder = c->border;
             c->border = 0;
             c->ismax = true;
@@ -343,7 +351,11 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
         c->border = 0;
         c->skip = true;
         c->isfixed = true;
-        titlebar_position_set(&c->titlebar, Off);
+        if(c->titlebar.position)
+        {
+            xcb_unmap_window(globalconf.connection, c->titlebar_sw->window);
+            c->titlebar.position = Off;
+        }
         client_setfloating(c, true, LAYER_ABOVE);
     }
     else if (state == net_wm_window_type_dialog)

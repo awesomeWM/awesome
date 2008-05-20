@@ -28,8 +28,9 @@ void window_setstate(xcb_window_t, long);
 long window_getstate(xcb_window_t);
 void window_configure(xcb_window_t, area_t, int);
 void window_grabbuttons(xcb_window_t, int);
-void window_root_grabbuttons(int);
-void window_root_grabkeys(int);
+void window_root_grabbutton(Button *);
+void window_root_grabbuttons(void);
+void window_root_grabkey(keybinding_t *);
 void window_setshape(xcb_window_t, int);
 void window_settrans(xcb_window_t, double);
 

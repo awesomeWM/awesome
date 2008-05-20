@@ -32,44 +32,42 @@ typedef struct
 } Data;
 
 static int
-iconbox_draw(widget_t *widget, draw_context_t *ctx, int offset,
+iconbox_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
              int used __attribute__ ((unused)))
 {
-    Data *d = widget->data;
+    Data *d = w->widget->data;
     area_t area = draw_get_image_size(d->image);
 
     /* image not valid */
     if(area.width < 0 || area.height < 0)
-        return (widget->area.width = 0);
+        return (w->area.width = 0);
 
     if(d->resize)
-        widget->area.width = ((double) widget->statusbar->height / area.height) * area.width;
+        w->area.width = ((double) statusbar->height / area.height) * area.width;
     else
-        widget->area.width = area.width;
+        w->area.width = area.width;
 
-    widget->area.height = widget->statusbar->height;
+    w->area.height = statusbar->height;
 
-    if(!widget->user_supplied_x)
-        widget->area.x = widget_calculate_offset(widget->statusbar->width,
-                                                 widget->area.width,
-                                                 offset,
-                                                 widget->alignment);
+    w->area.x = widget_calculate_offset(statusbar->width,
+                                        w->area.width,
+                                        offset,
+                                        w->widget->align);
 
-    if(!widget->user_supplied_y)
-        widget->area.y = 0;
+    w->area.y = 0;
 
-    draw_image(ctx, widget->area.x, widget->area.y,
-               d->resize ? widget->statusbar->height : 0, d->image);
+    draw_image(statusbar->ctx, w->area.x, w->area.y,
+               d->resize ? statusbar->height : 0, d->image);
 
-    return widget->area.width;
+    return w->area.width;
 }
 
 static widget_tell_status_t
-iconbox_tell(widget_t *widget, char *property, char *new_value)
+iconbox_tell(widget_t *widget, const char *property, const char *new_value)
 {
     Data *d = widget->data;
 
-    if(new_value == NULL)
+    if(!new_value)
         return WIDGET_ERROR_NOVALUE;
 
     if(!a_strcmp(property, "image"))
@@ -86,19 +84,18 @@ iconbox_tell(widget_t *widget, char *property, char *new_value)
 }
 
 widget_t *
-iconbox_new(statusbar_t *statusbar, cfg_t *config)
+iconbox_new(alignment_t align)
 {
     widget_t *w;
     Data *d;
 
     w = p_new(widget_t, 1);
-    widget_common_new(w, statusbar, config);
-    w->alignment = cfg_getalignment(config, "align");
+    widget_common_new(w);
+    w->align = align;
     w->draw = iconbox_draw;
     w->tell = iconbox_tell;
     w->data = d = p_new(Data, 1);
-    d->image = a_strdup(cfg_getstr(config, "image"));
-    d->resize = cfg_getbool(config, "resize");
+    d->resize = true;
 
     return w;
 }
