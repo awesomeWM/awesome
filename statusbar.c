@@ -81,7 +81,7 @@ statusbar_draw(statusbar_t *statusbar)
     simplewindow_refresh_drawable(statusbar->sw);
 }
 
-void
+static void
 statusbar_position_update(statusbar_t *statusbar, position_t position)
 {
     statusbar_t *sb;

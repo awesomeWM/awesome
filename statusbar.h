@@ -36,7 +36,6 @@ statusbar_delete(statusbar_t **statusbar)
     p_delete(statusbar);
 }
 
-void statusbar_position_update(statusbar_t *, position_t);
 void statusbar_refresh(void);
 statusbar_t * statusbar_getbyname(int, const char *);
 
