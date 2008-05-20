@@ -1112,6 +1112,18 @@ luaA_client_tostring(lua_State *L)
     return 1;
 }
 
+static int
+luaA_client_icon_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    const char *icon = luaL_optstring(L, 2, NULL);
+
+    p_delete(&(*c)->icon_path);
+    (*c)->icon_path = a_strdup(icon);
+
+    return 0;
+}
+
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },
@@ -1137,6 +1149,7 @@ const struct luaL_reg awesome_client_meta[] =
     { "redraw", luaA_client_redraw },
     { "floating_set", luaA_client_floating_set },
     { "floating_get", luaA_client_floating_get },
+    { "icon_set", luaA_client_icon_set },
     { "__eq", luaA_client_eq },
     { "__tostring", luaA_client_tostring },
     { NULL, NULL }

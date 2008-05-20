@@ -268,6 +268,8 @@ struct client_t
     position_t titlebar_oldposition;
     /** Layer in the stacking order */
     layer_t layer, oldlayer;
+    /** Path to an icon */
+    char *icon_path;
 };
 
 typedef struct client_node_t client_node_t;

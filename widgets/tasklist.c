@@ -116,9 +116,9 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
                 draw_rectangle(statusbar->ctx, area, 1.0, true,
                                statusbar->colors.bg);
 
-                if(0)
+                if(c->icon_path)
                 {
-//                    area = draw_get_image_size(r->icon);
+                    area = draw_get_image_size(c->icon_path);
                     if(area.width > 0 && area.height > 0)
                     {
                         icon_width = ((double) statusbar->height / (double) area.height) * area.width;
@@ -126,8 +126,7 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
                                    w->area.x + box_width * i,
                                    w->area.y,
                                    statusbar->height,
-                                   NULL);
-//                                   r->icon);
+                                   c->icon_path);
                     }
                 }
 
