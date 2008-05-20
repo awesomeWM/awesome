@@ -307,13 +307,13 @@ luaA_parserc(const char *rcfile)
     luaL_openlibs(L);
 
     /* Export awesome lib */
-    luaL_openlib(L, "awesome", awesome_lib, 0);
+    luaL_register(L, "awesome", awesome_lib);
 
     /* Export hooks lib */
-    luaL_openlib(L, "hooks", awesome_hooks_lib, 0);
+    luaL_register(L, "hooks", awesome_hooks_lib);
 
     /* Export hooks lib */
-    luaL_openlib(L, "mouse", awesome_mouse_lib, 0);
+    luaL_register(L, "mouse", awesome_mouse_lib);
 
     /* Export tag */
     luaA_openlib(L, "tag", awesome_tag_methods, awesome_tag_meta);
