@@ -287,6 +287,12 @@ client_focus(client_t *c, int screen, bool raise)
          * will appear under the mouse, grabbuttons */
         window_grabbuttons(c->win, c->phys_screen);
         phys_screen = c->phys_screen;
+
+        /* execute hook */
+        lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
+        *lc = c;
+        luaA_settype(globalconf.L, "client");
+        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
     }
     else
     {
@@ -299,11 +305,6 @@ client_focus(client_t *c, int screen, bool raise)
 
     ewmh_update_net_active_window(phys_screen);
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
-
-    lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
-    *lc = c;
-    luaA_settype(globalconf.L, "client");
-    luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
 
     return true;
 }
