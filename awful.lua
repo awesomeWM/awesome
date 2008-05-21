@@ -69,7 +69,6 @@ function client_swap(i)
     end
 end
 
--- Focus a client relative to current focused client
 function screen_focus(i)
     local sel = client.focus_get()
     local s
@@ -86,6 +85,9 @@ function screen_focus(i)
         s = 1
     end
     awesome.screen_focus(s)
+    -- Move the mouse on the screen
+    local screen_coords = awesome.screen_coords_get(s)
+    mouse.coords_set(screen_coords['x'], screen_coords['y'])
 end
 
 -- Return a table with all visible tags
