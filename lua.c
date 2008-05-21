@@ -272,6 +272,16 @@ luaA_openlib(lua_State *L, const char *name,
     luaL_register(L, name, methods);
 }
 
+static void
+luaA_font_set(lua_State *L)
+{
+    const char *font = luaL_checkstring(L, 1);
+    draw_font_delete(&globalconf.font);
+    globalconf.font = draw_font_new(globalconf.connection,
+                                    globalconf.default_screen, font);
+    return 0;
+}
+
 bool
 luaA_parserc(const char *rcfile)
 {
@@ -291,6 +301,7 @@ luaA_parserc(const char *rcfile)
         { "key", luaA_key },
         { "mouse", luaA_mouse },
         { "resizehints_set", luaA_resizehints_set },
+        { "font_set", luaA_font_set },
         { NULL, NULL }
     };
     static const struct luaL_reg awesome_hooks_lib[] =
