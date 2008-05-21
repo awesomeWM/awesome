@@ -511,31 +511,13 @@ main(int argc, char **argv)
         if(dbusfd >= 0 && FD_ISSET(dbusfd, &rd))
             a_dbus_process_requests(&dbusfd);
 
-        /* two level XPending:
-         * we need to first check we have XEvent to handle
-         * and if so, we handle them all in a round.
-         * Then when we have refresh()'ed stuff so maybe new XEvent
-         * are available and select() won't tell us, so let's check
-         * with XPending() again.
-         */
         while((ev = xcb_poll_for_event(globalconf.connection)))
         {
-            do
-            {
-                xcb_handle_event(globalconf.evenths, ev);
-
-                /* need to resync */
-                xcb_aux_sync(globalconf.connection);
-
-                p_delete(&ev);
-            } while((ev = xcb_poll_for_event(globalconf.connection)));
-
-            statusbar_refresh();
-            layout_refresh();
-
-            /* need to resync */
-            xcb_aux_sync(globalconf.connection);
+            xcb_handle_event(globalconf.evenths, ev);
+            p_delete(&ev);
         }
+        statusbar_refresh();
+        layout_refresh();
         xcb_aux_sync(globalconf.connection);
     }
 
