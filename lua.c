@@ -272,7 +272,7 @@ luaA_openlib(lua_State *L, const char *name,
     luaL_register(L, name, methods);
 }
 
-static void
+static int
 luaA_font_set(lua_State *L)
 {
     const char *font = luaL_checkstring(L, 1);
