@@ -15,24 +15,16 @@ modkey = "Mod4"
 -- }}}
 
 -- {{{ Tags
--- Define tags
+-- Define tags table
 tags = {}
 for s = 1, awesome.screen_count() do
-    tags[s] =
-    {
-        tag.new({ name = "1" }),
-        tag.new({ name = "2" }),
-        tag.new({ name = "3" }),
-        tag.new({ name = "4" }),
-        tag.new({ name = "5" }),
-        tag.new({ name = "6" }),
-        tag.new({ name = "7" }),
-        tag.new({ name = "8" }),
-        tag.new({ name = "9" })
-    }
-    -- Add tags to screen 0 one by one
-    for index, tag in ipairs(tags[s]) do
-        tag:add(s)
+    -- Each screen has its own tag table
+    tags[s] = {}
+    -- Create 9 tags per screen
+    for tagnumber = 1, 9 do
+        tags[s][tagnumber] = tag.new({ name = tagnumber })
+        -- Add tags to screen one by one
+        tags[s][tagnumber]:add(s)
     end
     -- I'm sure you want to see at least one tag.
     tags[s][1]:view(true)
