@@ -119,6 +119,8 @@ PKG_CHECK_MODULES([Lua], [lua >= 5.1],,
                       [AC_MSG_ERROR([awesome requires Lua >= 5.1.])])])
 PKG_CHECK_MODULES([glib], [glib-2.0],,
    [AC_MSG_ERROR([awesome requires glib-2.0.])])
+PKG_CHECK_MODULES([gthread], [gthread-2.0],,
+   [AC_MSG_ERROR([awesome requires gthread-2.0.])])
 PKG_CHECK_MODULES([dbus], [dbus-1],,
    [AC_MSG_ERROR([awesome requires dbus-1.])])
 AC_ARG_WITH([imlib2], AS_HELP_STRING([--with-imlib2], [Build with Imlib2 (default: disabled)]))

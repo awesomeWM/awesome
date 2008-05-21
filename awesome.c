@@ -36,6 +36,8 @@
 
 #include <pthread.h>
 
+#include <glib.h>
+
 #include <xcb/xcb.h>
 #include <xcb/shape.h>
 #include <xcb/randr.h>
@@ -483,6 +485,9 @@ main(int argc, char **argv)
     /* refresh everything before waiting events */
     statusbar_refresh(NULL);
     layout_refresh(NULL);
+
+    /* initialize Glib for thread safeness */
+    g_thread_init(NULL);
 
     /* main event loop, also reads status text from socket */
     while(running)
