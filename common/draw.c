@@ -197,8 +197,11 @@ draw_font_new(xcb_connection_t *conn, int phys_screen, const char *fontname)
 void
 draw_font_delete(font_t **font)
 {
-    pango_font_description_free((*font)->desc);
-    p_delete(font);
+    if(*font)
+    {
+        pango_font_description_free((*font)->desc);
+        p_delete(font);
+    }
 }
 
 typedef struct
