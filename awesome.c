@@ -34,6 +34,8 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include <pthread.h>
+
 #include <xcb/xcb.h>
 #include <xcb/shape.h>
 #include <xcb/randr.h>
@@ -60,6 +62,12 @@
 bool running = true;
 
 AwesomeConf globalconf;
+
+#define a_thread_refresh(id, fct) \
+    do { \
+        if(pthread_create(id, NULL, fct, NULL)) \
+            perror("error creating thread\n"); \
+    } while(0)
 
 typedef struct
 {
@@ -284,6 +292,7 @@ main(int argc, char **argv)
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
+    pthread_t tid_layout, tid_statusbar;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -504,38 +513,40 @@ main(int argc, char **argv)
                     break;
                 buf[r] = '\0';
                 luaA_docmd(buf);
-                statusbar_refresh(NULL);
-                layout_refresh(NULL);
             }
 
         if(dbusfd >= 0 && FD_ISSET(dbusfd, &rd))
             a_dbus_process_requests(&dbusfd);
 
-        /* two level XPending:
-         * we need to first check we have XEvent to handle
+        /* Two level polling:
+         * We need to first check we have an event to handle
          * and if so, we handle them all in a round.
          * Then when we have refresh()'ed stuff so maybe new XEvent
          * are available and select() won't tell us, so let's check
-         * with XPending() again.
+         * with xcb_poll_for_event() again.
          */
         while((ev = xcb_poll_for_event(globalconf.connection)))
         {
             do
             {
                 xcb_handle_event(globalconf.evenths, ev);
-
                 /* need to resync */
                 xcb_aux_sync(globalconf.connection);
-
                 p_delete(&ev);
             } while((ev = xcb_poll_for_event(globalconf.connection)));
 
-            statusbar_refresh(NULL);
-            layout_refresh(NULL);
+            a_thread_refresh(&tid_statusbar, &statusbar_refresh);
+            a_thread_refresh(&tid_layout, &layout_refresh);
+            pthread_join(tid_statusbar, NULL);
+            pthread_join(tid_layout, NULL);
 
             /* need to resync */
             xcb_aux_sync(globalconf.connection);
         }
+        a_thread_refresh(&tid_statusbar, &statusbar_refresh);
+        a_thread_refresh(&tid_layout, &layout_refresh);
+        pthread_join(tid_statusbar, NULL);
+        pthread_join(tid_layout, NULL);
         xcb_aux_sync(globalconf.connection);
     }
 
