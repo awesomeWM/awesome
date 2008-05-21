@@ -28,7 +28,7 @@
 typedef void (LayoutArrange)(int);
 
 LayoutArrange * layout_get_current(int);
-int layout_refresh(void);
+void * layout_refresh(void *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

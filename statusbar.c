@@ -224,8 +224,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     statusbar_draw(statusbar);
 }
 
-void
-statusbar_refresh()
+void *
+statusbar_refresh(void *p __attribute__ ((unused)))
 {
     int screen;
     statusbar_t *statusbar;
@@ -236,6 +236,7 @@ statusbar_refresh()
             statusbar = statusbar->next)
             if(statusbar->need_update)
                 statusbar_draw(statusbar);
+    return NULL;
 }
 
 statusbar_t *

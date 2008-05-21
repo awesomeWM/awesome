@@ -36,7 +36,7 @@ statusbar_delete(statusbar_t **statusbar)
     p_delete(statusbar);
 }
 
-void statusbar_refresh(void);
+void * statusbar_refresh(void *);
 statusbar_t * statusbar_getbyname(int, const char *);
 
 DO_RCNT(statusbar_t, statusbar, statusbar_delete)

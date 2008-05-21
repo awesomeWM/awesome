@@ -472,8 +472,8 @@ main(int argc, char **argv)
     signal(SIGHUP, &exit_on_signal);
 
     /* refresh everything before waiting events */
-    statusbar_refresh();
-    layout_refresh();
+    statusbar_refresh(NULL);
+    layout_refresh(NULL);
 
     /* main event loop, also reads status text from socket */
     while(running)
@@ -504,8 +504,8 @@ main(int argc, char **argv)
                     break;
                 buf[r] = '\0';
                 luaA_docmd(buf);
-                statusbar_refresh();
-                layout_refresh();
+                statusbar_refresh(NULL);
+                layout_refresh(NULL);
             }
 
         if(dbusfd >= 0 && FD_ISSET(dbusfd, &rd))
@@ -516,8 +516,8 @@ main(int argc, char **argv)
             xcb_handle_event(globalconf.evenths, ev);
             p_delete(&ev);
         }
-        statusbar_refresh();
-        layout_refresh();
+        statusbar_refresh(NULL);
+        layout_refresh(NULL);
         xcb_aux_sync(globalconf.connection);
     }
 
