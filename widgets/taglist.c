@@ -214,6 +214,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
                         ltag = lua_newuserdata(globalconf.L, sizeof(tag_t *));
                         luaA_settype(globalconf.L, "tag");
                         *ltag = tag;
+                        tag_ref(ltag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
                     }
                 break;
@@ -225,6 +226,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
                         ltag = lua_newuserdata(globalconf.L, sizeof(tag_t *));
                         luaA_settype(globalconf.L, "tag");
                         *ltag = tag;
+                        tag_ref(ltag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
                     }
                 break;
@@ -236,6 +238,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
                         ltag = lua_newuserdata(globalconf.L, sizeof(tag_t *));
                         luaA_settype(globalconf.L, "tag");
                         *ltag = tag;
+                        tag_ref(ltag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
                     }
                 break;
