@@ -41,8 +41,8 @@ mytaglist:mouse({}, 3,
                     tag:view(not tag:isselected())
                 end)
 mytaglist:mouse({ modkey }, 3, awful.client.toggletag)
-mytaglist:mouse({ }, 4, awful.tag.viewprev)
-mytaglist:mouse({ }, 5, awful.tag.viewnext)
+mytaglist:mouse({ }, 4, awful.tag.viewnext)
+mytaglist:mouse({ }, 5, awful.tag.viewprev)
 mytaglist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
 
 -- Create a tasklist widget
@@ -75,8 +75,8 @@ end
 
 -- {{{ Mouse bindings
 awesome.mouse({ }, 3, function () awful.spawn(terminal) end)
-awesome.mouse({ }, 4, awful.tag.viewprev)
-awesome.mouse({ }, 5, awful.tag.viewnext)
+awesome.mouse({ }, 4, awful.tag.viewnext)
+awesome.mouse({ }, 5, awful.tag.viewprev)
 client.mouse({ modkey }, 1, mouse.client_move)
 client.mouse({ modkey }, 3, mouse.client_resize)
 -- }}}

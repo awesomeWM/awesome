@@ -149,7 +149,7 @@ function tag_viewidx(r)
     tag_viewnone()
     for i, t in ipairs(tags) do
         if t == sel then
-            tags[array_boundandcycle(tags, i - r)]:view(true)
+            tags[array_boundandcycle(tags, i + r)]:view(true)
         end
     end
 end
