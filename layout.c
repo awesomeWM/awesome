@@ -50,22 +50,15 @@ arrange(int screen)
 
     for(c = globalconf.clients; c; c = c->next)
     {
-        if(client_isvisible(c, screen) && !c->newcomer)
+        if(client_isvisible(c, screen))
             client_unban(c);
         /* we don't touch other screens windows */
-        else if(c->screen == screen || c->newcomer)
+        else if(c->screen == screen)
             client_ban(c);
     }
 
     if(curlay)
         curlay(screen);
-
-    for(c = globalconf.clients; c; c = c->next)
-        if(c->newcomer && client_isvisible(c, screen))
-        {
-            c->newcomer = false;
-            client_unban(c);
-        }
 
     qp_c = xcb_query_pointer_unchecked(globalconf.connection,
                                        xcb_aux_get_screen(globalconf.connection,

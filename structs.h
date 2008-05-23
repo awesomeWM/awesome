@@ -256,8 +256,6 @@ struct client_t
     int screen;
     /** Client physical screen */
     int phys_screen;
-    /** True if the client is a new one */
-    bool newcomer;
     /** Titlebar */
     titlebar_t titlebar;
     /** Titlebar window */

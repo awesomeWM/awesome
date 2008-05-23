@@ -360,7 +360,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wgeom->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
     c->oldborder = wgeom->border_width;
-    c->newcomer = true;
     c->layer = c->oldlayer = LAYER_TILE;
 
     /* update window title */
