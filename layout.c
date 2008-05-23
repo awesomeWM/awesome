@@ -89,6 +89,9 @@ arrange(int screen)
 
     /* reset status */
     globalconf.screens[screen].need_arrange = false;
+
+    /* call hook */
+    luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 0);
 }
 
 /** Refresh the screen disposition

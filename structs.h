@@ -412,6 +412,8 @@ struct AwesomeConf
         luaA_function unfocus;
         /** Command to run when mouse is over */
         luaA_function mouseover;
+        /** Command to run on arrange */
+        luaA_function arrange;
     } hooks;
 };
 
