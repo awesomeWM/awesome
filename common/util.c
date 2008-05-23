@@ -78,10 +78,10 @@ compute_new_value_from_arg(const char *arg, double current_value)
 }
 
 /** Lookup for a function pointer from its name
- * in the given name_func_link_t list
- * \param funcname Function name
- * \param list Function and name link list
- * \return function pointer
+ * in the given name_func_link_t list.
+ * \param funcname Function name.
+ * \param list Function and name link list.
+ * \return Function pointer.
  */
 void *
 name_func_lookup(const char *funcname, const name_func_link_t *list)
@@ -92,6 +92,25 @@ name_func_lookup(const char *funcname, const name_func_link_t *list)
         for(i = 0; list[i].name; i++)
             if(!a_strcmp(funcname, list[i].name))
                 return list[i].func;
+
+    return NULL;
+}
+
+/** Lookup for a function name from its pointer
+ * in the given name_func_link_t list.
+ * \param funcp Function pointer.
+ * \param list Function and name link list.
+ * \return Name of the function.
+ */
+const char *
+name_func_rlookup(void * funcp, const name_func_link_t *list)
+{
+    int i;
+    
+    if(funcp && list)
+        for(i = 0; list[i].name; i++)
+            if(funcp == list[i].func)
+                return list[i].name;
 
     return NULL;
 }
