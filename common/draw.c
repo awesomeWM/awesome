@@ -22,9 +22,11 @@
 /* asprintf */
 #define _GNU_SOURCE
 
+#include <config.h>
+
 #include <cairo-xcb.h>
 
-#ifdef HAVE_IMLIB2
+#ifdef WITH_IMLIB2
 #include <Imlib2.h>
 #else
 #include <gtk/gtk.h>
@@ -673,8 +675,9 @@ draw_circle(draw_context_t *ctx, int x, int y, int r, bool filled, xcolor_t colo
  * \param wanted_h wanted height: if > 0, image will be resized
  * \param data the image pixels array
  */
-void draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
-                               int wanted_h, unsigned char *data)
+void
+draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
+                          int wanted_h, unsigned char *data)
 {
     double ratio;
     cairo_t *cr;
@@ -702,7 +705,7 @@ void draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
-#ifndef HAVE_IMLIB2
+#ifndef WITH_IMLIB2
 
 /** Draw an image (PNG format only) from a file to a draw context
  * \param ctx Draw context to draw to
@@ -765,7 +768,7 @@ draw_get_image_size(const char *filename)
     return size;
 }
 
-#else /* HAVE_IMLIB2 */
+#else /* WITH_IMLIB2 */
 
 static const char *
 draw_imlib_load_strerror(Imlib_Load_Error e)
@@ -878,7 +881,7 @@ draw_get_image_size(const char *filename)
 
     return size;
 }
-#endif /* HAVE_IMLIB2 */
+#endif /* WITH_IMLIB2 */
 
 /** Rotate a drawable
  * \param ctx Draw context to draw to
