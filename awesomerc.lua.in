@@ -173,7 +173,7 @@ end
 function hook_newclient(c)
     c:focus_set()
     local name = c:name_get()
-    if name:find("mplayer") then
+    if name:lower():find("mplayer") then
         c:floating_set(true)
     end
 end
