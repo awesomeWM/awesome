@@ -96,7 +96,7 @@ widget_common_tell(widget_t *widget,
                    const char *property __attribute__ ((unused)),
                    const char *new_value __attribute__ ((unused)))
 {
-    warn("%s widget does not accept commands.\n", widget->name);
+    warn("%s widget does not accept commands.", widget->name);
     return WIDGET_ERROR_CUSTOM;
 }
 
@@ -227,23 +227,23 @@ widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const ch
     switch(status)
     {
       case WIDGET_ERROR:
-        warn("error changing property %s of widget %s\n",
+        warn("error changing property %s of widget %s",
              property, widget->name);
         break;
       case WIDGET_ERROR_NOVALUE:
-        warn("error changing property %s of widget %s, no value given\n",
+        warn("error changing property %s of widget %s, no value given",
               property, widget->name);
         break;
       case WIDGET_ERROR_FORMAT_FONT:
-        warn("error changing property %s of widget %s, must be a valid font\n",
+        warn("error changing property %s of widget %s, must be a valid font",
              property, widget->name);
         break;
       case WIDGET_ERROR_FORMAT_COLOR:
-        warn("error changing property %s of widget %s, must be a valid color\n",
+        warn("error changing property %s of widget %s, must be a valid color",
              property, widget->name);
         break;
       case WIDGET_ERROR_FORMAT_SECTION:
-        warn("error changing property %s of widget %s, section/title not found\n",
+        warn("error changing property %s of widget %s, section/title not found",
              property, widget->name);
         break;
       case WIDGET_NOERROR:

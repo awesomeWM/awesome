@@ -39,6 +39,7 @@ _eprint(int line, const char *fct, const char *fmt, ...)
     fprintf(stderr, "E: awesome: %s:%d: ", fct, line);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
+    fprintf(stderr, "\n");
     exit(EXIT_FAILURE);
 }
 
@@ -52,6 +53,7 @@ _warn(int line, const char *fct, const char *fmt, ...)
     fprintf(stderr, "W: awesome: %s:%d: ", fct, line);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
+    fprintf(stderr, "\n");
 }
 
 /** Compute a value from a string containing

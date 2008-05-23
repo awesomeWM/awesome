@@ -89,7 +89,7 @@ socket_getclient(void)
     csfd = socket(AF_UNIX, SOCK_DGRAM, 0);
 
     if(csfd < 0)
-        warn("error opening UNIX domain socket: %s\n", strerror(errno));
+        warn("error opening UNIX domain socket: %s", strerror(errno));
 
     return csfd;
 }

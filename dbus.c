@@ -64,20 +64,20 @@ a_dbus_process_widget_set(DBusMessage *req)
        || a_strcmp(path[2], "widget")
        || a_strcmp(path[4], "property"))
     {
-        warn("invalid object path.\n");
+        warn("invalid object path.");
         dbus_error_free(&err);
         return;
     }
 
     if(!dbus_message_iter_init(req, &iter))
     {
-        warn("message has no argument: %s\n", err.message);
+        warn("message has no argument: %s", err.message);
         dbus_error_free(&err);
         return;
     }
     else if(DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&iter))
     {
-        warn("argument must be a string\n");
+        warn("argument must be a string");
         dbus_error_free(&err);
         return;
     }
@@ -85,7 +85,7 @@ a_dbus_process_widget_set(DBusMessage *req)
         dbus_message_iter_get_basic(&iter, &arg);
 
     if(!(widget = widget_getbyname(path[3])))
-        return warn("no such widget: %s.\n", path[3]);
+        return warn("no such widget: %s.", path[3]);
 
     status = widget->tell(widget, path[5], arg);
     widget_tell_managestatus(widget, status, path[5]);
@@ -140,7 +140,7 @@ a_dbus_init(int *fd)
     dbus_connection = dbus_bus_get(DBUS_BUS_SESSION, &err);
     if(dbus_error_is_set(&err))
     {
-        warn("DBus system bus connection failed: %s\n", err.message);
+        warn("DBus system bus connection failed: %s", err.message);
         dbus_connection = NULL;
         dbus_error_free(&err);
         return false;
@@ -152,21 +152,21 @@ a_dbus_init(int *fd)
 
     if(dbus_error_is_set(&err))
     {
-        warn("failed to request DBus name: %s\n", err.message);
+        warn("failed to request DBus name: %s", err.message);
         a_dbus_cleanup();
         return false;
     }
 
     if(ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
     {
-        warn("not primary DBus name owner\n");
+        warn("not primary DBus name owner");
         a_dbus_cleanup();
         return false;
     }
 
     if(!dbus_connection_get_unix_fd(dbus_connection, fd))
     {
-        warn("cannot get DBus connection file descriptor\n");
+        warn("cannot get DBus connection file descriptor");
         a_dbus_cleanup();
         return false;
     }

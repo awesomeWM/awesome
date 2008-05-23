@@ -63,10 +63,10 @@ send_msg(const char *msg, ssize_t msg_len)
         switch (errno)
         {
           case ENOENT:
-              warn("can't write to %s\n", addr->sun_path);
+              warn("can't write to %s", addr->sun_path);
               break;
           default:
-              warn("error sending datagram: %s\n", strerror(errno));
+              warn("error sending datagram: %s", strerror(errno));
          }
          ret_value = errno;
     }

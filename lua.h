@@ -34,7 +34,7 @@ typedef int luaA_function;
     do { \
         if(cmd) \
             if(luaL_dostring(L, cmd)) \
-                warn("error executing Lua code: %s\n", \
+                warn("error executing Lua code: %s", \
                      lua_tostring(L, -1)); \
     } while(0)
 
@@ -46,7 +46,7 @@ typedef int luaA_function;
             if(n) \
                 lua_insert(L, - (n + 1)); \
             if(lua_pcall(L, n, 0, 0)) \
-                warn("error running function: %s\n", \
+                warn("error running function: %s", \
                      lua_tostring(L, -1)); \
         } \
     } while(0)

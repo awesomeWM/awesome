@@ -362,7 +362,7 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
           case Right:
             break;
           default:
-            warn("error changing property %s of widget %s, must be 'left' or 'right'\n",
+            warn("error changing property %s of widget %s, must be 'left' or 'right'",
                  property, widget->name);
             return WIDGET_ERROR_CUSTOM;
         }
@@ -400,14 +400,14 @@ graph_new(alignment_t align)
     /*
     if(!(d->data_items = cfg_size(config, "data")))
     {
-        warn("graph widget needs at least one data section\n");
+        warn("graph widget needs at least one data section");
         return w;
     }
 
     d->grow = cfg_getposition(config, "grow");
     if(d->grow != Left && d->grow != Right)
     {
-        warn("graph widget: 'grow' argument must be 'left' or 'right'\n");
+        warn("graph widget: 'grow' argument must be 'left' or 'right'");
         */
     /*
         d->data_items = 0; /* disable widget drawing */

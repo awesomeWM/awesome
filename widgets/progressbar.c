@@ -133,14 +133,14 @@ check_settings(Data *d, int status_height)
         if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0)
            || (!d->ticks_count && tmp < 0))
         {
-            warn("progressbar's 'width' is too small for the given configuration options\n");
+            warn("progressbar's 'width' is too small for the given configuration options");
             return false;
         }
         tmp = h_total - d->data_items * (2 * (d->border_width + d->border_padding) + 1)
               - (d->data_items - 1) * d->gap;
         if(tmp < 0)
         {
-            warn("progressbar's 'height' is too small for the given configuration options\n");
+            warn("progressbar's 'height' is too small for the given configuration options");
             return false;
         }
     }
@@ -150,14 +150,14 @@ check_settings(Data *d, int status_height)
         if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0)
            || (!d->ticks_count && tmp < 0))
         {
-            warn("progressbar's 'height' is too small for the given configuration options\n");
+            warn("progressbar's 'height' is too small for the given configuration options");
             return false;
         }
         tmp = d->width - d->data_items * (2 * (d->border_width + d->border_padding) + 1)
               - (d->data_items - 1) * d->gap;
         if(tmp < 0)
         {
-            warn("progressbar's 'width' is too small for the given configuration options\n");
+            warn("progressbar's 'width' is too small for the given configuration options");
             return false;
         }
     }
@@ -509,7 +509,7 @@ progressbar_new(alignment_t align)
     /*
     if(!(d->data_items = cfg_size(config, "data")))
     {
-        warn("progressbar widget needs at least one bar section\n");
+        warn("progressbar widget needs at least one bar section");
         return w;
     }
 

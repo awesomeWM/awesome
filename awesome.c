@@ -114,7 +114,7 @@ scan()
         /* Get the tree of the children Windows of the current root
          * Window */
         if(!(wins = xcb_query_tree_children(tree_r)))
-            eprint("E: cannot get tree children\n");
+            eprint("E: cannot get tree children");
         tree_c_len = xcb_query_tree_children_length(tree_r);
         attr_wins = p_new(xcb_get_window_attributes_cookie_t, tree_c_len);
 
@@ -206,7 +206,7 @@ xerrorstart(void * data __attribute__ ((unused)),
             xcb_connection_t * c  __attribute__ ((unused)),
             xcb_generic_error_t * error __attribute__ ((unused)))
 {
-    eprint("another window manager is already running\n");
+    eprint("another window manager is already running");
 }
 
 /** Function to exit on some signals.
@@ -244,7 +244,7 @@ xerror(void *data __attribute__ ((unused)),
         return 0;
     }
 
-    warn("fatal error: request=%s, error=%s\n", err->request_label, err->error_label);
+    warn("fatal error: request=%s, error=%s", err->request_label, err->error_label);
     xutil_delete_error(err);
 
     /*
@@ -334,7 +334,7 @@ main(int argc, char **argv)
             if(a_strlen(optarg))
                 confpath = a_strdup(optarg);
             else
-                eprint("-c option requires a file name\n");
+                eprint("-c option requires a file name");
             break;
         }
 
@@ -344,7 +344,7 @@ main(int argc, char **argv)
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
     if(xcb_connection_has_error(globalconf.connection))
-        eprint("cannot open display\n");
+        eprint("cannot open display");
 
     /* Get the file descriptor corresponding to the X connection */
     xfd = xcb_get_file_descriptor(globalconf.connection);
@@ -466,12 +466,12 @@ main(int argc, char **argv)
         if(errno == EADDRINUSE)
         {
             if(unlink(addr->sun_path))
-                warn("error unlinking existing file: %s\n", strerror(errno));
+                warn("error unlinking existing file: %s", strerror(errno));
             if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
-                warn("error binding UNIX domain socket: %s\n", strerror(errno));
+                warn("error binding UNIX domain socket: %s", strerror(errno));
         }
         else
-            warn("error binding UNIX domain socket: %s\n", strerror(errno));
+            warn("error binding UNIX domain socket: %s", strerror(errno));
     }
 
     if(!a_dbus_init(&dbusfd))
@@ -502,13 +502,13 @@ main(int argc, char **argv)
         {
             if(errno == EINTR)
                 continue;
-            eprint("select failed\n");
+            eprint("select failed");
         }
         if(csfd >= 0 && FD_ISSET(csfd, &rd))
             switch(r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
             {
               case -1:
-                warn("error reading UNIX domain socket: %s\n", strerror(errno));
+                warn("error reading UNIX domain socket: %s", strerror(errno));
                 csfd = -1;
                 break;
               case 0:
@@ -558,9 +558,9 @@ main(int argc, char **argv)
     a_dbus_cleanup();
 
     if(csfd > 0 && close(csfd))
-        warn("error closing UNIX domain socket: %s\n", strerror(errno));
+        warn("error closing UNIX domain socket: %s", strerror(errno));
     if(unlink(addr->sun_path))
-        warn("error unlinking UNIX domain socket: %s\n", strerror(errno));
+        warn("error unlinking UNIX domain socket: %s", strerror(errno));
     p_delete(&addr);
 
     /* remap all clients since some WM won't handle them otherwise */

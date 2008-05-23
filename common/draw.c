@@ -70,7 +70,7 @@ draw_iso2utf8(const char *iso)
             warn("unable to convert text from %s to UTF-8, not available",
                  nl_langinfo(CODESET));
         else
-            warn("unable to convert text: %s\n", strerror(errno));
+            warn("unable to convert text: %s", strerror(errno));
 
         return NULL;
     }
@@ -80,7 +80,7 @@ draw_iso2utf8(const char *iso)
 
     if(iconv(iso2utf8, (char **) &iso, &len, &utf8, &utf8len) == (size_t) -1)
     {
-        warn("text conversion failed: %s\n", strerror(errno));
+        warn("text conversion failed: %s", strerror(errno));
         p_delete(&utf8p);
     }
 
@@ -725,7 +725,7 @@ draw_image(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename
     GError *error=NULL;
 
     if(!(pixbuf = gdk_pixbuf_new_from_file(filename,&error)))
-        return warn("cannot load image %s: %s\n", filename, error->message);
+        return warn("cannot load image %s: %s", filename, error->message);
 
     w = gdk_pixbuf_get_width(pixbuf);
     h = gdk_pixbuf_get_height(pixbuf);
@@ -763,7 +763,7 @@ draw_get_image_size(const char *filename)
         size.height = height;
     }
     else
-        warn("cannot load image %s: %s\n", filename, "format unrecognized");
+        warn("cannot load image %s: %s", filename, "format unrecognized");
 
     return size;
 }
@@ -828,7 +828,7 @@ draw_image(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename
     Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
 
     if(!(image = imlib_load_image_with_error_return(filename, &e)))
-        return warn("cannot load image %s: %s\n", filename, draw_imlib_load_strerror(e));
+        return warn("cannot load image %s: %s", filename, draw_imlib_load_strerror(e));
 
     imlib_context_set_image(image);
     h = imlib_image_get_height();
@@ -877,7 +877,7 @@ draw_get_image_size(const char *filename)
         imlib_free_image();
     }
     else
-        warn("cannot load image %s: %s\n", filename, draw_imlib_load_strerror(e));
+        warn("cannot load image %s: %s", filename, draw_imlib_load_strerror(e));
 
     return size;
 }
@@ -1029,7 +1029,7 @@ draw_color_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcol
         colnum = strtoul(&colstr[1], NULL, 16);
         if(errno != 0)
         {
-            warn("awesome: error, invalid color '%s'\n", colstr);
+            warn("awesome: error, invalid color '%s'", colstr);
             return false;
         }
 
@@ -1075,7 +1075,7 @@ draw_color_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcol
         }
     }
 
-    warn("awesome: error, cannot allocate color '%s'\n", colstr);
+    warn("awesome: error, cannot allocate color '%s'", colstr);
     return false;
 }
 
