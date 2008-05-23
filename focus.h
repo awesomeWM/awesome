@@ -24,8 +24,9 @@
 
 #include "structs.h"
 
-void focus_add_client(client_t *);
-void focus_delete_client(client_t *);
+void focus_client_push(client_t *);
+void focus_client_append(client_t *);
+void focus_client_delete(client_t *);
 client_t * focus_get_current_client(int);
 
 DO_SLIST(client_node_t, client_node, p_delete)

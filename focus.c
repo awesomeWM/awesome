@@ -25,6 +25,10 @@
 
 extern AwesomeConf globalconf;
 
+/** Get the client's node focus.
+ * \param c The client.
+ * \return The client node focus.
+ */
 static client_node_t *
 focus_get_node_by_client(client_t *c)
 {
@@ -37,8 +41,12 @@ focus_get_node_by_client(client_t *c)
     return NULL;
 }
 
-void
-focus_add_client(client_t *c)
+/** Create a client node for focus.
+ * \param c The client
+ * \return The client focus node.
+ */
+static client_node_t *
+focus_client_add(client_t *c)
 {
     client_node_t *node;
 
@@ -51,11 +59,34 @@ focus_add_client(client_t *c)
     else /* if we've got a node, detach it */
         client_node_list_detach(&globalconf.focus, node);
 
+    return node;
+}
+
+/** Push the client at the beginning of the client focus history stack.
+ * \param c The client to push.
+ */
+void
+focus_client_push(client_t *c)
+{
+    client_node_t *node = focus_client_add(c);
     client_node_list_push(&globalconf.focus, node);
 }
 
+/** Append the client at the end of the client focus history stack.
+ * \param c The client to append.
+ */
 void
-focus_delete_client(client_t *c)
+focus_client_append(client_t *c)
+{
+    client_node_t *node = focus_client_add(c);
+    client_node_list_append(&globalconf.focus, node);
+}
+
+/** Remove a client from focus history.
+ * \param c The client.
+ */
+void
+focus_client_delete(client_t *c)
 {
     client_node_t *node = focus_get_node_by_client(c);
 
@@ -87,6 +118,10 @@ focus_get_latest_client_for_tags(tag_t **t, int nindex)
     return NULL;
 }
 
+/** Get the latest focused client on a screen.
+ * \param screen The virtual screen number.
+ * \return A pointer to an existing client.
+ */
 client_t *
 focus_get_current_client(int screen)
 {

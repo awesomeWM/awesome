@@ -386,7 +386,7 @@ main(int argc, char **argv)
     /* init screens struct */
     globalconf.screens_info = screensinfo_new(globalconf.connection);
     globalconf.screens = p_new(VirtScreen, globalconf.screens_info->nscreen);
-    focus_add_client(NULL);
+    focus_client_push(NULL);
 
     /* parse config */
     if(!confpath)

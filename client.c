@@ -204,7 +204,7 @@ client_unfocus(client_t *c)
     luaA_settype(globalconf.L, "client");
     luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1);
 
-    focus_add_client(NULL);
+    focus_client_push(NULL);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     titlebar_draw(c);
 }
@@ -254,7 +254,7 @@ client_focus(client_t *c, int screen, bool raise)
         /* unban the client before focusing or it will fail */
         client_unban(c);
         /* save sel in focus history */
-        focus_add_client(c);
+        focus_client_push(c);
         titlebar_draw(c);
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
                             c->win, XCB_CURRENT_TIME);
@@ -421,7 +421,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
         window_setshape(c->win, c->phys_screen);
     }
 
+    /* Push client in client list */
     client_list_push(&globalconf.clients, c);
+    /* Append client in history: it'll be last. */
+    focus_client_append(c);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_client_list(c->phys_screen);
@@ -643,7 +646,7 @@ client_unmanage(client_t *c)
 
     /* remove client everywhere */
     client_list_detach(&globalconf.clients, c);
-    focus_delete_client(c);
+    focus_client_delete(c);
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
 
