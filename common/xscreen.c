@@ -25,11 +25,11 @@
 
 #include "common/xscreen.h"
 
-/** Return the Xinerama screen number where the coordinates belongs to
- * \param disp Display ref
- * \param x x coordinate of the window
- * \param y y coordinate of the window
- * \return screen number or DefaultScreen of disp on no match
+/** Return the Xinerama screen number where the coordinates belongs to.
+ * \param si The screens infos structure.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \return Screen number or screen param if no match or no multi-head.
  */
 int
 screen_get_bycoord(screens_info_t *si, int screen, int x, int y)
@@ -69,6 +69,10 @@ screensinfo_delete(screens_info_t **si)
     p_delete(si);
 }
 
+/** Get screens informations.
+ * \param conn X connection.
+ * \return A pointer to complete screens_info_t structure.
+ */
 screens_info_t *
 screensinfo_new(xcb_connection_t *conn)
 {
