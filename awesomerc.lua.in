@@ -61,6 +61,10 @@ mytextbox:set("text", "<i><small>awesome " .. AWESOME_VERSION .. "</small></i>")
 myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
 myiconbox:set("image", "@iconsdir@/awesome16.png")
 
+-- Create an iconbox widget which will contains an icon indicating which layout we're using
+mylayoutbox = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
+mylayoutbox:set("image", "@iconsdir@/layouts/tile.png")
+
 -- Create a statusbar for each screen and add it
 for s = 1, awesome.screen_count() do
     mystatusbar = statusbar.new({ position = "top", name = "mystatusbar" .. s,
@@ -69,6 +73,7 @@ for s = 1, awesome.screen_count() do
     mystatusbar:widget_add(mytaglist)
     mystatusbar:widget_add(mytasklist)
     mystatusbar:widget_add(mytextbox)
+    mystatusbar:widget_add(mylayoutbox)
     mystatusbar:add(s)
 end
 -- }}}
@@ -178,11 +183,19 @@ function hook_newclient(c)
     end
 end
 
+-- Hook function to execute when arranging the screen
+-- (tag switch, new client, etc)
+function hook_arrange()
+    local layout = awful.layout.get()    
+    mylayoutbox:set("image", "@iconsdir@/layouts/" .. layout .. "w.png")
+end
+
 -- Set up some hooks
 hooks.focus(hook_focus)
 hooks.unfocus(hook_unfocus)
 hooks.newclient(hook_newclient)
 hooks.mouseover(hook_mouseover)
+hooks.arrange(hook_arrange)
 -- }}}
 
 -- Respect size hints
