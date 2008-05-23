@@ -145,6 +145,8 @@ struct widget_t
     button_t *buttons;
     /** Cache flags */
     int cache_flags;
+    /** True if the widget is visible */
+    bool isvisible;
 };
 
 struct widget_node_t

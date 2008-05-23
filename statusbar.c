@@ -50,16 +50,16 @@ statusbar_draw(statusbar_t *statusbar)
                    statusbar->colors.bg);
 
     for(w = statusbar->widgets; w; w = w->next)
-        if(w->widget->align == AlignLeft)
+        if(w->widget->isvisible && w->widget->align == AlignLeft)
             left += w->widget->draw(w, statusbar, left, (left + right));
 
     /* renders right widget from last to first */
     for(w = *widget_node_list_last(&statusbar->widgets); w; w = w->prev)
-        if(w->widget->align == AlignRight)
+        if(w->widget->isvisible && w->widget->align == AlignRight)
             right += w->widget->draw(w, statusbar, right, (left + right));
 
     for(w = statusbar->widgets; w; w = w->next)
-        if(w->widget->align == AlignFlex)
+        if(w->widget->isvisible && w->widget->align == AlignFlex)
             left += w->widget->draw(w, statusbar, left, (left + right));
 
     switch(statusbar->position)

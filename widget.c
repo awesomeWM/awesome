@@ -176,6 +176,8 @@ luaA_widget_new(lua_State *L)
     widget = lua_newuserdata(L, sizeof(widget_t *));
     objpos = lua_gettop(L);
     *widget = w;
+    /* Set visible by default. */
+    w->isvisible = true;
 
     /* \todo check that the name is unique */
     (*widget)->name = luaA_name_init(L);
@@ -352,6 +354,23 @@ luaA_widget_name_get(lua_State *L)
     return 1;
 }
 
+static int
+luaA_widget_visible_set(lua_State *L)
+{
+    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    (*widget)->isvisible = luaA_checkboolean(L, 2);
+    widget_invalidate_statusbar_bywidget(*widget);
+    return 0;
+}
+
+static int
+luaA_widget_visible_get(lua_State *L)
+{
+    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    lua_pushboolean(L, (*widget)->isvisible);
+    return 1;
+}
+
 const struct luaL_reg awesome_widget_methods[] =
 {
     { "new", luaA_widget_new },
@@ -364,6 +383,8 @@ const struct luaL_reg awesome_widget_meta[] =
     { "set", luaA_widget_set },
     { "name_set", luaA_widget_name_set },
     { "name_get", luaA_widget_name_get },
+    { "visible_set", luaA_widget_visible_set },
+    { "visible_get", luaA_widget_visible_get },
     { "__gc", luaA_widget_gc },
     { "__eq", luaA_widget_eq },
     { "__tostring", luaA_widget_tostring },
