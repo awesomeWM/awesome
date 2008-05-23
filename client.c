@@ -199,9 +199,7 @@ static void
 client_unfocus(client_t *c)
 {
     /* Call hook */
-    client_t **lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
-    *lc = c;
-    luaA_settype(globalconf.L, "client");
+    luaA_client_userdata_new(globalconf.focus->client);
     luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1);
 
     focus_client_push(NULL);
@@ -232,7 +230,6 @@ client_ban(client_t *c)
 bool
 client_focus(client_t *c, int screen, bool raise)
 {
-    client_t **lc;
     int phys_screen;
 
     /* if c is NULL or invisible, take next client in the focus history */
@@ -266,9 +263,7 @@ client_focus(client_t *c, int screen, bool raise)
         phys_screen = c->phys_screen;
 
         /* execute hook */
-        lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
-        *lc = c;
-        luaA_settype(globalconf.L, "client");
+        luaA_client_userdata_new(globalconf.focus->client);
         luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
     }
     else
@@ -343,7 +338,7 @@ client_stack(client_t *c)
 void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 {
-    client_t **lc, *c, *t = NULL;
+    client_t *c, *t = NULL;
     xcb_window_t trans;
     bool rettrans, retloadprops;
     tag_t *tag;
@@ -430,9 +425,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     ewmh_update_net_client_list(c->phys_screen);
 
     /* call hook */
-    lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
-    *lc = c;
-    luaA_settype(globalconf.L, "client");
+    luaA_client_userdata_new(c);
     luaA_dofunction(globalconf.L, globalconf.hooks.newclient, 1);
 }
 
@@ -801,15 +794,13 @@ static int
 luaA_client_get(lua_State *L)
 {
     int i = 1;
-    client_t *c, **cobj;
+    client_t *c;
 
     lua_newtable(L);
 
     for(c = globalconf.clients; c; c = c->next)
     {
-        cobj = lua_newuserdata(L, sizeof(client_t *));
-        *cobj = c;
-        luaA_settype(L, "client");
+        luaA_client_userdata_new(c);
         lua_rawseti(L, -2, i++);
     }
 
@@ -850,7 +841,7 @@ static int
 luaA_client_visible_get(lua_State *L)
 {
     int i = 1;
-    client_t *c, **cobj;
+    client_t *c;
     int screen = luaL_checknumber(L, 1) - 1;
 
     luaA_checkscreen(screen);
@@ -860,9 +851,7 @@ luaA_client_visible_get(lua_State *L)
     for(c = globalconf.clients; c; c = c->next)
         if(!c->skip && client_isvisible(c, screen))
         {
-            cobj = lua_newuserdata(L, sizeof(client_t *));
-            *cobj = c;
-            luaA_settype(L, "client");
+            luaA_client_userdata_new(c);
             lua_rawseti(L, -2, i++);
         }
 
@@ -870,16 +859,12 @@ luaA_client_visible_get(lua_State *L)
 }
 
 static int
-luaA_client_focus_get(lua_State *L)
+luaA_client_focus_get(lua_State *L __attribute__ ((unused)))
 {
-    client_t **cobj;
-
     if(!globalconf.focus->client)
         return 0;
 
-    cobj = lua_newuserdata(L, sizeof(client_t *));
-    *cobj = globalconf.focus->client;
-    luaA_settype(L, "client");
+    luaA_client_userdata_new(globalconf.focus->client);
     return 1;
 }
 
@@ -1102,6 +1087,14 @@ luaA_client_name_get(lua_State *L)
     client_t **c = luaL_checkudata(L, 1, "client");
     lua_pushstring(L, (*c)->name);
     return 1;
+}
+
+int
+luaA_client_userdata_new(client_t *c)
+{
+    client_t **lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
+    *lc = c;
+    return luaA_settype(globalconf.L, "client");
 }
 
 const struct luaL_reg awesome_client_methods[] =

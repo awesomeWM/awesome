@@ -298,7 +298,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection __attribute__ ((unused)),
                          xcb_enter_notify_event_t *ev)
 {
-    client_t *c, **lc;
+    client_t *c;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
        || (ev->root_x == globalconf.pointer_x
@@ -318,9 +318,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         globalconf.pointer_x = ev->root_x;
         globalconf.pointer_y = ev->root_y;
 
-        lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
-        *lc = c;
-        luaA_settype(globalconf.L, "client");
+        luaA_client_userdata_new(c);
         luaA_dofunction(globalconf.L, globalconf.hooks.mouseover, 1);
     }
     else
