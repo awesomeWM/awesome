@@ -437,6 +437,31 @@ luaA_tag_gc(lua_State *L)
     return 0;
 }
 
+static int
+luaA_tag_layout_get(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    const char *name = a_strdup(name_func_rlookup((*tag)->layout, LayoutList));
+    lua_pushstring(L, name);
+    return 1;
+}
+
+static int
+luaA_tag_layout_set(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    const char *name = luaL_checkstring(L, 2);
+    layout_t *l = name_func_lookup(name, LayoutList);
+
+    if(l)
+        (*tag)->layout = l;
+    else
+        luaL_error(L, "unknown layout: %s", name);
+
+    return 0;
+
+}
+
 const struct luaL_reg awesome_tag_methods[] =
 {
     { "new", luaA_tag_new },
@@ -456,6 +481,8 @@ const struct luaL_reg awesome_tag_meta[] =
     { "nmaster_get", luaA_tag_nmaster_get },
     { "name_get", luaA_tag_name_get },
     { "name_set", luaA_tag_name_set },
+    { "layout_get", luaA_tag_layout_get },
+    { "layout_set", luaA_tag_layout_set },
     { "__eq", luaA_tag_eq },
     { "__gc", luaA_tag_gc },
     { "__tostring", luaA_tag_tostring },
