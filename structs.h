@@ -242,8 +242,6 @@ struct client_t
     bool isfloating;
     /** true if the window is fixed */
     bool isfixed;
-    /** true if the window is maximized */
-    bool ismax;
     /** true if the client must be skipped from client list */
     bool skip;
     /** true if the client is moving */

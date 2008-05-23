@@ -399,7 +399,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
        && !(xcb_size_hints_get_flags(u_size_hints) & (XCB_SIZE_US_POSITION_HINT |
                                                       XCB_SIZE_P_POSITION_HINT)))
     {
-        if(c->isfloating && !c->ismax)
+        if(c->isfloating)
             client_resize(c, globalconf.floating_placement(c), false);
         else
             c->f_geometry = globalconf.floating_placement(c);
@@ -539,11 +539,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
          * maximized */
         if(c->ismoving || c->isfloating
            || layout_get_current(new_screen) == layout_floating)
-        {
-            if(!c->ismax)
-                c->f_geometry = geometry;
             titlebar_update_geometry_floating(c);
-        }
 
         xcb_configure_window(globalconf.connection, c->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y |
@@ -573,11 +569,6 @@ client_setfloating(client_t *c, bool floating, layer_t layer)
     {
         if((c->isfloating = floating))
             client_resize(c, c->f_geometry, false);
-        else if(c->ismax)
-        {
-            c->ismax = false;
-            client_resize(c, c->m_geometry, false);
-        }
         if(client_isvisible(c, c->screen))
             globalconf.screens[c->screen].need_arrange = true;
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);

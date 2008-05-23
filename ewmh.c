@@ -287,7 +287,6 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
                 xcb_map_window(globalconf.connection, c->titlebar_sw->window);
             }
             c->border = c->oldborder;
-            c->ismax = false;
             client_setfloating(c, c->wasfloating, c->oldlayer);
         }
         else if(set == _NET_WM_STATE_ADD)
@@ -304,7 +303,6 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             }
             c->oldborder = c->border;
             c->border = 0;
-            c->ismax = true;
             client_setfloating(c, true, LAYER_FULLSCREEN);
         }
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
