@@ -23,7 +23,6 @@
 #include "widget.h"
 #include "screen.h"
 #include "common/draw.h"
-#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 

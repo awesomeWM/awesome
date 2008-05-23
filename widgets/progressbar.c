@@ -21,8 +21,6 @@
  */
 
 #include "screen.h"
-#include "widgets/common.h"
-#include "common/configopts.h"
 
 extern AwesomeConf globalconf;
 
@@ -65,6 +63,62 @@ typedef struct
     /** Border color */
     xcolor_t *bordercolor;
 } Data;
+
+static widget_tell_status_t
+widget_set_color_for_data(xcolor_t *color, char *new_value, int data_items, char ** data_title)
+{
+    char *title, *setting;
+    int i;
+    title = strtok(new_value, " ");
+    if(!(setting = strtok(NULL, " ")))
+        return WIDGET_ERROR_NOVALUE;
+    for(i = 0; i < data_items; i++)
+        if(!a_strcmp(title, data_title[i]))
+        {
+            if(draw_color_new(globalconf.connection,
+                              globalconf.default_screen,
+                              setting, &color[i]))
+                return WIDGET_NOERROR;
+            else
+                return WIDGET_ERROR_FORMAT_COLOR;
+        }
+    return WIDGET_ERROR_FORMAT_SECTION;
+}
+
+static widget_tell_status_t
+widget_set_color_pointer_for_data(xcolor_t **color, char *new_value, int data_items, char ** data_title)
+{
+    char *title, *setting;
+    int i;
+    bool flag;
+    title = strtok(new_value, " ");
+    if(!(setting = strtok(NULL, " ")))
+        return WIDGET_ERROR_NOVALUE;
+    for(i = 0; i < data_items; i++)
+        if(!a_strcmp(title, data_title[i]))
+        {
+            flag = false;
+            if(!color[i])
+            {
+                flag = true; /* p_delete && restore to NULL, if draw_color_new unsuccessful */
+                color[i] = p_new(xcolor_t, 1);
+            }
+            if(!(draw_color_new(globalconf.connection,
+                                globalconf.default_screen,
+                                setting, color[i])))
+            {
+                if(flag) /* restore */
+                {
+                    p_delete(&color[i]);
+                    color[i] = NULL;
+                }
+                return WIDGET_ERROR_FORMAT_COLOR;
+            }
+            return WIDGET_NOERROR;
+        }
+    return WIDGET_ERROR_FORMAT_SECTION;
+}
+
 
 static bool
 check_settings(Data *d, int status_height)
