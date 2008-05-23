@@ -412,6 +412,24 @@ luaA_tag_nmaster_get(lua_State *L)
 }
 
 static int
+luaA_tag_name_get(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    lua_pushstring(L, (*tag)->name);
+    return 1;
+}
+
+static int
+luaA_tag_name_set(lua_State *L)
+{
+    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    const char *name = luaL_checkstring(L, 2);
+    p_delete(&(*tag)->name);
+    (*tag)->name = a_strdup(name);
+    return 0;
+}
+
+static int
 luaA_tag_gc(lua_State *L)
 {
     tag_t **tag = luaL_checkudata(L, 1, "tag");
@@ -436,6 +454,8 @@ const struct luaL_reg awesome_tag_meta[] =
     { "ncol_get", luaA_tag_ncol_get },
     { "nmaster_set", luaA_tag_nmaster_set },
     { "nmaster_get", luaA_tag_nmaster_get },
+    { "name_get", luaA_tag_name_get },
+    { "name_set", luaA_tag_name_set },
     { "__eq", luaA_tag_eq },
     { "__gc", luaA_tag_gc },
     { "__tostring", luaA_tag_tostring },
