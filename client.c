@@ -491,7 +491,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
 {
     int new_screen;
     area_t area;
-    LayoutArrange *layout = layout_get_current(c->screen);
+    layout_t *layout = layout_get_current(c->screen);
     bool resized = false;
 
     if(!c->ismoving && !c->isfloating && layout != layout_floating)

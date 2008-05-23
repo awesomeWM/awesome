@@ -290,7 +290,7 @@ struct _tag_t
     /** true if selected */
     bool selected;
     /** Current tag layout */
-    LayoutArrange *layout;
+    layout_t *layout;
     /** Master width factor */
     double mwfact;
     /** Number of master windows */

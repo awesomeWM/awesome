@@ -7,7 +7,7 @@ echo "{"
 for file in ${top_srcdir}/layouts/*.h
 do
     echo "    /* $file */"
-    grep '^LayoutArrange layout_' $file | cut -d' ' -f2 | cut -d\; -f1 | while read layout
+    grep '^layout_t layout_' $file | cut -d' ' -f2 | cut -d\; -f1 | while read layout
     do
         shortname=$(echo $layout | cut -d _ -f2-)
         echo "    {\"$shortname\", $layout},"

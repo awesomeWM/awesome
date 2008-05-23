@@ -59,7 +59,7 @@ tag_view(tag_t *tag, bool view)
  * \return a new tag with all these parameters
  */
 tag_t *
-tag_new(const char *name, LayoutArrange *layout, double mwfact, int nmaster, int ncol)
+tag_new(const char *name, layout_t *layout, double mwfact, int nmaster, int ncol)
 {
     tag_t *tag;
 
@@ -298,7 +298,7 @@ luaA_tag_new(lua_State *L)
     int ncol, nmaster;
     const char *name, *lay;
     double mwfact;
-    LayoutArrange *layout;
+    layout_t *layout;
 
     luaA_checktable(L, 1);
 

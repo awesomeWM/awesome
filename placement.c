@@ -72,7 +72,7 @@ placement_smart(client_t *c)
     area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
     area_t *screen_geometry, *arealist = NULL, *r;
     bool found = false;
-    LayoutArrange *layout;
+    layout_t *layout;
 
     screen_geometry = p_new(area_t, 1);
 

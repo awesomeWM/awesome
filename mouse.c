@@ -196,7 +196,7 @@ mouse_client_move(int snap)
     int ocx, ocy, newscreen;
     area_t geometry;
     client_t *c = globalconf.focus->client, *target;
-    LayoutArrange *layout;
+    layout_t *layout;
     simple_window_t *sw = NULL;
     draw_context_t *ctx;
     xcb_generic_event_t *ev = NULL;
@@ -322,7 +322,7 @@ mouse_client_resize(void)
     xcb_motion_notify_event_t *ev_motion = NULL;
     client_t *c = globalconf.focus->client;
     tag_t **curtags;
-    LayoutArrange *layout;
+    layout_t *layout;
     area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry = { 0, 0, 0, 0, NULL, NULL };
     double mwfact;
     simple_window_t *sw = NULL;

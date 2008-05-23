@@ -24,8 +24,8 @@
 
 #include "layout.h"
 
-LayoutArrange layout_spiral;
-LayoutArrange layout_dwindle;
+layout_t layout_spiral;
+layout_t layout_dwindle;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

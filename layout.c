@@ -43,7 +43,7 @@ static void
 arrange(int screen)
 {
     client_t *c;
-    LayoutArrange *curlay = layout_get_current(screen);
+    layout_t *curlay = layout_get_current(screen);
     int phys_screen = screen_virttophys(screen);
     xcb_query_pointer_cookie_t qp_c;
     xcb_query_pointer_reply_t *qp_r;
@@ -109,10 +109,10 @@ layout_refresh(void *v __attribute__ ((unused)))
  * \param screen Virtual screen number.
  * \return layout used on that screen
  */
-LayoutArrange *
+layout_t *
 layout_get_current(int screen)
 {
-    LayoutArrange *l = NULL;
+    layout_t *l = NULL;
     tag_t **curtags = tags_get_current(screen);
 
     if(curtags[0])
