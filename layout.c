@@ -102,6 +102,7 @@ layout_refresh(void *v __attribute__ ((unused)))
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         if(globalconf.screens[screen].need_arrange)
             arrange(screen);
+    return NULL;
 }
 
 /** Get current layout used on screen.
