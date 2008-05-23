@@ -783,7 +783,7 @@ client_kill(client_t *c)
 
         ev.data.data32[0] = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
                                                     xutil_intern_atom(globalconf.connection,
-                                                                      &globalconf.atoms, 
+                                                                      &globalconf.atoms,
                                                                       "WM_DELETE_WINDOW"));
         ev.data.data32[1] = XCB_CURRENT_TIME;
 
@@ -797,30 +797,19 @@ client_kill(client_t *c)
 static int
 luaA_client_get(lua_State *L)
 {
-    int ret, i = 1;
-    regex_t r;
-    regmatch_t match;
+    int i = 1;
     client_t *c, **cobj;
-    const char *name = luaL_checkstring(L, 1);
-    char error[512];
-
-    if((ret = regcomp(&r, name, REG_EXTENDED)))
-    {
-        regerror(ret, &r, error, sizeof(error));
-        luaL_error(L, "regex compilation error: %s\n", error);
-    }
 
     lua_newtable(L);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(!regexec(&r, c->name, 1, &match, 0))
-        {
-            cobj = lua_newuserdata(L, sizeof(client_t *));
-            *cobj = c;
-            luaA_settype(L, "client");
-            lua_rawseti(L, -2, i++);
-        }
-    
+    {
+        cobj = lua_newuserdata(L, sizeof(client_t *));
+        *cobj = c;
+        luaA_settype(L, "client");
+        lua_rawseti(L, -2, i++);
+    }
+
     return 1;
 }
 
@@ -857,34 +846,23 @@ luaA_client_mouse(lua_State *L)
 static int
 luaA_client_visible_get(lua_State *L)
 {
-    int ret, i = 1;
-    regex_t r;
-    regmatch_t match;
+    int i = 1;
     client_t *c, **cobj;
-    char error[512];
     int screen = luaL_checknumber(L, 1) - 1;
-    const char *name = luaL_checkstring(L, 2);
 
     luaA_checkscreen(screen);
-
-    if((ret = regcomp(&r, name, REG_EXTENDED)))
-    {
-        regerror(ret, &r, error, sizeof(error));
-        luaL_error(L, "regex compilation error: %s\n", error);
-    }
 
     lua_newtable(L);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(!c->skip && client_isvisible(c, screen)
-           && !regexec(&r, c->name, 1, &match, 0))
+        if(!c->skip && client_isvisible(c, screen))
         {
             cobj = lua_newuserdata(L, sizeof(client_t *));
             *cobj = c;
             luaA_settype(L, "client");
             lua_rawseti(L, -2, i++);
         }
-    
+
     return 1;
 }
 
@@ -1006,7 +984,7 @@ luaA_client_coords_set(lua_State *L)
 {
     client_t **c = luaL_checkudata(L, 1, "client");
     area_t geometry;
-    
+
     if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
     {
         luaA_checktable(L, 2);

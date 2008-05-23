@@ -295,50 +295,39 @@ luaA_widget_eq(lua_State *L)
 static int
 luaA_widget_get(lua_State *L)
 {
-    const char *name = luaL_checkstring(L, 1);
     statusbar_t *sb;
     widget_t **wobj;
     widget_node_t *widget;
-    int ret, i = 1, screen;
-    regex_t r;
-    regmatch_t match;
-    char error[512];
+    int i = 1, screen;
     bool add = true;
     widget_node_t *wlist = NULL, *witer;
-
-    if((ret = regcomp(&r, name, REG_EXTENDED)))
-    {
-        regerror(ret, &r, error, sizeof(error));
-        luaL_error(L, "regex compilation error: %s\n", error);
-    }
 
     lua_newtable(L);
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
             for(widget = sb->widgets; widget; widget = widget->next)
-                if(!regexec(&r, widget->widget->name, 1, &match, 0))
-                {
-                    for(witer = wlist; witer; witer = witer->next)
-                        if(witer->widget == widget->widget)
-                        {
-                            add = false;
-                            break;
-                        }
-                    if(add)
+            {
+                for(witer = wlist; witer; witer = witer->next)
+                    if(witer->widget == widget->widget)
                     {
-                        witer = p_new(widget_node_t, 1);
-                        wobj = lua_newuserdata(L, sizeof(tag_t *));
-                        witer->widget = *wobj = widget->widget;
-                        widget_ref(&widget->widget);
-                        widget_node_list_push(&wlist, witer);
-                        /* ref again for the list */
-                        widget_ref(&widget->widget);
-                        luaA_settype(L, "widget");
-                        lua_rawseti(L, -2, i++);
+                        add = false;
+                        break;
                     }
-                    add = true;
+                if(add)
+                {
+                    witer = p_new(widget_node_t, 1);
+                    wobj = lua_newuserdata(L, sizeof(tag_t *));
+                    witer->widget = *wobj = widget->widget;
+                    widget_ref(&widget->widget);
+                    widget_node_list_push(&wlist, witer);
+                    /* ref again for the list */
+                    widget_ref(&widget->widget);
+                    luaA_settype(L, "widget");
+                    lua_rawseti(L, -2, i++);
                 }
+                add = true;
+            }
 
     widget_node_list_wipe(&wlist);
 

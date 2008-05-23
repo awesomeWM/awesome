@@ -40,7 +40,7 @@ end
 -- set i to 1 to get next, -1 to get previous.
 function client_next(i)
     -- Get all visible clients
-    local cls = client.visible_get(mouse.screen_get(), ".*")
+    local cls = client.visible_get(mouse.screen_get())
     -- Get currently focused client
     local sel = client.focus_get()
     if not sel then return end
@@ -94,7 +94,7 @@ end
 function getselectedtags()
     local idx = 1
     local screen = mouse.screen_get()
-    local tags = tag.get(screen, ".*")
+    local tags = tag.get(screen)
     local vtags = {}
     for i, t in ipairs(tags) do
         if t:isselected() then
@@ -161,14 +161,14 @@ end
 
 -- View no tag
 function tag_viewnone()
-    local tags = tag.get(mouse.screen_get(), ".*")
+    local tags = tag.get(mouse.screen_get())
     for i, t in ipairs(tags) do
         t:view(false)
     end
 end
 
 function tag_viewidx(r)
-    local tags = tag.get(mouse.screen_get(), ".*")
+    local tags = tag.get(mouse.screen_get())
     local sel = getselectedtag()
     tag_viewnone()
     for i, t in ipairs(tags) do
@@ -202,7 +202,7 @@ end
 
 function client_movetotag(target, c)
     local sel = c or client.focus_get();
-    local tags = tag.get(mouse.screen_get(), ".*")
+    local tags = tag.get(mouse.screen_get())
     for i, t in ipairs(tags) do
         sel:tag(t, false)
     end

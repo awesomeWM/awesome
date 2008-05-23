@@ -268,32 +268,21 @@ static int
 luaA_tag_get(lua_State *L)
 {
     int screen = luaL_checknumber(L, 1) - 1;
-    const char *name = luaL_checkstring(L, 2);
     tag_t *tag, **tobj;
-    int ret, i = 1;
-    regex_t r;
-    regmatch_t match;
-    char error[512];
+    int i = 1;
 
     luaA_checkscreen(screen);
-
-    if((ret = regcomp(&r, name, REG_EXTENDED)))
-    {
-        regerror(ret, &r, error, sizeof(error));
-        luaL_error(L, "regex compilation error: %s\n", error);
-    }
 
     lua_newtable(L);
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        if(!regexec(&r, tag->name, 1, &match, 0))
-        {
-            tobj = lua_newuserdata(L, sizeof(tag_t *));
-            *tobj = tag;
-            tag_ref(&tag);
-            luaA_settype(L, "tag");
-            lua_rawseti(L, -2, i++);
-        }
+    {
+        tobj = lua_newuserdata(L, sizeof(tag_t *));
+        *tobj = tag;
+        tag_ref(&tag);
+        luaA_settype(L, "tag");
+        lua_rawseti(L, -2, i++);
+    }
 
     return 1;
 }

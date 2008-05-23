@@ -24,8 +24,6 @@
 
 #include <xcb/xcb_event.h>
 
-#include <regex.h>
-
 #include "lua.h"
 #include "layout.h"
 #include "common/draw.h"
