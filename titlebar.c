@@ -412,9 +412,9 @@ luaA_titlebar_new(lua_State *L)
     *tb = p_new(titlebar_t, 1);
     objpos = lua_gettop(L);
 
-    (*tb)->text_normal = a_strdup(luaA_getopt_string(L, 1, "normal", "<title/>"));
-    (*tb)->text_focus = a_strdup(luaA_getopt_string(L, 1, "focus", "<title/>"));
-    (*tb)->text_urgent = a_strdup(luaA_getopt_string(L, 1, "urgent", "<title/>"));
+    (*tb)->text_normal = a_strdup(luaA_getopt_string(L, 1, "text_normal", "<title/>"));
+    (*tb)->text_focus = a_strdup(luaA_getopt_string(L, 1, "text_focus", "<title/>"));
+    (*tb)->text_urgent = a_strdup(luaA_getopt_string(L, 1, "text_urgent", "<title/>"));
 
     (*tb)->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
 
