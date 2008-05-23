@@ -39,7 +39,7 @@
 #define CURSOR_SIZING   120
 
 #define ANY_KEY      0L      /* special Key Code, passed to GrabKey */
-#define ANY_MODIFIER (1<<15) /* used in GrabButton, GrabKey */
+#define ANY_MODIFIER (1<<15) /* used in Grabbutton_t, GrabKey */
 
 /*****************************************************************
  * ERROR CODES

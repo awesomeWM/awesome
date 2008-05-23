@@ -192,7 +192,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
                      xcb_button_press_event_t *ev)
 {
     VirtScreen *vscreen = &globalconf.screens[statusbar->screen];
-    Button *b;
+    button_t *b;
     taglist_data_t *data = w->widget->data;
     taglist_drawn_area_t *tda;
     area_t *area;

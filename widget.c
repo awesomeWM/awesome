@@ -78,7 +78,7 @@ widget_common_button_press(widget_node_t *w,
                            statusbar_t *statusbar __attribute__ ((unused)),
                            xcb_button_press_event_t *ev)
 {
-    Button *b;
+    button_t *b;
 
     for(b = w->widget->buttons; b; b = b->next)
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
@@ -194,7 +194,7 @@ luaA_widget_mouse(lua_State *L)
     /* arg 1 is object */
     widget_t **widget = luaL_checkudata(L, 1, "widget");
     int b;
-    Button *button;
+    button_t *button;
 
     /* arg 2 is modkey table */
     luaA_checktable(L, 2);
@@ -203,7 +203,7 @@ luaA_widget_mouse(lua_State *L)
     /* arg 4 is cmd to run */
     luaA_checkfunction(L, 4);
 
-    button = p_new(Button, 1);
+    button = p_new(button_t, 1);
     button->button = xutil_button_fromint(b);
     button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
 

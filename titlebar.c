@@ -437,7 +437,7 @@ luaA_titlebar_mouse(lua_State *L)
 {
     size_t i, len;
     int b;
-    Button *button;
+    button_t *button;
 
     /* arg 1 is modkey table */
     luaA_checktable(L, 1);
@@ -446,7 +446,7 @@ luaA_titlebar_mouse(lua_State *L)
     /* arg 3 is cmd to run */
     luaA_checkfunction(L, 3);
 
-    button = p_new(Button, 1);
+    button = p_new(button_t, 1);
     button->button = xutil_button_fromint(b);
     button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
 

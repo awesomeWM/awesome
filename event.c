@@ -50,9 +50,9 @@ extern AwesomeConf globalconf;
 static void
 event_handle_mouse_button_press(unsigned int button,
                                 unsigned int state,
-                                Button *buttons)
+                                button_t *buttons)
 {
-    Button *b;
+    button_t *b;
 
     for(b = buttons; b; b = b->next)
         if(button == b->button && CLEANMASK(state) == b->mod && b->fct)

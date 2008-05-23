@@ -112,7 +112,7 @@ window_configure(xcb_window_t win, area_t geometry, int border)
 void
 window_grabbuttons(xcb_window_t win, int phys_screen)
 {
-    Button *b;
+    button_t *b;
 
     /* Always grab the first mouse button. */
     xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
@@ -155,7 +155,7 @@ window_grabbuttons(xcb_window_t win, int phys_screen)
 void
 window_root_grabbuttons(void)
 {
-    Button *b;
+    button_t *b;
     xcb_screen_t *s;
     int phys_screen = globalconf.default_screen;
 
@@ -186,7 +186,7 @@ window_root_grabbuttons(void)
  * \param b The button binding.
  */
 void
-window_root_grabbutton(Button *b)
+window_root_grabbutton(button_t *b)
 {
     xcb_screen_t *s;
     int phys_screen = globalconf.default_screen;

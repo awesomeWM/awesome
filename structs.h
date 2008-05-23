@@ -94,8 +94,8 @@ struct keybinding_t
 DO_SLIST(keybinding_t, keybinding, p_delete)
 
 /** Mouse buttons bindings */
-typedef struct Button Button;
-struct Button
+typedef struct button_t button_t;
+struct button_t
 {
     /** Key modifiers */
     unsigned long mod;
@@ -104,10 +104,10 @@ struct Button
     /** Lua function to execute. */
     luaA_function fct;
     /** Next and previous buttons */
-    Button *prev, *next;
+    button_t *prev, *next;
 };
 
-DO_SLIST(Button, button, p_delete)
+DO_SLIST(button_t, button, p_delete)
 
 /** Widget tell status code */
 typedef enum
@@ -141,8 +141,8 @@ struct widget_t
     alignment_t align;
     /** Misc private data */
     void *data;
-    /** Buttons bindings */
-    Button *buttons;
+    /** Button bindings */
+    button_t *buttons;
     /** Cache flags */
     int cache_flags;
 };
@@ -359,9 +359,9 @@ struct AwesomeConf
     /** Mouse bindings list */
     struct
     {
-           Button *root;
-           Button *client;
-           Button *titlebar;
+           button_t *root;
+           button_t *client;
+           button_t *titlebar;
     } buttons;
     /** Numlock mask */
     unsigned int numlockmask;
