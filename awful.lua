@@ -107,8 +107,16 @@ end
 
 -- Return only the first element of all visible tags,
 -- so that's the first visible tags.
-local function getselectedtag()
+function getselectedtag()
     return getselectedtags()[1]
+end
+
+-- Set master width factor
+function tag_setmwfact(i)
+    local t = getselectedtag()
+    if t then
+        t:mwfact_set(i)
+    end
 end
 
 -- Increase master width factor
@@ -119,11 +127,27 @@ function tag_incmwfact(i)
     end
 end
 
+-- Set number of master windows
+function tag_setnmaster(i)
+    local t = getselectedtag()
+    if t then
+        t:nmaster_set(i)
+    end
+end
+
 -- Increase number of master windows
 function tag_incnmaster(i)
     local t = getselectedtag()
     if t then
         t:nmaster_set(t:nmaster_get() + i)
+    end
+end
+
+-- Set number of column windows
+function tag_setncol(i)
+    local t = getselectedtag()
+    if t then
+        t:ncol_set(i)
     end
 end
 
@@ -169,6 +193,13 @@ function tag_viewonly(t)
     t:view(true)
 end
 
+function tag_viewmore(tags)
+    tag_viewnone()
+    for i, t in ipairs(tags) do
+        t:view(true)
+    end
+end
+
 function client_movetotag(target, c)
     local sel = c or client.focus_get();
     local tags = tag.get(mouse.screen_get(), ".*")
@@ -203,8 +234,12 @@ P.tag =
     viewprev = tag_viewprev;
     viewnext = tag_viewnext;
     viewonly = tag_viewonly;
+    viewmore = tag_viewmore;
+    setmwfact = tag_setmwfact;
     incmwfact = tag_incmwfact;
+    setncol = tag_setncol;
     incncol = tag_incncol;
+    setnmaster = tag_setnmaster;
     incnmaster = tag_incnmaster;
 }
 P.client =
@@ -221,5 +256,7 @@ P.screen =
     focus = screen_focus;
 }
 P.spawn = spawn
+P.getselectedtags = getselectedtags
+P.getselectedtag = getselectedtag
 
 return P
