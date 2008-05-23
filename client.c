@@ -1093,6 +1093,14 @@ luaA_client_icon_set(lua_State *L)
     return 0;
 }
 
+static int
+luaA_client_name_get(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    lua_pushstring(L, (*c)->name);
+    return 1;
+}
+
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },
@@ -1103,6 +1111,7 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
+    { "name_get", luaA_client_name_get },
     { "titlebar_set", luaA_client_titlebar_set },
     { "screen_set", luaA_client_screen_set },
     { "screen_get", luaA_client_screen_get },

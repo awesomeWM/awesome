@@ -172,6 +172,10 @@ end
 -- Hook function to execute when a new client appears.
 function hook_newclient(c)
     c:focus_set()
+    local name = c:name_get()
+    if name:find("mplayer") then
+        c:floating_set(true)
+    end
 end
 
 -- Set up some hooks
