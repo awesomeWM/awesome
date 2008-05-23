@@ -91,7 +91,7 @@ function screen_focus(i)
 end
 
 -- Return a table with all visible tags
-function getselectedtags()
+function tag_selectedlist()
     local idx = 1
     local screen = mouse.screen_get()
     local tags = tag.get(screen)
@@ -107,13 +107,13 @@ end
 
 -- Return only the first element of all visible tags,
 -- so that's the first visible tags.
-function getselectedtag()
-    return getselectedtags()[1]
+function tag_selected()
+    return tag_selectedlist()[1]
 end
 
 -- Set master width factor
 function tag_setmwfact(i)
-    local t = getselectedtag()
+    local t = tag_selected()
     if t then
         t:mwfact_set(i)
     end
@@ -121,7 +121,7 @@ end
 
 -- Increase master width factor
 function tag_incmwfact(i)
-    local t = getselectedtag()
+    local t = tag_selected()
     if t then
         t:mwfact_set(t:mwfact_get() + i)
     end
@@ -129,7 +129,7 @@ end
 
 -- Set number of master windows
 function tag_setnmaster(i)
-    local t = getselectedtag()
+    local t = tag_selected()
     if t then
         t:nmaster_set(i)
     end
@@ -137,7 +137,7 @@ end
 
 -- Increase number of master windows
 function tag_incnmaster(i)
-    local t = getselectedtag()
+    local t = tag_selected()
     if t then
         t:nmaster_set(t:nmaster_get() + i)
     end
@@ -145,7 +145,7 @@ end
 
 -- Set number of column windows
 function tag_setncol(i)
-    local t = getselectedtag()
+    local t = tag_selected()
     if t then
         t:ncol_set(i)
     end
@@ -153,7 +153,7 @@ end
 
 -- Increase number of column windows
 function tag_incncol(i)
-    local t = getselectedtag()
+    local t = tag_selected()
     if t then
         t:ncol_set(t:ncol_get() + i)
     end
@@ -169,7 +169,7 @@ end
 
 function tag_viewidx(r)
     local tags = tag.get(mouse.screen_get())
-    local sel = getselectedtag()
+    local sel = tag_selected()
     tag_viewnone()
     for i, t in ipairs(tags) do
         if t == sel then
@@ -223,6 +223,13 @@ function client_togglefloating(c)
     end
 end
 
+function layout_get()
+    local t = tag_selected()
+    if t then
+        return t:layout_get()
+    end
+end
+
 function spawn(cmd)
     return os.execute(cmd .. "&")
 end
@@ -241,6 +248,8 @@ P.tag =
     incncol = tag_incncol;
     setnmaster = tag_setnmaster;
     incnmaster = tag_incnmaster;
+    selected = tag_selected;
+    selectedlist = tag_selectedlist;
 }
 P.client =
 {
@@ -255,8 +264,10 @@ P.screen =
 {
     focus = screen_focus;
 }
+P.layout =
+{
+    get = layout_get
+}
 P.spawn = spawn
-P.getselectedtags = getselectedtags
-P.getselectedtag = getselectedtag
 
 return P
