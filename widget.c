@@ -334,6 +334,24 @@ luaA_widget_get(lua_State *L)
     return 1;
 }
 
+static int
+luaA_widget_name_set(lua_State *L)
+{
+    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    const char *name = luaL_checkstring(L, 2);
+    p_delete(&(*widget)->name);
+    (*widget)->name = a_strdup(name);
+    return 0;
+}
+
+static int
+luaA_widget_name_get(lua_State *L)
+{
+    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    lua_pushstring(L, (*widget)->name);
+    return 1;
+}
+
 const struct luaL_reg awesome_widget_methods[] =
 {
     { "new", luaA_widget_new },
@@ -344,6 +362,8 @@ const struct luaL_reg awesome_widget_meta[] =
 {
     { "mouse", luaA_widget_mouse },
     { "set", luaA_widget_set },
+    { "name_set", luaA_widget_name_set },
+    { "name_get", luaA_widget_name_get },
     { "__gc", luaA_widget_gc },
     { "__eq", luaA_widget_eq },
     { "__tostring", luaA_widget_tostring },
