@@ -3,6 +3,11 @@
 -- Include awesome library, with lots of useful function!
 require("awful")
 
+-- {{{ Colors and fonts
+awesome.font_set("sans 8")
+awesome.colors_set({ fg = "white", bg = "black" })
+-- }}}
+
 -- {{{ Variables definitions
 -- This is used later as the default terminal to run.
 terminal = "xterm"

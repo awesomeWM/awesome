@@ -291,6 +291,20 @@ luaA_font_set(lua_State *L)
     return 0;
 }
 
+static int
+luaA_colors_set(lua_State *L)
+{
+    const char *fg, *bg;
+    luaA_checktable(L, 1);
+    if((fg = luaA_getopt_string(L, 1, "fg", NULL)))
+        draw_color_new(globalconf.connection, globalconf.default_screen,
+                       fg, &globalconf.colors.fg);
+    if((bg = luaA_getopt_string(L, 1, "bg",NULL)))
+        draw_color_new(globalconf.connection, globalconf.default_screen,
+                       bg, &globalconf.colors.bg);
+    return 0;
+}
+
 bool
 luaA_parserc(const char *rcfile)
 {
@@ -311,6 +325,7 @@ luaA_parserc(const char *rcfile)
         { "mouse", luaA_mouse },
         { "resizehints_set", luaA_resizehints_set },
         { "font_set", luaA_font_set },
+        { "colors_set", luaA_colors_set },
         { NULL, NULL }
     };
     static const struct luaL_reg awesome_hooks_lib[] =
