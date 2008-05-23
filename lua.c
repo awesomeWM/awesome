@@ -21,7 +21,6 @@
 
 extern AwesomeConf globalconf;
 extern bool running;
-extern const name_func_link_t WidgetList[];
 extern const name_func_link_t FloatingPlacementList[];
 
 extern const struct luaL_reg awesome_mouse_lib[];
