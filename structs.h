@@ -336,7 +336,7 @@ typedef struct
     statusbar_t *statusbar;
     /** Padding */
     Padding padding;
-} VirtScreen;
+} screen_t;
 
 /** Main configuration structure */
 typedef struct awesome_t awesome_t;
@@ -351,7 +351,7 @@ struct awesome_t
     /** Keys symbol table */
     xcb_key_symbols_t *keysyms;
     /** Logical screens */
-    VirtScreen *screens;
+    screen_t *screens;
     /** Screens info */
     screens_info_t *screens_info;
     /** Keys bindings list */

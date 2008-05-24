@@ -121,7 +121,7 @@ taglist_draw(widget_node_t *w,
     tag_t *tag;
     taglist_data_t *data = w->widget->data;
     client_t *sel = globalconf.focus->client;
-    VirtScreen *vscreen = &globalconf.screens[statusbar->screen];
+    screen_t *vscreen = &globalconf.screens[statusbar->screen];
     draw_context_t *ctx = statusbar->ctx;
     int i = 0;
     area_t *area, rectangle = { 0, 0, 0, 0, NULL, NULL };
@@ -191,7 +191,7 @@ static void
 taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
                      xcb_button_press_event_t *ev)
 {
-    VirtScreen *vscreen = &globalconf.screens[statusbar->screen];
+    screen_t *vscreen = &globalconf.screens[statusbar->screen];
     button_t *b;
     taglist_data_t *data = w->widget->data;
     taglist_drawn_area_t *tda;

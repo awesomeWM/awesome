@@ -168,7 +168,7 @@ void
 tag_client_with_current_selected(client_t *c)
 {
     tag_t *tag;
-    VirtScreen vscreen = globalconf.screens[c->screen];
+    screen_t vscreen = globalconf.screens[c->screen];
 
     for(tag = vscreen.tags; tag; tag = tag->next)
         if(tag->selected)
