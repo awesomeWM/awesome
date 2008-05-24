@@ -204,20 +204,70 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
 
     switch(statusbar->position)
     {
-      case Top:
-        simplewindow_move(statusbar->sw, area.x, area.y);
+      default:
+        switch(statusbar->align)
+        {
+          default:
+            simplewindow_move(statusbar->sw, area.x, area.y);
+            break;
+          case AlignRight:
+            simplewindow_move(statusbar->sw,
+                              area.x + area.width - statusbar->width, area.y);
+            break;
+          case AlignCenter:
+            simplewindow_move(statusbar->sw,
+                              area.x + (area.width - statusbar->width) / 2, area.y);
+            break;
+        }
         break;
       case Bottom:
-        simplewindow_move(statusbar->sw, area.x, (area.y + area.height) - statusbar->height);
+        switch(statusbar->align)
+        {
+          default:
+            simplewindow_move(statusbar->sw,
+                              area.x, (area.y + area.height) - statusbar->height);
+            break;
+          case AlignRight:
+            simplewindow_move(statusbar->sw,
+                              area.x + area.width - statusbar->width,
+                              (area.y + area.height) - statusbar->height);
+            break;
+          case AlignCenter:
+            simplewindow_move(statusbar->sw,
+                              area.x + (area.width - statusbar->width) / 2,
+                              (area.y + area.height) - statusbar->height);
+            break;
+        }
         break;
       case Left:
-        simplewindow_move(statusbar->sw, area.x,
-                          (area.y + area.height) - statusbar->sw->geometry.height);
+        switch(statusbar->align)
+        {
+          default:
+            simplewindow_move(statusbar->sw, area.x,
+                              (area.y + area.height) - statusbar->sw->geometry.height);
+            break;
+          case AlignRight:
+            simplewindow_move(statusbar->sw, area.x, area.y);
+            break;
+          case AlignCenter:
+            simplewindow_move(statusbar->sw, area.x, (area.y + area.height - statusbar->width) / 2);
+        }
         break;
       case Right:
-        simplewindow_move(statusbar->sw, area.x + area.width - statusbar->height, area.y);
-        break;
-      default:
+        switch(statusbar->align)
+        {
+          default:
+            simplewindow_move(statusbar->sw, area.x + area.width - statusbar->height, area.y);
+            break;
+          case AlignRight:
+            simplewindow_move(statusbar->sw, area.x + area.width - statusbar->height,
+                              area.y + area.height - statusbar->width);
+            break;
+          case AlignCenter:
+            simplewindow_move(statusbar->sw, area.x + area.width - statusbar->height,
+                              (area.y + area.height - statusbar->width) / 2);
+            break;
+        }
         break;
     }
 
@@ -275,6 +325,19 @@ luaA_statusbar_position_set(lua_State *L)
         for(s = globalconf.screens[(*sb)->screen].statusbar; s; s = s->next)
             statusbar_position_update(s, s->position);
     }
+
+    return 0;
+}
+
+static int
+luaA_statusbar_align_set(lua_State *L)
+{
+    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
+    const char *al = luaL_checkstring(L, 2);
+    alignment_t align = draw_align_get_from_str(al);
+
+    (*sb)->align = align;
+    statusbar_position_update(*sb, (*sb)->position);
 
     return 0;
 }
@@ -351,6 +414,8 @@ luaA_statusbar_new(lua_State *L)
     else
         (*sb)->colors.bg = globalconf.colors.bg;
 
+    (*sb)->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
+
     (*sb)->width = luaA_getopt_number(L, 1, "width", 0);
     (*sb)->height = luaA_getopt_number(L, 1, "height", 0);
     if((*sb)->height <= 0)
@@ -382,6 +447,7 @@ const struct luaL_reg awesome_statusbar_meta[] =
 {
     { "widget_add", luaA_statusbar_widget_add },
     { "position_set", luaA_statusbar_position_set },
+    { "align_set", luaA_statusbar_align_set },
     { "add", luaA_statusbar_add },
     { "__gc", luaA_statusbar_gc },
     { "__eq", luaA_statusbar_eq },

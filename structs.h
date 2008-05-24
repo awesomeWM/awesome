@@ -200,6 +200,8 @@ struct statusbar_t
     int height;
     /** Bar position */
     position_t position;
+    /** Alignment */
+    alignment_t align;
     /** Screen */
     int screen;
     /** Physical screen id */
