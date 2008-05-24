@@ -447,7 +447,10 @@ luaA_tag_layout_set(lua_State *L)
     layout_t *l = name_func_lookup(name, LayoutList);
 
     if(l)
+    {
         (*tag)->layout = l;
+        globalconf.screens[(*tag)->screen].need_arrange = true;
+    }
     else
         luaL_error(L, "unknown layout: %s", name);
 
