@@ -154,12 +154,21 @@ widget_invalidate_statusbar_bywidget(widget_t *widget)
 }
 
 static int
+luaA_widget_userdata_new(widget_t *widget)
+{
+    widget_t **w;
+    w = lua_newuserdata(globalconf.L, sizeof(widget_t *));
+    *w = widget;
+    widget_ref(w);
+    return luaA_settype(globalconf.L, "widget");
+}
+
+static int
 luaA_widget_new(lua_State *L)
 {
     const char *type;
-    widget_t **widget, *w;
+    widget_t *w;
     WidgetConstructor *wc;
-    int objpos;
     alignment_t align;
 
     luaA_checktable(L, 1);
@@ -173,20 +182,13 @@ luaA_widget_new(lua_State *L)
     else
         return 0;
 
-    widget = lua_newuserdata(L, sizeof(widget_t *));
-    objpos = lua_gettop(L);
-    *widget = w;
     /* Set visible by default. */
     w->isvisible = true;
 
     /* \todo check that the name is unique */
-    (*widget)->name = luaA_name_init(L);
+    w->name = luaA_name_init(L);
 
-    widget_ref(widget);
-
-    /* repush obj on top */
-    lua_pushvalue(L, objpos);
-    return luaA_settype(L, "widget");
+    return luaA_widget_userdata_new(w);
 }
 
 static int
@@ -298,7 +300,6 @@ static int
 luaA_widget_get(lua_State *L)
 {
     statusbar_t *sb;
-    widget_t **wobj;
     widget_node_t *widget;
     int i = 1, screen;
     bool add = true;
@@ -319,13 +320,10 @@ luaA_widget_get(lua_State *L)
                 if(add)
                 {
                     witer = p_new(widget_node_t, 1);
-                    wobj = lua_newuserdata(L, sizeof(tag_t *));
-                    witer->widget = *wobj = widget->widget;
-                    widget_ref(&widget->widget);
                     widget_node_list_push(&wlist, witer);
+                    luaA_widget_userdata_new(witer->widget);
                     /* ref again for the list */
                     widget_ref(&widget->widget);
-                    luaA_settype(L, "widget");
                     lua_rawseti(L, -2, i++);
                 }
                 add = true;
