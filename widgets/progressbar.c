@@ -22,7 +22,7 @@
 
 #include "screen.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 typedef struct
 {

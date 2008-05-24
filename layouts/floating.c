@@ -23,7 +23,7 @@
 #include "tag.h"
 #include "layouts/floating.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 void
 layout_floating(int screen)

@@ -28,7 +28,7 @@
 #include "tag.h"
 #include "common/configopts.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 typedef enum
 {

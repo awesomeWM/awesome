@@ -28,7 +28,7 @@
 #include "titlebar.h"
 #include "layouts/floating.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 name_func_link_t FloatingPlacementList[] =
 {

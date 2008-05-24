@@ -35,7 +35,7 @@
 
 #include "layoutgen.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 /** View or unview a tag.
  * \param tag the tag

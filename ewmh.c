@@ -31,7 +31,7 @@
 #include "widget.h"
 #include "titlebar.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 static xcb_atom_t net_supported;
 static xcb_atom_t net_client_list;

@@ -27,7 +27,7 @@
 #include "layouts/tile.h"
 #include "common/util.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 static void
 _tile(int screen, const position_t position)

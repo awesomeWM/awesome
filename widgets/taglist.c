@@ -27,7 +27,7 @@
 #include "common/markup.h"
 #include "common/configopts.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 typedef struct taglist_drawn_area_t taglist_drawn_area_t;
 struct taglist_drawn_area_t

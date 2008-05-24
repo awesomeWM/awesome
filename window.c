@@ -28,7 +28,7 @@
 #include "structs.h"
 #include "window.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 /** Mask shorthands */
 #define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)

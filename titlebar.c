@@ -29,7 +29,7 @@
 #include "screen.h"
 #include "layouts/floating.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 static char *
 titlebar_text(client_t *c)

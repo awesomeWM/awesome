@@ -339,8 +339,8 @@ typedef struct
 } VirtScreen;
 
 /** Main configuration structure */
-typedef struct AwesomeConf AwesomeConf;
-struct AwesomeConf
+typedef struct awesome_t awesome_t;
+struct awesome_t
 {
     /** Connection ref */
     xcb_connection_t *connection;

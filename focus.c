@@ -23,7 +23,7 @@
 #include "focus.h"
 #include "client.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 /** Get the client's node focus.
  * \param c The client.

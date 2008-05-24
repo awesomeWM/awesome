@@ -25,7 +25,7 @@
 #include "statusbar.h"
 #include "widget.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 static DBusError err;
 static DBusConnection *dbus_connection = NULL;

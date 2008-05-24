@@ -21,9 +21,6 @@
 
 #include "widget.h"
 #include "common/util.h"
-#include "common/configopts.h"
-
-extern AwesomeConf globalconf;
 
 typedef struct
 {

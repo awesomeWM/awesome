@@ -34,7 +34,7 @@
 #include "layouts/fibonacci.h"
 #include "layouts/floating.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 /** Arrange windows following current selected layout
  * \param screen the screen to arrange

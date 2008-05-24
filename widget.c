@@ -25,7 +25,7 @@
 #include "event.h"
 #include "lua.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 #include "widgetgen.h"
 

@@ -39,7 +39,7 @@
 #include "common/xscreen.h"
 #include "common/xutil.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 /** Handle mouse button click
  * \param screen screen number

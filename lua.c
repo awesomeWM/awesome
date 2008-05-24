@@ -19,7 +19,7 @@
 #include "client.h"
 #include "layouts/tile.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 extern bool running;
 extern const name_func_link_t FloatingPlacementList[];
 

@@ -24,7 +24,7 @@
 #include "screen.h"
 #include "common/draw.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 typedef struct
 {

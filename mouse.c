@@ -37,7 +37,7 @@
                         | XCB_EVENT_MASK_BUTTON_RELEASE \
                         | XCB_EVENT_MASK_POINTER_MOTION)
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 /** Snap an area to the outside of an area.
  * \param geometry geometry of the area to snap

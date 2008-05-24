@@ -63,7 +63,7 @@
 
 bool running = true;
 
-AwesomeConf globalconf;
+awesome_t globalconf;
 
 #define a_thread_refresh(id, fct) \
     do { \

@@ -30,7 +30,7 @@
 #include "client.h"
 #include "layouts/floating.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 /** Get screens info
  * \param screen Screen number

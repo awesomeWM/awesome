@@ -40,7 +40,7 @@
 #include "common/xutil.h"
 #include "common/xscreen.h"
 
-extern AwesomeConf globalconf;
+extern awesome_t globalconf;
 
 /** Load windows properties, restoring client's tag
  * and floating state before awesome was restarted if any,
