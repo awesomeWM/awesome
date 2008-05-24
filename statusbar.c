@@ -171,7 +171,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     {
       case Right:
       case Left:
-        statusbar->width = area.height;
+        if(statusbar->width <= 0)
+            statusbar->width = area.height;
         statusbar->sw =
             simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
                              statusbar->height, statusbar->width, 0);
@@ -188,7 +189,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
                                           dw);
         break;
       default:
-        statusbar->width = area.width;
+        if(statusbar->width <= 0)
+            statusbar->width = area.width;
         statusbar->sw =
             simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
                              statusbar->width, statusbar->height, 0);
