@@ -17,6 +17,8 @@ terminal = "xterm"
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
+-- Table of layouts to cover with awful.layout.inc, order matters.
+layouts = { "tile", "tileleft", "tilebottom", "tiletop", "max", "spiral", "dwindle", "floating" }
 -- }}}
 
 -- {{{ Tags
@@ -160,6 +162,8 @@ awesome.key({ modkey, "Shift" }, "h", function () awful.tag.incnmaster(1) end)
 awesome.key({ modkey, "Shift" }, "l", function () awful.tag.incnmaster(-1) end)
 awesome.key({ modkey, "Control" }, "h", function () awful.tag.incncol(1) end)
 awesome.key({ modkey, "Control" }, "l", function () awful.tag.incncol(1) end)
+awesome.key({ modkey }, "space", function () awful.layout.inc(layouts, 1) end)
+awesome.key({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -1) end)
 -- }}}
 
 -- {{{ Hooks
