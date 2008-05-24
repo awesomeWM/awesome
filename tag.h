@@ -45,6 +45,7 @@ bool is_client_tagged(client_t *, tag_t *);
 void tag_client_with_current_selected(client_t *);
 void tag_view_only_byindex(int, int);
 void tag_append_to_screen(tag_t *, int);
+int luaA_tag_userdata_new(tag_t *);
 
 DO_RCNT(tag_t, tag, tag_delete)
 DO_SLIST(tag_t, tag, tag_delete)

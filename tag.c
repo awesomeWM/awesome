@@ -77,8 +77,6 @@ tag_new(const char *name, layout_t *layout, double mwfact, int nmaster, int ncol
     if((tag->ncol = ncol) < 1)
         tag->ncol = 1;
 
-    tag_ref(&tag);
-
     return tag;
 }
 
@@ -268,7 +266,7 @@ static int
 luaA_tag_get(lua_State *L)
 {
     int screen = luaL_checknumber(L, 1) - 1;
-    tag_t *tag, **tobj;
+    tag_t *tag;
     int i = 1;
 
     luaA_checkscreen(screen);
@@ -277,10 +275,7 @@ luaA_tag_get(lua_State *L)
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
     {
-        tobj = lua_newuserdata(L, sizeof(tag_t *));
-        *tobj = tag;
-        tag_ref(&tag);
-        luaA_settype(L, "tag");
+        luaA_tag_userdata_new(tag);
         lua_rawseti(L, -2, i++);
     }
 
@@ -294,7 +289,7 @@ luaA_tag_get(lua_State *L)
 static int
 luaA_tag_new(lua_State *L)
 {
-    tag_t **tag;
+    tag_t *tag;
     int ncol, nmaster;
     const char *name, *lay;
     double mwfact;
@@ -310,13 +305,11 @@ luaA_tag_new(lua_State *L)
 
     layout = name_func_lookup(lay, LayoutList);
 
-    tag = lua_newuserdata(L, sizeof(tag_t *));
+    tag = tag_new(name,
+                  layout,
+                  mwfact, nmaster, ncol);
 
-    *tag = tag_new(name,
-                   layout,
-                   mwfact, nmaster, ncol);
-
-    return luaA_settype(L, "tag");
+    return luaA_tag_userdata_new(tag);
 }
 
 static int
@@ -460,6 +453,15 @@ luaA_tag_layout_set(lua_State *L)
 
     return 0;
 
+}
+
+int
+luaA_tag_userdata_new(tag_t *t)
+{
+    tag_t **lt = lua_newuserdata(globalconf.L, sizeof(tag_t *));
+    *lt = t;
+    tag_ref(lt);
+    return luaA_settype(globalconf.L, "tag");
 }
 
 const struct luaL_reg awesome_tag_methods[] =

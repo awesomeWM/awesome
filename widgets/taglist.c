@@ -196,7 +196,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
     taglist_data_t *data = w->widget->data;
     taglist_drawn_area_t *tda;
     area_t *area;
-    tag_t *tag, **ltag;
+    tag_t *tag;
 
     /* Find the good drawn area list */
     for(tda = data->drawn_area; tda && tda->statusbar != statusbar; tda = tda->next);
@@ -211,10 +211,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
                     if(ev->event_x >= AREA_LEFT(*area)
                        && ev->event_x < AREA_RIGHT(*area))
                     {
-                        ltag = lua_newuserdata(globalconf.L, sizeof(tag_t *));
-                        luaA_settype(globalconf.L, "tag");
-                        *ltag = tag;
-                        tag_ref(ltag);
+                        luaA_tag_userdata_new(tag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
                     }
                 break;
@@ -223,10 +220,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
                     if(ev->event_y >= AREA_LEFT(*area)
                        && ev->event_y < AREA_RIGHT(*area))
                     {
-                        ltag = lua_newuserdata(globalconf.L, sizeof(tag_t *));
-                        luaA_settype(globalconf.L, "tag");
-                        *ltag = tag;
-                        tag_ref(ltag);
+                        luaA_tag_userdata_new(tag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
                     }
                 break;
@@ -235,10 +229,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
                     if(statusbar->width - ev->event_y >= AREA_LEFT(*area)
                        && statusbar->width - ev->event_y < AREA_RIGHT(*area))
                     {
-                        ltag = lua_newuserdata(globalconf.L, sizeof(tag_t *));
-                        luaA_settype(globalconf.L, "tag");
-                        *ltag = tag;
-                        tag_ref(ltag);
+                        luaA_tag_userdata_new(tag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
                     }
                 break;
