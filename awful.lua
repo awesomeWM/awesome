@@ -230,6 +230,35 @@ function layout_get()
     end
 end
 
+-- Function to change the layout of the current tag.
+-- layouts = table of layouts (define in .awesomerc.lua)
+-- i = relative index
+function layout_inc(layouts, i)
+    local t = tag_selected()
+    local number_of_layouts = 0
+    local rev_layouts = {}
+    for i, v in ipairs(layouts) do
+	rev_layouts[v] = i
+	number_of_layouts = number_of_layouts + 1
+    end
+    if t then
+	local cur_layout = layout_get()
+	local new_layout_index = (rev_layouts[cur_layout] + i) % number_of_layouts
+	if new_layout_index == 0 then
+	    new_layout_index = number_of_layouts
+	end
+	t:layout_set(layouts[new_layout_index])
+    end
+end
+
+-- function to set the layout of the current tag by name.
+function layout_set(layout)
+    local t = tag_selected()
+    if t then
+	t:layout_set(layout)
+    end
+end
+
 function spawn(cmd)
     return os.execute(cmd .. "&")
 end
@@ -266,7 +295,9 @@ P.screen =
 }
 P.layout =
 {
-    get = layout_get
+    get = layout_get;
+    set = layout_set;
+    inc = layout_inc;
 }
 P.spawn = spawn
 
