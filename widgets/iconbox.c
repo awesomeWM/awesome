@@ -44,6 +44,9 @@ iconbox_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
     else
         w->area.width = area.width;
 
+    if(w->area.width > statusbar->width - used)
+        return (w->area.width = 0);
+
     w->area.height = statusbar->height;
 
     w->area.x = widget_calculate_offset(statusbar->width,
