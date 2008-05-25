@@ -167,7 +167,7 @@ static int
 luaA_widget_new(lua_State *L)
 {
     const char *type;
-    widget_t *w;
+    widget_t *w = NULL;
     widget_constructor_t *wc;
     alignment_t align;
 
