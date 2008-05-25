@@ -1,7 +1,7 @@
 /*
- * focus.h - focus management header
+ * cnode.h - client node lists management header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,15 @@
  *
  */
 
-#ifndef AWESOME_FOCUS_H
-#define AWESOME_FOCUS_H
+#ifndef AWESOME_CNODE_H
+#define AWESOME_CNODE_H
 
 #include "client.h"
 
-void focus_client_push(client_t *);
-void focus_client_append(client_t *);
-void focus_client_delete(client_t *);
-client_t * focus_get_current_client(int);
+client_node_t * client_node_client_getby(client_node_t *, client_t *);
+client_node_t * client_node_client_add(client_node_t **, client_t *);
+
+DO_SLIST(client_node_t, client_node, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

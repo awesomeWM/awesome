@@ -19,48 +19,11 @@
  *
  */
 
-#include "tag.h"
 #include "focus.h"
-#include "client.h"
+#include "cnode.h"
+#include "tag.h"
 
 extern awesome_t globalconf;
-
-/** Get the client's node focus.
- * \param c The client.
- * \return The client node focus.
- */
-static client_node_t *
-focus_get_node_by_client(client_t *c)
-{
-    client_node_t *node;
-
-    for(node = globalconf.focus; node; node = node->next)
-        if(node->client == c)
-            return node;
-
-    return NULL;
-}
-
-/** Create a client node for focus.
- * \param c The client
- * \return The client focus node.
- */
-static client_node_t *
-focus_client_add(client_t *c)
-{
-    client_node_t *node;
-
-    /* if we don't find this node, create a new one */
-    if(!(node = focus_get_node_by_client(c)))
-    {
-        node = p_new(client_node_t, 1);
-        node->client = c;
-    }
-    else /* if we've got a node, detach it */
-        client_node_list_detach(&globalconf.focus, node);
-
-    return node;
-}
 
 /** Push the client at the beginning of the client focus history stack.
  * \param c The client to push.
@@ -68,7 +31,7 @@ focus_client_add(client_t *c)
 void
 focus_client_push(client_t *c)
 {
-    client_node_t *node = focus_client_add(c);
+    client_node_t *node = client_node_client_add(&globalconf.focus, c);
     client_node_list_push(&globalconf.focus, node);
 }
 
@@ -78,7 +41,7 @@ focus_client_push(client_t *c)
 void
 focus_client_append(client_t *c)
 {
-    client_node_t *node = focus_client_add(c);
+    client_node_t *node = client_node_client_add(&globalconf.focus, c);
     client_node_list_append(&globalconf.focus, node);
 }
 
@@ -88,7 +51,7 @@ focus_client_append(client_t *c)
 void
 focus_client_delete(client_t *c)
 {
-    client_node_t *node = focus_get_node_by_client(c);
+    client_node_t *node = client_node_client_getby(globalconf.focus, c);
 
     if(node)
     {
