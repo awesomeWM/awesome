@@ -267,6 +267,16 @@ luaA_hooks_arrange(lua_State *L)
     return 0;
 }
 
+static int
+luaA_hooks_titleupdate(lua_State *L)
+{
+    luaA_checkfunction(L, 1);
+    if(globalconf.hooks.titleupdate)
+        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.titleupdate);
+    globalconf.hooks.titleupdate = luaL_ref(L, LUA_REGISTRYINDEX);
+    return 0;
+}
+
 static void
 luaA_openlib(lua_State *L, const char *name,
              const struct luaL_reg methods[],
@@ -335,6 +345,7 @@ luaA_parserc(const char *rcfile)
         { "newclient", luaA_hooks_newclient },
         { "mouseover", luaA_hooks_mouseover },
         { "arrange", luaA_hooks_arrange },
+        { "titleupdate", luaA_hooks_titleupdate },
         { NULL, NULL }
     };
 

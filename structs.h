@@ -418,6 +418,8 @@ struct awesome_t
         luaA_function mouseover;
         /** Command to run on arrange */
         luaA_function arrange;
+        /** Command to run on title change */
+        luaA_function titleupdate;
     } hooks;
 };
 

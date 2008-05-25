@@ -191,6 +191,11 @@ client_updatetitle(client_t *c)
 
     p_delete(&c->name);
     c->name = name;
+
+    /* call hook */
+    luaA_client_userdata_new(c);
+    luaA_dofunction(globalconf.L, globalconf.hooks.titleupdate, 1);
+
     titlebar_draw(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
@@ -1102,6 +1107,16 @@ luaA_client_name_get(lua_State *L)
     return 1;
 }
 
+static int
+luaA_client_name_set(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    const char *name = luaL_checkstring(L, 2);
+    p_delete(&(*c)->name);
+    (*c)->name = a_strdup(name);
+    return 0;
+}
+
 int
 luaA_client_userdata_new(client_t *c)
 {
@@ -1121,6 +1136,7 @@ const struct luaL_reg awesome_client_methods[] =
 const struct luaL_reg awesome_client_meta[] =
 {
     { "name_get", luaA_client_name_get },
+    { "name_set", luaA_client_name_set },
     { "titlebar_set", luaA_client_titlebar_set },
     { "screen_set", luaA_client_screen_set },
     { "screen_get", luaA_client_screen_get },
