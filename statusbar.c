@@ -369,19 +369,52 @@ static int
 luaA_statusbar_add(lua_State *L)
 {
     statusbar_t *s, **sb = luaL_checkudata(L, 1, "statusbar");
-    int screen = luaL_checknumber(L, 2) - 1;
+    int i, screen = luaL_checknumber(L, 2) - 1;
 
     luaA_checkscreen(screen);
 
+    /* Check for uniq name and id. */
+    for(i = 0; i < globalconf.screens_info->nscreen; i++)
+        for(s = globalconf.screens[i].statusbar; s; s = s->next)
+        {
+            if(s == *sb)
+                luaL_error(L, "this statusbar is already on screen %d",
+                           s->screen + 1);
+            if(!a_strcmp(s->name, (*sb)->name))
+                luaL_error(L, "a statusbar with that name is already on screen %d\n",
+                           s->screen + 1);
+        }
+
     (*sb)->screen = screen;
 
-    /* \todo check for uniq name */
     statusbar_list_append(&globalconf.screens[screen].statusbar, *sb);
     for(s = globalconf.screens[(*sb)->screen].statusbar; s; s = s->next)
         statusbar_position_update(s, s->position);
     statusbar_ref(sb);
     (*sb)->screen = screen;
     (*sb)->phys_screen = screen_virttophys(screen);
+
+    return 0;
+}
+
+static int
+luaA_statusbar_remove(lua_State *L)
+{
+    statusbar_t *s, **sb = luaL_checkudata(L, 1, "statusbar");
+    int i;
+
+    for(i = 0; i < globalconf.screens_info->nscreen; i++)
+        for(s = globalconf.screens[i].statusbar; s; s = s->next)
+            if(s == *sb)
+            {
+                statusbar_position_update(*sb, Off);
+                statusbar_list_detach(&globalconf.screens[i].statusbar, *sb);
+                statusbar_unref(sb);
+                globalconf.screens[i].need_arrange = true;
+                return 0;
+            }
+
+    luaL_error(L, "unable to remove statusbar: not on any screen");
 
     return 0;
 }
@@ -449,6 +482,7 @@ const struct luaL_reg awesome_statusbar_meta[] =
     { "position_set", luaA_statusbar_position_set },
     { "align_set", luaA_statusbar_align_set },
     { "add", luaA_statusbar_add },
+    { "remove", luaA_statusbar_remove },
     { "__gc", luaA_statusbar_gc },
     { "__eq", luaA_statusbar_eq },
     { "__tostring", luaA_statusbar_tostring },
