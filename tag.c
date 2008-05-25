@@ -254,10 +254,16 @@ luaA_tag_tostring(lua_State *L)
 static int
 luaA_tag_add(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
-    int screen = luaL_checknumber(L, 2) - 1;
+    tag_t *t, **tag = luaL_checkudata(L, 1, "tag");
+    int i, screen = luaL_checknumber(L, 2) - 1;
     luaA_checkscreen(screen);
-    /* \todo check tag is not already in another screen */
+
+    for(i = 0; i < globalconf.screens_info->nscreen; i++)
+        for(t = globalconf.screens[screen].tags; t; t = t->next)
+            if(*tag == t)
+                luaL_error(L, "tag already on screen %d", i);
+
+    (*tag)->screen = screen;
     tag_append_to_screen(*tag, screen);
     return 0;
 }
