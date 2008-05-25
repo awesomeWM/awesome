@@ -20,6 +20,7 @@
  *
  */
 
+#include "widget.h"
 #include "screen.h"
 
 extern awesome_t globalconf;
@@ -48,7 +49,7 @@ typedef struct
     bool vertical;
     /** Number of data_items (bars) */
     int data_items;
-    /** Height 0-1, where 1 is height of statusbar */
+    /** Height 0-1, where 1.0 is height of statusbar */
     float height;
     /** Foreground color */
     xcolor_t *fg;
@@ -64,36 +65,53 @@ typedef struct
     xcolor_t *bordercolor;
 } Data;
 
+void add_data(Data *, const char *);
+
 static widget_tell_status_t
-widget_set_color_for_data(xcolor_t *color, char *new_value, int data_items, char ** data_title)
+widget_set_color_for_data(xcolor_t *color, const char *new_value, int data_items, char ** data_title)
 {
-    char *title, *setting;
+    char *title, *setting, *new_val;
     int i;
-    title = strtok(new_value, " ");
+    new_val = strdup(new_value);
+    title = strtok(new_val, " ");
     if(!(setting = strtok(NULL, " ")))
+    {
+        p_delete(&new_val);
         return WIDGET_ERROR_NOVALUE;
+    }
     for(i = 0; i < data_items; i++)
         if(!a_strcmp(title, data_title[i]))
         {
             if(draw_color_new(globalconf.connection,
                               globalconf.default_screen,
                               setting, &color[i]))
+            {
+                p_delete(&new_val);
                 return WIDGET_NOERROR;
+            }
             else
+            {
+                p_delete(&new_val);
                 return WIDGET_ERROR_FORMAT_COLOR;
+            }
         }
+    p_delete(&new_val);
     return WIDGET_ERROR_FORMAT_SECTION;
 }
 
 static widget_tell_status_t
-widget_set_color_pointer_for_data(xcolor_t **color, char *new_value, int data_items, char ** data_title)
+widget_set_color_pointer_for_data(xcolor_t **color, const char *new_value, int data_items, char ** data_title)
 {
     char *title, *setting;
     int i;
     bool flag;
-    title = strtok(new_value, " ");
+    char *new_val = strdup(new_value);
+    title = strtok(new_val, " ");
     if(!(setting = strtok(NULL, " ")))
+    {
+        p_delete(&new_val);
         return WIDGET_ERROR_NOVALUE;
+    }
     for(i = 0; i < data_items; i++)
         if(!a_strcmp(title, data_title[i]))
         {
@@ -112,58 +130,88 @@ widget_set_color_pointer_for_data(xcolor_t **color, char *new_value, int data_it
                     p_delete(&color[i]);
                     color[i] = NULL;
                 }
+                p_delete(&new_val);
                 return WIDGET_ERROR_FORMAT_COLOR;
             }
+            p_delete(&new_val);
             return WIDGET_NOERROR;
         }
+    p_delete(&new_val);
     return WIDGET_ERROR_FORMAT_SECTION;
 }
 
+/*static bool*/
+/*check_settings(Data *d, int status_height)*/
+/*{*/
+    /*int tmp, h_total;*/
 
-static bool
-check_settings(Data *d, int status_height)
+    /*h_total = (int)(status_height * d->height + 0.5);*/
+
+    /*if(!d->vertical) [> horizontal <]*/
+    /*{*/
+        /*tmp = d->width - 2 * (d->border_width + d->border_padding) - 1;*/
+        /*if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0)*/
+           /*|| (!d->ticks_count && tmp < 0))*/
+        /*{*/
+            /*warn("progressbar's 'width' is too small for the given configuration options");*/
+            /*return false;*/
+        /*}*/
+        /*tmp = h_total - d->data_items * (2 * (d->border_width + d->border_padding) + 1)*/
+              /*- (d->data_items - 1) * d->gap;*/
+        /*if(tmp < 0)*/
+        /*{*/
+            /*warn("progressbar's 'height' is too small for the given configuration options");*/
+            /*return false;*/
+        /*}*/
+    /*}*/
+    /*else [> vertical / standing up <]*/
+    /*{*/
+        /*tmp = h_total - 2 * (d->border_width + d->border_padding) - 1;*/
+        /*if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0)*/
+           /*|| (!d->ticks_count && tmp < 0))*/
+        /*{*/
+            /*warn("progressbar's 'height' is too small for the given configuration options");*/
+            /*return false;*/
+        /*}*/
+        /*tmp = d->width - d->data_items * (2 * (d->border_width + d->border_padding) + 1)*/
+              /*- (d->data_items - 1) * d->gap;*/
+        /*if(tmp < 0)*/
+        /*{*/
+            /*warn("progressbar's 'width' is too small for the given configuration options");*/
+            /*return false;*/
+        /*}*/
+    /*}*/
+    /*return true;*/
+/*}*/
+
+void add_data(Data *d, const char *new_data_title)
 {
-    int tmp, h_total;
+    d->data_items++;
 
-    h_total = (int)(status_height * d->height + 0.5);
+    /* memory (re-)allocating */
+    p_realloc(&(d->data_title), d->data_items);
+    p_realloc(&(d->percent), d->data_items);
+    p_realloc(&(d->reverse), d->data_items);
+    p_realloc(&(d->fg), d->data_items);
+    p_realloc(&(d->fg_off), d->data_items);
+    p_realloc(&(d->bg), d->data_items);
+    p_realloc(&(d->bordercolor), d->data_items);
+    p_realloc(&(d->pfg_center), d->data_items);
+    p_realloc(&(d->pfg_end), d->data_items);
 
-    if(!d->vertical) /* horizontal */
-    {
-        tmp = d->width - 2 * (d->border_width + d->border_padding) - 1;
-        if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0)
-           || (!d->ticks_count && tmp < 0))
-        {
-            warn("progressbar's 'width' is too small for the given configuration options");
-            return false;
-        }
-        tmp = h_total - d->data_items * (2 * (d->border_width + d->border_padding) + 1)
-              - (d->data_items - 1) * d->gap;
-        if(tmp < 0)
-        {
-            warn("progressbar's 'height' is too small for the given configuration options");
-            return false;
-        }
-    }
-    else /* vertical / standing up */
-    {
-        tmp = h_total - 2 * (d->border_width + d->border_padding) - 1;
-        if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0)
-           || (!d->ticks_count && tmp < 0))
-        {
-            warn("progressbar's 'height' is too small for the given configuration options");
-            return false;
-        }
-        tmp = d->width - d->data_items * (2 * (d->border_width + d->border_padding) + 1)
-              - (d->data_items - 1) * d->gap;
-        if(tmp < 0)
-        {
-            warn("progressbar's 'width' is too small for the given configuration options");
-            return false;
-        }
-    }
-    return true;
+    /* initialize values for new data section */
+    d->reverse[d->data_items - 1] = false;
+    d->fg[d->data_items - 1] = globalconf.colors.fg;
+    d->data_title[d->data_items - 1] = a_strdup(new_data_title);
+    d->percent[d->data_items - 1] = 0;
+
+    d->fg_off[d->data_items - 1] = globalconf.colors.bg;
+    d->bg[d->data_items - 1] = globalconf.colors.bg;
+    d->bordercolor[d->data_items - 1] = d->fg[d->data_items];
+    d->pfg_center[d->data_items - 1] = NULL;
+    d->pfg_end[d->data_items - 1] = NULL;
+
 }
-
 
 static int
 progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
@@ -436,26 +484,33 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     Data *d = widget->data;
     int i = 0, percent, tmp;
     char *title, *setting;
-    float tmpf;
-
-    if(!d->data_items)
-        return WIDGET_ERROR_CUSTOM; /* error already printed on _new */
+    char *new_val;
+    float ftmp;
 
     if(new_value == NULL)
         return WIDGET_ERROR_NOVALUE;
-
-    if(!a_strcmp(property, "data"))
+    else if(!a_strcmp(property, "add_data"))
+        add_data(d, new_value);
+    else if(!d->data_items)
+        return WIDGET_ERROR_CUSTOM; /* no error printed / no need to..? */
+    else if(!a_strcmp(property, "data"))
     {
-        title = strtok(new_value, " ");
+        new_val = a_strdup(new_value);
+        title = strtok(new_val, " ");
         if(!(setting = strtok(NULL, " ")))
+        {
+            p_delete(&new_val);
             return WIDGET_ERROR_NOVALUE;
+        }
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
                 percent = atoi(setting);
                 d->percent[i] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
+                p_delete(&new_val);
                 return WIDGET_NOERROR;
             }
+        p_delete(&new_val);
         return WIDGET_ERROR_FORMAT_SECTION;
     }
     else if(!a_strcmp(property, "fg"))
@@ -473,9 +528,25 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     else if(!a_strcmp(property, "gap"))
         d->gap = atoi(new_value);
     else if(!a_strcmp(property, "width"))
+    {
+        tmp = d->width;
         d->width = atoi(new_value);
+        /*if(!check_settings(d, widget->statusbar->height))*/
+        /*{*/
+            /*d->width = tmp; [> restore <]*/
+            /*return WIDGET_ERROR_CUSTOM;*/
+        /*}*/
+    }
     else if(!a_strcmp(property, "height"))
+    {
+        ftmp = d->height;
         d->height = atof(new_value);
+        /*if(!check_settings(d, widget->statusbar->height))*/
+        /*{*/
+            /*d->height = ftmp; [> restore <]*/
+            /*return WIDGET_ERROR_CUSTOM;*/
+        /*}*/
+    }
     else
         return WIDGET_ERROR;
 
@@ -487,8 +558,6 @@ progressbar_new(alignment_t align)
 {
     widget_t *w;
     Data *d;
-    char *color;
-    int i;
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
@@ -497,78 +566,20 @@ progressbar_new(alignment_t align)
     w->tell = progressbar_tell;
     d = w->data = p_new(Data, 1);
 
-    d->height = 0.67;
-    d->width = 100;
+    d->data_items = 0;
+    d->data_title = NULL;
+    d->fg = d->bg = d->fg_off = d->bordercolor = NULL;
+    d->pfg_center =  d->pfg_end = NULL;
+    d->percent = NULL;
+    d->reverse = NULL;
+
+    d->height = 0.80;
+    d->width = 80;
 
     d->ticks_gap = 1;
     d->border_width = 1;
     d->gap = 2;
 
-    /*
-    if(!(d->data_items = cfg_size(config, "data")))
-    {
-        warn("progressbar widget needs at least one bar section");
-        return w;
-    }
-
-    if(!check_settings(d, statusbar->height))
-    {
-        d->data_items = 0;
-        return w;
-    }
-
-    d->fg = p_new(xcolor_t, d->data_items);
-    d->pfg_end = p_new(xcolor_t *, d->data_items);
-    d->pfg_center = p_new(xcolor_t *, d->data_items);
-    d->fg_off = p_new(xcolor_t, d->data_items);
-    d->bg = p_new(xcolor_t, d->data_items);
-    d->bordercolor = p_new(xcolor_t, d->data_items);
-    d->percent = p_new(int, d->data_items);
-    d->reverse = p_new(bool, d->data_items);
-    d->data_title = p_new(char *, d->data_items);
-
-    for(i = 0; i < d->data_items; i++)
-    {
-        cfg = cfg_getnsec(config, "data", i);
-
-        d->data_title[i] = a_strdup(cfg_title(cfg));
-
-        if(!(d->reverse[i] = cfg_getbool(cfg, "reverse")))
-            d->reverse[i] = false;
-
-        if((color = cfg_getstr(cfg, "fg")))
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->fg[i]);
-        else
-            d->fg[i] = globalconf.screens[statusbar->screen].styles.normal.fg;
-
-        if((color = cfg_getstr(cfg, "fg_center")))
-        {
-            d->pfg_center[i] = p_new(xcolor_t, 1);
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, d->pfg_center[i]);
-        }
-
-        if((color = cfg_getstr(cfg, "fg_end")))
-        {
-            d->pfg_end[i] = p_new(xcolor_t, 1);
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, d->pfg_end[i]);
-        }
-
-        if((color = cfg_getstr(cfg, "fg_off")))
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->fg_off[i]);
-        else
-            d->fg_off[i] = globalconf.screens[statusbar->screen].styles.normal.bg;
-
-        if((color = cfg_getstr(cfg, "bg")))
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bg[i]);
-        else
-            d->bg[i] = globalconf.screens[statusbar->screen].styles.normal.bg;
-
-        if((color = cfg_getstr(cfg, "bordercolor")))
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bordercolor[i]);
-        else
-            d->bordercolor[i] = d->fg[i];
-    }
-    */
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
