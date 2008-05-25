@@ -77,6 +77,13 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             if(statusbar->sw->window == ev->event || statusbar->sw->window == ev->child)
             {
+                /* If the statusbar is child, then x,y are
+                 * relative to root window */
+                if(statusbar->sw->window == ev->child)
+                {
+                    ev->event_x -= statusbar->sw->geometry.x;
+                    ev->event_y -= statusbar->sw->geometry.y;
+                }
                 switch(statusbar->position)
                 {
                   case Top:
