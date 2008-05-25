@@ -34,7 +34,7 @@
 /** Stacking layout layers */
 typedef enum
 {
-    LAYER_DESKTOP,
+    LAYER_DESKTOP = 1,
     LAYER_BELOW,
     LAYER_TILE,
     LAYER_FLOAT,
@@ -387,6 +387,8 @@ struct awesome_t
     FloatingPlacement *floating_placement;
     /** Selected clients history */
     client_node_t *focus;
+    /** Stack client history */
+    client_node_t *stack;
     /** Link between tags and clients */
     tag_client_node_t *tclink;
     /** Command line passed to awesome */

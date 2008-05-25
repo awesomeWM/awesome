@@ -115,6 +115,7 @@ awesome_SOURCES = \
 	titlebar.c titlebar.h \
 	placement.c placement.h \
 	focus.c focus.h \
+	stack.c stack.h \
 	cnode.c cnode.h \
 	event.c event.h \
 	layout.c layout.h \

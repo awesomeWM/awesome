@@ -35,6 +35,7 @@
 #include "screen.h"
 #include "titlebar.h"
 #include "lua.h"
+#include "stack.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
 #include "common/xutil.h"
@@ -286,53 +287,41 @@ client_focus(client_t *c, int screen, bool raise)
     return true;
 }
 
+/** Restack clients and puts c in top of its layer.
+ * \param c The client to stack on top of others.
+ * \todo It might be worth stopping to restack everyone and only stack `c'
+ * relatively to the first matching in the list
+ */
 void
 client_stack(client_t *c)
 {
     uint32_t config_win_vals[2];
-    client_t *client;
+    client_node_t *node;
     layer_t layer;
 
     config_win_vals[0] = XCB_NONE;
-    config_win_vals[1] = XCB_STACK_MODE_ABOVE;
+    config_win_vals[1] = XCB_STACK_MODE_BELOW;
 
-    for(layer = LAYER_DESKTOP; layer < LAYER_FULLSCREEN; layer++)
-    {
-        /* \todo we need to maintain a separate stack list */
-        for(client = globalconf.clients; client; client = client->next)
-        {
-            if(client->layer == layer && client != c
-               && client_isvisible_anyscreen(client))
+    stack_client_push(c);
+
+    for(layer = LAYER_FULLSCREEN; layer >= LAYER_DESKTOP; layer--)
+        for(node = globalconf.stack; node; node = node->next)
+            if(node->client->layer == layer
+               && client_isvisible_anyscreen(node->client))
             {
-                if(client->titlebar.position && client->titlebar_sw)
+                if(node->client->titlebar.position && node->client->titlebar_sw)
                 {
                     xcb_configure_window(globalconf.connection,
-                                         client->titlebar_sw->window,
+                                         node->client->titlebar_sw->window,
                                          XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                                          config_win_vals);
-                    config_win_vals[0] = client->titlebar_sw->window;
+                    config_win_vals[0] = node->client->titlebar_sw->window;
                 }
-                xcb_configure_window(globalconf.connection, client->win,
+                xcb_configure_window(globalconf.connection, node->client->win,
                                      XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                                      config_win_vals);
-                config_win_vals[0] = client->win;
+                config_win_vals[0] = node->client->win;
             }
-        }
-        if(c->layer == layer)
-        {
-            if(c->titlebar.position && c->titlebar_sw)
-            {
-                xcb_configure_window(globalconf.connection, c->titlebar_sw->window,
-                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[0] = c->titlebar_sw->window;
-            }
-            xcb_configure_window(globalconf.connection, c->win,
-                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                 config_win_vals);
-            config_win_vals[0] = c->win;
-        }
-    }
 }
 
 /** Manage a new client
@@ -653,6 +642,7 @@ client_unmanage(client_t *c)
     /* remove client everywhere */
     client_list_detach(&globalconf.clients, c);
     focus_client_delete(c);
+    stack_client_delete(c);
     for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
         untag_client(c, tag);
 
