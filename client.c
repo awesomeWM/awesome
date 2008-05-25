@@ -534,7 +534,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
          * maximized */
         if(c->ismoving || c->isfloating
            || layout_get_current(new_screen) == layout_floating)
+        {
             titlebar_update_geometry_floating(c);
+            c->f_geometry = geometry;
+        }
 
         xcb_configure_window(globalconf.connection, c->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y |
