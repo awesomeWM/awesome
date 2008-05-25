@@ -937,10 +937,15 @@ luaA_client_tag(lua_State *L)
     client_t **c = luaL_checkudata(L, 1, "client");
     tag_t **tag = luaL_checkudata(L, 2, "tag");
     bool tag_the_client = luaA_checkboolean(L, 3);
+
+    if((*tag)->screen != (*c)->screen)
+        luaL_error(L, "tag and client are on different screens");
+
     if(tag_the_client)
         tag_client(*c, *tag);
     else
         untag_client(*c, *tag);
+
     return 0;
 }
 
