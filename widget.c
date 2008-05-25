@@ -176,16 +176,14 @@ luaA_widget_new(lua_State *L)
 
     type = luaA_getopt_string(L, 1, "type", NULL);
 
-    /* \todo use type to call the widget_constructor_t and set ->tell*/
     if((wc = name_func_lookup(type, WidgetList)))
         w = wc(align);
     else
-        return 0;
+        luaL_error(L, "unkown widget type: %s", type);
 
     /* Set visible by default. */
     w->isvisible = true;
 
-    /* \todo check that the name is unique */
     w->name = luaA_name_init(L);
 
     return luaA_widget_userdata_new(w);
