@@ -228,6 +228,8 @@ mouse_client_move(int snap)
     if(!(grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection, grab_pointer_c, NULL)))
         return;
 
+    c->ismax = false;
+
     p_delete(&grab_pointer_r);
 
     query_pointer_r = xcb_query_pointer_reply(globalconf.connection, query_pointer_c, NULL);
@@ -343,6 +345,7 @@ mouse_client_resize(void)
     {
         ocx = c->geometry.x;
         ocy = c->geometry.y;
+        c->ismax = false;
 
         sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
     }

@@ -159,11 +159,11 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
 
             p_delete(&text);
 
-            if(c->isfloating)
+            if(c->isfloating || c->ismax)
                 draw_circle(statusbar->ctx, w->area.x + icon_width + box_width * i,
                             w->area.y,
                             (globalconf.font->height + 2) / 4,
-                            false, statusbar->colors.fg);
+                            c->ismax, statusbar->colors.fg);
             i++;
         }
 

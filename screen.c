@@ -143,7 +143,7 @@ move_client_to_screen(client_t *c, int new_screen, bool doresize)
     /* resize the windows if it's floating */
     if(doresize && old_screen != c->screen)
     {
-        area_t new_f_geometry;
+        area_t new_geometry, new_f_geometry;
         new_f_geometry = c->f_geometry;
 
         to = screen_get_area(c->screen, NULL, NULL);
@@ -163,8 +163,42 @@ move_client_to_screen(client_t *c, int new_screen, bool doresize)
         if(new_f_geometry.y + new_f_geometry.height >= to.y + to.height)
             new_f_geometry.y = to.y + to.height - new_f_geometry.height - 2 * c->border;
 
+        if(c->ismax)
+        {
+            new_geometry = c->geometry;
+
+            /* compute new coords in new screen */
+            new_geometry.x = (c->geometry.x - from.x) + to.x;
+            new_geometry.y = (c->geometry.y - from.y) + to.y;
+
+            /* check that new coords are still in the screen */
+            if(new_geometry.width > to.width)
+                new_geometry.width = to.width;
+            if(new_geometry.height > to.height)
+                new_geometry.height = to.height;
+            if(new_geometry.x + new_geometry.width >= to.x + to.width)
+                new_geometry.x = to.x + to.width - new_geometry.width - 2 * c->border;
+            if(new_geometry.y + new_geometry.height >= to.y + to.height)
+                new_geometry.y = to.y + to.height - new_geometry.height - 2 * c->border;
+
+            /* compute new coords for max in new screen */
+            c->m_geometry.x = (c->m_geometry.x - from.x) + to.x;
+            c->m_geometry.y = (c->m_geometry.y - from.y) + to.y;
+
+            /* check that new coords are still in the screen */
+            if(c->m_geometry.width > to.width)
+                c->m_geometry.width = to.width;
+            if(c->m_geometry.height > to.height)
+                c->m_geometry.height = to.height;
+            if(c->m_geometry.x + c->m_geometry.width >= to.x + to.width)
+                c->m_geometry.x = to.x + to.width - c->m_geometry.width - 2 * c->border;
+            if(c->m_geometry.y + c->m_geometry.height >= to.y + to.height)
+                c->m_geometry.y = to.y + to.height - c->m_geometry.height - 2 * c->border;
+
+            client_resize(c, new_geometry, false);
+        }
         /* if floating, move to this new coords */
-        if(c->isfloating)
+        else if(c->isfloating)
             client_resize(c, new_f_geometry, false);
         /* otherwise just register them */
         else

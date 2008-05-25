@@ -536,7 +536,8 @@ client_resize(client_t *c, area_t geometry, bool hints)
            || layout_get_current(new_screen) == layout_floating)
         {
             titlebar_update_geometry_floating(c);
-            c->f_geometry = geometry;
+            if(!c->ismax)
+                c->f_geometry = geometry;
         }
 
         xcb_configure_window(globalconf.connection, c->win,
@@ -567,6 +568,11 @@ client_setfloating(client_t *c, bool floating, layer_t layer)
     {
         if((c->isfloating = floating))
             client_resize(c, c->f_geometry, false);
+        else if(c->ismax)
+        {
+            c->ismax = false;
+            client_resize(c, c->m_geometry, false);
+        }
         if(client_isvisible(c, c->screen))
             globalconf.screens[c->screen].need_arrange = true;
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);

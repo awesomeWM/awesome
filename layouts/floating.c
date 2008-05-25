@@ -31,7 +31,7 @@ layout_floating(int screen)
     client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(client_isvisible(c, screen))
+        if(client_isvisible(c, screen) && !c->ismax)
             client_resize(c, c->f_geometry, false);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
