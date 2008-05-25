@@ -430,7 +430,6 @@ luaA_statusbar_new(lua_State *L)
 
     *sb = p_new(statusbar_t, 1);
 
-    /* \todo check that the name is unique */
     (*sb)->name = luaA_name_init(L);
 
     lua_getfield(L, 1, "fg");
