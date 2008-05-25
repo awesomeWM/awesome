@@ -46,7 +46,7 @@ arrange(int screen)
     Client *c;
     Layout *curlay = layout_get_current(screen);
     unsigned int dui;
-    int di, x, y, phys_screen = screen_virttophys(screen);
+    int di, x, y, fscreen, phys_screen = screen_virttophys(screen);
     Window rootwin, childwin;
 
     for(c = globalconf.clients; c; c = c->next)
@@ -73,11 +73,6 @@ arrange(int screen)
                 client_stack(globalconf.focus->client);
         }
 
-    /* if we have a valid client that could be focused but currently no window
-     * are focused, then set the focus on this window */
-    if((c = focus_get_current_client(screen)) && globalconf.focus->client != c)
-        client_focus(c, screen, True);
-
     /* check that the mouse is on a window or not */
     if(XQueryPointer(globalconf.display,
                      RootWindow(globalconf.display, phys_screen),
@@ -86,8 +81,21 @@ arrange(int screen)
        if(rootwin == None || childwin == None || childwin == rootwin)
            window_root_grabbuttons(phys_screen);
 
-       globalconf.pointer_x = x;
-       globalconf.pointer_y = y;
+        globalconf.pointer_x = x;
+        globalconf.pointer_y = y;
+
+        /* no window have focus, let's try to see if mouse is on
+         * the screen we just rearranged */
+        if(!globalconf.focus->client)
+        {
+            fscreen = screen_get_bycoord(globalconf.screens_info,
+                                         screen, x, y);
+            /* if the mouse in on the same screen we just rearranged, and no
+             * client are currently focused, pick the first one in history */
+            if(fscreen == screen
+               && (c = focus_get_current_client(screen)))
+                   client_focus(c, screen, True);
+        }
     }
 
     /* reset status */
