@@ -30,7 +30,7 @@
 #define WIDGET_CACHE_TAGS           1<<2
 #define WIDGET_CACHE_ALL            (WIDGET_CACHE_CLIENTS | WIDGET_CACHE_LAYOUTS | WIDGET_CACHE_TAGS)
 
-typedef widget_t *(WidgetConstructor)(alignment_t);
+typedef widget_t *(widget_constructor_t)(alignment_t);
 
 void widget_invalidate_cache(int, int);
 int widget_calculate_offset(int, int, int, int);
@@ -39,12 +39,12 @@ widget_t * widget_getbyname(const char *);
 void widget_invalidate_statusbar_bywidget(widget_t *);
 void widget_tell_managestatus(widget_t *, widget_tell_status_t, const char *);
 
-WidgetConstructor taglist_new;
-WidgetConstructor textbox_new;
-WidgetConstructor iconbox_new;
-WidgetConstructor progressbar_new;
-WidgetConstructor graph_new;
-WidgetConstructor tasklist_new;
+widget_constructor_t taglist_new;
+widget_constructor_t textbox_new;
+widget_constructor_t iconbox_new;
+widget_constructor_t progressbar_new;
+widget_constructor_t graph_new;
+widget_constructor_t tasklist_new;
 
 #endif
 

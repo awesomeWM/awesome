@@ -168,7 +168,7 @@ luaA_widget_new(lua_State *L)
 {
     const char *type;
     widget_t *w;
-    WidgetConstructor *wc;
+    widget_constructor_t *wc;
     alignment_t align;
 
     luaA_checktable(L, 1);
@@ -176,7 +176,7 @@ luaA_widget_new(lua_State *L)
 
     type = luaA_getopt_string(L, 1, "type", NULL);
 
-    /* \todo use type to call the WidgetConstructor and set ->tell*/
+    /* \todo use type to call the widget_constructor_t and set ->tell*/
     if((wc = name_func_lookup(type, WidgetList)))
         w = wc(align);
     else

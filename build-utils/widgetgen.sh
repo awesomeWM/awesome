@@ -7,7 +7,7 @@ echo "{"
 for file in ${top_srcdir}/widget.h
 do
     echo "    /* $file */"
-    grep '^WidgetConstructor ' "$file" | cut -d' ' -f2 | cut -d\; -f1 | while read widget
+    grep '^widget_constructor_t ' "$file" | cut -d' ' -f2 | cut -d\; -f1 | while read widget
     do
         shortname=$(echo $widget | cut -d_ -f1)
         echo "    {\"$shortname\", $widget},"
