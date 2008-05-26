@@ -1,3 +1,24 @@
+/*
+ * lua.c - Lua configuration management
+ *
+ * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
+
 #include <stdio.h>
 #include <unistd.h>
 
@@ -20,6 +41,7 @@
 #include "layouts/tile.h"
 
 extern awesome_t globalconf;
+
 extern bool running;
 extern const name_func_link_t FloatingPlacementList[];
 
@@ -35,7 +57,6 @@ extern const struct luaL_reg awesome_widget_meta[];
 extern const struct luaL_reg awesome_statusbar_methods[];
 extern const struct luaL_reg awesome_statusbar_meta[];
 
-/* Static */
 static void
 __luaA_keystore(keybinding_t *key, const char *str)
 {
@@ -54,6 +75,12 @@ __luaA_keystore(keybinding_t *key, const char *str)
     }
 }
 
+/** Define a global mouse binding. This binding will be available wehn you
+ * click on root window.
+ * \param A table with modifiers keys.
+ * \param A mouse button number.
+ * \param A function to execute.
+ */
 static int
 luaA_mouse(lua_State *L)
 {
@@ -86,6 +113,11 @@ luaA_mouse(lua_State *L)
     return 0;
 }
 
+/** Define a global key binding. This key binding will always be available.
+ * \param A table with modifier keys.
+ * \param A key name.
+ * \param A function to execute.
+ */
 static int
 luaA_key(lua_State *L)
 {
@@ -119,6 +151,10 @@ luaA_key(lua_State *L)
     return 0;
 }
 
+/** Set the floating placement algorithm. This will be used to compute the
+ * initial floating position of floating windows.
+ * \param An algorith name, either `none', `smart' or `mouse'.
+ */
 static int
 luaA_floating_placement_set(lua_State *L)
 {
@@ -127,6 +163,8 @@ luaA_floating_placement_set(lua_State *L)
     return 0;
 }
 
+/** Quit awesome.
+ */
 static int
 luaA_quit(lua_State *L __attribute__ ((unused)))
 {
@@ -134,6 +172,10 @@ luaA_quit(lua_State *L __attribute__ ((unused)))
     return 0;
 }
 
+/** Execute another application, probably a window manager, to replace
+ * awesome.
+ * \param The command line to execute.
+ */
 static int
 luaA_exec(lua_State *L)
 {
@@ -150,6 +192,8 @@ luaA_exec(lua_State *L)
     return 0;
 }
 
+/** Restart awesome.
+ */
 static int
 luaA_restart(lua_State *L __attribute__ ((unused)))
 {
@@ -157,6 +201,11 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
     return 0;
 }
 
+/** Set the screen padding. This can be used to define margin around the
+ * screen. awesome will not use this area.
+ * \param A table with a list of margin for `right', `left', `top' and
+ * `bottom'.
+ */
 static int
 luaA_padding_set(lua_State *L)
 {
@@ -175,6 +224,11 @@ luaA_padding_set(lua_State *L)
     return 0;
 }
 
+/** Define if awesome should respect applications size hints when resizing
+ * windows in tiled mode. If you set this to true, you will experience gaps
+ * between windows, but they will have the best size they can have.
+ * \param A boolean value, true to enable, false to disable.
+ */
 static int
 luaA_resizehints_set(lua_State *L)
 {
@@ -182,6 +236,9 @@ luaA_resizehints_set(lua_State *L)
     return 0;
 }
 
+/** Get the screen count.
+ * \return The screen count, at least 1.
+ */
 static int
 luaA_screen_count(lua_State *L)
 {
@@ -189,6 +246,9 @@ luaA_screen_count(lua_State *L)
     return 1;
 }
 
+/** Give the focus to a screen.
+ * \param A screen number
+ */
 static int
 luaA_screen_focus(lua_State *L)
 {
@@ -216,7 +276,10 @@ luaA_screen_coords_get(lua_State *L)
     return 1;
 }
 
-/* Hooks */
+/** Set the function called each time a client gets focus. This function is
+ * called with the client object as argument.
+ * \param A function to call each time a client gets focus.
+ */
 static int
 luaA_hooks_focus(lua_State *L)
 {
@@ -227,6 +290,10 @@ luaA_hooks_focus(lua_State *L)
     return 0;
 }
 
+/** Set the function called each time a client loses focus. This function is
+ * called with the client object as argument.
+ * \param A function to call each time a client loses focus.
+ */
 static int
 luaA_hooks_unfocus(lua_State *L)
 {
@@ -237,6 +304,10 @@ luaA_hooks_unfocus(lua_State *L)
     return 0;
 }
 
+/** Set the function called each time a new client appears. This function is
+ * called with the client object as argument
+ * \param A function to call on each new client.
+ */
 static int
 luaA_hooks_newclient(lua_State *L)
 {
@@ -247,6 +318,9 @@ luaA_hooks_newclient(lua_State *L)
     return 0;
 }
 
+/** Set the function called each time the mouse enter a new window. This
+ * function is called with the client object as argument.
+ */
 static int
 luaA_hooks_mouseover(lua_State *L)
 {
@@ -257,6 +331,10 @@ luaA_hooks_mouseover(lua_State *L)
     return 0;
 }
 
+/** Set the function called on each screen arrange. This function is called
+ * with the screen number as argument.
+ * \param A function to call on each screen arrange.
+ */
 static int
 luaA_hooks_arrange(lua_State *L)
 {
@@ -267,6 +345,10 @@ luaA_hooks_arrange(lua_State *L)
     return 0;
 }
 
+/** Set the function called on each title update. This function is called with
+ * the client object as argument.
+ * \param A function to call on each title update of each client.
+ */
 static int
 luaA_hooks_titleupdate(lua_State *L)
 {
@@ -274,6 +356,36 @@ luaA_hooks_titleupdate(lua_State *L)
     if(globalconf.hooks.titleupdate)
         luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.titleupdate);
     globalconf.hooks.titleupdate = luaL_ref(L, LUA_REGISTRYINDEX);
+    return 0;
+}
+
+/** Set default font.
+ * \param A string with a font name in Pango format.
+ */
+static int
+luaA_font_set(lua_State *L)
+{
+    const char *font = luaL_checkstring(L, 1);
+    draw_font_delete(&globalconf.font);
+    globalconf.font = draw_font_new(globalconf.connection,
+                                    globalconf.default_screen, font);
+    return 0;
+}
+
+/** Set default colors.
+ * \param A table with `fg' and `bg' elements, containing colors.
+ */
+static int
+luaA_colors_set(lua_State *L)
+{
+    const char *fg, *bg;
+    luaA_checktable(L, 1);
+    if((fg = luaA_getopt_string(L, 1, "fg", NULL)))
+        draw_color_new(globalconf.connection, globalconf.default_screen,
+                       fg, &globalconf.colors.fg);
+    if((bg = luaA_getopt_string(L, 1, "bg",NULL)))
+        draw_color_new(globalconf.connection, globalconf.default_screen,
+                       bg, &globalconf.colors.bg);
     return 0;
 }
 
@@ -289,30 +401,6 @@ luaA_openlib(lua_State *L, const char *name,
 
     luaL_register(L, NULL, meta);
     luaL_register(L, name, methods);
-}
-
-static int
-luaA_font_set(lua_State *L)
-{
-    const char *font = luaL_checkstring(L, 1);
-    draw_font_delete(&globalconf.font);
-    globalconf.font = draw_font_new(globalconf.connection,
-                                    globalconf.default_screen, font);
-    return 0;
-}
-
-static int
-luaA_colors_set(lua_State *L)
-{
-    const char *fg, *bg;
-    luaA_checktable(L, 1);
-    if((fg = luaA_getopt_string(L, 1, "fg", NULL)))
-        draw_color_new(globalconf.connection, globalconf.default_screen,
-                       fg, &globalconf.colors.fg);
-    if((bg = luaA_getopt_string(L, 1, "bg",NULL)))
-        draw_color_new(globalconf.connection, globalconf.default_screen,
-                       bg, &globalconf.colors.bg);
-    return 0;
 }
 
 bool
