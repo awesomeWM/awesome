@@ -532,6 +532,11 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         tmp = d->border_padding;
         d->border_padding = atoi(new_value);
     }
+    else if(!a_strcmp(property, "border_width"))
+    {
+        tmp = d->border_width;
+        d->border_width = atoi(new_value);
+    }
     else if(!a_strcmp(property, "width"))
     {
         tmp = d->width;
