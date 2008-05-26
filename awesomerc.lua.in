@@ -73,7 +73,7 @@ myiconbox:set("image", "@iconsdir@/awesome16.png")
 mylayoutbox = {}
 for s = 1, awesome.screen_count() do
     mylayoutbox[s] = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
-    mylayoutbox[s]:set("image", "@iconsdir@/layouts/tile.png")
+    mylayoutbox[s]:set("image", "@iconsdir@/layouts/tilew.png")
 end
 
 -- Create a statusbar for each screen and add it
