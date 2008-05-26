@@ -66,78 +66,28 @@ typedef struct
 } Data;
 
 void add_data(Data *, const char *);
+static void set_new_p_color(xcolor_t **, char *);
+/*static bool check_settings(Data *, int);*/
 
-static widget_tell_status_t
-widget_set_color_for_data(xcolor_t *color, const char *new_value, int data_items, char ** data_title)
+static void
+set_new_p_color(xcolor_t **ppcolor, char *new_color)
 {
-    char *title, *setting, *new_val;
-    int i;
-    new_val = strdup(new_value);
-    title = strtok(new_val, " ");
-    if(!(setting = strtok(NULL, " ")))
+    bool flag = false;
+    if(!*ppcolor)
     {
-        p_delete(&new_val);
-        return WIDGET_ERROR_NOVALUE;
+        flag = true; /* p_delete && restore to NULL, if draw_color_new unsuccessful */
+        *ppcolor = p_new(xcolor_t, 1);
     }
-    for(i = 0; i < data_items; i++)
-        if(!a_strcmp(title, data_title[i]))
-        {
-            if(draw_color_new(globalconf.connection,
-                              globalconf.default_screen,
-                              setting, &color[i]))
-            {
-                p_delete(&new_val);
-                return WIDGET_NOERROR;
-            }
-            else
-            {
-                p_delete(&new_val);
-                return WIDGET_ERROR_FORMAT_COLOR;
-            }
-        }
-    p_delete(&new_val);
-    return WIDGET_ERROR_FORMAT_SECTION;
-}
-
-static widget_tell_status_t
-widget_set_color_pointer_for_data(xcolor_t **color, const char *new_value, int data_items, char ** data_title)
-{
-    char *title, *setting;
-    int i;
-    bool flag;
-    char *new_val = strdup(new_value);
-    title = strtok(new_val, " ");
-    if(!(setting = strtok(NULL, " ")))
+    if(!(draw_color_new(globalconf.connection,
+                    globalconf.default_screen,
+                    new_color, *ppcolor)))
     {
-        p_delete(&new_val);
-        return WIDGET_ERROR_NOVALUE;
-    }
-    for(i = 0; i < data_items; i++)
-        if(!a_strcmp(title, data_title[i]))
+        if(flag) /* restore */
         {
-            flag = false;
-            if(!color[i])
-            {
-                flag = true; /* p_delete && restore to NULL, if draw_color_new unsuccessful */
-                color[i] = p_new(xcolor_t, 1);
-            }
-            if(!(draw_color_new(globalconf.connection,
-                                globalconf.default_screen,
-                                setting, color[i])))
-            {
-                if(flag) /* restore */
-                {
-                    p_delete(&color[i]);
-                    color[i] = NULL;
-                }
-                p_delete(&new_val);
-                return WIDGET_ERROR_FORMAT_COLOR;
-            }
-            p_delete(&new_val);
-            return WIDGET_NOERROR;
+            p_delete(ppcolor);
+            *ppcolor = NULL;
         }
-    p_delete(&new_val);
-    return WIDGET_ERROR_FORMAT_SECTION;
+    }
 }
 
 /*static bool*/
@@ -486,14 +436,11 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     char *title, *setting;
     char *new_val;
     float ftmp;
-    bool btmp;
+    bool btmp, found;
 
     if(new_value == NULL)
         return WIDGET_ERROR_NOVALUE;
-    else if(!a_strcmp(property, "add_data"))
-        add_data(d, new_value);
-    else if(!d->data_items)
-        return WIDGET_ERROR_CUSTOM; /* no error printed / no need to..? */
+    /* seperate for save some cpu cyles (could be put into next else if */
     else if(!a_strcmp(property, "data"))
     {
         new_val = a_strdup(new_value);
@@ -511,11 +458,23 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
                 p_delete(&new_val);
                 return WIDGET_NOERROR;
             }
+        /* no section found -> create one */
+        add_data(d, title);
+        percent = atoi(setting);
+        d->percent[d->data_items - 1] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
         p_delete(&new_val);
-        return WIDGET_ERROR_FORMAT_SECTION;
+        return WIDGET_NOERROR;
     }
-    else if(!a_strcmp(property, "reverse"))
+    /* following properties need a datasection */
+    else if(!a_strcmp(property, "fg")
+            || !a_strcmp(property, "fg_off")
+            || !a_strcmp(property, "bg")
+            || !a_strcmp(property, "bordercolor")
+            || !a_strcmp(property, "fg_center")
+            || !a_strcmp(property, "fg_end")
+            || !a_strcmp(property, "reverse"))
     {
+        /* check if this section is defined alrady */
         new_val = a_strdup(new_value);
         title = strtok(new_val, " ");
         if(!(setting = strtok(NULL, " ")))
@@ -523,30 +482,41 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
             p_delete(&new_val);
             return WIDGET_ERROR_NOVALUE;
         }
-        for(i = 0; i < d->data_items; i++)
+        for(found = false, i = 0; i < d->data_items; i++)
+        {
             if(!a_strcmp(title, d->data_title[i]))
             {
-                d->reverse[i] = a_strtobool(setting);
-                p_delete(&new_val);
-                return WIDGET_NOERROR;
+                found = true;
+                break;
             }
+        }
+        /* no section found -> create one */
+        if(!found)
+            add_data(d, title);
+
+        /* change values accordingly... */
+        if(!a_strcmp(property, "fg"))
+            draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg[i]));
+        else if(!a_strcmp(property, "bg"))
+            draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->bg[i]));
+        else if(!a_strcmp(property, "fg_off"))
+            draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg_off[i]));
+        else if(!a_strcmp(property, "bordercolor"))
+            draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->bordercolor[i]));
+        else if(!a_strcmp(property, "fg_center"))
+            set_new_p_color(&(d->pfg_center[i]), setting);
+        else if(!a_strcmp(property, "fg_end"))
+            set_new_p_color(&(d->pfg_end[i]), setting);
+        else if(!a_strcmp(property, "reverse"))
+            d->reverse[i] = a_strtobool(setting);
+
         p_delete(&new_val);
-        return WIDGET_ERROR_FORMAT_SECTION;
+        return WIDGET_NOERROR;
     }
-    else if(!a_strcmp(property, "fg"))
-        return widget_set_color_for_data(d->fg, new_value, d->data_items, d->data_title);
-    else if(!a_strcmp(property, "fg_off"))
-        return widget_set_color_for_data(d->fg_off, new_value, d->data_items, d->data_title);
-    else if(!a_strcmp(property, "bg"))
-        return widget_set_color_for_data(d->bg, new_value, d->data_items, d->data_title);
-    else if(!a_strcmp(property, "bordercolor"))
-        return widget_set_color_for_data(d->bordercolor, new_value, d->data_items, d->data_title);
-    else if(!a_strcmp(property, "fg_center"))
-        return widget_set_color_pointer_for_data(d->pfg_center, new_value, d->data_items, d->data_title);
-    else if(!a_strcmp(property, "fg_end"))
-        return widget_set_color_pointer_for_data(d->pfg_end, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "gap"))
+    {
         d->gap = atoi(new_value);
+    }
     else if(!a_strcmp(property, "ticks_count"))
     {
         tmp = d->ticks_count;
