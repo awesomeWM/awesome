@@ -53,10 +53,14 @@ for i, line in ipairs(ilines) do
         else
             local fctname, fctdef
             _, _, fctname, fctdef = line:find("\"(.+)\", (.+) },")
-            if fctname and function_doc[fctdef] then
+            if fctname and not fctname:find("^__") then
                 if libtype == "meta" then sep = ":" else sep = "." end
                 print("*" .. libname .. sep .. fctname ..  "*::")
-                print(function_doc[fctdef]:comment_clean())
+                if function_doc[fctdef] then
+                    print(function_doc[fctdef]:comment_clean())
+                else
+                    print("This function is not yet documented.")
+                end
                 print()
             end
         end
