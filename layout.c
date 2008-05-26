@@ -94,7 +94,8 @@ arrange(int screen)
     globalconf.screens[screen].need_arrange = false;
 
     /* call hook */
-    luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 0);
+    lua_pushnumber(globalconf.L, screen + 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1);
 }
 
 /** Refresh the screen disposition

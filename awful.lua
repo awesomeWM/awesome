@@ -91,9 +91,9 @@ function screen_focus(i)
 end
 
 -- Return a table with all visible tags
-function tag_selectedlist()
+function tag_selectedlist(s)
     local idx = 1
-    local screen = mouse.screen_get()
+    local screen = s or mouse.screen_get()
     local tags = tag.get(screen)
     local vtags = {}
     for i, t in ipairs(tags) do
@@ -107,8 +107,8 @@ end
 
 -- Return only the first element of all visible tags,
 -- so that's the first visible tags.
-function tag_selected()
-    return tag_selectedlist()[1]
+function tag_selected(s)
+    return tag_selectedlist(s)[1]
 end
 
 -- Set master width factor
@@ -223,8 +223,8 @@ function client_togglefloating(c)
     end
 end
 
-function layout_get()
-    local t = tag_selected()
+function layout_get(screen)
+    local t = tag_selected(screen)
     if t then
         return t:layout_get()
     end
