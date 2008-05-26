@@ -489,8 +489,6 @@ progressbar_new(alignment_t align)
     Data *d;
     char *color;
     int i;
-    cfg_t *cfg;
-
 
     w = p_new(widget_t, 1);
     widget_common_new(w);

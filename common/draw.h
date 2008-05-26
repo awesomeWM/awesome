@@ -25,8 +25,6 @@
 #include <cairo.h>
 #include <pango/pangocairo.h>
 
-#include <confuse.h>
-
 #include <xcb/xcb.h>
 
 #include "config.h"

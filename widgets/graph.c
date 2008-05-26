@@ -377,7 +377,6 @@ graph_new(alignment_t align)
 {
     widget_t *w;
     Data *d;
-    cfg_t *cfg;
     char *color;
     int i;
     char *type;
