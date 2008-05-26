@@ -486,6 +486,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     char *title, *setting;
     char *new_val;
     float ftmp;
+    bool btmp;
 
     if(new_value == NULL)
         return WIDGET_ERROR_NOVALUE;
@@ -513,6 +514,25 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         p_delete(&new_val);
         return WIDGET_ERROR_FORMAT_SECTION;
     }
+    else if(!a_strcmp(property, "reverse"))
+    {
+        new_val = a_strdup(new_value);
+        title = strtok(new_val, " ");
+        if(!(setting = strtok(NULL, " ")))
+        {
+            p_delete(&new_val);
+            return WIDGET_ERROR_NOVALUE;
+        }
+        for(i = 0; i < d->data_items; i++)
+            if(!a_strcmp(title, d->data_title[i]))
+            {
+                d->reverse[i] = a_strtobool(setting);
+                p_delete(&new_val);
+                return WIDGET_NOERROR;
+            }
+        p_delete(&new_val);
+        return WIDGET_ERROR_FORMAT_SECTION;
+    }
     else if(!a_strcmp(property, "fg"))
         return widget_set_color_for_data(d->fg, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "fg_off"))
@@ -527,23 +547,38 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         return widget_set_color_pointer_for_data(d->pfg_end, new_value, d->data_items, d->data_title);
     else if(!a_strcmp(property, "gap"))
         d->gap = atoi(new_value);
+    else if(!a_strcmp(property, "ticks_count"))
+    {
+        tmp = d->ticks_count;
+        d->ticks_count = atoi(new_value);
+    }
+    else if(!a_strcmp(property, "ticks_gap"))
+    {
+        tmp = d->ticks_gap;
+        d->ticks_gap = atoi(new_value);
+    }
+    else if(!a_strcmp(property, "border_padding"))
+    {
+        tmp = d->border_padding;
+        d->border_padding = atoi(new_value);
+    }
     else if(!a_strcmp(property, "width"))
     {
         tmp = d->width;
         d->width = atoi(new_value);
-        /*if(!check_settings(d, widget->statusbar->height))*/
-        /*{*/
-            /*d->width = tmp; [> restore <]*/
-            /*return WIDGET_ERROR_CUSTOM;*/
-        /*}*/
     }
     else if(!a_strcmp(property, "height"))
     {
         ftmp = d->height;
         d->height = atof(new_value);
+    }
+    else if(!a_strcmp(property, "vertical"))
+    {
+        btmp = d->vertical;
+        d->vertical = a_strtobool(new_value);
         /*if(!check_settings(d, widget->statusbar->height))*/
         /*{*/
-            /*d->height = ftmp; [> restore <]*/
+            /*d->width = tmp; [> restore <]*/
             /*return WIDGET_ERROR_CUSTOM;*/
         /*}*/
     }
@@ -578,6 +613,7 @@ progressbar_new(alignment_t align)
 
     d->ticks_gap = 1;
     d->border_width = 1;
+    d->border_padding = 0;
     d->gap = 2;
 
     return w;
