@@ -36,6 +36,7 @@
 #include "titlebar.h"
 #include "lua.h"
 #include "stack.h"
+#include "mouse.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
 #include "common/xutil.h"
@@ -230,11 +231,10 @@ client_ban(client_t *c)
 /** Give focus to client, or to first client if c is NULL
  * \param c client
  * \param screen Screen ID
- * \param raise raise window if true
  * \return true if a window (even root) has received focus, false otherwise
  */
 bool
-client_focus(client_t *c, int screen, bool raise)
+client_focus(client_t *c, int screen)
 {
     int phys_screen;
 
@@ -261,8 +261,6 @@ client_focus(client_t *c, int screen, bool raise)
         titlebar_draw(c);
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
                             c->win, XCB_CURRENT_TIME);
-        if(raise)
-            client_stack(c);
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
         window_grabbuttons(c->win, c->phys_screen);
@@ -293,7 +291,7 @@ client_focus(client_t *c, int screen, bool raise)
  * relatively to the first matching in the list
  */
 void
-client_stack(client_t *c)
+client_raise(client_t *c)
 {
     uint32_t config_win_vals[2];
     client_node_t *node;
@@ -581,7 +579,7 @@ client_setfloating(client_t *c, bool floating, layer_t layer)
         {
             c->layer = c->oldlayer;
         }
-        client_stack(c);
+        client_raise(c);
         client_saveprops(c);
     }
 }
@@ -649,7 +647,7 @@ client_unmanage(client_t *c)
         untag_client(c, tag);
 
     if(globalconf.focus->client == c)
-        client_focus(NULL, c->screen, true);
+        client_focus(NULL, c->screen);
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win, ANY_MODIFIER);
     window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
@@ -1032,7 +1030,17 @@ static int
 luaA_client_focus_set(lua_State *L)
 {
     client_t **c = luaL_checkudata(L, 1, "client");
-    client_focus(*c, (*c)->screen, false);
+    client_focus(*c, (*c)->screen);
+    return 0;
+}
+
+/** Raise a client on top of others which are on the same layer.
+ */
+static int
+luaA_client_raise(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    client_raise(*c);
     return 0;
 }
 
@@ -1141,10 +1149,13 @@ const struct luaL_reg awesome_client_meta[] =
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
     { "focus_set", luaA_client_focus_set  },
+    { "raise", luaA_client_raise },
     { "redraw", luaA_client_redraw },
     { "floating_set", luaA_client_floating_set },
     { "floating_get", luaA_client_floating_get },
     { "icon_set", luaA_client_icon_set },
+    { "mouse_resize", luaA_client_mouse_resize },
+    { "mouse_move", luaA_client_mouse_move },
     { "__eq", luaA_client_eq },
     { "__tostring", luaA_client_tostring },
     { NULL, NULL }

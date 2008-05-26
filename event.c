@@ -48,7 +48,8 @@ extern awesome_t globalconf;
  * \param buttons buttons list to check for
  */
 static void
-event_handle_mouse_button_press(unsigned int button,
+event_handle_mouse_button_press(client_t *c,
+                                unsigned int button,
                                 unsigned int state,
                                 button_t *buttons)
 {
@@ -56,7 +57,15 @@ event_handle_mouse_button_press(unsigned int button,
 
     for(b = buttons; b; b = b->next)
         if(button == b->button && CLEANMASK(state) == b->mod && b->fct)
-            luaA_dofunction(globalconf.L, b->fct, 0);
+        {
+            if(c)
+            {
+                luaA_client_userdata_new(c);
+                luaA_dofunction(globalconf.L, b->fct, 1);
+            }
+            else
+                luaA_dofunction(globalconf.L, b->fct, 0);
+        }
 }
 
 /** Handle XButtonPressed events
@@ -130,34 +139,21 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     for(c = globalconf.clients; c; c = c->next)
         if(c->titlebar_sw && c->titlebar_sw->window == ev->event)
         {
-            if(!client_focus(c, c->screen, true))
-                client_stack(c);
-            if(CLEANMASK(ev->state) == XCB_NO_SYMBOL
-               && ev->detail == XCB_BUTTON_INDEX_1)
-                window_grabbuttons(c->win, c->phys_screen);
-            event_handle_mouse_button_press(ev->detail, ev->state,
+            event_handle_mouse_button_press(c, ev->detail, ev->state,
                                             globalconf.buttons.titlebar);
             return 0;
         }
 
     if((c = client_get_bywin(globalconf.clients, ev->event)))
     {
-        if(!client_focus(c, c->screen, true))
-            client_stack(c);
-        if(CLEANMASK(ev->state) == XCB_NO_SYMBOL
-           && ev->detail == XCB_BUTTON_INDEX_1)
-        {
-            xcb_allow_events(globalconf.connection, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
-            window_grabbuttons(c->win, c->phys_screen);
-        }
-        else
-            event_handle_mouse_button_press(ev->detail, ev->state, globalconf.buttons.client);
+        event_handle_mouse_button_press(c, ev->detail, ev->state, globalconf.buttons.client);
+        xcb_allow_events(globalconf.connection, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
     }
     else
         for(screen = 0; screen < nb_screen; screen++)
             if(xcb_aux_get_screen(connection, screen)->root == ev->event)
             {
-                event_handle_mouse_button_press(ev->detail, ev->state,
+                event_handle_mouse_button_press(NULL, ev->detail, ev->state,
                                                 globalconf.buttons.root);
                 return 0;
             }

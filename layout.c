@@ -84,7 +84,7 @@ arrange(int screen)
              * client are currently focused, pick the first one in history */
             if(fscreen == screen
                && (c = focus_get_current_client(screen)))
-                   client_focus(c, screen, true);
+                   client_focus(c, screen);
         }
 
         p_delete(&qp_r);

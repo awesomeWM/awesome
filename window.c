@@ -114,33 +114,19 @@ window_grabbuttons(xcb_window_t win, int phys_screen)
 {
     button_t *b;
 
-    /* Always grab the first mouse button. */
-    xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                    XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL);
-    xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                    XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL | XCB_MOD_MASK_LOCK);
-    xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                    XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL | globalconf.numlockmask);
-    xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                    XCB_BUTTON_INDEX_1, XCB_NO_SYMBOL | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
-
     for(b = globalconf.buttons.client; b; b = b->next)
     {
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod);
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | XCB_MOD_MASK_LOCK);
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask);
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
+                        XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
     }
 

@@ -28,8 +28,8 @@
 
 bool client_isvisible(client_t *, int);
 client_t * client_get_bywin(client_t *, xcb_window_t);
-bool client_focus(client_t *, int, bool);
-void client_stack(client_t *);
+bool client_focus(client_t *, int);
+void client_raise(client_t *);
 void client_ban(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int);

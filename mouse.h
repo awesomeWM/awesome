@@ -22,8 +22,10 @@
 #ifndef AWESOME_MOUSE_H
 #define AWESOME_MOUSE_H
 
-void mouse_client_move(int);
-void mouse_client_resize(void);
+#include <lua.h>
+
+int luaA_client_mouse_resize(lua_State *);
+int luaA_client_mouse_move(lua_State *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

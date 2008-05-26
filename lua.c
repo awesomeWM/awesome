@@ -195,7 +195,7 @@ luaA_screen_focus(lua_State *L)
     /* Our table begin at 0, Lua begins at 1 */
     int screen = luaL_checknumber(L, 1) - 1;
     luaA_checkscreen(screen);
-    client_focus(NULL, screen, true);
+    client_focus(NULL, screen);
     return 0;
 }
 

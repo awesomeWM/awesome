@@ -178,7 +178,7 @@ tasklist_button_press(widget_node_t *w, statusbar_t *statusbar,
                       xcb_button_press_event_t *ev)
 {
     button_t *b;
-    client_t *c, **lc;
+    client_t *c;
     Data *d = w->widget->data;
     int n = 0, box_width = 0, i, ci = 0;
 

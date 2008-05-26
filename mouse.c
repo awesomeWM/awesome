@@ -190,12 +190,12 @@ mouse_resizebar_new(int phys_screen, int border, area_t geometry,
 
 /** Move the focused window with the mouse.
  */
-void
-mouse_client_move(int snap)
+static void
+mouse_client_move(client_t *c, int snap)
 {
     int ocx, ocy, newscreen;
     area_t geometry;
-    client_t *c = globalconf.focus->client, *target;
+    client_t *target;
     layout_t *layout;
     simple_window_t *sw = NULL;
     draw_context_t *ctx;
@@ -206,9 +206,6 @@ mouse_client_move(int snap)
     xcb_query_pointer_reply_t *query_pointer_r = NULL, *mquery_pointer_r = NULL;
     xcb_query_pointer_cookie_t query_pointer_c;
     xcb_screen_t *s;
-
-    if(!c)
-        return;
 
     layout = layout_get_current(c->screen);
     s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
@@ -316,13 +313,12 @@ mouse_client_move(int snap)
  * \param screen Screen ID
  * \param arg Unused
  */
-void
-mouse_client_resize(void)
+static void
+mouse_client_resize(client_t *c)
 {
     int ocx = 0, ocy = 0, n;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
-    client_t *c = globalconf.focus->client;
     tag_t **curtags;
     layout_t *layout;
     area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry = { 0, 0, 0, 0, NULL, NULL };
@@ -333,14 +329,14 @@ mouse_client_resize(void)
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
     xcb_screen_t *s;
 
-    /* only handle floating and tiled layouts */
-    if(!c || c->isfixed)
+    if(c->isfixed)
         return;
 
     curtags = tags_get_current(c->screen);
     layout = curtags[0]->layout;
     s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
+    /* only handle floating and tiled layouts */
     if(layout == layout_floating || c->isfloating)
     {
         ocx = c->geometry.x;
@@ -457,6 +453,10 @@ mouse_client_resize(void)
     }
 }
 
+/** Set mouse coordinates.
+ * \param The x coordinates.
+ * \param The y coordinates.
+ */
 static int
 luaA_mouse_coords_set(lua_State *L)
 {
@@ -469,21 +469,31 @@ luaA_mouse_coords_set(lua_State *L)
     return 0;
 }
 
-static int
-luaA_mouse_client_resize(lua_State *L __attribute__ ((unused)))
+/** Resize a client with mouse.
+ */
+int
+luaA_client_mouse_resize(lua_State *L)
 {
-    mouse_client_resize();
+    client_t **c = luaL_checkudata(L, 1, "client");
+    mouse_client_resize(*c);
     return 0;
 }
 
-static int
-luaA_mouse_client_move(lua_State *L)
+/** Move a client with mouse.
+ * \param The pixel to snap.
+ */
+int
+luaA_client_mouse_move(lua_State *L)
 {
-    int snap = luaL_optnumber(L, 1, 8);
-    mouse_client_move(snap);
+    client_t **c = luaL_checkudata(L, 1, "client");
+    int snap = luaL_optnumber(L, 2, 8);
+    mouse_client_move(*c, snap);
     return 0;
 }
 
+/** Get the screen number where the mouse ic.
+ * \return The screen number.
+ */
 static int
 luaA_mouse_screen_get(lua_State *L)
 {
@@ -511,8 +521,6 @@ const struct luaL_reg awesome_mouse_lib[] =
 {
     { "screen_get", luaA_mouse_screen_get },
     { "coords_set", luaA_mouse_coords_set },
-    { "client_resize", luaA_mouse_client_resize },
-    { "client_move", luaA_mouse_client_move },
     { NULL, NULL }
 };
 

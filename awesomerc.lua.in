@@ -93,8 +93,9 @@ end
 awesome.mouse({ }, 3, function () awful.spawn(terminal) end)
 awesome.mouse({ }, 4, awful.tag.viewnext)
 awesome.mouse({ }, 5, awful.tag.viewprev)
-client.mouse({ modkey }, 1, mouse.client_move)
-client.mouse({ modkey }, 3, mouse.client_resize)
+client.mouse({ }, 1, function (c) c:focus_set() end)
+client.mouse({ modkey }, 1, function (c) c:mouse_move() end)
+client.mouse({ modkey }, 3, function (c) c:mouse_resize() end)
 -- }}}
 
 -- {{{ Key bindings
@@ -173,6 +174,7 @@ awesome.key({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, 
 -- {{{ Hooks
 -- Hook function to execute when focusing a client.
 function hook_focus(c)
+    c:raise()
     c:border_set({ width = 1, color = "white" })
 end
 
