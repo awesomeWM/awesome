@@ -4,7 +4,7 @@ awesomerc(5)
 NAME
 ----
 
-awesomerc - Configuration file for the 'awesome window manager'
+awesomerc - Configuration file for the awesome window manager
 
 SYNOPSIS
 --------
@@ -12,12 +12,15 @@ None.
 
 DESCRIPTION
 -----------
-
 The *awesomerc* file contains configuration informations for *awesome*. It can
 be used to configure the behaviour and look of awesome in a variety of ways.
+It can be assimilated as a Lua program/script run at startup by awesome.
+Therefore, it should use the awesome Lua API described in the API section.
+This file is read at startup.
 
-It is read at startup.
-
+AWESOME LUA API
+---------------
+include::apidocgen.txt[]
 
 SEE ALSO
 --------

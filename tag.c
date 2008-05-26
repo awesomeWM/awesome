@@ -289,8 +289,9 @@ luaA_tag_get(lua_State *L)
 }
 
 /** Create a new tag.
- * \param L Lua state.
- * \return One because there's one element, a user data.
+ * \param A table with at least a name attribute.
+ * Optionnal attributes are: mwfact, ncol, nmaster and layout.
+ * \return A new tag object.
  */
 static int
 luaA_tag_new(lua_State *L)

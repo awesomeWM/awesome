@@ -43,6 +43,7 @@ EXTRA_DIST += LICENSE
 EXTRA_DIST += STYLE
 doc_DATA   += STYLE
 
+EXTRA_DIST += build-utils/gendoc.lua
 
 EXTRA_DIST    += awful.lua
 dist_awful_DATA += awful.lua
@@ -194,9 +195,14 @@ endif
 SUFFIXES += .1.txt .1.xml
 SUFFIXES += .5.txt .5.xml
 if HAVE_ASCIIDOC
+CLEANFILES    += apidocgen.txt
+BUILT_SOURCES += apidocgen.txt
+APIDOCSOURCES=$(shell grep -l 'const struct luaL_reg' $(awesome_SOURCES))
+apidocgen.txt: $(APIDOCSOURCES) build-utils/gendoc.lua
+	cat $(APIDOCSOURCES) | $(top_srcdir)/build-utils/gendoc.lua > apidocgen.txt
 .1.txt.1.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
-awesomerc.5.xml:
+awesomerc.5.xml: apidocgen.txt
 .5.txt.5.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
 endif
