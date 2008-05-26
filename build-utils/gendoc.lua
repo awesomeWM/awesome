@@ -57,6 +57,7 @@ for i, line in ipairs(ilines) do
                 if libtype == "meta" then sep = ":" else sep = "." end
                 print("*" .. libname .. sep .. fctname ..  "*::")
                 print(function_doc[fctdef]:comment_clean())
+                print()
             end
         end
     end
