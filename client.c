@@ -469,11 +469,11 @@ client_geometry_hints(client_t *c, area_t geometry)
     return geometry;
 }
 
-/** Resize client window
- * \param c client to resize
- * \param geometry new window geometry
- * \param hints use resize hints
- * \param return true if resize has been done
+/** Resize client window.
+ * \param c Client to resize.
+ * \param geometry New window geometry.
+ * \param hints Use size hints.
+ * \return True if the client has been resized.
  */
 bool
 client_resize(client_t *c, area_t geometry, bool hints)
@@ -482,16 +482,15 @@ client_resize(client_t *c, area_t geometry, bool hints)
     area_t area;
     layout_t *layout = layout_get_current(c->screen);
     bool resized = false;
+    /* Values to configure a window is an array where values are
+     * stored according to 'value_mask' */
+    uint32_t values[5];
 
     if(!c->ismoving && !c->isfloating && layout != layout_floating)
     {
         titlebar_update_geometry(c, geometry);
         geometry = titlebar_geometry_remove(&c->titlebar, geometry);
     }
-
-    /* Values to configure a window is an array where values are
-     * stored according to 'value_mask' */
-    uint32_t values[5];
 
     if(hints)
         geometry = client_geometry_hints(c, geometry);
