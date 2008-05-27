@@ -199,7 +199,7 @@ CLEANFILES    += apidocgen.txt
 BUILT_SOURCES += apidocgen.txt
 APIDOCSOURCES=$(shell grep -l 'const struct luaL_reg' $(awesome_SOURCES))
 apidocgen.txt: $(APIDOCSOURCES) build-utils/gendoc.lua
-	cat $(APIDOCSOURCES) | $(top_srcdir)/build-utils/gendoc.lua > apidocgen.txt
+	cat $(APIDOCSOURCES) | $(LUA) $(top_srcdir)/build-utils/gendoc.lua > apidocgen.txt
 .1.txt.1.xml:
 	$(ASCIIDOC) -d manpage -b docbook -o $@ $<
 awesomerc.5.xml: apidocgen.txt

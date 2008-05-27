@@ -107,6 +107,10 @@ AC_PATH_PROG([WHOAMI], [whoami], [false])
 AS_IF([test "x$WHOAMI" = "xfalse"], [aw_whoami="???"], [aw_whoami=`$WHOAMI`])
 AC_DEFINE_UNQUOTED([AWESOME_COMPILE_BY], ["$aw_whoami"], [build user])
 
+AC_ARG_VAR([LUA], [Lua interpreter])
+AC_PATH_PROG([LUA], [lua], [:])
+test "x$LUA" = "x:" && AC_MSG_WARN([awesome compilation requires Lua])
+
 AS_AC_EXPAND(awesomelibdir, "$datarootdir/awesome/lib")
 AC_DEFINE_UNQUOTED([AWESOME_LUA_LIB_PATH], "${awesomelibdir}", [awesome lib path])
 
