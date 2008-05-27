@@ -29,6 +29,7 @@
 #include "window.h"
 #include "client.h"
 #include "screen.h"
+#include "layouts/magnifier.h"
 #include "layouts/tile.h"
 #include "layouts/max.h"
 #include "layouts/fibonacci.h"
@@ -56,9 +57,6 @@ arrange(int screen)
         else if(c->screen == screen)
             client_ban(c);
     }
-
-    if(curlay)
-        curlay(screen);
 
     qp_c = xcb_query_pointer_unchecked(globalconf.connection,
                                        xcb_aux_get_screen(globalconf.connection,
@@ -89,6 +87,9 @@ arrange(int screen)
 
         p_delete(&qp_r);
     }
+
+    if(curlay)
+        curlay(screen);
 
     /* reset status */
     globalconf.screens[screen].need_arrange = false;
