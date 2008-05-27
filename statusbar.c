@@ -348,6 +348,17 @@ luaA_statusbar_position_set(lua_State *L)
     return 0;
 }
 
+/** Get the statusbar position.
+ * \return The statusbar position.
+ */
+static int
+luaA_statusbar_position_get(lua_State *L)
+{
+    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
+    lua_pushstring(L, position_to_str((*sb)->position));
+    return 1;
+}
+
 static int
 luaA_statusbar_align_set(lua_State *L)
 {
@@ -504,6 +515,7 @@ const struct luaL_reg awesome_statusbar_meta[] =
 {
     { "widget_add", luaA_statusbar_widget_add },
     { "position_set", luaA_statusbar_position_set },
+    { "position_get", luaA_statusbar_position_get },
     { "align_set", luaA_statusbar_align_set },
     { "add", luaA_statusbar_add },
     { "remove", luaA_statusbar_remove },

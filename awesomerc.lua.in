@@ -95,8 +95,13 @@ mydebugbar = statusbar.new({ position = "off", name = "mydebugbar",
                             fg = "white", bg = "black" })
 mydebugbar:widget_add(mydebugbox)
 mydebugbar:add(1)
-awesome.key({ modkey }, "d", function () mydebugbar:position_set("bottom") end)
-awesome.key({ modkey, "Control" }, "d", function () mydebugbar:position_set("off") end)
+awesome.key({ modkey }, "d", function ()
+                                 if mydebugbar:position_get() == "off" then
+                                     mydebugbar:position_set("bottom")
+                                 else
+                                     mydebugbar:position_set("off")
+                                 end
+                             end)
 -- }}}
 
 -- {{{ Mouse bindings
@@ -166,9 +171,6 @@ awesome.key({ modkey, "Shift" }, "k", function () awful.client.swap(-1) end)
 awesome.key({ modkey, "Control" }, "j", function () awful.screen.focus(1) end)
 awesome.key({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end)
 awesome.key({ modkey, "Control" }, "space", function () awful.client.togglefloating() end)
-
--- Statubar manipulation
-awesome.key({ modkey }, "b", function () mystatusbar:position_set("off") end)
 
 -- Layout manipulation
 awesome.key({ modkey }, "l", function () awful.tag.incmwfact(0.05) end)
