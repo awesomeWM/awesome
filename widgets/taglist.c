@@ -123,17 +123,12 @@ taglist_draw(widget_node_t *w,
     client_t *sel = globalconf.focus->client;
     screen_t *vscreen = &globalconf.screens[statusbar->screen];
     draw_context_t *ctx = statusbar->ctx;
-    int i = 0;
+    int i = 0, prev_width = 0;
     area_t *area, rectangle = { 0, 0, 0, 0, NULL, NULL };
-    char **text;
+    char **text = NULL;
     taglist_drawn_area_t *tda;
 
-    w->area.width = 0;
-
-    w->area.x = widget_calculate_offset(statusbar->width, w->area.width,
-                                        offset, w->widget->align); 
-    w->area.y = 0;
-
+    w->area.width = w->area.y = 0;
 
     /* Lookup for our taglist_drawn_area.
      * This will be used to store area where we draw tag list for each
@@ -144,12 +139,15 @@ taglist_draw(widget_node_t *w,
     /* Oh, we did not find a drawn area for our statusbar. First time? */
     if(!tda)
     {
+        /** \todo delete this when the widget is removed from the statusbar */
         tda = p_new(taglist_drawn_area_t, 1);
         tda->statusbar = statusbar;
         taglist_drawn_area_list_push(&data->drawn_area, tda);
     }
 
-    text = p_new(char *, 1);
+    area_list_wipe(&tda->area);
+
+    /* First compute text and widget width */
     for(tag = vscreen->tags; tag; tag = tag->next, i++)
     {
         p_realloc(&text, i + 1);
@@ -158,16 +156,20 @@ taglist_draw(widget_node_t *w,
         text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
         *area = draw_text_extents(ctx->connection, ctx->phys_screen,
                                   globalconf.font, text[i]);
-        area->x = w->area.x + w->area.width;
-        area->height = statusbar->height;
-        area_list_append(&tda->area, area);
         w->area.width += area->width;
+        area_list_append(&tda->area, area);
     }
+
+    /* Now that we have widget width we can compute widget x coordinate */
+    w->area.x = widget_calculate_offset(statusbar->width, w->area.width,
+                                        offset, w->widget->align); 
 
     for(area = tda->area, tag = vscreen->tags, i = 0;
         tag && area;
         tag = tag->next, area = area->next, i++)
     {
+        area->x = w->area.x + prev_width;
+        prev_width += area->width;
         draw_text(ctx, globalconf.font, &statusbar->colors.fg, *area, text[i]);
         p_delete(&text[i]);
 
@@ -207,30 +209,33 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
             switch(statusbar->position)
             {
               default:
-                for(tag = vscreen->tags; tag; tag = tag->next, area = area->next)
+                for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
                     if(ev->event_x >= AREA_LEFT(*area)
                        && ev->event_x < AREA_RIGHT(*area))
                     {
                         luaA_tag_userdata_new(tag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
+                        return;
                     }
                 break;
               case Right:
-                for(tag = vscreen->tags; tag; tag = tag->next, area = area->next)
+                for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
                     if(ev->event_y >= AREA_LEFT(*area)
                        && ev->event_y < AREA_RIGHT(*area))
                     {
                         luaA_tag_userdata_new(tag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
+                        return;
                     }
                 break;
               case Left:
-                for(tag = vscreen->tags; tag; tag = tag->next, area = area->next)
+                for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
                     if(statusbar->width - ev->event_y >= AREA_LEFT(*area)
                        && statusbar->width - ev->event_y < AREA_RIGHT(*area))
                     {
                         luaA_tag_userdata_new(tag);
                         luaA_dofunction(globalconf.L, b->fct, 1);
+                        return;
                     }
                 break;
             }
