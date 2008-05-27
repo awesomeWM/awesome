@@ -181,8 +181,10 @@ end
 
 -- Hook function to exeucte when the mouse is over a client.
 function hook_mouseover(c)
-    -- Sloppy focus
-    c:focus_set()
+    -- Sloppy focus, but disabled for magnifier layout
+    if awful.layout.get(c:screen_get()) ~= "magnifier" then
+        c:focus_set()
+    end
 end
 
 -- Hook function to execute when a new client appears.
