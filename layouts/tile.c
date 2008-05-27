@@ -57,10 +57,7 @@ _tile(int screen, const position_t position)
 
     masterwin = MIN(n, curtags[0]->nmaster);
 
-    otherwin = n - masterwin;
-
-    if(otherwin < 0)
-        otherwin = 0;
+    otherwin = MAX(n - masterwin, 0);
 
     if(curtags[0]->nmaster)
         switch(position)
@@ -119,7 +116,9 @@ _tile(int screen, const position_t position)
             if(real_ncol)
                 win_by_col = otherwin / real_ncol;
 
-            if((i - curtags[0]->nmaster) && (i - curtags[0]->nmaster) % win_by_col == 0 && current_col < real_ncol - 1)
+            if((i - curtags[0]->nmaster)
+               && (i - curtags[0]->nmaster) % win_by_col == 0
+               && current_col < real_ncol - 1)
                 current_col++;
 
             if(current_col == real_ncol - 1)
