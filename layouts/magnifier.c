@@ -54,7 +54,9 @@ layout_magnifier(int screen)
     client_resize(focus, geometry, globalconf.resize_hints);
     client_raise(focus);
 
-    for(c = globalconf.clients; c; c = c->next)
+    for(c = client_list_prev_cycle(&globalconf.clients, focus);
+        c && c != focus;
+        c = client_list_prev_cycle(&globalconf.clients, c))
         if(IS_TILED(c, screen) && c != focus)
             n++;
 
@@ -67,7 +69,9 @@ layout_magnifier(int screen)
     geometry.height = area.height / n;
     geometry.width = area.width;
 
-    for(c = globalconf.clients; c; c = c->next)
+    for(c = client_list_prev_cycle(&globalconf.clients, focus);
+        c && c != focus;
+        c = client_list_prev_cycle(&globalconf.clients, c))
         if(IS_TILED(c, screen) && c != focus)
         {
             geometry.height -= 2 * c->border;
