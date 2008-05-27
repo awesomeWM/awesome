@@ -244,10 +244,6 @@ client_focus(client_t *c, int screen)
         /* if c is still NULL take next client in the stack */
         for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
 
-    /* if c is already the focused window, then stop */
-    if(c == globalconf.focus->client)
-        return false;
-
     /* unfocus current selected client */
     if(globalconf.focus->client)
         client_unfocus(globalconf.focus->client);
