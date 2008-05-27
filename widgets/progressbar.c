@@ -151,13 +151,13 @@ void add_data(Data *d, const char *new_data_title)
 
     /* initialize values for new data section */
     d->reverse[d->data_items - 1] = false;
-    d->fg[d->data_items - 1] = globalconf.colors.fg;
     d->data_title[d->data_items - 1] = a_strdup(new_data_title);
     d->percent[d->data_items - 1] = 0;
 
+    d->fg[d->data_items - 1] = globalconf.colors.fg;
     d->fg_off[d->data_items - 1] = globalconf.colors.bg;
     d->bg[d->data_items - 1] = globalconf.colors.bg;
-    d->bordercolor[d->data_items - 1] = d->fg[d->data_items];
+    d->bordercolor[d->data_items - 1] = globalconf.colors.fg;
     d->pfg_center[d->data_items - 1] = NULL;
     d->pfg_end[d->data_items - 1] = NULL;
 
@@ -440,7 +440,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
 
     if(new_value == NULL)
         return WIDGET_ERROR_NOVALUE;
-    /* seperate for save some cpu cyles (could be put into next else if */
+    /* seperate for saving some cpu cycles (could be put into next else if...) */
     else if(!a_strcmp(property, "data"))
     {
         new_val = a_strdup(new_value);
@@ -551,6 +551,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     {
         btmp = d->vertical;
         d->vertical = a_strtobool(new_value);
+        /*TODO:*/
         /*if(!check_settings(d, widget->statusbar->height))*/
         /*{*/
             /*d->width = tmp; [> restore <]*/
