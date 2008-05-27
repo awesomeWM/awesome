@@ -149,8 +149,8 @@ awesome.key({ modkey, "Shift" }, "q", awesome.quit)
 
 -- Client manipulation
 awesome.key({ modkey, "Shift" }, "c", function () client.focus_get():kill() end)
-awesome.key({ modkey }, "j", function () awful.client.focus(1) end)
-awesome.key({ modkey }, "k", function () awful.client.focus(-1) end)
+awesome.key({ modkey }, "j", function () awful.client.focus(1); client.focus_get():raise() end)
+awesome.key({ modkey }, "k", function () awful.client.focus(-1);  client.focus_get():raise() end)
 awesome.key({ modkey, "Shift" }, "j", function () awful.client.swap(1) end)
 awesome.key({ modkey, "Shift" }, "k", function () awful.client.swap(-1) end)
 awesome.key({ modkey, "Control" }, "j", function () awful.screen.focus(1) end)
@@ -171,7 +171,6 @@ awesome.key({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, 
 -- {{{ Hooks
 -- Hook function to execute when focusing a client.
 function hook_focus(c)
-    c:raise()
     c:border_set({ width = 1, color = "white" })
 end
 
