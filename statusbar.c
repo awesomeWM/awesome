@@ -113,6 +113,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     xcb_screen_t *s = NULL;
     bool ignore = false;
 
+    globalconf.screens[statusbar->screen].need_arrange = true;
+
     simplewindow_delete(&statusbar->sw);
     draw_context_delete(&statusbar->ctx);
 
@@ -294,7 +296,6 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
         break;
     }
 
-    globalconf.screens[statusbar->screen].need_arrange = true;
     xcb_map_window(globalconf.connection, statusbar->sw->window);
     statusbar_draw(statusbar);
 }
