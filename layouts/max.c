@@ -45,7 +45,8 @@ layout_max(int screen)
             area.height += 2 * c->border;
         }
 
-    if((focus = focus_get_current_client(screen)))
+    if((focus = focus_get_current_client(screen))
+       && IS_TILED(focus, screen))
         client_raise(focus);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
