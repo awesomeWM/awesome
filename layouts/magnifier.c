@@ -52,6 +52,7 @@ layout_magnifier(int screen)
     geometry.x = area.x + (area.width - geometry.width) / 2;
     geometry.y = area.y + (area.height - geometry.height) / 2;
     client_resize(focus, geometry, globalconf.resize_hints);
+    client_raise(focus);
 
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen) && c != focus)
