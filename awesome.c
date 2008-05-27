@@ -294,7 +294,7 @@ main(int argc, char **argv)
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
-    pthread_t tid_layout, tid_statusbar;
+    pthread_t tid_statusbar;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -484,7 +484,7 @@ main(int argc, char **argv)
 
     /* refresh everything before waiting events */
     statusbar_refresh(NULL);
-    layout_refresh(NULL);
+    layout_refresh();
 
     /* initialize Glib for thread safeness */
     g_thread_init(NULL);
@@ -541,17 +541,15 @@ main(int argc, char **argv)
             } while((ev = xcb_poll_for_event(globalconf.connection)));
 
             a_thread_refresh(&tid_statusbar, &statusbar_refresh);
-            a_thread_refresh(&tid_layout, &layout_refresh);
+            layout_refresh();
             pthread_join(tid_statusbar, NULL);
-            pthread_join(tid_layout, NULL);
 
             /* need to resync */
             xcb_aux_sync(globalconf.connection);
         }
         a_thread_refresh(&tid_statusbar, &statusbar_refresh);
-        a_thread_refresh(&tid_layout, &layout_refresh);
+        layout_refresh();
         pthread_join(tid_statusbar, NULL);
-        pthread_join(tid_layout, NULL);
         xcb_aux_sync(globalconf.connection);
     }
 

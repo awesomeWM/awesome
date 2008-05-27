@@ -101,15 +101,14 @@ arrange(int screen)
 /** Refresh the screen disposition
  * \return true if the screen was arranged, false otherwise
  */
-void *
-layout_refresh(void *v __attribute__ ((unused)))
+void
+layout_refresh(void)
 {
     int screen;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         if(globalconf.screens[screen].need_arrange)
             arrange(screen);
-    return NULL;
 }
 
 /** Get current layout used on screen.

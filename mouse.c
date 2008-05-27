@@ -284,14 +284,14 @@ mouse_client_move(client_t *c, int snap)
                         move_client_to_screen(c, newscreen, true);
                         globalconf.screens[c->screen].need_arrange = true;
                         globalconf.screens[newscreen].need_arrange = true;
-                        layout_refresh(NULL);
+                        layout_refresh();
                     }
                     if((target = client_get_bywin(globalconf.clients, mquery_pointer_r->child))
                        && target != c && !target->isfloating)
                     {
                         client_list_swap(&globalconf.clients, c, target);
                         globalconf.screens[c->screen].need_arrange = true;
-                        layout_refresh(NULL);
+                        layout_refresh();
                     }
                     p_delete(&mquery_pointer_r);
                 }
@@ -436,7 +436,7 @@ mouse_client_resize(client_t *c)
                     {
                         curtags[0]->mwfact = mwfact;
                         globalconf.screens[c->screen].need_arrange = true;
-                        layout_refresh(NULL);
+                        layout_refresh();
                     }
                 }
                 p_delete(&ev);
