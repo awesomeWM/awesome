@@ -42,6 +42,7 @@ DO_SLIST(taglist_drawn_area_t, taglist_drawn_area, p_delete);
 typedef struct
 {
     char *text_normal, *text_focus, *text_urgent;
+    bool show_empty;
     taglist_drawn_area_t *drawn_area;
 
 } taglist_data_t;
@@ -168,6 +169,9 @@ taglist_draw(widget_node_t *w,
         tag && area;
         tag = tag->next, area = area->next, i++)
     {
+        if (!data->show_empty && !tag->selected && !tag_isoccupied(tag))
+            continue;
+
         area->x = w->area.x + prev_width;
         prev_width += area->width;
         draw_text(ctx, globalconf.font, &statusbar->colors.fg, *area, text[i]);
@@ -261,6 +265,8 @@ taglist_tell(widget_t *widget, const char *property, const char *new_value)
         p_delete(&d->text_urgent);
         d->text_urgent = a_strdup(new_value);
     }
+    else if(!a_strcmp(property, "show_empty"))
+        d->show_empty = a_strtobool(new_value);
     else
         return WIDGET_ERROR;
 
@@ -284,6 +290,7 @@ taglist_new(alignment_t align)
     d->text_normal = a_strdup(" <text align=\"center\"/><title/> ");
     d->text_focus = a_strdup(" <text align=\"center\"/><title/> ");
     d->text_urgent = a_strdup(" <text align=\"center\"/><title/> ");
+    d->show_empty = true;
 
     /* Set cache property */
     w->cache_flags = WIDGET_CACHE_TAGS | WIDGET_CACHE_CLIENTS;
