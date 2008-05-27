@@ -279,15 +279,12 @@ main(int argc, char **argv)
     char buf[1024];
     const char *confpath = NULL;
     int r, xfd, csfd, dbusfd, i, screen_nbr, opt;
-    ssize_t len = 1;
+    ssize_t cmdlen = 1;
     const xcb_query_extension_reply_t *shape_query, *randr_query;
     fd_set rd;
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
-    int pstdout[2], pstderr[2], 
-        rstderr = -1, rstdout = -1,
-        a_stderr, a_stdout;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -301,15 +298,15 @@ main(int argc, char **argv)
 
     /* save argv */
     for(i = 0; i < argc; i++)
-        len += a_strlen(argv[i]) + 1;
+        cmdlen += a_strlen(argv[i]) + 1;
 
-    globalconf.argv = p_new(char, len);
-    a_strcpy(globalconf.argv, len, argv[0]);
+    globalconf.argv = p_new(char, cmdlen);
+    a_strcpy(globalconf.argv, cmdlen, argv[0]);
 
     for(i = 1; i < argc; i++)
     {
-        a_strcat(globalconf.argv, len, " ");
-        a_strcat(globalconf.argv, len, argv[i]);
+        a_strcat(globalconf.argv, cmdlen, " ");
+        a_strcat(globalconf.argv, cmdlen, argv[i]);
     }
 
     /* check args */
@@ -378,33 +375,6 @@ main(int argc, char **argv)
     /* init Atoms cache and then EWMH atoms */
     atom_cache_list_init(&globalconf.atoms);
     ewmh_init_atoms();
-
-    /* grab stdout and stderr */
-    if(pipe(pstdout) == -1)
-    {
-        perror("unable to pipe");
-        a_stdout = -1;
-    }
-    else
-    {
-        rstdout = dup(fileno(stdout));
-        dup2(pstdout[1], fileno(stdout));
-        a_stdout = pstdout[0];
-        /* stop making stdout buffered */
-        setvbuf(stdout, NULL, _IONBF, 0);
-    }
-
-    if(pipe(pstderr) == -1)
-    {
-        perror("unable to pipe");
-        a_stderr = -1;
-    }
-    else
-    {
-        rstderr = dup(fileno(stderr));
-        dup2(pstderr[1], fileno(stderr));
-        a_stderr = pstderr[0];
-    }
 
     /* init screens struct */
     globalconf.screens_info = screensinfo_new(globalconf.connection);
@@ -516,41 +486,15 @@ main(int argc, char **argv)
             FD_SET(csfd, &rd);
         if(dbusfd >= 0)
             FD_SET(dbusfd, &rd);
-        if(a_stdout >= 0)
-            FD_SET(a_stdout, &rd);
-        if(a_stderr >= 0)
-            FD_SET(a_stderr, &rd);
         FD_SET(xfd, &rd);
-
-        if(select(MAX(MAX(MAX(MAX(xfd, csfd), dbusfd), a_stdout), a_stderr) + 1,
-                  &rd, NULL, NULL, NULL) == -1)
+        if(select(MAX(MAX(xfd, csfd), dbusfd) + 1, &rd, NULL, NULL, NULL) == -1)
         {
             if(errno == EINTR)
                 continue;
             eprint("select failed");
         }
-
-        /* Read and write stdout */
-        if(a_stdout >= 0 && FD_ISSET(a_stdout, &rd))
-        {
-            len = read(a_stdout, buf, sizeof(buf));
-            write(rstdout, buf, len);
-            /* call hook */
-            lua_pushlstring(globalconf.L, buf, len);
-            luaA_dofunction(globalconf.L, globalconf.hooks.fdactivity, 1);
-        }
-
-        if(a_stderr >= 0 && FD_ISSET(a_stderr, &rd))
-        {
-            len = read(a_stderr, buf, sizeof(buf));
-            write(rstderr, buf, len);
-            /* call hook */
-            lua_pushlstring(globalconf.L, buf, len);
-            luaA_dofunction(globalconf.L, globalconf.hooks.fdactivity, 1);
-        }
-
         if(csfd >= 0 && FD_ISSET(csfd, &rd))
-            switch(r = recv(csfd, buf, sizeof(buf) - 1, MSG_TRUNC))
+            switch(r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
             {
               case -1:
                 warn("error reading UNIX domain socket: %s", strerror(errno));
