@@ -129,7 +129,7 @@ widget_invalidate_cache(int screen, int flags)
         for(widget = statusbar->widgets; widget; widget = widget->next)
             if(widget->widget->cache_flags & flags)
             {
-                statusbar->need_update = true;
+                statusbar_needupdate(statusbar);
                 break;
             }
 }
@@ -148,7 +148,7 @@ widget_invalidate_statusbar_bywidget(widget_t *widget)
             for(witer = statusbar->widgets; witer; witer = witer->next)
                 if(witer->widget == widget)
                 {
-                    statusbar->need_update = true;
+                    statusbar_needupdate(statusbar);
                     break;
                 }
 }

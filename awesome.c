@@ -34,8 +34,6 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include <pthread.h>
-
 #include <glib.h>
 
 #include <xcb/xcb.h>
@@ -49,7 +47,6 @@
 #include "event.h"
 #include "layout.h"
 #include "screen.h"
-#include "statusbar.h"
 #include "window.h"
 #include "client.h"
 #include "focus.h"
@@ -64,12 +61,6 @@
 bool running = true;
 
 awesome_t globalconf;
-
-#define a_thread_refresh(id, fct) \
-    do { \
-        if(pthread_create(id, NULL, fct, NULL)) \
-            perror("error creating thread\n"); \
-    } while(0)
 
 typedef struct
 {
@@ -294,7 +285,6 @@ main(int argc, char **argv)
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
-    pthread_t tid_statusbar;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -340,6 +330,9 @@ main(int argc, char **argv)
 
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
+
+    /* initialize Glib for thread safeness */
+    g_thread_init(NULL);
 
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
@@ -483,11 +476,7 @@ main(int argc, char **argv)
     signal(SIGHUP, &exit_on_signal);
 
     /* refresh everything before waiting events */
-    statusbar_refresh(NULL);
     layout_refresh();
-
-    /* initialize Glib for thread safeness */
-    g_thread_init(NULL);
 
     /* main event loop, also reads status text from socket */
     while(running)
@@ -540,16 +529,12 @@ main(int argc, char **argv)
                 p_delete(&ev);
             } while((ev = xcb_poll_for_event(globalconf.connection)));
 
-            a_thread_refresh(&tid_statusbar, &statusbar_refresh);
             layout_refresh();
-            pthread_join(tid_statusbar, NULL);
 
             /* need to resync */
             xcb_aux_sync(globalconf.connection);
         }
-        a_thread_refresh(&tid_statusbar, &statusbar_refresh);
         layout_refresh();
-        pthread_join(tid_statusbar, NULL);
         xcb_aux_sync(globalconf.connection);
     }
 

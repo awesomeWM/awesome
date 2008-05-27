@@ -23,7 +23,6 @@
 #define AWESOME_STATUSBAR_H
 
 #include "structs.h"
-#include "widget.h"
 #include "common/refcount.h"
 #include "common/swindow.h"
 
@@ -36,8 +35,8 @@ statusbar_delete(statusbar_t **statusbar)
     p_delete(statusbar);
 }
 
-void * statusbar_refresh(void *);
 statusbar_t * statusbar_getbyname(int, const char *);
+void statusbar_needupdate(statusbar_t *);
 
 DO_RCNT(statusbar_t, statusbar, statusbar_delete)
 DO_SLIST(statusbar_t, statusbar, statusbar_delete)

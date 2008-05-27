@@ -21,6 +21,9 @@
 
 #include <stdio.h>
 #include <math.h>
+
+#include <pthread.h>
+
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 
@@ -31,6 +34,7 @@
 #include "window.h"
 
 extern awesome_t globalconf;
+extern bool running;
 
 static void
 statusbar_draw(statusbar_t *statusbar)
@@ -39,7 +43,7 @@ statusbar_draw(statusbar_t *statusbar)
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
 
-    statusbar->need_update = false;
+    statusbar->need_update.value = false;
 
     if(!statusbar->position)
         return;
@@ -79,6 +83,25 @@ statusbar_draw(statusbar_t *statusbar)
     }
 
     simplewindow_refresh_drawable(statusbar->sw);
+}
+
+static void *
+statusbar_refresh(void *p)
+{
+    statusbar_t *statusbar = (statusbar_t *) p;
+
+    while(running)
+    {
+        pthread_mutex_lock(&statusbar->need_update.lock);
+
+        while(!statusbar->need_update.value)
+            pthread_cond_wait(&statusbar->need_update.cond, &statusbar->need_update.lock);
+
+        statusbar_draw(statusbar);
+        pthread_mutex_unlock(&statusbar->need_update.lock);
+    }
+
+    return NULL;
 }
 
 static void
@@ -276,19 +299,13 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     statusbar_draw(statusbar);
 }
 
-void *
-statusbar_refresh(void *p __attribute__ ((unused)))
+void
+statusbar_needupdate(statusbar_t *statusbar)
 {
-    int screen;
-    statusbar_t *statusbar;
-
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
-        for(statusbar = globalconf.screens[screen].statusbar;
-            statusbar;
-            statusbar = statusbar->next)
-            if(statusbar->need_update)
-                statusbar_draw(statusbar);
-    return NULL;
+    pthread_mutex_lock(&statusbar->need_update.lock);
+    statusbar->need_update.value = true;
+    pthread_mutex_unlock(&statusbar->need_update.lock);
+    pthread_cond_broadcast(&statusbar->need_update.cond);
 }
 
 statusbar_t *
@@ -357,7 +374,7 @@ luaA_statusbar_widget_add(lua_State *L)
     widget_t **widget = luaL_checkudata(L, 2, "widget");
     widget_node_t *w = p_new(widget_node_t, 1);
 
-    (*sb)->need_update = true;
+    statusbar_needupdate(*sb);
     w->widget = *widget;
     widget_node_list_append(&(*sb)->widgets, w);
     widget_ref(widget);
@@ -393,6 +410,12 @@ luaA_statusbar_add(lua_State *L)
     statusbar_ref(sb);
     (*sb)->screen = screen;
     (*sb)->phys_screen = screen_virttophys(screen);
+
+    /* Initialize thread stuffs and start it */
+    pthread_cond_init(&(*sb)->need_update.cond, NULL);
+    pthread_mutex_init(&(*sb)->need_update.lock, NULL);
+    if(pthread_create(&(*sb)->tid, NULL, statusbar_refresh, *sb))
+        perror("unable to create thread");
 
     return 0;
 }

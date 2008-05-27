@@ -211,7 +211,14 @@ struct statusbar_t
     /** Draw context */
     draw_context_t *ctx;
     /** Need update */
-    bool need_update;
+    struct
+    {
+        bool value;
+        pthread_mutex_t lock;
+        pthread_cond_t cond;
+    } need_update;
+    /** Thread id */
+    pthread_t tid;
     /** Default colors */
     struct
     {
