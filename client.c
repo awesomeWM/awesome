@@ -262,6 +262,9 @@ client_focus(client_t *c, int screen)
         window_grabbuttons(c->win, c->phys_screen);
         phys_screen = c->phys_screen;
 
+        /* Some layouts use focused client differently, so call them back. */
+        globalconf.screens[c->screen].need_arrange = true;
+
         /* execute hook */
         luaA_client_userdata_new(globalconf.focus->client);
         luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
