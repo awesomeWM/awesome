@@ -259,9 +259,9 @@ luaA_tag_add(lua_State *L)
     luaA_checkscreen(screen);
 
     for(i = 0; i < globalconf.screens_info->nscreen; i++)
-        for(t = globalconf.screens[screen].tags; t; t = t->next)
+        for(t = globalconf.screens[i].tags; t; t = t->next)
             if(*tag == t)
-                luaL_error(L, "tag already on screen %d", i);
+                luaL_error(L, "tag already on screen %d", i + 1);
 
     (*tag)->screen = screen;
     tag_append_to_screen(*tag, screen);
