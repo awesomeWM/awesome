@@ -84,7 +84,8 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-            if(statusbar->sw->window == ev->event || statusbar->sw->window == ev->child)
+            if(statusbar->sw
+               && (statusbar->sw->window == ev->event || statusbar->sw->window == ev->child))
             {
                 /* If the statusbar is child, then x,y are
                  * relative to root window */
@@ -346,8 +347,8 @@ event_handle_expose(void *data __attribute__ ((unused)),
     {
         for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
             for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-                if(statusbar->sw->window == ev->window
-                   && statusbar->position)
+                if(statusbar->sw
+                   && statusbar->sw->window == ev->window)
                 {
                     simplewindow_refresh_drawable(statusbar->sw);
                     return 0;
