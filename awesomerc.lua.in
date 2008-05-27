@@ -24,7 +24,7 @@ layouts = { "tile", "tileleft", "tilebottom", "tiletop", "max", "spiral", "dwind
 -- {{{ Tags
 -- Define tags table
 tags = {}
-for s = 1, awesome.screen_count() do
+for s = 1, screen.count() do
     -- Each screen has its own tag table
     tags[s] = {}
     -- Create 9 tags per screen
@@ -71,13 +71,13 @@ myiconbox:set("image", "@iconsdir@/awesome16.png")
 -- Create an iconbox widget which will contains an icon indicating which layout we're using.
 -- We need one layoutbox per screen.
 mylayoutbox = {}
-for s = 1, awesome.screen_count() do
+for s = 1, screen.count() do
     mylayoutbox[s] = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
     mylayoutbox[s]:set("image", "@iconsdir@/layouts/tilew.png")
 end
 
 -- Create a statusbar for each screen and add it
-for s = 1, awesome.screen_count() do
+for s = 1, screen.count() do
     mystatusbar = statusbar.new({ position = "top", name = "mystatusbar" .. s,
                                 fg = "lightblue", bg = "black" })
     -- Add widgets to the statusbar - order matters
@@ -118,7 +118,7 @@ client.mouse({ modkey }, 3, function (c) c:mouse_resize() end)
 -- Bind keyboard digits
 -- Compute the maximum number of digit we need, limited to 9
 keynumber = 0
-for s = 1, awesome.screen_count() do
+for s = 1, screen.count() do
    keynumber = math.min(9, math.max(#tags[s], keynumber));
 end
 

@@ -17,6 +17,7 @@ end
 -- Grab environment we need
 local ipairs = ipairs
 local awesome = awesome
+local screen = screen
 local client = client
 local tag = tag
 local mouse = mouse
@@ -77,16 +78,16 @@ function screen_focus(i)
     else
         s = mouse.screen_get()
     end
-    local count = awesome.screen_count()
+    local count = screen.count()
     s = s + i
     if s < 1 then
         s = count
     elseif s > count then
         s = 1
     end
-    awesome.screen_focus(s)
+    screen.focus(s)
     -- Move the mouse on the screen
-    local screen_coords = awesome.screen_coords_get(s)
+    local screen_coords = screen.coords_get(s)
     mouse.coords_set(screen_coords['x'], screen_coords['y'])
 end
 

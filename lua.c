@@ -430,15 +430,18 @@ luaA_parserc(const char *rcfile)
         { "restart", luaA_restart },
         { "floating_placement_set", luaA_floating_placement_set },
         { "padding_set", luaA_padding_set },
-        { "screen_coords_get", luaA_screen_coords_get },
-        { "screen_count", luaA_screen_count },
-        { "screen_focus", luaA_screen_focus },
         { "key", luaA_key },
         { "mouse", luaA_mouse },
         { "resizehints_set", luaA_resizehints_set },
         { "font_set", luaA_font_set },
         { "colors_set", luaA_colors_set },
         { NULL, NULL }
+    };
+    static const struct luaL_reg awesome_screen_lib[] =
+    {
+        { "coords_get", luaA_screen_coords_get },
+        { "count", luaA_screen_count },
+        { "focus", luaA_screen_focus },
     };
     static const struct luaL_reg awesome_hooks_lib[] =
     {
@@ -458,6 +461,9 @@ luaA_parserc(const char *rcfile)
 
     /* Export awesome lib */
     luaL_register(L, "awesome", awesome_lib);
+
+    /* Export screen lib */
+    luaL_register(L, "screen", awesome_screen_lib);
 
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);
