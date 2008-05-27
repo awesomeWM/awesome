@@ -32,6 +32,7 @@ layout_magnifier(int screen)
 {
     int n = 0;
     client_t *c, *focus;
+    tag_t **curtags = tags_get_current(screen);
     area_t geometry, area = screen_get_area(screen,
                                             globalconf.screens[screen].statusbar,
                                             &globalconf.screens[screen].padding);
@@ -44,10 +45,10 @@ layout_magnifier(int screen)
 
     /* No windows is tiled, nothing to do. */
     if(!focus)
-        return;
+        goto bailout;
 
-    geometry.width = area.width * 0.9;
-    geometry.height = area.height * 0.9;
+    geometry.width = area.width * curtags[0]->mwfact;
+    geometry.height = area.height * curtags[0]->mwfact;
     geometry.x = area.x + (area.width - geometry.width) / 2;
     geometry.y = area.y + (area.height - geometry.height) / 2;
     client_resize(focus, geometry, globalconf.resize_hints);
@@ -58,7 +59,7 @@ layout_magnifier(int screen)
 
     /* No other clients. */
     if(!n)
-        return;
+        goto bailout;
 
     geometry.x = area.x;
     geometry.y = area.y;
@@ -75,5 +76,8 @@ layout_magnifier(int screen)
             geometry.width += 2 * c->border;
             geometry.y += geometry.height;
         }
+
+bailout:
+    p_delete(&curtags);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
