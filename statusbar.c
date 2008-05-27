@@ -43,8 +43,6 @@ statusbar_draw(statusbar_t *statusbar)
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
 
-    statusbar->need_update.value = false;
-
     if(!statusbar->position)
         return;
 
@@ -99,6 +97,8 @@ statusbar_refresh(void *p)
             pthread_cond_wait(&statusbar->need_update.cond, &statusbar->need_update.lock);
 
         statusbar_draw(statusbar);
+        statusbar->need_update.value = false;
+
         pthread_mutex_unlock(&statusbar->need_update.lock);
     }
 

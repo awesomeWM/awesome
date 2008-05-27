@@ -87,6 +87,16 @@ for s = 1, awesome.screen_count() do
     mystatusbar:widget_add(mylayoutbox[s])
     mystatusbar:add(s)
 end
+
+-- Create a textbox widget for debug messages on screen 1
+mydebugbox = widget.new({ type = "textbox", name = "mydebugbox", align = "left" })
+mydebugbox:set("text", "No debug information.")
+mydebugbar = statusbar.new({ position = "off", name = "mydebugbar",
+                            fg = "white", bg = "black" })
+mydebugbar:widget_add(mydebugbox)
+mydebugbar:add(1)
+awesome.key({ modkey }, "d", function () mydebugbar:position_set("bottom") end)
+awesome.key({ modkey, "Control" }, "d", function () mydebugbar:position_set("off") end)
 -- }}}
 
 -- {{{ Mouse bindings
@@ -208,12 +218,20 @@ function hook_arrange(screen)
     mylayoutbox[screen]:set("image", "@iconsdir@/layouts/" .. layout .. "w.png")
 end
 
+-- Hook function to print errors message
+-- WARNING: you should _NOT_ print anything in this function
+-- or you go into infinite loop
+function hook_fdactivity(text)
+    mydebugbox:set("text", "<span font_desc=\"fixed 10\">" .. text ..  "</span>")
+end
+
 -- Set up some hooks
 hooks.focus(hook_focus)
 hooks.unfocus(hook_unfocus)
 hooks.newclient(hook_newclient)
 hooks.mouseover(hook_mouseover)
 hooks.arrange(hook_arrange)
+hooks.fdactivity(hook_fdactivity)
 -- }}}
 
 -- Respect size hints

@@ -359,6 +359,20 @@ luaA_hooks_titleupdate(lua_State *L)
     return 0;
 }
 
+/** Set the function called on standard file descriptor (stdout and stderr) activity.
+ * This function is called with the output buffer text as argument.
+ * \param A function to call on each standard file descriptor activity.
+ */
+static int
+luaA_hooks_fdactivity(lua_State *L)
+{
+    luaA_checkfunction(L, 1);
+    if(globalconf.hooks.fdactivity)
+        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.fdactivity);
+    globalconf.hooks.fdactivity = luaL_ref(L, LUA_REGISTRYINDEX);
+    return 0;
+}
+
 /** Set default font.
  * \param A string with a font name in Pango format.
  */
@@ -434,6 +448,7 @@ luaA_parserc(const char *rcfile)
         { "mouseover", luaA_hooks_mouseover },
         { "arrange", luaA_hooks_arrange },
         { "titleupdate", luaA_hooks_titleupdate },
+        { "fdactivity", luaA_hooks_fdactivity },
         { NULL, NULL }
     };
 
