@@ -83,6 +83,7 @@ statusbar_draw(statusbar_t *statusbar)
     }
 
     simplewindow_refresh_drawable(statusbar->sw);
+    xcb_aux_sync(globalconf.connection);
 }
 
 static void *
