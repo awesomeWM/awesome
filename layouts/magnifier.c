@@ -56,6 +56,10 @@ layout_magnifier(int screen)
         if(IS_TILED(c, screen) && c != focus)
             n++;
 
+    /* No other clients. */
+    if(!n)
+        return;
+
     geometry.x = area.x;
     geometry.y = area.y;
     geometry.height = area.height / n;
