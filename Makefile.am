@@ -26,6 +26,8 @@ LAYOUTS += layouts/max.h
 LAYOUTS += layouts/fibonacci.c
 LAYOUTS += layouts/fibonacci.h
 
+LAYOUTS += layouts/magnifier.c
+LAYOUTS += layouts/magnifier.h
 
 WIDGETS =
 WIDGETS += widgets/taglist.c
