@@ -46,7 +46,7 @@ OPTIONS
 -h | --help::
     Print help information, then exit.
 --config | -c::
-    Use an alternate configuration file instead of $HOME/.awesomerc.
+    Use an alternate configuration file instead of $HOME/.awesomerc.lua.
 
 DEFAULTS MOUSE BINDINGS
 -----------------------
@@ -66,27 +66,17 @@ DEFAULTS MOUSE BINDINGS
     Switch to previous or next tag.
 *Mod4 + Button1* on client window::
     Move window.
-*Mod4 + Button2* on client window::
-    Zoom window.
 *Mod4 + Button3* on client window::
     Resize window.
 
 DEFAULTS KEY BINDINGS
 ---------------------
-*Mod4 + F1*::
-    Spawn awesome-menu to read manual pages.
-*Mod4 + F2*::
-    Spawn awesome-menu to execute a program.
-*Mod4 + F3*::
-    Spawn awesome-menu to ssh to an host.
 *Mod4 + Return*::
     Spawn terminal emulator.
 *Mod4 + space*::
     Switch to next layout.
 *Mod4 \+ Shift \+ space*::
     Switch to previous layout.
-*Mod4 + b*::
-    Toggle statusbar.
 *Mod4 + j*::
     Focus next client.
 *Mod4 + k*::
@@ -117,36 +107,30 @@ DEFAULTS KEY BINDINGS
     View previous tag.
 *Mod4 + Right*::
     View next tag.
-*Mod4 + m*::
-    Set client maximized.
-*Mod4 \+ Control \+ Return*::
-    Zoom client.
 *Mod4 \+ Control \+ space*::
     Set client floating.
-*Mod4 \+ s*::
-    Redraw the client.
 *Mod4 \+ Shift \+ c*::
     Kill client.
 *Mod4 \+ Shift \+ q*::
     Quit awesome.
 *Mod4 \+ Control \+ r*::
     Restart awesome.
-*Mod4 + 0-9*::
-    Switch to tag 1-9, 0 for all.
-*Mod4 \+ Control \+ 0-9*::
+*Mod4 + 1-9*::
+    Switch to tag 1-9.
+*Mod4 \+ Control \+ 1-9*::
     Toggle tag view.
-*Mod4 \+ Shift \+ 0-9*::
+*Mod4 \+ Shift \+ 1-9*::
     Tag client with tag.
-*Mod4 \+ Shift \+ Control \+ 0-9*::
+*Mod4 \+ Shift \+ Control \+ 1-9*::
     Toggle tag on client.
 
 CUSTOMIZATION
 -------------
-awesome is customized by creating a custom $HOME/.awesomerc file.
+awesome is customized by creating a custom $HOME/.awesomerc.lua file.
 
 SEE ALSO
 --------
-awesomerc(5) awesome-menu(1) awesome-client(1) awesome-message(1)
+awesomerc(5) awesome-client(1)
 
 BUGS
 ----
