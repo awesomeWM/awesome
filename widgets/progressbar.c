@@ -65,12 +65,8 @@ typedef struct
     xcolor_t *bordercolor;
 } Data;
 
-void add_data(Data *, const char *);
-static void set_new_p_color(xcolor_t **, char *);
-/*static bool check_settings(Data *, int);*/
-
 static void
-set_new_p_color(xcolor_t **ppcolor, char *new_color)
+progressbar_pcolor_set(xcolor_t **ppcolor, char *new_color)
 {
     bool flag = false;
     if(!*ppcolor)
@@ -80,61 +76,14 @@ set_new_p_color(xcolor_t **ppcolor, char *new_color)
     }
     if(!(draw_color_new(globalconf.connection,
                     globalconf.default_screen,
-                    new_color, *ppcolor)))
-    {
-        if(flag) /* restore */
-        {
-            p_delete(ppcolor);
-            *ppcolor = NULL;
-        }
-    }
+                    new_color, *ppcolor))
+       && flag)
+        p_delete(ppcolor);
+        *ppcolor = NULL;
 }
 
-/*static bool*/
-/*check_settings(Data *d, int status_height)*/
-/*{*/
-    /*int tmp, h_total;*/
-
-    /*h_total = (int)(status_height * d->height + 0.5);*/
-
-    /*if(!d->vertical) [> horizontal <]*/
-    /*{*/
-        /*tmp = d->width - 2 * (d->border_width + d->border_padding) - 1;*/
-        /*if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0)*/
-           /*|| (!d->ticks_count && tmp < 0))*/
-        /*{*/
-            /*warn("progressbar's 'width' is too small for the given configuration options");*/
-            /*return false;*/
-        /*}*/
-        /*tmp = h_total - d->data_items * (2 * (d->border_width + d->border_padding) + 1)*/
-              /*- (d->data_items - 1) * d->gap;*/
-        /*if(tmp < 0)*/
-        /*{*/
-            /*warn("progressbar's 'height' is too small for the given configuration options");*/
-            /*return false;*/
-        /*}*/
-    /*}*/
-    /*else [> vertical / standing up <]*/
-    /*{*/
-        /*tmp = h_total - 2 * (d->border_width + d->border_padding) - 1;*/
-        /*if((d->ticks_count && tmp - (d->ticks_count - 1) * d->ticks_gap - d->ticks_count + 1 < 0)*/
-           /*|| (!d->ticks_count && tmp < 0))*/
-        /*{*/
-            /*warn("progressbar's 'height' is too small for the given configuration options");*/
-            /*return false;*/
-        /*}*/
-        /*tmp = d->width - d->data_items * (2 * (d->border_width + d->border_padding) + 1)*/
-              /*- (d->data_items - 1) * d->gap;*/
-        /*if(tmp < 0)*/
-        /*{*/
-            /*warn("progressbar's 'width' is too small for the given configuration options");*/
-            /*return false;*/
-        /*}*/
-    /*}*/
-    /*return true;*/
-/*}*/
-
-void add_data(Data *d, const char *new_data_title)
+static void
+progressbar_data_add(Data *d, const char *new_data_title)
 {
     d->data_items++;
 
@@ -218,7 +167,7 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
 
     if(d->vertical)
     {
-        /* TODO: maybe prevent to calculate that stuff below over and over again
+        /** \todo maybe prevent to calculate that stuff below over and over again
          * (->use static-values) */
         pb_height = (int) (statusbar->height * d->height + 0.5)
                     - 2 * (d->border_width + d->border_padding);
@@ -317,9 +266,7 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
                 for(rectangle.y = pb_y + (unit - d->ticks_gap);
                         pb_y + pb_height - d->ticks_gap >= rectangle.y;
                         rectangle.y += unit)
-                {
                     draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
-                }
             }
             pb_offset += pb_width + d->gap + 2 * (d->border_width + d->border_padding);
         }
@@ -438,7 +385,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     float ftmp;
     bool btmp, found;
 
-    if(new_value == NULL)
+    if(!new_value)
         return WIDGET_ERROR_NOVALUE;
     /* seperate for saving some cpu cycles (could be put into next else if...) */
     else if(!a_strcmp(property, "data"))
@@ -459,7 +406,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
                 return WIDGET_NOERROR;
             }
         /* no section found -> create one */
-        add_data(d, title);
+        progressbar_data_add(d, title);
         percent = atoi(setting);
         d->percent[d->data_items - 1] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
         p_delete(&new_val);
@@ -474,7 +421,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
             || !a_strcmp(property, "fg_end")
             || !a_strcmp(property, "reverse"))
     {
-        /* check if this section is defined alrady */
+        /* check if this section is defined already */
         new_val = a_strdup(new_value);
         title = strtok(new_val, " ");
         if(!(setting = strtok(NULL, " ")))
@@ -492,7 +439,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         }
         /* no section found -> create one */
         if(!found)
-            add_data(d, title);
+            progressbar_data_add(d, title);
 
         /* change values accordingly... */
         if(!a_strcmp(property, "fg"))
@@ -504,9 +451,9 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         else if(!a_strcmp(property, "bordercolor"))
             draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->bordercolor[i]));
         else if(!a_strcmp(property, "fg_center"))
-            set_new_p_color(&(d->pfg_center[i]), setting);
+            progressbar_pcolor_set(&(d->pfg_center[i]), setting);
         else if(!a_strcmp(property, "fg_end"))
-            set_new_p_color(&(d->pfg_end[i]), setting);
+            progressbar_pcolor_set(&(d->pfg_end[i]), setting);
         else if(!a_strcmp(property, "reverse"))
             d->reverse[i] = a_strtobool(setting);
 
@@ -514,9 +461,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         return WIDGET_NOERROR;
     }
     else if(!a_strcmp(property, "gap"))
-    {
         d->gap = atoi(new_value);
-    }
     else if(!a_strcmp(property, "ticks_count"))
     {
         tmp = d->ticks_count;
@@ -551,12 +496,6 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     {
         btmp = d->vertical;
         d->vertical = a_strtobool(new_value);
-        /*TODO:*/
-        /*if(!check_settings(d, widget->statusbar->height))*/
-        /*{*/
-            /*d->width = tmp; [> restore <]*/
-            /*return WIDGET_ERROR_CUSTOM;*/
-        /*}*/
     }
     else
         return WIDGET_ERROR;
