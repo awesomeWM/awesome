@@ -73,6 +73,10 @@ myiconbox:set("image", "@iconsdir@/awesome16.png")
 mylayoutbox = {}
 for s = 1, screen.count() do
     mylayoutbox[s] = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
+    mylayoutbox[s]:mouse({ }, 1, function () awful.layout.inc(layouts, 1) end)    
+    mylayoutbox[s]:mouse({ }, 3, function () awful.layout.inc(layouts, -1) end)    
+    mylayoutbox[s]:mouse({ }, 4, function () awful.layout.inc(layouts, 1) end)    
+    mylayoutbox[s]:mouse({ }, 5, function () awful.layout.inc(layouts, -1) end)    
     mylayoutbox[s]:set("image", "@iconsdir@/layouts/tilew.png")
 end
 
