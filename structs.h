@@ -79,6 +79,8 @@ DO_RCNT(titlebar_t, titlebar, titlebar_delete)
 typedef struct keybinding_t keybinding_t;
 struct keybinding_t
 {
+    /** Ref count */
+    int refcount;
     /** Key modifier */
     unsigned long mod;
     /** Keysym */
@@ -92,6 +94,7 @@ struct keybinding_t
 };
 
 DO_SLIST(keybinding_t, keybinding, p_delete)
+DO_RCNT(keybinding_t, keybinding, p_delete)
 
 /** Mouse buttons bindings */
 typedef struct button_t button_t;

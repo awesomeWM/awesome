@@ -112,64 +112,64 @@ for s = 1, screen.count() do
 end
 
 for i = 1, keynumber do
-    awesome.key({ modkey }, i,
-                function ()
-                    local screen = mouse.screen_get()
-                    if tags[screen][i] then
-                        awful.tag.viewonly(tags[screen][i])
-                    end
-                end)
-    awesome.key({ modkey, "Control" }, i,
-                function ()
-                    local screen = mouse.screen_get()
-                    if tags[screen][i] then
-                        tags[i]:view(not tags[screen][i]:isselected())
-                    end
-                end)
-    awesome.key({ modkey, "Shift" }, i,
-                function ()
-                    local screen = mouse.screen_get()
-                    if tags[screen][i] then
-                        awful.client.movetotag(tags[screen][i])
-                    end
-                end)
-    awesome.key({ modkey, "Control", "Shift" }, i,
-                function ()
-                    local screen = mouse.screen_get()
-                    if tags[screen][i] then
-                        awful.client.toggletag(tags[screen][i])
-                    end
-                end)
+    keybinding.new({ modkey }, i,
+                   function ()
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           awful.tag.viewonly(tags[screen][i])
+                       end
+                   end):add()
+    keybinding.new({ modkey, "Control" }, i,
+                   function ()
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           tags[i]:view(not tags[screen][i]:isselected())
+                       end
+                   end):add()
+    keybinding.new({ modkey, "Shift" }, i,
+                   function ()
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           awful.client.movetotag(tags[screen][i])
+                       end
+                   end):add()
+    keybinding.new({ modkey, "Control", "Shift" }, i,
+                   function ()
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           awful.client.toggletag(tags[screen][i])
+                       end
+                   end):add()
 end
 
-awesome.key({ modkey }, "Left", awful.tag.viewprev)
-awesome.key({ modkey }, "Right", awful.tag.viewnext)
+keybinding.new({ modkey }, "Left", awful.tag.viewprev):add()
+keybinding.new({ modkey }, "Right", awful.tag.viewnext):add()
 
 -- Standard program
-awesome.key({ modkey }, "Return", function () awful.spawn(terminal) end)
+keybinding.new({ modkey }, "Return", function () awful.spawn(terminal) end):add()
 
-awesome.key({ modkey, "Control" }, "r", awesome.restart)
-awesome.key({ modkey, "Shift" }, "q", awesome.quit)
+keybinding.new({ modkey, "Control" }, "r", awesome.restart):add()
+keybinding.new({ modkey, "Shift" }, "q", awesome.quit):add()
 
 -- Client manipulation
-awesome.key({ modkey, "Shift" }, "c", function () client.focus_get():kill() end)
-awesome.key({ modkey }, "j", function () awful.client.focus(1); client.focus_get():raise() end)
-awesome.key({ modkey }, "k", function () awful.client.focus(-1);  client.focus_get():raise() end)
-awesome.key({ modkey, "Shift" }, "j", function () awful.client.swap(1) end)
-awesome.key({ modkey, "Shift" }, "k", function () awful.client.swap(-1) end)
-awesome.key({ modkey, "Control" }, "j", function () awful.screen.focus(1) end)
-awesome.key({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end)
-awesome.key({ modkey, "Control" }, "space", function () awful.client.togglefloating() end)
+keybinding.new({ modkey, "Shift" }, "c", function () client.focus_get():kill() end):add()
+keybinding.new({ modkey }, "j", function () awful.client.focus(1); client.focus_get():raise() end):add()
+keybinding.new({ modkey }, "k", function () awful.client.focus(-1);  client.focus_get():raise() end):add()
+keybinding.new({ modkey, "Shift" }, "j", function () awful.client.swap(1) end):add()
+keybinding.new({ modkey, "Shift" }, "k", function () awful.client.swap(-1) end):add()
+keybinding.new({ modkey, "Control" }, "j", function () awful.screen.focus(1) end):add()
+keybinding.new({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end):add()
+keybinding.new({ modkey, "Control" }, "space", function () awful.client.togglefloating() end):add()
 
 -- Layout manipulation
-awesome.key({ modkey }, "l", function () awful.tag.incmwfact(0.05) end)
-awesome.key({ modkey }, "h", function () awful.tag.incmwfact(-0.05) end)
-awesome.key({ modkey, "Shift" }, "h", function () awful.tag.incnmaster(1) end)
-awesome.key({ modkey, "Shift" }, "l", function () awful.tag.incnmaster(-1) end)
-awesome.key({ modkey, "Control" }, "h", function () awful.tag.incncol(1) end)
-awesome.key({ modkey, "Control" }, "l", function () awful.tag.incncol(1) end)
-awesome.key({ modkey }, "space", function () awful.layout.inc(layouts, 1) end)
-awesome.key({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -1) end)
+keybinding.new({ modkey }, "l", function () awful.tag.incmwfact(0.05) end):add()
+keybinding.new({ modkey }, "h", function () awful.tag.incmwfact(-0.05) end):add()
+keybinding.new({ modkey, "Shift" }, "h", function () awful.tag.incnmaster(1) end):add()
+keybinding.new({ modkey, "Shift" }, "l", function () awful.tag.incnmaster(-1) end):add()
+keybinding.new({ modkey, "Control" }, "h", function () awful.tag.incncol(1) end):add()
+keybinding.new({ modkey, "Control" }, "l", function () awful.tag.incncol(1) end):add()
+keybinding.new({ modkey }, "space", function () awful.layout.inc(layouts, 1) end):add()
+keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -1) end):add()
 -- }}}
 
 -- {{{ Hooks

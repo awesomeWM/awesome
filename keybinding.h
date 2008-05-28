@@ -1,7 +1,7 @@
 /*
- * window.h - window handling functions header
+ * keybinding.h - Key bindings configuration management header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,21 +19,8 @@
  *
  */
 
-#ifndef AWESOME_WINDOW_H
-#define AWESOME_WINDOW_H
-
-#include "common/draw.h"
-
-void window_setstate(xcb_window_t, long);
-long window_getstate(xcb_window_t);
-void window_configure(xcb_window_t, area_t, int);
-void window_grabbuttons(xcb_window_t, int);
-void window_root_grabbutton(button_t *);
-void window_root_grabbuttons(void);
-void window_root_grabkey(keybinding_t *);
-void window_root_ungrabkey(keybinding_t *);
-void window_setshape(xcb_window_t, int);
-void window_settrans(xcb_window_t, double);
+#ifndef AWESOME_KEYBINDING_H
+#define AWESOME_KEYBINDING_H
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

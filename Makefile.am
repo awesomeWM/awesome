@@ -122,6 +122,7 @@ awesome_SOURCES = \
 	cnode.c cnode.h \
 	event.c event.h \
 	layout.c layout.h \
+	keybinding.c keybinding.h \
 	awesome.c \
 	tag.c tag.h \
 	lua.c lua.h \

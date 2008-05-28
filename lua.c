@@ -29,15 +29,12 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 
-/* XStringToKeysym() */
-#include <X11/Xlib.h>
-
 #include "config.h"
 #include "structs.h"
 #include "lua.h"
-#include "window.h"
 #include "tag.h"
 #include "client.h"
+#include "window.h"
 #include "layouts/tile.h"
 
 extern awesome_t globalconf;
@@ -56,24 +53,8 @@ extern const struct luaL_reg awesome_widget_methods[];
 extern const struct luaL_reg awesome_widget_meta[];
 extern const struct luaL_reg awesome_statusbar_methods[];
 extern const struct luaL_reg awesome_statusbar_meta[];
-
-static void
-__luaA_keystore(keybinding_t *key, const char *str)
-{
-    xcb_keycode_t kc;
-    int ikc;
-
-    if(!a_strlen(str))
-        return;
-    else if(a_strncmp(str, "#", 1))
-        key->keysym = XStringToKeysym(str);
-    else
-    {
-        ikc = atoi(str + 1);
-        memcpy(&kc, &ikc, sizeof(KeyCode));
-        key->keycode = kc;
-    }
-}
+extern const struct luaL_reg awesome_keybinding_methods[];
+extern const struct luaL_reg awesome_keybinding_meta[];
 
 /** Define a global mouse binding. This binding will be available wehn you
  * click on root window.
@@ -109,44 +90,6 @@ luaA_mouse(lua_State *L)
     button_list_push(&globalconf.buttons.root, button);
 
     window_root_grabbutton(button);
-
-    return 0;
-}
-
-/** Define a global key binding. This key binding will always be available.
- * \param A table with modifier keys.
- * \param A key name.
- * \param A function to execute.
- */
-static int
-luaA_key(lua_State *L)
-{
-    size_t i, len;
-    keybinding_t *k;
-    const char *key;
-
-    /* arg 1 is key mod table */
-    luaA_checktable(L, 1);
-    /* arg 2 is key */
-    key = luaL_checkstring(L, 2);
-    /* arg 3 is cmd to run */
-    luaA_checkfunction(L, 3);
-
-    /* get the last arg as function */
-    k = p_new(keybinding_t, 1);
-    __luaA_keystore(k, key);
-    k->fct = luaL_ref(L, LUA_REGISTRYINDEX);
-
-    len = lua_objlen(L, 1);
-    for(i = 1; i <= len; i++)
-    {
-        lua_rawgeti(L, 1, i);
-        k->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
-    }
-
-    keybinding_list_push(&globalconf.keys, k);
-
-    window_root_grabkey(k);
 
     return 0;
 }
@@ -431,7 +374,6 @@ luaA_parserc(const char *rcfile)
         { "restart", luaA_restart },
         { "floating_placement_set", luaA_floating_placement_set },
         { "padding_set", luaA_padding_set },
-        { "key", luaA_key },
         { "mouse", luaA_mouse },
         { "resizehints_set", luaA_resizehints_set },
         { "font_set", luaA_font_set },
@@ -487,6 +429,9 @@ luaA_parserc(const char *rcfile)
 
     /* Export titlebar */
     luaA_openlib(L, "titlebar", awesome_titlebar_methods, awesome_titlebar_meta);
+
+    /* Export keys */
+    luaA_openlib(L, "keybinding", awesome_keybinding_methods, awesome_keybinding_meta);
 
     lua_pushliteral(L, "AWESOME_VERSION");
     lua_pushliteral(L, VERSION);
