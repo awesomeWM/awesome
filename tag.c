@@ -235,6 +235,10 @@ tag_view_only_byindex(int screen, int dindex)
     tag_view_only(tag);
 }
 
+/** Check for tag equality.
+ * \param Another tag.
+ * \return True if tags are equals.
+ */
 static int
 luaA_tag_eq(lua_State *L)
 {
@@ -244,6 +248,9 @@ luaA_tag_eq(lua_State *L)
     return 1;
 }
 
+/** Convert a tag to a printable string.
+ * \return A string.
+ */
 static int
 luaA_tag_tostring(lua_State *L)
 {
@@ -252,6 +259,9 @@ luaA_tag_tostring(lua_State *L)
     return 1;
 }
 
+/** Add a tag to a screen.
+ * \param A screen number.
+ */
 static int
 luaA_tag_add(lua_State *L)
 {
@@ -269,6 +279,10 @@ luaA_tag_add(lua_State *L)
     return 0;
 }
 
+/** Get all tags from a screen.
+ * \param A screen number.
+ * \return A table with all tags from the screen specified.
+ */
 static int
 luaA_tag_get(lua_State *L)
 {
@@ -320,6 +334,9 @@ luaA_tag_new(lua_State *L)
     return luaA_tag_userdata_new(tag);
 }
 
+/** Add or remove a tag from the current view.
+ * \param A boolean value, true to view tag, false otherwise.
+ */
 static int
 luaA_tag_view(lua_State *L)
 {
@@ -329,6 +346,9 @@ luaA_tag_view(lua_State *L)
     return 0;
 }
 
+/** Get the tag selection attribute.
+ * \return True if the tag is viewed, false otherwise.
+ */
 static int
 luaA_tag_isselected(lua_State *L)
 {
@@ -337,6 +357,10 @@ luaA_tag_isselected(lua_State *L)
     return 1;
 }
 
+/** Set the tag master width factor. This value is used in various layouts to
+ * determine the size of the master window.
+ * \param The master width ratio value, between 0 and 1.
+ */
 static int
 luaA_tag_mwfact_set(lua_State *L)
 {
@@ -354,6 +378,9 @@ luaA_tag_mwfact_set(lua_State *L)
     return 0;
 }
 
+/** Get the tag master width factor.
+ * \return The master width ratio value.
+ */
 static int
 luaA_tag_mwfact_get(lua_State *L)
 {
@@ -362,6 +389,10 @@ luaA_tag_mwfact_get(lua_State *L)
     return 1;
 }
 
+/** Set the number of columns. This is used in various layouts to set the number
+ * of columns used to display non-master windows.
+ * \param The number of columns, at least 1.
+ */
 static int
 luaA_tag_ncol_set(lua_State *L)
 {
@@ -379,6 +410,9 @@ luaA_tag_ncol_set(lua_State *L)
     return 0;
 }
 
+/** Get the number of columns used to display non-master windows on this tag.
+ * \return The number of column.
+ */
 static int
 luaA_tag_ncol_get(lua_State *L)
 {
@@ -387,6 +421,10 @@ luaA_tag_ncol_get(lua_State *L)
     return 1;
 }
 
+/** Set the number of master windows. This is used in various layouts to
+ * determine how many windows are in the master area.
+ * \param The number of master windows.
+ */
 static int
 luaA_tag_nmaster_set(lua_State *L)
 {
@@ -404,6 +442,9 @@ luaA_tag_nmaster_set(lua_State *L)
     return 0;
 }
 
+/** Get the number of master windows of the tag.
+ * \return The number of master windows.
+ */
 static int
 luaA_tag_nmaster_get(lua_State *L)
 {
@@ -412,6 +453,9 @@ luaA_tag_nmaster_get(lua_State *L)
     return 1;
 }
 
+/** Get the tag name.
+ * \return The tag name.
+ */
 static int
 luaA_tag_name_get(lua_State *L)
 {
@@ -420,6 +464,9 @@ luaA_tag_name_get(lua_State *L)
     return 1;
 }
 
+/** Set the tag name.
+ * \param A string with the new tag name.
+ */
 static int
 luaA_tag_name_set(lua_State *L)
 {
@@ -430,6 +477,8 @@ luaA_tag_name_set(lua_State *L)
     return 0;
 }
 
+/** Handle tag garbage collection.
+ */
 static int
 luaA_tag_gc(lua_State *L)
 {
@@ -438,6 +487,9 @@ luaA_tag_gc(lua_State *L)
     return 0;
 }
 
+/** Get the layout of the tag.
+ * \return The layout name.
+ */
 static int
 luaA_tag_layout_get(lua_State *L)
 {
@@ -447,6 +499,9 @@ luaA_tag_layout_get(lua_State *L)
     return 1;
 }
 
+/** Set the layout of the tag.
+ * \param A layout name.
+ */
 static int
 luaA_tag_layout_set(lua_State *L)
 {
@@ -466,6 +521,10 @@ luaA_tag_layout_set(lua_State *L)
 
 }
 
+/** Create a new userdata from a tag.
+ * \param t The tag.
+ * \return The luaA_settype returnn value.
+ */
 int
 luaA_tag_userdata_new(tag_t *t)
 {
