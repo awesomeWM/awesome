@@ -428,6 +428,7 @@ luaA_parserc(const char *rcfile)
         { "coords_get", luaA_screen_coords_get },
         { "count", luaA_screen_count },
         { "focus", luaA_screen_focus },
+        { NULL, NULL }
     };
     static const struct luaL_reg awesome_hooks_lib[] =
     {
