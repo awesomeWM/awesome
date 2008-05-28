@@ -36,6 +36,9 @@
 extern awesome_t globalconf;
 extern bool running;
 
+/** Draw a statusbar.
+ * \param statusbar The statusbar to draw.
+ */
 static void
 statusbar_draw(statusbar_t *statusbar)
 {
@@ -86,6 +89,10 @@ statusbar_draw(statusbar_t *statusbar)
     xcb_aux_sync(globalconf.connection);
 }
 
+/** Statusbar thread main function.
+ * \param p A pointer to a statusbar_t.
+ * \return Return NULL.
+ */
 static void *
 statusbar_refresh(void *p)
 {
@@ -105,6 +112,11 @@ statusbar_refresh(void *p)
     return NULL;
 }
 
+/** Update the statusbar position. It deletes every statusbar resources and
+ * create them back.
+ * \param statusbar The statusbar.
+ * \param position The new position.
+ */
 static void
 statusbar_position_update(statusbar_t *statusbar, position_t position)
 {
@@ -301,6 +313,9 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     statusbar_draw(statusbar);
 }
 
+/** Update the need_update attribute of a statusbar to true.
+ * \param statusbar The statusbar to flag.
+ */
 void
 statusbar_needupdate(statusbar_t *statusbar)
 {
@@ -310,18 +325,10 @@ statusbar_needupdate(statusbar_t *statusbar)
     pthread_cond_broadcast(&statusbar->need_update.cond);
 }
 
-statusbar_t *
-statusbar_getbyname(int screen, const char *name)
-{
-    statusbar_t *sb;
-
-    for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
-        if(!a_strcmp(sb->name, name))
-            return sb;
-
-    return NULL;
-}
-
+/** Check for statusbar equality.
+ * \param A statusbar.
+ * \return True if statusbar are equals, false otherwise.
+ */
 static int
 luaA_statusbar_eq(lua_State *L)
 {
@@ -331,6 +338,9 @@ luaA_statusbar_eq(lua_State *L)
     return 1;
 }
 
+/** Set the statusbar position.
+ * \param A position: left, right, top, bottom or off.
+ */
 static int
 luaA_statusbar_position_set(lua_State *L)
 {
@@ -359,6 +369,9 @@ luaA_statusbar_position_get(lua_State *L)
     return 1;
 }
 
+/** Set the statusbar alignment on screen.
+ * \param An alignment: right, left or center.
+ */
 static int
 luaA_statusbar_align_set(lua_State *L)
 {
@@ -372,6 +385,8 @@ luaA_statusbar_align_set(lua_State *L)
     return 0;
 }
 
+/** Convert a statusbar to a printable string.
+ */
 static int
 luaA_statusbar_tostring(lua_State *L)
 {
@@ -380,6 +395,9 @@ luaA_statusbar_tostring(lua_State *L)
     return 1;
 }
 
+/** Add a widget to a statusbar.
+ * \param A widget.
+ */
 static int
 luaA_statusbar_widget_add(lua_State *L)
 {
@@ -395,6 +413,9 @@ luaA_statusbar_widget_add(lua_State *L)
     return 0;
 }
 
+/** Add the statusbar on a screen.
+ * \param A screen number.
+ */
 static int
 luaA_statusbar_add(lua_State *L)
 {
@@ -433,6 +454,8 @@ luaA_statusbar_add(lua_State *L)
     return 0;
 }
 
+/** Remove the statusbar its screen.
+ */
 static int
 luaA_statusbar_remove(lua_State *L)
 {
@@ -455,6 +478,11 @@ luaA_statusbar_remove(lua_State *L)
     return 0;
 }
 
+/** Create a new statusbar.
+ * \param A table with at least a name attribute. Optionnaly defined values are:
+ * position, align, fg, bg, width and height.
+ * \return A brand new statusbar.
+ */
 static int
 luaA_statusbar_new(lua_State *L)
 {
@@ -498,6 +526,8 @@ luaA_statusbar_new(lua_State *L)
     return luaA_settype(L, "statusbar");
 }
 
+/** Handle statusbar garbage collection.
+ */
 static int
 luaA_statusbar_gc(lua_State *L)
 {
