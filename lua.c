@@ -320,6 +320,7 @@ luaA_hooks_newclient(lua_State *L)
 
 /** Set the function called each time the mouse enter a new window. This
  * function is called with the client object as argument.
+ * \param A function to call each time a client gets mouse over it.
  */
 static int
 luaA_hooks_mouseover(lua_State *L)
