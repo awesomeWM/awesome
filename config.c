@@ -40,6 +40,12 @@
 #ifndef Button7
 #define Button7 7
 #endif
+#ifndef Button8
+#define Button8 8
+#endif
+#ifndef Button9
+#define Button9 9
+#endif
 
 extern AwesomeConf globalconf;
 extern cfg_opt_t awesome_opts[];
@@ -110,6 +116,8 @@ mouse_button_lookup(const char *button)
         {"5", Button5},
         {"6", Button6},
         {"7", Button7},
+        {"8", Button8},
+        {"9", Button9},
         {NULL, 0}
     };
     int i;
