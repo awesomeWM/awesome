@@ -30,7 +30,7 @@ for i, line in ipairs(ilines) do
         comment_start = false
         local l = ilines[i + 2]
         local fctname
-        _, _, fctname = l:find("^(.+)%(")
+        _, _, fctname = l:find("^(.+)%(lua_State")
         if fctname then
             function_doc[fctname] = comment
         end
