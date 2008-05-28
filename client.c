@@ -666,11 +666,13 @@ client_updatewmhints(client_t *c)
     if((wmh = xcb_get_wm_hints(globalconf.connection, c->win)))
     {
         const uint32_t wm_hints_flags = xcb_wm_hints_get_flags(wmh);
-        if((c->isurgent = ((wm_hints_flags & XCB_WM_X_URGENCY_HINT) &&
-                           globalconf.focus->client != c)))
+        if((c->isurgent = (wm_hints_flags & XCB_WM_X_URGENCY_HINT)))
         {
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
             titlebar_draw(c);
+            /* execute hook */
+            luaA_client_userdata_new(c);
+            luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1);
         }
         if((wm_hints_flags & XCB_WM_STATE_HINT) &&
            (xcb_wm_hints_get_initial_state(wmh) == XCB_WM_WITHDRAWN_STATE))

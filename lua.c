@@ -360,6 +360,20 @@ luaA_hooks_titleupdate(lua_State *L)
     return 0;
 }
 
+/** Set the function called when a client get urgency flag. This function is called with
+ * the client object as argument.
+ * \param A function to call when a client get the urgent flag.
+ */
+static int
+luaA_hooks_urgent(lua_State *L)
+{
+    luaA_checkfunction(L, 1);
+    if(globalconf.hooks.urgent)
+        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.urgent);
+    globalconf.hooks.urgent = luaL_ref(L, LUA_REGISTRYINDEX);
+    return 0;
+}
+
 /** Set default font.
  * \param A string with a font name in Pango format.
  */
@@ -439,6 +453,7 @@ luaA_parserc(const char *rcfile)
         { "mouseover", luaA_hooks_mouseover },
         { "arrange", luaA_hooks_arrange },
         { "titleupdate", luaA_hooks_titleupdate },
+        { "urgent", luaA_hooks_urgent },
         { NULL, NULL }
     };
 

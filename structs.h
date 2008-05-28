@@ -429,6 +429,8 @@ struct awesome_t
         luaA_function arrange;
         /** Command to run on title change */
         luaA_function titleupdate;
+        /** Command to run on urgent flag */
+        luaA_function urgent;
     } hooks;
 };
 
