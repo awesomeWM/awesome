@@ -134,6 +134,9 @@ widget_invalidate_cache(int screen, int flags)
             }
 }
 
+/** Set a statusbar needs update because it has widget.
+ * \param widget The widget to look for.
+ */
 void
 widget_invalidate_statusbar_bywidget(widget_t *widget)
 {
@@ -153,6 +156,10 @@ widget_invalidate_statusbar_bywidget(widget_t *widget)
                 }
 }
 
+/** Create a new widget userdata. The object is pushed on the stack.
+ * \param widget The widget.
+ * \return Return luaA_settype() return value.
+ */
 static int
 luaA_widget_userdata_new(widget_t *widget)
 {
@@ -163,6 +170,11 @@ luaA_widget_userdata_new(widget_t *widget)
     return luaA_settype(globalconf.L, "widget");
 }
 
+/** Create a new widget.
+ * \param A table with at least a name and a type value. Optionnal attributes
+ * are: align.
+ * \return A brand new widget.
+ */
 static int
 luaA_widget_new(lua_State *L)
 {
@@ -189,6 +201,12 @@ luaA_widget_new(lua_State *L)
     return luaA_widget_userdata_new(w);
 }
 
+/** Add a mouse button bindings to a widget.
+ * \param A table containing modifiers keys.
+ * \param A button number.
+ * \param A function to execute. Some widgets may passe arguments to this
+ * function.
+ */
 static int
 luaA_widget_mouse(lua_State *L)
 {
@@ -221,6 +239,11 @@ luaA_widget_mouse(lua_State *L)
     return 0;
 }
 
+/** Do what should be done with a widget_tell_status_t for a widget.
+ * \param widget The widget.
+ * \param status The status returned by the tell function of the widget.
+ * \para property The property updated.
+ */
 void
 widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const char *property)
 {
@@ -254,6 +277,10 @@ widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const ch
     }
 }
 
+/** Set a widget property. Each widget type has its own set of property.
+ * \param The property name.
+ * \param The property value.
+ */
 static int
 luaA_widget_set(lua_State *L)
 {
@@ -269,6 +296,8 @@ luaA_widget_set(lua_State *L)
     return 0;
 }
 
+/** Handle widget garbage collection.
+ */
 static int
 luaA_widget_gc(lua_State *L)
 {
@@ -277,6 +306,8 @@ luaA_widget_gc(lua_State *L)
     return 0;
 }
 
+/** Convert a widget into a printable string.
+ */
 static int
 luaA_widget_tostring(lua_State *L)
 {
@@ -285,6 +316,9 @@ luaA_widget_tostring(lua_State *L)
     return 1;
 }
 
+/** Check for widget equality.
+ * \param Another widget.
+ */
 static int
 luaA_widget_eq(lua_State *L)
 {
@@ -294,6 +328,9 @@ luaA_widget_eq(lua_State *L)
     return 1;
 }
 
+/** Get all widget from all statusbars.
+ * \return A table with all widgets from all statusbars.
+ */
 static int
 luaA_widget_get(lua_State *L)
 {
@@ -332,6 +369,9 @@ luaA_widget_get(lua_State *L)
     return 1;
 }
 
+/** Set the widget name.
+ * \param A string with the new widget name.
+ */
 static int
 luaA_widget_name_set(lua_State *L)
 {
@@ -342,6 +382,9 @@ luaA_widget_name_set(lua_State *L)
     return 0;
 }
 
+/** Get the widget name.
+ * \return A string with the name of the widget.
+ */
 static int
 luaA_widget_name_get(lua_State *L)
 {
@@ -350,6 +393,10 @@ luaA_widget_name_get(lua_State *L)
     return 1;
 }
 
+/** Set the visible attribute of a widget. If a widget is not visible, it is not
+ * drawn on the statusbar.
+ * \param A boolean value.
+ */
 static int
 luaA_widget_visible_set(lua_State *L)
 {
@@ -359,6 +406,9 @@ luaA_widget_visible_set(lua_State *L)
     return 0;
 }
 
+/** Get the visible attribute of a widget.
+ * \return A boolean value, true if the widget is visible, false otherwise.
+ */
 static int
 luaA_widget_visible_get(lua_State *L)
 {
