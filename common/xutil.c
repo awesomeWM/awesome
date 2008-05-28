@@ -577,8 +577,8 @@ xutil_button_fromint(int button)
         { 4, XCB_BUTTON_INDEX_4 },
         { 5, XCB_BUTTON_INDEX_5 },
         { 6, XCB_BUTTON_INDEX_6 },
-        { 7, XCB_BUTTON_INDEX_7 }
-        { 8, XCB_BUTTON_INDEX_8 }
+        { 7, XCB_BUTTON_INDEX_7 },
+        { 8, XCB_BUTTON_INDEX_8 },
         { 9, XCB_BUTTON_INDEX_9 }
     };
 
