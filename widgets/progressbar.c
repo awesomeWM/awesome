@@ -394,11 +394,10 @@ static widget_tell_status_t
 progressbar_tell(widget_t *widget, const char *property, const char *new_value)
 {
     Data *d = widget->data;
-    int i = 0, value, tmp;
+    int i = 0, value;
     char *title, *setting;
     char *new_val;
-    float ftmp;
-    bool btmp, found;
+    bool found;
 
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
@@ -501,40 +500,19 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     else if(!a_strcmp(property, "gap"))
         d->gap = atoi(new_value);
     else if(!a_strcmp(property, "ticks_count"))
-    {
-        tmp = d->ticks_count;
         d->ticks_count = atoi(new_value);
-    }
     else if(!a_strcmp(property, "ticks_gap"))
-    {
-        tmp = d->ticks_gap;
         d->ticks_gap = atoi(new_value);
-    }
     else if(!a_strcmp(property, "border_padding"))
-    {
-        tmp = d->border_padding;
         d->border_padding = atoi(new_value);
-    }
     else if(!a_strcmp(property, "border_width"))
-    {
-        tmp = d->border_width;
         d->border_width = atoi(new_value);
-    }
     else if(!a_strcmp(property, "width"))
-    {
-        tmp = d->width;
         d->width = atoi(new_value);
-    }
     else if(!a_strcmp(property, "height"))
-    {
-        ftmp = d->height;
         d->height = atof(new_value);
-    }
     else if(!a_strcmp(property, "vertical"))
-    {
-        btmp = d->vertical;
         d->vertical = a_strtobool(new_value);
-    }
     else
         return WIDGET_ERROR;
 
