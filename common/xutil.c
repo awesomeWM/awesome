@@ -548,10 +548,10 @@ xutil_keymask_fromstr(const char *keyname)
 #define XCB_BUTTON_INDEX_7 7
 #endif
 #ifndef XCB_BUTTON_INDEX_8
-#define XCB_BUTTON_INDEX_7 8
+#define XCB_BUTTON_INDEX_8 8
 #endif
 #ifndef XCB_BUTTON_INDEX_9
-#define XCB_BUTTON_INDEX_7 9
+#define XCB_BUTTON_INDEX_9 9
 #endif
 
 /** Link a name to a mouse button symbol */
