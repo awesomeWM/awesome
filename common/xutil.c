@@ -547,6 +547,12 @@ xutil_keymask_fromstr(const char *keyname)
 #ifndef XCB_BUTTON_INDEX_7
 #define XCB_BUTTON_INDEX_7 7
 #endif
+#ifndef XCB_BUTTON_INDEX_8
+#define XCB_BUTTON_INDEX_7 8
+#endif
+#ifndef XCB_BUTTON_INDEX_9
+#define XCB_BUTTON_INDEX_7 9
+#endif
 
 /** Link a name to a mouse button symbol */
 typedef struct
@@ -572,6 +578,8 @@ xutil_button_fromint(int button)
         { 5, XCB_BUTTON_INDEX_5 },
         { 6, XCB_BUTTON_INDEX_6 },
         { 7, XCB_BUTTON_INDEX_7 }
+        { 8, XCB_BUTTON_INDEX_8 }
+        { 9, XCB_BUTTON_INDEX_9 }
     };
 
     if(button >= 1 && button <= countof(mouse_button_list))
