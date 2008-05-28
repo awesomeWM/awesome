@@ -871,21 +871,35 @@ luaA_client_focus_get(lua_State *L __attribute__ ((unused)))
     return 1;
 }
 
+/** Set client border width.
+ * \c The client.
+ * \ width The border width.
+ */
+void
+client_setborder(client_t *c, uint32_t width)
+{
+    if(c->noborder && width > 0)
+        return;
+
+    c->border = width;
+    xcb_configure_window(globalconf.connection, c->win,
+                         XCB_CONFIG_WINDOW_BORDER_WIDTH, &width);
+    globalconf.screens[c->screen].need_arrange = true;
+}
+
+/** Set the client border width and color.
+ * \param The border width in pixel.
+ * \param The border color.
+ */
 static int
 luaA_client_border_set(lua_State *L)
 {
     client_t **c = luaL_checkudata(L, 1, "client");
-    int width = luaA_getopt_number(L, 2, "width", -1);
+    uint32_t width = luaA_getopt_number(L, 2, "width", 0);
     const char *colorstr = luaA_getopt_string(L, 2, "color", NULL);
     xcolor_t color;
 
-    if(width >= 0)
-    {
-        (*c)->border = width;
-        globalconf.screens[(*c)->screen].need_arrange = true;
-        xcb_configure_window(globalconf.connection, (*c)->win,
-                             XCB_CONFIG_WINDOW_BORDER_WIDTH, (uint32_t *) &width);
-    }
+    client_setborder(*c, width);
 
     if(colorstr
         && draw_color_new(globalconf.connection, (*c)->phys_screen, colorstr, &color))

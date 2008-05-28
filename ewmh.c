@@ -286,8 +286,9 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
                 c->titlebar.position = c->titlebar_oldposition;
                 xcb_map_window(globalconf.connection, c->titlebar_sw->window);
             }
-            c->border = c->oldborder;
+            c->noborder = false;
             c->ismax = false;
+            client_setborder(c, c->oldborder);
             client_setfloating(c, c->wasfloating, c->oldlayer);
         }
         else if(set == _NET_WM_STATE_ADD)
@@ -302,9 +303,10 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
                 xcb_unmap_window(globalconf.connection, c->titlebar_sw->window);
                 c->titlebar.position = Off;
             }
-            c->oldborder = c->border;
-            c->border = 0;
             c->ismax = true;
+            c->oldborder = c->border;
+            client_setborder(c, 0);
+            c->noborder = true;
             client_setfloating(c, true, LAYER_FULLSCREEN);
         }
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -348,7 +350,6 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
     else if(state == net_wm_window_type_dock
             || state == net_wm_window_type_splash)
     {
-        c->border = 0;
         c->skip = true;
         c->isfixed = true;
         if(c->titlebar.position)
@@ -356,6 +357,8 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
             xcb_unmap_window(globalconf.connection, c->titlebar_sw->window);
             c->titlebar.position = Off;
         }
+        client_setborder(c, 0);
+        c->noborder = true;
         client_setfloating(c, true, LAYER_ABOVE);
     }
     else if (state == net_wm_window_type_dialog)

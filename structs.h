@@ -246,6 +246,8 @@ struct client_t
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
     int border, oldborder;
+    /** True if the client does not want any border */
+    bool noborder;
     /** Has urgency hint */
     bool isurgent;
     /** Store previous floating state before maximizing */
