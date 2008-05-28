@@ -309,14 +309,13 @@ mouse_client_move(client_t *c, int snap)
     }
 }
 
-/** Resize the focused window with the mouse.
- * \param screen Screen ID
- * \param arg Unused
+/** Resize a client with the mouse.
+ * \param c The client to resize.
  */
 static void
 mouse_client_resize(client_t *c)
 {
-    int ocx = 0, ocy = 0, n;
+    int ocx = 0, ocy = 0, n, screen;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
     tag_t **curtags;
@@ -329,9 +328,6 @@ mouse_client_resize(client_t *c)
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
     xcb_screen_t *s;
 
-    if(c->isfixed)
-        return;
-
     curtags = tags_get_current(c->screen);
     layout = curtags[0]->layout;
     s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
@@ -339,6 +335,9 @@ mouse_client_resize(client_t *c)
     /* only handle floating and tiled layouts */
     if(layout == layout_floating || c->isfloating)
     {
+        if(c->isfixed)
+            return;
+
         ocx = c->geometry.x;
         ocy = c->geometry.y;
         c->ismax = false;
@@ -348,13 +347,14 @@ mouse_client_resize(client_t *c)
     else if (layout == layout_tile || layout == layout_tileleft
              || layout == layout_tilebottom || layout == layout_tiletop)
     {
+        screen = c->screen;
         for(n = 0, c = globalconf.clients; c; c = c->next)
-            if(IS_TILED(c, c->screen))
+            if(IS_TILED(c, screen))
                 n++;
 
         if(n <= curtags[0]->nmaster) return;
 
-        for(c = globalconf.clients; c && !IS_TILED(c, c->screen); c = c->next);
+        for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
         if(!c) return;
 
         area = screen_get_area(c->screen,
