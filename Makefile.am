@@ -146,7 +146,7 @@ awesome_client_SOURCES = \
 	common/socket.c common/socket.h \
 	common/version.c common/version.h \
 	common/util.c common/util.h
-awesome_client_LDADD = -lreadline
+awesome_client_LDADD = $(readline_LIBS)
 
 if HAVE_XMLTO
 if HAVE_ASCIIDOC
