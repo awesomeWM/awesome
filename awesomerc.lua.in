@@ -97,7 +97,7 @@ end
 awesome.mouse({ }, 3, function () awful.spawn(terminal) end)
 awesome.mouse({ }, 4, awful.tag.viewnext)
 awesome.mouse({ }, 5, awful.tag.viewprev)
-client.mouse({ }, 1, function (c) c:focus_set() end)
+client.mouse({ }, 1, function (c) c:focus_set(); c:raise() end)
 client.mouse({ modkey }, 1, function (c) c:mouse_move() end)
 client.mouse({ modkey }, 3, function (c) c:mouse_resize() end)
 -- }}}
