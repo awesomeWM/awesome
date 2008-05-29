@@ -79,7 +79,6 @@ progressbar_pcolor_set(xcolor_t **ppcolor, char *new_color)
                     new_color, *ppcolor))
        && flag)
         p_delete(ppcolor);
-        *ppcolor = NULL;
 }
 
 static void
@@ -516,19 +515,11 @@ progressbar_new(alignment_t align)
     w->tell = progressbar_tell;
     d = w->data = p_new(Data, 1);
 
-    d->data_items = 0;
-    d->data_title = NULL;
-    d->fg = d->bg = d->fg_off = d->bordercolor = NULL;
-    d->pfg_center =  d->pfg_end = NULL;
-    d->percent = NULL;
-    d->reverse = NULL;
-
     d->height = 0.80;
     d->width = 80;
 
     d->ticks_gap = 1;
     d->border_width = 1;
-    d->border_padding = 0;
     d->gap = 2;
 
     return w;
