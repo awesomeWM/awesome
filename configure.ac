@@ -160,7 +160,9 @@ PKG_CHECK_MODULES([xcb_icccm], [xcb-icccm],,
 PKG_CHECK_MODULES([cairo_xcb], [cairo-xcb],,
    [AC_MSG_ERROR([awesome requires cairo-xcb.])])
 AC_CHECK_LIB(pthread, pthread_create)
-AC_CHECK_LIB(readline, readline, [AC_SUBST([readline_LIBS], ["-lreadline -lncurses"])], -lncurses)
+AC_CHECK_LIB(readline, readline,
+             [AC_SUBST([readline_LIBS], ["-lreadline -lncurses"])],
+             [AC_MSG_FAILURE([awesome needs readline])], -lncurses)
 
 # Checks for header files.
 AC_PATH_X
