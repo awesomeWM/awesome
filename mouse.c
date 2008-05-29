@@ -237,7 +237,7 @@ mouse_client_move(client_t *c, int snap)
         xcb_aux_sync(globalconf.connection);
     }
 
-    for(;;)
+    while(true)
     {
         /* XMaskEvent allows to retrieve only specified events from
          * the queue and requeue the other events... */
@@ -360,19 +360,11 @@ mouse_client_resize(client_t *c)
         area = screen_get_area(c->screen,
                                globalconf.screens[c->screen].statusbar,
                                &globalconf.screens[c->screen].padding);
+
+    xcb_aux_sync(globalconf.connection);
     }
     else
         return;
-
-    grab_pointer_c = xcb_grab_pointer(globalconf.connection, false, s->root,
-                                      MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                      s->root, globalconf.cursor[CurResize], XCB_CURRENT_TIME);
-
-    if(!(grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection,
-                                                 grab_pointer_c, NULL)))
-        return;
-
-    p_delete(&grab_pointer_r);
 
     if(curtags[0]->layout == layout_tileleft)
         xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0, 0, 0,
@@ -385,9 +377,17 @@ mouse_client_resize(client_t *c)
                          c->geometry.width + c->border - 1,
                          c->geometry.height + c->border - 1);
 
-    xcb_aux_sync(globalconf.connection);
+    grab_pointer_c = xcb_grab_pointer(globalconf.connection, false, s->root,
+                                      MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
+                                      s->root, globalconf.cursor[CurResize], XCB_CURRENT_TIME);
 
-    for(;;)
+    if(!(grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection,
+                                                 grab_pointer_c, NULL)))
+        return;
+
+    p_delete(&grab_pointer_r);
+
+    while(true)
     {
         /* XMaskEvent allows to retrieve only specified events from
          * the queue and requeue the other events... */
