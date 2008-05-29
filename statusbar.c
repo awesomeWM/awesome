@@ -80,7 +80,6 @@ statusbar_draw(statusbar_t *statusbar)
             if((data = xcb_get_property_value(prop_r)))
             {
                rootpix = *(xcb_pixmap_t *) data;
-               printf("data %d\n", rootpix);
                xcb_copy_area(globalconf.connection, rootpix,
                              statusbar->sw->drawable, statusbar->sw->gc,
                              statusbar->sw->geometry.x, statusbar->sw->geometry.y,
