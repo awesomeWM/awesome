@@ -285,6 +285,8 @@ main(int argc, char **argv)
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
+    time_t lastrun = time(NULL);
+    struct timeval *tv = NULL;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -478,7 +480,7 @@ main(int argc, char **argv)
     /* refresh everything before waiting events */
     layout_refresh();
 
-    /* main event loop, also reads status text from socket */
+    /* main event loop */
     while(running)
     {
         FD_ZERO(&rd);
@@ -487,7 +489,15 @@ main(int argc, char **argv)
         if(dbusfd >= 0)
             FD_SET(dbusfd, &rd);
         FD_SET(xfd, &rd);
-        if(select(MAX(MAX(xfd, csfd), dbusfd) + 1, &rd, NULL, NULL, NULL) == -1)
+        if(globalconf.stimeout)
+        {
+            if(!tv)
+                tv = p_new(struct timeval, 1);
+            tv->tv_sec = MAX(globalconf.stimeout - (time(NULL) - lastrun), 1);
+        }
+        else
+            p_delete(&tv);
+        if(select(MAX(MAX(xfd, csfd), dbusfd) + 1, &rd, NULL, NULL, tv) == -1)
         {
             if(errno == EINTR)
                 continue;
@@ -536,6 +546,12 @@ main(int argc, char **argv)
         }
         layout_refresh();
         xcb_aux_sync(globalconf.connection);
+
+        if(tv && lastrun + globalconf.stimeout <= time(NULL))
+        {
+            luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0);
+            lastrun = time(NULL);
+        }
     }
 
     a_dbus_cleanup();

@@ -438,7 +438,11 @@ struct awesome_t
         luaA_function titleupdate;
         /** Command to run on urgent flag */
         luaA_function urgent;
+        /** Command to run on time */
+        luaA_function timer;
     } hooks;
+    /** The timeout after which we need to stop select() */
+    long stimeout;
 };
 
 #endif

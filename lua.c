@@ -317,6 +317,25 @@ luaA_hooks_urgent(lua_State *L)
     return 0;
 }
 
+/** Set the function to be called every N seconds.
+ * \param The number of seconds to run function every. Set 0 to disable.
+ * \param A function to call every N seconds (optionnal).
+ */
+static int
+luaA_hooks_timer(lua_State *L)
+{
+    globalconf.stimeout = luaL_checknumber(L, 1);
+
+    if(lua_gettop(L) == 2 && lua_isfunction(L, 2))
+    {
+        if(globalconf.hooks.timer)
+            luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.timer);
+        globalconf.hooks.timer = luaL_ref(L, LUA_REGISTRYINDEX);
+    }
+
+    return 0;
+}
+
 /** Set default font.
  * \param A string with a font name in Pango format.
  */
@@ -396,6 +415,7 @@ luaA_parserc(const char *rcfile)
         { "arrange", luaA_hooks_arrange },
         { "titleupdate", luaA_hooks_titleupdate },
         { "urgent", luaA_hooks_urgent },
+        { "timer", luaA_hooks_timer },
         { NULL, NULL }
     };
 
