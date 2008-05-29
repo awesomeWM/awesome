@@ -888,8 +888,8 @@ client_setborder(client_t *c, uint32_t width)
 }
 
 /** Set the client border width and color.
- * \param The border width in pixel.
- * \param The border color.
+ * \param A table with `width' key for the border width in pixel and `color' key
+ * for the border color.
  */
 static int
 luaA_client_border_set(lua_State *L)
