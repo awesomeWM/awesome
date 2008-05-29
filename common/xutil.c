@@ -171,7 +171,7 @@ xutil_intern_atom(xcb_connection_t *c, xutil_atom_cache_t **atoms,
     xutil_atom_cache_t *atom_next;
     int cmp_cache;
 
-    atom_req.name = strdup(name);
+    atom_req.name = a_strdup(name);
 
     /* Check if this atom is present in the cache ordered
      * linked-list */
