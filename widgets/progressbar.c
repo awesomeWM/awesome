@@ -27,23 +27,23 @@ extern awesome_t globalconf;
 
 typedef struct
 {
-    /** Percent 0 to 100 */
-    int *percent;
-    /** data_title of the data */
+    /** Pointer to values array */
+    float *values;
+    /** Title of the data/bar */
     char **data_title;
     /** Width of the data_items */
     int width;
     /** Pixel between data items (bars) */
     int gap;
-    /**  border width in pixels */
+    /** Border width in pixels */
     int border_width;
-    /**  padding between border and ticks/bar */
+    /** Padding between border and ticks/bar */
     int border_padding;
-    /**  gap/distance between the individual ticks */
+    /** Gap/distance between the individual ticks */
     int ticks_gap;
-    /**  total number of ticks */
+    /** Total number of ticks */
     int ticks_count;
-    /** reverse drawing */
+    /** Reverse filling */
     bool *reverse;
     /** 90 Degree's turned */
     bool vertical;
@@ -88,7 +88,7 @@ progressbar_data_add(Data *d, const char *new_data_title)
 
     /* memory (re-)allocating */
     p_realloc(&(d->data_title), d->data_items);
-    p_realloc(&(d->percent), d->data_items);
+    p_realloc(&(d->values), d->data_items);
     p_realloc(&(d->reverse), d->data_items);
     p_realloc(&(d->fg), d->data_items);
     p_realloc(&(d->fg_off), d->data_items);
@@ -100,7 +100,7 @@ progressbar_data_add(Data *d, const char *new_data_title)
     /* initialize values for new data section */
     d->reverse[d->data_items - 1] = false;
     d->data_title[d->data_items - 1] = a_strdup(new_data_title);
-    d->percent[d->data_items - 1] = 0;
+    d->values[d->data_items - 1] = 0.0;
 
     d->fg[d->data_items - 1] = globalconf.colors.fg;
     d->fg_off[d->data_items - 1] = globalconf.colors.bg;
@@ -116,7 +116,7 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
                  int used __attribute__ ((unused)))
 {
     /* pb_.. values points to the widget inside a potential border */
-    int i, percent_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
+    int i, values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
     int unit = 0; /* tick + gap */
     area_t rectangle, pattern_rect;
     draw_context_t *ctx = statusbar->ctx;
@@ -184,14 +184,14 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
         {
             if(d->ticks_count && d->ticks_gap)
             {
-                percent_ticks = (int)(d->ticks_count * (float)d->percent[i] / 100 + 0.5);
-                if(percent_ticks)
-                    pb_progress = percent_ticks * unit - d->ticks_gap;
+                values_ticks = (int)(d->ticks_count * d->values[i] / 100 + 0.5);
+                if(values_ticks)
+                    pb_progress = values_ticks * unit - d->ticks_gap;
                 else
                     pb_progress = 0;
             }
             else
-                pb_progress = (int)(pb_height * d->percent[i] / 100.0 + 0.5);
+                pb_progress = (int)(pb_height * d->values[i] / 100.0 + 0.5);
 
             if(d->border_width)
             {
@@ -283,14 +283,14 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
             if(d->ticks_count && d->ticks_gap)
             {
                 /* +0.5 rounds up ticks -> turn on a tick when half of it is reached */
-                percent_ticks = (int) (d->ticks_count * (float) d->percent[i] / 100 + 0.5);
-                if(percent_ticks)
-                    pb_progress = percent_ticks * unit - d->ticks_gap;
+                values_ticks = (int) (d->ticks_count * d->values[i] / 100 + 0.5);
+                if(values_ticks)
+                    pb_progress = values_ticks * unit - d->ticks_gap;
                 else
                     pb_progress = 0;
             }
             else
-                pb_progress = (int) (pb_width * d->percent[i] / 100.0 + 0.5);
+                pb_progress = (int) (pb_width * d->values[i] / 100.0 + 0.5);
 
             if(d->border_width)
             {
@@ -378,7 +378,7 @@ static widget_tell_status_t
 progressbar_tell(widget_t *widget, const char *property, const char *new_value)
 {
     Data *d = widget->data;
-    int i = 0, percent, tmp;
+    int i = 0, value, tmp;
     char *title, *setting;
     char *new_val;
     float ftmp;
@@ -399,15 +399,15 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         for(i = 0; i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
             {
-                percent = atoi(setting);
-                d->percent[i] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
+                value = atof(setting);
+                d->values[i] = (value < 0.0 ? 0.0 : (value > 100.0 ? 100.0 : value));
                 p_delete(&new_val);
                 return WIDGET_NOERROR;
             }
         /* no section found -> create one */
         progressbar_data_add(d, title);
-        percent = atoi(setting);
-        d->percent[d->data_items - 1] = (percent < 0 ? 0 : (percent > 100 ? 100 : percent));
+        value = atoi(setting);
+        d->values[d->data_items - 1] = (value < 0.0 ? 0.0 : (value > 100.0 ? 100.0 : value));
         p_delete(&new_val);
         return WIDGET_NOERROR;
     }
