@@ -29,6 +29,10 @@ typedef struct
 {
     /** Pointer to values array */
     float *values;
+    /** These or lower values won't fill the bar at all*/
+    float *min_value;
+    /** These or higher values fill the bar fully */
+    float *max_value;
     /** Title of the data/bar */
     char **data_title;
     /** Width of the data_items */
@@ -89,6 +93,8 @@ progressbar_data_add(Data *d, const char *new_data_title)
     /* memory (re-)allocating */
     p_realloc(&(d->data_title), d->data_items);
     p_realloc(&(d->values), d->data_items);
+    p_realloc(&(d->min_value), d->data_items);
+    p_realloc(&(d->max_value), d->data_items);
     p_realloc(&(d->reverse), d->data_items);
     p_realloc(&(d->fg), d->data_items);
     p_realloc(&(d->fg_off), d->data_items);
@@ -101,6 +107,8 @@ progressbar_data_add(Data *d, const char *new_data_title)
     d->reverse[d->data_items - 1] = false;
     d->data_title[d->data_items - 1] = a_strdup(new_data_title);
     d->values[d->data_items - 1] = 0.0;
+    d->min_value[d->data_items - 1] = 0.0;
+    d->max_value[d->data_items - 1] = 100.0;
 
     d->fg[d->data_items - 1] = globalconf.colors.fg;
     d->fg_off[d->data_items - 1] = globalconf.colors.bg;
@@ -184,14 +192,20 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
         {
             if(d->ticks_count && d->ticks_gap)
             {
-                values_ticks = (int)(d->ticks_count * d->values[i] / 100 + 0.5);
+                values_ticks = (int)(d->ticks_count * (d->values[i] - d->min_value[i])
+                               / (d->max_value[i] - d->min_value[i]) + 0.5);
                 if(values_ticks)
                     pb_progress = values_ticks * unit - d->ticks_gap;
                 else
                     pb_progress = 0;
             }
             else
-                pb_progress = (int)(pb_height * d->values[i] / 100.0 + 0.5);
+                /* e.g.: min = 50; max = 56; 53 should show 50% graph
+                 * (53(val) - 50(min) / (56(max) - 50(min) = 3 / 5 = 0.5 = 50%
+                 * round that ( + 0.5 and (int)) and finally multiply with height
+                 */
+                pb_progress = (int)(pb_height * (d->values[i] - d->min_value[i])
+                              / (d->max_value[i] - d->min_value[i]) + 0.5);
 
             if(d->border_width)
             {
@@ -283,14 +297,16 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
             if(d->ticks_count && d->ticks_gap)
             {
                 /* +0.5 rounds up ticks -> turn on a tick when half of it is reached */
-                values_ticks = (int) (d->ticks_count * d->values[i] / 100 + 0.5);
+                values_ticks = (int)(d->ticks_count * (d->values[i] - d->min_value[i])
+                               / (d->max_value[i] - d->min_value[i]) + 0.5);
                 if(values_ticks)
                     pb_progress = values_ticks * unit - d->ticks_gap;
                 else
                     pb_progress = 0;
             }
             else
-                pb_progress = (int) (pb_width * d->values[i] / 100.0 + 0.5);
+                pb_progress = (int)(pb_width * (d->values[i] - d->min_value[i])
+                              / (d->max_value[i] - d->min_value[i]) + 0.5);
 
             if(d->border_width)
             {
@@ -400,14 +416,16 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
             if(!a_strcmp(title, d->data_title[i]))
             {
                 value = atof(setting);
-                d->values[i] = (value < 0.0 ? 0.0 : (value > 100.0 ? 100.0 : value));
+                d->values[i] = (value < d->min_value[i] ? d->min_value[i] :
+                               (value > d->max_value[i] ? d->max_value[i] : value));
                 p_delete(&new_val);
                 return WIDGET_NOERROR;
             }
         /* no section found -> create one */
         progressbar_data_add(d, title);
         value = atoi(setting);
-        d->values[d->data_items - 1] = (value < 0.0 ? 0.0 : (value > 100.0 ? 100.0 : value));
+        d->values[d->data_items - 1] = (value < d->min_value[i] ? d->min_value[i] :
+                                       (value > d->max_value[i] ? d->max_value[i] : value));
         p_delete(&new_val);
         return WIDGET_NOERROR;
     }
@@ -418,6 +436,8 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
             || !a_strcmp(property, "bordercolor")
             || !a_strcmp(property, "fg_center")
             || !a_strcmp(property, "fg_end")
+            || !a_strcmp(property, "min_value")
+            || !a_strcmp(property, "max_value")
             || !a_strcmp(property, "reverse"))
     {
         /* check if this section is defined already */
@@ -453,6 +473,25 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
             progressbar_pcolor_set(&(d->pfg_center[i]), setting);
         else if(!a_strcmp(property, "fg_end"))
             progressbar_pcolor_set(&(d->pfg_end[i]), setting);
+        else if(!a_strcmp(property, "min_value"))
+        {
+            d->min_value[i] = atof(setting);
+            /* hack to prevent max_value beeing less than min_value
+             * and also preventing a division by zero when both are equal */
+            if(d->max_value[i] <= d->min_value[i])
+                d->max_value[i] = d->max_value[i] + 0.0001;
+            /* force a actual value into the newly possible range */
+            if(d->values[i] < d->min_value[i])
+                d->values[i] = d->min_value[i];
+        }
+        else if(!a_strcmp(property, "max_value"))
+        {
+            d->max_value[i] = atof(setting);
+            if(d->min_value[i] >= d->max_value[i])
+                d->min_value[i] = d->max_value[i] - 0.0001;
+            if(d->values[i] > d->max_value[i])
+                d->values[i] = d->max_value[i];
+        }
         else if(!a_strcmp(property, "reverse"))
             d->reverse[i] = a_strtobool(setting);
 
