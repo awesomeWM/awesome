@@ -169,9 +169,28 @@ static inline ssize_t a_strnlen(const char *s, ssize_t n)
  * \param[in] s the string to duplicate.
  * \return a pointer to the duplicated string.
  */
-static inline char *a_strdup(const char *s)
+static inline
+char *a_strdup(const char *s)
 {
     ssize_t len = a_strlen(s);
+    return len ? p_dup(s, len + 1) : NULL;
+}
+
+/** \brief safe limited strdup.
+ *
+ * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into a newly
+ * allocated buffer, always adding a final \c \\0, and returns that buffer.
+ *
+ * \warning when s is \c "" or l is 0, it returns NULL !
+ *
+ * \param[in]  s        source string.
+ * \param[in]  l        maximum number of chars to copy.
+ * \return a newly allocated buffer containing the first \c l chars of \c src.
+*/
+static inline
+char * a_strndup(const char *s, ssize_t l)
+{
+    ssize_t len = MIN(a_strlen(s), l);
     return len ? p_dup(s, len + 1) : NULL;
 }
 
@@ -211,7 +230,6 @@ static inline int a_strncmp(const char *a, const char *b, ssize_t n)
 
 ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l) __attribute__((nonnull(1)));
 ssize_t a_strcpy(char *dst, ssize_t n, const char *src) __attribute__((nonnull(1)));
-char* a_strndup(const char *src, ssize_t l) __attribute__((nonnull(1)));
 
 /** \brief safe strcat.
  *
