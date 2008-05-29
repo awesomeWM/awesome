@@ -233,13 +233,7 @@ xutil_intern_atom_reply(xcb_connection_t *c, xutil_atom_cache_t **atoms,
             atom_next && atom_next->next && a_strcmp(atom_req.name, atom_next->next->name) > 0;
             atom_next = atom_cache_list_next(NULL, atom_next));
 
-        atom_cache->prev = atom_next;
-        atom_cache->next = atom_next->next;
-
-        if(atom_next->next)
-            atom_next->next->prev = atom_cache;
-
-        atom_next->next = atom_cache;
+        atom_cache_list_attach_after(atom_next, atom_cache);
     }
 
     p_delete(&atom_rep);

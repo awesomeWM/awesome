@@ -154,9 +154,7 @@
     {                                                                            \
         if(item->next)                                                           \
             return item->next;                                                   \
-        else                                                                     \
-            return *list;                                                        \
-        return NULL;                                                             \
+        return *list;                                                            \
     }                                                                            \
                                                                                  \
     static inline type *prefix##_list_detach(type **list, type *item)            \
@@ -170,16 +168,23 @@
         item->next = NULL;                                                       \
         item->prev = NULL;                                                       \
         return item;                                                             \
+    }                                                                            \
+    static inline type *prefix##_list_attach_after(type *item1, type *item2)     \
+    {                                                                            \
+        item2->prev = item1;                                                     \
+        item2->next = item1->next;                                               \
+        if(item1->next)                                                          \
+            item1->next->prev = item2;                                           \
+        item1->next = item2;                                                     \
+        return item2;                                                            \
     }
 
 #define DO_SLIST_UNREF(type, prefix, dtor)                                     \
     static inline void prefix##_list_unref(type **list)                        \
     {                                                                          \
         type *next, *item = *list;                                             \
-        printf("list_unref\n");\
         while(item)                                                            \
         {                                                                      \
-            printf(" item %p refcount %d", item, item->refcount);\
             next = item->next;                                                 \
             if(--(item->refcount) <= 0)                                        \
             {                                                                  \
@@ -188,7 +193,6 @@
             }                                                                  \
             item = next;                                                       \
         }                                                                      \
-        printf("end list_unref\n");\
     }
 
 #endif
