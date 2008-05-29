@@ -272,8 +272,9 @@ xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
 
     class_hint_r = xcb_get_property_reply(conn, class_hint_c, NULL);
 
-    if(!class_hint_r || class_hint_r->type != STRING ||
-       class_hint_r->format != 8)
+    if(!class_hint_r
+       || class_hint_r->type != STRING
+       || class_hint_r->format != 8)
     {
         p_delete(&class_hint_r);
 	return NULL;

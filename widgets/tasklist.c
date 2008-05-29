@@ -113,8 +113,9 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
                 area.height = statusbar->height;
                 area.width = box_width;
 
-                draw_rectangle(statusbar->ctx, area, 1.0, true,
-                               statusbar->colors.bg);
+                if(!statusbar->transparency)
+                    draw_rectangle(statusbar->ctx, area, 1.0, true,
+                                   statusbar->colors.bg);
 
                 if(c->icon_path)
                 {
