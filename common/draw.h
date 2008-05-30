@@ -27,10 +27,16 @@
 
 #include <xcb/xcb.h>
 
-#include "config.h"
 #include "common/util.h"
 #include "common/list.h"
-#include "common/xutil.h"
+
+typedef struct
+{
+    uint32_t pixel;
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+} xcolor_t;
 
 typedef enum
 {

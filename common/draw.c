@@ -22,8 +22,6 @@
 /* asprintf */
 #define _GNU_SOURCE
 
-#include <config.h>
-
 #include <cairo-xcb.h>
 
 #ifdef WITH_IMLIB2

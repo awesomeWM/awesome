@@ -85,14 +85,6 @@ typedef struct
     char *res_class;
 } class_hint_t;
 
-typedef struct
-{
-    uint32_t pixel;
-    uint16_t red;
-    uint16_t green;
-    uint16_t blue;
-} xcolor_t;
-
 class_hint_t *xutil_get_class_hint(xcb_connection_t *, xcb_window_t);
 
 /** Cache entry */

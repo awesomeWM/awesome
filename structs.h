@@ -26,6 +26,7 @@
 
 #include "lua.h"
 #include "layout.h"
+#include "common/xutil.h"
 #include "common/draw.h"
 #include "common/swindow.h"
 #include "common/xscreen.h"
