@@ -285,7 +285,7 @@ main(int argc, char **argv)
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
-    time_t lastrun = time(NULL);
+    time_t lastrun = 0;
     struct timeval *tv = NULL;
     static struct option long_options[] =
     {

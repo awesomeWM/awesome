@@ -62,10 +62,10 @@ mytasklist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
 -- Create a textbox widget
 mytextbox = widget.new({ type = "textbox", name = "mytextbox", align = "right" })
 -- Set the default text in textbox
-mytextbox:set("text", "<i><small>awesome " .. AWESOME_VERSION .. "</small></i>")
+mytextbox:set("text", "<b><small> awesome " .. AWESOME_VERSION .. " </small></b>")
 
 -- Create an iconbox widget
-myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
+myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "left" })
 myiconbox:set("image", "@iconsdir@/awesome16.png")
 
 -- Create an iconbox widget which will contains an icon indicating which layout we're using.
@@ -86,6 +86,7 @@ for s = 1, screen.count() do
                                 fg = "lightblue", bg = "black" })
     -- Add widgets to the statusbar - order matters
     mystatusbar:widget_add(mytaglist)
+    mystatusbar:widget_add(myiconbox)
     mystatusbar:widget_add(mytasklist)
     mystatusbar:widget_add(mytextbox)
     mystatusbar:widget_add(mylayoutbox[s])
@@ -197,8 +198,7 @@ function hook_newclient(c)
     -- if they're not focusable, so set border anyway.
     c:border_set({ width = 1, color = "black" })
     c:focus_set()
-    local name = c:name_get()
-    if name:lower():find("mplayer") then
+    if c:name_get():lower():find("mplayer") then
         c:floating_set(true)
     end
 end
@@ -210,12 +210,18 @@ function hook_arrange(screen)
     mylayoutbox[screen]:set("image", "@iconsdir@/layouts/" .. layout .. "w.png")
 end
 
+-- Hook called every 60 seconds
+function hook_timer ()
+    mytextbox:set("text", os.time() .. " time_t")
+end
+
 -- Set up some hooks
 hooks.focus(hook_focus)
 hooks.unfocus(hook_unfocus)
 hooks.newclient(hook_newclient)
 hooks.mouseover(hook_mouseover)
 hooks.arrange(hook_arrange)
+hooks.timer(1, hook_timer)
 -- }}}
 
 -- Respect size hints
