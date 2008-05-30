@@ -892,18 +892,23 @@ draw_get_image_size(const char *filename)
 }
 #endif /* WITH_IMLIB2 */
 
-/** Rotate a drawable
- * \param ctx Draw context to draw to
- * \param dest Drawable to draw the result
- * \param dest_w Drawable width
- * \param dest_h Drawable height
- * \param angle angle to rotate
- * \param tx translate to this x coordinate
- * \param ty translate to this y coordinate
- * \return new rotated drawable
+/** Rotate a drawable.
+ * \param ctx Draw context to draw with.
+ * \param src Drawable to draw from.
+ * \param dest Drawable to draw to.
+ * \param src_w Drawable width.
+ * \param src_h Drawable height.
+ * \param dest_w Drawable width.
+ * \param dest_h Drawable height.
+ * \param angle angle to rotate.
+ * \param tx Translate to this x coordinate.
+ * \param ty Translate to this y coordinate.
  */
 void
-draw_rotate(draw_context_t *ctx, xcb_drawable_t dest, int dest_w, int dest_h,
+draw_rotate(draw_context_t *ctx,
+            xcb_drawable_t src, xcb_drawable_t dest,
+            int src_w, int src_h,
+            int dest_w, int dest_h,
             double angle, int tx, int ty)
 {
     cairo_surface_t *surface, *source;
@@ -911,8 +916,8 @@ draw_rotate(draw_context_t *ctx, xcb_drawable_t dest, int dest_w, int dest_h,
 
     surface = cairo_xcb_surface_create(ctx->connection, dest,
                                        ctx->visual, dest_w, dest_h);
-    source = cairo_xcb_surface_create(ctx->connection, ctx->drawable,
-                                      ctx->visual, ctx->width, ctx->height);
+    source = cairo_xcb_surface_create(ctx->connection, src,
+                                      ctx->visual, src_w, src_h);
     cr = cairo_create (surface);
 
     cairo_translate(cr, tx, ty);
@@ -1049,7 +1054,6 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
             colnum = strtoul(buf, NULL, 16);
             p_delete(&buf);
             color->alpha = RGB_COLOR_8_TO_16(strtoul(&colstr[7], NULL, 16));
-            printf("%d alpha\n", color->alpha);
             if(errno != 0)
             {
                 warn("awesome: error, invalid color '%s'", colstr);

@@ -49,7 +49,7 @@ statusbar_draw(statusbar_t *statusbar)
     char *data;
     xcb_get_property_reply_t *prop_r;
     xcb_get_property_cookie_t prop_c;
-    area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
+    area_t rectangle = { 0, 0, 0, 0, NULL, NULL }, rootsize;;
     xcb_atom_t rootpix_atom, pixmap_atom;
     xutil_intern_atom_request_t rootpix_atom_req, pixmap_atom_req;
 
@@ -80,12 +80,37 @@ statusbar_draw(statusbar_t *statusbar)
             if((data = xcb_get_property_value(prop_r)))
             {
                rootpix = *(xcb_pixmap_t *) data;
-               xcb_copy_area(globalconf.connection, rootpix,
-                             statusbar->sw->drawable, statusbar->sw->gc,
-                             statusbar->sw->geometry.x, statusbar->sw->geometry.y,
-                             0, 0,
-                             statusbar->sw->geometry.width,
-                             statusbar->sw->geometry.height);
+               switch(statusbar->position)
+               {
+                 case Left:
+                   rootsize = get_display_area(statusbar->phys_screen, NULL, NULL);
+                   draw_rotate(statusbar->ctx,
+                               rootpix, statusbar->ctx->drawable,
+                               rootsize.width, rootsize.height,
+                               statusbar->width, statusbar->height,
+                               M_PI_2,
+                               statusbar->sw->geometry.y + statusbar->width,
+                               - statusbar->sw->geometry.x);
+                   break;
+                 case Right:
+                   rootsize = get_display_area(statusbar->phys_screen, NULL, NULL);
+                   draw_rotate(statusbar->ctx,
+                               rootpix, statusbar->ctx->drawable,
+                               rootsize.width, rootsize.height,
+                               statusbar->width, statusbar->height,
+                               - M_PI_2,
+                               - statusbar->sw->geometry.y,
+                               statusbar->sw->geometry.x + statusbar->height);
+                   break;
+                 default:
+                   xcb_copy_area(globalconf.connection, rootpix,
+                                 statusbar->sw->drawable, statusbar->sw->gc,
+                                 statusbar->sw->geometry.x, statusbar->sw->geometry.y,
+                                 0, 0,
+                                 statusbar->sw->geometry.width,
+                                 statusbar->sw->geometry.height);
+                   break;
+               }
             }
             p_delete(&prop_r);
         }
@@ -110,12 +135,14 @@ statusbar_draw(statusbar_t *statusbar)
     switch(statusbar->position)
     {
         case Right:
-          draw_rotate(statusbar->ctx, statusbar->sw->drawable,
+          draw_rotate(statusbar->ctx, statusbar->ctx->drawable, statusbar->sw->drawable,
+                      statusbar->ctx->width, statusbar->ctx->height,
                       statusbar->ctx->height, statusbar->ctx->width,
                       M_PI_2, statusbar->height, 0);
           break;
         case Left:
-          draw_rotate(statusbar->ctx, statusbar->sw->drawable,
+          draw_rotate(statusbar->ctx, statusbar->ctx->drawable, statusbar->sw->drawable,
+                      statusbar->ctx->width, statusbar->ctx->height,
                       statusbar->ctx->height, statusbar->ctx->width,
                       - M_PI_2, 0, statusbar->width);
           break;

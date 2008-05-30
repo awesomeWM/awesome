@@ -108,12 +108,16 @@ titlebar_draw(client_t *c)
     switch(c->titlebar.position)
     {
       case Left:
-        draw_rotate(ctx, c->titlebar_sw->drawable, ctx->height, ctx->width,
+        draw_rotate(ctx, ctx->drawable, c->titlebar_sw->drawable,
+                    ctx->width, ctx->height,
+                    ctx->height, ctx->width,
                     - M_PI_2, 0, c->titlebar_sw->geometry.height);
         xcb_free_pixmap(globalconf.connection, dw);
         break;
       case Right:
-        draw_rotate(ctx, c->titlebar_sw->drawable, ctx->height, ctx->width,
+        draw_rotate(ctx, ctx->drawable, c->titlebar_sw->drawable,
+                    ctx->width, ctx->height,
+                    ctx->height, ctx->width,
                     M_PI_2, c->titlebar_sw->geometry.width, 0);
         xcb_free_pixmap(globalconf.connection, dw);
       default:
