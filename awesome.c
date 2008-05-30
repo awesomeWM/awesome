@@ -263,8 +263,7 @@ exit_help(int exit_code)
 "Usage: awesome [OPTION]\n\
   -h, --help             show help\n\
   -v, --version          show version\n\
-  -c, --config FILE      configuration file to use\n\
-  -k, --check            check configuration file syntax\n");
+  -c, --config FILE      configuration file to use\n");
     exit(exit_code);
 }
 
@@ -312,7 +311,7 @@ main(int argc, char **argv)
     }
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkc:s",
+    while((opt = getopt_long(argc, argv, "vhc:",
                              long_options, NULL)) != -1)
         switch(opt)
         {
