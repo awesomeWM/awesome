@@ -28,6 +28,14 @@ object with type "object_type".
 
 include::apidocgen.txt[]
 
+COLORS FORMAT
+-------------
+Colors format in *awesome* are either standard X color names
+(blue, darkblue, lightred, etc) or hexadecimal formatted colors (#rrggbb).
+By using hexadecimal format, you can also specifies an alpha channel:
+that means that #00ff00 will draw pure green, but #00ff00aa will set the
+alpha channel to `aa' and will blend the green with the color under it.
+
 SEE ALSO
 --------
 awesome(1) awesome-client(1)

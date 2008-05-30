@@ -348,10 +348,11 @@ draw_text(draw_context_t *ctx, font_t *font,
 
     if(parser_data.shadow.offset)
     {
-        cairo_set_source_rgb(ctx->cr,
-                             parser_data.shadow.color.red / 65535.0,
-                             parser_data.shadow.color.green / 65535.0,
-                             parser_data.shadow.color.blue / 65535.0);
+        cairo_set_source_rgba(ctx->cr,
+                              parser_data.shadow.color.red / 65535.0,
+                              parser_data.shadow.color.green / 65535.0,
+                              parser_data.shadow.color.blue / 65535.0,
+                              parser_data.shadow.color.alpha / 65535.0);
         cairo_move_to(ctx->cr, x + parser_data.shadow.offset, y + parser_data.shadow.offset);
         pango_cairo_update_layout(ctx->cr, ctx->layout);
         pango_cairo_show_layout(ctx->cr, ctx->layout);
@@ -359,10 +360,11 @@ draw_text(draw_context_t *ctx, font_t *font,
 
     cairo_move_to(ctx->cr, x, y);
 
-    cairo_set_source_rgb(ctx->cr,
-                         fg->red / 65535.0,
-                         fg->green / 65535.0,
-                         fg->blue / 65535.0);
+    cairo_set_source_rgba(ctx->cr,
+                          fg->red / 65535.0,
+                          fg->green / 65535.0,
+                          fg->blue / 65535.0,
+                          fg->alpha / 65535.0);
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 
@@ -386,7 +388,11 @@ draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
 
     /* no need for a real pattern: */
     if(!pcolor_end && !pcolor_center)
-        cairo_set_source_rgb(ctx->cr, pcolor->red / 65535.0, pcolor->green / 65535.0, pcolor->blue / 65535.0);
+        cairo_set_source_rgba(ctx->cr,
+                              pcolor->red / 65535.0,
+                              pcolor->green / 65535.0,
+                              pcolor->blue / 65535.0,
+                              pcolor->alpha / 65535.0);
     else
     {
         pat = cairo_pattern_create_linear(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
@@ -424,10 +430,11 @@ draw_rectangle(draw_context_t *ctx, area_t geometry, float line_width, bool fill
     cairo_set_line_width(ctx->cr, line_width);
     cairo_set_miter_limit(ctx->cr, 10.0);
     cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
-    cairo_set_source_rgb(ctx->cr,
-                         color.red / 65535.0,
-                         color.green / 65535.0,
-                         color.blue / 65535.0);
+    cairo_set_source_rgba(ctx->cr,
+                          color.red / 65535.0,
+                          color.green / 65535.0,
+                          color.blue / 65535.0,
+                          color.alpha / 65535.0);
     if(filled)
     {
         cairo_rectangle(ctx->cr, geometry.x, geometry.y,
@@ -647,7 +654,11 @@ void
 draw_circle(draw_context_t *ctx, int x, int y, int r, bool filled, xcolor_t color)
 {
     cairo_set_line_width(ctx->cr, 1.0);
-    cairo_set_source_rgb(ctx->cr, color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+    cairo_set_source_rgba(ctx->cr,
+                          color.red / 65535.0,
+                          color.green / 65535.0,
+                          color.blue / 65535.0,
+                          color.alpha / 65535.0);
 
     cairo_new_sub_path(ctx->cr); /* don't draw from the old reference point to.. */
 
@@ -1017,15 +1028,40 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
     unsigned long colnum;
     uint16_t red, green, blue;
     ssize_t len;
+    char *buf;
 
     if(!(len = a_strlen(colstr)))
         return false;
 
     /* The color is given in RGB value */
-    if(colstr[0] == '#' && len == 7)
+    if(colstr[0] == '#')
     {
         errno = 0;
-        colnum = strtoul(&colstr[1], NULL, 16);
+        if(len == 7)
+        {
+            colnum = strtoul(&colstr[1], NULL, 16);
+            color->alpha = 0xffff;
+        }
+        /* we have alpha */
+        else if(len == 9)
+        {
+            buf = a_strndup(colstr + 1, 6);
+            colnum = strtoul(buf, NULL, 16);
+            p_delete(&buf);
+            color->alpha = RGB_COLOR_8_TO_16(strtoul(&colstr[7], NULL, 16));
+            printf("%d alpha\n", color->alpha);
+            if(errno != 0)
+            {
+                warn("awesome: error, invalid color '%s'", colstr);
+                return false;
+            }
+        }
+        else
+        {
+            warn("awesome: error, invalid color '%s'", colstr);
+            return false;
+        }
+
         if(errno != 0)
         {
             warn("awesome: error, invalid color '%s'", colstr);
@@ -1068,6 +1104,7 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
             color->red = named_color->visual_red;
             color->green = named_color->visual_green;
             color->blue = named_color->visual_blue;
+            color->alpha = 0xffff;
 
             p_delete(&named_color);
             return true;
