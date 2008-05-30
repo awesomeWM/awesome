@@ -386,7 +386,8 @@ main(int argc, char **argv)
     /* parse config */
     if(!confpath)
         confpath = config_file();
-    luaA_parserc(confpath);
+    if (!luaA_parserc(confpath))
+        eprint("failed to load/parse configuration file %s", confpath);
 
     /* init cursors */
     globalconf.cursor[CurNormal] = create_font_cursor(CURSOR_LEFT_PTR);
