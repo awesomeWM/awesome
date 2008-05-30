@@ -73,18 +73,18 @@ screen_get_area(int screen, statusbar_t *statusbar, Padding *padding)
     return area;
 }
 
-/** Get display info
- * \param screen Screen number
- * \param statusbar the statusbar
- * \param padding Padding
+/** Get display info.
+ * \param screen Physical screen number.
+ * \param statusbar The statusbars.
+ * \param padding Padding.
  * \return area_t
  */
 area_t
-get_display_area(int screen, statusbar_t *statusbar, Padding *padding)
+get_display_area(int phys_screen, statusbar_t *statusbar, Padding *padding)
 {
     area_t area = { 0, 0, 0, 0, NULL, NULL };
     statusbar_t *sb;
-    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, screen);
+    xcb_screen_t *s = xcb_aux_get_screen(globalconf.connection, phys_screen);
 
     area.width = s->width_in_pixels;
     area.height = s->height_in_pixels;
