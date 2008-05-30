@@ -214,8 +214,6 @@ struct statusbar_t
     widget_node_t *widgets;
     /** Draw context */
     draw_context_t *ctx;
-    /** Transparency */
-    bool transparency;
     /** Need update */
     struct
     {

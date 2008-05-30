@@ -53,22 +53,22 @@ statusbar_draw(statusbar_t *statusbar)
     xcb_atom_t rootpix_atom, pixmap_atom;
     xutil_intern_atom_request_t rootpix_atom_req, pixmap_atom_req;
 
-    /* Send requests needed for transparency */
-    if(statusbar->transparency)
-    {
-        pixmap_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "PIXMAP");
-        rootpix_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_XROOTPMAP_ID");
-    }
-
     statusbar->need_update.value = false;
 
     if(!statusbar->position)
         return;
 
+    /* Send requests needed for transparency */
+    if(statusbar->colors.bg.alpha != 0xffff)
+    {
+        pixmap_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "PIXMAP");
+        rootpix_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_XROOTPMAP_ID");
+    }
+
     rectangle.width = statusbar->width;
     rectangle.height = statusbar->height;
 
-    if(statusbar->transparency)
+    if(statusbar->colors.bg.alpha != 0xffff)
     {
         rootwin = xcb_aux_get_screen(globalconf.connection, statusbar->phys_screen)->root;
         pixmap_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, pixmap_atom_req);
@@ -90,9 +90,9 @@ statusbar_draw(statusbar_t *statusbar)
             p_delete(&prop_r);
         }
     }
-    else
-        draw_rectangle(statusbar->ctx, rectangle, 1.0, true,
-                       statusbar->colors.bg);
+
+    draw_rectangle(statusbar->ctx, rectangle, 1.0, true,
+                   statusbar->colors.bg);
 
     for(w = statusbar->widgets; w; w = w->next)
         if(w->widget->isvisible && w->widget->align == AlignLeft)
@@ -579,18 +579,6 @@ luaA_statusbar_new(lua_State *L)
     return luaA_settype(L, "statusbar");
 }
 
-/** Set statusbar transparency.
- * \param A boolean value, true to enable, false to disable.
- */
-static int
-luaA_statusbar_transparency_set(lua_State *L)
-{
-    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
-    (*sb)->transparency = luaA_checkboolean(L, 2);
-    statusbar_needupdate(*sb);
-    return 0;
-}
-
 /** Handle statusbar garbage collection.
  */
 static int
@@ -614,7 +602,6 @@ const struct luaL_reg awesome_statusbar_meta[] =
     { "align_set", luaA_statusbar_align_set },
     { "add", luaA_statusbar_add },
     { "remove", luaA_statusbar_remove },
-    { "transparency_set", luaA_statusbar_transparency_set },
     { "__gc", luaA_statusbar_gc },
     { "__eq", luaA_statusbar_eq },
     { "__tostring", luaA_statusbar_tostring },
