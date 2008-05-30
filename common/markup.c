@@ -207,10 +207,10 @@ markup_parser_data_delete(markup_parser_data_t **p)
 }
 
 /** Parse markup defined in data on the string str.
- * \param data a markup_parser_data_t allocated by markup_parser_data_new()
- * \param str a string to parse markup from
- * \param slen str length
- * \return true if success, false otherwise
+ * \param data A markup_parser_data_t allocated by markup_parser_data_new().
+ * \param str A string to parse markup from.
+ * \param slen String length.
+ * \return True if success, false otherwise.
  */
 bool
 markup_parse(markup_parser_data_t *data, const char *str, ssize_t slen)
@@ -231,7 +231,7 @@ markup_parse(markup_parser_data_t *data, const char *str, ssize_t slen)
     };
     GError *error = NULL;
 
-    if(!a_strlen(str))
+    if(slen <= 0)
         return false;
 
     mkp_ctx = g_markup_parse_context_new(&parser, 0, data, NULL);

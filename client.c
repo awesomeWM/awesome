@@ -760,7 +760,7 @@ client_markup_parse(client_t *c, const char *str, ssize_t len)
 
 /** Kill a client via a WM_DELETE_WINDOW request or XKillClient if not
  * supported.
- * \param c the client to kill
+ * \param c The client to kill,
  */
 void
 client_kill(client_t *c)
