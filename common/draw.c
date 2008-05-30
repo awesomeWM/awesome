@@ -1016,12 +1016,13 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
     xcb_alloc_named_color_reply_t *named_color = NULL;
     unsigned long colnum;
     uint16_t red, green, blue;
+    ssize_t len;
 
-    if(!a_strlen(colstr))
+    if(!(len = a_strlen(colstr)))
         return false;
 
     /* The color is given in RGB value */
-    if(colstr[0] == '#' && a_strlen(colstr) == 7)
+    if(colstr[0] == '#' && len == 7)
     {
         errno = 0;
         colnum = strtoul(&colstr[1], NULL, 16);
@@ -1057,7 +1058,7 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
         named_color = xcb_alloc_named_color_reply(conn,
                                                   xcb_alloc_named_color(conn,
                                                                         s->default_colormap,
-                                                                        strlen(colstr),
+                                                                        len,
                                                                         colstr),
                                                   NULL);
 
