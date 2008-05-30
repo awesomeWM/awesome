@@ -358,10 +358,10 @@ luaA_colors_set(lua_State *L)
     const char *fg, *bg;
     luaA_checktable(L, 1);
     if((fg = luaA_getopt_string(L, 1, "fg", NULL)))
-        draw_color_new(globalconf.connection, globalconf.default_screen,
+        xcolor_new(globalconf.connection, globalconf.default_screen,
                        fg, &globalconf.colors.fg);
     if((bg = luaA_getopt_string(L, 1, "bg",NULL)))
-        draw_color_new(globalconf.connection, globalconf.default_screen,
+        xcolor_new(globalconf.connection, globalconf.default_screen,
                        bg, &globalconf.colors.bg);
     return 0;
 }
@@ -459,8 +459,8 @@ luaA_parserc(const char *rcfile)
 
     /* \todo move this */
     globalconf.font = draw_font_new(globalconf.connection, globalconf.default_screen, "sans 8");
-    draw_color_new(globalconf.connection, globalconf.default_screen, "black", &globalconf.colors.fg);
-    draw_color_new(globalconf.connection, globalconf.default_screen, "white", &globalconf.colors.bg);
+    xcolor_new(globalconf.connection, globalconf.default_screen, "black", &globalconf.colors.fg);
+    xcolor_new(globalconf.connection, globalconf.default_screen, "white", &globalconf.colors.bg);
 
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
 

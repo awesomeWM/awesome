@@ -902,7 +902,7 @@ luaA_client_border_set(lua_State *L)
     client_setborder(*c, width);
 
     if(colorstr
-        && draw_color_new(globalconf.connection, (*c)->phys_screen, colorstr, &color))
+        && xcolor_new(globalconf.connection, (*c)->phys_screen, colorstr, &color))
         xcb_change_window_attributes(globalconf.connection, (*c)->win, XCB_CW_BORDER_PIXEL,
                                      &color.pixel);
 

@@ -243,7 +243,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
     if(p->attribute_names[0])
         for(i = 0; p->attribute_names[0][i]; i++)
             if(!a_strcmp(p->attribute_names[0][i], "color"))
-                data->has_bg_color = draw_color_new(data->connection, data->phys_screen,
+                data->has_bg_color = xcolor_new(data->connection, data->phys_screen,
                                                     p->attribute_values[0][i], &data->bg_color);
 
     /* text */
@@ -253,7 +253,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
             if(!a_strcmp(p->attribute_names[1][i], "align"))
                 data->align = draw_align_get_from_str(p->attribute_values[1][i]);
             else if(!a_strcmp(p->attribute_names[1][i], "shadow"))
-                draw_color_new(data->connection, data->phys_screen,
+                xcolor_new(data->connection, data->phys_screen,
                                p->attribute_values[1][i], &data->shadow.color);
             else if(!a_strcmp(p->attribute_names[1][i], "shadow_offset"))
                 data->shadow.offset = atoi(p->attribute_values[1][i]);
@@ -1009,7 +1009,7 @@ draw_align_get_from_str(const char *align)
  * \return true if color allocation was successfull
  */
 bool
-draw_color_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t *color)
+xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t *color)
 {
     xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
     xcb_alloc_color_reply_t *hexa_color = NULL;

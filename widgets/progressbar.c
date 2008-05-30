@@ -75,10 +75,10 @@ progressbar_pcolor_set(xcolor_t **ppcolor, char *new_color)
     bool flag = false;
     if(!*ppcolor)
     {
-        flag = true; /* p_delete && restore to NULL, if draw_color_new unsuccessful */
+        flag = true; /* p_delete && restore to NULL, if xcolor_new unsuccessful */
         *ppcolor = p_new(xcolor_t, 1);
     }
-    if(!(draw_color_new(globalconf.connection,
+    if(!(xcolor_new(globalconf.connection,
                     globalconf.default_screen,
                     new_color, *ppcolor))
        && flag)
@@ -461,13 +461,13 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
 
         /* change values accordingly... */
         if(!a_strcmp(property, "fg"))
-            draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg[i]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg[i]));
         else if(!a_strcmp(property, "bg"))
-            draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->bg[i]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->bg[i]));
         else if(!a_strcmp(property, "fg_off"))
-            draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg_off[i]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg_off[i]));
         else if(!a_strcmp(property, "bordercolor"))
-            draw_color_new(globalconf.connection, globalconf.default_screen, setting, &(d->bordercolor[i]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->bordercolor[i]));
         else if(!a_strcmp(property, "fg_center"))
             progressbar_pcolor_set(&(d->pfg_center[i]), setting);
         else if(!a_strcmp(property, "fg_end"))

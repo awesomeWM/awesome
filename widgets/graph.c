@@ -343,14 +343,14 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
         d->height = atof(new_value);
     else if(!a_strcmp(property, "bg"))
     {
-        if(!draw_color_new(globalconf.connection,
+        if(!xcolor_new(globalconf.connection,
                            globalconf.default_screen,
                            new_value, &d->bg))
             return WIDGET_ERROR_FORMAT_COLOR;
     }
     else if(!a_strcmp(property, "bordercolor"))
     {
-        if(!draw_color_new(globalconf.connection,
+        if(!xcolor_new(globalconf.connection,
                            globalconf.default_screen,
                            new_value, &d->bordercolor))
             return WIDGET_ERROR_FORMAT_COLOR;
@@ -455,20 +455,20 @@ graph_new(alignment_t align)
         d->data_title[i] = a_strdup(cfg_title(cfg));
 
         if((color = cfg_getstr(cfg, "fg")))
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, &tmp_color);
+            xcolor_new(globalconf.connection, statusbar->phys_screen, color, &tmp_color);
         else
             tmp_color = globalconf.screens[statusbar->screen].styles.normal.fg;
 
         if((color = cfg_getstr(cfg, "fg_center")))
         {
             ptmp_color_center = p_new(xcolor_t, 1);
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, ptmp_color_center);
+            xcolor_new(globalconf.connection, statusbar->phys_screen, color, ptmp_color_center);
         }
 
         if((color = cfg_getstr(cfg, "fg_end")))
         {
             ptmp_color_end = p_new(xcolor_t, 1);
-            draw_color_new(globalconf.connection, statusbar->phys_screen, color, ptmp_color_end);
+            xcolor_new(globalconf.connection, statusbar->phys_screen, color, ptmp_color_end);
         }
 
         if (cfg_getbool(cfg, "scale"))
@@ -517,12 +517,12 @@ graph_new(alignment_t align)
     }
 
     if((color = cfg_getstr(config, "bg")))
-        draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bg);
+        xcolor_new(globalconf.connection, statusbar->phys_screen, color, &d->bg);
     else
         d->bg = globalconf.screens[statusbar->screen].styles.normal.bg;
 
     if((color = cfg_getstr(config, "bordercolor")))
-        draw_color_new(globalconf.connection, statusbar->phys_screen, color, &d->bordercolor);
+        xcolor_new(globalconf.connection, statusbar->phys_screen, color, &d->bordercolor);
     else
         d->bordercolor = tmp_color;
 */

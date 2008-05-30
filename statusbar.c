@@ -551,14 +551,14 @@ luaA_statusbar_new(lua_State *L)
 
     lua_getfield(L, 1, "fg");
     if((color = luaL_optstring(L, -1, NULL)))
-        draw_color_new(globalconf.connection, globalconf.default_screen,
+        xcolor_new(globalconf.connection, globalconf.default_screen,
                        color, &(*sb)->colors.fg);
     else
         (*sb)->colors.fg = globalconf.colors.fg;
 
     lua_getfield(L, 1, "bg");
     if((color = luaL_optstring(L, -1, NULL)))
-        draw_color_new(globalconf.connection, globalconf.default_screen,
+        xcolor_new(globalconf.connection, globalconf.default_screen,
                        color, &(*sb)->colors.bg);
     else
         (*sb)->colors.bg = globalconf.colors.bg;

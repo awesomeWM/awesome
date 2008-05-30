@@ -36,6 +36,7 @@ typedef struct
     uint16_t red;
     uint16_t green;
     uint16_t blue;
+    uint16_t alpha;
 } xcolor_t;
 
 typedef enum
@@ -143,7 +144,7 @@ area_t draw_get_image_size(const char *filename);
 void draw_rotate(draw_context_t *, xcb_drawable_t, int, int, double, int, int);
 area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *);
 alignment_t draw_align_get_from_str(const char *);
-bool draw_color_new(xcb_connection_t *, int, const char *, xcolor_t *);
+bool xcolor_new(xcb_connection_t *, int, const char *, xcolor_t *);
 
 void area_list_remove(area_t **, area_t *);
 
