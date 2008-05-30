@@ -18,6 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
  */
+#include "config.h"
+
+#ifdef HAVE_DBUS
 
 #include <dbus/dbus.h>
 
@@ -189,4 +192,28 @@ a_dbus_cleanup(void)
     dbus_connection = NULL;
 }
 
+#else /* HAVE_DBUS */
+
+#include "dbus.h"
+
+void
+a_dbus_process_requests(int *fd __attribute__((unused)))
+{
+    /* empty */
+}
+
+bool
+a_dbus_init(int *fd)
+{
+    *fd = -1;
+    return false;
+}
+
+void
+a_dbus_cleanup(void)
+{
+    /* empty */
+}
+
+#endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

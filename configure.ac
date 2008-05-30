@@ -125,8 +125,14 @@ PKG_CHECK_MODULES([glib], [glib-2.0],,
    [AC_MSG_ERROR([awesome requires glib-2.0.])])
 PKG_CHECK_MODULES([gthread], [gthread-2.0],,
    [AC_MSG_ERROR([awesome requires gthread-2.0.])])
-PKG_CHECK_MODULES([dbus], [dbus-1],,
-   [AC_MSG_ERROR([awesome requires dbus-1.])])
+
+AC_ARG_WITH([dbus], AS_HELP_STRING([--with-dbus], [Build with D-BUS (default: enabled)]), [], [with_dbus=yes])
+if test "x$with_dbus" == "xyes"; then
+	PKG_CHECK_MODULES([dbus], [dbus-1],,
+		[AC_MSG_ERROR([awesome requires dbus-1.])])
+	AC_DEFINE([WITH_DBUS],1,[Defined to use D-BUS])
+fi
+
 AC_ARG_WITH([imlib2], AS_HELP_STRING([--with-imlib2], [Build with Imlib2 (default: disabled)]))
 
 if test "x$with_imlib2" == "xyes"; then
