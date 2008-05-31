@@ -30,15 +30,17 @@ typedef struct
 {
     /* general layout */
 
-    char **data_title;                  /** data_title of the data sections */
+    char **data_title;                  /** Data title of the data sections */
     float *max;                         /** Represents a full graph */
     int width;                          /** Width of the widget */
-    float height;                       /** Height of graph (0-1; 1 = height of statusbar) */
+    float height;                       /** Height of graph (0.0-1.0; 1.0 = height of statusbar) */
     int box_height;                     /** Height of the innerbox in pixels */
     int size;                           /** Size of lines-array (also innerbox-lenght) */
     xcolor_t bg;                        /** Background color */
     xcolor_t bordercolor;               /** Border color */
-    position_t grow;                      /** grow: Left or Right */
+    position_t grow;                    /** grow: Left or Right */
+
+    bool *scale;                        /** Scale the graph */
 
     /* markers... */
     int *index;                         /** Index of current (new) value */
@@ -51,32 +53,113 @@ typedef struct
     float **values;                     /** Actual values */
 
     /* additional data + a pointer to **lines accordingly */
-    int **fillbottom;                   /** Data array pointer (like *lines) */
+    int **fillbottom;                   /** Data array pointer (point to some *lines) */
     int **fillbottom_index;             /** Points to some index[i] */
     int fillbottom_total;               /** Total of them */
     bool *fillbottom_vertical_grad;     /** Create a vertical color gradient */
-    xcolor_t *fillbottom_color;           /** Color of them */
-    xcolor_t **fillbottom_pcolor_center;  /** Color at middle of graph */
-    xcolor_t **fillbottom_pcolor_end;     /** Color at end of graph */
-    int **filltop;                      /** Data array pointer (like *lines) */
+    xcolor_t *fillbottom_color;         /** Color of them */
+    xcolor_t **fillbottom_pcolor_center;/** Color at middle of graph */
+    xcolor_t **fillbottom_pcolor_end;   /** Color at end of graph */
+    int **filltop;                      /** Data array pointer (points to some *lines) */
     int **filltop_index;                /** Points to some index[i] */
     int filltop_total;                  /** Total of them */
     bool *filltop_vertical_grad;        /** Create a vertical color gradient */
-    xcolor_t *filltop_color;              /** Color of them */
-    xcolor_t **filltop_pcolor_center;     /** Color at center of graph */
-    xcolor_t **filltop_pcolor_end;        /** Color at end of graph */
-    int **drawline;                     /** Data array pointer (like *lines) */
+    xcolor_t *filltop_color;            /** Color of them */
+    xcolor_t **filltop_pcolor_center;   /** Color at center of graph */
+    xcolor_t **filltop_pcolor_end;      /** Color at end of graph */
+    int **drawline;                     /** Data array pointer (points to some *lines) */
     int **drawline_index;               /** Points to some index[i] */
     int drawline_total;                 /** Total of them */
     bool *drawline_vertical_grad;       /** Create a vertical color gradient */
-    xcolor_t *drawline_color;             /** Color of them */
-    xcolor_t **drawline_pcolor_center;    /** Color at middle of graph */
-    xcolor_t **drawline_pcolor_end;       /** Color at end of graph */
+    xcolor_t *drawline_color;           /** Color of them */
+    xcolor_t **drawline_pcolor_center;  /** Color at middle of graph */
+    xcolor_t **drawline_pcolor_end;     /** Color at end of graph */
 
     int *draw_from;                     /** Preparation/tmp array for draw_graph(); */
     int *draw_to;                       /** Preparation/tmp array for draw_graph(); */
-
 } Data;
+
+/* the same as the progressbar_pcolor_set may use a common function */
+static void
+graph_pcolor_set(xcolor_t **ppcolor, char *new_color)
+{
+    bool flag = false;
+    if(!*ppcolor)
+    {
+        flag = true; /* p_delete && restore to NULL, if xcolor_new unsuccessful */
+        *ppcolor = p_new(xcolor_t, 1);
+    }
+    if(!(xcolor_new(globalconf.connection,
+                    globalconf.default_screen,
+                    new_color, *ppcolor))
+       && flag)
+        p_delete(ppcolor);
+}
+
+static void
+graph_data_add(Data *d, const char *new_data_title)
+{
+    d->data_items++;
+
+    /* memory (re-)allocating */
+    p_realloc(&(d->values), d->data_items);
+    p_realloc(&(d->lines), d->data_items);
+
+    p_realloc(&(d->scale), d->data_items);
+
+    p_realloc(&(d->index), d->data_items);
+    p_realloc(&(d->max_index), d->data_items);
+    p_realloc(&(d->current_max), d->data_items); /* \todo value itself - rename */
+
+    p_realloc(&(d->max), d->data_items);
+
+    p_realloc(&(d->data_title), d->data_items);
+
+    p_realloc(&(d->fillbottom), d->data_items);
+    p_realloc(&(d->fillbottom_index), d->data_items);
+    p_realloc(&(d->filltop), d->data_items);
+    p_realloc(&(d->filltop_index), d->data_items);
+    p_realloc(&(d->drawline), d->data_items);
+    p_realloc(&(d->drawline_index), d->data_items);
+
+    p_realloc(&(d->fillbottom_color), d->data_items);
+    p_realloc(&(d->fillbottom_color), d->data_items);
+    p_realloc(&(d->fillbottom_pcolor_center), d->data_items);
+    p_realloc(&(d->fillbottom_pcolor_end), d->data_items);
+    p_realloc(&(d->fillbottom_vertical_grad), d->data_items);
+    p_realloc(&(d->filltop_color), d->data_items);
+    p_realloc(&(d->filltop_color), d->data_items);
+    p_realloc(&(d->filltop_pcolor_center), d->data_items);
+    p_realloc(&(d->filltop_pcolor_end), d->data_items);
+    p_realloc(&(d->filltop_vertical_grad), d->data_items);
+    p_realloc(&(d->drawline_color), d->data_items);
+    p_realloc(&(d->drawline_color), d->data_items);
+    p_realloc(&(d->drawline_pcolor_center), d->data_items);
+    p_realloc(&(d->drawline_pcolor_end), d->data_items);
+    p_realloc(&(d->drawline_vertical_grad), d->data_items);
+
+    /* initialize values for new data section */
+    d->index[d->data_items - 1] = 0;
+    d->values[d->data_items - 1] = p_new(float, d->size);
+    d->lines[d->data_items - 1] = p_new(int, d->size);
+
+    d->scale[d->data_items - 1] = false;
+
+    d->data_title[d->data_items - 1] = a_strdup(new_data_title);
+
+    d->current_max[d->data_items - 1] =  0;
+    d->max_index[d->data_items - 1] =  0;
+    d->max[d->data_items - 1] = 100.0;
+
+    /* \fixme: initialise fillbottom by default */
+    d->fillbottom[d->fillbottom_total] = d->lines[d->data_items - 1];
+    d->fillbottom_index[d->fillbottom_total] = &d->index[d->data_items - 1];
+    d->fillbottom_color[d->fillbottom_total] = globalconf.colors.fg;
+    d->fillbottom_pcolor_center[d->fillbottom_total] = NULL;
+    d->fillbottom_pcolor_end[d->fillbottom_total] = NULL;
+    d->fillbottom_vertical_grad[d->fillbottom_total] = true;
+    d->fillbottom_total++;
+}
 
 static int
 graph_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
@@ -274,73 +357,138 @@ static widget_tell_status_t
 graph_tell(widget_t *widget, const char *property, const char *new_value)
 {
     Data *d = widget->data;
-    int i, u;
+    int i, u, fi;
     float value;
     char *title, *setting;
-
-    if(!d->data_items)
-        return WIDGET_ERROR_CUSTOM; /* error already printed on _new */
+    char *new_val;
+    bool found;
 
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
 
-    if(!a_strcmp(property, "data"))
+    /* following properties need a datasection */
+    else if(!a_strcmp(property, "data")
+            || !a_strcmp(property, "fg")
+            || !a_strcmp(property, "fg_center")
+            || !a_strcmp(property, "fg_end")
+            || !a_strcmp(property, "vertical_gradient")
+            || !a_strcmp(property, "scale")
+            || !a_strcmp(property, "max")
+            || !a_strcmp(property, "reverse"))
     {
-        title = strtok(new_value, " ");
+        /* check if this section is defined already */
+        new_val = a_strdup(new_value);
+        title = strtok(new_val, " ");
         if(!(setting = strtok(NULL, " ")))
+        {
+            p_delete(&new_val);
             return WIDGET_ERROR_NOVALUE;
-
-        for(i = 0; i < d->data_items; i++)
-            if(!a_strcmp(title, d->data_title[i]))
+        }
+        for(found = false, fi = 0; fi < d->data_items; fi++)
+        {
+            if(!a_strcmp(title, d->data_title[fi]))
             {
-                value = MAX(atof(setting), 0);
-
-                if(++d->index[i] >= d->size) /* cycle inside the array */
-                    d->index[i] = 0;
-
-                if(d->values[i]) /* scale option is true */
-                {
-                    d->values[i][d->index[i]] = value;
-
-                    if(value > d->current_max[i]) /* a new maximum value found */
-                    {
-                        d->max_index[i] = d->index[i];
-                        d->current_max[i] = value;
-
-                        /* recalculate */
-                        for (u = 0; u < d->size; u++)
-                            d->lines[i][u] = (int) (d->values[i][u] * (d->box_height) / d->current_max[i] + 0.5);
-                    }
-                    /* old max_index reached + current_max > normal, re-check/generate */
-                    else if(d->max_index[i] == d->index[i] && d->current_max[i] > d->max[i])
-                    {
-                        /* find the new max */
-                        for(u = 0; u < d->size; u++)
-                            if(d->values[i][u] > d->values[i][d->max_index[i]])
-                                d->max_index[i] = u;
-
-                        d->current_max[i] = MAX(d->values[i][d->max_index[i]], d->max[i]);
-
-                        /* recalculate */
-                        for(u = 0; u < d->size; u++)
-                            d->lines[i][u] = (int) (d->values[i][u] * d->box_height / d->current_max[i] + 0.5);
-                    }
-                    else
-                        d->lines[i][d->index[i]] = (int) (value * d->box_height / d->current_max[i] + 0.5);
-                }
-                else /* scale option is false - limit to d->box_height */
-                {
-                    if (value < d->current_max[i])
-                        d->lines[i][d->index[i]] = (int) (value * d->box_height / d->current_max[i] + 0.5);
-                    else
-                        d->lines[i][d->index[i]] = d->box_height;
-                }
-                return WIDGET_NOERROR;
+                found = true;
+                break;
             }
-        return WIDGET_ERROR_FORMAT_SECTION;
+        }
+        /* no section found -> create one */
+        if(!found)
+        {
+            graph_data_add(d, title);
+            fi = d->data_items - 1;
+        }
+
+        /* change values accordingly... */
+        if(!a_strcmp(property, "data"))
+        {
+            /* assign incoming value */
+            value = MAX(atof(setting), 0);
+
+            if(++d->index[fi] >= d->size) /* cycle inside the array */
+                d->index[fi] = 0;
+
+            if(d->scale[fi]) /* scale option is true */
+            {
+                d->values[fi][d->index[fi]] = value;
+
+                if(value > d->current_max[fi]) /* a new maximum value found */
+                {
+                    d->max_index[fi] = d->index[fi];
+                    d->current_max[fi] = value;
+
+                    /* recalculate */
+                    for (u = 0; u < d->size; u++)
+                        d->lines[fi][u] = (int) (d->values[fi][u] * (d->box_height) / d->current_max[fi] + 0.5);
+                }
+                /* old max_index reached + current_max > normal, re-check/generate */
+                else if(d->max_index[fi] == d->index[fi] && d->current_max[fi] > d->max[fi])
+                {
+                    /* find the new max */
+                    for(u = 0; u < d->size; u++)
+                        if(d->values[fi][u] > d->values[fi][d->max_index[fi]])
+                            d->max_index[fi] = u;
+
+                    d->current_max[fi] = MAX(d->values[fi][d->max_index[fi]], d->max[fi]);
+
+                    /* recalculate */
+                    for(u = 0; u < d->size; u++)
+                        d->lines[fi][u] = (int) (d->values[fi][u] * d->box_height / d->current_max[fi] + 0.5);
+                }
+                else
+                    d->lines[fi][d->index[fi]] = (int) (value * d->box_height / d->current_max[fi] + 0.5);
+            }
+            else /* scale option is false - limit to d->box_height */
+            {
+                if (value < d->max[fi])
+                    d->lines[fi][d->index[fi]] = (int) (value * d->box_height / d->max[fi] + 0.5);
+                else
+                    d->lines[fi][d->index[fi]] = d->box_height;
+            }
+            p_delete(&new_val);
+            return WIDGET_NOERROR;
+        }
+        /* TODO: using everything as strtobottom mixing e.g. FIX scale especially */
+        else if(!a_strcmp(property, "fg"))
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->fillbottom_color[fi]));
+        else if(!a_strcmp(property, "fg_center"))
+            graph_pcolor_set(&(d->fillbottom_pcolor_center[fi]), setting);
+        else if(!a_strcmp(property, "fg_end"))
+            graph_pcolor_set(&(d->fillbottom_pcolor_end[fi]), setting);
+        else if(!a_strcmp(property, "vertical_gradient"))
+            d->fillbottom_vertical_grad[fi] = a_strtobool(setting);
+        else if(!a_strcmp(property, "scale"))
+            d->scale[fi] = a_strtobool(setting);
+        else if(!a_strcmp(property, "max"))
+        {
+            d->max[fi] = atof(setting);
+            d->current_max[fi] = d->max[fi];
+        }
+
+        p_delete(&new_val);
+        return WIDGET_NOERROR;
     }
     else if(!a_strcmp(property, "height"))
         d->height = atof(new_value);
+    else if(!a_strcmp(property, "width"))
+    {
+        d->width = atoi(new_value);
+        d->size = d->width - 2;
+        /* re-allocate/initialise necessary values */
+        for(i = 0; i < d->data_items; i++)
+        {
+            p_delete(&d->values[i]);
+            p_delete(&d->lines[i]);
+            d->values[i] = p_new(float, d->size);
+            d->lines[i] = p_new(int, d->size);
+
+            d->fillbottom[i] = d->lines[i];
+
+            d->index[i] = 0;
+            d->current_max[i] =  0;
+            d->max_index[i] =  0;
+        }
+    }
     else if(!a_strcmp(property, "bg"))
     {
         if(!xcolor_new(globalconf.connection,
@@ -377,12 +525,6 @@ graph_new(alignment_t align)
 {
     widget_t *w;
     Data *d;
-    char *color;
-    int i;
-    char *type;
-    xcolor_t tmp_color = { 0, 0, 0, 0 };
-    xcolor_t *ptmp_color_center;
-    xcolor_t *ptmp_color_end;
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
@@ -392,140 +534,16 @@ graph_new(alignment_t align)
     w->align = align;
     d = w->data = p_new(Data, 1);
 
-    d->width = 100;
-    d->height = 0.67;
+    d->width = 80;
+    d->height = 0.80;
     d->size = d->width - 2;
-
-    /*
-    if(!(d->data_items = cfg_size(config, "data")))
-    {
-        warn("graph widget needs at least one data section");
-        return w;
-    }
-
-    d->grow = cfg_getposition(config, "grow");
-    if(d->grow != Left && d->grow != Right)
-    {
-        warn("graph widget: 'grow' argument must be 'left' or 'right'");
-        */
-    /*
-        d->data_items = 0; /* disable widget drawing */
-      /*  return w;
-    }
-
+    d->grow = Left;
     d->draw_from = p_new(int, d->size);
     d->draw_to = p_new(int, d->size);
 
-    d->fillbottom = p_new(int *, d->size);
-    d->fillbottom_index = p_new(int *, d->size);
-    d->filltop = p_new(int *, d->size);
-    d->filltop_index = p_new(int *, d->size);
-    d->drawline = p_new(int *, d->size);
-    d->drawline_index = p_new(int *, d->size);
+    d->bg = globalconf.colors.bg;
+    d->bordercolor = globalconf.colors.fg;
 
-    d->data_title = p_new(char *, d->data_items);
-    d->values = p_new(float *, d->data_items);
-    d->lines = p_new(int *, d->data_items);
-
-    d->filltop_color = p_new(xcolor_t, d->data_items);
-    d->filltop_pcolor_center = p_new(xcolor_t *, d->data_items);
-    d->filltop_pcolor_end = p_new(xcolor_t *, d->data_items);
-    d->filltop_vertical_grad = p_new(bool, d->data_items);
-    d->fillbottom_color = p_new(xcolor_t, d->data_items);
-    d->fillbottom_pcolor_center = p_new(xcolor_t *, d->data_items);
-    d->fillbottom_pcolor_end = p_new(xcolor_t *, d->data_items);
-    d->fillbottom_vertical_grad = p_new(bool, d->data_items);
-    d->drawline_color = p_new(xcolor_t, d->data_items);
-    d->drawline_pcolor_center = p_new(xcolor_t *, d->data_items);
-    d->drawline_pcolor_end = p_new(xcolor_t *, d->data_items);
-    d->drawline_vertical_grad = p_new(bool, d->data_items);
-
-    d->max_index = p_new(int, d->data_items);
-    d->index = p_new(int, d->data_items);
-
-    d->current_max = p_new(float, d->data_items);
-    d->max = p_new(float, d->data_items);
-
-    for(i = 0; i < d->data_items; i++)
-    {
-        ptmp_color_center = ptmp_color_end = NULL;
-
-        cfg = cfg_getnsec(config, "data", i);
-
-        d->data_title[i] = a_strdup(cfg_title(cfg));
-
-        if((color = cfg_getstr(cfg, "fg")))
-            xcolor_new(globalconf.connection, statusbar->phys_screen, color, &tmp_color);
-        else
-            tmp_color = globalconf.screens[statusbar->screen].styles.normal.fg;
-
-        if((color = cfg_getstr(cfg, "fg_center")))
-        {
-            ptmp_color_center = p_new(xcolor_t, 1);
-            xcolor_new(globalconf.connection, statusbar->phys_screen, color, ptmp_color_center);
-        }
-
-        if((color = cfg_getstr(cfg, "fg_end")))
-        {
-            ptmp_color_end = p_new(xcolor_t, 1);
-            xcolor_new(globalconf.connection, statusbar->phys_screen, color, ptmp_color_end);
-        }
-
-        if (cfg_getbool(cfg, "scale"))
-            d->values[i] = p_new(float, d->size); /* not null -> scale = true */
-
-        /* prevent: division by zero */
-    /*
-        d->current_max[i] = d->max[i] = cfg_getfloat(cfg, "max");
-        d->lines[i] = p_new(int, d->size);
-
-        /* filter each style-typ into it's own array (for easy looping later)*/
-/*
-        if ((type = cfg_getstr(cfg, "draw_style")))
-        {
-            if(!a_strncmp(type, "bottom", sizeof("bottom")))
-            {
-                d->fillbottom[d->fillbottom_total] = d->lines[i];
-                d->fillbottom_index[d->fillbottom_total] = &d->index[i];
-                d->fillbottom_color[d->fillbottom_total] = tmp_color;
-                d->fillbottom_pcolor_center[d->fillbottom_total] = ptmp_color_center;
-                d->fillbottom_pcolor_end[d->fillbottom_total] = ptmp_color_end;
-                d->fillbottom_vertical_grad[d->fillbottom_total] = cfg_getbool(cfg, "vertical_gradient");
-                d->fillbottom_total++;
-            }
-            else if (!a_strncmp(type, "top", sizeof("top")))
-            {
-                d->filltop[d->filltop_total] = d->lines[i];
-                d->filltop_index[d->filltop_total] = &d->index[i];
-                d->filltop_color[d->filltop_total] = tmp_color;
-                d->filltop_pcolor_center[d->filltop_total] = ptmp_color_center;
-                d->filltop_pcolor_end[d->filltop_total] = ptmp_color_end;
-                d->filltop_vertical_grad[d->filltop_total] = cfg_getbool(cfg, "vertical_gradient");
-                d->filltop_total++;
-            }
-            else if (!a_strncmp(type, "line", sizeof("line")))
-            {
-                d->drawline[d->drawline_total] = d->lines[i];
-                d->drawline_index[d->drawline_total] = &d->index[i];
-                d->drawline_color[d->drawline_total] = tmp_color;
-                d->drawline_pcolor_center[d->drawline_total] = ptmp_color_center;
-                d->drawline_pcolor_end[d->drawline_total] = ptmp_color_end;
-                d->drawline_vertical_grad[d->drawline_total] = cfg_getbool(cfg, "vertical_gradient");
-                d->drawline_total++;
-            }
-        }
-    }
-
-    if((color = cfg_getstr(config, "bg")))
-        xcolor_new(globalconf.connection, statusbar->phys_screen, color, &d->bg);
-    else
-        d->bg = globalconf.screens[statusbar->screen].styles.normal.bg;
-
-    if((color = cfg_getstr(config, "bordercolor")))
-        xcolor_new(globalconf.connection, statusbar->phys_screen, color, &d->bordercolor);
-    else
-        d->bordercolor = tmp_color;
-*/
     return w;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
