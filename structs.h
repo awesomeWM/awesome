@@ -434,7 +434,7 @@ struct awesome_t
         luaA_function timer;
     } hooks;
     /** The timeout after which we need to stop select() */
-    long stimeout;
+    struct timeval timer;
 };
 
 #endif

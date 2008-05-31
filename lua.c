@@ -324,7 +324,8 @@ luaA_hooks_urgent(lua_State *L)
 static int
 luaA_hooks_timer(lua_State *L)
 {
-    globalconf.stimeout = luaL_checknumber(L, 1);
+    globalconf.timer.tv_usec = 0;
+    globalconf.timer.tv_sec = luaL_checknumber(L, 1);
 
     if(lua_gettop(L) == 2 && lua_isfunction(L, 2))
     {

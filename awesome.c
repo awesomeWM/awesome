@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/un.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -285,8 +286,7 @@ main(int argc, char **argv)
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
-    time_t lastrun = 0;
-    struct timeval *tv = NULL;
+    struct timeval select_timeout, hook_lastrun, now, hook_nextrun;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -488,15 +488,23 @@ main(int argc, char **argv)
         if(dbusfd >= 0)
             FD_SET(dbusfd, &rd);
         FD_SET(xfd, &rd);
-        if(globalconf.stimeout)
+        if(timerisset(&globalconf.timer))
         {
-            if(!tv)
-                tv = p_new(struct timeval, 1);
-            tv->tv_sec = MAX(globalconf.stimeout - (time(NULL) - lastrun), 1);
+            gettimeofday(&now, NULL);
+            timeradd(&hook_lastrun, &globalconf.timer, &hook_nextrun);
+            /* Need to do 2 tests, <= does not work with timercmp() */
+            if(timercmp(&hook_nextrun, &now, <) || (timercmp(&hook_nextrun, &now, ==)))
+            {
+                gettimeofday(&hook_lastrun, NULL);
+                luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0);
+                select_timeout = globalconf.timer;
+            }
+            else
+                timersub(&hook_nextrun, &now, &select_timeout);
         }
-        else
-            p_delete(&tv);
-        if(select(MAX(MAX(xfd, csfd), dbusfd) + 1, &rd, NULL, NULL, tv) == -1)
+        if(select(MAX(MAX(xfd, csfd), dbusfd) + 1, &rd,
+                  NULL, NULL,
+                  timerisset(&globalconf.timer) ? &select_timeout : NULL) == -1)
         {
             if(errno == EINTR)
                 continue;
@@ -547,12 +555,6 @@ main(int argc, char **argv)
         layout_refresh();
         statusbar_refresh();
         xcb_aux_sync(globalconf.connection);
-
-        if(tv && lastrun + globalconf.stimeout <= time(NULL))
-        {
-            luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0);
-            lastrun = time(NULL);
-        }
     }
 
     a_dbus_cleanup();
