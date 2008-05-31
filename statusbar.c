@@ -22,8 +22,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <pthread.h>
-
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 
@@ -53,7 +51,7 @@ statusbar_draw(statusbar_t *statusbar)
     xcb_atom_t rootpix_atom, pixmap_atom;
     xutil_intern_atom_request_t rootpix_atom_req, pixmap_atom_req;
 
-    statusbar->need_update.value = false;
+    statusbar->need_update = false;
 
     if(!statusbar->position)
         return;
@@ -154,27 +152,20 @@ statusbar_draw(statusbar_t *statusbar)
     xcb_aux_sync(globalconf.connection);
 }
 
-/** Statusbar thread main function.
+/** Statusbar refresh function.
  * \param p A pointer to a statusbar_t.
  * \return Return NULL.
  */
-static void *
-statusbar_refresh(void *p)
+void
+statusbar_refresh(void)
 {
-    statusbar_t *statusbar = (statusbar_t *) p;
+    int screen;
+    statusbar_t *statusbar;
 
-    while(running)
-    {
-        pthread_mutex_lock(&statusbar->need_update.lock);
-
-        while(!statusbar->need_update.value)
-            pthread_cond_wait(&statusbar->need_update.cond, &statusbar->need_update.lock);
-
-        statusbar_draw(statusbar);
-        pthread_mutex_unlock(&statusbar->need_update.lock);
-    }
-
-    return NULL;
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+        for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+            if(statusbar->need_update)
+                statusbar_draw(statusbar);
 }
 
 /** Update the statusbar position. It deletes every statusbar resources and
@@ -193,18 +184,11 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
 
     globalconf.screens[statusbar->screen].need_arrange = true;
 
-    /* Lock the update thread.
-     * We will reinit every stuff so, it better do nothing at this moment. */
-    pthread_mutex_lock(&statusbar->need_update.lock);
-
     simplewindow_delete(&statusbar->sw);
     draw_context_delete(&statusbar->ctx);
 
     if((statusbar->position = position) == Off)
-    {
-        pthread_mutex_unlock(&statusbar->need_update.lock);
         return;
-    }
 
     area = screen_get_area(statusbar->screen,
                            NULL,
@@ -383,22 +367,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
 
     xcb_map_window(globalconf.connection, statusbar->sw->window);
 
-    /* Set need update, and release everything out! */
-    statusbar->need_update.value = true;
-    pthread_mutex_unlock(&statusbar->need_update.lock);
-    pthread_cond_broadcast(&statusbar->need_update.cond);
-}
-
-/** Update the need_update attribute of a statusbar to true.
- * \param statusbar The statusbar to flag.
- */
-void
-statusbar_needupdate(statusbar_t *statusbar)
-{
-    pthread_mutex_lock(&statusbar->need_update.lock);
-    statusbar->need_update.value = true;
-    pthread_mutex_unlock(&statusbar->need_update.lock);
-    pthread_cond_broadcast(&statusbar->need_update.cond);
+    /* Set need update */
+    statusbar->need_update = true;
 }
 
 /** Check for statusbar equality.
@@ -481,7 +451,7 @@ luaA_statusbar_widget_add(lua_State *L)
     widget_t **widget = luaL_checkudata(L, 2, "widget");
     widget_node_t *w = p_new(widget_node_t, 1);
 
-    statusbar_needupdate(*sb);
+    (*sb)->need_update = true;
     w->widget = *widget;
     widget_node_list_append(&(*sb)->widgets, w);
     widget_ref(widget);
@@ -515,21 +485,12 @@ luaA_statusbar_add(lua_State *L)
     (*sb)->screen = screen;
     (*sb)->phys_screen = screen_virttophys(screen);
 
-    /* Initialize thread stuffs before any position update, since it will
-     * set a need_update and so lock */
-    pthread_cond_init(&(*sb)->need_update.cond, NULL);
-    pthread_mutex_init(&(*sb)->need_update.lock, NULL);
-
     statusbar_list_append(&globalconf.screens[screen].statusbar, *sb);
     statusbar_ref(sb);
 
     /* All the other statusbar and ourselves need to be repositionned */
     for(s = globalconf.screens[screen].statusbar; s; s = s->next)
         statusbar_position_update(s, s->position);
-
-    /* Start the thread */
-    if(pthread_create(&(*sb)->tid, NULL, statusbar_refresh, *sb))
-        perror("unable to create thread");
 
     return 0;
 }

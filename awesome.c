@@ -53,6 +53,7 @@
 #include "ewmh.h"
 #include "tag.h"
 #include "dbus.h"
+#include "statusbar.h"
 #include "common/socket.h"
 #include "common/version.h"
 #include "common/configopts.h"
@@ -332,9 +333,6 @@ main(int argc, char **argv)
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
 
-    /* initialize Glib for thread safeness */
-    g_thread_init(NULL);
-
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
     if(xcb_connection_has_error(globalconf.connection))
@@ -479,6 +477,7 @@ main(int argc, char **argv)
 
     /* refresh everything before waiting events */
     layout_refresh();
+    statusbar_refresh();
 
     /* main event loop */
     while(running)
@@ -540,11 +539,13 @@ main(int argc, char **argv)
             } while((ev = xcb_poll_for_event(globalconf.connection)));
 
             layout_refresh();
+            statusbar_refresh();
 
             /* need to resync */
             xcb_aux_sync(globalconf.connection);
         }
         layout_refresh();
+        statusbar_refresh();
         xcb_aux_sync(globalconf.connection);
 
         if(tv && lastrun + globalconf.stimeout <= time(NULL))

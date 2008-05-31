@@ -123,8 +123,6 @@ PKG_CHECK_MODULES([Lua], [lua >= 5.1],,
                       [AC_MSG_ERROR([awesome requires Lua >= 5.1.])])])
 PKG_CHECK_MODULES([glib], [glib-2.0],,
    [AC_MSG_ERROR([awesome requires glib-2.0.])])
-PKG_CHECK_MODULES([gthread], [gthread-2.0],,
-   [AC_MSG_ERROR([awesome requires gthread-2.0.])])
 
 AC_ARG_WITH([dbus], AS_HELP_STRING([--with-dbus], [Build with D-BUS (default: enabled)]), [], [with_dbus=yes])
 if test "x$with_dbus" == "xyes"; then
@@ -165,7 +163,6 @@ PKG_CHECK_MODULES([xcb_icccm], [xcb-icccm],,
    [AC_MSG_ERROR([awesome requires xcb-icccm.])])
 PKG_CHECK_MODULES([cairo_xcb], [cairo-xcb],,
    [AC_MSG_ERROR([awesome requires cairo-xcb.])])
-AC_CHECK_LIB(pthread, pthread_create)
 AC_CHECK_LIB(readline, readline,
              [AC_SUBST([readline_LIBS], ["-lreadline -lncurses"])],
              [AC_MSG_FAILURE([awesome needs readline])], -lncurses)

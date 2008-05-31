@@ -35,7 +35,7 @@ statusbar_delete(statusbar_t **statusbar)
     p_delete(statusbar);
 }
 
-void statusbar_needupdate(statusbar_t *);
+void statusbar_refresh(void);
 
 DO_RCNT(statusbar_t, statusbar, statusbar_delete)
 DO_SLIST(statusbar_t, statusbar, statusbar_delete)
