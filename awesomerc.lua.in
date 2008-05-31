@@ -210,7 +210,7 @@ function hook_arrange(screen)
     mylayoutbox[screen]:set("image", "@iconsdir@/layouts/" .. layout .. "w.png")
 end
 
--- Hook called every 60 seconds
+-- Hook called every second
 function hook_timer ()
     mytextbox:set("text", os.time() .. " time_t")
 end
