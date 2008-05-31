@@ -216,12 +216,13 @@ function hook_timer ()
 end
 
 -- Set up some hooks
-hooks.focus(hook_focus)
-hooks.unfocus(hook_unfocus)
-hooks.newclient(hook_newclient)
-hooks.mouseover(hook_mouseover)
-hooks.arrange(hook_arrange)
-hooks.timer(1, hook_timer)
+awful.hooks.focus(hook_focus)
+awful.hooks.unfocus(hook_unfocus)
+awful.hooks.newclient(hook_newclient)
+awful.hooks.mouseover(hook_mouseover)
+awful.hooks.arrange(hook_arrange)
+awful.hooks.timer(1, hook_timer)
+
 -- }}}
 
 -- Respect size hints

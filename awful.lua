@@ -16,12 +16,15 @@ end
 
 -- Grab environment we need
 local ipairs = ipairs
+local pairs = pairs
 local awesome = awesome
 local screen = screen
 local client = client
 local tag = tag
 local mouse = mouse
 local os = os
+local table = table
+local hooks = hooks
 
 -- Reset env
 setfenv(1, P)
@@ -257,6 +260,56 @@ function layout_set(layout)
     local t = tag_selected()
     if t then
 	t:layout_set(layout)
+    end
+end
+
+-- Hook functions, wrappers around awesome's hooks. functions so we 
+-- can easily add multiple functions per hook.
+P.hooks = {}
+P.myhooks = {}
+
+for name, hook in pairs(hooks) do
+    if name ~= 'timer' then
+        P.hooks[name] = function (f)
+
+            if P.myhooks[name] == nil then
+                P.myhooks[name] = {}
+                hooks[name](function (...)
+                    
+                    for i,o in pairs(P.myhooks[name]) do
+                       P.myhooks[name][i]['callback'](...)
+                    end
+                    
+                end)
+            end
+
+            table.insert(P.myhooks[name], {callback = f})
+        end
+    else
+        P.hooks[name] = function (time, f, runnow)
+
+            if P.myhooks[name] == nil then
+                P.myhooks[name] = {}
+                hooks[name](1, function (...)
+                    
+                    for i,o in pairs(P.myhooks[name]) do
+                        if P.myhooks[name][i]['counter'] >= P.myhooks[name][i]['timer'] then
+                            P.myhooks[name][i]['counter'] = 1
+                            P.myhooks[name][i]['callback'](...)
+                        else
+                            P.myhooks[name][i]['counter'] = P.myhooks[name][i]['counter']+1
+                        end
+                    end
+                    
+                end)
+            end
+
+            if runnow then
+                table.insert(P.myhooks[name], {callback = f, timer = time, counter = time})
+            else
+                table.insert(P.myhooks[name], {callback = f, timer = time, counter = 0})
+            end
+        end
     end
 end
 
