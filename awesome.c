@@ -286,7 +286,7 @@ main(int argc, char **argv)
     xcb_generic_event_t *ev;
     struct sockaddr_un *addr;
     client_t *c;
-    struct timeval select_timeout, hook_lastrun, now, hook_nextrun;
+    struct timeval select_timeout, hook_lastrun = { 0, 0 }, now, hook_nextrun;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
