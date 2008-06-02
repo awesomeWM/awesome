@@ -243,6 +243,17 @@ tasklist_tell(widget_t *widget, const char *property, const char *new_value)
     }
     else if(!a_strcmp(property, "show_icons"))
         d->show_icons = a_strtobool(new_value);
+    else if(!a_strcmp(property, "show"))
+    {
+        if(!a_strcmp(property, "tags"))
+            d->show = ShowTags;
+        else if(!a_strcmp(property, "focus"))
+            d->show = ShowFocus;
+        else if(!a_strcmp(property, "all"))
+            d->show = ShowAll;
+        else
+            return WIDGET_ERROR;
+    }
     else
         return WIDGET_ERROR;
 
