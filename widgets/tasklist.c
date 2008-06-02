@@ -241,6 +241,8 @@ tasklist_tell(widget_t *widget, const char *property, const char *new_value)
         p_delete(&d->text_urgent);
         d->text_urgent = a_strdup(new_value);
     }
+    else if(!a_strcmp(property, "show_icons"))
+        d->show_icons = a_strtobool(new_value);
     else
         return WIDGET_ERROR;
 
