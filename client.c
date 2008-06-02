@@ -1131,6 +1131,16 @@ luaA_client_name_set(lua_State *L)
     return 0;
 }
 
+/** Stop managing a client.
+ */
+static int
+luaA_client_unmanage(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+    client_unmanage(*c);
+    return 0;
+}
+
 int
 luaA_client_userdata_new(client_t *c)
 {
@@ -1170,6 +1180,7 @@ const struct luaL_reg awesome_client_meta[] =
     { "icon_set", luaA_client_icon_set },
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },
+    { "unmanage", luaA_client_unmanage },
     { "__eq", luaA_client_eq },
     { "__tostring", luaA_client_tostring },
     { NULL, NULL }
