@@ -63,7 +63,9 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
 }
 
 static int
-tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
+tasklist_draw(draw_context_t *ctx, int screen,
+              widget_node_t *w, int width, int height,
+              int offset, int used, void *p __attribute__ ((unused)))
 {
     client_t *c;
     Data *d = w->widget->data;
@@ -72,27 +74,27 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;
 
-    if(used >= statusbar->width)
+    if(used >= width)
         return (w->area.width = 0);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(tasklist_isvisible(c, statusbar->screen, d->show))
+        if(tasklist_isvisible(c, screen, d->show))
             n++;
 
     if(!n)
         return (w->area.width = 0);
 
-    box_width = (statusbar->width - used) / n;
+    box_width = (width - used) / n;
     /* compute how many pixel we left empty */
-    box_width_rest = (statusbar->width - used) % n;
+    box_width_rest = (width - used) % n;
 
-    w->area.x = widget_calculate_offset(statusbar->width,
+    w->area.x = widget_calculate_offset(width,
                                         0, offset, w->widget->align);
 
     w->area.y = 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(tasklist_isvisible(c, statusbar->screen, d->show))
+        if(tasklist_isvisible(c, screen, d->show))
         {
             icon_width = 0;
 
@@ -110,7 +112,7 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
                 /* draw a background for icons */
                 area.x = w->area.x + box_width * i;
                 area.y = w->area.y;
-                area.height = statusbar->height;
+                area.height = height;
                 area.width = box_width;
 
                 if(c->icon_path)
@@ -118,24 +120,24 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
                     area = draw_get_image_size(c->icon_path);
                     if(area.width > 0 && area.height > 0)
                     {
-                        icon_width = ((double) statusbar->height / (double) area.height) * area.width;
-                        draw_image(statusbar->ctx,
+                        icon_width = ((double) height / (double) area.height) * area.width;
+                        draw_image(ctx,
                                    w->area.x + box_width * i,
                                    w->area.y,
-                                   statusbar->height,
+                                   height,
                                    c->icon_path);
                     }
                 }
 
                 if(!icon_width && (icon = ewmh_get_window_icon(c->win)))
                 {
-                    icon_width = ((double) statusbar->height / (double) icon->height)
+                    icon_width = ((double) height / (double) icon->height)
                         * icon->width;
-                    draw_image_from_argb_data(statusbar->ctx,
+                    draw_image_from_argb_data(ctx,
                                               w->area.x + box_width * i,
                                               w->area.y,
                                               icon->width, icon->height,
-                                              statusbar->height, icon->image);
+                                              height, icon->image);
                     p_delete(&icon->image);
                     p_delete(&icon);
                 }
@@ -144,28 +146,27 @@ tasklist_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
             area.x = w->area.x + icon_width + box_width * i;
             area.y = w->area.y;
             area.width = box_width - icon_width;
-            area.height = statusbar->height;
+            area.height = height;
 
             /* if we're on last elem, it has the last pixels left */
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            draw_text(statusbar->ctx, globalconf.font,
-                      &statusbar->colors.fg,
+            draw_text(ctx, globalconf.font,
                       area, text);
 
             p_delete(&text);
 
             if(c->isfloating || c->ismax)
-                draw_circle(statusbar->ctx, w->area.x + icon_width + box_width * i,
+                draw_circle(ctx, w->area.x + icon_width + box_width * i,
                             w->area.y,
                             (globalconf.font->height + 2) / 4,
-                            c->ismax, statusbar->colors.fg);
+                            c->ismax, ctx->fg);
             i++;
         }
 
-    w->area.width = statusbar->width - used;
-    w->area.height = statusbar->height;
+    w->area.width = width - used;
+    w->area.height = height;
 
     return w->area.width;
 }

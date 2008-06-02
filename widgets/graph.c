@@ -33,7 +33,7 @@ typedef struct
     char **data_title;                  /** Data title of the data sections */
     float *max;                         /** Represents a full graph */
     int width;                          /** Width of the widget */
-    float height;                       /** Height of graph (0.0-1.0; 1.0 = height of statusbar) */
+    float height;                       /** Height of graph (0.0-1.0; 1.0 = height of bar) */
     int box_height;                     /** Height of the innerbox in pixels */
     int size;                           /** Size of lines-array (also innerbox-lenght) */
     xcolor_t bg;                        /** Background color */
@@ -162,28 +162,31 @@ graph_data_add(Data *d, const char *new_data_title)
 }
 
 static int
-graph_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
-           int used __attribute__ ((unused)))
+graph_draw(draw_context_t *ctx,
+           int screen __attribute__ ((unused)),
+           widget_node_t *w,
+           int width, int height, int offset,
+           int used __attribute__ ((unused)),
+           void *p __attribute__ ((unused)))
 {
     int margin_top;
     int z, y, x, tmp, cur_index, test_index;
     Data *d = w->widget->data;
     area_t rectangle, pattern_area;
-    draw_context_t *ctx = statusbar->ctx;
 
     if(!d->data_items)
         return 0;
 
-    w->area.x = widget_calculate_offset(statusbar->width,
+    w->area.x = widget_calculate_offset(width,
                                         d->width, offset,
                                         w->widget->align);
     w->area.y = 0;
 
     /* box = the graph inside the rectangle */
     if(!(d->box_height))
-        d->box_height = (int) (statusbar->height * d->height + 0.5) - 2;
+        d->box_height = (int) (height * d->height + 0.5) - 2;
 
-    margin_top = (int)((statusbar->height - (d->box_height + 2)) / 2 + 0.5) + w->area.y;
+    margin_top = (int)((height - (d->box_height + 2)) / 2 + 0.5) + w->area.y;
 
     /* draw background */
     rectangle.x = w->area.x + 1;
@@ -349,7 +352,7 @@ graph_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
     draw_rectangle(ctx, rectangle, 1.0, false, d->bordercolor);
 
     w->area.width = d->width;
-    w->area.height = statusbar->height;
+    w->area.height = height;
     return w->area.width;
 }
 

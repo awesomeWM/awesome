@@ -32,7 +32,7 @@ extern awesome_t globalconf;
 typedef struct taglist_drawn_area_t taglist_drawn_area_t;
 struct taglist_drawn_area_t
 {
-    statusbar_t *statusbar;
+    void *object;
     area_t *area;
     taglist_drawn_area_t *next, *prev;
 };
@@ -114,16 +114,15 @@ taglist_text_get(tag_t *tag, taglist_data_t *data)
 }
 
 static int
-taglist_draw(widget_node_t *w,
-             statusbar_t *statusbar,
-             int offset,
-             int used __attribute__ ((unused)))
+taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
+             int width, int height, int offset,
+             int used __attribute__ ((unused)),
+             void *object)
 {
     tag_t *tag;
     taglist_data_t *data = w->widget->data;
     client_t *sel = globalconf.focus->client;
-    screen_t *vscreen = &globalconf.screens[statusbar->screen];
-    draw_context_t *ctx = statusbar->ctx;
+    screen_t *vscreen = &globalconf.screens[screen];
     int i = 0, prev_width = 0;
     area_t *area, rectangle = { 0, 0, 0, 0, NULL, NULL };
     char **text = NULL;
@@ -132,17 +131,15 @@ taglist_draw(widget_node_t *w,
     w->area.width = w->area.y = 0;
 
     /* Lookup for our taglist_drawn_area.
-     * This will be used to store area where we draw tag list for each
-     * statusbar.
-     */
-    for(tda = data->drawn_area; tda && tda->statusbar != statusbar; tda = tda->next);
+     * This will be used to store area where we draw tag list for each object.  */
+    for(tda = data->drawn_area; tda && tda->object != object; tda = tda->next);
 
-    /* Oh, we did not find a drawn area for our statusbar. First time? */
+    /* Oh, we did not find a drawn area for our object. First time? */
     if(!tda)
     {
-        /** \todo delete this when the widget is removed from the statusbar */
+        /** \todo delete this when the widget is removed from the object */
         tda = p_new(taglist_drawn_area_t, 1);
-        tda->statusbar = statusbar;
+        tda->object = object;
         taglist_drawn_area_list_push(&data->drawn_area, tda);
     }
 
@@ -162,7 +159,7 @@ taglist_draw(widget_node_t *w,
     }
 
     /* Now that we have widget width we can compute widget x coordinate */
-    w->area.x = widget_calculate_offset(statusbar->width, w->area.width,
+    w->area.x = widget_calculate_offset(width, w->area.width,
                                         offset, w->widget->align); 
 
     for(area = tda->area, tag = vscreen->tags, i = 0;
@@ -174,7 +171,7 @@ taglist_draw(widget_node_t *w,
 
         area->x = w->area.x + prev_width;
         prev_width += area->width;
-        draw_text(ctx, globalconf.font, &statusbar->colors.fg, *area, text[i]);
+        draw_text(ctx, globalconf.font, *area, text[i]);
         p_delete(&text[i]);
 
         if(tag_isoccupied(tag))
@@ -183,13 +180,13 @@ taglist_draw(widget_node_t *w,
             rectangle.x = area->x;
             rectangle.y = area->y;
             draw_rectangle(ctx, rectangle, 1.0,
-                           sel && is_client_tagged(sel, tag), statusbar->colors.fg);
+                           sel && is_client_tagged(sel, tag), ctx->fg);
         }
     }
 
     p_delete(&text);
 
-    w->area.height = statusbar->height;
+    w->area.height = height;
     return w->area.width;
 }
 
@@ -205,7 +202,7 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
     tag_t *tag;
 
     /* Find the good drawn area list */
-    for(tda = data->drawn_area; tda && tda->statusbar != statusbar; tda = tda->next);
+    for(tda = data->drawn_area; tda && tda->object != statusbar; tda = tda->next);
     area = tda->area;
 
     for(b = w->widget->buttons; b; b = b->next)

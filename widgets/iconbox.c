@@ -29,8 +29,11 @@ typedef struct
 } Data;
 
 static int
-iconbox_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
-             int used __attribute__ ((unused)))
+iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
+             widget_node_t *w,
+             int width, int height, int offset,
+             int used __attribute__ ((unused)),
+             void *p __attribute__ ((unused)))
 {
     Data *d = w->widget->data;
     area_t area = draw_get_image_size(d->image);
@@ -40,24 +43,24 @@ iconbox_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
         return (w->area.width = 0);
 
     if(d->resize)
-        w->area.width = ((double) statusbar->height / area.height) * area.width;
+        w->area.width = ((double) height / area.height) * area.width;
     else
         w->area.width = area.width;
 
-    if(w->area.width > statusbar->width - used)
+    if(w->area.width > width - used)
         return (w->area.width = 0);
 
-    w->area.height = statusbar->height;
+    w->area.height = height;
 
-    w->area.x = widget_calculate_offset(statusbar->width,
+    w->area.x = widget_calculate_offset(width,
                                         w->area.width,
                                         offset,
                                         w->widget->align);
 
     w->area.y = 0;
 
-    draw_image(statusbar->ctx, w->area.x, w->area.y,
-               d->resize ? statusbar->height : 0, d->image);
+    draw_image(ctx, w->area.x, w->area.y,
+               d->resize ? height : 0, d->image);
 
     return w->area.width;
 }

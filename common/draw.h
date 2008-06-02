@@ -106,9 +106,11 @@ typedef struct
     cairo_t *cr;
     cairo_surface_t *surface;
     PangoLayout *layout;
+    xcolor_t fg;
+    xcolor_t bg;
 } draw_context_t;
 
-draw_context_t *draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t);
+draw_context_t *draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t, xcolor_t, xcolor_t);
 /** Delete a draw context
  * \param ctx draw_context_t to delete
  */
@@ -130,7 +132,7 @@ draw_context_delete(draw_context_t **ctx)
 font_t *draw_font_new(xcb_connection_t *, int, const char *);
 void draw_font_delete(font_t **);
 
-void draw_text(draw_context_t *, font_t *, xcolor_t *, area_t, const char *);
+void draw_text(draw_context_t *, font_t *, area_t, const char *);
 void draw_rectangle(draw_context_t *, area_t, float, bool, xcolor_t);
 void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 

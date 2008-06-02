@@ -53,7 +53,7 @@ typedef struct
     bool vertical;
     /** Number of data_items (bars) */
     int data_items;
-    /** Height 0-1, where 1.0 is height of statusbar */
+    /** Height 0-1, where 1.0 is height of bar */
     float height;
     /** Foreground color */
     xcolor_t *fg;
@@ -120,14 +120,17 @@ progressbar_data_add(Data *d, const char *new_data_title)
 }
 
 static int
-progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
-                 int used __attribute__ ((unused)))
+progressbar_draw(draw_context_t *ctx,
+                 int screen __attribute__ ((unused)),
+                 widget_node_t *w,
+                 int width, int height, int offset,
+                 int used __attribute__ ((unused)),
+                 void *p __attribute__ ((unused)))
 {
     /* pb_.. values points to the widget inside a potential border */
     int i, values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
     int unit = 0; /* tick + gap */
     area_t rectangle, pattern_rect;
-    draw_context_t *ctx = statusbar->ctx;
     Data *d = w->widget->data;
 
     if(!d->data_items)
@@ -152,7 +155,7 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
         w->area.width = pb_width + 2 * (d->border_width + d->border_padding);
     }
 
-    w->area.x = widget_calculate_offset(statusbar->width,
+    w->area.x = widget_calculate_offset(width,
                                         w->area.width,
                                         offset,
                                         w->widget->align);
@@ -176,7 +179,7 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
     {
         /** \todo maybe prevent to calculate that stuff below over and over again
          * (->use static-values) */
-        pb_height = (int) (statusbar->height * d->height + 0.5)
+        pb_height = (int) (height * d->height + 0.5)
                     - 2 * (d->border_width + d->border_padding);
         if(d->ticks_count && d->ticks_gap)
         {
@@ -185,7 +188,7 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
             pb_height = unit * d->ticks_count - d->ticks_gap;
         }
 
-        pb_y = w->area.y + ((int) (statusbar->height * (1 - d->height)) / 2)
+        pb_y = w->area.y + ((int) (height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
         for(i = 0; i < d->data_items; i++)
@@ -286,10 +289,10 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
     }
     else /* a horizontal progressbar */
     {
-        pb_height = (int) ((statusbar->height * d->height
+        pb_height = (int) ((height * d->height
                     - d->data_items * 2 * (d->border_width + d->border_padding)
                     - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
-        pb_y = w->area.y + ((int) (statusbar->height * (1 - d->height)) / 2)
+        pb_y = w->area.y + ((int) (height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
         for(i = 0; i < d->data_items; i++)
@@ -386,7 +389,7 @@ progressbar_draw(widget_node_t *w, statusbar_t *statusbar, int offset,
         }
     }
 
-    w->area.height = statusbar->height;
+    w->area.height = height;
     return w->area.width;
 }
 

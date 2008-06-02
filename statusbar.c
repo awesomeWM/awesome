@@ -119,16 +119,16 @@ statusbar_draw(statusbar_t *statusbar)
 
     for(w = statusbar->widgets; w; w = w->next)
         if(w->widget->isvisible && w->widget->align == AlignLeft)
-            left += w->widget->draw(w, statusbar, left, (left + right));
+            left += w->widget->draw(statusbar->ctx, statusbar->screen, w, statusbar->width, statusbar->height, left, (left + right), statusbar);
 
     /* renders right widget from last to first */
     for(w = *widget_node_list_last(&statusbar->widgets); w; w = w->prev)
         if(w->widget->isvisible && w->widget->align == AlignRight)
-            right += w->widget->draw(w, statusbar, right, (left + right));
+            right += w->widget->draw(statusbar->ctx, statusbar->screen, w, statusbar->width, statusbar->height, right, (left + right), statusbar);
 
     for(w = statusbar->widgets; w; w = w->next)
         if(w->widget->isvisible && w->widget->align == AlignFlex)
-            left += w->widget->draw(w, statusbar, left, (left + right));
+            left += w->widget->draw(statusbar->ctx, statusbar->screen, w, statusbar->width, statusbar->height, left, (left + right), statusbar);
 
     switch(statusbar->position)
     {
@@ -280,7 +280,9 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
                                           statusbar->phys_screen,
                                           statusbar->width,
                                           statusbar->height,
-                                          dw);
+                                          dw,
+                                          statusbar->colors.fg,
+                                          statusbar->colors.bg);
         break;
       default:
         if(statusbar->width <= 0)
@@ -292,7 +294,9 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
                                           statusbar->phys_screen,
                                           statusbar->width,
                                           statusbar->height,
-                                          statusbar->sw->drawable);
+                                          statusbar->sw->drawable,
+                                          statusbar->colors.fg,
+                                          statusbar->colors.bg);
         break;
     }
 

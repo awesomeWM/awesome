@@ -113,10 +113,14 @@ draw_screen_default_visual(xcb_screen_t *s)
  * \param width width
  * \param height height
  * \param dw Drawable object to store in draw_context_t
+ * \param fg Foreground color.
+ * \param bg Background color.
  * \return draw context ref
  */
 draw_context_t *
-draw_context_new(xcb_connection_t *conn, int phys_screen, int width, int height, xcb_drawable_t dw)
+draw_context_new(xcb_connection_t *conn, int phys_screen,
+                 int width, int height, xcb_drawable_t dw,
+                 xcolor_t fg, xcolor_t bg)
 {
     draw_context_t *d = p_new(draw_context_t, 1);
     xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
@@ -131,6 +135,8 @@ draw_context_new(xcb_connection_t *conn, int phys_screen, int width, int height,
     d->surface = cairo_xcb_surface_create(conn, dw, d->visual, width, height);
     d->cr = cairo_create(d->surface);
     d->layout = pango_cairo_create_layout(d->cr);
+    d->fg = fg;
+    d->bg = bg;
 
     return d;
 };
@@ -286,7 +292,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
  */
 void
 draw_text(draw_context_t *ctx, font_t *font,
-          xcolor_t *fg, area_t area, const char *text)
+          area_t area, const char *text)
 {
     int x, y;
     ssize_t len, olen;
@@ -361,10 +367,10 @@ draw_text(draw_context_t *ctx, font_t *font,
     cairo_move_to(ctx->cr, x, y);
 
     cairo_set_source_rgba(ctx->cr,
-                          fg->red / 65535.0,
-                          fg->green / 65535.0,
-                          fg->blue / 65535.0,
-                          fg->alpha / 65535.0);
+                          ctx->fg.red / 65535.0,
+                          ctx->fg.green / 65535.0,
+                          ctx->fg.blue / 65535.0,
+                          ctx->fg.alpha / 65535.0);
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 

@@ -34,30 +34,32 @@ typedef struct
 } Data;
 
 static int
-textbox_draw(widget_node_t *w, statusbar_t *statusbar, int offset, int used)
+textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
+             widget_node_t *w,
+             int width, int height, int offset, int used,
+             void *p __attribute__ ((unused)))
 {
     Data *d = w->widget->data;
 
     if(d->width)
         w->area.width = d->width;
     else if(w->widget->align == AlignFlex)
-        w->area.width = statusbar->width - used;
+        w->area.width = width - used;
     else
-        w->area.width = MIN(draw_text_extents(statusbar->ctx->connection,
-                                              statusbar->ctx->phys_screen,
+        w->area.width = MIN(draw_text_extents(ctx->connection,
+                                              ctx->phys_screen,
                                               globalconf.font, d->text).width,
-                            statusbar->width - used);
+                            width - used);
 
-    w->area.height = statusbar->height;
+    w->area.height = height;
 
-    w->area.x = widget_calculate_offset(statusbar->width,
+    w->area.x = widget_calculate_offset(width,
                                         w->area.width,
                                         offset,
                                         w->widget->align);
     w->area.y = 0;
 
-    draw_text(statusbar->ctx, globalconf.font,
-              &statusbar->colors.fg,
+    draw_text(ctx, globalconf.font,
               w->area, d->text);
 
     return w->area.width;

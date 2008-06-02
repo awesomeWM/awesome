@@ -145,7 +145,7 @@ mouse_resizebar_draw(draw_context_t *ctx,
     snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
              geometry.x, geometry.y, geometry.width, geometry.height);
     draw_rectangle(ctx, draw_geometry, 1.0, true, globalconf.colors.bg);
-    draw_text(ctx, globalconf.font, &globalconf.colors.fg, draw_geometry, size);
+    draw_text(ctx, globalconf.font, draw_geometry, size);
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
@@ -180,7 +180,9 @@ mouse_resizebar_new(int phys_screen, int border, area_t geometry,
 
     *ctx = draw_context_new(globalconf.connection, sw->phys_screen,
                             sw->geometry.width, sw->geometry.height,
-                            sw->drawable);
+                            sw->drawable,
+                            globalconf.colors.fg,
+                            globalconf.colors.bg);
 
     xcb_map_window(globalconf.connection, sw->window);
     mouse_resizebar_draw(*ctx, sw, geometry, border);

@@ -86,7 +86,9 @@ titlebar_draw(client_t *c)
         ctx = draw_context_new(globalconf.connection, c->titlebar_sw->phys_screen,
                                c->titlebar_sw->geometry.height,
                                c->titlebar_sw->geometry.width,
-                               dw);
+                               dw,
+                               globalconf.colors.fg,
+                               globalconf.colors.bg);
         geometry.width = c->titlebar_sw->geometry.height;
         geometry.height = c->titlebar_sw->geometry.width;
         break;
@@ -94,7 +96,9 @@ titlebar_draw(client_t *c)
         ctx = draw_context_new(globalconf.connection, c->titlebar_sw->phys_screen,
                                c->titlebar_sw->geometry.width,
                                c->titlebar_sw->geometry.height,
-                               c->titlebar_sw->drawable);
+                               c->titlebar_sw->drawable,
+                               globalconf.colors.fg,
+                               globalconf.colors.bg);
         geometry = c->titlebar_sw->geometry;
         break;
     }
@@ -102,7 +106,7 @@ titlebar_draw(client_t *c)
     text = titlebar_text(c);
     geometry.x = geometry.y = 0;
     draw_rectangle(ctx, geometry, 1.0, true, globalconf.colors.bg);
-    draw_text(ctx, globalconf.font, &globalconf.colors.fg, geometry, text);
+    draw_text(ctx, globalconf.font, geometry, text);
     p_delete(&text);
 
     switch(c->titlebar.position)
