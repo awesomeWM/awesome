@@ -160,7 +160,7 @@ keybinding.new({ modkey, "Shift" }, "j", function () awful.client.swap(1) end):a
 keybinding.new({ modkey, "Shift" }, "k", function () awful.client.swap(-1) end):add()
 keybinding.new({ modkey, "Control" }, "j", function () awful.screen.focus(1) end):add()
 keybinding.new({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end):add()
-keybinding.new({ modkey, "Control" }, "space", function () awful.client.togglefloating() end):add()
+keybinding.new({ modkey, "Control" }, "space", awful.client.togglefloating):add()
 
 -- Layout manipulation
 keybinding.new({ modkey }, "l", function () awful.tag.incmwfact(0.05) end):add()
