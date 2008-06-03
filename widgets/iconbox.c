@@ -24,7 +24,7 @@
 
 typedef struct
 {
-    char *image;
+    draw_image_t *image;
     bool resize;
 } Data;
 
@@ -36,16 +36,16 @@ iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              void *p __attribute__ ((unused)))
 {
     Data *d = w->widget->data;
-    area_t area = draw_get_image_size(d->image);
+    draw_image_t *image = d->image;
 
     /* image not valid */
-    if(area.width < 0 || area.height < 0)
+    if(!image)
         return (w->area.width = 0);
 
     if(d->resize)
-        w->area.width = ((double) ctx->height / area.height) * area.width;
+        w->area.width = ((double) ctx->height / image->height) * image->width;
     else
-        w->area.width = area.width;
+        w->area.width = image->width;
 
     if(w->area.width > ctx->width - used)
         return (w->area.width = 0);
@@ -59,8 +59,8 @@ iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
 
     w->area.y = 0;
 
-    draw_image_from_file(ctx, w->area.x, w->area.y,
-                         d->resize ? ctx->height : 0, d->image);
+    draw_image(ctx, w->area.x, w->area.y,
+               d->resize ? ctx->height : 0, image);
 
     return w->area.width;
 }
@@ -75,8 +75,8 @@ iconbox_tell(widget_t *widget, const char *property, const char *new_value)
 
     if(!a_strcmp(property, "image"))
     {
-        p_delete(&d->image);
-        d->image = a_strdup(new_value);
+        draw_image_delete(&d->image);
+        d->image = draw_image_new(new_value);
     }
     else if(!a_strcmp(property, "resize"))
         d->resize = a_strtobool(new_value);
