@@ -143,7 +143,7 @@ mouse_resizebar_draw(draw_context_t *ctx,
     char size[64];
 
     snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
-             geometry.x, geometry.y, geometry.width, geometry.height);
+             geometry.width, geometry.height, geometry.x, geometry.y);
     draw_rectangle(ctx, draw_geometry, 1.0, true, globalconf.colors.bg);
     draw_text(ctx, globalconf.font, draw_geometry, size);
     simplewindow_move(sw,
