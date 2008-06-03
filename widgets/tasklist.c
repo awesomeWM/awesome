@@ -121,11 +121,11 @@ tasklist_draw(draw_context_t *ctx, int screen,
                     if(area.width > 0 && area.height > 0)
                     {
                         icon_width = ((double) ctx->height / (double) area.height) * area.width;
-                        draw_image(ctx,
-                                   w->area.x + box_width * i,
-                                   w->area.y,
-                                   ctx->height,
-                                   c->icon_path);
+                        draw_image_from_file(ctx,
+                                             w->area.x + box_width * i,
+                                             w->area.y,
+                                             ctx->height,
+                                             c->icon_path);
                     }
                 }
 

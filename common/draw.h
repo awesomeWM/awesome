@@ -140,7 +140,7 @@ void draw_graph_setup(draw_context_t *);
 void draw_graph(draw_context_t *, area_t, int *, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 void draw_circle(draw_context_t *, int, int, int, bool, xcolor_t);
-void draw_image(draw_context_t *, int, int, int, const char *);
+void draw_image_from_file(draw_context_t *, int, int, int, const char *);
 void draw_image_from_argb_data(draw_context_t *, int, int, int, int, int, unsigned char *);
 area_t draw_get_image_size(const char *filename);
 void draw_rotate(draw_context_t *, xcb_drawable_t, xcb_drawable_t, int, int, int, int, double, int, int);

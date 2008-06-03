@@ -59,8 +59,8 @@ iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
 
     w->area.y = 0;
 
-    draw_image(ctx, w->area.x, w->area.y,
-               d->resize ? ctx->height : 0, d->image);
+    draw_image_from_file(ctx, w->area.x, w->area.y,
+                         d->resize ? ctx->height : 0, d->image);
 
     return w->area.width;
 }

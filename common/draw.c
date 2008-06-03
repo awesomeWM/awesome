@@ -731,7 +731,7 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
  * \param filename file name to draw
  */
 void
-draw_image(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
+draw_image_from_file(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
 {
 
     double ratio;
@@ -834,7 +834,7 @@ draw_imlib_load_strerror(Imlib_Load_Error e)
  * \param filename file name to draw
  */
 void
-draw_image(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
+draw_image_from_file(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
 {
     int w, h, size, i;
     DATA32 *data;
