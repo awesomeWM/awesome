@@ -24,6 +24,7 @@
 
 #include <cairo-xcb.h>
 
+#include "config.h"
 #ifdef WITH_IMLIB2
 #include <Imlib2.h>
 #else
