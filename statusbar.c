@@ -19,9 +19,6 @@
  *
  */
 
-#include <stdio.h>
-#include <math.h>
-
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 
@@ -40,113 +37,15 @@ extern bool running;
 static void
 statusbar_draw(statusbar_t *statusbar)
 {
-    xcb_window_t rootwin;
-    xcb_pixmap_t rootpix;
-    widget_node_t *w;
-    int left = 0, right = 0;
-    char *data;
-    xcb_get_property_reply_t *prop_r;
-    xcb_get_property_cookie_t prop_c;
-    area_t rectangle = { 0, 0, 0, 0, NULL, NULL }, rootsize;;
-    xcb_atom_t rootpix_atom, pixmap_atom;
-    xutil_intern_atom_request_t rootpix_atom_req, pixmap_atom_req;
-
     statusbar->need_update = false;
 
     if(!statusbar->position)
         return;
 
-    /* Send requests needed for transparency */
-    if(statusbar->colors.bg.alpha != 0xffff)
-    {
-        pixmap_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "PIXMAP");
-        rootpix_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_XROOTPMAP_ID");
-    }
-
-    rectangle.width = statusbar->width;
-    rectangle.height = statusbar->height;
-
-    if(statusbar->colors.bg.alpha != 0xffff)
-    {
-        rootwin = xcb_aux_get_screen(globalconf.connection, statusbar->phys_screen)->root;
-        pixmap_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, pixmap_atom_req);
-        rootpix_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, rootpix_atom_req);
-        prop_c = xcb_get_property_unchecked(globalconf.connection, false, rootwin, rootpix_atom,
-                                            pixmap_atom, 0, 1);
-        if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
-        {
-            if((data = xcb_get_property_value(prop_r)))
-            {
-               rootpix = *(xcb_pixmap_t *) data;
-               switch(statusbar->position)
-               {
-                 case Left:
-                   rootsize = get_display_area(statusbar->phys_screen, NULL, NULL);
-                   draw_rotate(statusbar->ctx,
-                               rootpix, statusbar->ctx->drawable,
-                               rootsize.width, rootsize.height,
-                               statusbar->width, statusbar->height,
-                               M_PI_2,
-                               statusbar->sw->geometry.y + statusbar->width,
-                               - statusbar->sw->geometry.x);
-                   break;
-                 case Right:
-                   rootsize = get_display_area(statusbar->phys_screen, NULL, NULL);
-                   draw_rotate(statusbar->ctx,
-                               rootpix, statusbar->ctx->drawable,
-                               rootsize.width, rootsize.height,
-                               statusbar->width, statusbar->height,
-                               - M_PI_2,
-                               - statusbar->sw->geometry.y,
-                               statusbar->sw->geometry.x + statusbar->height);
-                   break;
-                 default:
-                   xcb_copy_area(globalconf.connection, rootpix,
-                                 statusbar->sw->drawable, statusbar->sw->gc,
-                                 statusbar->sw->geometry.x, statusbar->sw->geometry.y,
-                                 0, 0,
-                                 statusbar->sw->geometry.width,
-                                 statusbar->sw->geometry.height);
-                   break;
-               }
-            }
-            p_delete(&prop_r);
-        }
-    }
-
-    draw_rectangle(statusbar->ctx, rectangle, 1.0, true,
-                   statusbar->colors.bg);
-
-    for(w = statusbar->widgets; w; w = w->next)
-        if(w->widget->isvisible && w->widget->align == AlignLeft)
-            left += w->widget->draw(statusbar->ctx, statusbar->screen, w, left, (left + right), statusbar);
-
-    /* renders right widget from last to first */
-    for(w = *widget_node_list_last(&statusbar->widgets); w; w = w->prev)
-        if(w->widget->isvisible && w->widget->align == AlignRight)
-            right += w->widget->draw(statusbar->ctx, statusbar->screen, w, right, (left + right), statusbar);
-
-    for(w = statusbar->widgets; w; w = w->next)
-        if(w->widget->isvisible && w->widget->align == AlignFlex)
-            left += w->widget->draw(statusbar->ctx, statusbar->screen, w, left, (left + right), statusbar);
-
-    switch(statusbar->position)
-    {
-        case Right:
-          draw_rotate(statusbar->ctx, statusbar->ctx->drawable, statusbar->sw->drawable,
-                      statusbar->ctx->width, statusbar->ctx->height,
-                      statusbar->ctx->height, statusbar->ctx->width,
-                      M_PI_2, statusbar->height, 0);
-          break;
-        case Left:
-          draw_rotate(statusbar->ctx, statusbar->ctx->drawable, statusbar->sw->drawable,
-                      statusbar->ctx->width, statusbar->ctx->height,
-                      statusbar->ctx->height, statusbar->ctx->width,
-                      - M_PI_2, 0, statusbar->width);
-          break;
-        default:
-          break;
-    }
+    widget_render(statusbar->widgets, statusbar->ctx, statusbar->sw->drawable,
+                  statusbar->screen, statusbar->position,
+                  statusbar->sw->geometry.x, statusbar->sw->geometry.y,
+                  statusbar);
 
     simplewindow_refresh_drawable(statusbar->sw);
     xcb_aux_sync(globalconf.connection);

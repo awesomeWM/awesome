@@ -20,9 +20,15 @@
  *
  */
 
+#include <math.h>
+
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include "widget.h"
 #include "statusbar.h"
 #include "event.h"
+#include "screen.h"
 #include "lua.h"
 
 extern awesome_t globalconf;
@@ -101,6 +107,124 @@ widget_common_tell(widget_t *widget,
     warn("%s widget does not accept commands.", widget->name);
     return WIDGET_ERROR_CUSTOM;
 }
+
+/** Render a list of widgets.
+ * \param wnode The list of widgets.
+ * \param ctx The draw context where to render.
+ * \param rotate_dw The rotate drawable: where to rotate and render the final
+ * \param screen The logical screen used to render.
+ * \param position The object position.
+ * \param x The x coordinates of the object.
+ * \param y The y coordinates of the object.
+ * drawable when the object position is right or left.
+ * \param object The object pointer.
+ */
+void
+widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_drawable_t rotate_dw,
+              int screen, position_t position,
+              int x, int y, void *object)
+{
+    xcb_window_t rootwin;
+    xcb_pixmap_t rootpix;
+    widget_node_t *w;
+    int left = 0, right = 0;
+    char *data;
+    xcb_get_property_reply_t *prop_r;
+    xcb_get_property_cookie_t prop_c;
+    area_t rectangle = { 0, 0, 0, 0, NULL, NULL }, rootsize;
+    xcb_atom_t rootpix_atom, pixmap_atom;
+    xutil_intern_atom_request_t rootpix_atom_req, pixmap_atom_req;
+
+    /* Send requests needed for transparency */
+    if(ctx->bg.alpha != 0xffff)
+    {
+        pixmap_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "PIXMAP");
+        rootpix_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_XROOTPMAP_ID");
+    }
+
+    rectangle.width = ctx->width;
+    rectangle.height = ctx->height;
+
+    if(ctx->bg.alpha != 0xffff)
+    {
+        rootwin = xcb_aux_get_screen(globalconf.connection, ctx->phys_screen)->root;
+        pixmap_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, pixmap_atom_req);
+        rootpix_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, rootpix_atom_req);
+        prop_c = xcb_get_property_unchecked(globalconf.connection, false, rootwin, rootpix_atom,
+                                            pixmap_atom, 0, 1);
+        if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
+        {
+            if((data = xcb_get_property_value(prop_r)))
+            {
+               rootpix = *(xcb_pixmap_t *) data;
+                rootsize = get_display_area(ctx->phys_screen, NULL, NULL);
+               switch(position)
+               {
+                 case Left:
+                   draw_rotate(ctx,
+                               rootpix, ctx->drawable,
+                               rootsize.width, rootsize.height,
+                               ctx->width, ctx->height,
+                               M_PI_2,
+                               y + ctx->width,
+                               - x);
+                   break;
+                 case Right:
+                   draw_rotate(ctx,
+                               rootpix, ctx->drawable,
+                               rootsize.width, rootsize.height,
+                               ctx->width, ctx->height,
+                               - M_PI_2,
+                               - y,
+                               x + ctx->height);
+                   break;
+                 default:
+                   draw_rotate(ctx,
+                               rootpix, ctx->drawable,
+                               rootsize.width, rootsize.height,
+                               ctx->width, ctx->height,
+                               0, x, y);
+                   break;
+               }
+            }
+            p_delete(&prop_r);
+        }
+    }
+
+    draw_rectangle(ctx, rectangle, 1.0, true, ctx->bg);
+
+    for(w = wnode; w; w = w->next)
+        if(w->widget->isvisible && w->widget->align == AlignLeft)
+            left += w->widget->draw(ctx, screen, w, left, (left + right), object);
+
+    /* renders right widget from last to first */
+    for(w = *widget_node_list_last(&wnode); w; w = w->prev)
+        if(w->widget->isvisible && w->widget->align == AlignRight)
+            right += w->widget->draw(ctx, screen, w, right, (left + right), object);
+
+    for(w = wnode; w; w = w->next)
+        if(w->widget->isvisible && w->widget->align == AlignFlex)
+            left += w->widget->draw(ctx, screen, w, left, (left + right), object);
+
+    switch(position)
+    {
+        case Right:
+          draw_rotate(ctx, ctx->drawable, rotate_dw,
+                      ctx->width, ctx->height,
+                      ctx->height, ctx->width,
+                      M_PI_2, ctx->height, 0);
+          break;
+        case Left:
+          draw_rotate(ctx, ctx->drawable, rotate_dw,
+                      ctx->width, ctx->height,
+                      ctx->height, ctx->width,
+                      - M_PI_2, 0, ctx->width);
+          break;
+        default:
+          break;
+    }
+}
+
 
 /** Common function for creating a widget.
  * \param widget The allocated widget.
