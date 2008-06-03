@@ -123,7 +123,7 @@ static int
 progressbar_draw(draw_context_t *ctx,
                  int screen __attribute__ ((unused)),
                  widget_node_t *w,
-                 int width, int height, int offset,
+                 int offset,
                  int used __attribute__ ((unused)),
                  void *p __attribute__ ((unused)))
 {
@@ -155,7 +155,7 @@ progressbar_draw(draw_context_t *ctx,
         w->area.width = pb_width + 2 * (d->border_width + d->border_padding);
     }
 
-    w->area.x = widget_calculate_offset(width,
+    w->area.x = widget_calculate_offset(ctx->width,
                                         w->area.width,
                                         offset,
                                         w->widget->align);
@@ -179,7 +179,7 @@ progressbar_draw(draw_context_t *ctx,
     {
         /** \todo maybe prevent to calculate that stuff below over and over again
          * (->use static-values) */
-        pb_height = (int) (height * d->height + 0.5)
+        pb_height = (int) (ctx->height * d->height + 0.5)
                     - 2 * (d->border_width + d->border_padding);
         if(d->ticks_count && d->ticks_gap)
         {
@@ -188,7 +188,7 @@ progressbar_draw(draw_context_t *ctx,
             pb_height = unit * d->ticks_count - d->ticks_gap;
         }
 
-        pb_y = w->area.y + ((int) (height * (1 - d->height)) / 2)
+        pb_y = w->area.y + ((int) (ctx->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
         for(i = 0; i < d->data_items; i++)
@@ -289,10 +289,10 @@ progressbar_draw(draw_context_t *ctx,
     }
     else /* a horizontal progressbar */
     {
-        pb_height = (int) ((height * d->height
+        pb_height = (int) ((ctx->height * d->height
                     - d->data_items * 2 * (d->border_width + d->border_padding)
                     - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
-        pb_y = w->area.y + ((int) (height * (1 - d->height)) / 2)
+        pb_y = w->area.y + ((int) (ctx->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
         for(i = 0; i < d->data_items; i++)
@@ -389,7 +389,7 @@ progressbar_draw(draw_context_t *ctx,
         }
     }
 
-    w->area.height = height;
+    w->area.height = ctx->height;
     return w->area.width;
 }
 

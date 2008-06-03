@@ -136,7 +136,7 @@ struct widget_t
     /** widget_t name */
     char *name;
     /** Draw function */
-    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, int, int, void *);
+    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, void *);
     /** Update function */
     widget_tell_status_t (*tell)(widget_t *, const char *, const char *);
     /** ButtonPressedEvent handler */

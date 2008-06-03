@@ -31,7 +31,7 @@ typedef struct
 static int
 iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              widget_node_t *w,
-             int width, int height, int offset,
+             int offset,
              int used __attribute__ ((unused)),
              void *p __attribute__ ((unused)))
 {
@@ -43,16 +43,16 @@ iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
         return (w->area.width = 0);
 
     if(d->resize)
-        w->area.width = ((double) height / area.height) * area.width;
+        w->area.width = ((double) ctx->height / area.height) * area.width;
     else
         w->area.width = area.width;
 
-    if(w->area.width > width - used)
+    if(w->area.width > ctx->width - used)
         return (w->area.width = 0);
 
-    w->area.height = height;
+    w->area.height = ctx->height;
 
-    w->area.x = widget_calculate_offset(width,
+    w->area.x = widget_calculate_offset(ctx->width,
                                         w->area.width,
                                         offset,
                                         w->widget->align);
@@ -60,7 +60,7 @@ iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
     w->area.y = 0;
 
     draw_image(ctx, w->area.x, w->area.y,
-               d->resize ? height : 0, d->image);
+               d->resize ? ctx->height : 0, d->image);
 
     return w->area.width;
 }

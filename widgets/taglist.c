@@ -115,7 +115,7 @@ taglist_text_get(tag_t *tag, taglist_data_t *data)
 
 static int
 taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
-             int width, int height, int offset,
+             int offset,
              int used __attribute__ ((unused)),
              void *object)
 {
@@ -159,7 +159,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     }
 
     /* Now that we have widget width we can compute widget x coordinate */
-    w->area.x = widget_calculate_offset(width, w->area.width,
+    w->area.x = widget_calculate_offset(ctx->width, w->area.width,
                                         offset, w->widget->align); 
 
     for(area = tda->area, tag = vscreen->tags, i = 0;
@@ -186,7 +186,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
 
     p_delete(&text);
 
-    w->area.height = height;
+    w->area.height = ctx->height;
     return w->area.width;
 }
 

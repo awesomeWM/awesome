@@ -36,7 +36,7 @@ typedef struct
 static int
 textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              widget_node_t *w,
-             int width, int height, int offset, int used,
+             int offset, int used,
              void *p __attribute__ ((unused)))
 {
     Data *d = w->widget->data;
@@ -44,16 +44,16 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
     if(d->width)
         w->area.width = d->width;
     else if(w->widget->align == AlignFlex)
-        w->area.width = width - used;
+        w->area.width = ctx->width - used;
     else
         w->area.width = MIN(draw_text_extents(ctx->connection,
                                               ctx->phys_screen,
                                               globalconf.font, d->text).width,
-                            width - used);
+                            ctx->width - used);
 
-    w->area.height = height;
+    w->area.height = ctx->height;
 
-    w->area.x = widget_calculate_offset(width,
+    w->area.x = widget_calculate_offset(ctx->width,
                                         w->area.width,
                                         offset,
                                         w->widget->align);

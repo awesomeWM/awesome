@@ -64,7 +64,7 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
 
 static int
 tasklist_draw(draw_context_t *ctx, int screen,
-              widget_node_t *w, int width, int height,
+              widget_node_t *w,
               int offset, int used, void *p __attribute__ ((unused)))
 {
     client_t *c;
@@ -74,7 +74,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     NetWMIcon *icon;
 
-    if(used >= width)
+    if(used >= ctx->width)
         return (w->area.width = 0);
 
     for(c = globalconf.clients; c; c = c->next)
@@ -84,11 +84,11 @@ tasklist_draw(draw_context_t *ctx, int screen,
     if(!n)
         return (w->area.width = 0);
 
-    box_width = (width - used) / n;
+    box_width = (ctx->width - used) / n;
     /* compute how many pixel we left empty */
-    box_width_rest = (width - used) % n;
+    box_width_rest = (ctx->width - used) % n;
 
-    w->area.x = widget_calculate_offset(width,
+    w->area.x = widget_calculate_offset(ctx->width,
                                         0, offset, w->widget->align);
 
     w->area.y = 0;
@@ -112,7 +112,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
                 /* draw a background for icons */
                 area.x = w->area.x + box_width * i;
                 area.y = w->area.y;
-                area.height = height;
+                area.height = ctx->height;
                 area.width = box_width;
 
                 if(c->icon_path)
@@ -120,24 +120,24 @@ tasklist_draw(draw_context_t *ctx, int screen,
                     area = draw_get_image_size(c->icon_path);
                     if(area.width > 0 && area.height > 0)
                     {
-                        icon_width = ((double) height / (double) area.height) * area.width;
+                        icon_width = ((double) ctx->height / (double) area.height) * area.width;
                         draw_image(ctx,
                                    w->area.x + box_width * i,
                                    w->area.y,
-                                   height,
+                                   ctx->height,
                                    c->icon_path);
                     }
                 }
 
                 if(!icon_width && (icon = ewmh_get_window_icon(c->win)))
                 {
-                    icon_width = ((double) height / (double) icon->height)
+                    icon_width = ((double) ctx->height / (double) icon->height)
                         * icon->width;
                     draw_image_from_argb_data(ctx,
                                               w->area.x + box_width * i,
                                               w->area.y,
                                               icon->width, icon->height,
-                                              height, icon->image);
+                                              ctx->height, icon->image);
                     p_delete(&icon->image);
                     p_delete(&icon);
                 }
@@ -146,7 +146,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
             area.x = w->area.x + icon_width + box_width * i;
             area.y = w->area.y;
             area.width = box_width - icon_width;
-            area.height = height;
+            area.height = ctx->height;
 
             /* if we're on last elem, it has the last pixels left */
             if(i == n - 1)
@@ -165,8 +165,8 @@ tasklist_draw(draw_context_t *ctx, int screen,
             i++;
         }
 
-    w->area.width = width - used;
-    w->area.height = height;
+    w->area.width = ctx->width - used;
+    w->area.height = ctx->height;
 
     return w->area.width;
 }

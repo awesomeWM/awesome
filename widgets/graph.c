@@ -137,7 +137,7 @@ static int
 graph_draw(draw_context_t *ctx,
            int screen __attribute__ ((unused)),
            widget_node_t *w,
-           int width, int height, int offset,
+           int offset,
            int used __attribute__ ((unused)),
            void *p __attribute__ ((unused)))
 {
@@ -149,16 +149,16 @@ graph_draw(draw_context_t *ctx,
     if(!d->data_items)
         return 0;
 
-    w->area.x = widget_calculate_offset(width,
+    w->area.x = widget_calculate_offset(ctx->width,
                                         d->width, offset,
                                         w->widget->align);
     w->area.y = 0;
 
     /* box = the graph inside the rectangle */
     if(!(d->box_height))
-        d->box_height = (int) (height * d->height + 0.5) - 2;
+        d->box_height = (int) (ctx->height * d->height + 0.5) - 2;
 
-    margin_top = (int)((height - (d->box_height + 2)) / 2 + 0.5) + w->area.y;
+    margin_top = (int)((ctx->height - (d->box_height + 2)) / 2 + 0.5) + w->area.y;
 
     /* draw background */
     rectangle.x = w->area.x + 1;
@@ -328,7 +328,7 @@ graph_draw(draw_context_t *ctx,
     draw_rectangle(ctx, rectangle, 1.0, false, d->bordercolor);
 
     w->area.width = d->width;
-    w->area.height = height;
+    w->area.height = ctx->height;
     return w->area.width;
 }
 
