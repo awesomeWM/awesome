@@ -66,14 +66,12 @@ titlebar_getbywin(xcb_window_t win)
 
 /** Draw the titlebar content.
  * \param c the client
- * \todo stop duplicating the context
  */
 void
 titlebar_draw(titlebar_t *titlebar)
 {
     xcb_drawable_t dw = 0;
     draw_context_t *ctx;
-    area_t geometry;
     xcb_screen_t *s;
 
     if(!titlebar || !titlebar->sw || !titlebar->position)
@@ -82,7 +80,6 @@ titlebar_draw(titlebar_t *titlebar)
     s = xcb_aux_get_screen(globalconf.connection,
                            titlebar->sw->phys_screen);
 
-    /** \todo move this in init */
     switch(titlebar->position)
     {
       case Off:
@@ -101,8 +98,6 @@ titlebar_draw(titlebar_t *titlebar)
                                dw,
                                titlebar->colors.fg,
                                titlebar->colors.bg);
-        geometry.width = titlebar->sw->geometry.height;
-        geometry.height = titlebar->sw->geometry.width;
         break;
       default:
         ctx = draw_context_new(globalconf.connection, titlebar->sw->phys_screen,
@@ -111,7 +106,6 @@ titlebar_draw(titlebar_t *titlebar)
                                titlebar->sw->drawable,
                                titlebar->colors.fg,
                                titlebar->colors.bg);
-        geometry = titlebar->sw->geometry;
         break;
     }
 
