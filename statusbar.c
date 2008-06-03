@@ -42,7 +42,8 @@ statusbar_draw(statusbar_t *statusbar)
     if(!statusbar->position)
         return;
 
-    widget_render(statusbar->widgets, statusbar->ctx, statusbar->sw->drawable,
+    widget_render(statusbar->widgets, statusbar->ctx, statusbar->sw->gc,
+                  statusbar->sw->drawable,
                   statusbar->screen, statusbar->position,
                   statusbar->sw->geometry.x, statusbar->sw->geometry.y,
                   statusbar);

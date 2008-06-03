@@ -27,6 +27,7 @@
 
 #include "widget.h"
 #include "statusbar.h"
+#include "titlebar.h"
 #include "event.h"
 #include "screen.h"
 #include "lua.h"
@@ -118,9 +119,10 @@ widget_common_tell(widget_t *widget,
  * \param y The y coordinates of the object.
  * drawable when the object position is right or left.
  * \param object The object pointer.
+ * \todo Remove GC.
  */
 void
-widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_drawable_t rotate_dw,
+widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_drawable_t rotate_dw,
               int screen, position_t position,
               int x, int y, void *object)
 {
@@ -179,11 +181,11 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_drawable_t rotate_d
                                x + ctx->height);
                    break;
                  default:
-                   draw_rotate(ctx,
-                               rootpix, ctx->drawable,
-                               rootsize.width, rootsize.height,
-                               ctx->width, ctx->height,
-                               0, x, y);
+                   xcb_copy_area(globalconf.connection, rootpix,
+                                 rotate_dw, gc,
+                                 x, y,
+                                 0, 0, 
+                                 ctx->width, ctx->height);
                    break;
                }
             }
@@ -260,15 +262,17 @@ widget_invalidate_cache(int screen, int flags)
             }
 }
 
-/** Set a statusbar needs update because it has widget.
+/** Set a statusbar needs update because it has widget, or redraw a titlebar.
+ * \todo Probably needs more optimization.
  * \param widget The widget to look for.
  */
-void
-widget_invalidate_statusbar_bywidget(widget_t *widget)
+static void
+widget_invalidate_bywidget(widget_t *widget)
 {
     int screen;
     statusbar_t *statusbar;
     widget_node_t *witer;
+    titlebar_t *t;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar;
@@ -280,6 +284,11 @@ widget_invalidate_statusbar_bywidget(widget_t *widget)
                     statusbar->need_update = true;
                     break;
                 }
+
+    for(t = globalconf.titlebar; t; t = t->next)
+        for(witer = t->widgets; witer; witer = witer->next)
+            if(witer->widget == widget)
+                titlebar_draw(t);
 }
 
 /** Create a new widget userdata. The object is pushed on the stack.
@@ -396,7 +405,7 @@ widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const ch
              property, widget->name);
         break;
       case WIDGET_NOERROR:
-        widget_invalidate_statusbar_bywidget(widget);
+        widget_invalidate_bywidget(widget);
         break;
       case WIDGET_ERROR_CUSTOM:
         break;
@@ -528,7 +537,7 @@ luaA_widget_visible_set(lua_State *L)
 {
     widget_t **widget = luaL_checkudata(L, 1, "widget");
     (*widget)->isvisible = luaA_checkboolean(L, 2);
-    widget_invalidate_statusbar_bywidget(*widget);
+    widget_invalidate_bywidget(*widget);
     return 0;
 }
 

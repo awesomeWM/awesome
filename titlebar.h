@@ -24,10 +24,12 @@
 
 #include "structs.h"
 
-void titlebar_draw(client_t *);
-void titlebar_update_geometry_floating(client_t *);
-void titlebar_update_geometry(client_t *, area_t);
-void titlebar_init(client_t *);
+titlebar_t * titlebar_getbyclient(client_t *);
+titlebar_t * titlebar_getbywin(xcb_window_t);
+void titlebar_draw(titlebar_t *);
+void titlebar_update_geometry_floating(titlebar_t *);
+void titlebar_update_geometry(titlebar_t *, area_t);
+void titlebar_init(titlebar_t *);
 
 /** Add the titlebar geometry to a geometry.
  * \param t the titlebar
@@ -37,25 +39,26 @@ void titlebar_init(client_t *);
 static inline area_t
 titlebar_geometry_add(titlebar_t *t, area_t geometry)
 {
-    switch(t->position)
-    {
-      case Top:
-        geometry.y -= t->height;
-        geometry.height += t->height;
-        break;
-      case Bottom:
-        geometry.height += t->height;
-        break;
-      case Left:
-        geometry.x -= t->width;
-        geometry.width += t->width;
-        break;
-      case Right:
-        geometry.width += t->width;
-        break;
-      default:
-        break;
-    }
+    if(t && t->sw)
+        switch(t->position)
+        {
+          case Top:
+            geometry.y -= t->sw->geometry.height;
+            geometry.height += t->sw->geometry.height;
+            break;
+          case Bottom:
+            geometry.height += t->sw->geometry.height;
+            break;
+          case Left:
+            geometry.x -= t->sw->geometry.width;
+            geometry.width += t->sw->geometry.width;
+            break;
+          case Right:
+            geometry.width += t->sw->geometry.width;
+            break;
+          default:
+            break;
+        }
 
     return geometry;
 }
@@ -68,25 +71,26 @@ titlebar_geometry_add(titlebar_t *t, area_t geometry)
 static inline area_t
 titlebar_geometry_remove(titlebar_t *t, area_t geometry)
 {
-    switch(t->position)
-    {
-      case Top:
-        geometry.y += t->height;
-        geometry.height -= t->height;
-        break;
-      case Bottom:
-        geometry.height -= t->height;
-        break;
-      case Left:
-        geometry.x += t->width;
-        geometry.width -= t->width;
-        break;
-      case Right:
-        geometry.width -= t->width;
-        break;
-      default:
-        break;
-    }
+    if(t && t->sw)
+        switch(t->position)
+        {
+          case Top:
+            geometry.y += t->sw->geometry.height;
+            geometry.height -= t->sw->geometry.height;
+            break;
+          case Bottom:
+            geometry.height -= t->sw->geometry.height;
+            break;
+          case Left:
+            geometry.x += t->sw->geometry.width;
+            geometry.width -= t->sw->geometry.width;
+            break;
+          case Right:
+            geometry.width -= t->sw->geometry.width;
+            break;
+          default:
+            break;
+        }
 
     return geometry;
 }

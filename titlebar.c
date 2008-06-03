@@ -27,51 +27,63 @@
 #include "titlebar.h"
 #include "client.h"
 #include "screen.h"
+#include "widget.h"
 #include "layouts/floating.h"
 
 extern awesome_t globalconf;
 
-static char *
-titlebar_text(client_t *c)
+/** Get a titlebar for a client
+ * \param c The client.
+ * \return A titlebar.
+ */
+titlebar_t *
+titlebar_getbyclient(client_t *c)
 {
-    char *text;
+    titlebar_t *t;
 
-    if(globalconf.focus->client == c)
-        text = c->titlebar.text_focus;
-    else if(c->isurgent)
-        text = c->titlebar.text_urgent;
-    else
-        text = c->titlebar.text_normal;
+    for(t = globalconf.titlebar; t; t = t->next)
+        if(t->client == c)
+            return t;
 
-    return client_markup_parse(c, text, a_strlen(text));
+    return NULL;
 }
 
-static inline area_t
-titlebar_size(client_t *c)
+/** Get a titlebar which own a window.
+ * \param The window.
+ * \return A titlebar.
+ */
+titlebar_t *
+titlebar_getbywin(xcb_window_t win)
 {
-    return draw_text_extents(globalconf.connection, globalconf.default_screen,
-                             globalconf.font, titlebar_text(c));
+    titlebar_t *t;
+
+    for(t = globalconf.titlebar; t; t = t->next)
+        if(t->sw && t->sw->window == win)
+            return t;
+
+    return NULL;
 }
 
 /** Draw the titlebar content.
  * \param c the client
+ * \todo stop duplicating the context
  */
 void
-titlebar_draw(client_t *c)
+titlebar_draw(titlebar_t *titlebar)
 {
     xcb_drawable_t dw = 0;
     draw_context_t *ctx;
     area_t geometry;
     xcb_screen_t *s;
-    char *text;
 
-    if(!c->titlebar_sw)
+    if(!titlebar || !titlebar->sw || !titlebar->position)
         return;
 
     s = xcb_aux_get_screen(globalconf.connection,
-                           c->titlebar_sw->phys_screen);
+                           titlebar->sw->phys_screen);
 
-    switch(c->titlebar.position)
+    /** \todo move this in init */
+    switch(titlebar->position)
     {
       case Off:
         return;
@@ -81,54 +93,52 @@ titlebar_draw(client_t *c)
         xcb_create_pixmap(globalconf.connection, s->root_depth,
                           dw,
                           s->root,
-                          c->titlebar_sw->geometry.height,
-                          c->titlebar_sw->geometry.width);
-        ctx = draw_context_new(globalconf.connection, c->titlebar_sw->phys_screen,
-                               c->titlebar_sw->geometry.height,
-                               c->titlebar_sw->geometry.width,
+                          titlebar->sw->geometry.height,
+                          titlebar->sw->geometry.width);
+        ctx = draw_context_new(globalconf.connection, titlebar->sw->phys_screen,
+                               titlebar->sw->geometry.height,
+                               titlebar->sw->geometry.width,
                                dw,
-                               globalconf.colors.fg,
-                               globalconf.colors.bg);
-        geometry.width = c->titlebar_sw->geometry.height;
-        geometry.height = c->titlebar_sw->geometry.width;
+                               titlebar->colors.fg,
+                               titlebar->colors.bg);
+        geometry.width = titlebar->sw->geometry.height;
+        geometry.height = titlebar->sw->geometry.width;
         break;
       default:
-        ctx = draw_context_new(globalconf.connection, c->titlebar_sw->phys_screen,
-                               c->titlebar_sw->geometry.width,
-                               c->titlebar_sw->geometry.height,
-                               c->titlebar_sw->drawable,
-                               globalconf.colors.fg,
-                               globalconf.colors.bg);
-        geometry = c->titlebar_sw->geometry;
+        ctx = draw_context_new(globalconf.connection, titlebar->sw->phys_screen,
+                               titlebar->sw->geometry.width,
+                               titlebar->sw->geometry.height,
+                               titlebar->sw->drawable,
+                               titlebar->colors.fg,
+                               titlebar->colors.bg);
+        geometry = titlebar->sw->geometry;
         break;
     }
 
-    text = titlebar_text(c);
-    geometry.x = geometry.y = 0;
-    draw_rectangle(ctx, geometry, 1.0, true, globalconf.colors.bg);
-    draw_text(ctx, globalconf.font, geometry, text);
-    p_delete(&text);
+    widget_render(titlebar->widgets, ctx, titlebar->sw->gc, titlebar->sw->drawable,
+                  titlebar->client->screen, titlebar->position,
+                  titlebar->sw->geometry.x, titlebar->sw->geometry.y, titlebar);
 
-    switch(c->titlebar.position)
+    switch(titlebar->position)
     {
       case Left:
-        draw_rotate(ctx, ctx->drawable, c->titlebar_sw->drawable,
+        draw_rotate(ctx, ctx->drawable, titlebar->sw->drawable,
                     ctx->width, ctx->height,
                     ctx->height, ctx->width,
-                    - M_PI_2, 0, c->titlebar_sw->geometry.height);
+                    - M_PI_2, 0, titlebar->sw->geometry.height);
         xcb_free_pixmap(globalconf.connection, dw);
         break;
       case Right:
-        draw_rotate(ctx, ctx->drawable, c->titlebar_sw->drawable,
+        draw_rotate(ctx, ctx->drawable, titlebar->sw->drawable,
                     ctx->width, ctx->height,
                     ctx->height, ctx->width,
-                    M_PI_2, c->titlebar_sw->geometry.width, 0);
+                    M_PI_2, titlebar->sw->geometry.width, 0);
         xcb_free_pixmap(globalconf.connection, dw);
       default:
         break;
     }
 
-    simplewindow_refresh_drawable(c->titlebar_sw);
+    simplewindow_refresh_drawable(titlebar->sw);
 
     draw_context_delete(&ctx);
 }
@@ -137,110 +147,109 @@ titlebar_draw(client_t *c)
  * \param c the client
  */
 void
-titlebar_update_geometry_floating(client_t *c)
+titlebar_update_geometry_floating(titlebar_t *titlebar)
 {
     int width, x_offset = 0, y_offset = 0;
 
-    if(!c->titlebar_sw)
+    if(!titlebar || !titlebar->sw)
         return;
 
-    switch(c->titlebar.position)
+    switch(titlebar->position)
     {
       default:
         return;
       case Off:
         return;
       case Top:
-        if(!c->titlebar.width)
-            width = c->geometry.width + 2 * c->border;
+        if(titlebar->width)
+            width = MIN(titlebar->width, titlebar->client->geometry.width);
         else
-            width = MIN(c->titlebar.width, c->geometry.width);
-        switch(c->titlebar.align)
+            width = titlebar->client->geometry.width + 2 * titlebar->client->border;
+        switch(titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            x_offset = 2 * c->border + c->geometry.width - width;
+            x_offset = 2 * titlebar->client->border + titlebar->client->geometry.width - width;
             break;
           case AlignCenter:
-            x_offset = (c->geometry.width - width) / 2;
+            x_offset = (titlebar->client->geometry.width - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar_sw,
-                                 c->geometry.x + x_offset,
-                                 c->geometry.y - c->titlebar_sw->geometry.height,
+        simplewindow_move_resize(titlebar->sw,
+                                 titlebar->client->geometry.x + x_offset,
+                                 titlebar->client->geometry.y - titlebar->sw->geometry.height,
                                  width,
-                                 c->titlebar_sw->geometry.height);
+                                 titlebar->sw->geometry.height);
         break;
       case Bottom:
-        if(!c->titlebar.width)
-            width = c->geometry.width + 2 * c->border;
+        if(titlebar->width)
+            width = MIN(titlebar->width, titlebar->client->geometry.width);
         else
-            width = MIN(c->titlebar.width, c->geometry.width);
-        switch(c->titlebar.align)
+            width = titlebar->client->geometry.width + 2 * titlebar->client->border;
+        switch(titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            x_offset = 2 * c->border + c->geometry.width - width;
+            x_offset = 2 * titlebar->client->border + titlebar->client->geometry.width - width;
             break;
           case AlignCenter:
-            x_offset = (c->geometry.width - width) / 2;
+            x_offset = (titlebar->client->geometry.width - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar_sw,
-                                 c->geometry.x + x_offset,
-                                 c->geometry.y + c->geometry.height + 2 * c->border,
+        simplewindow_move_resize(titlebar->sw,
+                                 titlebar->client->geometry.x + x_offset,
+                                 titlebar->client->geometry.y + titlebar->client->geometry.height + 2 * titlebar->client->border,
                                  width,
-                                 c->titlebar_sw->geometry.height);
+                                 titlebar->sw->geometry.height);
         break;
       case Left:
-        if(!c->titlebar.width)
-            width = c->geometry.height + 2 * c->border;
+        if(titlebar->width)
+            width = MIN(titlebar->width, titlebar->client->geometry.height);
         else
-            width = MIN(c->titlebar.width, c->geometry.height);
-        switch(c->titlebar.align)
+            width = titlebar->client->geometry.height + 2 * titlebar->client->border;
+        switch(titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            y_offset = 2 * c->border + c->geometry.height - width;
+            y_offset = 2 * titlebar->client->border + titlebar->client->geometry.height - width;
             break;
           case AlignCenter:
-            y_offset = (c->geometry.height - width) / 2;
+            y_offset = (titlebar->client->geometry.height - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar_sw,
-                                 c->geometry.x - c->titlebar_sw->geometry.width,
-                                 c->geometry.y + y_offset,
-                                 c->titlebar_sw->geometry.width,
+        simplewindow_move_resize(titlebar->sw,
+                                 titlebar->client->geometry.x - titlebar->sw->geometry.width,
+                                 titlebar->client->geometry.y + y_offset,
+                                 titlebar->sw->geometry.width,
                                  width);
         break;
       case Right:
-        if(!c->titlebar.width)
-            width = c->geometry.height + 2 * c->border;
+        if(titlebar->width)
+            width = MIN(titlebar->width, titlebar->client->geometry.height);
         else
-            width = MIN(c->titlebar.width, c->geometry.height);
-        switch(c->titlebar.align)
+            width = titlebar->client->geometry.height + 2 * titlebar->client->border;
+        switch(titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            y_offset = 2 * c->border + c->geometry.height - width;
+            y_offset = 2 * titlebar->client->border + titlebar->client->geometry.height - width;
             break;
           case AlignCenter:
-            y_offset = (c->geometry.height - width) / 2;
+            y_offset = (titlebar->client->geometry.height - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar_sw,
-                                 c->geometry.x + c->geometry.width + 2 * c->border,
-                                 c->geometry.y + y_offset,
-                                 c->titlebar_sw->geometry.width,
+        simplewindow_move_resize(titlebar->sw,
+                                 titlebar->client->geometry.x + titlebar->client->geometry.width + 2 * titlebar->client->border,
+                                 titlebar->client->geometry.y + y_offset,
+                                 titlebar->sw->geometry.width,
                                  width);
         break;
     }
-
-    titlebar_draw(c);
+    titlebar_draw(titlebar);
 }
 
 
@@ -249,112 +258,112 @@ titlebar_update_geometry_floating(client_t *c)
  * \param geometry the geometry the client will receive
  */
 void
-titlebar_update_geometry(client_t *c, area_t geometry)
+titlebar_update_geometry(titlebar_t *titlebar, area_t geometry)
 {
     int width, x_offset = 0 , y_offset = 0;
 
-    if(!c->titlebar_sw)
+    if(!titlebar || !titlebar->sw)
         return;
 
-    switch(c->titlebar.position)
+    switch(titlebar->position)
     {
       default:
         return;
       case Off:
         return;
       case Top:
-        if(!c->titlebar.width)
-            width = geometry.width + 2 * c->border;
+        if(!titlebar->width)
+            width = geometry.width + 2 * titlebar->client->border;
         else
-            width = MIN(c->titlebar.width, geometry.width);
-        switch(c->titlebar.align)
+            width = MIN(titlebar->width, geometry.width);
+        switch(titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            x_offset = 2 * c->border + geometry.width - width;
+            x_offset = 2 * titlebar->client->border + geometry.width - width;
             break;
           case AlignCenter:
             x_offset = (geometry.width - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar_sw,
+        simplewindow_move_resize(titlebar->sw,
                                  geometry.x + x_offset,
                                  geometry.y,
                                  width,
-                                 c->titlebar_sw->geometry.height);
+                                 titlebar->sw->geometry.height);
         break;
       case Bottom:
-        if(!c->titlebar.width)
-            width = geometry.width + 2 * c->border;
+        if(titlebar->width)
+            width = geometry.width + 2 * titlebar->client->border;
         else
-            width = MIN(c->titlebar.width, geometry.width);
-        switch(c->titlebar.align)
+            width = MIN(titlebar->width, geometry.width);
+        switch(titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            x_offset = 2 * c->border + geometry.width - width;
+            x_offset = 2 * titlebar->client->border + geometry.width - width;
             break;
           case AlignCenter:
             x_offset = (geometry.width - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar_sw,
+        simplewindow_move_resize(titlebar->sw,
                                  geometry.x + x_offset,
                                  geometry.y + geometry.height
-                                     - c->titlebar_sw->geometry.height + 2 * c->border,
+                                     - titlebar->sw->geometry.height + 2 * titlebar->client->border,
                                  width,
-                                 c->titlebar_sw->geometry.height);
+                                 titlebar->sw->geometry.height);
         break;
       case Left:
-        if(!c->titlebar.width)
-            width = geometry.height + 2 * c->border;
+        if(!titlebar->width)
+            width = geometry.height + 2 * titlebar->client->border;
         else
-            width = MIN(c->titlebar.width, geometry.height);
-        switch(c->titlebar.align)
+            width = MIN(titlebar->width, geometry.height);
+        switch(titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            y_offset = 2 * c->border + geometry.height - width;
+            y_offset = 2 * titlebar->client->border + geometry.height - width;
             break;
           case AlignCenter:
             y_offset = (geometry.height - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar_sw,
+        simplewindow_move_resize(titlebar->sw,
                                  geometry.x,
                                  geometry.y + y_offset,
-                                 c->titlebar_sw->geometry.width,
+                                 titlebar->sw->geometry.width,
                                  width);
         break;
       case Right:
-        if(!c->titlebar.width)
-            width = geometry.height + 2 * c->border;
+        if(titlebar->width)
+            width = geometry.height + 2 * titlebar->client->border;
         else
-            width = MIN(c->titlebar.width, geometry.height);
-        switch(c->titlebar.align)
+            width = MIN(titlebar->width, geometry.height);
+        switch(titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            y_offset = 2 * c->border + geometry.height - width;
+            y_offset = 2 * titlebar->client->border + geometry.height - width;
             break;
           case AlignCenter:
             y_offset = (geometry.height - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar_sw,
+        simplewindow_move_resize(titlebar->sw,
                                  geometry.x + geometry.width
-                                     - c->titlebar_sw->geometry.width + 2 * c->border,
+                                     - titlebar->sw->geometry.width + 2 * titlebar->client->border,
                                  geometry.y + y_offset,
-                                 c->titlebar_sw->geometry.width,
+                                 titlebar->sw->geometry.width,
                                  width);
         break;
     }
 
-    titlebar_draw(c);
+    titlebar_draw(titlebar);
 }
 
 /** Set client titlebar position.
@@ -362,67 +371,61 @@ titlebar_update_geometry(client_t *c, area_t geometry)
  * \param p The position.
  */
 void
-titlebar_init(client_t *c)
+titlebar_init(titlebar_t *titlebar)
 {
     int width = 0, height = 0;
 
-    if(!c->titlebar.height)
-        c->titlebar.height = draw_text_extents(globalconf.connection, globalconf.default_screen,
-                                               globalconf.font,
-                                               client_markup_parse(c,
-                                                                   c->titlebar.text_focus,
-                                                                   a_strlen(c->titlebar.text_focus))).height;
-    switch(c->titlebar.position)
+    switch(titlebar->position)
     {
       default:
-        c->titlebar.position = Off;
-        if(c->titlebar_sw)
-            xcb_unmap_window(globalconf.connection, c->titlebar_sw->window);
-        return;
+        titlebar->position = Off;
+        if(titlebar->sw)
+            xcb_unmap_window(globalconf.connection, titlebar->sw->window);
         return;
       case Top:
       case Bottom:
-        if(!c->titlebar.width)
-            width = c->geometry.width + 2 * c->border;
+        if(titlebar->width)
+            width = MIN(titlebar->width, titlebar->client->geometry.width);
         else
-            width = MIN(c->titlebar.width, c->geometry.width);
-        height = c->titlebar.height;
+            width = titlebar->client->geometry.width + 2 * titlebar->client->border;
+        height = titlebar->height;
         break;
       case Left:
       case Right:
-        if(!c->titlebar.width)
-            height = c->geometry.height + 2 * c->border;
+        if(titlebar->width)
+            height = MIN(titlebar->width, titlebar->client->geometry.height);
         else
-            height = MIN(c->titlebar.width, c->geometry.height);
-        width = c->titlebar.height;
+            height = titlebar->client->geometry.height + 2 * titlebar->client->border;
+        width = titlebar->height;
         break;
     }
 
     /* Delete old statusbar */
-    simplewindow_delete(&c->titlebar_sw);
+    simplewindow_delete(&titlebar->sw);
 
-    c->titlebar_sw = simplewindow_new(globalconf.connection,
-                                      c->phys_screen, 0, 0,
-                                      width, height, 0);
-    titlebar_draw(c);
-    xcb_map_window(globalconf.connection, c->titlebar_sw->window);
+    titlebar->sw = simplewindow_new(globalconf.connection,
+                                    titlebar->client->phys_screen, 0, 0,
+                                    width, height, 0);
+    titlebar_draw(titlebar);
+    xcb_map_window(globalconf.connection, titlebar->sw->window);
 }
 
+/** Create a new titlebar.
+ * \param A table with values: align, position, fg, bg, width and height.
+ * \return A brand new titlebar.
+ */
 static int
 luaA_titlebar_new(lua_State *L)
 {
     titlebar_t **tb;
     int objpos;
+    const char *color;
 
     luaA_checktable(L, 1);
 
     tb = lua_newuserdata(L, sizeof(titlebar_t *));
     *tb = p_new(titlebar_t, 1);
     objpos = lua_gettop(L);
-
-    (*tb)->text_normal = a_strdup(luaA_getopt_string(L, 1, "text_normal", "<title/>"));
-    (*tb)->text_focus = a_strdup(luaA_getopt_string(L, 1, "text_focus", "<title/>"));
-    (*tb)->text_urgent = a_strdup(luaA_getopt_string(L, 1, "text_urgent", "<title/>"));
 
     (*tb)->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
 
@@ -434,38 +437,88 @@ luaA_titlebar_new(lua_State *L)
 
     (*tb)->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
 
+    lua_getfield(L, 1, "fg");
+    if((color = luaL_optstring(L, -1, NULL)))
+        xcolor_new(globalconf.connection, globalconf.default_screen,
+                       color, &(*tb)->colors.fg);
+    else
+        (*tb)->colors.fg = globalconf.colors.fg;
+
+    lua_getfield(L, 1, "bg");
+    if((color = luaL_optstring(L, -1, NULL)))
+        xcolor_new(globalconf.connection, globalconf.default_screen,
+                       color, &(*tb)->colors.bg);
+    else
+        (*tb)->colors.bg = globalconf.colors.bg;
+
     titlebar_ref(tb);
 
     lua_pushvalue(L, objpos);
     return luaA_settype(L, "titlebar");
 }
 
+/** Set the client where the titlebar belongs to.
+ * \param A client where to attach titlebar, or none for removing.
+ */
 static int
-luaA_titlebar_mouse(lua_State *L)
+luaA_titlebar_client_set(lua_State *L)
 {
-    size_t i, len;
-    int b;
-    button_t *button;
+    titlebar_t *oldt, **t = luaL_checkudata(L, 1, "titlebar");
+    client_t **c = NULL;
+   
+    if(lua_gettop(L) == 2)
+        c = luaL_checkudata(L, 2, "client");
 
-    /* arg 1 is modkey table */
-    luaA_checktable(L, 1);
-    /* arg 2 is mouse button */
-    b = luaL_checknumber(L, 2);
-    /* arg 3 is cmd to run */
-    luaA_checkfunction(L, 3);
-
-    button = p_new(button_t, 1);
-    button->button = xutil_button_fromint(b);
-    button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
-
-    len = lua_objlen(L, 1);
-    for(i = 1; i <= len; i++)
+    if(!c)
     {
-        lua_rawgeti(L, 1, i);
-        button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
+        if((*t)->client
+           && (*t)->client->isfloating
+           && layout_get_current((*t)->client->screen) != layout_floating)
+            globalconf.screens[(*t)->client->screen].need_arrange = true;
+
+        simplewindow_delete(&(*t)->sw);
+        titlebar_list_detach(&globalconf.titlebar, *t);
+        titlebar_unref(t);
+    }
+    else
+    {
+        if((oldt = titlebar_getbyclient(*c)))
+        {
+            simplewindow_delete(&oldt->sw);
+            titlebar_list_detach(&globalconf.titlebar, oldt);
+            titlebar_unref(&oldt);
+        }
+
+        titlebar_list_push(&globalconf.titlebar, *t);
+        titlebar_ref(t);
+
+        (*t)->client = *c;
+        titlebar_init(*t);
+
+        if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
+            titlebar_update_geometry_floating(*t);
+        else
+            globalconf.screens[(*c)->screen].need_arrange = true;
     }
 
-    button_list_push(&globalconf.buttons.titlebar, button);
+    return 0;
+}
+
+/** Add a widget to a titlebar.
+ * \param A widget.
+ */
+static int
+luaA_titlebar_widget_add(lua_State *L)
+{
+    titlebar_t **tb = luaL_checkudata(L, 1, "titlebar");
+    widget_t **widget = luaL_checkudata(L, 2, "widget");
+    widget_node_t *w = p_new(widget_node_t, 1);
+
+    w->widget = *widget;
+    widget_node_list_append(&(*tb)->widgets, w);
+    widget_ref(widget);
+
+    titlebar_draw(*tb);
 
     return 0;
 }
@@ -498,11 +551,12 @@ luaA_titlebar_eq(lua_State *L)
 const struct luaL_reg awesome_titlebar_methods[] =
 {
     { "new", luaA_titlebar_new },
-    { "mouse", luaA_titlebar_mouse },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_titlebar_meta[] =
 {
+    { "client_set", luaA_titlebar_client_set },
+    { "widget_add", luaA_titlebar_widget_add },
     { "__eq", luaA_titlebar_eq },
     { "__gc", luaA_titlebar_gc },
     { "__tostring", luaA_titlebar_tostring },

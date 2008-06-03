@@ -97,13 +97,14 @@ static area_t
 mouse_snapclient(client_t *c, area_t geometry, int snap)
 {
     client_t *snapper;
+    titlebar_t *t = titlebar_getbyclient(c);
     area_t snapper_geometry;
     area_t screen_geometry =
         screen_get_area(c->screen,
                         globalconf.screens[c->screen].statusbar,
                         &globalconf.screens[c->screen].padding);
 
-    geometry = titlebar_geometry_add(&c->titlebar, geometry);
+    geometry = titlebar_geometry_add(t, geometry);
     geometry.width += 2 * c->border;
     geometry.height += 2 * c->border;
 
@@ -116,7 +117,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
             snapper_geometry = snapper->geometry;
             snapper_geometry.width += 2 * c->border;
             snapper_geometry.height += 2 * c->border;
-            snapper_geometry = titlebar_geometry_add(&snapper->titlebar, snapper_geometry);
+            snapper_geometry = titlebar_geometry_add(t, snapper_geometry);
             geometry =
                 mouse_snapclienttogeometry_outside(geometry,
                                                    snapper_geometry,
@@ -125,7 +126,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
 
     geometry.width -= 2 * c->border;
     geometry.height -= 2 * c->border;
-    return titlebar_geometry_remove(&c->titlebar, geometry);
+    return titlebar_geometry_remove(t, geometry);
 }
 
 /** Redraw the resizebar.

@@ -81,6 +81,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     client_t *c;
     widget_node_t *w;
     statusbar_t *statusbar;
+    titlebar_t *titlebar;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
@@ -122,14 +123,35 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                 return 0;
             }
 
-    /* Check for titlebar first */
-    for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar_sw && c->titlebar_sw->window == ev->event)
+    if((titlebar = titlebar_getbywin(ev->event)))
+    {
+        /* Need to transform coordinates like it was
+         * top/bottom */
+        switch(titlebar->position)
         {
-            event_handle_mouse_button_press(c, ev->detail, ev->state,
-                                            globalconf.buttons.titlebar);
-            return 0;
+          case Right:
+            tmp = ev->event_y;
+            ev->event_y = titlebar->height - ev->event_x;
+            ev->event_x = tmp;
+            break;
+          case Left:
+            tmp = ev->event_y;
+            ev->event_y = ev->event_x;
+            ev->event_x = titlebar->width - tmp;
+            break;
+          default:
+            break;
         }
+        for(w = titlebar->widgets; w; w = w->next)
+            if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
+               && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
+            {
+                w->widget->button_press(w, ev, titlebar->client->screen, titlebar);
+                return 0;
+            }
+        /* return if no widget match */
+        return 0;
+    }
 
     if((c = client_get_bywin(globalconf.clients, ev->event)))
     {
@@ -188,7 +210,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         }
         else
         {
-            titlebar_update_geometry_floating(c);
+            titlebar_update_geometry_floating(titlebar_getbyclient(c));
             window_configure(c->win, geometry, c->border);
         }
     }
@@ -288,16 +310,16 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection __attribute__ ((unused)),
                          xcb_enter_notify_event_t *ev)
 {
-    client_t *c;
+    client_t *c = NULL;
+    titlebar_t *t;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
        || (ev->root_x == globalconf.pointer_x
            && ev->root_y == globalconf.pointer_y))
         return 0;
 
-    for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar_sw && c->titlebar_sw->window == ev->event)
-            break;
+    if((t = titlebar_getbywin(ev->event)))
+        c = t->client;
 
     if(c || (c = client_get_bywin(globalconf.clients, ev->event)))
     {
@@ -327,7 +349,7 @@ event_handle_expose(void *data __attribute__ ((unused)),
 {
     int screen;
     statusbar_t *statusbar;
-    client_t *c;
+    titlebar_t *t;
 
     if(!ev->count)
     {
@@ -340,12 +362,8 @@ event_handle_expose(void *data __attribute__ ((unused)),
                     return 0;
                 }
 
-        for(c = globalconf.clients; c; c = c->next)
-            if(c->titlebar_sw && c->titlebar_sw->window == ev->window)
-            {
-                simplewindow_refresh_drawable(c->titlebar_sw);
-                return 0;
-            }
+        if((t = titlebar_getbywin(ev->window)))
+           simplewindow_refresh_drawable(t->sw);
     }
 
     return 0;

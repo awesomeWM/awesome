@@ -47,58 +47,32 @@ typedef enum
 enum
 { CurNormal, CurResize, CurMove, CurLast };
 
-/** Titlebar template structure */
-typedef struct
-{
-    /** Ref count */
-    int refcount;
-    /** Position */
-    position_t position;
-    /** Alignment on window */
-    alignment_t align;
-    /** Width and height */
-    int width, height;
-    /** Various text used for rendering */
-    char *text_normal, *text_focus, *text_urgent;
-} titlebar_t;
-
-/** Delete a titlebar structure.
- * \param t The titlebar to destroy.
- */
-static inline void
-titlebar_delete(titlebar_t **t)
-{
-    p_delete(&(*t)->text_normal);
-    p_delete(&(*t)->text_focus);
-    p_delete(&(*t)->text_urgent);
-    p_delete(t);
-}
-
-DO_RCNT(titlebar_t, titlebar, titlebar_delete)
-
-/** Keys bindings */
+typedef struct button_t button_t;
+typedef struct widget_t widget_t;
+typedef struct widget_node_t widget_node_t;
+typedef struct statusbar_t statusbar_t;
+typedef struct client_t client_t;
+typedef struct titlebar_t titlebar_t;
 typedef struct keybinding_t keybinding_t;
-struct keybinding_t
-{
-    /** Ref count */
-    int refcount;
-    /** Key modifier */
-    unsigned long mod;
-    /** Keysym */
-    xcb_keysym_t keysym;
-    /** Keycode */
-    xcb_keycode_t keycode;
-    /** Lua function to execute. */
-    luaA_function fct;
-    /** Next and previous keys */
-    keybinding_t *prev, *next;
-};
+typedef struct client_node_t client_node_t;
+typedef struct _tag_t tag_t;
+typedef struct tag_client_node_t tag_client_node_t;
+typedef area_t (FloatingPlacement)(client_t *);
+typedef struct awesome_t awesome_t;
 
-DO_SLIST(keybinding_t, keybinding, p_delete)
-DO_RCNT(keybinding_t, keybinding, p_delete)
+/** Widget tell status code */
+typedef enum
+{
+    WIDGET_NOERROR = 0,
+    WIDGET_ERROR,
+    WIDGET_ERROR_NOVALUE,
+    WIDGET_ERROR_CUSTOM,
+    WIDGET_ERROR_FORMAT_FONT,
+    WIDGET_ERROR_FORMAT_COLOR,
+    WIDGET_ERROR_FORMAT_SECTION
+} widget_tell_status_t;
 
 /** Mouse buttons bindings */
-typedef struct button_t button_t;
 struct button_t
 {
     /** Key modifiers */
@@ -113,22 +87,7 @@ struct button_t
 
 DO_SLIST(button_t, button, p_delete)
 
-/** Widget tell status code */
-typedef enum
-{
-    WIDGET_NOERROR = 0,
-    WIDGET_ERROR,
-    WIDGET_ERROR_NOVALUE,
-    WIDGET_ERROR_CUSTOM,
-    WIDGET_ERROR_FORMAT_FONT,
-    WIDGET_ERROR_FORMAT_COLOR,
-    WIDGET_ERROR_FORMAT_SECTION
-} widget_tell_status_t;
-
 /** Widget */
-typedef struct widget_t widget_t;
-typedef struct widget_node_t widget_node_t;
-typedef struct statusbar_t statusbar_t;
 struct widget_t
 {
     /** Ref count */
@@ -153,16 +112,6 @@ struct widget_t
     bool isvisible;
 };
 
-struct widget_node_t
-{
-    /** The widget */
-    widget_t *widget;
-    /** The area where the widget was drawn */
-    area_t area;
-    /** Next and previous widget in the list */
-    widget_node_t *prev, *next;
-};
-
 /** Delete a widget structure.
  * \param widget The widget to destroy.
  */
@@ -177,6 +126,16 @@ widget_delete(widget_t **widget)
 
 DO_RCNT(widget_t, widget, widget_delete)
 
+struct widget_node_t
+{
+    /** The widget */
+    widget_t *widget;
+    /** The area where the widget was drawn */
+    area_t area;
+    /** Next and previous widget in the list */
+    widget_node_t *prev, *next;
+};
+
 /** Delete a widget node structure.
  * \param node The node to destroy.
  */
@@ -188,6 +147,65 @@ widget_node_delete(widget_node_t **node)
 }
 
 DO_SLIST(widget_node_t, widget_node, widget_node_delete)
+
+/** Titlebar template structure */
+struct titlebar_t
+{
+    /** Ref count */
+    int refcount;
+    /** Attached client */
+    client_t *client;
+    /** Position */
+    position_t position, oldposition;
+    /** Alignment on window */
+    alignment_t align;
+    /** Widgets */
+    widget_node_t *widgets;
+    /** Width and height */
+    int width, height;
+    /** Titlebar window */
+    simple_window_t *sw;
+    /** Default colors */
+    struct
+    {
+        xcolor_t fg, bg;
+    } colors;
+    /** Next and previous in list */
+    titlebar_t *prev, *next;
+};
+
+/** Delete a titlebar structure.
+ * \param t The titlebar to destroy.
+ */
+static inline void
+titlebar_delete(titlebar_t **t)
+{
+    widget_node_list_wipe(&(*t)->widgets);
+    p_delete(t);
+}
+
+DO_SLIST(titlebar_t, titlebar, titlebar_delete)
+DO_RCNT(titlebar_t, titlebar, titlebar_delete)
+
+/** Keys bindings */
+struct keybinding_t
+{
+    /** Ref count */
+    int refcount;
+    /** Key modifier */
+    unsigned long mod;
+    /** Keysym */
+    xcb_keysym_t keysym;
+    /** Keycode */
+    xcb_keycode_t keycode;
+    /** Lua function to execute. */
+    luaA_function fct;
+    /** Next and previous keys */
+    keybinding_t *prev, *next;
+};
+
+DO_SLIST(keybinding_t, keybinding, p_delete)
+DO_RCNT(keybinding_t, keybinding, p_delete)
 
 /** Status bar */
 struct statusbar_t
@@ -228,7 +246,6 @@ struct statusbar_t
 };
 
 /** client_t type */
-typedef struct client_t client_t;
 struct client_t
 {
     /** Client name */
@@ -268,19 +285,12 @@ struct client_t
     int screen;
     /** Client physical screen */
     int phys_screen;
-    /** Titlebar */
-    titlebar_t titlebar;
-    /** Titlebar window */
-    simple_window_t *titlebar_sw;
-    /** Old position */
-    position_t titlebar_oldposition;
     /** Layer in the stacking order */
     layer_t layer, oldlayer;
     /** Path to an icon */
     char *icon_path;
 };
 
-typedef struct client_node_t client_node_t;
 struct client_node_t
 {
     /** The client */
@@ -290,7 +300,6 @@ struct client_node_t
 };
 
 /** Tag type */
-typedef struct _tag_t tag_t;
 struct _tag_t
 {
     /** Ref count */
@@ -314,7 +323,6 @@ struct _tag_t
 };
 
 /** Tag client link type */
-typedef struct tag_client_node_t tag_client_node_t;
 struct tag_client_node_t
 {
     tag_t *tag;
@@ -336,8 +344,6 @@ typedef struct
     int right;
 } Padding;
 
-typedef area_t (FloatingPlacement)(client_t *);
-
 typedef struct
 {
     /** true if we need to arrange() */
@@ -351,7 +357,6 @@ typedef struct
 } screen_t;
 
 /** Main configuration structure */
-typedef struct awesome_t awesome_t;
 struct awesome_t
 {
     /** Connection ref */
@@ -387,8 +392,10 @@ struct awesome_t
     bool have_randr;
     /** Cursors */
     xcb_cursor_t cursor[CurLast];
-    /** client_ts list */
+    /** Clients list */
     client_t *clients;
+    /** Titlebar list */
+    titlebar_t *titlebar;
     /** Path to config file */
     char *configpath;
     /** Floating window placement algo */

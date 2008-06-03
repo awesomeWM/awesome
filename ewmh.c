@@ -253,6 +253,7 @@ static void
 ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
     const uint32_t raise_window_val = XCB_STACK_MODE_ABOVE;
+    titlebar_t *titlebar;
 
     if(state == net_wm_state_sticky)
     {
@@ -281,10 +282,11 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             /* restore geometry */
             geometry = c->m_geometry;
             /* restore borders and titlebar */
-            if((c->titlebar.position = c->titlebar_oldposition))
+            if((titlebar = titlebar_getbyclient(c))
+               && (titlebar->position = titlebar->oldposition))
             {
-                c->titlebar.position = c->titlebar_oldposition;
-                xcb_map_window(globalconf.connection, c->titlebar_sw->window);
+                titlebar->position = titlebar->oldposition;
+                xcb_map_window(globalconf.connection, titlebar->sw->window);
             }
             c->noborder = false;
             c->ismax = false;
@@ -298,10 +300,11 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->m_geometry = c->geometry;
             c->wasfloating = c->isfloating;
             /* disable titlebar and borders */
-            if((c->titlebar_oldposition = c->titlebar.position))
+            if((titlebar = titlebar_getbyclient(c))
+               && (titlebar->oldposition = titlebar->position))
             {
-                xcb_unmap_window(globalconf.connection, c->titlebar_sw->window);
-                c->titlebar.position = Off;
+                xcb_unmap_window(globalconf.connection, titlebar->sw->window);
+                titlebar->position = Off;
             }
             c->ismax = true;
             c->oldborder = c->border;
@@ -343,6 +346,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 static void
 ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
 {
+    titlebar_t *titlebar;
+
     if(state == net_wm_window_type_normal)
     {
         /* do nothing. this is REALLY IMPORTANT */
@@ -352,10 +357,11 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
     {
         c->skip = true;
         c->isfixed = true;
-        if(c->titlebar.position)
+        if((titlebar = titlebar_getbyclient(c))
+            && titlebar->position && titlebar->sw)
         {
-            xcb_unmap_window(globalconf.connection, c->titlebar_sw->window);
-            c->titlebar.position = Off;
+            xcb_unmap_window(globalconf.connection, titlebar->sw->window);
+            titlebar->position = Off;
         }
         client_setborder(c, 0);
         c->noborder = true;
