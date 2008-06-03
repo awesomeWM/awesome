@@ -265,7 +265,7 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     {
       case Right:
       case Left:
-        if(statusbar->width <= 0)
+        if(!statusbar->width_user)
             statusbar->width = area.height;
         statusbar->sw =
             simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
@@ -285,7 +285,7 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
                                           statusbar->colors.bg);
         break;
       default:
-        if(statusbar->width <= 0)
+        if(!statusbar->width_user)
             statusbar->width = area.width;
         statusbar->sw =
             simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
@@ -558,6 +558,8 @@ luaA_statusbar_new(lua_State *L)
     (*sb)->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
 
     (*sb)->width = luaA_getopt_number(L, 1, "width", 0);
+    if((*sb)->width > 0)
+        (*sb)->width_user = true;
     (*sb)->height = luaA_getopt_number(L, 1, "height", 0);
     if((*sb)->height <= 0)
         /* 1.5 as default factor, it fits nice but no one knows why */

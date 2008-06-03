@@ -202,6 +202,8 @@ struct statusbar_t
     int width;
     /** Bar height */
     int height;
+    /** True if user specified width */
+    bool width_user;
     /** Bar position */
     position_t position;
     /** Alignment */
