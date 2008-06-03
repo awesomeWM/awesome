@@ -110,6 +110,13 @@ typedef struct
     xcolor_t bg;
 } draw_context_t;
 
+typedef struct
+{
+    void   *data;
+    size_t width;
+    size_t height;
+} draw_image_t;
+
 draw_context_t *draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t, xcolor_t, xcolor_t);
 /** Delete a draw context
  * \param ctx draw_context_t to delete
@@ -140,6 +147,9 @@ void draw_graph_setup(draw_context_t *);
 void draw_graph(draw_context_t *, area_t, int *, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
 void draw_circle(draw_context_t *, int, int, int, bool, xcolor_t);
+draw_image_t *draw_image_new(const char *);
+void draw_image_delete(draw_image_t **);
+void draw_image(draw_context_t *, int, int, int, draw_image_t *);
 void draw_image_from_file(draw_context_t *, int, int, int, const char *);
 void draw_image_from_argb_data(draw_context_t *, int, int, int, int, int, unsigned char *);
 area_t draw_get_image_size(const char *filename);
