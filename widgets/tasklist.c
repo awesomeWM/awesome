@@ -172,8 +172,10 @@ tasklist_draw(draw_context_t *ctx, int screen,
 }
 
 static void
-tasklist_button_press(widget_node_t *w, statusbar_t *statusbar,
-                      xcb_button_press_event_t *ev)
+tasklist_button_press(widget_node_t *w,
+                      xcb_button_press_event_t *ev,
+                      int screen,
+                      void *p __attribute__ ((unused)))
 {
     button_t *b;
     client_t *c;
@@ -181,7 +183,7 @@ tasklist_button_press(widget_node_t *w, statusbar_t *statusbar,
     int n = 0, box_width = 0, i, ci = 0;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(tasklist_isvisible(c, statusbar->screen, d->show))
+        if(tasklist_isvisible(c, screen, d->show))
             n++;
 
     if(!n)
@@ -189,26 +191,15 @@ tasklist_button_press(widget_node_t *w, statusbar_t *statusbar,
 
     box_width = w->area.width / n;
 
-    switch(statusbar->position)
-    {
-      case Top:
-      case Bottom:
-        ci = (ev->event_x - w->area.x) / box_width;
-        break;
-      case Right:
-        ci = (ev->event_y - w->area.x) / box_width;
-        break;
-      default:
-         ci = ((statusbar->width - ev->event_y) - w->area.x) / box_width;
-         break;
-    }
+    ci = (ev->event_x - w->area.x) / box_width;
+
     /* found first visible client */
     for(c = globalconf.clients;
-        c && !tasklist_isvisible(c, statusbar->screen, d->show);
+        c && !tasklist_isvisible(c, screen, d->show);
         c = c->next);
     /* found ci-th visible client */
     for(i = 0; c ; c = c->next)
-        if(tasklist_isvisible(c, statusbar->screen, d->show))
+        if(tasklist_isvisible(c, screen, d->show))
             if(i++ >= ci)
                 break;
 

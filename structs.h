@@ -140,7 +140,7 @@ struct widget_t
     /** Update function */
     widget_tell_status_t (*tell)(widget_t *, const char *, const char *);
     /** ButtonPressedEvent handler */
-    void (*button_press)(widget_node_t *, statusbar_t *, xcb_button_press_event_t *);
+    void (*button_press)(widget_node_t *, xcb_button_press_event_t *, int, void *);
     /** Alignement */
     alignment_t align;
     /** Misc private data */

@@ -76,7 +76,7 @@ int
 event_handle_buttonpress(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_button_press_event_t *ev)
 {
-    int screen;
+    int screen, tmp;
     const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
     client_t *c;
     widget_node_t *w;
@@ -94,44 +94,30 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                     ev->event_x -= statusbar->sw->geometry.x;
                     ev->event_y -= statusbar->sw->geometry.y;
                 }
+                /* Need to transform coordinates like it was
+                 * top/bottom */
                 switch(statusbar->position)
                 {
-                  case Top:
-                  case Bottom:
-                    for(w = statusbar->widgets; w; w = w->next)
-                        if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
-                           && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
-                        {
-                            w->widget->button_press(w, statusbar, ev);
-                            return 0;
-                        }
-                    break;
                   case Right:
-                    for(w = statusbar->widgets; w; w = w->next)
-                        if(ev->event_y > w->area.x && ev->event_y < w->area.x + w->area.width
-                           && statusbar->sw->geometry.width - ev->event_x >= w->area.y
-                           && statusbar->sw->geometry.width - ev->event_x
-                              < w->area.y + w->area.height)
-                        {
-                            w->widget->button_press(w, statusbar, ev);
-                            return 0;
-                        }
+                    tmp = ev->event_y;
+                    ev->event_y = statusbar->height - ev->event_x;
+                    ev->event_x = tmp;
                     break;
                   case Left:
-                    for(w = statusbar->widgets; w; w = w->next)
-                        if(statusbar->sw->geometry.height - ev->event_y >= w->area.x
-                           && statusbar->sw->geometry.height - ev->event_y
-                              < w->area.x + w->area.width
-                           && ev->event_x >= w->area.y
-                           && ev->event_x < w->area.y + w->area.height)
-                        {
-                            w->widget->button_press(w, statusbar, ev);
-                            return 0;
-                        }
+                    tmp = ev->event_y;
+                    ev->event_y = ev->event_x;
+                    ev->event_x = statusbar->width - tmp;
                     break;
                   default:
                     break;
                 }
+                for(w = statusbar->widgets; w; w = w->next)
+                    if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
+                       && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
+                    {
+                        w->widget->button_press(w, ev, statusbar->screen, statusbar);
+                        return 0;
+                    }
                 /* return if no widget match */
                 return 0;
             }

@@ -70,13 +70,15 @@ widget_getbyname(const char *name)
 /** Common function for button press event on widget.
  * It will look into configuration to find the callback function to call.
  * \param w The widget node.
- * \param statusbar The statusbar.
  * \param ev The button press event the widget received.
+ * \param screen The screen number.
+ * \param p The object where user clicked.
  */
 static void
 widget_common_button_press(widget_node_t *w,
-                           statusbar_t *statusbar __attribute__ ((unused)),
-                           xcb_button_press_event_t *ev)
+                           xcb_button_press_event_t *ev,
+                           int screen __attribute__ ((unused)),
+                           void *p __attribute__ ((unused)))
 {
     button_t *b;
 

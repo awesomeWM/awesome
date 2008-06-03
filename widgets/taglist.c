@@ -191,10 +191,12 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
 }
 
 static void
-taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
-                     xcb_button_press_event_t *ev)
+taglist_button_press(widget_node_t *w,
+                     xcb_button_press_event_t *ev,
+                     int screen,
+                     void *object)
 {
-    screen_t *vscreen = &globalconf.screens[statusbar->screen];
+    screen_t *vscreen = &globalconf.screens[screen];
     button_t *b;
     taglist_data_t *data = w->widget->data;
     taglist_drawn_area_t *tda;
@@ -202,44 +204,19 @@ taglist_button_press(widget_node_t *w, statusbar_t *statusbar,
     tag_t *tag;
 
     /* Find the good drawn area list */
-    for(tda = data->drawn_area; tda && tda->object != statusbar; tda = tda->next);
+    for(tda = data->drawn_area; tda && tda->object != object; tda = tda->next);
     area = tda->area;
 
     for(b = w->widget->buttons; b; b = b->next)
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
-            switch(statusbar->position)
-            {
-              default:
-                for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
-                    if(ev->event_x >= AREA_LEFT(*area)
-                       && ev->event_x < AREA_RIGHT(*area))
-                    {
-                        luaA_tag_userdata_new(tag);
-                        luaA_dofunction(globalconf.L, b->fct, 1);
-                        return;
-                    }
-                break;
-              case Right:
-                for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
-                    if(ev->event_y >= AREA_LEFT(*area)
-                       && ev->event_y < AREA_RIGHT(*area))
-                    {
-                        luaA_tag_userdata_new(tag);
-                        luaA_dofunction(globalconf.L, b->fct, 1);
-                        return;
-                    }
-                break;
-              case Left:
-                for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
-                    if(statusbar->width - ev->event_y >= AREA_LEFT(*area)
-                       && statusbar->width - ev->event_y < AREA_RIGHT(*area))
-                    {
-                        luaA_tag_userdata_new(tag);
-                        luaA_dofunction(globalconf.L, b->fct, 1);
-                        return;
-                    }
-                break;
-            }
+            for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
+                if(ev->event_x >= AREA_LEFT(*area)
+                   && ev->event_x < AREA_RIGHT(*area))
+                {
+                    luaA_tag_userdata_new(tag);
+                    luaA_dofunction(globalconf.L, b->fct, 1);
+                    return;
+                }
 }
 
 static widget_tell_status_t
