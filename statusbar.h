@@ -39,7 +39,6 @@ void statusbar_refresh(void);
 
 DO_RCNT(statusbar_t, statusbar, statusbar_delete)
 DO_SLIST(statusbar_t, statusbar, statusbar_delete)
-DO_SLIST_UNREF(statusbar_t, statusbar, statusbar_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

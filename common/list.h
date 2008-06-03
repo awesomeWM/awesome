@@ -179,21 +179,5 @@
         return item2;                                                            \
     }
 
-#define DO_SLIST_UNREF(type, prefix, dtor)                                     \
-    static inline void prefix##_list_unref(type **list)                        \
-    {                                                                          \
-        type *next, *item = *list;                                             \
-        while(item)                                                            \
-        {                                                                      \
-            next = item->next;                                                 \
-            if(--(item->refcount) <= 0)                                        \
-            {                                                                  \
-                prefix##_list_detach(list, item);                              \
-                dtor(&item);                                                   \
-            }                                                                  \
-            item = next;                                                       \
-        }                                                                      \
-    }
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

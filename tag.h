@@ -49,7 +49,6 @@ int luaA_tag_userdata_new(tag_t *);
 
 DO_RCNT(tag_t, tag, tag_delete)
 DO_SLIST(tag_t, tag, tag_delete)
-DO_SLIST_UNREF(tag_t, tag, tag_delete)
 
 DO_SLIST(tag_client_node_t, tag_client_node, p_delete)
 
