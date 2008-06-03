@@ -721,6 +721,25 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
+/** Draw an image (PNG format only) from a file to a draw context
+ * \param ctx Draw context to draw to
+ * \param x x coordinate
+ * \param y y coordinate
+ * \param wanted_h wanted height: if > 0, image will be resized
+ * \param filename file name to draw
+ */
+void
+draw_image_from_file(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
+{
+    draw_image_t *image = draw_image_new(filename);
+
+    if(image)
+    {
+        draw_image(ctx, x, y, wanted_h, image);
+        draw_image_delete(&image);
+    }
+}
+
 #ifndef WITH_IMLIB2
 
 /** Load an image (PNG Format only) from filename
@@ -780,46 +799,6 @@ void draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *i
         gdk_cairo_set_source_pixbuf(cr, image->data, x, y);
 
     cairo_paint(cr);
-
-    cairo_destroy(cr);
-}
-
-/** Draw an image (PNG format only) from a file to a draw context
- * \param ctx Draw context to draw to
- * \param x x coordinate
- * \param y y coordinate
- * \param wanted_h wanted height: if > 0, image will be resized
- * \param filename file name to draw
- */
-void
-draw_image_from_file(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
-{
-
-    double ratio;
-    int w, h;
-    cairo_t *cr;
-    GdkPixbuf *pixbuf;
-    GError *error=NULL;
-
-    if(!(pixbuf = gdk_pixbuf_new_from_file(filename,&error)))
-        return warn("cannot load image %s: %s", filename, error->message);
-
-    w = gdk_pixbuf_get_width(pixbuf);
-    h = gdk_pixbuf_get_height(pixbuf);
-
-    cr = cairo_create(ctx->surface);
-    if(wanted_h > 0 && h > 0)
-    {
-        ratio = (double) wanted_h / (double) h;
-        cairo_scale(cr, ratio, ratio);
-        gdk_cairo_set_source_pixbuf(cr, pixbuf, x/ratio, y/ratio);
-    }
-    else
-        gdk_cairo_set_source_pixbuf(cr, pixbuf, (double) x, (double) y);
-
-    cairo_paint(cr);
-
-    gdk_pixbuf_unref(pixbuf);
 
     cairo_destroy(cr);
 }
@@ -962,51 +941,6 @@ void draw_image_delete(draw_image_t **image)
 void draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
 {
     draw_image_from_argb_data(ctx, x, y, image->width, image->height, wanted_h, image->data);
-}
-/** Draw an image (PNG format only) from a file to a draw context
- * \param ctx Draw context to draw to
- * \param x x coordinate
- * \param y y coordinate
- * \param wanted_h wanted height: if > 0, image will be resized
- * \param filename file name to draw
- */
-void
-draw_image_from_file(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
-{
-    int w, h, size, i;
-    DATA32 *data;
-    double alpha;
-    unsigned char *dataimg, *rdataimg;
-    Imlib_Image image;
-    Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
-
-    if(!(image = imlib_load_image_with_error_return(filename, &e)))
-        return warn("cannot load image %s: %s", filename, draw_imlib_load_strerror(e));
-
-    imlib_context_set_image(image);
-    h = imlib_image_get_height();
-    w = imlib_image_get_width();
-
-    size = w * h;
-
-    data = imlib_image_get_data_for_reading_only();
-
-    rdataimg = dataimg = p_new(unsigned char, size * 4);
-
-    for(i = 0; i < size; i++, dataimg += 4)
-    {
-        dataimg[3] = (data[i] >> 24) & 0xff;           /* A */
-        /* cairo wants pre-multiplied alpha */
-        alpha = dataimg[3] / 255.0;
-        dataimg[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
-        dataimg[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
-        dataimg[0] = (data[i]         & 0xff) * alpha; /* B */
-    }
-
-    draw_image_from_argb_data(ctx, x, y, w, h, wanted_h, rdataimg);
-
-    imlib_free_image();
-    p_delete(&rdataimg);
 }
 
 /** Get an image size
