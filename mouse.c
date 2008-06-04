@@ -385,21 +385,156 @@ mouse_client_move(client_t *c, int snap)
     }
 }
 
+
+/** Utility function to help with mouse-dragging
+ *
+ * \param x set to x-coordinate of the last event on return
+ * \param y set to y-coordinate of the last event on return
+ * \return true if an motion event was recieved
+ *         false if an button release event was recieved
+ */
+static bool
+mouse_track_mouse_drag(int *x, int *y)
+{
+    xcb_generic_event_t *ev;
+    xcb_motion_notify_event_t *ev_motion;
+    xcb_button_release_event_t *ev_button;
+
+    while(true)
+    {
+        while((ev = xcb_wait_for_event(globalconf.connection)))
+        {
+            switch((ev->response_type & 0x7F))
+            {
+
+                case XCB_MOTION_NOTIFY:
+                    ev_motion = (xcb_motion_notify_event_t*) ev;
+                    *x = ev_motion->event_x;
+                    *y = ev_motion->event_y;
+                    p_delete(&ev);
+                    return true;
+
+                case XCB_BUTTON_RELEASE:
+                    ev_button = (xcb_button_release_event_t*) ev;
+                    *x = ev_button->event_x;
+                    *y = ev_button->event_y;
+                    p_delete(&ev);
+                    return false;
+
+                default:
+                    xcb_handle_event(globalconf.evenths, ev);
+                    p_delete(&ev);
+                    break;
+            }
+
+        }
+    }
+}
+
+/** Resize a floating client with the mouse.
+ * \param c The client to resize.
+ */
+static void
+mouse_client_resize_floating(client_t *c)
+{
+    xcb_screen_t *screen;
+    /* one corner of the client has a fixed position */
+    int fixed_x, fixed_y;
+    /* the other is moved with the mouse */
+    int mouse_x = 0, mouse_y = 0;
+    /* the resize bar */
+    simple_window_t *sw;
+    draw_context_t  *ctx;
+
+    screen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+
+    /* get current mouse poistion */
+    mouse_query_pointer(screen->root, &mouse_x, &mouse_y);
+
+    /* figure out which corner to move */
+    {
+        int top, bottom, left, right;
+
+        top = c->geometry.y;
+        bottom = top + c->geometry.height;
+        left = c->geometry.x;
+        right = left + c->geometry.width;
+
+        if(abs(top - mouse_y) < abs(bottom - mouse_y))
+        {
+            mouse_y = top;
+            fixed_y = bottom;
+        }
+        else
+        {
+            mouse_y = bottom;
+            fixed_y = top;
+        }
+
+        if(abs(left - mouse_x) < abs(right - mouse_x))
+        {
+            mouse_x = left;
+            fixed_x = right;
+        }
+        else
+        {
+            mouse_x = right;
+            fixed_x = left;
+        }
+    }
+
+    /* set pointer to the moveable corner */
+    mouse_warp_pointer(screen->root, mouse_x, mouse_y);
+
+    /* grab the pointer */
+    if(!mouse_grab_pointer(screen->root, CurResize))
+        return;
+
+    /* create the resizebar */
+    sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
+    xcb_aux_sync(globalconf.connection);
+
+    /* for each motion event */
+    while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
+    {
+        /* new client geometry */
+        area_t geo = { .x = MIN(fixed_x, mouse_x),
+                       .y = MIN(fixed_y, mouse_y),
+                       .width = (MAX(fixed_x, mouse_x) - MIN(fixed_x, mouse_x)),
+                       .height = (MAX(fixed_y, mouse_y) - MIN(fixed_y, mouse_y)) };
+
+        /* resize the client */
+        client_resize(c, geo, true);
+
+        /* draw the resizebar */
+        mouse_resizebar_draw(ctx, sw, c->geometry, c->border);
+
+        xcb_aux_sync(globalconf.connection);
+    }
+
+    /* relase pointer */
+    mouse_ungrab_pointer();
+
+    /* free the resize bar */
+    draw_context_delete(&ctx);
+    simplewindow_delete(&sw);
+
+    xcb_aux_sync(globalconf.connection);
+}
+
 /** Resize a client with the mouse.
  * \param c The client to resize.
  */
 static void
 mouse_client_resize(client_t *c)
 {
-    int ocx = 0, ocy = 0, n, screen;
+    int n, screen;
     xcb_generic_event_t *ev = NULL;
     xcb_motion_notify_event_t *ev_motion = NULL;
     tag_t **curtags;
     layout_t *layout;
-    area_t area = { 0, 0, 0, 0, NULL, NULL }, geometry = { 0, 0, 0, 0, NULL, NULL };
+    area_t area = { 0, 0, 0, 0, NULL, NULL };
     double mwfact;
-    simple_window_t *sw = NULL;
-    draw_context_t *ctx = NULL;
     xcb_grab_pointer_cookie_t grab_pointer_c;
     xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
     xcb_screen_t *s;
@@ -414,11 +549,11 @@ mouse_client_resize(client_t *c)
         if(c->isfixed)
             return;
 
-        ocx = c->geometry.x;
-        ocy = c->geometry.y;
         c->ismax = false;
 
-        sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
+        mouse_client_resize_floating(c);
+
+        return;
     }
     else if (layout == layout_tile || layout == layout_tileleft
              || layout == layout_tilebottom || layout == layout_tiletop)
@@ -470,11 +605,6 @@ mouse_client_resize(client_t *c)
             switch((ev->response_type & 0x7f))
             {
               case XCB_BUTTON_RELEASE:
-                if(sw)
-                {
-                    draw_context_delete(&ctx);
-                    simplewindow_delete(&sw);
-                }
                 xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
                 p_delete(&ev);
                 p_delete(&curtags);
@@ -482,21 +612,8 @@ mouse_client_resize(client_t *c)
               case XCB_MOTION_NOTIFY:
                 ev_motion = (xcb_motion_notify_event_t *) ev;
 
-                if(layout == layout_floating || c->isfloating)
-                {
-                    if((geometry.width = ev_motion->event_x - ocx - 2 * c->border + 1) <= 0)
-                        geometry.width = 1;
-                    if((geometry.height = ev_motion->event_y - ocy - 2 * c->border + 1) <= 0)
-                        geometry.height = 1;
-                    geometry.x = c->geometry.x;
-                    geometry.y = c->geometry.y;
-                    client_resize(c, geometry, true);
-                    if(sw)
-                        mouse_resizebar_draw(ctx, sw, c->geometry, c->border);
-                    xcb_aux_sync(globalconf.connection);
-                }
-                else if(layout == layout_tile || layout == layout_tileleft
-                        || layout == layout_tiletop || layout == layout_tilebottom)
+                if(layout == layout_tile || layout == layout_tileleft
+                   || layout == layout_tiletop || layout == layout_tilebottom)
                 {
                     if(layout == layout_tile)
                         mwfact = (double) (ev_motion->event_x - area.x) / area.width;
