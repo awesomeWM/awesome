@@ -299,8 +299,7 @@ widget_invalidate_bywidget(widget_t *widget)
 int
 luaA_widget_userdata_new(widget_t *widget)
 {
-    widget_t **w;
-    w = lua_newuserdata(globalconf.L, sizeof(widget_t *));
+    widget_t **w = lua_newuserdata(globalconf.L, sizeof(widget_t *));
     *w = widget;
     widget_ref(w);
     return luaA_settype(globalconf.L, "widget");

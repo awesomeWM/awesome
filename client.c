@@ -1155,6 +1155,20 @@ luaA_client_titlebar_set(lua_State *L)
     return 0;
 }
 
+/** Get the titlebar of a client.
+ * \return A titlebar or nil if the client has no titlebar.
+ */
+static int
+luaA_client_titlebar_get(lua_State *L)
+{
+    client_t **c = luaL_checkudata(L, 1, "client");
+
+    if((*c)->titlebar)
+        return luaA_titlebar_userdata_new((*c)->titlebar);
+
+    return 0;
+}
+
 /** Stop managing a client.
  */
 static int
@@ -1184,6 +1198,7 @@ const struct luaL_reg awesome_client_methods[] =
 const struct luaL_reg awesome_client_meta[] =
 {
     { "titlebar_set", luaA_client_titlebar_set },
+    { "titlebar_get", luaA_client_titlebar_get },
     { "name_get", luaA_client_name_get },
     { "name_set", luaA_client_name_set },
     { "screen_set", luaA_client_screen_set },

@@ -478,6 +478,18 @@ luaA_titlebar_widget_get(lua_State *L)
     return 1;
 }
 
+/** Create a new titlebar userdata.
+ * \param t The titlebar.
+ */
+int
+luaA_titlebar_userdata_new(titlebar_t *t)
+{
+    titlebar_t **tb = lua_newuserdata(globalconf.L, sizeof(titlebar_t *));
+    *tb = t;
+    titlebar_ref(tb);
+    return luaA_settype(globalconf.L, "titlebar");
+}
+
 static int
 luaA_titlebar_gc(lua_State *L)
 {
