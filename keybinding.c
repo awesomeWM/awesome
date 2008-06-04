@@ -127,6 +127,7 @@ luaA_keybinding_gc(lua_State *L)
 {
     keybinding_t **keybinding = luaL_checkudata(L, 1, "keybinding");
     keybinding_unref(keybinding);
+    keybinding = NULL;
     return 0;
 }
 

@@ -438,6 +438,7 @@ luaA_widget_gc(lua_State *L)
 {
     widget_t **widget = luaL_checkudata(L, 1, "widget");
     widget_unref(widget);
+    *widget = NULL;
     return 0;
 }
 

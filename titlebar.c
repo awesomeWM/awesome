@@ -527,6 +527,7 @@ luaA_titlebar_gc(lua_State *L)
 {
     titlebar_t **titlebar = luaL_checkudata(L, 1, "titlebar");
     titlebar_unref(titlebar);
+    *titlebar = NULL;
     return 0;
 }
 

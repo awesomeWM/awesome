@@ -503,6 +503,7 @@ luaA_statusbar_gc(lua_State *L)
 {
     statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
     statusbar_unref(sb);
+    *sb = NULL;
     return 0;
 }
 

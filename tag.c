@@ -484,6 +484,7 @@ luaA_tag_gc(lua_State *L)
 {
     tag_t **tag = luaL_checkudata(L, 1, "tag");
     tag_unref(tag);
+    *tag = NULL;
     return 0;
 }
 
