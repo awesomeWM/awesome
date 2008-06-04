@@ -439,13 +439,18 @@ luaA_titlebar_widget_add(lua_State *L)
     titlebar_t **tb = luaL_checkudata(L, 1, "titlebar");
     widget_t **widget = luaL_checkudata(L, 2, "widget");
     widget_node_t *w = p_new(widget_node_t, 1);
+    client_t *c;
 
     w->widget = *widget;
     widget_node_list_append(&(*tb)->widgets, w);
     widget_ref(widget);
 
-    /* XXX */
-//    titlebar_draw(*tb);
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->titlebar == *tb)
+        {
+            titlebar_draw(c);
+            break;
+        }
 
     return 0;
 }
