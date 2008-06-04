@@ -34,10 +34,10 @@ eprint_version(const char *const executable)
 {
     printf("%s (awesome) " AWESOME_VERSION_INTERNAL
 	   " (" AWESOME_RELEASE ")\n"
-	   "compiled",
+	   "built",
 	   executable);
 #if defined(__DATE__) && defined(__TIME__)
-    printf(" at " __DATE__ " " __TIME__);
+    printf(" " __DATE__ " " __TIME__);
 #endif
     printf(" for %s", AWESOME_COMPILE_MACHINE);
 #if defined(__GNUC__)				\
