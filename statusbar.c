@@ -43,12 +43,12 @@ statusbar_draw(statusbar_t *statusbar)
         return;
 
     widget_render(statusbar->widgets, statusbar->ctx, statusbar->sw->gc,
-                  statusbar->sw->drawable,
+                  statusbar->sw->pixmap,
                   statusbar->screen, statusbar->position,
                   statusbar->sw->geometry.x, statusbar->sw->geometry.y,
                   statusbar);
 
-    simplewindow_refresh_drawable(statusbar->sw);
+    simplewindow_refresh_pixmap(statusbar->sw);
     xcb_aux_sync(globalconf.connection);
 }
 
@@ -78,7 +78,7 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
 {
     statusbar_t *sb;
     area_t area;
-    xcb_drawable_t dw;
+    xcb_pixmap_t dw;
     xcb_screen_t *s = NULL;
     bool ignore = false;
 
@@ -194,7 +194,7 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
                                           statusbar->phys_screen,
                                           statusbar->width,
                                           statusbar->height,
-                                          statusbar->sw->drawable,
+                                          statusbar->sw->pixmap,
                                           statusbar->colors.fg,
                                           statusbar->colors.bg);
         break;

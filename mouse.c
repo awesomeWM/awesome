@@ -149,7 +149,7 @@ mouse_resizebar_draw(draw_context_t *ctx,
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
-    simplewindow_refresh_drawable(sw);
+    simplewindow_refresh_pixmap(sw);
 }
 
 /** Initialize the resizebar window.
@@ -180,7 +180,7 @@ mouse_resizebar_new(int phys_screen, int border, area_t geometry,
 
     *ctx = draw_context_new(globalconf.connection, sw->phys_screen,
                             sw->geometry.width, sw->geometry.height,
-                            sw->drawable,
+                            sw->pixmap,
                             globalconf.colors.fg,
                             globalconf.colors.bg);
 

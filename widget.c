@@ -112,17 +112,17 @@ widget_common_tell(widget_t *widget,
 /** Render a list of widgets.
  * \param wnode The list of widgets.
  * \param ctx The draw context where to render.
- * \param rotate_dw The rotate drawable: where to rotate and render the final
+ * \param rotate_dw The rotate pixmap: where to rotate and render the final
  * \param screen The logical screen used to render.
  * \param position The object position.
  * \param x The x coordinates of the object.
  * \param y The y coordinates of the object.
- * drawable when the object position is right or left.
+ * pixmap when the object position is right or left.
  * \param object The object pointer.
  * \todo Remove GC.
  */
 void
-widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_drawable_t rotate_dw,
+widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_pixmap_t rotate_px,
               int screen, position_t position,
               int x, int y, void *object)
 {
@@ -164,7 +164,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
                {
                  case Left:
                    draw_rotate(ctx,
-                               rootpix, ctx->drawable,
+                               rootpix, ctx->pixmap,
                                rootsize.width, rootsize.height,
                                ctx->width, ctx->height,
                                M_PI_2,
@@ -173,7 +173,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
                    break;
                  case Right:
                    draw_rotate(ctx,
-                               rootpix, ctx->drawable,
+                               rootpix, ctx->pixmap,
                                rootsize.width, rootsize.height,
                                ctx->width, ctx->height,
                                - M_PI_2,
@@ -182,7 +182,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
                    break;
                  default:
                    xcb_copy_area(globalconf.connection, rootpix,
-                                 rotate_dw, gc,
+                                 rotate_px, gc,
                                  x, y,
                                  0, 0, 
                                  ctx->width, ctx->height);
@@ -211,13 +211,13 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
     switch(position)
     {
         case Right:
-          draw_rotate(ctx, ctx->drawable, rotate_dw,
+          draw_rotate(ctx, ctx->pixmap, rotate_px,
                       ctx->width, ctx->height,
                       ctx->height, ctx->width,
                       M_PI_2, ctx->height, 0);
           break;
         case Left:
-          draw_rotate(ctx, ctx->drawable, rotate_dw,
+          draw_rotate(ctx, ctx->pixmap, rotate_px,
                       ctx->width, ctx->height,
                       ctx->height, ctx->width,
                       - M_PI_2, 0, ctx->width);

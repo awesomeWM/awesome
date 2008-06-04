@@ -45,9 +45,6 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
     uint32_t create_win_val[3];
     const uint32_t gc_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
     const uint32_t gc_values[2] = { s->black_pixel, s->white_pixel };
-    /* The default GC is just a newly created associated to the root
-     * window */
-    xcb_drawable_t gc_draw = s->root;
 
     sw = p_new(simple_window_t, 1);
 
@@ -71,11 +68,13 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
                       XCB_CW_BACK_PIXMAP | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       create_win_val);
 
-    sw->drawable = xcb_generate_id(conn);
-    xcb_create_pixmap(conn, s->root_depth, sw->drawable, s->root, w, h);
+    sw->pixmap = xcb_generate_id(conn);
+    xcb_create_pixmap(conn, s->root_depth, sw->pixmap, s->root, w, h);
 
+    /* The default GC is just a newly created associated to the root
+     * window */
     sw->gc = xcb_generate_id(sw->connection);
-    xcb_create_gc(sw->connection, sw->gc, gc_draw, gc_mask, gc_values);
+    xcb_create_gc(sw->connection, sw->gc, s->root, gc_mask, gc_values);
 
     sw->border_width = border_width;
 
@@ -109,15 +108,17 @@ simplewindow_resize(simple_window_t *sw, unsigned int w, unsigned int h)
 {
     xcb_screen_t *s = xcb_aux_get_screen(sw->connection, sw->phys_screen);
     const uint32_t resize_win_vals[] = { w, h };
+    xcb_pixmap_t d;
 
     sw->geometry.width = w;
     sw->geometry.height = h;
-    xcb_free_pixmap(sw->connection, sw->drawable);
-    sw->drawable = xcb_generate_id(sw->connection);
-    xcb_create_pixmap(sw->connection, s->root_depth, sw->drawable, s->root, w, h);
+    d = sw->pixmap;
+    sw->pixmap = xcb_generate_id(sw->connection);
+    xcb_create_pixmap(sw->connection, s->root_depth, sw->pixmap, s->root, w, h);
     xcb_configure_window(sw->connection, sw->window,
                          XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                          resize_win_vals);
+    xcb_free_pixmap(sw->connection, d);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

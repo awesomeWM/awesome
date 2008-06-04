@@ -354,12 +354,12 @@ event_handle_expose(void *data __attribute__ ((unused)),
                 if(statusbar->sw
                    && statusbar->sw->window == ev->window)
                 {
-                    simplewindow_refresh_drawable(statusbar->sw);
+                    simplewindow_refresh_pixmap(statusbar->sw);
                     return 0;
                 }
 
         if((c = client_getbytitlebarwin(ev->window)))
-           simplewindow_refresh_drawable(c->titlebar->sw);
+           simplewindow_refresh_pixmap(c->titlebar->sw);
     }
 
     return 0;

@@ -108,19 +108,19 @@ draw_screen_default_visual(xcb_screen_t *s)
     return NULL;
 }
 
-/** Get a draw context
- * \param conn Connection ref
- * \param phys_screen physical screen id
- * \param width width
- * \param height height
- * \param dw Drawable object to store in draw_context_t
+/** Create a new draw context.
+ * \param conn Connection ref.
+ * \param phys_screen Physical screen id.
+ * \param width Width.
+ * \param height Height.
+ * \param px Pixmap object to store.
  * \param fg Foreground color.
  * \param bg Background color.
- * \return draw context ref
+ * \return A draw context pointer.
  */
 draw_context_t *
 draw_context_new(xcb_connection_t *conn, int phys_screen,
-                 int width, int height, xcb_drawable_t dw,
+                 int width, int height, xcb_pixmap_t px,
                  xcolor_t fg, xcolor_t bg)
 {
     draw_context_t *d = p_new(draw_context_t, 1);
@@ -132,8 +132,8 @@ draw_context_new(xcb_connection_t *conn, int phys_screen,
     d->height = height;
     d->depth = s->root_depth;
     d->visual = draw_screen_default_visual(s);
-    d->drawable = dw;
-    d->surface = cairo_xcb_surface_create(conn, dw, d->visual, width, height);
+    d->pixmap = px;
+    d->surface = cairo_xcb_surface_create(conn, px, d->visual, width, height);
     d->cr = cairo_create(d->surface);
     d->layout = pango_cairo_create_layout(d->cr);
     d->fg = fg;
@@ -970,7 +970,7 @@ draw_get_image_size(const char *filename)
 }
 #endif /* WITH_IMLIB2 */
 
-/** Rotate a drawable.
+/** Rotate a pixmap.
  * \param ctx Draw context to draw with.
  * \param src Drawable to draw from.
  * \param dest Drawable to draw to.
@@ -984,7 +984,7 @@ draw_get_image_size(const char *filename)
  */
 void
 draw_rotate(draw_context_t *ctx,
-            xcb_drawable_t src, xcb_drawable_t dest,
+            xcb_pixmap_t src, xcb_pixmap_t dest,
             int src_w, int src_h,
             int dest_w, int dest_h,
             double angle, int tx, int ty)

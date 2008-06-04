@@ -33,8 +33,8 @@ typedef struct simple_window_t
     int phys_screen;
     /** The window object. */
     xcb_window_t window;
-    /** The drawable copied to the window object. */
-    xcb_drawable_t drawable;
+    /** The pixmap copied to the window object. */
+    xcb_pixmap_t pixmap;
     /** The graphic context. */
     xcb_gcontext_t gc;
     /** The window geometry. */
@@ -54,7 +54,7 @@ simplewindow_delete(simple_window_t **sw)
     if(*sw)
     {
         xcb_destroy_window((*sw)->connection, (*sw)->window);
-        xcb_free_pixmap((*sw)->connection, (*sw)->drawable);
+        xcb_free_pixmap((*sw)->connection, (*sw)->pixmap);
         xcb_free_gc((*sw)->connection, (*sw)->gc);
         p_delete(sw);
     }
@@ -78,13 +78,13 @@ simplewindow_move_resize(simple_window_t *sw, int x, int y,
   simplewindow_resize(sw, w, h);
 }
 
-/** Refresh the window content by copying its drawable data to its window.
+/** Refresh the window content by copying its pixmap data to its window.
  * \param sw The simple window to refresh.
  */
 static inline void
-simplewindow_refresh_drawable(simple_window_t *sw)
+simplewindow_refresh_pixmap(simple_window_t *sw)
 {
-    xcb_copy_area(sw->connection, sw->drawable,
+    xcb_copy_area(sw->connection, sw->pixmap,
                   sw->window, sw->gc, 0, 0, 0, 0,
                   sw->geometry.width,
                   sw->geometry.height);

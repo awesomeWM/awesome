@@ -97,7 +97,7 @@ typedef struct
 typedef struct
 {
     xcb_connection_t *connection;
-    xcb_drawable_t drawable;
+    xcb_pixmap_t pixmap;
     xcb_visualtype_t *visual;
     int width;
     int height;

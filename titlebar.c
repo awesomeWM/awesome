@@ -87,27 +87,27 @@ titlebar_draw(client_t *c)
         ctx = draw_context_new(globalconf.connection, c->titlebar->sw->phys_screen,
                                c->titlebar->sw->geometry.width,
                                c->titlebar->sw->geometry.height,
-                               c->titlebar->sw->drawable,
+                               c->titlebar->sw->pixmap,
                                c->titlebar->colors.fg,
                                c->titlebar->colors.bg);
         break;
     }
 
-    widget_render(c->titlebar->widgets, ctx, c->titlebar->sw->gc, c->titlebar->sw->drawable,
+    widget_render(c->titlebar->widgets, ctx, c->titlebar->sw->gc, c->titlebar->sw->pixmap,
                   c->screen, c->titlebar->position,
                   c->titlebar->sw->geometry.x, c->titlebar->sw->geometry.y, c->titlebar);
 
     switch(c->titlebar->position)
     {
       case Left:
-        draw_rotate(ctx, ctx->drawable, c->titlebar->sw->drawable,
+        draw_rotate(ctx, ctx->pixmap, c->titlebar->sw->pixmap,
                     ctx->width, ctx->height,
                     ctx->height, ctx->width,
                     - M_PI_2, 0, c->titlebar->sw->geometry.height);
         xcb_free_pixmap(globalconf.connection, dw);
         break;
       case Right:
-        draw_rotate(ctx, ctx->drawable, c->titlebar->sw->drawable,
+        draw_rotate(ctx, ctx->pixmap, c->titlebar->sw->pixmap,
                     ctx->width, ctx->height,
                     ctx->height, ctx->width,
                     M_PI_2, c->titlebar->sw->geometry.width, 0);
@@ -116,7 +116,7 @@ titlebar_draw(client_t *c)
         break;
     }
 
-    simplewindow_refresh_drawable(c->titlebar->sw);
+    simplewindow_refresh_pixmap(c->titlebar->sw);
 
     draw_context_delete(&ctx);
 }
