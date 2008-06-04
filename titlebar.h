@@ -24,6 +24,7 @@
 
 #include "structs.h"
 
+client_t * client_getbytitlebar(titlebar_t *);
 client_t * client_getbytitlebarwin(xcb_window_t);
 void titlebar_draw(client_t *);
 void titlebar_update_geometry_floating(client_t *);

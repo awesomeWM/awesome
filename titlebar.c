@@ -32,8 +32,24 @@
 
 extern awesome_t globalconf;
 
+/** Get a client by its titlebar.
+ * \param titlebar The titlebar.
+ * \return A client.
+ */
+client_t *
+client_getbytitlebar(titlebar_t *titlebar)
+{
+    client_t *c;
+
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->titlebar == titlebar)
+            return c;
+
+    return NULL;
+}
+
 /** Get a client by its titlebar window.
- * \param The window.
+ * \param win The window.
  * \return A client.
  */
 client_t *
@@ -478,6 +494,22 @@ luaA_titlebar_widget_get(lua_State *L)
     return 1;
 }
 
+/** Get the client which the titlebar is attached to. That is a the same as
+ * checking if every clients's titlebar is equal to titlebar.
+ * \return A client if the titlebar is attached, nil otherwise.
+ */
+static int
+luaA_titlebar_client_get(lua_State *L)
+{
+    titlebar_t **titlebar = luaL_checkudata(L, 1, "titlebar");
+    client_t *c;
+
+    if((c = client_getbytitlebar(*titlebar)))
+        return luaA_client_userdata_new(c);
+
+    return 0;
+}
+
 /** Create a new titlebar userdata.
  * \param t The titlebar.
  */
@@ -524,6 +556,7 @@ const struct luaL_reg awesome_titlebar_meta[] =
 {
     { "widget_add", luaA_titlebar_widget_add },
     { "widget_get", luaA_titlebar_widget_get },
+    { "client_get", luaA_titlebar_client_get },
     { "__eq", luaA_titlebar_eq },
     { "__gc", luaA_titlebar_gc },
     { "__tostring", luaA_titlebar_tostring },

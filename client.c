@@ -1131,12 +1131,11 @@ luaA_client_name_set(lua_State *L)
 static int
 luaA_client_titlebar_set(lua_State *L)
 {
-    client_t *cl, **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaL_checkudata(L, 1, "client");
     titlebar_t **t = luaL_checkudata(L, 2, "titlebar");
 
-    for(cl = globalconf.clients; cl; cl = cl->next)
-        if(cl->titlebar == *t)
-            luaL_error(L, "titlebar is already used by another client");
+    if(client_getbytitlebar(*t))
+        luaL_error(L, "titlebar is already used by another client");
 
     /* If client had a titlebar, unref it */
     if((*c)->titlebar)
