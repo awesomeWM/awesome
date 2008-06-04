@@ -452,8 +452,8 @@ luaA_titlebar_new(lua_State *L)
 static int
 luaA_titlebar_widget_add(lua_State *L)
 {
-    titlebar_t **tb = luaL_checkudata(L, 1, "titlebar");
-    widget_t **widget = luaL_checkudata(L, 2, "widget");
+    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
+    widget_t **widget = luaA_checkudata(L, 2, "widget");
     widget_node_t *w = p_new(widget_node_t, 1);
     client_t *c;
 
@@ -477,7 +477,7 @@ luaA_titlebar_widget_add(lua_State *L)
 static int
 luaA_titlebar_widget_get(lua_State *L)
 {
-    titlebar_t **tb = luaL_checkudata(L, 1, "titlebar");
+    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
     widget_node_t *widget;
     int i = 1;
 
@@ -501,7 +501,7 @@ luaA_titlebar_widget_get(lua_State *L)
 static int
 luaA_titlebar_client_get(lua_State *L)
 {
-    titlebar_t **titlebar = luaL_checkudata(L, 1, "titlebar");
+    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     client_t *c;
 
     if((c = client_getbytitlebar(*titlebar)))
@@ -525,7 +525,7 @@ luaA_titlebar_userdata_new(titlebar_t *t)
 static int
 luaA_titlebar_gc(lua_State *L)
 {
-    titlebar_t **titlebar = luaL_checkudata(L, 1, "titlebar");
+    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     titlebar_unref(titlebar);
     *titlebar = NULL;
     return 0;
@@ -534,7 +534,7 @@ luaA_titlebar_gc(lua_State *L)
 static int
 luaA_titlebar_tostring(lua_State *L)
 {
-    titlebar_t **p = luaL_checkudata(L, 1, "titlebar");
+    titlebar_t **p = luaA_checkudata(L, 1, "titlebar");
     lua_pushfstring(L, "[titlebar udata(%p)]", *p);
     return 1;
 }
@@ -542,8 +542,8 @@ luaA_titlebar_tostring(lua_State *L)
 static int
 luaA_titlebar_eq(lua_State *L)
 {
-    titlebar_t **t1 = luaL_checkudata(L, 1, "titlebar");
-    titlebar_t **t2 = luaL_checkudata(L, 2, "titlebar");
+    titlebar_t **t1 = luaA_checkudata(L, 1, "titlebar");
+    titlebar_t **t2 = luaA_checkudata(L, 2, "titlebar");
     lua_pushboolean(L, (*t1 == *t2));
     return 1;
 }

@@ -242,8 +242,8 @@ tag_view_only_byindex(int screen, int dindex)
 static int
 luaA_tag_eq(lua_State *L)
 {
-    tag_t **t1 = luaL_checkudata(L, 1, "tag");
-    tag_t **t2 = luaL_checkudata(L, 2, "tag");
+    tag_t **t1 = luaA_checkudata(L, 1, "tag");
+    tag_t **t2 = luaA_checkudata(L, 2, "tag");
     lua_pushboolean(L, (*t1 == *t2));
     return 1;
 }
@@ -254,7 +254,7 @@ luaA_tag_eq(lua_State *L)
 static int
 luaA_tag_tostring(lua_State *L)
 {
-    tag_t **p = luaL_checkudata(L, 1, "tag");
+    tag_t **p = luaA_checkudata(L, 1, "tag");
     lua_pushfstring(L, "[tag udata(%p) name(%s)]", *p, (*p)->name);
     return 1;
 }
@@ -265,7 +265,7 @@ luaA_tag_tostring(lua_State *L)
 static int
 luaA_tag_add(lua_State *L)
 {
-    tag_t *t, **tag = luaL_checkudata(L, 1, "tag");
+    tag_t *t, **tag = luaA_checkudata(L, 1, "tag");
     int i, screen = luaL_checknumber(L, 2) - 1;
     luaA_checkscreen(screen);
 
@@ -340,7 +340,7 @@ luaA_tag_new(lua_State *L)
 static int
 luaA_tag_view(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     bool view = luaA_checkboolean(L, 2);
     tag_view(*tag, view);
     return 0;
@@ -352,7 +352,7 @@ luaA_tag_view(lua_State *L)
 static int
 luaA_tag_isselected(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     lua_pushboolean(L, (*tag)->selected);
     return 1;
 }
@@ -364,7 +364,7 @@ luaA_tag_isselected(lua_State *L)
 static int
 luaA_tag_mwfact_set(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     double mwfact = luaL_checknumber(L, 2);
 
     if(mwfact < 1 && mwfact > 0)
@@ -384,7 +384,7 @@ luaA_tag_mwfact_set(lua_State *L)
 static int
 luaA_tag_mwfact_get(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     lua_pushnumber(L, (*tag)->mwfact);
     return 1;
 }
@@ -396,7 +396,7 @@ luaA_tag_mwfact_get(lua_State *L)
 static int
 luaA_tag_ncol_set(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     int ncol = luaL_checknumber(L, 2);
 
     if(ncol >= 1)
@@ -416,7 +416,7 @@ luaA_tag_ncol_set(lua_State *L)
 static int
 luaA_tag_ncol_get(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     lua_pushnumber(L, (*tag)->ncol);
     return 1;
 }
@@ -428,7 +428,7 @@ luaA_tag_ncol_get(lua_State *L)
 static int
 luaA_tag_nmaster_set(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     int nmaster = luaL_checknumber(L, 2);
 
     if(nmaster >= 0)
@@ -448,7 +448,7 @@ luaA_tag_nmaster_set(lua_State *L)
 static int
 luaA_tag_nmaster_get(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     lua_pushnumber(L, (*tag)->nmaster);
     return 1;
 }
@@ -459,7 +459,7 @@ luaA_tag_nmaster_get(lua_State *L)
 static int
 luaA_tag_name_get(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     lua_pushstring(L, (*tag)->name);
     return 1;
 }
@@ -470,7 +470,7 @@ luaA_tag_name_get(lua_State *L)
 static int
 luaA_tag_name_set(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *name = luaL_checkstring(L, 2);
     p_delete(&(*tag)->name);
     (*tag)->name = a_strdup(name);
@@ -482,7 +482,7 @@ luaA_tag_name_set(lua_State *L)
 static int
 luaA_tag_gc(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     tag_unref(tag);
     *tag = NULL;
     return 0;
@@ -494,7 +494,7 @@ luaA_tag_gc(lua_State *L)
 static int
 luaA_tag_layout_get(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *name = a_strdup(name_func_rlookup((*tag)->layout, LayoutList));
     lua_pushstring(L, name);
     return 1;
@@ -506,7 +506,7 @@ luaA_tag_layout_get(lua_State *L)
 static int
 luaA_tag_layout_set(lua_State *L)
 {
-    tag_t **tag = luaL_checkudata(L, 1, "tag");
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *name = luaL_checkstring(L, 2);
     layout_t *l = name_func_lookup(name, LayoutList);
 

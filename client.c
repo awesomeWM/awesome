@@ -900,7 +900,7 @@ client_setborder(client_t *c, uint32_t width)
 static int
 luaA_client_border_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     uint32_t width = luaA_getopt_number(L, 2, "width", 0);
     const char *colorstr = luaA_getopt_string(L, 2, "color", NULL);
     xcolor_t color;
@@ -918,7 +918,7 @@ luaA_client_border_set(lua_State *L)
 static int
 luaA_client_screen_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     int screen = luaL_checknumber(L, 2) - 1;
     luaA_checkscreen(screen);
     move_client_to_screen(*c, screen, true);
@@ -928,7 +928,7 @@ luaA_client_screen_set(lua_State *L)
 static int
 luaA_client_screen_get(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     lua_pushnumber(L, 1 + (*c)->screen);
     return 1;
 }
@@ -937,8 +937,8 @@ luaA_client_screen_get(lua_State *L)
 static int
 luaA_client_tag(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
-    tag_t **tag = luaL_checkudata(L, 2, "tag");
+    client_t **c = luaA_checkudata(L, 1, "client");
+    tag_t **tag = luaA_checkudata(L, 2, "tag");
     bool tag_the_client = luaA_checkboolean(L, 3);
 
     if((*tag)->screen != (*c)->screen)
@@ -955,8 +955,8 @@ luaA_client_tag(lua_State *L)
 static int
 luaA_client_istagged(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
-    tag_t **tag = luaL_checkudata(L, 2, "tag");
+    client_t **c = luaA_checkudata(L, 1, "client");
+    tag_t **tag = luaA_checkudata(L, 2, "tag");
     lua_pushboolean(L, is_client_tagged(*c, *tag));
     return 1;
 }
@@ -964,7 +964,7 @@ luaA_client_istagged(lua_State *L)
 static int
 luaA_client_coords_get(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     lua_newtable(L);
     lua_pushnumber(L, (*c)->geometry.width);
     lua_setfield(L, -2, "width");
@@ -980,7 +980,7 @@ luaA_client_coords_get(lua_State *L)
 static int
 luaA_client_coords_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     area_t geometry;
 
     if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
@@ -999,7 +999,7 @@ luaA_client_coords_set(lua_State *L)
 static int
 luaA_client_opacity_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     double opacity = luaL_checknumber(L, 2);
 
     if(opacity == -1 || (opacity >= 0 && opacity <= 100))
@@ -1010,7 +1010,7 @@ luaA_client_opacity_set(lua_State *L)
 static int
 luaA_client_kill(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     client_kill(*c);
     return 0;
 }
@@ -1018,8 +1018,8 @@ luaA_client_kill(lua_State *L)
 static int
 luaA_client_swap(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
-    client_t **swap = luaL_checkudata(L, 2, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
+    client_t **swap = luaA_checkudata(L, 2, "client");
     client_list_swap(&globalconf.clients, *swap, *c);
     globalconf.screens[(*c)->screen].need_arrange = true;
     globalconf.screens[(*swap)->screen].need_arrange = true;
@@ -1031,7 +1031,7 @@ luaA_client_swap(lua_State *L)
 static int
 luaA_client_focus_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     client_focus(*c, (*c)->screen);
     return 0;
 }
@@ -1041,7 +1041,7 @@ luaA_client_focus_set(lua_State *L)
 static int
 luaA_client_raise(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     client_raise(*c);
     return 0;
 }
@@ -1049,7 +1049,7 @@ luaA_client_raise(lua_State *L)
 static int
 luaA_client_floating_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     bool f = luaA_checkboolean(L, 2);
     client_setfloating(*c, f, (*c)->layer == LAYER_FLOAT ? LAYER_TILE : LAYER_FLOAT);
     return 0;
@@ -1058,7 +1058,7 @@ luaA_client_floating_set(lua_State *L)
 static int
 luaA_client_floating_get(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     lua_pushboolean(L, (*c)->isfloating);
     return 1;
 }
@@ -1066,8 +1066,8 @@ luaA_client_floating_get(lua_State *L)
 static int
 luaA_client_eq(lua_State *L)
 {
-    client_t **c1 = luaL_checkudata(L, 1, "client");
-    client_t **c2 = luaL_checkudata(L, 2, "client");
+    client_t **c1 = luaA_checkudata(L, 1, "client");
+    client_t **c2 = luaA_checkudata(L, 2, "client");
     lua_pushboolean(L, (*c1 == *c2));
     return 1;
 }
@@ -1075,7 +1075,7 @@ luaA_client_eq(lua_State *L)
 static int
 luaA_client_redraw(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     xcb_unmap_window(globalconf.connection, (*c)->win);
     xcb_map_window(globalconf.connection, (*c)->win);
     return 0;
@@ -1084,7 +1084,7 @@ luaA_client_redraw(lua_State *L)
 static int
 luaA_client_tostring(lua_State *L)
 {
-    client_t **p = luaL_checkudata(L, 1, "client");
+    client_t **p = luaA_checkudata(L, 1, "client");
     lua_pushfstring(L, "[client udata(%p) name(%s)]", *p, (*p)->name);
     return 1;
 }
@@ -1092,7 +1092,7 @@ luaA_client_tostring(lua_State *L)
 static int
 luaA_client_icon_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     const char *icon = luaL_optstring(L, 2, NULL);
 
     p_delete(&(*c)->icon_path);
@@ -1107,7 +1107,7 @@ luaA_client_icon_set(lua_State *L)
 static int
 luaA_client_name_get(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     lua_pushstring(L, (*c)->name);
     return 1;
 }
@@ -1118,7 +1118,7 @@ luaA_client_name_get(lua_State *L)
 static int
 luaA_client_name_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     const char *name = luaL_checkstring(L, 2);
     p_delete(&(*c)->name);
     (*c)->name = a_strdup(name);
@@ -1131,8 +1131,8 @@ luaA_client_name_set(lua_State *L)
 static int
 luaA_client_titlebar_set(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
-    titlebar_t **t = luaL_checkudata(L, 2, "titlebar");
+    client_t **c = luaA_checkudata(L, 1, "client");
+    titlebar_t **t = luaA_checkudata(L, 2, "titlebar");
 
     if(client_getbytitlebar(*t))
         luaL_error(L, "titlebar is already used by another client");
@@ -1160,7 +1160,7 @@ luaA_client_titlebar_set(lua_State *L)
 static int
 luaA_client_titlebar_get(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
 
     if((*c)->titlebar)
         return luaA_titlebar_userdata_new((*c)->titlebar);
@@ -1173,7 +1173,7 @@ luaA_client_titlebar_get(lua_State *L)
 static int
 luaA_client_unmanage(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     client_unmanage(*c);
     return 0;
 }

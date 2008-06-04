@@ -476,7 +476,7 @@ luaA_mouse_coords_set(lua_State *L)
 int
 luaA_client_mouse_resize(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     mouse_client_resize(*c);
     return 0;
 }
@@ -487,7 +487,7 @@ luaA_client_mouse_resize(lua_State *L)
 int
 luaA_client_mouse_move(lua_State *L)
 {
-    client_t **c = luaL_checkudata(L, 1, "client");
+    client_t **c = luaA_checkudata(L, 1, "client");
     int snap = luaL_optnumber(L, 2, 8);
     mouse_client_move(*c, snap);
     return 0;

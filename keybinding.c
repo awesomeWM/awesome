@@ -88,7 +88,7 @@ luaA_keybinding_new(lua_State *L)
 static int
 luaA_keybinding_add(lua_State *L)
 {
-    keybinding_t *key, **k = luaL_checkudata(L, 1, "keybinding");
+    keybinding_t *key, **k = luaA_checkudata(L, 1, "keybinding");
 
     /* Check that the keybinding has not been already added. */
     for(key = globalconf.keys; key; key = key->next)
@@ -109,7 +109,7 @@ luaA_keybinding_add(lua_State *L)
 static int
 luaA_keybinding_remove(lua_State *L)
 {
-    keybinding_t **k = luaL_checkudata(L, 1, "keybinding");
+    keybinding_t **k = luaA_checkudata(L, 1, "keybinding");
 
     keybinding_list_detach(&globalconf.keys, *k);
 
@@ -125,7 +125,7 @@ luaA_keybinding_remove(lua_State *L)
 static int
 luaA_keybinding_gc(lua_State *L)
 {
-    keybinding_t **keybinding = luaL_checkudata(L, 1, "keybinding");
+    keybinding_t **keybinding = luaA_checkudata(L, 1, "keybinding");
     keybinding_unref(keybinding);
     keybinding = NULL;
     return 0;
@@ -137,7 +137,7 @@ luaA_keybinding_gc(lua_State *L)
 static int
 luaA_keybinding_tostring(lua_State *L)
 {
-    keybinding_t **p = luaL_checkudata(L, 1, "keybinding");
+    keybinding_t **p = luaA_checkudata(L, 1, "keybinding");
     lua_pushfstring(L, "[keybinding udata(%p)]", *p);
     return 1;
 }

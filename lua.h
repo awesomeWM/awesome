@@ -69,6 +69,22 @@ typedef int luaA_function;
             luaL_error(L, "invalid screen number: %d\n", screen); \
     } while(0)
 
+/** Check that an object is not a NULL reference.
+ * \param L The Lua state.
+ * \param ud The index of the object in the stack.
+ * \param tname The type name.
+ * \return A pointer to the object.
+ */
+static inline void *
+luaA_checkudata(lua_State *L, int ud, const char *tname)
+{
+    void **p = luaL_checkudata(L, ud, tname);
+    if(*p)
+        return p;
+    luaL_error(L, "invalid object");
+    return NULL;
+}
+
 static inline lua_Number
 luaA_getopt_number(lua_State *L, int idx, const char *name, lua_Number def)
 {

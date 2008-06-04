@@ -347,7 +347,7 @@ luaA_widget_mouse(lua_State *L)
 {
     size_t i, len;
     /* arg 1 is object */
-    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     int b;
     button_t *button;
 
@@ -419,7 +419,7 @@ widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const ch
 static int
 luaA_widget_set(lua_State *L)
 {
-    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *property, *value;
     widget_tell_status_t status;
 
@@ -436,7 +436,7 @@ luaA_widget_set(lua_State *L)
 static int
 luaA_widget_gc(lua_State *L)
 {
-    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     widget_unref(widget);
     *widget = NULL;
     return 0;
@@ -447,7 +447,7 @@ luaA_widget_gc(lua_State *L)
 static int
 luaA_widget_tostring(lua_State *L)
 {
-    widget_t **p = luaL_checkudata(L, 1, "widget");
+    widget_t **p = luaA_checkudata(L, 1, "widget");
     lua_pushfstring(L, "[widget udata(%p) name(%s)]", *p, (*p)->name);
     return 1;
 }
@@ -458,8 +458,8 @@ luaA_widget_tostring(lua_State *L)
 static int
 luaA_widget_eq(lua_State *L)
 {
-    widget_t **t1 = luaL_checkudata(L, 1, "widget");
-    widget_t **t2 = luaL_checkudata(L, 2, "widget");
+    widget_t **t1 = luaA_checkudata(L, 1, "widget");
+    widget_t **t2 = luaA_checkudata(L, 2, "widget");
     lua_pushboolean(L, (*t1 == *t2));
     return 1;
 }
@@ -470,7 +470,7 @@ luaA_widget_eq(lua_State *L)
 static int
 luaA_widget_name_set(lua_State *L)
 {
-    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *name = luaL_checkstring(L, 2);
     p_delete(&(*widget)->name);
     (*widget)->name = a_strdup(name);
@@ -483,7 +483,7 @@ luaA_widget_name_set(lua_State *L)
 static int
 luaA_widget_name_get(lua_State *L)
 {
-    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     lua_pushstring(L, (*widget)->name);
     return 1;
 }
@@ -495,7 +495,7 @@ luaA_widget_name_get(lua_State *L)
 static int
 luaA_widget_visible_set(lua_State *L)
 {
-    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     (*widget)->isvisible = luaA_checkboolean(L, 2);
     widget_invalidate_bywidget(*widget);
     return 0;
@@ -507,7 +507,7 @@ luaA_widget_visible_set(lua_State *L)
 static int
 luaA_widget_visible_get(lua_State *L)
 {
-    widget_t **widget = luaL_checkudata(L, 1, "widget");
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     lua_pushboolean(L, (*widget)->isvisible);
     return 1;
 }

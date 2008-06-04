@@ -282,8 +282,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
 static int
 luaA_statusbar_eq(lua_State *L)
 {
-    statusbar_t **t1 = luaL_checkudata(L, 1, "statusbar");
-    statusbar_t **t2 = luaL_checkudata(L, 2, "statusbar");
+    statusbar_t **t1 = luaA_checkudata(L, 1, "statusbar");
+    statusbar_t **t2 = luaA_checkudata(L, 2, "statusbar");
     lua_pushboolean(L, (*t1 == *t2));
     return 1;
 }
@@ -294,7 +294,7 @@ luaA_statusbar_eq(lua_State *L)
 static int
 luaA_statusbar_position_set(lua_State *L)
 {
-    statusbar_t *s, **sb = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t *s, **sb = luaA_checkudata(L, 1, "statusbar");
     const char *pos = luaL_checkstring(L, 2);
     position_t position = position_get_from_str(pos);
 
@@ -314,7 +314,7 @@ luaA_statusbar_position_set(lua_State *L)
 static int
 luaA_statusbar_position_get(lua_State *L)
 {
-    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
     lua_pushstring(L, position_to_str((*sb)->position));
     return 1;
 }
@@ -325,7 +325,7 @@ luaA_statusbar_position_get(lua_State *L)
 static int
 luaA_statusbar_align_set(lua_State *L)
 {
-    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
     const char *al = luaL_checkstring(L, 2);
     alignment_t align = draw_align_get_from_str(al);
 
@@ -340,7 +340,7 @@ luaA_statusbar_align_set(lua_State *L)
 static int
 luaA_statusbar_tostring(lua_State *L)
 {
-    statusbar_t **p = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t **p = luaA_checkudata(L, 1, "statusbar");
     lua_pushfstring(L, "[statusbar udata(%p) name(%s)]", *p, (*p)->name);
     return 1;
 }
@@ -351,8 +351,8 @@ luaA_statusbar_tostring(lua_State *L)
 static int
 luaA_statusbar_widget_add(lua_State *L)
 {
-    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
-    widget_t **widget = luaL_checkudata(L, 2, "widget");
+    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
+    widget_t **widget = luaA_checkudata(L, 2, "widget");
     widget_node_t *w = p_new(widget_node_t, 1);
 
     (*sb)->need_update = true;
@@ -369,7 +369,7 @@ luaA_statusbar_widget_add(lua_State *L)
 static int
 luaA_statusbar_add(lua_State *L)
 {
-    statusbar_t *s, **sb = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t *s, **sb = luaA_checkudata(L, 1, "statusbar");
     int i, screen = luaL_checknumber(L, 2) - 1;
 
     luaA_checkscreen(screen);
@@ -404,7 +404,7 @@ luaA_statusbar_add(lua_State *L)
 static int
 luaA_statusbar_remove(lua_State *L)
 {
-    statusbar_t *s, **sb = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t *s, **sb = luaA_checkudata(L, 1, "statusbar");
     int i;
 
     for(i = 0; i < globalconf.screens_info->nscreen; i++)
@@ -479,7 +479,7 @@ luaA_statusbar_new(lua_State *L)
 static int
 luaA_statusbar_widget_get(lua_State *L)
 {
-    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
     widget_node_t *widget;
     int i = 1;
 
@@ -501,7 +501,7 @@ luaA_statusbar_widget_get(lua_State *L)
 static int
 luaA_statusbar_gc(lua_State *L)
 {
-    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
+    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
     statusbar_unref(sb);
     *sb = NULL;
     return 0;
