@@ -32,7 +32,7 @@ layout_fibonacci(int screen, int shape)
     int n = 0, i = 0;
     client_t *c;
     area_t geometry, area;
-    geometry = area = screen_get_area(screen,
+    geometry = area = screen_area_get(screen,
                                       globalconf.screens[screen].statusbar,
                                       &globalconf.screens[screen].padding);
 

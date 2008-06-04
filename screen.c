@@ -39,7 +39,7 @@ extern awesome_t globalconf;
  * \return The screen area.
  */
 area_t
-screen_get_area(int screen, statusbar_t *statusbar, padding_t *padding)
+screen_area_get(int screen, statusbar_t *statusbar, padding_t *padding)
 {
     area_t area = globalconf.screens_info->geometry[screen];
     statusbar_t *sb;
@@ -146,8 +146,8 @@ move_client_to_screen(client_t *c, int new_screen, bool doresize)
         area_t new_geometry, new_f_geometry;
         new_f_geometry = c->f_geometry;
 
-        to = screen_get_area(c->screen, NULL, NULL);
-        from = screen_get_area(old_screen, NULL, NULL);
+        to = screen_area_get(c->screen, NULL, NULL);
+        from = screen_area_get(old_screen, NULL, NULL);
 
         /* compute new coords in new screen */
         new_f_geometry.x = (c->f_geometry.x - from.x) + to.x;

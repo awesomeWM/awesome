@@ -42,7 +42,7 @@ placement_fix_offscreen(area_t geometry, int screen, int border)
 {
     area_t screen_geometry;
 
-    screen_geometry = screen_get_area(screen,
+    screen_geometry = screen_area_get(screen,
                                       globalconf.screens[screen].statusbar,
                                       &globalconf.screens[screen].padding);
 
@@ -76,7 +76,7 @@ placement_smart(client_t *c)
 
     screen_geometry = p_new(area_t, 1);
 
-    *screen_geometry = screen_get_area(c->screen,
+    *screen_geometry = screen_area_get(c->screen,
                                        globalconf.screens[c->screen].statusbar,
                                        &globalconf.screens[c->screen].padding);
 

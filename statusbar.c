@@ -90,7 +90,7 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     if((statusbar->position = position) == Off)
         return;
 
-    area = screen_get_area(statusbar->screen,
+    area = screen_area_get(statusbar->screen,
                            NULL,
                            &globalconf.screens[statusbar->screen].padding);
 

@@ -42,9 +42,9 @@ _tile(int screen, const position_t position)
     client_t *c;
     tag_t **curtags = tags_get_current(screen);
 
-    area = screen_get_area(screen,
+    area = screen_area_get(screen,
                            globalconf.screens[screen].statusbar,
-                            &globalconf.screens[screen].padding);
+                           &globalconf.screens[screen].padding);
 
     for(n = 0, c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))

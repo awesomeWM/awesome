@@ -290,7 +290,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         }
         else if(set == _NET_WM_STATE_ADD)
         {
-            geometry = screen_get_area(c->screen, NULL, &globalconf.screens[c->screen].padding);
+            geometry = screen_area_get(c->screen, NULL, &globalconf.screens[c->screen].padding);
             /* save geometry */
             c->m_geometry = c->geometry;
             c->wasfloating = c->isfloating;

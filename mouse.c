@@ -99,7 +99,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
     client_t *snapper;
     area_t snapper_geometry;
     area_t screen_geometry =
-        screen_get_area(c->screen,
+        screen_area_get(c->screen,
                         globalconf.screens[c->screen].statusbar,
                         &globalconf.screens[c->screen].padding);
 
@@ -359,7 +359,7 @@ mouse_client_resize(client_t *c)
         for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
         if(!c) return;
 
-        area = screen_get_area(c->screen,
+        area = screen_area_get(c->screen,
                                globalconf.screens[c->screen].statusbar,
                                &globalconf.screens[c->screen].padding);
 
