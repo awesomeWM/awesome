@@ -362,8 +362,6 @@ mouse_client_resize(client_t *c)
         area = screen_area_get(c->screen,
                                globalconf.screens[c->screen].statusbar,
                                &globalconf.screens[c->screen].padding);
-
-    xcb_aux_sync(globalconf.connection);
     }
     else
         return;
