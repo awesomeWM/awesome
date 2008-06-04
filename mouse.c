@@ -20,6 +20,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
@@ -188,6 +189,79 @@ mouse_resizebar_new(int phys_screen, int border, area_t geometry,
     mouse_resizebar_draw(*ctx, sw, geometry, border);
 
     return sw;
+}
+
+/** Get the Pointer position
+ * \param window
+ * \param x will be set to the Pointer-x-coordinate relative to window
+ * \param y will be set to the Pointer-y-coordinate relative to window
+ * \return true on success, false if an error occured
+ **/
+static bool
+mouse_query_pointer(xcb_window_t window, int *x, int *y)
+{
+    xcb_query_pointer_cookie_t query_ptr_c;
+    xcb_query_pointer_reply_t *query_ptr_r;
+
+    query_ptr_c = xcb_query_pointer(globalconf.connection, window);
+    query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
+
+    if(!query_ptr_r)
+        return false;
+
+    *x = query_ptr_r->win_x;
+    *y = query_ptr_r->win_y;
+
+    p_delete(&query_ptr_r);
+
+    return true;
+}
+
+/** Grab the Pointer
+ * \param window
+ * \param cursor the Cursor to display (see struct.h CurNormal, CurResize etc)
+ * \return true on success, false if an error occured
+ */
+static bool
+mouse_grab_pointer(xcb_window_t window, size_t cursor)
+{
+    xcb_grab_pointer_cookie_t grab_ptr_c;
+    xcb_grab_pointer_reply_t *grab_ptr_r;
+
+    if(cursor >= CurLast)
+        cursor = CurNormal;
+
+    grab_ptr_c = xcb_grab_pointer(globalconf.connection, false, window,
+                                  MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
+                                  window, globalconf.cursor[cursor], XCB_CURRENT_TIME);
+    grab_ptr_r = xcb_grab_pointer_reply(globalconf.connection, grab_ptr_c, NULL);
+
+    if(!grab_ptr_r)
+        return false;
+
+    p_delete(&grab_ptr_r);
+
+    return true;
+}
+
+/** Ungrab the Pointer
+ */
+static inline void
+mouse_ungrab_pointer()
+{
+    xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
+}
+
+/** Set the Pointer position
+ * \param window the destination window
+ * \param x x-coordinate inside window
+ * \param y y-coordinate inside window
+ */
+static inline void
+mouse_warp_pointer(xcb_window_t window, int x, int y)
+{
+    xcb_warp_pointer(globalconf.connection, XCB_NONE, window,
+                     0, 0, 0, 0, x, y );
 }
 
 /** Move the focused window with the mouse.
