@@ -32,14 +32,14 @@
 
 extern awesome_t globalconf;
 
-/** Get screens info
- * \param screen Screen number
- * \param statusbar statusbar
- * \param padding Padding
- * \return area_t
+/** Get screens info.
+ * \param screen Screen number.
+ * \param statusbar Statusbar list to remove.
+ * \param padding Padding.
+ * \return The screen area.
  */
 area_t
-screen_get_area(int screen, statusbar_t *statusbar, Padding *padding)
+screen_get_area(int screen, statusbar_t *statusbar, padding_t *padding)
 {
     area_t area = globalconf.screens_info->geometry[screen];
     statusbar_t *sb;
@@ -77,10 +77,10 @@ screen_get_area(int screen, statusbar_t *statusbar, Padding *padding)
  * \param screen Physical screen number.
  * \param statusbar The statusbars.
  * \param padding Padding.
- * \return area_t
+ * \return The display area.
  */
 area_t
-get_display_area(int phys_screen, statusbar_t *statusbar, Padding *padding)
+get_display_area(int phys_screen, statusbar_t *statusbar, padding_t *padding)
 {
     area_t area = { 0, 0, 0, 0, NULL, NULL };
     statusbar_t *sb;

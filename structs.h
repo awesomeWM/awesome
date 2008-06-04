@@ -339,7 +339,7 @@ typedef struct
     int left;
     /** Padding at right */
     int right;
-} Padding;
+} padding_t;
 
 typedef struct
 {
@@ -350,7 +350,7 @@ typedef struct
     /** Status bar */
     statusbar_t *statusbar;
     /** Padding */
-    Padding padding;
+    padding_t padding;
 } screen_t;
 
 /** Main configuration structure */

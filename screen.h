@@ -24,8 +24,8 @@
 
 #include "structs.h"
 
-area_t screen_get_area(int, statusbar_t *, Padding *);
-area_t get_display_area(int, statusbar_t *, Padding *);
+area_t screen_get_area(int, statusbar_t *, padding_t *);
+area_t get_display_area(int, statusbar_t *, padding_t *);
 int screen_virttophys(int);
 void move_client_to_screen(client_t *, int, bool);
 
