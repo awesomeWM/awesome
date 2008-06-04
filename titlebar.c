@@ -455,6 +455,29 @@ luaA_titlebar_widget_add(lua_State *L)
     return 0;
 }
 
+/** Get all widgets from a titlebar.
+ * \return A table with all widgets from the titlebar.
+ */
+static int
+luaA_titlebar_widget_get(lua_State *L)
+{
+    titlebar_t **tb = luaL_checkudata(L, 1, "titlebar");
+    widget_node_t *widget;
+    int i = 1;
+
+    lua_newtable(L);
+
+    for(widget = (*tb)->widgets; widget; widget = widget->next)
+    {
+        luaA_widget_userdata_new(widget->widget);
+        /* ref again for the list */
+        widget_ref(&widget->widget);
+        lua_rawseti(L, -2, i++);
+    }
+
+    return 1;
+}
+
 static int
 luaA_titlebar_gc(lua_State *L)
 {
@@ -488,6 +511,7 @@ const struct luaL_reg awesome_titlebar_methods[] =
 const struct luaL_reg awesome_titlebar_meta[] =
 {
     { "widget_add", luaA_titlebar_widget_add },
+    { "widget_get", luaA_titlebar_widget_get },
     { "__eq", luaA_titlebar_eq },
     { "__gc", luaA_titlebar_gc },
     { "__tostring", luaA_titlebar_tostring },

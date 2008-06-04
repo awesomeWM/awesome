@@ -479,7 +479,7 @@ luaA_statusbar_new(lua_State *L)
 static int
 luaA_statusbar_widget_get(lua_State *L)
 {
-    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");;
+    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");
     widget_node_t *widget;
     int i = 1;
 
