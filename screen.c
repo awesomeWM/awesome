@@ -80,7 +80,7 @@ screen_get_area(int screen, statusbar_t *statusbar, padding_t *padding)
  * \return The display area.
  */
 area_t
-get_display_area(int phys_screen, statusbar_t *statusbar, padding_t *padding)
+display_area_get(int phys_screen, statusbar_t *statusbar, padding_t *padding)
 {
     area_t area = { 0, 0, 0, 0, NULL, NULL };
     statusbar_t *sb;

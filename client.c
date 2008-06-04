@@ -500,7 +500,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         return false;
 
     /* offscreen appearance fixes */
-    area = get_display_area(c->phys_screen, NULL,
+    area = display_area_get(c->phys_screen, NULL,
                             &globalconf.screens[c->screen].padding);
 
     if(geometry.x > area.width)

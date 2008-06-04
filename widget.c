@@ -159,7 +159,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
             if((data = xcb_get_property_value(prop_r)))
             {
                rootpix = *(xcb_pixmap_t *) data;
-                rootsize = get_display_area(ctx->phys_screen, NULL, NULL);
+                rootsize = display_area_get(ctx->phys_screen, NULL, NULL);
                switch(position)
                {
                  case Left:
