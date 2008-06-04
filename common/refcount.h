@@ -26,7 +26,7 @@
 #define DO_RCNT(type, prefix, dtor)                                            \
     static inline void prefix##_unref(type **item)                             \
     {                                                                          \
-        if(--(*item)->refcount <= 0)                                           \
+        if(*item && --(*item)->refcount <= 0)                                  \
             dtor(item);                                                        \
     }                                                                          \
                                                                                \
