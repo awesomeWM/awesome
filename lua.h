@@ -27,6 +27,13 @@
 
 #include "common/util.h"
 
+/** Object types */
+typedef enum
+{
+    AWESOME_TYPE_STATUSBAR = 1,
+    AWESOME_TYPE_TITLEBAR
+} awesome_type_t;
+
 /** Type for Lua function */
 typedef int luaA_function;
 
@@ -126,8 +133,9 @@ luaA_checkboolean(lua_State *L, int n)
     return lua_toboolean(L, n);
 }
 
-
 bool luaA_parserc(const char *);
 void luaA_docmd(char *);
+void luaA_pushpointer(void *, awesome_type_t);
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

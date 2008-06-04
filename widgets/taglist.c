@@ -190,11 +190,19 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     return w->area.width;
 }
 
+/** Handle button click on tasklist.
+ * \param w The widget node.
+ * \param ev The button press event.
+ * \param screen The screen where the click was.
+ * \param object The object we're onto.
+ * \param type The type object.
+ */
 static void
 taglist_button_press(widget_node_t *w,
                      xcb_button_press_event_t *ev,
                      int screen,
-                     void *object)
+                     void *object,
+                     awesome_type_t type)
 {
     screen_t *vscreen = &globalconf.screens[screen];
     button_t *b;
@@ -213,8 +221,9 @@ taglist_button_press(widget_node_t *w,
                 if(ev->event_x >= AREA_LEFT(*area)
                    && ev->event_x < AREA_RIGHT(*area))
                 {
+                    luaA_pushpointer(object, type);
                     luaA_tag_userdata_new(tag);
-                    luaA_dofunction(globalconf.L, b->fct, 1);
+                    luaA_dofunction(globalconf.L, b->fct, 2);
                     return;
                 }
 }

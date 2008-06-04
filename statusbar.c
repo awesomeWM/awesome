@@ -473,6 +473,18 @@ luaA_statusbar_new(lua_State *L)
     return luaA_settype(L, "statusbar");
 }
 
+/** Create a new statusbar userdata.
+ * \param t The statusbar.
+ */
+int
+luaA_statusbar_userdata_new(statusbar_t *t)
+{
+    statusbar_t **sb = lua_newuserdata(globalconf.L, sizeof(statusbar_t *));
+    *sb = t;
+    statusbar_ref(sb);
+    return luaA_settype(globalconf.L, "statusbar");
+}
+
 /** Get all widget from a statusbar.
  * \return A table with all widgets from the statusbar.
  */

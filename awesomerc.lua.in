@@ -44,7 +44,7 @@ mytaglist = widget.new({ type = "taglist", name = "mytaglist" })
 mytaglist:mouse({}, 1, awful.tag.viewonly)
 mytaglist:mouse({ modkey }, 1, awful.client.toggletag)
 mytaglist:mouse({}, 3,
-                function (tag)
+                function (object, tag)
                     tag:view(not tag:isselected())
                 end)
 mytaglist:mouse({ modkey }, 3, awful.client.toggletag)
@@ -54,7 +54,7 @@ mytaglist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
 
 -- Create a tasklist widget
 mytasklist = widget.new({ type = "tasklist", name = "mytasklist" })
-mytasklist:mouse({ }, 1, function (c) c:focus_set(); c:raise() end)
+mytasklist:mouse({ }, 1, function (object, c) c:focus_set(); c:raise() end)
 mytasklist:mouse({ }, 4, function () awful.client.focus(1) end)
 mytasklist:mouse({ }, 5, function () awful.client.focus(-1) end)
 mytasklist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")

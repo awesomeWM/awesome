@@ -115,7 +115,8 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                     if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
                        && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
                     {
-                        w->widget->button_press(w, ev, statusbar->screen, statusbar);
+                        w->widget->button_press(w, ev, statusbar->screen,
+                                                statusbar, AWESOME_TYPE_STATUSBAR);
                         return 0;
                     }
                 /* return if no widget match */
@@ -145,7 +146,8 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
             if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
                && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
             {
-                w->widget->button_press(w, ev, c->screen, c->titlebar);
+                w->widget->button_press(w, ev, c->screen,
+                                        c->titlebar, AWESOME_TYPE_TITLEBAR);
                 return 0;
             }
         /* return if no widget match */

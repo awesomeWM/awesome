@@ -406,44 +406,38 @@ titlebar_init(client_t *c)
 static int
 luaA_titlebar_new(lua_State *L)
 {
-    titlebar_t **tb;
-    int objpos;
+    titlebar_t *tb;
     const char *color;
 
     luaA_checktable(L, 1);
 
-    tb = lua_newuserdata(L, sizeof(titlebar_t *));
-    *tb = p_new(titlebar_t, 1);
-    objpos = lua_gettop(L);
+    tb = p_new(titlebar_t, 1);
 
-    (*tb)->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
+    tb->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
 
-    (*tb)->width = luaA_getopt_number(L, 1, "width", 0);
-    (*tb)->height = luaA_getopt_number(L, 1, "height", 0);
-    if((*tb)->height <= 0)
+    tb->width = luaA_getopt_number(L, 1, "width", 0);
+    tb->height = luaA_getopt_number(L, 1, "height", 0);
+    if(tb->height <= 0)
         /* 1.5 as default factor, it fits nice but no one knows why */
-        (*tb)->height = 1.5 * globalconf.font->height;
+        tb->height = 1.5 * globalconf.font->height;
 
-    (*tb)->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
+    tb->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
 
     lua_getfield(L, 1, "fg");
     if((color = luaL_optstring(L, -1, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &(*tb)->colors.fg);
+                       color, &tb->colors.fg);
     else
-        (*tb)->colors.fg = globalconf.colors.fg;
+        tb->colors.fg = globalconf.colors.fg;
 
     lua_getfield(L, 1, "bg");
     if((color = luaL_optstring(L, -1, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &(*tb)->colors.bg);
+                       color, &tb->colors.bg);
     else
-        (*tb)->colors.bg = globalconf.colors.bg;
+        tb->colors.bg = globalconf.colors.bg;
 
-    titlebar_ref(tb);
-
-    lua_pushvalue(L, objpos);
-    return luaA_settype(L, "titlebar");
+    return luaA_titlebar_userdata_new(tb);
 }
 
 /** Add a widget to a titlebar.

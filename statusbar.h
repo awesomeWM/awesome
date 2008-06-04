@@ -37,6 +37,8 @@ statusbar_delete(statusbar_t **statusbar)
 
 void statusbar_refresh(void);
 
+int luaA_statusbar_userdata_new(statusbar_t *);
+
 DO_RCNT(statusbar_t, statusbar, statusbar_delete)
 DO_SLIST(statusbar_t, statusbar, statusbar_delete)
 

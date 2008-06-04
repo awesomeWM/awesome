@@ -80,18 +80,23 @@ widget_getbyname(const char *name)
  * \param ev The button press event the widget received.
  * \param screen The screen number.
  * \param p The object where user clicked.
+ * \param type The object type.
  */
 static void
 widget_common_button_press(widget_node_t *w,
                            xcb_button_press_event_t *ev,
                            int screen __attribute__ ((unused)),
-                           void *p __attribute__ ((unused)))
+                           void *p,
+                           awesome_type_t type)
 {
     button_t *b;
-
+    
     for(b = w->widget->buttons; b; b = b->next)
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
-            luaA_dofunction(globalconf.L, b->fct, 0);
+        {
+            luaA_pushpointer(p, type);
+            luaA_dofunction(globalconf.L, b->fct, 1);
+        }
 }
 
 /** Common tell function for widget, which only warn user that widget

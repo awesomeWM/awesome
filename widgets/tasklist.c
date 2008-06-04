@@ -171,11 +171,19 @@ tasklist_draw(draw_context_t *ctx, int screen,
     return w->area.width;
 }
 
+/** Handle button click on tasklist.
+ * \param w The widget node.
+ * \param ev The button press event.
+ * \param screen The screen where the click was.
+ * \param object The object we're onto.
+ * \param type The type object.
+ */
 static void
 tasklist_button_press(widget_node_t *w,
                       xcb_button_press_event_t *ev,
                       int screen,
-                      void *p __attribute__ ((unused)))
+                      void *object,
+                      awesome_type_t type)
 {
     button_t *b;
     client_t *c;
@@ -207,8 +215,9 @@ tasklist_button_press(widget_node_t *w,
         for(b = w->widget->buttons; b; b = b->next)
             if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
             {
+                luaA_pushpointer(object, type);
                 luaA_client_userdata_new(c);
-                luaA_dofunction(globalconf.L, b->fct, 1);
+                luaA_dofunction(globalconf.L, b->fct, 2);
             }
 }
 

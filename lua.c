@@ -35,6 +35,8 @@
 #include "tag.h"
 #include "client.h"
 #include "window.h"
+#include "statusbar.h"
+#include "titlebar.h"
 #include "layouts/tile.h"
 
 extern awesome_t globalconf;
@@ -365,6 +367,25 @@ luaA_colors_set(lua_State *L)
         xcolor_new(globalconf.connection, globalconf.default_screen,
                        bg, &globalconf.colors.bg);
     return 0;
+}
+
+/** Push a pointer onto the stack according to its type.
+ * \param L The Lua state.
+ * \param p The pointer.
+ * \param type Its type.
+ */
+void
+luaA_pushpointer(void *p, awesome_type_t type)
+{
+    switch(type)
+    {
+      case AWESOME_TYPE_STATUSBAR:
+        luaA_statusbar_userdata_new(p);
+        break;
+      case AWESOME_TYPE_TITLEBAR:
+        luaA_titlebar_userdata_new(p);
+        break;
+    }
 }
 
 static void
