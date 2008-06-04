@@ -473,6 +473,29 @@ luaA_statusbar_new(lua_State *L)
     return luaA_settype(L, "statusbar");
 }
 
+/** Get all widget from a statusbar.
+ * \return A table with all widgets from the statusbar.
+ */
+static int
+luaA_statusbar_widget_get(lua_State *L)
+{
+    statusbar_t **sb = luaL_checkudata(L, 1, "statusbar");;
+    widget_node_t *widget;
+    int i = 1;
+
+    lua_newtable(L);
+
+    for(widget = (*sb)->widgets; widget; widget = widget->next)
+    {
+        luaA_widget_userdata_new(widget->widget);
+        /* ref again for the list */
+        widget_ref(&widget->widget);
+        lua_rawseti(L, -2, i++);
+    }
+
+    return 1;
+}
+
 /** Handle statusbar garbage collection.
  */
 static int
@@ -491,6 +514,7 @@ const struct luaL_reg awesome_statusbar_methods[] =
 const struct luaL_reg awesome_statusbar_meta[] =
 {
     { "widget_add", luaA_statusbar_widget_add },
+    { "widget_get", luaA_statusbar_widget_get },
     { "position_set", luaA_statusbar_position_set },
     { "position_get", luaA_statusbar_position_get },
     { "align_set", luaA_statusbar_align_set },

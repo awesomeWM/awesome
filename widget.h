@@ -39,6 +39,8 @@ widget_t * widget_getbyname(const char *);
 void widget_tell_managestatus(widget_t *, widget_tell_status_t, const char *);
 void widget_render(widget_node_t *, draw_context_t *, xcb_gcontext_t, xcb_drawable_t, int, position_t, int, int, void *);
 
+int luaA_widget_userdata_new(widget_t *);
+
 widget_constructor_t taglist_new;
 widget_constructor_t textbox_new;
 widget_constructor_t iconbox_new;

@@ -296,7 +296,7 @@ widget_invalidate_bywidget(widget_t *widget)
  * \param widget The widget.
  * \return Return luaA_settype() return value.
  */
-static int
+int
 luaA_widget_userdata_new(widget_t *widget)
 {
     widget_t **w;
@@ -464,47 +464,6 @@ luaA_widget_eq(lua_State *L)
     return 1;
 }
 
-/** Get all widget from all statusbars.
- * \return A table with all widgets from all statusbars.
- */
-static int
-luaA_widget_get(lua_State *L)
-{
-    statusbar_t *sb;
-    widget_node_t *widget;
-    int i = 1, screen;
-    bool add = true;
-    widget_node_t *wlist = NULL, *witer;
-
-    lua_newtable(L);
-
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
-        for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
-            for(widget = sb->widgets; widget; widget = widget->next)
-            {
-                for(witer = wlist; witer; witer = witer->next)
-                    if(witer->widget == widget->widget)
-                    {
-                        add = false;
-                        break;
-                    }
-                if(add)
-                {
-                    witer = p_new(widget_node_t, 1);
-                    widget_node_list_push(&wlist, witer);
-                    luaA_widget_userdata_new(witer->widget);
-                    /* ref again for the list */
-                    widget_ref(&widget->widget);
-                    lua_rawseti(L, -2, i++);
-                }
-                add = true;
-            }
-
-    widget_node_list_wipe(&wlist);
-
-    return 1;
-}
-
 /** Set the widget name.
  * \param A string with the new widget name.
  */
@@ -556,7 +515,6 @@ luaA_widget_visible_get(lua_State *L)
 const struct luaL_reg awesome_widget_methods[] =
 {
     { "new", luaA_widget_new },
-    { "get", luaA_widget_get },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_widget_meta[] =
