@@ -89,22 +89,21 @@ mouse_snapclienttogeometry_inside(area_t geometry, area_t snap_geometry, int sna
 }
 
 /** Snap a client with a futur geometry to the screen and other clients.
- * \param c the client
- * \param geometry geometry the client will get
- * \return geometry to set to the client
+ * \param c The client.
+ * \param geometry Geometry the client will get.
+ * \return Geometry to set to the client.
  */
 static area_t
 mouse_snapclient(client_t *c, area_t geometry, int snap)
 {
     client_t *snapper;
-    titlebar_t *t = titlebar_getbyclient(c);
     area_t snapper_geometry;
     area_t screen_geometry =
         screen_get_area(c->screen,
                         globalconf.screens[c->screen].statusbar,
                         &globalconf.screens[c->screen].padding);
 
-    geometry = titlebar_geometry_add(t, geometry);
+    geometry = titlebar_geometry_add(c->titlebar, geometry);
     geometry.width += 2 * c->border;
     geometry.height += 2 * c->border;
 
@@ -117,7 +116,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
             snapper_geometry = snapper->geometry;
             snapper_geometry.width += 2 * c->border;
             snapper_geometry.height += 2 * c->border;
-            snapper_geometry = titlebar_geometry_add(t, snapper_geometry);
+            snapper_geometry = titlebar_geometry_add(c->titlebar, snapper_geometry);
             geometry =
                 mouse_snapclienttogeometry_outside(geometry,
                                                    snapper_geometry,
@@ -126,7 +125,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
 
     geometry.width -= 2 * c->border;
     geometry.height -= 2 * c->border;
-    return titlebar_geometry_remove(t, geometry);
+    return titlebar_geometry_remove(c->titlebar, geometry);
 }
 
 /** Redraw the resizebar.

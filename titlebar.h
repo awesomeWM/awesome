@@ -24,12 +24,11 @@
 
 #include "structs.h"
 
-titlebar_t * titlebar_getbyclient(client_t *);
-titlebar_t * titlebar_getbywin(xcb_window_t);
-void titlebar_draw(titlebar_t *);
-void titlebar_update_geometry_floating(titlebar_t *);
-void titlebar_update_geometry(titlebar_t *, area_t);
-void titlebar_init(titlebar_t *);
+client_t * client_getbytitlebarwin(xcb_window_t);
+void titlebar_draw(client_t *);
+void titlebar_update_geometry_floating(client_t *);
+void titlebar_update_geometry(client_t *, area_t);
+void titlebar_init(client_t *);
 
 /** Add the titlebar geometry to a geometry.
  * \param t the titlebar

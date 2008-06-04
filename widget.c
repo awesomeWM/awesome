@@ -272,7 +272,7 @@ widget_invalidate_bywidget(widget_t *widget)
     int screen;
     statusbar_t *statusbar;
     widget_node_t *witer;
-    titlebar_t *t;
+    client_t *c;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar;
@@ -285,10 +285,11 @@ widget_invalidate_bywidget(widget_t *widget)
                     break;
                 }
 
-    for(t = globalconf.titlebar; t; t = t->next)
-        for(witer = t->widgets; witer; witer = witer->next)
-            if(witer->widget == widget)
-                titlebar_draw(t);
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->titlebar)
+            for(witer = c->titlebar->widgets; witer; witer = witer->next)
+                if(witer->widget == widget)
+                    titlebar_draw(c);
 }
 
 /** Create a new widget userdata. The object is pushed on the stack.

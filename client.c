@@ -198,7 +198,7 @@ client_updatetitle(client_t *c)
     luaA_client_userdata_new(c);
     luaA_dofunction(globalconf.L, globalconf.hooks.titleupdate, 1);
 
-    titlebar_draw(titlebar_getbyclient(c));
+    titlebar_draw(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
@@ -211,7 +211,7 @@ client_unfocus(client_t *c)
 
     focus_client_push(NULL);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    titlebar_draw(titlebar_getbyclient(c));
+    titlebar_draw(c);
 }
 
 /** Ban client and unmap it
@@ -220,14 +220,12 @@ client_unfocus(client_t *c)
 void
 client_ban(client_t *c)
 {
-    titlebar_t *titlebar = titlebar_getbyclient(c);
-
     if(globalconf.focus->client == c)
         client_unfocus(c);
     xcb_unmap_window(globalconf.connection, c->win);
     window_setstate(c->win, XCB_WM_ICONIC_STATE);
-    if(titlebar && titlebar->position && titlebar->sw)
-        xcb_unmap_window(globalconf.connection, titlebar->sw->window);
+    if(c->titlebar && c->titlebar->position && c->titlebar->sw)
+        xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
 }
 
 /** Give focus to client, or to first client if c is NULL
@@ -256,7 +254,7 @@ client_focus(client_t *c, int screen)
         client_unban(c);
         /* save sel in focus history */
         focus_client_push(c);
-        titlebar_draw(titlebar_getbyclient(c));
+        titlebar_draw(c);
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
                             c->win, XCB_CURRENT_TIME);
         /* since we're dropping EnterWindow events and sometimes the window
@@ -297,7 +295,6 @@ client_raise(client_t *c)
     uint32_t config_win_vals[2];
     client_node_t *node;
     layer_t layer;
-    titlebar_t *titlebar;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_BELOW;
@@ -309,15 +306,15 @@ client_raise(client_t *c)
             if(node->client->layer == layer
                && client_isvisible_anyscreen(node->client))
             {
-                if((titlebar = titlebar_getbyclient(node->client))
-                   && titlebar->position
-                   && titlebar->sw)
+                if(node->client->titlebar
+                   && node->client->titlebar->sw
+                   && node->client->titlebar->position)
                 {
                     xcb_configure_window(globalconf.connection,
-                                         titlebar->sw->window,
+                                         node->client->titlebar->sw->window,
                                          XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                                          config_win_vals);
-                    config_win_vals[0] = titlebar->sw->window;
+                    config_win_vals[0] = node->client->titlebar->sw->window;
                 }
                 xcb_configure_window(globalconf.connection, node->client->win,
                                      XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
@@ -489,14 +486,11 @@ client_resize(client_t *c, area_t geometry, bool hints)
     /* Values to configure a window is an array where values are
      * stored according to 'value_mask' */
     uint32_t values[5];
-    titlebar_t *titlebar;
 
-    titlebar = titlebar_getbyclient(c);
-
-    if(titlebar && !c->ismoving && !c->isfloating && layout != layout_floating)
+    if(c->titlebar && !c->ismoving && !c->isfloating && layout != layout_floating)
     {
-        titlebar_update_geometry(titlebar, geometry);
-        geometry = titlebar_geometry_remove(titlebar, geometry);
+        titlebar_update_geometry(c, geometry);
+        geometry = titlebar_geometry_remove(c->titlebar, geometry);
     }
 
     if(hints)
@@ -535,7 +529,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         if(c->ismoving || c->isfloating
            || layout_get_current(new_screen) == layout_floating)
         {
-            titlebar_update_geometry_floating(titlebar);
+            titlebar_update_geometry_floating(c);
             if(!c->ismax)
                 c->f_geometry = geometry;
         }
@@ -556,7 +550,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     /* call it again like it was floating,
      * we want it to be sticked to the window */
     if(!c->ismoving && !c->isfloating && layout != layout_floating)
-       titlebar_update_geometry_floating(titlebar);
+       titlebar_update_geometry_floating(c);
 
     return resized;
 }
@@ -627,18 +621,16 @@ client_saveprops(client_t *c)
 void
 client_unban(client_t *c)
 {
-    titlebar_t *titlebar = titlebar_getbyclient(c);
     xcb_map_window(globalconf.connection, c->win);
     window_setstate(c->win, XCB_WM_NORMAL_STATE);
-    if(titlebar && titlebar->sw && titlebar->position != Off)
-        xcb_map_window(globalconf.connection, titlebar->sw->window);
+    if(c->titlebar && c->titlebar->sw && c->titlebar->position)
+        xcb_map_window(globalconf.connection, c->titlebar->sw->window);
 }
 
 void
 client_unmanage(client_t *c)
 {
     tag_t *tag;
-    titlebar_t *titlebar;
 
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
@@ -663,11 +655,10 @@ client_unmanage(client_t *c)
     xcb_aux_sync(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);
 
-    if((titlebar = titlebar_getbyclient(c)))
+    if(c->titlebar)
     {
-        simplewindow_delete(&titlebar->sw);
-        titlebar_list_detach(&globalconf.titlebar, titlebar);
-        titlebar_unref(&titlebar);
+        simplewindow_delete(&c->titlebar->sw);
+        titlebar_unref(&c->titlebar);
     }
 
     p_delete(&c);
@@ -684,7 +675,7 @@ client_updatewmhints(client_t *c)
         if((c->isurgent = (wm_hints_flags & XCB_WM_X_URGENCY_HINT)))
         {
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-            titlebar_draw(titlebar_getbyclient(c));
+            titlebar_draw(c);
             /* execute hook */
             luaA_client_userdata_new(c);
             luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1);
@@ -1110,6 +1101,9 @@ luaA_client_icon_set(lua_State *L)
     return 0;
 }
 
+/** Get the client name.
+ * \return A string with the client name.
+ */
 static int
 luaA_client_name_get(lua_State *L)
 {
@@ -1118,6 +1112,9 @@ luaA_client_name_get(lua_State *L)
     return 1;
 }
 
+/** Change the client name. It'll change it only from awesome point of view.
+ * \param A string with the new client name.
+ */
 static int
 luaA_client_name_set(lua_State *L)
 {
@@ -1125,6 +1122,36 @@ luaA_client_name_set(lua_State *L)
     const char *name = luaL_checkstring(L, 2);
     p_delete(&(*c)->name);
     (*c)->name = a_strdup(name);
+    return 0;
+}
+
+/** Set the client's titlebar.
+ * \param A titlebar.
+ */
+static int
+luaA_client_titlebar_set(lua_State *L)
+{
+    client_t *cl, **c = luaL_checkudata(L, 1, "client");
+    titlebar_t **t = luaL_checkudata(L, 2, "titlebar");
+
+    for(cl = globalconf.clients; cl; cl = cl->next)
+        if(cl->titlebar == *t)
+            luaL_error(L, "titlebar is already used by another client");
+
+    /* If client had a titlebar, unref it */
+    if((*c)->titlebar)
+        titlebar_unref(&(*c)->titlebar);
+
+    /* Attach titlebar to client */
+    (*c)->titlebar = *t;
+    titlebar_ref(t);
+    titlebar_init(*c);
+
+    if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
+        titlebar_update_geometry_floating(*c);
+    else
+        globalconf.screens[(*c)->screen].need_arrange = true;
+
     return 0;
 }
 
@@ -1156,6 +1183,7 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
+    { "titlebar_set", luaA_client_titlebar_set },
     { "name_get", luaA_client_name_get },
     { "name_set", luaA_client_name_set },
     { "screen_set", luaA_client_screen_set },

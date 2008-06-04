@@ -81,7 +81,6 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     client_t *c;
     widget_node_t *w;
     statusbar_t *statusbar;
-    titlebar_t *titlebar;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
@@ -123,30 +122,30 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                 return 0;
             }
 
-    if((titlebar = titlebar_getbywin(ev->event)))
+    if((c = client_getbytitlebarwin(ev->event)))
     {
         /* Need to transform coordinates like it was
          * top/bottom */
-        switch(titlebar->position)
+        switch(c->titlebar->position)
         {
           case Right:
             tmp = ev->event_y;
-            ev->event_y = titlebar->height - ev->event_x;
+            ev->event_y = c->titlebar->height - ev->event_x;
             ev->event_x = tmp;
             break;
           case Left:
             tmp = ev->event_y;
             ev->event_y = ev->event_x;
-            ev->event_x = titlebar->width - tmp;
+            ev->event_x = c->titlebar->width - tmp;
             break;
           default:
             break;
         }
-        for(w = titlebar->widgets; w; w = w->next)
+        for(w = c->titlebar->widgets; w; w = w->next)
             if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
                && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
             {
-                w->widget->button_press(w, ev, titlebar->client->screen, titlebar);
+                w->widget->button_press(w, ev, c->screen, c->titlebar);
                 return 0;
             }
         /* return if no widget match */
@@ -210,7 +209,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         }
         else
         {
-            titlebar_update_geometry_floating(titlebar_getbyclient(c));
+            titlebar_update_geometry_floating(c);
             window_configure(c->win, geometry, c->border);
         }
     }
@@ -311,17 +310,14 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                          xcb_enter_notify_event_t *ev)
 {
     client_t *c = NULL;
-    titlebar_t *t;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
        || (ev->root_x == globalconf.pointer_x
            && ev->root_y == globalconf.pointer_y))
         return 0;
 
-    if((t = titlebar_getbywin(ev->event)))
-        c = t->client;
-
-    if(c || (c = client_get_bywin(globalconf.clients, ev->event)))
+    if((c = client_getbytitlebarwin(ev->event))
+       || (c = client_get_bywin(globalconf.clients, ev->event)))
     {
         window_grabbuttons(c->win, c->phys_screen);
         /* the idea behind saving pointer_x and pointer_y is Bob Marley powered
@@ -349,7 +345,7 @@ event_handle_expose(void *data __attribute__ ((unused)),
 {
     int screen;
     statusbar_t *statusbar;
-    titlebar_t *t;
+    client_t *c;
 
     if(!ev->count)
     {
@@ -362,8 +358,8 @@ event_handle_expose(void *data __attribute__ ((unused)),
                     return 0;
                 }
 
-        if((t = titlebar_getbywin(ev->window)))
-           simplewindow_refresh_drawable(t->sw);
+        if((c = client_getbytitlebarwin(ev->window)))
+           simplewindow_refresh_drawable(c->titlebar->sw);
     }
 
     return 0;

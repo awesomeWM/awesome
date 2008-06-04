@@ -153,8 +153,6 @@ struct titlebar_t
 {
     /** Ref count */
     int refcount;
-    /** Attached client */
-    client_t *client;
     /** Position */
     position_t position, oldposition;
     /** Alignment on window */
@@ -170,8 +168,6 @@ struct titlebar_t
     {
         xcolor_t fg, bg;
     } colors;
-    /** Next and previous in list */
-    titlebar_t *prev, *next;
 };
 
 /** Delete a titlebar structure.
@@ -184,7 +180,6 @@ titlebar_delete(titlebar_t **t)
     p_delete(t);
 }
 
-DO_SLIST(titlebar_t, titlebar, titlebar_delete)
 DO_RCNT(titlebar_t, titlebar, titlebar_delete)
 
 /** Keys bindings */
@@ -289,6 +284,8 @@ struct client_t
     layer_t layer, oldlayer;
     /** Path to an icon */
     char *icon_path;
+    /** Titlebar */
+    titlebar_t *titlebar;
 };
 
 struct client_node_t
@@ -394,8 +391,6 @@ struct awesome_t
     xcb_cursor_t cursor[CurLast];
     /** Clients list */
     client_t *clients;
-    /** Titlebar list */
-    titlebar_t *titlebar;
     /** Path to config file */
     char *configpath;
     /** Floating window placement algo */
