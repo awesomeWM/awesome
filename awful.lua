@@ -73,6 +73,17 @@ function client_swap(i)
     end
 end
 
+-- Move/resize a client relativ to current coordinates.
+function client_moveresize(x, y, w, h)
+    local sel = client.focus_get()
+    local coords = sel:coords_get()
+    coords['x'] = coords['x'] + x
+    coords['y'] = coords['y'] + y
+    coords['width'] = coords['width'] + w
+    coords['height'] = coords['height'] + h
+    sel:coords_set(coords)
+end
+
 function screen_focus(i)
     local sel = client.focus_get()
     local s
@@ -263,7 +274,7 @@ function layout_set(layout)
     end
 end
 
--- Hook functions, wrappers around awesome's hooks. functions so we 
+-- Hook functions, wrappers around awesome's hooks. functions so we
 -- can easily add multiple functions per hook.
 P.hooks = {}
 P.myhooks = {}
@@ -275,11 +286,11 @@ for name, hook in pairs(hooks) do
             if P.myhooks[name] == nil then
                 P.myhooks[name] = {}
                 hooks[name](function (...)
-                    
+
                     for i,o in pairs(P.myhooks[name]) do
                        P.myhooks[name][i]['callback'](...)
                     end
-                    
+
                 end)
             end
 
@@ -291,7 +302,7 @@ for name, hook in pairs(hooks) do
             if P.myhooks[name] == nil then
                 P.myhooks[name] = {}
                 hooks[name](1, function (...)
-                    
+
                     for i,o in pairs(P.myhooks[name]) do
                         if P.myhooks[name][i]['counter'] >= P.myhooks[name][i]['timer'] then
                             P.myhooks[name][i]['counter'] = 1
@@ -300,7 +311,7 @@ for name, hook in pairs(hooks) do
                             P.myhooks[name][i]['counter'] = P.myhooks[name][i]['counter']+1
                         end
                     end
-                    
+
                 end)
             end
 
@@ -342,6 +353,7 @@ P.client =
     movetotag = client_movetotag;
     toggletag = client_toggletag;
     togglefloating = client_togglefloating;
+    moveresize = client_moveresize;
 }
 P.screen =
 {
