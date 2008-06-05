@@ -483,12 +483,12 @@ mouse_client_resize_floating(client_t *c)
         }
     }
 
-    /* set pointer to the moveable corner */
-    mouse_warp_pointer(screen->root, mouse_x, mouse_y);
-
     /* grab the pointer */
     if(!mouse_grab_pointer(screen->root, CurResize))
         return;
+
+    /* set pointer to the moveable corner */
+    mouse_warp_pointer(screen->root, mouse_x, mouse_y);
 
     /* create the resizebar */
     sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
