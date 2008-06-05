@@ -154,7 +154,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
         return 0;
     }
 
-    if((c = client_get_bywin(globalconf.clients, ev->event)))
+    if((c = client_getbywin(ev->event)))
     {
         event_handle_mouse_button_press(c, ev->detail, ev->state, globalconf.buttons.client);
         xcb_allow_events(globalconf.connection, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
@@ -182,7 +182,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
     client_t *c;
     area_t geometry;
 
-    if((c = client_get_bywin(globalconf.clients, ev->window)))
+    if((c = client_getbywin(ev->window)))
     {
         geometry = c->geometry;
 
@@ -296,7 +296,7 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
 {
     client_t *c;
 
-    if((c = client_get_bywin(globalconf.clients, ev->window)))
+    if((c = client_getbywin(ev->window)))
         client_unmanage(c);
 
     return 0;
@@ -319,7 +319,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         return 0;
 
     if((c = client_getbytitlebarwin(ev->event))
-       || (c = client_get_bywin(globalconf.clients, ev->event)))
+       || (c = client_getbywin(ev->event)))
     {
         window_grabbuttons(c->win, c->phys_screen);
         /* the idea behind saving pointer_x and pointer_y is Bob Marley powered
@@ -418,7 +418,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         return 0;
     }
 
-    if(!(c = client_get_bywin(globalconf.clients, ev->window)))
+    if(!(c = client_getbywin(ev->window)))
     {
         geom_c = xcb_get_geometry(connection, ev->window);
 
@@ -473,13 +473,13 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
 
     if(ev->state == XCB_PROPERTY_DELETE)
         return 0; /* ignore */
-    if((c = client_get_bywin(globalconf.clients, ev->window)))
+    if((c = client_getbywin(ev->window)))
     {
         if(ev->atom == WM_TRANSIENT_FOR)
         {
             xutil_get_transient_for_hint(connection, c->win, &trans);
             if(!c->isfloating
-               && (c->isfloating = (client_get_bywin(globalconf.clients, trans) != NULL)))
+               && (c->isfloating = (client_getbywin(trans) != NULL)))
                 globalconf.screens[c->screen].need_arrange = true;
         }
         else if (ev->atom == WM_NORMAL_HINTS)
@@ -515,7 +515,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
      */
     bool send_event = ((ev->response_type & 0x80) >> 7);
 
-    if((c = client_get_bywin(globalconf.clients, ev->window))
+    if((c = client_getbywin(ev->window))
        && ev->event == xcb_aux_get_screen(connection, c->phys_screen)->root
        && send_event && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
         client_unmanage(c);
@@ -531,7 +531,7 @@ event_handle_shape(void *data __attribute__ ((unused)),
                    xcb_connection_t *connection __attribute__ ((unused)),
                    xcb_shape_notify_event_t *ev)
 {
-    client_t *c = client_get_bywin(globalconf.clients, ev->affected_window);
+    client_t *c = client_getbywin(ev->affected_window);
 
     if(c)
         window_setshape(c->win, c->phys_screen);

@@ -379,12 +379,12 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
 
     if(ev->type == net_close_window)
     {
-        if((c = client_get_bywin(globalconf.clients, ev->window)))
+        if((c = client_getbywin(ev->window)))
            client_kill(c);
     }
     else if(ev->type == net_wm_state)
     {
-        if((c = client_get_bywin(globalconf.clients, ev->window)))
+        if((c = client_getbywin(ev->window)))
         {
             ewmh_process_state_atom(c, (xcb_atom_t) ev->data.data32[1], ev->data.data32[0]);
             if(ev->data.data32[2])

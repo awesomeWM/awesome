@@ -362,7 +362,7 @@ mouse_client_move(client_t *c, int snap)
                         globalconf.screens[newscreen].need_arrange = true;
                         layout_refresh();
                     }
-                    if((target = client_get_bywin(globalconf.clients, mquery_pointer_r->child))
+                    if((target = client_getbywin(mquery_pointer_r->child))
                        && target != c && !target->isfloating)
                     {
                         client_list_swap(&globalconf.clients, c, target);
