@@ -401,7 +401,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     client_t *c;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
-    xcb_query_pointer_cookie_t qp_c;
+    xcb_query_pointer_cookie_t qp_c = { 0 };
     xcb_query_pointer_reply_t *qp_r = NULL;
     xcb_get_geometry_cookie_t geom_c;
     xcb_get_geometry_reply_t *geom_r;
@@ -413,10 +413,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         return -1;
 
     if(wa_r->override_redirect)
-    {
-        p_delete(&wa_r);
-        return 0;
-    }
+        goto bailout;
 
     if(!(c = client_getbywin(ev->window)))
     {
@@ -425,12 +422,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         if(globalconf.screens_info->xinerama_is_active)
             qp_c = xcb_query_pointer(connection, xcb_aux_get_screen(globalconf.connection,
                                                                     screen_nbr)->root);
-    }
 
-    p_delete(&wa_r);
-
-    if(!c)
-    {
         if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
         {
             if(globalconf.screens_info->xinerama_is_active)
@@ -438,7 +430,6 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
                 qp_r = xcb_query_pointer_reply(connection, qp_c, NULL);
                 p_delete(&qp_r);
             }
-
             return -1;
         }
 
@@ -457,6 +448,8 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         p_delete(&geom_r);
     }
 
+bailout:
+    p_delete(&wa_r);
     return 0;
 }
 
