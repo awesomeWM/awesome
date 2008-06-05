@@ -1133,6 +1133,21 @@ luaA_client_tostring(lua_State *L)
     return 1;
 }
 
+/** Get the client name.
+ * \return A string with the client class.
+ */
+static int
+luaA_client_class_get(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    class_hint_t *hint=xutil_get_class_hint(globalconf.connection, (*c)->win);
+    if (hint)
+        lua_pushstring(L, hint->res_class);
+    else
+        luaL_error(L, "Unable to get the class property for client");
+    return 1;
+}
+
 static int
 luaA_client_icon_set(lua_State *L)
 {
@@ -1260,6 +1275,7 @@ const struct luaL_reg awesome_client_meta[] =
     { "floating_set", luaA_client_floating_set },
     { "floating_get", luaA_client_floating_get },
     { "icon_set", luaA_client_icon_set },
+    { "class_get", luaA_client_class_get },
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },
     { "unmanage", luaA_client_unmanage },
