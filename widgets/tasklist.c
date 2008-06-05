@@ -27,6 +27,7 @@
 #include "ewmh.h"
 #include "tag.h"
 #include "common/configopts.h"
+#include "common/markup.h"
 
 extern awesome_t globalconf;
 
@@ -65,14 +66,17 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
 static int
 tasklist_draw(draw_context_t *ctx, int screen,
               widget_node_t *w,
-              int offset, int used, void *p __attribute__ ((unused)))
+              int offset, int used, void *q __attribute__ ((unused)))
 {
     client_t *c;
     Data *d = w->widget->data;
     area_t area;
     char *text;
-    int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
+    int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0, j = 0;
     NetWMIcon *icon;
+    markup_parser_data_t *p;
+    const char *elements[] = { "bg", NULL };
+    xcolor_t bg_color;
 
     if(used >= ctx->width)
         return (w->area.width = 0);
@@ -114,6 +118,20 @@ tasklist_draw(draw_context_t *ctx, int screen,
                 area.y = w->area.y;
                 area.height = ctx->height;
                 area.width = box_width;
+
+                /* Actually look for the proper background color, since
+                 * otherwise the background statusbar color is used instead */
+                p = markup_parser_data_new(elements, NULL, countof(elements));
+                if(markup_parse(p, text, a_strlen(text)) && p->attribute_names[0])
+                    for(j = 0; p->attribute_names[0][j]; j++)
+                        if(!a_strcmp(p->attribute_names[0][j], "color"))
+                        {
+                            xcolor_new(ctx->connection, ctx->phys_screen, p->attribute_values[0][j], &bg_color);
+                            draw_rectangle(ctx, area, 1.0, true, bg_color);
+                            break;
+                        }
+                p->text = NULL;
+                markup_parser_data_delete(&p);
 
                 if(c->icon_path)
                 {
