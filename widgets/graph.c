@@ -38,7 +38,7 @@ typedef struct
     /* general layout */
 
     char **data_title;                  /** Data title of the data sections */
-    float *max;                         /** Represents a full graph */
+    float *max_value;                   /** Represents a full graph */
     int width;                          /** Width of the widget */
     float height;                       /** Height of graph (0.0-1.0; 1.0 = height of bar) */
     int box_height;                     /** Height of the innerbox in pixels */
@@ -111,8 +111,8 @@ graph_data_add(Data *d, const char *new_data_title)
     p_realloc(&(d->current_max), d->data_items);
     d->current_max[d->data_items - 1] =  0;
 
-    p_realloc(&(d->max), d->data_items);
-    d->max[d->data_items - 1] = 100.0;
+    p_realloc(&(d->max_value), d->data_items);
+    d->max_value[d->data_items - 1] = 100.0;
 
     p_realloc(&(d->data_title), d->data_items);
     d->data_title[d->data_items - 1] = a_strdup(new_data_title);
@@ -352,7 +352,7 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
             || !a_strcmp(property, "fg_end")
             || !a_strcmp(property, "vertical_gradient")
             || !a_strcmp(property, "scale")
-            || !a_strcmp(property, "max")
+            || !a_strcmp(property, "max_value")
             || !a_strcmp(property, "draw_style"))
     {
         /* check if this section is defined already */
@@ -401,14 +401,14 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
                         d->lines[fi][u] = (int) (d->values[fi][u] * (d->box_height) / d->current_max[fi] + 0.5);
                 }
                 /* old max_index reached + current_max > normal, re-check/generate */
-                else if(d->max_index[fi] == d->index[fi] && d->current_max[fi] > d->max[fi])
+                else if(d->max_index[fi] == d->index[fi] && d->current_max[fi] > d->max_value[fi])
                 {
                     /* find the new max */
                     for(u = 0; u < d->size; u++)
                         if(d->values[fi][u] > d->values[fi][d->max_index[fi]])
                             d->max_index[fi] = u;
 
-                    d->current_max[fi] = MAX(d->values[fi][d->max_index[fi]], d->max[fi]);
+                    d->current_max[fi] = MAX(d->values[fi][d->max_index[fi]], d->max_value[fi]);
 
                     /* recalculate */
                     for(u = 0; u < d->size; u++)
@@ -419,8 +419,8 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
             }
             else /* scale option is false - limit to d->box_height */
             {
-                if (value < d->max[fi])
-                    d->lines[fi][d->index[fi]] = (int) (value * d->box_height / d->max[fi] + 0.5);
+                if (value < d->max_value[fi])
+                    d->lines[fi][d->index[fi]] = (int) (value * d->box_height / d->max_value[fi] + 0.5);
                 else
                     d->lines[fi][d->index[fi]] = d->box_height;
             }
@@ -437,10 +437,10 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
             d->vertical_gradient[fi] = a_strtobool(setting);
         else if(!a_strcmp(property, "scale"))
             d->scale[fi] = a_strtobool(setting);
-        else if(!a_strcmp(property, "max"))
+        else if(!a_strcmp(property, "max_value"))
         {
-            d->max[fi] = atof(setting);
-            d->current_max[fi] = d->max[fi];
+            d->max_value[fi] = atof(setting);
+            d->current_max[fi] = d->max_value[fi];
         }
         else if(!a_strcmp(property, "draw_style"))
         {
