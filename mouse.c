@@ -551,6 +551,7 @@ mouse_client_resize_tiled(client_t *c)
     layout_t *layout;
 
     int mouse_x, mouse_y;
+    size_t cursor = CurResize;
 
     screen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
     tag = tags_get_current(c->screen)[0];
@@ -564,18 +565,30 @@ mouse_client_resize_tiled(client_t *c)
 
     /* select initial pointer position */
     if(layout == layout_tile)
+    {
         mouse_x = area.x + area.width * tag->mwfact;
+        cursor = CurResizeH;
+    }
     else if(layout == layout_tileleft)
+    {
         mouse_x = area.x + area.width * (1. - tag->mwfact);
+        cursor = CurResizeH;
+    }
     else if(layout == layout_tilebottom)
+    {
         mouse_y = area.y + area.height * tag->mwfact;
+        cursor = CurResizeV;
+    }
     else if(layout == layout_tiletop)
+    {
         mouse_y = area.y + area.height * (1. - tag->mwfact);
+        cursor = CurResizeV;
+    }
     else
         return;
 
     /* grab the pointer */
-    if(!mouse_grab_pointer(screen->root, CurResize))
+    if(!mouse_grab_pointer(screen->root, cursor))
         return;
 
     /* set pointer to the moveable border */

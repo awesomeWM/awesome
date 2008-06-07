@@ -389,6 +389,8 @@ main(int argc, char **argv)
     /* init cursors */
     globalconf.cursor[CurNormal] = create_font_cursor(CURSOR_LEFT_PTR);
     globalconf.cursor[CurResize] = create_font_cursor(CURSOR_SIZING);
+    globalconf.cursor[CurResizeH] = create_font_cursor(CURSOR_DOUBLE_ARROW_HORIZ);
+    globalconf.cursor[CurResizeV] = create_font_cursor(CURSOR_DOUBLE_ARROW_VERT);
     globalconf.cursor[CurMove] = create_font_cursor(CURSOR_FLEUR);
     globalconf.cursor[CurTopRight] = create_font_cursor(CURSOR_TOP_RIGHT_CORNER);
     globalconf.cursor[CurTopLeft] = create_font_cursor(CURSOR_TOP_LEFT_CORNER);

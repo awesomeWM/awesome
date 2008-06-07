@@ -41,7 +41,8 @@
 #define CURSOR_BOTTOM_RIGHT_CORNER               14
 #define CURSOR_TOP_LEFT_CORNER                  134
 #define CURSOR_TOP_RIGHT_CORNER                 136
-
+#define CURSOR_DOUBLE_ARROW_HORIZ               108
+#define CURSOR_DOUBLE_ARROW_VERT                116
 
 #define ANY_KEY      0L      /* special Key Code, passed to GrabKey */
 #define ANY_MODIFIER (1<<15) /* used in Grabbutton_t, GrabKey */
