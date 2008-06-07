@@ -390,6 +390,10 @@ main(int argc, char **argv)
     globalconf.cursor[CurNormal] = create_font_cursor(CURSOR_LEFT_PTR);
     globalconf.cursor[CurResize] = create_font_cursor(CURSOR_SIZING);
     globalconf.cursor[CurMove] = create_font_cursor(CURSOR_FLEUR);
+    globalconf.cursor[CurTopRight] = create_font_cursor(CURSOR_TOP_RIGHT_CORNER);
+    globalconf.cursor[CurTopLeft] = create_font_cursor(CURSOR_TOP_LEFT_CORNER);
+    globalconf.cursor[CurBotRight] = create_font_cursor(CURSOR_BOTTOM_RIGHT_CORNER);
+    globalconf.cursor[CurBotLeft] = create_font_cursor(CURSOR_BOTTOM_LEFT_CORNER);
 
     /* select for events */
     const uint32_t change_win_vals[] =

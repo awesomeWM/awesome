@@ -34,9 +34,14 @@
 #include "common/list.h"
 
 /* See http://tronche.com/gui/x/xlib/appendix/b/ for values */
-#define CURSOR_FLEUR    52
-#define CURSOR_LEFT_PTR 68
-#define CURSOR_SIZING   120
+#define CURSOR_FLEUR                             52
+#define CURSOR_LEFT_PTR                          68
+#define CURSOR_SIZING                           120
+#define CURSOR_BOTTOM_LEFT_CORNER                12
+#define CURSOR_BOTTOM_RIGHT_CORNER               14
+#define CURSOR_TOP_LEFT_CORNER                  134
+#define CURSOR_TOP_RIGHT_CORNER                 136
+
 
 #define ANY_KEY      0L      /* special Key Code, passed to GrabKey */
 #define ANY_MODIFIER (1<<15) /* used in Grabbutton_t, GrabKey */

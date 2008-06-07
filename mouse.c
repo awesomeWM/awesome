@@ -217,10 +217,10 @@ mouse_query_pointer(xcb_window_t window, int *x, int *y)
     return true;
 }
 
-/** Grab the Pointer
- * \param window
- * \param cursor the Cursor to display (see struct.h CurNormal, CurResize etc)
- * \return true on success, false if an error occured
+/** Grab the Pointer.
+ * \param window The window grabbed.
+ * \param cursor The cursor to display (see struct.h CurNormal, CurResize, etc).
+ * \return True on success, false if an error occured.
  */
 static bool
 mouse_grab_pointer(xcb_window_t window, size_t cursor)
@@ -445,6 +445,7 @@ mouse_client_resize_floating(client_t *c)
     /* the resize bar */
     simple_window_t *sw;
     draw_context_t  *ctx;
+    size_t cursor = CurResize;
 
     screen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
@@ -464,27 +465,40 @@ mouse_client_resize_floating(client_t *c)
         {
             mouse_y = top;
             fixed_y = bottom;
+            if(abs(left - mouse_x) < abs(right - mouse_x))
+            {
+                mouse_x = left;
+                fixed_x = right;
+                cursor = CurTopLeft;
+            }
+            else
+            {
+                mouse_x = right;
+                fixed_x = left;
+                cursor = CurTopRight;
+            }
         }
         else
         {
             mouse_y = bottom;
             fixed_y = top;
-        }
-
-        if(abs(left - mouse_x) < abs(right - mouse_x))
-        {
-            mouse_x = left;
-            fixed_x = right;
-        }
-        else
-        {
-            mouse_x = right;
-            fixed_x = left;
+            if(abs(left - mouse_x) < abs(right - mouse_x))
+            {
+                mouse_x = left;
+                fixed_x = right;
+                cursor = CurBotLeft;
+            }
+            else
+            {
+                mouse_x = right;
+                fixed_x = left;
+                cursor = CurBotRight;
+            }
         }
     }
 
     /* grab the pointer */
-    if(!mouse_grab_pointer(screen->root, CurResize))
+    if(!mouse_grab_pointer(screen->root, cursor))
         return;
 
     /* set pointer to the moveable corner */

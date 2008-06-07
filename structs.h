@@ -45,7 +45,7 @@ typedef enum
 
 /** Cursors */
 enum
-{ CurNormal, CurResize, CurMove, CurLast };
+{ CurNormal, CurResize, CurMove, CurTopLeft, CurTopRight, CurBotLeft, CurBotRight, CurLast };
 
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
