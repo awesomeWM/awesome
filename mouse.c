@@ -536,6 +536,88 @@ mouse_client_resize_floating(client_t *c)
     xcb_aux_sync(globalconf.connection);
 }
 
+/** Resize the master column/row of a tiled layout
+ * \param c A client on the tag/layout to resize.
+ */
+static void
+mouse_client_resize_tiled(client_t *c)
+{
+    xcb_screen_t *screen;
+    /* screen area modulo statusbar */
+    area_t area;
+    /* current tag */
+    tag_t *tag;
+    /* current layout */
+    layout_t *layout;
+
+    int mouse_x, mouse_y;
+
+    screen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    tag = tags_get_current(c->screen)[0];
+    layout = tag->layout;
+
+    area = screen_area_get(tag->screen,
+                           globalconf.screens[tag->screen].statusbar,
+                           &globalconf.screens[tag->screen].padding);
+
+    mouse_query_pointer(screen->root, &mouse_x, &mouse_y);
+
+    /* select initial pointer position */
+    if(layout == layout_tile)
+        mouse_x = area.x + area.width * tag->mwfact;
+    else if(layout == layout_tileleft)
+        mouse_x = area.x + area.width * (1. - tag->mwfact);
+    else if(layout == layout_tilebottom)
+        mouse_y = area.y + area.height * tag->mwfact;
+    else if(layout == layout_tiletop)
+        mouse_y = area.y + area.height * (1. - tag->mwfact);
+    else
+        return;
+
+    /* grab the pointer */
+    if(!mouse_grab_pointer(screen->root, CurResize))
+        return;
+
+    /* set pointer to the moveable border */
+    mouse_warp_pointer(screen->root, mouse_x, mouse_y);
+
+    xcb_aux_sync(globalconf.connection);
+
+    /* for each motion event */
+    while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
+    {
+        double mwfact, fact_x, fact_y;
+
+        /* calculate new master / rest ratio */
+        fact_x = (double) (mouse_x - area.x) / area.width;
+        fact_y = (double) (mouse_y - area.y) / area.height;
+
+        if(layout == layout_tile)
+            mwfact = fact_x;
+        else if(layout == layout_tileleft)
+            mwfact = 1. - fact_x;
+        else if(layout == layout_tilebottom)
+            mwfact = fact_y;
+        else if(layout == layout_tiletop)
+            mwfact = 1. - fact_y;
+
+        /* refresh layout */
+        if(fabs(tag->mwfact - mwfact) >= 0.01)
+        {
+            tag->mwfact = mwfact;
+            globalconf.screens[tag->screen].need_arrange = true;
+            layout_refresh();
+            xcb_aux_sync(globalconf.connection);
+        }
+    }
+
+    /* relase pointer */
+    mouse_ungrab_pointer();
+
+    xcb_aux_sync(globalconf.connection);
+}
+
+
 /** Resize a client with the mouse.
  * \param c The client to resize.
  */
@@ -543,14 +625,8 @@ static void
 mouse_client_resize(client_t *c)
 {
     int n, screen;
-    xcb_generic_event_t *ev = NULL;
-    xcb_motion_notify_event_t *ev_motion = NULL;
     tag_t **curtags;
     layout_t *layout;
-    area_t area = { 0, 0, 0, 0, NULL, NULL };
-    double mwfact;
-    xcb_grab_pointer_cookie_t grab_pointer_c;
-    xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
     xcb_screen_t *s;
 
     curtags = tags_get_current(c->screen);
@@ -566,8 +642,6 @@ mouse_client_resize(client_t *c)
         c->ismax = false;
 
         mouse_client_resize_floating(c);
-
-        return;
     }
     else if (layout == layout_tile || layout == layout_tileleft
              || layout == layout_tilebottom || layout == layout_tiletop)
@@ -577,84 +651,14 @@ mouse_client_resize(client_t *c)
             if(IS_TILED(c, screen))
                 n++;
 
+        /* only masters on this screen? */
         if(n <= curtags[0]->nmaster) return;
 
+        /* no tiled clients on this screen? */
         for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
         if(!c) return;
 
-        area = screen_area_get(c->screen,
-                               globalconf.screens[c->screen].statusbar,
-                               &globalconf.screens[c->screen].padding);
-    }
-    else
-        return;
-
-    if(curtags[0]->layout == layout_tileleft)
-        xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0, 0, 0,
-                         0, c->geometry.height + c->border - 1);
-    else if(curtags[0]->layout == layout_tiletop)
-        xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0, 0, 0,
-                         c->geometry.width + c->border - 1, 0);
-    else
-        xcb_warp_pointer(globalconf.connection, XCB_NONE, c->win, 0, 0, 0, 0,
-                         c->geometry.width + c->border - 1,
-                         c->geometry.height + c->border - 1);
-
-    grab_pointer_c = xcb_grab_pointer(globalconf.connection, false, s->root,
-                                      MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                      s->root, globalconf.cursor[CurResize], XCB_CURRENT_TIME);
-
-    if(!(grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection,
-                                                 grab_pointer_c, NULL)))
-        return;
-
-    p_delete(&grab_pointer_r);
-
-    while(true)
-    {
-        /* XMaskEvent allows to retrieve only specified events from
-         * the queue and requeue the other events... */
-        while(ev || (ev = xcb_wait_for_event(globalconf.connection)))
-        {
-            switch((ev->response_type & 0x7f))
-            {
-              case XCB_BUTTON_RELEASE:
-                xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
-                p_delete(&ev);
-                p_delete(&curtags);
-                return;
-              case XCB_MOTION_NOTIFY:
-                ev_motion = (xcb_motion_notify_event_t *) ev;
-
-                if(layout == layout_tile || layout == layout_tileleft
-                   || layout == layout_tiletop || layout == layout_tilebottom)
-                {
-                    if(layout == layout_tile)
-                        mwfact = (double) (ev_motion->event_x - area.x) / area.width;
-                    else if(curtags[0]->layout == layout_tileleft)
-                        mwfact = 1 - (double) (ev_motion->event_x - area.x) / area.width;
-                    else if(curtags[0]->layout == layout_tilebottom)
-                        mwfact = (double) (ev_motion->event_y - area.y) / area.height;
-                    else
-                        mwfact = 1 - (double) (ev_motion->event_y - area.y) / area.height;
-                    if(fabs(curtags[0]->mwfact - mwfact) >= 0.01)
-                    {
-                        curtags[0]->mwfact = mwfact;
-                        globalconf.screens[c->screen].need_arrange = true;
-                        layout_refresh();
-                    }
-                }
-                p_delete(&ev);
-                while((ev = xcb_poll_for_event(globalconf.connection))
-                      && (ev->response_type & 0x7f) == XCB_MOTION_NOTIFY)
-                    p_delete(&ev);
-                break;
-              default:
-                xcb_handle_event(globalconf.evenths, ev);
-                p_delete(&ev);
-                break;
-            }
-        }
+        mouse_client_resize_tiled(c);
     }
 }
 
