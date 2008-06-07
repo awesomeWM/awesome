@@ -154,7 +154,10 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
         *area = draw_text_extents(ctx->connection, ctx->phys_screen,
                                   globalconf.font, text[i]);
-        w->area.width += area->width;
+
+        if (data->show_empty || tag->selected || tag_isoccupied(tag))
+            w->area.width += area->width;
+
         area_list_append(&tda->area, area);
     }
 
@@ -219,7 +222,8 @@ taglist_button_press(widget_node_t *w,
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
             for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
                 if(ev->event_x >= AREA_LEFT(*area)
-                   && ev->event_x < AREA_RIGHT(*area))
+                   && ev->event_x < AREA_RIGHT(*area)
+                   && (data->show_empty || tag->selected || tag_isoccupied(tag)) )
                 {
                     luaA_pushpointer(object, type);
                     luaA_tag_userdata_new(tag);
