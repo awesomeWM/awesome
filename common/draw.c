@@ -1009,20 +1009,21 @@ draw_rotate(draw_context_t *ctx,
     cairo_surface_destroy(surface);
 }
 
-/** Return the width of a text in pixel
- * \param conn Connection ref
- * \param font font to use
- * \param text the text
- * \return text width
+/** Return the width and height of a text in pixel.
+ * \param conn Connection ref.
+ * \param phys_screen Physical screen number.
+ * \param font Font to use.
+ * \param text The text.
+ * \return Text height and width.
  */
 area_t
-draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, const char *text)
+draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const char *text)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
     PangoLayout *layout;
     PangoRectangle ext;
-    xcb_screen_t *s = xcb_aux_get_screen(conn, default_screen);
+    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
     area_t geom = { 0, 0, 0, 0, NULL, NULL };
     ssize_t len;
     char *buf, *utf8;
@@ -1039,7 +1040,7 @@ draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, cons
 
     p_clear(&parser_data, 1);
     parser_data.connection = conn;
-    parser_data.phys_screen = default_screen;
+    parser_data.phys_screen = phys_screen;
     if(draw_text_markup_expand(&parser_data, utf8, len))
     {
         buf = parser_data.text;
@@ -1050,7 +1051,7 @@ draw_text_extents(xcb_connection_t *conn, int default_screen, font_t *font, cons
 
     len = a_strlen(buf);
 
-    surface = cairo_xcb_surface_create(conn, default_screen,
+    surface = cairo_xcb_surface_create(conn, phys_screen,
                                        draw_screen_default_visual(s),
                                        s->width_in_pixels,
                                        s->height_in_pixels);
