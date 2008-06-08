@@ -356,6 +356,11 @@ main(int argc, char **argv)
     globalconf.screens = p_new(screen_t, globalconf.screens_info->nscreen);
     focus_client_push(NULL);
 
+    /* init default font and colors */
+    globalconf.font = draw_font_new(globalconf.connection, globalconf.default_screen, "sans 8");
+    xcolor_new(globalconf.connection, globalconf.default_screen, "black", &globalconf.colors.fg);
+    xcolor_new(globalconf.connection, globalconf.default_screen, "white", &globalconf.colors.bg);
+
     /* parse config */
     if(!confpath)
         confpath = config_file();

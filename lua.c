@@ -479,11 +479,6 @@ luaA_parserc(const char *rcfile)
     lua_pushliteral(L, VERSION);
     lua_settable(L, LUA_GLOBALSINDEX);
 
-    /* \todo move this */
-    globalconf.font = draw_font_new(globalconf.connection, globalconf.default_screen, "sans 8");
-    xcolor_new(globalconf.connection, globalconf.default_screen, "black", &globalconf.colors.fg);
-    xcolor_new(globalconf.connection, globalconf.default_screen, "white", &globalconf.colors.bg);
-
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
 
     if(luaL_dofile(L, rcfile))
