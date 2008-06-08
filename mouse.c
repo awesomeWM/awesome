@@ -131,7 +131,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
 
 /** Redraw the resizebar.
  * \param ctx Draw context.
- * \param style The style pointer to use for drawing.
+ * \param sw The simple window.
  * \param geometry The geometry to use for the box.
  * \param border The client border size.
  */
@@ -157,7 +157,6 @@ mouse_resizebar_draw(draw_context_t *ctx,
  * \param phys_screen Physical screen number.
  * \param border Border size of the client.
  * \param geometry Client geometry.
- * \param style Style used to draw.
  * \param ctx Draw context to create.
  * \return The simple window.
  */

@@ -154,7 +154,6 @@ client_isvisible(client_t *c, int screen)
     return false;
 }
 /** Get a client by its window.
- * \param list A client_t list to look into.
  * \param w The client window to find.
  * \return A client pointer if found, NULL otherwise.
  */

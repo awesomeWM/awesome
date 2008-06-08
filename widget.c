@@ -101,6 +101,7 @@ widget_common_button_press(widget_node_t *w,
 /** Common tell function for widget, which only warn user that widget
  * cannot be told anything.
  * \param widget The widget.
+ * \param property Unused argument.
  * \param new_value Unused argument.
  * \return The status of the command, which is always an error in this case.
  */
@@ -116,7 +117,7 @@ widget_common_tell(widget_t *widget,
 /** Render a list of widgets.
  * \param wnode The list of widgets.
  * \param ctx The draw context where to render.
- * \param rotate_dw The rotate pixmap: where to rotate and render the final
+ * \param rotate_px The rotate pixmap: where to rotate and render the final
  * \param screen The logical screen used to render.
  * \param position The object position.
  * \param x The x coordinates of the object.
@@ -382,7 +383,7 @@ luaA_widget_mouse(lua_State *L)
 /** Do what should be done with a widget_tell_status_t for a widget.
  * \param widget The widget.
  * \param status The status returned by the tell function of the widget.
- * \para property The property updated.
+ * \param property The property updated.
  */
 void
 widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const char *property)

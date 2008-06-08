@@ -74,7 +74,6 @@ tag_markup_parse(tag_t *t, const char *str, ssize_t len)
 
 /** Check if at least one client is tagged with tag number t and is on screen
  * screen
- * \param screen screen number
  * \param t tag
  * \return true or false
  */

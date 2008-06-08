@@ -22,7 +22,7 @@
 #include "cnode.h"
 
 /** Get the client's node focus.
- * \arap, list The client list.
+ * \param list The client list.
  * \param c The client.
  * \return The client node focus.
  */
@@ -39,7 +39,7 @@ client_node_client_getby(client_node_t *list, client_t *c)
 }
 
 /** Create a client node for focus.
- * \arap, list The client list.
+ * \param list The client list.
  * \param c The client
  * \return The client focus node.
  */

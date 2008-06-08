@@ -96,7 +96,7 @@ markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused))
 }
 
 /** Callback to invoke when the closing tag of an element is seen. Note that
- * this is also called for empty tags like <empty/>.
+ * this is also called for empty tags like \<empty/\>.
  * Here is just copies element elements we do not care about.
  * \param context the context of GMarkup
  * \param element_name element name

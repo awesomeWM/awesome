@@ -61,8 +61,7 @@ placement_fix_offscreen(area_t geometry, int screen, int border)
 }
 
 /** Compute smart coordinates for a client window
- * \param geometry current/requested client geometry
- * \param screen screen used
+ * \param c The client to place.
  * \return new geometry
  */
 area_t

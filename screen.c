@@ -74,7 +74,7 @@ screen_area_get(int screen, statusbar_t *statusbar, padding_t *padding)
 }
 
 /** Get display info.
- * \param screen Physical screen number.
+ * \param phys_screen Physical screen number.
  * \param statusbar The statusbars.
  * \param padding Padding.
  * \return The display area.

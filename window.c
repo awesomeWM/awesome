@@ -136,7 +136,6 @@ window_grabbuttons(xcb_window_t win, int phys_screen)
 }
 
 /** Grab all buttons on the root window.
- * \param b The button binding.
  */
 void
 window_root_grabbuttons(void)

@@ -53,8 +53,6 @@ statusbar_draw(statusbar_t *statusbar)
 }
 
 /** Statusbar refresh function.
- * \param p A pointer to a statusbar_t.
- * \return Return NULL.
  */
 void
 statusbar_refresh(void)
