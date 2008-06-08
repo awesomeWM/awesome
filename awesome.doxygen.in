@@ -37,6 +37,11 @@ BUILTIN_STL_SUPPORT    = NO
 CPP_CLI_SUPPORT        = NO
 DISTRIBUTE_GROUP_DOC   = NO
 SUBGROUPING            = YES
+
+ALIASES += luastack="\par Lua Stack:"
+ALIASES += lparam="- \em param "
+ALIASES += lreturn="- \em returns "
+
 #---------------------------------------------------------------------------
 # Build related configuration options
 #---------------------------------------------------------------------------
