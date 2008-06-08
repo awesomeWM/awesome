@@ -5,8 +5,9 @@
 function string.comment_clean(str)
     local s = str:gsub("/%*%* ", "    ")
     s = s:gsub(" %* ", " ")
-    s = s:gsub("\\param", "\n\n    Parameter:")
-    s = s:gsub("\\return", "\n\n    Return:")
+	s = s:gsub("\\luastack", "")
+    s = s:gsub("\\lparam", "\n\n    Parameter:")
+    s = s:gsub("\\lreturn", "\n\n    Return:")
     return s
 end
 
@@ -36,7 +37,9 @@ for i, line in ipairs(ilines) do
         end
         comment = nil
     elseif comment_start then
-        comment = comment .. line
+		if not line:find("\\param") and not line:find("\\return") then
+	        comment = comment .. line
+		end
     end
 end
 
