@@ -29,7 +29,6 @@
 #include "statusbar.h"
 #include "titlebar.h"
 #include "event.h"
-#include "screen.h"
 #include "lua.h"
 
 extern awesome_t globalconf;
@@ -133,12 +132,13 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
 {
     xcb_window_t rootwin;
     xcb_pixmap_t rootpix;
+    xcb_screen_t *s;
     widget_node_t *w;
     int left = 0, right = 0;
     char *data;
     xcb_get_property_reply_t *prop_r;
     xcb_get_property_cookie_t prop_c;
-    area_t rectangle = { 0, 0, 0, 0, NULL, NULL }, rootsize;
+    area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
     xcb_atom_t rootpix_atom, pixmap_atom;
     xutil_intern_atom_request_t rootpix_atom_req, pixmap_atom_req;
 
@@ -154,6 +154,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
 
     if(ctx->bg.alpha != 0xffff)
     {
+        s = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
         rootwin = xcb_aux_get_screen(globalconf.connection, ctx->phys_screen)->root;
         pixmap_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, pixmap_atom_req);
         rootpix_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, rootpix_atom_req);
@@ -164,13 +165,12 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
             if((data = xcb_get_property_value(prop_r)))
             {
                rootpix = *(xcb_pixmap_t *) data;
-                rootsize = display_area_get(ctx->phys_screen, NULL, NULL);
                switch(position)
                {
                  case Left:
                    draw_rotate(ctx,
                                rootpix, ctx->pixmap,
-                               rootsize.width, rootsize.height,
+                               s->width_in_pixels, s->height_in_pixels,
                                ctx->width, ctx->height,
                                M_PI_2,
                                y + ctx->width,
@@ -179,7 +179,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
                  case Right:
                    draw_rotate(ctx,
                                rootpix, ctx->pixmap,
-                               rootsize.width, rootsize.height,
+                               s->width_in_pixels, s->height_in_pixels,
                                ctx->width, ctx->height,
                                - M_PI_2,
                                - y,
