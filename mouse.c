@@ -40,6 +40,34 @@
 
 extern awesome_t globalconf;
 
+/** Define corners. */
+typedef enum
+{
+    AutoCorner,
+    TopRightCorner,
+    TopLeftCorner,
+    BottomLeftCorner,
+    BottomRightCorner
+} corner_t;
+
+/** Convert a corner name into a corner type.
+ * \param str A string.
+ * \return A corner type.
+ */
+static corner_t
+a_strtocorner(const char *str)
+{
+    if(!a_strcmp(str, "bottomright"))
+        return BottomRightCorner;
+    else if(!a_strcmp(str, "bottomleft"))
+        return BottomLeftCorner;
+    else if(!a_strcmp(str, "topleft"))
+        return TopLeftCorner;
+    else if(!a_strcmp(str, "topright"))
+        return TopRightCorner;
+    return AutoCorner;
+}
+
 /** Snap an area to the outside of an area.
  * \param geometry geometry of the area to snap
  * \param snap_geometry geometry of snapping area
@@ -432,9 +460,10 @@ mouse_track_mouse_drag(int *x, int *y)
 
 /** Resize a floating client with the mouse.
  * \param c The client to resize.
+ * \param c The corner to resize with.
  */
 static void
-mouse_client_resize_floating(client_t *c)
+mouse_client_resize_floating(client_t *c, corner_t corner)
 {
     xcb_screen_t *screen;
     /* one corner of the client has a fixed position */
@@ -445,55 +474,67 @@ mouse_client_resize_floating(client_t *c)
     simple_window_t *sw;
     draw_context_t  *ctx;
     size_t cursor = CurResize;
+    int top, bottom, left, right;
 
     screen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
-    /* get current mouse poistion */
+    /* get current mouse position */
     mouse_query_pointer(screen->root, &mouse_x, &mouse_y);
 
+    top = c->geometry.y;
+    bottom = top + c->geometry.height;
+    left = c->geometry.x;
+    right = left + c->geometry.width;
+
     /* figure out which corner to move */
+    if(corner == AutoCorner)
     {
-        int top, bottom, left, right;
-
-        top = c->geometry.y;
-        bottom = top + c->geometry.height;
-        left = c->geometry.x;
-        right = left + c->geometry.width;
-
         if(abs(top - mouse_y) < abs(bottom - mouse_y))
         {
-            mouse_y = top;
-            fixed_y = bottom;
             if(abs(left - mouse_x) < abs(right - mouse_x))
-            {
-                mouse_x = left;
-                fixed_x = right;
                 cursor = CurTopLeft;
-            }
             else
-            {
-                mouse_x = right;
-                fixed_x = left;
-                cursor = CurTopRight;
-            }
+                corner = TopRightCorner;
         }
         else
         {
-            mouse_y = bottom;
-            fixed_y = top;
             if(abs(left - mouse_x) < abs(right - mouse_x))
-            {
-                mouse_x = left;
-                fixed_x = right;
-                cursor = CurBotLeft;
-            }
+                corner = BottomLeftCorner;
             else
-            {
-                mouse_x = right;
-                fixed_x = left;
-                cursor = CurBotRight;
-            }
+                corner = BottomRightCorner;
         }
+    }
+
+    switch(corner)
+    {
+      default:
+          mouse_y = top;
+          fixed_y = bottom;
+          mouse_x = left;
+          fixed_x = right;
+          corner = TopLeftCorner;
+          break;
+        case TopRightCorner:
+          mouse_y = top;
+          fixed_y = bottom;
+          mouse_x = right;
+          fixed_x = left;
+          cursor = CurTopRight;
+          break;
+        case BottomLeftCorner:
+          mouse_y = bottom;
+          fixed_y = top;
+          mouse_x = left;
+          fixed_x = right;
+          cursor = CurBotLeft;
+          break;
+        case BottomRightCorner:
+          mouse_y = bottom;
+          fixed_y = top;
+          mouse_x = right;
+          fixed_x = left;
+          cursor = CurBotRight;
+          break;
     }
 
     /* grab the pointer */
@@ -632,9 +673,10 @@ mouse_client_resize_tiled(client_t *c)
 
 /** Resize a client with the mouse.
  * \param c The client to resize.
+ * \param corner The corner to use.
  */
 static void
-mouse_client_resize(client_t *c)
+mouse_client_resize(client_t *c, corner_t corner)
 {
     int n, screen;
     tag_t **curtags;
@@ -653,7 +695,7 @@ mouse_client_resize(client_t *c)
 
         c->ismax = false;
 
-        mouse_client_resize_floating(c);
+        mouse_client_resize_floating(c, corner);
     }
     else if (layout == layout_tile || layout == layout_tileleft
              || layout == layout_tilebottom || layout == layout_tiletop)
@@ -691,12 +733,18 @@ luaA_mouse_coords_set(lua_State *L)
 }
 
 /** Resize a client with mouse.
+ * \param An optionnal corner, such as bottomleft, topright, etc.
  */
 int
 luaA_client_mouse_resize(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
-    mouse_client_resize(*c);
+    corner_t corner = AutoCorner;
+
+    if(lua_gettop(L) == 2 && lua_isstring(L, 2))
+        corner = a_strtocorner(lua_tostring(L, 2));
+
+    mouse_client_resize(*c, corner);
     return 0;
 }
 
