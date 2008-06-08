@@ -717,8 +717,11 @@ mouse_client_resize(client_t *c, corner_t corner)
 }
 
 /** Set mouse coordinates.
- * \param The x coordinates.
- * \param The y coordinates.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam The x coordinate.
+ * \lparam The y coordinate.
  */
 static int
 luaA_mouse_coords_set(lua_State *L)
@@ -733,7 +736,10 @@ luaA_mouse_coords_set(lua_State *L)
 }
 
 /** Resize a client with mouse.
- * \param An optionnal corner, such as bottomleft, topright, etc.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam An optionnal corner, such as bottomleft, topright, etc.
  */
 int
 luaA_client_mouse_resize(lua_State *L)
@@ -749,7 +755,10 @@ luaA_client_mouse_resize(lua_State *L)
 }
 
 /** Move a client with mouse.
- * \param The pixel to snap.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam The pixel to snap.
  */
 int
 luaA_client_mouse_move(lua_State *L)
@@ -761,7 +770,10 @@ luaA_client_mouse_move(lua_State *L)
 }
 
 /** Get the screen number where the mouse ic.
- * \return The screen number.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lreturn The screen number.
  */
 static int
 luaA_mouse_screen_get(lua_State *L)
