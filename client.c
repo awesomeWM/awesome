@@ -360,7 +360,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     /* Try to load props if any */
     if(!(retloadprops = client_loadprops(c, screen)))
-        move_client_to_screen(c, screen, true);
+        screen_client_moveto(c, screen, true);
 
     /* Then check clients hints */
     ewmh_check_client_hints(c);
@@ -538,7 +538,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         window_configure(c->win, geometry, c->border);
 
         if(c->screen != new_screen)
-            move_client_to_screen(c, new_screen, false);
+            screen_client_moveto(c, new_screen, false);
 
         resized = true;
     }
@@ -951,7 +951,7 @@ luaA_client_screen_set(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
     int screen = luaL_checknumber(L, 2) - 1;
     luaA_checkscreen(screen);
-    move_client_to_screen(*c, screen, true);
+    screen_client_moveto(*c, screen, true);
     return 0;
 }
 

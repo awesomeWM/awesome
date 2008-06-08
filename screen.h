@@ -27,7 +27,7 @@
 area_t screen_area_get(int, statusbar_t *, padding_t *);
 area_t display_area_get(int, statusbar_t *, padding_t *);
 int screen_virttophys(int);
-void move_client_to_screen(client_t *, int, bool);
+void screen_client_moveto(client_t *, int, bool);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

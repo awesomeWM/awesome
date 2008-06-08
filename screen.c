@@ -108,8 +108,8 @@ display_area_get(int phys_screen, statusbar_t *statusbar, padding_t *padding)
 
 /** This returns the real X screen number for a logical
  * screen if Xinerama is active.
- * \param screen the logical screen
- * \return the X screen
+ * \param screen The logical screen.
+ * \return The X screen.
  */
 int
 screen_virttophys(int screen)
@@ -119,14 +119,14 @@ screen_virttophys(int screen)
     return screen;
 }
 
-/** Move a client to a virtual screen
- * \param c the client
- * \param new_screen The destinatiuon screen
- * \param doresize set to true if we also move the client to the new x and
- *        y of the new screen
+/** Move a client to a virtual screen.
+ * \param c The client to move.
+ * \param new_screen The destinatiuon screen number.
+ * \param doresize Set to true if we also move the client to the new x and
+ *        y of the new screen.
  */
 void
-move_client_to_screen(client_t *c, int new_screen, bool doresize)
+screen_client_moveto(client_t *c, int new_screen, bool doresize)
 {
     tag_t *tag;
     int old_screen = c->screen;

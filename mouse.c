@@ -357,7 +357,7 @@ mouse_client_move(client_t *c, int snap)
                                                        mquery_pointer_r->root_x,
                                                        mquery_pointer_r->root_y)) != c->screen)
                     {
-                        move_client_to_screen(c, newscreen, true);
+                        screen_client_moveto(c, newscreen, true);
                         globalconf.screens[c->screen].need_arrange = true;
                         globalconf.screens[newscreen].need_arrange = true;
                         layout_refresh();
