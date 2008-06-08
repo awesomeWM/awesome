@@ -402,11 +402,12 @@ luaA_openlib(lua_State *L, const char *name,
     luaL_register(L, name, methods);
 }
 
-bool
-luaA_parserc(const char *rcfile)
+/** Initialize the Lua VM
+ */
+void
+luaA_init(void)
 {
     lua_State *L;
-    int screen;
 
     static const struct luaL_reg awesome_lib[] =
     {
@@ -480,10 +481,21 @@ luaA_parserc(const char *rcfile)
     lua_settable(L, LUA_GLOBALSINDEX);
 
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
+}
 
-    if(luaL_dofile(L, rcfile))
+/** Load a configuration file
+ *
+ * \param rcfile The configuration file to load.
+ * \return True on succes, false on failure.
+ */
+bool
+luaA_parserc(const char* rcfile)
+{
+    int screen;
+
+    if(luaL_dofile(globalconf.L, rcfile))
     {
-        fprintf(stderr, "%s\n", lua_tostring(L, -1));
+        fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
         return false;
     }
 

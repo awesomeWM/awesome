@@ -133,6 +133,7 @@ luaA_checkboolean(lua_State *L, int n)
     return lua_toboolean(L, n);
 }
 
+void luaA_init(void);
 bool luaA_parserc(const char *);
 void luaA_docmd(char *);
 void luaA_pushpointer(void *, awesome_type_t);

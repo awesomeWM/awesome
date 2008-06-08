@@ -361,12 +361,6 @@ main(int argc, char **argv)
     xcolor_new(globalconf.connection, globalconf.default_screen, "black", &globalconf.colors.fg);
     xcolor_new(globalconf.connection, globalconf.default_screen, "white", &globalconf.colors.bg);
 
-    /* parse config */
-    if(!confpath)
-        confpath = config_file();
-    if (!luaA_parserc(confpath))
-        eprint("failed to load/parse configuration file %s", confpath);
-
     /* init cursors */
     globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, CURSOR_LEFT_PTR);
     globalconf.cursor[CurResize] = xutil_cursor_new(globalconf.connection, CURSOR_SIZING);
@@ -377,6 +371,15 @@ main(int argc, char **argv)
     globalconf.cursor[CurTopLeft] = xutil_cursor_new(globalconf.connection, CURSOR_TOP_LEFT_CORNER);
     globalconf.cursor[CurBotRight] = xutil_cursor_new(globalconf.connection, CURSOR_BOTTOM_RIGHT_CORNER);
     globalconf.cursor[CurBotLeft] = xutil_cursor_new(globalconf.connection, CURSOR_BOTTOM_LEFT_CORNER);
+
+    /* init lua */
+    luaA_init();
+
+    /* parse config */
+    if(!confpath)
+        confpath = config_file();
+    if (!luaA_parserc(confpath))
+        eprint("failed to load/parse configuration file %s", confpath);
 
     /* select for events */
     const uint32_t change_win_vals[] =
