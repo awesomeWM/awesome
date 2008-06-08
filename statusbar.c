@@ -429,46 +429,42 @@ luaA_statusbar_remove(lua_State *L)
 static int
 luaA_statusbar_new(lua_State *L)
 {
-    statusbar_t **sb = lua_newuserdata(L, sizeof(statusbar_t *));
-    int objpos = lua_gettop(L);
+    statusbar_t *sb;
     const char *color;
 
     luaA_checktable(L, 1);
 
-    *sb = p_new(statusbar_t, 1);
+    sb = p_new(statusbar_t, 1);
 
-    (*sb)->name = luaA_name_init(L);
+    sb->name = luaA_name_init(L);
 
     lua_getfield(L, 1, "fg");
     if((color = luaL_optstring(L, -1, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &(*sb)->colors.fg);
+                       color, &sb->colors.fg);
     else
-        (*sb)->colors.fg = globalconf.colors.fg;
+        sb->colors.fg = globalconf.colors.fg;
 
     lua_getfield(L, 1, "bg");
     if((color = luaL_optstring(L, -1, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &(*sb)->colors.bg);
+                       color, &sb->colors.bg);
     else
-        (*sb)->colors.bg = globalconf.colors.bg;
+        sb->colors.bg = globalconf.colors.bg;
 
-    (*sb)->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
+    sb->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
 
-    (*sb)->width = luaA_getopt_number(L, 1, "width", 0);
-    if((*sb)->width > 0)
-        (*sb)->width_user = true;
-    (*sb)->height = luaA_getopt_number(L, 1, "height", 0);
-    if((*sb)->height <= 0)
+    sb->width = luaA_getopt_number(L, 1, "width", 0);
+    if(sb->width > 0)
+        sb->width_user = true;
+    sb->height = luaA_getopt_number(L, 1, "height", 0);
+    if(sb->height <= 0)
         /* 1.5 as default factor, it fits nice but no one knows why */
-        (*sb)->height = 1.5 * globalconf.font->height;
+        sb->height = 1.5 * globalconf.font->height;
 
-    (*sb)->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
+    sb->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
 
-    statusbar_ref(sb);
-
-    lua_pushvalue(L, objpos);
-    return luaA_settype(L, "statusbar");
+    return luaA_statusbar_userdata_new(sb);
 }
 
 /** Create a new statusbar userdata.
