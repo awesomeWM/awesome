@@ -209,12 +209,12 @@ xutil_intern_atom_reply(xcb_connection_t *c, xutil_atom_cache_t **atoms,
     xutil_atom_cache_t *atom_cache, *atom_next;
 
     /* If the atom is present in the cache, just returns the
-     * atom... */ 
+     * atom... */
     if(atom_req.cache_hit)
         return atom_req.cache->atom;
 
     /* Get the reply from InternAtom request */
-    if((atom_rep = xcb_intern_atom_reply(c, atom_req.cookie, NULL)) == NULL)
+    if(!(atom_rep = xcb_intern_atom_reply(c, atom_req.cookie, NULL)))
         return 0;
 
     /* Create a new atom cache entry */
@@ -581,6 +581,30 @@ xutil_button_fromint(int button)
         return mouse_button_list[button - 1].button;
 
     return 0;
+}
+
+/** Equivalent to 'XCreateFontCursor()', error are handled by the
+ * default current error handler.
+ * \param cursor_font Type of cursor to use.
+ * \return Allocated cursor font.
+ */
+xcb_cursor_t
+xutil_cursor_new(xcb_connection_t *conn, unsigned int cursor_font)
+{
+    xcb_font_t font;
+    xcb_cursor_t cursor;
+
+    /* Get the font for the cursor*/
+    font = xcb_generate_id(conn);
+    xcb_open_font(conn, font, a_strlen("cursor"), "cursor");
+
+    cursor = xcb_generate_id(conn);
+    xcb_create_glyph_cursor(conn, cursor, font, font,
+                            cursor_font, cursor_font + 1,
+                            0, 0, 0,
+                            65535, 65535, 65535);
+
+    return cursor;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

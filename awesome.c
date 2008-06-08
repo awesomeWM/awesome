@@ -164,30 +164,6 @@ scan()
     p_delete(&root_wins);
 }
 
-/** Equivalent to 'XCreateFontCursor()', error are handled by the
- * default current error handler
- * \param cursor_font type of cursor to use
- * \return allocated cursor font
- */
-static xcb_cursor_t
-create_font_cursor(unsigned int cursor_font)
-{
-    xcb_font_t font;
-    xcb_cursor_t cursor;
-
-    /* Get the font for the cursor*/
-    font = xcb_generate_id(globalconf.connection);
-    xcb_open_font(globalconf.connection, font, strlen("cursor"), "cursor");
-
-    cursor = xcb_generate_id(globalconf.connection);
-    xcb_create_glyph_cursor (globalconf.connection, cursor, font, font,
-                             cursor_font, cursor_font + 1,
-                             0, 0, 0,
-                             65535, 65535, 65535);
-
-    return cursor;
-}
-
 /** Startup Error handler to check if another window manager
  * is already running.
  * \param data Additional optional parameters data
@@ -387,15 +363,15 @@ main(int argc, char **argv)
         eprint("failed to load/parse configuration file %s", confpath);
 
     /* init cursors */
-    globalconf.cursor[CurNormal] = create_font_cursor(CURSOR_LEFT_PTR);
-    globalconf.cursor[CurResize] = create_font_cursor(CURSOR_SIZING);
-    globalconf.cursor[CurResizeH] = create_font_cursor(CURSOR_DOUBLE_ARROW_HORIZ);
-    globalconf.cursor[CurResizeV] = create_font_cursor(CURSOR_DOUBLE_ARROW_VERT);
-    globalconf.cursor[CurMove] = create_font_cursor(CURSOR_FLEUR);
-    globalconf.cursor[CurTopRight] = create_font_cursor(CURSOR_TOP_RIGHT_CORNER);
-    globalconf.cursor[CurTopLeft] = create_font_cursor(CURSOR_TOP_LEFT_CORNER);
-    globalconf.cursor[CurBotRight] = create_font_cursor(CURSOR_BOTTOM_RIGHT_CORNER);
-    globalconf.cursor[CurBotLeft] = create_font_cursor(CURSOR_BOTTOM_LEFT_CORNER);
+    globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, CURSOR_LEFT_PTR);
+    globalconf.cursor[CurResize] = xutil_cursor_new(globalconf.connection, CURSOR_SIZING);
+    globalconf.cursor[CurResizeH] = xutil_cursor_new(globalconf.connection, CURSOR_DOUBLE_ARROW_HORIZ);
+    globalconf.cursor[CurResizeV] = xutil_cursor_new(globalconf.connection, CURSOR_DOUBLE_ARROW_VERT);
+    globalconf.cursor[CurMove] = xutil_cursor_new(globalconf.connection, CURSOR_FLEUR);
+    globalconf.cursor[CurTopRight] = xutil_cursor_new(globalconf.connection, CURSOR_TOP_RIGHT_CORNER);
+    globalconf.cursor[CurTopLeft] = xutil_cursor_new(globalconf.connection, CURSOR_TOP_LEFT_CORNER);
+    globalconf.cursor[CurBotRight] = xutil_cursor_new(globalconf.connection, CURSOR_BOTTOM_RIGHT_CORNER);
+    globalconf.cursor[CurBotLeft] = xutil_cursor_new(globalconf.connection, CURSOR_BOTTOM_LEFT_CORNER);
 
     /* select for events */
     const uint32_t change_win_vals[] =
