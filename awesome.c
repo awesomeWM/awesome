@@ -59,6 +59,7 @@
 #include "common/version.h"
 #include "common/configopts.h"
 #include "common/xutil.h"
+#include "config.h"
 
 bool running = true;
 
@@ -378,8 +379,14 @@ main(int argc, char **argv)
     /* parse config */
     if(!confpath)
         confpath = config_file();
-    if (!luaA_parserc(confpath))
-        eprint("failed to load/parse configuration file %s", confpath);
+    if(!luaA_parserc(confpath))
+    {
+        const char *default_confpath = AWESOME_CONF_PATH "/awesomerc.lua";
+        warn("failed to load/parse configuration file %s", confpath);
+        warn("falling back to: %s", default_confpath);
+        if(!luaA_parserc(default_confpath))
+            eprint("failed to load any configuration file");
+    }
 
     /* select for events */
     const uint32_t change_win_vals[] =
