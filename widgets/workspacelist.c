@@ -1,6 +1,7 @@
 /*
- * taglist.c - tag list widget
+ * workspacelist.c - workspace list widget
  *
+ * Copyright © 2008 Julien Danjou <julien@danjou.info>
  * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +22,7 @@
 
 #include "client.h"
 #include "widget.h"
-#include "tag.h"
+#include "workspace.h"
 #include "lua.h"
 #include "event.h"
 #include "common/markup.h"
@@ -29,26 +30,26 @@
 
 extern awesome_t globalconf;
 
-typedef struct taglist_drawn_area_t taglist_drawn_area_t;
-struct taglist_drawn_area_t
+typedef struct workspacelist_drawn_area_t workspacelist_drawn_area_t;
+struct workspacelist_drawn_area_t
 {
     void *object;
     area_t *area;
-    taglist_drawn_area_t *next, *prev;
+    workspacelist_drawn_area_t *next, *prev;
 };
 
-DO_SLIST(taglist_drawn_area_t, taglist_drawn_area, p_delete);
+DO_SLIST(workspacelist_drawn_area_t, workspacelist_drawn_area, p_delete);
 
 typedef struct
 {
     char *text_normal, *text_focus, *text_urgent;
     bool show_empty;
-    taglist_drawn_area_t *drawn_area;
+    workspacelist_drawn_area_t *drawn_area;
 
-} taglist_data_t;
+} workspacelist_data_t;
 
 static char *
-tag_markup_parse(tag_t *t, const char *str, ssize_t len)
+workspace_markup_parse(workspace_t *t, const char *str, ssize_t len)
 {
     const char *elements[] = { "title", NULL };
     char *title_esc = g_markup_escape_text(t->name, -1);
@@ -72,89 +73,88 @@ tag_markup_parse(tag_t *t, const char *str, ssize_t len)
     return ret;
 }
 
-/** Check if at least one client is tagged with tag number t and is on screen
- * screen
- * \param t tag
- * \return true or false
+/** Check if at least one client is on the workspace.
+ * \param ws The workspace.
+ * \return True or false.
  */
 static bool
-tag_isoccupied(tag_t *t)
+workspace_isoccupied(workspace_t *ws)
 {
     client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t) && !c->skip)
+        if(workspace_client_get(c) == ws)
             return true;
 
     return false;
 }
 
 static bool
-tag_isurgent(tag_t *t)
+workspace_isurgent(workspace_t *ws)
 {
     client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t) && c->isurgent)
+        if(c->isurgent && workspace_client_get(c) == ws)
             return true;
 
     return false;
 }
 
 static char *
-taglist_text_get(tag_t *tag, taglist_data_t *data)
+workspacelist_text_get(workspace_t *ws, screen_t *screen, workspacelist_data_t *data)
 {
-    if(tag->selected)
+    if(screen->workspace == ws)
         return data->text_focus;
-    else if(tag_isurgent(tag))
+
+    if(workspace_isurgent(ws))
         return data->text_urgent;
 
     return data->text_normal;
 }
 
 static int
-taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
-             int offset,
-             int used __attribute__ ((unused)),
-             void *object)
+workspacelist_draw(draw_context_t *ctx, int screen,
+                   widget_node_t *w,
+                   int offset,
+                   int used __attribute__ ((unused)),
+                   void *object)
 {
-    tag_t *tag;
-    taglist_data_t *data = w->widget->data;
-    client_t *sel = globalconf.focus->client;
-    screen_t *vscreen = &globalconf.screens[screen];
+    workspace_t *ws;
+    workspacelist_data_t *data = w->widget->data;
     int i = 0, prev_width = 0;
     area_t *area, rectangle = { 0, 0, 0, 0, NULL, NULL };
     char **text = NULL;
-    taglist_drawn_area_t *tda;
+    workspacelist_drawn_area_t *tda;
 
     w->area.width = w->area.y = 0;
 
-    /* Lookup for our taglist_drawn_area.
-     * This will be used to store area where we draw tag list for each object.  */
+    /* Lookup for our workspacelist_drawn_area.
+     * This will be used to store area where we draw ws list for each object.  */
     for(tda = data->drawn_area; tda && tda->object != object; tda = tda->next);
 
     /* Oh, we did not find a drawn area for our object. First time? */
     if(!tda)
     {
         /** \todo delete this when the widget is removed from the object */
-        tda = p_new(taglist_drawn_area_t, 1);
+        tda = p_new(workspacelist_drawn_area_t, 1);
         tda->object = object;
-        taglist_drawn_area_list_push(&data->drawn_area, tda);
+        workspacelist_drawn_area_list_push(&data->drawn_area, tda);
     }
 
     area_list_wipe(&tda->area);
 
     /* First compute text and widget width */
-    for(tag = vscreen->tags; tag; tag = tag->next, i++)
+    for(ws = globalconf.workspaces; ws; ws = ws->next, i++)
     {
         p_realloc(&text, i + 1);
         area = p_new(area_t, 1);
-        text[i] = taglist_text_get(tag, data);
-        text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
+        text[i] = workspacelist_text_get(ws, &globalconf.screens[screen], data);
+        text[i] = workspace_markup_parse(ws, text[i], a_strlen(text[i]));
         *area = draw_text_extents(ctx->connection, ctx->phys_screen,
                                   globalconf.font, text[i]);
 
-        if (data->show_empty || tag->selected || tag_isoccupied(tag))
+        if (data->show_empty || workspace_isoccupied(ws))
             w->area.width += area->width;
 
         area_list_append(&tda->area, area);
@@ -164,11 +164,11 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     w->area.x = widget_calculate_offset(ctx->width, w->area.width,
                                         offset, w->widget->align); 
 
-    for(area = tda->area, tag = vscreen->tags, i = 0;
-        tag && area;
-        tag = tag->next, area = area->next, i++)
+    for(area = tda->area, ws = globalconf.workspaces, i = 0;
+        ws && area;
+        ws = ws->next, area = area->next, i++)
     {
-        if (!data->show_empty && !tag->selected && !tag_isoccupied(tag))
+        if (!data->show_empty && !workspace_isoccupied(ws))
             continue;
 
         area->x = w->area.x + prev_width;
@@ -176,13 +176,12 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         draw_text(ctx, globalconf.font, *area, text[i]);
         p_delete(&text[i]);
 
-        if(tag_isoccupied(tag))
+        if(workspace_isoccupied(ws))
         {
             rectangle.width = rectangle.height = (globalconf.font->height + 2) / 3;
             rectangle.x = area->x;
             rectangle.y = area->y;
-            draw_rectangle(ctx, rectangle, 1.0,
-                           sel && is_client_tagged(sel, tag), ctx->fg);
+            draw_rectangle(ctx, rectangle, 1.0, false, ctx->fg);
         }
     }
 
@@ -200,18 +199,17 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
  * \param type The type object.
  */
 static void
-taglist_button_press(widget_node_t *w,
-                     xcb_button_press_event_t *ev,
-                     int screen,
-                     void *object,
-                     awesome_type_t type)
+workspacelist_button_press(widget_node_t *w,
+                           xcb_button_press_event_t *ev,
+                           int screen __attribute__ ((unused)),
+                           void *object,
+                           awesome_type_t type)
 {
-    screen_t *vscreen = &globalconf.screens[screen];
     button_t *b;
-    taglist_data_t *data = w->widget->data;
-    taglist_drawn_area_t *tda;
+    workspacelist_data_t *data = w->widget->data;
+    workspacelist_drawn_area_t *tda;
     area_t *area;
-    tag_t *tag;
+    workspace_t *ws;
 
     /* Find the good drawn area list */
     for(tda = data->drawn_area; tda && tda->object != object; tda = tda->next);
@@ -219,22 +217,22 @@ taglist_button_press(widget_node_t *w,
 
     for(b = w->widget->buttons; b; b = b->next)
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
-            for(tag = vscreen->tags; tag && area; tag = tag->next, area = area->next)
+            for(ws = globalconf.workspaces; ws && area; ws = ws->next, area = area->next)
                 if(ev->event_x >= AREA_LEFT(*area)
                    && ev->event_x < AREA_RIGHT(*area)
-                   && (data->show_empty || tag->selected || tag_isoccupied(tag)) )
+                   && (data->show_empty || workspace_isoccupied(ws)) )
                 {
                     luaA_pushpointer(object, type);
-                    luaA_tag_userdata_new(tag);
+                    luaA_workspace_userdata_new(ws);
                     luaA_dofunction(globalconf.L, b->fct, 2);
                     return;
                 }
 }
 
 static widget_tell_status_t
-taglist_tell(widget_t *widget, const char *property, const char *new_value)
+workspacelist_tell(widget_t *widget, const char *property, const char *new_value)
 {
-    taglist_data_t *d = widget->data;
+    workspacelist_data_t *d = widget->data;
 
     if(!a_strcmp(property, "text_normal"))
     {
@@ -260,26 +258,26 @@ taglist_tell(widget_t *widget, const char *property, const char *new_value)
 }
 
 widget_t *
-taglist_new(alignment_t align)
+workspacelist_new(alignment_t align)
 {
     widget_t *w;
-    taglist_data_t *d;
+    workspacelist_data_t *d;
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
     w->align = align;
-    w->draw = taglist_draw;
-    w->button_press = taglist_button_press;
-    w->tell = taglist_tell;
+    w->draw = workspacelist_draw;
+    w->button_press = workspacelist_button_press;
+    w->tell = workspacelist_tell;
 
-    w->data = d = p_new(taglist_data_t, 1);
+    w->data = d = p_new(workspacelist_data_t, 1);
     d->text_normal = a_strdup(" <text align=\"center\"/><title/> ");
     d->text_focus = a_strdup(" <text align=\"center\"/><title/> ");
     d->text_urgent = a_strdup(" <text align=\"center\"/><title/> ");
     d->show_empty = true;
 
     /* Set cache property */
-    w->cache_flags = WIDGET_CACHE_TAGS | WIDGET_CACHE_CLIENTS;
+    w->cache_flags = WIDGET_CACHE_WORKSPACES | WIDGET_CACHE_CLIENTS;
 
     return w;
 }

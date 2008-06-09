@@ -25,9 +25,6 @@
 #include "common/list.h"
 #include "common/util.h"
 
-typedef void (layout_t)(int);
-
-layout_t * layout_get_current(int);
 void layout_refresh(void);
 
 #endif

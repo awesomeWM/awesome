@@ -32,7 +32,7 @@
 #include "config.h"
 #include "structs.h"
 #include "lua.h"
-#include "tag.h"
+#include "workspace.h"
 #include "client.h"
 #include "window.h"
 #include "statusbar.h"
@@ -49,8 +49,8 @@ extern const struct luaL_reg awesome_client_methods[];
 extern const struct luaL_reg awesome_client_meta[];
 extern const struct luaL_reg awesome_titlebar_methods[];
 extern const struct luaL_reg awesome_titlebar_meta[];
-extern const struct luaL_reg awesome_tag_methods[];
-extern const struct luaL_reg awesome_tag_meta[];
+extern const struct luaL_reg awesome_workspace_methods[];
+extern const struct luaL_reg awesome_workspace_meta[];
 extern const struct luaL_reg awesome_widget_methods[];
 extern const struct luaL_reg awesome_widget_meta[];
 extern const struct luaL_reg awesome_statusbar_methods[];
@@ -191,16 +191,17 @@ luaA_screen_count(lua_State *L)
     return 1;
 }
 
-/** Give the focus to a screen.
- * \param A screen number
- */
+/** Get the workspace displayed on a screen.
+ * \param A screen number.
+*/
 static int
-luaA_screen_focus(lua_State *L)
+luaA_screen_workspace_get(lua_State *L)
 {
     /* Our table begin at 0, Lua begins at 1 */
     int screen = luaL_checknumber(L, 1) - 1;
     luaA_checkscreen(screen);
-    client_focus(NULL, screen);
+    if(globalconf.screens[screen].workspace)
+        return luaA_workspace_userdata_new(globalconf.screens[screen].workspace);
     return 0;
 }
 
@@ -426,7 +427,7 @@ luaA_init(void)
     {
         { "coords_get", luaA_screen_coords_get },
         { "count", luaA_screen_count },
-        { "focus", luaA_screen_focus },
+        { "workspace_get", luaA_screen_workspace_get },
         { NULL, NULL }
     };
     static const struct luaL_reg awesome_hooks_lib[] =
@@ -458,8 +459,8 @@ luaA_init(void)
     /* Export hooks lib */
     luaL_register(L, "mouse", awesome_mouse_lib);
 
-    /* Export tag */
-    luaA_openlib(L, "tag", awesome_tag_methods, awesome_tag_meta);
+    /* Export workspace */
+    luaA_openlib(L, "workspace", awesome_workspace_methods, awesome_workspace_meta);
 
     /* Export statusbar */
     luaA_openlib(L, "statusbar", awesome_statusbar_methods, awesome_statusbar_meta);
@@ -491,18 +492,13 @@ luaA_init(void)
 bool
 luaA_parserc(const char* rcfile)
 {
-    int screen;
-
     if(luaL_dofile(globalconf.L, rcfile))
     {
         fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
         return false;
     }
 
-    /* Assure there's at least one tag */
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
-        if(!globalconf.screens[screen].tags)
-            tag_append_to_screen(tag_new("default", layout_tile, 0.5, 1, 0), screen);
+    /* \todo Assure there's at least one workspace */
 
     return true;
 }

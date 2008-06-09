@@ -26,7 +26,6 @@ awesome-client reads commands from standard input.
 When you pipe multiple lines into awesome-client, an empty line will flush already
 collected lines into awesome with an according immediate execution.
 
-
 SEE ALSO
 --------
 awesome(1) awesomerc(5)

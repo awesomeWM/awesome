@@ -25,7 +25,6 @@
 #include "screen.h"
 #include "event.h"
 #include "ewmh.h"
-#include "tag.h"
 #include "common/configopts.h"
 #include "common/markup.h"
 
@@ -34,7 +33,7 @@ extern awesome_t globalconf;
 typedef enum
 {
     ShowFocus,
-    ShowTags,
+    ShowWorkspace,
     ShowAll,
 } showclient_t;
 
@@ -54,11 +53,11 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
     switch(show)
     {
       case ShowAll:
-        return (c->screen == screen);
-      case ShowTags:
+        return true;
+      case ShowWorkspace:
         return client_isvisible(c, screen);
       case ShowFocus:
-        return (c == focus_get_current_client(screen));
+        return (c == focus_client_getcurrent(screen));
     }
     return false;
 }
@@ -263,8 +262,8 @@ tasklist_tell(widget_t *widget, const char *property, const char *new_value)
         d->show_icons = a_strtobool(new_value);
     else if(!a_strcmp(property, "show"))
     {
-        if(!a_strcmp(new_value, "tags"))
-            d->show = ShowTags;
+        if(!a_strcmp(new_value, "workspace"))
+            d->show = ShowWorkspace;
         else if(!a_strcmp(new_value, "focus"))
             d->show = ShowFocus;
         else if(!a_strcmp(new_value, "all"))
@@ -296,7 +295,7 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     d->text_focus = a_strdup(" <title/> ");
     d->text_urgent = a_strdup(" <title/> ");
     d->show_icons = true;
-    d->show = ShowTags;
+    d->show = ShowWorkspace;
 
     /* Set cache property */
     w->cache_flags = WIDGET_CACHE_CLIENTS;

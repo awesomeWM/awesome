@@ -27,12 +27,12 @@
 
 #define WIDGET_CACHE_CLIENTS        1<<0
 #define WIDGET_CACHE_LAYOUTS        1<<1
-#define WIDGET_CACHE_TAGS           1<<2
-#define WIDGET_CACHE_ALL            (WIDGET_CACHE_CLIENTS | WIDGET_CACHE_LAYOUTS | WIDGET_CACHE_TAGS)
+#define WIDGET_CACHE_WORKSPACES     1<<2
+#define WIDGET_CACHE_ALL            (WIDGET_CACHE_CLIENTS | WIDGET_CACHE_LAYOUTS | WIDGET_CACHE_WORKSPACES)
 
 typedef widget_t *(widget_constructor_t)(alignment_t);
 
-void widget_invalidate_cache(int, int);
+void widget_invalidate_cache(int);
 int widget_calculate_offset(int, int, int, int);
 void widget_common_new(widget_t *);
 widget_t * widget_getbyname(const char *);
@@ -41,7 +41,7 @@ void widget_render(widget_node_t *, draw_context_t *, xcb_gcontext_t, xcb_drawab
 
 int luaA_widget_userdata_new(widget_t *);
 
-widget_constructor_t taglist_new;
+widget_constructor_t workspacelist_new;
 widget_constructor_t textbox_new;
 widget_constructor_t iconbox_new;
 widget_constructor_t progressbar_new;

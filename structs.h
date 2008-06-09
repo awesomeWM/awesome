@@ -50,6 +50,8 @@ enum
     CurTopLeft, CurTopRight, CurBotLeft, CurBotRight, CurLast
 };
 
+typedef struct workspace_t workspace_t;
+typedef void (layout_t)(workspace_t *);
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
 typedef struct widget_node_t widget_node_t;
@@ -58,8 +60,7 @@ typedef struct client_t client_t;
 typedef struct titlebar_t titlebar_t;
 typedef struct keybinding_t keybinding_t;
 typedef struct client_node_t client_node_t;
-typedef struct _tag_t tag_t;
-typedef struct tag_client_node_t tag_client_node_t;
+typedef struct workspace_client_node_t workspace_client_node_t;
 typedef area_t (FloatingPlacement)(client_t *);
 typedef struct awesome_t awesome_t;
 
@@ -279,8 +280,6 @@ struct client_t
     client_t *prev, *next;
     /** Window of the client */
     xcb_window_t win;
-    /** Client logical screen */
-    int screen;
     /** Client physical screen */
     int phys_screen;
     /** Layer in the stacking order */
@@ -299,18 +298,14 @@ struct client_node_t
     client_node_t *prev, *next;
 };
 
-/** Tag type */
-struct _tag_t
+/** Workspace type */
+struct workspace_t
 {
     /** Ref count */
     int refcount;
     /** Tag name */
     char *name;
-    /** Screen */
-    int screen;
-    /** true if selected */
-    bool selected;
-    /** Current tag layout */
+    /** Current workspace layout */
     layout_t *layout;
     /** Master width factor */
     double mwfact;
@@ -318,17 +313,19 @@ struct _tag_t
     int nmaster;
     /** Number of columns in tile layout */
     int ncol;
-    /** Next and previous tags */
-    tag_t *prev, *next;
+    /** True if we need to arrange() */
+    bool need_arrange;
+    /** Next and previous workspaces */
+    workspace_t *prev, *next;
 };
 
 /** Tag client link type */
-struct tag_client_node_t
+struct workspace_client_node_t
 {
-    tag_t *tag;
+    workspace_t *workspace;
     client_t *client;
-    /** Next and previous tag_client_nodes */
-    tag_client_node_t *prev, *next;
+    /** Next and previous workspace_client_nodes */
+    workspace_client_node_t *prev, *next;
 };
 
 /** Padding type */
@@ -344,16 +341,15 @@ typedef struct
     int right;
 } padding_t;
 
+/** An awesome screen. */
 typedef struct
 {
-    /** true if we need to arrange() */
-    bool need_arrange;
-    /** Tag list */
-    tag_t *tags;
     /** Status bar */
     statusbar_t *statusbar;
     /** Padding */
     padding_t padding;
+    /** Visible workspace */
+    workspace_t *workspace;
 } screen_t;
 
 /** Main configuration structure */
@@ -402,8 +398,8 @@ struct awesome_t
     client_node_t *focus;
     /** Stack client history */
     client_node_t *stack;
-    /** Link between tags and clients */
-    tag_client_node_t *tclink;
+    /** Link between workspaces and clients */
+    workspace_client_node_t *wclink;
     /** Command line passed to awesome */
     char *argv;
     /** Last XMotionEvent coords */
@@ -442,6 +438,8 @@ struct awesome_t
     } hooks;
     /** The timeout after which we need to stop select() */
     struct timeval timer;
+    /** Workspace list */
+    workspace_t *workspaces;
 };
 
 #endif

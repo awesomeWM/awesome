@@ -19,7 +19,7 @@
  *
  */
 
-#include "tag.h"
+#include "workspace.h"
 #include "screen.h"
 #include "client.h"
 #include "focus.h"
@@ -28,12 +28,13 @@
 extern awesome_t globalconf;
 
 void
-layout_max(int screen)
+layout_max(workspace_t *ws)
 {
     client_t *c, *focus;
+    int screen = workspace_screen_get(ws);
     area_t area = screen_area_get(screen,
-                                globalconf.screens[screen].statusbar,
-                                &globalconf.screens[screen].padding);
+                                  globalconf.screens[screen].statusbar,
+                                  &globalconf.screens[screen].padding);
 
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))
@@ -45,7 +46,7 @@ layout_max(int screen)
             area.height += 2 * c->border;
         }
 
-    if((focus = focus_get_current_client(screen))
+    if((focus = focus_client_getcurrent(screen))
        && IS_TILED(focus, screen))
         client_raise(focus);
 }

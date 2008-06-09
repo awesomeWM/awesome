@@ -26,6 +26,7 @@
 #include "screen.h"
 #include "client.h"
 #include "titlebar.h"
+#include "workspace.h"
 #include "layouts/floating.h"
 
 extern awesome_t globalconf;
@@ -71,21 +72,21 @@ placement_smart(client_t *c)
     area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
     area_t *screen_geometry, *arealist = NULL, *r;
     bool found = false;
-    layout_t *layout;
+    workspace_t *ws = workspace_client_get(c);
+    int screen = workspace_screen_get(ws);
 
     screen_geometry = p_new(area_t, 1);
 
-    *screen_geometry = screen_area_get(c->screen,
-                                       globalconf.screens[c->screen].statusbar,
-                                       &globalconf.screens[c->screen].padding);
+    *screen_geometry = screen_area_get(screen,
+                                       globalconf.screens[screen].statusbar,
+                                       &globalconf.screens[screen].padding);
 
-    layout = layout_get_current(c->screen);
 
     area_list_push(&arealist, screen_geometry);
 
     for(client = globalconf.clients; client; client = client->next)
-        if((client->isfloating || layout == layout_floating)
-            && client_isvisible(client, c->screen))
+        if((client->isfloating || ws->layout == layout_floating)
+            && client_isvisible(client, screen))
         {
             newgeometry = client->f_geometry;
             newgeometry.width += 2 * client->border;
@@ -119,7 +120,7 @@ placement_smart(client_t *c)
     newgeometry.height = c->f_geometry.height;
 
     newgeometry = titlebar_geometry_add(c->titlebar, newgeometry);
-    newgeometry = placement_fix_offscreen(newgeometry, c->screen, c->border);
+    newgeometry = placement_fix_offscreen(newgeometry, screen, c->border);
     newgeometry = titlebar_geometry_remove(c->titlebar, newgeometry);
 
     area_list_wipe(&arealist);
@@ -133,6 +134,7 @@ placement_under_mouse(client_t *c)
     xcb_query_pointer_cookie_t qp_c;
     xcb_query_pointer_reply_t *qp_r;
     area_t finalgeometry = c->f_geometry;
+    int screen = workspace_screen_get(workspace_client_get(c));
 
     qp_c = xcb_query_pointer(globalconf.connection,
                              xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root);
@@ -145,7 +147,7 @@ placement_under_mouse(client_t *c)
     }
 
     finalgeometry = titlebar_geometry_add(c->titlebar, finalgeometry);
-    finalgeometry = placement_fix_offscreen(finalgeometry, c->screen, c->border);
+    finalgeometry = placement_fix_offscreen(finalgeometry, screen, c->border);
     finalgeometry = titlebar_geometry_remove(c->titlebar, finalgeometry);
 
     return finalgeometry;

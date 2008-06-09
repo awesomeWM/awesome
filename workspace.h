@@ -1,5 +1,5 @@
 /*
- * tag.h - tag management header
+ * workspace.h - workspace management header
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_TAG_H
-#define AWESOME_TAG_H
+#ifndef AWESOME_WORKSPACE_H
+#define AWESOME_WORKSPACE_H
 
 #include "structs.h"
 #include "common/refcount.h"
@@ -29,28 +29,26 @@
 #define IS_TILED(client, screen)            (client && !client->isfloating && !client->ismax && client_isvisible(client, screen))
 
 /* Contructor, destructor and referencors */
-tag_t * tag_new(const char *, layout_t *, double, int, int);
+workspace_t * workspace_new(const char *, layout_t *, double, int, int);
 
 static inline void
-tag_delete(tag_t **tag)
+workspace_delete(workspace_t **workspace)
 {
-    p_delete(&(*tag)->name);
-    p_delete(tag);
+    p_delete(&(*workspace)->name);
+    p_delete(workspace);
 }
 
-tag_t ** tags_get_current(int);
-void tag_client(client_t *, tag_t *);
-void untag_client(client_t *, tag_t *);
-bool is_client_tagged(client_t *, tag_t *);
-void tag_client_with_current_selected(client_t *);
-void tag_view_only_byindex(int, int);
-void tag_append_to_screen(tag_t *, int);
-int luaA_tag_userdata_new(tag_t *);
+void workspace_client_set(client_t *, workspace_t *);
+workspace_t * workspace_client_get(client_t *);
+void workspace_client_remove(client_t *);
+int workspace_screen_get(workspace_t *);
 
-DO_RCNT(tag_t, tag, tag_delete)
-DO_SLIST(tag_t, tag, tag_delete)
+int luaA_workspace_userdata_new(workspace_t *);
 
-DO_SLIST(tag_client_node_t, tag_client_node, p_delete)
+DO_RCNT(workspace_t, workspace, workspace_delete)
+DO_SLIST(workspace_t, workspace, workspace_delete)
+
+DO_SLIST(workspace_client_node_t, workspace_client_node, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

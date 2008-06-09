@@ -24,7 +24,6 @@
 
 #include "statusbar.h"
 #include "screen.h"
-#include "tag.h"
 #include "widget.h"
 #include "window.h"
 
@@ -80,7 +79,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     xcb_screen_t *s = NULL;
     bool ignore = false;
 
-    globalconf.screens[statusbar->screen].need_arrange = true;
+    if(globalconf.screens[statusbar->screen].workspace)
+        globalconf.screens[statusbar->screen].workspace->need_arrange = true;
 
     simplewindow_delete(&statusbar->sw);
     draw_context_delete(&statusbar->ctx);
@@ -412,7 +412,8 @@ luaA_statusbar_remove(lua_State *L)
                 statusbar_position_update(*sb, Off);
                 statusbar_list_detach(&globalconf.screens[i].statusbar, *sb);
                 statusbar_unref(sb);
-                globalconf.screens[i].need_arrange = true;
+                if(globalconf.screens[s->screen].workspace)
+                    globalconf.screens[s->screen].workspace->need_arrange = true;
                 return 0;
             }
 

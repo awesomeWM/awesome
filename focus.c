@@ -21,7 +21,7 @@
 
 #include "focus.h"
 #include "cnode.h"
-#include "tag.h"
+#include "workspace.h"
 
 extern awesome_t globalconf;
 
@@ -61,38 +61,28 @@ focus_client_delete(client_t *c)
 }
 
 static client_t *
-focus_get_latest_client_for_tags(tag_t **t, int nindex)
+focus_get_latest_client_for_workspace(workspace_t *ws, int nindex)
 {
     client_node_t *node;
-    tag_t **tags;
     int i = 0;
 
     for(node = globalconf.focus; node; node = node->next)
         if(node->client && !node->client->skip)
-            for(tags = t; *tags; tags++)
-                if(is_client_tagged(node->client, *tags))
-                {
-                    if(i == nindex)
-                        return node->client;
-                    else
-                        i--;
-                }
+            if(workspace_client_get(node->client) == ws)
+                if(i-- == nindex)
+                    return node->client;
 
     return NULL;
 }
 
-/** Get the latest focused client on a screen.
- * \param screen The virtual screen number.
+/** Get the latest focused client on a workspace.
+ * \param ws The workspace.
  * \return A pointer to an existing client.
  */
 client_t *
-focus_get_current_client(int screen)
+focus_client_getcurrent(workspace_t *ws)
 {
-    tag_t **curtags = tags_get_current(screen);
-    client_t *sel = focus_get_latest_client_for_tags(curtags, 0);
-    p_delete(&curtags);
-
-    return sel;
+    return focus_get_latest_client_for_workspace(ws, 0);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
