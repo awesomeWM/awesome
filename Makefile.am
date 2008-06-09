@@ -5,6 +5,8 @@ SUFFIXES =
 bin_PROGRAMS =
 doc_DATA =
 man_MANS =
+etcdir = $(sysconfdir)/awesome
+etc_DATA =
 iconsdir = $(pkgdatadir)/icons
 dist_icons_DATA =
 iconslayoutsdir = $(iconsdir)/layouts
@@ -54,6 +56,8 @@ EXTRA_DIST    += awesomerc.lua.in
 CLEANFILES    += awesomerc.lua
 BUILT_SOURCES += awesomerc.lua
 doc_DATA      += awesomerc.lua
+etc_DATA      += awesomerc.lua
+
 awesomerc.lua: $(srcdir)/awesomerc.lua.in
 	$(SED) -e "s|[@]iconslayoutsdir@|$(iconslayoutsdir)|;s|[@]iconsdir@|$(iconsdir)|" \
 	    < $(srcdir)/awesomerc.lua.in > awesomerc.lua

@@ -113,6 +113,8 @@ test "x$LUA" = "x" && AC_MSG_WARN([awesome compilation requires Lua])
 
 AS_AC_EXPAND(awesomelibdir, "$datarootdir/awesome/lib")
 AC_DEFINE_UNQUOTED([AWESOME_LUA_LIB_PATH], "${awesomelibdir}", [awesome lib path])
+AS_AC_EXPAND(awesomesysconfdir, "$sysconfdir/awesome")
+AC_DEFINE_UNQUOTED([AWESOME_CONF_PATH], "${awesomesysconfdir}", [awesome conf path])
 
 # Checks for libraries.
 AC_PATH_XTRA
