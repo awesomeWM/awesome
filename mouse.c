@@ -365,6 +365,21 @@ mouse_client_move(client_t *c, int snap)
                     geometry.y = ocy + (ev_motion->event_y - query_pointer_r->root_y);
 
                     geometry = mouse_snapclient(c, geometry, snap);
+                    if((newscreen = screen_get_bycoord(globalconf.screens_info, screen,
+                                                       geometry.x, geometry.y)) != screen)
+                    {
+                        if((ws = globalconf.screens[newscreen].workspace))
+                        {
+                            screen = workspace_screen_get(ws);
+                            workspace_client_set(c, ws);
+                        }
+                        else
+                        {
+                            p_delete(&ev);
+                            break;
+                        }
+                    }
+
                     c->ismoving = true;
                     client_resize(c, geometry, false);
                     c->ismoving = false;
@@ -771,8 +786,8 @@ static int
 luaA_mouse_screen_get(lua_State *L)
 {
     int screen;
-    xcb_query_pointer_cookie_t qc; 
-    xcb_query_pointer_reply_t *qr; 
+    xcb_query_pointer_cookie_t qc;
+    xcb_query_pointer_reply_t *qr;
 
     qc = xcb_query_pointer(globalconf.connection,
                            xcb_aux_get_screen(globalconf.connection,
