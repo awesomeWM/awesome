@@ -39,7 +39,6 @@ function array_boundandcycle(t, i)
     return i
 end
 
-
 -- Function to get a client by its relative index:
 -- set i to 1 to get next, -1 to get previous.
 function client_next(i)
@@ -238,6 +237,19 @@ function client_togglefloating(c)
     end
 end
 
+-- Move a client to a screen. Default is next screen, cycling.
+function client_movetoscreen(c, s)
+    local sel = c or client.focus_get();
+    if sel then
+        local sc = screen.count()
+        if not s then
+            s = sel:screen_get() + 1
+        end
+        if s > sc then s = 1 elseif s < 1 then s = sc end
+        sel:screen_set(s)
+    end
+end
+
 function layout_get(screen)
     local t = tag_selected(screen)
     if t then
@@ -354,6 +366,7 @@ P.client =
     toggletag = client_toggletag;
     togglefloating = client_togglefloating;
     moveresize = client_moveresize;
+    movetoscreen = client_movetoscreen;
 }
 P.screen =
 {
