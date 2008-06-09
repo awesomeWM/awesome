@@ -49,13 +49,13 @@ arrange(workspace_t *ws)
     workspace_t *cws;
 
     for(c = globalconf.clients; c; c = c->next)
-        if((cws = workspace_client_get(c)) == ws)
+        if((cws = workspace_client_get(c)) == ws && !c->ishidden)
         {
             screen_client_moveto(c, screen);
             client_unban(c);
         }
         /* we don't touch other screens windows */
-        else if(workspace_screen_get(cws) == -1)
+        else if(c->ishidden || workspace_screen_get(cws) == -1)
             client_ban(c);
 
     qp_c = xcb_query_pointer_unchecked(globalconf.connection,

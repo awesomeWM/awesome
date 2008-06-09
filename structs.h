@@ -274,10 +274,10 @@ struct client_t
     bool skip;
     /** true if the client is moving */
     bool ismoving;
+    /** True if the client is hidden */
+    bool ishidden;
     /** true if the client must be skipped from task bar client list */
     bool skiptb;
-    /** Next and previous clients */
-    client_t *prev, *next;
     /** Window of the client */
     xcb_window_t win;
     /** Client physical screen */
@@ -288,6 +288,8 @@ struct client_t
     char *icon_path;
     /** Titlebar */
     titlebar_t *titlebar;
+    /** Next and previous clients */
+    client_t *prev, *next;
 };
 
 struct client_node_t

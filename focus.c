@@ -67,7 +67,7 @@ focus_get_latest_client_for_workspace(workspace_t *ws, int nindex)
     int i = 0;
 
     for(node = globalconf.focus; node; node = node->next)
-        if(node->client && !node->client->skip)
+        if(node->client && !node->client->skip && !node->client->ishidden)
             if(workspace_client_get(node->client) == ws)
                 if(i-- == nindex)
                     return node->client;

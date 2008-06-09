@@ -126,7 +126,7 @@ client_isvisible_anyscreen(client_t *c)
     workspace_t *ws;
     int screen;
 
-    if(c)
+    if(c && !c->ishidden)
     {
         ws = workspace_client_get(c);
         for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
@@ -146,7 +146,7 @@ client_isvisible_anyscreen(client_t *c)
 bool
 client_isvisible(client_t *c, int screen)
 {
-    if(c)
+    if(c && !c->ishidden)
         return (workspace_client_get(c) == globalconf.screens[screen].workspace);
     return false;
 }
@@ -850,7 +850,7 @@ luaA_client_visible_get(lua_State *L)
     lua_newtable(L);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(!c->skip && client_isvisible(c, screen))
+        if(!c->skip && !c->ishidden && client_isvisible(c, screen))
         {
             luaA_client_userdata_new(c);
             lua_rawseti(L, -2, i++);
@@ -1169,6 +1169,28 @@ luaA_client_unmanage(lua_State *L)
     return 0;
 }
 
+/** Hide a client.
+ */
+static int
+luaA_client_hide(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    (*c)->ishidden = true;
+    workspace_client_get(*c)->need_arrange = true;
+    return 0;
+}
+
+/** Unhide a client.
+ */
+static int
+luaA_client_unhide(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    (*c)->ishidden = false;
+    workspace_client_get(*c)->need_arrange = true;
+    return 0;
+}
+
 int
 luaA_client_userdata_new(client_t *c)
 {
@@ -1209,6 +1231,8 @@ const struct luaL_reg awesome_client_meta[] =
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },
     { "unmanage", luaA_client_unmanage },
+    { "hide", luaA_client_hide },
+    { "unhide", luaA_client_unhide },
     { "__eq", luaA_client_eq },
     { "__tostring", luaA_client_tostring },
     { NULL, NULL }
