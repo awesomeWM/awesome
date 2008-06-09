@@ -37,7 +37,7 @@ layout_magnifier(workspace_t *ws)
                                             globalconf.screens[screen].statusbar,
                                             &globalconf.screens[screen].padding);
 
-    focus = focus_client_getcurrent(screen);
+    focus = focus_client_getcurrent(ws);
 
     /* If focused window is not tiled, take the first one which is tiled. */
     if(!IS_TILED(focus, screen))

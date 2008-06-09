@@ -46,7 +46,7 @@ layout_max(workspace_t *ws)
             area.height += 2 * c->border;
         }
 
-    if((focus = focus_client_getcurrent(screen))
+    if((focus = focus_client_getcurrent(ws))
        && IS_TILED(focus, screen))
         client_raise(focus);
 }

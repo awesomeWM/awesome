@@ -57,7 +57,7 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
       case ShowWorkspace:
         return client_isvisible(c, screen);
       case ShowFocus:
-        return (c == focus_client_getcurrent(screen));
+        return (c == focus_client_getcurrent(globalconf.screens[screen].workspace));
     }
     return false;
 }

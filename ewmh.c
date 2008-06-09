@@ -238,7 +238,7 @@ void
 ewmh_update_net_active_window(int phys_screen)
 {
     xcb_window_t win;
-    client_t *sel = focus_client_getcurrent(phys_screen);
+    client_t *sel = focus_client_getcurrent(globalconf.screens[phys_screen].workspace);
 
     win = sel ? sel->win : XCB_NONE;
 
