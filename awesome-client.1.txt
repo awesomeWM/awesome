@@ -16,6 +16,7 @@ DESCRIPTION
 
 awesome-client is the command line interface to awesome. It communicates with awesome
 via a socket located in the users's HOME directory.
+It permits to execute Lua code remotely.
 
 USAGE
 -----
@@ -24,25 +25,6 @@ awesome-client reads commands from standard input.
 
 When you pipe multiple lines into awesome-client, an empty line will flush already
 collected lines into awesome with an according immediate execution.
-
-The command format is:
- screen_number command argument
-
-For example, to change a statusbar textbox text on screen 0, you can do the following:
-
-    echo 0 widget_tell <statusbar-name> <textbox-name> text Hello, world | awesome-client
-
-To change an iconbox image on screen 1, you can do the following:
-
-    echo 0 widget_tell <statusbar-name> <iconbox-name> image /home/user/image.jpg | awesome-client
-
-To view tag number 3 on screen 1:
-
-    echo 1 tag_view 3 | awesome-client
-
-To zoom focused window on screen 0:
-
-    echo 0 client_swap 0 | awesome-client
 
 
 SEE ALSO
