@@ -20,19 +20,18 @@
  */
 
 #include "screen.h"
-#include "workspace.h"
+#include "tag.h"
 #include "client.h"
 #include "layouts/fibonacci.h"
 
 extern awesome_t globalconf;
 
 static void
-layout_fibonacci(workspace_t *ws, int shape)
+layout_fibonacci(int screen, int shape)
 {
     int n = 0, i = 0;
     client_t *c;
     area_t geometry, area;
-    int screen = workspace_screen_get(ws);
     geometry = area = screen_area_get(screen,
                                       globalconf.screens[screen].statusbar,
                                       &globalconf.screens[screen].padding);
@@ -89,15 +88,15 @@ layout_fibonacci(workspace_t *ws, int shape)
 }
 
 void
-layout_spiral(workspace_t *ws)
+layout_spiral(int screen)
 {
-    layout_fibonacci(ws, 0);
+    layout_fibonacci(screen, 0);
 }
 
 void
-layout_dwindle(workspace_t *ws)
+layout_dwindle(int screen)
 {
-    layout_fibonacci(ws, 1);
+    layout_fibonacci(screen, 1);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

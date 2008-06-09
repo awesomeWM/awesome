@@ -32,7 +32,7 @@ LAYOUTS += layouts/magnifier.c
 LAYOUTS += layouts/magnifier.h
 
 WIDGETS =
-WIDGETS += widgets/workspacelist.c
+WIDGETS += widgets/taglist.c
 WIDGETS += widgets/textbox.c
 WIDGETS += widgets/iconbox.c
 WIDGETS += widgets/progressbar.c
@@ -128,7 +128,7 @@ awesome_SOURCES = \
 	layout.c layout.h \
 	keybinding.c keybinding.h \
 	awesome.c \
-	workspace.c workspace.h \
+	tag.c tag.h \
 	lua.c lua.h \
 	screen.c screen.h \
 	statusbar.c statusbar.h \

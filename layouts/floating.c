@@ -20,16 +20,15 @@
  */
 
 #include "client.h"
-#include "workspace.h"
+#include "tag.h"
 #include "layouts/floating.h"
 
 extern awesome_t globalconf;
 
 void
-layout_floating(workspace_t *ws)
+layout_floating(int screen)
 {
     client_t *c;
-    int screen = workspace_screen_get(ws);
 
     for(c = globalconf.clients; c; c = c->next)
         if(client_isvisible(c, screen) && !c->ismax)

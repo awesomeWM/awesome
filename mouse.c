@@ -27,7 +27,7 @@
 
 #include "mouse.h"
 #include "screen.h"
-#include "workspace.h"
+#include "tag.h"
 #include "event.h"
 #include "client.h"
 #include "titlebar.h"
@@ -126,12 +126,11 @@ static area_t
 mouse_snapclient(client_t *c, area_t geometry, int snap)
 {
     client_t *snapper;
-    int screen = workspace_screen_get(workspace_client_get(c));
     area_t snapper_geometry;
     area_t screen_geometry =
-        screen_area_get(screen,
-                        globalconf.screens[screen].statusbar,
-                        &globalconf.screens[screen].padding);
+        screen_area_get(c->screen,
+                        globalconf.screens[c->screen].statusbar,
+                        &globalconf.screens[c->screen].padding);
 
     geometry = titlebar_geometry_add(c->titlebar, geometry);
     geometry.width += 2 * c->border;
@@ -141,7 +140,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
         mouse_snapclienttogeometry_inside(geometry, screen_geometry, snap);
 
     for(snapper = globalconf.clients; snapper; snapper = snapper->next)
-        if(snapper != c && client_isvisible(c, screen))
+        if(snapper != c && client_isvisible(c, c->screen))
         {
             snapper_geometry = snapper->geometry;
             snapper_geometry.width += 2 * c->border;
@@ -297,9 +296,10 @@ mouse_warp_pointer(xcb_window_t window, int x, int y)
 static void
 mouse_client_move(client_t *c, int snap)
 {
+    int ocx, ocy, newscreen;
     area_t geometry;
     client_t *target;
-    workspace_t *ws = workspace_client_get(c);
+    layout_t *layout;
     simple_window_t *sw = NULL;
     draw_context_t *ctx;
     xcb_generic_event_t *ev = NULL;
@@ -309,8 +309,8 @@ mouse_client_move(client_t *c, int snap)
     xcb_query_pointer_reply_t *query_pointer_r = NULL, *mquery_pointer_r = NULL;
     xcb_query_pointer_cookie_t query_pointer_c;
     xcb_screen_t *s;
-    int ocx, ocy, newscreen, screen = workspace_screen_get(ws);
 
+    layout = layout_get_current(c->screen);
     s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
     /* Send pointer requests */
@@ -334,16 +334,18 @@ mouse_client_move(client_t *c, int snap)
 
     query_pointer_r = xcb_query_pointer_reply(globalconf.connection, query_pointer_c, NULL);
 
-    if(c->isfloating || ws->layout == layout_floating)
+    if(c->isfloating || layout == layout_floating)
     {
         sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
         xcb_aux_sync(globalconf.connection);
     }
 
     while(true)
+    {
         /* XMaskEvent allows to retrieve only specified events from
          * the queue and requeue the other events... */
         while(ev || (ev = xcb_wait_for_event(globalconf.connection)))
+        {
             switch((ev->response_type & 0x7f))
             {
               case XCB_BUTTON_RELEASE:
@@ -357,7 +359,7 @@ mouse_client_move(client_t *c, int snap)
                 p_delete(&ev);
                 return;
               case XCB_MOTION_NOTIFY:
-                if(c->isfloating || ws->layout == layout_floating)
+                if(c->isfloating || layout == layout_floating)
                 {
                     ev_motion = (xcb_motion_notify_event_t *) ev;
 
@@ -365,21 +367,6 @@ mouse_client_move(client_t *c, int snap)
                     geometry.y = ocy + (ev_motion->event_y - query_pointer_r->root_y);
 
                     geometry = mouse_snapclient(c, geometry, snap);
-                    if((newscreen = screen_get_bycoord(globalconf.screens_info, screen,
-                                                       geometry.x, geometry.y)) != screen)
-                    {
-                        if((ws = globalconf.screens[newscreen].workspace))
-                        {
-                            screen = workspace_screen_get(ws);
-                            workspace_client_set(c, ws);
-                        }
-                        else
-                        {
-                            p_delete(&ev);
-                            break;
-                        }
-                    }
-
                     c->ismoving = true;
                     client_resize(c, geometry, false);
                     c->ismoving = false;
@@ -393,24 +380,20 @@ mouse_client_move(client_t *c, int snap)
                 {
                     query_pointer_c = xcb_query_pointer_unchecked(globalconf.connection, s->root);
                     mquery_pointer_r = xcb_query_pointer_reply(globalconf.connection, query_pointer_c, NULL);
-                    if((newscreen = screen_get_bycoord(globalconf.screens_info,
-                                                       screen,
+                    if((newscreen = screen_get_bycoord(globalconf.screens_info, c->screen,
                                                        mquery_pointer_r->root_x,
-                                                       mquery_pointer_r->root_y)) != screen
-                       && globalconf.screens[newscreen].workspace)
+                                                       mquery_pointer_r->root_y)) != c->screen)
                     {
-                        ws->need_arrange = true;
-                        ws = globalconf.screens[newscreen].workspace;
-                        screen = workspace_screen_get(ws);
-                        workspace_client_set(c, ws);
-                        ws->need_arrange = true;
+                        screen_client_moveto(c, newscreen, true);
+                        globalconf.screens[c->screen].need_arrange = true;
+                        globalconf.screens[newscreen].need_arrange = true;
                         layout_refresh();
                     }
                     if((target = client_getbywin(mquery_pointer_r->child))
                        && target != c && !target->isfloating)
                     {
                         client_list_swap(&globalconf.clients, c, target);
-                        ws->need_arrange = true;
+                        globalconf.screens[c->screen].need_arrange = true;
                         layout_refresh();
                     }
                     p_delete(&mquery_pointer_r);
@@ -425,6 +408,8 @@ mouse_client_move(client_t *c, int snap)
                 p_delete(&ev);
                 break;
             }
+        }
+    }
 }
 
 
@@ -592,57 +577,62 @@ mouse_client_resize_floating(client_t *c, corner_t corner)
 }
 
 /** Resize the master column/row of a tiled layout
- * \param c A client on the workspace/layout to resize.
+ * \param c A client on the tag/layout to resize.
  */
 static void
 mouse_client_resize_tiled(client_t *c)
 {
-    xcb_screen_t *xscreen;
+    xcb_screen_t *screen;
     /* screen area modulo statusbar */
     area_t area;
-    /* current workspace */
-    workspace_t *ws = workspace_client_get(c);
-    int mouse_x, mouse_y, screen = workspace_screen_get(ws);
+    /* current tag */
+    tag_t *tag;
+    /* current layout */
+    layout_t *layout;
+
+    int mouse_x, mouse_y;
     size_t cursor = CurResize;
 
-    xscreen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    screen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    tag = tags_get_current(c->screen)[0];
+    layout = tag->layout;
 
-    area = screen_area_get(screen,
-                           globalconf.screens[screen].statusbar,
-                           &globalconf.screens[screen].padding);
+    area = screen_area_get(tag->screen,
+                           globalconf.screens[tag->screen].statusbar,
+                           &globalconf.screens[tag->screen].padding);
 
-    mouse_query_pointer(xscreen->root, &mouse_x, &mouse_y);
+    mouse_query_pointer(screen->root, &mouse_x, &mouse_y);
 
     /* select initial pointer position */
-    if(ws->layout == layout_tile)
+    if(layout == layout_tile)
     {
-        mouse_x = area.x + area.width * ws->mwfact;
+        mouse_x = area.x + area.width * tag->mwfact;
         cursor = CurResizeH;
     }
-    else if(ws->layout == layout_tileleft)
+    else if(layout == layout_tileleft)
     {
-        mouse_x = area.x + area.width * (1. - ws->mwfact);
+        mouse_x = area.x + area.width * (1. - tag->mwfact);
         cursor = CurResizeH;
     }
-    else if(ws->layout == layout_tilebottom)
+    else if(layout == layout_tilebottom)
     {
-        mouse_y = area.y + area.height * ws->mwfact;
+        mouse_y = area.y + area.height * tag->mwfact;
         cursor = CurResizeV;
     }
-    else if(ws->layout == layout_tiletop)
+    else if(layout == layout_tiletop)
     {
-        mouse_y = area.y + area.height * (1. - ws->mwfact);
+        mouse_y = area.y + area.height * (1. - tag->mwfact);
         cursor = CurResizeV;
     }
     else
         return;
 
     /* grab the pointer */
-    if(!mouse_grab_pointer(xscreen->root, cursor))
+    if(!mouse_grab_pointer(screen->root, cursor))
         return;
 
     /* set pointer to the moveable border */
-    mouse_warp_pointer(xscreen->root, mouse_x, mouse_y);
+    mouse_warp_pointer(screen->root, mouse_x, mouse_y);
 
     xcb_aux_sync(globalconf.connection);
 
@@ -655,20 +645,20 @@ mouse_client_resize_tiled(client_t *c)
         fact_x = (double) (mouse_x - area.x) / area.width;
         fact_y = (double) (mouse_y - area.y) / area.height;
 
-        if(ws->layout == layout_tile)
+        if(layout == layout_tile)
             mwfact = fact_x;
-        else if(ws->layout == layout_tileleft)
+        else if(layout == layout_tileleft)
             mwfact = 1. - fact_x;
-        else if(ws->layout == layout_tilebottom)
+        else if(layout == layout_tilebottom)
             mwfact = fact_y;
-        else if(ws->layout == layout_tiletop)
+        else if(layout == layout_tiletop)
             mwfact = 1. - fact_y;
 
         /* refresh layout */
-        if(fabs(ws->mwfact - mwfact) >= 0.01)
+        if(fabs(tag->mwfact - mwfact) >= 0.01)
         {
-            ws->mwfact = mwfact;
-            ws->need_arrange = true;
+            tag->mwfact = mwfact;
+            globalconf.screens[tag->screen].need_arrange = true;
             layout_refresh();
             xcb_aux_sync(globalconf.connection);
         }
@@ -689,13 +679,16 @@ static void
 mouse_client_resize(client_t *c, corner_t corner)
 {
     int n, screen;
-    workspace_t *ws = workspace_client_get(c);
+    tag_t **curtags;
+    layout_t *layout;
     xcb_screen_t *s;
 
+    curtags = tags_get_current(c->screen);
+    layout = curtags[0]->layout;
     s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
     /* only handle floating and tiled layouts */
-    if(ws->layout == layout_floating || c->isfloating)
+    if(layout == layout_floating || c->isfloating)
     {
         if(c->isfixed)
             return;
@@ -704,16 +697,16 @@ mouse_client_resize(client_t *c, corner_t corner)
 
         mouse_client_resize_floating(c, corner);
     }
-    else if (ws->layout == layout_tile || ws->layout == layout_tileleft
-             || ws->layout == layout_tilebottom || ws->layout == layout_tiletop)
+    else if (layout == layout_tile || layout == layout_tileleft
+             || layout == layout_tilebottom || layout == layout_tiletop)
     {
-        screen = workspace_screen_get(ws);
+        screen = c->screen;
         for(n = 0, c = globalconf.clients; c; c = c->next)
             if(IS_TILED(c, screen))
                 n++;
 
         /* only masters on this screen? */
-        if(n <= ws->nmaster) return;
+        if(n <= curtags[0]->nmaster) return;
 
         /* no tiled clients on this screen? */
         for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
@@ -786,8 +779,8 @@ static int
 luaA_mouse_screen_get(lua_State *L)
 {
     int screen;
-    xcb_query_pointer_cookie_t qc;
-    xcb_query_pointer_reply_t *qr;
+    xcb_query_pointer_cookie_t qc; 
+    xcb_query_pointer_reply_t *qr; 
 
     qc = xcb_query_pointer(globalconf.connection,
                            xcb_aux_get_screen(globalconf.connection,

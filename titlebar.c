@@ -28,7 +28,6 @@
 #include "client.h"
 #include "screen.h"
 #include "widget.h"
-#include "workspace.h"
 #include "layouts/floating.h"
 
 extern awesome_t globalconf;
@@ -111,7 +110,7 @@ titlebar_draw(client_t *c)
     }
 
     widget_render(c->titlebar->widgets, ctx, c->titlebar->sw->gc, c->titlebar->sw->pixmap,
-                  workspace_screen_get(workspace_client_get(c)), c->titlebar->position,
+                  c->screen, c->titlebar->position,
                   c->titlebar->sw->geometry.x, c->titlebar->sw->geometry.y, c->titlebar);
 
     switch(c->titlebar->position)

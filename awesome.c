@@ -52,6 +52,7 @@
 #include "client.h"
 #include "focus.h"
 #include "ewmh.h"
+#include "tag.h"
 #include "dbus.h"
 #include "statusbar.h"
 #include "common/socket.h"

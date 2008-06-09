@@ -21,25 +21,33 @@ modkey = "Mod4"
 layouts = { "tile", "tileleft", "tilebottom", "tiletop", "magnifier", "max", "spiral", "dwindle", "floating" }
 -- }}}
 
--- {{{ Workspaces
--- Define workspaces table
-workspaces = {}
--- Create 9 workspaces
-for i = 1, 9 do
-    workspaces[i] = workspace.new({ name = i })
-    workspaces[i]:add(s)
+-- {{{ Tags
+-- Define tags table
+tags = {}
+for s = 1, screen.count() do
+    -- Each screen has its own tag table
+    tags[s] = {}
+    -- Create 9 tags per screen
+    for tagnumber = 1, 9 do
+        tags[s][tagnumber] = tag.new({ name = tagnumber })
+        -- Add tags to screen one by one
+        tags[s][tagnumber]:add(s)
+    end
+    -- I'm sure you want to see at least one tag.
+    tags[s][1]:view(true)
 end
--- I'm sure you want to see at least one workspace
-workspaces[1]:screen_set(1)
 -- }}}
 
 -- {{{ Statusbar
--- Create a workspacelist widget
-myworkspacelist = widget.new({ type = "workspacelist", name = "myworkspacelist" })
-myworkspacelist:mouse({ }, 1, function (object, workspace) workspace:screen_set(mouse.screen_get()) end)
-myworkspacelist:mouse({ }, 4, awful.workspace.viewnext)
-myworkspacelist:mouse({ }, 5, awful.workspace.viewprev)
-myworkspacelist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
+-- Create a taglist widget
+mytaglist = widget.new({ type = "taglist", name = "mytaglist" })
+mytaglist:mouse({}, 1, function (object, tag) awful.tag.viewonly(tag) end)
+mytaglist:mouse({ modkey }, 1, function (object, tag) awful.client.toggletag(tag) end)
+mytaglist:mouse({}, 3, function (object, tag) tag:view(not tag:isselected()) end)
+mytaglist:mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end)
+mytaglist:mouse({ }, 4, awful.tag.viewnext)
+mytaglist:mouse({ }, 5, awful.tag.viewprev)
+mytaglist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
 
 -- Create a tasklist widget
 mytasklist = widget.new({ type = "tasklist", name = "mytasklist" })
@@ -74,7 +82,7 @@ for s = 1, screen.count() do
     mystatusbar = statusbar.new({ position = "top", name = "mystatusbar" .. s,
                                 fg = "lightblue", bg = "black" })
     -- Add widgets to the statusbar - order matters
-    mystatusbar:widget_add(myworkspacelist)
+    mystatusbar:widget_add(mytaglist)
     mystatusbar:widget_add(myiconbox)
     mystatusbar:widget_add(mytasklist)
     mystatusbar:widget_add(mytextbox)
@@ -85,8 +93,8 @@ end
 
 -- {{{ Mouse bindings
 awesome.mouse({ }, 3, function () awful.spawn(terminal) end)
-awesome.mouse({ }, 4, awful.workspace.viewnext)
-awesome.mouse({ }, 5, awful.workspace.viewprev)
+awesome.mouse({ }, 4, awful.tag.viewnext)
+awesome.mouse({ }, 5, awful.tag.viewprev)
 client.mouse({ }, 1, function (c) c:focus_set(); c:raise() end)
 client.mouse({ modkey }, 1, function (c) c:mouse_move() end)
 client.mouse({ modkey }, 3, function (c) c:mouse_resize() end)
@@ -96,20 +104,44 @@ client.mouse({ modkey }, 3, function (c) c:mouse_resize() end)
 
 -- Bind keyboard digits
 -- Compute the maximum number of digit we need, limited to 9
-keynumber = math.min(9, #workspaces);
+keynumber = 0
+for s = 1, screen.count() do
+   keynumber = math.min(9, math.max(#tags[s], keynumber));
+end
+
 for i = 1, keynumber do
     keybinding.new({ modkey }, i,
                    function ()
-                       workspaces[i]:screen_set(mouse.screen_get())
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           awful.tag.viewonly(tags[screen][i])
+                       end
+                   end):add()
+    keybinding.new({ modkey, "Control" }, i,
+                   function ()
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           tags[i]:view(not tags[screen][i]:isselected())
+                       end
                    end):add()
     keybinding.new({ modkey, "Shift" }, i,
                    function ()
-                       client.focus_get():workspace_set(workspaces[i])
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           awful.client.movetotag(tags[screen][i])
+                       end
+                   end):add()
+    keybinding.new({ modkey, "Control", "Shift" }, i,
+                   function ()
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           awful.client.toggletag(tags[screen][i])
+                       end
                    end):add()
 end
 
-keybinding.new({ modkey }, "Left", awful.workspace.viewprev):add()
-keybinding.new({ modkey }, "Right", awful.workspace.viewnext):add()
+keybinding.new({ modkey }, "Left", awful.tag.viewprev):add()
+keybinding.new({ modkey }, "Right", awful.tag.viewnext):add()
 
 -- Standard program
 keybinding.new({ modkey }, "Return", function () awful.spawn(terminal) end):add()
@@ -129,12 +161,12 @@ keybinding.new({ modkey, "Control" }, "space", awful.client.togglefloating):add(
 keybinding.new({ modkey }, "o", awful.client.movetoscreen):add()
 
 -- Layout manipulation
-keybinding.new({ modkey }, "l", function () awful.workspace.incmwfact(0.05) end):add()
-keybinding.new({ modkey }, "h", function () awful.workspace.incmwfact(-0.05) end):add()
-keybinding.new({ modkey, "Shift" }, "h", function () awful.workspace.incnmaster(1) end):add()
-keybinding.new({ modkey, "Shift" }, "l", function () awful.workspace.incnmaster(-1) end):add()
-keybinding.new({ modkey, "Control" }, "h", function () awful.workspace.incncol(1) end):add()
-keybinding.new({ modkey, "Control" }, "l", function () awful.workspace.incncol(1) end):add()
+keybinding.new({ modkey }, "l", function () awful.tag.incmwfact(0.05) end):add()
+keybinding.new({ modkey }, "h", function () awful.tag.incmwfact(-0.05) end):add()
+keybinding.new({ modkey, "Shift" }, "h", function () awful.tag.incnmaster(1) end):add()
+keybinding.new({ modkey, "Shift" }, "l", function () awful.tag.incnmaster(-1) end):add()
+keybinding.new({ modkey, "Control" }, "h", function () awful.tag.incncol(1) end):add()
+keybinding.new({ modkey, "Control" }, "l", function () awful.tag.incncol(1) end):add()
 keybinding.new({ modkey }, "space", function () awful.layout.inc(layouts, 1) end):add()
 keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -1) end):add()
 -- }}}
@@ -153,7 +185,7 @@ end
 -- Hook function to exeucte when the mouse is over a client.
 function hook_mouseover(c)
     -- Sloppy focus, but disabled for magnifier layout
-    if c:workspace_get():layout_get() ~= "magnifier" then
+    if awful.layout.get(c:screen_get()) ~= "magnifier" then
         c:focus_set()
     end
 end
@@ -170,10 +202,10 @@ function hook_newclient(c)
 end
 
 -- Hook function to execute when arranging the screen
--- (workspace switch, new client, etc)
-function hook_arrange(ws)
-    local screen = ws:screen_get()
-    mylayoutbox[screen]:set("image", "@iconsdir@/layouts/" .. ws:layout_get() .. "w.png")
+-- (tag switch, new client, etc)
+function hook_arrange(screen)
+    local layout = awful.layout.get(screen)
+    mylayoutbox[screen]:set("image", "@iconsdir@/layouts/" .. layout .. "w.png")
 end
 
 -- Hook called every second

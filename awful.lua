@@ -20,7 +20,7 @@ local pairs = pairs
 local awesome = awesome
 local screen = screen
 local client = client
-local workspace = workspace
+local tag = tag
 local mouse = mouse
 local os = os
 local table = table
@@ -84,7 +84,13 @@ function client_moveresize(x, y, w, h)
 end
 
 function screen_focus(i)
-    local s = mouse.screen_get()
+    local sel = client.focus_get()
+    local s
+    if sel then
+        s = sel:screen_get()
+    else
+        s = mouse.screen_get()
+    end
     local count = screen.count()
     s = s + i
     if s < 1 then
@@ -92,81 +98,136 @@ function screen_focus(i)
     elseif s > count then
         s = 1
     end
-    local ws = screen.workspace_get(s)
-    if ws then
-        ws:focus_set()
-    end
+    screen.focus(s)
     -- Move the mouse on the screen
     local screen_coords = screen.coords_get(s)
     mouse.coords_set(screen_coords['x'], screen_coords['y'])
 end
 
+-- Return a table with all visible tags
+function tag_selectedlist(s)
+    local idx = 1
+    local screen = s or mouse.screen_get()
+    local tags = tag.get(screen)
+    local vtags = {}
+    for i, t in ipairs(tags) do
+        if t:isselected() then
+            vtags[idx] = t
+            idx = idx + 1
+        end
+    end
+    return vtags
+end
+
+-- Return only the first element of all visible tags,
+-- so that's the first visible tags.
+function tag_selected(s)
+    return tag_selectedlist(s)[1]
+end
+
 -- Set master width factor
-function workspace_setmwfact(i)
-    local t = workspace_selected()
+function tag_setmwfact(i)
+    local t = tag_selected()
     if t then
         t:mwfact_set(i)
     end
 end
 
 -- Increase master width factor
-function workspace_incmwfact(i)
-    local t = workspace_selected()
+function tag_incmwfact(i)
+    local t = tag_selected()
     if t then
         t:mwfact_set(t:mwfact_get() + i)
     end
 end
 
 -- Set number of master windows
-function workspace_setnmaster(i)
-    local t = workspace_selected()
+function tag_setnmaster(i)
+    local t = tag_selected()
     if t then
         t:nmaster_set(i)
     end
 end
 
 -- Increase number of master windows
-function workspace_incnmaster(i)
-    local t = workspace_selected()
+function tag_incnmaster(i)
+    local t = tag_selected()
     if t then
         t:nmaster_set(t:nmaster_get() + i)
     end
 end
 
 -- Set number of column windows
-function workspace_setncol(i)
-    local t = workspace_selected()
+function tag_setncol(i)
+    local t = tag_selected()
     if t then
         t:ncol_set(i)
     end
 end
 
 -- Increase number of column windows
-function workspace_incncol(i)
-    local t = workspace_selected()
+function tag_incncol(i)
+    local t = tag_selected()
     if t then
         t:ncol_set(t:ncol_get() + i)
     end
 end
 
-function workspace_viewidx(r)
-    local workspaces = workspace.get()
-    local sel = workspace.visible_get(mouse.screen_get())
-    for i, t in ipairs(workspaces) do
+-- View no tag
+function tag_viewnone()
+    local tags = tag.get(mouse.screen_get())
+    for i, t in ipairs(tags) do
+        t:view(false)
+    end
+end
+
+function tag_viewidx(r)
+    local tags = tag.get(mouse.screen_get())
+    local sel = tag_selected()
+    tag_viewnone()
+    for i, t in ipairs(tags) do
         if t == sel then
-            workspaces[array_boundandcycle(workspaces, i + r)]:screen_set(mouse.screen_get())
+            tags[array_boundandcycle(tags, i + r)]:view(true)
         end
     end
 end
 
--- View next workspace
-function workspace_viewnext()
-    return workspace_viewidx(1)
+-- View next tag
+function tag_viewnext()
+    return tag_viewidx(1)
 end
 
--- View previous workspace
-function workspace_viewprev()
-    return workspace_viewidx(-1)
+-- View previous tag
+function tag_viewprev()
+    return tag_viewidx(-1)
+end
+
+function tag_viewonly(t)
+    tag_viewnone()
+    t:view(true)
+end
+
+function tag_viewmore(tags)
+    tag_viewnone()
+    for i, t in ipairs(tags) do
+        t:view(true)
+    end
+end
+
+function client_movetotag(target, c)
+    local sel = c or client.focus_get();
+    local tags = tag.get(mouse.screen_get())
+    for i, t in ipairs(tags) do
+        sel:tag(t, false)
+    end
+    sel:tag(target, true)
+end
+
+function client_toggletag(target, c)
+    local sel = c or client.focus_get();
+    if sel then
+        sel:tag(target, not sel:istagged(target))
+    end
 end
 
 function client_togglefloating(c)
@@ -189,11 +250,18 @@ function client_movetoscreen(c, s)
     end
 end
 
--- Function to change the layout of the current workspace.
+function layout_get(screen)
+    local t = tag_selected(screen)
+    if t then
+        return t:layout_get()
+    end
+end
+
+-- Function to change the layout of the current tag.
 -- layouts = table of layouts (define in .awesomerc.lua)
 -- i = relative index
 function layout_inc(layouts, i)
-    local t = workspace.visible_get(mouse.screen_get())
+    local t = tag_selected()
     local number_of_layouts = 0
     local rev_layouts = {}
     for i, v in ipairs(layouts) do
@@ -201,7 +269,7 @@ function layout_inc(layouts, i)
 	number_of_layouts = number_of_layouts + 1
     end
     if t then
-	local cur_layout = t:layout_get()
+	local cur_layout = layout_get()
 	local new_layout_index = (rev_layouts[cur_layout] + i) % number_of_layouts
 	if new_layout_index == 0 then
 	    new_layout_index = number_of_layouts
@@ -210,9 +278,9 @@ function layout_inc(layouts, i)
     end
 end
 
--- function to set the layout of the current workspace by name.
+-- function to set the layout of the current tag by name.
 function layout_set(layout)
-    local t = workspace.visible_get(mouse.screen_get())
+    local t = tag_selected()
     if t then
 	t:layout_set(layout)
     end
@@ -272,24 +340,30 @@ function spawn(cmd)
     return os.execute(cmd .. "&")
 end
 
--- Export workspaces function
-P.workspace =
+-- Export tags function
+P.tag =
 {
-    viewprev = workspace_viewprev;
-    viewnext = workspace_viewnext;
-    setmwfact = workspace_setmwfact;
-    incmwfact = workspace_incmwfact;
-    setncol = workspace_setncol;
-    incncol = workspace_incncol;
-    setnmaster = workspace_setnmaster;
-    incnmaster = workspace_incnmaster;
+    viewnone = tag_viewnone;
+    viewprev = tag_viewprev;
+    viewnext = tag_viewnext;
+    viewonly = tag_viewonly;
+    viewmore = tag_viewmore;
+    setmwfact = tag_setmwfact;
+    incmwfact = tag_incmwfact;
+    setncol = tag_setncol;
+    incncol = tag_incncol;
+    setnmaster = tag_setnmaster;
+    incnmaster = tag_incnmaster;
+    selected = tag_selected;
+    selectedlist = tag_selectedlist;
 }
 P.client =
 {
     next = client_next;
     focus = client_focus;
     swap = client_swap;
-    movetoworkspace = client_movetoworkspace;
+    movetotag = client_movetotag;
+    toggletag = client_toggletag;
     togglefloating = client_togglefloating;
     moveresize = client_moveresize;
     movetoscreen = client_movetoscreen;
@@ -300,6 +374,7 @@ P.screen =
 }
 P.layout =
 {
+    get = layout_get;
     set = layout_set;
     inc = layout_inc;
 }

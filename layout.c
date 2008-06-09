@@ -23,12 +23,13 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
 
+#include "tag.h"
 #include "focus.h"
 #include "widget.h"
 #include "window.h"
 #include "client.h"
 #include "screen.h"
-#include "workspace.h"
+#include "layouts/magnifier.h"
 #include "layouts/tile.h"
 #include "layouts/max.h"
 #include "layouts/fibonacci.h"
@@ -36,27 +37,26 @@
 
 extern awesome_t globalconf;
 
-/** Arrange windows following current selected layout.
- * \param ws The workspace to arrange.
+/** Arrange windows following current selected layout
+ * \param screen the screen to arrange
  */
 static void
-arrange(workspace_t *ws)
+arrange(int screen)
 {
     client_t *c;
-    int fscreen, screen = workspace_screen_get(ws), phys_screen = screen_virttophys(screen);
+    layout_t *curlay = layout_get_current(screen);
+    int fscreen, phys_screen = screen_virttophys(screen);
     xcb_query_pointer_cookie_t qp_c;
     xcb_query_pointer_reply_t *qp_r;
-    workspace_t *cws;
 
     for(c = globalconf.clients; c; c = c->next)
-        if((cws = workspace_client_get(c)) == ws && !c->ishidden)
-        {
-            screen_client_moveto(c, screen);
+    {
+        if(!c->ishidden && client_isvisible(c, screen))
             client_unban(c);
-        }
         /* we don't touch other screens windows */
-        else if(c->ishidden || workspace_screen_get(cws) == -1)
+        else if(c->screen == screen)
             client_ban(c);
+    }
 
     qp_c = xcb_query_pointer_unchecked(globalconf.connection,
                                        xcb_aux_get_screen(globalconf.connection,
@@ -81,25 +81,26 @@ arrange(workspace_t *ws)
             /* if the mouse in on the same screen we just rearranged, and no
              * client are currently focused, pick the first one in history */
             if(fscreen == screen
-               && (c = focus_client_getcurrent(ws)))
-                   client_focus(c);
+               && (c = focus_get_current_client(screen)))
+                   client_focus(c, screen);
         }
 
         p_delete(&qp_r);
     }
 
-    if(ws->layout)
-        ws->layout(ws);
+    if(curlay)
+        curlay(screen);
 
     /* reset status */
-    ws->need_arrange = false;
+    globalconf.screens[screen].need_arrange = false;
 
     /* call hook */
-    luaA_workspace_userdata_new(ws);
+    lua_pushnumber(globalconf.L, screen + 1);
     luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1);
 }
 
-/** Refresh the screens disposition.
+/** Refresh the screen disposition
+ * \return true if the screen was arranged, false otherwise
  */
 void
 layout_refresh(void)
@@ -107,8 +108,25 @@ layout_refresh(void)
     int screen;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
-        if(globalconf.screens[screen].workspace && globalconf.screens[screen].workspace->need_arrange)
-            arrange(globalconf.screens[screen].workspace);
+        if(globalconf.screens[screen].need_arrange)
+            arrange(screen);
+}
+
+/** Get current layout used on screen.
+ * \param screen Virtual screen number.
+ * \return layout used on that screen
+ */
+layout_t *
+layout_get_current(int screen)
+{
+    layout_t *l = NULL;
+    tag_t **curtags = tags_get_current(screen);
+
+    if(curtags[0])
+        l = curtags[0]->layout;
+    p_delete(&curtags);
+
+    return l;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

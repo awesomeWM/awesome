@@ -20,7 +20,7 @@
  */
 
 #include "client.h"
-#include "workspace.h"
+#include "tag.h"
 #include "screen.h"
 #include "focus.h"
 #include "layouts/magnifier.h"
@@ -28,16 +28,16 @@
 extern awesome_t globalconf;
 
 void
-layout_magnifier(workspace_t *ws)
+layout_magnifier(int screen)
 {
     int n = 0;
     client_t *c, *focus;
-    int screen = workspace_screen_get(ws);
+    tag_t **curtags = tags_get_current(screen);
     area_t geometry, area = screen_area_get(screen,
                                             globalconf.screens[screen].statusbar,
                                             &globalconf.screens[screen].padding);
 
-    focus = focus_client_getcurrent(ws);
+    focus = focus_get_current_client(screen);
 
     /* If focused window is not tiled, take the first one which is tiled. */
     if(!IS_TILED(focus, screen))
@@ -45,10 +45,10 @@ layout_magnifier(workspace_t *ws)
 
     /* No windows is tiled, nothing to do. */
     if(!focus)
-        return;
+        goto bailout;
 
-    geometry.width = area.width * ws->mwfact;
-    geometry.height = area.height * ws->mwfact;
+    geometry.width = area.width * curtags[0]->mwfact;
+    geometry.height = area.height * curtags[0]->mwfact;
     geometry.x = area.x + (area.width - geometry.width) / 2;
     geometry.y = area.y + (area.height - geometry.height) / 2;
     client_resize(focus, geometry, globalconf.resize_hints);
@@ -62,7 +62,7 @@ layout_magnifier(workspace_t *ws)
 
     /* No other clients. */
     if(!n)
-        return;
+        goto bailout;
 
     geometry.x = area.x;
     geometry.y = area.y;
@@ -81,5 +81,8 @@ layout_magnifier(workspace_t *ws)
             geometry.width += 2 * c->border;
             geometry.y += geometry.height;
         }
+
+bailout:
+    p_delete(&curtags);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

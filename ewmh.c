@@ -24,7 +24,7 @@
 #include <xcb/xcb_aux.h>
 
 #include "ewmh.h"
-#include "workspace.h"
+#include "tag.h"
 #include "focus.h"
 #include "screen.h"
 #include "client.h"
@@ -188,9 +188,9 @@ void
 ewmh_update_net_numbers_of_desktop(int phys_screen)
 {
     uint32_t count = 0;
-    workspace_t *workspace;
+    tag_t *tag;
 
-    for(workspace = globalconf.workspaces; workspace; workspace = workspace->next)
+    for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
         count++;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
@@ -202,14 +202,16 @@ void
 ewmh_update_net_current_desktop(int phys_screen)
 {
     uint32_t count = 0;
-    workspace_t *workspace;
+    tag_t *tag, **curtags = tags_get_current(phys_screen);
 
-    for(workspace = globalconf.workspaces; workspace; workspace = workspace->next)
+    for(tag = globalconf.screens[phys_screen].tags; tag != curtags[0]; tag = tag->next)
         count++;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
                         net_current_desktop, CARDINAL, 32, 1, &count);
+
+    p_delete(&curtags);
 }
 
 void
@@ -217,14 +219,14 @@ ewmh_update_net_desktop_names(int phys_screen)
 {
     char buf[1024], *pos;
     ssize_t len, curr_size;
-    workspace_t *workspace;
+    tag_t *tag;
 
     pos = buf;
     len = 0;
-    for(workspace = globalconf.workspaces; workspace; workspace = workspace->next)
+    for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
     {
-        curr_size = a_strlen(workspace->name);
-        a_strcpy(pos, sizeof(buf), workspace->name);
+        curr_size = a_strlen(tag->name);
+        a_strcpy(pos, sizeof(buf), tag->name);
         pos += curr_size + 1;
         len += curr_size + 1;
     }
@@ -238,7 +240,7 @@ void
 ewmh_update_net_active_window(int phys_screen)
 {
     xcb_window_t win;
-    client_t *sel = focus_client_getcurrent(globalconf.screens[phys_screen].workspace);
+    client_t *sel = focus_get_current_client(phys_screen);
 
     win = sel ? sel->win : XCB_NONE;
 
@@ -251,11 +253,12 @@ static void
 ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
     const uint32_t raise_window_val = XCB_STACK_MODE_ABOVE;
-    int screen;
 
     if(state == net_wm_state_sticky)
     {
-        /* \todo support for sticky */
+        tag_t *tag;
+        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+            tag_client(c, tag);
     }
     else if(state == net_wm_state_skip_taskbar)
     {
@@ -287,8 +290,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         }
         else if(set == _NET_WM_STATE_ADD)
         {
-            screen = workspace_screen_get(workspace_client_get(c));
-            geometry = screen_area_get(screen, NULL, &globalconf.screens[screen].padding);
+            geometry = screen_area_get(c->screen, NULL, &globalconf.screens[c->screen].padding);
             /* save geometry */
             c->m_geometry = c->geometry;
             c->wasfloating = c->isfloating;
@@ -304,7 +306,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->noborder = true;
             client_setfloating(c, true, LAYER_FULLSCREEN);
         }
-        widget_invalidate_cache(WIDGET_CACHE_CLIENTS);
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, false);
 	xcb_configure_window(globalconf.connection, c->win, XCB_CONFIG_WINDOW_STACK_MODE, &raise_window_val);
     }
@@ -365,21 +367,17 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
     client_t *c;
     int screen;
-    unsigned int i;
-    workspace_t *ws;
 
     if(ev->type == net_current_desktop)
-    {
         for(screen = 0;
             screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
             screen++)
+        {
             if(ev->window == xcb_aux_get_screen(globalconf.connection, screen)->root)
-            {
-                for(i = 0, ws = globalconf.workspaces; i < ev->data.data32[0]; i++, ws = ws ->next);
-                globalconf.screens[screen].workspace = ws;
-            }
-    }
-    else if(ev->type == net_close_window)
+                tag_view_only_byindex(screen, ev->data.data32[0]);
+        }
+
+    if(ev->type == net_close_window)
     {
         if((c = client_getbywin(ev->window)))
            client_kill(c);

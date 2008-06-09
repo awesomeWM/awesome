@@ -27,7 +27,7 @@
 #include <xcb/shape.h>
 
 #include "client.h"
-#include "workspace.h"
+#include "tag.h"
 #include "window.h"
 #include "focus.h"
 #include "ewmh.h"
@@ -44,40 +44,40 @@
 
 extern awesome_t globalconf;
 
-/** Load windows properties, restoring client's workspace
+/** Load windows properties, restoring client's tag
  * and floating state before awesome was restarted if any.
- * \todo This may bug if number of workspacess is != than before.
+ * \todo This may bug if number of tags is != than before.
  * \param c A client pointer.
+ * \param screen A virtual screen number.
  * \return True if client had property, false otherwise.
  */
 static bool
-client_loadprops(client_t * c)
+client_loadprops(client_t * c, int screen)
 {
-    int i, nworkspaces = 0;
-    workspace_t *workspace;
+    int i, ntags = 0;
+    tag_t *tag;
     char *prop = NULL;
     bool result = false;
-    xutil_intern_atom_request_t atom_q;
 
-    atom_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_AWESOME_PROPERTIES");
-
-    for(workspace = globalconf.workspaces; workspace; workspace = workspace->next)
-        nworkspaces++;
+    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+        ntags++;
 
     if(xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
-                         xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_q),
+                         xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                                 xutil_intern_atom(globalconf.connection,
+                                                                   &globalconf.atoms,
+                                                                   "_AWESOME_PROPERTIES")),
                          &prop))
     {
-        for(i = 0, workspace = globalconf.workspaces; workspace && i < nworkspaces && prop[i]; i++, workspace = workspace->next)
+        for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
             {
-                workspace_client_set(c, workspace);
+                tag_client(c, tag);
                 result = true;
-                break;
             }
+            else
+                untag_client(c, tag);
 
-        /* jump to the end */
-        i = nworkspaces;
         if(prop[i])
             client_setfloating(c, prop[i] == '1',
                                (prop[i + 1] >= 0 && prop[i + 1] <= LAYER_FULLSCREEN) ? atoi(&prop[i + 1]) : prop[i] == '1' ? LAYER_FLOAT : LAYER_TILE);
@@ -115,42 +115,43 @@ window_isprotodel(xcb_window_t win)
     return ret;
 }
 
-/** Returns true if a client is on a workspace visible
+/** Returns true if a client is tagged with one of the tags visibl
  * on any screen.
  * \param c The client.
- * \return True if client is visible, false otherwise.
+ * \return True if client is tagged, false otherwise.
  */
 static bool
 client_isvisible_anyscreen(client_t *c)
 {
-    workspace_t *ws;
+    tag_t *tag;
     int screen;
 
     if(c && !c->ishidden)
-    {
-        ws = workspace_client_get(c);
         for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
-            if(globalconf.screens[screen].workspace == ws)
-                return true;
-    }
+            for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+                if(tag->selected && is_client_tagged(c, tag))
+                    return true;
 
     return false;
 }
 
-/** Returns true if a client is on the workspace visible on the specified
- * screen.
+/** Returns true if a client is tagged
+ * with one of the tags of the specified screen.
  * \param c The client to check.
  * \param screen Virtual screen number.
- * \return True if the client is visible, false otherwise.
+ * \return true if the client is visible, false otherwise.
  */
 bool
 client_isvisible(client_t *c, int screen)
 {
-    if(c && !c->ishidden)
-        return (workspace_client_get(c) == globalconf.screens[screen].workspace);
+    tag_t *tag;
+
+    if(c && !c->ishidden && c->screen == screen)
+        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+            if(tag->selected && is_client_tagged(c, tag))
+                return true;
     return false;
 }
-
 /** Get a client by its window.
  * \param w The client window to find.
  * \return A client pointer if found, NULL otherwise.
@@ -193,18 +194,18 @@ client_updatetitle(client_t *c)
     luaA_client_userdata_new(c);
     luaA_dofunction(globalconf.L, globalconf.hooks.titleupdate, 1);
 
-    widget_invalidate_cache(WIDGET_CACHE_CLIENTS);
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 static void
 client_unfocus(client_t *c)
 {
     /* Call hook */
-    luaA_client_userdata_new(c);
+    luaA_client_userdata_new(globalconf.focus->client);
     luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1);
 
     focus_client_push(NULL);
-    widget_invalidate_cache(WIDGET_CACHE_CLIENTS);
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 /** Ban client and unmap it
@@ -223,40 +224,55 @@ client_ban(client_t *c)
 
 /** Give focus to client, or to first client if client is NULL,
  * \param c The client or NULL.
- * \return True if a window (even root).
+ * \param screen Virtual screen number.
+ * \return True if a window (even root) has received focus, false otherwise.
  */
 bool
-client_focus(client_t *c)
+client_focus(client_t *c, int screen)
 {
     int phys_screen;
 
-    if(!c)
-        return false;
+    /* if c is NULL or invisible, take next client in the focus history */
+    if((!c || (c && (!client_isvisible(c, screen))))
+       && !(c = focus_get_current_client(screen)))
+        /* if c is still NULL take next client in the stack */
+        for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
 
     /* unfocus current selected client */
     if(globalconf.focus->client)
         client_unfocus(globalconf.focus->client);
 
-    /* unban the client before focusing or it will fail */
-    client_unban(c);
-    /* save sel in focus history */
-    focus_client_push(c);
-    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-                        c->win, XCB_CURRENT_TIME);
-    /* since we're dropping EnterWindow events and sometimes the window
-     * will appear under the mouse, grabbuttons */
-    window_grabbuttons(c->win, c->phys_screen);
-    phys_screen = c->phys_screen;
+    if(c)
+    {
+        /* unban the client before focusing or it will fail */
+        client_unban(c);
+        /* save sel in focus history */
+        focus_client_push(c);
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+                            c->win, XCB_CURRENT_TIME);
+        /* since we're dropping EnterWindow events and sometimes the window
+         * will appear under the mouse, grabbuttons */
+        window_grabbuttons(c->win, c->phys_screen);
+        phys_screen = c->phys_screen;
 
-    /* Some layouts use focused client differently, so call them back. */
-    workspace_client_get(c)->need_arrange = true;
+        /* Some layouts use focused client differently, so call them back. */
+        globalconf.screens[c->screen].need_arrange = true;
 
-    /* execute hook */
-    luaA_client_userdata_new(globalconf.focus->client);
-    luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
+        /* execute hook */
+        luaA_client_userdata_new(globalconf.focus->client);
+        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
+    }
+    else
+    {
+        phys_screen = screen_virttophys(screen);
+        xcb_set_input_focus(globalconf.connection,
+                            XCB_INPUT_FOCUS_POINTER_ROOT,
+                            xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
+                            XCB_CURRENT_TIME);
+    }
 
     ewmh_update_net_active_window(phys_screen);
-    widget_invalidate_cache(WIDGET_CACHE_CLIENTS);
+    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
 
     return true;
 }
@@ -312,20 +328,20 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     client_t *c, *t = NULL;
     xcb_window_t trans;
     bool rettrans, retloadprops;
+    tag_t *tag;
     xcb_size_hints_t *u_size_hints;
-    int rscreen;
     const uint32_t select_input_val[] = {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE |
         XCB_EVENT_MASK_ENTER_WINDOW };
 
     c = p_new(client_t, 1);
 
-    rscreen = screen_get_bycoord(globalconf.screens_info, screen, wgeom->x, wgeom->y);
+    c->screen = screen_get_bycoord(globalconf.screens_info, screen, wgeom->x, wgeom->y);
 
     if(globalconf.screens_info->xinerama_is_active)
         c->phys_screen = globalconf.default_screen;
     else
-        c->phys_screen = rscreen;
+        c->phys_screen = c->screen;
 
     /* Initial values */
     c->win = w;
@@ -341,16 +357,18 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     client_updatewmhints(c);
 
     /* Try to load props if any */
-    if(!(retloadprops = client_loadprops(c)))
-        workspace_client_set(c, globalconf.screens[screen].workspace);
+    if(!(retloadprops = client_loadprops(c, screen)))
+        screen_client_moveto(c, screen, true);
 
     /* Then check clients hints */
     ewmh_check_client_hints(c);
 
-    /* check for transient and set on same workspace like its parent */
+    /* check for transient and set tags like its parent */
     if((rettrans = xutil_get_transient_for_hint(globalconf.connection, w, &trans))
        && (t = client_getbywin(trans)))
-        workspace_client_set(c, workspace_client_get(t));
+        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+            if(is_client_tagged(t, tag))
+                tag_client(c, tag);
 
     /* should be floating if transsient or fixed */
     if(rettrans || c->isfixed)
@@ -388,7 +406,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* Push client in stack */
     stack_client_push(c);
 
-    widget_invalidate_cache(WIDGET_CACHE_CLIENTS);
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_client_list(c->phys_screen);
 
     /* update window title */
@@ -455,16 +473,15 @@ client_geometry_hints(client_t *c, area_t geometry)
 bool
 client_resize(client_t *c, area_t geometry, bool hints)
 {
-    int screen, new_screen;
-    workspace_t *ws;
+    int new_screen;
+    area_t area;
+    layout_t *layout = layout_get_current(c->screen);
     bool resized = false;
     /* Values to configure a window is an array where values are
      * stored according to 'value_mask' */
     uint32_t values[5];
 
-    ws = workspace_client_get(c);
-
-    if(c->titlebar && !c->ismoving && !c->isfloating && ws->layout != layout_floating)
+    if(c->titlebar && !c->ismoving && !c->isfloating && layout != layout_floating)
     {
         titlebar_update_geometry(c, geometry);
         geometry = titlebar_geometry_remove(c->titlebar, geometry);
@@ -476,12 +493,24 @@ client_resize(client_t *c, area_t geometry, bool hints)
     if(geometry.width <= 0 || geometry.height <= 0)
         return false;
 
+    /* offscreen appearance fixes */
+    area = display_area_get(c->phys_screen, NULL,
+                            &globalconf.screens[c->screen].padding);
+
+    if(geometry.x > area.width)
+        geometry.x = area.width - geometry.width - 2 * c->border;
+    if(geometry.y > area.height)
+        geometry.y = area.height - geometry.height - 2 * c->border;
+    if(geometry.x + geometry.width + 2 * c->border < 0)
+        geometry.x = 0;
+    if(geometry.y + geometry.height + 2 * c->border < 0)
+        geometry.y = 0;
+
     if(c->geometry.x != geometry.x || c->geometry.y != geometry.y
        || c->geometry.width != geometry.width || c->geometry.height != geometry.height)
     {
-        screen = workspace_screen_get(ws);
         new_screen =
-            screen_get_bycoord(globalconf.screens_info, screen, geometry.x, geometry.y);
+            screen_get_bycoord(globalconf.screens_info, c->screen, geometry.x, geometry.y);
 
         c->geometry.x = values[0] = geometry.x;
         c->geometry.width = values[2] = geometry.width;
@@ -492,7 +521,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         /* save the floating geometry if the window is floating but not
          * maximized */
         if(c->ismoving || c->isfloating
-           || ws->layout == layout_floating)
+           || layout_get_current(new_screen) == layout_floating)
         {
             titlebar_update_geometry_floating(c);
             if(!c->ismax)
@@ -506,12 +535,15 @@ client_resize(client_t *c, area_t geometry, bool hints)
                              values);
         window_configure(c->win, geometry, c->border);
 
+        if(c->screen != new_screen)
+            screen_client_moveto(c, new_screen, false);
+
         resized = true;
     }
 
     /* call it again like it was floating,
      * we want it to be sticked to the window */
-    if(!c->ismoving && !c->isfloating && ws->layout != layout_floating)
+    if(!c->ismoving && !c->isfloating && layout != layout_floating)
        titlebar_update_geometry_floating(c);
 
     return resized;
@@ -534,8 +566,9 @@ client_setfloating(client_t *c, bool floating, layer_t layer)
             c->ismax = false;
             client_resize(c, c->m_geometry, false);
         }
-        workspace_client_get(c)->need_arrange = true;
-        widget_invalidate_cache(WIDGET_CACHE_CLIENTS);
+        if(client_isvisible(c, c->screen))
+            globalconf.screens[c->screen].need_arrange = true;
+        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         if(floating)
         {
             c->oldlayer = c->layer;
@@ -554,23 +587,20 @@ client_setfloating(client_t *c, bool floating, layer_t layer)
 void
 client_saveprops(client_t *c)
 {
-    int i = 0, nws = 0;
+    int i = 0, ntags = 0;
     char *prop;
-    workspace_t *workspace, *cws = workspace_client_get(c);
+    tag_t *tag;
     xutil_intern_atom_request_t atom_q;
 
     atom_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_AWESOME_PROPERTIES");
 
-    for(workspace = globalconf.workspaces; workspace; workspace = workspace->next)
-        nws++;
+    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+        ntags++;
 
-    prop = p_new(char, nws + 3);
+    prop = p_new(char, ntags + 3);
 
-    for(workspace = globalconf.workspaces; workspace; workspace = workspace->next, i++)
-        if(cws == workspace)
-            prop[i] = '1';
-        else
-            prop[i] = '0';
+    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
+        prop[i] = is_client_tagged(c, tag) ? '1' : '0';
 
     prop[i] = c->isfloating ? '1' : '0';
 
@@ -597,6 +627,8 @@ client_unban(client_t *c)
 void
 client_unmanage(client_t *c)
 {
+    tag_t *tag;
+
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
 
@@ -608,11 +640,11 @@ client_unmanage(client_t *c)
     client_list_detach(&globalconf.clients, c);
     focus_client_delete(c);
     stack_client_delete(c);
+    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+        untag_client(c, tag);
 
     if(globalconf.focus->client == c)
-        client_focus(focus_client_getcurrent(workspace_client_get(c)));
-
-    workspace_client_remove(c);
+        client_focus(NULL, c->screen);
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win, ANY_MODIFIER);
     window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
@@ -647,7 +679,7 @@ client_updatewmhints(client_t *c)
             luaA_client_userdata_new(c);
             luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1);
 
-            widget_invalidate_cache(WIDGET_CACHE_CLIENTS);
+            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         }
         if((wm_hints_flags & XCB_WM_STATE_HINT) &&
            (xcb_wm_hints_get_initial_state(wmh) == XCB_WM_WITHDRAWN_STATE))
@@ -883,7 +915,7 @@ client_setborder(client_t *c, uint32_t width)
     c->border = width;
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH, &width);
-    workspace_client_get(c)->need_arrange = true;
+    globalconf.screens[c->screen].need_arrange = true;
 }
 
 /** Set the client border width and color.
@@ -908,28 +940,64 @@ luaA_client_border_set(lua_State *L)
     return 0;
 }
 
-/** Set the client on the specified workspace.
- * \param A workspace object.
+/** Move the client to another screen.
+ * \param A screen number.
  */
 static int
-luaA_client_workspace_set(lua_State *L)
+luaA_client_screen_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
-    workspace_t **workspace = luaA_checkudata(L, 2, "workspace");
-    /* arrange old ws */
-    workspace_client_get(*c)->need_arrange = true;
-    workspace_client_set(*c, *workspace);
+    int screen = luaL_checknumber(L, 2) - 1;
+    luaA_checkscreen(screen);
+    screen_client_moveto(*c, screen, true);
     return 0;
 }
 
-/** Get the workspace the client is on.
- * \return A workspace.
+/** Get the screen number the client is onto.
+ * \return A screen number.
  */
 static int
-luaA_client_workspace_get(lua_State *L)
+luaA_client_screen_get(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
-    return luaA_workspace_userdata_new(workspace_client_get(*c));
+    lua_pushnumber(L, 1 + (*c)->screen);
+    return 1;
+}
+
+/** Tag a client with a specified tag.
+ * \param A tag object.
+ * \param A boolean value: true to add this tag to clients, false to remove.
+ */
+static int
+luaA_client_tag(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    tag_t **tag = luaA_checkudata(L, 2, "tag");
+    bool tag_the_client = luaA_checkboolean(L, 3);
+
+    if((*tag)->screen != (*c)->screen)
+        luaL_error(L, "tag and client are on different screens");
+
+    if(tag_the_client)
+        tag_client(*c, *tag);
+    else
+        untag_client(*c, *tag);
+
+    return 0;
+}
+
+/** Check if a client is tagged with the specified tag.
+ * \param A tag object.
+ * \return A boolean value, true if the client is tagged with this tag, false
+ * otherwise.
+ */
+static int
+luaA_client_istagged(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    tag_t **tag = luaA_checkudata(L, 2, "tag");
+    lua_pushboolean(L, is_client_tagged(*c, *tag));
+    return 1;
 }
 
 /** Get the client coordinates on the display.
@@ -957,7 +1025,7 @@ luaA_client_coords_set(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
     area_t geometry;
 
-    if((*c)->isfloating || workspace_client_get(*c)->layout == layout_floating)
+    if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
     {
         luaA_checktable(L, 2);
         geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
@@ -995,9 +1063,10 @@ luaA_client_swap(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
     client_t **swap = luaA_checkudata(L, 2, "client");
     client_list_swap(&globalconf.clients, *swap, *c);
-    workspace_client_get(*c)->need_arrange = true;
-    workspace_client_get(*swap)->need_arrange = true;
-    widget_invalidate_cache(WIDGET_CACHE_CLIENTS);
+    globalconf.screens[(*c)->screen].need_arrange = true;
+    globalconf.screens[(*swap)->screen].need_arrange = true;
+    widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
+    widget_invalidate_cache((*swap)->screen, WIDGET_CACHE_CLIENTS);
     return 0;
 }
 
@@ -1005,7 +1074,7 @@ static int
 luaA_client_focus_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
-    client_focus(*c);
+    client_focus(*c, (*c)->screen);
     return 0;
 }
 
@@ -1121,7 +1190,6 @@ luaA_client_titlebar_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     titlebar_t **t = luaA_checkudata(L, 2, "titlebar");
-    workspace_t *ws;
 
     if(client_getbytitlebar(*t))
         luaL_error(L, "titlebar is already used by another client");
@@ -1135,12 +1203,10 @@ luaA_client_titlebar_set(lua_State *L)
     titlebar_ref(t);
     titlebar_init(*c);
 
-    ws = workspace_client_get(*c);
-
-    if((*c)->isfloating || ws->layout == layout_floating)
+    if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
         titlebar_update_geometry_floating(*c);
     else
-        ws->need_arrange = true;
+        globalconf.screens[(*c)->screen].need_arrange = true;
 
     return 0;
 }
@@ -1176,7 +1242,7 @@ luaA_client_hide(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     (*c)->ishidden = true;
-    workspace_client_get(*c)->need_arrange = true;
+    globalconf.screens[(*c)->screen].need_arrange = true;
     return 0;
 }
 
@@ -1187,7 +1253,7 @@ luaA_client_unhide(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     (*c)->ishidden = false;
-    workspace_client_get(*c)->need_arrange = true;
+    globalconf.screens[(*c)->screen].need_arrange = true;
     return 0;
 }
 
@@ -1213,9 +1279,11 @@ const struct luaL_reg awesome_client_meta[] =
     { "titlebar_get", luaA_client_titlebar_get },
     { "name_get", luaA_client_name_get },
     { "name_set", luaA_client_name_set },
+    { "screen_set", luaA_client_screen_set },
+    { "screen_get", luaA_client_screen_get },
     { "border_set", luaA_client_border_set },
-    { "workspace_set", luaA_client_workspace_set },
-    { "workspace_get", luaA_client_workspace_get },
+    { "tag", luaA_client_tag },
+    { "istagged", luaA_client_istagged },
     { "coords_get", luaA_client_coords_get },
     { "coords_set", luaA_client_coords_set },
     { "opacity_set", luaA_client_opacity_set },

@@ -27,7 +27,7 @@
 void focus_client_push(client_t *);
 void focus_client_append(client_t *);
 void focus_client_delete(client_t *);
-client_t * focus_client_getcurrent(workspace_t *);
+client_t * focus_get_current_client(int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

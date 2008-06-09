@@ -25,6 +25,7 @@
 
 #include "screen.h"
 #include "event.h"
+#include "tag.h"
 #include "statusbar.h"
 #include "window.h"
 #include "mouse.h"
@@ -33,7 +34,6 @@
 #include "widget.h"
 #include "titlebar.h"
 #include "lua.h"
-#include "workspace.h"
 #include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "common/xscreen.h"
@@ -146,7 +146,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
             if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
                && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
             {
-                w->widget->button_press(w, ev, workspace_screen_get(workspace_client_get(c)),
+                w->widget->button_press(w, ev, c->screen,
                                         c->titlebar, AWESOME_TYPE_TITLEBAR);
                 return 0;
             }
@@ -181,12 +181,9 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
 {
     client_t *c;
     area_t geometry;
-    workspace_t *ws;
 
     if((c = client_getbywin(ev->window)))
     {
-        ws = workspace_client_get(c);
-
         geometry = c->geometry;
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
@@ -201,11 +198,11 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
-            if(c->isfloating || ws->layout == layout_floating)
+            if(c->isfloating || layout_get_current(c->screen) == layout_floating)
                 client_resize(c, geometry, false);
             else
             {
-                ws->need_arrange = true;
+                globalconf.screens[c->screen].need_arrange = true;
                 /* If we do not resize the client, at least tell it that it
                  * has its new configuration. That fixes at least
                  * gnome-terminal */
@@ -466,7 +463,6 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
 {
     client_t *c;
     xcb_window_t trans;
-    workspace_t *ws;
 
     if(ev->state == XCB_PROPERTY_DELETE)
         return 0; /* ignore */
@@ -474,11 +470,10 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
     {
         if(ev->atom == WM_TRANSIENT_FOR)
         {
-            ws = workspace_client_get(c);
             xutil_get_transient_for_hint(connection, c->win, &trans);
             if(!c->isfloating
                && (c->isfloating = (client_getbywin(trans) != NULL)))
-                ws->need_arrange = true;
+                globalconf.screens[c->screen].need_arrange = true;
         }
         else if (ev->atom == WM_NORMAL_HINTS)
             client_updatesizehints(c);

@@ -248,25 +248,24 @@ widget_common_new(widget_t *widget)
 /** Invalidate widgets which should be refresh upon
  * external modifications. widget_t who watch flags will
  * be set to be refreshed.
+ * \param screen Virtual screen number.
  * \param flags Cache flags to invalidate.
  */
 void
-widget_invalidate_cache(int flags)
+widget_invalidate_cache(int screen, int flags)
 {
     statusbar_t *statusbar;
     widget_node_t *widget;
-    int screen;
 
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
-        for(statusbar = globalconf.screens[screen].statusbar;
-            statusbar;
-            statusbar = statusbar->next)
-            for(widget = statusbar->widgets; widget; widget = widget->next)
-                if(widget->widget->cache_flags & flags)
-                {
-                    statusbar->need_update = true;
-                    break;
-                }
+    for(statusbar = globalconf.screens[screen].statusbar;
+        statusbar;
+        statusbar = statusbar->next)
+        for(widget = statusbar->widgets; widget; widget = widget->next)
+            if(widget->widget->cache_flags & flags)
+            {
+                statusbar->need_update = true;
+                break;
+            }
 }
 
 /** Set a statusbar needs update because it has widget, or redraw a titlebar.
