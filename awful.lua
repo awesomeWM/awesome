@@ -225,7 +225,16 @@ end
 
 function client_toggletag(target, c)
     local sel = c or client.focus_get();
-    if sel then
+    local toggle = false
+    -- Count how many tags has the client
+    -- an only toggle tag if the client has at least one tag other than target
+    for k, v in ipairs(tag.get(sel:screen_get())) do
+        if target ~= v and sel:istagged(v) then
+            toggle = true
+            break
+        end
+    end
+    if toggle and sel then
         sel:tag(target, not sel:istagged(target))
     end
 end
