@@ -749,8 +749,8 @@ luaA_client_mouse_resize(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
     corner_t corner = AutoCorner;
 
-    if(lua_gettop(L) == 2 && lua_isstring(L, 2))
-        corner = a_strtocorner(lua_tostring(L, 2));
+    if(lua_gettop(L) == 2)
+        corner = a_strtocorner(luaL_checkstring(L, 2));
 
     mouse_client_resize(*c, corner);
     return 0;

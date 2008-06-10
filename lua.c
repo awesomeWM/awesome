@@ -393,8 +393,9 @@ luaA_hooks_timer(lua_State *L)
     globalconf.timer.tv_usec = 0;
     globalconf.timer.tv_sec = luaL_checknumber(L, 1);
 
-    if(lua_gettop(L) == 2 && lua_isfunction(L, 2))
+    if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
     {
+        luaA_checkfunction(L, 2);
         if(globalconf.hooks.timer)
             luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.timer);
         globalconf.hooks.timer = luaL_ref(L, LUA_REGISTRYINDEX);
