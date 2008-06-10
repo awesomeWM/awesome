@@ -891,7 +891,7 @@ luaA_client_mouse(lua_State *L)
 
 /** Get only visible clients for a screen.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lparam A screen number.
  * \lreturn A table with all visible clients for this screen.
  */
@@ -918,7 +918,7 @@ luaA_client_visible_get(lua_State *L)
 
 /** Get the currently focused client.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lreturn The currently focused client.
  */
 static int
@@ -947,7 +947,7 @@ client_setborder(client_t *c, uint32_t width)
 
 /** Set the client border width and color.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lparam A table with `width' key for the border width in pixel and `color' key
  * for the border color.
  */
@@ -971,7 +971,7 @@ luaA_client_border_set(lua_State *L)
 
 /** Move the client to another screen.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lparam A screen number.
  */
 static int
@@ -986,7 +986,7 @@ luaA_client_screen_set(lua_State *L)
 
 /** Get the screen number the client is onto.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lreturn A screen number.
  */
 static int
@@ -999,7 +999,7 @@ luaA_client_screen_get(lua_State *L)
 
 /** Tag a client with a specified tag.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lparam A tag object.
  * \lparam A boolean value: true to add this tag to clients, false to remove.
  */
@@ -1023,7 +1023,7 @@ luaA_client_tag(lua_State *L)
 
 /** Check if a client is tagged with the specified tag.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lparam A tag object.
  * \lreturn A boolean value, true if the client is tagged with this tag, false
  * otherwise.
@@ -1039,7 +1039,7 @@ luaA_client_istagged(lua_State *L)
 
 /** Get the client coordinates on the display.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lreturn A table with keys `width', `height', `x' and `y'.
  */
 static int
@@ -1060,7 +1060,7 @@ luaA_client_coords_get(lua_State *L)
 
 /** Set client coordinates. This only operates if the client is floating.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lparam A table with keys: x, y, width, height.
  */
 static int
@@ -1085,7 +1085,7 @@ luaA_client_coords_set(lua_State *L)
 /** Set the client opacity.
  * Note: this requires an external composite manager.
  * \param L The Lua VM state.
- * \luacheck
+ * \luastack
  * \lparam A floating value between 0 and 1.
  */
 static int
