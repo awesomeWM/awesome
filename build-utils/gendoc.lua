@@ -4,7 +4,7 @@
 
 function string.comment_clean(str)
     local s = str:gsub("/%*%* ", "    ")
-    s = s:gsub(" %* ", " ")
+    s = s:gsub(" %*", "")
 	s = s:gsub("\\luastack", "")
     s = s:gsub("\\lparam", "\n\n    Parameter:")
     s = s:gsub("\\lreturn", "\n\n    Return:")
