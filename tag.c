@@ -65,7 +65,7 @@ tag_new(const char *name, layout_t *layout, double mwfact, int nmaster, int ncol
     tag_t *tag;
 
     tag = p_new(tag_t, 1);
-    tag->name = a_strdup(name);
+    a_iso2utf8(name, &tag->name);
     tag->layout = layout;
 
     tag->mwfact = mwfact;
@@ -473,7 +473,7 @@ luaA_tag_name_set(lua_State *L)
     tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *name = luaL_checkstring(L, 2);
     p_delete(&(*tag)->name);
-    (*tag)->name = a_strdup(name);
+    a_iso2utf8(name, &(*tag)->name);
     return 0;
 }
 

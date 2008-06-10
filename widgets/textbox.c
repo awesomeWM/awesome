@@ -73,7 +73,7 @@ textbox_tell(widget_t *widget, const char *property, const char *new_value)
     if(!a_strcmp(property, "text"))
     {
         p_delete(&d->text);
-        d->text = a_strdup(new_value);
+        a_iso2utf8(new_value, &d->text);
     }
     else if(!a_strcmp(property, "width"))
         d->width = atoi(new_value);

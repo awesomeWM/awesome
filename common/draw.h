@@ -139,6 +139,21 @@ draw_context_delete(draw_context_t **ctx)
 font_t *draw_font_new(xcb_connection_t *, int, const char *);
 void draw_font_delete(font_t **);
 
+char * draw_iso2utf8(const char *);
+
+static inline bool
+a_iso2utf8(const char *str, char **res)
+{
+    char *utf8;
+    if((utf8 = draw_iso2utf8(str)))
+    {
+        *res = utf8;
+        return true;
+    }
+    *res = a_strdup(str);
+    return false;
+}
+
 void draw_text(draw_context_t *, font_t *, area_t, const char *);
 void draw_rectangle(draw_context_t *, area_t, float, bool, xcolor_t);
 void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);

@@ -188,7 +188,7 @@ client_updatetitle(client_t *c)
             return;
 
     p_delete(&c->name);
-    c->name = name;
+    a_iso2utf8(name, &c->name);
 
     /* call hook */
     luaA_client_userdata_new(c);
@@ -1178,7 +1178,7 @@ luaA_client_name_set(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
     const char *name = luaL_checkstring(L, 2);
     p_delete(&(*c)->name);
-    (*c)->name = a_strdup(name);
+    a_iso2utf8(name, &(*c)->name);
     return 0;
 }
 

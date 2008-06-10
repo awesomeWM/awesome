@@ -49,7 +49,7 @@
  * \param iso the ISO string to convert
  * \return NULL if error, otherwise pointer to the new converted string
  */
-static char *
+char *
 draw_iso2utf8(const char *iso)
 {
     iconv_t iso2utf8;
@@ -304,11 +304,7 @@ draw_text(draw_context_t *ctx, font_t *font,
     if(!(len = a_strlen(text)))
         return;
 
-    /* try to convert it to UTF-8 */
-    if((utf8 = draw_iso2utf8(text)))
-        len = a_strlen(utf8);
-    else
-        utf8 = a_strdup(text);
+    utf8 = a_strdup(text);
 
     p_clear(&parser_data, 1);
     parser_data.connection = ctx->connection;
@@ -1033,10 +1029,7 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
         return geom;
 
     /* try to convert it to UTF-8 */
-    if((utf8 = draw_iso2utf8(text)))
-        len = a_strlen(utf8);
-    else
-        utf8 = a_strdup(text);
+    utf8 = a_strdup(text);
 
     p_clear(&parser_data, 1);
     parser_data.connection = conn;
