@@ -90,7 +90,7 @@ client_loadprops(client_t * c, screen_t *screen)
 
 /** Check if client supports protocol WM_DELETE_WINDOW,
  * \param win The window.
- * \return true if client has WM_DELETE_WINDOW, false otherwise.
+ * \return True if client has WM_DELETE_WINDOW, false otherwise.
  */
 static bool
 window_isprotodel(xcb_window_t win)
@@ -152,6 +152,7 @@ client_isvisible(client_t *c, int screen)
                 return true;
     return false;
 }
+
 /** Get a client by its window.
  * \param w The client window to find.
  * \return A client pointer if found, NULL otherwise.
@@ -197,6 +198,9 @@ client_updatetitle(client_t *c)
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
+/** Unfocus a client.
+ * \param c The client.
+ */
 static void
 client_unfocus(client_t *c)
 {
@@ -208,8 +212,8 @@ client_unfocus(client_t *c)
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
-/** Ban client and unmap it
- * \param c the client
+/** Ban client and unmap it.
+ * \param c The client.
  */
 void
 client_ban(client_t *c)
@@ -417,6 +421,11 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1);
 }
 
+/** Compute client geometry with respect to its geometry hints.
+ * \param c The client.
+ * \param geometry The geometry that the client might receive.
+ * \return The geometry the client must take rescping its hints.
+ */
 static area_t
 client_geometry_hints(client_t *c, area_t geometry)
 {
@@ -615,6 +624,9 @@ client_saveprops(client_t *c)
     p_delete(&prop);
 }
 
+/** Unban a client.
+ * \param c The client.
+ */
 void
 client_unban(client_t *c)
 {
@@ -624,6 +636,9 @@ client_unban(client_t *c)
         xcb_map_window(globalconf.connection, c->titlebar->sw->window);
 }
 
+/** Unmanage a client.
+ * \param c The client.
+ */
 void
 client_unmanage(client_t *c)
 {
@@ -816,7 +831,9 @@ client_kill(client_t *c)
 }
 
 /** Get all clients into a table.
- * \return A table with all clients.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lreturn A table with all clients.
  */
 static int
 luaA_client_get(lua_State *L)
@@ -836,9 +853,11 @@ luaA_client_get(lua_State *L)
 }
 
 /** Add mouse bindings over clients's window.
- * \param A table with modifier keys.
- * \param A mouse button number
- * \param A function to execute.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lparam A table with modifier keys.
+ * \lparam A mouse button number
+ * \lparam A function to execute.
  */
 static int
 luaA_client_mouse(lua_State *L)
@@ -871,8 +890,10 @@ luaA_client_mouse(lua_State *L)
 }
 
 /** Get only visible clients for a screen.
- * \param A screen number.
- * \return A table with all visible clients for this screen.
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lparam A screen number.
+ * \lreturn A table with all visible clients for this screen.
  */
 static int
 luaA_client_visible_get(lua_State *L)
@@ -896,7 +917,9 @@ luaA_client_visible_get(lua_State *L)
 }
 
 /** Get the currently focused client.
- * \return The currently focused client.
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lreturn The currently focused client.
  */
 static int
 luaA_client_focus_get(lua_State *L __attribute__ ((unused)))
@@ -923,7 +946,9 @@ client_setborder(client_t *c, uint32_t width)
 }
 
 /** Set the client border width and color.
- * \param A table with `width' key for the border width in pixel and `color' key
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lparam A table with `width' key for the border width in pixel and `color' key
  * for the border color.
  */
 static int
@@ -945,7 +970,9 @@ luaA_client_border_set(lua_State *L)
 }
 
 /** Move the client to another screen.
- * \param A screen number.
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lparam A screen number.
  */
 static int
 luaA_client_screen_set(lua_State *L)
@@ -958,7 +985,9 @@ luaA_client_screen_set(lua_State *L)
 }
 
 /** Get the screen number the client is onto.
- * \return A screen number.
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lreturn A screen number.
  */
 static int
 luaA_client_screen_get(lua_State *L)
@@ -969,8 +998,10 @@ luaA_client_screen_get(lua_State *L)
 }
 
 /** Tag a client with a specified tag.
- * \param A tag object.
- * \param A boolean value: true to add this tag to clients, false to remove.
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lparam A tag object.
+ * \lparam A boolean value: true to add this tag to clients, false to remove.
  */
 static int
 luaA_client_tag(lua_State *L)
@@ -991,8 +1022,10 @@ luaA_client_tag(lua_State *L)
 }
 
 /** Check if a client is tagged with the specified tag.
- * \param A tag object.
- * \return A boolean value, true if the client is tagged with this tag, false
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lparam A tag object.
+ * \lreturn A boolean value, true if the client is tagged with this tag, false
  * otherwise.
  */
 static int
@@ -1005,7 +1038,9 @@ luaA_client_istagged(lua_State *L)
 }
 
 /** Get the client coordinates on the display.
- * \return A table with keys `width', `height', `x' and `y'.
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lreturn A table with keys `width', `height', `x' and `y'.
  */
 static int
 luaA_client_coords_get(lua_State *L)
@@ -1023,6 +1058,11 @@ luaA_client_coords_get(lua_State *L)
     return 1;
 }
 
+/** Set client coordinates. This only operates if the client is floating.
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lparam A table with keys: x, y, width, height.
+ */
 static int
 luaA_client_coords_set(lua_State *L)
 {
@@ -1042,17 +1082,26 @@ luaA_client_coords_set(lua_State *L)
     return 0;
 }
 
+/** Set the client opacity.
+ * Note: this requires an external composite manager.
+ * \param L The Lua VM state.
+ * \luacheck
+ * \lparam A floating value between 0 and 1.
+ */
 static int
 luaA_client_opacity_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     double opacity = luaL_checknumber(L, 2);
 
-    if(opacity == -1 || (opacity >= 0 && opacity <= 100))
+    if(opacity == -1 || (opacity >= 0 && opacity <= 1))
         window_settrans((*c)->win, opacity);
     return 0;
 }
 
+/** Kill a client.
+ * \param L The Lua VM state.
+ */
 static int
 luaA_client_kill(lua_State *L)
 {
@@ -1061,6 +1110,11 @@ luaA_client_kill(lua_State *L)
     return 0;
 }
 
+/** Swap a client with another one.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lparam A client to swap with.
+ */
 static int
 luaA_client_swap(lua_State *L)
 {
@@ -1074,6 +1128,9 @@ luaA_client_swap(lua_State *L)
     return 0;
 }
 
+/** Focus a client.
+ * \param L The Lua VM state.
+ */
 static int
 luaA_client_focus_set(lua_State *L)
 {
@@ -1083,6 +1140,7 @@ luaA_client_focus_set(lua_State *L)
 }
 
 /** Raise a client on top of others which are on the same layer.
+ * \param L The Lua VM state.
  */
 static int
 luaA_client_raise(lua_State *L)
@@ -1092,6 +1150,11 @@ luaA_client_raise(lua_State *L)
     return 0;
 }
 
+/** Set the client floating attribute.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lparam A boolean, true to set, false to unset.
+ */
 static int
 luaA_client_floating_set(lua_State *L)
 {
@@ -1101,6 +1164,12 @@ luaA_client_floating_set(lua_State *L)
     return 0;
 }
 
+/** Check if a client has the floating attribute.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lreturn A boolean, true if the client has the floating attribute set, false
+ * otherwise.
+ */
 static int
 luaA_client_floating_get(lua_State *L)
 {
@@ -1109,6 +1178,9 @@ luaA_client_floating_get(lua_State *L)
     return 1;
 }
 
+/** Check if a client is equal to another.
+ * \param L The Lua VM state.
+ */
 static int
 luaA_client_eq(lua_State *L)
 {
@@ -1118,6 +1190,9 @@ luaA_client_eq(lua_State *L)
     return 1;
 }
 
+/** Redraw a client by unmapping and mapping it quickly.
+ * \param L The Lua VM state.
+ */
 static int
 luaA_client_redraw(lua_State *L)
 {
@@ -1127,6 +1202,11 @@ luaA_client_redraw(lua_State *L)
     return 0;
 }
 
+/** Return a formated string for a client.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lreturn A string.
+ */
 static int
 luaA_client_tostring(lua_State *L)
 {
@@ -1136,7 +1216,9 @@ luaA_client_tostring(lua_State *L)
 }
 
 /** Get the client name.
- * \return A string with the client class.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lreturn A string with the client class.
  */
 static int
 luaA_client_class_get(lua_State *L)
@@ -1150,6 +1232,11 @@ luaA_client_class_get(lua_State *L)
     return 1;
 }
 
+/** Set the default icon for this client.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lparam A path to an icon image, or nil to remove.
+ */
 static int
 luaA_client_icon_set(lua_State *L)
 {
@@ -1163,7 +1250,9 @@ luaA_client_icon_set(lua_State *L)
 }
 
 /** Get the client name.
- * \return A string with the client name.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lreturn A string with the client name.
  */
 static int
 luaA_client_name_get(lua_State *L)
@@ -1174,7 +1263,9 @@ luaA_client_name_get(lua_State *L)
 }
 
 /** Change the client name. It'll change it only from awesome point of view.
- * \param A string with the new client name.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lparam A string with the new client name.
  */
 static int
 luaA_client_name_set(lua_State *L)
@@ -1187,7 +1278,9 @@ luaA_client_name_set(lua_State *L)
 }
 
 /** Set the client's titlebar.
- * \param A titlebar.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lparam A titlebar.
  */
 static int
 luaA_client_titlebar_set(lua_State *L)
@@ -1216,7 +1309,9 @@ luaA_client_titlebar_set(lua_State *L)
 }
 
 /** Get the titlebar of a client.
- * \return A titlebar or nil if the client has no titlebar.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lreturn A titlebar or nil if the client has no titlebar.
  */
 static int
 luaA_client_titlebar_get(lua_State *L)
@@ -1230,6 +1325,7 @@ luaA_client_titlebar_get(lua_State *L)
 }
 
 /** Stop managing a client.
+ * \param L The Lua VM state.
  */
 static int
 luaA_client_unmanage(lua_State *L)
@@ -1240,6 +1336,7 @@ luaA_client_unmanage(lua_State *L)
 }
 
 /** Hide a client.
+ * \param L The Lua VM state.
  */
 static int
 luaA_client_hide(lua_State *L)
@@ -1251,6 +1348,7 @@ luaA_client_hide(lua_State *L)
 }
 
 /** Unhide a client.
+ * \param L The Lua VM state.
  */
 static int
 luaA_client_unhide(lua_State *L)
