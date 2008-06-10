@@ -1286,19 +1286,31 @@ static int
 luaA_client_titlebar_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
-    titlebar_t **t = luaA_checkudata(L, 2, "titlebar");
-
-    if(client_getbytitlebar(*t))
-        luaL_error(L, "titlebar is already used by another client");
+    titlebar_t **t = NULL;
+   
+    if(lua_gettop(L) == 2)
+    {
+        t = luaA_checkudata(L, 2, "titlebar");
+        if(client_getbytitlebar(*t))
+            luaL_error(L, "titlebar is already used by another client");
+    }
 
     /* If client had a titlebar, unref it */
     if((*c)->titlebar)
+    {
         titlebar_unref(&(*c)->titlebar);
+        simplewindow_delete(&(*c)->titlebar->sw);
+    }
 
-    /* Attach titlebar to client */
-    (*c)->titlebar = *t;
-    titlebar_ref(t);
-    titlebar_init(*c);
+    if(t)
+    {
+        /* Attach titlebar to client */
+        (*c)->titlebar = *t;
+        titlebar_ref(t);
+        titlebar_init(*c);
+    }
+    else
+        (*c)->titlebar = NULL;
 
     if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
         titlebar_update_geometry_floating(*c);

@@ -368,8 +368,6 @@ titlebar_init(client_t *c)
     {
       default:
         c->titlebar->position = Off;
-        if(c->titlebar->sw)
-            xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
         return;
       case Top:
       case Bottom:
@@ -389,12 +387,9 @@ titlebar_init(client_t *c)
         break;
     }
 
-    /* Delete old statusbar */
-    simplewindow_delete(&c->titlebar->sw);
-
     c->titlebar->sw = simplewindow_new(globalconf.connection,
-                                    c->phys_screen, 0, 0,
-                                    width, height, 0);
+                                       c->phys_screen, 0, 0,
+                                       width, height, 0);
     titlebar_draw(c);
     xcb_map_window(globalconf.connection, c->titlebar->sw->window);
 }
