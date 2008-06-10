@@ -203,7 +203,7 @@ function hook_mouseover(c)
 end
 
 -- Hook function to execute when a new client appears.
-function hook_newclient(c)
+function hook_manage(c)
     -- New client may not receive focus
     -- if they're not focusable, so set border anyway.
     c:border_set({ width = 1, color = "black" })
@@ -231,7 +231,7 @@ end
 -- Set up some hooks
 awful.hooks.focus(hook_focus)
 awful.hooks.unfocus(hook_unfocus)
-awful.hooks.newclient(hook_newclient)
+awful.hooks.manage(hook_manage)
 awful.hooks.mouseover(hook_mouseover)
 awful.hooks.arrange(hook_arrange)
 awful.hooks.timer(1, hook_timer)

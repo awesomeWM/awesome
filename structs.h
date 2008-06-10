@@ -426,7 +426,9 @@ struct awesome_t
     struct
     {
         /** Command to execute when spawning a new client */
-        luaA_function newclient;
+        luaA_function manage;
+        /** Command to execute when unmanaging client */
+        luaA_function unmanage;
         /** Command to execute when giving focus to a client */
         luaA_function focus;
         /** Command to execute when removing focus to a client */

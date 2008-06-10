@@ -414,7 +414,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     /* call hook */
     luaA_client_userdata_new(c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.newclient, 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1);
 }
 
 static area_t
@@ -628,6 +628,10 @@ void
 client_unmanage(client_t *c)
 {
     tag_t *tag;
+
+    /* call hook */
+    luaA_client_userdata_new(c);
+    luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1);
 
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);

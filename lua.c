@@ -251,16 +251,38 @@ luaA_hooks_unfocus(lua_State *L)
 }
 
 /** Set the function called each time a new client appears. This function is
- * called with the client object as argument
- * \param A function to call on each new client.
+ * called with the client object as argument.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ *
+ * \lparam A function to call on each new client.
  */
 static int
-luaA_hooks_newclient(lua_State *L)
+luaA_hooks_manage(lua_State *L)
 {
     luaA_checkfunction(L, 1);
-    if(globalconf.hooks.newclient)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.newclient);
-    globalconf.hooks.newclient = luaL_ref(L, LUA_REGISTRYINDEX);
+    if(globalconf.hooks.manage)
+        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.manage);
+    globalconf.hooks.manage = luaL_ref(L, LUA_REGISTRYINDEX);
+    return 0;
+}
+
+/** Set the function called each time a client goes away. This function is
+ * called with the client object as argument.
+ * \param L The Lua VM state.
+ * 
+ * \luastack
+ *
+ * \lparam A function to call on each new client.
+ */
+static int
+luaA_hooks_unmanage(lua_State *L)
+{
+    luaA_checkfunction(L, 1);
+    if(globalconf.hooks.unmanage)
+        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.unmanage);
+    globalconf.hooks.unmanage = luaL_ref(L, LUA_REGISTRYINDEX);
     return 0;
 }
 
@@ -434,7 +456,8 @@ luaA_init(void)
     {
         { "focus", luaA_hooks_focus },
         { "unfocus", luaA_hooks_unfocus },
-        { "newclient", luaA_hooks_newclient },
+        { "manage", luaA_hooks_manage },
+        { "unmanage", luaA_hooks_unmanage },
         { "mouseover", luaA_hooks_mouseover },
         { "arrange", luaA_hooks_arrange },
         { "titleupdate", luaA_hooks_titleupdate },
