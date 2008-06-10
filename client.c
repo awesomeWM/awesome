@@ -1261,6 +1261,22 @@ luaA_client_unhide(lua_State *L)
     return 0;
 }
 
+/** Guess if a client has been hidden.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ *
+ * \lreturn A boolean, true if the client has been hidden with hide(), false
+ * otherwise.
+ */
+static int
+luaA_client_ishidden(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    lua_pushboolean(L, (*c)->ishidden);
+    return 1;
+}
+
 int
 luaA_client_userdata_new(client_t *c)
 {
@@ -1305,6 +1321,7 @@ const struct luaL_reg awesome_client_meta[] =
     { "unmanage", luaA_client_unmanage },
     { "hide", luaA_client_hide },
     { "unhide", luaA_client_unhide },
+    { "ishidden", luaA_client_ishidden },
     { "__eq", luaA_client_eq },
     { "__tostring", luaA_client_tostring },
     { NULL, NULL }
