@@ -395,8 +395,11 @@ titlebar_init(client_t *c)
 }
 
 /** Create a new titlebar.
- * \param A table with values: align, position, fg, bg, width and height.
- * \return A brand new titlebar.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A table with values: align, position, fg, bg, width and height.
+ * \lreturn A brand new titlebar.
  */
 static int
 luaA_titlebar_new(lua_State *L)
@@ -436,7 +439,11 @@ luaA_titlebar_new(lua_State *L)
 }
 
 /** Add a widget to a titlebar.
- * \param A widget.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A titlebar.
+ * \lparam A widget.
  */
 static int
 luaA_titlebar_widget_add(lua_State *L)
@@ -461,7 +468,11 @@ luaA_titlebar_widget_add(lua_State *L)
 }
 
 /** Get all widgets from a titlebar.
- * \return A table with all widgets from the titlebar.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A titlebar
+ * \lreturn A table with all widgets from the titlebar.
  */
 static int
 luaA_titlebar_widget_get(lua_State *L)
@@ -485,7 +496,11 @@ luaA_titlebar_widget_get(lua_State *L)
 
 /** Get the client which the titlebar is attached to. That is a the same as
  * checking if every clients's titlebar is equal to titlebar.
- * \return A client if the titlebar is attached, nil otherwise.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A titlebar.
+ * \lreturn A client if the titlebar is attached, nil otherwise.
  */
 static int
 luaA_titlebar_client_get(lua_State *L)

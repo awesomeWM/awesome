@@ -312,9 +312,12 @@ luaA_widget_userdata_new(widget_t *widget)
 }
 
 /** Create a new widget.
- * \param A table with at least a name and a type value. Optionnal attributes
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A table with at least a name and a type value. Optionnal attributes
  * are: align.
- * \return A brand new widget.
+ * \lreturn A brand new widget.
  */
 static int
 luaA_widget_new(lua_State *L)
@@ -343,9 +346,13 @@ luaA_widget_new(lua_State *L)
 }
 
 /** Add a mouse button bindings to a widget.
- * \param A table containing modifiers keys.
- * \param A button number.
- * \param A function to execute. Some widgets may passe arguments to this
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A widget.
+ * \lparam A table containing modifiers keys.
+ * \lparam A button number.
+ * \lparam A function to execute. Some widgets may pass arguments to this
  * function.
  */
 static int
@@ -419,8 +426,12 @@ widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const ch
 }
 
 /** Set a widget property. Each widget type has its own set of property.
- * \param The property name.
- * \param The property value.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A widget.
+ * \lparam The property name.
+ * \lparam The property value.
  */
 static int
 luaA_widget_set(lua_State *L)
@@ -438,6 +449,10 @@ luaA_widget_set(lua_State *L)
 }
 
 /** Handle widget garbage collection.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A widget.
  */
 static int
 luaA_widget_gc(lua_State *L)
@@ -449,6 +464,10 @@ luaA_widget_gc(lua_State *L)
 }
 
 /** Convert a widget into a printable string.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A widget.
  */
 static int
 luaA_widget_tostring(lua_State *L)
@@ -459,7 +478,12 @@ luaA_widget_tostring(lua_State *L)
 }
 
 /** Check for widget equality.
- * \param Another widget.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A widget.
+ * \lparam Another widget.
+ * \lreturn True if widgets are equal.
  */
 static int
 luaA_widget_eq(lua_State *L)
@@ -471,7 +495,11 @@ luaA_widget_eq(lua_State *L)
 }
 
 /** Set the widget name.
- * \param A string with the new widget name.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A widget.
+ * \lparam A string with the new widget name.
  */
 static int
 luaA_widget_name_set(lua_State *L)
@@ -484,7 +512,11 @@ luaA_widget_name_set(lua_State *L)
 }
 
 /** Get the widget name.
- * \return A string with the name of the widget.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A widget.
+ * \lreturn A string with the name of the widget.
  */
 static int
 luaA_widget_name_get(lua_State *L)
@@ -496,7 +528,11 @@ luaA_widget_name_get(lua_State *L)
 
 /** Set the visible attribute of a widget. If a widget is not visible, it is not
  * drawn on the statusbar.
- * \param A boolean value.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A widget.
+ * \lparam A boolean value.
  */
 static int
 luaA_widget_visible_set(lua_State *L)

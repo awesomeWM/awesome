@@ -61,9 +61,12 @@ extern const struct luaL_reg awesome_keybinding_meta[];
 
 /** Define a global mouse binding. This binding will be available wehn you
  * click on root window.
- * \param A table with modifiers keys.
- * \param A mouse button number.
- * \param A function to execute.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A table with modifiers keys.
+ * \lparam A mouse button number.
+ * \lparam A function to execute.
  */
 static int
 luaA_mouse(lua_State *L)
@@ -99,7 +102,10 @@ luaA_mouse(lua_State *L)
 
 /** Set the floating placement algorithm. This will be used to compute the
  * initial floating position of floating windows.
- * \param An algorith name, either `none', `smart' or `mouse'.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam An algorith name, either `none', `smart' or `mouse'.
  */
 static int
 luaA_floating_placement_set(lua_State *L)
@@ -120,7 +126,10 @@ luaA_quit(lua_State *L __attribute__ ((unused)))
 
 /** Execute another application, probably a window manager, to replace
  * awesome.
- * \param The command line to execute.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam The command line to execute.
  */
 static int
 luaA_exec(lua_State *L)
@@ -149,7 +158,11 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
 
 /** Set the screen padding. This can be used to define margin around the
  * screen. awesome will not use this area.
- * \param A table with a list of margin for `right', `left', `top' and
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A screen number.
+ * \lparam A table with a list of margin for `right', `left', `top' and
  * `bottom'.
  */
 static int
@@ -173,7 +186,10 @@ luaA_padding_set(lua_State *L)
 /** Define if awesome should respect applications size hints when resizing
  * windows in tiled mode. If you set this to true, you will experience gaps
  * between windows, but they will have the best size they can have.
- * \param A boolean value, true to enable, false to disable.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A boolean value, true to enable, false to disable.
  */
 static int
 luaA_resizehints_set(lua_State *L)
@@ -183,7 +199,10 @@ luaA_resizehints_set(lua_State *L)
 }
 
 /** Get the screen count.
- * \return The screen count, at least 1.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lreturn The screen count, at least 1.
  */
 static int
 luaA_screen_count(lua_State *L)
@@ -193,7 +212,10 @@ luaA_screen_count(lua_State *L)
 }
 
 /** Give the focus to a screen.
- * \param A screen number
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A screen number
  */
 static int
 luaA_screen_focus(lua_State *L)
@@ -224,7 +246,10 @@ luaA_screen_coords_get(lua_State *L)
 
 /** Set the function called each time a client gets focus. This function is
  * called with the client object as argument.
- * \param A function to call each time a client gets focus.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A function to call each time a client gets focus.
  */
 static int
 luaA_hooks_focus(lua_State *L)
@@ -238,7 +263,10 @@ luaA_hooks_focus(lua_State *L)
 
 /** Set the function called each time a client loses focus. This function is
  * called with the client object as argument.
- * \param A function to call each time a client loses focus.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A function to call each time a client loses focus.
  */
 static int
 luaA_hooks_unfocus(lua_State *L)
@@ -255,7 +283,6 @@ luaA_hooks_unfocus(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- *
  * \lparam A function to call on each new client.
  */
 static int
@@ -273,8 +300,7 @@ luaA_hooks_manage(lua_State *L)
  * \param L The Lua VM state.
  * 
  * \luastack
- *
- * \lparam A function to call on each new client.
+ * \lparam A function to call when a client goes away.
  */
 static int
 luaA_hooks_unmanage(lua_State *L)
@@ -288,7 +314,10 @@ luaA_hooks_unmanage(lua_State *L)
 
 /** Set the function called each time the mouse enter a new window. This
  * function is called with the client object as argument.
- * \param A function to call each time a client gets mouse over it.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A function to call each time a client gets mouse over it.
  */
 static int
 luaA_hooks_mouseover(lua_State *L)
@@ -302,7 +331,10 @@ luaA_hooks_mouseover(lua_State *L)
 
 /** Set the function called on each screen arrange. This function is called
  * with the screen number as argument.
- * \param A function to call on each screen arrange.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A function to call on each screen arrange.
  */
 static int
 luaA_hooks_arrange(lua_State *L)
@@ -316,7 +348,10 @@ luaA_hooks_arrange(lua_State *L)
 
 /** Set the function called on each title update. This function is called with
  * the client object as argument.
- * \param A function to call on each title update of each client.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A function to call on each title update of each client.
  */
 static int
 luaA_hooks_titleupdate(lua_State *L)
@@ -330,7 +365,10 @@ luaA_hooks_titleupdate(lua_State *L)
 
 /** Set the function called when a client get urgency flag. This function is called with
  * the client object as argument.
- * \param A function to call when a client get the urgent flag.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A function to call when a client get the urgent flag.
  */
 static int
 luaA_hooks_urgent(lua_State *L)
@@ -343,8 +381,11 @@ luaA_hooks_urgent(lua_State *L)
 }
 
 /** Set the function to be called every N seconds.
- * \param The number of seconds to run function every. Set 0 to disable.
- * \param A function to call every N seconds (optionnal).
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam The number of seconds to run function every. Set 0 to disable.
+ * \lparam A function to call every N seconds (optionnal).
  */
 static int
 luaA_hooks_timer(lua_State *L)
@@ -363,7 +404,10 @@ luaA_hooks_timer(lua_State *L)
 }
 
 /** Set default font.
- * \param A string with a font name in Pango format.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A string with a font name in Pango format.
  */
 static int
 luaA_font_set(lua_State *L)
@@ -376,7 +420,10 @@ luaA_font_set(lua_State *L)
 }
 
 /** Set default colors.
- * \param A table with `fg' and `bg' elements, containing colors.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A table with `fg' and `bg' elements, containing colors.
  */
 static int
 luaA_colors_set(lua_State *L)
@@ -393,7 +440,6 @@ luaA_colors_set(lua_State *L)
 }
 
 /** Push a pointer onto the stack according to its type.
- * \param L The Lua state.
  * \param p The pointer.
  * \param type Its type.
  */

@@ -47,9 +47,13 @@ __luaA_keystore(keybinding_t *key, const char *str)
 }
 
 /** Define a global key binding. This key binding will always be available.
- * \param A table with modifier keys.
- * \param A key name.
- * \param A function to execute.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A table with modifier keys.
+ * \lparam A key name.
+ * \lparam A function to execute.
+ * \lreturn The keybinding.
  */
 static int
 luaA_keybinding_new(lua_State *L)
@@ -84,6 +88,10 @@ luaA_keybinding_new(lua_State *L)
 }
 
 /** Add a global key binding. This key binding will always be available.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A keybinding.
  */
 static int
 luaA_keybinding_add(lua_State *L)
@@ -105,6 +113,10 @@ luaA_keybinding_add(lua_State *L)
 }
 
 /** Remove a global key binding.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A keybinding.
  */
 static int
 luaA_keybinding_remove(lua_State *L)

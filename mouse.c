@@ -460,7 +460,7 @@ mouse_track_mouse_drag(int *x, int *y)
 
 /** Resize a floating client with the mouse.
  * \param c The client to resize.
- * \param c The corner to resize with.
+ * \param corner The corner to resize with.
  */
 static void
 mouse_client_resize_floating(client_t *c, corner_t corner)
@@ -720,6 +720,7 @@ mouse_client_resize(client_t *c, corner_t corner)
  * \param L The Lua VM state.
  *
  * \luastack
+ * \lparam A client.
  * \lparam The x coordinate.
  * \lparam The y coordinate.
  */
@@ -739,6 +740,7 @@ luaA_mouse_coords_set(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
+ * \lparam A client.
  * \lparam An optionnal corner, such as bottomleft, topright, etc.
  */
 int
@@ -758,6 +760,7 @@ luaA_client_mouse_resize(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
+ * \lparam A client.
  * \lparam The pixel to snap.
  */
 int

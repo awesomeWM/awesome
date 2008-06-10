@@ -236,8 +236,12 @@ tag_view_only_byindex(int screen, int dindex)
 }
 
 /** Check for tag equality.
- * \param Another tag.
- * \return True if tags are equals.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lparam Another tag.
+ * \lreturn True if tags are equals.
  */
 static int
 luaA_tag_eq(lua_State *L)
@@ -249,7 +253,11 @@ luaA_tag_eq(lua_State *L)
 }
 
 /** Convert a tag to a printable string.
- * \return A string.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lreturn A string.
  */
 static int
 luaA_tag_tostring(lua_State *L)
@@ -260,7 +268,11 @@ luaA_tag_tostring(lua_State *L)
 }
 
 /** Add a tag to a screen.
- * \param A screen number.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lparam A screen number.
  */
 static int
 luaA_tag_add(lua_State *L)
@@ -280,8 +292,11 @@ luaA_tag_add(lua_State *L)
 }
 
 /** Get all tags from a screen.
- * \param A screen number.
- * \return A table with all tags from the screen specified.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A screen number.
+ * \lreturn A table with all tags from the screen specified.
  */
 static int
 luaA_tag_get(lua_State *L)
@@ -304,9 +319,12 @@ luaA_tag_get(lua_State *L)
 }
 
 /** Create a new tag.
- * \param A table with at least a name attribute.
- * Optionnal attributes are: mwfact, ncol, nmaster and layout.
- * \return A new tag object.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A table with at least a name attribute.
+ *         Optionnal attributes are: mwfact, ncol, nmaster and layout.
+ * \lreturn A new tag object.
  */
 static int
 luaA_tag_new(lua_State *L)
@@ -335,7 +353,11 @@ luaA_tag_new(lua_State *L)
 }
 
 /** Add or remove a tag from the current view.
- * \param A boolean value, true to view tag, false otherwise.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lparam A boolean value, true to view tag, false otherwise.
  */
 static int
 luaA_tag_view(lua_State *L)
@@ -347,7 +369,11 @@ luaA_tag_view(lua_State *L)
 }
 
 /** Get the tag selection attribute.
- * \return True if the tag is viewed, false otherwise.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lreturn True if the tag is viewed, false otherwise.
  */
 static int
 luaA_tag_isselected(lua_State *L)
@@ -359,7 +385,11 @@ luaA_tag_isselected(lua_State *L)
 
 /** Set the tag master width factor. This value is used in various layouts to
  * determine the size of the master window.
- * \param The master width ratio value, between 0 and 1.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lparam The master width ratio value, between 0 and 1.
  */
 static int
 luaA_tag_mwfact_set(lua_State *L)
@@ -379,7 +409,11 @@ luaA_tag_mwfact_set(lua_State *L)
 }
 
 /** Get the tag master width factor.
- * \return The master width ratio value.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lreturn The master width ratio value.
  */
 static int
 luaA_tag_mwfact_get(lua_State *L)
@@ -391,7 +425,11 @@ luaA_tag_mwfact_get(lua_State *L)
 
 /** Set the number of columns. This is used in various layouts to set the number
  * of columns used to display non-master windows.
- * \param The number of columns, at least 1.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lparam The number of columns, at least 1.
  */
 static int
 luaA_tag_ncol_set(lua_State *L)
@@ -411,7 +449,11 @@ luaA_tag_ncol_set(lua_State *L)
 }
 
 /** Get the number of columns used to display non-master windows on this tag.
- * \return The number of column.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lreturn The number of column.
  */
 static int
 luaA_tag_ncol_get(lua_State *L)
@@ -423,7 +465,11 @@ luaA_tag_ncol_get(lua_State *L)
 
 /** Set the number of master windows. This is used in various layouts to
  * determine how many windows are in the master area.
- * \param The number of master windows.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lparam The number of master windows.
  */
 static int
 luaA_tag_nmaster_set(lua_State *L)
@@ -443,7 +489,11 @@ luaA_tag_nmaster_set(lua_State *L)
 }
 
 /** Get the number of master windows of the tag.
- * \return The number of master windows.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lreturn The number of master windows.
  */
 static int
 luaA_tag_nmaster_get(lua_State *L)
@@ -454,7 +504,11 @@ luaA_tag_nmaster_get(lua_State *L)
 }
 
 /** Get the tag name.
- * \return The tag name.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lreturn The tag name.
  */
 static int
 luaA_tag_name_get(lua_State *L)
@@ -465,7 +519,11 @@ luaA_tag_name_get(lua_State *L)
 }
 
 /** Set the tag name.
- * \param A string with the new tag name.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lparam A string with the new tag name.
  */
 static int
 luaA_tag_name_set(lua_State *L)
@@ -489,7 +547,11 @@ luaA_tag_gc(lua_State *L)
 }
 
 /** Get the layout of the tag.
- * \return The layout name.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lreturn The layout name.
  */
 static int
 luaA_tag_layout_get(lua_State *L)
@@ -501,7 +563,11 @@ luaA_tag_layout_get(lua_State *L)
 }
 
 /** Set the layout of the tag.
- * \param A layout name.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A tag.
+ * \lparam A layout name.
  */
 static int
 luaA_tag_layout_set(lua_State *L)
