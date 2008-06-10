@@ -48,18 +48,18 @@ extern awesome_t globalconf;
  * and floating state before awesome was restarted if any.
  * \todo This may bug if number of tags is != than before.
  * \param c A client pointer.
- * \param screen A virtual screen number.
+ * \param screen A virtual screen.
  * \return True if client had property, false otherwise.
  */
 static bool
-client_loadprops(client_t * c, int screen)
+client_loadprops(client_t * c, screen_t *screen)
 {
     int i, ntags = 0;
     tag_t *tag;
     char *prop = NULL;
     bool result = false;
 
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+    for(tag = screen->tags; tag; tag = tag->next)
         ntags++;
 
     if(xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
@@ -69,7 +69,7 @@ client_loadprops(client_t * c, int screen)
                                                                    "_AWESOME_PROPERTIES")),
                          &prop))
     {
-        for(i = 0, tag = globalconf.screens[screen].tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
+        for(i = 0, tag = screen->tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
             if(prop[i] == '1')
             {
                 tag_client(c, tag);
@@ -357,7 +357,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     client_updatewmhints(c);
 
     /* Try to load props if any */
-    if(!(retloadprops = client_loadprops(c, screen)))
+    if(!(retloadprops = client_loadprops(c, &globalconf.screens[screen])))
         screen_client_moveto(c, screen, true);
 
     /* Then check clients hints */
