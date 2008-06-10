@@ -11,8 +11,8 @@ iconsdir = $(pkgdatadir)/icons
 dist_icons_DATA =
 iconslayoutsdir = $(iconsdir)/layouts
 dist_iconslayouts_DATA =
-awfuldir = $(pkgdatadir)/lib
-dist_awful_DATA =
+awesomelibdir = $(pkgdatadir)/lib
+dist_awesomelib_DATA =
 
 LAYOUTS =
 
@@ -50,7 +50,9 @@ doc_DATA   += STYLE
 EXTRA_DIST += build-utils/gendoc.lua
 
 EXTRA_DIST    += awful.lua
-dist_awful_DATA += awful.lua
+EXTRA_DIST    += tabulous.lua
+dist_awesomelib_DATA += awful.lua
+dist_awesomelib_DATA += tabulous.lua
 
 EXTRA_DIST    += awesomerc.lua.in
 CLEANFILES    += awesomerc.lua

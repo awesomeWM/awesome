@@ -50,7 +50,7 @@ function client_next(i)
     -- Loop upon each client
     for idx, c in ipairs(cls) do
         if c == sel then
-            return cls[array_boundandcycle(cls, idx +i)]
+            return cls[array_boundandcycle(cls, idx + i)]
         end
     end
 end
