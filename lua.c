@@ -45,6 +45,7 @@ extern bool running;
 extern const name_func_link_t FloatingPlacementList[];
 
 extern const struct luaL_reg awesome_mouse_lib[];
+extern const struct luaL_reg awesome_keygrabber_lib[];
 extern const struct luaL_reg awesome_client_methods[];
 extern const struct luaL_reg awesome_client_meta[];
 extern const struct luaL_reg awesome_titlebar_methods[];
@@ -455,8 +456,11 @@ luaA_init(void)
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);
 
-    /* Export hooks lib */
+    /* Export mouses lib */
     luaL_register(L, "mouse", awesome_mouse_lib);
+
+    /* Export keygrabber lib */
+    luaL_register(L, "keygrabber", awesome_keygrabber_lib);
 
     /* Export tag */
     luaA_openlib(L, "tag", awesome_tag_methods, awesome_tag_meta);

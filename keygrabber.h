@@ -1,5 +1,5 @@
 /*
- * keybinding.h - Key bindings configuration management header
+ * keygrabber.h - key grabbing header
  *
  * Copyright © 2008 Julien Danjou <julien@danjou.info>
  *
@@ -19,8 +19,14 @@
  *
  */
 
-#ifndef AWESOME_KEYBINDING_H
-#define AWESOME_KEYBINDING_H
+#ifndef AWESOME_KEYGRABBER_H
+#define AWESOME_KEYGRABBER_H
+
+#include <lua.h>
+#include <xcb/xcb.h>
+
+void keygrabber_ungrab(void);
+void keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

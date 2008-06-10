@@ -33,8 +33,8 @@
 #include "client.h"
 #include "widget.h"
 #include "titlebar.h"
+#include "keygrabber.h"
 #include "lua.h"
-#include "layouts/tile.h"
 #include "layouts/floating.h"
 #include "common/xscreen.h"
 #include "common/xutil.h"
@@ -379,12 +379,28 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     xcb_keysym_t keysym;
     keybinding_t *k;
 
-    keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
+    if(globalconf.keygrabber != LUA_REFNIL)
+    {
+        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);
+        keygrabber_handlekpress(globalconf.L, ev);
+        if(lua_pcall(globalconf.L, 2, 1, 0))
+        {
+            warn("error running function: %s", lua_tostring(globalconf.L, -1));
+            keygrabber_ungrab();
+        }
+        else if(!lua_isboolean(globalconf.L, -1) || !lua_toboolean(globalconf.L, -1))
+            keygrabber_ungrab();
+        lua_pop(globalconf.L, 1);  /* pop returned value */
+    }
+    else
+    {
+        keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
 
-    for(k = globalconf.keys; k; k = k->next)
-        if(((k->keycode && ev->detail == k->keycode) || (k->keysym && keysym == k->keysym))
-           && k->fct && CLEANMASK(k->mod) == CLEANMASK(ev->state))
-            luaA_dofunction(globalconf.L, k->fct, 0);
+        for(k = globalconf.keys; k; k = k->next)
+            if(((k->keycode && ev->detail == k->keycode) || (k->keysym && keysym == k->keysym))
+               && k->fct && CLEANMASK(k->mod) == CLEANMASK(ev->state))
+                luaA_dofunction(globalconf.L, k->fct, 0);
+    }
 
     return 0;
 }

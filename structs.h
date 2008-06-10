@@ -444,6 +444,8 @@ struct awesome_t
     } hooks;
     /** The timeout after which we need to stop select() */
     struct timeval timer;
+    /** The key grabber function */
+    luaA_function keygrabber;
 };
 
 #endif

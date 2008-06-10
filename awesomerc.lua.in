@@ -62,6 +62,7 @@ mytasklist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
 mytextbox = widget.new({ type = "textbox", name = "mytextbox", align = "right" })
 -- Set the default text in textbox
 mytextbox:set("text", "<b><small> awesome " .. AWESOME_VERSION .. " </small></b>")
+mymenubox = widget.new({ type = "textbox", name = "mytextbox", align = "left" })
 
 -- Create an iconbox widget
 myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "left" })
@@ -87,6 +88,7 @@ for s = 1, screen.count() do
     mystatusbar:widget_add(mytaglist)
     mystatusbar:widget_add(myiconbox)
     mystatusbar:widget_add(mytasklist)
+    mystatusbar:widget_add(mymenubox)
     mystatusbar:widget_add(mytextbox)
     mystatusbar:widget_add(mylayoutbox[s])
     mystatusbar:add(s)
@@ -171,6 +173,9 @@ keybinding.new({ modkey, "Control" }, "h", function () awful.tag.incncol(1) end)
 keybinding.new({ modkey, "Control" }, "l", function () awful.tag.incncol(1) end):add()
 keybinding.new({ modkey }, "space", function () awful.layout.inc(layouts, 1) end):add()
 keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -1) end):add()
+
+-- Menu
+keybinding.new({ modkey }, "F1", function () awful.menu("Run: ", mymenubox, awful.spawn) end):add()
 
 -- Tabulous, tab manipulation
 keybinding.new({ modkey, "Control" }, "y", function () tabulous.tab(awful.client.next(1)) end):add()

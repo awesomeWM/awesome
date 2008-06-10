@@ -25,12 +25,13 @@ local mouse = mouse
 local os = os
 local table = table
 local hooks = hooks
+local keygrabber = keygrabber
 
 -- Reset env
 setfenv(1, P)
 
 -- Function to the good value in table, cycling
-function array_boundandcycle(t, i)
+local function array_boundandcycle(t, i)
     if i > #t then
         i = 1
     elseif i < 1 then
@@ -41,7 +42,7 @@ end
 
 -- Function to get a client by its relative index:
 -- set i to 1 to get next, -1 to get previous.
-function client_next(i)
+local function client_next(i)
     -- Get all visible clients
     local cls = client.visible_get(mouse.screen_get())
     -- Get currently focused client
@@ -56,7 +57,7 @@ function client_next(i)
 end
 
 -- Focus a client by its relative index.
-function client_focus(i)
+local function client_focus(i)
     local c = client_next(i)
     if c then
         c:focus_set()
@@ -64,7 +65,7 @@ function client_focus(i)
 end
 
 -- Swap a client by its relative index.
-function client_swap(i)
+local function client_swap(i)
     local c = client_next(i)
     local sel = client.focus_get()
     if c and sel then
@@ -73,7 +74,7 @@ function client_swap(i)
 end
 
 -- Move/resize a client relativ to current coordinates.
-function client_moveresize(x, y, w, h)
+local function client_moveresize(x, y, w, h)
     local sel = client.focus_get()
     local coords = sel:coords_get()
     coords['x'] = coords['x'] + x
@@ -83,7 +84,7 @@ function client_moveresize(x, y, w, h)
     sel:coords_set(coords)
 end
 
-function screen_focus(i)
+local function screen_focus(i)
     local sel = client.focus_get()
     local s
     if sel then
@@ -105,7 +106,7 @@ function screen_focus(i)
 end
 
 -- Return a table with all visible tags
-function tag_selectedlist(s)
+local function tag_selectedlist(s)
     local idx = 1
     local screen = s or mouse.screen_get()
     local tags = tag.get(screen)
@@ -121,12 +122,12 @@ end
 
 -- Return only the first element of all visible tags,
 -- so that's the first visible tags.
-function tag_selected(s)
+local function tag_selected(s)
     return tag_selectedlist(s)[1]
 end
 
 -- Set master width factor
-function tag_setmwfact(i)
+local function tag_setmwfact(i)
     local t = tag_selected()
     if t then
         t:mwfact_set(i)
@@ -134,7 +135,7 @@ function tag_setmwfact(i)
 end
 
 -- Increase master width factor
-function tag_incmwfact(i)
+local function tag_incmwfact(i)
     local t = tag_selected()
     if t then
         t:mwfact_set(t:mwfact_get() + i)
@@ -142,7 +143,7 @@ function tag_incmwfact(i)
 end
 
 -- Set number of master windows
-function tag_setnmaster(i)
+local function tag_setnmaster(i)
     local t = tag_selected()
     if t then
         t:nmaster_set(i)
@@ -150,7 +151,7 @@ function tag_setnmaster(i)
 end
 
 -- Increase number of master windows
-function tag_incnmaster(i)
+local function tag_incnmaster(i)
     local t = tag_selected()
     if t then
         t:nmaster_set(t:nmaster_get() + i)
@@ -158,7 +159,7 @@ function tag_incnmaster(i)
 end
 
 -- Set number of column windows
-function tag_setncol(i)
+local function tag_setncol(i)
     local t = tag_selected()
     if t then
         t:ncol_set(i)
@@ -166,7 +167,7 @@ function tag_setncol(i)
 end
 
 -- Increase number of column windows
-function tag_incncol(i)
+local function tag_incncol(i)
     local t = tag_selected()
     if t then
         t:ncol_set(t:ncol_get() + i)
@@ -174,14 +175,14 @@ function tag_incncol(i)
 end
 
 -- View no tag
-function tag_viewnone()
+local function tag_viewnone()
     local tags = tag.get(mouse.screen_get())
     for i, t in ipairs(tags) do
         t:view(false)
     end
 end
 
-function tag_viewidx(r)
+local function tag_viewidx(r)
     local tags = tag.get(mouse.screen_get())
     local sel = tag_selected()
     tag_viewnone()
@@ -193,28 +194,28 @@ function tag_viewidx(r)
 end
 
 -- View next tag
-function tag_viewnext()
+local function tag_viewnext()
     return tag_viewidx(1)
 end
 
 -- View previous tag
-function tag_viewprev()
+local function tag_viewprev()
     return tag_viewidx(-1)
 end
 
-function tag_viewonly(t)
+local function tag_viewonly(t)
     tag_viewnone()
     t:view(true)
 end
 
-function tag_viewmore(tags)
+local function tag_viewmore(tags)
     tag_viewnone()
     for i, t in ipairs(tags) do
         t:view(true)
     end
 end
 
-function client_movetotag(target, c)
+local function client_movetotag(target, c)
     local sel = c or client.focus_get();
     local tags = tag.get(mouse.screen_get())
     for i, t in ipairs(tags) do
@@ -223,7 +224,7 @@ function client_movetotag(target, c)
     sel:tag(target, true)
 end
 
-function client_toggletag(target, c)
+local function client_toggletag(target, c)
     local sel = c or client.focus_get();
     local toggle = false
     -- Count how many tags has the client
@@ -239,7 +240,7 @@ function client_toggletag(target, c)
     end
 end
 
-function client_togglefloating(c)
+local function client_togglefloating(c)
     local sel = c or client.focus_get();
     if sel then
         sel:floating_set(not sel:floating_get())
@@ -247,7 +248,7 @@ function client_togglefloating(c)
 end
 
 -- Move a client to a screen. Default is next screen, cycling.
-function client_movetoscreen(c, s)
+local function client_movetoscreen(c, s)
     local sel = c or client.focus_get();
     if sel then
         local sc = screen.count()
@@ -259,7 +260,7 @@ function client_movetoscreen(c, s)
     end
 end
 
-function layout_get(screen)
+local function layout_get(screen)
     local t = tag_selected(screen)
     if t then
         return t:layout_get()
@@ -269,7 +270,7 @@ end
 -- Function to change the layout of the current tag.
 -- layouts = table of layouts (define in .awesomerc.lua)
 -- i = relative index
-function layout_inc(layouts, i)
+local function layout_inc(layouts, i)
     local t = tag_selected()
     local number_of_layouts = 0
     local rev_layouts = {}
@@ -288,7 +289,7 @@ function layout_inc(layouts, i)
 end
 
 -- function to set the layout of the current tag by name.
-function layout_set(layout)
+local function layout_set(layout)
     local t = tag_selected()
     if t then
 	t:layout_set(layout)
@@ -345,8 +346,33 @@ for name, hook in pairs(hooks) do
     end
 end
 
-function spawn(cmd)
+local function spawn(cmd)
     return os.execute(cmd .. "&")
+end
+
+local function menu(p, textbox, exe_callback)
+    local command = ""
+    local prompt = p or ""
+    textbox:set("text", prompt)
+    keygrabber.run(
+    function (mod, key)
+        if key == "space" then key = " " end -- special case
+        if key == "Return" then
+            exe_callback(command)
+            textbox:set("text", "")
+            return false
+        elseif key == "Escape" then
+            textbox:set("text", "")
+            return false
+        elseif key == "BackSpace" then
+            command = command:sub(1, #command - 1)
+            textbox:set("text", p .. command)
+        elseif key ~= "None" then
+            command = command .. key
+            textbox:set("text", p .. command)
+        end
+        return true
+    end)
 end
 
 -- Export tags function
@@ -388,5 +414,6 @@ P.layout =
     inc = layout_inc;
 }
 P.spawn = spawn
+P.menu = menu
 
 return P

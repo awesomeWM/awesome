@@ -274,6 +274,7 @@ main(int argc, char **argv)
 
     /* clear the globalconf structure */
     p_clear(&globalconf, 1);
+    globalconf.keygrabber = LUA_REFNIL;
 
     /* save argv */
     for(i = 0; i < argc; i++)
