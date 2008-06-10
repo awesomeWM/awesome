@@ -446,6 +446,7 @@ keysym_to_str(const xcb_keysym_t ksym)
 
     /* Try to convert to Latin-1, handling ctrl */
     if(!((ksym >= XK_BackSpace && ksym <= XK_Clear)
+         || (ksym >= XK_Home && ksym <= XK_Begin)
          || ksym == XK_Return
          || ksym == XK_Escape
          || ksym == XK_KP_Space
@@ -459,6 +460,24 @@ keysym_to_str(const xcb_keysym_t ksym)
 
     switch(ksym)
     {
+      case XK_Home:
+        return a_strdup("Home");
+      case XK_Left:
+        return a_strdup("Left");
+      case XK_Up:
+        return a_strdup("Up");
+      case XK_Right:
+        return a_strdup("Right");
+      case XK_Down:
+        return a_strdup("Down");
+      case XK_Page_Up:
+        return a_strdup("Page_Up");
+      case XK_Page_Down:
+        return a_strdup("Page_Down");
+      case XK_End:
+        return a_strdup("End");
+      case XK_Begin:
+        return a_strdup("Begin");
       case XK_BackSpace:
         return a_strdup("BackSpace");
       case XK_Return:
