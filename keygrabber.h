@@ -26,7 +26,7 @@
 #include <xcb/xcb.h>
 
 void keygrabber_ungrab(void);
-void keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *);
+bool keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -26,6 +26,8 @@ local os = os
 local table = table
 local hooks = hooks
 local keygrabber = keygrabber
+local print = print
+local table = table
 
 -- Reset env
 setfenv(1, P)
@@ -356,7 +358,6 @@ local function menu(p, textbox, exe_callback)
     textbox:set("text", prompt)
     keygrabber.run(
     function (mod, key)
-        if key == "space" then key = " " end -- special case
         if key == "Return" then
             exe_callback(command)
             textbox:set("text", "")
@@ -367,7 +368,7 @@ local function menu(p, textbox, exe_callback)
         elseif key == "BackSpace" then
             command = command:sub(1, #command - 1)
             textbox:set("text", p .. command)
-        elseif key ~= "None" then
+        else
             command = command .. key
             textbox:set("text", p .. command)
         end

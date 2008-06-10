@@ -19,9 +19,6 @@
  *
  */
 
-/* XKeysymToString */
-#include <X11/Xlib.h>
-
 #include <unistd.h>
 
 #include <xcb/xcb.h>
@@ -448,26 +445,116 @@ keysym_to_str(const xcb_keysym_t ksym)
     char *buf;
 
     /* Try to convert to Latin-1, handling ctrl */
-    if(!(((ksym >= XK_BackSpace) && (ksym <= XK_Clear)) ||
-         (ksym == XK_Return) || (ksym == XK_Escape) ||
-         (ksym == XK_KP_Space) || (ksym == XK_KP_Tab) ||
-         (ksym == XK_KP_Enter) ||
-         ((ksym >= XK_KP_Multiply) && (ksym <= XK_KP_9)) ||
-         (ksym == XK_KP_Equal) ||
-         (ksym == XK_Delete)))
+    if(!((ksym >= XK_BackSpace && ksym <= XK_Clear)
+         || ksym == XK_Return
+         || ksym == XK_Escape
+         || ksym == XK_KP_Space
+         || ksym == XK_KP_Tab
+         || ksym == XK_KP_Enter
+         || ksym == XK_KP_Equal
+         || (ksym >= XK_KP_Multiply && ksym <= XK_KP_9)
+         || (ksym >= XK_F1 && ksym <= XK_R15)
+         || ksym == XK_Delete))
         return NULL;
+
+    switch(ksym)
+    {
+      case XK_BackSpace:
+        return a_strdup("BackSpace");
+      case XK_Return:
+        return a_strdup("Return");
+      case XK_Escape:
+        return a_strdup("Escape");
+      case XK_KP_Enter:
+        return a_strdup("KP_Enter");
+      case XK_F1:
+        return a_strdup("F1");
+      case XK_F2:
+        return a_strdup("F2");
+      case XK_F3:
+        return a_strdup("F3");
+      case XK_F4:
+        return a_strdup("F4");
+      case XK_F5:
+        return a_strdup("F5");
+      case XK_F6:
+        return a_strdup("F6");
+      case XK_F7:
+        return a_strdup("F7");
+      case XK_F8:
+        return a_strdup("F8");
+      case XK_F9:
+        return a_strdup("F9");
+      case XK_F10:
+        return a_strdup("F10");
+      case XK_F11:
+        return a_strdup("F11");
+      case XK_F12:
+        return a_strdup("F12");
+      case XK_F13:
+        return a_strdup("F13");
+      case XK_F14:
+        return a_strdup("F14");
+      case XK_F15:
+        return a_strdup("F15");
+      case XK_F16:
+        return a_strdup("F16");
+      case XK_F17:
+        return a_strdup("F17");
+      case XK_F18:
+        return a_strdup("F18");
+      case XK_F19:
+        return a_strdup("F19");
+      case XK_F20:
+        return a_strdup("F20");
+      case XK_F21:
+        return a_strdup("F21");
+      case XK_F22:
+        return a_strdup("F22");
+      case XK_F23:
+        return a_strdup("F23");
+      case XK_F24:
+        return a_strdup("F24");
+      case XK_F25:
+        return a_strdup("F25");
+      case XK_F26:
+        return a_strdup("F26");
+      case XK_F27:
+        return a_strdup("F27");
+      case XK_F28:
+        return a_strdup("F28");
+      case XK_F29:
+        return a_strdup("F29");
+      case XK_F30:
+        return a_strdup("F30");
+      case XK_F31:
+        return a_strdup("F31");
+      case XK_F32:
+        return a_strdup("F32");
+      case XK_F33:
+        return a_strdup("F33");
+      case XK_F34:
+        return a_strdup("F34");
+      case XK_F35:
+        return a_strdup("F35");
+    }
 
     buf = p_new(char, 2);
 
-    /* If X KeySym, convert to ascii by grabbing low 7 bits */
-    if(ksym == XK_KP_Space)
+    switch(ksym)
+    {
+      case XK_KP_Space:
         /* Patch encoding botch */
         buf[0] = XK_space & 0x7F;
-    else if(ksym == XK_hyphen)
+        break;
+      case XK_hyphen:
         /* Map to equivalent character */
         buf[0] = (char)(XK_minus & 0xFF);
-    else
+        break;
+      default:
         buf[0] = (char)(ksym & 0x7F);
+        break;
+    }
 
     buf[1] = '\0';
     return buf;
@@ -482,18 +569,29 @@ key_press_lookup_string(xcb_key_press_event_t *e,
 
     /* 'col' (third parameter) is used to get the proper KeySym
      * according to modifier (XCB doesn't provide an equivalent to
-     * XLookupString()) */
-    k0 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 0);
-    k1 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 1);
+     * XLookupString()).
+     *
+     * If Mod5 is ON we look into second group.
+     */
+    if(e->state & XCB_MOD_MASK_5)
+    {
+        k0 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 2);
+        k1 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 3);
+    }
+    else
+    {
+        k0 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 0);
+        k1 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 1);
+    }
 
     /* The numlock modifier is on and the second KeySym is a keypad
      * KeySym */
-    if((CLEANMASK(e->state) & globalconf.numlockmask) && xcb_is_keypad_key(k1))
+    if((e->state & globalconf.numlockmask) && xcb_is_keypad_key(k1))
     {
         /* The Shift modifier is on, or if the Lock modifier is on and
          * is interpreted as ShiftLock, use the first KeySym */
-        if((CLEANMASK(e->state) & XCB_MOD_MASK_SHIFT) ||
-           (CLEANMASK(e->state) & XCB_MOD_MASK_LOCK && (e->state & globalconf.shiftlockmask)))
+        if((e->state & XCB_MOD_MASK_SHIFT) ||
+           (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.shiftlockmask)))
             *ksym = k0;
         else
             *ksym = k1;
@@ -501,13 +599,13 @@ key_press_lookup_string(xcb_key_press_event_t *e,
 
     /* The Shift and Lock modifers are both off, use the first
      * KeySym */
-    else if(!(CLEANMASK(e->state) & XCB_MOD_MASK_SHIFT) && !(e->state & XCB_MOD_MASK_LOCK))
+    else if(!(e->state & XCB_MOD_MASK_SHIFT) && !(e->state & XCB_MOD_MASK_LOCK))
         *ksym = k0;
 
     /* The Shift modifier is off and the Lock modifier is on and is
      * interpreted as CapsLock */
-    else if(!(CLEANMASK(e->state) & XCB_MOD_MASK_SHIFT) &&
-            (CLEANMASK(e->state) & XCB_MOD_MASK_LOCK && (e->state & globalconf.capslockmask)))
+    else if(!(e->state & XCB_MOD_MASK_SHIFT) &&
+            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.capslockmask)))
         /* The first Keysym is used but if that KeySym is lowercase
          * alphabetic, then the corresponding uppercase KeySym is used
          * instead */
@@ -515,8 +613,8 @@ key_press_lookup_string(xcb_key_press_event_t *e,
 
     /* The Shift modifier is on, and the Lock modifier is on and is
      * interpreted as CapsLock */
-    else if((CLEANMASK(e->state) & XCB_MOD_MASK_SHIFT) &&
-            (CLEANMASK(e->state) & XCB_MOD_MASK_LOCK && (e->state & globalconf.capslockmask)))
+    else if((e->state & XCB_MOD_MASK_SHIFT) &&
+            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.capslockmask)))
         /* The second Keysym is used but if that KeySym is lowercase
          * alphabetic, then the corresponding uppercase KeySym is used
          * instead */
@@ -524,17 +622,9 @@ key_press_lookup_string(xcb_key_press_event_t *e,
 
     /* The Shift modifer is on, or the Lock modifier is on and is
      * interpreted as ShiftLock, or both */
-    else if((CLEANMASK(e->state) & XCB_MOD_MASK_SHIFT) ||
-            (CLEANMASK(e->state) & XCB_MOD_MASK_LOCK && (e->state & globalconf.shiftlockmask)))
+    else if((e->state & XCB_MOD_MASK_SHIFT) ||
+            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.shiftlockmask)))
         *ksym = k1;
-
-    if(xcb_is_modifier_key(*ksym) || xcb_is_function_key(*ksym) ||
-       xcb_is_pf_key(*ksym) || xcb_is_cursor_key(*ksym) ||
-       xcb_is_misc_function_key(*ksym))
-    {
-        *buf_len = 0;
-        return;
-    }
 
     /* Handle special KeySym (Tab, Newline...) */
     if((*ksym & 0xffffff00) == 0xff00)
@@ -585,8 +675,9 @@ keygrabber_ungrab(void)
 /** Handle keypress event.
  * \param L Lua stack to push the key pressed.
  * \param e Received XKeyEvent.
+ * \return True if a key was succesfully get, false otherwise.
  */
-void
+bool
 keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 {
     xcb_keysym_t ksym = 0;
@@ -595,7 +686,8 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
     int i = 1;
 
     key_press_lookup_string(e, &buf, &len, &ksym);
-    /* Got a special key, see x_lookup_string() */
+    if(!len)
+        return false;
 
     lua_newtable(L);
 
@@ -640,15 +732,9 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
         lua_rawseti(L, -2, i++);
     }
 
-    if(len)
-    {
-        /* \todo use buf, but for now it does not report correctly some keys
-         * as return, etc. */
-        lua_pushstring(L, XKeysymToString(ksym));
-        p_delete(&buf);
-    }
-    else
-        lua_pushstring(L, "None");
+    lua_pushstring(L, buf);
+    p_delete(&buf);
+    return true;
 }
 
 /** Grab keyboard and read pressed keys, calling callback function at each key

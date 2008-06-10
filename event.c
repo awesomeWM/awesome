@@ -382,15 +382,17 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     if(globalconf.keygrabber != LUA_REFNIL)
     {
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);
-        keygrabber_handlekpress(globalconf.L, ev);
-        if(lua_pcall(globalconf.L, 2, 1, 0))
+        if(keygrabber_handlekpress(globalconf.L, ev))
         {
-            warn("error running function: %s", lua_tostring(globalconf.L, -1));
-            keygrabber_ungrab();
+            if(lua_pcall(globalconf.L, 2, 1, 0))
+            {
+                warn("error running function: %s", lua_tostring(globalconf.L, -1));
+                keygrabber_ungrab();
+            }
+            else if(!lua_isboolean(globalconf.L, -1) || !lua_toboolean(globalconf.L, -1))
+                keygrabber_ungrab();
         }
-        else if(!lua_isboolean(globalconf.L, -1) || !lua_toboolean(globalconf.L, -1))
-            keygrabber_ungrab();
-        lua_pop(globalconf.L, 1);  /* pop returned value */
+        lua_pop(globalconf.L, 1);  /* pop returned value or function if not called */
     }
     else
     {
