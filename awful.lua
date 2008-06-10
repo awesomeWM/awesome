@@ -375,6 +375,15 @@ local function menu(p, textbox, exe_callback)
     end)
 end
 
+local function escape(text)
+    text = text:gsub("&", "&amp;")
+    text = text:gsub("<", "&lt;")
+    text = text:gsub(">", "&gt;")
+    text = text:gsub("\\", "&apos;")
+    text = text:gsub("\"", "&quot;")
+    return text
+end
+
 -- Export tags function
 P.tag =
 {
@@ -415,5 +424,6 @@ P.layout =
 }
 P.spawn = spawn
 P.menu = menu
+P.escape = escape
 
 return P
