@@ -29,15 +29,8 @@ former or as a rectangular fractal for the later.
 Windows are grouped by tags. Each window can be tagged with one or multiple
 tags. Selecting certain tags displays all windows with these tags.
 
-awesome contains a small status bar which displays all available tags, the layout,
-the title of the focused window, and a status text. A
-floating window is indicated with an empty circle and a maximized
-floating window is indicated with a circle square before the windows
-title. The selected tags are indicated with a different color. The tags of
-the focused window are indicated with a filled square in the top left
-corner. The tags which are applied to one or more windows are indicated
-with an empty square in the top left corner.
-awesome can draw a small border around windows to indicate the focus state.
+awesome can contain small statusbars which can display anything you want:
+all available tags, the layout, the title of the visible windows, a text, etc.
 
 OPTIONS
 -------
@@ -53,7 +46,7 @@ DEFAULTS MOUSE BINDINGS
 *Button1* on tag name::
     View tag.
 *Mod4 + Button1* on tag name::
-    Tag current client with this tag.
+    Tag current client with this tag only.
 *Button3* on tag name::
     Add this tag to current view.
 *Mod4 + Button3* on tag name::
@@ -101,8 +94,6 @@ DEFAULTS KEY BINDINGS
     Increase number of columns for non-master windows by 1.
 *Mod4 \+ Control \+ l*::
     Decrease number of columns for non-master windows by 1.
-*Mod4 + Escape*::
-    View previously selected tag.
 *Mod4 + Left*::
     View previous tag.
 *Mod4 + Right*::
@@ -145,7 +136,7 @@ backend instead): AWT_TOOLKIT=MToolkit
 
 AUTHORS
 -------
-Julien Danjou <julien@danjou.info>
+Julien Danjou <julien@danjou.info> and others.
 
 WWW
 ---

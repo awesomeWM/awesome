@@ -36,6 +36,112 @@ By using hexadecimal format, you can also specifies an alpha channel:
 that means that #00ff00 will draw pure green, but #00ff00aa will set the
 alpha channel to `aa' and will blend the green with the color under it.
 
+WIDGETS
+-------
+The current list of available widget is:
+
+- iconbox
+- graph
+- progressbar
+- taglist
+- tasklist
+- textbox
+
+Each widget as its own set of properties, described below, that can bet modified with the set()
+method.
+
+ICONBOX
+~~~~~~~
+*image*::
+    The image path.
+
+*resize*::
+    True if you want the image to be auto-resized.
+
+PROGRESSBAR
+~~~~~~~~~~~
+A progressbar widget can contain several bars, so some properties need a data section,
+that means a title for the bar. For example, if you want to feed data to the `memory' bar
+you want to do mywidget:set("data", "memory 100"), where memory will be the data section.
+Using a new data section name will automagically create a new bar.
+
+
+The following properties require a data section before the value:
+
+*data*::
+    Feed with data.
+
+*fg*::
+    Foreground color.
+
+*fg_off*::
+    Unknown.
+
+*bg*::
+    Background color.
+
+*bordercolor*::
+    Border color.
+
+*fg_center*::
+    Foreground center color.
+
+*fg_end*::
+    Foreground end color.
+
+*min_value*::
+    Minimum value.
+
+*max_value*::
+    Maximum value.
+
+*reverse*::
+    True to draw reverse.
+
+
+The following properties do not require a data section before the value and applies to all bars inside
+the widget:
+
+*gap*::
+    Gap between borders.
+
+*ticks_count*::
+    The number of ticks.
+
+*ticks_gap*::
+    The gap between ticks.
+
+*border_padding*::
+    The padding inside the border.
+
+*border_width*::
+    The border width.
+
+*width*::
+    The widget width.
+
+*height*::
+    The widget height.
+
+*vertical*::
+    True if the widget is vertical.
+
+GRAPH
+~~~~~
+No documentation yet.
+
+TAGLIST
+~~~~~~~
+No documentation yet.
+
+TASKLIST
+~~~~~~~~
+No documentation yet.
+
+TEXTBOX
+~~~~~~~
+No documentation yet.
+
 SEE ALSO
 --------
 awesome(1) awesome-client(1)
