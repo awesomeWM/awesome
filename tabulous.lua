@@ -22,6 +22,7 @@ local client = client
 local table = table
 local pairs = pairs
 local awful = awful
+local print = print
 
 -- Reset env
 setfenv(1, P)
@@ -199,10 +200,13 @@ local function client_tab(tabindex, cl)
             client_display(tabindex, c)
 
             awful.hooks.userhook_call('tabbed', {c})
-        else
+        elseif x ~= tabindex then
             -- Merge two tabbed views
+            local cc = tabbed[tabindex][1]
             local clients = client_get_clients(x)
             client_untab_all(x)
+
+            tabindex = client_find_tabindex(cc)
 
             for i,b in pairs(clients) do
                 client_tab(tabindex, b)
