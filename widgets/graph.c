@@ -33,41 +33,66 @@ typedef enum
     Line_Style
 } draw_style_t;
 
-typedef struct
+typedef struct graph_t graph_t;
+
+struct graph_t
 {
-    /* general layout */
-
-    char **data_title;                  /** graph_data_t title of the data sections */
-    float *max_value;                   /** Represents a full graph */
-    int width;                          /** Width of the widget */
-    float height;                       /** Height of graph (0.0-1.0; 1.0 = height of bar) */
-    int box_height;                     /** Height of the innerbox in pixels */
-    int size;                           /** Size of lines-array (also innerbox-lenght) */
-    xcolor_t bg;                        /** Background color */
-    xcolor_t bordercolor;               /** Border color */
-    position_t grow;                    /** grow: Left or Right */
-
-    bool *scale;                        /** Scale the graph */
+    /** Grapht title of the data sections */
+    char *title;
+    /** Represents a full graph */
+    float max_value;
+    /** Scale the graph */
+    bool scale;
 
     /* markers... */
-    int *index;                         /** Index of current (new) value */
-    int *max_index;                     /** Index of the actual maximum value */
-    float *current_max;                 /** Pointer to current maximum value itself */
-    draw_style_t *draw_style;           /** Draw style of according index */
+    /** Index of current (new) value */
+    int index;
+    /** Index of the actual maximum value */
+    int max_index;
+    /** Pointer to current maximum value itself */
+    float current_max;
+    /** Draw style of according index */
+    draw_style_t draw_style;
+    /** Keeps the calculated values (line-length); */
+    int *lines;
+    /** Actual values */
+    float *values;
+    /** Color of them */
+    xcolor_t color_start;
+    /** Color at middle of graph */
+    xcolor_t *pcolor_center;
+    /** Color at end of graph */
+    xcolor_t *pcolor_end;
+    /** Create a vertical color gradient */
+    bool vertical_gradient;
+    /** Next and previous graph */
+    graph_t *next, *prev;
+};
 
-    /* all data is stored here */
-    int data_items;                     /** Number of data-input items */
-    int **lines;                        /** Keeps the calculated values (line-length); */
-    float **values;                     /** Actual values */
+DO_SLIST(graph_t, graph, p_delete)
 
-    bool *vertical_gradient;            /** Create a vertical color gradient */
-
-    xcolor_t *color_start;              /** Color of them */
-    xcolor_t **pcolor_center;           /** Color at middle of graph */
-    xcolor_t **pcolor_end;              /** Color at end of graph */
-
-    int *draw_from;                     /** Preparation/tmp array for draw_graph(); */
-    int *draw_to;                       /** Preparation/tmp array for draw_graph(); */
+typedef struct
+{
+    /** Width of the widget */
+    int width;
+    /** Height of graph (0.0-1.0; 1.0 = height of bar) */
+    float height;
+    /** Height of the innerbox in pixels */
+    int box_height;
+    /** Size of lines-array (also innerbox-length) */
+    int size;
+    /** Background color */
+    xcolor_t bg;
+    /** Border color */
+    xcolor_t bordercolor;
+    /** Grow: Left or Right */
+    position_t grow;
+    /** Preparation/tmp array for draw_graph(); */
+    int *draw_from;
+    /** Preparation/tmp array for draw_graph(); */
+    int *draw_to;
+    /** Graph list */
+    graph_t *graphs;
 } graph_data_t;
 
 /* the same as the progressbar_pcolor_set may use a common function */
@@ -87,50 +112,23 @@ graph_pcolor_set(xcolor_t **ppcolor, char *new_color)
         p_delete(ppcolor);
 }
 
-static void
+static graph_t *
 graph_data_add(graph_data_t *d, const char *new_data_title)
 {
-    d->data_items++;
+    graph_t *graph = p_new(graph_t, 1);
 
     /* memory (re-)allocating + initialising */
-    p_realloc(&(d->values), d->data_items);
-    d->values[d->data_items - 1] = p_new(float, d->size);
+    graph->values = p_new(float, d->size);
+    graph->lines = p_new(int, d->size);
+    graph->max_value = 100.0;
+    graph->title = a_strdup(new_data_title);
+    graph->color_start = globalconf.colors.fg;
+    graph->vertical_gradient = true;
+    graph->draw_style = Bottom_Style;
 
-    p_realloc(&(d->lines), d->data_items);
-    d->lines[d->data_items - 1] = p_new(int, d->size);
+    graph_list_append(&d->graphs, graph);
 
-    p_realloc(&(d->scale), d->data_items);
-    d->scale[d->data_items - 1] = false;
-
-    p_realloc(&(d->index), d->data_items);
-    d->index[d->data_items - 1] = 0;
-
-    p_realloc(&(d->max_index), d->data_items);
-    d->max_index[d->data_items - 1] =  0;
-
-    p_realloc(&(d->current_max), d->data_items);
-    d->current_max[d->data_items - 1] =  0;
-
-    p_realloc(&(d->max_value), d->data_items);
-    d->max_value[d->data_items - 1] = 100.0;
-
-    p_realloc(&(d->data_title), d->data_items);
-    d->data_title[d->data_items - 1] = a_strdup(new_data_title);
-
-    p_realloc(&(d->color_start), d->data_items);
-    d->color_start[d->data_items - 1] = globalconf.colors.fg;
-
-    p_realloc(&(d->pcolor_center), d->data_items);
-    d->pcolor_center[d->data_items - 1] = NULL;
-
-    p_realloc(&(d->pcolor_end), d->data_items);
-    d->pcolor_end[d->data_items - 1] = NULL;
-
-    p_realloc(&(d->vertical_gradient), d->data_items);
-    d->vertical_gradient[d->data_items - 1] = true;
-
-    p_realloc(&(d->draw_style), d->data_items);
-    d->draw_style[d->data_items - 1] = Bottom_Style;
+    return graph;
 }
 
 static int
@@ -142,11 +140,12 @@ graph_draw(draw_context_t *ctx,
            void *p __attribute__ ((unused)))
 {
     int margin_top;
-    int z, y, x, tmp, cur_index, test_index;
+    int y, tmp, cur_index, test_index;
     graph_data_t *d = w->widget->data;
     area_t rectangle, pattern_area;
+    graph_t *graph, *graphtmp;
 
-    if(!d->data_items)
+    if(!d->graphs)
         return 0;
 
     w->area.x = widget_calculate_offset(ctx->width,
@@ -181,13 +180,12 @@ graph_draw(draw_context_t *ctx,
 
     pattern_area.y = rectangle.y - rectangle.height;
 
-    /* draw style = top */
-    for(z = 0; z < d->data_items; z++)
+    for(graph = d->graphs; graph; graph = graph->next)
     {
-        if(d->draw_style[z] != Top_Style)
+        if(graph->draw_style != Top_Style)
             continue;
 
-        if(d->vertical_gradient[z])
+        if(graph->vertical_gradient)
         {
             pattern_area.width = 0;
             pattern_area.height = rectangle.height;
@@ -197,112 +195,108 @@ graph_draw(draw_context_t *ctx,
             pattern_area.height = 0;
 
             if(d->grow == Right)
-                pattern_area.width = -rectangle.width;
+                pattern_area.width = - rectangle.width;
             else
                 pattern_area.width = rectangle.width;
         }
 
-        cur_index = d->index[z];
+        cur_index = graph->index;
 
         for(y = 0; y < d->size; y++)
         {
-            /* draw this filltop data thing [z]. But figure out the part
+            /* draw this filltop data thing. But figure out the part
              * what shall be visible. Therefore find the next smaller value
              * on this index (draw_from) - might be 0 (then draw from start) */
-            for(tmp = 0, x = 0; x < d->data_items; x++)
+            tmp = 0;
+            for(graphtmp = d->graphs; graphtmp; graphtmp = graphtmp->next)
             {
-                if(d->draw_style[x] != Top_Style)
-                    continue;
-                if (x == z) /* no need to compare with itself */
+                /* no need to compare with itself */
+                if(graphtmp == graph || graphtmp->draw_style != Top_Style)
                     continue;
 
                 /* current index's can be different (widget_tell might shift
                  * some with a different frequenzy), so calculate
                  * offset and compare accordingly finally */
-                test_index = cur_index + (d->index[x] - d->index[z]);
+                test_index = cur_index + (graphtmp->index - graph->index);
 
-                if (test_index < 0)
+                if(test_index < 0)
                     test_index = d->size + test_index; /* text_index is minus, since < 0 */
                 else if(test_index >= d->size)
                     test_index -= d->size;
 
-                /* ... (test_)index to test for a smaller value found. */
-
                 /* if such a smaller value (to not overdraw!) is there, store into 'tmp' */
-                if(d->lines[x][test_index] > tmp && d->lines[x][test_index] < d->lines[z][cur_index])
-                    tmp = d->lines[x][test_index];
-
+                if(graphtmp->lines[test_index] < graph->lines[cur_index])
+                    tmp = MIN(graphtmp->lines[test_index], tmp);
             }
             /* reverse values (because drawing from top) */
             d->draw_from[cur_index] = d->box_height - tmp; /* i.e. no smaller value -> from top of box */
-            d->draw_to[cur_index] = d->box_height - d->lines[z][cur_index]; /* i.e. on full graph -> 0 = bottom */
+            d->draw_to[cur_index] = d->box_height - graph->lines[cur_index]; /* i.e. on full graph -> 0 = bottom */
 
             if (--cur_index < 0) /* next index to compare to other values */
                 cur_index = d->size - 1;
         }
-        draw_graph(ctx, rectangle , d->draw_from, d->draw_to, d->index[z], d->grow, pattern_area,
-                   &(d->color_start[z]), d->pcolor_center[z], d->pcolor_end[z]);
+        draw_graph(ctx, rectangle , d->draw_from, d->draw_to, graph->index, d->grow, pattern_area,
+                   &graph->color_start, graph->pcolor_center, graph->pcolor_end);
     }
 
     pattern_area.y = rectangle.y;
 
     /* draw style = bottom */
-    for(z = 0; z < d->data_items; z++)
+    for(graph = d->graphs; graph; graph = graph->next)
     {
-        if(d->draw_style[z] != Bottom_Style)
+        if(graph->draw_style != Bottom_Style)
             continue;
 
-        if(d->vertical_gradient[z])
+        if(graph->vertical_gradient)
         {
             pattern_area.width = 0;
-            pattern_area.height = -rectangle.height;
+            pattern_area.height = - rectangle.height;
         }
         else
         {
             pattern_area.height = 0;
 
             if(d->grow == Right)
-                pattern_area.width = -rectangle.width;
+                pattern_area.width = - rectangle.width;
             else
                 pattern_area.width = rectangle.width;
         }
 
-        cur_index = d->index[z];
+        cur_index = graph->index;
 
         for(y = 0; y < d->size; y++)
         {
-            for(tmp = 0, x = 0; x < d->data_items; x++)
+            tmp = 0;
+            for(graphtmp = d->graphs; graphtmp; graphtmp = graphtmp->next)
             {
-                if(d->draw_style[x] != Bottom_Style)
-                    continue;
-                if (x == z)
+                if(graph == graphtmp || graphtmp->draw_style != Bottom_Style)
                     continue;
 
-                test_index = cur_index + (d->index[x] - d->index[z]);
+                test_index = cur_index + (graphtmp->index - graph->index);
 
                 if (test_index < 0)
                     test_index = d->size + test_index;
                 else if(test_index >= d->size)
                     test_index -= d->size;
 
-                if(d->lines[x][test_index] > tmp && d->lines[x][test_index] < d->lines[z][cur_index])
-                    tmp = d->lines[x][test_index];
+                if(graphtmp->lines[test_index] < graph->lines[cur_index])
+                    tmp = MIN(graphtmp->lines[test_index], tmp);
             }
             d->draw_from[cur_index] = tmp;
-            if (--cur_index < 0)
+            if(--cur_index < 0)
                 cur_index = d->size - 1;
         }
-        draw_graph(ctx, rectangle, d->draw_from, d->lines[z], d->index[z], d->grow, pattern_area,
-                   &(d->color_start[z]), d->pcolor_center[z], d->pcolor_end[z]);
+        draw_graph(ctx, rectangle, d->draw_from, graph->lines, graph->index, d->grow, pattern_area,
+                   &graph->color_start, graph->pcolor_center, graph->pcolor_end);
     }
 
     /* draw style = line */
-    for(z = 0; z < d->data_items; z++)
+    for(graph = d->graphs; graph; graph = graph->next)
     {
-        if(d->draw_style[z] != Line_Style)
+        if(graph->draw_style != Line_Style)
             continue;
 
-        if(d->vertical_gradient[z])
+        if(graph->vertical_gradient)
         {
             pattern_area.width = 0;
             pattern_area.height = -rectangle.height;
@@ -311,13 +305,13 @@ graph_draw(draw_context_t *ctx,
         {
             pattern_area.height = 0;
             if(d->grow == Right)
-                pattern_area.width = -rectangle.width;
+                pattern_area.width = - rectangle.width;
             else
                 pattern_area.width = rectangle.width;
         }
 
-        draw_graph_line(ctx, rectangle, d->lines[z], d->index[z], d->grow, pattern_area,
-                &(d->color_start[z]), d->pcolor_center[z], d->pcolor_end[z]);
+        draw_graph_line(ctx, rectangle, graph->lines, graph->index, d->grow, pattern_area,
+                &graph->color_start, graph->pcolor_center, graph->pcolor_end);
     }
 
     /* draw border (after line-drawing, what paints 0-values to the border) */
@@ -336,15 +330,14 @@ static widget_tell_status_t
 graph_tell(widget_t *widget, const char *property, const char *new_value)
 {
     graph_data_t *d = widget->data;
-    int i, u, fi;
+    graph_t *graph;
+    int i;
     float value;
     char *title, *setting;
     char *new_val;
-    bool found;
 
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
-
     /* following properties need a datasection */
     else if(!a_strcmp(property, "data")
             || !a_strcmp(property, "fg")
@@ -363,20 +356,12 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
             p_delete(&new_val);
             return WIDGET_ERROR_NOVALUE;
         }
-        for(found = false, fi = 0; fi < d->data_items; fi++)
-        {
-            if(!a_strcmp(title, d->data_title[fi]))
-            {
-                found = true;
+        for(graph = d->graphs; graph; graph = graph->next)
+            if(!a_strcmp(title, graph->title))
                 break;
-            }
-        }
         /* no section found -> create one */
-        if(!found)
-        {
-            graph_data_add(d, title);
-            fi = d->data_items - 1;
-        }
+        if(!graph)
+            graph = graph_data_add(d, title);
 
         /* change values accordingly... */
         if(!a_strcmp(property, "data"))
@@ -384,72 +369,77 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
             /* assign incoming value */
             value = MAX(atof(setting), 0);
 
-            if(++d->index[fi] >= d->size) /* cycle inside the array */
-                d->index[fi] = 0;
+            if(++graph->index >= d->size) /* cycle inside the array */
+                graph->index = 0;
 
-            if(d->scale[fi]) /* scale option is true */
+            if(graph->scale) /* scale option is true */
             {
-                d->values[fi][d->index[fi]] = value;
+                graph->values[graph->index] = value;
 
-                if(value > d->current_max[fi]) /* a new maximum value found */
+                if(value > graph->current_max) /* a new maximum value found */
                 {
-                    d->max_index[fi] = d->index[fi];
-                    d->current_max[fi] = value;
+                    graph->max_index = graph->index;
+                    graph->current_max = value;
 
                     /* recalculate */
-                    for (u = 0; u < d->size; u++)
-                        d->lines[fi][u] = (int) (d->values[fi][u] * (d->box_height) / d->current_max[fi] + 0.5);
+                    for (i = 0; i < d->size; i++)
+                        graph->lines[i] = (int) (graph->values[i] * d->box_height
+                                                 / graph->current_max + 0.5);
                 }
                 /* old max_index reached + current_max > normal, re-check/generate */
-                else if(d->max_index[fi] == d->index[fi] && d->current_max[fi] > d->max_value[fi])
+                else if(graph->max_index == graph->index
+                        && graph->current_max > graph->max_value)
                 {
                     /* find the new max */
-                    for(u = 0; u < d->size; u++)
-                        if(d->values[fi][u] > d->values[fi][d->max_index[fi]])
-                            d->max_index[fi] = u;
+                    for(i = 0; i < d->size; i++)
+                        if(graph->values[i] > graph->values[graph->max_index])
+                            graph->max_index = i;
 
-                    d->current_max[fi] = MAX(d->values[fi][d->max_index[fi]], d->max_value[fi]);
+                    graph->current_max = MAX(graph->values[graph->max_index], graph->max_value);
 
                     /* recalculate */
-                    for(u = 0; u < d->size; u++)
-                        d->lines[fi][u] = (int) (d->values[fi][u] * d->box_height / d->current_max[fi] + 0.5);
+                    for(i = 0; i < d->size; i++)
+                        graph->lines[i] = (int) (graph->values[i] * d->box_height
+                                                 / graph->current_max + 0.5);
                 }
                 else
-                    d->lines[fi][d->index[fi]] = (int) (value * d->box_height / d->current_max[fi] + 0.5);
+                    graph->lines[graph->index] = (int) (value * d->box_height
+                                                        / graph->current_max + 0.5);
             }
             else /* scale option is false - limit to d->box_height */
             {
-                if (value < d->max_value[fi])
-                    d->lines[fi][d->index[fi]] = (int) (value * d->box_height / d->max_value[fi] + 0.5);
+                if(value < graph->max_value)
+                    graph->lines[graph->index] = (int) (value * d->box_height
+                                                        / graph->max_value + 0.5);
                 else
-                    d->lines[fi][d->index[fi]] = d->box_height;
+                    graph->lines[graph->index] = d->box_height;
             }
             p_delete(&new_val);
             return WIDGET_NOERROR;
         }
         else if(!a_strcmp(property, "fg"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->color_start[fi]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &graph->color_start);
         else if(!a_strcmp(property, "fg_center"))
-            graph_pcolor_set(&(d->pcolor_center[fi]), setting);
+            graph_pcolor_set(&graph->pcolor_center, setting);
         else if(!a_strcmp(property, "fg_end"))
-            graph_pcolor_set(&(d->pcolor_end[fi]), setting);
+            graph_pcolor_set(&graph->pcolor_end, setting);
         else if(!a_strcmp(property, "vertical_gradient"))
-            d->vertical_gradient[fi] = a_strtobool(setting);
+            graph->vertical_gradient = a_strtobool(setting);
         else if(!a_strcmp(property, "scale"))
-            d->scale[fi] = a_strtobool(setting);
+            graph->scale = a_strtobool(setting);
         else if(!a_strcmp(property, "max_value"))
         {
-            d->max_value[fi] = atof(setting);
-            d->current_max[fi] = d->max_value[fi];
+            graph->max_value = atof(setting);
+            graph->current_max = graph->max_value;
         }
         else if(!a_strcmp(property, "draw_style"))
         {
             if(!a_strcmp(setting, "bottom"))
-                d->draw_style[fi] = Bottom_Style;
+                graph->draw_style = Bottom_Style;
             else if(!a_strcmp(setting, "line"))
-                d->draw_style[fi] = Line_Style;
+                graph->draw_style = Line_Style;
             else if(!a_strcmp(setting, "top"))
-                d->draw_style[fi] = Top_Style;
+                graph->draw_style = Top_Style;
             else
             {
                 warn("'error changing property %s of widget %s, must be 'bottom', 'top' or 'line'",
@@ -468,16 +458,15 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
         d->width = atoi(new_value);
         d->size = d->width - 2;
         /* re-allocate/initialise necessary values */
-        for(i = 0; i < d->data_items; i++)
+        for(graph = d->graphs; graph; graph = graph->next)
         {
-            p_delete(&d->values[i]);
-            p_delete(&d->lines[i]);
-            d->values[i] = p_new(float, d->size);
-            d->lines[i] = p_new(int, d->size);
-
-            d->index[i] = 0;
-            d->current_max[i] =  0;
-            d->max_index[i] =  0;
+            p_realloc(&graph->values, d->size);
+            p_realloc(&graph->lines, d->size);
+            p_clear(&graph->values, d->size);
+            p_clear(&graph->lines, d->size);
+            graph->index = 0;
+            graph->current_max =  0;
+            graph->max_index =  0;
         }
     }
     else if(!a_strcmp(property, "bg"))
