@@ -404,35 +404,9 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
 
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
-    /* seperate for saving some cpu cycles (could be put into next else if...) */
-    else if(!a_strcmp(property, "data"))
-    {
-        new_val = a_strdup(new_value);
-        title = strtok(new_val, " ");
-        if(!(setting = strtok(NULL, " ")))
-        {
-            p_delete(&new_val);
-            return WIDGET_ERROR_NOVALUE;
-        }
-        for(i = 0; i < d->data_items; i++)
-            if(!a_strcmp(title, d->data_title[i]))
-            {
-                value = atof(setting);
-                d->values[i] = (value < d->min_value[i] ? d->min_value[i] :
-                               (value > d->max_value[i] ? d->max_value[i] : value));
-                p_delete(&new_val);
-                return WIDGET_NOERROR;
-            }
-        /* no section found -> create one */
-        progressbar_data_add(d, title);
-        value = atoi(setting);
-        d->values[d->data_items - 1] = (value < d->min_value[i] ? d->min_value[i] :
-                                       (value > d->max_value[i] ? d->max_value[i] : value));
-        p_delete(&new_val);
-        return WIDGET_NOERROR;
-    }
     /* following properties need a datasection */
     else if(!a_strcmp(property, "fg")
+            || !a_strcmp(property, "data")
             || !a_strcmp(property, "fg_off")
             || !a_strcmp(property, "bg")
             || !a_strcmp(property, "bordercolor")
@@ -450,20 +424,21 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
             p_delete(&new_val);
             return WIDGET_ERROR_NOVALUE;
         }
-        for(found = false, i = 0; i < d->data_items; i++)
-        {
+        for(found = false, i = 0; !found && i < d->data_items; i++)
             if(!a_strcmp(title, d->data_title[i]))
-            {
                 found = true;
-                break;
-            }
-        }
         /* no section found -> create one */
         if(!found)
             progressbar_data_add(d, title);
 
         /* change values accordingly... */
-        if(!a_strcmp(property, "fg"))
+        if(!a_strcmp(property, "data"))
+        {
+            value = atof(setting);
+            d->values[d->data_items - 1] = (value < d->min_value[i] ? d->min_value[i] :
+                                            (value > d->max_value[i] ? d->max_value[i] : value));
+        }
+        else if(!a_strcmp(property, "fg"))
             xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg[i]));
         else if(!a_strcmp(property, "bg"))
             xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->bg[i]));
