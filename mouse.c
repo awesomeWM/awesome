@@ -720,7 +720,6 @@ mouse_client_resize(client_t *c, corner_t corner)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A client.
  * \lparam The x coordinate.
  * \lparam The y coordinate.
  */
@@ -740,7 +739,7 @@ luaA_mouse_coords_set(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A client.
+ * \lvalue A client.
  * \lparam An optionnal corner, such as bottomleft, topright, etc.
  */
 int
@@ -760,7 +759,7 @@ luaA_client_mouse_resize(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A client.
+ * \lvalue A client.
  * \lparam The pixel to snap.
  */
 int

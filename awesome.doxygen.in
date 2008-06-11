@@ -39,6 +39,7 @@ DISTRIBUTE_GROUP_DOC   = NO
 SUBGROUPING            = YES
 
 ALIASES += luastack="\par Lua Stack:"
+ALIASES += lvalue="- \em value "
 ALIASES += lparam="- \em param "
 ALIASES += lreturn="- \em returns "
 

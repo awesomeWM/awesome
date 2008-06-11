@@ -442,7 +442,7 @@ luaA_titlebar_new(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A titlebar.
+ * \lvalue A titlebar.
  * \lparam A widget.
  */
 static int
@@ -471,7 +471,7 @@ luaA_titlebar_widget_add(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A titlebar
+ * \lvalue A titlebar
  * \lreturn A table with all widgets from the titlebar.
  */
 static int
@@ -499,7 +499,7 @@ luaA_titlebar_widget_get(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A titlebar.
+ * \lvalue A titlebar.
  * \lreturn A client if the titlebar is attached, nil otherwise.
  */
 static int

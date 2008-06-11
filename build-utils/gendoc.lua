@@ -37,7 +37,7 @@ for i, line in ipairs(ilines) do
         end
         comment = nil
     elseif comment_start then
-		if not line:find("\\param") and not line:find("\\return") then
+		if not line:find("\\param") and not line:find("\\return") and not line:find("\\lvalue") then
 	        comment = comment .. line
 		end
     end

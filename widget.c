@@ -349,7 +349,7 @@ luaA_widget_new(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A widget.
+ * \lvalue A widget.
  * \lparam A table containing modifiers keys.
  * \lparam A button number.
  * \lparam A function to execute. Some widgets may pass arguments to this
@@ -429,7 +429,7 @@ widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const ch
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A widget.
+ * \lvalue A widget.
  * \lparam The property name.
  * \lparam The property value.
  */
@@ -452,7 +452,7 @@ luaA_widget_set(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A widget.
+ * \lvalue A widget.
  */
 static int
 luaA_widget_gc(lua_State *L)
@@ -467,7 +467,7 @@ luaA_widget_gc(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A widget.
+ * \lvalue A widget.
  */
 static int
 luaA_widget_tostring(lua_State *L)
@@ -481,7 +481,7 @@ luaA_widget_tostring(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A widget.
+ * \lvalue A widget.
  * \lparam Another widget.
  * \lreturn True if widgets are equal.
  */
@@ -498,7 +498,7 @@ luaA_widget_eq(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A widget.
+ * \lvalue A widget.
  * \lparam A string with the new widget name.
  */
 static int
@@ -515,7 +515,7 @@ luaA_widget_name_set(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A widget.
+ * \lvalue A widget.
  * \lreturn A string with the name of the widget.
  */
 static int
@@ -531,7 +531,7 @@ luaA_widget_name_get(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A widget.
+ * \lvalue A widget.
  * \lparam A boolean value.
  */
 static int
@@ -544,6 +544,10 @@ luaA_widget_visible_set(lua_State *L)
 }
 
 /** Get the visible attribute of a widget.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lvalue A widget.
  * \return A boolean value, true if the widget is visible, false otherwise.
  */
 static int

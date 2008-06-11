@@ -277,7 +277,7 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A statusbar.
+ * \lvalue A statusbar.
  * \lparam Another statusbar.
  * \return True if statusbar are equals, false otherwise.
  */
@@ -294,7 +294,7 @@ luaA_statusbar_eq(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A statusbar.
+ * \lvalue A statusbar.
  * \lparam A position: left, right, top, bottom or off.
  */
 static int
@@ -318,7 +318,7 @@ luaA_statusbar_position_set(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A statusbar.
+ * \lvalue A statusbar.
  * \lreturn The statusbar position.
  */
 static int
@@ -333,7 +333,7 @@ luaA_statusbar_position_get(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A statusbar,
+ * \lvalue A statusbar,
  * \lparam An alignment: right, left or center.
  */
 static int
@@ -353,7 +353,7 @@ luaA_statusbar_align_set(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A statusbar.
+ * \lvalue A statusbar.
  */
 static int
 luaA_statusbar_tostring(lua_State *L)
@@ -367,7 +367,7 @@ luaA_statusbar_tostring(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A statusbar.
+ * \lvalue A statusbar.
  * \lparam A widget.
  */
 static int
@@ -389,7 +389,7 @@ luaA_statusbar_widget_add(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A stausbar
+ * \lvalue A stausbar
  * \lparam A screen number.
  */
 static int
@@ -426,6 +426,10 @@ luaA_statusbar_add(lua_State *L)
 }
 
 /** Remove the statusbar its screen.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lvalue A statusbar
  */
 static int
 luaA_statusbar_remove(lua_State *L)
@@ -514,6 +518,7 @@ luaA_statusbar_userdata_new(statusbar_t *t)
  * \param L The Lua VM state.
  *
  * \luastack
+ * \lvalue A statusbar.
  * \lreturn A table with all widgets from the statusbar.
  */
 static int
