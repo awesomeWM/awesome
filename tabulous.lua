@@ -159,7 +159,7 @@ local function client_untab(cl)
 
     table.remove(tabbed[tabindex][2], cindex)
 
-    if table.maxn(tabbed[tabindex][2]) == o then
+    if table.maxn(tabbed[tabindex][2]) == 0 then
         -- Table is empty now, remove the tabbed display
         table.remove(tabbed, tabindex)
     end
