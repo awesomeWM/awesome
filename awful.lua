@@ -456,10 +456,10 @@ local function menu(p, textbox, exe_callback)
             return false
         elseif key == "BackSpace" then
             command = command:sub(1, #command - 1)
-            textbox:set("text", p .. command)
+            textbox:set("text", p .. escape(command))
         else
             command = command .. key
-            textbox:set("text", p .. command)
+            textbox:set("text", p .. escape(command))
         end
         return true
     end)
