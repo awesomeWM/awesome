@@ -7,22 +7,48 @@ require("tabulous")
 -- Uncomment this to activate autotabbing
 -- tabulous.autotab_start()
 
--- {{{ Colors and fonts
-awesome.font_set("sans 8")
-awesome.colors_set({ fg = "white", bg = "black" })
--- }}}
-
--- {{{ Variables definitions
+-- {{{ Variable definitions
 -- This is used later as the default terminal to run.
 terminal = "xterm"
+
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
+
 -- Table of layouts to cover with awful.layout.inc, order matters.
-layouts = { "tile", "tileleft", "tilebottom", "tiletop", "magnifier", "max", "spiral", "dwindle", "floating" }
+layouts =
+{
+    "tile",
+    "tileleft",
+    "tilebottom",
+    "tiletop",
+    "magnifier",
+    "max",
+    "spiral",
+    "dwindle",
+    "floating"
+}
+
+-- Color & Appearance definitions, we use these later to display things
+font = "sans 8"
+border_width = 1
+
+bg_normal = "#222222"
+fg_normal = "#aaaaaa"
+border_normal = "#000000"
+
+bg_focus = "#535d6c"
+fg_focus = "#ffffff"
+border_focus = bg_focus
+border_marked = "#91231C"
+
+awesome.font_set(font)
+awesome.colors_set({ fg = fg_normal, bg = bg_normal })
+awesome.resizehints_set(true)
+
 -- }}}
 
 -- {{{ Tags
@@ -51,14 +77,14 @@ mytaglist:mouse({}, 3, function (object, tag) tag:view(not tag:isselected()) end
 mytaglist:mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end)
 mytaglist:mouse({ }, 4, awful.tag.viewnext)
 mytaglist:mouse({ }, 5, awful.tag.viewprev)
-mytaglist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
+mytaglist:set("text_focus", "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'><title/></span> ")
 
 -- Create a tasklist widget
 mytasklist = widget.new({ type = "tasklist", name = "mytasklist" })
 mytasklist:mouse({ }, 1, function (object, c) c:focus_set(); c:raise() end)
 mytasklist:mouse({ }, 4, function () awful.client.focus(1) end)
 mytasklist:mouse({ }, 5, function () awful.client.focus(-1) end)
-mytasklist:set("text_focus", "<bg color=\"#555555\"/> <title/> ")
+mytasklist:set("text_focus", "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'><title/></span> ")
 
 -- Create a textbox widget
 mytextbox = widget.new({ type = "textbox", name = "mytextbox", align = "right" })
@@ -75,17 +101,17 @@ myiconbox:set("image", "@iconsdir@/awesome16.png")
 mylayoutbox = {}
 for s = 1, screen.count() do
     mylayoutbox[s] = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
-    mylayoutbox[s]:mouse({ }, 1, function () awful.layout.inc(layouts, 1) end)    
-    mylayoutbox[s]:mouse({ }, 3, function () awful.layout.inc(layouts, -1) end)    
-    mylayoutbox[s]:mouse({ }, 4, function () awful.layout.inc(layouts, 1) end)    
-    mylayoutbox[s]:mouse({ }, 5, function () awful.layout.inc(layouts, -1) end)    
+    mylayoutbox[s]:mouse({ }, 1, function () awful.layout.inc(layouts, 1) end)
+    mylayoutbox[s]:mouse({ }, 3, function () awful.layout.inc(layouts, -1) end)
+    mylayoutbox[s]:mouse({ }, 4, function () awful.layout.inc(layouts, 1) end)
+    mylayoutbox[s]:mouse({ }, 5, function () awful.layout.inc(layouts, -1) end)
     mylayoutbox[s]:set("image", "@iconsdir@/layouts/tilew.png")
 end
 
 -- Create a statusbar for each screen and add it
 for s = 1, screen.count() do
     mystatusbar = statusbar.new({ position = "top", name = "mystatusbar" .. s,
-                                fg = "lightblue", bg = "black" })
+                                fg = fg_normal, bg = bg_normal })
     -- Add widgets to the statusbar - order matters
     mystatusbar:widget_add(mytaglist)
     mystatusbar:widget_add(myiconbox)
@@ -180,7 +206,7 @@ keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layout
 keybinding.new({ modkey }, "F1", function () awful.menu("Run: ", mymenubox, awful.spawn) end):add()
 
 --- Tabulous, tab manipulation
-keybinding.new({ modkey, "Control" }, "y", function () 
+keybinding.new({ modkey, "Control" }, "y", function ()
     local tabbedview = tabulous.tabindex_get()
     local nextclient = awful.client.next(1)
 
@@ -243,25 +269,25 @@ end
 -- Hook function to execute when focusing a client.
 function hook_focus(c)
     if not awful.client.ismarked(c) then
-        c:border_set({ width = 1, color = "white" })
+        c:border_set({ width = border_width, color = border_focus })
     end
 end
 
 -- Hook function to execute when unfocusing a client.
 function hook_unfocus(c)
     if not awful.client.ismarked(c) then
-        c:border_set({ width = 1, color = "black" })
+        c:border_set({ width = border_width, color = border_normal })
     end
 end
 
 -- Hook function to execute when marking a client
 function hook_marked(c)
-    c:border_set({ width = 1, color = "red" })
+    c:border_set({ width = border_width, color = border_marked })
 end
 
 -- Hook function to execute when unmarking a client
 function hook_unmarked(c)
-    c:border_set({ width = 1, color = "white" })
+    c:border_set({ width = border_width, color = border_focus })
 end
 
 -- Hook function to exeucte when the mouse is over a client.
@@ -276,7 +302,7 @@ end
 function hook_manage(c)
     -- New client may not receive focus
     -- if they're not focusable, so set border anyway.
-    c:border_set({ width = 1, color = "black" })
+    c:border_set({ width = border_width, color = border_normal })
     c:focus_set()
     if c:name_get():lower():find("mplayer") then
         c:floating_set(true)
@@ -307,8 +333,4 @@ awful.hooks.manage(hook_manage)
 awful.hooks.mouseover(hook_mouseover)
 awful.hooks.arrange(hook_arrange)
 awful.hooks.timer(1, hook_timer)
-
 -- }}}
-
--- Respect size hints
-awesome.resizehints_set(true)
