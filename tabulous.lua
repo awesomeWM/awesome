@@ -86,29 +86,20 @@ local function client_find_tabindex(cl)
     return nil
 end
 
--- Create a new tabbed display with client as the master
-local function client_tab_create(cl)
-    local c = cl or client.focus_get()
-
-    table.insert(tabbed, {
-        c, -- Window currently being displayed
-        { c } -- List of windows in tabbed display
-    })
-
-    awful.hooks.userhook_call('tabbed', {c})
-    return client_find_tabindex(c)
+-- Get all clients on a tabbed display
+local function client_get_clients(tabindex)
+    return tabbed[tabindex][2]
 end
 
--- Add a client to a tabbed display
-local function client_tab(tabindex, cl)
-    local c = cl or client.focus_get()
+-- Get the displayed client on a tabbed display
+local function client_get_displayed(tabindex)
+    return tabbed[tabindex][1]
+end
 
-    if tabbed[tabindex] ~= nil and client_find_tabindex(c) == nil then
-        table.insert(tabbed[tabindex][2], c)
-        client_display(tabindex, c)
-
-        awful.hooks.userhook_call('tabbed', {c})
-    end
+-- Get a client by tab number
+local function client_get_position(tabindex, pos)
+    if tabbed[tabindex] == nil then return nil end
+    return tabbed[tabindex][2][pos]
 end
 
 -- Get the next client in a tabdisplay
@@ -168,6 +159,48 @@ local function client_untab(cl)
     awful.hooks.userhook_call('untabbed', {c})
 end
 
+-- Create a new tabbed display with client as the master
+local function client_tab_create(cl)
+    local c = cl or client.focus_get()
+
+    table.insert(tabbed, {
+        c, -- Window currently being displayed
+        { c } -- List of windows in tabbed display
+    })
+
+    awful.hooks.userhook_call('tabbed', {c})
+    return client_find_tabindex(c)
+end
+
+-- Add a client to a tabbed display
+local function client_tab(tabindex, cl)
+    local c = cl or client.focus_get()
+
+    if tabbed[tabindex] ~= nil then
+        local x = client_find_tabindex(c)
+
+        if x == nil then
+            -- Add untabbed client to tabindex
+            table.insert(tabbed[tabindex][2], c)
+            client_display(tabindex, c)
+
+            awful.hooks.userhook_call('tabbed', {c})
+        else
+            -- Merge two tabbed views
+            waiting = {}
+
+            for i,b in pairs(client_get_clients(x)) do
+                client_untab(b)
+                table.insert(waiting, b)
+            end
+
+            for i,b in pairs(waiting) do
+                client_tab(tabindex, b)
+            end
+        end
+    end
+end
+
 -- Untab all clients in a tabbed display
 local function client_untab_all(tabindex)
     for i,c in pairs(tabbed[tabindex][2]) do
@@ -177,22 +210,6 @@ local function client_untab_all(tabindex)
     if tabbed[tabindex] ~= nil then
         table.remove(tabbed, tabindex)
     end
-end
-
--- Get all clients on a tabbed display
-local function client_get_clients(tabindex)
-    return tabbed[tabindex][2]
-end
-
--- Get the displayed client on a tabbed display
-local function client_get_displayed(tabindex)
-    return tabbed[tabindex][1]
-end
-
--- Get a client by tab number
-local function client_get_position(tabindex, pos)
-    if tabbed[tabindex] == nil then return nil end
-    return tabbed[tabindex][2][pos]
 end
 
 -- Start autotabbing, this automatically
