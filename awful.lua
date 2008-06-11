@@ -469,8 +469,17 @@ local function escape(text)
     text = text:gsub("&", "&amp;")
     text = text:gsub("<", "&lt;")
     text = text:gsub(">", "&gt;")
-    text = text:gsub("\\", "&apos;")
+    text = text:gsub("'", "&apos;")
     text = text:gsub("\"", "&quot;")
+    return text
+end
+
+local function unescape(text)
+    text = text:gsub("&amp;", "&")
+    text = text:gsub("&lt;", "<")
+    text = text:gsub("&gt;", ">")
+    text = text:gsub("&apos;", "'")
+    text = text:gsub("&quot;", "\"")
     return text
 end
 
