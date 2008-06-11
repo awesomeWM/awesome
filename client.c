@@ -1327,8 +1327,8 @@ luaA_client_titlebar_set(lua_State *L)
     /* If client had a titlebar, unref it */
     if((*c)->titlebar)
     {
-        titlebar_unref(&(*c)->titlebar);
         simplewindow_delete(&(*c)->titlebar->sw);
+        titlebar_unref(&(*c)->titlebar);
     }
 
     if(t)
