@@ -63,7 +63,7 @@ PROGRESSBAR
 A progressbar widget can contain several bars, so some properties need a data section,
 that means a title for the bar. For example, if you want to feed data to the `memory' bar
 you want to do mywidget:set("data", "memory 100"), where memory will be the data section.
-Using a new data section name will automagically create a new bar.
+Using a new data section name will automatically create a new bar.
 
 
 The following properties require a data section before the value:
@@ -75,10 +75,10 @@ The following properties require a data section before the value:
     Foreground color.
 
 *fg_off*::
-    Unknown.
+    Color of unfilled area of bar.
 
 *bg*::
-    Background color.
+    Background color (between ticks; border_padding space).
 
 *bordercolor*::
     Border color.
@@ -90,10 +90,10 @@ The following properties require a data section before the value:
     Foreground end color.
 
 *min_value*::
-    Minimum value.
+    Minimum value. This or lower values, draw a 0% bar.
 
 *max_value*::
-    Maximum value.
+    Maximum value. This or higher values, draw a 100% bar.
 
 *reverse*::
     True to draw reverse.
@@ -128,7 +128,55 @@ the widget:
 
 GRAPH
 ~~~~~
-No documentation yet.
+A graph widget can display several data-graphs inside its widget-border. Some
+properties need a data section, that means a title for the incoming data. For
+example, if you want to feed 'memory' data, you want to do
+mywidget:set("data", "memory 100").
+
+
+The following properties require a data section before the value:
+
+*data*::
+    Feed with data.
+
+*fg*::
+    Foreground color.
+
+*fg_center*::
+    Foreground center color.
+
+*fg_end*::
+    Foreground end color.
+
+*vertical_gradient*::
+    If 'true', colorgradient shall be applied vertically.
+
+*max_value*::
+    Maximum value. Bigger values gets truncated, unless 'scale' is true.
+
+*scale*::
+    Scales the graph acccording to incoming values bigger than 'max_value'.
+
+*draw_style*::
+    'bottom', 'top' or 'line'.
+
+
+The following properties do not require a data section before the value:
+
+*width*::
+    The widget width.
+
+*height*::
+    The widget height.
+
+*bg*::
+    Background color.
+
+*bordercolor*::
+    Border color.
+
+*grow*::
+   'left' or 'right'. E.g. 'right' means new values get added on the right of the widget.
 
 TAGLIST
 ~~~~~~~
@@ -140,7 +188,12 @@ No documentation yet.
 
 TEXTBOX
 ~~~~~~~
-No documentation yet.
+*width*::
+    The widget width.
+
+*text*::
+    Text to display. You can use pango-markup e.g. <span weight='bold' foreground="#336699">...</span>
+    and/or 'awesome-markup, e.g. <text align='right'>...</text>.
 
 SEE ALSO
 --------
