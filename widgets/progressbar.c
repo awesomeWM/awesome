@@ -25,16 +25,40 @@
 
 extern awesome_t globalconf;
 
+typedef struct bar_t bar_t;
+
+struct bar_t
+{
+    /** Title of the data/bar */
+    char *title;
+    /** These or lower values won't fill the bar at all*/
+    float min_value;
+    /** These or higher values fill the bar fully */
+    float max_value;
+    /** Pointer to value */
+    float value;
+    /** Reverse filling */
+    bool reverse;
+    /** Foreground color */
+    xcolor_t fg;
+    /** Foreground color of turned-off ticks */
+    xcolor_t fg_off;
+    /** Foreground color when bar is half-full */
+    xcolor_t *pfg_center;
+    /** Foreground color when bar is full */
+    xcolor_t *pfg_end;
+    /** Background color */
+    xcolor_t bg;
+    /** Border color */
+    xcolor_t bordercolor;
+    /** The next and previous bar in the list */
+    bar_t *next, *prev;
+};
+
+DO_SLIST(bar_t, bar, p_delete)
+
 typedef struct
 {
-    /** Pointer to values array */
-    float *values;
-    /** These or lower values won't fill the bar at all*/
-    float *min_value;
-    /** These or higher values fill the bar fully */
-    float *max_value;
-    /** Title of the data/bar */
-    char **data_title;
     /** Width of the data_items */
     int width;
     /** Pixel between data items (bars) */
@@ -47,27 +71,13 @@ typedef struct
     int ticks_gap;
     /** Total number of ticks */
     int ticks_count;
-    /** Reverse filling */
-    bool *reverse;
     /** 90 Degree's turned */
     bool vertical;
-    /** Number of data_items (bars) */
-    int data_items;
     /** Height 0-1, where 1.0 is height of bar */
     float height;
-    /** Foreground color */
-    xcolor_t *fg;
-    /** Foreground color of turned-off ticks */
-    xcolor_t *fg_off;
-    /** Foreground color when bar is half-full */
-    xcolor_t **pfg_center;
-    /** Foreground color when bar is full */
-    xcolor_t **pfg_end;
-    /** Background color */
-    xcolor_t *bg;
-    /** Border color */
-    xcolor_t *bordercolor;
-} Data;
+    /** The bars */
+    bar_t *bars;
+} progressbar_data_t;
 
 static void
 progressbar_pcolor_set(xcolor_t **ppcolor, char *new_color)
@@ -85,38 +95,23 @@ progressbar_pcolor_set(xcolor_t **ppcolor, char *new_color)
         p_delete(ppcolor);
 }
 
-static void
-progressbar_data_add(Data *d, const char *new_data_title)
+static bar_t *
+progressbar_data_add(progressbar_data_t *d, const char *new_data_title)
 {
-    d->data_items++;
+    bar_t *bar = p_new(bar_t, 1);
 
-    /* memory (re-)allocating */
-    p_realloc(&(d->data_title), d->data_items);
-    p_realloc(&(d->values), d->data_items);
-    p_realloc(&(d->min_value), d->data_items);
-    p_realloc(&(d->max_value), d->data_items);
-    p_realloc(&(d->reverse), d->data_items);
-    p_realloc(&(d->fg), d->data_items);
-    p_realloc(&(d->fg_off), d->data_items);
-    p_realloc(&(d->bg), d->data_items);
-    p_realloc(&(d->bordercolor), d->data_items);
-    p_realloc(&(d->pfg_center), d->data_items);
-    p_realloc(&(d->pfg_end), d->data_items);
+    bar->title = a_strdup(new_data_title);
 
-    /* initialize values for new data section */
-    d->reverse[d->data_items - 1] = false;
-    d->data_title[d->data_items - 1] = a_strdup(new_data_title);
-    d->values[d->data_items - 1] = 0.0;
-    d->min_value[d->data_items - 1] = 0.0;
-    d->max_value[d->data_items - 1] = 100.0;
+    bar->fg = globalconf.colors.fg;
+    bar->fg_off = globalconf.colors.bg;
+    bar->bg = globalconf.colors.bg;
+    bar->bordercolor = globalconf.colors.fg;
+    bar->max_value = 100.0;
 
-    d->fg[d->data_items - 1] = globalconf.colors.fg;
-    d->fg_off[d->data_items - 1] = globalconf.colors.bg;
-    d->bg[d->data_items - 1] = globalconf.colors.bg;
-    d->bordercolor[d->data_items - 1] = globalconf.colors.fg;
-    d->pfg_center[d->data_items - 1] = NULL;
-    d->pfg_end[d->data_items - 1] = NULL;
+    /* append the bar in the list */
+    bar_list_append(&d->bars, bar);
 
+    return bar;
 }
 
 static int
@@ -128,19 +123,23 @@ progressbar_draw(draw_context_t *ctx,
                  void *p __attribute__ ((unused)))
 {
     /* pb_.. values points to the widget inside a potential border */
-    int i, values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
-    int unit = 0; /* tick + gap */
+    int values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
+    int unit = 0, nbbars = 0; /* tick + gap */
     area_t rectangle, pattern_rect;
-    Data *d = w->widget->data;
+    progressbar_data_t *d = w->widget->data;
+    bar_t *bar;
 
-    if(!d->data_items)
+    if(!d->bars)
         return 0;
+
+    for(bar = d->bars; bar; bar = bar->next)
+        nbbars++;
 
     if(d->vertical)
     {
-        pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->data_items
-                   - d->gap * (d->data_items - 1)) / d->data_items);
-        w->area.width = d->data_items
+        pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * nbbars
+                   - d->gap * (nbbars - 1)) / nbbars);
+        w->area.width = nbbars
                         * (pb_width + 2 * (d->border_width + d->border_padding)
                         + d->gap) - d->gap;
     }
@@ -191,12 +190,12 @@ progressbar_draw(draw_context_t *ctx,
         pb_y = w->area.y + ((int) (ctx->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
-        for(i = 0; i < d->data_items; i++)
+        for(bar = d->bars; bar; bar = bar->next)
         {
             if(d->ticks_count && d->ticks_gap)
             {
-                values_ticks = (int)(d->ticks_count * (d->values[i] - d->min_value[i])
-                               / (d->max_value[i] - d->min_value[i]) + 0.5);
+                values_ticks = (int)(d->ticks_count * (bar->value - bar->min_value)
+                               / (bar->max_value - bar->min_value) + 0.5);
                 if(values_ticks)
                     pb_progress = values_ticks * unit - d->ticks_gap;
                 else
@@ -207,8 +206,8 @@ progressbar_draw(draw_context_t *ctx,
                  * (53(val) - 50(min) / (56(max) - 50(min) = 3 / 5 = 0.5 = 50%
                  * round that ( + 0.5 and (int)) and finally multiply with height
                  */
-                pb_progress = (int)(pb_height * (d->values[i] - d->min_value[i])
-                              / (d->max_value[i] - d->min_value[i]) + 0.5);
+                pb_progress = (int) (pb_height * (bar->value - bar->min_value)
+                                     / (bar->max_value - bar->min_value) + 0.5);
 
             if(d->border_width)
             {
@@ -219,27 +218,26 @@ progressbar_draw(draw_context_t *ctx,
                 rectangle.height = pb_height + 2 * (d->border_padding + d->border_width);
 
                 if(d->border_padding)
-                    draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
-                draw_rectangle(ctx, rectangle, d->border_width, false, d->bordercolor[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, bar->bg);
+                draw_rectangle(ctx, rectangle, d->border_width, false, bar->bordercolor);
             }
 
+            pattern_rect.x = pb_x;
+            pattern_rect.width =  0;
+            pattern_rect.y = pb_y;
+
             /* new value/progress in px + pattern setup */
-            if(!d->reverse[i])
-            {
-                /* bottom to top */
-                pattern_rect.x = pb_x;
-                pattern_rect.y = pb_y + pb_height;
-                pattern_rect.width =  0;
-                pattern_rect.height = -pb_height;
-            }
-            else
+            if(bar->reverse)
             {
                 /* invert: top with bottom part */
                 pb_progress = pb_height - pb_progress;
-                pattern_rect.x = pb_x;
-                pattern_rect.y = pb_y;
-                pattern_rect.width =  0;
                 pattern_rect.height = pb_height;
+            }
+            else
+            {
+                /* bottom to top */
+                pattern_rect.y += pb_height;
+                pattern_rect.height = - pb_height;
             }
 
             /* bottom part */
@@ -251,11 +249,11 @@ progressbar_draw(draw_context_t *ctx,
                 rectangle.height = pb_progress;
 
                 /* fg color */
-                if(!d->reverse[i])
+                if(bar->reverse)
+                    draw_rectangle(ctx, rectangle, 1.0, true, bar->fg_off);
+                else
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
-                                            &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
-                else /*REV: bg */
-                    draw_rectangle(ctx, rectangle, 1.0, true, d->fg_off[i]);
+                                            &bar->fg, bar->pfg_center, bar->pfg_end);
             }
 
             /* top part */
@@ -267,11 +265,11 @@ progressbar_draw(draw_context_t *ctx,
                 rectangle.height = pb_height - pb_progress;
 
                 /* bg color */
-                if(!d->reverse[i])
-                    draw_rectangle(ctx, rectangle, 1.0, true, d->fg_off[i]);
-                else /* REV: fg */
+                if(bar->reverse)
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
-                                            &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
+                                            &bar->fg, bar->pfg_center, bar->pfg_end);
+                else
+                    draw_rectangle(ctx, rectangle, 1.0, true, bar->fg_off);
             }
             /* draw gaps TODO: improve e.g all in one */
             if(d->ticks_count && d->ticks_gap)
@@ -282,7 +280,7 @@ progressbar_draw(draw_context_t *ctx,
                 for(rectangle.y = pb_y + (unit - d->ticks_gap);
                         pb_y + pb_height - d->ticks_gap >= rectangle.y;
                         rectangle.y += unit)
-                    draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, bar->bg);
             }
             pb_offset += pb_width + d->gap + 2 * (d->border_width + d->border_padding);
         }
@@ -290,26 +288,26 @@ progressbar_draw(draw_context_t *ctx,
     else /* a horizontal progressbar */
     {
         pb_height = (int) ((ctx->height * d->height
-                    - d->data_items * 2 * (d->border_width + d->border_padding)
-                    - (d->gap * (d->data_items - 1))) / d->data_items + 0.5);
+                            - nbbars * 2 * (d->border_width + d->border_padding)
+                            - (d->gap * (nbbars - 1))) / nbbars + 0.5);
         pb_y = w->area.y + ((int) (ctx->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
-        for(i = 0; i < d->data_items; i++)
+        for(bar = d->bars; bar; bar = bar->next)
         {
             if(d->ticks_count && d->ticks_gap)
             {
                 /* +0.5 rounds up ticks -> turn on a tick when half of it is reached */
-                values_ticks = (int)(d->ticks_count * (d->values[i] - d->min_value[i])
-                               / (d->max_value[i] - d->min_value[i]) + 0.5);
+                values_ticks = (int)(d->ticks_count * (bar->value - bar->min_value)
+                                     / (bar->max_value - bar->min_value) + 0.5);
                 if(values_ticks)
                     pb_progress = values_ticks * unit - d->ticks_gap;
                 else
                     pb_progress = 0;
             }
             else
-                pb_progress = (int)(pb_width * (d->values[i] - d->min_value[i])
-                              / (d->max_value[i] - d->min_value[i]) + 0.5);
+                pb_progress = (int) (pb_width * (bar->value - bar->min_value)
+                                     / (bar->max_value - bar->min_value) + 0.5);
 
             if(d->border_width)
             {
@@ -320,27 +318,25 @@ progressbar_draw(draw_context_t *ctx,
                 rectangle.height = pb_height + 2 * (d->border_padding + d->border_width);
 
                 if(d->border_padding)
-                    draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
-                draw_rectangle(ctx, rectangle, d->border_width, false, d->bordercolor[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, bar->bg);
+                draw_rectangle(ctx, rectangle, d->border_width, false, bar->bordercolor);
             }
+
+            pattern_rect.y = pb_y;
+            pattern_rect.height = 0;
+            pattern_rect.x = pb_x;
+
             /* new value/progress in px + pattern setup */
-            if(!d->reverse[i])
-            {
-                /* left to right */
-                pattern_rect.x = pb_x;
-                pattern_rect.y = pb_y;
-                pattern_rect.width =  pb_width;
-                pattern_rect.height = 0;
-            }
-            else
+            if(bar->reverse)
             {
                 /* reverse: right to left */
                 pb_progress = pb_width - pb_progress;
-                pattern_rect.x = pb_x + pb_width;
-                pattern_rect.y = pb_y;
-                pattern_rect.width =  -pb_width;
-                pattern_rect.height = 0;
+                pattern_rect.x += pb_width;
+                pattern_rect.width = - pb_width;
             }
+            else
+                /* left to right */
+                pattern_rect.width = pb_width;
 
             /* left part */
             if(pb_progress > 0)
@@ -351,11 +347,11 @@ progressbar_draw(draw_context_t *ctx,
                 rectangle.height = pb_height;
 
                 /* fg color */
-                if(!d->reverse[i])
+                if(bar->reverse)
+                    draw_rectangle(ctx, rectangle, 1.0, true, bar->fg_off);
+                else
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
-                                            &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
-                else /* reverse: bg */
-                    draw_rectangle(ctx, rectangle, 1.0, true, d->fg_off[i]);
+                                            &bar->fg, bar->pfg_center, bar->pfg_end);
             }
 
             /* right part */
@@ -367,11 +363,11 @@ progressbar_draw(draw_context_t *ctx,
                 rectangle.height = pb_height;
 
                 /* bg color */
-                if(!d->reverse[i])
-                    draw_rectangle(ctx, rectangle, 1.0, true, d->fg_off[i]);
-                else /* reverse: fg */
+                if(bar->reverse)
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
-                                            &(d->fg[i]), d->pfg_center[i], d->pfg_end[i]);
+                                            &bar->fg, bar->pfg_center, bar->pfg_end);
+                else
+                    draw_rectangle(ctx, rectangle, 1.0, true, bar->fg_off);
             }
             /* draw gaps TODO: improve e.g all in one */
             if(d->ticks_count && d->ticks_gap)
@@ -382,7 +378,7 @@ progressbar_draw(draw_context_t *ctx,
                 for(rectangle.x = pb_x + (unit - d->ticks_gap);
                         pb_x + pb_width - d->ticks_gap >= rectangle.x;
                         rectangle.x += unit)
-                    draw_rectangle(ctx, rectangle, 1.0, true, d->bg[i]);
+                    draw_rectangle(ctx, rectangle, 1.0, true, bar->bg);
             }
 
             pb_offset += pb_height + d->gap + 2 * (d->border_width + d->border_padding);
@@ -396,11 +392,11 @@ progressbar_draw(draw_context_t *ctx,
 static widget_tell_status_t
 progressbar_tell(widget_t *widget, const char *property, const char *new_value)
 {
-    Data *d = widget->data;
-    int i = 0, value;
+    progressbar_data_t *d = widget->data;
+    int value;
     char *title, *setting;
     char *new_val;
-    bool found;
+    bar_t *bar;
 
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
@@ -424,53 +420,54 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
             p_delete(&new_val);
             return WIDGET_ERROR_NOVALUE;
         }
-        for(found = false, i = 0; !found && i < d->data_items; i++)
-            if(!a_strcmp(title, d->data_title[i]))
-                found = true;
+        for(bar = d->bars; bar; bar = bar->next)
+            if(!a_strcmp(title, bar->title))
+                break;
+
         /* no section found -> create one */
-        if(!found)
-            progressbar_data_add(d, title);
+        if(!bar)
+            bar = progressbar_data_add(d, title);
 
         /* change values accordingly... */
         if(!a_strcmp(property, "data"))
         {
             value = atof(setting);
-            d->values[d->data_items - 1] = (value < d->min_value[i] ? d->min_value[i] :
-                                            (value > d->max_value[i] ? d->max_value[i] : value));
+            bar->value = (value < bar->min_value ? bar->min_value :
+                          (value > bar->max_value ? bar->max_value : value));
         }
         else if(!a_strcmp(property, "fg"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg[i]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->fg);
         else if(!a_strcmp(property, "bg"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->bg[i]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->bg);
         else if(!a_strcmp(property, "fg_off"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->fg_off[i]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->fg_off);
         else if(!a_strcmp(property, "bordercolor"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &(d->bordercolor[i]));
+            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->bordercolor);
         else if(!a_strcmp(property, "fg_center"))
-            progressbar_pcolor_set(&(d->pfg_center[i]), setting);
+            progressbar_pcolor_set(&bar->pfg_center, setting);
         else if(!a_strcmp(property, "fg_end"))
-            progressbar_pcolor_set(&(d->pfg_end[i]), setting);
+            progressbar_pcolor_set(&bar->pfg_end, setting);
         else if(!a_strcmp(property, "min_value"))
         {
-            d->min_value[i] = atof(setting);
+            bar->min_value = atof(setting);
             /* hack to prevent max_value beeing less than min_value
              * and also preventing a division by zero when both are equal */
-            if(d->max_value[i] <= d->min_value[i])
-                d->max_value[i] = d->max_value[i] + 0.0001;
+            if(bar->max_value <= bar->min_value)
+                bar->max_value = bar->max_value + 0.0001;
             /* force a actual value into the newly possible range */
-            if(d->values[i] < d->min_value[i])
-                d->values[i] = d->min_value[i];
+            if(bar->value < bar->min_value)
+                bar->value = bar->min_value;
         }
         else if(!a_strcmp(property, "max_value"))
         {
-            d->max_value[i] = atof(setting);
-            if(d->min_value[i] >= d->max_value[i])
-                d->min_value[i] = d->max_value[i] - 0.0001;
-            if(d->values[i] > d->max_value[i])
-                d->values[i] = d->max_value[i];
+            bar->max_value = atof(setting);
+            if(bar->min_value >= bar->max_value)
+                bar->min_value = bar->max_value - 0.0001;
+            if(bar->value > bar->max_value)
+                bar->value = bar->max_value;
         }
         else if(!a_strcmp(property, "reverse"))
-            d->reverse[i] = a_strtobool(setting);
+            bar->reverse = a_strtobool(setting);
 
         p_delete(&new_val);
         return WIDGET_NOERROR;
@@ -501,14 +498,14 @@ widget_t *
 progressbar_new(alignment_t align)
 {
     widget_t *w;
-    Data *d;
+    progressbar_data_t *d;
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
     w->align = align;
     w->draw = progressbar_draw;
     w->tell = progressbar_tell;
-    d = w->data = p_new(Data, 1);
+    d = w->data = p_new(progressbar_data_t, 1);
 
     d->height = 0.80;
     d->width = 80;
