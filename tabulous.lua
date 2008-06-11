@@ -164,6 +164,7 @@ end
 -- Untab all clients in a tabbed display
 local function client_untab_all(tabindex)
     for i,c in pairs(tabbed[tabindex][2]) do
+        c:unhide()
         awful.hooks.userhook_call('untabbed', {c})
     end
 
