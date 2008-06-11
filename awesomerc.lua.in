@@ -182,12 +182,20 @@ keybinding.new({ modkey }, "F1", function () awful.menu("Run: ", mymenubox, awfu
 --- Tabulous, tab manipulation
 keybinding.new({ modkey, "Control" }, "y", function () 
     local tabbedview = tabulous.tabindex_get()
+    local nextclient = awful.client.next(1)
 
     if tabbedview == nil then
-       tabbedview = tabulous.tab_create()
-    end
+        tabbedview = tabulous.tabindex_get(nextclient)
 
-    tabulous.tab(tabbedview, awful.client.next(1))
+        if tabbedview == nil then
+            tabbedview = tabulous.tab_create()
+            tabulous.tab(tabbedview, nextclient)
+        else
+            tabulous.tab(tabbedview, client.focus_get())
+        end
+    else
+        tabulous.tab(tabbedview, nextclient)
+    end
 end):add()
 
 keybinding.new({ modkey, "Shift" }, "y", tabulous.untab):add()
