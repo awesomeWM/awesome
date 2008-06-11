@@ -31,6 +31,26 @@ local keygrabber = keygrabber
 -- Reset env
 setfenv(1, P)
 
+-- Hook functions, wrappers around awesome's hooks. functions so we
+-- can easily add multiple functions per hook.
+P.hooks = {}
+P.myhooks = {}
+
+-- Create a new userhook (for external libs)
+local function userhook_create(name)
+    P.myhooks[name] = {}
+    P.hooks[name] = function (f)
+        table.insert(P.myhooks[name], {callback = f})
+    end
+end
+
+-- Call a created userhook (for external libs
+local function userhook_call(name, args)
+    for i,o in pairs(P.myhooks[name]) do
+       P.myhooks[name][i]['callback'](unpack(args))
+    end
+end
+
 -- Function to the good value in table, cycling
 local function array_boundandcycle(t, i)
     if i > #t then
@@ -268,42 +288,75 @@ local function layout_get(screen)
     end
 end
 
--- Just set a awful tag to a client to move it later.
-local awfultags = {}
-local ontag_callback = nil
-local onuntag_callback = nil
+-- Just set an awful mark to a client to move it later.
+local awfulmarked = {}
+userhook_create('marked')
+userhook_create('unmarked')
 
-local function client_ontag (f)
-    ontag_callback = f
-end
-
-local function client_onuntag (f)
-    onuntag_callback = f
-end
-
-local function client_tag (c)
+-- Mark a client
+local function client_mark (c)
     local cl = c or client.focus_get()
     if cl then
-        for k, v in pairs(awfultags) do
+        for k, v in pairs(awfulmarked) do
             if cl == v then
-                return
+                return false
             end
         end
-        awfultags[cl] = true
+
+        table.insert(awfulmarked, cl)
+
         -- Call callback
-        if ontag_callback then ontag_callback(cl) end
+        userhook_call('marked', {cl})
+        return true
     end
 end
 
--- Return the tagged client and empty the table
-local function client_gettagged ()
-    if onuntag_callback then
-        for k, v in pairs(awfultags) do
-            onuntag_callback(k)
+-- Unmark a client
+local function client_unmark(c)
+    local cl = c or client.focus_get()
+
+    for k, v in pairs(awfulmarked) do
+        if cl == v then
+            table.remove(awfulmarked, k)
+            userhook_call('unmarked', {cl})
+            return true
         end
     end
-    t = awfultags
-    awfultags = {}
+
+    return false
+end
+
+-- Check if marked
+local function client_ismarked(c)
+    local cl = c or client.focus_get()
+    if cl then
+        for k, v in pairs(awfulmarked) do
+            if cl == v then
+                return true
+            end
+        end
+
+        return false
+    end
+end
+
+-- Toggle marked
+local function client_togglemarked(c)
+    local cl = c or client.focus_get()
+
+    if not client_mark(c) then
+        client_unmark(c)
+    end
+end
+
+-- Return the marked clients and empty the table
+local function client_getmarked ()
+    for k, v in pairs(awfulmarked) do
+        userhook_call('unmarked', {v})
+    end
+
+    t = awfulmarked
+    awfulmarked = {}
     return t
 end
 
@@ -333,26 +386,6 @@ local function layout_set(layout)
     local t = tag_selected()
     if t then
 	t:layout_set(layout)
-    end
-end
-
--- Hook functions, wrappers around awesome's hooks. functions so we
--- can easily add multiple functions per hook.
-P.hooks = {}
-P.myhooks = {}
-
--- Create a new userhook (for external libs)
-local function userhook_create(name)
-    P.myhooks[name] = {}
-    P.hooks[name] = function (f)
-        table.insert(P.myhooks[name], {callback = f})
-    end
-end
-
--- Call a created userhook (for external libs
-local function userhook_call(name, args)
-    for i,o in pairs(P.myhooks[name]) do
-       P.myhooks[name][i]['callback'](unpack(args))
     end
 end
 
@@ -468,10 +501,11 @@ P.client =
     togglefloating = client_togglefloating;
     moveresize = client_moveresize;
     movetoscreen = client_movetoscreen;
-    tag = client_tag;
-    gettagged = client_gettagged;
-    ontag = client_ontag;
-    onuntag = client_onuntag;
+    mark = client_mark;
+    unmark = client_unmark;
+    ismarked = client_ismarked;
+    togglemarked = client_togglemarked;
+    getmarked = client_getmarked;
 }
 P.screen =
 {

@@ -2,6 +2,10 @@
 
 -- Include awesome library, with lots of useful function!
 require("awful")
+require("tabulous")
+
+-- Uncomment this to activate autotabbing
+-- tabulous.autotab_start()
 
 -- {{{ Colors and fonts
 awesome.font_set("sans 8")
@@ -175,15 +179,51 @@ keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layout
 -- Menu
 keybinding.new({ modkey }, "F1", function () awful.menu("Run: ", mymenubox, awful.spawn) end):add()
 
+--- Tabulous, tab manipulation
+keybinding.new({ modkey, "Control" }, "y", function () 
+    local tabbedview = tabulous.tabindex_get()
+
+    if tabbedview == nil then
+       tabbedview = tabulous.tab_create()
+    end
+
+    tabulous.tab(tabbedview, awful.client.next(1))
+end):add()
+
+keybinding.new({ modkey, "Shift" }, "y", tabulous.untab):add()
+
+keybinding.new({ modkey }, "y", function ()
+   local tabbedview = tabulous.tabindex_get()
+
+   if tabbedview ~= nil then
+       local n = tabulous.next(tabbedview)
+       tabulous.display(tabbedview, n)
+   end
+end):add()
+
 -- Client awful tagging: this is useful to tag some clients and then do stuff like move to tag on them
-awful.client.ontag(function (c) c:border_set({ color = "red" }) end)
-keybinding.new({ modkey }, "t", awful.client.tag):add()
+keybinding.new({ modkey }, "t", awful.client.togglemarked):add()
+keybinding.new({ modkey, 'Shift' }, "t", function ()
+    local tabbedview = tabulous.tabindex_get()
+    local clients = awful.client.getmarked()
+
+    if tabbedview == nil then
+        tabbedview = tabulous.tab_create(clients[1])
+        table.remove(clients, 1)
+    end
+
+    for k,c in pairs(clients) do
+        tabulous.tab(tabbedview, c)
+    end
+
+end):add()
+
 for i = 1, keynumber do
     keybinding.new({ modkey, "Shift" }, "F" .. i,
                    function ()
                        local screen = mouse.screen_get()
                        if tags[screen][i] then
-                           for c, v in pairs(awful.client.gettagged()) do
+                           for k, c in pairs(awful.client.getmarked()) do
                                awful.client.movetotag(tags[screen][i], c)
                            end
                        end
@@ -194,12 +234,26 @@ end
 -- {{{ Hooks
 -- Hook function to execute when focusing a client.
 function hook_focus(c)
-    c:border_set({ width = 1, color = "white" })
+    if not awful.client.ismarked(c) then
+        c:border_set({ width = 1, color = "white" })
+    end
 end
 
 -- Hook function to execute when unfocusing a client.
 function hook_unfocus(c)
-    c:border_set({ width = 1, color = "black" })
+    if not awful.client.ismarked(c) then
+        c:border_set({ width = 1, color = "black" })
+    end
+end
+
+-- Hook function to execute when marking a client
+function hook_marked(c)
+    c:border_set({ width = 1, color = "red" })
+end
+
+-- Hook function to execute when unmarking a client
+function hook_unmarked(c)
+    c:border_set({ width = 1, color = "white" })
 end
 
 -- Hook function to exeucte when the mouse is over a client.
@@ -239,6 +293,8 @@ end
 -- Set up some hooks
 awful.hooks.focus(hook_focus)
 awful.hooks.unfocus(hook_unfocus)
+awful.hooks.marked(hook_marked)
+awful.hooks.unmarked(hook_unmarked)
 awful.hooks.manage(hook_manage)
 awful.hooks.mouseover(hook_mouseover)
 awful.hooks.arrange(hook_arrange)
