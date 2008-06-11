@@ -42,7 +42,7 @@ end
 -- Create a taglist widget
 mytaglist = widget.new({ type = "taglist", name = "mytaglist" })
 mytaglist:mouse({}, 1, function (object, tag) awful.tag.viewonly(tag) end)
-mytaglist:mouse({ modkey }, 1, function (object, tag) awful.client.toggletag(tag) end)
+mytaglist:mouse({ modkey }, 1, function (object, tag) awful.client.movetotag(tag) end)
 mytaglist:mouse({}, 3, function (object, tag) tag:view(not tag:isselected()) end)
 mytaglist:mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end)
 mytaglist:mouse({ }, 4, awful.tag.viewnext)
@@ -174,6 +174,21 @@ keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layout
 
 -- Menu
 keybinding.new({ modkey }, "F1", function () awful.menu("Run: ", mymenubox, awful.spawn) end):add()
+
+-- Client awful tagging: this is useful to tag some clients and then do stuff like move to tag on them
+awful.client.ontag(function (c) c:border_set({ color = "red" }) end)
+keybinding.new({ modkey }, "t", awful.client.tag):add()
+for i = 1, keynumber do
+    keybinding.new({ modkey, "Shift" }, "F" .. i,
+                   function ()
+                       local screen = mouse.screen_get()
+                       if tags[screen][i] then
+                           for c, v in pairs(awful.client.gettagged()) do
+                               awful.client.movetotag(tags[screen][i], c)
+                           end
+                       end
+                   end):add()
+end
 -- }}}
 
 -- {{{ Hooks

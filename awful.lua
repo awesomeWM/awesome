@@ -268,6 +268,45 @@ local function layout_get(screen)
     end
 end
 
+-- Just set a awful tag to a client to move it later.
+local awfultags = {}
+local ontag_callback = nil
+local onuntag_callback = nil
+
+local function client_ontag (f)
+    ontag_callback = f
+end
+
+local function client_onuntag (f)
+    onuntag_callback = f
+end
+
+local function client_tag (c)
+    local cl = c or client.focus_get()
+    if cl then
+        for k, v in pairs(awfultags) do
+            if cl == v then
+                return
+            end
+        end
+        awfultags[cl] = true
+        -- Call callback
+        if ontag_callback then ontag_callback(cl) end
+    end
+end
+
+-- Return the tagged client and empty the table
+local function client_gettagged ()
+    if onuntag_callback then
+        for k, v in pairs(awfultags) do
+            onuntag_callback(k)
+        end
+    end
+    t = awfultags
+    awfultags = {}
+    return t
+end
+
 -- Function to change the layout of the current tag.
 -- layouts = table of layouts (define in .awesomerc.lua)
 -- i = relative index
@@ -429,6 +468,10 @@ P.client =
     togglefloating = client_togglefloating;
     moveresize = client_moveresize;
     movetoscreen = client_movetoscreen;
+    tag = client_tag;
+    gettagged = client_gettagged;
+    ontag = client_ontag;
+    onuntag = client_onuntag;
 }
 P.screen =
 {
