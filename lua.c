@@ -59,7 +59,7 @@ extern const struct luaL_reg awesome_statusbar_meta[];
 extern const struct luaL_reg awesome_keybinding_methods[];
 extern const struct luaL_reg awesome_keybinding_meta[];
 
-/** Define a global mouse binding. This binding will be available wehn you
+/** Define a global mouse binding. This binding will be available when you'll
  * click on root window.
  * \param L The Lua VM state.
  *
