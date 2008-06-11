@@ -37,7 +37,7 @@ typedef struct
 {
     /* general layout */
 
-    char **data_title;                  /** Data title of the data sections */
+    char **data_title;                  /** graph_data_t title of the data sections */
     float *max_value;                   /** Represents a full graph */
     int width;                          /** Width of the widget */
     float height;                       /** Height of graph (0.0-1.0; 1.0 = height of bar) */
@@ -68,7 +68,7 @@ typedef struct
 
     int *draw_from;                     /** Preparation/tmp array for draw_graph(); */
     int *draw_to;                       /** Preparation/tmp array for draw_graph(); */
-} Data;
+} graph_data_t;
 
 /* the same as the progressbar_pcolor_set may use a common function */
 static void
@@ -88,7 +88,7 @@ graph_pcolor_set(xcolor_t **ppcolor, char *new_color)
 }
 
 static void
-graph_data_add(Data *d, const char *new_data_title)
+graph_data_add(graph_data_t *d, const char *new_data_title)
 {
     d->data_items++;
 
@@ -143,7 +143,7 @@ graph_draw(draw_context_t *ctx,
 {
     int margin_top;
     int z, y, x, tmp, cur_index, test_index;
-    Data *d = w->widget->data;
+    graph_data_t *d = w->widget->data;
     area_t rectangle, pattern_area;
 
     if(!d->data_items)
@@ -335,7 +335,7 @@ graph_draw(draw_context_t *ctx,
 static widget_tell_status_t
 graph_tell(widget_t *widget, const char *property, const char *new_value)
 {
-    Data *d = widget->data;
+    graph_data_t *d = widget->data;
     int i, u, fi;
     float value;
     char *title, *setting;
@@ -515,7 +515,7 @@ widget_t *
 graph_new(alignment_t align)
 {
     widget_t *w;
-    Data *d;
+    graph_data_t *d;
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
@@ -523,7 +523,7 @@ graph_new(alignment_t align)
     w->draw = graph_draw;
     w->tell = graph_tell;
     w->align = align;
-    d = w->data = p_new(Data, 1);
+    d = w->data = p_new(graph_data_t, 1);
 
     d->width = 80;
     d->height = 0.80;
