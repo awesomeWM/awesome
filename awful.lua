@@ -17,6 +17,7 @@ end
 -- Grab environment we need
 local ipairs = ipairs
 local pairs = pairs
+local unpack = unpack
 local awesome = awesome
 local screen = screen
 local client = client
@@ -26,8 +27,6 @@ local os = os
 local table = table
 local hooks = hooks
 local keygrabber = keygrabber
-local print = print
-local table = table
 
 -- Reset env
 setfenv(1, P)
@@ -302,6 +301,24 @@ end
 -- can easily add multiple functions per hook.
 P.hooks = {}
 P.myhooks = {}
+
+-- Create a new userhook (for external libs)
+local function userhook_create(name)
+    P.myhooks[name] = {}
+    P.hooks[name] = function (f)
+        table.insert(P.myhooks[name], {callback = f})
+    end
+end
+
+-- Call a created userhook (for external libs
+local function userhook_call(name, args)
+    for i,o in pairs(P.myhooks[name]) do
+       P.myhooks[name][i]['callback'](unpack(args))
+    end
+end
+
+P.hooks['userhook_create'] = userhook_create
+P.hooks['userhook_call'] = userhook_call
 
 for name, hook in pairs(hooks) do
     if name ~= 'timer' then

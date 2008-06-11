@@ -2,8 +2,6 @@
 
 -- Include awesome library, with lots of useful function!
 require("awful")
--- Include another library, which defines useful tabular system
-require("tabulous")
 
 -- {{{ Colors and fonts
 awesome.font_set("sans 8")
@@ -176,11 +174,6 @@ keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layout
 
 -- Menu
 keybinding.new({ modkey }, "F1", function () awful.menu("Run: ", mymenubox, awful.spawn) end):add()
-
--- Tabulous, tab manipulation
-keybinding.new({ modkey, "Control" }, "y", function () tabulous.tab(awful.client.next(1)) end):add()
-keybinding.new({ modkey, "Shift" }, "y", tabulous.untab):add()
-keybinding.new({ modkey }, "y", tabulous.focusnext):add()
 -- }}}
 
 -- {{{ Hooks
