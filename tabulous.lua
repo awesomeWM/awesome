@@ -88,11 +88,13 @@ end
 
 -- Get all clients on a tabbed display
 local function client_get_clients(tabindex)
+    if tabbed[tabindex] == nil then return nil end
     return tabbed[tabindex][2]
 end
 
 -- Get the displayed client on a tabbed display
 local function client_get_displayed(tabindex)
+    if tabbed[tabindex] == nil then return nil end
     return tabbed[tabindex][1]
 end
 
@@ -159,6 +161,17 @@ local function client_untab(cl)
     awful.hooks.userhook_call('untabbed', {c})
 end
 
+-- Untab all clients in a tabbed display
+local function client_untab_all(tabindex)
+    for i,c in pairs(tabbed[tabindex][2]) do
+        awful.hooks.userhook_call('untabbed', {c})
+    end
+
+    if tabbed[tabindex] ~= nil then
+        table.remove(tabbed, tabindex)
+    end
+end
+
 -- Create a new tabbed display with client as the master
 local function client_tab_create(cl)
     local c = cl or client.focus_get()
@@ -187,28 +200,13 @@ local function client_tab(tabindex, cl)
             awful.hooks.userhook_call('tabbed', {c})
         else
             -- Merge two tabbed views
-            waiting = {}
+            local clients = client_get_clients(x)
+            client_untab_all(x)
 
-            for i,b in pairs(client_get_clients(x)) do
-                client_untab(b)
-                table.insert(waiting, b)
-            end
-
-            for i,b in pairs(waiting) do
+            for i,b in pairs(clients) do
                 client_tab(tabindex, b)
             end
         end
-    end
-end
-
--- Untab all clients in a tabbed display
-local function client_untab_all(tabindex)
-    for i,c in pairs(tabbed[tabindex][2]) do
-        awful.hooks.userhook_call('untabbed', {c})
-    end
-
-    if tabbed[tabindex] ~= nil then
-        table.remove(tabbed, tabindex)
     end
 end
 
