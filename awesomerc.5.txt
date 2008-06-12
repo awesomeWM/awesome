@@ -36,6 +36,12 @@ By using hexadecimal format, you can also specifies an alpha channel:
 that means that #00ff00 will draw pure green, but #00ff00aa will set the
 alpha channel to `aa' and will blend the green with the color under it.
 
+TEXT FORMAT
+-----------
+You can use/mix 'pango-markup' and 'awesome-markup' on text properties.
+A pango-markup example: "<span weight='bold' foreground="#336699">...</span>".
+An awesome-markup example: "<text align='right'>...</text>".
+
 WIDGETS
 -------
 The current list of available widget is:
@@ -180,20 +186,49 @@ The following properties do not require a data section before the value:
 
 TAGLIST
 ~~~~~~~
-No documentation yet.
+A taglist widget displays available tags and their state.
+
+*text_normal*::
+    Text to display. '<title/>' substitutes the client's title.
+
+*text_focus*::
+    Text to display. '<title/>' substitutes the client's title.
+
+*text_urgent*::
+    Text to display. '<title/>' substitutes the client's title.
+
+*show_empty*::
+    'true' or 'false'. If 'false', empty tags won't get displayed. Selected tags are always displayed so.
 
 TASKLIST
 ~~~~~~~~
-No documentation yet.
+A tasklist widget displays the titles of clients according to the 'show' setting.
+
+*show*::
+    'tags', 'focus' or 'all'. E.g. 'tags' shows only clients of currently selected tags.
+
+*text_normal*::
+    Text to display. '<title/>' substitutes the client's title.
+
+*text_focus*::
+    Text to display. '<title/>' substitutes the client's title.
+
+*text_urgent*::
+    Text to display. '<title/>' substitutes the client's title.
+
+*show_icons*::
+    'true' or 'false'. Set to 'true' if client's icon (if one is avaiable) shall be displayed.
+
 
 TEXTBOX
 ~~~~~~~
+A textbox displays text.
+
 *width*::
-    The widget width.
+    Width of the widget.
 
 *text*::
-    Text to display. You can use pango-markup e.g. <span weight='bold' foreground="#336699">...</span>
-    and/or 'awesome-markup, e.g. <text align='right'>...</text>.
+    Text to display.
 
 SEE ALSO
 --------
