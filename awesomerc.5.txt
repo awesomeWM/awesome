@@ -189,13 +189,13 @@ TAGLIST
 A taglist widget displays available tags and their state.
 
 *text_normal*::
-    Text to display. '<title/>' substitutes the client's title.
+    Text to display on normal clients. '<title/>' substitutes the client's title.
 
 *text_focus*::
-    Text to display. '<title/>' substitutes the client's title.
+    Text to display on the focused client. '<title/>' substitutes the client's title.
 
 *text_urgent*::
-    Text to display. '<title/>' substitutes the client's title.
+    Text to display on urgent clients. '<title/>' substitutes the client's title.
 
 *show_empty*::
     'true' or 'false'. If 'false', empty tags won't get displayed. Selected tags are always displayed so.
@@ -208,13 +208,13 @@ A tasklist widget displays the titles of clients according to the 'show' setting
     'tags', 'focus' or 'all'. E.g. 'tags' shows only clients of currently selected tags.
 
 *text_normal*::
-    Text to display. '<title/>' substitutes the client's title.
+    Text to display on normal clients. '<title/>' substitutes the client's title.
 
 *text_focus*::
-    Text to display. '<title/>' substitutes the client's title.
+    Text to display on the focused client. '<title/>' substitutes the client's title.
 
 *text_urgent*::
-    Text to display. '<title/>' substitutes the client's title.
+    Text to display on urgent clients. '<title/>' substitutes the client's title.
 
 *show_icons*::
     'true' or 'false'. Set to 'true' if client's icon (if one is avaiable) shall be displayed.
