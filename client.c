@@ -408,7 +408,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* Append client in history: it'll be last. */
     focus_client_append(c);
     /* Push client in stack */
-    stack_client_push(c);
+    client_raise(c);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_client_list(c->phys_screen);
