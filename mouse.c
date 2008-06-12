@@ -157,16 +157,16 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
     return titlebar_geometry_remove(c->titlebar, geometry);
 }
 
-/** Redraw the resizebar.
+/** Redraw the infobox.
  * \param ctx Draw context.
  * \param sw The simple window.
  * \param geometry The geometry to use for the box.
  * \param border The client border size.
  */
 static void
-mouse_resizebar_draw(draw_context_t *ctx,
-                     simple_window_t *sw,
-                     area_t geometry, int border)
+mouse_infobox_draw(draw_context_t *ctx,
+                   simple_window_t *sw,
+                   area_t geometry, int border)
 {
     area_t draw_geometry = { 0, 0, ctx->width, ctx->height, NULL, NULL };
     char size[64];
@@ -181,7 +181,7 @@ mouse_resizebar_draw(draw_context_t *ctx,
     simplewindow_refresh_pixmap(sw);
 }
 
-/** Initialize the resizebar window.
+/** Initialize the infobox window.
  * \param phys_screen Physical screen number.
  * \param border Border size of the client.
  * \param geometry Client geometry.
@@ -189,8 +189,8 @@ mouse_resizebar_draw(draw_context_t *ctx,
  * \return The simple window.
  */
 static simple_window_t *
-mouse_resizebar_new(int phys_screen, int border, area_t geometry,
-                    draw_context_t **ctx)
+mouse_infobox_new(int phys_screen, int border, area_t geometry,
+                  draw_context_t **ctx)
 {
     simple_window_t *sw;
     area_t geom;
@@ -213,7 +213,7 @@ mouse_resizebar_new(int phys_screen, int border, area_t geometry,
                             globalconf.colors.bg);
 
     xcb_map_window(globalconf.connection, sw->window);
-    mouse_resizebar_draw(*ctx, sw, geometry, border);
+    mouse_infobox_draw(*ctx, sw, geometry, border);
 
     return sw;
 }
@@ -294,7 +294,7 @@ mouse_warp_pointer(xcb_window_t window, int x, int y)
 /** Move the focused window with the mouse.
  */
 static void
-mouse_client_move(client_t *c, int snap)
+mouse_client_move(client_t *c, int snap, bool infobox)
 {
     int ocx, ocy, newscreen;
     area_t geometry;
@@ -334,9 +334,9 @@ mouse_client_move(client_t *c, int snap)
 
     query_pointer_r = xcb_query_pointer_reply(globalconf.connection, query_pointer_c, NULL);
 
-    if(c->isfloating || layout == layout_floating)
+    if(infobox && (c->isfloating || layout == layout_floating))
     {
-        sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
         xcb_aux_sync(globalconf.connection);
     }
 
@@ -372,7 +372,7 @@ mouse_client_move(client_t *c, int snap)
                     c->ismoving = false;
 
                     if(sw)
-                        mouse_resizebar_draw(ctx, sw, c->geometry, c->border);
+                        mouse_infobox_draw(ctx, sw, c->geometry, c->border);
 
                     xcb_aux_sync(globalconf.connection);
                 }
@@ -461,9 +461,10 @@ mouse_track_mouse_drag(int *x, int *y)
 /** Resize a floating client with the mouse.
  * \param c The client to resize.
  * \param corner The corner to resize with.
+ * \param infobox Enable or disable the infobox.
  */
 static void
-mouse_client_resize_floating(client_t *c, corner_t corner)
+mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 {
     xcb_screen_t *screen;
     /* one corner of the client has a fixed position */
@@ -471,7 +472,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner)
     /* the other is moved with the mouse */
     int mouse_x = 0, mouse_y = 0;
     /* the resize bar */
-    simple_window_t *sw;
+    simple_window_t *sw = NULL;
     draw_context_t  *ctx;
     size_t cursor = CurResize;
     int top, bottom, left, right;
@@ -544,9 +545,12 @@ mouse_client_resize_floating(client_t *c, corner_t corner)
     /* set pointer to the moveable corner */
     mouse_warp_pointer(screen->root, mouse_x, mouse_y);
 
-    /* create the resizebar */
-    sw = mouse_resizebar_new(c->phys_screen, c->border, c->geometry, &ctx);
-    xcb_aux_sync(globalconf.connection);
+    /* create the infobox */
+    if(infobox)
+    {
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
+        xcb_aux_sync(globalconf.connection);
+    }
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -560,8 +564,9 @@ mouse_client_resize_floating(client_t *c, corner_t corner)
         /* resize the client */
         client_resize(c, geo, true);
 
-        /* draw the resizebar */
-        mouse_resizebar_draw(ctx, sw, c->geometry, c->border);
+        /* draw the infobox */
+        if(sw)
+            mouse_infobox_draw(ctx, sw, c->geometry, c->border);
 
         xcb_aux_sync(globalconf.connection);
     }
@@ -570,10 +575,11 @@ mouse_client_resize_floating(client_t *c, corner_t corner)
     mouse_ungrab_pointer();
 
     /* free the resize bar */
-    draw_context_delete(&ctx);
-    simplewindow_delete(&sw);
-
-    xcb_aux_sync(globalconf.connection);
+    if(sw)
+    {
+        draw_context_delete(&ctx);
+        simplewindow_delete(&sw);
+    }
 }
 
 /** Resize the master column/row of a tiled layout
@@ -674,9 +680,10 @@ mouse_client_resize_tiled(client_t *c)
 /** Resize a client with the mouse.
  * \param c The client to resize.
  * \param corner The corner to use.
+ * \param infobox Enable or disable the info box.
  */
 static void
-mouse_client_resize(client_t *c, corner_t corner)
+mouse_client_resize(client_t *c, corner_t corner, bool infobox)
 {
     int n, screen;
     tag_t **curtags;
@@ -695,7 +702,7 @@ mouse_client_resize(client_t *c, corner_t corner)
 
         c->ismax = false;
 
-        mouse_client_resize_floating(c, corner);
+        mouse_client_resize_floating(c, corner, infobox);
     }
     else if (layout == layout_tile || layout == layout_tileleft
              || layout == layout_tilebottom || layout == layout_tiletop)
@@ -740,18 +747,27 @@ luaA_mouse_coords_set(lua_State *L)
  *
  * \luastack
  * \lvalue A client.
- * \lparam An optionnal corner, such as bottomleft, topright, etc.
+ * \lparam An optional table with keys: `corner', such as bottomleft,
+ * topright, etc, to specify which corner to grab (default to auto) and
+ * `infobox' to enable or disable the coordinates and dimensions box (default to
+ * enabled).
  */
 int
 luaA_client_mouse_resize(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     corner_t corner = AutoCorner;
+    bool infobox = true;
 
-    if(lua_gettop(L) == 2)
-        corner = a_strtocorner(luaL_checkstring(L, 2));
+    if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
+    {
+        luaA_checktable(L, 2);
+        corner = a_strtocorner(luaA_getopt_string(L, 2, "corner", "auto"));
+        infobox = luaA_getopt_boolean(L, 2, "infobox", true);
+    }
 
-    mouse_client_resize(*c, corner);
+    mouse_client_resize(*c, corner, infobox);
+
     return 0;
 }
 
@@ -760,14 +776,26 @@ luaA_client_mouse_resize(lua_State *L)
  *
  * \luastack
  * \lvalue A client.
- * \lparam The pixel to snap.
+ * \lparam An optional table with keys: `snap' for pixel to snap (default to 8), and
+ * `infobox' to enable or disable the coordinates and dimensions box (default to
+ * enabled).
  */
 int
 luaA_client_mouse_move(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
-    int snap = luaL_optnumber(L, 2, 8);
-    mouse_client_move(*c, snap);
+    int snap = 8;
+    bool infobox = true;
+
+    if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
+    {
+        luaA_checktable(L, 2);
+        snap = luaA_getopt_number(L, 2, "snap", 8);
+        infobox = luaA_getopt_boolean(L, 2, "infobox", true);
+    }
+
+    mouse_client_move(*c, snap, infobox);
+
     return 0;
 }
 
