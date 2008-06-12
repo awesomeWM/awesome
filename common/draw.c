@@ -374,13 +374,13 @@ draw_text(draw_context_t *ctx, font_t *font,
     p_delete(&buf);
 }
 
-/** Setup color-source for cairo (gradient or mono)
- * \param ctx Draw context
- * \param rect x,y to x+x_offset,y+y_offset
- * \param color color to use at start (x,y)
- * \param pcolor_center color at 50% of width
- * \param pcolor_end color at pattern end (x + x_offset, y + y_offset)
- * \return pat pattern or NULL; needs to get cairo_pattern_destroy()'ed;
+/** Setup color-source for cairo (gradient or mono).
+ * \param ctx Draw context.
+ * \param rect x, y to x + x_offset, y + y_offset.
+ * \param color Color to use at start (x, y).
+ * \param pcolor_center Color at 50% of width.
+ * \param pcolor_end Color at pattern end (x + x_offset, y + y_offset).
+ * \return pat Pattern or NULL, needs to get cairo_pattern_destroy()'ed.
  */
 static cairo_pattern_t *
 draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
@@ -401,19 +401,31 @@ draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
         pat = cairo_pattern_create_linear(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
 
         /* pcolor is always set (so far in awesome) */
-        cairo_pattern_add_color_stop_rgb(pat, 0.0, pcolor->red / 65535.0,
-                                             pcolor->green / 65535.0, pcolor->blue / 65535.0);
+        cairo_pattern_add_color_stop_rgba(pat, 0.0,
+                                          pcolor->red / 65535.0,
+                                          pcolor->green / 65535.0,
+                                          pcolor->blue / 65535.0,
+                                          pcolor->alpha / 65535.0);
 
         if(pcolor_center)
-            cairo_pattern_add_color_stop_rgb(pat, 0.5, pcolor_center->red / 65535.0,
-                                             pcolor_center->green / 65535.0, pcolor_center->blue / 65535.0);
+            cairo_pattern_add_color_stop_rgba(pat, 0.5,
+                                              pcolor_center->red / 65535.0,
+                                              pcolor_center->green / 65535.0,
+                                              pcolor_center->blue / 65535.0,
+                                              pcolor_center->alpha / 65535.0);
 
         if(pcolor_end)
-            cairo_pattern_add_color_stop_rgb(pat, 1.0, pcolor_end->red / 65535.0,
-                                             pcolor_end->green / 65535.0, pcolor_end->blue / 65535.0);
+            cairo_pattern_add_color_stop_rgba(pat, 1.0,
+                                              pcolor_end->red / 65535.0,
+                                              pcolor_end->green / 65535.0,
+                                              pcolor_end->blue / 65535.0,
+                                              pcolor_end->alpha / 65535.0);
         else
-            cairo_pattern_add_color_stop_rgb(pat, 1.0, pcolor->red / 65535.0,
-                                             pcolor->green / 65535.0, pcolor->blue / 65535.0);
+            cairo_pattern_add_color_stop_rgba(pat, 1.0,
+                                              pcolor->red / 65535.0,
+                                              pcolor->green / 65535.0,
+                                              pcolor->blue / 65535.0,
+                                              pcolor->alpha / 65535.0);
         cairo_set_source(ctx->cr, pat);
     }
     return pat;
