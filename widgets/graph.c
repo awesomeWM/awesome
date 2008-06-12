@@ -20,6 +20,8 @@
  *
  */
 
+#include <math.h>
+
 #include "widget.h"
 #include "screen.h"
 #include "common/draw.h"
@@ -154,10 +156,10 @@ graph_draw(draw_context_t *ctx,
     w->area.y = 0;
 
     /* box = the graph inside the rectangle */
-    if(!(d->box_height))
-        d->box_height = (int) (ctx->height * d->height + 0.5) - 2;
+    if(!d->box_height)
+        d->box_height = round(ctx->height * d->height) - 2;
 
-    margin_top = (int)((ctx->height - (d->box_height + 2)) / 2 + 0.5) + w->area.y;
+    margin_top = round((ctx->height - (d->box_height + 2)) / 2) + w->area.y;
 
     /* draw background */
     rectangle.x = w->area.x + 1;
@@ -383,8 +385,7 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
 
                     /* recalculate */
                     for (i = 0; i < d->size; i++)
-                        graph->lines[i] = (int) (graph->values[i] * d->box_height
-                                                 / graph->current_max + 0.5);
+                        graph->lines[i] = round(graph->values[i] * d->box_height / graph->current_max);
                 }
                 /* old max_index reached + current_max > normal, re-check/generate */
                 else if(graph->max_index == graph->index
@@ -399,18 +400,15 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
 
                     /* recalculate */
                     for(i = 0; i < d->size; i++)
-                        graph->lines[i] = (int) (graph->values[i] * d->box_height
-                                                 / graph->current_max + 0.5);
+                        graph->lines[i] = round(graph->values[i] * d->box_height / graph->current_max);
                 }
                 else
-                    graph->lines[graph->index] = (int) (value * d->box_height
-                                                        / graph->current_max + 0.5);
+                    graph->lines[graph->index] = round(value * d->box_height / graph->current_max);
             }
             else /* scale option is false - limit to d->box_height */
             {
                 if(value < graph->max_value)
-                    graph->lines[graph->index] = (int) (value * d->box_height
-                                                        / graph->max_value + 0.5);
+                    graph->lines[graph->index] = round(value * d->box_height / graph->max_value);
                 else
                     graph->lines[graph->index] = d->box_height;
             }
