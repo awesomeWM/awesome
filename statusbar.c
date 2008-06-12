@@ -385,6 +385,32 @@ luaA_statusbar_widget_add(lua_State *L)
     return 0;
 }
 
+/** Remove a widget from a statusbar.
+ * \param L The Lua VM State.
+ *
+ * \luastack
+ * \lvalue A statusbar.
+ * \lparam A widget.
+ */
+static int
+luaA_statusbar_widget_remove(lua_State *L)
+{
+    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
+    widget_t **widget = luaA_checkudata(L, 2, "widget");
+    widget_node_t *w;
+
+    for(w = (*sb)->widgets; w; w = w->next)
+        if(w->widget == *widget)
+        {
+            widget_unref(widget);
+            widget_node_list_detach(&(*sb)->widgets, w);
+            p_delete(&w);
+            (*sb)->need_update = true;
+        }
+
+    return 0;
+}
+
 /** Add the statusbar on a screen.
  * \param L The Lua VM state.
  *
@@ -425,7 +451,7 @@ luaA_statusbar_add(lua_State *L)
     return 0;
 }
 
-/** Remove the statusbar its screen.
+/** Remove the statusbar from its screen.
  * \param L The Lua VM state.
  *
  * \luastack
@@ -560,6 +586,7 @@ const struct luaL_reg awesome_statusbar_methods[] =
 const struct luaL_reg awesome_statusbar_meta[] =
 {
     { "widget_add", luaA_statusbar_widget_add },
+    { "widget_remove", luaA_statusbar_widget_remove },
     { "widget_get", luaA_statusbar_widget_get },
     { "position_set", luaA_statusbar_position_set },
     { "position_get", luaA_statusbar_position_get },
