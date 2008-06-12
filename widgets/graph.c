@@ -30,8 +30,8 @@ extern awesome_t globalconf;
 
 typedef enum
 {
-    Top_Style = 1,
-    Bottom_Style,
+    Bottom_Style = 0,
+    Top_Style,
     Line_Style
 } draw_style_t;
 
@@ -126,7 +126,6 @@ graph_data_add(graph_data_t *d, const char *new_data_title)
     graph->title = a_strdup(new_data_title);
     graph->color_start = globalconf.colors.fg;
     graph->vertical_gradient = true;
-    graph->draw_style = Bottom_Style;
 
     graph_list_append(&d->graphs, graph);
 
@@ -202,40 +201,11 @@ graph_draw(draw_context_t *ctx,
                 pattern_area.width = rectangle.width;
         }
 
-        cur_index = graph->index;
-
         for(y = 0; y < d->size; y++)
         {
-            /* draw this filltop data thing. But figure out the part
-             * what shall be visible. Therefore find the next smaller value
-             * on this index (draw_from) - might be 0 (then draw from start) */
-            tmp = 0;
-            for(graphtmp = d->graphs; graphtmp; graphtmp = graphtmp->next)
-            {
-                /* no need to compare with itself */
-                if(graphtmp == graph || graphtmp->draw_style != Top_Style)
-                    continue;
-
-                /* current index's can be different (widget_tell might shift
-                 * some with a different frequenzy), so calculate
-                 * offset and compare accordingly finally */
-                test_index = cur_index + (graphtmp->index - graph->index);
-
-                if(test_index < 0)
-                    test_index = d->size + test_index; /* text_index is minus, since < 0 */
-                else if(test_index >= d->size)
-                    test_index -= d->size;
-
-                /* if such a smaller value (to not overdraw!) is there, store into 'tmp' */
-                if(graphtmp->lines[test_index] < graph->lines[cur_index])
-                    tmp = MIN(graphtmp->lines[test_index], tmp);
-            }
             /* reverse values (because drawing from top) */
-            d->draw_from[cur_index] = d->box_height - tmp; /* i.e. no smaller value -> from top of box */
-            d->draw_to[cur_index] = d->box_height - graph->lines[cur_index]; /* i.e. on full graph -> 0 = bottom */
-
-            if (--cur_index < 0) /* next index to compare to other values */
-                cur_index = d->size - 1;
+            d->draw_from[y] = d->box_height; /* i.e. no smaller value -> from top of box */
+            d->draw_to[y] = d->box_height - graph->lines[y]; /* i.e. on full graph -> 0 = bottom */
         }
         draw_graph(ctx, rectangle , d->draw_from, d->draw_to, graph->index, d->grow, pattern_area,
                    &graph->color_start, graph->pcolor_center, graph->pcolor_end);
@@ -264,30 +234,7 @@ graph_draw(draw_context_t *ctx,
                 pattern_area.width = rectangle.width;
         }
 
-        cur_index = graph->index;
-
-        for(y = 0; y < d->size; y++)
-        {
-            tmp = 0;
-            for(graphtmp = d->graphs; graphtmp; graphtmp = graphtmp->next)
-            {
-                if(graph == graphtmp || graphtmp->draw_style != Bottom_Style)
-                    continue;
-
-                test_index = cur_index + (graphtmp->index - graph->index);
-
-                if (test_index < 0)
-                    test_index = d->size + test_index;
-                else if(test_index >= d->size)
-                    test_index -= d->size;
-
-                if(graphtmp->lines[test_index] < graph->lines[cur_index])
-                    tmp = MIN(graphtmp->lines[test_index], tmp);
-            }
-            d->draw_from[cur_index] = tmp;
-            if(--cur_index < 0)
-                cur_index = d->size - 1;
-        }
+        p_clear(d->draw_from, d->size);
         draw_graph(ctx, rectangle, d->draw_from, graph->lines, graph->index, d->grow, pattern_area,
                    &graph->color_start, graph->pcolor_center, graph->pcolor_end);
     }
@@ -460,8 +407,8 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
         {
             p_realloc(&graph->values, d->size);
             p_realloc(&graph->lines, d->size);
-            p_clear(&graph->values, d->size);
-            p_clear(&graph->lines, d->size);
+            p_clear(graph->values, d->size);
+            p_clear(graph->lines, d->size);
             graph->index = 0;
             graph->current_max =  0;
             graph->max_index =  0;
