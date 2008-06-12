@@ -506,59 +506,53 @@ draw_graph_setup(draw_context_t *ctx)
     cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
 }
 
-/** Draw a graph
- * \param ctx Draw context
- * \param x x-offset of widget
- * \param y y-offset of widget
- * \param w width in pixels
- * \param from array of starting-point offsets to draw a graph-lines
- * \param to array of end-point offsets to draw a graph-lines
- * \param cur_index current position in data-array (cycles around)
- * \param grow put new values to the left or to the right
- * \param pcolor color at the left
- * \param pcolor_center color in the center
- * \param pcolor_end color at the right
+/** Draw a graph.
+ * \param ctx Draw context.
+ * \param x x offset of widget.
+ * \param y y offset of widget.
+ * \param w Width in pixels.
+ * \param from Array of starting-point offsets to draw a graph lines.
+ * \param to Array of end-point offsets to draw a graph lines.
+ * \param cur_index Current position in data-array (cycles around).
+ * \param grow Put new values to the left or to the right.
+ * \param pcolor Color at the left.
+ * \param pcolor_center Color in the center.
+ * \param pcolor_end Color at the right.
  */
 void
 draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
            position_t grow, area_t patt_rect,
            xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
 {
-    int i, y, w;
-    float x;
+    int i = -1;
+    float x = rect.x + 0.5; /* middle of a pixel */
     cairo_pattern_t *pat;
 
     pat = draw_setup_cairo_color_source(ctx, patt_rect,
                                         pcolor, pcolor_center, pcolor_end);
 
-    /* middle of a pixel */
-    x = rect.x + 0.5;
-    y = rect.y;
-    w = rect.width;
-
-    i = -1;
     if(grow == Right) /* draw from right to left */
     {
-        x += w - 1;
-        while(++i < w)
+        x += rect.width - 1;
+        while(++i < rect.width)
         {
-            cairo_move_to(ctx->cr, x, y - from[cur_index]);
-            cairo_line_to(ctx->cr, x, y - to[cur_index]);
+            cairo_move_to(ctx->cr, x, rect.y - from[cur_index]);
+            cairo_line_to(ctx->cr, x, rect.y - to[cur_index]);
             x -= 1.0;
 
             if (--cur_index < 0)
-                cur_index = w - 1;
+                cur_index = rect.width - 1;
         }
     }
     else /* draw from left to right */
-        while(++i < w)
+        while(++i < rect.width)
         {
-            cairo_move_to(ctx->cr, x, y - from[cur_index]);
-            cairo_line_to(ctx->cr, x, y - to[cur_index]);
+            cairo_move_to(ctx->cr, x, rect.y - from[cur_index]);
+            cairo_line_to(ctx->cr, x, rect.y - to[cur_index]);
             x += 1.0;
 
             if (--cur_index < 0)
-                cur_index = w - 1;
+                cur_index = rect.width - 1;
         }
 
     cairo_stroke(ctx->cr);
