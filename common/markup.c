@@ -157,7 +157,7 @@ markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
 
 /** Create a markup_parser_data_t structure with elements list.
  * \param elements an array of elements to look for, NULL terminated
- * \param elements_sub an optionnal array of values to substitude to elements, NULL
+ * \param elements_sub an optional array of values to substitude to elements, NULL
  *        terminated, or NULL if not needed
  * \param nelem number of elements in the array (without NULL)
  * \return a pointer to an allocated markup_parser_data_t which must be freed

@@ -298,7 +298,7 @@ luaA_hooks_manage(lua_State *L)
 /** Set the function called each time a client goes away. This function is
  * called with the client object as argument.
  * \param L The Lua VM state.
- * 
+ *
  * \luastack
  * \lparam A function to call when a client goes away.
  */
@@ -385,7 +385,7 @@ luaA_hooks_urgent(lua_State *L)
  *
  * \luastack
  * \lparam The number of seconds to run function every. Set 0 to disable.
- * \lparam A function to call every N seconds (optionnal).
+ * \lparam A function to call every N seconds (optional).
  */
 static int
 luaA_hooks_timer(lua_State *L)
