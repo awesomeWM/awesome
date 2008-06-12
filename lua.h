@@ -92,6 +92,20 @@ luaA_checkudata(lua_State *L, int ud, const char *tname)
     return NULL;
 }
 
+static inline bool
+luaA_checkboolean(lua_State *L, int n)
+{
+    if(!lua_isboolean(L, n))
+        luaL_typerror(L, n, "boolean");
+    return lua_toboolean(L, n);
+}
+
+static inline bool
+luaA_optboolean(lua_State *L, int idx, bool def)
+{
+    return luaL_opt(L, luaA_checkboolean, idx, def);
+}
+
 static inline lua_Number
 luaA_getopt_number(lua_State *L, int idx, const char *name, lua_Number def)
 {
@@ -110,6 +124,15 @@ luaA_getopt_string(lua_State *L, int idx, const char *name, const char *def)
     return luaL_optstring(L, -1, def);
 }
 
+static inline bool
+luaA_getopt_boolean(lua_State *L, int idx, const char *name, bool def)
+{
+    /* assume that table is first on stack */
+    lua_getfield(L, idx, name);
+    /* return luaL_optnumber result */
+    return luaA_optboolean(L, -1, def);
+}
+
 static inline int
 luaA_settype(lua_State *L, const char *type)
 {
@@ -123,14 +146,6 @@ luaA_name_init(lua_State *L)
 {
     lua_getfield(L, 1, "name");
     return a_strdup(luaL_checkstring(L, -1));
-}
-
-static inline bool
-luaA_checkboolean(lua_State *L, int n)
-{
-    if(!lua_isboolean(L, n))
-        luaL_typerror(L, n, "boolean");
-    return lua_toboolean(L, n);
 }
 
 void luaA_init(void);
