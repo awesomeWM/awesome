@@ -40,7 +40,9 @@ typedef enum
     LAYER_TILE,
     LAYER_FLOAT,
     LAYER_ABOVE,
-    LAYER_FULLSCREEN
+    LAYER_FULLSCREEN,
+    LAYER_MODAL,
+    LAYER_OUTOFSPACE
 } layer_t;
 
 /** Cursors */

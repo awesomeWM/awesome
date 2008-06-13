@@ -54,6 +54,7 @@ static xcb_atom_t net_wm_state_skip_taskbar;
 static xcb_atom_t net_wm_state_fullscreen;
 static xcb_atom_t net_wm_state_above;
 static xcb_atom_t net_wm_state_below;
+static xcb_atom_t net_wm_state_modal;
 
 static xcb_atom_t utf8_string;
 
@@ -88,6 +89,7 @@ static AtomItem AtomNames[] =
     { "_NET_WM_STATE_FULLSCREEN", &net_wm_state_fullscreen },
     { "_NET_WM_STATE_ABOVE", &net_wm_state_above },
     { "_NET_WM_STATE_BELOW", &net_wm_state_below },
+    { "_NET_WM_STATE_MODAL", &net_wm_state_modal },
 
     { "UTF8_STRING", &utf8_string },
 };
@@ -155,6 +157,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_fullscreen;
     atom[i++] = net_wm_state_above;
     atom[i++] = net_wm_state_below;
+    atom[i++] = net_wm_state_modal;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
@@ -313,9 +316,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == net_wm_state_above)
     {
         if(set == _NET_WM_STATE_REMOVE)
-        {
             c->layer = c->oldlayer;
-        }
         else if(set == _NET_WM_STATE_ADD)
         {
             c->oldlayer = c->layer;
@@ -325,13 +326,21 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == net_wm_state_below)
     {
         if(set == _NET_WM_STATE_REMOVE)
-        {
             c->layer = c->oldlayer;
-        }
         else if(set == _NET_WM_STATE_ADD)
         {
             c->oldlayer = c->layer;
             c->layer = LAYER_BELOW;
+        }
+    }
+    else if(state == net_wm_state_modal)
+    {
+        if(set == _NET_WM_STATE_REMOVE)
+            c->layer = c->oldlayer;
+        else if(set == _NET_WM_STATE_ADD)
+        {
+            c->oldlayer = c->layer;
+            c->layer = LAYER_MODAL;
         }
     }
 
@@ -359,7 +368,7 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
         client_setfloating(c, true, LAYER_ABOVE);
     }
     else if (state == net_wm_window_type_dialog)
-        client_setfloating(c, true, LAYER_ABOVE);
+        client_setfloating(c, true, LAYER_MODAL);
 }
 
 void

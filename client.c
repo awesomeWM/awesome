@@ -299,7 +299,7 @@ client_raise(client_t *c)
     /* Push c on top of the stack. */
     stack_client_push(c);
 
-    for(layer = LAYER_FULLSCREEN; layer >= LAYER_DESKTOP; layer--)
+    for(layer = LAYER_OUTOFSPACE - 1; layer >= LAYER_DESKTOP; layer--)
         for(node = globalconf.stack; node; node = node->next)
             if(node->client->layer == layer
                && client_isvisible_anyscreen(node->client))
