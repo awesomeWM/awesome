@@ -80,6 +80,8 @@ typedef enum
 /** Mouse buttons bindings */
 struct button_t
 {
+    /** Ref count */
+    int refcount;
     /** Key modifiers */
     unsigned long mod;
     /** Mouse button number */
@@ -91,6 +93,7 @@ struct button_t
 };
 
 DO_SLIST(button_t, button, p_delete)
+DO_RCNT(button_t, button, p_delete)
 
 /** Widget */
 struct widget_t
@@ -291,6 +294,8 @@ struct client_t
     char *icon_path;
     /** Titlebar */
     titlebar_t *titlebar;
+    /** Button bindings */
+    button_t *buttons;
     /** Next and previous clients */
     client_t *prev, *next;
 };
@@ -381,7 +386,6 @@ struct awesome_t
     struct
     {
            button_t *root;
-           button_t *client;
     } buttons;
     /** Numlock mask */
     unsigned int numlockmask;

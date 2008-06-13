@@ -22,12 +22,12 @@
 #ifndef AWESOME_WINDOW_H
 #define AWESOME_WINDOW_H
 
-#include "common/draw.h"
+#include "structs.h"
 
 void window_setstate(xcb_window_t, long);
 long window_getstate(xcb_window_t);
 void window_configure(xcb_window_t, area_t, int);
-void window_grabbuttons(xcb_window_t, int);
+void window_grabbuttons(xcb_window_t, int, button_t *);
 void window_root_grabbutton(button_t *);
 void window_root_grabbuttons(void);
 void window_root_grabkey(keybinding_t *);

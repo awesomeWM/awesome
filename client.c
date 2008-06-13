@@ -256,7 +256,7 @@ client_focus(client_t *c, int screen)
                             c->win, XCB_CURRENT_TIME);
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
-        window_grabbuttons(c->win, c->phys_screen);
+        window_grabbuttons(c->win, c->phys_screen, c->buttons);
         phys_screen = c->phys_screen;
 
         /* Some layouts use focused client differently, so call them back. */
@@ -855,37 +855,32 @@ luaA_client_get(lua_State *L)
 /** Add mouse bindings over clients's window.
  * \param L The Lua VM state.
  * \luastack
- * \lparam A table with modifier keys.
- * \lparam A mouse button number
- * \lparam A function to execute.
+ * \lvalue A client.
+ * \lparam A button binding.
  */
 static int
-luaA_client_mouse(lua_State *L)
+luaA_client_mouse_add(lua_State *L)
 {
-    size_t i, len;
-    int b;
-    button_t *button;
+    client_t **c = luaA_checkudata(L, 1, "client");
+    button_t **b = luaA_checkudata(L, 2, "mouse");
+    button_list_push(&(*c)->buttons, *b);
+    button_ref(b);
+    return 0;
+}
 
-    /* arg 1 is modkey table */
-    luaA_checktable(L, 1);
-    /* arg 2 is mouse button */
-    b = luaL_checknumber(L, 2);
-    /* arg 3 is cmd to run */
-    luaA_checkfunction(L, 3);
-
-    button = p_new(button_t, 1);
-    button->button = xutil_button_fromint(b);
-    button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
-
-    len = lua_objlen(L, 1);
-    for(i = 1; i <= len; i++)
-    {
-        lua_rawgeti(L, 1, i);
-        button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
-    }
-
-    button_list_push(&globalconf.buttons.client, button);
-
+/** Remove mouse bindings over clients's window.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lvalue A client.
+ * \lparam A button binding.
+ */
+static int
+luaA_client_mouse_remove(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    button_t **b = luaA_checkudata(L, 1, "mouse");
+    button_list_detach(&(*c)->buttons, *b);
+    button_unref(b);
     return 0;
 }
 
@@ -1440,7 +1435,6 @@ const struct luaL_reg awesome_client_methods[] =
     { "get", luaA_client_get },
     { "focus_get", luaA_client_focus_get },
     { "visible_get", luaA_client_visible_get },
-    { "mouse", luaA_client_mouse },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_client_meta[] =
@@ -1472,6 +1466,8 @@ const struct luaL_reg awesome_client_meta[] =
     { "hide", luaA_client_hide },
     { "unhide", luaA_client_unhide },
     { "ishidden", luaA_client_ishidden },
+    { "mouse_add", luaA_client_mouse_add },
+    { "mouse_remove", luaA_client_mouse_remove },
     { "__eq", luaA_client_eq },
     { "__tostring", luaA_client_tostring },
     { NULL, NULL }

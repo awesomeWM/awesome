@@ -72,19 +72,19 @@ end
 -- {{{ Statusbar
 -- Create a taglist widget
 mytaglist = widget.new({ type = "taglist", name = "mytaglist" })
-mytaglist:mouse({}, 1, function (object, tag) awful.tag.viewonly(tag) end)
-mytaglist:mouse({ modkey }, 1, function (object, tag) awful.client.movetotag(tag) end)
-mytaglist:mouse({}, 3, function (object, tag) tag:view(not tag:isselected()) end)
-mytaglist:mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end)
-mytaglist:mouse({ }, 4, awful.tag.viewnext)
-mytaglist:mouse({ }, 5, awful.tag.viewprev)
+mytaglist:mouse_add(mouse.new({}, 1, function (object, tag) awful.tag.viewonly(tag) end))
+mytaglist:mouse_add(mouse.new({ modkey }, 1, function (object, tag) awful.client.movetotag(tag) end))
+mytaglist:mouse_add(mouse.new({}, 3, function (object, tag) tag:view(not tag:isselected()) end))
+mytaglist:mouse_add(mouse.new({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end))
+mytaglist:mouse_add(mouse.new({ }, 4, awful.tag.viewnext))
+mytaglist:mouse_add(mouse.new({ }, 5, awful.tag.viewprev))
 mytaglist:set("text_focus", "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'><title/></span> ")
 
 -- Create a tasklist widget
 mytasklist = widget.new({ type = "tasklist", name = "mytasklist" })
-mytasklist:mouse({ }, 1, function (object, c) c:focus_set(); c:raise() end)
-mytasklist:mouse({ }, 4, function () awful.client.focus(1) end)
-mytasklist:mouse({ }, 5, function () awful.client.focus(-1) end)
+mytasklist:mouse_add(mouse.new({ }, 1, function (object, c) c:focus_set(); c:raise() end))
+mytasklist:mouse_add(mouse.new({ }, 4, function () awful.client.focus(1) end))
+mytasklist:mouse_add(mouse.new({ }, 5, function () awful.client.focus(-1) end))
 mytasklist:set("text_focus", "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'><title/></span> ")
 
 -- Create a textbox widget
@@ -102,10 +102,10 @@ myiconbox:set("image", "@iconsdir@/awesome16.png")
 mylayoutbox = {}
 for s = 1, screen.count() do
     mylayoutbox[s] = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
-    mylayoutbox[s]:mouse({ }, 1, function () awful.layout.inc(layouts, 1) end)
-    mylayoutbox[s]:mouse({ }, 3, function () awful.layout.inc(layouts, -1) end)
-    mylayoutbox[s]:mouse({ }, 4, function () awful.layout.inc(layouts, 1) end)
-    mylayoutbox[s]:mouse({ }, 5, function () awful.layout.inc(layouts, -1) end)
+    mylayoutbox[s]:mouse_add(mouse.new({ }, 1, function () awful.layout.inc(layouts, 1) end))
+    mylayoutbox[s]:mouse_add(mouse.new({ }, 3, function () awful.layout.inc(layouts, -1) end))
+    mylayoutbox[s]:mouse_add(mouse.new({ }, 4, function () awful.layout.inc(layouts, 1) end))
+    mylayoutbox[s]:mouse_add(mouse.new({ }, 5, function () awful.layout.inc(layouts, -1) end))
     mylayoutbox[s]:set("image", "@iconsdir@/layouts/tilew.png")
 end
 
@@ -125,12 +125,9 @@ end
 -- }}}
 
 -- {{{ Mouse bindings
-awesome.mouse({ }, 3, function () awful.spawn(terminal) end)
-awesome.mouse({ }, 4, awful.tag.viewnext)
-awesome.mouse({ }, 5, awful.tag.viewprev)
-client.mouse({ }, 1, function (c) c:focus_set(); c:raise() end)
-client.mouse({ modkey }, 1, function (c) c:mouse_move() end)
-client.mouse({ modkey }, 3, function (c) c:mouse_resize() end)
+awesome.mouse_add(mouse.new({ }, 3, function () awful.spawn(terminal) end))
+awesome.mouse_add(mouse.new({ }, 4, awful.tag.viewnext))
+awesome.mouse_add(mouse.new({ }, 5, awful.tag.viewprev))
 -- }}}
 
 -- {{{ Key bindings
@@ -301,6 +298,10 @@ end
 
 -- Hook function to execute when a new client appears.
 function hook_manage(c)
+    -- Add mouse bindings
+    c:mouse_add(mouse.new({ }, 1, function (c) c:focus_set(); c:raise() end))
+    c:mouse_add(mouse.new({ modkey }, 1, function (c) c:mouse_move() end))
+    c:mouse_add(mouse.new({ modkey }, 3, function (c) c:mouse_resize() end))
     -- New client may not receive focus
     -- if they're not focusable, so set border anyway.
     c:border_set({ width = border_width, color = border_normal })

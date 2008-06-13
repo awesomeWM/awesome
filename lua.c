@@ -44,8 +44,9 @@ extern awesome_t globalconf;
 extern bool running;
 extern const name_func_link_t FloatingPlacementList[];
 
-extern const struct luaL_reg awesome_mouse_lib[];
 extern const struct luaL_reg awesome_keygrabber_lib[];
+extern const struct luaL_reg awesome_mouse_methods[];
+extern const struct luaL_reg awesome_mouse_meta[];
 extern const struct luaL_reg awesome_client_methods[];
 extern const struct luaL_reg awesome_client_meta[];
 extern const struct luaL_reg awesome_titlebar_methods[];
@@ -59,43 +60,22 @@ extern const struct luaL_reg awesome_statusbar_meta[];
 extern const struct luaL_reg awesome_keybinding_methods[];
 extern const struct luaL_reg awesome_keybinding_meta[];
 
-/** Define a global mouse binding. This binding will be available when you'll
+/** Add a global mouse binding. This binding will be available when you'll
  * click on root window.
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A table with modifiers keys.
- * \lparam A mouse button number.
- * \lparam A function to execute.
+ * \lparam A mouse button binding.
  */
 static int
-luaA_mouse(lua_State *L)
+luaA_mouse_add(lua_State *L)
 {
-    size_t i, len;
-    int b;
-    button_t *button;
+    button_t **button = luaA_checkudata(L, 1, "mouse");
 
-    /* arg 1 is modkey table */
-    luaA_checktable(L, 1);
-    /* arg 2 is mouse button */
-    b = luaL_checknumber(L, 2);
-    /* arg 3 is cmd to run */
-    luaA_checkfunction(L, 3);
+    button_list_push(&globalconf.buttons.root, *button);
+    button_ref(button);
 
-    button = p_new(button_t, 1);
-    button->button = xutil_button_fromint(b);
-    button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
-
-    len = lua_objlen(L, 1);
-    for(i = 1; i <= len; i++)
-    {
-        lua_rawgeti(L, 1, i);
-        button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
-    }
-
-    button_list_push(&globalconf.buttons.root, button);
-
-    window_root_grabbutton(button);
+    window_root_grabbutton(*button);
 
     return 0;
 }
@@ -486,7 +466,7 @@ luaA_init(void)
         { "restart", luaA_restart },
         { "floating_placement_set", luaA_floating_placement_set },
         { "padding_set", luaA_padding_set },
-        { "mouse", luaA_mouse },
+        { "mouse_add", luaA_mouse_add },
         { "resizehints_set", luaA_resizehints_set },
         { "font_set", luaA_font_set },
         { "colors_set", luaA_colors_set },
@@ -526,11 +506,11 @@ luaA_init(void)
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);
 
-    /* Export mouses lib */
-    luaL_register(L, "mouse", awesome_mouse_lib);
-
     /* Export keygrabber lib */
     luaL_register(L, "keygrabber", awesome_keygrabber_lib);
+
+    /* Export mouse */
+    luaA_openlib(L, "mouse", awesome_mouse_methods, awesome_mouse_meta);
 
     /* Export tag */
     luaA_openlib(L, "tag", awesome_tag_methods, awesome_tag_meta);

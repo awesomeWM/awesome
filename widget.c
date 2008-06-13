@@ -350,39 +350,37 @@ luaA_widget_new(lua_State *L)
  *
  * \luastack
  * \lvalue A widget.
- * \lparam A table containing modifiers keys.
- * \lparam A button number.
- * \lparam A function to execute. Some widgets may pass arguments to this
+ * \lvalue A mouse button bindings object.
  * function.
  */
 static int
-luaA_widget_mouse(lua_State *L)
+luaA_widget_mouse_add(lua_State *L)
 {
-    size_t i, len;
-    /* arg 1 is object */
     widget_t **widget = luaA_checkudata(L, 1, "widget");
-    int b;
-    button_t *button;
+    button_t **b = luaA_checkudata(L, 2, "mouse");
 
-    /* arg 2 is modkey table */
-    luaA_checktable(L, 2);
-    /* arg 3 is mouse button */
-    b = luaL_checknumber(L, 3);
-    /* arg 4 is cmd to run */
-    luaA_checkfunction(L, 4);
+    button_list_push(&(*widget)->buttons, *b);
+    button_ref(b);
 
-    button = p_new(button_t, 1);
-    button->button = xutil_button_fromint(b);
-    button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
+    return 0;
+}
 
-    len = lua_objlen(L, 2);
-    for(i = 1; i <= len; i++)
-    {
-        lua_rawgeti(L, 2, i);
-        button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
-    }
+/** Remove a mouse button bindings from a widget.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lvalue A widget.
+ * \lvalue A mouse button bindings object.
+ * function.
+ */
+static int
+luaA_widget_mouse_remove(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    button_t **b = luaA_checkudata(L, 2, "mouse");
 
-    button_list_push(&(*widget)->buttons, button);
+    button_list_detach(&(*widget)->buttons, *b);
+    button_unref(b);
 
     return 0;
 }
@@ -565,7 +563,8 @@ const struct luaL_reg awesome_widget_methods[] =
 };
 const struct luaL_reg awesome_widget_meta[] =
 {
-    { "mouse", luaA_widget_mouse },
+    { "mouse_add", luaA_widget_mouse_add },
+    { "mouse_remove", luaA_widget_mouse_remove },
     { "set", luaA_widget_set },
     { "name_set", luaA_widget_name_set },
     { "name_get", luaA_widget_name_get },

@@ -828,10 +828,61 @@ luaA_mouse_screen_get(lua_State *L)
     return 1;
 }
 
-const struct luaL_reg awesome_mouse_lib[] =
+/** Create a new mouse userdata.
+ * \param t The mouse.
+ */
+static int
+luaA_mouse_userdata_new(button_t *bt)
 {
+    button_t **b = lua_newuserdata(globalconf.L, sizeof(button_t *));
+    *b = bt;
+    button_ref(b);
+    return luaA_settype(globalconf.L, "mouse");
+}
+
+/** Create a new mouse button bindings.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lparam A table with modifiers keys.
+ * \lparam A mouse button number.
+ * \lparam A function to execute on click events.
+ * \lreturn A mouse button binding.
+ */
+static int
+luaA_mouse_new(lua_State *L)
+{
+    int i, len;
+    button_t *button;
+
+    luaA_checktable(L, 1);
+    /* arg 3 is mouse button */
+    i = luaL_checknumber(L, 2);
+    /* arg 4 is cmd to run */
+    luaA_checkfunction(L, 3);
+
+    button = p_new(button_t, 1);
+    button->button = xutil_button_fromint(i);
+    button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    len = lua_objlen(L, 1);
+    for(i = 1; i <= len; i++)
+    {
+        lua_rawgeti(L, 1, i);
+        button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
+    }
+
+    return luaA_mouse_userdata_new(button);
+}
+
+const struct luaL_reg awesome_mouse_methods[] =
+{
+    { "new", luaA_mouse_new },
     { "screen_get", luaA_mouse_screen_get },
     { "coords_set", luaA_mouse_coords_set },
+    { NULL, NULL }
+};
+const struct luaL_reg awesome_mouse_meta[] =
+{
     { NULL, NULL }
 };
 

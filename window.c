@@ -110,11 +110,11 @@ window_configure(xcb_window_t win, area_t geometry, int border)
  * \param phys_screen Physical screen number.
  */
 void
-window_grabbuttons(xcb_window_t win, int phys_screen)
+window_grabbuttons(xcb_window_t win, int phys_screen, button_t *buttons)
 {
     button_t *b;
 
-    for(b = globalconf.buttons.client; b; b = b->next)
+    for(b = buttons; b; b = b->next)
     {
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
                         XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,

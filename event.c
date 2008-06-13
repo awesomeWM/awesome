@@ -156,7 +156,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
 
     if((c = client_getbywin(ev->event)))
     {
-        event_handle_mouse_button_press(c, ev->detail, ev->state, globalconf.buttons.client);
+        event_handle_mouse_button_press(c, ev->detail, ev->state, c->buttons);
         xcb_allow_events(globalconf.connection, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
     }
     else
@@ -321,7 +321,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
     {
-        window_grabbuttons(c->win, c->phys_screen);
+        window_grabbuttons(c->win, c->phys_screen, c->buttons);
         /* the idea behind saving pointer_x and pointer_y is Bob Marley powered
          * this will allow us top drop some EnterNotify events and thus not giving
          * focus to windows appering under the cursor without a cursor move */
