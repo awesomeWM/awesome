@@ -231,7 +231,7 @@ mouse_query_pointer(xcb_window_t window, int *x, int *y)
     xcb_query_pointer_cookie_t query_ptr_c;
     xcb_query_pointer_reply_t *query_ptr_r;
 
-    query_ptr_c = xcb_query_pointer(globalconf.connection, window);
+    query_ptr_c = xcb_query_pointer_unchecked(globalconf.connection, window);
     query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
 
     if(!query_ptr_r)
@@ -259,9 +259,9 @@ mouse_grab_pointer(xcb_window_t window, size_t cursor)
     if(cursor >= CurLast)
         cursor = CurNormal;
 
-    grab_ptr_c = xcb_grab_pointer(globalconf.connection, false, window,
-                                  MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                  window, globalconf.cursor[cursor], XCB_CURRENT_TIME);
+    grab_ptr_c = xcb_grab_pointer_unchecked(globalconf.connection, false, window,
+                                            MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
+                                            window, globalconf.cursor[cursor], XCB_CURRENT_TIME);
     grab_ptr_r = xcb_grab_pointer_reply(globalconf.connection, grab_ptr_c, NULL);
 
     if(!grab_ptr_r)
@@ -315,9 +315,9 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
     /* Send pointer requests */
-    grab_pointer_c = xcb_grab_pointer(globalconf.connection, false, s->root,
-                                      MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                      s->root, globalconf.cursor[CurMove], XCB_CURRENT_TIME);
+    grab_pointer_c = xcb_grab_pointer_unchecked(globalconf.connection, false, s->root,
+                                                MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
+                                                s->root, globalconf.cursor[CurMove], XCB_CURRENT_TIME);
 
     query_pointer_c = xcb_query_pointer_unchecked(globalconf.connection, s->root);
 
