@@ -144,8 +144,10 @@ if test "x$with_imlib2" == "xyes"; then
         [AC_MSG_ERROR([Cannot fined Imlib2.])])
     AC_DEFINE([WITH_IMLIB2],1,[Defined to use Imlib2])
 else
-    PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.2],,
-        [AC_MSG_ERROR([Cannot find gtk+-2.0 >= 2.2])])
+    PKG_CHECK_MODULES([GdkPixbuf], [gdk-pixbuf-2.0 >= 2.2],,
+        [AC_MSG_ERROR([Cannot find gdk-pixbuf-2.0 >= 2.2])])
+    PKG_CHECK_MODULES([GDK], [gdk-2.0 >= 2.2],,
+        [AC_MSG_ERROR([Cannot find gdk-2.0 >= 2.2])])
 fi
 PKG_CHECK_MODULES([xcb], [xcb],,
    [AC_MSG_ERROR([awesome requires xcb.])])

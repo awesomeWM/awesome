@@ -28,7 +28,7 @@
 #ifdef WITH_IMLIB2
 #include <Imlib2.h>
 #else
-#include <gtk/gtk.h>
+#include <gdk/gdkcairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #endif
 

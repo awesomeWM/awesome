@@ -109,7 +109,7 @@ AWESOME_CFLAGS = -std=gnu99 -pipe \
 		 -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn
 endif
 AM_CPPFLAGS = $(pangocairo_CFLAGS) $(AWESOME_CFLAGS) \
-	$(GTK_CFLAGS) $(imlib2_CFLAGS) \
+	$(GdkPixbuf_CFLAGS) $(GDK_CFLAGS) $(imlib2_CFLAGS) \
 	$(xcb_CFLAGS) $(xcb_event_CFLAGS) \
 	$(xcb_randr_CFLAGS) $(xcb_xinerama_CFLAGS) $(xcb_shape_CFLAGS) \
 	$(xcb_aux_CFLAGS) $(xcb_atom_CFLAGS) $(xcb_keysyms_CFLAGS) \
@@ -153,7 +153,7 @@ awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(pangocairo_LIBS) $(xcb_LIBS) $(xcb_event_LIBS) \
 	$(xcb_randr_LIBS) $(xcb_xinerama_LIBS) $(xcb_shape_LIBS) $(xcb_aux_LIBS) \
 	$(xcb_atom_LIBS) $(xcb_keysyms_LIBS) $(xcb_icccm_LIBS) $(dbus_LIBS)\
-	$(imlib2_LIBS) $(GTK_LIBS) $(Lua_LIBS)
+	$(imlib2_LIBS) $(GdkPixbuf_LIBS) $(GDK_LIBS) $(Lua_LIBS)
 
 bin_PROGRAMS += awesome-client
 awesome_client_SOURCES = \
