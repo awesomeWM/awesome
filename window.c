@@ -83,7 +83,7 @@ window_getstate(xcb_window_t w)
 }
 
 /** Configure a window with its new geometry and border size.
- * \param win Tthe X window id to configure.
+ * \param win The X window id to configure.
  * \param geometry The new window geometry.
  * \param border The new border size.
  */
@@ -108,6 +108,7 @@ window_configure(xcb_window_t win, area_t geometry, int border)
 /** Grab or ungrab buttons on a window.
  * \param win The window.
  * \param phys_screen Physical screen number.
+ * \param buttons The buttons to grab.
  */
 void
 window_grabbuttons(xcb_window_t win, int phys_screen, button_t *buttons)

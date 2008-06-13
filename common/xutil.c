@@ -160,7 +160,7 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
  * linked-list)
  * \param c X connection
  * \param atoms atoms cache
- * \param property atom name
+ * \param name atom name
  * \return a request structure
  */
 xutil_intern_atom_request_t
@@ -585,6 +585,7 @@ xutil_button_fromint(int button)
 
 /** Equivalent to 'XCreateFontCursor()', error are handled by the
  * default current error handler.
+ * \param conn The connection to the X server.
  * \param cursor_font Type of cursor to use.
  * \return Allocated cursor font.
  */

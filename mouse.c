@@ -120,6 +120,7 @@ mouse_snapclienttogeometry_inside(area_t geometry, area_t snap_geometry, int sna
 /** Snap a client with a futur geometry to the screen and other clients.
  * \param c The client.
  * \param geometry Geometry the client will get.
+ * \param snap The maximum distance in pixels to trigger a "snap".
  * \return Geometry to set to the client.
  */
 static area_t
@@ -829,7 +830,7 @@ luaA_mouse_screen_get(lua_State *L)
 }
 
 /** Create a new mouse userdata.
- * \param t The mouse.
+ * \param bt The mouse button binding.
  */
 static int
 luaA_mouse_userdata_new(button_t *bt)

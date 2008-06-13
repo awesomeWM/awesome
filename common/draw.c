@@ -144,6 +144,7 @@ draw_context_new(xcb_connection_t *conn, int phys_screen,
 
 /** Create a new Pango font
  * \param conn Connection ref
+ * \param phys_screen The physical screen number.
  * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE])
  * \return a new font
  */
@@ -287,9 +288,9 @@ draw_text_markup_expand(draw_parser_data_t *data,
 
 /** Draw text into a draw context.
  * \param ctx Draw context  to draw to.
+ * \param font The font to use.
  * \param area Area to draw to.
  * \param text Text to draw.
- * \param style A pointer to the style to use.
  */
 void
 draw_text(draw_context_t *ctx, font_t *font,
@@ -377,7 +378,7 @@ draw_text(draw_context_t *ctx, font_t *font,
 /** Setup color-source for cairo (gradient or mono).
  * \param ctx Draw context.
  * \param rect x, y to x + x_offset, y + y_offset.
- * \param color Color to use at start (x, y).
+ * \param pcolor Color to use at start (x, y).
  * \param pcolor_center Color at 50% of width.
  * \param pcolor_end Color at pattern end (x + x_offset, y + y_offset).
  * \return pat Pattern or NULL, needs to get cairo_pattern_destroy()'ed.
@@ -469,9 +470,8 @@ draw_rectangle(draw_context_t *ctx, area_t geometry, float line_width, bool fill
  * \param geometry geometry
  * \param line_width line width
  * \param filled filled rectangle?
- * \param pattern__x pattern start x coord
- * \param pattern_width pattern width
- * \param color color to use at start
+ * \param pattern_rect pattern geometry
+ * \param pcolor color to use at start
  * \param pcolor_center color at 50% of width
  * \param pcolor_end color at pattern_start + pattern_width
  */
@@ -520,13 +520,12 @@ draw_graph_setup(draw_context_t *ctx)
 
 /** Draw a graph.
  * \param ctx Draw context.
- * \param x x offset of widget.
- * \param y y offset of widget.
- * \param w Width in pixels.
+ * \param rect The area to draw into.
  * \param from Array of starting-point offsets to draw a graph lines.
  * \param to Array of end-point offsets to draw a graph lines.
  * \param cur_index Current position in data-array (cycles around).
  * \param grow Put new values to the left or to the right.
+ * \param patt_rect Pattern geometry.
  * \param pcolor Color at the left.
  * \param pcolor_center Color in the center.
  * \param pcolor_end Color at the right.
@@ -575,12 +574,11 @@ draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
 
 /** Draw a line into a graph-widget
  * \param ctx Draw context
- * \param x x-offset of widget
- * \param y y-offset of widget
- * \param w width in pixels
+ * \param rect The area to draw into.
  * \param to array of offsets to draw the line through...
  * \param cur_index current position in data-array (cycles around)
  * \param grow put new values to the left or to the right
+ * \param patt_rect Pattern geometry.
  * \param pcolor color at the left
  * \param pcolor_center color in the center
  * \param pcolor_end color at the right

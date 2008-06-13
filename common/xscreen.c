@@ -27,6 +27,7 @@
 
 /** Return the Xinerama screen number where the coordinates belongs to.
  * \param si The screens infos structure.
+ * \param screen The logical screen number.
  * \param x X coordinate
  * \param y Y coordinate
  * \return Screen number or screen param if no match or no multi-head.

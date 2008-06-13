@@ -192,8 +192,9 @@ exit_on_signal(int sig __attribute__ ((unused)))
  * There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
  * default error handler, which may call exit.
- * \param edpy display ref
- * \param ee XErrorEvent event
+ * \param data currently unused
+ * \param c The connectiont to the X server.
+ * \param e The error event
  * \return 0 if no error, or xerror's xlib return status
  */
 static int

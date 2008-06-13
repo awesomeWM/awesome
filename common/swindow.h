@@ -104,7 +104,7 @@ simplewindow_border_width_set(simple_window_t *sw, uint32_t border_width)
 
 /** Set a simple window border color.
  * \param sw The simple window to change border width.
- * \param border_color The border color.
+ * \param color The border color.
  */
 static inline void
 simplewindow_border_color_set(simple_window_t *sw, xcolor_t *color)
