@@ -55,6 +55,7 @@ static xcb_atom_t net_wm_state_fullscreen;
 static xcb_atom_t net_wm_state_above;
 static xcb_atom_t net_wm_state_below;
 static xcb_atom_t net_wm_state_modal;
+static xcb_atom_t net_wm_state_hidden;
 
 static xcb_atom_t utf8_string;
 
@@ -90,6 +91,7 @@ static AtomItem AtomNames[] =
     { "_NET_WM_STATE_ABOVE", &net_wm_state_above },
     { "_NET_WM_STATE_BELOW", &net_wm_state_below },
     { "_NET_WM_STATE_MODAL", &net_wm_state_modal },
+    { "_NET_WM_STATE_HIDDEN", &net_wm_state_hidden },
 
     { "UTF8_STRING", &utf8_string },
 };
@@ -158,6 +160,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_above;
     atom[i++] = net_wm_state_below;
     atom[i++] = net_wm_state_modal;
+    atom[i++] = net_wm_state_hidden;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
@@ -343,7 +346,14 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->layer = LAYER_MODAL;
         }
     }
-
+    else if(state == net_wm_state_hidden)
+    {
+        if(set == _NET_WM_STATE_REMOVE)
+            c->ishidden = false;
+        else if(set == _NET_WM_STATE_ADD)
+            c->ishidden = true;
+        globalconf.screens[c->screen].need_arrange = true;
+    }
 }
 
 static void
