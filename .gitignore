@@ -1,11 +1,14 @@
+.*.sw?
+*.luac
 *.o
 awesome
 awesome-client
 doc
-*.swp
 .deps
 .dirstamp
 configure
+config.h
+config.h.in
 config.log
 config.status
 Makefile
@@ -18,8 +21,10 @@ awesome-client.1
 awesome-menu.1
 awesome.1
 awesomerc.5
+awesomerc.5.xml
 awesomerc.lua
 widgetgen.h
 layoutgen.h
 awesome-version-internal.h
 apidocgen.txt
+stamp-h1
