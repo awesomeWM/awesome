@@ -382,7 +382,6 @@ struct awesome_t
     {
            button_t *root;
            button_t *client;
-           button_t *titlebar;
     } buttons;
     /** Numlock mask */
     unsigned int numlockmask;
