@@ -41,11 +41,11 @@
 
 extern awesome_t globalconf;
 
-/** Handle mouse button click
- * \param screen screen number
- * \param button button number
- * \param state modkeys state
- * \param buttons buttons list to check for
+/** Handle mouse button press.
+ * \param c The client on which the event happened or NULL.
+ * \param button Button number
+ * \param state Modkeys state
+ * \param buttons Buttons list to check for
  */
 static void
 event_handle_mouse_button_press(client_t *c,
@@ -68,9 +68,10 @@ event_handle_mouse_button_press(client_t *c,
         }
 }
 
-/** Handle XButtonPressed events
- * \param connection connection to the X server
- * \param ev ButtonPress event
+/** The button press event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_buttonpress(void *data __attribute__ ((unused)),
@@ -171,9 +172,10 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XConfigureRequest events
- * \param connection connection to the X server
- * \param ev ConfigureRequest event
+/** The configure event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_configurerequest(void *data __attribute__ ((unused)),
@@ -263,9 +265,10 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XConfigure events
- * \param connection connection to the X server
- * \param ev ConfigureNotify event
+/** The configure notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_configurenotify(void *data __attribute__ ((unused)),
@@ -285,9 +288,10 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XDestroyWindow events
- * \param connection connection to the X server
- * \param ev DestroyNotify event
+/** The destroy notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_destroynotify(void *data __attribute__ ((unused)),
@@ -302,9 +306,10 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XCrossing events
- * \param connection connection to the X server
- * \param ev Crossing event
+/** The enter notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_enternotify(void *data __attribute__ ((unused)),
@@ -337,8 +342,10 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XExpose events
- * \param ev Expose event
+/** The expose event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_expose(void *data __attribute__ ((unused)),
@@ -367,9 +374,10 @@ event_handle_expose(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XKey events
- * \param connection connection to the X server
- * \param ev KeyPress event
+/** The key press event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_keypress(void *data __attribute__ ((unused)),
@@ -407,9 +415,10 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XMapRequest events
- * \param connection connection to the X server
- * \param ev MapRequest event
+/** The map request event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_maprequest(void *data __attribute__ ((unused)),
@@ -471,9 +480,10 @@ bailout:
     return 0;
 }
 
-/** Handle XProperty events
- * \param connection connection to the X server
- * \param ev PropertyNotify event
+/** The property notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_propertynotify(void *data __attribute__ ((unused)),
@@ -509,9 +519,10 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XUnmap events
- * \param connection connection to the X server
- * \param ev UnmapNotify event
+/** The unmap notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_unmapnotify(void *data __attribute__ ((unused)),
@@ -534,8 +545,10 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XShape events
- * \param ev Shape event
+/** The shape notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_shape(void *data __attribute__ ((unused)),
@@ -550,8 +563,10 @@ event_handle_shape(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XRandR events
- * \param ev RandrScreenChangeNotify event
+/** The randr screen change notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
@@ -582,8 +597,10 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** Handle XClientMessage events
- * \param ev ClientMessage event
+/** The client message event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
  */
 int
 event_handle_clientmessage(void *data __attribute__ ((unused)),
