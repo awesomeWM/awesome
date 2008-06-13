@@ -25,9 +25,9 @@
 
 #include "structs.h"
 
-#define WIDGET_CACHE_CLIENTS        1<<0
-#define WIDGET_CACHE_LAYOUTS        1<<1
-#define WIDGET_CACHE_TAGS           1<<2
+#define WIDGET_CACHE_CLIENTS        (1<<0)
+#define WIDGET_CACHE_LAYOUTS        (1<<1)
+#define WIDGET_CACHE_TAGS           (1<<2)
 #define WIDGET_CACHE_ALL            (WIDGET_CACHE_CLIENTS | WIDGET_CACHE_LAYOUTS | WIDGET_CACHE_TAGS)
 
 typedef widget_t *(widget_constructor_t)(alignment_t);
