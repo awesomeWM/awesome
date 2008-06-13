@@ -38,9 +38,9 @@ alpha channel to `aa' and will blend the green with the color under it.
 
 TEXT FORMAT
 -----------
-You can use/mix 'pango-markup' and 'awesome-markup' on text properties.
-A pango-markup example: "<span weight='bold' foreground="#336699">...</span>".
-An awesome-markup example: "<text align='right'>...</text>".
+You can use/mix pango-markup and awesome-markup on text properties.
+A pango-markup example: "<span weight=\'bold\' foreground=\'#336699\'>...</span>".
+An awesome-markup example: "<text align=\'right\'>...</text>".
 
 WIDGETS
 -------
@@ -130,14 +130,14 @@ the widget:
     The widget height.
 
 *vertical*::
-    True if the widget is vertical.
+    If \'true\', bars are vertically aligned. If \'false\', horizontally.
 
 GRAPH
 ~~~~~
 A graph widget can display several data-graphs inside its widget-border. Some
 properties need a data section, that means a title for the incoming data. For
-example, if you want to feed 'memory' data, you want to do
-mywidget:set("data", "memory 100").
+example, if you want to feed \'mymemory\' data, you want to do
+mywidget:set("data", "mymemory 100").
 
 
 The following properties require a data section before the value:
@@ -155,16 +155,16 @@ The following properties require a data section before the value:
     Foreground end color.
 
 *vertical_gradient*::
-    If 'true', colorgradient shall be applied vertically.
+    If \'true\', colorgradient shall be applied vertically.
 
 *max_value*::
-    Maximum value. Bigger values gets truncated, unless 'scale' is true.
+    Maximum value. Bigger values gets truncated, unless \'scale\' is true.
 
 *scale*::
-    Scales the graph acccording to incoming values bigger than 'max_value'.
+    Scales the graph acccording to incoming values bigger than \'max_value\'.
 
 *draw_style*::
-    'bottom', 'top' or 'line'.
+    \'bottom\', \'top\' or \'line\'.
 
 
 The following properties do not require a data section before the value:
@@ -182,42 +182,42 @@ The following properties do not require a data section before the value:
     Border color.
 
 *grow*::
-   'left' or 'right'. E.g. 'right' means new values get added on the right of the widget.
+   \'left\' or \'right\'. E.g. \'right\' means new values get added on the right of the widget.
 
 TAGLIST
 ~~~~~~~
 A taglist widget displays available tags and their state.
 
 *text_normal*::
-    Text to display on normal clients. '<title/>' substitutes the client's title.
+    Text to display on normal clients. \'<title/>\' substitutes the tag's title.
 
 *text_focus*::
-    Text to display on the focused client. '<title/>' substitutes the client's title.
+    Text to display on the focused client. \'<title/>\' gets substituted by the tag's title.
 
 *text_urgent*::
-    Text to display on urgent clients. '<title/>' substitutes the client's title.
+    Text to display on urgent clients. \'<title/>\' gets substituted by the tag's title.
 
 *show_empty*::
-    'true' or 'false'. If 'false', empty tags won't get displayed. Selected tags are always displayed so.
+    \'true\' or \'false\'. If \'false\', empty tags won't get displayed. Selected tags are always displayed so.
 
 TASKLIST
 ~~~~~~~~
-A tasklist widget displays the titles of clients according to the 'show' setting.
+A tasklist widget displays the titles of clients according to the \'show\' setting.
 
 *show*::
-    'tags', 'focus' or 'all'. E.g. 'tags' shows only clients of currently selected tags.
+    \'tags\', \'focus\' or \'all\'. E.g. \'tags\' shows only clients of currently selected tags.
 
 *text_normal*::
-    Text to display on normal clients. '<title/>' substitutes the client's title.
+    Text to display on normal clients. \'<title/>\' gets substituted by the client's title.
 
 *text_focus*::
-    Text to display on the focused client. '<title/>' substitutes the client's title.
+    Text to display on the focused client. \'<title/>\' gets substituted by the client's title.
 
 *text_urgent*::
-    Text to display on urgent clients. '<title/>' substitutes the client's title.
+    Text to display on urgent clients. \'<title/>\' gets substituted by the client's title.
 
 *show_icons*::
-    'true' or 'false'. Set to 'true' if client's icon (if one is avaiable) shall be displayed.
+    \'true\' or \'false\'. Set to \'true\' if client's icon (if one is avaiable) shall be displayed.
 
 
 TEXTBOX
