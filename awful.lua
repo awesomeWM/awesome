@@ -15,6 +15,8 @@ else
 end
 
 -- Grab environment we need
+local assert = assert
+local loadstring = loadstring
 local ipairs = ipairs
 local pairs = pairs
 local unpack = unpack
@@ -441,15 +443,22 @@ local function spawn(cmd)
     return os.execute(cmd .. "&")
 end
 
+local function eval(cmd)
+    assert(loadstring(cmd))()
+end
+
 local function menu(p, textbox, exe_callback)
     local command = ""
     local prompt = p or ""
+    if not textbox or not exe_callback then
+        return
+    end
     textbox:set("text", prompt)
     keygrabber.run(
     function (mod, key)
         if key == "Return" then
-            exe_callback(command)
             textbox:set("text", "")
+            exe_callback(command)
             return false
         elseif key == "Escape" then
             textbox:set("text", "")
@@ -529,5 +538,6 @@ P.layout =
 P.spawn = spawn
 P.menu = menu
 P.escape = escape
+P.eval = eval
 
 return P
