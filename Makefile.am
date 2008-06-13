@@ -190,13 +190,15 @@ dist_iconslayouts_DATA += icons/layouts/maxw.png
 dist_iconslayouts_DATA += icons/layouts/spiral.png
 dist_iconslayouts_DATA += icons/layouts/spiralw.png
 dist_iconslayouts_DATA += icons/layouts/tile.png
+dist_iconslayouts_DATA += icons/layouts/tilew.png
 dist_iconslayouts_DATA += icons/layouts/tilebottom.png
 dist_iconslayouts_DATA += icons/layouts/tilebottomw.png
 dist_iconslayouts_DATA += icons/layouts/tileleft.png
 dist_iconslayouts_DATA += icons/layouts/tileleftw.png
 dist_iconslayouts_DATA += icons/layouts/tiletop.png
 dist_iconslayouts_DATA += icons/layouts/tiletopw.png
-dist_iconslayouts_DATA += icons/layouts/tilew.png
+dist_iconslayouts_DATA += icons/layouts/magnifier.png
+dist_iconslayouts_DATA += icons/layouts/magnifierw.png
 
 clean-local:
 	rm -f awesome*.1 awesome*.1.xml awesome*.5 awesome*.5.xml
