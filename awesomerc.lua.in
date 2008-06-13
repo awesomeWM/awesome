@@ -202,6 +202,7 @@ keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layout
 
 -- Menu
 keybinding.new({ modkey }, "F1", function () awful.menu("Run: ", mymenubox, awful.spawn) end):add()
+keybinding.new({ modkey }, "F4", function () awful.menu("Run Lua code: ", mymenubox, awful.eval) end):add()
 
 --- Tabulous, tab manipulation
 keybinding.new({ modkey, "Control" }, "y", function ()
