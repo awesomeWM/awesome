@@ -109,7 +109,11 @@ AC_DEFINE_UNQUOTED([AWESOME_COMPILE_BY], ["$aw_whoami"], [build user])
 
 AC_ARG_VAR([LUA], [Lua interpreter])
 AC_PATH_PROG([LUA], [lua], [:])
-test "x$LUA" = "x" && AC_MSG_WARN([awesome compilation requires Lua])
+test "x$LUA" = "x" && AC_MSG_WARN([awesome compilation requires lua])
+
+AC_ARG_VAR([LUAC], [Lua compiler])
+AC_PATH_PROG([LUAC], [luac], [:])
+test "x$LUAC" = "x" && AC_MSG_WARN([awesome compilation requires luac])
 
 AS_AC_EXPAND(awesomelibdir, "$datarootdir/awesome/lib")
 AC_DEFINE_UNQUOTED([AWESOME_LUA_LIB_PATH], "${awesomelibdir}", [awesome lib path])

@@ -53,12 +53,20 @@ EXTRA_DIST    += awful.lua
 EXTRA_DIST    += tabulous.lua
 dist_awesomelib_DATA += awful.lua
 dist_awesomelib_DATA += tabulous.lua
+dist_awesomelib_DATA += awful.luac
+dist_awesomelib_DATA += tabulous.luac
+CLEANFILES    += awful.luac
+CLEANFILES    += tabulous.luac
 
 EXTRA_DIST    += awesomerc.lua.in
 CLEANFILES    += awesomerc.lua
 BUILT_SOURCES += awesomerc.lua
 doc_DATA      += awesomerc.lua
 etc_DATA      += awesomerc.lua
+
+SUFFIXES += .lua .luac
+.lua.luac:
+	$(LUAC) -s -o $@ $<
 
 awesomerc.lua: $(srcdir)/awesomerc.lua.in
 	$(SED) -e "s|[@]iconslayoutsdir@|$(iconslayoutsdir)|;s|[@]iconsdir@|$(iconsdir)|" \
