@@ -39,7 +39,8 @@
  * \return true on sucess, falsse on failure
  */
 bool
-xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xutil_atom_cache_t **atoms,
+xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w,
+                  xutil_atom_cache_t **atoms,
                   xcb_atom_t atom, char **text)
 {
     xcb_get_property_cookie_t prop_c;
@@ -157,14 +158,15 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
 
 /** Send an unchecked InternAtom request if it is not already in the
  * cache, in the second case it stores the cache entry (an ordered
- * linked-list)
- * \param c X connection
- * \param atoms atoms cache
- * \param name atom name
- * \return a request structure
+ * linked-list).
+ * \param c X connection.
+ * \param atoms Atoms cache, or NULL if no cache.
+ * \param name Atom name.
+ * \return A request structure.
  */
 xutil_intern_atom_request_t
-xutil_intern_atom(xcb_connection_t *c, xutil_atom_cache_t **atoms,
+xutil_intern_atom(xcb_connection_t *c,
+                  xutil_atom_cache_t **atoms,
                   const char *name)
 {
     xutil_intern_atom_request_t atom_req;
@@ -175,15 +177,16 @@ xutil_intern_atom(xcb_connection_t *c, xutil_atom_cache_t **atoms,
 
     /* Check if this atom is present in the cache ordered
      * linked-list */
-    for(atom_next = *atoms;
-        atom_next && (cmp_cache = a_strcmp(name, atom_next->name)) >= 0;
-        atom_next = atom_cache_list_next(NULL, atom_next))
-        if(cmp_cache == 0)
-        {
-            atom_req.cache_hit = true;
-            atom_req.cache = atom_next;
-            return atom_req;
-        }
+    if(atoms)
+        for(atom_next = *atoms;
+            atom_next && (cmp_cache = a_strcmp(name, atom_next->name)) >= 0;
+            atom_next = atom_cache_list_next(NULL, atom_next))
+            if(cmp_cache == 0)
+            {
+                atom_req.cache_hit = true;
+                atom_req.cache = atom_next;
+                return atom_req;
+            }
 
     /* Otherwise send an InternAtom request to the server */
     atom_req.cache_hit = false;
@@ -195,14 +198,15 @@ xutil_intern_atom(xcb_connection_t *c, xutil_atom_cache_t **atoms,
 
 /** Treat the reply which may be a cache entry or a reply from
  * InternAtom request (cookie), in the second case, add the atom to
- * the cache
- * \param c X connection
- * \param atoms atoms cache
- * \param atom_req atom request
- * \return a brand new xcb_atom_t
+ * the cache.
+ * \param c X connection.
+ * \param atoms Atoms cache or NULL if no cache.
+ * \param atom_req Atom request.
+ * \return A brand new xcb_atom_t.
  */
 xcb_atom_t
-xutil_intern_atom_reply(xcb_connection_t *c, xutil_atom_cache_t **atoms,
+xutil_intern_atom_reply(xcb_connection_t *c,
+                        xutil_atom_cache_t **atoms,
                         xutil_intern_atom_request_t atom_req)
 {
     xcb_intern_atom_reply_t *atom_rep;
@@ -222,18 +226,21 @@ xutil_intern_atom_reply(xcb_connection_t *c, xutil_atom_cache_t **atoms,
     atom_cache->atom = atom_rep->atom;
     atom_cache->name = atom_req.name;
 
-    /* Add the entry in the list at the beginning of the cache list */
-    if(*atoms == NULL || a_strcmp(atom_req.name, (*atoms)->name) < 0)
-        atom_cache_list_push(atoms, atom_cache);
-    /* Otherwise insert it at the proper position in the cache list
-     * according to its name */
-    else
+    if(atoms)
     {
-        for(atom_next = *atoms;
-            atom_next && atom_next->next && a_strcmp(atom_req.name, atom_next->next->name) > 0;
-            atom_next = atom_cache_list_next(NULL, atom_next));
-
-        atom_cache_list_attach_after(atom_next, atom_cache);
+        /* Add the entry in the list at the beginning of the cache list */
+        if(*atoms == NULL || a_strcmp(atom_req.name, (*atoms)->name) < 0)
+            atom_cache_list_push(atoms, atom_cache);
+        /* Otherwise insert it at the proper position in the cache list
+         * according to its name */
+        else
+        {
+            for(atom_next = *atoms;
+                atom_next && atom_next->next && a_strcmp(atom_req.name, atom_next->next->name) > 0;
+                atom_next = atom_cache_list_next(NULL, atom_next));
+    
+            atom_cache_list_attach_after(atom_next, atom_cache);
+        }
     }
 
     p_delete(&atom_rep);
