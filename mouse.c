@@ -738,11 +738,14 @@ static int
 luaA_mouse_coords_set(lua_State *L)
 {
     int x, y;
+    xcb_window_t root;
+
     x = luaL_checknumber(L, 1);
     y = luaL_checknumber(L, 2);
-    xcb_warp_pointer(globalconf.connection, XCB_NONE,
-                     xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root,
-                     0, 0, 0, 0, x, y);
+
+    root = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root;
+    mouse_warp_pointer(root, x, y);
+
     return 0;
 }
 
@@ -812,21 +815,18 @@ luaA_client_mouse_move(lua_State *L)
 static int
 luaA_mouse_screen_get(lua_State *L)
 {
-    int screen;
-    xcb_query_pointer_cookie_t qc; 
-    xcb_query_pointer_reply_t *qr; 
+    int screen, mouse_x, mouse_y;
+    xcb_window_t root;
 
-    qc = xcb_query_pointer(globalconf.connection,
-                           xcb_aux_get_screen(globalconf.connection,
-                                              globalconf.default_screen)->root);
+    root = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root;
 
-    if(!(qr = xcb_query_pointer_reply(globalconf.connection, qc, NULL)))
+    if(!mouse_query_pointer(root, &mouse_x, &mouse_y))
         return 0;
 
     screen = screen_get_bycoord(globalconf.screens_info,
                                 globalconf.default_screen,
-                                qr->root_x, qr->root_y);
-    p_delete(&qr);
+                                mouse_x, mouse_y);
+
     lua_pushnumber(L, screen + 1);
 
     return 1;
