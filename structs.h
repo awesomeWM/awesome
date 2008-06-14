@@ -372,6 +372,8 @@ typedef struct
     statusbar_t *statusbar;
     /** Padding */
     padding_t padding;
+    /** Statusbar that contains the systray */
+    statusbar_t *systray;
 } screen_t;
 
 /** Main configuration structure */
@@ -416,8 +418,6 @@ struct awesome_t
     char *configpath;
     /** Floating window placement algo */
     FloatingPlacement *floating_placement;
-    /** Statusbar that contains the systray */
-    statusbar_t *systray;
     /** Selected clients history */
     client_node_t *focus;
     /** Stack client history */

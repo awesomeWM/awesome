@@ -22,17 +22,13 @@
 #include <xcb/xcb.h>
 
 #include "widget.h"
+#include "screen.h"
 #include "common/xembed.h"
 
 extern awesome_t globalconf;
 
-typedef struct
-{
-    bool init;
-} systray_data_t;
-
 static bool
-systray_init(void)
+systray_init(statusbar_t *sb)
 {
     xutil_intern_atom_request_t atom_systray_q, atom_manager_q;
     xcb_atom_t atom_systray;
@@ -41,13 +37,13 @@ systray_init(void)
 
     /* Send requests */
     atom_manager_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
-    snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", globalconf.default_screen);
+    snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", sb->sw->phys_screen);
     atom_systray_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
 
     /* Fill event */
     ev.format = 32;
     ev.data.data32[0] = XCB_CURRENT_TIME;
-    ev.data.data32[2] = globalconf.systray->sw->window;
+    ev.data.data32[2] = sb->sw->window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
     ev.response_type = xutil_intern_atom_reply(globalconf.connection,
                                                &globalconf.atoms, atom_manager_q);
@@ -57,7 +53,7 @@ systray_init(void)
                                                                atom_systray_q);
 
     xcb_set_selection_owner(globalconf.connection,
-                            globalconf.systray->sw->window,
+                            sb->sw->window,
                             atom_systray,
                             XCB_CURRENT_TIME);
 
@@ -69,16 +65,25 @@ systray_draw(draw_context_t *ctx,
              int screen __attribute__ ((unused)),
              widget_node_t *w,
              int offset, int used __attribute__ ((unused)),
-             void *p __attribute__ ((unused)))
+             void *p)
 {
-    int i = 0;
+    int i = 0, phys_screen;
     xembed_window_t *em;
     uint32_t config_win_vals[6];
-    systray_data_t *d = w->widget->data;
+    /* p is always a statusbar, titlebars are forbidden */
+    statusbar_t *sb = (statusbar_t *) p;
 
+    phys_screen = screen_virttophys(screen);
 
-    if(!d->init)
-        d->init = systray_init();
+    /* only init and take systray handling if noone has it and if we have a
+     * window to handle others... windows. */
+    if(!globalconf.screens[phys_screen].systray && sb->sw)
+    {
+        globalconf.screens[phys_screen].systray = sb;
+        systray_init(sb);
+    }
+    else if(globalconf.screens[phys_screen].systray != p)
+        return (w->area.width = 0);
 
     for(em = globalconf.embedded; em; em = em->next)
         i++;
@@ -99,18 +104,18 @@ systray_draw(draw_context_t *ctx,
     /* height */
     config_win_vals[3] = w->area.height;
     /* sibling */
-    config_win_vals[4] = globalconf.systray->sw->window;
+    config_win_vals[4] = sb->sw->window;
     /* stack mode */
     config_win_vals[5] = XCB_STACK_MODE_ABOVE;
 
-    switch(globalconf.systray->position)
+    switch(sb->position)
     {
       case Left:
-        config_win_vals[0] = globalconf.systray->sw->geometry.x + w->area.y;
-        config_win_vals[1] = globalconf.systray->sw->geometry.y + globalconf.systray->sw->geometry.height
+        config_win_vals[0] = sb->sw->geometry.x + w->area.y;
+        config_win_vals[1] = sb->sw->geometry.y + sb->sw->geometry.height
             - w->area.x - config_win_vals[3];
         for(em = globalconf.embedded; em; em = em->next)
-            if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) globalconf.systray->sw->geometry.y)
+            if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) sb->sw->geometry.y)
             {
                 xcb_map_window(globalconf.connection, em->win);
                 xcb_configure_window(globalconf.connection, em->win,
@@ -127,10 +132,10 @@ systray_draw(draw_context_t *ctx,
                 xcb_unmap_window(globalconf.connection, em->win);
         break;
       case Right:
-        config_win_vals[0] = globalconf.systray->sw->geometry.x - w->area.y;
-        config_win_vals[1] = globalconf.systray->sw->geometry.y + w->area.x;
+        config_win_vals[0] = sb->sw->geometry.x - w->area.y;
+        config_win_vals[1] = sb->sw->geometry.y + w->area.x;
         for(em = globalconf.embedded; em; em = em->next)
-            if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) globalconf.systray->sw->geometry.y + ctx->width)
+            if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) sb->sw->geometry.y + ctx->width)
             {
                 xcb_map_window(globalconf.connection, em->win);
                 xcb_configure_window(globalconf.connection, em->win,
@@ -148,13 +153,13 @@ systray_draw(draw_context_t *ctx,
         break;
       default:
         /* x */
-        config_win_vals[0] = globalconf.systray->sw->geometry.x + w->area.x;
+        config_win_vals[0] = sb->sw->geometry.x + w->area.x;
         /* y */
-        config_win_vals[1] = globalconf.systray->sw->geometry.y + w->area.y;
+        config_win_vals[1] = sb->sw->geometry.y + w->area.y;
     
         for(em = globalconf.embedded; em; em = em->next)
             /* if(x + width < systray.x + systray.width) */
-            if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(w->area) + globalconf.systray->sw->geometry.x)
+            if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(w->area) + sb->sw->geometry.x)
             {
                 xcb_map_window(globalconf.connection, em->win);
                 xcb_configure_window(globalconf.connection, em->win,
@@ -185,7 +190,6 @@ systray_new(alignment_t align)
     w->align = align;
     w->draw = systray_draw;
     w->cache_flags = WIDGET_CACHE_EMBEDDED;
-    w->data = p_new(systray_data_t, 1);
 
     return w;
 }

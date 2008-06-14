@@ -124,9 +124,9 @@ for s = 1, screen.count() do
     mystatusbar[s]:widget_add(mymenubox)
     mystatusbar[s]:widget_add(mytextbox)
     mystatusbar[s]:widget_add(mylayoutbox[s])
+    mystatusbar[s]:widget_add(mysystray)
     mystatusbar[s]:add(s)
 end
-mystatusbar[screen.count()]:widget_add(mysystray)
 -- }}}
 
 -- {{{ Mouse bindings

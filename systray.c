@@ -25,6 +25,7 @@
 #include "structs.h"
 #include "systray.h"
 #include "window.h"
+#include "widget.h"
 #include "common/xembed.h"
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
@@ -38,6 +39,7 @@ int
 systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *info)
 {
     xembed_window_t *em;
+    int i;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -62,11 +64,14 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
     xembed_window_list_append(&globalconf.embedded, em);
 
     xembed_embedded_notify(globalconf.connection, em->win,
-                           globalconf.systray->sw->window,
+                           globalconf.screens[phys_screen].systray->sw->window,
                            MIN(XEMBED_VERSION, em->info.version));
 
     if(em->info.flags & XEMBED_MAPPED)
        xcb_map_window(globalconf.connection, em->win);
+
+    for(i = 0; i < globalconf.screens_info->nscreen; i++)
+        widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
 
     return 0;
 }
