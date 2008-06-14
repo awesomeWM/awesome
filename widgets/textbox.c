@@ -31,7 +31,7 @@ typedef struct
 {
     char *text;
     int width;
-} Data;
+} textbox_data_t;
 
 static int
 textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
@@ -39,7 +39,7 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              int offset, int used,
              void *p __attribute__ ((unused)))
 {
-    Data *d = w->widget->data;
+    textbox_data_t *d = w->widget->data;
 
     if(d->width)
         w->area.width = d->width;
@@ -68,7 +68,7 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
 static widget_tell_status_t
 textbox_tell(widget_t *widget, const char *property, const char *new_value)
 {
-    Data *d = widget->data;
+    textbox_data_t *d = widget->data;
 
     if(!a_strcmp(property, "text"))
     {
@@ -87,14 +87,14 @@ widget_t *
 textbox_new(alignment_t align)
 {
     widget_t *w;
-    Data *d;
+    textbox_data_t *d;
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
     w->align = align;
     w->draw = textbox_draw;
     w->tell = textbox_tell;
-    w->data = d = p_new(Data, 1);
+    w->data = d = p_new(textbox_data_t, 1);
 
     return w;
 }
