@@ -28,9 +28,7 @@
 #define WIDGET_CACHE_CLIENTS        (1<<0)
 #define WIDGET_CACHE_LAYOUTS        (1<<1)
 #define WIDGET_CACHE_TAGS           (1<<2)
-#define WIDGET_CACHE_ALL            (WIDGET_CACHE_CLIENTS | WIDGET_CACHE_LAYOUTS | WIDGET_CACHE_TAGS)
-
-typedef widget_t *(widget_constructor_t)(alignment_t);
+#define WIDGET_CACHE_EMBEDDED       (1<<3)
 
 void widget_invalidate_cache(int, int);
 int widget_calculate_offset(int, int, int, int);
@@ -47,6 +45,7 @@ widget_constructor_t iconbox_new;
 widget_constructor_t progressbar_new;
 widget_constructor_t graph_new;
 widget_constructor_t tasklist_new;
+widget_constructor_t systray_new;
 
 #endif
 

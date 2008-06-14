@@ -38,6 +38,7 @@ WIDGETS += widgets/iconbox.c
 WIDGETS += widgets/progressbar.c
 WIDGETS += widgets/tasklist.c
 WIDGETS += widgets/graph.c
+WIDGETS += widgets/systray.c
 
 
 doc_DATA   += README
@@ -122,6 +123,7 @@ awesome_SOURCES = \
 	common/version.c common/version.h \
 	common/util.c common/util.h \
 	common/xutil.c common/xutil.h \
+	common/xembed.c common/xembed.h \
 	common/configopts.h common/configopts.c \
 	common/xscreen.h common/xscreen.c \
 	common/draw.c common/draw.h \
@@ -129,6 +131,7 @@ awesome_SOURCES = \
 	common/list.h common/refcount.h \
 	structs.h \
 	client.c client.h \
+	systray.c systray.h \
 	titlebar.c titlebar.h \
 	placement.c placement.h \
 	focus.c focus.h \

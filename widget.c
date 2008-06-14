@@ -337,6 +337,8 @@ luaA_widget_new(lua_State *L)
     else
         luaL_error(L, "unkown widget type: %s", type);
 
+    w->type = wc;
+
     /* Set visible by default. */
     w->isvisible = true;
 

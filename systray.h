@@ -1,7 +1,7 @@
 /*
- * ewmh.h - EWMH header
+ * systray.h - systray handlers header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,28 +19,15 @@
  *
  */
 
-#ifndef AWESOME_EWMH_H
-#define AWESOME_EWMH_H
+#ifndef AWESOME_SYSTRAY_H
+#define AWESOME_SYSTRAY_H
 
-#include "structs.h"
+#include <xcb/xcb.h>
+#include "common/xembed.h"
 
-typedef struct
-{
-    int height;
-    int width;
-    unsigned char *image;
-} NetWMIcon;
-
-void ewmh_init_atoms(void);
-void ewmh_set_supported_hints(int);
-void ewmh_update_net_client_list(int);
-void ewmh_update_net_numbers_of_desktop(int);
-void ewmh_update_net_current_desktop(int);
-void ewmh_update_net_desktop_names(int);
-void ewmh_update_net_active_window(int);
-int ewmh_process_client_message(xcb_client_message_event_t *);
-void ewmh_check_client_hints(client_t *);
-NetWMIcon * ewmh_get_window_icon(xcb_window_t);
+int systray_request_handle(xcb_window_t, int, xembed_info_t *);
+int systray_process_client_message(xcb_client_message_event_t *);
+int xembed_process_client_message(xcb_client_message_event_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

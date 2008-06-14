@@ -97,6 +97,9 @@ mymenubox = widget.new({ type = "textbox", name = "mytextbox", align = "left" })
 myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "left" })
 myiconbox:set("image", "@iconsdir@/awesome16.png")
 
+-- Create a systray
+mysystray = widget.new({ type = "systray", name = "mysystray", align = "right" })
+
 -- Create an iconbox widget which will contains an icon indicating which layout we're using.
 -- We need one layoutbox per screen.
 mylayoutbox = {}
@@ -110,18 +113,20 @@ for s = 1, screen.count() do
 end
 
 -- Create a statusbar for each screen and add it
+mystatusbar = {}
 for s = 1, screen.count() do
-    mystatusbar = statusbar.new({ position = "top", name = "mystatusbar" .. s,
-                                fg = fg_normal, bg = bg_normal })
+    mystatusbar[s] = statusbar.new({ position = "top", name = "mystatusbar" .. s,
+                                   fg = fg_normal, bg = bg_normal })
     -- Add widgets to the statusbar - order matters
-    mystatusbar:widget_add(mytaglist)
-    mystatusbar:widget_add(myiconbox)
-    mystatusbar:widget_add(mytasklist)
-    mystatusbar:widget_add(mymenubox)
-    mystatusbar:widget_add(mytextbox)
-    mystatusbar:widget_add(mylayoutbox[s])
-    mystatusbar:add(s)
+    mystatusbar[s]:widget_add(mytaglist)
+    mystatusbar[s]:widget_add(myiconbox)
+    mystatusbar[s]:widget_add(mytasklist)
+    mystatusbar[s]:widget_add(mymenubox)
+    mystatusbar[s]:widget_add(mytextbox)
+    mystatusbar[s]:widget_add(mylayoutbox[s])
+    mystatusbar[s]:add(s)
 end
+mystatusbar[screen.count()]:widget_add(mysystray)
 -- }}}
 
 -- {{{ Mouse bindings

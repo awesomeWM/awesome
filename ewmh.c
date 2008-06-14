@@ -381,7 +381,7 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
         client_setfloating(c, true, LAYER_MODAL);
 }
 
-void
+int
 ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
     client_t *c;
@@ -411,6 +411,8 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
                                         ev->data.data32[0]);
         }
     }
+
+    return 0;
 }
 
 void

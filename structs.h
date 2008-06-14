@@ -30,6 +30,7 @@
 #include "common/draw.h"
 #include "common/swindow.h"
 #include "common/xscreen.h"
+#include "common/xembed.h"
 #include "common/refcount.h"
 
 /** Stacking layout layers */
@@ -63,6 +64,7 @@ typedef struct client_node_t client_node_t;
 typedef struct _tag_t tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
 typedef area_t (FloatingPlacement)(client_t *);
+typedef widget_t *(widget_constructor_t)(alignment_t);
 typedef struct awesome_t awesome_t;
 
 /** Widget tell status code */
@@ -102,6 +104,8 @@ struct widget_t
     int refcount;
     /** widget_t name */
     char *name;
+    /** Widget type is constructor */
+    widget_constructor_t *type;
     /** Draw function */
     int (*draw)(draw_context_t *, int, widget_node_t *, int, int, void *);
     /** Update function */
@@ -401,10 +405,14 @@ struct awesome_t
     xcb_cursor_t cursor[CurLast];
     /** Clients list */
     client_t *clients;
+    /** Embedded windows */
+    xembed_window_t *embedded;
     /** Path to config file */
     char *configpath;
     /** Floating window placement algo */
     FloatingPlacement *floating_placement;
+    /** Statusbar that contains the systray */
+    statusbar_t *systray;
     /** Selected clients history */
     client_node_t *focus;
     /** Stack client history */

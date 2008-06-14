@@ -453,6 +453,9 @@ luaA_titlebar_widget_add(lua_State *L)
     widget_node_t *w = p_new(widget_node_t, 1);
     client_t *c;
 
+    if((*widget)->type == systray_new)
+        luaL_error(L, "cannot add systray widget to titlebar");
+
     w->widget = *widget;
     widget_node_list_append(&(*tb)->widgets, w);
     widget_ref(widget);

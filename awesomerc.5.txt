@@ -52,6 +52,7 @@ The current list of available widget is:
 - taglist
 - tasklist
 - textbox
+- systray
 
 Each widget as its own set of properties, described below, that can bet modified with the set()
 method.

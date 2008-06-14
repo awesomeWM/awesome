@@ -55,6 +55,7 @@
 #include "tag.h"
 #include "dbus.h"
 #include "statusbar.h"
+#include "systray.h"
 #include "common/socket.h"
 #include "common/version.h"
 #include "common/configopts.h"
@@ -85,6 +86,7 @@ scan()
     xcb_get_geometry_cookie_t **geom_wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
+    xembed_info_t eminfo;
 
     for(screen = 0; screen < screen_max; screen++)
     {
@@ -105,8 +107,7 @@ scan()
         if(!tree_r)
             continue;
 
-        /* Get the tree of the children Windows of the current root
-         * Window */
+        /* Get the tree of the children windows of the current root window */
         if(!(wins = xcb_query_tree_children(tree_r)))
             eprint("E: cannot get tree children");
         tree_c_len = xcb_query_tree_children_length(tree_r);
@@ -153,7 +154,10 @@ scan()
             real_screen = screen_get_bycoord(globalconf.screens_info, screen,
                                              geom_r->x, geom_r->y);
 
-            client_manage(wins[i], geom_r, real_screen);
+            if(xembed_info_get(globalconf.connection, wins[i], &eminfo))
+                systray_request_handle(wins[i], screen, &eminfo);
+            else
+                client_manage(wins[i], geom_r, real_screen);
 
             p_delete(&geom_r);
             p_delete(&geom_wins[i]);

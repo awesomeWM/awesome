@@ -35,6 +35,7 @@
 #include "titlebar.h"
 #include "keygrabber.h"
 #include "lua.h"
+#include "systray.h"
 #include "layouts/floating.h"
 #include "common/xscreen.h"
 #include "common/xutil.h"
@@ -313,10 +314,11 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
  */
 int
 event_handle_enternotify(void *data __attribute__ ((unused)),
-                         xcb_connection_t *connection __attribute__ ((unused)),
+                         xcb_connection_t *connection,
                          xcb_enter_notify_event_t *ev)
 {
-    client_t *c = NULL;
+    client_t *c;
+    xembed_window_t *emwin;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
        || (ev->root_x == globalconf.pointer_x
@@ -327,7 +329,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
        || (c = client_getbywin(ev->event)))
     {
         window_grabbuttons(c->win, c->phys_screen, c->buttons);
-        /* the idea behind saving pointer_x and pointer_y is Bob Marley powered
+        /* The idea behind saving pointer_x and pointer_y is Bob Marley powered.
          * this will allow us top drop some EnterNotify events and thus not giving
          * focus to windows appering under the cursor without a cursor move */
         globalconf.pointer_x = ev->root_x;
@@ -336,6 +338,10 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         luaA_client_userdata_new(c);
         luaA_dofunction(globalconf.L, globalconf.hooks.mouseover, 1);
     }
+    else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
+        xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
+                          xcb_aux_get_screen(connection, emwin->phys_screen)->root,
+                          ANY_MODIFIER);
     else
         window_root_grabbuttons();
 
@@ -442,7 +448,12 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     if(wa_r->override_redirect)
         goto bailout;
 
-    if(!(c = client_getbywin(ev->window)))
+    if(xembed_getbywin(globalconf.embedded, ev->window))
+    {
+        xcb_map_window(connection, ev->window);
+        xembed_window_activate(connection, ev->window);
+    }
+    else if(!(c = client_getbywin(ev->window)))
     {
         geom_c = xcb_get_geometry(connection, ev->window);
 
@@ -491,10 +502,13 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
 {
     client_t *c;
     xcb_window_t trans;
+    xembed_window_t *emwin;
 
     if(ev->state == XCB_PROPERTY_DELETE)
         return 0; /* ignore */
-    if((c = client_getbywin(ev->window)))
+    if((emwin = xembed_getbywin(globalconf.embedded, ev->window)))
+        xembed_property_update(connection, emwin);
+    else if((c = client_getbywin(ev->window)))
     {
         if(ev->atom == WM_TRANSIENT_FOR)
         {
@@ -529,18 +543,26 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_unmap_notify_event_t *ev)
 {
     client_t *c;
+    xembed_window_t *em;
+    int i;
 
-    /*
-     * event->send_event (Xlib)  is quivalent to  (ev->response_type &
+    /* event->send_event (Xlib)  is quivalent to  (ev->response_type &
      * 0x80)  in XCB  because the  SendEvent bit  is available  in the
-     * response_type field
-     */
+     * response_type field */
     bool send_event = ((ev->response_type & 0x80) >> 7);
 
     if((c = client_getbywin(ev->window))
        && ev->event == xcb_aux_get_screen(connection, c->phys_screen)->root
        && send_event && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
         client_unmanage(c);
+
+    /** \todo invalidate for all screen might be too much */
+    if((em = xembed_getbywin(globalconf.embedded, ev->window)))
+    {
+        xembed_window_list_detach(&globalconf.embedded, em);
+        for(i = 0; i < globalconf.screens_info->nscreen; i++)
+            widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
+    }
 
     return 0;
 }
@@ -604,11 +626,23 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
  */
 int
 event_handle_clientmessage(void *data __attribute__ ((unused)),
-                           xcb_connection_t *connection __attribute__ ((unused)),
+                           xcb_connection_t *connection,
                            xcb_client_message_event_t *ev)
 {
-    ewmh_process_client_message(ev);
-    return 0;
+    xutil_intern_atom_request_t atom_xem_q, atom_systray_q;
+    xcb_atom_t atom_xem, atom_systray;
+
+    atom_xem_q = xutil_intern_atom(connection, &globalconf.atoms, "_XEMBED");
+    atom_systray_q = xutil_intern_atom(connection, &globalconf.atoms, "_NET_SYSTEM_TRAY_OPCODE");
+
+    atom_xem = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_xem_q);
+    atom_systray = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_systray_q);
+
+    if(ev->type == atom_xem)
+        return xembed_process_client_message(ev);
+    else if(ev->type == atom_systray)
+        return systray_process_client_message(ev);
+    return ewmh_process_client_message(ev);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

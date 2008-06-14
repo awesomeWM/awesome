@@ -377,6 +377,14 @@ luaA_statusbar_widget_add(lua_State *L)
     widget_t **widget = luaA_checkudata(L, 2, "widget");
     widget_node_t *w = p_new(widget_node_t, 1);
 
+    if((*widget)->type == systray_new)
+    {
+        if(globalconf.systray)
+            luaL_error(L, "system tray already added and only one is allowed");
+        else
+            globalconf.systray = *sb;
+    }
+
     (*sb)->need_update = true;
     w->widget = *widget;
     widget_node_list_append(&(*sb)->widgets, w);
@@ -403,6 +411,8 @@ widget_remove_loop:
     for(w = (*sb)->widgets; w; w = w->next)
         if(w->widget == *widget)
         {
+            if(*sb == globalconf.systray && (*widget)->type == systray_new)
+                globalconf.systray = NULL;
             widget_unref(widget);
             widget_node_list_detach(&(*sb)->widgets, w);
             p_delete(&w);
