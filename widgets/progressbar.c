@@ -55,7 +55,16 @@ struct bar_t
     bar_t *next, *prev;
 };
 
-DO_SLIST(bar_t, bar, p_delete)
+static void
+bar_delete(bar_t **bar)
+{
+    p_delete(&(*bar)->title);
+    p_delete(&(*bar)->pfg_center);
+    p_delete(&(*bar)->pfg_end);
+    p_delete(bar);
+}
+
+DO_SLIST(bar_t, bar, bar_delete)
 
 typedef struct
 {
@@ -494,6 +503,15 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     return WIDGET_NOERROR;
 }
 
+static void
+progressbar_destructor(widget_t *widget)
+{
+    progressbar_data_t *d = widget->data;
+
+    bar_list_wipe(&d->bars);
+    p_delete(&d);
+}
+
 widget_t *
 progressbar_new(alignment_t align)
 {
@@ -505,6 +523,7 @@ progressbar_new(alignment_t align)
     w->align = align;
     w->draw = progressbar_draw;
     w->tell = progressbar_tell;
+    w->destructor = progressbar_destructor;
     d = w->data = p_new(progressbar_data_t, 1);
 
     d->height = 0.80;

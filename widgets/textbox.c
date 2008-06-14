@@ -83,6 +83,14 @@ textbox_tell(widget_t *widget, const char *property, const char *new_value)
     return WIDGET_NOERROR;
 }
 
+static void
+textbox_destructor(widget_t *w)
+{
+    textbox_data_t *d = w->data;
+    p_delete(&d->text);
+    p_delete(&d);
+}
+
 widget_t *
 textbox_new(alignment_t align)
 {
@@ -94,6 +102,7 @@ textbox_new(alignment_t align)
     w->align = align;
     w->draw = textbox_draw;
     w->tell = textbox_tell;
+    w->destructor = textbox_destructor;
     w->data = d = p_new(textbox_data_t, 1);
 
     return w;

@@ -37,7 +37,14 @@ struct taglist_drawn_area_t
     taglist_drawn_area_t *next, *prev;
 };
 
-DO_SLIST(taglist_drawn_area_t, taglist_drawn_area, p_delete);
+static void
+taglist_drawn_area_delete(taglist_drawn_area_t **a)
+{
+    area_list_wipe(&(*a)->area);
+    p_delete(a);
+}
+
+DO_SLIST(taglist_drawn_area_t, taglist_drawn_area, taglist_drawn_area_delete);
 
 typedef struct
 {
@@ -259,6 +266,18 @@ taglist_tell(widget_t *widget, const char *property, const char *new_value)
     return WIDGET_NOERROR;
 }
 
+static void
+taglist_destructor(widget_t *widget)
+{
+    taglist_data_t *d = widget->data;
+
+    p_delete(&d->text_normal);
+    p_delete(&d->text_focus);
+    p_delete(&d->text_urgent);
+    taglist_drawn_area_list_wipe(&d->drawn_area);
+    p_delete(&d);
+}
+
 widget_t *
 taglist_new(alignment_t align)
 {
@@ -271,6 +290,7 @@ taglist_new(alignment_t align)
     w->draw = taglist_draw;
     w->button_press = taglist_button_press;
     w->tell = taglist_tell;
+    w->destructor = taglist_destructor;
 
     w->data = d = p_new(taglist_data_t, 1);
     d->text_normal = a_strdup(" <text align=\"center\"/><title/> ");

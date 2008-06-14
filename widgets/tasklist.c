@@ -43,7 +43,7 @@ typedef struct
     showclient_t show;
     bool show_icons;
     char *text_normal, *text_urgent, *text_focus;
-} Data;
+} tasklist_data_t;
 
 static inline bool
 tasklist_isvisible(client_t *c, int screen, showclient_t show)
@@ -69,7 +69,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
               int offset, int used, void *q __attribute__ ((unused)))
 {
     client_t *c;
-    Data *d = w->widget->data;
+    tasklist_data_t *d = w->widget->data;
     area_t area;
     char *text;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0, j = 0;
@@ -205,7 +205,7 @@ tasklist_button_press(widget_node_t *w,
 {
     button_t *b;
     client_t *c;
-    Data *d = w->widget->data;
+    tasklist_data_t *d = w->widget->data;
     int n = 0, box_width = 0, i, ci = 0;
 
     for(c = globalconf.clients; c; c = c->next)
@@ -242,7 +242,7 @@ tasklist_button_press(widget_node_t *w,
 static widget_tell_status_t
 tasklist_tell(widget_t *widget, const char *property, const char *new_value)
 {
-    Data *d = widget->data;
+    tasklist_data_t *d = widget->data;
 
     if(!a_strcmp(property, "text_normal"))
     {
@@ -278,19 +278,31 @@ tasklist_tell(widget_t *widget, const char *property, const char *new_value)
     return WIDGET_NOERROR;
 }
 
+static void
+tasklist_destructor(widget_t *widget)
+{
+    tasklist_data_t *d = widget->data;
+
+    p_delete(&d->text_normal);
+    p_delete(&d->text_focus);
+    p_delete(&d->text_urgent);
+    p_delete(&d);
+}
+
 widget_t *
 tasklist_new(alignment_t align __attribute__ ((unused)))
 {
     widget_t *w;
-    Data *d;
+    tasklist_data_t *d;
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
     w->draw = tasklist_draw;
     w->button_press = tasklist_button_press;
     w->align = AlignFlex;
-    w->data = d = p_new(Data, 1);
+    w->data = d = p_new(tasklist_data_t, 1);
     w->tell = tasklist_tell;
+    w->destructor = tasklist_destructor;
 
     d->text_normal = a_strdup(" <title/> ");
     d->text_focus = a_strdup(" <title/> ");

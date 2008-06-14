@@ -26,7 +26,7 @@ typedef struct
 {
     draw_image_t *image;
     bool resize;
-} Data;
+} iconbox_data_t;
 
 static int
 iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
@@ -35,7 +35,7 @@ iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              int used __attribute__ ((unused)),
              void *p __attribute__ ((unused)))
 {
-    Data *d = w->widget->data;
+    iconbox_data_t *d = w->widget->data;
     draw_image_t *image = d->image;
 
     /* image not valid */
@@ -68,7 +68,7 @@ iconbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
 static widget_tell_status_t
 iconbox_tell(widget_t *widget, const char *property, const char *new_value)
 {
-    Data *d = widget->data;
+    iconbox_data_t *d = widget->data;
 
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
@@ -86,18 +86,28 @@ iconbox_tell(widget_t *widget, const char *property, const char *new_value)
     return WIDGET_NOERROR;
 }
 
+static void
+iconbox_destructor(widget_t *widget)
+{
+    iconbox_data_t *d = widget->data;
+
+    draw_image_delete(&d->image);
+    p_delete(&d);
+}
+
 widget_t *
 iconbox_new(alignment_t align)
 {
     widget_t *w;
-    Data *d;
+    iconbox_data_t *d;
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
     w->align = align;
     w->draw = iconbox_draw;
     w->tell = iconbox_tell;
-    w->data = d = p_new(Data, 1);
+    w->destructor = iconbox_destructor;
+    w->data = d = p_new(iconbox_data_t, 1);
     d->resize = true;
 
     return w;

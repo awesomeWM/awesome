@@ -71,7 +71,18 @@ struct graph_t
     graph_t *next, *prev;
 };
 
-DO_SLIST(graph_t, graph, p_delete)
+static void
+graph_delete(graph_t **g)
+{
+    p_delete(&(*g)->title);
+    p_delete(&(*g)->lines);
+    p_delete(&(*g)->values);
+    p_delete(&(*g)->pcolor_center);
+    p_delete(&(*g)->pcolor_end);
+    p_delete(g);
+}
+
+DO_SLIST(graph_t, graph, graph_delete)
 
 typedef struct
 {
@@ -431,6 +442,17 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
     return WIDGET_NOERROR;
 }
 
+static void
+graph_destructor(widget_t *widget)
+{
+    graph_data_t *d = widget->data;
+
+    graph_list_wipe(&d->graphs);
+    p_delete(&d->draw_from);
+    p_delete(&d->draw_to);
+    p_delete(&d);
+}
+
 widget_t *
 graph_new(alignment_t align)
 {
@@ -442,6 +464,7 @@ graph_new(alignment_t align)
 
     w->draw = graph_draw;
     w->tell = graph_tell;
+    w->destructor = graph_destructor;
     w->align = align;
     d = w->data = p_new(graph_data_t, 1);
 
