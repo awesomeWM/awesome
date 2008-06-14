@@ -661,6 +661,9 @@ mouse_client_resize_tiled(client_t *c)
         else if(layout == layout_tiletop)
             mwfact = 1. - fact_y;
 
+        /* keep mwfact within sensible bounds */
+        mwfact = MIN( MAX( 0.01, mwfact), 0.99 );
+
         /* refresh layout */
         if(fabs(tag->mwfact - mwfact) >= 0.01)
         {
