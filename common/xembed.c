@@ -41,7 +41,7 @@ xembed_window_unembed(xcb_connection_t *connection, xcb_window_t child, xcb_wind
  * \param client The client to send message to.
  */
 static inline void
-xembed_focus_out (xcb_connection_t *c, xcb_window_t client)
+xembed_focus_out(xcb_connection_t *c, xcb_window_t client)
 {
     xembed_message_send(c, client, XEMBED_FOCUS_OUT, 0, 0, 0);
 }
