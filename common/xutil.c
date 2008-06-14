@@ -46,13 +46,13 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xutil_atom_cache_t **a
     xcb_get_property_reply_t *prop_r;
     void *prop_val;
 
+    if(!text)
+        return false;
+
     prop_c = xcb_get_property_unchecked(conn, false,
                                         w, atom,
                                         XCB_GET_PROPERTY_TYPE_ANY,
                                         0L, 1000000L);
-
-    if(!text)
-        return false;
 
     prop_r = xcb_get_property_reply(conn, prop_c, NULL);
 
