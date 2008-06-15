@@ -20,6 +20,7 @@
  */
 
 #include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
 #include <xcb/xcb_icccm.h>
 
 #include "structs.h"
@@ -39,10 +40,11 @@ systray_init(int phys_screen)
     xutil_intern_atom_request_t atom_systray_q, atom_manager_q;
     xcb_atom_t atom_systray;
     xcb_client_message_event_t ev;
+    xcb_screen_t *xscreen = xcb_aux_get_screen(globalconf.connection, phys_screen);
     char atom_name[22];
 
     /* Send requests */
-    atom_manager_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
+    atom_manager_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "MANAGER");
     snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
     atom_systray_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
 
@@ -65,6 +67,8 @@ systray_init(int phys_screen)
                             globalconf.screens[phys_screen].systray->window,
                             atom_systray,
                             XCB_CURRENT_TIME);
+
+    xcb_send_event(globalconf.connection, false, xscreen->root, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *) &ev);
 }
 
 /** Handle a systray request.
