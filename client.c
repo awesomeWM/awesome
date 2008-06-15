@@ -799,25 +799,22 @@ void
 client_kill(client_t *c)
 {
     xcb_client_message_event_t ev;
+    xutil_intern_atom_request_t wm_protocols_q, wm_delete_window_q;
 
     if(window_isprotodel(c->win))
     {
+        wm_protocols_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "WM_PROTOCOLS");
+        wm_delete_window_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "WM_DELETE_WINDOW");
+
         /* Initialize all of event's fields first */
         p_clear(&ev, 1);
 
         ev.response_type = XCB_CLIENT_MESSAGE;
         ev.window = c->win;
-        ev.type = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
-                                          xutil_intern_atom(globalconf.connection,
-                                                            &globalconf.atoms,
-                                                            "WM_PROTOCOLS"));
         ev.format = 32;
-
-        ev.data.data32[0] = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
-                                                    xutil_intern_atom(globalconf.connection,
-                                                                      &globalconf.atoms,
-                                                                      "WM_DELETE_WINDOW"));
         ev.data.data32[1] = XCB_CURRENT_TIME;
+        ev.type = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wm_protocols_q);
+        ev.data.data32[0] = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wm_delete_window_q);
 
         xcb_send_event(globalconf.connection, false, c->win,
                        XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
