@@ -52,12 +52,13 @@ systray_init(int phys_screen)
                                                                -1, -1, 1, 1, 0);
 
     /* Fill event */
+    ev.response_type = XCB_CLIENT_MESSAGE;
     ev.format = 32;
     ev.data.data32[0] = XCB_CURRENT_TIME;
     ev.data.data32[2] = globalconf.screens[phys_screen].systray->window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
-    ev.response_type = xutil_intern_atom_reply(globalconf.connection,
-                                               &globalconf.atoms, atom_manager_q);
+    ev.type = xutil_intern_atom_reply(globalconf.connection,
+                                      &globalconf.atoms, atom_manager_q);
 
     ev.data.data32[1] = atom_systray = xutil_intern_atom_reply(globalconf.connection,
                                                                &globalconf.atoms,
