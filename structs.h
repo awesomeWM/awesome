@@ -136,7 +136,6 @@ widget_delete(widget_t **widget)
     if((*widget)->destructor)
         (*widget)->destructor(*widget);
     button_list_wipe(&(*widget)->buttons);
-    p_delete(&(*widget)->data);
     p_delete(&(*widget)->name);
     p_delete(widget);
 }
