@@ -60,7 +60,6 @@ xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
 {
     xcb_client_message_event_t ev;
     xutil_intern_atom_request_t atom_q;
-    xcb_atom_t atom;
 
     /** \todo use atom cache */
     atom_q = xutil_intern_atom(connection, NULL, "_XEMBED");
@@ -73,8 +72,7 @@ xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
     ev.data.data32[2] = d1;
     ev.data.data32[3] = d2;
     ev.data.data32[4] = d3;
-    atom = xutil_intern_atom_reply(connection, NULL, atom_q);
-    ev.type = atom;
+    ev.type = xutil_intern_atom_reply(connection, NULL, atom_q);
     xcb_send_event(connection, false, towin, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
 }
 
