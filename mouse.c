@@ -158,6 +158,75 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
     return titlebar_geometry_remove(c->titlebar, geometry);
 }
 
+/** Set coordinates to a corner of an area.
+ *
+ * \param a The area.
+ * \param[in,out] x The x coordinate.
+ * \param[in,out] y The y coordinate.
+ * \param corner The corner to snap to.
+ * \return The corner the coordinates have been set to. If corner != AutoCorner
+ * this is always equal to \em corner.
+ *
+ * \todo rename/move this is still awkward and might be useful somewhere else.
+ */
+static corner_t
+mouse_snap_to_corner(area_t a, int *x, int *y, corner_t corner)
+{
+    int top, bottom, left, right;
+
+    top = AREA_TOP(a);
+    bottom = AREA_BOTTOM(a);
+    left = AREA_LEFT(a);
+    right = AREA_RIGHT(a);
+
+    /* figure out the nearser corner */
+    if(corner == AutoCorner)
+    {
+        if(abs(top - *y) < abs(bottom - *y))
+        {
+            if(abs(left - *x) < abs(right - *x))
+                corner = TopLeftCorner;
+            else
+                corner = TopRightCorner;
+        }
+        else
+        {
+            if(abs(left - *x) < abs(right - *x))
+                corner = BottomLeftCorner;
+            else
+                corner = BottomRightCorner;
+        }
+    }
+
+    switch(corner)
+    {
+        case TopRightCorner:
+            *x = right;
+            *y = top;
+            break;
+
+        case TopLeftCorner:
+            *x = left;
+            *y = top;
+            break;
+
+        case BottomLeftCorner:
+            *x = left;
+            *y = bottom;
+            break;
+
+        case BottomRightCorner:
+            *x = right;
+            *y = bottom;
+            break;
+
+        default:
+            break;
+    }
+
+    return corner;
+}
+
 /** Redraw the infobox.
  * \param ctx Draw context.
  * \param sw The simple window.
@@ -502,52 +571,25 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     right = left + c->geometry.width;
 
     /* figure out which corner to move */
-    if(corner == AutoCorner)
-    {
-        if(abs(top - mouse_y) < abs(bottom - mouse_y))
-        {
-            if(abs(left - mouse_x) < abs(right - mouse_x))
-                cursor = CurTopLeft;
-            else
-                corner = TopRightCorner;
-        }
-        else
-        {
-            if(abs(left - mouse_x) < abs(right - mouse_x))
-                corner = BottomLeftCorner;
-            else
-                corner = BottomRightCorner;
-        }
-    }
+    corner = mouse_snap_to_corner(c->geometry, &mouse_x, &mouse_y, corner);
 
+    /* the opposite corner is fixed */
+    fixed_x = (mouse_x == left) ? right : left;
+    fixed_y = (mouse_y == top) ? bottom : top;
+
+    /* select cursor */
     switch(corner)
     {
       default:
-          mouse_y = top;
-          fixed_y = bottom;
-          mouse_x = left;
-          fixed_x = right;
-          corner = TopLeftCorner;
+          cursor = CurTopLeft;
           break;
         case TopRightCorner:
-          mouse_y = top;
-          fixed_y = bottom;
-          mouse_x = right;
-          fixed_x = left;
           cursor = CurTopRight;
           break;
         case BottomLeftCorner:
-          mouse_y = bottom;
-          fixed_y = top;
-          mouse_x = left;
-          fixed_x = right;
           cursor = CurBotLeft;
           break;
         case BottomRightCorner:
-          mouse_y = bottom;
-          fixed_y = top;
-          mouse_x = right;
-          fixed_x = left;
           cursor = CurBotRight;
           break;
     }
