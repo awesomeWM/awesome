@@ -292,6 +292,51 @@ mouse_warp_pointer(xcb_window_t window, int x, int y)
                      0, 0, 0, 0, x, y );
 }
 
+/** Utility function to help with mouse-dragging
+ *
+ * \param x set to x-coordinate of the last event on return
+ * \param y set to y-coordinate of the last event on return
+ * \return true if an motion event was recieved
+ *         false if an button release event was recieved
+ */
+static bool
+mouse_track_mouse_drag(int *x, int *y)
+{
+    xcb_generic_event_t *ev;
+    xcb_motion_notify_event_t *ev_motion;
+    xcb_button_release_event_t *ev_button;
+
+    while(true)
+    {
+        while((ev = xcb_wait_for_event(globalconf.connection)))
+        {
+            switch((ev->response_type & 0x7F))
+            {
+
+                case XCB_MOTION_NOTIFY:
+                    ev_motion = (xcb_motion_notify_event_t*) ev;
+                    *x = ev_motion->event_x;
+                    *y = ev_motion->event_y;
+                    p_delete(&ev);
+                    return true;
+
+                case XCB_BUTTON_RELEASE:
+                    ev_button = (xcb_button_release_event_t*) ev;
+                    *x = ev_button->event_x;
+                    *y = ev_button->event_y;
+                    p_delete(&ev);
+                    return false;
+
+                default:
+                    xcb_handle_event(globalconf.evenths, ev);
+                    p_delete(&ev);
+                    break;
+            }
+
+        }
+    }
+}
+
 /** Move the focused window with the mouse.
  */
 static void
@@ -413,51 +458,6 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     }
 }
 
-
-/** Utility function to help with mouse-dragging
- *
- * \param x set to x-coordinate of the last event on return
- * \param y set to y-coordinate of the last event on return
- * \return true if an motion event was recieved
- *         false if an button release event was recieved
- */
-static bool
-mouse_track_mouse_drag(int *x, int *y)
-{
-    xcb_generic_event_t *ev;
-    xcb_motion_notify_event_t *ev_motion;
-    xcb_button_release_event_t *ev_button;
-
-    while(true)
-    {
-        while((ev = xcb_wait_for_event(globalconf.connection)))
-        {
-            switch((ev->response_type & 0x7F))
-            {
-
-                case XCB_MOTION_NOTIFY:
-                    ev_motion = (xcb_motion_notify_event_t*) ev;
-                    *x = ev_motion->event_x;
-                    *y = ev_motion->event_y;
-                    p_delete(&ev);
-                    return true;
-
-                case XCB_BUTTON_RELEASE:
-                    ev_button = (xcb_button_release_event_t*) ev;
-                    *x = ev_button->event_x;
-                    *y = ev_button->event_y;
-                    p_delete(&ev);
-                    return false;
-
-                default:
-                    xcb_handle_event(globalconf.evenths, ev);
-                    p_delete(&ev);
-                    break;
-            }
-
-        }
-    }
-}
 
 /** Resize a floating client with the mouse.
  * \param c The client to resize.
