@@ -75,7 +75,7 @@ typedef struct
 /** Scan X to find windows to manage
  */
 static void
-scan()
+scan(void)
 {
     int i, screen, real_screen, tree_c_len;
     const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
@@ -328,15 +328,17 @@ main(int argc, char **argv)
     globalconf.evenths = xcb_alloc_event_handlers(globalconf.connection);
     xutil_set_error_handler_catch_all(globalconf.evenths, xerrorstart, NULL);
 
-    const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
-
     for(screen_nbr = 0;
         screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
         screen_nbr++)
+    {
+        const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
+
         /* This causes an error if some other window manager is running */
         xcb_change_window_attributes(globalconf.connection,
                                      xcb_aux_get_screen(globalconf.connection, screen_nbr)->root,
                                      XCB_CW_EVENT_MASK, &select_input_val);
+    }
 
     /* Need to xcb_flush to validate error handler */
     xcb_aux_sync(globalconf.connection);
@@ -394,20 +396,20 @@ main(int argc, char **argv)
             eprint("failed to load any configuration file");
     }
 
-    /* select for events */
-    const uint32_t change_win_vals[] =
-    {
-        XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-            | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW
-            | XCB_EVENT_MASK_STRUCTURE_NOTIFY,
-        globalconf.cursor[CurNormal]
-    };
-
     /* do this only for real screen */
     for(screen_nbr = 0;
         screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
         screen_nbr++)
     {
+        /* select for events */
+        const uint32_t change_win_vals[] =
+        {
+            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW
+                | XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+            globalconf.cursor[CurNormal]
+        };
+
         xcb_change_window_attributes(globalconf.connection,
                                      xcb_aux_get_screen(globalconf.connection, screen_nbr)->root,
                                      XCB_CW_EVENT_MASK | XCB_CW_CURSOR,

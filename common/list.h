@@ -101,12 +101,14 @@
                                                                                  \
     static inline void prefix##_list_swap(type **list, type *item1, type *item2) \
     {                                                                            \
+        type *i1n, *i2n, *i1p, *i2p;                                             \
+                                                                                 \
         if(!item1 || !item2) return;                                             \
                                                                                  \
-        type *i1n = item1->next;                                                 \
-        type *i2n = item2->next;                                                 \
-        type *i1p = item1->prev;                                                 \
-        type *i2p = item2->prev;                                                 \
+        i1n = item1->next;                                                       \
+        i2n = item2->next;                                                       \
+        i1p = item1->prev;                                                       \
+        i2p = item2->prev;                                                       \
                                                                                  \
         if(item1 == i2n)                                                         \
         {                                                                        \
