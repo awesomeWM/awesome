@@ -27,10 +27,45 @@
 #include "window.h"
 #include "widget.h"
 #include "common/xembed.h"
+#include "common/swindow.h"
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 
 extern awesome_t globalconf;
+
+void
+systray_init(int phys_screen)
+{
+    xutil_intern_atom_request_t atom_systray_q, atom_manager_q;
+    xcb_atom_t atom_systray;
+    xcb_client_message_event_t ev;
+    char atom_name[22];
+
+    /* Send requests */
+    atom_manager_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
+    snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
+    atom_systray_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
+
+    globalconf.screens[phys_screen].systray = simplewindow_new(globalconf.connection, phys_screen,
+                                                               -1, -1, 1, 1, 0);
+
+    /* Fill event */
+    ev.format = 32;
+    ev.data.data32[0] = XCB_CURRENT_TIME;
+    ev.data.data32[2] = globalconf.screens[phys_screen].systray->window;
+    ev.data.data32[3] = ev.data.data32[4] = 0;
+    ev.response_type = xutil_intern_atom_reply(globalconf.connection,
+                                               &globalconf.atoms, atom_manager_q);
+
+    ev.data.data32[1] = atom_systray = xutil_intern_atom_reply(globalconf.connection,
+                                                               &globalconf.atoms,
+                                                               atom_systray_q);
+
+    xcb_set_selection_owner(globalconf.connection,
+                            globalconf.screens[phys_screen].systray->window,
+                            atom_systray,
+                            XCB_CURRENT_TIME);
+}
 
 /** Handle a systray request.
  * \param embed_win The window to embed.
@@ -66,7 +101,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
     /** \todo we should create a dedicated window for that */
     if(globalconf.screens[phys_screen].systray)
         xembed_embedded_notify(globalconf.connection, em->win,
-                                globalconf.screens[phys_screen].systray->sw->window,
+                                globalconf.screens[phys_screen].systray->window,
                                 MIN(XEMBED_VERSION, em->info.version));
 
     if(em->info.flags & XEMBED_MAPPED)

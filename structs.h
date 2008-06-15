@@ -372,8 +372,8 @@ typedef struct
     statusbar_t *statusbar;
     /** Padding */
     padding_t padding;
-    /** Statusbar that contains the systray */
-    statusbar_t *systray;
+    /** Window that contains the systray */
+    simple_window_t *systray;
 } screen_t;
 
 /** Main configuration structure */

@@ -413,6 +413,7 @@ main(int argc, char **argv)
                                      XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
                                      change_win_vals);
         ewmh_set_supported_hints(screen_nbr);
+        systray_init(screen_nbr);
     }
 
     /* call this to at least grab root window clicks */

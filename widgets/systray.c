@@ -27,39 +27,6 @@
 
 extern awesome_t globalconf;
 
-static bool
-systray_init(statusbar_t *sb)
-{
-    xutil_intern_atom_request_t atom_systray_q, atom_manager_q;
-    xcb_atom_t atom_systray;
-    xcb_client_message_event_t ev;
-    char atom_name[22];
-
-    /* Send requests */
-    atom_manager_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
-    snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", sb->sw->phys_screen);
-    atom_systray_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
-
-    /* Fill event */
-    ev.format = 32;
-    ev.data.data32[0] = XCB_CURRENT_TIME;
-    ev.data.data32[2] = sb->sw->window;
-    ev.data.data32[3] = ev.data.data32[4] = 0;
-    ev.response_type = xutil_intern_atom_reply(globalconf.connection,
-                                               &globalconf.atoms, atom_manager_q);
-
-    ev.data.data32[1] = atom_systray = xutil_intern_atom_reply(globalconf.connection,
-                                                               &globalconf.atoms,
-                                                               atom_systray_q);
-
-    xcb_set_selection_owner(globalconf.connection,
-                            sb->sw->window,
-                            atom_systray,
-                            XCB_CURRENT_TIME);
-
-    return true;
-}
-
 static int
 systray_draw(draw_context_t *ctx,
              int screen __attribute__ ((unused)),
@@ -74,16 +41,6 @@ systray_draw(draw_context_t *ctx,
     statusbar_t *sb = (statusbar_t *) p;
 
     phys_screen = screen_virttophys(screen);
-
-    /* only init and take systray handling if noone has it and if we have a
-     * window to handle others... windows. */
-    if(!globalconf.screens[phys_screen].systray && sb->sw)
-    {
-        globalconf.screens[phys_screen].systray = sb;
-        systray_init(sb);
-    }
-    else if(globalconf.screens[phys_screen].systray != p)
-        return (w->area.width = 0);
 
     for(em = globalconf.embedded; em; em = em->next)
         i++;
