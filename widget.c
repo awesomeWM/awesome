@@ -348,8 +348,7 @@ luaA_widget_new(lua_State *L)
  *
  * \luastack
  * \lvalue A widget.
- * \lvalue A mouse button bindings object.
- * function.
+ * \lparam A mouse button bindings object.
  */
 static int
 luaA_widget_mouse_add(lua_State *L)
@@ -368,8 +367,7 @@ luaA_widget_mouse_add(lua_State *L)
  *
  * \luastack
  * \lvalue A widget.
- * \lvalue A mouse button bindings object.
- * function.
+ * \lparam A mouse button bindings object.
  */
 static int
 luaA_widget_mouse_remove(lua_State *L)
