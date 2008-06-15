@@ -118,7 +118,7 @@ mouse_snapclienttogeometry_inside(area_t geometry, area_t snap_geometry, int sna
     return geometry;
 }
 
-/** Snap a client with a futur geometry to the screen and other clients.
+/** Snap a client with a future geometry to the screen and other clients.
  * \param c The client.
  * \param geometry Geometry the client will get.
  * \param snap The maximum distance in pixels to trigger a "snap".
@@ -366,8 +366,8 @@ mouse_warp_pointer(xcb_window_t window, int x, int y)
  *
  * \param x set to x-coordinate of the last event on return
  * \param y set to y-coordinate of the last event on return
- * \return true if an motion event was recieved
- *         false if an button release event was recieved
+ * \return true if an motion event was received
+ *         false if an button release event was received
  */
 static bool
 mouse_track_mouse_drag(int *x, int *y)
@@ -555,7 +555,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     int fixed_x, fixed_y;
     /* the other is moved with the mouse */
     int mouse_x = 0, mouse_y = 0;
-    /* the resize bar */
+    /* the infobox */
     simple_window_t *sw = NULL;
     draw_context_t  *ctx;
     size_t cursor = CurResize;
@@ -631,7 +631,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     /* relase pointer */
     mouse_ungrab_pointer();
 
-    /* free the resize bar */
+    /* free the infobox */
     if(sw)
     {
         draw_context_delete(&ctx);
@@ -717,7 +717,7 @@ mouse_client_resize_tiled(client_t *c)
         else if(layout == layout_tiletop)
             mwfact = 1. - fact_y;
 
-        /* keep mwfact within sensible bounds */
+        /* keep mwfact within reasonable bounds */
         mwfact = MIN( MAX( 0.01, mwfact), 0.99 );
 
         /* refresh layout */
@@ -842,7 +842,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     /* ungrab pointer */
     mouse_ungrab_pointer();
 
-    /* free the resize bar */
+    /* free the infobox */
     if(sw)
     {
         draw_context_delete(&ctx);
