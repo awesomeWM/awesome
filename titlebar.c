@@ -396,6 +396,7 @@ titlebar_init(client_t *c)
 
 /** Create a new titlebar.
  * \param L The Lua VM state.
+ * \return The number of value pushed.
  *
  * \luastack
  * \lparam A table with values: align, position, fg, bg, width and height.
@@ -440,6 +441,7 @@ luaA_titlebar_new(lua_State *L)
 
 /** Add a widget to a titlebar.
  * \param L The Lua VM state.
+ * \return The number of value pushed.
  *
  * \luastack
  * \lvalue A titlebar.
@@ -472,6 +474,7 @@ luaA_titlebar_widget_add(lua_State *L)
 
 /** Get all widgets from a titlebar.
  * \param L The Lua VM state.
+ * \return The number of value pushed.
  *
  * \luastack
  * \lvalue A titlebar
@@ -517,8 +520,40 @@ luaA_titlebar_client_get(lua_State *L)
     return 0;
 }
 
+/** Set titlebar colors.
+ * \param L The Lua VM state.
+ * \return The number of value pushed.
+ *
+ * \luastack
+ * \lvalue A titlebar.
+ * \lparam A table with keys `fg' and `bg', for foreground and background colors.
+ */
+static int
+luaA_titlebar_colors_set(lua_State *L)
+{
+    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
+    const char *color;
+
+    luaA_checktable(L, 2);
+
+    lua_getfield(L, 2, "fg");
+    if((color = luaL_optstring(L, -1, NULL)))
+        xcolor_new(globalconf.connection, globalconf.default_screen,
+                       color, &(*tb)->colors.fg);
+
+    lua_getfield(L, 2, "bg");
+    if((color = luaL_optstring(L, -1, NULL)))
+        xcolor_new(globalconf.connection, globalconf.default_screen,
+                       color, &(*tb)->colors.bg);
+
+    titlebar_draw(client_getbytitlebar(*tb));
+
+    return 0;
+}
+
 /** Create a new titlebar userdata.
  * \param t The titlebar.
+ * \return The number of value pushed.
  */
 int
 luaA_titlebar_userdata_new(titlebar_t *t)
@@ -529,6 +564,13 @@ luaA_titlebar_userdata_new(titlebar_t *t)
     return luaA_settype(globalconf.L, "titlebar");
 }
 
+/** Handle titlebar garbage collection.
+ * \param L The Lua VM state.
+ * \return The number of value pushed.
+ *
+ * \luastack
+ * \lvalue A titlebar.
+ */
 static int
 luaA_titlebar_gc(lua_State *L)
 {
@@ -538,6 +580,14 @@ luaA_titlebar_gc(lua_State *L)
     return 0;
 }
 
+/** Convert a titlebar to a printable string.
+ * \param L The Lua VM state.
+ * \return The number of value pushed.
+ *
+ * \luastack
+ * \lvalue A titlebar.
+ * \lreturn A string.
+ */
 static int
 luaA_titlebar_tostring(lua_State *L)
 {
@@ -546,6 +596,15 @@ luaA_titlebar_tostring(lua_State *L)
     return 1;
 }
 
+/** Check for titlebar equality.
+ * \param L The Lua VM state.
+ * \return The number of value pushed, 1.
+ *
+ * \luastack
+ * \lvalue A titlebar.
+ * \lparam A titlebar to compare with.
+ * \lreturn A boolean value, true if both titlebar are equals.
+ */
 static int
 luaA_titlebar_eq(lua_State *L)
 {
@@ -565,6 +624,7 @@ const struct luaL_reg awesome_titlebar_meta[] =
     { "widget_add", luaA_titlebar_widget_add },
     { "widget_get", luaA_titlebar_widget_get },
     { "client_get", luaA_titlebar_client_get },
+    { "colors_set", luaA_titlebar_colors_set },
     { "__eq", luaA_titlebar_eq },
     { "__gc", luaA_titlebar_gc },
     { "__tostring", luaA_titlebar_tostring },
