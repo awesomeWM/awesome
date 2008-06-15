@@ -337,6 +337,32 @@ mouse_track_mouse_drag(int *x, int *y)
     }
 }
 
+/** Get the client that contains the Pointer.
+ *
+ * \return The client that contains the Pointer or NULL.
+ */
+static client_t *
+mouse_get_client_under_pointer()
+{
+    xcb_window_t root;
+    xcb_query_pointer_cookie_t query_ptr_c;
+    xcb_query_pointer_reply_t *query_ptr_r;
+    client_t *c = NULL;
+
+    root = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root;
+
+    query_ptr_c = xcb_query_pointer_unchecked(globalconf.connection, root);
+    query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
+
+    if(query_ptr_r)
+    {
+        c = client_getbywin(query_ptr_r->child);
+        p_delete(&query_ptr_r);
+    }
+
+    return c;
+}
+
 /** Move the focused window with the mouse.
  */
 static void
