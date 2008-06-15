@@ -131,7 +131,6 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
               int screen, position_t position,
               int x, int y, void *object)
 {
-    xcb_window_t rootwin;
     xcb_pixmap_t rootpix;
     xcb_screen_t *s;
     widget_node_t *w;
@@ -155,11 +154,10 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
 
     if(ctx->bg.alpha != 0xffff)
     {
-        s = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
-        rootwin = xcb_aux_get_screen(globalconf.connection, ctx->phys_screen)->root;
+        s = xcb_aux_get_screen(globalconf.connection, ctx->phys_screen);
         pixmap_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, pixmap_atom_req);
         rootpix_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, rootpix_atom_req);
-        prop_c = xcb_get_property_unchecked(globalconf.connection, false, rootwin, rootpix_atom,
+        prop_c = xcb_get_property_unchecked(globalconf.connection, false, s->root, rootpix_atom,
                                             pixmap_atom, 0, 1);
         if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
         {
