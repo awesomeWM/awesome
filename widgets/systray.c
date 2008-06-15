@@ -43,7 +43,8 @@ systray_draw(draw_context_t *ctx,
     phys_screen = screen_virttophys(screen);
 
     for(em = globalconf.embedded; em; em = em->next)
-        i++;
+        if(em->phys_screen == phys_screen)
+            i++;
 
     if(ctx->width - used > 0)
         w->area.width = MIN(i * ctx->height, ctx->width - used);
@@ -72,41 +73,47 @@ systray_draw(draw_context_t *ctx,
         config_win_vals[1] = sb->sw->geometry.y + sb->sw->geometry.height
             - w->area.x - config_win_vals[3];
         for(em = globalconf.embedded; em; em = em->next)
-            if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) sb->sw->geometry.y)
+            if(em->phys_screen == phys_screen)
             {
-                xcb_map_window(globalconf.connection, em->win);
-                xcb_configure_window(globalconf.connection, em->win,
-                                     XCB_CONFIG_WINDOW_X
-                                     | XCB_CONFIG_WINDOW_Y
-                                     | XCB_CONFIG_WINDOW_WIDTH
-                                     | XCB_CONFIG_WINDOW_HEIGHT
-                                     | XCB_CONFIG_WINDOW_SIBLING
-                                     | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[1] -= config_win_vals[3];
+                if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) sb->sw->geometry.y)
+                {
+                    xcb_map_window(globalconf.connection, em->win);
+                    xcb_configure_window(globalconf.connection, em->win,
+                                         XCB_CONFIG_WINDOW_X
+                                         | XCB_CONFIG_WINDOW_Y
+                                         | XCB_CONFIG_WINDOW_WIDTH
+                                         | XCB_CONFIG_WINDOW_HEIGHT
+                                         | XCB_CONFIG_WINDOW_SIBLING
+                                         | XCB_CONFIG_WINDOW_STACK_MODE,
+                                         config_win_vals);
+                    config_win_vals[1] -= config_win_vals[3];
+                }
+                else
+                    xcb_unmap_window(globalconf.connection, em->win);
             }
-            else
-                xcb_unmap_window(globalconf.connection, em->win);
         break;
       case Right:
         config_win_vals[0] = sb->sw->geometry.x - w->area.y;
         config_win_vals[1] = sb->sw->geometry.y + w->area.x;
         for(em = globalconf.embedded; em; em = em->next)
-            if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) sb->sw->geometry.y + ctx->width)
+            if(em->phys_screen == phys_screen)
             {
-                xcb_map_window(globalconf.connection, em->win);
-                xcb_configure_window(globalconf.connection, em->win,
-                                     XCB_CONFIG_WINDOW_X
-                                     | XCB_CONFIG_WINDOW_Y
-                                     | XCB_CONFIG_WINDOW_WIDTH
-                                     | XCB_CONFIG_WINDOW_HEIGHT
-                                     | XCB_CONFIG_WINDOW_SIBLING
-                                     | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[1] += config_win_vals[3];
+                if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) sb->sw->geometry.y + ctx->width)
+                {
+                    xcb_map_window(globalconf.connection, em->win);
+                    xcb_configure_window(globalconf.connection, em->win,
+                                         XCB_CONFIG_WINDOW_X
+                                         | XCB_CONFIG_WINDOW_Y
+                                         | XCB_CONFIG_WINDOW_WIDTH
+                                         | XCB_CONFIG_WINDOW_HEIGHT
+                                         | XCB_CONFIG_WINDOW_SIBLING
+                                         | XCB_CONFIG_WINDOW_STACK_MODE,
+                                         config_win_vals);
+                    config_win_vals[1] += config_win_vals[3];
+                }
+                else
+                    xcb_unmap_window(globalconf.connection, em->win);
             }
-            else
-                xcb_unmap_window(globalconf.connection, em->win);
         break;
       default:
         /* x */
@@ -115,22 +122,25 @@ systray_draw(draw_context_t *ctx,
         config_win_vals[1] = sb->sw->geometry.y + w->area.y;
     
         for(em = globalconf.embedded; em; em = em->next)
-            /* if(x + width < systray.x + systray.width) */
-            if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(w->area) + sb->sw->geometry.x)
+            if(em->phys_screen == phys_screen)
             {
-                xcb_map_window(globalconf.connection, em->win);
-                xcb_configure_window(globalconf.connection, em->win,
-                                     XCB_CONFIG_WINDOW_X
-                                     | XCB_CONFIG_WINDOW_Y
-                                     | XCB_CONFIG_WINDOW_WIDTH
-                                     | XCB_CONFIG_WINDOW_HEIGHT
-                                     | XCB_CONFIG_WINDOW_SIBLING
-                                     | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[0] += config_win_vals[2];
+                /* if(x + width < systray.x + systray.width) */
+                if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(w->area) + sb->sw->geometry.x)
+                {
+                    xcb_map_window(globalconf.connection, em->win);
+                    xcb_configure_window(globalconf.connection, em->win,
+                                         XCB_CONFIG_WINDOW_X
+                                         | XCB_CONFIG_WINDOW_Y
+                                         | XCB_CONFIG_WINDOW_WIDTH
+                                         | XCB_CONFIG_WINDOW_HEIGHT
+                                         | XCB_CONFIG_WINDOW_SIBLING
+                                         | XCB_CONFIG_WINDOW_STACK_MODE,
+                                         config_win_vals);
+                    config_win_vals[0] += config_win_vals[2];
+                }
+                else
+                    xcb_unmap_window(globalconf.connection, em->win);
             }
-            else
-                xcb_unmap_window(globalconf.connection, em->win);
         break;
     }
 
