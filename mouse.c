@@ -364,47 +364,35 @@ mouse_get_client_under_pointer()
 }
 
 /** Move the focused window with the mouse.
+ * \param c The client.
+ * \param snap The maximum distance in pixels to trigger a "snap".
+ * \param infobox Enable or disable the infobox.
  */
 static void
 mouse_client_move(client_t *c, int snap, bool infobox)
 {
-    int ocx, ocy, newscreen;
-    area_t geometry;
-    client_t *target;
+    /* current mouse postion */
+    int mouse_x, mouse_y;
+    /* last mouse position */
+    int last_x, last_y;
+    /* current layout */
     layout_t *layout;
+    /* the infobox */
     simple_window_t *sw = NULL;
     draw_context_t *ctx;
-    xcb_generic_event_t *ev = NULL;
-    xcb_motion_notify_event_t *ev_motion = NULL;
-    xcb_grab_pointer_reply_t *grab_pointer_r = NULL;
-    xcb_grab_pointer_cookie_t grab_pointer_c;
-    xcb_query_pointer_reply_t *query_pointer_r = NULL, *mquery_pointer_r = NULL;
-    xcb_query_pointer_cookie_t query_pointer_c;
-    xcb_screen_t *s;
+    /* the root window */
+    xcb_window_t root;
 
     layout = layout_get_current(c->screen);
-    s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    root = xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root;
 
-    /* Send pointer requests */
-    grab_pointer_c = xcb_grab_pointer_unchecked(globalconf.connection, false, s->root,
-                                                MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                                s->root, globalconf.cursor[CurMove], XCB_CURRENT_TIME);
+    /* get current pointer position */
+    mouse_query_pointer(root, &last_x, &last_y);
 
-    query_pointer_c = xcb_query_pointer_unchecked(globalconf.connection, s->root);
-
-    geometry = c->geometry;
-    ocx = geometry.x;
-    ocy = geometry.y;
-
-    /* Get responses */
-    if(!(grab_pointer_r = xcb_grab_pointer_reply(globalconf.connection, grab_pointer_c, NULL)))
-        return;
+    /* grab pointer */
+    mouse_grab_pointer(root, CurMove);
 
     c->ismax = false;
-
-    p_delete(&grab_pointer_r);
-
-    query_pointer_r = xcb_query_pointer_reply(globalconf.connection, query_pointer_c, NULL);
 
     if(infobox && (c->isfloating || layout == layout_floating))
     {
@@ -412,76 +400,75 @@ mouse_client_move(client_t *c, int snap, bool infobox)
         xcb_aux_sync(globalconf.connection);
     }
 
-    while(true)
+    /* for each motion event */
+    while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
     {
-        /* XMaskEvent allows to retrieve only specified events from
-         * the queue and requeue the other events... */
-        while(ev || (ev = xcb_wait_for_event(globalconf.connection)))
+        if(c->isfloating || layout == layout_floating)
         {
-            switch((ev->response_type & 0x7f))
+            area_t geometry;
+
+            /* calc new geometry */
+            geometry = c->geometry;
+            geometry.x += (mouse_x - last_x);
+            geometry.y += (mouse_y - last_y);
+
+            /* snap and move */
+            geometry = mouse_snapclient(c, geometry, snap);
+            c->ismoving = true;
+            client_resize(c, geometry, false);
+            c->ismoving = false;
+
+            /* draw the infobox */
+            if(sw)
             {
-              case XCB_BUTTON_RELEASE:
-                xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
-                if(sw)
-                {
-                    draw_context_delete(&ctx);
-                    simplewindow_delete(&sw);
-                }
-                p_delete(&query_pointer_r);
-                p_delete(&ev);
-                return;
-              case XCB_MOTION_NOTIFY:
-                if(c->isfloating || layout == layout_floating)
-                {
-                    ev_motion = (xcb_motion_notify_event_t *) ev;
+                mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+                xcb_aux_sync(globalconf.connection);
+            }
 
-                    geometry.x = ocx + (ev_motion->event_x - query_pointer_r->root_x);
-                    geometry.y = ocy + (ev_motion->event_y - query_pointer_r->root_y);
+            /* keep track */
+            last_x = mouse_x;
+            last_y = mouse_y;
+        }
+        else
+        {
+            int newscreen;
+            client_t *target;
 
-                    geometry = mouse_snapclient(c, geometry, snap);
-                    c->ismoving = true;
-                    client_resize(c, geometry, false);
-                    c->ismoving = false;
+            /* client moved to another screen? */
+            newscreen = screen_get_bycoord(globalconf.screens_info, c->screen,
+                                           mouse_x, mouse_y);
+            if(newscreen != c->screen)
+            {
+                screen_client_moveto(c, newscreen, true);
+                globalconf.screens[c->screen].need_arrange = true;
+                globalconf.screens[newscreen].need_arrange = true;
+                layout_refresh();
+            }
 
-                    if(sw)
-                        mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+            /* find client to swap with */
+            target = mouse_get_client_under_pointer();
 
-                    xcb_aux_sync(globalconf.connection);
-                }
-                else
-                {
-                    query_pointer_c = xcb_query_pointer_unchecked(globalconf.connection, s->root);
-                    mquery_pointer_r = xcb_query_pointer_reply(globalconf.connection, query_pointer_c, NULL);
-                    if((newscreen = screen_get_bycoord(globalconf.screens_info, c->screen,
-                                                       mquery_pointer_r->root_x,
-                                                       mquery_pointer_r->root_y)) != c->screen)
-                    {
-                        screen_client_moveto(c, newscreen, true);
-                        globalconf.screens[c->screen].need_arrange = true;
-                        globalconf.screens[newscreen].need_arrange = true;
-                        layout_refresh();
-                    }
-                    if((target = client_getbywin(mquery_pointer_r->child))
-                       && target != c && !target->isfloating)
-                    {
-                        client_list_swap(&globalconf.clients, c, target);
-                        globalconf.screens[c->screen].need_arrange = true;
-                        layout_refresh();
-                    }
-                    p_delete(&mquery_pointer_r);
-                }
-                p_delete(&ev);
-                while((ev = xcb_poll_for_event(globalconf.connection))
-                      && (ev->response_type & 0x7f) == XCB_MOTION_NOTIFY)
-                    p_delete(&ev);
-                break;
-              default:
-                xcb_handle_event(globalconf.evenths, ev);
-                p_delete(&ev);
-                break;
+            /* swap position */
+            if(target && target != c && !target->isfloating)
+            {
+                client_list_swap(&globalconf.clients, c, target);
+                globalconf.screens[c->screen].need_arrange = true;
+                layout_refresh();
             }
         }
     }
+
+    /* ungrab pointer */
+    xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
+
+    /* free the infobox */
+    if(sw)
+    {
+        draw_context_delete(&ctx);
+        simplewindow_delete(&sw);
+    }
+
+    xcb_aux_sync(globalconf.connection);
 }
 
 
