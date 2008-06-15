@@ -823,6 +823,9 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
         /* new master/rest ratio */
         mwfact = dist / maxdist;
 
+        /* keep mwfact within reasonable bounds */
+        mwfact = MIN(MAX( 0.01, mwfact), 0.99);
+
         /* refresh the layout */
         if(fabs(tag->mwfact - mwfact) >= 0.01)
         {
