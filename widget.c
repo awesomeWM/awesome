@@ -163,9 +163,8 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
                                             pixmap_atom, 0, 1);
         if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
         {
-            if((data = xcb_get_property_value(prop_r)))
-            {
-               rootpix = *(xcb_pixmap_t *) data;
+            if((data = xcb_get_property_value(prop_r))
+               && (rootpix = *(xcb_pixmap_t *) data))
                switch(position)
                {
                  case Left:
@@ -194,7 +193,6 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
                                  ctx->width, ctx->height);
                    break;
                }
-            }
             p_delete(&prop_r);
         }
     }
