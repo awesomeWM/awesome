@@ -63,7 +63,7 @@ typedef struct keybinding_t keybinding_t;
 typedef struct client_node_t client_node_t;
 typedef struct _tag_t tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
-typedef area_t (FloatingPlacement)(client_t *);
+typedef area_t (floating_placement_t)(client_t *);
 typedef widget_t *(widget_constructor_t)(alignment_t);
 typedef void (widget_destructor_t)(widget_t *);
 typedef struct awesome_t awesome_t;
@@ -417,7 +417,7 @@ struct awesome_t
     /** Path to config file */
     char *configpath;
     /** Floating window placement algo */
-    FloatingPlacement *floating_placement;
+    floating_placement_t *floating_placement;
     /** Selected clients history */
     client_node_t *focus;
     /** Stack client history */

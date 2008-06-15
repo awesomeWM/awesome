@@ -24,8 +24,8 @@
 
 #include "structs.h"
 
-FloatingPlacement placement_smart;
-FloatingPlacement placement_under_mouse;
+floating_placement_t placement_smart;
+floating_placement_t placement_under_mouse;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
