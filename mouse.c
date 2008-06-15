@@ -33,6 +33,7 @@
 #include "titlebar.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
+#include "layouts/magnifier.h"
 
 #define MOUSEMASK      (XCB_EVENT_MASK_BUTTON_PRESS \
                         | XCB_EVENT_MASK_BUTTON_RELEASE \
@@ -735,6 +736,119 @@ mouse_client_resize_tiled(client_t *c)
     xcb_aux_sync(globalconf.connection);
 }
 
+/** Resize the master client in mangifier layout
+ * \param c The client to resize.
+ * \param infobox Enable or disable the infobox.
+ */
+static void
+mouse_client_resize_magnified(client_t *c, bool infobox)
+{
+    /* screen area modulo statusbar */
+    area_t area;
+    /* center of area */
+    int center_x, center_y;
+    /* max. distance from the center */
+    double maxdist;
+    /* mouse position */
+    int mouse_x, mouse_y;
+    /* cursor while grabbing */
+    size_t cursor = CurResize;
+    corner_t corner = AutoCorner;
+    /* current tag */
+    tag_t *tag;
+    /* the infobox */
+    simple_window_t *sw = NULL;
+    draw_context_t  *ctx;
+    xcb_window_t root;
+
+    tag = tags_get_current(c->screen)[0];
+
+    root = xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root;
+
+    area = screen_area_get(tag->screen,
+                           globalconf.screens[tag->screen].statusbar,
+                           &globalconf.screens[tag->screen].padding);
+
+    center_x = area.x + (round(area.width / 2.));
+    center_y = area.y + (round(area.height / 2.));
+
+    maxdist = round(sqrt((area.width*area.width) + (area.height*area.height)) / 2.);
+
+    /* get current mouse position */
+    mouse_query_pointer(root, &mouse_x, &mouse_y);
+
+    /* select corner */
+    corner = mouse_snap_to_corner(c->geometry, &mouse_x, &mouse_y, corner);
+
+    /* select cursor */
+    switch(corner)
+    {
+      default:
+          cursor = CurTopLeft;
+          break;
+        case TopRightCorner:
+          cursor = CurTopRight;
+          break;
+        case BottomLeftCorner:
+          cursor = CurBotLeft;
+          break;
+        case BottomRightCorner:
+          cursor = CurBotRight;
+          break;
+    }
+
+    /* grab pointer */
+    mouse_grab_pointer(root, cursor);
+
+    /* move pointer to corner */
+    mouse_warp_pointer(root, mouse_x, mouse_y);
+
+    /* create the infobox */
+    if(infobox)
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
+
+    xcb_aux_sync(globalconf.connection);
+
+    /* for each motion event */
+    while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
+    {
+        /* \todo keep pointer on screen diagonals */
+        double mwfact, dist, dx, dy;
+
+        /* calc distance from the center */
+        dx = center_x - mouse_x;
+        dy = center_y - mouse_y;
+        dist = sqrt((dx*dx) + (dy*dy));
+
+        /* new master/rest ratio */
+        mwfact = dist / maxdist;
+
+        /* refresh the layout */
+        if(fabs(tag->mwfact - mwfact) >= 0.01)
+        {
+            tag->mwfact = mwfact;
+            globalconf.screens[tag->screen].need_arrange = true;
+            layout_refresh();
+        }
+
+        /* draw the infobox */
+        if(sw)
+        {
+            mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+            xcb_aux_sync(globalconf.connection);
+        }
+    }
+
+    /* ungrab pointer */
+    mouse_ungrab_pointer();
+
+    /* free the resize bar */
+    if(sw)
+    {
+        draw_context_delete(&ctx);
+        simplewindow_delete(&sw);
+    }
+}
 
 /** Resize a client with the mouse.
  * \param c The client to resize.
@@ -753,7 +867,7 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
     layout = curtags[0]->layout;
     s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
 
-    /* only handle floating and tiled layouts */
+    /* only handle floating, tiled and magnifier layouts */
     if(layout == layout_floating || c->isfloating)
     {
         if(c->isfixed)
@@ -763,8 +877,8 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
 
         mouse_client_resize_floating(c, corner, infobox);
     }
-    else if (layout == layout_tile || layout == layout_tileleft
-             || layout == layout_tilebottom || layout == layout_tiletop)
+    else if(layout == layout_tile || layout == layout_tileleft
+            || layout == layout_tilebottom || layout == layout_tiletop)
     {
         screen = c->screen;
         for(n = 0, c = globalconf.clients; c; c = c->next)
@@ -779,6 +893,10 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
         if(!c) return;
 
         mouse_client_resize_tiled(c);
+    }
+    else if(layout == layout_magnifier)
+    {
+        mouse_client_resize_magnified(c, infobox);
     }
 }
 
