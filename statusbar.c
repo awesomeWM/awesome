@@ -29,7 +29,6 @@
 #include "window.h"
 
 extern awesome_t globalconf;
-extern bool running;
 
 /** Draw a statusbar.
  * \param statusbar The statusbar to draw.

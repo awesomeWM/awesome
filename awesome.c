@@ -22,20 +22,12 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 
-#include <errno.h>
 #include <locale.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/select.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <fcntl.h>
 #include <signal.h>
 
-#include <glib.h>
 #include <ev.h>
-
 #include <xcb/xcb.h>
 #include <xcb/shape.h>
 #include <xcb/randr.h>
@@ -60,8 +52,6 @@
 #include "common/configopts.h"
 #include "common/xutil.h"
 #include "config.h"
-
-bool running = true;
 
 awesome_t globalconf;
 
@@ -168,6 +158,45 @@ scan(void)
     p_delete(&root_wins);
 }
 
+static void
+a_xcb_check_cb(EV_P_ ev_check *w, int revents)
+{
+    xcb_generic_event_t *ev;
+
+    while((ev = xcb_poll_for_event(globalconf.connection)))
+    {
+        do
+        {
+            xcb_handle_event(globalconf.evenths, ev);
+            /* need to resync */
+            xcb_aux_sync(globalconf.connection);
+            p_delete(&ev);
+        } while((ev = xcb_poll_for_event(globalconf.connection)));
+
+        layout_refresh();
+        statusbar_refresh();
+
+        /* need to resync */
+        xcb_aux_sync(globalconf.connection);
+    }
+    layout_refresh();
+    statusbar_refresh();
+    xcb_aux_sync(globalconf.connection);
+}
+
+static void
+a_xcb_io_cb(EV_P_ ev_io *w, int revents)
+{
+    /* Two level polling:
+     * We need to first check we have an event to handle
+     * and if so, we handle them all in a round.
+     * Then when we have refresh()'ed stuff so maybe new XEvent
+     * are available and select() won't tell us, so let's check
+     * with xcb_poll_for_event() again.
+     */
+    /* empty */
+}
+
 /** Startup Error handler to check if another window manager
  * is already running.
  * \param data Additional optional parameters data
@@ -186,9 +215,9 @@ xerrorstart(void * data __attribute__ ((unused)),
  * \param sig the signal received, unused
  */
 static void
-exit_on_signal(int sig __attribute__ ((unused)))
+exit_on_signal(EV_P_ ev_signal *w, int revents)
 {
-    running = false;
+    ev_unloop(EV_A_ 1);
 }
 
 /** \brief awesome xerror function
@@ -262,10 +291,7 @@ main(int argc, char **argv)
     int xfd, i, screen_nbr, opt;
     ssize_t cmdlen = 1;
     const xcb_query_extension_reply_t *shape_query, *randr_query;
-    fd_set rd;
-    xcb_generic_event_t *ev;
     client_t *c;
-    struct timeval select_timeout, hook_lastrun = { 0, 0 }, now, hook_nextrun;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -273,6 +299,13 @@ main(int argc, char **argv)
         {"config",  1, NULL, 'c'},
         {NULL,      0, NULL, 0}
     };
+
+    /* event loop watchers */
+    ev_io xio    = { .fd = -1 };
+    ev_check xcheck;
+    ev_signal sigint;
+    ev_signal sigterm;
+    ev_signal sighup;
 
     /* clear the globalconf structure */
     p_clear(&globalconf, 1);
@@ -312,6 +345,19 @@ main(int argc, char **argv)
 
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
+    globalconf.loop = ev_default_loop(0);
+    ev_timer_init(&globalconf.timer, &luaA_on_timer, 0., 0.);
+
+    /* register function for signals */
+    ev_signal_init(&sigint, exit_on_signal, SIGINT);
+    ev_signal_init(&sigterm, &exit_on_signal, SIGTERM);
+    ev_signal_init(&sighup, &exit_on_signal, SIGHUP);
+    ev_signal_start(globalconf.loop, &sigint);
+    ev_signal_start(globalconf.loop, &sigterm);
+    ev_signal_start(globalconf.loop, &sighup);
+    ev_unref(globalconf.loop);
+    ev_unref(globalconf.loop);
+    ev_unref(globalconf.loop);
 
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
@@ -320,6 +366,12 @@ main(int argc, char **argv)
 
     /* Get the file descriptor corresponding to the X connection */
     xfd = xcb_get_file_descriptor(globalconf.connection);
+    ev_io_init(&xio, &a_xcb_io_cb, xfd, EV_READ);
+    ev_io_start(globalconf.loop, &xio);
+    ev_unref(globalconf.loop);
+    ev_check_init(&xcheck, &a_xcb_check_cb);
+    ev_check_start(globalconf.loop, &xcheck);
+    ev_unref(globalconf.loop);
 
     /* Allocate a handler which will holds all errors and events */
     globalconf.evenths = xcb_alloc_event_handlers(globalconf.connection);
@@ -457,71 +509,18 @@ main(int argc, char **argv)
     luaA_cs_init();
     a_dbus_init();
 
-    /* register function for signals */
-    signal(SIGINT, &exit_on_signal);
-    signal(SIGTERM, &exit_on_signal);
-    signal(SIGHUP, &exit_on_signal);
-
     /* refresh everything before waiting events */
     layout_refresh();
     statusbar_refresh();
 
     /* main event loop */
-    while(running)
-    {
-        FD_ZERO(&rd);
-        FD_SET(xfd, &rd);
-        if(timerisset(&globalconf.timer))
-        {
-            gettimeofday(&now, NULL);
-            timeradd(&hook_lastrun, &globalconf.timer, &hook_nextrun);
-            /* Need to do 2 tests, <= does not work with timercmp() */
-            if(timercmp(&hook_nextrun, &now, <) || (timercmp(&hook_nextrun, &now, ==)))
-            {
-                gettimeofday(&hook_lastrun, NULL);
-                luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0);
-                select_timeout = globalconf.timer;
-            }
-            else
-                timersub(&hook_nextrun, &now, &select_timeout);
-        }
-        if(select(xfd + 1, &rd,
-                  NULL, NULL,
-                  timerisset(&globalconf.timer) ? &select_timeout : NULL) == -1)
-        {
-            if(errno == EINTR)
-                continue;
-            eprint("select failed");
-        }
+    ev_loop(globalconf.loop, 0);
 
-        /* Two level polling:
-         * We need to first check we have an event to handle
-         * and if so, we handle them all in a round.
-         * Then when we have refresh()'ed stuff so maybe new XEvent
-         * are available and select() won't tell us, so let's check
-         * with xcb_poll_for_event() again.
-         */
-        while((ev = xcb_poll_for_event(globalconf.connection)))
-        {
-            do
-            {
-                xcb_handle_event(globalconf.evenths, ev);
-                /* need to resync */
-                xcb_aux_sync(globalconf.connection);
-                p_delete(&ev);
-            } while((ev = xcb_poll_for_event(globalconf.connection)));
-
-            layout_refresh();
-            statusbar_refresh();
-
-            /* need to resync */
-            xcb_aux_sync(globalconf.connection);
-        }
-        layout_refresh();
-        statusbar_refresh();
-        xcb_aux_sync(globalconf.connection);
-    }
-
+    /* cleanup event loop */
+    ev_ref(globalconf.loop);
+    ev_check_stop(globalconf.loop, &xcheck);
+    ev_ref(globalconf.loop);
+    ev_io_stop(globalconf.loop, &xio);
     a_dbus_cleanup();
     luaA_cs_cleanup();
 

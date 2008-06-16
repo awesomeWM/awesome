@@ -23,6 +23,7 @@
 #define AWESOME_STRUCTS_H
 
 #include <xcb/xcb_event.h>
+#include <ev.h>
 
 #include "lua.h"
 #include "layout.h"
@@ -461,8 +462,10 @@ struct awesome_t
         /** Command to run on time */
         luaA_function timer;
     } hooks;
+    /** The event loop */
+    struct ev_loop *loop;
     /** The timeout after which we need to stop select() */
-    struct timeval timer;
+    struct ev_timer timer;
     /** The key grabber function */
     luaA_function keygrabber;
 };

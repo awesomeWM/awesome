@@ -46,7 +46,6 @@
 
 extern awesome_t globalconf;
 
-extern bool running;
 extern const name_func_link_t FloatingPlacementList[];
 
 extern const struct luaL_reg awesome_keygrabber_lib[];
@@ -108,7 +107,7 @@ luaA_floating_placement_set(lua_State *L)
 static int
 luaA_quit(lua_State *L __attribute__ ((unused)))
 {
-    running = false;
+    ev_unloop(globalconf.loop, 1);
     return 0;
 }
 
@@ -378,8 +377,7 @@ luaA_hooks_urgent(lua_State *L)
 static int
 luaA_hooks_timer(lua_State *L)
 {
-    globalconf.timer.tv_usec = 0;
-    globalconf.timer.tv_sec = luaL_checknumber(L, 1);
+    globalconf.timer.repeat = luaL_checknumber(L, 1);
 
     if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
     {
@@ -389,6 +387,7 @@ luaA_hooks_timer(lua_State *L)
         globalconf.hooks.timer = luaL_ref(L, LUA_REGISTRYINDEX);
     }
 
+    ev_timer_again(globalconf.loop, &globalconf.timer);
     return 0;
 }
 
@@ -648,4 +647,10 @@ luaA_cs_cleanup(void)
         warn("error unlinking UNIX domain socket: %s", strerror(errno));
     p_delete(&addr);
     csio.fd = -1;
+}
+
+void
+luaA_on_timer(EV_P_ ev_timer *w, int revents)
+{
+    luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0);
 }

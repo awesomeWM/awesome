@@ -22,6 +22,7 @@
 #ifndef AWESOME_LUA_H
 #define AWESOME_LUA_H
 
+#include <ev.h>
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -173,6 +174,7 @@ bool luaA_parserc(const char *);
 void luaA_pushpointer(void *, awesome_type_t);
 void luaA_cs_init(void);
 void luaA_cs_cleanup(void);
+void luaA_on_timer(EV_P_ ev_timer *w, int revents);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
