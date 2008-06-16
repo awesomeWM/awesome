@@ -201,7 +201,7 @@ keybinding.new({ modkey }, "h", function () awful.tag.incmwfact(-0.05) end):add(
 keybinding.new({ modkey, "Shift" }, "h", function () awful.tag.incnmaster(1) end):add()
 keybinding.new({ modkey, "Shift" }, "l", function () awful.tag.incnmaster(-1) end):add()
 keybinding.new({ modkey, "Control" }, "h", function () awful.tag.incncol(1) end):add()
-keybinding.new({ modkey, "Control" }, "l", function () awful.tag.incncol(1) end):add()
+keybinding.new({ modkey, "Control" }, "l", function () awful.tag.incncol(-1) end):add()
 keybinding.new({ modkey }, "space", function () awful.layout.inc(layouts, 1) end):add()
 keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -1) end):add()
 
