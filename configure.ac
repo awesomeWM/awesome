@@ -141,7 +141,7 @@ AC_ARG_WITH([imlib2], AS_HELP_STRING([--with-imlib2], [Build with Imlib2 (defaul
 
 if test "x$with_imlib2" == "xyes"; then
     PKG_CHECK_MODULES([imlib2], [imlib2],,
-        [AC_MSG_ERROR([Cannot fined Imlib2.])])
+        [AC_MSG_ERROR([Cannot find Imlib2.])])
     AC_DEFINE([WITH_IMLIB2],1,[Defined to use Imlib2])
 else
     PKG_CHECK_MODULES([GdkPixbuf], [gdk-pixbuf-2.0 >= 2.2],,
