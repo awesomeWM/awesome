@@ -20,7 +20,7 @@
  */
 #include "config.h"
 
-#ifdef HAVE_DBUS
+#ifdef WITH_DBUS
 
 #include <dbus/dbus.h>
 
