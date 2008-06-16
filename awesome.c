@@ -29,9 +29,7 @@
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
 #include <sys/time.h>
-#include <sys/un.h>
 #include <fcntl.h>
 #include <signal.h>
 
@@ -260,14 +258,12 @@ exit_help(int exit_code)
 int
 main(int argc, char **argv)
 {
-    char buf[1024];
     const char *confpath = NULL;
-    int r, xfd, csfd, i, screen_nbr, opt;
+    int xfd, i, screen_nbr, opt;
     ssize_t cmdlen = 1;
     const xcb_query_extension_reply_t *shape_query, *randr_query;
     fd_set rd;
     xcb_generic_event_t *ev;
-    struct sockaddr_un *addr;
     client_t *c;
     struct timeval select_timeout, hook_lastrun = { 0, 0 }, now, hook_nextrun;
     static struct option long_options[] =
@@ -458,23 +454,7 @@ main(int argc, char **argv)
 
     xcb_aux_sync(globalconf.connection);
 
-    /* get socket fd */
-    csfd = socket_getclient();
-    addr = socket_getaddr(getenv("DISPLAY"));
-
-    if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
-    {
-        if(errno == EADDRINUSE)
-        {
-            if(unlink(addr->sun_path))
-                warn("error unlinking existing file: %s", strerror(errno));
-            if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
-                warn("error binding UNIX domain socket: %s", strerror(errno));
-        }
-        else
-            warn("error binding UNIX domain socket: %s", strerror(errno));
-    }
-
+    luaA_cs_init();
     a_dbus_init();
 
     /* register function for signals */
@@ -490,8 +470,6 @@ main(int argc, char **argv)
     while(running)
     {
         FD_ZERO(&rd);
-        if(csfd >= 0)
-            FD_SET(csfd, &rd);
         FD_SET(xfd, &rd);
         if(timerisset(&globalconf.timer))
         {
@@ -507,7 +485,7 @@ main(int argc, char **argv)
             else
                 timersub(&hook_nextrun, &now, &select_timeout);
         }
-        if(select(MAX(xfd, csfd) + 1, &rd,
+        if(select(xfd + 1, &rd,
                   NULL, NULL,
                   timerisset(&globalconf.timer) ? &select_timeout : NULL) == -1)
         {
@@ -515,21 +493,6 @@ main(int argc, char **argv)
                 continue;
             eprint("select failed");
         }
-        if(csfd >= 0 && FD_ISSET(csfd, &rd))
-            switch(r = recv(csfd, buf, sizeof(buf)-1, MSG_TRUNC))
-            {
-              case -1:
-                warn("error reading UNIX domain socket: %s", strerror(errno));
-                csfd = -1;
-                break;
-              case 0:
-                break;
-              default:
-                if(r >= ssizeof(buf))
-                    break;
-                buf[r] = '\0';
-                luaA_docmd(buf);
-            }
 
         /* Two level polling:
          * We need to first check we have an event to handle
@@ -560,12 +523,7 @@ main(int argc, char **argv)
     }
 
     a_dbus_cleanup();
-
-    if(csfd > 0 && close(csfd))
-        warn("error closing UNIX domain socket: %s", strerror(errno));
-    if(unlink(addr->sun_path))
-        warn("error unlinking UNIX domain socket: %s", strerror(errno));
-    p_delete(&addr);
+    luaA_cs_cleanup();
 
     /* remap all clients since some WM won't handle them otherwise */
     for(c = globalconf.clients; c; c = c->next)

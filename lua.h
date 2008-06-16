@@ -170,8 +170,9 @@ luaA_name_init(lua_State *L)
 
 void luaA_init(void);
 bool luaA_parserc(const char *);
-void luaA_docmd(char *);
 void luaA_pushpointer(void *, awesome_type_t);
+void luaA_cs_init(void);
+void luaA_cs_cleanup(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -19,9 +19,13 @@
  *
  */
 
+#include <errno.h>
 #include <stdio.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <unistd.h>
 
+#include <ev.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -30,6 +34,7 @@
 #include <xcb/xcb_aux.h>
 
 #include "config.h"
+#include "common/socket.h"
 #include "structs.h"
 #include "lua.h"
 #include "tag.h"
@@ -59,6 +64,9 @@ extern const struct luaL_reg awesome_statusbar_methods[];
 extern const struct luaL_reg awesome_statusbar_meta[];
 extern const struct luaL_reg awesome_keybinding_methods[];
 extern const struct luaL_reg awesome_keybinding_meta[];
+
+static struct sockaddr_un *addr;
+static ev_io csio = { .fd = -1 };
 
 /** Add a global mouse binding. This binding will be available when you'll
  * click on root window.
@@ -565,7 +573,7 @@ luaA_parserc(const char* rcfile)
  * \param cmd The buffer to parse.
  * \return true on succes, false on failure.
  */
-void
+static void
 luaA_docmd(char *cmd)
 {
     char *p, *curcmd = cmd;
@@ -577,4 +585,67 @@ luaA_docmd(char *cmd)
             luaA_dostring(globalconf.L, curcmd);
             curcmd = p + 1;
         }
+}
+
+static void
+luaA_cb(EV_P_ ev_io *w, int revents)
+{
+    char buf[1024];
+    int r;
+
+    switch(r = recv(w->fd, buf, sizeof(buf)-1, MSG_TRUNC))
+    {
+      case -1:
+        warn("error reading UNIX domain socket: %s", strerror(errno));
+        luaA_cs_cleanup();
+        break;
+      case 0:
+        break;
+      default:
+        if(r >= ssizeof(buf))
+            break;
+        buf[r] = '\0';
+        luaA_docmd(buf);
+    }
+}
+
+void
+luaA_cs_init(void)
+{
+    int csfd = socket_getclient();
+
+    if (csfd < 0)
+        return;
+    addr = socket_getaddr(getenv("DISPLAY"));
+
+    if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
+    {
+        if(errno == EADDRINUSE)
+        {
+            if(unlink(addr->sun_path))
+                warn("error unlinking existing file: %s", strerror(errno));
+            if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
+                warn("error binding UNIX domain socket: %s", strerror(errno));
+        }
+        else
+            warn("error binding UNIX domain socket: %s", strerror(errno));
+    }
+    ev_io_init(&csio, &luaA_cb, csfd, EV_READ);
+    ev_io_start(EV_DEFAULT_UC_ &csio);
+    ev_unref(EV_DEFAULT_UC);
+}
+
+void
+luaA_cs_cleanup(void)
+{
+    if(csio.fd < 0)
+        return;
+    ev_ref(EV_DEFAULT_UC);
+    ev_io_stop(EV_DEFAULT_UC_ &csio);
+    if (close(csio.fd))
+        warn("error closing UNIX domain socket: %s", strerror(errno));
+    if(unlink(addr->sun_path))
+        warn("error unlinking UNIX domain socket: %s", strerror(errno));
+    p_delete(&addr);
+    csio.fd = -1;
 }
