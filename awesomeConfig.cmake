@@ -121,6 +121,13 @@ CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/awesome-version-internal.h.in
                 @ONLY 
                 )
 
+# Configure awesome.doxygen
+CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/awesome.doxygen.in
+                ${CMAKE_CURRENT_SOURCE_DIR}/awesome.doxygen
+                ESCAPE_QUOTE
+                @ONLY
+                )
+
 # Execute some header generator
 EXECUTE_PROCESS(    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh 
                     OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h 
