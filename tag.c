@@ -235,23 +235,6 @@ tag_view_only_byindex(int screen, int dindex)
     tag_view_only(tag);
 }
 
-/** Check for tag equality.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lparam Another tag.
- * \lreturn True if tags are equals.
- */
-static int
-luaA_tag_eq(lua_State *L)
-{
-    tag_t **t1 = luaA_checkudata(L, 1, "tag");
-    tag_t **t2 = luaA_checkudata(L, 2, "tag");
-    lua_pushboolean(L, (*t1 == *t2));
-    return 1;
-}
-
 /** Convert a tag to a printable string.
  * \param L The Lua VM state.
  *
@@ -591,6 +574,7 @@ luaA_tag_userdata_new(tag_t *t)
 }
 
 DO_LUA_GC(tag_t, tag, "tag", tag_unref)
+DO_LUA_EQ(tag_t, tag, "tag")
 
 const struct luaL_reg awesome_tag_methods[] =
 {

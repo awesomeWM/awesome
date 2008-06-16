@@ -47,6 +47,16 @@ typedef int luaA_function;
         return 0; \
     }
 
+#define DO_LUA_EQ(type, prefix, lua_type) \
+    static int \
+    luaA_##prefix##_eq(lua_State *L) \
+    { \
+        type **p1 = luaA_checkudata(L, 1, lua_type); \
+        type **p2 = luaA_checkudata(L, 2, lua_type); \
+        lua_pushboolean(L, (*p1 == *p2)); \
+        return 1; \
+    }
+
 #define luaA_dostring(L, cmd) \
     do { \
         if(cmd) \

@@ -580,25 +580,8 @@ luaA_titlebar_tostring(lua_State *L)
     return 1;
 }
 
-/** Check for titlebar equality.
- * \param L The Lua VM state.
- * \return The number of value pushed, 1.
- *
- * \luastack
- * \lvalue A titlebar.
- * \lparam A titlebar to compare with.
- * \lreturn A boolean value, true if both titlebar are equals.
- */
-static int
-luaA_titlebar_eq(lua_State *L)
-{
-    titlebar_t **t1 = luaA_checkudata(L, 1, "titlebar");
-    titlebar_t **t2 = luaA_checkudata(L, 2, "titlebar");
-    lua_pushboolean(L, (*t1 == *t2));
-    return 1;
-}
-
 DO_LUA_GC(titlebar_t, titlebar, "titlebar", titlebar_unref)
+DO_LUA_EQ(titlebar_t, titlebar, "titlebar")
 
 const struct luaL_reg awesome_titlebar_methods[] =
 {

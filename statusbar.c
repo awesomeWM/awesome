@@ -273,23 +273,6 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     statusbar->need_update = true;
 }
 
-/** Check for statusbar equality.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A statusbar.
- * \lparam Another statusbar.
- * \return True if statusbar are equals, false otherwise.
- */
-static int
-luaA_statusbar_eq(lua_State *L)
-{
-    statusbar_t **t1 = luaA_checkudata(L, 1, "statusbar");
-    statusbar_t **t2 = luaA_checkudata(L, 2, "statusbar");
-    lua_pushboolean(L, (*t1 == *t2));
-    return 1;
-}
-
 /** Set the statusbar position.
  * \param L The Lua VM state.
  *
@@ -571,6 +554,7 @@ luaA_statusbar_widget_get(lua_State *L)
 }
 
 DO_LUA_GC(statusbar_t, statusbar, "statusbar", statusbar_unref)
+DO_LUA_EQ(statusbar_t, statusbar, "statusbar")
 
 const struct luaL_reg awesome_statusbar_methods[] =
 {

@@ -456,25 +456,6 @@ luaA_widget_tostring(lua_State *L)
     return 1;
 }
 
-/** Check for widget equality.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- * \lparam Another widget.
- * \lreturn True if widgets are equal.
- */
-static int
-luaA_widget_eq(lua_State *L)
-{
-    widget_t **t1 = luaA_checkudata(L, 1, "widget");
-    widget_t **t2 = luaA_checkudata(L, 2, "widget");
-    lua_pushboolean(L, (*t1 == *t2));
-    return 1;
-}
-
-DO_LUA_GC(widget_t, widget, "widget", widget_unref)
-
 /** Set the widget name.
  * \param L The Lua VM state.
  *
@@ -538,6 +519,9 @@ luaA_widget_visible_get(lua_State *L)
     lua_pushboolean(L, (*widget)->isvisible);
     return 1;
 }
+
+DO_LUA_GC(widget_t, widget, "widget", widget_unref)
+DO_LUA_EQ(widget_t, widget, "widget")
 
 const struct luaL_reg awesome_widget_methods[] =
 {

@@ -1188,18 +1188,6 @@ luaA_client_floating_get(lua_State *L)
     return 1;
 }
 
-/** Check if a client is equal to another.
- * \param L The Lua VM state.
- */
-static int
-luaA_client_eq(lua_State *L)
-{
-    client_t **c1 = luaA_checkudata(L, 1, "client");
-    client_t **c2 = luaA_checkudata(L, 2, "client");
-    lua_pushboolean(L, (*c1 == *c2));
-    return 1;
-}
-
 /** Redraw a client by unmapping and mapping it quickly.
  * \param L The Lua VM state.
  *
@@ -1415,6 +1403,10 @@ luaA_client_ishidden(lua_State *L)
     return 1;
 }
 
+/** Create and push a client userdata.
+ * \param c The client.
+ * \return The number of pushed value.
+ */
 int
 luaA_client_userdata_new(client_t *c)
 {
@@ -1422,6 +1414,8 @@ luaA_client_userdata_new(client_t *c)
     *lc = c;
     return luaA_settype(globalconf.L, "client");
 }
+
+DO_LUA_EQ(client_t, client, "client")
 
 const struct luaL_reg awesome_client_methods[] =
 {

@@ -1055,6 +1055,7 @@ luaA_mouse_new(lua_State *L)
 }
 
 DO_LUA_GC(button_t, mouse, "mouse", button_unref)
+DO_LUA_EQ(button_t, mouse, "mouse")
 
 const struct luaL_reg awesome_mouse_methods[] =
 {
@@ -1066,6 +1067,7 @@ const struct luaL_reg awesome_mouse_methods[] =
 const struct luaL_reg awesome_mouse_meta[] =
 {
     { "__gc", luaA_mouse_gc },
+    { "__eq", luaA_mouse_eq },
     { NULL, NULL }
 };
 
