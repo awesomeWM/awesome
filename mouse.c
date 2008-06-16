@@ -1054,16 +1054,7 @@ luaA_mouse_new(lua_State *L)
     return luaA_mouse_userdata_new(button);
 }
 
-/** Handle mouse garbage collection.
- */
-static int
-luaA_mouse_gc(lua_State *L)
-{
-    button_t **b = luaA_checkudata(L, 1, "mouse");
-    button_unref(b);
-    *b = NULL;
-    return 0;
-}
+DO_LUA_GC(button_t, mouse, "mouse", button_unref)
 
 const struct luaL_reg awesome_mouse_methods[] =
 {

@@ -442,21 +442,6 @@ luaA_widget_set(lua_State *L)
     return 0;
 }
 
-/** Handle widget garbage collection.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- */
-static int
-luaA_widget_gc(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    widget_unref(widget);
-    *widget = NULL;
-    return 0;
-}
-
 /** Convert a widget into a printable string.
  * \param L The Lua VM state.
  *
@@ -487,6 +472,8 @@ luaA_widget_eq(lua_State *L)
     lua_pushboolean(L, (*t1 == *t2));
     return 1;
 }
+
+DO_LUA_GC(widget_t, widget, "widget", widget_unref)
 
 /** Set the widget name.
  * \param L The Lua VM state.

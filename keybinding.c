@@ -132,16 +132,7 @@ luaA_keybinding_remove(lua_State *L)
     return 0;
 }
 
-/** Handle keybinding garbage collection.
- */
-static int
-luaA_keybinding_gc(lua_State *L)
-{
-    keybinding_t **keybinding = luaA_checkudata(L, 1, "keybinding");
-    keybinding_unref(keybinding);
-    keybinding = NULL;
-    return 0;
-}
+DO_LUA_GC(keybinding_t, keybinding, "keybinding", keybinding_unref)
 
 /** Convert a keybinding to a printable string.
  * \return A string.

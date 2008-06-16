@@ -37,6 +37,16 @@ typedef enum
 /** Type for Lua function */
 typedef int luaA_function;
 
+#define DO_LUA_GC(type, prefix, lua_type, type_unref) \
+    static int \
+    luaA_##prefix##_gc(lua_State *L) \
+    { \
+        type **p = luaA_checkudata(L, 1, lua_type); \
+        type_unref(p); \
+        *p = NULL; \
+        return 0; \
+    }
+
 #define luaA_dostring(L, cmd) \
     do { \
         if(cmd) \

@@ -570,16 +570,7 @@ luaA_statusbar_widget_get(lua_State *L)
     return 1;
 }
 
-/** Handle statusbar garbage collection.
- */
-static int
-luaA_statusbar_gc(lua_State *L)
-{
-    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
-    statusbar_unref(sb);
-    *sb = NULL;
-    return 0;
-}
+DO_LUA_GC(statusbar_t, statusbar, "statusbar", statusbar_unref)
 
 const struct luaL_reg awesome_statusbar_methods[] =
 {

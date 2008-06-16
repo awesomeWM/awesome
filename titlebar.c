@@ -564,22 +564,6 @@ luaA_titlebar_userdata_new(titlebar_t *t)
     return luaA_settype(globalconf.L, "titlebar");
 }
 
-/** Handle titlebar garbage collection.
- * \param L The Lua VM state.
- * \return The number of value pushed.
- *
- * \luastack
- * \lvalue A titlebar.
- */
-static int
-luaA_titlebar_gc(lua_State *L)
-{
-    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
-    titlebar_unref(titlebar);
-    *titlebar = NULL;
-    return 0;
-}
-
 /** Convert a titlebar to a printable string.
  * \param L The Lua VM state.
  * \return The number of value pushed.
@@ -613,6 +597,8 @@ luaA_titlebar_eq(lua_State *L)
     lua_pushboolean(L, (*t1 == *t2));
     return 1;
 }
+
+DO_LUA_GC(titlebar_t, titlebar, "titlebar", titlebar_unref)
 
 const struct luaL_reg awesome_titlebar_methods[] =
 {

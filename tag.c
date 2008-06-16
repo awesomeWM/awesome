@@ -535,17 +535,6 @@ luaA_tag_name_set(lua_State *L)
     return 0;
 }
 
-/** Handle tag garbage collection.
- */
-static int
-luaA_tag_gc(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    tag_unref(tag);
-    *tag = NULL;
-    return 0;
-}
-
 /** Get the layout of the tag.
  * \param L The Lua VM state.
  *
@@ -600,6 +589,8 @@ luaA_tag_userdata_new(tag_t *t)
     tag_ref(lt);
     return luaA_settype(globalconf.L, "tag");
 }
+
+DO_LUA_GC(tag_t, tag, "tag", tag_unref)
 
 const struct luaL_reg awesome_tag_methods[] =
 {
