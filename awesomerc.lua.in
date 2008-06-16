@@ -95,7 +95,7 @@ mymenubox = widget.new({ type = "textbox", name = "mymenubox", align = "left" })
 
 -- Create an iconbox widget
 myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "left" })
-myiconbox:set("image", "@iconsdir@/awesome16.png")
+myiconbox:set("image", "@AWESOME_ICON_PATH@/awesome16.png")
 
 -- Create a systray
 mysystray = widget.new({ type = "systray", name = "mysystray", align = "right" })
@@ -109,7 +109,7 @@ for s = 1, screen.count() do
     mylayoutbox[s]:mouse_add(mouse.new({ }, 3, function () awful.layout.inc(layouts, -1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 4, function () awful.layout.inc(layouts, 1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 5, function () awful.layout.inc(layouts, -1) end))
-    mylayoutbox[s]:set("image", "@iconsdir@/layouts/tilew.png")
+    mylayoutbox[s]:set("image", "@AWESOME_ICON_PATH@/layouts/tilew.png")
 end
 
 -- Create a statusbar for each screen and add it
@@ -329,7 +329,7 @@ end
 -- (tag switch, new client, etc)
 function hook_arrange(screen)
     local layout = awful.layout.get(screen)
-    mylayoutbox[screen]:set("image", "@iconsdir@/layouts/" .. layout .. "w.png")
+    mylayoutbox[screen]:set("image", "@AWESOME_ICON_PATH@/layouts/" .. layout .. "w.png")
 
     -- Uncomment if you want mouse warping
     --[[
