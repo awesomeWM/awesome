@@ -22,6 +22,7 @@
 
 #ifdef WITH_DBUS
 
+#include <ev.h>
 #include <dbus/dbus.h>
 
 #include "dbus.h"
@@ -32,6 +33,7 @@ extern awesome_t globalconf;
 
 static DBusError err;
 static DBusConnection *dbus_connection = NULL;
+ev_io dbusio = { .fd = -1 };
 
 /** Check a dbus object path format and its number of element.
  * \param path The path.
@@ -98,13 +100,13 @@ a_dbus_process_widget_set(DBusMessage *req)
     p_delete(&path);
 }
 
-void
-a_dbus_process_requests(int *fd)
+static void
+a_dbus_process_requests(EV_P_ ev_io *w, int revents)
 {
     DBusMessage *msg;
     int nmsg = 0;
 
-    if(!dbus_connection && !a_dbus_init(fd))
+    if(!dbus_connection && !a_dbus_init())
         return;
 
     while(true)
@@ -134,9 +136,10 @@ a_dbus_process_requests(int *fd)
 }
 
 bool
-a_dbus_init(int *fd)
+a_dbus_init(void)
 {
     bool ret;
+    int fd;
 
     dbus_error_init(&err);
 
@@ -167,13 +170,16 @@ a_dbus_init(int *fd)
         return false;
     }
 
-    if(!dbus_connection_get_unix_fd(dbus_connection, fd))
+    if(!dbus_connection_get_unix_fd(dbus_connection, &fd))
     {
         warn("cannot get DBus connection file descriptor");
         a_dbus_cleanup();
         return false;
     }
 
+    ev_io_init(&dbusio, a_dbus_process_requests, fd, EV_READ);
+    ev_io_start(EV_DEFAULT_UC_ &dbusio);
+    ev_unref(EV_DEFAULT_UC);
     return true;
 }
 
@@ -184,6 +190,12 @@ a_dbus_cleanup(void)
         return;
 
     dbus_error_free(&err);
+
+    if (dbusio.fd >= 0) {
+        ev_ref(EV_DEFAULT_UC);
+        ev_io_stop(EV_DEFAULT_UC_ &dbusio);
+        dbusio.fd = -1;
+    }
 
     /* This is a shared connection owned by libdbus
      * Do not close it, only unref
@@ -196,16 +208,9 @@ a_dbus_cleanup(void)
 
 #include "dbus.h"
 
-void
-a_dbus_process_requests(int *fd __attribute__((unused)))
-{
-    /* empty */
-}
-
 bool
-a_dbus_init(int *fd)
+a_dbus_init(void)
 {
-    *fd = -1;
     return false;
 }
 
