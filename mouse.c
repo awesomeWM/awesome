@@ -345,7 +345,7 @@ mouse_grab_pointer(xcb_window_t window, size_t cursor)
 /** Ungrab the Pointer
  */
 static inline void
-mouse_ungrab_pointer()
+mouse_ungrab_pointer(void)
 {
     xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
 }
@@ -412,7 +412,7 @@ mouse_track_mouse_drag(int *x, int *y)
  * \return The client that contains the Pointer or NULL.
  */
 static client_t *
-mouse_get_client_under_pointer()
+mouse_get_client_under_pointer(void)
 {
     xcb_window_t root;
     xcb_query_pointer_cookie_t query_ptr_c;
