@@ -156,7 +156,7 @@ awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(pangocairo_LIBS) $(xcb_LIBS) $(xcb_event_LIBS) \
 	$(xcb_randr_LIBS) $(xcb_xinerama_LIBS) $(xcb_shape_LIBS) $(xcb_aux_LIBS) \
 	$(xcb_atom_LIBS) $(xcb_keysyms_LIBS) $(xcb_icccm_LIBS) $(dbus_LIBS)\
-	$(imlib2_LIBS) $(GdkPixbuf_LIBS) $(GDK_LIBS) $(Lua_LIBS)
+	$(imlib2_LIBS) $(GdkPixbuf_LIBS) $(GDK_LIBS) $(Lua_LIBS) $(ev_LIBS)
 
 bin_PROGRAMS += awesome-client
 awesome_client_SOURCES = \

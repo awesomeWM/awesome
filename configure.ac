@@ -174,6 +174,9 @@ PKG_CHECK_MODULES([cairo_xcb], [cairo-xcb],,
 AC_CHECK_LIB(readline, readline,
              [AC_SUBST([readline_LIBS], ["-lreadline -lncurses"])],
              [AC_MSG_FAILURE([awesome needs readline])], -lncurses)
+AC_CHECK_LIB(ev, ev_loop,
+             [AC_SUBST([ev_LIBS], ["-lev"])],
+             [AC_MSG_FAILURE([awesome needs libev])])
 
 # Checks for header files.
 AC_PATH_X
