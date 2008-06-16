@@ -168,11 +168,11 @@ titlebar_update_geometry_floating(client_t *c)
             x_offset = (c->geometry.width - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar->sw,
-                                 c->geometry.x + x_offset,
-                                 c->geometry.y - c->titlebar->sw->geometry.height,
-                                 width,
-                                 c->titlebar->sw->geometry.height);
+        simplewindow_moveresize(c->titlebar->sw,
+                                c->geometry.x + x_offset,
+                                c->geometry.y - c->titlebar->sw->geometry.height,
+                                width,
+                                c->titlebar->sw->geometry.height);
         break;
       case Bottom:
         if(c->titlebar->width)
@@ -190,11 +190,11 @@ titlebar_update_geometry_floating(client_t *c)
             x_offset = (c->geometry.width - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar->sw,
-                                 c->geometry.x + x_offset,
-                                 c->geometry.y + c->geometry.height + 2 * c->border,
-                                 width,
-                                 c->titlebar->sw->geometry.height);
+        simplewindow_moveresize(c->titlebar->sw,
+                                c->geometry.x + x_offset,
+                                c->geometry.y + c->geometry.height + 2 * c->border,
+                                width,
+                                c->titlebar->sw->geometry.height);
         break;
       case Left:
         if(c->titlebar->width)
@@ -212,11 +212,11 @@ titlebar_update_geometry_floating(client_t *c)
             y_offset = (c->geometry.height - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar->sw,
-                                 c->geometry.x - c->titlebar->sw->geometry.width,
-                                 c->geometry.y + y_offset,
-                                 c->titlebar->sw->geometry.width,
-                                 width);
+        simplewindow_moveresize(c->titlebar->sw,
+                                c->geometry.x - c->titlebar->sw->geometry.width,
+                                c->geometry.y + y_offset,
+                                c->titlebar->sw->geometry.width,
+                                width);
         break;
       case Right:
         if(c->titlebar->width)
@@ -234,11 +234,11 @@ titlebar_update_geometry_floating(client_t *c)
             y_offset = (c->geometry.height - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar->sw,
-                                 c->geometry.x + c->geometry.width + 2 * c->border,
-                                 c->geometry.y + y_offset,
-                                 c->titlebar->sw->geometry.width,
-                                 width);
+        simplewindow_moveresize(c->titlebar->sw,
+                                c->geometry.x + c->geometry.width + 2 * c->border,
+                                c->geometry.y + y_offset,
+                                c->titlebar->sw->geometry.width,
+                                width);
         break;
     }
     titlebar_draw(c);
@@ -277,11 +277,11 @@ titlebar_update_geometry(client_t *c, area_t geometry)
             x_offset = (geometry.width - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar->sw,
-                                 geometry.x + x_offset,
-                                 geometry.y,
-                                 width,
-                                 c->titlebar->sw->geometry.height);
+        simplewindow_moveresize(c->titlebar->sw,
+                                geometry.x + x_offset,
+                                geometry.y,
+                                width,
+                                c->titlebar->sw->geometry.height);
         break;
       case Bottom:
         if(c->titlebar->width)
@@ -299,12 +299,12 @@ titlebar_update_geometry(client_t *c, area_t geometry)
             x_offset = (geometry.width - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar->sw,
-                                 geometry.x + x_offset,
-                                 geometry.y + geometry.height
-                                     - c->titlebar->sw->geometry.height + 2 * c->border,
-                                 width,
-                                 c->titlebar->sw->geometry.height);
+        simplewindow_moveresize(c->titlebar->sw,
+                                geometry.x + x_offset,
+                                geometry.y + geometry.height
+                                    - c->titlebar->sw->geometry.height + 2 * c->border,
+                                width,
+                                c->titlebar->sw->geometry.height);
         break;
       case Left:
         if(!c->titlebar->width)
@@ -322,11 +322,11 @@ titlebar_update_geometry(client_t *c, area_t geometry)
             y_offset = (geometry.height - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar->sw,
-                                 geometry.x,
-                                 geometry.y + y_offset,
-                                 c->titlebar->sw->geometry.width,
-                                 width);
+        simplewindow_moveresize(c->titlebar->sw,
+                                geometry.x,
+                                geometry.y + y_offset,
+                                c->titlebar->sw->geometry.width,
+                                width);
         break;
       case Right:
         if(c->titlebar->width)
@@ -344,12 +344,12 @@ titlebar_update_geometry(client_t *c, area_t geometry)
             y_offset = (geometry.height - width) / 2;
             break;
         }
-        simplewindow_move_resize(c->titlebar->sw,
-                                 geometry.x + geometry.width
-                                     - c->titlebar->sw->geometry.width + 2 * c->border,
-                                 geometry.y + y_offset,
-                                 c->titlebar->sw->geometry.width,
-                                 width);
+        simplewindow_moveresize(c->titlebar->sw,
+                                geometry.x + geometry.width
+                                    - c->titlebar->sw->geometry.width + 2 * c->border,
+                                geometry.y + y_offset,
+                                c->titlebar->sw->geometry.width,
+                                width);
         break;
     }
 

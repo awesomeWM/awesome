@@ -121,4 +121,33 @@ simplewindow_resize(simple_window_t *sw, unsigned int w, unsigned int h)
     xcb_free_pixmap(sw->connection, d);
 }
 
+/** Move and resize a window in one call.
+ * \param sw The simple window to move and resize.
+ * \param x The new x coordinate.
+ * \param y The new y coordinate.
+ * \param w The new width.
+ * \param h The new height.
+ */
+void
+simplewindow_moveresize(simple_window_t *sw, int x, int y,
+                        unsigned int w, unsigned int h)
+{
+    const uint32_t moveresize_win_vals[] = { x, y, w, h };
+    xcb_pixmap_t d;
+    xcb_screen_t *s = xcb_aux_get_screen(sw->connection, sw->phys_screen);
+
+    sw->geometry.x = x;
+    sw->geometry.y = y;
+    sw->geometry.width = w;
+    sw->geometry.height = h;
+    d = sw->pixmap;
+    sw->pixmap = xcb_generate_id(sw->connection);
+    xcb_create_pixmap(sw->connection, s->root_depth, sw->pixmap, s->root, w, h);
+    xcb_configure_window(sw->connection, sw->window,
+                         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
+                         | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                         moveresize_win_vals);
+    xcb_free_pixmap(sw->connection, d);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

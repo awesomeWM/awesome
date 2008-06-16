@@ -62,21 +62,7 @@ simplewindow_delete(simple_window_t **sw)
 
 void simplewindow_move(simple_window_t *, int, int);
 void simplewindow_resize(simple_window_t *, unsigned int, unsigned int);
-
-/** Move and resize a window in one call.
- * \param sw The simple window to move and resize.
- * \param x The new x coordinate.
- * \param y The new y coordinate.
- * \param w The new width.
- * \param h The new height.
- */
-static inline void
-simplewindow_move_resize(simple_window_t *sw, int x, int y,
-                         unsigned int w, unsigned int h)
-{
-  simplewindow_move(sw, x, y);
-  simplewindow_resize(sw, w, h);
-}
+void simplewindow_moveresize(simple_window_t *, int, int, unsigned int, unsigned int);
 
 /** Refresh the window content by copying its pixmap data to its window.
  * \param sw The simple window to refresh.
