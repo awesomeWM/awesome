@@ -461,9 +461,12 @@ local function menu_text_with_cursor(text, text_color, cursor_color, cursor_pos)
     return text_start .. "<span background=\"" .. cursor_color .. "\" foreground=\"" .. text_color .. "\">" .. char .. "</span>" .. text_end
 end
 
-local function menu(p, textbox, inv_col, cur_col, exe_callback)
+local function menu(args, textbox, exe_callback)
+    if not args then return end
     local command = ""
-    local prompt = p or ""
+    local prompt = args.prompt or ""
+    local inv_col = args.cursor_fg or "black"
+    local cur_col = args.cursor_bg or "white"
     local cur_pos = 1
     if not textbox or not exe_callback then
         return
