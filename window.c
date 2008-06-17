@@ -245,21 +245,24 @@ void
 window_settrans(xcb_window_t win, double opacity)
 {
     unsigned int real_opacity = 0xffffffff;
-    const xcb_atom_t wopacity_atom = xutil_intern_atom_reply(globalconf.connection,
-                                                             &globalconf.atoms,
-                                                             xutil_intern_atom(globalconf.connection,
-                                                                               &globalconf.atoms,
-                                                                               "_NET_WM_WINDOW_OPACITY"));
+    xcb_atom_t wopacity_atom;
+    xutil_intern_atom_request_t wopacity_atom_q;
+
+    wopacity_atom_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_NET_WM_WINDOW_OPACITY");
 
     if(opacity >= 0 && opacity <= 1)
     {
         real_opacity = opacity * 0xffffffff;
+        wopacity_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wopacity_atom_q);
         xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
                             wopacity_atom, CARDINAL, 32, 1L, &real_opacity);
     }
     else
+    {
+        wopacity_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wopacity_atom_q);
         xcb_delete_property(globalconf.connection, win,
                             wopacity_atom);
+    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
