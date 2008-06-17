@@ -21,6 +21,7 @@
 
 #include "stack.h"
 #include "cnode.h"
+#include "ewmh.h"
 
 extern awesome_t globalconf;
 
@@ -32,6 +33,7 @@ stack_client_push(client_t *c)
 {
     client_node_t *node = client_node_client_add(&globalconf.stack, c);
     client_node_list_push(&globalconf.stack, node);
+    ewmh_update_net_client_list_stacking(c->phys_screen);
 }
 
 /** Remove a client from stack history.
@@ -46,6 +48,7 @@ stack_client_delete(client_t *c)
     {
         client_node_list_detach(&globalconf.stack, node);
         p_delete(&node);
+        ewmh_update_net_client_list_stacking(c->phys_screen);
     }
 }
 

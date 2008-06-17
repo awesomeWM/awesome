@@ -29,6 +29,7 @@
 #include "screen.h"
 #include "client.h"
 #include "widget.h"
+#include "cnode.h"
 #include "titlebar.h"
 
 extern awesome_t globalconf;
@@ -36,6 +37,7 @@ extern awesome_t globalconf;
 static xcb_atom_t net_supported;
 static xcb_atom_t net_supporting_wm_check;
 static xcb_atom_t net_client_list;
+static xcb_atom_t net_client_list_stacking;
 static xcb_atom_t net_number_of_desktops;
 static xcb_atom_t net_current_desktop;
 static xcb_atom_t net_desktop_names;
@@ -71,6 +73,7 @@ static AtomItem AtomNames[] =
     { "_NET_SUPPORTED", &net_supported },
     { "_NET_SUPPORTING_WM_CHECK", &net_supporting_wm_check },
     { "_NET_CLIENT_LIST", &net_client_list },
+    { "_NET_CLIENT_LIST_STACKING", &net_client_list_stacking },
     { "_NET_NUMBER_OF_DESKTOPS", &net_number_of_desktops },
     { "_NET_CURRENT_DESKTOP", &net_current_desktop },
     { "_NET_DESKTOP_NAMES", &net_desktop_names },
@@ -143,6 +146,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_supported;
     atom[i++] = net_supporting_wm_check;
     atom[i++] = net_client_list;
+    atom[i++] = net_client_list_stacking;
     atom[i++] = net_number_of_desktops;
     atom[i++] = net_current_desktop;
     atom[i++] = net_desktop_names;
@@ -200,6 +204,32 @@ ewmh_update_net_client_list(int phys_screen)
     for(n = 0, c = globalconf.clients; c; c = c->next, n++)
         if(c->phys_screen == phys_screen)
             wins[n] = c->win;
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+			xutil_screen_get(globalconf.connection, phys_screen)->root,
+			net_client_list, WINDOW, 32, n, wins);
+
+    p_delete(&wins);
+}
+
+/** Set the client list in stacking order, bottom to top.
+ * \param phys_screen The physical screen id.
+ */
+void
+ewmh_update_net_client_list_stacking(int phys_screen)
+{
+    xcb_window_t *wins;
+    client_node_t *c;
+    int n = 0;
+
+    for(c = globalconf.stack; c; c = c->next)
+        n++;
+
+    wins = p_new(xcb_window_t, n);
+
+    for(n = 0, c = *client_node_list_last(&globalconf.stack); c; c = c->prev, n++)
+        if(c->client->phys_screen == phys_screen)
+            wins[n] = c->client->win;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
