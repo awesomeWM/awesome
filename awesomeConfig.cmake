@@ -70,6 +70,8 @@ FIND_LIBRARY(LUA_LIB NAMES lua5.1 lua
     /usr/local/lib
     ../libs/lua-5.1.3/lib)
 
+FIND_PROGRAM( LUA_EXECUTABLE lua )
+
 # Error check
 IF( NOT LIB_READLINE )
     MESSAGE( FATAL_ERROR "readline library not found" )

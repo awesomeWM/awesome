@@ -82,7 +82,17 @@ SET( AWE_MAN1_NAME  ${CMAKE_CURRENT_BINARY_DIR}/awesome.1.gz
                     ${CMAKE_CURRENT_BINARY_DIR}/awesome-client.1.gz )
 SET( AWE_MAN5_NAME  ${CMAKE_CURRENT_BINARY_DIR}/awesomerc.5.gz )                
 
+SET( AWE_LUADOC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/apidocgen.txt )
+
 IF( AWESOME_GENERATE_MAN )
+
+	# Create luadoc file
+    FIND_PROGRAM( CAT_EXECUTABLE cat )
+    EXECUTE_PROCESS( COMMAND ${CAT_EXECUTABLE} ${AWE_SRCS}
+		             COMMAND ${LUA_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
+					 OUTPUT_FILE ${AWE_LUADOC_FILE}
+					 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+
 	FOREACH( txtfile ${AWE_MAN_SRCS})
 		STRING( REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile} )
         STRING( REGEX REPLACE ".xml\$" ".gz" gzipman ${xmlfile} )
