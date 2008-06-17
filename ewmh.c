@@ -45,6 +45,7 @@ static xcb_atom_t net_workarea;
 static xcb_atom_t net_supporting_wm_check;
 static xcb_atom_t net_close_window;
 static xcb_atom_t net_wm_name;
+static xcb_atom_t net_wm_visible_name;
 static xcb_atom_t net_wm_icon_name;
 static xcb_atom_t net_wm_window_type;
 static xcb_atom_t net_wm_window_type_normal;
@@ -84,6 +85,7 @@ static AtomItem AtomNames[] =
     { "_NET_CLOSE_WINDOW", &net_close_window },
 
     { "_NET_WM_NAME", &net_wm_name },
+    { "_NET_WM_VISIBLE_NAME", &net_wm_visible_name },
     { "_NET_WM_ICON_NAME", &net_wm_icon_name },
     { "_NET_WM_WINDOW_TYPE", &net_wm_window_type },
     { "_NET_WM_WINDOW_TYPE_NORMAL", &net_wm_window_type_normal },
