@@ -789,27 +789,6 @@ draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
     cairo_destroy(cr);
 }
 
-/** get an image size
- * \param filename file name
- * \return area_t structure with width and height set to image size
- */
-area_t
-draw_get_image_size(const char *filename)
-{
-    area_t size = { -1, -1, -1, -1, NULL, NULL };
-    gint width, height;
-
-    if(gdk_pixbuf_get_file_info(filename, &width, &height))
-    {
-        size.width = width;
-        size.height = height;
-    }
-    else
-        warn("cannot load image %s: %s", filename, "format unrecognized");
-
-    return size;
-}
-
 #else /* WITH_IMLIB2 */
 
 static const char *
