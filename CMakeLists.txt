@@ -118,6 +118,7 @@ TARGET_LINK_LIBRARIES( ${PROJECT_AWE_NAME}  ${AWE_MOD_LIBRARIES}
                                             ${LUA_LIB}
                                             ${LIB_READLINE}
                                             ${LIB_NCURSES}
+                                            ${LIB_EV}
                                             )
 
 TARGET_LINK_LIBRARIES( ${PROJECT_AWECLIENT_NAME}    ${AWE_MOD_LIBRARIES}

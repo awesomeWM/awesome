@@ -54,6 +54,9 @@ pkg_check_modules( AWE_MOD REQUIRED     glib-2.0
 FIND_LIBRARY( LIB_READLINE readline )
 FIND_LIBRARY( LIB_NCURSES ncurses )
 
+# Check for lobev
+FIND_LIBRARY( LIB_EV ev )
+
 # Check for lua5.1
 FIND_PATH(LUA_INC_DIR lua.h
     /usr/include
@@ -75,6 +78,10 @@ ENDIF( NOT LIB_READLINE )
 IF( NOT LIB_NCURSES )
     MESSAGE( FATAL_ERROR "ncurse library not found" )
 ENDIF( NOT LIB_NCURSES )        
+
+IF( NOT LIB_EV )
+    MESSAGE( FATAL_ERROR "libev not found" )
+ENDIF( NOT LIB_EV )
 
 IF( NOT LUA_LIB )
     MESSAGE( FATAL_ERROR "lua library not found" )
