@@ -24,6 +24,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
+#include <xcb/xcb_atom.h>
 
 #include "widget.h"
 #include "statusbar.h"
@@ -139,15 +140,12 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
     xcb_get_property_reply_t *prop_r;
     xcb_get_property_cookie_t prop_c;
     area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
-    xcb_atom_t rootpix_atom, pixmap_atom;
-    xutil_intern_atom_request_t rootpix_atom_req, pixmap_atom_req;
+    xcb_atom_t rootpix_atom;
+    xutil_intern_atom_request_t rootpix_atom_req;
 
     /* Send requests needed for transparency */
     if(ctx->bg.alpha != 0xffff)
-    {
-        pixmap_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "PIXMAP");
         rootpix_atom_req = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_XROOTPMAP_ID");
-    }
 
     rectangle.width = ctx->width;
     rectangle.height = ctx->height;
@@ -155,10 +153,9 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
     if(ctx->bg.alpha != 0xffff)
     {
         s = xutil_screen_get(globalconf.connection, ctx->phys_screen);
-        pixmap_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, pixmap_atom_req);
         rootpix_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, rootpix_atom_req);
         prop_c = xcb_get_property_unchecked(globalconf.connection, false, s->root, rootpix_atom,
-                                            pixmap_atom, 0, 1);
+                                            PIXMAP, 0, 1);
         if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
         {
             if((data = xcb_get_property_value(prop_r))
