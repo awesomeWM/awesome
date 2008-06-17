@@ -172,7 +172,7 @@ window_root_grabkey(keybinding_t *k)
        || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         do
         {
-            s = xcb_aux_get_screen(globalconf.connection, phys_screen);
+            s = xutil_screen_get(globalconf.connection, phys_screen);
             xcb_grab_key(globalconf.connection, true, s->root,
                          k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
             xcb_grab_key(globalconf.connection, true, s->root,
@@ -201,7 +201,7 @@ window_root_ungrabkey(keybinding_t *k)
        || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         do
         {
-            s = xcb_aux_get_screen(globalconf.connection, phys_screen);
+            s = xutil_screen_get(globalconf.connection, phys_screen);
             xcb_ungrab_key(globalconf.connection, kc, s->root,
                            k->mod);
             xcb_ungrab_key(globalconf.connection, kc, s->root,

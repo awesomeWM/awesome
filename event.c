@@ -163,7 +163,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
     }
     else
         for(screen = 0; screen < nb_screen; screen++)
-            if(xcb_aux_get_screen(connection, screen)->root == ev->event)
+            if(xutil_screen_get(connection, screen)->root == ev->event)
             {
                 event_handle_mouse_button_press(NULL, ev->detail, ev->state,
                                                 globalconf.buttons.root);
@@ -279,7 +279,7 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
     const xcb_screen_t *screen;
 
     for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length(xcb_get_setup (connection)); screen_nbr++)
-        if((screen = xcb_aux_get_screen(connection, screen_nbr)) != NULL
+        if((screen = xutil_screen_get(connection, screen_nbr)) != NULL
            && ev->window == screen->root
            && (ev->width != screen->width_in_pixels
                || ev->height != screen->height_in_pixels))
@@ -340,7 +340,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     }
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
         xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
-                          xcb_aux_get_screen(connection, emwin->phys_screen)->root,
+                          xutil_screen_get(connection, emwin->phys_screen)->root,
                           ANY_MODIFIER);
     else
         window_root_grabbuttons(ev->root);
@@ -458,7 +458,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         geom_c = xcb_get_geometry(connection, ev->window);
 
         if(globalconf.screens_info->xinerama_is_active)
-            qp_c = xcb_query_pointer(connection, xcb_aux_get_screen(globalconf.connection,
+            qp_c = xcb_query_pointer(connection, xutil_screen_get(globalconf.connection,
                                                                     screen_nbr)->root);
 
         if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
@@ -552,7 +552,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     bool send_event = ((ev->response_type & 0x80) >> 7);
 
     if((c = client_getbywin(ev->window))
-       && ev->event == xcb_aux_get_screen(connection, c->phys_screen)->root
+       && ev->event == xutil_screen_get(connection, c->phys_screen)->root
        && send_event && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
         client_unmanage(c);
 

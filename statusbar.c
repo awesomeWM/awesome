@@ -167,7 +167,7 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
         statusbar->sw =
             simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
                              statusbar->height, statusbar->width, 0);
-        s = xcb_aux_get_screen(globalconf.connection, statusbar->phys_screen);
+        s = xutil_screen_get(globalconf.connection, statusbar->phys_screen);
         /* we need a new pixmap this way [     ] to render */
         dw = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection,

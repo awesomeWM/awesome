@@ -263,7 +263,7 @@ client_focus(client_t *c, int screen)
         phys_screen = screen_virttophys(screen);
         xcb_set_input_focus(globalconf.connection,
                             XCB_INPUT_FOCUS_POINTER_ROOT,
-                            xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
+                            xutil_screen_get(globalconf.connection, phys_screen)->root,
                             XCB_CURRENT_TIME);
     }
 

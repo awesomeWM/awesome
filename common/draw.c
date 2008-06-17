@@ -44,6 +44,7 @@
 
 #include "common/draw.h"
 #include "common/markup.h"
+#include "common/xutil.h"
 
 /** Convert text from any charset to UTF-8 using iconv
  * \param iso the ISO string to convert
@@ -124,7 +125,7 @@ draw_context_new(xcb_connection_t *conn, int phys_screen,
                  xcolor_t fg, xcolor_t bg)
 {
     draw_context_t *d = p_new(draw_context_t, 1);
-    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
 
     d->connection = conn;
     d->phys_screen = phys_screen;
@@ -152,7 +153,7 @@ font_t *
 draw_font_new(xcb_connection_t *conn, int phys_screen, const char *fontname)
 {
     cairo_surface_t *surface;
-    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     cairo_t *cr;
     PangoLayout *layout;
     font_t *font = p_new(font_t, 1);
@@ -980,7 +981,7 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     cairo_t *cr;
     PangoLayout *layout;
     PangoRectangle ext;
-    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     area_t geom = { 0, 0, 0, 0, NULL, NULL };
     ssize_t len;
     char *buf, *utf8;
@@ -1060,7 +1061,7 @@ draw_align_get_from_str(const char *align)
 bool
 xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t *color)
 {
-    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     xcb_alloc_color_reply_t *hexa_color = NULL;
     xcb_alloc_named_color_reply_t *named_color = NULL;
     unsigned long colnum;

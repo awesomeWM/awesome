@@ -154,7 +154,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
 
     if(ctx->bg.alpha != 0xffff)
     {
-        s = xcb_aux_get_screen(globalconf.connection, ctx->phys_screen);
+        s = xutil_screen_get(globalconf.connection, ctx->phys_screen);
         pixmap_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, pixmap_atom_req);
         rootpix_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, rootpix_atom_req);
         prop_c = xcb_get_property_unchecked(globalconf.connection, false, s->root, rootpix_atom,

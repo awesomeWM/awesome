@@ -79,7 +79,7 @@ scan(void)
     for(screen = 0; screen < screen_max; screen++)
     {
         /* Get the root window ID associated to this screen */
-        root_wins[screen].id = xcb_aux_get_screen(globalconf.connection, screen)->root;
+        root_wins[screen].id = xutil_screen_get(globalconf.connection, screen)->root;
 
         /* Get the window tree associated to this screen */
         root_wins[screen].tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
@@ -384,7 +384,7 @@ main(int argc, char **argv)
 
         /* This causes an error if some other window manager is running */
         xcb_change_window_attributes(globalconf.connection,
-                                     xcb_aux_get_screen(globalconf.connection, screen_nbr)->root,
+                                     xutil_screen_get(globalconf.connection, screen_nbr)->root,
                                      XCB_CW_EVENT_MASK, &select_input_val);
     }
 
@@ -459,7 +459,7 @@ main(int argc, char **argv)
         };
 
         xcb_change_window_attributes(globalconf.connection,
-                                     xcb_aux_get_screen(globalconf.connection, screen_nbr)->root,
+                                     xutil_screen_get(globalconf.connection, screen_nbr)->root,
                                      XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
                                      change_win_vals);
         ewmh_set_supported_hints(screen_nbr);

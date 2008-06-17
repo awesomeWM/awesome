@@ -59,7 +59,7 @@ arrange(int screen)
     }
 
     qp_c = xcb_query_pointer_unchecked(globalconf.connection,
-                                       xcb_aux_get_screen(globalconf.connection,
+                                       xutil_screen_get(globalconf.connection,
                                                           phys_screen)->root);
 
     /* check that the mouse is on a window or not */

@@ -419,7 +419,7 @@ mouse_get_client_under_pointer(void)
     xcb_query_pointer_reply_t *query_ptr_r;
     client_t *c = NULL;
 
-    root = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root;
+    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
 
     query_ptr_c = xcb_query_pointer_unchecked(globalconf.connection, root);
     query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
@@ -454,7 +454,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     xcb_window_t root;
 
     layout = layout_get_current(c->screen);
-    root = xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root;
+    root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
 
     /* get current pointer position */
     mouse_query_pointer(root, &last_x, &last_y);
@@ -561,7 +561,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     size_t cursor = CurResize;
     int top, bottom, left, right;
 
-    screen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    screen = xutil_screen_get(globalconf.connection, c->phys_screen);
 
     /* get current mouse position */
     mouse_query_pointer(screen->root, &mouse_x, &mouse_y);
@@ -656,7 +656,7 @@ mouse_client_resize_tiled(client_t *c)
     int mouse_x, mouse_y;
     size_t cursor = CurResize;
 
-    screen = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    screen = xutil_screen_get(globalconf.connection, c->phys_screen);
     tag = tags_get_current(c->screen)[0];
     layout = tag->layout;
 
@@ -763,7 +763,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
     tag = tags_get_current(c->screen)[0];
 
-    root = xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root;
+    root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
 
     area = screen_area_get(tag->screen,
                            globalconf.screens[tag->screen].statusbar,
@@ -868,7 +868,7 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
 
     curtags = tags_get_current(c->screen);
     layout = curtags[0]->layout;
-    s = xcb_aux_get_screen(globalconf.connection, c->phys_screen);
+    s = xutil_screen_get(globalconf.connection, c->phys_screen);
 
     /* only handle floating, tiled and magnifier layouts */
     if(layout == layout_floating || c->isfloating)
@@ -919,7 +919,7 @@ luaA_mouse_coords_set(lua_State *L)
     x = luaL_checknumber(L, 1);
     y = luaL_checknumber(L, 2);
 
-    root = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root;
+    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
     mouse_warp_pointer(root, x, y);
 
     return 0;
@@ -994,7 +994,7 @@ luaA_mouse_screen_get(lua_State *L)
     int screen, mouse_x, mouse_y;
     xcb_window_t root;
 
-    root = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen)->root;
+    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
 
     if(!mouse_query_pointer(root, &mouse_x, &mouse_y))
         return 0;

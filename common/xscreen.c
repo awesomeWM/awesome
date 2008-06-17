@@ -24,6 +24,7 @@
 #include <xcb/xinerama.h>
 
 #include "common/xscreen.h"
+#include "common/xutil.h"
 
 /** Return the Xinerama screen number where the coordinates belongs to.
  * \param si The screens infos structure.
@@ -144,7 +145,7 @@ screensinfo_new(xcb_connection_t *conn)
         si->geometry = p_new(area_t, si->nscreen);
         for(screen = 0; screen < si->nscreen; screen++)
         {
-            s = xcb_aux_get_screen(conn, screen);
+            s = xutil_screen_get(conn, screen);
             si->geometry[screen].x = 0;
             si->geometry[screen].y = 0;
             si->geometry[screen].width = s->width_in_pixels;

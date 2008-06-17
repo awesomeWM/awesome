@@ -26,6 +26,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
+#include <xcb/xcb_aux.h>
 #include <xcb/xcb_event.h>
 
 /* XCB doesn't provide keysyms definition */
@@ -159,6 +160,20 @@ void xutil_delete_error(xutil_error_t *);
 xcb_keysym_t xutil_keymask_fromstr(const char *);
 unsigned int xutil_button_fromint(int);
 xcb_cursor_t xutil_cursor_new(xcb_connection_t *, unsigned int);
+
+/* Get the informations about the screen.
+ * \param c X connection.
+ * \param screen Screen number.
+ * \return Screen informations (must not be freed!).
+ */
+static inline xcb_screen_t *
+xutil_screen_get(xcb_connection_t *c, int screen)
+{
+    if(xcb_connection_has_error(c))
+        eprint("X connection invalid");
+
+    return xcb_aux_get_screen(c, screen);
+}
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

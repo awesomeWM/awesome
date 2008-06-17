@@ -77,7 +77,7 @@ titlebar_draw(client_t *c)
     if(!c->titlebar || !c->titlebar->sw || !c->titlebar->position)
         return;
 
-    s = xcb_aux_get_screen(globalconf.connection,
+    s = xutil_screen_get(globalconf.connection,
                            c->titlebar->sw->phys_screen);
 
     switch(c->titlebar->position)

@@ -135,7 +135,7 @@ placement_under_mouse(client_t *c)
     area_t finalgeometry = c->f_geometry;
 
     qp_c = xcb_query_pointer(globalconf.connection,
-                             xcb_aux_get_screen(globalconf.connection, c->phys_screen)->root);
+                             xutil_screen_get(globalconf.connection, c->phys_screen)->root);
     if((qp_r = xcb_query_pointer_reply(globalconf.connection, qp_c, NULL)))
     {
         finalgeometry.x = qp_r->root_x - c->f_geometry.width / 2;

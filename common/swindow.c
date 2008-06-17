@@ -23,6 +23,7 @@
 #include <xcb/xcb_aux.h>
 
 #include "common/swindow.h"
+#include "common/xutil.h"
 
 /** Create a simple window.
  * \param conn Connection ref.
@@ -41,7 +42,7 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
                  unsigned int border_width)
 {
     simple_window_t *sw;
-    xcb_screen_t *s = xcb_aux_get_screen(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     uint32_t create_win_val[3];
     const uint32_t gc_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
     const uint32_t gc_values[2] = { s->black_pixel, s->white_pixel };
@@ -106,7 +107,7 @@ simplewindow_move(simple_window_t *sw, int x, int y)
 void
 simplewindow_resize(simple_window_t *sw, unsigned int w, unsigned int h)
 {
-    xcb_screen_t *s = xcb_aux_get_screen(sw->connection, sw->phys_screen);
+    xcb_screen_t *s = xutil_screen_get(sw->connection, sw->phys_screen);
     const uint32_t resize_win_vals[] = { w, h };
     xcb_pixmap_t d;
 
@@ -134,7 +135,7 @@ simplewindow_moveresize(simple_window_t *sw, int x, int y,
 {
     const uint32_t moveresize_win_vals[] = { x, y, w, h };
     xcb_pixmap_t d;
-    xcb_screen_t *s = xcb_aux_get_screen(sw->connection, sw->phys_screen);
+    xcb_screen_t *s = xutil_screen_get(sw->connection, sw->phys_screen);
 
     sw->geometry.x = x;
     sw->geometry.y = y;

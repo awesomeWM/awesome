@@ -40,7 +40,7 @@ systray_init(int phys_screen)
     xutil_intern_atom_request_t atom_systray_q, atom_manager_q;
     xcb_atom_t atom_systray;
     xcb_client_message_event_t ev;
-    xcb_screen_t *xscreen = xcb_aux_get_screen(globalconf.connection, phys_screen);
+    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
     char atom_name[22];
 
     /* Send requests */
