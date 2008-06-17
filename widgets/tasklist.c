@@ -77,6 +77,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
     markup_parser_data_t *p;
     const char *elements[] = { "bg", NULL };
     xcolor_t bg_color;
+    draw_image_t *image;
 
     if(used >= ctx->width)
         return (w->area.width = 0);
@@ -133,18 +134,12 @@ tasklist_draw(draw_context_t *ctx, int screen,
                 p->text = NULL;
                 markup_parser_data_delete(&p);
 
-                if(c->icon_path)
+                if((image = draw_image_new(c->icon_path)))
                 {
-                    area = draw_get_image_size(c->icon_path);
-                    if(area.width > 0 && area.height > 0)
-                    {
-                        icon_width = ((double) ctx->height / (double) area.height) * area.width;
-                        draw_image_from_file(ctx,
-                                             w->area.x + box_width * i,
-                                             w->area.y,
-                                             ctx->height,
-                                             c->icon_path);
-                    }
+                    icon_width = ((double) ctx->height / (double) image->height) * image->width;
+                    draw_image(ctx, w->area.x + box_width * i,
+                               w->area.y, ctx->height, image);
+                    draw_image_delete(&image);
                 }
 
                 if(!icon_width && (icon = ewmh_get_window_icon(c->win)))

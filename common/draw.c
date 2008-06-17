@@ -721,46 +721,31 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
-/** Draw an image (PNG format only) from a file to a draw context
- * \param ctx Draw context to draw to
- * \param x x coordinate
- * \param y y coordinate
- * \param wanted_h wanted height: if > 0, image will be resized
- * \param filename file name to draw
- */
-void
-draw_image_from_file(draw_context_t *ctx, int x, int y, int wanted_h, const char *filename)
-{
-    draw_image_t *image = draw_image_new(filename);
-
-    if(image)
-    {
-        draw_image(ctx, x, y, wanted_h, image);
-        draw_image_delete(&image);
-    }
-}
-
 #ifndef WITH_IMLIB2
 
-/** Load an image (PNG Format only) from filename
- * \param filename the image file to load
- * \return a new image
+/** Load an image from filename.
+ * \param filename The image file to load.
+ * \return A new image.
  */
-draw_image_t *draw_image_new(const char *filename)
+draw_image_t
+*draw_image_new(const char *filename)
 {
-    draw_image_t *image;
+    draw_image_t *image = NULL;
     GdkPixbuf *pixbuf;
-    GError *error=NULL;
+    GError *error = NULL;
 
-    if(!(pixbuf = gdk_pixbuf_new_from_file(filename,&error))) {
-        warn("cannot load image %s: %s", filename, error->message);
-        return NULL;
+    if(filename)
+    {
+        if(!(pixbuf = gdk_pixbuf_new_from_file(filename,&error)))
+            warn("cannot load image %s: %s", filename, error->message);
+        else
+        {
+            image = p_new(draw_image_t, 1);
+            image->data = pixbuf;
+            image->width = gdk_pixbuf_get_width(pixbuf);
+            image->height = gdk_pixbuf_get_height(pixbuf);
+        }
     }
-
-    image = p_new(draw_image_t, 1);
-    image->data = pixbuf;
-    image->width = gdk_pixbuf_get_width(pixbuf);
-    image->height = gdk_pixbuf_get_height(pixbuf);
 
     return image;
 }
@@ -770,21 +755,22 @@ draw_image_t *draw_image_new(const char *filename)
  */
 void draw_image_delete(draw_image_t **image)
 {
-    if (*image)
+    if(*image)
     {
         gdk_pixbuf_unref((*image)->data);
         p_delete(image);
     }
 }
 
-/** Draw an image to a draw context
- * \param ctx Draw context to draw to
- * \param x x coordinate
- * \param y y coordinate
- * \param wanted_h wanted height: if > 0, image will be resized
- * \param image the image to draw
+/** Draw an image to a draw context.
+ * \param ctx Draw context to draw to.
+ * \param x x coordinate.
+ * \param y y coordinate.
+ * \param wanted_h Wanted height: if > 0, image will be resized.
+ * \param image The image to draw.
  */
-void draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
+void
+draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
 {
     cairo_t *cr;
 
