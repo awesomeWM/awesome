@@ -48,14 +48,18 @@ systray_init(int phys_screen)
     snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
     atom_systray_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
 
-    globalconf.screens[phys_screen].systray = simplewindow_new(globalconf.connection, phys_screen,
-                                                               -1, -1, 1, 1, 0);
+    globalconf.screens[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, xscreen->root_depth,
+                      globalconf.screens[phys_screen].systray.window,
+                      xscreen->root,
+                      -1, -1, 1, 1, 0,
+                      XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
 
     /* Fill event */
     ev.response_type = XCB_CLIENT_MESSAGE;
     ev.format = 32;
     ev.data.data32[0] = XCB_CURRENT_TIME;
-    ev.data.data32[2] = globalconf.screens[phys_screen].systray->window;
+    ev.data.data32[2] = globalconf.screens[phys_screen].systray.window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
     ev.type = xutil_intern_atom_reply(globalconf.connection,
                                       &globalconf.atoms, atom_manager_q);
@@ -65,7 +69,7 @@ systray_init(int phys_screen)
                                                                atom_systray_q);
 
     xcb_set_selection_owner(globalconf.connection,
-                            globalconf.screens[phys_screen].systray->window,
+                            globalconf.screens[phys_screen].systray.window,
                             atom_systray,
                             XCB_CURRENT_TIME);
 
@@ -103,14 +107,15 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 
     xembed_window_list_append(&globalconf.embedded, em);
 
-    /** \todo we should create a dedicated window for that */
-    if(globalconf.screens[phys_screen].systray)
-        xembed_embedded_notify(globalconf.connection, em->win,
-                                globalconf.screens[phys_screen].systray->window,
-                                MIN(XEMBED_VERSION, em->info.version));
+    xembed_embedded_notify(globalconf.connection, em->win,
+                           globalconf.screens[phys_screen].systray.window,
+                           MIN(XEMBED_VERSION, em->info.version));
 
-    if(em->info.flags & XEMBED_MAPPED)
+    if(globalconf.screens[phys_screen].systray.has_systray_widget
+       && em->info.flags & XEMBED_MAPPED)
        xcb_map_window(globalconf.connection, em->win);
+    else
+        xcb_unmap_window(globalconf.connection, em->win);
 
     for(i = 0; i < globalconf.screens_info->nscreen; i++)
         widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);

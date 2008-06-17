@@ -373,7 +373,10 @@ typedef struct
     /** Padding */
     padding_t padding;
     /** Window that contains the systray */
-    simple_window_t *systray;
+    struct {
+        xcb_window_t window;
+        bool has_systray_widget;
+    } systray;
 } screen_t;
 
 /** Main configuration structure */

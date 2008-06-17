@@ -144,6 +144,9 @@ systray_draw(draw_context_t *ctx,
         break;
     }
 
+    /* inform that there's a widget */
+    globalconf.screens[phys_screen].systray.has_systray_widget = true;
+
     return w->area.width;
 }
 
