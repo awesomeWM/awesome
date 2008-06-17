@@ -78,24 +78,37 @@ SET( AWE_MAN_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/awesome.1.txt
 				  ${CMAKE_CURRENT_SOURCE_DIR}/awesome-client.1.txt
 				  ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.5.txt
 				  )
+SET( AWE_MAN1_NAME  ${CMAKE_CURRENT_BINARY_DIR}/awesome.1.gz
+                    ${CMAKE_CURRENT_BINARY_DIR}/awesome-client.1.gz )
+SET( AWE_MAN5_NAME  ${CMAKE_CURRENT_BINARY_DIR}/awesomerc.5.gz )                
 
 IF( AWESOME_GENERATE_MAN )
 	FOREACH( txtfile ${AWE_MAN_SRCS})
 		STRING( REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile} )
-		STRING( REGEX REPLACE ".xml\$" "" manfile ${xmlfile} )
+        STRING( REGEX REPLACE ".xml\$" ".gz" gzipman ${xmlfile} )
+        STRING( REPLACE ${CMAKE_CURRENT_SOURCE_DIR} 
+                        ${CMAKE_CURRENT_BINARY_DIR} gzipman ${gzipman} )
+		STRING( REGEX REPLACE ".gz\$" "" manfile ${gzipman} )
 
 		ADD_CUSTOM_COMMAND( OUTPUT ${xmlfile}
 							COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} ${txtfile}
 							DEPENDS ${txtfile}
+                            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 							)
 		ADD_CUSTOM_COMMAND( OUTPUT ${manfile}
 							COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
 							DEPENDS ${xmlfile}
+                            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 							)
-		SET( AWE_MAN_FILES ${AWE_MAN_FILES} ${manfile} )
+        ADD_CUSTOM_COMMAND( OUTPUT ${gzipman}
+                            COMMAND ${GZIP_EXECUTABLE} -f ${manfile} 
+                            DEPENDS ${manfile}
+                            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                            )
+		SET( AWE_MAN_FILES ${AWE_MAN_FILES} ${gzipman} )
 	ENDFOREACH( txtfile)
-
-	ADD_CUSTOM_TARGET( man ALL DEPENDS ${AWE_MAN_FILES} )
+	ADD_CUSTOM_TARGET(  man ALL DEPENDS ${AWE_MAN_FILES} 
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 ENDIF( AWESOME_GENERATE_MAN )
 
 ADD_EXECUTABLE( ${PROJECT_AWE_NAME}         ${AWE_SRCS} )
@@ -124,6 +137,14 @@ INSTALL(    FILES ${AWE_LUA_FILES}
 INSTALL(	FILES ${AWE_CONF_FILES}
 			DESTINATION ${AWESOME_CONF_PATH}
 			)
+
+INSTALL(    FILES ${AWE_MAN1_NAME}
+            DESTINATION ${AWESOME_MAN1_PATH}
+            ) 
+
+INSTALL(    FILES ${AWE_MAN5_NAME}
+            DESTINATION ${AWESOME_MAN5_PATH}
+            )    
 
 INSTALL(	DIRECTORY ${AWE_ICON_PATH}
 			DESTINATION ${AWESOME_ICON_PATH}
