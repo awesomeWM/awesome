@@ -205,6 +205,7 @@ client_unfocus(client_t *c)
 
     focus_client_push(NULL);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+    ewmh_update_net_active_window(c->phys_screen);
 }
 
 /** Ban client and unmap it.
@@ -395,11 +396,11 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* Push client in stack */
     client_raise(c);
 
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    ewmh_update_net_client_list(c->phys_screen);
-
     /* update window title */
     client_updatetitle(c);
+
+    ewmh_update_net_client_list(c->phys_screen);
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 
     /* call hook */
     luaA_client_userdata_new(c);
@@ -661,6 +662,8 @@ client_unmanage(client_t *c)
         simplewindow_delete(&c->titlebar->sw);
         titlebar_unref(&c->titlebar);
     }
+
+    ewmh_update_net_client_list(c->phys_screen);
 
     p_delete(&c);
 }
