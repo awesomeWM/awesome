@@ -247,7 +247,7 @@ ewmh_update_net_client_list_stacking(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			net_client_list, WINDOW, 32, n, wins);
+			net_client_list_stacking, WINDOW, 32, n, wins);
 
     p_delete(&wins);
 }
