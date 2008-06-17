@@ -35,13 +35,14 @@
 extern awesome_t globalconf;
 
 static xcb_atom_t net_supported;
-static xcb_atom_t net_supporting_wm_check;
 static xcb_atom_t net_client_list;
 static xcb_atom_t net_client_list_stacking;
 static xcb_atom_t net_number_of_desktops;
 static xcb_atom_t net_current_desktop;
 static xcb_atom_t net_desktop_names;
 static xcb_atom_t net_active_window;
+static xcb_atom_t net_workarea;
+static xcb_atom_t net_supporting_wm_check;
 static xcb_atom_t net_close_window;
 static xcb_atom_t net_wm_name;
 static xcb_atom_t net_wm_icon_name;
@@ -71,13 +72,14 @@ typedef struct
 static AtomItem AtomNames[] =
 {
     { "_NET_SUPPORTED", &net_supported },
-    { "_NET_SUPPORTING_WM_CHECK", &net_supporting_wm_check },
     { "_NET_CLIENT_LIST", &net_client_list },
     { "_NET_CLIENT_LIST_STACKING", &net_client_list_stacking },
     { "_NET_NUMBER_OF_DESKTOPS", &net_number_of_desktops },
     { "_NET_CURRENT_DESKTOP", &net_current_desktop },
     { "_NET_DESKTOP_NAMES", &net_desktop_names },
     { "_NET_ACTIVE_WINDOW", &net_active_window },
+    { "_NET_WORKAREA", &net_workarea },
+    { "_NET_SUPPORTING_WM_CHECK", &net_supporting_wm_check },
 
     { "_NET_CLOSE_WINDOW", &net_close_window },
 
@@ -151,6 +153,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_current_desktop;
     atom[i++] = net_desktop_names;
     atom[i++] = net_active_window;
+    atom[i++] = net_workarea;
 
     atom[i++] = net_close_window;
 
@@ -182,11 +185,11 @@ ewmh_set_supported_hints(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xscreen->root, net_supporting_wm_check, WINDOW, 32,
-                        1, (void *) &father);
+                        1, &father);
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, net_supporting_wm_check, WINDOW, 32,
-                        1, (void *) &father);
+                        1, &father);
 }
 
 void
@@ -288,6 +291,37 @@ ewmh_update_net_desktop_names(int phys_screen)
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
 			net_desktop_names, utf8_string, 8, len, buf);
+}
+
+/** Update the work area space for each physical screen and each desktop.
+ * \param phys_screen The physical screen id.
+ */
+void
+ewmh_update_workarea(int phys_screen)
+{
+    uint32_t *area;
+    tag_t *tag;
+    int count = 0;
+    area_t geom = screen_area_get(phys_screen,
+                                  globalconf.screens[phys_screen].statusbar,
+                                  &globalconf.screens[phys_screen].padding);
+
+    for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
+        count++;
+
+    area = p_new(uint32_t, count * 4);
+    for(tag = globalconf.screens[phys_screen].tags, count = 0; tag; tag = tag->next, count++)
+    {
+        area[4 * count + 0] = geom.x;
+        area[4 * count + 1] = geom.y;
+        area[4 * count + 2] = geom.width;
+        area[4 * count + 3] = geom.height;
+    }
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        xutil_screen_get(globalconf.connection, phys_screen)->root,
+                        net_workarea, CARDINAL, 32, count, area);
+    p_delete(&area);
 }
 
 void

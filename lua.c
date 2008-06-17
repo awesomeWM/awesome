@@ -33,8 +33,8 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 
+#include "ewmh.h"
 #include "config.h"
-#include "common/socket.h"
 #include "structs.h"
 #include "lua.h"
 #include "tag.h"
@@ -42,7 +42,9 @@
 #include "window.h"
 #include "statusbar.h"
 #include "titlebar.h"
+#include "screen.h"
 #include "layouts/tile.h"
+#include "common/socket.h"
 
 extern awesome_t globalconf;
 
@@ -164,6 +166,8 @@ luaA_padding_set(lua_State *L)
         globalconf.screens[screen].padding.top = luaA_getopt_number(L, 2, "top", 0);
         globalconf.screens[screen].padding.bottom = luaA_getopt_number(L, 2, "bottom", 0);
     }
+
+    ewmh_update_workarea(screen_virttophys(screen));
 
     return 0;
 }

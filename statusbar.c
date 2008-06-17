@@ -27,6 +27,7 @@
 #include "tag.h"
 #include "widget.h"
 #include "window.h"
+#include "ewmh.h"
 
 extern awesome_t globalconf;
 
@@ -293,6 +294,8 @@ luaA_statusbar_position_set(lua_State *L)
             statusbar_position_update(s, s->position);
     }
 
+    ewmh_update_workarea((*sb)->phys_screen);
+
     return 0;
 }
 
@@ -432,6 +435,8 @@ luaA_statusbar_add(lua_State *L)
     /* All the other statusbar and ourselves need to be repositionned */
     for(s = globalconf.screens[screen].statusbar; s; s = s->next)
         statusbar_position_update(s, s->position);
+
+    ewmh_update_workarea((*sb)->phys_screen);
 
     return 0;
 }

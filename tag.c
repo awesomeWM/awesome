@@ -95,6 +95,7 @@ tag_append_to_screen(tag_t *tag, int screen)
     tag_ref(&tag);
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
+    ewmh_update_workarea(phys_screen);
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
