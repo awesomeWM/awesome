@@ -447,13 +447,28 @@ local function eval(cmd)
     assert(loadstring(cmd))()
 end
 
-local function menu(p, textbox, exe_callback)
+-- Menu functions
+local function menu_text_with_cursor(text, text_color, cursor_color, cursor_pos)
+    local char
+    if not text then text = "" end
+    if #text < cursor_pos then
+        char = " "
+    else
+        char = escape(text:sub(cursor_pos, cursor_pos))
+    end
+    local text_start = escape(text:sub(1, cursor_pos - 1))
+    local text_end = escape(text:sub(cursor_pos + 1))
+    return text_start .. "<span background=\"" .. cursor_color .. "\" foreground=\"" .. text_color .. "\">" .. char .. "</span>" .. text_end
+end
+
+local function menu(p, textbox, inv_col, cur_col, exe_callback)
     local command = ""
     local prompt = p or ""
+    local cur_pos = 1
     if not textbox or not exe_callback then
         return
     end
-    textbox:set("text", prompt)
+    textbox:set("text", prompt .. menu_text_with_cursor(text, inv_col, cur_col, cur_pos))
     keygrabber.run(
     function (mod, key)
         if key == "Return" then
@@ -464,12 +479,25 @@ local function menu(p, textbox, exe_callback)
             textbox:set("text", "")
             return false
         elseif key == "BackSpace" then
-            command = command:sub(1, #command - 1)
-            textbox:set("text", p .. escape(command))
+            command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
+            cur_pos = cur_pos - 1
+        -- That's DEL
+        elseif key:byte() == 127 then
+            command = command:sub(1, cur_pos - 1) .. command:sub(cur_pos + 1)
+        elseif key == "Left" then
+            cur_pos = cur_pos - 1
+        elseif key == "Right" then
+            cur_pos = cur_pos + 1
         else
-            command = command .. key
-            textbox:set("text", p .. escape(command))
+            command = command:sub(1, cur_pos - 1) .. key .. command:sub(cur_pos)
+            cur_pos = cur_pos + 1
         end
+        if cur_pos < 1 then
+            cur_pos = 1
+        elseif cur_pos > #command + 1 then
+            cur_pos = #command + 1
+        end
+        textbox:set("text", prompt .. menu_text_with_cursor(command, inv_col, cur_col, cur_pos))
         return true
     end)
 end
