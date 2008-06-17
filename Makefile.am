@@ -106,7 +106,7 @@ if USING_GCC
 AWESOME_CFLAGS = -std=gnu99 -pipe \
 		 -Wall -Wextra \
 		 -Wundef -Wshadow -Wcast-align -Wwrite-strings -Wsign-compare \
-		 -Wunused -Winit-self -Wpointer-arith -Wredundant-decls \
+		 -Wunused -Wno-unused-parameter -Winit-self -Wpointer-arith -Wredundant-decls \
 		 -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn
 endif
 AM_CPPFLAGS = $(pangocairo_CFLAGS) $(AWESOME_CFLAGS) \
