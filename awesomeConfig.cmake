@@ -98,8 +98,8 @@ SET( AWESOME_SHARE              ${CMAKE_INSTALL_PREFIX}/share )
 SET( AWESOME_LUA_LIB_PATH       ${AWESOME_SHARE}/${PROJECT_AWE_NAME}/lib )
 SET( AWESOME_ICON_PATH          ${AWESOME_SHARE}/${PROJECT_AWE_NAME}/icons )
 SET( AWESOME_CONF_PATH          ${AWESOME_ETC}/${PROJECT_AWE_NAME} )
-SET( AWESOME_MAN1_PATH          /usr/share/man/man1 )
-SET( AWESOME_MAN5_PATH          /usr/share/man/man5 )
+SET( AWESOME_MAN1_PATH          ${AWESOME_SHARE}/man/man1 )
+SET( AWESOME_MAN5_PATH          ${AWESOME_SHARE}/man/man5 )
 
 # Configure awesome config.h from template
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/config.h.in 
