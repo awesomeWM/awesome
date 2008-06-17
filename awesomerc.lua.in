@@ -294,7 +294,7 @@ function hook_unmarked(c)
     c:border_set({ width = border_width, color = border_focus })
 end
 
--- Hook function to exeucte when the mouse is over a client.
+-- Hook function to execute when the mouse is over a client.
 function hook_mouseover(c)
     -- Sloppy focus, but disabled for magnifier layout
     if awful.layout.get(c:screen_get()) ~= "magnifier" then
