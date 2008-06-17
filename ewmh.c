@@ -46,6 +46,7 @@ static xcb_atom_t net_supporting_wm_check;
 static xcb_atom_t net_close_window;
 static xcb_atom_t net_wm_name;
 static xcb_atom_t net_wm_visible_name;
+static xcb_atom_t net_wm_desktop;
 static xcb_atom_t net_wm_icon_name;
 static xcb_atom_t net_wm_visible_icon_name;
 static xcb_atom_t net_wm_window_type;
@@ -88,6 +89,7 @@ static AtomItem AtomNames[] =
 
     { "_NET_WM_NAME", &net_wm_name },
     { "_NET_WM_VISIBLE_NAME", &net_wm_visible_name },
+    { "_NET_WM_DESKTOP", &net_wm_desktop },
     { "_NET_WM_ICON_NAME", &net_wm_icon_name },
     { "_NET_WM_VISIBLE_ICON_NAME", &net_wm_visible_icon_name },
     { "_NET_WM_WINDOW_TYPE", &net_wm_window_type },
@@ -166,6 +168,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_name;
     atom[i++] = net_wm_icon_name;
     atom[i++] = net_wm_visible_icon_name;
+    atom[i++] = net_wm_desktop;
     atom[i++] = net_wm_window_type;
     atom[i++] = net_wm_window_type_normal;
     atom[i++] = net_wm_window_type_dock;
@@ -491,7 +494,9 @@ int
 ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
     client_t *c;
+    tag_t *tag;
     int screen;
+    unsigned int i;
 
     if(ev->type == net_current_desktop)
         for(screen = 0;
@@ -505,6 +510,21 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     {
         if((c = client_getbywin(ev->window)))
            client_kill(c);
+    }
+    else if(ev->type == net_wm_desktop)
+    {
+        if((c = client_getbywin(ev->window)))
+        {
+            if(ev->data.data32[0] == 0xffffffff)
+                for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+                    tag_client(c, tag);
+            else
+                for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
+                    if(ev->data.data32[0] == i)
+                        tag_client(c, tag);
+                    else
+                        untag_client(c, tag);
+        }
     }
     else if(ev->type == net_wm_state)
     {
@@ -525,17 +545,37 @@ ewmh_check_client_hints(client_t *c)
 {
     xcb_atom_t *state;
     void *data = NULL;
-    int i;
-
-    xcb_get_property_cookie_t c1, c2;
+    int i, desktop;
+    xcb_get_property_cookie_t c0, c1, c2;
     xcb_get_property_reply_t *reply;
+    tag_t *tag;
 
     /* Send the GetProperty requests which will be processed later */
+    c0 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+                                    net_wm_desktop, XCB_GET_PROPERTY_TYPE_ANY, 0, 1);
+
     c1 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
                                     net_wm_state, ATOM, 0, UINT32_MAX);
 
     c2 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
                                     net_wm_window_type, ATOM, 0, UINT32_MAX);
+
+    reply = xcb_get_property_reply(globalconf.connection, c0, NULL);
+    if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
+    {
+        desktop = *(uint32_t *) data;
+        if(desktop == -1)
+            for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+                tag_client(c, tag);
+        else
+            for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
+                if(desktop == i)
+                    tag_client(c, tag);
+                else
+                    untag_client(c, tag);
+    }
+
+    p_delete(&reply);
 
     reply = xcb_get_property_reply(globalconf.connection, c1, NULL);
     if(reply && (data = xcb_get_property_value(reply)))
