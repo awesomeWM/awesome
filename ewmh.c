@@ -62,6 +62,7 @@ static xcb_atom_t net_wm_state_above;
 static xcb_atom_t net_wm_state_below;
 static xcb_atom_t net_wm_state_modal;
 static xcb_atom_t net_wm_state_hidden;
+static xcb_atom_t net_wm_state_demands_attention;
 
 static xcb_atom_t utf8_string;
 
@@ -103,6 +104,7 @@ static AtomItem AtomNames[] =
     { "_NET_WM_STATE_BELOW", &net_wm_state_below },
     { "_NET_WM_STATE_MODAL", &net_wm_state_modal },
     { "_NET_WM_STATE_HIDDEN", &net_wm_state_hidden },
+    { "_NET_WM_STATE_DEMANDS_ATTENTION", &net_wm_state_demands_attention },
 
     { "UTF8_STRING", &utf8_string },
 };
@@ -178,6 +180,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_below;
     atom[i++] = net_wm_state_modal;
     atom[i++] = net_wm_state_hidden;
+    atom[i++] = net_wm_state_demands_attention;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xscreen->root, net_supported, ATOM, 32, i, atom);
@@ -443,6 +446,19 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         else if(set == _NET_WM_STATE_ADD)
             c->ishidden = true;
         globalconf.screens[c->screen].need_arrange = true;
+    }
+    else if(state == net_wm_state_demands_attention)
+    {
+        if(set == _NET_WM_STATE_REMOVE)
+            c->isurgent = false;
+        else if(set == _NET_WM_STATE_ADD)
+        {
+            c->isurgent = true;
+            /* execute hook */
+            luaA_client_userdata_new(c);
+            luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1);
+            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+        }
     }
 }
 
