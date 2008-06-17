@@ -175,23 +175,6 @@ draw_font_new(xcb_connection_t *conn, int phys_screen, const char *fontname)
     /* Get height */
     pango_layout_get_pixel_size(layout, NULL, &font->height);
 
-    /* At the moment, we don't need ascent/descent but maybe it could
-     * be useful in the future... */
-#if 0
-    PangoContext *context;
-    PangoFontMetrics *font_metrics;
-
-    /* Get ascent and descent */
-    context = pango_layout_get_context(layout);
-    font_metrics = pango_context_get_metrics(context, font->desc, NULL);
-
-    /* Values in PangoFontMetrics are given in Pango units */
-    font->ascent = PANGO_PIXELS(pango_font_metrics_get_ascent(font_metrics));
-    font->descent = PANGO_PIXELS(pango_font_metrics_get_descent(font_metrics));
-
-    pango_font_metrics_unref(font_metrics);
-#endif
-
     g_object_unref(layout);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
@@ -199,8 +182,8 @@ draw_font_new(xcb_connection_t *conn, int phys_screen, const char *fontname)
     return font;
 }
 
-/** Delete a font
- * \param font font_t to delete
+/** Delete a font.
+ * \param font Font to delete.
  */
 void
 draw_font_delete(font_t **font)
@@ -224,6 +207,7 @@ typedef struct
     } margin;
     bool has_bg_color;
     xcolor_t bg_color;
+    draw_image_t *bg_image;
     struct
     {
         int offset;
@@ -253,11 +237,12 @@ draw_text_markup_expand(draw_parser_data_t *data,
             if(!a_strcmp(p->attribute_names[0][i], "color"))
                 data->has_bg_color = xcolor_new(data->connection, data->phys_screen,
                                                     p->attribute_values[0][i], &data->bg_color);
+            else if(!a_strcmp(p->attribute_names[0][i], "image"))
+                data->bg_image = draw_image_new(p->attribute_values[0][i]);
 
     /* text */
     if(p->attribute_names[1])
         for(i = 0; p->attribute_names[1][i]; i++)
-        {
             if(!a_strcmp(p->attribute_names[1][i], "align"))
                 data->align = draw_align_get_from_str(p->attribute_values[1][i]);
             else if(!a_strcmp(p->attribute_names[1][i], "shadow"))
@@ -265,17 +250,14 @@ draw_text_markup_expand(draw_parser_data_t *data,
                                p->attribute_values[1][i], &data->shadow.color);
             else if(!a_strcmp(p->attribute_names[1][i], "shadow_offset"))
                 data->shadow.offset = atoi(p->attribute_values[1][i]);
-        }
 
     /* margin */
     if(p->attribute_names[2])
         for(i = 0; p->attribute_names[2][i]; i++)
-        {
             if(!a_strcmp(p->attribute_names[2][i], "left"))
                 data->margin.left = atoi(p->attribute_values[2][i]);
             else if(!a_strcmp(p->attribute_names[2][i], "right"))
                 data->margin.right = atoi(p->attribute_values[2][i]);
-        }
 
     /* stole text */
     data->text = p->text;
@@ -322,6 +304,12 @@ draw_text(draw_context_t *ctx, font_t *font,
 
     if(parser_data.has_bg_color)
         draw_rectangle(ctx, area, 1.0, true, parser_data.bg_color);
+
+    if(parser_data.bg_image)
+    {
+        draw_image(ctx, area.x, area.y, 0, parser_data.bg_image);
+        draw_image_delete(&parser_data.bg_image);
+    }
 
     pango_layout_set_width(ctx->layout,
                            pango_units_from_double(area.width
@@ -727,8 +715,8 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
  * \param filename The image file to load.
  * \return A new image.
  */
-draw_image_t
-*draw_image_new(const char *filename)
+draw_image_t *
+draw_image_new(const char *filename)
 {
     draw_image_t *image = NULL;
     GdkPixbuf *pixbuf;
@@ -750,10 +738,11 @@ draw_image_t
     return image;
 }
 
-/** Delete an image
- * \param image the image to delete
+/** Delete an image.
+ * \param image The image to delete.
  */
-void draw_image_delete(draw_image_t **image)
+void
+draw_image_delete(draw_image_t **image)
 {
     if(*image)
     {
@@ -832,11 +821,12 @@ draw_imlib_load_strerror(Imlib_Load_Error e)
 }
 
 
-/** Load an image (PNG Format only) from filename
- * \param filename the image file to load
- * \return a new image
+/** Load an image from filename.
+ * \param filename The image file to load.
+ * \return A new image.
  */
-draw_image_t *draw_image_new(const char *filename)
+draw_image_t
+*draw_image_new(const char *filename)
 {
     int w, h, size, i;
     DATA32 *data;
@@ -887,7 +877,8 @@ draw_image_t *draw_image_new(const char *filename)
 /** Delete an image
  * \param image the image to delete
  */
-void draw_image_delete(draw_image_t **image)
+void
+draw_image_delete(draw_image_t **image)
 {
     if (*image)
     {
@@ -903,7 +894,8 @@ void draw_image_delete(draw_image_t **image)
  * \param wanted_h wanted height: if > 0, image will be resized
  * \param image the image to draw
  */
-void draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
+void
+draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
 {
     draw_image_from_argb_data(ctx, x, y, image->width, image->height, wanted_h, image->data);
 }
