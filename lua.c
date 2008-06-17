@@ -82,8 +82,6 @@ luaA_mouse_add(lua_State *L)
     button_list_push(&globalconf.buttons.root, *button);
     button_ref(button);
 
-    window_root_grabbutton(*button);
-
     return 0;
 }
 

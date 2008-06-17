@@ -250,9 +250,6 @@ client_focus(client_t *c, int screen)
         focus_client_push(c);
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
                             c->win, XCB_CURRENT_TIME);
-        /* since we're dropping EnterWindow events and sometimes the window
-         * will appear under the mouse, grabbuttons */
-        window_grabbuttons(c->win, c->phys_screen, c->buttons);
         phys_screen = c->phys_screen;
 
         /* Some layouts use focused client differently, so call them back. */

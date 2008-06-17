@@ -467,9 +467,6 @@ main(int argc, char **argv)
         systray_init(screen_nbr);
     }
 
-    /* call this to at least grab root window clicks */
-    window_root_grabbuttons();
-
     /* scan existing windows */
     scan();
 

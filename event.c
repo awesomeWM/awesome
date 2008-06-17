@@ -343,7 +343,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                           xcb_aux_get_screen(connection, emwin->phys_screen)->root,
                           ANY_MODIFIER);
     else
-        window_root_grabbuttons();
+        window_root_grabbuttons(ev->root);
 
     return 0;
 }

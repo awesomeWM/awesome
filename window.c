@@ -107,11 +107,11 @@ window_configure(xcb_window_t win, area_t geometry, int border)
 
 /** Grab or ungrab buttons on a window.
  * \param win The window.
- * \param phys_screen Physical screen number.
+ * \param root The root window.
  * \param buttons The buttons to grab.
  */
 void
-window_grabbuttons(xcb_window_t win, int phys_screen, button_t *buttons)
+window_grabbuttons(xcb_window_t win, xcb_window_t root, button_t *buttons)
 {
     button_t *b;
 
@@ -131,70 +131,32 @@ window_grabbuttons(xcb_window_t win, int phys_screen, button_t *buttons)
                         b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
     }
 
-    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
-                      xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
-                      ANY_MODIFIER);
+    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, root, ANY_MODIFIER);
 }
 
 /** Grab all buttons on the root window.
+ * \param root The root window.
  */
 void
-window_root_grabbuttons(void)
+window_root_grabbuttons(xcb_window_t root)
 {
     button_t *b;
-    xcb_screen_t *s;
-    int phys_screen = globalconf.default_screen;
 
-    do
+    for(b = globalconf.buttons.root; b; b = b->next)
     {
-        s = xcb_aux_get_screen(globalconf.connection, phys_screen);
-        for(b = globalconf.buttons.root; b; b = b->next)
-        {
-            xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
-                            XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
-                            b->button, b->mod);
-            xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
-                            XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
-                            b->button, b->mod | XCB_MOD_MASK_LOCK);
-            xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
-                            XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
-                            b->button, b->mod | globalconf.numlockmask);
-            xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
-                            XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
-                            b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
-        }
-        phys_screen++;
-    } while(!globalconf.screens_info->xinerama_is_active
-            && phys_screen < globalconf.screens_info->nscreen);
-}
-
-/** Grab button on the root window.
- * \param b The button binding.
- */
-void
-window_root_grabbutton(button_t *b)
-{
-    xcb_screen_t *s;
-    int phys_screen = globalconf.default_screen;
-
-    do
-    {
-        s = xcb_aux_get_screen(globalconf.connection, phys_screen);
-        xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
+        xcb_grab_button(globalconf.connection, false, root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod);
-        xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
+        xcb_grab_button(globalconf.connection, false, root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | XCB_MOD_MASK_LOCK);
-        xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
+        xcb_grab_button(globalconf.connection, false, root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask);
-        xcb_grab_button(globalconf.connection, false, s->root, BUTTONMASK,
+        xcb_grab_button(globalconf.connection, false, root, BUTTONMASK,
                         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
                         b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
-        phys_screen++;
-    } while(!globalconf.screens_info->xinerama_is_active
-            && phys_screen < globalconf.screens_info->nscreen);
+    }
 }
 
 /** Grab key on the root windows.
@@ -206,7 +168,7 @@ window_root_grabkey(keybinding_t *k)
     int phys_screen = globalconf.default_screen;
     xcb_screen_t *s;
     xcb_keycode_t kc;
-    
+
     if((kc = k->keycode)
        || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         do
@@ -235,7 +197,7 @@ window_root_ungrabkey(keybinding_t *k)
     int phys_screen = globalconf.default_screen;
     xcb_screen_t *s;
     xcb_keycode_t kc;
-    
+
     if((kc = k->keycode)
        || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         do
