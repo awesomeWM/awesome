@@ -477,8 +477,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             if(ev->window == xutil_screen_get(globalconf.connection, screen)->root)
                 tag_view_only_byindex(screen, ev->data.data32[0]);
         }
-
-    if(ev->type == net_close_window)
+    else if(ev->type == net_close_window)
     {
         if((c = client_getbywin(ev->window)))
            client_kill(c);
