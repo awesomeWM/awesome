@@ -367,7 +367,6 @@ main(int argc, char **argv)
     xfd = xcb_get_file_descriptor(globalconf.connection);
     ev_io_init(&xio, &a_xcb_io_cb, xfd, EV_READ);
     ev_io_start(globalconf.loop, &xio);
-    ev_unref(globalconf.loop);
     ev_check_init(&xcheck, &a_xcb_check_cb);
     ev_check_start(globalconf.loop, &xcheck);
     ev_unref(globalconf.loop);
