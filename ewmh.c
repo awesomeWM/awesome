@@ -34,6 +34,7 @@
 extern awesome_t globalconf;
 
 static xcb_atom_t net_supported;
+static xcb_atom_t net_supporting_wm_check;
 static xcb_atom_t net_client_list;
 static xcb_atom_t net_number_of_desktops;
 static xcb_atom_t net_current_desktop;
@@ -68,6 +69,7 @@ typedef struct
 static AtomItem AtomNames[] =
 {
     { "_NET_SUPPORTED", &net_supported },
+    { "_NET_SUPPORTING_WM_CHECK", &net_supporting_wm_check },
     { "_NET_CLIENT_LIST", &net_client_list },
     { "_NET_NUMBER_OF_DESKTOPS", &net_number_of_desktops },
     { "_NET_CURRENT_DESKTOP", &net_current_desktop },
@@ -134,9 +136,12 @@ void
 ewmh_set_supported_hints(int phys_screen)
 {
     xcb_atom_t atom[ATOM_NUMBER];
+    xcb_window_t father;
+    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
     int i = 0;
 
     atom[i++] = net_supported;
+    atom[i++] = net_supporting_wm_check;
     atom[i++] = net_client_list;
     atom[i++] = net_number_of_desktops;
     atom[i++] = net_current_desktop;
@@ -163,8 +168,21 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_hidden;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			net_supported, ATOM, 32, i, atom);
+                        xscreen->root, net_supported, ATOM, 32, i, atom);
+
+    /* create our own window */
+    father = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, xscreen->root_depth,
+                      father, xscreen->root, -1, -1, 1, 1, 0,
+                      XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        xscreen->root, net_supporting_wm_check, WINDOW, 32,
+                        1, (void *) &father);
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        father, net_supporting_wm_check, WINDOW, 32,
+                        1, (void *) &father);
 }
 
 void
