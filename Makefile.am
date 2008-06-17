@@ -112,7 +112,7 @@ endif
 AM_CPPFLAGS = $(pangocairo_CFLAGS) $(AWESOME_CFLAGS) \
 	$(GdkPixbuf_CFLAGS) $(GDK_CFLAGS) $(imlib2_CFLAGS) \
 	$(xcb_CFLAGS) $(xcb_event_CFLAGS) \
-	$(xcb_randr_CFLAGS) $(xcb_xinerama_CFLAGS) $(xcb_shape_CFLAGS) \
+	$(xcb_randr_CFLAGS) $(xcb_xinerama_CFLAGS) \
 	$(xcb_aux_CFLAGS) $(xcb_atom_CFLAGS) $(xcb_keysyms_CFLAGS) \
 	$(xcb_icccm_CFLAGS) $(dbus_CFLAGS) $(Lua_CFLAGS)
 
@@ -154,7 +154,7 @@ awesome_SOURCES = \
 awesome_SOURCES += $(LAYOUTS)
 awesome_SOURCES += $(WIDGETS)
 awesome_LDADD = $(pangocairo_LIBS) $(xcb_LIBS) $(xcb_event_LIBS) \
-	$(xcb_randr_LIBS) $(xcb_xinerama_LIBS) $(xcb_shape_LIBS) $(xcb_aux_LIBS) \
+	$(xcb_randr_LIBS) $(xcb_xinerama_LIBS) $(xcb_aux_LIBS) \
 	$(xcb_atom_LIBS) $(xcb_keysyms_LIBS) $(xcb_icccm_LIBS) $(dbus_LIBS)\
 	$(imlib2_LIBS) $(GdkPixbuf_LIBS) $(GDK_LIBS) $(Lua_LIBS) $(ev_LIBS)
 

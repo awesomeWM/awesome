@@ -24,7 +24,6 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_atom.h>
-#include <xcb/shape.h>
 
 #include "client.h"
 #include "tag.h"
@@ -388,13 +387,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK,
                                  select_input_val);
-
-    /* handle xshape */
-    if(globalconf.have_shape)
-    {
-        xcb_shape_select_input(globalconf.connection, w, true);
-        window_setshape(c->win, c->phys_screen);
-    }
 
     /* Push client in client list */
     client_list_push(&globalconf.clients, c);

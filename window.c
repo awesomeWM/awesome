@@ -21,7 +21,6 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-#include <xcb/shape.h>
 #include <xcb/xcb_keysyms.h>
 #include <xcb/xcb_aux.h>
 
@@ -214,27 +213,6 @@ window_root_ungrabkey(keybinding_t *k)
         phys_screen++;
         } while(!globalconf.screens_info->xinerama_is_active
                 && phys_screen < globalconf.screens_info->nscreen);
-}
-
-/** Set shape property on window.
- * \param win The window.
- * \param phys_screen Physical screen number.
- */
-void
-window_setshape(xcb_window_t win, int phys_screen)
-{
-    xcb_shape_query_extents_reply_t *r;
-
-    /* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10. */
-    if((r = xcb_shape_query_extents_reply(globalconf.connection,
-                                          xcb_shape_query_extents_unchecked(globalconf.connection, win),
-                                          NULL)) && r->bounding_shaped)
-        xcb_shape_combine(globalconf.connection, XCB_SHAPE_SO_SET,
-                          XCB_SHAPE_SK_BOUNDING, XCB_SHAPE_SK_BOUNDING,
-                          xcb_aux_get_screen(globalconf.connection, phys_screen)->root,
-                          0, 0, win);
-
-    p_delete(&r);
 }
 
 /** Set transparency of a window.

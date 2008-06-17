@@ -407,8 +407,6 @@ struct awesome_t
     unsigned int shiftlockmask;
     /** Numlock mask */
     unsigned int capslockmask;
-    /** Check for XShape extension */
-    bool have_shape;
     /** Check for XRandR extension */
     bool have_randr;
     /** Cursors */

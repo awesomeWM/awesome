@@ -567,24 +567,6 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     return 0;
 }
 
-/** The shape notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
- * \param ev The event.
- */
-int
-event_handle_shape(void *data __attribute__ ((unused)),
-                   xcb_connection_t *connection __attribute__ ((unused)),
-                   xcb_shape_notify_event_t *ev)
-{
-    client_t *c = client_getbywin(ev->affected_window);
-
-    if(c)
-        window_setshape(c->win, c->phys_screen);
-
-    return 0;
-}
-
 /** The randr screen change notify event handler.
  * \param data currently unused.
  * \param connection The connection to the X server.

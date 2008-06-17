@@ -29,7 +29,6 @@
 
 #include <ev.h>
 #include <xcb/xcb.h>
-#include <xcb/shape.h>
 #include <xcb/randr.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_atom.h>
@@ -290,7 +289,7 @@ main(int argc, char **argv)
     const char *confpath = NULL;
     int xfd, i, screen_nbr, opt;
     ssize_t cmdlen = 1;
-    const xcb_query_extension_reply_t *shape_query, *randr_query;
+    const xcb_query_extension_reply_t *randr_query;
     client_t *c;
     static struct option long_options[] =
     {
@@ -484,14 +483,6 @@ main(int argc, char **argv)
     set_property_notify_event_handler(globalconf.evenths, event_handle_propertynotify, NULL);
     set_unmap_notify_event_handler(globalconf.evenths, event_handle_unmapnotify, NULL);
     set_client_message_event_handler(globalconf.evenths, event_handle_clientmessage, NULL);
-
-    /* check for shape extension */
-    shape_query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
-    if((globalconf.have_shape = shape_query->present))
-        xcb_set_event_handler(globalconf.evenths,
-                              (shape_query->first_event + XCB_SHAPE_NOTIFY),
-                              (xcb_generic_event_handler_t) event_handle_shape,
-                              NULL);
 
     /* check for randr extension */
     randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);

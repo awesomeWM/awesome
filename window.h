@@ -31,7 +31,6 @@ void window_grabbuttons(xcb_window_t, xcb_window_t, button_t *);
 void window_root_grabbuttons(xcb_window_t);
 void window_root_grabkey(keybinding_t *);
 void window_root_ungrabkey(keybinding_t *);
-void window_setshape(xcb_window_t, int);
 void window_settrans(xcb_window_t, double);
 
 #endif

@@ -24,7 +24,6 @@
 
 #include <xcb/xcb.h>
 #include <xcb/randr.h>
-#include <xcb/shape.h>
 
 #define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
 
@@ -38,7 +37,6 @@ int event_handle_keypress(void *, xcb_connection_t *, xcb_key_press_event_t *);
 int event_handle_maprequest(void *, xcb_connection_t *, xcb_map_request_event_t *);
 int event_handle_propertynotify(void *, xcb_connection_t *, xcb_property_notify_event_t *);
 int event_handle_unmapnotify(void *, xcb_connection_t *, xcb_unmap_notify_event_t *);
-int event_handle_shape(void *, xcb_connection_t *, xcb_shape_notify_event_t *);
 int event_handle_randr_screen_change_notify(void *, xcb_connection_t *, xcb_randr_screen_change_notify_event_t *);
 int event_handle_clientmessage(void *, xcb_connection_t *, xcb_client_message_event_t *);
 

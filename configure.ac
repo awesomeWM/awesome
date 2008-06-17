@@ -157,8 +157,6 @@ PKG_CHECK_MODULES([xcb_randr], [xcb-randr],,
    [AC_MSG_ERROR([awesome requires xcb-randr.])])
 PKG_CHECK_MODULES([xcb_xinerama], [xcb-xinerama],,
    [AC_MSG_ERROR([awesome requires xcb-xinerama.])])
-PKG_CHECK_MODULES([xcb_shape], [xcb-shape],,
-   [AC_MSG_ERROR([awesome requires xcb-shape.])])
 PKG_CHECK_MODULES([xcb_aux], [xcb-aux],,
    [AC_MSG_ERROR([awesome requires xcb-aux.])])
 PKG_CHECK_MODULES([xcb_atom], [xcb-atom],,
