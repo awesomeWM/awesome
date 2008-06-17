@@ -190,6 +190,9 @@ ewmh_set_supported_hints(int phys_screen)
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, net_supporting_wm_check, WINDOW, 32,
                         1, &father);
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        father, net_wm_name, utf8_string, 8, 7, "awesome");
 }
 
 void
