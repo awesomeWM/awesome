@@ -610,7 +610,11 @@ local function menu(args, textbox, exe_callback, completion_callback)
             end
 
             -- Typin cases
-            if key == "BackSpace" then
+            if key == "Home" then
+                cur_pos = 1
+            elseif key == "End" then
+                cur_pos = #command + 1
+            elseif key == "BackSpace" then
                 if cur_pos > 1 then
                     command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
                     cur_pos = cur_pos - 1
