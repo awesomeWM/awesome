@@ -96,6 +96,10 @@ local function client_swap(i)
     end
 end
 
+local function client_master()
+    return client.visible_get(mouse.screen_get())[1]
+end
+
 -- Move/resize a client relativ to current coordinates.
 local function client_moveresize(x, y, w, h)
     local sel = client.focus_get()
@@ -590,6 +594,7 @@ P.client =
     next = client_next;
     focus = client_focus;
     swap = client_swap;
+    master = client_master;
     movetotag = client_movetotag;
     toggletag = client_toggletag;
     togglefloating = client_togglefloating;

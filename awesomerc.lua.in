@@ -193,6 +193,7 @@ keybinding.new({ modkey, "Shift" }, "k", function () awful.client.swap(-1) end):
 keybinding.new({ modkey, "Control" }, "j", function () awful.screen.focus(1) end):add()
 keybinding.new({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end):add()
 keybinding.new({ modkey, "Control" }, "space", awful.client.togglefloating):add()
+keybinding.new({ modkey, "Control" }, "Return", function () client.focus_get():swap(awful.client.master()) end):add()
 keybinding.new({ modkey }, "o", awful.client.movetoscreen):add()
 
 -- Layout manipulation
