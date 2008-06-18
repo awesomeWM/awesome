@@ -477,10 +477,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     uint32_t values[5];
 
     if(c->titlebar && !c->ismoving && !c->isfloating && layout != layout_floating)
-    {
-        titlebar_update_geometry_tiled(c, geometry);
         geometry = titlebar_geometry_remove(c->titlebar, geometry);
-    }
 
     if(hints)
         geometry = client_geometry_hints(c, geometry);
@@ -539,7 +536,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     /* call it again like it was floating,
      * we want it to be sticked to the window */
     if(!c->ismoving && !c->isfloating && layout != layout_floating)
-       titlebar_update_geometry_floating(c);
+        titlebar_update_geometry_floating(c);
 
     return resized;
 }

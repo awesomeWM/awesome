@@ -33,9 +33,9 @@ void titlebar_init(client_t *);
 int luaA_titlebar_userdata_new(titlebar_t *);
 
 /** Add the titlebar geometry to a geometry.
- * \param t the titlebar
- * \param geometry the geometry
- * \return a new geometry bigger if the titlebar is visible
+ * \param t The titlebar
+ * \param geometry The geometry
+ * \return A new geometry bigger if the titlebar is visible.
  */
 static inline area_t
 titlebar_geometry_add(titlebar_t *t, area_t geometry)
@@ -65,9 +65,9 @@ titlebar_geometry_add(titlebar_t *t, area_t geometry)
 }
 
 /** Remove the titlebar geometry to a geometry.
- * \param t the titlebar
- * \param geometry the geometry
- * \return a new geometry smaller if the titlebar is visible
+ * \param t The titlebar.
+ * \param geometry The geometry.
+ * \return A new geometry smaller if the titlebar is visible.
  */
 static inline area_t
 titlebar_geometry_remove(titlebar_t *t, area_t geometry)
@@ -97,7 +97,7 @@ titlebar_geometry_remove(titlebar_t *t, area_t geometry)
 }
 
 /** Update the titlebar geometry for a floating client.
- * \param c the client
+ * \param c The client.
  */
 static inline void
 titlebar_update_geometry_floating(client_t *c)
@@ -111,7 +111,6 @@ titlebar_update_geometry_floating(client_t *c)
     simplewindow_moveresize(c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
     titlebar_draw(c);
 }
-
 
 /** Update the titlebar geometry for a tiled client.
  * \param c The client.
