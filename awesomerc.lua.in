@@ -208,10 +208,10 @@ keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layout
 
 -- Menu
 keybinding.new({ modkey }, "F1", function ()
-                                     awful.menu({ prompt = "Run: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mymenubox, awful.spawn)
+                                     awful.menu({ prompt = "Run: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mymenubox, awful.spawn, awful.completion.bash)
                                  end):add()
 keybinding.new({ modkey }, "F4", function ()
-                                     awful.menu({ prompt = "Run Lua code: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mymenubox, awful.eval)
+                                     awful.menu({ prompt = "Run Lua code: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mymenubox, awful.eval, awful.completion.bash)
                                  end):add()
 
 --- Tabulous, tab manipulation

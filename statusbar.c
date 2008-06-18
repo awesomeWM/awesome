@@ -443,7 +443,7 @@ luaA_statusbar_add(lua_State *L)
     statusbar_list_append(&globalconf.screens[screen].statusbar, *sb);
     statusbar_ref(sb);
 
-    /* All the other statusbar and ourselves need to be repositionned */
+    /* All the other statusbar and ourselves need to be repositioned */
     for(s = globalconf.screens[screen].statusbar; s; s = s->next)
         statusbar_position_update(s, s->position);
 

@@ -29,6 +29,7 @@ local os = os
 local table = table
 local hooks = hooks
 local keygrabber = keygrabber
+local io = io
 
 -- Reset env
 setfenv(1, P)
@@ -453,6 +454,60 @@ local function eval(cmd)
     assert(loadstring(cmd))()
 end
 
+local function menu_completion_bash(command, cur_pos, ncomp)
+    local wstart = 1
+    local wend = 1
+    local words = {}
+    local cword_index = 0
+    local cword_start = 0
+    local cword_end = 0
+    local i = 1
+    local comptype = "file"
+
+    -- do nothing if we are on a letter, i.e. not at len + 1 or on a space
+    if cur_pos ~= #command + 1 and command:sub(cur_pos, cur_pos) ~= " " then
+        return command, cur_pos
+    end
+
+    while wend <= #command do
+        wend = command:find(" ", wstart)
+        if not wend then wend = #command + 1 end
+        table.insert(words, command:sub(wstart, wend - 1))
+        if cur_pos >= wstart and cur_pos <= wend + 1 then
+            cword_start = wstart
+            cword_end = wend
+            cword_index = i
+        end
+        wstart = wend + 1
+        i = i + 1
+    end
+
+    if cword_index == 1 then
+        comptype = "command"
+    end
+
+    local c = io.popen("/bin/bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'")
+    local output = {}
+    i = 0
+    while true do
+        local line = c:read("*line")
+        if not line then break end
+        table.insert(output, line)
+    end
+
+    c:close()
+
+    -- cycle
+    while ncomp > #output do
+        ncomp = ncomp - #output
+    end
+
+    local str = command:sub(1, cword_start - 1) .. output[ncomp] .. command:sub(cword_end)
+    cur_pos = cword_end + #output[ncomp] + 1
+
+    return str, cur_pos
+end
+
 -- Menu functions
 local function menu_text_with_cursor(text, text_color, cursor_color, cursor_pos)
     local char
@@ -470,6 +525,8 @@ end
 local function menu(args, textbox, exe_callback, completion_callback)
     if not args then return end
     local command = ""
+    local command_before_comp
+    local cur_pos_before_comp
     local prompt = args.prompt or ""
     local inv_col = args.cursor_fg or "black"
     local cur_col = args.cursor_bg or "white"
@@ -518,8 +575,13 @@ local function menu(args, textbox, exe_callback, completion_callback)
             if completion_callback then
                 -- That's tab
                 if key:byte() == 9 then
-                    command, cur_pos = completion_callback(command, cur_pos, ncomp)
+                    if ncomp == 1 then
+                        command_before_comp = command
+                        cur_pos_before_comp = cur_pos
+                    end
+                    command, cur_pos = completion_callback(command_before_comp, cur_pos_before_comp, ncomp)
                     ncomp = ncomp + 1
+                    key = ""
                 else
                     ncomp = 1
                 end
@@ -617,6 +679,10 @@ P.layout =
     get = layout_get;
     set = layout_set;
     inc = layout_inc;
+}
+P.completion =
+{
+    bash = menu_completion_bash;
 }
 P.spawn = spawn
 P.menu = menu
