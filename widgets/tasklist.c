@@ -73,7 +73,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
     area_t area;
     char *text;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0, j = 0;
-    NetWMIcon *icon;
+    netwm_icon_t *icon;
     markup_parser_data_t *p;
     const char *elements[] = { "bg", NULL };
     xcolor_t bg_color;

@@ -610,11 +610,11 @@ ewmh_check_client_hints(client_t *c)
     p_delete(&reply);
 }
 
-NetWMIcon *
+netwm_icon_t *
 ewmh_get_window_icon(xcb_window_t w)
 {
     double alpha;
-    NetWMIcon *icon;
+    netwm_icon_t *icon;
     int size, i;
     uint32_t *data;
     unsigned char *imgdata;
@@ -631,7 +631,7 @@ ewmh_get_window_icon(xcb_window_t w)
         return NULL;
     }
 
-    icon = p_new(NetWMIcon, 1);
+    icon = p_new(netwm_icon_t, 1);
 
     icon->width = data[0];
     icon->height = data[1];
