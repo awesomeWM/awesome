@@ -434,15 +434,15 @@ luaA_colors_set(lua_State *L)
  * \param type Its type.
  */
 void
-luaA_pushpointer(void *p, awesome_type_t type)
+luaA_pushpointer(lua_State *L, void *p, awesome_type_t type)
 {
     switch(type)
     {
       case AWESOME_TYPE_STATUSBAR:
-        luaA_statusbar_userdata_new(p);
+        luaA_statusbar_userdata_new(L, p);
         break;
       case AWESOME_TYPE_TITLEBAR:
-        luaA_titlebar_userdata_new(p);
+        luaA_titlebar_userdata_new(L, p);
         break;
     }
 }

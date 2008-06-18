@@ -41,6 +41,10 @@
 
 extern awesome_t globalconf;
 
+DO_LUA_NEW(static, button_t, mouse, "mouse", button_ref)
+DO_LUA_GC(button_t, mouse, "mouse", button_unref)
+DO_LUA_EQ(button_t, mouse, "mouse")
+
 /** Define corners. */
 typedef enum
 {
@@ -1008,18 +1012,6 @@ luaA_mouse_screen_get(lua_State *L)
     return 1;
 }
 
-/** Create a new mouse userdata.
- * \param bt The mouse button binding.
- */
-static int
-luaA_mouse_userdata_new(button_t *bt)
-{
-    button_t **b = lua_newuserdata(globalconf.L, sizeof(button_t *));
-    *b = bt;
-    button_ref(b);
-    return luaA_settype(globalconf.L, "mouse");
-}
-
 /** Create a new mouse button bindings.
  * \param L The Lua VM state.
  * \luastack
@@ -1051,11 +1043,8 @@ luaA_mouse_new(lua_State *L)
         button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
     }
 
-    return luaA_mouse_userdata_new(button);
+    return luaA_mouse_userdata_new(L, button);
 }
-
-DO_LUA_GC(button_t, mouse, "mouse", button_unref)
-DO_LUA_EQ(button_t, mouse, "mouse")
 
 const struct luaL_reg awesome_mouse_methods[] =
 {

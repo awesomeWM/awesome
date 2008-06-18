@@ -231,8 +231,8 @@ taglist_button_press(widget_node_t *w,
                    && ev->event_x < AREA_RIGHT(*area)
                    && (data->show_empty || tag->selected || tag_isoccupied(tag)) )
                 {
-                    luaA_pushpointer(object, type);
-                    luaA_tag_userdata_new(tag);
+                    luaA_pushpointer(globalconf.L, object, type);
+                    luaA_tag_userdata_new(globalconf.L, tag);
                     luaA_dofunction(globalconf.L, b->fct, 2);
                     return;
                 }

@@ -228,8 +228,8 @@ tasklist_button_press(widget_node_t *w,
         for(b = w->widget->buttons; b; b = b->next)
             if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
             {
-                luaA_pushpointer(object, type);
-                luaA_client_userdata_new(c);
+                luaA_pushpointer(globalconf.L, object, type);
+                luaA_client_userdata_new(globalconf.L, c);
                 luaA_dofunction(globalconf.L, b->fct, 2);
             }
 }

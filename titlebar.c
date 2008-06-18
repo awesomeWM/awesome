@@ -32,6 +32,10 @@
 
 extern awesome_t globalconf;
 
+DO_LUA_NEW(extern, titlebar_t, titlebar, "titlebar", titlebar_ref)
+DO_LUA_GC(titlebar_t, titlebar, "titlebar", titlebar_unref)
+DO_LUA_EQ(titlebar_t, titlebar, "titlebar")
+
 /** Get a client by its titlebar.
  * \param titlebar The titlebar.
  * \return A client.
@@ -327,7 +331,7 @@ luaA_titlebar_new(lua_State *L)
 
     tb->border.width = luaA_getopt_number(L, 1, "border_width", 0);
 
-    return luaA_titlebar_userdata_new(tb);
+    return luaA_titlebar_userdata_new(globalconf.L, tb);
 }
 
 /** Add a widget to a titlebar.
@@ -382,7 +386,7 @@ luaA_titlebar_widget_get(lua_State *L)
 
     for(witer = (*tb)->widgets; witer; witer = witer->next)
     {
-        luaA_widget_userdata_new(witer->widget);
+        luaA_widget_userdata_new(L, witer->widget);
         lua_setfield(L, -2, witer->widget->name);
     }
 
@@ -404,7 +408,7 @@ luaA_titlebar_client_get(lua_State *L)
     client_t *c;
 
     if((c = client_getbytitlebar(*titlebar)))
-        return luaA_client_userdata_new(c);
+        return luaA_client_userdata_new(L, c);
 
     return 0;
 }
@@ -481,19 +485,6 @@ luaA_titlebar_border_set(lua_State *L)
     return 0;
 }
 
-/** Create a new titlebar userdata.
- * \param t The titlebar.
- * \return The number of value pushed.
- */
-int
-luaA_titlebar_userdata_new(titlebar_t *t)
-{
-    titlebar_t **tb = lua_newuserdata(globalconf.L, sizeof(titlebar_t *));
-    *tb = t;
-    titlebar_ref(tb);
-    return luaA_settype(globalconf.L, "titlebar");
-}
-
 /** Convert a titlebar to a printable string.
  * \param L The Lua VM state.
  * \return The number of value pushed.
@@ -509,9 +500,6 @@ luaA_titlebar_tostring(lua_State *L)
     lua_pushfstring(L, "[titlebar udata(%p)]", *p);
     return 1;
 }
-
-DO_LUA_GC(titlebar_t, titlebar, "titlebar", titlebar_unref)
-DO_LUA_EQ(titlebar_t, titlebar, "titlebar")
 
 const struct luaL_reg awesome_titlebar_methods[] =
 {

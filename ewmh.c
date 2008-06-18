@@ -470,7 +470,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         {
             c->isurgent = true;
             /* execute hook */
-            luaA_client_userdata_new(c);
+            luaA_client_userdata_new(globalconf.L, c);
             luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1);
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         }

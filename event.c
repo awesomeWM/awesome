@@ -61,7 +61,7 @@ event_handle_mouse_button_press(client_t *c,
         {
             if(c)
             {
-                luaA_client_userdata_new(c);
+                luaA_client_userdata_new(globalconf.L, c);
                 luaA_dofunction(globalconf.L, b->fct, 1);
             }
             else
@@ -335,7 +335,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         globalconf.pointer_x = ev->root_x;
         globalconf.pointer_y = ev->root_y;
 
-        luaA_client_userdata_new(c);
+        luaA_client_userdata_new(globalconf.L, c);
         luaA_dofunction(globalconf.L, globalconf.hooks.mouseover, 1);
     }
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))

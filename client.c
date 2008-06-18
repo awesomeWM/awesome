@@ -43,6 +43,16 @@
 
 extern awesome_t globalconf;
 
+int
+luaA_client_userdata_new(lua_State *L, client_t *p)
+{
+    client_t **pp = lua_newuserdata(L, sizeof(client_t *));
+    *pp = p;
+    return luaA_settype(L, "client");
+}
+
+DO_LUA_EQ(client_t, client, "client")
+
 /** Load windows properties, restoring client's tag
  * and floating state before awesome was restarted if any.
  * \todo This may bug if number of tags is != than before.
@@ -187,7 +197,7 @@ client_updatetitle(client_t *c)
     a_iso2utf8(name, &c->name);
 
     /* call hook */
-    luaA_client_userdata_new(c);
+    luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.titleupdate, 1);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -200,7 +210,7 @@ static void
 client_unfocus(client_t *c)
 {
     /* Call hook */
-    luaA_client_userdata_new(globalconf.focus->client);
+    luaA_client_userdata_new(globalconf.L, globalconf.focus->client);
     luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1);
 
     focus_client_push(NULL);
@@ -256,7 +266,7 @@ client_focus(client_t *c, int screen)
         globalconf.screens[c->screen].need_arrange = true;
 
         /* execute hook */
-        luaA_client_userdata_new(globalconf.focus->client);
+        luaA_client_userdata_new(globalconf.L, globalconf.focus->client);
         luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
     }
     else
@@ -403,7 +413,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 
     /* call hook */
-    luaA_client_userdata_new(c);
+    luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1);
 }
 
@@ -628,7 +638,7 @@ client_unmanage(client_t *c)
     tag_t *tag;
 
     /* call hook */
-    luaA_client_userdata_new(c);
+    luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1);
 
     /* The server grab construct avoids race conditions. */
@@ -680,7 +690,7 @@ client_updatewmhints(client_t *c)
         if((c->isurgent = (wm_hints_flags & XCB_WM_X_URGENCY_HINT)))
         {
             /* execute hook */
-            luaA_client_userdata_new(c);
+            luaA_client_userdata_new(globalconf.L, c);
             luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1);
 
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -827,7 +837,7 @@ luaA_client_get(lua_State *L)
 
     for(c = globalconf.clients; c; c = c->next)
     {
-        luaA_client_userdata_new(c);
+        luaA_client_userdata_new(globalconf.L, c);
         lua_rawseti(L, -2, i++);
     }
 
@@ -886,7 +896,7 @@ luaA_client_visible_get(lua_State *L)
     for(c = globalconf.clients; c; c = c->next)
         if(!c->skip && !c->ishidden && client_isvisible(c, screen))
         {
-            luaA_client_userdata_new(c);
+            luaA_client_userdata_new(globalconf.L, c);
             lua_rawseti(L, -2, i++);
         }
 
@@ -902,7 +912,7 @@ static int
 luaA_client_focus_get(lua_State *L __attribute__ ((unused)))
 {
     if(globalconf.focus->client)
-        return luaA_client_userdata_new(globalconf.focus->client);
+        return luaA_client_userdata_new(globalconf.L, globalconf.focus->client);
     return 0;
 }
 
@@ -1328,7 +1338,7 @@ luaA_client_titlebar_get(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
 
     if((*c)->titlebar)
-        return luaA_titlebar_userdata_new((*c)->titlebar);
+        return luaA_titlebar_userdata_new(globalconf.L, (*c)->titlebar);
 
     return 0;
 }
@@ -1391,20 +1401,6 @@ luaA_client_ishidden(lua_State *L)
     lua_pushboolean(L, (*c)->ishidden);
     return 1;
 }
-
-/** Create and push a client userdata.
- * \param c The client.
- * \return The number of pushed value.
- */
-int
-luaA_client_userdata_new(client_t *c)
-{
-    client_t **lc = lua_newuserdata(globalconf.L, sizeof(client_t *));
-    *lc = c;
-    return luaA_settype(globalconf.L, "client");
-}
-
-DO_LUA_EQ(client_t, client, "client")
 
 const struct luaL_reg awesome_client_methods[] =
 {

@@ -30,7 +30,7 @@ void titlebar_geometry_compute(client_t *, area_t, area_t *);
 void titlebar_draw(client_t *);
 void titlebar_init(client_t *);
 
-int luaA_titlebar_userdata_new(titlebar_t *);
+int luaA_titlebar_userdata_new(lua_State *, titlebar_t *);
 
 /** Add the titlebar geometry to a geometry.
  * \param t The titlebar

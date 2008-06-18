@@ -38,6 +38,16 @@ typedef enum
 /** Type for Lua function */
 typedef int luaA_function;
 
+#define DO_LUA_NEW(decl, type, prefix, lua_type, type_ref) \
+    decl int \
+    luaA_##prefix##_userdata_new(lua_State *L, type *p) \
+    { \
+        type **pp = lua_newuserdata(L, sizeof(type *)); \
+        *pp = p; \
+        type_ref(pp); \
+        return luaA_settype(L, lua_type); \
+    }
+
 #define DO_LUA_GC(type, prefix, lua_type, type_unref) \
     static int \
     luaA_##prefix##_gc(lua_State *L) \
@@ -171,7 +181,7 @@ luaA_name_init(lua_State *L)
 
 void luaA_init(void);
 bool luaA_parserc(const char *);
-void luaA_pushpointer(void *, awesome_type_t);
+void luaA_pushpointer(lua_State *, void *, awesome_type_t);
 void luaA_cs_init(void);
 void luaA_cs_cleanup(void);
 void luaA_on_timer(EV_P_ ev_timer *w, int revents);

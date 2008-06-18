@@ -31,6 +31,10 @@
 
 extern awesome_t globalconf;
 
+DO_LUA_NEW(extern, statusbar_t, statusbar, "statusbar", statusbar_ref)
+DO_LUA_GC(statusbar_t, statusbar, "statusbar", statusbar_unref)
+DO_LUA_EQ(statusbar_t, statusbar, "statusbar")
+
 /** Draw a statusbar.
  * \param statusbar The statusbar to draw.
  */
@@ -523,19 +527,7 @@ luaA_statusbar_new(lua_State *L)
 
     sb->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
 
-    return luaA_statusbar_userdata_new(sb);
-}
-
-/** Create a new statusbar userdata.
- * \param t The statusbar.
- */
-int
-luaA_statusbar_userdata_new(statusbar_t *t)
-{
-    statusbar_t **sb = lua_newuserdata(globalconf.L, sizeof(statusbar_t *));
-    *sb = t;
-    statusbar_ref(sb);
-    return luaA_settype(globalconf.L, "statusbar");
+    return luaA_statusbar_userdata_new(L, sb);
 }
 
 /** Get all widget from a statusbar.
@@ -556,7 +548,7 @@ luaA_statusbar_widget_get(lua_State *L)
 
     for(widget = (*sb)->widgets; widget; widget = widget->next)
     {
-        luaA_widget_userdata_new(widget->widget);
+        luaA_widget_userdata_new(L, widget->widget);
         /* ref again for the list */
         widget_ref(&widget->widget);
         lua_rawseti(L, -2, i++);
@@ -564,9 +556,6 @@ luaA_statusbar_widget_get(lua_State *L)
 
     return 1;
 }
-
-DO_LUA_GC(statusbar_t, statusbar, "statusbar", statusbar_unref)
-DO_LUA_EQ(statusbar_t, statusbar, "statusbar")
 
 const struct luaL_reg awesome_statusbar_methods[] =
 {

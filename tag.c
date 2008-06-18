@@ -38,6 +38,10 @@
 
 extern awesome_t globalconf;
 
+DO_LUA_NEW(extern, tag_t, tag, "tag", tag_ref)
+DO_LUA_GC(tag_t, tag, "tag", tag_unref)
+DO_LUA_EQ(tag_t, tag, "tag")
+
 /** View or unview a tag.
  * \param tag the tag
  * \param view set visible or not
@@ -296,7 +300,7 @@ luaA_tag_get(lua_State *L)
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
     {
-        luaA_tag_userdata_new(tag);
+        luaA_tag_userdata_new(L, tag);
         lua_setfield(L, -2, tag->name);
     }
 
@@ -323,7 +327,7 @@ luaA_tag_geti(lua_State *L)
 
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
     {
-        luaA_tag_userdata_new(tag);
+        luaA_tag_userdata_new(L, tag);
         lua_rawseti(L, -2, i++);
     }
 
@@ -361,7 +365,7 @@ luaA_tag_new(lua_State *L)
                   layout,
                   mwfact, nmaster, ncol);
 
-    return luaA_tag_userdata_new(tag);
+    return luaA_tag_userdata_new(L, tag);
 }
 
 /** Add or remove a tag from the current view.
@@ -588,22 +592,6 @@ luaA_tag_layout_set(lua_State *L)
     return 0;
 
 }
-
-/** Create a new userdata from a tag.
- * \param t The tag.
- * \return The luaA_settype returnn value.
- */
-int
-luaA_tag_userdata_new(tag_t *t)
-{
-    tag_t **lt = lua_newuserdata(globalconf.L, sizeof(tag_t *));
-    *lt = t;
-    tag_ref(lt);
-    return luaA_settype(globalconf.L, "tag");
-}
-
-DO_LUA_GC(tag_t, tag, "tag", tag_unref)
-DO_LUA_EQ(tag_t, tag, "tag")
 
 const struct luaL_reg awesome_tag_methods[] =
 {

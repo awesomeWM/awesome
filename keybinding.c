@@ -28,6 +28,9 @@
 
 extern awesome_t globalconf;
 
+DO_LUA_NEW(static, keybinding_t, keybinding, "keybinding", keybinding_ref)
+DO_LUA_GC(keybinding_t, keybinding, "keybinding", keybinding_unref)
+
 static void
 __luaA_keystore(keybinding_t *key, const char *str)
 {
@@ -59,7 +62,7 @@ static int
 luaA_keybinding_new(lua_State *L)
 {
     size_t i, len;
-    keybinding_t *k, **keyb;
+    keybinding_t *k;
     const char *key;
 
     /* arg 1 is key mod table */
@@ -81,10 +84,7 @@ luaA_keybinding_new(lua_State *L)
         k->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
     }
 
-    keyb = lua_newuserdata(globalconf.L, sizeof(client_t *));
-    *keyb = k;
-    keybinding_ref(keyb);
-    return luaA_settype(L, "keybinding");
+    return luaA_keybinding_userdata_new(L, k);
 }
 
 /** Add a global key binding. This key binding will always be available.
@@ -131,8 +131,6 @@ luaA_keybinding_remove(lua_State *L)
 
     return 0;
 }
-
-DO_LUA_GC(keybinding_t, keybinding, "keybinding", keybinding_unref)
 
 /** Convert a keybinding to a printable string.
  * \return A string.

@@ -34,6 +34,10 @@
 
 extern awesome_t globalconf;
 
+DO_LUA_NEW(extern, widget_t, widget, "widget", widget_ref)
+DO_LUA_GC(widget_t, widget, "widget", widget_unref)
+DO_LUA_EQ(widget_t, widget, "widget")
+
 #include "widgetgen.h"
 
 /** Compute offset for drawing the first pixel of a widget.
@@ -94,7 +98,7 @@ widget_common_button_press(widget_node_t *w,
     for(b = w->widget->buttons; b; b = b->next)
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
         {
-            luaA_pushpointer(p, type);
+            luaA_pushpointer(globalconf.L, p, type);
             luaA_dofunction(globalconf.L, b->fct, 1);
         }
 }
@@ -291,19 +295,6 @@ widget_invalidate_bywidget(widget_t *widget)
                     titlebar_draw(c);
 }
 
-/** Create a new widget userdata. The object is pushed on the stack.
- * \param widget The widget.
- * \return Return luaA_settype() return value.
- */
-int
-luaA_widget_userdata_new(widget_t *widget)
-{
-    widget_t **w = lua_newuserdata(globalconf.L, sizeof(widget_t *));
-    *w = widget;
-    widget_ref(w);
-    return luaA_settype(globalconf.L, "widget");
-}
-
 /** Create a new widget.
  * \param L The Lua VM state.
  *
@@ -337,7 +328,7 @@ luaA_widget_new(lua_State *L)
 
     w->name = luaA_name_init(L);
 
-    return luaA_widget_userdata_new(w);
+    return luaA_widget_userdata_new(L, w);
 }
 
 /** Add a mouse button bindings to a widget.
@@ -516,9 +507,6 @@ luaA_widget_visible_get(lua_State *L)
     lua_pushboolean(L, (*widget)->isvisible);
     return 1;
 }
-
-DO_LUA_GC(widget_t, widget, "widget", widget_unref)
-DO_LUA_EQ(widget_t, widget, "widget")
 
 const struct luaL_reg awesome_widget_methods[] =
 {
