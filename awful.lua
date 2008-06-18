@@ -570,6 +570,23 @@ local function menu(args, textbox, exe_callback, completion_callback)
                 cur_pos = 1
             elseif key == "e" then
                 cur_pos = #command + 1
+            elseif key == "w" then
+                local wstart = 1
+                local wend = 1
+                local cword_start = 1
+                local cword_end = 1
+                while wend < cur_pos do
+                    wend = command:find(" ", wstart)
+                    if not wend then wend = #command + 1 end
+                    if cur_pos >= wstart and cur_pos <= wend + 1 then
+                        cword_start = wstart
+                        cword_end = cur_pos - 1
+                        break
+                    end
+                    wstart = wend + 1
+                end
+                command = command:sub(1, cword_start - 1) .. command:sub(cword_end + 1)
+                cur_pos = cword_start
             end
         else
             if completion_callback then
