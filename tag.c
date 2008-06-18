@@ -339,7 +339,7 @@ luaA_tag_geti(lua_State *L)
  *
  * \luastack
  * \lparam A table with at least a name attribute.
- * Optionnal attributes are: mwfact, ncol, nmaster and layout.
+ * Optional attributes are: mwfact, ncol, nmaster and layout.
  * \lreturn A new tag object.
  */
 static int

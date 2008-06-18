@@ -299,7 +299,7 @@ widget_invalidate_bywidget(widget_t *widget)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A table with at least a name and a type value. Optionnal attributes
+ * \lparam A table with at least a name and a type value. Optional attributes
  * are: align.
  * \lreturn A brand new widget.
  */

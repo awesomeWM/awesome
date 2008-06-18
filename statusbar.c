@@ -484,7 +484,7 @@ luaA_statusbar_remove(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A table with at least a name attribute. Optionnaly defined values are:
+ * \lparam A table with at least a name attribute. Optionaly defined values are:
  * position, align, fg, bg, width and height.
  * \lreturn A brand new statusbar.
  */
