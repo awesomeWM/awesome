@@ -61,8 +61,8 @@ simplewindow_delete(simple_window_t **sw)
 }
 
 void simplewindow_move(simple_window_t *, int, int);
-void simplewindow_resize(simple_window_t *, unsigned int, unsigned int);
-void simplewindow_moveresize(simple_window_t *, int, int, unsigned int, unsigned int);
+void simplewindow_resize(simple_window_t *, int, int);
+void simplewindow_moveresize(simple_window_t *, int, int, int, int);
 
 /** Refresh the window content by copying its pixmap data to its window.
  * \param sw The simple window to refresh.

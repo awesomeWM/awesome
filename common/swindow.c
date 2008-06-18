@@ -105,21 +105,24 @@ simplewindow_move(simple_window_t *sw, int x, int y)
  * \param h New height.
  */
 void
-simplewindow_resize(simple_window_t *sw, unsigned int w, unsigned int h)
+simplewindow_resize(simple_window_t *sw, int w, int h)
 {
     xcb_screen_t *s = xutil_screen_get(sw->connection, sw->phys_screen);
-    const uint32_t resize_win_vals[] = { w, h };
+    uint32_t resize_win_vals[2];
     xcb_pixmap_t d;
 
-    sw->geometry.width = w;
-    sw->geometry.height = h;
-    d = sw->pixmap;
-    sw->pixmap = xcb_generate_id(sw->connection);
-    xcb_create_pixmap(sw->connection, s->root_depth, sw->pixmap, s->root, w, h);
-    xcb_configure_window(sw->connection, sw->window,
-                         XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                         resize_win_vals);
-    xcb_free_pixmap(sw->connection, d);
+    if(w > 0 && h > 0 && (sw->geometry.width != w || sw->geometry.height != h))
+    {
+        sw->geometry.width = resize_win_vals[0] = w;
+        sw->geometry.height = resize_win_vals[1] = h;
+        d = sw->pixmap;
+        sw->pixmap = xcb_generate_id(sw->connection);
+        xcb_create_pixmap(sw->connection, s->root_depth, sw->pixmap, s->root, w, h);
+        xcb_configure_window(sw->connection, sw->window,
+                             XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                             resize_win_vals);
+        xcb_free_pixmap(sw->connection, d);
+    }
 }
 
 /** Move and resize a window in one call.
@@ -130,25 +133,39 @@ simplewindow_resize(simple_window_t *sw, unsigned int w, unsigned int h)
  * \param h The new height.
  */
 void
-simplewindow_moveresize(simple_window_t *sw, int x, int y,
-                        unsigned int w, unsigned int h)
+simplewindow_moveresize(simple_window_t *sw, int x, int y, int w, int h)
 {
-    const uint32_t moveresize_win_vals[] = { x, y, w, h };
+    uint32_t moveresize_win_vals[4], mask_vals = 0;
     xcb_pixmap_t d;
     xcb_screen_t *s = xutil_screen_get(sw->connection, sw->phys_screen);
 
-    sw->geometry.x = x;
-    sw->geometry.y = y;
-    sw->geometry.width = w;
-    sw->geometry.height = h;
-    d = sw->pixmap;
-    sw->pixmap = xcb_generate_id(sw->connection);
-    xcb_create_pixmap(sw->connection, s->root_depth, sw->pixmap, s->root, w, h);
-    xcb_configure_window(sw->connection, sw->window,
-                         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
-                         | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                         moveresize_win_vals);
-    xcb_free_pixmap(sw->connection, d);
+    if(sw->geometry.x != x || sw->geometry.y != y)
+    {
+        sw->geometry.x = moveresize_win_vals[0] = x;
+        sw->geometry.y = moveresize_win_vals[1] = y;
+        mask_vals |= XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y;
+    }
+
+    if(sw->geometry.width != w || sw->geometry.height != h)
+    {
+        if(mask_vals)
+        {
+            sw->geometry.width = moveresize_win_vals[2] = w;
+            sw->geometry.height = moveresize_win_vals[3] = h;
+        }
+        else
+        {
+            sw->geometry.width = moveresize_win_vals[0] = w;
+            sw->geometry.height = moveresize_win_vals[1] = h;
+        }
+        mask_vals |= XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
+        d = sw->pixmap;
+        sw->pixmap = xcb_generate_id(sw->connection);
+        xcb_create_pixmap(sw->connection, s->root_depth, sw->pixmap, s->root, w, h);
+        xcb_free_pixmap(sw->connection, d);
+    }
+
+    xcb_configure_window(sw->connection, sw->window, mask_vals, moveresize_win_vals);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
