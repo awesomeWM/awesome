@@ -482,13 +482,20 @@ local function menu(args, textbox, exe_callback)
         end
 
         -- Get out cases
-        if key == "Return" then
-            textbox:set("text", "")
-            exe_callback(command)
-            return false
-        elseif key == "Escape" then
-            textbox:set("text", "")
-            return false
+        if has_ctrl then
+            if key == "g" then
+                textbox:set("text", "")
+                return false
+            end
+        else
+            if key == "Return" then
+                textbox:set("text", "")
+                exe_callback(command)
+                return false
+            elseif key == "Escape" then
+                textbox:set("text", "")
+                return false
+            end
         end
 
         -- Control cases
