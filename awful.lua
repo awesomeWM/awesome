@@ -497,6 +497,11 @@ local function menu_completion_bash(command, cur_pos, ncomp)
 
     c:close()
 
+    -- no completion, return
+    if #output == 0 then
+        return command, cur_pos
+    end
+
     -- cycle
     while ncomp > #output do
         ncomp = ncomp - #output
