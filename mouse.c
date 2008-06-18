@@ -621,6 +621,30 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
                        .y = MIN(fixed_y, mouse_y),
                        .width = (MAX(fixed_x, mouse_x) - MIN(fixed_x, mouse_x)),
                        .height = (MAX(fixed_y, mouse_y) - MIN(fixed_y, mouse_y)) };
+        /* new moveable corner */
+        corner_t new_corner;
+
+        if(mouse_x == AREA_LEFT(geo))
+            new_corner = (mouse_y == AREA_TOP(geo)) ? TopLeftCorner : BottomLeftCorner;
+        else
+            new_corner = (mouse_y == AREA_TOP(geo)) ? TopRightCorner : BottomRightCorner;
+
+        /* update cursor */
+        if(corner != new_corner)
+        {
+            corner = new_corner;
+
+            switch(corner)
+            {
+                default: cursor = CurTopLeft; break;
+                case TopRightCorner: cursor = CurTopRight; break;
+                case BottomLeftCorner: cursor = CurBotLeft; break;
+                case BottomRightCorner: cursor = CurBotRight; break;
+            }
+
+            xcb_change_active_pointer_grab(globalconf.connection, globalconf.cursor[cursor],
+                                           XCB_CURRENT_TIME, MOUSEMASK);
+        }
 
         /* resize the client */
         client_resize(c, geo, true);
