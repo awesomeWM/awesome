@@ -368,9 +368,8 @@ luaA_statusbar_widget_add(lua_State *L)
 
     /* check that there is not already a widget with that name in the titlebar */
     for(witer = (*sb)->widgets; witer; witer = witer->next)
-        if(witer->widget == *widget)
-            luaL_error(L, "widget `%s' is already on statusbar");
-        else if(!a_strcmp(witer->widget->name, (*widget)->name))
+        if(witer->widget != *widget
+           && !a_strcmp(witer->widget->name, (*widget)->name))
             luaL_error(L, "a widget with name `%s' already on statusbar `%s'",
                        witer->widget->name, (*sb)->name);
 
