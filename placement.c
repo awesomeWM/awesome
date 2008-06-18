@@ -90,7 +90,7 @@ placement_smart(client_t *c)
             newgeometry = client->f_geometry;
             newgeometry.width += 2 * client->border;
             newgeometry.height += 2 * client->border;
-            newgeometry = titlebar_geometry_add(c->titlebar, newgeometry);
+            newgeometry = titlebar_geometry_add(c->titlebar, c->border, newgeometry);
             area_list_remove(&arealist, &newgeometry);
         }
 
@@ -118,9 +118,9 @@ placement_smart(client_t *c)
     newgeometry.width = c->f_geometry.width;
     newgeometry.height = c->f_geometry.height;
 
-    newgeometry = titlebar_geometry_add(c->titlebar, newgeometry);
+    newgeometry = titlebar_geometry_add(c->titlebar, c->border, newgeometry);
     newgeometry = placement_fix_offscreen(newgeometry, c->screen, c->border);
-    newgeometry = titlebar_geometry_remove(c->titlebar, newgeometry);
+    newgeometry = titlebar_geometry_remove(c->titlebar, c->border, newgeometry);
 
     area_list_wipe(&arealist);
 
@@ -144,9 +144,9 @@ placement_under_mouse(client_t *c)
         p_delete(&qp_r);
     }
 
-    finalgeometry = titlebar_geometry_add(c->titlebar, finalgeometry);
+    finalgeometry = titlebar_geometry_add(c->titlebar, c->border, finalgeometry);
     finalgeometry = placement_fix_offscreen(finalgeometry, c->screen, c->border);
-    finalgeometry = titlebar_geometry_remove(c->titlebar, finalgeometry);
+    finalgeometry = titlebar_geometry_remove(c->titlebar, c->border, finalgeometry);
 
     return finalgeometry;
 }

@@ -134,7 +134,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
                         globalconf.screens[c->screen].statusbar,
                         &globalconf.screens[c->screen].padding);
 
-    geometry = titlebar_geometry_add(c->titlebar, geometry);
+    geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
     geometry.width += 2 * c->border;
     geometry.height += 2 * c->border;
 
@@ -147,7 +147,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
             snapper_geometry = snapper->geometry;
             snapper_geometry.width += 2 * c->border;
             snapper_geometry.height += 2 * c->border;
-            snapper_geometry = titlebar_geometry_add(c->titlebar, snapper_geometry);
+            snapper_geometry = titlebar_geometry_add(c->titlebar, c->border, snapper_geometry);
             geometry =
                 mouse_snapclienttogeometry_outside(geometry,
                                                    snapper_geometry,
@@ -156,7 +156,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
 
     geometry.width -= 2 * c->border;
     geometry.height -= 2 * c->border;
-    return titlebar_geometry_remove(c->titlebar, geometry);
+    return titlebar_geometry_remove(c->titlebar, c->border, geometry);
 }
 
 /** Set coordinates to a corner of an area.

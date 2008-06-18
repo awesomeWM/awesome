@@ -163,7 +163,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             break;
         }
         res->x = geometry.x + x_offset;
-        res->y = geometry.y - c->titlebar->height - 2 * c->titlebar->border.width;
+        res->y = geometry.y - c->titlebar->height - 2 * c->titlebar->border.width + c->border;
         res->width = width;
         res->height = c->titlebar->height;
         break;
@@ -184,7 +184,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             break;
         }
         res->x = geometry.x + x_offset;
-        res->y = geometry.y + geometry.height + 2 * c->border;
+        res->y = geometry.y + geometry.height + c->border;
         res->width = width;
         res->height = c->titlebar->height;
         break;
@@ -204,7 +204,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             y_offset = (geometry.height - width) / 2;
             break;
         }
-        res->x = geometry.x - c->titlebar->height;
+        res->x = geometry.x - c->titlebar->height + c->border;
         res->y = geometry.y + y_offset;
         res->width = c->titlebar->height;
         res->height = width;
@@ -225,7 +225,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             y_offset = (geometry.height - width) / 2;
             break;
         }
-        res->x = geometry.x + geometry.width + 2 * c->border;
+        res->x = geometry.x + geometry.width + c->border;
         res->y = geometry.y + y_offset;
         res->width = c->titlebar->height;
         res->height = width;

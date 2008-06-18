@@ -34,28 +34,29 @@ int luaA_titlebar_userdata_new(titlebar_t *);
 
 /** Add the titlebar geometry to a geometry.
  * \param t The titlebar
+ * \param border The client border size.
  * \param geometry The geometry
  * \return A new geometry bigger if the titlebar is visible.
  */
 static inline area_t
-titlebar_geometry_add(titlebar_t *t, area_t geometry)
+titlebar_geometry_add(titlebar_t *t, int border, area_t geometry)
 {
     if(t && t->sw)
         switch(t->position)
         {
           case Top:
-            geometry.y -= t->sw->geometry.height + 2 * t->border.width;
-            geometry.height += t->sw->geometry.height + 2 * t->border.width;
+            geometry.y -= t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.height += t->sw->geometry.height + 2 * t->border.width - border;
             break;
           case Bottom:
-            geometry.height += t->sw->geometry.height + 2 * t->border.width;
+            geometry.height += t->sw->geometry.height + 2 * t->border.width - border;
             break;
           case Left:
-            geometry.x -= t->sw->geometry.width + 2 * t->border.width;
-            geometry.width += t->sw->geometry.width + 2 * t->border.width;
+            geometry.x -= t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.width += t->sw->geometry.width + 2 * t->border.width - border;
             break;
           case Right:
-            geometry.width += t->sw->geometry.width + 2 * t->border.width;
+            geometry.width += t->sw->geometry.width + 2 * t->border.width - border;
             break;
           default:
             break;
@@ -66,28 +67,29 @@ titlebar_geometry_add(titlebar_t *t, area_t geometry)
 
 /** Remove the titlebar geometry to a geometry.
  * \param t The titlebar.
+ * \param border The client border size.
  * \param geometry The geometry.
  * \return A new geometry smaller if the titlebar is visible.
  */
 static inline area_t
-titlebar_geometry_remove(titlebar_t *t, area_t geometry)
+titlebar_geometry_remove(titlebar_t *t, int border, area_t geometry)
 {
     if(t && t->sw)
         switch(t->position)
         {
           case Top:
-            geometry.y += t->sw->geometry.height + 2 * t->border.width;
-            geometry.height -= t->sw->geometry.height + 2 * t->border.width;
+            geometry.y += t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.height -= t->sw->geometry.height + 2 * t->border.width - border;
             break;
           case Bottom:
-            geometry.height -= t->sw->geometry.height + 2 * t->border.width;
+            geometry.height -= t->sw->geometry.height + 2 * t->border.width - border;
             break;
           case Left:
-            geometry.x += t->sw->geometry.width + 2 * t->border.width;
-            geometry.width -= t->sw->geometry.width + 2 * t->border.width;
+            geometry.x += t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.width -= t->sw->geometry.width + 2 * t->border.width - border;
             break;
           case Right:
-            geometry.width -= t->sw->geometry.width + 2 * t->border.width;
+            geometry.width -= t->sw->geometry.width + 2 * t->border.width - border;
             break;
           default:
             break;
