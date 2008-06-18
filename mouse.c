@@ -646,8 +646,40 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
                                            XCB_CURRENT_TIME, MOUSEMASK);
         }
 
+        if(globalconf.resize_hints && c->hassizehints)
+        {
+            int dx, dy;
+
+            /* apply size hints */
+            geo = client_geometry_hints(c, geo);
+
+            /* get the nonmoveable corner back onto fixed_x,fixed_y */
+            switch(corner)
+            {
+                default /* TopLeftCorner */:
+                    dx = fixed_x - AREA_RIGHT(geo);
+                    dy = fixed_y - AREA_BOTTOM(geo);
+                    break;
+                case TopRightCorner:
+                    dx = fixed_x - AREA_LEFT(geo);
+                    dy = fixed_y - AREA_BOTTOM(geo);
+                    break;
+                case BottomRightCorner:
+                    dx = fixed_x - AREA_LEFT(geo);
+                    dy = fixed_y - AREA_TOP(geo);
+                    break;
+                case BottomLeftCorner:
+                    dx = fixed_x - AREA_RIGHT(geo);
+                    dy = fixed_y - AREA_TOP(geo);
+                    break;
+            }
+
+            geo.x += dx;
+            geo.y += dy;
+        }
+
         /* resize the client */
-        client_resize(c, geo, true);
+        client_resize(c, geo, false);
 
         /* draw the infobox */
         if(sw)
