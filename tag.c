@@ -267,12 +267,10 @@ luaA_tag_add(lua_State *L)
 
     for(i = 0; i < globalconf.screens_info->nscreen; i++)
         for(t = globalconf.screens[i].tags; t; t = t->next)
-        {
             if(*tag == t)
                 luaL_error(L, "tag already on screen %d", i + 1);
             else if(t->screen == screen && !a_strcmp((*tag)->name, t->name))
                 luaL_error(L, "a tag with the name `%s' is already on screen %d", t->name, i + 1);
-        }
 
     (*tag)->screen = screen;
     tag_append_to_screen(*tag, screen);

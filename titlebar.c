@@ -343,11 +343,18 @@ luaA_titlebar_widget_add(lua_State *L)
 {
     titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
     widget_t **widget = luaA_checkudata(L, 2, "widget");
-    widget_node_t *w = p_new(widget_node_t, 1);
+    widget_node_t *witer, *w = p_new(widget_node_t, 1);
     client_t *c;
 
     if((*widget)->type == systray_new)
         luaL_error(L, "cannot add systray widget to titlebar");
+
+    /* check that there is not already a widget with that name in the titlebar */
+    for(witer = (*tb)->widgets; witer; witer = witer->next)
+        if(witer->widget == *widget)
+            luaL_error(L, "widget `%s' is already on titlebar");
+        else if(!a_strcmp(witer->widget->name, (*widget)->name))
+            luaL_error(L, "a widget with name `%s' already on titlebar", witer->widget->name);
 
     w->widget = *widget;
     widget_node_list_append(&(*tb)->widgets, w);
@@ -375,17 +382,14 @@ static int
 luaA_titlebar_widget_get(lua_State *L)
 {
     titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
-    widget_node_t *widget;
-    int i = 1;
+    widget_node_t *witer;
 
     lua_newtable(L);
 
-    for(widget = (*tb)->widgets; widget; widget = widget->next)
+    for(witer = (*tb)->widgets; witer; witer = witer->next)
     {
-        luaA_widget_userdata_new(widget->widget);
-        /* ref again for the list */
-        widget_ref(&widget->widget);
-        lua_rawseti(L, -2, i++);
+        luaA_widget_userdata_new(witer->widget);
+        lua_setfield(L, -2, witer->widget->name);
     }
 
     return 1;
