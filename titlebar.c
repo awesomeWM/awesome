@@ -344,7 +344,6 @@ luaA_titlebar_widget_add(lua_State *L)
     titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
     widget_t **widget = luaA_checkudata(L, 2, "widget");
     widget_node_t *witer, *w = p_new(widget_node_t, 1);
-    client_t *c;
 
     if((*widget)->type == systray_new)
         luaL_error(L, "cannot add systray widget to titlebar");
@@ -360,12 +359,7 @@ luaA_titlebar_widget_add(lua_State *L)
     widget_node_list_append(&(*tb)->widgets, w);
     widget_ref(widget);
 
-    for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar == *tb)
-        {
-            titlebar_draw(c);
-            break;
-        }
+    titlebar_draw(client_getbytitlebar(*tb));
 
     return 0;
 }
