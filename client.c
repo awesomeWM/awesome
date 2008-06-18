@@ -756,6 +756,9 @@ client_updatesizehints(client_t *c)
        && c->maxw == c->minw && c->maxh == c->minh)
         c->isfixed = true;
 
+    c->hassizehints = !(!c->basew && !c->baseh && !c->incw && !c->inch
+                        && !c->maxw && !c->maxh && !c->minw && !c->minh
+                        && !c->minax && !c->maxax && !c->minax && !c->minay);
     return size;
 }
 

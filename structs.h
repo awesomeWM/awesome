@@ -274,8 +274,10 @@ struct client_t
     area_t f_geometry;
     /** Max window geometry */
     area_t m_geometry;
+    /* Size hints */
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
+    bool hassizehints;
     int border, oldborder;
     /** True if the client does not want any border */
     bool noborder;
