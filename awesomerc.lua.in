@@ -91,7 +91,7 @@ mytasklist:set("text_focus", "<bg color='"..bg_focus.."'/> <span color='"..fg_fo
 mytextbox = widget.new({ type = "textbox", name = "mytextbox", align = "right" })
 -- Set the default text in textbox
 mytextbox:set("text", "<b><small> awesome " .. AWESOME_VERSION .. " </small></b>")
-mymenubox = widget.new({ type = "textbox", name = "mytextbox", align = "left" })
+mymenubox = widget.new({ type = "textbox", name = "mymenubox", align = "left" })
 
 -- Create an iconbox widget
 myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "left" })
@@ -104,7 +104,7 @@ mysystray = widget.new({ type = "systray", name = "mysystray", align = "right" }
 -- We need one layoutbox per screen.
 mylayoutbox = {}
 for s = 1, screen.count() do
-    mylayoutbox[s] = widget.new({ type = "iconbox", name = "myiconbox", align = "right" })
+    mylayoutbox[s] = widget.new({ type = "iconbox", name = "mylayoutbox", align = "right" })
     mylayoutbox[s]:mouse_add(mouse.new({ }, 1, function () awful.layout.inc(layouts, 1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 3, function () awful.layout.inc(layouts, -1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 4, function () awful.layout.inc(layouts, 1) end))
