@@ -107,7 +107,8 @@ AWESOME_CFLAGS = -std=gnu99 -pipe \
 		 -Wall -Wextra \
 		 -Wundef -Wshadow -Wcast-align -Wwrite-strings -Wsign-compare \
 		 -Wunused -Wno-unused-parameter -Winit-self -Wpointer-arith -Wredundant-decls \
-		 -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn
+		 -Wmissing-prototypes -Wmissing-format-attribute -Wmissing-noreturn \
+		 -fno-strict-aliasing
 endif
 AM_CPPFLAGS = $(pangocairo_CFLAGS) $(AWESOME_CFLAGS) \
 	$(GdkPixbuf_CFLAGS) $(GDK_CFLAGS) $(imlib2_CFLAGS) \
