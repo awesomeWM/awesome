@@ -420,9 +420,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 /** Compute client geometry with respect to its geometry hints.
  * \param c The client.
  * \param geometry The geometry that the client might receive.
- * \return The geometry the client must take rescping its hints.
+ * \return The geometry the client must take respecting its hints.
  */
-static area_t
+area_t
 client_geometry_hints(client_t *c, area_t geometry)
 {
     double dx, dy, max, min, ratio;
