@@ -78,7 +78,7 @@ titlebar_draw(client_t *c)
     draw_context_t *ctx;
     xcb_screen_t *s;
 
-    if(!c->titlebar || !c->titlebar->sw || !c->titlebar->position)
+    if(!c || !c->titlebar || !c->titlebar->sw || !c->titlebar->position)
         return;
 
     s = xutil_screen_get(globalconf.connection,
