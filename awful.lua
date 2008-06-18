@@ -461,13 +461,16 @@ local function menu_text_with_cursor(text, text_color, cursor_color, cursor_pos)
     return text_start .. "<span background=\"" .. cursor_color .. "\" foreground=\"" .. text_color .. "\">" .. char .. "</span>" .. text_end
 end
 
-local function menu(args, textbox, exe_callback)
+local function menu(args, textbox, exe_callback, completion_callback)
     if not args then return end
     local command = ""
     local prompt = args.prompt or ""
     local inv_col = args.cursor_fg or "black"
     local cur_col = args.cursor_bg or "white"
+    -- The cursor position
     local cur_pos = 1
+    -- The completion element to use on completion request.
+    local ncomp = 1
     if not textbox or not exe_callback then
         return
     end
@@ -506,6 +509,16 @@ local function menu(args, textbox, exe_callback)
                 cur_pos = #command + 1
             end
         else
+            if completion_callback then
+                -- That's tab
+                if key:byte() == 9 then
+                    command, cur_pos = completion_callback(command, cur_pos, ncomp)
+                    ncomp = ncomp + 1
+                else
+                    ncomp = 1
+                end
+            end
+
             -- Typin cases
             if key == "BackSpace" then
                 if cur_pos > 1 then
