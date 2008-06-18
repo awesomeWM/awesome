@@ -267,8 +267,12 @@ luaA_tag_add(lua_State *L)
 
     for(i = 0; i < globalconf.screens_info->nscreen; i++)
         for(t = globalconf.screens[i].tags; t; t = t->next)
+        {
             if(*tag == t)
                 luaL_error(L, "tag already on screen %d", i + 1);
+            else if(t->screen == screen && !a_strcmp((*tag)->name, t->name))
+                luaL_error(L, "a tag with the name `%s' is already on screen %d", t->name, i + 1);
+        }
 
     (*tag)->screen = screen;
     tag_append_to_screen(*tag, screen);
@@ -287,7 +291,6 @@ luaA_tag_get(lua_State *L)
 {
     int screen = luaL_checknumber(L, 1) - 1;
     tag_t *tag;
-    int i = 1;
 
     luaA_checkscreen(screen);
 
@@ -296,7 +299,7 @@ luaA_tag_get(lua_State *L)
     for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
     {
         luaA_tag_userdata_new(tag);
-        lua_rawseti(L, -2, i++);
+        lua_setfield(L, -2, tag->name);
     }
 
     return 1;

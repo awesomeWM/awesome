@@ -138,7 +138,7 @@ local function tag_selectedlist(s)
     local screen = s or mouse.screen_get()
     local tags = tag.get(screen)
     local vtags = {}
-    for i, t in ipairs(tags) do
+    for i, t in pairs(tags) do
         if t:isselected() then
             vtags[idx] = t
             idx = idx + 1
@@ -204,7 +204,7 @@ end
 -- View no tag
 local function tag_viewnone()
     local tags = tag.get(mouse.screen_get())
-    for i, t in ipairs(tags) do
+    for i, t in pairs(tags) do
         t:view(false)
     end
 end
@@ -212,11 +212,13 @@ end
 local function tag_viewidx(r)
     local tags = tag.get(mouse.screen_get())
     local sel = tag_selected()
+    local i = 1
     tag_viewnone()
-    for i, t in ipairs(tags) do
+    for name, t in pairs(tags) do
         if t == sel then
             tags[array_boundandcycle(tags, i + r)]:view(true)
         end
+        i = i + 1
     end
 end
 
@@ -237,7 +239,7 @@ end
 
 local function tag_viewmore(tags)
     tag_viewnone()
-    for i, t in ipairs(tags) do
+    for i, t in pairs(tags) do
         t:view(true)
     end
 end
@@ -245,7 +247,7 @@ end
 local function client_movetotag(target, c)
     local sel = c or client.focus_get();
     local tags = tag.get(mouse.screen_get())
-    for i, t in ipairs(tags) do
+    for i, t in pairs(tags) do
         sel:tag(t, false)
     end
     sel:tag(target, true)
@@ -254,16 +256,18 @@ end
 local function client_toggletag(target, c)
     local sel = c or client.focus_get();
     local toggle = false
-    -- Count how many tags has the client
-    -- an only toggle tag if the client has at least one tag other than target
-    for k, v in ipairs(tag.get(sel:screen_get())) do
-        if target ~= v and sel:istagged(v) then
-            toggle = true
-            break
+    if sel then
+        -- Count how many tags has the client
+        -- an only toggle tag if the client has at least one tag other than target
+        for k, v in pairs(tag.get(sel:screen_get())) do
+            if target ~= v and sel:istagged(v) then
+                toggle = true
+                break
+            end
         end
-    end
-    if toggle and sel then
-        sel:tag(target, not sel:istagged(target))
+        if toggle then
+            sel:tag(target, not sel:istagged(target))
+        end
     end
 end
 
