@@ -284,7 +284,8 @@ titlebar_init(client_t *c)
  * \return The number of value pushed.
  *
  * \luastack
- * \lparam A table with values: align, position, fg, bg, width and height.
+ * \lparam A table with values: align, position, fg, bg, border_width,
+ * border_color, width and height.
  * \lreturn A brand new titlebar.
  */
 static int
