@@ -55,7 +55,7 @@ tag_view(tag_t *tag, bool view)
     globalconf.screens[tag->screen].need_arrange = true;
 }
 
-/** Create a new tag. Parameteres values are checked.
+/** Create a new tag. Parameters values are checked.
  * \param name tag name
  * \param layout layout to use
  * \param mwfact master width factor
@@ -339,7 +339,7 @@ luaA_tag_geti(lua_State *L)
  *
  * \luastack
  * \lparam A table with at least a name attribute.
- *         Optionnal attributes are: mwfact, ncol, nmaster and layout.
+ * Optionnal attributes are: mwfact, ncol, nmaster and layout.
  * \lreturn A new tag object.
  */
 static int
