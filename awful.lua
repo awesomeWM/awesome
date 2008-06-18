@@ -501,8 +501,10 @@ local function menu(args, textbox, exe_callback)
         else
             -- Typin cases
             if key == "BackSpace" then
-                command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
-                cur_pos = cur_pos - 1
+                if cur_pos > 1 then
+                    command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
+                    cur_pos = cur_pos - 1
+                end
             -- That's DEL
             elseif key:byte() == 127 then
                 command = command:sub(1, cur_pos - 1) .. command:sub(cur_pos + 1)
