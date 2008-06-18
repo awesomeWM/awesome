@@ -282,7 +282,7 @@ luaA_tag_add(lua_State *L)
  *
  * \luastack
  * \lparam A screen number.
- * \lreturn A table with all tags from the screen specified.
+ * \lreturn A table with all tags from the screen specified, indexed by tag name.
  */
 static int
 luaA_tag_get(lua_State *L)
@@ -298,6 +298,33 @@ luaA_tag_get(lua_State *L)
     {
         luaA_tag_userdata_new(tag);
         lua_setfield(L, -2, tag->name);
+    }
+
+    return 1;
+}
+
+/** Get all tags from a screen.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A screen number.
+ * \lreturn A table with all tags from the screen specified, ordered and indexed
+ * by number.
+ */
+static int
+luaA_tag_geti(lua_State *L)
+{
+    int i = 1, screen = luaL_checknumber(L, 1) - 1;
+    tag_t *tag;
+
+    luaA_checkscreen(screen);
+
+    lua_newtable(L);
+
+    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+    {
+        luaA_tag_userdata_new(tag);
+        lua_rawseti(L, -2, i++);
     }
 
     return 1;
@@ -581,7 +608,8 @@ DO_LUA_EQ(tag_t, tag, "tag")
 const struct luaL_reg awesome_tag_methods[] =
 {
     { "new", luaA_tag_new },
-    { "get", luaA_tag_get},
+    { "get", luaA_tag_get },
+    { "geti", luaA_tag_geti },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_tag_meta[] =

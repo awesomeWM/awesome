@@ -136,7 +136,7 @@ end
 local function tag_selectedlist(s)
     local idx = 1
     local screen = s or mouse.screen_get()
-    local tags = tag.get(screen)
+    local tags = tag.geti(screen)
     local vtags = {}
     for i, t in pairs(tags) do
         if t:isselected() then
@@ -210,15 +210,13 @@ local function tag_viewnone()
 end
 
 local function tag_viewidx(r)
-    local tags = tag.get(mouse.screen_get())
+    local tags = tag.geti(mouse.screen_get())
     local sel = tag_selected()
-    local i = 1
     tag_viewnone()
-    for name, t in pairs(tags) do
+    for i, t in ipairs(tags) do
         if t == sel then
             tags[array_boundandcycle(tags, i + r)]:view(true)
         end
-        i = i + 1
     end
 end
 
@@ -247,7 +245,7 @@ end
 local function client_movetotag(target, c)
     local sel = c or client.focus_get();
     local tags = tag.get(mouse.screen_get())
-    for i, t in pairs(tags) do
+    for k, t in pairs(tags) do
         sel:tag(t, false)
     end
     sel:tag(target, true)
