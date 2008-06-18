@@ -486,7 +486,7 @@ local function menu_completion_bash(command, cur_pos, ncomp)
         comptype = "command"
     end
 
-    local c = io.popen("/bin/bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'")
+    local c = io.popen("/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'")
     local output = {}
     i = 0
     while true do
