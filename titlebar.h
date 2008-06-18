@@ -26,9 +26,8 @@
 
 client_t * client_getbytitlebar(titlebar_t *);
 client_t * client_getbytitlebarwin(xcb_window_t);
+void titlebar_geometry_compute(client_t *, area_t, area_t *);
 void titlebar_draw(client_t *);
-void titlebar_update_geometry_floating(client_t *);
-void titlebar_update_geometry(client_t *, area_t);
 void titlebar_init(client_t *);
 
 int luaA_titlebar_userdata_new(titlebar_t *);
@@ -45,18 +44,18 @@ titlebar_geometry_add(titlebar_t *t, area_t geometry)
         switch(t->position)
         {
           case Top:
-            geometry.y -= t->sw->geometry.height;
-            geometry.height += t->sw->geometry.height;
+            geometry.y -= t->sw->geometry.height + 2 * t->border.width;
+            geometry.height += t->sw->geometry.height + 2 * t->border.width;
             break;
           case Bottom:
-            geometry.height += t->sw->geometry.height;
+            geometry.height += t->sw->geometry.height + 2 * t->border.width;
             break;
           case Left:
-            geometry.x -= t->sw->geometry.width;
-            geometry.width += t->sw->geometry.width;
+            geometry.x -= t->sw->geometry.width + 2 * t->border.width;
+            geometry.width += t->sw->geometry.width + 2 * t->border.width;
             break;
           case Right:
-            geometry.width += t->sw->geometry.width;
+            geometry.width += t->sw->geometry.width + 2 * t->border.width;
             break;
           default:
             break;
@@ -77,24 +76,58 @@ titlebar_geometry_remove(titlebar_t *t, area_t geometry)
         switch(t->position)
         {
           case Top:
-            geometry.y += t->sw->geometry.height;
-            geometry.height -= t->sw->geometry.height;
+            geometry.y += t->sw->geometry.height + 2 * t->border.width;
+            geometry.height -= t->sw->geometry.height + 2 * t->border.width;
             break;
           case Bottom:
-            geometry.height -= t->sw->geometry.height;
+            geometry.height -= t->sw->geometry.height + 2 * t->border.width;
             break;
           case Left:
-            geometry.x += t->sw->geometry.width;
-            geometry.width -= t->sw->geometry.width;
+            geometry.x += t->sw->geometry.width + 2 * t->border.width;
+            geometry.width -= t->sw->geometry.width + 2 * t->border.width;
             break;
           case Right:
-            geometry.width -= t->sw->geometry.width;
+            geometry.width -= t->sw->geometry.width + 2 * t->border.width;
             break;
           default:
             break;
         }
 
     return geometry;
+}
+
+/** Update the titlebar geometry for a floating client.
+ * \param c the client
+ */
+static inline void
+titlebar_update_geometry_floating(client_t *c)
+{
+    area_t geom;
+
+    if(!c->titlebar || !c->titlebar->sw)
+        return;
+
+    titlebar_geometry_compute(c, c->geometry, &geom);
+    simplewindow_moveresize(c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
+    titlebar_draw(c);
+}
+
+
+/** Update the titlebar geometry for a tiled client.
+ * \param c The client.
+ * \param geometry The geometry the client will receive.
+ */
+static inline void
+titlebar_update_geometry_tiled(client_t *c, area_t geometry)
+{
+    area_t geom;
+
+    if(!c->titlebar || !c->titlebar->sw)
+        return;
+
+    titlebar_geometry_compute(c, geometry, &geom);
+    simplewindow_moveresize(c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
+    titlebar_draw(c);
 }
 
 #endif

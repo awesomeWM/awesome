@@ -185,6 +185,12 @@ struct titlebar_t
     {
         xcolor_t fg, bg;
     } colors;
+    /** Border */
+    struct
+    {
+        xcolor_t color;
+        int width;
+    } border;
 };
 
 /** Delete a titlebar structure.

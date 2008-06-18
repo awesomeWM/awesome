@@ -478,7 +478,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
     if(c->titlebar && !c->ismoving && !c->isfloating && layout != layout_floating)
     {
-        titlebar_update_geometry(c, geometry);
+        titlebar_update_geometry_tiled(c, geometry);
         geometry = titlebar_geometry_remove(c->titlebar, geometry);
     }
 
