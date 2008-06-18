@@ -19,6 +19,9 @@
  *
  */
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
@@ -55,6 +58,7 @@ static xcb_atom_t net_wm_window_type_dock;
 static xcb_atom_t net_wm_window_type_splash;
 static xcb_atom_t net_wm_window_type_dialog;
 static xcb_atom_t net_wm_icon;
+static xcb_atom_t net_wm_pid;
 static xcb_atom_t net_wm_state;
 static xcb_atom_t net_wm_state_sticky;
 static xcb_atom_t net_wm_state_skip_taskbar;
@@ -98,6 +102,7 @@ static AtomItem AtomNames[] =
     { "_NET_WM_WINDOW_TYPE_SPLASH", &net_wm_window_type_splash },
     { "_NET_WM_WINDOW_TYPE_DIALOG", &net_wm_window_type_dialog },
     { "_NET_WM_ICON", &net_wm_icon },
+    { "_NET_WM_PID", &net_wm_pid },
     { "_NET_WM_STATE", &net_wm_state },
     { "_NET_WM_STATE_STICKY", &net_wm_state_sticky },
     { "_NET_WM_STATE_SKIP_TASKBAR", &net_wm_state_skip_taskbar },
@@ -175,6 +180,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_window_type_splash;
     atom[i++] = net_wm_window_type_dialog;
     atom[i++] = net_wm_icon;
+    atom[i++] = net_wm_pid;
     atom[i++] = net_wm_state;
     atom[i++] = net_wm_state_sticky;
     atom[i++] = net_wm_state_skip_taskbar;
@@ -202,8 +208,14 @@ ewmh_set_supported_hints(int phys_screen)
                         father, net_supporting_wm_check, WINDOW, 32,
                         1, &father);
 
+    /* set the window manager name */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, net_wm_name, utf8_string, 8, 7, "awesome");
+
+    /* set the window manager PID */
+    i = getpid();
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        father, net_wm_pid, CARDINAL, 32, 1, &i);
 }
 
 void
