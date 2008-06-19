@@ -169,3 +169,4 @@ SET( AWE_INC_DIR    ${CMAKE_CURRENT_SOURCE_DIR}
                     ${LUA_INC_DIR}
                     )
 
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

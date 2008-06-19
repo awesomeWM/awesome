@@ -161,3 +161,4 @@ INSTALL(    DIRECTORY ${AWE_ICON_DIR}
             DESTINATION ${AWESOME_DATA_PATH}
 			)
 
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
