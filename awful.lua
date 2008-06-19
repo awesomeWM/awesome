@@ -467,6 +467,8 @@ local function menu_completion_bash(command, cur_pos, ncomp)
     -- do nothing if we are on a letter, i.e. not at len + 1 or on a space
     if cur_pos ~= #command + 1 and command:sub(cur_pos, cur_pos) ~= " " then
         return command, cur_pos
+    elseif #command == 0 then
+        return command, cur_pos
     end
 
     while wend <= #command do
