@@ -451,7 +451,7 @@ local function spawn(cmd)
 end
 
 local function eval(s)
-    return assert(loadstring("return" ..s))()
+    return assert(loadstring("return " .. s))()
 end
 
 local function menu_completion_bash(command, cur_pos, ncomp)
