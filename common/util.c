@@ -56,29 +56,6 @@ _warn(int line, const char *fct, const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
-/** Compute a value from a string containing
- * an absolute or a relative number. If relative,
- * add it to current_value.
- * \param arg the string with the number
- * \param current_value value to add the number if it's relative
- * \return new value
- */
-double
-compute_new_value_from_arg(const char *arg, double current_value)
-{
-    double delta;
-
-    if(arg && sscanf(arg, "%lf", &delta) == 1)
-    {
-        if(arg[0] == '+' || arg[0] == '-')
-            current_value += delta;
-        else
-            current_value = delta;
-    }
-
-    return current_value;
-}
-
 /** Lookup for a function pointer from its name
  * in the given name_func_link_t list.
  * \param funcname Function name.
