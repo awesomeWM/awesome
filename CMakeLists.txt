@@ -8,6 +8,31 @@ INCLUDE(awesomeConfig.cmake)
 
 INCLUDE_DIRECTORIES(${AWE_INC_DIR})
 
+# C flags {{{
+# big debug flags
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -ggdb3")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wchar-subscripts")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wundef")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wcast-align")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wwrite-strings")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsign-compare")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunused")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wuninitialized")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winit-self")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpointer-arith")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wredundant-decls")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wformat-nonliteral")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-format-zero-length")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-prototypes")
+#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-format-attribute")
+# }}}
+
 SET(AWE_LUA_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/tabulous.lua
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/awful.lua)
