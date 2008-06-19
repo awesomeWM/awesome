@@ -2,7 +2,7 @@ IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/awesomeConfig.cmake)
     MESSAGE(FATAL "Please provide awesomeConfig.cmake")
 ENDIF()
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 INCLUDE(awesomeConfig.cmake)
 
