@@ -330,6 +330,20 @@ end
 function hook_arrange(screen)
     local layout = awful.layout.get(screen)
     mylayoutbox[screen]:set("image", "@iconsdir@/layouts/" .. layout .. "w.png")
+
+    -- Uncomment if you want mouse warping
+    --[[
+    local sel = client.focus_get()
+    if sel then
+        local c_c = sel:coords_get()
+        local m_c = mouse.coords_get()
+
+        if m_c.x < c_c.x or m_c.x > c_c.x + c_c.width or
+            m_c.y < c_c.y or m_c.y > c_c.y + c_c.height then
+            mouse.coords_set(c_c.x + 1, c_c.y + 1)
+        end
+    end
+    ]]
 end
 
 -- Hook called every second
