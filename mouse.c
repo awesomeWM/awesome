@@ -971,6 +971,32 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
  * \lparam The y coordinate.
  */
 static int
+luaA_mouse_coords_get(lua_State *L)
+{
+    int mouse_x, mouse_y;
+    xcb_window_t root;
+
+    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+
+    if(!mouse_query_pointer(root, &mouse_x, &mouse_y))
+        return 0;
+
+    lua_newtable(L);
+    lua_pushnumber(L, mouse_x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, mouse_y);
+    lua_setfield(L, -2, "y");
+    return 1;
+}
+
+/** Set mouse coordinates.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam The x coordinate.
+ * \lparam The y coordinate.
+ */
+static int
 luaA_mouse_coords_set(lua_State *L)
 {
     int x, y;
@@ -1107,6 +1133,7 @@ const struct luaL_reg awesome_mouse_methods[] =
     { "new", luaA_mouse_new },
     { "screen_get", luaA_mouse_screen_get },
     { "coords_set", luaA_mouse_coords_set },
+    { "coords_get", luaA_mouse_coords_get },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_mouse_meta[] =
