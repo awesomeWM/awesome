@@ -963,12 +963,11 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
     }
 }
 
-/** Set mouse coordinates.
+/** Get mouse coordinates.
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam The x coordinate.
- * \lparam The y coordinate.
+ * \lreturn A table with `x' and `y' keys set to mouse coordinates.
  */
 static int
 luaA_mouse_coords_get(lua_State *L)
