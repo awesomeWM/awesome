@@ -84,43 +84,6 @@ SET( AWE_MAN5_NAME  ${CMAKE_CURRENT_BINARY_DIR}/awesomerc.5.gz )
 
 SET( AWE_LUADOC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/apidocgen.txt )
 
-IF( AWESOME_GENERATE_MAN )
-
-	# Create luadoc file
-    FIND_PROGRAM( CAT_EXECUTABLE cat )
-    EXECUTE_PROCESS( COMMAND ${CAT_EXECUTABLE} ${AWE_SRCS}
-		             COMMAND ${LUA_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
-					 OUTPUT_FILE ${AWE_LUADOC_FILE}
-					 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-
-	FOREACH( txtfile ${AWE_MAN_SRCS})
-		STRING( REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile} )
-        STRING( REGEX REPLACE ".xml\$" ".gz" gzipman ${xmlfile} )
-        STRING( REPLACE ${CMAKE_CURRENT_SOURCE_DIR} 
-                        ${CMAKE_CURRENT_BINARY_DIR} gzipman ${gzipman} )
-		STRING( REGEX REPLACE ".gz\$" "" manfile ${gzipman} )
-
-		ADD_CUSTOM_COMMAND( OUTPUT ${xmlfile}
-							COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} ${txtfile}
-							DEPENDS ${txtfile}
-                            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-							)
-		ADD_CUSTOM_COMMAND( OUTPUT ${manfile}
-							COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
-							DEPENDS ${xmlfile}
-                            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-							)
-        ADD_CUSTOM_COMMAND( OUTPUT ${gzipman}
-                            COMMAND ${GZIP_EXECUTABLE} -f ${manfile} 
-                            DEPENDS ${manfile}
-                            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                            )
-		SET( AWE_MAN_FILES ${AWE_MAN_FILES} ${gzipman} )
-	ENDFOREACH( txtfile)
-	ADD_CUSTOM_TARGET(  man ALL DEPENDS ${AWE_MAN_FILES} 
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-ENDIF( AWESOME_GENERATE_MAN )
-
 ADD_EXECUTABLE( ${PROJECT_AWE_NAME}         ${AWE_SRCS} )
 ADD_EXECUTABLE( ${PROJECT_AWECLIENT_NAME}   ${AWE_CLIENT_SRCS} )
 
@@ -135,6 +98,31 @@ TARGET_LINK_LIBRARIES( ${PROJECT_AWECLIENT_NAME}    ${AWE_MOD_LIBRARIES}
                                                     ${LIB_READLINE}
                                                     ${LIB_NCURSES}
                                                     )         
+
+IF( AWESOME_GENERATE_MAN )
+    # Create luadoc file
+    FIND_PROGRAM( CAT_EXECUTABLE cat )
+    EXECUTE_PROCESS( COMMAND ${CAT_EXECUTABLE} ${AWE_SRCS}
+                     COMMAND ${LUA_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
+                     OUTPUT_FILE ${AWE_LUADOC_FILE}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+    
+    FOREACH( txtfile ${AWE_MAN_SRCS})
+	STRING( REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile} )
+        STRING( REGEX REPLACE ".xml\$" ".gz" gzipman ${xmlfile} )
+        STRING( REPLACE ${CMAKE_CURRENT_SOURCE_DIR} 
+                        ${CMAKE_CURRENT_BINARY_DIR} gzipman ${gzipman} )
+	STRING( REGEX REPLACE ".gz\$" "" manfile ${gzipman} )
+
+        ADD_CUSTOM_COMMAND( TARGET ${PROJECT_AWECLIENT_NAME} POST_BUILD
+                            COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} ${txtfile}
+			    COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
+                            COMMAND ${GZIP_EXECUTABLE} -f ${manfile} 
+                            COMMENT "Generating man pages for ${manfile}"
+                            VERBATIM
+                            )
+    ENDFOREACH( txtfile )
+ENDIF( AWESOME_GENERATE_MAN )
                                             
 INSTALL(    TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} 
             RUNTIME DESTINATION bin
