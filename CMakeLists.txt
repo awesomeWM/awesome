@@ -112,15 +112,15 @@ IF(AWESOME_GENERATE_MAN)
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
     FOREACH(txtfile ${AWE_MAN_SRCS})
-	STRING(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
+        STRING(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
         STRING(REGEX REPLACE ".xml\$" ".gz" gzipman ${xmlfile})
         STRING(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}
                        ${CMAKE_CURRENT_BINARY_DIR} gzipman ${gzipman})
-	STRING(REGEX REPLACE ".gz\$" "" manfile ${gzipman})
+        STRING(REGEX REPLACE ".gz\$" "" manfile ${gzipman})
 
         ADD_CUSTOM_COMMAND(TARGET ${PROJECT_AWECLIENT_NAME} POST_BUILD
                            COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} ${txtfile}
-			   COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
+                           COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
                            COMMAND ${GZIP_EXECUTABLE} -f ${manfile}
                            COMMENT "Generating manpage for ${manfile}")
     ENDFOREACH()
