@@ -450,8 +450,8 @@ local function spawn(cmd)
     return os.execute(cmd .. "&")
 end
 
-local function eval(cmd)
-    assert(loadstring(cmd))()
+local function eval(s)
+    return assert(loadstring("return" ..s))()
 end
 
 local function menu_completion_bash(command, cur_pos, ncomp)
