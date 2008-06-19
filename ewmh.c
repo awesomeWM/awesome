@@ -346,7 +346,7 @@ ewmh_update_workarea(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xutil_screen_get(globalconf.connection, phys_screen)->root,
-                        net_workarea, CARDINAL, 32, count, area);
+                        net_workarea, CARDINAL, 32, count * 4, area);
     p_delete(&area);
 }
 
