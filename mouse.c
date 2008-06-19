@@ -297,10 +297,11 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
  * \param window
  * \param x will be set to the Pointer-x-coordinate relative to window
  * \param y will be set to the Pointer-y-coordinate relative to window
+ * \param mask will be set to the current buttons state
  * \return true on success, false if an error occured
  **/
 static bool
-mouse_query_pointer(xcb_window_t window, int *x, int *y)
+mouse_query_pointer(xcb_window_t window, int *x, int *y, uint16_t *mask)
 {
     xcb_query_pointer_cookie_t query_ptr_c;
     xcb_query_pointer_reply_t *query_ptr_r;
@@ -313,6 +314,8 @@ mouse_query_pointer(xcb_window_t window, int *x, int *y)
 
     *x = query_ptr_r->win_x;
     *y = query_ptr_r->win_y;
+    if (mask)
+        *mask = query_ptr_r->mask;
 
     p_delete(&query_ptr_r);
 
@@ -461,7 +464,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
 
     /* get current pointer position */
-    mouse_query_pointer(root, &last_x, &last_y);
+    mouse_query_pointer(root, &last_x, &last_y, NULL);
 
     /* grab pointer */
     mouse_grab_pointer(root, CurMove);
@@ -568,7 +571,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     screen = xutil_screen_get(globalconf.connection, c->phys_screen);
 
     /* get current mouse position */
-    mouse_query_pointer(screen->root, &mouse_x, &mouse_y);
+    mouse_query_pointer(screen->root, &mouse_x, &mouse_y, NULL);
 
     top = c->geometry.y;
     bottom = top + c->geometry.height;
@@ -724,7 +727,7 @@ mouse_client_resize_tiled(client_t *c)
                            globalconf.screens[tag->screen].statusbar,
                            &globalconf.screens[tag->screen].padding);
 
-    mouse_query_pointer(screen->root, &mouse_x, &mouse_y);
+    mouse_query_pointer(screen->root, &mouse_x, &mouse_y, NULL);
 
     /* select initial pointer position */
     if(layout == layout_tile)
@@ -835,7 +838,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     maxdist = round(sqrt((area.width*area.width) + (area.height*area.height)) / 2.);
 
     /* get current mouse position */
-    mouse_query_pointer(root, &mouse_x, &mouse_y);
+    mouse_query_pointer(root, &mouse_x, &mouse_y, NULL);
 
     /* select corner */
     corner = mouse_snap_to_corner(c->geometry, &mouse_x, &mouse_y, corner);
@@ -967,17 +970,19 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lreturn A table with `x' and `y' keys set to mouse coordinates.
+ * \lreturn A table with `x' and `y' keys set to mouse coordinates, and
+ *   'buttons' the list of the currently pressed buttons as numbers.
  */
 static int
 luaA_mouse_coords_get(lua_State *L)
 {
-    int mouse_x, mouse_y;
+    int mouse_x, mouse_y, i = 0;
+    uint16_t mask;
     xcb_window_t root;
 
     root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
 
-    if(!mouse_query_pointer(root, &mouse_x, &mouse_y))
+    if(!mouse_query_pointer(root, &mouse_x, &mouse_y, &mask))
         return 0;
 
     lua_newtable(L);
@@ -985,6 +990,28 @@ luaA_mouse_coords_get(lua_State *L)
     lua_setfield(L, -2, "x");
     lua_pushnumber(L, mouse_y);
     lua_setfield(L, -2, "y");
+    lua_newtable(L);
+    if (mask & XCB_BUTTON_MASK_1) {
+        lua_pushnumber(L, 1);
+        lua_rawseti(L, -2, ++i);
+    }
+    if (mask & XCB_BUTTON_MASK_2) {
+        lua_pushnumber(L, 2);
+        lua_rawseti(L, -2, ++i);
+    }
+    if (mask & XCB_BUTTON_MASK_3) {
+        lua_pushnumber(L, 3);
+        lua_rawseti(L, -2, ++i);
+    }
+    if (mask & XCB_BUTTON_MASK_4) {
+        lua_pushnumber(L, 4);
+        lua_rawseti(L, -2, ++i);
+    }
+    if (mask & XCB_BUTTON_MASK_5) {
+        lua_pushnumber(L, 5);
+        lua_rawseti(L, -2, ++i);
+    }
+    lua_setfield(L, -2, "buttons");
     return 1;
 }
 
@@ -1081,7 +1108,7 @@ luaA_mouse_screen_get(lua_State *L)
 
     root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
 
-    if(!mouse_query_pointer(root, &mouse_x, &mouse_y))
+    if(!mouse_query_pointer(root, &mouse_x, &mouse_y, NULL))
         return 0;
 
     screen = screen_get_bycoord(globalconf.screens_info,
