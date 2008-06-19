@@ -170,7 +170,7 @@ static inline xcb_screen_t *
 xutil_screen_get(xcb_connection_t *c, int screen)
 {
     if(xcb_connection_has_error(c))
-        eprint("X connection invalid");
+        fatal("X connection invalid");
 
     return xcb_aux_get_screen(c, screen);
 }

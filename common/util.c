@@ -28,10 +28,10 @@
 
 #include "util.h"
 
-/** Print error and exit with EXIT_FAILURE code
+/** Print error and exit with EXIT_FAILURE code.
  */
 void
-_eprint(int line, const char *fct, const char *fmt, ...)
+_fatal(int line, const char *fct, const char *fmt, ...)
 {
     va_list ap;
 
@@ -43,7 +43,7 @@ _eprint(int line, const char *fct, const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-/** Print error message on stderr
+/** Print error message on stderr.
  */
 void
 _warn(int line, const char *fct, const char *fmt, ...)

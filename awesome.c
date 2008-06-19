@@ -97,7 +97,7 @@ scan(void)
 
         /* Get the tree of the children windows of the current root window */
         if(!(wins = xcb_query_tree_children(tree_r)))
-            eprint("E: cannot get tree children");
+            fatal("E: cannot get tree children");
         tree_c_len = xcb_query_tree_children_length(tree_r);
         attr_wins = p_new(xcb_get_window_attributes_cookie_t, tree_c_len);
 
@@ -207,7 +207,7 @@ xerrorstart(void * data __attribute__ ((unused)),
             xcb_connection_t * c  __attribute__ ((unused)),
             xcb_generic_error_t * error __attribute__ ((unused)))
 {
-    eprint("another window manager is already running");
+    fatal("another window manager is already running");
 }
 
 /** Function to exit on some signals.
@@ -338,7 +338,7 @@ main(int argc, char **argv)
             if(a_strlen(optarg))
                 confpath = a_strdup(optarg);
             else
-                eprint("-c option requires a file name");
+                fatal("-c option requires a file name");
             break;
         }
 
@@ -361,7 +361,7 @@ main(int argc, char **argv)
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
     if(xcb_connection_has_error(globalconf.connection))
-        eprint("cannot open display");
+        fatal("cannot open display");
 
     /* Get the file descriptor corresponding to the X connection */
     xfd = xcb_get_file_descriptor(globalconf.connection);
@@ -440,7 +440,7 @@ main(int argc, char **argv)
         warn("failed to load/parse configuration file %s", confpath);
         warn("falling back to: %s", default_confpath);
         if(!luaA_parserc(default_confpath))
-            eprint("failed to load any configuration file");
+            fatal("failed to load any configuration file");
     }
 
     /* do this only for real screen */

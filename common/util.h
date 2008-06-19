@@ -285,10 +285,10 @@ a_strtobool(const char *s)
     return false;
 }
 
-#define eprint(string, ...) _eprint(__LINE__, \
-                                    __FUNCTION__, \
-                                    string, ## __VA_ARGS__)
-void _eprint(int, const char *, const char *, ...)
+#define fatal(string, ...) _fatal(__LINE__, \
+                                  __FUNCTION__, \
+                                  string, ## __VA_ARGS__)
+void _fatal(int, const char *, const char *, ...)
     __attribute__ ((noreturn)) __attribute__ ((format(printf, 3, 4)));
 
 #define warn(string, ...) _warn(__LINE__, \
