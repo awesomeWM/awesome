@@ -84,11 +84,13 @@ SET( AWE_MAN5_NAME  ${CMAKE_CURRENT_BINARY_DIR}/awesomerc.5.gz )
 
 SET( AWE_LUADOC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/apidocgen.txt )
 
+
 ADD_EXECUTABLE( ${PROJECT_AWE_NAME}         ${AWE_SRCS} )
 ADD_EXECUTABLE( ${PROJECT_AWECLIENT_NAME}   ${AWE_CLIENT_SRCS} )
 
 TARGET_LINK_LIBRARIES( ${PROJECT_AWE_NAME}  ${AWE_MOD_LIBRARIES}
                                             ${LUA_LIB}
+                                            ${LIB_EV}
                                             ${LIB_READLINE}
                                             ${LIB_NCURSES}
                                             ${LIB_EV}
@@ -117,9 +119,8 @@ IF( AWESOME_GENERATE_MAN )
         ADD_CUSTOM_COMMAND( TARGET ${PROJECT_AWECLIENT_NAME} POST_BUILD
                             COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} ${txtfile}
 			    COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
-                            COMMAND ${GZIP_EXECUTABLE} -f ${manfile} 
-                            COMMENT "Generating man pages for ${manfile}"
-                            VERBATIM
+                            COMMAND ${GZIP_EXECUTABLE} -f ${manfile}
+                            COMMENT "Generating manpage for ${manfile}"
                             )
     ENDFOREACH( txtfile )
 ENDIF( AWESOME_GENERATE_MAN )

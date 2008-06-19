@@ -58,6 +58,7 @@ pkg_check_modules( AWE_MOD REQUIRED     glib-2.0
 # Check for readline and ncurse                                    
 FIND_LIBRARY( LIB_READLINE readline )
 FIND_LIBRARY( LIB_NCURSES ncurses )
+FIND_LIBRARY( LIB_EV ev )
 
 # Check for lobev
 FIND_LIBRARY( LIB_EV ev )
@@ -78,6 +79,10 @@ FIND_LIBRARY(LUA_LIB NAMES lua5.1 lua
 FIND_PROGRAM( LUA_EXECUTABLE lua )
 
 # Error check
+IF( NOT LIB_EV )
+    MESSAGE( FATAL_ERROR "ev library not found" )
+ENDIF( NOT LIB_EV )
+
 IF( NOT LIB_READLINE )
     MESSAGE( FATAL_ERROR "readline library not found" )
 ENDIF( NOT LIB_READLINE )
