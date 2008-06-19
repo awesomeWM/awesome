@@ -126,7 +126,6 @@ ENDIF( AWESOME_GENERATE_MAN )
                                             
 INSTALL(    TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} 
             RUNTIME DESTINATION bin
-            LIBRARY DESTINATION lib
             )
 
 INSTALL(    FILES ${AWE_LUA_FILES}
