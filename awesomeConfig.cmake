@@ -38,7 +38,8 @@ MESSAGE( "Checking for REQUIRED modules: " )
 pkg_check_modules( AWE_MOD REQUIRED     glib-2.0
                                         cairo
                                         pango
-                                        gtk+-2.0>=2.2
+                                        gdk-2.0>=2.2
+                                        gdk-pixbuf-2.0>=2.2
                                         xcb
                                         xcb-event 
                                         xcb-randr
