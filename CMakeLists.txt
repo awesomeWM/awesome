@@ -8,8 +8,8 @@ INCLUDE( awesomeConfig.cmake )
 
 INCLUDE_DIRECTORIES( ${AWE_INC_DIR} )
 
-SET( AWE_LUA_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/tabulous.lua
-                    ${CMAKE_CURRENT_SOURCE_DIR}/awful.lua
+SET( AWE_LUA_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/lib/tabulous.lua
+                    ${CMAKE_CURRENT_SOURCE_DIR}/lib/awful.lua
                     )
 
 SET( AWE_CONF_FILES ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.lua
