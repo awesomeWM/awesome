@@ -41,7 +41,7 @@ P.myhooks = {}
 P.menu = {}
 P.screen = {}
 P.layout = {}
-P.menu.completion = {}
+P.completion = {}
 P.client = {}
 P.tag = {}
 
@@ -460,7 +460,7 @@ function P.eval(s)
     return assert(loadstring("return " .. s))()
 end
 
-function P.menu.completion.bash(command, cur_pos, ncomp)
+function P.completion.bash(command, cur_pos, ncomp)
     local wstart = 1
     local wend = 1
     local words = {}
