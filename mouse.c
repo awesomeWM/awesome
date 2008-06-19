@@ -451,7 +451,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     /* current mouse postion */
     int mouse_x, mouse_y;
     /* last mouse position */
-    int last_x, last_y;
+    int last_x = 0, last_y = 0;
     /* current layout */
     layout_t *layout;
     /* the infobox */
@@ -716,7 +716,7 @@ mouse_client_resize_tiled(client_t *c)
     /* current layout */
     layout_t *layout;
 
-    int mouse_x, mouse_y;
+    int mouse_x = 0, mouse_y = 0;
     size_t cursor = CurResize;
 
     screen = xutil_screen_get(globalconf.connection, c->phys_screen);
@@ -813,7 +813,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     /* max. distance from the center */
     double maxdist;
     /* mouse position */
-    int mouse_x, mouse_y;
+    int mouse_x = 0, mouse_y = 0;
     /* cursor while grabbing */
     size_t cursor = CurResize;
     corner_t corner = AutoCorner;
