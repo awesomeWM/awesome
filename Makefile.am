@@ -50,14 +50,14 @@ doc_DATA   += STYLE
 
 EXTRA_DIST += build-utils/gendoc.lua
 
-EXTRA_DIST    += awful.lua
-EXTRA_DIST    += tabulous.lua
-dist_awesomelib_DATA += awful.lua
-dist_awesomelib_DATA += tabulous.lua
-dist_awesomelib_DATA += awful.luac
-dist_awesomelib_DATA += tabulous.luac
-CLEANFILES    += awful.luac
-CLEANFILES    += tabulous.luac
+EXTRA_DIST    += lib/awful.lua
+EXTRA_DIST    += lib/tabulous.lua
+dist_awesomelib_DATA += lib/awful.lua
+dist_awesomelib_DATA += lib/tabulous.lua
+dist_awesomelib_DATA += lib/awful.luac
+dist_awesomelib_DATA += lib/tabulous.luac
+CLEANFILES    += lib/awful.luac
+CLEANFILES    += lib/tabulous.luac
 
 EXTRA_DIST    += awesomerc.lua.in
 CLEANFILES    += awesomerc.lua
