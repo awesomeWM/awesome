@@ -162,6 +162,13 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 {
     xcb_generic_event_t *ev;
 
+    /* Two level polling:
+     * We need to first check we have an event to handle
+     * and if so, we handle them all in a round.
+     * Then when we have refresh()'ed stuff so maybe new XEvent
+     * are available and select() won't tell us, so let's check
+     * with xcb_poll_for_event() again.
+     */
     while((ev = xcb_poll_for_event(globalconf.connection)))
     {
         do
@@ -186,13 +193,6 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 static void
 a_xcb_io_cb(EV_P_ ev_io *w, int revents)
 {
-    /* Two level polling:
-     * We need to first check we have an event to handle
-     * and if so, we handle them all in a round.
-     * Then when we have refresh()'ed stuff so maybe new XEvent
-     * are available and select() won't tell us, so let's check
-     * with xcb_poll_for_event() again.
-     */
     /* empty */
 }
 
