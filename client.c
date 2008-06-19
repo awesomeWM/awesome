@@ -124,26 +124,6 @@ window_isprotodel(xcb_window_t win)
     return ret;
 }
 
-/** Returns true if a client is tagged with one of the tags visibl
- * on any screen.
- * \param c The client.
- * \return True if client is tagged, false otherwise.
- */
-static bool
-client_isvisible_anyscreen(client_t *c)
-{
-    tag_t *tag;
-    int screen;
-
-    if(c && !c->ishidden)
-        for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
-            for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-                if(tag->selected && is_client_tagged(c, tag))
-                    return true;
-
-    return false;
-}
-
 /** Returns true if a client is tagged
  * with one of the tags of the specified screen.
  * \param c The client to check.
@@ -295,6 +275,8 @@ client_raise(client_t *c)
     uint32_t config_win_vals[2];
     client_node_t *node;
     layer_t layer;
+    statusbar_t *sb;
+    int screen;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_BELOW;
@@ -302,10 +284,19 @@ client_raise(client_t *c)
     /* Push c on top of the stack. */
     stack_client_push(c);
 
+    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+        for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
+        {
+            xcb_configure_window(globalconf.connection,
+                                 sb->sw->window,
+                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                 config_win_vals);
+            config_win_vals[0] = sb->sw->window;
+        }
+
     for(layer = LAYER_OUTOFSPACE - 1; layer >= LAYER_DESKTOP; layer--)
         for(node = globalconf.stack; node; node = node->next)
-            if(node->client->layer == layer
-               && client_isvisible_anyscreen(node->client))
+            if(node->client->layer == layer)
             {
                 if(node->client->titlebar
                    && node->client->titlebar->sw

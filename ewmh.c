@@ -54,6 +54,7 @@ static xcb_atom_t net_wm_icon_name;
 static xcb_atom_t net_wm_visible_icon_name;
 static xcb_atom_t net_wm_window_type;
 static xcb_atom_t net_wm_window_type_normal;
+static xcb_atom_t net_wm_window_type_desktop;
 static xcb_atom_t net_wm_window_type_dock;
 static xcb_atom_t net_wm_window_type_splash;
 static xcb_atom_t net_wm_window_type_dialog;
@@ -98,6 +99,7 @@ static AtomItem AtomNames[] =
     { "_NET_WM_VISIBLE_ICON_NAME", &net_wm_visible_icon_name },
     { "_NET_WM_WINDOW_TYPE", &net_wm_window_type },
     { "_NET_WM_WINDOW_TYPE_NORMAL", &net_wm_window_type_normal },
+    { "_NET_WM_WINDOW_TYPE_DESKTOP", &net_wm_window_type_desktop },
     { "_NET_WM_WINDOW_TYPE_DOCK", &net_wm_window_type_dock },
     { "_NET_WM_WINDOW_TYPE_SPLASH", &net_wm_window_type_splash },
     { "_NET_WM_WINDOW_TYPE_DIALOG", &net_wm_window_type_dialog },
@@ -176,6 +178,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_desktop;
     atom[i++] = net_wm_window_type;
     atom[i++] = net_wm_window_type_normal;
+    atom[i++] = net_wm_window_type_desktop;
     atom[i++] = net_wm_window_type_dock;
     atom[i++] = net_wm_window_type_splash;
     atom[i++] = net_wm_window_type_dialog;
@@ -480,6 +483,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 static void
 ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
 {
+    tag_t *tag;
+
     if(state == net_wm_window_type_normal)
     {
         /* do nothing. this is REALLY IMPORTANT */
@@ -498,8 +503,17 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
         c->noborder = true;
         client_setfloating(c, true, LAYER_ABOVE);
     }
-    else if (state == net_wm_window_type_dialog)
+    else if(state == net_wm_window_type_dialog)
         client_setfloating(c, true, LAYER_MODAL);
+    else if(state == net_wm_window_type_desktop)
+    {
+        c->noborder = true;
+        c->isfixed = true;
+        c->skip = true;
+        c->layer = LAYER_DESKTOP;
+        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
+            tag_client(c, tag);
+    }
 }
 
 int
