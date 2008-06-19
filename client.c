@@ -207,7 +207,10 @@ client_ban(client_t *c)
     if(globalconf.focus->client == c)
         client_unfocus(c);
     xcb_unmap_window(globalconf.connection, c->win);
-    window_setstate(c->win, XCB_WM_ICONIC_STATE);
+    if(c->ishidden)
+        window_setstate(c->win, XCB_WM_ICONIC_STATE);
+    else
+        window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
     if(c->titlebar && c->titlebar->position && c->titlebar->sw)
         xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
 }
