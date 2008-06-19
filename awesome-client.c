@@ -120,6 +120,7 @@ main(int argc, char **argv)
         while((msg = readline(prompt)))
             if((msg_len = a_strlen(msg)))
             {
+                add_history (msg);
                 p_realloc(&msg, msg_len + 2);
                 msg[msg_len] = '\n';
                 msg[msg_len + 1] = '\0';
