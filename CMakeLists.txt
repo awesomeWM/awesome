@@ -95,6 +95,31 @@ TARGET_LINK_LIBRARIES(${PROJECT_AWECLIENT_NAME}
     ${LIB_READLINE}
     ${LIB_NCURSES})
 
+# {{{ Generated headers
+FILE(GLOB LAYOUTGEN_DEPS ${CMAKE_CURRENT_SOURCE_DIR}/layouts/*.h)
+ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
+                   ARGS > layoutgen.h
+                   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h
+                   WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
+                   DEPENDS ${LAYOUTGEN_DEPS}
+                   COMMENT "Generating layoutgen.h."
+                   VERBATIM)
+
+ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
+                   ARGS > widgetgen.h
+                   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
+                   WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
+                   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/widget.h
+                   COMMENT "Generating widgetgen.h."
+                   VERBATIM)
+
+ADD_CUSTOM_TARGET(generated_headers
+                  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
+                          ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h)
+
+ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_headers)
+# }}}
+
 IF(GENERATE_MANPAGES)
     # Create luadoc file
     EXECUTE_PROCESS(COMMAND ${CAT_EXECUTABLE} ${AWE_SRCS}

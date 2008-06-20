@@ -197,15 +197,6 @@ FOREACH(file ${AWESOME_CONFIGURE_FILES})
 ENDFOREACH()
 #}}}
 
-# Execute some header generator
-EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
-                OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
-EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
-                OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
 # {{{ CPack configuration
 SET(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
 SET(CPACK_GENERATOR                    "TBZ2")
