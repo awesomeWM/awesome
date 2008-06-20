@@ -65,10 +65,6 @@ IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD)
 ENDIF()
 
 
-SET(AWE_COMMON_DIR common)
-SET(AWE_LAYOUT_DIR layouts)
-SET(AWE_WIDGET_DIR widgets)
-
 # Use pkgconfig to get most of the libraries
 pkg_check_modules(AWE_MOD REQUIRED
     glib-2.0

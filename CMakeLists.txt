@@ -38,34 +38,34 @@ SET(AWE_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/titlebar.c
     ${CMAKE_CURRENT_SOURCE_DIR}/widget.c
     ${CMAKE_CURRENT_SOURCE_DIR}/window.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/configopts.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/draw.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/markup.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/socket.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/swindow.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/util.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/version.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/xembed.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/xscreen.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/xutil.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_LAYOUT_DIR}/fibonacci.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_LAYOUT_DIR}/floating.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_LAYOUT_DIR}/magnifier.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_LAYOUT_DIR}/max.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_LAYOUT_DIR}/tile.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_WIDGET_DIR}/graph.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_WIDGET_DIR}/iconbox.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_WIDGET_DIR}/progressbar.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_WIDGET_DIR}/taglist.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_WIDGET_DIR}/tasklist.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_WIDGET_DIR}/textbox.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_WIDGET_DIR}/systray.c)
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/configopts.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/draw.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/markup.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/socket.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/swindow.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/util.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/version.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/xembed.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/xscreen.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/xutil.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/fibonacci.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/floating.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/magnifier.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/max.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/tile.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/graph.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/iconbox.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/progressbar.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/taglist.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/tasklist.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/textbox.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/systray.c)
 
 SET(AWE_CLIENT_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/awesome-client.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/socket.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/util.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/${AWE_COMMON_DIR}/version.c)
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/socket.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/util.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/version.c)
 
 SET(AWE_MAN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/awesome.1.txt
