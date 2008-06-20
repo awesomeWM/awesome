@@ -12,6 +12,7 @@ SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS  TRUE)
 
 OPTION(WITH_DBUS "build with D-BUS" ON)
 OPTION(WITH_IMLIB2 "build with Imlib2" ON)
+OPTION(GENERATE_MANPAGES "generate manpages" ON)
 
 ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
@@ -19,7 +20,7 @@ ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wpointer-arith -Wredundant-decls -Wformat-nonliteral
     -Wno-format-zero-length -Wmissing-format-attribute)
 
-# {{{ external utilities
+# {{{ Find external utilities
 FIND_PROGRAM(CAT_EXECUTABLE cat)
 FIND_PROGRAM(GIT_EXECUTABLE git)
 FIND_PROGRAM(LUA_EXECUTABLE lua)
@@ -31,6 +32,25 @@ FIND_PROGRAM(GZIP_EXECUTABLE gzip)
 INCLUDE(FindDoxygen)
 # pkg-config
 INCLUDE(FindPkgConfig)
+# }}}
+
+# {{{ Check if manpages can be build
+IF(GENERATE_MANPAGES)
+    IF(NOT ASCIIDOC_EXECUTABLE OR NOT XMLTO_EXECUTABLE OR NOT GZIP_EXECUTABLE)
+        IF(NOT ASCIIDOC_EXECUTABLE)
+            SET(missing "asciidoc")
+        ENDIF()
+        IF(NOT XMLTO_EXECUTABLE)
+            SET(missing ${missing} " xmlto")
+        ENDIF()
+        IF(NOT GZIP_EXECUTABLE)
+            SET(missing ${missing} " gzip")
+        ENDIF()
+
+        MESSAGE(STATUS "Not generating manpages. Missing: " ${missing})
+        SET(GENERATE_MANPAGES OFF)
+    ENDIF()
+ENDIF()
 # }}}
 
 # If this is a git repository...
@@ -124,9 +144,6 @@ IF(NOT LUA_LIB)
     MESSAGE(FATAL_ERROR "lua library not found")
 ENDIF()
 
-IF(ASCIIDOC_EXECUTABLE AND XMLTO_EXECUTABLE AND GZIP_EXECUTABLE)
-    SET(AWESOME_GENERATE_MAN TRUE)
-ENDIF()
 
 # Set awesome informations and path
 IF(DEFINED PREFIX)
