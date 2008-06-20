@@ -166,16 +166,14 @@ void
 client_updatetitle(client_t *c)
 {
     char *name;
-    xutil_intern_atom_request_t net_wm_name_q, wm_name_q;
-    xcb_atom_t net_wm_name, wm_name;
+    xutil_intern_atom_request_t net_wm_name_q;
+    xcb_atom_t net_wm_name;
 
     net_wm_name_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_NET_WM_NAME");
-    wm_name_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "WM_NAME");
     net_wm_name = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, net_wm_name_q);
-    wm_name = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wm_name_q);
 
     if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms, net_wm_name, &name))
-        if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms, wm_name, &name))
+        if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms, WM_NAME, &name))
             return;
 
     p_delete(&c->name);
