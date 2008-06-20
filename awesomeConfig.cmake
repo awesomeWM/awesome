@@ -34,7 +34,6 @@ ENDIF()
 # Check for doxygen
 INCLUDE(FindDoxygen)
 INCLUDE(FindPkgConfig)
-INCLUDE(UsePkgConfig)
 
 SET(AWE_COMMON_DIR common)
 SET(AWE_LAYOUT_DIR layouts)
