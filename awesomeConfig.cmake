@@ -19,10 +19,23 @@ ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wpointer-arith -Wredundant-decls -Wformat-nonliteral
     -Wno-format-zero-length -Wmissing-format-attribute)
 
+# {{{ external utilities
+FIND_PROGRAM(CAT_EXECUTABLE cat)
+FIND_PROGRAM(GIT_EXECUTABLE git)
+FIND_PROGRAM(LUA_EXECUTABLE lua)
+# programs needed for man pages
+FIND_PROGRAM(ASCIIDOC_EXECUTABLE asciidoc)
+FIND_PROGRAM(XMLTO_EXECUTABLE xmlto)
+FIND_PROGRAM(GZIP_EXECUTABLE gzip)
+# doxygen
+INCLUDE(FindDoxygen)
+# pkg-config
+INCLUDE(FindPkgConfig)
+# }}}
+
 # If this is a git repository...
 IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD)
     # ...update version
-    FIND_PROGRAM(GIT_EXECUTABLE git)
     IF(GIT_EXECUTABLE)
         EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -31,9 +44,6 @@ IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD)
     ENDIF()
 ENDIF()
 
-# Check for doxygen
-INCLUDE(FindDoxygen)
-INCLUDE(FindPkgConfig)
 
 SET(AWE_COMMON_DIR common)
 SET(AWE_LAYOUT_DIR layouts)
@@ -97,8 +107,6 @@ FIND_LIBRARY(LUA_LIB NAMES lua5.1 lua
     /usr/lib/lua
     /usr/local/lib)
 
-FIND_PROGRAM(LUA_EXECUTABLE lua)
-
 # Error check
 IF(NOT LIB_EV)
     MESSAGE( FATAL_ERROR "ev library not found")
@@ -119,11 +127,6 @@ ENDIF()
 IF(DOXYGEN_EXECUTABLE)
     ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/awesome.doxygen)
 ENDIF()
-
-# Check for programs needed for man pages
-FIND_PROGRAM(ASCIIDOC_EXECUTABLE asciidoc)
-FIND_PROGRAM(XMLTO_EXECUTABLE xmlto)
-FIND_PROGRAM(GZIP_EXECUTABLE gzip)
 
 IF(ASCIIDOC_EXECUTABLE AND XMLTO_EXECUTABLE AND GZIP_EXECUTABLE)
     SET(AWESOME_GENERATE_MAN TRUE)
