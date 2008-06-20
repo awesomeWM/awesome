@@ -91,10 +91,17 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-icccm
     cairo-xcb)
 
+MACRO(a_find_library variable library)
+    FIND_LIBRARY(${variable} ${library})
+    IF(NOT ${variable})
+        MESSAGE(FATAL_ERROR ${library} " library not found.")
+    ENDIF()
+ENDMACRO()
+
 # Check for readline, ncurse and libev
-FIND_LIBRARY(LIB_READLINE readline)
-FIND_LIBRARY(LIB_NCURSES ncurses)
-FIND_LIBRARY(LIB_EV ev)
+a_find_library(LIB_READLINE readline)
+a_find_library(LIB_NCURSES ncurses)
+a_find_library(LIB_EV ev)
 
 # Check for lua5.1
 FIND_PATH(LUA_INC_DIR lua.h
@@ -108,18 +115,6 @@ FIND_LIBRARY(LUA_LIB NAMES lua5.1 lua
     /usr/local/lib)
 
 # Error check
-IF(NOT LIB_EV)
-    MESSAGE( FATAL_ERROR "ev library not found")
-ENDIF()
-
-IF(NOT LIB_READLINE)
-    MESSAGE(FATAL_ERROR "readline library not found")
-ENDIF()
-
-IF(NOT LIB_NCURSES)
-    MESSAGE(FATAL_ERROR "ncurse library not found")
-ENDIF()
-
 IF(NOT LUA_LIB)
     MESSAGE(FATAL_ERROR "lua library not found")
 ENDIF()
