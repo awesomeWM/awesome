@@ -34,8 +34,6 @@ local io = io
 -- Reset env
 setfenv(1, P)
 
--- Hook functions, wrappers around awesome's hooks. functions so we
--- can easily add multiple functions per hook.
 P.hooks = {}
 P.myhooks = {}
 P.menu = {}
@@ -45,71 +43,91 @@ P.completion = {}
 P.client = {}
 P.tag = {}
 
--- Create a new userhook (for external libs)
+--- Create a new userhook (for external libs).
+-- @param name Hook name.
 local function userhook_create(name)
     P.myhooks[name] = {}
     P.hooks[name] = function (f)
-        table.insert(P.myhooks[name], {callback = f})
+        table.insert(P.myhooks[name], { callback = f })
     end
 end
 
--- Call a created userhook (for external libs
+--- Call a created userhook (for external libs).
+-- @param name Hook name.
 local function userhook_call(name, args)
-    for i,o in pairs(P.myhooks[name]) do
-       P.myhooks[name][i]['callback'](unpack(args))
+    for i, o in pairs(P.myhooks[name]) do
+        P.myhooks[name][i]['callback'](unpack(args))
     end
 end
 
--- Function to the good value in table, cycling
-local function array_boundandcycle(t, i)
-    if i > #t then
-        i = 1
-    elseif i < 1 then
-        i = #t
-    end
+--- Make i cycle.
+-- @param t A length.
+-- @param i An absolute index to fit into #t.
+-- @return The object at new index.
+local function cycle(t, i)
+    while i > t do i = i - t end
+    while i < 1 do i = i + t end
     return i
 end
 
--- Function to get a client by its relative index:
--- set i to 1 to get next, -1 to get previous.
-function P.client.next(i)
-    -- Get all visible clients
-    local cls = client.visible_get(mouse.screen_get())
+--- Get a client by its relative index to the focused window.
+-- @usage Set i to 1 to get next, -1 to get previous.
+-- @param i The index.
+-- @param c Optional client.
+-- @return A client, or nil if no client is available.
+function P.client.next(i, c)
     -- Get currently focused client
-    local sel = client.focus_get()
-    if not sel then return end
-    -- Loop upon each client
-    for idx, c in ipairs(cls) do
-        if c == sel then
-            return cls[array_boundandcycle(cls, idx + i)]
+    local sel = c or client.focus_get()
+    if sel then
+        -- Get all visible clients
+        local cls = client.visible_get(sel:screen_get())
+        -- Loop upon each client
+        for idx, c in ipairs(cls) do
+            if c == sel then
+                -- Cycle
+                return cls[cycle(#cls, idx +i)]
+            end
         end
     end
 end
 
--- Focus a client by its relative index.
-function P.client.focus(i)
-    local c = P.client.next(i)
-    if c then
-        c:focus_set()
+--- Focus a client by its relative index.
+-- @param i The index.
+-- @param c Optional client.
+function P.client.focus(i, c)
+    local target = P.client.next(i, c)
+    if target then
+        target:focus_set()
     end
 end
 
--- Swap a client by its relative index.
-function P.client.swap(i)
-    local c = P.client.next(i)
-    local sel = client.focus_get()
-    if c and sel then
-        sel:swap(c)
+--- Swap a client by its relative index.
+-- @param i The index.
+-- @param c Optional client, otherwise focused one is used.
+function P.client.swap(i, c)
+    local sel = c or client.focus_get()
+    local target = P.client.next(i, sel)
+    if target then
+        target:swap(c)
     end
 end
 
-function P.client.master()
-    return client.visible_get(mouse.screen_get())[1]
+--- Get the master window
+-- @param screen Optional screen number, otherwise screen mouse is used.
+-- @return The master window.
+function P.client.master(screen)
+    local s = screen or mouse.screen_get()
+    return client.visible_get(screen)[1]
 end
 
--- Move/resize a client relativ to current coordinates.
-function P.client.moveresize(x, y, w, h)
-    local sel = client.focus_get()
+--- Move/resize a client relative to current coordinates.
+-- @param x The relative x coordinate.
+-- @param y The relative y coordinate.
+-- @param w The relative width.
+-- @param h The relative height.
+-- @param c The optional client, otherwise focused one is used.
+function P.client.moveresize(x, y, w, h, c)
+    local sel = c or client.focus_get()
     local coords = sel:coords_get()
     coords['x'] = coords['x'] + x
     coords['y'] = coords['y'] + y
@@ -118,6 +136,8 @@ function P.client.moveresize(x, y, w, h)
     sel:coords_set(coords)
 end
 
+--- Give the focus to a screen, and move pointer.
+-- @param Screen number.
 function P.screen.focus(i)
     local sel = client.focus_get()
     local s
@@ -126,132 +146,143 @@ function P.screen.focus(i)
     else
         s = mouse.screen_get()
     end
-    local count = screen.count()
-    s = s + i
-    if s < 1 then
-        s = count
-    elseif s > count then
-        s = 1
-    end
-    screen.focus(s)
+    screen.focus(cycle(screen.count(), s))
     -- Move the mouse on the screen
     local screen_coords = screen.coords_get(s)
     mouse.coords_set(screen_coords['x'], screen_coords['y'])
 end
 
--- Return a table with all visible tags
+--- Return a table with all visible tags
+-- @param s Screen number.
+-- @return A table with all selected tags.
 function P.tag.selectedlist(s)
-    local idx = 1
     local screen = s or mouse.screen_get()
     local tags = tag.geti(screen)
     local vtags = {}
     for i, t in pairs(tags) do
         if t:isselected() then
-            vtags[idx] = t
-            idx = idx + 1
+            vtags[#vtags + 1] = t
         end
     end
     return vtags
 end
 
--- Return only the first element of all visible tags,
--- so that's the first visible tags.
+--- Return only the first visible tag.
+-- @param s Screen number.
 function P.tag.selected(s)
     return P.tag.selectedlist(s)[1]
 end
 
--- Set master width factor
-function P.tag.setmwfact(i)
+--- Set master width factor.
+-- @param mwfact Master width factor.
+function P.tag.setmwfact(mwfact)
     local t = P.tag.selected()
     if t then
-        t:mwfact_set(i)
+        t:mwfact_set(mwfact)
     end
 end
 
--- Increase master width factor
-function P.tag.incmwfact(i)
+--- Increase master width factor.
+-- @param add Value to add to master width factor.
+function P.tag.incmwfact(add)
     local t = P.tag.selected()
     if t then
-        t:mwfact_set(t:mwfact_get() + i)
+        t:mwfact_set(t:mwfact_get() + add)
     end
 end
 
--- Set number of master windows
-function P.tag.setnmaster(i)
+--- Set the number of master windows.
+-- @param nmaster The number of master windows.
+function P.tag.setnmaster(nmaster)
     local t = P.tag.selected()
     if t then
-        t:nmaster_set(i)
+        t:nmaster_set(nmaster)
     end
 end
 
--- Increase number of master windows
-function P.tag.incnmaster(i)
+--- Increase the number of master windows.
+-- @param add Value to add to number of master windows.
+function P.tag.incnmaster(add)
     local t = P.tag.selected()
     if t then
-        t:nmaster_set(t:nmaster_get() + i)
+        t:nmaster_set(t:nmaster_get() + add)
     end
 end
 
--- Set number of column windows
-function P.tag.setncol(i)
+--- Set number of column windows.
+-- @param ncol The number of column.
+function P.tag.setncol(ncol)
     local t = P.tag.selected()
     if t then
-        t:ncol_set(i)
+        t:ncol_set(ncol)
     end
 end
 
--- Increase number of column windows
-function P.tag.incncol(i)
+--- Increase number of column windows.
+-- @param add Value to add to number of column windows.
+function P.tag.incncol(add)
     local t = P.tag.selected()
     if t then
-        t:ncol_set(t:ncol_get() + i)
+        t:ncol_set(t:ncol_get() + add)
     end
 end
 
--- View no tag
-function P.tag.viewnone()
-    local tags = tag.get(mouse.screen_get())
+--- View no tag.
+-- @param Optional screen number.
+function P.tag.viewnone(screen)
+    local tags = tag.get(screen or mouse.screen_get())
     for i, t in pairs(tags) do
         t:view(false)
     end
 end
 
-function P.tag.viewidx(r)
-    local tags = tag.geti(mouse.screen_get())
+--- View a tag by its index.
+-- @param i The relative index to see.
+-- @param screen Optional screen number.
+function P.tag.viewidx(i, screen)
+    local tags = tag.geti(screen or mouse.screen_get())
     local sel = P.tag.selected()
     P.tag.viewnone()
-    for i, t in ipairs(tags) do
+    for k, t in ipairs(tags) do
         if t == sel then
-            tags[array_boundandcycle(tags, i + r)]:view(true)
+            tags[cycle(#tags, k + i)]:view(true)
         end
     end
 end
 
--- View next tag
+--- View next tag. This is the same as tag.viewidx(1).
 function P.tag.viewnext()
     return P.tag.viewidx(1)
 end
 
--- View previous tag
+--- View previous tag. This is the same a tag.viewidx(-1).
 function P.tag.viewprev()
     return P.tag.viewidx(-1)
 end
 
+--- View only a tag.
+-- @param t The tag object.
 function P.tag.viewonly(t)
     P.tag.viewnone()
     t:view(true)
 end
 
-function P.tag.viewmore(tags)
-    P.tag.viewnone()
+--- View only a set of tags.
+-- @param tags A table with tags to view only.
+-- @param screen Optional screen number of the tags.
+function P.tag.viewmore(tags, screen)
+    P.tag.viewnone(screen)
     for i, t in pairs(tags) do
         t:view(true)
     end
 end
 
+--- Move a client to a tag.
+-- @param target The tag to move the client to.
+-- @para c Optional client to move, otherwise the focused one is used.
 function P.client.movetotag(target, c)
     local sel = c or client.focus_get();
-    local tags = tag.get(mouse.screen_get())
+    local tags = tag.get(c:screen_get())
     for k, t in pairs(tags) do
         sel:tag(t, false)
     end
