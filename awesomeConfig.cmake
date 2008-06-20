@@ -11,7 +11,7 @@ SET(CMAKE_BUILD_TYPE RELEASE)
 SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS  TRUE)
 
 OPTION(WITH_DBUS "build with D-BUS" ON)
-OPTION(WITH_IMLIB "build with Imlib" ON)
+OPTION(WITH_IMLIB2 "build with Imlib2" ON)
 
 ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
@@ -76,15 +76,15 @@ IF(WITH_DBUS)
     ENDIF()
 ENDIF()
 
-IF(WITH_IMLIB)
-    pkg_check_modules(IMLIB imlib2)
-    IF(IMLIB_FOUND)
-        ADD_DEFINITIONS(-DWITH_IMLIB)
-        SET(AWE_MOD_LIBRARIES ${AWE_MOD_LIBRARIES} ${IMLIB_LIBRARIES})
-        SET(AWE_MOD_INCLUDE_DIRS ${AWE_MOD_INCLUDE_DIRS} ${IMLIB_INCLUDE_DIRS})
+IF(WITH_IMLIB2)
+    pkg_check_modules(IMLIB2 imlib2)
+    IF(IMLIB2_FOUND)
+        ADD_DEFINITIONS(-DWITH_IMLIB2)
+        SET(AWE_MOD_LIBRARIES ${AWE_MOD_LIBRARIES} ${IMLIB2_LIBRARIES})
+        SET(AWE_MOD_INCLUDE_DIRS ${AWE_MOD_INCLUDE_DIRS} ${IMLIB2_INCLUDE_DIRS})
     ELSE()
-        SET(WITH_IMLIB OFF)
-        MESSAGE(STATUS "Imlib not found. Disabled.")
+        SET(WITH_IMLIB2 OFF)
+        MESSAGE(STATUS "Imlib2 not found. Disabled.")
     ENDIF()
 ENDIF()
 
