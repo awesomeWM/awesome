@@ -14,11 +14,13 @@ OPTION(WITH_DBUS "build with D-BUS" ON)
 OPTION(WITH_IMLIB2 "build with Imlib2" ON)
 OPTION(GENERATE_MANPAGES "generate manpages" ON)
 
+# {{{ CFLAGS
 ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
     -Wsign-compare -Wunused -Wno-unused-parameter -Wuninitialized -Winit-self
     -Wpointer-arith -Wredundant-decls -Wformat-nonliteral
     -Wno-format-zero-length -Wmissing-format-attribute)
+# }}}
 
 # {{{ Find external utilities
 FIND_PROGRAM(CAT_EXECUTABLE cat)
@@ -160,7 +162,7 @@ IF(WITH_IMLIB2)
 ENDIF()
 # }}}
 
-# Set awesome informations and path
+# {{{ Install path and configuration variables.
 IF(DEFINED PREFIX)
     SET(CMAKE_INSTALL_PREFIX ${PREFIX})
 ENDIF()
@@ -179,8 +181,9 @@ SET(AWESOME_MAN5_PATH        ${AWESOME_SHARE}/man/man5 )
 SET(AWESOME_REL_LUA_LIB_PATH ${AWESOME_SHARE}/${PROJECT_AWE_NAME}/lib )
 SET(AWESOME_REL_CONF_PATH    ${AWESOME_ETC}/${PROJECT_AWE_NAME} )
 SET(AWESOME_REL_ICON_PATH    ${AWESOME_SHARE}/${PROJECT_AWE_NAME} )
+# }}}
 
-# Configure files.
+# {{{ Configure files.
 SET (AWESOME_CONFIGURE_FILES config.h.in
                              awesomerc.lua.in
                              awesome-version-internal.h.in
@@ -198,6 +201,7 @@ ENDMACRO()
 FOREACH(file ${AWESOME_CONFIGURE_FILES})
     a_configure_file(${file})
 ENDFOREACH()
+#}}}
 
 # Execute some header generator
 EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
@@ -208,6 +212,7 @@ EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
                 OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
+# {{{ CPack configuration
 SET(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
 SET(CPACK_GENERATOR                    "TBZ2")
 SET(CPACK_SOURCE_GENERATOR             "TBZ2")
@@ -221,5 +226,6 @@ SET(CPACK_PACKAGE_VERSION_MINOR        "${VERSION_MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH        "${VERSION_PATCH}")
 
 INCLUDE(CPack)
+#}}}
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
