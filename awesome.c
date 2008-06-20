@@ -75,6 +75,7 @@ scan(void)
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
     xembed_info_t eminfo;
+    long state;
 
     for(screen = 0; screen < screen_max; screen++)
     {
@@ -113,9 +114,12 @@ scan(void)
                                                      attr_wins[i],
                                                      NULL);
 
-            if(!attr_r || attr_r->override_redirect ||
-               !(attr_r->map_state == XCB_MAP_STATE_VIEWABLE ||
-                 window_getstate(wins[i]) == XCB_WM_ICONIC_STATE))
+            state = window_getstate(wins[i]);
+
+            if(!attr_r || attr_r->override_redirect
+               || !(attr_r->map_state == XCB_MAP_STATE_VIEWABLE
+                    || state == XCB_WM_ICONIC_STATE
+                    || state == XCB_WM_WITHDRAWN_STATE))
             {
                 p_delete(&attr_r);
                 continue;
