@@ -108,7 +108,7 @@ function P.client.swap(i, c)
     local sel = c or client.focus_get()
     local target = P.client.next(i, sel)
     if target then
-        target:swap(c)
+        target:swap(sel)
     end
 end
 
