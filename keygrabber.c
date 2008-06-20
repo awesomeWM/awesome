@@ -656,6 +656,7 @@ key_press_lookup_string(xcb_key_press_event_t *e,
 }
 
 /** Grab the keyboard.
+ * \return True if keyboard was grabbed.
  */
 static bool
 keygrabber_grab(void)

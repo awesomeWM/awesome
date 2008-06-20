@@ -40,7 +40,7 @@ client_node_client_getby(client_node_t *list, client_t *c)
 
 /** Create a client node for focus.
  * \param list The client list.
- * \param c The client
+ * \param c The client.
  * \return The client focus node.
  */
 client_node_t *

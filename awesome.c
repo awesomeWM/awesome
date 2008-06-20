@@ -60,7 +60,7 @@ typedef struct
     xcb_query_tree_cookie_t tree_cookie;
 } root_win_t;
 
-/** Scan X to find windows to manage
+/** Scan X to find windows to manage.
  */
 static void
 scan(void)
@@ -202,9 +202,9 @@ a_xcb_io_cb(EV_P_ ev_io *w, int revents)
 
 /** Startup Error handler to check if another window manager
  * is already running.
- * \param data Additional optional parameters data
- * \param c X connection
- * \param error Error event
+ * \param data Additional optional parameters data.
+ * \param c X connection.
+ * \param error Error event.
  */
 static int __attribute__ ((noreturn))
 xerrorstart(void * data __attribute__ ((unused)),
@@ -223,14 +223,14 @@ exit_on_signal(EV_P_ ev_signal *w, int revents)
     ev_unloop(EV_A_ 1);
 }
 
-/** \brief awesome xerror function
+/** \brief awesome xerror function.
  * There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
  * default error handler, which may call exit.
- * \param data currently unused
+ * \param data Currently unused.
  * \param c The connectiont to the X server.
- * \param e The error event
- * \return 0 if no error, or xerror's xlib return status
+ * \param e The error event.
+ * \return 0 if no error, or xerror's xlib return status.
  */
 static int
 xerror(void *data __attribute__ ((unused)),
@@ -268,7 +268,7 @@ xerror(void *data __attribute__ ((unused)),
 }
 
 /** Print help and exit(2) with given exit_code.
- * \param exit_code the exit code
+ * \param exit_code The exit code.
  */
 static void __attribute__ ((noreturn))
 exit_help(int exit_code)
@@ -283,9 +283,9 @@ exit_help(int exit_code)
 }
 
 /** Hello, this is main.
- * \param argc who knows
- * \param argv who knows
- * \return EXIT_SUCCESS I hope
+ * \param argc Who knows.
+ * \param argv Who knows.
+ * \return EXIT_SUCCESS I hope.
  */
 int
 main(int argc, char **argv)

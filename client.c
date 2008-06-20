@@ -43,6 +43,11 @@
 
 extern awesome_t globalconf;
 
+/** Create a new client userdata.
+ * \param L The Lua VM state.
+ * \param p A client pointer.
+ * \param The number of elements pushed on the stack.
+ */
 int
 luaA_client_userdata_new(lua_State *L, client_t *p)
 {
@@ -97,7 +102,7 @@ client_loadprops(client_t * c, screen_t *screen)
     return result;
 }
 
-/** Check if client supports protocol WM_DELETE_WINDOW,
+/** Check if client supports protocol WM_DELETE_WINDOW.
  * \param win The window.
  * \return True if client has WM_DELETE_WINDOW, false otherwise.
  */
@@ -215,7 +220,7 @@ client_ban(client_t *c)
         xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
 }
 
-/** Give focus to client, or to first client if client is NULL,
+/** Give focus to client, or to first client if client is NULL.
  * \param c The client or NULL.
  * \param screen Virtual screen number.
  * \return True if a window (even root) has received focus, false otherwise.
@@ -700,7 +705,7 @@ client_updatewmhints(client_t *c)
 }
 
 /** Update the size hintz of a client.
- * \param c The client
+ * \param c The client.
  * \return A pointer to a xcb_size_hints_t.
  */
 xcb_size_hints_t *
