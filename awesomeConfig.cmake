@@ -9,6 +9,9 @@ PROJECT(${PROJECT_AWE_NAME})
 
 SET(CMAKE_BUILD_TYPE RELEASE)
 
+OPTION(WITH_DBUS "build with D-BUS" ON)
+OPTION(WITH_IMLIB "build with Imlib" ON)
+
 ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
     -Wsign-compare -Wunused -Wno-unused-parameter -Wuninitialized -Winit-self
@@ -53,14 +56,37 @@ pkg_check_modules(AWE_MOD REQUIRED
     xcb-keysyms
     xcb-render
     xcb-icccm
-    cairo-xcb
-    dbus-1
-    imlib2)
+    cairo-xcb)
 
-# Check for readline and ncurse
+# Check for readline, ncurse and libev
 FIND_LIBRARY(LIB_READLINE readline)
 FIND_LIBRARY(LIB_NCURSES ncurses)
 FIND_LIBRARY(LIB_EV ev)
+
+# Check for optional libs
+IF(WITH_DBUS)
+    pkg_check_modules(DBUS dbus-1)
+    IF(DBUS_FOUND)
+        ADD_DEFINITIONS(-DWITH_DBUS)
+        SET(AWE_MOD_LIBRARIES ${AWE_MOD_LIBRARIES} ${DBUS_LIBRARIES})
+        SET(AWE_MOD_INCLUDE_DIRS ${AWE_MOD_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
+    ELSE()
+        SET(WITH_DBUS OFF)
+        MESSAGE(STATUS "DBUS not found. Disabled.")
+    ENDIF()
+ENDIF()
+
+IF(WITH_IMLIB)
+    pkg_check_modules(IMLIB imlib2)
+    IF(IMLIB_FOUND)
+        ADD_DEFINITIONS(-DWITH_IMLIB)
+        SET(AWE_MOD_LIBRARIES ${AWE_MOD_LIBRARIES} ${IMLIB_LIBRARIES})
+        SET(AWE_MOD_INCLUDE_DIRS ${AWE_MOD_INCLUDE_DIRS} ${IMLIB_INCLUDE_DIRS})
+    ELSE()
+        SET(WITH_IMLIB OFF)
+        MESSAGE(STATUS "Imlib not found. Disabled.")
+    ENDIF()
+ENDIF()
 
 # Check for lua5.1
 FIND_PATH(LUA_INC_DIR lua.h
@@ -91,9 +117,6 @@ ENDIF()
 IF(NOT LUA_LIB)
     MESSAGE(FATAL_ERROR "lua library not found")
 ENDIF()
-
-# Add awesome defines
-ADD_DEFINITIONS(-DWITH_DBUS -DWITH_IMLIB)
 
 IF(DOXYGEN_EXECUTABLE)
     ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/awesome.doxygen)
