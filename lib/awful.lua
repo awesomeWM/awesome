@@ -146,7 +146,8 @@ function P.screen.focus(i)
     else
         s = mouse.screen_get()
     end
-    screen.focus(cycle(screen.count(), s))
+    s = cycle(screen.count(), s + i)
+    screen.focus(s)
     -- Move the mouse on the screen
     local screen_coords = screen.coords_get(s)
     mouse.coords_set(screen_coords['x'], screen_coords['y'])
