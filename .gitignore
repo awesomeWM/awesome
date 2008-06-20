@@ -8,6 +8,8 @@ config.h
 Makefile
 CMakeCache.txt
 CMakeFiles/
+CPackConfig.cmake
+CPackSourceConfig.cmake
 cmake_install.cmake
 install_manifest.txt
 awesome.doxygen
