@@ -6,4 +6,7 @@
 #define AWESOME_CONF_PATH "@AWESOME_CONF_PATH@"
 #define VERSION "@VERSION@"
 
+#cmakedefine WITH_DBUS
+#cmakedefine WITH_IMLIB2
+
 #endif //_CONFIG_H_
