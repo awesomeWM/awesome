@@ -64,9 +64,14 @@ IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD)
     ENDIF()
 ENDIF()
 
+# {{{ Required libraries
+#
+# this sets up:
+# AWESOME_REQUIRED_LIBRARIES
+# AWESOME_REQUIRED_INCLUDE_DIRS
 
 # Use pkgconfig to get most of the libraries
-pkg_check_modules(AWE_MOD REQUIRED
+pkg_check_modules(AWESOME_REQUIRED REQUIRED
     glib-2.0
     cairo
     pango
@@ -88,29 +93,6 @@ pkg_check_modules(AWE_MOD REQUIRED
 FIND_LIBRARY(LIB_READLINE readline)
 FIND_LIBRARY(LIB_NCURSES ncurses)
 FIND_LIBRARY(LIB_EV ev)
-
-# Check for optional libs
-IF(WITH_DBUS)
-    pkg_check_modules(DBUS dbus-1)
-    IF(DBUS_FOUND)
-        SET(AWE_MOD_LIBRARIES ${AWE_MOD_LIBRARIES} ${DBUS_LIBRARIES})
-        SET(AWE_MOD_INCLUDE_DIRS ${AWE_MOD_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
-    ELSE()
-        SET(WITH_DBUS OFF)
-        MESSAGE(STATUS "DBUS not found. Disabled.")
-    ENDIF()
-ENDIF()
-
-IF(WITH_IMLIB2)
-    pkg_check_modules(IMLIB2 imlib2)
-    IF(IMLIB2_FOUND)
-        SET(AWE_MOD_LIBRARIES ${AWE_MOD_LIBRARIES} ${IMLIB2_LIBRARIES})
-        SET(AWE_MOD_INCLUDE_DIRS ${AWE_MOD_INCLUDE_DIRS} ${IMLIB2_INCLUDE_DIRS})
-    ELSE()
-        SET(WITH_IMLIB2 OFF)
-        MESSAGE(STATUS "Imlib2 not found. Disabled.")
-    ENDIF()
-ENDIF()
 
 # Check for lua5.1
 FIND_PATH(LUA_INC_DIR lua.h
@@ -140,6 +122,43 @@ IF(NOT LUA_LIB)
     MESSAGE(FATAL_ERROR "lua library not found")
 ENDIF()
 
+SET(AWESOME_REQUIRED_LIBRARIES ${AWESOME_REQUIRED_LIBRARIES}
+        ${LIB_READLINE}
+        ${LIB_NCURSES}
+        ${LIB_EV}
+        ${LUA_LIB})
+
+SET(AWESOME_REQUIRED_INCLUDE_DIRS ${AWESOME_REQUIRED_INCLUDE_DIRS} ${LUA_INC_DIR})
+# }}}
+
+# {{{ Optional libraries.
+#
+# this sets up:
+# AWESOME_OPTIONAL_LIBRARIES
+# AWESOME_OPTIONAL_INCLUDE_DIRS
+
+IF(WITH_DBUS)
+    pkg_check_modules(DBUS dbus-1)
+    IF(DBUS_FOUND)
+        SET(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES} ${DBUS_LIBRARIES})
+        SET(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
+    ELSE()
+        SET(WITH_DBUS OFF)
+        MESSAGE(STATUS "DBUS not found. Disabled.")
+    ENDIF()
+ENDIF()
+
+IF(WITH_IMLIB2)
+    pkg_check_modules(IMLIB2 imlib2)
+    IF(IMLIB2_FOUND)
+        SET(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES} ${IMLIB2_LIBRARIES})
+        SET(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${IMLIB2_INCLUDE_DIRS})
+    ELSE()
+        SET(WITH_IMLIB2 OFF)
+        MESSAGE(STATUS "Imlib2 not found. Disabled.")
+    ENDIF()
+ENDIF()
+# }}}
 
 # Set awesome informations and path
 IF(DEFINED PREFIX)
@@ -188,9 +207,6 @@ EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
 EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
                 OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
-# Set the awesome include dir
-SET(AWE_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${AWE_MOD_INCLUDE_DIRS} ${LUA_INC_DIR})
 
 SET(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
 SET(CPACK_GENERATOR                    "TBZ2")
