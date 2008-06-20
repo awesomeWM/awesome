@@ -148,30 +148,24 @@ SET(AWESOME_REL_LUA_LIB_PATH ${AWESOME_SHARE}/${PROJECT_AWE_NAME}/lib )
 SET(AWESOME_REL_CONF_PATH    ${AWESOME_ETC}/${PROJECT_AWE_NAME} )
 SET(AWESOME_REL_ICON_PATH    ${AWESOME_SHARE}/${PROJECT_AWE_NAME} )
 
+# Configure files.
+SET (AWESOME_CONFIGURE_FILES config.h.in
+                             awesomerc.lua.in
+                             awesome-version-internal.h.in
+                             awesome.doxygen.in)
 
-# Configure awesome config.h from template
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/config.h
-               ESCAPE_QUOTE
-               @ONLY)
+MACRO(a_configure_file file)
+    STRING(REGEX REPLACE ".in\$" "" outfile ${file})
+    MESSAGE(STATUS "Configuring ${outfile}")
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${file}
+                   ${CMAKE_CURRENT_SOURCE_DIR}/${outfile}
+                   ESCAPE_QUOTE
+                   @ONLY)
+ENDMACRO()
 
-# Confiure awesomerc.lua.in
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.lua.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.lua
-               ESCAPE_QUOTE
-               @ONLY)
-
-# Configure awesome awesome-version-internal.h from template
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/awesome-version-internal.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/awesome-version-internal.h
-               ESCAPE_QUOTE
-               @ONLY)
-
-# Configure awesome.doxygen
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/awesome.doxygen.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/awesome.doxygen
-               ESCAPE_QUOTE
-               @ONLY)
+FOREACH(file ${AWESOME_CONFIGURE_FILES})
+    a_configure_file(${file})
+ENDFOREACH()
 
 # Execute some header generator
 EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
