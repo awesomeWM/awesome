@@ -187,9 +187,12 @@ IF(GENERATE_MANPAGES)
         ADD_CUSTOM_COMMAND(COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
                            OUTPUT ${manfile}
                            DEPENDS ${xmlfile})
-        ADD_CUSTOM_COMMAND(COMMAND ${GZIP_EXECUTABLE} -f ${manfile}
+        ADD_CUSTOM_COMMAND(COMMAND ${CAT_EXECUTABLE} ${manfile}
+                           | ${GZIP_EXECUTABLE}
+                           > ${gzfile}
                            OUTPUT ${gzfile}
-                           DEPENDS ${manfile})
+                           DEPENDS ${manfile}
+                           VERBATIM)
 
         SET(MAN_FILES ${MAN_FILES} ${gzfile})
     ENDFOREACH()
