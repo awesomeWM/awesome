@@ -126,13 +126,34 @@ ADD_CUSTOM_TARGET(generated_headers
 ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_headers)
 # }}}
 
+# {{{ Manpages.
 IF(GENERATE_MANPAGES)
+
+    MACRO(a_file_match infile regex result_var)
+        FILE(STRINGS ${infile} matches REGEX ${regex} LIMIT_COUNT 1)
+        IF(matches)
+            SET(${result_var} TRUE)
+        ELSE()
+            SET(${result_var} FALSE)
+        ENDIF()
+    ENDMACRO()
+
+    # find .c files exporting lua functions
+    FOREACH(cfile ${AWE_SRCS})
+        a_file_match(${cfile} "const struct luaL_reg" result)
+        IF(result)
+            SET(LUA_APIDOC_SRCS ${LUA_APIDOC_SRCS} ${cfile})
+        ENDIF()
+    ENDFOREACH()
+
     # Create luadoc file
-    EXECUTE_PROCESS(COMMAND ${CAT_EXECUTABLE} ${AWE_SRCS}
+    # TODO: make this a target that depends on LUA_APIDOC_SRCS
+    EXECUTE_PROCESS(COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
                     COMMAND ${LUA_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
                     OUTPUT_FILE ${AWE_LUADOC_FILE}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
+    # TODO: awesome.5 should depend on apidocgen.txt
     FOREACH(txtfile ${AWE_MAN_SRCS})
         STRING(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
         STRING(REGEX REPLACE ".xml\$" ".gz" gzipman ${xmlfile})
@@ -147,6 +168,7 @@ IF(GENERATE_MANPAGES)
                            COMMENT "Generating manpage for ${manfile}")
     ENDFOREACH()
 ENDIF()
+# }}}
 
 IF(DOXYGEN_EXECUTABLE)
     ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/awesome.doxygen)
