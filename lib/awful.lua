@@ -117,7 +117,7 @@ end
 -- @return The master window.
 function P.client.master(screen)
     local s = screen or mouse.screen_get()
-    return client.visible_get(screen)[1]
+    return client.visible_get(s)[1]
 end
 
 --- Move/resize a client relative to current coordinates.
