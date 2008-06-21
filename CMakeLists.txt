@@ -129,6 +129,7 @@ ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_headers)
 # {{{ Manpages.
 IF(GENERATE_MANPAGES)
 
+    # {{{ Lua API documentation.
     MACRO(a_file_match infile regex result_var)
         IF(CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION LESS 6)
             # cmake < 2.6 doesn't know FILE(STRINGS ...)
@@ -169,22 +170,31 @@ IF(GENERATE_MANPAGES)
                        VERBATIM)
 
     ADD_CUSTOM_TARGET(luadoc DEPENDS ${AWE_LUADOC_FILE})
-    # TODO: only awesome.5 should depend on apidocgen.txt
-    ADD_DEPENDENCIES(${PROJECT_AWE_NAME} luadoc)
+    # }}}
 
     FOREACH(txtfile ${AWE_MAN_SRCS})
         STRING(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
-        STRING(REGEX REPLACE ".xml\$" ".gz" gzipman ${xmlfile})
+        STRING(REGEX REPLACE ".xml\$" ".gz" gzfile ${xmlfile})
+        STRING(REGEX REPLACE ".gz\$" "" manfile ${gzfile})
         STRING(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}
-                       ${CMAKE_CURRENT_BINARY_DIR} gzipman ${gzipman})
-        STRING(REGEX REPLACE ".gz\$" "" manfile ${gzipman})
+                       ${CMAKE_CURRENT_BINARY_DIR} gzfile ${gzfile})
 
-        ADD_CUSTOM_COMMAND(TARGET ${PROJECT_AWECLIENT_NAME} POST_BUILD
-                           COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} ${txtfile}
-                           COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
-                           COMMAND ${GZIP_EXECUTABLE} -f ${manfile}
-                           COMMENT "Generating manpage for ${manfile}")
+        # TODO: This is still not 100% right. Actually only
+        #       awesomerc.5.xml should depend on ${AWE_LUADOC_FILE}.
+        ADD_CUSTOM_COMMAND(COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} ${txtfile}
+                           OUTPUT ${xmlfile}
+                           DEPENDS ${txtfile} ${AWE_LUADOC_FILE})
+        ADD_CUSTOM_COMMAND(COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
+                           OUTPUT ${manfile}
+                           DEPENDS ${xmlfile})
+        ADD_CUSTOM_COMMAND(COMMAND ${GZIP_EXECUTABLE} -f ${manfile}
+                           OUTPUT ${gzfile}
+                           DEPENDS ${manfile})
+
+        SET(MAN_FILES ${MAN_FILES} ${gzfile})
     ENDFOREACH()
+
+    ADD_CUSTOM_TARGET(man ALL DEPENDS ${MAN_FILES})
 ENDIF()
 # }}}
 
