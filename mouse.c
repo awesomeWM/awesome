@@ -473,7 +473,8 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     mouse_query_pointer(root, &last_x, &last_y, NULL);
 
     /* grab pointer */
-    mouse_grab_pointer(root, CurMove);
+    if(!mouse_grab_pointer(root, CurMove))
+        return;
 
     c->ismax = false;
 
@@ -863,7 +864,8 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     }
 
     /* grab pointer */
-    mouse_grab_pointer(root, cursor);
+    if(!mouse_grab_pointer(root, cursor))
+        return;
 
     /* move pointer to corner */
     mouse_warp_pointer(root, mouse_x, mouse_y);
