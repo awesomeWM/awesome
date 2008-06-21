@@ -104,17 +104,17 @@ TARGET_LINK_LIBRARIES(${PROJECT_AWECLIENT_NAME}
 # {{{ Generated headers
 FILE(GLOB LAYOUTGEN_DEPS ${CMAKE_CURRENT_SOURCE_DIR}/layouts/*.h)
 ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
-                   ARGS > layoutgen.h
+                   ARGS > ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h
                    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h
-                   WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${LAYOUTGEN_DEPS}
                    COMMENT "Generating layoutgen.h."
                    VERBATIM)
 
 ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
-                   ARGS > widgetgen.h
+                   ARGS > ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
                    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
-                   WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/widget.h
                    COMMENT "Generating widgetgen.h."
                    VERBATIM)
