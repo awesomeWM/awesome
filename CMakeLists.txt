@@ -158,14 +158,20 @@ IF(GENERATE_MANPAGES)
         ENDIF()
     ENDFOREACH()
 
-    # Create luadoc file
-    # TODO: make this a target that depends on LUA_APIDOC_SRCS
-    EXECUTE_PROCESS(COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
-                    COMMAND ${LUA_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
-                    OUTPUT_FILE ${AWE_LUADOC_FILE}
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    # luadoc target
+    ADD_CUSTOM_COMMAND(COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
+                       | ${LUA_EXECUTABL} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
+                       > ${AWE_LUADOC_FILE}
+                       OUTPUT ${AWE_LUADOC_FILE}
+                       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                       DEPENDS ${LUA_APIDOC_SRCS}
+                       COMMENT "Generating Lua API documentation."
+                       VERBATIM)
 
-    # TODO: awesome.5 should depend on apidocgen.txt
+    ADD_CUSTOM_TARGET(luadoc DEPENDS ${AWE_LUADOC_FILE})
+    # TODO: only awesome.5 should depend on apidocgen.txt
+    ADD_DEPENDENCIES(${PROJECT_AWE_NAME} luadoc)
+
     FOREACH(txtfile ${AWE_MAN_SRCS})
         STRING(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
         STRING(REGEX REPLACE ".xml\$" ".gz" gzipman ${xmlfile})
