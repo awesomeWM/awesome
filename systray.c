@@ -138,7 +138,7 @@ systray_process_client_message(xcb_client_message_event_t *ev)
     switch(ev->data.data32[1])
     {
       case SYSTEM_TRAY_REQUEST_DOCK:
-        geom_c = xcb_get_geometry(globalconf.connection, ev->window);
+        geom_c = xcb_get_geometry_unchecked(globalconf.connection, ev->window);
 
         if(!(geom_r = xcb_get_geometry_reply(globalconf.connection, geom_c, NULL)))
             return -1;

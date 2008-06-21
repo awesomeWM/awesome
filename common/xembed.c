@@ -95,7 +95,9 @@ xembed_info_get(xcb_connection_t *connection, xcb_window_t win, xembed_info_t *i
     atom_q = xutil_intern_atom(connection, NULL, "_XEMBED_INFO");
     atom = xutil_intern_atom_reply(connection, NULL, atom_q);
 
-    prop_c = xcb_get_property(connection, false, win, atom, XCB_GET_PROPERTY_TYPE_ANY, 0L, 2);
+    prop_c = xcb_get_property_unchecked(connection, false, win, atom,
+                                        XCB_GET_PROPERTY_TYPE_ANY, 0L, 2);
+
     prop_r = xcb_get_property_reply(connection, prop_c, NULL);
 
     if(!prop_r || !prop_r->value_len)

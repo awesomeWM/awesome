@@ -440,7 +440,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     xcb_get_geometry_reply_t *geom_r;
     xcb_screen_iterator_t iter;
 
-    wa_c = xcb_get_window_attributes(connection, ev->window);
+    wa_c = xcb_get_window_attributes_unchecked(connection, ev->window);
 
     if(!(wa_r = xcb_get_window_attributes_reply(connection, wa_c, NULL)))
         return -1;
@@ -455,11 +455,11 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     }
     else if(!(c = client_getbywin(ev->window)))
     {
-        geom_c = xcb_get_geometry(connection, ev->window);
+        geom_c = xcb_get_geometry_unchecked(connection, ev->window);
 
         if(globalconf.screens_info->xinerama_is_active)
-            qp_c = xcb_query_pointer(connection, xutil_screen_get(globalconf.connection,
-                                                                    screen_nbr)->root);
+            qp_c = xcb_query_pointer_unchecked(connection, xutil_screen_get(globalconf.connection,
+                                                                            screen_nbr)->root);
 
         if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
         {

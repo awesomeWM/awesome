@@ -137,9 +137,9 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
     /* Use checked because the error handler should not take care of
      * this error as we only return a boolean */
     t_hint_r = xcb_get_property_reply(c,
-                                      xcb_get_property(c, false, win,
-                                                       WM_TRANSIENT_FOR,
-                                                       WINDOW, 0, 1),
+                                      xcb_get_property_unchecked(c, false, win,
+                                                                 WM_TRANSIENT_FOR,
+                                                                 WINDOW, 0, 1),
                                       NULL);
 
     if(!t_hint_r || t_hint_r->type != WINDOW || t_hint_r->format != 32 ||

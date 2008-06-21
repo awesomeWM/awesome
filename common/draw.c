@@ -1111,9 +1111,9 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
         blue = RGB_COLOR_8_TO_16(colnum);
 
         hexa_color = xcb_alloc_color_reply(conn,
-                                           xcb_alloc_color(conn,
-                                                           s->default_colormap,
-                                                           red, green, blue),
+                                           xcb_alloc_color_unchecked(conn,
+                                                                     s->default_colormap,
+                                                                     red, green, blue),
                                            NULL);
 
         if(hexa_color)
@@ -1130,10 +1130,10 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
     else
     {
         named_color = xcb_alloc_named_color_reply(conn,
-                                                  xcb_alloc_named_color(conn,
-                                                                        s->default_colormap,
-                                                                        len,
-                                                                        colstr),
+                                                  xcb_alloc_named_color_unchecked(conn,
+                                                                                  s->default_colormap,
+                                                                                  len,
+                                                                                  colstr),
                                                   NULL);
 
         if(named_color)
