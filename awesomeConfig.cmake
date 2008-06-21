@@ -23,6 +23,7 @@ ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
 
 # {{{ Find external utilities
 FIND_PROGRAM(CAT_EXECUTABLE cat)
+FIND_PROGRAM(GREP_EXECUTABLE grep)
 FIND_PROGRAM(GIT_EXECUTABLE git)
 FIND_PROGRAM(LUA_EXECUTABLE lua)
 # programs needed for man pages
