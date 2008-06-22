@@ -64,10 +64,23 @@ typedef struct
 #define ssizeof(foo)            (ssize_t)sizeof(foo)
 #define countof(foo)            (ssizeof(foo) / ssizeof(foo[0]))
 
+#define p_alloc_nr(x)           (((x) + 16) * 3 / 2)
 #define p_new(type, count)      ((type *)xmalloc(sizeof(type) * (count)))
 #define p_clear(p, count)       ((void)memset((p), 0, sizeof(*(p)) * (count)))
 #define p_realloc(pp, count)    xrealloc((void*)(pp), sizeof(**(pp)) * (count))
 #define p_dup(p, count)         xmemdup((p), sizeof(*(p)) * (count))
+#define p_grow(pp, goalnb, allocnb)                  \
+    do {                                             \
+        if ((goalnb) > *(allocnb)) {                 \
+            if (p_alloc_nr(*(allocnb)) < (goalnb)) { \
+                *(allocnb) = (goalnb);               \
+            } else {                                 \
+                *(allocnb) = p_alloc_nr(*(allocnb)); \
+            }                                        \
+            p_realloc(pp, *(allocnb));               \
+        }                                            \
+    } while (0)
+
 
 #ifdef __GNUC__
 
