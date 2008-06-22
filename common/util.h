@@ -26,6 +26,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 /** A list of possible position, not sex related */
 typedef enum
@@ -91,6 +92,9 @@ typedef struct
         *__ptr = NULL;                             \
     } while(0)
 
+#define likely(expr)    __builtin_expect(!!(expr), 1)
+#define unlikely(expr)  __builtin_expect((expr), 0)
+
 #else
 
 #define p_delete(mem_p)                            \
@@ -99,6 +103,9 @@ typedef struct
         free(*__ptr);                              \
         *(void **)__ptr = NULL;                    \
     } while (0)
+
+#define likely(expr)    expr
+#define unlikely(expr)  expr
 
 #endif
 
