@@ -225,8 +225,17 @@ char * a_strndup(const char *s, ssize_t l)
  */
 static inline int a_strcmp(const char *a, const char *b)
 {
-        return strcmp(NONULL(a), NONULL(b));
+    return strcmp(NONULL(a), NONULL(b));
 }
+#ifdef __GNUC__
+#define a_strcmp(a, b) \
+    ({                                                                              \
+        __builtin_choose_expr(__builtin_constant_p(a) || __builtin_constant_p(b),   \
+            (void)({__asm__(".warning \"you may want to use a_tokenize here\"");}), \
+            (void)0);                                                               \
+        (a_strcmp)((a), (b));                                                       \
+    })
+#endif
 
 /** \brief \c NULL resistant strcasecmp.
  * \param[in]  a     the first string.
