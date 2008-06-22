@@ -23,5 +23,6 @@
 #define AWESOME_COMMON_VERSION_H
 
 void eprint_version(const char *const executable) __attribute__ ((noreturn));
+const char *version_string(void);
 
 #endif

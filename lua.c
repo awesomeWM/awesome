@@ -45,6 +45,7 @@
 #include "screen.h"
 #include "layouts/tile.h"
 #include "common/socket.h"
+#include "common/version.h"
 
 extern awesome_t globalconf;
 
@@ -540,7 +541,7 @@ luaA_init(void)
     luaA_openlib(L, "keybinding", awesome_keybinding_methods, awesome_keybinding_meta);
 
     lua_pushliteral(L, "AWESOME_VERSION");
-    lua_pushliteral(L, VERSION);
+    lua_pushstring(L, version_string());
     lua_settable(L, LUA_GLOBALSINDEX);
 
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
