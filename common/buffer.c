@@ -1,4 +1,6 @@
 /*
+ *  Copyright © 2006,2007,2008 Pierre Habouzit
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
@@ -24,9 +26,6 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-/*
- *  Copyright © 2006,2007,2008 Pierre Habouzit
- */
 
 #include <assert.h>
 #include <sysexits.h>
@@ -36,7 +35,8 @@
 
 char buffer_slop[1];
 
-void buffer_ensure(buffer_t *buf, int newlen)
+void
+buffer_ensure(buffer_t *buf, int newlen)
 {
     if (newlen < 0)
         exit(EX_SOFTWARE);
@@ -44,7 +44,8 @@ void buffer_ensure(buffer_t *buf, int newlen)
     if (newlen < buf->size)
         return;
 
-    if (newlen < buf->offs + buf->size && buf->offs > buf->size / 4) {
+    if (newlen < buf->offs + buf->size && buf->offs > buf->size / 4)
+    {
         /* Data fits in the current area, shift it left */
         memmove(buf->s - buf->offs, buf->s, buf->len + 1);
         buf->s    -= buf->offs;
@@ -56,9 +57,10 @@ void buffer_ensure(buffer_t *buf, int newlen)
     buf->size = p_alloc_nr(buf->size + buf->offs);
     if (buf->size < newlen + 1)
         buf->size = newlen + 1;
-    if (buf->alloced && !buf->offs) {
+    if (buf->alloced && !buf->offs)
         p_realloc(&buf->s, buf->size);
-    } else {
+    else
+    {
         char *new_area = xmalloc(buf->size);
         memcpy(new_area, buf->s, buf->len + 1);
         if (buf->alloced)
@@ -69,7 +71,8 @@ void buffer_ensure(buffer_t *buf, int newlen)
     }
 }
 
-void buffer_addvf(buffer_t *buf, const char *fmt, va_list args)
+void
+buffer_addvf(buffer_t *buf, const char *fmt, va_list args)
 {
     int len;
     va_list ap;
@@ -80,7 +83,8 @@ void buffer_addvf(buffer_t *buf, const char *fmt, va_list args)
     len = vsnprintf(buf->s + buf->len, buf->size - buf->len, fmt, args);
     if (unlikely(len < 0))
         return;
-    if (len >= buf->size - buf->len) {
+    if (len >= buf->size - buf->len)
+    {
         buffer_ensure(buf, len);
         vsnprintf(buf->s + buf->len, buf->size - buf->len, fmt, ap);
     }
@@ -88,7 +92,8 @@ void buffer_addvf(buffer_t *buf, const char *fmt, va_list args)
     buf->s[buf->len] = '\0';
 }
 
-void buffer_addf(buffer_t *buf, const char *fmt, ...)
+void
+buffer_addf(buffer_t *buf, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -96,7 +101,12 @@ void buffer_addf(buffer_t *buf, const char *fmt, ...)
     va_end(args);
 }
 
-char *buffer_detach(buffer_t *buf)
+/** Detach the data from a buffer.
+ * \param Buffer from which detach.
+ * \return The data.
+ */
+char *
+buffer_detach(buffer_t *buf)
 {
     char *res = buf->s;
     if (!buf->alloced)
@@ -105,14 +115,21 @@ char *buffer_detach(buffer_t *buf)
     return res;
 }
 
-void buffer_add_xmlescaped(buffer_t *buf, const char *s)
+/** Add a string to a buffer, escaping XML chars.
+ * \param buf Where to add data.
+ * \param s The string to add.
+ */
+void
+buffer_add_xmlescaped(buffer_t *buf, const char *s)
 {
-    for (;;) {
+    for(;;)
+    {
         int len = strcspn(s, "&<>'\"");
         buffer_add(buf, s, len);
         s += len;
 
-        switch (*s++) {
+        switch (*s++)
+        {
           case '\0':
             return;
           case '&':

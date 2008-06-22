@@ -1,4 +1,6 @@
 /*
+ *  Copyright © 2006,2007,2008 Pierre Habouzit
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
@@ -24,16 +26,14 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-/*
- *  Copyright © 2006,2007,2008 Pierre Habouzit
- */
 
-#ifndef MC_BASE_BUFFER_H
-#define MC_BASE_BUFFER_H
+#ifndef AWESOME_COMMON_BUFFER_H
+#define AWESOME_COMMON_BUFFER_H
 
 #include "common/util.h"
 
-typedef struct buffer_t {
+typedef struct buffer_t
+{
     char *s;
     int len, size;
     unsigned alloced: 1;
@@ -42,31 +42,63 @@ typedef struct buffer_t {
 
 extern char buffer_slop[1];
 
-
-#define BUFFER_INIT  (buffer_t){ .s = buffer_slop, .size = 1 }
+#define BUFFER_INIT (buffer_t) { .s = buffer_slop, .size = 1 }
 
 #define buffer_inita(b, sz)                                                 \
     ({ int __sz = (sz); assert (__sz < (64 << 10));                         \
        buffer_init_buf((b), alloca(__sz), __sz); })
 
-static inline buffer_t *buffer_init(buffer_t *buf) {
+/** Initialize a buffer.
+ * \param buf A buffer pointer.
+ * \return The same buffer pointer.
+ */
+static inline buffer_t *
+buffer_init(buffer_t *buf)
+{
     *buf = BUFFER_INIT;
     return buf;
 }
-static inline void buffer_init_buf(buffer_t *b, void *buf, int size) {
+
+/** Initialize a buffer with data.
+ * \param b The buffer to ini.
+ * \param buf The data to set.
+ * \param size Data size.
+ */
+static inline void
+buffer_init_buf(buffer_t *b, void *buf, int size)
+{
     *b = (buffer_t){ .s = buf, .size = size };
     b->s[0] = '\0';
 }
-static inline void buffer_wipe(buffer_t *buf) {
+
+/** Wipe a buffer.
+ * \param buf The buffer.
+ */
+static inline void
+buffer_wipe(buffer_t *buf)
+{
     if (buf->alloced)
         free(buf->s - buf->offs);
     buffer_init(buf);
 }
-static inline buffer_t *buffer_new(void) {
+
+/** Get a new buffer.
+ * \return A new allocatedbuffer.
+ */
+static inline buffer_t
+buffer_new(void)
+{
     return buffer_init(p_new(buffer_t, 1));
 }
-static inline void buffer_delete(buffer_t **buf) {
-    if (*buf) {
+
+/** Delete a buffer.
+ * \param buf A pointer to a buffer pointer to free.
+ */
+static inline void
+buffer_delete(buffer_t **buf)
+{
+    if(*buf)
+    {
         buffer_wipe(*buf);
         p_delete(buf);
     }
@@ -74,15 +106,28 @@ static inline void buffer_delete(buffer_t **buf) {
 
 char *buffer_detach(buffer_t *buf);
 void buffer_ensure(buffer_t *buf, int len);
-static inline void buffer_grow(buffer_t *buf, int extra)
+
+/** Grow a buffer.
+ * \param buf The buffer to grow.
+ * \param extra The number to add to length.
+ */
+static inline void
+buffer_grow(buffer_t *buf, int extra)
 {
     assert (extra >= 0);
-    if (buf->len + extra > buf->size) {
+    if (buf->len + extra > buf->size)
+    {
         buffer_ensure(buf, buf->len + extra);
     }
 }
 
-
+/** Add data in the buffer.
+ * \param buf Buffer where to add.
+ * \param pos Position where to add.
+ * \param len Length.
+ * \param data Data to add.
+ * \param dlen Data length.
+ */
 static inline void
 buffer_splice(buffer_t *buf, int pos, int len, const void *data, int dlen)
 {
@@ -92,14 +137,16 @@ buffer_splice(buffer_t *buf, int pos, int len, const void *data, int dlen)
         pos = buf->len;
     if (unlikely(len > buf->len - pos))
         len = buf->len - pos;
-    if (pos == 0 && len + buf->offs >= dlen) {
+    if (pos == 0 && len + buf->offs >= dlen)
+    {
         buf->offs += len - dlen;
         buf->s    += len - dlen;
         buf->size -= len - dlen;
         buf->len  -= len - dlen;
         len = dlen;
-    } else
-    if (len != dlen) {
+    }
+    else if (len != dlen)
+    {
         buffer_ensure(buf, buf->len + dlen - len);
         memmove(buf->s + pos + dlen, buf->s + pos + len, buf->len - pos - len);
         buf->len += dlen - len;
@@ -108,14 +155,32 @@ buffer_splice(buffer_t *buf, int pos, int len, const void *data, int dlen)
     memcpy(buf->s + pos, data, dlen);
 }
 
-
-static inline void buffer_add(buffer_t *buf, const void *data, int len) {
+/** Add data at the end of buffer.
+ * \param buf Buffer where to add.
+ * \param data Data to add.
+ * \param len Data length.
+ */
+static inline void
+buffer_add(buffer_t *buf, const void *data, int len)
+{
     buffer_splice(buf, buf->len, 0, data, len);
 }
-static inline void buffer_adds(buffer_t *buf, const char *s) {
+
+/** Add a string to the and of a buffer.
+ * \param buf The buffer where to add.
+ * \param s The string to add.
+ */
+static inline void buffer_adds(buffer_t *buf, const char *s)
+{
     buffer_splice(buf, buf->len, 0, s, strlen(s));
 }
-static inline void buffer_addc(buffer_t *buf, int c) {
+
+/** Add a char at the end of a buffer.
+ * \param buf The buffer where to add.
+ * \param c The char to add.
+ */
+static inline void buffer_addc(buffer_t *buf, int c)
+{
     buffer_grow(buf, 1);
     buf->s[buf->len++] = c;
     buf->s[buf->len]   = '\0';
@@ -130,4 +195,4 @@ void buffer_addf(buffer_t *buf, const char *fmt, ...)
 
 void buffer_add_xmlescaped(buffer_t *buf, const char *s);
 
-#endif /* MC_BASE_BUFFER_H */
+#endif
