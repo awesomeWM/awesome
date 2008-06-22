@@ -67,7 +67,8 @@ static char *
 tag_markup_parse(tag_t *t, const char *str, ssize_t len)
 {
     static char const * const elements[] = { "title", NULL };
-    markup_parser_data_t p = {
+    markup_parser_data_t p =
+    {
         .elements   = elements,
         .on_element = &tag_markup_on_elem,
         .priv       = t->name,
@@ -183,7 +184,10 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         tag = tag->next, area = area->next, i++)
     {
         if (!data->show_empty && !tag->selected && !tag_isoccupied(tag))
+        {
+            p_delete(&text[i]);
             continue;
+        }
 
         area->x = w->area.x + prev_width;
         prev_width += area->width;
