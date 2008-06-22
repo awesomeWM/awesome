@@ -103,10 +103,7 @@ luaA_keybinding_add(lua_State *L)
         if(key == *k)
             luaL_error(L, "keybinding already added");
 
-    keybinding_list_push(&globalconf.keys, *k);
-
-    keybinding_ref(k);
-
+    keybinding_list_push(&globalconf.keys, keybinding_ref(k));
     window_root_grabkey(*k);
 
     return 0;
@@ -124,10 +121,8 @@ luaA_keybinding_remove(lua_State *L)
     keybinding_t **k = luaA_checkudata(L, 1, "keybinding");
 
     keybinding_list_detach(&globalconf.keys, *k);
-
-    keybinding_unref(k);
-
     window_root_ungrabkey(*k);
+    keybinding_unref(k);
 
     return 0;
 }

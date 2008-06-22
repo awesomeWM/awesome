@@ -28,11 +28,13 @@
     {                                                                          \
         if(*item && --(*item)->refcount <= 0)                                  \
             dtor(item);                                                        \
+        *item = NULL;                                                          \
     }                                                                          \
                                                                                \
-    static inline void prefix##_ref(type **item)                               \
+    static inline type *prefix##_ref(type **item)                              \
     {                                                                          \
         (*item)->refcount++;                                                   \
+        return *item;                                                          \
     }
 
 #endif
