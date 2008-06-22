@@ -203,7 +203,15 @@ ENDFOREACH()
 SET(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
 SET(CPACK_GENERATOR                    "TBZ2")
 SET(CPACK_SOURCE_GENERATOR             "TBZ2")
-SET(CPACK_SOURCE_IGNORE_FILES          ".git;.*.swp$;.*~;.*patch;.gitignore")
+SET(CPACK_SOURCE_IGNORE_FILES
+    ".git;.*.swp$;.*~;.*patch;.gitignore;${CMAKE_CURRENT_BINARY_DIR}")
+
+FOREACH(file ${AWESOME_CONFIGURE_FILES}) 
+    STRING(REPLACE ".in" "" confheader ${file})
+    SET( CPACK_SOURCE_IGNORE_FILES
+        ";${CPACK_SOURCE_IGNORE_FILES};${confheader}$;" )
+ENDFOREACH()
+
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY  "A dynamic floating and tiling window manager")
 SET(CPACK_PACKAGE_VENDOR               "awesome development team")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE     "${CMAKE_CURRENT_SOURCE_DIR}/README")
