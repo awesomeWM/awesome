@@ -74,7 +74,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
     char *text;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0, j = 0;
     netwm_icon_t *icon;
-    markup_parser_data_t *p;
+    markup_parser_data_t p;
     const char *elements[] = { "bg", NULL };
     xcolor_t bg_color;
     draw_image_t *image;
@@ -122,16 +122,16 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
                 /* Actually look for the proper background color, since
                  * otherwise the background statusbar color is used instead */
-                p = markup_parser_data_new(elements, NULL, countof(elements));
-                if(markup_parse(p, text, a_strlen(text)) && p->attribute_names[0])
-                    for(j = 0; p->attribute_names[0][j]; j++)
-                        if(!a_strcmp(p->attribute_names[0][j], "color"))
+                markup_parser_data_init(&p, elements, NULL, countof(elements));
+                if(markup_parse(&p, text, a_strlen(text)) && p.attribute_names[0])
+                    for(j = 0; p.attribute_names[0][j]; j++)
+                        if(!a_strcmp(p.attribute_names[0][j], "color"))
                         {
-                            xcolor_new(ctx->connection, ctx->phys_screen, p->attribute_values[0][j], &bg_color);
+                            xcolor_new(ctx->connection, ctx->phys_screen, p.attribute_values[0][j], &bg_color);
                             draw_rectangle(ctx, area, 1.0, true, bg_color);
                             break;
                         }
-                markup_parser_data_delete(&p);
+                markup_parser_data_wipe(&p);
 
                 if((image = draw_image_new(c->icon_path)))
                 {

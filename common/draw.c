@@ -221,49 +221,49 @@ draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
     const char *elements[] = { "bg", "text", "margin", NULL };
-    markup_parser_data_t *p;
+    markup_parser_data_t p;
     int i;
 
-    p = markup_parser_data_new(elements, NULL, countof(elements));
+    markup_parser_data_init(&p, elements, NULL, countof(elements));
 
-    if(!markup_parse(p, str, slen))
+    if(!markup_parse(&p, str, slen))
     {
-        markup_parser_data_delete(&p);
+        markup_parser_data_wipe(&p);
         return false;
     }
 
     /* bg */
-    if(p->attribute_names[0])
-        for(i = 0; p->attribute_names[0][i]; i++)
-            if(!a_strcmp(p->attribute_names[0][i], "color"))
+    if(p.attribute_names[0])
+        for(i = 0; p.attribute_names[0][i]; i++)
+            if(!a_strcmp(p.attribute_names[0][i], "color"))
                 data->has_bg_color = xcolor_new(data->connection, data->phys_screen,
-                                                    p->attribute_values[0][i], &data->bg_color);
-            else if(!a_strcmp(p->attribute_names[0][i], "image"))
-                data->bg_image = draw_image_new(p->attribute_values[0][i]);
+                                                    p.attribute_values[0][i], &data->bg_color);
+            else if(!a_strcmp(p.attribute_names[0][i], "image"))
+                data->bg_image = draw_image_new(p.attribute_values[0][i]);
 
     /* text */
-    if(p->attribute_names[1])
-        for(i = 0; p->attribute_names[1][i]; i++)
-            if(!a_strcmp(p->attribute_names[1][i], "align"))
-                data->align = draw_align_get_from_str(p->attribute_values[1][i]);
-            else if(!a_strcmp(p->attribute_names[1][i], "shadow"))
+    if(p.attribute_names[1])
+        for(i = 0; p.attribute_names[1][i]; i++)
+            if(!a_strcmp(p.attribute_names[1][i], "align"))
+                data->align = draw_align_get_from_str(p.attribute_values[1][i]);
+            else if(!a_strcmp(p.attribute_names[1][i], "shadow"))
                 xcolor_new(data->connection, data->phys_screen,
-                               p->attribute_values[1][i], &data->shadow.color);
-            else if(!a_strcmp(p->attribute_names[1][i], "shadow_offset"))
-                data->shadow.offset = atoi(p->attribute_values[1][i]);
+                               p.attribute_values[1][i], &data->shadow.color);
+            else if(!a_strcmp(p.attribute_names[1][i], "shadow_offset"))
+                data->shadow.offset = atoi(p.attribute_values[1][i]);
 
     /* margin */
-    if(p->attribute_names[2])
-        for(i = 0; p->attribute_names[2][i]; i++)
-            if(!a_strcmp(p->attribute_names[2][i], "left"))
-                data->margin.left = atoi(p->attribute_values[2][i]);
-            else if(!a_strcmp(p->attribute_names[2][i], "right"))
-                data->margin.right = atoi(p->attribute_values[2][i]);
+    if(p.attribute_names[2])
+        for(i = 0; p.attribute_names[2][i]; i++)
+            if(!a_strcmp(p.attribute_names[2][i], "left"))
+                data->margin.left = atoi(p.attribute_values[2][i]);
+            else if(!a_strcmp(p.attribute_names[2][i], "right"))
+                data->margin.right = atoi(p.attribute_values[2][i]);
 
     /* stole text */
-    data->text = p->text;
-    buffer_init(&p->text);
-    markup_parser_data_delete(&p);
+    data->text = p.text;
+    buffer_init(&p.text);
+    markup_parser_data_wipe(&p);
 
     return true;
 }

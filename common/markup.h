@@ -33,8 +33,8 @@ typedef struct
     char ***attribute_values;
 } markup_parser_data_t;
 
-markup_parser_data_t * markup_parser_data_new(const char **, const char **, ssize_t);
-void markup_parser_data_delete(markup_parser_data_t **);
+void markup_parser_data_init(markup_parser_data_t *, const char **, const char **, ssize_t);
+void markup_parser_data_wipe(markup_parser_data_t *);
 bool markup_parse(markup_parser_data_t *data, const char *, ssize_t);
 
 #endif

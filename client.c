@@ -771,19 +771,19 @@ client_markup_parse(client_t *c, const char *str, ssize_t len)
     const char *elements[] = { "title", NULL };
     char *title_esc = g_markup_escape_text(c->name, -1);
     const char *elements_sub[] = { title_esc , NULL };
-    markup_parser_data_t *p;
+    markup_parser_data_t p;
     char *ret;
 
-    p = markup_parser_data_new(elements, elements_sub, countof(elements));
+    markup_parser_data_init(&p, elements, elements_sub, countof(elements));
 
-    if(markup_parse(p, str, len))
+    if(markup_parse(&p, str, len))
     {
-        ret = buffer_detach(&p->text);
+        ret = buffer_detach(&p.text);
     }
     else
         ret = a_strdup(str);
 
-    markup_parser_data_delete(&p);
+    markup_parser_data_wipe(&p);
     p_delete(&title_esc);
 
     return ret;

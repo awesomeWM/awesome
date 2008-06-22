@@ -132,54 +132,48 @@ markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
 }
 
 /** Create a markup_parser_data_t structure with elements list.
+ * \param a pointer to an allocated markup_parser_data_t which must be wiped
+ *         with markup_parser_data_wipe()
  * \param elements an array of elements to look for, NULL terminated
  * \param elements_sub an optional array of values to substitude to elements, NULL
  *        terminated, or NULL if not needed
  * \param nelem number of elements in the array (without NULL)
- * \return a pointer to an allocated markup_parser_data_t which must be freed
- *         with markup_parser_data_delete()
  */
-markup_parser_data_t *
-markup_parser_data_new(const char **elements, const char **elements_sub, ssize_t nelem)
+void
+markup_parser_data_init(markup_parser_data_t *p, const char **elements,
+                        const char **elements_sub, ssize_t nelem)
 {
-    markup_parser_data_t *p;
-
-    p = p_new(markup_parser_data_t, 1);
-
     buffer_init(&p->text);
     p->elements = elements;
     p->elements_sub = elements_sub;
     p->attribute_names = p_new(char **, nelem);
     p->attribute_values = p_new(char **, nelem);
-
-    return p;
 }
 
-/** Delete a markup_parser_data_t allocated.
- * \param p markup_parser_data_t pointer address
+/** Wipe a markup_parser_data_t initialized with markup_parser_data_init.
+ * \param p markup_parser_data_t address
  */
 void
-markup_parser_data_delete(markup_parser_data_t **p)
+markup_parser_data_wipe(markup_parser_data_t *p)
 {
     int i, j;
 
-    for(i = 0; (*p)->elements[i]; i++)
-        if((*p)->attribute_names[i])
+    for(i = 0; p->elements[i]; i++)
+        if(p->attribute_names[i])
         {
-            for(j = 0; (*p)->attribute_names[i][j]; j++)
+            for(j = 0; p->attribute_names[i][j]; j++)
             {
-                p_delete(&((*p)->attribute_names[i][j]));
-                p_delete(&((*p)->attribute_values[i][j]));
+                p_delete(&p->attribute_names[i][j]);
+                p_delete(&p->attribute_values[i][j]);
             }
-            p_delete(&((*p)->attribute_names[i]));
-            p_delete(&((*p)->attribute_values[i]));
+            p_delete(&p->attribute_names[i]);
+            p_delete(&p->attribute_values[i]);
         }
 
-    p_delete(&(*p)->attribute_names);
-    p_delete(&(*p)->attribute_values);
+    p_delete(&p->attribute_names);
+    p_delete(&p->attribute_values);
 
-    buffer_wipe(&(*p)->text);
-    p_delete(p);
+    buffer_wipe(&p->text);
 }
 
 /** Parse markup defined in data on the string str.
