@@ -25,6 +25,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 
+#include "common/tokenize.h"
 #include "mouse.h"
 #include "screen.h"
 #include "tag.h"
@@ -62,15 +63,13 @@ typedef enum
 static corner_t
 a_strtocorner(const char *str)
 {
-    if(!a_strcmp(str, "bottomright"))
-        return BottomRightCorner;
-    else if(!a_strcmp(str, "bottomleft"))
-        return BottomLeftCorner;
-    else if(!a_strcmp(str, "topleft"))
-        return TopLeftCorner;
-    else if(!a_strcmp(str, "topright"))
-        return TopRightCorner;
-    return AutoCorner;
+    switch (a_tokenize(str, -1)) {
+      case A_TK_BOTTOMRIGHT: return BottomRightCorner;
+      case A_TK_BOTTOMLEFT:  return BottomLeftCorner;
+      case A_TK_TOPLEFT:     return TopLeftCorner;
+      case A_TK_TOPRIGHT:    return TopRightCorner;
+      default:               return AutoCorner;
+    }
 }
 
 /** Snap an area to the outside of an area.
