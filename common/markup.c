@@ -126,11 +126,9 @@ markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
                   GError **error __attribute__ ((unused)))
 {
     markup_parser_data_t *p = (markup_parser_data_t *) user_data;
-    char *esc;
 
-    esc = g_markup_escape_text(text, text_len);
-    buffer_adds(&p->text, esc);
-    p_delete(&esc);
+    buffer_grow(&p->text, text_len);
+    buffer_add_xmlescaped(&p->text, text);
 }
 
 /** Create a markup_parser_data_t structure with elements list.

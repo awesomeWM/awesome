@@ -104,3 +104,33 @@ char *buffer_detach(buffer_t *buf)
     buffer_init(buf);
     return res;
 }
+
+void buffer_add_xmlescaped(buffer_t *buf, const char *s)
+{
+    for (;;) {
+        int len = strcspn(s, "&<>'\"");
+        buffer_add(buf, s, len);
+        s += len;
+
+        switch (*s++) {
+          case '\0':
+            return;
+          case '&':
+            buffer_adds(buf, "&amp;");
+            break;
+          case '<':
+            buffer_adds(buf, "&lt;");
+            break;
+          case '>':
+            buffer_adds(buf, "&gt;");
+            break;
+          case '\'':
+            /* OG: why not use default? */
+            buffer_adds(buf, "&#39;");
+            break;
+          case '"':
+            buffer_adds(buf, "&#34;");
+            break;
+        }
+    }
+}

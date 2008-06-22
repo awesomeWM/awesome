@@ -109,7 +109,7 @@ buffer_splice(buffer_t *buf, int pos, int len, const void *data, int dlen)
 }
 
 
-static inline void buffer_add(buffer_t *buf, void *data, int len) {
+static inline void buffer_add(buffer_t *buf, const void *data, int len) {
     buffer_splice(buf, buf->len, 0, data, len);
 }
 static inline void buffer_adds(buffer_t *buf, const char *s) {
@@ -126,5 +126,8 @@ void buffer_addvf(buffer_t *buf, const char *fmt, va_list)
 
 void buffer_addf(buffer_t *buf, const char *fmt, ...)
     __attribute__((format(printf, 2, 3)));
+
+
+void buffer_add_xmlescaped(buffer_t *buf, const char *s);
 
 #endif /* MC_BASE_BUFFER_H */
