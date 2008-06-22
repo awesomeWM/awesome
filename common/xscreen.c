@@ -59,7 +59,6 @@ screen_xsitoarea(xcb_xinerama_screen_info_t si)
     a.y = si.y_org;
     a.width = si.width;
     a.height = si.height;
-    a.next = a.prev = NULL;
 
     return a;
 }

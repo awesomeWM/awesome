@@ -143,7 +143,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
     char *data;
     xcb_get_property_reply_t *prop_r;
     xcb_get_property_cookie_t prop_c;
-    area_t rectangle = { 0, 0, 0, 0, NULL, NULL };
+    area_t rectangle = { 0, 0, 0, 0 };
     xcb_atom_t rootpix_atom;
     xutil_intern_atom_request_t rootpix_atom_req;
 

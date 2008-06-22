@@ -243,7 +243,7 @@ mouse_infobox_draw(draw_context_t *ctx,
                    simple_window_t *sw,
                    area_t geometry, int border)
 {
-    area_t draw_geometry = { 0, 0, ctx->width, ctx->height, NULL, NULL };
+    area_t draw_geometry = { 0, 0, ctx->width, ctx->height };
     char size[64];
 
     snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",

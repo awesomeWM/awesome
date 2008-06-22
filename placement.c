@@ -68,20 +68,18 @@ area_t
 placement_smart(client_t *c)
 {
     client_t *client;
-    area_t newgeometry = { 0, 0, 0, 0, NULL, NULL };
-    area_t *screen_geometry, *arealist = NULL, *r;
+    area_t newgeometry = { 0, 0, 0, 0 };
+    area_t screen_geometry;
+    area_array_t areas;
     bool found = false;
     layout_t *layout;
 
-    screen_geometry = p_new(area_t, 1);
-
-    *screen_geometry = screen_area_get(c->screen,
-                                       globalconf.screens[c->screen].statusbar,
-                                       &globalconf.screens[c->screen].padding);
+    screen_geometry = screen_area_get(c->screen,
+                                      globalconf.screens[c->screen].statusbar,
+                                      &globalconf.screens[c->screen].padding);
 
     layout = layout_get_current(c->screen);
-
-    area_list_push(&arealist, screen_geometry);
+    area_array_append(&areas, screen_geometry);
 
     for(client = globalconf.clients; client; client = client->next)
         if((client->isfloating || layout == layout_floating)
@@ -91,7 +89,7 @@ placement_smart(client_t *c)
             newgeometry.width += 2 * client->border;
             newgeometry.height += 2 * client->border;
             newgeometry = titlebar_geometry_add(c->titlebar, c->border, newgeometry);
-            area_list_remove(&arealist, &newgeometry);
+            area_array_remove(&areas, newgeometry);
         }
 
     newgeometry.x = c->f_geometry.x;
@@ -99,20 +97,29 @@ placement_smart(client_t *c)
     newgeometry.width = 0;
     newgeometry.height = 0;
 
-    for(r = arealist; r; r = r->next)
+    for(int i = 0; i < areas.len; i++)
+    {
+        area_t *r = &areas.tab[i];
+
         if(r->width >= c->f_geometry.width && r->height >= c->f_geometry.height
            && r->width * r->height > newgeometry.width * newgeometry.height)
         {
             found = true;
             newgeometry = *r;
         }
+    }
 
     /* we did not found a space with enough space for our size:
      * just take the biggest available and go in */
     if(!found)
-        for(r = arealist; r; r = r->next)
-           if(r->width * r->height > newgeometry.width * newgeometry.height)
-               newgeometry = *r;
+    {
+        for(int i = 0; i < areas.len; i++)
+        {
+            area_t *r = &areas.tab[i];
+            if(r->width * r->height > newgeometry.width * newgeometry.height)
+                newgeometry = *r;
+        }
+    }
 
     /* restore height and width */
     newgeometry.width = c->f_geometry.width;
@@ -122,8 +129,7 @@ placement_smart(client_t *c)
     newgeometry = placement_fix_offscreen(newgeometry, c->screen, c->border);
     newgeometry = titlebar_geometry_remove(c->titlebar, c->border, newgeometry);
 
-    area_list_wipe(&arealist);
-
+    area_array_wipe(&areas);
     return newgeometry;
 }
 

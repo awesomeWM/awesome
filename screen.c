@@ -82,7 +82,7 @@ screen_area_get(int screen, statusbar_t *statusbar, padding_t *padding)
 area_t
 display_area_get(int phys_screen, statusbar_t *statusbar, padding_t *padding)
 {
-    area_t area = { 0, 0, 0, 0, NULL, NULL };
+    area_t area = { 0, 0, 0, 0 };
     statusbar_t *sb;
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
 

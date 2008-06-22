@@ -923,7 +923,7 @@ draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
 area_t
 draw_get_image_size(const char *filename)
 {
-    area_t size = { -1, -1, -1, -1, NULL, NULL };
+    area_t size = { 0, 0, 0, 0 };
     Imlib_Image image;
     Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
 
@@ -997,7 +997,7 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     PangoLayout *layout;
     PangoRectangle ext;
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
-    area_t geom = { 0, 0, 0, 0, NULL, NULL };
+    area_t geom = { 0, 0, 0, 0 };
     ssize_t len;
     draw_parser_data_t parser_data;
 
@@ -1160,66 +1160,67 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
 
 /** Remove a area from a list of them,
  * spliting the space between several area that can overlap
- * \param head list head
- * \param elem area to remove
+ * \param areas  array of areas.
+ * \param elem   area to remove
  */
 void
-area_list_remove(area_t **head, area_t *elem)
+area_array_remove(area_array_t *areas, area_t elem)
 {
-    area_t *r, inter, *extra, *rnext;
-
-    for(r = *head; r; r = rnext)
+    /* loop from the end because:
+     *  (1) we remove elements ;
+     *  (2) the one we add to the end are okay wrt the invariants
+     */
+    for (int i = areas->len - 1; i >= 0; i--)
     {
-        rnext = r->next;
-        if(area_intersect_area(*r, *elem))
+        if(area_intersect_area(areas->tab[i], elem))
         {
             /* remove it from the list */
-            area_list_detach(head, r);
+            area_t r = area_array_take(areas, i);
+            area_t inter = area_get_intersect_area(r, elem);
 
-            inter = area_get_intersect_area(*r, *elem);
-
-            if(AREA_LEFT(inter) > AREA_LEFT(*r))
+            if(AREA_LEFT(inter) > AREA_LEFT(r))
             {
-                extra = p_new(area_t, 1);
-                extra->x = r->x;
-                extra->y = r->y;
-                extra->width = AREA_LEFT(inter) - r->x;
-                extra->height = r->height;
-                area_list_append(head, extra);
+                area_t extra = {
+                    .x = r.x,
+                    .y = r.y,
+                    .width = AREA_LEFT(inter) - r.x,
+                    .height = r.height,
+                };
+                area_array_append(areas, extra);
             }
 
-            if(AREA_TOP(inter) > AREA_TOP(*r))
+            if(AREA_TOP(inter) > AREA_TOP(r))
             {
-                extra = p_new(area_t, 1);
-                extra->x = r->x;
-                extra->y = r->y;
-                extra->width = r->width;
-                extra->height = AREA_TOP(inter) - r->y;
-                area_list_append(head, extra);
+                area_t extra = {
+                    .x = r.x,
+                    .y = r.y,
+                    .width = r.width,
+                    .height = AREA_TOP(inter) - r.y,
+                };
+                area_array_append(areas, extra);
             }
 
-            if(AREA_RIGHT(inter) < AREA_RIGHT(*r))
+            if(AREA_RIGHT(inter) < AREA_RIGHT(r))
             {
-                extra = p_new(area_t, 1);
-                extra->x = AREA_RIGHT(inter);
-                extra->y = r->y;
-                extra->width = AREA_RIGHT(*r) - AREA_RIGHT(inter);
-                extra->height = r->height;
-                area_list_append(head, extra);
+                area_t extra = {
+                    .x = AREA_RIGHT(inter),
+                    .y = r.y,
+                    .width = AREA_RIGHT(r) - AREA_RIGHT(inter),
+                    .height = r.height,
+                };
+                area_array_append(areas, extra);
             }
 
-            if(AREA_BOTTOM(inter) < AREA_BOTTOM(*r))
+            if(AREA_BOTTOM(inter) < AREA_BOTTOM(r))
             {
-                extra = p_new(area_t, 1);
-                extra->x = r->x;
-                extra->y = AREA_BOTTOM(inter);
-                extra->width = r->width;
-                extra->height = AREA_BOTTOM(*r) - AREA_BOTTOM(inter);
-                area_list_append(head, extra);
+                area_t extra = {
+                    .x = r.x,
+                    .y = AREA_BOTTOM(inter),
+                    .width = r.width,
+                    .height = AREA_BOTTOM(r) - AREA_BOTTOM(inter),
+                };
+                area_array_append(areas, extra);
             }
-
-            /* delete the elem since we removed it from the list */
-            p_delete(&r);
         }
     }
 }

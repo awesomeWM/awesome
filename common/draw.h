@@ -27,7 +27,7 @@
 
 #include <xcb/xcb.h>
 
-#include "common/util.h"
+#include "common/array.h"
 #include "common/list.h"
 
 typedef struct
@@ -52,14 +52,13 @@ typedef struct area_t area_t;
 struct area_t
 {
     /** Co-ords of upper left corner */
-    int x;
-    int y;
-    int width;
-    int height;
-    area_t *prev, *next;
+    int16_t  x;
+    int16_t  y;
+    uint16_t width;
+    uint16_t height;
 };
 
-DO_SLIST(area_t, area, p_delete)
+DO_ARRAY(area_t, area, DO_NOTHING);
 
 #define AREA_LEFT(a)    ((a).x)
 #define AREA_TOP(a)     ((a).y)
@@ -171,7 +170,7 @@ area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *);
 alignment_t draw_align_get_from_str(const char *);
 bool xcolor_new(xcb_connection_t *, int, const char *, xcolor_t *);
 
-void area_list_remove(area_t **, area_t *);
+void area_array_remove(area_array_t *, area_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

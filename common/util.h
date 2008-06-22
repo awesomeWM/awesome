@@ -58,6 +58,8 @@ typedef struct
 /** \brief replace \c NULL strings with emtpy strings */
 #define NONULL(x)       (x ? x : "")
 
+#define DO_NOTHING(...)
+
 #undef MAX
 #undef MIN
 #define MAX(a,b) ((a) < (b) ? (b) : (a))
