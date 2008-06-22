@@ -64,7 +64,7 @@ markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused))
 
             if(p->elements_sub && p->elements_sub[i])
             {
-                buffer_adds(&p->text, p->elements_sub[i]);
+                buffer_add_xmlescaped(&p->text, p->elements_sub[i]);
             }
 
             return;

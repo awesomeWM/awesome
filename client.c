@@ -769,8 +769,7 @@ char *
 client_markup_parse(client_t *c, const char *str, ssize_t len)
 {
     const char *elements[] = { "title", NULL };
-    char *title_esc = g_markup_escape_text(c->name, -1);
-    const char *elements_sub[] = { title_esc , NULL };
+    const char *elements_sub[] = { c->name , NULL };
     markup_parser_data_t p;
     char *ret;
 
@@ -784,7 +783,6 @@ client_markup_parse(client_t *c, const char *str, ssize_t len)
         ret = a_strdup(str);
 
     markup_parser_data_wipe(&p);
-    p_delete(&title_esc);
 
     return ret;
 }
