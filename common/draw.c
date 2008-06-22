@@ -826,8 +826,8 @@ draw_imlib_load_strerror(Imlib_Load_Error e)
  * \param filename The image file to load.
  * \return A new image.
  */
-draw_image_t
-*draw_image_new(const char *filename)
+draw_image_t *
+draw_image_new(const char *filename)
 {
     int w, h, size, i;
     DATA32 *data;
@@ -836,6 +836,9 @@ draw_image_t
     Imlib_Image imimage;
     Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
     draw_image_t *image;
+
+    if(!filename)
+        return NULL;
 
     if(!(imimage = imlib_load_image_with_error_return(filename, &e)))
     {
