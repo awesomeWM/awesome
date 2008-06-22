@@ -42,6 +42,7 @@
 #include <ctype.h>
 #include <math.h>
 
+#include "common/tokenize.h"
 #include "common/draw.h"
 #include "common/markup.h"
 #include "common/xutil.h"
@@ -1042,16 +1043,13 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
 alignment_t
 draw_align_get_from_str(const char *align)
 {
-    if(!a_strcmp(align, "left"))
-        return AlignLeft;
-    else if(!a_strcmp(align, "center"))
-        return AlignCenter;
-    else if(!a_strcmp(align, "right"))
-        return AlignRight;
-    else if(!a_strcmp(align, "flex"))
-        return AlignFlex;
-
-    return AlignAuto;
+    switch (a_tokenize(align, -1)) {
+      case A_TK_LEFT:   return AlignLeft;
+      case A_TK_CENTER: return AlignCenter;
+      case A_TK_RIGHT:  return AlignRight;
+      case A_TK_FLEX:   return AlignFlex;
+      default:          return AlignAuto;
+    }
 }
 
 #define RGB_COLOR_8_TO_16(i) (65535 * ((i) & 0xff) / 255)

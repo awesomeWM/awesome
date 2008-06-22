@@ -26,6 +26,24 @@ SET(AWE_DOC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/README
     ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
 
+ADD_CUSTOM_COMMAND(
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
+            ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.h
+    OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.h
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
+            ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    COMMENT "Generating common/tokenize.h"
+)
+ADD_CUSTOM_COMMAND(
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
+            ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.c
+    OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
+            ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    COMMENT "Generating common/tokenize.c"
+)
 SET(AWE_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/awesome.c
     ${CMAKE_CURRENT_SOURCE_DIR}/client.c
@@ -54,6 +72,8 @@ SET(AWE_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/common/markup.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/socket.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/swindow.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.h
     ${CMAKE_CURRENT_SOURCE_DIR}/common/util.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/version.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/xembed.c
