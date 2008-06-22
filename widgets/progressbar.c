@@ -20,6 +20,7 @@
  *
  */
 
+#include "common/tokenize.h"
 #include "widget.h"
 #include "screen.h"
 
@@ -406,21 +407,48 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     char *title, *setting;
     char *new_val;
     bar_t *bar;
+    awesome_token_t prop = a_tokenize(property, -1);
 
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
+
+    switch (prop) {
+      case A_TK_GAP:
+        d->gap = atoi(new_value);
+        return WIDGET_NOERROR;
+      case A_TK_TICKS_COUNT:
+        d->ticks_count = atoi(new_value);
+        return WIDGET_NOERROR;
+      case A_TK_TICKS_GAP:
+        d->ticks_gap = atoi(new_value);
+        return WIDGET_NOERROR;
+      case A_TK_BORDER_PADDING:
+        d->border_padding = atoi(new_value);
+        return WIDGET_NOERROR;
+      case A_TK_BORDER_WIDTH:
+        d->border_width = atoi(new_value);
+        return WIDGET_NOERROR;
+      case A_TK_WIDTH:
+        d->width = atoi(new_value);
+        return WIDGET_NOERROR;
+      case A_TK_HEIGHT:
+        d->height = atof(new_value);
+        return WIDGET_NOERROR;
+      case A_TK_VERTICAL:
+        d->vertical = a_strtobool(new_value);
+        return WIDGET_NOERROR;
+
     /* following properties need a datasection */
-    else if(!a_strcmp(property, "fg")
-            || !a_strcmp(property, "data")
-            || !a_strcmp(property, "fg_off")
-            || !a_strcmp(property, "bg")
-            || !a_strcmp(property, "bordercolor")
-            || !a_strcmp(property, "fg_center")
-            || !a_strcmp(property, "fg_end")
-            || !a_strcmp(property, "min_value")
-            || !a_strcmp(property, "max_value")
-            || !a_strcmp(property, "reverse"))
-    {
+      case A_TK_FG:
+      case A_TK_DATA:
+      case A_TK_FG_OFF:
+      case A_TK_BG:
+      case A_TK_BORDERCOLOR:
+      case A_TK_FG_CENTER:
+      case A_TK_FG_END:
+      case A_TK_MIN_VALUE:
+      case A_TK_MAX_VALUE:
+      case A_TK_REVERSE:
         /* check if this section is defined already */
         new_val = a_strdup(new_value);
         title = strtok(new_val, " ");
@@ -436,69 +464,61 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         /* no section found -> create one */
         if(!bar)
             bar = progressbar_data_add(d, title);
+        break;
 
-        /* change values accordingly... */
-        if(!a_strcmp(property, "data"))
-        {
-            value = atof(setting);
-            bar->value = (value < bar->min_value ? bar->min_value :
-                          (value > bar->max_value ? bar->max_value : value));
-        }
-        else if(!a_strcmp(property, "fg"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->fg);
-        else if(!a_strcmp(property, "bg"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->bg);
-        else if(!a_strcmp(property, "fg_off"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->fg_off);
-        else if(!a_strcmp(property, "bordercolor"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->bordercolor);
-        else if(!a_strcmp(property, "fg_center"))
-            progressbar_pcolor_set(&bar->pfg_center, setting);
-        else if(!a_strcmp(property, "fg_end"))
-            progressbar_pcolor_set(&bar->pfg_end, setting);
-        else if(!a_strcmp(property, "min_value"))
-        {
-            bar->min_value = atof(setting);
-            /* hack to prevent max_value beeing less than min_value
-             * and also preventing a division by zero when both are equal */
-            if(bar->max_value <= bar->min_value)
-                bar->max_value = bar->max_value + 0.0001;
-            /* force a actual value into the newly possible range */
-            if(bar->value < bar->min_value)
-                bar->value = bar->min_value;
-        }
-        else if(!a_strcmp(property, "max_value"))
-        {
-            bar->max_value = atof(setting);
-            if(bar->min_value >= bar->max_value)
-                bar->min_value = bar->max_value - 0.0001;
-            if(bar->value > bar->max_value)
-                bar->value = bar->max_value;
-        }
-        else if(!a_strcmp(property, "reverse"))
-            bar->reverse = a_strtobool(setting);
-
-        p_delete(&new_val);
-        return WIDGET_NOERROR;
-    }
-    else if(!a_strcmp(property, "gap"))
-        d->gap = atoi(new_value);
-    else if(!a_strcmp(property, "ticks_count"))
-        d->ticks_count = atoi(new_value);
-    else if(!a_strcmp(property, "ticks_gap"))
-        d->ticks_gap = atoi(new_value);
-    else if(!a_strcmp(property, "border_padding"))
-        d->border_padding = atoi(new_value);
-    else if(!a_strcmp(property, "border_width"))
-        d->border_width = atoi(new_value);
-    else if(!a_strcmp(property, "width"))
-        d->width = atoi(new_value);
-    else if(!a_strcmp(property, "height"))
-        d->height = atof(new_value);
-    else if(!a_strcmp(property, "vertical"))
-        d->vertical = a_strtobool(new_value);
-    else
+      default:
         return WIDGET_ERROR;
+    }
+
+    switch (prop) {
+      case A_TK_DATA:
+        value = atof(setting);
+        bar->value = (value < bar->min_value ? bar->min_value :
+                      (value > bar->max_value ? bar->max_value : value));
+        break;
+      case A_TK_FG:
+        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->fg);
+        break;
+      case A_TK_BG:
+        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->bg);
+        break;
+      case A_TK_FG_OFF:
+        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->fg_off);
+        break;
+      case A_TK_BORDERCOLOR:
+        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->bordercolor);
+        break;
+      case A_TK_FG_CENTER:
+        progressbar_pcolor_set(&bar->pfg_center, setting);
+        break;
+      case A_TK_FG_END:
+        progressbar_pcolor_set(&bar->pfg_end, setting);
+        break;
+      case A_TK_MIN_VALUE:
+        bar->min_value = atof(setting);
+        /* hack to prevent max_value beeing less than min_value
+         * and also preventing a division by zero when both are equal */
+        if(bar->max_value <= bar->min_value)
+            bar->max_value = bar->max_value + 0.0001;
+        /* force a actual value into the newly possible range */
+        if(bar->value < bar->min_value)
+            bar->value = bar->min_value;
+        break;
+      case A_TK_MAX_VALUE:
+        bar->max_value = atof(setting);
+        if(bar->min_value >= bar->max_value)
+            bar->min_value = bar->max_value - 0.0001;
+        if(bar->value > bar->max_value)
+            bar->value = bar->max_value;
+        break;
+      case A_TK_REVERSE:
+        bar->reverse = a_strtobool(setting);
+        break;
+      default:
+        return WIDGET_ERROR;
+    }
+
+    p_delete(&new_val);
 
     return WIDGET_NOERROR;
 }
