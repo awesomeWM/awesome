@@ -200,7 +200,7 @@ typedef struct
 {
     xcb_connection_t *connection;
     int phys_screen;
-    char *text;
+    buffer_t text;
     alignment_t align;
     struct
     {
@@ -261,7 +261,8 @@ draw_text_markup_expand(draw_parser_data_t *data,
                 data->margin.right = atoi(p->attribute_values[2][i]);
 
     /* stole text */
-    data->text = buffer_detach(&p->text);
+    data->text = p->text;
+    buffer_init(&p->text);
     markup_parser_data_delete(&p);
 
     return true;
@@ -288,10 +289,12 @@ draw_text(draw_context_t *ctx, font_t *font,
     p_clear(&parser_data, 1);
     parser_data.connection = ctx->connection;
     parser_data.phys_screen = ctx->phys_screen;
-    if(draw_text_markup_expand(&parser_data, text, len))
-        text = parser_data.text;
+    if(draw_text_markup_expand(&parser_data, text, len)) {
+        text = parser_data.text.s;
+        len  = parser_data.text.len;
+    }
 
-    len = olen = a_strlen(text);
+    olen = len;
 
     if(parser_data.has_bg_color)
         draw_rectangle(ctx, area, 1.0, true, parser_data.bg_color);
@@ -351,7 +354,7 @@ draw_text(draw_context_t *ctx, font_t *font,
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 
-    p_delete(&parser_data.text);
+    buffer_wipe(&parser_data.text);
 }
 
 /** Setup color-source for cairo (gradient or mono).
@@ -985,10 +988,10 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     p_clear(&parser_data, 1);
     parser_data.connection = conn;
     parser_data.phys_screen = phys_screen;
-    if(draw_text_markup_expand(&parser_data, text, len))
-        text = parser_data.text;
-
-    len = a_strlen(text);
+    if(draw_text_markup_expand(&parser_data, text, len)) {
+        text = parser_data.text.s;
+        len  = parser_data.text.len;
+    }
 
     surface = cairo_xcb_surface_create(conn, phys_screen,
                                        draw_screen_default_visual(s),
@@ -1007,7 +1010,7 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     geom.width = ext.width;
     geom.height = ext.height * 1.5;
 
-    p_delete(&parser_data.text);
+    buffer_wipe(&parser_data.text);
     return geom;
 }
 
