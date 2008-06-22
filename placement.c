@@ -74,6 +74,7 @@ placement_smart(client_t *c)
     bool found = false;
     layout_t *layout;
 
+    area_array_init(&areas);
     screen_geometry = screen_area_get(c->screen,
                                       globalconf.screens[c->screen].statusbar,
                                       &globalconf.screens[c->screen].padding);
