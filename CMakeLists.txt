@@ -119,6 +119,19 @@ ADD_CUSTOM_TARGET(generated_headers
 ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_headers)
 # }}}
 
+# {{{ version stamp
+IF(BUILD_FROM_GIT)
+    ADD_CUSTOM_TARGET(version_stamp ALL
+                      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/git-version-stamp.sh
+                              ${VERSION_STAMP_FILE}
+                              ${CMAKE_CURRENT_BINARY_DIR}/awesome-version-internal.h
+                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+    ADD_DEPENDENCIES(${PROJECT_AWE_NAME} version_stamp)
+    ADD_DEPENDENCIES(${PROJECT_AWECLIENT_NAME} version_stamp)
+ENDIF()
+# }}}
+
 # {{{ Manpages.
 IF(GENERATE_MANPAGES)
 

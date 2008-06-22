@@ -58,16 +58,23 @@ IF(GENERATE_MANPAGES)
 ENDIF()
 # }}}
 
+# {{{ git version stamp
 # If this is a git repository...
 IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD)
-    # ...update version
     IF(GIT_EXECUTABLE)
+        # get current version
         EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            OUTPUT_VARIABLE VERSION
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        OUTPUT_VARIABLE VERSION
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        # file the git-version-stamp.sh script will look into
+        SET(VERSION_STAMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/.version_stamp)
+        FILE(WRITE ${VERSION_STAMP_FILE} ${VERSION})
+        # create a version_stamp target later
+        SET(BUILD_FROM_GIT TRUE)
     ENDIF()
 ENDIF()
+# }}}
 
 # {{{ Required libraries
 #
