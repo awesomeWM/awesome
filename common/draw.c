@@ -261,9 +261,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
                 data->margin.right = atoi(p->attribute_values[2][i]);
 
     /* stole text */
-    data->text = p->text;
-    p->text = NULL;
-
+    data->text = buffer_detach(&p->text);
     markup_parser_data_delete(&p);
 
     return true;

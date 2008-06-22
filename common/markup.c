@@ -47,9 +47,7 @@ markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused))
                            GError **error __attribute__ ((unused)))
 {
     markup_parser_data_t *p = (markup_parser_data_t *) user_data;
-    char *newtext;
     int i, j;
-    ssize_t len;
 
     for(i = 0; p->elements[i]; i++)
         if(!a_strcmp(element_name, p->elements[i]))
@@ -66,9 +64,7 @@ markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused))
 
             if(p->elements_sub && p->elements_sub[i])
             {
-                asprintf(&newtext, "%s%s", NONULL(p->text), p->elements_sub[i]);
-                p_delete(&p->text);
-                p->text = newtext;
+                buffer_adds(&p->text, p->elements_sub[i]);
             }
 
             return;
@@ -76,22 +72,13 @@ markup_parse_start_element(GMarkupParseContext *context __attribute__ ((unused))
 
     if(a_strcmp(element_name, "markup"))
     {
-        if(!(len = asprintf(&newtext, "%s<%s ", NONULL(p->text), element_name)))
-            return;
-        len++; /* add \0 that asprintf does not return in len */
+        buffer_addf(&p->text, "<%s", element_name);
         for(i = 0; attribute_names[i]; i++)
         {
-            len += a_strlen(attribute_names[i]) + a_strlen(attribute_values[i]) + 5;
-            p_realloc(&newtext, len);
-            a_strcat(newtext, len, attribute_names[i]);
-            a_strcat(newtext, len, "=\"");
-            a_strcat(newtext, len, attribute_values[i]);
-            a_strcat(newtext, len, "\" ");
+            buffer_addf(&p->text, " %s=\"%s\"", attribute_names[i],
+                        attribute_values[i]);
         }
-        p_realloc(&newtext, ++len);
-        a_strcat(newtext, len, ">");
-        p_delete(&p->text);
-        p->text = newtext;
+        buffer_addc(&p->text, '>');
     }
 }
 
@@ -110,7 +97,6 @@ markup_parse_end_element(GMarkupParseContext *context __attribute__ ((unused)),
                          GError **error __attribute__ ((unused)))
 {
     markup_parser_data_t *p = (markup_parser_data_t *) user_data;
-    char *newtext;
     int i;
 
     for(i = 0; p->elements[i]; i++)
@@ -118,11 +104,7 @@ markup_parse_end_element(GMarkupParseContext *context __attribute__ ((unused)),
             return;
 
     if(a_strcmp(element_name, "markup"))
-    {
-        asprintf(&newtext, "%s</%s>", p->text, element_name);
-        p_delete(&p->text);
-        p->text = newtext;
-    }
+        buffer_addf(&p->text, "</%s>", element_name);
 }
 
 /** Callback to invoke when some text is seen (text is always inside an
@@ -144,14 +126,10 @@ markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
                   GError **error __attribute__ ((unused)))
 {
     markup_parser_data_t *p = (markup_parser_data_t *) user_data;
-    ssize_t rlen;
     char *esc;
 
     esc = g_markup_escape_text(text, text_len);
-    text_len = a_strlen(esc);
-    rlen = a_strlen(p->text) + 1 + text_len;
-    p_realloc(&p->text, rlen);
-    a_strncat(p->text, rlen, esc, text_len);
+    buffer_adds(&p->text, esc);
     p_delete(&esc);
 }
 
@@ -202,7 +180,7 @@ markup_parser_data_delete(markup_parser_data_t **p)
     p_delete(&(*p)->attribute_names);
     p_delete(&(*p)->attribute_values);
 
-    buffer_wipe(&p->text);
+    buffer_wipe(&(*p)->text);
     p_delete(p);
 }
 

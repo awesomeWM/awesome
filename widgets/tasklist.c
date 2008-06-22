@@ -131,7 +131,6 @@ tasklist_draw(draw_context_t *ctx, int screen,
                             draw_rectangle(ctx, area, 1.0, true, bg_color);
                             break;
                         }
-                p->text = NULL;
                 markup_parser_data_delete(&p);
 
                 if((image = draw_image_new(c->icon_path)))

@@ -778,8 +778,7 @@ client_markup_parse(client_t *c, const char *str, ssize_t len)
 
     if(markup_parse(p, str, len))
     {
-        ret = p->text;
-        p->text = NULL;
+        ret = buffer_detach(&p->text);
     }
     else
         ret = a_strdup(str);
