@@ -215,8 +215,7 @@ markup_parser_data_delete(markup_parser_data_t **p)
 bool
 markup_parse(markup_parser_data_t *data, const char *str, ssize_t slen)
 {
-    GMarkupParseContext *mkp_ctx;
-    GMarkupParser parser =
+    static GMarkupParser const parser =
     {
         /* start_element */
         markup_parse_start_element,
@@ -229,6 +228,7 @@ markup_parse(markup_parser_data_t *data, const char *str, ssize_t slen)
         /* error */
         NULL
     };
+    GMarkupParseContext *mkp_ctx;
     GError *error = NULL;
 
     if(slen <= 0)
