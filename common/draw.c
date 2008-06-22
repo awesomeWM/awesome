@@ -279,27 +279,19 @@ draw_text(draw_context_t *ctx, font_t *font,
 {
     int x, y;
     ssize_t len, olen;
-    char *buf = NULL, *utf8 = NULL;
     PangoRectangle ext;
     draw_parser_data_t parser_data;
 
     if(!(len = a_strlen(text)))
         return;
 
-    utf8 = a_strdup(text);
-
     p_clear(&parser_data, 1);
     parser_data.connection = ctx->connection;
     parser_data.phys_screen = ctx->phys_screen;
-    if(draw_text_markup_expand(&parser_data, utf8, len))
-    {
-        buf = parser_data.text;
-        p_delete(&utf8);
-    }
-    else
-        buf = utf8;
+    if(draw_text_markup_expand(&parser_data, text, len))
+        text = parser_data.text;
 
-    len = olen = a_strlen(buf);
+    len = olen = a_strlen(text);
 
     if(parser_data.has_bg_color)
         draw_rectangle(ctx, area, 1.0, true, parser_data.bg_color);
@@ -315,7 +307,7 @@ draw_text(draw_context_t *ctx, font_t *font,
                                                    - (parser_data.margin.left
                                                       + parser_data.margin.right)));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
-    pango_layout_set_markup(ctx->layout, buf, len);
+    pango_layout_set_markup(ctx->layout, text, len);
     pango_layout_set_font_description(ctx->layout, font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
@@ -359,7 +351,7 @@ draw_text(draw_context_t *ctx, font_t *font,
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 
-    p_delete(&buf);
+    p_delete(&parser_data.text);
 }
 
 /** Setup color-source for cairo (gradient or mono).
@@ -985,27 +977,18 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     area_t geom = { 0, 0, 0, 0, NULL, NULL };
     ssize_t len;
-    char *buf, *utf8;
     draw_parser_data_t parser_data;
 
     if(!(len = a_strlen(text)))
         return geom;
 
-    /* try to convert it to UTF-8 */
-    utf8 = a_strdup(text);
-
     p_clear(&parser_data, 1);
     parser_data.connection = conn;
     parser_data.phys_screen = phys_screen;
-    if(draw_text_markup_expand(&parser_data, utf8, len))
-    {
-        buf = parser_data.text;
-        p_delete(&utf8);
-    }
-    else
-        buf = utf8;
+    if(draw_text_markup_expand(&parser_data, text, len))
+        text = parser_data.text;
 
-    len = a_strlen(buf);
+    len = a_strlen(text);
 
     surface = cairo_xcb_surface_create(conn, phys_screen,
                                        draw_screen_default_visual(s),
@@ -1014,7 +997,7 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
 
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);
-    pango_layout_set_markup(layout, buf, len);
+    pango_layout_set_markup(layout, text, len);
     pango_layout_set_font_description(layout, font->desc);
     pango_layout_get_pixel_extents(layout, NULL, &ext);
     g_object_unref(layout);
@@ -1024,8 +1007,7 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     geom.width = ext.width;
     geom.height = ext.height * 1.5;
 
-    p_delete(&buf);
-
+    p_delete(&parser_data.text);
     return geom;
 }
 
