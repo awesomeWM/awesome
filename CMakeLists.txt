@@ -8,6 +8,7 @@ ENDIF()
 INCLUDE(awesomeConfig.cmake)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_CURRENT_BINARY_DIR}
                     ${AWESOME_REQUIRED_INCLUDE_DIRS}
                     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
@@ -15,7 +16,7 @@ SET(AWE_LUA_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/tabulous.lua
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/awful.lua)
 
-SET(AWE_CONF_FILES ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.lua)
+SET(AWE_CONF_FILES ${CMAKE_CURRENT_BINARY_DIR}/awesomerc.lua)
 
 SET(AWE_ICON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/icons)
 
@@ -81,9 +82,6 @@ SET(AWE_MAN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/awesome-client.1.txt
     ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.5.txt)
 
-SET(AWE_LUADOC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/apidocgen.txt)
-
-
 ADD_EXECUTABLE(${PROJECT_AWE_NAME} ${AWE_SRCS})
 ADD_EXECUTABLE(${PROJECT_AWECLIENT_NAME} ${AWE_CLIENT_SRCS})
 
@@ -98,24 +96,24 @@ TARGET_LINK_LIBRARIES(${PROJECT_AWECLIENT_NAME}
 # {{{ Generated headers
 FILE(GLOB LAYOUTGEN_DEPS ${CMAKE_CURRENT_SOURCE_DIR}/layouts/*.h)
 ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
-                   ARGS > ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h
-                   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h
+                   ARGS > ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
+                   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${LAYOUTGEN_DEPS}
                    COMMENT "Generating layoutgen.h."
                    VERBATIM)
 
 ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
-                   ARGS > ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
-                   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
+                   ARGS > ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
+                   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/widget.h
                    COMMENT "Generating widgetgen.h."
                    VERBATIM)
 
 ADD_CUSTOM_TARGET(generated_headers
-                  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/widgetgen.h
-                          ${CMAKE_CURRENT_SOURCE_DIR}/layoutgen.h)
+                  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
+                          ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h)
 
 ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_headers)
 # }}}
@@ -124,6 +122,8 @@ ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_headers)
 IF(GENERATE_MANPAGES)
 
     # {{{ Lua API documentation.
+    SET(LUADOC_FILE ${CMAKE_CURRENT_BINARY_DIR}/apidocgen.txt)
+
     MACRO(a_file_match infile regex result_var)
         IF(CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION LESS 6)
             # cmake < 2.6 doesn't know FILE(STRINGS ...)
@@ -156,28 +156,31 @@ IF(GENERATE_MANPAGES)
     # luadoc target
     ADD_CUSTOM_COMMAND(COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
                        | ${LUA_EXECUTABL} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
-                       > ${AWE_LUADOC_FILE}
-                       OUTPUT ${AWE_LUADOC_FILE}
+                       > ${LUADOC_FILE}
+                       OUTPUT ${LUADOC_FILE}
                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                        DEPENDS ${LUA_APIDOC_SRCS}
                        COMMENT "Generating Lua API documentation."
                        VERBATIM)
 
-    ADD_CUSTOM_TARGET(luadoc DEPENDS ${AWE_LUADOC_FILE})
+    ADD_CUSTOM_TARGET(luadoc DEPENDS ${LUADOC_FILE})
     # }}}
 
     FOREACH(txtfile ${AWE_MAN_SRCS})
         STRING(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
+        STRING(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}
+                       ${CMAKE_CURRENT_BINARY_DIR} xmlfile ${xmlfile})
         STRING(REGEX REPLACE ".xml\$" ".gz" gzfile ${xmlfile})
         STRING(REGEX REPLACE ".gz\$" "" manfile ${gzfile})
-        STRING(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}
-                       ${CMAKE_CURRENT_BINARY_DIR} gzfile ${gzfile})
 
         # TODO: This is still not 100% right. Actually only
-        #       awesomerc.5.xml should depend on ${AWE_LUADOC_FILE}.
-        ADD_CUSTOM_COMMAND(COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} ${txtfile}
+        #       awesomerc.5.xml should depend on ${LUADOC_FILE}.
+        ADD_CUSTOM_COMMAND(COMMAND ${CAT_EXECUTABLE} ${txtfile}
+                           | ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} -
+                           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                            OUTPUT ${xmlfile}
-                           DEPENDS ${txtfile} ${AWE_LUADOC_FILE})
+                           DEPENDS ${txtfile} ${LUADOC_FILE}
+                           VERBATIM)
         ADD_CUSTOM_COMMAND(COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
                            OUTPUT ${manfile}
                            DEPENDS ${xmlfile})
@@ -190,7 +193,7 @@ IF(GENERATE_MANPAGES)
 
         SET(MAN_FILES ${MAN_FILES} ${gzfile})
 
-        # figure out in what section to install to rom filename
+        # figure out in what section to install to from filename
         STRING(REGEX REPLACE "^.*\\.([0-9])\\.gz\$" "\\1" section ${gzfile})
         SET(AWE_MAN${section}_FILES ${AWE_MAN${section}_FILES} ${gzfile})
     ENDFOREACH()
@@ -199,9 +202,13 @@ IF(GENERATE_MANPAGES)
 ENDIF()
 # }}}
 
+# {{{ Doxygen
 IF(DOXYGEN_EXECUTABLE)
-    ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/awesome.doxygen)
+    ADD_CUSTOM_TARGET(doc
+                      COMMAND ${DOXYGEN_EXECUTABLE} awesome.doxygen
+                      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 ENDIF()
+# }}}
 
 # {{{ Installation.
 INSTALL(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)

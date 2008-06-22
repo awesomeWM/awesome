@@ -189,7 +189,7 @@ MACRO(a_configure_file file)
     STRING(REGEX REPLACE ".in\$" "" outfile ${file})
     MESSAGE(STATUS "Configuring ${outfile}")
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${file}
-                   ${CMAKE_CURRENT_SOURCE_DIR}/${outfile}
+                   ${CMAKE_CURRENT_BINARY_DIR}/${outfile}
                    ESCAPE_QUOTE
                    @ONLY)
 ENDMACRO()
