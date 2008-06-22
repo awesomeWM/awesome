@@ -22,11 +22,11 @@
 #ifndef AWESOME_COMMON_MARKUP_H
 #define AWESOME_COMMON_MARKUP_H
 
-#include "common/util.h"
+#include "common/buffer.h"
 
 typedef struct
 {
-    char *text;
+    buffer_t text;
     const char **elements;
     const char **elements_sub;
     char ***attribute_names;

@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <assert.h>
 
 /** A list of possible position, not sex related */
 typedef enum

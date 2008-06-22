@@ -48,6 +48,7 @@ SET(AWE_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/titlebar.c
     ${CMAKE_CURRENT_SOURCE_DIR}/widget.c
     ${CMAKE_CURRENT_SOURCE_DIR}/window.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/buffer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/configopts.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/draw.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/markup.c

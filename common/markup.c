@@ -170,7 +170,7 @@ markup_parser_data_new(const char **elements, const char **elements_sub, ssize_t
 
     p = p_new(markup_parser_data_t, 1);
 
-    p->text = p_new(char, 1);
+    buffer_init(&p->text);
     p->elements = elements;
     p->elements_sub = elements_sub;
     p->attribute_names = p_new(char **, nelem);
@@ -202,7 +202,7 @@ markup_parser_data_delete(markup_parser_data_t **p)
     p_delete(&(*p)->attribute_names);
     p_delete(&(*p)->attribute_values);
 
-    p_delete(&(*p)->text);
+    buffer_wipe(&p->text);
     p_delete(p);
 }
 
