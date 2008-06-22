@@ -24,6 +24,7 @@
 
 #include "widget.h"
 #include "screen.h"
+#include "common/tokenize.h"
 #include "common/draw.h"
 
 extern awesome_t globalconf;
@@ -281,19 +282,64 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
     float value;
     char *title, *setting;
     char *new_val;
+    awesome_token_t prop = a_tokenize(property, -1);
 
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
-    /* following properties need a datasection */
-    else if(!a_strcmp(property, "data")
-            || !a_strcmp(property, "fg")
-            || !a_strcmp(property, "fg_center")
-            || !a_strcmp(property, "fg_end")
-            || !a_strcmp(property, "vertical_gradient")
-            || !a_strcmp(property, "scale")
-            || !a_strcmp(property, "max_value")
-            || !a_strcmp(property, "draw_style"))
-    {
+
+    switch (prop) {
+      default:
+        return WIDGET_ERROR;
+
+      case A_TK_HEIGHT:
+        d->height = atof(new_value);
+        return WIDGET_NOERROR;
+      case A_TK_WIDTH:
+        d->width = atoi(new_value);
+        d->size = d->width - 2;
+        /* re-allocate/initialise necessary values */
+        for(graph = d->graphs; graph; graph = graph->next)
+        {
+            p_realloc(&graph->values, d->size);
+            p_realloc(&graph->lines, d->size);
+            p_clear(graph->values, d->size);
+            p_clear(graph->lines, d->size);
+            graph->index = 0;
+            graph->current_max =  0;
+            graph->max_index =  0;
+        }
+        return WIDGET_NOERROR;
+      case A_TK_BG:
+        if(!xcolor_new(globalconf.connection,
+                       globalconf.default_screen,
+                       new_value, &d->bg))
+            return WIDGET_ERROR_FORMAT_COLOR;
+        return WIDGET_NOERROR;
+      case A_TK_BORDERCOLOR:
+        if(!xcolor_new(globalconf.connection,
+                       globalconf.default_screen,
+                       new_value, &d->bordercolor))
+            return WIDGET_ERROR_FORMAT_COLOR;
+        return WIDGET_NOERROR;
+      case A_TK_GROW:
+        switch((d->grow = position_get_from_str(new_value)))
+        {
+          case Left:
+          case Right:
+            return WIDGET_NOERROR;
+          default:
+            warn("error changing property %s of widget %s, must be 'left' or 'right'",
+                 property, widget->name);
+            return WIDGET_ERROR_CUSTOM;
+        }
+      case A_TK_DATA:
+      case A_TK_FG:
+      case A_TK_FG_CENTER:
+      case A_TK_FG_END:
+      case A_TK_VERTICAL_GRADIENT:
+      case A_TK_SCALE:
+      case A_TK_MAX_VALUE:
+      case A_TK_DRAW_STYLE:
         /* check if this section is defined already */
         new_val = a_strdup(new_value);
         title = strtok(new_val, " ");
@@ -308,137 +354,96 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
         /* no section found -> create one */
         if(!graph)
             graph = graph_data_add(d, title);
-
-        /* change values accordingly... */
-        if(!a_strcmp(property, "data"))
-        {
-            /* assign incoming value */
-            value = MAX(atof(setting), 0);
-
-            if(++graph->index >= d->size) /* cycle inside the array */
-                graph->index = 0;
-
-            if(graph->scale) /* scale option is true */
-            {
-                graph->values[graph->index] = value;
-
-                if(value > graph->current_max) /* a new maximum value found */
-                {
-                    graph->max_index = graph->index;
-                    graph->current_max = value;
-
-                    /* recalculate */
-                    for (i = 0; i < d->size; i++)
-                        graph->lines[i] = round(graph->values[i] * d->box_height / graph->current_max);
-                }
-                /* old max_index reached + current_max > normal, re-check/generate */
-                else if(graph->max_index == graph->index
-                        && graph->current_max > graph->max_value)
-                {
-                    /* find the new max */
-                    for(i = 0; i < d->size; i++)
-                        if(graph->values[i] > graph->values[graph->max_index])
-                            graph->max_index = i;
-
-                    graph->current_max = MAX(graph->values[graph->max_index], graph->max_value);
-
-                    /* recalculate */
-                    for(i = 0; i < d->size; i++)
-                        graph->lines[i] = round(graph->values[i] * d->box_height / graph->current_max);
-                }
-                else
-                    graph->lines[graph->index] = round(value * d->box_height / graph->current_max);
-            }
-            else /* scale option is false - limit to d->box_height */
-            {
-                if(value < graph->max_value)
-                    graph->lines[graph->index] = round(value * d->box_height / graph->max_value);
-                else
-                    graph->lines[graph->index] = d->box_height;
-            }
-            p_delete(&new_val);
-            return WIDGET_NOERROR;
-        }
-        else if(!a_strcmp(property, "fg"))
-            xcolor_new(globalconf.connection, globalconf.default_screen, setting, &graph->color_start);
-        else if(!a_strcmp(property, "fg_center"))
-            graph_pcolor_set(&graph->pcolor_center, setting);
-        else if(!a_strcmp(property, "fg_end"))
-            graph_pcolor_set(&graph->pcolor_end, setting);
-        else if(!a_strcmp(property, "vertical_gradient"))
-            graph->vertical_gradient = a_strtobool(setting);
-        else if(!a_strcmp(property, "scale"))
-            graph->scale = a_strtobool(setting);
-        else if(!a_strcmp(property, "max_value"))
-        {
-            graph->max_value = atof(setting);
-            graph->current_max = graph->max_value;
-        }
-        else if(!a_strcmp(property, "draw_style"))
-        {
-            if(!a_strcmp(setting, "bottom"))
-                graph->draw_style = Bottom_Style;
-            else if(!a_strcmp(setting, "line"))
-                graph->draw_style = Line_Style;
-            else if(!a_strcmp(setting, "top"))
-                graph->draw_style = Top_Style;
-            else
-            {
-                warn("'error changing property %s of widget %s, must be 'bottom', 'top' or 'line'",
-                     property, widget->name);
-                p_delete(&new_val);
-                return WIDGET_ERROR_CUSTOM;
-            }
-        }
-        p_delete(&new_val);
-        return WIDGET_NOERROR;
+        break;
     }
-    else if(!a_strcmp(property, "height"))
-        d->height = atof(new_value);
-    else if(!a_strcmp(property, "width"))
-    {
-        d->width = atoi(new_value);
-        d->size = d->width - 2;
-        /* re-allocate/initialise necessary values */
-        for(graph = d->graphs; graph; graph = graph->next)
-        {
-            p_realloc(&graph->values, d->size);
-            p_realloc(&graph->lines, d->size);
-            p_clear(graph->values, d->size);
-            p_clear(graph->lines, d->size);
+
+    switch (prop) {
+      case A_TK_DATA:
+        /* assign incoming value */
+        value = MAX(atof(setting), 0);
+
+        if(++graph->index >= d->size) /* cycle inside the array */
             graph->index = 0;
-            graph->current_max =  0;
-            graph->max_index =  0;
-        }
-    }
-    else if(!a_strcmp(property, "bg"))
-    {
-        if(!xcolor_new(globalconf.connection,
-                       globalconf.default_screen,
-                       new_value, &d->bg))
-            return WIDGET_ERROR_FORMAT_COLOR;
-    }
-    else if(!a_strcmp(property, "bordercolor"))
-    {
-        if(!xcolor_new(globalconf.connection,
-                       globalconf.default_screen,
-                       new_value, &d->bordercolor))
-            return WIDGET_ERROR_FORMAT_COLOR;
-    }
-    else if(!a_strcmp(property, "grow"))
-        switch((d->grow = position_get_from_str(new_value)))
+
+        if(graph->scale) /* scale option is true */
         {
-          case Left:
-          case Right:
+            graph->values[graph->index] = value;
+
+            if(value > graph->current_max) /* a new maximum value found */
+            {
+                graph->max_index = graph->index;
+                graph->current_max = value;
+
+                /* recalculate */
+                for (i = 0; i < d->size; i++)
+                    graph->lines[i] = round(graph->values[i] * d->box_height / graph->current_max);
+            }
+            /* old max_index reached + current_max > normal, re-check/generate */
+            else if(graph->max_index == graph->index
+                    && graph->current_max > graph->max_value)
+            {
+                /* find the new max */
+                for(i = 0; i < d->size; i++)
+                    if(graph->values[i] > graph->values[graph->max_index])
+                        graph->max_index = i;
+
+                graph->current_max = MAX(graph->values[graph->max_index], graph->max_value);
+
+                /* recalculate */
+                for(i = 0; i < d->size; i++)
+                    graph->lines[i] = round(graph->values[i] * d->box_height / graph->current_max);
+            }
+            else
+                graph->lines[graph->index] = round(value * d->box_height / graph->current_max);
+        }
+        else /* scale option is false - limit to d->box_height */
+        {
+            if(value < graph->max_value)
+                graph->lines[graph->index] = round(value * d->box_height / graph->max_value);
+            else
+                graph->lines[graph->index] = d->box_height;
+        }
+        break;
+      case A_TK_FG:
+        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &graph->color_start);
+        break;
+      case A_TK_FG_CENTER:
+        graph_pcolor_set(&graph->pcolor_center, setting);
+        break;
+      case A_TK_FG_END:
+        graph_pcolor_set(&graph->pcolor_end, setting);
+        break;
+      case A_TK_VERTICAL_GRADIENT:
+        graph->vertical_gradient = a_strtobool(setting);
+        break;
+      case A_TK_SCALE:
+        graph->scale = a_strtobool(setting);
+        break;
+      case A_TK_MAX_VALUE:
+        graph->max_value = atof(setting);
+        graph->current_max = graph->max_value;
+        break;
+      case A_TK_DRAW_STYLE:
+        switch (a_tokenize(setting, -1)) {
+          case A_TK_BOTTOM:
+            graph->draw_style = Bottom_Style;
+            break;
+          case A_TK_LINE:
+            graph->draw_style = Line_Style;
+            break;
+          case A_TK_TOP:
+            graph->draw_style = Top_Style;
             break;
           default:
-            warn("error changing property %s of widget %s, must be 'left' or 'right'",
+            warn("'error changing property %s of widget %s, must be 'bottom', 'top' or 'line'",
                  property, widget->name);
-            return WIDGET_ERROR_CUSTOM;
+            break;
         }
-    else
-        return WIDGET_ERROR;
-
+        break;
+      default:
+        break;
+    }
+    p_delete(&new_val);
     return WIDGET_NOERROR;
 }
 
