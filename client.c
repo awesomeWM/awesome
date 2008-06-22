@@ -759,6 +759,17 @@ client_updatesizehints(client_t *c)
     return size;
 }
 
+/** Markup parsing hook.
+ * For now only substitute <title />
+ */
+static void
+client_markup_on_elem(markup_parser_data_t *p, const char *elem,
+                      const char **names, const char **values)
+{
+    assert (!strcmp(elem, "title"));
+    buffer_add_xmlescaped(&p->text, p->priv);
+}
+
 /** Parse a markup string which contains special markup sequence relative to a
  * client, i.e. its title, etc.
  * \param c The client concerned by the markup string.
@@ -768,17 +779,18 @@ client_updatesizehints(client_t *c)
 char *
 client_markup_parse(client_t *c, const char *str, ssize_t len)
 {
-    const char *elements[] = { "title", NULL };
-    const char *elements_sub[] = { c->name , NULL };
-    markup_parser_data_t p;
+    static char const * const elements[] = { "title", NULL };
+    markup_parser_data_t p = {
+        .elements   = elements,
+        .priv       = c->name,
+        .on_element = client_markup_on_elem,
+    };
     char *ret;
 
-    markup_parser_data_init(&p, elements, elements_sub, countof(elements));
+    markup_parser_data_init(&p);
 
     if(markup_parse(&p, str, len))
-    {
         ret = buffer_detach(&p.text);
-    }
     else
         ret = a_strdup(str);
 

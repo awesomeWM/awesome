@@ -24,16 +24,20 @@
 
 #include "common/buffer.h"
 
-typedef struct
+typedef struct markup_parser_data_t markup_parser_data_t;
+
+typedef void (markup_on_elem_f)(markup_parser_data_t *, const char *,
+                                const char **, const char **);
+
+struct markup_parser_data_t
 {
     buffer_t text;
-    const char **elements;
-    const char **elements_sub;
-    char ***attribute_names;
-    char ***attribute_values;
-} markup_parser_data_t;
+    const char * const *elements;
+    markup_on_elem_f *on_element;
+    void *priv;
+};
 
-void markup_parser_data_init(markup_parser_data_t *, const char **, const char **, ssize_t);
+void markup_parser_data_init(markup_parser_data_t *);
 void markup_parser_data_wipe(markup_parser_data_t *);
 bool markup_parse(markup_parser_data_t *data, const char *, ssize_t);
 

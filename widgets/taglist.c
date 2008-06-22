@@ -54,15 +54,27 @@ typedef struct
 
 } taglist_data_t;
 
+static void
+tag_markup_on_elem(markup_parser_data_t *p, const char *elem,
+                      const char **names, const char **values)
+{
+    assert (!strcmp(elem, "title"));
+    buffer_add_xmlescaped(&p->text, p->priv);
+}
+
+
 static char *
 tag_markup_parse(tag_t *t, const char *str, ssize_t len)
 {
-    const char *elements[] = { "title", NULL };
-    const char *elements_sub[] = { t->name , NULL };
-    markup_parser_data_t p;
+    static char const * const elements[] = { "title", NULL };
+    markup_parser_data_t p = {
+        .elements   = elements,
+        .on_element = &tag_markup_on_elem,
+        .priv       = t->name,
+    };
     char *ret;
 
-    markup_parser_data_init(&p, elements, elements_sub, countof(elements));
+    markup_parser_data_init(&p);
 
     if(markup_parse(&p, str, len))
         ret = buffer_detach(&p.text);

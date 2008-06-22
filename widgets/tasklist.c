@@ -63,6 +63,31 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
     return false;
 }
 
+struct tasklist_hook_data {
+    draw_context_t *ctx;
+    area_t *area;
+};
+
+static void
+tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
+                        const char **names, const char **values)
+{
+    struct tasklist_hook_data *data = p->priv;
+    draw_context_t *ctx = data->ctx;
+
+    assert (!strcmp(elem, "bg"));
+    for (; *names; names++, values++) {
+        if(!a_strcmp(*names, "color"))
+        {
+            xcolor_t bg_color;
+            xcolor_new(ctx->connection, ctx->phys_screen, *values, &bg_color);
+            draw_rectangle(ctx, *data->area, 1.0, true, bg_color);
+            break;
+        }
+    }
+}
+
+
 static int
 tasklist_draw(draw_context_t *ctx, int screen,
               widget_node_t *w,
@@ -72,11 +97,8 @@ tasklist_draw(draw_context_t *ctx, int screen,
     tasklist_data_t *d = w->widget->data;
     area_t area;
     char *text;
-    int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0, j = 0;
+    int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     netwm_icon_t *icon;
-    markup_parser_data_t p;
-    const char *elements[] = { "bg", NULL };
-    xcolor_t bg_color;
     draw_image_t *image;
 
     if(used >= ctx->width)
@@ -114,6 +136,14 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
             if(d->show_icons)
             {
+                static char const * const elements[] = { "bg", NULL };
+                struct tasklist_hook_data data = { .ctx = ctx, .area = &area };
+                markup_parser_data_t p = {
+                    .elements   = elements,
+                    .on_element = &tasklist_markup_on_elem,
+                    .priv       = &data,
+                };
+
                 /* draw a background for icons */
                 area.x = w->area.x + box_width * i;
                 area.y = w->area.y;
@@ -122,15 +152,8 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
                 /* Actually look for the proper background color, since
                  * otherwise the background statusbar color is used instead */
-                markup_parser_data_init(&p, elements, NULL, countof(elements));
-                if(markup_parse(&p, text, a_strlen(text)) && p.attribute_names[0])
-                    for(j = 0; p.attribute_names[0][j]; j++)
-                        if(!a_strcmp(p.attribute_names[0][j], "color"))
-                        {
-                            xcolor_new(ctx->connection, ctx->phys_screen, p.attribute_values[0][j], &bg_color);
-                            draw_rectangle(ctx, area, 1.0, true, bg_color);
-                            break;
-                        }
+                markup_parser_data_init(&p);
+                markup_parse(&p, text, a_strlen(text));
                 markup_parser_data_wipe(&p);
 
                 if((image = draw_image_new(c->icon_path)))
