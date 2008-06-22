@@ -61,6 +61,9 @@
         assert (pos <= arr->len && pos + len < arr->len);                   \
         if (len != count) {                                                 \
             pfx##_array_grow(arr, arr->len + count - len);                  \
+            for (int i = pos; i < pos + len; i++) {                         \
+                dtor(&arr->tab[i]);                                         \
+            }                                                               \
             memmove(arr->tab + pos + count, arr->tab + pos + len,           \
                     arr->len - pos - len);                                  \
             arr->len += count - len;                                        \
