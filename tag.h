@@ -29,7 +29,7 @@
 #define IS_TILED(client, screen)            (client && !client->isfloating && !client->ismax && client_isvisible(client, screen))
 
 /* Contructor, destructor and referencors */
-tag_t * tag_new(const char *, layout_t *, double, int, int);
+tag_t *tag_new(const char *, layout_t *, double, int, int);
 
 static inline void
 tag_delete(tag_t **tag)
@@ -38,7 +38,7 @@ tag_delete(tag_t **tag)
     p_delete(tag);
 }
 
-tag_t ** tags_get_current(int);
+tag_t **tags_get_current(int);
 void tag_client(client_t *, tag_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
@@ -48,7 +48,7 @@ void tag_append_to_screen(tag_t *, int);
 int luaA_tag_userdata_new(lua_State *, tag_t *);
 
 DO_RCNT(tag_t, tag, tag_delete)
-DO_SLIST(tag_t, tag, tag_delete)
+ARRAY_FUNCS(tag_t *, tag, tag_unref);
 
 DO_SLIST(tag_client_node_t, tag_client_node, p_delete)
 

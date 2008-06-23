@@ -346,9 +346,8 @@ struct _tag_t
     int nmaster;
     /** Number of columns in tile layout */
     int ncol;
-    /** Next and previous tags */
-    tag_t *prev, *next;
 };
+ARRAY_TYPE(tag_t *, tag);
 
 /** Tag client link type */
 struct tag_client_node_t
@@ -377,7 +376,7 @@ typedef struct
     /** true if we need to arrange() */
     bool need_arrange;
     /** Tag list */
-    tag_t *tags;
+    tag_array_t tags;
     /** Status bar */
     statusbar_t *statusbar;
     /** Padding */

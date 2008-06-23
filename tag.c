@@ -95,8 +95,7 @@ tag_append_to_screen(tag_t *tag, int screen)
     int phys_screen = screen_virttophys(screen);
 
     tag->screen = screen;
-    tag_list_append(&globalconf.screens[screen].tags, tag);
-    tag_ref(&tag);
+    tag_array_append(&globalconf.screens[screen].tags, tag_ref(&tag));
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
@@ -173,14 +172,13 @@ is_client_tagged(client_t *c, tag_t *t)
 void
 tag_client_with_current_selected(client_t *c)
 {
-    tag_t *tag;
-    screen_t vscreen = globalconf.screens[c->screen];
+    tag_array_t *tags = &globalconf.screens[c->screen].tags;
 
-    for(tag = vscreen.tags; tag; tag = tag->next)
-        if(tag->selected)
-            tag_client(c, tag);
+    for(int i = 0; i < tags->len; i++)
+        if(tags->tab[i]->selected)
+            tag_client(c, tags->tab[i]);
         else
-            untag_client(c, tag);
+            untag_client(c, tags->tab[i]);
 }
 
 /** Get the current tags for the specified screen.
@@ -191,21 +189,15 @@ tag_client_with_current_selected(client_t *c)
 tag_t **
 tags_get_current(int screen)
 {
-    tag_t *tag, **tags = NULL;
-    int n = 1;
+    tag_array_t *tags = &globalconf.screens[screen].tags;
+    tag_t **out = p_new(tag_t *, tags->len + 1);
+    int n = 0;
 
-    tags = p_new(tag_t *, n);
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-        if(tag->selected)
-        {
-            p_realloc(&tags, ++n);
-            tags[n - 2] = tag;
-        }
+    for(int i = 0; i < tags->len; i++)
+        if(tags->tab[i]->selected)
+            out[n++] = tags->tab[i];
 
-    /* finish with null */
-    tags[n - 1] = NULL;
-
-    return tags;
+    return out;
 }
 
 
@@ -215,12 +207,12 @@ tags_get_current(int screen)
 static void
 tag_view_only(tag_t *target)
 {
-    tag_t *tag;
+    if (target) {
+        tag_array_t *tags = &globalconf.screens[target->screen].tags;
 
-    if(!target) return;
-
-    for(tag = globalconf.screens[target->screen].tags; tag; tag = tag->next)
-        tag_view(tag, tag == target);
+        for(int i = 0; i < tags->len; i++)
+            tag_view(tags->tab[i], tags->tab[i] == target);
+    }
 }
 
 /** View only a tag, selected by its index.
@@ -230,14 +222,11 @@ tag_view_only(tag_t *target)
 void
 tag_view_only_byindex(int screen, int dindex)
 {
-    tag_t *tag;
+    tag_array_t *tags = &globalconf.screens[screen].tags;
 
-    if(dindex < 0)
+    if(dindex < 0 || dindex >= tags->len)
         return;
-
-    for(tag = globalconf.screens[screen].tags; tag && dindex > 0;
-        tag = tag->next, dindex--);
-    tag_view_only(tag);
+    tag_view_only(tags->tab[dindex]);
 }
 
 /** Convert a tag to a printable string.
@@ -265,16 +254,22 @@ luaA_tag_tostring(lua_State *L)
 static int
 luaA_tag_add(lua_State *L)
 {
-    tag_t *t, **tag = luaA_checkudata(L, 1, "tag");
-    int i, screen = luaL_checknumber(L, 2) - 1;
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
+    int screen = luaL_checknumber(L, 2) - 1;
     luaA_checkscreen(screen);
 
-    for(i = 0; i < globalconf.screens_info->nscreen; i++)
-        for(t = globalconf.screens[i].tags; t; t = t->next)
+    for(int i = 0; i < globalconf.screens_info->nscreen; i++)
+    {
+        tag_array_t *tags = &globalconf.screens[i].tags;
+        for(int j = 0; j < tags->len; j++)
+        {
+            tag_t *t = tags->tab[j];
             if(*tag == t)
                 luaL_error(L, "tag already on screen %d", i + 1);
             else if(t->screen == screen && !a_strcmp((*tag)->name, t->name))
                 luaL_error(L, "a tag with the name `%s' is already on screen %d", t->name, i + 1);
+        }
+    }
 
     (*tag)->screen = screen;
     tag_append_to_screen(*tag, screen);
@@ -292,16 +287,16 @@ static int
 luaA_tag_get(lua_State *L)
 {
     int screen = luaL_checknumber(L, 1) - 1;
-    tag_t *tag;
+    tag_array_t *tags = &globalconf.screens[screen].tags;
 
     luaA_checkscreen(screen);
 
     lua_newtable(L);
 
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+    for(int i = 0; i < tags->len; i++)
     {
-        luaA_tag_userdata_new(L, tag);
-        lua_setfield(L, -2, tag->name);
+        luaA_tag_userdata_new(L, tags->tab[i]);
+        lua_setfield(L, -2, tags->tab[i]->name);
     }
 
     return 1;
@@ -318,17 +313,17 @@ luaA_tag_get(lua_State *L)
 static int
 luaA_tag_geti(lua_State *L)
 {
-    int i = 1, screen = luaL_checknumber(L, 1) - 1;
-    tag_t *tag;
+    int screen = luaL_checknumber(L, 1) - 1;
+    tag_array_t *tags = &globalconf.screens[screen].tags;
 
     luaA_checkscreen(screen);
 
     lua_newtable(L);
 
-    for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
+    for(int i = 0; i < tags->len; i++)
     {
-        luaA_tag_userdata_new(L, tag);
-        lua_rawseti(L, -2, i++);
+        luaA_tag_userdata_new(L, tags->tab[i]);
+        lua_rawseti(L, -2, i + 1);
     }
 
     return 1;

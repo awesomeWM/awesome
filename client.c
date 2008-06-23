@@ -61,7 +61,6 @@ DO_LUA_EQ(client_t, client, "client")
 
 /** Load windows properties, restoring client's tag
  * and floating state before awesome was restarted if any.
- * \todo This may bug if number of tags is != than before.
  * \param c A client pointer.
  * \param screen A virtual screen.
  * \return True if client had property, false otherwise.
@@ -69,38 +68,32 @@ DO_LUA_EQ(client_t, client, "client")
 static bool
 client_loadprops(client_t * c, screen_t *screen)
 {
-    int i, ntags = 0;
-    tag_t *tag;
+    tag_array_t *tags = &screen->tags;
     char *prop = NULL;
-    bool result = false;
 
-    for(tag = screen->tags; tag; tag = tag->next)
-        ntags++;
-
-    if(xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
+    if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
                          xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
                                                  xutil_intern_atom(globalconf.connection,
                                                                    &globalconf.atoms,
                                                                    "_AWESOME_PROPERTIES")),
                          &prop))
-    {
-        for(i = 0, tag = screen->tags; tag && i < ntags && prop[i]; i++, tag = tag->next)
-            if(prop[i] == '1')
-            {
-                tag_client(c, tag);
-                result = true;
-            }
-            else
-                untag_client(c, tag);
+        return false;
 
-        if(prop[i])
-            client_setfloating(c, prop[i] == '1',
-                               (prop[i + 1] >= 0 && prop[i + 1] <= LAYER_FULLSCREEN) ? atoi(&prop[i + 1]) : prop[i] == '1' ? LAYER_FLOAT : LAYER_TILE);
+    if (strlen(prop) != tags->len + 2) {
+        /* ignore property if the tag count isn't matching */
+        p_delete(&prop);
+        return false;
     }
 
-    p_delete(&prop);
+    for(int i = 0; i < tags->len; i++)
+        if(prop[i] == '1')
+            tag_client(c, tags->tab[i]);
+        else
+            untag_client(c, tags->tab[i]);
 
-    return result;
+    client_setfloating(c, prop[tags->len] == '1', prop[tags->len + 1] - '0');
+    p_delete(&prop);
+    return true;
 }
 
 /** Check if client supports protocol WM_DELETE_WINDOW.
@@ -139,12 +132,13 @@ window_isprotodel(xcb_window_t win)
 bool
 client_isvisible(client_t *c, int screen)
 {
-    tag_t *tag;
-
     if(c && !c->ishidden && c->screen == screen)
-        for(tag = globalconf.screens[screen].tags; tag; tag = tag->next)
-            if(tag->selected && is_client_tagged(c, tag))
+    {
+        tag_array_t *tags = &globalconf.screens[screen].tags;
+        for(int i = 0; i < tags->len; i++)
+            if(tags->tab[i]->selected && is_client_tagged(c, tags->tab[i]))
                 return true;
+    }
     return false;
 }
 
@@ -345,7 +339,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     client_t *c, *t = NULL;
     xcb_window_t trans;
     bool rettrans, retloadprops;
-    tag_t *tag;
     xcb_size_hints_t *u_size_hints;
     const uint32_t select_input_val[] = {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE |
@@ -383,9 +376,12 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* check for transient and set tags like its parent */
     if((rettrans = xutil_get_transient_for_hint(globalconf.connection, w, &trans))
        && (t = client_getbywin(trans)))
-        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-            if(is_client_tagged(t, tag))
-                tag_client(c, tag);
+    {
+        tag_array_t *tags = &globalconf.screens[c->screen].tags;
+        for(int i = 0; i < tags->len; i++)
+            if(is_client_tagged(t, tags->tab[i]))
+                tag_client(c, tags->tab[i]);
+    }
 
     /* should be floating if transsient or fixed */
     if(rettrans || c->isfixed)
@@ -600,32 +596,22 @@ client_setfloating(client_t *c, bool floating, layer_t layer)
 void
 client_saveprops(client_t *c)
 {
-    int i = 0, ntags = 0;
-    char *prop;
-    tag_t *tag;
+    tag_array_t *tags = &globalconf.screens[c->screen].tags;
+    unsigned char *prop = p_alloca(unsigned char, tags->len + 3);
     xutil_intern_atom_request_t atom_q;
+    int i;
 
     atom_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_AWESOME_PROPERTIES");
 
-    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-        ntags++;
+    for(i = 0; i < tags->len; i++)
+        prop[i] = is_client_tagged(c, tags->tab[i]) ? '1' : '0';
 
-    prop = p_new(char, ntags + 3);
-
-    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
-        prop[i] = is_client_tagged(c, tag) ? '1' : '0';
-
-    prop[i] = c->isfloating ? '1' : '0';
-
-    sprintf(&prop[++i], "%d", c->layer);
-
-    prop[++i] = '\0';
+    prop[i++] = c->isfloating ? '1' : '0';
+    prop[i++] = '0' + c->layer;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win,
                         xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_q),
-                        STRING, 8, i, (unsigned char *) prop);
-
-    p_delete(&prop);
+                        STRING, 8, i, prop);
 }
 
 /** Unban a client.
@@ -646,7 +632,7 @@ client_unban(client_t *c)
 void
 client_unmanage(client_t *c)
 {
-    tag_t *tag;
+    tag_array_t *tags = &globalconf.screens[c->screen].tags;
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
@@ -663,8 +649,8 @@ client_unmanage(client_t *c)
     client_list_detach(&globalconf.clients, c);
     focus_client_delete(c);
     stack_client_delete(c);
-    for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-        untag_client(c, tag);
+    for(int i = 0; i < tags->len; i++)
+        untag_client(c, tags->tab[i]);
 
     if(globalconf.focus->client == c)
         client_focus(NULL, c->screen);

@@ -128,12 +128,12 @@ screen_virttophys(int screen)
 void
 screen_client_moveto(client_t *c, int new_screen, bool doresize)
 {
-    tag_t *tag;
     int old_screen = c->screen;
+    tag_array_t *tags = &globalconf.screens[old_screen].tags;
     area_t from, to;
 
-    for(tag = globalconf.screens[old_screen].tags; tag; tag = tag->next)
-        untag_client(c, tag);
+    for(int i = 0; i < tags->len; i++)
+        untag_client(c, tags->tab[i]);
 
     c->screen = new_screen;
 

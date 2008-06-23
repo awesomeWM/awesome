@@ -273,11 +273,7 @@ ewmh_update_net_client_list_stacking(int phys_screen)
 void
 ewmh_update_net_numbers_of_desktop(int phys_screen)
 {
-    uint32_t count = 0;
-    tag_t *tag;
-
-    for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
-        count++;
+    uint32_t count = globalconf.screens[phys_screen].tags.len;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
@@ -287,11 +283,11 @@ ewmh_update_net_numbers_of_desktop(int phys_screen)
 void
 ewmh_update_net_current_desktop(int phys_screen)
 {
+    tag_array_t *tags = &globalconf.screens[phys_screen].tags;
     uint32_t count = 0;
-    tag_t *tag, **curtags = tags_get_current(phys_screen);
+    tag_t **curtags = tags_get_current(phys_screen);
 
-    for(tag = globalconf.screens[phys_screen].tags; tag != curtags[0]; tag = tag->next)
-        count++;
+    for(count = 0; tags->tab[count] != curtags[0]; count++);
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xutil_screen_get(globalconf.connection, phys_screen)->root,
@@ -303,23 +299,21 @@ ewmh_update_net_current_desktop(int phys_screen)
 void
 ewmh_update_net_desktop_names(int phys_screen)
 {
-    char buf[1024], *pos;
-    ssize_t len, curr_size;
-    tag_t *tag;
+    tag_array_t *tags = &globalconf.screens[phys_screen].tags;
+    buffer_t buf;
 
-    pos = buf;
-    len = 0;
-    for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
+    buffer_inita(&buf, BUFSIZ);
+
+    for(int i = 0; i < tags->len; i++)
     {
-        curr_size = a_strlen(tag->name);
-        a_strcpy(pos, sizeof(buf), tag->name);
-        pos += curr_size + 1;
-        len += curr_size + 1;
+        buffer_adds(&buf, tags->tab[i]->name);
+        buffer_addc(&buf, '\0');
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			net_desktop_names, utf8_string, 8, len, buf);
+			net_desktop_names, utf8_string, 8, buf.len, buf.s);
+    buffer_wipe(&buf);
 }
 
 /** Update the work area space for each physical screen and each desktop.
@@ -328,29 +322,24 @@ ewmh_update_net_desktop_names(int phys_screen)
 void
 ewmh_update_workarea(int phys_screen)
 {
-    uint32_t *area;
-    tag_t *tag;
-    int count = 0;
+    tag_array_t *tags = &globalconf.screens[phys_screen].tags;
+    uint32_t *area = p_alloca(uint32_t, tags->len * 4);
     area_t geom = screen_area_get(phys_screen,
                                   globalconf.screens[phys_screen].statusbar,
                                   &globalconf.screens[phys_screen].padding);
 
-    for(tag = globalconf.screens[phys_screen].tags; tag; tag = tag->next)
-        count++;
 
-    area = p_new(uint32_t, count * 4);
-    for(tag = globalconf.screens[phys_screen].tags, count = 0; tag; tag = tag->next, count++)
+    for(int i = 0; i < tags->len; i++)
     {
-        area[4 * count + 0] = geom.x;
-        area[4 * count + 1] = geom.y;
-        area[4 * count + 2] = geom.width;
-        area[4 * count + 3] = geom.height;
+        area[4 * i + 0] = geom.x;
+        area[4 * i + 1] = geom.y;
+        area[4 * i + 2] = geom.width;
+        area[4 * i + 3] = geom.height;
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xutil_screen_get(globalconf.connection, phys_screen)->root,
-                        net_workarea, CARDINAL, 32, count * 4, area);
-    p_delete(&area);
+                        net_workarea, CARDINAL, 32, tags->len * 4, area);
 }
 
 void
@@ -369,13 +358,13 @@ ewmh_update_net_active_window(int phys_screen)
 static void
 ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
-    const uint32_t raise_window_val = XCB_STACK_MODE_ABOVE;
+    static uint32_t const raise_window_val = XCB_STACK_MODE_ABOVE;
 
     if(state == net_wm_state_sticky)
     {
-        tag_t *tag;
-        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-            tag_client(c, tag);
+        tag_array_t *tags = &globalconf.screens[c->screen].tags;
+        for(int i = 0; i < tags->len; i++)
+            tag_client(c, tags->tab[i]);
     }
     else if(state == net_wm_state_skip_taskbar)
     {
@@ -483,8 +472,6 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 static void
 ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
 {
-    tag_t *tag;
-
     if(state == net_wm_window_type_normal)
     {
         /* do nothing. this is REALLY IMPORTANT */
@@ -507,12 +494,13 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
         client_setfloating(c, true, LAYER_MODAL);
     else if(state == net_wm_window_type_desktop)
     {
+        tag_array_t *tags = &globalconf.screens[c->screen].tags;
         c->noborder = true;
         c->isfixed = true;
         c->skip = true;
         c->layer = LAYER_DESKTOP;
-        for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-            tag_client(c, tag);
+        for(int i = 0; i < tags->len; i++)
+            tag_client(c, tags->tab[i]);
     }
 }
 
@@ -520,9 +508,7 @@ int
 ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
     client_t *c;
-    tag_t *tag;
     int screen;
-    unsigned int i;
 
     if(ev->type == net_current_desktop)
         for(screen = 0;
@@ -541,15 +527,17 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     {
         if((c = client_getbywin(ev->window)))
         {
+            tag_array_t *tags = &globalconf.screens[c->screen].tags;
+
             if(ev->data.data32[0] == 0xffffffff)
-                for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-                    tag_client(c, tag);
+                for(int i = 0; i < tags->len; i++)
+                    tag_client(c, tags->tab[i]);
             else
-                for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
-                    if(ev->data.data32[0] == i)
-                        tag_client(c, tag);
+                for(int i = 0; i < tags->len; i++)
+                    if((int)ev->data.data32[0] == i)
+                        tag_client(c, tags->tab[i]);
                     else
-                        untag_client(c, tag);
+                        untag_client(c, tags->tab[i]);
         }
     }
     else if(ev->type == net_wm_state)
@@ -571,10 +559,9 @@ ewmh_check_client_hints(client_t *c)
 {
     xcb_atom_t *state;
     void *data = NULL;
-    int i, desktop;
+    int desktop;
     xcb_get_property_cookie_t c0, c1, c2;
     xcb_get_property_reply_t *reply;
-    tag_t *tag;
 
     /* Send the GetProperty requests which will be processed later */
     c0 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
@@ -589,16 +576,18 @@ ewmh_check_client_hints(client_t *c)
     reply = xcb_get_property_reply(globalconf.connection, c0, NULL);
     if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
     {
+        tag_array_t *tags = &globalconf.screens[c->screen].tags;
+
         desktop = *(uint32_t *) data;
         if(desktop == -1)
-            for(tag = globalconf.screens[c->screen].tags; tag; tag = tag->next)
-                tag_client(c, tag);
+            for(int i = 0; i < tags->len; i++)
+                tag_client(c, tags->tab[i]);
         else
-            for(i = 0, tag = globalconf.screens[c->screen].tags; tag; tag = tag->next, i++)
+            for(int i = 0; i < tags->len; i++)
                 if(desktop == i)
-                    tag_client(c, tag);
+                    tag_client(c, tags->tab[i]);
                 else
-                    untag_client(c, tag);
+                    untag_client(c, tags->tab[i]);
     }
 
     p_delete(&reply);
@@ -607,7 +596,7 @@ ewmh_check_client_hints(client_t *c)
     if(reply && (data = xcb_get_property_value(reply)))
     {
         state = (xcb_atom_t *) data;
-        for(i = 0; i < xcb_get_property_value_length(reply); i++)
+        for(int i = 0; i < xcb_get_property_value_length(reply); i++)
             ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
     }
 
@@ -617,7 +606,7 @@ ewmh_check_client_hints(client_t *c)
     if(reply && (data = xcb_get_property_value(reply)))
     {
         state = (xcb_atom_t *) data;
-        for(i = 0; i < xcb_get_property_value_length(reply); i++)
+        for(int i = 0; i < xcb_get_property_value_length(reply); i++)
             ewmh_process_window_type_atom(c, state[i]);
     }
 

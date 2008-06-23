@@ -134,15 +134,15 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
              int used __attribute__ ((unused)),
              void *object)
 {
-    tag_t *tag;
     taglist_data_t *data = w->widget->data;
     client_t *sel = globalconf.focus->client;
-    screen_t *vscreen = &globalconf.screens[screen];
-    int i = 0, prev_width = 0;
     area_t area, rectangle = { 0, 0, 0, 0 };
-    char **text = NULL;
     taglist_drawn_area_t *tda;
-    draw_parser_data_t *pdata = NULL;
+    int prev_width = 0;
+
+    tag_array_t *tags = &globalconf.screens[screen].tags;
+    char **text = p_alloca(char *, tags->len);
+    draw_parser_data_t *pdata = p_alloca(draw_parser_data_t, tags->len);
 
     w->area.width = w->area.y = 0;
 
@@ -162,10 +162,10 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     tda->areas.len = 0;
 
     /* First compute text and widget width */
-    for(tag = vscreen->tags; tag; tag = tag->next, i++)
+    for(int i = 0; i < tags->len; i++)
     {
-        p_realloc(&text, i + 1);
-        p_realloc(&pdata, i + 1);
+        tag_t *tag = tags->tab[i];
+
         text[i] = taglist_text_get(tag, data);
         text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
         draw_parser_data_init(&pdata[i]);
@@ -182,8 +182,9 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     w->area.x = widget_calculate_offset(ctx->width, w->area.width,
                                         offset, w->widget->align); 
 
-    for(i = 0, tag = vscreen->tags; tag && i < tda->areas.len; i++, tag = tag->next)
+    for(int i = 0; i < tags->len; i++)
     {
+        tag_t *tag = tags->tab[i];
         area_t *r = &tda->areas.tab[i];
 
         if(!data->show_empty && !tag->selected && !tag_isoccupied(tag))
@@ -209,9 +210,6 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         }
     }
 
-    p_delete(&text);
-    p_delete(&pdata);
-
     w->area.height = ctx->height;
     return w->area.width;
 }
@@ -230,20 +228,19 @@ taglist_button_press(widget_node_t *w,
                      void *object,
                      awesome_type_t type)
 {
-    screen_t *vscreen = &globalconf.screens[screen];
+    tag_array_t *tags = &globalconf.screens[screen].tags;
     button_t *b;
     taglist_data_t *data = w->widget->data;
     taglist_drawn_area_t *tda;
-    tag_t *tag;
-    int i;
 
     /* Find the good drawn area list */
     for(tda = data->drawn_area; tda && tda->object != object; tda = tda->next);
 
     for(b = w->widget->buttons; b; b = b->next)
         if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
-            for(i = 0, tag = vscreen->tags; tag && i < tda->areas.len; tag = tag->next, i++)
+            for(int i = 0; i < MIN(tags->len, tda->areas.len); i++)
             {
+                tag_t *tag  = tags->tab[i];
                 area_t *area = &tda->areas.tab[i];
                 if(ev->event_x >= AREA_LEFT(*area)
                    && ev->event_x < AREA_RIGHT(*area)
