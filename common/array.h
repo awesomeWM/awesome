@@ -66,7 +66,7 @@
                 dtor(&arr->tab[i]);                                         \
             }                                                               \
             memmove(arr->tab + pos + count, arr->tab + pos + len,           \
-                    arr->len - pos - len);                                  \
+                    (arr->len - pos - len) * sizeof(*items));               \
             arr->len += count - len;                                        \
         }                                                                   \
         memcpy(arr->tab + pos, items, count * sizeof(*items));              \
