@@ -1,7 +1,10 @@
 set(PROJECT_AWE_NAME awesome)
 set(PROJECT_AWECLIENT_NAME awesome-client)
 
-set(VERSION 3)
+# If ${SOURCE_DIR} is a git repository VERSION is set to
+# `git-describe` later.
+set(VERSION 3-devel)
+
 set(VERSION_MAJOR ${VERSION})
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
@@ -63,22 +66,22 @@ if(GENERATE_MANPAGES)
 endif()
 # }}}
 
-# {{{ git version stamp
-# If this is a git repository...
-if(EXISTS ${SOURCE_DIR}/.git/HEAD)
-    if(GIT_EXECUTABLE)
-        # get current version
-        execute_process(
-            COMMAND ${GIT_EXECUTABLE} describe
-            WORKING_DIRECTORY ${SOURCE_DIR}
-            OUTPUT_VARIABLE VERSION
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        # file the git-version-stamp.sh script will look into
-        set(VERSION_STAMP_FILE ${BUILD_DIR}/.version_stamp)
-        file(WRITE ${VERSION_STAMP_FILE} ${VERSION})
-        # create a version_stamp target later
-        set(BUILD_FROM_GIT TRUE)
-    endif()
+# {{{ version stamp
+if(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
+    # get current version
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe
+        WORKING_DIRECTORY ${SOURCE_DIR}
+        OUTPUT_VARIABLE VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # file the git-version-stamp.sh script will look into
+    set(VERSION_STAMP_FILE ${BUILD_DIR}/.version_stamp)
+    file(WRITE ${VERSION_STAMP_FILE} ${VERSION})
+    # create a version_stamp target later
+    set(BUILD_FROM_GIT TRUE)
+else()
+    # get version from version stamp
+    file(READ ${SOURCE_DIR}/.version_stamp VERSION LIMIT 128)
 endif()
 # }}}
 

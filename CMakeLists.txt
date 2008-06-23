@@ -285,6 +285,14 @@ if(LUADOC_EXECUTABLE)
 endif()
 # }}}
 
+# {{{ dist tarball
+if(BUILD_FROM_GIT)
+    add_custom_target(dist
+        COMMAND ${SOURCE_DIR}/build-utils/dist.sh ${VERSION}
+        WORKING_DIRECTORY ${SOURCE_DIR})
+endif()
+# }}}
+
 # {{{ Installation.
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
 install(FILES ${AWE_LUA_FILES} DESTINATION ${AWESOME_REL_LUA_LIB_PATH})
