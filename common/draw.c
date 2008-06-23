@@ -197,26 +197,6 @@ draw_font_delete(font_t **font)
     }
 }
 
-typedef struct
-{
-    xcb_connection_t *connection;
-    int phys_screen;
-    buffer_t text;
-    alignment_t align;
-    struct
-    {
-        int left, right;
-    } margin;
-    bool has_bg_color;
-    xcolor_t bg_color;
-    draw_image_t *bg_image;
-    struct
-    {
-        int offset;
-        xcolor_t color;
-    } shadow;
-} draw_parser_data_t;
-
 static void
 draw_markup_on_event(markup_parser_data_t *p, const char *elem,
                       const char **names, const char **values)
@@ -266,7 +246,8 @@ draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
     static char const * const elements[] = { "bg", "text", "margin", NULL };
-    markup_parser_data_t p = {
+    markup_parser_data_t p =
+    {
         .elements   = elements,
         .priv       = data,
         .on_element = &draw_markup_on_event,
@@ -293,54 +274,65 @@ draw_text_markup_expand(draw_parser_data_t *data,
  * \param font The font to use.
  * \param area Area to draw to.
  * \param text Text to draw.
+ * \param data Optional parser data.
  */
 void
 draw_text(draw_context_t *ctx, font_t *font,
-          area_t area, const char *text)
+          area_t area, const char *text, draw_parser_data_t *pdata)
 {
     int x, y;
-    ssize_t len, olen;
+    ssize_t len = 0, olen;
     PangoRectangle ext;
     draw_parser_data_t parser_data;
 
     if(!(len = a_strlen(text)))
         return;
 
-    p_clear(&parser_data, 1);
-    parser_data.connection = ctx->connection;
-    parser_data.phys_screen = ctx->phys_screen;
-    if(draw_text_markup_expand(&parser_data, text, len)) {
-        text = parser_data.text.s;
-        len  = parser_data.text.len;
+    if(!pdata)
+    {
+        p_clear(&parser_data, 1);
+        parser_data.connection = ctx->connection;
+        parser_data.phys_screen = ctx->phys_screen;
+        if(draw_text_markup_expand(&parser_data, text, len))
+        {
+            text = parser_data.text.s;
+            len = parser_data.text.len;
+        }
+        pdata = &parser_data;
+    }
+    else
+    {
+        text = pdata->text.s;
+        len = pdata->text.len;
     }
 
     olen = len;
 
-    if(parser_data.has_bg_color)
-        draw_rectangle(ctx, area, 1.0, true, parser_data.bg_color);
+    if(pdata->has_bg_color)
+        draw_rectangle(ctx, area, 1.0, true, pdata->bg_color);
 
-    if(parser_data.bg_image)
+    if(pdata->bg_image)
     {
-        draw_image(ctx, area.x, area.y, 0, parser_data.bg_image);
-        draw_image_delete(&parser_data.bg_image);
+        draw_image(ctx, area.x, area.y, 0, pdata->bg_image);
+        draw_image_delete(&pdata->bg_image);
     }
 
     pango_layout_set_width(ctx->layout,
                            pango_units_from_double(area.width
-                                                   - (parser_data.margin.left
-                                                      + parser_data.margin.right)));
+                                                   - (pdata->margin.left
+                                                      + pdata->margin.right)));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
     pango_layout_set_markup(ctx->layout, text, len);
     pango_layout_set_font_description(ctx->layout, font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
-    x = area.x + parser_data.margin.left;
+    x = area.x + pdata->margin.left;
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
      * the text 1px lower than too high which usually results in a better type
      * face */
     y = area.y + (ctx->height - font->height + 1) / 2;
 
-    switch(parser_data.align)
+    switch(pdata->align)
     {
       case AlignCenter:
         x += (area.width - ext.width) / 2;
@@ -352,14 +344,14 @@ draw_text(draw_context_t *ctx, font_t *font,
         break;
     }
 
-    if(parser_data.shadow.offset)
+    if(pdata->shadow.offset)
     {
         cairo_set_source_rgba(ctx->cr,
-                              parser_data.shadow.color.red / 65535.0,
-                              parser_data.shadow.color.green / 65535.0,
-                              parser_data.shadow.color.blue / 65535.0,
-                              parser_data.shadow.color.alpha / 65535.0);
-        cairo_move_to(ctx->cr, x + parser_data.shadow.offset, y + parser_data.shadow.offset);
+                              pdata->shadow.color.red / 65535.0,
+                              pdata->shadow.color.green / 65535.0,
+                              pdata->shadow.color.blue / 65535.0,
+                              pdata->shadow.color.alpha / 65535.0);
+        cairo_move_to(ctx->cr, x + pdata->shadow.offset, y + pdata->shadow.offset);
         pango_cairo_update_layout(ctx->cr, ctx->layout);
         pango_cairo_show_layout(ctx->cr, ctx->layout);
     }
@@ -374,7 +366,7 @@ draw_text(draw_context_t *ctx, font_t *font,
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 
-    buffer_wipe(&parser_data.text);
+    buffer_wipe(&pdata->text);
 }
 
 /** Setup color-source for cairo (gradient or mono).
@@ -963,10 +955,11 @@ draw_rotate(draw_context_t *ctx,
  * \param phys_screen Physical screen number.
  * \param font Font to use.
  * \param text The text.
+ * \param pdata The parser data to fill.
  * \return Text height and width.
  */
 area_t
-draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const char *text)
+draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const char *text, draw_parser_data_t *parser_data)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -975,17 +968,18 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     area_t geom = { 0, 0, 0, 0 };
     ssize_t len;
-    draw_parser_data_t parser_data;
+
+    p_clear(parser_data, 1);
 
     if(!(len = a_strlen(text)))
         return geom;
 
-    p_clear(&parser_data, 1);
-    parser_data.connection = conn;
-    parser_data.phys_screen = phys_screen;
-    if(draw_text_markup_expand(&parser_data, text, len)) {
-        text = parser_data.text.s;
-        len  = parser_data.text.len;
+    parser_data->connection = conn;
+    parser_data->phys_screen = phys_screen;
+    if(draw_text_markup_expand(parser_data, text, len))
+    {
+        text = parser_data->text.s;
+        len  = parser_data->text.len;
     }
 
     surface = cairo_xcb_surface_create(conn, phys_screen,
@@ -1005,7 +999,6 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     geom.width = ext.width;
     geom.height = ext.height * 1.5;
 
-    buffer_wipe(&parser_data.text);
     return geom;
 }
 
@@ -1018,7 +1011,8 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
 alignment_t
 draw_align_get_from_str(const char *align)
 {
-    switch (a_tokenize(align, -1)) {
+    switch (a_tokenize(align, -1))
+    {
       case A_TK_LEFT:   return AlignLeft;
       case A_TK_CENTER: return AlignCenter;
       case A_TK_RIGHT:  return AlignRight;
@@ -1143,8 +1137,7 @@ area_array_remove(area_array_t *areas, area_t elem)
      *  (1) we remove elements ;
      *  (2) the one we add to the end are okay wrt the invariants
      */
-    for (int i = areas->len - 1; i >= 0; i--)
-    {
+    for(int i = areas->len - 1; i >= 0; i--)
         if(area_intersect_area(areas->tab[i], elem))
         {
             /* remove it from the list */
@@ -1153,7 +1146,8 @@ area_array_remove(area_array_t *areas, area_t elem)
 
             if(AREA_LEFT(inter) > AREA_LEFT(r))
             {
-                area_t extra = {
+                area_t extra =
+                {
                     .x = r.x,
                     .y = r.y,
                     .width = AREA_LEFT(inter) - r.x,
@@ -1164,7 +1158,8 @@ area_array_remove(area_array_t *areas, area_t elem)
 
             if(AREA_TOP(inter) > AREA_TOP(r))
             {
-                area_t extra = {
+                area_t extra =
+                {
                     .x = r.x,
                     .y = r.y,
                     .width = r.width,
@@ -1175,7 +1170,8 @@ area_array_remove(area_array_t *areas, area_t elem)
 
             if(AREA_RIGHT(inter) < AREA_RIGHT(r))
             {
-                area_t extra = {
+                area_t extra =
+                {
                     .x = AREA_RIGHT(inter),
                     .y = r.y,
                     .width = AREA_RIGHT(r) - AREA_RIGHT(inter),
@@ -1186,7 +1182,8 @@ area_array_remove(area_array_t *areas, area_t elem)
 
             if(AREA_BOTTOM(inter) < AREA_BOTTOM(r))
             {
-                area_t extra = {
+                area_t extra =
+                {
                     .x = r.x,
                     .y = AREA_BOTTOM(inter),
                     .width = r.width,
@@ -1195,7 +1192,6 @@ area_array_remove(area_array_t *areas, area_t elem)
                 area_array_append(areas, extra);
             }
         }
-    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

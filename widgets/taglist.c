@@ -141,6 +141,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     area_t area, rectangle = { 0, 0, 0, 0 };
     char **text = NULL;
     taglist_drawn_area_t *tda;
+    draw_parser_data_t *pdata = NULL;
 
     w->area.width = w->area.y = 0;
 
@@ -163,10 +164,11 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     for(tag = vscreen->tags; tag; tag = tag->next, i++)
     {
         p_realloc(&text, i + 1);
+        p_realloc(&pdata, i + 1);
         text[i] = taglist_text_get(tag, data);
         text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
         area = draw_text_extents(ctx->connection, ctx->phys_screen,
-                                  globalconf.font, text[i]);
+                                  globalconf.font, text[i], &pdata[i]);
 
         if (data->show_empty || tag->selected || tag_isoccupied(tag))
             w->area.width += area.width;
@@ -182,7 +184,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     {
         area_t *r = &tda->areas.tab[i];
 
-        if (!data->show_empty && !tag->selected && !tag_isoccupied(tag))
+        if(!data->show_empty && !tag->selected && !tag_isoccupied(tag))
         {
             p_delete(&text[i]);
             continue;
@@ -190,7 +192,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
 
         r->x = w->area.x + prev_width;
         prev_width += r->width;
-        draw_text(ctx, globalconf.font, *r, text[i]);
+        draw_text(ctx, globalconf.font, *r, text[i], &pdata[i]);
         p_delete(&text[i]);
 
         if(tag_isoccupied(tag))
@@ -204,6 +206,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     }
 
     p_delete(&text);
+    p_delete(&pdata);
 
     w->area.height = ctx->height;
     return w->area.width;

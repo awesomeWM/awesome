@@ -63,7 +63,8 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
     return false;
 }
 
-struct tasklist_hook_data {
+struct tasklist_hook_data
+{
     draw_context_t *ctx;
     area_t *area;
 };
@@ -75,8 +76,9 @@ tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
     struct tasklist_hook_data *data = p->priv;
     draw_context_t *ctx = data->ctx;
 
-    assert (!strcmp(elem, "bg"));
-    for (; *names; names++, values++) {
+    assert(!strcmp(elem, "bg"));
+    for(; *names; names++, values++)
+    {
         if(!a_strcmp(*names, "color"))
         {
             xcolor_t bg_color;
@@ -138,7 +140,8 @@ tasklist_draw(draw_context_t *ctx, int screen,
             {
                 static char const * const elements[] = { "bg", NULL };
                 struct tasklist_hook_data data = { .ctx = ctx, .area = &area };
-                markup_parser_data_t p = {
+                markup_parser_data_t p =
+                {
                     .elements   = elements,
                     .on_element = &tasklist_markup_on_elem,
                     .priv       = &data,
@@ -187,8 +190,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            draw_text(ctx, globalconf.font,
-                      area, text);
+            draw_text(ctx, globalconf.font, area, text, NULL);
 
             p_delete(&text);
 

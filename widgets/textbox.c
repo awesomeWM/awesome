@@ -40,16 +40,20 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              void *p __attribute__ ((unused)))
 {
     textbox_data_t *d = w->widget->data;
+    draw_parser_data_t pdata, *pdata_arg = NULL;
 
     if(d->width)
         w->area.width = d->width;
     else if(w->widget->align == AlignFlex)
         w->area.width = ctx->width - used;
     else
+    {
         w->area.width = MIN(draw_text_extents(ctx->connection,
                                               ctx->phys_screen,
-                                              globalconf.font, d->text).width,
+                                              globalconf.font, d->text, &pdata).width,
                             ctx->width - used);
+        pdata_arg = &pdata;
+    }
 
     w->area.height = ctx->height;
 
@@ -59,8 +63,7 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
                                         w->widget->align);
     w->area.y = 0;
 
-    draw_text(ctx, globalconf.font,
-              w->area, d->text);
+    draw_text(ctx, globalconf.font, w->area, d->text, pdata_arg);
 
     return w->area.width;
 }

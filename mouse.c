@@ -234,12 +234,14 @@ mouse_snap_to_corner(area_t a, int *x, int *y, corner_t corner)
 /** Redraw the infobox.
  * \param ctx Draw context.
  * \param sw The simple window.
+ * \param pdata The draw parser data.
  * \param geometry The geometry to use for the box.
  * \param border The client border size.
  */
 static void
 mouse_infobox_draw(draw_context_t *ctx,
                    simple_window_t *sw,
+                   draw_parser_data_t *pdata,
                    area_t geometry, int border)
 {
     area_t draw_geometry = { 0, 0, ctx->width, ctx->height };
@@ -248,7 +250,7 @@ mouse_infobox_draw(draw_context_t *ctx,
     snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
              geometry.width, geometry.height, geometry.x, geometry.y);
     draw_rectangle(ctx, draw_geometry, 1.0, true, globalconf.colors.bg);
-    draw_text(ctx, globalconf.font, draw_geometry, size);
+    draw_text(ctx, globalconf.font, draw_geometry, size, pdata);
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
@@ -260,11 +262,12 @@ mouse_infobox_draw(draw_context_t *ctx,
  * \param border Border size of the client.
  * \param geometry Client geometry.
  * \param ctx Draw context to create.
+ * \param pdata The draw parser data to fill.
  * \return The simple window.
  */
 static simple_window_t *
 mouse_infobox_new(int phys_screen, int border, area_t geometry,
-                  draw_context_t **ctx)
+                  draw_context_t **ctx, draw_parser_data_t *pdata)
 {
     simple_window_t *sw;
     area_t geom;
@@ -272,7 +275,7 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
     geom = draw_text_extents(globalconf.connection,
                              globalconf.default_screen,
                              globalconf.font,
-                             "0000x0000+0000+0000");
+                             "0000x0000+0000+0000", pdata);
     geom.x = geometry.x + ((2 * border + geometry.width) - geom.width) / 2;
     geom.y = geometry.y + ((2 * border + geometry.height) - geom.height) / 2;
 
@@ -287,7 +290,7 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
                             globalconf.colors.bg);
 
     xcb_map_window(globalconf.connection, sw->window);
-    mouse_infobox_draw(*ctx, sw, geometry, border);
+    mouse_infobox_draw(*ctx, sw, pdata, geometry, border);
 
     return sw;
 }
@@ -458,6 +461,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     draw_context_t *ctx;
     /* the root window */
     xcb_window_t root;
+    draw_parser_data_t pdata;
 
     layout = layout_get_current(c->screen);
     root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
@@ -472,7 +476,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
 
     if(infobox && (c->isfloating || layout == layout_floating))
     {
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx, &pdata);
         xcb_aux_sync(globalconf.connection);
     }
 
@@ -497,7 +501,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             /* draw the infobox */
             if(sw)
             {
-                mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+                mouse_infobox_draw(ctx, sw, &pdata, c->geometry, c->border);
                 xcb_aux_sync(globalconf.connection);
             }
 
@@ -566,6 +570,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     draw_context_t  *ctx;
     size_t cursor = CurResize;
     int top, bottom, left, right;
+    draw_parser_data_t pdata;
 
     screen = xutil_screen_get(globalconf.connection, c->phys_screen);
 
@@ -611,7 +616,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     /* create the infobox */
     if(infobox)
     {
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx, &pdata);
         xcb_aux_sync(globalconf.connection);
     }
 
@@ -685,7 +690,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
         /* draw the infobox */
         if(sw)
-            mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+            mouse_infobox_draw(ctx, sw, &pdata, c->geometry, c->border);
 
         xcb_aux_sync(globalconf.connection);
     }
@@ -822,6 +827,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     simple_window_t *sw = NULL;
     draw_context_t  *ctx;
     xcb_window_t root;
+    draw_parser_data_t pdata;
 
     tag = tags_get_current(c->screen)[0];
 
@@ -867,7 +873,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
     /* create the infobox */
     if(infobox)
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx, &pdata);
 
     xcb_aux_sync(globalconf.connection);
 
@@ -899,7 +905,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
         /* draw the infobox */
         if(sw)
         {
-            mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+            mouse_infobox_draw(ctx, sw, &pdata, c->geometry, c->border);
             xcb_aux_sync(globalconf.connection);
         }
     }
