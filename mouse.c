@@ -769,7 +769,7 @@ mouse_client_resize_tiled(client_t *c)
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
     {
-        double mwfact, fact_x, fact_y;
+        double mwfact = 0, fact_x, fact_y;
 
         /* calculate new master / rest ratio */
         fact_x = (double) (mouse_x - area.x) / area.width;
@@ -785,7 +785,7 @@ mouse_client_resize_tiled(client_t *c)
             mwfact = 1. - fact_y;
 
         /* keep mwfact within reasonable bounds */
-        mwfact = MIN( MAX( 0.01, mwfact), 0.99 );
+        mwfact = MIN(MAX( 0.01, mwfact), 0.99);
 
         /* refresh layout */
         if(fabs(tag->mwfact - mwfact) >= 0.01)
