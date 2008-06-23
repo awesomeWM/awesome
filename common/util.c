@@ -130,16 +130,6 @@ position_to_str(position_t p)
     }
 }
 
-fuzzy_t
-fuzzy_get_from_str(const char *str)
-{
-    if(!a_strcmp(str, "true") || !a_strcmp(str, "yes"))
-        return Yes;
-    else if(!a_strcmp(str, "false") || !a_strcmp(str, "no"))
-        return No;
-    return Maybe;
-}
-
 /** \brief safe limited strcpy.
  *
  * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into \c dst,
