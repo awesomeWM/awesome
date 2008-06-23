@@ -213,8 +213,6 @@ if(GENERATE_MANPAGES)
         DEPENDS ${LUA_APIDOC_SRCS}
         COMMENT "Generating Lua API documentation."
         VERBATIM)
-
-    add_custom_target(luadoc DEPENDS ${LUADOC_FILE})
     # }}}
 
     foreach(txtfile ${AWE_MAN_SRCS})
@@ -264,6 +262,22 @@ if(DOXYGEN_EXECUTABLE)
 endif()
 # }}}
 
+# {{{ Lua API Documentation
+if(LUADOC_EXECUTABLE)
+    # dont include full path names in documentation
+    set(luadoc_srcs "")
+    foreach(file ${AWE_LUA_FILES})
+        string(REPLACE ${SOURCE_DIR}/ "" file ${file})
+        set(luadoc_srcs ${luadoc_srcs} ${file})
+    endforeach()
+
+    add_custom_target(luadoc ALL
+        COMMAND ${LUADOC_EXECUTABLE} ${luadoc_srcs} -d ${BUILD_DIR}/luadoc
+        WORKING_DIRECTORY ${SOURCE_DIR}
+        DEPENDS ${AWE_LUA_FILES})
+endif()
+# }}}
+
 # {{{ Installation.
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
 install(FILES ${AWE_LUA_FILES} DESTINATION ${AWESOME_REL_LUA_LIB_PATH})
@@ -274,6 +288,9 @@ if(GENERATE_MANPAGES)
 endif()
 install(DIRECTORY ${AWE_ICON_DIR} DESTINATION ${AWESOME_REL_ICON_PATH})
 install(FILES ${AWE_DOC_FILES} DESTINATION ${AWESOME_REL_DOC_PATH})
+if(LUADOC_EXECUTABLE)
+    install(DIRECTORY ${BUILD_DIR}/luadoc DESTINATION ${AWESOME_REL_DOC_PATH})
+endif()
 # }}}
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

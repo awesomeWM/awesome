@@ -28,12 +28,14 @@ add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
 find_program(CAT_EXECUTABLE cat)
 find_program(GREP_EXECUTABLE grep)
 find_program(GIT_EXECUTABLE git)
-find_program(LUA_EXECUTABLE lua)
 find_program(GPERF_EXECUTABLE gperf)
 # programs needed for man pages
 find_program(ASCIIDOC_EXECUTABLE asciidoc)
 find_program(XMLTO_EXECUTABLE xmlto)
 find_program(GZIP_EXECUTABLE gzip)
+# lua documentation
+find_program(LUA_EXECUTABLE lua)
+find_program(LUADOC_EXECUTABLE luadoc)
 # doxygen
 include(FindDoxygen)
 # pkg-config
