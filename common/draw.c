@@ -917,31 +917,6 @@ draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
     draw_image_from_argb_data(ctx, x, y, image->width, image->height, wanted_h, image->data);
 }
 
-/** Get an image size
- * \param filename file name
- * \return area_t structure with width and height set to image size
- */
-area_t
-draw_get_image_size(const char *filename)
-{
-    area_t size = { 0, 0, 0, 0 };
-    Imlib_Image image;
-    Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
-
-    if((image = imlib_load_image_with_error_return(filename, &e)))
-    {
-        imlib_context_set_image(image);
-
-        size.width = imlib_image_get_width();
-        size.height = imlib_image_get_height();
-
-        imlib_free_image();
-    }
-    else
-        warn("cannot load image %s: %s", filename, draw_imlib_load_strerror(e));
-
-    return size;
-}
 #endif /* WITH_IMLIB2 */
 
 /** Rotate a pixmap.
