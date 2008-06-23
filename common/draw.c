@@ -47,6 +47,18 @@
 #include "common/markup.h"
 #include "common/xutil.h"
 
+void draw_parser_data_init(draw_parser_data_t *pdata)
+{
+    p_clear(pdata, 1);
+    buffer_init(&pdata->text);
+}
+
+void draw_parser_data_wipe(draw_parser_data_t *pdata)
+{
+    buffer_wipe(&pdata->text);
+    draw_image_delete(&pdata->bg_image);
+}
+
 /** Convert text from any charset to UTF-8 using iconv
  * \param iso the ISO string to convert
  * \return NULL if error, otherwise pointer to the new converted string
@@ -277,6 +289,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
     }
 
     /* stole text */
+    buffer_wipe(&data->text);
     data->text = p.text;
     buffer_init(&p.text);
     markup_parser_data_wipe(&p);
@@ -305,7 +318,7 @@ draw_text(draw_context_t *ctx, font_t *font,
 
     if(!pdata)
     {
-        p_clear(&parser_data, 1);
+        draw_parser_data_init(&parser_data);
         parser_data.connection = ctx->connection;
         parser_data.phys_screen = ctx->phys_screen;
         if(draw_text_markup_expand(&parser_data, text, len))
@@ -381,7 +394,8 @@ draw_text(draw_context_t *ctx, font_t *font,
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
 
-    buffer_wipe(&pdata->text);
+    if (pdata == &parser_data)
+        draw_parser_data_wipe(&parser_data);
 }
 
 /** Setup color-source for cairo (gradient or mono).
@@ -974,7 +988,8 @@ draw_rotate(draw_context_t *ctx,
  * \return Text height and width.
  */
 area_t
-draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const char *text, draw_parser_data_t *parser_data)
+draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
+                  const char *text, draw_parser_data_t *parser_data)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -983,8 +998,6 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     area_t geom = { 0, 0, 0, 0 };
     ssize_t len;
-
-    p_clear(parser_data, 1);
 
     if(!(len = a_strlen(text)))
         return geom;

@@ -168,6 +168,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         p_realloc(&pdata, i + 1);
         text[i] = taglist_text_get(tag, data);
         text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
+        draw_parser_data_init(&pdata[i]);
         area = draw_text_extents(ctx->connection, ctx->phys_screen,
                                   globalconf.font, text[i], &pdata[i]);
 
@@ -188,12 +189,14 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         if(!data->show_empty && !tag->selected && !tag_isoccupied(tag))
         {
             p_delete(&text[i]);
+            draw_parser_data_wipe(&pdata[i]);
             continue;
         }
 
         r->x = w->area.x + prev_width;
         prev_width += r->width;
         draw_text(ctx, globalconf.font, *r, text[i], &pdata[i]);
+        draw_parser_data_wipe(&pdata[i]);
         p_delete(&text[i]);
 
         if(tag_isoccupied(tag))

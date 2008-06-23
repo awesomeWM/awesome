@@ -465,6 +465,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     xcb_window_t root;
     draw_parser_data_t pdata;
 
+    draw_parser_data_init(&pdata);
     layout = layout_get_current(c->screen);
     root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
 
@@ -551,6 +552,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     }
 
     xcb_aux_sync(globalconf.connection);
+    draw_parser_data_wipe(&pdata);
 }
 
 
@@ -574,6 +576,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     int top, bottom, left, right;
     draw_parser_data_t pdata;
 
+    draw_parser_data_init(&pdata);
     screen = xutil_screen_get(globalconf.connection, c->phys_screen);
 
     /* get current mouse position */
@@ -706,6 +709,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
         draw_context_delete(&ctx);
         simplewindow_delete(&sw);
     }
+    draw_parser_data_wipe(&pdata);
 }
 
 /** Resize the master column/row of a tiled layout
@@ -831,6 +835,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     xcb_window_t root;
     draw_parser_data_t pdata;
 
+    draw_parser_data_init(&pdata);
     tag = tags_get_current(c->screen)[0];
 
     root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
@@ -921,6 +926,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
         draw_context_delete(&ctx);
         simplewindow_delete(&sw);
     }
+    draw_parser_data_wipe(&pdata);
 }
 
 /** Resize a client with the mouse.

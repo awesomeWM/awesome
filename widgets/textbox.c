@@ -49,6 +49,7 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
         w->area.width = ctx->width - used;
     else
     {
+        draw_parser_data_init(&pdata);
         w->area.width = MIN(draw_text_extents(ctx->connection,
                                               ctx->phys_screen,
                                               globalconf.font, d->text, &pdata).width,
@@ -65,6 +66,8 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
     w->area.y = 0;
 
     draw_text(ctx, globalconf.font, w->area, d->text, pdata_arg);
+    if (pdata_arg)
+        draw_parser_data_wipe(pdata_arg);
 
     return w->area.width;
 }
