@@ -26,6 +26,7 @@
 #include "event.h"
 #include "common/markup.h"
 #include "common/configopts.h"
+#include "common/tokenize.h"
 
 extern awesome_t globalconf;
 
@@ -258,26 +259,26 @@ taglist_tell(widget_t *widget, const char *property, const char *new_value)
 {
     taglist_data_t *d = widget->data;
 
-    if(!a_strcmp(property, "text_normal"))
+    switch(a_tokenize(property, -1))
     {
+      case A_TK_TEXT_NORMAL:
         p_delete(&d->text_normal);
         d->text_normal = a_strdup(new_value);
-    }
-    else if(!a_strcmp(property, "text_focus"))
-    {
+        break;
+      case A_TK_TEXT_FOCUS:
         p_delete(&d->text_focus);
         d->text_focus = a_strdup(new_value);
-    }
-    else if(!a_strcmp(property, "text_urgent"))
-    {
+        break;
+      case A_TK_TEXT_URGENT:
         p_delete(&d->text_urgent);
         d->text_urgent = a_strdup(new_value);
-    }
-    else if(!a_strcmp(property, "show_empty"))
+        break;
+      case A_TK_SHOW_EMPTY:
         d->show_empty = a_strtobool(new_value);
-    else
+        break;
+      default:
         return WIDGET_ERROR;
-
+    }
     return WIDGET_NOERROR;
 }
 

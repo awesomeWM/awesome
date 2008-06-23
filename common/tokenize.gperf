@@ -30,7 +30,11 @@ right
 scale
 shadow
 shadow_offset
+show_empty
 text
+text_focus
+text_normal
+text_urgent
 ticks_count
 ticks_gap
 top
