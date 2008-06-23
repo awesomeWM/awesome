@@ -61,15 +61,15 @@ ENDIF()
 
 # {{{ git version stamp
 # If this is a git repository...
-IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD)
+IF(EXISTS ${SOURCE_DIR}/.git/HEAD)
     IF(GIT_EXECUTABLE)
         # get current version
         EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        WORKING_DIRECTORY ${SOURCE_DIR}
                         OUTPUT_VARIABLE VERSION
                         OUTPUT_STRIP_TRAILING_WHITESPACE)
         # file the git-version-stamp.sh script will look into
-        SET(VERSION_STAMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/.version_stamp)
+        SET(VERSION_STAMP_FILE ${BUILD_DIR}/.version_stamp)
         FILE(WRITE ${VERSION_STAMP_FILE} ${VERSION})
         # create a version_stamp target later
         SET(BUILD_FROM_GIT TRUE)
@@ -199,8 +199,8 @@ SET (AWESOME_CONFIGURE_FILES config.h.in
 MACRO(a_configure_file file)
     STRING(REGEX REPLACE ".in\$" "" outfile ${file})
     MESSAGE(STATUS "Configuring ${outfile}")
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${file}
-                   ${CMAKE_CURRENT_BINARY_DIR}/${outfile}
+    CONFIGURE_FILE(${SOURCE_DIR}/${file}
+                   ${BUILD_DIR}/${outfile}
                    ESCAPE_QUOTE
                    @ONLY)
 ENDMACRO()
@@ -215,7 +215,7 @@ SET(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
 SET(CPACK_GENERATOR                    "TBZ2")
 SET(CPACK_SOURCE_GENERATOR             "TBZ2")
 SET(CPACK_SOURCE_IGNORE_FILES
-    ".git;.*.swp$;.*~;.*patch;.gitignore;${CMAKE_CURRENT_BINARY_DIR}")
+    ".git;.*.swp$;.*~;.*patch;.gitignore;${BUILD_DIR}")
 
 FOREACH(file ${AWESOME_CONFIGURE_FILES}) 
     STRING(REPLACE ".in" "" confheader ${file})
@@ -225,8 +225,8 @@ ENDFOREACH()
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY  "A dynamic floating and tiling window manager")
 SET(CPACK_PACKAGE_VENDOR               "awesome development team")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE     "${CMAKE_CURRENT_SOURCE_DIR}/README")
-SET(CPACK_RESOURCE_FILE_LICENSE        "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE     "${SOURCE_DIR}/README")
+SET(CPACK_RESOURCE_FILE_LICENSE        "${SOURCE_DIR}/LICENSE")
 SET(CPACK_PACKAGE_VERSION_MAJOR        "${VERSION_MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR        "${VERSION_MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH        "${VERSION_PATCH}")

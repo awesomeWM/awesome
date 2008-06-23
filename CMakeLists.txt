@@ -1,90 +1,93 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7)
 SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS  TRUE)
 
-IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/awesomeConfig.cmake)
+SET(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+SET(BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+IF(NOT EXISTS ${SOURCE_DIR}/awesomeConfig.cmake)
     MESSAGE(FATAL_ERROR "Please provide awesomeConfig.cmake")
 ENDIF()
 
 INCLUDE(awesomeConfig.cmake)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_BINARY_DIR}
+INCLUDE_DIRECTORIES(${SOURCE_DIR}
+                    ${BUILD_DIR}
                     ${AWESOME_REQUIRED_INCLUDE_DIRS}
                     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
 SET(AWE_LUA_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/tabulous.lua
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/awful.lua)
+    ${SOURCE_DIR}/lib/tabulous.lua
+    ${SOURCE_DIR}/lib/awful.lua)
 
-SET(AWE_CONF_FILES ${CMAKE_CURRENT_BINARY_DIR}/awesomerc.lua)
+SET(AWE_CONF_FILES ${BUILD_DIR}/awesomerc.lua)
 
-SET(AWE_ICON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/icons)
+SET(AWE_ICON_DIR ${SOURCE_DIR}/icons)
 
 SET(AWE_DOC_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/AUTHORS
-    ${CMAKE_CURRENT_SOURCE_DIR}/BUGS
-    ${CMAKE_CURRENT_SOURCE_DIR}/README
-    ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
+    ${SOURCE_DIR}/AUTHORS
+    ${SOURCE_DIR}/BUGS
+    ${SOURCE_DIR}/README
+    ${SOURCE_DIR}/LICENSE)
 
 SET(AWE_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/awesome.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/client.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/cnode.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/dbus.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/event.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/ewmh.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/focus.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/keybinding.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/keygrabber.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/layout.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/lua.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/mouse.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/placement.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/screen.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/stack.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/statusbar.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/systray.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/tag.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/titlebar.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/widget.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/window.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/buffer.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/configopts.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/draw.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/markup.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/socket.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/swindow.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/util.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/version.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/xembed.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/xscreen.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/xutil.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/fibonacci.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/floating.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/magnifier.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/max.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/layouts/tile.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/graph.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/iconbox.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/progressbar.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/taglist.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/tasklist.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/textbox.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/widgets/systray.c)
+    ${SOURCE_DIR}/awesome.c
+    ${SOURCE_DIR}/client.c
+    ${SOURCE_DIR}/cnode.c
+    ${SOURCE_DIR}/dbus.c
+    ${SOURCE_DIR}/event.c
+    ${SOURCE_DIR}/ewmh.c
+    ${SOURCE_DIR}/focus.c
+    ${SOURCE_DIR}/keybinding.c
+    ${SOURCE_DIR}/keygrabber.c
+    ${SOURCE_DIR}/layout.c
+    ${SOURCE_DIR}/lua.c
+    ${SOURCE_DIR}/mouse.c
+    ${SOURCE_DIR}/placement.c
+    ${SOURCE_DIR}/screen.c
+    ${SOURCE_DIR}/stack.c
+    ${SOURCE_DIR}/statusbar.c
+    ${SOURCE_DIR}/systray.c
+    ${SOURCE_DIR}/tag.c
+    ${SOURCE_DIR}/titlebar.c
+    ${SOURCE_DIR}/widget.c
+    ${SOURCE_DIR}/window.c
+    ${SOURCE_DIR}/common/buffer.c
+    ${SOURCE_DIR}/common/configopts.c
+    ${SOURCE_DIR}/common/draw.c
+    ${SOURCE_DIR}/common/markup.c
+    ${SOURCE_DIR}/common/socket.c
+    ${SOURCE_DIR}/common/swindow.c
+    ${SOURCE_DIR}/common/util.c
+    ${SOURCE_DIR}/common/version.c
+    ${SOURCE_DIR}/common/xembed.c
+    ${SOURCE_DIR}/common/xscreen.c
+    ${SOURCE_DIR}/common/xutil.c
+    ${SOURCE_DIR}/layouts/fibonacci.c
+    ${SOURCE_DIR}/layouts/floating.c
+    ${SOURCE_DIR}/layouts/magnifier.c
+    ${SOURCE_DIR}/layouts/max.c
+    ${SOURCE_DIR}/layouts/tile.c
+    ${SOURCE_DIR}/widgets/graph.c
+    ${SOURCE_DIR}/widgets/iconbox.c
+    ${SOURCE_DIR}/widgets/progressbar.c
+    ${SOURCE_DIR}/widgets/taglist.c
+    ${SOURCE_DIR}/widgets/tasklist.c
+    ${SOURCE_DIR}/widgets/textbox.c
+    ${SOURCE_DIR}/widgets/systray.c)
 
 SET(AWE_CLIENT_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/awesome-client.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/socket.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/util.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/version.c)
+    ${SOURCE_DIR}/awesome-client.c 
+    ${SOURCE_DIR}/common/socket.c
+    ${SOURCE_DIR}/common/util.c
+    ${SOURCE_DIR}/common/version.c)
 
 SET(AWE_MAN_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/awesome.1.txt
-    ${CMAKE_CURRENT_SOURCE_DIR}/awesome-client.1.txt
-    ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.5.txt)
+    ${SOURCE_DIR}/awesome.1.txt
+    ${SOURCE_DIR}/awesome-client.1.txt
+    ${SOURCE_DIR}/awesomerc.5.txt)
 
 ADD_EXECUTABLE(${PROJECT_AWE_NAME} ${AWE_SRCS}
-    ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c)
+    ${BUILD_DIR}/common/tokenize.c)
 
 ADD_EXECUTABLE(${PROJECT_AWECLIENT_NAME} ${AWE_CLIENT_SRCS}
     ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c)
@@ -98,51 +101,51 @@ TARGET_LINK_LIBRARIES(${PROJECT_AWECLIENT_NAME}
     ${LIB_NCURSES})
 
 # {{{ Generated sources
-FILE(GLOB LAYOUTGEN_DEPS ${CMAKE_CURRENT_SOURCE_DIR}/layouts/*.h)
+FILE(GLOB LAYOUTGEN_DEPS ${SOURCE_DIR}/layouts/*.h)
 ADD_CUSTOM_COMMAND(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
-    ARGS    > ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${SOURCE_DIR}/build-utils/layoutgen.sh
+    ARGS    > ${BUILD_DIR}/layoutgen.h
+    OUTPUT  ${BUILD_DIR}/layoutgen.h
+    WORKING_DIRECTORY ${SOURCE_DIR}
     DEPENDS ${LAYOUTGEN_DEPS}
     COMMENT "Generating layoutgen.h."
     VERBATIM)
 
 ADD_CUSTOM_COMMAND(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
-    ARGS    > ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/widget.h
+    COMMAND ${SOURCE_DIR}/build-utils/widgetgen.sh
+    ARGS    > ${BUILD_DIR}/widgetgen.h
+    OUTPUT  ${BUILD_DIR}/widgetgen.h
+    WORKING_DIRECTORY ${SOURCE_DIR}
+    DEPENDS ${SOURCE_DIR}/widget.h
     COMMENT "Generating widgetgen.h."
     VERBATIM)
 
 # gperf 
-FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/common)
+FILE(MAKE_DIRECTORY ${BUILD_DIR}/common)
 
 ADD_CUSTOM_COMMAND(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
-    ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    COMMAND ${SOURCE_DIR}/build-utils/gperf.sh
+    ARGS    ${SOURCE_DIR}/common/tokenize.gperf
+            ${BUILD_DIR}/common/tokenize.h
+    OUTPUT  ${BUILD_DIR}/common/tokenize.h
+    DEPENDS ${SOURCE_DIR}/common/tokenize.gperf
+            ${SOURCE_DIR}/build-utils/gperf.sh
     COMMENT "Generating common/tokenize.h")
 
 ADD_CUSTOM_COMMAND(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
-    ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    COMMAND ${SOURCE_DIR}/build-utils/gperf.sh
+    ARGS    ${SOURCE_DIR}/common/tokenize.gperf
+            ${BUILD_DIR}/common/tokenize.c
+    OUTPUT  ${BUILD_DIR}/common/tokenize.c
+    DEPENDS ${SOURCE_DIR}/common/tokenize.gperf
+            ${SOURCE_DIR}/build-utils/gperf.sh
     COMMENT "Generating common/tokenize.c")
 
 ADD_CUSTOM_TARGET(generated_sources
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
-            ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
-            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
-            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h)
+    DEPENDS ${BUILD_DIR}/widgetgen.h
+            ${BUILD_DIR}/layoutgen.h
+            ${BUILD_DIR}/common/tokenize.c
+            ${BUILD_DIR}/common/tokenize.h)
 
 ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_sources)
 # }}}
@@ -150,10 +153,10 @@ ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_sources)
 # {{{ version stamp
 IF(BUILD_FROM_GIT)
     ADD_CUSTOM_TARGET(version_stamp ALL
-                      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/git-version-stamp.sh
+                      COMMAND ${SOURCE_DIR}/build-utils/git-version-stamp.sh
                               ${VERSION_STAMP_FILE}
-                              ${CMAKE_CURRENT_BINARY_DIR}/awesome-version-internal.h
-                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+                              ${BUILD_DIR}/awesome-version-internal.h
+                      WORKING_DIRECTORY ${SOURCE_DIR})
 
     ADD_DEPENDENCIES(${PROJECT_AWE_NAME} version_stamp)
     ADD_DEPENDENCIES(${PROJECT_AWECLIENT_NAME} version_stamp)
@@ -164,7 +167,7 @@ ENDIF()
 IF(GENERATE_MANPAGES)
 
     # {{{ Lua API documentation.
-    SET(LUADOC_FILE ${CMAKE_CURRENT_BINARY_DIR}/apidocgen.txt)
+    SET(LUADOC_FILE ${BUILD_DIR}/apidocgen.txt)
 
     MACRO(a_file_match infile regex result_var)
         IF(CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION LESS 6)
@@ -197,10 +200,10 @@ IF(GENERATE_MANPAGES)
 
     # luadoc target
     ADD_CUSTOM_COMMAND(COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
-                       | ${LUA_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
+                       | ${LUA_EXECUTABLE} ${SOURCE_DIR}/build-utils/gendoc.lua
                        > ${LUADOC_FILE}
                        OUTPUT ${LUADOC_FILE}
-                       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                       WORKING_DIRECTORY ${SOURCE_DIR}
                        DEPENDS ${LUA_APIDOC_SRCS}
                        COMMENT "Generating Lua API documentation."
                        VERBATIM)
@@ -210,8 +213,8 @@ IF(GENERATE_MANPAGES)
 
     FOREACH(txtfile ${AWE_MAN_SRCS})
         STRING(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
-        STRING(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}
-                       ${CMAKE_CURRENT_BINARY_DIR} xmlfile ${xmlfile})
+        STRING(REPLACE ${SOURCE_DIR}
+                       ${BUILD_DIR} xmlfile ${xmlfile})
         STRING(REGEX REPLACE ".xml\$" ".gz" gzfile ${xmlfile})
         STRING(REGEX REPLACE ".gz\$" "" manfile ${gzfile})
 
@@ -219,7 +222,7 @@ IF(GENERATE_MANPAGES)
         #       awesomerc.5.xml should depend on ${LUADOC_FILE}.
         ADD_CUSTOM_COMMAND(COMMAND ${CAT_EXECUTABLE} ${txtfile}
                            | ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} -
-                           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                           WORKING_DIRECTORY ${BUILD_DIR}
                            OUTPUT ${xmlfile}
                            DEPENDS ${txtfile} ${LUADOC_FILE}
                            VERBATIM)
@@ -248,7 +251,7 @@ ENDIF()
 IF(DOXYGEN_EXECUTABLE)
     ADD_CUSTOM_TARGET(doc
                       COMMAND ${DOXYGEN_EXECUTABLE} awesome.doxygen
-                      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+                      WORKING_DIRECTORY ${BUILD_DIR})
 ENDIF()
 # }}}
 
