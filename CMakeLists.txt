@@ -10,10 +10,11 @@ endif()
 
 include(awesomeConfig.cmake)
 
-include_directories(${SOURCE_DIR}
-                    ${BUILD_DIR}
-                    ${AWESOME_REQUIRED_INCLUDE_DIRS}
-                    ${AWESOME_OPTIONAL_INCLUDE_DIRS})
+include_directories(
+    ${SOURCE_DIR}
+    ${BUILD_DIR}
+    ${AWESOME_REQUIRED_INCLUDE_DIRS}
+    ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
 set(AWE_LUA_FILES
     ${SOURCE_DIR}/lib/tabulous.lua
@@ -155,10 +156,10 @@ add_dependencies(${PROJECT_AWE_NAME} generated_sources)
 # {{{ version stamp
 if(BUILD_FROM_GIT)
     add_custom_target(version_stamp ALL
-                      COMMAND ${SOURCE_DIR}/build-utils/git-version-stamp.sh
-                              ${VERSION_STAMP_FILE}
-                              ${BUILD_DIR}/awesome-version-internal.h
-                      WORKING_DIRECTORY ${SOURCE_DIR})
+        COMMAND ${SOURCE_DIR}/build-utils/git-version-stamp.sh
+                ${VERSION_STAMP_FILE}
+                ${BUILD_DIR}/awesome-version-internal.h
+        WORKING_DIRECTORY ${SOURCE_DIR})
 
     add_dependencies(${PROJECT_AWE_NAME} version_stamp)
     add_dependencies(${PROJECT_AWECLIENT_NAME} version_stamp)
@@ -174,9 +175,10 @@ if(GENERATE_MANPAGES)
     macro(a_file_match infile regex result_var)
         if(CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION LESS 6)
             # cmake < 2.6 doesn't know FILE(STRINGS ...)
-            execute_process(COMMAND ${GREP_EXECUTABLE} -l ${regex} ${infile}
-                            RESULT_VARIABLE exit_code
-                            OUTPUT_QUIET)
+            execute_process(
+                COMMAND ${GREP_EXECUTABLE} -l ${regex} ${infile}
+                RESULT_VARIABLE exit_code
+                OUTPUT_QUIET)
             if(exit_code EQUAL 0)
                 set(${result_var} TRUE)
             else()
@@ -201,14 +203,15 @@ if(GENERATE_MANPAGES)
     endforeach()
 
     # luadoc target
-    add_custom_command(COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
-                       | ${LUA_EXECUTABLE} ${SOURCE_DIR}/build-utils/gendoc.lua
-                       > ${LUADOC_FILE}
-                       OUTPUT ${LUADOC_FILE}
-                       WORKING_DIRECTORY ${SOURCE_DIR}
-                       DEPENDS ${LUA_APIDOC_SRCS}
-                       COMMENT "Generating Lua API documentation."
-                       VERBATIM)
+    add_custom_command(
+        COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
+                | ${LUA_EXECUTABLE} ${SOURCE_DIR}/build-utils/gendoc.lua
+                > ${LUADOC_FILE}
+        OUTPUT  ${LUADOC_FILE}
+        WORKING_DIRECTORY ${SOURCE_DIR}
+        DEPENDS ${LUA_APIDOC_SRCS}
+        COMMENT "Generating Lua API documentation."
+        VERBATIM)
 
     add_custom_target(luadoc DEPENDS ${LUADOC_FILE})
     # }}}
@@ -222,21 +225,24 @@ if(GENERATE_MANPAGES)
 
         # TODO: This is still not 100% right. Actually only
         #       awesomerc.5.xml should depend on ${LUADOC_FILE}.
-        add_custom_command(COMMAND ${CAT_EXECUTABLE} ${txtfile}
-                           | ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} -
-                           WORKING_DIRECTORY ${BUILD_DIR}
-                           OUTPUT ${xmlfile}
-                           DEPENDS ${txtfile} ${LUADOC_FILE}
-                           VERBATIM)
-        add_custom_command(COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
-                           OUTPUT ${manfile}
-                           DEPENDS ${xmlfile})
-        add_custom_command(COMMAND ${CAT_EXECUTABLE} ${manfile}
-                           | ${GZIP_EXECUTABLE}
-                           > ${gzfile}
-                           OUTPUT ${gzfile}
-                           DEPENDS ${manfile}
-                           VERBATIM)
+        add_custom_command(
+            COMMAND ${CAT_EXECUTABLE} ${txtfile}
+                    | ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} -
+            WORKING_DIRECTORY ${BUILD_DIR}
+            OUTPUT  ${xmlfile}
+            DEPENDS ${txtfile} ${LUADOC_FILE}
+            VERBATIM)
+        add_custom_command(
+            COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
+            OUTPUT  ${manfile}
+            DEPENDS ${xmlfile})
+        add_custom_command(
+            COMMAND ${CAT_EXECUTABLE} ${manfile}
+                    | ${GZIP_EXECUTABLE}
+                    > ${gzfile}
+            OUTPUT  ${gzfile}
+            DEPENDS ${manfile}
+            VERBATIM)
 
         set(MAN_FILES ${MAN_FILES} ${gzfile})
 
@@ -252,8 +258,8 @@ endif()
 # {{{ Doxygen
 if(DOXYGEN_EXECUTABLE)
     add_custom_target(doc
-                      COMMAND ${DOXYGEN_EXECUTABLE} awesome.doxygen
-                      WORKING_DIRECTORY ${BUILD_DIR})
+        COMMAND ${DOXYGEN_EXECUTABLE} awesome.doxygen
+        WORKING_DIRECTORY ${BUILD_DIR})
 endif()
 # }}}
 

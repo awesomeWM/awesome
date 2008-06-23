@@ -64,10 +64,11 @@ endif()
 if(EXISTS ${SOURCE_DIR}/.git/HEAD)
     if(GIT_EXECUTABLE)
         # get current version
-        execute_process(COMMAND ${GIT_EXECUTABLE} describe
-                        WORKING_DIRECTORY ${SOURCE_DIR}
-                        OUTPUT_VARIABLE VERSION
-                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} describe
+            WORKING_DIRECTORY ${SOURCE_DIR}
+            OUTPUT_VARIABLE VERSION
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
         # file the git-version-stamp.sh script will look into
         set(VERSION_STAMP_FILE ${BUILD_DIR}/.version_stamp)
         file(WRITE ${VERSION_STAMP_FILE} ${VERSION})
@@ -131,12 +132,13 @@ if(NOT LUA_LIB)
 endif()
 
 set(AWESOME_REQUIRED_LIBRARIES ${AWESOME_REQUIRED_LIBRARIES}
-        ${LIB_READLINE}
-        ${LIB_NCURSES}
-        ${LIB_EV}
-        ${LUA_LIB})
+    ${LIB_READLINE}
+    ${LIB_NCURSES}
+    ${LIB_EV}
+    ${LUA_LIB})
 
-set(AWESOME_REQUIRED_INCLUDE_DIRS ${AWESOME_REQUIRED_INCLUDE_DIRS} ${LUA_INC_DIR})
+set(AWESOME_REQUIRED_INCLUDE_DIRS ${AWESOME_REQUIRED_INCLUDE_DIRS}
+    ${LUA_INC_DIR})
 # }}}
 
 # {{{ Optional libraries.
@@ -191,10 +193,11 @@ set(AWESOME_REL_DOC_PATH     ${AWESOME_SHARE}/doc/${PROJECT_AWE_NAME})
 # }}}
 
 # {{{ Configure files.
-set (AWESOME_CONFIGURE_FILES config.h.in
-                             awesomerc.lua.in
-                             awesome-version-internal.h.in
-                             awesome.doxygen.in)
+set(AWESOME_CONFIGURE_FILES
+    config.h.in
+    awesomerc.lua.in
+    awesome-version-internal.h.in
+    awesome.doxygen.in)
 
 macro(a_configure_file file)
     string(REGEX REPLACE ".in\$" "" outfile ${file})
