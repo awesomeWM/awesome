@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <alloca.h>
 
 /** A list of possible position, not sex related */
 typedef enum
@@ -59,6 +60,10 @@ typedef struct
 
 #define ssizeof(foo)            (ssize_t)sizeof(foo)
 #define countof(foo)            (ssizeof(foo) / ssizeof(foo[0]))
+
+#define p_alloca(type, count)                                \
+        ((type *)memset(alloca(sizeof(type) * (count)),      \
+                        0, sizeof(type) * (count)))
 
 #define p_alloc_nr(x)           (((x) + 16) * 3 / 2)
 #define p_new(type, count)      ((type *)xmalloc(sizeof(type) * (count)))
