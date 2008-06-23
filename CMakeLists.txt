@@ -26,11 +26,12 @@ SET(AWE_DOC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/README
     ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
 
+FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/common)
 ADD_CUSTOM_COMMAND(
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
     ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.h
-    OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.h
+            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
             ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
     COMMENT "Generating common/tokenize.h"
@@ -38,8 +39,8 @@ ADD_CUSTOM_COMMAND(
 ADD_CUSTOM_COMMAND(
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
     ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.c
-    OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.c
+            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
             ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
     COMMENT "Generating common/tokenize.c"
@@ -102,8 +103,8 @@ SET(AWE_MAN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.5.txt)
 
 ADD_EXECUTABLE(${PROJECT_AWE_NAME} ${AWE_SRCS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.h
+    ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
+    ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
 )
 ADD_EXECUTABLE(${PROJECT_AWECLIENT_NAME} ${AWE_CLIENT_SRCS})
 
