@@ -168,6 +168,7 @@ typedef struct
     xcolor_t bg_color;
     draw_image_t *bg_image;
     alignment_t bg_align;
+    bool bg_resize;
     struct
     {
         int offset;
