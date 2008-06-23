@@ -1,23 +1,23 @@
-SET(PROJECT_AWE_NAME awesome)
-SET(PROJECT_AWECLIENT_NAME awesome-client)
+set(PROJECT_AWE_NAME awesome)
+set(PROJECT_AWECLIENT_NAME awesome-client)
 
-SET(VERSION 3)
-SET(VERSION_MAJOR ${VERSION})
-SET(VERSION_MINOR 0)
-SET(VERSION_PATCH 0)
+set(VERSION 3)
+set(VERSION_MAJOR ${VERSION})
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 0)
 
-SET(CODENAME "Productivity Breaker")
+set(CODENAME "Productivity Breaker")
 
-PROJECT(${PROJECT_AWE_NAME})
+project(${PROJECT_AWE_NAME})
 
-SET(CMAKE_BUILD_TYPE RELEASE)
+set(CMAKE_BUILD_TYPE RELEASE)
 
-OPTION(WITH_DBUS "build with D-BUS" ON)
-OPTION(WITH_IMLIB2 "build with Imlib2" ON)
-OPTION(GENERATE_MANPAGES "generate manpages" ON)
+option(WITH_DBUS "build with D-BUS" ON)
+option(WITH_IMLIB2 "build with Imlib2" ON)
+option(GENERATE_MANPAGES "generate manpages" ON)
 
 # {{{ CFLAGS
-ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
+add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
     -Wsign-compare -Wunused -Wno-unused-parameter -Wuninitialized -Winit-self
     -Wpointer-arith -Wredundant-decls -Wformat-nonliteral
@@ -25,56 +25,56 @@ ADD_DEFINITIONS(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
 # }}}
 
 # {{{ Find external utilities
-FIND_PROGRAM(CAT_EXECUTABLE cat)
-FIND_PROGRAM(GREP_EXECUTABLE grep)
-FIND_PROGRAM(GIT_EXECUTABLE git)
-FIND_PROGRAM(LUA_EXECUTABLE lua)
-FIND_PROGRAM(GPERF_EXECUTABLE gperf)
+find_program(CAT_EXECUTABLE cat)
+find_program(GREP_EXECUTABLE grep)
+find_program(GIT_EXECUTABLE git)
+find_program(LUA_EXECUTABLE lua)
+find_program(GPERF_EXECUTABLE gperf)
 # programs needed for man pages
-FIND_PROGRAM(ASCIIDOC_EXECUTABLE asciidoc)
-FIND_PROGRAM(XMLTO_EXECUTABLE xmlto)
-FIND_PROGRAM(GZIP_EXECUTABLE gzip)
+find_program(ASCIIDOC_EXECUTABLE asciidoc)
+find_program(XMLTO_EXECUTABLE xmlto)
+find_program(GZIP_EXECUTABLE gzip)
 # doxygen
-INCLUDE(FindDoxygen)
+include(FindDoxygen)
 # pkg-config
-INCLUDE(FindPkgConfig)
+include(FindPkgConfig)
 # }}}
 
 # {{{ Check if manpages can be build
-IF(GENERATE_MANPAGES)
-    IF(NOT ASCIIDOC_EXECUTABLE OR NOT XMLTO_EXECUTABLE OR NOT GZIP_EXECUTABLE)
-        IF(NOT ASCIIDOC_EXECUTABLE)
+if(GENERATE_MANPAGES)
+    if(NOT ASCIIDOC_EXECUTABLE OR NOT XMLTO_EXECUTABLE OR NOT GZIP_EXECUTABLE)
+        if(NOT ASCIIDOC_EXECUTABLE)
             SET(missing "asciidoc")
-        ENDIF()
-        IF(NOT XMLTO_EXECUTABLE)
+        endif()
+        if(NOT XMLTO_EXECUTABLE)
             SET(missing ${missing} " xmlto")
-        ENDIF()
-        IF(NOT GZIP_EXECUTABLE)
+        endif()
+        if(NOT GZIP_EXECUTABLE)
             SET(missing ${missing} " gzip")
-        ENDIF()
+        endif()
 
-        MESSAGE(STATUS "Not generating manpages. Missing: " ${missing})
-        SET(GENERATE_MANPAGES OFF)
-    ENDIF()
-ENDIF()
+        message(STATUS "Not generating manpages. Missing: " ${missing})
+        set(GENERATE_MANPAGES OFF)
+    endif()
+endif()
 # }}}
 
 # {{{ git version stamp
 # If this is a git repository...
-IF(EXISTS ${SOURCE_DIR}/.git/HEAD)
-    IF(GIT_EXECUTABLE)
+if(EXISTS ${SOURCE_DIR}/.git/HEAD)
+    if(GIT_EXECUTABLE)
         # get current version
-        EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe
+        execute_process(COMMAND ${GIT_EXECUTABLE} describe
                         WORKING_DIRECTORY ${SOURCE_DIR}
                         OUTPUT_VARIABLE VERSION
                         OUTPUT_STRIP_TRAILING_WHITESPACE)
         # file the git-version-stamp.sh script will look into
-        SET(VERSION_STAMP_FILE ${BUILD_DIR}/.version_stamp)
-        FILE(WRITE ${VERSION_STAMP_FILE} ${VERSION})
+        set(VERSION_STAMP_FILE ${BUILD_DIR}/.version_stamp)
+        file(WRITE ${VERSION_STAMP_FILE} ${VERSION})
         # create a version_stamp target later
-        SET(BUILD_FROM_GIT TRUE)
-    ENDIF()
-ENDIF()
+        set(BUILD_FROM_GIT TRUE)
+    endif()
+endif()
 # }}}
 
 # {{{ Required libraries
@@ -102,12 +102,12 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-icccm
     cairo-xcb)
 
-MACRO(a_find_library variable library)
-    FIND_LIBRARY(${variable} ${library})
-    IF(NOT ${variable})
-        MESSAGE(FATAL_ERROR ${library} " library not found.")
-    ENDIF()
-ENDMACRO()
+macro(a_find_library variable library)
+    find_library(${variable} ${library})
+    if(NOT ${variable})
+        message(FATAL_ERROR ${library} " library not found.")
+    endif()
+endmacro()
 
 # Check for readline, ncurse and libev
 a_find_library(LIB_READLINE readline)
@@ -115,28 +115,28 @@ a_find_library(LIB_NCURSES ncurses)
 a_find_library(LIB_EV ev)
 
 # Check for lua5.1
-FIND_PATH(LUA_INC_DIR lua.h
+find_path(LUA_INC_DIR lua.h
     /usr/include
     /usr/include/lua5.1
     /usr/local/include/lua5.1)
 
-FIND_LIBRARY(LUA_LIB NAMES lua5.1 lua
+find_library(LUA_LIB NAMES lua5.1 lua
     /usr/lib
     /usr/lib/lua
     /usr/local/lib)
 
 # Error check
-IF(NOT LUA_LIB)
-    MESSAGE(FATAL_ERROR "lua library not found")
-ENDIF()
+if(NOT LUA_LIB)
+    message(FATAL_ERROR "lua library not found")
+endif()
 
-SET(AWESOME_REQUIRED_LIBRARIES ${AWESOME_REQUIRED_LIBRARIES}
+set(AWESOME_REQUIRED_LIBRARIES ${AWESOME_REQUIRED_LIBRARIES}
         ${LIB_READLINE}
         ${LIB_NCURSES}
         ${LIB_EV}
         ${LUA_LIB})
 
-SET(AWESOME_REQUIRED_INCLUDE_DIRS ${AWESOME_REQUIRED_INCLUDE_DIRS} ${LUA_INC_DIR})
+set(AWESOME_REQUIRED_INCLUDE_DIRS ${AWESOME_REQUIRED_INCLUDE_DIRS} ${LUA_INC_DIR})
 # }}}
 
 # {{{ Optional libraries.
@@ -145,93 +145,93 @@ SET(AWESOME_REQUIRED_INCLUDE_DIRS ${AWESOME_REQUIRED_INCLUDE_DIRS} ${LUA_INC_DIR
 # AWESOME_OPTIONAL_LIBRARIES
 # AWESOME_OPTIONAL_INCLUDE_DIRS
 
-IF(WITH_DBUS)
+if(WITH_DBUS)
     pkg_check_modules(DBUS dbus-1)
-    IF(DBUS_FOUND)
-        SET(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES} ${DBUS_LIBRARIES})
-        SET(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
-    ELSE()
-        SET(WITH_DBUS OFF)
-        MESSAGE(STATUS "DBUS not found. Disabled.")
-    ENDIF()
-ENDIF()
+    if(DBUS_FOUND)
+        set(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES} ${DBUS_LIBRARIES})
+        set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
+    else()
+        set(WITH_DBUS OFF)
+        message(STATUS "DBUS not found. Disabled.")
+    endif()
+endif()
 
-IF(WITH_IMLIB2)
+if(WITH_IMLIB2)
     pkg_check_modules(IMLIB2 imlib2)
-    IF(IMLIB2_FOUND)
-        SET(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES} ${IMLIB2_LIBRARIES})
-        SET(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${IMLIB2_INCLUDE_DIRS})
-    ELSE()
-        SET(WITH_IMLIB2 OFF)
-        MESSAGE(STATUS "Imlib2 not found. Disabled.")
-    ENDIF()
-ENDIF()
+    if(IMLIB2_FOUND)
+        set(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES} ${IMLIB2_LIBRARIES})
+        set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${IMLIB2_INCLUDE_DIRS})
+    else()
+        set(WITH_IMLIB2 OFF)
+        message(STATUS "Imlib2 not found. Disabled.")
+    endif()
+endif()
 # }}}
 
 # {{{ Install path and configuration variables.
-IF(DEFINED PREFIX)
-    SET(CMAKE_INSTALL_PREFIX ${PREFIX})
-ENDIF()
-SET(AWESOME_VERSION          ${VERSION} )
-SET(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR} )
-SET(AWESOME_COMPILE_HOSTNAME $ENV{HOSTNAME} )
-SET(AWESOME_COMPILE_BY       $ENV{USER} )
-SET(AWESOME_RELEASE          ${CODENAME} )
-SET(AWESOME_ETC              etc )
-SET(AWESOME_SHARE            share )
-SET(AWESOME_LUA_LIB_PATH     ${CMAKE_INSTALL_PREFIX}/${AWESOME_SHARE}/${PROJECT_AWE_NAME}/lib )
-SET(AWESOME_ICON_PATH        ${CMAKE_INSTALL_PREFIX}/${AWESOME_SHARE}/${PROJECT_AWE_NAME}/icons )
-SET(AWESOME_CONF_PATH        ${CMAKE_INSTALL_PREFIX}/${AWESOME_ETC}/${PROJECT_AWE_NAME} )
-SET(AWESOME_MAN1_PATH        ${AWESOME_SHARE}/man/man1 )
-SET(AWESOME_MAN5_PATH        ${AWESOME_SHARE}/man/man5 )
-SET(AWESOME_REL_LUA_LIB_PATH ${AWESOME_SHARE}/${PROJECT_AWE_NAME}/lib )
-SET(AWESOME_REL_CONF_PATH    ${AWESOME_ETC}/${PROJECT_AWE_NAME} )
-SET(AWESOME_REL_ICON_PATH    ${AWESOME_SHARE}/${PROJECT_AWE_NAME} )
-SET(AWESOME_REL_DOC_PATH     ${AWESOME_SHARE}/doc/${PROJECT_AWE_NAME})
+if(DEFINED PREFIX)
+    set(CMAKE_INSTALL_PREFIX ${PREFIX})
+endif()
+set(AWESOME_VERSION          ${VERSION} )
+set(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR} )
+set(AWESOME_COMPILE_HOSTNAME $ENV{HOSTNAME} )
+set(AWESOME_COMPILE_BY       $ENV{USER} )
+set(AWESOME_RELEASE          ${CODENAME} )
+set(AWESOME_ETC              etc )
+set(AWESOME_SHARE            share )
+set(AWESOME_LUA_LIB_PATH     ${CMAKE_INSTALL_PREFIX}/${AWESOME_SHARE}/${PROJECT_AWE_NAME}/lib )
+set(AWESOME_ICON_PATH        ${CMAKE_INSTALL_PREFIX}/${AWESOME_SHARE}/${PROJECT_AWE_NAME}/icons )
+set(AWESOME_CONF_PATH        ${CMAKE_INSTALL_PREFIX}/${AWESOME_ETC}/${PROJECT_AWE_NAME} )
+set(AWESOME_MAN1_PATH        ${AWESOME_SHARE}/man/man1 )
+set(AWESOME_MAN5_PATH        ${AWESOME_SHARE}/man/man5 )
+set(AWESOME_REL_LUA_LIB_PATH ${AWESOME_SHARE}/${PROJECT_AWE_NAME}/lib )
+set(AWESOME_REL_CONF_PATH    ${AWESOME_ETC}/${PROJECT_AWE_NAME} )
+set(AWESOME_REL_ICON_PATH    ${AWESOME_SHARE}/${PROJECT_AWE_NAME} )
+set(AWESOME_REL_DOC_PATH     ${AWESOME_SHARE}/doc/${PROJECT_AWE_NAME})
 # }}}
 
 # {{{ Configure files.
-SET (AWESOME_CONFIGURE_FILES config.h.in
+set (AWESOME_CONFIGURE_FILES config.h.in
                              awesomerc.lua.in
                              awesome-version-internal.h.in
                              awesome.doxygen.in)
 
-MACRO(a_configure_file file)
-    STRING(REGEX REPLACE ".in\$" "" outfile ${file})
-    MESSAGE(STATUS "Configuring ${outfile}")
-    CONFIGURE_FILE(${SOURCE_DIR}/${file}
+macro(a_configure_file file)
+    string(REGEX REPLACE ".in\$" "" outfile ${file})
+    message(STATUS "Configuring ${outfile}")
+    configure_file(${SOURCE_DIR}/${file}
                    ${BUILD_DIR}/${outfile}
                    ESCAPE_QUOTE
                    @ONLY)
-ENDMACRO()
+endmacro()
 
-FOREACH(file ${AWESOME_CONFIGURE_FILES})
+foreach(file ${AWESOME_CONFIGURE_FILES})
     a_configure_file(${file})
-ENDFOREACH()
+endforeach()
 #}}}
 
 # {{{ CPack configuration
-SET(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
-SET(CPACK_GENERATOR                    "TBZ2")
-SET(CPACK_SOURCE_GENERATOR             "TBZ2")
-SET(CPACK_SOURCE_IGNORE_FILES
+set(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
+set(CPACK_GENERATOR                    "TBZ2")
+set(CPACK_SOURCE_GENERATOR             "TBZ2")
+set(CPACK_SOURCE_IGNORE_FILES
     ".git;.*.swp$;.*~;.*patch;.gitignore;${BUILD_DIR}")
 
-FOREACH(file ${AWESOME_CONFIGURE_FILES}) 
-    STRING(REPLACE ".in" "" confheader ${file})
-    SET( CPACK_SOURCE_IGNORE_FILES
+foreach(file ${AWESOME_CONFIGURE_FILES})
+    string(REPLACE ".in" "" confheader ${file})
+    set( CPACK_SOURCE_IGNORE_FILES
         ";${CPACK_SOURCE_IGNORE_FILES};${confheader}$;" )
-ENDFOREACH()
+endforeach()
 
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY  "A dynamic floating and tiling window manager")
-SET(CPACK_PACKAGE_VENDOR               "awesome development team")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE     "${SOURCE_DIR}/README")
-SET(CPACK_RESOURCE_FILE_LICENSE        "${SOURCE_DIR}/LICENSE")
-SET(CPACK_PACKAGE_VERSION_MAJOR        "${VERSION_MAJOR}")
-SET(CPACK_PACKAGE_VERSION_MINOR        "${VERSION_MINOR}")
-SET(CPACK_PACKAGE_VERSION_PATCH        "${VERSION_PATCH}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY  "A dynamic floating and tiling window manager")
+set(CPACK_PACKAGE_VENDOR               "awesome development team")
+set(CPACK_PACKAGE_DESCRIPTION_FILE     "${SOURCE_DIR}/README")
+set(CPACK_RESOURCE_FILE_LICENSE        "${SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_VERSION_MAJOR        "${VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR        "${VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH        "${VERSION_PATCH}")
 
-INCLUDE(CPack)
+include(CPack)
 #}}}
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
