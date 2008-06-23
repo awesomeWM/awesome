@@ -72,8 +72,6 @@ SET(AWE_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/common/markup.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/socket.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/swindow.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.h
     ${CMAKE_CURRENT_SOURCE_DIR}/common/util.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/version.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/xembed.c
@@ -103,7 +101,10 @@ SET(AWE_MAN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/awesome-client.1.txt
     ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.5.txt)
 
-ADD_EXECUTABLE(${PROJECT_AWE_NAME} ${AWE_SRCS})
+ADD_EXECUTABLE(${PROJECT_AWE_NAME} ${AWE_SRCS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.h
+)
 ADD_EXECUTABLE(${PROJECT_AWECLIENT_NAME} ${AWE_CLIENT_SRCS})
 
 TARGET_LINK_LIBRARIES(${PROJECT_AWE_NAME}
