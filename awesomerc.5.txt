@@ -20,13 +20,8 @@ This file is read at startup.
 
 AWESOME LUA API
 ---------------
-Each function available in awesome Lua implementation is listed below.
-Function named package.function are relative to the package and must be called
-as is.
-Function named object_type:function are objects methods and must be applied on
-object with type "object_type".
 
-include::apidocgen.txt[]
+Documentation for the Lua API can be found in the luadoc directory.
 
 COLORS FORMAT
 -------------
