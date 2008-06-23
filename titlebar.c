@@ -268,7 +268,7 @@ titlebar_init(client_t *c)
         width = c->titlebar->height;
         break;
     }
-    
+
     titlebar_geometry_compute(c, c->geometry, &geom);
 
     c->titlebar->sw = simplewindow_new(globalconf.connection, c->phys_screen, geom.x, geom.y,
@@ -297,7 +297,7 @@ static int
 luaA_titlebar_new(lua_State *L)
 {
     titlebar_t *tb;
-    const char *color;
+    const char *buf;
     size_t len;
 
     luaA_checktable(L, 1);
@@ -312,23 +312,24 @@ luaA_titlebar_new(lua_State *L)
         /* 1.5 as default factor, it fits nice but no one knows why */
         tb->height = 1.5 * globalconf.font->height;
 
-    tb->position = position_fromstr(luaA_getopt_string(L, 1, "position", "top", &len), len);
+    buf = luaA_getopt_string(L, 1, "position", "top", &len);
+    tb->position = position_fromstr(buf, len);
 
-    if((color = luaA_getopt_string(L, -1, "fg", NULL, NULL)))
+    if((buf = luaA_getopt_string(L, -1, "fg", NULL, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &tb->colors.fg);
+                    buf, &tb->colors.fg);
     else
         tb->colors.fg = globalconf.colors.fg;
 
-    if((color = luaA_getopt_string(L, 1, "bg", NULL, NULL)))
+    if((buf = luaA_getopt_string(L, 1, "bg", NULL, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &tb->colors.bg);
+                   buf, &tb->colors.bg);
     else
         tb->colors.bg = globalconf.colors.bg;
 
-    if((color = luaA_getopt_string(L, 1, "border_color", NULL, NULL)))
+    if((buf = luaA_getopt_string(L, 1, "border_color", NULL, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                   color, &tb->border.color);
+                   buf, &tb->border.color);
 
     tb->border.width = luaA_getopt_number(L, 1, "border_width", 0);
 
