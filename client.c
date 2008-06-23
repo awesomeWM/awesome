@@ -42,6 +42,7 @@
 #include "common/xscreen.h"
 
 extern awesome_t globalconf;
+extern const name_func_link_t FloatingPlacementList[];
 
 /** Create a new client userdata.
  * \param L The Lua VM state.
@@ -378,21 +379,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     if(rettrans || c->isfixed)
         client_setfloating(c, true, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
 
-    if(globalconf.floating_placement
-       && !retloadprops
-       && u_size_hints
-       && !(xcb_size_hints_get_flags(u_size_hints) & (XCB_SIZE_US_POSITION_HINT |
-                                                      XCB_SIZE_P_POSITION_HINT)))
-    {
-        if(c->isfloating)
-            client_resize(c, globalconf.floating_placement(c), false);
-        else
-            c->f_geometry = globalconf.floating_placement(c);
-    }
-
-    if(u_size_hints)
-        xcb_free_size_hints(u_size_hints);
-
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK,
                                  select_input_val);
 
@@ -412,6 +398,22 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1);
+
+    if(c->floating_placement
+       && !retloadprops
+       && u_size_hints
+       && !(xcb_size_hints_get_flags(u_size_hints) & (XCB_SIZE_US_POSITION_HINT |
+                                                      XCB_SIZE_P_POSITION_HINT)))
+    {
+        if(c->isfloating)
+            client_resize(c, c->floating_placement(c), false);
+        else
+            c->f_geometry = c->floating_placement(c);
+    }
+
+    if(u_size_hints)
+        xcb_free_size_hints(u_size_hints);
+
 }
 
 /** Compute client geometry with respect to its geometry hints.
@@ -1302,7 +1304,7 @@ luaA_client_titlebar_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     titlebar_t **t = NULL;
-   
+
     if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
     {
         t = luaA_checkudata(L, 2, "titlebar");
@@ -1411,6 +1413,24 @@ luaA_client_ishidden(lua_State *L)
     return 1;
 }
 
+/** Set the floating placement algorithm. This will be used to compute the
+ * initial floating position of the window then floating.
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lvalue A client.
+ * \lparam An algorith name, either `none', `smart' or `mouse'.
+ */
+static int
+luaA_client_floating_placement_set(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    const char *pl = luaL_checkstring(L, 2);
+    (*c)->floating_placement = name_func_lookup(pl, FloatingPlacementList);
+    return 0;
+}
+
+
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },
@@ -1420,6 +1440,7 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
+    { "floating_placement_set", luaA_client_floating_placement_set },
     { "titlebar_set", luaA_client_titlebar_set },
     { "titlebar_get", luaA_client_titlebar_get },
     { "name_get", luaA_client_name_get },

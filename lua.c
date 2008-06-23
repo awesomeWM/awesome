@@ -49,8 +49,6 @@
 
 extern awesome_t globalconf;
 
-extern const name_func_link_t FloatingPlacementList[];
-
 extern const struct luaL_reg awesome_keygrabber_lib[];
 extern const struct luaL_reg awesome_mouse_methods[];
 extern const struct luaL_reg awesome_mouse_meta[];
@@ -85,21 +83,6 @@ luaA_mouse_add(lua_State *L)
     button_list_push(&globalconf.buttons.root, *button);
     button_ref(button);
 
-    return 0;
-}
-
-/** Set the floating placement algorithm. This will be used to compute the
- * initial floating position of floating windows.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lparam An algorith name, either `none', `smart' or `mouse'.
- */
-static int
-luaA_floating_placement_set(lua_State *L)
-{
-    const char *pl = luaL_checkstring(L, 1);
-    globalconf.floating_placement = name_func_lookup(pl, FloatingPlacementList);
     return 0;
 }
 
@@ -474,7 +457,6 @@ luaA_init(void)
         { "quit", luaA_quit },
         { "exec", luaA_exec },
         { "restart", luaA_restart },
-        { "floating_placement_set", luaA_floating_placement_set },
         { "padding_set", luaA_padding_set },
         { "mouse_add", luaA_mouse_add },
         { "resizehints_set", luaA_resizehints_set },

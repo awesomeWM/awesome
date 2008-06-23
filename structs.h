@@ -313,6 +313,8 @@ struct client_t
     titlebar_t *titlebar;
     /** Button bindings */
     button_t *buttons;
+    /** Floating window placement algo */
+    floating_placement_t *floating_placement;
     /** Next and previous clients */
     client_t *prev, *next;
 };
@@ -381,7 +383,8 @@ typedef struct
     /** Padding */
     padding_t padding;
     /** Window that contains the systray */
-    struct {
+    struct
+    {
         xcb_window_t window;
         bool has_systray_widget;
     } systray;
@@ -425,8 +428,6 @@ struct awesome_t
     xembed_window_t *embedded;
     /** Path to config file */
     char *configpath;
-    /** Floating window placement algo */
-    floating_placement_t *floating_placement;
     /** Selected clients history */
     client_node_t *focus;
     /** Stack client history */

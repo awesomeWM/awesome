@@ -30,7 +30,7 @@
 
 extern awesome_t globalconf;
 
-name_func_link_t FloatingPlacementList[] =
+const name_func_link_t FloatingPlacementList[] =
 {
     { "smart", placement_smart },
     { "under_mouse", placement_under_mouse },
