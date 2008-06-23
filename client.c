@@ -1431,7 +1431,7 @@ luaA_client_ishidden(lua_State *L)
  *
  * \luastack
  * \lvalue A client.
- * \lparam An algorith name, either `none', `smart' or `mouse'.
+ * \lparam An algorith name, either `none', `smart' or `under_mouse'.
  */
 static int
 luaA_client_floating_placement_set(lua_State *L)
