@@ -26,25 +26,6 @@ SET(AWE_DOC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/README
     ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
 
-FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/common)
-ADD_CUSTOM_COMMAND(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
-    ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
-    COMMENT "Generating common/tokenize.h"
-)
-ADD_CUSTOM_COMMAND(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
-    ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
-    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
-            ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
-    COMMENT "Generating common/tokenize.c"
-)
 SET(AWE_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/awesome.c
     ${CMAKE_CURRENT_SOURCE_DIR}/client.c
@@ -103,9 +84,8 @@ SET(AWE_MAN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/awesomerc.5.txt)
 
 ADD_EXECUTABLE(${PROJECT_AWE_NAME} ${AWE_SRCS}
-    ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
-    ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
-)
+    ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c)
+
 ADD_EXECUTABLE(${PROJECT_AWECLIENT_NAME} ${AWE_CLIENT_SRCS})
 
 TARGET_LINK_LIBRARIES(${PROJECT_AWE_NAME}
@@ -116,29 +96,54 @@ TARGET_LINK_LIBRARIES(${PROJECT_AWECLIENT_NAME}
     ${LIB_READLINE}
     ${LIB_NCURSES})
 
-# {{{ Generated headers
+# {{{ Generated sources
 FILE(GLOB LAYOUTGEN_DEPS ${CMAKE_CURRENT_SOURCE_DIR}/layouts/*.h)
-ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
-                   ARGS > ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
-                   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                   DEPENDS ${LAYOUTGEN_DEPS}
-                   COMMENT "Generating layoutgen.h."
-                   VERBATIM)
+ADD_CUSTOM_COMMAND(
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/layoutgen.sh
+    ARGS    > ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS ${LAYOUTGEN_DEPS}
+    COMMENT "Generating layoutgen.h."
+    VERBATIM)
 
-ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
-                   ARGS > ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
-                   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/widget.h
-                   COMMENT "Generating widgetgen.h."
-                   VERBATIM)
+ADD_CUSTOM_COMMAND(
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/widgetgen.sh
+    ARGS    > ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/widget.h
+    COMMENT "Generating widgetgen.h."
+    VERBATIM)
 
-ADD_CUSTOM_TARGET(generated_headers
-                  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
-                          ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h)
+# gperf 
+FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/common)
 
-ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_headers)
+ADD_CUSTOM_COMMAND(
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
+            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
+            ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    COMMENT "Generating common/tokenize.h")
+
+ADD_CUSTOM_COMMAND(
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    ARGS    ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
+            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
+    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common/tokenize.gperf
+            ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gperf.sh
+    COMMENT "Generating common/tokenize.c")
+
+ADD_CUSTOM_TARGET(generated_sources
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/widgetgen.h
+            ${CMAKE_CURRENT_BINARY_DIR}/layoutgen.h
+            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.c
+            ${CMAKE_CURRENT_BINARY_DIR}/common/tokenize.h)
+
+ADD_DEPENDENCIES(${PROJECT_AWE_NAME} generated_sources)
 # }}}
 
 # {{{ version stamp
