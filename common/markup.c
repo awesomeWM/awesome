@@ -113,8 +113,10 @@ markup_parse_text(GMarkupParseContext *context __attribute__ ((unused)),
 {
     markup_parser_data_t *p = (markup_parser_data_t *) user_data;
 
-    buffer_grow(&p->text, text_len);
-    buffer_add_xmlescaped(&p->text, text);
+    if (text_len) {
+        buffer_grow(&p->text, text_len);
+        buffer_add_xmlescaped(&p->text, text);
+    }
 }
 
 /** Create a markup_parser_data_t structure with elements list.
