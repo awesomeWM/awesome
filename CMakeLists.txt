@@ -13,6 +13,7 @@ include(awesomeConfig.cmake)
 include_directories(
     ${SOURCE_DIR}
     ${BUILD_DIR}
+    ${BUILD_DIR}/common
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
