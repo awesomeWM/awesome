@@ -77,9 +77,8 @@ tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
     struct tasklist_hook_data *data = p->priv;
     draw_context_t *ctx = data->ctx;
 
-    assert(!strcmp(elem, "bg"));
+    assert(!a_strcmp(elem, "bg"));
     for(; *names; names++, values++)
-    {
         if(!a_strcmp(*names, "color"))
         {
             xcolor_t bg_color;
@@ -87,7 +86,6 @@ tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
             draw_rectangle(ctx, *data->area, 1.0, true, bg_color);
             break;
         }
-    }
 }
 
 

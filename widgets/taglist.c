@@ -59,7 +59,7 @@ static void
 tag_markup_on_elem(markup_parser_data_t *p, const char *elem,
                       const char **names, const char **values)
 {
-    assert (!strcmp(elem, "title"));
+    assert(!a_strcmp(elem, "title"));
     buffer_add_xmlescaped(&p->text, p->priv);
 }
 
