@@ -198,8 +198,8 @@ draw_font_delete(font_t **font)
 }
 
 static void
-draw_markup_on_event(markup_parser_data_t *p, const char *elem,
-                      const char **names, const char **values)
+draw_markup_on_element(markup_parser_data_t *p, const char *elem,
+                       const char **names, const char **values)
 {
     draw_parser_data_t *data = p->priv;
 
@@ -250,7 +250,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
     {
         .elements   = elements,
         .priv       = data,
-        .on_element = &draw_markup_on_event,
+        .on_element = &draw_markup_on_element,
     };
 
     markup_parser_data_init(&p);
