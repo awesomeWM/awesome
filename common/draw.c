@@ -206,37 +206,51 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
     /* hack: markup.c validates tags so we can avoid strcmps here */
     switch (*elem) {
       case 'b': /* bg */
-        for (; *names; names++, values++)
-        {
-            if(!a_strcmp(*names, "color"))
+        for(; *names; names++, values++)
+            switch(a_tokenize(*names, -1))
+            {
+              case A_TK_COLOR:
                 data->has_bg_color = xcolor_new(data->connection, data->phys_screen,
                                                 *values, &data->bg_color);
-            else if(!a_strcmp(*names, "image"))
+                break;
+              case A_TK_IMAGE:
                 data->bg_image = draw_image_new(*values);
-        }
+                break;
+              default:
+                break;
+            }
         break;
-
       case 't': /* text */
-        for (; *names; names++, values++)
-        {
-            if(!a_strcmp(*names, "align"))
+        for(; *names; names++, values++)
+            switch(a_tokenize(*names, -1))
+            {
+              case A_TK_ALIGN:
                 data->align = draw_align_get_from_str(*values);
-            else if(!a_strcmp(*names, "shadow"))
+                break;
+              case A_TK_SHADOW:
                 xcolor_new(data->connection, data->phys_screen, *values,
                            &data->shadow.color);
-            else if(!a_strcmp(*names, "shadow_offset"))
+                break;
+              case A_TK_SHADOW_OFFSET:
                 data->shadow.offset = atoi(*values);
-        }
+                break;
+              default:
+                break;
+            }
         break;
-
       case 'm': /* margin */
         for (; *names; names++, values++)
-        {
-            if(!a_strcmp(*names, "left"))
+            switch(a_tokenize(*names, -1))
+            {
+              case A_TK_LEFT:
                 data->margin.left = atoi(*values);
-            else if(!a_strcmp(*names, "right"))
+                break;
+              case A_TK_RIGHT:
                 data->margin.right = atoi(*values);
-        }
+                break;
+              default:
+                break;
+            }
         break;
     }
 }
