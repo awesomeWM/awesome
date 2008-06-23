@@ -322,7 +322,7 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
             return WIDGET_ERROR_FORMAT_COLOR;
         return WIDGET_NOERROR;
       case A_TK_GROW:
-        switch((d->grow = position_get_from_str(new_value)))
+        switch((d->grow = position_fromstr(new_value, -1)))
         {
           case Left:
           case Right:

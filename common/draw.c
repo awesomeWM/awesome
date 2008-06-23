@@ -201,6 +201,7 @@ static void
 draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                        const char **names, const char **values)
 {
+    size_t len;
     draw_parser_data_t *data = p->priv;
 
     /* hack: markup.c validates tags so we can avoid strcmps here */
@@ -222,10 +223,10 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
         break;
       case 't': /* text */
         for(; *names; names++, values++)
-            switch(a_tokenize(*names, -1))
+            switch(a_tokenize(*names, (len = a_strlen(*names))))
             {
               case A_TK_ALIGN:
-                data->align = draw_align_get_from_str(*values);
+                data->align = draw_align_fromstr(*values, len);
                 break;
               case A_TK_SHADOW:
                 xcolor_new(data->connection, data->phys_screen, *values,
@@ -1019,11 +1020,12 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font, const c
 /** Transform a string to a alignment_t type.
  * Recognized string are left, center or right. Everything else will be
  * recognized as AlignAuto.
- * \param align string with align text
- * \return alignment_t type
+ * \param align Atring with align text.
+ * \param len The string length.
+ * \return An alignment_t type.
  */
 alignment_t
-draw_align_get_from_str(const char *align)
+draw_align_fromstr(const char *align, ssize_t len)
 {
     switch (a_tokenize(align, -1))
     {

@@ -287,9 +287,10 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
 static int
 luaA_statusbar_position_set(lua_State *L)
 {
+    size_t len;
     statusbar_t *s, **sb = luaA_checkudata(L, 1, "statusbar");
-    const char *pos = luaL_checkstring(L, 2);
-    position_t position = position_get_from_str(pos);
+    const char *pos = luaL_checklstring(L, 2, &len);
+    position_t position = position_fromstr(pos, len);
 
     if(position != (*sb)->position)
     {
@@ -314,7 +315,7 @@ static int
 luaA_statusbar_position_get(lua_State *L)
 {
     statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
-    lua_pushstring(L, position_to_str((*sb)->position));
+    lua_pushstring(L, position_tostr((*sb)->position));
     return 1;
 }
 
@@ -328,9 +329,10 @@ luaA_statusbar_position_get(lua_State *L)
 static int
 luaA_statusbar_align_set(lua_State *L)
 {
+    size_t len;
     statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
-    const char *al = luaL_checkstring(L, 2);
-    alignment_t align = draw_align_get_from_str(al);
+    const char *al = luaL_checklstring(L, 2, &len);
+    alignment_t align = draw_align_fromstr(al, len);
 
     (*sb)->align = align;
     statusbar_position_update(*sb, (*sb)->position);
@@ -492,7 +494,8 @@ static int
 luaA_statusbar_new(lua_State *L)
 {
     statusbar_t *sb;
-    const char *color;
+    const char *buf;
+    size_t len;
 
     luaA_checktable(L, 1);
 
@@ -501,20 +504,20 @@ luaA_statusbar_new(lua_State *L)
     sb->name = luaA_name_init(L);
 
     lua_getfield(L, 1, "fg");
-    if((color = luaL_optstring(L, -1, NULL)))
+    if((buf = luaL_optstring(L, -1, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &sb->colors.fg);
+                   buf, &sb->colors.fg);
     else
         sb->colors.fg = globalconf.colors.fg;
 
     lua_getfield(L, 1, "bg");
-    if((color = luaL_optstring(L, -1, NULL)))
+    if((buf = luaL_optstring(L, -1, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &sb->colors.bg);
+                   buf, &sb->colors.bg);
     else
         sb->colors.bg = globalconf.colors.bg;
 
-    sb->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
+    sb->align = draw_align_fromstr(luaA_getopt_string(L, 1, "align", "left", &len), len);
 
     sb->width = luaA_getopt_number(L, 1, "width", 0);
     if(sb->width > 0)
@@ -524,7 +527,8 @@ luaA_statusbar_new(lua_State *L)
         /* 1.5 as default factor, it fits nice but no one knows why */
         sb->height = 1.5 * globalconf.font->height;
 
-    sb->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
+    buf = luaA_getopt_string(L, 1, "position", "top", &len);
+    sb->position = position_fromstr(buf, len);
 
     return luaA_statusbar_userdata_new(L, sb);
 }

@@ -298,12 +298,13 @@ luaA_titlebar_new(lua_State *L)
 {
     titlebar_t *tb;
     const char *color;
+    size_t len;
 
     luaA_checktable(L, 1);
 
     tb = p_new(titlebar_t, 1);
 
-    tb->align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
+    tb->align = draw_align_fromstr(luaA_getopt_string(L, 1, "align", "left", &len), len);
 
     tb->width = luaA_getopt_number(L, 1, "width", 0);
     tb->height = luaA_getopt_number(L, 1, "height", 0);
@@ -311,21 +312,21 @@ luaA_titlebar_new(lua_State *L)
         /* 1.5 as default factor, it fits nice but no one knows why */
         tb->height = 1.5 * globalconf.font->height;
 
-    tb->position = position_get_from_str(luaA_getopt_string(L, 1, "position", "top"));
+    tb->position = position_fromstr(luaA_getopt_string(L, 1, "position", "top", &len), len);
 
-    if((color = luaA_getopt_string(L, -1, "fg", NULL)))
+    if((color = luaA_getopt_string(L, -1, "fg", NULL, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                        color, &tb->colors.fg);
     else
         tb->colors.fg = globalconf.colors.fg;
 
-    if((color = luaA_getopt_string(L, 1, "bg", NULL)))
+    if((color = luaA_getopt_string(L, 1, "bg", NULL, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                        color, &tb->colors.bg);
     else
         tb->colors.bg = globalconf.colors.bg;
 
-    if((color = luaA_getopt_string(L, 1, "border_color", NULL)))
+    if((color = luaA_getopt_string(L, 1, "border_color", NULL, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                    color, &tb->border.color);
 
@@ -428,11 +429,11 @@ luaA_titlebar_colors_set(lua_State *L)
 
     luaA_checktable(L, 2);
 
-    if((color = luaA_getopt_string(L, 2, "fg", NULL)))
+    if((color = luaA_getopt_string(L, 2, "fg", NULL, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                        color, &(*tb)->colors.fg);
 
-    if((color = luaA_getopt_string(L, 2, "bg", NULL)))
+    if((color = luaA_getopt_string(L, 2, "bg", NULL, NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                        color, &(*tb)->colors.bg);
 
@@ -459,7 +460,7 @@ luaA_titlebar_border_set(lua_State *L)
 
     luaA_checktable(L, 2);
 
-    if((color = luaA_getopt_string(L, 2, "color", NULL)))
+    if((color = luaA_getopt_string(L, 2, "color", NULL, NULL)))
     {
         xcolor_new(globalconf.connection, globalconf.default_screen,
                        color, &(*tb)->border.color);

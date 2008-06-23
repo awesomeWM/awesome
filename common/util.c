@@ -27,6 +27,7 @@
 #include <limits.h>
 
 #include "util.h"
+#include "tokenize.h"
 
 /** Print error and exit with EXIT_FAILURE code.
  */
@@ -94,24 +95,37 @@ name_func_rlookup(void * funcp, const name_func_link_t *list)
     return NULL;
 }
 
+/** Get a position type from a string.
+ * \param pos The position.
+ * \param len The string length, -1 if unknown.
+ * \return A position.
+ */
 position_t
-position_get_from_str(const char *pos)
+position_fromstr(const char *pos, ssize_t len)
 {
-    if(!a_strcmp(pos, "top"))
+    switch(a_tokenize(pos, len))
+    {
+      case A_TK_TOP:
         return Top;
-    else if(!a_strcmp(pos, "bottom"))
+      case A_TK_BOTTOM:
         return Bottom;
-    else if(!a_strcmp(pos, "right"))
+      case A_TK_RIGHT:
         return Right;
-    else if(!a_strcmp(pos, "left"))
+      case A_TK_LEFT:
         return Left;
-    else if(!a_strcmp(pos, "auto"))
+      case A_TK_AUTO:
         return Auto;
-    return Off;
+      default:
+        return Off;
+    }
 }
 
+/** Convert a position type to a string.
+ * \param p The position.
+ * \return A position string.
+ */
 char *
-position_to_str(position_t p)
+position_tostr(position_t p)
 {
     switch(p)
     {

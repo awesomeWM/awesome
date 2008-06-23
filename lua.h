@@ -147,12 +147,12 @@ luaA_getopt_number(lua_State *L, int idx, const char *name, lua_Number def)
 }
 
 static inline const char *
-luaA_getopt_string(lua_State *L, int idx, const char *name, const char *def)
+luaA_getopt_string(lua_State *L, int idx, const char *name, const char *def, size_t *len)
 {
     /* assume that table is first on stack */
     lua_getfield(L, idx, name);
     /* return luaL_optnumber result */
-    return luaL_optstring(L, -1, def);
+    return luaL_optlstring(L, -1, def, len);
 }
 
 static inline bool

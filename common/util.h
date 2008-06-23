@@ -321,8 +321,8 @@ void _fatal(int, const char *, const char *, ...)
 void _warn(int, const char *, const char *, ...)
     __attribute__ ((format(printf, 3, 4)));
 
-position_t position_get_from_str(const char *);
-char * position_to_str(position_t);
+position_t position_fromstr(const char *, ssize_t);
+char * position_tostr(position_t);
 void *name_func_lookup(const char *, const name_func_link_t *);
 const char * name_func_rlookup(void *, const name_func_link_t *);
 void a_exec(const char *);

@@ -58,12 +58,14 @@ typedef enum
 
 /** Convert a corner name into a corner type.
  * \param str A string.
+ * \param len String length.
  * \return A corner type.
  */
 static corner_t
-a_strtocorner(const char *str)
+a_strtocorner(const char *str, size_t len)
 {
-    switch (a_tokenize(str, -1)) {
+    switch (a_tokenize(str, len))
+    {
       case A_TK_BOTTOMRIGHT: return BottomRightCorner;
       case A_TK_BOTTOMLEFT:  return BottomLeftCorner;
       case A_TK_TOPLEFT:     return TopLeftCorner;
@@ -1058,11 +1060,12 @@ luaA_client_mouse_resize(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
     corner_t corner = AutoCorner;
     bool infobox = true;
+    size_t len;
 
     if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
     {
         luaA_checktable(L, 2);
-        corner = a_strtocorner(luaA_getopt_string(L, 2, "corner", "auto"));
+        corner = a_strtocorner(luaA_getopt_string(L, 2, "corner", "auto", &len), len);
         infobox = luaA_getopt_boolean(L, 2, "infobox", true);
     }
 

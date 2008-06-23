@@ -293,13 +293,14 @@ client_raise(client_t *c)
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
-        {
-            xcb_configure_window(globalconf.connection,
-                                 sb->sw->window,
-                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                 config_win_vals);
-            config_win_vals[0] = sb->sw->window;
-        }
+            if(sb->sw)
+            {
+                xcb_configure_window(globalconf.connection,
+                                     sb->sw->window,
+                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                     config_win_vals);
+                config_win_vals[0] = sb->sw->window;
+            }
 
     for(layer = LAYER_OUTOFSPACE - 1; layer >= LAYER_DESKTOP; layer--)
         for(node = globalconf.stack; node; node = node->next)
@@ -957,7 +958,7 @@ luaA_client_border_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     int width = luaA_getopt_number(L, 2, "width", (*c)->border);
-    const char *colorstr = luaA_getopt_string(L, 2, "color", NULL);
+    const char *colorstr = luaA_getopt_string(L, 2, "color", NULL, NULL);
     xcolor_t color;
 
     client_setborder(*c, width);

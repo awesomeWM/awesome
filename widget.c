@@ -310,11 +310,12 @@ luaA_widget_new(lua_State *L)
     widget_t *w = NULL;
     widget_constructor_t *wc;
     alignment_t align;
+    size_t len;
 
     luaA_checktable(L, 1);
-    align = draw_align_get_from_str(luaA_getopt_string(L, 1, "align", "left"));
+    align = draw_align_fromstr(luaA_getopt_string(L, 1, "align", "left", &len), len);
 
-    type = luaA_getopt_string(L, 1, "type", NULL);
+    type = luaA_getopt_string(L, 1, "type", NULL, NULL);
 
     if((wc = name_func_lookup(type, WidgetList)))
         w = wc(align);
