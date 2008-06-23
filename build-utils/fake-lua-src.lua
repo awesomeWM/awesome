@@ -3,13 +3,20 @@
 -- dummy lua source file that can be processed by luadoc.
 -- Take a .c file in stdin
 
+nparam = 0;
+function string.replace_param(s)
+    nparam = nparam + 1;
+    return "@param arg" .. nparam
+end
+
 function string.comment_translate(s)
 	local lua_comment = "";
+        nparam = 0;
 	for line in s:gmatch("[^\r\n]+") do
 		line = line:gsub("/%*%*", "---")
 		line = line:gsub("^.*%*", "--")
-		line = line:gsub("\\lvalue", "@param")
-		line = line:gsub("\\lparam", "@param")
+		line = line:gsub("\\lvalue", "")
+		line = line:gsub("\\(lparam)", string.replace_param)
 		line = line:gsub("\\lreturn", "@return")
 		lua_comment = lua_comment .. line .. "\n"
 	end
