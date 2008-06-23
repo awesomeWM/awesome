@@ -196,7 +196,7 @@ IF(GENERATE_MANPAGES)
 
     # luadoc target
     ADD_CUSTOM_COMMAND(COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
-                       | ${LUA_EXECUTABL} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
+                       | ${LUA_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/build-utils/gendoc.lua
                        > ${LUADOC_FILE}
                        OUTPUT ${LUADOC_FILE}
                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
