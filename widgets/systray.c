@@ -36,7 +36,7 @@ systray_draw(draw_context_t *ctx,
 {
     int i = 0, phys_screen;
     xembed_window_t *em;
-    uint32_t config_win_vals[6];
+    uint32_t config_win_vals[4];
     /* p is always a statusbar, titlebars are forbidden */
     statusbar_t *sb = (statusbar_t *) p;
 
@@ -61,10 +61,6 @@ systray_draw(draw_context_t *ctx,
     config_win_vals[2] = w->area.height;
     /* height */
     config_win_vals[3] = w->area.height;
-    /* sibling */
-    config_win_vals[4] = sb->sw->window;
-    /* stack mode */
-    config_win_vals[5] = XCB_STACK_MODE_ABOVE;
 
     switch(sb->position)
     {
@@ -82,9 +78,7 @@ systray_draw(draw_context_t *ctx,
                                          XCB_CONFIG_WINDOW_X
                                          | XCB_CONFIG_WINDOW_Y
                                          | XCB_CONFIG_WINDOW_WIDTH
-                                         | XCB_CONFIG_WINDOW_HEIGHT
-                                         | XCB_CONFIG_WINDOW_SIBLING
-                                         | XCB_CONFIG_WINDOW_STACK_MODE,
+                                         | XCB_CONFIG_WINDOW_HEIGHT,
                                          config_win_vals);
                     config_win_vals[1] -= config_win_vals[3];
                 }
@@ -105,9 +99,7 @@ systray_draw(draw_context_t *ctx,
                                          XCB_CONFIG_WINDOW_X
                                          | XCB_CONFIG_WINDOW_Y
                                          | XCB_CONFIG_WINDOW_WIDTH
-                                         | XCB_CONFIG_WINDOW_HEIGHT
-                                         | XCB_CONFIG_WINDOW_SIBLING
-                                         | XCB_CONFIG_WINDOW_STACK_MODE,
+                                         | XCB_CONFIG_WINDOW_HEIGHT,
                                          config_win_vals);
                     config_win_vals[1] += config_win_vals[3];
                 }
@@ -132,9 +124,7 @@ systray_draw(draw_context_t *ctx,
                                          XCB_CONFIG_WINDOW_X
                                          | XCB_CONFIG_WINDOW_Y
                                          | XCB_CONFIG_WINDOW_WIDTH
-                                         | XCB_CONFIG_WINDOW_HEIGHT
-                                         | XCB_CONFIG_WINDOW_SIBLING
-                                         | XCB_CONFIG_WINDOW_STACK_MODE,
+                                         | XCB_CONFIG_WINDOW_HEIGHT,
                                          config_win_vals);
                     config_win_vals[0] += config_win_vals[2];
                 }

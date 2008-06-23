@@ -284,12 +284,23 @@ client_raise(client_t *c)
     layer_t layer;
     statusbar_t *sb;
     int screen;
-
-    config_win_vals[0] = XCB_NONE;
-    config_win_vals[1] = XCB_STACK_MODE_BELOW;
+    xembed_window_t *emwin;
 
     /* Push c on top of the stack. */
     stack_client_push(c);
+
+    config_win_vals[0] = XCB_NONE;
+
+    for(emwin = globalconf.embedded; emwin; emwin = emwin->next)
+    {
+        xcb_configure_window(globalconf.connection,
+                             emwin->win,
+                             XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                             config_win_vals);
+        config_win_vals[0] = emwin->win;
+    }
+
+    config_win_vals[1] = XCB_STACK_MODE_BELOW;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
