@@ -25,12 +25,13 @@
 #include <assert.h>
 #include "common/util.h"
 
-#define DO_ARRAY(type_t, pfx, dtor)                                         \
+#define ARRAY_TYPE(type_t, pfx)                                             \
     typedef struct pfx##_array_t {                                          \
         type_t *tab;                                                        \
         int len, size;                                                      \
-    } pfx##_array_t;                                                        \
-                                                                            \
+    } pfx##_array_t
+
+#define ARRAY_FUNCS(type_t, pfx, dtor)                                      \
     static inline pfx##_array_t * pfx##_array_new(void) {                   \
         return p_new(pfx##_array_t, 1);                                     \
     }                                                                       \
@@ -78,6 +79,9 @@
     static inline void pfx##_array_append(pfx##_array_t *arr, type_t e) {   \
         pfx##_array_splice(arr, arr->len, 0, &e, 1);                        \
     }
+
+#define DO_ARRAY(type_t, pfx, dtor)                                         \
+    ARRAY_TYPE(type_t, pfx); ARRAY_FUNCS(type_t, pfx, dtor)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
