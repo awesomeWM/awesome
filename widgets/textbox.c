@@ -24,6 +24,7 @@
 #include "screen.h"
 #include "common/util.h"
 #include "common/configopts.h"
+#include "common/tokenize.h"
 
 extern awesome_t globalconf;
 
@@ -73,15 +74,18 @@ textbox_tell(widget_t *widget, const char *property, const char *new_value)
 {
     textbox_data_t *d = widget->data;
 
-    if(!a_strcmp(property, "text"))
+    switch(a_tokenize(property, -1))
     {
+      case A_TK_TEXT:
         p_delete(&d->text);
         a_iso2utf8(new_value, &d->text);
-    }
-    else if(!a_strcmp(property, "width"))
+        break;
+      case A_TK_WIDTH:
         d->width = atoi(new_value);
-    else
+        break;
+      default:
         return WIDGET_ERROR;
+    }
 
     return WIDGET_NOERROR;
 }

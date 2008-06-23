@@ -412,7 +412,8 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
 
-    switch (prop) {
+    switch (prop)
+    {
       case A_TK_GAP:
         d->gap = atoi(new_value);
         return WIDGET_NOERROR;
@@ -470,7 +471,8 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         return WIDGET_ERROR;
     }
 
-    switch (prop) {
+    switch (prop)
+    {
       case A_TK_DATA:
         value = atof(setting);
         bar->value = (value < bar->min_value ? bar->min_value :
