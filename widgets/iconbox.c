@@ -21,6 +21,7 @@
 
 #include "widget.h"
 #include "common/util.h"
+#include "common/tokenize.h"
 
 typedef struct
 {
@@ -73,15 +74,18 @@ iconbox_tell(widget_t *widget, const char *property, const char *new_value)
     if(!new_value)
         return WIDGET_ERROR_NOVALUE;
 
-    if(!a_strcmp(property, "image"))
+    switch(a_tokenize(property, -1))
     {
+      case A_TK_IMAGE:
         draw_image_delete(&d->image);
         d->image = draw_image_new(new_value);
-    }
-    else if(!a_strcmp(property, "resize"))
+        break;
+      case A_TK_RESIZE:
         d->resize = a_strtobool(new_value);
-    else
+        break;
+      default:
        return WIDGET_ERROR;
+    }
 
     return WIDGET_NOERROR;
 }
