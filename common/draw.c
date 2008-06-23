@@ -19,9 +19,6 @@
  *
  */
 
-/* asprintf */
-#define _GNU_SOURCE
-
 #include <cairo-xcb.h>
 
 #include "config.h"
@@ -1179,7 +1176,7 @@ area_array_remove(area_array_t *areas, area_t elem)
                 {
                     .x = r.x,
                     .y = r.y,
-                    .width = AREA_LEFT(inter) - r.x,
+                    .width = AREA_LEFT(inter) - AREA_LEFT(r),
                     .height = r.height,
                 };
                 area_array_append(areas, extra);
@@ -1192,7 +1189,7 @@ area_array_remove(area_array_t *areas, area_t elem)
                     .x = r.x,
                     .y = r.y,
                     .width = r.width,
-                    .height = AREA_TOP(inter) - r.y,
+                    .height = AREA_TOP(inter) - AREA_LEFT(r),
                 };
                 area_array_append(areas, extra);
             }

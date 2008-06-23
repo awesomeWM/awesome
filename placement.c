@@ -73,6 +73,7 @@ placement_smart(client_t *c)
     area_array_t areas;
     bool found = false;
     layout_t *layout;
+    int i;
 
     area_array_init(&areas);
     screen_geometry = screen_area_get(c->screen,
@@ -83,8 +84,8 @@ placement_smart(client_t *c)
     area_array_append(&areas, screen_geometry);
 
     for(client = globalconf.clients; client; client = client->next)
-        if((client->isfloating || layout == layout_floating)
-            && client_isvisible(client, c->screen))
+        if(client != c && (client->isfloating || layout == layout_floating)
+           && client_isvisible(client, c->screen))
         {
             newgeometry = client->f_geometry;
             newgeometry.width += 2 * client->border;
@@ -98,7 +99,7 @@ placement_smart(client_t *c)
     newgeometry.width = 0;
     newgeometry.height = 0;
 
-    for(int i = 0; i < areas.len; i++)
+    for(i = areas.len - 1; i >= 0; i--)
     {
         area_t *r = &areas.tab[i];
 
@@ -113,14 +114,12 @@ placement_smart(client_t *c)
     /* we did not found a space with enough space for our size:
      * just take the biggest available and go in */
     if(!found)
-    {
-        for(int i = 0; i < areas.len; i++)
+        for(i = 0; i < areas.len; i++)
         {
             area_t *r = &areas.tab[i];
             if(r->width * r->height > newgeometry.width * newgeometry.height)
                 newgeometry = *r;
         }
-    }
 
     /* restore height and width */
     newgeometry.width = c->f_geometry.width;
@@ -134,6 +133,10 @@ placement_smart(client_t *c)
     return newgeometry;
 }
 
+/** Compute placement for a window centered under the mouse.
+ * \param c The client.
+ * \return The proposed geometry.
+ */
 area_t
 placement_under_mouse(client_t *c)
 {
