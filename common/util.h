@@ -30,6 +30,8 @@
 #include <assert.h>
 #include <alloca.h>
 
+#include "tokenize.h"
+
 /** A list of possible position, not sex related */
 typedef enum
 {
@@ -295,14 +297,18 @@ a_strncat(char *dst, ssize_t n, const char *src, ssize_t l)
  * \return true if the string is recognized as possibly true, false otherwise.
  */
 static inline bool
-a_strtobool(const char *s)
+a_strtobool(const char *s, ssize_t len)
 {
-    if(!strcasecmp(s, "true")
-       || !strcasecmp(s, "on")
-       || !strcasecmp(s, "yes")
-       || !strcasecmp(s, "1"))
-        return true;
-    return false;
+    switch(a_tokenize(s, len))
+    {
+        case A_TK_TRUE:
+        case A_TK_YES:
+        case A_TK_ON:
+        case A_TK_1:
+          return true;
+        default:
+          return false;
+    }
 }
 
 #define fatal(string, ...) _fatal(__LINE__, \

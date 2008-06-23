@@ -1,3 +1,4 @@
+1
 align
 all
 auto
@@ -26,6 +27,7 @@ left
 line
 max_value
 min_value
+on
 resize
 reverse
 right
@@ -45,6 +47,8 @@ ticks_gap
 top
 topleft
 topright
+true
 vertical
 vertical_gradient
 width
+yes

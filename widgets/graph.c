@@ -414,10 +414,10 @@ graph_tell(widget_t *widget, const char *property, const char *new_value)
         graph_pcolor_set(&graph->pcolor_end, setting);
         break;
       case A_TK_VERTICAL_GRADIENT:
-        graph->vertical_gradient = a_strtobool(setting);
+        graph->vertical_gradient = a_strtobool(setting, -1);
         break;
       case A_TK_SCALE:
-        graph->scale = a_strtobool(setting);
+        graph->scale = a_strtobool(setting, -1);
         break;
       case A_TK_MAX_VALUE:
         graph->max_value = atof(setting);

@@ -436,7 +436,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
         d->height = atof(new_value);
         return WIDGET_NOERROR;
       case A_TK_VERTICAL:
-        d->vertical = a_strtobool(new_value);
+        d->vertical = a_strtobool(new_value, -1);
         return WIDGET_NOERROR;
 
     /* following properties need a datasection */
@@ -514,7 +514,7 @@ progressbar_tell(widget_t *widget, const char *property, const char *new_value)
             bar->value = bar->max_value;
         break;
       case A_TK_REVERSE:
-        bar->reverse = a_strtobool(setting);
+        bar->reverse = a_strtobool(setting, -1);
         break;
       default:
         return WIDGET_ERROR;

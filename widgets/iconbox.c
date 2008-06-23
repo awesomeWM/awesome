@@ -81,7 +81,7 @@ iconbox_tell(widget_t *widget, const char *property, const char *new_value)
         d->image = draw_image_new(new_value);
         break;
       case A_TK_RESIZE:
-        d->resize = a_strtobool(new_value);
+        d->resize = a_strtobool(new_value, -1);
         break;
       default:
        return WIDGET_ERROR;

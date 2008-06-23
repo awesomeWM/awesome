@@ -274,7 +274,7 @@ taglist_tell(widget_t *widget, const char *property, const char *new_value)
         d->text_urgent = a_strdup(new_value);
         break;
       case A_TK_SHOW_EMPTY:
-        d->show_empty = a_strtobool(new_value);
+        d->show_empty = a_strtobool(new_value, -1);
         break;
       default:
         return WIDGET_ERROR;
