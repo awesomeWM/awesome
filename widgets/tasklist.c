@@ -28,6 +28,7 @@
 #include "tag.h"
 #include "common/configopts.h"
 #include "common/markup.h"
+#include "common/tokenize.h"
 
 extern awesome_t globalconf;
 
@@ -263,37 +264,42 @@ tasklist_tell(widget_t *widget, const char *property, const char *new_value)
 {
     tasklist_data_t *d = widget->data;
 
-    if(!a_strcmp(property, "text_normal"))
+    switch(a_tokenize(property, -1))
     {
+      case A_TK_TEXT_NORMAL:
         p_delete(&d->text_normal);
         d->text_normal = a_strdup(new_value);
-    }
-    else if(!a_strcmp(property, "text_focus"))
-    {
+        break;
+      case A_TK_TEXT_FOCUS:
         p_delete(&d->text_focus);
         d->text_focus = a_strdup(new_value);
-    }
-    else if(!a_strcmp(property, "text_urgent"))
-    {
+        break;
+      case A_TK_TEXT_URGENT:
         p_delete(&d->text_urgent);
         d->text_urgent = a_strdup(new_value);
-    }
-    else if(!a_strcmp(property, "show_icons"))
+        break;
+      case A_TK_SHOW_ICONS:
         d->show_icons = a_strtobool(new_value);
-    else if(!a_strcmp(property, "show"))
-    {
-        if(!a_strcmp(new_value, "tags"))
+        break;
+      case A_TK_SHOW:
+        switch(a_tokenize(new_value, -1))
+        {
+          case A_TK_TAGS:
             d->show = ShowTags;
-        else if(!a_strcmp(new_value, "focus"))
+            break;
+          case A_TK_FOCUS:
             d->show = ShowFocus;
-        else if(!a_strcmp(new_value, "all"))
+            break;
+          case A_TK_ALL:
             d->show = ShowAll;
-        else
+            break;
+          default:
             return WIDGET_ERROR;
-    }
-    else
+        }
+        break;
+      default:
         return WIDGET_ERROR;
-
+    }
     return WIDGET_NOERROR;
 }
 

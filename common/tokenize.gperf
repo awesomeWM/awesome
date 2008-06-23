@@ -1,4 +1,5 @@
 align
+all
 auto
 bg
 border_padding
@@ -16,6 +17,7 @@ fg_center
 fg_end
 fg_off
 flex
+focus
 gap
 grow
 height
@@ -30,7 +32,10 @@ right
 scale
 shadow
 shadow_offset
+show
 show_empty
+show_icons
+tags
 text
 text_focus
 text_normal
