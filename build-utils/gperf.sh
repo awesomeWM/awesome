@@ -75,7 +75,7 @@ do_c() {
         exit 1;
     fi;
 
-    cat <<EOF | gperf --ignore-case -m16 -l -t -C -F",0" \
+    cat <<EOF | gperf -m16 -l -t -C -F",0" \
         --language=ANSI-C -Na_tokenize_aux \
         | sed -e '/__gnu_inline__/d;s/\<\(__\|\)inline\>//g'
 %{
