@@ -79,7 +79,8 @@ client_loadprops(client_t * c, screen_t *screen)
                          &prop))
         return false;
 
-    if (strlen(prop) != tags->len + 2) {
+    if(a_strlen(prop) != tags->len + 2)
+    {
         /* ignore property if the tag count isn't matching */
         p_delete(&prop);
         return false;
