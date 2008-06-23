@@ -320,7 +320,7 @@ function hook_manage(c)
     if c:name_get():lower():find("pinentry") then
         c:floating_set(true)
     end
-    if c:name_get():find("mplayer") then
+    if c:name_get():lower():find("mplayer") then
         c:floating_set(true)
     end
 end
