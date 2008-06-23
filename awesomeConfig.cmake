@@ -219,13 +219,6 @@ set(CPACK_GENERATOR                    "TBZ2")
 set(CPACK_SOURCE_GENERATOR             "TBZ2")
 set(CPACK_SOURCE_IGNORE_FILES
     ".git;.*.swp$;.*~;.*patch;.gitignore;${BUILD_DIR}")
-
-foreach(file ${AWESOME_CONFIGURE_FILES})
-    string(REPLACE ".in" "" confheader ${file})
-    set( CPACK_SOURCE_IGNORE_FILES
-        ";${CPACK_SOURCE_IGNORE_FILES};${confheader}$;" )
-endforeach()
-
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY  "A dynamic floating and tiling window manager")
 set(CPACK_PACKAGE_VENDOR               "awesome development team")
 set(CPACK_PACKAGE_DESCRIPTION_FILE     "${SOURCE_DIR}/README")
