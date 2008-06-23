@@ -1,14 +1,19 @@
 #!/usr/bin/lua
--- Generate documentation for awesome Lua functions
+-- Translate the custom doxygen tags in c-source to a 
+-- dummy lua source file that can be processed by luadoc.
 -- Take a .c file in stdin
 
-function string.comment_clean(str)
-    local s = str:gsub("/%*%* ", "    ")
-    s = s:gsub(" %*", "")
-	s = s:gsub("\\luastack", "")
-    s = s:gsub("\\lparam", "\n\n    Parameter:")
-    s = s:gsub("\\lreturn", "\n\n    Return:")
-    return s
+function string.comment_translate(s)
+	local lua_comment = "";
+	for line in s:gmatch("[^\r\n]+") do
+		line = line:gsub("/%*%*", "---")
+		line = line:gsub("^.*%*", "--")
+		line = line:gsub("\\lvalue", "@param")
+		line = line:gsub("\\lparam", "@param")
+		line = line:gsub("\\lreturn", "@return")
+		lua_comment = lua_comment .. line .. "\n"
+	end
+    return lua_comment
 end
 
 -- Read all the files in lines
@@ -37,8 +42,8 @@ for i, line in ipairs(ilines) do
         end
         comment = nil
     elseif comment_start then
-		if not line:find("\\param") and not line:find("\\return") and not line:find("\\lvalue") then
-	        comment = comment .. line
+		if not line:find("\\param") and not line:find("\\return") and not line:find("\\luastack") then
+	        comment = comment .. "\n" .. line
 		end
     end
 end
@@ -57,10 +62,10 @@ for i, line in ipairs(ilines) do
             local fctname, fctdef
             _, _, fctname, fctdef = line:find("\"(.+)\", (.+) },")
             if fctname and not fctname:find("^__") then
-                if libtype == "meta" then sep = ":" else sep = "." end
-                print("*" .. libname .. sep .. fctname ..  "*::")
                 if function_doc[fctdef] then
-                    print(function_doc[fctdef]:comment_clean())
+                    print(function_doc[fctdef]:comment_translate())
+					print("function " .. libname .. "." .. fctname .. "()")
+					print("end");
                 else
                     print("This function is not yet documented.")
                 end

@@ -26,6 +26,7 @@ add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
 
 # {{{ Find external utilities
 find_program(CAT_EXECUTABLE cat)
+find_program(LN_EXECUTABLE ln)
 find_program(GREP_EXECUTABLE grep)
 find_program(GIT_EXECUTABLE git)
 find_program(GPERF_EXECUTABLE gperf)

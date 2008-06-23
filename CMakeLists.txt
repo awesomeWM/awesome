@@ -169,52 +169,6 @@ endif()
 
 # {{{ Manpages.
 if(GENERATE_MANPAGES)
-
-    # {{{ Lua API documentation.
-    set(LUADOC_FILE ${BUILD_DIR}/apidocgen.txt)
-
-    macro(a_file_match infile regex result_var)
-        if(CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION LESS 6)
-            # cmake < 2.6 doesn't know FILE(STRINGS ...)
-            execute_process(
-                COMMAND ${GREP_EXECUTABLE} -l ${regex} ${infile}
-                RESULT_VARIABLE exit_code
-                OUTPUT_QUIET)
-            if(exit_code EQUAL 0)
-                set(${result_var} TRUE)
-            else()
-                set(${result_var} FALSE)
-            endif()
-        else()
-            file(STRINGS ${infile} match REGEX ${regex} LIMIT_COUNT 1)
-            if(match)
-                set(${result_var} TRUE)
-            else()
-                set(${result_var} FALSE)
-            endif()
-        endif()
-    endmacro()
-
-    # find .c files exporting lua functions
-    foreach(cfile ${AWE_SRCS})
-        a_file_match(${cfile} "const struct luaL_reg" result)
-        if(result)
-            set(LUA_APIDOC_SRCS ${LUA_APIDOC_SRCS} ${cfile})
-        endif()
-    endforeach()
-
-    # luadoc target
-    add_custom_command(
-        COMMAND ${CAT_EXECUTABLE} ${LUA_APIDOC_SRCS}
-                | ${LUA_EXECUTABLE} ${SOURCE_DIR}/build-utils/gendoc.lua
-                > ${LUADOC_FILE}
-        OUTPUT  ${LUADOC_FILE}
-        WORKING_DIRECTORY ${SOURCE_DIR}
-        DEPENDS ${LUA_APIDOC_SRCS}
-        COMMENT "Generating Lua API documentation."
-        VERBATIM)
-    # }}}
-
     foreach(txtfile ${AWE_MAN_SRCS})
         string(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
         string(REPLACE ${SOURCE_DIR}
@@ -222,14 +176,12 @@ if(GENERATE_MANPAGES)
         string(REGEX REPLACE ".xml\$" ".gz" gzfile ${xmlfile})
         string(REGEX REPLACE ".gz\$" "" manfile ${gzfile})
 
-        # TODO: This is still not 100% right. Actually only
-        #       awesomerc.5.xml should depend on ${LUADOC_FILE}.
         add_custom_command(
             COMMAND ${CAT_EXECUTABLE} ${txtfile}
                     | ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} -
             WORKING_DIRECTORY ${BUILD_DIR}
             OUTPUT  ${xmlfile}
-            DEPENDS ${txtfile} ${LUADOC_FILE}
+            DEPENDS ${txtfile}
             VERBATIM)
         add_custom_command(
             COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
@@ -264,17 +216,72 @@ endif()
 
 # {{{ Lua API Documentation
 if(LUADOC_EXECUTABLE)
+
+    set(capi_lua ${BUILD_DIR}/lib/capi.lua)
+
+    if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
+        file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
+        # setup symlink so everything is in one directory
+        foreach(lua_file ${AWE_LUA_FILES})
+            execute_process(COMMAND ${LN_EXECUTABLE} -s ${lua_file}
+                            WORKING_DIRECTORY ${BUILD_DIR}/lib)
+        endforeach()
+    endif()
+
+    # {{{ setup a command for ${capi_lua}
+    macro(a_file_match infile regex result_var)
+        if(CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION LESS 6)
+            # cmake < 2.6 doesn't know FILE(STRINGS ...)
+            execute_process(
+                COMMAND ${GREP_EXECUTABLE} -l ${regex} ${infile}
+                RESULT_VARIABLE exit_code
+                OUTPUT_QUIET)
+            if(exit_code EQUAL 0)
+                set(${result_var} TRUE)
+            else()
+                set(${result_var} FALSE)
+            endif()
+        else()
+            file(STRINGS ${infile} match REGEX ${regex} LIMIT_COUNT 1)
+            if(match)
+                set(${result_var} TRUE)
+            else()
+                set(${result_var} FALSE)
+            endif()
+        endif()
+    endmacro()
+
+    set(luadoc_c_srcs "")
+
+    # find .c files exporting lua functions
+    foreach(cfile ${AWE_SRCS})
+        a_file_match(${cfile} "const struct luaL_reg" result)
+        if(result)
+            set(luadoc_c_srcs ${luadoc_c_srcs} ${cfile})
+        endif()
+    endforeach()
+
+    # create fake lua source file to process by luadoc
+    add_custom_command(
+        COMMAND ${CAT_EXECUTABLE} ${luadoc_c_srcs}
+                | ${LUA_EXECUTABLE} ${SOURCE_DIR}/build-utils/fake-lua-src.lua
+                > ${capi_lua}
+        OUTPUT  ${capi_lua}
+        DEPENDS ${luadoc_c_srcs}
+        COMMENT "Generating fake lua source."
+        VERBATIM)
+    # }}}
+
     # dont include full path names in documentation
-    set(luadoc_srcs "")
-    foreach(file ${AWE_LUA_FILES})
-        string(REPLACE ${SOURCE_DIR}/ "" file ${file})
-        set(luadoc_srcs ${luadoc_srcs} ${file})
+    foreach(filename ${AWE_LUA_FILES} ${capi_lua})
+        get_filename_component(filename ${filename} NAME)
+        set(luadoc_srcs ${luadoc_srcs} ${filename})
     endforeach()
 
     add_custom_target(luadoc ALL
         COMMAND ${LUADOC_EXECUTABLE} ${luadoc_srcs} -d ${BUILD_DIR}/luadoc
-        WORKING_DIRECTORY ${SOURCE_DIR}
-        DEPENDS ${AWE_LUA_FILES})
+        WORKING_DIRECTORY ${BUILD_DIR}/lib
+        DEPENDS ${AWE_LUA_FILES} ${capi_lua})
 endif()
 # }}}
 
