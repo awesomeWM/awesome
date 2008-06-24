@@ -22,6 +22,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef WITH_IMLIB2
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#endif
+
 #include "config.h"
 #include "common/version.h"
 #include "awesome-version-internal.h"
@@ -51,7 +55,7 @@ eprint_version(const char *const executable)
 #ifdef WITH_IMLIB2
     printf("Imlib2\n");
 #else
-    printf("GdkPixBuf\n");
+    printf("GdkPixBuf " GDK_PIXBUF_VERSION "\n");
 #endif
     printf("* DBus support: ");
 #ifdef WITH_DBUS
