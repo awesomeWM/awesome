@@ -109,17 +109,11 @@ tag_append_to_screen(tag_t *tag, int screen)
 void
 tag_client(client_t *c, tag_t *t)
 {
-    tag_client_node_t *tc;
-
     /* don't tag twice */
     if(is_client_tagged(c, t))
         return;
 
-    tc = p_new(tag_client_node_t, 1);
-    tc->client = c;
-    tc->tag = t;
-    tag_client_node_list_push(&globalconf.tclink, tc);
-
+    client_array_append(&t->clients, c);
     client_saveprops(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     globalconf.screens[c->screen].need_arrange = true;
@@ -132,17 +126,14 @@ tag_client(client_t *c, tag_t *t)
 void
 untag_client(client_t *c, tag_t *t)
 {
-    tag_client_node_t *tc;
-
-    for(tc = globalconf.tclink; tc; tc = tc->next)
-        if(tc->client == c && tc->tag == t)
+    for(int i = 0; i < t->clients.len; i++)
+        if(t->clients.tab[i] == c)
         {
-            tag_client_node_list_detach(&globalconf.tclink, tc);
-            p_delete(&tc);
+            client_array_take(&t->clients, i);
             client_saveprops(c);
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-            globalconf.screens[c->screen].need_arrange = True;
-            break;
+            globalconf.screens[c->screen].need_arrange = true;
+            return;
         }
 }
 
@@ -154,13 +145,8 @@ untag_client(client_t *c, tag_t *t)
 bool
 is_client_tagged(client_t *c, tag_t *t)
 {
-    tag_client_node_t *tc;
-
-    if(!c)
-        return false;
-
-    for(tc = globalconf.tclink; tc; tc = tc->next)
-        if(tc->client == c && tc->tag == t)
+    for(int i = 0; i < t->clients.len; i++)
+        if (t->clients.tab[i] == c)
             return true;
 
     return false;

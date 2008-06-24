@@ -34,6 +34,7 @@ tag_t *tag_new(const char *, layout_t *, double, int, int);
 static inline void
 tag_delete(tag_t **tag)
 {
+    client_array_wipe(&(*tag)->clients);
     p_delete(&(*tag)->name);
     p_delete(tag);
 }
@@ -49,8 +50,6 @@ int luaA_tag_userdata_new(lua_State *, tag_t *);
 
 DO_RCNT(tag_t, tag, tag_delete)
 ARRAY_FUNCS(tag_t *, tag, tag_unref);
-
-DO_SLIST(tag_client_node_t, tag_client_node, p_delete)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -318,6 +318,7 @@ struct client_t
     /** Next and previous clients */
     client_t *prev, *next;
 };
+DO_ARRAY(client_t *, client, DO_NOTHING);
 
 struct client_node_t
 {
@@ -346,17 +347,10 @@ struct _tag_t
     int nmaster;
     /** Number of columns in tile layout */
     int ncol;
+    /** clients in this tag */
+    client_array_t clients;
 };
 ARRAY_TYPE(tag_t *, tag);
-
-/** Tag client link type */
-struct tag_client_node_t
-{
-    tag_t *tag;
-    client_t *client;
-    /** Next and previous tag_client_nodes */
-    tag_client_node_t *prev, *next;
-};
 
 /** Padding type */
 typedef struct
@@ -431,8 +425,6 @@ struct awesome_t
     client_node_t *focus;
     /** Stack client history */
     client_node_t *stack;
-    /** Link between tags and clients */
-    tag_client_node_t *tclink;
     /** Command line passed to awesome */
     char *argv;
     /** Last XMotionEvent coords */
