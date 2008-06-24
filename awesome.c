@@ -117,9 +117,8 @@ scan(void)
             state = window_getstate(wins[i]);
 
             if(!attr_r || attr_r->override_redirect
-               || !(attr_r->map_state == XCB_MAP_STATE_VIEWABLE
-                    || state == XCB_WM_ICONIC_STATE
-                    || state == XCB_WM_WITHDRAWN_STATE))
+               || attr_r->map_state != XCB_MAP_STATE_VIEWABLE
+               || state == XCB_WM_WITHDRAWN_STATE)
             {
                 p_delete(&attr_r);
                 continue;
@@ -146,10 +145,7 @@ scan(void)
             real_screen = screen_get_bycoord(globalconf.screens_info, screen,
                                              geom_r->x, geom_r->y);
 
-            if(xembed_info_get(globalconf.connection, wins[i], &eminfo))
-                systray_request_handle(wins[i], screen, &eminfo);
-            else
-                client_manage(wins[i], geom_r, real_screen);
+            client_manage(wins[i], geom_r, real_screen);
 
             p_delete(&geom_r);
             p_delete(&geom_wins[i]);
