@@ -56,6 +56,7 @@ systray_init(int phys_screen)
                       XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
 
     /* Fill event */
+    p_clear(&ev, 1);
     ev.response_type = XCB_CLIENT_MESSAGE;
     ev.window = xscreen->root;
     ev.format = 32;
@@ -74,7 +75,7 @@ systray_init(int phys_screen)
                             atom_systray,
                             XCB_CURRENT_TIME);
 
-    xcb_send_event(globalconf.connection, false, xscreen->root, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+    xcb_send_event(globalconf.connection, false, xscreen->root, 0xFFFFFF, (char *) &ev);
 }
 
 /** Handle a systray request.
@@ -115,11 +116,11 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
     if(globalconf.screens[phys_screen].systray.has_systray_widget
        && em->info.flags & XEMBED_MAPPED)
     {
-        static const uint32_t config_win_vals[2] = { XCB_NONE, XCB_STACK_MODE_BELOW };
+        static const uint32_t config_win_vals[] = { XCB_STACK_MODE_ABOVE };
         xcb_map_window(globalconf.connection, em->win);
         xcb_configure_window(globalconf.connection,
                              em->win,
-                             XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                             XCB_CONFIG_WINDOW_STACK_MODE,
                              config_win_vals);
     }
     else
