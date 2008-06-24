@@ -81,7 +81,7 @@ if(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
     set(BUILD_FROM_GIT TRUE)
 else()
     # get version from version stamp
-    file(READ ${SOURCE_DIR}/.version_stamp VERSION LIMIT 128)
+    file(READ ${SOURCE_DIR}/.version_stamp VERSION)
 endif()
 # }}}
 
