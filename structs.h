@@ -207,6 +207,12 @@ DO_RCNT(titlebar_t, titlebar, titlebar_delete)
 
 /** Keys bindings */
 ARRAY_TYPE(struct keybinding_t *, keybinding);
+
+typedef struct keybinding_idx_t {
+    keybinding_array_t by_code;
+    keybinding_array_t by_sym;
+} keybinding_idx_t;
+
 struct keybinding_t
 {
     /** Ref count */
@@ -220,10 +226,6 @@ struct keybinding_t
     /** Lua function to execute. */
     luaA_function fct;
 };
-
-void keybinding_delete(keybinding_t **);
-DO_RCNT(keybinding_t, keybinding, keybinding_delete)
-ARRAY_FUNCS(keybinding_t *, keybinding, keybinding_unref)
 
 /** Status bar */
 struct statusbar_t
@@ -399,7 +401,7 @@ struct awesome_t
     /** Screens info */
     screens_info_t *screens_info;
     /** Keys bindings list */
-    keybinding_array_t keys;
+    keybinding_idx_t keys;
     /** Mouse bindings list */
     struct
     {

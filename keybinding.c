@@ -2,6 +2,7 @@
  * keybinding.c - Key bindings configuration management
  *
  * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008 Pierre Habouzit <madcoder@debian.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +23,8 @@
 /* XStringToKeysym() */
 #include <X11/Xlib.h>
 
-#include "structs.h"
+#include "keybinding.h"
+#include "event.h"
 #include "lua.h"
 #include "window.h"
 
@@ -31,27 +33,140 @@ extern awesome_t globalconf;
 DO_LUA_NEW(static, keybinding_t, keybinding, "keybinding", keybinding_ref)
 DO_LUA_GC(keybinding_t, keybinding, "keybinding", keybinding_unref)
 
+void keybinding_idx_wipe(keybinding_idx_t *idx)
+{
+    keybinding_array_wipe(&idx->by_code);
+    keybinding_array_wipe(&idx->by_sym);
+}
+
 void keybinding_delete(keybinding_t **kbp)
 {
     p_delete(kbp);
 }
 
+static int
+keybinding_ev_cmp(xcb_keysym_t keysym, xcb_keycode_t keycode,
+                  unsigned long mod, const keybinding_t *k)
+{
+    if (k->keysym) {
+        if (k->keysym != keysym)
+            return k->keysym > keysym ? 1 : -1;
+    }
+    if (k->keycode) {
+        if (k->keycode != keycode)
+            return k->keycode > keycode ? 1 : -1;
+    }
+    return k->mod == mod ? 0 : (k->mod > mod ? 1 : -1);
+}
+
+static int
+keybinding_cmp(const keybinding_t *k1, const keybinding_t *k2)
+{
+    assert ((k1->keysym && k2->keysym) || (k1->keycode && k2->keycode));
+    assert ((!k1->keysym && !k2->keysym) || (!k1->keycode && !k2->keycode));
+
+    if (k1->keysym != k2->keysym)
+        return k2->keysym > k1->keysym ? 1 : -1;
+    if (k1->keycode != k2->keycode)
+        return k2->keycode > k1->keycode ? 1 : -1;
+    return k1->mod == k2->mod ? 0 : (k2->mod > k1->mod ? 1 : -1);
+}
+
+void
+keybinding_register_root(keybinding_t *k)
+{
+    keybinding_idx_t *idx = &globalconf.keys;
+    keybinding_array_t *arr = k->keysym ? &idx->by_sym : &idx->by_code;
+    int l = 0, r = arr->len;
+
+    keybinding_ref(&k);
+
+    while (l < r) {
+        int i = (r + l) / 2;
+        switch (keybinding_cmp(k, arr->tab[i])) {
+          case -1: /* k < arr->tab[i] */
+            r = i;
+            break;
+          case 0: /* k == arr->tab[i] */
+            keybinding_unref(&arr->tab[i]);
+            arr->tab[i] = k;
+            return;
+          case 1: /* k > arr->tab[i] */
+            l = i + 1;
+            break;
+        }
+    }
+
+    keybinding_array_splice(arr, r, 0, &k, 1);
+    window_root_grabkey(k);
+}
+
+void
+keybinding_unregister_root(keybinding_t **k)
+{
+    keybinding_idx_t *idx = &globalconf.keys;
+    keybinding_array_t *arr = (*k)->keysym ? &idx->by_sym : &idx->by_code;
+    int l = 0, r = arr->len;
+
+    while (l < r) {
+        int i = (r + l) / 2;
+        switch (keybinding_cmp(*k, arr->tab[i])) {
+          case -1: /* k < arr->tab[i] */
+            r = i;
+            break;
+          case 0: /* k == arr->tab[i] */
+            keybinding_array_take(arr, i);
+            window_root_ungrabkey(*k);
+            keybinding_unref(k);
+            return;
+          case 1: /* k > arr->tab[i] */
+            l = i + 1;
+            break;
+        }
+    }
+}
+
+keybinding_t *
+keybinding_find(const keybinding_idx_t *idx, const xcb_key_press_event_t *ev)
+{
+    const keybinding_array_t *arr = &idx->by_sym;
+    int l, r, mod = CLEANMASK(ev->state);
+    xcb_keysym_t keysym;
+
+    keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
+
+  again:
+    l = 0;
+    r = arr->len;
+    while (l < r) {
+        int i = (r + l) / 2;
+        switch (keybinding_ev_cmp(keysym, ev->detail, mod, arr->tab[i])) {
+          case -1: /* ev < arr->tab[i] */
+            r = i;
+            break;
+          case 0: /* ev == arr->tab[i] */
+            return arr->tab[i];
+          case 1: /* ev > arr->tab[i] */
+            l = i + 1;
+            break;
+        }
+    }
+    if (arr != &idx->by_code) {
+        arr = &idx->by_code;
+        goto again;
+    }
+    return NULL;
+}
+
 static void
 __luaA_keystore(keybinding_t *key, const char *str)
 {
-    xcb_keycode_t kc;
-    int ikc;
-
     if(!a_strlen(str))
         return;
-    else if(a_strncmp(str, "#", 1))
+    else if(*str != '#')
         key->keysym = XStringToKeysym(str);
     else
-    {
-        ikc = atoi(str + 1);
-        memcpy(&kc, &ikc, sizeof(KeyCode));
-        key->keycode = kc;
-    }
+        key->keycode = atoi(str + 1);
 }
 
 /** Define a global key binding. This key binding will always be available.
@@ -103,14 +218,7 @@ luaA_keybinding_add(lua_State *L)
 {
     keybinding_t **k = luaA_checkudata(L, 1, "keybinding");
 
-    /* Check that the keybinding has not been already added. */
-    for(int i = 0; i < globalconf.keys.len; i++)
-        if(globalconf.keys.tab[i] == *k)
-            luaL_error(L, "keybinding already added");
-
-    keybinding_array_append(&globalconf.keys, keybinding_ref(k));
-    window_root_grabkey(*k);
-
+    keybinding_register_root(*k);
     return 0;
 }
 
@@ -124,15 +232,7 @@ static int
 luaA_keybinding_remove(lua_State *L)
 {
     keybinding_t **k = luaA_checkudata(L, 1, "keybinding");
-
-    for(int i = 0; i < globalconf.keys.len; i++)
-        if(globalconf.keys.tab[i] == *k)
-        {
-            keybinding_array_take(&globalconf.keys, i);
-            window_root_ungrabkey(*k);
-            keybinding_unref(k);
-        }
-
+    keybinding_unregister_root(k);
     return 0;
 }
 
