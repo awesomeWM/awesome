@@ -20,10 +20,14 @@
  */
 
 #include <xcb/xcb.h>
+#include <xcb/xcb_atom.h>
 
 #include "widget.h"
 #include "screen.h"
 #include "common/xembed.h"
+
+#define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
+#define _NET_SYSTEM_TRAY_ORIENTATION_VERT 1
 
 extern awesome_t globalconf;
 
@@ -36,11 +40,17 @@ systray_draw(draw_context_t *ctx,
 {
     int i = 0, phys_screen;
     xembed_window_t *em;
-    uint32_t config_win_vals[4];
+    uint32_t orient, config_win_vals[4];
     /* p is always a statusbar, titlebars are forbidden */
     statusbar_t *sb = (statusbar_t *) p;
+    xutil_intern_atom_request_t net_system_tray_orientation_q;
+    xcb_atom_t net_system_tray_orientation;
 
     phys_screen = screen_virttophys(screen);
+
+    net_system_tray_orientation_q = xutil_intern_atom(globalconf.connection,
+                                                      &globalconf.atoms,
+                                                      "_NET_SYSTEM_TRAY_ORIENTATION");
 
     for(em = globalconf.embedded; em; em = em->next)
         if(em->phys_screen == phys_screen)
@@ -68,6 +78,7 @@ systray_draw(draw_context_t *ctx,
         config_win_vals[0] = sb->sw->geometry.x + w->area.y;
         config_win_vals[1] = sb->sw->geometry.y + sb->sw->geometry.height
             - w->area.x - config_win_vals[3];
+        orient = _NET_SYSTEM_TRAY_ORIENTATION_VERT;
         for(em = globalconf.embedded; em; em = em->next)
             if(em->phys_screen == phys_screen)
             {
@@ -87,6 +98,7 @@ systray_draw(draw_context_t *ctx,
             }
         break;
       case Right:
+        orient = _NET_SYSTEM_TRAY_ORIENTATION_VERT;
         config_win_vals[0] = sb->sw->geometry.x - w->area.y;
         config_win_vals[1] = sb->sw->geometry.y + w->area.x;
         for(em = globalconf.embedded; em; em = em->next)
@@ -108,6 +120,7 @@ systray_draw(draw_context_t *ctx,
             }
         break;
       default:
+        orient = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
         /* x */
         config_win_vals[0] = sb->sw->geometry.x + w->area.x;
         /* y */
@@ -136,6 +149,16 @@ systray_draw(draw_context_t *ctx,
 
     /* inform that there's a widget */
     globalconf.screens[phys_screen].systray.has_systray_widget = true;
+
+    /* set statusbar orientation */
+    /** \todo stop setting that property on each redraw */
+    net_system_tray_orientation = xutil_intern_atom_reply(globalconf.connection,
+                                                          &globalconf.atoms,
+                                                          net_system_tray_orientation_q);
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        globalconf.screens[phys_screen].systray.window,
+                        net_system_tray_orientation, CARDINAL, 32, 1, &orient);
 
     return w->area.width;
 }

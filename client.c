@@ -387,8 +387,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     if(rettrans || c->isfixed)
         client_setfloating(c, true, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
 
-    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK,
-                                 select_input_val);
+    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
     /* Push client in client list */
     client_list_push(&globalconf.clients, c);

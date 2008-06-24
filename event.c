@@ -620,6 +620,8 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
     atom_xem = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_xem_q);
     atom_systray = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_systray_q);
 
+    printf("msg %d to %d\n", ev->type, ev->window);
+
     if(ev->type == atom_xem)
         return xembed_process_client_message(ev);
     else if(ev->type == atom_systray)
