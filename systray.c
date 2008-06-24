@@ -114,7 +114,14 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 
     if(globalconf.screens[phys_screen].systray.has_systray_widget
        && em->info.flags & XEMBED_MAPPED)
-       xcb_map_window(globalconf.connection, em->win);
+    {
+        static const uint32_t config_win_vals[2] = { XCB_NONE, XCB_STACK_MODE_BELOW };
+        xcb_map_window(globalconf.connection, em->win);
+        xcb_configure_window(globalconf.connection,
+                             em->win,
+                             XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                             config_win_vals);
+    }
     else
         xcb_unmap_window(globalconf.connection, em->win);
 
