@@ -33,6 +33,7 @@
 #include "client.h"
 #include "widget.h"
 #include "titlebar.h"
+#include "keybinding.h"
 #include "keygrabber.h"
 #include "lua.h"
 #include "systray.h"
@@ -390,8 +391,6 @@ event_handle_keypress(void *data __attribute__ ((unused)),
                       xcb_connection_t *connection __attribute__ ((unused)),
                       xcb_key_press_event_t *ev)
 {
-    xcb_keysym_t keysym;
-
     if(globalconf.keygrabber != LUA_REFNIL)
     {
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);
@@ -409,15 +408,9 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     }
     else
     {
-        keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
-
-        for(int i = 0; i < globalconf.keys.len; i++)
-        {
-            keybinding_t *k = globalconf.keys.tab[i];
-            if(((k->keycode && ev->detail == k->keycode) || (k->keysym && keysym == k->keysym))
-               && k->fct && CLEANMASK(k->mod) == CLEANMASK(ev->state))
-                luaA_dofunction(globalconf.L, k->fct, 0);
-        }
+        keybinding_t *k = keybinding_find(&globalconf.keys, ev);
+        if (k && k->fct)
+            luaA_dofunction(globalconf.L, k->fct, 0);
     }
 
     return 0;
