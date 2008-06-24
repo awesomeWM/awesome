@@ -152,6 +152,7 @@ add_custom_target(generated_sources
             ${BUILD_DIR}/common/tokenize.h)
 
 add_dependencies(${PROJECT_AWE_NAME} generated_sources)
+add_dependencies(${PROJECT_AWECLIENT_NAME} generated_sources)
 # }}}
 
 # {{{ version stamp
