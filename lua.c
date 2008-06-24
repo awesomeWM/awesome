@@ -123,6 +123,14 @@ luaA_exec(lua_State *L)
 static int
 luaA_restart(lua_State *L __attribute__ ((unused)))
 {
+    client_t *c;
+
+    for(c = globalconf.clients; c; c = c->next)
+        client_unban(c);
+
+    xcb_aux_sync(globalconf.connection);
+    xcb_disconnect(globalconf.connection);
+
     a_exec(globalconf.argv);
     return 0;
 }
