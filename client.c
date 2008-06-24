@@ -1365,33 +1365,22 @@ luaA_client_unmanage(lua_State *L)
     return 0;
 }
 
-/** Hide a client.
+/** Hide or unhide a client.
  * \param L The Lua VM state.
  *
  * \luastack
  * \lvalue A client.
  */
 static int
-luaA_client_hide(lua_State *L)
+luaA_client_hide_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
-    (*c)->ishidden = true;
-    globalconf.screens[(*c)->screen].need_arrange = true;
-    return 0;
-}
-
-/** Unhide a client.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A client.
- */
-static int
-luaA_client_unhide(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    (*c)->ishidden = false;
-    globalconf.screens[(*c)->screen].need_arrange = true;
+    bool v = luaA_checkboolean(L, 2);
+    if(v != (*c)->ishidden)
+    {
+        (*c)->ishidden = v;
+        globalconf.screens[(*c)->screen].need_arrange = true;
+    }
     return 0;
 }
 
@@ -1404,7 +1393,7 @@ luaA_client_unhide(lua_State *L)
  * otherwise.
  */
 static int
-luaA_client_ishidden(lua_State *L)
+luaA_client_hide_get(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     lua_pushboolean(L, (*c)->ishidden);
@@ -1463,9 +1452,8 @@ const struct luaL_reg awesome_client_meta[] =
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },
     { "unmanage", luaA_client_unmanage },
-    { "hide", luaA_client_hide },
-    { "unhide", luaA_client_unhide },
-    { "ishidden", luaA_client_ishidden },
+    { "hide_set", luaA_client_hide_set },
+    { "hide_get", luaA_client_hide_get },
     { "mouse_add", luaA_client_mouse_add },
     { "mouse_remove", luaA_client_mouse_remove },
     { "__eq", luaA_client_eq },

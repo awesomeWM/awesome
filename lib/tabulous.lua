@@ -53,9 +53,9 @@ local function client_display(tabindex, cl)
     local p = tabbed[tabindex][1]
     
     if cl and p ~= cl then
-        cl:unhide()
+        cl:hide(false)
         cl:swap(p)
-        p:hide()
+        p:hide(true)
         cl:focus_set()
 
         tabbed[tabindex][1] = cl
@@ -158,14 +158,14 @@ local function client_untab(cl)
         table.remove(tabbed, tabindex)
     end
 
-    c:unhide()
+    c:hide(false)
     awful.hooks.userhook_call('untabbed', {c})
 end
 
 -- Untab all clients in a tabbed display
 local function client_untab_all(tabindex)
     for i,c in pairs(tabbed[tabindex][2]) do
-        c:unhide()
+        c:hide(false)
         awful.hooks.userhook_call('untabbed', {c})
     end
 
