@@ -47,6 +47,18 @@ eprint_version(const char *const executable)
 	   __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #endif
     printf(" (%s@%s)\n", AWESOME_COMPILE_BY, AWESOME_COMPILE_HOSTNAME);
+    printf("* Image drawing engine: ");
+#ifdef WITH_IMLIB2
+    printf("Imlib2\n");
+#else
+    printf("GdkPixBuf\n");
+#endif
+    printf("* DBus support: ");
+#ifdef WITH_DBUS
+    printf("enabled\n");
+#else
+    printf("disabled\n");
+#endif
     exit(EXIT_SUCCESS);
 }
 
