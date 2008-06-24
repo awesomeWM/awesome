@@ -51,7 +51,7 @@ arrange(int screen)
 
     for(c = globalconf.clients; c; c = c->next)
     {
-        if(!c->ishidden && client_isvisible(c, screen))
+        if(client_isvisible(c, screen))
             client_unban(c);
         /* we don't touch other screens windows */
         else if(c->screen == screen)
