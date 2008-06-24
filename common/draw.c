@@ -609,8 +609,8 @@ draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
         cairo_pattern_destroy(pat);
 }
 
-/** Draw a line into a graph-widget
- * \param ctx Draw context
+/** Draw a line into a graph-widget.
+ * \param ctx Draw context.
  * \param rect The area to draw into.
  * \param to array of offsets to draw the line through...
  * \param cur_index current position in data-array (cycles around)
@@ -686,13 +686,13 @@ draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
     cairo_set_line_width(ctx->cr, 1.0);
 }
 
-/** Draw a circle
- * \param ctx Draw context to draw to
- * \param x x coordinate
- * \param y y coordinate
- * \param r size of the circle
- * \param filled fill circle?
- * \param color color to use
+/** Draw a circle.
+ * \param ctx Draw context to draw to.
+ * \param x X coordinate.
+ * \param y Y coordinate.
+ * \param r Size of the circle.
+ * \param filled Fill circle, or not.
+ * \param color Color to use.
  */
 void
 draw_circle(draw_context_t *ctx, int x, int y, int r, bool filled, xcolor_t color)
@@ -720,13 +720,13 @@ draw_circle(draw_context_t *ctx, int x, int y, int r, bool filled, xcolor_t colo
 /** Draw an image from ARGB data to a draw context.
  * Data should be stored as an array of alpha, red, blue, green for each pixel
  * and the array size should be w * h elements long.
- * \param ctx Draw context to draw to
- * \param x x coordinate
- * \param y y coordinate
- * \param w width
- * \param h height
- * \param wanted_h wanted height: if > 0, image will be resized
- * \param data the image pixels array
+ * \param ctx Draw context to draw to.
+ * \param x X coordinate.
+ * \param y Y coordinate.
+ * \param w Width.
+ * \param h Height.
+ * \param wanted_h Wanted height: if > 0, image will be resized.
+ * \param data The image pixels array.
  */
 void
 draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
@@ -926,8 +926,8 @@ draw_image_new(const char *filename)
     return image;
 }
 
-/** Delete an image
- * \param image the image to delete
+/** Delete an image.
+ * \param image The image to delete.
  */
 void
 draw_image_delete(draw_image_t **image)
@@ -939,12 +939,12 @@ draw_image_delete(draw_image_t **image)
     }
 }
 
-/** Draw an image to a draw context
- * \param ctx Draw context to draw to
- * \param x x coordinate
- * \param y y coordinate
- * \param wanted_h wanted height: if > 0, image will be resized
- * \param image the image to draw
+/** Draw an image to a draw context.
+ * \param ctx Draw context to draw to.
+ * \param x X coordinate.
+ * \param y Y coordinate.
+ * \param wanted_h Wanted height: if > 0, image will be resized.
+ * \param image The image to draw.
  */
 void
 draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
@@ -1054,7 +1054,7 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
 alignment_t
 draw_align_fromstr(const char *align, ssize_t len)
 {
-    switch (a_tokenize(align, -1))
+    switch (a_tokenize(align, len))
     {
       case A_TK_LEFT:   return AlignLeft;
       case A_TK_CENTER: return AlignCenter;
@@ -1066,12 +1066,12 @@ draw_align_fromstr(const char *align, ssize_t len)
 
 #define RGB_COLOR_8_TO_16(i) (65535 * ((i) & 0xff) / 255)
 
-/** Initialize an X color
- * \param conn Connection ref
- * \param phys_screen Physical screen number
- * \param colstr Color specification
- * \param color xcolor_t struct to store color to
- * \return true if color allocation was successfull
+/** Initialize an X color.
+ * \param conn Connection ref.
+ * \param phys_screen Physical screen number.
+ * \param colstr Color specification.
+ * \param color xcolor_t struct to store color to.
+ * \return True if color allocation was successfull.
  */
 bool
 xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t *color)
@@ -1170,8 +1170,8 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
 
 /** Remove a area from a list of them,
  * spliting the space between several area that can overlap
- * \param areas  array of areas.
- * \param elem   area to remove
+ * \param areas Array of areas.
+ * \param elem Area to remove.
  */
 void
 area_array_remove(area_array_t *areas, area_t elem)
