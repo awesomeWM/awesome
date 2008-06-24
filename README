@@ -17,8 +17,8 @@ In order to build awesome itself, you need header files and libs of:
 
 In order to build the awesome man pages and documentation,
 you need these tools:
-  - asciidoc (recent version)
-  - xmlto (recent version)
+  - asciidoc
+  - xmlto
   - docbook XSL stylesheets
   - luadoc
 
