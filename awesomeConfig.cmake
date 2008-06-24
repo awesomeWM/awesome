@@ -194,12 +194,20 @@ endif()
 if(DEFINED PREFIX)
     set(CMAKE_INSTALL_PREFIX ${PREFIX})
 endif()
+
+#If a sysconfdir is specified, use it instead
+#of the default configuration dir.
+if(DEFINED SYSCONFDIR)
+    set(AWESOME_ETC ${SYSCONFDIR})
+else()
+    set(AWESOME_ETC etc)
+endif()   
+
 set(AWESOME_VERSION          ${VERSION})
 set(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR})
 set(AWESOME_COMPILE_HOSTNAME ${BUILDHOSTNAME})
 set(AWESOME_COMPILE_BY       $ENV{USER})
 set(AWESOME_RELEASE          ${CODENAME})
-set(AWESOME_ETC              etc)
 set(AWESOME_SHARE            share)
 set(AWESOME_LUA_LIB_PATH     ${CMAKE_INSTALL_PREFIX}/${AWESOME_SHARE}/${PROJECT_AWE_NAME}/lib)
 set(AWESOME_ICON_PATH        ${CMAKE_INSTALL_PREFIX}/${AWESOME_SHARE}/${PROJECT_AWE_NAME}/icons)
