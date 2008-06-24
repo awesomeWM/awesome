@@ -304,7 +304,8 @@ luaA_titlebar_new(lua_State *L)
 
     tb = p_new(titlebar_t, 1);
 
-    tb->align = draw_align_fromstr(luaA_getopt_string(L, 1, "align", "left", &len), len);
+    buf = luaA_getopt_string(L, 1, "align", "left", &len);
+    tb->align = draw_align_fromstr(buf, len);
 
     tb->width = luaA_getopt_number(L, 1, "width", 0);
     tb->height = luaA_getopt_number(L, 1, "height", 0);

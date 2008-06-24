@@ -210,7 +210,6 @@ static void
 draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                        const char **names, const char **values)
 {
-    size_t len;
     draw_parser_data_t *data = p->priv;
 
     /* hack: markup.c validates tags so we can avoid strcmps here */
@@ -236,10 +235,10 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
         break;
       case 't': /* text */
         for(; *names; names++, values++)
-            switch(a_tokenize(*names, (len = a_strlen(*names))))
+            switch(a_tokenize(*names, -1))
             {
               case A_TK_ALIGN:
-                data->align = draw_align_fromstr(*values, len);
+                data->align = draw_align_fromstr(*values, -1);
                 break;
               case A_TK_SHADOW:
                 xcolor_new(data->connection, data->phys_screen, *values,

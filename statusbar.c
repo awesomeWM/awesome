@@ -517,7 +517,8 @@ luaA_statusbar_new(lua_State *L)
     else
         sb->colors.bg = globalconf.colors.bg;
 
-    sb->align = draw_align_fromstr(luaA_getopt_string(L, 1, "align", "left", &len), len);
+    buf = luaA_getopt_string(L, 1, "align", "left", &len);
+    sb->align = draw_align_fromstr(buf, len);
 
     sb->width = luaA_getopt_number(L, 1, "width", 0);
     if(sb->width > 0)
