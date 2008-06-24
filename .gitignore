@@ -1,3 +1,5 @@
+.tags
+.version_stamp
 .*.sw?
 *.luac
 *.o
