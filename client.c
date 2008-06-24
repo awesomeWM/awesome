@@ -72,10 +72,10 @@ client_loadprops(client_t * c, screen_t *screen)
     char *prop = NULL;
 
     if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
-                         xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
-                                                 xutil_intern_atom(globalconf.connection,
-                                                                   &globalconf.atoms,
-                                                                   "_AWESOME_PROPERTIES")),
+                          xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
+                                                  xutil_intern_atom(globalconf.connection,
+                                                                    &globalconf.atoms,
+                                                                    "_AWESOME_PROPERTIES")),
                          &prop))
         return false;
 

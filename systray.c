@@ -74,7 +74,7 @@ systray_init(int phys_screen)
                             atom_systray,
                             XCB_CURRENT_TIME);
 
-    xcb_send_event(globalconf.connection, false, xscreen->root, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *) &ev);
+    xcb_send_event(globalconf.connection, false, xscreen->root, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
 }
 
 /** Handle a systray request.
