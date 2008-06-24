@@ -57,6 +57,7 @@ systray_init(int phys_screen)
 
     /* Fill event */
     ev.response_type = XCB_CLIENT_MESSAGE;
+    ev.window = xscreen->root;
     ev.format = 32;
     ev.data.data32[0] = XCB_CURRENT_TIME;
     ev.data.data32[2] = globalconf.screens[phys_screen].systray.window;
