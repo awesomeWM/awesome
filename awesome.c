@@ -74,7 +74,6 @@ scan(void)
     xcb_get_geometry_cookie_t **geom_wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
-    xembed_info_t eminfo;
     long state;
 
     for(screen = 0; screen < screen_max; screen++)
@@ -443,28 +442,6 @@ main(int argc, char **argv)
             fatal("failed to load any configuration file");
     }
 
-    /* do this only for real screen */
-    for(screen_nbr = 0;
-        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen_nbr++)
-    {
-        /* select for events */
-        const uint32_t change_win_vals[] =
-        {
-            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-                | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW
-                | XCB_EVENT_MASK_STRUCTURE_NOTIFY,
-            globalconf.cursor[CurNormal]
-        };
-
-        xcb_change_window_attributes(globalconf.connection,
-                                     xutil_screen_get(globalconf.connection, screen_nbr)->root,
-                                     XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
-                                     change_win_vals);
-        ewmh_set_supported_hints(screen_nbr);
-        systray_init(screen_nbr);
-    }
-
     /* scan existing windows */
     scan();
 
@@ -490,6 +467,28 @@ main(int argc, char **argv)
                               (randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY),
                               (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,
                               NULL);
+
+    /* do this only for real screen */
+    for(screen_nbr = 0;
+        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+        screen_nbr++)
+    {
+        /* select for events */
+        const uint32_t change_win_vals[] =
+        {
+            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+                | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW
+                | XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+            globalconf.cursor[CurNormal]
+        };
+
+        xcb_change_window_attributes(globalconf.connection,
+                                     xutil_screen_get(globalconf.connection, screen_nbr)->root,
+                                     XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
+                                     change_win_vals);
+        ewmh_set_supported_hints(screen_nbr);
+        systray_init(screen_nbr);
+    }
 
     xcb_aux_sync(globalconf.connection);
 
