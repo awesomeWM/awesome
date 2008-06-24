@@ -285,6 +285,7 @@ client_raise(client_t *c)
     stack_client_push(c);
 
     config_win_vals[0] = XCB_NONE;
+    config_win_vals[1] = XCB_STACK_MODE_BELOW;
 
     for(emwin = globalconf.embedded; emwin; emwin = emwin->next)
     {
@@ -294,8 +295,6 @@ client_raise(client_t *c)
                              config_win_vals);
         config_win_vals[0] = emwin->win;
     }
-
-    config_win_vals[1] = XCB_STACK_MODE_BELOW;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
