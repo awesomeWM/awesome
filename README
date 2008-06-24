@@ -11,8 +11,8 @@ In order to build awesome itself, you need header files and libs of:
   - pango and pangocairo
   - libev
   - glib
-  - GdkPixBuf or Imlib2 (use --with-imlib2 with ./configure)
-  - dbus (optional, use --with-dbus=no with ./configure to disable)
+  - GdkPixBuf or Imlib2 (use -DWITH_IMLIB2=1 with cmake)
+  - dbus (optional, use -DWITH_DBUS=0 with cmake to disable)
   - gperf
 
 In order to build the awesome man pages and documentation,
