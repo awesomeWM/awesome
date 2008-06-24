@@ -59,12 +59,9 @@
                        type_t items[], int count)                           \
     {                                                                       \
         assert (pos >= 0 && len >= 0 && count >= 0);                        \
-        assert (pos <= arr->len && pos + len < arr->len);                   \
+        assert (pos <= arr->len && pos + len <= arr->len);                  \
         if (len != count) {                                                 \
             pfx##_array_grow(arr, arr->len + count - len);                  \
-            for (int i = pos; i < pos + len; i++) {                         \
-                dtor(&arr->tab[i]);                                         \
-            }                                                               \
             memmove(arr->tab + pos + count, arr->tab + pos + len,           \
                     (arr->len - pos - len) * sizeof(*items));               \
             arr->len += count - len;                                        \
