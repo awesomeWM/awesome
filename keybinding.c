@@ -31,6 +31,11 @@ extern awesome_t globalconf;
 DO_LUA_NEW(static, keybinding_t, keybinding, "keybinding", keybinding_ref)
 DO_LUA_GC(keybinding_t, keybinding, "keybinding", keybinding_unref)
 
+void keybinding_delete(keybinding_t **kbp)
+{
+    p_delete(kbp);
+}
+
 static void
 __luaA_keystore(keybinding_t *key, const char *str)
 {
@@ -96,14 +101,14 @@ luaA_keybinding_new(lua_State *L)
 static int
 luaA_keybinding_add(lua_State *L)
 {
-    keybinding_t *key, **k = luaA_checkudata(L, 1, "keybinding");
+    keybinding_t **k = luaA_checkudata(L, 1, "keybinding");
 
     /* Check that the keybinding has not been already added. */
-    for(key = globalconf.keys; key; key = key->next)
-        if(key == *k)
+    for(int i = 0; i < globalconf.keys.len; i++)
+        if(globalconf.keys.tab[i] == *k)
             luaL_error(L, "keybinding already added");
 
-    keybinding_list_push(&globalconf.keys, keybinding_ref(k));
+    keybinding_array_append(&globalconf.keys, keybinding_ref(k));
     window_root_grabkey(*k);
 
     return 0;
@@ -120,9 +125,13 @@ luaA_keybinding_remove(lua_State *L)
 {
     keybinding_t **k = luaA_checkudata(L, 1, "keybinding");
 
-    keybinding_list_detach(&globalconf.keys, *k);
-    window_root_ungrabkey(*k);
-    keybinding_unref(k);
+    for(int i = 0; i < globalconf.keys.len; i++)
+        if(globalconf.keys.tab[i] == *k)
+        {
+            keybinding_array_take(&globalconf.keys, i);
+            window_root_ungrabkey(*k);
+            keybinding_unref(k);
+        }
 
     return 0;
 }

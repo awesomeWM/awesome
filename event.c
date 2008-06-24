@@ -391,7 +391,6 @@ event_handle_keypress(void *data __attribute__ ((unused)),
                       xcb_key_press_event_t *ev)
 {
     xcb_keysym_t keysym;
-    keybinding_t *k;
 
     if(globalconf.keygrabber != LUA_REFNIL)
     {
@@ -412,10 +411,13 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     {
         keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
 
-        for(k = globalconf.keys; k; k = k->next)
+        for(int i = 0; i < globalconf.keys.len; i++)
+        {
+            keybinding_t *k = globalconf.keys.tab[i];
             if(((k->keycode && ev->detail == k->keycode) || (k->keysym && keysym == k->keysym))
                && k->fct && CLEANMASK(k->mod) == CLEANMASK(ev->state))
                 luaA_dofunction(globalconf.L, k->fct, 0);
+        }
     }
 
     return 0;
