@@ -234,6 +234,7 @@ endforeach()
 #}}}
 
 # {{{ CPack configuration
+SET(CPACK_SET_DESTDIR                  TRUE)
 set(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
 set(CPACK_GENERATOR                    "TBZ2")
 set(CPACK_SOURCE_GENERATOR             "TBZ2")
