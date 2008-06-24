@@ -100,6 +100,7 @@ execute_process(
 # this sets up:
 # AWESOME_REQUIRED_LIBRARIES
 # AWESOME_REQUIRED_INCLUDE_DIRS
+# AWESOMECLIENT_LIBRARIES
 
 # Use pkgconfig to get most of the libraries
 pkg_check_modules(AWESOME_REQUIRED REQUIRED
@@ -149,13 +150,15 @@ if(NOT LUA_LIB)
 endif()
 
 set(AWESOME_REQUIRED_LIBRARIES ${AWESOME_REQUIRED_LIBRARIES}
-    ${LIB_READLINE}
-    ${LIB_NCURSES}
     ${LIB_EV}
     ${LUA_LIB})
 
 set(AWESOME_REQUIRED_INCLUDE_DIRS ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${LUA_INC_DIR})
+
+set(AWESOMECLIENT_LIBRARIES
+    ${LIB_READLINE}
+    ${LIB_NCURSES})
 # }}}
 
 # {{{ Optional libraries.

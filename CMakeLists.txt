@@ -101,8 +101,7 @@ target_link_libraries(${PROJECT_AWE_NAME}
     ${AWESOME_OPTIONAL_LIBRARIES})
 
 target_link_libraries(${PROJECT_AWECLIENT_NAME}
-    ${LIB_READLINE}
-    ${LIB_NCURSES})
+    ${AWESOMECLIENT_LIBRARIES})
 
 # {{{ Generated sources
 file(GLOB LAYOUTGEN_DEPS ${SOURCE_DIR}/layouts/*.h)
