@@ -290,6 +290,9 @@ function P.client.movetotag(target, c)
     sel:tag(target, true)
 end
 
+--- Toggle a tag on a client.
+-- @param target The tag to toggle.
+-- @param c Optional client to toggle, otherwise the focused one is used.
 function P.client.toggletag(target, c)
     local sel = c or client.focus_get();
     local toggle = false
@@ -308,6 +311,8 @@ function P.client.toggletag(target, c)
     end
 end
 
+--- Toggle the floating status of a client.
+-- @param c Optional client, the focused on if not set.
 function P.client.togglefloating(c)
     local sel = c or client.focus_get();
     if sel then
@@ -315,7 +320,9 @@ function P.client.togglefloating(c)
     end
 end
 
--- Move a client to a screen. Default is next screen, cycling.
+--- Move a client to a screen. Default is next screen, cycling.
+-- @param c The client to move.
+-- @param s The screen number, default to current + 1.
 function P.client.movetoscreen(c, s)
     local sel = c or client.focus_get();
     if sel then
@@ -328,6 +335,8 @@ function P.client.movetoscreen(c, s)
     end
 end
 
+--- Get the current layout name.
+-- @param screen The screen number.
 function P.layout.get(screen)
     local t = P.tag.selected(screen)
     if t then
@@ -340,7 +349,9 @@ local awfulmarked = {}
 userhook_create('marked')
 userhook_create('unmarked')
 
--- Mark a client
+--- Mark a client, and then call 'marked' hook.
+-- @param c The client to mark, the focused one if not specified.
+-- @return True if the client has been marked. False if the client was already marked.
 function P.client.mark (c)
     local cl = c or client.focus_get()
     if cl then
@@ -358,7 +369,9 @@ function P.client.mark (c)
     end
 end
 
--- Unmark a client
+--- Unmark a client and then call 'unmarked' hook.
+-- @param c The client to unmark, or the focused one if not specified.
+-- @return True if the client has been unmarked. False if the client was not marked.
 function P.client.unmark(c)
     local cl = c or client.focus_get()
 
@@ -373,7 +386,8 @@ function P.client.unmark(c)
     return false
 end
 
--- Check if marked
+--- Check if a client is marked.
+-- @param c The client to check, or the focused one otherwise.
 function P.client.ismarked(c)
     local cl = c or client.focus_get()
     if cl then
@@ -382,12 +396,12 @@ function P.client.ismarked(c)
                 return true
             end
         end
-
-        return false
     end
+    return false
 end
 
--- Toggle marked
+--- Toggle a client as marked.
+-- @param c The client to toggle mark.
 function P.client.togglemarked(c)
     local cl = c or client.focus_get()
 
@@ -396,7 +410,8 @@ function P.client.togglemarked(c)
     end
 end
 
--- Return the marked clients and empty the table
+--- Return the marked clients and empty the marked table.
+-- @return A table with all marked clients.
 function P.client.getmarked()
     for k, v in pairs(awfulmarked) do
         userhook_call('unmarked', {v})
@@ -407,9 +422,9 @@ function P.client.getmarked()
     return t
 end
 
--- Function to change the layout of the current tag.
--- layouts = table of layouts (define in .awesomerc.lua)
--- i = relative index
+--- Change the layout of the current tag.
+-- @param layouts A table of layouts.
+-- @param i Relative index.
 function P.layout.inc(layouts, i)
     local t = P.tag.selected()
     local number_of_layouts = 0
@@ -428,7 +443,8 @@ function P.layout.inc(layouts, i)
     end
 end
 
--- function to set the layout of the current tag by name.
+--- Set the layout of the current tag by name.
+-- @param layout Layout name.
 function P.layout.set(layout)
     local t = P.tag.selected()
     if t then
@@ -447,7 +463,7 @@ for name, hook in pairs(hooks) do
                 P.myhooks[name] = {}
                 hooks[name](function (...)
 
-                    for i,o in pairs(P.myhooks[name]) do
+                    for i, o in pairs(P.myhooks[name]) do
                        P.myhooks[name][i]['callback'](...)
                     end
 
@@ -484,14 +500,24 @@ for name, hook in pairs(hooks) do
     end
 end
 
+--- Spawn a program.
+-- @param cmd The command.
+-- @return The os.execute() return value.
 function P.spawn(cmd)
     return os.execute(cmd .. "&")
 end
 
+--- Eval Lua code.
+-- @return The return value of Lua code.
 function P.eval(s)
     return assert(loadstring("return " .. s))()
 end
 
+--- Use bash completion system to complete command and filename.
+-- @param command The command line.
+-- @param cur_pos The cursor position.
+-- @paran ncomp The element number to complete.
+-- @return The new commande and the new cursor position.
 function P.completion.bash(command, cur_pos, ncomp)
     local wstart = 1
     local wend = 1
@@ -553,7 +579,11 @@ function P.completion.bash(command, cur_pos, ncomp)
     return str, cur_pos
 end
 
--- Menu functions
+--- Draw the text menu with a cursor.
+-- @param text The text.
+-- @param text_color The text color.
+-- @param cursor_color The cursor color.
+-- @param cursor_pos The cursor position.
 local function menu_text_with_cursor(text, text_color, cursor_color, cursor_pos)
     local char
     if not text then text = "" end
@@ -567,6 +597,11 @@ local function menu_text_with_cursor(text, text_color, cursor_color, cursor_pos)
     return text_start .. "<span background=\"" .. cursor_color .. "\" foreground=\"" .. text_color .. "\">" .. char .. "</span>" .. text_end
 end
 
+--- Run a prompt in a box.
+-- @param args A table with optional arguments: cursor_fg, cursor_bg, prompt.
+-- @param textbox The textbox to use for the prompt.
+-- @param exe_callback The callback function to call with command as argument when finished.
+-- @param completion_callback The callback function to call to get completion.
 function P.menu(args, textbox, exe_callback, completion_callback)
     if not args then return end
     local command = ""
@@ -684,6 +719,10 @@ function P.menu(args, textbox, exe_callback, completion_callback)
     end)
 end
 
+--- Escape a string from XML char.
+-- Useful to set raw text in textbox.
+-- @param text Text to escape.
+-- @return Escape text.
 function P.escape(text)
     text = text:gsub("&", "&amp;")
     text = text:gsub("<", "&lt;")
@@ -693,6 +732,9 @@ function P.escape(text)
     return text
 end
 
+--- Unescape a string from entities.
+-- @param text Text to unescape.
+-- @return Unescaped text.
 function P.unescape(text)
     text = text:gsub("&amp;", "&")
     text = text:gsub("&lt;", "<")
