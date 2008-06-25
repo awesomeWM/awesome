@@ -18,6 +18,7 @@ set(CMAKE_BUILD_TYPE RELEASE)
 option(WITH_DBUS "build with D-BUS" ON)
 option(WITH_IMLIB2 "build with Imlib2" OFF)
 option(GENERATE_MANPAGES "generate manpages" ON)
+option(GENERATE_LUADOC "generate luadoc" ON)
 
 # {{{ CFLAGS
 add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
@@ -47,7 +48,7 @@ include(FindDoxygen)
 include(FindPkgConfig)
 # }}}
 
-# {{{ Check if manpages can be build
+# {{{ Check if documentation can be build
 if(GENERATE_MANPAGES)
     if(NOT ASCIIDOC_EXECUTABLE OR NOT XMLTO_EXECUTABLE OR NOT GZIP_EXECUTABLE)
         if(NOT ASCIIDOC_EXECUTABLE)
@@ -64,7 +65,15 @@ if(GENERATE_MANPAGES)
         set(GENERATE_MANPAGES OFF)
     endif()
 endif()
+
+if(GENERATE_LUADOC)
+    if(NOT LUADOC_EXECUTABLE)
+        message(STATUS "Not generating luadoc. Missing: luadoc")
+        set(GENERATE_LUADOC OFF)
+    endif()
+endif()
 # }}}
+
 
 # {{{ version stamp
 if(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)

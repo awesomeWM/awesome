@@ -219,7 +219,7 @@ endif()
 # }}}
 
 # {{{ Lua API Documentation
-if(LUADOC_EXECUTABLE)
+if(GENERATE_LUADOC)
 
     set(capi_lua ${BUILD_DIR}/lib/capi.lua)
 
