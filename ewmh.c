@@ -358,8 +358,6 @@ ewmh_update_net_active_window(int phys_screen)
 static void
 ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
-    static uint32_t const raise_window_val = XCB_STACK_MODE_ABOVE;
-
     if(state == net_wm_state_sticky)
     {
         tag_array_t *tags = &globalconf.screens[c->screen].tags;
