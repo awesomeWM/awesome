@@ -27,11 +27,16 @@ left
 line
 max_value
 min_value
+mouse_add
+mouse_remove
+name_get
+name_set
 on
 resize
 reverse
 right
 scale
+set
 shadow
 shadow_offset
 show
@@ -50,5 +55,7 @@ topright
 true
 vertical
 vertical_gradient
+visible_get
+visible_set
 width
 yes

@@ -510,6 +510,38 @@ luaA_widget_visible_get(lua_State *L)
     return 1;
 }
 
+static int
+luaA_widget_index(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    size_t len;
+    const char *str = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(str, len))
+    {
+      case A_TK_MOUSE_ADD:
+        lua_pushcfunction(L, luaA_widget_mouse_add);
+        return 1;
+      case A_TK_SET:
+        lua_pushcfunction(L, luaA_widget_set);
+        return 1;
+      case A_TK_NAME_SET:
+        lua_pushcfunction(L, luaA_widget_name_set);
+        return 1;
+      case A_TK_NAME_GET:
+        lua_pushcfunction(L, luaA_widget_name_get);
+        return 1;
+      case A_TK_VISIBLE_SET:
+        lua_pushcfunction(L, luaA_widget_visible_set);
+        return 1;
+      case A_TK_VISIBLE_GET:
+        lua_pushcfunction(L, luaA_widget_visible_get);
+        return 1;
+      default:
+        return 0;
+    }
+}
+
 const struct luaL_reg awesome_widget_methods[] =
 {
     { "new", luaA_widget_new },
@@ -524,6 +556,7 @@ const struct luaL_reg awesome_widget_meta[] =
     { "name_get", luaA_widget_name_get },
     { "visible_set", luaA_widget_visible_set },
     { "visible_get", luaA_widget_visible_get },
+    { "__index", luaA_widget_index },
     { "__gc", luaA_widget_gc },
     { "__eq", luaA_widget_eq },
     { "__tostring", luaA_widget_tostring },
