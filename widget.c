@@ -313,10 +313,10 @@ luaA_widget_new(lua_State *L)
     size_t len;
 
     luaA_checktable(L, 1);
-    buf = luaA_getopt_string(L, 1, "align", "left", &len);
+    buf = luaA_getopt_lstring(L, 1, "align", "left", &len);
     align = draw_align_fromstr(buf, len);
 
-    type = luaA_getopt_string(L, 1, "type", NULL, NULL);
+    type = luaA_getopt_string(L, 1, "type", NULL);
 
     if((wc = name_func_lookup(type, WidgetList)))
         w = wc(align);
@@ -513,7 +513,6 @@ luaA_widget_visible_get(lua_State *L)
 static int
 luaA_widget_index(lua_State *L)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
     size_t len;
     const char *str = luaL_checklstring(L, 2, &len);
 

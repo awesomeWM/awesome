@@ -397,10 +397,10 @@ luaA_colors_set(lua_State *L)
 {
     const char *fg, *bg;
     luaA_checktable(L, 1);
-    if((fg = luaA_getopt_string(L, 1, "fg", NULL, NULL)))
+    if((fg = luaA_getopt_string(L, 1, "fg", NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                        fg, &globalconf.colors.fg);
-    if((bg = luaA_getopt_string(L, 1, "bg", NULL, NULL)))
+    if((bg = luaA_getopt_string(L, 1, "bg", NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                        bg, &globalconf.colors.bg);
     return 0;

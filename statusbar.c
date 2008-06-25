@@ -517,7 +517,7 @@ luaA_statusbar_new(lua_State *L)
     else
         sb->colors.bg = globalconf.colors.bg;
 
-    buf = luaA_getopt_string(L, 1, "align", "left", &len);
+    buf = luaA_getopt_lstring(L, 1, "align", "left", &len);
     sb->align = draw_align_fromstr(buf, len);
 
     sb->width = luaA_getopt_number(L, 1, "width", 0);
@@ -528,7 +528,7 @@ luaA_statusbar_new(lua_State *L)
         /* 1.5 as default factor, it fits nice but no one knows why */
         sb->height = 1.5 * globalconf.font->height;
 
-    buf = luaA_getopt_string(L, 1, "position", "top", &len);
+    buf = luaA_getopt_lstring(L, 1, "position", "top", &len);
     sb->position = position_fromstr(buf, len);
 
     return luaA_statusbar_userdata_new(L, sb);

@@ -338,7 +338,7 @@ luaA_tag_new(lua_State *L)
     mwfact = luaA_getopt_number(L, 1, "mwfact", 0.5);
     ncol = luaA_getopt_number(L, 1, "ncol", 1);
     nmaster = luaA_getopt_number(L, 1, "nmaster", 1);
-    lay = luaA_getopt_string(L, 1, "layout", "tile", NULL);
+    lay = luaA_getopt_string(L, 1, "layout", "tile");
 
     layout = name_func_lookup(lay, LayoutList);
 

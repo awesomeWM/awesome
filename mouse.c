@@ -1058,11 +1058,13 @@ luaA_client_mouse_resize(lua_State *L)
     corner_t corner = AutoCorner;
     bool infobox = true;
     size_t len;
+    const char *buf;
 
     if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
     {
         luaA_checktable(L, 2);
-        corner = a_strtocorner(luaA_getopt_string(L, 2, "corner", "auto", &len), len);
+        buf = luaA_getopt_lstring(L, 2, "corner", "auto", &len);
+        corner = a_strtocorner(buf, len);
         infobox = luaA_getopt_boolean(L, 2, "infobox", true);
     }
 

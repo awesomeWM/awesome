@@ -978,7 +978,7 @@ luaA_client_border_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     int width = luaA_getopt_number(L, 2, "width", (*c)->border);
-    const char *colorstr = luaA_getopt_string(L, 2, "color", NULL, NULL);
+    const char *colorstr = luaA_getopt_string(L, 2, "color", NULL);
     xcolor_t color;
 
     client_setborder(*c, width);

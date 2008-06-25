@@ -140,27 +140,27 @@ luaA_optboolean(lua_State *L, int idx, bool def)
 static inline lua_Number
 luaA_getopt_number(lua_State *L, int idx, const char *name, lua_Number def)
 {
-    /* assume that table is first on stack */
     lua_getfield(L, idx, name);
-    /* return luaL_optnumber result */
     return luaL_optnumber(L, -1, def);
 }
 
 static inline const char *
-luaA_getopt_string(lua_State *L, int idx, const char *name, const char *def, size_t *len)
+luaA_getopt_lstring(lua_State *L, int idx, const char *name, const char *def, size_t *len)
 {
-    /* assume that table is first on stack */
     lua_getfield(L, idx, name);
-    /* return luaL_optnumber result */
     return luaL_optlstring(L, -1, def, len);
+}
+
+static inline const char *
+luaA_getopt_string(lua_State *L, int idx, const char *name, const char *def)
+{
+    return luaA_getopt_lstring(L, idx, name, def, NULL);
 }
 
 static inline bool
 luaA_getopt_boolean(lua_State *L, int idx, const char *name, bool def)
 {
-    /* assume that table is first on stack */
     lua_getfield(L, idx, name);
-    /* return luaL_optnumber result */
     return luaA_optboolean(L, -1, def);
 }
 
