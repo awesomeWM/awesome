@@ -35,71 +35,6 @@ static DBusError err;
 static DBusConnection *dbus_connection = NULL;
 ev_io dbusio = { .fd = -1 };
 
-/** Check a dbus object path format and its number of element.
- * \param path The path.
- * \param nelem The number of element it should have.
- * \return true if the path is ok, false otherwise.
- */
-static bool
-a_dbus_path_check(char **path, int nelem)
-{
-    int i;
-
-    for(i = 0; path[i]; i++);
-    if(i != nelem)
-        return false;
-
-    return (!a_strcmp(path[0], "org")&& !a_strcmp(path[1], "awesome"));
-}
-
-/** Process widget.set method call.
- * \param req The dbus message.
- */
-static void
-a_dbus_process_widget_set(DBusMessage *req)
-{
-    char *arg, **path;
-    int i;
-    DBusMessageIter iter;
-    widget_t *widget;
-    widget_tell_status_t status;
-
-    if(!dbus_message_get_path_decomposed(req, &path)
-       || !a_dbus_path_check(path, 6)
-       || a_strcmp(path[2], "widget")
-       || a_strcmp(path[4], "property"))
-    {
-        warn("invalid object path.");
-        dbus_error_free(&err);
-        return;
-    }
-
-    if(!dbus_message_iter_init(req, &iter))
-    {
-        warn("message has no argument: %s", err.message);
-        dbus_error_free(&err);
-        return;
-    }
-    else if(DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&iter))
-    {
-        warn("argument must be a string");
-        dbus_error_free(&err);
-        return;
-    }
-    else
-        dbus_message_iter_get_basic(&iter, &arg);
-
-    if(!(widget = widget_getbyname(path[3])))
-        return warn("no such widget: %s.", path[3]);
-
-    status = widget->tell(widget, path[5], arg);
-    widget_tell_managestatus(widget, status, path[5]);
-
-    for(i = 0; path[i]; i++)
-        p_delete(&path[i]);
-    p_delete(&path);
-}
-
 static void
 a_dbus_process_requests(EV_P_ ev_io *w, int revents)
 {
@@ -117,9 +52,7 @@ a_dbus_process_requests(EV_P_ ev_io *w, int revents)
             break;
 
 
-        if(dbus_message_is_method_call(msg, "org.awesome.widget", "set"))
-            a_dbus_process_widget_set(msg);
-        else if(dbus_message_is_signal(msg, DBUS_INTERFACE_LOCAL, "Disconnected"))
+        if(dbus_message_is_signal(msg, DBUS_INTERFACE_LOCAL, "Disconnected"))
         {
             a_dbus_cleanup();
             dbus_message_unref(msg);

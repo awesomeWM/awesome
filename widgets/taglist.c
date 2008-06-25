@@ -1,7 +1,7 @@
 /*
  * taglist.c - tag list widget
  *
- * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
+ * Copyright © 2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,9 @@
 
 extern awesome_t globalconf;
 
+/** Data type used to store where we draw the taglist for a particular object.
+ * This is filled in the draw function, and use later when we get a click.
+ */
 typedef struct taglist_drawn_area_t taglist_drawn_area_t;
 struct taglist_drawn_area_t
 {
@@ -38,6 +41,9 @@ struct taglist_drawn_area_t
     taglist_drawn_area_t *next, *prev;
 };
 
+/** Delete a taglist_drawn_area_t object.
+ * \param a The drawn area to delete.
+ */
 static void
 taglist_drawn_area_delete(taglist_drawn_area_t **a)
 {
@@ -47,14 +53,21 @@ taglist_drawn_area_delete(taglist_drawn_area_t **a)
 
 DO_SLIST(taglist_drawn_area_t, taglist_drawn_area, taglist_drawn_area_delete);
 
+/** Taglist widget private data */
 typedef struct
 {
     char *text_normal, *text_focus, *text_urgent;
     bool show_empty;
     taglist_drawn_area_t *drawn_area;
-
 } taglist_data_t;
 
+
+/** Called when a markup element is encountered.
+ * \param p The parser data.
+ * \param elem The element.
+ * \param names The element attributes names.
+ * \param values The element attributes values.
+ */
 static void
 tag_markup_on_elem(markup_parser_data_t *p, const char *elem,
                       const char **names, const char **values)
@@ -63,7 +76,12 @@ tag_markup_on_elem(markup_parser_data_t *p, const char *elem,
     buffer_add_xmlescaped(&p->text, NONULL(p->priv));
 }
 
-
+/** Parse a markup string.
+ * \param t The tag we're parsing for.
+ * \param str The string we're parsing.
+ * \param len The string length.
+ * \return The parsed string.
+ */
 static char *
 tag_markup_parse(tag_t *t, const char *str, ssize_t len)
 {
@@ -88,10 +106,9 @@ tag_markup_parse(tag_t *t, const char *str, ssize_t len)
     return ret;
 }
 
-/** Check if at least one client is tagged with tag number t and is on screen
- * screen
- * \param t tag
- * \return true or false
+/** Check if at least one client is tagged with tag number t.
+ * \param t The tag to check.
+ * \return True if the tag has a client, false otherwise.
  */
 static bool
 tag_isoccupied(tag_t *t)
@@ -99,24 +116,33 @@ tag_isoccupied(tag_t *t)
     client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t) && !c->skip)
+        if(!c->skip && is_client_tagged(c, t))
             return true;
 
     return false;
 }
 
+/** Check if a tag  has at least one client with urgency hint.
+ * \param t The tag.
+ * \return True if the tag has a client with urgency set, false otherwise.
+ */
 static bool
 tag_isurgent(tag_t *t)
 {
     client_t *c;
 
     for(c = globalconf.clients; c; c = c->next)
-        if(is_client_tagged(c, t) && c->isurgent)
+        if(c->isurgent && is_client_tagged(c, t))
             return true;
 
     return false;
 }
 
+/** Get the string to use for drawing the tag.
+ * \param tag The tag.
+ * \param data The taglist private data.
+ * \return The string to use.
+ */
 static char *
 taglist_text_get(tag_t *tag, taglist_data_t *data)
 {
@@ -124,10 +150,18 @@ taglist_text_get(tag_t *tag, taglist_data_t *data)
         return data->text_focus;
     else if(tag_isurgent(tag))
         return data->text_urgent;
-
     return data->text_normal;
 }
 
+/** Draw a taglist.
+ * \param ctx The draw context.
+ * \param screen The screen we're drawing for.
+ * \param w The widget node we're drawing for.
+ * \param offset Offset to draw at.
+ * \param used Space already used.
+ * \param object The object pointer we're drawing onto.
+ * \return The width used.
+ */
 static int
 taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
              int offset,
@@ -180,7 +214,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
 
     /* Now that we have widget width we can compute widget x coordinate */
     w->area.x = widget_calculate_offset(ctx->width, w->area.width,
-                                        offset, w->widget->align); 
+                                        offset, w->widget->align);
 
     for(int i = 0; i < tags->len; i++)
     {
@@ -254,34 +288,92 @@ taglist_button_press(widget_node_t *w,
             }
 }
 
-static widget_tell_status_t
-taglist_tell(widget_t *widget, const char *property, const char *new_value)
+/** Set text format string in case of a tag is normal, has focused client
+ * or has a client with urgency hint.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam A table with keys to change: `normal', `focus' and `urgent'.
+ */
+static int
+luaA_taglist_text_set(lua_State *L)
 {
-    taglist_data_t *d = widget->data;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    taglist_data_t *d = (*widget)->data;
+    const char *buf;
 
-    switch(a_tokenize(property, -1))
+    luaA_checktable(L, 2);
+
+    if((buf = luaA_getopt_string(L, 2, "normal", NULL)))
     {
-      case A_TK_TEXT_NORMAL:
         p_delete(&d->text_normal);
-        d->text_normal = a_strdup(new_value);
-        break;
-      case A_TK_TEXT_FOCUS:
-        p_delete(&d->text_focus);
-        d->text_focus = a_strdup(new_value);
-        break;
-      case A_TK_TEXT_URGENT:
-        p_delete(&d->text_urgent);
-        d->text_urgent = a_strdup(new_value);
-        break;
-      case A_TK_SHOW_EMPTY:
-        d->show_empty = a_strtobool(new_value, -1);
-        break;
-      default:
-        return WIDGET_ERROR;
+        d->text_normal = a_strdup(buf);
     }
-    return WIDGET_NOERROR;
+
+    if((buf = luaA_getopt_string(L, 2, "focus", NULL)))
+    {
+        p_delete(&d->text_focus);
+        d->text_focus = a_strdup(buf);
+    }
+
+    if((buf = luaA_getopt_string(L, 2, "urgent",  NULL)))
+    {
+        p_delete(&d->text_urgent);
+        d->text_urgent = a_strdup(buf);
+    }
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
 }
 
+/** Set if the taglist must show the tags which have no client.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam A boolean value, true to show empty tags, false otherwise.
+ */
+static int
+luaA_taglist_showempty_set(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    taglist_data_t *d = (*widget)->data;
+
+    d->show_empty = luaA_checkboolean(L, 2);
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
+}
+
+/** Index function for taglist.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_taglist_index(lua_State *L)
+{
+    size_t len;
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_TEXT_SET:
+        lua_pushcfunction(L, luaA_taglist_text_set);
+        return 1;
+      case A_TK_SHOWEMPTY_SET:
+        lua_pushcfunction(L, luaA_taglist_showempty_set);
+        return 1;
+      default:
+        return 0;
+    }
+}
+
+/** Taglist destructor.
+ * \param widget The widget to destroy.
+ */
 static void
 taglist_destructor(widget_t *widget)
 {
@@ -294,6 +386,10 @@ taglist_destructor(widget_t *widget)
     p_delete(&d);
 }
 
+/** Create a brand new taglist widget.
+ * \param align Widget alignment.
+ * \return A taglist widget.
+ */
 widget_t *
 taglist_new(alignment_t align)
 {
@@ -302,10 +398,10 @@ taglist_new(alignment_t align)
 
     w = p_new(widget_t, 1);
     widget_common_new(w);
+    w->index = luaA_taglist_index;
     w->align = align;
     w->draw = taglist_draw;
     w->button_press = taglist_button_press;
-    w->tell = taglist_tell;
     w->destructor = taglist_destructor;
 
     w->data = d = p_new(taglist_data_t, 1);

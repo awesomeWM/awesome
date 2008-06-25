@@ -69,18 +69,6 @@ typedef widget_t *(widget_constructor_t)(alignment_t);
 typedef void (widget_destructor_t)(widget_t *);
 typedef struct awesome_t awesome_t;
 
-/** Widget tell status code */
-typedef enum
-{
-    WIDGET_NOERROR = 0,
-    WIDGET_ERROR,
-    WIDGET_ERROR_NOVALUE,
-    WIDGET_ERROR_CUSTOM,
-    WIDGET_ERROR_FORMAT_FONT,
-    WIDGET_ERROR_FORMAT_COLOR,
-    WIDGET_ERROR_FORMAT_SECTION
-} widget_tell_status_t;
-
 /** Mouse buttons bindings */
 struct button_t
 {
@@ -112,8 +100,8 @@ struct widget_t
     widget_destructor_t *destructor;
     /** Draw function */
     int (*draw)(draw_context_t *, int, widget_node_t *, int, int, void *);
-    /** Update function */
-    widget_tell_status_t (*tell)(widget_t *, const char *, const char *);
+    /** Index function */
+    int (*index)(lua_State *);
     /** ButtonPressedEvent handler */
     void (*button_press)(widget_node_t *, xcb_button_press_event_t *, int, void *, awesome_type_t);
     /** Alignement */

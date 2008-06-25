@@ -2,7 +2,6 @@
  * textbox.c - text box widget
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
- * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,12 +27,24 @@
 
 extern awesome_t globalconf;
 
+/** The textbox private data structure */
 typedef struct
 {
+    /** Textbox text */
     char *text;
+    /** Textbox width */
     int width;
 } textbox_data_t;
 
+/** Draw a textbox widget.
+ * \param ctx The draw context.
+ * \param screen The screen.
+ * \param w The widget node we are linked from.
+ * \param offset Offset to draw at.
+ * \param used The size used on the element.
+ * \param p A pointer to the object we're draw onto.
+ * \return The width used.
+ */
 static int
 textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              widget_node_t *w,
@@ -72,27 +83,9 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
     return w->area.width;
 }
 
-static widget_tell_status_t
-textbox_tell(widget_t *widget, const char *property, const char *new_value)
-{
-    textbox_data_t *d = widget->data;
-
-    switch(a_tokenize(property, -1))
-    {
-      case A_TK_TEXT:
-        p_delete(&d->text);
-        a_iso2utf8(new_value, &d->text);
-        break;
-      case A_TK_WIDTH:
-        d->width = atoi(new_value);
-        break;
-      default:
-        return WIDGET_ERROR;
-    }
-
-    return WIDGET_NOERROR;
-}
-
+/** Delete a textbox widget.
+ * \param w The widget to destroy.
+ */
 static void
 textbox_destructor(widget_t *w)
 {
@@ -101,6 +94,77 @@ textbox_destructor(widget_t *w)
     p_delete(&d);
 }
 
+/** Set the text of a textbox.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam The text to set.
+ */
+static int
+luaA_textbox_text_set(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    const char *text = luaL_checkstring(L, 2);
+    textbox_data_t *d = (*widget)->data;
+
+    p_delete(&d->text);
+    a_iso2utf8(text, &d->text);
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
+}
+
+/** Set the width of a textbox.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam The width to set.
+ */
+static int
+luaA_textbox_width_set(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    int width = luaL_checknumber(L, 2);
+    textbox_data_t *d = (*widget)->data;
+
+    d->width = width;
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
+}
+
+/** The __index method for a textbox object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \param The numbre of elements return on the stack.
+ */
+static int
+luaA_textbox_index(lua_State *L)
+{
+    size_t len;
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_TEXT_SET:
+        lua_pushcfunction(L, luaA_textbox_text_set);
+        return 1;
+      case A_TK_WIDTH_SET:
+        lua_pushcfunction(L, luaA_textbox_width_set);
+        return 1;
+      default:
+        return 0;
+    }
+}
+
+/** Create a new textbox widget.
+ * \param align Widget alignment.
+ * \return A brand new widget.
+ */
 widget_t *
 textbox_new(alignment_t align)
 {
@@ -111,7 +175,7 @@ textbox_new(alignment_t align)
     widget_common_new(w);
     w->align = align;
     w->draw = textbox_draw;
-    w->tell = textbox_tell;
+    w->index = luaA_textbox_index;
     w->destructor = textbox_destructor;
     w->data = d = p_new(textbox_data_t, 1);
 

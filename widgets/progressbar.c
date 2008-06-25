@@ -28,6 +28,7 @@ extern awesome_t globalconf;
 
 typedef struct bar_t bar_t;
 
+/** Progressbar bar data structure */
 struct bar_t
 {
     /** Title of the data/bar */
@@ -56,6 +57,9 @@ struct bar_t
     bar_t *next, *prev;
 };
 
+/** Delete a bar.
+ * \param bar The bar to annihilate.
+ */
 static void
 bar_delete(bar_t **bar)
 {
@@ -67,6 +71,7 @@ bar_delete(bar_t **bar)
 
 DO_SLIST(bar_t, bar, bar_delete)
 
+/** Progressbar private data structure */
 typedef struct
 {
     /** Width of the data_items */
@@ -90,7 +95,7 @@ typedef struct
 } progressbar_data_t;
 
 static void
-progressbar_pcolor_set(xcolor_t **ppcolor, char *new_color)
+progressbar_pcolor_set(xcolor_t **ppcolor, const char *new_color)
 {
     bool flag = false;
     if(!*ppcolor)
@@ -105,13 +110,16 @@ progressbar_pcolor_set(xcolor_t **ppcolor, char *new_color)
         p_delete(ppcolor);
 }
 
+/** Add a new bar to the progressbar private data structure.
+ * \param d The private data structure.
+ * \param title The graph title.
+ */
 static bar_t *
-progressbar_data_add(progressbar_data_t *d, const char *new_data_title)
+progressbar_bar_add(progressbar_data_t *d, const char *title)
 {
     bar_t *bar = p_new(bar_t, 1);
 
-    bar->title = a_strdup(new_data_title);
-
+    bar->title = a_strdup(title);
     bar->fg = globalconf.colors.fg;
     bar->fg_off = globalconf.colors.bg;
     bar->bg = globalconf.colors.bg;
@@ -124,6 +132,15 @@ progressbar_data_add(progressbar_data_t *d, const char *new_data_title)
     return bar;
 }
 
+/** Draw a progressbar.
+ * \param ctx The draw context.
+ * \param screen The screen we're drawing for.
+ * \param w The widget node we're drawing for.
+ * \param offset Offset to draw at.
+ * \param used Space already used.
+ * \param object The object pointer we're drawing onto.
+ * \return The width used.
+ */
 static int
 progressbar_draw(draw_context_t *ctx,
                  int screen __attribute__ ((unused)),
@@ -399,132 +416,161 @@ progressbar_draw(draw_context_t *ctx,
     return w->area.width;
 }
 
-static widget_tell_status_t
-progressbar_tell(widget_t *widget, const char *property, const char *new_value)
+/** Set various progressbar general properties:
+ * gap, ticks_count, ticks_gap, border_padding, border_width, width, height and
+ * vertical.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on the stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam A table with keys as properties names.
+ */
+int
+luaA_progressbar_properties_set(lua_State *L)
 {
-    progressbar_data_t *d = widget->data;
-    int value;
-    char *title, *setting;
-    char *new_val;
-    bar_t *bar;
-    awesome_token_t prop = a_tokenize(property, -1);
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    progressbar_data_t *d = (*widget)->data;
 
-    if(!new_value)
-        return WIDGET_ERROR_NOVALUE;
+    luaA_checktable(L, 2);
 
-    switch (prop)
-    {
-      case A_TK_GAP:
-        d->gap = atoi(new_value);
-        return WIDGET_NOERROR;
-      case A_TK_TICKS_COUNT:
-        d->ticks_count = atoi(new_value);
-        return WIDGET_NOERROR;
-      case A_TK_TICKS_GAP:
-        d->ticks_gap = atoi(new_value);
-        return WIDGET_NOERROR;
-      case A_TK_BORDER_PADDING:
-        d->border_padding = atoi(new_value);
-        return WIDGET_NOERROR;
-      case A_TK_BORDER_WIDTH:
-        d->border_width = atoi(new_value);
-        return WIDGET_NOERROR;
-      case A_TK_WIDTH:
-        d->width = atoi(new_value);
-        return WIDGET_NOERROR;
-      case A_TK_HEIGHT:
-        d->height = atof(new_value);
-        return WIDGET_NOERROR;
-      case A_TK_VERTICAL:
-        d->vertical = a_strtobool(new_value, -1);
-        return WIDGET_NOERROR;
+    d->gap = luaA_getopt_number(L, 2, "gap", d->gap);
+    d->ticks_count = luaA_getopt_number(L, 2, "ticks_count", d->ticks_count);
+    d->ticks_gap = luaA_getopt_number(L, 2, "ticks_gap", d->ticks_gap);
+    d->border_padding = luaA_getopt_number(L, 2, "border_padding", d->border_padding);
+    d->border_width = luaA_getopt_number(L, 2, "border_width", d->border_width);
+    d->width = luaA_getopt_number(L, 2, "width", d->width);
+    d->height = luaA_getopt_number(L, 2, "height", d->height);
 
-    /* following properties need a datasection */
-      case A_TK_FG:
-      case A_TK_DATA:
-      case A_TK_FG_OFF:
-      case A_TK_BG:
-      case A_TK_BORDERCOLOR:
-      case A_TK_FG_CENTER:
-      case A_TK_FG_END:
-      case A_TK_MIN_VALUE:
-      case A_TK_MAX_VALUE:
-      case A_TK_REVERSE:
-        /* check if this section is defined already */
-        new_val = a_strdup(new_value);
-        title = strtok(new_val, " ");
-        if(!(setting = strtok(NULL, " ")))
-        {
-            p_delete(&new_val);
-            return WIDGET_ERROR_NOVALUE;
-        }
-        for(bar = d->bars; bar; bar = bar->next)
-            if(!a_strcmp(title, bar->title))
-                break;
+    d->vertical = luaA_getopt_boolean(L, 2, "vertical", d->vertical);
 
-        /* no section found -> create one */
-        if(!bar)
-            bar = progressbar_data_add(d, title);
-        break;
+    widget_invalidate_bywidget(*widget);
 
-      default:
-        return WIDGET_ERROR;
-    }
-
-    switch (prop)
-    {
-      case A_TK_DATA:
-        value = atof(setting);
-        bar->value = (value < bar->min_value ? bar->min_value :
-                      (value > bar->max_value ? bar->max_value : value));
-        break;
-      case A_TK_FG:
-        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->fg);
-        break;
-      case A_TK_BG:
-        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->bg);
-        break;
-      case A_TK_FG_OFF:
-        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->fg_off);
-        break;
-      case A_TK_BORDERCOLOR:
-        xcolor_new(globalconf.connection, globalconf.default_screen, setting, &bar->bordercolor);
-        break;
-      case A_TK_FG_CENTER:
-        progressbar_pcolor_set(&bar->pfg_center, setting);
-        break;
-      case A_TK_FG_END:
-        progressbar_pcolor_set(&bar->pfg_end, setting);
-        break;
-      case A_TK_MIN_VALUE:
-        bar->min_value = atof(setting);
-        /* hack to prevent max_value beeing less than min_value
-         * and also preventing a division by zero when both are equal */
-        if(bar->max_value <= bar->min_value)
-            bar->max_value = bar->max_value + 0.0001;
-        /* force a actual value into the newly possible range */
-        if(bar->value < bar->min_value)
-            bar->value = bar->min_value;
-        break;
-      case A_TK_MAX_VALUE:
-        bar->max_value = atof(setting);
-        if(bar->min_value >= bar->max_value)
-            bar->min_value = bar->max_value - 0.0001;
-        if(bar->value > bar->max_value)
-            bar->value = bar->max_value;
-        break;
-      case A_TK_REVERSE:
-        bar->reverse = a_strtobool(setting, -1);
-        break;
-      default:
-        return WIDGET_ERROR;
-    }
-
-    p_delete(&new_val);
-
-    return WIDGET_NOERROR;
+    return 0;
 }
 
+/** Set various progressbar bars properties:
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on the stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam A bar name.
+ * \lparam A table with keys as properties names.
+ */
+int
+luaA_progressbar_bar_properties_set(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    const char *buf, *title = luaL_checkstring(L, 2);
+    bar_t *bar;
+    progressbar_data_t *d = (*widget)->data;
+
+    luaA_checktable(L, 3);
+
+    /* check if this section is defined already */
+    for(bar = d->bars; bar; bar = bar->next)
+        if(!a_strcmp(title, bar->title))
+            break;
+
+    /* no bar found -> create one */
+    if(!bar)
+        bar = progressbar_bar_add(d, title);
+
+    if((buf = luaA_getopt_string(L, 3, "fg", NULL)))
+        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &bar->fg);
+    if((buf = luaA_getopt_string(L, 3, "bg", NULL)))
+        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &bar->bg);
+    if((buf = luaA_getopt_string(L, 3, "fg_off", NULL)))
+        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &bar->fg_off);
+    if((buf = luaA_getopt_string(L, 3, "border_color", NULL)))
+        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &bar->bordercolor);
+    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL)))
+        progressbar_pcolor_set(&bar->pfg_center, buf);
+    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL)))
+        progressbar_pcolor_set(&bar->pfg_end, buf);
+
+    bar->min_value = luaA_getopt_number(L, 3, "min_value", bar->min_value);
+    /* hack to prevent max_value beeing less than min_value
+     * and also preventing a division by zero when both are equal */
+    if(bar->max_value <= bar->min_value)
+        bar->max_value = bar->max_value + 0.0001;
+    /* force a actual value into the newly possible range */
+    if(bar->value < bar->min_value)
+        bar->value = bar->min_value;
+
+    bar->max_value = luaA_getopt_number(L, 3, "max_value", bar->max_value);
+    if(bar->min_value >= bar->max_value)
+        bar->min_value = bar->max_value - 0.0001;
+    if(bar->value > bar->max_value)
+        bar->value = bar->max_value;
+
+    bar->reverse = luaA_getopt_boolean(L, 3, "reverse", bar->reverse);
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
+}
+
+/** Add a value to a progressbar bar.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on the stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam A bar name.
+ * \lparam A data value.
+ */
+int
+luaA_progressbar_bar_data_add(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    const char *title = luaL_checkstring(L, 2);
+    progressbar_data_t *d = (*widget)->data;
+    bar_t *bar;
+
+    /* check if this section is defined already */
+    for(bar = d->bars; bar; bar = bar->next)
+        if(!a_strcmp(title, bar->title))
+            break;
+
+    /* no bar found -> create one */
+    if(!bar)
+        bar = progressbar_bar_add(d, title);
+
+    bar->value = MAX(bar->min_value, MIN(bar->max_value, luaL_checknumber(L, 3)));
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
+}
+
+/** Index function for progressbar.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on the stack.
+ */
+static int
+luaA_progressbar_index(lua_State *L)
+{
+    size_t len;
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_PROPERTIES_SET:
+        lua_pushcfunction(L, luaA_progressbar_properties_set);
+        return 1;
+      case A_TK_BAR_PROPERTIES_SET:
+        lua_pushcfunction(L, luaA_progressbar_bar_properties_set);
+        return 1;
+      case A_TK_BAR_DATA_ADD:
+        lua_pushcfunction(L, luaA_progressbar_bar_data_add);
+        return 1;
+      default:
+        return 0;
+    }
+}
+
+/** Destroy a progressbar.
+ * \param widget The widget to kill.
+ */
 static void
 progressbar_destructor(widget_t *widget)
 {
@@ -534,6 +580,10 @@ progressbar_destructor(widget_t *widget)
     p_delete(&d);
 }
 
+/** Create a new progressbar.
+ * \param align Alignment of the widget.
+ * \return A brand new progressbar.
+ */
 widget_t *
 progressbar_new(alignment_t align)
 {
@@ -544,7 +594,7 @@ progressbar_new(alignment_t align)
     widget_common_new(w);
     w->align = align;
     w->draw = progressbar_draw;
-    w->tell = progressbar_tell;
+    w->index = luaA_progressbar_index;
     w->destructor = progressbar_destructor;
     d = w->data = p_new(progressbar_data_t, 1);
 

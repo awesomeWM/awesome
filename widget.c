@@ -2,7 +2,6 @@
  * widget.c - widget managing
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
- * Copyright © 2007 Aldo Cortesi <aldo@nullcube.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,26 +57,6 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
     return barwidth - offset - widgetwidth;
 }
 
-/** Find a widget on a screen by its name.
- * \param name The widget name.
- * \return A widget pointer.
- */
-widget_t *
-widget_getbyname(const char *name)
-{
-    widget_node_t *widget;
-    statusbar_t *sb;
-    int screen;
-
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
-        for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
-            for(widget = sb->widgets; widget; widget = widget->next)
-                if(!a_strcmp(name, widget->widget->name))
-                    return widget->widget;
-
-    return NULL;
-}
-
 /** Common function for button press event on widget.
  * It will look into configuration to find the callback function to call.
  * \param w The widget node.
@@ -101,22 +80,6 @@ widget_common_button_press(widget_node_t *w,
             luaA_pushpointer(globalconf.L, p, type);
             luaA_dofunction(globalconf.L, b->fct, 1);
         }
-}
-
-/** Common tell function for widget, which only warn user that widget
- * cannot be told anything.
- * \param widget The widget.
- * \param property Unused argument.
- * \param new_value Unused argument.
- * \return The status of the command, which is always an error in this case.
- */
-static widget_tell_status_t
-widget_common_tell(widget_t *widget,
-                   const char *property __attribute__ ((unused)),
-                   const char *new_value __attribute__ ((unused)))
-{
-    warn("%s widget does not accept commands.", widget->name);
-    return WIDGET_ERROR_CUSTOM;
 }
 
 /** Render a list of widgets.
@@ -238,7 +201,6 @@ void
 widget_common_new(widget_t *widget)
 {
     widget->align = AlignLeft;
-    widget->tell = widget_common_tell;
     widget->button_press = widget_common_button_press;
 }
 
@@ -269,7 +231,7 @@ widget_invalidate_cache(int screen, int flags)
  * \todo Probably needs more optimization.
  * \param widget The widget to look for.
  */
-static void
+void
 widget_invalidate_bywidget(widget_t *widget)
 {
     int screen;
@@ -371,67 +333,6 @@ luaA_widget_mouse_remove(lua_State *L)
     return 0;
 }
 
-/** Do what should be done with a widget_tell_status_t for a widget.
- * \param widget The widget.
- * \param status The status returned by the tell function of the widget.
- * \param property The property updated.
- */
-void
-widget_tell_managestatus(widget_t *widget, widget_tell_status_t status, const char *property)
-{
-    switch(status)
-    {
-      case WIDGET_ERROR:
-        warn("error changing property %s of widget %s",
-             property, widget->name);
-        break;
-      case WIDGET_ERROR_NOVALUE:
-        warn("error changing property %s of widget %s, no value given",
-              property, widget->name);
-        break;
-      case WIDGET_ERROR_FORMAT_FONT:
-        warn("error changing property %s of widget %s, must be a valid font",
-             property, widget->name);
-        break;
-      case WIDGET_ERROR_FORMAT_COLOR:
-        warn("error changing property %s of widget %s, must be a valid color",
-             property, widget->name);
-        break;
-      case WIDGET_ERROR_FORMAT_SECTION:
-        warn("error changing property %s of widget %s, section/title not found",
-             property, widget->name);
-        break;
-      case WIDGET_NOERROR:
-        widget_invalidate_bywidget(widget);
-        break;
-      case WIDGET_ERROR_CUSTOM:
-        break;
-    }
-}
-
-/** Set a widget property. Each widget type has its own set of property.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- * \lparam The property name.
- * \lparam The property value.
- */
-static int
-luaA_widget_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    const char *property, *value;
-    widget_tell_status_t status;
-
-    property = luaL_checkstring(L, 2);
-    value = luaL_checkstring(L, 3);
-
-    status = (*widget)->tell(*widget, property, value);
-    widget_tell_managestatus(*widget, status, property);
-    return 0;
-}
-
 /** Convert a widget into a printable string.
  * \param L The Lua VM state.
  *
@@ -513,6 +414,7 @@ luaA_widget_visible_get(lua_State *L)
 static int
 luaA_widget_index(lua_State *L)
 {
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     size_t len;
     const char *str = luaL_checklstring(L, 2, &len);
 
@@ -523,9 +425,6 @@ luaA_widget_index(lua_State *L)
         return 1;
       case A_TK_MOUSE_REMOVE:
         lua_pushcfunction(L, luaA_widget_mouse_remove);
-        return 1;
-      case A_TK_SET:
-        lua_pushcfunction(L, luaA_widget_set);
         return 1;
       case A_TK_NAME_SET:
         lua_pushcfunction(L, luaA_widget_name_set);
@@ -540,6 +439,8 @@ luaA_widget_index(lua_State *L)
         lua_pushcfunction(L, luaA_widget_visible_get);
         return 1;
       default:
+        if((*widget)->index)
+            return (*widget)->index(L);
         return 0;
     }
 }
@@ -553,7 +454,6 @@ const struct luaL_reg awesome_widget_meta[] =
 {
     { "mouse_add", luaA_widget_mouse_add },
     { "mouse_remove", luaA_widget_mouse_remove },
-    { "set", luaA_widget_set },
     { "name_set", luaA_widget_name_set },
     { "name_get", luaA_widget_name_get },
     { "visible_set", luaA_widget_visible_set },

@@ -39,6 +39,7 @@ typedef enum
     ShowAll,
 } showclient_t;
 
+/** The tasklist private data structure. */
 typedef struct
 {
     showclient_t show;
@@ -46,6 +47,18 @@ typedef struct
     char *text_normal, *text_urgent, *text_focus;
 } tasklist_data_t;
 
+struct tasklist_hook_data
+{
+    draw_context_t *ctx;
+    area_t *area;
+};
+
+/** Check if a client is visible according to the showclient type paramater.
+ * \param c The client.
+ * \param screen The screen number.
+ * \param show The show parameters.
+ * \return True if the client is visible, false otherwise.
+ */
 static inline bool
 tasklist_isvisible(client_t *c, int screen, showclient_t show)
 {
@@ -64,12 +77,12 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
     return false;
 }
 
-struct tasklist_hook_data
-{
-    draw_context_t *ctx;
-    area_t *area;
-};
-
+/** Called when a markup element is found.
+ * \param p The markup parser data.
+ * \param elem The element name.
+ * \param names The attributes names.
+ * \param values The attributes values.
+ */
 static void
 tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
                         const char **names, const char **values)
@@ -88,11 +101,18 @@ tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
         }
 }
 
-
+/** Draw a tasklist widget.
+ * \param ctx The draw context.
+ * \param screen The screen number.
+ * \param w The widget node we are called from.
+ * \param offset The offset to draw at.
+ * \param used The already used width.
+ * \param p A pointer to the object we're drawing onto.
+ */
 static int
 tasklist_draw(draw_context_t *ctx, int screen,
               widget_node_t *w,
-              int offset, int used, void *q __attribute__ ((unused)))
+              int offset, int used, void *p __attribute__ ((unused)))
 {
     client_t *c;
     tasklist_data_t *d = w->widget->data;
@@ -139,7 +159,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
             {
                 static char const * const elements[] = { "bg", NULL };
                 struct tasklist_hook_data data = { .ctx = ctx, .area = &area };
-                markup_parser_data_t p =
+                markup_parser_data_t pdata =
                 {
                     .elements   = elements,
                     .on_element = &tasklist_markup_on_elem,
@@ -154,9 +174,9 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
                 /* Actually look for the proper background color, since
                  * otherwise the background statusbar color is used instead */
-                markup_parser_data_init(&p);
-                markup_parse(&p, text, a_strlen(text));
-                markup_parser_data_wipe(&p);
+                markup_parser_data_init(&pdata);
+                markup_parse(&pdata, text, a_strlen(text));
+                markup_parser_data_wipe(&pdata);
 
                 if((image = draw_image_new(c->icon_path)))
                 {
@@ -257,50 +277,126 @@ tasklist_button_press(widget_node_t *w,
             }
 }
 
-static widget_tell_status_t
-tasklist_tell(widget_t *widget, const char *property, const char *new_value)
+/** Set the tasklist show attribute.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam A string: tags, focus or all.
+ */
+static int
+luaA_tasklist_show_set(lua_State *L)
 {
-    tasklist_data_t *d = widget->data;
+    size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    tasklist_data_t *d = (*widget)->data;
+    const char *buf = luaL_checklstring(L, 2, &len);
 
-    switch(a_tokenize(property, -1))
+    switch(a_tokenize(buf, len))
     {
-      case A_TK_TEXT_NORMAL:
-        p_delete(&d->text_normal);
-        d->text_normal = a_strdup(new_value);
+      case A_TK_TAGS:
+        d->show = ShowTags;
         break;
-      case A_TK_TEXT_FOCUS:
-        p_delete(&d->text_focus);
-        d->text_focus = a_strdup(new_value);
+      case A_TK_FOCUS:
+        d->show = ShowFocus;
         break;
-      case A_TK_TEXT_URGENT:
-        p_delete(&d->text_urgent);
-        d->text_urgent = a_strdup(new_value);
-        break;
-      case A_TK_SHOW_ICONS:
-        d->show_icons = a_strtobool(new_value, -1);
-        break;
-      case A_TK_SHOW:
-        switch(a_tokenize(new_value, -1))
-        {
-          case A_TK_TAGS:
-            d->show = ShowTags;
-            break;
-          case A_TK_FOCUS:
-            d->show = ShowFocus;
-            break;
-          case A_TK_ALL:
-            d->show = ShowAll;
-            break;
-          default:
-            return WIDGET_ERROR;
-        }
+      case A_TK_ALL:
+        d->show = ShowAll;
         break;
       default:
-        return WIDGET_ERROR;
+        break;
     }
-    return WIDGET_NOERROR;
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
 }
 
+/** Select if icons must be shown.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue A widget.
+ * \lparam A boolean, true to see icons, false otherwise.
+ */
+static int
+luaA_tasklist_showicons_set(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    tasklist_data_t *d = (*widget)->data;
+
+    d->show_icons = luaA_checkboolean(L, 2);
+
+    return 0;
+}
+
+/** Set text format string in case of a client is either normal, focused or has
+ * urgency hint.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \lstack
+ * \lvalue A widget.
+ * \lparam A table with keys to change: `normal', `focus' and `urgent'.
+ */
+static int
+luaA_tasklist_text_set(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    tasklist_data_t *d = (*widget)->data;
+    const char *buf;
+
+    luaA_checktable(L, 2);
+
+    if((buf = luaA_getopt_string(L, 2, "normal", NULL)))
+    {
+        p_delete(&d->text_normal);
+        d->text_normal = a_strdup(buf);
+    }
+
+    if((buf = luaA_getopt_string(L, 2, "focus", NULL)))
+    {
+        p_delete(&d->text_focus);
+        d->text_focus = a_strdup(buf);
+    }
+
+    if((buf = luaA_getopt_string(L, 2, "urgent",  NULL)))
+    {
+        p_delete(&d->text_urgent);
+        d->text_urgent = a_strdup(buf);
+    }
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
+}
+
+/** Index function for tasklist widget.
+ * \lparam L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_tasklist_index(lua_State *L)
+{
+    size_t len;
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_TEXT_SET:
+        lua_pushcfunction(L, luaA_tasklist_text_set);
+        return 1;
+      case A_TK_SHOWICONS_SET:
+        lua_pushcfunction(L, luaA_tasklist_showicons_set);
+      case A_TK_SHOW_SET:
+        lua_pushcfunction(L, luaA_tasklist_show_set);
+      default:
+        return 0;
+    }
+}
+
+/** Destructor for the tasklist widget.
+ * \param widget The widget to destroy.
+ */
 static void
 tasklist_destructor(widget_t *widget)
 {
@@ -312,6 +408,10 @@ tasklist_destructor(widget_t *widget)
     p_delete(&d);
 }
 
+/** Create a new widget tasklist.
+ * \param align The widget alignment, which is flex anyway.
+ * \return A brand new tasklist widget.
+ */
 widget_t *
 tasklist_new(alignment_t align __attribute__ ((unused)))
 {
@@ -323,8 +423,8 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     w->draw = tasklist_draw;
     w->button_press = tasklist_button_press;
     w->align = AlignFlex;
+    w->index = luaA_tasklist_index;
     w->data = d = p_new(tasklist_data_t, 1);
-    w->tell = tasklist_tell;
     w->destructor = tasklist_destructor;
 
     d->text_normal = a_strdup(" <title/> ");
