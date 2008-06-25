@@ -302,6 +302,10 @@ if(LUAC_EXECUTABLE)
         set(AWE_LUAC_FILES ${AWE_LUAC_FILES} ${luacfile})
     endforeach()
 
+    if(NOT EXISTS ${BUILD_DIR}/lib)
+        FILE(MAKE_DIRECTORY ${BUILD_DIR}/lib)
+    endif()
+
     add_custom_target(compile_lua ALL DEPENDS ${AWE_LUAC_FILES})
 endif()
 # }}}
