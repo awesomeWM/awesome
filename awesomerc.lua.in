@@ -100,8 +100,8 @@ mytextbox:set("text", "<b><small> awesome " .. AWESOME_VERSION .. " </small></b>
 mypromptbox = widget.new({ type = "textbox", name = "mypromptbox", align = "left" })
 
 -- Create an iconbox widget
-myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "left" })
-myiconbox:set("image", "@AWESOME_ICON_PATH@/awesome16.png")
+myiconbox = widget.new({ type = "textbox", name = "myiconbox", align = "left" })
+myiconbox:set("text", "<bg image=\"@AWESOME_ICON_PATH@/awesome16.png\" resize=\"true\"/>")
 
 -- Create a systray
 mysystray = widget.new({ type = "systray", name = "mysystray", align = "right" })
@@ -110,12 +110,12 @@ mysystray = widget.new({ type = "systray", name = "mysystray", align = "right" }
 -- We need one layoutbox per screen.
 mylayoutbox = {}
 for s = 1, screen.count() do
-    mylayoutbox[s] = widget.new({ type = "iconbox", name = "mylayoutbox", align = "right" })
+    mylayoutbox[s] = widget.new({ type = "textbox", name = "mylayoutbox", align = "right" })
     mylayoutbox[s]:mouse_add(mouse.new({ }, 1, function () awful.layout.inc(layouts, 1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 3, function () awful.layout.inc(layouts, -1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 4, function () awful.layout.inc(layouts, 1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 5, function () awful.layout.inc(layouts, -1) end))
-    mylayoutbox[s]:set("image", "@AWESOME_ICON_PATH@/layouts/tilew.png")
+    mylayoutbox[s]:set("text", "<bg image=\"@AWESOME_ICON_PATH@/layouts/tilew.png\" resize=\"true\"/>")
 end
 
 -- Create a statusbar for each screen and add it
@@ -334,7 +334,7 @@ end
 -- (tag switch, new client, etc)
 function hook_arrange(screen)
     local layout = awful.layout.get(screen)
-    mylayoutbox[screen]:set("image", "@AWESOME_ICON_PATH@/layouts/" .. layout .. "w.png")
+    mylayoutbox[screen]:set("text", "<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. layout .. "w.png\" resize=\"true\"/>")
 
     -- Uncomment if you want mouse warping
     --[[

@@ -41,7 +41,6 @@ WIDGETS
 -------
 The current list of available widget is:
 
-- iconbox
 - graph
 - progressbar
 - taglist
@@ -51,14 +50,6 @@ The current list of available widget is:
 
 Each widget as its own set of properties, described below, that can bet modified with the set()
 method.
-
-ICONBOX
-~~~~~~~
-*image*::
-    The image path.
-
-*resize*::
-    True if you want the image to be auto-resized.
 
 PROGRESSBAR
 ~~~~~~~~~~~

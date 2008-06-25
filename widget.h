@@ -41,7 +41,6 @@ int luaA_widget_userdata_new(lua_State *, widget_t *);
 
 widget_constructor_t taglist_new;
 widget_constructor_t textbox_new;
-widget_constructor_t iconbox_new;
 widget_constructor_t progressbar_new;
 widget_constructor_t graph_new;
 widget_constructor_t tasklist_new;

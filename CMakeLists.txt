@@ -74,7 +74,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/layouts/max.c
     ${SOURCE_DIR}/layouts/tile.c
     ${SOURCE_DIR}/widgets/graph.c
-    ${SOURCE_DIR}/widgets/iconbox.c
     ${SOURCE_DIR}/widgets/progressbar.c
     ${SOURCE_DIR}/widgets/taglist.c
     ${SOURCE_DIR}/widgets/tasklist.c
