@@ -32,6 +32,13 @@ layouts =
     "floating"
 }
 
+-- Table of clients that should be set floating
+floatings =
+{
+    ["mplayer"] = true,
+    ["pinentry"] = true
+}
+
 -- Color & Appearance definitions, we use these later to display things
 font = "sans 8"
 border_width = 1
@@ -317,10 +324,7 @@ function hook_manage(c)
     -- if they're not focusable, so set border anyway.
     c:border_set({ width = border_width, color = border_normal })
     c:focus_set()
-    if c:name_get():lower():find("pinentry") then
-        c:floating_set(true)
-    end
-    if c:name_get():lower():find("mplayer") then
+    if floatings[c:name_get():lower()] then
         c:floating_set(true)
     end
 end
