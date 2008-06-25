@@ -414,7 +414,6 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         }
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, false);
-	xcb_configure_window(globalconf.connection, c->win, XCB_CONFIG_WINDOW_STACK_MODE, &raise_window_val);
     }
     else if(state == net_wm_state_above)
     {

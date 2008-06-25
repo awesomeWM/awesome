@@ -287,6 +287,28 @@ client_raise(client_t *c)
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_BELOW;
 
+    /* first stack fullscreen and modal windows */
+    for(layer = LAYER_OUTOFSPACE - 1; layer >= LAYER_FULLSCREEN; layer--)
+        for(node = globalconf.stack; node; node = node->next)
+            if(node->client->layer == layer)
+            {
+                if(node->client->titlebar
+                   && node->client->titlebar->sw
+                   && node->client->titlebar->position)
+                {
+                    xcb_configure_window(globalconf.connection,
+                                         node->client->titlebar->sw->window,
+                                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                         config_win_vals);
+                    config_win_vals[0] = node->client->titlebar->sw->window;
+                }
+                xcb_configure_window(globalconf.connection, node->client->win,
+                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                     config_win_vals);
+                config_win_vals[0] = node->client->win;
+            }
+
+    /* then stack systray windows */
     for(emwin = globalconf.embedded; emwin; emwin = emwin->next)
     {
         xcb_configure_window(globalconf.connection,
@@ -296,6 +318,7 @@ client_raise(client_t *c)
         config_win_vals[0] = emwin->win;
     }
 
+    /* then stack statusbar window */
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
             if(sb->sw)
@@ -307,7 +330,8 @@ client_raise(client_t *c)
                 config_win_vals[0] = sb->sw->window;
             }
 
-    for(layer = LAYER_OUTOFSPACE - 1; layer >= LAYER_DESKTOP; layer--)
+    /* finally stack everything else */
+    for(layer = LAYER_FULLSCREEN - 1; layer >= LAYER_DESKTOP; layer--)
         for(node = globalconf.stack; node; node = node->next)
             if(node->client->layer == layer)
             {
