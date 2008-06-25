@@ -280,6 +280,8 @@ struct client_t
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
     bool hassizehints;
+    /** Respect resize hints */
+    bool honorsizehints;
     int border, oldborder;
     /** True if the client does not want any border */
     bool noborder;
@@ -442,8 +444,6 @@ struct awesome_t
     } colors;
     /** Default font */
     font_t *font;
-    /** Respect resize hints */
-    bool resize_hints;
     struct
     {
         /** Command to execute when spawning a new client */

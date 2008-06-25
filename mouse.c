@@ -652,7 +652,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
                                            XCB_CURRENT_TIME, MOUSEMASK);
         }
 
-        if(globalconf.resize_hints && c->hassizehints)
+        if(c->hassizehints && c->honorsizehints)
         {
             int dx, dy;
 

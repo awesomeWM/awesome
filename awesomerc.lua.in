@@ -54,7 +54,6 @@ border_marked = "#91231C"
 
 awesome.font_set(font)
 awesome.colors_set({ fg = fg_normal, bg = bg_normal })
-awesome.resizehints_set(true)
 
 -- }}}
 
@@ -327,6 +326,8 @@ function hook_manage(c)
     if floatings[c:name_get():lower()] then
         c:floating_set(true)
     end
+    -- Honor size hints
+    c:honorsizehints_set(true)
 end
 
 -- Hook function to execute when arranging the screen

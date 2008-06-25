@@ -51,7 +51,7 @@ layout_magnifier(int screen)
     geometry.height = area.height * curtags[0]->mwfact;
     geometry.x = area.x + (area.width - geometry.width) / 2;
     geometry.y = area.y + (area.height - geometry.height) / 2;
-    client_resize(focus, geometry, globalconf.resize_hints);
+    client_resize(focus, geometry, focus->honorsizehints);
     client_raise(focus);
 
     for(c = client_list_prev_cycle(&globalconf.clients, focus);
@@ -76,7 +76,7 @@ layout_magnifier(int screen)
         {
             geometry.height -= 2 * c->border;
             geometry.width -= 2 * c->border;
-            client_resize(c, geometry, globalconf.resize_hints);
+            client_resize(c, geometry, c->honorsizehints);
             geometry.height += 2 * c->border;
             geometry.width += 2 * c->border;
             geometry.y += geometry.height;

@@ -164,21 +164,6 @@ luaA_padding_set(lua_State *L)
     return 0;
 }
 
-/** Define if awesome should respect applications size hints when resizing
- * windows in tiled mode. If you set this to true, you will experience gaps
- * between windows, but they will have the best size they can have.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lparam A boolean value, true to enable, false to disable.
- */
-static int
-luaA_resizehints_set(lua_State *L)
-{
-    globalconf.resize_hints = luaA_checkboolean(L, 1);
-    return 0;
-}
-
 /** Get the screen count.
  * \param L The Lua VM state.
  *
@@ -484,7 +469,6 @@ luaA_init(void)
         { "restart", luaA_restart },
         { "padding_set", luaA_padding_set },
         { "mouse_add", luaA_mouse_add },
-        { "resizehints_set", luaA_resizehints_set },
         { "font_set", luaA_font_set },
         { "colors_set", luaA_colors_set },
         { NULL, NULL }

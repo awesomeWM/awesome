@@ -109,7 +109,7 @@ _tile(int screen, const position_t position)
             geometry.width = mw - 2 * c->border;
             geometry.height =  mh - 2 * c->border;
 
-            client_resize(c, geometry, globalconf.resize_hints);
+            client_resize(c, geometry, c->honorsizehints);
         }
         else
         {
@@ -162,7 +162,7 @@ _tile(int screen, const position_t position)
                 if(position == Bottom)
                     geometry.y += mh;
             }
-            client_resize(c, geometry, globalconf.resize_hints);
+            client_resize(c, geometry, c->honorsizehints);
         }
         i++;
     }
