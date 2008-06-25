@@ -35,6 +35,7 @@ find_program(GREP_EXECUTABLE grep)
 find_program(GIT_EXECUTABLE git)
 find_program(HOSTNAME_EXECUTABLE hostname)
 find_program(GPERF_EXECUTABLE gperf)
+find_program(LUAC_EXECUTABLE luac)
 # programs needed for man pages
 find_program(ASCIIDOC_EXECUTABLE asciidoc)
 find_program(XMLTO_EXECUTABLE xmlto)

@@ -289,6 +289,24 @@ if(GENERATE_LUADOC)
 endif()
 # }}}
 
+# {{{ compile Lua libs
+if(LUAC_EXECUTABLE)
+    foreach(luafile ${AWE_LUA_FILES})
+        string(REGEX REPLACE ".lua\$" ".luac" luacfile ${luafile})
+        string(REPLACE ${SOURCE_DIR} ${BUILD_DIR} luacfile ${luacfile})
+
+        add_custom_command(
+            COMMAND ${LUAC_EXECUTABLE} -o ${luacfile} ${luafile}
+            OUTPUT ${luacfile}
+            DEPENDS ${luafile})
+
+        set(AWE_LUAC_FILES ${AWE_LUAC_FILES} ${luacfile})
+    endforeach()
+
+    add_custom_target(compile_lua ALL DEPENDS ${AWE_LUAC_FILES})
+endif()
+# }}}
+
 # {{{ dist tarball
 if(BUILD_FROM_GIT)
     add_custom_target(dist
@@ -299,7 +317,7 @@ endif()
 
 # {{{ Installation.
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
-install(FILES ${AWE_LUA_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
+install(FILES ${AWE_LUA_FILES} ${AWE_LUAC_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
 install(FILES ${AWE_CONF_FILES} DESTINATION ${AWESOME_CONF_PATH})
 if(GENERATE_MANPAGES)
     install(FILES ${AWE_MAN1_FILES} DESTINATION ${AWESOME_MAN_PATH}/man1)
