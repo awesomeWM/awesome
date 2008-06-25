@@ -29,6 +29,7 @@
 bool client_isvisible(client_t *, int);
 client_t * client_getbywin(xcb_window_t);
 bool client_focus(client_t *, int);
+void client_setlayer(client_t *, layer_t);
 void client_raise(client_t *);
 void client_ban(client_t *);
 void client_unban(client_t *);
@@ -41,7 +42,7 @@ xcb_size_hints_t *client_updatesizehints(client_t *);
 void client_updatetitle(client_t *);
 void client_saveprops(client_t *);
 void client_kill(client_t *);
-void client_setfloating(client_t *, bool, layer_t);
+void client_setfloating(client_t *, bool);
 char * client_markup_parse(client_t *, const char *, ssize_t);
 void client_setborder(client_t *, int);
 

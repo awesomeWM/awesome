@@ -389,8 +389,9 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
                 xcb_map_window(globalconf.connection, c->titlebar->sw->window);
             c->noborder = false;
             c->ismax = false;
+            client_setlayer(c, c->oldlayer);
             client_setborder(c, c->oldborder);
-            client_setfloating(c, c->wasfloating, c->oldlayer);
+            client_setfloating(c, c->wasfloating);
         }
         else if(set == _NET_WM_STATE_ADD)
         {
@@ -408,7 +409,9 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->oldborder = c->border;
             client_setborder(c, 0);
             c->noborder = true;
-            client_setfloating(c, true, LAYER_FULLSCREEN);
+            c->oldlayer = c->layer;
+            client_setlayer(c, LAYER_FULLSCREEN);
+            client_setfloating(c, true);
         }
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, false);
@@ -416,31 +419,31 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == net_wm_state_above)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            c->layer = c->oldlayer;
+            client_setlayer(c, c->oldlayer);
         else if(set == _NET_WM_STATE_ADD)
         {
             c->oldlayer = c->layer;
-            c->layer = LAYER_ABOVE;
+            client_setlayer(c, LAYER_ABOVE);
         }
     }
     else if(state == net_wm_state_below)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            c->layer = c->oldlayer;
+            client_setlayer(c, c->oldlayer);
         else if(set == _NET_WM_STATE_ADD)
         {
             c->oldlayer = c->layer;
-            c->layer = LAYER_BELOW;
+            client_setlayer(c, LAYER_BELOW);
         }
     }
     else if(state == net_wm_state_modal)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            c->layer = c->oldlayer;
+            client_setlayer(c, c->oldlayer);
         else if(set == _NET_WM_STATE_ADD)
         {
             c->oldlayer = c->layer;
-            c->layer = LAYER_MODAL;
+            client_setlayer(c, LAYER_MODAL);
         }
     }
     else if(state == net_wm_state_hidden)
@@ -485,17 +488,21 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
         }
         client_setborder(c, 0);
         c->noborder = true;
-        client_setfloating(c, true, LAYER_ABOVE);
+        client_setlayer(c, LAYER_ABOVE);
+        client_setfloating(c, true);
     }
     else if(state == net_wm_window_type_dialog)
-        client_setfloating(c, true, LAYER_MODAL);
+    {
+        client_setlayer(c, LAYER_MODAL);
+        client_setfloating(c, true);
+    }
     else if(state == net_wm_window_type_desktop)
     {
         tag_array_t *tags = &globalconf.screens[c->screen].tags;
         c->noborder = true;
         c->isfixed = true;
         c->skip = true;
-        c->layer = LAYER_DESKTOP;
+        client_setlayer(c, LAYER_DESKTOP);
         for(int i = 0; i < tags->len; i++)
             tag_client(c, tags->tab[i]);
     }

@@ -92,7 +92,8 @@ client_loadprops(client_t * c, screen_t *screen)
         else
             untag_client(c, tags->tab[i]);
 
-    client_setfloating(c, prop[tags->len] == '1', prop[tags->len + 1] - '0');
+    client_setlayer(c, prop[tags->len + 1] - '0');
+    client_setfloating(c, prop[tags->len] == '1');
     p_delete(&prop);
     return true;
 }
@@ -409,7 +410,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     /* should be floating if transsient or fixed */
     if(rettrans || c->isfixed)
-        client_setfloating(c, true, c->layer != LAYER_TILE ? c->layer : LAYER_FLOAT);
+        client_setfloating(c, true);
 
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
@@ -581,34 +582,43 @@ client_resize(client_t *c, area_t geometry, bool hints)
     return resized;
 }
 
+/* Set the client layer.
+ * \param c The client.
+ * \param layer The layer.
+ */
+void
+client_setlayer(client_t *c, layer_t layer)
+{
+    c->layer = layer;
+    client_raise(c);
+}
+
 /** Set a clinet floating.
  * \param c The client.
  * \param floating Set floating, or not.
  * \param layer Layer to put the floating window onto.
  */
 void
-client_setfloating(client_t *c, bool floating, layer_t layer)
+client_setfloating(client_t *c, bool floating)
 {
     if(c->isfloating != floating)
     {
         if((c->isfloating = floating))
+        {
+            client_setlayer(c, MAX(c->layer, LAYER_FLOAT));
             client_resize(c, c->f_geometry, false);
+        }
         else if(c->ismax)
         {
             c->ismax = false;
+            client_setlayer(c, c->oldlayer);
             client_resize(c, c->m_geometry, false);
         }
+        else
+            client_setlayer(c, c->oldlayer);
         if(client_isvisible(c, c->screen))
             globalconf.screens[c->screen].need_arrange = true;
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-        if(floating)
-        {
-            c->oldlayer = c->layer;
-            c->layer = layer;
-        }
-        else
-            c->layer = c->oldlayer;
-        client_raise(c);
         client_saveprops(c);
     }
 }
@@ -1200,7 +1210,7 @@ luaA_client_floating_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     bool f = luaA_checkboolean(L, 2);
-    client_setfloating(*c, f, (*c)->layer == LAYER_FLOAT ? LAYER_TILE : LAYER_FLOAT);
+    client_setfloating(*c, f);
     return 0;
 }
 
