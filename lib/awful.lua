@@ -36,10 +36,10 @@ setfenv(1, P)
 
 P.hooks = {}
 P.myhooks = {}
-P.menu = {}
+P.prompt = {}
+P.completion = {}
 P.screen = {}
 P.layout = {}
-P.completion = {}
 P.client = {}
 P.tag = {}
 
@@ -579,12 +579,12 @@ function P.completion.bash(command, cur_pos, ncomp)
     return str, cur_pos
 end
 
---- Draw the text menu with a cursor.
+--- Draw the prompt text with a cursor.
 -- @param text The text.
 -- @param text_color The text color.
 -- @param cursor_color The cursor color.
 -- @param cursor_pos The cursor position.
-local function menu_text_with_cursor(text, text_color, cursor_color, cursor_pos)
+local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_pos)
     local char
     if not text then text = "" end
     if #text < cursor_pos then
@@ -602,7 +602,7 @@ end
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument when finished.
 -- @param completion_callback The callback function to call to get completion.
-function P.menu(args, textbox, exe_callback, completion_callback)
+function P.prompt(args, textbox, exe_callback, completion_callback)
     if not args then return end
     local command = ""
     local command_before_comp
@@ -617,7 +617,7 @@ function P.menu(args, textbox, exe_callback, completion_callback)
     if not textbox or not exe_callback then
         return
     end
-    textbox:set("text", prompt .. menu_text_with_cursor(text, inv_col, cur_col, cur_pos))
+    textbox:set("text", prompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos))
     keygrabber.run(
     function (mod, key)
         local has_ctrl = false
@@ -713,7 +713,7 @@ function P.menu(args, textbox, exe_callback, completion_callback)
         end
 
         -- Update textbox
-        textbox:set("text", prompt .. menu_text_with_cursor(command, inv_col, cur_col, cur_pos))
+        textbox:set("text", prompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos))
 
         return true
     end)

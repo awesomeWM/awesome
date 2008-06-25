@@ -91,7 +91,7 @@ mytasklist:set("text_focus", "<bg color='"..bg_focus.."'/> <span color='"..fg_fo
 mytextbox = widget.new({ type = "textbox", name = "mytextbox", align = "right" })
 -- Set the default text in textbox
 mytextbox:set("text", "<b><small> awesome " .. AWESOME_VERSION .. " </small></b>")
-mymenubox = widget.new({ type = "textbox", name = "mymenubox", align = "left" })
+mypromptbox = widget.new({ type = "textbox", name = "mypromptbox", align = "left" })
 
 -- Create an iconbox widget
 myiconbox = widget.new({ type = "iconbox", name = "myiconbox", align = "left" })
@@ -121,7 +121,7 @@ for s = 1, screen.count() do
     mystatusbar[s]:widget_add(mytaglist)
     mystatusbar[s]:widget_add(myiconbox)
     mystatusbar[s]:widget_add(mytasklist)
-    mystatusbar[s]:widget_add(mymenubox)
+    mystatusbar[s]:widget_add(mypromptbox)
     mystatusbar[s]:widget_add(mytextbox)
     mystatusbar[s]:widget_add(mylayoutbox[s])
     mystatusbar[s]:add(s)
@@ -206,12 +206,12 @@ keybinding.new({ modkey, "Control" }, "l", function () awful.tag.incncol(-1) end
 keybinding.new({ modkey }, "space", function () awful.layout.inc(layouts, 1) end):add()
 keybinding.new({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -1) end):add()
 
--- Menu
+-- Prompt
 keybinding.new({ modkey }, "F1", function ()
-                                     awful.menu({ prompt = "Run: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mymenubox, awful.spawn, awful.completion.bash)
+                                     awful.prompt({ prompt = "Run: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mypromptbox, awful.spawn, awful.completion.bash)
                                  end):add()
 keybinding.new({ modkey }, "F4", function ()
-                                     awful.menu({ prompt = "Run Lua code: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mymenubox, awful.eval, awful.completion.bash)
+                                     awful.prompt({ prompt = "Run Lua code: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mypromptbox, awful.eval, awful.prompt.bash)
                                  end):add()
 
 --- Tabulous, tab manipulation
