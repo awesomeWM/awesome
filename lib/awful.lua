@@ -15,6 +15,7 @@ else
 end
 
 -- Grab environment we need
+local string = string
 local assert = assert
 local loadstring = loadstring
 local ipairs = ipairs
@@ -667,8 +668,10 @@ function P.menu(args, textbox, exe_callback, completion_callback)
             elseif key == "Right" then
                 cur_pos = cur_pos + 1
             else
-                command = command:sub(1, cur_pos - 1) .. key .. command:sub(cur_pos)
-                cur_pos = cur_pos + 1
+                if string.len(key) == 1 then
+                    command = command:sub(1, cur_pos - 1) .. key .. command:sub(cur_pos)
+                    cur_pos = cur_pos + 1
+                end
             end
             if cur_pos < 1 then
                 cur_pos = 1
