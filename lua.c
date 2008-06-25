@@ -453,6 +453,23 @@ luaA_openlib(lua_State *L, const char *name,
     luaL_register(L, name, methods);
 }
 
+static int
+luaA_mbstrlen(lua_State *L)
+{
+    const char *cmd = luaL_checkstring(L, 1);
+    lua_pushnumber(L, mbstowcs(NULL, NONULL(cmd), 0));
+    return 1;
+}
+
+static void
+luaA_fixups(lua_State *L)
+{
+    lua_getglobal(L, "string");
+    lua_pushcfunction(L, luaA_mbstrlen);
+    lua_setfield(L, -2, "len");
+    lua_pop(L, 1);
+}
+
 /** Initialize the Lua VM
  */
 void
@@ -496,6 +513,8 @@ luaA_init(void)
     L = globalconf.L = lua_open();
 
     luaL_openlibs(L);
+
+    luaA_fixups(L);
 
     /* Export awesome lib */
     luaL_register(L, "awesome", awesome_lib);
