@@ -140,7 +140,6 @@ luaA_textbox_width_set(lua_State *L)
 /** The __index method for a textbox object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \param The numbre of elements return on the stack.
  */
 static int
 luaA_textbox_index(lua_State *L)
