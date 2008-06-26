@@ -618,7 +618,7 @@ function P.prompt(args, textbox, exe_callback, completion_callback)
     if not textbox or not exe_callback then
         return
     end
-    textbox:set("text", prompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos))
+    textbox:text_set(prompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos))
     keygrabber.run(
     function (mod, key)
         local has_ctrl = false
@@ -631,16 +631,16 @@ function P.prompt(args, textbox, exe_callback, completion_callback)
         -- Get out cases
         if has_ctrl then
             if key == "g" then
-                textbox:set("text", "")
+                textbox:text_set("")
                 return false
             end
         else
             if key == "Return" then
-                textbox:set("text", "")
+                textbox:text_set( "")
                 exe_callback(command)
                 return false
             elseif key == "Escape" then
-                textbox:set("text", "")
+                textbox:text_set("")
                 return false
             end
         end
@@ -716,7 +716,7 @@ function P.prompt(args, textbox, exe_callback, completion_callback)
         end
 
         -- Update textbox
-        textbox:set("text", prompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos))
+        textbox:text_set(prompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos))
 
         return true
     end)
