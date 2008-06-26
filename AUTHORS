@@ -1,13 +1,26 @@
-awesome - awesome window manager
+
+    awesome - awesome window manager
+
+Author:
 
     © 2007-2008 Julien Danjou <julien@danjou.info>
+
+Contributors:
+
     © 2007-2008 Arnaud Fontaine <arnau@debian.org>
-    © 2007-2008 Nikos Ntarmos <ntarmos@ceid.upatras.gr>
     © 2007-2008 Marco Candrian <mac@calmar.ws>
+    © 2008 Lucas de Vries <lucasdevries@gmail.com>
     © 2008 Michael Gehring <mg@ebfe.org>
     © 2008 Pierre Habouzit <madcoder@debian.org>
+    © 2008 Félix C. Morency <felix.morency@gmail.com>
+
+Past contributors:
+
+    © 2007-2008 Nikos Ntarmos <ntarmos@ceid.upatras.gr>
     © 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
     © 2007 Aldo Cortesi <aldo@nullcube.com>
+
+License:
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
