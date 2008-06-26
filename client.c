@@ -217,7 +217,7 @@ client_ban(client_t *c)
  * \param screen Virtual screen number.
  * \return True if a window (even root) has received focus, false otherwise.
  */
-bool
+void
 client_focus(client_t *c, int screen)
 {
     int phys_screen;
@@ -229,7 +229,7 @@ client_focus(client_t *c, int screen)
         for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
 
     /* unfocus current selected client */
-    if(globalconf.focus->client)
+    if(globalconf.focus->client && c != globalconf.focus->client)
         client_unfocus(globalconf.focus->client);
 
     if(c)
@@ -260,8 +260,6 @@ client_focus(client_t *c, int screen)
 
     ewmh_update_net_active_window(phys_screen);
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
-
-    return true;
 }
 
 /** Restack clients and puts c in top of its layer.
