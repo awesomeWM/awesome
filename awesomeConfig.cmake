@@ -202,16 +202,18 @@ endif()
 
 # {{{ Install path and configuration variables.
 if(DEFINED PREFIX)
-    set(CMAKE_INSTALL_PREFIX ${PREFIX})
+    set(PREFIX ${PREFIX} CACHE PATH "install prefix")
+else()
+    set(PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH "install prefix")
 endif()
 
 #If a sysconfdir is specified, use it instead
 #of the default configuration dir.
 if(DEFINED SYSCONFDIR)
-    set(AWESOME_ETC ${SYSCONFDIR})
+    set(SYSCONFDIR ${SYSCONFDIR} CACHE PATH "config directory")
 else()
-    set(AWESOME_ETC ${CMAKE_INSTALL_PREFIX}/etc)
-endif()   
+    set(SYSCONFDIR ${PREFIX}/etc CACHE PATH "config directory")
+endif()
 
 set(AWESOME_VERSION          ${VERSION})
 set(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR})
