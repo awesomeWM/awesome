@@ -1040,12 +1040,6 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
     geom.width = ext.width;
     geom.height = ext.height * 1.5;
 
-    if(parser_data->bg_image)
-    {
-        geom.width = MAX(geom.width, parser_data->bg_image->width);
-        geom.height = MAX(geom.height, parser_data->bg_image->height);
-    }
-
     return geom;
 }
 
