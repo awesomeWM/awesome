@@ -354,7 +354,7 @@ draw_text(draw_context_t *ctx, font_t *font,
           default:
             break;
         }
-        draw_image(ctx, x, y, area.height, pdata->bg_image);
+        draw_image(ctx, x, y, pdata->bg_resize ? area.height : 0, pdata->bg_image);
         draw_image_delete(&pdata->bg_image);
     }
 
