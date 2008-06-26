@@ -75,7 +75,6 @@ if(GENERATE_LUADOC)
 endif()
 # }}}
 
-
 # {{{ version stamp
 if(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
     # get current version
@@ -203,6 +202,7 @@ endif()
 # {{{ Install path and configuration variables.
 if(DEFINED PREFIX)
     set(PREFIX ${PREFIX} CACHE PATH "install prefix")
+    set(CMAKE_INSTALL_PREFIX ${PREFIX})
 else()
     set(PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH "install prefix")
 endif()
@@ -220,10 +220,10 @@ set(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR})
 set(AWESOME_COMPILE_HOSTNAME ${BUILDHOSTNAME})
 set(AWESOME_COMPILE_BY       $ENV{USER})
 set(AWESOME_RELEASE          ${CODENAME})
-set(AWESOME_CONF_PATH        ${AWESOME_ETC}/${PROJECT_AWE_NAME})
-set(AWESOME_DATA_PATH        ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_AWE_NAME})
-set(AWESOME_DOC_PATH         ${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_AWE_NAME})
-set(AWESOME_MAN_PATH         ${CMAKE_INSTALL_PREFIX}/share/man)
+set(AWESOME_CONF_PATH        ${SYSCONFDIR}/${PROJECT_AWE_NAME})
+set(AWESOME_DATA_PATH        ${PREFIX}/share/${PROJECT_AWE_NAME})
+set(AWESOME_DOC_PATH         ${PREFIX}/share/doc/${PROJECT_AWE_NAME})
+set(AWESOME_MAN_PATH         ${PREFIX}/share/man)
 set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)
 set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 # }}}
