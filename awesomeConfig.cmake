@@ -215,6 +215,9 @@ else()
     set(SYSCONFDIR ${PREFIX}/etc CACHE PATH "config directory")
 endif()
 
+# hide to avoid confusion
+mark_as_advanced(CMAKE_INSTALL_PREFIX)
+
 set(AWESOME_VERSION          ${VERSION})
 set(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR})
 set(AWESOME_COMPILE_HOSTNAME ${BUILDHOSTNAME})
