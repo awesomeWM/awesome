@@ -86,6 +86,7 @@ plot_delete(plot_t **g)
 
 DO_SLIST(plot_t, plot, plot_delete)
 
+/** The private graph data structure */
 typedef struct
 {
     /** Width of the widget */
@@ -148,6 +149,14 @@ graph_plot_add(graph_data_t *d, const char *title)
     return plot;
 }
 
+/** Draw a graph widget.
+ * \param ctx The draw context.
+ * \param screen The screen number.
+ * \param w The widget node we are called from.
+ * \param offset The offset to draw at.
+ * \param used The already used width.
+ * \param p A pointer to the object we're drawing onto.
+ */
 static int
 graph_draw(draw_context_t *ctx,
            int screen __attribute__ ((unused)),
@@ -547,4 +556,5 @@ graph_new(alignment_t align)
 
     return w;
 }
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
