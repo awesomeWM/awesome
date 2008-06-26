@@ -42,16 +42,18 @@ for i, line in ipairs(ilines) do
     elseif line:find("%*/") then
         comment_start = false
         local l = ilines[i + 2]
-        local fctname
-        _, _, fctname = l:find("^(.+)%(lua_State")
-        if fctname then
-            function_doc[fctname] = comment
+        if l then
+            local fctname
+            _, _, fctname = l:find("^(.+)%(lua_State")
+            if fctname then
+                function_doc[fctname] = comment
+            end
         end
         comment = nil
     elseif comment_start then
-		if not line:find("\\param") and not line:find("\\return") and not line:find("\\luastack") then
-	        comment = comment .. "\n" .. line
-		end
+        if not line:find("\\param") and not line:find("\\return") and not line:find("\\luastack") then
+            comment = comment .. "\n" .. line
+        end
     end
 end
 
@@ -67,12 +69,12 @@ for i, line in ipairs(ilines) do
             libname = nil
         else
             local fctname, fctdef
-            _, _, fctname, fctdef = line:find("\"(.+)\", (.+) },")
+            _, _, fctname, fctdef = line:find("\"(.+)\", (.+) },?")
             if fctname and not fctname:find("^__") then
                 if function_doc[fctdef] then
                     print(function_doc[fctdef]:comment_translate())
-					print("function " .. libname .. "." .. fctname .. "()")
-					print("end");
+                    print("function " .. libname .. "." .. fctname .. "()")
+                    print("end");
                 else
                     print("This function is not yet documented.")
                 end
