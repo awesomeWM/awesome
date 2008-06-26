@@ -41,6 +41,7 @@ void keybinding_idx_wipe(keybinding_idx_t *idx)
 
 void keybinding_delete(keybinding_t **kbp)
 {
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*kbp)->fct);
     p_delete(kbp);
 }
 
