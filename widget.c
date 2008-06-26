@@ -521,6 +521,9 @@ luaA_widget_index(lua_State *L)
       case A_TK_MOUSE_ADD:
         lua_pushcfunction(L, luaA_widget_mouse_add);
         return 1;
+      case A_TK_MOUSE_REMOVE:
+        lua_pushcfunction(L, luaA_widget_mouse_remove);
+        return 1;
       case A_TK_SET:
         lua_pushcfunction(L, luaA_widget_set);
         return 1;
