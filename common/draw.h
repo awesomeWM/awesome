@@ -118,8 +118,9 @@ typedef struct
 } draw_image_t;
 
 draw_context_t *draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t, xcolor_t, xcolor_t);
-/** Delete a draw context
- * \param ctx draw_context_t to delete
+
+/** Delete a draw context.
+ * \param ctx The draw_context_t to delete.
  */
 static inline void
 draw_context_delete(draw_context_t **ctx)

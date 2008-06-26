@@ -340,6 +340,47 @@ luaA_statusbar_align_set(lua_State *L)
     return 0;
 }
 
+/** Set the default statusbar colors outside the constructor
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on the stack.
+ *
+ * \luastack
+ * \lvalue A statusbar.
+ * \lparam A table with `bg' and `fg'.
+ */
+static int
+luaA_statusbar_colors_set(lua_State *L)
+{
+    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
+    const char *buf;
+
+    luaA_checktable(L, 2);
+
+    if ((buf = luaA_getopt_string(L, 2, "fg", NULL)))
+    {
+        xcolor_new(globalconf.connection, globalconf.default_screen,
+                   buf, &(*sb)->colors.fg);
+
+        if((*sb)->ctx)
+            (*sb)->ctx->fg = (*sb)->colors.fg;
+
+        (*sb)->need_update = true;
+    }
+
+    if ((buf = luaA_getopt_string(L, 2, "bg", NULL)))
+    {
+        xcolor_new(globalconf.connection, globalconf.default_screen,
+                   buf, &(*sb)->colors.bg);
+
+        if((*sb)->ctx)
+            (*sb)->ctx->bg = (*sb)->colors.bg;
+
+        (*sb)->need_update = true;
+    }
+
+    return 0;
+}
+
 /** Convert a statusbar to a printable string.
  * \param L The Lua VM state.
  *
@@ -572,6 +613,7 @@ const struct luaL_reg awesome_statusbar_meta[] =
     { "position_set", luaA_statusbar_position_set },
     { "position_get", luaA_statusbar_position_get },
     { "align_set", luaA_statusbar_align_set },
+    { "colors_set", luaA_statusbar_colors_set },
     { "add", luaA_statusbar_add },
     { "remove", luaA_statusbar_remove },
     { "__gc", luaA_statusbar_gc },
