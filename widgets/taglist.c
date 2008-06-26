@@ -295,7 +295,7 @@ taglist_button_press(widget_node_t *w,
  * or has a client with urgency hint.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A table with keys to change: `normal', `focus' and `urgent'.
  */
@@ -334,7 +334,7 @@ luaA_taglist_text_set(lua_State *L)
 /** Set if the taglist must show the tags which have no client.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A boolean value, true to show empty tags, false otherwise.
  */

@@ -280,7 +280,7 @@ graph_draw(draw_context_t *ctx,
 /** Set various graph general properties.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A table with various properties set.
  */
@@ -340,7 +340,7 @@ luaA_graph_properties_set(lua_State *L)
 /** Set various plot graph properties.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A plot name.
  * \lparam A table with various properties set.
@@ -403,7 +403,7 @@ luaA_graph_plot_properties_set(lua_State *L)
 /** Add data to a plot.
  * \param l The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A plot name.
  * \lparam A data value.

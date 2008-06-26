@@ -421,7 +421,7 @@ progressbar_draw(draw_context_t *ctx,
  * vertical.
  * \param L The Lua VM state.
  * \return The number of elements pushed on the stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A table with keys as properties names.
  */
@@ -451,7 +451,7 @@ luaA_progressbar_properties_set(lua_State *L)
 /** Set various progressbar bars properties:
  * \param L The Lua VM state.
  * \return The number of elements pushed on the stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A bar name.
  * \lparam A table with keys as properties names.
@@ -513,7 +513,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
 /** Add a value to a progressbar bar.
  * \param L The Lua VM state.
  * \return The number of elements pushed on the stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A bar name.
  * \lparam A data value.

@@ -100,7 +100,7 @@ textbox_destructor(widget_t *w)
 /** Set the text of a textbox.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam The text to set.
  */
@@ -122,7 +122,7 @@ luaA_textbox_text_set(lua_State *L)
 /** Set the width of a textbox.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam The width to set.
  */

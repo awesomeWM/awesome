@@ -280,7 +280,7 @@ tasklist_button_press(widget_node_t *w,
 /** Set the tasklist show attribute.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A string: tags, focus or all.
  */
@@ -334,7 +334,7 @@ luaA_tasklist_showicons_set(lua_State *L)
  * urgency hint.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \lstack
+ * \luastack
  * \lvalue A widget.
  * \lparam A table with keys to change: `normal', `focus' and `urgent'.
  */
