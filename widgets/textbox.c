@@ -65,6 +65,9 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
                                               ctx->phys_screen,
                                               globalconf.font, d->text, &pdata).width,
                             ctx->width - used);
+        if(pdata.bg_image)
+            w->area.width = MAX(w->area.width, pdata.bg_resize ? w->area.height : pdata.bg_image->width);
+
         pdata_arg = &pdata;
     }
 

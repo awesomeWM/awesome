@@ -206,7 +206,10 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         area = draw_text_extents(ctx->connection, ctx->phys_screen,
                                   globalconf.font, text[i], &pdata[i]);
 
-        if (data->show_empty || tag->selected || tag_isoccupied(tag))
+        if(pdata[i].bg_image)
+            area.width = MAX(area.width, pdata[i].bg_resize ? w->area.height : pdata[i].bg_image->width);
+
+        if(data->show_empty || tag->selected || tag_isoccupied(tag))
             w->area.width += area.width;
 
         area_array_append(&tda->areas, area);
