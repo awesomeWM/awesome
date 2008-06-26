@@ -277,7 +277,6 @@ main(int argc, char **argv)
     const char *confpath = NULL;
     int xfd, i, screen_nbr, opt;
     ssize_t cmdlen = 1;
-    const xcb_query_extension_reply_t *randr_query;
     client_t *c;
     static struct option long_options[] =
     {
@@ -436,26 +435,6 @@ main(int argc, char **argv)
 
     /* process all errors in the queue if any */
     xcb_poll_for_event_loop(globalconf.evenths);
-
-    set_button_press_event_handler(globalconf.evenths, event_handle_buttonpress, NULL);
-    set_configure_request_event_handler(globalconf.evenths, event_handle_configurerequest, NULL);
-    set_configure_notify_event_handler(globalconf.evenths, event_handle_configurenotify, NULL);
-    set_destroy_notify_event_handler(globalconf.evenths, event_handle_destroynotify, NULL);
-    set_enter_notify_event_handler(globalconf.evenths, event_handle_enternotify, NULL);
-    set_expose_event_handler(globalconf.evenths, event_handle_expose, NULL);
-    set_key_press_event_handler(globalconf.evenths, event_handle_keypress, NULL);
-    set_map_request_event_handler(globalconf.evenths, event_handle_maprequest, NULL);
-    set_property_notify_event_handler(globalconf.evenths, event_handle_propertynotify, NULL);
-    set_unmap_notify_event_handler(globalconf.evenths, event_handle_unmapnotify, NULL);
-    set_client_message_event_handler(globalconf.evenths, event_handle_clientmessage, NULL);
-
-    /* check for randr extension */
-    randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
-    if((globalconf.have_randr = randr_query->present))
-        xcb_set_event_handler(globalconf.evenths,
-                              (randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY),
-                              (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,
-                              NULL);
 
     /* do this only for real screen */
     for(screen_nbr = 0;

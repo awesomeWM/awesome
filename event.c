@@ -21,6 +21,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
+#include <xcb/randr.h>
 
 #include "event.h"
 #include "window.h"
@@ -68,7 +69,7 @@ event_handle_mouse_button_press(client_t *c,
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_buttonpress(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_button_press_event_t *ev)
 {
@@ -172,7 +173,7 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_configurerequest(void *data __attribute__ ((unused)),
                               xcb_connection_t *connection, xcb_configure_request_event_t *ev)
 {
@@ -265,7 +266,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_configurenotify(void *data __attribute__ ((unused)),
                              xcb_connection_t *connection, xcb_configure_notify_event_t *ev)
 {
@@ -288,7 +289,7 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_destroynotify(void *data __attribute__ ((unused)),
                            xcb_connection_t *connection __attribute__ ((unused)),
                            xcb_destroy_notify_event_t *ev)
@@ -306,7 +307,7 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_enternotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection,
                          xcb_enter_notify_event_t *ev)
@@ -347,7 +348,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_expose(void *data __attribute__ ((unused)),
                     xcb_connection_t *connection __attribute__ ((unused)),
                     xcb_expose_event_t *ev)
@@ -379,7 +380,7 @@ event_handle_expose(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_keypress(void *data __attribute__ ((unused)),
                       xcb_connection_t *connection __attribute__ ((unused)),
                       xcb_key_press_event_t *ev)
@@ -414,7 +415,7 @@ event_handle_keypress(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_maprequest(void *data __attribute__ ((unused)),
                         xcb_connection_t *connection, xcb_map_request_event_t *ev)
 {
@@ -484,7 +485,7 @@ bailout:
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_propertynotify(void *data __attribute__ ((unused)),
                             xcb_connection_t *connection, xcb_property_notify_event_t *ev)
 {
@@ -526,7 +527,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_unmapnotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_unmap_notify_event_t *ev)
 {
@@ -560,7 +561,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
                                         xcb_connection_t *connection __attribute__ ((unused)),
                                         xcb_randr_screen_change_notify_event_t *ev)
@@ -594,7 +595,7 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
  * \param connection The connection to the X server.
  * \param ev The event.
  */
-int
+static int
 event_handle_clientmessage(void *data __attribute__ ((unused)),
                            xcb_connection_t *connection,
                            xcb_client_message_event_t *ev)
@@ -613,6 +614,32 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
     else if(ev->type == atom_systray)
         return systray_process_client_message(ev);
     return ewmh_process_client_message(ev);
+}
+
+void a_xcb_set_event_handlers(void)
+{
+    const xcb_query_extension_reply_t *randr_query;
+
+    set_button_press_event_handler(globalconf.evenths, event_handle_buttonpress, NULL);
+    set_configure_request_event_handler(globalconf.evenths, event_handle_configurerequest, NULL);
+    set_configure_notify_event_handler(globalconf.evenths, event_handle_configurenotify, NULL);
+    set_destroy_notify_event_handler(globalconf.evenths, event_handle_destroynotify, NULL);
+    set_enter_notify_event_handler(globalconf.evenths, event_handle_enternotify, NULL);
+    set_expose_event_handler(globalconf.evenths, event_handle_expose, NULL);
+    set_key_press_event_handler(globalconf.evenths, event_handle_keypress, NULL);
+    set_map_request_event_handler(globalconf.evenths, event_handle_maprequest, NULL);
+    set_property_notify_event_handler(globalconf.evenths, event_handle_propertynotify, NULL);
+    set_unmap_notify_event_handler(globalconf.evenths, event_handle_unmapnotify, NULL);
+    set_client_message_event_handler(globalconf.evenths, event_handle_clientmessage, NULL);
+
+    /* check for randr extension */
+    randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
+    if((globalconf.have_randr = randr_query->present))
+        xcb_set_event_handler(globalconf.evenths,
+                              (randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY),
+                              (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,
+                              NULL);
+
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
