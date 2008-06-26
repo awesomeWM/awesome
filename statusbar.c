@@ -503,15 +503,13 @@ luaA_statusbar_new(lua_State *L)
 
     sb->name = luaA_name_init(L);
 
-    lua_getfield(L, 1, "fg");
-    if((buf = luaL_optstring(L, -1, NULL)))
+    if((buf = luaA_getopt_string(L, 1, "fg", NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                    buf, &sb->colors.fg);
     else
         sb->colors.fg = globalconf.colors.fg;
 
-    lua_getfield(L, 1, "bg");
-    if((buf = luaL_optstring(L, -1, NULL)))
+    if((buf = luaA_getopt_string(L, 1, "bg", NULL)))
         xcolor_new(globalconf.connection, globalconf.default_screen,
                    buf, &sb->colors.bg);
     else
