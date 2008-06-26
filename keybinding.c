@@ -24,7 +24,6 @@
 #include <X11/Xlib.h>
 
 #include "keybinding.h"
-#include "event.h"
 #include "window.h"
 
 extern awesome_t globalconf;

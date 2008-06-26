@@ -22,7 +22,6 @@
 #include "widget.h"
 #include "client.h"
 #include "focus.h"
-#include "event.h"
 #include "ewmh.h"
 #include "tag.h"
 #include "common/markup.h"

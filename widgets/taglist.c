@@ -23,7 +23,6 @@
 #include "widget.h"
 #include "tag.h"
 #include "lua.h"
-#include "event.h"
 #include "common/markup.h"
 #include "common/tokenize.h"
 

@@ -34,6 +34,8 @@
 
 #include "common/list.h"
 
+#define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
+
 /* See http://tronche.com/gui/x/xlib/appendix/b/ for values */
 #define CURSOR_FLEUR                             52
 #define CURSOR_LEFT_PTR                          68

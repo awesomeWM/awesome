@@ -25,8 +25,6 @@
 #include <xcb/xcb.h>
 #include <xcb/randr.h>
 
-#define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
-
 int event_handle_buttonpress(void *, xcb_connection_t *, xcb_button_press_event_t *);
 int event_handle_configurerequest(void *, xcb_connection_t *, xcb_configure_request_event_t *);
 int event_handle_configurenotify(void *, xcb_connection_t *, xcb_configure_notify_event_t *);

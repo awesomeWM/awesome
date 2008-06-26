@@ -26,7 +26,6 @@
 
 #include "widget.h"
 #include "titlebar.h"
-#include "event.h"
 
 extern awesome_t globalconf;
 
