@@ -25,7 +25,6 @@
 #include "lua.h"
 #include "event.h"
 #include "common/markup.h"
-#include "common/configopts.h"
 #include "common/tokenize.h"
 
 extern awesome_t globalconf;

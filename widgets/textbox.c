@@ -20,9 +20,6 @@
  */
 
 #include "widget.h"
-#include "screen.h"
-#include "common/util.h"
-#include "common/configopts.h"
 #include "common/tokenize.h"
 
 extern awesome_t globalconf;

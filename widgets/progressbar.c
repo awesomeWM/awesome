@@ -22,7 +22,6 @@
 
 #include "common/tokenize.h"
 #include "widget.h"
-#include "screen.h"
 
 extern awesome_t globalconf;
 

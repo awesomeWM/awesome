@@ -23,7 +23,6 @@
 #include <math.h>
 
 #include "widget.h"
-#include "screen.h"
 #include "common/tokenize.h"
 #include "common/draw.h"
 

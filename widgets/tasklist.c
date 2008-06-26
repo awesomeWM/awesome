@@ -22,11 +22,9 @@
 #include "widget.h"
 #include "client.h"
 #include "focus.h"
-#include "screen.h"
 #include "event.h"
 #include "ewmh.h"
 #include "tag.h"
-#include "common/configopts.h"
 #include "common/markup.h"
 #include "common/tokenize.h"
 
