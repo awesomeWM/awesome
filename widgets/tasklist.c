@@ -436,4 +436,12 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     return w;
 }
 
+/* This is used for building documentation. */
+static const struct luaL_reg awesome_tasklist_meta[] __attribute__ ((unused)) =
+{
+    { "text_set", luaA_tasklist_text_set },
+    { "showicons_set", luaA_tasklist_showicons_set },
+    { "show_set", luaA_tasklist_show_set }
+};
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

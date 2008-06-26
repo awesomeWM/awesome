@@ -417,4 +417,11 @@ taglist_new(alignment_t align)
     return w;
 }
 
+/* This is used for building documentation. */
+static const struct luaL_reg awesome_taglist_meta[] __attribute__ ((unused)) =
+{
+    { "text_set", luaA_taglist_text_set },
+    { "showempty_set", luaA_taglist_showempty_set }
+};
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

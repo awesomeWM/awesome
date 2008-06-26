@@ -285,7 +285,12 @@ graph_draw(draw_context_t *ctx,
     return w->area.width;
 }
 
-/** Set various graph general properties.
+/** Set various graph general properties:
+ * width, the widget width;
+ * height, the widget height;
+ * bg, the bacground color;
+ * bordercolor, the border color;
+ * grow, left or right where to add plot data.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
@@ -555,5 +560,13 @@ graph_new(alignment_t align)
 
     return w;
 }
+
+/* This is used for building documentation. */
+static const struct luaL_reg awesome_graph_meta[] __attribute__ ((unused)) =
+{
+    { "properties_set", luaA_graph_properties_set },
+    { "plot_properties_set", luaA_graph_plot_properties_set },
+    { "plot_data_add", luaA_graph_plot_data_add },
+};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

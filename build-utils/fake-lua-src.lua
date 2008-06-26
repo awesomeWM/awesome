@@ -61,7 +61,7 @@ end
 capture = false
 for i, line in ipairs(ilines) do
     if not libname then
-        _, _, libname, libtype = line:find("const struct luaL_reg awesome_(%a+)_(%a+)%[%] =")
+        _, _, libname, libtype = line:find("const struct luaL_reg awesome_(%a+)_(%a+)%[%] ")
         -- Special case
         if not libname then _, _, libname, libtype = line:find("const struct luaL_reg (awesome)_(lib)%[%] =") end
     else
