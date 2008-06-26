@@ -19,9 +19,6 @@
  *
  */
 
-#include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
-
 #include "placement.h"
 #include "screen.h"
 #include "client.h"

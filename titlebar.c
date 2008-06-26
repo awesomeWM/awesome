@@ -26,9 +26,7 @@
 
 #include "titlebar.h"
 #include "client.h"
-#include "screen.h"
 #include "widget.h"
-#include "layouts/floating.h"
 
 extern awesome_t globalconf;
 

@@ -28,28 +28,17 @@
 #include <signal.h>
 
 #include <ev.h>
-#include <xcb/xcb.h>
-#include <xcb/randr.h>
-#include <xcb/xcb_aux.h>
-#include <xcb/xcb_atom.h>
-#include <xcb/xcb_icccm.h>
 
-#include "lua.h"
 #include "event.h"
-#include "layout.h"
-#include "screen.h"
 #include "window.h"
-#include "client.h"
 #include "focus.h"
 #include "ewmh.h"
-#include "tag.h"
 #include "dbus.h"
 #include "statusbar.h"
 #include "systray.h"
 #include "common/socket.h"
 #include "common/version.h"
 #include "common/configopts.h"
-#include "common/xutil.h"
 #include "config.h"
 
 awesome_t globalconf;

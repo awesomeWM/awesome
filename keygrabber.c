@@ -21,13 +21,9 @@
 
 #include <unistd.h>
 
-#include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
-
 #include "keygrabber.h"
 #include "event.h"
 #include "structs.h"
-#include "lua.h"
 
 extern awesome_t globalconf;
 

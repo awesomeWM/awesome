@@ -26,7 +26,6 @@
 #include <dbus/dbus.h>
 
 #include "dbus.h"
-#include "statusbar.h"
 #include "widget.h"
 
 extern awesome_t globalconf;

@@ -19,9 +19,6 @@
  *
  */
 
-#include <stdio.h>
-#include <X11/Xutil.h>
-
 #include "screen.h"
 #include "tag.h"
 #include "client.h"

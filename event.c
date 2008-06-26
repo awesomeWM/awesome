@@ -19,16 +19,11 @@
  *
  */
 
-#include <xcb/xcb_keysyms.h>
+#include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-#include <xcb/xcb_aux.h>
 
-#include "screen.h"
 #include "event.h"
-#include "tag.h"
-#include "statusbar.h"
 #include "window.h"
-#include "mouse.h"
 #include "ewmh.h"
 #include "client.h"
 #include "widget.h"
@@ -38,8 +33,6 @@
 #include "lua.h"
 #include "systray.h"
 #include "layouts/floating.h"
-#include "common/xscreen.h"
-#include "common/xutil.h"
 
 extern awesome_t globalconf;
 

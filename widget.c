@@ -22,14 +22,11 @@
 #include <math.h>
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 #include <xcb/xcb_atom.h>
 
 #include "widget.h"
-#include "statusbar.h"
 #include "titlebar.h"
 #include "event.h"
-#include "lua.h"
 
 extern awesome_t globalconf;
 

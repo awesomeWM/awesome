@@ -21,10 +21,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-#include <xcb/xcb_keysyms.h>
-#include <xcb/xcb_aux.h>
 
-#include "structs.h"
 #include "window.h"
 
 extern awesome_t globalconf;

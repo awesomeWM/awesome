@@ -20,16 +20,11 @@
  */
 
 #include <math.h>
-#include <stdbool.h>
-
-#include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 
 #include "common/tokenize.h"
 #include "mouse.h"
 #include "screen.h"
 #include "tag.h"
-#include "event.h"
 #include "client.h"
 #include "titlebar.h"
 #include "layouts/floating.h"

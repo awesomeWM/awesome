@@ -25,7 +25,6 @@
 
 #include "keybinding.h"
 #include "event.h"
-#include "lua.h"
 #include "window.h"
 
 extern awesome_t globalconf;

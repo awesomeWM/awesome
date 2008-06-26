@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include <ev.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -35,11 +36,9 @@
 
 #include "ewmh.h"
 #include "config.h"
-#include "structs.h"
 #include "lua.h"
 #include "tag.h"
 #include "client.h"
-#include "window.h"
 #include "statusbar.h"
 #include "titlebar.h"
 #include "screen.h"

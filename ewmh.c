@@ -24,7 +24,6 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-#include <xcb/xcb_aux.h>
 
 #include "ewmh.h"
 #include "tag.h"

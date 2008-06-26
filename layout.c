@@ -19,21 +19,10 @@
  *
  */
 
-#include <xcb/xcb.h>
-#include <xcb/xcb_atom.h>
-#include <xcb/xcb_aux.h>
-
 #include "tag.h"
 #include "focus.h"
-#include "widget.h"
 #include "window.h"
-#include "client.h"
 #include "screen.h"
-#include "layouts/magnifier.h"
-#include "layouts/tile.h"
-#include "layouts/max.h"
-#include "layouts/fibonacci.h"
-#include "layouts/floating.h"
 
 extern awesome_t globalconf;
 

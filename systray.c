@@ -20,15 +20,11 @@
  */
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 #include <xcb/xcb_icccm.h>
 
-#include "structs.h"
 #include "systray.h"
 #include "window.h"
 #include "widget.h"
-#include "common/xembed.h"
-#include "common/swindow.h"
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 

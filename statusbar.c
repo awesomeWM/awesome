@@ -20,13 +20,10 @@
  */
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 
 #include "statusbar.h"
 #include "screen.h"
-#include "tag.h"
 #include "widget.h"
-#include "window.h"
 #include "ewmh.h"
 
 extern awesome_t globalconf;

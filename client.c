@@ -22,7 +22,6 @@
 #include <stdio.h>
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 #include <xcb/xcb_atom.h>
 
 #include "client.h"
@@ -38,8 +37,6 @@
 #include "mouse.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
-#include "common/xutil.h"
-#include "common/xscreen.h"
 
 extern awesome_t globalconf;
 extern const name_func_link_t FloatingPlacementList[];
