@@ -360,7 +360,7 @@ luaA_tasklist_newindex(lua_State *L)
         d->show_icons = luaA_checkboolean(L, 3);
         break;
       case A_TK_SHOW:
-        if((buf = luaL_checklstring(L, 2, &len)))
+        if((buf = luaL_checklstring(L, 3, &len)))
             switch(a_tokenize(buf, len))
             {
               case A_TK_TAGS:
