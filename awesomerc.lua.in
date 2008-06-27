@@ -96,12 +96,12 @@ mytasklist:text_set({ ["focus"] = "<bg color='"..bg_focus.."'/> <span color='"..
 -- Create a textbox widget
 mytextbox = widget.new({ type = "textbox", name = "mytextbox", align = "right" })
 -- Set the default text in textbox
-mytextbox:text_set("<b><small> awesome " .. AWESOME_VERSION .. " </small></b>")
+mytextbox.text = "<b><small> awesome " .. AWESOME_VERSION .. " </small></b>"
 mypromptbox = widget.new({ type = "textbox", name = "mypromptbox", align = "left" })
 
 -- Create an iconbox widget
 myiconbox = widget.new({ type = "textbox", name = "myiconbox", align = "left" })
-myiconbox:text_set("<bg image=\"@AWESOME_ICON_PATH@/awesome16.png\" resize=\"true\"/>")
+myiconbox.text = "<bg image=\"@AWESOME_ICON_PATH@/awesome16.png\" resize=\"true\"/>"
 
 -- Create a systray
 mysystray = widget.new({ type = "systray", name = "mysystray", align = "right" })
@@ -115,7 +115,7 @@ for s = 1, screen.count() do
     mylayoutbox[s]:mouse_add(mouse.new({ }, 3, function () awful.layout.inc(layouts, -1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 4, function () awful.layout.inc(layouts, 1) end))
     mylayoutbox[s]:mouse_add(mouse.new({ }, 5, function () awful.layout.inc(layouts, -1) end))
-    mylayoutbox[s]:text_set("<bg image=\"@AWESOME_ICON_PATH@/layouts/tilew.png\" resize=\"true\"/>")
+    mylayoutbox[s].text = "<bg image=\"@AWESOME_ICON_PATH@/layouts/tilew.png\" resize=\"true\"/>"
 end
 
 -- Create a statusbar for each screen and add it
@@ -334,7 +334,7 @@ end
 -- (tag switch, new client, etc)
 function hook_arrange(screen)
     local layout = awful.layout.get(screen)
-    mylayoutbox[screen]:text_set("<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. layout .. "w.png\" resize=\"true\"/>")
+    mylayoutbox[screen].text = "<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. layout .. "w.png\" resize=\"true\"/>"
 
     -- Uncomment if you want mouse warping
     --[[
@@ -356,9 +356,9 @@ end
 -- Hook called every second
 function hook_timer ()
     -- For unix time_t lovers
-    mytextbox:text_set(" " .. os.time() .. " time_t ")
+    mytextbox.text = " " .. os.time() .. " time_t "
     -- Otherwise use:
-    -- mytextbox:text_set(" " .. os.date() .. " ")
+    -- mytextbox.text = " " .. os.date() .. " "
 end
 
 -- Set up some hooks

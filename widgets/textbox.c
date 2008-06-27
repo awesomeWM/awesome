@@ -94,49 +94,6 @@ textbox_destructor(widget_t *w)
     p_delete(&d);
 }
 
-/** Set the text of a textbox.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A widget.
- * \lparam The text to set.
- */
-static int
-luaA_textbox_text_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    const char *text = luaL_checkstring(L, 2);
-    textbox_data_t *d = (*widget)->data;
-
-    p_delete(&d->text);
-    a_iso2utf8(text, &d->text);
-
-    widget_invalidate_bywidget(*widget);
-
-    return 0;
-}
-
-/** Set the width of a textbox.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A widget.
- * \lparam The width to set.
- */
-static int
-luaA_textbox_width_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    int width = luaL_checknumber(L, 2);
-    textbox_data_t *d = (*widget)->data;
-
-    d->width = width;
-
-    widget_invalidate_bywidget(*widget);
-
-    return 0;
-}
-
 /** The __index method for a textbox object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -151,18 +108,17 @@ luaA_textbox_index(lua_State *L)
 
     switch(a_tokenize(attr, len))
     {
-      case A_TK_TEXT_SET:
-        lua_pushcfunction(L, luaA_textbox_text_set);
-        return 1;
-      case A_TK_WIDTH_SET:
-        lua_pushcfunction(L, luaA_textbox_width_set);
-        return 1;
       case A_TK_TEXT:
         lua_pushstring(L, d->text);
+        return 1;
+      case A_TK_WIDTH:
+        lua_pushnumber(L, d->width);
         return 1;
       default:
         return 0;
     }
+
+    widget_invalidate_bywidget(*widget);
 }
 
 /** The __newindex method for a textbox object.
@@ -174,22 +130,26 @@ luaA_textbox_newindex(lua_State *L)
 {
     size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
-    const char *value, *attr = luaL_checklstring(L, 2, &len);
+    const char *buf, *attr = luaL_checklstring(L, 2, &len);
     textbox_data_t *d = (*widget)->data;
 
     switch(a_tokenize(attr, len))
     {
       case A_TK_TEXT:
-        if((value = luaL_checkstring(L, 3)))
+        if((buf = luaL_checkstring(L, 3)))
         {
             p_delete(&d->text);
-            d->text = a_strdup(value);
-            widget_invalidate_bywidget(*widget);
+            a_iso2utf8(buf, &d->text);
         }
+        break;
+      case A_TK_WIDTH:
+        d->width = luaL_checknumber(L, 3);
         break;
       default:
         return 0;
     }
+
+    widget_invalidate_bywidget(*widget);
 
     return 0;
 }
@@ -215,12 +175,5 @@ textbox_new(alignment_t align)
 
     return w;
 }
-
-/* This is used for building documentation. */
-static const struct luaL_reg awesome_textbox_meta[] __attribute__ ((unused)) =
-{
-    { "text_set", luaA_textbox_text_set },
-    { "width_set", luaA_textbox_width_set }
-};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
