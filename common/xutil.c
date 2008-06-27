@@ -173,10 +173,9 @@ xutil_intern_atom(xcb_connection_t *c,
     xutil_atom_cache_t *atom_next;
     int cmp_cache;
 
-    atom_req.name = a_strdup(name);
+    p_clear(&atom_req, 1);
 
-    /* Check if this atom is present in the cache ordered
-     * linked-list */
+    /* Check if this atom is present in the cache ordered linked-list */
     if(atoms)
         for(atom_next = *atoms;
             atom_next && (cmp_cache = a_strcmp(name, atom_next->name)) >= 0;
@@ -189,9 +188,9 @@ xutil_intern_atom(xcb_connection_t *c,
             }
 
     /* Otherwise send an InternAtom request to the server */
+    atom_req.name = a_strdup(name);
     atom_req.cache_hit = false;
-    atom_req.cookie = xcb_intern_atom_unchecked(c, false, a_strlen(name),
-                                                name);
+    atom_req.cookie = xcb_intern_atom_unchecked(c, false, a_strlen(name), name);
 
     return atom_req;
 }
@@ -219,7 +218,10 @@ xutil_intern_atom_reply(xcb_connection_t *c,
 
     /* Get the reply from InternAtom request */
     if(!(atom_rep = xcb_intern_atom_reply(c, atom_req.cookie, NULL)))
+    {
+        p_delete(&atom_req.name);
         return 0;
+    }
 
     /* Create a new atom cache entry */
     atom_cache = p_new(xutil_atom_cache_t, 1);
@@ -248,8 +250,8 @@ xutil_intern_atom_reply(xcb_connection_t *c,
     return atom_cache->atom;
 }
 
-/* Delete a cache entry
- * \param entry cache entry
+/* Delete a atom cache entry.
+ * \param entry A cache entry.
  */
 void
 xutil_atom_cache_delete(xutil_atom_cache_t **entry)
