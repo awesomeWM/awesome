@@ -30,3 +30,5 @@ layoutgen.h
 awesome-version-internal.h
 apidocgen.txt
 common/tokenize.[hc]
+luadoc
+lib/capi.lua
