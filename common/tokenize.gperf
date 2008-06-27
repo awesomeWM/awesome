@@ -14,10 +14,6 @@ focus
 image
 left
 line
-mouse_add
-mouse_remove
-name_get
-name_set
 on
 plot_data_add
 plot_properties_set
@@ -38,7 +34,5 @@ top
 topleft
 topright
 true
-visible_get
-visible_set
 width
 yes
