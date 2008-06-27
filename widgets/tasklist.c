@@ -274,99 +274,6 @@ tasklist_button_press(widget_node_t *w,
             }
 }
 
-/** Set the tasklist show attribute.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A widget.
- * \lparam A string: tags, focus or all.
- */
-static int
-luaA_tasklist_show_set(lua_State *L)
-{
-    size_t len;
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    tasklist_data_t *d = (*widget)->data;
-    const char *buf = luaL_checklstring(L, 2, &len);
-
-    switch(a_tokenize(buf, len))
-    {
-      case A_TK_TAGS:
-        d->show = ShowTags;
-        break;
-      case A_TK_FOCUS:
-        d->show = ShowFocus;
-        break;
-      case A_TK_ALL:
-        d->show = ShowAll;
-        break;
-      default:
-        break;
-    }
-
-    widget_invalidate_bywidget(*widget);
-
-    return 0;
-}
-
-/** Select if icons must be shown.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A widget.
- * \lparam A boolean, true to see icons, false otherwise.
- */
-static int
-luaA_tasklist_showicons_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    tasklist_data_t *d = (*widget)->data;
-
-    d->show_icons = luaA_checkboolean(L, 2);
-
-    return 0;
-}
-
-/** Set text format string in case of a client is either normal, focused or has
- * urgency hint.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A widget.
- * \lparam A table with keys to change: `normal', `focus' and `urgent'.
- */
-static int
-luaA_tasklist_text_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    tasklist_data_t *d = (*widget)->data;
-    const char *buf;
-
-    luaA_checktable(L, 2);
-
-    if((buf = luaA_getopt_string(L, 2, "normal", NULL)))
-    {
-        p_delete(&d->text_normal);
-        d->text_normal = a_strdup(buf);
-    }
-
-    if((buf = luaA_getopt_string(L, 2, "focus", NULL)))
-    {
-        p_delete(&d->text_focus);
-        d->text_focus = a_strdup(buf);
-    }
-
-    if((buf = luaA_getopt_string(L, 2, "urgent",  NULL)))
-    {
-        p_delete(&d->text_urgent);
-        d->text_urgent = a_strdup(buf);
-    }
-
-    widget_invalidate_bywidget(*widget);
-
-    return 0;
-}
-
 /** Index function for tasklist widget.
  * \lparam L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -375,20 +282,107 @@ static int
 luaA_tasklist_index(lua_State *L)
 {
     size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    tasklist_data_t *d = (*widget)->data;
     const char *attr = luaL_checklstring(L, 2, &len);
 
     switch(a_tokenize(attr, len))
     {
-      case A_TK_TEXT_SET:
-        lua_pushcfunction(L, luaA_tasklist_text_set);
+      case A_TK_TEXT_NORMAL:
+        lua_pushstring(L, d->text_normal);
         return 1;
-      case A_TK_SHOWICONS_SET:
-        lua_pushcfunction(L, luaA_tasklist_showicons_set);
-      case A_TK_SHOW_SET:
-        lua_pushcfunction(L, luaA_tasklist_show_set);
+      case A_TK_TEXT_FOCUS:
+        lua_pushstring(L, d->text_focus);
+        return 1;
+      case A_TK_TEXT_URGENT:
+        lua_pushstring(L, d->text_urgent);
+        return 1;
+      case A_TK_SHOW_ICONS:
+        lua_pushboolean(L, d->show_icons);
+        return 1;
+      case A_TK_SHOW:
+        switch(d->show)
+        {
+          case ShowTags:
+            lua_pushliteral(L, "tags");
+            break;
+          case ShowFocus:
+            lua_pushliteral(L, "focus");
+            break;
+          case ShowAll:
+            lua_pushliteral(L, "all");
+            break;
+          default:
+            return 0;
+        }
+        return 1;
       default:
         return 0;
     }
+}
+
+/** Newindex function for tasklist widget.
+ * \lparam L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_tasklist_newindex(lua_State *L)
+{
+    size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    tasklist_data_t *d = (*widget)->data;
+    const char *buf, *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_TEXT_NORMAL:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            p_delete(&d->text_normal);
+            d->text_normal = a_strdup(buf);
+        }
+        break;
+      case A_TK_TEXT_FOCUS:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            p_delete(&d->text_focus);
+            d->text_focus = a_strdup(buf);
+        }
+        break;
+      case A_TK_TEXT_URGENT:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            p_delete(&d->text_urgent);
+            d->text_urgent = a_strdup(buf);
+        }
+        break;
+      case A_TK_SHOW_ICONS:
+        d->show_icons = luaA_checkboolean(L, 3);
+        break;
+      case A_TK_SHOW:
+        if((buf = luaL_checklstring(L, 2, &len)))
+            switch(a_tokenize(buf, len))
+            {
+              case A_TK_TAGS:
+                d->show = ShowTags;
+                break;
+              case A_TK_FOCUS:
+                d->show = ShowFocus;
+                break;
+              case A_TK_ALL:
+                d->show = ShowAll;
+                break;
+              default:
+                break;
+            }
+        break;
+      default:
+        return 0;
+    }
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
 }
 
 /** Destructor for the tasklist widget.
@@ -421,6 +415,7 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     w->button_press = tasklist_button_press;
     w->align = AlignFlex;
     w->index = luaA_tasklist_index;
+    w->newindex = luaA_tasklist_newindex;
     w->data = d = p_new(tasklist_data_t, 1);
     w->destructor = tasklist_destructor;
 
@@ -435,13 +430,5 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
 
     return w;
 }
-
-/* This is used for building documentation. */
-static const struct luaL_reg awesome_tasklist_meta[] __attribute__ ((unused)) =
-{
-    { "text_set", luaA_tasklist_text_set },
-    { "showicons_set", luaA_tasklist_showicons_set },
-    { "show_set", luaA_tasklist_show_set }
-};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

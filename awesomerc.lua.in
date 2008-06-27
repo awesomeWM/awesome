@@ -91,7 +91,7 @@ mytasklist = widget.new({ type = "tasklist", name = "mytasklist" })
 mytasklist:mouse_add(mouse.new({ }, 1, function (object, c) c:focus_set(); c:raise() end))
 mytasklist:mouse_add(mouse.new({ }, 4, function () awful.client.focus(1) end))
 mytasklist:mouse_add(mouse.new({ }, 5, function () awful.client.focus(-1) end))
-mytasklist:text_set({ ["focus"] = "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'><title/></span> " })
+mytasklist.text_focus = "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'><title/></span> "
 
 -- Create a textbox widget
 mytextbox = widget.new({ type = "textbox", name = "mytextbox", align = "right" })

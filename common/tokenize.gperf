@@ -27,12 +27,14 @@ right
 shadow
 shadow_offset
 show
-show_set
 showempty_set
-showicons_set
+show_icons
 tags
 text
+text_focus
+text_normal
 text_set
+text_urgent
 top
 topleft
 topright
@@ -40,5 +42,4 @@ true
 visible_get
 visible_set
 width
-width_set
 yes
