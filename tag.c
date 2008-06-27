@@ -149,21 +149,6 @@ is_client_tagged(client_t *c, tag_t *t)
     return false;
 }
 
-/** Tag the client with the currently selected (visible) tags.
- * \param c the client
- */
-void
-tag_client_with_current_selected(client_t *c)
-{
-    tag_array_t *tags = &globalconf.screens[c->screen].tags;
-
-    for(int i = 0; i < tags->len; i++)
-        if(tags->tab[i]->selected)
-            tag_client(c, tags->tab[i]);
-        else
-            untag_client(c, tags->tab[i]);
-}
-
 /** Get the current tags for the specified screen.
  * Returned pointer must be p_delete'd after.
  * \param screen screen id

@@ -128,17 +128,21 @@ screen_virttophys(int screen)
 void
 screen_client_moveto(client_t *c, int new_screen, bool doresize)
 {
-    int old_screen = c->screen;
-    tag_array_t *tags = &globalconf.screens[old_screen].tags;
+    int i, old_screen = c->screen;
+    tag_array_t *old_tags = &globalconf.screens[old_screen].tags,
+                *new_tags = &globalconf.screens[new_screen].tags;
     area_t from, to;
-
-    for(int i = 0; i < tags->len; i++)
-        untag_client(c, tags->tab[i]);
 
     c->screen = new_screen;
 
-    /* tag client with new screen tags */
-    tag_client_with_current_selected(c);
+    /* remove old tags */
+    for(i = 0; i < old_tags->len; i++)
+        untag_client(c, old_tags->tab[i]);
+
+    /* add new tags */
+    for(i = 0; i < new_tags->len; i++)
+        if(new_tags->tab[i]->selected)
+            tag_client(c, new_tags->tab[i]);
 
     /* resize the windows if it's floating */
     if(doresize && old_screen != c->screen)
