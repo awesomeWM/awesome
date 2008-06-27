@@ -145,7 +145,9 @@ static int
 luaA_textbox_index(lua_State *L)
 {
     size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *attr = luaL_checklstring(L, 2, &len);
+    textbox_data_t *d = (*widget)->data;
 
     switch(a_tokenize(attr, len))
     {
@@ -155,9 +157,41 @@ luaA_textbox_index(lua_State *L)
       case A_TK_WIDTH_SET:
         lua_pushcfunction(L, luaA_textbox_width_set);
         return 1;
+      case A_TK_TEXT:
+        lua_pushstring(L, d->text);
+        return 1;
       default:
         return 0;
     }
+}
+
+/** The __newindex method for a textbox object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_textbox_newindex(lua_State *L)
+{
+    size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    const char *value, *attr = luaL_checklstring(L, 2, &len);
+    textbox_data_t *d = (*widget)->data;
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_TEXT:
+        if((value = luaL_checkstring(L, 3)))
+        {
+            p_delete(&d->text);
+            d->text = a_strdup(value);
+            widget_invalidate_bywidget(*widget);
+        }
+        break;
+      default:
+        return 0;
+    }
+
+    return 0;
 }
 
 /** Create a new textbox widget.
@@ -175,6 +209,7 @@ textbox_new(alignment_t align)
     w->align = align;
     w->draw = textbox_draw;
     w->index = luaA_textbox_index;
+    w->newindex = luaA_textbox_newindex;
     w->destructor = textbox_destructor;
     w->data = d = p_new(textbox_data_t, 1);
 
