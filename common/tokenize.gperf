@@ -27,13 +27,12 @@ right
 shadow
 shadow_offset
 show
-showempty_set
+show_empty
 show_icons
 tags
 text
 text_focus
 text_normal
-text_set
 text_urgent
 top
 topleft

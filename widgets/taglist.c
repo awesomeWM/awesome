@@ -289,66 +289,6 @@ taglist_button_press(widget_node_t *w,
             }
 }
 
-/** Set text format string in case of a tag is normal, has focused client
- * or has a client with urgency hint.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A widget.
- * \lparam A table with keys to change: `normal', `focus' and `urgent'.
- */
-static int
-luaA_taglist_text_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    taglist_data_t *d = (*widget)->data;
-    const char *buf;
-
-    luaA_checktable(L, 2);
-
-    if((buf = luaA_getopt_string(L, 2, "normal", NULL)))
-    {
-        p_delete(&d->text_normal);
-        d->text_normal = a_strdup(buf);
-    }
-
-    if((buf = luaA_getopt_string(L, 2, "focus", NULL)))
-    {
-        p_delete(&d->text_focus);
-        d->text_focus = a_strdup(buf);
-    }
-
-    if((buf = luaA_getopt_string(L, 2, "urgent",  NULL)))
-    {
-        p_delete(&d->text_urgent);
-        d->text_urgent = a_strdup(buf);
-    }
-
-    widget_invalidate_bywidget(*widget);
-
-    return 0;
-}
-
-/** Set if the taglist must show the tags which have no client.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A widget.
- * \lparam A boolean value, true to show empty tags, false otherwise.
- */
-static int
-luaA_taglist_showempty_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    taglist_data_t *d = (*widget)->data;
-
-    d->show_empty = luaA_checkboolean(L, 2);
-
-    widget_invalidate_bywidget(*widget);
-
-    return 0;
-}
-
 /** Index function for taglist.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -357,19 +297,74 @@ int
 luaA_taglist_index(lua_State *L)
 {
     size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *attr = luaL_checklstring(L, 2, &len);
+    taglist_data_t *d = (*widget)->data;
 
     switch(a_tokenize(attr, len))
     {
-      case A_TK_TEXT_SET:
-        lua_pushcfunction(L, luaA_taglist_text_set);
+      case A_TK_TEXT_NORMAL:
+        lua_pushstring(L, d->text_normal);
         return 1;
-      case A_TK_SHOWEMPTY_SET:
-        lua_pushcfunction(L, luaA_taglist_showempty_set);
+      case A_TK_TEXT_FOCUS:
+        lua_pushstring(L, d->text_focus);
+        return 1;
+      case A_TK_TEXT_URGENT:
+        lua_pushstring(L, d->text_urgent);
+        return 1;
+      case A_TK_SHOW_EMPTY:
+        lua_pushboolean(L, d->show_empty);
         return 1;
       default:
         return 0;
     }
+}
+
+/** Newindex function for taglist.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_taglist_newindex(lua_State *L)
+{
+    size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    const char *buf, *attr = luaL_checklstring(L, 2, &len);
+    taglist_data_t *d = (*widget)->data;
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_TEXT_NORMAL:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            p_delete(&d->text_normal);
+            d->text_normal = a_strdup(buf);
+        }
+        break;
+      case A_TK_TEXT_FOCUS:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            p_delete(&d->text_focus);
+            d->text_focus = a_strdup(buf);
+        }
+        break;
+      case A_TK_TEXT_URGENT:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            p_delete(&d->text_urgent);
+            d->text_urgent = a_strdup(buf);
+        }
+        break;
+      case A_TK_SHOW_EMPTY:
+        d->show_empty = luaA_checkboolean(L, 3);
+        break;
+      default:
+        return 0;
+    }
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
 }
 
 /** Taglist destructor.
@@ -400,6 +395,7 @@ taglist_new(alignment_t align)
     w = p_new(widget_t, 1);
     widget_common_new(w);
     w->index = luaA_taglist_index;
+    w->newindex = luaA_taglist_newindex;
     w->align = align;
     w->draw = taglist_draw;
     w->button_press = taglist_button_press;
@@ -416,12 +412,5 @@ taglist_new(alignment_t align)
 
     return w;
 }
-
-/* This is used for building documentation. */
-static const struct luaL_reg awesome_taglist_meta[] __attribute__ ((unused)) =
-{
-    { "text_set", luaA_taglist_text_set },
-    { "showempty_set", luaA_taglist_showempty_set }
-};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
