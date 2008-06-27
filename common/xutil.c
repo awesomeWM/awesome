@@ -210,6 +210,7 @@ xutil_intern_atom_reply(xcb_connection_t *c,
 {
     xcb_intern_atom_reply_t *atom_rep;
     xutil_atom_cache_t *atom_cache, *atom_next;
+    xcb_atom_t atom;
 
     /* If the atom is present in the cache, just returns the
      * atom... */
@@ -223,13 +224,15 @@ xutil_intern_atom_reply(xcb_connection_t *c,
         return 0;
     }
 
-    /* Create a new atom cache entry */
-    atom_cache = p_new(xutil_atom_cache_t, 1);
-    atom_cache->atom = atom_rep->atom;
-    atom_cache->name = atom_req.name;
+    atom = atom_rep->atom;
 
     if(atoms)
     {
+        /* Create a new atom cache entry */
+        atom_cache = p_new(xutil_atom_cache_t, 1);
+        atom_cache->atom = atom_rep->atom;
+        atom_cache->name = atom_req.name;
+
         /* Add the entry in the list at the beginning of the cache list */
         if(*atoms == NULL || a_strcmp(atom_req.name, (*atoms)->name) < 0)
             atom_cache_list_push(atoms, atom_cache);
@@ -247,7 +250,7 @@ xutil_intern_atom_reply(xcb_connection_t *c,
 
     p_delete(&atom_rep);
 
-    return atom_cache->atom;
+    return atom;
 }
 
 /* Delete a atom cache entry.
