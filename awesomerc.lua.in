@@ -65,7 +65,7 @@ for s = 1, screen.count() do
     tags[s] = {}
     -- Create 9 tags per screen
     for tagnumber = 1, 9 do
-        tags[s][tagnumber] = tag.new({ name = tagnumber })
+        tags[s][tagnumber] = tag.new({ name = tagnumber, layout = layouts[1] })
         -- Add tags to screen one by one
         tags[s][tagnumber]:mwfact_set(0.618033988769)
         tags[s][tagnumber]:add(s)
