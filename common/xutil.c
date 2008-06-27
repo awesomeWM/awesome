@@ -40,7 +40,7 @@
  */
 bool
 xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w,
-                  xutil_atom_cache_t **atoms,
+                  xutil_atom_cache_array_t *atoms,
                   xcb_atom_t atom, char **text)
 {
     xcb_get_property_cookie_t prop_c;
@@ -158,7 +158,7 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
 
 /** Send an unchecked InternAtom request if it is not already in the
  * cache, in the second case it stores the cache entry (an ordered
- * linked-list).
+ * array).
  * \param c X connection.
  * \param atoms Atoms cache, or NULL if no cache.
  * \param name Atom name.
@@ -166,30 +166,39 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
  */
 xutil_intern_atom_request_t
 xutil_intern_atom(xcb_connection_t *c,
-                  xutil_atom_cache_t **atoms,
+                  xutil_atom_cache_array_t *atoms,
                   const char *name)
 {
     xutil_intern_atom_request_t atom_req;
-    xutil_atom_cache_t *atom_next;
-    int cmp_cache;
+    int l = 0, r;
 
     p_clear(&atom_req, 1);
 
-    /* Check if this atom is present in the cache ordered linked-list */
+    /* Check if this atom is present in the cache ordered array */
     if(atoms)
-        for(atom_next = *atoms;
-            atom_next && (cmp_cache = a_strcmp(name, atom_next->name)) >= 0;
-            atom_next = atom_cache_list_next(NULL, atom_next))
-            if(cmp_cache == 0)
+    {
+        r = atoms->len;
+        while (l < r)
+        {
+            int i = (r + l) / 2;
+            switch (a_strcmp(name, atoms->tab[i]->name))
             {
+              case -1: /* ev < atoms->tab[i] */
+                r = i;
+                break;
+              case 0: /* ev == atoms->tab[i] */
                 atom_req.cache_hit = true;
-                atom_req.cache = atom_next;
+                atom_req.cache = atoms->tab[i];
                 return atom_req;
+              case 1: /* ev > atoms->tab[i] */
+                l = i + 1;
+                break;
             }
+        }
+    }
 
     /* Otherwise send an InternAtom request to the server */
     atom_req.name = a_strdup(name);
-    atom_req.cache_hit = false;
     atom_req.cookie = xcb_intern_atom_unchecked(c, false, a_strlen(name), name);
 
     return atom_req;
@@ -205,12 +214,13 @@ xutil_intern_atom(xcb_connection_t *c,
  */
 xcb_atom_t
 xutil_intern_atom_reply(xcb_connection_t *c,
-                        xutil_atom_cache_t **atoms,
+                        xutil_atom_cache_array_t *atoms,
                         xutil_intern_atom_request_t atom_req)
 {
     xcb_intern_atom_reply_t *atom_rep;
-    xutil_atom_cache_t *atom_cache, *atom_next;
-    xcb_atom_t atom;
+    xutil_atom_cache_t *atom_cache;
+    xcb_atom_t atom = 0;
+    int l = 0, r;
 
     /* If the atom is present in the cache, just returns the
      * atom... */
@@ -219,35 +229,39 @@ xutil_intern_atom_reply(xcb_connection_t *c,
 
     /* Get the reply from InternAtom request */
     if(!(atom_rep = xcb_intern_atom_reply(c, atom_req.cookie, NULL)))
-    {
-        p_delete(&atom_req.name);
-        return 0;
-    }
+        goto bailout;
 
     atom = atom_rep->atom;
 
     if(atoms)
     {
+        r = atoms->len;
+
         /* Create a new atom cache entry */
         atom_cache = p_new(xutil_atom_cache_t, 1);
         atom_cache->atom = atom_rep->atom;
         atom_cache->name = atom_req.name;
 
-        /* Add the entry in the list at the beginning of the cache list */
-        if(*atoms == NULL || a_strcmp(atom_req.name, (*atoms)->name) < 0)
-            atom_cache_list_push(atoms, atom_cache);
-        /* Otherwise insert it at the proper position in the cache list
-         * according to its name */
-        else
+        while (l < r)
         {
-            for(atom_next = *atoms;
-                atom_next && atom_next->next && a_strcmp(atom_req.name, atom_next->next->name) > 0;
-                atom_next = atom_cache_list_next(NULL, atom_next));
-    
-            atom_cache_list_attach_after(atom_next, atom_cache);
+            int i = (r + l) / 2;
+            switch(a_strcmp(atom_cache->name, atoms->tab[i]->name))
+            {
+              case -1: /* k < atoms->tab[i] */
+                r = i;
+                break;
+              case 0: /* k == atoms->tab[i] cannot append */
+                assert(0);
+              case 1: /* k > atoms->tab[i] */
+                l = i + 1;
+                break;
+            }
         }
+
+        xutil_atom_cache_array_splice(atoms, r, 0, &atom_cache, 1);
     }
 
+bailout:
     p_delete(&atom_rep);
 
     return atom;

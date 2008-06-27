@@ -422,7 +422,7 @@ struct awesome_t
     /** Last XMotionEvent coords */
     int pointer_x, pointer_y;
     /** Atoms cache */
-    xutil_atom_cache_t *atoms;
+    xutil_atom_cache_array_t atoms;
     /** Lua VM state */
     lua_State *L;
     /** Default colors */

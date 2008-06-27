@@ -32,7 +32,7 @@
 /* XCB doesn't provide keysyms definition */
 #include <X11/keysym.h>
 
-#include "common/list.h"
+#include "array.h"
 
 #define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
 
@@ -97,16 +97,17 @@ typedef struct
 class_hint_t *xutil_get_class_hint(xcb_connection_t *, xcb_window_t);
 
 /** Cache entry */
-typedef struct xutil_atom_cache_t xutil_atom_cache_t;
-struct xutil_atom_cache_t
+typedef struct
 {
     /** Atom X identifier */
     xcb_atom_t atom;
     /** Atom name */
     char *name;
-    /** Next and previous atom cache entries */
-    xutil_atom_cache_t *prev, *next;
-};
+} xutil_atom_cache_t;
+
+void xutil_atom_cache_delete(xutil_atom_cache_t **);
+
+DO_ARRAY(xutil_atom_cache_t *, xutil_atom_cache, xutil_atom_cache_delete)
 
 /** InternAtom request data structure which may hold the cookie if the
  * atom is not already present in the cache */
@@ -125,22 +126,13 @@ typedef struct
     };
 } xutil_intern_atom_request_t;
 
-/* InternATom request which relies on a cache stored as a ordered
- * linked-list */
-xutil_intern_atom_request_t xutil_intern_atom(xcb_connection_t *, xutil_atom_cache_t **,
+xutil_intern_atom_request_t xutil_intern_atom(xcb_connection_t *, xutil_atom_cache_array_t *,
                                               const char *);
 
-/** Treat reply from InternAtom request */
-xcb_atom_t xutil_intern_atom_reply(xcb_connection_t *, xutil_atom_cache_t **,
+xcb_atom_t xutil_intern_atom_reply(xcb_connection_t *, xutil_atom_cache_array_t *,
                                    xutil_intern_atom_request_t);
 
-/** Delete a entry in the cache */
-void xutil_atom_cache_delete(xutil_atom_cache_t **);
-
-/** Cache list utils functions */
-DO_SLIST(xutil_atom_cache_t, atom_cache, xutil_atom_cache_delete)
-
-bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xutil_atom_cache_t **,
+bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xutil_atom_cache_array_t *,
                        xcb_atom_t, char **);
 
 void xutil_getlockmask(xcb_connection_t *, xcb_key_symbols_t *,

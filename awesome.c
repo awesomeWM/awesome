@@ -391,7 +391,6 @@ main(int argc, char **argv)
                       &globalconf.shiftlockmask, &globalconf.capslockmask);
 
     /* init Atoms cache and then EWMH atoms */
-    atom_cache_list_init(&globalconf.atoms);
     ewmh_init_atoms();
 
     /* init screens struct */
