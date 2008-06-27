@@ -262,13 +262,12 @@ client_focus(client_t *c, int screen)
     widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
 }
 
-/** Restack clients and puts c in top of its layer.
- * \param c The client to stack on top of others.
+/** Restack clients.
  * \todo It might be worth stopping to restack everyone and only stack `c'
  * relatively to the first matching in the list.
  */
-void
-client_raise(client_t *c)
+static void
+client_stack(void)
 {
     uint32_t config_win_vals[2];
     client_node_t *node;
@@ -276,9 +275,6 @@ client_raise(client_t *c)
     statusbar_t *sb;
     int screen;
     xembed_window_t *emwin;
-
-    /* Push c on top of the stack. */
-    stack_client_push(c);
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_BELOW;
@@ -346,6 +342,17 @@ client_raise(client_t *c)
                                      config_win_vals);
                 config_win_vals[0] = node->client->win;
             }
+}
+
+/** Put client on top of the stack
+ * \param c The client to raise.
+ */
+void
+client_raise(client_t *c)
+{
+    /* Push c on top of the stack. */
+    stack_client_push(c);
+    client_stack();
 }
 
 /** Manage a new client.
