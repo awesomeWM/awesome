@@ -394,6 +394,7 @@ luaA_widget_visible_set(lua_State *L)
 
 /** Get the visible attribute of a widget.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  *
  * \luastack
  * \lvalue A widget.
@@ -407,6 +408,11 @@ luaA_widget_visible_get(lua_State *L)
     return 1;
 }
 
+
+/** Generic widget index.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
 static int
 luaA_widget_index(lua_State *L)
 {
@@ -441,6 +447,21 @@ luaA_widget_index(lua_State *L)
     }
 }
 
+/** Generic widget newindex.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_widget_newindex(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+
+    if((*widget)->newindex)
+        return (*widget)->newindex(L);
+
+    return 0;
+}
+
 const struct luaL_reg awesome_widget_methods[] =
 {
     { "new", luaA_widget_new },
@@ -455,6 +476,7 @@ const struct luaL_reg awesome_widget_meta[] =
     { "visible_set", luaA_widget_visible_set },
     { "visible_get", luaA_widget_visible_get },
     { "__index", luaA_widget_index },
+    { "__newindex", luaA_widget_newindex },
     { "__gc", luaA_widget_gc },
     { "__eq", luaA_widget_eq },
     { "__tostring", luaA_widget_tostring },

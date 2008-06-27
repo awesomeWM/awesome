@@ -102,6 +102,8 @@ struct widget_t
     int (*draw)(draw_context_t *, int, widget_node_t *, int, int, void *);
     /** Index function */
     int (*index)(lua_State *);
+    /** Newindex function */
+    int (*newindex)(lua_State *);
     /** ButtonPressedEvent handler */
     void (*button_press)(widget_node_t *, xcb_button_press_event_t *, int, void *, awesome_type_t);
     /** Alignement */
