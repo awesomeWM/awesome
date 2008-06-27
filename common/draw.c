@@ -223,6 +223,8 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                                                 *values, &data->bg_color);
                 break;
               case A_TK_IMAGE:
+                if(data->bg_image)
+                    draw_image_delete(&data->bg_image);
                 data->bg_image = draw_image_new(*values);
                 break;
               case A_TK_ALIGN:
