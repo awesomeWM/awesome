@@ -448,6 +448,13 @@ luaA_graph_index(lua_State *L)
         break;
       case A_TK_WIDTH:
         lua_pushnumber(L, d->width);
+        break;
+      case A_TK_BORDER_COLOR:
+        lua_pushstring(L, d->border_color.name);
+        break;
+      case A_TK_BG:
+        lua_pushstring(L, d->bg.name);
+        break;
       case A_TK_GROW:
         switch(d->grow)
         {
