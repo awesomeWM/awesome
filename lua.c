@@ -453,7 +453,7 @@ luaA_init(void)
         { NULL, NULL }
     };
 
-    L = globalconf.L = lua_open();
+    L = globalconf.L = luaL_newstate();
 
     luaL_openlibs(L);
 
