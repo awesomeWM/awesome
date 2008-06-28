@@ -51,7 +51,7 @@ struct bar_t
     /** Background color */
     xcolor_t bg;
     /** Border color */
-    xcolor_t bordercolor;
+    xcolor_t border_color;
     /** The next and previous bar in the list */
     bar_t *next, *prev;
 };
@@ -93,22 +93,6 @@ typedef struct
     bar_t *bars;
 } progressbar_data_t;
 
-static void
-progressbar_pcolor_set(xcolor_t **ppcolor, const char *new_color)
-{
-    bool flag = false;
-    if(!*ppcolor)
-    {
-        flag = true; /* p_delete && restore to NULL, if xcolor_new unsuccessful */
-        *ppcolor = p_new(xcolor_t, 1);
-    }
-    if(!(xcolor_new(globalconf.connection,
-                    globalconf.default_screen,
-                    new_color, *ppcolor))
-       && flag)
-        p_delete(ppcolor);
-}
-
 /** Add a new bar to the progressbar private data structure.
  * \param d The private data structure.
  * \param title The graph title.
@@ -122,7 +106,7 @@ progressbar_bar_add(progressbar_data_t *d, const char *title)
     bar->fg = globalconf.colors.fg;
     bar->fg_off = globalconf.colors.bg;
     bar->bg = globalconf.colors.bg;
-    bar->bordercolor = globalconf.colors.fg;
+    bar->border_color = globalconf.colors.fg;
     bar->max_value = 100.0;
 
     /* append the bar in the list */
@@ -245,7 +229,7 @@ progressbar_draw(draw_context_t *ctx,
 
                 if(d->border_padding)
                     draw_rectangle(ctx, rectangle, 1.0, true, bar->bg);
-                draw_rectangle(ctx, rectangle, d->border_width, false, bar->bordercolor);
+                draw_rectangle(ctx, rectangle, d->border_width, false, bar->border_color);
             }
 
             pattern_rect.x = pb_x;
@@ -345,7 +329,7 @@ progressbar_draw(draw_context_t *ctx,
 
                 if(d->border_padding)
                     draw_rectangle(ctx, rectangle, 1.0, true, bar->bg);
-                draw_rectangle(ctx, rectangle, d->border_width, false, bar->bordercolor);
+                draw_rectangle(ctx, rectangle, d->border_width, false, bar->border_color);
             }
 
             pattern_rect.y = pb_y;
@@ -462,6 +446,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     const char *buf, *title = luaL_checkstring(L, 2);
     bar_t *bar;
     progressbar_data_t *d = (*widget)->data;
+    xcolor_t color;
 
     luaA_checktable(L, 3);
 
@@ -474,18 +459,40 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     if(!bar)
         bar = progressbar_bar_add(d, title);
 
-    if((buf = luaA_getopt_string(L, 3, "fg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &bar->fg);
-    if((buf = luaA_getopt_string(L, 3, "bg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &bar->bg);
-    if((buf = luaA_getopt_string(L, 3, "fg_off", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &bar->fg_off);
-    if((buf = luaA_getopt_string(L, 3, "border_color", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &bar->bordercolor);
-    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL)))
-        progressbar_pcolor_set(&bar->pfg_center, buf);
-    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL)))
-        progressbar_pcolor_set(&bar->pfg_end, buf);
+    if((buf = luaA_getopt_string(L, 3, "fg", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(&bar->fg);
+        bar->fg = color;
+    }
+
+    if((buf = luaA_getopt_string(L, 3, "bg", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(&bar->bg);
+        bar->bg = color;
+    }
+
+    if((buf = luaA_getopt_string(L, 3, "border_color", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(&bar->border_color);
+        bar->border_color = color;
+    }
+
+    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(bar->pfg_center);
+        bar->pfg_end = p_dup(&color, 1);;
+    }
+
+    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(bar->pfg_end);
+        bar->pfg_end = p_dup(&color, 1);;
+    }
 
     bar->min_value = luaA_getopt_number(L, 3, "min_value", bar->min_value);
     /* hack to prevent max_value beeing less than min_value

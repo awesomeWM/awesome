@@ -394,14 +394,25 @@ luaA_font_set(lua_State *L)
 static int
 luaA_colors_set(lua_State *L)
 {
-    const char *fg, *bg;
+    const char *buf;
+    xcolor_t color;
+
     luaA_checktable(L, 1);
-    if((fg = luaA_getopt_string(L, 1, "fg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                       fg, &globalconf.colors.fg);
-    if((bg = luaA_getopt_string(L, 1, "bg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                       bg, &globalconf.colors.bg);
+
+    if((buf = luaA_getopt_string(L, 1, "fg", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(&globalconf.colors.fg);
+        globalconf.colors.fg = color;
+    }
+
+    if((buf = luaA_getopt_string(L, 1, "bg", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(&globalconf.colors.bg);
+        globalconf.colors.bg = color;
+    }
+
     return 0;
 }
 

@@ -1005,8 +1005,11 @@ luaA_client_border_set(lua_State *L)
 
     if(colorstr
         && xcolor_new(globalconf.connection, (*c)->phys_screen, colorstr, &color))
+    {
         xcb_change_window_attributes(globalconf.connection, (*c)->win, XCB_CW_BORDER_PIXEL,
                                      &color.pixel);
+        xcolor_wipe(&color);
+    }
 
     return 0;
 }

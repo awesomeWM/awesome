@@ -1138,7 +1138,7 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
             color->red = hexa_color->red;
             color->green = hexa_color->green;
             color->blue = hexa_color->blue;
-
+            color->name = a_strdup(colstr);
             p_delete(&hexa_color);
             return true;
         }
@@ -1159,6 +1159,7 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
             color->green = named_color->visual_green;
             color->blue = named_color->visual_blue;
             color->alpha = 0xffff;
+            color->name = a_strdup(colstr);
 
             p_delete(&named_color);
             return true;

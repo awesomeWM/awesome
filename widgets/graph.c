@@ -110,22 +110,6 @@ typedef struct
     plot_t *plots;
 } graph_data_t;
 
-static void
-plot_pcolor_set(xcolor_t **ppcolor, const char *new_color)
-{
-    bool flag = false;
-    if(!*ppcolor)
-    {
-        flag = true; /* p_delete && restore to NULL, if xcolor_new unsuccessful */
-        *ppcolor = p_new(xcolor_t, 1);
-    }
-    if(!(xcolor_new(globalconf.connection,
-                    globalconf.default_screen,
-                    new_color, *ppcolor))
-       && flag)
-        p_delete(ppcolor);
-}
-
 /** Add a plot to a graph.
  * \param d The graph private data.
  * \param title The plot title.
@@ -302,6 +286,7 @@ luaA_graph_plot_properties_set(lua_State *L)
     const char *title, *buf;
     size_t len;
     plot_t *plot;
+    xcolor_t color;
 
     title = luaL_checkstring(L, 2);
     luaA_checktable(L, 3);
@@ -313,12 +298,26 @@ luaA_graph_plot_properties_set(lua_State *L)
     if(!plot)
         plot = graph_plot_add(d, title);
 
-    if((buf = luaA_getopt_string(L, 3, "fg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &plot->color_start);
-    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL)))
-        plot_pcolor_set(&plot->pcolor_center, buf);
-    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL)))
-        plot_pcolor_set(&plot->pcolor_end, buf);
+    if((buf = luaA_getopt_string(L, 3, "fg", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(&plot->color_start);
+        plot->color_start = color;
+    }
+
+    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(plot->pcolor_center);
+        plot->pcolor_center = p_dup(&color, 1);
+    }
+
+    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(plot->pcolor_end);
+        plot->pcolor_end = p_dup(&color, 1);
+    }
 
     plot->vertical_gradient = luaA_getopt_boolean(L, 3, "vertical_gradient", plot->vertical_gradient);
     plot->scale = luaA_getopt_boolean(L, 3, "scale", plot->scale);
@@ -483,6 +482,7 @@ luaA_graph_newindex(lua_State *L)
     int width;
     plot_t *plot;
     position_t pos;
+    xcolor_t color;
 
     switch(a_tokenize(attr, len))
     {
@@ -510,10 +510,22 @@ luaA_graph_newindex(lua_State *L)
             return 0;
         break;
       case A_TK_BG:
-        xcolor_new(globalconf.connection, globalconf.default_screen, luaL_checkstring(L, 3), &d->bg);
+        if(xcolor_new(globalconf.connection, globalconf.default_screen, luaL_checkstring(L, 3), &color))
+        {
+            xcolor_wipe(&d->bg);
+            d->bg = color;
+        }
+        else
+            return 0;
         break;
       case A_TK_BORDER_COLOR:
-        xcolor_new(globalconf.connection, globalconf.default_screen, luaL_checkstring(L, 3), &d->border_color);
+        if(xcolor_new(globalconf.connection, globalconf.default_screen, luaL_checkstring(L, 3), &color))
+        {
+            xcolor_wipe(&d->border_color);
+            d->border_color = color;
+        }
+        else
+            return 0;
         break;
       case A_TK_GROW:
         buf = luaL_checklstring(L, 3, &len);

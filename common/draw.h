@@ -33,6 +33,8 @@
 
 typedef struct
 {
+    /** Color name */
+    char *name;
     uint32_t pixel;
     uint16_t red;
     uint16_t green;
@@ -195,6 +197,17 @@ void draw_image_from_argb_data(draw_context_t *, int, int, int, int, int, unsign
 void draw_rotate(draw_context_t *, xcb_drawable_t, xcb_drawable_t, int, int, int, int, double, int, int);
 area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *, draw_parser_data_t *);
 alignment_t draw_align_fromstr(const char *, ssize_t);
+
+/** Wipe a color resources.
+ * \param color The color to wipe out.
+ */
+static inline void
+xcolor_wipe(xcolor_t *color)
+{
+    if(color)
+        p_delete(&color->name);
+}
+
 bool xcolor_new(xcb_connection_t *, int, const char *, xcolor_t *);
 
 void area_array_remove(area_array_t *, area_t);

@@ -94,6 +94,7 @@ tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
             xcolor_t bg_color;
             xcolor_new(ctx->connection, ctx->phys_screen, *values, &bg_color);
             draw_rectangle(ctx, *data->area, 1.0, true, bg_color);
+            xcolor_wipe(&bg_color);
             break;
         }
 }

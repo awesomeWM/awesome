@@ -350,13 +350,15 @@ luaA_statusbar_colors_set(lua_State *L)
 {
     statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
     const char *buf;
+    xcolor_t color;
 
     luaA_checktable(L, 2);
 
-    if ((buf = luaA_getopt_string(L, 2, "fg", NULL)))
+    if((buf = luaA_getopt_string(L, 2, "fg", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
     {
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                   buf, &(*sb)->colors.fg);
+        xcolor_wipe(&(*sb)->colors.fg);
+        (*sb)->colors.fg = color;
 
         if((*sb)->ctx)
             (*sb)->ctx->fg = (*sb)->colors.fg;
@@ -364,10 +366,11 @@ luaA_statusbar_colors_set(lua_State *L)
         (*sb)->need_update = true;
     }
 
-    if ((buf = luaA_getopt_string(L, 2, "bg", NULL)))
+    if((buf = luaA_getopt_string(L, 2, "bg", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
     {
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                   buf, &(*sb)->colors.bg);
+        xcolor_wipe(&(*sb)->colors.bg);
+        (*sb)->colors.bg = color;
 
         if((*sb)->ctx)
             (*sb)->ctx->bg = (*sb)->colors.bg;
@@ -541,16 +544,14 @@ luaA_statusbar_new(lua_State *L)
 
     sb->name = luaA_name_init(L);
 
-    if((buf = luaA_getopt_string(L, 1, "fg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                   buf, &sb->colors.fg);
-    else
+    if(!(buf = luaA_getopt_string(L, 1, "fg", NULL))
+       || !xcolor_new(globalconf.connection, globalconf.default_screen,
+                     buf, &sb->colors.fg))
         sb->colors.fg = globalconf.colors.fg;
 
-    if((buf = luaA_getopt_string(L, 1, "bg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                   buf, &sb->colors.bg);
-    else
+    if(!(buf = luaA_getopt_string(L, 1, "bg", NULL))
+       || !xcolor_new(globalconf.connection, globalconf.default_screen,
+                     buf, &sb->colors.bg))
         sb->colors.bg = globalconf.colors.bg;
 
     buf = luaA_getopt_lstring(L, 1, "align", "left", &len);
