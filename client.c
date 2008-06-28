@@ -447,7 +447,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     if(u_size_hints)
         xcb_free_size_hints(u_size_hints);
-
 }
 
 /** Compute client geometry with respect to its geometry hints.
@@ -669,6 +668,10 @@ void
 client_unmanage(client_t *c)
 {
     tag_array_t *tags = &globalconf.screens[c->screen].tags;
+    xutil_intern_atom_request_t awesome_properties_q;
+    xcb_atom_t awesome_properties;
+
+    awesome_properties_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_AWESOME_PROPERTIES");
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
@@ -704,6 +707,10 @@ client_unmanage(client_t *c)
     }
 
     ewmh_update_net_client_list(c->phys_screen);
+
+    /* delete properties */
+    awesome_properties = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, awesome_properties_q);
+    xcb_delete_property(globalconf.connection, c->win, awesome_properties);
 
     p_delete(&c);
 }
