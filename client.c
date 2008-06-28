@@ -593,6 +593,7 @@ client_setlayer(client_t *c, layer_t layer)
 {
     c->layer = layer;
     client_raise(c);
+    client_saveprops(c);
 }
 
 /** Set a clinet floating.
