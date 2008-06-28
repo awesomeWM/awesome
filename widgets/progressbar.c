@@ -541,7 +541,8 @@ luaA_progressbar_bar_data_add(lua_State *L)
     if(!bar)
         bar = progressbar_bar_add(d, title);
 
-    bar->value = MAX(bar->min_value, MIN(bar->max_value, luaL_checknumber(L, 3)));
+    bar->value = luaL_checknumber(L, 3);
+    bar->value = MAX(bar->min_value, MIN(bar->max_value, bar->value));
 
     widget_invalidate_bywidget(*widget);
 
