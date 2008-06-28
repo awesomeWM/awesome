@@ -99,7 +99,7 @@ typedef struct
     /** Background color */
     xcolor_t bg;
     /** Border color */
-    xcolor_t bordercolor;
+    xcolor_t border_color;
     /** Grow: Left or Right */
     position_t grow;
     /** Preparation/tmp array for draw_graph(); */
@@ -278,76 +278,11 @@ graph_draw(draw_context_t *ctx,
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
-    draw_rectangle(ctx, rectangle, 1.0, false, d->bordercolor);
+    draw_rectangle(ctx, rectangle, 1.0, false, d->border_color);
 
     w->area.width = d->width;
     w->area.height = ctx->height;
     return w->area.width;
-}
-
-/** Set various graph general properties:
- * width, the widget width;
- * height, the widget height;
- * bg, the bacground color;
- * bordercolor, the border color;
- * grow, left or right where to add plot data.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A widget.
- * \lparam A table with various properties set.
- */
-static int
-luaA_graph_properties_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    graph_data_t *d = (*widget)->data;
-    plot_t *plot;
-    int width;
-    const char *buf;
-    size_t len;
-    position_t pos;
-
-    luaA_checktable(L, 2);
-
-    d->height = luaA_getopt_number(L, 2, "height", d->height);
-
-    width = luaA_getopt_number(L, 2, "width", d->width);
-    if(width != d->width)
-    {
-        d->width = width;
-        d->size = d->width - 2;
-        for(plot = d->plots; plot; plot = plot->next)
-        {
-            p_realloc(&plot->values, d->size);
-            p_realloc(&plot->lines, d->size);
-            p_clear(plot->values, d->size);
-            p_clear(plot->lines, d->size);
-            plot->index = 0;
-            plot->current_max =  0;
-            plot->max_index =  0;
-        }
-    }
-
-    if((buf = luaA_getopt_string(L, 2, "bg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &d->bg);
-    if((buf = luaA_getopt_string(L, 2, "bordercolor", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen, buf, &d->bordercolor);
-
-    if((buf = luaA_getopt_lstring(L, 2, "grow", NULL, &len)))
-        switch((pos = position_fromstr(buf, len)))
-        {
-          case Left:
-          case Right:
-            d->grow = pos;
-            break;
-          default:
-            break;
-        }
-
-    widget_invalidate_bywidget(*widget);
-
-    return 0;
 }
 
 /** Set various plot graph properties.
@@ -497,22 +432,108 @@ static int
 luaA_graph_index(lua_State *L)
 {
     size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    graph_data_t *d = (*widget)->data;
     const char *attr = luaL_checklstring(L, 2, &len);
 
     switch(a_tokenize(attr, len))
     {
-      case A_TK_PROPERTIES_SET:
-        lua_pushcfunction(L, luaA_graph_properties_set);
-        return 1;
       case A_TK_PLOT_PROPERTIES_SET:
         lua_pushcfunction(L, luaA_graph_plot_properties_set);
-        return 1;
+        break;
       case A_TK_PLOT_DATA_ADD:
         lua_pushcfunction(L, luaA_graph_plot_data_add);
-        return 1;
+        break;
+      case A_TK_HEIGHT:
+        lua_pushnumber(L, d->height);
+        break;
+      case A_TK_WIDTH:
+        lua_pushnumber(L, d->width);
+      case A_TK_GROW:
+        switch(d->grow)
+        {
+          case Left:
+            lua_pushliteral(L, "left");
+            break;
+          case Right:
+            lua_pushliteral(L, "right");
+            break;
+          default:
+            return 0;
+        }
+        break;
       default:
         return 0;
     }
+
+    return 1;
+}
+
+/** Newindex function for graph widget.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_graph_newindex(lua_State *L)
+{
+    size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    graph_data_t *d = (*widget)->data;
+    const char *buf, *attr = luaL_checklstring(L, 2, &len);
+    int width;
+    plot_t *plot;
+    position_t pos;
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_HEIGHT:
+        d->height = luaL_checknumber(L, 3);
+        break;
+      case A_TK_WIDTH:
+        width = luaL_checknumber(L, 3);
+        if(width != d->width)
+        {
+            d->width = width;
+            d->size = d->width - 2;
+            for(plot = d->plots; plot; plot = plot->next)
+            {
+                p_realloc(&plot->values, d->size);
+                p_realloc(&plot->lines, d->size);
+                p_clear(plot->values, d->size);
+                p_clear(plot->lines, d->size);
+                plot->index = 0;
+                plot->current_max =  0;
+                plot->max_index =  0;
+            }
+        }
+        else
+            return 0;
+        break;
+      case A_TK_BG:
+        xcolor_new(globalconf.connection, globalconf.default_screen, luaL_checkstring(L, 3), &d->bg);
+        break;
+      case A_TK_BORDER_COLOR:
+        xcolor_new(globalconf.connection, globalconf.default_screen, luaL_checkstring(L, 3), &d->border_color);
+        break;
+      case A_TK_GROW:
+        buf = luaL_checklstring(L, 3, &len);
+        switch((pos = position_fromstr(buf, len)))
+        {
+          case Left:
+          case Right:
+            d->grow = pos;
+            break;
+          default:
+            return 0;
+        }
+        break;
+      default:
+        return 0;
+    }
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
 }
 
 /** Destroy definitively a graph widget.
@@ -544,6 +565,7 @@ graph_new(alignment_t align)
 
     w->draw = graph_draw;
     w->index = luaA_graph_index;
+    w->newindex = luaA_graph_newindex;
     w->destructor = graph_destructor;
     w->align = align;
     d = w->data = p_new(graph_data_t, 1);
@@ -556,7 +578,7 @@ graph_new(alignment_t align)
     d->draw_to = p_new(int, d->size);
 
     d->bg = globalconf.colors.bg;
-    d->bordercolor = globalconf.colors.fg;
+    d->border_color = globalconf.colors.fg;
 
     return w;
 }
@@ -564,7 +586,6 @@ graph_new(alignment_t align)
 /* This is used for building documentation. */
 static const struct luaL_reg awesome_graph_meta[] __attribute__ ((unused)) =
 {
-    { "properties_set", luaA_graph_properties_set },
     { "plot_properties_set", luaA_graph_plot_properties_set },
     { "plot_data_add", luaA_graph_plot_data_add },
 };

@@ -4,6 +4,8 @@ all
 auto
 bar_data_add
 bar_properties_set
+bg
+border_color
 bottom
 bottomleft
 bottomright
@@ -11,6 +13,8 @@ center
 color
 flex
 focus
+grow
+height
 image
 left
 line
