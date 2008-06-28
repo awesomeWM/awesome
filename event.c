@@ -445,17 +445,12 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     }
     else if((c = client_getbywin(ev->window)))
     {
-        tag_array_t *tags = &globalconf.screens[c->screen].tags;
-
-        xcb_map_window(globalconf.connection, ev->window);
-
-        /* add tags currently shown */
-        for(int i = 0; i < tags->len; i++)
-            if(tags->tab[i]->selected)
-                tag_client(c, tags->tab[i]);
-
-        /* it will be raised, so just update ourself */
-        client_raise(c);
+        if(client_isvisible(c, c->screen))
+        {
+            xcb_map_window(globalconf.connection, ev->window);
+            /* it will be raised, so just update ourself */
+            client_raise(c);
+        }
     }
     else
     {
