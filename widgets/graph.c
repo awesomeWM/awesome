@@ -124,7 +124,7 @@ graph_plot_add(graph_data_t *d, const char *title)
     plot->values = p_new(float, d->size);
     plot->lines = p_new(int, d->size);
     plot->max_value = 100.0;
-    plot->color_start = globalconf.colors.fg;
+    plot->color_start = xcolor_copy(&globalconf.colors.fg);
     plot->vertical_gradient = true;
 
     plot_list_append(&d->plots, plot);
@@ -596,8 +596,8 @@ graph_new(alignment_t align)
     d->draw_from = p_new(int, d->size);
     d->draw_to = p_new(int, d->size);
 
-    d->bg = globalconf.colors.bg;
-    d->border_color = globalconf.colors.fg;
+    d->bg = xcolor_copy(&globalconf.colors.bg);
+    d->border_color = xcolor_copy(&globalconf.colors.fg);
 
     return w;
 }

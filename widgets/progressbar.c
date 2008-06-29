@@ -103,10 +103,10 @@ progressbar_bar_add(progressbar_data_t *d, const char *title)
     bar_t *bar = p_new(bar_t, 1);
 
     bar->title = a_strdup(title);
-    bar->fg = globalconf.colors.fg;
-    bar->fg_off = globalconf.colors.bg;
-    bar->bg = globalconf.colors.bg;
-    bar->border_color = globalconf.colors.fg;
+    bar->fg = xcolor_copy(&globalconf.colors.fg);
+    bar->fg_off = xcolor_copy(&globalconf.colors.bg);
+    bar->bg = xcolor_copy(&globalconf.colors.bg);
+    bar->border_color = xcolor_copy(&globalconf.colors.fg);
     bar->max_value = 100.0;
 
     /* append the bar in the list */

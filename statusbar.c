@@ -547,12 +547,12 @@ luaA_statusbar_new(lua_State *L)
     if(!(buf = luaA_getopt_string(L, 1, "fg", NULL))
        || !xcolor_new(globalconf.connection, globalconf.default_screen,
                      buf, &sb->colors.fg))
-        sb->colors.fg = globalconf.colors.fg;
+        sb->colors.fg = xcolor_copy(&globalconf.colors.fg);
 
     if(!(buf = luaA_getopt_string(L, 1, "bg", NULL))
        || !xcolor_new(globalconf.connection, globalconf.default_screen,
                      buf, &sb->colors.bg))
-        sb->colors.bg = globalconf.colors.bg;
+        sb->colors.bg = xcolor_copy(&globalconf.colors.bg);
 
     buf = luaA_getopt_lstring(L, 1, "align", "left", &len);
     sb->align = draw_align_fromstr(buf, len);

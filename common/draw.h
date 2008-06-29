@@ -205,7 +205,23 @@ static inline void
 xcolor_wipe(xcolor_t *color)
 {
     if(color)
+    {
         p_delete(&color->name);
+        p_clear(color, 1);
+    }
+}
+
+static inline xcolor_t
+xcolor_copy(xcolor_t *color)
+{
+    xcolor_t c;
+
+    assert(color);
+
+    c = *color;
+    c.name = a_strdup(color->name);
+
+    return c;
 }
 
 bool xcolor_new(xcb_connection_t *, int, const char *, xcolor_t *);

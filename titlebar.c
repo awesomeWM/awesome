@@ -317,17 +317,17 @@ luaA_titlebar_new(lua_State *L)
     if(!(buf = luaA_getopt_string(L, -1, "fg", NULL))
         || !xcolor_new(globalconf.connection, globalconf.default_screen,
                        buf, &tb->colors.fg))
-        tb->colors.fg = globalconf.colors.fg;
+        tb->colors.fg = xcolor_copy(&globalconf.colors.fg);
 
     if(!(buf = luaA_getopt_string(L, -1, "bg", NULL))
         || !xcolor_new(globalconf.connection, globalconf.default_screen,
                        buf, &tb->colors.bg))
-        tb->colors.bg = globalconf.colors.bg;
+        tb->colors.bg = xcolor_copy(&globalconf.colors.bg);
 
     if(!(buf = luaA_getopt_string(L, -1, "border_color", NULL))
         || !xcolor_new(globalconf.connection, globalconf.default_screen,
                        buf, &tb->border.color))
-        tb->border.color = globalconf.colors.fg;
+        tb->border.color = xcolor_copy(&globalconf.colors.fg);
 
     tb->border.width = luaA_getopt_number(L, 1, "border_width", 0);
 
