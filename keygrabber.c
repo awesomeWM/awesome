@@ -332,12 +332,27 @@ keysym_to_unicode_20a0_20ac[] =
     0x20a8, 0x20a9, 0x20aa, 0x20ab, 0x20ac                          /* 0x20a8-0x20af */
 };
 
-static char *
-keysym_to_utf8(const xcb_keysym_t ksym)
+static uint8_t const __utf8_mark[7] = {
+    0x00, 0x00, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc
+};
+
+static int8_t const __utf32_clz_to_len[32] = {
+    7,                  /* 0x80000000 */
+    6, 6, 6, 6, 6,      /* 0x04000000 */
+    5, 5, 5, 5, 5,      /* 0x00200000 */
+    4, 4, 4, 4, 4,      /* 0x00010000 */
+    3, 3, 3, 3, 3,      /* 0x00000800 */
+    2, 2, 2, 2,         /* 0x00000080 */
+    1, 1, 1, 1, 1, 1, 1 /* 0x00000001 */
+};
+#define utf8clen(c) __utf32_clz_to_len[__builtin_clz((uint32_t)(c) | 1)]
+
+
+static bool
+keysym_to_utf8(char *buf, int len, const xcb_keysym_t ksym)
 {
     unsigned int ksym_conv;
     int count;
-    char *buf;
 
     /* Unicode keysym */
     if((ksym & 0xff000000) == 0x01000000)
@@ -385,60 +400,26 @@ keysym_to_utf8(const xcb_keysym_t ksym)
     else if(ksym > 0x209f && ksym < 0x20ad)
 	ksym_conv = keysym_to_unicode_20a0_20ac[ksym - 0x20a0];
     else
-        return NULL;
+        return false;
 
-    if(ksym_conv < 0x80)
-        count = 1;
-    else if(ksym_conv < 0x800)
-        count = 2;
-    else if(ksym_conv < 0x10000)
-        count = 3;
-    else if(ksym_conv < 0x200000)
-        count = 4;
-    else if(ksym_conv < 0x4000000)
-        count = 5;
-    else if(ksym_conv <= 0x7fffffff)
-        count = 6;
-    else
-        return NULL;
-
-    buf = p_new(char, count + 1);
-
+    count = utf8clen(ksym_conv);
     switch (count)
     {
-    case 6:
-        buf[5] = 0x80 | (ksym_conv & 0x3f);
-        ksym_conv = ksym_conv >> 6;
-        ksym_conv |= 0x4000000;
-    case 5:
-        buf[4] = 0x80 | (ksym_conv & 0x3f);
-        ksym_conv = ksym_conv >> 6;
-        ksym_conv |= 0x200000;
-    case 4:
-        buf[3] = 0x80 | (ksym_conv & 0x3f);
-        ksym_conv = ksym_conv >> 6;
-        ksym_conv |= 0x10000;
-    case 3:
-        buf[2] = 0x80 | (ksym_conv & 0x3f);
-        ksym_conv = ksym_conv >> 6;
-        ksym_conv |= 0x800;
-    case 2:
-        buf[1] = 0x80 | (ksym_conv & 0x3f);
-        ksym_conv = ksym_conv >> 6;
-        ksym_conv |= 0xc0;
-    case 1:
-        buf[0] = ksym_conv;
+      case 7: return false;
+      case 6: buf[5] = (ksym_conv | 0x80) & 0xbf; ksym_conv >>= 6;
+      case 5: buf[4] = (ksym_conv | 0x80) & 0xbf; ksym_conv >>= 6;
+      case 4: buf[3] = (ksym_conv | 0x80) & 0xbf; ksym_conv >>= 6;
+      case 3: buf[2] = (ksym_conv | 0x80) & 0xbf; ksym_conv >>= 6;
+      case 2: buf[1] = (ksym_conv | 0x80) & 0xbf; ksym_conv >>= 6;
+      case 1: buf[0] = (ksym_conv | __utf8_mark[count]);
     }
-
     buf[count] = '\0';
-    return buf;
+    return true;
 }
 
-static char *
-keysym_to_str(const xcb_keysym_t ksym)
+static bool
+keysym_to_str(char *buf, int len, const xcb_keysym_t ksym)
 {
-    char *buf;
-
     /* Try to convert to Latin-1, handling ctrl */
     if(!((ksym >= XK_BackSpace && ksym <= XK_Clear)
          || (ksym >= XK_Home && ksym <= XK_Begin)
@@ -451,112 +432,31 @@ keysym_to_str(const xcb_keysym_t ksym)
          || (ksym >= XK_KP_Multiply && ksym <= XK_KP_9)
          || (ksym >= XK_F1 && ksym <= XK_R15)
          || ksym == XK_Delete))
-        return NULL;
+        return false;
 
     switch(ksym)
     {
-      case XK_Home:
-        return a_strdup("Home");
-      case XK_Left:
-        return a_strdup("Left");
-      case XK_Up:
-        return a_strdup("Up");
-      case XK_Right:
-        return a_strdup("Right");
-      case XK_Down:
-        return a_strdup("Down");
-      case XK_Page_Up:
-        return a_strdup("Page_Up");
-      case XK_Page_Down:
-        return a_strdup("Page_Down");
-      case XK_End:
-        return a_strdup("End");
-      case XK_Begin:
-        return a_strdup("Begin");
-      case XK_BackSpace:
-        return a_strdup("BackSpace");
-      case XK_Return:
-        return a_strdup("Return");
-      case XK_Escape:
-        return a_strdup("Escape");
-      case XK_KP_Enter:
-        return a_strdup("KP_Enter");
-      case XK_F1:
-        return a_strdup("F1");
-      case XK_F2:
-        return a_strdup("F2");
-      case XK_F3:
-        return a_strdup("F3");
-      case XK_F4:
-        return a_strdup("F4");
-      case XK_F5:
-        return a_strdup("F5");
-      case XK_F6:
-        return a_strdup("F6");
-      case XK_F7:
-        return a_strdup("F7");
-      case XK_F8:
-        return a_strdup("F8");
-      case XK_F9:
-        return a_strdup("F9");
-      case XK_F10:
-        return a_strdup("F10");
-      case XK_F11:
-        return a_strdup("F11");
-      case XK_F12:
-        return a_strdup("F12");
-      case XK_F13:
-        return a_strdup("F13");
-      case XK_F14:
-        return a_strdup("F14");
-      case XK_F15:
-        return a_strdup("F15");
-      case XK_F16:
-        return a_strdup("F16");
-      case XK_F17:
-        return a_strdup("F17");
-      case XK_F18:
-        return a_strdup("F18");
-      case XK_F19:
-        return a_strdup("F19");
-      case XK_F20:
-        return a_strdup("F20");
-      case XK_F21:
-        return a_strdup("F21");
-      case XK_F22:
-        return a_strdup("F22");
-      case XK_F23:
-        return a_strdup("F23");
-      case XK_F24:
-        return a_strdup("F24");
-      case XK_F25:
-        return a_strdup("F25");
-      case XK_F26:
-        return a_strdup("F26");
-      case XK_F27:
-        return a_strdup("F27");
-      case XK_F28:
-        return a_strdup("F28");
-      case XK_F29:
-        return a_strdup("F29");
-      case XK_F30:
-        return a_strdup("F30");
-      case XK_F31:
-        return a_strdup("F31");
-      case XK_F32:
-        return a_strdup("F32");
-      case XK_F33:
-        return a_strdup("F33");
-      case XK_F34:
-        return a_strdup("F34");
-      case XK_F35:
-        return a_strdup("F35");
-    }
-
-    buf = p_new(char, 2);
-
-    switch(ksym)
-    {
+#define CASE(k)  case XK_##k: a_strcpy(buf, len, #k); return true
+        CASE(Home);
+        CASE(Left);
+        CASE(Up);
+        CASE(Right);
+        CASE(Down);
+        CASE(Page_Up);
+        CASE(Page_Down);
+        CASE(End);
+        CASE(Begin);
+        CASE(BackSpace);
+        CASE(Return);
+        CASE(Escape);
+        CASE(KP_Enter);
+        CASE(F1);  CASE(F2);  CASE(F3);  CASE(F4);  CASE(F5);  CASE(F6);
+        CASE(F7);  CASE(F8);  CASE(F9);  CASE(F10); CASE(F11); CASE(F12);
+        CASE(F13); CASE(F14); CASE(F15); CASE(F16); CASE(F17); CASE(F18);
+        CASE(F19); CASE(F20); CASE(F21); CASE(F22); CASE(F23); CASE(F24);
+        CASE(F25); CASE(F26); CASE(F27); CASE(F28); CASE(F29); CASE(F30);
+        CASE(F31); CASE(F32); CASE(F33); CASE(F34); CASE(F35);
+#undef CASE
       case XK_KP_Space:
         /* Patch encoding botch */
         buf[0] = XK_space & 0x7F;
@@ -571,12 +471,12 @@ keysym_to_str(const xcb_keysym_t ksym)
     }
 
     buf[1] = '\0';
-    return buf;
+    return true;
 }
 
-static void
+static bool
 key_press_lookup_string(xcb_key_press_event_t *e,
-                        char **buf, size_t *buf_len,
+                        char *buf, int buf_len,
                         xcb_keysym_t *ksym)
 {
     xcb_keysym_t k0, k1;
@@ -642,12 +542,9 @@ key_press_lookup_string(xcb_key_press_event_t *e,
 
     /* Handle special KeySym (Tab, Newline...) */
     if((*ksym & 0xffffff00) == 0xff00)
-        *buf = keysym_to_str(*ksym);
+        return keysym_to_str(buf, buf_len, *ksym);
     /* Handle other KeySym (like unicode...) */
-    else
-        *buf = keysym_to_utf8(*ksym);
-
-    *buf_len = a_strlen(*buf);
+    return keysym_to_utf8(buf, buf_len, *ksym);
 }
 
 /** Grab the keyboard.
@@ -696,12 +593,10 @@ bool
 keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 {
     xcb_keysym_t ksym = 0;
-    char *buf = NULL;
-    size_t len;
+    char buf[MAX(MB_LEN_MAX, 32)];
     int i = 1;
 
-    key_press_lookup_string(e, &buf, &len, &ksym);
-    if(!len)
+    if (!key_press_lookup_string(e, buf, countof(buf), &ksym))
         return false;
 
     lua_newtable(L);
@@ -748,7 +643,6 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
     }
 
     lua_pushstring(L, buf);
-    p_delete(&buf);
     return true;
 }
 
