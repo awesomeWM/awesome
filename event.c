@@ -296,9 +296,17 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
                            xcb_destroy_notify_event_t *ev)
 {
     client_t *c;
+    xembed_window_t *emwin;
+    int i;
 
     if((c = client_getbywin(ev->window)))
         client_unmanage(c);
+    else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
+    {
+        xembed_window_list_detach(&globalconf.embedded, emwin);
+        for(i = 0; i < globalconf.screens_info->nscreen; i++)
+            widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
+    }
 
     return 0;
 }
@@ -550,13 +558,14 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
      * response_type field */
     bool send_event = ((ev->response_type & 0x80) >> 7);
 
-    if((c = client_getbywin(ev->window))
-       && ev->event == xutil_screen_get(connection, c->phys_screen)->root
-       && send_event && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
-        client_unmanage(c);
-
-    /** \todo invalidate for all screen might be too much */
-    if((em = xembed_getbywin(globalconf.embedded, ev->window)))
+    if((c = client_getbywin(ev->window)))
+    {
+        if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
+           && send_event
+           && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
+            client_unmanage(c);
+    }
+    else if((em = xembed_getbywin(globalconf.embedded, ev->window)))
     {
         xembed_window_list_detach(&globalconf.embedded, em);
         for(i = 0; i < globalconf.screens_info->nscreen; i++)

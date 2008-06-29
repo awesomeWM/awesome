@@ -77,7 +77,7 @@ systray_init(int phys_screen)
 /** Handle a systray request.
  * \param embed_win The window to embed.
  */
-int
+static int
 systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *info)
 {
     xembed_window_t *em;
@@ -89,6 +89,9 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
             | XCB_EVENT_MASK_ENTER_WINDOW
     };
 
+    /* check if not already trayed */
+    if((em = xembed_getbywin(globalconf.embedded, embed_win)))
+        return 1;
 
     xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_EVENT_MASK,
                                  select_input_val);
@@ -135,7 +138,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 int
 systray_process_client_message(xcb_client_message_event_t *ev)
 {
-    int screen_nbr = 0;
+    int screen_nbr = 0, ret = 0;
     xcb_get_geometry_cookie_t geom_c;
     xcb_get_geometry_reply_t *geom_r;
     xcb_screen_iterator_t iter;
@@ -153,10 +156,11 @@ systray_process_client_message(xcb_client_message_event_t *ev)
 
         p_delete(&geom_r);
 
-        systray_request_handle(ev->data.data32[2], screen_nbr, NULL);
+        ret = systray_request_handle(ev->data.data32[2], screen_nbr, NULL);
         break;
     }
-    return 0;
+
+    return ret;
 }
 
 /** Handle xembed client message.

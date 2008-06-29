@@ -26,7 +26,6 @@
 #include "common/xembed.h"
 
 void systray_init(int);
-int systray_request_handle(xcb_window_t, int, xembed_info_t *);
 int systray_process_client_message(xcb_client_message_event_t *);
 int xembed_process_client_message(xcb_client_message_event_t *);
 
