@@ -583,28 +583,28 @@ luaA_progressbar_newindex(lua_State *L)
     switch(a_tokenize(attr, len))
     {
       case A_TK_GAP:
-        d->gap = luaA_getopt_number(L, 2, "gap", d->gap);
+        d->gap = luaL_checknumber(L, 3);
         break;
       case A_TK_TICKS_COUNT:
-        d->ticks_count = luaA_getopt_number(L, 2, "ticks_count", d->ticks_count);
+        d->ticks_count = luaL_checknumber(L, 3);
         break;
       case A_TK_TICKS_GAP:
-        d->ticks_gap = luaA_getopt_number(L, 2, "ticks_gap", d->ticks_gap);
+        d->ticks_gap = luaL_checknumber(L, 3);
         break;
       case A_TK_BORDER_PADDING:
-        d->border_padding = luaA_getopt_number(L, 2, "border_padding", d->border_padding);
+        d->border_padding = luaL_checknumber(L, 3);
         break;
       case A_TK_BORDER_WIDTH:
-        d->border_width = luaA_getopt_number(L, 2, "border_width", d->border_width);
+        d->border_width = luaL_checknumber(L, 3);
         break;
       case A_TK_WIDTH:
-        d->width = luaA_getopt_number(L, 2, "width", d->width);
+        d->width = luaL_checknumber(L, 3);
         break;
       case A_TK_HEIGHT:
-        d->height = luaA_getopt_number(L, 2, "height", d->height);
+        d->height = luaL_checknumber(L, 3);
         break;
       case A_TK_VERTICAL:
-        d->vertical = luaA_getopt_boolean(L, 2, "vertical", d->vertical);
+        d->vertical = luaA_checkboolean(L, 3);
         break;
       default:
         return 0;
