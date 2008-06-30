@@ -26,6 +26,7 @@
 #include "systray.h"
 #include "window.h"
 #include "widget.h"
+#include "common/atoms.h"
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 
@@ -34,16 +35,17 @@ extern awesome_t globalconf;
 void
 systray_init(int phys_screen)
 {
-    xutil_intern_atom_request_t atom_systray_q, atom_manager_q;
-    xcb_atom_t atom_systray;
     xcb_client_message_event_t ev;
     xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
     char atom_name[22];
+    xcb_intern_atom_cookie_t atom_systray_q;
+    xcb_intern_atom_reply_t *atom_systray_r;
+    xcb_atom_t atom_systray;
 
     /* Send requests */
-    atom_manager_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "MANAGER");
     snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
-    atom_systray_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, atom_name);
+    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false,
+                                               a_strlen(atom_name), atom_name);
 
     globalconf.screens[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
@@ -57,15 +59,20 @@ systray_init(int phys_screen)
     ev.response_type = XCB_CLIENT_MESSAGE;
     ev.window = xscreen->root;
     ev.format = 32;
+    ev.type = MANAGER;
     ev.data.data32[0] = XCB_CURRENT_TIME;
     ev.data.data32[2] = globalconf.screens[phys_screen].systray.window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
-    ev.type = xutil_intern_atom_reply(globalconf.connection,
-                                      &globalconf.atoms, atom_manager_q);
 
-    ev.data.data32[1] = atom_systray = xutil_intern_atom_reply(globalconf.connection,
-                                                               &globalconf.atoms,
-                                                               atom_systray_q);
+    if(!(atom_systray_r = xcb_intern_atom_reply(globalconf.connection, atom_systray_q, NULL)))
+    {
+        warn("error getting systray atom");
+        return;
+    }
+
+    ev.data.data32[1] = atom_systray = atom_systray_r->atom;
+
+    p_delete(&atom_systray_r);
 
     xcb_set_selection_owner(globalconf.connection,
                             globalconf.screens[phys_screen].systray.window,
@@ -171,26 +178,14 @@ systray_process_client_message(xcb_client_message_event_t *ev)
 bool
 systray_iskdedockapp(xcb_window_t w)
 {
-    xcb_atom_t kde_net_wm_sytem_tray_window_for;
-    xutil_intern_atom_request_t kde_net_wm_sytem_tray_window_for_q;
     xcb_get_property_cookie_t kde_check_q;
     xcb_get_property_reply_t *kde_check;
     bool ret;
 
     /* Check if that is a KDE tray because it does not repect fdo standards,
      * thanks KDE. */
-    kde_net_wm_sytem_tray_window_for_q =
-        xutil_intern_atom(globalconf.connection,
-                          &globalconf.atoms,
-                          "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR");
-
-    kde_net_wm_sytem_tray_window_for =
-        xutil_intern_atom_reply(globalconf.connection,
-                                &globalconf.atoms,
-                                kde_net_wm_sytem_tray_window_for_q);
-
     kde_check_q = xcb_get_property_unchecked(globalconf.connection, false, w,
-                                             kde_net_wm_sytem_tray_window_for,
+                                             _KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR,
                                              WINDOW, 0, 1);
 
     kde_check = xcb_get_property_reply(globalconf.connection, kde_check_q, NULL);

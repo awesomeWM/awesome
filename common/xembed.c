@@ -23,6 +23,7 @@
 #include "common/xembed.h"
 #include "common/xutil.h"
 #include "common/util.h"
+#include "common/atoms.h"
 
 /** Have the embedder end XEMBED protocol communication with a child.
  * \param connection The X connection.
@@ -59,10 +60,8 @@ xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
                     long message, long d1, long d2, long d3)
 {
     xcb_client_message_event_t ev;
-    xutil_intern_atom_request_t atom_q;
 
     /** \todo use atom cache */
-    atom_q = xutil_intern_atom(connection, NULL, "_XEMBED");
     p_clear(&ev, 1);
     ev.response_type = XCB_CLIENT_MESSAGE;
     ev.window = towin;
@@ -72,7 +71,7 @@ xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
     ev.data.data32[2] = d1;
     ev.data.data32[3] = d2;
     ev.data.data32[4] = d3;
-    ev.type = xutil_intern_atom_reply(connection, NULL, atom_q);
+    ev.type = _XEMBED;
     xcb_send_event(connection, false, towin, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
 }
 
@@ -84,18 +83,13 @@ xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
 bool
 xembed_info_get(xcb_connection_t *connection, xcb_window_t win, xembed_info_t *info)
 {
-    xutil_intern_atom_request_t atom_q;
-    xcb_atom_t atom;
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r;
     uint32_t *data;
     bool ret = false;
 
     /** \todo use atom cache */
-    atom_q = xutil_intern_atom(connection, NULL, "_XEMBED_INFO");
-    atom = xutil_intern_atom_reply(connection, NULL, atom_q);
-
-    prop_c = xcb_get_property_unchecked(connection, false, win, atom,
+    prop_c = xcb_get_property_unchecked(connection, false, win, _XEMBED_INFO,
                                         XCB_GET_PROPERTY_TYPE_ANY, 0L, 2);
 
     prop_r = xcb_get_property_reply(connection, prop_c, NULL);

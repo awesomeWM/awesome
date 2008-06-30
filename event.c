@@ -35,6 +35,7 @@
 #include "lua.h"
 #include "systray.h"
 #include "layouts/floating.h"
+#include "common/atoms.h"
 
 extern awesome_t globalconf;
 
@@ -530,11 +531,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
         else if (ev->atom == WM_HINTS)
             client_updatewmhints(c);
 
-        if(ev->atom == WM_NAME
-           || ev->atom == xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
-                                                  xutil_intern_atom(globalconf.connection,
-                                                                    &globalconf.atoms,
-                                                                    "_NET_WM_NAME")))
+        if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)
             client_updatetitle(c);
     }
 
@@ -620,18 +617,9 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
                            xcb_connection_t *connection,
                            xcb_client_message_event_t *ev)
 {
-    xutil_intern_atom_request_t atom_xem_q, atom_systray_q;
-    xcb_atom_t atom_xem, atom_systray;
-
-    atom_xem_q = xutil_intern_atom(connection, &globalconf.atoms, "_XEMBED");
-    atom_systray_q = xutil_intern_atom(connection, &globalconf.atoms, "_NET_SYSTEM_TRAY_OPCODE");
-
-    atom_xem = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_xem_q);
-    atom_systray = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_systray_q);
-
-    if(ev->type == atom_xem)
+    if(ev->type == _XEMBED)
         return xembed_process_client_message(ev);
-    else if(ev->type == atom_systray)
+    else if(ev->type == _NET_SYSTEM_TRAY_OPCODE)
         return systray_process_client_message(ev);
     return ewmh_process_client_message(ev);
 }

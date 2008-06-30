@@ -25,6 +25,7 @@
 #include "widget.h"
 #include "screen.h"
 #include "common/xembed.h"
+#include "common/atoms.h"
 
 #define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
 #define _NET_SYSTEM_TRAY_ORIENTATION_VERT 1
@@ -43,14 +44,8 @@ systray_draw(draw_context_t *ctx,
     uint32_t orient, config_win_vals[4];
     /* p is always a statusbar, titlebars are forbidden */
     statusbar_t *sb = (statusbar_t *) p;
-    xutil_intern_atom_request_t net_system_tray_orientation_q;
-    xcb_atom_t net_system_tray_orientation;
 
     phys_screen = screen_virttophys(screen);
-
-    net_system_tray_orientation_q = xutil_intern_atom(globalconf.connection,
-                                                      &globalconf.atoms,
-                                                      "_NET_SYSTEM_TRAY_ORIENTATION");
 
     for(em = globalconf.embedded; em; em = em->next)
         if(em->phys_screen == phys_screen)
@@ -152,13 +147,9 @@ systray_draw(draw_context_t *ctx,
 
     /* set statusbar orientation */
     /** \todo stop setting that property on each redraw */
-    net_system_tray_orientation = xutil_intern_atom_reply(globalconf.connection,
-                                                          &globalconf.atoms,
-                                                          net_system_tray_orientation_q);
-
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         globalconf.screens[phys_screen].systray.window,
-                        net_system_tray_orientation, CARDINAL, 32, 1, &orient);
+                        _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
 
     return w->area.width;
 }

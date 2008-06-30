@@ -23,6 +23,7 @@
 #include <xcb/xcb_atom.h>
 
 #include "window.h"
+#include "common/atoms.h"
 
 extern awesome_t globalconf;
 
@@ -37,13 +38,8 @@ void
 window_setstate(xcb_window_t win, long state)
 {
     long data[] = { state, XCB_NONE };
-    const xcb_atom_t wm_state_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
-                                                             xutil_intern_atom(globalconf.connection,
-                                                                               &globalconf.atoms,
-                                                                               "WM_STATE"));
-
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
-                        wm_state_atom, wm_state_atom, 32, 2, data);
+                        WM_STATE, WM_STATE, 32, 2, data);
 }
 
 /** Get a window state (WM_STATE).
@@ -56,14 +52,10 @@ window_getstate(xcb_window_t w)
     long result = -1;
     unsigned char *p = NULL;
     xcb_get_property_cookie_t prop_c;
-    xcb_atom_t wm_state_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
-                                                       xutil_intern_atom(globalconf.connection,
-                                                                         &globalconf.atoms,
-                                                                         "WM_STATE"));
     xcb_get_property_reply_t *prop_r;
 
     prop_c = xcb_get_property_unchecked(globalconf.connection, false, w,
-                                        wm_state_atom, wm_state_atom,
+                                        WM_STATE, WM_STATE,
                                         0L, 2L);
 
     if(!(prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
@@ -220,24 +212,15 @@ void
 window_settrans(xcb_window_t win, double opacity)
 {
     unsigned int real_opacity = 0xffffffff;
-    xcb_atom_t wopacity_atom;
-    xutil_intern_atom_request_t wopacity_atom_q;
-
-    wopacity_atom_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_NET_WM_WINDOW_OPACITY");
 
     if(opacity >= 0 && opacity <= 1)
     {
         real_opacity = opacity * 0xffffffff;
-        wopacity_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wopacity_atom_q);
         xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
-                            wopacity_atom, CARDINAL, 32, 1L, &real_opacity);
+                            _NET_WM_WINDOW_OPACITY, CARDINAL, 32, 1L, &real_opacity);
     }
     else
-    {
-        wopacity_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wopacity_atom_q);
-        xcb_delete_property(globalconf.connection, win,
-                            wopacity_atom);
-    }
+        xcb_delete_property(globalconf.connection, win, _NET_WM_WINDOW_OPACITY);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

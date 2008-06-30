@@ -38,6 +38,7 @@
 #include "systray.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
+#include "common/atoms.h"
 
 extern awesome_t globalconf;
 extern const name_func_link_t FloatingPlacementList[];
@@ -69,12 +70,7 @@ client_loadprops(client_t * c, screen_t *screen)
     tag_array_t *tags = &screen->tags;
     char *prop = NULL;
 
-    if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms,
-                          xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
-                                                  xutil_intern_atom(globalconf.connection,
-                                                                    &globalconf.atoms,
-                                                                    "_AWESOME_PROPERTIES")),
-                         &prop))
+    if(!xutil_gettextprop(globalconf.connection, c->win, _AWESOME_PROPERTIES, &prop))
         return false;
 
     if(a_strlen(prop) != tags->len + 2)
@@ -104,19 +100,13 @@ static bool
 window_isprotodel(xcb_window_t win)
 {
     uint32_t i, n;
-    xcb_atom_t wm_delete_win_atom;
     xcb_atom_t *protocols;
     bool ret = false;
 
     if(xcb_get_wm_protocols(globalconf.connection, win, &n, &protocols))
     {
-        wm_delete_win_atom = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms,
-                                                     xutil_intern_atom(globalconf.connection,
-                                                                       &globalconf.atoms,
-                                                                       "WM_DELETE_WINDOW"));
-
         for(i = 0; !ret && i < n; i++)
-            if(protocols[i] == wm_delete_win_atom)
+            if(protocols[i] == WM_DELETE_WINDOW)
                 ret = true;
         p_delete(&protocols);
     }
@@ -161,14 +151,9 @@ void
 client_updatetitle(client_t *c)
 {
     char *name;
-    xutil_intern_atom_request_t net_wm_name_q;
-    xcb_atom_t net_wm_name;
 
-    net_wm_name_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_NET_WM_NAME");
-    net_wm_name = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, net_wm_name_q);
-
-    if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms, net_wm_name, &name))
-        if(!xutil_gettextprop(globalconf.connection, c->win, &globalconf.atoms, WM_NAME, &name))
+    if(!xutil_gettextprop(globalconf.connection, c->win, _NET_WM_NAME, &name))
+        if(!xutil_gettextprop(globalconf.connection, c->win, WM_NAME, &name))
             return;
 
     p_delete(&c->name);
@@ -643,10 +628,7 @@ client_saveprops(client_t *c)
 {
     tag_array_t *tags = &globalconf.screens[c->screen].tags;
     unsigned char *prop = p_alloca(unsigned char, tags->len + 3);
-    xutil_intern_atom_request_t atom_q;
     int i;
-
-    atom_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_AWESOME_PROPERTIES");
 
     for(i = 0; i < tags->len; i++)
         prop[i] = is_client_tagged(c, tags->tab[i]) ? '1' : '0';
@@ -654,9 +636,7 @@ client_saveprops(client_t *c)
     prop[i++] = c->isfloating ? '1' : '0';
     prop[i++] = '0' + c->layer;
 
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win,
-                        xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, atom_q),
-                        STRING, 8, i, prop);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win, _AWESOME_PROPERTIES, STRING, 8, i, prop);
 }
 
 /** Unban a client.
@@ -678,10 +658,6 @@ void
 client_unmanage(client_t *c)
 {
     tag_array_t *tags = &globalconf.screens[c->screen].tags;
-    xutil_intern_atom_request_t awesome_properties_q;
-    xcb_atom_t awesome_properties;
-
-    awesome_properties_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "_AWESOME_PROPERTIES");
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
@@ -719,8 +695,7 @@ client_unmanage(client_t *c)
     ewmh_update_net_client_list(c->phys_screen);
 
     /* delete properties */
-    awesome_properties = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, awesome_properties_q);
-    xcb_delete_property(globalconf.connection, c->win, awesome_properties);
+    xcb_delete_property(globalconf.connection, c->win, _AWESOME_PROPERTIES);
 
     p_delete(&c);
 }
@@ -860,13 +835,9 @@ void
 client_kill(client_t *c)
 {
     xcb_client_message_event_t ev;
-    xutil_intern_atom_request_t wm_protocols_q, wm_delete_window_q;
 
     if(window_isprotodel(c->win))
     {
-        wm_protocols_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "WM_PROTOCOLS");
-        wm_delete_window_q = xutil_intern_atom(globalconf.connection, &globalconf.atoms, "WM_DELETE_WINDOW");
-
         /* Initialize all of event's fields first */
         p_clear(&ev, 1);
 
@@ -874,8 +845,8 @@ client_kill(client_t *c)
         ev.window = c->win;
         ev.format = 32;
         ev.data.data32[1] = XCB_CURRENT_TIME;
-        ev.type = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wm_protocols_q);
-        ev.data.data32[0] = xutil_intern_atom_reply(globalconf.connection, &globalconf.atoms, wm_delete_window_q);
+        ev.type = WM_PROTOCOLS;
+        ev.data.data32[0] = WM_DELETE_WINDOW;
 
         xcb_send_event(globalconf.connection, false, c->win,
                        XCB_EVENT_MASK_NO_EVENT, (char *) &ev);

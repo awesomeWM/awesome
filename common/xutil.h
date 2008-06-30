@@ -96,44 +96,7 @@ typedef struct
 
 class_hint_t *xutil_get_class_hint(xcb_connection_t *, xcb_window_t);
 
-/** Cache entry */
-typedef struct
-{
-    /** Atom X identifier */
-    xcb_atom_t atom;
-    /** Atom name */
-    char *name;
-} xutil_atom_cache_t;
-
-void xutil_atom_cache_delete(xutil_atom_cache_t **);
-
-DO_ARRAY(xutil_atom_cache_t *, xutil_atom_cache, xutil_atom_cache_delete)
-
-/** InternAtom request data structure which may hold the cookie if the
- * atom is not already present in the cache */
-typedef struct
-{
-    /* Cache hit */
-    bool cache_hit;
-    /* Atom string name */
-    char *name;
-    union
-    {
-        /* Cookie of the InternAtom request */ 
-        xcb_intern_atom_cookie_t cookie;
-        /* Cache entry */
-        xutil_atom_cache_t *cache;
-    };
-} xutil_intern_atom_request_t;
-
-xutil_intern_atom_request_t xutil_intern_atom(xcb_connection_t *, xutil_atom_cache_array_t *,
-                                              const char *);
-
-xcb_atom_t xutil_intern_atom_reply(xcb_connection_t *, xutil_atom_cache_array_t *,
-                                   xutil_intern_atom_request_t);
-
-bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xutil_atom_cache_array_t *,
-                       xcb_atom_t, char **);
+bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **);
 
 void xutil_getlockmask(xcb_connection_t *, xcb_key_symbols_t *,
                        unsigned int *, unsigned int *, unsigned int *);
