@@ -162,7 +162,7 @@ for i = 1, keynumber do
                    function ()
                        local screen = mouse.screen_get()
                        if tags[screen][i] then
-                           tags[i]:view(not tags[screen][i]:isselected())
+                           tags[screen][i]:view(not tags[screen][i]:isselected())
                        end
                    end):add()
     keybinding.new({ modkey, "Shift" }, i,
