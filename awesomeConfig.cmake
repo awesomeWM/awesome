@@ -75,7 +75,7 @@ if(GENERATE_LUADOC)
 endif()
 # }}}
 
-# {{{ version stamp
+# {{{ Version stamp
 if(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
     # get current version
     execute_process(
@@ -170,7 +170,7 @@ set(AWESOMECLIENT_LIBRARIES
     ${LIB_NCURSES})
 # }}}
 
-# {{{ Optional libraries.
+# {{{ Optional libraries
 #
 # this sets up:
 # AWESOME_OPTIONAL_LIBRARIES
@@ -199,7 +199,7 @@ if(WITH_IMLIB2)
 endif()
 # }}}
 
-# {{{ Install path and configuration variables.
+# {{{ Install path and configuration variables
 if(DEFINED PREFIX)
     set(PREFIX ${PREFIX} CACHE PATH "install prefix")
     set(CMAKE_INSTALL_PREFIX ${PREFIX})
@@ -215,7 +215,7 @@ else()
     set(SYSCONFDIR ${PREFIX}/etc CACHE PATH "config directory")
 endif()
 
-# hide to avoid confusion
+# Hide to avoid confusion
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 
 set(AWESOME_VERSION          ${VERSION})
@@ -231,7 +231,7 @@ set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)
 set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 # }}}
 
-# {{{ Configure files.
+# {{{ Configure files
 set(AWESOME_CONFIGURE_FILES
     config.h.in
     awesomerc.lua.in

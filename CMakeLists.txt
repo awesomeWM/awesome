@@ -82,7 +82,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/widgets/systray.c)
 
 set(AWE_CLIENT_SRCS
-    ${SOURCE_DIR}/awesome-client.c 
+    ${SOURCE_DIR}/awesome-client.c
     ${SOURCE_DIR}/common/socket.c
     ${SOURCE_DIR}/common/util.c
     ${SOURCE_DIR}/common/version.c)
@@ -115,7 +115,7 @@ add_custom_command(
     OUTPUT  ${BUILD_DIR}/layoutgen.h
     WORKING_DIRECTORY ${SOURCE_DIR}
     DEPENDS ${LAYOUTGEN_DEPS}
-    COMMENT "Generating layoutgen.h."
+    COMMENT "Generating layoutgen.h"
     VERBATIM)
 
 add_custom_command(
@@ -124,12 +124,30 @@ add_custom_command(
     OUTPUT  ${BUILD_DIR}/widgetgen.h
     WORKING_DIRECTORY ${SOURCE_DIR}
     DEPENDS ${SOURCE_DIR}/widget.h
-    COMMENT "Generating widgetgen.h."
+    COMMENT "Generating widgetgen.h"
     VERBATIM)
 
-# gperf 
+# atoms
 file(MAKE_DIRECTORY ${BUILD_DIR}/common)
+add_custom_command(
+    COMMAND ${SOURCE_DIR}/build-utils/atoms-ext.sh ${SOURCE_DIR}/common/atoms.list
+    ARGS    > ${BUILD_DIR}/common/atoms-extern.h
+    OUTPUT  ${BUILD_DIR}/common/atoms-extern.h
+    WORKING_DIRECTORY ${SOURCE_DIR}
+    DEPENDS ${SOURCE_DIR}/common/atoms.list
+    COMMENT "Generating atoms-extern.h"
+    VERBATIM)
 
+add_custom_command(
+    COMMAND ${SOURCE_DIR}/build-utils/atoms-int.sh ${SOURCE_DIR}/common/atoms.list
+    ARGS    > ${BUILD_DIR}/common/atoms-intern.h
+    OUTPUT  ${BUILD_DIR}/common/atoms-intern.h
+    WORKING_DIRECTORY ${SOURCE_DIR}
+    DEPENDS ${SOURCE_DIR}/common/atoms.list
+    COMMENT "Generating atoms-intern.h"
+    VERBATIM)
+
+# gperf
 add_custom_command(
     COMMAND ${SOURCE_DIR}/build-utils/gperf.sh
     ARGS    ${SOURCE_DIR}/common/tokenize.gperf
@@ -151,6 +169,8 @@ add_custom_command(
 add_custom_target(generated_sources
     DEPENDS ${BUILD_DIR}/widgetgen.h
             ${BUILD_DIR}/layoutgen.h
+            ${BUILD_DIR}/common/atoms-intern.h
+            ${BUILD_DIR}/common/atoms-extern.h
             ${BUILD_DIR}/common/tokenize.c
             ${BUILD_DIR}/common/tokenize.h)
 
@@ -158,7 +178,7 @@ add_dependencies(${PROJECT_AWE_NAME} generated_sources)
 add_dependencies(${PROJECT_AWECLIENT_NAME} generated_sources)
 # }}}
 
-# {{{ version stamp
+# {{{ Version stamp
 if(BUILD_FROM_GIT)
     add_custom_target(version_stamp ALL
         COMMAND ${SOURCE_DIR}/build-utils/git-version-stamp.sh
@@ -171,7 +191,7 @@ if(BUILD_FROM_GIT)
 endif()
 # }}}
 
-# {{{ Manpages.
+# {{{ Manpages
 if(GENERATE_MANPAGES)
     foreach(txtfile ${AWE_MAN_SRCS})
         string(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
@@ -289,7 +309,7 @@ if(GENERATE_LUADOC)
 endif()
 # }}}
 
-# {{{ compile Lua libs
+# {{{ Compile Lua libs
 if(LUAC_EXECUTABLE)
     foreach(luafile ${AWE_LUA_FILES})
         string(REGEX REPLACE ".lua\$" ".luac" luacfile ${luafile})
@@ -311,7 +331,7 @@ if(LUAC_EXECUTABLE)
 endif()
 # }}}
 
-# {{{ dist tarball
+# {{{ Dist tarball
 if(BUILD_FROM_GIT)
     add_custom_target(dist
         COMMAND ${SOURCE_DIR}/build-utils/dist.sh ${VERSION}
@@ -319,7 +339,7 @@ if(BUILD_FROM_GIT)
 endif()
 # }}}
 
-# {{{ Installation.
+# {{{ Installation
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
 install(FILES ${AWE_LUA_FILES} ${AWE_LUAC_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
 install(FILES ${AWE_CONF_FILES} DESTINATION ${AWESOME_CONF_PATH})
