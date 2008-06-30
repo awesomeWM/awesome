@@ -540,10 +540,13 @@ luaA_statusbar_new(lua_State *L)
 
     luaA_checktable(L, 1);
 
+    if(!(buf = luaA_getopt_string(L, 1, "name", NULL)))
+        luaL_error(L, "object statusbar must have a name");
+
     sb = p_new(statusbar_t, 1);
 
-    sb->name = luaA_name_init(L);
-
+    sb->name = a_strdup(buf);
+    
     if(!(buf = luaA_getopt_string(L, 1, "fg", NULL))
        || !xcolor_new(globalconf.connection, globalconf.default_screen,
                      buf, &sb->colors.fg))

@@ -172,13 +172,6 @@ luaA_settype(lua_State *L, const char *type)
     return 1;
 }
 
-static inline char *
-luaA_name_init(lua_State *L)
-{
-    lua_getfield(L, 1, "name");
-    return a_strdup(luaL_checkstring(L, -1));
-}
-
 void luaA_init(void);
 bool luaA_parserc(const char *);
 void luaA_pushpointer(lua_State *, void *, awesome_type_t);

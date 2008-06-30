@@ -316,7 +316,9 @@ luaA_tag_new(lua_State *L)
 
     luaA_checktable(L, 1);
 
-    name = luaA_name_init(L);
+    if(!(name = luaA_getopt_string(L, 1, "name", NULL)))
+        luaL_error(L, "object tag must have a name");
+
     mwfact = luaA_getopt_number(L, 1, "mwfact", 0.5);
     ncol = luaA_getopt_number(L, 1, "ncol", 1);
     nmaster = luaA_getopt_number(L, 1, "nmaster", 1);

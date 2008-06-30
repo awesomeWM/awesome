@@ -271,8 +271,12 @@ luaA_widget_new(lua_State *L)
     size_t len;
 
     luaA_checktable(L, 1);
+
     buf = luaA_getopt_lstring(L, 1, "align", "left", &len);
     align = draw_align_fromstr(buf, len);
+
+    if(!(buf = luaA_getopt_string(L, 1, "name", NULL)))
+        luaL_error(L, "object widget must have a name");
 
     type = luaA_getopt_string(L, 1, "type", NULL);
 
@@ -286,7 +290,7 @@ luaA_widget_new(lua_State *L)
     /* Set visible by default. */
     w->isvisible = true;
 
-    w->name = luaA_name_init(L);
+    w->name = a_strdup(buf);
 
     return luaA_widget_userdata_new(L, w);
 }
