@@ -367,9 +367,14 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     xcb_window_t trans;
     bool rettrans, retloadprops;
     xcb_size_hints_t *u_size_hints;
-    const uint32_t select_input_val[] = {
-        XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE |
-        XCB_EVENT_MASK_ENTER_WINDOW };
+    const uint32_t select_input_val[] =
+    {
+        XCB_EVENT_MASK_STRUCTURE_NOTIFY
+            | XCB_EVENT_MASK_PROPERTY_CHANGE
+            | XCB_EVENT_MASK_ENTER_WINDOW
+    };
+
+    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
     c = p_new(client_t, 1);
 
@@ -414,8 +419,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     if(rettrans || c->isfixed)
         client_setfloating(c, true);
 
-    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
-
     /* Push client in client list */
     client_list_push(&globalconf.clients, c);
     /* Append client in history: it'll be last. */
@@ -436,8 +439,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     if(c->floating_placement
        && !retloadprops
        && u_size_hints
-       && !(xcb_size_hints_get_flags(u_size_hints) & (XCB_SIZE_US_POSITION_HINT |
-                                                      XCB_SIZE_P_POSITION_HINT)))
+       && !(xcb_size_hints_get_flags(u_size_hints) & (XCB_SIZE_US_POSITION_HINT
+                                                      | XCB_SIZE_P_POSITION_HINT)))
     {
         if(c->isfloating)
             client_resize(c, c->floating_placement(c), false);

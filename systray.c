@@ -21,6 +21,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
+#include <xcb/xcb_atom.h>
 
 #include "systray.h"
 #include "window.h"
@@ -77,7 +78,7 @@ systray_init(int phys_screen)
 /** Handle a systray request.
  * \param embed_win The window to embed.
  */
-static int
+int
 systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *info)
 {
     xembed_window_t *em;
@@ -91,7 +92,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 
     /* check if not already trayed */
     if((em = xembed_getbywin(globalconf.embedded, embed_win)))
-        return 1;
+        return -1;
 
     xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_EVENT_MASK,
                                  select_input_val);
@@ -159,6 +160,45 @@ systray_process_client_message(xcb_client_message_event_t *ev)
         ret = systray_request_handle(ev->data.data32[2], screen_nbr, NULL);
         break;
     }
+
+    return ret;
+}
+
+/** Check if a window is a KDE tray.
+ * \param w The window to check.
+ * \return True if it is, false otherwise.
+ */
+bool
+systray_iskdedockapp(xcb_window_t w)
+{
+    xcb_atom_t kde_net_wm_sytem_tray_window_for;
+    xutil_intern_atom_request_t kde_net_wm_sytem_tray_window_for_q;
+    xcb_get_property_cookie_t kde_check_q;
+    xcb_get_property_reply_t *kde_check;
+    bool ret;
+
+    /* Check if that is a KDE tray because it does not repect fdo standards,
+     * thanks KDE. */
+    kde_net_wm_sytem_tray_window_for_q =
+        xutil_intern_atom(globalconf.connection,
+                          &globalconf.atoms,
+                          "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR");
+
+    kde_net_wm_sytem_tray_window_for =
+        xutil_intern_atom_reply(globalconf.connection,
+                                &globalconf.atoms,
+                                kde_net_wm_sytem_tray_window_for_q);
+
+    kde_check_q = xcb_get_property_unchecked(globalconf.connection, false, w,
+                                             kde_net_wm_sytem_tray_window_for,
+                                             WINDOW, 0, 1);
+
+    kde_check = xcb_get_property_reply(globalconf.connection, kde_check_q, NULL);
+
+    /* it's a KDE systray ?*/
+    ret = (kde_check && kde_check->value_len);
+
+    p_delete(&kde_check);
 
     return ret;
 }

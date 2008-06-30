@@ -428,7 +428,7 @@ static int
 event_handle_maprequest(void *data __attribute__ ((unused)),
                         xcb_connection_t *connection, xcb_map_request_event_t *ev)
 {
-    int screen_nbr = 0;
+    int screen_nbr = 0, ret = 0;
     client_t *c;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
@@ -460,6 +460,23 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
             client_raise(c);
         }
     }
+    else if(systray_iskdedockapp(ev->window))
+    {
+        geom_c = xcb_get_geometry_unchecked(connection, ev->window);
+
+        if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
+        {
+            ret = -1;
+            goto bailout;
+        }
+
+        /* get real screen */
+        for(iter = xcb_setup_roots_iterator(xcb_get_setup(connection)), screen_nbr = 0;
+            iter.rem && iter.data->root != geom_r->root; xcb_screen_next (&iter), ++screen_nbr);
+        systray_request_handle(ev->window, screen_nbr, NULL);
+
+        p_delete(&geom_r);
+    }
     else
     {
         geom_c = xcb_get_geometry_unchecked(connection, ev->window);
@@ -475,7 +492,8 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
                 qp_r = xcb_query_pointer_reply(connection, qp_c, NULL);
                 p_delete(&qp_r);
             }
-            return -1;
+            ret = -1;
+            goto bailout;
         }
 
         if(globalconf.screens_info->xinerama_is_active
@@ -495,7 +513,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
 
 bailout:
     p_delete(&wa_r);
-    return 0;
+    return ret;
 }
 
 /** The property notify event handler.
