@@ -35,6 +35,7 @@
 #include "lua.h"
 #include "stack.h"
 #include "mouse.h"
+#include "systray.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
 
@@ -375,6 +376,12 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     };
 
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
+
+    if(systray_iskdedockapp(w))
+    {
+        systray_request_handle(w, screen_virttophys(screen), NULL);
+        return;
+    }
 
     c = p_new(client_t, 1);
 

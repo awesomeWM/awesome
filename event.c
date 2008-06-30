@@ -460,23 +460,6 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
             client_raise(c);
         }
     }
-    else if(systray_iskdedockapp(ev->window))
-    {
-        geom_c = xcb_get_geometry_unchecked(connection, ev->window);
-
-        if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
-        {
-            ret = -1;
-            goto bailout;
-        }
-
-        /* get real screen */
-        for(iter = xcb_setup_roots_iterator(xcb_get_setup(connection)), screen_nbr = 0;
-            iter.rem && iter.data->root != geom_r->root; xcb_screen_next (&iter), ++screen_nbr);
-        systray_request_handle(ev->window, screen_nbr, NULL);
-
-        p_delete(&geom_r);
-    }
     else
     {
         geom_c = xcb_get_geometry_unchecked(connection, ev->window);
