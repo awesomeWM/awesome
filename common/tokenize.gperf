@@ -6,6 +6,8 @@ bar_data_add
 bar_properties_set
 bg
 border_color
+border_padding
+border_width
 bottom
 bottomleft
 bottomright
@@ -13,6 +15,7 @@ center
 color
 flex
 focus
+gap
 grow
 height
 image
@@ -21,7 +24,6 @@ line
 on
 plot_data_add
 plot_properties_set
-properties_set
 resize
 right
 shadow
@@ -34,9 +36,12 @@ text
 text_focus
 text_normal
 text_urgent
+ticks_count
+ticks_gap
 top
 topleft
 topright
 true
+vertical
 width
 yes

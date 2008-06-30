@@ -399,38 +399,6 @@ progressbar_draw(draw_context_t *ctx,
     return w->area.width;
 }
 
-/** Set various progressbar general properties:
- * gap, ticks_count, ticks_gap, border_padding, border_width, width, height and
- * vertical.
- * \param L The Lua VM state.
- * \return The number of elements pushed on the stack.
- * \luastack
- * \lvalue A widget.
- * \lparam A table with keys as properties names.
- */
-int
-luaA_progressbar_properties_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    progressbar_data_t *d = (*widget)->data;
-
-    luaA_checktable(L, 2);
-
-    d->gap = luaA_getopt_number(L, 2, "gap", d->gap);
-    d->ticks_count = luaA_getopt_number(L, 2, "ticks_count", d->ticks_count);
-    d->ticks_gap = luaA_getopt_number(L, 2, "ticks_gap", d->ticks_gap);
-    d->border_padding = luaA_getopt_number(L, 2, "border_padding", d->border_padding);
-    d->border_width = luaA_getopt_number(L, 2, "border_width", d->border_width);
-    d->width = luaA_getopt_number(L, 2, "width", d->width);
-    d->height = luaA_getopt_number(L, 2, "height", d->height);
-
-    d->vertical = luaA_getopt_boolean(L, 2, "vertical", d->vertical);
-
-    widget_invalidate_bywidget(*widget);
-
-    return 0;
-}
-
 /** Set various progressbar bars properties:
  * \param L The Lua VM state.
  * \return The number of elements pushed on the stack.
@@ -557,22 +525,94 @@ static int
 luaA_progressbar_index(lua_State *L)
 {
     size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    progressbar_data_t *d = (*widget)->data;
     const char *attr = luaL_checklstring(L, 2, &len);
 
     switch(a_tokenize(attr, len))
     {
-      case A_TK_PROPERTIES_SET:
-        lua_pushcfunction(L, luaA_progressbar_properties_set);
-        return 1;
       case A_TK_BAR_PROPERTIES_SET:
         lua_pushcfunction(L, luaA_progressbar_bar_properties_set);
-        return 1;
+        break;
       case A_TK_BAR_DATA_ADD:
         lua_pushcfunction(L, luaA_progressbar_bar_data_add);
-        return 1;
+        break;
+      case A_TK_GAP:
+        lua_pushnumber(L, d->gap);
+        break;
+      case A_TK_TICKS_GAP:
+        lua_pushnumber(L, d->ticks_gap);
+        break;
+      case A_TK_TICKS_COUNT:
+        lua_pushnumber(L, d->ticks_count);
+        break;
+      case A_TK_BORDER_PADDING:
+        lua_pushnumber(L, d->border_padding);
+        break;
+      case A_TK_BORDER_WIDTH:
+        lua_pushnumber(L, d->border_width);
+        break;
+      case A_TK_WIDTH:
+        lua_pushnumber(L, d->width);
+        break;
+      case A_TK_HEIGHT:
+        lua_pushnumber(L, d->height);
+        break;
+      case A_TK_VERTICAL:
+        lua_pushnumber(L, d->vertical);
+        break;
       default:
         return 0;
     }
+
+    return 1;
+}
+
+/** Newindex function for progressbar.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on the stack.
+ */
+static int
+luaA_progressbar_newindex(lua_State *L)
+{
+    size_t len;
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    progressbar_data_t *d = (*widget)->data;
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_GAP:
+        d->gap = luaA_getopt_number(L, 2, "gap", d->gap);
+        break;
+      case A_TK_TICKS_COUNT:
+        d->ticks_count = luaA_getopt_number(L, 2, "ticks_count", d->ticks_count);
+        break;
+      case A_TK_TICKS_GAP:
+        d->ticks_gap = luaA_getopt_number(L, 2, "ticks_gap", d->ticks_gap);
+        break;
+      case A_TK_BORDER_PADDING:
+        d->border_padding = luaA_getopt_number(L, 2, "border_padding", d->border_padding);
+        break;
+      case A_TK_BORDER_WIDTH:
+        d->border_width = luaA_getopt_number(L, 2, "border_width", d->border_width);
+        break;
+      case A_TK_WIDTH:
+        d->width = luaA_getopt_number(L, 2, "width", d->width);
+        break;
+      case A_TK_HEIGHT:
+        d->height = luaA_getopt_number(L, 2, "height", d->height);
+        break;
+      case A_TK_VERTICAL:
+        d->vertical = luaA_getopt_boolean(L, 2, "vertical", d->vertical);
+        break;
+      default:
+        return 0;
+    }
+
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
 }
 
 /** Destroy a progressbar.
@@ -602,6 +642,7 @@ progressbar_new(alignment_t align)
     w->align = align;
     w->draw = progressbar_draw;
     w->index = luaA_progressbar_index;
+    w->newindex = luaA_progressbar_newindex;
     w->destructor = progressbar_destructor;
     d = w->data = p_new(progressbar_data_t, 1);
 
@@ -614,13 +655,5 @@ progressbar_new(alignment_t align)
 
     return w;
 }
-
-/* This is used for building documentation. */
-static const struct luaL_reg awesome_progressbar_meta[] __attribute__ ((unused)) =
-{
-    { "properties_set", luaA_progressbar_properties_set },
-    { "bar_properties_set", luaA_progressbar_bar_properties_set },
-    { "bar_data_add", luaA_progressbar_bar_data_add },
-};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
