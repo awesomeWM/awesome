@@ -58,6 +58,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/widget.c
     ${SOURCE_DIR}/window.c
     ${SOURCE_DIR}/common/buffer.c
+    ${SOURCE_DIR}/common/atoms.c
     ${SOURCE_DIR}/common/configopts.c
     ${SOURCE_DIR}/common/draw.c
     ${SOURCE_DIR}/common/markup.c

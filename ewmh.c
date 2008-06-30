@@ -33,168 +33,58 @@
 #include "widget.h"
 #include "cnode.h"
 #include "titlebar.h"
+#include "common/atoms.h"
 
 extern awesome_t globalconf;
-
-static xcb_atom_t net_supported;
-static xcb_atom_t net_client_list;
-static xcb_atom_t net_client_list_stacking;
-static xcb_atom_t net_number_of_desktops;
-static xcb_atom_t net_current_desktop;
-static xcb_atom_t net_desktop_names;
-static xcb_atom_t net_active_window;
-static xcb_atom_t net_workarea;
-static xcb_atom_t net_supporting_wm_check;
-static xcb_atom_t net_close_window;
-static xcb_atom_t net_wm_name;
-static xcb_atom_t net_wm_visible_name;
-static xcb_atom_t net_wm_desktop;
-static xcb_atom_t net_wm_icon_name;
-static xcb_atom_t net_wm_visible_icon_name;
-static xcb_atom_t net_wm_window_type;
-static xcb_atom_t net_wm_window_type_normal;
-static xcb_atom_t net_wm_window_type_desktop;
-static xcb_atom_t net_wm_window_type_dock;
-static xcb_atom_t net_wm_window_type_splash;
-static xcb_atom_t net_wm_window_type_dialog;
-static xcb_atom_t net_wm_icon;
-static xcb_atom_t net_wm_pid;
-static xcb_atom_t net_wm_state;
-static xcb_atom_t net_wm_state_sticky;
-static xcb_atom_t net_wm_state_skip_taskbar;
-static xcb_atom_t net_wm_state_fullscreen;
-static xcb_atom_t net_wm_state_above;
-static xcb_atom_t net_wm_state_below;
-static xcb_atom_t net_wm_state_modal;
-static xcb_atom_t net_wm_state_hidden;
-static xcb_atom_t net_wm_state_demands_attention;
-
-static xcb_atom_t utf8_string;
-
-typedef struct
-{
-    const char *name;
-    xcb_atom_t *atom;
-} AtomItem;
-
-static AtomItem AtomNames[] =
-{
-    { "_NET_SUPPORTED", &net_supported },
-    { "_NET_CLIENT_LIST", &net_client_list },
-    { "_NET_CLIENT_LIST_STACKING", &net_client_list_stacking },
-    { "_NET_NUMBER_OF_DESKTOPS", &net_number_of_desktops },
-    { "_NET_CURRENT_DESKTOP", &net_current_desktop },
-    { "_NET_DESKTOP_NAMES", &net_desktop_names },
-    { "_NET_ACTIVE_WINDOW", &net_active_window },
-    { "_NET_WORKAREA", &net_workarea },
-    { "_NET_SUPPORTING_WM_CHECK", &net_supporting_wm_check },
-
-    { "_NET_CLOSE_WINDOW", &net_close_window },
-
-    { "_NET_WM_NAME", &net_wm_name },
-    { "_NET_WM_VISIBLE_NAME", &net_wm_visible_name },
-    { "_NET_WM_DESKTOP", &net_wm_desktop },
-    { "_NET_WM_ICON_NAME", &net_wm_icon_name },
-    { "_NET_WM_VISIBLE_ICON_NAME", &net_wm_visible_icon_name },
-    { "_NET_WM_WINDOW_TYPE", &net_wm_window_type },
-    { "_NET_WM_WINDOW_TYPE_NORMAL", &net_wm_window_type_normal },
-    { "_NET_WM_WINDOW_TYPE_DESKTOP", &net_wm_window_type_desktop },
-    { "_NET_WM_WINDOW_TYPE_DOCK", &net_wm_window_type_dock },
-    { "_NET_WM_WINDOW_TYPE_SPLASH", &net_wm_window_type_splash },
-    { "_NET_WM_WINDOW_TYPE_DIALOG", &net_wm_window_type_dialog },
-    { "_NET_WM_ICON", &net_wm_icon },
-    { "_NET_WM_PID", &net_wm_pid },
-    { "_NET_WM_STATE", &net_wm_state },
-    { "_NET_WM_STATE_STICKY", &net_wm_state_sticky },
-    { "_NET_WM_STATE_SKIP_TASKBAR", &net_wm_state_skip_taskbar },
-    { "_NET_WM_STATE_FULLSCREEN", &net_wm_state_fullscreen },
-    { "_NET_WM_STATE_ABOVE", &net_wm_state_above },
-    { "_NET_WM_STATE_BELOW", &net_wm_state_below },
-    { "_NET_WM_STATE_MODAL", &net_wm_state_modal },
-    { "_NET_WM_STATE_HIDDEN", &net_wm_state_hidden },
-    { "_NET_WM_STATE_DEMANDS_ATTENTION", &net_wm_state_demands_attention },
-
-    { "UTF8_STRING", &utf8_string },
-};
-
-#define ATOM_NUMBER (sizeof(AtomNames)/sizeof(AtomItem))
 
 #define _NET_WM_STATE_REMOVE 0
 #define _NET_WM_STATE_ADD 1
 #define _NET_WM_STATE_TOGGLE 2
 
 void
-ewmh_init_atoms(void)
+ewmh_init(int phys_screen)
 {
-    unsigned int i;
-    xcb_intern_atom_cookie_t cs[ATOM_NUMBER];
-    xcb_intern_atom_reply_t *r;
-
-    /*
-     * Create the atom and get the reply in a XCB way (e.g. send all
-     * the requests at the same time and then get the replies)
-     */
-    for(i = 0; i < ATOM_NUMBER; i++)
-	cs[i] = xcb_intern_atom_unchecked(globalconf.connection,
-					  false,
-					  strlen(AtomNames[i].name),
-					  AtomNames[i].name);
-
-    for(i = 0; i < ATOM_NUMBER; i++)
-    {
-	if(!(r = xcb_intern_atom_reply(globalconf.connection, cs[i], NULL)))
-	    /* An error occured, get reply for next atom */
-	    continue;
-
-	*AtomNames[i].atom = r->atom;
-        p_delete(&r);
-    }
-}
-
-void
-ewmh_set_supported_hints(int phys_screen)
-{
-    xcb_atom_t atom[ATOM_NUMBER];
     xcb_window_t father;
     xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
-    int i = 0;
-
-    atom[i++] = net_supported;
-    atom[i++] = net_supporting_wm_check;
-    atom[i++] = net_client_list;
-    atom[i++] = net_client_list_stacking;
-    atom[i++] = net_number_of_desktops;
-    atom[i++] = net_current_desktop;
-    atom[i++] = net_desktop_names;
-    atom[i++] = net_active_window;
-    atom[i++] = net_workarea;
-
-    atom[i++] = net_close_window;
-
-    atom[i++] = net_wm_name;
-    atom[i++] = net_wm_icon_name;
-    atom[i++] = net_wm_visible_icon_name;
-    atom[i++] = net_wm_desktop;
-    atom[i++] = net_wm_window_type;
-    atom[i++] = net_wm_window_type_normal;
-    atom[i++] = net_wm_window_type_desktop;
-    atom[i++] = net_wm_window_type_dock;
-    atom[i++] = net_wm_window_type_splash;
-    atom[i++] = net_wm_window_type_dialog;
-    atom[i++] = net_wm_icon;
-    atom[i++] = net_wm_pid;
-    atom[i++] = net_wm_state;
-    atom[i++] = net_wm_state_sticky;
-    atom[i++] = net_wm_state_skip_taskbar;
-    atom[i++] = net_wm_state_fullscreen;
-    atom[i++] = net_wm_state_above;
-    atom[i++] = net_wm_state_below;
-    atom[i++] = net_wm_state_modal;
-    atom[i++] = net_wm_state_hidden;
-    atom[i++] = net_wm_state_demands_attention;
+    xcb_atom_t atom[] =
+    {
+        NET_SUPPORTED,
+        NET_SUPPORTING_WM_CHECK,
+        NET_CLIENT_LIST,
+        NET_CLIENT_LIST_STACKING,
+        NET_NUMBER_OF_DESKTOPS,
+        NET_CURRENT_DESKTOP,
+        NET_DESKTOP_NAMES,
+        NET_ACTIVE_WINDOW,
+        NET_WORKAREA,
+        NET_CLOSE_WINDOW,
+        NET_WM_NAME,
+        NET_WM_ICON_NAME,
+        NET_WM_VISIBLE_ICON_NAME,
+        NET_WM_DESKTOP,
+        NET_WM_WINDOW_TYPE,
+        NET_WM_WINDOW_TYPE_NORMAL,
+        NET_WM_WINDOW_TYPE_DESKTOP,
+        NET_WM_WINDOW_TYPE_DOCK,
+        NET_WM_WINDOW_TYPE_SPLASH,
+        NET_WM_WINDOW_TYPE_DIALOG,
+        NET_WM_ICON,
+        NET_WM_PID,
+        NET_WM_STATE,
+        NET_WM_STATE_STICKY,
+        NET_WM_STATE_SKIP_TASKBAR,
+        NET_WM_STATE_FULLSCREEN,
+        NET_WM_STATE_ABOVE,
+        NET_WM_STATE_BELOW,
+        NET_WM_STATE_MODAL,
+        NET_WM_STATE_HIDDEN,
+        NET_WM_STATE_DEMANDS_ATTENTION
+    };
+    int i;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        xscreen->root, net_supported, ATOM, 32, i, atom);
+                        xscreen->root, NET_SUPPORTED, ATOM, 32,
+                        countof(atom), atom);
 
     /* create our own window */
     father = xcb_generate_id(globalconf.connection);
@@ -203,21 +93,21 @@ ewmh_set_supported_hints(int phys_screen)
                       XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        xscreen->root, net_supporting_wm_check, WINDOW, 32,
+                        xscreen->root, NET_SUPPORTING_WM_CHECK, WINDOW, 32,
                         1, &father);
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        father, net_supporting_wm_check, WINDOW, 32,
+                        father, NET_SUPPORTING_WM_CHECK, WINDOW, 32,
                         1, &father);
 
     /* set the window manager name */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        father, net_wm_name, utf8_string, 8, 7, "awesome");
+                        father, NET_WM_NAME, UTF8_STRING, 8, 7, "awesome");
 
     /* set the window manager PID */
     i = getpid();
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        father, net_wm_pid, CARDINAL, 32, 1, &i);
+                        father, NET_WM_PID, CARDINAL, 32, 1, &i);
 }
 
 void
@@ -238,7 +128,7 @@ ewmh_update_net_client_list(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			net_client_list, WINDOW, 32, n, wins);
+			NET_CLIENT_LIST, WINDOW, 32, n, wins);
 
     p_delete(&wins);
 }
@@ -264,7 +154,7 @@ ewmh_update_net_client_list_stacking(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			net_client_list_stacking, WINDOW, 32, n, wins);
+			NET_CLIENT_LIST_STACKING, WINDOW, 32, n, wins);
 
     p_delete(&wins);
 }
@@ -276,7 +166,7 @@ ewmh_update_net_numbers_of_desktop(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			net_number_of_desktops, CARDINAL, 32, 1, &count);
+			NET_NUMBER_OF_DESKTOPS, CARDINAL, 32, 1, &count);
 }
 
 void
@@ -290,7 +180,7 @@ ewmh_update_net_current_desktop(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xutil_screen_get(globalconf.connection, phys_screen)->root,
-                        net_current_desktop, CARDINAL, 32, 1, &count);
+                        NET_CURRENT_DESKTOP, CARDINAL, 32, 1, &count);
 
     p_delete(&curtags);
 }
@@ -311,7 +201,7 @@ ewmh_update_net_desktop_names(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			net_desktop_names, utf8_string, 8, buf.len, buf.s);
+			NET_DESKTOP_NAMES, UTF8_STRING, 8, buf.len, buf.s);
     buffer_wipe(&buf);
 }
 
@@ -338,7 +228,7 @@ ewmh_update_workarea(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xutil_screen_get(globalconf.connection, phys_screen)->root,
-                        net_workarea, CARDINAL, 32, tags->len * 4, area);
+                        NET_WORKAREA, CARDINAL, 32, tags->len * 4, area);
 }
 
 void
@@ -351,19 +241,19 @@ ewmh_update_net_active_window(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			net_active_window, WINDOW, 32, 1, &win);
+			NET_ACTIVE_WINDOW, WINDOW, 32, 1, &win);
 }
 
 static void
 ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
-    if(state == net_wm_state_sticky)
+    if(state == NET_WM_STATE_STICKY)
     {
         tag_array_t *tags = &globalconf.screens[c->screen].tags;
         for(int i = 0; i < tags->len; i++)
             tag_client(c, tags->tab[i]);
     }
-    else if(state == net_wm_state_skip_taskbar)
+    else if(state == NET_WM_STATE_SKIP_TASKBAR)
     {
         if(set == _NET_WM_STATE_REMOVE)
         {
@@ -376,7 +266,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->skip = true;
         }
     }
-    else if(state == net_wm_state_fullscreen)
+    else if(state == NET_WM_STATE_FULLSCREEN)
     {
         area_t geometry = c->geometry;
         if(set == _NET_WM_STATE_REMOVE)
@@ -415,7 +305,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_resize(c, geometry, false);
     }
-    else if(state == net_wm_state_above)
+    else if(state == NET_WM_STATE_ABOVE)
     {
         if(set == _NET_WM_STATE_REMOVE)
             client_setlayer(c, c->oldlayer);
@@ -425,7 +315,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_setlayer(c, LAYER_ABOVE);
         }
     }
-    else if(state == net_wm_state_below)
+    else if(state == NET_WM_STATE_BELOW)
     {
         if(set == _NET_WM_STATE_REMOVE)
             client_setlayer(c, c->oldlayer);
@@ -435,7 +325,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_setlayer(c, LAYER_BELOW);
         }
     }
-    else if(state == net_wm_state_modal)
+    else if(state == NET_WM_STATE_MODAL)
     {
         if(set == _NET_WM_STATE_REMOVE)
             client_setlayer(c, c->oldlayer);
@@ -445,7 +335,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_setlayer(c, LAYER_MODAL);
         }
     }
-    else if(state == net_wm_state_hidden)
+    else if(state == NET_WM_STATE_HIDDEN)
     {
         if(set == _NET_WM_STATE_REMOVE)
             c->ishidden = false;
@@ -453,7 +343,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->ishidden = true;
         globalconf.screens[c->screen].need_arrange = true;
     }
-    else if(state == net_wm_state_demands_attention)
+    else if(state == NET_WM_STATE_DEMANDS_ATTENTION)
     {
         if(set == _NET_WM_STATE_REMOVE)
             c->isurgent = false;
@@ -471,12 +361,12 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 static void
 ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
 {
-    if(state == net_wm_window_type_normal)
+    if(state == NET_WM_WINDOW_TYPE_NORMAL)
     {
         /* do nothing. this is REALLY IMPORTANT */
     }
-    else if(state == net_wm_window_type_dock
-            || state == net_wm_window_type_splash)
+    else if(state == NET_WM_WINDOW_TYPE_DOCK
+            || state == NET_WM_WINDOW_TYPE_SPLASH)
     {
         c->skip = true;
         c->isfixed = true;
@@ -490,12 +380,12 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
         client_setlayer(c, LAYER_ABOVE);
         client_setfloating(c, true);
     }
-    else if(state == net_wm_window_type_dialog)
+    else if(state == NET_WM_WINDOW_TYPE_DIALOG)
     {
         client_setlayer(c, LAYER_MODAL);
         client_setfloating(c, true);
     }
-    else if(state == net_wm_window_type_desktop)
+    else if(state == NET_WM_WINDOW_TYPE_DESKTOP)
     {
         tag_array_t *tags = &globalconf.screens[c->screen].tags;
         c->noborder = true;
@@ -513,7 +403,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     client_t *c;
     int screen;
 
-    if(ev->type == net_current_desktop)
+    if(ev->type == NET_CURRENT_DESKTOP)
         for(screen = 0;
             screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
             screen++)
@@ -521,12 +411,12 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             if(ev->window == xutil_screen_get(globalconf.connection, screen)->root)
                 tag_view_only_byindex(screen, ev->data.data32[0]);
         }
-    else if(ev->type == net_close_window)
+    else if(ev->type == NET_CLOSE_WINDOW)
     {
         if((c = client_getbywin(ev->window)))
            client_kill(c);
     }
-    else if(ev->type == net_wm_desktop)
+    else if(ev->type == NET_WM_DESKTOP)
     {
         if((c = client_getbywin(ev->window)))
         {
@@ -543,7 +433,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
                         untag_client(c, tags->tab[i]);
         }
     }
-    else if(ev->type == net_wm_state)
+    else if(ev->type == NET_WM_STATE)
     {
         if((c = client_getbywin(ev->window)))
         {
@@ -568,13 +458,13 @@ ewmh_check_client_hints(client_t *c)
 
     /* Send the GetProperty requests which will be processed later */
     c0 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
-                                    net_wm_desktop, XCB_GET_PROPERTY_TYPE_ANY, 0, 1);
+                                    NET_WM_DESKTOP, XCB_GET_PROPERTY_TYPE_ANY, 0, 1);
 
     c1 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
-                                    net_wm_state, ATOM, 0, UINT32_MAX);
+                                    NET_WM_STATE, ATOM, 0, UINT32_MAX);
 
     c2 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
-                                    net_wm_window_type, ATOM, 0, UINT32_MAX);
+                                    NET_WM_WINDOW_TYPE, ATOM, 0, UINT32_MAX);
 
     reply = xcb_get_property_reply(globalconf.connection, c0, NULL);
     if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
@@ -628,7 +518,7 @@ ewmh_get_window_icon(xcb_window_t w)
 
     r = xcb_get_property_reply(globalconf.connection,
                                xcb_get_property_unchecked(globalconf.connection, false, w,
-                                                          net_wm_icon, CARDINAL, 0, UINT32_MAX),
+                                                          NET_WM_ICON, CARDINAL, 0, UINT32_MAX),
                                NULL);
     if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 ||
        !(data = (uint32_t *) xcb_get_property_value(r)))

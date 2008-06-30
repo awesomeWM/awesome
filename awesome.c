@@ -39,6 +39,7 @@
 #include "common/socket.h"
 #include "common/version.h"
 #include "common/configopts.h"
+#include "common/atoms.h"
 #include "config.h"
 
 awesome_t globalconf;
@@ -390,8 +391,8 @@ main(int argc, char **argv)
     xutil_getlockmask(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
                       &globalconf.shiftlockmask, &globalconf.capslockmask);
 
-    /* init Atoms cache and then EWMH atoms */
-    ewmh_init_atoms();
+    /* init atom cache */
+    atoms_init(globalconf.connection);
 
     /* init screens struct */
     globalconf.screens_info = screensinfo_new(globalconf.connection);
@@ -454,7 +455,7 @@ main(int argc, char **argv)
                                      xutil_screen_get(globalconf.connection, screen_nbr)->root,
                                      XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
                                      change_win_vals);
-        ewmh_set_supported_hints(screen_nbr);
+        ewmh_init(screen_nbr);
         systray_init(screen_nbr);
     }
 
