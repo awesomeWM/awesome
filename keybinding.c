@@ -23,23 +23,30 @@
 /* XStringToKeysym() */
 #include <X11/Xlib.h>
 
+#include "structs.h"
+#include "common/refcount.h"
+#include "common/array.h"
 #include "keybinding.h"
-#include "window.h"
+
+ARRAY_TYPE(keybinding_t *, keybinding);
 
 extern awesome_t globalconf;
+
 static struct {
     keybinding_array_t by_code;
     keybinding_array_t by_sym;
-} keys;
+} keys_g;
 
-DO_LUA_NEW(static, keybinding_t, keybinding, "keybinding", keybinding_ref)
-DO_LUA_GC(keybinding_t, keybinding, "keybinding", keybinding_unref)
-
-void keybinding_delete(keybinding_t **kbp)
+static void keybinding_delete(keybinding_t **kbp)
 {
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*kbp)->fct);
     p_delete(kbp);
 }
+
+DO_RCNT(keybinding_t, keybinding, keybinding_delete)
+ARRAY_FUNCS(keybinding_t *, keybinding, keybinding_unref)
+DO_LUA_NEW(static, keybinding_t, keybinding, "keybinding", keybinding_ref)
+DO_LUA_GC(keybinding_t, keybinding, "keybinding", keybinding_unref)
 
 static int
 keybinding_ev_cmp(xcb_keysym_t keysym, xcb_keycode_t keycode,
@@ -126,10 +133,10 @@ window_root_ungrabkey(keybinding_t *k)
                 && phys_screen < globalconf.screens_info->nscreen);
 }
 
-void
+static void
 keybinding_register_root(keybinding_t *k)
 {
-    keybinding_array_t *arr = k->keysym ? &keys.by_sym : &keys.by_code;
+    keybinding_array_t *arr = k->keysym ? &keys_g.by_sym : &keys_g.by_code;
     int l = 0, r = arr->len;
 
     keybinding_ref(&k);
@@ -154,10 +161,10 @@ keybinding_register_root(keybinding_t *k)
     window_root_grabkey(k);
 }
 
-void
+static void
 keybinding_unregister_root(keybinding_t **k)
 {
-    keybinding_array_t *arr = (*k)->keysym ? &keys.by_sym : &keys.by_code;
+    keybinding_array_t *arr = (*k)->keysym ? &keys_g.by_sym : &keys_g.by_code;
     int l = 0, r = arr->len;
 
     while (l < r) {
@@ -181,7 +188,7 @@ keybinding_unregister_root(keybinding_t **k)
 keybinding_t *
 keybinding_find(const xcb_key_press_event_t *ev)
 {
-    const keybinding_array_t *arr = &keys.by_sym;
+    const keybinding_array_t *arr = &keys_g.by_sym;
     int l, r, mod = CLEANMASK(ev->state);
     xcb_keysym_t keysym;
 
@@ -203,8 +210,8 @@ keybinding_find(const xcb_key_press_event_t *ev)
             break;
         }
     }
-    if (arr != &keys.by_code) {
-        arr = &keys.by_code;
+    if (arr != &keys_g.by_code) {
+        arr = &keys_g.by_code;
         goto again;
     }
     return NULL;

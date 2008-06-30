@@ -24,14 +24,8 @@
 
 #include <xcb/xcb.h>
 #include "lua.h"
-#include "common/refcount.h"
-#include "common/array.h"
 
-/** Keys bindings */
-typedef struct keybinding_t keybinding_t;
-ARRAY_TYPE(struct keybinding_t *, keybinding);
-
-struct keybinding_t
+typedef struct keybinding_t
 {
     /** Ref count */
     int refcount;
@@ -43,11 +37,8 @@ struct keybinding_t
     xcb_keycode_t keycode;
     /** Lua function to execute. */
     luaA_function fct;
-};
+} keybinding_t;
 
-void keybinding_delete(keybinding_t **);
-DO_RCNT(keybinding_t, keybinding, keybinding_delete)
-ARRAY_FUNCS(keybinding_t *, keybinding, keybinding_unref)
 keybinding_t *keybinding_find(const xcb_key_press_event_t *);
 
 #endif
