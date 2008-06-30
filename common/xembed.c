@@ -61,7 +61,6 @@ xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
 {
     xcb_client_message_event_t ev;
 
-    /** \todo use atom cache */
     p_clear(&ev, 1);
     ev.response_type = XCB_CLIENT_MESSAGE;
     ev.window = towin;
@@ -88,7 +87,6 @@ xembed_info_get(xcb_connection_t *connection, xcb_window_t win, xembed_info_t *i
     uint32_t *data;
     bool ret = false;
 
-    /** \todo use atom cache */
     prop_c = xcb_get_property_unchecked(connection, false, win, _XEMBED_INFO,
                                         XCB_GET_PROPERTY_TYPE_ANY, 0L, 2);
 
