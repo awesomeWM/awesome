@@ -1136,20 +1136,20 @@ luaA_mouse_new(lua_State *L)
     int i, len;
     button_t *button;
 
-    luaA_checktable(L, 1);
+    luaA_checktable(L, 2);
     /* arg 3 is mouse button */
-    i = luaL_checknumber(L, 2);
+    i = luaL_checknumber(L, 3);
     /* arg 4 is cmd to run */
-    luaA_checkfunction(L, 3);
+    luaA_checkfunction(L, 4);
 
     button = p_new(button_t, 1);
     button->button = xutil_button_fromint(i);
     button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    len = lua_objlen(L, 1);
+    len = lua_objlen(L, 2);
     for(i = 1; i <= len; i++)
     {
-        lua_rawgeti(L, 1, i);
+        lua_rawgeti(L, 2, i);
         button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
     }
 
@@ -1158,7 +1158,7 @@ luaA_mouse_new(lua_State *L)
 
 const struct luaL_reg awesome_mouse_methods[] =
 {
-    { "new", luaA_mouse_new },
+    { "__call", luaA_mouse_new },
     { "screen_get", luaA_mouse_screen_get },
     { "coords_set", luaA_mouse_coords_set },
     { "coords_get", luaA_mouse_coords_get },

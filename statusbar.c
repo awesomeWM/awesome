@@ -538,37 +538,37 @@ luaA_statusbar_new(lua_State *L)
     const char *buf;
     size_t len;
 
-    luaA_checktable(L, 1);
+    luaA_checktable(L, 2);
 
-    if(!(buf = luaA_getopt_string(L, 1, "name", NULL)))
+    if(!(buf = luaA_getopt_string(L, 2, "name", NULL)))
         luaL_error(L, "object statusbar must have a name");
 
     sb = p_new(statusbar_t, 1);
 
     sb->name = a_strdup(buf);
     
-    if(!(buf = luaA_getopt_string(L, 1, "fg", NULL))
+    if(!(buf = luaA_getopt_string(L, 2, "fg", NULL))
        || !xcolor_new(globalconf.connection, globalconf.default_screen,
                      buf, &sb->colors.fg))
         sb->colors.fg = xcolor_copy(&globalconf.colors.fg);
 
-    if(!(buf = luaA_getopt_string(L, 1, "bg", NULL))
+    if(!(buf = luaA_getopt_string(L, 2, "bg", NULL))
        || !xcolor_new(globalconf.connection, globalconf.default_screen,
                      buf, &sb->colors.bg))
         sb->colors.bg = xcolor_copy(&globalconf.colors.bg);
 
-    buf = luaA_getopt_lstring(L, 1, "align", "left", &len);
+    buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     sb->align = draw_align_fromstr(buf, len);
 
-    sb->width = luaA_getopt_number(L, 1, "width", 0);
+    sb->width = luaA_getopt_number(L, 2, "width", 0);
     if(sb->width > 0)
         sb->width_user = true;
-    sb->height = luaA_getopt_number(L, 1, "height", 0);
+    sb->height = luaA_getopt_number(L, 2, "height", 0);
     if(sb->height <= 0)
         /* 1.5 as default factor, it fits nice but no one knows why */
         sb->height = 1.5 * globalconf.font->height;
 
-    buf = luaA_getopt_lstring(L, 1, "position", "top", &len);
+    buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
     sb->position = position_fromstr(buf, len);
 
     return luaA_statusbar_userdata_new(L, sb);
@@ -603,7 +603,7 @@ luaA_statusbar_widget_get(lua_State *L)
 
 const struct luaL_reg awesome_statusbar_methods[] =
 {
-    { "new", luaA_statusbar_new },
+    { "__call", luaA_statusbar_new },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_statusbar_meta[] =

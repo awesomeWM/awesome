@@ -314,15 +314,15 @@ luaA_tag_new(lua_State *L)
     double mwfact;
     layout_t *layout;
 
-    luaA_checktable(L, 1);
+    luaA_checktable(L, 2);
 
-    if(!(name = luaA_getopt_string(L, 1, "name", NULL)))
+    if(!(name = luaA_getopt_string(L, 2, "name", NULL)))
         luaL_error(L, "object tag must have a name");
 
-    mwfact = luaA_getopt_number(L, 1, "mwfact", 0.5);
-    ncol = luaA_getopt_number(L, 1, "ncol", 1);
-    nmaster = luaA_getopt_number(L, 1, "nmaster", 1);
-    lay = luaA_getopt_string(L, 1, "layout", "tile");
+    mwfact = luaA_getopt_number(L, 2, "mwfact", 0.5);
+    ncol = luaA_getopt_number(L, 2, "ncol", 1);
+    nmaster = luaA_getopt_number(L, 2, "nmaster", 1);
+    lay = luaA_getopt_string(L, 2, "layout", "tile");
 
     layout = name_func_lookup(lay, LayoutList);
 
@@ -560,7 +560,7 @@ luaA_tag_layout_set(lua_State *L)
 
 const struct luaL_reg awesome_tag_methods[] =
 {
-    { "new", luaA_tag_new },
+    { "__call", luaA_tag_new },
     { "get", luaA_tag_get },
     { "geti", luaA_tag_geti },
     { NULL, NULL }

@@ -298,38 +298,38 @@ luaA_titlebar_new(lua_State *L)
     const char *buf;
     size_t len;
 
-    luaA_checktable(L, 1);
+    luaA_checktable(L, 2);
 
     tb = p_new(titlebar_t, 1);
 
-    buf = luaA_getopt_lstring(L, 1, "align", "left", &len);
+    buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     tb->align = draw_align_fromstr(buf, len);
 
-    tb->width = luaA_getopt_number(L, 1, "width", 0);
-    tb->height = luaA_getopt_number(L, 1, "height", 0);
+    tb->width = luaA_getopt_number(L, 2, "width", 0);
+    tb->height = luaA_getopt_number(L, 2, "height", 0);
     if(tb->height <= 0)
         /* 1.5 as default factor, it fits nice but no one knows why */
         tb->height = 1.5 * globalconf.font->height;
 
-    buf = luaA_getopt_lstring(L, 1, "position", "top", &len);
+    buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
     tb->position = position_fromstr(buf, len);
 
-    if(!(buf = luaA_getopt_string(L, 1, "fg", NULL))
+    if(!(buf = luaA_getopt_string(L, 2, "fg", NULL))
         || !xcolor_new(globalconf.connection, globalconf.default_screen,
                        buf, &tb->colors.fg))
         tb->colors.fg = xcolor_copy(&globalconf.colors.fg);
 
-    if(!(buf = luaA_getopt_string(L, 1, "bg", NULL))
+    if(!(buf = luaA_getopt_string(L, 2, "bg", NULL))
         || !xcolor_new(globalconf.connection, globalconf.default_screen,
                        buf, &tb->colors.bg))
         tb->colors.bg = xcolor_copy(&globalconf.colors.bg);
 
-    if(!(buf = luaA_getopt_string(L, 1, "border_color", NULL))
+    if(!(buf = luaA_getopt_string(L, 2, "border_color", NULL))
         || !xcolor_new(globalconf.connection, globalconf.default_screen,
                        buf, &tb->border.color))
         tb->border.color = xcolor_copy(&globalconf.colors.fg);
 
-    tb->border.width = luaA_getopt_number(L, 1, "border_width", 0);
+    tb->border.width = luaA_getopt_number(L, 2, "border_width", 0);
 
     return luaA_titlebar_userdata_new(globalconf.L, tb);
 }
@@ -502,7 +502,7 @@ luaA_titlebar_tostring(lua_State *L)
 
 const struct luaL_reg awesome_titlebar_methods[] =
 {
-    { "new", luaA_titlebar_new },
+    { "__call", luaA_titlebar_new },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_titlebar_meta[] =

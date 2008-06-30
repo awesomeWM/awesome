@@ -264,21 +264,21 @@ widget_invalidate_bywidget(widget_t *widget)
 static int
 luaA_widget_new(lua_State *L)
 {
-    const char *type, *buf;
+    const char *buf, *type;
     widget_t *w = NULL;
     widget_constructor_t *wc;
     alignment_t align;
     size_t len;
 
-    luaA_checktable(L, 1);
+    luaA_checktable(L, 2);
 
-    buf = luaA_getopt_lstring(L, 1, "align", "left", &len);
+    buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     align = draw_align_fromstr(buf, len);
 
-    if(!(buf = luaA_getopt_string(L, 1, "name", NULL)))
+    if(!(buf = luaA_getopt_string(L, 2, "name", NULL)))
         luaL_error(L, "object widget must have a name");
 
-    type = luaA_getopt_string(L, 1, "type", NULL);
+    type = luaA_getopt_string(L, 2, "type", NULL);
 
     if((wc = name_func_lookup(type, WidgetList)))
         w = wc(align);
@@ -422,14 +422,16 @@ luaA_widget_index(lua_State *L)
 {
     widget_t **widget = luaA_checkudata(L, 1, "widget");
 
-    lua_getmetatable(L, 1);                /* 1 */
-    lua_pushvalue(L, 2);                   /* 2 */
-    lua_rawget(L, -2);                     /* 2 */
-    if (!lua_isnil(L, -1)) {
-        lua_remove(L, -2);                 /* 1 */
+    lua_getmetatable(L, 1);
+    lua_pushvalue(L, 2);
+    lua_rawget(L, -2);
+    if (!lua_isnil(L, -1))
+    {
+        lua_remove(L, -2);
         return 1;
     }
     lua_pop(L, 2);
+
     return (*widget)->index ? (*widget)->index(L) : 0;
 }
 
@@ -450,7 +452,7 @@ luaA_widget_newindex(lua_State *L)
 
 const struct luaL_reg awesome_widget_methods[] =
 {
-    { "new", luaA_widget_new },
+    { "__call", luaA_widget_new },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_widget_meta[] =

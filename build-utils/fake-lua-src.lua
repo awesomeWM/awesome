@@ -70,10 +70,12 @@ for i, line in ipairs(ilines) do
         else
             local fctname, fctdef
             _, _, fctname, fctdef = line:find("\"(.+)\", (.+) },?")
-            if fctname and not fctname:find("^__") then
+            if fctname and (not fctname:find("^__") or fctname:find("^__call")) then
                 if function_doc[fctdef] then
+                    fctname = "." .. fctname
+                    fctname = fctname:gsub("^.__call", "")
                     print(function_doc[fctdef]:comment_translate())
-                    print("function " .. libname .. "." .. fctname .. "()")
+                    print("function " .. libname .. fctname .. "()")
                     print("end");
                 else
                     print("This function is not yet documented.")

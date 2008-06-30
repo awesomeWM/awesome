@@ -184,22 +184,22 @@ luaA_keybinding_new(lua_State *L)
     keybinding_t *k;
     const char *key;
 
-    /* arg 1 is key mod table */
-    luaA_checktable(L, 1);
-    /* arg 2 is key */
-    key = luaL_checkstring(L, 2);
-    /* arg 3 is cmd to run */
-    luaA_checkfunction(L, 3);
+    /* arg 2 is key mod table */
+    luaA_checktable(L, 2);
+    /* arg 3 is key */
+    key = luaL_checkstring(L, 3);
+    /* arg 4 is cmd to run */
+    luaA_checkfunction(L, 4);
 
     /* get the last arg as function */
     k = p_new(keybinding_t, 1);
     __luaA_keystore(k, key);
     k->fct = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    len = lua_objlen(L, 1);
+    len = lua_objlen(L, 2);
     for(i = 1; i <= len; i++)
     {
-        lua_rawgeti(L, 1, i);
+        lua_rawgeti(L, 2, i);
         k->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
     }
 
@@ -248,7 +248,7 @@ luaA_keybinding_tostring(lua_State *L)
 
 const struct luaL_reg awesome_keybinding_methods[] =
 {
-    { "new", luaA_keybinding_new },
+    { "__call", luaA_keybinding_new },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_keybinding_meta[] =
