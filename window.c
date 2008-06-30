@@ -147,63 +147,6 @@ window_root_grabbuttons(xcb_window_t root)
     }
 }
 
-/** Grab key on the root windows.
- * \param k The keybinding.
- */
-void
-window_root_grabkey(keybinding_t *k)
-{
-    int phys_screen = globalconf.default_screen;
-    xcb_screen_t *s;
-    xcb_keycode_t kc;
-
-    if((kc = k->keycode)
-       || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
-        do
-        {
-            s = xutil_screen_get(globalconf.connection, phys_screen);
-            xcb_grab_key(globalconf.connection, true, s->root,
-                         k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, s->root,
-                         k->mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, s->root,
-                         k->mod | globalconf.numlockmask, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, s->root,
-                         k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
-                         XCB_GRAB_MODE_ASYNC);
-        phys_screen++;
-        } while(!globalconf.screens_info->xinerama_is_active
-                && phys_screen < globalconf.screens_info->nscreen);
-}
-
-/** Ungrab key on the root windows.
- * \param k The keybinding.
- */
-void
-window_root_ungrabkey(keybinding_t *k)
-{
-    int phys_screen = globalconf.default_screen;
-    xcb_screen_t *s;
-    xcb_keycode_t kc;
-
-    if((kc = k->keycode)
-       || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
-        do
-        {
-            s = xutil_screen_get(globalconf.connection, phys_screen);
-            xcb_ungrab_key(globalconf.connection, kc, s->root,
-                           k->mod);
-            xcb_ungrab_key(globalconf.connection, kc, s->root,
-                           k->mod | XCB_MOD_MASK_LOCK);
-            xcb_ungrab_key(globalconf.connection, kc, s->root,
-                           k->mod | globalconf.numlockmask);
-            xcb_ungrab_key(globalconf.connection, kc, s->root,
-                           k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
-        phys_screen++;
-        } while(!globalconf.screens_info->xinerama_is_active
-                && phys_screen < globalconf.screens_info->nscreen);
-}
-
 /** Set transparency of a window.
  * \param win The window.
  * \param opacity Opacity of the window, between 0 and 1.

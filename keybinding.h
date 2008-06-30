@@ -22,17 +22,32 @@
 #ifndef AWESOME_KEYBINDING_H
 #define AWESOME_KEYBINDING_H
 
-#include "structs.h"
+#include <xcb/xcb.h>
+#include "lua.h"
+#include "common/refcount.h"
+#include "common/array.h"
+
+/** Keys bindings */
+typedef struct keybinding_t keybinding_t;
+ARRAY_TYPE(struct keybinding_t *, keybinding);
+
+struct keybinding_t
+{
+    /** Ref count */
+    int refcount;
+    /** Key modifier */
+    unsigned long mod;
+    /** Keysym */
+    xcb_keysym_t keysym;
+    /** Keycode */
+    xcb_keycode_t keycode;
+    /** Lua function to execute. */
+    luaA_function fct;
+};
 
 void keybinding_delete(keybinding_t **);
 DO_RCNT(keybinding_t, keybinding, keybinding_delete)
 ARRAY_FUNCS(keybinding_t *, keybinding, keybinding_unref)
-
-void keybinding_idx_wipe(keybinding_idx_t *);
-
-void keybinding_register_root(keybinding_t *);
-void keybinding_unregiste_rootr(keybinding_t **);
-keybinding_t *keybinding_find(const keybinding_idx_t *,
-                              const xcb_key_press_event_t *);
+keybinding_t *keybinding_find(const xcb_key_press_event_t *);
 
 #endif

@@ -27,15 +27,13 @@
 #include "window.h"
 
 extern awesome_t globalconf;
+static struct {
+    keybinding_array_t by_code;
+    keybinding_array_t by_sym;
+} keys;
 
 DO_LUA_NEW(static, keybinding_t, keybinding, "keybinding", keybinding_ref)
 DO_LUA_GC(keybinding_t, keybinding, "keybinding", keybinding_unref)
-
-void keybinding_idx_wipe(keybinding_idx_t *idx)
-{
-    keybinding_array_wipe(&idx->by_code);
-    keybinding_array_wipe(&idx->by_sym);
-}
 
 void keybinding_delete(keybinding_t **kbp)
 {
@@ -71,11 +69,67 @@ keybinding_cmp(const keybinding_t *k1, const keybinding_t *k2)
     return k1->mod == k2->mod ? 0 : (k2->mod > k1->mod ? 1 : -1);
 }
 
+/** Grab key on the root windows.
+ * \param k The keybinding.
+ */
+static void
+window_root_grabkey(keybinding_t *k)
+{
+    int phys_screen = globalconf.default_screen;
+    xcb_screen_t *s;
+    xcb_keycode_t kc;
+
+    if((kc = k->keycode)
+       || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
+        do
+        {
+            s = xutil_screen_get(globalconf.connection, phys_screen);
+            xcb_grab_key(globalconf.connection, true, s->root,
+                         k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+            xcb_grab_key(globalconf.connection, true, s->root,
+                         k->mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+            xcb_grab_key(globalconf.connection, true, s->root,
+                         k->mod | globalconf.numlockmask, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+            xcb_grab_key(globalconf.connection, true, s->root,
+                         k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
+                         XCB_GRAB_MODE_ASYNC);
+        phys_screen++;
+        } while(!globalconf.screens_info->xinerama_is_active
+                && phys_screen < globalconf.screens_info->nscreen);
+}
+
+/** Ungrab key on the root windows.
+ * \param k The keybinding.
+ */
+static void
+window_root_ungrabkey(keybinding_t *k)
+{
+    int phys_screen = globalconf.default_screen;
+    xcb_screen_t *s;
+    xcb_keycode_t kc;
+
+    if((kc = k->keycode)
+       || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
+        do
+        {
+            s = xutil_screen_get(globalconf.connection, phys_screen);
+            xcb_ungrab_key(globalconf.connection, kc, s->root,
+                           k->mod);
+            xcb_ungrab_key(globalconf.connection, kc, s->root,
+                           k->mod | XCB_MOD_MASK_LOCK);
+            xcb_ungrab_key(globalconf.connection, kc, s->root,
+                           k->mod | globalconf.numlockmask);
+            xcb_ungrab_key(globalconf.connection, kc, s->root,
+                           k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
+        phys_screen++;
+        } while(!globalconf.screens_info->xinerama_is_active
+                && phys_screen < globalconf.screens_info->nscreen);
+}
+
 void
 keybinding_register_root(keybinding_t *k)
 {
-    keybinding_idx_t *idx = &globalconf.keys;
-    keybinding_array_t *arr = k->keysym ? &idx->by_sym : &idx->by_code;
+    keybinding_array_t *arr = k->keysym ? &keys.by_sym : &keys.by_code;
     int l = 0, r = arr->len;
 
     keybinding_ref(&k);
@@ -103,8 +157,7 @@ keybinding_register_root(keybinding_t *k)
 void
 keybinding_unregister_root(keybinding_t **k)
 {
-    keybinding_idx_t *idx = &globalconf.keys;
-    keybinding_array_t *arr = (*k)->keysym ? &idx->by_sym : &idx->by_code;
+    keybinding_array_t *arr = (*k)->keysym ? &keys.by_sym : &keys.by_code;
     int l = 0, r = arr->len;
 
     while (l < r) {
@@ -126,9 +179,9 @@ keybinding_unregister_root(keybinding_t **k)
 }
 
 keybinding_t *
-keybinding_find(const keybinding_idx_t *idx, const xcb_key_press_event_t *ev)
+keybinding_find(const xcb_key_press_event_t *ev)
 {
-    const keybinding_array_t *arr = &idx->by_sym;
+    const keybinding_array_t *arr = &keys.by_sym;
     int l, r, mod = CLEANMASK(ev->state);
     xcb_keysym_t keysym;
 
@@ -150,8 +203,8 @@ keybinding_find(const keybinding_idx_t *idx, const xcb_key_press_event_t *ev)
             break;
         }
     }
-    if (arr != &idx->by_code) {
-        arr = &idx->by_code;
+    if (arr != &keys.by_code) {
+        arr = &keys.by_code;
         goto again;
     }
     return NULL;

@@ -412,7 +412,7 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     }
     else
     {
-        keybinding_t *k = keybinding_find(&globalconf.keys, ev);
+        keybinding_t *k = keybinding_find(ev);
         if (k && k->fct != LUA_REFNIL)
             luaA_dofunction(globalconf.L, k->fct, 0);
     }

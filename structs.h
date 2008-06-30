@@ -60,7 +60,6 @@ typedef struct widget_node_t widget_node_t;
 typedef struct statusbar_t statusbar_t;
 typedef struct client_t client_t;
 typedef struct titlebar_t titlebar_t;
-typedef struct keybinding_t keybinding_t;
 typedef struct client_node_t client_node_t;
 typedef struct _tag_t tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
@@ -194,28 +193,6 @@ titlebar_delete(titlebar_t **t)
 }
 
 DO_RCNT(titlebar_t, titlebar, titlebar_delete)
-
-/** Keys bindings */
-ARRAY_TYPE(struct keybinding_t *, keybinding);
-
-typedef struct keybinding_idx_t {
-    keybinding_array_t by_code;
-    keybinding_array_t by_sym;
-} keybinding_idx_t;
-
-struct keybinding_t
-{
-    /** Ref count */
-    int refcount;
-    /** Key modifier */
-    unsigned long mod;
-    /** Keysym */
-    xcb_keysym_t keysym;
-    /** Keycode */
-    xcb_keycode_t keycode;
-    /** Lua function to execute. */
-    luaA_function fct;
-};
 
 /** Status bar */
 struct statusbar_t
@@ -392,8 +369,6 @@ struct awesome_t
     screen_t *screens;
     /** Screens info */
     screens_info_t *screens_info;
-    /** Keys bindings list */
-    keybinding_idx_t keys;
     /** Mouse bindings list */
     struct
     {
