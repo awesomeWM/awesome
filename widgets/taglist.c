@@ -293,7 +293,7 @@ taglist_button_press(widget_node_t *w,
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  */
-int
+static int
 luaA_taglist_index(lua_State *L)
 {
     size_t len;
@@ -324,7 +324,7 @@ luaA_taglist_index(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  */
-int
+static int
 luaA_taglist_newindex(lua_State *L)
 {
     size_t len;

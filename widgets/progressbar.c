@@ -407,7 +407,7 @@ progressbar_draw(draw_context_t *ctx,
  * \lparam A bar name.
  * \lparam A table with keys as properties names.
  */
-int
+static int
 luaA_progressbar_bar_properties_set(lua_State *L)
 {
     widget_t **widget = luaA_checkudata(L, 1, "widget");
@@ -492,7 +492,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
  * \lparam A bar name.
  * \lparam A data value.
  */
-int
+static int
 luaA_progressbar_bar_data_add(lua_State *L)
 {
     widget_t **widget = luaA_checkudata(L, 1, "widget");

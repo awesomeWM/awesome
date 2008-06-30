@@ -25,7 +25,8 @@ add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
     -Wsign-compare -Wunused -Wno-unused-parameter -Wuninitialized -Winit-self
     -Wpointer-arith -Wredundant-decls -Wformat-nonliteral
-    -Wno-format-zero-length -Wmissing-format-attribute)
+    -Wno-format-zero-length -Wmissing-format-attribute -Wmissing-prototypes
+    -Wstrict-prototypes)
 # }}}
 
 # {{{ Find external utilities
