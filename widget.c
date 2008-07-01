@@ -341,38 +341,6 @@ luaA_widget_tostring(lua_State *L)
     return 1;
 }
 
-/** Set the widget name.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- * \lparam A string with the new widget name.
- */
-static int
-luaA_widget_name_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    const char *name = luaL_checkstring(L, 2);
-    p_delete(&(*widget)->name);
-    (*widget)->name = a_strdup(name);
-    return 0;
-}
-
-/** Get the widget name.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- * \lreturn A string with the name of the widget.
- */
-static int
-luaA_widget_name_get(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    lua_pushstring(L, (*widget)->name);
-    return 1;
-}
-
 /** Generic widget index.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -399,6 +367,9 @@ luaA_widget_index(lua_State *L)
     {
       case A_TK_VISIBLE:
         lua_pushboolean(L, (*widget)->isvisible);
+        return 1;
+      case A_TK_NAME:
+        lua_pushstring(L, (*widget)->name);
         return 1;
       default:
         break;
@@ -440,8 +411,6 @@ const struct luaL_reg awesome_widget_meta[] =
 {
     { "mouse_add", luaA_widget_mouse_add },
     { "mouse_remove", luaA_widget_mouse_remove },
-    { "name_set", luaA_widget_name_set },
-    { "name_get", luaA_widget_name_get },
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },
     { "__gc", luaA_widget_gc },
