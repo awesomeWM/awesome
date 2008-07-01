@@ -316,50 +316,6 @@ luaA_statusbar_position_get(lua_State *L)
     return 1;
 }
 
-/** Set the default statusbar colors outside the constructor
- * \param L The Lua VM state.
- * \return The number of elements pushed on the stack.
- *
- * \luastack
- * \lvalue A statusbar.
- * \lparam A table with `bg' and `fg'.
- */
-static int
-luaA_statusbar_colors_set(lua_State *L)
-{
-    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
-    const char *buf;
-    xcolor_t color;
-
-    luaA_checktable(L, 2);
-
-    if((buf = luaA_getopt_string(L, 2, "fg", NULL))
-       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
-    {
-        xcolor_wipe(&(*sb)->colors.fg);
-        (*sb)->colors.fg = color;
-
-        if((*sb)->ctx)
-            (*sb)->ctx->fg = (*sb)->colors.fg;
-
-        (*sb)->need_update = true;
-    }
-
-    if((buf = luaA_getopt_string(L, 2, "bg", NULL))
-       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
-    {
-        xcolor_wipe(&(*sb)->colors.bg);
-        (*sb)->colors.bg = color;
-
-        if((*sb)->ctx)
-            (*sb)->ctx->bg = (*sb)->colors.bg;
-
-        (*sb)->need_update = true;
-    }
-
-    return 0;
-}
-
 /** Convert a statusbar to a printable string.
  * \param L The Lua VM state.
  *
@@ -606,6 +562,12 @@ luaA_statusbar_index(lua_State *L)
       case A_TK_ALIGN:
         lua_pushstring(L, draw_align_tostr((*statusbar)->align));
         break;
+      case A_TK_FG:
+        lua_pushstring(L, (*statusbar)->colors.fg.name);
+        break;
+      case A_TK_BG:
+        lua_pushstring(L, (*statusbar)->colors.bg.name);
+        break;
       default:
         return 0;
     }
@@ -623,6 +585,7 @@ luaA_statusbar_newindex(lua_State *L)
     size_t len;
     statusbar_t **statusbar = luaA_checkudata(L, 1, "statusbar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
+    xcolor_t color;
 
     switch(a_tokenize(attr, len))
     {
@@ -630,6 +593,32 @@ luaA_statusbar_newindex(lua_State *L)
         buf = luaL_checklstring(L, 3, &len);
         (*statusbar)->align = draw_align_fromstr(buf, len);
         statusbar_position_update(*statusbar, (*statusbar)->position);
+        break;
+      case A_TK_FG:
+        if((buf = luaL_checkstring(L, 3))
+           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+        {
+            xcolor_wipe(&(*statusbar)->colors.fg);
+            (*statusbar)->colors.fg = color;
+
+            if((*statusbar)->ctx)
+                (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
+
+            (*statusbar)->need_update = true;
+        }
+        break;
+      case A_TK_BG:
+        if((buf = luaL_checkstring(L, 3))
+           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+        {
+            xcolor_wipe(&(*statusbar)->colors.fg);
+            (*statusbar)->colors.fg = color;
+
+            if((*statusbar)->ctx)
+                (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
+
+            (*statusbar)->need_update = true;
+        }
         break;
       default:
         return 0;
@@ -650,7 +639,6 @@ const struct luaL_reg awesome_statusbar_meta[] =
     { "widget_get", luaA_statusbar_widget_get },
     { "position_set", luaA_statusbar_position_set },
     { "position_get", luaA_statusbar_position_get },
-    { "colors_set", luaA_statusbar_colors_set },
     { "add", luaA_statusbar_add },
     { "remove", luaA_statusbar_remove },
     { "__index", luaA_statusbar_index },

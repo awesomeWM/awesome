@@ -13,6 +13,7 @@ bottomleft
 bottomright
 center
 color
+fg
 flex
 focus
 gap
