@@ -7,35 +7,38 @@ else
     ECHO=@:
 endif
 
-all: cmake
-	$(ECHO) "Building…"
-	$(MAKE) -C build
+TARGETS=awesome awesome-client
+BUILDLN=build
 
-install: cmake
-	$(ECHO) "Installing…"
-	$(MAKE) -C build install
+all: $(TARGETS) $(BUILDLN) ;
 
-cmake: build/cmake-stamp
-build/cmake-stamp: build CMakeLists.txt awesomeConfig.cmake
-	$(ECHO) "Running cmake…"
-	cd ${builddir} && cmake "$@" ..
-	touch ${builddir}/cmake-stamp
+$(TARGETS): cmake-build
+	ln -s -f ${builddir}/$@ $@
 
-build: awesome awesome-client
-	$(ECHO) -n "Creating new build directory…"
+$(BUILDLN):
+	ln -s -f ${builddir} $(BUILDLN)
+
+cmake ${builddir}/CMakeCache.txt:
 	mkdir -p ${builddir}
-	ln -s -f ${builddir} build
-	$(ECHO) " done"
+	$(ECHO) "Running cmake…"
+	cd ${builddir} && cmake "$(@D)" ..
 
-awesome:
-	@ln -s -f ${builddir}/awesome awesome
+cmake-build: ${builddir}/CMakeCache.txt
+	$(ECHO) "Building…"
+	$(MAKE) -C ${builddir}
 
-awesome-client:
-	@ln -s -f ${builddir}/awesome-client awesome-client
+install: cmake-build
+	$(ECHO) "Installing…"
+	$(MAKE) -C ${builddir} install
 
-clean:
+distclean:
 	$(ECHO) -n "Cleaning up build directory…"
-	@rm -rf ${builddir} build
+	$(RM) -r ${builddir} $(BUILDLN) $(TARGETS)
 	$(ECHO) " done"
 
-.PHONY: clean
+%:
+	$(ECHO) "Running make $@…"
+	$(MAKE) -C ${builddir} $@
+	$(and $(filter clean,$@),$(RM) $(BUILDLN) $(TARGETS))
+
+.PHONY: cmake-build cmake install $(BUILDLN)
