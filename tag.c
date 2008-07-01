@@ -340,48 +340,6 @@ luaA_tag_new(lua_State *L)
     return luaA_tag_userdata_new(L, tag);
 }
 
-/** Get the layout of the tag.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lreturn The layout name.
- */
-static int
-luaA_tag_layout_get(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    const char *name = a_strdup(name_func_rlookup((*tag)->layout, LayoutList));
-    lua_pushstring(L, name);
-    return 1;
-}
-
-/** Set the layout of the tag.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lparam A layout name.
- */
-static int
-luaA_tag_layout_set(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    const char *name = luaL_checkstring(L, 2);
-    layout_t *l = name_func_lookup(name, LayoutList);
-
-    if(l)
-    {
-        (*tag)->layout = l;
-        globalconf.screens[(*tag)->screen].need_arrange = true;
-    }
-    else
-        luaL_error(L, "unknown layout: %s", name);
-
-    return 0;
-
-}
-
 /** Tag index.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -409,6 +367,9 @@ luaA_tag_index(lua_State *L)
     {
       case A_TK_NAME:
         lua_pushstring(L, (*tag)->name);
+        break;
+      case A_TK_LAYOUT:
+        lua_pushstring(L, name_func_rlookup((*tag)->layout, LayoutList));
         break;
       case A_TK_SELECTED:
         lua_pushboolean(L, (*tag)->selected);
@@ -441,6 +402,7 @@ luaA_tag_newindex(lua_State *L)
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     double d;
     int i;
+    layout_t *l;
 
     switch(a_tokenize(attr, len))
     {
@@ -451,6 +413,14 @@ luaA_tag_newindex(lua_State *L)
         if((*tag)->screen != TAG_SCREEN_UNDEF)
             widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
         return 0;
+      case A_TK_LAYOUT:
+        buf = luaL_checkstring(L, 3);
+        l = name_func_lookup(buf, LayoutList);
+        if(l)
+            (*tag)->layout = l;
+        else
+            luaL_error(L, "unknown layout: %s", buf);
+        break;
       case A_TK_SELECTED:
         tag_view(*tag, luaA_checkboolean(L, 3));
         return 0;
@@ -496,8 +466,6 @@ const struct luaL_reg awesome_tag_methods[] =
 const struct luaL_reg awesome_tag_meta[] =
 {
     { "add", luaA_tag_add },
-    { "layout_get", luaA_tag_layout_get },
-    { "layout_set", luaA_tag_layout_set },
     { "__index", luaA_tag_index },
     { "__newindex", luaA_tag_newindex },
     { "__eq", luaA_tag_eq },

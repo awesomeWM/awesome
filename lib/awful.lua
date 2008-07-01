@@ -342,7 +342,7 @@ end
 function P.layout.get(screen)
     local t = P.tag.selected(screen)
     if t then
-        return t:layout_get()
+        return t.layout
     end
 end
 
@@ -441,7 +441,7 @@ function P.layout.inc(layouts, i)
 	if new_layout_index == 0 then
 	    new_layout_index = number_of_layouts
 	end
-	t:layout_set(layouts[new_layout_index])
+	t.layout = layouts[new_layout_index]
     end
 end
 
@@ -450,7 +450,7 @@ end
 function P.layout.set(layout)
     local t = P.tag.selected()
     if t then
-	t:layout_set(layout)
+	t.layout = layout
     end
 end
 
