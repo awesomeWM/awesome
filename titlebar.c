@@ -443,49 +443,6 @@ luaA_titlebar_colors_set(lua_State *L)
     return 0;
 }
 
-/** Set titlebar border color and width.
- * \param L The Lua VM state.
- * \return The number of value pushed.
- *
- * \luastack
- * \lvalue A titlebar.
- * \lparam A table with keys `color' and `width'.
- */
-static int
-luaA_titlebar_border_set(lua_State *L)
-{
-    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
-    client_t *c;
-    const char *color;
-    int border_width;
-
-    luaA_checktable(L, 2);
-
-    if((color = luaA_getopt_string(L, 2, "color", NULL)))
-    {
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &(*tb)->border.color);
-        if((*tb)->sw)
-            xcb_change_window_attributes(globalconf.connection, (*tb)->sw->window,
-                                         XCB_CW_BORDER_PIXEL, &(*tb)->border.color.pixel);
-    }
-
-    if((border_width = luaA_getopt_number(L, 2, "width", -1)) >= 0)
-    {
-        (*tb)->border.width = border_width;
-        if((*tb)->sw)
-            simplewindow_border_width_set((*tb)->sw, border_width);
-        if((c = client_getbytitlebar(*tb)) && client_isvisible(c, c->screen))
-        {
-            globalconf.screens[c->screen].need_arrange = true;
-            if(c->isfloating)
-                titlebar_update_geometry_floating(c);
-        }
-    }
-
-    return 0;
-}
-
 /** Titlebar newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -497,21 +454,42 @@ luaA_titlebar_newindex(lua_State *L)
     titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     client_t *c;
+    xcolor_t color;
+    int i;
 
     switch(a_tokenize(attr, len))
     {
       case A_TK_ALIGN:
         if((buf = luaL_checklstring(L, 3, &len)))
-        {
             (*titlebar)->align = draw_align_fromstr(buf, len);
-            if((c = client_getbytitlebar(*titlebar))
-               && client_isvisible(c, c->screen))
-                globalconf.screens[c->screen].need_arrange = true;
-        }
+        else
+            return 0;
         break;
+      case A_TK_BORDER_WIDTH:
+        if((i = luaL_checknumber(L, 3)) >= 0)
+            (*titlebar)->border.width = i;
+        else
+            return 0;
+        break;
+      case A_TK_BORDER_COLOR:
+        if((buf = luaL_checkstring(L, 3))
+           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+        {
+            xcolor_wipe(&(*titlebar)->border.color);
+            (*titlebar)->border.color = color;
+
+            if((*titlebar)->sw)
+                xcb_change_window_attributes(globalconf.connection, (*titlebar)->sw->window,
+                                             XCB_CW_BORDER_PIXEL, &(*titlebar)->border.color.pixel);
+        }
+        return 0;
       default:
         return 0;
     }
+
+    if((c = client_getbytitlebar(*titlebar))
+       && client_isvisible(c, c->screen))
+        globalconf.screens[c->screen].need_arrange = true;
 
     return 0;
 }
@@ -541,6 +519,12 @@ luaA_titlebar_index(lua_State *L)
     {
       case A_TK_ALIGN:
         lua_pushstring(L, draw_align_tostr((*titlebar)->align));
+        break;
+      case A_TK_BORDER_WIDTH:
+        lua_pushnumber(L, (*titlebar)->border.width);
+        break;
+      case A_TK_BORDER_COLOR:
+        lua_pushstring(L, (*titlebar)->border.color.name);
         break;
       default:
         return 0;
@@ -576,7 +560,6 @@ const struct luaL_reg awesome_titlebar_meta[] =
     { "widget_get", luaA_titlebar_widget_get },
     { "client_get", luaA_titlebar_client_get },
     { "colors_set", luaA_titlebar_colors_set },
-    { "border_set", luaA_titlebar_border_set },
     { "__index", luaA_titlebar_index },
     { "__newindex", luaA_titlebar_newindex },
     { "__eq", luaA_titlebar_eq },
