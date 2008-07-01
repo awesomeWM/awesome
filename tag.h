@@ -29,7 +29,7 @@
 #define IS_TILED(client, screen)            (client && !client->isfloating && !client->ismax && client_isvisible(client, screen))
 
 /* Contructor, destructor and referencors */
-tag_t *tag_new(const char *, layout_t *, double, int, int);
+tag_t *tag_new(const char *, ssize_t, layout_t *, double, int, int);
 
 static inline void
 tag_delete(tag_t **tag)

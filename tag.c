@@ -55,20 +55,21 @@ tag_view(tag_t *tag, bool view)
 }
 
 /** Create a new tag. Parameters values are checked.
- * \param name tag name
- * \param layout layout to use
- * \param mwfact master width factor
- * \param nmaster number of master windows
- * \param ncol number of columns for slaves windows
- * \return a new tag with all these parameters
+ * \param name Tag name.
+ * \param len Tag name length.
+ * \param layout Layout to use.
+ * \param mwfact Master width factor.
+ * \param nmaster Number of master windows.
+ * \param ncol Number of columns for slaves windows.
+ * \return A new tag with all these parameters.
  */
 tag_t *
-tag_new(const char *name, layout_t *layout, double mwfact, int nmaster, int ncol)
+tag_new(const char *name, ssize_t len, layout_t *layout, double mwfact, int nmaster, int ncol)
 {
     tag_t *tag;
 
     tag = p_new(tag_t, 1);
-    a_iso2utf8(name, &tag->name);
+    a_iso2utf8(&tag->name, name, len);
     tag->layout = layout;
 
     /* to avoid error */
@@ -313,6 +314,7 @@ luaA_tag_geti(lua_State *L)
 static int
 luaA_tag_new(lua_State *L)
 {
+    size_t len;
     tag_t *tag;
     int ncol, nmaster;
     const char *name, *lay;
@@ -327,11 +329,11 @@ luaA_tag_new(lua_State *L)
     mwfact = luaA_getopt_number(L, 2, "mwfact", 0.5);
     ncol = luaA_getopt_number(L, 2, "ncol", 1);
     nmaster = luaA_getopt_number(L, 2, "nmaster", 1);
-    lay = luaA_getopt_string(L, 2, "layout", "tile");
+    lay = luaA_getopt_lstring(L, 2, "layout", "tile", &len);
 
     layout = name_func_lookup(lay, LayoutList);
 
-    tag = tag_new(name,
+    tag = tag_new(name, len,
                   layout,
                   mwfact, nmaster, ncol);
 
@@ -443,9 +445,9 @@ luaA_tag_newindex(lua_State *L)
     switch(a_tokenize(attr, len))
     {
       case A_TK_NAME:
-        buf = luaL_checkstring(L, 3);
+        buf = luaL_checklstring(L, 3, &len);
         p_delete(&(*tag)->name);
-        a_iso2utf8(buf, &(*tag)->name);
+        a_iso2utf8(&(*tag)->name, buf, len);
         if((*tag)->screen != TAG_SCREEN_UNDEF)
             widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
         return 0;

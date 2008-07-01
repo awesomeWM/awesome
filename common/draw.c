@@ -56,18 +56,22 @@ void draw_parser_data_wipe(draw_parser_data_t *pdata)
     draw_image_delete(&pdata->bg_image);
 }
 
-/** Convert text from any charset to UTF-8 using iconv
- * \param iso the ISO string to convert
- * \return NULL if error, otherwise pointer to the new converted string
+/** Convert text from any charset to UTF-8 using iconv.
+ * \param iso The ISO string to convert.
+ * \param len The string size.
+ * \return NULL if error, otherwise pointer to the new converted string.
  */
 char *
-draw_iso2utf8(const char *iso)
+draw_iso2utf8(const char *iso, size_t len)
 {
     iconv_t iso2utf8;
-    size_t len, utf8len;
+    size_t utf8len;
     char *utf8, *utf8p;
 
-    if(!(len = a_strlen(iso)))
+    if(len < 0)
+        len = a_strlen(iso);
+
+    if(!len)
         return NULL;
 
     if(!a_strcmp(nl_langinfo(CODESET), "UTF-8"))

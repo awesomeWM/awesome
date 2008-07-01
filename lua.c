@@ -571,7 +571,7 @@ luaA_parserc(const char* rcfile)
     /* Assure there's at least one tag */
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         if(!globalconf.screens[screen].tags.len)
-            tag_append_to_screen(tag_new("default", layout_tile, 0.5, 1, 0), screen);
+            tag_append_to_screen(tag_new("default", sizeof("default"), layout_tile, 0.5, 1, 0), screen);
 
     return true;
 }

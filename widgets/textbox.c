@@ -136,10 +136,10 @@ luaA_textbox_newindex(lua_State *L)
     switch(a_tokenize(attr, len))
     {
       case A_TK_TEXT:
-        if((buf = luaL_checkstring(L, 3)))
+        if((buf = luaL_checklstring(L, 3, &len)))
         {
             p_delete(&d->text);
-            a_iso2utf8(buf, &d->text);
+            a_iso2utf8(&d->text, buf, len);
         }
         break;
       case A_TK_WIDTH:

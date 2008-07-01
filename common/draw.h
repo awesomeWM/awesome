@@ -142,18 +142,18 @@ draw_context_delete(draw_context_t **ctx)
 font_t *draw_font_new(xcb_connection_t *, int, const char *);
 void draw_font_delete(font_t **);
 
-char * draw_iso2utf8(const char *);
+char * draw_iso2utf8(const char *, size_t);
 
 static inline bool
-a_iso2utf8(const char *str, char **res)
+a_iso2utf8(char **dest, const char *str, ssize_t len)
 {
     char *utf8;
-    if((utf8 = draw_iso2utf8(str)))
+    if((utf8 = draw_iso2utf8(str, len)))
     {
-        *res = utf8;
+        *dest = utf8;
         return true;
     }
-    *res = a_strdup(str);
+    *dest = a_strdup(str);
     return false;
 }
 

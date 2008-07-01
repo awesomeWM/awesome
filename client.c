@@ -67,13 +67,14 @@ DO_LUA_EQ(client_t, client, "client")
 static bool
 client_loadprops(client_t * c, screen_t *screen)
 {
+    ssize_t len;
     tag_array_t *tags = &screen->tags;
     char *prop = NULL;
 
-    if(!xutil_gettextprop(globalconf.connection, c->win, _AWESOME_PROPERTIES, &prop))
+    if(!xutil_gettextprop(globalconf.connection, c->win, _AWESOME_PROPERTIES, &prop, &len))
         return false;
 
-    if(a_strlen(prop) != tags->len + 2)
+    if(len != tags->len + 2)
     {
         /* ignore property if the tag count isn't matching */
         p_delete(&prop);
@@ -151,13 +152,14 @@ void
 client_updatetitle(client_t *c)
 {
     char *name;
+    ssize_t len;
 
-    if(!xutil_gettextprop(globalconf.connection, c->win, _NET_WM_NAME, &name))
-        if(!xutil_gettextprop(globalconf.connection, c->win, WM_NAME, &name))
+    if(!xutil_gettextprop(globalconf.connection, c->win, _NET_WM_NAME, &name, &len))
+        if(!xutil_gettextprop(globalconf.connection, c->win, WM_NAME, &name, &len))
             return;
 
     p_delete(&c->name);
-    a_iso2utf8(name, &c->name);
+    a_iso2utf8(&c->name, name, len);
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
@@ -1311,10 +1313,11 @@ luaA_client_name_get(lua_State *L)
 static int
 luaA_client_name_set(lua_State *L)
 {
+    size_t len;
     client_t **c = luaA_checkudata(L, 1, "client");
-    const char *name = luaL_checkstring(L, 2);
+    const char *name = luaL_checklstring(L, 2, &len);
     p_delete(&(*c)->name);
-    a_iso2utf8(name, &(*c)->name);
+    a_iso2utf8(&(*c)->name, name, len);
     return 0;
 }
 

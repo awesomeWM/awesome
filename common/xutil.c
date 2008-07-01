@@ -32,14 +32,15 @@
 #include "common/atoms.h"
 
 /** Get the string value of an atom.
- * \param conn X connection
- * \param w window
- * \param atom the atom
- * \param text buffer to fill
- * \return true on sucess, falsse on failure
+ * \param conn X connection.
+ * \param w Window.
+ * \param atom The atom.
+ * \param text Buffer to fill.
+ * \param len Length of the filled buffer.
+ * \return True on sucess, false on failure.
  */
 bool
-xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom, char **text)
+xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom, char **text, ssize_t *len)
 {
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r;
@@ -72,6 +73,7 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom, char 
         /* use memcpy() because prop_val may not be \0 terminated */
         memcpy(*text, prop_val, prop_r->value_len);
         (*text)[prop_r->value_len] = '\0';
+        *len = prop_r->value_len;
     }
 
     p_delete(&prop_r);

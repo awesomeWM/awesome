@@ -96,7 +96,7 @@ typedef struct
 
 class_hint_t *xutil_get_class_hint(xcb_connection_t *, xcb_window_t);
 
-bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **);
+bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 
 void xutil_getlockmask(xcb_connection_t *, xcb_key_symbols_t *,
                        unsigned int *, unsigned int *, unsigned int *);
