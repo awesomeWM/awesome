@@ -1272,24 +1272,6 @@ luaA_client_class_get(lua_State *L)
     return 1;
 }
 
-/** Set the default icon for this client.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A path to an icon image, or nil to remove.
- */
-static int
-luaA_client_icon_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    const char *icon = luaL_optstring(L, 2, NULL);
-
-    p_delete(&(*c)->icon_path);
-    (*c)->icon_path = a_strdup(icon);
-
-    return 0;
-}
-
 /** Set the client's titlebar.
  * \param L The Lua VM state.
  * \luastack
@@ -1427,8 +1409,14 @@ luaA_client_newindex(lua_State *L)
                 globalconf.screens[(*c)->screen].need_arrange = true;
         }
         break;
-      default:
+      case A_TK_ICON_PATH:
+        buf = luaL_checkstring(L, 3);
+        p_delete(&(*c)->icon_path);
+        (*c)->icon_path = a_strdup(buf);
+        widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
         break;
+      default:
+        return 0;
     }
 
     return 0;
@@ -1456,6 +1444,8 @@ luaA_client_index(lua_State *L)
       case A_TK_HIDE:
         lua_pushboolean(L, (*c)->ishidden);
         break;
+      case A_TK_ICON_PATH:
+        lua_pushstring(L, (*c)->icon_path);
       default:
         break;
     }
@@ -1491,7 +1481,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "redraw", luaA_client_redraw },
     { "floating_set", luaA_client_floating_set },
     { "floating_get", luaA_client_floating_get },
-    { "icon_set", luaA_client_icon_set },
     { "class_get", luaA_client_class_get },
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },
