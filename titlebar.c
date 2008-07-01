@@ -486,6 +486,69 @@ luaA_titlebar_border_set(lua_State *L)
     return 0;
 }
 
+/** Titlebar newindex.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_titlebar_newindex(lua_State *L)
+{
+    size_t len;
+    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
+    const char *buf, *attr = luaL_checklstring(L, 2, &len);
+    client_t *c;
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_ALIGN:
+        if((buf = luaL_checklstring(L, 3, &len)))
+        {
+            (*titlebar)->align = draw_align_fromstr(buf, len);
+            if((c = client_getbytitlebar(*titlebar))
+               && client_isvisible(c, c->screen))
+                globalconf.screens[c->screen].need_arrange = true;
+        }
+        break;
+      default:
+        return 0;
+    }
+
+    return 0;
+}
+
+/** Titlebar index.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_titlebar_index(lua_State *L)
+{
+    size_t len;
+    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    lua_getmetatable(L, 1);
+    lua_pushvalue(L, 2);
+    lua_rawget(L, -2);
+    if (!lua_isnil(L, -1))
+    {
+        lua_remove(L, -2);
+        return 1;
+    }
+    lua_pop(L, 2);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_ALIGN:
+        lua_pushstring(L, draw_align_tostr((*titlebar)->align));
+        break;
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
 /** Convert a titlebar to a printable string.
  * \param L The Lua VM state.
  * \return The number of value pushed.
@@ -514,6 +577,8 @@ const struct luaL_reg awesome_titlebar_meta[] =
     { "client_get", luaA_titlebar_client_get },
     { "colors_set", luaA_titlebar_colors_set },
     { "border_set", luaA_titlebar_border_set },
+    { "__index", luaA_titlebar_index },
+    { "__newindex", luaA_titlebar_newindex },
     { "__eq", luaA_titlebar_eq },
     { "__gc", luaA_titlebar_gc },
     { "__tostring", luaA_titlebar_tostring },
