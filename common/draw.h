@@ -197,6 +197,7 @@ void draw_image_from_argb_data(draw_context_t *, int, int, int, int, int, unsign
 void draw_rotate(draw_context_t *, xcb_drawable_t, xcb_drawable_t, int, int, int, int, double, int, int);
 area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *, draw_parser_data_t *);
 alignment_t draw_align_fromstr(const char *, ssize_t);
+const char *draw_align_tostr(alignment_t);
 
 /** Wipe a color resources.
  * \param color The color to wipe out.

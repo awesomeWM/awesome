@@ -1066,6 +1066,24 @@ draw_align_fromstr(const char *align, ssize_t len)
     }
 }
 
+/** Transform an alignment to a string.
+ * \param a The alignment.
+ * \return A string which must not be freed.
+ */
+const char *
+draw_align_tostr(alignment_t a)
+{
+    switch(a)
+    {
+      case AlignLeft:   return "left";
+      case AlignCenter: return "center";
+      case AlignRight:  return "right";
+      case AlignFlex:   return "flex";
+      case AlignAuto:   return "auto";
+      default:          return NULL;
+    }
+}
+
 #define RGB_COLOR_8_TO_16(i) (65535 * ((i) & 0xff) / 255)
 
 /** Initialize an X color.
