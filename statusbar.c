@@ -329,19 +329,19 @@ luaA_statusbar_widget_remove(lua_State *L)
 {
     statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
     widget_t **widget = luaA_checkudata(L, 2, "widget");
-    widget_node_t *w;
+    widget_node_t *w, *wnext;
 
-widget_remove_loop:
-    for(w = (*sb)->widgets; w; w = w->next)
+    for(w = (*sb)->widgets; w; w = wnext)
+    {
+        wnext = w->next;
         if(w->widget == *widget)
         {
             widget_unref(widget);
             widget_node_list_detach(&(*sb)->widgets, w);
             p_delete(&w);
             (*sb)->need_update = true;
-            /* need to jump out the loop */
-            goto widget_remove_loop;
         }
+    }
 
     return 0;
 }
