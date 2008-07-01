@@ -124,23 +124,17 @@ position_fromstr(const char *pos, ssize_t len)
  * \param p The position.
  * \return A position string.
  */
-char *
+const char *
 position_tostr(position_t p)
 {
     switch(p)
     {
-      case Top:
-        return a_strdup("top");
-      case Bottom:
-        return a_strdup("bottom");
-      case Right:
-        return a_strdup("right");
-      case Left:
-        return a_strdup("left");
-      case Auto:
-        return a_strdup("auto");
-      default:
-        return a_strdup("off");
+      case Top:    return "top";
+      case Bottom: return "bottom";
+      case Right:  return "right";
+      case Left:   return "left";
+      case Auto:   return "auto";
+      default:     return "off";
     }
 }
 
