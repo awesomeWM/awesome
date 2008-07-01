@@ -8,29 +8,27 @@ install: cmake
 	@echo "Installing…"
 	make -C build install
 
-cmake: build CMakeLists.txt
-CMakeLists.txt:	awesomeConfig.cmake
-awesomeConfig.cmake:
+cmake: build/cmake-stamp
+build/cmake-stamp: build CMakeLists.txt awesomeConfig.cmake
 	@echo "Running cmake…"
 	cd ${builddir} && cmake "$@" ..
+	touch ${builddir}/cmake-stamp
 
-build:
+build: awesome awesome-client
 	@echo -n "Creating new build directory…"
 	@mkdir -p ${builddir}
+	@ln -s -f ${builddir} build
 	@echo " done"
 
-	@echo -n "Setting up links…"
-	@rm build
-	@ln -s ${builddir} build
+awesome:
+	@ln -s -f ${builddir}/awesome awesome
 
-	@rm awesome awesome-client
-	@ln -s ${builddir}/awesome awesome
-	@ln -s ${builddir}/awesome-client awesome-client
-	@echo " done"
+awesome-client:
+	@ln -s -f ${builddir}/awesome-client awesome-client
 
 clean:
 	@echo -n "Cleaning up build directory…"
-	@rm -rf ${builddir}
+	@rm -rf ${builddir} build
 	@echo " done"
 
 .PHONY: clean
