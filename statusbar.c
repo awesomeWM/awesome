@@ -316,27 +316,6 @@ luaA_statusbar_position_get(lua_State *L)
     return 1;
 }
 
-/** Set the statusbar alignment on screen.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A statusbar,
- * \lparam An alignment: right, left or center.
- */
-static int
-luaA_statusbar_align_set(lua_State *L)
-{
-    size_t len;
-    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
-    const char *al = luaL_checklstring(L, 2, &len);
-    alignment_t align = draw_align_fromstr(al, len);
-
-    (*sb)->align = align;
-    statusbar_position_update(*sb, (*sb)->position);
-
-    return 0;
-}
-
 /** Set the default statusbar colors outside the constructor
  * \param L The Lua VM state.
  * \return The number of elements pushed on the stack.
@@ -546,7 +525,7 @@ luaA_statusbar_new(lua_State *L)
     sb = p_new(statusbar_t, 1);
 
     sb->name = a_strdup(buf);
-    
+
     if(!(buf = luaA_getopt_string(L, 2, "fg", NULL))
        || !xcolor_new(globalconf.connection, globalconf.default_screen,
                      buf, &sb->colors.fg))
@@ -601,6 +580,64 @@ luaA_statusbar_widget_get(lua_State *L)
     return 1;
 }
 
+/** Statusbar index.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_statusbar_index(lua_State *L)
+{
+    size_t len;
+    statusbar_t **statusbar = luaA_checkudata(L, 1, "statusbar");
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    lua_getmetatable(L, 1);
+    lua_pushvalue(L, 2);
+    lua_rawget(L, -2);
+    if (!lua_isnil(L, -1))
+    {
+        lua_remove(L, -2);
+        return 1;
+    }
+    lua_pop(L, 2);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_ALIGN:
+        lua_pushstring(L, draw_align_tostr((*statusbar)->align));
+        break;
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
+/** Statusbar newindex.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_statusbar_newindex(lua_State *L)
+{
+    size_t len;
+    statusbar_t **statusbar = luaA_checkudata(L, 1, "statusbar");
+    const char *buf, *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_ALIGN:
+        buf = luaL_checklstring(L, 3, &len);
+        (*statusbar)->align = draw_align_fromstr(buf, len);
+        statusbar_position_update(*statusbar, (*statusbar)->position);
+        break;
+      default:
+        return 0;
+    }
+
+    return 0;
+}
+
 const struct luaL_reg awesome_statusbar_methods[] =
 {
     { "__call", luaA_statusbar_new },
@@ -613,10 +650,11 @@ const struct luaL_reg awesome_statusbar_meta[] =
     { "widget_get", luaA_statusbar_widget_get },
     { "position_set", luaA_statusbar_position_set },
     { "position_get", luaA_statusbar_position_get },
-    { "align_set", luaA_statusbar_align_set },
     { "colors_set", luaA_statusbar_colors_set },
     { "add", luaA_statusbar_add },
     { "remove", luaA_statusbar_remove },
+    { "__index", luaA_statusbar_index },
+    { "__newindex", luaA_statusbar_newindex },
     { "__gc", luaA_statusbar_gc },
     { "__eq", luaA_statusbar_eq },
     { "__tostring", luaA_statusbar_tostring },
