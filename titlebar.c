@@ -414,35 +414,6 @@ luaA_titlebar_client_get(lua_State *L)
     return 0;
 }
 
-/** Set titlebar colors.
- * \param L The Lua VM state.
- * \return The number of value pushed.
- *
- * \luastack
- * \lvalue A titlebar.
- * \lparam A table with keys `fg' and `bg', for foreground and background colors.
- */
-static int
-luaA_titlebar_colors_set(lua_State *L)
-{
-    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
-    const char *color;
-
-    luaA_checktable(L, 2);
-
-    if((color = luaA_getopt_string(L, 2, "fg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &(*tb)->colors.fg);
-
-    if((color = luaA_getopt_string(L, 2, "bg", NULL)))
-        xcolor_new(globalconf.connection, globalconf.default_screen,
-                       color, &(*tb)->colors.bg);
-
-    titlebar_draw(client_getbytitlebar(*tb));
-
-    return 0;
-}
-
 /** Titlebar newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -481,6 +452,24 @@ luaA_titlebar_newindex(lua_State *L)
             if((*titlebar)->sw)
                 xcb_change_window_attributes(globalconf.connection, (*titlebar)->sw->window,
                                              XCB_CW_BORDER_PIXEL, &(*titlebar)->border.color.pixel);
+        }
+        return 0;
+      case A_TK_FG:
+        if((buf = luaL_checkstring(L, 3))
+           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+        {
+            xcolor_wipe(&(*titlebar)->colors.fg);
+            (*titlebar)->colors.fg = color;
+            titlebar_draw(client_getbytitlebar(*titlebar));
+        }
+        return 0;
+      case A_TK_BG:
+        if((buf = luaL_checkstring(L, 3))
+           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+        {
+            xcolor_wipe(&(*titlebar)->colors.bg);
+            (*titlebar)->colors.bg = color;
+            titlebar_draw(client_getbytitlebar(*titlebar));
         }
         return 0;
       default:
@@ -526,6 +515,12 @@ luaA_titlebar_index(lua_State *L)
       case A_TK_BORDER_COLOR:
         lua_pushstring(L, (*titlebar)->border.color.name);
         break;
+      case A_TK_FG:
+        lua_pushstring(L, (*titlebar)->colors.fg.name);
+        break;
+      case A_TK_BG:
+        lua_pushstring(L, (*titlebar)->colors.bg.name);
+        break;
       default:
         return 0;
     }
@@ -559,7 +554,6 @@ const struct luaL_reg awesome_titlebar_meta[] =
     { "widget_add", luaA_titlebar_widget_add },
     { "widget_get", luaA_titlebar_widget_get },
     { "client_get", luaA_titlebar_client_get },
-    { "colors_set", luaA_titlebar_colors_set },
     { "__index", luaA_titlebar_index },
     { "__newindex", luaA_titlebar_newindex },
     { "__eq", luaA_titlebar_eq },
