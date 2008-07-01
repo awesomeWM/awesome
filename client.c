@@ -1364,41 +1364,6 @@ luaA_client_unmanage(lua_State *L)
     return 0;
 }
 
-/** Hide or unhide a client.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A client.
- */
-static int
-luaA_client_hide_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    bool v = luaA_checkboolean(L, 2);
-    if(v != (*c)->ishidden)
-    {
-        (*c)->ishidden = v;
-        globalconf.screens[(*c)->screen].need_arrange = true;
-    }
-    return 0;
-}
-
-/** Guess if a client has been hidden.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A client.
- * \lreturn A boolean, true if the client has been hidden with hide(), false
- * otherwise.
- */
-static int
-luaA_client_hide_get(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    lua_pushboolean(L, (*c)->ishidden);
-    return 1;
-}
-
 /** Set the floating placement algorithm. This will be used to compute the
  * initial floating position of the window then floating.
  * \param L The Lua VM state.
@@ -1443,6 +1408,7 @@ luaA_client_newindex(lua_State *L)
     size_t len;
     client_t **c = luaA_checkudata(L, 1, "client");
     const char *buf = luaL_checklstring(L, 2, &len);
+    bool b;
 
     switch(a_tokenize(buf, len))
     {
@@ -1450,6 +1416,16 @@ luaA_client_newindex(lua_State *L)
         buf = luaL_checklstring(L, 3, &len);
         p_delete(&(*c)->name);
         a_iso2utf8(&(*c)->name, buf, len);
+        widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
+        break;
+      case A_TK_HIDE:
+        b = luaA_checkboolean(L, 3);
+        if(b != (*c)->ishidden)
+        {
+            (*c)->ishidden = b;
+            if(client_isvisible(*c, (*c)->screen))
+                globalconf.screens[(*c)->screen].need_arrange = true;
+        }
         break;
       default:
         break;
@@ -1476,6 +1452,9 @@ luaA_client_index(lua_State *L)
     {
       case A_TK_NAME:
         lua_pushstring(L, (*c)->name);
+        break;
+      case A_TK_HIDE:
+        lua_pushboolean(L, (*c)->ishidden);
         break;
       default:
         break;
@@ -1517,8 +1496,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },
     { "unmanage", luaA_client_unmanage },
-    { "hide_set", luaA_client_hide_set },
-    { "hide_get", luaA_client_hide_get },
     { "mouse_add", luaA_client_mouse_add },
     { "mouse_remove", luaA_client_mouse_remove },
     { "__index", luaA_client_index },

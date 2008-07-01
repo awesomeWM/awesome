@@ -57,9 +57,9 @@ function P.display(tabindex, cl)
     local p = tabbed[tabindex][1]
     
     if cl and p ~= cl then
-        cl:hide(false)
+        cl.hide = false
         cl:swap(p)
-        p:hide(true)
+        p.hide = true
         cl:focus_set()
 
         tabbed[tabindex][1] = cl
@@ -183,7 +183,7 @@ function P.untab(cl)
         table.remove(tabbed, tabindex)
     end
 
-    c:hide(false)
+    c.hide = false
     awful.hooks.userhook_call('untabbed', {c})
 end
 
@@ -191,7 +191,7 @@ end
 -- @param tabindex The tab index.
 function P.untab_all(tabindex)
     for i,c in pairs(tabbed[tabindex][2]) do
-        c:hide(false)
+        c.hide = false
         awful.hooks.userhook_call('untabbed', {c})
     end
 
@@ -263,6 +263,6 @@ function P.autotab_start()
 end
 
 -- Set up hook so we don't leave lost hidden clients
-awful.hooks.unmanage(function (c) P.untab(c) end)
+awful.hooks.unmanage(P.untab)
 
 return P
