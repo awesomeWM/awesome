@@ -89,7 +89,7 @@ if(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
     file(WRITE ${VERSION_STAMP_FILE} ${VERSION})
     # create a version_stamp target later
     set(BUILD_FROM_GIT TRUE)
-else()
+elseif( EXISTS ${SOURCE_DIR}/.version_stamp )
     # get version from version stamp
     file(READ ${SOURCE_DIR}/.version_stamp VERSION)
 endif()
