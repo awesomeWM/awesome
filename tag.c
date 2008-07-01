@@ -338,38 +338,6 @@ luaA_tag_new(lua_State *L)
     return luaA_tag_userdata_new(L, tag);
 }
 
-/** Get the tag name.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lreturn The tag name.
- */
-static int
-luaA_tag_name_get(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    lua_pushstring(L, (*tag)->name);
-    return 1;
-}
-
-/** Set the tag name.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lparam A string with the new tag name.
- */
-static int
-luaA_tag_name_set(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    const char *name = luaL_checkstring(L, 2);
-    p_delete(&(*tag)->name);
-    a_iso2utf8(name, &(*tag)->name);
-    return 0;
-}
-
 /** Get the layout of the tag.
  * \param L The Lua VM state.
  *
@@ -437,6 +405,9 @@ luaA_tag_index(lua_State *L)
 
     switch(a_tokenize(attr, len))
     {
+      case A_TK_NAME:
+        lua_pushstring(L, (*tag)->name);
+        break;
       case A_TK_SELECTED:
         lua_pushboolean(L, (*tag)->selected);
         break;
@@ -465,12 +436,19 @@ luaA_tag_newindex(lua_State *L)
 {
     size_t len;
     tag_t **tag = luaA_checkudata(L, 1, "tag");
-    const char *attr = luaL_checklstring(L, 2, &len);
+    const char *buf, *attr = luaL_checklstring(L, 2, &len);
     double d;
     int i;
 
     switch(a_tokenize(attr, len))
     {
+      case A_TK_NAME:
+        buf = luaL_checkstring(L, 3);
+        p_delete(&(*tag)->name);
+        a_iso2utf8(buf, &(*tag)->name);
+        if((*tag)->screen != TAG_SCREEN_UNDEF)
+            widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
+        return 0;
       case A_TK_SELECTED:
         tag_view(*tag, luaA_checkboolean(L, 3));
         return 0;
@@ -516,8 +494,6 @@ const struct luaL_reg awesome_tag_methods[] =
 const struct luaL_reg awesome_tag_meta[] =
 {
     { "add", luaA_tag_add },
-    { "name_get", luaA_tag_name_get },
-    { "name_set", luaA_tag_name_set },
     { "layout_get", luaA_tag_layout_get },
     { "layout_set", luaA_tag_layout_set },
     { "__index", luaA_tag_index },

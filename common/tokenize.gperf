@@ -24,6 +24,7 @@ line
 mwfact
 ncol
 nmaster
+name
 on
 plot_data_add
 plot_properties_set
