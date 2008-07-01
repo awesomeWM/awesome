@@ -96,17 +96,16 @@ textbox_destructor(widget_t *w)
 
 /** The __index method for a textbox object.
  * \param L The Lua VM state.
+ * \param token The key token.
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_textbox_index(lua_State *L)
+luaA_textbox_index(lua_State *L, awesome_token_t token)
 {
-    size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
-    const char *attr = luaL_checklstring(L, 2, &len);
     textbox_data_t *d = (*widget)->data;
 
-    switch(a_tokenize(attr, len))
+    switch(token)
     {
       case A_TK_TEXT:
         lua_pushstring(L, d->text);
@@ -123,17 +122,18 @@ luaA_textbox_index(lua_State *L)
 
 /** The __newindex method for a textbox object.
  * \param L The Lua VM state.
+ * \param token The key token.
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_textbox_newindex(lua_State *L)
+luaA_textbox_newindex(lua_State *L, awesome_token_t token)
 {
     size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
-    const char *buf, *attr = luaL_checklstring(L, 2, &len);
+    const char *buf;
     textbox_data_t *d = (*widget)->data;
 
-    switch(a_tokenize(attr, len))
+    switch(token)
     {
       case A_TK_TEXT:
         if((buf = luaL_checklstring(L, 3, &len)))

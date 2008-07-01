@@ -519,17 +519,16 @@ luaA_progressbar_bar_data_add(lua_State *L)
 
 /** Index function for progressbar.
  * \param L The Lua VM state.
+ * \param token The key token.
  * \return The number of elements pushed on the stack.
  */
 static int
-luaA_progressbar_index(lua_State *L)
+luaA_progressbar_index(lua_State *L, awesome_token_t token)
 {
-    size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     progressbar_data_t *d = (*widget)->data;
-    const char *attr = luaL_checklstring(L, 2, &len);
 
-    switch(a_tokenize(attr, len))
+    switch(token)
     {
       case A_TK_BAR_PROPERTIES_SET:
         lua_pushcfunction(L, luaA_progressbar_bar_properties_set);
@@ -570,17 +569,16 @@ luaA_progressbar_index(lua_State *L)
 
 /** Newindex function for progressbar.
  * \param L The Lua VM state.
+ * \param token The key token.
  * \return The number of elements pushed on the stack.
  */
 static int
-luaA_progressbar_newindex(lua_State *L)
+luaA_progressbar_newindex(lua_State *L, awesome_token_t token)
 {
-    size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     progressbar_data_t *d = (*widget)->data;
-    const char *attr = luaL_checklstring(L, 2, &len);
 
-    switch(a_tokenize(attr, len))
+    switch(token)
     {
       case A_TK_GAP:
         d->gap = luaL_checknumber(L, 3);

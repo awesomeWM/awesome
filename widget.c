@@ -383,6 +383,7 @@ luaA_widget_index(lua_State *L)
     size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *buf = luaL_checklstring(L, 2, &len);
+    awesome_token_t token;
 
     lua_getmetatable(L, 1);
     lua_pushvalue(L, 2);
@@ -394,7 +395,7 @@ luaA_widget_index(lua_State *L)
     }
     lua_pop(L, 2);
 
-    switch(a_tokenize(buf, len))
+    switch((token = a_tokenize(buf, len)))
     {
       case A_TK_VISIBLE:
         lua_pushboolean(L, (*widget)->isvisible);
@@ -403,7 +404,7 @@ luaA_widget_index(lua_State *L)
         break;
     }
 
-    return (*widget)->index ? (*widget)->index(L) : 0;
+    return (*widget)->index ? (*widget)->index(L, token) : 0;
 }
 
 /** Generic widget newindex.
@@ -416,8 +417,9 @@ luaA_widget_newindex(lua_State *L)
     size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *buf = luaL_checklstring(L, 2, &len);
+    awesome_token_t token;
 
-    switch(a_tokenize(buf, len))
+    switch((token = a_tokenize(buf, len)))
     {
       case A_TK_VISIBLE:
         (*widget)->isvisible = luaA_checkboolean(L, 3);
@@ -426,7 +428,7 @@ luaA_widget_newindex(lua_State *L)
         break;
     }
 
-    return (*widget)->newindex ? (*widget)->newindex(L) : 0;
+    return (*widget)->newindex ? (*widget)->newindex(L, token) : 0;
 }
 
 const struct luaL_reg awesome_widget_methods[] =

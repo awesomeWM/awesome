@@ -425,17 +425,16 @@ luaA_graph_plot_data_add(lua_State *L)
 
 /** Index function for graph widget.
  * \param L The Lua VM state.
+ * \param token The key token.
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_graph_index(lua_State *L)
+luaA_graph_index(lua_State *L, awesome_token_t token)
 {
-    size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     graph_data_t *d = (*widget)->data;
-    const char *attr = luaL_checklstring(L, 2, &len);
 
-    switch(a_tokenize(attr, len))
+    switch(token)
     {
       case A_TK_PLOT_PROPERTIES_SET:
         lua_pushcfunction(L, luaA_graph_plot_properties_set);
@@ -477,21 +476,22 @@ luaA_graph_index(lua_State *L)
 
 /** Newindex function for graph widget.
  * \param L The Lua VM state.
+ * \param token The key token.
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_graph_newindex(lua_State *L)
+luaA_graph_newindex(lua_State *L, awesome_token_t token)
 {
     size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     graph_data_t *d = (*widget)->data;
-    const char *buf, *attr = luaL_checklstring(L, 2, &len);
+    const char *buf;
     int width;
     plot_t *plot;
     position_t pos;
     xcolor_t color;
 
-    switch(a_tokenize(attr, len))
+    switch(token)
     {
       case A_TK_HEIGHT:
         d->height = luaL_checknumber(L, 3);
