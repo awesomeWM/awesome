@@ -323,7 +323,7 @@ function hook_manage(c)
     -- if they're not focusable, so set border anyway.
     c:border_set({ width = border_width, color = border_normal })
     c:focus_set()
-    if floatings[c:name_get():lower()] then
+    if floatings[c.name:lower()] then
         c:floating_set(true)
     end
     -- Honor size hints

@@ -1290,37 +1290,6 @@ luaA_client_icon_set(lua_State *L)
     return 0;
 }
 
-/** Get the client name.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lreturn A string with the client name.
- */
-static int
-luaA_client_name_get(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    lua_pushstring(L, (*c)->name);
-    return 1;
-}
-
-/** Change the client name. It'll change it only from awesome point of view.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A string with the new client name.
- */
-static int
-luaA_client_name_set(lua_State *L)
-{
-    size_t len;
-    client_t **c = luaA_checkudata(L, 1, "client");
-    const char *name = luaL_checklstring(L, 2, &len);
-    p_delete(&(*c)->name);
-    a_iso2utf8(&(*c)->name, name, len);
-    return 0;
-}
-
 /** Set the client's titlebar.
  * \param L The Lua VM state.
  * \luastack
@@ -1464,6 +1433,57 @@ luaA_honorsizehints_set(lua_State *L)
     return 0;
 }
 
+/** Client newindex.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_newindex(lua_State *L)
+{
+    size_t len;
+    client_t **c = luaA_checkudata(L, 1, "client");
+    const char *buf = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_NAME:
+        buf = luaL_checklstring(L, 3, &len);
+        p_delete(&(*c)->name);
+        a_iso2utf8(&(*c)->name, buf, len);
+        break;
+      default:
+        break;
+    }
+
+    return 0;
+}
+
+/** Client index.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_index(lua_State *L)
+{
+    size_t len;
+    client_t **c = luaA_checkudata(L, 1, "client");
+    const char *buf = luaL_checklstring(L, 2, &len);
+
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_NAME:
+        lua_pushstring(L, (*c)->name);
+        break;
+      default:
+        break;
+    }
+
+    return 1;
+}
+
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },
@@ -1477,8 +1497,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "floating_placement_set", luaA_client_floating_placement_set },
     { "titlebar_set", luaA_client_titlebar_set },
     { "titlebar_get", luaA_client_titlebar_get },
-    { "name_get", luaA_client_name_get },
-    { "name_set", luaA_client_name_set },
     { "screen_set", luaA_client_screen_set },
     { "screen_get", luaA_client_screen_get },
     { "border_set", luaA_client_border_set },
@@ -1503,6 +1521,8 @@ const struct luaL_reg awesome_client_meta[] =
     { "hide_get", luaA_client_hide_get },
     { "mouse_add", luaA_client_mouse_add },
     { "mouse_remove", luaA_client_mouse_remove },
+    { "__index", luaA_client_index },
+    { "__newindex", luaA_client_newindex },
     { "__eq", luaA_client_eq },
     { "__tostring", luaA_client_tostring },
     { NULL, NULL }
