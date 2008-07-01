@@ -347,8 +347,8 @@ luaA_titlebar_widget_add(lua_State *L)
 {
     titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
     widget_t **widget = luaA_checkudata(L, 2, "widget");
-    widget_node_t *witer, *w = p_new(widget_node_t, 1);
-
+    widget_node_t *witer, *w;
+   
     if((*widget)->type == systray_new)
         luaL_error(L, "cannot add systray widget to titlebar");
 
@@ -358,6 +358,8 @@ luaA_titlebar_widget_add(lua_State *L)
            && !a_strcmp(witer->widget->name, (*widget)->name))
             luaL_error(L, "a widget with name `%s' already on titlebar", witer->widget->name);
 
+    w = p_new(widget_node_t, 1);
+
     w->widget = *widget;
     widget_node_list_append(&(*tb)->widgets, w);
     widget_ref(widget);
@@ -366,6 +368,36 @@ luaA_titlebar_widget_add(lua_State *L)
 
     return 0;
 }
+
+/** Remove a widget from a titlebar.
+ * \param L The Lua VM State.
+ *
+ * \luastack
+ * \lvalue A statusbar.
+ * \lparam A widget.
+ */
+static int
+luaA_titlebar_widget_remove(lua_State *L)
+{
+    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
+    widget_t **widget = luaA_checkudata(L, 2, "widget");
+    widget_node_t *w, *wnext;
+
+    for(w = (*tb)->widgets; w; w = wnext)
+    {
+        wnext = w->next;
+        if(w->widget == *widget)
+        {
+            widget_unref(widget);
+            widget_node_list_detach(&(*tb)->widgets, w);
+            p_delete(&w);
+            titlebar_draw(client_getbytitlebar(*tb));
+        }
+    }
+
+    return 0;
+}
+
 
 /** Get all widgets from a titlebar.
  * \param L The Lua VM state.
@@ -545,6 +577,7 @@ const struct luaL_reg awesome_titlebar_methods[] =
 const struct luaL_reg awesome_titlebar_meta[] =
 {
     { "widget_add", luaA_titlebar_widget_add },
+    { "widget_remove", luaA_titlebar_widget_remove },
     { "widget_get", luaA_titlebar_widget_get },
     { "client_get", luaA_titlebar_client_get },
     { "__index", luaA_titlebar_index },
