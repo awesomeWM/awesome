@@ -15,6 +15,7 @@ center
 color
 fg
 flex
+floating
 focus
 gap
 grow

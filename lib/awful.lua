@@ -316,7 +316,7 @@ end
 function P.client.togglefloating(c)
     local sel = c or client.focus_get();
     if sel then
-        sel:floating_set(not sel:floating_get())
+        sel.floating = not sel.floating
     end
 end
 

@@ -1177,36 +1177,6 @@ luaA_client_raise(lua_State *L)
     return 0;
 }
 
-/** Set the client floating attribute.
- * \param L The Lua VM state.
- * \luastack
- * \lparam A client.
- * \lparam A boolean, true to set, false to unset.
- */
-static int
-luaA_client_floating_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    bool f = luaA_checkboolean(L, 2);
-    client_setfloating(*c, f);
-    return 0;
-}
-
-/** Check if a client has the floating attribute.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lreturn A boolean, true if the client has the floating attribute set, false
- * otherwise.
- */
-static int
-luaA_client_floating_get(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    lua_pushboolean(L, (*c)->isfloating);
-    return 1;
-}
-
 /** Redraw a client by unmapping and mapping it quickly.
  * \param L The Lua VM state.
  *
@@ -1403,6 +1373,9 @@ luaA_client_newindex(lua_State *L)
         if(d == -1 || (d >= 0 && d <= 1))
             window_settrans((*c)->win, d);
         break;
+      case A_TK_FLOATING:
+        client_setfloating(*c, luaA_checkboolean(L, 3));
+        break;
       default:
         return 0;
     }
@@ -1434,6 +1407,9 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_ICON_PATH:
         lua_pushstring(L, (*c)->icon_path);
+        break;
+      case A_TK_FLOATING:
+        lua_pushboolean(L, (*c)->isfloating);
         break;
       default:
         break;
@@ -1467,8 +1443,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "focus_set", luaA_client_focus_set  },
     { "raise", luaA_client_raise },
     { "redraw", luaA_client_redraw },
-    { "floating_set", luaA_client_floating_set },
-    { "floating_get", luaA_client_floating_get },
     { "class_get", luaA_client_class_get },
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },

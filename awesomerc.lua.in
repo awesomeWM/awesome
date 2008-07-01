@@ -324,7 +324,7 @@ function hook_manage(c)
     c:border_set({ width = border_width, color = border_normal })
     c:focus_set()
     if floatings[c.name:lower()] then
-        c:floating_set(true)
+        c.floating = true
     end
     -- Honor size hints
     c:honorsizehints_set(true)
