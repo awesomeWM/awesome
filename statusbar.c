@@ -274,48 +274,6 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     statusbar->need_update = true;
 }
 
-/** Set the statusbar position.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A statusbar.
- * \lparam A position: left, right, top, bottom or off.
- */
-static int
-luaA_statusbar_position_set(lua_State *L)
-{
-    size_t len;
-    statusbar_t *s, **sb = luaA_checkudata(L, 1, "statusbar");
-    const char *pos = luaL_checklstring(L, 2, &len);
-    position_t position = position_fromstr(pos, len);
-
-    if(position != (*sb)->position)
-    {
-        (*sb)->position = position;
-        for(s = globalconf.screens[(*sb)->screen].statusbar; s; s = s->next)
-            statusbar_position_update(s, s->position);
-    }
-
-    ewmh_update_workarea((*sb)->phys_screen);
-
-    return 0;
-}
-
-/** Get the statusbar position.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A statusbar.
- * \lreturn The statusbar position.
- */
-static int
-luaA_statusbar_position_get(lua_State *L)
-{
-    statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
-    lua_pushstring(L, position_tostr((*sb)->position));
-    return 1;
-}
-
 /** Convert a statusbar to a printable string.
  * \param L The Lua VM state.
  *
@@ -567,6 +525,9 @@ luaA_statusbar_index(lua_State *L)
       case A_TK_BG:
         lua_pushstring(L, (*statusbar)->colors.bg.name);
         break;
+      case A_TK_POSITION:
+        lua_pushstring(L, position_tostr((*statusbar)->position));
+        break;
       default:
         return 0;
     }
@@ -582,9 +543,10 @@ static int
 luaA_statusbar_newindex(lua_State *L)
 {
     size_t len;
-    statusbar_t **statusbar = luaA_checkudata(L, 1, "statusbar");
+    statusbar_t *s, **statusbar = luaA_checkudata(L, 1, "statusbar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     xcolor_t color;
+    position_t p;
 
     switch(a_tokenize(attr, len))
     {
@@ -619,6 +581,17 @@ luaA_statusbar_newindex(lua_State *L)
             (*statusbar)->need_update = true;
         }
         break;
+      case A_TK_POSITION:
+        buf = luaL_checklstring(L, 3, &len);
+        p = position_fromstr(buf, len);
+        if(p != (*statusbar)->position)
+        {
+            (*statusbar)->position = p;
+            for(s = globalconf.screens[(*statusbar)->screen].statusbar; s; s = s->next)
+                statusbar_position_update(s, s->position);
+            ewmh_update_workarea((*statusbar)->phys_screen);
+        }
+        break;
       default:
         return 0;
     }
@@ -636,8 +609,6 @@ const struct luaL_reg awesome_statusbar_meta[] =
     { "widget_add", luaA_statusbar_widget_add },
     { "widget_remove", luaA_statusbar_widget_remove },
     { "widget_get", luaA_statusbar_widget_get },
-    { "position_set", luaA_statusbar_position_set },
-    { "position_get", luaA_statusbar_position_get },
     { "add", luaA_statusbar_add },
     { "remove", luaA_statusbar_remove },
     { "__index", luaA_statusbar_index },
