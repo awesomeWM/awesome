@@ -30,6 +30,7 @@ ncol
 nmaster
 name
 on
+opacity
 plot_data_add
 plot_properties_set
 position

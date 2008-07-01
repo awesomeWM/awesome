@@ -1116,24 +1116,6 @@ luaA_client_coords_set(lua_State *L)
     return 0;
 }
 
-/** Set the client opacity.
- * Note: this requires an external composite manager.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A floating value between 0 and 1.
- */
-static int
-luaA_client_opacity_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    double opacity = luaL_checknumber(L, 2);
-
-    if(opacity == -1 || (opacity >= 0 && opacity <= 1))
-        window_settrans((*c)->win, opacity);
-    return 0;
-}
-
 /** Kill a client.
  * \param L The Lua VM state.
  *
@@ -1391,6 +1373,7 @@ luaA_client_newindex(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
     const char *buf = luaL_checklstring(L, 2, &len);
     bool b;
+    double d;
 
     switch(a_tokenize(buf, len))
     {
@@ -1414,6 +1397,11 @@ luaA_client_newindex(lua_State *L)
         p_delete(&(*c)->icon_path);
         (*c)->icon_path = a_strdup(buf);
         widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
+        break;
+      case A_TK_OPACITY:
+        d = luaL_checknumber(L, 3);
+        if(d == -1 || (d >= 0 && d <= 1))
+            window_settrans((*c)->win, d);
         break;
       default:
         return 0;
@@ -1474,7 +1462,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "istagged", luaA_client_istagged },
     { "coords_get", luaA_client_coords_get },
     { "coords_set", luaA_client_coords_set },
-    { "opacity_set", luaA_client_opacity_set },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
     { "focus_set", luaA_client_focus_set  },
