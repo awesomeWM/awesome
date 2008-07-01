@@ -333,6 +333,7 @@ function P.client.movetoscreen(c, s)
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel:screen_set(s)
         mouse.coords_set(screen.coords_get(s))
+        sel:focus_set()
     end
 end
 
