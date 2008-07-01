@@ -704,9 +704,11 @@ function P.prompt(args, textbox, exe_callback, completion_callback)
             elseif key == "Right" then
                 cur_pos = cur_pos + 1
             else
-                if string.len(key) == 1 then
+                -- len() is UTF-8 aware but #key is not,
+                -- so check that we have one UTF-8 char but advance the cursor of # position
+                if key:len() == 1 then
                     command = command:sub(1, cur_pos - 1) .. key .. command:sub(cur_pos)
-                    cur_pos = cur_pos + 1
+                    cur_pos = cur_pos + #key
                 end
             end
             if cur_pos < 1 then
