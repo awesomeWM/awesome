@@ -1315,23 +1315,6 @@ luaA_client_floating_placement_set(lua_State *L)
     return 0;
 }
 
-/** Define if awesome should respect client size hints when resizing
- * windows in tiled mode. If you set this to true, you will experience gaps
- * between windows, but they will have the best size they can have.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A client.
- * \lparam A boolean value, true to enable, false to disable.
- */
-static int
-luaA_honorsizehints_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    (*c)->honorsizehints = luaA_checkboolean(L, 2);
-    return 0;
-}
-
 /** Client newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1376,6 +1359,11 @@ luaA_client_newindex(lua_State *L)
       case A_TK_FLOATING:
         client_setfloating(*c, luaA_checkboolean(L, 3));
         break;
+      case A_TK_HONORSIZEHINTS:
+        (*c)->honorsizehints = true;
+        if(client_isvisible(*c, (*c)->screen))
+            globalconf.screens[(*c)->screen].need_arrange = true;
+        break;
       default:
         return 0;
     }
@@ -1411,8 +1399,11 @@ luaA_client_index(lua_State *L)
       case A_TK_FLOATING:
         lua_pushboolean(L, (*c)->isfloating);
         break;
-      default:
+      case A_TK_HONORSIZEHINTS:
+        lua_pushboolean(L, (*c)->honorsizehints);
         break;
+      default:
+        return 0;
     }
 
     return 1;
@@ -1427,7 +1418,6 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
-    { "honorsizehints_set", luaA_honorsizehints_set },
     { "floating_placement_set", luaA_client_floating_placement_set },
     { "titlebar_set", luaA_client_titlebar_set },
     { "titlebar_get", luaA_client_titlebar_get },

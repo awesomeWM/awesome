@@ -21,6 +21,7 @@ gap
 grow
 height
 hide
+honorsizehints
 icon_path
 image
 layout

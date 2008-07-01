@@ -327,7 +327,7 @@ function hook_manage(c)
         c.floating = true
     end
     -- Honor size hints
-    c:honorsizehints_set(true)
+    c.honorsizehints = true
 end
 
 -- Hook function to execute when arranging the screen
