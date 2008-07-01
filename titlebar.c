@@ -386,6 +386,8 @@ luaA_titlebar_widget_get(lua_State *L)
     for(witer = (*tb)->widgets; witer; witer = witer->next)
     {
         luaA_widget_userdata_new(L, witer->widget);
+        /* ref again for the list */
+        widget_ref(&witer->widget);
         lua_setfield(L, -2, witer->widget->name);
     }
 
