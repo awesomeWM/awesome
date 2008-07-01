@@ -338,46 +338,6 @@ luaA_tag_new(lua_State *L)
     return luaA_tag_userdata_new(L, tag);
 }
 
-/** Set the number of columns. This is used in various layouts to set the number
- * of columns used to display non-master windows.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lparam The number of columns, at least 1.
- */
-static int
-luaA_tag_ncol_set(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    int ncol = luaL_checknumber(L, 2);
-
-    if(ncol >= 1)
-    {
-        (*tag)->ncol = ncol;
-        globalconf.screens[(*tag)->screen].need_arrange = true;
-    }
-    else
-        luaL_error(L, "bad value, must be greater than 1");
-
-    return 0;
-}
-
-/** Get the number of columns used to display non-master windows on this tag.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lreturn The number of column.
- */
-static int
-luaA_tag_ncol_get(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    lua_pushnumber(L, (*tag)->ncol);
-    return 1;
-}
-
 /** Get the tag name.
  * \param L The Lua VM state.
  *
@@ -486,6 +446,9 @@ luaA_tag_index(lua_State *L)
       case A_TK_NMASTER:
         lua_pushnumber(L, (*tag)->nmaster);
         break;
+      case A_TK_NCOL:
+        lua_pushnumber(L, (*tag)->ncol);
+        break;
       default:
         return 0;
     }
@@ -525,6 +488,13 @@ luaA_tag_newindex(lua_State *L)
         else
             luaL_error(L, "bad value, must be greater than 0");
         break;
+      case A_TK_NCOL:
+        i = luaL_checknumber(L, 3);
+        if(i >= 1)
+            (*tag)->ncol = i;
+        else
+            luaL_error(L, "bad value, must be greater than 1");
+        break;
       default:
         return 0;
     }
@@ -546,8 +516,6 @@ const struct luaL_reg awesome_tag_methods[] =
 const struct luaL_reg awesome_tag_meta[] =
 {
     { "add", luaA_tag_add },
-    { "ncol_set", luaA_tag_ncol_set },
-    { "ncol_get", luaA_tag_ncol_get },
     { "name_get", luaA_tag_name_get },
     { "name_set", luaA_tag_name_set },
     { "layout_get", luaA_tag_layout_get },

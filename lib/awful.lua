@@ -215,7 +215,7 @@ end
 function P.tag.setncol(ncol)
     local t = P.tag.selected()
     if t then
-        t:ncol_set(ncol)
+        t.ncol = ncol
     end
 end
 
@@ -224,7 +224,7 @@ end
 function P.tag.incncol(add)
     local t = P.tag.selected()
     if t then
-        t:ncol_set(t:ncol_get() + add)
+        t.ncol = t.ncol + add
     end
 end
 
