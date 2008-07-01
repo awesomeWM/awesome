@@ -1101,67 +1101,6 @@ luaA_client_tostring(lua_State *L)
     return 1;
 }
 
-/** Set the client's titlebar.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A titlebar.
- */
-static int
-luaA_client_titlebar_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    titlebar_t **t = NULL;
-
-    if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
-    {
-        t = luaA_checkudata(L, 2, "titlebar");
-        if(client_getbytitlebar(*t))
-            luaL_error(L, "titlebar is already used by another client");
-    }
-
-    /* If client had a titlebar, unref it */
-    if((*c)->titlebar)
-    {
-        simplewindow_delete(&(*c)->titlebar->sw);
-        titlebar_unref(&(*c)->titlebar);
-    }
-
-    if(t)
-    {
-        /* Attach titlebar to client */
-        (*c)->titlebar = *t;
-        titlebar_ref(t);
-        titlebar_init(*c);
-    }
-    else
-        (*c)->titlebar = NULL;
-
-    if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
-        titlebar_update_geometry_floating(*c);
-    else
-        globalconf.screens[(*c)->screen].need_arrange = true;
-
-    return 0;
-}
-
-/** Get the titlebar of a client.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lreturn A titlebar or nil if the client has no titlebar.
- */
-static int
-luaA_client_titlebar_get(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-
-    if((*c)->titlebar)
-        return luaA_titlebar_userdata_new(globalconf.L, (*c)->titlebar);
-
-    return 0;
-}
-
 /** Stop managing a client.
  * \param L The Lua VM state.
  * \luastack
@@ -1189,6 +1128,7 @@ luaA_client_newindex(lua_State *L)
     double d;
     int i;
     xcolor_t color;  
+    titlebar_t **t = NULL;
 
     switch(a_tokenize(buf, len))
     {
@@ -1259,6 +1199,31 @@ luaA_client_newindex(lua_State *L)
             client_resize(*c, geometry, false);
         }
         break;
+      case A_TK_TITLEBAR:
+        if(!lua_isnil(L, 3))
+        {
+            t = luaA_checkudata(L, 3, "titlebar");
+            if(client_getbytitlebar(*t))
+                luaL_error(L, "titlebar is already used by another client");
+        }
+
+        /* If client had a titlebar, unref it */
+        if((*c)->titlebar)
+        {
+            simplewindow_delete(&(*c)->titlebar->sw);
+            titlebar_unref(&(*c)->titlebar);
+            globalconf.screens[(*c)->screen].need_arrange = true;
+        }
+
+        if(t)
+        {
+            /* Attach titlebar to client */
+            (*c)->titlebar = *t;
+            titlebar_ref(t);
+            titlebar_init(*c);
+        }
+
+        break;
       default:
         return 0;
     }
@@ -1293,9 +1258,7 @@ luaA_client_index(lua_State *L)
             lua_pushstring(L, hint.res_class);
             return 2;
         }
-        else
-            return 0;
-        break;
+        return 0;
       case A_TK_FLOATING_PLACEMENT:
         lua_pushstring(L, name_func_rlookup((*c)->floating_placement,
                                             FloatingPlacementList));
@@ -1332,6 +1295,10 @@ luaA_client_index(lua_State *L)
         lua_pushnumber(L, (*c)->geometry.y);
         lua_setfield(L, -2, "y");
         break;
+      case A_TK_TITLEBAR:
+        if((*c)->titlebar)
+            return luaA_titlebar_userdata_new(globalconf.L, (*c)->titlebar);
+        return 0;
       default:
         return 0;
     }
@@ -1348,8 +1315,6 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
-    { "titlebar_set", luaA_client_titlebar_set },
-    { "titlebar_get", luaA_client_titlebar_get },
     { "tag", luaA_client_tag },
     { "istagged", luaA_client_istagged },
     { "kill", luaA_client_kill },

@@ -55,6 +55,7 @@ text_normal
 text_urgent
 ticks_count
 ticks_gap
+titlebar
 top
 topleft
 topright
