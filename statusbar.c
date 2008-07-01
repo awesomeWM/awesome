@@ -520,17 +520,16 @@ static int
 luaA_statusbar_widget_get(lua_State *L)
 {
     statusbar_t **sb = luaA_checkudata(L, 1, "statusbar");
-    widget_node_t *widget;
-    int i = 1;
+    widget_node_t *witer;
 
     lua_newtable(L);
 
-    for(widget = (*sb)->widgets; widget; widget = widget->next)
+    for(witer = (*sb)->widgets; witer; witer = witer->next)
     {
-        luaA_widget_userdata_new(L, widget->widget);
+        luaA_widget_userdata_new(L, witer->widget);
         /* ref again for the list */
-        widget_ref(&widget->widget);
-        lua_rawseti(L, -2, i++);
+        widget_ref(&witer->widget);
+        lua_setfield(L, -2, witer->widget->name);
     }
 
     return 1;
