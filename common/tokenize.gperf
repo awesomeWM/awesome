@@ -38,6 +38,7 @@ plot_properties_set
 position
 resize
 right
+screen
 selected
 shadow
 shadow_offset

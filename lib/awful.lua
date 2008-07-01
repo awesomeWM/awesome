@@ -81,7 +81,7 @@ function P.client.next(i, c)
     local sel = c or client.focus_get()
     if sel then
         -- Get all visible clients
-        local cls = client.visible_get(sel:screen_get())
+        local cls = client.visible_get(sel.screen)
         -- Loop upon each client
         for idx, c in ipairs(cls) do
             if c == sel then
@@ -143,7 +143,7 @@ function P.screen.focus(i)
     local sel = client.focus_get()
     local s
     if sel then
-        s = sel:screen_get()
+        s = sel.screen
     else
         s = mouse.screen_get()
     end
@@ -283,7 +283,7 @@ end
 -- @para c Optional client to move, otherwise the focused one is used.
 function P.client.movetotag(target, c)
     local sel = c or client.focus_get();
-    local tags = tag.get(sel:screen_get())
+    local tags = tag.get(sel.screen)
     for k, t in pairs(tags) do
         sel:tag(t, false)
     end
@@ -299,7 +299,7 @@ function P.client.toggletag(target, c)
     if sel then
         -- Count how many tags has the client
         -- an only toggle tag if the client has at least one tag other than target
-        for k, v in pairs(tag.get(sel:screen_get())) do
+        for k, v in pairs(tag.get(sel.screen)) do
             if target ~= v and sel:istagged(v) then
                 toggle = true
                 break
@@ -328,10 +328,10 @@ function P.client.movetoscreen(c, s)
     if sel then
         local sc = screen.count()
         if not s then
-            s = sel:screen_get() + 1
+            s = sel.screen + 1
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
-        sel:screen_set(s)
+        sel.screen = s
         mouse.coords_set(screen.coords_get(s))
         sel:focus_set()
     end

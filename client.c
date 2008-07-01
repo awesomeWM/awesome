@@ -969,36 +969,6 @@ client_setborder(client_t *c, int width)
     globalconf.screens[c->screen].need_arrange = true;
 }
 
-/** Move the client to another screen.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A screen number.
- */
-static int
-luaA_client_screen_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    int screen = luaL_checknumber(L, 2) - 1;
-    luaA_checkscreen(screen);
-    screen_client_moveto(*c, screen, true);
-    return 0;
-}
-
-/** Get the screen number the client is onto.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lreturn A screen number.
- */
-static int
-luaA_client_screen_get(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    lua_pushnumber(L, 1 + (*c)->screen);
-    return 1;
-}
-
 /** Tag a client with a specified tag.
  * \param L The Lua VM state.
  * \luastack
@@ -1299,6 +1269,7 @@ luaA_client_newindex(lua_State *L)
     const char *buf = luaL_checklstring(L, 2, &len);
     bool b;
     double d;
+    int i;
     xcolor_t color;  
 
     switch(a_tokenize(buf, len))
@@ -1308,6 +1279,11 @@ luaA_client_newindex(lua_State *L)
         p_delete(&(*c)->name);
         a_iso2utf8(&(*c)->name, buf, len);
         widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
+        break;
+      case A_TK_SCREEN:
+        i = luaL_checknumber(L, 3) - 1;
+        luaA_checkscreen(i);
+        screen_client_moveto(*c, i, true);
         break;
       case A_TK_HIDE:
         b = luaA_checkboolean(L, 3);
@@ -1375,6 +1351,9 @@ luaA_client_index(lua_State *L)
       case A_TK_NAME:
         lua_pushstring(L, (*c)->name);
         break;
+      case A_TK_SCREEN:
+        lua_pushnumber(L, 1 + (*c)->screen);
+        break;
       case A_TK_HIDE:
         lua_pushboolean(L, (*c)->ishidden);
         break;
@@ -1411,15 +1390,13 @@ const struct luaL_reg awesome_client_meta[] =
     { "floating_placement_set", luaA_client_floating_placement_set },
     { "titlebar_set", luaA_client_titlebar_set },
     { "titlebar_get", luaA_client_titlebar_get },
-    { "screen_set", luaA_client_screen_set },
-    { "screen_get", luaA_client_screen_get },
     { "tag", luaA_client_tag },
     { "istagged", luaA_client_istagged },
     { "coords_get", luaA_client_coords_get },
     { "coords_set", luaA_client_coords_set },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
-    { "focus_set", luaA_client_focus_set  },
+    { "focus_set", luaA_client_focus_set },
     { "raise", luaA_client_raise },
     { "redraw", luaA_client_redraw },
     { "class_get", luaA_client_class_get },
