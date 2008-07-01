@@ -68,9 +68,6 @@ draw_iso2utf8(const char *iso, size_t len)
     size_t utf8len;
     char *utf8, *utf8p;
 
-    if(len < 0)
-        len = a_strlen(iso);
-
     if(!len)
         return NULL;
 
