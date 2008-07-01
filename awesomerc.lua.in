@@ -346,7 +346,7 @@ function hook_arrange(screen)
         if m_c.x < c_c.x or m_c.x >= c_c.x + c_c.width or
             m_c.y < c_c.y or m_c.y >= c_c.y + c_c.height then
             if table.maxn(m_c.buttons) == 0 then
-                mouse.coords_set(c_c.x + 5, c_c.y + 5)
+                mouse.coords_set({ x = c_c.x + 5, y = c_c.y + 5})
             end
         end
     end

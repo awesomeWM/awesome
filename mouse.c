@@ -990,23 +990,28 @@ luaA_mouse_coords_get(lua_State *L)
     lua_pushnumber(L, mouse_y);
     lua_setfield(L, -2, "y");
     lua_newtable(L);
-    if (mask & XCB_BUTTON_MASK_1) {
+    if (mask & XCB_BUTTON_MASK_1)
+    {
         lua_pushnumber(L, 1);
         lua_rawseti(L, -2, ++i);
     }
-    if (mask & XCB_BUTTON_MASK_2) {
+    if (mask & XCB_BUTTON_MASK_2)
+    {
         lua_pushnumber(L, 2);
         lua_rawseti(L, -2, ++i);
     }
-    if (mask & XCB_BUTTON_MASK_3) {
+    if (mask & XCB_BUTTON_MASK_3)
+    {
         lua_pushnumber(L, 3);
         lua_rawseti(L, -2, ++i);
     }
-    if (mask & XCB_BUTTON_MASK_4) {
+    if (mask & XCB_BUTTON_MASK_4)
+    {
         lua_pushnumber(L, 4);
         lua_rawseti(L, -2, ++i);
     }
-    if (mask & XCB_BUTTON_MASK_5) {
+    if (mask & XCB_BUTTON_MASK_5)
+    {
         lua_pushnumber(L, 5);
         lua_rawseti(L, -2, ++i);
     }
@@ -1018,17 +1023,24 @@ luaA_mouse_coords_get(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam The x coordinate.
- * \lparam The y coordinate.
+ * \lparam The x and y coordinate in a table.
  */
 static int
 luaA_mouse_coords_set(lua_State *L)
 {
-    int x, y;
+    int x, y, mouse_x, mouse_y;
     xcb_window_t root;
+    uint16_t mask;
 
-    x = luaL_checknumber(L, 1);
-    y = luaL_checknumber(L, 2);
+    luaA_checktable(L, 1);
+
+    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+
+    if(!mouse_query_pointer(root, &mouse_x, &mouse_y, &mask))
+        return 0;
+
+    x = luaA_getopt_number(L, 1, "x", mouse_x);
+    y = luaA_getopt_number(L, 1, "y", mouse_y);
 
     root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
     mouse_warp_pointer(root, x, y);
