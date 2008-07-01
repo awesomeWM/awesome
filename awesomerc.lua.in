@@ -71,7 +71,7 @@ for s = 1, screen.count() do
         tags[s][tagnumber]:add(s)
     end
     -- I'm sure you want to see at least one tag.
-    tags[s][1]:view(true)
+    tags[s][1].selected = true
 end
 -- }}}
 
@@ -80,7 +80,7 @@ end
 mytaglist = widget({ type = "taglist", name = "mytaglist" })
 mytaglist:mouse_add(mouse({}, 1, function (object, tag) awful.tag.viewonly(tag) end))
 mytaglist:mouse_add(mouse({ modkey }, 1, function (object, tag) awful.client.movetotag(tag) end))
-mytaglist:mouse_add(mouse({}, 3, function (object, tag) tag:view(not tag:isselected()) end))
+mytaglist:mouse_add(mouse({}, 3, function (object, tag) tag.selected = not tag.selected end))
 mytaglist:mouse_add(mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end))
 mytaglist:mouse_add(mouse({ }, 4, awful.tag.viewnext))
 mytaglist:mouse_add(mouse({ }, 5, awful.tag.viewprev))
@@ -162,7 +162,7 @@ for i = 1, keynumber do
                    function ()
                        local screen = mouse.screen_get()
                        if tags[screen][i] then
-                           tags[screen][i]:view(not tags[screen][i]:isselected())
+                           tags[screen][i].selected = not tags[screen][i].selected
                        end
                    end):add()
     keybinding({ modkey, "Shift" }, i,

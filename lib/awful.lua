@@ -161,7 +161,7 @@ function P.tag.selectedlist(s)
     local tags = tag.geti(screen)
     local vtags = {}
     for i, t in pairs(tags) do
-        if t:isselected() then
+        if t.selected then
             vtags[#vtags + 1] = t
         end
     end
@@ -233,7 +233,7 @@ end
 function P.tag.viewnone(screen)
     local tags = tag.get(screen or mouse.screen_get())
     for i, t in pairs(tags) do
-        t:view(false)
+        t.selected = false
     end
 end
 
@@ -246,7 +246,7 @@ function P.tag.viewidx(i, screen)
     P.tag.viewnone()
     for k, t in ipairs(tags) do
         if t == sel then
-            tags[cycle(#tags, k + i)]:view(true)
+            tags[cycle(#tags, k + i)].selected = true
         end
     end
 end
@@ -265,7 +265,7 @@ end
 -- @param t The tag object.
 function P.tag.viewonly(t)
     P.tag.viewnone()
-    t:view(true)
+    t.selected = true
 end
 
 --- View only a set of tags.
@@ -274,7 +274,7 @@ end
 function P.tag.viewmore(tags, screen)
     P.tag.viewnone(screen)
     for i, t in pairs(tags) do
-        t:view(true)
+        t.selected = true
     end
 end
 

@@ -333,37 +333,6 @@ luaA_tag_new(lua_State *L)
     return luaA_tag_userdata_new(L, tag);
 }
 
-/** Add or remove a tag from the current view.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lparam A boolean value, true to view tag, false otherwise.
- */
-static int
-luaA_tag_view(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    bool view = luaA_checkboolean(L, 2);
-    tag_view(*tag, view);
-    return 0;
-}
-
-/** Get the tag selection attribute.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lreturn True if the tag is viewed, false otherwise.
- */
-static int
-luaA_tag_isselected(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    lua_pushboolean(L, (*tag)->selected);
-    return 1;
-}
-
 /** Set the tag master width factor. This value is used in various layouts to
  * determine the size of the master window.
  * \param L The Lua VM state.
@@ -558,6 +527,65 @@ luaA_tag_layout_set(lua_State *L)
 
 }
 
+/** Tag index.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_tag_index(lua_State *L)
+{
+    size_t len;
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
+    const char *attr;
+
+    lua_getmetatable(L, 1);
+    lua_pushvalue(L, 2);
+    lua_rawget(L, -2);
+    if (!lua_isnil(L, -1))
+    {
+        lua_remove(L, -2);
+        return 1;
+    }
+    lua_pop(L, 2);
+
+    attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_SELECTED:
+        lua_pushboolean(L, (*tag)->selected);
+        break;
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
+/** Tag newindex.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_tag_newindex(lua_State *L)
+{
+    size_t len;
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_SELECTED:
+        tag_view(*tag, luaA_checkboolean(L, 3));
+        break;
+      default:
+        return 0;
+    }
+
+    return 0;
+}
+
+
 const struct luaL_reg awesome_tag_methods[] =
 {
     { "__call", luaA_tag_new },
@@ -568,8 +596,6 @@ const struct luaL_reg awesome_tag_methods[] =
 const struct luaL_reg awesome_tag_meta[] =
 {
     { "add", luaA_tag_add },
-    { "view", luaA_tag_view },
-    { "isselected", luaA_tag_isselected },
     { "mwfact_set", luaA_tag_mwfact_set },
     { "mwfact_get", luaA_tag_mwfact_get },
     { "ncol_set", luaA_tag_ncol_set },
@@ -580,6 +606,8 @@ const struct luaL_reg awesome_tag_meta[] =
     { "name_set", luaA_tag_name_set },
     { "layout_get", luaA_tag_layout_get },
     { "layout_set", luaA_tag_layout_set },
+    { "__index", luaA_tag_index },
+    { "__newindex", luaA_tag_newindex },
     { "__eq", luaA_tag_eq },
     { "__gc", luaA_tag_gc },
     { "__tostring", luaA_tag_tostring },

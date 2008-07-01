@@ -26,6 +26,7 @@ plot_data_add
 plot_properties_set
 resize
 right
+selected
 shadow
 shadow_offset
 show
