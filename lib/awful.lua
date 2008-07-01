@@ -197,7 +197,7 @@ end
 function P.tag.setnmaster(nmaster)
     local t = P.tag.selected()
     if t then
-        t:nmaster_set(nmaster)
+        t.nmaster = nmaster
     end
 end
 
@@ -206,7 +206,7 @@ end
 function P.tag.incnmaster(add)
     local t = P.tag.selected()
     if t then
-        t:nmaster_set(t:nmaster_get() + add)
+        t.nmaster = t.nmaster + add
     end
 end
 

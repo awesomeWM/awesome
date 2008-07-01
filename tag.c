@@ -245,7 +245,6 @@ luaA_tag_add(lua_State *L)
         }
     }
 
-    (*tag)->screen = screen;
     tag_append_to_screen(*tag, screen);
     return 0;
 }
@@ -379,46 +378,6 @@ luaA_tag_ncol_get(lua_State *L)
     return 1;
 }
 
-/** Set the number of master windows. This is used in various layouts to
- * determine how many windows are in the master area.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lparam The number of master windows.
- */
-static int
-luaA_tag_nmaster_set(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    int nmaster = luaL_checknumber(L, 2);
-
-    if(nmaster >= 0)
-    {
-        (*tag)->nmaster = nmaster;
-        globalconf.screens[(*tag)->screen].need_arrange = true;
-    }
-    else
-        luaL_error(L, "bad value, must be greater than 0");
-
-    return 0;
-}
-
-/** Get the number of master windows of the tag.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lreturn The number of master windows.
- */
-static int
-luaA_tag_nmaster_get(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    lua_pushnumber(L, (*tag)->nmaster);
-    return 1;
-}
-
 /** Get the tag name.
  * \param L The Lua VM state.
  *
@@ -524,6 +483,9 @@ luaA_tag_index(lua_State *L)
       case A_TK_MWFACT:
         lua_pushnumber(L, (*tag)->mwfact);
         break;
+      case A_TK_NMASTER:
+        lua_pushnumber(L, (*tag)->nmaster);
+        break;
       default:
         return 0;
     }
@@ -542,6 +504,7 @@ luaA_tag_newindex(lua_State *L)
     tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *attr = luaL_checklstring(L, 2, &len);
     double d;
+    int i;
 
     switch(a_tokenize(attr, len))
     {
@@ -554,6 +517,13 @@ luaA_tag_newindex(lua_State *L)
             (*tag)->mwfact = d;
         else
             luaL_error(L, "bad value, must be between 0 and 1");
+        break;
+      case A_TK_NMASTER:
+        i = luaL_checknumber(L, 3);
+        if(i >= 0)
+            (*tag)->nmaster = i;
+        else
+            luaL_error(L, "bad value, must be greater than 0");
         break;
       default:
         return 0;
@@ -578,8 +548,6 @@ const struct luaL_reg awesome_tag_meta[] =
     { "add", luaA_tag_add },
     { "ncol_set", luaA_tag_ncol_set },
     { "ncol_get", luaA_tag_ncol_get },
-    { "nmaster_set", luaA_tag_nmaster_set },
-    { "nmaster_get", luaA_tag_nmaster_get },
     { "name_get", luaA_tag_name_get },
     { "name_set", luaA_tag_name_set },
     { "layout_get", luaA_tag_layout_get },
