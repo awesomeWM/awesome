@@ -1446,6 +1446,7 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_ICON_PATH:
         lua_pushstring(L, (*c)->icon_path);
+        break;
       default:
         break;
     }
