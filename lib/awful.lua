@@ -129,12 +129,12 @@ end
 -- @param c The optional client, otherwise focused one is used.
 function P.client.moveresize(x, y, w, h, c)
     local sel = c or client.focus_get()
-    local coords = sel:coords_get()
+    local coords = sel.coords
     coords['x'] = coords['x'] + x
     coords['y'] = coords['y'] + y
     coords['width'] = coords['width'] + w
     coords['height'] = coords['height'] + h
-    sel:coords_set(coords)
+    sel.coords = coords
 end
 
 --- Give the focus to a screen, and move pointer.

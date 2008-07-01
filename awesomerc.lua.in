@@ -308,7 +308,7 @@ end
 -- Hook function to execute when the mouse is over a client.
 function hook_mouseover(c)
     -- Sloppy focus, but disabled for magnifier layout
-    if awful.layout.get(c:screen_get()) ~= "magnifier" then
+    if awful.layout.get(c.screen) ~= "magnifier" then
         c:focus_set()
     end
 end
@@ -341,7 +341,7 @@ function hook_arrange(screen)
     --[[
     local sel = client.focus_get()
     if sel then
-        local c_c = sel:coords_get()
+        local c_c = sel.coords
         local m_c = mouse.coords_get()
 
         if m_c.x < c_c.x or m_c.x >= c_c.x + c_c.width or

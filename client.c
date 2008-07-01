@@ -1011,53 +1011,6 @@ luaA_client_istagged(lua_State *L)
     return 1;
 }
 
-/** Get the client coordinates on the display.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lreturn A table with keys `width', `height', `x' and `y'.
- */
-static int
-luaA_client_coords_get(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    lua_newtable(L);
-    lua_pushnumber(L, (*c)->geometry.width);
-    lua_setfield(L, -2, "width");
-    lua_pushnumber(L, (*c)->geometry.height);
-    lua_setfield(L, -2, "height");
-    lua_pushnumber(L, (*c)->geometry.x);
-    lua_setfield(L, -2, "x");
-    lua_pushnumber(L, (*c)->geometry.y);
-    lua_setfield(L, -2, "y");
-    return 1;
-}
-
-/** Set client coordinates. This only operates if the client is floating.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A table with keys: x, y, width, height.
- */
-static int
-luaA_client_coords_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    area_t geometry;
-
-    if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
-    {
-        luaA_checktable(L, 2);
-        geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
-        geometry.y = luaA_getopt_number(L, 2, "y", (*c)->geometry.y);
-        geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
-        geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
-        client_resize(*c, geometry, false);
-    }
-
-    return 0;
-}
-
 /** Kill a client.
  * \param L The Lua VM state.
  *
@@ -1294,6 +1247,18 @@ luaA_client_newindex(lua_State *L)
             xcb_change_window_attributes(globalconf.connection, (*c)->win, XCB_CW_BORDER_PIXEL, &color.pixel);
         }
         break;
+      case A_TK_COORDS:
+        if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
+        {
+            area_t geometry;
+            luaA_checktable(L, 3);
+            geometry.x = luaA_getopt_number(L, 3, "x", (*c)->geometry.x);
+            geometry.y = luaA_getopt_number(L, 3, "y", (*c)->geometry.y);
+            geometry.width = luaA_getopt_number(L, 3, "width", (*c)->geometry.width);
+            geometry.height = luaA_getopt_number(L, 3, "height", (*c)->geometry.height);
+            client_resize(*c, geometry, false);
+        }
+        break;
       default:
         return 0;
     }
@@ -1355,6 +1320,18 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_BORDER_COLOR:
         lua_pushstring(L, (*c)->border_color.name);
+        break;
+      case A_TK_COORDS:
+        lua_newtable(L);
+        lua_pushnumber(L, (*c)->geometry.width);
+        lua_setfield(L, -2, "width");
+        lua_pushnumber(L, (*c)->geometry.height);
+        lua_setfield(L, -2, "height");
+        lua_pushnumber(L, (*c)->geometry.x);
+        lua_setfield(L, -2, "x");
+        lua_pushnumber(L, (*c)->geometry.y);
+        lua_setfield(L, -2, "y");
+        break;
       default:
         return 0;
     }
@@ -1375,8 +1352,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "titlebar_get", luaA_client_titlebar_get },
     { "tag", luaA_client_tag },
     { "istagged", luaA_client_istagged },
-    { "coords_get", luaA_client_coords_get },
-    { "coords_set", luaA_client_coords_set },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
     { "focus_set", luaA_client_focus_set },
