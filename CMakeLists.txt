@@ -247,7 +247,7 @@ if(GENERATE_LUADOC)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
         # setup symlink so everything is in one directory
         foreach(lua_file ${AWE_LUA_FILES})
-            execute_process(COMMAND ${LN_EXECUTABLE} -s ${lua_file}
+            execute_process(COMMAND ${LN_EXECUTABLE} -s -f ${lua_file}
                             WORKING_DIRECTORY ${BUILD_DIR}/lib)
         endforeach()
     endif()
