@@ -16,6 +16,7 @@ color
 fg
 flex
 floating
+floating_placement
 focus
 gap
 grow

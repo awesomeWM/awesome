@@ -1240,23 +1240,6 @@ luaA_client_unmanage(lua_State *L)
     return 0;
 }
 
-/** Set the floating placement algorithm. This will be used to compute the
- * initial floating position of the window then floating.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A client.
- * \lparam An algorith name, either `none', `smart' or `under_mouse'.
- */
-static int
-luaA_client_floating_placement_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    const char *pl = luaL_checkstring(L, 2);
-    (*c)->floating_placement = name_func_lookup(pl, FloatingPlacementList);
-    return 0;
-}
-
 /** Client newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1279,6 +1262,10 @@ luaA_client_newindex(lua_State *L)
         p_delete(&(*c)->name);
         a_iso2utf8(&(*c)->name, buf, len);
         widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
+        break;
+      case A_TK_FLOATING_PLACEMENT:
+        (*c)->floating_placement = name_func_lookup(luaL_checkstring(L, 3),
+                                                    FloatingPlacementList);
         break;
       case A_TK_SCREEN:
         i = luaL_checknumber(L, 3) - 1;
@@ -1351,6 +1338,10 @@ luaA_client_index(lua_State *L)
       case A_TK_NAME:
         lua_pushstring(L, (*c)->name);
         break;
+      case A_TK_FLOATING_PLACEMENT:
+        lua_pushstring(L, name_func_rlookup((*c)->floating_placement,
+                                            FloatingPlacementList));
+        break;
       case A_TK_SCREEN:
         lua_pushnumber(L, 1 + (*c)->screen);
         break;
@@ -1387,7 +1378,6 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
-    { "floating_placement_set", luaA_client_floating_placement_set },
     { "titlebar_set", luaA_client_titlebar_set },
     { "titlebar_get", luaA_client_titlebar_get },
     { "tag", luaA_client_tag },
