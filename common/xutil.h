@@ -92,9 +92,9 @@ typedef struct
 {
     char *res_name;
     char *res_class;
-} class_hint_t;
+} xutil_class_hint_t;
 
-class_hint_t *xutil_get_class_hint(xcb_connection_t *, xcb_window_t);
+bool xutil_get_class_hint(xcb_connection_t *, xcb_window_t, xutil_class_hint_t *);
 
 bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 

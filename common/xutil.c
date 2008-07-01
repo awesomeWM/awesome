@@ -153,18 +153,16 @@ xutil_get_transient_for_hint(xcb_connection_t *c, xcb_window_t win,
     return true;
 }
 
-class_hint_t *
-xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
+bool
+xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win, xutil_class_hint_t *ch)
 {
     xcb_get_property_reply_t *class_hint_r;
     xcb_get_property_cookie_t class_hint_c;
     char *data;
     int len_name, len_class;
-    class_hint_t *ch;
 
     class_hint_c = xcb_get_property_unchecked(conn, false, win, WM_CLASS,
                                               STRING, 0L, 2048L);
-    ch = p_new(class_hint_t, 1);
 
     class_hint_r = xcb_get_property_reply(conn, class_hint_c, NULL);
 
@@ -173,7 +171,7 @@ xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
        || class_hint_r->format != 8)
     {
         p_delete(&class_hint_r);
-	return NULL;
+	return false;
     }
 
     data = xcb_get_property_value(class_hint_r);
@@ -186,7 +184,7 @@ xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win)
 
     p_delete(&class_hint_r);
 
-    return ch;
+    return true;
 }
 
 /* Number of different errors */
