@@ -969,34 +969,6 @@ client_setborder(client_t *c, int width)
     globalconf.screens[c->screen].need_arrange = true;
 }
 
-/** Set the client border width and color.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A table with `width' key for the border width in pixel and `color' key
- * for the border color.
- */
-static int
-luaA_client_border_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    int width = luaA_getopt_number(L, 2, "width", (*c)->border);
-    const char *colorstr = luaA_getopt_string(L, 2, "color", NULL);
-    xcolor_t color;
-
-    client_setborder(*c, width);
-
-    if(colorstr
-        && xcolor_new(globalconf.connection, (*c)->phys_screen, colorstr, &color))
-    {
-        xcb_change_window_attributes(globalconf.connection, (*c)->win, XCB_CW_BORDER_PIXEL,
-                                     &color.pixel);
-        xcolor_wipe(&color);
-    }
-
-    return 0;
-}
-
 /** Move the client to another screen.
  * \param L The Lua VM state.
  * \luastack
@@ -1327,6 +1299,7 @@ luaA_client_newindex(lua_State *L)
     const char *buf = luaL_checklstring(L, 2, &len);
     bool b;
     double d;
+    xcolor_t color;  
 
     switch(a_tokenize(buf, len))
     {
@@ -1360,9 +1333,21 @@ luaA_client_newindex(lua_State *L)
         client_setfloating(*c, luaA_checkboolean(L, 3));
         break;
       case A_TK_HONORSIZEHINTS:
-        (*c)->honorsizehints = true;
+        (*c)->honorsizehints = luaA_checkboolean(L, 3);
         if(client_isvisible(*c, (*c)->screen))
             globalconf.screens[(*c)->screen].need_arrange = true;
+        break;
+      case A_TK_BORDER_WIDTH:
+        client_setborder(*c, luaL_checknumber(L, 3));
+        break;
+      case A_TK_BORDER_COLOR:
+        if((buf = luaL_checkstring(L, 3))
+           && xcolor_new(globalconf.connection, (*c)->phys_screen, buf, &color))
+        {
+            xcolor_wipe(&(*c)->border_color);
+            (*c)->border_color = color;
+            xcb_change_window_attributes(globalconf.connection, (*c)->win, XCB_CW_BORDER_PIXEL, &color.pixel);
+        }
         break;
       default:
         return 0;
@@ -1402,6 +1387,11 @@ luaA_client_index(lua_State *L)
       case A_TK_HONORSIZEHINTS:
         lua_pushboolean(L, (*c)->honorsizehints);
         break;
+      case A_TK_BORDER_WIDTH:
+        lua_pushnumber(L, (*c)->border);
+        break;
+      case A_TK_BORDER_COLOR:
+        lua_pushstring(L, (*c)->border_color.name);
       default:
         return 0;
     }
@@ -1423,7 +1413,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "titlebar_get", luaA_client_titlebar_get },
     { "screen_set", luaA_client_screen_set },
     { "screen_get", luaA_client_screen_get },
-    { "border_set", luaA_client_border_set },
     { "tag", luaA_client_tag },
     { "istagged", luaA_client_istagged },
     { "coords_get", luaA_client_coords_get },

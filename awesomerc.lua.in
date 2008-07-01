@@ -284,25 +284,25 @@ end
 -- Hook function to execute when focusing a client.
 function hook_focus(c)
     if not awful.client.ismarked(c) then
-        c:border_set({ width = border_width, color = border_focus })
+        c.border_color = border_focus
     end
 end
 
 -- Hook function to execute when unfocusing a client.
 function hook_unfocus(c)
     if not awful.client.ismarked(c) then
-        c:border_set({ width = border_width, color = border_normal })
+        c.border_color = border_normal
     end
 end
 
 -- Hook function to execute when marking a client
 function hook_marked(c)
-    c:border_set({ width = border_width, color = border_marked })
+    c.border_color = border_marked
 end
 
 -- Hook function to execute when unmarking a client
 function hook_unmarked(c)
-    c:border_set({ width = border_width, color = border_focus })
+    c.border_color = border_focus
 end
 
 -- Hook function to execute when the mouse is over a client.
@@ -321,7 +321,8 @@ function hook_manage(c)
     c:mouse_add(mouse({ modkey }, 3, function (c) c:mouse_resize() end))
     -- New client may not receive focus
     -- if they're not focusable, so set border anyway.
-    c:border_set({ width = border_width, color = border_normal })
+    c.border_width = border_width
+    c.border_color = border_normal
     c:focus_set()
     if floatings[c.name:lower()] then
         c.floating = true

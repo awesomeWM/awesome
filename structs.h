@@ -250,6 +250,7 @@ struct client_t
     /** Respect resize hints */
     bool honorsizehints;
     int border, oldborder;
+    xcolor_t border_color;
     /** True if the client does not want any border */
     bool noborder;
     /** Has urgency hint */
