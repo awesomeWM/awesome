@@ -373,40 +373,6 @@ luaA_widget_name_get(lua_State *L)
     return 1;
 }
 
-/** Set the visible attribute of a widget. If a widget is not visible, it is not
- * drawn on the statusbar.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- * \lparam A boolean value.
- */
-static int
-luaA_widget_visible_set(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    (*widget)->isvisible = luaA_checkboolean(L, 2);
-    widget_invalidate_bywidget(*widget);
-    return 0;
-}
-
-/** Get the visible attribute of a widget.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- *
- * \luastack
- * \lvalue A widget.
- * \return A boolean value, true if the widget is visible, false otherwise.
- */
-static int
-luaA_widget_visible_get(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    lua_pushboolean(L, (*widget)->isvisible);
-    return 1;
-}
-
-
 /** Generic widget index.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -414,7 +380,9 @@ luaA_widget_visible_get(lua_State *L)
 static int
 luaA_widget_index(lua_State *L)
 {
+    size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
+    const char *buf = luaL_checklstring(L, 2, &len);
 
     lua_getmetatable(L, 1);
     lua_pushvalue(L, 2);
@@ -426,6 +394,15 @@ luaA_widget_index(lua_State *L)
     }
     lua_pop(L, 2);
 
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_VISIBLE:
+        lua_pushboolean(L, (*widget)->isvisible);
+        return 1;
+      default:
+        break;
+    }
+
     return (*widget)->index ? (*widget)->index(L) : 0;
 }
 
@@ -436,12 +413,20 @@ luaA_widget_index(lua_State *L)
 static int
 luaA_widget_newindex(lua_State *L)
 {
+    size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
+    const char *buf = luaL_checklstring(L, 2, &len);
 
-    if((*widget)->newindex)
-        return (*widget)->newindex(L);
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_VISIBLE:
+        (*widget)->isvisible = luaA_checkboolean(L, 3);
+        return 0;
+      default:
+        break;
+    }
 
-    return 0;
+    return (*widget)->newindex ? (*widget)->newindex(L) : 0;
 }
 
 const struct luaL_reg awesome_widget_methods[] =
@@ -455,8 +440,6 @@ const struct luaL_reg awesome_widget_meta[] =
     { "mouse_remove", luaA_widget_mouse_remove },
     { "name_set", luaA_widget_name_set },
     { "name_get", luaA_widget_name_get },
-    { "visible_set", luaA_widget_visible_set },
-    { "visible_get", luaA_widget_visible_get },
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },
     { "__gc", luaA_widget_gc },
