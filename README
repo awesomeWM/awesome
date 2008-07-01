@@ -5,7 +5,8 @@ awesome is an extremely fast, small, and dynamic window manager for X.
 Requirements
 ------------
 In order to build awesome itself, you need header files and libs of:
-  - Xlib, xcb and xcb-util.
+  - cmake
+  - Xlib, xcb and xcb-util
   - Lua 5.1
   - cairo
   - pango and pangocairo
@@ -30,11 +31,13 @@ Building and Installation
 -------------------------
 After extracting the dist tarball, run:
 
-  cmake .
   make
-  make install # might need root permissions
 
-The source code reference can be built with "make doc".
+This will create a build directory, run cmake in it and build awesome.
+
+After the building done, you can type this to install:
+
+  make install # might need root permissions
 
 Running awesome
 -----------

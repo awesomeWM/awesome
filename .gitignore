@@ -7,7 +7,6 @@ awesome
 awesome-client
 doc
 config.h
-Makefile
 CMakeCache.txt
 CMakeFiles/
 CPackConfig.cmake
@@ -33,3 +32,5 @@ common/tokenize.[hc]
 common/atoms-*.h
 luadoc
 lib/capi.lua
+build
+.build*
