@@ -33,6 +33,8 @@
 
 #include "layoutgen.h"
 
+#define TAG_SCREEN_UNDEF    (-1)
+
 extern awesome_t globalconf;
 
 DO_LUA_NEW(extern, tag_t, tag, "tag", tag_ref)
@@ -68,6 +70,9 @@ tag_new(const char *name, layout_t *layout, double mwfact, int nmaster, int ncol
     tag = p_new(tag_t, 1);
     a_iso2utf8(name, &tag->name);
     tag->layout = layout;
+
+    /* to avoid error */
+    tag->screen = TAG_SCREEN_UNDEF;
 
     tag->mwfact = mwfact;
     if(tag->mwfact <= 0 || tag->mwfact >= 1)
@@ -175,7 +180,8 @@ tags_get_current(int screen)
 static void
 tag_view_only(tag_t *target)
 {
-    if (target) {
+    if (target)
+    {
         tag_array_t *tags = &globalconf.screens[target->screen].tags;
 
         for(int i = 0; i < tags->len; i++)
@@ -331,46 +337,6 @@ luaA_tag_new(lua_State *L)
                   mwfact, nmaster, ncol);
 
     return luaA_tag_userdata_new(L, tag);
-}
-
-/** Set the tag master width factor. This value is used in various layouts to
- * determine the size of the master window.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lparam The master width ratio value, between 0 and 1.
- */
-static int
-luaA_tag_mwfact_set(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    double mwfact = luaL_checknumber(L, 2);
-
-    if(mwfact < 1 && mwfact > 0)
-    {
-        (*tag)->mwfact = mwfact;
-        globalconf.screens[(*tag)->screen].need_arrange = true;
-    }
-    else
-        luaL_error(L, "bad value, must be between 0 and 1");
-
-    return 0;
-}
-
-/** Get the tag master width factor.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lreturn The master width ratio value.
- */
-static int
-luaA_tag_mwfact_get(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    lua_pushnumber(L, (*tag)->mwfact);
-    return 1;
 }
 
 /** Set the number of columns. This is used in various layouts to set the number
@@ -555,6 +521,9 @@ luaA_tag_index(lua_State *L)
       case A_TK_SELECTED:
         lua_pushboolean(L, (*tag)->selected);
         break;
+      case A_TK_MWFACT:
+        lua_pushnumber(L, (*tag)->mwfact);
+        break;
       default:
         return 0;
     }
@@ -572,15 +541,26 @@ luaA_tag_newindex(lua_State *L)
     size_t len;
     tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *attr = luaL_checklstring(L, 2, &len);
+    double d;
 
     switch(a_tokenize(attr, len))
     {
       case A_TK_SELECTED:
         tag_view(*tag, luaA_checkboolean(L, 3));
+        return 0;
+      case A_TK_MWFACT:
+        d = luaL_checknumber(L, 3);
+        if(d > 0 && d < 1)
+            (*tag)->mwfact = d;
+        else
+            luaL_error(L, "bad value, must be between 0 and 1");
         break;
       default:
         return 0;
     }
+
+    if((*tag)->screen != TAG_SCREEN_UNDEF)
+        globalconf.screens[(*tag)->screen].need_arrange = true;
 
     return 0;
 }
@@ -596,8 +576,6 @@ const struct luaL_reg awesome_tag_methods[] =
 const struct luaL_reg awesome_tag_meta[] =
 {
     { "add", luaA_tag_add },
-    { "mwfact_set", luaA_tag_mwfact_set },
-    { "mwfact_get", luaA_tag_mwfact_get },
     { "ncol_set", luaA_tag_ncol_set },
     { "ncol_get", luaA_tag_ncol_get },
     { "nmaster_set", luaA_tag_nmaster_set },

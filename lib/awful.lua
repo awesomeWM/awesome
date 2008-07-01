@@ -179,7 +179,7 @@ end
 function P.tag.setmwfact(mwfact)
     local t = P.tag.selected()
     if t then
-        t:mwfact_set(mwfact)
+        t.mwfact = mwfact
     end
 end
 
@@ -188,7 +188,7 @@ end
 function P.tag.incmwfact(add)
     local t = P.tag.selected()
     if t then
-        t:mwfact_set(t:mwfact_get() + add)
+        t.mwfact = t.mwfact + add
     end
 end
 
