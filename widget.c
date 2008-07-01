@@ -353,15 +353,8 @@ luaA_widget_index(lua_State *L)
     const char *buf = luaL_checklstring(L, 2, &len);
     awesome_token_t token;
 
-    lua_getmetatable(L, 1);
-    lua_pushvalue(L, 2);
-    lua_rawget(L, -2);
-    if (!lua_isnil(L, -1))
-    {
-        lua_remove(L, -2);
+    if(luaA_usemetatable(L, 1, 2))
         return 1;
-    }
-    lua_pop(L, 2);
 
     switch((token = a_tokenize(buf, len)))
     {

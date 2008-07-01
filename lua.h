@@ -172,6 +172,22 @@ luaA_settype(lua_State *L, const char *type)
     return 1;
 }
 
+static inline int
+luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
+{
+    lua_getmetatable(L, idxobj);
+    lua_pushvalue(L, idxfield);
+    lua_rawget(L, -2);
+    if (!lua_isnil(L, -1))
+    {
+        lua_remove(L, -2);
+        return 1;
+    }
+    lua_pop(L, 2);
+
+    return 0;
+}
+
 void luaA_init(void);
 bool luaA_parserc(const char *);
 void luaA_pushpointer(lua_State *, void *, awesome_type_t);

@@ -494,15 +494,8 @@ luaA_titlebar_index(lua_State *L)
     titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *attr = luaL_checklstring(L, 2, &len);
 
-    lua_getmetatable(L, 1);
-    lua_pushvalue(L, 2);
-    lua_rawget(L, -2);
-    if (!lua_isnil(L, -1))
-    {
-        lua_remove(L, -2);
+    if(luaA_usemetatable(L, 1, 2))
         return 1;
-    }
-    lua_pop(L, 2);
 
     switch(a_tokenize(attr, len))
     {
