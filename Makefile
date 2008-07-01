@@ -27,7 +27,10 @@ cmake-build: ${builddir}/CMakeCache.txt
 	$(ECHO) "Building…"
 	$(MAKE) -C ${builddir}
 
-install: cmake-build
+tags:
+	git ls-files | xargs ctags
+
+install:
 	$(ECHO) "Installing…"
 	$(MAKE) -C ${builddir} install
 
