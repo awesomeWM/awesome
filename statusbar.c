@@ -565,11 +565,11 @@ luaA_statusbar_newindex(lua_State *L)
         if((buf = luaL_checkstring(L, 3))
            && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
         {
-            xcolor_wipe(&(*statusbar)->colors.fg);
-            (*statusbar)->colors.fg = color;
+            xcolor_wipe(&(*statusbar)->colors.bg);
+            (*statusbar)->colors.bg = color;
 
             if((*statusbar)->ctx)
-                (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
+                (*statusbar)->ctx->bg = (*statusbar)->colors.bg;
 
             (*statusbar)->need_update = true;
         }
