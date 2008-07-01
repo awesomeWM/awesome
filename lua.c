@@ -144,19 +144,18 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
  * `bottom'.
  */
 static int
-luaA_padding_set(lua_State *L)
+luaA_screen_padding_set(lua_State *L)
 {
     int screen = luaL_checknumber(L, 1) - 1;
 
-    if(screen >= 0 && screen < globalconf.screens_info->nscreen)
-    {
-        luaA_checktable(L, 2);
+    luaA_checkscreen(screen);
 
-        globalconf.screens[screen].padding.right = luaA_getopt_number(L, 2, "right", 0);
-        globalconf.screens[screen].padding.left = luaA_getopt_number(L, 2, "left", 0);
-        globalconf.screens[screen].padding.top = luaA_getopt_number(L, 2, "top", 0);
-        globalconf.screens[screen].padding.bottom = luaA_getopt_number(L, 2, "bottom", 0);
-    }
+    luaA_checktable(L, 2);
+
+    globalconf.screens[screen].padding.right = luaA_getopt_number(L, 2, "right", 0);
+    globalconf.screens[screen].padding.left = luaA_getopt_number(L, 2, "left", 0);
+    globalconf.screens[screen].padding.top = luaA_getopt_number(L, 2, "top", 0);
+    globalconf.screens[screen].padding.bottom = luaA_getopt_number(L, 2, "bottom", 0);
 
     ewmh_update_workarea(screen_virttophys(screen));
 
@@ -479,7 +478,6 @@ luaA_init(void)
         { "quit", luaA_quit },
         { "exec", luaA_exec },
         { "restart", luaA_restart },
-        { "padding_set", luaA_padding_set },
         { "mouse_add", luaA_mouse_add },
         { "font_set", luaA_font_set },
         { "colors_set", luaA_colors_set },
@@ -487,6 +485,7 @@ luaA_init(void)
     };
     static const struct luaL_reg awesome_screen_lib[] =
     {
+        { "padding_set", luaA_screen_padding_set },
         { "coords_get", luaA_screen_coords_get },
         { "count", luaA_screen_count },
         { "focus", luaA_screen_focus },
