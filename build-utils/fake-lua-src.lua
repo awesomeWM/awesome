@@ -60,6 +60,7 @@ for i, line in ipairs(ilines) do
     end
 end
 
+
 -- Get function list and print their documentation
 capture = false
 for i, line in ipairs(ilines) do
@@ -67,6 +68,15 @@ for i, line in ipairs(ilines) do
         _, _, libname, libtype = line:find("const struct luaL_reg awesome_(%a+)_(%a+)%[%] ")
         -- Special case
         if not libname then _, _, libname, libtype = line:find("const struct luaL_reg (awesome)_(lib)%[%] =") end
+        -- __index alone
+        if not libname and line:find("^luaA_.*_index") then
+            local fctname, fctdef
+            _, _, fctdef, fctname =  line:find("^(luaA_(.+)_index)")
+            print(function_doc[fctdef]:comment_translate())
+            print("-- @class table")
+            print("-- @name " .. fctname)
+            print(fctname)
+        end
     else
         if line:find("};") then
             libname = nil
@@ -74,21 +84,13 @@ for i, line in ipairs(ilines) do
             local fctname, fctdef
             _, _, fctname, fctdef = line:find("\"(.+)\", (.+) },?")
             if fctname and (not fctname:find("^__")
-                            or fctname:find("^__call")
-                            or fctname:find("^__index")) then
+                            or fctname:find("^__call")) then
                 if function_doc[fctdef] then
-                    if fctname:find("^__index") then
-                        print(function_doc[fctdef]:comment_translate())
-                        print("-- @class table")
-                        print("-- @name " .. libname)
-                        print(libname)
-                    else
-                        fctname = "." .. fctname
-                        fctname = fctname:gsub("^.__call", "")
-                        print(function_doc[fctdef]:comment_translate())
-                        print("function " .. libname .. fctname .. "()")
-                        print("end");
-                    end
+                    fctname = "." .. fctname
+                    fctname = fctname:gsub("^.__call", "")
+                    print(function_doc[fctdef]:comment_translate())
+                    print("function " .. libname .. fctname .. "()")
+                    print("end");
                 else
                     print("This function is not yet documented.")
                 end
