@@ -94,10 +94,13 @@ textbox_destructor(widget_t *w)
     p_delete(&d);
 }
 
-/** The __index method for a textbox object.
+/** Textbox attributes.
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield text The text to display.
+ * \lfield width The width of the textbox. Set to 0 for auto.
  */
 static int
 luaA_textbox_index(lua_State *L, awesome_token_t token)
