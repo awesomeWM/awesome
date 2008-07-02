@@ -266,7 +266,7 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
     simple_window_t *sw;
     area_t geom;
     draw_parser_data_t pdata;
-     
+
     draw_parser_data_init(&pdata);
 
     geom = draw_text_extents(globalconf.connection,
@@ -1025,32 +1025,6 @@ luaA_client_mouse_move(lua_State *L)
     return 0;
 }
 
-/** Get the screen number where the mouse ic.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lreturn The screen number.
- */
-static int
-luaA_mouse_screen_get(lua_State *L)
-{
-    int screen, mouse_x, mouse_y;
-    xcb_window_t root;
-
-    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
-
-    if(!mouse_query_pointer(root, &mouse_x, &mouse_y, NULL))
-        return 0;
-
-    screen = screen_get_bycoord(globalconf.screens_info,
-                                globalconf.default_screen,
-                                mouse_x, mouse_y);
-
-    lua_pushnumber(L, screen + 1);
-
-    return 1;
-}
-
 /** Create a new mouse button bindings.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1140,6 +1114,18 @@ luaA_mouse_index(lua_State *L)
         }
         lua_setfield(L, -2, "buttons");
         break;
+      case A_TK_SCREEN:
+        root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+
+        if(!mouse_query_pointer(root, &mouse_x, &mouse_y, NULL))
+            return 0;
+
+        i = screen_get_bycoord(globalconf.screens_info,
+                               globalconf.default_screen,
+                               mouse_x, mouse_y);
+
+        lua_pushnumber(L, i + 1);
+        break;
       default:
         return 0;
     }
@@ -1186,7 +1172,6 @@ const struct luaL_reg awesome_mouse_methods[] =
     { "__call", luaA_mouse_new },
     { "__index", luaA_mouse_index },
     { "__newindex", luaA_mouse_newindex },
-    { "screen_get", luaA_mouse_screen_get },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_mouse_meta[] =

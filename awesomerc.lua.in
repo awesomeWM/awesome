@@ -153,28 +153,28 @@ end
 for i = 1, keynumber do
     keybinding({ modkey }, i,
                    function ()
-                       local screen = mouse.screen_get()
+                       local screen = mouse.screen
                        if tags[screen][i] then
                            awful.tag.viewonly(tags[screen][i])
                        end
                    end):add()
     keybinding({ modkey, "Control" }, i,
                    function ()
-                       local screen = mouse.screen_get()
+                       local screen = mouse.screen
                        if tags[screen][i] then
                            tags[screen][i].selected = not tags[screen][i].selected
                        end
                    end):add()
     keybinding({ modkey, "Shift" }, i,
                    function ()
-                       local screen = mouse.screen_get()
+                       local screen = mouse.screen
                        if tags[screen][i] then
                            awful.client.movetotag(tags[screen][i])
                        end
                    end):add()
     keybinding({ modkey, "Control", "Shift" }, i,
                    function ()
-                       local screen = mouse.screen_get()
+                       local screen = mouse.screen
                        if tags[screen][i] then
                            awful.client.toggletag(tags[screen][i])
                        end
@@ -270,7 +270,7 @@ end):add()
 for i = 1, keynumber do
     keybinding({ modkey, "Shift" }, "F" .. i,
                    function ()
-                       local screen = mouse.screen_get()
+                       local screen = mouse.screen
                        if tags[screen][i] then
                            for k, c in pairs(awful.client.getmarked()) do
                                awful.client.movetotag(tags[screen][i], c)

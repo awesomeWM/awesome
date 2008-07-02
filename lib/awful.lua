@@ -117,7 +117,7 @@ end
 -- @param screen Optional screen number, otherwise screen mouse is used.
 -- @return The master window.
 function P.client.master(screen)
-    local s = screen or mouse.screen_get()
+    local s = screen or mouse.screen
     return client.visible_get(s)[1]
 end
 
@@ -145,7 +145,7 @@ function P.screen.focus(i)
     if sel then
         s = sel.screen
     else
-        s = mouse.screen_get()
+        s = mouse.screen
     end
     s = cycle(screen.count(), s + i)
     screen.focus(s)
@@ -157,7 +157,7 @@ end
 -- @param s Screen number.
 -- @return A table with all selected tags.
 function P.tag.selectedlist(s)
-    local screen = s or mouse.screen_get()
+    local screen = s or mouse.screen
     local tags = tag.geti(screen)
     local vtags = {}
     for i, t in pairs(tags) do
@@ -231,7 +231,7 @@ end
 --- View no tag.
 -- @param Optional screen number.
 function P.tag.viewnone(screen)
-    local tags = tag.get(screen or mouse.screen_get())
+    local tags = tag.get(screen or mouse.screen)
     for i, t in pairs(tags) do
         t.selected = false
     end
@@ -241,7 +241,7 @@ end
 -- @param i The relative index to see.
 -- @param screen Optional screen number.
 function P.tag.viewidx(i, screen)
-    local tags = tag.geti(screen or mouse.screen_get())
+    local tags = tag.geti(screen or mouse.screen)
     local sel = P.tag.selected()
     P.tag.viewnone()
     for k, t in ipairs(tags) do
