@@ -133,7 +133,8 @@ progressbar_draw(draw_context_t *ctx,
     /* pb_.. values points to the widget inside a potential border */
     int values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
     int unit = 0, nbbars = 0; /* tick + gap */
-    area_t rectangle, pattern_rect;
+    area_t rectangle;
+    vector_t color_gradient;
     progressbar_data_t *d = w->widget->data;
     bar_t *bar;
 
@@ -230,22 +231,22 @@ progressbar_draw(draw_context_t *ctx,
                 draw_rectangle(ctx, rectangle, d->border_width, false, &bar->border_color);
             }
 
-            pattern_rect.x = pb_x;
-            pattern_rect.width =  0;
-            pattern_rect.y = pb_y;
+            color_gradient.x = pb_x;
+            color_gradient.x_offset =  0;
+            color_gradient.y = pb_y;
 
             /* new value/progress in px + pattern setup */
             if(bar->reverse)
             {
                 /* invert: top with bottom part */
                 pb_progress = pb_height - pb_progress;
-                pattern_rect.height = pb_height;
+                color_gradient.y_offset = pb_height;
             }
             else
             {
                 /* bottom to top */
-                pattern_rect.y += pb_height;
-                pattern_rect.height = - pb_height;
+                color_gradient.y += pb_height;
+                color_gradient.y_offset = - pb_height;
             }
 
             /* bottom part */
@@ -260,7 +261,7 @@ progressbar_draw(draw_context_t *ctx,
                 if(bar->reverse)
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
                 else
-                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, color_gradient,
                                             &bar->fg, &bar->fg_center, &bar->fg_end);
             }
 
@@ -274,7 +275,7 @@ progressbar_draw(draw_context_t *ctx,
 
                 /* bg color */
                 if(bar->reverse)
-                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, color_gradient,
                                             &bar->fg, &bar->fg_center, &bar->fg_end);
                 else
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
@@ -330,21 +331,21 @@ progressbar_draw(draw_context_t *ctx,
                 draw_rectangle(ctx, rectangle, d->border_width, false, &bar->border_color);
             }
 
-            pattern_rect.y = pb_y;
-            pattern_rect.height = 0;
-            pattern_rect.x = pb_x;
+            color_gradient.y = pb_y;
+            color_gradient.y_offset = 0;
+            color_gradient.x = pb_x;
 
             /* new value/progress in px + pattern setup */
             if(bar->reverse)
             {
                 /* reverse: right to left */
                 pb_progress = pb_width - pb_progress;
-                pattern_rect.x += pb_width;
-                pattern_rect.width = - pb_width;
+                color_gradient.x += pb_width;
+                color_gradient.x_offset = - pb_width;
             }
             else
                 /* left to right */
-                pattern_rect.width = pb_width;
+                color_gradient.x_offset = pb_width;
 
             /* left part */
             if(pb_progress > 0)
@@ -358,7 +359,7 @@ progressbar_draw(draw_context_t *ctx,
                 if(bar->reverse)
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
                 else
-                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, color_gradient,
                                             &bar->fg, &bar->fg_center, &bar->fg_end);
             }
 
@@ -372,7 +373,7 @@ progressbar_draw(draw_context_t *ctx,
 
                 /* bg color */
                 if(bar->reverse)
-                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
+                    draw_rectangle_gradient(ctx, rectangle, 1.0, true, color_gradient,
                                             &bar->fg, &bar->fg_center, &bar->fg_end);
                 else
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);

@@ -415,14 +415,14 @@ draw_text(draw_context_t *ctx, font_t *font,
 
 /** Setup color-source for cairo (gradient or mono).
  * \param ctx Draw context.
- * \param rect x, y to x + x_offset, y + y_offset.
- * \param pcolor Color to use at start (x, y).
- * \param pcolor_center Color at 50% of width.
- * \param pcolor_end Color at pattern end (x + x_offset, y + y_offset).
+ * \param gradient_vector x, y to x + x_offset, y + y_offset.
+ * \param pcolor Color to use at start of gradient_vector.
+ * \param pcolor_center Color at center of gradient_vector.
+ * \param pcolor_end Color at end of gradient_vector.
  * \return pat Pattern or NULL, needs to get cairo_pattern_destroy()'ed.
  */
 static cairo_pattern_t *
-draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
+draw_setup_cairo_color_source(draw_context_t *ctx, vector_t gradient_vector,
                               const xcolor_t *pcolor, const xcolor_t *pcolor_center,
                               const xcolor_t *pcolor_end)
 {
@@ -439,7 +439,10 @@ draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
                               pcolor->alpha / 65535.0);
     else
     {
-        pat = cairo_pattern_create_linear(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+        pat = cairo_pattern_create_linear(gradient_vector.x,
+                                          gradient_vector.y,
+                                          gradient_vector.x + gradient_vector.x_offset,
+                                          gradient_vector.y + gradient_vector.y_offset);
 
         /* pcolor is always set (so far in awesome) */
         cairo_pattern_add_color_stop_rgba(pat, 0.0,
@@ -507,18 +510,18 @@ draw_rectangle(draw_context_t *ctx, area_t geometry,
 }
 
 /** Draw rectangle with gradient colors
- * \param ctx Draw context
- * \param geometry geometry
- * \param line_width line width
- * \param filled filled rectangle?
- * \param pattern_rect pattern geometry
- * \param pcolor color to use at start
- * \param pcolor_center color at 50% of width
- * \param pcolor_end color at pattern_start + pattern_width
+ * \param ctx Draw context.
+ * \param geometry Geometry.
+ * \param line_width Line width.
+ * \param filled Filled rectangle?
+ * \param gradient_vector Color-gradient course.
+ * \param pcolor Color at start of gradient_vector.
+ * \param pcolor_center Color in the center.
+ * \param pcolor_end Color at end of gradient_vector.
  */
 void
 draw_rectangle_gradient(draw_context_t *ctx, area_t geometry, float line_width, bool filled,
-                        area_t pattern_rect, const xcolor_t *pcolor,
+                        vector_t gradient_vector, const xcolor_t *pcolor,
                         const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
 {
     cairo_pattern_t *pat;
@@ -528,7 +531,7 @@ draw_rectangle_gradient(draw_context_t *ctx, area_t geometry, float line_width, 
     cairo_set_miter_limit(ctx->cr, 10.0);
     cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
 
-    pat = draw_setup_cairo_color_source(ctx, pattern_rect, pcolor, pcolor_center, pcolor_end);
+    pat = draw_setup_cairo_color_source(ctx, gradient_vector, pcolor, pcolor_center, pcolor_end);
 
     if(filled)
     {
@@ -566,21 +569,21 @@ draw_graph_setup(draw_context_t *ctx)
  * \param to Array of end-point offsets to draw a graph lines.
  * \param cur_index Current position in data-array (cycles around).
  * \param grow Put new values to the left or to the right.
- * \param patt_rect Pattern geometry.
- * \param pcolor Color at the left.
+ * \param gradient_vector Color-Gradient course.
+ * \param pcolor Color at start of gradient_vector.
  * \param pcolor_center Color in the center.
- * \param pcolor_end Color at the right.
+ * \param pcolor_end Color at end of gradient_vector.
  */
 void
 draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
-           position_t grow, area_t patt_rect, const xcolor_t *pcolor,
+           position_t grow, vector_t gradient_vector, const xcolor_t *pcolor,
            const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
 {
     int i = -1;
     float x = rect.x + 0.5; /* middle of a pixel */
     cairo_pattern_t *pat;
 
-    pat = draw_setup_cairo_color_source(ctx, patt_rect,
+    pat = draw_setup_cairo_color_source(ctx, gradient_vector,
                                         pcolor, pcolor_center, pcolor_end);
 
     if(grow == Right) /* draw from right to left */
@@ -619,14 +622,14 @@ draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
  * \param to array of offsets to draw the line through...
  * \param cur_index current position in data-array (cycles around)
  * \param grow put new values to the left or to the right
- * \param patt_rect Pattern geometry.
- * \param pcolor color at the left
- * \param pcolor_center color in the center
- * \param pcolor_end color at the right
+ * \param gradient_vector Color-gradient course.
+ * \param pcolor Color at start of gradient_vector.
+ * \param pcolor_center Color in the center.
+ * \param pcolor_end Color at end of gradient_vector.
  */
 void
 draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
-                position_t grow, area_t patt_rect, const xcolor_t *pcolor,
+                position_t grow, vector_t gradient_vector, const xcolor_t *pcolor,
                 const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
 {
     int i, w;
@@ -641,7 +644,7 @@ draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
     /* a nicer, better visible line compared to 1.0 */
     cairo_set_line_width(ctx->cr, 1.25);
 
-    pat = draw_setup_cairo_color_source(ctx, patt_rect, pcolor, pcolor_center, pcolor_end);
+    pat = draw_setup_cairo_color_source(ctx, gradient_vector, pcolor, pcolor_center, pcolor_end);
 
     /* path through the centers of pixels */
     x = rect.x + 0.5;

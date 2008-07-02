@@ -148,7 +148,8 @@ graph_draw(draw_context_t *ctx,
 {
     int margin_top, y;
     graph_data_t *d = w->widget->data;
-    area_t rectangle, pattern_area;
+    area_t rectangle;
+    vector_t color_gradient;
     plot_t *plot;
 
     if(!d->plots)
@@ -180,28 +181,28 @@ graph_draw(draw_context_t *ctx,
 
     /* gradient begin either left or on the right of the rectangle */
     if(d->grow == Right)
-        pattern_area.x = rectangle.x + rectangle.width;
+        color_gradient.x = rectangle.x + rectangle.width;
     else
-        pattern_area.x = rectangle.x;
+        color_gradient.x = rectangle.x;
 
     for(plot = d->plots; plot; plot = plot->next)
         switch(plot->draw_style)
         {
             case Top_Style:
-              pattern_area.y = rectangle.y - rectangle.height;
+              color_gradient.y = rectangle.y - rectangle.height;
               if(plot->vertical_gradient)
               {
-                  pattern_area.width = 0;
-                  pattern_area.height = rectangle.height;
+                  color_gradient.x_offset = 0;
+                  color_gradient.y_offset = rectangle.height;
               }
               else
               {
-                  pattern_area.height = 0;
+                  color_gradient.y_offset = 0;
 
                   if(d->grow == Right)
-                      pattern_area.width = - rectangle.width;
+                      color_gradient.x_offset = - rectangle.width;
                   else
-                      pattern_area.width = rectangle.width;
+                      color_gradient.x_offset = rectangle.width;
               }
 
               for(y = 0; y < d->size; y++)
@@ -210,47 +211,47 @@ graph_draw(draw_context_t *ctx,
                   d->draw_from[y] = d->box_height; /* i.e. no smaller value -> from top of box */
                   d->draw_to[y] = d->box_height - plot->lines[y]; /* i.e. on full plot -> 0 = bottom */
               }
-              draw_graph(ctx, rectangle , d->draw_from, d->draw_to, plot->index, d->grow, pattern_area,
+              draw_graph(ctx, rectangle , d->draw_from, d->draw_to, plot->index, d->grow, color_gradient,
                          &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
             case Bottom_Style:
-              pattern_area.y = rectangle.y;
+              color_gradient.y = rectangle.y;
               if(plot->vertical_gradient)
               {
-                  pattern_area.width = 0;
-                  pattern_area.height = - rectangle.height;
+                  color_gradient.x_offset = 0;
+                  color_gradient.y_offset = - rectangle.height;
               }
               else
               {
-                  pattern_area.height = 0;
+                  color_gradient.y_offset = 0;
 
                   if(d->grow == Right)
-                      pattern_area.width = - rectangle.width;
+                      color_gradient.x_offset = - rectangle.width;
                   else
-                      pattern_area.width = rectangle.width;
+                      color_gradient.x_offset = rectangle.width;
               }
 
               p_clear(d->draw_from, d->size);
-              draw_graph(ctx, rectangle, d->draw_from, plot->lines, plot->index, d->grow, pattern_area,
+              draw_graph(ctx, rectangle, d->draw_from, plot->lines, plot->index, d->grow, color_gradient,
                          &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
             case Line_Style:
-              pattern_area.y = rectangle.y;
+              color_gradient.y = rectangle.y;
               if(plot->vertical_gradient)
               {
-                  pattern_area.width = 0;
-                  pattern_area.height = -rectangle.height;
+                  color_gradient.x_offset = 0;
+                  color_gradient.y_offset = -rectangle.height;
               }
               else
               {
-                  pattern_area.height = 0;
+                  color_gradient.y_offset = 0;
                   if(d->grow == Right)
-                      pattern_area.width = - rectangle.width;
+                      color_gradient.x_offset = - rectangle.width;
                   else
-                      pattern_area.width = rectangle.width;
+                      color_gradient.x_offset = rectangle.width;
               }
 
-              draw_graph_line(ctx, rectangle, plot->lines, plot->index, d->grow, pattern_area,
+              draw_graph_line(ctx, rectangle, plot->lines, plot->index, d->grow, color_gradient,
                               &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
         }
