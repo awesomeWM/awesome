@@ -45,9 +45,9 @@ struct bar_t
     /** Foreground color of turned-off ticks */
     xcolor_t fg_off;
     /** Foreground color when bar is half-full */
-    xcolor_t pfg_center;
+    xcolor_t fg_center;
     /** Foreground color when bar is full */
-    xcolor_t pfg_end;
+    xcolor_t fg_end;
     /** Background color */
     xcolor_t bg;
     /** Border color */
@@ -261,7 +261,7 @@ progressbar_draw(draw_context_t *ctx,
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
                 else
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
-                                            &bar->fg, &bar->pfg_center, &bar->pfg_end);
+                                            &bar->fg, &bar->fg_center, &bar->fg_end);
             }
 
             /* top part */
@@ -275,7 +275,7 @@ progressbar_draw(draw_context_t *ctx,
                 /* bg color */
                 if(bar->reverse)
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
-                                            &bar->fg, &bar->pfg_center, &bar->pfg_end);
+                                            &bar->fg, &bar->fg_center, &bar->fg_end);
                 else
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
             }
@@ -359,7 +359,7 @@ progressbar_draw(draw_context_t *ctx,
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
                 else
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
-                                            &bar->fg, &bar->pfg_center, &bar->pfg_end);
+                                            &bar->fg, &bar->fg_center, &bar->fg_end);
             }
 
             /* right part */
@@ -373,7 +373,7 @@ progressbar_draw(draw_context_t *ctx,
                 /* bg color */
                 if(bar->reverse)
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, pattern_rect,
-                                            &bar->fg, &bar->pfg_center, &bar->pfg_end);
+                                            &bar->fg, &bar->fg_center, &bar->fg_end);
                 else
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
             }
@@ -450,13 +450,13 @@ luaA_progressbar_bar_properties_set(lua_State *L)
 
     if((buf = luaA_getopt_string(L, 3, "fg_center", NULL)))
     {
-        xcolor_init(&bar->pfg_center, globalconf.connection,
+        xcolor_init(&bar->fg_center, globalconf.connection,
                     globalconf.default_screen, buf);
     }
 
     if((buf = luaA_getopt_string(L, 3, "fg_end", NULL)))
     {
-        xcolor_init(&bar->pfg_end, globalconf.connection,
+        xcolor_init(&bar->fg_end, globalconf.connection,
                     globalconf.default_screen, buf);
     }
 
