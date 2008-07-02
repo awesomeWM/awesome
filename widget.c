@@ -344,6 +344,9 @@ luaA_widget_tostring(lua_State *L)
 /** Generic widget index.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield visible The widget visibility.
+ * \lfield name The widget name.
  */
 static int
 luaA_widget_index(lua_State *L)
