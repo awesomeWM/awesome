@@ -434,6 +434,13 @@ luaA_progressbar_bar_properties_set(lua_State *L)
         bar->fg = color;
     }
 
+    if((buf = luaA_getopt_string(L, 3, "fg_off", NULL))
+       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    {
+        xcolor_wipe(&bar->fg_off);
+        bar->fg_off = color;
+    }
+
     if((buf = luaA_getopt_string(L, 3, "bg", NULL))
        && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
     {
@@ -452,7 +459,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
        && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
     {
         xcolor_wipe(bar->pfg_center);
-        bar->pfg_end = p_dup(&color, 1);;
+        bar->pfg_center = p_dup(&color, 1);;
     }
 
     if((buf = luaA_getopt_string(L, 3, "fg_end", NULL))
