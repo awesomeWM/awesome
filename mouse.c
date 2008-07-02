@@ -1136,6 +1136,7 @@ luaA_mouse_screen_get(lua_State *L)
 
 /** Create a new mouse button bindings.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A table with modifiers keys.
  * \lparam A mouse button number.
@@ -1168,9 +1169,29 @@ luaA_mouse_new(lua_State *L)
     return luaA_mouse_userdata_new(L, button);
 }
 
+/** Index for mouse.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_mouse_index(lua_State *L)
+{
+    size_t len;
+    const char *attr = luaL_checklstring(L, 1, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
 const struct luaL_reg awesome_mouse_methods[] =
 {
     { "__call", luaA_mouse_new },
+    { "__index", luaA_mouse_index },
     { "screen_get", luaA_mouse_screen_get },
     { "coords_set", luaA_mouse_coords_set },
     { "coords_get", luaA_mouse_coords_get },
