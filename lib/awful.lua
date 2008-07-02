@@ -150,7 +150,7 @@ function P.screen.focus(i)
     s = cycle(screen.count(), s + i)
     screen.focus(s)
     -- Move the mouse on the screen
-    mouse.coords_set(screen.coords_get(s))
+    mouse.coords = screen.coords_get(s)
 end
 
 --- Return a table with all visible tags
@@ -332,7 +332,7 @@ function P.client.movetoscreen(c, s)
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel.screen = s
-        mouse.coords_set(screen.coords_get(s))
+        mouse.coords = screen.coords_get(s)
         sel:focus_set()
     end
 end

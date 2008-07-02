@@ -965,89 +965,6 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
     }
 }
 
-/** Get mouse coordinates.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lreturn A table with `x' and `y' keys set to mouse coordinates, and
- *   'buttons' the list of the currently pressed buttons as numbers.
- */
-static int
-luaA_mouse_coords_get(lua_State *L)
-{
-    int mouse_x, mouse_y, i = 0;
-    uint16_t mask;
-    xcb_window_t root;
-
-    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
-
-    if(!mouse_query_pointer(root, &mouse_x, &mouse_y, &mask))
-        return 0;
-
-    lua_newtable(L);
-    lua_pushnumber(L, mouse_x);
-    lua_setfield(L, -2, "x");
-    lua_pushnumber(L, mouse_y);
-    lua_setfield(L, -2, "y");
-    lua_newtable(L);
-    if (mask & XCB_BUTTON_MASK_1)
-    {
-        lua_pushnumber(L, 1);
-        lua_rawseti(L, -2, ++i);
-    }
-    if (mask & XCB_BUTTON_MASK_2)
-    {
-        lua_pushnumber(L, 2);
-        lua_rawseti(L, -2, ++i);
-    }
-    if (mask & XCB_BUTTON_MASK_3)
-    {
-        lua_pushnumber(L, 3);
-        lua_rawseti(L, -2, ++i);
-    }
-    if (mask & XCB_BUTTON_MASK_4)
-    {
-        lua_pushnumber(L, 4);
-        lua_rawseti(L, -2, ++i);
-    }
-    if (mask & XCB_BUTTON_MASK_5)
-    {
-        lua_pushnumber(L, 5);
-        lua_rawseti(L, -2, ++i);
-    }
-    lua_setfield(L, -2, "buttons");
-    return 1;
-}
-
-/** Set mouse coordinates.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lparam The x and y coordinate in a table.
- */
-static int
-luaA_mouse_coords_set(lua_State *L)
-{
-    int x, y, mouse_x, mouse_y;
-    xcb_window_t root;
-    uint16_t mask;
-
-    luaA_checktable(L, 1);
-
-    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
-
-    if(!mouse_query_pointer(root, &mouse_x, &mouse_y, &mask))
-        return 0;
-
-    x = luaA_getopt_number(L, 1, "x", mouse_x);
-    y = luaA_getopt_number(L, 1, "y", mouse_y);
-
-    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
-    mouse_warp_pointer(root, x, y);
-
-    return 0;
-}
-
 /** Resize a client with mouse.
  * \param L The Lua VM state.
  *
@@ -1177,10 +1094,52 @@ static int
 luaA_mouse_index(lua_State *L)
 {
     size_t len;
-    const char *attr = luaL_checklstring(L, 1, &len);
+    const char *attr = luaL_checklstring(L, 2, &len);
+    int mouse_x, mouse_y, i = 0;
+    uint16_t mask;
+    xcb_window_t root;
 
     switch(a_tokenize(attr, len))
     {
+      case A_TK_COORDS:
+        root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+
+        if(!mouse_query_pointer(root, &mouse_x, &mouse_y, &mask))
+            return 0;
+
+        lua_newtable(L);
+        lua_pushnumber(L, mouse_x);
+        lua_setfield(L, -2, "x");
+        lua_pushnumber(L, mouse_y);
+        lua_setfield(L, -2, "y");
+        lua_newtable(L);
+        if (mask & XCB_BUTTON_MASK_1)
+        {
+            lua_pushnumber(L, 1);
+            lua_rawseti(L, -2, ++i);
+        }
+        if (mask & XCB_BUTTON_MASK_2)
+        {
+            lua_pushnumber(L, 2);
+            lua_rawseti(L, -2, ++i);
+        }
+        if (mask & XCB_BUTTON_MASK_3)
+        {
+            lua_pushnumber(L, 3);
+            lua_rawseti(L, -2, ++i);
+        }
+        if (mask & XCB_BUTTON_MASK_4)
+        {
+            lua_pushnumber(L, 4);
+            lua_rawseti(L, -2, ++i);
+        }
+        if (mask & XCB_BUTTON_MASK_5)
+        {
+            lua_pushnumber(L, 5);
+            lua_rawseti(L, -2, ++i);
+        }
+        lua_setfield(L, -2, "buttons");
+        break;
       default:
         return 0;
     }
@@ -1188,13 +1147,46 @@ luaA_mouse_index(lua_State *L)
     return 1;
 }
 
+/** Newindex for mouse.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_mouse_newindex(lua_State *L)
+{
+    size_t len;
+    const char *attr = luaL_checklstring(L, 2, &len);
+    int mouse_x, mouse_y, x, y = 0;
+    uint16_t mask;
+    xcb_window_t root;
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_COORDS:
+        luaA_checktable(L, 3);
+
+        root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+        if(!mouse_query_pointer(root, &mouse_x, &mouse_y, &mask))
+            return 0;
+
+        x = luaA_getopt_number(L, 3, "x", mouse_x);
+        y = luaA_getopt_number(L, 3, "y", mouse_y);
+
+        mouse_warp_pointer(root, x, y);
+        break;
+      default:
+        return 0;
+    }
+
+    return 0;
+}
+
 const struct luaL_reg awesome_mouse_methods[] =
 {
     { "__call", luaA_mouse_new },
     { "__index", luaA_mouse_index },
+    { "__newindex", luaA_mouse_newindex },
     { "screen_get", luaA_mouse_screen_get },
-    { "coords_set", luaA_mouse_coords_set },
-    { "coords_get", luaA_mouse_coords_get },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_mouse_meta[] =

@@ -342,12 +342,12 @@ function hook_arrange(screen)
     local sel = client.focus_get()
     if sel then
         local c_c = sel.coords
-        local m_c = mouse.coords_get()
+        local m_c = mouse.coords
 
         if m_c.x < c_c.x or m_c.x >= c_c.x + c_c.width or
             m_c.y < c_c.y or m_c.y >= c_c.y + c_c.height then
             if table.maxn(m_c.buttons) == 0 then
-                mouse.coords_set({ x = c_c.x + 5, y = c_c.y + 5})
+                mouse.coords = { x = c_c.x + 5, y = c_c.y + 5}
             end
         end
     end
