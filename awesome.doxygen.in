@@ -42,6 +42,7 @@ ALIASES += luastack="\par Lua Stack:"
 ALIASES += lvalue="- \em value "
 ALIASES += lparam="- \em param "
 ALIASES += lreturn="- \em returns "
+ALIASES += lfield="- \em fields "
 
 #---------------------------------------------------------------------------
 # Build related configuration options
