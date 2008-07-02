@@ -516,10 +516,10 @@ luaA_statusbar_index(lua_State *L)
         lua_pushstring(L, draw_align_tostr((*statusbar)->align));
         break;
       case A_TK_FG:
-        lua_pushstring(L, (*statusbar)->colors.fg.name);
+        luaA_pushcolor(L, &(*statusbar)->colors.fg);
         break;
       case A_TK_BG:
-        lua_pushstring(L, (*statusbar)->colors.bg.name);
+        luaA_pushcolor(L, &(*statusbar)->colors.bg);
         break;
       case A_TK_POSITION:
         lua_pushstring(L, position_tostr((*statusbar)->position));

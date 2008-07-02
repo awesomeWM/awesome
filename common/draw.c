@@ -427,8 +427,8 @@ draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
                               const xcolor_t *pcolor_end)
 {
     cairo_pattern_t *pat = NULL;
-    bool has_center = pcolor_center->name[0] != '\0';
-    bool has_end    = pcolor_end->name[0] != '\0';
+    bool has_center = pcolor_center->initialized;
+    bool has_end    = pcolor_end->initialized;
 
     /* no need for a real pattern: */
     if(!has_end && !has_center)
@@ -1151,7 +1151,7 @@ xcolor_init(xcolor_t *color, xcb_connection_t *conn, int phys_screen,
             color->green = hexa_color->green;
             color->blue  = hexa_color->blue;
             color->alpha = alpha;
-            a_strcpy(color->name, sizeof(color->name), colstr);
+            color->initialized = true;
             p_delete(&hexa_color);
             return true;
         }
@@ -1173,7 +1173,7 @@ xcolor_init(xcolor_t *color, xcb_connection_t *conn, int phys_screen,
             color->blue  = named_color->visual_blue;
             color->alpha = 0xffff;
             color->alpha = alpha;
-            a_strcpy(color->name, sizeof(color->name), colstr);
+            color->initialized = true;
             p_delete(&named_color);
             return true;
         }

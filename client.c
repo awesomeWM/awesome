@@ -1280,7 +1280,7 @@ luaA_client_index(lua_State *L)
         lua_pushnumber(L, (*c)->border);
         break;
       case A_TK_BORDER_COLOR:
-        lua_pushstring(L, (*c)->border_color.name);
+        luaA_pushcolor(L, &(*c)->border_color);
         break;
       case A_TK_COORDS:
         lua_newtable(L);

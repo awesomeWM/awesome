@@ -27,6 +27,7 @@
 #include <lauxlib.h>
 
 #include "common/util.h"
+#include "common/draw.h"
 
 /** Object types */
 typedef enum
@@ -194,6 +195,7 @@ void luaA_pushpointer(lua_State *, void *, awesome_type_t);
 void luaA_cs_init(void);
 void luaA_cs_cleanup(void);
 void luaA_on_timer(EV_P_ ev_timer *w, int revents);
+void luaA_pushcolor(lua_State *, const xcolor_t *c);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

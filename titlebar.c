@@ -538,13 +538,13 @@ luaA_titlebar_index(lua_State *L)
         lua_pushnumber(L, (*titlebar)->border.width);
         break;
       case A_TK_BORDER_COLOR:
-        lua_pushstring(L, (*titlebar)->border.color.name);
+        luaA_pushcolor(L, &(*titlebar)->border.color);
         break;
       case A_TK_FG:
-        lua_pushstring(L, (*titlebar)->colors.fg.name);
+        luaA_pushcolor(L, &(*titlebar)->colors.fg);
         break;
       case A_TK_BG:
-        lua_pushstring(L, (*titlebar)->colors.bg.name);
+        luaA_pushcolor(L, &(*titlebar)->colors.bg);
         break;
       default:
         return 0;

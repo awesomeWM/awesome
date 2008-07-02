@@ -653,3 +653,13 @@ luaA_on_timer(EV_P_ ev_timer *w, int revents)
 {
     luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0);
 }
+
+void
+luaA_pushcolor(lua_State *L, const xcolor_t *c)
+{
+    uint8_t r = (unsigned)c->red   * 0xff / 0xffff;
+    uint8_t g = (unsigned)c->green * 0xff / 0xffff;
+    uint8_t b = (unsigned)c->blue  * 0xff / 0xffff;
+    uint8_t a = (unsigned)c->alpha * 0xff / 0xffff;
+    lua_pushfstring(L, "#%02x%02x%02x%02x", r, g, b, a);
+}

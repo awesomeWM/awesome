@@ -33,8 +33,7 @@
 
 typedef struct
 {
-    /** Color name */
-    char name[32];
+    unsigned initialized : 1;
     uint32_t pixel;
     uint16_t red;
     uint16_t green;
