@@ -98,16 +98,16 @@ titlebar_draw(client_t *c)
                                c->titlebar->sw->geometry.height,
                                c->titlebar->sw->geometry.width,
                                dw,
-                               c->titlebar->colors.fg,
-                               c->titlebar->colors.bg);
+                               &c->titlebar->colors.fg,
+                               &c->titlebar->colors.bg);
         break;
       default:
         ctx = draw_context_new(globalconf.connection, c->titlebar->sw->phys_screen,
                                c->titlebar->sw->geometry.width,
                                c->titlebar->sw->geometry.height,
                                c->titlebar->sw->pixmap,
-                               c->titlebar->colors.fg,
-                               c->titlebar->colors.bg);
+                               &c->titlebar->colors.fg,
+                               &c->titlebar->colors.bg);
         break;
     }
 
@@ -315,19 +315,25 @@ luaA_titlebar_new(lua_State *L)
     tb->position = position_fromstr(buf, len);
 
     if(!(buf = luaA_getopt_string(L, 2, "fg", NULL))
-        || !xcolor_new(globalconf.connection, globalconf.default_screen,
-                       buf, &tb->colors.fg))
-        tb->colors.fg = xcolor_copy(&globalconf.colors.fg);
+        || !xcolor_init(&tb->colors.fg, globalconf.connection,
+                        globalconf.default_screen, buf))
+    {
+        tb->colors.fg = globalconf.colors.fg;
+    }
 
     if(!(buf = luaA_getopt_string(L, 2, "bg", NULL))
-        || !xcolor_new(globalconf.connection, globalconf.default_screen,
-                       buf, &tb->colors.bg))
-        tb->colors.bg = xcolor_copy(&globalconf.colors.bg);
+        || !xcolor_init(&tb->colors.bg, globalconf.connection,
+                        globalconf.default_screen, buf))
+    {
+        tb->colors.bg = globalconf.colors.bg;
+    }
 
     if(!(buf = luaA_getopt_string(L, 2, "border_color", NULL))
-        || !xcolor_new(globalconf.connection, globalconf.default_screen,
-                       buf, &tb->border.color))
-        tb->border.color = xcolor_copy(&globalconf.colors.fg);
+        || !xcolor_init(&tb->border.color, globalconf.connection,
+                        globalconf.default_screen, buf))
+    {
+        tb->border.color = globalconf.colors.fg;
+    }
 
     tb->border.width = luaA_getopt_number(L, 2, "border_width", 0);
 
@@ -457,7 +463,6 @@ luaA_titlebar_newindex(lua_State *L)
     titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     client_t *c;
-    xcolor_t color;
     int i;
 
     switch(a_tokenize(attr, len))
@@ -476,11 +481,9 @@ luaA_titlebar_newindex(lua_State *L)
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checkstring(L, 3))
-           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+           && xcolor_init(&(*titlebar)->border.color, globalconf.connection,
+                          globalconf.default_screen, buf))
         {
-            xcolor_wipe(&(*titlebar)->border.color);
-            (*titlebar)->border.color = color;
-
             if((*titlebar)->sw)
                 xcb_change_window_attributes(globalconf.connection, (*titlebar)->sw->window,
                                              XCB_CW_BORDER_PIXEL, &(*titlebar)->border.color.pixel);
@@ -488,19 +491,16 @@ luaA_titlebar_newindex(lua_State *L)
         return 0;
       case A_TK_FG:
         if((buf = luaL_checkstring(L, 3))
-           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+           && xcolor_init(&(*titlebar)->colors.fg, globalconf.connection,
+                          globalconf.default_screen, buf))
         {
-            xcolor_wipe(&(*titlebar)->colors.fg);
-            (*titlebar)->colors.fg = color;
             titlebar_draw(client_getbytitlebar(*titlebar));
         }
         return 0;
       case A_TK_BG:
         if((buf = luaL_checkstring(L, 3))
-           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+           && xcolor_init(&(*titlebar)->colors.bg, globalconf.connection, globalconf.default_screen, buf))
         {
-            xcolor_wipe(&(*titlebar)->colors.bg);
-            (*titlebar)->colors.bg = color;
             titlebar_draw(client_getbytitlebar(*titlebar));
         }
         return 0;

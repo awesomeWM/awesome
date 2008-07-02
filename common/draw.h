@@ -34,7 +34,7 @@
 typedef struct
 {
     /** Color name */
-    char *name;
+    char name[32];
     uint32_t pixel;
     uint16_t red;
     uint16_t green;
@@ -119,7 +119,9 @@ typedef struct
     size_t height;
 } draw_image_t;
 
-draw_context_t *draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t, xcolor_t, xcolor_t);
+draw_context_t *
+draw_context_new(xcb_connection_t *, int, int, int, xcb_drawable_t,
+                 const xcolor_t *, const xcolor_t*);
 
 /** Delete a draw context.
  * \param ctx The draw_context_t to delete.
@@ -183,13 +185,16 @@ void draw_parser_data_init(draw_parser_data_t *);
 void draw_parser_data_wipe(draw_parser_data_t *);
 
 void draw_text(draw_context_t *, font_t *, area_t, const char *, draw_parser_data_t *);
-void draw_rectangle(draw_context_t *, area_t, float, bool, xcolor_t);
-void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
+void draw_rectangle(draw_context_t *, area_t, float, bool, const xcolor_t *);
+void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, area_t,
+                             const xcolor_t *, const xcolor_t *, const xcolor_t *);
 
 void draw_graph_setup(draw_context_t *);
-void draw_graph(draw_context_t *, area_t, int *, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
-void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, area_t, xcolor_t *, xcolor_t *, xcolor_t *);
-void draw_circle(draw_context_t *, int, int, int, bool, xcolor_t);
+void draw_graph(draw_context_t *, area_t, int *, int *, int, position_t, area_t,
+                const xcolor_t *, const xcolor_t *, const xcolor_t *);
+void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, area_t,
+                     const xcolor_t *, const xcolor_t *, const xcolor_t *);
+void draw_circle(draw_context_t *, int, int, int, bool, const xcolor_t *);
 draw_image_t *draw_image_new(const char *);
 void draw_image_delete(draw_image_t **);
 void draw_image(draw_context_t *, int, int, int, draw_image_t *);
@@ -199,33 +204,7 @@ area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *, draw_p
 alignment_t draw_align_fromstr(const char *, ssize_t);
 const char *draw_align_tostr(alignment_t);
 
-/** Wipe a color resources.
- * \param color The color to wipe out.
- */
-static inline void
-xcolor_wipe(xcolor_t *color)
-{
-    if(color)
-    {
-        p_delete(&color->name);
-        p_clear(color, 1);
-    }
-}
-
-static inline xcolor_t
-xcolor_copy(xcolor_t *color)
-{
-    xcolor_t c;
-
-    assert(color);
-
-    c = *color;
-    c.name = a_strdup(color->name);
-
-    return c;
-}
-
-bool xcolor_new(xcb_connection_t *, int, const char *, xcolor_t *);
+bool xcolor_init(xcolor_t *c, xcb_connection_t *, int, const char *);
 
 void area_array_remove(area_array_t *, area_t);
 

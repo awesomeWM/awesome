@@ -63,9 +63,9 @@ struct plot_t
     /** Color of them */
     xcolor_t color_start;
     /** Color at middle of graph */
-    xcolor_t *pcolor_center;
+    xcolor_t pcolor_center;
     /** Color at end of graph */
-    xcolor_t *pcolor_end;
+    xcolor_t pcolor_end;
     /** Create a vertical color gradient */
     bool vertical_gradient;
     /** Next and previous graph */
@@ -78,8 +78,6 @@ plot_delete(plot_t **g)
     p_delete(&(*g)->title);
     p_delete(&(*g)->lines);
     p_delete(&(*g)->values);
-    p_delete(&(*g)->pcolor_center);
-    p_delete(&(*g)->pcolor_end);
     p_delete(g);
 }
 
@@ -124,7 +122,7 @@ graph_plot_add(graph_data_t *d, const char *title)
     plot->values = p_new(float, d->size);
     plot->lines = p_new(int, d->size);
     plot->max_value = 100.0;
-    plot->color_start = xcolor_copy(&globalconf.colors.fg);
+    plot->color_start = globalconf.colors.fg;
     plot->vertical_gradient = true;
 
     plot_list_append(&d->plots, plot);
@@ -172,7 +170,7 @@ graph_draw(draw_context_t *ctx,
     rectangle.y = margin_top + 1;
     rectangle.width = d->size;
     rectangle.height = d->box_height;
-    draw_rectangle(ctx, rectangle, 1.0, true, d->bg);
+    draw_rectangle(ctx, rectangle, 1.0, true, &d->bg);
 
     /* for plot drawing */
     rectangle.y = margin_top + d->box_height + 1; /* bottom left corner as starting point */
@@ -213,7 +211,7 @@ graph_draw(draw_context_t *ctx,
                   d->draw_to[y] = d->box_height - plot->lines[y]; /* i.e. on full plot -> 0 = bottom */
               }
               draw_graph(ctx, rectangle , d->draw_from, d->draw_to, plot->index, d->grow, pattern_area,
-                         &plot->color_start, plot->pcolor_center, plot->pcolor_end);
+                         &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
             case Bottom_Style:
               pattern_area.y = rectangle.y;
@@ -234,7 +232,7 @@ graph_draw(draw_context_t *ctx,
 
               p_clear(d->draw_from, d->size);
               draw_graph(ctx, rectangle, d->draw_from, plot->lines, plot->index, d->grow, pattern_area,
-                         &plot->color_start, plot->pcolor_center, plot->pcolor_end);
+                         &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
             case Line_Style:
               pattern_area.y = rectangle.y;
@@ -253,7 +251,7 @@ graph_draw(draw_context_t *ctx,
               }
 
               draw_graph_line(ctx, rectangle, plot->lines, plot->index, d->grow, pattern_area,
-                              &plot->color_start, plot->pcolor_center, plot->pcolor_end);
+                              &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
         }
 
@@ -262,7 +260,7 @@ graph_draw(draw_context_t *ctx,
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
-    draw_rectangle(ctx, rectangle, 1.0, false, d->border_color);
+    draw_rectangle(ctx, rectangle, 1.0, false, &d->border_color);
 
     w->area.width = d->width;
     w->area.height = ctx->height;
@@ -286,7 +284,6 @@ luaA_graph_plot_properties_set(lua_State *L)
     const char *title, *buf;
     size_t len;
     plot_t *plot;
-    xcolor_t color;
 
     title = luaL_checkstring(L, 2);
     luaA_checktable(L, 3);
@@ -298,25 +295,22 @@ luaA_graph_plot_properties_set(lua_State *L)
     if(!plot)
         plot = graph_plot_add(d, title);
 
-    if((buf = luaA_getopt_string(L, 3, "fg", NULL))
-       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    if((buf = luaA_getopt_string(L, 3, "fg", NULL)))
     {
-        xcolor_wipe(&plot->color_start);
-        plot->color_start = color;
+       xcolor_init(&plot->color_start, globalconf.connection,
+                   globalconf.default_screen, buf);
     }
 
-    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL))
-       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL)))
     {
-        xcolor_wipe(plot->pcolor_center);
-        plot->pcolor_center = p_dup(&color, 1);
+       xcolor_init(&plot->pcolor_center, globalconf.connection,
+                   globalconf.default_screen, buf);
     }
 
-    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL))
-       && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL)))
     {
-        xcolor_wipe(plot->pcolor_end);
-        plot->pcolor_end = p_dup(&color, 1);
+        xcolor_init(&plot->pcolor_end, globalconf.connection,
+                    globalconf.default_screen, buf);
     }
 
     plot->vertical_gradient = luaA_getopt_boolean(L, 3, "vertical_gradient", plot->vertical_gradient);
@@ -489,7 +483,6 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
     int width;
     plot_t *plot;
     position_t pos;
-    xcolor_t color;
 
     switch(token)
     {
@@ -517,21 +510,13 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
             return 0;
         break;
       case A_TK_BG:
-        if(xcolor_new(globalconf.connection, globalconf.default_screen, luaL_checkstring(L, 3), &color))
-        {
-            xcolor_wipe(&d->bg);
-            d->bg = color;
-        }
-        else
+        if (!xcolor_init(&d->bg, globalconf.connection, globalconf.default_screen,
+                         luaL_checkstring(L, 3)))
             return 0;
         break;
       case A_TK_BORDER_COLOR:
-        if(xcolor_new(globalconf.connection, globalconf.default_screen, luaL_checkstring(L, 3), &color))
-        {
-            xcolor_wipe(&d->border_color);
-            d->border_color = color;
-        }
-        else
+        if (!xcolor_init(&d->border_color, globalconf.connection,
+                         globalconf.default_screen, luaL_checkstring(L, 3)))
             return 0;
         break;
       case A_TK_GROW:
@@ -596,8 +581,8 @@ graph_new(alignment_t align)
     d->draw_from = p_new(int, d->size);
     d->draw_to = p_new(int, d->size);
 
-    d->bg = xcolor_copy(&globalconf.colors.bg);
-    d->border_color = xcolor_copy(&globalconf.colors.fg);
+    d->bg = globalconf.colors.bg;
+    d->border_color = globalconf.colors.fg;
 
     return w;
 }

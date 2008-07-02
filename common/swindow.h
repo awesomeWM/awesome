@@ -93,7 +93,7 @@ simplewindow_border_width_set(simple_window_t *sw, uint32_t border_width)
  * \param color The border color.
  */
 static inline void
-simplewindow_border_color_set(simple_window_t *sw, xcolor_t *color)
+simplewindow_border_color_set(simple_window_t *sw, const xcolor_t *color)
 {
     xcb_change_window_attributes(sw->connection, sw->window,
                                  XCB_CW_BORDER_PIXEL, &color->pixel);

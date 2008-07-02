@@ -241,7 +241,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
             rectangle.x = r->x;
             rectangle.y = r->y;
             draw_rectangle(ctx, rectangle, 1.0,
-                           sel && is_client_tagged(sel, tag), ctx->fg);
+                           sel && is_client_tagged(sel, tag), &ctx->fg);
         }
     }
 

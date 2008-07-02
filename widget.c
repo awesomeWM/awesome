@@ -149,7 +149,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
         }
     }
 
-    draw_rectangle(ctx, rectangle, 1.0, true, ctx->bg);
+    draw_rectangle(ctx, rectangle, 1.0, true, &ctx->bg);
 
     for(w = wnode; w; w = w->next)
         if(w->widget->isvisible && w->widget->align == AlignLeft)

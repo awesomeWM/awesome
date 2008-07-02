@@ -1127,7 +1127,6 @@ luaA_client_newindex(lua_State *L)
     bool b;
     double d;
     int i;
-    xcolor_t color;  
     titlebar_t **t = NULL;
 
     switch(a_tokenize(buf, len))
@@ -1180,11 +1179,10 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checkstring(L, 3))
-           && xcolor_new(globalconf.connection, (*c)->phys_screen, buf, &color))
+           && xcolor_init(&(*c)->border_color, globalconf.connection, (*c)->phys_screen, buf))
         {
-            xcolor_wipe(&(*c)->border_color);
-            (*c)->border_color = color;
-            xcb_change_window_attributes(globalconf.connection, (*c)->win, XCB_CW_BORDER_PIXEL, &color.pixel);
+            xcb_change_window_attributes(globalconf.connection, (*c)->win,
+                                         XCB_CW_BORDER_PIXEL, &(*c)->border_color.pixel);
         }
         break;
       case A_TK_COORDS:

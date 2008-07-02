@@ -180,8 +180,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
                                           statusbar->width,
                                           statusbar->height,
                                           dw,
-                                          statusbar->colors.fg,
-                                          statusbar->colors.bg);
+                                          &statusbar->colors.fg,
+                                          &statusbar->colors.bg);
         break;
       default:
         if(!statusbar->width_user)
@@ -194,8 +194,8 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
                                           statusbar->width,
                                           statusbar->height,
                                           statusbar->sw->pixmap,
-                                          statusbar->colors.fg,
-                                          statusbar->colors.bg);
+                                          &statusbar->colors.fg,
+                                          &statusbar->colors.bg);
         break;
     }
 
@@ -441,14 +441,17 @@ luaA_statusbar_new(lua_State *L)
     sb->name = a_strdup(buf);
 
     if(!(buf = luaA_getopt_string(L, 2, "fg", NULL))
-       || !xcolor_new(globalconf.connection, globalconf.default_screen,
-                     buf, &sb->colors.fg))
-        sb->colors.fg = xcolor_copy(&globalconf.colors.fg);
+       || !xcolor_init(&sb->colors.fg, globalconf.connection, globalconf.default_screen, buf))
+    {
+        sb->colors.fg = globalconf.colors.fg;
+    }
 
     if(!(buf = luaA_getopt_string(L, 2, "bg", NULL))
-       || !xcolor_new(globalconf.connection, globalconf.default_screen,
-                     buf, &sb->colors.bg))
-        sb->colors.bg = xcolor_copy(&globalconf.colors.bg);
+       || !xcolor_init(&sb->colors.bg, globalconf.connection,
+                       globalconf.default_screen, buf))
+    {
+        sb->colors.bg = globalconf.colors.bg;
+    }
 
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     sb->align = draw_align_fromstr(buf, len);
@@ -538,7 +541,6 @@ luaA_statusbar_newindex(lua_State *L)
     size_t len;
     statusbar_t *s, **statusbar = luaA_checkudata(L, 1, "statusbar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
-    xcolor_t color;
     position_t p;
 
     switch(a_tokenize(attr, len))
@@ -550,24 +552,19 @@ luaA_statusbar_newindex(lua_State *L)
         break;
       case A_TK_FG:
         if((buf = luaL_checkstring(L, 3))
-           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+           && xcolor_init(&(*statusbar)->colors.fg, globalconf.connection,
+                          globalconf.default_screen, buf))
         {
-            xcolor_wipe(&(*statusbar)->colors.fg);
-            (*statusbar)->colors.fg = color;
-
             if((*statusbar)->ctx)
                 (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
-
             (*statusbar)->need_update = true;
         }
         break;
       case A_TK_BG:
         if((buf = luaL_checkstring(L, 3))
-           && xcolor_new(globalconf.connection, globalconf.default_screen, buf, &color))
+           && xcolor_init(&(*statusbar)->colors.bg, globalconf.connection,
+                          globalconf.default_screen, buf))
         {
-            xcolor_wipe(&(*statusbar)->colors.bg);
-            (*statusbar)->colors.bg = color;
-
             if((*statusbar)->ctx)
                 (*statusbar)->ctx->bg = (*statusbar)->colors.bg;
 

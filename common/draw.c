@@ -133,7 +133,7 @@ draw_screen_default_visual(xcb_screen_t *s)
 draw_context_t *
 draw_context_new(xcb_connection_t *conn, int phys_screen,
                  int width, int height, xcb_pixmap_t px,
-                 xcolor_t fg, xcolor_t bg)
+                 const xcolor_t *fg, const xcolor_t *bg)
 {
     draw_context_t *d = p_new(draw_context_t, 1);
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
@@ -148,8 +148,8 @@ draw_context_new(xcb_connection_t *conn, int phys_screen,
     d->surface = cairo_xcb_surface_create(conn, px, d->visual, width, height);
     d->cr = cairo_create(d->surface);
     d->layout = pango_cairo_create_layout(d->cr);
-    d->fg = fg;
-    d->bg = bg;
+    d->fg = *fg;
+    d->bg = *bg;
 
     return d;
 };
@@ -220,8 +220,7 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
             switch(a_tokenize(*names, -1))
             {
               case A_TK_COLOR:
-                data->has_bg_color = xcolor_new(data->connection, data->phys_screen,
-                                                *values, &data->bg_color);
+                data->has_bg_color = xcolor_init(&data->bg_color, data->connection, data->phys_screen, *values);
                 break;
               case A_TK_IMAGE:
                 if(data->bg_image)
@@ -244,8 +243,8 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 data->align = draw_align_fromstr(*values, -1);
                 break;
               case A_TK_SHADOW:
-                xcolor_new(data->connection, data->phys_screen, *values,
-                           &data->shadow.color);
+                xcolor_init(&data->shadow.color, data->connection,
+                            data->phys_screen, *values);
                 break;
               case A_TK_SHADOW_OFFSET:
                 data->shadow.offset = atoi(*values);
@@ -340,7 +339,7 @@ draw_text(draw_context_t *ctx, font_t *font,
     olen = len;
 
     if(pdata->has_bg_color)
-        draw_rectangle(ctx, area, 1.0, true, pdata->bg_color);
+        draw_rectangle(ctx, area, 1.0, true, &pdata->bg_color);
 
     if(pdata->bg_image)
     {
@@ -424,13 +423,15 @@ draw_text(draw_context_t *ctx, font_t *font,
  */
 static cairo_pattern_t *
 draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
-                              xcolor_t *pcolor, xcolor_t *pcolor_center,
-                              xcolor_t *pcolor_end)
+                              const xcolor_t *pcolor, const xcolor_t *pcolor_center,
+                              const xcolor_t *pcolor_end)
 {
     cairo_pattern_t *pat = NULL;
+    bool has_center = pcolor_center->name[0] != '\0';
+    bool has_end    = pcolor_end->name[0] != '\0';
 
     /* no need for a real pattern: */
-    if(!pcolor_end && !pcolor_center)
+    if(!has_end && !has_center)
         cairo_set_source_rgba(ctx->cr,
                               pcolor->red / 65535.0,
                               pcolor->green / 65535.0,
@@ -447,14 +448,14 @@ draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
                                           pcolor->blue / 65535.0,
                                           pcolor->alpha / 65535.0);
 
-        if(pcolor_center)
+        if(has_center)
             cairo_pattern_add_color_stop_rgba(pat, 0.5,
                                               pcolor_center->red / 65535.0,
                                               pcolor_center->green / 65535.0,
                                               pcolor_center->blue / 65535.0,
                                               pcolor_center->alpha / 65535.0);
 
-        if(pcolor_end)
+        if(has_end)
             cairo_pattern_add_color_stop_rgba(pat, 1.0,
                                               pcolor_end->red / 65535.0,
                                               pcolor_end->green / 65535.0,
@@ -479,17 +480,18 @@ draw_setup_cairo_color_source(draw_context_t *ctx, area_t rect,
  * \param color color to use
  */
 void
-draw_rectangle(draw_context_t *ctx, area_t geometry, float line_width, bool filled, xcolor_t color)
+draw_rectangle(draw_context_t *ctx, area_t geometry,
+               float line_width, bool filled, const xcolor_t *color)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, line_width);
     cairo_set_miter_limit(ctx->cr, 10.0);
     cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
     cairo_set_source_rgba(ctx->cr,
-                          color.red / 65535.0,
-                          color.green / 65535.0,
-                          color.blue / 65535.0,
-                          color.alpha / 65535.0);
+                          color->red / 65535.0,
+                          color->green / 65535.0,
+                          color->blue / 65535.0,
+                          color->alpha / 65535.0);
     if(filled)
     {
         cairo_rectangle(ctx->cr, geometry.x, geometry.y,
@@ -516,8 +518,8 @@ draw_rectangle(draw_context_t *ctx, area_t geometry, float line_width, bool fill
  */
 void
 draw_rectangle_gradient(draw_context_t *ctx, area_t geometry, float line_width, bool filled,
-                        area_t pattern_rect, xcolor_t *pcolor,
-                        xcolor_t *pcolor_center, xcolor_t *pcolor_end)
+                        area_t pattern_rect, const xcolor_t *pcolor,
+                        const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
 {
     cairo_pattern_t *pat;
 
@@ -571,8 +573,8 @@ draw_graph_setup(draw_context_t *ctx)
  */
 void
 draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
-           position_t grow, area_t patt_rect,
-           xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
+           position_t grow, area_t patt_rect, const xcolor_t *pcolor,
+           const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
 {
     int i = -1;
     float x = rect.x + 0.5; /* middle of a pixel */
@@ -624,8 +626,8 @@ draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
  */
 void
 draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
-                position_t grow, area_t patt_rect,
-                xcolor_t *pcolor, xcolor_t *pcolor_center, xcolor_t *pcolor_end)
+                position_t grow, area_t patt_rect, const xcolor_t *pcolor,
+                const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
 {
     int i, w;
     float x, y;
@@ -697,14 +699,14 @@ draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
  * \param color Color to use.
  */
 void
-draw_circle(draw_context_t *ctx, int x, int y, int r, bool filled, xcolor_t color)
+draw_circle(draw_context_t *ctx, int x, int y, int r, bool filled, const xcolor_t *color)
 {
     cairo_set_line_width(ctx->cr, 1.0);
     cairo_set_source_rgba(ctx->cr,
-                          color.red / 65535.0,
-                          color.green / 65535.0,
-                          color.blue / 65535.0,
-                          color.alpha / 65535.0);
+                          color->red / 65535.0,
+                          color->green / 65535.0,
+                          color->blue / 65535.0,
+                          color->alpha / 65535.0);
 
     cairo_new_sub_path(ctx->cr); /* don't draw from the old reference point to.. */
 
@@ -1087,22 +1089,20 @@ draw_align_tostr(alignment_t a)
 #define RGB_COLOR_8_TO_16(i) (65535 * ((i) & 0xff) / 255)
 
 /** Initialize an X color.
+ * \param color xcolor_t struct to store color into.
  * \param conn Connection ref.
  * \param phys_screen Physical screen number.
  * \param colstr Color specification.
- * \param color xcolor_t struct to store color to.
  * \return True if color allocation was successfull.
  */
 bool
-xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t *color)
+xcolor_init(xcolor_t *color, xcb_connection_t *conn, int phys_screen,
+            const char *colstr)
 {
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
-    xcb_alloc_color_reply_t *hexa_color = NULL;
-    xcb_alloc_named_color_reply_t *named_color = NULL;
     unsigned long colnum;
-    uint16_t red, green, blue;
+    uint16_t red, green, blue, alpha = 0xffff;
     ssize_t len;
-    char *buf;
 
     if(!(len = a_strlen(colstr)))
         return false;
@@ -1110,76 +1110,70 @@ xcolor_new(xcb_connection_t *conn, int phys_screen, const char *colstr, xcolor_t
     /* The color is given in RGB value */
     if(colstr[0] == '#')
     {
-        errno = 0;
+        xcb_alloc_color_cookie_t cookie;
+        xcb_alloc_color_reply_t *hexa_color;
+        char *p;
+
         if(len == 7)
         {
-            colnum = strtoul(&colstr[1], NULL, 16);
-            color->alpha = 0xffff;
+            colnum = strtoul(colstr + 1, &p, 16);
+            if(p - colstr != 7)
+                goto invalid;
         }
         /* we have alpha */
         else if(len == 9)
         {
-            buf = a_strndup(colstr + 1, 6);
-            colnum = strtoul(buf, NULL, 16);
-            p_delete(&buf);
-            color->alpha = RGB_COLOR_8_TO_16(strtoul(&colstr[7], NULL, 16));
-            if(errno != 0)
-            {
-                warn("awesome: error, invalid color '%s'", colstr);
-                return false;
-            }
+            colnum = strtoul(colstr + 1, &p, 16);
+            if(p - colstr != 9)
+                goto invalid;
+            alpha = RGB_COLOR_8_TO_16(colnum);
+            colnum >>= 8;
         }
         else
         {
+          invalid:
             warn("awesome: error, invalid color '%s'", colstr);
             return false;
         }
 
-        if(errno != 0)
-        {
-            warn("awesome: error, invalid color '%s'", colstr);
-            return false;
-        }
-
-        red = RGB_COLOR_8_TO_16(colnum >> 16);
+        red   = RGB_COLOR_8_TO_16(colnum >> 16);
         green = RGB_COLOR_8_TO_16(colnum >> 8);
-        blue = RGB_COLOR_8_TO_16(colnum);
+        blue  = RGB_COLOR_8_TO_16(colnum);
 
-        hexa_color = xcb_alloc_color_reply(conn,
-                                           xcb_alloc_color_unchecked(conn,
-                                                                     s->default_colormap,
-                                                                     red, green, blue),
-                                           NULL);
+        cookie = xcb_alloc_color_unchecked(conn, s->default_colormap,
+                                           red, green, blue),
+        hexa_color = xcb_alloc_color_reply(conn, cookie, NULL);
 
         if(hexa_color)
         {
             color->pixel = hexa_color->pixel;
-            color->red = hexa_color->red;
+            color->red   = hexa_color->red;
             color->green = hexa_color->green;
-            color->blue = hexa_color->blue;
-            color->name = a_strdup(colstr);
+            color->blue  = hexa_color->blue;
+            color->alpha = alpha;
+            a_strcpy(color->name, sizeof(color->name), colstr);
             p_delete(&hexa_color);
             return true;
         }
     }
     else
     {
-        named_color = xcb_alloc_named_color_reply(conn,
-                                                  xcb_alloc_named_color_unchecked(conn,
-                                                                                  s->default_colormap,
-                                                                                  len,
-                                                                                  colstr),
-                                                  NULL);
+        xcb_alloc_named_color_reply_t *named_color = NULL;
+        xcb_alloc_named_color_cookie_t cookie;
+
+        cookie = xcb_alloc_named_color_unchecked(conn, s->default_colormap, len,
+                                                 colstr),
+        named_color = xcb_alloc_named_color_reply(conn, cookie, NULL);
 
         if(named_color)
         {
             color->pixel = named_color->pixel;
-            color->red = named_color->visual_red;
+            color->red   = named_color->visual_red;
             color->green = named_color->visual_green;
-            color->blue = named_color->visual_blue;
+            color->blue  = named_color->visual_blue;
             color->alpha = 0xffff;
-            color->name = a_strdup(colstr);
-
+            color->alpha = alpha;
+            a_strcpy(color->name, sizeof(color->name), colstr);
             p_delete(&named_color);
             return true;
         }

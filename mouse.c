@@ -244,7 +244,7 @@ mouse_infobox_draw(draw_context_t *ctx,
 
     snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
              geometry.width, geometry.height, geometry.x, geometry.y);
-    draw_rectangle(ctx, draw_geometry, 1.0, true, globalconf.colors.bg);
+    draw_rectangle(ctx, draw_geometry, 1.0, true, &globalconf.colors.bg);
     draw_text(ctx, globalconf.font, draw_geometry, size, NULL);
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
@@ -283,8 +283,8 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
     *ctx = draw_context_new(globalconf.connection, sw->phys_screen,
                             sw->geometry.width, sw->geometry.height,
                             sw->pixmap,
-                            globalconf.colors.fg,
-                            globalconf.colors.bg);
+                            &globalconf.colors.fg,
+                            &globalconf.colors.bg);
 
     xcb_map_window(globalconf.connection, sw->window);
     mouse_infobox_draw(*ctx, sw, geometry, border);
