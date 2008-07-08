@@ -1122,7 +1122,7 @@ luaA_client_unmanage(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  */
-static int
+int
 luaA_client_newindex(lua_State *L)
 {
     size_t len;

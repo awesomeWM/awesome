@@ -46,6 +46,8 @@ void client_setfloating(client_t *, bool);
 char * client_markup_parse(client_t *, const char *, ssize_t);
 void client_setborder(client_t *, int);
 
+int luaA_client_newindex(lua_State *);
+
 int luaA_client_userdata_new(lua_State *, client_t *);
 
 DO_SLIST(client_t, client, p_delete)

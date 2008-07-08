@@ -11,8 +11,10 @@ border_width
 bottom
 bottomleft
 bottomright
+byname
 center
 class
+client
 color
 coords
 fg
