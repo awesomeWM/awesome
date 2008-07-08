@@ -190,7 +190,7 @@ luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
 }
 
 void luaA_init(void);
-bool luaA_parserc(const char *);
+void luaA_parserc(const char *);
 void luaA_pushpointer(lua_State *, void *, awesome_type_t);
 void luaA_cs_init(void);
 void luaA_cs_cleanup(void);

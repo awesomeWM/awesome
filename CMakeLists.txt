@@ -59,7 +59,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/window.c
     ${SOURCE_DIR}/common/buffer.c
     ${SOURCE_DIR}/common/atoms.c
-    ${SOURCE_DIR}/common/configopts.c
     ${SOURCE_DIR}/common/draw.c
     ${SOURCE_DIR}/common/markup.c
     ${SOURCE_DIR}/common/socket.c
@@ -347,7 +346,7 @@ endif()
 # {{{ Installation
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
 install(FILES ${AWE_LUA_FILES} ${AWE_LUAC_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
-install(FILES ${AWE_CONF_FILES} DESTINATION ${AWESOME_CONF_PATH})
+install(FILES ${AWE_CONF_FILES} DESTINATION ${AWESOME_SYSCONFIG_DIR})
 if(GENERATE_MANPAGES)
     install(FILES ${AWE_MAN1_FILES} DESTINATION ${AWESOME_MAN_PATH}/man1)
     install(FILES ${AWE_MAN5_FILES} DESTINATION ${AWESOME_MAN_PATH}/man5)

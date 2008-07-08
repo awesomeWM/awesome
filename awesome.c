@@ -38,7 +38,6 @@
 #include "systray.h"
 #include "common/socket.h"
 #include "common/version.h"
-#include "common/configopts.h"
 #include "common/atoms.h"
 #include "config.h"
 
@@ -418,17 +417,7 @@ main(int argc, char **argv)
     /* init lua */
     luaA_init();
 
-    /* parse config */
-    if(!confpath)
-        confpath = config_file();
-    if(!luaA_parserc(confpath))
-    {
-        const char *default_confpath = AWESOME_CONF_PATH "/awesomerc.lua";
-        warn("failed to load/parse configuration file %s", confpath);
-        warn("falling back to: %s", default_confpath);
-        if(!luaA_parserc(default_confpath))
-            fatal("failed to load any configuration file");
-    }
+    luaA_parserc(confpath);
 
     /* scan existing windows */
     scan();
