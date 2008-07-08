@@ -1244,7 +1244,10 @@ luaA_client_index(lua_State *L)
     size_t len;
     client_t **c = luaA_checkudata(L, 1, "client");
     const char *buf = luaL_checklstring(L, 2, &len);
+    void *data;
     xutil_class_hint_t hint;
+    xcb_get_property_cookie_t prop_c;
+    xcb_get_property_reply_t *prop_r = NULL;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
@@ -1262,6 +1265,18 @@ luaA_client_index(lua_State *L)
             return 2;
         }
         return 0;
+      case A_TK_PID:
+        prop_c = xcb_get_property_unchecked(globalconf.connection, false, (*c)->win, _NET_WM_PID, CARDINAL, 0L, 1L);
+        prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
+
+        if(prop_r && prop_r->value_len && (data = xcb_get_property_value(prop_r)))
+            lua_pushnumber(L, *(uint32_t *)data);
+        else
+        {
+            p_delete(&prop_r);
+            return 0;
+        }
+        break;
       case A_TK_FLOATING_PLACEMENT:
         lua_pushstring(L, name_func_rlookup((*c)->floating_placement,
                                             FloatingPlacementList));

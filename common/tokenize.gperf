@@ -38,6 +38,7 @@ nmaster
 name
 on
 opacity
+pid
 plot_data_add
 plot_properties_set
 position
