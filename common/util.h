@@ -328,6 +328,7 @@ const char * position_tostr(position_t);
 void *name_func_lookup(const char *, const name_func_link_t *);
 const char * name_func_rlookup(void *, const name_func_link_t *);
 void a_exec(const char *);
+char ** a_strsplit(const char *, ssize_t, char);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
