@@ -570,10 +570,10 @@ luaA_parserc(const char *confpatharg)
 
     if(a_strlen(confdir))
     {
-        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE) + 2;
+        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE) + sizeof("/awesome/") + 1;
         confpath = p_new(char, len);
         a_strcpy(confpath, len, confdir);
-        a_strcat(confpath, len, "/");
+        a_strcat(confpath, len, "/awesome/");
     }
     else
     {
