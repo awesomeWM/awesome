@@ -531,7 +531,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
         else if (ev->atom == WM_HINTS)
             client_updatewmhints(c);
         else if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)
-            client_updatetitle(c, ev->atom);
+            client_updatetitle(c);
     }
 
     return 0;
