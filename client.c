@@ -147,16 +147,17 @@ client_getbywin(xcb_window_t w)
 
 /** Update client name attribute with its new title.
  * \param c The client.
+ * \param atom The atom to use to get the name.
+ * \param Return true if it has been updated.
  */
-void
-client_updatetitle(client_t *c)
+bool
+client_updatetitle(client_t *c, xcb_atom_t atom)
 {
     char *name;
     ssize_t len;
 
-    if(!xutil_gettextprop(globalconf.connection, c->win, _NET_WM_NAME, &name, &len))
-        if(!xutil_gettextprop(globalconf.connection, c->win, WM_NAME, &name, &len))
-            return;
+    if(!xutil_gettextprop(globalconf.connection, c->win, atom, &name, &len))
+        return false;
 
     p_delete(&c->name);
     a_iso2utf8(&c->name, name, len);
@@ -166,6 +167,8 @@ client_updatetitle(client_t *c)
     luaA_dofunction(globalconf.L, globalconf.hooks.titleupdate, 1);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+
+    return true;
 }
 
 /** Unfocus a client.
@@ -421,7 +424,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     client_raise(c);
 
     /* update window title */
-    client_updatetitle(c);
+    if(!client_updatetitle(c, _NET_WM_NAME))
+        client_updatetitle(c, WM_NAME);
 
     ewmh_update_net_client_list(c->phys_screen);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);

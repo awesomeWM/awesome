@@ -530,9 +530,8 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
             client_updatesizehints(c);
         else if (ev->atom == WM_HINTS)
             client_updatewmhints(c);
-
-        if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)
-            client_updatetitle(c);
+        else if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)
+            client_updatetitle(c, ev->atom);
     }
 
     return 0;
