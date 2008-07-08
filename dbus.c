@@ -82,7 +82,6 @@ a_dbus_process_request_client(DBusMessage *msg)
         /* not found, return */
         if(!c)
             goto bailout;
-        printf("found\n");
         break;
       default:
         return;
@@ -90,7 +89,6 @@ a_dbus_process_request_client(DBusMessage *msg)
 
     if(!dbus_message_iter_init(msg, &iter))
     {
-        printf("bad init\n");
         dbus_error_free(&err);
         return;
     }
@@ -143,7 +141,6 @@ a_dbus_process_request_client(DBusMessage *msg)
     while(dbus_message_iter_next(&iter));
 
     lua_pcall(globalconf.L, i, 0, 0);
-    printf("pcall\n");
 
 bailout:
     for(i = 0; path[i]; i++)
