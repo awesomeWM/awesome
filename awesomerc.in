@@ -142,7 +142,7 @@ screen 0
             {
                 button = "1"
                 command = "spawn"
-                arg = "exec xterm -e man awesome"
+                arg = "exec xterm -e \"man awesome\""
             }
         }
     }
@@ -211,7 +211,7 @@ keys
         modkey = {"Mod4"}
         key = "F1"
         command = "spawn"
-        arg = "for i in /usr/share/man/man?;do ls $i; done | cut -d. -f1 | awesome-menu -e 'xterm -e man ' 'See manual page for:'"
+        arg = "xterm -e \"man `for i in /usr/share/man/man?;do ls $i; done | cut -d. -f1 | awesome-menu 'See manual page for:'`\""
     }
     key
     {
@@ -225,7 +225,7 @@ keys
         modkey = {"Mod4"}
         key = "F3"
         command = "spawn"
-        arg = "cut -d' ' -f1 ~/.ssh/known_hosts | cut -d, -f1 | awesome-menu -e 'xterm -e ssh ' 'ssh to:'"
+        arg = "xterm -e \"ssh `cut -d' ' -f1 ~/.ssh/known_hosts | cut -d, -f1 | awesome-menu 'ssh to:'`\""
     }
     key
     {
