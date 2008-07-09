@@ -543,9 +543,9 @@ luaA_init(void)
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
 }
 
-#define XDG_CONFIG_HOME_DEFAULT "/.config/awesome/"
+#define XDG_CONFIG_HOME_DEFAULT "/.config"
 
-#define AWESOME_CONFIG_FILE "rc.lua"
+#define AWESOME_CONFIG_FILE "/awesome/rc.lua"
 
 /** Load a configuration file.
  * \param rcfile The configuration file to load.
@@ -570,10 +570,9 @@ luaA_parserc(const char *confpatharg)
 
     if(a_strlen(confdir))
     {
-        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE) + sizeof("/awesome/") + 1;
+        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE) + 1;
         confpath = p_new(char, len);
         a_strcpy(confpath, len, confdir);
-        a_strcat(confpath, len, "/awesome/");
     }
     else
     {
@@ -594,8 +593,8 @@ luaA_parserc(const char *confpatharg)
 
     if(!(len = a_strlen(xdg_config_dirs)))
     {
-        xdg_config_dirs = AWESOME_SYSCONFIG_DIR;
-        len = sizeof(AWESOME_SYSCONFIG_DIR);
+        xdg_config_dirs = SYSCONFDIR;
+        len = sizeof(SYSCONFDIR);
     }
 
     xdg_files = a_strsplit(xdg_config_dirs, len, ':');
@@ -603,10 +602,9 @@ luaA_parserc(const char *confpatharg)
     for(buf = xdg_files; *buf; buf++)
     {
         p_delete(&confpath);
-        len = a_strlen(*buf) + sizeof("AWESOME_CONFIG_FILE") + 2;
+        len = a_strlen(*buf) + sizeof("AWESOME_CONFIG_FILE") + 1;
         confpath = p_new(char, len);
         a_strcpy(confpath, len, *buf);
-        a_strcat(confpath, len, "/");
         a_strcat(confpath, len, AWESOME_CONFIG_FILE);
         if(luaL_dofile(globalconf.L, confpath))
             fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
