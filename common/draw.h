@@ -189,6 +189,11 @@ typedef struct
         int offset;
         xcolor_t color;
     } shadow;
+    struct
+    {
+        int width;
+        xcolor_t color;
+    } border;
 } draw_parser_data_t;
 
 void draw_parser_data_init(draw_parser_data_t *);
