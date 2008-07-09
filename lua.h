@@ -79,7 +79,7 @@ typedef int luaA_function;
 
 #define luaA_dofunction(L, f, n, r) \
     do { \
-        if(f) \
+        if(f != LUA_REFNIL) \
         { \
             lua_rawgeti(L, LUA_REGISTRYINDEX, f); \
             if(n) \
