@@ -208,6 +208,16 @@ luaA_screen_coords_get(lua_State *L)
     return 1;
 }
 
+static int
+luaA_registerfct(lua_State *L, luaA_function *fct)
+{
+    luaA_checkfunction(L, -1);
+    if(*fct != LUA_REFNIL)
+        luaL_unref(L, LUA_REGISTRYINDEX, *fct);
+    *fct = luaL_ref(L, LUA_REGISTRYINDEX);
+    return 0;
+}
+
 /** Set the function called each time a client gets focus. This function is
  * called with the client object as argument.
  * \param L The Lua VM state.
@@ -218,11 +228,7 @@ luaA_screen_coords_get(lua_State *L)
 static int
 luaA_hooks_focus(lua_State *L)
 {
-    luaA_checkfunction(L, 1);
-    if(globalconf.hooks.focus)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.focus);
-    globalconf.hooks.focus = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
+    return luaA_registerfct(L, &globalconf.hooks.focus);
 }
 
 /** Set the function called each time a client loses focus. This function is
@@ -235,11 +241,7 @@ luaA_hooks_focus(lua_State *L)
 static int
 luaA_hooks_unfocus(lua_State *L)
 {
-    luaA_checkfunction(L, 1);
-    if(globalconf.hooks.unfocus)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.unfocus);
-    globalconf.hooks.unfocus = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
+    return luaA_registerfct(L, &globalconf.hooks.unfocus);
 }
 
 /** Set the function called each time a new client appears. This function is
@@ -252,11 +254,7 @@ luaA_hooks_unfocus(lua_State *L)
 static int
 luaA_hooks_manage(lua_State *L)
 {
-    luaA_checkfunction(L, 1);
-    if(globalconf.hooks.manage)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.manage);
-    globalconf.hooks.manage = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
+    return luaA_registerfct(L, &globalconf.hooks.manage);
 }
 
 /** Set the function called each time a client goes away. This function is
@@ -269,11 +267,7 @@ luaA_hooks_manage(lua_State *L)
 static int
 luaA_hooks_unmanage(lua_State *L)
 {
-    luaA_checkfunction(L, 1);
-    if(globalconf.hooks.unmanage)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.unmanage);
-    globalconf.hooks.unmanage = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
+    return luaA_registerfct(L, &globalconf.hooks.unmanage);
 }
 
 /** Set the function called each time the mouse enter a new window. This
@@ -286,11 +280,7 @@ luaA_hooks_unmanage(lua_State *L)
 static int
 luaA_hooks_mouseover(lua_State *L)
 {
-    luaA_checkfunction(L, 1);
-    if(globalconf.hooks.mouseover)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.mouseover);
-    globalconf.hooks.mouseover = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
+    return luaA_registerfct(L, &globalconf.hooks.mouseover);
 }
 
 /** Set the function called on each screen arrange. This function is called
@@ -303,11 +293,7 @@ luaA_hooks_mouseover(lua_State *L)
 static int
 luaA_hooks_arrange(lua_State *L)
 {
-    luaA_checkfunction(L, 1);
-    if(globalconf.hooks.arrange)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.arrange);
-    globalconf.hooks.arrange = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
+    return luaA_registerfct(L, &globalconf.hooks.arrange);
 }
 
 /** Set the function called on each title update. This function is called with
@@ -320,11 +306,7 @@ luaA_hooks_arrange(lua_State *L)
 static int
 luaA_hooks_titleupdate(lua_State *L)
 {
-    luaA_checkfunction(L, 1);
-    if(globalconf.hooks.titleupdate)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.titleupdate);
-    globalconf.hooks.titleupdate = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
+    return luaA_registerfct(L, &globalconf.hooks.titleupdate);
 }
 
 /** Set the function called when a client get urgency flag. This function is called with
@@ -337,11 +319,7 @@ luaA_hooks_titleupdate(lua_State *L)
 static int
 luaA_hooks_urgent(lua_State *L)
 {
-    luaA_checkfunction(L, 1);
-    if(globalconf.hooks.urgent)
-        luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.urgent);
-    globalconf.hooks.urgent = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
+    return luaA_registerfct(L, &globalconf.hooks.urgent);
 }
 
 /** Set the function to be called every N seconds.
@@ -357,12 +335,7 @@ luaA_hooks_timer(lua_State *L)
     globalconf.timer.repeat = luaL_checknumber(L, 1);
 
     if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
-    {
-        luaA_checkfunction(L, 2);
-        if(globalconf.hooks.timer)
-            luaL_unref(L, LUA_REGISTRYINDEX, globalconf.hooks.timer);
-        globalconf.hooks.timer = luaL_ref(L, LUA_REGISTRYINDEX);
-    }
+        luaA_registerfct(L, &globalconf.hooks.timer);
 
     ev_timer_again(globalconf.loop, &globalconf.timer);
     return 0;
@@ -541,6 +514,17 @@ luaA_init(void)
     lua_settable(L, LUA_GLOBALSINDEX);
 
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
+
+    /* init hooks */
+    globalconf.hooks.manage = LUA_REFNIL;
+    globalconf.hooks.unmanage = LUA_REFNIL;
+    globalconf.hooks.focus = LUA_REFNIL;
+    globalconf.hooks.unfocus = LUA_REFNIL;
+    globalconf.hooks.mouseover = LUA_REFNIL;
+    globalconf.hooks.arrange = LUA_REFNIL;
+    globalconf.hooks.titleupdate = LUA_REFNIL;
+    globalconf.hooks.urgent = LUA_REFNIL;
+    globalconf.hooks.timer = LUA_REFNIL;
 }
 
 #define XDG_CONFIG_HOME_DEFAULT "/.config"
