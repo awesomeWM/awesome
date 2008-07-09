@@ -56,6 +56,8 @@ void draw_parser_data_wipe(draw_parser_data_t *pdata)
     draw_image_delete(&pdata->bg_image);
 }
 
+static iconv_t iso2utf8 = (iconv_t) -1;
+
 /** Convert text from any charset to UTF-8 using iconv.
  * \param iso The ISO string to convert.
  * \param len The string size.
@@ -64,7 +66,6 @@ void draw_parser_data_wipe(draw_parser_data_t *pdata)
 char *
 draw_iso2utf8(const char *iso, size_t len)
 {
-    iconv_t iso2utf8;
     size_t utf8len;
     char *utf8, *utf8p;
 
@@ -74,16 +75,19 @@ draw_iso2utf8(const char *iso, size_t len)
     if(!a_strcmp(nl_langinfo(CODESET), "UTF-8"))
         return NULL;
 
-    iso2utf8 = iconv_open("UTF-8", nl_langinfo(CODESET));
     if(iso2utf8 == (iconv_t) -1)
     {
-        if(errno == EINVAL)
-            warn("unable to convert text from %s to UTF-8, not available",
-                 nl_langinfo(CODESET));
-        else
-            warn("unable to convert text: %s", strerror(errno));
+        iso2utf8 = iconv_open("UTF-8", nl_langinfo(CODESET));
+        if(iso2utf8 == (iconv_t) -1)
+        {
+            if(errno == EINVAL)
+                warn("unable to convert text from %s to UTF-8, not available",
+                     nl_langinfo(CODESET));
+            else
+                warn("unable to convert text: %s", strerror(errno));
 
-        return NULL;
+            return NULL;
+        }
     }
 
     utf8len = 2 * len + 1;
@@ -94,9 +98,6 @@ draw_iso2utf8(const char *iso, size_t len)
         warn("text conversion failed: %s", strerror(errno));
         p_delete(&utf8p);
     }
-
-    if(iconv_close(iso2utf8))
-        warn("error closing iconv");
 
     return utf8p;
 }
