@@ -231,6 +231,7 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                     break;
                   case A_TK_ALIGN:
                     data->bg_align = draw_align_fromstr(*values, -1);
+                    break;
                   case A_TK_RESIZE:
                     data->bg_resize = a_strtobool(*values, -1);
                   default:
