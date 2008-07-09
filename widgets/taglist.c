@@ -283,7 +283,7 @@ taglist_button_press(widget_node_t *w,
                 {
                     luaA_pushpointer(globalconf.L, object, type);
                     luaA_tag_userdata_new(globalconf.L, tag);
-                    luaA_dofunction(globalconf.L, b->fct, 2);
+                    luaA_dofunction(globalconf.L, b->fct, 2, 0);
                     return;
                 }
             }

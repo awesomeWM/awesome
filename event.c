@@ -59,10 +59,10 @@ event_handle_mouse_button_press(client_t *c,
             if(c)
             {
                 luaA_client_userdata_new(globalconf.L, c);
-                luaA_dofunction(globalconf.L, b->fct, 1);
+                luaA_dofunction(globalconf.L, b->fct, 1, 0);
             }
             else
-                luaA_dofunction(globalconf.L, b->fct, 0);
+                luaA_dofunction(globalconf.L, b->fct, 0, 0);
         }
 }
 
@@ -341,7 +341,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         globalconf.pointer_y = ev->root_y;
 
         luaA_client_userdata_new(globalconf.L, c);
-        luaA_dofunction(globalconf.L, globalconf.hooks.mouseover, 1);
+        luaA_dofunction(globalconf.L, globalconf.hooks.mouseover, 1, 0);
     }
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
         xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
@@ -414,7 +414,7 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     {
         keybinding_t *k = keybinding_find(ev);
         if (k && k->fct != LUA_REFNIL)
-            luaA_dofunction(globalconf.L, k->fct, 0);
+            luaA_dofunction(globalconf.L, k->fct, 0, 0);
     }
 
     return 0;

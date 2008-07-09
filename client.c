@@ -166,7 +166,7 @@ client_updatetitle(client_t *c)
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.titleupdate, 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.titleupdate, 1, 0);
 
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 
@@ -181,7 +181,7 @@ client_unfocus(client_t *c)
 {
     /* Call hook */
     luaA_client_userdata_new(globalconf.L, globalconf.focus->client);
-    luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
 
     focus_client_push(NULL);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -240,7 +240,7 @@ client_focus(client_t *c, int screen)
 
         /* execute hook */
         luaA_client_userdata_new(globalconf.L, globalconf.focus->client);
-        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1);
+        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
     }
     else
     {
@@ -433,7 +433,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1, 0);
 
     if(c->floating_placement
        && !retloadprops
@@ -668,7 +668,7 @@ client_unmanage(client_t *c)
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1, 0);
 
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
@@ -723,7 +723,7 @@ client_updatewmhints(client_t *c)
         {
             /* execute hook */
             luaA_client_userdata_new(globalconf.L, c);
-            luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1);
+            luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1, 0);
 
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         }

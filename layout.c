@@ -87,7 +87,7 @@ arrange(int screen)
 
     /* call hook */
     lua_pushnumber(globalconf.L, screen + 1);
-    luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1, 0);
 }
 
 /** Refresh the screen disposition

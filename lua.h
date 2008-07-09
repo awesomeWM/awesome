@@ -77,14 +77,14 @@ typedef int luaA_function;
                      lua_tostring(L, -1)); \
     } while(0)
 
-#define luaA_dofunction(L, f, n) \
+#define luaA_dofunction(L, f, n, r) \
     do { \
         if(f) \
         { \
             lua_rawgeti(L, LUA_REGISTRYINDEX, f); \
             if(n) \
                 lua_insert(L, - (n + 1)); \
-            if(lua_pcall(L, n, 0, 0)) \
+            if(lua_pcall(L, n, r, 0)) \
                 warn("error running function: %s", \
                      lua_tostring(L, -1)); \
         } \
@@ -186,6 +186,16 @@ luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
     }
     lua_pop(L, 2);
 
+    return 0;
+}
+
+static inline int
+luaA_registerfct(lua_State *L, luaA_function *fct)
+{
+    luaA_checkfunction(L, -1);
+    if(*fct != LUA_REFNIL)
+        luaL_unref(L, LUA_REGISTRYINDEX, *fct);
+    *fct = luaL_ref(L, LUA_REGISTRYINDEX);
     return 0;
 }
 

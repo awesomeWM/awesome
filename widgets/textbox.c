@@ -60,8 +60,10 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
         draw_parser_data_init(&pdata);
         w->area.width = draw_text_extents(ctx->connection, ctx->phys_screen,
                                           globalconf.font, d->text, &pdata).width;
+
         if(w->area.width > ctx->width - used)
             w->area.width = ctx->width - used;
+
         if(pdata.bg_image)
             w->area.width = MAX(w->area.width, pdata.bg_resize ? w->area.height : pdata.bg_image->width);
 

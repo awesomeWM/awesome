@@ -41,7 +41,7 @@ typedef struct
 {
     showclient_t show;
     bool show_icons;
-    char *text_normal, *text_urgent, *text_focus;
+    luaA_function label;
 } tasklist_data_t;
 
 struct tasklist_hook_data
@@ -115,9 +115,11 @@ tasklist_draw(draw_context_t *ctx, int screen,
     tasklist_data_t *d = w->widget->data;
     area_t area;
     char *text;
+    const char *buf;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     netwm_icon_t *icon;
     draw_image_t *image;
+    size_t len;
 
     if(used >= ctx->width)
         return (w->area.width = 0);
@@ -143,14 +145,21 @@ tasklist_draw(draw_context_t *ctx, int screen,
         {
             icon_width = 0;
 
-            if(globalconf.focus->client == c)
-                text = d->text_focus;
-            else if(c->isurgent)
-                text = d->text_urgent;
-            else
-                text = d->text_normal;
+            /* push client */
+            luaA_client_userdata_new(globalconf.L, c);
+            /* call label function with client as argument and wait for one
+             * result */
+            luaA_dofunction(globalconf.L, d->label, 1, 1);
 
-            text = client_markup_parse(c, text, a_strlen(text));
+            if(lua_isstring(globalconf.L, -1))
+            {
+                buf = lua_tolstring(globalconf.L, -1, &len);
+                text = client_markup_parse(c, buf, len);
+            }
+            else
+                text = NULL;
+
+            lua_pop(globalconf.L, 1);
 
             if(d->show_icons)
             {
@@ -209,12 +218,6 @@ tasklist_draw(draw_context_t *ctx, int screen,
             draw_text(ctx, globalconf.font, area, text, NULL);
 
             p_delete(&text);
-
-            if(c->isfloating || c->ismax)
-                draw_circle(ctx, w->area.x + icon_width + box_width * i,
-                            w->area.y,
-                            (globalconf.font->height + 2) / 4,
-                            c->ismax, &ctx->fg);
             i++;
         }
 
@@ -270,7 +273,7 @@ tasklist_button_press(widget_node_t *w,
             {
                 luaA_pushpointer(globalconf.L, object, type);
                 luaA_client_userdata_new(globalconf.L, c);
-                luaA_dofunction(globalconf.L, b->fct, 2);
+                luaA_dofunction(globalconf.L, b->fct, 2, 0);
             }
 }
 
@@ -287,15 +290,6 @@ luaA_tasklist_index(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
-      case A_TK_TEXT_NORMAL:
-        lua_pushstring(L, d->text_normal);
-        return 1;
-      case A_TK_TEXT_FOCUS:
-        lua_pushstring(L, d->text_focus);
-        return 1;
-      case A_TK_TEXT_URGENT:
-        lua_pushstring(L, d->text_urgent);
-        return 1;
       case A_TK_SHOW_ICONS:
         lua_pushboolean(L, d->show_icons);
         return 1;
@@ -314,6 +308,9 @@ luaA_tasklist_index(lua_State *L, awesome_token_t token)
           default:
             return 0;
         }
+        return 1;
+      case A_TK_LABEL:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, d->label);
         return 1;
       default:
         return 0;
@@ -335,27 +332,6 @@ luaA_tasklist_newindex(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
-      case A_TK_TEXT_NORMAL:
-        if((buf = luaL_checkstring(L, 3)))
-        {
-            p_delete(&d->text_normal);
-            d->text_normal = a_strdup(buf);
-        }
-        break;
-      case A_TK_TEXT_FOCUS:
-        if((buf = luaL_checkstring(L, 3)))
-        {
-            p_delete(&d->text_focus);
-            d->text_focus = a_strdup(buf);
-        }
-        break;
-      case A_TK_TEXT_URGENT:
-        if((buf = luaL_checkstring(L, 3)))
-        {
-            p_delete(&d->text_urgent);
-            d->text_urgent = a_strdup(buf);
-        }
-        break;
       case A_TK_SHOW_ICONS:
         d->show_icons = luaA_checkboolean(L, 3);
         break;
@@ -376,6 +352,9 @@ luaA_tasklist_newindex(lua_State *L, awesome_token_t token)
                 break;
             }
         break;
+      case A_TK_LABEL:
+        luaA_registerfct(L, &d->label);
+        break;
       default:
         return 0;
     }
@@ -392,10 +371,6 @@ static void
 tasklist_destructor(widget_t *widget)
 {
     tasklist_data_t *d = widget->data;
-
-    p_delete(&d->text_normal);
-    p_delete(&d->text_focus);
-    p_delete(&d->text_urgent);
     p_delete(&d);
 }
 
@@ -418,12 +393,10 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     w->newindex = luaA_tasklist_newindex;
     w->data = d = p_new(tasklist_data_t, 1);
     w->destructor = tasklist_destructor;
-
-    d->text_normal = a_strdup(" <title/> ");
-    d->text_focus = a_strdup(" <title/> ");
-    d->text_urgent = a_strdup(" <title/> ");
+    
     d->show_icons = true;
     d->show = ShowTags;
+    d->label = LUA_REFNIL;
 
     /* Set cache property */
     w->cache_flags = WIDGET_CACHE_CLIENTS;

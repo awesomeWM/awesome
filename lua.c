@@ -208,16 +208,6 @@ luaA_screen_coords_get(lua_State *L)
     return 1;
 }
 
-static int
-luaA_registerfct(lua_State *L, luaA_function *fct)
-{
-    luaA_checkfunction(L, -1);
-    if(*fct != LUA_REFNIL)
-        luaL_unref(L, LUA_REGISTRYINDEX, *fct);
-    *fct = luaL_ref(L, LUA_REGISTRYINDEX);
-    return 0;
-}
-
 /** Set the function called each time a client gets focus. This function is
  * called with the client object as argument.
  * \param L The Lua VM state.
@@ -693,7 +683,7 @@ luaA_cs_cleanup(void)
 void
 luaA_on_timer(EV_P_ ev_timer *w, int revents)
 {
-    luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0);
+    luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0, 0);
 }
 
 void
