@@ -414,8 +414,8 @@ draw_text(draw_context_t *ctx, font_t *font,
                               pdata->shadow.color.blue / 65535.0,
                               pdata->shadow.color.alpha / 65535.0);
         cairo_move_to(ctx->cr, x + pdata->shadow.offset, y + pdata->shadow.offset);
-        pango_cairo_update_layout(ctx->cr, ctx->layout);
-        pango_cairo_show_layout(ctx->cr, ctx->layout);
+        pango_cairo_layout_path(ctx->cr, ctx->layout);
+        cairo_stroke(ctx->cr);
     }
 
     cairo_move_to(ctx->cr, x, y);
