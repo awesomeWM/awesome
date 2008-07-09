@@ -92,10 +92,16 @@ mytasklist:mouse_add(mouse({ }, 1, function (object, c) c:focus_set(); c:raise()
 mytasklist:mouse_add(mouse({ }, 4, function () awful.client.focus(1) end))
 mytasklist:mouse_add(mouse({ }, 5, function () awful.client.focus(-1) end))
 function mytasklist.label(c)
-    if client.focus_get() == c then
-        return " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'><title/></span> "
+    local text = ""
+    if c.floating then
+        text = text .. "<bg image=\"@AWESOME_ICON_PATH@/floatingw.png\" align=\"right\"/>"
     end
-    return " <title/> "
+    if client.focus_get() == c then
+        text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'><title/></span> "
+    else
+        text = text .. " <title/> "
+    end
+    return text
 end
 
 -- Create a textbox widget
