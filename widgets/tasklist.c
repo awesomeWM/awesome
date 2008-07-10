@@ -20,7 +20,6 @@
  */
 
 #include "widget.h"
-#include "client.h"
 #include "focus.h"
 #include "ewmh.h"
 #include "tag.h"
@@ -114,8 +113,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
     client_t *c;
     tasklist_data_t *d = w->widget->data;
     area_t area;
-    char *text;
-    const char *buf;
+    const char *text;
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     netwm_icon_t *icon;
     draw_image_t *image;
@@ -152,10 +150,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
             luaA_dofunction(globalconf.L, d->label, 1, 1);
 
             if(lua_isstring(globalconf.L, -1))
-            {
-                buf = lua_tolstring(globalconf.L, -1, &len);
-                text = client_markup_parse(c, buf, len);
-            }
+                text = lua_tolstring(globalconf.L, -1, &len);
             else
                 text = NULL;
 
@@ -217,7 +212,6 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
             draw_text(ctx, globalconf.font, area, text, NULL);
 
-            p_delete(&text);
             i++;
         }
 
@@ -281,6 +275,11 @@ tasklist_button_press(widget_node_t *w,
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield show_icons Show icons near client title.
+ * \lfield show Which windows to show: all, tags, focus.
+ * \lfield label Function used to get the string to display as the window title.
+ * It gets the client as argument, and must return a string.
  */
 static int
 luaA_tasklist_index(lua_State *L, awesome_token_t token)
