@@ -44,16 +44,21 @@
 #include "common/markup.h"
 #include "common/xutil.h"
 
-void draw_parser_data_init(draw_parser_data_t *pdata)
+void
+draw_parser_data_init(draw_parser_data_t *pdata)
 {
     p_clear(pdata, 1);
     buffer_init(&pdata->text);
 }
 
-void draw_parser_data_wipe(draw_parser_data_t *pdata)
+void
+draw_parser_data_wipe(draw_parser_data_t *pdata)
 {
-    buffer_wipe(&pdata->text);
-    draw_image_delete(&pdata->bg_image);
+    if(pdata)
+    {
+        buffer_wipe(&pdata->text);
+        draw_image_delete(&pdata->bg_image);
+    }
 }
 
 static iconv_t iso2utf8 = (iconv_t) -1;
@@ -291,7 +296,7 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
     }
 }
 
-static bool
+bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
