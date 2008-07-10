@@ -85,8 +85,11 @@ typedef int luaA_function;
             if(n) \
                 lua_insert(L, - (n + 1)); \
             if(lua_pcall(L, n, r, 0)) \
+            { \
                 warn("error running function: %s", \
                      lua_tostring(L, -1)); \
+                lua_pop(L, 1); \
+            } \
         } \
     } while(0)
 
