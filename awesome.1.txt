@@ -39,7 +39,7 @@ OPTIONS
 -h | --help::
     Print help information, then exit.
 --config | -c::
-    Use an alternate configuration file instead of $HOME/.awesomerc.lua.
+    Use an alternate configuration file instead of $XDG_CONFIG_HOME/awesome/rc.lua.
 
 DEFAULTS MOUSE BINDINGS
 -----------------------
