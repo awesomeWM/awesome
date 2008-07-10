@@ -152,7 +152,10 @@ tasklist_draw(draw_context_t *ctx, int screen,
             if(lua_isstring(globalconf.L, -1))
                 text = lua_tolstring(globalconf.L, -1, &len);
             else
+            {
                 text = NULL;
+                len = 0;
+            }
 
             lua_pop(globalconf.L, 1);
 
@@ -176,7 +179,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
                 /* Actually look for the proper background color, since
                  * otherwise the background statusbar color is used instead */
                 markup_parser_data_init(&pdata);
-                markup_parse(&pdata, text, a_strlen(text));
+                markup_parse(&pdata, text, len);
                 markup_parser_data_wipe(&pdata);
 
                 if((image = draw_image_new(c->icon_path)))
