@@ -41,11 +41,11 @@ systray_init(int phys_screen)
     xcb_intern_atom_cookie_t atom_systray_q;
     xcb_intern_atom_reply_t *atom_systray_r;
     xcb_atom_t atom_systray;
+    ssize_t len;
 
     /* Send requests */
-    snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
-    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false,
-                                               a_strlen(atom_name), atom_name);
+    len = snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
+    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false, len, atom_name);
 
     globalconf.screens[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
