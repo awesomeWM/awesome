@@ -43,12 +43,6 @@ typedef struct
     luaA_function label;
 } tasklist_data_t;
 
-struct tasklist_hook_data
-{
-    draw_context_t *ctx;
-    area_t *area;
-};
-
 /** Check if a client is visible according to the showclient type paramater.
  * \param c The client.
  * \param screen The screen number.
@@ -73,31 +67,6 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
     return false;
 }
 
-/** Called when a markup element is found.
- * \param p The markup parser data.
- * \param elem The element name.
- * \param names The attributes names.
- * \param values The attributes values.
- */
-static void
-tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
-                        const char **names, const char **values)
-{
-    struct tasklist_hook_data *data = p->priv;
-    draw_context_t *ctx = data->ctx;
-
-    assert(!a_strcmp(elem, "bg"));
-    for(; *names; names++, values++)
-        if(!a_strcmp(*names, "color"))
-        {
-            xcolor_t bg_color;
-            xcolor_init(&bg_color, ctx->connection, ctx->phys_screen,
-                        *values, a_strlen(*values));
-            draw_rectangle(ctx, *data->area, 1.0, true, &bg_color);
-            break;
-        }
-}
-
 /** Draw a tasklist widget.
  * \param ctx The draw context.
  * \param screen The screen number.
@@ -118,6 +87,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
     int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
     netwm_icon_t *icon;
     draw_image_t *image;
+    draw_parser_data_t pdata, *parser_data;
     size_t len;
 
     if(used >= ctx->width)
@@ -162,26 +132,29 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
             if(d->show_icons)
             {
-                static char const * const elements[] = { "bg", NULL };
-                struct tasklist_hook_data data = { .ctx = ctx, .area = &area };
-                markup_parser_data_t pdata =
-                {
-                    .elements   = elements,
-                    .on_element = &tasklist_markup_on_elem,
-                    .priv       = &data,
-                };
+                draw_parser_data_init(&pdata);
 
-                /* draw a background for icons */
-                area.x = w->area.x + box_width * i;
-                area.y = w->area.y;
-                area.height = ctx->height;
-                area.width = box_width;
+                pdata.connection = ctx->connection;
+                pdata.phys_screen = ctx->phys_screen;
 
                 /* Actually look for the proper background color, since
                  * otherwise the background statusbar color is used instead */
-                markup_parser_data_init(&pdata);
-                markup_parse(&pdata, text, len);
-                markup_parser_data_wipe(&pdata);
+                if(draw_text_markup_expand(&pdata, text, len))
+                {
+                    parser_data = &pdata;
+                    if(pdata.has_bg_color)
+                    {
+                        /* draw a background for icons */
+                        area.x = w->area.x + box_width * i;
+                        area.y = w->area.y;
+                        area.height = ctx->height;
+                        area.width = box_width;
+                        draw_rectangle(ctx, area, 1.0, true, &pdata.bg_color);
+                    }
+                }
+                else
+                    parser_data = NULL;
+
 
                 if((image = draw_image_new(c->icon_path)))
                 {
@@ -204,6 +177,8 @@ tasklist_draw(draw_context_t *ctx, int screen,
                     p_delete(&icon);
                 }
             }
+            else
+                parser_data = NULL;
 
             area.x = w->area.x + icon_width + box_width * i;
             area.y = w->area.y;
@@ -214,7 +189,8 @@ tasklist_draw(draw_context_t *ctx, int screen,
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            draw_text(ctx, globalconf.font, area, text, len, NULL);
+            draw_text(ctx, globalconf.font, area, text, len, parser_data);
+            draw_parser_data_wipe(parser_data);
 
             i++;
         }
