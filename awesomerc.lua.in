@@ -84,7 +84,15 @@ mytaglist:mouse_add(mouse({}, 3, function (object, tag) tag.selected = not tag.s
 mytaglist:mouse_add(mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end))
 mytaglist:mouse_add(mouse({ }, 4, awful.tag.viewnext))
 mytaglist:mouse_add(mouse({ }, 5, awful.tag.viewprev))
-mytaglist.text_focus = "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'><title/></span> "
+function mytaglist.label(t)
+    local text = ""
+    if t.selected then
+        text = "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'>"..t.name.."</span> "
+    else
+        text = " "..t.name.." "
+    end
+    return text
+end
 
 -- Create a tasklist widget
 mytasklist = widget({ type = "tasklist", name = "mytasklist" })
@@ -94,7 +102,7 @@ mytasklist:mouse_add(mouse({ }, 5, function () awful.client.focus(-1) end))
 function mytasklist.label(c)
     local text = ""
     if c.floating then
-        text = text .. "<bg image=\"@AWESOME_ICON_PATH@/floatingw.png\" align=\"right\"/>"
+        text = "<bg image=\"@AWESOME_ICON_PATH@/floatingw.png\" align=\"right\"/>"
     end
     if client.focus_get() == c then
         text = text .. " <bg color='"..bg_focus.."'/><span color='"..awful.escape(fg_focus).."'>"..c.name.."</span> "

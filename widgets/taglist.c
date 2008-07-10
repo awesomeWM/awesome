@@ -23,7 +23,6 @@
 #include "widget.h"
 #include "tag.h"
 #include "lua.h"
-#include "common/markup.h"
 #include "common/tokenize.h"
 
 extern awesome_t globalconf;
@@ -54,55 +53,10 @@ DO_SLIST(taglist_drawn_area_t, taglist_drawn_area, taglist_drawn_area_delete);
 /** Taglist widget private data */
 typedef struct
 {
-    char *text_normal, *text_focus, *text_urgent;
     bool show_empty;
     taglist_drawn_area_t *drawn_area;
+    luaA_function label;
 } taglist_data_t;
-
-
-/** Called when a markup element is encountered.
- * \param p The parser data.
- * \param elem The element.
- * \param names The element attributes names.
- * \param values The element attributes values.
- */
-static void
-tag_markup_on_elem(markup_parser_data_t *p, const char *elem,
-                      const char **names, const char **values)
-{
-    assert(!a_strcmp(elem, "title"));
-    buffer_add_xmlescaped(&p->text, NONULL(p->priv));
-}
-
-/** Parse a markup string.
- * \param t The tag we're parsing for.
- * \param str The string we're parsing.
- * \param len The string length.
- * \return The parsed string.
- */
-static char *
-tag_markup_parse(tag_t *t, const char *str, ssize_t len)
-{
-    static char const * const elements[] = { "title", NULL };
-    markup_parser_data_t p =
-    {
-        .elements   = elements,
-        .on_element = &tag_markup_on_elem,
-        .priv       = t->name,
-    };
-    char *ret;
-
-    markup_parser_data_init(&p);
-
-    if(markup_parse(&p, str, len))
-        ret = buffer_detach(&p.text);
-    else
-        ret = a_strdup(str);
-
-    markup_parser_data_wipe(&p);
-
-    return ret;
-}
 
 /** Check if at least one client is tagged with tag number t.
  * \param t The tag to check.
@@ -118,37 +72,6 @@ tag_isoccupied(tag_t *t)
             return true;
 
     return false;
-}
-
-/** Check if a tag  has at least one client with urgency hint.
- * \param t The tag.
- * \return True if the tag has a client with urgency set, false otherwise.
- */
-static bool
-tag_isurgent(tag_t *t)
-{
-    client_t *c;
-
-    for(c = globalconf.clients; c; c = c->next)
-        if(c->isurgent && is_client_tagged(c, t))
-            return true;
-
-    return false;
-}
-
-/** Get the string to use for drawing the tag.
- * \param tag The tag.
- * \param data The taglist private data.
- * \return The string to use.
- */
-static char *
-taglist_text_get(tag_t *tag, taglist_data_t *data)
-{
-    if(tag->selected)
-        return data->text_focus;
-    else if(tag_isurgent(tag))
-        return data->text_urgent;
-    return data->text_normal;
 }
 
 /** Draw a taglist.
@@ -167,13 +90,12 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
              void *object)
 {
     taglist_data_t *data = w->widget->data;
-    client_t *sel = globalconf.focus->client;
-    area_t area, rectangle = { 0, 0, 0, 0 };
+    area_t area;
     taglist_drawn_area_t *tda;
     int prev_width = 0;
 
     tag_array_t *tags = &globalconf.screens[screen].tags;
-    char **text = p_alloca(char *, tags->len);
+    const char **text = p_alloca(const char *, tags->len);
     draw_parser_data_t *pdata = p_alloca(draw_parser_data_t, tags->len);
 
     w->area.width = w->area.y = 0;
@@ -198,11 +120,17 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     {
         tag_t *tag = tags->tab[i];
 
-        text[i] = taglist_text_get(tag, data);
-        text[i] = tag_markup_parse(tag, text[i], a_strlen(text[i]));
+        luaA_tag_userdata_new(globalconf.L, tag);
+        luaA_dofunction(globalconf.L, data->label, 1, 1);
+
+        if(lua_isstring(globalconf.L, -1))
+            text[i] = lua_tostring(globalconf.L, -1);
+
+        lua_pop(globalconf.L, 1);
+
         draw_parser_data_init(&pdata[i]);
         area = draw_text_extents(ctx->connection, ctx->phys_screen,
-                                  globalconf.font, text[i], &pdata[i]);
+                                 globalconf.font, text[i], &pdata[i]);
 
         if(pdata[i].bg_image)
             area.width = MAX(area.width, pdata[i].bg_resize ? w->area.height : pdata[i].bg_image->width);
@@ -224,7 +152,6 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
 
         if(!data->show_empty && !tag->selected && !tag_isoccupied(tag))
         {
-            p_delete(&text[i]);
             draw_parser_data_wipe(&pdata[i]);
             continue;
         }
@@ -233,16 +160,6 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         prev_width += r->width;
         draw_text(ctx, globalconf.font, *r, text[i], &pdata[i]);
         draw_parser_data_wipe(&pdata[i]);
-        p_delete(&text[i]);
-
-        if(tag_isoccupied(tag))
-        {
-            rectangle.width = rectangle.height = (globalconf.font->height + 2) / 3;
-            rectangle.x = r->x;
-            rectangle.y = r->y;
-            draw_rectangle(ctx, rectangle, 1.0,
-                           sel && is_client_tagged(sel, tag), &ctx->fg);
-        }
     }
 
     w->area.height = ctx->height;
@@ -302,17 +219,11 @@ luaA_taglist_index(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
-      case A_TK_TEXT_NORMAL:
-        lua_pushstring(L, d->text_normal);
-        return 1;
-      case A_TK_TEXT_FOCUS:
-        lua_pushstring(L, d->text_focus);
-        return 1;
-      case A_TK_TEXT_URGENT:
-        lua_pushstring(L, d->text_urgent);
-        return 1;
       case A_TK_SHOW_EMPTY:
         lua_pushboolean(L, d->show_empty);
+        return 1;
+      case A_TK_LABEL:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, d->label);
         return 1;
       default:
         return 0;
@@ -328,34 +239,15 @@ static int
 luaA_taglist_newindex(lua_State *L, awesome_token_t token)
 {
     widget_t **widget = luaA_checkudata(L, 1, "widget");
-    const char *buf;
     taglist_data_t *d = (*widget)->data;
 
     switch(token)
     {
-      case A_TK_TEXT_NORMAL:
-        if((buf = luaL_checkstring(L, 3)))
-        {
-            p_delete(&d->text_normal);
-            d->text_normal = a_strdup(buf);
-        }
-        break;
-      case A_TK_TEXT_FOCUS:
-        if((buf = luaL_checkstring(L, 3)))
-        {
-            p_delete(&d->text_focus);
-            d->text_focus = a_strdup(buf);
-        }
-        break;
-      case A_TK_TEXT_URGENT:
-        if((buf = luaL_checkstring(L, 3)))
-        {
-            p_delete(&d->text_urgent);
-            d->text_urgent = a_strdup(buf);
-        }
-        break;
       case A_TK_SHOW_EMPTY:
         d->show_empty = luaA_checkboolean(L, 3);
+        break;
+      case A_TK_LABEL:
+        luaA_registerfct(L, &d->label);
         break;
       default:
         return 0;
@@ -374,9 +266,6 @@ taglist_destructor(widget_t *widget)
 {
     taglist_data_t *d = widget->data;
 
-    p_delete(&d->text_normal);
-    p_delete(&d->text_focus);
-    p_delete(&d->text_urgent);
     taglist_drawn_area_list_wipe(&d->drawn_area);
     p_delete(&d);
 }
@@ -401,10 +290,8 @@ taglist_new(alignment_t align)
     w->destructor = taglist_destructor;
 
     w->data = d = p_new(taglist_data_t, 1);
-    d->text_normal = a_strdup(" <text align=\"center\"/><title/> ");
-    d->text_focus = a_strdup(" <text align=\"center\"/><title/> ");
-    d->text_urgent = a_strdup(" <text align=\"center\"/><title/> ");
     d->show_empty = true;
+    d->label = LUA_REFNIL;
 
     /* Set cache property */
     w->cache_flags = WIDGET_CACHE_TAGS | WIDGET_CACHE_CLIENTS;
