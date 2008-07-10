@@ -1237,6 +1237,20 @@ luaA_client_newindex(lua_State *L)
 /** Client index.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield name The client title.
+ * \lfield class The client class, 2 strings long.
+ * \lfield pid The client PID, if available.
+ * \lfield floating_placement The floating placement used for this client.
+ * \lfield screen Client screen number.
+ * \lfield hide Define if the client must be hidden, i.e. never mapped.
+ * \lfield icon_path Path to the icon used to identify.
+ * \lfield floating True always floating.
+ * \lfield honorsizehints Honor size hints, i.e. respect size ratio.
+ * \lfield border_width The client border width.
+ * \lfield border_color The client border color.
+ * \lfield coords The client coordinates.
+ * \lfield titlebar The client titlebar.
  */
 static int
 luaA_client_index(lua_State *L)

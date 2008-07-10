@@ -518,6 +518,12 @@ luaA_titlebar_newindex(lua_State *L)
 /** Titlebar index.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield align Alignment relative to the client.
+ * \lfield border_width Border width.
+ * \lfield border_color Border color.
+ * \lfield fg Foreground color.
+ * \lfield bg Background color.
  */
 static int
 luaA_titlebar_index(lua_State *L)

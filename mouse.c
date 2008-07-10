@@ -1063,6 +1063,9 @@ luaA_mouse_new(lua_State *L)
 /** Index for mouse.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield coords Mouse coordinates.
+ * \lfield screen Mouse screen number.
  */
 static int
 luaA_mouse_index(lua_State *L)

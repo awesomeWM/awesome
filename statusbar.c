@@ -499,6 +499,11 @@ luaA_statusbar_widget_get(lua_State *L)
 /** Statusbar index.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield align The alignment.
+ * \lfield fg Foreground color.
+ * \lfield bg Background color.
+ * \lfield position The position.
  */
 static int
 luaA_statusbar_index(lua_State *L)

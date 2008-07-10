@@ -343,6 +343,13 @@ luaA_tag_new(lua_State *L)
 /** Tag index.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield name Tag name.
+ * \lfield layout Tag layout.
+ * \lfield selected True if the client is selected to be viewed.
+ * \lfield mwfact Master width factor.
+ * \lfield nmaster Number of master windows.
+ * \lfield ncol Number of column for slave windows.
  */
 static int
 luaA_tag_index(lua_State *L)
@@ -399,13 +406,6 @@ luaA_tag_newindex(lua_State *L)
 
     switch(a_tokenize(attr, len))
     {
-      case A_TK_NAME:
-        buf = luaL_checklstring(L, 3, &len);
-        p_delete(&(*tag)->name);
-        a_iso2utf8(&(*tag)->name, buf, len);
-        if((*tag)->screen != TAG_SCREEN_UNDEF)
-            widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
-        return 0;
       case A_TK_LAYOUT:
         buf = luaL_checkstring(L, 3);
         l = name_func_lookup(buf, LayoutList);
@@ -448,7 +448,6 @@ luaA_tag_newindex(lua_State *L)
     return 0;
 }
 
-
 const struct luaL_reg awesome_tag_methods[] =
 {
     { "__call", luaA_tag_new },
@@ -466,4 +465,5 @@ const struct luaL_reg awesome_tag_meta[] =
     { "__tostring", luaA_tag_tostring },
     { NULL, NULL },
 };
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
