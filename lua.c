@@ -604,17 +604,16 @@ luaA_parserc(const char *confpatharg)
  * \return true on succes, false on failure.
  */
 static void
-luaA_docmd(char *cmd)
+luaA_docmd(const char *cmd)
 {
-    char *p, *curcmd = cmd;
+    char *p;
 
-    if(a_strlen(cmd))
-        while((p = strchr(curcmd, '\n')))
-        {
-            *p = '\0';
-            luaA_dostring(globalconf.L, curcmd);
-            curcmd = p + 1;
-        }
+    while((p = strchr(cmd, '\n')))
+    {
+        *p = '\0';
+        luaA_dostring(globalconf.L, cmd);
+        cmd = p + 1;
+    }
 }
 
 static void
