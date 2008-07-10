@@ -993,12 +993,13 @@ draw_rotate(draw_context_t *ctx,
  * \param phys_screen Physical screen number.
  * \param font Font to use.
  * \param text The text.
+ * \param len The text length.
  * \param pdata The parser data to fill.
  * \return Text height and width.
  */
 area_t
 draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
-                  const char *text, draw_parser_data_t *parser_data)
+                  const char *text, ssize_t len, draw_parser_data_t *parser_data)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -1006,9 +1007,8 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
     PangoRectangle ext;
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     area_t geom = { 0, 0, 0, 0 };
-    ssize_t len;
 
-    if(!(len = a_strlen(text)))
+    if(!len)
         return geom;
 
     parser_data->connection = conn;

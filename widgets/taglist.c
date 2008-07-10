@@ -93,6 +93,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     area_t area;
     taglist_drawn_area_t *tda;
     int prev_width = 0;
+    size_t len;
 
     tag_array_t *tags = &globalconf.screens[screen].tags;
     const char **text = p_alloca(const char *, tags->len);
@@ -124,13 +125,13 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         luaA_dofunction(globalconf.L, data->label, 1, 1);
 
         if(lua_isstring(globalconf.L, -1))
-            text[i] = lua_tostring(globalconf.L, -1);
+            text[i] = lua_tolstring(globalconf.L, -1, &len);
 
         lua_pop(globalconf.L, 1);
 
         draw_parser_data_init(&pdata[i]);
         area = draw_text_extents(ctx->connection, ctx->phys_screen,
-                                 globalconf.font, text[i], &pdata[i]);
+                                 globalconf.font, text[i], len, &pdata[i]);
 
         if(pdata[i].bg_image)
             area.width = MAX(area.width, pdata[i].bg_resize ? w->area.height : pdata[i].bg_image->width);

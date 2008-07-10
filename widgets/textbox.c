@@ -29,6 +29,8 @@ typedef struct
 {
     /** Textbox text */
     char *text;
+    /** Textbox text length */
+    size_t len;
     /** Textbox width */
     int width;
 } textbox_data_t;
@@ -59,7 +61,7 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
     {
         draw_parser_data_init(&pdata);
         w->area.width = draw_text_extents(ctx->connection, ctx->phys_screen,
-                                          globalconf.font, d->text, &pdata).width;
+                                          globalconf.font, d->text, d->len, &pdata).width;
 
         if(w->area.width > ctx->width - used)
             w->area.width = ctx->width - used;
@@ -145,6 +147,7 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         {
             p_delete(&d->text);
             a_iso2utf8(&d->text, buf, len);
+            d->len = len;
         }
         break;
       case A_TK_WIDTH:
