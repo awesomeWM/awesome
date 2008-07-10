@@ -409,6 +409,7 @@ progressbar_draw(draw_context_t *ctx,
 static int
 luaA_progressbar_bar_properties_set(lua_State *L)
 {
+    size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *buf, *title = luaL_checkstring(L, 2);
     bar_t *bar;
@@ -425,41 +426,29 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     if(!bar)
         bar = progressbar_bar_add(d, title);
 
-    if((buf = luaA_getopt_string(L, 3, "fg", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "fg", NULL, &len)))
         xcolor_init(&bar->fg, globalconf.connection,
-                    globalconf.default_screen, buf);
-    }
+                    globalconf.default_screen, buf, len);
 
-    if((buf = luaA_getopt_string(L, 3, "fg_off", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "fg_off", NULL, &len)))
         xcolor_init(&bar->fg_off, globalconf.connection,
-                    globalconf.default_screen, buf);
-    }
+                    globalconf.default_screen, buf, len);
 
-    if((buf = luaA_getopt_string(L, 3, "bg", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "bg", NULL, &len)))
         xcolor_init(&bar->bg, globalconf.connection,
-                    globalconf.default_screen, buf);
-    }
+                    globalconf.default_screen, buf, len);
 
-    if((buf = luaA_getopt_string(L, 3, "border_color", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "border_color", NULL, &len)))
         xcolor_init(&bar->border_color, globalconf.connection,
-                    globalconf.default_screen, buf);
-    }
+                    globalconf.default_screen, buf, len);
 
-    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "fg_center", NULL, &len)))
         xcolor_init(&bar->fg_center, globalconf.connection,
-                    globalconf.default_screen, buf);
-    }
+                    globalconf.default_screen, buf, len);
 
-    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "fg_end", NULL, &len)))
         xcolor_init(&bar->fg_end, globalconf.connection,
-                    globalconf.default_screen, buf);
-    }
+                    globalconf.default_screen, buf, len);
 
     bar->min_value = luaA_getopt_number(L, 3, "min_value", bar->min_value);
     /* hack to prevent max_value beeing less than min_value

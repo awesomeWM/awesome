@@ -296,23 +296,17 @@ luaA_graph_plot_properties_set(lua_State *L)
     if(!plot)
         plot = graph_plot_add(d, title);
 
-    if((buf = luaA_getopt_string(L, 3, "fg", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "fg", NULL, &len)))
        xcolor_init(&plot->color_start, globalconf.connection,
-                   globalconf.default_screen, buf);
-    }
+                   globalconf.default_screen, buf, len);
 
-    if((buf = luaA_getopt_string(L, 3, "fg_center", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "fg_center", NULL, &len)))
        xcolor_init(&plot->pcolor_center, globalconf.connection,
-                   globalconf.default_screen, buf);
-    }
+                   globalconf.default_screen, buf, len);
 
-    if((buf = luaA_getopt_string(L, 3, "fg_end", NULL)))
-    {
+    if((buf = luaA_getopt_lstring(L, 3, "fg_end", NULL, &len)))
         xcolor_init(&plot->pcolor_end, globalconf.connection,
-                    globalconf.default_screen, buf);
-    }
+                    globalconf.default_screen, buf, len);
 
     plot->vertical_gradient = luaA_getopt_boolean(L, 3, "vertical_gradient", plot->vertical_gradient);
     plot->scale = luaA_getopt_boolean(L, 3, "scale", plot->scale);
@@ -484,6 +478,7 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
     int width;
     plot_t *plot;
     position_t pos;
+    xcolor_t color;
 
     switch(token)
     {
@@ -511,14 +506,24 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
             return 0;
         break;
       case A_TK_BG:
-        if (!xcolor_init(&d->bg, globalconf.connection, globalconf.default_screen,
-                         luaL_checkstring(L, 3)))
-            return 0;
+        if((buf = luaL_checklstring(L, 3, &len)))
+        {
+            if(xcolor_init(&color, globalconf.connection,
+                           globalconf.default_screen, buf, len))
+                d->bg = color;
+            else
+                return 0;
+        }
         break;
       case A_TK_BORDER_COLOR:
-        if (!xcolor_init(&d->border_color, globalconf.connection,
-                         globalconf.default_screen, luaL_checkstring(L, 3)))
-            return 0;
+        if((buf = luaL_checklstring(L, 3, &len)))
+        {
+            if(xcolor_init(&color, globalconf.connection,
+                           globalconf.default_screen, buf, len))
+                d->border_color = color;
+            else
+                return 0;
+        }
         break;
       case A_TK_GROW:
         buf = luaL_checklstring(L, 3, &len);

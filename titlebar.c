@@ -314,26 +314,20 @@ luaA_titlebar_new(lua_State *L)
     buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
     tb->position = position_fromstr(buf, len);
 
-    if(!(buf = luaA_getopt_string(L, 2, "fg", NULL))
-        || !xcolor_init(&tb->colors.fg, globalconf.connection,
-                        globalconf.default_screen, buf))
-    {
-        tb->colors.fg = globalconf.colors.fg;
-    }
+    if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
+        if(xcolor_init(&tb->colors.fg, globalconf.connection,
+                       globalconf.default_screen, buf, len))
+            tb->colors.fg = globalconf.colors.fg;
 
-    if(!(buf = luaA_getopt_string(L, 2, "bg", NULL))
-        || !xcolor_init(&tb->colors.bg, globalconf.connection,
-                        globalconf.default_screen, buf))
-    {
-        tb->colors.bg = globalconf.colors.bg;
-    }
+    if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
+        if(xcolor_init(&tb->colors.bg, globalconf.connection,
+                       globalconf.default_screen, buf, len))
+            tb->colors.bg = globalconf.colors.bg;
 
-    if(!(buf = luaA_getopt_string(L, 2, "border_color", NULL))
-        || !xcolor_init(&tb->border.color, globalconf.connection,
-                        globalconf.default_screen, buf))
-    {
-        tb->border.color = globalconf.colors.fg;
-    }
+    if((buf = luaA_getopt_lstring(L, 2, "border_color", NULL, &len)))
+        if(xcolor_init(&tb->border.color, globalconf.connection,
+                       globalconf.default_screen, buf, len))
+            tb->border.color = globalconf.colors.fg;
 
     tb->border.width = luaA_getopt_number(L, 2, "border_width", 0);
 
@@ -480,29 +474,24 @@ luaA_titlebar_newindex(lua_State *L)
             return 0;
         break;
       case A_TK_BORDER_COLOR:
-        if((buf = luaL_checkstring(L, 3))
-           && xcolor_init(&(*titlebar)->border.color, globalconf.connection,
-                          globalconf.default_screen, buf))
-        {
-            if((*titlebar)->sw)
-                xcb_change_window_attributes(globalconf.connection, (*titlebar)->sw->window,
-                                             XCB_CW_BORDER_PIXEL, &(*titlebar)->border.color.pixel);
-        }
+        if((buf = luaL_checklstring(L, 3, &len)))
+            if(xcolor_init(&(*titlebar)->border.color, globalconf.connection,
+                           globalconf.default_screen, buf, len))
+                if((*titlebar)->sw)
+                    xcb_change_window_attributes(globalconf.connection, (*titlebar)->sw->window,
+                                                 XCB_CW_BORDER_PIXEL, &(*titlebar)->border.color.pixel);
         return 0;
       case A_TK_FG:
-        if((buf = luaL_checkstring(L, 3))
-           && xcolor_init(&(*titlebar)->colors.fg, globalconf.connection,
-                          globalconf.default_screen, buf))
-        {
-            titlebar_draw(client_getbytitlebar(*titlebar));
-        }
+        if((buf = luaL_checklstring(L, 3, &len)))
+            if(xcolor_init(&(*titlebar)->colors.fg, globalconf.connection,
+                          globalconf.default_screen, buf, len))
+                titlebar_draw(client_getbytitlebar(*titlebar));
         return 0;
       case A_TK_BG:
-        if((buf = luaL_checkstring(L, 3))
-           && xcolor_init(&(*titlebar)->colors.bg, globalconf.connection, globalconf.default_screen, buf))
-        {
-            titlebar_draw(client_getbytitlebar(*titlebar));
-        }
+        if((buf = luaL_checklstring(L, 3, &len)))
+            if(xcolor_init(&(*titlebar)->colors.bg, globalconf.connection,
+                           globalconf.default_screen, buf, len))
+                titlebar_draw(client_getbytitlebar(*titlebar));
         return 0;
       default:
         return 0;

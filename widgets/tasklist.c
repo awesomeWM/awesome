@@ -91,7 +91,8 @@ tasklist_markup_on_elem(markup_parser_data_t *p, const char *elem,
         if(!a_strcmp(*names, "color"))
         {
             xcolor_t bg_color;
-            xcolor_init(&bg_color, ctx->connection, ctx->phys_screen, *values);
+            xcolor_init(&bg_color, ctx->connection, ctx->phys_screen,
+                        *values, a_strlen(*values));
             draw_rectangle(ctx, *data->area, 1.0, true, &bg_color);
             break;
         }

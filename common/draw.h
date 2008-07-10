@@ -218,7 +218,7 @@ area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *, ssize_
 alignment_t draw_align_fromstr(const char *, ssize_t);
 const char *draw_align_tostr(alignment_t);
 
-bool xcolor_init(xcolor_t *c, xcb_connection_t *, int, const char *);
+bool xcolor_init(xcolor_t *c, xcb_connection_t *, int, const char *, ssize_t);
 
 void area_array_remove(area_array_t *, area_t);
 

@@ -400,8 +400,8 @@ main(int argc, char **argv)
 
     /* init default font and colors */
     globalconf.font = draw_font_new(globalconf.connection, globalconf.default_screen, "sans 8");
-    xcolor_init(&globalconf.colors.fg, globalconf.connection, globalconf.default_screen, "black");
-    xcolor_init(&globalconf.colors.bg, globalconf.connection, globalconf.default_screen, "white");
+    xcolor_init(&globalconf.colors.fg, globalconf.connection, globalconf.default_screen, "black", sizeof("black"));
+    xcolor_init(&globalconf.colors.bg, globalconf.connection, globalconf.default_screen, "white", sizeof("white"));
 
     /* init cursors */
     globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, CURSOR_LEFT_PTR);

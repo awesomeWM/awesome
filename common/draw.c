@@ -222,7 +222,11 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 switch(a_tokenize(*names, -1))
                 {
                   case A_TK_COLOR:
-                    data->has_bg_color = xcolor_init(&data->bg_color, data->connection, data->phys_screen, *values);
+                    data->has_bg_color = xcolor_init(&data->bg_color,
+                                                     data->connection,
+                                                     data->phys_screen,
+                                                     *values,
+                                                     a_strlen(*values));
                     break;
                   case A_TK_IMAGE:
                     if(data->bg_image)
@@ -242,7 +246,8 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 switch(a_tokenize(*names, -1))
                 {
                   case A_TK_COLOR:
-                    xcolor_init(&data->border.color, data->connection, data->phys_screen, *values);
+                    xcolor_init(&data->border.color, data->connection,
+                                data->phys_screen, *values, a_strlen(*values));
                     break;
                   case A_TK_WIDTH:
                     data->border.width = atoi(*values);
@@ -260,7 +265,7 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 break;
               case A_TK_SHADOW:
                 xcolor_init(&data->shadow.color, data->connection,
-                            data->phys_screen, *values);
+                            data->phys_screen, *values, a_strlen(*values));
                 break;
               case A_TK_SHADOW_OFFSET:
                 data->shadow.offset = atoi(*values);
@@ -1088,14 +1093,13 @@ draw_align_tostr(alignment_t a)
  */
 bool
 xcolor_init(xcolor_t *color, xcb_connection_t *conn, int phys_screen,
-            const char *colstr)
+            const char *colstr, ssize_t len)
 {
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
     unsigned long colnum;
     uint16_t red, green, blue, alpha = 0xffff;
-    ssize_t len;
 
-    if(!(len = a_strlen(colstr)))
+    if(!len)
         return false;
 
     /* The color is given in RGB value */

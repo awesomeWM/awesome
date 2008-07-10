@@ -440,18 +440,15 @@ luaA_statusbar_new(lua_State *L)
 
     sb->name = a_strdup(buf);
 
-    if(!(buf = luaA_getopt_string(L, 2, "fg", NULL))
-       || !xcolor_init(&sb->colors.fg, globalconf.connection, globalconf.default_screen, buf))
-    {
-        sb->colors.fg = globalconf.colors.fg;
-    }
+    if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
+        if(xcolor_init(&sb->colors.fg, globalconf.connection,
+                       globalconf.default_screen, buf, len))
+            sb->colors.fg = globalconf.colors.fg;
 
-    if(!(buf = luaA_getopt_string(L, 2, "bg", NULL))
-       || !xcolor_init(&sb->colors.bg, globalconf.connection,
-                       globalconf.default_screen, buf))
-    {
-        sb->colors.bg = globalconf.colors.bg;
-    }
+    if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
+        if(xcolor_init(&sb->colors.bg, globalconf.connection,
+                       globalconf.default_screen, buf, len))
+            sb->colors.bg = globalconf.colors.bg;
 
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     sb->align = draw_align_fromstr(buf, len);
@@ -556,25 +553,25 @@ luaA_statusbar_newindex(lua_State *L)
         statusbar_position_update(*statusbar, (*statusbar)->position);
         break;
       case A_TK_FG:
-        if((buf = luaL_checkstring(L, 3))
-           && xcolor_init(&(*statusbar)->colors.fg, globalconf.connection,
-                          globalconf.default_screen, buf))
-        {
-            if((*statusbar)->ctx)
-                (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
-            (*statusbar)->need_update = true;
-        }
+        if((buf = luaL_checklstring(L, 3, &len)))
+            if(xcolor_init(&(*statusbar)->colors.fg, globalconf.connection,
+                           globalconf.default_screen, buf, len))
+            {
+                if((*statusbar)->ctx)
+                    (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
+                (*statusbar)->need_update = true;
+            }
         break;
       case A_TK_BG:
-        if((buf = luaL_checkstring(L, 3))
-           && xcolor_init(&(*statusbar)->colors.bg, globalconf.connection,
-                          globalconf.default_screen, buf))
-        {
-            if((*statusbar)->ctx)
-                (*statusbar)->ctx->bg = (*statusbar)->colors.bg;
+        if((buf = luaL_checklstring(L, 3, &len)))
+            if(xcolor_init(&(*statusbar)->colors.bg, globalconf.connection,
+                           globalconf.default_screen, buf, len))
+            {
+                if((*statusbar)->ctx)
+                    (*statusbar)->ctx->bg = (*statusbar)->colors.bg;
 
-            (*statusbar)->need_update = true;
-        }
+                (*statusbar)->need_update = true;
+            }
         break;
       case A_TK_POSITION:
         buf = luaL_checklstring(L, 3, &len);

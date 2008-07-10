@@ -1143,8 +1143,8 @@ luaA_client_newindex(lua_State *L)
         client_setborder(*c, luaL_checknumber(L, 3));
         break;
       case A_TK_BORDER_COLOR:
-        if((buf = luaL_checkstring(L, 3))
-           && xcolor_init(&(*c)->border_color, globalconf.connection, (*c)->phys_screen, buf))
+        if((buf = luaL_checklstring(L, 3, &len))
+           && xcolor_init(&(*c)->border_color, globalconf.connection, (*c)->phys_screen, buf, len))
         {
             xcb_change_window_attributes(globalconf.connection, (*c)->win,
                                          XCB_CW_BORDER_PIXEL, &(*c)->border_color.pixel);
