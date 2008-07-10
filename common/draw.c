@@ -712,37 +712,6 @@ draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
     cairo_set_line_width(ctx->cr, 1.0);
 }
 
-/** Draw a circle.
- * \param ctx Draw context to draw to.
- * \param x X coordinate.
- * \param y Y coordinate.
- * \param r Size of the circle.
- * \param filled Fill circle, or not.
- * \param color Color to use.
- */
-void
-draw_circle(draw_context_t *ctx, int x, int y, int r, bool filled, const xcolor_t *color)
-{
-    cairo_set_line_width(ctx->cr, 1.0);
-    cairo_set_source_rgba(ctx->cr,
-                          color->red / 65535.0,
-                          color->green / 65535.0,
-                          color->blue / 65535.0,
-                          color->alpha / 65535.0);
-
-    cairo_new_sub_path(ctx->cr); /* don't draw from the old reference point to.. */
-
-    if(filled)
-    {
-        cairo_arc (ctx->cr, x + r, y + r, r, 0, 2 * M_PI);
-        cairo_fill(ctx->cr);
-    }
-    else
-        cairo_arc (ctx->cr, x + r, y + r, r - 1, 0, 2 * M_PI);
-
-    cairo_stroke(ctx->cr);
-}
-
 /** Draw an image from ARGB data to a draw context.
  * Data should be stored as an array of alpha, red, blue, green for each pixel
  * and the array size should be w * h elements long.

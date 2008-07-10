@@ -209,7 +209,6 @@ void draw_graph(draw_context_t *, area_t, int *, int *, int, position_t, vector_
                 const xcolor_t *, const xcolor_t *, const xcolor_t *);
 void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, vector_t,
                      const xcolor_t *, const xcolor_t *, const xcolor_t *);
-void draw_circle(draw_context_t *, int, int, int, bool, const xcolor_t *);
 draw_image_t *draw_image_new(const char *);
 void draw_image_delete(draw_image_t **);
 void draw_image(draw_context_t *, int, int, int, draw_image_t *);
