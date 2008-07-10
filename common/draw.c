@@ -325,19 +325,16 @@ draw_text_markup_expand(draw_parser_data_t *data,
  * \param font The font to use.
  * \param area Area to draw to.
  * \param text Text to draw.
+ * \param len Text to draw length.
  * \param data Optional parser data.
  */
 void
 draw_text(draw_context_t *ctx, font_t *font,
-          area_t area, const char *text, draw_parser_data_t *pdata)
+          area_t area, const char *text, ssize_t len, draw_parser_data_t *pdata)
 {
     int x, y;
-    ssize_t len = 0, olen;
     PangoRectangle ext;
     draw_parser_data_t parser_data;
-
-    if(!(len = a_strlen(text)))
-        return;
 
     if(!pdata)
     {
@@ -356,8 +353,6 @@ draw_text(draw_context_t *ctx, font_t *font,
         text = pdata->text.s;
         len = pdata->text.len;
     }
-
-    olen = len;
 
     if(pdata->has_bg_color)
         draw_rectangle(ctx, area, 1.0, true, &pdata->bg_color);

@@ -214,7 +214,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
             if(i == n - 1)
                 area.width += box_width_rest;
 
-            draw_text(ctx, globalconf.font, area, text, NULL);
+            draw_text(ctx, globalconf.font, area, text, len, NULL);
 
             i++;
         }

@@ -241,11 +241,12 @@ mouse_infobox_draw(draw_context_t *ctx,
 {
     area_t draw_geometry = { 0, 0, ctx->width, ctx->height };
     char size[64];
+    size_t len;
 
-    snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
-             geometry.width, geometry.height, geometry.x, geometry.y);
+    len = snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
+                   geometry.width, geometry.height, geometry.x, geometry.y);
     draw_rectangle(ctx, draw_geometry, 1.0, true, &globalconf.colors.bg);
-    draw_text(ctx, globalconf.font, draw_geometry, size, NULL);
+    draw_text(ctx, globalconf.font, draw_geometry, size, len, NULL);
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);

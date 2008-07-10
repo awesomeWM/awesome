@@ -199,7 +199,7 @@ typedef struct
 void draw_parser_data_init(draw_parser_data_t *);
 void draw_parser_data_wipe(draw_parser_data_t *);
 
-void draw_text(draw_context_t *, font_t *, area_t, const char *, draw_parser_data_t *);
+void draw_text(draw_context_t *, font_t *, area_t, const char *, ssize_t len, draw_parser_data_t *);
 void draw_rectangle(draw_context_t *, area_t, float, bool, const xcolor_t *);
 void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, vector_t,
                              const xcolor_t *, const xcolor_t *, const xcolor_t *);

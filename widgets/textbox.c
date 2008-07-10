@@ -80,7 +80,7 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
                                         w->widget->align);
     w->area.y = 0;
 
-    draw_text(ctx, globalconf.font, w->area, d->text, pdata_arg);
+    draw_text(ctx, globalconf.font, w->area, d->text, d->len, pdata_arg);
     if (pdata_arg)
         draw_parser_data_wipe(pdata_arg);
 
