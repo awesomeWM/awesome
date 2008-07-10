@@ -40,12 +40,13 @@ socket_getaddr(const char *display)
 {
     char *homedir, *tmp;
     const char *real_display = NULL;
-    ssize_t path_len;
+    ssize_t path_len, display_len;
     struct sockaddr_un *addr;
 
     addr = p_new(struct sockaddr_un, 1);
     homedir = getenv("HOME");
-    if(a_strlen(display))
+    display_len = a_strlen(display);
+    if(display_len)
     {
         if((tmp = strchr(display, ':')))
             real_display = tmp + 1;
@@ -57,8 +58,8 @@ socket_getaddr(const char *display)
 
     /* a_strlen(display) because we strcat on display and
      * + 2 for / and \0 */
-    path_len = a_strlen(homedir) + a_strlen(CONTROL_UNIX_SOCKET_PATH)
-               + (a_strlen(display) ? (a_strlen(real_display)) : 1) + 2;
+    path_len = a_strlen(homedir) + sizeof(CONTROL_UNIX_SOCKET_PATH)
+               + (display_len ? (a_strlen(real_display)) : 1) + 2;
 
     if(path_len >= ssizeof(addr->sun_path))
     {
@@ -68,7 +69,7 @@ socket_getaddr(const char *display)
     a_strcpy(addr->sun_path, path_len, homedir);
     a_strcat(addr->sun_path, path_len, "/");
     a_strcat(addr->sun_path, path_len, CONTROL_UNIX_SOCKET_PATH);
-    if(a_strlen(display))
+    if(display_len)
         a_strcat(addr->sun_path, path_len, real_display);
     else
         a_strcat(addr->sun_path, path_len, "0");
