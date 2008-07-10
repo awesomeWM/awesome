@@ -11,7 +11,7 @@ set(VERSION_PATCH 0)
 
 set(CODENAME "Productivity Breaker")
 
-project(${PROJECT_AWE_NAME})
+project(${PROJECT_AWE_NAME} C)
 
 set(CMAKE_BUILD_TYPE RELEASE)
 
