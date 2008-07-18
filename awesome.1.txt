@@ -99,7 +99,9 @@ DEFAULT KEY BINDINGS
 *Mod4 + Right*::
     View next tag.
 *Mod4 \+ Control \+ space*::
-    Set client floating.
+    Toggle client floating status.
+*Mod4 \+ Control \+ Return*::
+    Swap focused client with master.
 *Mod4 \+ Shift \+ c*::
     Kill client.
 *Mod4 \+ Shift \+ q*::
@@ -114,6 +116,10 @@ DEFAULT KEY BINDINGS
     Tag client with tag.
 *Mod4 \+ Shift \+ Control \+ 1-9*::
     Toggle tag on client.
+*Mod4 \+ F1*::
+    Run prompt.
+*Mod4 \+ F4*::
+    Run lua code prompt.
 
 CUSTOMIZATION
 -------------
