@@ -30,20 +30,33 @@ add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
 # }}}
 
 # {{{ Find external utilities
-find_program(CAT_EXECUTABLE cat)
-find_program(LN_EXECUTABLE ln)
-find_program(GREP_EXECUTABLE grep)
-find_program(GIT_EXECUTABLE git)
-find_program(HOSTNAME_EXECUTABLE hostname)
-find_program(GPERF_EXECUTABLE gperf)
-find_program(LUAC_EXECUTABLE luac)
+macro(a_find_program var prg req)
+    set(required ${req})
+    find_program(${var} ${prg})
+    if(NOT ${var})
+        message(STATUS "${prg} not found.")
+        if(required)
+            message(FATAL_ERROR "${prg} is required to build awesome")
+        endif()
+    else()
+        message(STATUS "${prg} -> ${${var}}")
+    endif()
+endmacro()
+
+a_find_program(CAT_EXECUTABLE cat TRUE)
+a_find_program(LN_EXECUTABLE ln TRUE)
+a_find_program(GREP_EXECUTABLE grep TRUE)
+a_find_program(GIT_EXECUTABLE git FALSE)
+a_find_program(HOSTNAME_EXECUTABLE hostname FALSE)
+a_find_program(GPERF_EXECUTABLE gperf TRUE)
+a_find_program(LUAC_EXECUTABLE luac TRUE)
 # programs needed for man pages
-find_program(ASCIIDOC_EXECUTABLE asciidoc)
-find_program(XMLTO_EXECUTABLE xmlto)
-find_program(GZIP_EXECUTABLE gzip)
+a_find_program(ASCIIDOC_EXECUTABLE asciidoc FALSE)
+a_find_program(XMLTO_EXECUTABLE xmlto FALSE)
+a_find_program(GZIP_EXECUTABLE gzip FALSE)
 # lua documentation
-find_program(LUA_EXECUTABLE lua)
-find_program(LUADOC_EXECUTABLE luadoc)
+a_find_program(LUA_EXECUTABLE lua FALSE)
+a_find_program(LUADOC_EXECUTABLE luadoc FALSE)
 # doxygen
 include(FindDoxygen)
 # pkg-config
