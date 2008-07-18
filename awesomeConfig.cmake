@@ -131,6 +131,10 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-icccm
     cairo-xcb)
 
+if(NOT AWESOME_REQUIRED_FOUND)
+    message(FATAL_ERROR)
+endif()
+
 macro(a_find_library variable library)
     find_library(${variable} ${library})
     if(NOT ${variable})
