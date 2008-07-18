@@ -274,14 +274,23 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
 {
     int screen_nbr;
     const xcb_screen_t *screen;
+    client_t *c;
 
     for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length(xcb_get_setup (connection)); screen_nbr++)
         if((screen = xutil_screen_get(connection, screen_nbr)) != NULL
            && ev->window == screen->root
            && (ev->width != screen->width_in_pixels
                || ev->height != screen->height_in_pixels))
+        {
             /* it's not that we panic, but restart */
+            for(c = globalconf.clients; c; c = c->next)
+                client_unban(c);
+
+            xcb_aux_sync(globalconf.connection);
+            xcb_disconnect(globalconf.connection);
+
             a_exec(globalconf.argv);
+        }
 
     return 0;
 }
@@ -582,6 +591,8 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
                                         xcb_connection_t *connection __attribute__ ((unused)),
                                         xcb_randr_screen_change_notify_event_t *ev)
 {
+    client_t *c;
+
     if(!globalconf.have_randr)
         return -1;
 
@@ -601,6 +612,12 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
      *
      * XRenderSetSubpixelOrder(dpy, snum, scevent->subpixel_order);
      */
+
+    for(c = globalconf.clients; c; c = c->next)
+        client_unban(c);
+
+    xcb_aux_sync(globalconf.connection);
+    xcb_disconnect(globalconf.connection);
 
     a_exec(globalconf.argv);
     return 0;
