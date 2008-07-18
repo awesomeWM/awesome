@@ -2,7 +2,7 @@
 #define _CONFIG_H_
 
 #define AWESOME_LUA_LIB_PATH "@AWESOME_LUA_LIB_PATH@"
-#define SYSCONFDIR           "@SYSCONFDIR@"
+#define XDG_CONFIG_DIR       "@XDG_CONFIG_DIR@"
 
 #cmakedefine WITH_DBUS
 #cmakedefine WITH_IMLIB2

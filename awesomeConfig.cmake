@@ -233,6 +233,14 @@ else()
     set(SYSCONFDIR ${PREFIX}/etc CACHE PATH "config directory")
 endif()
 
+#If an XDG Config Dir is specificed, use it instead
+#of the default XDG configuration dir.
+if(DEFINED XDG_CONFIG_DIR)
+    set(XDG_CONFIG_DIR ${XDG_CONFIG_SYS} CACHE PATH "xdg config directory")
+else()
+    set(XDG_CONFIG_DIR ${SYSCONFDIR}/xdg CACHE PATH "xdg config directory")
+endif()
+
 # Hide to avoid confusion
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 
@@ -241,7 +249,7 @@ set(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR})
 set(AWESOME_COMPILE_HOSTNAME ${BUILDHOSTNAME})
 set(AWESOME_COMPILE_BY       $ENV{USER})
 set(AWESOME_RELEASE          ${CODENAME})
-set(AWESOME_SYSCONFDIR       ${SYSCONFDIR}/xdg/${PROJECT_AWE_NAME})
+set(AWESOME_SYSCONFDIR       ${XDG_CONFIG_DIR}/${PROJECT_AWE_NAME})
 set(AWESOME_DATA_PATH        ${PREFIX}/share/${PROJECT_AWE_NAME})
 set(AWESOME_DOC_PATH         ${PREFIX}/share/doc/${PROJECT_AWE_NAME})
 set(AWESOME_MAN_PATH         ${PREFIX}/share/man)

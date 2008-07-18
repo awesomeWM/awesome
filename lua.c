@@ -560,8 +560,8 @@ luaA_parserc(const char *confpatharg)
 
     if(!(len = a_strlen(xdg_config_dirs)))
     {
-        xdg_config_dirs = SYSCONFDIR;
-        len = sizeof(SYSCONFDIR)-1;
+        xdg_config_dirs = XDG_CONFIG_DIR;
+        len = sizeof(XDG_CONFIG_DIR) - 1;
     }
 
     xdg_files = a_strsplit(xdg_config_dirs, len, ':');
