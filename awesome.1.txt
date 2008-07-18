@@ -41,7 +41,7 @@ OPTIONS
 --config | -c::
     Use an alternate configuration file instead of $XDG_CONFIG_HOME/awesome/rc.lua.
 
-DEFAULTS MOUSE BINDINGS
+DEFAULT MOUSE BINDINGS
 -----------------------
 *Button1* on tag name::
     View tag.
@@ -62,7 +62,7 @@ DEFAULTS MOUSE BINDINGS
 *Mod4 + Button3* on client window::
     Resize window.
 
-DEFAULTS KEY BINDINGS
+DEFAULT KEY BINDINGS
 ---------------------
 *Mod4 + Return*::
     Spawn terminal emulator.
@@ -117,7 +117,7 @@ DEFAULTS KEY BINDINGS
 
 CUSTOMIZATION
 -------------
-awesome is customized by creating a custom $HOME/.awesomerc.lua file.
+awesome is customized by creating a custom $XDG_CONFIG_HOME/awesome/rc.lua file.
 
 SEE ALSO
 --------
