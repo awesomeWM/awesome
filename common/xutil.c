@@ -497,7 +497,7 @@ xutil_cursor_new(xcb_connection_t *conn, unsigned int cursor_font)
 
     /* Get the font for the cursor*/
     font = xcb_generate_id(conn);
-    xcb_open_font(conn, font, sizeof("cursor"), "cursor");
+    xcb_open_font(conn, font, sizeof("cursor")-1, "cursor");
 
     cursor = xcb_generate_id(conn);
     xcb_create_glyph_cursor(conn, cursor, font, font,

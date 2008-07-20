@@ -58,7 +58,7 @@ socket_getaddr(const char *display)
 
     /* a_strlen(display) because we strcat on display and
      * + 2 for / and \0 */
-    path_len = a_strlen(homedir) + sizeof(CONTROL_UNIX_SOCKET_PATH)
+    path_len = a_strlen(homedir) + sizeof(CONTROL_UNIX_SOCKET_PATH)-1
                + (display_len ? (a_strlen(real_display)) : 1) + 2;
 
     if(path_len >= ssizeof(addr->sun_path))

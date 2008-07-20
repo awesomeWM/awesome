@@ -276,7 +276,7 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
                              globalconf.default_screen,
                              globalconf.font,
                              MOUSE_INFOBOX_STRING_DEFAULT,
-                             sizeof(MOUSE_INFOBOX_STRING_DEFAULT),
+                             sizeof(MOUSE_INFOBOX_STRING_DEFAULT)-1,
                              &pdata);
     geom.x = geometry.x + ((2 * border + geometry.width) - geom.width) / 2;
     geom.y = geometry.y + ((2 * border + geometry.height) - geom.height) / 2;

@@ -537,14 +537,14 @@ luaA_parserc(const char *confpatharg)
 
     if(a_strlen(confdir))
     {
-        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE) + 1;
+        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE);
         confpath = p_new(char, len);
         a_strcpy(confpath, len, confdir);
     }
     else
     {
         confdir = getenv("HOME");
-        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE) + sizeof(XDG_CONFIG_HOME_DEFAULT) + 1;
+        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE)-1 + sizeof(XDG_CONFIG_HOME_DEFAULT);
         confpath = p_new(char, len);
         a_strcpy(confpath, len, confdir);
         a_strcat(confpath, len, XDG_CONFIG_HOME_DEFAULT);
@@ -561,7 +561,7 @@ luaA_parserc(const char *confpatharg)
     if(!(len = a_strlen(xdg_config_dirs)))
     {
         xdg_config_dirs = SYSCONFDIR;
-        len = sizeof(SYSCONFDIR);
+        len = sizeof(SYSCONFDIR)-1;
     }
 
     xdg_files = a_strsplit(xdg_config_dirs, len, ':');
@@ -569,7 +569,7 @@ luaA_parserc(const char *confpatharg)
     for(buf = xdg_files; *buf; buf++)
     {
         p_delete(&confpath);
-        len = a_strlen(*buf) + sizeof("AWESOME_CONFIG_FILE") + 1;
+        len = a_strlen(*buf) + sizeof("AWESOME_CONFIG_FILE");
         confpath = p_new(char, len);
         a_strcpy(confpath, len, *buf);
         a_strcat(confpath, len, AWESOME_CONFIG_FILE);
@@ -587,7 +587,7 @@ luaA_parserc(const char *confpatharg)
     /* Assure there's at least one tag */
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         if(!globalconf.screens[screen].tags.len)
-            tag_append_to_screen(tag_new("default", sizeof("default"), layout_tile, 0.5, 1, 0), screen);
+            tag_append_to_screen(tag_new("default", sizeof("default")-1, layout_tile, 0.5, 1, 0), screen);
 
     p_delete(&confpath);
 }
