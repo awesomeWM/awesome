@@ -296,7 +296,10 @@ ewmh_process_window_type_atom(Client *c, Atom state)
         client_setfloating(c, True);
     }
     else if (state == net_wm_window_type_dialog)
+    {
         client_setfloating(c, True);
+        client_focus(c, c->screen, True);
+    }
 }
 void
 ewmh_process_client_message(XClientMessageEvent *ev)
