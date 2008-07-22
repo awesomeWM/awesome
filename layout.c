@@ -47,6 +47,9 @@ arrange(int screen)
             client_ban(c);
     }
 
+    if(curlay)
+        curlay(screen);
+
     qp_c = xcb_query_pointer_unchecked(globalconf.connection,
                                        xutil_screen_get(globalconf.connection,
                                                           phys_screen)->root);
@@ -78,9 +81,6 @@ arrange(int screen)
 
         p_delete(&qp_r);
     }
-
-    if(curlay)
-        curlay(screen);
 
     /* reset status */
     globalconf.screens[screen].need_arrange = false;
