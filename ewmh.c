@@ -555,4 +555,21 @@ ewmh_get_window_icon(xcb_window_t w)
     return icon;
 }
 
+/**
+ * Restart awesome.
+ */
+void
+ewmh_restart(void)
+{
+    client_t *c;
+
+    for(c = globalconf.clients; c; c = c->next)
+        client_unban(c);
+
+    xcb_aux_sync(globalconf.connection);
+    xcb_disconnect(globalconf.connection);
+
+    a_exec(globalconf.argv);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

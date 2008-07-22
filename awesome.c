@@ -207,6 +207,15 @@ exit_on_signal(EV_P_ ev_signal *w, int revents)
     ev_unloop(EV_A_ 1);
 }
 
+/** Function to restart aweome on some signals.
+ * \param sig the signam received, unused
+ */
+static void
+restart_on_signal(EV_P_ ev_signal *w, int revents)
+{
+    ewmh_restart();
+}
+
 /** \brief awesome xerror function.
  * There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
@@ -336,8 +345,8 @@ main(int argc, char **argv)
 
     /* register function for signals */
     ev_signal_init(&sigint, exit_on_signal, SIGINT);
-    ev_signal_init(&sigterm, &exit_on_signal, SIGTERM);
-    ev_signal_init(&sighup, &exit_on_signal, SIGHUP);
+    ev_signal_init(&sigterm, exit_on_signal, SIGTERM);
+    ev_signal_init(&sighup, restart_on_signal, SIGHUP);
     ev_signal_start(globalconf.loop, &sigint);
     ev_signal_start(globalconf.loop, &sigterm);
     ev_signal_start(globalconf.loop, &sighup);

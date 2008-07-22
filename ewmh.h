@@ -42,6 +42,7 @@ void ewmh_update_net_client_list_stacking(int);
 void ewmh_check_client_hints(client_t *);
 void ewmh_update_workarea(int);
 netwm_icon_t * ewmh_get_window_icon(xcb_window_t);
+void ewmh_restart(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
