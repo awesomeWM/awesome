@@ -670,6 +670,9 @@ client_unmanage(client_t *c)
     luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1, 0);
 
+    if(globalconf.focus->client == c)
+        client_focus(NULL, c->screen);
+
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
 
@@ -683,9 +686,6 @@ client_unmanage(client_t *c)
     stack_client_delete(c);
     for(int i = 0; i < tags->len; i++)
         untag_client(c, tags->tab[i]);
-
-    if(globalconf.focus->client == c)
-        client_focus(NULL, c->screen);
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win, ANY_MODIFIER);
     window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
