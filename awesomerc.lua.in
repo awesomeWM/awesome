@@ -186,16 +186,20 @@ for i = 1, keynumber do
                    end):add()
     keybinding({ modkey, "Shift" }, i,
                    function ()
-                       local screen = mouse.screen
-                       if tags[screen][i] then
-                           awful.client.movetotag(tags[screen][i])
+                       local sel = client.focus_get()
+                       if sel then
+                           if tags[sel.screen][i] then
+                               awful.client.movetotag(tags[sel.screen][i])
+                           end
                        end
                    end):add()
     keybinding({ modkey, "Control", "Shift" }, i,
                    function ()
-                       local screen = mouse.screen
-                       if tags[screen][i] then
-                           awful.client.toggletag(tags[screen][i])
+                       local sel = client.focus_get()
+                       if sel then
+                           if tags[sel.screen][i] then
+                               awful.client.toggletag(tags[sel.screen][i])
+                           end
                        end
                    end):add()
 end
