@@ -290,7 +290,7 @@ struct client_t
     /** Next and previous clients */
     client_t *prev, *next;
 };
-DO_ARRAY(client_t *, client, DO_NOTHING);
+DO_ARRAY(client_t *, client, DO_NOTHING)
 
 struct client_node_t
 {
@@ -322,7 +322,7 @@ struct _tag_t
     /** clients in this tag */
     client_array_t clients;
 };
-ARRAY_TYPE(tag_t *, tag);
+ARRAY_TYPE(tag_t *, tag)
 
 /** Padding type */
 typedef struct
