@@ -68,7 +68,7 @@ for s = 1, screen.count() do
         tags[s][tagnumber] = tag({ name = tagnumber, layout = layouts[1] })
         -- Add tags to screen one by one
         tags[s][tagnumber].mwfact = 0.618033988769
-        tags[s][tagnumber]:add(s)
+        tags[s][tagnumber].screen = s
     end
     -- I'm sure you want to see at least one tag.
     tags[s][1].selected = true

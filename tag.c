@@ -219,37 +219,6 @@ luaA_tag_tostring(lua_State *L)
     return 1;
 }
 
-/** Add a tag to a screen.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lparam A screen number.
- */
-static int
-luaA_tag_add(lua_State *L)
-{
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    int screen = luaL_checknumber(L, 2) - 1;
-    luaA_checkscreen(screen);
-
-    for(int i = 0; i < globalconf.screens_info->nscreen; i++)
-    {
-        tag_array_t *tags = &globalconf.screens[i].tags;
-        for(int j = 0; j < tags->len; j++)
-        {
-            tag_t *t = tags->tab[j];
-            if(*tag == t)
-                luaL_error(L, "tag already on screen %d", i + 1);
-            else if(t->screen == screen && !a_strcmp((*tag)->name, t->name))
-                luaL_error(L, "a tag with the name `%s' is already on screen %d", t->name, i + 1);
-        }
-    }
-
-    tag_append_to_screen(*tag, screen);
-    return 0;
-}
-
 /** Get all tags from a screen.
  * \param L The Lua VM state.
  *
@@ -345,6 +314,7 @@ luaA_tag_new(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield name Tag name.
+ * \lfield screen Screen number of the tag.
  * \lfield layout Tag layout.
  * \lfield selected True if the client is selected to be viewed.
  * \lfield mwfact Master width factor.
@@ -367,6 +337,11 @@ luaA_tag_index(lua_State *L)
     {
       case A_TK_NAME:
         lua_pushstring(L, (*tag)->name);
+        break;
+      case A_TK_SCREEN:
+        if((*tag)->screen == TAG_SCREEN_UNDEF)
+            return 0;
+        lua_pushnumber(L, (*tag)->screen + 1);
         break;
       case A_TK_LAYOUT:
         lua_pushstring(L, name_func_rlookup((*tag)->layout, LayoutList));
@@ -420,6 +395,24 @@ luaA_tag_newindex(lua_State *L)
         a_iso2utf8(&(*tag)->name, buf, len);
         widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
         break;
+      case A_TK_SCREEN:
+        if((*tag)->screen == TAG_SCREEN_UNDEF)
+        {
+            int screen = luaL_checknumber(L, 3) - 1;
+
+            luaA_checkscreen(screen);
+
+            tag_array_t *tags = &globalconf.screens[screen].tags;
+            for(i = 0; i < tags->len; i++)
+                if(tags->tab[i] != *tag && !a_strcmp((*tag)->name, tags->tab[i]->name))
+                    luaL_error(L, "a tag with the name `%s' is already on screen %d",
+                               (*tag)->name, screen);
+
+            tag_append_to_screen(*tag, screen);
+            return 0;
+        }
+        else
+            luaL_error(L, "tag already on screen %d", (*tag)->screen + 1);
       case A_TK_LAYOUT:
         buf = luaL_checkstring(L, 3);
         l = name_func_lookup(buf, LayoutList);
@@ -471,7 +464,6 @@ const struct luaL_reg awesome_tag_methods[] =
 };
 const struct luaL_reg awesome_tag_meta[] =
 {
-    { "add", luaA_tag_add },
     { "__index", luaA_tag_index },
     { "__newindex", luaA_tag_newindex },
     { "__eq", luaA_tag_eq },
