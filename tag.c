@@ -406,6 +406,20 @@ luaA_tag_newindex(lua_State *L)
 
     switch(a_tokenize(attr, len))
     {
+      case A_TK_NAME:
+        buf = luaL_checklstring(L, 3, &len);
+        if((*tag)->screen != TAG_SCREEN_UNDEF)
+        {
+            tag_array_t *tags = &globalconf.screens[(*tag)->screen].tags;
+            for(i = 0; i < tags->len; i++)
+                if(tags->tab[i] != *tag && !a_strcmp(buf, tags->tab[i]->name))
+                    luaL_error(L, "a tag with the name `%s' is already on screen %d",
+                               buf, (*tag)->screen);
+        }
+        p_delete(&(*tag)->name);
+        a_iso2utf8(&(*tag)->name, buf, len);
+        widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
+        break;
       case A_TK_LAYOUT:
         buf = luaL_checkstring(L, 3);
         l = name_func_lookup(buf, LayoutList);
