@@ -369,15 +369,15 @@ luaA_statusbar_new(lua_State *L)
 
     sb->name = a_strdup(buf);
 
+    sb->colors.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
-        if(xcolor_init(&sb->colors.fg, globalconf.connection,
-                       globalconf.default_screen, buf, len))
-            sb->colors.fg = globalconf.colors.fg;
+        xcolor_init(&sb->colors.fg, globalconf.connection,
+                    globalconf.default_screen, buf, len);
 
+    sb->colors.bg = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
-        if(xcolor_init(&sb->colors.bg, globalconf.connection,
-                       globalconf.default_screen, buf, len))
-            sb->colors.bg = globalconf.colors.bg;
+        xcolor_init(&sb->colors.bg, globalconf.connection,
+                    globalconf.default_screen, buf, len);
 
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     sb->align = draw_align_fromstr(buf, len);
