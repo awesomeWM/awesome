@@ -28,7 +28,7 @@
 #include "common/array.h"
 #include "keybinding.h"
 
-ARRAY_TYPE(keybinding_t *, keybinding);
+ARRAY_TYPE(keybinding_t *, keybinding)
 
 extern awesome_t globalconf;
 

@@ -29,7 +29,7 @@
     typedef struct pfx##_array_t {                                          \
         type_t *tab;                                                        \
         int len, size;                                                      \
-    } pfx##_array_t
+    } pfx##_array_t;
 
 #define ARRAY_FUNCS(type_t, pfx, dtor)                                      \
     static inline pfx##_array_t * pfx##_array_new(void) {                   \
