@@ -33,8 +33,6 @@
 
 #include "layoutgen.h"
 
-#define TAG_SCREEN_UNDEF    (-1)
-
 extern awesome_t globalconf;
 
 DO_LUA_NEW(extern, tag_t, tag, "tag", tag_ref)
@@ -73,7 +71,7 @@ tag_new(const char *name, ssize_t len, layout_t *layout, double mwfact, int nmas
     tag->layout = layout;
 
     /* to avoid error */
-    tag->screen = TAG_SCREEN_UNDEF;
+    tag->screen = SCREEN_UNDEF;
 
     tag->mwfact = mwfact;
     if(tag->mwfact <= 0 || tag->mwfact >= 1)
@@ -339,7 +337,7 @@ luaA_tag_index(lua_State *L)
         lua_pushstring(L, (*tag)->name);
         break;
       case A_TK_SCREEN:
-        if((*tag)->screen == TAG_SCREEN_UNDEF)
+        if((*tag)->screen == SCREEN_UNDEF)
             return 0;
         lua_pushnumber(L, (*tag)->screen + 1);
         break;
@@ -383,7 +381,7 @@ luaA_tag_newindex(lua_State *L)
     {
       case A_TK_NAME:
         buf = luaL_checklstring(L, 3, &len);
-        if((*tag)->screen != TAG_SCREEN_UNDEF)
+        if((*tag)->screen != SCREEN_UNDEF)
         {
             tag_array_t *tags = &globalconf.screens[(*tag)->screen].tags;
             for(i = 0; i < tags->len; i++)
@@ -396,7 +394,7 @@ luaA_tag_newindex(lua_State *L)
         widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
         break;
       case A_TK_SCREEN:
-        if((*tag)->screen == TAG_SCREEN_UNDEF)
+        if((*tag)->screen == SCREEN_UNDEF)
         {
             int screen = luaL_checknumber(L, 3) - 1;
 
@@ -449,7 +447,7 @@ luaA_tag_newindex(lua_State *L)
         return 0;
     }
 
-    if((*tag)->screen != TAG_SCREEN_UNDEF)
+    if((*tag)->screen != SCREEN_UNDEF)
         globalconf.screens[(*tag)->screen].need_arrange = true;
 
     return 0;

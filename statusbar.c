@@ -70,10 +70,9 @@ statusbar_refresh(void)
 /** Update the statusbar position. It deletes every statusbar resources and
  * create them back.
  * \param statusbar The statusbar.
- * \param position The new position.
  */
 static void
-statusbar_position_update(statusbar_t *statusbar, position_t position)
+statusbar_position_update(statusbar_t *statusbar)
 {
     statusbar_t *sb;
     area_t area;
@@ -86,7 +85,7 @@ statusbar_position_update(statusbar_t *statusbar, position_t position)
     simplewindow_delete(&statusbar->sw);
     draw_context_delete(&statusbar->ctx);
 
-    if((statusbar->position = position) == Off)
+    if(statusbar->position == Off)
         return;
 
     area = screen_area_get(statusbar->screen,
@@ -346,76 +345,6 @@ luaA_statusbar_widget_remove(lua_State *L)
     return 0;
 }
 
-/** Add the statusbar on a screen.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A stausbar
- * \lparam A screen number.
- */
-static int
-luaA_statusbar_add(lua_State *L)
-{
-    statusbar_t *s, **sb = luaA_checkudata(L, 1, "statusbar");
-    int i, screen = luaL_checknumber(L, 2) - 1;
-
-    luaA_checkscreen(screen);
-
-    /* Check for uniq name and id. */
-    for(i = 0; i < globalconf.screens_info->nscreen; i++)
-        for(s = globalconf.screens[i].statusbar; s; s = s->next)
-        {
-            if(s == *sb)
-                luaL_error(L, "this statusbar is already on screen %d",
-                           s->screen + 1);
-            if(!a_strcmp(s->name, (*sb)->name))
-                luaL_error(L, "a statusbar with that name is already on screen %d\n",
-                           s->screen + 1);
-        }
-
-    (*sb)->screen = screen;
-    (*sb)->phys_screen = screen_virttophys(screen);
-
-    statusbar_list_append(&globalconf.screens[screen].statusbar, *sb);
-    statusbar_ref(sb);
-
-    /* All the other statusbar and ourselves need to be repositioned */
-    for(s = globalconf.screens[screen].statusbar; s; s = s->next)
-        statusbar_position_update(s, s->position);
-
-    ewmh_update_workarea((*sb)->phys_screen);
-
-    return 0;
-}
-
-/** Remove the statusbar from its screen.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A statusbar
- */
-static int
-luaA_statusbar_remove(lua_State *L)
-{
-    statusbar_t *s, **sb = luaA_checkudata(L, 1, "statusbar");
-    int i;
-
-    for(i = 0; i < globalconf.screens_info->nscreen; i++)
-        for(s = globalconf.screens[i].statusbar; s; s = s->next)
-            if(s == *sb)
-            {
-                statusbar_position_update(*sb, Off);
-                statusbar_list_detach(&globalconf.screens[i].statusbar, *sb);
-                statusbar_unref(sb);
-                globalconf.screens[i].need_arrange = true;
-                return 0;
-            }
-
-    luaL_error(L, "unable to remove statusbar: not on any screen");
-
-    return 0;
-}
-
 /** Create a new statusbar.
  * \param L The Lua VM state.
  *
@@ -464,6 +393,8 @@ luaA_statusbar_new(lua_State *L)
     buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
     sb->position = position_fromstr(buf, len);
 
+    sb->screen = SCREEN_UNDEF;
+
     return luaA_statusbar_userdata_new(L, sb);
 }
 
@@ -497,6 +428,7 @@ luaA_statusbar_widget_get(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lfield screen Screen number.
  * \lfield align The alignment.
  * \lfield fg Foreground color.
  * \lfield bg Background color.
@@ -514,6 +446,11 @@ luaA_statusbar_index(lua_State *L)
 
     switch(a_tokenize(attr, len))
     {
+      case A_TK_SCREEN:
+        if((*statusbar)->screen == SCREEN_UNDEF)
+            return 0;
+        lua_pushnumber(L, (*statusbar)->screen + 1);
+        break;
       case A_TK_ALIGN:
         lua_pushstring(L, draw_align_tostr((*statusbar)->align));
         break;
@@ -533,6 +470,30 @@ luaA_statusbar_index(lua_State *L)
     return 1;
 }
 
+/** Remove a statubar from a screen.
+ * \param statusbar Statusbar to detach from screen.
+ */
+static void
+statusbar_remove(statusbar_t *statusbar)
+{
+    if(statusbar->screen != SCREEN_UNDEF)
+    {
+        position_t p;
+
+        /* save position */
+        p = statusbar->position;
+        statusbar->position = Off;
+        statusbar_position_update(statusbar);
+        /* restore position */
+        statusbar->position = p;
+
+        statusbar_list_detach(&globalconf.screens[statusbar->screen].statusbar, statusbar);
+        globalconf.screens[statusbar->screen].need_arrange = true;
+        statusbar->screen = SCREEN_UNDEF;
+        statusbar_unref(&statusbar);
+    }
+}
+
 /** Statusbar newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -544,13 +505,48 @@ luaA_statusbar_newindex(lua_State *L)
     statusbar_t *s, **statusbar = luaA_checkudata(L, 1, "statusbar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     position_t p;
+    int screen;
 
     switch(a_tokenize(attr, len))
     {
+      case A_TK_SCREEN:
+        if(lua_isnil(L, 3))
+            statusbar_remove(*statusbar);
+        else
+        {
+            screen = luaL_checknumber(L, 3) - 1;
+            
+            luaA_checkscreen(screen);
+
+            if((*statusbar)->screen == screen)
+                luaL_error(L, "this statusbar is already on screen %d",
+                           (*statusbar)->screen + 1);
+
+            /* Check for uniq name and id. */
+            for(s = globalconf.screens[screen].statusbar; s; s = s->next)
+                if(!a_strcmp(s->name, (*statusbar)->name))
+                    luaL_error(L, "a statusbar with that name is already on screen %d\n",
+                               screen + 1);
+
+            statusbar_remove(*statusbar);
+
+            (*statusbar)->screen = screen;
+            (*statusbar)->phys_screen = screen_virttophys(screen);
+
+            statusbar_list_append(&globalconf.screens[screen].statusbar, *statusbar);
+            statusbar_ref(statusbar);
+
+            /* All the other statusbar and ourselves need to be repositioned */
+            for(s = globalconf.screens[screen].statusbar; s; s = s->next)
+                statusbar_position_update(s);
+
+            ewmh_update_workarea((*statusbar)->phys_screen);
+        }
+        break;
       case A_TK_ALIGN:
         buf = luaL_checklstring(L, 3, &len);
         (*statusbar)->align = draw_align_fromstr(buf, len);
-        statusbar_position_update(*statusbar, (*statusbar)->position);
+        statusbar_position_update(*statusbar);
         break;
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
@@ -580,7 +576,7 @@ luaA_statusbar_newindex(lua_State *L)
         {
             (*statusbar)->position = p;
             for(s = globalconf.screens[(*statusbar)->screen].statusbar; s; s = s->next)
-                statusbar_position_update(s, s->position);
+                statusbar_position_update(s);
             ewmh_update_workarea((*statusbar)->phys_screen);
         }
         break;
@@ -601,8 +597,6 @@ const struct luaL_reg awesome_statusbar_meta[] =
     { "widget_add", luaA_statusbar_widget_add },
     { "widget_remove", luaA_statusbar_widget_remove },
     { "widget_get", luaA_statusbar_widget_get },
-    { "add", luaA_statusbar_add },
-    { "remove", luaA_statusbar_remove },
     { "__index", luaA_statusbar_index },
     { "__newindex", luaA_statusbar_newindex },
     { "__gc", luaA_statusbar_gc },

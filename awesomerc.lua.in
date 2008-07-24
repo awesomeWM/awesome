@@ -149,7 +149,7 @@ for s = 1, screen.count() do
     mystatusbar[s]:widget_add(mypromptbox)
     mystatusbar[s]:widget_add(mytextbox)
     mystatusbar[s]:widget_add(mylayoutbox[s])
-    mystatusbar[s]:add(s)
+    mystatusbar[s].screen = s
 end
 mystatusbar[screen.count()]:widget_add(mysystray)
 -- }}}

@@ -24,6 +24,8 @@
 
 #include "structs.h"
 
+#define SCREEN_UNDEF    (-1)
+
 area_t screen_area_get(int, statusbar_t *, padding_t *);
 area_t display_area_get(int, statusbar_t *, padding_t *);
 int screen_virttophys(int);
