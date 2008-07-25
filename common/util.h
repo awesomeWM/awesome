@@ -28,7 +28,10 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <assert.h>
+
+#ifndef __FreeBSD__
 #include <alloca.h>
+#endif
 
 #include "tokenize.h"
 
