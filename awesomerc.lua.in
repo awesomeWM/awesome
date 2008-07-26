@@ -338,6 +338,8 @@ end
 
 -- Hook function to execute when a new client appears.
 function hook_manage(c)
+    -- Set floating placement to be smart!
+    c.floating_placement = "smart"
     -- Add mouse bindings
     c:mouse_add(mouse({ }, 1, function (c) c:focus_set(); c:raise() end))
     c:mouse_add(mouse({ modkey }, 1, function (c) c:mouse_move() end))
