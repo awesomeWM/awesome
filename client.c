@@ -1199,7 +1199,8 @@ luaA_client_newindex(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield name The client title.
- * \lfield class The client class, 2 strings long.
+ * \lfield class The client class.
+ * \lfield instance The client instance.
  * \lfield pid The client PID, if available.
  * \lfield floating_placement The floating placement used for this client.
  * \lfield screen Client screen number.
@@ -1232,13 +1233,15 @@ luaA_client_index(lua_State *L)
         lua_pushstring(L, (*c)->name);
         break;
       case A_TK_CLASS:
-        if(xutil_get_class_hint(globalconf.connection, (*c)->win, &hint))
-        {
-            lua_pushstring(L, hint.res_name);
-            lua_pushstring(L, hint.res_class);
-            return 2;
-        }
-        return 0;
+        if(!xutil_get_class_hint(globalconf.connection, (*c)->win, &hint))
+             return 0;
+        lua_pushstring(L, hint.res_class);
+        break;
+      case A_TK_INSTANCE:
+        if(!xutil_get_class_hint(globalconf.connection, (*c)->win, &hint))
+            return 0;
+        lua_pushstring(L, hint.res_name);
+        break;
       case A_TK_PID:
         prop_c = xcb_get_property_unchecked(globalconf.connection, false, (*c)->win, _NET_WM_PID, CARDINAL, 0L, 1L);
         prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
