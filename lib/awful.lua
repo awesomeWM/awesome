@@ -283,9 +283,9 @@ end
 -- @para c Optional client to move, otherwise the focused one is used.
 function P.client.movetotag(target, c)
     local sel = c or client.focus_get();
+    -- Check that tag and client screen are identical
     if sel.screen ~= target.screen then return end
     local tags = tag.get(sel.screen)
-    -- Check that tags and client screen are identical
     for k, t in pairs(tags) do
         sel:tag(t, false)
     end
@@ -297,6 +297,8 @@ end
 -- @param c Optional client to toggle, otherwise the focused one is used.
 function P.client.toggletag(target, c)
     local sel = c or client.focus_get();
+    -- Check that tag and client screen are identical
+    if sel.screen ~= target.screen then return end
     local toggle = false
     if sel then
         -- Count how many tags has the client
