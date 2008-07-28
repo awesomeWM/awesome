@@ -218,7 +218,7 @@ keys
         modkey = {"Mod4"}
         key = "F2"
         command = "spawn"
-        arg = "exec find /usr/bin -type f -executable ! -empty | awesome-menu -e 'exec ' Execute:"
+        arg = "exec find /usr/bin -type f -executable ! -empty | sed 's,.*/,,' | awesome-menu -e 'exec ' Execute:"
     }
     key
     {
