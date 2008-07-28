@@ -22,6 +22,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 #include <xcb/randr.h>
+#include <xcb/xcb_icccm.h>
 
 #include "event.h"
 #include "tag.h"
@@ -521,7 +522,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
     {
         if(ev->atom == WM_TRANSIENT_FOR)
         {
-            xutil_get_transient_for_hint(connection, c->win, &trans);
+            xcb_get_wm_transient_for(connection, c->win, &trans);
             if(!c->isfloating
                && (c->isfloating = (client_getbywin(trans) != NULL)))
                 globalconf.screens[c->screen].need_arrange = true;

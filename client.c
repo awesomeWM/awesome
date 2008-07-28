@@ -23,6 +23,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
+#include <xcb/xcb_icccm.h>
 
 #include "client.h"
 #include "tag.h"
@@ -405,7 +406,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     ewmh_check_client_hints(c);
 
     /* check for transient and set tags like its parent */
-    if((rettrans = xutil_get_transient_for_hint(globalconf.connection, w, &trans))
+    if((rettrans = xcb_get_wm_transient_for(globalconf.connection, w, &trans))
        && (t = client_getbywin(trans)))
     {
         tag_array_t *tags = &globalconf.screens[c->screen].tags;

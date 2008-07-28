@@ -85,9 +85,6 @@
 #define LastExtensionError      255
 /* End of macros not defined in XCB */
 
-/* Common function defined in Xlib but not in XCB */
-bool xutil_get_transient_for_hint(xcb_connection_t *, xcb_window_t, xcb_window_t *);
-
 typedef struct
 {
     char *res_name;
