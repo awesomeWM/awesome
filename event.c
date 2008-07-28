@@ -515,7 +515,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
 
     if(ev->state == XCB_PROPERTY_DELETE)
         return 0; /* ignore */
-    if((emwin = xembed_getbywin(globalconf.embedded, ev->window)))
+    else if((emwin = xembed_getbywin(globalconf.embedded, ev->window)))
         xembed_property_update(connection, emwin);
     else if((c = client_getbywin(ev->window)))
     {
@@ -617,7 +617,19 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
                            xcb_connection_t *connection,
                            xcb_client_message_event_t *ev)
 {
-    if(ev->type == _XEMBED)
+    client_t *c;
+
+    if(ev->type == WM_CHANGE_STATE)
+    {
+        if((c = client_getbywin(ev->window))
+           && ev->format == 32
+           && ev->data.data32[0] == XCB_WM_ICONIC_STATE)
+        {
+            c->ishidden = true;
+            globalconf.screens[c->screen].need_arrange = true;
+        }
+    }
+    else if(ev->type == _XEMBED)
         return xembed_process_client_message(ev);
     else if(ev->type == _NET_SYSTEM_TRAY_OPCODE)
         return systray_process_client_message(ev);
