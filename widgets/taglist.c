@@ -53,26 +53,9 @@ DO_SLIST(taglist_drawn_area_t, taglist_drawn_area, taglist_drawn_area_delete);
 /** Taglist widget private data */
 typedef struct
 {
-    bool show_empty;
     taglist_drawn_area_t *drawn_area;
     luaA_function label;
 } taglist_data_t;
-
-/** Check if at least one client is tagged with tag number t.
- * \param t The tag to check.
- * \return True if the tag has a client, false otherwise.
- */
-static bool
-tag_isoccupied(tag_t *t)
-{
-    client_t *c;
-
-    for(c = globalconf.clients; c; c = c->next)
-        if(!c->skip && is_client_tagged(c, t))
-            return true;
-
-    return false;
-}
 
 /** Draw a taglist.
  * \param ctx The draw context.
@@ -136,8 +119,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         if(pdata[i].bg_image)
             area.width = MAX(area.width, pdata[i].bg_resize ? w->area.height : pdata[i].bg_image->width);
 
-        if(data->show_empty || tag->selected || tag_isoccupied(tag))
-            w->area.width += area.width;
+        w->area.width += area.width;
 
         area_array_append(&tda->areas, area);
     }
@@ -148,14 +130,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
 
     for(int i = 0; i < tags->len; i++)
     {
-        tag_t *tag = tags->tab[i];
         area_t *r = &tda->areas.tab[i];
-
-        if(!data->show_empty && !tag->selected && !tag_isoccupied(tag))
-        {
-            draw_parser_data_wipe(&pdata[i]);
-            continue;
-        }
 
         r->x = w->area.x + prev_width;
         prev_width += r->width;
@@ -196,8 +171,7 @@ taglist_button_press(widget_node_t *w,
                 tag_t *tag  = tags->tab[i];
                 area_t *area = &tda->areas.tab[i];
                 if(ev->event_x >= AREA_LEFT(*area)
-                   && ev->event_x < AREA_RIGHT(*area)
-                   && (data->show_empty || tag->selected || tag_isoccupied(tag)) )
+                   && ev->event_x < AREA_RIGHT(*area))
                 {
                     luaA_pushpointer(globalconf.L, object, type);
                     luaA_tag_userdata_new(globalconf.L, tag);
@@ -220,9 +194,6 @@ luaA_taglist_index(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
-      case A_TK_SHOW_EMPTY:
-        lua_pushboolean(L, d->show_empty);
-        return 1;
       case A_TK_LABEL:
         lua_rawgeti(L, LUA_REGISTRYINDEX, d->label);
         return 1;
@@ -244,9 +215,6 @@ luaA_taglist_newindex(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
-      case A_TK_SHOW_EMPTY:
-        d->show_empty = luaA_checkboolean(L, 3);
-        break;
       case A_TK_LABEL:
         luaA_registerfct(L, &d->label);
         break;
@@ -291,7 +259,6 @@ taglist_new(alignment_t align)
     w->destructor = taglist_destructor;
 
     w->data = d = p_new(taglist_data_t, 1);
-    d->show_empty = true;
     d->label = LUA_REFNIL;
 
     /* Set cache property */
