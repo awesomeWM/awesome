@@ -1194,7 +1194,7 @@ luaA_client_newindex(lua_State *L)
     return 0;
 }
 
-/** Client index.
+/** Client object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack

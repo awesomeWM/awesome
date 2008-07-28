@@ -412,7 +412,7 @@ luaA_graph_plot_data_add(lua_State *L)
     return 0;
 }
 
-/** Index function for graph widget.
+/** Graph widget.
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on stack.

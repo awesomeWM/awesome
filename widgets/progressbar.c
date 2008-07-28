@@ -505,7 +505,7 @@ luaA_progressbar_bar_data_add(lua_State *L)
     return 0;
 }
 
-/** Index function for progressbar.
+/** Progressbar widget.
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on the stack.

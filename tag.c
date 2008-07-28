@@ -307,7 +307,7 @@ luaA_tag_new(lua_State *L)
     return luaA_tag_userdata_new(L, tag);
 }
 
-/** Tag index.
+/** Tag object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack

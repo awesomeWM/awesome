@@ -424,7 +424,7 @@ luaA_statusbar_widget_get(lua_State *L)
     return 1;
 }
 
-/** Statusbar index.
+/** Statusbar object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack

@@ -283,14 +283,14 @@ tasklist_button_press(widget_node_t *w,
         }
 }
 
-/** Index function for tasklist widget.
+/** Tasklist widget.
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield show_icons Show icons near client title.
  * \lfield label Function used to get the string to display as the window title.
- * It gets the client as argument, and must return a string.
+ * It gets the client and a screen number as argument, and must return a string.
  */
 static int
 luaA_tasklist_index(lua_State *L, awesome_token_t token)

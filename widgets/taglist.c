@@ -181,10 +181,13 @@ taglist_button_press(widget_node_t *w,
             }
 }
 
-/** Index function for taglist.
+/** Taglist widget.
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield label Function used to get the string to display as the tag title.
+ * It gets the tag as argument, and must return a string.
  */
 static int
 luaA_taglist_index(lua_State *L, awesome_token_t token)

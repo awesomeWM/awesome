@@ -98,7 +98,7 @@ textbox_destructor(widget_t *w)
     p_delete(&d);
 }
 
-/** Textbox attributes.
+/** Textbox widget.
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on stack.

@@ -1065,7 +1065,7 @@ luaA_mouse_new(lua_State *L)
     return luaA_mouse_userdata_new(L, button);
 }
 
-/** Index for mouse.
+/** Mouse object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack

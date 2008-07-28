@@ -504,7 +504,7 @@ luaA_titlebar_newindex(lua_State *L)
     return 0;
 }
 
-/** Titlebar index.
+/** Titlebar object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
