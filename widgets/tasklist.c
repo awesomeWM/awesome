@@ -28,43 +28,74 @@
 
 extern awesome_t globalconf;
 
-typedef enum
+/** Link a client and a label */
+typedef struct
 {
-    ShowFocus,
-    ShowTags,
-    ShowAll,
-} showclient_t;
+    /** A client */
+    client_t *client;
+    /** The client label */
+    char *label;
+    /** The client label len */
+    size_t label_len;
+} client_label_t;
+
+/** Delete a client label.
+ * \param l The client label.
+ */
+static void
+client_label_wipe(client_label_t *l)
+{
+    p_delete(&l->label);
+}
+
+DO_ARRAY(client_label_t, client_label, client_label_wipe)
+
+typedef struct tasklist_object_data_t tasklist_object_data_t;
+/** Link an object with a client label array and other infos */
+struct tasklist_object_data_t
+{
+    /** The object */
+    void *object;
+    /** The box width for each client */
+    int box_width;
+    /** The client label array for the object */
+    client_label_array_t client_labels;
+    /** This is a list */
+    tasklist_object_data_t *prev, *next;
+};
+
+static void
+tasklist_object_data_delete(tasklist_object_data_t **l)
+{
+    client_label_array_wipe(&(*l)->client_labels);
+    p_delete(l);
+}
+
+DO_SLIST(tasklist_object_data_t, tasklist_object_data, tasklist_object_data_delete)
 
 /** The tasklist private data structure. */
 typedef struct
 {
-    showclient_t show;
     bool show_icons;
     luaA_function label;
+    tasklist_object_data_t *objects_data;
 } tasklist_data_t;
 
-/** Check if a client is visible according to the showclient type paramater.
- * \param c The client.
- * \param screen The screen number.
- * \param show The show parameters.
- * \return True if the client is visible, false otherwise.
+/** Get an object data by its object.
+ * \param od The object data list.
+ * \param p The object.
+ * \return A object data or NULL if not found.
  */
-static inline bool
-tasklist_isvisible(client_t *c, int screen, showclient_t show)
+static tasklist_object_data_t *
+tasklist_object_data_getbyobj(tasklist_object_data_t *od, void *p)
 {
-    if(c->skip || c->skiptb)
-        return false;
+    tasklist_object_data_t *o;
 
-    switch(show)
-    {
-      case ShowAll:
-        return (c->screen == screen);
-      case ShowTags:
-        return client_isvisible(c, screen);
-      case ShowFocus:
-        return (c == focus_get_current_client(screen));
-    }
-    return false;
+    for(o = od; o; o = o->next)
+        if(o->object == p)
+            return o;
+
+    return NULL;
 }
 
 /** Draw a tasklist widget.
@@ -78,122 +109,138 @@ tasklist_isvisible(client_t *c, int screen, showclient_t show)
 static int
 tasklist_draw(draw_context_t *ctx, int screen,
               widget_node_t *w,
-              int offset, int used, void *p __attribute__ ((unused)))
+              int offset, int used, void *p)
 {
     client_t *c;
     tasklist_data_t *d = w->widget->data;
     area_t area;
-    const char *text;
-    int n = 0, i = 0, box_width = 0, icon_width = 0, box_width_rest = 0;
+    int i = 0, icon_width = 0, box_width_rest = 0;
     netwm_icon_t *icon;
     draw_image_t *image;
     draw_parser_data_t pdata, *parser_data;
-    size_t len;
+    tasklist_object_data_t *odata;
 
     if(used >= ctx->width)
         return (w->area.width = 0);
 
-    for(c = globalconf.clients; c; c = c->next)
-        if(tasklist_isvisible(c, screen, d->show))
-            n++;
+    if(!(odata = tasklist_object_data_getbyobj(d->objects_data, p)))
+    {
+        /** \todo delete this when the widget is removed from the object */
+        odata = p_new(tasklist_object_data_t, 1);
+        odata->object = p;
+        tasklist_object_data_list_push(&d->objects_data, odata);
+    }
 
-    if(!n)
+    client_label_array_wipe(&odata->client_labels);
+    client_label_array_init(&odata->client_labels);
+
+    for(c = globalconf.clients; c; c = c->next)
+        if(!c->skip && !c->skiptb)
+        {
+            /* push client */
+            luaA_client_userdata_new(globalconf.L, c);
+            /* push screen we're at */
+            lua_pushnumber(globalconf.L, screen + 1);
+            /* call label function with client as argument and wait for one
+             * result */
+            luaA_dofunction(globalconf.L, d->label, 2, 1);
+
+            /* If we got a string as returned value, we got something to write:
+             * a label. So we store it in a client_label_t structure, pushed
+             * into the client_label_array_t which is owned by the object. */
+            if(lua_isstring(globalconf.L, -1))
+            {
+                client_label_t cl;
+                cl.client = c;
+                cl.label = a_strdup(lua_tolstring(globalconf.L, -1, &cl.label_len));
+                client_label_array_append(&odata->client_labels, cl);
+            }
+
+            lua_pop(globalconf.L, 1);
+        }
+
+    if(!odata->client_labels.len)
         return (w->area.width = 0);
 
-    box_width = (ctx->width - used) / n;
+    odata->box_width = (ctx->width - used) / odata->client_labels.len;
     /* compute how many pixel we left empty */
-    box_width_rest = (ctx->width - used) % n;
+    box_width_rest = (ctx->width - used) % odata->client_labels.len;
 
     w->area.x = widget_calculate_offset(ctx->width,
                                         0, offset, w->widget->align);
 
     w->area.y = 0;
 
-    for(c = globalconf.clients; c; c = c->next)
-        if(tasklist_isvisible(c, screen, d->show))
+    for(i = 0; i < odata->client_labels.len; i++)
+    {
+        icon_width = 0;
+
+        if(d->show_icons)
         {
-            icon_width = 0;
+            draw_parser_data_init(&pdata);
 
-            /* push client */
-            luaA_client_userdata_new(globalconf.L, c);
-            /* call label function with client as argument and wait for one
-             * result */
-            luaA_dofunction(globalconf.L, d->label, 1, 1);
+            pdata.connection = ctx->connection;
+            pdata.phys_screen = ctx->phys_screen;
 
-            if(lua_isstring(globalconf.L, -1))
-                text = lua_tolstring(globalconf.L, -1, &len);
-            else
+            /* Actually look for the proper background color, since
+             * otherwise the background statusbar color is used instead */
+            if(draw_text_markup_expand(&pdata,
+                                       odata->client_labels.tab[i].label,
+                                       odata->client_labels.tab[i].label_len))
             {
-                text = NULL;
-                len = 0;
-            }
-
-            lua_pop(globalconf.L, 1);
-
-            if(d->show_icons)
-            {
-                draw_parser_data_init(&pdata);
-
-                pdata.connection = ctx->connection;
-                pdata.phys_screen = ctx->phys_screen;
-
-                /* Actually look for the proper background color, since
-                 * otherwise the background statusbar color is used instead */
-                if(draw_text_markup_expand(&pdata, text, len))
+                parser_data = &pdata;
+                if(pdata.has_bg_color)
                 {
-                    parser_data = &pdata;
-                    if(pdata.has_bg_color)
-                    {
-                        /* draw a background for icons */
-                        area.x = w->area.x + box_width * i;
-                        area.y = w->area.y;
-                        area.height = ctx->height;
-                        area.width = box_width;
-                        draw_rectangle(ctx, area, 1.0, true, &pdata.bg_color);
-                    }
-                }
-                else
-                    parser_data = NULL;
-
-
-                if((image = draw_image_new(c->icon_path)))
-                {
-                    icon_width = ((double) ctx->height / (double) image->height) * image->width;
-                    draw_image(ctx, w->area.x + box_width * i,
-                               w->area.y, ctx->height, image);
-                    draw_image_delete(&image);
-                }
-
-                if(!icon_width && (icon = ewmh_get_window_icon(c->win)))
-                {
-                    icon_width = ((double) ctx->height / (double) icon->height)
-                        * icon->width;
-                    draw_image_from_argb_data(ctx,
-                                              w->area.x + box_width * i,
-                                              w->area.y,
-                                              icon->width, icon->height,
-                                              ctx->height, icon->image);
-                    p_delete(&icon->image);
-                    p_delete(&icon);
+                    /* draw a background for icons */
+                    area.x = w->area.x + odata->box_width * i;
+                    area.y = w->area.y;
+                    area.height = ctx->height;
+                    area.width = odata->box_width;
+                    draw_rectangle(ctx, area, 1.0, true, &pdata.bg_color);
                 }
             }
             else
                 parser_data = NULL;
 
-            area.x = w->area.x + icon_width + box_width * i;
-            area.y = w->area.y;
-            area.width = box_width - icon_width;
-            area.height = ctx->height;
+            if((image = draw_image_new(odata->client_labels.tab[i].client->icon_path)))
+            {
+                icon_width = ((double) ctx->height / (double) image->height) * image->width;
+                draw_image(ctx, w->area.x + odata->box_width * i,
+                           w->area.y, ctx->height, image);
+                draw_image_delete(&image);
+            }
 
-            /* if we're on last elem, it has the last pixels left */
-            if(i == n - 1)
-                area.width += box_width_rest;
-
-            draw_text(ctx, globalconf.font, area, text, len, parser_data);
-            draw_parser_data_wipe(parser_data);
-
-            i++;
+            if(!icon_width && (icon = ewmh_get_window_icon(odata->client_labels.tab[i].client->win)))
+            {
+                icon_width = ((double) ctx->height / (double) icon->height)
+                    * icon->width;
+                draw_image_from_argb_data(ctx,
+                                          w->area.x + odata->box_width * i,
+                                          w->area.y,
+                                          icon->width, icon->height,
+                                          ctx->height, icon->image);
+                p_delete(&icon->image);
+                p_delete(&icon);
+            }
         }
+        else
+            parser_data = NULL;
+
+        area.x = w->area.x + icon_width + odata->box_width * i;
+        area.y = w->area.y;
+        area.width = odata->box_width - icon_width;
+        area.height = ctx->height;
+
+        /* if we're on last elem, it has the last pixels left */
+        if(i == odata->client_labels.len - 1)
+            area.width += box_width_rest;
+
+        draw_text(ctx, globalconf.font, area,
+                  odata->client_labels.tab[i].label,
+                  odata->client_labels.tab[i].label_len,
+                  parser_data);
+        draw_parser_data_wipe(parser_data);
+    }
 
     w->area.width = ctx->width - used;
     w->area.height = ctx->height;
@@ -216,39 +263,24 @@ tasklist_button_press(widget_node_t *w,
                       awesome_type_t type)
 {
     button_t *b;
-    client_t *c;
     tasklist_data_t *d = w->widget->data;
-    int n = 0, box_width = 0, i, ci = 0;
+    int ci = 0;
+    tasklist_object_data_t *odata;
 
-    for(c = globalconf.clients; c; c = c->next)
-        if(tasklist_isvisible(c, screen, d->show))
-            n++;
+    odata = tasklist_object_data_getbyobj(d->objects_data, object);
 
-    if(!n)
+    if(!odata || !odata->client_labels.len)
         return;
 
-    box_width = w->area.width / n;
+    ci = (ev->event_x - w->area.x) / odata->box_width;
 
-    ci = (ev->event_x - w->area.x) / box_width;
-
-    /* found first visible client */
-    for(c = globalconf.clients;
-        c && !tasklist_isvisible(c, screen, d->show);
-        c = c->next);
-    /* found ci-th visible client */
-    for(i = 0; c ; c = c->next)
-        if(tasklist_isvisible(c, screen, d->show))
-            if(i++ >= ci)
-                break;
-
-    if(c)
-        for(b = w->widget->buttons; b; b = b->next)
-            if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
-            {
-                luaA_pushpointer(globalconf.L, object, type);
-                luaA_client_userdata_new(globalconf.L, c);
-                luaA_dofunction(globalconf.L, b->fct, 2, 0);
-            }
+    for(b = w->widget->buttons; b; b = b->next)
+        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
+        {
+            luaA_pushpointer(globalconf.L, object, type);
+            luaA_client_userdata_new(globalconf.L, odata->client_labels.tab[ci].client);
+            luaA_dofunction(globalconf.L, b->fct, 2, 0);
+        }
 }
 
 /** Index function for tasklist widget.
@@ -257,7 +289,6 @@ tasklist_button_press(widget_node_t *w,
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield show_icons Show icons near client title.
- * \lfield show Which windows to show: all, tags, focus.
  * \lfield label Function used to get the string to display as the window title.
  * It gets the client as argument, and must return a string.
  */
@@ -271,22 +302,6 @@ luaA_tasklist_index(lua_State *L, awesome_token_t token)
     {
       case A_TK_SHOW_ICONS:
         lua_pushboolean(L, d->show_icons);
-        return 1;
-      case A_TK_SHOW:
-        switch(d->show)
-        {
-          case ShowTags:
-            lua_pushliteral(L, "tags");
-            break;
-          case ShowFocus:
-            lua_pushliteral(L, "focus");
-            break;
-          case ShowAll:
-            lua_pushliteral(L, "all");
-            break;
-          default:
-            return 0;
-        }
         return 1;
       case A_TK_LABEL:
         lua_rawgeti(L, LUA_REGISTRYINDEX, d->label);
@@ -304,32 +319,13 @@ luaA_tasklist_index(lua_State *L, awesome_token_t token)
 static int
 luaA_tasklist_newindex(lua_State *L, awesome_token_t token)
 {
-    size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     tasklist_data_t *d = (*widget)->data;
-    const char *buf;
 
     switch(token)
     {
       case A_TK_SHOW_ICONS:
         d->show_icons = luaA_checkboolean(L, 3);
-        break;
-      case A_TK_SHOW:
-        if((buf = luaL_checklstring(L, 3, &len)))
-            switch(a_tokenize(buf, len))
-            {
-              case A_TK_TAGS:
-                d->show = ShowTags;
-                break;
-              case A_TK_FOCUS:
-                d->show = ShowFocus;
-                break;
-              case A_TK_ALL:
-                d->show = ShowAll;
-                break;
-              default:
-                break;
-            }
         break;
       case A_TK_LABEL:
         luaA_registerfct(L, &d->label);
@@ -350,6 +346,7 @@ static void
 tasklist_destructor(widget_t *widget)
 {
     tasklist_data_t *d = widget->data;
+    tasklist_object_data_list_wipe(&d->objects_data);
     p_delete(&d);
 }
 
@@ -372,9 +369,8 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     w->newindex = luaA_tasklist_newindex;
     w->data = d = p_new(tasklist_data_t, 1);
     w->destructor = tasklist_destructor;
-    
+
     d->show_icons = true;
-    d->show = ShowTags;
     d->label = LUA_REFNIL;
 
     /* Set cache property */
