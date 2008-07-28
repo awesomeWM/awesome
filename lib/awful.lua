@@ -283,7 +283,9 @@ end
 -- @para c Optional client to move, otherwise the focused one is used.
 function P.client.movetotag(target, c)
     local sel = c or client.focus_get();
+    if sel.screen ~= target.screen then return end
     local tags = tag.get(sel.screen)
+    -- Check that tags and client screen are identical
     for k, t in pairs(tags) do
         sel:tag(t, false)
     end
