@@ -720,7 +720,7 @@ client_updatewmhints(client_t *c)
     if((wmh = xcb_get_wm_hints(globalconf.connection, c->win)))
     {
         wm_hints_flags = xcb_wm_hints_get_flags(wmh);
-        if((c->isurgent = (wm_hints_flags & XCB_WM_X_URGENCY_HINT)))
+        if((c->isurgent = xcb_wm_hints_get_urgency(wmh)))
         {
             /* execute hook */
             luaA_client_userdata_new(globalconf.L, c);
