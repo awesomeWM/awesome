@@ -211,21 +211,21 @@ keys
         modkey = {"Mod4"}
         key = "F1"
         command = "spawn"
-        arg = "xterm -e \"man `for i in /usr/share/man/man?;do ls $i; done | cut -d. -f1 | awesome-menu 'See manual page for:'`\""
+        arg = "exec xterm -e \"man `for i in /usr/share/man/man?;do ls $i; done | cut -d. -f1 | awesome-menu 'See manual page for:'`\""
     }
     key
     {
         modkey = {"Mod4"}
         key = "F2"
         command = "spawn"
-        arg = "find /usr/bin -type f -executable ! -empty | awesome-menu -e 'exec ' Execute:"
+        arg = "exec find /usr/bin -type f -executable ! -empty | awesome-menu -e 'exec ' Execute:"
     }
     key
     {
         modkey = {"Mod4"}
         key = "F3"
         command = "spawn"
-        arg = "xterm -e \"ssh `cut -d' ' -f1 ~/.ssh/known_hosts | cut -d, -f1 | awesome-menu 'ssh to:'`\""
+        arg = "exec xterm -e \"ssh `cut -d' ' -f1 ~/.ssh/known_hosts | cut -d, -f1 | awesome-menu 'ssh to:'`\""
     }
     key
     {
