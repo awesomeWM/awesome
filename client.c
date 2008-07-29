@@ -1214,6 +1214,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield border_color The client border color.
  * \lfield coords The client coordinates.
  * \lfield titlebar The client titlebar.
+ * \lfield urgent The client urgent state.
  */
 static int
 luaA_client_index(lua_State *L)
@@ -1296,6 +1297,9 @@ luaA_client_index(lua_State *L)
         if((*c)->titlebar)
             return luaA_titlebar_userdata_new(globalconf.L, (*c)->titlebar);
         return 0;
+      case A_TK_URGENT:
+        lua_pushboolean(L, (*c)->isurgent);
+        break;
       default:
         return 0;
     }
