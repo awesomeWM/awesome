@@ -145,6 +145,19 @@ function P.client.moveresize(x, y, w, h, c)
     sel.coords = coords
 end
 
+--- Maximize a client to use the full workspace area.
+-- @param c A client, or the focused one if nil.
+function P.client.maximize(c)
+    local sel = c or client.focus_get()
+    if sel then
+        sel.floating = true
+        local ws = screen.workspace_get(sel.screen)
+        ws.width = ws.width - 2 * sel.border_width
+        ws.height = ws.height - 2 * sel.border_width
+        sel.coords = ws
+    end
+end
+
 --- Give the focus to a screen, and move pointer.
 -- @param Screen number.
 function P.screen.focus(i)

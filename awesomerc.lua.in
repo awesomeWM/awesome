@@ -195,6 +195,7 @@ keybinding({ modkey, "Control" }, "r", awesome.restart):add()
 keybinding({ modkey, "Shift" }, "q", awesome.quit):add()
 
 -- Client manipulation
+keybinding({ modkey }, "m", awful.client.maximize):add()
 keybinding({ modkey, "Shift" }, "c", function () client.focus_get():kill() end):add()
 keybinding({ modkey }, "j", function () awful.client.focus(1); client.focus_get():raise() end):add()
 keybinding({ modkey }, "k", function () awful.client.focus(-1);  client.focus_get():raise() end):add()
