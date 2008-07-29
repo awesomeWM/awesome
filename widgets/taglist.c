@@ -57,6 +57,18 @@ typedef struct
     luaA_function label;
 } taglist_data_t;
 
+static taglist_drawn_area_t *
+taglist_drawn_area_getbyobj(taglist_drawn_area_t *list, void *p)
+{
+    taglist_drawn_area_t *t;
+    
+    for(t = list; t; t = t->next)
+        if(t->object == p)
+            return t;
+
+    return NULL;
+}
+
 /** Draw a taglist.
  * \param ctx The draw context.
  * \param screen The screen we're drawing for.
@@ -86,12 +98,9 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
 
     /* Lookup for our taglist_drawn_area.
      * This will be used to store area where we draw tag list for each object.  */
-    for(tda = data->drawn_area; tda && tda->object != object; tda = tda->next);
-
-    /* Oh, we did not find a drawn area for our object. First time? */
-    if(!tda)
+    if(!(tda = taglist_drawn_area_getbyobj(data->drawn_area, object)))
     {
-        /** \todo delete this when the widget is removed from the object */
+        /* Oh, we did not find a drawn area for our object. First time? */
         tda = p_new(taglist_drawn_area_t, 1);
         tda->object = object;
         taglist_drawn_area_list_push(&data->drawn_area, tda);
@@ -163,23 +172,22 @@ taglist_button_press(widget_node_t *w,
     taglist_drawn_area_t *tda;
 
     /* Find the good drawn area list */
-    for(tda = data->drawn_area; tda && tda->object != object; tda = tda->next);
-
-    for(b = w->widget->buttons; b; b = b->next)
-        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
-            for(int i = 0; i < MIN(tags->len, tda->areas.len); i++)
-            {
-                tag_t *tag  = tags->tab[i];
-                area_t *area = &tda->areas.tab[i];
-                if(ev->event_x >= AREA_LEFT(*area)
-                   && ev->event_x < AREA_RIGHT(*area))
+    if((tda = taglist_drawn_area_getbyobj(data->drawn_area, object)))
+        for(b = w->widget->buttons; b; b = b->next)
+            if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
+                for(int i = 0; i < MIN(tags->len, tda->areas.len); i++)
                 {
-                    luaA_pushpointer(globalconf.L, object, type);
-                    luaA_tag_userdata_new(globalconf.L, tag);
-                    luaA_dofunction(globalconf.L, b->fct, 2, 0);
-                    return;
+                    tag_t *tag  = tags->tab[i];
+                    area_t *area = &tda->areas.tab[i];
+                    if(ev->event_x >= AREA_LEFT(*area)
+                       && ev->event_x < AREA_RIGHT(*area))
+                    {
+                        luaA_pushpointer(globalconf.L, object, type);
+                        luaA_tag_userdata_new(globalconf.L, tag);
+                        luaA_dofunction(globalconf.L, b->fct, 2, 0);
+                        return;
+                    }
                 }
-            }
 }
 
 /** Taglist widget.
