@@ -77,22 +77,6 @@ typedef int luaA_function;
                      lua_tostring(L, -1)); \
     } while(0)
 
-#define luaA_dofunction(L, f, n, r) \
-    do { \
-        if(f != LUA_REFNIL) \
-        { \
-            lua_rawgeti(L, LUA_REGISTRYINDEX, f); \
-            if(n) \
-                lua_insert(L, - (n + 1)); \
-            if(lua_pcall(L, n, r, 0)) \
-            { \
-                warn("error running function: %s", \
-                     lua_tostring(L, -1)); \
-                lua_pop(L, 1); \
-            } \
-        } \
-    } while(0)
-
 #define luaA_checktable(L, n) \
     do { \
         if(!lua_istable(L, n)) \
@@ -192,6 +176,13 @@ luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
     return 0;
 }
 
+/** Register a function.
+ * \param L The Lua stack.
+ * \param fct A luaA_function address: it will be filled with the luaA_function
+ * registered. If the adresse point to an already registered function, it will
+ * be unregistered.
+ * \return Always 0.
+ */
 static inline int
 luaA_registerfct(lua_State *L, luaA_function *fct)
 {
@@ -200,6 +191,33 @@ luaA_registerfct(lua_State *L, luaA_function *fct)
         luaL_unref(L, LUA_REGISTRYINDEX, *fct);
     *fct = luaL_ref(L, LUA_REGISTRYINDEX);
     return 0;
+}
+
+/** Execute an Lua function.
+ * \param L The Lua stack.
+ * \param f The Lua function to execute.
+ * \param nargs The number of arguments for the Lua function.
+ * \param nret The number of returned value from the Lua function.
+ * \return True on no error, false otherwise.
+ */
+static inline bool
+luaA_dofunction(lua_State *L, luaA_function f, int nargs, int nret)
+{
+    if(f != LUA_REFNIL)
+    {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, f);
+        if(nargs)
+            lua_insert(L, - (nargs + 1));
+        if(lua_pcall(L, nargs, nret, 0))
+        {
+            warn("error running function: %s",
+                 lua_tostring(L, -1));
+            lua_pop(L, 1);
+            return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 void luaA_init(void);
