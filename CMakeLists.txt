@@ -23,6 +23,7 @@ include_directories(
 
 set(AWE_LUA_FILES
     ${SOURCE_DIR}/lib/tabulous.lua)
+set(awful_lua ${BUILD_DIR}/lib/awful.lua)
 
 set(AWE_CONF_FILE_DEFAULT ${BUILD_DIR}/awesomerc.lua)
 set(AWE_CONF_FILE rc.lua)
@@ -302,7 +303,7 @@ if(GENERATE_LUADOC)
     # }}}
 
     # dont include full path names in documentation
-    foreach(filename ${AWE_LUA_FILES} ${capi_lua})
+    foreach(filename ${AWE_LUA_FILES} ${capi_lua} ${awful_lua})
         get_filename_component(filename ${filename} NAME)
         set(luadoc_srcs ${luadoc_srcs} ${filename})
     endforeach()
@@ -310,7 +311,7 @@ if(GENERATE_LUADOC)
     add_custom_target(luadoc ALL
         COMMAND ${LUADOC_EXECUTABLE} ${luadoc_srcs} -d ${BUILD_DIR}/luadoc
         WORKING_DIRECTORY ${BUILD_DIR}/lib
-        DEPENDS ${AWE_LUA_FILES} ${capi_lua})
+        DEPENDS ${AWE_LUA_FILES} ${capi_lua} ${awful_lua})
 endif()
 # }}}
 
@@ -327,6 +328,15 @@ if(LUAC_EXECUTABLE)
 
         set(AWE_LUAC_FILES ${AWE_LUAC_FILES} ${luacfile})
     endforeach()
+
+    # Special case for awful.lua
+    string(REGEX REPLACE ".lua\$" ".luac" luacfile ${awful_lua})
+    add_custom_command(
+        COMMAND ${LUAC_EXECUTABLE} -o ${luacfile} ${awful_lua}
+        OUTPUT ${luacfile}
+        DEPENDS ${awful_lua})
+
+    set(AWE_LUAC_FILES ${AWE_LUAC_FILES} ${luacfile})
 
     if(NOT EXISTS ${BUILD_DIR}/lib)
         FILE(MAKE_DIRECTORY ${BUILD_DIR}/lib)
@@ -346,7 +356,7 @@ endif()
 
 # {{{ Installation
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
-install(FILES ${AWE_LUA_FILES} ${AWE_LUAC_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
+install(FILES ${AWE_LUA_FILES} ${awful_lua} ${AWE_LUAC_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
 install(FILES ${AWE_CONF_FILE_DEFAULT} DESTINATION ${AWESOME_SYSCONFDIR}
         RENAME ${AWE_CONF_FILE})
 if(GENERATE_MANPAGES)
