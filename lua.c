@@ -129,6 +129,7 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
 /** Set the screen padding. This can be used to define margin around the
  * screen. awesome will not use this area.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  *
  * \luastack
  * \lparam A screen number.
@@ -156,6 +157,7 @@ luaA_screen_padding_set(lua_State *L)
 
 /** Get the screen count.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  *
  * \luastack
  * \lreturn The screen count, at least 1.
@@ -169,6 +171,7 @@ luaA_screen_count(lua_State *L)
 
 /** Give the focus to a screen.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  *
  * \luastack
  * \lparam A screen number
@@ -183,6 +186,13 @@ luaA_screen_focus(lua_State *L)
     return 0;
 }
 
+/** Return screen coordinates.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A screen number.
+ * \lreturn A table with the screen geometry: x, y, width and height.
+ */
 static int
 luaA_screen_coords_get(lua_State *L)
 {
@@ -200,9 +210,38 @@ luaA_screen_coords_get(lua_State *L)
     return 1;
 }
 
+/** Return the geometry of the workspace, i.e. where applications live.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A screen number.
+ * \lreturn A table with the workspace geometry.
+ */
+static int
+luaA_screen_workspace_get(lua_State *L)
+{
+    area_t g;
+    int screen = luaL_checknumber(L, 1) - 1;
+    luaA_checkscreen(screen);
+    g = screen_area_get(screen,
+                        globalconf.screens[screen].statusbar,
+                        &globalconf.screens[screen].padding);
+    lua_newtable(L);
+    lua_pushnumber(L, g.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, g.y);
+    lua_setfield(L, -2, "y");
+    lua_pushnumber(L, g.width);
+    lua_setfield(L, -2, "width");
+    lua_pushnumber(L, g.height);
+    lua_setfield(L, -2, "height");
+    return 1;
+}
+
 /** Set the function called each time a client gets focus. This function is
  * called with the client object as argument.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  *
  * \luastack
  * \lparam A function to call each time a client gets focus.
@@ -435,6 +474,7 @@ luaA_init(void)
     {
         { "padding_set", luaA_screen_padding_set },
         { "coords_get", luaA_screen_coords_get },
+        { "workspace_get", luaA_screen_workspace_get },
         { "count", luaA_screen_count },
         { "focus", luaA_screen_focus },
         { NULL, NULL }
