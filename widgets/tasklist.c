@@ -143,20 +143,21 @@ tasklist_draw(draw_context_t *ctx, int screen,
             lua_pushnumber(globalconf.L, screen + 1);
             /* call label function with client as argument and wait for one
              * result */
-            luaA_dofunction(globalconf.L, d->label, 2, 1);
-
-            /* If we got a string as returned value, we got something to write:
-             * a label. So we store it in a client_label_t structure, pushed
-             * into the client_label_array_t which is owned by the object. */
-            if(lua_isstring(globalconf.L, -1))
+            if(luaA_dofunction(globalconf.L, d->label, 2, 1))
             {
-                client_label_t cl;
-                cl.client = c;
-                cl.label = a_strdup(lua_tolstring(globalconf.L, -1, &cl.label_len));
-                client_label_array_append(&odata->client_labels, cl);
-            }
+                /* If we got a string as returned value, we got something to write:
+                 * a label. So we store it in a client_label_t structure, pushed
+                 * into the client_label_array_t which is owned by the object. */
+                if(lua_isstring(globalconf.L, -1))
+                {
+                    client_label_t cl;
+                    cl.client = c;
+                    cl.label = a_strdup(lua_tolstring(globalconf.L, -1, &cl.label_len));
+                    client_label_array_append(&odata->client_labels, cl);
+                }
 
-            lua_pop(globalconf.L, 1);
+                lua_pop(globalconf.L, 1);
+            }
         }
 
     if(!odata->client_labels.len)

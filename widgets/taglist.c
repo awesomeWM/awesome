@@ -105,23 +105,24 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         tag_t *tag = tags->tab[i];
 
         luaA_tag_userdata_new(globalconf.L, tag);
-        luaA_dofunction(globalconf.L, data->label, 1, 1);
+        if(luaA_dofunction(globalconf.L, data->label, 1, 1))
+        {
+            if(lua_isstring(globalconf.L, -1))
+                text[i] = lua_tolstring(globalconf.L, -1, &len[i]);
 
-        if(lua_isstring(globalconf.L, -1))
-            text[i] = lua_tolstring(globalconf.L, -1, &len[i]);
+            lua_pop(globalconf.L, 1);
 
-        lua_pop(globalconf.L, 1);
+            draw_parser_data_init(&pdata[i]);
+            area = draw_text_extents(ctx->connection, ctx->phys_screen,
+                                     globalconf.font, text[i], len[i], &pdata[i]);
 
-        draw_parser_data_init(&pdata[i]);
-        area = draw_text_extents(ctx->connection, ctx->phys_screen,
-                                 globalconf.font, text[i], len[i], &pdata[i]);
+            if(pdata[i].bg_image)
+                area.width = MAX(area.width, pdata[i].bg_resize ? w->area.height : pdata[i].bg_image->width);
 
-        if(pdata[i].bg_image)
-            area.width = MAX(area.width, pdata[i].bg_resize ? w->area.height : pdata[i].bg_image->width);
+            w->area.width += area.width;
 
-        w->area.width += area.width;
-
-        area_array_append(&tda->areas, area);
+            area_array_append(&tda->areas, area);
+        }
     }
 
     /* Now that we have widget width we can compute widget x coordinate */
