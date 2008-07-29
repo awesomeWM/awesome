@@ -324,7 +324,7 @@ function hook_manage(c)
     -- Set floating placement to be smart!
     c.floating_placement = "smart"
     -- Add a titlebar
-    c.titlebar = awful.titlebar.new({ fg = fg, bg = bg })
+    c.titlebar = awful.titlebar.new({ fg = fg, bg = bg, modkey = modkey })
     awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
     -- Add mouse bindings
     c:mouse_add(mouse({ }, 1, function (c) c:focus_set(); c:raise() end))

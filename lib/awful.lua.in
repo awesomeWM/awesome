@@ -843,12 +843,17 @@ end
 -- @param args Arguments.
 -- fg: the foreground color,
 -- bg: the background color.
--- text_align: the title text alignment.
 -- @return A brand new titlebar.
 function P.titlebar.new(args)
-    local tb = titlebar(args)
+    local targs = {}
+    if args.fg then targs.fg = args.fg end
+    if args.bg then targs.bg = args.bg end
+    local tb = titlebar(targs)
     tb:widget_add(widget({ type = "appicon", name = "appicon", align = "left" }))
-    tb:widget_add(widget({ type = "textbox", name = "title" }))
+    local title = widget({ type = "textbox", name = "title", align = "flex" })
+    title:mouse_add(mouse({ args.modkey }, 1, function (t) t:client_get():mouse_move() end))
+    title:mouse_add(mouse({ args.modkey }, 3, function (t) t:client_get():mouse_resize() end))
+    tb:widget_add(title)
     local close_button= widget({ type = "textbox", name = "close", align = "right" })
     close_button:mouse_add(mouse({ }, 1, function (t) t:client_get():kill() end))
     tb:widget_add(close_button)
