@@ -771,10 +771,22 @@ end
 -- @return A string to print.
 function P.widget.taglist.label.all(t, bg_focus, fg_focus)
     local text = ""
-    if t.selected then
-        text = "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'>"..t.name.."</span> "
+    local background = ""
+    local sel = client.focus_get()
+    if sel and sel:istagged(t) then
+        background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
     else
-        text = " "..t.name.." "
+        for k, c in pairs(client.get()) do
+            if c:istagged(t) then
+                background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarew.png\""
+                break
+            end
+        end
+    end
+    if t.selected then
+        text = "<bg "..background.." color='"..bg_focus.."'/> <span color='"..fg_focus.."'>"..P.escape(t.name).."</span> "
+    else
+        text = " <bg "..background.." />"..P.escape(t.name).." "
     end
     return text
 end
