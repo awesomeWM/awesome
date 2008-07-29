@@ -506,6 +506,10 @@ ewmh_check_client_hints(client_t *c)
     p_delete(&reply);
 }
 
+/** Get NET_WM_ICON.
+ * \param w The window.
+ * \return A netwm_icon_t structure which must be deleted after usage.
+ */
 netwm_icon_t *
 ewmh_get_window_icon(xcb_window_t w)
 {

@@ -219,8 +219,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
                                           w->area.y,
                                           icon->width, icon->height,
                                           ctx->height, icon->image);
-                p_delete(&icon->image);
-                p_delete(&icon);
+                netwm_icon_delete(&icon);
             }
         }
         else

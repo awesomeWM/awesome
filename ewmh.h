@@ -31,6 +31,13 @@ typedef struct
     unsigned char *image;
 } netwm_icon_t;
 
+static inline void
+netwm_icon_delete(netwm_icon_t **i)
+{
+    p_delete(&(*i)->image);
+    p_delete(i);
+}
+
 void ewmh_init(int);
 void ewmh_update_net_client_list(int);
 void ewmh_update_net_numbers_of_desktop(int);
