@@ -45,6 +45,7 @@ P.client = {}
 P.tag = {}
 P.widget = {}
 P.widget.taglist = {}
+P.widget.taglist.label = {}
 P.widget.tasklist = {}
 P.widget.tasklist.label = {}
 
@@ -758,14 +759,14 @@ function P.unescape(text)
     return text
 end
 
---- Return labels for a taglist widget.
+--- Return labels for a taglist widget with all tag from screen.
 -- It returns the tag name and set a special
 -- foreground and background color for selected tags.
 -- @param t The tag.
 -- @param bg_focus The background color for selected tag.
 -- @param fg_focus The foreground color for selected tag.
 -- @return A string to print.
-function P.widget.taglist.label(t, bg_focus, fg_focus)
+function P.widget.taglist.label.all(t, bg_focus, fg_focus)
     local text = ""
     if t.selected then
         text = "<bg color='"..bg_focus.."'/> <span color='"..fg_focus.."'>"..t.name.."</span> "
