@@ -221,7 +221,7 @@ keybinding({ modkey }, "F1", function ()
                                      awful.prompt({ prompt = "Run: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mypromptbox, awful.spawn, awful.completion.bash)
                                  end):add()
 keybinding({ modkey }, "F4", function ()
-                                     awful.prompt({ prompt = "Run Lua code: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mypromptbox, awful.eval, awful.prompt.bash)
+                                     awful.prompt({ prompt = "Run Lua code: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mypromptbox, awful.eval, nil)
                                  end):add()
 
 --- Tabulous, tab manipulation
