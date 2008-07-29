@@ -251,6 +251,23 @@ taglist_destructor(widget_t *widget)
     p_delete(&d);
 }
 
+/** Taglist detach function.
+ * \param widget The widget which is detaching.
+ * \param object The object we are leaving.
+ */
+static void
+taglist_detach(widget_t *widget, void *object)
+{
+    taglist_data_t *d = widget->data;
+    taglist_drawn_area_t *tda;
+    
+    if((tda = taglist_drawn_area_getbyobj(d->drawn_area, object)))
+    {
+        taglist_drawn_area_list_detach(&d->drawn_area, tda);
+        taglist_drawn_area_delete(&tda);
+    }
+}
+
 /** Create a brand new taglist widget.
  * \param align Widget alignment.
  * \return A taglist widget.
@@ -269,6 +286,7 @@ taglist_new(alignment_t align)
     w->draw = taglist_draw;
     w->button_press = taglist_button_press;
     w->destructor = taglist_destructor;
+    w->detach = taglist_detach;
 
     w->data = d = p_new(taglist_data_t, 1);
     d->label = LUA_REFNIL;

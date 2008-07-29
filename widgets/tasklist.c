@@ -125,7 +125,6 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
     if(!(odata = tasklist_object_data_getbyobj(d->objects_data, p)))
     {
-        /** \todo delete this when the widget is removed from the object */
         odata = p_new(tasklist_object_data_t, 1);
         odata->object = p;
         tasklist_object_data_list_push(&d->objects_data, odata);
@@ -351,6 +350,23 @@ tasklist_destructor(widget_t *widget)
     p_delete(&d);
 }
 
+/** Tasklist detach function.
+ * \param widget The widget which is detaching.
+ * \param object The object we are leaving.
+ */
+static void
+tasklist_detach(widget_t *widget, void *object)
+{
+    tasklist_data_t *d = widget->data;
+    tasklist_object_data_t *od;
+    
+    if((od = tasklist_object_data_getbyobj(d->objects_data, object)))
+    {
+        tasklist_object_data_list_detach(&d->objects_data, od);
+        tasklist_object_data_delete(&od);
+    }
+}
+
 /** Create a new widget tasklist.
  * \param align The widget alignment, which is flex anyway.
  * \return A brand new tasklist widget.
@@ -370,6 +386,7 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     w->newindex = luaA_tasklist_newindex;
     w->data = d = p_new(tasklist_data_t, 1);
     w->destructor = tasklist_destructor;
+    w->detach = tasklist_detach;
 
     d->show_icons = true;
     d->label = LUA_REFNIL;

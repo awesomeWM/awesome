@@ -335,6 +335,8 @@ luaA_statusbar_widget_remove(lua_State *L)
         wnext = w->next;
         if(w->widget == *widget)
         {
+            if((*widget)->detach)
+                (*widget)->detach(*widget, *sb);
             widget_unref(widget);
             widget_node_list_detach(&(*sb)->widgets, w);
             p_delete(&w);

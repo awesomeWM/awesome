@@ -97,6 +97,8 @@ struct widget_t
     widget_constructor_t *type;
     /** Widget destructor */
     widget_destructor_t *destructor;
+    /** Widget detach function */
+    void (*detach)(widget_t *, void *);
     /** Draw function */
     int (*draw)(draw_context_t *, int, widget_node_t *, int, int, void *);
     /** Index function */

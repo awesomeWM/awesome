@@ -388,6 +388,8 @@ luaA_titlebar_widget_remove(lua_State *L)
         wnext = w->next;
         if(w->widget == *widget)
         {
+            if((*widget)->detach)
+                (*widget)->detach(*widget, *tb);
             widget_unref(widget);
             widget_node_list_detach(&(*tb)->widgets, w);
             p_delete(&w);
