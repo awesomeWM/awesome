@@ -45,6 +45,8 @@ P.client = {}
 P.tag = {}
 P.widget = {}
 P.widget.taglist = {}
+P.widget.tasklist = {}
+P.widget.tasklist.label = {}
 
 --- Create a new userhook (for external libs).
 -- @param name Hook name.
@@ -771,6 +773,66 @@ function P.widget.taglist.label(t, bg_focus, fg_focus)
         text = " "..t.name.." "
     end
     return text
+end
+
+local function widget_tasklist_label_common(c, bg_focus, fg_focus)
+    local text = ""
+    if c.floating then
+        text = "<bg image=\"@AWESOME_ICON_PATH@/floatingw.png\" align=\"right\"/>"
+    end
+    if client.focus_get() == c then
+        text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..P.escape(c.name).."</span> "
+    else
+        text = text .. " "..P.escape(c.name).." "
+    end
+    return text
+end
+
+--- Return labels for a tasklist widget with clients from all tags and screen.
+-- It returns the client name and set a special
+-- foreground and background color for focused client.
+-- It also puts a special icon for floating windows.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @param bg_focus The background color for focused client.
+-- @param fg_focus The foreground color for focused client.
+-- @return A string to pring.
+function P.widget.tasklist.label.allscreen(c, screen, bg_focus, fg_focus)
+    return widget_tasklist_label_common(c, bg_focus, fg_focus)
+end
+
+--- Return labels for a tasklist widget with clients from all tags.
+-- It returns the client name and set a special
+-- foreground and background color for focused client.
+-- It also puts a special icon for floating windows.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @param bg_focus The background color for focused client.
+-- @param fg_focus The foreground color for focused client.
+-- @return A string to pring.
+function P.widget.tasklist.label.alltags(c, screen, bg_focus, fg_focus)
+    -- Only print client on the same screen as this widget
+    if c.screen ~= screen then return end
+    return widget_tasklist_label_common(c, bg_focus, fg_focus)
+end
+
+--- Return labels for a tasklist widget with clients from currently selected tags.
+-- It returns the client name and set a special
+-- foreground and background color for focused client.
+-- It also puts a special icon for floating windows.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @param bg_focus The background color for focused client.
+-- @param fg_focus The foreground color for focused client.
+-- @return A string to pring.
+function P.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus)
+    -- Only print client on the same screen as this widget
+    if c.screen ~= screen then return end
+    for k, t in pairs(tag.get(screen)) do
+        if t.selected and c:istagged(t) then
+            return widget_tasklist_label_common(c, bg_focus, fg_focus)
+        end
+    end
 end
 
 return P
