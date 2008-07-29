@@ -359,7 +359,7 @@ tasklist_detach(widget_t *widget, void *object)
 {
     tasklist_data_t *d = widget->data;
     tasklist_object_data_t *od;
-    
+
     if((od = tasklist_object_data_getbyobj(d->objects_data, object)))
     {
         tasklist_object_data_list_detach(&d->objects_data, od);
@@ -392,7 +392,7 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     d->label = LUA_REFNIL;
 
     /* Set cache property */
-    w->cache_flags = WIDGET_CACHE_CLIENTS;
+    w->cache_flags = WIDGET_CACHE_CLIENTS | WIDGET_CACHE_TAGS;
 
     return w;
 }
