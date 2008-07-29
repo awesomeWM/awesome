@@ -26,6 +26,8 @@ local screen = screen
 local client = client
 local tag = tag
 local mouse = mouse
+local titlebar = titlebar
+local widget = widget
 local os = os
 local table = table
 local hooks = hooks
@@ -43,6 +45,7 @@ P.screen = {}
 P.layout = {}
 P.client = {}
 P.tag = {}
+P.titlebar = {}
 P.widget = {}
 P.widget.taglist = {}
 P.widget.taglist.label = {}
@@ -832,6 +835,49 @@ function P.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus)
     for k, t in pairs(tag.get(screen)) do
         if t.selected and c:istagged(t) then
             return widget_tasklist_label_common(c, bg_focus, fg_focus)
+        end
+    end
+end
+
+--- Create a standard titlebar.
+-- @param args Arguments.
+-- fg: the foreground color,
+-- bg: the background color.
+-- text_align: the title text alignment.
+-- @return A brand new titlebar.
+function P.titlebar.new(args)
+    local tb = titlebar(args)
+    tb:widget_add(widget({ type = "textbox", name = "title" }))
+    local close_button= widget({ type = "textbox", name = "close", align = "right"})
+    close_button:mouse_add(mouse({ }, 1, function (t) t:client_get():kill() end))
+    tb:widget_add(close_button)
+    return tb
+end
+
+--- Update a titlebar. This should be called in some hooks.
+-- @param c The client to update.
+-- @param bg The background color for normal client.
+-- @param fg The foreground color for normal client.
+-- @param bg_focus The background color for focused client.
+-- @param fg_focus The foreground color for focused client.
+function P.titlebar.update(c, bg, fg, bg_focus, fg_focus)
+    if c.titlebar then
+        local widgets = c.titlebar:widget_get()
+        if widgets.title then
+            widgets.title.text = " " .. P.escape(c.name)
+        end
+        if client.focus_get() == c then
+            c.titlebar.bg = bg_focus
+            c.titlebar.fg = fg_focus
+            if widgets.close then
+                widgets.close.text = "<bg image=\"@AWESOME_ICON_PATH@/titlebar/closer.png\" resize=\"true\"/>"
+            end
+        else
+            c.titlebar.bg = bg
+            c.titlebar.fg = fg
+            if widgets.close then
+                widgets.close.text = "<bg image=\"@AWESOME_ICON_PATH@/titlebar/close.png\" resize=\"true\"/>"
+            end
         end
     end
 end

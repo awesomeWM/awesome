@@ -22,8 +22,7 @@ include_directories(
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
 set(AWE_LUA_FILES
-    ${SOURCE_DIR}/lib/tabulous.lua
-    ${SOURCE_DIR}/lib/awful.lua)
+    ${SOURCE_DIR}/lib/tabulous.lua)
 
 set(AWE_CONF_FILE_DEFAULT ${BUILD_DIR}/awesomerc.lua)
 set(AWE_CONF_FILE rc.lua)

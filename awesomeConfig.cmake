@@ -261,6 +261,7 @@ set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 set(AWESOME_CONFIGURE_FILES
     config.h.in
     awesomerc.lua.in
+    lib/awful.lua.in
     awesome-version-internal.h.in
     awesome.doxygen.in)
 
