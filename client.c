@@ -180,11 +180,12 @@ client_updatetitle(client_t *c)
 static void
 client_unfocus(client_t *c)
 {
+    focus_client_push(NULL);
+
     /* Call hook */
-    luaA_client_userdata_new(globalconf.L, globalconf.focus->client);
+    luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
 
-    focus_client_push(NULL);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_active_window(c->phys_screen);
 }
