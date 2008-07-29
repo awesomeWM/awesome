@@ -113,7 +113,8 @@ titlebar_draw(client_t *c)
 
     widget_render(c->titlebar->widgets, ctx, c->titlebar->sw->gc, c->titlebar->sw->pixmap,
                   c->screen, c->titlebar->position,
-                  c->titlebar->sw->geometry.x, c->titlebar->sw->geometry.y, c->titlebar);
+                  c->titlebar->sw->geometry.x, c->titlebar->sw->geometry.y,
+                  c->titlebar, AWESOME_TYPE_TITLEBAR);
 
     switch(c->titlebar->position)
     {

@@ -76,13 +76,15 @@ taglist_drawn_area_getbyobj(taglist_drawn_area_t *list, void *p)
  * \param offset Offset to draw at.
  * \param used Space already used.
  * \param object The object pointer we're drawing onto.
+ * \param type The object type.
  * \return The width used.
  */
 static int
 taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
              int offset,
              int used __attribute__ ((unused)),
-             void *object)
+             void *object,
+             awesome_type_t type)
 {
     taglist_data_t *data = w->widget->data;
     area_t area;

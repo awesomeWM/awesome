@@ -37,7 +37,8 @@ systray_draw(draw_context_t *ctx,
              int screen __attribute__ ((unused)),
              widget_node_t *w,
              int offset, int used __attribute__ ((unused)),
-             void *p)
+             void *p,
+             awesome_type_t type)
 {
     int i = 0, phys_screen;
     xembed_window_t *em;

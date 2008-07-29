@@ -120,6 +120,7 @@ progressbar_bar_add(progressbar_data_t *d, const char *title)
  * \param offset Offset to draw at.
  * \param used Space already used.
  * \param object The object pointer we're drawing onto.
+ * \param type The object type.
  * \return The width used.
  */
 static int
@@ -128,7 +129,8 @@ progressbar_draw(draw_context_t *ctx,
                  widget_node_t *w,
                  int offset,
                  int used __attribute__ ((unused)),
-                 void *p __attribute__ ((unused)))
+                 void *p __attribute__ ((unused)),
+                 awesome_type_t type)
 {
     /* pb_.. values points to the widget inside a potential border */
     int values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;

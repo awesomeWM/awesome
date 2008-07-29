@@ -137,6 +137,8 @@ graph_plot_add(graph_data_t *d, const char *title)
  * \param offset The offset to draw at.
  * \param used The already used width.
  * \param p A pointer to the object we're drawing onto.
+ * \param type The object type.
+ * \return The widget width.
  */
 static int
 graph_draw(draw_context_t *ctx,
@@ -144,7 +146,8 @@ graph_draw(draw_context_t *ctx,
            widget_node_t *w,
            int offset,
            int used __attribute__ ((unused)),
-           void *p __attribute__ ((unused)))
+           void *p __attribute__ ((unused)),
+           awesome_type_t type)
 {
     int margin_top, y;
     graph_data_t *d = w->widget->data;

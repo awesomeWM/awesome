@@ -31,7 +31,7 @@
 void widget_invalidate_cache(int, int);
 int widget_calculate_offset(int, int, int, int);
 void widget_common_new(widget_t *);
-void widget_render(widget_node_t *, draw_context_t *, xcb_gcontext_t, xcb_drawable_t, int, position_t, int, int, void *);
+void widget_render(widget_node_t *, draw_context_t *, xcb_gcontext_t, xcb_drawable_t, int, position_t, int, int, void *, awesome_type_t);
 
 int luaA_widget_userdata_new(lua_State *, widget_t *);
 
@@ -43,6 +43,7 @@ widget_constructor_t progressbar_new;
 widget_constructor_t graph_new;
 widget_constructor_t tasklist_new;
 widget_constructor_t systray_new;
+widget_constructor_t appicon_new;
 
 #endif
 

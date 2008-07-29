@@ -105,11 +105,14 @@ tasklist_object_data_getbyobj(tasklist_object_data_t *od, void *p)
  * \param offset The offset to draw at.
  * \param used The already used width.
  * \param p A pointer to the object we're drawing onto.
+ * \param type The object type.
+ * \return The widget width.
  */
 static int
 tasklist_draw(draw_context_t *ctx, int screen,
               widget_node_t *w,
-              int offset, int used, void *p)
+              int offset, int used, void *p,
+              awesome_type_t type)
 {
     client_t *c;
     tasklist_data_t *d = w->widget->data;

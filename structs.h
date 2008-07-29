@@ -100,7 +100,7 @@ struct widget_t
     /** Widget detach function */
     void (*detach)(widget_t *, void *);
     /** Draw function */
-    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, void *);
+    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, void *, awesome_type_t);
     /** Index function */
     int (*index)(lua_State *, awesome_token_t);
     /** Newindex function */

@@ -47,7 +47,7 @@ statusbar_draw(statusbar_t *statusbar)
                   statusbar->sw->pixmap,
                   statusbar->screen, statusbar->position,
                   statusbar->sw->geometry.x, statusbar->sw->geometry.y,
-                  statusbar);
+                  statusbar, AWESOME_TYPE_STATUSBAR);
 
     simplewindow_refresh_pixmap(statusbar->sw);
     xcb_aux_sync(globalconf.connection);

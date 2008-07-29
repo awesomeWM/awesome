@@ -89,12 +89,13 @@ widget_common_button_press(widget_node_t *w,
  * \param y The y coordinates of the object.
  * pixmap when the object position is right or left.
  * \param object The object pointer.
+ * \param type The object type.
  * \todo Remove GC.
  */
 void
 widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_pixmap_t rotate_px,
               int screen, position_t position,
-              int x, int y, void *object)
+              int x, int y, void *object, awesome_type_t type)
 {
     xcb_pixmap_t rootpix;
     xcb_screen_t *s;
@@ -153,16 +154,16 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
 
     for(w = wnode; w; w = w->next)
         if(w->widget->isvisible && w->widget->align == AlignLeft)
-            left += w->widget->draw(ctx, screen, w, left, (left + right), object);
+            left += w->widget->draw(ctx, screen, w, left, (left + right), object, type);
 
     /* renders right widget from last to first */
     for(w = *widget_node_list_last(&wnode); w; w = w->prev)
         if(w->widget->isvisible && w->widget->align == AlignRight)
-            right += w->widget->draw(ctx, screen, w, right, (left + right), object);
+            right += w->widget->draw(ctx, screen, w, right, (left + right), object, type);
 
     for(w = wnode; w; w = w->next)
         if(w->widget->isvisible && w->widget->align == AlignFlex)
-            left += w->widget->draw(ctx, screen, w, left, (left + right), object);
+            left += w->widget->draw(ctx, screen, w, left, (left + right), object, type);
 
     switch(position)
     {

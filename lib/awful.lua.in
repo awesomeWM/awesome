@@ -847,8 +847,9 @@ end
 -- @return A brand new titlebar.
 function P.titlebar.new(args)
     local tb = titlebar(args)
+    tb:widget_add(widget({ type = "appicon", name = "appicon", align = "left" }))
     tb:widget_add(widget({ type = "textbox", name = "title" }))
-    local close_button= widget({ type = "textbox", name = "close", align = "right"})
+    local close_button= widget({ type = "textbox", name = "close", align = "right" })
     close_button:mouse_add(mouse({ }, 1, function (t) t:client_get():kill() end))
     tb:widget_add(close_button)
     return tb
