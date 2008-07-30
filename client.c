@@ -933,7 +933,11 @@ client_setborder(client_t *c, int width)
     c->border = width;
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH, &w);
-    globalconf.screens[c->screen].need_arrange = true;
+
+    if(!c->isfloating && layout_get_current(c->screen) != layout_floating)
+        globalconf.screens[c->screen].need_arrange = true;
+    else
+        titlebar_update_geometry_floating(c);
 }
 
 /** Tag a client with a specified tag.
