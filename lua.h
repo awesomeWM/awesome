@@ -71,7 +71,7 @@ typedef int luaA_function;
 
 #define luaA_dostring(L, cmd) \
     do { \
-        if(cmd) \
+        if(a_strlen(cmd)) \
             if(luaL_dostring(L, cmd)) \
                 warn("error executing Lua code: %s", \
                      lua_tostring(L, -1)); \

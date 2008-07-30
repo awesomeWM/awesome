@@ -562,7 +562,7 @@ luaA_parserc(const char *confpatharg)
 {
     int screen;
     const char *confdir, *xdg_config_dirs;
-    char *confpath = NULL, **xdg_files, **buf;
+    char *confpath = NULL, **xdg_files, **buf, path[1024];
     ssize_t len;
 
     if(confpatharg)
@@ -580,6 +580,9 @@ luaA_parserc(const char *confpatharg)
         len += sizeof(AWESOME_CONFIG_FILE);
         confpath = p_new(char, len);
         a_strcpy(confpath, len, confdir);
+        /* update package.path */
+        snprintf(path, sizeof(path) - 1, "package.path = package.path .. \";%s/awesome/?.lua\"", confdir);
+        luaA_dostring(globalconf.L, path);
     }
     else
     {
@@ -588,6 +591,9 @@ luaA_parserc(const char *confpatharg)
         confpath = p_new(char, len);
         a_strcpy(confpath, len, confdir);
         a_strcat(confpath, len, XDG_CONFIG_HOME_DEFAULT);
+        /* update package.path */
+        snprintf(path, sizeof(path) - 1, "package.path = package.path .. \";%s" XDG_CONFIG_HOME_DEFAULT "/awesome/?.lua\"", confdir);
+        luaA_dostring(globalconf.L, path);
     }
     a_strcat(confpath, len, AWESOME_CONFIG_FILE);
 
@@ -613,6 +619,8 @@ luaA_parserc(const char *confpatharg)
         confpath = p_new(char, len);
         a_strcpy(confpath, len, *buf);
         a_strcat(confpath, len, AWESOME_CONFIG_FILE);
+        snprintf(path, sizeof(path) - 1, "package.path = package.path .. \";%s/awesome/?.lua\"", *buf);
+        luaA_dostring(globalconf.L, path);
         if(luaL_dofile(globalconf.L, confpath))
             fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
         else
