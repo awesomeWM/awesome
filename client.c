@@ -392,8 +392,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->geometry.y = c->f_geometry.y = c->m_geometry.y = wgeom->y;
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wgeom->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
-    c->oldborder = wgeom->border_width;
     c->layer = c->oldlayer = LAYER_TILE;
+    client_setborder(c, wgeom->border_width);
 
     /* update hints */
     u_size_hints = client_updatesizehints(c);
@@ -613,6 +613,7 @@ client_setfloating(client_t *c, bool floating)
         {
             client_setlayer(c, MAX(c->layer, LAYER_FLOAT));
             client_resize(c, c->f_geometry, false);
+            titlebar_update_geometry_floating(c);
         }
         else if(c->ismax)
         {
@@ -934,10 +935,10 @@ client_setborder(client_t *c, int width)
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH, &w);
 
-    if(!c->isfloating && layout_get_current(c->screen) != layout_floating)
-        globalconf.screens[c->screen].need_arrange = true;
-    else
+    if(c->isfloating || layout_get_current(c->screen) == layout_floating)
         titlebar_update_geometry_floating(c);
+    else
+        globalconf.screens[c->screen].need_arrange = true;
 }
 
 /** Tag a client with a specified tag.
@@ -1151,10 +1152,8 @@ luaA_client_newindex(lua_State *L)
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len))
            && xcolor_init(&(*c)->border_color, globalconf.connection, (*c)->phys_screen, buf, len))
-        {
             xcb_change_window_attributes(globalconf.connection, (*c)->win,
                                          XCB_CW_BORDER_PIXEL, &(*c)->border_color.pixel);
-        }
         break;
       case A_TK_COORDS:
         if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
