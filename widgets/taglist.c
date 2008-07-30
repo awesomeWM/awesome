@@ -128,7 +128,8 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
                                      globalconf.font, text[i], len[i], &pdata[i]);
 
             if(pdata[i].bg_image)
-                area.width = MAX(area.width, pdata[i].bg_resize ? w->area.height : pdata[i].bg_image->width);
+                area.width = MAX(area.width,
+                                 pdata[i].bg_resize ? ((double) pdata[i].bg_image->width / (double) pdata[i].bg_image->height) * w->area.height : pdata[i].bg_image->width);
 
             w->area.width += area.width;
 
