@@ -389,7 +389,7 @@ draw_text(draw_context_t *ctx, font_t *font,
                                                    - (pdata->margin.left
                                                       + pdata->margin.right)));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
-    pango_layout_set_markup(ctx->layout, text, len);
+    pango_layout_set_markup(ctx->layout, NONULL(text), len);
     pango_layout_set_font_description(ctx->layout, font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
