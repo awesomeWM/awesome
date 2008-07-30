@@ -187,6 +187,7 @@ end
 
 keybinding({ modkey }, "Left", awful.tag.viewprev):add()
 keybinding({ modkey }, "Right", awful.tag.viewnext):add()
+keybinding({ modkey }, "Escape", awful.tag.history.restore):add()
 
 -- Standard program
 keybinding({ modkey }, "Return", function () awful.spawn(terminal) end):add()
@@ -346,8 +347,11 @@ end
 -- Hook function to execute when arranging the screen
 -- (tag switch, new client, etc)
 function hook_arrange(screen)
-    local layout = awful.layout.get(screen)
-    mylayoutbox[screen].text = "<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. layout .. "w.png\" resize=\"true\"/>"
+    mylayoutbox[screen].text =
+        "<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. awful.layout.get(screen) .. "w.png\" resize=\"true\"/>"
+
+    -- Update tag history
+    awful.tag.history.update(screen)
 
     -- Uncomment if you want mouse warping
     --[[

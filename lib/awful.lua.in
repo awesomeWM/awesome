@@ -45,6 +45,10 @@ P.screen = {}
 P.layout = {}
 P.client = {}
 P.tag = {}
+P.tag.history = {}
+P.tag.history.data = {}
+P.tag.history.data.past = {}
+P.tag.history.data.current = {}
 P.titlebar = {}
 P.widget = {}
 P.widget.taglist = {}
@@ -172,6 +176,54 @@ function P.screen.focus(i)
     screen.focus(s)
     -- Move the mouse on the screen
     mouse.coords = screen.coords_get(s)
+end
+
+--- Compare 2 tables of tags.
+-- @param a The first table.
+-- @param b The second table of tags.
+-- @return True if the tables are identical, false otherwise.
+local function tag_compare_select(a, b)
+    if not a or not b then
+        return false
+    end
+    -- Quick size comparison
+    if #a ~= #b then
+        return false
+    end
+    for ka, va in pairs(a) do
+        if b[ka] ~= va.selected then
+            return false
+        end
+    end
+    for kb, vb in pairs(b) do
+        if a[kb].selected ~= vb then
+            return false
+        end
+    end
+    return true
+end
+
+--- Update the tag history.
+-- @param screen The screen number.
+function P.tag.history.update(screen)
+    local curtags = tag.geti(screen)
+    if not tag_compare_select(curtags, P.tag.history.data.current[screen]) then
+        P.tag.history.data.past[screen] = P.tag.history.data.current[screen]
+        P.tag.history.data.current[screen] = {}
+        for k, v in ipairs(curtags) do
+            P.tag.history.data.current[screen][k] = v.selected
+        end
+    end
+end
+
+-- Revert tag history.
+-- @param screen The screen number.
+function P.tag.history.restore(screen)
+    local s = screen or mouse.screen
+    local tags = tag.geti(s)
+    for k, t in pairs(tags) do
+        t.selected = P.tag.history.data.past[s][k]
+    end
 end
 
 --- Return a table with all visible tags
