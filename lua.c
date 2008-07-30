@@ -564,7 +564,7 @@ luaA_parserc(const char *confpatharg)
     const char *confdir, *xdg_config_dirs;
     char *confpath = NULL, **xdg_files, **buf;
     ssize_t len;
-    
+
     if(confpatharg)
     {
         if(luaL_dofile(globalconf.L, confpatharg))
@@ -575,9 +575,9 @@ luaA_parserc(const char *confpatharg)
 
     confdir = getenv("XDG_CONFIG_HOME");
 
-    if(a_strlen(confdir))
+    if((len = a_strlen(confdir)))
     {
-        len = a_strlen(confdir) + sizeof(AWESOME_CONFIG_FILE);
+        len += sizeof(AWESOME_CONFIG_FILE);
         confpath = p_new(char, len);
         a_strcpy(confpath, len, confdir);
     }
@@ -622,7 +622,7 @@ luaA_parserc(const char *confpatharg)
     for(buf = xdg_files; *buf; buf++)
         p_delete(buf);
     p_delete(&xdg_files);
-    
+
   bailout:
     /* Assure there's at least one tag */
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
