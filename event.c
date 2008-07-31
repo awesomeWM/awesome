@@ -200,7 +200,10 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
             if(c->isfloating || layout_get_current(c->screen) == layout_floating)
+            {
                 client_resize(c, geometry, false);
+                titlebar_draw(c);
+            }
             else
             {
                 globalconf.screens[c->screen].need_arrange = true;
