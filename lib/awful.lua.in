@@ -173,7 +173,8 @@ function P.screen.focus(i)
         s = mouse.screen
     end
     s = cycle(screen.count(), s + i)
-    screen.focus(s)
+    local vc = client.visible_get(s)
+    if #vc > 0 then vc[1]:focus_set() end
     -- Move the mouse on the screen
     mouse.coords = screen.coords_get(s)
 end

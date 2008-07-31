@@ -169,23 +169,6 @@ luaA_screen_count(lua_State *L)
     return 1;
 }
 
-/** Give the focus to a screen.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- *
- * \luastack
- * \lparam A screen number
- */
-static int
-luaA_screen_focus(lua_State *L)
-{
-    /* Our table begin at 0, Lua begins at 1 */
-    int screen = luaL_checknumber(L, 1) - 1;
-    luaA_checkscreen(screen);
-    client_focus(NULL, screen);
-    return 0;
-}
-
 /** Return screen coordinates.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -476,7 +459,6 @@ luaA_init(void)
         { "coords_get", luaA_screen_coords_get },
         { "workspace_get", luaA_screen_workspace_get },
         { "count", luaA_screen_count },
-        { "focus", luaA_screen_focus },
         { NULL, NULL }
     };
     static const struct luaL_reg awesome_hooks_lib[] =
