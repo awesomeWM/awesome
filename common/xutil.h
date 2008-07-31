@@ -123,10 +123,16 @@ xcb_cursor_t xutil_cursor_new(xcb_connection_t *, unsigned int);
 static inline xcb_screen_t *
 xutil_screen_get(xcb_connection_t *c, int screen)
 {
+    xcb_screen_t *s;
+
     if(xcb_connection_has_error(c))
         fatal("X connection invalid");
 
-    return xcb_aux_get_screen(c, screen);
+    s = xcb_aux_get_screen(c, screen);
+
+    assert(s);
+
+    return s;
 }
 
 #endif

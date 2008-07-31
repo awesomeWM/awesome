@@ -49,7 +49,7 @@ int luaA_client_newindex(lua_State *);
 
 int luaA_client_userdata_new(lua_State *, client_t *);
 
-DO_SLIST(client_t, client, p_delete)
+DO_SLIST(client_t, client, client_unref)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -54,10 +54,12 @@ luaA_client_userdata_new(lua_State *L, client_t *p)
 {
     client_t **pp = lua_newuserdata(L, sizeof(client_t *));
     *pp = p;
+    client_ref(pp);
     return luaA_settype(L, "client");
 }
 
 DO_LUA_EQ(client_t, client, "client")
+DO_LUA_GC(client_t, client, "client", client_unref)
 
 /** Load windows properties, restoring client's tag
  * and floating state before awesome was restarted if any.
@@ -424,6 +426,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     client_list_push(&globalconf.clients, c);
     /* Append client in history: it'll be last. */
     focus_client_append(c);
+    client_ref(&c);
     /* Push client in stack */
     client_raise(c);
 
@@ -669,6 +672,9 @@ client_unmanage(client_t *c)
 {
     tag_array_t *tags = &globalconf.screens[c->screen].tags;
 
+    if(globalconf.screens[c->screen].client_focus == c)
+        client_unfocus(c);
+
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1, 0);
@@ -707,7 +713,10 @@ client_unmanage(client_t *c)
     /* delete properties */
     xcb_delete_property(globalconf.connection, c->win, _AWESOME_PROPERTIES);
 
-    p_delete(&c);
+    /* set client as invalid */
+    c->invalid = true;
+
+    client_unref(&c);
 }
 
 /** Update the WM hints of a client.
@@ -1101,6 +1110,9 @@ luaA_client_newindex(lua_State *L)
     int i;
     titlebar_t **t = NULL;
 
+    if((*c)->invalid)
+        luaL_error(L, "client is invalid\n");
+
     switch(a_tokenize(buf, len))
     {
       case A_TK_NAME:
@@ -1230,6 +1242,9 @@ luaA_client_index(lua_State *L)
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r = NULL;
 
+    if((*c)->invalid)
+        luaL_error(L, "client is invalid\n");
+
     if(luaA_usemetatable(L, 1, 2))
         return 1;
 
@@ -1334,6 +1349,7 @@ const struct luaL_reg awesome_client_meta[] =
     { "__index", luaA_client_index },
     { "__newindex", luaA_client_newindex },
     { "__eq", luaA_client_eq },
+    { "__gc", luaA_client_gc },
     { "__tostring", luaA_client_tostring },
     { NULL, NULL }
 };

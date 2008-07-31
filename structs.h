@@ -239,6 +239,10 @@ struct statusbar_t
 /** client_t type */
 struct client_t
 {
+    /** Ref counter */
+    int refcount;
+    /** Valid, or not ? */
+    bool invalid;
     /** Client name */
     char *name;
     /** Window geometry */
@@ -294,7 +298,18 @@ struct client_t
     /** Next and previous clients */
     client_t *prev, *next;
 };
+
+static void
+client_delete(client_t **c)
+{
+    button_list_wipe(&(*c)->buttons);
+    p_delete(&(*c)->icon_path);
+    p_delete(&(*c)->name);
+    p_delete(c);
+}
+
 DO_ARRAY(client_t *, client, DO_NOTHING)
+DO_RCNT(client_t, client, client_delete)
 
 struct client_node_t
 {
