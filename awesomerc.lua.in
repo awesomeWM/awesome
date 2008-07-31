@@ -360,9 +360,6 @@ function hook_arrange(screen)
     mylayoutbox[screen].text =
         "<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. awful.layout.get(screen) .. "w.png\" resize=\"true\"/>"
 
-    -- Update tag history
-    awful.tag.history.update(screen)
-
     -- If no window has focus, give focus to the latest in history
     if not client.focus_get() then
         local c = awful.client.focus.history.get(screen, 0)
@@ -411,6 +408,7 @@ awful.hooks.manage(hook_manage)
 awful.hooks.unmanage(awful.client.focus.history.delete)
 awful.hooks.mouseover(hook_mouseover)
 awful.hooks.arrange(hook_arrange)
+awful.hooks.arrange(awful.tag.history.update)
 awful.hooks.timer(1, hook_timer)
 awful.hooks.titleupdate(hook_titleupdate)
 -- }}}
