@@ -66,13 +66,4 @@ eprint_version(const char *const executable)
     exit(EXIT_SUCCESS);
 }
 
-/** Get version string.
- * \return A string describing the current version.
- */
-const char*
-version_string(void)
-{
-    return AWESOME_VERSION;
-}
-
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
