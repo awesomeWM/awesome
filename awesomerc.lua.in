@@ -92,8 +92,8 @@ function mytaglist.label(t) return awful.widget.taglist.label.all(t, bg_focus, f
 -- Create a tasklist widget
 mytasklist = widget({ type = "tasklist", name = "mytasklist" })
 mytasklist:mouse_add(mouse({ }, 1, function (object, c) c:focus_set(); c:raise() end))
-mytasklist:mouse_add(mouse({ }, 4, function () awful.client.focus(1) end))
-mytasklist:mouse_add(mouse({ }, 5, function () awful.client.focus(-1) end))
+mytasklist:mouse_add(mouse({ }, 4, function () awful.client.focusbyidx(1) end))
+mytasklist:mouse_add(mouse({ }, 5, function () awful.client.focusbyidx(-1) end))
 function mytasklist.label(c, screen) return awful.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus) end
 
 -- Create a textbox widget
@@ -201,8 +201,8 @@ keybinding({ modkey, "Shift" }, "q", awesome.quit):add()
 -- Client manipulation
 keybinding({ modkey }, "m", awful.client.maximize):add()
 keybinding({ modkey, "Shift" }, "c", function () client.focus_get():kill() end):add()
-keybinding({ modkey }, "j", function () awful.client.focus(1); client.focus_get():raise() end):add()
-keybinding({ modkey }, "k", function () awful.client.focus(-1);  client.focus_get():raise() end):add()
+keybinding({ modkey }, "j", function () awful.client.focusbyidx(1); client.focus_get():raise() end):add()
+keybinding({ modkey }, "k", function () awful.client.focusbyidx(-1);  client.focus_get():raise() end):add()
 keybinding({ modkey, "Shift" }, "j", function () awful.client.swap(1) end):add()
 keybinding({ modkey, "Shift" }, "k", function () awful.client.swap(-1) end):add()
 keybinding({ modkey, "Control" }, "j", function () awful.screen.focus(1) end):add()
@@ -210,6 +210,7 @@ keybinding({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end):a
 keybinding({ modkey, "Control" }, "space", awful.client.togglefloating):add()
 keybinding({ modkey, "Control" }, "Return", function () client.focus_get():swap(awful.client.master()) end):add()
 keybinding({ modkey }, "o", awful.client.movetoscreen):add()
+keybinding({ modkey }, "Tab", awful.client.focus.history.previous):add()
 
 -- Layout manipulation
 keybinding({ modkey }, "l", function () awful.tag.incmwfact(0.05) end):add()
@@ -362,10 +363,10 @@ function hook_arrange(screen)
     -- Update tag history
     awful.tag.history.update(screen)
 
-    -- If no window has focus, give focus to the first one
+    -- If no window has focus, give focus to the latest in history
     if not client.focus_get() then
-        local vc = client.visible_get(screen)
-        if #vc > 0 then vc[1]:focus_set() end
+        local c = awful.client.focus.history.get(screen, 0)
+        if c then c:focus_set() end
     end
 
     -- Uncomment if you want mouse warping
@@ -402,10 +403,12 @@ end
 
 -- Set up some hooks
 awful.hooks.focus(hook_focus)
+awful.hooks.focus(awful.client.focus.history.add)
 awful.hooks.unfocus(hook_unfocus)
 awful.hooks.marked(hook_marked)
 awful.hooks.unmarked(hook_unmarked)
 awful.hooks.manage(hook_manage)
+awful.hooks.unmanage(awful.client.focus.history.delete)
 awful.hooks.mouseover(hook_mouseover)
 awful.hooks.arrange(hook_arrange)
 awful.hooks.timer(1, hook_timer)

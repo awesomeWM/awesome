@@ -44,6 +44,9 @@ P.completion = {}
 P.screen = {}
 P.layout = {}
 P.client = {}
+P.client.focus = {}
+P.client.focus.history = {}
+P.client.focus.history.data = {}
 P.tag = {}
 P.tag.history = {}
 P.tag.history.data = {}
@@ -83,6 +86,68 @@ local function cycle(t, i)
     return i
 end
 
+--- Remove a client from the focus history
+-- @param c The client that must be removed.
+function P.client.focus.history.delete(c)
+    for k, v in ipairs(P.client.focus.history.data) do
+        if v == c then
+            table.remove(P.client.focus.history.data, k)
+            break
+        end
+    end
+end
+
+--- Update client focus history.
+-- @param c The client that has been focused.
+function P.client.focus.history.add(c)
+    -- Remove the client if its in stack
+    P.client.focus.history.delete(c)
+    -- Record the client has latest focused
+    table.insert(P.client.focus.history.data, 1, c)
+end
+
+--- Get the latest focused client for a screen in history.
+-- @param screen The screen number to look for.
+-- @param idx The index: 0 will return first candidate,
+-- 1 will return second, etc.
+-- @return A client.
+function P.client.focus.history.get(screen, idx)
+    -- When this counter is equal to idx, we return the client
+    local counter = 0
+    local vc = client.visible_get(screen)
+    for k, c in ipairs(P.client.focus.history.data) do
+        if c.screen == screen then
+            for j, vcc in ipairs(vc) do
+                if vcc == c then
+                    if counter == idx then
+                        return c
+                    end
+                    -- We found one, increment the counter only.
+                    counter = counter + 1
+                    break
+                end
+            end
+        end
+    end
+    -- Argh nobody found in history, give the first one visible if there is one
+    if counter == 0 then
+        return vc[1]
+    end
+end
+
+--- Focus the previous client in history.
+function P.client.focus.history.previous()
+    local sel = client.focus_get()
+    local s
+    if sel then
+        s = sel.screen
+    else
+        s = mouse.screen
+    end
+    local c = P.client.focus.history.get(s, 1)
+    if c then c:focus_set() end
+end
+
 --- Get a client by its relative index to the focused window.
 -- @usage Set i to 1 to get next, -1 to get previous.
 -- @param i The index.
@@ -107,7 +172,7 @@ end
 --- Focus a client by its relative index.
 -- @param i The index.
 -- @param c Optional client.
-function P.client.focus(i, c)
+function P.client.focusbyidx(i, c)
     local target = P.client.next(i, c)
     if target then
         target:focus_set()
@@ -173,8 +238,8 @@ function P.screen.focus(i)
         s = mouse.screen
     end
     s = cycle(screen.count(), s + i)
-    local vc = client.visible_get(s)
-    if #vc > 0 then vc[1]:focus_set() end
+    local c = P.client.focus.history.get(s, 0)
+    if c then c:focus_set() end
     -- Move the mouse on the screen
     mouse.coords = screen.coords_get(s)
 end
