@@ -182,6 +182,8 @@ struct titlebar_t
         xcolor_t color;
         int width;
     } border;
+    /** Need update */
+    bool need_update;
 };
 
 /** Delete a titlebar structure.

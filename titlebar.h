@@ -29,6 +29,7 @@ client_t * client_getbytitlebarwin(xcb_window_t);
 void titlebar_geometry_compute(client_t *, area_t, area_t *);
 void titlebar_draw(client_t *);
 void titlebar_init(client_t *);
+void titlebar_refresh(void);
 
 int luaA_titlebar_userdata_new(lua_State *, titlebar_t *);
 
@@ -111,7 +112,7 @@ titlebar_update_geometry_floating(client_t *c)
 
     titlebar_geometry_compute(c, c->geometry, &geom);
     simplewindow_moveresize(c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
-    titlebar_draw(c);
+    c->titlebar->need_update = true;
 }
 
 /** Update the titlebar geometry for a tiled client.
@@ -128,7 +129,7 @@ titlebar_update_geometry_tiled(client_t *c, area_t geometry)
 
     titlebar_geometry_compute(c, geometry, &geom);
     simplewindow_moveresize(c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
-    titlebar_draw(c);
+    c->titlebar->need_update = true;
 }
 
 #endif

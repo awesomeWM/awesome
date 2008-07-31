@@ -245,7 +245,7 @@ widget_invalidate_bywidget(widget_t *widget)
         if(c->titlebar)
             for(witer = c->titlebar->widgets; witer; witer = witer->next)
                 if(witer->widget == widget)
-                    titlebar_draw(c);
+                    c->titlebar->need_update = true;
 }
 
 /** Create a new widget.

@@ -169,12 +169,14 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 
         layout_refresh();
         statusbar_refresh();
+        titlebar_refresh();
 
         /* need to resync */
         xcb_aux_sync(globalconf.connection);
     }
     layout_refresh();
     statusbar_refresh();
+    titlebar_refresh();
     xcb_aux_sync(globalconf.connection);
 }
 
@@ -465,6 +467,7 @@ main(int argc, char **argv)
     /* refresh everything before waiting events */
     layout_refresh();
     statusbar_refresh();
+    titlebar_refresh();
 
     /* main event loop */
     ev_loop(globalconf.loop, 0);

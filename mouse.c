@@ -686,6 +686,8 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
         /* resize the client */
         client_resize(c, geo, false);
+        /* redaw titlebar live */
+        titlebar_draw(c);
 
         /* draw the infobox */
         if(sw)

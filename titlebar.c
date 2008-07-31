@@ -138,6 +138,20 @@ titlebar_draw(client_t *c)
     simplewindow_refresh_pixmap(c->titlebar->sw);
 
     draw_context_delete(&ctx);
+
+    c->titlebar->need_update = false;
+}
+
+/** Titlebar refresh function.
+ */
+void
+titlebar_refresh(void)
+{
+    client_t *c;
+
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->titlebar && c->titlebar->need_update)
+            titlebar_draw(c);
 }
 
 void
@@ -280,7 +294,7 @@ titlebar_init(client_t *c)
     if(client_isvisible(c, c->screen))
         globalconf.screens[c->screen].need_arrange = true;
 
-    titlebar_draw(c);
+    c->titlebar->need_update = true;
 }
 
 /** Create a new titlebar.
@@ -365,7 +379,7 @@ luaA_titlebar_widget_add(lua_State *L)
     widget_node_list_append(&(*tb)->widgets, w);
     widget_ref(widget);
 
-    titlebar_draw(client_getbytitlebar(*tb));
+    (*tb)->need_update = true;
 
     return 0;
 }
@@ -394,7 +408,7 @@ luaA_titlebar_widget_remove(lua_State *L)
             widget_unref(widget);
             widget_node_list_detach(&(*tb)->widgets, w);
             p_delete(&w);
-            titlebar_draw(client_getbytitlebar(*tb));
+            (*tb)->need_update = true;
         }
     }
 
@@ -488,13 +502,13 @@ luaA_titlebar_newindex(lua_State *L)
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init(&(*titlebar)->colors.fg, globalconf.connection,
                           globalconf.default_screen, buf, len))
-                titlebar_draw(client_getbytitlebar(*titlebar));
+                (*titlebar)->need_update = true;
         return 0;
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init(&(*titlebar)->colors.bg, globalconf.connection,
                            globalconf.default_screen, buf, len))
-                titlebar_draw(client_getbytitlebar(*titlebar));
+                (*titlebar)->need_update = true;
         return 0;
       default:
         return 0;
