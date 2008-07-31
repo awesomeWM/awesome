@@ -52,6 +52,9 @@ fg_focus = "#ffffff"
 border_focus = bg_focus
 border_marked = "#91231C"
 
+-- Define if we want to use titlebar on all applications
+use_titlebar = false
+
 awesome.font_set(font)
 awesome.colors_set({ fg = fg_normal, bg = bg_normal })
 
@@ -292,7 +295,9 @@ function hook_focus(c)
     if not awful.client.ismarked(c) then
         c.border_color = border_focus
     end
-    awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+    if use_titlebar then
+        awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+    end
 end
 
 -- Hook function to execute when unfocusing a client.
@@ -300,7 +305,9 @@ function hook_unfocus(c)
     if not awful.client.ismarked(c) then
         c.border_color = border_normal
     end
-    awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+    if use_titlebar then
+       awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+   end
 end
 
 -- Hook function to execute when marking a client
@@ -325,9 +332,11 @@ end
 function hook_manage(c)
     -- Set floating placement to be smart!
     c.floating_placement = "smart"
-    -- Add a titlebar
-    c.titlebar = awful.titlebar.new({ fg = fg, bg = bg, modkey = modkey })
-    awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+    if use_titlebar then
+        -- Add a titlebar
+        c.titlebar = awful.titlebar.new({ fg = fg, bg = bg, modkey = modkey })
+        awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+    end
     -- Add mouse bindings
     c:mouse_add(mouse({ }, 1, function (c) c:focus_set(); c:raise() end))
     c:mouse_add(mouse({ modkey }, 1, function (c) c:mouse_move() end))
@@ -385,8 +394,10 @@ function hook_timer ()
 end
 
 function hook_titleupdate (c)
-    -- Update titlebar
-    awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+    if use_titlebar then
+        -- Update titlebar
+        awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+    end
 end
 
 -- Set up some hooks
