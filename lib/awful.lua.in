@@ -1031,4 +1031,9 @@ function P.titlebar.update(c, bg, fg, bg_focus, fg_focus)
     end
 end
 
+-- Register standards hooks
+P.hooks.arrange(P.tag.history.update)
+P.hooks.focus(P.client.focus.history.add)
+P.hooks.unmanage(P.client.focus.history.delete)
+
 return P

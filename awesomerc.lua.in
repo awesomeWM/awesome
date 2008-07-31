@@ -400,15 +400,12 @@ end
 
 -- Set up some hooks
 awful.hooks.focus(hook_focus)
-awful.hooks.focus(awful.client.focus.history.add)
 awful.hooks.unfocus(hook_unfocus)
 awful.hooks.marked(hook_marked)
 awful.hooks.unmarked(hook_unmarked)
 awful.hooks.manage(hook_manage)
-awful.hooks.unmanage(awful.client.focus.history.delete)
 awful.hooks.mouseover(hook_mouseover)
 awful.hooks.arrange(hook_arrange)
-awful.hooks.arrange(awful.tag.history.update)
 awful.hooks.timer(1, hook_timer)
 awful.hooks.titleupdate(hook_titleupdate)
 -- }}}
