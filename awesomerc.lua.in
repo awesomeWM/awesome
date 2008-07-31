@@ -296,9 +296,6 @@ function hook_focus(c)
     if not awful.client.ismarked(c) then
         c.border_color = border_focus
     end
-    if use_titlebar then
-        awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
-    end
 end
 
 -- Hook function to execute when unfocusing a client.
@@ -306,9 +303,6 @@ function hook_unfocus(c)
     if not awful.client.ismarked(c) then
         c.border_color = border_normal
     end
-    if use_titlebar then
-       awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
-   end
 end
 
 -- Hook function to execute when marking a client
@@ -335,8 +329,11 @@ function hook_manage(c)
     c.floating_placement = "smart"
     if use_titlebar then
         -- Add a titlebar
-        c.titlebar = awful.titlebar.new({ fg = fg, bg = bg, modkey = modkey })
-        awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
+        awful.titlebar.add(c, { fg = fg_normal,
+                                bg = bg_normal,
+                                fg_focus = fg_focus,
+                                bg_focus = bg_focus,
+                                modkey = modkey })
     end
     -- Add mouse bindings
     c:mouse_add(mouse({ }, 1, function (c) c:focus_set(); c:raise() end))
@@ -391,13 +388,6 @@ function hook_timer ()
     -- mytextbox.text = " " .. os.date() .. " "
 end
 
-function hook_titleupdate (c)
-    if use_titlebar then
-        -- Update titlebar
-        awful.titlebar.update(c, bg_normal, fg_normal, bg_focus, fg_focus)
-    end
-end
-
 -- Set up some hooks
 awful.hooks.focus(hook_focus)
 awful.hooks.unfocus(hook_unfocus)
@@ -407,5 +397,4 @@ awful.hooks.manage(hook_manage)
 awful.hooks.mouseover(hook_mouseover)
 awful.hooks.arrange(hook_arrange)
 awful.hooks.timer(1, hook_timer)
-awful.hooks.titleupdate(hook_titleupdate)
 -- }}}

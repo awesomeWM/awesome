@@ -33,10 +33,30 @@ local table = table
 local hooks = hooks
 local keygrabber = keygrabber
 local io = io
+local setmetatable = setmetatable
 
 -- Reset env
 setfenv(1, P)
 
+-- The ObjectTable class
+ObjectTable = {}
+ObjectTable.__index  = ObjectTable
+--- Lookup in a table indexed by objects
+function ObjectTable.__index(self, key)
+    for k, v in pairs(self) do
+        if k == key then
+            return v
+        end
+    end
+end
+
+function ObjectTable.new()
+    local o =  {}
+    setmetatable(o, ObjectTable)
+    return o
+end
+
+-- Various structure
 P.hooks = {}
 P.myhooks = {}
 P.prompt = {}
@@ -53,11 +73,13 @@ P.tag.history.data = {}
 P.tag.history.data.past = {}
 P.tag.history.data.current = {}
 P.titlebar = {}
+P.titlebar.data = ObjectTable.new()
 P.widget = {}
 P.widget.taglist = {}
 P.widget.taglist.label = {}
 P.widget.tasklist = {}
 P.widget.tasklist.label = {}
+
 
 --- Create a new userhook (for external libs).
 -- @param name Hook name.
@@ -983,47 +1005,59 @@ function P.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus)
 end
 
 --- Create a standard titlebar.
+-- @param c The client.
 -- @param args Arguments.
--- fg: the foreground color,
+-- fg: the foreground color.
 -- bg: the background color.
--- @return A brand new titlebar.
-function P.titlebar.new(args)
+-- fg_focus: the foreground color for focused window.
+-- fg_focus: the background color for focused window.
+function P.titlebar.add(c, args)
+    -- Store colors
+    P.titlebar.data[c] = {}
+    P.titlebar.data[c].fg = args.fg
+    P.titlebar.data[c].bg = args.bg
+    P.titlebar.data[c].fg_focus = args.fg_focus
+    P.titlebar.data[c].bg_focus = args.bg_focus
+
+    -- Built args
     local targs = {}
     if args.fg then targs.fg = args.fg end
     if args.bg then targs.bg = args.bg end
     local tb = titlebar(targs)
+
     tb:widget_add(widget({ type = "appicon", name = "appicon", align = "left" }))
+
     local title = widget({ type = "textbox", name = "title", align = "flex" })
     title:mouse_add(mouse({ args.modkey }, 1, function (t) t:client_get():mouse_move() end))
     title:mouse_add(mouse({ args.modkey }, 3, function (t) t:client_get():mouse_resize() end))
     tb:widget_add(title)
+
     local close_button= widget({ type = "textbox", name = "close", align = "right" })
     close_button:mouse_add(mouse({ }, 1, function (t) t:client_get():kill() end))
     tb:widget_add(close_button)
-    return tb
+
+    P.titlebar.update(c)
+
+    c.titlebar = tb
 end
 
 --- Update a titlebar. This should be called in some hooks.
 -- @param c The client to update.
--- @param bg The background color for normal client.
--- @param fg The foreground color for normal client.
--- @param bg_focus The background color for focused client.
--- @param fg_focus The foreground color for focused client.
-function P.titlebar.update(c, bg, fg, bg_focus, fg_focus)
-    if c.titlebar then
+function P.titlebar.update(c)
+    if c.titlebar and P.titlebar.data[c] then
         local widgets = c.titlebar:widget_get()
         if widgets.title then
             widgets.title.text = " " .. P.escape(c.name)
         end
         if client.focus_get() == c then
-            c.titlebar.bg = bg_focus
-            c.titlebar.fg = fg_focus
+            c.titlebar.fg = P.titlebar.data[c].fg_focus
+            c.titlebar.bg = P.titlebar.data[c].bg_focus
             if widgets.close then
                 widgets.close.text = "<bg image=\"@AWESOME_ICON_PATH@/titlebar/closer.png\" resize=\"true\"/>"
             end
         else
-            c.titlebar.bg = bg
-            c.titlebar.fg = fg
+            c.titlebar.fg = P.titlebar.data[c].fg
+            c.titlebar.bg = P.titlebar.data[c].bg
             if widgets.close then
                 widgets.close.text = "<bg image=\"@AWESOME_ICON_PATH@/titlebar/close.png\" resize=\"true\"/>"
             end
@@ -1031,9 +1065,22 @@ function P.titlebar.update(c, bg, fg, bg_focus, fg_focus)
     end
 end
 
+--- Remove a titlebar from a client.
+-- @param c The client.
+function P.titlebar.remove(c)
+    c.titlebar = nil
+    P.titlebar.data[c] = nil
+end
+
 -- Register standards hooks
 P.hooks.arrange(P.tag.history.update)
+
 P.hooks.focus(P.client.focus.history.add)
 P.hooks.unmanage(P.client.focus.history.delete)
+
+P.hooks.focus(P.titlebar.update)
+P.hooks.unfocus(P.titlebar.update)
+P.hooks.titleupdate(P.titlebar.update)
+P.hooks.unmanage(P.titlebar.unmanage)
 
 return P
