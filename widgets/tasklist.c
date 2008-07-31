@@ -19,8 +19,8 @@
  *
  */
 
+#include "client.h"
 #include "widget.h"
-#include "focus.h"
 #include "ewmh.h"
 #include "tag.h"
 #include "common/markup.h"

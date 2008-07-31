@@ -22,7 +22,6 @@
 #include "client.h"
 #include "tag.h"
 #include "screen.h"
-#include "focus.h"
 #include "layouts/magnifier.h"
 
 extern awesome_t globalconf;
@@ -37,7 +36,7 @@ layout_magnifier(int screen)
                                             globalconf.screens[screen].statusbar,
                                             &globalconf.screens[screen].padding);
 
-    focus = focus_get_current_client(screen);
+    focus = globalconf.screens[screen].client_focus;
 
     /* If focused window is not tiled, take the first one which is tiled. */
     if(!IS_TILED(focus, screen))

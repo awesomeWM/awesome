@@ -353,6 +353,12 @@ function hook_arrange(screen)
     -- Update tag history
     awful.tag.history.update(screen)
 
+    -- If no window has focus, give focus to the first one
+    if not client.focus_get() then
+        local vc = client.visible_get(screen)
+        if #vc > 0 then vc[1]:focus_set() end
+    end
+
     -- Uncomment if you want mouse warping
     --[[
     local sel = client.focus_get()

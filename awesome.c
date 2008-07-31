@@ -29,9 +29,10 @@
 
 #include <ev.h>
 
+#include "client.h"
+#include "titlebar.h"
 #include "event.h"
 #include "window.h"
-#include "focus.h"
 #include "ewmh.h"
 #include "dbus.h"
 #include "statusbar.h"
@@ -406,8 +407,7 @@ main(int argc, char **argv)
 
     /* init screens struct */
     globalconf.screens_info = screensinfo_new(globalconf.connection);
-    globalconf.screens = p_new(screen_t, globalconf.screens_info->nscreen);
-    focus_client_push(NULL);
+    globalconf.screen_focus = globalconf.screens = p_new(screen_t, globalconf.screens_info->nscreen);
 
     /* init default font and colors */
     globalconf.font = draw_font_new(globalconf.connection, globalconf.default_screen, "sans 8");

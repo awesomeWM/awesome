@@ -48,7 +48,7 @@ appicon_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
     switch(type)
     {
       case AWESOME_TYPE_STATUSBAR:
-        c = globalconf.focus->client;
+        c = globalconf.screen_focus->client_focus;
         break;
       case AWESOME_TYPE_TITLEBAR:
         c = client_getbytitlebar(p);

@@ -22,7 +22,6 @@
 #include "tag.h"
 #include "screen.h"
 #include "client.h"
-#include "focus.h"
 #include "layouts/max.h"
 
 extern awesome_t globalconf;
@@ -30,7 +29,7 @@ extern awesome_t globalconf;
 void
 layout_max(int screen)
 {
-    client_t *c, *focus;
+    client_t *c;
     area_t area = screen_area_get(screen,
                                 globalconf.screens[screen].statusbar,
                                 &globalconf.screens[screen].padding);
@@ -45,8 +44,7 @@ layout_max(int screen)
             area.height += 2 * c->border;
         }
 
-    if((focus = focus_get_current_client(screen))
-       && IS_TILED(focus, screen))
-        client_raise(focus);
+    if(IS_TILED(globalconf.screens[screen].client_focus, screen))
+        client_raise(globalconf.screens[screen].client_focus);
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

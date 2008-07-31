@@ -27,7 +27,6 @@
 
 #include "ewmh.h"
 #include "tag.h"
-#include "focus.h"
 #include "screen.h"
 #include "client.h"
 #include "widget.h"
@@ -235,9 +234,12 @@ void
 ewmh_update_net_active_window(int phys_screen)
 {
     xcb_window_t win;
-    client_t *sel = focus_get_current_client(phys_screen);
 
-    win = sel ? sel->win : XCB_NONE;
+    if(globalconf.screen_focus->client_focus
+       && globalconf.screen_focus->client_focus->phys_screen == phys_screen)
+        win = globalconf.screen_focus->client_focus->win;
+    else
+        win = XCB_NONE;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,

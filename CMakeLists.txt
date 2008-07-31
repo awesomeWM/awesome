@@ -43,7 +43,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/dbus.c
     ${SOURCE_DIR}/event.c
     ${SOURCE_DIR}/ewmh.c
-    ${SOURCE_DIR}/focus.c
     ${SOURCE_DIR}/keybinding.c
     ${SOURCE_DIR}/keygrabber.c
     ${SOURCE_DIR}/layout.c

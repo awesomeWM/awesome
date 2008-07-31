@@ -372,6 +372,8 @@ typedef struct
         xcb_window_t window;
         bool has_systray_widget;
     } systray;
+    /** Focused client */
+    client_t *client_focus;
 } screen_t;
 
 /** Main configuration structure */
@@ -410,8 +412,6 @@ struct awesome_t
     xembed_window_t *embedded;
     /** Path to config file */
     char *configpath;
-    /** Selected clients history */
-    client_node_t *focus;
     /** Stack client history */
     client_node_t *stack;
     /** Command line passed to awesome */
@@ -454,6 +454,8 @@ struct awesome_t
     struct ev_timer timer;
     /** The key grabber function */
     luaA_function keygrabber;
+    /** Focused screen */
+    screen_t *screen_focus;
 };
 
 #endif

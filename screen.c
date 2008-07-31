@@ -26,7 +26,6 @@
 
 #include "screen.h"
 #include "tag.h"
-#include "focus.h"
 #include "client.h"
 #include "layouts/floating.h"
 

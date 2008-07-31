@@ -19,8 +19,8 @@
  *
  */
 
+#include "client.h"
 #include "tag.h"
-#include "focus.h"
 #include "window.h"
 #include "screen.h"
 
@@ -34,7 +34,7 @@ arrange(int screen)
 {
     client_t *c;
     layout_t *curlay = layout_get_current(screen);
-    int fscreen, phys_screen = screen_virttophys(screen);
+    int phys_screen = screen_virttophys(screen);
     xcb_query_pointer_cookie_t qp_c;
     xcb_query_pointer_reply_t *qp_r;
 
@@ -64,20 +64,6 @@ arrange(int screen)
 
         globalconf.pointer_x = qp_r->root_x;
         globalconf.pointer_y = qp_r->root_y;
-
-        /* no window have focus, let's try to see if mouse is on
-         * the screen we just rearranged */
-        if(!globalconf.focus->client)
-        {
-            fscreen = screen_get_bycoord(globalconf.screens_info,
-                                         screen,
-                                         qp_r->root_x, qp_r->root_y);
-            /* if the mouse in on the same screen we just rearranged, and no
-             * client are currently focused, pick the first one in history */
-            if(fscreen == screen
-               && (c = focus_get_current_client(screen)))
-                   client_focus(c, screen);
-        }
 
         p_delete(&qp_r);
     }

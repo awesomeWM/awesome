@@ -28,7 +28,6 @@
 #include "client.h"
 #include "tag.h"
 #include "window.h"
-#include "focus.h"
 #include "ewmh.h"
 #include "widget.h"
 #include "screen.h"
@@ -182,7 +181,7 @@ client_updatetitle(client_t *c)
 static void
 client_unfocus(client_t *c)
 {
-    focus_client_push(NULL);
+    globalconf.screens[c->screen].client_focus = NULL;
 
     /* Call hook */
     luaA_client_userdata_new(globalconf.L, c);
@@ -198,7 +197,7 @@ client_unfocus(client_t *c)
 void
 client_ban(client_t *c)
 {
-    if(globalconf.focus->client == c)
+    if(globalconf.screen_focus->client_focus == c)
         client_unfocus(c);
     xcb_unmap_window(globalconf.connection, c->win);
     if(c->ishidden)
@@ -221,20 +220,22 @@ client_focus(client_t *c, int screen)
 
     /* if c is NULL or invisible, take next client in the focus history */
     if((!c || (c && (!client_isvisible(c, screen))))
-       && !(c = focus_get_current_client(screen)))
+       && !(c = globalconf.screens[screen].client_focus))
         /* if c is still NULL take next client in the stack */
         for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
 
     /* unfocus current selected client */
-    if(globalconf.focus->client && c != globalconf.focus->client)
-        client_unfocus(globalconf.focus->client);
+    if(globalconf.screen_focus->client_focus && c != globalconf.screen_focus->client_focus)
+        client_unfocus(globalconf.screen_focus->client_focus);
 
     if(c)
     {
         /* unban the client before focusing or it will fail */
         client_unban(c);
-        /* save sel in focus history */
-        focus_client_push(c);
+
+        globalconf.screen_focus = &globalconf.screens[c->screen];
+        globalconf.screen_focus->client_focus = c;
+
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
                             c->win, XCB_CURRENT_TIME);
         phys_screen = c->phys_screen;
@@ -243,7 +244,7 @@ client_focus(client_t *c, int screen)
         globalconf.screens[c->screen].need_arrange = true;
 
         /* execute hook */
-        luaA_client_userdata_new(globalconf.L, globalconf.focus->client);
+        luaA_client_userdata_new(globalconf.L, globalconf.screen_focus->client_focus);
         luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
     }
     else
@@ -424,8 +425,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     /* Push client in client list */
     client_list_push(&globalconf.clients, c);
-    /* Append client in history: it'll be last. */
-    focus_client_append(c);
     client_ref(&c);
     /* Push client in stack */
     client_raise(c);
@@ -679,9 +678,6 @@ client_unmanage(client_t *c)
     luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1, 0);
 
-    if(globalconf.focus->client == c)
-        client_focus(NULL, c->screen);
-
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
 
@@ -691,7 +687,6 @@ client_unmanage(client_t *c)
 
     /* remove client everywhere */
     client_list_detach(&globalconf.clients, c);
-    focus_client_delete(c);
     stack_client_delete(c);
     for(int i = 0; i < tags->len; i++)
         untag_client(c, tags->tab[i]);
@@ -921,10 +916,10 @@ luaA_client_visible_get(lua_State *L)
  * \lreturn The currently focused client.
  */
 static int
-luaA_client_focus_get(lua_State *L __attribute__ ((unused)))
+luaA_client_focus_get(lua_State *L)
 {
-    if(globalconf.focus->client)
-        return luaA_client_userdata_new(globalconf.L, globalconf.focus->client);
+    if(globalconf.screen_focus->client_focus)
+        return luaA_client_userdata_new(L, globalconf.screen_focus->client_focus);
     return 0;
 }
 
