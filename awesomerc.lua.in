@@ -52,6 +52,9 @@ fg_focus = "#ffffff"
 border_focus = bg_focus
 border_marked = "#91231C"
 
+bg_urgent = "#ff0000"
+fg_urgent = "#ffffff"
+
 -- Define if we want to use titlebar on all applications
 use_titlebar = false
 
@@ -87,14 +90,14 @@ mytaglist:mouse_add(mouse({}, 3, function (object, tag) tag.selected = not tag.s
 mytaglist:mouse_add(mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end))
 mytaglist:mouse_add(mouse({ }, 4, awful.tag.viewnext))
 mytaglist:mouse_add(mouse({ }, 5, awful.tag.viewprev))
-function mytaglist.label(t) return awful.widget.taglist.label.all(t, bg_focus, fg_focus) end
+function mytaglist.label(t) return awful.widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent) end
 
 -- Create a tasklist widget
 mytasklist = widget({ type = "tasklist", name = "mytasklist" })
 mytasklist:mouse_add(mouse({ }, 1, function (object, c) c:focus_set(); c:raise() end))
 mytasklist:mouse_add(mouse({ }, 4, function () awful.client.focusbyidx(1) end))
 mytasklist:mouse_add(mouse({ }, 5, function () awful.client.focusbyidx(-1) end))
-function mytasklist.label(c, screen) return awful.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus) end
+function mytasklist.label(c, screen) return awful.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent) end
 
 -- Create a textbox widget
 mytextbox = widget({ type = "textbox", name = "mytextbox", align = "right" })

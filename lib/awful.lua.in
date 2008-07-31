@@ -921,35 +921,48 @@ end
 -- @param t The tag.
 -- @param bg_focus The background color for selected tag.
 -- @param fg_focus The foreground color for selected tag.
+-- @param bg_urgent The background color for urgent tags.
+-- @param fg_urgent The foreground color for urgent tags.
 -- @return A string to print.
-function P.widget.taglist.label.all(t, bg_focus, fg_focus)
-    local text = ""
+function P.widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
+    local text
     local background = ""
     local sel = client.focus_get()
+    local bg_color = nil
+    local fg_color = nil
+    local has_color = t.selected
     if sel and sel:istagged(t) then
+        bg_color = bg_focus
+        fg_color = fg_focus
         background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
-    else
-        for k, c in pairs(client.get()) do
-            if c:istagged(t) then
+    end
+    for k, c in pairs(client.get()) do
+        if c:istagged(t) then
+            if not (sel and sel:istagged(t)) then
                 background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarew.png\""
-                break
+            end
+            if c.urgent and bg_urgent and fg_urgent then
+                bg_color = bg_urgent
+                fg_color = fg_urgent
             end
         end
     end
-    if t.selected then
-        text = "<bg "..background.." color='"..bg_focus.."'/> <span color='"..fg_focus.."'>"..P.escape(t.name).."</span> "
+    if bg_color and fg_color then
+        text = "<bg "..background.." color='"..bg_color.."'/> <span color='"..fg_color.."'>"..P.escape(t.name).."</span> "
     else
         text = " <bg "..background.." />"..P.escape(t.name).." "
     end
     return text
 end
 
-local function widget_tasklist_label_common(c, bg_focus, fg_focus)
+local function widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
     local text = ""
     if c.floating then
         text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
     end
-    if client.focus_get() == c then
+    if c.urgent and bg_urgent and fg_urgent then
+        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..P.escape(c.name).."</span> "
+    elseif client.focus_get() == c then
         text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..P.escape(c.name).."</span> "
     else
         text = text .. " "..P.escape(c.name).." "
@@ -965,9 +978,11 @@ end
 -- @param screen The screen we are drawing on.
 -- @param bg_focus The background color for focused client.
 -- @param fg_focus The foreground color for focused client.
+-- @param bg_urgent The background color for urgent clients.
+-- @param fg_urgent The foreground color for urgent clients.
 -- @return A string to pring.
-function P.widget.tasklist.label.allscreen(c, screen, bg_focus, fg_focus)
-    return widget_tasklist_label_common(c, bg_focus, fg_focus)
+function P.widget.tasklist.label.allscreen(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
+    return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
 end
 
 --- Return labels for a tasklist widget with clients from all tags.
@@ -978,11 +993,13 @@ end
 -- @param screen The screen we are drawing on.
 -- @param bg_focus The background color for focused client.
 -- @param fg_focus The foreground color for focused client.
+-- @param bg_urgent The background color for urgent clients.
+-- @param fg_urgent The foreground color for urgent clients.
 -- @return A string to pring.
-function P.widget.tasklist.label.alltags(c, screen, bg_focus, fg_focus)
+function P.widget.tasklist.label.alltags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
-    return widget_tasklist_label_common(c, bg_focus, fg_focus)
+    return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
 end
 
 --- Return labels for a tasklist widget with clients from currently selected tags.
@@ -993,13 +1010,15 @@ end
 -- @param screen The screen we are drawing on.
 -- @param bg_focus The background color for focused client.
 -- @param fg_focus The foreground color for focused client.
+-- @param bg_urgent The background color for urgent clients.
+-- @param fg_urgent The foreground color for urgent clients.
 -- @return A string to pring.
-function P.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus)
+function P.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
     for k, t in pairs(tag.get(screen)) do
         if t.selected and c:istagged(t) then
-            return widget_tasklist_label_common(c, bg_focus, fg_focus)
+            return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
         end
     end
 end
