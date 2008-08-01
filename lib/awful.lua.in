@@ -930,10 +930,11 @@ function P.widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
     local sel = client.focus_get()
     local bg_color = nil
     local fg_color = nil
-    local has_color = t.selected
-    if sel and sel:istagged(t) then
+    if t.selected then
         bg_color = bg_focus
         fg_color = fg_focus
+    end
+    if sel and sel:istagged(t) then
         background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
     elseif bg_urgent and fg_urgent then
         for k, c in pairs(client.get()) do
