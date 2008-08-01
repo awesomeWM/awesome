@@ -4,9 +4,10 @@
 
 set -e
 
-VERSION=`echo $1 | sed 's/^v//'`
-git-archive --prefix=dist/awesome-$VERSION/ $VERSION | tar -xf -
+VERSION=$1
+SVERSION=`echo $1 | sed 's/^v//'`
+git-archive --prefix=dist/awesome-$SVERSION/ $VERSION | tar -xf -
 cd dist
-echo -n $VERSION > awesome-$VERSION/.version_stamp
-tar czf awesome-$VERSION.tar.gz awesome-$VERSION
-tar cjf awesome-$VERSION.tar.bz2 awesome-$VERSION
+echo -n $VERSION > awesome-$SVERSION/.version_stamp
+tar czf awesome-$SVERSION.tar.gz awesome-$SVERSION
+tar cjf awesome-$SVERSION.tar.bz2 awesome-$SVERSION
