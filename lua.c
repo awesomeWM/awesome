@@ -519,6 +519,7 @@ luaA_init(void)
     lua_settable(L, LUA_GLOBALSINDEX);
 
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
+    luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?/init.lua\"");
 
     /* init hooks */
     globalconf.hooks.manage = LUA_REFNIL;
