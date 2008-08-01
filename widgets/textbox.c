@@ -55,6 +55,8 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
     textbox_data_t *d = w->widget->data;
     draw_parser_data_t pdata, *pdata_arg = NULL;
 
+    w->area.height = ctx->height;
+
     if(d->width)
         w->area.width = d->width;
     else if(w->widget->align == AlignFlex)
@@ -73,8 +75,6 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
             w->area.width = MAX(w->area.width,
                                 pdata.bg_resize ? ((double) pdata.bg_image->width / (double) pdata.bg_image->height) * w->area.height : pdata.bg_image->width);
     }
-
-    w->area.height = ctx->height;
 
     w->area.x = widget_calculate_offset(ctx->width,
                                         w->area.width,
