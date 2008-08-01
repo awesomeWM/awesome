@@ -1081,6 +1081,6 @@ P.hooks.unmanage(P.client.focus.history.delete)
 P.hooks.focus(P.titlebar.update)
 P.hooks.unfocus(P.titlebar.update)
 P.hooks.titleupdate(P.titlebar.update)
-P.hooks.unmanage(P.titlebar.unmanage)
+P.hooks.unmanage(P.titlebar.remove)
 
 return P
