@@ -122,6 +122,8 @@ typedef struct
     char *exec;
     /** Prompt */
     char *prompt;
+    /** String match mode */
+    Bool match_string;
 } AwesomeMenuConf;
 
 static AwesomeMenuConf globalconf;
@@ -196,6 +198,7 @@ config_parse(int screen, const char *confpatharg,
            geometry->width = i;
         if((i = cfg_getint(cfg_menu, "height")) > 0)
            geometry->height = i;
+        globalconf.match_string = cfg_getbool(cfg_menu, "match_string");
     }
 
     if(cfg_screen
@@ -373,11 +376,12 @@ complete(Bool reverse)
 /** Compute a match from completion list for word.
  * \param word the word to match
  */
-static void
+static int
 compute_match(const char *word)
 {
     ssize_t len = a_strlen(word);
     item_t *item;
+    int matches = 0;
 
     /* reset the selected item to NULL */
     globalconf.item_selected = NULL;
@@ -389,8 +393,11 @@ compute_match(const char *word)
             item_list_fill_file(word);
 
         for(item = globalconf.items; item; item = item->next)
-            if(!a_strncmp(word, item->data, a_strlen(word)))
+            if((globalconf.match_string && strstr(item->data, word) != NULL) || (!globalconf.match_string && !a_strncmp(word, item->data, a_strlen(word))))
+            {
                 item->match = True;
+                matches++;
+            }
             else
                 item->match = False;
     }
@@ -399,8 +406,14 @@ compute_match(const char *word)
         if(a_strlen(globalconf.text))
             item_list_fill_file(NULL);
         for(item = globalconf.items; item; item = item->next)
+        {
             item->match = True;
+            matches++;
+        }
     }
+
+    return matches;
+
 }
 
 /* Why not? */
@@ -498,7 +511,7 @@ handle_kpress(XKeyEvent *e)
 {
     char buf[32];
     KeySym ksym;
-    int num;
+    int num, matches;
     ssize_t len;
     size_t text_dst_len;
 
@@ -538,7 +551,9 @@ handle_kpress(XKeyEvent *e)
                     globalconf.text[i--] = '\0';
                 while(i >= 0 && globalconf.text[i] != ' ')
                     globalconf.text[i--] = '\0';
-                compute_match(get_last_word(globalconf.text));
+                matches = compute_match(get_last_word(globalconf.text));
+                if (matches == 1)
+                    complete(False);
                 redraw();
             }
             return;
@@ -576,7 +591,9 @@ handle_kpress(XKeyEvent *e)
                 }
                 a_strncat(globalconf.text, globalconf.text_size, buf, num);
             }
-            compute_match(get_last_word(globalconf.text));
+            matches = compute_match(get_last_word(globalconf.text));
+            if (matches == 1)
+                complete(False);
             redraw();
         }
         break;
@@ -584,7 +601,9 @@ handle_kpress(XKeyEvent *e)
         if(len)
         {
             globalconf.text[--len] = '\0';
-            compute_match(get_last_word(globalconf.text));
+            matches = compute_match(get_last_word(globalconf.text));
+            if (matches == 1)
+                complete(False);
             redraw();
         }
         break;
@@ -696,7 +715,7 @@ int
 main(int argc, char **argv)
 {
     XEvent ev;
-    int opt, ret, x, y, i, screen = 0;
+    int opt, ret, x, y, i, screen = 0, matches;
     char *configfile = NULL, *cmd;
     ssize_t len;
     const char *shell = getenv("SHELL");
@@ -800,7 +819,9 @@ main(int argc, char **argv)
             item_list_fill_file(NULL);
     }
 
-    compute_match(NULL);
+    matches = compute_match(NULL);
+    if (matches == 1)
+        complete(False);
 
     redraw();
 
