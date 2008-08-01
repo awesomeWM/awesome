@@ -9,7 +9,7 @@ set(VERSION_MAJOR ${VERSION})
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
 
-set(CODENAME "Productivity Breaker")
+set(CODENAME "Time To Pretend")
 
 project(${PROJECT_AWE_NAME} C)
 
