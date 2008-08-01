@@ -935,13 +935,9 @@ function P.widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
         bg_color = bg_focus
         fg_color = fg_focus
         background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
-    end
-    for k, c in pairs(client.get()) do
-        if c:istagged(t) then
-            if not (sel and sel:istagged(t)) then
-                background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarew.png\""
-            end
-            if c.urgent and bg_urgent and fg_urgent then
+    elseif bg_urgent and fg_urgent then
+        for k, c in pairs(client.get()) do
+            if c.urgent and c:istagged(t) then
                 bg_color = bg_urgent
                 fg_color = fg_urgent
             end
@@ -960,10 +956,10 @@ local function widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg
     if c.floating then
         text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
     end
-    if c.urgent and bg_urgent and fg_urgent then
-        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..P.escape(c.name).."</span> "
-    elseif client.focus_get() == c then
+    if client.focus_get() == c then
         text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..P.escape(c.name).."</span> "
+    elseif c.urgent and bg_urgent and fg_urgent then
+        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..P.escape(c.name).."</span> "
     else
         text = text .. " "..P.escape(c.name).." "
     end
