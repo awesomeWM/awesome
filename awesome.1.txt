@@ -98,6 +98,12 @@ DEFAULT KEY BINDINGS
     View previous tag.
 *Mod4 + Right*::
     View next tag.
+*Mod4 + Control + y*::
+    Move next client to a tabbed display in current client.
+*Mod4 + Shift + y*::
+    Move client out of a tabbed display.
+*Mod4 + y*::
+    Go to next client in a tabbed display.
 *Mod4 + Control + space*::
     Toggle client floating status.
 *Mod4 + Control + Return*::
