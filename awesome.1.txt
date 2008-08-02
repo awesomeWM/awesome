@@ -68,57 +68,57 @@ DEFAULT KEY BINDINGS
     Spawn terminal emulator.
 *Mod4 + space*::
     Switch to next layout.
-*Mod4 \+ Shift \+ space*::
+*Mod4 + Shift + space*::
     Switch to previous layout.
 *Mod4 + j*::
     Focus next client.
 *Mod4 + k*::
     Focus previous client.
-*Mod4 \+ Shift \+ j*::
+*Mod4 + Shift + j*::
     Switch client with next client.
-*Mod4 \+ Shift \+ k*::
+*Mod4 + Shift + k*::
     Switch client with previous client.
-*Mod4 \+ Control \+ j*::
+*Mod4 + Control + j*::
     Focus next screen.
-*Mod4 \+ Control \+ k*::
+*Mod4 + Control + k*::
     Focus previous screen.
 *Mod4 + h*::
     Decrease master width factor by 5%.
 *Mod4 + l*::
     Increase master width factor by 5%.
-*Mod4 \+ Shift \+ h*::
+*Mod4 + Shift + h*::
     Increase number of master windows by 1.
-*Mod4 \+ Shift \+ l*::
+*Mod4 + Shift + l*::
     Decrease number of master windows by 1.
-*Mod4 \+ Control \+ h*::
+*Mod4 + Control + h*::
     Increase number of columns for non-master windows by 1.
-*Mod4 \+ Control \+ l*::
+*Mod4 + Control + l*::
     Decrease number of columns for non-master windows by 1.
 *Mod4 + Left*::
     View previous tag.
 *Mod4 + Right*::
     View next tag.
-*Mod4 \+ Control \+ space*::
+*Mod4 + Control + space*::
     Toggle client floating status.
-*Mod4 \+ Control \+ Return*::
+*Mod4 + Control + Return*::
     Swap focused client with master.
-*Mod4 \+ Shift \+ c*::
+*Mod4 + Shift + c*::
     Kill client.
-*Mod4 \+ Shift \+ q*::
+*Mod4 + Shift + q*::
     Quit awesome.
-*Mod4 \+ Control \+ r*::
+*Mod4 + Control + r*::
     Restart awesome.
 *Mod4 + 1-9*::
     Switch to tag 1-9.
-*Mod4 \+ Control \+ 1-9*::
+*Mod4 + Control + 1-9*::
     Toggle tag view.
-*Mod4 \+ Shift \+ 1-9*::
+*Mod4 + Shift + 1-9*::
     Tag client with tag.
-*Mod4 \+ Shift \+ Control \+ 1-9*::
+*Mod4 + Shift + Control + 1-9*::
     Toggle tag on client.
-*Mod4 \+ F1*::
+*Mod4 + F1*::
     Run prompt.
-*Mod4 \+ F4*::
+*Mod4 + F4*::
     Run lua code prompt.
 
 CUSTOMIZATION
