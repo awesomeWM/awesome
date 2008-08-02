@@ -9,16 +9,16 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-awesome [ -v | --version ] [ -h | --help ] [ --config | -c configuration file ]
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE']
 
 DESCRIPTION
 -----------
 
-+awesome+ is a window manager for X. It manages windows in different layouts, like
+*awesome* is a window manager for X. It manages windows in different layouts, like
 floating or tiled. Either layout can be applied dynamically, optimizing the
 environment for the application in use and the task performed.
 
-In tiled layout windows are managed in a master and stacking area. The master
+In tiled layout, windows are managed in a master and stacking area. The master
 area contains the windows which currently need most attention, whereas the
 stacking area contains all other windows. In floating layout windows can be
 resized and moved freely. Dialog windows are always managed floating,
@@ -29,17 +29,17 @@ former or as a rectangular fractal for the later.
 Windows are grouped by tags. Each window can be tagged with one or multiple
 tags. Selecting certain tags displays all windows with these tags.
 
-awesome can contain small statusbars which can display anything you want:
+*awesome* can contain small statusbars which can display anything you want:
 all available tags, the layout, the title of the visible windows, a text, etc.
 
 OPTIONS
 -------
--v | --version::
+*-v*, *--version*::
     Print version information to standard output, then exit.
--h | --help::
+*-h*, *--help*::
     Print help information, then exit.
---config | -c::
-    Use an alternate configuration file instead of $XDG_CONFIG_HOME/awesome/rc.lua.
+*-c*, *--config* 'FILE'::
+    Use an alternate configuration file instead of '$XDG_CONFIG_HOME/awesome/rc.lua'.
 
 DEFAULT MOUSE BINDINGS
 -----------------------
@@ -85,9 +85,9 @@ Birth and annihilation.
 *Mod4 + Shift + c*::
     Kill client.
 *Mod4 + Control + r*::
-    Restart awesome.
+    Restart *awesome*.
 *Mod4 + Shift + q*::
-    Quit awesome.
+    Quit *awesome*.
 
 Navigation.
 ~~~~~~~~~~~
@@ -149,20 +149,20 @@ Layout modification.
 
 CUSTOMIZATION
 -------------
-awesome is customized by creating a custom $XDG_CONFIG_HOME/awesome/rc.lua file.
+*awesome* is customized by creating a custom '$XDG_CONFIG_HOME/awesome/rc.lua' file.
 
 SEE ALSO
 --------
-awesomerc(5) awesome-client(1)
+*awesomerc*(5) *awesome-client*(1)
 
 BUGS
 ----
-Of course there's no bug in awesome. But there may be unexpected behaviours.
+Of course there's no bug in *awesome*. But there may be unexpected behaviors.
 
-Java applications which use the XToolkit/XAWT backend may draw grey windows
+Java applications which use the XToolkit/XAWT backend may draw gray windows
 only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and early
-JDK 1.6 versions, because it assumes a reparenting window manager. As a workaround
-you can use JDK 1.4 (which doesn't contain the XToolkit/XAWT backend) or you
+JDK 1.6 versions because it assumes a reparenting window manager. As a workaround
+you can use JDK 1.4 (which doesn't contain the XToolkit/XAWT backend), or you
 can set the following environment variable (to use the older Motif
 backend instead): AWT_TOOLKIT=MToolkit
 
