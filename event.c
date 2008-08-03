@@ -337,7 +337,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
     {
-        window_grabbuttons(c->win, c->phys_screen, c->buttons);
+        window_grabbuttons(c->win, ev->root, c->buttons);
         /* The idea behind saving pointer_x and pointer_y is Bob Marley powered.
          * this will allow us top drop some EnterNotify events and thus not giving
          * focus to windows appering under the cursor without a cursor move */
