@@ -796,8 +796,12 @@ function P.prompt(args, textbox, exe_callback, completion_callback)
 
         -- Get out cases
         if has_ctrl then
-            if key == "g" then
+            if key == "c" or key == "g" then
                 textbox.text = ""
+                return false
+            elseif key == "j" or key == "m" then
+                textbox.text = ""
+                exec_callback(command)
                 return false
             end
         else
@@ -815,8 +819,30 @@ function P.prompt(args, textbox, exe_callback, completion_callback)
         if has_ctrl then
             if key == "a" then
                 cur_pos = 1
+            elseif key == "b" then
+                if cur_pos > 1 then
+                    cur_pos = cur_pos - 1
+                end
+            elseif key == "d" then
+                if cur_pos <= #command then
+                    command = command:sub(1, cur_pos - 1) .. command:sub(cur_pos + 1)
+                end
             elseif key == "e" then
                 cur_pos = #command + 1
+            elseif key == "f" then
+                if cur_pos <= #command then
+                    cur_pos = cur_pos + 1
+                end
+            elseif key == "h" then
+                if cur_pos > 1 then
+                    command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
+                    cur_pos = cur_pos - 1
+                end
+            elseif key == "k" then
+                command = command:sub(1, cur_pos - 1)
+            elseif key == "u" then
+                command = command:sub(cur_pos, #command)
+                cur_pos = 1
             elseif key == "w" then
                 local wstart = 1
                 local wend = 1
