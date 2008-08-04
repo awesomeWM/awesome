@@ -392,12 +392,12 @@ function hook_timer ()
 end
 
 -- Set up some hooks
-awful.hooks.focus(hook_focus)
-awful.hooks.unfocus(hook_unfocus)
-awful.hooks.marked(hook_marked)
-awful.hooks.unmarked(hook_unmarked)
-awful.hooks.manage(hook_manage)
-awful.hooks.mouseover(hook_mouseover)
-awful.hooks.arrange(hook_arrange)
-awful.hooks.timer(1, hook_timer)
+awful.hooks.focus.register(hook_focus)
+awful.hooks.unfocus.register(hook_unfocus)
+awful.hooks.marked.register(hook_marked)
+awful.hooks.unmarked.register(hook_unmarked)
+awful.hooks.manage.register(hook_manage)
+awful.hooks.mouseover.register(hook_mouseover)
+awful.hooks.arrange.register(hook_arrange)
+awful.hooks.timer.register(1, hook_timer)
 -- }}}

@@ -1,18 +1,9 @@
------------------------------------------------
--- awful: AWesome Function very UsefuL       --
--- Common useful awesome functions           --
---                                           --
--- © 2008 Julien Danjou <julien@danjou.info> --
------------------------------------------------
-
--- We usually are required as 'awful'
--- But that can be changed.
-local P = {}   -- package
-if _REQUIREDNAME == nil then
-    awful = P
-else
-    _G[_REQUIREDNAME] = P
-end
+---------------------------------------------------------------------------
+-- awful: AWesome Functions very UsefuL
+--
+-- @author Julien Danjou <julien@danjou.info>
+-- @copyright 2008 Julien Danjou
+---------------------------------------------------------------------------
 
 -- Grab environment we need
 local string = string
@@ -21,22 +12,23 @@ local loadstring = loadstring
 local ipairs = ipairs
 local pairs = pairs
 local unpack = unpack
-local awesome = awesome
-local screen = screen
-local client = client
-local tag = tag
-local mouse = mouse
-local titlebar = titlebar
-local widget = widget
 local os = os
-local table = table
-local hooks = hooks
-local keygrabber = keygrabber
 local io = io
 local setmetatable = setmetatable
+local table = table
+local capi =
+{
+    screen = screen,
+    client = client,
+    tag = tag,
+    mouse = mouse,
+    titlebar = titlebar,
+    widget = widget,
+    hooks = hooks,
+    keygrabber = keygrabber
+}
 
--- Reset env
-setfenv(1, P)
+module("awful")
 
 -- The ObjectTable class
 ObjectTable = {}
@@ -57,46 +49,28 @@ function ObjectTable.new()
 end
 
 -- Various structure
-P.hooks = {}
-P.myhooks = {}
-P.prompt = {}
-P.completion = {}
-P.screen = {}
-P.layout = {}
-P.client = {}
-P.client.focus = {}
-P.client.focus.history = {}
-P.client.focus.history.data = {}
-P.tag = {}
-P.tag.history = {}
-P.tag.history.data = {}
-P.tag.history.data.past = {}
-P.tag.history.data.current = {}
-P.titlebar = {}
-P.titlebar.data = ObjectTable.new()
-P.widget = {}
-P.widget.taglist = {}
-P.widget.taglist.label = {}
-P.widget.tasklist = {}
-P.widget.tasklist.label = {}
-
-
---- Create a new userhook (for external libs).
--- @param name Hook name.
-local function userhook_create(name)
-    P.myhooks[name] = {}
-    P.hooks[name] = function (f)
-        table.insert(P.myhooks[name], { callback = f })
-    end
-end
-
---- Call a created userhook (for external libs).
--- @param name Hook name.
-local function userhook_call(name, args)
-    for i, o in pairs(P.myhooks[name]) do
-        P.myhooks[name][i]['callback'](unpack(args))
-    end
-end
+hooks = {}
+hooks.user =  {}
+prompt = {}
+completion = {}
+screen = {}
+layout = {}
+client = {}
+client.focus = {}
+client.focus.history = {}
+client.focus.history.data = {}
+tag = {}
+tag.history = {}
+tag.history.data = {}
+tag.history.data.past = {}
+tag.history.data.current = {}
+titlebar = {}
+titlebar.data = ObjectTable.new()
+widget = {}
+widget.taglist = {}
+widget.taglist.label = {}
+widget.tasklist = {}
+widget.tasklist.label = {}
 
 --- Make i cycle.
 -- @param t A length.
@@ -110,10 +84,10 @@ end
 
 --- Remove a client from the focus history
 -- @param c The client that must be removed.
-function P.client.focus.history.delete(c)
-    for k, v in ipairs(P.client.focus.history.data) do
+function client.focus.history.delete(c)
+    for k, v in ipairs(client.focus.history.data) do
         if v == c then
-            table.remove(P.client.focus.history.data, k)
+            table.remove(client.focus.history.data, k)
             break
         end
     end
@@ -121,11 +95,11 @@ end
 
 --- Update client focus history.
 -- @param c The client that has been focused.
-function P.client.focus.history.add(c)
+function client.focus.history.add(c)
     -- Remove the client if its in stack
-    P.client.focus.history.delete(c)
+    client.focus.history.delete(c)
     -- Record the client has latest focused
-    table.insert(P.client.focus.history.data, 1, c)
+    table.insert(client.focus.history.data, 1, c)
 end
 
 --- Get the latest focused client for a screen in history.
@@ -133,11 +107,11 @@ end
 -- @param idx The index: 0 will return first candidate,
 -- 1 will return second, etc.
 -- @return A client.
-function P.client.focus.history.get(screen, idx)
+function client.focus.history.get(screen, idx)
     -- When this counter is equal to idx, we return the client
     local counter = 0
-    local vc = client.visible_get(screen)
-    for k, c in ipairs(P.client.focus.history.data) do
+    local vc = capi.client.visible_get(screen)
+    for k, c in ipairs(client.focus.history.data) do
         if c.screen == screen then
             for j, vcc in ipairs(vc) do
                 if vcc == c then
@@ -158,15 +132,15 @@ function P.client.focus.history.get(screen, idx)
 end
 
 --- Focus the previous client in history.
-function P.client.focus.history.previous()
-    local sel = client.focus_get()
+function client.focus.history.previous()
+    local sel = capi.client.focus_get()
     local s
     if sel then
         s = sel.screen
     else
-        s = mouse.screen
+        s = capi.mouse.screen
     end
-    local c = P.client.focus.history.get(s, 1)
+    local c = client.focus.history.get(s, 1)
     if c then c:focus_set() end
 end
 
@@ -175,12 +149,12 @@ end
 -- @param i The index.
 -- @param c Optional client.
 -- @return A client, or nil if no client is available.
-function P.client.next(i, c)
+function client.next(i, c)
     -- Get currently focused client
-    local sel = c or client.focus_get()
+    local sel = c or capi.client.focus_get()
     if sel then
         -- Get all visible clients
-        local cls = client.visible_get(sel.screen)
+        local cls = capi.client.visible_get(sel.screen)
         -- Loop upon each client
         for idx, c in ipairs(cls) do
             if c == sel then
@@ -194,8 +168,8 @@ end
 --- Focus a client by its relative index.
 -- @param i The index.
 -- @param c Optional client.
-function P.client.focusbyidx(i, c)
-    local target = P.client.next(i, c)
+function client.focusbyidx(i, c)
+    local target = client.next(i, c)
     if target then
         target:focus_set()
     end
@@ -204,20 +178,20 @@ end
 --- Swap a client by its relative index.
 -- @param i The index.
 -- @param c Optional client, otherwise focused one is used.
-function P.client.swap(i, c)
-    local sel = c or client.focus_get()
-    local target = P.client.next(i, sel)
+function client.swap(i, c)
+    local sel = c or capi.client.focus_get()
+    local target = client.next(i, sel)
     if target then
         target:swap(sel)
     end
 end
 
---- Get the master window
+--- Get the master window.
 -- @param screen Optional screen number, otherwise screen mouse is used.
 -- @return The master window.
-function P.client.master(screen)
-    local s = screen or mouse.screen
-    return client.visible_get(s)[1]
+function client.master(screen)
+    local s = screen or capi.mouse.screen
+    return capi.client.visible_get(s)[1]
 end
 
 --- Move/resize a client relative to current coordinates.
@@ -226,8 +200,8 @@ end
 -- @param w The relative width.
 -- @param h The relative height.
 -- @param c The optional client, otherwise focused one is used.
-function P.client.moveresize(x, y, w, h, c)
-    local sel = c or client.focus_get()
+function client.moveresize(x, y, w, h, c)
+    local sel = c or capi.client.focus_get()
     local coords = sel.coords
     coords['x'] = coords['x'] + x
     coords['y'] = coords['y'] + y
@@ -238,11 +212,11 @@ end
 
 --- Maximize a client to use the full workspace area.
 -- @param c A client, or the focused one if nil.
-function P.client.maximize(c)
-    local sel = c or client.focus_get()
+function client.maximize(c)
+    local sel = c or capi.client.focus_get()
     if sel then
         sel.floating = true
-        local ws = screen.workspace_get(sel.screen)
+        local ws = capi.screen.workspace_get(sel.screen)
         ws.width = ws.width - 2 * sel.border_width
         ws.height = ws.height - 2 * sel.border_width
         sel.coords = ws
@@ -251,19 +225,19 @@ end
 
 --- Give the focus to a screen, and move pointer.
 -- @param Screen number.
-function P.screen.focus(i)
-    local sel = client.focus_get()
+function screen.focus(i)
+    local sel = capi.client.focus_get()
     local s
     if sel then
         s = sel.screen
     else
-        s = mouse.screen
+        s = capi.mouse.screen
     end
-    s = cycle(screen.count(), s + i)
-    local c = P.client.focus.history.get(s, 0)
+    s = cycle(capi.screen.count(), s + i)
+    local c = client.focus.history.get(s, 0)
     if c then c:focus_set() end
     -- Move the mouse on the screen
-    mouse.coords = screen.coords_get(s)
+    capi.mouse.coords = capi.screen.coords_get(s)
 end
 
 --- Compare 2 tables of tags.
@@ -293,33 +267,33 @@ end
 
 --- Update the tag history.
 -- @param screen The screen number.
-function P.tag.history.update(screen)
-    local curtags = tag.geti(screen)
-    if not tag_compare_select(curtags, P.tag.history.data.current[screen]) then
-        P.tag.history.data.past[screen] = P.tag.history.data.current[screen]
-        P.tag.history.data.current[screen] = {}
+function tag.history.update(screen)
+    local curtags = capi.tag.geti(screen)
+    if not tag_compare_select(curtags, tag.history.data.current[screen]) then
+        tag.history.data.past[screen] = tag.history.data.current[screen]
+        tag.history.data.current[screen] = {}
         for k, v in ipairs(curtags) do
-            P.tag.history.data.current[screen][k] = v.selected
+            tag.history.data.current[screen][k] = v.selected
         end
     end
 end
 
 -- Revert tag history.
 -- @param screen The screen number.
-function P.tag.history.restore(screen)
-    local s = screen or mouse.screen
-    local tags = tag.geti(s)
+function tag.history.restore(screen)
+    local s = screen or capi.mouse.screen
+    local tags = capi.tag.geti(s)
     for k, t in pairs(tags) do
-        t.selected = P.tag.history.data.past[s][k]
+        t.selected = tag.history.data.past[s][k]
     end
 end
 
 --- Return a table with all visible tags
 -- @param s Screen number.
 -- @return A table with all selected tags.
-function P.tag.selectedlist(s)
-    local screen = s or mouse.screen
-    local tags = tag.geti(screen)
+function tag.selectedlist(s)
+    local screen = s or capi.mouse.screen
+    local tags = capi.tag.geti(screen)
     local vtags = {}
     for i, t in pairs(tags) do
         if t.selected then
@@ -331,14 +305,14 @@ end
 
 --- Return only the first visible tag.
 -- @param s Screen number.
-function P.tag.selected(s)
-    return P.tag.selectedlist(s)[1]
+function tag.selected(s)
+    return tag.selectedlist(s)[1]
 end
 
 --- Set master width factor.
 -- @param mwfact Master width factor.
-function P.tag.setmwfact(mwfact)
-    local t = P.tag.selected()
+function tag.setmwfact(mwfact)
+    local t = tag.selected()
     if t then
         t.mwfact = mwfact
     end
@@ -346,8 +320,8 @@ end
 
 --- Increase master width factor.
 -- @param add Value to add to master width factor.
-function P.tag.incmwfact(add)
-    local t = P.tag.selected()
+function tag.incmwfact(add)
+    local t = tag.selected()
     if t then
         t.mwfact = t.mwfact + add
     end
@@ -355,8 +329,8 @@ end
 
 --- Set the number of master windows.
 -- @param nmaster The number of master windows.
-function P.tag.setnmaster(nmaster)
-    local t = P.tag.selected()
+function tag.setnmaster(nmaster)
+    local t = tag.selected()
     if t then
         t.nmaster = nmaster
     end
@@ -364,8 +338,8 @@ end
 
 --- Increase the number of master windows.
 -- @param add Value to add to number of master windows.
-function P.tag.incnmaster(add)
-    local t = P.tag.selected()
+function tag.incnmaster(add)
+    local t = tag.selected()
     if t then
         t.nmaster = t.nmaster + add
     end
@@ -373,8 +347,8 @@ end
 
 --- Set number of column windows.
 -- @param ncol The number of column.
-function P.tag.setncol(ncol)
-    local t = P.tag.selected()
+function tag.setncol(ncol)
+    local t = tag.selected()
     if t then
         t.ncol = ncol
     end
@@ -382,8 +356,8 @@ end
 
 --- Increase number of column windows.
 -- @param add Value to add to number of column windows.
-function P.tag.incncol(add)
-    local t = P.tag.selected()
+function tag.incncol(add)
+    local t = tag.selected()
     if t then
         t.ncol = t.ncol + add
     end
@@ -391,8 +365,8 @@ end
 
 --- View no tag.
 -- @param Optional screen number.
-function P.tag.viewnone(screen)
-    local tags = tag.get(screen or mouse.screen)
+function tag.viewnone(screen)
+    local tags = capi.tag.get(screen or capi.mouse.screen)
     for i, t in pairs(tags) do
         t.selected = false
     end
@@ -401,10 +375,10 @@ end
 --- View a tag by its index.
 -- @param i The relative index to see.
 -- @param screen Optional screen number.
-function P.tag.viewidx(i, screen)
-    local tags = tag.geti(screen or mouse.screen)
-    local sel = P.tag.selected()
-    P.tag.viewnone()
+function tag.viewidx(i, screen)
+    local tags = capi.tag.geti(screen or capi.mouse.screen)
+    local sel = tag.selected()
+    tag.viewnone()
     for k, t in ipairs(tags) do
         if t == sel then
             tags[cycle(#tags, k + i)].selected = true
@@ -413,27 +387,27 @@ function P.tag.viewidx(i, screen)
 end
 
 --- View next tag. This is the same as tag.viewidx(1).
-function P.tag.viewnext()
-    return P.tag.viewidx(1)
+function tag.viewnext()
+    return tag.viewidx(1)
 end
 
 --- View previous tag. This is the same a tag.viewidx(-1).
-function P.tag.viewprev()
-    return P.tag.viewidx(-1)
+function tag.viewprev()
+    return tag.viewidx(-1)
 end
 
 --- View only a tag.
 -- @param t The tag object.
-function P.tag.viewonly(t)
-    P.tag.viewnone()
+function tag.viewonly(t)
+    tag.viewnone()
     t.selected = true
 end
 
 --- View only a set of tags.
 -- @param tags A table with tags to view only.
 -- @param screen Optional screen number of the tags.
-function P.tag.viewmore(tags, screen)
-    P.tag.viewnone(screen)
+function tag.viewmore(tags, screen)
+    tag.viewnone(screen)
     for i, t in pairs(tags) do
         t.selected = true
     end
@@ -442,11 +416,11 @@ end
 --- Move a client to a tag.
 -- @param target The tag to move the client to.
 -- @para c Optional client to move, otherwise the focused one is used.
-function P.client.movetotag(target, c)
-    local sel = c or client.focus_get();
+function client.movetotag(target, c)
+    local sel = c or capi.client.focus_get();
     -- Check that tag and client screen are identical
     if sel.screen ~= target.screen then return end
-    local tags = tag.get(sel.screen)
+    local tags = capi.tag.get(sel.screen)
     for k, t in pairs(tags) do
         sel:tag(t, false)
     end
@@ -456,15 +430,15 @@ end
 --- Toggle a tag on a client.
 -- @param target The tag to toggle.
 -- @param c Optional client to toggle, otherwise the focused one is used.
-function P.client.toggletag(target, c)
-    local sel = c or client.focus_get();
+function client.toggletag(target, c)
+    local sel = c or capi.client.focus_get();
     -- Check that tag and client screen are identical
     if sel.screen ~= target.screen then return end
     local toggle = false
     if sel then
         -- Count how many tags has the client
         -- an only toggle tag if the client has at least one tag other than target
-        for k, v in pairs(tag.get(sel.screen)) do
+        for k, v in pairs(capi.tag.get(sel.screen)) do
             if target ~= v and sel:istagged(v) then
                 toggle = true
                 break
@@ -478,8 +452,8 @@ end
 
 --- Toggle the floating status of a client.
 -- @param c Optional client, the focused on if not set.
-function P.client.togglefloating(c)
-    local sel = c or client.focus_get();
+function client.togglefloating(c)
+    local sel = c or capi.client.focus_get();
     if sel then
         sel.floating = not sel.floating
     end
@@ -488,39 +462,57 @@ end
 --- Move a client to a screen. Default is next screen, cycling.
 -- @param c The client to move.
 -- @param s The screen number, default to current + 1.
-function P.client.movetoscreen(c, s)
-    local sel = c or client.focus_get();
+function client.movetoscreen(c, s)
+    local sel = c or capi.client.focus_get();
     if sel then
-        local sc = screen.count()
+        local sc = capi.screen.count()
         if not s then
             s = sel.screen + 1
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel.screen = s
-        mouse.coords = screen.coords_get(s)
+        capi.mouse.coords = capi.screen.coords_get(s)
         sel:focus_set()
     end
 end
 
 --- Get the current layout name.
 -- @param screen The screen number.
-function P.layout.get(screen)
-    local t = P.tag.selected(screen)
+function layout.get(screen)
+    local t = tag.selected(screen)
     if t then
         return t.layout
     end
 end
 
+--- Create a new userhook (for external libs).
+-- @param name Hook name.
+function hooks.user.create(name)
+    hooks[name] = {}
+    hooks[name].callbacks = {}
+    hooks[name].register = function (f)
+        table.insert(hooks[name].callbacks, f)
+    end
+end
+
+--- Call a created userhook (for external libs).
+-- @param name Hook name.
+function hooks.user.call(name, ...)
+    for name, callback in pairs(hooks[name].callbacks) do
+        callback(unpack(args))
+    end
+end
+
 -- Just set an awful mark to a client to move it later.
 local awfulmarked = {}
-userhook_create('marked')
-userhook_create('unmarked')
+hooks.user.create('marked')
+hooks.user.create('unmarked')
 
 --- Mark a client, and then call 'marked' hook.
 -- @param c The client to mark, the focused one if not specified.
 -- @return True if the client has been marked. False if the client was already marked.
-function P.client.mark (c)
-    local cl = c or client.focus_get()
+function client.mark (c)
+    local cl = c or capi.client.focus_get()
     if cl then
         for k, v in pairs(awfulmarked) do
             if cl == v then
@@ -531,7 +523,7 @@ function P.client.mark (c)
         table.insert(awfulmarked, cl)
 
         -- Call callback
-        userhook_call('marked', {cl})
+        hooks.user.call('marked', cl)
         return true
     end
 end
@@ -539,13 +531,13 @@ end
 --- Unmark a client and then call 'unmarked' hook.
 -- @param c The client to unmark, or the focused one if not specified.
 -- @return True if the client has been unmarked. False if the client was not marked.
-function P.client.unmark(c)
-    local cl = c or client.focus_get()
+function client.unmark(c)
+    local cl = c or capi.client.focus_get()
 
     for k, v in pairs(awfulmarked) do
         if cl == v then
             table.remove(awfulmarked, k)
-            userhook_call('unmarked', {cl})
+            hooks.user.call('unmarked', cl)
             return true
         end
     end
@@ -555,8 +547,8 @@ end
 
 --- Check if a client is marked.
 -- @param c The client to check, or the focused one otherwise.
-function P.client.ismarked(c)
-    local cl = c or client.focus_get()
+function client.ismarked(c)
+    local cl = c or capi.client.focus_get()
     if cl then
         for k, v in pairs(awfulmarked) do
             if cl == v then
@@ -569,19 +561,19 @@ end
 
 --- Toggle a client as marked.
 -- @param c The client to toggle mark.
-function P.client.togglemarked(c)
-    local cl = c or client.focus_get()
+function client.togglemarked(c)
+    local cl = c or capi.client.focus_get()
 
-    if not P.client.mark(c) then
-        P.client.unmark(c)
+    if not client.mark(c) then
+        client.unmark(c)
     end
 end
 
 --- Return the marked clients and empty the marked table.
 -- @return A table with all marked clients.
-function P.client.getmarked()
+function client.getmarked()
     for k, v in pairs(awfulmarked) do
-        userhook_call('unmarked', {v})
+        hooks.user.call('unmarked', v)
     end
 
     t = awfulmarked
@@ -592,8 +584,8 @@ end
 --- Change the layout of the current tag.
 -- @param layouts A table of layouts.
 -- @param i Relative index.
-function P.layout.inc(layouts, i)
-    local t = P.tag.selected()
+function layout.inc(layouts, i)
+    local t = tag.selected()
     local number_of_layouts = 0
     local rev_layouts = {}
     for i, v in ipairs(layouts) do
@@ -612,56 +604,51 @@ end
 
 --- Set the layout of the current tag by name.
 -- @param layout Layout name.
-function P.layout.set(layout)
-    local t = P.tag.selected()
+function layout.set(layout)
+    local t = tag.selected()
     if t then
 	t.layout = layout
     end
 end
 
-P.hooks['userhook_create'] = userhook_create
-P.hooks['userhook_call'] = userhook_call
-
-for name, hook in pairs(hooks) do
+-- Autodeclare awful.hooks.* functions
+-- mapped to awesome hooks.* functions
+for name, hook in pairs(capi.hooks) do
     if name ~= 'timer' then
-        P.hooks[name] = function (f)
-
-            if P.myhooks[name] == nil then
-                P.myhooks[name] = {}
-                hooks[name](function (...)
-
-                    for i, o in pairs(P.myhooks[name]) do
-                       P.myhooks[name][i]['callback'](...)
+        hooks[name] = {}
+        hooks[name].register = function (f)
+            if not hooks[name].callbacks then
+                hooks[name].callbacks = {}
+                hook(function (...)
+                    for i, callback in ipairs(hooks[name].callbacks) do
+                       callback(...)
                     end
-
                 end)
             end
 
-            table.insert(P.myhooks[name], {callback = f})
+            table.insert(hooks[name].callbacks, f)
         end
     else
-        P.hooks[name] = function (time, f, runnow)
-
-            if P.myhooks[name] == nil then
-                P.myhooks[name] = {}
-                hooks[name](1, function (...)
-
-                    for i,o in pairs(P.myhooks[name]) do
-                        if P.myhooks[name][i]['counter'] >= P.myhooks[name][i]['timer'] then
-                            P.myhooks[name][i]['counter'] = 1
-                            P.myhooks[name][i]['callback'](...)
+        hooks[name] = {}
+        hooks[name].register = function (time, f, runnow)
+            if not hooks[name].callbacks then
+                hooks[name].callbacks = {}
+                hook(1, function (...)
+                    for i, callback in pairs(hooks[name].callbacks) do
+                        if callback['counter'] >= callback['timer'] then
+                            callback['counter'] = 1
+                            callback['callback'](...)
                         else
-                            P.myhooks[name][i]['counter'] = P.myhooks[name][i]['counter']+1
+                            callback['counter'] = callback['counter'] + 1
                         end
                     end
-
                 end)
             end
 
             if runnow then
-                table.insert(P.myhooks[name], {callback = f, timer = time, counter = time})
+                table.insert(hooks[name].callbacks, { callback = f, timer = time, counter = time })
             else
-                table.insert(P.myhooks[name], {callback = f, timer = time, counter = 0})
+                table.insert(hooks[name].callbacks, { callback = f, timer = time, counter = 0 })
             end
         end
     end
@@ -670,13 +657,13 @@ end
 --- Spawn a program.
 -- @param cmd The command.
 -- @return The os.execute() return value.
-function P.spawn(cmd)
+function spawn(cmd)
     return os.execute(cmd .. "&")
 end
 
 --- Eval Lua code.
 -- @return The return value of Lua code.
-function P.eval(s)
+function eval(s)
     return assert(loadstring("return " .. s))()
 end
 
@@ -685,7 +672,7 @@ end
 -- @param cur_pos The cursor position.
 -- @paran ncomp The element number to complete.
 -- @return The new commande and the new cursor position.
-function P.completion.bash(command, cur_pos, ncomp)
+function completion.bash(command, cur_pos, ncomp)
     local wstart = 1
     local wend = 1
     local words = {}
@@ -769,7 +756,7 @@ end
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument when finished.
 -- @param completion_callback The callback function to call to get completion.
-function P.prompt(args, textbox, exe_callback, completion_callback)
+function prompt(args, textbox, exe_callback, completion_callback)
     if not args then return end
     local command = ""
     local command_before_comp
@@ -785,7 +772,7 @@ function P.prompt(args, textbox, exe_callback, completion_callback)
         return
     end
     textbox.text = prompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos)
-    keygrabber.run(
+    capi.keygrabber.run(
     function (mod, key)
         local has_ctrl = false
 
@@ -920,7 +907,7 @@ end
 -- Useful to set raw text in textbox.
 -- @param text Text to escape.
 -- @return Escape text.
-function P.escape(text)
+function escape(text)
     text = text:gsub("&", "&amp;")
     text = text:gsub("<", "&lt;")
     text = text:gsub(">", "&gt;")
@@ -932,7 +919,7 @@ end
 --- Unescape a string from entities.
 -- @param text Text to unescape.
 -- @return Unescaped text.
-function P.unescape(text)
+function unescape(text)
     text = text:gsub("&amp;", "&")
     text = text:gsub("&lt;", "<")
     text = text:gsub("&gt;", ">")
@@ -950,10 +937,10 @@ end
 -- @param bg_urgent The background color for urgent tags.
 -- @param fg_urgent The foreground color for urgent tags.
 -- @return A string to print.
-function P.widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
+function widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
     local text
     local background = ""
-    local sel = client.focus_get()
+    local sel = capi.client.focus_get()
     local bg_color = nil
     local fg_color = nil
     if t.selected then
@@ -963,7 +950,7 @@ function P.widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
     if sel and sel:istagged(t) then
         background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
     elseif bg_urgent and fg_urgent then
-        for k, c in pairs(client.get()) do
+        for k, c in pairs(capi.client.get()) do
             if c:istagged(t) then
                 background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarew.png\""
                 if c.urgent then
@@ -974,9 +961,9 @@ function P.widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
         end
     end
     if bg_color and fg_color then
-        text = "<bg "..background.." color='"..bg_color.."'/> <span color='"..fg_color.."'>"..P.escape(t.name).."</span> "
+        text = "<bg "..background.." color='"..bg_color.."'/> <span color='"..fg_color.."'>"..escape(t.name).."</span> "
     else
-        text = " <bg "..background.." />"..P.escape(t.name).." "
+        text = " <bg "..background.." />"..escape(t.name).." "
     end
     return text
 end
@@ -986,12 +973,12 @@ local function widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg
     if c.floating then
         text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
     end
-    if client.focus_get() == c then
-        text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..P.escape(c.name).."</span> "
+    if capi.client.focus_get() == c then
+        text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..escape(c.name).."</span> "
     elseif c.urgent and bg_urgent and fg_urgent then
-        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..P.escape(c.name).."</span> "
+        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..escape(c.name).."</span> "
     else
-        text = text .. " "..P.escape(c.name).." "
+        text = text .. " "..escape(c.name).." "
     end
     return text
 end
@@ -1007,7 +994,7 @@ end
 -- @param bg_urgent The background color for urgent clients.
 -- @param fg_urgent The foreground color for urgent clients.
 -- @return A string to pring.
-function P.widget.tasklist.label.allscreen(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
+function widget.tasklist.label.allscreen(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
     return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
 end
 
@@ -1022,7 +1009,7 @@ end
 -- @param bg_urgent The background color for urgent clients.
 -- @param fg_urgent The foreground color for urgent clients.
 -- @return A string to pring.
-function P.widget.tasklist.label.alltags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
+function widget.tasklist.label.alltags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
     return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
@@ -1039,10 +1026,10 @@ end
 -- @param bg_urgent The background color for urgent clients.
 -- @param fg_urgent The foreground color for urgent clients.
 -- @return A string to pring.
-function P.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
+function widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
-    for k, t in pairs(tag.get(screen)) do
+    for k, t in pairs(capi.tag.get(screen)) do
         if t.selected and c:istagged(t) then
             return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
         end
@@ -1056,53 +1043,53 @@ end
 -- bg: the background color.
 -- fg_focus: the foreground color for focused window.
 -- fg_focus: the background color for focused window.
-function P.titlebar.add(c, args)
+function titlebar.add(c, args)
     -- Store colors
-    P.titlebar.data[c] = {}
-    P.titlebar.data[c].fg = args.fg
-    P.titlebar.data[c].bg = args.bg
-    P.titlebar.data[c].fg_focus = args.fg_focus
-    P.titlebar.data[c].bg_focus = args.bg_focus
+    titlebar.data[c] = {}
+    titlebar.data[c].fg = args.fg
+    titlebar.data[c].bg = args.bg
+    titlebar.data[c].fg_focus = args.fg_focus
+    titlebar.data[c].bg_focus = args.bg_focus
 
     -- Built args
     local targs = {}
     if args.fg then targs.fg = args.fg end
     if args.bg then targs.bg = args.bg end
-    local tb = titlebar(targs)
+    local tb = capi.titlebar(targs)
 
-    tb:widget_add(widget({ type = "appicon", name = "appicon", align = "left" }))
+    tb:widget_add(capi.widget({ type = "appicon", name = "appicon", align = "left" }))
 
-    local title = widget({ type = "textbox", name = "title", align = "flex" })
+    local title = capi.widget({ type = "textbox", name = "title", align = "flex" })
     title:mouse_add(mouse({ args.modkey }, 1, function (t) t:client_get():mouse_move() end))
     title:mouse_add(mouse({ args.modkey }, 3, function (t) t:client_get():mouse_resize() end))
     tb:widget_add(title)
 
-    local close_button= widget({ type = "textbox", name = "close", align = "right" })
+    local close_button= capi.widget({ type = "textbox", name = "close", align = "right" })
     close_button:mouse_add(mouse({ }, 1, function (t) t:client_get():kill() end))
     tb:widget_add(close_button)
 
-    P.titlebar.update(c)
+    titlebar.update(c)
 
     c.titlebar = tb
 end
 
 --- Update a titlebar. This should be called in some hooks.
 -- @param c The client to update.
-function P.titlebar.update(c)
-    if c.titlebar and P.titlebar.data[c] then
+function titlebar.update(c)
+    if c.titlebar and titlebar.data[c] then
         local widgets = c.titlebar:widget_get()
         if widgets.title then
-            widgets.title.text = " " .. P.escape(c.name)
+            widgets.title.text = " " .. escape(c.name)
         end
-        if client.focus_get() == c then
-            c.titlebar.fg = P.titlebar.data[c].fg_focus
-            c.titlebar.bg = P.titlebar.data[c].bg_focus
+        if capi.client.focus_get() == c then
+            c.titlebar.fg = titlebar.data[c].fg_focus
+            c.titlebar.bg = titlebar.data[c].bg_focus
             if widgets.close then
                 widgets.close.text = "<bg image=\"@AWESOME_ICON_PATH@/titlebar/closer.png\" resize=\"true\"/>"
             end
         else
-            c.titlebar.fg = P.titlebar.data[c].fg
-            c.titlebar.bg = P.titlebar.data[c].bg
+            c.titlebar.fg = titlebar.data[c].fg
+            c.titlebar.bg = titlebar.data[c].bg
             if widgets.close then
                 widgets.close.text = "<bg image=\"@AWESOME_ICON_PATH@/titlebar/close.png\" resize=\"true\"/>"
             end
@@ -1112,20 +1099,18 @@ end
 
 --- Remove a titlebar from a client.
 -- @param c The client.
-function P.titlebar.remove(c)
+function titlebar.remove(c)
     c.titlebar = nil
-    P.titlebar.data[c] = nil
+    titlebar.data[c] = nil
 end
 
 -- Register standards hooks
-P.hooks.arrange(P.tag.history.update)
+hooks.arrange.register(tag.history.update)
 
-P.hooks.focus(P.client.focus.history.add)
-P.hooks.unmanage(P.client.focus.history.delete)
+hooks.focus.register(client.focus.history.add)
+hooks.unmanage.register(client.focus.history.delete)
 
-P.hooks.focus(P.titlebar.update)
-P.hooks.unfocus(P.titlebar.update)
-P.hooks.titleupdate(P.titlebar.update)
-P.hooks.unmanage(P.titlebar.remove)
-
-return P
+hooks.focus.register(titlebar.update)
+hooks.unfocus.register(titlebar.update)
+hooks.titleupdate.register(titlebar.update)
+hooks.unmanage.register(titlebar.remove)
