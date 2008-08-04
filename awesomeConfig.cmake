@@ -136,7 +136,6 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-event
     xcb-randr
     xcb-xinerama
-    xcb-shape
     xcb-aux
     xcb-atom
     xcb-keysyms
