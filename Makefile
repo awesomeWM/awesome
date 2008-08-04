@@ -39,7 +39,7 @@ distclean:
 	$(RM) -r ${builddir} $(BUILDLN) $(TARGETS)
 	$(ECHO) " done"
 
-%:
+%: cmake
 	$(ECHO) "Running make $@…"
 	$(MAKE) -C ${builddir} $@
 	$(and $(filter clean,$@),$(RM) $(BUILDLN) $(TARGETS))
