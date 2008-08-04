@@ -1,7 +1,5 @@
 ---------------------------------------------------------------------------
--- awful: AWesome Functions very UsefuL
---
--- @author Julien Danjou <julien@danjou.info>
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 ---------------------------------------------------------------------------
 
@@ -29,6 +27,7 @@ local capi =
     keygrabber = keygrabber
 }
 
+--- awful: AWesome Functions very UsefuL
 module("awful")
 
 -- The ObjectTable class

@@ -1,8 +1,6 @@
 ---------------------------------------------------------------------------
--- tabulous: fabulous tabs for awesome
---
--- @author Lucas de Vries <lucasdevries@gmail.com>
--- @author Julien Danjou <julien@danjou.info>
+-- @author Lucas de Vries &lt;lucasdevries@gmail.com&gt;
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou, Lucas de Vries
 ---------------------------------------------------------------------------
 
@@ -12,6 +10,7 @@ local table = table
 local pairs = pairs
 local awful = require('awful')
 
+--- tabulous: fabulous tabs for awesome
 module("tabulous")
 
 local tabbed = {}

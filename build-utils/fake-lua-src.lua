@@ -61,9 +61,9 @@ for i, line in ipairs(ilines) do
 end
 
 print("---------------------------------------------------------------------------")
-print("-- capi: awesome C API")
+print("--- capi: awesome C API")
 print("--")
-print("-- @author Julien Danjou <julien@danjou.info>")
+print("-- @author Julien Danjou &lt;julien@danjou.info&gt;")
 print("-- @copyright 2008 Julien Danjou")
 print("---------------------------------------------------------------------------")
 print("module(\"capi\")")
