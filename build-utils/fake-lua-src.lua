@@ -60,6 +60,13 @@ for i, line in ipairs(ilines) do
     end
 end
 
+print("---------------------------------------------------------------------------")
+print("-- capi: awesome C API")
+print("--")
+print("-- @author Julien Danjou <julien@danjou.info>")
+print("-- @copyright 2008 Julien Danjou")
+print("---------------------------------------------------------------------------")
+print("module(\"capi\")")
 
 -- Get function list and print their documentation
 capture = false
