@@ -230,7 +230,7 @@ endif()
 if(DEFINED SYSCONFDIR)
     set(SYSCONFDIR ${SYSCONFDIR} CACHE PATH "config directory")
 else()
-    set(SYSCONFDIR ${PREFIX}/etc CACHE PATH "config directory")
+    set(SYSCONFDIR /etc CACHE PATH "config directory")
 endif()
 
 #If an XDG Config Dir is specificed, use it instead
