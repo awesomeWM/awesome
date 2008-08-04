@@ -6,6 +6,7 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
+local type = type
 local string = string
 local assert = assert
 local loadstring = loadstring
@@ -493,6 +494,14 @@ function hooks.user.create(name)
     hooks[name].register = function (f)
         table.insert(hooks[name].callbacks, f)
     end
+    hooks[name].unregister = function (f)
+        for k, h in ipairs(hooks[name].callbacks) do
+            if h == f then
+                table.remove(hooks[name].callbacks, k)
+                break
+            end
+        end
+    end
 end
 
 --- Call a created userhook (for external libs).
@@ -628,13 +637,26 @@ for name, hook in pairs(capi.hooks) do
 
             table.insert(hooks[name].callbacks, f)
         end
+        hooks[name].unregister = function (f)
+            if hooks[name].callbacks then
+                for k, h in ipairs(hooks[name].callbacks) do
+                    if h == f then
+                        table.remove(hooks[name].callbacks, k)
+                        break
+                    end
+                end
+            end
+        end
     else
         hooks[name] = {}
         hooks[name].register = function (time, f, runnow)
+            if type(time) ~= 'number' or type(f) ~= 'function' then
+                return
+            end
             if not hooks[name].callbacks then
                 hooks[name].callbacks = {}
                 hook(1, function (...)
-                    for i, callback in pairs(hooks[name].callbacks) do
+                    for i, callback in ipairs(hooks[name].callbacks) do
                         if callback['counter'] >= callback['timer'] then
                             callback['counter'] = 1
                             callback['callback'](...)
@@ -649,6 +671,16 @@ for name, hook in pairs(capi.hooks) do
                 table.insert(hooks[name].callbacks, { callback = f, timer = time, counter = time })
             else
                 table.insert(hooks[name].callbacks, { callback = f, timer = time, counter = 0 })
+            end
+        end
+        hooks[name].unregister = function (f)
+            if hooks[name].callbacks then
+                for k, h in ipairs(hooks[name].callbacks) do
+                    if h.callback == f then
+                        table.remove(hooks[name].callbacks, k)
+                        break
+                    end
+                end
             end
         end
     end
