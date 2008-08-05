@@ -151,6 +151,10 @@ CUSTOMIZATION
 -------------
 *awesome* is customized by creating a custom '$XDG_CONFIG_HOME/awesome/rc.lua' file.
 
+SIGNALS
+-------
+*awesome* can be restarted by sending it a SIGHUP.
+
 SEE ALSO
 --------
 *awesomerc*(5) *awesome-client*(1)
