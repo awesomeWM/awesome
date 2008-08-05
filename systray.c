@@ -120,19 +120,6 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
                            globalconf.screens[phys_screen].systray.window,
                            MIN(XEMBED_VERSION, em->info.version));
 
-    if(globalconf.screens[phys_screen].systray.has_systray_widget
-       && em->info.flags & XEMBED_MAPPED)
-    {
-        static const uint32_t config_win_vals[] = { XCB_STACK_MODE_ABOVE };
-        xcb_map_window(globalconf.connection, em->win);
-        xcb_configure_window(globalconf.connection,
-                             em->win,
-                             XCB_CONFIG_WINDOW_STACK_MODE,
-                             config_win_vals);
-    }
-    else
-        xcb_unmap_window(globalconf.connection, em->win);
-
     for(i = 0; i < globalconf.screens_info->nscreen; i++)
         widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
 

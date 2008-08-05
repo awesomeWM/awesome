@@ -67,9 +67,6 @@ systray_draw(draw_context_t *ctx,
                                         w->widget->align);
     w->area.y = 0;
 
-    /* inform that there's a widget */
-    globalconf.screens[sb->phys_screen].systray.has_systray_widget = true;
-
     switch(sb->position)
     {
       case Right:

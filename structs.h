@@ -370,7 +370,6 @@ typedef struct
     struct
     {
         xcb_window_t window;
-        bool has_systray_widget;
     } systray;
     /** Focused client */
     client_t *client_focus;
