@@ -151,9 +151,9 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 {
     xcb_generic_event_t *ev;
 
-xev_restart:
     while((ev = xcb_poll_for_event(globalconf.connection)))
     {
+xev_restart:
         xcb_handle_event(globalconf.evenths, ev);
         p_delete(&ev);
     }
