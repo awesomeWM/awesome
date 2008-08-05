@@ -1,0 +1,26 @@
+---------------------------
+-- Default awesome theme --
+---------------------------
+
+# Lines beginning with '#' are comments.
+# You do not need to add quotes.
+font=sans 8
+
+bg_normal=#222222
+bg_focus=#535d6c
+bg_urgent=#ff0000
+
+fg_normal=#aaaaaa
+fg_focus=#ffffff
+fg_urgent=#ffffff
+
+border_width=1
+border_normal=#000000
+border_focus=#535d6c
+border_marked=#91231C
+
+# You can't change that variable name, because beautiful
+# will check if 'wallpaper_cmd' is defined before setting 
+# the wallpaper.
+# Don't forget to set your own command here
+wallpaper_cmd=xsetroot -solid darkgrey

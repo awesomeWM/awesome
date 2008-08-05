@@ -3,6 +3,9 @@
 -- Include awesome library, with lots of useful function!
 require("awful")
 require("tabulous")
+require("beautiful")
+
+beautiful.init("@AWESOME_THEMES_PATH@/default")
 
 -- Uncomment this to activate autotabbing
 -- tabulous.autotab_start()
@@ -39,28 +42,8 @@ floatings =
     ["pinentry"] = true
 }
 
--- Color & Appearance definitions, we use these later to display things
-font = "sans 8"
-border_width = 1
-
-bg_normal = "#222222"
-fg_normal = "#aaaaaa"
-border_normal = "#000000"
-
-bg_focus = "#535d6c"
-fg_focus = "#ffffff"
-border_focus = bg_focus
-border_marked = "#91231C"
-
-bg_urgent = "#ff0000"
-fg_urgent = "#ffffff"
-
 -- Define if we want to use titlebar on all applications
 use_titlebar = false
-
-awesome.font_set(font)
-awesome.colors_set({ fg = fg_normal, bg = bg_normal })
-
 -- }}}
 
 -- {{{ Tags
@@ -90,14 +73,14 @@ mytaglist:mouse_add(mouse({}, 3, function (object, tag) tag.selected = not tag.s
 mytaglist:mouse_add(mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end))
 mytaglist:mouse_add(mouse({ }, 4, awful.tag.viewnext))
 mytaglist:mouse_add(mouse({ }, 5, awful.tag.viewprev))
-function mytaglist.label(t) return awful.widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent) end
+function mytaglist.label(t) return awful.widget.taglist.label.all(t, beautiful.bg_focus, beautiful.fg_focus, beautiful.bg_urgent, beautiful.fg_urgent) end
 
 -- Create a tasklist widget
 mytasklist = widget({ type = "tasklist", name = "mytasklist" })
 mytasklist:mouse_add(mouse({ }, 1, function (object, c) c:focus_set(); c:raise() end))
 mytasklist:mouse_add(mouse({ }, 4, function () awful.client.focusbyidx(1) end))
 mytasklist:mouse_add(mouse({ }, 5, function () awful.client.focusbyidx(-1) end))
-function mytasklist.label(c, screen) return awful.widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent) end
+function mytasklist.label(c, screen) return awful.widget.tasklist.label.currenttags(c, screen, beautiful.bg_focus, beautiful.fg_focus, beautiful.bg_urgent, beautiful.fg_urgent) end
 
 -- Create a textbox widget
 mytextbox = widget({ type = "textbox", name = "mytextbox", align = "right" })
@@ -128,7 +111,7 @@ end
 mystatusbar = {}
 for s = 1, screen.count() do
     mystatusbar[s] = statusbar({ position = "top", name = "mystatusbar" .. s,
-                                   fg = fg_normal, bg = bg_normal })
+                                   fg = beautiful.fg_normal, bg = beautiful.bg_normal })
     -- Add widgets to the statusbar - order matters
     mystatusbar[s]:widget_add(mytaglist)
     mystatusbar[s]:widget_add(myiconbox)
@@ -227,10 +210,10 @@ keybinding({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -
 
 -- Prompt
 keybinding({ modkey }, "F1", function ()
-                                     awful.prompt({ prompt = "Run: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mypromptbox, awful.spawn, awful.completion.bash)
+                                     awful.prompt({ prompt = "Run: ", cursor_fg = beautiful.fg_focus, cursor_bg = beautiful.bg_focus }, mypromptbox, awful.spawn, awful.completion.bash)
                                  end):add()
 keybinding({ modkey }, "F4", function ()
-                                     awful.prompt({ prompt = "Run Lua code: ", cursor_fg = fg_focus, cursor_bg = bg_focus }, mypromptbox, awful.eval)
+                                     awful.prompt({ prompt = "Run Lua code: ", cursor_fg = beautiful.fg_focus, cursor_bg = beautiful.bg_focus }, mypromptbox, awful.eval)
                                  end):add()
 
 --- Tabulous, tab manipulation
@@ -297,25 +280,25 @@ end
 -- Hook function to execute when focusing a client.
 function hook_focus(c)
     if not awful.client.ismarked(c) then
-        c.border_color = border_focus
+        c.border_color = beautiful.border_focus
     end
 end
 
 -- Hook function to execute when unfocusing a client.
 function hook_unfocus(c)
     if not awful.client.ismarked(c) then
-        c.border_color = border_normal
+        c.border_color = beautiful.border_normal
     end
 end
 
 -- Hook function to execute when marking a client
 function hook_marked(c)
-    c.border_color = border_marked
+    c.border_color = beautiful.border_marked
 end
 
 -- Hook function to execute when unmarking a client
 function hook_unmarked(c)
-    c.border_color = border_focus
+    c.border_color = beautiful.border_focus
 end
 
 -- Hook function to execute when the mouse is over a client.
@@ -332,10 +315,10 @@ function hook_manage(c)
     c.floating_placement = "smart"
     if use_titlebar then
         -- Add a titlebar
-        awful.titlebar.add(c, { fg = fg_normal,
-                                bg = bg_normal,
-                                fg_focus = fg_focus,
-                                bg_focus = bg_focus,
+        awful.titlebar.add(c, { fg = beautiful.fg_normal,
+                                bg = beautiful.bg_normal,
+                                fg_focus = beautiful.fg_focus,
+                                bg_focus = beautiful.bg_focus,
                                 modkey = modkey })
     end
     -- Add mouse bindings
@@ -344,8 +327,8 @@ function hook_manage(c)
     c:mouse_add(mouse({ modkey }, 3, function (c) c:mouse_resize() end))
     -- New client may not receive focus
     -- if they're not focusable, so set border anyway.
-    c.border_width = border_width
-    c.border_color = border_normal
+    c.border_width = beautiful.border_width
+    c.border_color = beautiful.border_normal
     c:focus_set()
     if floatings[c.name:lower()] then
         c.floating = true

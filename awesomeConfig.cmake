@@ -254,6 +254,7 @@ set(AWESOME_DOC_PATH         ${PREFIX}/share/doc/${PROJECT_AWE_NAME})
 set(AWESOME_MAN_PATH         ${PREFIX}/share/man)
 set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)
 set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
+set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
 # {{{ Configure files

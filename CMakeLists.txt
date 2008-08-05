@@ -22,13 +22,15 @@ include_directories(
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
 set(AWE_LUA_FILES
-    ${SOURCE_DIR}/lib/tabulous.lua)
+    ${SOURCE_DIR}/lib/tabulous.lua
+    ${SOURCE_DIR}/lib/beautiful.lua)
 set(awful_lua ${BUILD_DIR}/lib/awful.lua)
 
 set(AWE_CONF_FILE_DEFAULT ${BUILD_DIR}/awesomerc.lua)
 set(AWE_CONF_FILE rc.lua)
 
 set(AWE_ICON_DIR ${SOURCE_DIR}/icons)
+set(AWE_THEMES_DIR ${SOURCE_DIR}/themes)
 
 set(AWE_DOC_FILES
     ${SOURCE_DIR}/AUTHORS
@@ -363,6 +365,7 @@ if(GENERATE_MANPAGES)
     install(FILES ${AWE_MAN5_FILES} DESTINATION ${AWESOME_MAN_PATH}/man5)
 endif()
 install(DIRECTORY ${AWE_ICON_DIR} DESTINATION ${AWESOME_DATA_PATH})
+install(DIRECTORY ${AWE_THEMES_DIR} DESTINATION ${AWESOME_DATA_PATH})
 install(FILES ${AWE_DOC_FILES} DESTINATION ${AWESOME_DOC_PATH})
 if(GENERATE_LUADOC)
     install(DIRECTORY ${BUILD_DIR}/luadoc DESTINATION ${AWESOME_DOC_PATH})
