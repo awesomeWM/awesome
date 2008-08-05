@@ -40,40 +40,56 @@ systray_draw(draw_context_t *ctx,
              void *p,
              awesome_type_t type)
 {
-    int i = 0, phys_screen;
+    int phys_screen;
     xembed_window_t *em;
     uint32_t orient, config_win_vals[4];
     /* p is always a statusbar, titlebars are forbidden */
     statusbar_t *sb = (statusbar_t *) p;
 
+    /* we are on a statusbar */
+    assert(type == AWESOME_TYPE_STATUSBAR);
+
     phys_screen = screen_virttophys(screen);
 
-    for(em = globalconf.embedded; em; em = em->next)
-        if(em->phys_screen == phys_screen)
-            i++;
-
-    if(ctx->width - used > 0)
-        w->area.width = MIN(i * ctx->height, ctx->width - used);
-    else
-        w->area.width = 0;
     w->area.height = ctx->height;
-    w->area.x = widget_calculate_offset(ctx->width,
-                                        w->area.width,
-                                        offset,
-                                        w->widget->align);
-    w->area.y = 0;
 
     /* width */
     config_win_vals[2] = w->area.height;
     /* height */
     config_win_vals[3] = w->area.height;
 
+    if(!w->widget->isvisible)
+    {
+        w->area.width = 0;
+        config_win_vals[0] = - config_win_vals[2];
+        config_win_vals[1] = - config_win_vals[3];
+    }
+    else if(ctx->width - used > 0)
+    {
+        int i = 0;
+        for(em = globalconf.embedded; em; em = em->next)
+            if(em->phys_screen == phys_screen)
+                i++;
+        w->area.width = MIN(i * ctx->height, ctx->width - used);
+    }
+    else
+        w->area.width = 0;
+
+    w->area.x = widget_calculate_offset(ctx->width,
+                                        w->area.width,
+                                        offset,
+                                        w->widget->align);
+    w->area.y = 0;
+
     switch(sb->position)
     {
       case Left:
-        config_win_vals[0] = sb->sw->geometry.x + w->area.y;
-        config_win_vals[1] = sb->sw->geometry.y + sb->sw->geometry.height
-            - w->area.x - config_win_vals[3];
+        if(w->widget->isvisible)
+        {
+            config_win_vals[0] = sb->sw->geometry.x + w->area.y;
+            config_win_vals[1] = sb->sw->geometry.y + sb->sw->geometry.height
+                - w->area.x - config_win_vals[3];
+        }
         orient = _NET_SYSTEM_TRAY_ORIENTATION_VERT;
         for(em = globalconf.embedded; em; em = em->next)
             if(em->phys_screen == phys_screen)
@@ -94,9 +110,12 @@ systray_draw(draw_context_t *ctx,
             }
         break;
       case Right:
+        if(w->widget->isvisible)
+        {
+            config_win_vals[0] = sb->sw->geometry.x - w->area.y;
+            config_win_vals[1] = sb->sw->geometry.y + w->area.x;
+        }
         orient = _NET_SYSTEM_TRAY_ORIENTATION_VERT;
-        config_win_vals[0] = sb->sw->geometry.x - w->area.y;
-        config_win_vals[1] = sb->sw->geometry.y + w->area.x;
         for(em = globalconf.embedded; em; em = em->next)
             if(em->phys_screen == phys_screen)
             {
@@ -116,12 +135,12 @@ systray_draw(draw_context_t *ctx,
             }
         break;
       default:
+        if(w->widget->isvisible)
+        {
+            config_win_vals[0] = sb->sw->geometry.x + w->area.x;
+            config_win_vals[1] = sb->sw->geometry.y + w->area.y;
+        }
         orient = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
-        /* x */
-        config_win_vals[0] = sb->sw->geometry.x + w->area.x;
-        /* y */
-        config_win_vals[1] = sb->sw->geometry.y + w->area.y;
-    
         for(em = globalconf.embedded; em; em = em->next)
             if(em->phys_screen == phys_screen)
             {
