@@ -56,6 +56,7 @@ systray_draw(draw_context_t *ctx,
         for(em = globalconf.embedded; em; em = em->next)
             if(em->phys_screen == sb->phys_screen)
                 i++;
+        /** \todo use clas hints */
         w->area.width = MIN(i * ctx->height, ctx->width - used);
     }
     else
