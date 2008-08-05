@@ -154,20 +154,16 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
     draw_rectangle(ctx, rectangle, 1.0, true, &ctx->bg);
 
     for(w = wnode; w; w = w->next)
-        if(w->widget->align == AlignLeft)
-            /* special case: systray need to be called even if it's not visible */
-            if(w->widget->isvisible || w->widget->type == systray_new)
+        if(w->widget->align == AlignLeft && w->widget->isvisible)
                 left += w->widget->draw(ctx, screen, w, left, (left + right), object, type);
 
     /* renders right widget from last to first */
     for(w = *widget_node_list_last(&wnode); w; w = w->prev)
-        if(w->widget->align == AlignRight)
-            if(w->widget->isvisible || w->widget->type == systray_new)
+        if(w->widget->align == AlignRight && w->widget->isvisible)
                 right += w->widget->draw(ctx, screen, w, right, (left + right), object, type);
 
     for(w = wnode; w; w = w->next)
-        if(w->widget->align == AlignFlex)
-            if(w->widget->isvisible || w->widget->type == systray_new)
+        if(w->widget->align == AlignFlex && w->widget->isvisible)
                 left += w->widget->draw(ctx, screen, w, left, (left + right), object, type);
 
     switch(position)

@@ -264,7 +264,7 @@ client_focus(client_t *c, int screen)
  * \todo It might be worth stopping to restack everyone and only stack `c'
  * relatively to the first matching in the list.
  */
-static void
+void
 client_stack(void)
 {
     uint32_t config_win_vals[2];

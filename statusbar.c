@@ -21,6 +21,7 @@
 
 #include <xcb/xcb.h>
 
+#include "client.h"
 #include "statusbar.h"
 #include "screen.h"
 #include "widget.h"
@@ -38,19 +39,142 @@ DO_LUA_EQ(statusbar_t, statusbar, "statusbar")
 static void
 statusbar_draw(statusbar_t *statusbar)
 {
+    widget_node_t *systray;
+
     statusbar->need_update = false;
 
-    if(!statusbar->position)
-        return;
+    /* found the systray if any */
+    for(systray = statusbar->widgets; systray; systray = systray->next)
+        if(systray->widget->type == systray_new)
+            break;
 
-    widget_render(statusbar->widgets, statusbar->ctx, statusbar->sw->gc,
-                  statusbar->sw->pixmap,
-                  statusbar->screen, statusbar->position,
-                  statusbar->sw->geometry.x, statusbar->sw->geometry.y,
-                  statusbar, AWESOME_TYPE_STATUSBAR);
+    if(statusbar->position)
+    {
+        widget_render(statusbar->widgets, statusbar->ctx, statusbar->sw->gc,
+                      statusbar->sw->pixmap,
+                      statusbar->screen, statusbar->position,
+                      statusbar->sw->geometry.x, statusbar->sw->geometry.y,
+                      statusbar, AWESOME_TYPE_STATUSBAR);
+        simplewindow_refresh_pixmap(statusbar->sw);
+    }
 
-    simplewindow_refresh_pixmap(statusbar->sw);
-    xcb_aux_sync(globalconf.connection);
+    if(systray)
+    {
+        uint32_t config_win_vals[4];
+        uint32_t config_win_vals_off[4] = { -1, -1, 1, 1 };
+        xembed_window_t *em;
+        position_t pos;
+
+        if(statusbar->position && systray->widget->isvisible)
+        {
+            pos = statusbar->position;
+            /* width */
+            config_win_vals[2] = systray->area.height;
+            /* height */
+            config_win_vals[3] = systray->area.height;
+        }
+        else
+            /* hide */
+            pos = Off;
+
+        switch(pos)
+        {
+          case Left:
+            config_win_vals[0] = statusbar->sw->geometry.x + systray->area.y;
+            config_win_vals[1] = statusbar->sw->geometry.y + statusbar->sw->geometry.height
+                - systray->area.x - config_win_vals[3];
+            for(em = globalconf.embedded; em; em = em->next)
+                if(em->phys_screen == statusbar->phys_screen)
+                {
+                    if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) statusbar->sw->geometry.y)
+                    {
+                        xcb_map_window(globalconf.connection, em->win);
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals);
+                        config_win_vals[1] -= config_win_vals[3];
+                    }
+                    else
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals_off);
+                }
+            client_stack();
+            break;
+          case Right:
+            config_win_vals[0] = statusbar->sw->geometry.x - systray->area.y;
+            config_win_vals[1] = statusbar->sw->geometry.y + systray->area.x;
+            for(em = globalconf.embedded; em; em = em->next)
+                if(em->phys_screen == statusbar->phys_screen)
+                {
+                    if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) statusbar->sw->geometry.y + statusbar->ctx->width)
+                    {
+                        xcb_map_window(globalconf.connection, em->win);
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals);
+                        config_win_vals[1] += config_win_vals[3];
+                    }
+                    else
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals_off);
+                }
+            client_stack();
+            break;
+          case Top:
+          case Bottom:
+            config_win_vals[0] = statusbar->sw->geometry.x + systray->area.x;
+            config_win_vals[1] = statusbar->sw->geometry.y + systray->area.y;
+            for(em = globalconf.embedded; em; em = em->next)
+                if(em->phys_screen == statusbar->phys_screen)
+                {
+                    /* if(x + width < systray.x + systray.width) */
+                    if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->area) + statusbar->sw->geometry.x)
+                    {
+                        xcb_map_window(globalconf.connection, em->win);
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals);
+                        config_win_vals[0] += config_win_vals[2];
+                    }
+                    else
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals_off);
+                }
+            client_stack();
+            break;
+          default:
+            for(em = globalconf.embedded; em; em = em->next)
+                if(em->phys_screen == statusbar->phys_screen)
+                    xcb_configure_window(globalconf.connection, em->win,
+                                         XCB_CONFIG_WINDOW_X
+                                         | XCB_CONFIG_WINDOW_Y
+                                         | XCB_CONFIG_WINDOW_WIDTH
+                                         | XCB_CONFIG_WINDOW_HEIGHT,
+                                         config_win_vals_off);
+            break;
+        }
+    }
 }
 
 /** Statusbar refresh function.

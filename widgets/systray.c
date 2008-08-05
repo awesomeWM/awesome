@@ -40,35 +40,21 @@ systray_draw(draw_context_t *ctx,
              void *p,
              awesome_type_t type)
 {
-    int phys_screen;
-    xembed_window_t *em;
-    uint32_t orient, config_win_vals[4];
+    uint32_t orient;
     /* p is always a statusbar, titlebars are forbidden */
     statusbar_t *sb = (statusbar_t *) p;
 
     /* we are on a statusbar */
     assert(type == AWESOME_TYPE_STATUSBAR);
 
-    phys_screen = screen_virttophys(screen);
-
     w->area.height = ctx->height;
 
-    /* width */
-    config_win_vals[2] = w->area.height;
-    /* height */
-    config_win_vals[3] = w->area.height;
-
-    if(!w->widget->isvisible)
-    {
-        w->area.width = 0;
-        config_win_vals[0] = - config_win_vals[2];
-        config_win_vals[1] = - config_win_vals[3];
-    }
-    else if(ctx->width - used > 0)
+    if(ctx->width - used > 0)
     {
         int i = 0;
+        xembed_window_t *em;
         for(em = globalconf.embedded; em; em = em->next)
-            if(em->phys_screen == phys_screen)
+            if(em->phys_screen == sb->phys_screen)
                 i++;
         w->area.width = MIN(i * ctx->height, ctx->width - used);
     }
@@ -81,94 +67,24 @@ systray_draw(draw_context_t *ctx,
                                         w->widget->align);
     w->area.y = 0;
 
+    /* inform that there's a widget */
+    globalconf.screens[sb->phys_screen].systray.has_systray_widget = true;
+
     switch(sb->position)
     {
-      case Left:
-        if(w->widget->isvisible)
-        {
-            config_win_vals[0] = sb->sw->geometry.x + w->area.y;
-            config_win_vals[1] = sb->sw->geometry.y + sb->sw->geometry.height
-                - w->area.x - config_win_vals[3];
-        }
-        orient = _NET_SYSTEM_TRAY_ORIENTATION_VERT;
-        for(em = globalconf.embedded; em; em = em->next)
-            if(em->phys_screen == phys_screen)
-            {
-                if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) sb->sw->geometry.y)
-                {
-                    xcb_map_window(globalconf.connection, em->win);
-                    xcb_configure_window(globalconf.connection, em->win,
-                                         XCB_CONFIG_WINDOW_X
-                                         | XCB_CONFIG_WINDOW_Y
-                                         | XCB_CONFIG_WINDOW_WIDTH
-                                         | XCB_CONFIG_WINDOW_HEIGHT,
-                                         config_win_vals);
-                    config_win_vals[1] -= config_win_vals[3];
-                }
-                else
-                    xcb_unmap_window(globalconf.connection, em->win);
-            }
-        break;
       case Right:
-        if(w->widget->isvisible)
-        {
-            config_win_vals[0] = sb->sw->geometry.x - w->area.y;
-            config_win_vals[1] = sb->sw->geometry.y + w->area.x;
-        }
+      case Left:
         orient = _NET_SYSTEM_TRAY_ORIENTATION_VERT;
-        for(em = globalconf.embedded; em; em = em->next)
-            if(em->phys_screen == phys_screen)
-            {
-                if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) sb->sw->geometry.y + ctx->width)
-                {
-                    xcb_map_window(globalconf.connection, em->win);
-                    xcb_configure_window(globalconf.connection, em->win,
-                                         XCB_CONFIG_WINDOW_X
-                                         | XCB_CONFIG_WINDOW_Y
-                                         | XCB_CONFIG_WINDOW_WIDTH
-                                         | XCB_CONFIG_WINDOW_HEIGHT,
-                                         config_win_vals);
-                    config_win_vals[1] += config_win_vals[3];
-                }
-                else
-                    xcb_unmap_window(globalconf.connection, em->win);
-            }
         break;
       default:
-        if(w->widget->isvisible)
-        {
-            config_win_vals[0] = sb->sw->geometry.x + w->area.x;
-            config_win_vals[1] = sb->sw->geometry.y + w->area.y;
-        }
         orient = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
-        for(em = globalconf.embedded; em; em = em->next)
-            if(em->phys_screen == phys_screen)
-            {
-                /* if(x + width < systray.x + systray.width) */
-                if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(w->area) + sb->sw->geometry.x)
-                {
-                    xcb_map_window(globalconf.connection, em->win);
-                    xcb_configure_window(globalconf.connection, em->win,
-                                         XCB_CONFIG_WINDOW_X
-                                         | XCB_CONFIG_WINDOW_Y
-                                         | XCB_CONFIG_WINDOW_WIDTH
-                                         | XCB_CONFIG_WINDOW_HEIGHT,
-                                         config_win_vals);
-                    config_win_vals[0] += config_win_vals[2];
-                }
-                else
-                    xcb_unmap_window(globalconf.connection, em->win);
-            }
         break;
     }
-
-    /* inform that there's a widget */
-    globalconf.screens[phys_screen].systray.has_systray_widget = true;
 
     /* set statusbar orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        globalconf.screens[phys_screen].systray.window,
+                        globalconf.screens[sb->phys_screen].systray.window,
                         _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
 
     return w->area.width;
