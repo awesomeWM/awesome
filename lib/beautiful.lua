@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
--- @author Damien Leone &lt;oxmoz@yahoo.fr&gt;
+-- @author Damien Leone &lt;damien.leone@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Damien Leone, Julien Danjou
 ----------------------------------------------------------------------------
