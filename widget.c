@@ -116,7 +116,8 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
                                             PIXMAP, 0, 1);
         if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
         {
-            if((data = xcb_get_property_value(prop_r))
+            if(prop_r->value_len
+               && (data = xcb_get_property_value(prop_r))
                && (rootpix = *(xcb_pixmap_t *) data))
                switch(position)
                {
