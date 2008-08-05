@@ -151,6 +151,7 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 {
     xcb_generic_event_t *ev;
 
+xev_restart:
     while((ev = xcb_poll_for_event(globalconf.connection)))
     {
         xcb_handle_event(globalconf.evenths, ev);
@@ -162,6 +163,10 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
     titlebar_refresh();
 
     xcb_aux_sync(globalconf.connection);
+
+    /* synchronize can wake up X and pull new events in the queue */
+    if((ev = xcb_poll_for_event(globalconf.connection)))
+        goto xev_restart;
 }
 
 static void
