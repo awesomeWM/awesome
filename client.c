@@ -154,7 +154,7 @@ client_getbywin(xcb_window_t w)
 bool
 client_updatetitle(client_t *c)
 {
-    char *name;
+    char *name, *utf8;
     ssize_t len;
 
     if(!xutil_gettextprop(globalconf.connection, c->win, _NET_WM_NAME, &name, &len))
@@ -162,9 +162,11 @@ client_updatetitle(client_t *c)
             return false;
 
     p_delete(&c->name);
-    a_iso2utf8(&c->name, name, len);
 
-    c->name = name;
+    if((utf8 = draw_iso2utf8(name, len)))
+        c->name = utf8;
+    else
+        c->name = name;
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
@@ -720,7 +722,7 @@ client_unmanage(client_t *c)
 void
 client_updatewmhints(client_t *c)
 {
-    xcb_wm_hints_t *wmh = NULL;
+    xcb_wm_hints_t *wmh;
     uint32_t wm_hints_flags;
 
     if((wmh = xcb_get_wm_hints(globalconf.connection, c->win)))
