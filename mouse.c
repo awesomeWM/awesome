@@ -925,7 +925,7 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
     if(layout == layout_floating || c->isfloating)
     {
         if(c->isfixed)
-            return;
+            goto bailout;
 
         c->ismax = false;
 
@@ -940,18 +940,21 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
                 n++;
 
         /* only masters on this screen? */
-        if(n <= curtags[0]->nmaster) return;
+        if(n <= curtags[0]->nmaster)
+            goto bailout;
 
         /* no tiled clients on this screen? */
         for(c = globalconf.clients; c && !IS_TILED(c, screen); c = c->next);
-        if(!c) return;
+        if(!c)
+            goto bailout;
 
         mouse_client_resize_tiled(c);
     }
     else if(layout == layout_magnifier)
-    {
         mouse_client_resize_magnified(c, infobox);
-    }
+
+bailout:
+    p_delete(&curtags);
 }
 
 /** Resize a client with mouse.
