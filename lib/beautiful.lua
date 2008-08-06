@@ -73,3 +73,5 @@ function init(path)
 end
 
 setmetatable(package.loaded[module_name], package.loaded[module_name])
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

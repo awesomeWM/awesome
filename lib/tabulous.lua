@@ -250,3 +250,5 @@ end
 
 -- Set up hook so we don't leave lost hidden clients
 awful.hooks.unmanage.register(untab)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

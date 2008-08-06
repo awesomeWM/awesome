@@ -1178,3 +1178,5 @@ hooks.focus.register(titlebar.update)
 hooks.unfocus.register(titlebar.update)
 hooks.titleupdate.register(titlebar.update)
 hooks.unmanage.register(titlebar.remove)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
