@@ -660,6 +660,9 @@ luaA_cb(EV_P_ ev_io *w, int revents)
         buf[r] = '\0';
         luaA_docmd(buf);
     }
+    layout_refresh();
+    statusbar_refresh();
+    titlebar_refresh();
 }
 
 void
