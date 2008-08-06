@@ -37,7 +37,6 @@
 #include "dbus.h"
 #include "statusbar.h"
 #include "systray.h"
-#include "common/socket.h"
 #include "common/version.h"
 #include "common/atoms.h"
 #include "config.h"
