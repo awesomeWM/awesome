@@ -531,7 +531,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
                 globalconf.screens[c->screen].need_arrange = true;
         }
         else if (ev->atom == WM_NORMAL_HINTS)
-            client_updatesizehints(c);
+            xcb_free_size_hints(client_updatesizehints(c));
         else if (ev->atom == WM_HINTS)
             client_updatewmhints(c);
         else if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)

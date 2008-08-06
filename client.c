@@ -744,7 +744,7 @@ client_updatewmhints(client_t *c)
     }
 }
 
-/** Update the size hintz of a client.
+/** Update the size hints of a client.
  * \param c The client.
  * \return A pointer to a xcb_size_hints_t.
  */
