@@ -707,6 +707,9 @@ void
 luaA_on_timer(EV_P_ ev_timer *w, int revents)
 {
     luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0, 0);
+    layout_refresh();
+    statusbar_refresh();
+    titlebar_refresh();
 }
 
 void
