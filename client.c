@@ -685,17 +685,17 @@ client_unmanage(client_t *c)
                          XCB_CONFIG_WINDOW_BORDER_WIDTH,
                          (uint32_t *) &c->oldborder);
 
-    /* remove client everywhere */
-    client_list_detach(&globalconf.clients, c);
-    stack_client_delete(c);
-    for(int i = 0; i < tags->len; i++)
-        untag_client(c, tags->tab[i]);
-
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win, ANY_MODIFIER);
     window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
 
     xcb_aux_sync(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);
+
+    /* remove client everywhere */
+    client_list_detach(&globalconf.clients, c);
+    stack_client_delete(c);
+    for(int i = 0; i < tags->len; i++)
+        untag_client(c, tags->tab[i]);
 
     if(c->titlebar)
     {
