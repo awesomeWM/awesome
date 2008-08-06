@@ -5,12 +5,10 @@ require("awful")
 require("tabulous")
 require("beautiful")
 
-beautiful.init("@AWESOME_THEMES_PATH@/default")
-
--- Uncomment this to activate autotabbing
--- tabulous.autotab_start()
-
 -- {{{ Variable definitions
+-- This is a file path to a theme file which will defines colors.
+theme_path = "@AWESOME_THEMES_PATH@/default"
+
 -- This is used later as the default terminal to run.
 terminal = "xterm"
 
@@ -35,24 +33,37 @@ layouts =
     "floating"
 }
 
--- Table of clients that should be set floating
+-- Table of clients that should be set floating.
 floatings =
 {
     ["mplayer"] = true,
     ["pinentry"] = true
 }
 
--- Define if we want to use titlebar on all applications
+-- Define if we want to use titlebar on all applications.
 use_titlebar = false
 -- }}}
 
+-- {{{ Initialization
+-- Initialize theme (colors).
+beautiful.init(theme_path)
+
+-- Register theme in awful.
+-- This allows to not pass plenty of arguments to each function
+-- to inform it about colors we want it to draw.
+awful.beautiful.register(beautiful)
+
+-- Uncomment this to activate autotabbing
+-- tabulous.autotab_start()
+-- }}}
+
 -- {{{ Tags
--- Define tags table
+-- Define tags table.
 tags = {}
 for s = 1, screen.count() do
-    -- Each screen has its own tag table
+    -- Each screen has its own tag table.
     tags[s] = {}
-    -- Create 9 tags per screen
+    -- Create 9 tags per screen.
     for tagnumber = 1, 9 do
         tags[s][tagnumber] = tag({ name = tagnumber, layout = layouts[1] })
         -- Add tags to screen one by one
@@ -73,14 +84,14 @@ mytaglist:mouse_add(mouse({}, 3, function (object, tag) tag.selected = not tag.s
 mytaglist:mouse_add(mouse({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end))
 mytaglist:mouse_add(mouse({ }, 4, awful.tag.viewnext))
 mytaglist:mouse_add(mouse({ }, 5, awful.tag.viewprev))
-function mytaglist.label(t) return awful.widget.taglist.label.all(t, beautiful.bg_focus, beautiful.fg_focus, beautiful.bg_urgent, beautiful.fg_urgent) end
+mytaglist.label = awful.widget.taglist.label.all
 
 -- Create a tasklist widget
 mytasklist = widget({ type = "tasklist", name = "mytasklist" })
 mytasklist:mouse_add(mouse({ }, 1, function (object, c) c:focus_set(); c:raise() end))
 mytasklist:mouse_add(mouse({ }, 4, function () awful.client.focusbyidx(1) end))
 mytasklist:mouse_add(mouse({ }, 5, function () awful.client.focusbyidx(-1) end))
-function mytasklist.label(c, screen) return awful.widget.tasklist.label.currenttags(c, screen, beautiful.bg_focus, beautiful.fg_focus, beautiful.bg_urgent, beautiful.fg_urgent) end
+mytasklist.label = awful.widget.tasklist.label.currenttags
 
 -- Create a textbox widget
 mytextbox = widget({ type = "textbox", name = "mytextbox", align = "right" })
@@ -210,10 +221,10 @@ keybinding({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -
 
 -- Prompt
 keybinding({ modkey }, "F1", function ()
-                                     awful.prompt({ prompt = "Run: ", cursor_fg = beautiful.fg_focus, cursor_bg = beautiful.bg_focus }, mypromptbox, awful.spawn, awful.completion.bash)
+                                     awful.prompt({ prompt = "Run: " }, mypromptbox, awful.spawn, awful.completion.bash)
                                  end):add()
 keybinding({ modkey }, "F4", function ()
-                                     awful.prompt({ prompt = "Run Lua code: ", cursor_fg = beautiful.fg_focus, cursor_bg = beautiful.bg_focus }, mypromptbox, awful.eval)
+                                     awful.prompt({ prompt = "Run Lua code: " }, mypromptbox, awful.eval)
                                  end):add()
 
 --- Tabulous, tab manipulation
@@ -315,11 +326,7 @@ function hook_manage(c)
     c.floating_placement = "smart"
     if use_titlebar then
         -- Add a titlebar
-        awful.titlebar.add(c, { fg = beautiful.fg_normal,
-                                bg = beautiful.bg_normal,
-                                fg_focus = beautiful.fg_focus,
-                                bg_focus = beautiful.bg_focus,
-                                modkey = modkey })
+        awful.titlebar.add(c, { modkey = modkey })
     end
     -- Add mouse bindings
     c:mouse_add(mouse({ }, 1, function (c) c:focus_set(); c:raise() end))

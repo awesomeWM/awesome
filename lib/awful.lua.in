@@ -48,7 +48,11 @@ function ObjectTable.new()
     return o
 end
 
--- Various structure
+-- Local variable handling theme
+local theme = {}
+
+-- Various public structures
+beautiful = {}
 hooks = {}
 hooks.user =  {}
 prompt = {}
@@ -783,18 +787,18 @@ local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_po
 end
 
 --- Run a prompt in a box.
--- @param args A table with optional arguments: cursor_fg, cursor_bg, prompt.
+-- @param args A table with optional arguments: fg_cursor, bg_cursor, prompt.
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument when finished.
 -- @param completion_callback The callback function to call to get completion.
 function prompt(args, textbox, exe_callback, completion_callback)
-    if not args then return end
+    if not args then args = {} end
     local command = ""
     local command_before_comp
     local cur_pos_before_comp
     local prompt = args.prompt or ""
-    local inv_col = args.cursor_fg or "black"
-    local cur_col = args.cursor_bg or "white"
+    local inv_col = args.fg_cursor or theme.fg_focus or "black"
+    local cur_col = args.bg_cursor or theme.bg_focus or "white"
     -- The cursor position
     local cur_pos = 1
     -- The completion element to use on completion request.
@@ -967,12 +971,18 @@ end
 -- It returns the tag name and set a special
 -- foreground and background color for selected tags.
 -- @param t The tag.
--- @param bg_focus The background color for selected tag.
--- @param fg_focus The foreground color for selected tag.
--- @param bg_urgent The background color for urgent tags.
--- @param fg_urgent The foreground color for urgent tags.
+-- @param args The arguments table.
+-- bg_focus The background color for selected tag.
+-- fg_focus The foreground color for selected tag.
+-- bg_urgent The background color for urgent tags.
+-- fg_urgent The foreground color for urgent tags.
 -- @return A string to print.
-function widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
+function widget.taglist.label.all(t, args)
+    if not args then args = {} end
+    local fg_focus = args.fg_focus or theme.fg_focus
+    local bg_focus = args.bg_focus or theme.bg_focus
+    local fg_urgent = args.fg_urgent or theme.fg_urgent
+    local bg_urgent = args.bg_urgent or theme.bg_urgent
     local text
     local background = ""
     local sel = capi.client.focus_get()
@@ -1003,7 +1013,12 @@ function widget.taglist.label.all(t, bg_focus, fg_focus, bg_urgent, fg_urgent)
     return text
 end
 
-local function widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
+local function widget_tasklist_label_common(c, args)
+    if not args then args = {} end
+    local fg_focus = args.fg_focus or theme.fg_focus
+    local bg_focus = args.bg_focus or theme.bg_focus
+    local fg_urgent = args.fg_urgent or theme.fg_urgent
+    local bg_urgent = args.bg_urgent or theme.bg_urgent
     local text = ""
     if c.floating then
         text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
@@ -1024,13 +1039,14 @@ end
 -- It also puts a special icon for floating windows.
 -- @param c The client.
 -- @param screen The screen we are drawing on.
--- @param bg_focus The background color for focused client.
--- @param fg_focus The foreground color for focused client.
--- @param bg_urgent The background color for urgent clients.
--- @param fg_urgent The foreground color for urgent clients.
--- @return A string to pring.
-function widget.tasklist.label.allscreen(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
-    return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
+-- @param args The arguments table.
+-- bg_focus The background color for focused client.
+-- fg_focus The foreground color for focused client.
+-- bg_urgent The background color for urgent clients.
+-- fg_urgent The foreground color for urgent clients.
+-- @return A string to print.
+function widget.tasklist.label.allscreen(c, screen, args)
+    return widget_tasklist_label_common(c, args)
 end
 
 --- Return labels for a tasklist widget with clients from all tags.
@@ -1039,15 +1055,16 @@ end
 -- It also puts a special icon for floating windows.
 -- @param c The client.
 -- @param screen The screen we are drawing on.
--- @param bg_focus The background color for focused client.
--- @param fg_focus The foreground color for focused client.
--- @param bg_urgent The background color for urgent clients.
--- @param fg_urgent The foreground color for urgent clients.
--- @return A string to pring.
-function widget.tasklist.label.alltags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
+-- @param args The arguments table.
+-- bg_focus The background color for focused client.
+-- fg_focus The foreground color for focused client.
+-- bg_urgent The background color for urgent clients.
+-- fg_urgent The foreground color for urgent clients.
+-- @return A string to print.
+function widget.tasklist.label.alltags(c, screen, args)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
-    return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
+    return widget_tasklist_label_common(c, args)
 end
 
 --- Return labels for a tasklist widget with clients from currently selected tags.
@@ -1056,17 +1073,18 @@ end
 -- It also puts a special icon for floating windows.
 -- @param c The client.
 -- @param screen The screen we are drawing on.
--- @param bg_focus The background color for focused client.
--- @param fg_focus The foreground color for focused client.
--- @param bg_urgent The background color for urgent clients.
--- @param fg_urgent The foreground color for urgent clients.
--- @return A string to pring.
-function widget.tasklist.label.currenttags(c, screen, bg_focus, fg_focus, bg_urgent, fg_urgent)
+-- @param args The arguments table.
+-- bg_focus The background color for focused client.
+-- fg_focus The foreground color for focused client.
+-- bg_urgent The background color for urgent clients.
+-- fg_urgent The foreground color for urgent clients.
+-- @return A string to print.
+function widget.tasklist.label.currenttags(c, screen, args)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
     for k, t in pairs(capi.tag.get(screen)) do
         if t.selected and c:istagged(t) then
-            return widget_tasklist_label_common(c, bg_focus, fg_focus, bg_urgent, fg_urgent)
+            return widget_tasklist_label_common(c, args)
         end
     end
 end
@@ -1079,12 +1097,13 @@ end
 -- fg_focus: the foreground color for focused window.
 -- fg_focus: the background color for focused window.
 function titlebar.add(c, args)
+    if not args then args = {} end
     -- Store colors
     titlebar.data[c] = {}
-    titlebar.data[c].fg = args.fg
-    titlebar.data[c].bg = args.bg
-    titlebar.data[c].fg_focus = args.fg_focus
-    titlebar.data[c].bg_focus = args.bg_focus
+    titlebar.data[c].fg = args.fg or theme.fg_normal
+    titlebar.data[c].bg = args.bg or theme.bg_normal
+    titlebar.data[c].fg_focus = args.fg_focus or theme.fg_focus
+    titlebar.data[c].bg_focus = args.bg_focus or theme.bg_focus
 
     -- Built args
     local targs = {}
@@ -1137,6 +1156,16 @@ end
 function titlebar.remove(c)
     c.titlebar = nil
     titlebar.data[c] = nil
+end
+
+--- Set the beautiful theme if any.
+-- @param The beautiful theme.
+function beautiful.register(btheme)
+    if btheme then
+        theme = btheme
+    else
+        theme = {}
+    end
 end
 
 -- Register standards hooks
