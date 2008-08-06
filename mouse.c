@@ -251,6 +251,7 @@ mouse_infobox_draw(draw_context_t *ctx,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
     simplewindow_refresh_pixmap(sw);
+    xcb_aux_sync(ctx->connection);
 }
 
 #define MOUSE_INFOBOX_STRING_DEFAULT "0000x0000+0000+0000"
@@ -479,10 +480,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     c->ismax = false;
 
     if(infobox && (c->isfloating || layout == layout_floating))
-    {
         sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
-        xcb_aux_sync(globalconf.connection);
-    }
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -503,10 +501,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
 
             /* draw the infobox */
             if(sw)
-            {
                 mouse_infobox_draw(ctx, sw, c->geometry, c->border);
-                xcb_aux_sync(globalconf.connection);
-            }
 
             /* keep track */
             last_x = mouse_x;
@@ -614,10 +609,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
     /* create the infobox */
     if(infobox)
-    {
         sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
-        xcb_aux_sync(globalconf.connection);
-    }
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -692,8 +684,6 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
         /* draw the infobox */
         if(sw)
             mouse_infobox_draw(ctx, sw, c->geometry, c->border);
-
-        xcb_aux_sync(globalconf.connection);
     }
 
     /* relase pointer */
@@ -794,14 +784,11 @@ mouse_client_resize_tiled(client_t *c)
             tag->mwfact = mwfact;
             globalconf.screens[tag->screen].need_arrange = true;
             layout_refresh();
-            xcb_aux_sync(globalconf.connection);
         }
     }
 
     /* relase pointer */
     mouse_ungrab_pointer();
-
-    xcb_aux_sync(globalconf.connection);
 }
 
 /** Resize the master client in mangifier layout
@@ -876,8 +863,6 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     if(infobox)
         sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
 
-    xcb_aux_sync(globalconf.connection);
-
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
     {
@@ -905,10 +890,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
         /* draw the infobox */
         if(sw)
-        {
             mouse_infobox_draw(ctx, sw, c->geometry, c->border);
-            xcb_aux_sync(globalconf.connection);
-        }
     }
 
     /* ungrab pointer */
