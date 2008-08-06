@@ -153,20 +153,19 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 
     while((ev = xcb_poll_for_event(globalconf.connection)))
     {
-xev_restart:
-        xcb_handle_event(globalconf.evenths, ev);
-        p_delete(&ev);
+        do
+        {
+            xcb_handle_event(globalconf.evenths, ev);
+            p_delete(&ev);
+        }
+        while((ev = xcb_poll_for_event(globalconf.connection)));
+
+        layout_refresh();
+        statusbar_refresh();
+        titlebar_refresh();
+
+        xcb_aux_sync(globalconf.connection);
     }
-
-    layout_refresh();
-    statusbar_refresh();
-    titlebar_refresh();
-
-    xcb_aux_sync(globalconf.connection);
-
-    /* synchronize can wake up X and pull new events in the queue */
-    if((ev = xcb_poll_for_event(globalconf.connection)))
-        goto xev_restart;
 }
 
 static void
