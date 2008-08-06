@@ -601,16 +601,16 @@ function layout.inc(layouts, i)
     local number_of_layouts = 0
     local rev_layouts = {}
     for i, v in ipairs(layouts) do
-	rev_layouts[v] = i
-	number_of_layouts = number_of_layouts + 1
+        rev_layouts[v] = i
+        number_of_layouts = number_of_layouts + 1
     end
     if t then
-	local cur_layout = layout.get()
-	local new_layout_index = (rev_layouts[cur_layout] + i) % number_of_layouts
-	if new_layout_index == 0 then
-	    new_layout_index = number_of_layouts
-	end
-	t.layout = layouts[new_layout_index]
+        local cur_layout = layout.get()
+        local new_layout_index = (rev_layouts[cur_layout] + i) % number_of_layouts
+        if new_layout_index == 0 then
+            new_layout_index = number_of_layouts
+        end
+        t.layout = layouts[new_layout_index]
     end
 end
 
@@ -619,7 +619,7 @@ end
 function layout.set(layout)
     local t = tag.selected()
     if t then
-	t.layout = layout
+        t.layout = layout
     end
 end
 
