@@ -25,7 +25,6 @@ local theme = {}
 -- @return nil if  the '=' character is not in the string
 -- if the string begins with '#' which is a comment
 local function split_line(line)
-    local values = {}
     local split_val = line:find('=')
 
     if split_val and line:sub(1, 1) ~= '#' and line:sub(1, 2) ~= '--' then
@@ -69,6 +68,7 @@ function init(path)
                 theme[key] = value
             end
         end
+        f:close()
     end
 end
 
