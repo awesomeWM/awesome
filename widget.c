@@ -235,15 +235,16 @@ widget_invalidate_bywidget(widget_t *widget)
         for(statusbar = globalconf.screens[screen].statusbar;
             statusbar;
             statusbar = statusbar->next)
-            for(witer = statusbar->widgets; witer; witer = witer->next)
-                if(witer->widget == widget)
-                {
-                    statusbar->need_update = true;
-                    break;
-                }
+            if(!statusbar->need_update)
+                for(witer = statusbar->widgets; witer; witer = witer->next)
+                    if(witer->widget == widget)
+                    {
+                        statusbar->need_update = true;
+                        break;
+                    }
 
     for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar)
+        if(c->titlebar && !c->titlebar->need_update)
             for(witer = c->titlebar->widgets; witer; witer = witer->next)
                 if(witer->widget == widget)
                     c->titlebar->need_update = true;
