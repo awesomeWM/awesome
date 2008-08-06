@@ -1125,7 +1125,8 @@ luaA_client_newindex(lua_State *L)
       case A_TK_SCREEN:
         i = luaL_checknumber(L, 3) - 1;
         luaA_checkscreen(i);
-        screen_client_moveto(*c, i, true);
+        if(i != (*c)->screen)
+            screen_client_moveto(*c, i, true);
         break;
       case A_TK_HIDE:
         b = luaA_checkboolean(L, 3);
