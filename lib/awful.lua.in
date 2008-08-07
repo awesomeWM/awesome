@@ -519,9 +519,9 @@ end
 function client.toggletag(target, c)
     local sel = c or capi.client.focus_get();
     -- Check that tag and client screen are identical
-    if sel.screen ~= target.screen then return end
     local toggle = false
     if sel then
+        if sel.screen ~= target.screen then return end
         -- Count how many tags has the client
         -- an only toggle tag if the client has at least one tag other than target
         for k, v in pairs(capi.tag.get(sel.screen)) do
