@@ -16,6 +16,7 @@ local io = io
 local math = math
 local setmetatable = setmetatable
 local table = table
+local otable = otable
 local capi =
 {
     screen = screen,
@@ -30,24 +31,6 @@ local capi =
 
 --- awful: AWesome Functions very UsefuL
 module("awful")
-
--- The ObjectTable class
-ObjectTable = {}
-ObjectTable.__index  = ObjectTable
---- Lookup in a table indexed by objects
-function ObjectTable.__index(self, key)
-    for k, v in pairs(self) do
-        if k == key then
-            return v
-        end
-    end
-end
-
-function ObjectTable.new()
-    local o =  {}
-    setmetatable(o, ObjectTable)
-    return o
-end
 
 -- Local variable handling theme
 local theme = {}
@@ -70,7 +53,7 @@ tag.history.data = {}
 tag.history.data.past = {}
 tag.history.data.current = {}
 titlebar = {}
-titlebar.data = ObjectTable.new()
+titlebar.data = otable()
 widget = {}
 widget.taglist = {}
 widget.taglist.label = {}

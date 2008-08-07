@@ -220,6 +220,28 @@ luaA_dofunction(lua_State *L, luaA_function f, int nargs, int nret)
     return false;
 }
 
+int luaA_otable_index(lua_State *);
+
+/** Create a new object table with a metatable.
+ * This is useful to compare table with objects (udata) as keys.
+ * \param L The Lua stack.
+ * \return The number of elements pushed on stack.
+ */
+static inline int
+luaA_otable_new(lua_State *L)
+{
+    /* Our object */
+    lua_newtable(L);
+    /* The meta table */
+    lua_newtable(L);
+    lua_pushcfunction(L, luaA_otable_index);
+    /* Register index into the metatable */
+    lua_setfield(L, -2, "__index");
+    /* Set the meta table */
+    lua_setmetatable(L, -2);
+    return 1;
+}
+
 void luaA_init(void);
 void luaA_parserc(const char *);
 void luaA_pushpointer(lua_State *, void *, awesome_type_t);

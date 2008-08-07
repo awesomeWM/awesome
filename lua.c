@@ -436,6 +436,35 @@ luaA_fixups(lua_State *L)
     lua_pop(L, 1);
 }
 
+/** Object table.
+ * This table can use safely object as key.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_otable_index(lua_State *L)
+{
+    void **obj, **v;
+
+    if((obj = lua_touserdata(L, 2)))
+    {
+        /* begins at nil */
+        lua_pushnil(L);
+        while(lua_next(L, 1))
+        {
+            if((v = lua_touserdata(L, -2))
+               && *v == *obj)
+                return 1;
+            /* removes 'value'; keeps 'key' for next iteration */
+            lua_pop(L, 1);
+        }
+        return 0;
+    }
+    
+    lua_rawget(L, 1);
+    return 1;
+}
+
 /** Initialize the Lua VM
  */
 void
@@ -443,6 +472,16 @@ luaA_init(void)
 {
     lua_State *L;
 
+    static const struct luaL_reg otable_methods[] =
+    {
+        { "__call", luaA_otable_new },
+        { NULL, NULL }
+    };
+    static const struct luaL_reg otable_meta[] =
+    {
+        { "__index", luaA_otable_index },
+        { NULL, NULL }
+    };
     static const struct luaL_reg awesome_lib[] =
     {
         { "quit", luaA_quit },
@@ -492,6 +531,9 @@ luaA_init(void)
 
     /* Export keygrabber lib */
     luaL_register(L, "keygrabber", awesome_keygrabber_lib);
+
+    /* Export otable lib */
+    luaA_openlib(L, "otable", otable_methods, otable_meta);
 
     /* Export mouse */
     luaA_openlib(L, "mouse", awesome_mouse_methods, awesome_mouse_meta);
