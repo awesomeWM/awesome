@@ -2,25 +2,26 @@
 -- Default awesome theme --
 ---------------------------
 
-# Lines beginning with '#' are comments.
-# You do not need to add quotes.
-font=sans 8
+font          = sans 8
 
-bg_normal=#222222
-bg_focus=#535d6c
-bg_urgent=#ff0000
+bg_normal     = #222222
+bg_focus      = #535d6c
+bg_urgent     = #ff0000
 
-fg_normal=#aaaaaa
-fg_focus=#ffffff
-fg_urgent=#ffffff
+fg_normal     = #aaaaaa
+fg_focus      = #ffffff
+fg_urgent     = #ffffff
 
-border_width=1
-border_normal=#000000
-border_focus=#535d6c
-border_marked=#91231C
+border_width  = 1
+border_normal = #000000
+border_focus  = #535d6c
+border_marked = #91231c
 
-# You can't change that variable name, because beautiful
-# will check if 'wallpaper_cmd' is defined before setting 
-# the wallpaper.
-# Don't forget to set your own command here
-wallpaper_cmd=xsetroot -solid darkgrey
+# You can use your own command to
+# set your wallpaper
+wallpaper_cmd = xsetroot -solid darkgrey
+
+# You can add as many variables as
+# you wish and access them by using
+# beautiful.variable in your rc.lua
+#bg_widget    = #cc0000

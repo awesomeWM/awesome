@@ -23,12 +23,17 @@ local theme = {}
 --- Split line in two if it  contains the '=' character.
 -- @param line The line to split.
 -- @return nil if  the '=' character is not in the string
--- if the string begins with '#' which is a comment
 local function split_line(line)
     local split_val = line:find('=')
 
     if split_val and line:sub(1, 1) ~= '#' and line:sub(1, 2) ~= '--' then
-        return line:sub(1, split_val - 1), line:sub(split_val + 1, -1)
+        -- Remove spaces in key and extra spaces before value
+        local value = line:sub(split_val + 1, -1)
+        while value:sub(1, 1) == ' ' do
+            value = value:sub(2, -1)
+        end
+
+        return line:sub(1, split_val - 1):gsub(' ', ''), value
     end
 end
 
