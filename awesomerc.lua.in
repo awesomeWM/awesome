@@ -33,11 +33,25 @@ layouts =
     "floating"
 }
 
--- Table of clients that should be set floating.
-floatings =
+-- Table of clients that should be set floating. The index may be either
+-- the application class or instance. The instance is useful when running
+-- a console app in a terminal like (Music on Console)
+--    xterm -name mocp -e mocp
+floatapps =
 {
-    ["mplayer"] = true,
-    ["pinentry"] = true
+    -- by class
+    ["MPlayer"] = true,
+    ["pinentry"] = true,
+    -- by instance
+    ["mocp"] = true
+}
+
+-- Applications to be moved to a pre-defined tag by class or instance.
+-- Use the screen and workspace indices.
+apptags =
+{
+    -- ["Firefox"] = { screen = 1, tag = 2 }
+    -- ["mocp"] = { screen = 2, tag = 4 }
 }
 
 -- Define if we want to use titlebar on all applications.
@@ -337,9 +351,28 @@ function hook_manage(c)
     c.border_width = beautiful.border_width
     c.border_color = beautiful.border_normal
     c:focus_set()
-    if floatings[c.name:lower()] then
-        c.floating = true
+
+    -- Check if the application should be floating.
+    local cls = c.class
+    local inst = c.instance
+    if floatapps[cls] then
+        c.floating = floatapps[cls]
+    elseif floatapps[inst] then
+        c.floating = floatapps[inst]
     end
+
+    -- Check application->screen/tag mappings.
+    local target
+    if apptags[cls] then
+        target = apptags[cls]
+    elseif apptags[inst] then
+        target = apptags[inst]
+    end
+    if target then
+        c.screen = target.screen
+        awful.client.movetotag(tags[target.screen][target.tag], c)
+    end
+
     -- Honor size hints
     c.honorsizehints = true
 end
