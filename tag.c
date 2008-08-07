@@ -318,6 +318,7 @@ luaA_tag_new(lua_State *L)
  * \lfield mwfact Master width factor.
  * \lfield nmaster Number of master windows.
  * \lfield ncol Number of column for slave windows.
+ * \lfield clients The clients that has this tag set.
  */
 static int
 luaA_tag_index(lua_State *L)
@@ -325,6 +326,8 @@ luaA_tag_index(lua_State *L)
     size_t len;
     tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *attr;
+    client_array_t *clients;
+    int i;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
@@ -356,6 +359,16 @@ luaA_tag_index(lua_State *L)
       case A_TK_NCOL:
         lua_pushnumber(L, (*tag)->ncol);
         break;
+      case A_TK_CLIENTS:
+        clients = &(*tag)->clients;
+        luaA_otable_new(L);
+        for(i = 0; i < clients->len; i++)
+        {
+            luaA_client_userdata_new(L, clients->tab[i]);
+            luaA_client_userdata_new(L, clients->tab[i]);
+            lua_rawset(L, -3);
+        }
+        break;
       default:
         return 0;
     }
@@ -376,6 +389,7 @@ luaA_tag_newindex(lua_State *L)
     double d;
     int i;
     layout_t *l;
+    client_t **c;
 
     switch(a_tokenize(attr, len))
     {
@@ -442,6 +456,18 @@ luaA_tag_newindex(lua_State *L)
             (*tag)->ncol = i;
         else
             luaL_error(L, "bad value, must be greater than 1");
+        break;
+      case A_TK_CLIENTS:
+        luaA_checktable(L, 3);
+        for(i = 0; i < (*tag)->clients.len; i++)
+            untag_client((*tag)->clients.tab[i], *tag);
+        lua_pushnil(L);
+        while(lua_next(L, 3))
+        {
+            c = luaA_checkudata(L, -1, "client");
+            tag_client(*c, *tag);
+            lua_pop(L, 1);
+        }
         break;
       default:
         return 0;
