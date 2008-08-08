@@ -521,6 +521,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
                 globalconf.screens[c->screen].need_arrange = true;
                 globalconf.screens[newscreen].need_arrange = true;
                 layout_refresh();
+                titlebar_refresh();
             }
 
             /* find client to swap with */
@@ -532,6 +533,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
                 client_list_swap(&globalconf.clients, c, target);
                 globalconf.screens[c->screen].need_arrange = true;
                 layout_refresh();
+                titlebar_refresh();
             }
         }
 
@@ -784,6 +786,7 @@ mouse_client_resize_tiled(client_t *c)
             tag->mwfact = mwfact;
             globalconf.screens[tag->screen].need_arrange = true;
             layout_refresh();
+            titlebar_refresh();
         }
     }
 
@@ -886,6 +889,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
             tag->mwfact = mwfact;
             globalconf.screens[tag->screen].need_arrange = true;
             layout_refresh();
+            titlebar_refresh();
         }
 
         /* draw the infobox */
