@@ -362,6 +362,7 @@ luaA_titlebar_newindex(lua_State *L)
     client_t *c = NULL, **newc;
     int i;
     widget_node_t *witer;
+    position_t position;
 
     switch(a_tokenize(attr, len))
     {
@@ -453,6 +454,17 @@ luaA_titlebar_newindex(lua_State *L)
             widget_node_list_append(&(*titlebar)->widgets, w);
             widget_ref(widget);
             lua_pop(L, 1);
+        }
+        break;
+      case A_TK_POSITION:
+        buf = luaL_checklstring(L, 3, &len);
+        position = position_fromstr(buf, len);
+        if(position != (*titlebar)->position)
+        {
+            (*titlebar)->position = position;
+            c = client_getbytitlebar(*titlebar);
+            simplewindow_delete(&c->titlebar->sw);
+            titlebar_init(c);
         }
         break;
       default:
