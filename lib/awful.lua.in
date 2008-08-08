@@ -468,7 +468,7 @@ end
 --- View only a tag.
 -- @param t The tag object.
 function tag.viewonly(t)
-    tag.viewnone()
+    tag.viewnone(t.screen)
     t.selected = true
 end
 
