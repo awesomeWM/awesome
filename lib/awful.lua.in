@@ -1170,12 +1170,12 @@ function titlebar.add(c, args)
     tb:widget_add(capi.widget({ type = "appicon", name = "appicon", align = "left" }))
 
     local title = capi.widget({ type = "textbox", name = "title", align = "flex" })
-    title:mouse_add(capi.mouse({ }, 1, function (t) t:client_get():mouse_move() end))
-    title:mouse_add(capi.mouse({ args.modkey }, 3, function (t) t:client_get():mouse_resize() end))
+    title:mouse_add(capi.mouse({ }, 1, function (t) t.client:mouse_move() end))
+    title:mouse_add(capi.mouse({ args.modkey }, 3, function (t) t.client:mouse_resize() end))
     tb:widget_add(title)
 
     local close_button= capi.widget({ type = "textbox", name = "close", align = "right" })
-    close_button:mouse_add(capi.mouse({ }, 1, function (t) t:client_get():kill() end))
+    close_button:mouse_add(capi.mouse({ }, 1, function (t) t.client:kill() end))
     tb:widget_add(close_button)
 
     titlebar.update(c)

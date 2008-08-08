@@ -443,26 +443,6 @@ luaA_titlebar_widget_get(lua_State *L)
     return 1;
 }
 
-/** Get the client which the titlebar is attached to. That is a the same as
- * checking if every clients's titlebar is equal to titlebar.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A titlebar.
- * \lreturn A client if the titlebar is attached, nil otherwise.
- */
-static int
-luaA_titlebar_client_get(lua_State *L)
-{
-    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
-    client_t *c;
-
-    if((c = client_getbytitlebar(*titlebar)))
-        return luaA_client_userdata_new(L, c);
-
-    return 0;
-}
-
 /** Titlebar newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -473,11 +453,42 @@ luaA_titlebar_newindex(lua_State *L)
     size_t len;
     titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
-    client_t *c;
+    client_t *c = NULL, **newc;
     int i;
 
     switch(a_tokenize(attr, len))
     {
+      case A_TK_CLIENT:
+        if(!lua_isnil(L, 3))
+            newc = luaA_checkudata(L, 3, "client");
+        else
+            newc = NULL;
+
+        if(newc)
+        {
+            if((*newc)->titlebar)
+            {
+                simplewindow_delete(&(*newc)->titlebar->sw);
+                titlebar_unref(&(*newc)->titlebar);
+                globalconf.screens[(*newc)->screen].need_arrange = true;
+            }
+            /* Attach titlebar to client */
+            (*newc)->titlebar = *titlebar;
+            titlebar_ref(titlebar);
+            titlebar_init(*newc);
+            c = *newc;
+        }
+        else
+        {
+            if((c = client_getbytitlebar(*titlebar)))
+            {
+                simplewindow_delete(&(*titlebar)->sw);
+                /* unref and NULL the ref */
+                titlebar_unref(&c->titlebar);
+                globalconf.screens[c->screen].need_arrange = true;
+            }
+        }
+        break;
       case A_TK_ALIGN:
         if((buf = luaL_checklstring(L, 3, &len)))
             (*titlebar)->align = draw_align_fromstr(buf, len);
@@ -514,7 +525,7 @@ luaA_titlebar_newindex(lua_State *L)
         return 0;
     }
 
-    if((c = client_getbytitlebar(*titlebar))
+    if((c || (c = client_getbytitlebar(*titlebar)))
        && client_isvisible(c, c->screen))
         globalconf.screens[c->screen].need_arrange = true;
 
@@ -525,6 +536,7 @@ luaA_titlebar_newindex(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lfield client The client attached to this titlebar.
  * \lfield align Alignment relative to the client.
  * \lfield border_width Border width.
  * \lfield border_color Border color.
@@ -537,12 +549,18 @@ luaA_titlebar_index(lua_State *L)
     size_t len;
     titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *attr = luaL_checklstring(L, 2, &len);
+    client_t *c;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
 
     switch(a_tokenize(attr, len))
     {
+      case A_TK_CLIENT:
+        if((c = client_getbytitlebar(*titlebar)))
+            return luaA_client_userdata_new(L, c);
+        else
+            return 0;
       case A_TK_ALIGN:
         lua_pushstring(L, draw_align_tostr((*titlebar)->align));
         break;
@@ -591,7 +609,6 @@ const struct luaL_reg awesome_titlebar_meta[] =
     { "widget_add", luaA_titlebar_widget_add },
     { "widget_remove", luaA_titlebar_widget_remove },
     { "widget_get", luaA_titlebar_widget_get },
-    { "client_get", luaA_titlebar_client_get },
     { "__index", luaA_titlebar_index },
     { "__newindex", luaA_titlebar_newindex },
     { "__eq", luaA_titlebar_eq },
