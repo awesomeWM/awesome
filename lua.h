@@ -92,7 +92,7 @@ typedef int luaA_function;
 #define luaA_checkscreen(screen) \
     do { \
         if(screen < 0 || screen >= globalconf.screens_info->nscreen) \
-            luaL_error(L, "invalid screen number: %d\n", screen); \
+            luaL_error(L, "invalid screen number: %d", screen); \
     } while(0)
 
 /** Check that an object is not a NULL reference.
