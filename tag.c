@@ -103,6 +103,29 @@ tag_append_to_screen(tag_t *tag, int screen)
     widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
 }
 
+/** Remove a tag from screen. Tag must be on a screen and have no clients.
+ * \param tag The tag to remove.
+ */
+static void
+tag_remove_from_screen(tag_t *tag)
+{
+    int phys_screen = screen_virttophys(tag->screen);
+    tag_array_t *tags = &globalconf.screens[tag->screen].tags;
+
+    for(int i = 0; i < tags->len; i++)
+        if(tags->tab[i] == tag)
+        {
+            tag_array_take(tags, i);
+            break;
+        }
+    ewmh_update_net_numbers_of_desktop(phys_screen);
+    ewmh_update_net_desktop_names(phys_screen);
+    ewmh_update_workarea(phys_screen);
+    widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
+    tag->screen = SCREEN_UNDEF;
+    tag_unref(&tag);
+}
+
 /** Tag a client with specified tag.
  * \param c the client to tag
  * \param t the tag to tag the client with
@@ -376,6 +399,22 @@ luaA_tag_index(lua_State *L)
     return 1;
 }
 
+/** Get a screen by its name.
+ * \param screen The screen to look into.
+ * \param name The name.
+ */
+static tag_t *
+tag_getbyname(int screen, const char *name)
+{
+    int i;
+    tag_array_t *tags = &globalconf.screens[screen].tags;
+
+    for(i = 0; i < tags->len; i++)
+        if(!a_strcmp(name, tags->tab[i]->name))
+            return tags->tab[i];
+    return NULL;
+}
+
 /** Tag newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -387,7 +426,7 @@ luaA_tag_newindex(lua_State *L)
     tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     double d;
-    int i;
+    int i, screen;
     layout_t *l;
     client_t **c;
 
@@ -397,34 +436,41 @@ luaA_tag_newindex(lua_State *L)
         buf = luaL_checklstring(L, 3, &len);
         if((*tag)->screen != SCREEN_UNDEF)
         {
-            tag_array_t *tags = &globalconf.screens[(*tag)->screen].tags;
-            for(i = 0; i < tags->len; i++)
-                if(tags->tab[i] != *tag && !a_strcmp(buf, tags->tab[i]->name))
-                    luaL_error(L, "a tag with the name `%s' is already on screen %d",
-                               buf, (*tag)->screen);
+            if(tag_getbyname((*tag)->screen, (*tag)->name) != *tag)
+                luaL_error(L, "a tag with the name `%s' is already on screen %d",
+                           buf, (*tag)->screen);
             widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
         }
         p_delete(&(*tag)->name);
         a_iso2utf8(&(*tag)->name, buf, len);
         break;
       case A_TK_SCREEN:
-        if((*tag)->screen == SCREEN_UNDEF)
+        if(!lua_isnil(L, 3))
         {
-            int screen = luaL_checknumber(L, 3) - 1;
-
+            screen = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(screen);
-
-            tag_array_t *tags = &globalconf.screens[screen].tags;
-            for(i = 0; i < tags->len; i++)
-                if(tags->tab[i] != *tag && !a_strcmp((*tag)->name, tags->tab[i]->name))
-                    luaL_error(L, "a tag with the name `%s' is already on screen %d",
-                               (*tag)->name, screen);
-
-            tag_append_to_screen(*tag, screen);
-            return 0;
         }
         else
-            luaL_error(L, "tag already on screen %d", (*tag)->screen + 1);
+            screen = SCREEN_UNDEF;
+
+        if((*tag)->screen != SCREEN_UNDEF)
+        {
+            if((*tag)->clients.len)
+                luaL_error(L, "unable to remove tag %s from screen %d, it still has clients",
+                           (*tag)->name, (*tag)->screen);
+            else
+                tag_remove_from_screen(*tag);
+        }
+
+        if(screen != SCREEN_UNDEF)
+        {
+            if(tag_getbyname(screen, (*tag)->name))
+                luaL_error(L, "a tag with the name `%s' is already on screen %d",
+                           (*tag)->name, screen);
+
+            tag_append_to_screen(*tag, screen);
+        }
+        break;
       case A_TK_LAYOUT:
         buf = luaL_checkstring(L, 3);
         l = name_func_lookup(buf, LayoutList);
