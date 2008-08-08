@@ -144,11 +144,11 @@ for s = 1, screen.count() do
         mytasklist,
         mypromptbox,
         mytextbox,
-        mylayoutbox[s]
+        mylayoutbox[s],
+        s == screen.count() and mysystray or nil
     }
     mystatusbar[s].screen = s
 end
-table.insert(mystatusbar[screen.count()].widgets, mysystray)
 -- }}}
 
 -- {{{ Mouse bindings
