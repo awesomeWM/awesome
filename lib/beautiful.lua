@@ -15,7 +15,7 @@ local capi = { awesome = awesome }
 local module_name = "beautiful"
 
 --- beautiful: theme library
-module(module_name)
+module("beautiful")
 
 -- Local data
 local theme = {}
