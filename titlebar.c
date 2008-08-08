@@ -476,6 +476,7 @@ luaA_titlebar_newindex(lua_State *L)
  * \lfield border_color Border color.
  * \lfield fg Foreground color.
  * \lfield bg Background color.
+ * \lfield position Position.
  */
 static int
 luaA_titlebar_index(lua_State *L)
@@ -519,6 +520,9 @@ luaA_titlebar_index(lua_State *L)
             luaA_widget_userdata_new(L, witer->widget);
             lua_rawseti(L, -2, ++i);
         }
+        break;
+      case A_TK_POSITION:
+        lua_pushstring(L, position_tostr((*titlebar)->position)); 
         break;
       default:
         return 0;
