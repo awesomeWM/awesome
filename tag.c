@@ -402,10 +402,10 @@ luaA_tag_newindex(lua_State *L)
                 if(tags->tab[i] != *tag && !a_strcmp(buf, tags->tab[i]->name))
                     luaL_error(L, "a tag with the name `%s' is already on screen %d",
                                buf, (*tag)->screen);
+            widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
         }
         p_delete(&(*tag)->name);
         a_iso2utf8(&(*tag)->name, buf, len);
-        widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
         break;
       case A_TK_SCREEN:
         if((*tag)->screen == SCREEN_UNDEF)
