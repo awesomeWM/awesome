@@ -55,7 +55,7 @@ apptags =
 }
 
 -- Define if we want to use titlebar on all applications.
-use_titlebar = false
+use_titlebar = true
 -- }}}
 
 -- {{{ Initialization

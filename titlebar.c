@@ -349,100 +349,6 @@ luaA_titlebar_new(lua_State *L)
     return luaA_titlebar_userdata_new(globalconf.L, tb);
 }
 
-/** Add a widget to a titlebar.
- * \param L The Lua VM state.
- * \return The number of value pushed.
- *
- * \luastack
- * \lvalue A titlebar.
- * \lparam A widget.
- */
-static int
-luaA_titlebar_widget_add(lua_State *L)
-{
-    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
-    widget_t **widget = luaA_checkudata(L, 2, "widget");
-    widget_node_t *witer, *w;
-   
-    if((*widget)->type == systray_new)
-        luaL_error(L, "cannot add systray widget to titlebar");
-
-    /* check that there is not already a widget with that name in the titlebar */
-    for(witer = (*tb)->widgets; witer; witer = witer->next)
-        if(witer->widget != *widget
-           && !a_strcmp(witer->widget->name, (*widget)->name))
-            luaL_error(L, "a widget with name `%s' already on titlebar", witer->widget->name);
-
-    w = p_new(widget_node_t, 1);
-
-    w->widget = *widget;
-    widget_node_list_append(&(*tb)->widgets, w);
-    widget_ref(widget);
-
-    (*tb)->need_update = true;
-
-    return 0;
-}
-
-/** Remove a widget from a titlebar.
- * \param L The Lua VM State.
- *
- * \luastack
- * \lvalue A statusbar.
- * \lparam A widget.
- */
-static int
-luaA_titlebar_widget_remove(lua_State *L)
-{
-    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
-    widget_t **widget = luaA_checkudata(L, 2, "widget");
-    widget_node_t *w, *wnext;
-
-    for(w = (*tb)->widgets; w; w = wnext)
-    {
-        wnext = w->next;
-        if(w->widget == *widget)
-        {
-            if((*widget)->detach)
-                (*widget)->detach(*widget, *tb);
-            widget_unref(widget);
-            widget_node_list_detach(&(*tb)->widgets, w);
-            p_delete(&w);
-            (*tb)->need_update = true;
-        }
-    }
-
-    return 0;
-}
-
-
-/** Get all widgets from a titlebar.
- * \param L The Lua VM state.
- * \return The number of value pushed.
- *
- * \luastack
- * \lvalue A titlebar
- * \lreturn A table with all widgets from the titlebar.
- */
-static int
-luaA_titlebar_widget_get(lua_State *L)
-{
-    titlebar_t **tb = luaA_checkudata(L, 1, "titlebar");
-    widget_node_t *witer;
-
-    lua_newtable(L);
-
-    for(witer = (*tb)->widgets; witer; witer = witer->next)
-    {
-        luaA_widget_userdata_new(L, witer->widget);
-        /* ref again for the list */
-        widget_ref(&witer->widget);
-        lua_setfield(L, -2, witer->widget->name);
-    }
-
-    return 1;
-}
-
 /** Titlebar newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -455,6 +361,7 @@ luaA_titlebar_newindex(lua_State *L)
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     client_t *c = NULL, **newc;
     int i;
+    widget_node_t *witer;
 
     switch(a_tokenize(attr, len))
     {
@@ -521,6 +428,33 @@ luaA_titlebar_newindex(lua_State *L)
                            globalconf.default_screen, buf, len))
                 (*titlebar)->need_update = true;
         return 0;
+      case A_TK_WIDGETS:
+        luaA_checktable(L, 3);
+
+        /* remove all widgets */
+        for(witer = (*titlebar)->widgets; witer; witer = (*titlebar)->widgets)
+        {
+            if(witer->widget->detach)
+                witer->widget->detach(witer->widget, *titlebar);
+            widget_unref(&witer->widget);
+            widget_node_list_detach(&(*titlebar)->widgets, witer);
+            p_delete(&witer);
+        }
+
+        (*titlebar)->need_update = true;
+
+        /* now read all widgets and add them */
+        lua_pushnil(L);
+        while(lua_next(L, 3))
+        {
+            widget_t **widget = luaA_checkudata(L, -1, "widget");
+            widget_node_t *w = p_new(widget_node_t, 1);
+            w->widget = *widget;
+            widget_node_list_append(&(*titlebar)->widgets, w);
+            widget_ref(widget);
+            lua_pop(L, 1);
+        }
+        break;
       default:
         return 0;
     }
@@ -550,6 +484,8 @@ luaA_titlebar_index(lua_State *L)
     titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *attr = luaL_checklstring(L, 2, &len);
     client_t *c;
+    widget_node_t *witer;
+    int i = 0;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
@@ -575,6 +511,14 @@ luaA_titlebar_index(lua_State *L)
         break;
       case A_TK_BG:
         luaA_pushcolor(L, &(*titlebar)->colors.bg);
+        break;
+      case A_TK_WIDGETS:
+        lua_newtable(L);
+        for(witer = (*titlebar)->widgets; witer; witer = witer->next)
+        {
+            luaA_widget_userdata_new(L, witer->widget);
+            lua_rawseti(L, -2, ++i);
+        }
         break;
       default:
         return 0;
@@ -606,9 +550,6 @@ const struct luaL_reg awesome_titlebar_methods[] =
 };
 const struct luaL_reg awesome_titlebar_meta[] =
 {
-    { "widget_add", luaA_titlebar_widget_add },
-    { "widget_remove", luaA_titlebar_widget_remove },
-    { "widget_get", luaA_titlebar_widget_get },
     { "__index", luaA_titlebar_index },
     { "__newindex", luaA_titlebar_newindex },
     { "__eq", luaA_titlebar_eq },

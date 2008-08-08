@@ -674,7 +674,6 @@ luaA_statusbar_newindex(lua_State *L)
             widget_ref(widget);
             lua_pop(L, 1);
         }
-
         break;
       default:
         return 0;
