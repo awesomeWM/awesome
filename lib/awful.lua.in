@@ -487,10 +487,12 @@ end
 -- @para c Optional client to move, otherwise the focused one is used.
 function client.movetotag(target, c)
     local sel = c or capi.client.focus_get();
-    -- Check that tag and client screen are identical
-    if sel.screen ~= target.screen then return end
-    local tags = { target }
-    sel.tags = tags
+    if sel then
+        -- Check that tag and client screen are identical
+        if sel.screen ~= target.screen then return end
+        local tags = { target }
+        sel.tags = tags
+    end
 end
 
 --- Toggle a tag on a client.
