@@ -138,15 +138,17 @@ for s = 1, screen.count() do
     mystatusbar[s] = statusbar({ position = "top", name = "mystatusbar" .. s,
                                    fg = beautiful.fg_normal, bg = beautiful.bg_normal })
     -- Add widgets to the statusbar - order matters
-    mystatusbar[s]:widget_add(mytaglist)
-    mystatusbar[s]:widget_add(myiconbox)
-    mystatusbar[s]:widget_add(mytasklist)
-    mystatusbar[s]:widget_add(mypromptbox)
-    mystatusbar[s]:widget_add(mytextbox)
-    mystatusbar[s]:widget_add(mylayoutbox[s])
+    mystatusbar[s].widgets =
+    {
+        mytaglist,
+        mytasklist,
+        mypromptbox,
+        mytextbox,
+        mylayoutbox[s]
+    }
     mystatusbar[s].screen = s
 end
-mystatusbar[screen.count()]:widget_add(mysystray)
+table.insert(mystatusbar[screen.count()].widgets, mysystray)
 -- }}}
 
 -- {{{ Mouse bindings
