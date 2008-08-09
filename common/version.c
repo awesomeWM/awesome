@@ -22,13 +22,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifndef WITH_IMLIB2
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#endif
-
 #include "config.h"
 #include "common/version.h"
 #include "awesome-version-internal.h"
+
+#ifndef WITH_IMLIB2
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#endif
 
 /** \brief Print version message and quit program.
  * \param executable program name
