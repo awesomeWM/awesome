@@ -130,8 +130,6 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     glib-2.0
     cairo
     pango
-    gdk-2.0>=2.2
-    gdk-pixbuf-2.0>=2.2
     xcb
     xcb-event
     xcb-randr
@@ -212,6 +210,18 @@ if(WITH_IMLIB2)
     else()
         set(WITH_IMLIB2 OFF)
         message(STATUS "Imlib2 not found. Disabled.")
+    endif()
+endif()
+
+if(NOT WITH_IMLIB2)
+    pkg_check_modules(GDK_PIXBUF REQUIRED gdk-2.0>=2.2 gdk-pixbuf-2.0>=2.2)
+    if(GDK_PIXBUF_FOUND)
+        set(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES}
+            ${GDK_PIXBUF_LIBRARIES})
+        set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS}
+            ${GDK_PIXBUF_INCLUDE_DIRS})
+    else()
+        message(FATAL_ERROR "GdkPixBuf not found.")
     endif()
 endif()
 # }}}
