@@ -159,7 +159,7 @@ function untab(cl)
     local cindex = findkey(tabbed[tabindex][2], c)
 
     if tabbed[tabindex][1] == c then
-        display(tabindex, P.next(tabindex, c))
+        display(tabindex, next(tabindex, c))
     end
 
     table.remove(tabbed[tabindex][2], cindex)

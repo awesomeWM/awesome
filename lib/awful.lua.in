@@ -10,7 +10,6 @@ local assert = assert
 local loadstring = loadstring
 local ipairs = ipairs
 local pairs = pairs
-local unpack = unpack
 local os = os
 local io = io
 local math = math
@@ -569,7 +568,7 @@ end
 -- @param name Hook name.
 function hooks.user.call(name, ...)
     for name, callback in pairs(hooks[name].callbacks) do
-        callback(unpack(args))
+        callback(...)
     end
 end
 
