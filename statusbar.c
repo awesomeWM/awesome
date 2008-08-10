@@ -88,8 +88,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == statusbar->phys_screen)
                     {
-                        if(em->info.flags & XEMBED_MAPPED
-                           && config_win_vals[1] - config_win_vals[2] >= (uint32_t) statusbar->sw->geometry.y)
+                        if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) statusbar->sw->geometry.y)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -114,8 +113,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == statusbar->phys_screen)
                     {
-                        if(em->info.flags & XEMBED_MAPPED
-                           && config_win_vals[1] + config_win_vals[3] <= (uint32_t) statusbar->sw->geometry.y + statusbar->ctx->width)
+                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) statusbar->sw->geometry.y + statusbar->ctx->width)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -142,8 +140,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                     if(em->phys_screen == statusbar->phys_screen)
                     {
                         /* if(x + width < systray.x + systray.width) */
-                        if(em->info.flags & XEMBED_MAPPED
-                           && config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->area) + statusbar->sw->geometry.x)
+                        if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->area) + statusbar->sw->geometry.x)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
