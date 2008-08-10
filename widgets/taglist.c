@@ -114,6 +114,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
     for(int i = 0; i < tags->len; i++)
     {
         tag_t *tag = tags->tab[i];
+        p_clear(&area, 1);
 
         luaA_tag_userdata_new(globalconf.L, tag);
         if(luaA_dofunction(globalconf.L, data->label, 1, 1))
@@ -132,9 +133,8 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
                                  pdata[i].bg_resize ? ((double) pdata[i].bg_image->width / (double) pdata[i].bg_image->height) * w->area.height : pdata[i].bg_image->width);
 
             w->area.width += area.width;
-
-            area_array_append(&tda->areas, area);
         }
+        area_array_append(&tda->areas, area);
     }
 
     /* Now that we have widget width we can compute widget x coordinate */
