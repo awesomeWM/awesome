@@ -427,6 +427,38 @@ luaA_mbstrlen(lua_State *L)
     return 1;
 }
 
+static int
+luaA_next(lua_State *L)
+{
+    if(luaL_getmetafield(L, 1, "__next"))
+    {
+        lua_insert(L, 1);
+        lua_call(L, lua_gettop(L) - 1, LUA_MULTRET);
+        return lua_gettop(L);
+    }
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+    lua_settop(L, 2);
+    if(lua_next(L, 1))
+        return 2;
+    lua_pushnil(L);
+    return 1;
+}
+
+static int
+luaA_pairs(lua_State *L)
+{
+    if(luaL_getmetafield(L, 1, "__pairs"))
+    {
+        lua_insert(L, 1);
+        lua_call(L, lua_gettop(L) - 1, LUA_MULTRET);
+        return lua_gettop(L);
+    }
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+    return luaA_generic_pairs(L);
+}
+
 static void
 luaA_fixups(lua_State *L)
 {
@@ -434,6 +466,13 @@ luaA_fixups(lua_State *L)
     lua_pushcfunction(L, luaA_mbstrlen);
     lua_setfield(L, -2, "len");
     lua_pop(L, 1);
+    lua_pushliteral(L, "next");
+    lua_pushcfunction(L, luaA_next);
+    lua_settable(L, LUA_GLOBALSINDEX);
+    lua_pushliteral(L, "pairs");
+    lua_pushcfunction(L, luaA_next);
+    lua_pushcclosure(L, luaA_pairs, 1); /* pairs get next as upvalue */
+    lua_settable(L, LUA_GLOBALSINDEX);
 }
 
 /** Object table.
