@@ -1083,10 +1083,13 @@ luaA_client_newindex(lua_State *L)
                                                     FloatingPlacementList);
         break;
       case A_TK_SCREEN:
-        i = luaL_checknumber(L, 3) - 1;
-        luaA_checkscreen(i);
-        if(i != (*c)->screen)
-            screen_client_moveto(*c, i, true);
+        if(globalconf.screens_info->xinerama_is_active)
+        {
+            i = luaL_checknumber(L, 3) - 1;
+            luaA_checkscreen(i);
+            if(i != (*c)->screen)
+                screen_client_moveto(*c, i, true);
+        }
         break;
       case A_TK_HIDE:
         b = luaA_checkboolean(L, 3);
