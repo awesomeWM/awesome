@@ -304,6 +304,27 @@ luaA_generic_pairs(lua_State *L)
         lua_pushfstring(L, "["typename" udata(%p)]", value);                \
         return 1;                                                           \
     }                                                                       \
+    static inline int                                                       \
+    luaA_##pfx##_array_next(lua_State *L)                                   \
+    {                                                                       \
+        atype *value = lua_touserdata(L, 1);                                \
+        if(value)                                                           \
+        {                                                                   \
+            lua_settop(L, 2);                                               \
+            if(lua_isnumber(L, 2))                                          \
+            {                                                               \
+                int idx = lua_tonumber(L, 2);                               \
+                if(idx >= 0 && idx < value->len)                            \
+                    return ctor(L, value->tab[idx]);                        \
+            }                                                               \
+            else if(lua_isnil(L, 2))                                        \
+            {                                                               \
+                if(value->len)                                              \
+                    return ctor(L, value->tab[0]);                          \
+            }                                                               \
+        }                                                                   \
+        return 0;                                                           \
+    }                                                                       \
     static inline void                                                      \
     luaA_##pfx##_array_export(lua_State *L, atype *arr)                     \
     {                                                                       \
@@ -313,6 +334,11 @@ luaA_generic_pairs(lua_State *L)
         lua_setfield(L, -2, "__index");                                     \
         lua_pushcfunction(L, luaA_##pfx##_array_tostring);                  \
         lua_setfield(L, -2, "__tostring");                                  \
+        lua_pushcfunction(L, luaA_##pfx##_array_next);                      \
+        lua_setfield(L, -2, "__next");                                      \
+        lua_pushcfunction(L, luaA_##pfx##_array_next);                      \
+        lua_pushcclosure(L, luaA_generic_pairs, 1);                         \
+        lua_setfield(L, -2, "__pairs");                                     \
         lua_pushcfunction(L, luaA_##pfx##_array_newindex);                  \
         lua_setfield(L, -2, "__newindex");                                  \
         lua_pushcfunction(L, luaA_##pfx##_array_len);                       \
