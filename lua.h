@@ -259,5 +259,66 @@ luaA_generic_pairs(lua_State *L)
     return 3;
 }
 
+#define DO_LUA_EXPORT_ARRAY(pfx, typename, type, atype, ctor)               \
+    static inline int                                                       \
+    luaA_##pfx##_array_index(lua_State *L)                                  \
+    {                                                                       \
+        atype *value = lua_touserdata(L, 1);                                \
+        type **obj;                                                         \
+        int idx;                                                            \
+                                                                            \
+        if ((obj = lua_touserdata(L, 2)))                                   \
+        {                                                                   \
+            for (idx = 0; idx < value->len; idx++)                          \
+                if (value->tab[idx] == *obj)                                \
+                    return ctor(L, value->tab[idx]);                        \
+            return 0;                                                       \
+        }                                                                   \
+                                                                            \
+        idx = luaL_checknumber(L, 2) - 1;                                   \
+        if (idx < 0 || idx >= value->len)                                   \
+            return 0;                                                       \
+                                                                            \
+        return ctor(L, value->tab[idx]);                                    \
+    }                                                                       \
+    static inline int                                                       \
+    luaA_##pfx##_array_newindex(lua_State *L)                               \
+    {                                                                       \
+        atype *value = lua_touserdata(L, 1);                                \
+        int idx = luaL_checknumber(L, 2);                                   \
+        type **elem = luaL_checkudata(L, 3, #pfx);                          \
+        pfx##_array_splice(value, idx - 1, 1, elem, 1);                     \
+        return 0;                                                           \
+    }                                                                       \
+    static inline int                                                       \
+    luaA_##pfx##_array_len(lua_State *L)                                    \
+    {                                                                       \
+        atype *value = lua_touserdata(L, 1);                                \
+        lua_pushnumber(L, value->len);                                      \
+        return 1;                                                           \
+    }                                                                       \
+    static inline int                                                       \
+    luaA_##pfx##_array_tostring(lua_State *L)                               \
+    {                                                                       \
+        atype *value = lua_touserdata(L, 1);                                \
+        lua_pushfstring(L, "["typename" udata(%p)]", value);                \
+        return 1;                                                           \
+    }                                                                       \
+    static inline void                                                      \
+    luaA_##pfx##_array_export(lua_State *L, atype *arr)                     \
+    {                                                                       \
+        lua_pushlightuserdata(L, arr);                                      \
+        lua_newtable(L);                                                    \
+        lua_pushcfunction(L, luaA_##pfx##_array_index);                     \
+        lua_setfield(L, -2, "__index");                                     \
+        lua_pushcfunction(L, luaA_##pfx##_array_tostring);                  \
+        lua_setfield(L, -2, "__tostring");                                  \
+        lua_pushcfunction(L, luaA_##pfx##_array_newindex);                  \
+        lua_setfield(L, -2, "__newindex");                                  \
+        lua_pushcfunction(L, luaA_##pfx##_array_len);                       \
+        lua_setfield(L, -2, "__len");                                       \
+        lua_setmetatable(L, -2);                                            \
+    }
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
