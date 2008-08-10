@@ -315,12 +315,20 @@ luaA_generic_pairs(lua_State *L)
             {                                                               \
                 int idx = lua_tonumber(L, 2);                               \
                 if(idx >= 0 && idx < value->len)                            \
-                    return ctor(L, value->tab[idx]);                        \
+                {                                                           \
+                    lua_pushnumber(L, idx + 1);                             \
+                    ctor(L, value->tab[idx]);                               \
+                    return 2;                                               \
+                }                                                           \
             }                                                               \
             else if(lua_isnil(L, 2))                                        \
             {                                                               \
                 if(value->len)                                              \
-                    return ctor(L, value->tab[0]);                          \
+                {                                                           \
+                    lua_pushnumber(L, 1);                                   \
+                    ctor(L, value->tab[0]);                                 \
+                    return 2;                                               \
+                }                                                           \
             }                                                               \
         }                                                                   \
         return 0;                                                           \
