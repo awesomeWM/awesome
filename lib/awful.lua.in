@@ -1069,6 +1069,49 @@ function widget.taglist.label.all(t, args)
     return text
 end
 
+--- Return labels for a taglist widget with all *non empty* tags from screen.
+-- It returns the tag name and set a special
+-- foreground and background color for selected tags.
+-- @param t The tag.
+-- @param args The arguments table.
+-- bg_focus The background color for selected tag.
+-- fg_focus The foreground color for selected tag.
+-- bg_urgent The background color for urgent tags.
+-- fg_urgent The foreground color for urgent tags.
+-- @return A string to print.
+function widget.taglist.label.noempty(t, args)
+    if #t.clients > 0 then
+        if not args then args = {} end
+        local fg_focus = args.fg_focus or theme.fg_focus
+        local bg_focus = args.bg_focus or theme.bg_focus
+        local fg_urgent = args.fg_urgent or theme.fg_urgent
+        local bg_urgent = args.bg_urgent or theme.bg_urgent
+        local bg_color = nil
+        local fg_color = nil
+        local text
+
+        if t.selected then
+            bg_color = bg_focus
+            fg_color = fg_focus
+        end
+        if bg_urgent and fg_urgent then
+            for k, c in pairs(t.clients) do
+                if c.urgent then
+                    bg_color = bg_urgent
+                    fg_color = fg_urgent
+                    break
+                end
+            end
+        end
+        if fg_color and bg_color then
+            text = "<bg color='" .. bg_color .. "'/> <span color='" .. fg_color .. "'>" .. escape(t.name) .. "</span> "
+        else
+            text = " " .. escape(t.name) .. " "
+        end
+        return text
+    end
+end
+
 local function widget_tasklist_label_common(c, args)
     if not args then args = {} end
     local fg_focus = args.fg_focus or theme.fg_focus
