@@ -105,7 +105,8 @@ scan(void)
             state = window_getstate(wins[i]);
 
             if(!attr_r || attr_r->override_redirect
-               || attr_r->map_state == XCB_MAP_STATE_UNVIEWABLE)
+               || attr_r->map_state != XCB_MAP_STATE_VIEWABLE
+               || state == XCB_WM_WITHDRAWN_STATE)
             {
                 p_delete(&attr_r);
                 continue;
