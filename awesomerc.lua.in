@@ -382,8 +382,13 @@ end
 -- Hook function to execute when arranging the screen
 -- (tag switch, new client, etc)
 function hook_arrange(screen)
-    mylayoutbox[screen].text =
-        "<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. awful.layout.get(screen) .. "w.png\" resize=\"true\"/>"
+    local layout = awful.layout.get(screen)
+    if layout then
+        mylayoutbox[screen].text =
+            "<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. awful.layout.get(screen) .. "w.png\" resize=\"true\"/>"
+        else
+            mylayoutbox[screen].text = "No layout."
+    end
 
     -- If no window has focus, give focus to the latest in history
     if not client.focus_get() then
