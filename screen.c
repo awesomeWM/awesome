@@ -247,6 +247,7 @@ luaA_screen_index(lua_State *L)
     const char *buf = luaL_checklstring(L, 2, &len);
     screen_t *s;
     area_t g;
+    int i;
 
     s = lua_touserdata(L, 1);
 
@@ -286,6 +287,14 @@ luaA_screen_index(lua_State *L)
         lua_setfield(L, -2, "width");
         lua_pushnumber(L, g.height);
         lua_setfield(L, -2, "height");
+        break;
+      case A_TK_TAGS:
+        lua_newtable(L);
+        for(i = 0; i < s->tags.len; i++)
+        {
+            luaA_tag_userdata_new(L, s->tags.tab[i]);
+            lua_rawseti(L, -2, i + 1);
+        }
         break;
       default:
         return 0;
