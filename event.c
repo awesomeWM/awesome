@@ -458,8 +458,9 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     }
     else if((c = client_getbywin(ev->window)))
     {
-        if(client_isvisible(c, c->screen))
+        if(client_maybevisible(c, c->screen))
         {
+            c->ishidden = false;
             xcb_map_window(globalconf.connection, ev->window);
             /* it will be raised, so just update ourself */
             client_raise(c);

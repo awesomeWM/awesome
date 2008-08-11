@@ -123,9 +123,9 @@ window_isprotodel(xcb_window_t win)
  * \return true if the client is visible, false otherwise.
  */
 bool
-client_isvisible(client_t *c, int screen)
+client_maybevisible(client_t *c, int screen)
 {
-    if(c && !c->ishidden && c->screen == screen)
+    if(c->screen == screen)
     {
         tag_array_t *tags = &globalconf.screens[screen].tags;
         for(int i = 0; i < tags->len; i++)
@@ -133,6 +133,18 @@ client_isvisible(client_t *c, int screen)
                 return true;
     }
     return false;
+}
+
+/** Returns true if a client is tagged
+ * with one of the tags of the specified screen and is not hidden.
+ * \param c The client to check.
+ * \param screen Virtual screen number.
+ * \return true if the client is visible, false otherwise.
+ */
+bool
+client_isvisible(client_t *c, int screen)
+{
+    return (!c->ishidden && client_maybevisible(c, screen));
 }
 
 /** Get a client by its window.
@@ -217,19 +229,7 @@ client_ban(client_t *c)
 static void
 client_focus(client_t *c)
 {
-    bool istagged = false;
-    tag_array_t *tags = &globalconf.screens[c->screen].tags;
-
-    /* Just check if the client is tagged with at least one visible tag.
-     * If so, we can give it the focus. */
-    for(int i = 0; i < tags->len; i++)
-        if(tags->tab[i]->selected && is_client_tagged(c, tags->tab[i]))
-        {
-            istagged = true;
-            break;
-        }
-
-    if(!istagged)
+    if(!client_maybevisible(c, c->screen))
         return;
 
     /* unfocus current selected client */

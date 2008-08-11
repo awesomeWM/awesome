@@ -26,6 +26,7 @@
 
 #include "structs.h"
 
+bool client_maybevisible(client_t *, int);
 bool client_isvisible(client_t *, int);
 client_t * client_getbywin(xcb_window_t);
 void client_setlayer(client_t *, layer_t);
