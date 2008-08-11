@@ -502,7 +502,7 @@ function client.toggletag(target, c)
     local sel = c or capi.client.focus_get();
     -- Check that tag and client screen are identical
     if sel and sel.screen == target.screen then
-        local tags = client.tags
+        local tags = sel.tags
         if tags[target] then
             tags[target] = nil
         else

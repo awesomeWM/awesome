@@ -232,14 +232,7 @@ luaA_otable_new(lua_State *L)
 {
     /* Our object */
     lua_newtable(L);
-    /* The meta table */
-    lua_newtable(L);
-    lua_pushcfunction(L, luaA_otable_index);
-    /* Register index into the metatable */
-    lua_setfield(L, -2, "__index");
-    /* Set the meta table */
-    lua_setmetatable(L, -2);
-    return 1;
+    return luaA_settype(L, "otable");
 }
 
 void luaA_init(void);

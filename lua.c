@@ -411,6 +411,44 @@ luaA_otable_index(lua_State *L)
     return 1;
 }
 
+/** Object table.
+ * This table can use safely object as key.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_otable_newindex(lua_State *L)
+{
+    void **obj, **v;
+
+    if((obj = lua_touserdata(L, 2)))
+    {
+        printf("looking for %p\n", *obj);
+        /* begins at nil */
+        lua_pushnil(L);
+        while(lua_next(L, 1))
+        {
+            if((v = lua_touserdata(L, -2))
+               && *v == *obj)
+            {
+                printf("found %p, replace\n", *v);
+                /* remove value */
+                lua_pop(L, 1);
+                /* push new value on top */
+                lua_pushvalue(L, 3);
+                /* set in table key = value */
+                lua_rawset(L, 1);
+                return 0;
+            }
+            /* removes 'value'; keeps 'key' for next iteration */
+            lua_pop(L, 1);
+        }
+    }
+    
+    lua_rawset(L, 1);
+    return 0;
+}
+
 /** Initialize the Lua VM
  */
 void
@@ -426,6 +464,7 @@ luaA_init(void)
     static const struct luaL_reg otable_meta[] =
     {
         { "__index", luaA_otable_index },
+        { "__newindex", luaA_otable_newindex },
         { NULL, NULL }
     };
     static const struct luaL_reg awesome_lib[] =
