@@ -249,6 +249,13 @@ else()
     set(XDG_CONFIG_DIR ${SYSCONFDIR}/xdg CACHE PATH "xdg config directory")
 endif()
 
+# setting AWESOME_DOC_PATH
+if(DEFINED AWESOME_DOC_PATH)
+    set(AWESOME_DOC_PATH ${AWESOME_DOC_PATH} CACHE PATH "awesome docs directory")
+else()
+    set(AWESOME_DOC_PATH ${PREFIX}/share/doc/${PROJECT_AWE_NAME} CACHE PATH "awesome docs directory")
+endif()
+
 # Hide to avoid confusion
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 
@@ -259,7 +266,6 @@ set(AWESOME_COMPILE_BY       $ENV{USER})
 set(AWESOME_RELEASE          ${CODENAME})
 set(AWESOME_SYSCONFDIR       ${XDG_CONFIG_DIR}/${PROJECT_AWE_NAME})
 set(AWESOME_DATA_PATH        ${PREFIX}/share/${PROJECT_AWE_NAME})
-set(AWESOME_DOC_PATH         ${PREFIX}/share/doc/${PROJECT_AWE_NAME})
 set(AWESOME_MAN_PATH         ${PREFIX}/share/man)
 set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)
 set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
