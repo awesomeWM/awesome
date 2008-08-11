@@ -36,7 +36,7 @@ typedef struct keybinding_t
     /** Keycode */
     xcb_keycode_t keycode;
     /** Lua function to execute. */
-    luaA_function fct;
+    luaA_ref fct;
 } keybinding_t;
 
 keybinding_t *keybinding_find(const xcb_key_press_event_t *);

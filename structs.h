@@ -78,7 +78,7 @@ struct button_t
     /** Mouse button number */
     unsigned int button;
     /** Lua function to execute. */
-    luaA_function fct;
+    luaA_ref fct;
     /** Next and previous buttons */
     button_t *prev, *next;
 };
@@ -429,30 +429,30 @@ struct awesome_t
     struct
     {
         /** Command to execute when spawning a new client */
-        luaA_function manage;
+        luaA_ref manage;
         /** Command to execute when unmanaging client */
-        luaA_function unmanage;
+        luaA_ref unmanage;
         /** Command to execute when giving focus to a client */
-        luaA_function focus;
+        luaA_ref focus;
         /** Command to execute when removing focus to a client */
-        luaA_function unfocus;
+        luaA_ref unfocus;
         /** Command to run when mouse is over */
-        luaA_function mouseover;
+        luaA_ref mouseover;
         /** Command to run on arrange */
-        luaA_function arrange;
+        luaA_ref arrange;
         /** Command to run on title change */
-        luaA_function titleupdate;
+        luaA_ref titleupdate;
         /** Command to run on urgent flag */
-        luaA_function urgent;
+        luaA_ref urgent;
         /** Command to run on time */
-        luaA_function timer;
+        luaA_ref timer;
     } hooks;
     /** The event loop */
     struct ev_loop *loop;
     /** The timeout after which we need to stop select() */
     struct ev_timer timer;
     /** The key grabber function */
-    luaA_function keygrabber;
+    luaA_ref keygrabber;
     /** Focused screen */
     screen_t *screen_focus;
 };

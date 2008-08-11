@@ -54,7 +54,7 @@ DO_SLIST(taglist_drawn_area_t, taglist_drawn_area, taglist_drawn_area_delete);
 typedef struct
 {
     taglist_drawn_area_t *drawn_area;
-    luaA_function label;
+    luaA_ref label;
 } taglist_data_t;
 
 static taglist_drawn_area_t *

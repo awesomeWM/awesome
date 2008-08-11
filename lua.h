@@ -37,7 +37,7 @@ typedef enum
 } awesome_type_t;
 
 /** Type for Lua function */
-typedef int luaA_function;
+typedef int luaA_ref;
 
 #define DO_LUA_NEW(decl, type, prefix, lua_type, type_ref) \
     decl int \
@@ -178,13 +178,13 @@ luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
 
 /** Register a function.
  * \param L The Lua stack.
- * \param fct A luaA_function address: it will be filled with the luaA_function
+ * \param fct A luaA_ref address: it will be filled with the luaA_ref
  * registered. If the adresse point to an already registered function, it will
  * be unregistered.
  * \return Always 0.
  */
 static inline int
-luaA_registerfct(lua_State *L, luaA_function *fct)
+luaA_registerfct(lua_State *L, luaA_ref *fct)
 {
     luaA_checkfunction(L, -1);
     if(*fct != LUA_REFNIL)
@@ -201,7 +201,7 @@ luaA_registerfct(lua_State *L, luaA_function *fct)
  * \return True on no error, false otherwise.
  */
 static inline bool
-luaA_dofunction(lua_State *L, luaA_function f, int nargs, int nret)
+luaA_dofunction(lua_State *L, luaA_ref f, int nargs, int nret)
 {
     if(f != LUA_REFNIL)
     {

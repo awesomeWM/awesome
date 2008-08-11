@@ -77,7 +77,7 @@ DO_SLIST(tasklist_object_data_t, tasklist_object_data, tasklist_object_data_dele
 typedef struct
 {
     bool show_icons;
-    luaA_function label;
+    luaA_ref label;
     tasklist_object_data_t *objects_data;
 } tasklist_data_t;
 
