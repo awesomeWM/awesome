@@ -779,7 +779,7 @@ end
 
 --- Set path for history file
 -- @param path The history file path, set "on" to enable history in the default file (~/.awesome_history)
--- @param max_size Optional parameter: set the max entries number in the history file, 50 by default
+-- @param max_cmd Optional parameter: set the max entries number in the history file, 50 by default
 function prompt.history.set(path, max_cmd)
     if path then
         prompt.history.data.path = path
@@ -809,18 +809,19 @@ end
 --- Add an entry to the history file
 -- @param command The command to add
 local function prompt_history_add(command)
-    if prompt.history.data.path
-        and command
-        and command ~= prompt.history.data.table[#prompt.history.data.table] then
-        table.insert(prompt.history.data.table, command)
+    if prompt.history.data.path then
+        if command ~= ""
+            and command ~= prompt.history.data.table[#prompt.history.data.table] then
+            table.insert(prompt.history.data.table, command)
 
-        -- Do not exceed our max_cmd
-        if #prompt.history.data.table > prompt.history.data.max then
-            table.remove(prompt.history.data.table, 1)
-        end
+            -- Do not exceed our max_cmd
+            if #prompt.history.data.table > prompt.history.data.max then
+                table.remove(prompt.history.data.table, 1)
+            end
       
-        -- Save table content in file, not very optimized atm...
-        prompt_history_save()
+            -- Save table content in file, not very optimized atm...
+            prompt_history_save()
+        end
 
         prompt.history.data.index = #prompt.history.data.table + 1
     end
@@ -1055,6 +1056,8 @@ function prompt.run(args, textbox, exe_callback, completion_callback)
                    command = prompt.history.data.table[prompt.history.data.index]
                    cur_pos = #command + 2
                 elseif prompt.history.data.index == #prompt.history.data.table then
+                   prompt.history.data.index = prompt.history.data.index + 1
+
                    command = ""
                    cur_pos = 1
                 end
