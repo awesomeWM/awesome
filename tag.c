@@ -240,59 +240,6 @@ luaA_tag_tostring(lua_State *L)
     return 1;
 }
 
-/** Get all tags from a screen.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lparam A screen number.
- * \lreturn A table with all tags from the screen specified, indexed by tag name.
- */
-static int
-luaA_tag_get(lua_State *L)
-{
-    int screen = luaL_checknumber(L, 1) - 1;
-    tag_array_t *tags = &globalconf.screens[screen].tags;
-
-    luaA_checkscreen(screen);
-
-    lua_newtable(L);
-
-    for(int i = 0; i < tags->len; i++)
-    {
-        luaA_tag_userdata_new(L, tags->tab[i]);
-        lua_setfield(L, -2, tags->tab[i]->name);
-    }
-
-    return 1;
-}
-
-/** Get all tags from a screen.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lparam A screen number.
- * \lreturn A table with all tags from the screen specified, ordered and indexed
- * by number.
- */
-static int
-luaA_tag_geti(lua_State *L)
-{
-    int screen = luaL_checknumber(L, 1) - 1;
-    tag_array_t *tags = &globalconf.screens[screen].tags;
-
-    luaA_checkscreen(screen);
-
-    lua_newtable(L);
-
-    for(int i = 0; i < tags->len; i++)
-    {
-        luaA_tag_userdata_new(L, tags->tab[i]);
-        lua_rawseti(L, -2, i + 1);
-    }
-
-    return 1;
-}
-
 /** Create a new tag.
  * \param L The Lua VM state.
  *
@@ -529,8 +476,6 @@ luaA_tag_newindex(lua_State *L)
 const struct luaL_reg awesome_tag_methods[] =
 {
     { "__call", luaA_tag_new },
-    { "get", luaA_tag_get },
-    { "geti", luaA_tag_geti },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_tag_meta[] =
