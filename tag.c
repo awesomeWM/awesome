@@ -349,6 +349,8 @@ luaA_tag_index(lua_State *L)
     size_t len;
     tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *attr;
+    client_array_t *clients;
+    int i;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
@@ -381,7 +383,14 @@ luaA_tag_index(lua_State *L)
         lua_pushnumber(L, (*tag)->ncol);
         break;
       case A_TK_CLIENTS:
-        luaA_client_array_export(L, &(*tag)->clients);
+        clients = &(*tag)->clients;
+        luaA_otable_new(L);
+        for(i = 0; i < clients->len; i++)
+        {
+            luaA_client_userdata_new(L, clients->tab[i]);
+            luaA_client_userdata_new(L, clients->tab[i]);
+            lua_rawset(L, -3);
+        }
         break;
       default:
         return 0;
