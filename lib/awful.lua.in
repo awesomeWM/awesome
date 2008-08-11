@@ -1119,15 +1119,21 @@ local function widget_tasklist_label_common(c, args)
     local fg_urgent = args.fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.bg_urgent
     local text = ""
+    local name
     if c.floating then
         text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
     end
-    if capi.client.focus_get() == c then
-        text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..escape(c.name).."</span> "
-    elseif c.urgent and bg_urgent and fg_urgent then
-        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..escape(c.name).."</span> "
+    if c.hidden then
+        name = escape(c.icon_name)
     else
-        text = text .. " "..escape(c.name).." "
+        name = escape(c.name)
+    end
+    if capi.client.focus_get() == c then
+        text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..name.."</span> "
+    elseif c.urgent and bg_urgent and fg_urgent then
+        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..name.."</span> "
+    else
+        text = text .. " "..name.." "
     end
     return text
 end

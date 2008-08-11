@@ -27,6 +27,7 @@ grow
 height
 hide
 honorsizehints
+icon_name
 icon_path
 image
 instance

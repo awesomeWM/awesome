@@ -1193,6 +1193,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield instance The client instance.
  * \lfield pid The client PID, if available.
  * \lfield machine The machine client is running on.
+ * \lfield icon_name The client name when iconified.
  * \lfield floating_placement The floating placement used for this client.
  * \lfield screen Client screen number.
  * \lfield hide Define if the client must be hidden, i.e. never mapped.
@@ -1257,6 +1258,13 @@ luaA_client_index(lua_State *L)
       case A_TK_MACHINE:
         if(!xutil_gettextprop(globalconf.connection, (*c)->win, WM_CLIENT_MACHINE, &value, &slen))
             return 0;
+        lua_pushlstring(L, value, slen);
+        p_delete(&value);
+        break;
+      case A_TK_ICON_NAME:
+        if(!xutil_gettextprop(globalconf.connection, (*c)->win, _NET_WM_ICON_NAME, &value, &slen))
+            if(!xutil_gettextprop(globalconf.connection, (*c)->win, WM_ICON_NAME, &value, &slen))
+                return 0;
         lua_pushlstring(L, value, slen);
         p_delete(&value);
         break;
