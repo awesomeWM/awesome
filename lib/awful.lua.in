@@ -774,7 +774,6 @@ local function prompt_history_load()
                 end
             end
         end
-        prompt.history.data.index = #prompt.history.data.table + 1
     end
 end
 
@@ -823,8 +822,6 @@ local function prompt_history_add(command)
             -- Save table content in file, not very optimized atm...
             prompt_history_save()
         end
-
-        prompt.history.data.index = #prompt.history.data.table + 1
     end
 end
 
@@ -933,6 +930,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback)
         return
     end
     textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos)
+    prompt.history.data.index = #prompt.history.data.table + 1
     capi.keygrabber.run(
     function (mod, key)
         local has_ctrl = false
