@@ -461,6 +461,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         if(client_maybevisible(c, c->screen))
         {
             c->ishidden = false;
+            globalconf.screens[c->screen].need_arrange = true;
             xcb_map_window(globalconf.connection, ev->window);
             /* it will be raised, so just update ourself */
             client_raise(c);
