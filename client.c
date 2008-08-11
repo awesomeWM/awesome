@@ -1192,6 +1192,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield class The client class.
  * \lfield instance The client instance.
  * \lfield pid The client PID, if available.
+ * \lfield machine The machine client is running on.
  * \lfield floating_placement The floating placement used for this client.
  * \lfield screen Client screen number.
  * \lfield hide Define if the client must be hidden, i.e. never mapped.
@@ -1209,8 +1210,10 @@ static int
 luaA_client_index(lua_State *L)
 {
     size_t len;
+    ssize_t slen;
     client_t **c = luaA_checkudata(L, 1, "client");
     const char *buf = luaL_checklstring(L, 2, &len);
+    char *value;
     void *data;
     xutil_class_hint_t hint;
     xcb_get_property_cookie_t prop_c;
@@ -1250,6 +1253,12 @@ luaA_client_index(lua_State *L)
             p_delete(&prop_r);
             return 0;
         }
+        break;
+      case A_TK_MACHINE:
+        if(!xutil_gettextprop(globalconf.connection, (*c)->win, WM_CLIENT_MACHINE, &value, &slen))
+            return 0;
+        lua_pushlstring(L, value, slen);
+        p_delete(&value);
         break;
       case A_TK_FLOATING_PLACEMENT:
         lua_pushstring(L, name_func_rlookup((*c)->floating_placement,
