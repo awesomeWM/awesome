@@ -772,8 +772,9 @@ local function prompt_history_load()
                 if #prompt.history.data.table >= prompt.history.data.max then
                     break
                 end
-	    end
+            end
         end
+        prompt.history.data.index = #prompt.history.data.table + 1
     end
 end
 
