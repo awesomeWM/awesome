@@ -480,7 +480,8 @@ luaA_tag_newindex(lua_State *L)
             luaL_error(L, "unknown layout: %s", buf);
         break;
       case A_TK_SELECTED:
-        tag_view(*tag, luaA_checkboolean(L, 3));
+        if((*tag)->screen != SCREEN_UNDEF)
+            tag_view(*tag, luaA_checkboolean(L, 3));
         return 0;
       case A_TK_MWFACT:
         d = luaL_checknumber(L, 3);
