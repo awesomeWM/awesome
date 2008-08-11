@@ -130,7 +130,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
     client_t *snapper;
     area_t snapper_geometry;
     area_t screen_geometry =
-        screen_area_get(c->screen,
+        screen_area_get(&globalconf.screens[c->screen].geometry,
                         globalconf.screens[c->screen].statusbar,
                         &globalconf.screens[c->screen].padding);
 
@@ -720,7 +720,7 @@ mouse_client_resize_tiled(client_t *c)
     tag = tags_get_current(c->screen)[0];
     layout = tag->layout;
 
-    area = screen_area_get(tag->screen,
+    area = screen_area_get(&globalconf.screens[tag->screen].geometry,
                            globalconf.screens[tag->screen].statusbar,
                            &globalconf.screens[tag->screen].padding);
 
@@ -823,7 +823,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
     root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
 
-    area = screen_area_get(tag->screen,
+    area = screen_area_get(&globalconf.screens[tag->screen].geometry,
                            globalconf.screens[tag->screen].statusbar,
                            &globalconf.screens[tag->screen].padding);
 

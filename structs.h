@@ -358,6 +358,10 @@ typedef struct
 
 typedef struct
 {
+    /** Screen index */
+    int index;
+    /** Screen geometry */
+    area_t geometry;
     /** true if we need to arrange() */
     bool need_arrange;
     /** Tag list */

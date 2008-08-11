@@ -223,7 +223,7 @@ statusbar_position_update(statusbar_t *statusbar)
     if(statusbar->position == Off)
         return;
 
-    area = screen_area_get(statusbar->screen,
+    area = screen_area_get(&globalconf.screens[statusbar->screen].geometry,
                            NULL,
                            &globalconf.screens[statusbar->screen].padding);
 

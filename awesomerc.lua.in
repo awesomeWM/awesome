@@ -47,7 +47,7 @@ floatapps =
 }
 
 -- Applications to be moved to a pre-defined tag by class or instance.
--- Use the screen and workspace indices.
+-- Use the screen and tags indices.
 apptags =
 {
     -- ["Firefox"] = { screen = 1, tag = 2 },

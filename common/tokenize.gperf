@@ -42,6 +42,7 @@ nmaster
 name
 on
 opacity
+padding
 pid
 plot_data_add
 plot_properties_set
@@ -71,4 +72,5 @@ visible
 vertical
 widgets
 width
+workarea
 yes

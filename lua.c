@@ -51,6 +51,8 @@ extern awesome_t globalconf;
 extern const struct luaL_reg awesome_keygrabber_lib[];
 extern const struct luaL_reg awesome_mouse_methods[];
 extern const struct luaL_reg awesome_mouse_meta[];
+extern const struct luaL_reg awesome_screen_methods[];
+extern const struct luaL_reg awesome_screen_meta[];
 extern const struct luaL_reg awesome_client_methods[];
 extern const struct luaL_reg awesome_client_meta[];
 extern const struct luaL_reg awesome_titlebar_methods[];
@@ -124,101 +126,6 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
 {
     ewmh_restart();
     return 0;
-}
-
-/** Set the screen padding. This can be used to define margin around the
- * screen. awesome will not use this area.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- *
- * \luastack
- * \lparam A screen number.
- * \lparam A table with a list of margin for `right', `left', `top' and
- * `bottom'.
- */
-static int
-luaA_screen_padding_set(lua_State *L)
-{
-    int screen = luaL_checknumber(L, 1) - 1;
-
-    luaA_checkscreen(screen);
-
-    luaA_checktable(L, 2);
-
-    globalconf.screens[screen].padding.right = luaA_getopt_number(L, 2, "right", 0);
-    globalconf.screens[screen].padding.left = luaA_getopt_number(L, 2, "left", 0);
-    globalconf.screens[screen].padding.top = luaA_getopt_number(L, 2, "top", 0);
-    globalconf.screens[screen].padding.bottom = luaA_getopt_number(L, 2, "bottom", 0);
-
-    ewmh_update_workarea(screen_virttophys(screen));
-
-    return 0;
-}
-
-/** Get the screen count.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- *
- * \luastack
- * \lreturn The screen count, at least 1.
- */
-static int
-luaA_screen_count(lua_State *L)
-{
-    lua_pushnumber(L, globalconf.screens_info->nscreen);
-    return 1;
-}
-
-/** Return screen coordinates.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A screen number.
- * \lreturn A table with the screen geometry: x, y, width and height.
- */
-static int
-luaA_screen_coords_get(lua_State *L)
-{
-    int screen = luaL_checknumber(L, 1) - 1;
-    luaA_checkscreen(screen);
-    lua_newtable(L);
-    lua_pushnumber(L, globalconf.screens_info->geometry[screen].x);
-    lua_setfield(L, -2, "x");
-    lua_pushnumber(L, globalconf.screens_info->geometry[screen].y);
-    lua_setfield(L, -2, "y");
-    lua_pushnumber(L, globalconf.screens_info->geometry[screen].width);
-    lua_setfield(L, -2, "width");
-    lua_pushnumber(L, globalconf.screens_info->geometry[screen].height);
-    lua_setfield(L, -2, "height");
-    return 1;
-}
-
-/** Return the geometry of the workspace, i.e. where applications live.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A screen number.
- * \lreturn A table with the workspace geometry.
- */
-static int
-luaA_screen_workspace_get(lua_State *L)
-{
-    area_t g;
-    int screen = luaL_checknumber(L, 1) - 1;
-    luaA_checkscreen(screen);
-    g = screen_area_get(screen,
-                        globalconf.screens[screen].statusbar,
-                        &globalconf.screens[screen].padding);
-    lua_newtable(L);
-    lua_pushnumber(L, g.x);
-    lua_setfield(L, -2, "x");
-    lua_pushnumber(L, g.y);
-    lua_setfield(L, -2, "y");
-    lua_pushnumber(L, g.width);
-    lua_setfield(L, -2, "width");
-    lua_pushnumber(L, g.height);
-    lua_setfield(L, -2, "height");
-    return 1;
 }
 
 /** Set the function called each time a client gets focus. This function is
@@ -531,14 +438,6 @@ luaA_init(void)
         { "colors_set", luaA_colors_set },
         { NULL, NULL }
     };
-    static const struct luaL_reg awesome_screen_lib[] =
-    {
-        { "padding_set", luaA_screen_padding_set },
-        { "coords_get", luaA_screen_coords_get },
-        { "workspace_get", luaA_screen_workspace_get },
-        { "count", luaA_screen_count },
-        { NULL, NULL }
-    };
     static const struct luaL_reg awesome_hooks_lib[] =
     {
         { "focus", luaA_hooks_focus },
@@ -562,9 +461,6 @@ luaA_init(void)
     /* Export awesome lib */
     luaL_register(L, "awesome", awesome_lib);
 
-    /* Export screen lib */
-    luaL_register(L, "screen", awesome_screen_lib);
-
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);
 
@@ -573,6 +469,9 @@ luaA_init(void)
 
     /* Export otable lib */
     luaA_openlib(L, "otable", otable_methods, otable_meta);
+
+    /* Export screen */
+    luaA_openlib(L, "screen", awesome_screen_methods, awesome_screen_meta);
 
     /* Export mouse */
     luaA_openlib(L, "mouse", awesome_mouse_methods, awesome_mouse_meta);

@@ -399,6 +399,12 @@ main(int argc, char **argv)
     /* init screens struct */
     globalconf.screens_info = screensinfo_new(globalconf.connection);
     globalconf.screen_focus = globalconf.screens = p_new(screen_t, globalconf.screens_info->nscreen);
+    /* \todo stop duplicating this */
+    for(screen_nbr = 0; screen_nbr < globalconf.screens_info->nscreen; screen_nbr++)
+    {
+        globalconf.screens[screen_nbr].index = screen_nbr;
+        globalconf.screens[screen_nbr].geometry = globalconf.screens_info->geometry[screen_nbr];
+    }
 
     /* init default font and colors */
     globalconf.font = draw_font_new(globalconf.connection, globalconf.default_screen, "sans 8");

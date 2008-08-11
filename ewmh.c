@@ -213,7 +213,7 @@ ewmh_update_workarea(int phys_screen)
 {
     tag_array_t *tags = &globalconf.screens[phys_screen].tags;
     uint32_t *area = p_alloca(uint32_t, tags->len * 4);
-    area_t geom = screen_area_get(phys_screen,
+    area_t geom = screen_area_get(&globalconf.screens[phys_screen].geometry,
                                   globalconf.screens[phys_screen].statusbar,
                                   &globalconf.screens[phys_screen].padding);
 
@@ -287,7 +287,9 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         }
         else if(set == _NET_WM_STATE_ADD)
         {
-            geometry = screen_area_get(c->screen, NULL, &globalconf.screens[c->screen].padding);
+            geometry = screen_area_get(&globalconf.screens[c->screen].geometry,
+                                       NULL,
+                                       &globalconf.screens[c->screen].padding);
             /* save geometry */
             c->m_geometry = c->geometry;
             c->wasfloating = c->isfloating;

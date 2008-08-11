@@ -278,13 +278,13 @@ function client.moveresize(x, y, w, h, c)
     sel.coords = coords
 end
 
---- Maximize a client to use the full workspace area.
+--- Maximize a client to use the full workarea.
 -- @param c A client, or the focused one if nil.
 function client.maximize(c)
     local sel = c or capi.client.focus_get()
     if sel then
         sel.floating = true
-        local ws = capi.screen.workspace_get(sel.screen)
+        local ws = capi.screen[sel.screen].workarea
         ws.width = ws.width - 2 * sel.border_width
         ws.height = ws.height - 2 * sel.border_width
         sel.coords = ws
@@ -305,7 +305,7 @@ function screen.focus(i)
     local c = client.focus.history.get(s, 0)
     if c then c:focus_set() end
     -- Move the mouse on the screen
-    capi.mouse.coords = capi.screen.coords_get(s)
+    capi.mouse.coords = capi.screen[s].coords
 end
 
 --- Compare 2 tables of tags.
@@ -532,7 +532,7 @@ function client.movetoscreen(c, s)
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel.screen = s
-        capi.mouse.coords = capi.screen.coords_get(s)
+        capi.mouse.coords = capi.screen[s].coords
         sel:focus_set()
     end
 end

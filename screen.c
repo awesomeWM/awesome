@@ -25,9 +25,9 @@
 #include <xcb/xcb_aux.h>
 
 #include "screen.h"
+#include "ewmh.h"
 #include "tag.h"
 #include "client.h"
-#include "layouts/floating.h"
 
 extern awesome_t globalconf;
 
@@ -38,9 +38,9 @@ extern awesome_t globalconf;
  * \return The screen area.
  */
 area_t
-screen_area_get(int screen, statusbar_t *statusbar, padding_t *padding)
+screen_area_get(area_t *geometry, statusbar_t *statusbar, padding_t *padding)
 {
-    area_t area = globalconf.screens_info->geometry[screen];
+    area_t area = *geometry;
     statusbar_t *sb;
 
     /* make padding corrections */
@@ -149,8 +149,10 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
         area_t new_geometry, new_f_geometry;
         new_f_geometry = c->f_geometry;
 
-        to = screen_area_get(c->screen, NULL, NULL);
-        from = screen_area_get(old_screen, NULL, NULL);
+        to = screen_area_get(&globalconf.screens[c->screen].geometry,
+                             NULL, NULL);
+        from = screen_area_get(&globalconf.screens[old_screen].geometry,
+                               NULL, NULL);
 
         /* compute new coords in new screen */
         new_f_geometry.x = (c->f_geometry.x - from.x) + to.x;
@@ -212,5 +214,140 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
         }
     }
 }
+
+/** Screen module.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield coords The screen coordinates.
+ * \lfield padding The screen padding.
+ */
+static int
+luaA_screen_module_index(lua_State *L)
+{
+    int screen = luaL_checknumber(L, 2) - 1;
+
+    luaA_checkscreen(screen);
+    lua_pushlightuserdata(L, &globalconf.screens[screen]);
+    return luaA_settype(L, "screen");
+}
+
+/** A screen.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lfield padding The screen padding. A table with top, right, left and bottom
+ * keys and values in pixel.
+ * \lfield coords The screen coordinates. Immutable.
+ * \lfield workarea The screen workarea, i.e. without statusbar.
+ */
+static int
+luaA_screen_index(lua_State *L)
+{
+    size_t len;
+    const char *buf = luaL_checklstring(L, 2, &len);
+    screen_t *s;
+    area_t g;
+
+    s = lua_touserdata(L, 1);
+
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_PADDING:
+        lua_newtable(L);
+        lua_pushnumber(L, s->padding.right);
+        lua_setfield(L, -2, "right");
+        lua_pushnumber(L, s->padding.left);
+        lua_setfield(L, -2, "left");
+        lua_pushnumber(L, s->padding.top);
+        lua_setfield(L, -2, "top");
+        lua_pushnumber(L, s->padding.bottom);
+        lua_setfield(L, -2, "bottom");
+        break;
+      case A_TK_COORDS:
+        /* \todo lua_pushgeometry() ? */
+        lua_newtable(L);
+        lua_pushnumber(L, s->geometry.x);
+        lua_setfield(L, -2, "x");
+        lua_pushnumber(L, s->geometry.y);
+        lua_setfield(L, -2, "y");
+        lua_pushnumber(L, s->geometry.width);
+        lua_setfield(L, -2, "width");
+        lua_pushnumber(L, s->geometry.height);
+        lua_setfield(L, -2, "height");
+        break;
+      case A_TK_WORKAREA:
+        g = screen_area_get(&s->geometry, s->statusbar, &s->padding);
+        lua_newtable(L);
+        lua_pushnumber(L, g.x);
+        lua_setfield(L, -2, "x");
+        lua_pushnumber(L, g.y);
+        lua_setfield(L, -2, "y");
+        lua_pushnumber(L, g.width);
+        lua_setfield(L, -2, "width");
+        lua_pushnumber(L, g.height);
+        lua_setfield(L, -2, "height");
+        break;
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
+static int
+luaA_screen_newindex(lua_State *L)
+{
+    size_t len;
+    const char *buf = luaL_checklstring(L, 2, &len);
+    screen_t *s;
+
+    s = lua_touserdata(L, 1);
+
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_PADDING:
+        luaA_checktable(L, 3);
+        s->padding.right = luaA_getopt_number(L, 2, "right", 0);
+        s->padding.left = luaA_getopt_number(L, 2, "left", 0);
+        s->padding.top = luaA_getopt_number(L, 2, "top", 0);
+        s->padding.bottom = luaA_getopt_number(L, 2, "bottom", 0);
+
+        ewmh_update_workarea(screen_virttophys(s->index));
+
+        break;
+      default:
+        return 0;
+    }
+
+    return 0;
+}
+
+/** Get the screen count.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ *
+ * \luastack
+ * \lreturn The screen count, at least 1.
+ */
+static int
+luaA_screen_count(lua_State *L)
+{
+    lua_pushnumber(L, globalconf.screens_info->nscreen);
+    return 1;
+}
+
+const struct luaL_reg awesome_screen_methods[] =
+{
+    { "count", luaA_screen_count },
+    { "__index", luaA_screen_module_index },
+    { NULL, NULL }
+};
+
+const struct luaL_reg awesome_screen_meta[] =
+{
+    { "__index", luaA_screen_index },
+    { "__newindex", luaA_screen_newindex },
+    { NULL, NULL }
+};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
