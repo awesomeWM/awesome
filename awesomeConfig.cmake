@@ -137,7 +137,6 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-aux
     xcb-atom
     xcb-keysyms
-    xcb-render
     xcb-icccm
     cairo-xcb)
 
