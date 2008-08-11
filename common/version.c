@@ -57,7 +57,7 @@ eprint_version(const char *const executable)
 #else
     printf("GdkPixBuf " GDK_PIXBUF_VERSION "\n");
 #endif
-    printf(" • DBus support: ");
+    printf(" • D-Bus support: ");
 #ifdef WITH_DBUS
     printf("✔\n");
 #else
