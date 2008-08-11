@@ -40,7 +40,8 @@
  * \return True on sucess, false on failure.
  */
 bool
-xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom, char **text, ssize_t *len)
+xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
+                    char **text, ssize_t *len)
 {
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r;
@@ -76,9 +77,9 @@ xutil_gettextprop(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom, char 
 }
 
 void
-xutil_getlockmask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
-                  unsigned int *numlockmask, unsigned int *shiftlockmask,
-                  unsigned int *capslockmask)
+xutil_lock_mask_get(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
+                    unsigned int *numlockmask, unsigned int *shiftlockmask,
+                    unsigned int *capslockmask)
 {
     xcb_get_modifier_mapping_reply_t *modmap_r;
     xcb_keycode_t *modmap, kc;
@@ -112,7 +113,8 @@ xutil_getlockmask(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
 }
 
 bool
-xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win, xutil_class_hint_t *ch)
+xutil_class_hint_get(xcb_connection_t *conn, xcb_window_t win,
+                     xutil_class_hint_t *ch)
 {
     xcb_get_property_reply_t *class_hint_r;
     xcb_get_property_cookie_t class_hint_c;
@@ -152,7 +154,7 @@ xutil_get_class_hint(xcb_connection_t *conn, xcb_window_t win, xutil_class_hint_
 #define EVENTS_NBR 126
 
 void
-xutil_set_error_handler_catch_all(xcb_event_handlers_t *evenths,
+xutil_error_handler_catch_all_set(xcb_event_handlers_t *evenths,
                                   xcb_generic_error_handler_t handler,
                                   void *data)
 {
@@ -162,7 +164,7 @@ xutil_set_error_handler_catch_all(xcb_event_handlers_t *evenths,
 }
 
 const char *
-xutil_error_label[] =
+xutil_label_error[] =
 {
     "Success",
     "BadRequest",
@@ -185,7 +187,7 @@ xutil_error_label[] =
 };
 
 const char *
-xutil_request_label[] =
+xutil_label_request[] =
 {
     "None",
     "CreateWindow",
@@ -318,7 +320,7 @@ xutil_request_label[] =
 };
 
 xutil_error_t *
-xutil_get_error(const xcb_generic_error_t *e)
+xutil_error_get(const xcb_generic_error_t *e)
 {
     if(e->response_type != 0)
         /* This is not an error, this _should_ not happen */
@@ -335,23 +337,23 @@ xutil_get_error(const xcb_generic_error_t *e)
 
     /* Extensions  generally provide  their  own requests  so we  just
      * store the request code */
-    if(err->request_code >= (sizeof(xutil_request_label) / sizeof(char *)))
+    if(err->request_code >= (sizeof(xutil_label_request) / sizeof(char *)))
         asprintf(&err->request_label, "%d", err->request_code);
     else
-        err->request_label = a_strdup(xutil_request_label[err->request_code]);
+        err->request_label = a_strdup(xutil_label_request[err->request_code]);
 
     /* Extensions may also define their  own errors, so just store the
      * error_code */
-    if(e->error_code >= (sizeof(xutil_error_label) / sizeof(char *)))
+    if(e->error_code >= (sizeof(xutil_label_error) / sizeof(char *)))
         asprintf(&err->error_label, "%d", e->error_code);
     else
-        err->error_label = a_strdup(xutil_error_label[e->error_code]);
+        err->error_label = a_strdup(xutil_label_error[e->error_code]);
 
     return err;
 }
 
 void
-xutil_delete_error(xutil_error_t *err)
+xutil_error_delete(xutil_error_t *err)
 {
     p_delete(&err->error_label);
     p_delete(&err->request_label);
@@ -366,7 +368,7 @@ typedef struct
 } keymod_t;
 
 xcb_keysym_t
-xutil_keymask_fromstr(const char *keyname)
+xutil_key_mask_fromstr(const char *keyname)
 {
     /** List of keyname and corresponding X11 mask codes */
     static const keymod_t KeyModList[] =

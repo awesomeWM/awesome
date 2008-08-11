@@ -34,56 +34,71 @@
 
 #include "array.h"
 
-#define CLEANMASK(mask)      (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
+#define XUTIL_MASK_CLEAN(mask) (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
 
 /* See http://tronche.com/gui/x/xlib/appendix/b/ for values */
-#define CURSOR_FLEUR                             52
-#define CURSOR_LEFT_PTR                          68
-#define CURSOR_SIZING                           120
-#define CURSOR_BOTTOM_LEFT_CORNER                12
-#define CURSOR_BOTTOM_RIGHT_CORNER               14
-#define CURSOR_TOP_LEFT_CORNER                  134
-#define CURSOR_TOP_RIGHT_CORNER                 136
-#define CURSOR_DOUBLE_ARROW_HORIZ               108
-#define CURSOR_DOUBLE_ARROW_VERT                116
+#define XUTIL_CURSOR_FLEUR 52
+#define XUTIL_CURSOR_LEFT_PTR 68
+#define XUTIL_CURSOR_SIZING 120
+#define XUTIL_CURSOR_BOTTOM_LEFT_CORNER 12
+#define XUTIL_CURSOR_BOTTOM_RIGHT_CORNER 14
+#define XUTIL_CURSOR_TOP_LEFT_CORNER 134
+#define XUTIL_CURSOR_TOP_RIGHT_CORNER 136
+#define XUTIL_CURSOR_DOUBLE_ARROW_HORIZ 108
+#define XUTIL_CURSOR_DOUBLE_ARROW_VERT 116
 
-#define ANY_KEY      0L      /* special Key Code, passed to GrabKey */
-#define ANY_MODIFIER (1<<15) /* used in Grabbutton_t, GrabKey */
+/* Special Key Code, passed to GrabKey */
+#define XUTIL_ANY_KEY 0L
 
-/*****************************************************************
- * ERROR CODES
- *****************************************************************/
+/* Used in Grabbutton_t, GrabKey */
+#define XUTIL_ANY_MODIFIER (1<<15)
 
-#define Success            0    /* everything's okay */
-#define BadRequest         1    /* bad request code */
-#define BadValue           2    /* int parameter out of range */
-#define BadWindow          3    /* parameter not a Window */
-#define BadPixmap          4    /* parameter not a Pixmap */
-#define BadAtom            5    /* parameter not an Atom */
-#define BadCursor          6    /* parameter not a Cursor */
-#define BadFont            7    /* parameter not a Font */
-#define BadMatch           8    /* parameter mismatch */
-#define BadDrawable        9    /* parameter not a Pixmap or Window */
-#define BadAccess         10    /* depending on context:
-                                 - key/button already grabbed
-                                 - attempt to free an illegal
-                                   cmap entry
-                                - attempt to store into a read-only
-                                   color map entry.
-                                - attempt to modify the access control
-                                   list from other than the local host.
-                                */
-#define BadAlloc          11    /* insufficient resources */
-#define BadColor          12    /* no such colormap */
-#define BadGC             13    /* parameter not a GC */
-#define BadIDChoice       14    /* choice not in range or already used */
-#define BadName           15    /* font or color name doesn't exist */
-#define BadLength         16    /* Request length incorrect */
-#define BadImplementation 17    /* server is defective */
+/* X error codes */
 
-#define FirstExtensionError     128
-#define LastExtensionError      255
-/* End of macros not defined in XCB */
+/* Everything's okay */
+#define XUTIL_SUCCESS 0
+/* Bad request code */
+#define XUTIL_BAD_REQUEST 1
+/* Int parameter out of range */
+#define XUTIL_BAD_VALUE 2
+/* Parameter not a Window */
+#define XUTIL_BAD_WINDOW 3
+/* Parameter not a Pixmap */
+#define XUTIL_BAD_PIXMAP 4
+/* Parameter not an Atom */
+#define XUTIL_BAD_ATOM 5
+/* Parameter not a Cursor */
+#define XUTIL_BAD_CURSOR 6
+/* Parameter not a Font */
+#define XUTIL_BAD_FONT 7
+/* Parameter mismatch */
+#define XUTIL_BAD_MATCH 8
+/* Parameter not a Pixmap or Window */
+#define XUTIL_BAD_DRAWABLE 9
+/* Depending on context:
+   - key/button already grabbed
+   - attempt to free an illegal
+     cmap entry
+   - attempt to store into a read-only
+     color map entry.
+   - attempt to modify the access control
+     list from other than the local host.
+*/
+#define XUTIL_BAD_ACCESS 10
+/* Insufficient resources */
+#define XUTIL_BAD_ALLOC 11
+/* No such colormap */
+#define XUTIL_BAD_COLOR 12
+/* Parameter not a GC */
+#define XUTIL_BAD_GC 13
+/* Choice not in range or already used */
+#define XUTIL_BAD_ID_CHOICE 14
+/* Font or color name doesn't exist */
+#define XUTIL_BAD_NAME 15
+/* Request length incorrect */
+#define XUTIL_BAD_LENGTH 16
+/* Server is defective */
+#define XUTIL_BAD_IMPLEMENTATION 17
 
 typedef struct
 {
@@ -91,15 +106,15 @@ typedef struct
     char *res_class;
 } xutil_class_hint_t;
 
-bool xutil_get_class_hint(xcb_connection_t *, xcb_window_t, xutil_class_hint_t *);
+bool xutil_class_hint_get(xcb_connection_t *, xcb_window_t, xutil_class_hint_t *);
 
-bool xutil_gettextprop(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
+bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 
-void xutil_getlockmask(xcb_connection_t *, xcb_key_symbols_t *,
-                       unsigned int *, unsigned int *, unsigned int *);
+void xutil_lock_mask_get(xcb_connection_t *, xcb_key_symbols_t *,
+                         unsigned int *, unsigned int *, unsigned int *);
 
 /** Set the same handler for all errors */
-void xutil_set_error_handler_catch_all(xcb_event_handlers_t *,
+void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,
                                        xcb_generic_error_handler_t, void *);
 
 typedef struct
@@ -109,9 +124,9 @@ typedef struct
     char *error_label;
 } xutil_error_t;
 
-xutil_error_t *xutil_get_error(const xcb_generic_error_t *);
-void xutil_delete_error(xutil_error_t *);
-xcb_keysym_t xutil_keymask_fromstr(const char *);
+xutil_error_t *xutil_error_get(const xcb_generic_error_t *);
+void xutil_error_delete(xutil_error_t *);
+xcb_keysym_t xutil_key_mask_fromstr(const char *);
 unsigned int xutil_button_fromint(int);
 xcb_cursor_t xutil_cursor_new(xcb_connection_t *, unsigned int);
 

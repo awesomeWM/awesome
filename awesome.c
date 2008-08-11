@@ -106,7 +106,7 @@ scan(void)
 
             state = window_getstate(wins[i]);
 
-            has_awesome_prop = xutil_gettextprop(globalconf.connection, wins[1], _AWESOME_PROPERTIES, NULL, NULL);
+            has_awesome_prop = xutil_text_prop_get(globalconf.connection, wins[1], _AWESOME_PROPERTIES, NULL, NULL);
 
             if(!attr_r || attr_r->override_redirect
                || has_awesome_prop
@@ -224,21 +224,21 @@ xerror(void *data __attribute__ ((unused)),
        xcb_connection_t *c __attribute__ ((unused)),
        xcb_generic_error_t *e)
 {
-    xutil_error_t *err = xutil_get_error(e);
+    xutil_error_t *err = xutil_error_get(e);
     if(!err)
         return 0;
 
-    if(e->error_code == BadWindow
-       || (e->error_code == BadMatch && err->request_code == XCB_SET_INPUT_FOCUS)
-       || (e->error_code == BadValue && err->request_code == XCB_KILL_CLIENT)
-       || (err->request_code == XCB_CONFIGURE_WINDOW && e->error_code == BadMatch))
+    if(e->error_code == XUTIL_BAD_WINDOW
+       || (e->error_code == XUTIL_BAD_MATCH && err->request_code == XCB_SET_INPUT_FOCUS)
+       || (e->error_code == XUTIL_BAD_VALUE && err->request_code == XCB_KILL_CLIENT)
+       || (err->request_code == XCB_CONFIGURE_WINDOW && e->error_code == XUTIL_BAD_MATCH))
     {
-        xutil_delete_error(err);
+        xutil_error_delete(err);
         return 0;
     }
 
     warn("fatal error: request=%s, error=%s", err->request_label, err->error_label);
-    xutil_delete_error(err);
+    xutil_error_delete(err);
 
     /*
      * Xlib code was using default X error handler, namely
@@ -248,7 +248,7 @@ xerror(void *data __attribute__ ((unused)),
      *
      * \todo display more informations about the error (like the Xlib default error handler)
      */
-    if(e->error_code == BadImplementation)
+    if(e->error_code == XUTIL_BAD_IMPLEMENTATION)
         exit(EXIT_FAILURE);
 
     return 0;
@@ -363,7 +363,7 @@ main(int argc, char **argv)
 
     /* Allocate a handler which will holds all errors and events */
     globalconf.evenths = xcb_alloc_event_handlers(globalconf.connection);
-    xutil_set_error_handler_catch_all(globalconf.evenths, xerrorstart, NULL);
+    xutil_error_handler_catch_all_set(globalconf.evenths, xerrorstart, NULL);
 
     for(screen_nbr = 0;
         screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
@@ -384,14 +384,14 @@ main(int argc, char **argv)
     xcb_poll_for_event_loop(globalconf.evenths);
 
     /* Set the default xerror handler */
-    xutil_set_error_handler_catch_all(globalconf.evenths, xerror, NULL);
+    xutil_error_handler_catch_all_set(globalconf.evenths, xerror, NULL);
 
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
 
     /* Get the NumLock, ShiftLock and CapsLock masks */
-    xutil_getlockmask(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
-                      &globalconf.shiftlockmask, &globalconf.capslockmask);
+    xutil_lock_mask_get(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
+                        &globalconf.shiftlockmask, &globalconf.capslockmask);
 
     /* init atom cache */
     atoms_init(globalconf.connection);
@@ -412,15 +412,15 @@ main(int argc, char **argv)
     xcolor_init(&globalconf.colors.bg, globalconf.connection, globalconf.default_screen, "white", sizeof("white")-1);
 
     /* init cursors */
-    globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, CURSOR_LEFT_PTR);
-    globalconf.cursor[CurResize] = xutil_cursor_new(globalconf.connection, CURSOR_SIZING);
-    globalconf.cursor[CurResizeH] = xutil_cursor_new(globalconf.connection, CURSOR_DOUBLE_ARROW_HORIZ);
-    globalconf.cursor[CurResizeV] = xutil_cursor_new(globalconf.connection, CURSOR_DOUBLE_ARROW_VERT);
-    globalconf.cursor[CurMove] = xutil_cursor_new(globalconf.connection, CURSOR_FLEUR);
-    globalconf.cursor[CurTopRight] = xutil_cursor_new(globalconf.connection, CURSOR_TOP_RIGHT_CORNER);
-    globalconf.cursor[CurTopLeft] = xutil_cursor_new(globalconf.connection, CURSOR_TOP_LEFT_CORNER);
-    globalconf.cursor[CurBotRight] = xutil_cursor_new(globalconf.connection, CURSOR_BOTTOM_RIGHT_CORNER);
-    globalconf.cursor[CurBotLeft] = xutil_cursor_new(globalconf.connection, CURSOR_BOTTOM_LEFT_CORNER);
+    globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_LEFT_PTR);
+    globalconf.cursor[CurResize] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_SIZING);
+    globalconf.cursor[CurResizeH] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_DOUBLE_ARROW_HORIZ);
+    globalconf.cursor[CurResizeV] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_DOUBLE_ARROW_VERT);
+    globalconf.cursor[CurMove] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_FLEUR);
+    globalconf.cursor[CurTopRight] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_TOP_RIGHT_CORNER);
+    globalconf.cursor[CurTopLeft] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_TOP_LEFT_CORNER);
+    globalconf.cursor[CurBotRight] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_BOTTOM_RIGHT_CORNER);
+    globalconf.cursor[CurBotLeft] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_BOTTOM_LEFT_CORNER);
 
     /* init lua */
     luaA_init();

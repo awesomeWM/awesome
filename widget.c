@@ -72,7 +72,7 @@ widget_common_button_press(widget_node_t *w,
     button_t *b;
     
     for(b = w->widget->buttons; b; b = b->next)
-        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
+        if(ev->detail == b->button && XUTIL_MASK_CLEAN(ev->state) == b->mod && b->fct)
         {
             luaA_pushpointer(globalconf.L, p, type);
             luaA_dofunction(globalconf.L, b->fct, 1, 0);

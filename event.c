@@ -55,7 +55,7 @@ event_handle_mouse_button_press(client_t *c,
     button_t *b;
 
     for(b = buttons; b; b = b->next)
-        if(button == b->button && CLEANMASK(state) == b->mod && b->fct)
+        if(button == b->button && XUTIL_MASK_CLEAN(state) == b->mod && b->fct)
         {
             if(c)
             {
@@ -350,7 +350,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
         xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
                           xutil_screen_get(connection, emwin->phys_screen)->root,
-                          ANY_MODIFIER);
+                          XUTIL_ANY_MODIFIER);
     else
         window_root_grabbuttons(ev->root);
 

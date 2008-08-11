@@ -601,42 +601,42 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 
     lua_newtable(L);
 
-    if(CLEANMASK(e->state) & XCB_MOD_MASK_CONTROL)
+    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_CONTROL)
     {
         lua_pushliteral(L, "Control");
         lua_rawseti(L, -2, i++);
     }
-    if(CLEANMASK(e->state) & XCB_MOD_MASK_LOCK)
+    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_LOCK)
     {
         lua_pushliteral(L, "Lock");
         lua_rawseti(L, -2, i++);
     }
-    if(CLEANMASK(e->state) & XCB_MOD_MASK_SHIFT)
+    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_SHIFT)
     {
         lua_pushliteral(L, "Shift");
         lua_rawseti(L, -2, i++);
     }
-    if(CLEANMASK(e->state) & XCB_MOD_MASK_1)
+    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_1)
     {
         lua_pushliteral(L, "Mod1");
         lua_rawseti(L, -2, i++);
     }
-    if(CLEANMASK(e->state) & XCB_MOD_MASK_2)
+    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_2)
     {
         lua_pushliteral(L, "Mod2");
         lua_rawseti(L, -2, i++);
     }
-    if(CLEANMASK(e->state) & XCB_MOD_MASK_3)
+    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_3)
     {
         lua_pushliteral(L, "Mod3");
         lua_rawseti(L, -2, i++);
     }
-    if(CLEANMASK(e->state) & XCB_MOD_MASK_4)
+    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_4)
     {
         lua_pushliteral(L, "Mod4");
         lua_rawseti(L, -2, i++);
     }
-    if(CLEANMASK(e->state) & XCB_MOD_MASK_5)
+    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_5)
     {
         lua_pushliteral(L, "Mod5");
         lua_rawseti(L, -2, i++);

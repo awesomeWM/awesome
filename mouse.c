@@ -1050,7 +1050,7 @@ luaA_mouse_new(lua_State *L)
     for(i = 1; i <= len; i++)
     {
         lua_rawgeti(L, 2, i);
-        button->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
+        button->mod |= xutil_key_mask_fromstr(luaL_checkstring(L, -1));
     }
 
     return luaA_mouse_userdata_new(L, button);

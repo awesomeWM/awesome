@@ -73,7 +73,8 @@ client_loadprops(client_t * c, screen_t *screen)
     tag_array_t *tags = &screen->tags;
     char *prop = NULL;
 
-    if(!xutil_gettextprop(globalconf.connection, c->win, _AWESOME_PROPERTIES, &prop, &len))
+    if(!xutil_text_prop_get(globalconf.connection, c->win, _AWESOME_PROPERTIES,
+                            &prop, &len))
         return false;
 
     if(len != tags->len + 2)
@@ -169,8 +170,8 @@ client_updatetitle(client_t *c)
     char *name, *utf8;
     ssize_t len;
 
-    if(!xutil_gettextprop(globalconf.connection, c->win, _NET_WM_NAME, &name, &len))
-        if(!xutil_gettextprop(globalconf.connection, c->win, WM_NAME, &name, &len))
+    if(!xutil_text_prop_get(globalconf.connection, c->win, _NET_WM_NAME, &name, &len))
+        if(!xutil_text_prop_get(globalconf.connection, c->win, WM_NAME, &name, &len))
             return false;
 
     p_delete(&c->name);
@@ -686,7 +687,8 @@ client_unmanage(client_t *c)
                          XCB_CONFIG_WINDOW_BORDER_WIDTH,
                          (uint32_t *) &c->oldborder);
 
-    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win, ANY_MODIFIER);
+    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win,
+                      XUTIL_ANY_MODIFIER);
     window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
 
     xcb_aux_sync(globalconf.connection);
@@ -1233,12 +1235,12 @@ luaA_client_index(lua_State *L)
         lua_pushstring(L, (*c)->name);
         break;
       case A_TK_CLASS:
-        if(!xutil_get_class_hint(globalconf.connection, (*c)->win, &hint))
+        if(!xutil_class_hint_get(globalconf.connection, (*c)->win, &hint))
              return 0;
         lua_pushstring(L, hint.res_class);
         break;
       case A_TK_INSTANCE:
-        if(!xutil_get_class_hint(globalconf.connection, (*c)->win, &hint))
+        if(!xutil_class_hint_get(globalconf.connection, (*c)->win, &hint))
             return 0;
         lua_pushstring(L, hint.res_name);
         break;
@@ -1255,14 +1257,17 @@ luaA_client_index(lua_State *L)
         }
         break;
       case A_TK_MACHINE:
-        if(!xutil_gettextprop(globalconf.connection, (*c)->win, WM_CLIENT_MACHINE, &value, &slen))
+        if(!xutil_text_prop_get(globalconf.connection, (*c)->win,
+                                WM_CLIENT_MACHINE, &value, &slen))
             return 0;
         lua_pushlstring(L, value, slen);
         p_delete(&value);
         break;
       case A_TK_ICON_NAME:
-        if(!xutil_gettextprop(globalconf.connection, (*c)->win, _NET_WM_ICON_NAME, &value, &slen))
-            if(!xutil_gettextprop(globalconf.connection, (*c)->win, WM_ICON_NAME, &value, &slen))
+        if(!xutil_text_prop_get(globalconf.connection, (*c)->win,
+                                _NET_WM_ICON_NAME, &value, &slen))
+            if(!xutil_text_prop_get(globalconf.connection, (*c)->win,
+                                    WM_ICON_NAME, &value, &slen))
                 return 0;
         lua_pushlstring(L, value, slen);
         p_delete(&value);

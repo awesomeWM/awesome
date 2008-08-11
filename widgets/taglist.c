@@ -177,7 +177,7 @@ taglist_button_press(widget_node_t *w,
     /* Find the good drawn area list */
     if((tda = taglist_drawn_area_getbyobj(data->drawn_area, object)))
         for(b = w->widget->buttons; b; b = b->next)
-            if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
+            if(ev->detail == b->button && XUTIL_MASK_CLEAN(ev->state) == b->mod && b->fct)
                 for(int i = 0; i < MIN(tags->len, tda->areas.len); i++)
                 {
                     tag_t *tag  = tags->tab[i];

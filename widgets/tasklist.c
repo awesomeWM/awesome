@@ -277,7 +277,7 @@ tasklist_button_press(widget_node_t *w,
     ci = (ev->event_x - w->area.x) / odata->box_width;
 
     for(b = w->widget->buttons; b; b = b->next)
-        if(ev->detail == b->button && CLEANMASK(ev->state) == b->mod && b->fct)
+        if(ev->detail == b->button && XUTIL_MASK_CLEAN(ev->state) == b->mod && b->fct)
         {
             luaA_pushpointer(globalconf.L, object, type);
             luaA_client_userdata_new(globalconf.L, odata->client_labels.tab[ci].client);

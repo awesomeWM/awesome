@@ -189,7 +189,7 @@ keybinding_t *
 keybinding_find(const xcb_key_press_event_t *ev)
 {
     const keybinding_array_t *arr = &keys_g.by_sym;
-    int l, r, mod = CLEANMASK(ev->state);
+    int l, r, mod = XUTIL_MASK_CLEAN(ev->state);
     xcb_keysym_t keysym;
 
     keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
@@ -260,7 +260,7 @@ luaA_keybinding_new(lua_State *L)
     for(i = 1; i <= len; i++)
     {
         lua_rawgeti(L, 2, i);
-        k->mod |= xutil_keymask_fromstr(luaL_checkstring(L, -1));
+        k->mod |= xutil_key_mask_fromstr(luaL_checkstring(L, -1));
     }
 
     return luaA_keybinding_userdata_new(L, k);
