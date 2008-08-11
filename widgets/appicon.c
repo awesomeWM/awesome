@@ -42,7 +42,6 @@ appicon_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              void *p, awesome_type_t type)
 {
     client_t *c = NULL;
-    netwm_icon_t *icon;
     draw_image_t *image;
 
     switch(type)
@@ -68,10 +67,10 @@ appicon_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
                        w->area.y, ctx->height, image);
             draw_image_delete(&image);
         }
-        else if((icon = ewmh_get_window_icon(c->win)))
+        else if(c->icon)
         {
-            w->area.width = ((double) ctx->height / (double) icon->height)
-                * icon->width;
+            w->area.width = ((double) ctx->height / (double) c->icon->height)
+                * c->icon->width;
             w->area.x = widget_calculate_offset(ctx->width,
                                                 w->area.width,
                                                 offset,
@@ -79,9 +78,8 @@ appicon_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
             draw_image_from_argb_data(ctx,
                                       w->area.x,
                                       w->area.y,
-                                      icon->width, icon->height,
-                                      ctx->height, icon->image);
-            netwm_icon_delete(&icon);
+                                      c->icon->width, c->icon->height,
+                                      ctx->height, c->icon->image);
         }
     }
     else

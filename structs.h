@@ -236,6 +236,14 @@ struct statusbar_t
     statusbar_t *prev, *next;
 };
 
+/** Netwm icon */
+typedef struct
+{
+    int height;
+    int width;
+    unsigned char *image;
+} netwm_icon_t;
+
 /** client_t type */
 struct client_t
 {
@@ -295,6 +303,8 @@ struct client_t
     button_t *buttons;
     /** Floating window placement algo */
     floating_placement_t *floating_placement;
+    /** Icon */
+    netwm_icon_t *icon;
     /** Next and previous clients */
     client_t *prev, *next;
 };

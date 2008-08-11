@@ -399,6 +399,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
     c->layer = c->oldlayer = LAYER_TILE;
     client_setborder(c, wgeom->border_width);
+    c->icon = ewmh_window_icon_get(c->win);
 
     /* update hints */
     u_size_hints = client_updatesizehints(c);

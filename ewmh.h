@@ -24,18 +24,14 @@
 
 #include "structs.h"
 
-typedef struct
-{
-    int height;
-    int width;
-    unsigned char *image;
-} netwm_icon_t;
-
 static inline void
 netwm_icon_delete(netwm_icon_t **i)
 {
-    p_delete(&(*i)->image);
-    p_delete(i);
+    if(*i)
+    {
+        p_delete(&(*i)->image);
+        p_delete(i);
+    }
 }
 
 void ewmh_init(int);
@@ -48,7 +44,7 @@ int ewmh_process_client_message(xcb_client_message_event_t *);
 void ewmh_update_net_client_list_stacking(int);
 void ewmh_check_client_hints(client_t *);
 void ewmh_update_workarea(int);
-netwm_icon_t * ewmh_get_window_icon(xcb_window_t);
+netwm_icon_t * ewmh_window_icon_get(xcb_window_t);
 void ewmh_restart(void);
 
 #endif

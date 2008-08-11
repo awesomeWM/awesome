@@ -538,6 +538,12 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
             client_updatewmhints(c);
         else if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)
             client_updatetitle(c);
+        else if(ev->atom == _NET_WM_ICON)
+        {
+            netwm_icon_delete(&c->icon);
+            c->icon = ewmh_window_icon_get(c->win);
+            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+        }
     }
 
     return 0;

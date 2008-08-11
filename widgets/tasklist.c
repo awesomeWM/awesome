@@ -118,7 +118,6 @@ tasklist_draw(draw_context_t *ctx, int screen,
     tasklist_data_t *d = w->widget->data;
     area_t area;
     int i = 0, icon_width = 0, box_width_rest = 0;
-    netwm_icon_t *icon;
     draw_image_t *image;
     draw_parser_data_t pdata, *parser_data;
     tasklist_object_data_t *odata;
@@ -213,8 +212,9 @@ tasklist_draw(draw_context_t *ctx, int screen,
                 draw_image_delete(&image);
             }
 
-            if(!icon_width && (icon = ewmh_get_window_icon(odata->client_labels.tab[i].client->win)))
+            if(!icon_width && odata->client_labels.tab[i].client->icon)
             {
+                netwm_icon_t *icon = odata->client_labels.tab[i].client->icon;
                 icon_width = ((double) ctx->height / (double) icon->height)
                     * icon->width;
                 draw_image_from_argb_data(ctx,
@@ -222,7 +222,6 @@ tasklist_draw(draw_context_t *ctx, int screen,
                                           w->area.y,
                                           icon->width, icon->height,
                                           ctx->height, icon->image);
-                netwm_icon_delete(&icon);
             }
         }
         else
