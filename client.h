@@ -28,7 +28,6 @@
 
 bool client_isvisible(client_t *, int);
 client_t * client_getbywin(xcb_window_t);
-void client_focus(client_t *, int);
 void client_setlayer(client_t *, layer_t);
 void client_stack(void);
 void client_raise(client_t *);

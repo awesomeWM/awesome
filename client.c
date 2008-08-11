@@ -212,54 +212,53 @@ client_ban(client_t *c)
 
 /** Give focus to client, or to first client if client is NULL.
  * \param c The client or NULL.
- * \param screen Virtual screen number.
  * \return True if a window (even root) has received focus, false otherwise.
  */
-void
-client_focus(client_t *c, int screen)
+static void
+client_focus(client_t *c)
 {
-    int phys_screen;
+    bool istagged = false;
+    tag_array_t *tags = &globalconf.screens[c->screen].tags;
 
-    /* if c is NULL or invisible, take next client in the focus history */
-    if((!c || (c && (!client_isvisible(c, screen))))
-       && !(c = globalconf.screens[screen].client_focus))
-        /* if c is still NULL take next client in the stack */
-        for(c = globalconf.clients; c && (c->skip || !client_isvisible(c, screen)); c = c->next);
+    /* Just check if the client is tagged with at least one visible tag.
+     * If so, we can give it the focus. */
+    for(int i = 0; i < tags->len; i++)
+        if(tags->tab[i]->selected && is_client_tagged(c, tags->tab[i]))
+        {
+            istagged = true;
+            break;
+        }
+
+    if(!istagged)
+        return;
 
     /* unfocus current selected client */
-    if(globalconf.screen_focus->client_focus && c != globalconf.screen_focus->client_focus)
+    if(globalconf.screen_focus->client_focus
+       && c != globalconf.screen_focus->client_focus)
         client_unfocus(globalconf.screen_focus->client_focus);
 
-    if(c)
-    {
-        /* unban the client before focusing or it will fail */
-        client_unban(c);
+    /* stop hiding c */
+    c->ishidden = false;
 
-        globalconf.screen_focus = &globalconf.screens[c->screen];
-        globalconf.screen_focus->client_focus = c;
+    /* unban the client before focusing or it will fail */
+    client_unban(c);
 
-        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-                            c->win, XCB_CURRENT_TIME);
-        phys_screen = c->phys_screen;
+    globalconf.screen_focus = &globalconf.screens[c->screen];
+    globalconf.screen_focus->client_focus = c;
 
-        /* Some layouts use focused client differently, so call them back. */
-        globalconf.screens[c->screen].need_arrange = true;
+    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+                        c->win, XCB_CURRENT_TIME);
 
-        /* execute hook */
-        luaA_client_userdata_new(globalconf.L, globalconf.screen_focus->client_focus);
-        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
-    }
-    else
-    {
-        phys_screen = screen_virttophys(screen);
-        xcb_set_input_focus(globalconf.connection,
-                            XCB_INPUT_FOCUS_POINTER_ROOT,
-                            xutil_screen_get(globalconf.connection, phys_screen)->root,
-                            XCB_CURRENT_TIME);
-    }
+    /* Some layouts use focused client differently, so call them back.
+     * And anyway, we have maybe unhidden */
+    globalconf.screens[c->screen].need_arrange = true;
 
-    ewmh_update_net_active_window(phys_screen);
-    widget_invalidate_cache(screen, WIDGET_CACHE_CLIENTS);
+    /* execute hook */
+    luaA_client_userdata_new(globalconf.L, globalconf.screen_focus->client_focus);
+    luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
+
+    ewmh_update_net_active_window(c->phys_screen);
+    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 /** Restack clients.
@@ -990,7 +989,7 @@ static int
 luaA_client_focus_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
-    client_focus(*c, (*c)->screen);
+    client_focus(*c);
     return 0;
 }
 
