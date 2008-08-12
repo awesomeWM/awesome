@@ -1226,9 +1226,9 @@ local function widget_tasklist_label_common(c, args)
         text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
     end
     if c.hidden then
-        name = escape(c.icon_name)
+        name = escape(c.icon_name) or ""
     else
-        name = escape(c.name)
+        name = escape(c.name) or ""
     end
     if capi.client.focus == c then
         text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..name.."</span> "
