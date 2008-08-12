@@ -240,11 +240,18 @@ keybinding({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -
 
 -- Prompt
 keybinding({ modkey }, "F1", function ()
-                                     awful.prompt.run({ prompt = "Run: " }, mypromptbox, awful.spawn, awful.completion.bash)
-                                 end):add()
+                                 awful.prompt.run({ prompt = "Run: " }, mypromptbox, awful.spawn, awful.completion.bash)
+                             end):add()
 keybinding({ modkey }, "F4", function ()
-                                     awful.prompt.run({ prompt = "Run Lua code: " }, mypromptbox, awful.eval)
-                                 end):add()
+                                 awful.prompt.run({ prompt = "Run Lua code: " }, mypromptbox, awful.eval)
+                             end):add()
+keybinding({ modkey, "Ctrl" }, "i", function ()
+                                        if mypromptbox.text then
+                                            mypromptbox.text = nil
+                                        else
+                                            mypromptbox.text = "Class: " .. client.focus.class .. " Instance: ".. client.focus.instance
+                                        end
+                                    end):add()
 
 --- Tabulous, tab manipulation
 keybinding({ modkey, "Control" }, "y", function ()
