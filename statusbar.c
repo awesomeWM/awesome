@@ -640,9 +640,12 @@ luaA_statusbar_newindex(lua_State *L)
         if(p != (*statusbar)->position)
         {
             (*statusbar)->position = p;
-            for(s = globalconf.screens[(*statusbar)->screen].statusbar; s; s = s->next)
-                statusbar_position_update(s);
-            ewmh_update_workarea((*statusbar)->phys_screen);
+            if((*statusbar)->screen != SCREEN_UNDEF)
+            {
+                for(s = globalconf.screens[(*statusbar)->screen].statusbar; s; s = s->next)
+                    statusbar_position_update(s);
+                ewmh_update_workarea((*statusbar)->phys_screen);
+            }
         }
         break;
       case A_TK_WIDGETS:
