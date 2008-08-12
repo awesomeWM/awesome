@@ -44,6 +44,8 @@ completion = {}
 screen = {}
 layout = {}
 client = {}
+client.data = {}
+client.data.maximize = otable()
 client.focus = {}
 client.focus.history = {}
 client.focus.history.data = {}
@@ -284,12 +286,32 @@ end
 function client.maximize(c)
     local sel = c or capi.client.focus_get()
     if sel then
-        sel.floating = true
         local ws = capi.screen[sel.screen].workarea
         ws.width = ws.width - 2 * sel.border_width
         ws.height = ws.height - 2 * sel.border_width
-        sel.coords = ws
+        if sel.floating
+            and sel.coords.x == ws.x
+            and sel.coords.y == ws.y
+            and sel.coords.width == ws.width
+            and sel.coords.height == ws.height then
+            if client.data.maximize[sel] then
+                sel.floating = client.data.maximize[sel].floating
+                sel.coords = client.data.maximize[sel].coords
+                client.data.maximize[sel] = nil
+            end
+        else
+            client.data.maximize[sel] = { coords = sel.coords, floating = sel.floating }
+            sel.floating = true
+            sel.coords = ws
+        end
     end
+end
+
+
+--- Erase eventual client data in maximize.
+-- @param c The client.
+local function client_maximize_clean(c)
+    client.data.maximize[c] = nil
 end
 
 --- Give the focus to a screen, and move pointer.
@@ -1374,6 +1396,7 @@ hooks.arrange.register(tag.history.update)
 
 hooks.focus.register(client.focus.history.add)
 hooks.unmanage.register(client.focus.history.delete)
+hooks.unmanage.register(client_maximize_clean)
 
 hooks.focus.register(titlebar.update)
 hooks.unfocus.register(titlebar.update)
