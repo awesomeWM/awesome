@@ -423,7 +423,6 @@ luaA_otable_newindex(lua_State *L)
 
     if((obj = lua_touserdata(L, 2)))
     {
-        printf("looking for %p\n", *obj);
         /* begins at nil */
         lua_pushnil(L);
         while(lua_next(L, 1))
@@ -431,7 +430,6 @@ luaA_otable_newindex(lua_State *L)
             if((v = lua_touserdata(L, -2))
                && *v == *obj)
             {
-                printf("found %p, replace\n", *v);
                 /* remove value */
                 lua_pop(L, 1);
                 /* push new value on top */
