@@ -1,0 +1,6 @@
+[Desktop Entry] 
+Encoding=UTF-8
+Name=awesome
+Comment=Floating and tiling window manager
+TryExec=awesome
+Exec=awesome
