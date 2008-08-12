@@ -343,7 +343,7 @@ luaA_keybinding_new(lua_State *L)
     /* get the last arg as function */
     k = p_new(keybinding_t, 1);
     luaA_keystore(k, key, len);
-    luaA_registerfct(L, &k->fct);
+    luaA_registerfct(L, 4, &k->fct);
 
     len = lua_objlen(L, 2);
     for(i = 1; i <= len; i++)

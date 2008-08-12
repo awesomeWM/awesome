@@ -23,6 +23,7 @@ local capi =
     screen = screen,
     client = client,
     mouse = mouse,
+    button = button,
     titlebar = titlebar,
     widget = widget,
     hooks = hooks,
@@ -1497,12 +1498,16 @@ function titlebar.add(c, args)
     local tb = capi.titlebar(targs)
 
     local title = capi.widget({ type = "textbox", name = "title", align = "flex" })
-    title:mouse_add(capi.mouse({ }, 1, function (t) t.client:mouse_move() end))
-    title:mouse_add(capi.mouse({ args.modkey }, 3, function (t) t.client:mouse_resize() end))
+    local bts =
+    {
+        capi.button({ }, 1, function (t) t.client:mouse_move() end),
+        capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
+    }
+    title:button_press(bts)
 
     if theme.titlebar_close_button == "true" then
         local close_button = capi.widget({ type = "textbox", name = "close", align = "right" })
-        close_button:mouse_add(capi.mouse({ }, 1, function (t) t.client:kill() end))
+        close_button:button_press({ capi.button({ }, 1, function (t) t.client:kill() end) })
 
         tb:widgets({
             capi.widget({ type = "appicon", name = "appicon", align = "left" }),

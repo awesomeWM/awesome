@@ -46,6 +46,7 @@
 #include "client.h"
 #include "screen.h"
 #include "event.h"
+#include "mouse.h"
 #include "layouts/tile.h"
 #include "common/socket.h"
 #include "common/buffer.h"
@@ -53,6 +54,8 @@
 extern awesome_t globalconf;
 
 extern const struct luaL_reg awesome_keygrabber_lib[];
+extern const struct luaL_reg awesome_button_methods[];
+extern const struct luaL_reg awesome_button_meta[];
 extern const struct luaL_reg awesome_mouse_methods[];
 extern const struct luaL_reg awesome_mouse_meta[];
 extern const struct luaL_reg awesome_screen_methods[];
@@ -74,22 +77,24 @@ static struct sockaddr_un *addr;
 static ev_io csio = { .fd = -1 };
 struct ev_io csio2 = { .fd = -1 };
 
-/** Add a global mouse binding. This binding will be available when you'll
- * click on root window.
+/** Get or set global mouse bindings.
+ * This binding will be available when you'll click on root window.
  * \param L The Lua VM state.
- *
+ * \return The number of element pushed on stack.
  * \luastack
- * \lparam A mouse button binding.
+ * \lvalue A client.
+ * \lparam An array of mouse button bindings objects, or nothing.
+ * \return The array of mouse button bindings objects of this client.
  */
 static int
-luaA_mouse_add(lua_State *L)
+luaA_buttons(lua_State *L)
 {
-    button_t **button = luaA_checkudata(L, 1, "mouse");
+    button_array_t *buttons = &globalconf.buttons;
 
-    button_list_push(&globalconf.buttons.root, *button);
-    button_ref(button);
+    if(lua_gettop(L) == 1)
+        luaA_button_array_set(L, 1, buttons);
 
-    return 0;
+    return luaA_button_array_get(L, buttons);
 }
 
 /** Quit awesome.
@@ -139,7 +144,7 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
 static int
 luaA_hooks_focus(lua_State *L)
 {
-    return luaA_registerfct(L, &globalconf.hooks.focus);
+    return luaA_registerfct(L, 1, &globalconf.hooks.focus);
 }
 
 /** Set the function called each time a client loses focus. This function is
@@ -152,7 +157,7 @@ luaA_hooks_focus(lua_State *L)
 static int
 luaA_hooks_unfocus(lua_State *L)
 {
-    return luaA_registerfct(L, &globalconf.hooks.unfocus);
+    return luaA_registerfct(L, 1, &globalconf.hooks.unfocus);
 }
 
 /** Set the function called each time a new client appears. This function is
@@ -165,7 +170,7 @@ luaA_hooks_unfocus(lua_State *L)
 static int
 luaA_hooks_manage(lua_State *L)
 {
-    return luaA_registerfct(L, &globalconf.hooks.manage);
+    return luaA_registerfct(L, 1, &globalconf.hooks.manage);
 }
 
 /** Set the function called each time a client goes away. This function is
@@ -178,7 +183,7 @@ luaA_hooks_manage(lua_State *L)
 static int
 luaA_hooks_unmanage(lua_State *L)
 {
-    return luaA_registerfct(L, &globalconf.hooks.unmanage);
+    return luaA_registerfct(L, 1, &globalconf.hooks.unmanage);
 }
 
 /** Set the function called each time the mouse enter a new window. This
@@ -191,7 +196,7 @@ luaA_hooks_unmanage(lua_State *L)
 static int
 luaA_hooks_mouseover(lua_State *L)
 {
-    return luaA_registerfct(L, &globalconf.hooks.mouseover);
+    return luaA_registerfct(L, 1, &globalconf.hooks.mouseover);
 }
 
 /** Set the function called on each screen arrange. This function is called
@@ -204,7 +209,7 @@ luaA_hooks_mouseover(lua_State *L)
 static int
 luaA_hooks_arrange(lua_State *L)
 {
-    return luaA_registerfct(L, &globalconf.hooks.arrange);
+    return luaA_registerfct(L, 1, &globalconf.hooks.arrange);
 }
 
 /** Set the function called on each title update. This function is called with
@@ -217,7 +222,7 @@ luaA_hooks_arrange(lua_State *L)
 static int
 luaA_hooks_titleupdate(lua_State *L)
 {
-    return luaA_registerfct(L, &globalconf.hooks.titleupdate);
+    return luaA_registerfct(L, 1, &globalconf.hooks.titleupdate);
 }
 
 /** Set the function called when a client get urgency flag. This function is called with
@@ -230,7 +235,7 @@ luaA_hooks_titleupdate(lua_State *L)
 static int
 luaA_hooks_urgent(lua_State *L)
 {
-    return luaA_registerfct(L, &globalconf.hooks.urgent);
+    return luaA_registerfct(L, 1, &globalconf.hooks.urgent);
 }
 
 /** Set the function to be called every N seconds.
@@ -246,7 +251,7 @@ luaA_hooks_timer(lua_State *L)
     globalconf.timer.repeat = luaL_checknumber(L, 1);
 
     if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
-        luaA_registerfct(L, &globalconf.hooks.timer);
+        luaA_registerfct(L, 2, &globalconf.hooks.timer);
 
     ev_timer_again(globalconf.loop, &globalconf.timer);
     return 0;
@@ -543,7 +548,7 @@ luaA_init(void)
         { "exec", luaA_exec },
         { "spawn", luaA_spawn },
         { "restart", luaA_restart },
-        { "mouse_add", luaA_mouse_add },
+        { "buttons", luaA_buttons },
         { "font_set", luaA_font_set },
         { "colors_set", luaA_colors_set },
         { NULL, NULL }
@@ -585,6 +590,9 @@ luaA_init(void)
 
     /* Export mouse */
     luaA_openlib(L, "mouse", awesome_mouse_methods, awesome_mouse_meta);
+
+    /* Export button */
+    luaA_openlib(L, "button", awesome_button_methods, awesome_button_meta);
 
     /* Export tag */
     luaA_openlib(L, "tag", awesome_tag_methods, awesome_tag_meta);

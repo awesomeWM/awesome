@@ -159,36 +159,41 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
 /** Handle button click on tasklist.
  * \param w The widget node.
  * \param ev The button press event.
+ * \param btype The button press event type.
  * \param screen The screen where the click was.
  * \param object The object we're onto.
  * \param type The type object.
  */
 static void
-taglist_button_press(widget_node_t *w,
-                     xcb_button_press_event_t *ev,
-                     int screen,
-                     void *object,
-                     awesome_type_t type)
+taglist_button(widget_node_t *w,
+               xcb_button_press_event_t *ev,
+               int screen,
+               void *object,
+               awesome_type_t type)
 {
     tag_array_t *tags = &globalconf.screens[screen].tags;
-    button_t *b;
     taglist_data_t *data = w->widget->data;
     taglist_drawn_area_t *tda;
+    button_array_t *barr = &w->widget->buttons;
 
     /* Find the good drawn area list */
     if((tda = taglist_drawn_area_getbyobj(data->drawn_area, object)))
-        for(b = w->widget->buttons; b; b = b->next)
-            if(ev->detail == b->button && XUTIL_MASK_CLEAN(ev->state) == b->mod && b->fct)
-                for(int i = 0; i < MIN(tags->len, tda->areas.len); i++)
+        for(int i = 0; i < barr->len; i++)
+            if(ev->detail == barr->tab[i]->button
+               && XUTIL_MASK_CLEAN(ev->state) == barr->tab[i]->mod)
+                for(int j = 0; i < MIN(tags->len, tda->areas.len); j++)
                 {
-                    tag_t *tag  = tags->tab[i];
-                    area_t *area = &tda->areas.tab[i];
+                    tag_t *tag  = tags->tab[j];
+                    area_t *area = &tda->areas.tab[j];
                     if(ev->event_x >= AREA_LEFT(*area)
                        && ev->event_x < AREA_RIGHT(*area))
                     {
                         luaA_pushpointer(globalconf.L, object, type);
                         luaA_tag_userdata_new(globalconf.L, tag);
-                        luaA_dofunction(globalconf.L, b->fct, 2, 0);
+                        luaA_dofunction(globalconf.L,
+                                        ev->response_type == XCB_BUTTON_PRESS ?
+                                        barr->tab[i]->press : barr->tab[i]->release,
+                                        2, 0);
                         return;
                     }
                 }
@@ -232,7 +237,7 @@ luaA_taglist_newindex(lua_State *L, awesome_token_t token)
     switch(token)
     {
       case A_TK_LABEL:
-        luaA_registerfct(L, &d->label);
+        luaA_registerfct(L, 3, &d->label);
         break;
       default:
         return 0;
@@ -288,7 +293,7 @@ taglist_new(alignment_t align)
     w->newindex = luaA_taglist_newindex;
     w->align = align;
     w->draw = taglist_draw;
-    w->button_press = taglist_button_press;
+    w->button = taglist_button;
     w->destructor = taglist_destructor;
     w->detach = taglist_detach;
 

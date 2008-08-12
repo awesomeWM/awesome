@@ -77,14 +77,14 @@ struct button_t
     unsigned long mod;
     /** Mouse button number */
     unsigned int button;
-    /** Lua function to execute. */
-    luaA_ref fct;
-    /** Next and previous buttons */
-    button_t *prev, *next;
+    /** Lua function to execute on press. */
+    luaA_ref press;
+    /** Lua function to execute on release. */
+    luaA_ref release;
 };
 
-DO_SLIST(button_t, button, p_delete)
 DO_RCNT(button_t, button, p_delete)
+DO_ARRAY(button_t *, button, button_unref)
 
 /** Widget */
 struct widget_t
@@ -105,14 +105,14 @@ struct widget_t
     int (*index)(lua_State *, awesome_token_t);
     /** Newindex function */
     int (*newindex)(lua_State *, awesome_token_t);
-    /** ButtonPressedEvent handler */
-    void (*button_press)(widget_node_t *, xcb_button_press_event_t *, int, void *, awesome_type_t);
+    /** Button event handler */
+    void (*button)(widget_node_t *, xcb_button_press_event_t *, int, void *, awesome_type_t);
     /** Alignement */
     alignment_t align;
     /** Misc private data */
     void *data;
     /** Button bindings */
-    button_t *buttons;
+    button_array_t buttons;
     /** Cache flags */
     int cache_flags;
     /** True if the widget is visible */
@@ -127,7 +127,7 @@ widget_delete(widget_t **widget)
 {
     if((*widget)->destructor)
         (*widget)->destructor(*widget);
-    button_list_wipe(&(*widget)->buttons);
+    button_array_wipe(&(*widget)->buttons);
     p_delete(&(*widget)->name);
     p_delete(widget);
 }
@@ -300,7 +300,7 @@ struct client_t
     /** Titlebar */
     titlebar_t *titlebar;
     /** Button bindings */
-    button_t *buttons;
+    button_array_t buttons;
     /** Floating window placement algo */
     floating_placement_t *floating_placement;
     /** Icon */
@@ -312,7 +312,7 @@ struct client_t
 static void
 client_delete(client_t **c)
 {
-    button_list_wipe(&(*c)->buttons);
+    button_array_wipe(&(*c)->buttons);
     p_delete(&(*c)->icon_path);
     p_delete(&(*c)->name);
     p_delete(c);
@@ -407,10 +407,7 @@ struct awesome_t
     /** Screens info */
     screens_info_t *screens_info;
     /** Mouse bindings list */
-    struct
-    {
-           button_t *root;
-    } buttons;
+    button_array_t buttons;
     /** Numlock mask */
     unsigned int numlockmask;
     /** Numlock mask */

@@ -37,9 +37,9 @@
 
 extern awesome_t globalconf;
 
-DO_LUA_NEW(static, button_t, mouse, "mouse", button_ref)
-DO_LUA_GC(button_t, mouse, "mouse", button_unref)
-DO_LUA_EQ(button_t, mouse, "mouse")
+DO_LUA_NEW(extern, button_t, button, "button", button_ref)
+DO_LUA_GC(button_t, button, "button", button_unref)
+DO_LUA_EQ(button_t, button, "button")
 
 /** Define corners. */
 typedef enum
@@ -1063,10 +1063,11 @@ luaA_client_mouse_move(lua_State *L)
  * \lparam A table with modifiers keys.
  * \lparam A mouse button number.
  * \lparam A function to execute on click events.
+ * \lparam A function to execute on release events.
  * \lreturn A mouse button binding.
  */
 static int
-luaA_mouse_new(lua_State *L)
+luaA_button_new(lua_State *L)
 {
     int i, len;
     button_t *button;
@@ -1074,12 +1075,24 @@ luaA_mouse_new(lua_State *L)
     luaA_checktable(L, 2);
     /* arg 3 is mouse button */
     i = luaL_checknumber(L, 3);
-    /* arg 4 is cmd to run */
-    luaA_checkfunction(L, 4);
+    /* arg 4 and 5 are callback functions */
+    if(!lua_isnil(L, 4))
+        luaA_checkfunction(L, 4);
+    if(lua_gettop(L) == 5 && !lua_isnil(L, 5))
+        luaA_checkfunction(L, 5);
 
     button = p_new(button_t, 1);
     button->button = xutil_button_fromint(i);
-    button->fct = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    if(lua_isnil(L, 4))
+        button->press = LUA_REFNIL;
+    else
+        luaA_registerfct(L, 4, &button->press);
+
+    if(lua_gettop(L) == 5 && !lua_isnil(L, 5))
+        luaA_registerfct(L, 5, &button->release);
+    else
+        button->release = LUA_REFNIL;
 
     len = lua_objlen(L, 2);
     for(i = 1; i <= len; i++)
@@ -1088,10 +1101,78 @@ luaA_mouse_new(lua_State *L)
         button->mod |= xutil_key_mask_fromstr(luaL_checkstring(L, -1));
     }
 
-    return luaA_mouse_userdata_new(L, button);
+    return luaA_button_userdata_new(L, button);
 }
 
-/** Mouse object.
+/** Return a formated string for a button.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lvalue  A button.
+ * \lreturn A string.
+ */
+static int
+luaA_button_tostring(lua_State *L)
+{
+    button_t **p = luaA_checkudata(L, 1, "button");
+    lua_pushfstring(L, "[button udata(%p)]", *p);
+    return 1;
+}
+
+/** Set a button array with a Lua table.
+ * \param L The Lua VM state.
+ * \param idx The index of the Lua table.
+ * \param buttons The array button to fill.
+ */
+void
+luaA_button_array_set(lua_State *L, int idx, button_array_t *buttons)
+{
+    button_t **b;
+
+    luaA_checktable(L, idx);
+    button_array_wipe(buttons);
+    button_array_init(buttons);
+    lua_pushnil(L);
+    while(lua_next(L, idx))
+    {
+        b = luaA_checkudata(L, -1, "button");
+        button_array_append(buttons, *b);
+        button_ref(b);
+        lua_pop(L, 1);
+    }
+    lua_pop(L, 1);
+}
+
+/** Push an array of button as an Lua table onto the stack.
+ * \param L The Lua VM state.
+ * \param buttons The button array to push.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_button_array_get(lua_State *L, button_array_t *buttons)
+{
+    luaA_otable_new(L);
+    for(int i = 0; i < buttons->len; i++)
+    {
+        luaA_button_userdata_new(L, buttons->tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
+}
+
+const struct luaL_reg awesome_button_methods[] =
+{
+    { "__call", luaA_button_new },
+    { NULL, NULL }
+};
+const struct luaL_reg awesome_button_meta[] =
+{
+    { "__gc", luaA_button_gc },
+    { "__eq", luaA_button_eq },
+    { "__tostring", luaA_button_tostring },
+    { NULL, NULL }
+};
+
+/** Mouse library.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
@@ -1229,7 +1310,6 @@ luaA_mouse_coords(lua_State *L)
 
 const struct luaL_reg awesome_mouse_methods[] =
 {
-    { "__call", luaA_mouse_new },
     { "__index", luaA_mouse_index },
     { "__newindex", luaA_mouse_newindex },
     { "coords", luaA_mouse_coords },
@@ -1237,8 +1317,6 @@ const struct luaL_reg awesome_mouse_methods[] =
 };
 const struct luaL_reg awesome_mouse_meta[] =
 {
-    { "__gc", luaA_mouse_gc },
-    { "__eq", luaA_mouse_eq },
     { NULL, NULL }
 };
 

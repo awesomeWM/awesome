@@ -42,47 +42,59 @@
 
 extern awesome_t globalconf;
 
-/** Handle mouse button press.
+/** Handle mouse button events.
  * \param c The client on which the event happened or NULL.
- * \param button Button number
- * \param state Modkeys state
- * \param buttons Buttons list to check for
+ * \param type Event type, press or release.
+ * \param button Button number.
+ * \param state Modkeys state.
+ * \param buttons Buttons array to check for.
  */
 static void
-event_handle_mouse_button_press(client_t *c,
-                                unsigned int button,
-                                unsigned int state,
-                                button_t *buttons)
+event_handle_mouse_button(client_t *c,
+                          uint8_t type,
+                          xcb_button_t button,
+                          uint16_t state,
+                          button_array_t *buttons)
 {
-    button_t *b;
-
-    for(b = buttons; b; b = b->next)
-        if(button == b->button && XUTIL_MASK_CLEAN(state) == b->mod && b->fct)
+    for(int i = 0; i < buttons->len; i++)
+        if(button == buttons->tab[i]->button
+           && XUTIL_MASK_CLEAN(state) == buttons->tab[i]->mod)
         {
             if(c)
             {
                 luaA_client_userdata_new(globalconf.L, c);
-                luaA_dofunction(globalconf.L, b->fct, 1, 0);
+                luaA_dofunction(globalconf.L,
+                                type == XCB_BUTTON_PRESS ?
+                                buttons->tab[i]->press : buttons->tab[i]->release,
+                                1, 0);
             }
             else
-                luaA_dofunction(globalconf.L, b->fct, 0, 0);
+                luaA_dofunction(globalconf.L,
+                                type == XCB_BUTTON_PRESS ?
+                                buttons->tab[i]->press : buttons->tab[i]->release,
+                                0, 0);
         }
 }
 
 /** The button press event handler.
- * \param data currently unused.
+ * \param data The type of mouse event.
  * \param connection The connection to the X server.
  * \param ev The event.
  */
 static int
-event_handle_buttonpress(void *data __attribute__ ((unused)),
-                         xcb_connection_t *connection, xcb_button_press_event_t *ev)
+event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_event_t *ev)
 {
     int screen, tmp;
     const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
     client_t *c;
     widget_node_t *w;
     statusbar_t *statusbar;
+
+    /* ev->state is
+     * button status (8 bits) + modifiers status (8 bits)
+     * we don't care for button status that we get, especially on release, so
+     * drop them */
+    ev->state &= 0x00ff;
 
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
@@ -117,8 +129,8 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
                     if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
                        && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
                     {
-                        w->widget->button_press(w, ev, statusbar->screen,
-                                                statusbar, AWESOME_TYPE_STATUSBAR);
+                        w->widget->button(w, ev, statusbar->screen,
+                                          statusbar, AWESOME_TYPE_STATUSBAR);
                         return 0;
                     }
                 /* return if no widget match */
@@ -148,8 +160,8 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
             if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
                && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
             {
-                w->widget->button_press(w, ev, c->screen,
-                                        c->titlebar, AWESOME_TYPE_TITLEBAR);
+                w->widget->button(w, ev, c->screen,
+                                  c->titlebar, AWESOME_TYPE_TITLEBAR);
                 return 0;
             }
         /* return if no widget match */
@@ -158,15 +170,16 @@ event_handle_buttonpress(void *data __attribute__ ((unused)),
 
     if((c = client_getbywin(ev->event)))
     {
-        event_handle_mouse_button_press(c, ev->detail, ev->state, c->buttons);
-        xcb_allow_events(globalconf.connection, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
+        event_handle_mouse_button(c, ev->response_type, ev->detail, ev->state, &c->buttons);
+        xcb_allow_events(globalconf.connection,
+                         XCB_ALLOW_REPLAY_POINTER,
+                         XCB_CURRENT_TIME);
     }
     else
         for(screen = 0; screen < nb_screen; screen++)
             if(xutil_screen_get(connection, screen)->root == ev->event)
             {
-                event_handle_mouse_button_press(NULL, ev->detail, ev->state,
-                                                globalconf.buttons.root);
+                event_handle_mouse_button(NULL, ev->response_type, ev->detail, ev->state, &globalconf.buttons);
                 return 0;
             }
 
@@ -339,7 +352,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
     {
-        window_buttons_grab(c->win, ev->root, c->buttons);
+        window_buttons_grab(c->win, ev->root, &c->buttons);
         /* The idea behind saving pointer_x and pointer_y is Bob Marley powered.
          * this will allow us top drop some EnterNotify events and thus not giving
          * focus to windows appering under the cursor without a cursor move */
@@ -686,7 +699,8 @@ void a_xcb_set_event_handlers(void)
 {
     const xcb_query_extension_reply_t *randr_query;
 
-    xcb_event_set_button_press_handler(&globalconf.evenths, event_handle_buttonpress, NULL);
+    xcb_event_set_button_press_handler(&globalconf.evenths, event_handle_button, NULL);
+    xcb_event_set_button_release_handler(&globalconf.evenths, event_handle_button, NULL);
     xcb_event_set_configure_request_handler(&globalconf.evenths, event_handle_configurerequest, NULL);
     xcb_event_set_configure_notify_handler(&globalconf.evenths, event_handle_configurenotify, NULL);
     xcb_event_set_destroy_notify_handler(&globalconf.evenths, event_handle_destroynotify, NULL);

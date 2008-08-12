@@ -202,15 +202,17 @@ luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
 
 /** Register a function.
  * \param L The Lua stack.
+ * \param idx Index of the function in the stack.
  * \param fct A luaA_ref address: it will be filled with the luaA_ref
  * registered. If the adresse point to an already registered function, it will
  * be unregistered.
  * \return Always 0.
  */
 static inline int
-luaA_registerfct(lua_State *L, luaA_ref *fct)
+luaA_registerfct(lua_State *L, int idx, luaA_ref *fct)
 {
-    luaA_checkfunction(L, -1);
+    luaA_checkfunction(L, idx);
+    lua_pushvalue(L, idx);
     if(*fct != LUA_REFNIL)
         luaL_unref(L, LUA_REGISTRYINDEX, *fct);
     *fct = luaL_ref(L, LUA_REGISTRYINDEX);

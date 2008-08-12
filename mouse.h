@@ -22,10 +22,15 @@
 #ifndef AWESOME_MOUSE_H
 #define AWESOME_MOUSE_H
 
-#include <lua.h>
+#include "structs.h"
 
 int luaA_client_mouse_resize(lua_State *);
 int luaA_client_mouse_move(lua_State *);
+
+int luaA_button_userdata_new(lua_State *, button_t *);
+
+int luaA_button_array_get(lua_State *, button_array_t *);
+void luaA_button_array_set(lua_State *, int idx, button_array_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

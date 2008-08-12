@@ -871,38 +871,6 @@ luaA_client_get(lua_State *L)
     return 1;
 }
 
-/** Add mouse bindings over clients's window.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A button binding.
- */
-static int
-luaA_client_mouse_add(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    button_t **b = luaA_checkudata(L, 2, "mouse");
-    button_list_push(&(*c)->buttons, *b);
-    button_ref(b);
-    return 0;
-}
-
-/** Remove mouse bindings over clients's window.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A button binding.
- */
-static int
-luaA_client_mouse_remove(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    button_t **b = luaA_checkudata(L, 1, "mouse");
-    button_list_detach(&(*c)->buttons, *b);
-    button_unref(b);
-    return 0;
-}
-
 /** Get only visible clients for a screen.
  * \param L The Lua VM state.
  * \luastack
@@ -1406,6 +1374,26 @@ luaA_client_index(lua_State *L)
     return 1;
 }
 
+/** Get or set mouse buttons bindings for a client.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lvalue A client.
+ * \lparam An array of mouse button bindings objects, or nothing.
+ * \return The array of mouse button bindings objects of this client.
+ */
+static int
+luaA_client_buttons(lua_State *L)
+{
+    client_t **client = luaA_checkudata(L, 1, "client");
+    button_array_t *buttons = &(*client)->buttons;
+
+    if(lua_gettop(L) == 2)
+        luaA_button_array_set(L, 2, buttons);
+
+    return luaA_button_array_get(L, buttons);
+}
+
 /* Client module.
  * \param L The Lua VM state.
  * \return The number of pushed elements.
@@ -1467,6 +1455,7 @@ const struct luaL_reg awesome_client_methods[] =
 const struct luaL_reg awesome_client_meta[] =
 {
     { "coords", luaA_client_coords },
+    { "buttons", luaA_client_buttons },
     { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
@@ -1476,8 +1465,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },
     { "unmanage", luaA_client_unmanage },
-    { "mouse_add", luaA_client_mouse_add },
-    { "mouse_remove", luaA_client_mouse_remove },
     { "__index", luaA_client_index },
     { "__newindex", luaA_client_newindex },
     { "__eq", luaA_client_eq },

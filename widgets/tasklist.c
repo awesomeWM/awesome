@@ -287,16 +287,16 @@ tasklist_draw(draw_context_t *ctx, int screen,
  * \param type The type object.
  */
 static void
-tasklist_button_press(widget_node_t *w,
-                      xcb_button_press_event_t *ev,
-                      int screen,
-                      void *object,
-                      awesome_type_t type)
+tasklist_button(widget_node_t *w,
+                xcb_button_press_event_t *ev,
+                int screen,
+                void *object,
+                awesome_type_t type)
 {
-    button_t *b;
     tasklist_data_t *d = w->widget->data;
     int ci = 0;
     tasklist_object_data_t *odata;
+    button_array_t *barr = &w->widget->buttons;
 
     odata = tasklist_object_data_getbyobj(d->objects_data, object);
 
@@ -308,12 +308,16 @@ tasklist_button_press(widget_node_t *w,
     else
         ci = odata->client_labels.len - 1 - (ev->event_x - w->area.x) / odata->box_width;
 
-    for(b = w->widget->buttons; b; b = b->next)
-        if(ev->detail == b->button && XUTIL_MASK_CLEAN(ev->state) == b->mod && b->fct)
+    for(int i = 0; i < barr->len; i++)
+        if(ev->detail == barr->tab[i]->button
+           && XUTIL_MASK_CLEAN(ev->state) == barr->tab[i]->mod)
         {
             luaA_pushpointer(globalconf.L, object, type);
             luaA_client_userdata_new(globalconf.L, odata->client_labels.tab[ci].client);
-            luaA_dofunction(globalconf.L, b->fct, 2, 0);
+            luaA_dofunction(globalconf.L,
+                            ev->response_type == XCB_BUTTON_PRESS ?
+                            barr->tab[i]->press : barr->tab[i]->release,
+                            2, 0);
         }
 }
 
@@ -365,7 +369,7 @@ luaA_tasklist_newindex(lua_State *L, awesome_token_t token)
         d->show_icons = luaA_checkboolean(L, 3);
         break;
       case A_TK_LABEL:
-        luaA_registerfct(L, &d->label);
+        luaA_registerfct(L, 3, &d->label);
         break;
       case A_TK_INVERT:
         d->invert = luaA_checkboolean(L, 3);
@@ -420,7 +424,7 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
     w = p_new(widget_t, 1);
     widget_common_new(w);
     w->draw = tasklist_draw;
-    w->button_press = tasklist_button_press;
+    w->button = tasklist_button;
     w->align = AlignFlex;
     w->index = luaA_tasklist_index;
     w->newindex = luaA_tasklist_newindex;

@@ -24,6 +24,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
+#include "mouse.h"
 #include "widget.h"
 #include "titlebar.h"
 #include "common/atoms.h"
@@ -63,19 +64,23 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
  * \param type The object type.
  */
 static void
-widget_common_button_press(widget_node_t *w,
-                           xcb_button_press_event_t *ev,
-                           int screen __attribute__ ((unused)),
-                           void *p,
-                           awesome_type_t type)
+widget_common_button(widget_node_t *w,
+                     xcb_button_press_event_t *ev,
+                     int screen __attribute__ ((unused)),
+                     void *p,
+                     awesome_type_t type)
 {
-    button_t *b;
+    button_array_t *b = &w->widget->buttons;
 
-    for(b = w->widget->buttons; b; b = b->next)
-        if(ev->detail == b->button && XUTIL_MASK_CLEAN(ev->state) == b->mod && b->fct)
+    for(int i = 0; i < b->len; i++)
+        if(ev->detail == b->tab[i]->button
+           && XUTIL_MASK_CLEAN(ev->state) == b->tab[i]->mod)
         {
             luaA_pushpointer(globalconf.L, p, type);
-            luaA_dofunction(globalconf.L, b->fct, 1, 0);
+            luaA_dofunction(globalconf.L,
+                            ev->response_type == XCB_BUTTON_PRESS ?
+                            b->tab[i]->press : b->tab[i]->release,
+                            1, 0);
         }
 }
 
@@ -193,7 +198,7 @@ void
 widget_common_new(widget_t *widget)
 {
     widget->align = AlignLeft;
-    widget->button_press = widget_common_button_press;
+    widget->button = widget_common_button;
 }
 
 /** Invalidate widgets which should be refresh upon
@@ -292,42 +297,24 @@ luaA_widget_new(lua_State *L)
     return luaA_widget_userdata_new(L, w);
 }
 
-/** Add a mouse button bindings to a widget.
+/** Get or set mouse buttons bindings to a widget.
  * \param L The Lua VM state.
  *
  * \luastack
  * \lvalue A widget.
- * \lparam A mouse button bindings object.
+ * \lparam An array of mouse button bindings objects, or nothing.
+ * \return The array of mouse button bindings objects of this widget.
  */
 static int
-luaA_widget_mouse_add(lua_State *L)
+luaA_widget_buttons(lua_State *L)
 {
     widget_t **widget = luaA_checkudata(L, 1, "widget");
-    button_t **b = luaA_checkudata(L, 2, "mouse");
+    button_array_t *buttons = &(*widget)->buttons;
 
-    button_list_push(&(*widget)->buttons, *b);
-    button_ref(b);
+    if(lua_gettop(L) == 2)
+        luaA_button_array_set(L, 2, buttons);
 
-    return 0;
-}
-
-/** Remove a mouse button bindings from a widget.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- * \lparam A mouse button bindings object.
- */
-static int
-luaA_widget_mouse_remove(lua_State *L)
-{
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    button_t **b = luaA_checkudata(L, 2, "mouse");
-
-    button_list_detach(&(*widget)->buttons, *b);
-    button_unref(b);
-
-    return 0;
+    return luaA_button_array_get(L, buttons);
 }
 
 /** Convert a widget into a printable string.
@@ -469,8 +456,7 @@ const struct luaL_reg awesome_widget_methods[] =
 };
 const struct luaL_reg awesome_widget_meta[] =
 {
-    { "mouse_add", luaA_widget_mouse_add },
-    { "mouse_remove", luaA_widget_mouse_remove },
+    { "buttons", luaA_widget_buttons },
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },
     { "__gc", luaA_widget_gc },
