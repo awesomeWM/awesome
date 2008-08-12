@@ -109,9 +109,8 @@ scan(void)
             has_awesome_prop = xutil_text_prop_get(globalconf.connection, wins[1], _AWESOME_PROPERTIES, NULL, NULL);
 
             if(!attr_r || attr_r->override_redirect
-               || has_awesome_prop
-               || attr_r->map_state != XCB_MAP_STATE_VIEWABLE
-               || state == XCB_WM_WITHDRAWN_STATE)
+               || (attr_r->map_state != XCB_MAP_STATE_VIEWABLE && !has_awesome_prop)
+               || (state == XCB_WM_WITHDRAWN_STATE && !has_awesome_prop))
             {
                 p_delete(&attr_r);
                 continue;
