@@ -256,6 +256,13 @@ else()
     set(AWESOME_DOC_PATH ${PREFIX}/share/doc/${PROJECT_AWE_NAME} CACHE PATH "awesome docs directory")
 endif()
 
+# setting AWESOME_XSESSION_PATH
+if(DEFINED AWESOME_XSESSION_PATH)
+    set(AWESOME_XSESSION_PATH ${AWESOME_XSESSION_PATH} CACHE PATH "awesome xsessions directory")
+else()
+    set(AWESOME_XSESSION_PATH ${PREFIX}/share/xsessions CACHE PATH "awesome xsessions directory")
+endif()
+
 # Hide to avoid confusion
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 
@@ -270,7 +277,6 @@ set(AWESOME_MAN_PATH         ${PREFIX}/share/man)
 set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)
 set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
-set(AWESOME_XSESSION_PATH    ${PREFIX}/share/xsessions)
 # }}}
 
 # {{{ Configure files
