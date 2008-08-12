@@ -85,7 +85,6 @@ for s = 1, screen.count() do
     for tagnumber = 1, 9 do
         tags[s][tagnumber] = tag({ name = tagnumber, layout = layouts[1] })
         -- Add tags to screen one by one
-        tags[s][tagnumber].mwfact = 0.618033988769
         tags[s][tagnumber].screen = s
     end
     -- I'm sure you want to see at least one tag.
