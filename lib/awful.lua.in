@@ -39,7 +39,7 @@ hooks = {}
 hooks.user =  {}
 prompt = {}
 prompt.history = {}
-prompt.history.data = { max = 50, index = 0, table = {} }
+prompt.history.data = { max = 50, table = {} }
 completion = {}
 screen = {}
 layout = {}
@@ -922,6 +922,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback)
     local prettyprompt = args.prompt or ""
     local inv_col = args.fg_cursor or theme.fg_focus or "black"
     local cur_col = args.bg_cursor or theme.bg_focus or "white"
+    local history_index = #prompt.history.data.table + 1
     -- The cursor position
     local cur_pos = 1
     -- The completion element to use on completion request.
@@ -930,7 +931,6 @@ function prompt.run(args, textbox, exe_callback, completion_callback)
         return
     end
     textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos)
-    prompt.history.data.index = #prompt.history.data.table + 1
     capi.keygrabber.run(
     function (mod, key)
         local has_ctrl = false
@@ -1042,20 +1042,20 @@ function prompt.run(args, textbox, exe_callback, completion_callback)
             elseif key == "Right" then
                 cur_pos = cur_pos + 1
             elseif key == "Up" then
-                if prompt.history.data.index > 1 then
-                    prompt.history.data.index = prompt.history.data.index - 1
+                if history_index > 1 then
+                    history_index = history_index - 1
 
-                    command = prompt.history.data.table[prompt.history.data.index]
+                    command = prompt.history.data.table[history_index]
                     cur_pos = #command + 2
                 end
             elseif key == "Down" then
-                if prompt.history.data.index < #prompt.history.data.table then
-                    prompt.history.data.index = prompt.history.data.index + 1
+                if history_index < #prompt.history.data.table then
+                    history_index = history_index + 1
 
-                   command = prompt.history.data.table[prompt.history.data.index]
+                   command = prompt.history.data.table[history_index]
                    cur_pos = #command + 2
-                elseif prompt.history.data.index == #prompt.history.data.table then
-                   prompt.history.data.index = prompt.history.data.index + 1
+                elseif history_index == #prompt.history.data.table then
+                   history_index = history_index + 1
 
                    command = ""
                    cur_pos = 1
