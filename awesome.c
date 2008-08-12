@@ -279,6 +279,7 @@ main(int argc, char **argv)
     const char *confpath = NULL;
     int xfd, i, screen_nbr, opt, colors_nbr;
     xcolor_init_request_t colors_reqs[2];
+    xcb_get_modifier_mapping_cookie_t xmapping_cookie;
     ssize_t cmdlen = 1;
     client_t *c;
     static struct option long_options[] =
@@ -389,9 +390,9 @@ main(int argc, char **argv)
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
 
-    /* Get the NumLock, ShiftLock and CapsLock masks */
-    xutil_lock_mask_get(globalconf.connection, globalconf.keysyms, &globalconf.numlockmask,
-                        &globalconf.shiftlockmask, &globalconf.capslockmask);
+    /* Send the request to get the NumLock, ShiftLock and CapsLock
+       masks */
+    xmapping_cookie = xcb_get_modifier_mapping_unchecked(globalconf.connection);
 
     /* init atom cache */
     atoms_init(globalconf.connection);
@@ -430,6 +431,11 @@ main(int argc, char **argv)
 
     for(colors_nbr = 0; colors_nbr < 2; colors_nbr++)
         xcolor_init_reply(globalconf.connection, colors_reqs[colors_nbr]);
+
+    /* Process the reply of previously sent mapping request */
+    xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
+                        globalconf.keysyms, &globalconf.numlockmask,
+                        &globalconf.shiftlockmask, &globalconf.capslockmask);
 
     /* init lua */
     luaA_init();

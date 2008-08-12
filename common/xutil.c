@@ -76,9 +76,20 @@ xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
     return true;
 }
 
+/** Get the lock masks (shiftlock, numlock, capslock).
+ * \param connection The X connection.
+ * \param cookie The cookie of the request.
+ * \param keysyms Key symbols.
+ * \param numlockmask Numlock mask.
+ * \param shiftlockmask Shiftlock mask.
+ * \param capslockmask Capslock mask.
+ */
 void
-xutil_lock_mask_get(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
-                    unsigned int *numlockmask, unsigned int *shiftlockmask,
+xutil_lock_mask_get(xcb_connection_t *connection,
+                    xcb_get_modifier_mapping_cookie_t cookie,
+                    xcb_key_symbols_t *keysyms,
+                    unsigned int *numlockmask,
+                    unsigned int *shiftlockmask,
                     unsigned int *capslockmask)
 {
     xcb_get_modifier_mapping_reply_t *modmap_r;
@@ -86,10 +97,7 @@ xutil_lock_mask_get(xcb_connection_t *conn, xcb_key_symbols_t *keysyms,
     unsigned int mask;
     int i, j;
 
-    modmap_r = xcb_get_modifier_mapping_reply(conn,
-                                              xcb_get_modifier_mapping_unchecked(conn),
-                                              NULL);
-
+    modmap_r = xcb_get_modifier_mapping_reply(connection, cookie, NULL);
     modmap = xcb_get_modifier_mapping_keycodes(modmap_r);
 
     for(i = 0; i < 8; i++)

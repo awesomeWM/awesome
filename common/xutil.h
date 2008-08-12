@@ -110,8 +110,9 @@ bool xutil_class_hint_get(xcb_connection_t *, xcb_window_t, xutil_class_hint_t *
 
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 
-void xutil_lock_mask_get(xcb_connection_t *, xcb_key_symbols_t *,
-                         unsigned int *, unsigned int *, unsigned int *);
+void xutil_lock_mask_get(xcb_connection_t *, xcb_get_modifier_mapping_cookie_t,
+                         xcb_key_symbols_t *, unsigned int *, unsigned int *,
+                         unsigned int *);
 
 /** Set the same handler for all errors */
 void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,
