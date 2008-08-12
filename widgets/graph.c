@@ -302,19 +302,19 @@ luaA_graph_plot_properties_set(lua_State *L)
         plot = graph_plot_add(d, title);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg", NULL, &len)))
-        reqs[reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
                                                &plot->color_start,
                                                globalconf.default_screen,
                                                buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_center", NULL, &len)))
-        reqs[reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
                                                &plot->pcolor_center,
                                                globalconf.default_screen,
                                                buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_end", NULL, &len)))
-        reqs[reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
                                                &plot->pcolor_end,
                                                globalconf.default_screen,
                                                buf, len);
