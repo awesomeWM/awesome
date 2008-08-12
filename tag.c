@@ -91,16 +91,16 @@ tag_new(const char *name, ssize_t len, layout_t *layout, double mwfact, int nmas
  * \param screen the screen id
  */
 void
-tag_append_to_screen(tag_t *tag, int screen)
+tag_append_to_screen(tag_t *tag, screen_t *s)
 {
-    int phys_screen = screen_virttophys(screen);
+    int phys_screen = screen_virttophys(s->index);
 
-    tag->screen = screen;
-    tag_array_append(&globalconf.screens[screen].tags, tag_ref(&tag));
+    tag->screen = s->index;
+    tag_array_append(&s->tags, tag_ref(&tag));
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
-    widget_invalidate_cache(screen, WIDGET_CACHE_TAGS);
+    widget_invalidate_cache(s->index, WIDGET_CACHE_TAGS);
 }
 
 /** Remove a tag from screen. Tag must be on a screen and have no clients.
@@ -137,6 +137,7 @@ tag_client(client_t *c, tag_t *t)
     if(is_client_tagged(c, t))
         return;
 
+    tag_ref(&t);
     client_array_append(&t->clients, c);
     client_saveprops(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -153,6 +154,7 @@ untag_client(client_t *c, tag_t *t)
     for(int i = 0; i < t->clients.len; i++)
         if(t->clients.tab[i] == c)
         {
+            tag_unref(&t);
             client_array_take(&t->clients, i);
             client_saveprops(c);
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -401,13 +403,7 @@ luaA_tag_newindex(lua_State *L)
             screen = SCREEN_UNDEF;
 
         if((*tag)->screen != SCREEN_UNDEF)
-        {
-            if((*tag)->clients.len)
-                luaL_error(L, "unable to remove tag %s from screen %d, it still has clients",
-                           (*tag)->name, (*tag)->screen);
-            else
-                tag_remove_from_screen(*tag);
-        }
+            tag_remove_from_screen(*tag);
 
         if(screen != SCREEN_UNDEF)
         {
@@ -415,7 +411,7 @@ luaA_tag_newindex(lua_State *L)
                 luaL_error(L, "a tag with the name `%s' is already on screen %d",
                            (*tag)->name, screen);
 
-            tag_append_to_screen(*tag, screen);
+            tag_append_to_screen(*tag, &globalconf.screens[screen]);
         }
         break;
       case A_TK_LAYOUT:

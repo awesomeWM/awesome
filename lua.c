@@ -645,7 +645,8 @@ luaA_parserc(const char *confpatharg)
     /* Assure there's at least one tag */
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
         if(!globalconf.screens[screen].tags.len)
-            tag_append_to_screen(tag_new("default", sizeof("default")-1, layout_tile, 0.5, 1, 0), screen);
+            tag_append_to_screen(tag_new("default", sizeof("default")-1, layout_tile, 0.5, 1, 0),
+                                 &globalconf.screens[screen]);
 
     p_delete(&confpath);
 }

@@ -308,6 +308,8 @@ luaA_screen_newindex(lua_State *L)
     size_t len;
     const char *buf = luaL_checklstring(L, 2, &len);
     screen_t *s;
+    tag_t **tag;
+    int i;
 
     s = lua_touserdata(L, 1);
 
@@ -322,6 +324,27 @@ luaA_screen_newindex(lua_State *L)
 
         ewmh_update_workarea(screen_virttophys(s->index));
 
+        break;
+      case A_TK_TAGS:
+        luaA_checktable(L, 3);
+
+        /* remove current tags */
+        for(i = 0; i < s->tags.len; i++)
+            s->tags.tab[i]->screen = SCREEN_UNDEF;
+
+        tag_array_wipe(&s->tags);
+        tag_array_init(&s->tags);
+
+        s->need_arrange = true;
+
+        /* push new tags */
+        lua_pushnil(L);
+        while(lua_next(L, 3))
+        {
+            tag = luaA_checkudata(L, -1, "tag");
+            tag_append_to_screen(*tag, s);
+            lua_pop(L, 1);
+        }
         break;
       default:
         return 0;

@@ -44,7 +44,7 @@ void tag_client(client_t *, tag_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
 void tag_view_only_byindex(int, int);
-void tag_append_to_screen(tag_t *, int);
+void tag_append_to_screen(tag_t *, screen_t *);
 int luaA_tag_userdata_new(lua_State *, tag_t *);
 
 DO_RCNT(tag_t, tag, tag_delete)
