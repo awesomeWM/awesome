@@ -276,6 +276,7 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 set(AWESOME_CONFIGURE_FILES
     config.h.in
     awesomerc.lua.in
+    themes/default.in
     lib/awful.lua.in
     awesome-version-internal.h.in
     awesome.doxygen.in)

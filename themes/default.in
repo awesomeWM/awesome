@@ -19,7 +19,7 @@ border_marked = #91231c
 
 # You can use your own command to
 # set your wallpaper
-wallpaper_cmd = xsetroot -solid darkgrey
+wallpaper_cmd = xsetbg -fullscreen -border black @AWESOME_THEMES_PATH@/default-background.png || xsetroot -solid darkgrey
 
 # You can add as many variables as
 # you wish and access them by using
