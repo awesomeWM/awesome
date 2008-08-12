@@ -263,6 +263,13 @@ else()
     set(AWESOME_XSESSION_PATH ${PREFIX}/share/xsessions CACHE PATH "awesome xsessions directory")
 endif()
 
+# set man path
+if(DEFINED AWESOME_MAN_PATH)
+   set(AWESOME_MAN_PATH ${AWESOME_MAN_PATH} CACHE PATH "awesome manpage directory")
+else()
+   set(AWESOME_MAN_PATH ${PREFIX}/share/man CACHE PATH "awesome manpage directory")
+endif()
+
 # Hide to avoid confusion
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 
@@ -273,7 +280,6 @@ set(AWESOME_COMPILE_BY       $ENV{USER})
 set(AWESOME_RELEASE          ${CODENAME})
 set(AWESOME_SYSCONFDIR       ${XDG_CONFIG_DIR}/${PROJECT_AWE_NAME})
 set(AWESOME_DATA_PATH        ${PREFIX}/share/${PROJECT_AWE_NAME})
-set(AWESOME_MAN_PATH         ${PREFIX}/share/man)
 set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)
 set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
