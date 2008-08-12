@@ -137,18 +137,20 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
 static int
 luaA_textbox_newindex(lua_State *L, awesome_token_t token)
 {
-    size_t len;
+    size_t len = 0;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
-    const char *buf;
+    const char *buf = NULL;
     textbox_data_t *d = (*widget)->data;
 
     switch(token)
     {
       case A_TK_TEXT:
-        if((buf = luaL_checklstring(L, 3, &len)))
+        if(lua_isnil(L, 3)
+           || (buf = luaL_checklstring(L, 3, &len)))
         {
             p_delete(&d->text);
-            a_iso2utf8(&d->text, buf, len);
+            if(buf)
+                a_iso2utf8(&d->text, buf, len);
             d->len = len;
         }
         break;
