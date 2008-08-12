@@ -74,23 +74,33 @@ xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
     xcb_send_event(connection, false, towin, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
 }
 
-/** Get the XEMBED info for a window.
+/** Deliver a request to get XEMBED info for a window.
  * \param connection The X connection.
  * \param win The window.
+ * \return A cookie.
+ */
+xcb_get_property_cookie_t
+xembed_info_get_unchecked(xcb_connection_t *connection, xcb_window_t win)
+{
+    return xcb_get_property_unchecked(connection, false, win, _XEMBED_INFO,
+                                      XCB_GET_PROPERTY_TYPE_ANY, 0L, 2);
+}
+
+/** Get the XEMBED info for a window.
+ * \param connection The X connection.
+ * \param cookie The cookie of the request.
  * \param info The xembed_info_t structure to fill.
  */
 bool
-xembed_info_get(xcb_connection_t *connection, xcb_window_t win, xembed_info_t *info)
+xembed_info_get_reply(xcb_connection_t *connection,
+                      xcb_get_property_cookie_t cookie,
+                      xembed_info_t *info)
 {
-    xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r;
     uint32_t *data;
     bool ret = false;
 
-    prop_c = xcb_get_property_unchecked(connection, false, win, _XEMBED_INFO,
-                                        XCB_GET_PROPERTY_TYPE_ANY, 0L, 2);
-
-    prop_r = xcb_get_property_reply(connection, prop_c, NULL);
+    prop_r = xcb_get_property_reply(connection, cookie, NULL);
 
     if(!prop_r || !prop_r->value_len)
         goto bailout;
@@ -131,7 +141,11 @@ xembed_property_update(xcb_connection_t *connection, xembed_window_t *emwin)
     int flags_changed;
     xembed_info_t info = { 0, 0 };
 
-    xembed_info_get(connection, emwin->win, &info);
+    xembed_info_get_reply(connection,
+                          xembed_info_get_unchecked(connection,
+                                                    emwin->win), 
+                          &info);
+
     /* test if it changed */
     if(!(flags_changed = info.flags ^ emwin->info.flags))
         return;

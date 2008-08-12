@@ -93,7 +93,12 @@ DO_SLIST(xembed_window_t, xembed_window, p_delete)
 void xembed_message_send(xcb_connection_t *, xcb_window_t, long, long, long, long);
 xembed_window_t * xembed_getbywin(xembed_window_t *, xcb_window_t);
 void xembed_property_update(xcb_connection_t *, xembed_window_t *);
-bool xembed_info_get(xcb_connection_t *, xcb_window_t, xembed_info_t *);
+xcb_get_property_cookie_t xembed_info_get_unchecked(xcb_connection_t *,
+                                                    xcb_window_t);
+bool xembed_info_get_reply(xcb_connection_t *connection,
+                           xcb_get_property_cookie_t cookie,
+                           xembed_info_t *info);
+
 
 /** Indicate to an embedded window that it has focus.
  * \param c The X connection.

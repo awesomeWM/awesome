@@ -89,6 +89,7 @@ int
 systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *info)
 {
     xembed_window_t *em;
+    xcb_get_property_cookie_t em_cookie;
     int i;
     const uint32_t select_input_val[] =
     {
@@ -101,6 +102,11 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
     if((em = xembed_getbywin(globalconf.embedded, embed_win)))
         return -1;
 
+    p_clear(&em_cookie, 1);
+
+    if(!info)
+        em_cookie = xembed_info_get_unchecked(globalconf.connection, embed_win);
+
     xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_EVENT_MASK,
                                  select_input_val);
     window_setstate(embed_win, XCB_WM_WITHDRAWN_STATE);
@@ -109,12 +115,12 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
     em->win = embed_win;
     em->phys_screen = phys_screen;
 
+    xembed_window_list_append(&globalconf.embedded, em);
+
     if(info)
         em->info = *info;
     else
-        xembed_info_get(globalconf.connection, em->win, &em->info);
-
-    xembed_window_list_append(&globalconf.embedded, em);
+        xembed_info_get_reply(globalconf.connection, em_cookie, &em->info);
 
     xembed_embedded_notify(globalconf.connection, em->win,
                            globalconf.screens[phys_screen].systray.window,
