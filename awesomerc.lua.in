@@ -42,6 +42,7 @@ floatapps =
     -- by class
     ["MPlayer"] = true,
     ["pinentry"] = true,
+    ["gimp"] = true,
     -- by instance
     ["mocp"] = true
 }
