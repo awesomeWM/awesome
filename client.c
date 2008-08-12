@@ -914,7 +914,7 @@ luaA_client_visible_get(lua_State *L)
     return 1;
 }
 
-/** Get the currently focused client.
+/** Get the currently focused client (DEPRECATED).
  * \param L The Lua VM state.
  * \luastack
  * \lreturn The currently focused client.
@@ -924,6 +924,7 @@ luaA_client_focus_get(lua_State *L)
 {
     if(globalconf.screen_focus->client_focus)
         return luaA_client_userdata_new(L, globalconf.screen_focus->client_focus);
+    deprecate();
     return 0;
 }
 
@@ -982,7 +983,7 @@ luaA_client_swap(lua_State *L)
     return 0;
 }
 
-/** Focus a client.
+/** Focus a client (DEPRECATED).
  * \param L The Lua VM state.
  *
  * \luastack
@@ -993,6 +994,7 @@ luaA_client_focus_set(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     client_focus(*c);
+    deprecate();
     return 0;
 }
 
@@ -1208,6 +1210,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield titlebar The client titlebar.
  * \lfield urgent The client urgent state.
  * \lfield tags The clients tags.
+ * \lfield focus The focused client.
  */
 static int
 luaA_client_index(lua_State *L)
@@ -1334,11 +1337,62 @@ luaA_client_index(lua_State *L)
     return 1;
 }
 
+/* Client module.
+ * \param L The Lua VM state.
+ * \return The number of pushed elements.
+ */
+static int
+luaA_client_module_index(lua_State *L)
+{
+    size_t len;
+    const char *buf = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_FOCUS:
+        if(globalconf.screen_focus->client_focus)
+            luaA_client_userdata_new(L, globalconf.screen_focus->client_focus);
+        else
+            return 0;
+        break;
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
+/* Client module new index.
+ * \param L The Lua VM state.
+ * \return The number of pushed elements.
+ */
+static int
+luaA_client_module_newindex(lua_State *L)
+{
+    size_t len;
+    const char *buf = luaL_checklstring(L, 2, &len);
+    client_t **c;
+
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_FOCUS:
+        c = luaA_checkudata(L, 3, "client");
+        client_focus(*c);
+        break;
+      default:
+        break;
+    }
+
+    return 0;
+}
+
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },
     { "focus_get", luaA_client_focus_get },
     { "visible_get", luaA_client_visible_get },
+    { "__index", luaA_client_module_index },
+    { "__newindex", luaA_client_module_newindex },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_client_meta[] =

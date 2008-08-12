@@ -123,7 +123,7 @@ end
 
 --- Focus the previous client in history.
 function client.focus.history.previous()
-    local sel = capi.client.focus_get()
+    local sel = capi.client.focus
     local s
     if sel then
         s = sel.screen
@@ -131,7 +131,7 @@ function client.focus.history.previous()
         s = capi.mouse.screen
     end
     local c = client.focus.history.get(s, 1)
-    if c then c:focus_set() end
+    if c then capi.client.focus = c end
 end
 
 --- Get a client by its relative index to the focused window.
@@ -141,7 +141,7 @@ end
 -- @return A client, or nil if no client is available.
 function client.next(i, c)
     -- Get currently focused client
-    local sel = c or capi.client.focus_get()
+    local sel = c or capi.client.focus
     if sel then
         -- Get all visible clients
         local cls = capi.client.visible_get(sel.screen)
@@ -206,7 +206,7 @@ end
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param c Optional client.
 function client.focusbydirection(dir, c)
-    local sel = c or capi.client.focus_get()
+    local sel = c or capi.client.focus
     if sel then
         local coords = sel.coords
         local dist, dist_min
@@ -231,7 +231,7 @@ function client.focusbydirection(dir, c)
 
         -- If we found a client to focus, then do it.
         if target then
-            target:focus_set()
+            capi.client.focus = target
         end
     end
 end
@@ -242,7 +242,7 @@ end
 function client.focusbyidx(i, c)
     local target = client.next(i, c)
     if target then
-        target:focus_set()
+        capi.client.focus = target
     end
 end
 
@@ -250,7 +250,7 @@ end
 -- @param i The index.
 -- @param c Optional client, otherwise focused one is used.
 function client.swap(i, c)
-    local sel = c or capi.client.focus_get()
+    local sel = c or capi.client.focus
     local target = client.next(i, sel)
     if target then
         target:swap(sel)
@@ -272,7 +272,7 @@ end
 -- @param h The relative height.
 -- @param c The optional client, otherwise focused one is used.
 function client.moveresize(x, y, w, h, c)
-    local sel = c or capi.client.focus_get()
+    local sel = c or capi.client.focus
     local coords = sel.coords
     coords['x'] = coords['x'] + x
     coords['y'] = coords['y'] + y
@@ -284,7 +284,7 @@ end
 --- Maximize a client to use the full workarea.
 -- @param c A client, or the focused one if nil.
 function client.maximize(c)
-    local sel = c or capi.client.focus_get()
+    local sel = c or capi.client.focus
     if sel then
         local ws = capi.screen[sel.screen].workarea
         ws.width = ws.width - 2 * sel.border_width
@@ -317,7 +317,7 @@ end
 --- Give the focus to a screen, and move pointer.
 -- @param Screen number.
 function screen.focus(i)
-    local sel = capi.client.focus_get()
+    local sel = capi.client.focus
     local s
     if sel then
         s = sel.screen
@@ -326,7 +326,7 @@ function screen.focus(i)
     end
     s = cycle(capi.screen.count(), s + i)
     local c = client.focus.history.get(s, 0)
-    if c then c:focus_set() end
+    if c then capi.client.focus = c end
     -- Move the mouse on the screen
     capi.mouse.coords = capi.screen[s].coords
 end
@@ -508,7 +508,7 @@ end
 -- @param target The tag to move the client to.
 -- @para c Optional client to move, otherwise the focused one is used.
 function client.movetotag(target, c)
-    local sel = c or capi.client.focus_get();
+    local sel = c or capi.client.focus
     if sel then
         -- Check that tag and client screen are identical
         if sel.screen ~= target.screen then return end
@@ -521,7 +521,7 @@ end
 -- @param target The tag to toggle.
 -- @param c Optional client to toggle, otherwise the focused one is used.
 function client.toggletag(target, c)
-    local sel = c or capi.client.focus_get();
+    local sel = c or capi.client.focus
     -- Check that tag and client screen are identical
     if sel and sel.screen == target.screen then
         local tags = sel.tags
@@ -537,7 +537,7 @@ end
 --- Toggle the floating status of a client.
 -- @param c Optional client, the focused on if not set.
 function client.togglefloating(c)
-    local sel = c or capi.client.focus_get();
+    local sel = c or capi.client.focus
     if sel then
         sel.floating = not sel.floating
     end
@@ -547,7 +547,7 @@ end
 -- @param c The client to move.
 -- @param s The screen number, default to current + 1.
 function client.movetoscreen(c, s)
-    local sel = c or capi.client.focus_get();
+    local sel = c or capi.client.focus
     if sel then
         local sc = capi.screen.count()
         if not s then
@@ -556,7 +556,7 @@ function client.movetoscreen(c, s)
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel.screen = s
         capi.mouse.coords = capi.screen[s].coords
-        sel:focus_set()
+        capi.client.focus = sel
     end
 end
 
@@ -604,7 +604,7 @@ hooks.user.create('unmarked')
 -- @param c The client to mark, the focused one if not specified.
 -- @return True if the client has been marked. False if the client was already marked.
 function client.mark (c)
-    local cl = c or capi.client.focus_get()
+    local cl = c or capi.client.focus
     if cl then
         for k, v in pairs(awfulmarked) do
             if cl == v then
@@ -624,7 +624,7 @@ end
 -- @param c The client to unmark, or the focused one if not specified.
 -- @return True if the client has been unmarked. False if the client was not marked.
 function client.unmark(c)
-    local cl = c or capi.client.focus_get()
+    local cl = c or capi.client.focus
 
     for k, v in pairs(awfulmarked) do
         if cl == v then
@@ -640,7 +640,7 @@ end
 --- Check if a client is marked.
 -- @param c The client to check, or the focused one otherwise.
 function client.ismarked(c)
-    local cl = c or capi.client.focus_get()
+    local cl = c or capi.client.focus
     if cl then
         for k, v in pairs(awfulmarked) do
             if cl == v then
@@ -654,7 +654,7 @@ end
 --- Toggle a client as marked.
 -- @param c The client to toggle mark.
 function client.togglemarked(c)
-    local cl = c or capi.client.focus_get()
+    local cl = c or capi.client.focus
 
     if not client.mark(c) then
         client.unmark(c)
@@ -1151,7 +1151,7 @@ function widget.taglist.label.all(t, args)
     local bg_urgent = args.bg_urgent or theme.bg_urgent
     local text
     local background = ""
-    local sel = capi.client.focus_get()
+    local sel = capi.client.focus
     local bg_color = nil
     local fg_color = nil
     if t.selected then
@@ -1237,7 +1237,7 @@ local function widget_tasklist_label_common(c, args)
     else
         name = escape(c.name)
     end
-    if capi.client.focus_get() == c then
+    if capi.client.focus == c then
         text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..name.."</span> "
     elseif c.urgent and bg_urgent and fg_urgent then
         text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..name.."</span> "
@@ -1358,7 +1358,7 @@ function titlebar.update(c)
         if title then
             title.text = " " .. escape(c.name)
         end
-        if capi.client.focus_get() == c then
+        if capi.client.focus == c then
             c.titlebar.fg = titlebar.data[c].fg_focus
             c.titlebar.bg = titlebar.data[c].bg_focus
             if close then

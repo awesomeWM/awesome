@@ -219,8 +219,7 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \lfield coords The screen coordinates.
- * \lfield padding The screen padding.
+ * \lfield number The screen number, to get a screen.
  */
 static int
 luaA_screen_module_index(lua_State *L)

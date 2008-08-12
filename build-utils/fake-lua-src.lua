@@ -79,10 +79,12 @@ for i, line in ipairs(ilines) do
         if not libname and line:find("^luaA_.*_index") then
             local fctname, fctdef
             _, _, fctdef, fctname =  line:find("^(luaA_(.+)_index)")
-            print(function_doc[fctdef]:comment_translate())
-            print("-- @class table")
-            print("-- @name " .. fctname)
-            print(fctname)
+            if function_doc[fctdef] and not fctdef:find("_module_") then
+                print(function_doc[fctdef]:comment_translate())
+                print("-- @class table")
+                print("-- @name " .. fctname)
+                print(fctname)
+            end
         end
     else
         if line:find("};") then
