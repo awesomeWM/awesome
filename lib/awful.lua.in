@@ -317,14 +317,7 @@ end
 --- Give the focus to a screen, and move pointer.
 -- @param Screen number.
 function screen.focus(i)
-    local sel = capi.client.focus
-    local s
-    if sel then
-        s = sel.screen
-    else
-        s = capi.mouse.screen
-    end
-    s = cycle(capi.screen.count(), s + i)
+    local s = cycle(capi.screen.count(), capi.mouse.screen + i)
     local c = client.focus.history.get(s, 0)
     if c then capi.client.focus = c end
     -- Move the mouse on the screen
