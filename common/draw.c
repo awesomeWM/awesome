@@ -219,6 +219,9 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
 {
     draw_parser_data_t *data = p->priv;
 
+    xcolor_init_request_t reqs[3];
+    int8_t i, bg_color_nbr = -1, reqs_nbr = -1;
+
     /* hack: markup.c validates tags so we can avoid strcmps here */
     switch (*elem) {
       case 'b':
@@ -227,11 +230,13 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 switch(a_tokenize(*names, -1))
                 {
                   case A_TK_COLOR:
-                    data->has_bg_color = xcolor_init(&data->bg_color,
-                                                     data->connection,
-                                                     data->phys_screen,
-                                                     *values,
-                                                     a_strlen(*values));
+                    reqs[++reqs_nbr] = xcolor_init_unchecked(data->connection,
+                                                            &data->bg_color,
+                                                            data->phys_screen,
+                                                            *values,
+                                                            a_strlen(*values));
+
+                    bg_color_nbr = reqs_nbr;
                     break;
                   case A_TK_IMAGE:
                     if(data->bg_image)
@@ -251,8 +256,11 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 switch(a_tokenize(*names, -1))
                 {
                   case A_TK_COLOR:
-                    xcolor_init(&data->border.color, data->connection,
-                                data->phys_screen, *values, a_strlen(*values));
+                    reqs[++reqs_nbr] = xcolor_init_unchecked(data->connection,
+                                                            &data->border.color,
+                                                            data->phys_screen,
+                                                            *values,
+                                                            a_strlen(*values));
                     break;
                   case A_TK_WIDTH:
                     data->border.width = atoi(*values);
@@ -269,8 +277,11 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 data->align = draw_align_fromstr(*values, -1);
                 break;
               case A_TK_SHADOW:
-                xcolor_init(&data->shadow.color, data->connection,
-                            data->phys_screen, *values, a_strlen(*values));
+                reqs[++reqs_nbr] = xcolor_init_unchecked(data->connection,
+                                                        &data->shadow.color,
+                                                        data->phys_screen,
+                                                        *values,
+                                                        a_strlen(*values));
                 break;
               case A_TK_SHADOW_OFFSET:
                 data->shadow.offset = atoi(*values);
@@ -294,6 +305,12 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
             }
         break;
     }
+
+    for(i = 0; i <= reqs_nbr; i++)
+        if(i == bg_color_nbr)
+            data->has_bg_color = xcolor_init_reply(data->connection, reqs[i]);
+        else
+            xcolor_init_reply(data->connection, reqs[i]);
 }
 
 bool
@@ -1084,29 +1101,36 @@ draw_align_tostr(alignment_t a)
 
 #define RGB_COLOR_8_TO_16(i) (65535 * ((i) & 0xff) / 255)
 
-/** Initialize an X color.
- * \param color xcolor_t struct to store color into.
+/** Send a request to initialize a X color.
  * \param conn Connection ref.
+ * \param color xcolor_t struct to store color into.
  * \param phys_screen Physical screen number.
  * \param colstr Color specification.
- * \return True if color allocation was successfull.
+ * \return request informations.
  */
-bool
-xcolor_init(xcolor_t *color, xcb_connection_t *conn, int phys_screen,
-            const char *colstr, ssize_t len)
+xcolor_init_request_t
+xcolor_init_unchecked(xcb_connection_t *conn, xcolor_t *color, int phys_screen,
+                      const char *colstr, ssize_t len)
 {
     xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
+    xcolor_init_request_t req;
     unsigned long colnum;
-    uint16_t red, green, blue, alpha = 0xffff;
+    uint16_t red, green, blue;
+
+    p_clear(&req, 1);
 
     if(!len)
-        return false;
+    {
+        req.has_error = true;
+        return req;
+    }
+
+    req.alpha = 0xffff;
+    req.color = color;
 
     /* The color is given in RGB value */
     if(colstr[0] == '#')
     {
-        xcb_alloc_color_cookie_t cookie;
-        xcb_alloc_color_reply_t *hexa_color;
         char *p;
 
         if(len == 7)
@@ -1121,60 +1145,84 @@ xcolor_init(xcolor_t *color, xcb_connection_t *conn, int phys_screen,
             colnum = strtoul(colstr + 1, &p, 16);
             if(p - colstr != 9)
                 goto invalid;
-            alpha = RGB_COLOR_8_TO_16(colnum);
+            req.alpha = RGB_COLOR_8_TO_16(colnum);
             colnum >>= 8;
         }
         else
         {
           invalid:
             warn("awesome: error, invalid color '%s'", colstr);
-            return false;
+            req.has_error = true;
+            return req;
         }
 
         red   = RGB_COLOR_8_TO_16(colnum >> 16);
         green = RGB_COLOR_8_TO_16(colnum >> 8);
         blue  = RGB_COLOR_8_TO_16(colnum);
 
-        cookie = xcb_alloc_color_unchecked(conn, s->default_colormap,
-                                           red, green, blue),
-        hexa_color = xcb_alloc_color_reply(conn, cookie, NULL);
+        req.is_hexa = true;
+        req.cookie_hexa = xcb_alloc_color_unchecked(conn, s->default_colormap,
+                                                        red, green, blue);
+    }
+    else
+    {
+        req.is_hexa = false;
+        req.cookie_named = xcb_alloc_named_color_unchecked(conn, s->default_colormap, len,
+                                                               colstr);
+    }
 
-        if(hexa_color)
+    req.has_error = false;
+    req.colstr = colstr;
+
+    return req;
+}
+
+/** Initialize a X color.
+ * \param conn Connection ref.
+ * \param req xcolor_init request.
+ * \return True if color allocation was successfull.
+ */
+bool
+xcolor_init_reply(xcb_connection_t *conn,
+                  xcolor_init_request_t req)
+{
+    if(req.has_error)
+        return false;
+
+    if(req.is_hexa)
+    {
+        xcb_alloc_color_reply_t *hexa_color;
+
+        if((hexa_color = xcb_alloc_color_reply(conn, req.cookie_hexa, NULL)))
         {
-            color->pixel = hexa_color->pixel;
-            color->red   = hexa_color->red;
-            color->green = hexa_color->green;
-            color->blue  = hexa_color->blue;
-            color->alpha = alpha;
-            color->initialized = true;
+            req.color->pixel = hexa_color->pixel;
+            req.color->red   = hexa_color->red;
+            req.color->green = hexa_color->green;
+            req.color->blue  = hexa_color->blue;
+            req.color->alpha = req.alpha;
+            req.color->initialized = true;
             p_delete(&hexa_color);
             return true;
         }
     }
     else
     {
-        xcb_alloc_named_color_reply_t *named_color = NULL;
-        xcb_alloc_named_color_cookie_t cookie;
+        xcb_alloc_named_color_reply_t *named_color;
 
-        cookie = xcb_alloc_named_color_unchecked(conn, s->default_colormap, len,
-                                                 colstr),
-        named_color = xcb_alloc_named_color_reply(conn, cookie, NULL);
-
-        if(named_color)
+        if((named_color = xcb_alloc_named_color_reply(conn, req.cookie_named, NULL)))
         {
-            color->pixel = named_color->pixel;
-            color->red   = named_color->visual_red;
-            color->green = named_color->visual_green;
-            color->blue  = named_color->visual_blue;
-            color->alpha = 0xffff;
-            color->alpha = alpha;
-            color->initialized = true;
+            req.color->pixel = named_color->pixel;
+            req.color->red   = named_color->visual_red;
+            req.color->green = named_color->visual_green;
+            req.color->blue  = named_color->visual_blue;
+            req.color->alpha = req.alpha;
+            req.color->initialized = true;
             p_delete(&named_color);
             return true;
         }
     }
 
-    warn("awesome: error, cannot allocate color '%s'", colstr);
+    warn("awesome: error, cannot allocate color '%s'", req.colstr);
     return false;
 }
 

@@ -279,16 +279,26 @@ luaA_colors_set(lua_State *L)
 {
     const char *buf;
     size_t len;
+    int8_t colors_nbr = -1, i;
+    xcolor_init_request_t reqs[2];
 
     luaA_checktable(L, 1);
 
     if((buf = luaA_getopt_lstring(L, 1, "fg", NULL, &len)))
-       xcolor_init(&globalconf.colors.fg, globalconf.connection,
-                   globalconf.default_screen, buf, len);
+       reqs[++colors_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                  &globalconf.colors.fg,
+                                                  globalconf.default_screen,
+                                                  buf, len);
 
     if((buf = luaA_getopt_lstring(L, 1, "bg", NULL, &len)))
-       xcolor_init(&globalconf.colors.bg, globalconf.connection,
-                   globalconf.default_screen, buf, len);
+       reqs[++colors_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                  &globalconf.colors.bg,
+                                                  globalconf.default_screen,
+                                                  buf, len);
+
+    for(i = 0; i <= colors_nbr; i++)
+       xcolor_init_reply(globalconf.connection, reqs[i]);
+
     return 0;
 }
 

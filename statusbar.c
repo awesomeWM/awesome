@@ -436,6 +436,8 @@ luaA_statusbar_new(lua_State *L)
     statusbar_t *sb;
     const char *buf;
     size_t len;
+    xcolor_init_request_t reqs[2];
+    int8_t i, reqs_nbr = -1;
 
     luaA_checktable(L, 2);
 
@@ -448,13 +450,17 @@ luaA_statusbar_new(lua_State *L)
 
     sb->colors.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
-        xcolor_init(&sb->colors.fg, globalconf.connection,
-                    globalconf.default_screen, buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                 &sb->colors.fg,
+                                                 globalconf.default_screen,
+                                                 buf, len);
 
     sb->colors.bg = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
-        xcolor_init(&sb->colors.bg, globalconf.connection,
-                    globalconf.default_screen, buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                 &sb->colors.bg,                                                 
+                                                 globalconf.default_screen,
+                                                 buf, len);
 
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     sb->align = draw_align_fromstr(buf, len);
@@ -471,6 +477,9 @@ luaA_statusbar_new(lua_State *L)
     sb->position = position_fromstr(buf, len);
 
     sb->screen = SCREEN_UNDEF;
+
+    for(i = 0; i <= reqs_nbr; i++)
+        xcolor_init_reply(globalconf.connection, reqs[i]);
 
     return luaA_statusbar_userdata_new(L, sb);
 }
@@ -615,8 +624,11 @@ luaA_statusbar_newindex(lua_State *L)
         break;
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init(&(*statusbar)->colors.fg, globalconf.connection,
-                           globalconf.default_screen, buf, len))
+            if(xcolor_init_reply(globalconf.connection,
+                                 xcolor_init_unchecked(globalconf.connection,
+                                                       &(*statusbar)->colors.fg,
+                                                       globalconf.default_screen,
+                                                       buf, len)))
             {
                 if((*statusbar)->ctx)
                     (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
@@ -625,8 +637,10 @@ luaA_statusbar_newindex(lua_State *L)
         break;
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init(&(*statusbar)->colors.bg, globalconf.connection,
-                           globalconf.default_screen, buf, len))
+            if(xcolor_init_reply(globalconf.connection,
+                                 xcolor_init_unchecked(globalconf.connection,
+                                                       &(*statusbar)->colors.bg,
+                                                       globalconf.default_screen, buf, len)))
             {
                 if((*statusbar)->ctx)
                     (*statusbar)->ctx->bg = (*statusbar)->colors.bg;

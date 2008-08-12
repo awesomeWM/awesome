@@ -277,7 +277,8 @@ int
 main(int argc, char **argv)
 {
     const char *confpath = NULL;
-    int xfd, i, screen_nbr, opt;
+    int xfd, i, screen_nbr, opt, colors_nbr;
+    xcolor_init_request_t colors_reqs[2];
     ssize_t cmdlen = 1;
     client_t *c;
     static struct option long_options[] =
@@ -406,9 +407,15 @@ main(int argc, char **argv)
     }
 
     /* init default font and colors */
+    colors_reqs[0] = xcolor_init_unchecked(globalconf.connection, &globalconf.colors.fg,
+                                           globalconf.default_screen, "black",
+                                           sizeof("black")-1);
+
+    colors_reqs[1] = xcolor_init_unchecked(globalconf.connection, &globalconf.colors.bg,
+                                           globalconf.default_screen, "white",
+                                           sizeof("white")-1);
+
     globalconf.font = draw_font_new(globalconf.connection, globalconf.default_screen, "sans 8");
-    xcolor_init(&globalconf.colors.fg, globalconf.connection, globalconf.default_screen, "black", sizeof("black")-1);
-    xcolor_init(&globalconf.colors.bg, globalconf.connection, globalconf.default_screen, "white", sizeof("white")-1);
 
     /* init cursors */
     globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_LEFT_PTR);
@@ -420,6 +427,9 @@ main(int argc, char **argv)
     globalconf.cursor[CurTopLeft] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_TOP_LEFT_CORNER);
     globalconf.cursor[CurBotRight] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_BOTTOM_RIGHT_CORNER);
     globalconf.cursor[CurBotLeft] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_BOTTOM_LEFT_CORNER);
+
+    for(colors_nbr = 0; colors_nbr < 2; colors_nbr++)
+        xcolor_init_reply(globalconf.connection, colors_reqs[colors_nbr]);
 
     /* init lua */
     luaA_init();

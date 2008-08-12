@@ -312,6 +312,8 @@ luaA_titlebar_new(lua_State *L)
     titlebar_t *tb;
     const char *buf;
     size_t len;
+    xcolor_init_request_t reqs[3];
+    int8_t i, reqs_nbr = -1;
 
     luaA_checktable(L, 2);
 
@@ -331,20 +333,29 @@ luaA_titlebar_new(lua_State *L)
 
     tb->colors.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
-        xcolor_init(&tb->colors.fg, globalconf.connection,
-                    globalconf.default_screen, buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                 &tb->colors.fg,
+                                                 globalconf.default_screen,
+                                                 buf, len);
 
     tb->colors.bg = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
-        xcolor_init(&tb->colors.bg, globalconf.connection,
-                    globalconf.default_screen, buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                 &tb->colors.bg,
+                                                 globalconf.default_screen,
+                                                 buf, len);
 
     tb->border.color = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "border_color", NULL, &len)))
-        xcolor_init(&tb->border.color, globalconf.connection,
-                    globalconf.default_screen, buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                 &tb->border.color,
+                                                 globalconf.default_screen,
+                                                 buf, len);
 
     tb->border.width = luaA_getopt_number(L, 2, "border_width", 0);
+
+    for(i = 0; i <= reqs_nbr; i++)
+        xcolor_init_reply(globalconf.connection, reqs[i]);
 
     return luaA_titlebar_userdata_new(globalconf.L, tb);
 }
@@ -411,22 +422,30 @@ luaA_titlebar_newindex(lua_State *L)
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init(&(*titlebar)->border.color, globalconf.connection,
-                           globalconf.default_screen, buf, len))
+            if(xcolor_init_reply(globalconf.connection,
+                                 xcolor_init_unchecked(globalconf.connection,
+                                                       &(*titlebar)->border.color,
+                                                       globalconf.default_screen, buf, len)))
                 if((*titlebar)->sw)
                     xcb_change_window_attributes(globalconf.connection, (*titlebar)->sw->window,
                                                  XCB_CW_BORDER_PIXEL, &(*titlebar)->border.color.pixel);
         return 0;
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init(&(*titlebar)->colors.fg, globalconf.connection,
-                          globalconf.default_screen, buf, len))
+            if(xcolor_init_reply(globalconf.connection,
+                                 xcolor_init_unchecked(globalconf.connection,
+                                                       &(*titlebar)->colors.fg,
+                                                       globalconf.default_screen,
+                                                       buf, len)))
                 (*titlebar)->need_update = true;
         return 0;
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init(&(*titlebar)->colors.bg, globalconf.connection,
-                           globalconf.default_screen, buf, len))
+            if(xcolor_init_reply(globalconf.connection,
+                                 xcolor_init_unchecked(globalconf.connection,
+                                                       &(*titlebar)->colors.bg,
+                                                       globalconf.default_screen,
+                                                       buf, len)))
                 (*titlebar)->need_update = true;
         return 0;
       case A_TK_WIDGETS:

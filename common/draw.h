@@ -220,7 +220,24 @@ area_t draw_text_extents(xcb_connection_t *, int, font_t *, const char *, ssize_
 alignment_t draw_align_fromstr(const char *, ssize_t);
 const char *draw_align_tostr(alignment_t);
 
-bool xcolor_init(xcolor_t *c, xcb_connection_t *, int, const char *, ssize_t);
+typedef struct
+{
+    union
+    {
+        xcb_alloc_color_cookie_t cookie_hexa;
+        xcb_alloc_named_color_cookie_t cookie_named;
+    };
+
+    uint16_t alpha;
+    xcolor_t *color;
+    bool is_hexa, has_error;
+    const char *colstr;
+} xcolor_init_request_t;
+
+xcolor_init_request_t xcolor_init_unchecked(xcb_connection_t *, xcolor_t *, int,
+                                            const char *, ssize_t);
+
+bool xcolor_init_reply(xcb_connection_t *, xcolor_init_request_t);
 
 void area_array_remove(area_array_t *, area_t);
 

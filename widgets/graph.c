@@ -288,6 +288,8 @@ luaA_graph_plot_properties_set(lua_State *L)
     const char *title, *buf;
     size_t len;
     plot_t *plot;
+    xcolor_init_request_t reqs[3];
+    int8_t i, reqs_nbr = -1;
 
     title = luaL_checkstring(L, 2);
     luaA_checktable(L, 3);
@@ -300,16 +302,22 @@ luaA_graph_plot_properties_set(lua_State *L)
         plot = graph_plot_add(d, title);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg", NULL, &len)))
-       xcolor_init(&plot->color_start, globalconf.connection,
-                   globalconf.default_screen, buf, len);
+        reqs[reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                               &plot->color_start,
+                                               globalconf.default_screen,
+                                               buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_center", NULL, &len)))
-       xcolor_init(&plot->pcolor_center, globalconf.connection,
-                   globalconf.default_screen, buf, len);
+        reqs[reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                               &plot->pcolor_center,
+                                               globalconf.default_screen,
+                                               buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_end", NULL, &len)))
-        xcolor_init(&plot->pcolor_end, globalconf.connection,
-                    globalconf.default_screen, buf, len);
+        reqs[reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                               &plot->pcolor_end,
+                                               globalconf.default_screen,
+                                               buf, len);
 
     plot->vertical_gradient = luaA_getopt_boolean(L, 3, "vertical_gradient", plot->vertical_gradient);
     plot->scale = luaA_getopt_boolean(L, 3, "scale", plot->scale);
@@ -333,6 +341,9 @@ luaA_graph_plot_properties_set(lua_State *L)
           default:
             break;
         }
+
+    for(i = 0; i <= reqs_nbr; i++)
+        xcolor_init_reply(globalconf.connection, reqs[i]);
 
     widget_invalidate_bywidget(*widget);
 
@@ -511,8 +522,11 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
         {
-            if(xcolor_init(&color, globalconf.connection,
-                           globalconf.default_screen, buf, len))
+            if(xcolor_init_reply(globalconf.connection,
+                                 xcolor_init_unchecked(globalconf.connection,
+                                                       &color,
+                                                       globalconf.default_screen,
+                                                       buf, len)))
                 d->bg = color;
             else
                 return 0;
@@ -521,8 +535,11 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
         {
-            if(xcolor_init(&color, globalconf.connection,
-                           globalconf.default_screen, buf, len))
+            if(xcolor_init_reply(globalconf.connection,
+                                 xcolor_init_unchecked(globalconf.connection,
+                                                       &color,
+                                                       globalconf.default_screen,
+                                                       buf, len)))
                 d->border_color = color;
             else
                 return 0;
