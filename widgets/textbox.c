@@ -33,6 +33,10 @@ typedef struct
     size_t len;
     /** Textbox width */
     int width;
+    /** Extents */
+    int extents;
+    /** Draw parser data */
+    draw_parser_data_t pdata;
 } textbox_data_t;
 
 /** Draw a textbox widget.
@@ -53,7 +57,6 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              awesome_type_t type)
 {
     textbox_data_t *d = w->widget->data;
-    draw_parser_data_t pdata, *pdata_arg = NULL;
 
     w->area.height = ctx->height;
 
@@ -63,17 +66,11 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
         w->area.width = ctx->width - used;
     else
     {
-        draw_parser_data_init(&pdata);
-        pdata_arg = &pdata;
-        w->area.width = draw_text_extents(ctx->connection, ctx->phys_screen,
-                                          globalconf.font, d->text, d->len, &pdata).width;
+        w->area.width = MIN(d->extents, ctx->width - used);
 
-        if(w->area.width > ctx->width - used)
-            w->area.width = ctx->width - used;
-
-        if(pdata.bg_image)
+        if(d->pdata.bg_image)
             w->area.width = MAX(w->area.width,
-                                pdata.bg_resize ? ((double) pdata.bg_image->width / (double) pdata.bg_image->height) * w->area.height : pdata.bg_image->width);
+                                d->pdata.bg_resize ? ((double) d->pdata.bg_image->width / (double) d->pdata.bg_image->height) * w->area.height : d->pdata.bg_image->width);
     }
 
     w->area.x = widget_calculate_offset(ctx->width,
@@ -82,9 +79,7 @@ textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
                                         w->widget->align);
     w->area.y = 0;
 
-    draw_text(ctx, globalconf.font, w->area, d->text, d->len, pdata_arg);
-    if (pdata_arg)
-        draw_parser_data_wipe(pdata_arg);
+    draw_text(ctx, globalconf.font, w->area, d->text, d->len, &d->pdata);
 
     return w->area.width;
 }
@@ -96,6 +91,7 @@ static void
 textbox_destructor(widget_t *w)
 {
     textbox_data_t *d = w->data;
+    draw_parser_data_wipe(&d->pdata);
     p_delete(&d->text);
     p_delete(&d);
 }
@@ -148,10 +144,19 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         if(lua_isnil(L, 3)
            || (buf = luaL_checklstring(L, 3, &len)))
         {
+            /* delete */
+            draw_parser_data_wipe(&d->pdata);
             p_delete(&d->text);
-            if(buf)
-                a_iso2utf8(&d->text, buf, len);
+
+            /* re-init */
             d->len = len;
+            if(buf)
+            {
+                a_iso2utf8(&d->text, buf, len);
+                draw_parser_data_init(&d->pdata);
+                d->extents = draw_text_extents(globalconf.connection, globalconf.default_screen,
+                                               globalconf.font, d->text, d->len, &d->pdata).width;
+            }
         }
         break;
       case A_TK_WIDTH:
