@@ -1188,7 +1188,7 @@ end
 -- fg_urgent The foreground color for urgent tags.
 -- @return A string to print.
 function widget.taglist.label.noempty(t, args)
-    if #t:clients() > 0 then
+    if #t:clients() > 0 or t.selected then
         if not args then args = {} end
         local fg_focus = args.fg_focus or theme.fg_focus
         local bg_focus = args.bg_focus or theme.bg_focus
