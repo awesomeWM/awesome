@@ -765,7 +765,9 @@ end
 -- @param cmd The command.
 -- @return The os.execute() return value.
 function spawn(cmd)
-    return os.execute(cmd .. "&")
+    if cmd and cmd ~= "" then
+        return os.execute(cmd .. "&")
+    end
 end
 
 --- Eval Lua code.
