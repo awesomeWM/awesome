@@ -154,8 +154,8 @@ untag_client(client_t *c, tag_t *t)
     for(int i = 0; i < t->clients.len; i++)
         if(t->clients.tab[i] == c)
         {
-            tag_unref(&t);
             client_array_take(&t->clients, i);
+            tag_unref(&t);
             client_saveprops(c);
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
             globalconf.screens[c->screen].need_arrange = true;
