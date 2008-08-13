@@ -40,5 +40,6 @@ typedef struct keybinding_t
 } keybinding_t;
 
 keybinding_t *keybinding_find(const xcb_key_press_event_t *);
+xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);
 
 #endif

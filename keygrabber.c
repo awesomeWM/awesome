@@ -479,70 +479,12 @@ key_press_lookup_string(xcb_key_press_event_t *e,
                         char *buf, int buf_len,
                         xcb_keysym_t *ksym)
 {
-    xcb_keysym_t k0, k1;
-
-    /* 'col' (third parameter) is used to get the proper KeySym
-     * according to modifier (XCB doesn't provide an equivalent to
-     * XLookupString()).
-     *
-     * If Mod5 is ON we look into second group.
-     */
-    if(e->state & XCB_MOD_MASK_5)
-    {
-        k0 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 2);
-        k1 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 3);
-    }
-    else
-    {
-        k0 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 0);
-        k1 = xcb_key_press_lookup_keysym(globalconf.keysyms, e, 1);
-    }
-
-    /* The numlock modifier is on and the second KeySym is a keypad
-     * KeySym */
-    if((e->state & globalconf.numlockmask) && xcb_is_keypad_key(k1))
-    {
-        /* The Shift modifier is on, or if the Lock modifier is on and
-         * is interpreted as ShiftLock, use the first KeySym */
-        if((e->state & XCB_MOD_MASK_SHIFT) ||
-           (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.shiftlockmask)))
-            *ksym = k0;
-        else
-            *ksym = k1;
-    }
-
-    /* The Shift and Lock modifers are both off, use the first
-     * KeySym */
-    else if(!(e->state & XCB_MOD_MASK_SHIFT) && !(e->state & XCB_MOD_MASK_LOCK))
-        *ksym = k0;
-
-    /* The Shift modifier is off and the Lock modifier is on and is
-     * interpreted as CapsLock */
-    else if(!(e->state & XCB_MOD_MASK_SHIFT) &&
-            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.capslockmask)))
-        /* The first Keysym is used but if that KeySym is lowercase
-         * alphabetic, then the corresponding uppercase KeySym is used
-         * instead */
-        *ksym = k1;
-
-    /* The Shift modifier is on, and the Lock modifier is on and is
-     * interpreted as CapsLock */
-    else if((e->state & XCB_MOD_MASK_SHIFT) &&
-            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.capslockmask)))
-        /* The second Keysym is used but if that KeySym is lowercase
-         * alphabetic, then the corresponding uppercase KeySym is used
-         * instead */
-        *ksym = k1;
-
-    /* The Shift modifer is on, or the Lock modifier is on and is
-     * interpreted as ShiftLock, or both */
-    else if((e->state & XCB_MOD_MASK_SHIFT) ||
-            (e->state & XCB_MOD_MASK_LOCK && (e->state & globalconf.shiftlockmask)))
-        *ksym = k1;
+    *ksym = key_getkeysym(e->detail, e->state);
 
     /* Handle special KeySym (Tab, Newline...) */
     if((*ksym & 0xffffff00) == 0xff00)
         return keysym_to_str(buf, buf_len, *ksym);
+
     /* Handle other KeySym (like unicode...) */
     return keysym_to_utf8(buf, buf_len, *ksym);
 }

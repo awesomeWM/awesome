@@ -87,7 +87,8 @@ window_root_grabkey(keybinding_t *k)
     xcb_keycode_t kc;
 
     if((kc = k->keycode)
-       || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
+       || (k->keysym
+           && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
         do
         {
             s = xutil_screen_get(globalconf.connection, phys_screen);
@@ -185,6 +186,79 @@ keybinding_unregister_root(keybinding_t **k)
     }
 }
 
+/** Return the keysym from keycode.
+ * \param detail The keycode received.
+ * \param state The modifier state.
+ * \return A keysym.
+ */
+xcb_keysym_t
+key_getkeysym(xcb_keycode_t detail, uint16_t state)
+{
+    xcb_keysym_t k0, k1;
+
+    /* 'col' (third parameter) is used to get the proper KeySym
+     * according to modifier (XCB doesn't provide an equivalent to
+     * XLookupString()).
+     *
+     * If Mod5 is ON we look into second group.
+     */
+    if(state & XCB_MOD_MASK_5)
+    {
+        k0 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 2);
+        k1 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 3);
+    }
+    else
+    {
+        k0 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 0);
+        k1 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 1);
+    }
+
+    /* The numlock modifier is on and the second KeySym is a keypad
+     * KeySym */
+    if((state & globalconf.numlockmask) && xcb_is_keypad_key(k1))
+    {
+        /* The Shift modifier is on, or if the Lock modifier is on and
+         * is interpreted as ShiftLock, use the first KeySym */
+        if((state & XCB_MOD_MASK_SHIFT) ||
+           (state & XCB_MOD_MASK_LOCK && (state & globalconf.shiftlockmask)))
+            return k0;
+        else
+            return k1;
+    }
+
+    /* The Shift and Lock modifers are both off, use the first
+     * KeySym */
+    else if(!(state & XCB_MOD_MASK_SHIFT) && !(state & XCB_MOD_MASK_LOCK))
+        return k0;
+
+    /* The Shift modifier is off and the Lock modifier is on and is
+     * interpreted as CapsLock */
+    else if(!(state & XCB_MOD_MASK_SHIFT) &&
+            (state & XCB_MOD_MASK_LOCK && (state & globalconf.capslockmask)))
+        /* The first Keysym is used but if that KeySym is lowercase
+         * alphabetic, then the corresponding uppercase KeySym is used
+         * instead */
+        return k1;
+
+    /* The Shift modifier is on, and the Lock modifier is on and is
+     * interpreted as CapsLock */
+    else if((state & XCB_MOD_MASK_SHIFT) &&
+            (state & XCB_MOD_MASK_LOCK && (state & globalconf.capslockmask)))
+        /* The second Keysym is used but if that KeySym is lowercase
+         * alphabetic, then the corresponding uppercase KeySym is used
+         * instead */
+        return k1;
+
+    /* The Shift modifer is on, or the Lock modifier is on and is
+     * interpreted as ShiftLock, or both */
+    else if((state & XCB_MOD_MASK_SHIFT) ||
+            (state & XCB_MOD_MASK_LOCK && (state & globalconf.shiftlockmask)))
+        return k1;
+
+    return XCB_NO_SYMBOL;
+}
+
+
 keybinding_t *
 keybinding_find(const xcb_key_press_event_t *ev)
 {
@@ -192,14 +266,16 @@ keybinding_find(const xcb_key_press_event_t *ev)
     int l, r, mod = XUTIL_MASK_CLEAN(ev->state);
     xcb_keysym_t keysym;
 
-    keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
+    keysym = key_getkeysym(ev->detail, ev->state);
 
   again:
     l = 0;
     r = arr->len;
-    while (l < r) {
+    while (l < r)
+    {
         int i = (r + l) / 2;
-        switch (keybinding_ev_cmp(keysym, ev->detail, mod, arr->tab[i])) {
+        switch (keybinding_ev_cmp(keysym, ev->detail, mod, arr->tab[i]))
+        {
           case -1: /* ev < arr->tab[i] */
             r = i;
             break;
@@ -210,7 +286,8 @@ keybinding_find(const xcb_key_press_event_t *ev)
             break;
         }
     }
-    if (arr != &keys_g.by_code) {
+    if (arr != &keys_g.by_code)
+    {
         arr = &keys_g.by_code;
         goto again;
     }
@@ -220,12 +297,13 @@ keybinding_find(const xcb_key_press_event_t *ev)
 static void
 __luaA_keystore(keybinding_t *key, const char *str)
 {
-    if(!a_strlen(str))
-        return;
-    else if(*str != '#')
-        key->keysym = XStringToKeysym(str);
-    else
-        key->keycode = atoi(str + 1);
+    if(a_strlen(str))
+    {
+        if(*str != '#')
+            key->keysym = XStringToKeysym(str);
+        else
+            key->keycode = atoi(str + 1);
+    }
 }
 
 /** Define a global key binding. This key binding will always be available.
