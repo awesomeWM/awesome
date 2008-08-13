@@ -935,7 +935,8 @@ end
 -- @param completion_callback The callback function to call to get completion.
 -- @param history_path Optional parameter: file path where the history should be saved, set nil to disable history
 -- @param history_max Optional parameter: set the maximum entries in history file, 50 by default
-function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max)
+-- @param done_callback Optional parameter: the callback function to always call without arguments, regardless of whether the prompt was cancelled.
+function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback)
     if not args then args = {} end
     local command = ""
     local command_before_comp
@@ -967,10 +968,12 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
         if has_ctrl then
             if key == "c" or key == "g" then
                 textbox.text = ""
+                if done_callback then done_callback() end
                 return false
             elseif key == "j" or key == "m" then
                 textbox.text = ""
                 exec_callback(command)
+                if done_callback then done_callback() end
                 return false
             end
         else
@@ -978,9 +981,11 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                 textbox.text = ""
                 prompt_history_add(history_path, command)
                 exe_callback(command)
+                if done_callback then done_callback() end
                 return false
             elseif key == "Escape" then
                 textbox.text = ""
+                if done_callback then done_callback() end
                 return false
             end
         end
