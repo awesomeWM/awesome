@@ -15,6 +15,8 @@ project(${PROJECT_AWE_NAME} C)
 
 set(CMAKE_BUILD_TYPE RELEASE)
 
+set(CURSES_NEED_NCURSES true)
+
 option(WITH_DBUS "build with D-BUS" ON)
 option(WITH_IMLIB2 "build with Imlib2" OFF)
 option(GENERATE_MANPAGES "generate manpages" ON)
@@ -61,6 +63,10 @@ a_find_program(LUADOC_EXECUTABLE luadoc FALSE)
 include(FindDoxygen)
 # pkg-config
 include(FindPkgConfig)
+# ncurses
+include(FindCurses)
+# lua 5.1
+include(FindLua51) #Due to a cmake bug, you will see Lua50 on screen
 # }}}
 
 # {{{ Check if documentation can be build
@@ -109,13 +115,11 @@ endif()
 # }}}
 
 # {{{ Get hostname
-
 execute_process(
     COMMAND ${HOSTNAME_EXECUTABLE} -f
     WORKING_DIRECTORY ${SOURCE_DIR}
     OUTPUT_VARIABLE BUILDHOSTNAME
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-
 # }}}
 
 # {{{ Required libraries
@@ -153,35 +157,24 @@ endmacro()
 
 # Check for readline, ncurse and libev
 a_find_library(LIB_READLINE readline)
-a_find_library(LIB_NCURSES ncurses)
 a_find_library(LIB_EV ev)
 
-# Check for lua5.1
-find_path(LUA_INC_DIR lua.h
-    /usr/include
-    /usr/include/lua5.1
-    /usr/local/include/lua5.1)
-
-find_library(LUA_LIB NAMES lua5.1 lua
-    /usr/lib
-    /usr/lib/lua
-    /usr/local/lib)
-
 # Error check
-if(NOT LUA_LIB)
+set( LUA_FOUND LUA51_FOUND OR LUA50_FOUND )# This is a workaround to a cmake bug
+if(NOT LUA_FOUND)
     message(FATAL_ERROR "lua library not found")
 endif()
 
 set(AWESOME_REQUIRED_LIBRARIES ${AWESOME_REQUIRED_LIBRARIES}
     ${LIB_EV}
-    ${LUA_LIB})
+    ${LUA_LIBRARIES})
 
 set(AWESOME_REQUIRED_INCLUDE_DIRS ${AWESOME_REQUIRED_INCLUDE_DIRS}
-    ${LUA_INC_DIR})
+    ${LUA_INCLUDE_DIR})
 
 set(AWESOMECLIENT_LIBRARIES
     ${LIB_READLINE}
-    ${LIB_NCURSES})
+    ${CURSES_LIBRARIES})
 # }}}
 
 # {{{ Optional libraries
