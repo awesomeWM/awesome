@@ -352,7 +352,7 @@ end
 --- Update the tag history.
 -- @param screen The screen number.
 function tag.history.update(screen)
-    local curtags = capi.screen[screen].tags
+    local curtags = capi.screen[screen]:tags()
     if not tag_compare_select(curtags, tag.history.data.current[screen]) then
         tag.history.data.past[screen] = tag.history.data.current[screen]
         tag.history.data.current[screen] = {}
@@ -366,7 +366,7 @@ end
 -- @param screen The screen number.
 function tag.history.restore(screen)
     local s = screen or capi.mouse.screen
-    local tags = capi.screen[s].tags
+    local tags = capi.screen[s]:tags()
     for k, t in pairs(tags) do
         t.selected = tag.history.data.past[s][k]
     end
@@ -377,7 +377,7 @@ end
 -- @return A table with all selected tags.
 function tag.selectedlist(s)
     local screen = s or capi.mouse.screen
-    local tags = capi.screen[screen].tags
+    local tags = capi.screen[screen]:tags()
     local vtags = {}
     for i, t in pairs(tags) do
         if t.selected then
@@ -450,7 +450,7 @@ end
 --- View no tag.
 -- @param Optional screen number.
 function tag.viewnone(screen)
-    local tags = capi.screen[screen or capi.mouse.screen].tags
+    local tags = capi.screen[screen or capi.mouse.screen]:tags()
     for i, t in pairs(tags) do
         t.selected = false
     end
@@ -460,7 +460,7 @@ end
 -- @param i The relative index to see.
 -- @param screen Optional screen number.
 function tag.viewidx(i, screen)
-    local tags = capi.screen[screen or capi.mouse.screen].tags
+    local tags = capi.screen[screen or capi.mouse.screen]:tags()
     local sel = tag.selected()
     tag.viewnone()
     for k, t in ipairs(tags) do
@@ -1288,7 +1288,7 @@ end
 function widget.tasklist.label.currenttags(c, screen, args)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
-    for k, t in ipairs(capi.screen[screen].tags) do
+    for k, t in ipairs(capi.screen[screen]:tags()) do
         if t.selected and c:tags()[t] then
             return widget_tasklist_label_common(c, args)
         end

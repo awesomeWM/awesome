@@ -170,7 +170,7 @@ luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
     lua_getmetatable(L, idxobj);
     lua_pushvalue(L, idxfield);
     lua_rawget(L, -2);
-    if (!lua_isnil(L, -1))
+    if(!lua_isnil(L, -1))
     {
         lua_remove(L, -2);
         return 1;

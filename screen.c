@@ -28,6 +28,7 @@
 #include "ewmh.h"
 #include "tag.h"
 #include "client.h"
+#include "layouts/tile.h"
 
 extern awesome_t globalconf;
 
@@ -231,8 +232,70 @@ luaA_screen_module_index(lua_State *L)
     return luaA_settype(L, "screen");
 }
 
+/** Get or set screen tags.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam None or a table of tags to set to the screen.
+ * The table must contains at least one tag.
+ * \return A table with all screen tags.
+ */
+static int
+luaA_screen_tags(lua_State *L)
+{
+    int i;
+    screen_t *s = lua_touserdata(L, 1);
+
+    if(!s)
+        luaL_typerror(L, 1, "screen");
+
+    if(lua_gettop(L) == 2)
+    {
+        tag_t **tag;
+
+        luaA_checktable(L, 2);
+
+        /* remove current tags */
+        for(i = 0; i < s->tags.len; i++)
+            s->tags.tab[i]->screen = SCREEN_UNDEF;
+
+        tag_array_wipe(&s->tags);
+        tag_array_init(&s->tags);
+
+        s->need_arrange = true;
+
+        /* push new tags */
+        lua_pushnil(L);
+        while(lua_next(L, 2))
+        {
+            tag = luaA_checkudata(L, -1, "tag");
+            tag_append_to_screen(*tag, s);
+            lua_pop(L, 1);
+        }
+
+        /* check there's at least one tag! */
+        if(!s->tags.len)
+        {
+            tag_append_to_screen(tag_new("default", sizeof("default") - 1, layout_tile, 0.5, 1, 0), s);
+            luaL_error(L, "no tag were added on screen %d, taking last resort action and adding default tag\n", s->index);
+        }
+    }
+    else
+    {
+        lua_newtable(L);
+        for(i = 0; i < s->tags.len; i++)
+        {
+            luaA_tag_userdata_new(L, s->tags.tab[i]);
+            lua_rawseti(L, -2, i + 1);
+        }
+    }
+
+    return 1;
+}
+
 /** A screen.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lfield padding The screen padding. A table with top, right, left and bottom
  * keys and values in pixel.
@@ -243,11 +306,14 @@ static int
 luaA_screen_index(lua_State *L)
 {
     size_t len;
-    const char *buf = luaL_checklstring(L, 2, &len);
+    const char *buf;
     screen_t *s;
     area_t g;
-    int i;
 
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    buf = luaL_checklstring(L, 2, &len);
     s = lua_touserdata(L, 1);
 
     switch(a_tokenize(buf, len))
@@ -287,14 +353,6 @@ luaA_screen_index(lua_State *L)
         lua_pushnumber(L, g.height);
         lua_setfield(L, -2, "height");
         break;
-      case A_TK_TAGS:
-        lua_newtable(L);
-        for(i = 0; i < s->tags.len; i++)
-        {
-            luaA_tag_userdata_new(L, s->tags.tab[i]);
-            lua_rawseti(L, -2, i + 1);
-        }
-        break;
       default:
         return 0;
     }
@@ -308,8 +366,6 @@ luaA_screen_newindex(lua_State *L)
     size_t len;
     const char *buf = luaL_checklstring(L, 2, &len);
     screen_t *s;
-    tag_t **tag;
-    int i;
 
     s = lua_touserdata(L, 1);
 
@@ -324,27 +380,6 @@ luaA_screen_newindex(lua_State *L)
 
         ewmh_update_workarea(screen_virttophys(s->index));
 
-        break;
-      case A_TK_TAGS:
-        luaA_checktable(L, 3);
-
-        /* remove current tags */
-        for(i = 0; i < s->tags.len; i++)
-            s->tags.tab[i]->screen = SCREEN_UNDEF;
-
-        tag_array_wipe(&s->tags);
-        tag_array_init(&s->tags);
-
-        s->need_arrange = true;
-
-        /* push new tags */
-        lua_pushnil(L);
-        while(lua_next(L, 3))
-        {
-            tag = luaA_checkudata(L, -1, "tag");
-            tag_append_to_screen(*tag, s);
-            lua_pop(L, 1);
-        }
         break;
       default:
         return 0;
@@ -376,6 +411,7 @@ const struct luaL_reg awesome_screen_methods[] =
 
 const struct luaL_reg awesome_screen_meta[] =
 {
+    { "tags", luaA_screen_tags },
     { "__index", luaA_screen_index },
     { "__newindex", luaA_screen_newindex },
     { NULL, NULL }
