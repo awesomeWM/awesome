@@ -1153,7 +1153,7 @@ function widget.taglist.label.all(t, args)
     if sel and sel:tags()[t] then
         background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
     elseif bg_urgent and fg_urgent then
-        for k, c in pairs(t.clients) do
+        for k, c in pairs(t:clients()) do
             background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarew.png\""
             if c.urgent then
                 bg_color = bg_urgent
@@ -1181,7 +1181,7 @@ end
 -- fg_urgent The foreground color for urgent tags.
 -- @return A string to print.
 function widget.taglist.label.noempty(t, args)
-    if #t.clients > 0 then
+    if #t:clients() > 0 then
         if not args then args = {} end
         local fg_focus = args.fg_focus or theme.fg_focus
         local bg_focus = args.bg_focus or theme.bg_focus
@@ -1196,7 +1196,7 @@ function widget.taglist.label.noempty(t, args)
             fg_color = fg_focus
         end
         if bg_urgent and fg_urgent then
-            for k, c in pairs(t.clients) do
+            for k, c in pairs(t:clients()) do
                 if c.urgent then
                     bg_color = bg_urgent
                     fg_color = fg_urgent

@@ -279,6 +279,49 @@ luaA_tag_new(lua_State *L)
     return luaA_tag_userdata_new(L, tag);
 }
 
+/** Get or set the clients attached to this tag.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \param None or a table of clients to set.
+ * \return A table with the clients attached to this tags.
+ */
+static int
+luaA_tag_clients(lua_State *L)
+{
+    tag_t **tag = luaA_checkudata(L, 1, "tag");
+    int i;
+
+    if(lua_gettop(L) == 2)
+    {
+        client_t **c;
+
+        luaA_checktable(L, 2);
+        for(i = 0; i < (*tag)->clients.len; i++)
+            untag_client((*tag)->clients.tab[i], *tag);
+        lua_pushnil(L);
+        while(lua_next(L, 2))
+        {
+            c = luaA_checkudata(L, -1, "client");
+            tag_client(*c, *tag);
+            lua_pop(L, 1);
+        }
+    }
+    else
+    {
+        client_array_t *clients = &(*tag)->clients;
+        luaA_otable_new(L);
+        for(i = 0; i < clients->len; i++)
+        {
+            luaA_client_userdata_new(L, clients->tab[i]);
+            luaA_client_userdata_new(L, clients->tab[i]);
+            lua_rawset(L, -3);
+        }
+    }
+
+    return 1;
+}
+
 /** Tag object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -290,7 +333,6 @@ luaA_tag_new(lua_State *L)
  * \lfield mwfact Master width factor.
  * \lfield nmaster Number of master windows.
  * \lfield ncol Number of column for slave windows.
- * \lfield clients The clients that has this tag set.
  */
 static int
 luaA_tag_index(lua_State *L)
@@ -298,8 +340,6 @@ luaA_tag_index(lua_State *L)
     size_t len;
     tag_t **tag = luaA_checkudata(L, 1, "tag");
     const char *attr;
-    client_array_t *clients;
-    int i;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
@@ -330,16 +370,6 @@ luaA_tag_index(lua_State *L)
         break;
       case A_TK_NCOL:
         lua_pushnumber(L, (*tag)->ncol);
-        break;
-      case A_TK_CLIENTS:
-        clients = &(*tag)->clients;
-        luaA_otable_new(L);
-        for(i = 0; i < clients->len; i++)
-        {
-            luaA_client_userdata_new(L, clients->tab[i]);
-            luaA_client_userdata_new(L, clients->tab[i]);
-            lua_rawset(L, -3);
-        }
         break;
       default:
         return 0;
@@ -377,7 +407,6 @@ luaA_tag_newindex(lua_State *L)
     double d;
     int i, screen;
     layout_t *l;
-    client_t **c;
 
     switch(a_tokenize(attr, len))
     {
@@ -447,18 +476,6 @@ luaA_tag_newindex(lua_State *L)
         else
             luaL_error(L, "bad value, must be greater than 1");
         break;
-      case A_TK_CLIENTS:
-        luaA_checktable(L, 3);
-        for(i = 0; i < (*tag)->clients.len; i++)
-            untag_client((*tag)->clients.tab[i], *tag);
-        lua_pushnil(L);
-        while(lua_next(L, 3))
-        {
-            c = luaA_checkudata(L, -1, "client");
-            tag_client(*c, *tag);
-            lua_pop(L, 1);
-        }
-        break;
       default:
         return 0;
     }
@@ -476,6 +493,7 @@ const struct luaL_reg awesome_tag_methods[] =
 };
 const struct luaL_reg awesome_tag_meta[] =
 {
+    { "clients", luaA_tag_clients },
     { "__index", luaA_tag_index },
     { "__newindex", luaA_tag_newindex },
     { "__eq", luaA_tag_eq },
