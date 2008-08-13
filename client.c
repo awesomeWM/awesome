@@ -986,6 +986,49 @@ luaA_client_swap(lua_State *L)
     return 0;
 }
 
+/** Access or set the client tags.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \lparam A table with tags to set, or none to get the current tags table.
+ * \return The clients tag.
+ */
+static int
+luaA_client_tags(lua_State *L)
+{
+    tag_array_t *tags;
+    tag_t **tag;
+    client_t **c = luaA_checkudata(L, 1, "client");
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_checktable(L, 2);
+        tags = &globalconf.screens[(*c)->screen].tags;
+        for(int i = 0; i < tags->len; i++)
+            untag_client(*c, tags->tab[i]);
+        lua_pushnil(L);
+        while(lua_next(L, 2))
+        {
+            tag = luaA_checkudata(L, -1, "tag");
+            tag_client(*c, *tag);
+            lua_pop(L, 1);
+        }
+    }
+    else
+    {
+        tags = &globalconf.screens[(*c)->screen].tags;
+        luaA_otable_new(L);
+        for(int i = 0; i < tags->len; i++)
+            if(is_client_tagged(*c, tags->tab[i]))
+            {
+                luaA_tag_userdata_new(L, tags->tab[i]);
+                luaA_tag_userdata_new(L, tags->tab[i]);
+                lua_rawset(L, -3);
+            }
+    }
+
+    return 1;
+}
+
 /** Focus a client (DEPRECATED).
  * \param L The Lua VM state.
  *
@@ -1071,8 +1114,6 @@ luaA_client_newindex(lua_State *L)
     double d;
     int i;
     titlebar_t **t = NULL;
-    tag_array_t *tags;
-    tag_t **tag;
 
     if((*c)->invalid)
         luaL_error(L, "client is invalid\n");
@@ -1175,19 +1216,6 @@ luaA_client_newindex(lua_State *L)
             titlebar_init(*c);
         }
         break;
-      case A_TK_TAGS:
-        luaA_checktable(L, 3);
-        tags = &globalconf.screens[(*c)->screen].tags;
-        for(i = 0; i < tags->len; i++)
-            untag_client(*c, tags->tab[i]);
-        lua_pushnil(L);
-        while(lua_next(L, 3))
-        {
-            tag = luaA_checkudata(L, -1, "tag");
-            tag_client(*c, *tag);
-            lua_pop(L, 1);
-        }
-        break;
       default:
         return 0;
     }
@@ -1216,7 +1244,6 @@ luaA_client_newindex(lua_State *L)
  * \lfield coords The client coordinates.
  * \lfield titlebar The client titlebar.
  * \lfield urgent The client urgent state.
- * \lfield tags The clients tags.
  * \lfield focus The focused client.
  */
 static int
@@ -1231,8 +1258,6 @@ luaA_client_index(lua_State *L)
     xutil_class_hint_t hint;
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r = NULL;
-    tag_array_t *tags;
-    int i;
 
     if((*c)->invalid)
         luaL_error(L, "client is invalid\n");
@@ -1326,17 +1351,6 @@ luaA_client_index(lua_State *L)
       case A_TK_URGENT:
         lua_pushboolean(L, (*c)->isurgent);
         break;
-      case A_TK_TAGS:
-        tags = &globalconf.screens[(*c)->screen].tags;
-        luaA_otable_new(L);
-        for(i = 0; i < tags->len; i++)
-            if(is_client_tagged(*c, tags->tab[i]))
-            {
-                luaA_tag_userdata_new(L, tags->tab[i]);
-                luaA_tag_userdata_new(L, tags->tab[i]);
-                lua_rawset(L, -3);
-            }
-        break;
       default:
         return 0;
     }
@@ -1404,6 +1418,7 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
+    { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
     { "focus_set", luaA_client_focus_set },
