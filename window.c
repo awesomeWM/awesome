@@ -35,7 +35,7 @@ extern awesome_t globalconf;
  * \param state The state to set.
  */
 void
-window_setstate(xcb_window_t win, long state)
+window_state_set(xcb_window_t win, long state)
 {
     long data[] = { state, XCB_NONE };
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
@@ -105,7 +105,7 @@ window_configure(xcb_window_t win, area_t geometry, int border)
  * \param buttons The buttons to grab.
  */
 void
-window_grabbuttons(xcb_window_t win, xcb_window_t root, button_t *buttons)
+window_buttons_grab(xcb_window_t win, xcb_window_t root, button_t *buttons)
 {
     button_t *b;
 
@@ -132,7 +132,7 @@ window_grabbuttons(xcb_window_t win, xcb_window_t root, button_t *buttons)
  * \param root The root window.
  */
 void
-window_root_grabbuttons(xcb_window_t root)
+window_root_buttons_grab(xcb_window_t root)
 {
     button_t *b;
 
@@ -158,7 +158,7 @@ window_root_grabbuttons(xcb_window_t root)
  * \param opacity Opacity of the window, between 0 and 1.
  */
 void
-window_settrans(xcb_window_t win, double opacity)
+window_trans_set(xcb_window_t win, double opacity)
 {
     unsigned int real_opacity = 0xffffffff;
 

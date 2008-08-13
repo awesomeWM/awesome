@@ -216,9 +216,9 @@ client_ban(client_t *c)
         client_unfocus(c);
     xcb_unmap_window(globalconf.connection, c->win);
     if(c->ishidden)
-        window_setstate(c->win, XCB_WM_ICONIC_STATE);
+        window_state_set(c->win, XCB_WM_ICONIC_STATE);
     else
-        window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
+        window_state_set(c->win, XCB_WM_WITHDRAWN_STATE);
     if(c->titlebar && c->titlebar->position && c->titlebar->sw)
         xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
 }
@@ -664,7 +664,7 @@ void
 client_unban(client_t *c)
 {
     xcb_map_window(globalconf.connection, c->win);
-    window_setstate(c->win, XCB_WM_NORMAL_STATE);
+    window_state_set(c->win, XCB_WM_NORMAL_STATE);
     if(c->titlebar && c->titlebar->sw && c->titlebar->position)
         xcb_map_window(globalconf.connection, c->titlebar->sw->window);
 }
@@ -693,7 +693,7 @@ client_unmanage(client_t *c)
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win,
                       XUTIL_ANY_MODIFIER);
-    window_setstate(c->win, XCB_WM_WITHDRAWN_STATE);
+    window_state_set(c->win, XCB_WM_WITHDRAWN_STATE);
 
     xcb_aux_sync(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);
@@ -1157,7 +1157,7 @@ luaA_client_newindex(lua_State *L)
       case A_TK_OPACITY:
         d = luaL_checknumber(L, 3);
         if(d == -1 || (d >= 0 && d <= 1))
-            window_settrans((*c)->win, d);
+            window_trans_set((*c)->win, d);
         break;
       case A_TK_FLOATING:
         client_setfloating(*c, luaA_checkboolean(L, 3));
