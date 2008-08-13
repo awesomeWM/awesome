@@ -363,6 +363,7 @@ client_raise(client_t *c)
 void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 {
+    xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c, *t = NULL;
     xcb_window_t trans;
     bool rettrans, retloadprops;
@@ -374,6 +375,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
             | XCB_EVENT_MASK_ENTER_WINDOW
     };
 
+    /* Send request to get NET_WM_ICON property as soon as possible... */
+    ewmh_icon_cookie = ewmh_window_icon_get_unchecked(w);
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
     if(systray_iskdedockapp(w))
@@ -399,7 +402,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
     c->layer = c->oldlayer = LAYER_TILE;
     client_setborder(c, wgeom->border_width);
-    c->icon = ewmh_window_icon_get(c->win);
+    c->icon = ewmh_window_icon_get_reply(ewmh_icon_cookie);
 
     /* update hints */
     u_size_hints = client_updatesizehints(c);

@@ -511,12 +511,23 @@ ewmh_check_client_hints(client_t *c)
     p_delete(&reply);
 }
 
-/** Get NET_WM_ICON.
+/** Send request to get NET_WM_ICON (EWMH)
  * \param w The window.
+ * \return The cookie associated with the request.
+ */
+xcb_get_property_cookie_t
+ewmh_window_icon_get_unchecked(xcb_window_t w)
+{
+  return xcb_get_property_unchecked(globalconf.connection, false, w,
+                                    _NET_WM_ICON, CARDINAL, 0, UINT32_MAX);
+}
+
+/** Get NET_WM_ICON.
+ * \param cookie The cookie.
  * \return A netwm_icon_t structure which must be deleted after usage.
  */
 netwm_icon_t *
-ewmh_window_icon_get(xcb_window_t w)
+ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
 {
     double alpha;
     netwm_icon_t *icon;
@@ -525,10 +536,7 @@ ewmh_window_icon_get(xcb_window_t w)
     unsigned char *imgdata;
     xcb_get_property_reply_t *r;
 
-    r = xcb_get_property_reply(globalconf.connection,
-                               xcb_get_property_unchecked(globalconf.connection, false, w,
-                                                          _NET_WM_ICON, CARDINAL, 0, UINT32_MAX),
-                               NULL);
+    r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
     if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 ||
        !(data = (uint32_t *) xcb_get_property_value(r)))
     {
