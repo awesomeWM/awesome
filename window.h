@@ -25,7 +25,8 @@
 #include "structs.h"
 
 void window_setstate(xcb_window_t, long);
-long window_getstate(xcb_window_t);
+xcb_get_property_cookie_t window_state_get_unchecked(xcb_window_t);
+long window_state_get_reply(xcb_get_property_cookie_t);
 void window_configure(xcb_window_t, area_t, int);
 void window_grabbuttons(xcb_window_t, xcb_window_t, button_t *);
 void window_root_grabbuttons(xcb_window_t);

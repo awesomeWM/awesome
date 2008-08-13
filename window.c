@@ -42,23 +42,29 @@ window_setstate(xcb_window_t win, long state)
                         WM_STATE, WM_STATE, 32, 2, data);
 }
 
-/** Get a window state (WM_STATE).
+/** Send request to get a window state (WM_STATE).
  * \param w A client window.
+ * \return The cookie associated with the request.
+ */
+xcb_get_property_cookie_t
+window_state_get_unchecked(xcb_window_t w)
+{
+    return xcb_get_property_unchecked(globalconf.connection, false, w, WM_STATE,
+                                      WM_STATE, 0L, 2L);
+}
+
+/** Get a window state (WM_STATE).
+ * \param cookie The cookie.
  * \return The current state of the window, or -1 on error.
  */
 long
-window_getstate(xcb_window_t w)
+window_state_get_reply(xcb_get_property_cookie_t cookie)
 {
     long result = -1;
     unsigned char *p = NULL;
-    xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r;
 
-    prop_c = xcb_get_property_unchecked(globalconf.connection, false, w,
-                                        WM_STATE, WM_STATE,
-                                        0L, 2L);
-
-    if(!(prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
+    if(!(prop_r = xcb_get_property_reply(globalconf.connection, cookie, NULL)))
         return -1;
 
     p = xcb_get_property_value(prop_r);

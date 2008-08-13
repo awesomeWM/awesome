@@ -60,6 +60,7 @@ scan(void)
     xcb_query_tree_reply_t *tree_r;
     xcb_window_t *wins = NULL;
     xcb_get_window_attributes_cookie_t *attr_wins = NULL;
+    xcb_get_property_cookie_t *state_wins = NULL;
     xcb_get_geometry_cookie_t **geom_wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
@@ -89,10 +90,15 @@ scan(void)
             fatal("E: cannot get tree children");
         tree_c_len = xcb_query_tree_children_length(tree_r);
         attr_wins = p_new(xcb_get_window_attributes_cookie_t, tree_c_len);
+        state_wins = p_new(xcb_get_property_cookie_t, tree_c_len);
 
         for(i = 0; i < tree_c_len; i++)
+        {
             attr_wins[i] = xcb_get_window_attributes_unchecked(globalconf.connection,
                                                                wins[i]);
+
+            state_wins[i] = window_state_get_unchecked(wins[i]);
+        }
 
         geom_wins = p_new(xcb_get_geometry_cookie_t *, tree_c_len);
 
@@ -104,9 +110,10 @@ scan(void)
                                                      attr_wins[i],
                                                      NULL);
 
-            state = window_getstate(wins[i]);
+            state = window_state_get_reply(state_wins[i]);
 
-            has_awesome_prop = xutil_text_prop_get(globalconf.connection, wins[1], _AWESOME_PROPERTIES, NULL, NULL);
+            has_awesome_prop = xutil_text_prop_get(globalconf.connection, wins[1],
+                                                   _AWESOME_PROPERTIES, NULL, NULL);
 
             if(!attr_r || attr_r->override_redirect
                || (attr_r->map_state != XCB_MAP_STATE_VIEWABLE && !has_awesome_prop)
@@ -123,6 +130,7 @@ scan(void)
             *(geom_wins[i]) = xcb_get_geometry_unchecked(globalconf.connection, wins[i]);
         }
 
+        p_delete(&state_wins);
         p_delete(&attr_wins);
 
         for(i = 0; i < tree_c_len; i++)

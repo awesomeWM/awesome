@@ -572,7 +572,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     {
         if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
            && send_event
-           && window_getstate(c->win) == XCB_WM_NORMAL_STATE)
+           && window_state_get_reply(window_state_get_unchecked(c->win)) == XCB_WM_NORMAL_STATE)
             client_unmanage(c);
     }
     else if((em = xembed_getbywin(globalconf.embedded, ev->window)))
