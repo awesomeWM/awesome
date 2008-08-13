@@ -310,12 +310,11 @@ luaA_tag_clients(lua_State *L)
     else
     {
         client_array_t *clients = &(*tag)->clients;
-        luaA_otable_new(L);
+        lua_newtable(L);
         for(i = 0; i < clients->len; i++)
         {
             luaA_client_userdata_new(L, clients->tab[i]);
-            luaA_client_userdata_new(L, clients->tab[i]);
-            lua_rawset(L, -3);
+            lua_rawseti(L, -2, i + 1);
         }
     }
 
