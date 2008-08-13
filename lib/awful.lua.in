@@ -39,7 +39,7 @@ hooks = {}
 hooks.user =  {}
 prompt = {}
 prompt.history = {}
-prompt.history.data = { max = 50, table = {} }
+prompt.history.data = {}
 completion = {}
 screen = {}
 layout = {}
@@ -775,66 +775,69 @@ function eval(s)
 end
 
 --- Load history file in history table
-local function prompt_history_load()
-    if prompt.history.data.path then
-        local f = io.open(prompt.history.data.path, "r")
-      
-        -- Read history file
-        if f then
+-- @param id The prompt history identifier which is the path to the filename
+-- @param max Optional parameter, the maximum number of entries in file
+local function prompt_history_check_load(id, max)
+    if id and id ~= ""
+        and not prompt.history[id] then
+	prompt.history[id] = { max = 50, table = {} }
+
+	if max then
+            prompt.history[id].max = max
+	end
+
+	local f = io.open(id, "r")
+
+	-- Read history file
+	if f then
             for line in f:lines() do
-	        table.insert(prompt.history.data.table, line)
-                if #prompt.history.data.table >= prompt.history.data.max then
-                    break
-                end
+                table.insert(prompt.history[id].table, line)
+                if #prompt.history[id].table >= prompt.history[id].max then
+                   break
+		end
             end
-        end
+	end
     end
-end
-
---- Set path for history file
--- @param path The history file path, set "on" to enable history in the default file (~/.awesome_history)
--- @param max_cmd Optional parameter: set the max entries number in the history file, 50 by default
-function prompt.history.set(path, max_cmd)
-    if path then
-        prompt.history.data.path = path
-    else
-        prompt.history.data.path = os.getenv("HOME") .. "/.awesome_history"
-    end
-
-    if max_cmd then
-        prompt.history.data.max = max_cmd
-    end
-
-    -- Load history stuff with current settings
-    prompt_history_load()
 end
 
 --- Save history table in history file
-local function prompt_history_save()
-    if prompt.history.data.path then
-        local f = assert(io.open(prompt.history.data.path, "w"))
-        for i = 1, math.min(#prompt.history.data.table, prompt.history.data.max) do
-            f:write(prompt.history.data.table[i] .. "\n")
+-- @param id The prompt history identifier
+local function prompt_history_save(id)
+    if prompt.history[id] then
+        local f = assert(io.open(id, "w"))
+	for i = 1, math.min(#prompt.history[id].table, prompt.history[id].max) do
+            f:write(prompt.history[id].table[i] .. "\n")
         end
-        f:close()
+       f:close()
+    end
+end
+
+--- Return the number of items in history table regarding the id
+-- @param id The prompt history identifier
+-- @return the number of items in history table, -1 if history is disabled
+local function prompt_history_items(id)
+    if prompt.history[id] then
+        return #prompt.history[id].table
+    else
+        return -1
     end
 end
 
 --- Add an entry to the history file
+-- @param id The prompt history identifier
 -- @param command The command to add
-local function prompt_history_add(command)
-    if prompt.history.data.path then
+local function prompt_history_add(id, command)
+    if prompt.history[id] then
         if command ~= ""
-            and command ~= prompt.history.data.table[#prompt.history.data.table] then
-            table.insert(prompt.history.data.table, command)
+            and command ~= prompt.history[id].table[#prompt.history[id].table] then
+            table.insert(prompt.history[id].table, command)
 
             -- Do not exceed our max_cmd
-            if #prompt.history.data.table > prompt.history.data.max then
-                table.remove(prompt.history.data.table, 1)
+            if #prompt.history[id].table > prompt.history[id].max then
+                table.remove(prompt.history[id].table, 1)
             end
-      
-            -- Save table content in file, not very optimized atm...
-            prompt_history_save()
+
+            prompt_history_save(id)
         end
     end
 end
@@ -928,7 +931,9 @@ end
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument when finished.
 -- @param completion_callback The callback function to call to get completion.
-function prompt.run(args, textbox, exe_callback, completion_callback)
+-- @param history_path Optional parameter: file path where the history should be saved, set nil to disable history
+-- @param history_max Optional parameter: set the maximum entries in history file, 50 by default
+function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max)
     if not args then args = {} end
     local command = ""
     local command_before_comp
@@ -936,7 +941,9 @@ function prompt.run(args, textbox, exe_callback, completion_callback)
     local prettyprompt = args.prompt or ""
     local inv_col = args.fg_cursor or theme.fg_focus or "black"
     local cur_col = args.bg_cursor or theme.bg_focus or "white"
-    local history_index = #prompt.history.data.table + 1
+
+    prompt_history_check_load(history_path, history_max)
+    local history_index = prompt_history_items(history_path) + 1
     -- The cursor position
     local cur_pos = 1
     -- The completion element to use on completion request.
@@ -967,7 +974,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback)
         else
             if key == "Return" then
                 textbox.text = ""
-                prompt_history_add(command)
+                prompt_history_add(history_path, command)
                 exe_callback(command)
                 return false
             elseif key == "Escape" then
@@ -1059,20 +1066,20 @@ function prompt.run(args, textbox, exe_callback, completion_callback)
                 if history_index > 1 then
                     history_index = history_index - 1
 
-                    command = prompt.history.data.table[history_index]
+                    command = prompt.history[history_path].table[history_index]
                     cur_pos = #command + 2
                 end
             elseif key == "Down" then
-                if history_index < #prompt.history.data.table then
+               if history_index < prompt_history_items(history_path) then
                     history_index = history_index + 1
 
-                   command = prompt.history.data.table[history_index]
-                   cur_pos = #command + 2
-                elseif history_index == #prompt.history.data.table then
-                   history_index = history_index + 1
+                    command = prompt.history[history_path].table[history_index]
+                    cur_pos = #command + 2
+                elseif history_index == prompt_history_items(history_path) then
+                    history_index = history_index + 1
 
-                   command = ""
-                   cur_pos = 1
+                    command = ""
+                    cur_pos = 1
                 end
             else
                 -- len() is UTF-8 aware but #key is not,
