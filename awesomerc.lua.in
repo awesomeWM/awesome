@@ -68,9 +68,6 @@ beautiful.init(theme_path)
 -- to inform it about colors we want it to draw.
 awful.beautiful.register(beautiful)
 
--- Enable prompt history
-awful.prompt.history.set()
-
 -- Uncomment this to activate autotabbing
 -- tabulous.autotab_start()
 -- }}}
@@ -240,11 +237,11 @@ keybinding({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -
 
 -- Prompt
 keybinding({ modkey }, "F1", function ()
-                                 awful.prompt.run({ prompt = "Run: " }, mypromptbox, awful.spawn, awful.completion.bash)
-                             end):add()
+                                 awful.prompt.run({ prompt = "Run: " }, mypromptbox, awful.spawn, awful.completion.bash,
+os.getenv("HOME") .. "/.cache/awesome_history") end):add()
 keybinding({ modkey }, "F4", function ()
-                                 awful.prompt.run({ prompt = "Run Lua code: " }, mypromptbox, awful.eval)
-                             end):add()
+                                 awful.prompt.run({ prompt = "Run Lua code: " }, mypromptbox, awful.eval, awful.prompt.bash,
+os.getenv("HOME") .. "/.cache/awesome_history_eval") end):add()
 keybinding({ modkey, "Ctrl" }, "i", function ()
                                         if mypromptbox.text then
                                             mypromptbox.text = nil
