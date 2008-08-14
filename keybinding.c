@@ -82,7 +82,8 @@ keybinding_cmp(const keybinding_t *k1, const keybinding_t *k2)
 static void
 window_root_grabkey(keybinding_t *k)
 {
-    int phys_screen = globalconf.default_screen;
+    int phys_screen = 0;
+    int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
     xcb_screen_t *s;
     xcb_keycode_t kc;
 
@@ -102,8 +103,7 @@ window_root_grabkey(keybinding_t *k)
                          k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
                          XCB_GRAB_MODE_ASYNC);
         phys_screen++;
-        } while(!globalconf.screens_info->xinerama_is_active
-                && phys_screen < globalconf.screens_info->nscreen);
+        } while(phys_screen < nscreen);
 }
 
 /** Ungrab key on the root windows.
@@ -112,7 +112,8 @@ window_root_grabkey(keybinding_t *k)
 static void
 window_root_ungrabkey(keybinding_t *k)
 {
-    int phys_screen = globalconf.default_screen;
+    int phys_screen = 0;
+    int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
     xcb_screen_t *s;
     xcb_keycode_t kc;
 
@@ -130,8 +131,7 @@ window_root_ungrabkey(keybinding_t *k)
             xcb_ungrab_key(globalconf.connection, kc, s->root,
                            k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
         phys_screen++;
-        } while(!globalconf.screens_info->xinerama_is_active
-                && phys_screen < globalconf.screens_info->nscreen);
+        } while(phys_screen < nscreen);
 }
 
 static void

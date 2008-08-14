@@ -24,6 +24,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <ev.h>
 
@@ -454,6 +456,64 @@ luaA_otable_newindex(lua_State *L)
     }
     
     lua_rawset(L, 1);
+
+    return 0;
+}
+
+/** Spawn a program.
+ * This function is multi-head (Zaphod) aware and will set display to
+ * the right screen according to mouse position.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack
+ * \luastack
+ * \lparam The command to launch.
+ * \lparam The optional screen number to spawn the command on.
+ */
+static int
+luaA_spawn(lua_State *L)
+{
+    static const char *shell = NULL;
+    char display[128], *tmp, newdisplay[128];
+    const char *cmd;
+    int screen = 0;
+
+    if(!shell && !(shell = getenv("SHELL")))
+        shell = "/bin/sh";
+
+    if(lua_gettop(L) == 2)
+    {
+        screen = luaL_checknumber(L, 2) - 1;
+        luaA_checkscreen(screen);
+    }
+
+    cmd = luaL_checkstring(L, 1);
+
+    if(!globalconf.screens_info->xinerama_is_active
+       && (tmp = getenv("DISPLAY")))
+    {
+        a_strcpy(display, sizeof(display) - 1, tmp);
+        if((tmp = strrchr(display, '.')))
+            *tmp = '\0';
+        snprintf(newdisplay, sizeof(newdisplay) - 1, "%s.%d", display, screen);
+        setenv("DISPLAY", newdisplay, 1);
+    }
+
+    /* The double-fork construct avoids zombie processes and keeps the code
+     * clean from stupid signal handlers. */
+    if(fork() == 0)
+    {
+        if(fork() == 0)
+        {
+            if(globalconf.connection)
+                xcb_disconnect(globalconf.connection);
+            setsid();
+            execl(shell, shell, "-c", cmd, NULL);
+            warn("execl '%s -c %s' failed: %s\n", shell, cmd, strerror(errno));
+        }
+        exit(EXIT_SUCCESS);
+    }
+    wait(0);
+
     return 0;
 }
 
@@ -479,6 +539,7 @@ luaA_init(void)
     {
         { "quit", luaA_quit },
         { "exec", luaA_exec },
+        { "spawn", luaA_spawn },
         { "restart", luaA_restart },
         { "mouse_add", luaA_mouse_add },
         { "font_set", luaA_font_set },

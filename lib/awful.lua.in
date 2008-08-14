@@ -18,6 +18,7 @@ local table = table
 local otable = otable
 local capi =
 {
+    awesome = awesome,
     screen = screen,
     client = client,
     mouse = mouse,
@@ -321,7 +322,7 @@ function screen.focus(i)
     local c = client.focus.history.get(s, 0)
     if c then capi.client.focus = c end
     -- Move the mouse on the screen
-    capi.mouse.coords = capi.screen[s].coords
+    capi.mouse.screen = s
 end
 
 --- Compare 2 tables of tags.
@@ -772,10 +773,10 @@ end
 
 --- Spawn a program.
 -- @param cmd The command.
--- @return The os.execute() return value.
+-- @return The awesome.spawn return value.
 function spawn(cmd)
     if cmd and cmd ~= "" then
-        return os.execute(cmd .. "&")
+        return capi.awesome.spawn(cmd .. "&", capi.mouse.screen)
     end
 end
 

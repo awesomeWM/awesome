@@ -300,8 +300,8 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
     return sw;
 }
 
-/** Get the Pointer position
- * \param window
+/** Get the pointer position.
+ * \param window The window to get position on.
  * \param x will be set to the Pointer-x-coordinate relative to window
  * \param y will be set to the Pointer-y-coordinate relative to window
  * \param mask will be set to the current buttons state
@@ -316,7 +316,7 @@ mouse_query_pointer(xcb_window_t window, int *x, int *y, uint16_t *mask)
     query_ptr_c = xcb_query_pointer_unchecked(globalconf.connection, window);
     query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
 
-    if(!query_ptr_r)
+    if(!query_ptr_r || !query_ptr_r->same_screen)
         return false;
 
     *x = query_ptr_r->win_x;
@@ -327,6 +327,31 @@ mouse_query_pointer(xcb_window_t window, int *x, int *y, uint16_t *mask)
     p_delete(&query_ptr_r);
 
     return true;
+}
+
+/** Get the pointer position on the screen.
+ * \param screen This will be set to the screen number the mouse is on.
+ * \param x This will be set to the Pointer-x-coordinate relative to window.
+ * \param y This will be set to the Pointer-y-coordinate relative to window.
+ * \param mask This will be set to the current buttons state.
+ * \return True on success, false if an error occured.
+ */
+static bool
+mouse_query_pointer_root(int *s, int *x, int *y, uint16_t *mask)
+{
+    for(int screen = 0;
+        screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+        screen++)
+    {
+        xcb_window_t root = xutil_screen_get(globalconf.connection, screen)->root;
+
+        if(mouse_query_pointer(root, x, y, mask))
+        {
+            *s = screen;
+            return true;
+        }
+    }
+    return false;
 }
 
 /** Grab the Pointer.
@@ -364,10 +389,10 @@ mouse_ungrab_pointer(void)
     xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
 }
 
-/** Set the Pointer position
- * \param window the destination window
- * \param x x-coordinate inside window
- * \param y y-coordinate inside window
+/** Set the pointer position.
+ * \param window The destination window.
+ * \param x X-coordinate inside window.
+ * \param y Y-coordinate inside window.
  */
 static inline void
 mouse_warp_pointer(xcb_window_t window, int x, int y)
@@ -421,19 +446,19 @@ mouse_track_mouse_drag(int *x, int *y)
     }
 }
 
-/** Get the client that contains the Pointer.
+/** Get the client that contains the pointer.
  *
- * \return The client that contains the Pointer or NULL.
+ * \return The client that contains the pointer or NULL.
  */
 static client_t *
-mouse_get_client_under_pointer(void)
+mouse_get_client_under_pointer(int phys_screen)
 {
     xcb_window_t root;
     xcb_query_pointer_cookie_t query_ptr_c;
     xcb_query_pointer_reply_t *query_ptr_r;
     client_t *c = NULL;
 
-    root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+    root = xutil_screen_get(globalconf.connection, phys_screen)->root;
 
     query_ptr_c = xcb_query_pointer_unchecked(globalconf.connection, root);
     query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
@@ -525,7 +550,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             }
 
             /* find client to swap with */
-            target = mouse_get_client_under_pointer();
+            target = mouse_get_client_under_pointer(c->phys_screen);
 
             /* swap position */
             if(target && target != c && !target->isfloating)
@@ -832,8 +857,10 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
     maxdist = round(sqrt((area.width*area.width) + (area.height*area.height)) / 2.);
 
-    /* get current mouse position */
-    mouse_query_pointer(root, &mouse_x, &mouse_y, NULL);
+    root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
+
+    if(!mouse_query_pointer(root, &mouse_x, &mouse_y, NULL))
+        return;
 
     /* select corner */
     corner = mouse_snap_to_corner(c->geometry, &mouse_x, &mouse_y, corner);
@@ -1070,14 +1097,12 @@ luaA_mouse_index(lua_State *L)
     const char *attr = luaL_checklstring(L, 2, &len);
     int mouse_x, mouse_y, i = 0;
     uint16_t mask;
-    xcb_window_t root;
+    int screen;
 
     switch(a_tokenize(attr, len))
     {
       case A_TK_COORDS:
-        root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
-
-        if(!mouse_query_pointer(root, &mouse_x, &mouse_y, &mask))
+        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
             return 0;
 
         lua_newtable(L);
@@ -1114,14 +1139,10 @@ luaA_mouse_index(lua_State *L)
         lua_setfield(L, -2, "buttons");
         break;
       case A_TK_SCREEN:
-        root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
-
-        if(!mouse_query_pointer(root, &mouse_x, &mouse_y, NULL))
+        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL))
             return 0;
 
-        i = screen_get_bycoord(globalconf.screens_info,
-                               globalconf.default_screen,
-                               mouse_x, mouse_y);
+        i = screen_get_bycoord(globalconf.screens_info, screen, mouse_x, mouse_y);
 
         lua_pushnumber(L, i + 1);
         break;
@@ -1144,18 +1165,32 @@ luaA_mouse_newindex(lua_State *L)
     int mouse_x, mouse_y, x, y = 0;
     uint16_t mask;
     xcb_window_t root;
+    int screen, phys_screen;
 
     switch(a_tokenize(attr, len))
     {
       case A_TK_COORDS:
         luaA_checktable(L, 3);
 
-        root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
-        if(!mouse_query_pointer(root, &mouse_x, &mouse_y, &mask))
+        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
             return 0;
 
         x = luaA_getopt_number(L, 3, "x", mouse_x);
         y = luaA_getopt_number(L, 3, "y", mouse_y);
+
+        root = xutil_screen_get(globalconf.connection, screen)->root;
+        mouse_warp_pointer(root, x, y);
+        break;
+      case A_TK_SCREEN:
+        screen = luaL_checknumber(L, 3) - 1;
+        luaA_checkscreen(screen);
+
+        /* we need the physical one to get the root window */
+        phys_screen = screen_virttophys(screen);
+        root = xutil_screen_get(globalconf.connection, phys_screen)->root;
+
+        x = globalconf.screens_info->geometry[screen].x;
+        y = globalconf.screens_info->geometry[screen].y;
 
         mouse_warp_pointer(root, x, y);
         break;
