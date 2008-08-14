@@ -318,17 +318,6 @@ luaA_screen_index(lua_State *L)
 
     switch(a_tokenize(buf, len))
     {
-      case A_TK_PADDING:
-        lua_newtable(L);
-        lua_pushnumber(L, s->padding.right);
-        lua_setfield(L, -2, "right");
-        lua_pushnumber(L, s->padding.left);
-        lua_setfield(L, -2, "left");
-        lua_pushnumber(L, s->padding.top);
-        lua_setfield(L, -2, "top");
-        lua_pushnumber(L, s->padding.bottom);
-        lua_setfield(L, -2, "bottom");
-        break;
       case A_TK_COORDS:
         /* \todo lua_pushgeometry() ? */
         lua_newtable(L);
@@ -360,32 +349,45 @@ luaA_screen_index(lua_State *L)
     return 1;
 }
 
+/** Set or get the screen padding.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \param None or a table with new padding values.
+ * \return The screen padding. A table with top, right, left and bottom
+ * keys and values in pixel.
+ */
 static int
-luaA_screen_newindex(lua_State *L)
+luaA_screen_padding(lua_State *L)
 {
-    size_t len;
-    const char *buf = luaL_checklstring(L, 2, &len);
     screen_t *s;
 
     s = lua_touserdata(L, 1);
 
-    switch(a_tokenize(buf, len))
+    if(lua_gettop(L) == 2)
     {
-      case A_TK_PADDING:
-        luaA_checktable(L, 3);
+        luaA_checktable(L, 2);
         s->padding.right = luaA_getopt_number(L, 2, "right", 0);
         s->padding.left = luaA_getopt_number(L, 2, "left", 0);
         s->padding.top = luaA_getopt_number(L, 2, "top", 0);
         s->padding.bottom = luaA_getopt_number(L, 2, "bottom", 0);
 
         ewmh_update_workarea(screen_virttophys(s->index));
-
-        break;
-      default:
-        return 0;
+    }
+    else
+    {
+        lua_newtable(L);
+        lua_pushnumber(L, s->padding.right);
+        lua_setfield(L, -2, "right");
+        lua_pushnumber(L, s->padding.left);
+        lua_setfield(L, -2, "left");
+        lua_pushnumber(L, s->padding.top);
+        lua_setfield(L, -2, "top");
+        lua_pushnumber(L, s->padding.bottom);
+        lua_setfield(L, -2, "bottom");
     }
 
-    return 0;
+    return 1;
 }
 
 /** Get the screen count.
@@ -412,8 +414,8 @@ const struct luaL_reg awesome_screen_methods[] =
 const struct luaL_reg awesome_screen_meta[] =
 {
     { "tags", luaA_screen_tags },
+    { "padding", luaA_screen_padding },
     { "__index", luaA_screen_index },
-    { "__newindex", luaA_screen_newindex },
     { NULL, NULL }
 };
 
