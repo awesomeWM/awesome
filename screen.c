@@ -28,6 +28,7 @@
 #include "ewmh.h"
 #include "tag.h"
 #include "client.h"
+#include "statusbar.h"
 #include "layouts/tile.h"
 
 extern awesome_t globalconf;
@@ -360,17 +361,27 @@ luaA_screen_index(lua_State *L)
 static int
 luaA_screen_padding(lua_State *L)
 {
-    screen_t *s;
+    screen_t *s = lua_touserdata(L, 1);
 
-    s = lua_touserdata(L, 1);
+    if(!s)
+        luaL_typerror(L, 1, "screen");
 
     if(lua_gettop(L) == 2)
     {
+        statusbar_t *sb;
+
         luaA_checktable(L, 2);
+
         s->padding.right = luaA_getopt_number(L, 2, "right", 0);
         s->padding.left = luaA_getopt_number(L, 2, "left", 0);
         s->padding.top = luaA_getopt_number(L, 2, "top", 0);
         s->padding.bottom = luaA_getopt_number(L, 2, "bottom", 0);
+
+        s->need_arrange = true;
+
+        /* All the statusbar repositioned */
+        for(sb = s->statusbar; sb; sb = sb->next)
+            statusbar_position_update(sb);
 
         ewmh_update_workarea(screen_virttophys(s->index));
     }

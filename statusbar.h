@@ -36,6 +36,7 @@ statusbar_delete(statusbar_t **statusbar)
 }
 
 void statusbar_refresh(void);
+void statusbar_position_update(statusbar_t *);
 
 int luaA_statusbar_userdata_new(lua_State *, statusbar_t *);
 

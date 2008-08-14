@@ -206,7 +206,7 @@ statusbar_refresh(void)
  * create them back.
  * \param statusbar The statusbar.
  */
-static void
+void
 statusbar_position_update(statusbar_t *statusbar)
 {
     statusbar_t *sb;
