@@ -112,7 +112,7 @@ scan(void)
 
             state = window_state_get_reply(state_wins[i]);
 
-            has_awesome_prop = xutil_text_prop_get(globalconf.connection, wins[1],
+            has_awesome_prop = xutil_text_prop_get(globalconf.connection, wins[i],
                                                    _AWESOME_PROPERTIES, NULL, NULL);
 
             if(!attr_r || attr_r->override_redirect
