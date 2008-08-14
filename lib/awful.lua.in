@@ -725,18 +725,27 @@ for name, hook in pairs(capi.hooks) do
     else
         hooks[name] = {}
         hooks[name].register = function (time, f, runnow)
-            if type(time) ~= 'number' or type(f) ~= 'function' then
+            if type(time) ~= 'number' or type(f) ~= 'function' or time <= 0 then
                 return
+            end
+            local new_timer
+            if hooks[name].timer then
+                -- Take the smallest between current and new
+                new_timer = math.min(time, hooks[name].timer)
+            else
+                new_timer = time
             end
             if not hooks[name].callbacks then
                 hooks[name].callbacks = {}
-                hook(1, function (...)
+            end
+            if hooks[name].timer ~= new_timer then
+                hooks[name].timer = new_timer
+                hook(hooks[name].timer, function (...)
                     for i, callback in ipairs(hooks[name].callbacks) do
+                        callback['counter'] = callback['counter'] + hooks[name].timer
                         if callback['counter'] >= callback['timer'] then
-                            callback['counter'] = 1
                             callback['callback'](...)
-                        else
-                            callback['counter'] = callback['counter'] + 1
+                            callback['counter'] = 0
                         end
                     end
                 end)
