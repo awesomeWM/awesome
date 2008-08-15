@@ -1155,9 +1155,14 @@ luaA_client_newindex(lua_State *L)
         widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
         break;
       case A_TK_OPACITY:
-        d = luaL_checknumber(L, 3);
-        if(d == -1 || (d >= 0 && d <= 1))
-            window_trans_set((*c)->win, d);
+        if(lua_isnil(L, 3))
+            window_opacity_set((*c)->win, -1);
+        else
+        {
+            d = luaL_checknumber(L, 3);
+            if(d >= 0 && d <= 1)
+                window_opacity_set((*c)->win, d);
+        }
         break;
       case A_TK_FLOATING:
         client_setfloating(*c, luaA_checkboolean(L, 3));
@@ -1245,6 +1250,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield titlebar The client titlebar.
  * \lfield urgent The client urgent state.
  * \lfield focus The focused client.
+ * \lfield opacity The client opacity between 0 and 1.
  */
 static int
 luaA_client_index(lua_State *L)
@@ -1258,6 +1264,7 @@ luaA_client_index(lua_State *L)
     xutil_class_hint_t hint;
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r = NULL;
+    double d;
 
     if((*c)->invalid)
         luaL_error(L, "client is invalid\n");
@@ -1320,6 +1327,12 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_ICON_PATH:
         lua_pushstring(L, (*c)->icon_path);
+        break;
+      case A_TK_OPACITY:
+        if((d = window_opacity_get((*c)->win)) >= 0)
+            lua_pushnumber(L, d);
+        else
+            return 0;
         break;
       case A_TK_FLOATING:
         lua_pushboolean(L, (*c)->isfloating);

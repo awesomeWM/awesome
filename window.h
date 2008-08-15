@@ -30,7 +30,8 @@ long window_state_get_reply(xcb_get_property_cookie_t);
 void window_configure(xcb_window_t, area_t, int);
 void window_buttons_grab(xcb_window_t, xcb_window_t, button_t *);
 void window_root_buttons_grab(xcb_window_t);
-void window_trans_set(xcb_window_t, double);
+double window_opacity_get(xcb_window_t);
+void window_opacity_set(xcb_window_t, double);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

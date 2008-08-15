@@ -153,12 +153,42 @@ window_root_buttons_grab(xcb_window_t root)
     }
 }
 
-/** Set transparency of a window.
+/** Get the opacity of a window.
+ * \param The window.
+ * \return The opacity, between 0 and 1 or -1 or no opacity set.
+ */
+double
+window_opacity_get(xcb_window_t win)
+{
+    xcb_get_property_cookie_t prop_c;
+    xcb_get_property_reply_t *prop_r;
+
+    prop_c = xcb_get_property_unchecked(globalconf.connection, false, win,
+                                        _NET_WM_WINDOW_OPACITY, CARDINAL, 0L, 1L);
+
+    prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
+
+    if(!prop_r || !prop_r->value_len || prop_r->format != 32)
+        goto bailout;
+
+    if(prop_r->value_len)
+    {
+        unsigned int *data = xcb_get_property_value(prop_r);
+        printf("result %d\n", *data);
+        return (double) *data / (double) 0xffffffff;
+    }
+
+  bailout:
+    p_delete(&prop_r);
+    return -1;
+}
+
+/** Set opacity of a window.
  * \param win The window.
  * \param opacity Opacity of the window, between 0 and 1.
  */
 void
-window_trans_set(xcb_window_t win, double opacity)
+window_opacity_set(xcb_window_t win, double opacity)
 {
     unsigned int real_opacity = 0xffffffff;
 
