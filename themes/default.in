@@ -17,9 +17,20 @@ border_normal = #000000
 border_focus  = #535d6c
 border_marked = #91231c
 
+# Display the taglist squares
+taglist_squares = true
+
 # You can use your own command to
 # set your wallpaper
 wallpaper_cmd = xsetbg -fullscreen -border black @AWESOME_THEMES_PATH@/default-background.png || xsetroot -solid darkgrey
+
+# There are another variables sets
+# overriding the default one when
+# defined, the sets are:
+# [taglist|tasklist]_[bg|fg]_[focus|urgent]
+# titlebar_[bg|fg]_[normal|focus]
+# Example:
+#taglist_bg_focus = #ff0000
 
 # You can add as many variables as
 # you wish and access them by using
