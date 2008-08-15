@@ -8,7 +8,11 @@ awesomerc - Configuration file for the awesome window manager
 
 SYNOPSIS
 --------
-None.
+*awesome* looks for this configuration file in this order:
+
+* $XDG_CONFIG_HOME/awesome/rc.lua
+* $HOME/.config/awesome/rc.lua
+* XDG_CONFIG_DIRS/awesome/rc.lua
 
 DESCRIPTION
 -----------
@@ -26,7 +30,8 @@ Documentation for the Lua API can be found in the luadoc directory.
 COLORS FORMAT
 -------------
 Colors format in *awesome* are either standard X color names
-(blue, darkblue, lightred, etc) or hexadecimal formatted colors (#rrggbb).
+(blue, darkblue, lightred, etc) or hexadecimal formatted colors (#rrggbb
+or #rrggbbaa).
 By using hexadecimal format, you can also specifies an alpha channel:
 that means that #00ff00 will draw pure green, but #00ff00aa will set the
 alpha channel to `aa' and will blend the green with the color under it.
@@ -56,22 +61,9 @@ List of awesome markup and their attribute:
   - shadow_offset: shadow color offset in pixel
 
 
-A pango-markup example: <span weight="bold" foreground="#336699">...</span>.
-An awesome-markup example: <text align="right"/>.
+A pango markup example: <span weight="bold" foreground="#336699">...</span>.
 
-WIDGETS
--------
-The current list of available widget is:
-
-- graph
-- progressbar
-- taglist
-- tasklist
-- textbox
-- systray
-
-Each widget as its own set of properties, described below, that can bet modified with the set()
-method.
+Ax awesome-markup example: <text align="right"/>.
 
 SEE ALSO
 --------
@@ -79,7 +71,7 @@ awesome(1) awesome-client(1)
 
 AUTHORS
 -------
-This man page was written by Julien Danjou <julien@danjou.info>.
+Written by Julien Danjou <julien@danjou.info>.
 
 WWW
 ---
