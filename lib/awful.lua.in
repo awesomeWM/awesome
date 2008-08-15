@@ -1161,10 +1161,10 @@ end
 -- @return A string to print.
 function widget.taglist.label.all(t, args)
     if not args then args = {} end
-    local fg_focus = args.fg_focus or theme.fg_focus
-    local bg_focus = args.bg_focus or theme.bg_focus
-    local fg_urgent = args.fg_urgent or theme.fg_urgent
-    local bg_urgent = args.bg_urgent or theme.bg_urgent
+    local fg_focus = args.fg_focus or theme.taglist_fg_focus or theme.fg_focus
+    local bg_focus = args.bg_focus or theme.taglist_bg_focus or theme.bg_focus
+    local fg_urgent = args.fg_urgent or theme.taglist_fg_urgent or theme.fg_urgent
+    local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
     local taglist_squares = args.taglist_squares or theme.taglist_squares
     local text
     local background = ""
@@ -1212,10 +1212,10 @@ end
 function widget.taglist.label.noempty(t, args)
     if #t:clients() > 0 or t.selected then
         if not args then args = {} end
-        local fg_focus = args.fg_focus or theme.fg_focus
-        local bg_focus = args.bg_focus or theme.bg_focus
-        local fg_urgent = args.fg_urgent or theme.fg_urgent
-        local bg_urgent = args.bg_urgent or theme.bg_urgent
+        local fg_focus = args.fg_focus or theme.taglist_fg_focus or theme.fg_focus
+        local bg_focus = args.bg_focus or theme.taglist_bg_focus or theme.bg_focus
+        local fg_urgent = args.fg_urgent or theme.taglist_fg_urgent or theme.fg_urgent
+        local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
         local bg_color = nil
         local fg_color = nil
         local text
@@ -1244,10 +1244,10 @@ end
 
 local function widget_tasklist_label_common(c, args)
     if not args then args = {} end
-    local fg_focus = args.fg_focus or theme.fg_focus
-    local bg_focus = args.bg_focus or theme.bg_focus
-    local fg_urgent = args.fg_urgent or theme.fg_urgent
-    local bg_urgent = args.bg_urgent or theme.bg_urgent
+    local fg_focus = args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus
+    local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
+    local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
+    local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
     local text = ""
     local name
     if c.floating then
@@ -1335,10 +1335,10 @@ function titlebar.add(c, args)
     if not args then args = {} end
     -- Store colors
     titlebar.data[c] = {}
-    titlebar.data[c].fg = args.fg or theme.fg_normal
-    titlebar.data[c].bg = args.bg or theme.bg_normal
-    titlebar.data[c].fg_focus = args.fg_focus or theme.fg_focus
-    titlebar.data[c].bg_focus = args.bg_focus or theme.bg_focus
+    titlebar.data[c].fg = args.fg or theme.titlebar_fg_normal or theme.fg_normal
+    titlebar.data[c].bg = args.bg or theme.titlebar_bg_normal or theme.bg_normal
+    titlebar.data[c].fg_focus = args.fg_focus or theme.titlebar_fg_focus or theme.fg_focus
+    titlebar.data[c].bg_focus = args.bg_focus or theme.titlebar_bg_focus or theme.bg_focus
 
     -- Built args
     local targs = {}
