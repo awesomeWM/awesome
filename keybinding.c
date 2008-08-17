@@ -37,7 +37,8 @@ static struct {
     keybinding_array_t by_sym;
 } keys_g;
 
-static void keybinding_delete(keybinding_t **kbp)
+static void
+keybinding_delete(keybinding_t **kbp)
 {
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*kbp)->fct);
     p_delete(kbp);
@@ -333,7 +334,7 @@ luaA_keybinding_new(lua_State *L)
     /* get the last arg as function */
     k = p_new(keybinding_t, 1);
     __luaA_keystore(k, key);
-    k->fct = luaL_ref(L, LUA_REGISTRYINDEX);
+    luaA_registerfct(L, &k->fct);
 
     len = lua_objlen(L, 2);
     for(i = 1; i <= len; i++)
@@ -355,7 +356,6 @@ static int
 luaA_keybinding_add(lua_State *L)
 {
     keybinding_t **k = luaA_checkudata(L, 1, "keybinding");
-
     keybinding_register_root(*k);
     return 0;
 }
