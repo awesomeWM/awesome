@@ -998,6 +998,7 @@ luaA_client_tags(lua_State *L)
     tag_array_t *tags;
     tag_t **tag;
     client_t **c = luaA_checkudata(L, 1, "client");
+    int j = 0;
 
     if(lua_gettop(L) == 2)
     {
@@ -1012,19 +1013,17 @@ luaA_client_tags(lua_State *L)
             tag_client(*c, *tag);
             lua_pop(L, 1);
         }
+        lua_pop(L, 1);
     }
-    else
-    {
-        tags = &globalconf.screens[(*c)->screen].tags;
-        luaA_otable_new(L);
-        for(int i = 0; i < tags->len; i++)
-            if(is_client_tagged(*c, tags->tab[i]))
-            {
-                luaA_tag_userdata_new(L, tags->tab[i]);
-                luaA_tag_userdata_new(L, tags->tab[i]);
-                lua_rawset(L, -3);
-            }
-    }
+
+    tags = &globalconf.screens[(*c)->screen].tags;
+    luaA_otable_new(L);
+    for(int i = 0; i < tags->len; i++)
+        if(is_client_tagged(*c, tags->tab[i]))
+        {
+            luaA_tag_userdata_new(L, tags->tab[i]);
+            lua_rawseti(L, -2, ++j);
+        }
 
     return 1;
 }

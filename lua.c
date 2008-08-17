@@ -410,9 +410,19 @@ luaA_otable_index(lua_State *L)
         lua_pushnil(L);
         while(lua_next(L, 1))
         {
+            /* check the key against the key if the key is a userdata,
+             * otherwise check it again the value. */
             if((v = lua_touserdata(L, -2))
-               && *v == *obj)
+                && *v == *obj)
+                /* return value */
                 return 1;
+            else if((v = lua_touserdata(L, -1))
+                    && *v == *obj)
+            {
+                /* return key */
+                lua_pop(L, 1);
+                return 1;
+            }
             /* removes 'value'; keeps 'key' for next iteration */
             lua_pop(L, 1);
         }

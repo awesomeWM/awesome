@@ -290,6 +290,7 @@ static int
 luaA_tag_clients(lua_State *L)
 {
     tag_t **tag = luaA_checkudata(L, 1, "tag");
+    client_array_t *clients = &(*tag)->clients;
     int i;
 
     if(lua_gettop(L) == 2)
@@ -307,15 +308,12 @@ luaA_tag_clients(lua_State *L)
             lua_pop(L, 1);
         }
     }
-    else
+
+    luaA_otable_new(L);
+    for(i = 0; i < clients->len; i++)
     {
-        client_array_t *clients = &(*tag)->clients;
-        lua_newtable(L);
-        for(i = 0; i < clients->len; i++)
-        {
-            luaA_client_userdata_new(L, clients->tab[i]);
-            lua_rawseti(L, -2, i + 1);
-        }
+        luaA_client_userdata_new(L, clients->tab[i]);
+        lua_rawseti(L, -2, i + 1);
     }
 
     return 1;
