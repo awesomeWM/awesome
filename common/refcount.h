@@ -28,7 +28,6 @@
     {                                                                          \
         if(*item && --(*item)->refcount <= 0)                                  \
             dtor(item);                                                        \
-        *item = NULL;                                                          \
     }                                                                          \
                                                                                \
     static inline type *prefix##_ref(type **item)                              \
