@@ -239,10 +239,10 @@ keybinding({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -
 -- Prompt
 keybinding({ modkey }, "F1", function ()
                                  awful.prompt.run({ prompt = "Run: " }, mypromptbox, awful.spawn, awful.completion.bash,
-os.getenv("HOME") .. "/.cache/awesome_history") end):add()
+os.getenv("HOME") .. "/.cache/awesome/history") end):add()
 keybinding({ modkey }, "F4", function ()
                                  awful.prompt.run({ prompt = "Run Lua code: " }, mypromptbox, awful.eval, awful.prompt.bash,
-os.getenv("HOME") .. "/.cache/awesome_history_eval") end):add()
+os.getenv("HOME") .. "/.cache/awesome/history_eval") end):add()
 keybinding({ modkey, "Ctrl" }, "i", function ()
                                         if mypromptbox.text then
                                             mypromptbox.text = nil
