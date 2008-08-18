@@ -251,24 +251,11 @@ if(GENERATE_LUADOC)
 
     # {{{ setup a command for ${capi_lua}
     macro(a_file_match infile regex result_var)
-        if(CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION LESS 6)
-            # cmake < 2.6 doesn't know FILE(STRINGS ...)
-            execute_process(
-                COMMAND ${GREP_EXECUTABLE} -l ${regex} ${infile}
-                RESULT_VARIABLE exit_code
-                OUTPUT_QUIET)
-            if(exit_code EQUAL 0)
-                set(${result_var} TRUE)
-            else()
-                set(${result_var} FALSE)
-            endif()
+        file(STRINGS ${infile} match REGEX ${regex} LIMIT_COUNT 1)
+        if(match)
+            set(${result_var} TRUE)
         else()
-            file(STRINGS ${infile} match REGEX ${regex} LIMIT_COUNT 1)
-            if(match)
-                set(${result_var} TRUE)
-            else()
-                set(${result_var} FALSE)
-            endif()
+            set(${result_var} FALSE)
         endif()
     endmacro()
 
