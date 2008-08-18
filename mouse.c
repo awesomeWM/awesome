@@ -92,11 +92,11 @@ mouse_snapclient(Client *c, area_t geometry)
         mouse_snapclienttogeometry_inside(geometry, screen_geometry, snap);
 
     for(snapper = globalconf.clients; snapper; snapper = snapper->next)
-        if(snapper != c && client_isvisible(c, c->screen))
+        if(snapper != c && client_isvisible(snapper, c->screen))
         {
             snapper_geometry = snapper->geometry;
-            snapper_geometry.width += 2 * c->border;
-            snapper_geometry.height += 2 * c->border;
+            snapper_geometry.width += 2 * snapper->border;
+            snapper_geometry.height += 2 * snapper->border;
             snapper_geometry = titlebar_geometry_add(&snapper->titlebar,
                                                      snapper_geometry);
             geometry =
