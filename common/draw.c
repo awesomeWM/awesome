@@ -330,7 +330,12 @@ draw_text_markup_expand(draw_parser_data_t *data,
         goto bailout;
 
     if(!pango_parse_markup(p.text.s, p.text.len, 0, &data->attr_list, &text, NULL, &error))
+    {
+        warn("cannot parse pango markup: %s", error ? error->message : "unknown error");
+        if(error)
+            g_error_free(error);
         goto bailout;
+    }
 
     /* stole text */
     data->text = text;
@@ -791,7 +796,11 @@ draw_image_new(const char *filename)
     if(filename)
     {
         if(!(pixbuf = gdk_pixbuf_new_from_file(filename,&error)))
-            warn("cannot load image %s: %s", filename, error->message);
+        {
+            warn("cannot load image %s: %s", filename, error ? error->message : "unknown error");
+            if(error)
+                g_error_free(error);
+        }
         else
         {
             image = p_new(draw_image_t, 1);
