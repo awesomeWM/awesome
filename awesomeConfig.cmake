@@ -18,7 +18,7 @@ set(CMAKE_BUILD_TYPE RELEASE)
 set(CURSES_NEED_NCURSES true)
 
 option(WITH_DBUS "build with D-BUS" ON)
-option(WITH_IMLIB2 "build with Imlib2" OFF)
+option(WITH_IMLIB2 "build with Imlib2" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
 option(GENERATE_LUADOC "generate luadoc" ON)
 
