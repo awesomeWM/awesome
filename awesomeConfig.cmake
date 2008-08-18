@@ -285,6 +285,8 @@ set(AWESOME_CONFIGURE_FILES
     awesomerc.lua.in
     themes/default.in
     lib/awful.lua.in
+    lib/beautiful.lua.in
+    lib/tabulous.lua.in
     awesome-version-internal.h.in
     awesome.doxygen.in)
 

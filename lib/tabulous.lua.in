@@ -2,6 +2,7 @@
 -- @author Lucas de Vries &lt;lucasdevries@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou, Lucas de Vries
+-- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need

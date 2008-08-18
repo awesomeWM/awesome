@@ -22,9 +22,9 @@ include_directories(
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
 set(AWE_LUA_FILES
-    ${SOURCE_DIR}/lib/tabulous.lua
-    ${SOURCE_DIR}/lib/beautiful.lua)
-set(awful_lua ${BUILD_DIR}/lib/awful.lua)
+    ${BUILD_DIR}/lib/tabulous.lua
+    ${BUILD_DIR}/lib/beautiful.lua
+    ${BUILD_DIR}/lib/awful.lua)
 
 set(AWE_CONF_FILE_DEFAULT ${BUILD_DIR}/awesomerc.lua)
 set(AWE_CONF_FILE rc.lua)
@@ -247,11 +247,6 @@ if(GENERATE_LUADOC)
 
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
-        # setup symlink so everything is in one directory
-        foreach(lua_file ${AWE_LUA_FILES})
-            execute_process(COMMAND ${LN_EXECUTABLE} -s -f ${lua_file}
-                            WORKING_DIRECTORY ${BUILD_DIR}/lib)
-        endforeach()
     endif()
 
     # {{{ setup a command for ${capi_lua}
@@ -304,7 +299,7 @@ if(GENERATE_LUADOC)
     # }}}
 
     # dont include full path names in documentation
-    foreach(filename ${AWE_LUA_FILES} ${capi_lua} ${awful_lua})
+    foreach(filename ${AWE_LUA_FILES} ${capi_lua})
         get_filename_component(filename ${filename} NAME)
         set(luadoc_srcs ${luadoc_srcs} ${filename})
     endforeach()
@@ -312,7 +307,7 @@ if(GENERATE_LUADOC)
     add_custom_target(luadoc ALL
         COMMAND ${LUADOC_EXECUTABLE} ${luadoc_srcs} -d ${BUILD_DIR}/luadoc
         WORKING_DIRECTORY ${BUILD_DIR}/lib
-        DEPENDS ${AWE_LUA_FILES} ${capi_lua} ${awful_lua})
+        DEPENDS ${AWE_LUA_FILES} ${capi_lua})
 endif()
 # }}}
 
@@ -320,7 +315,6 @@ endif()
 if(LUAC_EXECUTABLE)
     foreach(luafile ${AWE_LUA_FILES})
         string(REGEX REPLACE ".lua\$" ".luac" luacfile ${luafile})
-        string(REPLACE ${SOURCE_DIR} ${BUILD_DIR} luacfile ${luacfile})
 
         add_custom_command(
             COMMAND ${LUAC_EXECUTABLE} -o ${luacfile} ${luafile}
@@ -329,15 +323,6 @@ if(LUAC_EXECUTABLE)
 
         set(AWE_LUAC_FILES ${AWE_LUAC_FILES} ${luacfile})
     endforeach()
-
-    # Special case for awful.lua
-    string(REGEX REPLACE ".lua\$" ".luac" luacfile ${awful_lua})
-    add_custom_command(
-        COMMAND ${LUAC_EXECUTABLE} -o ${luacfile} ${awful_lua}
-        OUTPUT ${luacfile}
-        DEPENDS ${awful_lua})
-
-    set(AWE_LUAC_FILES ${AWE_LUAC_FILES} ${luacfile})
 
     if(NOT EXISTS ${BUILD_DIR}/lib)
         FILE(MAKE_DIRECTORY ${BUILD_DIR}/lib)
@@ -357,7 +342,7 @@ endif()
 
 # {{{ Installation
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
-install(FILES ${AWE_LUA_FILES} ${awful_lua} ${AWE_LUAC_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
+install(FILES ${AWE_LUA_FILES} ${AWE_LUAC_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
 install(FILES ${AWE_CONF_FILE_DEFAULT} DESTINATION ${AWESOME_SYSCONFDIR}
         RENAME ${AWE_CONF_FILE})
 if(GENERATE_MANPAGES)
