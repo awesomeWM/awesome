@@ -27,7 +27,7 @@ In order to build the source code reference, you need these tools:
   - doxygen
   - graphviz
 
-Building and Installation
+Building and installation
 -------------------------
 After extracting the dist tarball, run:
 
@@ -40,9 +40,10 @@ After the building done, you can type this to install:
   make install # might need root permissions
 
 Running awesome
------------
-Add the following line to your .xinitrc to start awesome using startx
-or to .xsession to start awesome using gdm/kdm/xdm...:
+---------------
+You can directly select awesome from your display manager. If not, you can
+add the following line to your .xinitrc to start awesome using startx
+or to .xsession to start awesome using your display manager:
 
     exec awesome
 
