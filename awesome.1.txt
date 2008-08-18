@@ -73,8 +73,8 @@ Layout modification.
 DEFAULT KEY BINDINGS
 ---------------------
 
-Birth and annihilation.
-~~~~~~~~~~~~~~~~~~~~~~~
+Birth and annihilation
+~~~~~~~~~~~~~~~~~~~~~~
 
 *Mod4 \+ Return*::
     Spawn terminal emulator.
@@ -89,8 +89,8 @@ Birth and annihilation.
 *Mod4 \+ Shift \+ q*::
     Quit *awesome*.
 
-Navigation.
-~~~~~~~~~~~
+Navigation
+~~~~~~~~~~
 
 *Mod4 \+ j*::
     Focus next client.
@@ -111,8 +111,8 @@ Navigation.
 *Mod4 \+ Control \+ k*::
     Focus previous screen.
 
-Layout modification.
-~~~~~~~~~~~~~~~~~~~~
+Layout modification
+~~~~~~~~~~~~~~~~~~~
 
 *Mod4 \+ Shift \+ j*::
     Switch client with next client.
@@ -148,6 +148,11 @@ Layout modification.
     Tag client with tag.
 *Mod4 \+ Shift \+ Control \+ 1-9*::
     Toggle tag on client.
+
+Misc
+~~~~
+*Mod4 \+ Shift \+ i*::
+    Print the client class and instance.
 
 CUSTOMIZATION
 -------------
