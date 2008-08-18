@@ -96,6 +96,8 @@ Navigation.
     Focus next client.
 *Mod4 \+ k*::
     Focus previous client.
+*Mod4 \+ u*::
+    Focus first urgent client.
 *Mod4 \+ Left*::
     View previous tag.
 *Mod4 \+ Right*::

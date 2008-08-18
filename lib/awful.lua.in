@@ -62,6 +62,9 @@ widget.taglist = {}
 widget.taglist.label = {}
 widget.tasklist = {}
 widget.tasklist.label = {}
+client.urgent = {}
+client.urgent.stack = {}
+client.urgent.stack.data = {}
 
 --- Make i cycle.
 -- @param t A length.
@@ -71,6 +74,56 @@ local function cycle(t, i)
     while i > t do i = i - t end
     while i < 1 do i = i + t end
     return i
+end
+
+--- Get the first client that got the urgent hint.
+-- @return The first urgent client.
+function client.urgent.get()
+    if #client.urgent.stack.data > 0 then
+        return client.urgent.stack.data[1]
+    else
+        -- fallback behaviour: iterate through clients and get the first urgent
+        local clients = capi.client.get()
+        for k, cl in pairs(clients) do
+            if cl.urgent then
+                return cl
+            end
+        end
+    end
+end
+
+--- Jump to the client that received the urgent hint first.
+function client.urgent.jumpto()
+    local c = client.urgent.get()
+    if c then
+        local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
+        -- focus the screen
+        if s ~= c.screen then
+            capi.mouse.screen = c.screen
+        end
+        -- focus the tag
+        tag.viewonly(c:tags()[1])
+        -- focus the client
+        capi.client.focus = c
+        c:raise()
+    end
+end
+
+--- Adds client to urgent stack.
+-- @param The client object.
+function client.urgent.stack.add(c)
+    table.insert(client.urgent.stack.data, c)
+end
+
+--- Remove client from urgent stack.
+-- @param The client object.
+function client.urgent.stack.delete(c)
+    for k, cl in ipairs(client.urgent.stack.data) do
+        if c == cl then
+            table.remove(client.urgent.stack.data, k)
+            break
+        end
+    end
 end
 
 --- Remove a client from the focus history
@@ -1420,5 +1473,9 @@ hooks.focus.register(titlebar.update)
 hooks.unfocus.register(titlebar.update)
 hooks.titleupdate.register(titlebar.update)
 hooks.unmanage.register(titlebar.remove)
+
+hooks.urgent.register(client.urgent.stack.add)
+hooks.focus.register(client.urgent.stack.delete)
+hooks.unmanage.register(client.urgent.stack.delete)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
