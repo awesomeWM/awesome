@@ -48,17 +48,13 @@ void
 draw_parser_data_init(draw_parser_data_t *pdata)
 {
     p_clear(pdata, 1);
-    buffer_init(&pdata->text);
 }
 
 void
 draw_parser_data_wipe(draw_parser_data_t *pdata)
 {
     if(pdata)
-    {
-        buffer_wipe(&pdata->text);
         draw_image_delete(&pdata->bg_image);
-    }
 }
 
 static iconv_t iso2utf8 = (iconv_t) -1;
@@ -324,22 +320,26 @@ draw_text_markup_expand(draw_parser_data_t *data,
         .priv       = data,
         .on_element = &draw_markup_on_element,
     };
+    char *text = NULL;
+    GError *error = NULL;
+    bool ret = false;
 
     markup_parser_data_init(&p);
 
     if(!markup_parse(&p, str, slen))
-    {
-        markup_parser_data_wipe(&p);
-        return false;
-    }
+        goto bailout;
+
+    if(!pango_parse_markup(p.text.s, p.text.len, 0, &data->attr_list, &text, NULL, &error))
+        goto bailout;
 
     /* stole text */
-    buffer_wipe(&data->text);
-    data->text = p.text;
-    buffer_init(&p.text);
-    markup_parser_data_wipe(&p);
+    data->text = text;
+    data->len = a_strlen(text);
+    ret = true;
 
-    return true;
+  bailout:
+    markup_parser_data_wipe(&p);
+    return ret;
 }
 
 /** Draw text into a draw context.
@@ -365,15 +365,15 @@ draw_text(draw_context_t *ctx, font_t *font,
         parser_data.phys_screen = ctx->phys_screen;
         if(draw_text_markup_expand(&parser_data, text, len))
         {
-            text = parser_data.text.s;
-            len = parser_data.text.len;
+            text = parser_data.text;
+            len = parser_data.len;
         }
         pdata = &parser_data;
     }
     else
     {
-        text = pdata->text.s;
-        len = pdata->text.len;
+        text = pdata->text;
+        len = pdata->len;
     }
 
     if(pdata->has_bg_color)
@@ -400,12 +400,13 @@ draw_text(draw_context_t *ctx, font_t *font,
         draw_image(ctx, x, y, pdata->bg_resize ? area.height : 0, pdata->bg_image);
     }
 
+    pango_layout_set_text(ctx->layout, pdata->text, pdata->len);
     pango_layout_set_width(ctx->layout,
                            pango_units_from_double(area.width
                                                    - (pdata->margin.left
                                                       + pdata->margin.right)));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
-    pango_layout_set_markup(ctx->layout, NONULL(text), len);
+    pango_layout_set_attributes(ctx->layout, pdata->attr_list);
     pango_layout_set_font_description(ctx->layout, font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
@@ -1036,8 +1037,8 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
     parser_data->phys_screen = phys_screen;
     if(draw_text_markup_expand(parser_data, text, len))
     {
-        text = parser_data->text.s;
-        len  = parser_data->text.len;
+        text = parser_data->text;
+        len  = parser_data->len;
     }
 
     surface = cairo_xcb_surface_create(conn, phys_screen,
@@ -1047,7 +1048,8 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
 
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);
-    pango_layout_set_markup(layout, text, len);
+    pango_layout_set_text(layout, parser_data->text, parser_data->len);
+    pango_layout_set_attributes(layout, parser_data->attr_list);
     pango_layout_set_font_description(layout, font->desc);
     pango_layout_get_pixel_extents(layout, NULL, &ext);
     g_object_unref(layout);

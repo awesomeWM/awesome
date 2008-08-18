@@ -172,8 +172,10 @@ a_iso2utf8(char **dest, const char *str, ssize_t len)
 typedef struct
 {
     xcb_connection_t *connection;
+    PangoAttrList *attr_list;
     int phys_screen;
-    buffer_t text;
+    char *text;
+    ssize_t len;
     alignment_t align;
     struct
     {
