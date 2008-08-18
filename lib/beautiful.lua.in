@@ -28,13 +28,15 @@ local function split_line(line)
     local split_val = line:find('=')
 
     if split_val and line:sub(1, 1) ~= '#' and line:sub(1, 2) ~= '--' then
-        -- Remove spaces in key and extra spaces before value
+        -- Remove spaces and tabulations in key
+        local key = line:sub(1, split_val - 1):gsub(' ', ''):gsub('\t', '')
+        -- and extra spaces and tabulations before value
         local value = line:sub(split_val + 1, -1)
-        while value:sub(1, 1) == ' ' do
+        while value:sub(1, 1) == ' ' or value:sub(1, 1) == '\t' do
             value = value:sub(2, -1)
         end
 
-        return line:sub(1, split_val - 1):gsub(' ', ''), value
+        return key, value
     end
 end
 
