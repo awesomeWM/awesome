@@ -113,8 +113,6 @@ position_fromstr(const char *pos, ssize_t len)
         return Right;
       case A_TK_LEFT:
         return Left;
-      case A_TK_AUTO:
-        return Auto;
       default:
         return Off;
     }
@@ -133,7 +131,6 @@ position_tostr(position_t p)
       case Bottom: return "bottom";
       case Right:  return "right";
       case Left:   return "left";
-      case Auto:   return "auto";
       default:     return "off";
     }
 }

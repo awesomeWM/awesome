@@ -42,8 +42,7 @@ typedef enum
     Top,
     Bottom,
     Right,
-    Left,
-    Auto
+    Left
 } position_t;
 
 /** Link a name to a function */
