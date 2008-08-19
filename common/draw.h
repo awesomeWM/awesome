@@ -181,6 +181,10 @@ typedef struct
     {
         int left, right, top;
     } margin;
+    struct
+    {
+        int top, left;
+    } bg_margin;
     bool has_bg_color;
     xcolor_t bg_color;
     draw_image_t *bg_image;
