@@ -1419,7 +1419,7 @@ end
 -- @param c The client to update.
 function titlebar.update(c)
     if c.titlebar and titlebar.data[c] then
-        local widgets = c.titlebar.widgets
+        local widgets = c.titlebar:widgets()
         local title, close
         for k, v in ipairs(widgets) do
             if v.name == "title" then title = v end

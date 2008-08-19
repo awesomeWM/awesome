@@ -372,7 +372,6 @@ luaA_titlebar_newindex(lua_State *L)
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     client_t *c = NULL, **newc;
     int i;
-    widget_node_t *witer;
     position_t position;
 
     switch(a_tokenize(attr, len))
@@ -449,33 +448,6 @@ luaA_titlebar_newindex(lua_State *L)
                                                        globalconf.default_screen,
                                                        buf, len)))
                 (*titlebar)->need_update = true;
-        return 0;
-      case A_TK_WIDGETS:
-        luaA_checktable(L, 3);
-
-        /* remove all widgets */
-        for(witer = (*titlebar)->widgets; witer; witer = (*titlebar)->widgets)
-        {
-            if(witer->widget->detach)
-                witer->widget->detach(witer->widget, *titlebar);
-            widget_unref(&witer->widget);
-            widget_node_list_detach(&(*titlebar)->widgets, witer);
-            p_delete(&witer);
-        }
-
-        (*titlebar)->need_update = true;
-
-        /* now read all widgets and add them */
-        lua_pushnil(L);
-        while(lua_next(L, 3))
-        {
-            widget_t **widget = luaA_checkudata(L, -1, "widget");
-            widget_node_t *w = p_new(widget_node_t, 1);
-            w->widget = *widget;
-            widget_node_list_append(&(*titlebar)->widgets, w);
-            widget_ref(widget);
-            lua_pop(L, 1);
-        }
         break;
       case A_TK_POSITION:
         buf = luaL_checklstring(L, 3, &len);
@@ -518,8 +490,6 @@ luaA_titlebar_index(lua_State *L)
     titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *attr = luaL_checklstring(L, 2, &len);
     client_t *c;
-    widget_node_t *witer;
-    int i = 0;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
@@ -546,14 +516,6 @@ luaA_titlebar_index(lua_State *L)
       case A_TK_BG:
         luaA_pushcolor(L, &(*titlebar)->colors.bg);
         break;
-      case A_TK_WIDGETS:
-        lua_newtable(L);
-        for(witer = (*titlebar)->widgets; witer; witer = witer->next)
-        {
-            luaA_widget_userdata_new(L, witer->widget);
-            lua_rawseti(L, -2, ++i);
-        }
-        break;
       case A_TK_POSITION:
         lua_pushstring(L, position_tostr((*titlebar)->position)); 
         break;
@@ -562,6 +524,20 @@ luaA_titlebar_index(lua_State *L)
     }
 
     return 1;
+}
+
+static int
+luaA_titlebar_widgets(lua_State *L)
+{
+    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_widget_set(L, 2, *titlebar, &(*titlebar)->widgets);
+        (*titlebar)->need_update = true;
+        return 1;
+    }
+    return luaA_widget_get(L, (*titlebar)->widgets);
 }
 
 /** Convert a titlebar to a printable string.
@@ -587,6 +563,7 @@ const struct luaL_reg awesome_titlebar_methods[] =
 };
 const struct luaL_reg awesome_titlebar_meta[] =
 {
+    { "widgets", luaA_titlebar_widgets },
     { "__index", luaA_titlebar_index },
     { "__newindex", luaA_titlebar_newindex },
     { "__eq", luaA_titlebar_eq },

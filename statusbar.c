@@ -541,49 +541,14 @@ static int
 luaA_statusbar_widgets(lua_State *L)
 {
     statusbar_t **statusbar = luaA_checkudata(L, 1, "statusbar");
-    widget_node_t *witer;
 
     if(lua_gettop(L) == 2)
     {
-        luaA_checktable(L, 2);
-
-        /* remove all widgets */
-        for(witer = (*statusbar)->widgets; witer; witer = (*statusbar)->widgets)
-        {
-            if(witer->widget->detach)
-                witer->widget->detach(witer->widget, *statusbar);
-            widget_unref(&witer->widget);
-            widget_node_list_detach(&(*statusbar)->widgets, witer);
-            p_delete(&witer);
-        }
-
+        luaA_widget_set(L, 2, *statusbar, &(*statusbar)->widgets);
         (*statusbar)->need_update = true;
-
-        /* now read all widgets and add them */
-        lua_pushnil(L);
-        while(lua_next(L, 2))
-        {
-            widget_t **widget = luaA_checkudata(L, -1, "widget");
-            widget_node_t *w = p_new(widget_node_t, 1);
-            w->widget = *widget;
-            widget_node_list_append(&(*statusbar)->widgets, w);
-            widget_ref(widget);
-            lua_pop(L, 1);
-        }
-        lua_pop(L, 1);
+        return 1;
     }
-    else
-    {
-        int i = 0;
-        lua_newtable(L);
-        for(witer = (*statusbar)->widgets; witer; witer = witer->next)
-        {
-            luaA_widget_userdata_new(L, witer->widget);
-            lua_rawseti(L, -2, ++i);
-        }
-    }
-
-    return 1;
+    return luaA_widget_get(L, (*statusbar)->widgets);
 }
 
 /** Remove a statubar from a screen.

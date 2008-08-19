@@ -401,6 +401,65 @@ luaA_widget_newindex(lua_State *L)
     return (*widget)->newindex ? (*widget)->newindex(L, token) : 0;
 }
 
+/** Generic widget set.
+ * \param L The Lua VM state.
+ * \param idx The table of widgets index.
+ * \param object The object the widget will be attached to.
+ * \param widgets The widgets to fill.
+ * \return The number of elements pushed on stack.
+ */
+void
+luaA_widget_set(lua_State *L, int idx, void *object, widget_node_t **widgets)
+{
+    widget_node_t *witer;
+
+    luaA_checktable(L, idx);
+
+    /* remove all widgets */
+    for(witer = *widgets; witer; witer = *widgets)
+    {
+        if(witer->widget->detach)
+            witer->widget->detach(witer->widget, object);
+        widget_unref(&witer->widget);
+        widget_node_list_detach(widgets, witer);
+        p_delete(&witer);
+    }
+
+    /* now read all widgets and add them */
+    lua_pushnil(L);
+    while(lua_next(L, idx))
+    {
+        widget_t **widget = luaA_checkudata(L, -1, "widget");
+        widget_node_t *w = p_new(widget_node_t, 1);
+        w->widget = *widget;
+        widget_node_list_append(widgets, w);
+        widget_ref(widget);
+        lua_pop(L, 1);
+    }
+}
+
+/** Generic widget get.
+ * \param L The Lua VM state.
+ * \param widget The widget list.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_widget_get(lua_State *L, widget_node_t *widgets)
+{
+    widget_node_t *witer;
+    int i = 0;
+
+    lua_newtable(L);
+
+    for(witer = widgets; witer; witer = witer->next)
+    {
+        luaA_widget_userdata_new(L, witer->widget);
+        lua_rawseti(L, -2, ++i);
+    }
+
+    return 1;
+}
+
 const struct luaL_reg awesome_widget_methods[] =
 {
     { "__call", luaA_widget_new },
