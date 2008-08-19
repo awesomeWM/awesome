@@ -55,6 +55,7 @@ List of awesome markup and their attribute:
 * margin
   - left: left margin in pixel
   - right: right margin in pixel
+  - top: top margin in pixel
 * text
   - align: text alignment
   - shadow: shadow color

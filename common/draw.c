@@ -296,6 +296,8 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
               case A_TK_RIGHT:
                 data->margin.right = atoi(*values);
                 break;
+              case A_TK_TOP:
+                data->margin.top = atoi(*values);
               default:
                 break;
             }
@@ -419,7 +421,7 @@ draw_text(draw_context_t *ctx, font_t *font,
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
      * the text 1px lower than too high which usually results in a better type
      * face */
-    y = area.y + (ctx->height - font->height + 1) / 2;
+    y = area.y + (ctx->height - font->height + 1) / 2 + pdata->margin.top;
 
     switch(pdata->align)
     {

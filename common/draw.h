@@ -179,7 +179,7 @@ typedef struct
     alignment_t align;
     struct
     {
-        int left, right;
+        int left, right, top;
     } margin;
     bool has_bg_color;
     xcolor_t bg_color;
