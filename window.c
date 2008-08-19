@@ -125,7 +125,7 @@ window_buttons_grab(xcb_window_t win, xcb_window_t root, button_t *buttons)
                         b->button, b->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
     }
 
-    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, root, XUTIL_ANY_MODIFIER);
+    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, root, XCB_BUTTON_MASK_ANY);
 }
 
 /** Grab all buttons on the root window.

@@ -692,7 +692,7 @@ client_unmanage(client_t *c)
                          (uint32_t *) &c->oldborder);
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win,
-                      XUTIL_ANY_MODIFIER);
+                      XCB_BUTTON_MASK_ANY);
     window_state_set(c->win, XCB_WM_WITHDRAWN_STATE);
 
     xcb_aux_sync(globalconf.connection);

@@ -50,9 +50,6 @@
 /* Special Key Code, passed to GrabKey */
 #define XUTIL_ANY_KEY 0L
 
-/* Used in Grabbutton_t, GrabKey */
-#define XUTIL_ANY_MODIFIER (1<<15)
-
 /* X error codes */
 
 /* Everything's okay */

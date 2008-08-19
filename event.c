@@ -350,7 +350,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
         xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
                           xutil_screen_get(connection, emwin->phys_screen)->root,
-                          XUTIL_ANY_MODIFIER);
+                          XCB_BUTTON_MASK_ANY);
     else
         window_root_buttons_grab(ev->root);
 
