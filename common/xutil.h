@@ -47,9 +47,6 @@
 #define XUTIL_CURSOR_DOUBLE_ARROW_HORIZ 108
 #define XUTIL_CURSOR_DOUBLE_ARROW_VERT 116
 
-/* Special Key Code, passed to GrabKey */
-#define XUTIL_ANY_KEY 0L
-
 /* X error codes */
 
 /* Everything's okay */
