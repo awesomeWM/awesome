@@ -1404,12 +1404,11 @@ function titlebar.add(c, args)
     local close_button= capi.widget({ type = "textbox", name = "close", align = "right" })
     close_button:mouse_add(capi.mouse({ }, 1, function (t) t.client:kill() end))
 
-    tb.widgets =
-    {
+    tb:widgets({
         capi.widget({ type = "appicon", name = "appicon", align = "left" }),
         title,
         close_button
-    }
+    })
 
     titlebar.update(c)
 

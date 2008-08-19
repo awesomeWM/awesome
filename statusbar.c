@@ -493,14 +493,11 @@ luaA_statusbar_new(lua_State *L)
  * \lfield fg Foreground color.
  * \lfield bg Background color.
  * \lfield position The position.
- * \lfield widget The statusbar widgets.
  */
 static int
 luaA_statusbar_index(lua_State *L)
 {
     size_t len;
-    int i = 0;
-    widget_node_t *witer;
     statusbar_t **statusbar = luaA_checkudata(L, 1, "statusbar");
     const char *attr = luaL_checklstring(L, 2, &len);
 
@@ -526,16 +523,64 @@ luaA_statusbar_index(lua_State *L)
       case A_TK_POSITION:
         lua_pushstring(L, position_tostr((*statusbar)->position));
         break;
-      case A_TK_WIDGETS:
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
+/** Get or set the statusbar widgets.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \param None, or a table of widgets to set.
+ * \return The current statusbar widgets.
+*/
+static int
+luaA_statusbar_widgets(lua_State *L)
+{
+    statusbar_t **statusbar = luaA_checkudata(L, 1, "statusbar");
+    widget_node_t *witer;
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_checktable(L, 2);
+
+        /* remove all widgets */
+        for(witer = (*statusbar)->widgets; witer; witer = (*statusbar)->widgets)
+        {
+            if(witer->widget->detach)
+                witer->widget->detach(witer->widget, *statusbar);
+            widget_unref(&witer->widget);
+            widget_node_list_detach(&(*statusbar)->widgets, witer);
+            p_delete(&witer);
+        }
+
+        (*statusbar)->need_update = true;
+
+        /* now read all widgets and add them */
+        lua_pushnil(L);
+        while(lua_next(L, 2))
+        {
+            widget_t **widget = luaA_checkudata(L, -1, "widget");
+            widget_node_t *w = p_new(widget_node_t, 1);
+            w->widget = *widget;
+            widget_node_list_append(&(*statusbar)->widgets, w);
+            widget_ref(widget);
+            lua_pop(L, 1);
+        }
+        lua_pop(L, 1);
+    }
+    else
+    {
+        int i = 0;
         lua_newtable(L);
         for(witer = (*statusbar)->widgets; witer; witer = witer->next)
         {
             luaA_widget_userdata_new(L, witer->widget);
             lua_rawseti(L, -2, ++i);
         }
-        break;
-      default:
-        return 0;
     }
 
     return 1;
@@ -579,7 +624,6 @@ luaA_statusbar_newindex(lua_State *L)
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     position_t p;
     int screen;
-    widget_node_t *witer;
 
     switch(a_tokenize(attr, len))
     {
@@ -662,33 +706,6 @@ luaA_statusbar_newindex(lua_State *L)
             }
         }
         break;
-      case A_TK_WIDGETS:
-        luaA_checktable(L, 3);
-
-        /* remove all widgets */
-        for(witer = (*statusbar)->widgets; witer; witer = (*statusbar)->widgets)
-        {
-            if(witer->widget->detach)
-                witer->widget->detach(witer->widget, *statusbar);
-            widget_unref(&witer->widget);
-            widget_node_list_detach(&(*statusbar)->widgets, witer);
-            p_delete(&witer);
-        }
-
-        (*statusbar)->need_update = true;
-
-        /* now read all widgets and add them */
-        lua_pushnil(L);
-        while(lua_next(L, 3))
-        {
-            widget_t **widget = luaA_checkudata(L, -1, "widget");
-            widget_node_t *w = p_new(widget_node_t, 1);
-            w->widget = *widget;
-            widget_node_list_append(&(*statusbar)->widgets, w);
-            widget_ref(widget);
-            lua_pop(L, 1);
-        }
-        break;
       default:
         return 0;
     }
@@ -703,6 +720,7 @@ const struct luaL_reg awesome_statusbar_methods[] =
 };
 const struct luaL_reg awesome_statusbar_meta[] =
 {
+    { "widgets", luaA_statusbar_widgets },
     { "__index", luaA_statusbar_index },
     { "__newindex", luaA_statusbar_newindex },
     { "__gc", luaA_statusbar_gc },
