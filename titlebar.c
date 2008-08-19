@@ -389,6 +389,7 @@ luaA_titlebar_newindex(lua_State *L)
             {
                 simplewindow_delete(&(*newc)->titlebar->sw);
                 titlebar_unref(&(*newc)->titlebar);
+                (*newc)->titlebar = NULL;
                 globalconf.screens[(*newc)->screen].need_arrange = true;
             }
             /* Attach titlebar to client */
@@ -404,6 +405,7 @@ luaA_titlebar_newindex(lua_State *L)
                 simplewindow_delete(&(*titlebar)->sw);
                 /* unref and NULL the ref */
                 titlebar_unref(&c->titlebar);
+                c->titlebar = NULL;
                 globalconf.screens[c->screen].need_arrange = true;
             }
         }

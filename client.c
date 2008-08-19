@@ -708,6 +708,7 @@ client_unmanage(client_t *c)
     {
         simplewindow_delete(&c->titlebar->sw);
         titlebar_unref(&c->titlebar);
+        c->titlebar = NULL;
     }
 
     ewmh_update_net_client_list(c->phys_screen);
@@ -1209,6 +1210,7 @@ luaA_client_newindex(lua_State *L)
         {
             simplewindow_delete(&(*c)->titlebar->sw);
             titlebar_unref(&(*c)->titlebar);
+            (*c)->titlebar = NULL;
             globalconf.screens[(*c)->screen].need_arrange = true;
         }
 
