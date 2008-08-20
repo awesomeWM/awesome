@@ -154,6 +154,9 @@ Misc
 *Mod4 \+ Shift \+ i*::
     Print the client class and instance.
 
+*Mod4 \+ Shift \+ r*::
+    Redraw the focused window.
+
 CUSTOMIZATION
 -------------
 *awesome* is customized by creating a custom '$XDG_CONFIG_HOME/awesome/rc.lua' file.

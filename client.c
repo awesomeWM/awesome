@@ -1068,8 +1068,17 @@ static int
 luaA_client_redraw(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
+
     xcb_unmap_window(globalconf.connection, (*c)->win);
     xcb_map_window(globalconf.connection, (*c)->win);
+
+    /* Set the focus on the current window if the redraw has been
+       performed on the window where the pointer is currently on
+       because after the unmapping/mapping, the focus is lost */
+    if(globalconf.screen_focus->client_focus == *c)
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+                            (*c)->win, XCB_CURRENT_TIME);
+    
     return 0;
 }
 
