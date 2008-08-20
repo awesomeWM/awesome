@@ -1171,17 +1171,17 @@ luaA_mouse_coords(lua_State *L)
     uint16_t mask;
     int screen, x, y, mouse_x, mouse_y, i = 0;
 
-    if(lua_gettop(L) == 2)
+    if(lua_gettop(L) == 1)
     {
         xcb_window_t root;
 
-        luaA_checktable(L, 3);
+        luaA_checktable(L, 1);
 
         if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
             return 0;
 
-        x = luaA_getopt_number(L, 3, "x", mouse_x);
-        y = luaA_getopt_number(L, 3, "y", mouse_y);
+        x = luaA_getopt_number(L, 1, "x", mouse_x);
+        y = luaA_getopt_number(L, 1, "y", mouse_y);
 
         root = xutil_screen_get(globalconf.connection, screen)->root;
         mouse_warp_pointer(root, x, y);
