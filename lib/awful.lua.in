@@ -263,7 +263,7 @@ end
 function client.focusbydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
-        local coords = sel.coords
+        local coords = sel:coords()
         local dist, dist_min
         local target = nil
         local cls = capi.client.visible_get(sel.screen)
@@ -271,10 +271,10 @@ function client.focusbydirection(dir, c)
         -- We check each client.
         for i, c in ipairs(cls) do
             -- Check coords to see if client is located in the right direction.
-            if is_in_direction(dir, coords, c.coords) then
+            if is_in_direction(dir, coords, c:coords()) then
 
                 -- Calculate distance between focused client and checked client.
-                dist = calculate_distance(dir, coords, c.coords)
+                dist = calculate_distance(dir, coords, c:coords())
 
                 -- If distance is shorter then keep the client.
                 if not target or dist < dist_min then
@@ -328,12 +328,12 @@ end
 -- @param c The optional client, otherwise focused one is used.
 function client.moveresize(x, y, w, h, c)
     local sel = c or capi.client.focus
-    local coords = sel.coords
+    local coords = sel:coords()
     coords['x'] = coords['x'] + x
     coords['y'] = coords['y'] + y
     coords['width'] = coords['width'] + w
     coords['height'] = coords['height'] + h
-    sel.coords = coords
+    sel:coords(coords)
 end
 
 --- Maximize a client to use the full workarea.
@@ -347,13 +347,13 @@ function client.maximize(c)
         if sel.floating and client.data.maximize[sel] then
             sel.floating = client.data.maximize[sel].floating
             if sel.floating then
-                sel.coords = client.data.maximize[sel].coords
+                sel:coords(client.data.maximize[sel].coords)
             end
             client.data.maximize[sel] = nil
         else
-            client.data.maximize[sel] = { coords = sel.coords, floating = sel.floating }
+            client.data.maximize[sel] = { coords = sel:coords(), floating = sel.floating }
             sel.floating = true
-            sel.coords = ws
+            sel:coords(ws)
         end
     end
 end

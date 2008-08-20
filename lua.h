@@ -164,6 +164,26 @@ luaA_settype(lua_State *L, const char *type)
     return 1;
 }
 
+/** Push a area type to a table on stack.
+ * \param L The Lua VM state.
+ * \param geometry The area geometry to push.
+ * \return The number of elements pushed on stack.
+ */
+static inline int
+luaA_pusharea(lua_State *L, area_t geometry)
+{
+    lua_newtable(L);
+    lua_pushnumber(L, geometry.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, geometry.y);
+    lua_setfield(L, -2, "y");
+    lua_pushnumber(L, geometry.width);
+    lua_setfield(L, -2, "width");
+    lua_pushnumber(L, geometry.height);
+    lua_setfield(L, -2, "height");
+    return 1;
+}
+
 static inline int
 luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
 {

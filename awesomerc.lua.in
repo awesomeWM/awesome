@@ -407,7 +407,7 @@ function hook_arrange(screen)
     --[[
     local sel = client.focus
     if sel then
-        local c_c = sel.coords
+        local c_c = sel:coords()
         local m_c = mouse.coords
 
         if m_c.x < c_c.x or m_c.x >= c_c.x + c_c.width or

@@ -1100,6 +1100,29 @@ luaA_client_unmanage(lua_State *L)
     return 0;
 }
 
+static int
+luaA_client_coords(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+
+    if(lua_gettop(L) == 2)
+    {
+        if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
+        {
+            area_t geometry;
+
+            luaA_checktable(L, 2);
+            geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
+            geometry.y = luaA_getopt_number(L, 2, "y", (*c)->geometry.y);
+            geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
+            geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
+            client_resize(*c, geometry, false);
+        }
+    }
+
+    return luaA_pusharea(L, (*c)->geometry);
+}
+
 /** Client newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1185,18 +1208,6 @@ luaA_client_newindex(lua_State *L)
             xcb_change_window_attributes(globalconf.connection, (*c)->win,
                                          XCB_CW_BORDER_PIXEL, &(*c)->border_color.pixel);
         break;
-      case A_TK_COORDS:
-        if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
-        {
-            area_t geometry;
-            luaA_checktable(L, 3);
-            geometry.x = luaA_getopt_number(L, 3, "x", (*c)->geometry.x);
-            geometry.y = luaA_getopt_number(L, 3, "y", (*c)->geometry.y);
-            geometry.width = luaA_getopt_number(L, 3, "width", (*c)->geometry.width);
-            geometry.height = luaA_getopt_number(L, 3, "height", (*c)->geometry.height);
-            client_resize(*c, geometry, false);
-        }
-        break;
       case A_TK_TITLEBAR:
         if(!lua_isnil(L, 3))
         {
@@ -1247,7 +1258,6 @@ luaA_client_newindex(lua_State *L)
  * \lfield honorsizehints Honor size hints, i.e. respect size ratio.
  * \lfield border_width The client border width.
  * \lfield border_color The client border color.
- * \lfield coords The client coordinates.
  * \lfield titlebar The client titlebar.
  * \lfield urgent The client urgent state.
  * \lfield focus The focused client.
@@ -1347,17 +1357,6 @@ luaA_client_index(lua_State *L)
       case A_TK_BORDER_COLOR:
         luaA_pushcolor(L, &(*c)->border_color);
         break;
-      case A_TK_COORDS:
-        lua_newtable(L);
-        lua_pushnumber(L, (*c)->geometry.width);
-        lua_setfield(L, -2, "width");
-        lua_pushnumber(L, (*c)->geometry.height);
-        lua_setfield(L, -2, "height");
-        lua_pushnumber(L, (*c)->geometry.x);
-        lua_setfield(L, -2, "x");
-        lua_pushnumber(L, (*c)->geometry.y);
-        lua_setfield(L, -2, "y");
-        break;
       case A_TK_TITLEBAR:
         if((*c)->titlebar)
             return luaA_titlebar_userdata_new(globalconf.L, (*c)->titlebar);
@@ -1432,6 +1431,7 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
+    { "coords", luaA_client_coords },
     { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
