@@ -1103,49 +1103,11 @@ luaA_mouse_index(lua_State *L)
 {
     size_t len;
     const char *attr = luaL_checklstring(L, 2, &len);
-    int mouse_x, mouse_y, i = 0;
-    uint16_t mask;
+    int mouse_x, mouse_y, i;
     int screen;
 
     switch(a_tokenize(attr, len))
     {
-      case A_TK_COORDS:
-        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
-            return 0;
-
-        lua_newtable(L);
-        lua_pushnumber(L, mouse_x);
-        lua_setfield(L, -2, "x");
-        lua_pushnumber(L, mouse_y);
-        lua_setfield(L, -2, "y");
-        lua_newtable(L);
-        if (mask & XCB_BUTTON_MASK_1)
-        {
-            lua_pushnumber(L, 1);
-            lua_rawseti(L, -2, ++i);
-        }
-        if (mask & XCB_BUTTON_MASK_2)
-        {
-            lua_pushnumber(L, 2);
-            lua_rawseti(L, -2, ++i);
-        }
-        if (mask & XCB_BUTTON_MASK_3)
-        {
-            lua_pushnumber(L, 3);
-            lua_rawseti(L, -2, ++i);
-        }
-        if (mask & XCB_BUTTON_MASK_4)
-        {
-            lua_pushnumber(L, 4);
-            lua_rawseti(L, -2, ++i);
-        }
-        if (mask & XCB_BUTTON_MASK_5)
-        {
-            lua_pushnumber(L, 5);
-            lua_rawseti(L, -2, ++i);
-        }
-        lua_setfield(L, -2, "buttons");
-        break;
       case A_TK_SCREEN:
         if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL))
             return 0;
@@ -1170,25 +1132,12 @@ luaA_mouse_newindex(lua_State *L)
 {
     size_t len;
     const char *attr = luaL_checklstring(L, 2, &len);
-    int mouse_x, mouse_y, x, y = 0;
-    uint16_t mask;
+    int x, y = 0;
     xcb_window_t root;
     int screen, phys_screen;
 
     switch(a_tokenize(attr, len))
     {
-      case A_TK_COORDS:
-        luaA_checktable(L, 3);
-
-        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
-            return 0;
-
-        x = luaA_getopt_number(L, 3, "x", mouse_x);
-        y = luaA_getopt_number(L, 3, "y", mouse_y);
-
-        root = xutil_screen_get(globalconf.connection, screen)->root;
-        mouse_warp_pointer(root, x, y);
-        break;
       case A_TK_SCREEN:
         screen = luaL_checknumber(L, 3) - 1;
         luaA_checkscreen(screen);
@@ -1209,11 +1158,81 @@ luaA_mouse_newindex(lua_State *L)
     return 0;
 }
 
+/** Get or set the mouse coords.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam None or a table with x and y keys as mouse coordinates.
+ * \lreturn A table with mouse coordinates.
+ */
+static int
+luaA_mouse_coords(lua_State *L)
+{
+    uint16_t mask;
+    int screen, x, y, mouse_x, mouse_y, i = 0;
+
+    if(lua_gettop(L) == 2)
+    {
+        xcb_window_t root;
+
+        luaA_checktable(L, 3);
+
+        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
+            return 0;
+
+        x = luaA_getopt_number(L, 3, "x", mouse_x);
+        y = luaA_getopt_number(L, 3, "y", mouse_y);
+
+        root = xutil_screen_get(globalconf.connection, screen)->root;
+        mouse_warp_pointer(root, x, y);
+        lua_pop(L, 1);
+    }
+
+    if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
+        return 0;
+
+    lua_newtable(L);
+    lua_pushnumber(L, mouse_x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, mouse_y);
+    lua_setfield(L, -2, "y");
+    lua_newtable(L);
+    if (mask & XCB_BUTTON_MASK_1)
+    {
+        lua_pushnumber(L, 1);
+        lua_rawseti(L, -2, ++i);
+    }
+    if (mask & XCB_BUTTON_MASK_2)
+    {
+        lua_pushnumber(L, 2);
+        lua_rawseti(L, -2, ++i);
+    }
+    if (mask & XCB_BUTTON_MASK_3)
+    {
+        lua_pushnumber(L, 3);
+        lua_rawseti(L, -2, ++i);
+    }
+    if (mask & XCB_BUTTON_MASK_4)
+    {
+        lua_pushnumber(L, 4);
+        lua_rawseti(L, -2, ++i);
+    }
+    if (mask & XCB_BUTTON_MASK_5)
+    {
+        lua_pushnumber(L, 5);
+        lua_rawseti(L, -2, ++i);
+    }
+    lua_setfield(L, -2, "buttons");
+
+    return 1;
+}
+
 const struct luaL_reg awesome_mouse_methods[] =
 {
     { "__call", luaA_mouse_new },
     { "__index", luaA_mouse_index },
     { "__newindex", luaA_mouse_newindex },
+    { "coords", luaA_mouse_coords },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_mouse_meta[] =

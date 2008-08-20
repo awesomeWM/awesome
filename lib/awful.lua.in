@@ -598,7 +598,7 @@ function client.movetoscreen(c, s)
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel.screen = s
-        capi.mouse.coords = capi.screen[s].coords
+        capi.mouse.coords(capi.screen[s].coords)
         capi.client.focus = sel
     end
 end
