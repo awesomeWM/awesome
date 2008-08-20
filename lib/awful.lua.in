@@ -1401,14 +1401,21 @@ function titlebar.add(c, args)
     title:mouse_add(capi.mouse({ }, 1, function (t) t.client:mouse_move() end))
     title:mouse_add(capi.mouse({ args.modkey }, 3, function (t) t.client:mouse_resize() end))
 
-    local close_button= capi.widget({ type = "textbox", name = "close", align = "right" })
-    close_button:mouse_add(capi.mouse({ }, 1, function (t) t.client:kill() end))
+    if theme.titlebar_close_button == "true" then
+        local close_button = capi.widget({ type = "textbox", name = "close", align = "right" })
+        close_button:mouse_add(capi.mouse({ }, 1, function (t) t.client:kill() end))
 
-    tb:widgets({
-        capi.widget({ type = "appicon", name = "appicon", align = "left" }),
-        title,
-        close_button
-    })
+        tb:widgets({
+            capi.widget({ type = "appicon", name = "appicon", align = "left" }),
+            title,
+            close_button
+        })
+    else
+        tb:widgets({
+            capi.widget({ type = "appicon", name = "appicon", align = "left" }),
+            title
+        })
+    end
 
     titlebar.update(c)
 
@@ -1433,13 +1440,18 @@ function titlebar.update(c)
             c.titlebar.fg = titlebar.data[c].fg_focus
             c.titlebar.bg = titlebar.data[c].bg_focus
             if close then
-                close.text = "<bg image=\"@AWESOME_ICON_PATH@/titlebar/closer.png\" resize=\"true\"/>"
+                close.text = theme.titlebar_close_button_focus or
+                        "<bg image=\"" .. theme.titlebar_close_button_img_focus .. "\" resize=\"true\"/>" or
+                        "<bg image=\"@AWESOME_ICON_PATH@/titlebar/closer.png\" resize=\"true\"/>"
+
             end
         else
             c.titlebar.fg = titlebar.data[c].fg
             c.titlebar.bg = titlebar.data[c].bg
             if close then
-                close.text = "<bg image=\"@AWESOME_ICON_PATH@/titlebar/close.png\" resize=\"true\"/>"
+                close.text = theme.titlebar_close_button_normal or
+                        "<bg image=\"" .. theme.titlebar_close_button_img_normal .. "\" resize=\"true\"/>" or
+                        "<bg image=\"@AWESOME_ICON_PATH@/titlebar/close.png\" resize=\"true\"/>"
             end
         end
     end

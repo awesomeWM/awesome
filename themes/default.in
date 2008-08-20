@@ -17,13 +17,6 @@ border_normal = #000000
 border_focus  = #535d6c
 border_marked = #91231c
 
-# Display the taglist squares
-taglist_squares = true
-
-# You can use your own command to
-# set your wallpaper
-wallpaper_cmd = xsetbg -fullscreen -border black @AWESOME_THEMES_PATH@/default-background.png || xsetroot -solid darkgrey
-
 # There are another variables sets
 # overriding the default one when
 # defined, the sets are:
@@ -32,7 +25,24 @@ wallpaper_cmd = xsetbg -fullscreen -border black @AWESOME_THEMES_PATH@/default-b
 # Example:
 #taglist_bg_focus = #ff0000
 
+# Display the taglist squares
+taglist_squares = true
+
 # You can add as many variables as
 # you wish and access them by using
 # beautiful.variable in your rc.lua
 #bg_widget    = #cc0000
+
+# Display close button inside titlebar
+titlebar_close_button = true
+
+# Define the image to load
+@ (if titlebar_close_button_[normal|focus] these values are ignored)
+#titlebar_close_button_img_normal = @AWESOME_ICONS_PATH@/titlebar/closea.png
+#titlebar_close_button_img_focus = @AWESOME_ICONS_PATH@/titlebar/closera.png
+# Or create your own close button
+#titlebar_close_button_normal = <span>...</span>
+#titlebar_close_button_focus = <span>...</span>
+
+# You can use your own command to set your wallpaper
+wallpaper_cmd = xsetbg -fullscreen -border black @AWESOME_THEMES_PATH@/default-background.png || xsetroot -solid darkgrey
