@@ -28,6 +28,7 @@ local capi =
     hooks = hooks,
     keygrabber = keygrabber
 }
+local lfs = require("lfs")
 
 --- awful: AWesome Functions very UsefuL
 module("awful")
@@ -866,7 +867,15 @@ end
 -- @param id The prompt history identifier
 local function prompt_history_save(id)
     if prompt.history[id] then
-        local f = assert(io.open(id, "w"))
+        local f = io.open(id, "w")
+        if not f then
+            local dir = ""
+            for d in id:gfind(".-/") do
+                dir = dir .. d
+                lfs.mkdir(dir)
+            end
+            f = assert(io.open(id, "w"))
+        end
 	for i = 1, math.min(#prompt.history[id].table, prompt.history[id].max) do
             f:write(prompt.history[id].table[i] .. "\n")
         end
