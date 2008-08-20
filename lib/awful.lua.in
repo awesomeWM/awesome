@@ -569,7 +569,7 @@ function client.toggletag(target, c)
     if sel and sel.screen == target.screen then
         local tags = sel:tags()
         if tags[target] then
-            tags[target] = nil
+            tags[tags[target]] = nil
         else
             tags[target] = target
         end
