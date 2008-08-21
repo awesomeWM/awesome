@@ -1282,6 +1282,9 @@ luaA_client_newindex(lua_State *L)
             client_need_arrange(*c);
         }
         break;
+      case A_TK_FULLSCREEN:
+        client_setfullscreen(*c, luaA_checkboolean(L, 3));
+        break;
       case A_TK_ICON_PATH:
         buf = luaL_checkstring(L, 3);
         p_delete(&(*c)->icon_path);
@@ -1380,6 +1383,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield focus The focused client.
  * \lfield opacity The client opacity between 0 and 1.
  * \lfield ontop The client is on top of every other windows.
+ * \lfield fullscreen The client is fullscreen or not.
  */
 static int
 luaA_client_index(lua_State *L)
@@ -1466,6 +1470,9 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_HIDE:
         lua_pushboolean(L, (*c)->ishidden);
+        break;
+      case A_TK_FULLSCREEN:
+        lua_pushboolean(L, (*c)->isfullscreen);
         break;
       case A_TK_ICON_PATH:
         lua_pushstring(L, (*c)->icon_path);

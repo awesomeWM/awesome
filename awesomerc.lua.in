@@ -222,6 +222,7 @@ keybinding({ modkey, "Shift" }, "q", awesome.quit):add()
 
 -- Client manipulation
 keybinding({ modkey }, "m", awful.client.maximize):add()
+keybinding({ modkey }, "f", function () client.focus.fullscreen = not client.focus.fullscreen end):add()
 keybinding({ modkey, "Shift" }, "c", function () client.focus:kill() end):add()
 keybinding({ modkey }, "j", function () awful.client.focusbyidx(1); client.focus:raise() end):add()
 keybinding({ modkey }, "k", function () awful.client.focusbyidx(-1);  client.focus:raise() end):add()
