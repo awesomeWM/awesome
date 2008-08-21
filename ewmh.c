@@ -260,15 +260,9 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == _NET_WM_STATE_SKIP_TASKBAR)
     {
         if(set == _NET_WM_STATE_REMOVE)
-        {
             c->skiptb = false;
-            c->skip = false;
-        }
         else if(set == _NET_WM_STATE_ADD)
-        {
             c->skiptb = true;
-            c->skip = true;
-        }
     }
     else if(state == _NET_WM_STATE_FULLSCREEN)
     {
@@ -378,7 +372,6 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
     else if(state == _NET_WM_WINDOW_TYPE_DOCK
             || state == _NET_WM_WINDOW_TYPE_SPLASH)
     {
-        c->skip = true;
         c->isfixed = true;
         if(c->titlebar && c->titlebar->position && c->titlebar->sw)
         {
@@ -400,7 +393,6 @@ ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
         tag_array_t *tags = &globalconf.screens[c->screen].tags;
         c->noborder = true;
         c->isfixed = true;
-        c->skip = true;
         client_setlayer(c, LAYER_DESKTOP);
         for(int i = 0; i < tags->len; i++)
             tag_client(c, tags->tab[i]);

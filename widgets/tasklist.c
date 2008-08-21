@@ -215,7 +215,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
     client_label_array_init(&odata->client_labels);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(!c->skip && !c->skiptb)
+        if(!c->skiptb)
         {
             /* push client */
             luaA_client_userdata_new(globalconf.L, c);

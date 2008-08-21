@@ -281,8 +281,6 @@ struct client_t
     bool isfixed;
     /** true if the window is maximized */
     bool ismax;
-    /** true if the client must be skipped from client list */
-    bool skip;
     /** true if the client is moving */
     bool ismoving;
     /** True if the client is hidden */
