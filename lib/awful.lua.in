@@ -1450,18 +1450,29 @@ function titlebar.update(c)
             c.titlebar.fg = titlebar.data[c].fg_focus
             c.titlebar.bg = titlebar.data[c].bg_focus
             if close then
-                close.text = theme.titlebar_close_button_focus or
-                        "<bg image=\"" .. theme.titlebar_close_button_img_focus .. "\" resize=\"true\"/>" or
+                if theme.titlebar_close_button_focus then
+                    close.text = theme.titlebar_close_button_focus
+                elseif theme.titlebar_close_button_img_focus then
+                    close.text =
+                        "<bg image=\"" .. theme.titlebar_close_button_img_focus .. "\" resize=\"true\"/>"
+                else
+                    close.text =
                         "<bg image=\"@AWESOME_ICON_PATH@/titlebar/closer.png\" resize=\"true\"/>"
-
+                end
             end
         else
             c.titlebar.fg = titlebar.data[c].fg
             c.titlebar.bg = titlebar.data[c].bg
             if close then
-                close.text = theme.titlebar_close_button_normal or
-                        "<bg image=\"" .. theme.titlebar_close_button_img_normal .. "\" resize=\"true\"/>" or
+                if theme.titlebar_close_button_normal then
+                    close.text = theme.titlebar_close_button_normal
+                elseif theme.titlebar_close_button_img_normal then
+                    close.text =
+                        "<bg image=\"" .. theme.titlebar_close_button_img_normal .. "\" resize=\"true\"/>"
+                else
+                    close.text =
                         "<bg image=\"@AWESOME_ICON_PATH@/titlebar/close.png\" resize=\"true\"/>"
+                end
             end
         end
     end
