@@ -1,7 +1,5 @@
 1
 align
-all
-auto
 bar_data_add
 bar_properties_set
 bg
@@ -14,7 +12,6 @@ bottomright
 center
 class
 client
-clients
 color
 coords
 fg
@@ -42,7 +39,6 @@ nmaster
 name
 on
 opacity
-padding
 pid
 plot_data_add
 plot_properties_set
@@ -53,13 +49,8 @@ screen
 selected
 shadow
 shadow_offset
-show_empty
 show_icons
-tags
 text
-text_focus
-text_normal
-text_urgent
 ticks_count
 ticks_gap
 titlebar
