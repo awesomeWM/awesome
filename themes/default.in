@@ -45,4 +45,4 @@ titlebar_close_button = true
 #titlebar_close_button_focus = <span>...</span>
 
 # You can use your own command to set your wallpaper
-wallpaper_cmd = xsetbg -fullscreen -border black @AWESOME_THEMES_PATH@/default-background.png || xsetroot -solid darkgrey
+wallpaper_cmd = awsetbg @AWESOME_THEMES_PATH@/default-background.png
