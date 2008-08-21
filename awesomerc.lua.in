@@ -141,8 +141,8 @@ for s = 1, screen.count() do
     mystatusbar[s]:widgets({
         mytaglist,
         mytasklist,
-        mypromptbox,
         myiconbox,
+        mypromptbox,
         mytextbox,
         mylayoutbox[s],
         s == screen.count() and mysystray or nil
