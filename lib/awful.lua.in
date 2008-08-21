@@ -1506,13 +1506,29 @@ function titlebar.add(c, args)
     title:buttons(bts)
 
     if theme.titlebar_close_button == "true" then
-        local close_button = capi.widget({ type = "textbox", name = "close", align = "right" })
-        close_button:buttons({ capi.button({ }, 1, function (t) t.client:kill() end) })
+        local closef = widget.button({ name = "closef", align = "right",
+                                       image = theme.titlebar_close_button_focus
+                                               or theme.titlebar_close_button_img_focus
+                                               or "@AWESOME_ICON_PATH@/titlebar/closer.png" })
+        local close = widget.button({ name = "close", align = "right",
+                                      image = theme.titlebar_close_button_normal
+                                              or theme.titlebar_close_button_img_normal
+                                              or "@AWESOME_ICON_PATH@/titlebar/close.png" })
+
+        -- Bind kill button
+        local b = capi.button({ }, 1, nil, function (t) t.client:kill() end)
+        local bts = closef:buttons()
+        bts[#bts + 1] = b
+        closef:buttons(bts)
+
+        bts = close:buttons()
+        bts[#bts + 1] = b
+        close:buttons(bts)
 
         tb:widgets({
             capi.widget({ type = "appicon", name = "appicon", align = "left" }),
             title,
-            close_button
+            closef, close
         })
     else
         tb:widgets({
@@ -1531,43 +1547,26 @@ end
 function titlebar.update(c)
     if c.titlebar and titlebar.data[c] then
         local widgets = c.titlebar:widgets()
-        local title, close
+        local title, close, closef
         for k, v in ipairs(widgets) do
             if v.name == "title" then title = v end
             if v.name == "close" then close = v end
-            if title and close then break end
+            if v.name == "closef" then closef = v end
+            if title and close and closef then break end
         end
         if title then
-            title.text = " " .. escape(c.name)
+            title.text = " " .. escape(c.name) .. " "
         end
         if capi.client.focus == c then
             c.titlebar.fg = titlebar.data[c].fg_focus
             c.titlebar.bg = titlebar.data[c].bg_focus
-            if close then
-                if theme.titlebar_close_button_focus then
-                    close.text = theme.titlebar_close_button_focus
-                elseif theme.titlebar_close_button_img_focus then
-                    close.text =
-                        "<bg image=\"" .. theme.titlebar_close_button_img_focus .. "\" resize=\"true\"/>"
-                else
-                    close.text =
-                        "<bg image=\"@AWESOME_ICON_PATH@/titlebar/closer.png\" resize=\"true\"/>"
-                end
-            end
+            if closef then closef.visible = true end
+            if close then close.visible = false end
         else
             c.titlebar.fg = titlebar.data[c].fg
             c.titlebar.bg = titlebar.data[c].bg
-            if close then
-                if theme.titlebar_close_button_normal then
-                    close.text = theme.titlebar_close_button_normal
-                elseif theme.titlebar_close_button_img_normal then
-                    close.text =
-                        "<bg image=\"" .. theme.titlebar_close_button_img_normal .. "\" resize=\"true\"/>"
-                else
-                    close.text =
-                        "<bg image=\"@AWESOME_ICON_PATH@/titlebar/close.png\" resize=\"true\"/>"
-                end
-            end
+            if closef then closef.visible = false end
+            if close then close.visible = true end
         end
     end
 end
