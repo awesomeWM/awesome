@@ -255,7 +255,7 @@ client_focus(client_t *c)
 
     /* Some layouts use focused client differently, so call them back.
      * And anyway, we have maybe unhidden */
-    globalconf.screens[c->screen].need_arrange = true;
+    client_need_arrange(c);
 
     /* execute hook */
     luaA_client_userdata_new(globalconf.L, globalconf.screen_focus->client_focus);
@@ -623,8 +623,7 @@ client_setfloating(client_t *c, bool floating)
         }
         else
             client_setlayer(c, c->oldlayer);
-        if(client_isvisible(c, c->screen))
-            globalconf.screens[c->screen].need_arrange = true;
+        client_need_arrange(c);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_saveprops(c);
     }
@@ -928,10 +927,13 @@ client_setborder(client_t *c, int width)
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH, &w);
 
-    if(c->isfloating || layout_get_current(c->screen) == layout_floating)
-        titlebar_update_geometry_floating(c);
-    else
-        globalconf.screens[c->screen].need_arrange = true;
+    if(client_isvisible(c, c->screen))
+    {
+        if(c->isfloating || layout_get_current(c->screen) == layout_floating)
+            titlebar_update_geometry_floating(c);
+        else
+            globalconf.screens[c->screen].need_arrange = true;
+    }
 }
 
 /** Kill a client.
@@ -960,8 +962,8 @@ luaA_client_swap(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
     client_t **swap = luaA_checkudata(L, 2, "client");
     client_list_swap(&globalconf.clients, *swap, *c);
-    globalconf.screens[(*c)->screen].need_arrange = true;
-    globalconf.screens[(*swap)->screen].need_arrange = true;
+    client_need_arrange(*c);
+    client_need_arrange(*swap);
     widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
     widget_invalidate_cache((*swap)->screen, WIDGET_CACHE_CLIENTS);
     return 0;
@@ -1155,9 +1157,9 @@ luaA_client_newindex(lua_State *L)
         b = luaA_checkboolean(L, 3);
         if(b != (*c)->ishidden)
         {
+            client_need_arrange(*c);
             (*c)->ishidden = b;
-            if(client_maybevisible(*c, (*c)->screen))
-                globalconf.screens[(*c)->screen].need_arrange = true;
+            client_need_arrange(*c);
         }
         break;
       case A_TK_ICON_PATH:
@@ -1181,8 +1183,7 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_HONORSIZEHINTS:
         (*c)->honorsizehints = luaA_checkboolean(L, 3);
-        if(client_isvisible(*c, (*c)->screen))
-            globalconf.screens[(*c)->screen].need_arrange = true;
+        client_need_arrange(*c);
         break;
       case A_TK_BORDER_WIDTH:
         client_setborder(*c, luaL_checknumber(L, 3));
@@ -1211,7 +1212,7 @@ luaA_client_newindex(lua_State *L)
             simplewindow_delete(&(*c)->titlebar->sw);
             titlebar_unref(&(*c)->titlebar);
             (*c)->titlebar = NULL;
-            globalconf.screens[(*c)->screen].need_arrange = true;
+            client_need_arrange(*c);
         }
 
         if(t)

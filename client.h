@@ -26,6 +26,13 @@
 
 #include "structs.h"
 
+#define client_need_arrange(c) \
+    do { \
+        if(!globalconf.screens[(c)->screen].need_arrange \
+           && client_isvisible(c, (c)->screen)) \
+            globalconf.screens[(c)->screen].need_arrange = true; \
+    } while(0)
+
 bool client_maybevisible(client_t *, int);
 bool client_isvisible(client_t *, int);
 client_t * client_getbywin(xcb_window_t);

@@ -343,10 +343,15 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == _NET_WM_STATE_HIDDEN)
     {
         if(set == _NET_WM_STATE_REMOVE)
+        {
+            client_need_arrange(c);
             c->ishidden = false;
+        }
         else if(set == _NET_WM_STATE_ADD)
+        {
+            client_need_arrange(c);
             c->ishidden = true;
-        globalconf.screens[c->screen].need_arrange = true;
+        }
     }
     else if(state == _NET_WM_STATE_DEMANDS_ATTENTION)
     {

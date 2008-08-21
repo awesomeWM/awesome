@@ -135,7 +135,7 @@ tag_client(client_t *c, tag_t *t)
     client_array_append(&t->clients, c);
     client_saveprops(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-    globalconf.screens[c->screen].need_arrange = true;
+    client_need_arrange(c);
 }
 
 /** Untag a client with specified tag.
@@ -148,11 +148,11 @@ untag_client(client_t *c, tag_t *t)
     for(int i = 0; i < t->clients.len; i++)
         if(t->clients.tab[i] == c)
         {
+            client_need_arrange(c);
             client_array_take(&t->clients, i);
             tag_unref(&t);
             client_saveprops(c);
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-            globalconf.screens[c->screen].need_arrange = true;
             return;
         }
 }
@@ -471,7 +471,7 @@ luaA_tag_newindex(lua_State *L)
         return 0;
     }
 
-    if((*tag)->screen != SCREEN_UNDEF)
+    if((*tag)->screen != SCREEN_UNDEF && (*tag)->selected)
         globalconf.screens[(*tag)->screen].need_arrange = true;
 
     return 0;

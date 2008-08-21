@@ -132,6 +132,7 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
     tag_array_t *old_tags = &globalconf.screens[old_screen].tags,
                 *new_tags = &globalconf.screens[new_screen].tags;
     area_t from, to;
+    bool wasvisible = client_isvisible(c, c->screen);
 
     c->screen = new_screen;
 
@@ -210,8 +211,9 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
         else
         {
             c->f_geometry = new_f_geometry;
-            globalconf.screens[old_screen].need_arrange = true;
-            globalconf.screens[c->screen].need_arrange = true;
+            if(wasvisible)
+                globalconf.screens[old_screen].need_arrange = true;
+            client_need_arrange(c);
         }
     }
 }

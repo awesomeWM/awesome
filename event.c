@@ -221,7 +221,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             }
             else
             {
-                globalconf.screens[c->screen].need_arrange = true;
+                client_need_arrange(c);
                 /* If we do not resize the client, at least tell it that it
                  * has its new configuration. That fixes at least
                  * gnome-terminal */
@@ -531,7 +531,6 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
                             xcb_connection_t *connection, xcb_property_notify_event_t *ev)
 {
     client_t *c;
-    xcb_window_t trans;
     xembed_window_t *emwin;
     xcb_size_hints_t size_hints;
 
@@ -543,13 +542,16 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
     {
         if(ev->atom == WM_TRANSIENT_FOR)
         {
-            xcb_get_wm_transient_for_reply(connection,
-                                           xcb_get_wm_transient_for_unchecked(connection,
-                                                                              c->win),
-                                           &trans, NULL);
-            if(!c->isfloating
-               && (c->isfloating = (client_getbywin(trans) != NULL)))
-                globalconf.screens[c->screen].need_arrange = true;
+            if(!c->isfloating)
+            {
+                xcb_window_t trans;
+                xcb_get_wm_transient_for_reply(connection,
+                                               xcb_get_wm_transient_for_unchecked(connection,
+                                                                                  c->win),
+                                               &trans, NULL);
+                if(client_getbywin(trans))
+                    client_setfloating(c, true);
+            }
         }
         else if (ev->atom == WM_NORMAL_HINTS)
             client_updatesizehints(c, &size_hints);
@@ -652,8 +654,8 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
            && ev->format == 32
            && ev->data.data32[0] == XCB_WM_STATE_ICONIC)
         {
+            client_need_arrange(c);
             c->ishidden = true;
-            globalconf.screens[c->screen].need_arrange = true;
         }
     }
     else if(ev->type == _XEMBED)

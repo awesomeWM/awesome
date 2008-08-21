@@ -290,8 +290,7 @@ titlebar_init(client_t *c)
         xcb_change_window_attributes(globalconf.connection, c->titlebar->sw->window,
                                      XCB_CW_BORDER_PIXEL, &c->titlebar->border.color.pixel);
 
-    if(client_isvisible(c, c->screen))
-        globalconf.screens[c->screen].need_arrange = true;
+    client_need_arrange(c);
 
     c->titlebar->need_update = true;
 }
@@ -388,7 +387,7 @@ luaA_titlebar_newindex(lua_State *L)
                 simplewindow_delete(&(*newc)->titlebar->sw);
                 titlebar_unref(&(*newc)->titlebar);
                 (*newc)->titlebar = NULL;
-                globalconf.screens[(*newc)->screen].need_arrange = true;
+                client_need_arrange(*newc);
             }
             /* Attach titlebar to client */
             (*newc)->titlebar = *titlebar;
@@ -404,7 +403,7 @@ luaA_titlebar_newindex(lua_State *L)
                 /* unref and NULL the ref */
                 titlebar_unref(&c->titlebar);
                 c->titlebar = NULL;
-                globalconf.screens[c->screen].need_arrange = true;
+                client_need_arrange(c);
             }
         }
         break;
@@ -463,9 +462,8 @@ luaA_titlebar_newindex(lua_State *L)
         return 0;
     }
 
-    if((c || (c = client_getbytitlebar(*titlebar)))
-       && client_isvisible(c, c->screen))
-        globalconf.screens[c->screen].need_arrange = true;
+    if((c || (c = client_getbytitlebar(*titlebar))))
+        client_need_arrange(c);
 
     return 0;
 }
