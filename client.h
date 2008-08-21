@@ -25,6 +25,7 @@
 #include <xcb/xcb_icccm.h>
 
 #include "structs.h"
+#include "stack.h"
 
 #define client_need_arrange(c) \
     do { \
@@ -38,7 +39,6 @@ bool client_isvisible(client_t *, int);
 client_t * client_getbywin(xcb_window_t);
 void client_setlayer(client_t *, layer_t);
 void client_stack(void);
-void client_raise(client_t *);
 void client_ban(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int);
@@ -52,6 +52,11 @@ void client_saveprops(client_t *);
 void client_kill(client_t *);
 void client_setfloating(client_t *, bool);
 void client_setsticky(client_t *, bool);
+void client_setabove(client_t *, bool);
+void client_setbelow(client_t *, bool);
+void client_setmodal(client_t *, bool);
+void client_setontop(client_t *, bool);
+void client_setfullscreen(client_t *, bool);
 void client_setborder(client_t *, int);
 
 int luaA_client_newindex(lua_State *);
@@ -59,6 +64,18 @@ int luaA_client_newindex(lua_State *);
 int luaA_client_userdata_new(lua_State *, client_t *);
 
 DO_SLIST(client_t, client, client_unref)
+
+/** Put client on top of the stack
+ * \param c The client to raise.
+ */
+static inline void
+client_raise(client_t *c)
+{
+    /* Push c on top of the stack. */
+    stack_client_push(c);
+    client_stack();
+}
+
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

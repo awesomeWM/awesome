@@ -170,7 +170,7 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
         if(new_f_geometry.y + new_f_geometry.height >= to.y + to.height)
             new_f_geometry.y = to.y + to.height - new_f_geometry.height - 2 * c->border;
 
-        if(c->ismax)
+        if(c->isfullscreen)
         {
             new_geometry = c->geometry;
 

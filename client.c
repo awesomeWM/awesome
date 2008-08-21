@@ -33,7 +33,6 @@
 #include "screen.h"
 #include "titlebar.h"
 #include "lua.h"
-#include "stack.h"
 #include "mouse.h"
 #include "systray.h"
 #include "layouts/floating.h"
@@ -269,6 +268,57 @@ client_focus(client_t *c)
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
+/** Stack a window below.
+ * \param c The client.
+ * \param previous The previous window on the stack.
+ * \param return The next-previous!
+ */
+static xcb_window_t
+client_stack_below(client_t *c, xcb_window_t previous)
+{
+    uint32_t config_win_vals[2];
+
+    config_win_vals[0] = previous;
+    config_win_vals[1] = XCB_STACK_MODE_BELOW;
+
+    if(c->titlebar
+       && c->titlebar->sw
+       && c->titlebar->position)
+    {
+        xcb_configure_window(globalconf.connection,
+                             c->titlebar->sw->window,
+                             XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                             config_win_vals);
+        config_win_vals[0] = c->titlebar->sw->window;
+    }
+    xcb_configure_window(globalconf.connection, c->win,
+                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                         config_win_vals);
+    config_win_vals[0] = c->win;
+
+    return c->win;
+}
+
+/** Get the real layer of a client according to its attribute (fullscreen, …)
+ * \param c The client.
+ * \return The real layer.
+ */
+static layer_t
+client_layer_translator(client_t *c)
+{
+    if(c->isontop)
+        return LAYER_ONTOP;
+    else if(c->ismodal)
+        return LAYER_MODAL;
+    else if(c->isfullscreen)
+        return LAYER_FULLSCREEN;
+    else if(c->isabove)
+        return LAYER_ABOVE;
+    else if(c->isfloating)
+        return LAYER_FLOAT;
+    return c->layer;
+}
+
 /** Restack clients.
  * \todo It might be worth stopping to restack everyone and only stack `c'
  * relatively to the first matching in the list.
@@ -285,26 +335,11 @@ client_stack(void)
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_BELOW;
 
-    /* first stack fullscreen and modal windows */
+    /* first stack modal and fullscreen windows */
     for(layer = LAYER_OUTOFSPACE - 1; layer >= LAYER_FULLSCREEN; layer--)
         for(node = globalconf.stack; node; node = node->next)
-            if(node->client->layer == layer)
-            {
-                if(node->client->titlebar
-                   && node->client->titlebar->sw
-                   && node->client->titlebar->position)
-                {
-                    xcb_configure_window(globalconf.connection,
-                                         node->client->titlebar->sw->window,
-                                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                         config_win_vals);
-                    config_win_vals[0] = node->client->titlebar->sw->window;
-                }
-                xcb_configure_window(globalconf.connection, node->client->win,
-                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[0] = node->client->win;
-            }
+            if(client_layer_translator(node->client) == layer)
+                config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
 
     /* then stack statusbar window */
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
@@ -321,34 +356,8 @@ client_stack(void)
     /* finally stack everything else */
     for(layer = LAYER_FULLSCREEN - 1; layer >= LAYER_DESKTOP; layer--)
         for(node = globalconf.stack; node; node = node->next)
-            if(node->client->layer == layer)
-            {
-                if(node->client->titlebar
-                   && node->client->titlebar->sw
-                   && node->client->titlebar->position)
-                {
-                    xcb_configure_window(globalconf.connection,
-                                         node->client->titlebar->sw->window,
-                                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                         config_win_vals);
-                    config_win_vals[0] = node->client->titlebar->sw->window;
-                }
-                xcb_configure_window(globalconf.connection, node->client->win,
-                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[0] = node->client->win;
-            }
-}
-
-/** Put client on top of the stack
- * \param c The client to raise.
- */
-void
-client_raise(client_t *c)
-{
-    /* Push c on top of the stack. */
-    stack_client_push(c);
-    client_stack();
+            if(client_layer_translator(node->client) == layer)
+                config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
 }
 
 /** Manage a new client.
@@ -396,7 +405,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->geometry.y = c->f_geometry.y = c->m_geometry.y = wgeom->y;
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wgeom->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
-    c->layer = c->oldlayer = LAYER_TILE;
+    c->layer = LAYER_TILE;
     client_setborder(c, wgeom->border_width);
     c->icon = ewmh_window_icon_get_reply(ewmh_icon_cookie);
 
@@ -526,7 +535,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
      * stored according to 'value_mask' */
     uint32_t values[5];
 
-    if(c->titlebar && !c->ismoving && !c->isfloating && layout != layout_floating)
+    if(c->titlebar && !c->ismoving && !c->isfloating && !c->isfullscreen && layout != layout_floating)
         geometry = titlebar_geometry_remove(c->titlebar, c->border, geometry);
 
     if(hints)
@@ -566,7 +575,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
            || layout_get_current(new_screen) == layout_floating)
         {
             titlebar_update_geometry_floating(c);
-            if(!c->ismax)
+            if(!c->isfullscreen)
                 c->f_geometry = geometry;
         }
 
@@ -615,21 +624,16 @@ client_setfloating(client_t *c, bool floating)
     {
         if((c->isfloating = floating))
         {
-            client_setlayer(c, MAX(c->layer, LAYER_FLOAT));
-            client_resize(c, c->f_geometry, false);
-            titlebar_update_geometry_floating(c);
+            if(!c->isfullscreen)
+            {
+                client_resize(c, c->f_geometry, false);
+                titlebar_update_geometry_floating(c);
+            }
         }
-        else if(c->ismax)
-        {
-            c->ismax = false;
-            client_setlayer(c, c->oldlayer);
-            client_resize(c, c->m_geometry, false);
-        }
-        else
-            client_setlayer(c, c->oldlayer);
         client_need_arrange(c);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_saveprops(c);
+        client_stack();
     }
 }
 
@@ -645,6 +649,106 @@ client_setsticky(client_t *c, bool s)
         client_need_arrange(c);
         c->issticky = s;
         client_need_arrange(c);
+    }
+}
+
+/** Set a client fullscreen, or not.
+ * \param c The client.
+ * \param s Set or not the client fullscreen.
+ */
+void
+client_setfullscreen(client_t *c, bool s)
+{
+    if(c->isfullscreen != s)
+    {
+        area_t geometry;
+
+        /* become fullscreen! */
+        if((c->isfullscreen = s))
+        {
+            /* disable titlebar and borders */
+            if(c->titlebar && c->titlebar->sw && (c->titlebar->oldposition = c->titlebar->position))
+            {
+                xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
+                c->titlebar->position = Off;
+            }
+            geometry = screen_area_get(&globalconf.screens[c->screen].geometry,
+                                       NULL,
+                                       &globalconf.screens[c->screen].padding);
+            c->m_geometry = c->geometry;
+            c->oldborder = c->border;
+            client_setborder(c, 0);
+            c->noborder = true;
+        }
+        else
+        {
+            /* restore borders and titlebar */
+            if(c->titlebar && c->titlebar->sw && (c->titlebar->position = c->titlebar->oldposition))
+                xcb_map_window(globalconf.connection, c->titlebar->sw->window);
+            geometry = c->m_geometry;
+            c->noborder = false;
+            client_setborder(c, c->oldborder);
+            client_resize(c, c->m_geometry, false);
+        }
+        client_resize(c, geometry, false);
+        client_need_arrange(c);
+        client_stack();
+    }
+}
+
+/** Set a client above, or not.
+ * \param c The client.
+ * \param s Set or not the client above.
+ */
+void
+client_setabove(client_t *c, bool s)
+{
+    if(c->isabove != s)
+    {
+        c->isabove = s;
+        client_stack();
+    }
+}
+
+/** Set a client below, or not.
+ * \param c The client.
+ * \param s Set or not the client below.
+ */
+void
+client_setbelow(client_t *c, bool s)
+{
+    if(c->isbelow != s)
+    {
+        c->isbelow = s;
+        client_stack();
+    }
+}
+
+/** Set a client modal, or not.
+ * \param c The client.
+ * \param s Set or not the client moda.
+ */
+void
+client_setmodal(client_t *c, bool s)
+{
+    if(c->ismodal != s)
+    {
+        c->ismodal = s;
+        client_stack();
+    }
+}
+
+/** Set a client ontop, or not.
+ * \param c The client.
+ * \param s Set or not the client moda.
+ */
+void
+client_setontop(client_t *c, bool s)
+{
+    if(c->isontop != s)
+    {
+        c->isontop = s;
+        client_stack();
     }
 }
 
@@ -1207,6 +1311,9 @@ luaA_client_newindex(lua_State *L)
       case A_TK_BORDER_WIDTH:
         client_setborder(*c, luaL_checknumber(L, 3));
         break;
+      case A_TK_ONTOP:
+        client_setontop(*c, luaA_checkboolean(L, 3));
+        break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len))
            && xcolor_init_reply(globalconf.connection,
@@ -1272,6 +1379,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield urgent The client urgent state.
  * \lfield focus The focused client.
  * \lfield opacity The client opacity between 0 and 1.
+ * \lfield ontop The client is on top of every other windows.
  */
 static int
 luaA_client_index(lua_State *L)
@@ -1370,6 +1478,9 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_FLOATING:
         lua_pushboolean(L, (*c)->isfloating);
+        break;
+      case A_TK_ONTOP:
+        lua_pushboolean(L, (*c)->isontop);
         break;
       case A_TK_STICKY:
         lua_pushboolean(L, (*c)->issticky);

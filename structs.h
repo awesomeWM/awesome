@@ -44,6 +44,7 @@ typedef enum
     LAYER_ABOVE,
     LAYER_FULLSCREEN,
     LAYER_MODAL,
+    LAYER_ONTOP,
     LAYER_OUTOFSPACE
 } layer_t;
 
@@ -273,18 +274,24 @@ struct client_t
     bool issticky;
     /** Has urgency hint */
     bool isurgent;
-    /** Store previous floating state before maximizing */
-    bool wasfloating;
     /** true if the window is floating */
     bool isfloating;
     /** true if the window is fixed */
     bool isfixed;
-    /** true if the window is maximized */
-    bool ismax;
     /** true if the client is moving */
     bool ismoving;
     /** True if the client is hidden */
     bool ishidden;
+    /** True if the client is fullscreen */
+    bool isfullscreen;
+    /** True if the client is above others */
+    bool isabove;
+    /** True if the client is below others */
+    bool isbelow;
+    /** True if the client is modal */
+    bool ismodal;
+    /** True if the client is on top */
+    bool isontop;
     /** true if the client must be skipped from task bar client list */
     bool skiptb;
     /** Window of the client */
@@ -294,7 +301,7 @@ struct client_t
     /** Client physical screen */
     int phys_screen;
     /** Layer in the stacking order */
-    layer_t layer, oldlayer;
+    layer_t layer;
     /** Path to an icon */
     char *icon_path;
     /** Titlebar */

@@ -266,74 +266,31 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     }
     else if(state == _NET_WM_STATE_FULLSCREEN)
     {
-        area_t geometry = c->geometry;
         if(set == _NET_WM_STATE_REMOVE)
-        {
-            /* restore geometry */
-            geometry = c->m_geometry;
-            /* restore borders and titlebar */
-            if(c->titlebar && c->titlebar->sw && (c->titlebar->position = c->titlebar->oldposition))
-                xcb_map_window(globalconf.connection, c->titlebar->sw->window);
-            c->noborder = false;
-            c->ismax = false;
-            client_setlayer(c, c->oldlayer);
-            client_setborder(c, c->oldborder);
-            client_setfloating(c, c->wasfloating);
-        }
+            client_setfullscreen(c, false);
         else if(set == _NET_WM_STATE_ADD)
-        {
-            geometry = screen_area_get(&globalconf.screens[c->screen].geometry,
-                                       NULL,
-                                       &globalconf.screens[c->screen].padding);
-            /* save geometry */
-            c->m_geometry = c->geometry;
-            c->wasfloating = c->isfloating;
-            /* disable titlebar and borders */
-            if(c->titlebar && c->titlebar->sw && (c->titlebar->oldposition = c->titlebar->position))
-            {
-                xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
-                c->titlebar->position = Off;
-            }
-            c->ismax = true;
-            c->oldborder = c->border;
-            client_setborder(c, 0);
-            c->noborder = true;
-            c->oldlayer = c->layer;
-            client_setlayer(c, LAYER_FULLSCREEN);
-            client_setfloating(c, true);
-        }
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-        client_resize(c, geometry, false);
+            client_setfullscreen(c, true);
     }
     else if(state == _NET_WM_STATE_ABOVE)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setlayer(c, c->oldlayer);
+            client_setabove(c, false);
         else if(set == _NET_WM_STATE_ADD)
-        {
-            c->oldlayer = c->layer;
-            client_setlayer(c, LAYER_ABOVE);
-        }
+            client_setabove(c, true);
     }
     else if(state == _NET_WM_STATE_BELOW)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setlayer(c, c->oldlayer);
+            client_setbelow(c, false);
         else if(set == _NET_WM_STATE_ADD)
-        {
-            c->oldlayer = c->layer;
-            client_setlayer(c, LAYER_BELOW);
-        }
+            client_setbelow(c, true);
     }
     else if(state == _NET_WM_STATE_MODAL)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setlayer(c, c->oldlayer);
+            client_setmodal(c, false);
         else if(set == _NET_WM_STATE_ADD)
-        {
-            c->oldlayer = c->layer;
-            client_setlayer(c, LAYER_MODAL);
-        }
+            client_setmodal(c, true);
     }
     else if(state == _NET_WM_STATE_HIDDEN)
     {

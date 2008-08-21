@@ -507,10 +507,8 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     mouse_query_pointer(root, &last_x, &last_y, NULL);
 
     /* grab pointer */
-    if(!mouse_grab_pointer(root, CurMove))
+    if(c->isfullscreen || !mouse_grab_pointer(root, CurMove))
         return;
-
-    c->ismax = false;
 
     if(infobox && (c->isfloating || layout == layout_floating))
         sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
@@ -956,6 +954,9 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
     layout_t *layout;
     xcb_screen_t *s;
 
+    if(c->isfullscreen)
+        return;
+
     curtags = tags_get_current(c->screen);
     layout = curtags[0]->layout;
     s = xutil_screen_get(globalconf.connection, c->phys_screen);
@@ -966,7 +967,7 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
         if(c->isfixed)
             goto bailout;
 
-        c->ismax = false;
+        client_setfullscreen(c, false);
 
         mouse_client_resize_floating(c, corner, infobox);
     }
