@@ -51,6 +51,7 @@ bool client_updatetitle(client_t *);
 void client_saveprops(client_t *);
 void client_kill(client_t *);
 void client_setfloating(client_t *, bool);
+void client_setsticky(client_t *, bool);
 void client_setborder(client_t *, int);
 
 int luaA_client_newindex(lua_State *);

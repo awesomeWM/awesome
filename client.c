@@ -131,7 +131,11 @@ client_maybevisible(client_t *c, int screen)
 {
     if(c->screen == screen)
     {
+        if(c->issticky)
+            return true;
+
         tag_array_t *tags = &globalconf.screens[screen].tags;
+
         for(int i = 0; i < tags->len; i++)
             if(tags->tab[i]->selected && is_client_tagged(c, tags->tab[i]))
                 return true;
@@ -626,6 +630,21 @@ client_setfloating(client_t *c, bool floating)
         client_need_arrange(c);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_saveprops(c);
+    }
+}
+
+/** Set a client sticky, or not.
+ * \param c The client.
+ * \param s Set or not the client sticky.
+ */
+void
+client_setsticky(client_t *c, bool s)
+{
+    if(c->issticky != s)
+    {
+        client_need_arrange(c);
+        c->issticky = s;
+        client_need_arrange(c);
     }
 }
 
@@ -1181,6 +1200,9 @@ luaA_client_newindex(lua_State *L)
       case A_TK_FLOATING:
         client_setfloating(*c, luaA_checkboolean(L, 3));
         break;
+      case A_TK_STICKY:
+        client_setsticky(*c, luaA_checkboolean(L, 3));
+        break;
       case A_TK_HONORSIZEHINTS:
         (*c)->honorsizehints = luaA_checkboolean(L, 3);
         client_need_arrange(*c);
@@ -1351,6 +1373,9 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_FLOATING:
         lua_pushboolean(L, (*c)->isfloating);
+        break;
+      case A_TK_STICKY:
+        lua_pushboolean(L, (*c)->issticky);
         break;
       case A_TK_HONORSIZEHINTS:
         lua_pushboolean(L, (*c)->honorsizehints);

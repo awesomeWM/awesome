@@ -269,6 +269,8 @@ struct client_t
     xcolor_t border_color;
     /** True if the client does not want any border */
     bool noborder;
+    /** True if the client is sticky */
+    bool issticky;
     /** Has urgency hint */
     bool isurgent;
     /** Store previous floating state before maximizing */

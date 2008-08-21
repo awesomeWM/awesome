@@ -252,9 +252,10 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
     if(state == _NET_WM_STATE_STICKY)
     {
-        tag_array_t *tags = &globalconf.screens[c->screen].tags;
-        for(int i = 0; i < tags->len; i++)
-            tag_client(c, tags->tab[i]);
+        if(set == _NET_WM_STATE_REMOVE)
+            client_setsticky(c, false);
+        else if(set == _NET_WM_STATE_ADD)
+            client_setsticky(c, true);
     }
     else if(state == _NET_WM_STATE_SKIP_TASKBAR)
     {
@@ -432,8 +433,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             tag_array_t *tags = &globalconf.screens[c->screen].tags;
 
             if(ev->data.data32[0] == 0xffffffff)
-                for(int i = 0; i < tags->len; i++)
-                    tag_client(c, tags->tab[i]);
+                c->issticky = true;
             else
                 for(int i = 0; i < tags->len; i++)
                     if((int)ev->data.data32[0] == i)
@@ -482,8 +482,7 @@ ewmh_check_client_hints(client_t *c)
 
         desktop = *(uint32_t *) data;
         if(desktop == -1)
-            for(int i = 0; i < tags->len; i++)
-                tag_client(c, tags->tab[i]);
+            c->issticky = true;
         else
             for(int i = 0; i < tags->len; i++)
                 if(desktop == i)
