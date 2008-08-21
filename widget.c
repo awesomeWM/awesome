@@ -70,7 +70,7 @@ widget_common_button_press(widget_node_t *w,
                            awesome_type_t type)
 {
     button_t *b;
-    
+
     for(b = w->widget->buttons; b; b = b->next)
         if(ev->detail == b->button && XUTIL_MASK_CLEAN(ev->state) == b->mod && b->fct)
         {
@@ -143,7 +143,7 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
                    xcb_copy_area(globalconf.connection, rootpix,
                                  rotate_px, gc,
                                  x, y,
-                                 0, 0, 
+                                 0, 0,
                                  ctx->width, ctx->height);
                    break;
                }
@@ -395,10 +395,12 @@ luaA_widget_newindex(lua_State *L)
         (*widget)->isvisible = luaA_checkboolean(L, 3);
         return 0;
       default:
-        break;
+        return (*widget)->newindex ? (*widget)->newindex(L, token) : 0;
     }
 
-    return (*widget)->newindex ? (*widget)->newindex(L, token) : 0;
+    widget_invalidate_bywidget(*widget);
+
+    return 0;
 }
 
 /** Generic widget set.
