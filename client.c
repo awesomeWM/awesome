@@ -909,7 +909,7 @@ luaA_client_visible_get(lua_State *L)
     lua_newtable(L);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(!c->skip && !c->ishidden && client_isvisible(c, screen))
+        if(!c->skip && client_isvisible(c, screen))
         {
             luaA_client_userdata_new(globalconf.L, c);
             lua_rawseti(L, -2, i++);
