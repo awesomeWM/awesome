@@ -120,8 +120,7 @@ mytextbox.text = "<b><small> awesome " .. AWESOME_VERSION .. " </small></b>"
 mypromptbox = widget({ type = "textbox", name = "mypromptbox", align = "left" })
 
 -- Create an iconbox widget
-myiconbox = widget({ type = "textbox", name = "myiconbox", align = "left" })
-myiconbox.text = "<bg image=\"@AWESOME_ICON_PATH@/awesome16.png\" resize=\"true\"/>"
+myiconbox = awful.widget.button({ name = "myiconbox", image = "@AWESOME_ICON_PATH@/awesome16.png" })
 
 -- Create a systray
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })

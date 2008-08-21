@@ -1503,11 +1503,11 @@ function titlebar.add(c, args)
         capi.button({ }, 1, function (t) t.client:mouse_move() end),
         capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
     }
-    title:button_press(bts)
+    title:buttons(bts)
 
     if theme.titlebar_close_button == "true" then
         local close_button = capi.widget({ type = "textbox", name = "close", align = "right" })
-        close_button:button_press({ capi.button({ }, 1, function (t) t.client:kill() end) })
+        close_button:buttons({ capi.button({ }, 1, function (t) t.client:kill() end) })
 
         tb:widgets({
             capi.widget({ type = "appicon", name = "appicon", align = "left" }),
@@ -1587,6 +1587,21 @@ function beautiful.register(btheme)
     else
         theme = {}
     end
+end
+
+--- Create a button widget. When clicked, the image is deplaced to make it like
+-- a real button.
+-- @param args Standard widget table arguments, plus image for the image path.
+-- @return A textbox widget configured as a button.
+function widget.button(args)
+    if not args then return end
+    args.type = "textbox"
+    local w = capi.widget(args)
+    local img_release = "<bg image=\"" .. args.image .. "\" resize=\"true\"/>"
+    local img_press = "<bg_margin top=\"2\" left=\"2\"/><bg image=\"" .. args.image .. "\" resize=\"true\"/>"
+    w.text = img_release
+    w:buttons({ capi.button({}, 1, function () w.text = img_press end, function () w.text = img_release end) })
+    return w
 end
 
 -- Register standards hooks
