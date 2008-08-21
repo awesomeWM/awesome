@@ -926,9 +926,9 @@ luaA_client_visible_get(lua_State *L)
 static int
 luaA_client_focus_get(lua_State *L)
 {
+    deprecate();
     if(globalconf.screen_focus->client_focus)
         return luaA_client_userdata_new(L, globalconf.screen_focus->client_focus);
-    deprecate();
     return 0;
 }
 
@@ -1078,7 +1078,7 @@ luaA_client_redraw(lua_State *L)
     if(globalconf.screen_focus->client_focus == *c)
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
                             (*c)->win, XCB_CURRENT_TIME);
-    
+
     return 0;
 }
 
