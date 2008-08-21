@@ -142,6 +142,7 @@ for s = 1, screen.count() do
         mytaglist,
         mytasklist,
         mypromptbox,
+        myiconbox,
         mytextbox,
         mylayoutbox[s],
         s == screen.count() and mysystray or nil
