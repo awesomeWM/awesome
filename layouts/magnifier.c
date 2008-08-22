@@ -19,6 +19,8 @@
  *
  */
 
+#include <math.h>
+
 #include "client.h"
 #include "tag.h"
 #include "screen.h"
@@ -46,8 +48,8 @@ layout_magnifier(int screen)
     if(!focus)
         goto bailout;
 
-    geometry.width = area.width * curtags[0]->mwfact;
-    geometry.height = area.height * curtags[0]->mwfact;
+    geometry.width = sqrt(area.width * area.width * curtags[0]->mwfact);
+    geometry.height = sqrt(area.height * area.height * curtags[0]->mwfact);
     geometry.x = area.x + (area.width - geometry.width) / 2;
     geometry.y = area.y + (area.height - geometry.height) / 2;
     client_resize(focus, geometry, focus->honorsizehints);

@@ -913,7 +913,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
         dist = sqrt((dx*dx) + (dy*dy));
 
         /* new master/rest ratio */
-        mwfact = dist / maxdist;
+        mwfact = (dist * dist) / (maxdist * maxdist);
 
         /* keep mwfact within reasonable bounds */
         mwfact = MIN(MAX( 0.01, mwfact), 0.99);
