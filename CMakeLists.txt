@@ -102,6 +102,10 @@ add_executable(${PROJECT_AWECLIENT_NAME}
     ${AWE_CLIENT_SRCS}
     ${BUILD_DIR}/common/tokenize.c)
 
+set_target_properties(${PROJECT_AWE_NAME}
+    PROPERTIES
+    LINK_FLAGS -export-dynamic)
+
 target_link_libraries(${PROJECT_AWE_NAME}
     ${AWESOME_REQUIRED_LIBRARIES}
     ${AWESOME_OPTIONAL_LIBRARIES})
