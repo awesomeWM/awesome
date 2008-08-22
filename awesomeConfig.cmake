@@ -9,7 +9,7 @@ set(VERSION_MAJOR ${VERSION})
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
 
-set(CODENAME "Into The Groove")
+set(CODENAME "Scared Of Girls")
 
 project(${PROJECT_AWE_NAME} C)
 
