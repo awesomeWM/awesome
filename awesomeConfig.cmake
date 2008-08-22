@@ -22,6 +22,8 @@ option(WITH_IMLIB2 "build with Imlib2" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
 option(GENERATE_LUADOC "generate luadoc" ON)
 
+link_directories(/usr/local/lib)
+
 # {{{ CFLAGS
 add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
