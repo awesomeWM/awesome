@@ -29,7 +29,7 @@
 #include <stdarg.h>
 #include <assert.h>
 
-#ifndef __FreeBSD__
+#if !(defined (__FreeBSD__) || defined(__OpenBSD__))
 #include <alloca.h>
 #endif
 
