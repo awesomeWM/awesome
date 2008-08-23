@@ -28,7 +28,6 @@ local capi =
     hooks = hooks,
     keygrabber = keygrabber
 }
-local lfs = require("lfs")
 
 --- awful: AWesome Functions very UsefuL
 module("awful")
@@ -76,6 +75,13 @@ local function cycle(t, i)
     while i > t do i = i - t end
     while i < 1 do i = i + t end
     return i
+end
+
+--- Create a directory
+-- @param dir The directory.
+-- @return mkdir return code
+function mkdir(dir)
+    return os.execute("mkdir -p " .. dir)
 end
 
 --- Get the first client that got the urgent hint.
@@ -870,11 +876,11 @@ local function prompt_history_save(id)
     if prompt.history[id] then
         local f = io.open(id, "w")
         if not f then
-            local dir = ""
+            local i = 0
             for d in id:gfind(".-/") do
-                dir = dir .. d
-                lfs.mkdir(dir)
+                i = i + #d
             end
+            mkdir(id:sub(1, i - 1))
             f = assert(io.open(id, "w"))
         end
 	for i = 1, math.min(#prompt.history[id].table, prompt.history[id].max) do
