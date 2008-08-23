@@ -910,7 +910,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
         /* calc distance from the center */
         dx = center_x - mouse_x;
         dy = center_y - mouse_y;
-        dist = sqrt((dx*dx) + (dy*dy));
+        dist = sqrt((dx * dx) + (dy * dy));
 
         /* new master/rest ratio */
         mwfact = (dist * dist) / (maxdist * maxdist);
