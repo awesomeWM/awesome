@@ -48,22 +48,27 @@ layout_magnifier(int screen)
     if(!focus)
         goto bailout;
 
-    geometry.width = area.width * sqrt(curtags[0]->mwfact);
-    geometry.height = area.height *  sqrt(curtags[0]->mwfact);
-    geometry.x = area.x + (area.width - geometry.width) / 2;
-    geometry.y = area.y + (area.height - geometry.height) / 2;
-    client_resize(focus, geometry, focus->honorsizehints);
-    client_raise(focus);
-
     for(c = client_list_prev_cycle(&globalconf.clients, focus);
         c && c != focus;
         c = client_list_prev_cycle(&globalconf.clients, c))
         if(IS_TILED(c, screen) && c != focus)
             n++;
 
-    /* No other clients. */
-    if(!n)
+    if(n)
+    {
+        geometry.width = area.width * sqrt(curtags[0]->mwfact);
+        geometry.height = area.height *  sqrt(curtags[0]->mwfact);
+        geometry.x = area.x + (area.width - geometry.width) / 2;
+        geometry.y = area.y + (area.height - geometry.height) / 2;
+    }
+    else
+    {
+       /* No other clients. */
+        geometry = area;
         goto bailout;
+    }
+    client_resize(focus, geometry, focus->honorsizehints);
+    client_raise(focus);
 
     geometry.x = area.x;
     geometry.y = area.y;
