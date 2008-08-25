@@ -283,8 +283,8 @@ luaA_tag_new(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \param None or a table of clients to set.
- * \return A table with the clients attached to this tags.
+ * \lparam None or a table of clients to set.
+ * \lreturn A table with the clients attached to this tags.
  */
 static int
 luaA_tag_clients(lua_State *L)

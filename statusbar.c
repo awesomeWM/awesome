@@ -534,8 +534,8 @@ luaA_statusbar_index(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \param None, or a table of widgets to set.
- * \return The current statusbar widgets.
+ * \lparam None, or a table of widgets to set.
+ * \lreturn The current statusbar widgets.
 */
 static int
 luaA_statusbar_widgets(lua_State *L)
