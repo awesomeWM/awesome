@@ -76,6 +76,46 @@ event_handle_mouse_button(client_t *c,
         }
 }
 
+/** Get a widget node from a statusbar by coords.
+ * \param Container position.
+ * \param widgets The widget list.
+ * \param height The container height.
+ * \param width The container width.
+ * \param x X coordinate of the widget.
+ * \param y Y coordinate of the widget.
+ * \return A widget node.
+ */
+static widget_node_t *
+widget_getbycoords(position_t position, widget_node_t *widgets, int height, int width, int x, int y)
+{
+    int tmp;
+    widget_node_t *w;
+
+    /* Need to transform coordinates like it was top/bottom */
+    switch(position)
+    {
+      case Right:
+        tmp = y;
+        y = height - x;
+        x = tmp;
+        break;
+      case Left:
+        tmp = y;
+        y = x;
+        x = width - tmp;
+        break;
+      default:
+        break;
+    }
+
+    for(w = widgets; w; w = w->next)
+        if(x >= w->area.x && x < w->area.x + w->area.width
+           && y >= w->area.y && y < w->area.y + w->area.height)
+            return w;
+
+    return NULL;
+}
+
 /** The button press event handler.
  * \param data The type of mouse event.
  * \param connection The connection to the X server.
@@ -84,7 +124,7 @@ event_handle_mouse_button(client_t *c,
 static int
 event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_event_t *ev)
 {
-    int screen, tmp;
+    int screen;
     const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
     client_t *c;
     widget_node_t *w;
@@ -108,63 +148,21 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                     ev->event_x -= statusbar->sw->geometry.x;
                     ev->event_y -= statusbar->sw->geometry.y;
                 }
-                /* Need to transform coordinates like it was
-                 * top/bottom */
-                switch(statusbar->position)
-                {
-                  case Right:
-                    tmp = ev->event_y;
-                    ev->event_y = statusbar->height - ev->event_x;
-                    ev->event_x = tmp;
-                    break;
-                  case Left:
-                    tmp = ev->event_y;
-                    ev->event_y = ev->event_x;
-                    ev->event_x = statusbar->width - tmp;
-                    break;
-                  default:
-                    break;
-                }
-                for(w = statusbar->widgets; w; w = w->next)
-                    if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
-                       && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
-                    {
-                        w->widget->button(w, ev, statusbar->screen,
-                                          statusbar, AWESOME_TYPE_STATUSBAR);
-                        return 0;
-                    }
-                /* return if no widget match */
+                if((w = widget_getbycoords(statusbar->position, statusbar->widgets,
+                                           statusbar->width, statusbar->height,
+                                           ev->event_x, ev->event_y)))
+                    w->widget->button(w, ev, statusbar->screen, statusbar, AWESOME_TYPE_STATUSBAR);
+                /* return even if no widget match */
                 return 0;
             }
 
     if((c = client_getbytitlebarwin(ev->event)))
     {
-        /* Need to transform coordinates like it was
-         * top/bottom */
-        switch(c->titlebar->position)
-        {
-          case Right:
-            tmp = ev->event_y;
-            ev->event_y = c->titlebar->height - ev->event_x;
-            ev->event_x = tmp;
-            break;
-          case Left:
-            tmp = ev->event_y;
-            ev->event_y = ev->event_x;
-            ev->event_x = c->titlebar->width - tmp;
-            break;
-          default:
-            break;
-        }
-        for(w = c->titlebar->widgets; w; w = w->next)
-            if(ev->event_x >= w->area.x && ev->event_x < w->area.x + w->area.width
-               && ev->event_y >= w->area.y && ev->event_y < w->area.y + w->area.height)
-            {
-                w->widget->button(w, ev, c->screen,
-                                  c->titlebar, AWESOME_TYPE_TITLEBAR);
-                return 0;
-            }
-        /* return if no widget match */
+        if((w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
+                                   c->titlebar->width, c->titlebar->height,
+                                   ev->event_x, ev->event_y)))
+                w->widget->button(w, ev, c->screen, c->titlebar, AWESOME_TYPE_TITLEBAR);
+        /* return even if no widget match */
         return 0;
     }
 
