@@ -298,8 +298,6 @@ luaA_screen_tags(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \lfield padding The screen padding. A table with top, right, left and bottom
- * keys and values in pixel.
  * \lfield coords The screen coordinates. Immutable.
  * \lfield workarea The screen workarea, i.e. without statusbar.
  */
