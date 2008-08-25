@@ -71,27 +71,45 @@ client_loadprops(client_t * c, screen_t *screen)
     ssize_t len;
     tag_array_t *tags = &screen->tags;
     char *prop = NULL;
+    xcb_get_property_cookie_t floating_q, fullscreen_q;
+    xcb_get_property_reply_t *reply;
+    void *data;
 
-    if(!xutil_text_prop_get(globalconf.connection, c->win, _AWESOME_PROPERTIES,
+    if(!xutil_text_prop_get(globalconf.connection, c->win, _AWESOME_TAGS,
                             &prop, &len))
         return false;
 
-    if(len != tags->len + 2)
-    {
-        /* ignore property if the tag count isn't matching */
-        p_delete(&prop);
-        return false;
-    }
+    /* Send the GetProperty requests which will be processed later */
+    floating_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+                                            _AWESOME_FLOATING, CARDINAL, 0, 1);
 
-    for(int i = 0; i < tags->len; i++)
-        if(prop[i] == '1')
-            tag_client(c, tags->tab[i]);
-        else
-            untag_client(c, tags->tab[i]);
+    fullscreen_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+                                             _AWESOME_FULLSCREEN, CARDINAL, 0, 1);
 
-    client_setlayer(c, prop[tags->len + 1] - '0');
-    client_setfloating(c, prop[tags->len] == '1');
+    /* ignore property if the tag count isn't matching */
+    if(len == tags->len)
+        for(int i = 0; i < tags->len; i++)
+            if(prop[i] == '1')
+                tag_client(c, tags->tab[i]);
+            else
+                untag_client(c, tags->tab[i]);
+
     p_delete(&prop);
+
+    /* check for floating */
+    reply = xcb_get_property_reply(globalconf.connection, floating_q, NULL);
+
+    if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
+        client_setfloating(c, *(bool *) data);
+    p_delete(&reply);
+
+    /* check for fullscreen */
+    reply = xcb_get_property_reply(globalconf.connection, fullscreen_q, NULL);
+
+    if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
+        client_setfullscreen(c, *(bool *) data);
+    p_delete(&reply);
+
     return true;
 }
 
@@ -609,7 +627,6 @@ client_setlayer(client_t *c, layer_t layer)
 {
     c->layer = layer;
     client_raise(c);
-    client_saveprops(c);
 }
 
 /** Set a clinet floating.
@@ -632,8 +649,11 @@ client_setfloating(client_t *c, bool floating)
         }
         client_need_arrange(c);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-        client_saveprops(c);
         client_stack();
+        xcb_change_property(globalconf.connection,
+                            XCB_PROP_MODE_REPLACE,
+                            c->win, _AWESOME_FLOATING, CARDINAL, 8, 1,
+                            &c->isfloating);
     }
 }
 
@@ -693,6 +713,10 @@ client_setfullscreen(client_t *c, bool s)
         client_resize(c, geometry, false);
         client_need_arrange(c);
         client_stack();
+        xcb_change_property(globalconf.connection,
+                            XCB_PROP_MODE_REPLACE,
+                            c->win, _AWESOME_FULLSCREEN, CARDINAL, 8, 1,
+                            &c->isfullscreen);
     }
 }
 
@@ -756,19 +780,16 @@ client_setontop(client_t *c, bool s)
  * \param c The client.
  */
 void
-client_saveprops(client_t *c)
+client_saveprops_tags(client_t *c)
 {
     tag_array_t *tags = &globalconf.screens[c->screen].tags;
-    unsigned char *prop = p_alloca(unsigned char, tags->len + 3);
+    unsigned char *prop = p_alloca(unsigned char, tags->len + 1);
     int i;
 
     for(i = 0; i < tags->len; i++)
         prop[i] = is_client_tagged(c, tags->tab[i]) ? '1' : '0';
 
-    prop[i++] = c->isfloating ? '1' : '0';
-    prop[i++] = '0' + c->layer;
-
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win, _AWESOME_PROPERTIES, STRING, 8, i, prop);
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win, _AWESOME_TAGS, STRING, 8, i, prop);
 }
 
 /** Unban a client.
@@ -828,7 +849,8 @@ client_unmanage(client_t *c)
     ewmh_update_net_client_list(c->phys_screen);
 
     /* delete properties */
-    xcb_delete_property(globalconf.connection, c->win, _AWESOME_PROPERTIES);
+    xcb_delete_property(globalconf.connection, c->win, _AWESOME_TAGS);
+    xcb_delete_property(globalconf.connection, c->win, _AWESOME_FLOATING);
 
     /* set client as invalid */
     c->invalid = true;

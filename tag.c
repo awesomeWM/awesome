@@ -133,7 +133,7 @@ tag_client(client_t *c, tag_t *t)
 
     tag_ref(&t);
     client_array_append(&t->clients, c);
-    client_saveprops(c);
+    client_saveprops_tags(c);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     client_need_arrange(c);
 }
@@ -151,7 +151,7 @@ untag_client(client_t *c, tag_t *t)
             client_need_arrange(c);
             client_array_take(&t->clients, i);
             tag_unref(&t);
-            client_saveprops(c);
+            client_saveprops_tags(c);
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
             return;
         }

@@ -48,7 +48,7 @@ void client_unmanage(client_t *);
 void client_updatewmhints(client_t *);
 bool client_updatesizehints(client_t *, xcb_size_hints_t *);
 bool client_updatetitle(client_t *);
-void client_saveprops(client_t *);
+void client_saveprops_tags(client_t *);
 void client_kill(client_t *);
 void client_setfloating(client_t *, bool);
 void client_setsticky(client_t *, bool);

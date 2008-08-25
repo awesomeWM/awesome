@@ -146,7 +146,7 @@ scan(void)
             state = window_state_get_reply(state_wins[i]);
 
             has_awesome_prop = xutil_text_prop_get(globalconf.connection, wins[i],
-                                                   _AWESOME_PROPERTIES, NULL, NULL);
+                                                   _AWESOME_TAGS, NULL, NULL);
 
             if(!attr_r || attr_r->override_redirect
                || (attr_r->map_state != XCB_MAP_STATE_VIEWABLE && !has_awesome_prop)
