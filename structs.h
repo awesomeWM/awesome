@@ -108,6 +108,8 @@ struct widget_t
     int (*newindex)(lua_State *, awesome_token_t);
     /** Button event handler */
     void (*button)(widget_node_t *, xcb_button_press_event_t *, int, void *, awesome_type_t);
+    /** Mouse over event handler */
+    luaA_ref mouse_enter, mouse_leave;
     /** Alignement */
     alignment_t align;
     /** Misc private data */
@@ -168,6 +170,8 @@ struct titlebar_t
     alignment_t align;
     /** Widgets */
     widget_node_t *widgets;
+    /** Widget the mouse is over */
+    widget_node_t *mouse_over;
     /** Width and height */
     int width, height;
     /** Titlebar window */
@@ -233,6 +237,8 @@ struct statusbar_t
     {
         xcolor_t fg, bg;
     } colors;
+    /** Widget the mouse is over */
+    widget_node_t *mouse_over;
     /** Next and previous statusbars */
     statusbar_t *prev, *next;
 };

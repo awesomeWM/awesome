@@ -606,6 +606,7 @@ luaA_statusbar_widgets(lua_State *L)
     {
         luaA_widget_set(L, 2, *statusbar, &(*statusbar)->widgets);
         (*statusbar)->need_update = true;
+        (*statusbar)->mouse_over = NULL;
         return 1;
     }
     return luaA_widget_get(L, (*statusbar)->widgets);

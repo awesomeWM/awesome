@@ -37,6 +37,7 @@
 #include "keygrabber.h"
 #include "lua.h"
 #include "systray.h"
+#include "statusbar.h"
 #include "layouts/floating.h"
 #include "common/atoms.h"
 
@@ -324,6 +325,107 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
         xembed_window_list_detach(&globalconf.embedded, emwin);
         for(i = 0; i < globalconf.screens_info->nscreen; i++)
             widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
+    }
+
+    return 0;
+}
+
+/** Handle a motion notify over widgets.
+ * \param object The object.
+ * \param type The object type.
+ * \param mouse_over The pointer to the registered mouse over widget.
+ * \param w The new widget the mouse is over.
+ */
+static void
+event_handle_widget_motionnotify(void *object,
+                                 awesome_type_t type,
+                                 widget_node_t **mouse_over,
+                                 widget_node_t *w)
+{
+    if(w != *mouse_over)
+    {
+        if(*mouse_over)
+        {
+            /* call mouse leave function on old widget */
+            luaA_pushpointer(globalconf.L, object, type);
+            luaA_dofunction(globalconf.L, (*mouse_over)->widget->mouse_leave, 1, 0);
+        }
+        if(w)
+        {
+            /* call mouse enter function on new widget and register it */
+            *mouse_over = w;
+            luaA_pushpointer(globalconf.L, object, type);
+            luaA_dofunction(globalconf.L, w->widget->mouse_enter, 1, 0);
+        }
+    }
+}
+
+/** The motion notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
+ */
+static int
+event_handle_motionnotify(void *data __attribute__ ((unused)),
+                          xcb_connection_t *connection,
+                          xcb_motion_notify_event_t *ev)
+{
+    statusbar_t *statusbar = statusbar_getbywin(ev->event);
+    client_t *c;
+    widget_node_t *w;
+
+    if(statusbar)
+    {
+        w = widget_getbycoords(statusbar->position, statusbar->widgets,
+                               statusbar->width, statusbar->height,
+                               ev->event_x, ev->event_y);
+        event_handle_widget_motionnotify(statusbar,
+                                         AWESOME_TYPE_STATUSBAR,
+                                         &statusbar->mouse_over, w);
+    }
+    else if((c = client_getbytitlebarwin(ev->event)))
+    {
+        w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
+                               c->titlebar->width, c->titlebar->height,
+                               ev->event_x, ev->event_y);
+        event_handle_widget_motionnotify(c->titlebar,
+                                         AWESOME_TYPE_TITLEBAR,
+                                         &c->titlebar->mouse_over, w);
+    }
+
+    return 0;
+}
+
+/** The leave notify event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
+ */
+static int
+event_handle_leavenotify(void *data __attribute__ ((unused)),
+                         xcb_connection_t *connection,
+                         xcb_leave_notify_event_t *ev)
+{
+    statusbar_t *statusbar = statusbar_getbywin(ev->event);
+    client_t *c;
+
+    if(statusbar)
+    {
+        if(statusbar->mouse_over)
+        {
+            /* call mouse leave function on widget the mouse was over */
+            luaA_statusbar_userdata_new(globalconf.L, statusbar);
+            luaA_dofunction(globalconf.L, statusbar->mouse_over->widget->mouse_leave, 1, 0);
+        }
+    }
+    else if((c = client_getbytitlebarwin(ev->event)))
+    {
+        if(c->titlebar->mouse_over)
+        {
+            /* call mouse leave function on widget the mouse was over */
+            luaA_titlebar_userdata_new(globalconf.L, c->titlebar);
+            luaA_dofunction(globalconf.L, c->titlebar->mouse_over->widget->mouse_leave, 1, 0);
+        }
     }
 
     return 0;
@@ -705,6 +807,8 @@ void a_xcb_set_event_handlers(void)
     xcb_event_set_configure_notify_handler(&globalconf.evenths, event_handle_configurenotify, NULL);
     xcb_event_set_destroy_notify_handler(&globalconf.evenths, event_handle_destroynotify, NULL);
     xcb_event_set_enter_notify_handler(&globalconf.evenths, event_handle_enternotify, NULL);
+    xcb_event_set_leave_notify_handler(&globalconf.evenths, event_handle_leavenotify, NULL);
+    xcb_event_set_motion_notify_handler(&globalconf.evenths, event_handle_motionnotify, NULL);
     xcb_event_set_expose_handler(&globalconf.evenths, event_handle_expose, NULL);
     xcb_event_set_key_press_handler(&globalconf.evenths, event_handle_keypress, NULL);
     xcb_event_set_map_request_handler(&globalconf.evenths, event_handle_maprequest, NULL);

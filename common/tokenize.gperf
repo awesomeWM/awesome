@@ -35,6 +35,8 @@ layout
 left
 line
 machine
+mouse_enter
+mouse_leave
 mwfact
 ncol
 nmaster

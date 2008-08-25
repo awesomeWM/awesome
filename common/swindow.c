@@ -61,7 +61,7 @@ simplewindow_new(xcb_connection_t *conn, int phys_screen, int x, int y,
         | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
         | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
         | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE
-        | XCB_EVENT_MASK_EXPOSURE;
+        | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE;
 
     sw->window = xcb_generate_id(conn);
     xcb_create_window(conn, s->root_depth, sw->window, s->root, x, y, w, h,

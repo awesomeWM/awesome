@@ -292,6 +292,8 @@ luaA_widget_new(lua_State *L)
     /* Set visible by default. */
     w->isvisible = true;
 
+    w->mouse_enter = w->mouse_leave = LUA_REFNIL;
+
     w->name = a_strdup(buf);
 
     return luaA_widget_userdata_new(L, w);
@@ -337,6 +339,8 @@ luaA_widget_tostring(lua_State *L)
  * \luastack
  * \lfield visible The widget visibility.
  * \lfield name The widget name.
+ * \lfield mouse_enter A function to execute when the mouse enter the widget.
+ * \lfield mouse_leave A function to execute when the mouse leave the widget.
  */
 static int
 luaA_widget_index(lua_State *L)
@@ -356,6 +360,12 @@ luaA_widget_index(lua_State *L)
         return 1;
       case A_TK_NAME:
         lua_pushstring(L, (*widget)->name);
+        return 1;
+      case A_TK_MOUSE_ENTER:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, (*widget)->mouse_enter);
+        return 1;
+      case A_TK_MOUSE_LEAVE:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, (*widget)->mouse_leave);
         return 1;
       default:
         break;
@@ -380,6 +390,12 @@ luaA_widget_newindex(lua_State *L)
     {
       case A_TK_VISIBLE:
         (*widget)->isvisible = luaA_checkboolean(L, 3);
+        break;
+      case A_TK_MOUSE_ENTER:
+        luaA_registerfct(L, 3, &(*widget)->mouse_enter);
+        break;
+      case A_TK_MOUSE_LEAVE:
+        luaA_registerfct(L, 3, &(*widget)->mouse_leave);
         break;
       default:
         return (*widget)->newindex ? (*widget)->newindex(L, token) : 0;
