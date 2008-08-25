@@ -228,6 +228,21 @@ statusbar_draw(statusbar_t *statusbar)
     statusbar_systray_refresh(statusbar);
 }
 
+/** Get a statusbar by its window.
+ * \param w The window id.
+ * \return A statusbar if found, NULL otherwise.
+ */
+statusbar_t *
+statusbar_getbywin(xcb_window_t w)
+{
+    statusbar_t *s;
+    for(int i = 0; i < globalconf.screens_info->nscreen; i++)
+        for(s = globalconf.screens[i].statusbar; s; s = s->next)
+            if(s->sw->window == w)
+                return s;
+    return NULL;
+}
+
 /** Statusbar refresh function.
  */
 void
