@@ -1250,8 +1250,8 @@ luaA_mouse_newindex(lua_State *L)
 static int
 luaA_mouse_coords(lua_State *L)
 {
-    uint16_t mask;
-    int screen, x, y, mouse_x, mouse_y, i = 0;
+    uint16_t mask, maski;
+    int screen, x, y, mouse_x, mouse_y, i = 1;
 
     if(lua_gettop(L) == 1)
     {
@@ -1279,31 +1279,12 @@ luaA_mouse_coords(lua_State *L)
     lua_pushnumber(L, mouse_y);
     lua_setfield(L, -2, "y");
     lua_newtable(L);
-    if (mask & XCB_BUTTON_MASK_1)
-    {
-        lua_pushnumber(L, 1);
-        lua_rawseti(L, -2, ++i);
-    }
-    if (mask & XCB_BUTTON_MASK_2)
-    {
-        lua_pushnumber(L, 2);
-        lua_rawseti(L, -2, ++i);
-    }
-    if (mask & XCB_BUTTON_MASK_3)
-    {
-        lua_pushnumber(L, 3);
-        lua_rawseti(L, -2, ++i);
-    }
-    if (mask & XCB_BUTTON_MASK_4)
-    {
-        lua_pushnumber(L, 4);
-        lua_rawseti(L, -2, ++i);
-    }
-    if (mask & XCB_BUTTON_MASK_5)
-    {
-        lua_pushnumber(L, 5);
-        lua_rawseti(L, -2, ++i);
-    }
+    for(maski = XCB_BUTTON_MASK_1; i <= XCB_BUTTON_MASK_5; maski <<= 1, i++)
+        if(mask & maski)
+        {
+            lua_pushboolean(L, true);
+            lua_rawseti(L, -2, i);
+        }
     lua_setfield(L, -2, "buttons");
 
     return 1;
