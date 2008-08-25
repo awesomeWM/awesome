@@ -393,7 +393,7 @@ luaA_widget_newindex(lua_State *L)
     {
       case A_TK_VISIBLE:
         (*widget)->isvisible = luaA_checkboolean(L, 3);
-        return 0;
+        break;
       default:
         return (*widget)->newindex ? (*widget)->newindex(L, token) : 0;
     }
