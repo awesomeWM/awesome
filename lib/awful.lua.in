@@ -1601,6 +1601,7 @@ function widget.button(args)
     w.text = img_release
     w:buttons({ capi.button({}, 1, function () w.text = img_press end, function () w.text = img_release end) })
     function w.mouse_leave(s) w.text = img_release end
+    function w.mouse_enter(s) if capi.mouse.coords().buttons[1] then w.text = img_press end end
     return w
 end
 
