@@ -352,8 +352,8 @@ luaA_screen_index(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \param None or a table with new padding values.
- * \return The screen padding. A table with top, right, left and bottom
+ * \lparam None or a table with new padding values.
+ * \lreturn The screen padding. A table with top, right, left and bottom
  * keys and values in pixel.
  */
 static int
