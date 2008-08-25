@@ -333,39 +333,39 @@ end
 
 -- {{{ Hooks
 -- Hook function to execute when focusing a client.
-function hook_focus(c)
+awful.hooks.focus.register(function (c)
     if not awful.client.ismarked(c) then
         c.border_color = beautiful.border_focus
     end
-end
+end)
 
 -- Hook function to execute when unfocusing a client.
-function hook_unfocus(c)
+awful.hooks.unfocus.register(function (c)
     if not awful.client.ismarked(c) then
         c.border_color = beautiful.border_normal
     end
-end
+end)
 
 -- Hook function to execute when marking a client
-function hook_marked(c)
+awful.hooks.marked.register(function (c)
     c.border_color = beautiful.border_marked
-end
+end)
 
 -- Hook function to execute when unmarking a client
-function hook_unmarked(c)
+awful.hooks.unmarked.register(function (c)
     c.border_color = beautiful.border_focus
-end
+end)
 
 -- Hook function to execute when the mouse is over a client.
-function hook_mouseover(c)
+awful.hooks.mouse_over.register(function (c)
     -- Sloppy focus, but disabled for magnifier layout
     if awful.layout.get(c.screen) ~= "magnifier" then
         client.focus = c
     end
-end
+end)
 
 -- Hook function to execute when a new client appears.
-function hook_manage(c)
+awful.hooks.manage.register(function (c)
     -- Set floating placement to be smart!
     c.floating_placement = "smart"
     if use_titlebar then
@@ -411,11 +411,11 @@ function hook_manage(c)
 
     -- Honor size hints
     c.honorsizehints = true
-end
+end)
 
 -- Hook function to execute when arranging the screen
 -- (tag switch, new client, etc)
-function hook_arrange(screen)
+awful.hooks.arrange.register(function (screen)
     local layout = awful.layout.get(screen)
     if layout then
         mylayoutbox[screen].text =
@@ -445,23 +445,13 @@ function hook_arrange(screen)
         end
     end
     ]]
-end
+end)
 
 -- Hook called every second
-function hook_timer ()
+awful.hooks.timer.register(1, function ()
     -- For unix time_t lovers
     mytextbox.text = " " .. os.time() .. " time_t "
     -- Otherwise use:
     -- mytextbox.text = " " .. os.date() .. " "
-end
-
--- Set up some hooks
-awful.hooks.focus.register(hook_focus)
-awful.hooks.unfocus.register(hook_unfocus)
-awful.hooks.marked.register(hook_marked)
-awful.hooks.unmarked.register(hook_unmarked)
-awful.hooks.manage.register(hook_manage)
-awful.hooks.mouseover.register(hook_mouseover)
-awful.hooks.arrange.register(hook_arrange)
-awful.hooks.timer.register(1, hook_timer)
+end)
 -- }}}

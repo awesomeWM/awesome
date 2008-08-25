@@ -463,7 +463,7 @@ struct awesome_t
         /** Command to execute when removing focus to a client */
         luaA_ref unfocus;
         /** Command to run when mouse is over */
-        luaA_ref mouseover;
+        luaA_ref mouse_over;
         /** Command to run on arrange */
         luaA_ref arrange;
         /** Command to run on title change */

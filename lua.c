@@ -194,9 +194,9 @@ luaA_hooks_unmanage(lua_State *L)
  * \lparam A function to call each time a client gets mouse over it.
  */
 static int
-luaA_hooks_mouseover(lua_State *L)
+luaA_hooks_mouse_over(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.mouseover);
+    return luaA_registerfct(L, 1, &globalconf.hooks.mouse_over);
 }
 
 /** Set the function called on each screen arrange. This function is called
@@ -559,7 +559,7 @@ luaA_init(void)
         { "unfocus", luaA_hooks_unfocus },
         { "manage", luaA_hooks_manage },
         { "unmanage", luaA_hooks_unmanage },
-        { "mouseover", luaA_hooks_mouseover },
+        { "mouse_over", luaA_hooks_mouse_over },
         { "arrange", luaA_hooks_arrange },
         { "titleupdate", luaA_hooks_titleupdate },
         { "urgent", luaA_hooks_urgent },
@@ -624,7 +624,7 @@ luaA_init(void)
     globalconf.hooks.unmanage = LUA_REFNIL;
     globalconf.hooks.focus = LUA_REFNIL;
     globalconf.hooks.unfocus = LUA_REFNIL;
-    globalconf.hooks.mouseover = LUA_REFNIL;
+    globalconf.hooks.mouse_over = LUA_REFNIL;
     globalconf.hooks.arrange = LUA_REFNIL;
     globalconf.hooks.titleupdate = LUA_REFNIL;
     globalconf.hooks.urgent = LUA_REFNIL;
