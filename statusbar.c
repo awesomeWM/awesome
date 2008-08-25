@@ -61,6 +61,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
     for(systray = statusbar->widgets; systray; systray = systray->next)
         if(systray->widget->type == systray_new)
         {
+            uint32_t config_back[] = { globalconf.colors.bg.pixel };
             uint32_t config_win_vals[4];
             uint32_t config_win_vals_off[2] = { -512, -512 };
             xembed_window_t *em;
@@ -78,6 +79,10 @@ statusbar_systray_refresh(statusbar_t *statusbar)
             else
                 /* hide */
                 pos = Off;
+
+            for(em = globalconf.embedded; em; em = em->next)
+                if(em->phys_screen == statusbar->phys_screen)
+                    xcb_change_window_attributes(globalconf.connection, em->win, XCB_CW_BACK_PIXEL, config_back);
 
             switch(pos)
             {
@@ -458,7 +463,7 @@ luaA_statusbar_new(lua_State *L)
     sb->colors.bg = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
         reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &sb->colors.bg,                                                 
+                                                 &sb->colors.bg,
                                                  globalconf.default_screen,
                                                  buf, len);
 
