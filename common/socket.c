@@ -38,28 +38,62 @@
 struct sockaddr_un *
 socket_getaddr(const char *display)
 {
-    char *homedir, *tmp;
-    const char *real_display = NULL;
-    ssize_t path_len, display_len;
+    char *homedir, *tmp, *dot;
+    char *hostname = NULL, *screen = NULL;
+    ssize_t path_len, hostname_len, screen_len;
     struct sockaddr_un *addr;
 
     addr = p_new(struct sockaddr_un, 1);
     homedir = getenv("HOME");
-    display_len = a_strlen(display);
-    if(display_len)
+
+    if(a_strlen(display))
     {
+        /* find hostname */
         if((tmp = strchr(display, ':')))
-            real_display = tmp + 1;
+        {
+            /* if display starts with : */
+            if(tmp == display)
+            {
+                hostname = a_strdup("localhost");
+                hostname_len = 9;
+            }
+            else
+            {
+                hostname_len = tmp - display;
+                hostname = a_strndup(display, hostname_len);
+            }
+
+            tmp++;
+            if((dot = strchr(tmp, '.')))
+            {
+                screen_len = dot - tmp;
+                screen = a_strndup(tmp, screen_len); 
+            }
+            else
+            {
+                screen = a_strdup(tmp);
+                screen_len = a_strlen(screen);
+            }
+        }
         else
-            real_display = display;
-        if((tmp = strrchr(display, '.')))
-            *tmp = '\0';
+        {
+            hostname = a_strdup("unknown");
+            hostname_len = 7;
+            screen = a_strdup("0");
+            screen_len = 1;
+        }
+    }
+    else
+    {
+        hostname = a_strdup("localhost");
+        hostname_len = 9;
+        screen = a_strdup("0");
+        screen_len = 1;
     }
 
-    /* a_strlen(display) because we strcat on display and
-     * + 2 for / and \0 */
-    path_len = a_strlen(homedir) + sizeof(CONTROL_UNIX_SOCKET_PATH)-1
-               + (display_len ? (a_strlen(real_display)) : 1) + 2;
+    /* + 2 for / and . and \0 */
+    path_len = a_strlen(homedir) + sizeof(CONTROL_UNIX_SOCKET_PATH) - 1
+               + screen_len + hostname_len + 3;
 
     if(path_len >= ssizeof(addr->sun_path))
     {
@@ -69,10 +103,12 @@ socket_getaddr(const char *display)
     a_strcpy(addr->sun_path, path_len, homedir);
     a_strcat(addr->sun_path, path_len, "/");
     a_strcat(addr->sun_path, path_len, CONTROL_UNIX_SOCKET_PATH);
-    if(display_len)
-        a_strcat(addr->sun_path, path_len, real_display);
-    else
-        a_strcat(addr->sun_path, path_len, "0");
+    a_strcat(addr->sun_path, path_len, hostname);
+    a_strcat(addr->sun_path, path_len, "|");
+    a_strcat(addr->sun_path, path_len, screen);
+
+    p_delete(&hostname);
+    p_delete(&screen);
 
     addr->sun_family = AF_UNIX;
 
