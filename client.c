@@ -1222,6 +1222,7 @@ luaA_client_tostring(lua_State *L)
 
 /** Stop managing a client.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lvalue A client.
  */
@@ -1233,6 +1234,13 @@ luaA_client_unmanage(lua_State *L)
     return 0;
 }
 
+/** Return client coordinates.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A table with new coordinates, or none.
+ * \lreturn A table with client coordinates.
+ */
 static int
 luaA_client_coords(lua_State *L)
 {
@@ -1254,6 +1262,40 @@ luaA_client_coords(lua_State *L)
     }
 
     return luaA_pusharea(L, (*c)->geometry);
+}
+
+/** Return client coordinates, using also titlebar and border width.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A table with new coordinates, or none.
+ * \lreturn A table with client coordinates.
+ */
+static int
+luaA_client_fullcoords(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    area_t geometry;
+
+    if(lua_gettop(L) == 2)
+    {
+        if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
+        {
+            luaA_checktable(L, 2);
+            geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
+            geometry.y = luaA_getopt_number(L, 2, "y", (*c)->geometry.y);
+            geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
+            geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
+            geometry = titlebar_geometry_remove((*c)->titlebar,
+                                                (*c)->border,
+                                                geometry);
+            client_resize(*c, geometry, false);
+        }
+    }
+
+    return luaA_pusharea(L, titlebar_geometry_add((*c)->titlebar,
+                                                  (*c)->border,
+                                                  (*c)->geometry));
 }
 
 /** Client newindex.
@@ -1618,6 +1660,7 @@ const struct luaL_reg awesome_client_methods[] =
 const struct luaL_reg awesome_client_meta[] =
 {
     { "coords", luaA_client_coords },
+    { "fullcoords", luaA_client_fullcoords },
     { "buttons", luaA_client_buttons },
     { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },
