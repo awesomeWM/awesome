@@ -35,6 +35,10 @@ module("awful")
 -- Local variable handling theme
 local theme = {}
 
+-- mapping of command/completion function
+local bashcomp_funcs = {}
+local bashcomp_src = "/etc/bash_completion"
+
 -- Various public structures
 beautiful = {}
 hooks = {}
@@ -920,6 +924,24 @@ local function prompt_history_add(id, command)
     end
 end
 
+
+--- Enable programmable bash completion in awful.completion.bash at the price of
+--  a slight overhead
+--  @param src The bash completion source file, /etc/bash_completion by default.
+function completion.bashcomp_load(src)
+    if src then bashcomp_src = src end
+    local c = io.popen("/usr/bin/env bash -c 'source " .. bashcomp_src .. "; complete -p'")
+    while true do
+        local line = c:read("*line")
+        if not line then break end
+        -- if a bash function is used for completion, register it
+        if line:match(".* -F .*") then
+            bashcomp_funcs[line:gsub(".* (%S+)$","%1")] = line:gsub(".*-F +(%S+) .*$", "%1")
+        end
+    end
+    c:close()
+end
+
 --- Use bash completion system to complete command and filename.
 -- @param command The command line.
 -- @param cur_pos The cursor position.
@@ -959,7 +981,18 @@ function completion.bash(command, cur_pos, ncomp)
         comptype = "command"
     end
 
-    local c = io.popen("/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'")
+    local bash_cmd
+    if bashcomp_funcs[words[1]] then
+        -- fairly complex command with inline bash script to get the possible completions
+        bash_cmd = "/usr/bin/env bash -c 'source " .. bashcomp_src .. "; " ..
+                   "__print_completions() { for ((i=0;i<${#COMPREPLY[*]};i++)); do echo ${COMPREPLY[i]}; done }; " ..
+                   "COMP_WORDS=(" ..  command .."); COMP_LINE=\"" .. command .. "\"; " ..
+                   "COMP_COUNT=" .. cur_pos ..  "; COMP_CWORD=" .. cword_index-1 .. "; " ..
+                   bashcomp_funcs[words[1]] .. "; __print_completions | sort -u'"
+    else
+        bash_cmd = "/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'"
+    end
+    local c = io.popen(bash_cmd)
     local output = {}
     i = 0
     while true do
