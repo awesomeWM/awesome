@@ -215,7 +215,13 @@ static inline
 char * a_strndup(const char *s, ssize_t l)
 {
     ssize_t len = MIN(a_strlen(s), l);
-    return len ? p_dup(s, len + 1) : NULL;
+    if(len)
+    {
+        char *p = p_dup(s, len + 1);
+        p[len] = '\0';
+        return p;
+    }
+    return NULL;
 }
 
 /** \brief \c NULL resistant strcmp.
