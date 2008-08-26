@@ -583,7 +583,7 @@ ewmh_restart(void)
     for(c = globalconf.clients; c; c = c->next)
         client_unban(c);
 
-    xcb_aux_sync(globalconf.connection);
+    xcb_flush(globalconf.connection);
     xcb_disconnect(globalconf.connection);
 
     a_exec(globalconf.argv);

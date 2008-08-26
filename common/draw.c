@@ -30,7 +30,6 @@
 #endif
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 
 #include <langinfo.h>
 #include <iconv.h>

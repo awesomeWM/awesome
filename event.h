@@ -22,6 +22,21 @@
 #ifndef AWESOME_EVENT_H
 #define AWESOME_EVENT_H
 
+#include <xcb/xcb.h>
+
+#include "statusbar.h"
+#include "titlebar.h"
+#include "layout.h"
+
+static inline int
+awesome_refresh(xcb_connection_t *c)
+{
+    layout_refresh();
+    statusbar_refresh();
+    titlebar_refresh();
+    return xcb_flush(c);
+}
+
 void a_xcb_set_event_handlers(void);
 
 #endif

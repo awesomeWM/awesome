@@ -34,7 +34,6 @@
 #include <lualib.h>
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 
 #include "awesome-version-internal.h"
 #include "ewmh.h"
@@ -42,9 +41,8 @@
 #include "lua.h"
 #include "tag.h"
 #include "client.h"
-#include "statusbar.h"
-#include "titlebar.h"
 #include "screen.h"
+#include "event.h"
 #include "layouts/tile.h"
 #include "common/socket.h"
 
@@ -114,7 +112,7 @@ luaA_exec(lua_State *L)
     for(c = globalconf.clients; c; c = c->next)
         client_unban(c);
 
-    xcb_aux_sync(globalconf.connection);
+    xcb_flush(globalconf.connection);
     xcb_disconnect(globalconf.connection);
 
     a_exec(cmd);
@@ -759,9 +757,7 @@ luaA_cb(EV_P_ ev_io *w, int revents)
         buf[r] = '\0';
         luaA_docmd(buf);
     }
-    layout_refresh();
-    statusbar_refresh();
-    titlebar_refresh();
+    awesome_refresh(globalconf.connection);
 }
 
 void
@@ -809,9 +805,7 @@ void
 luaA_on_timer(EV_P_ ev_timer *w, int revents)
 {
     luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0, 0);
-    layout_refresh();
-    statusbar_refresh();
-    titlebar_refresh();
+    awesome_refresh(globalconf.connection);
 }
 
 void

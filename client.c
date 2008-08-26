@@ -695,7 +695,7 @@ client_unmanage(client_t *c)
                       XCB_BUTTON_MASK_ANY);
     window_state_set(c->win, XCB_WM_WITHDRAWN_STATE);
 
-    xcb_aux_sync(globalconf.connection);
+    xcb_flush(c);
     xcb_ungrab_server(globalconf.connection);
 
     /* remove client everywhere */

@@ -20,7 +20,6 @@
  */
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 #include <xcb/xinerama.h>
 
 #include "common/xscreen.h"

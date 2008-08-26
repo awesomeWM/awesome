@@ -22,7 +22,6 @@
 #include <stdio.h>
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 
 #include "screen.h"
 #include "ewmh.h"

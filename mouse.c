@@ -259,7 +259,7 @@ mouse_infobox_draw(draw_context_t *ctx,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
     simplewindow_refresh_pixmap(sw);
-    xcb_aux_sync(ctx->connection);
+    xcb_flush(globalconf.connection);
 }
 
 #define MOUSE_INFOBOX_STRING_DEFAULT "0000x0000+0000+0000"
@@ -790,7 +790,7 @@ mouse_client_resize_tiled(client_t *c)
     /* set pointer to the moveable border */
     mouse_warp_pointer(screen->root, mouse_x, mouse_y);
 
-    xcb_aux_sync(globalconf.connection);
+    xcb_flush(globalconf.connection);
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))

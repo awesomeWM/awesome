@@ -20,7 +20,6 @@
  */
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
 
 #include "common/swindow.h"
 #include "common/xutil.h"
