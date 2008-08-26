@@ -35,7 +35,7 @@ const name_func_link_t FloatingPlacementList[] =
 };
 
 static area_t
-placement_fix_offscreen(area_t geometry, int screen, int border)
+placement_fix_offscreen(area_t geometry, int screen)
 {
     area_t screen_geometry;
 
@@ -45,12 +45,12 @@ placement_fix_offscreen(area_t geometry, int screen, int border)
 
     /* fix offscreen */
     if(AREA_RIGHT(geometry) > AREA_RIGHT(screen_geometry))
-        geometry.x = screen_geometry.x + screen_geometry.width - (geometry.width + 2 * border);
+        geometry.x = screen_geometry.x + screen_geometry.width - geometry.width;
     else if(AREA_LEFT(geometry) < AREA_LEFT(screen_geometry))
         geometry.x = screen_geometry.x;
 
     if(AREA_BOTTOM(geometry) > AREA_BOTTOM(screen_geometry))
-        geometry.y = screen_geometry.y + screen_geometry.height - (geometry.height + 2 * border);
+        geometry.y = screen_geometry.y + screen_geometry.height - geometry.height;
     else if(AREA_TOP(geometry) < AREA_TOP(screen_geometry))
         geometry.y = screen_geometry.y;
 
@@ -85,8 +85,6 @@ placement_smart(client_t *c)
            && client_isvisible(client, c->screen))
         {
             newgeometry = client->f_geometry;
-            newgeometry.width += 2 * client->border;
-            newgeometry.height += 2 * client->border;
             newgeometry = titlebar_geometry_add(c->titlebar, c->border, newgeometry);
             area_array_remove(&areas, newgeometry);
         }
@@ -123,7 +121,7 @@ placement_smart(client_t *c)
     newgeometry.height = c->f_geometry.height;
 
     newgeometry = titlebar_geometry_add(c->titlebar, c->border, newgeometry);
-    newgeometry = placement_fix_offscreen(newgeometry, c->screen, c->border);
+    newgeometry = placement_fix_offscreen(newgeometry, c->screen);
     newgeometry = titlebar_geometry_remove(c->titlebar, c->border, newgeometry);
 
     area_array_wipe(&areas);
@@ -153,7 +151,7 @@ placement_under_mouse(client_t *c)
     }
 
     finalgeometry = titlebar_geometry_add(c->titlebar, c->border, finalgeometry);
-    finalgeometry = placement_fix_offscreen(finalgeometry, c->screen, c->border);
+    finalgeometry = placement_fix_offscreen(finalgeometry, c->screen);
     finalgeometry = titlebar_geometry_remove(c->titlebar, c->border, finalgeometry);
 
     return finalgeometry;

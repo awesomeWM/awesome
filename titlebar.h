@@ -33,7 +33,7 @@ void titlebar_refresh(void);
 
 int luaA_titlebar_userdata_new(lua_State *, titlebar_t *);
 
-/** Add the titlebar geometry to a geometry.
+/** Add the titlebar geometry and border to a geometry.
  * \param t The titlebar
  * \param border The client border size.
  * \param geometry The geometry
@@ -48,25 +48,34 @@ titlebar_geometry_add(titlebar_t *t, int border, area_t geometry)
           case Top:
             geometry.y -= t->sw->geometry.height + 2 * t->border.width - border;
             geometry.height += t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.width += 2 * border;
             break;
           case Bottom:
             geometry.height += t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.width += 2 * border;
             break;
           case Left:
             geometry.x -= t->sw->geometry.width + 2 * t->border.width - border;
             geometry.width += t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.height += 2 * border;
             break;
           case Right:
             geometry.width += t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.height += 2 * border;
             break;
           default:
             break;
         }
+    else
+    {
+        geometry.width += 2 * border;
+        geometry.height += 2 * border;
+    }
 
     return geometry;
 }
 
-/** Remove the titlebar geometry to a geometry.
+/** Remove the titlebar geometry and border width to a geometry.
  * \param t The titlebar.
  * \param border The client border size.
  * \param geometry The geometry.
@@ -81,20 +90,29 @@ titlebar_geometry_remove(titlebar_t *t, int border, area_t geometry)
           case Top:
             geometry.y += t->sw->geometry.height + 2 * t->border.width - border;
             geometry.height -= t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.width -= 2 * border;
             break;
           case Bottom:
             geometry.height -= t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.width -= 2 * border;
             break;
           case Left:
             geometry.x += t->sw->geometry.width + 2 * t->border.width - border;
             geometry.width -= t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.height -= 2 * border;
             break;
           case Right:
             geometry.width -= t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.height -= 2 * border;
             break;
           default:
             break;
         }
+    else
+    {
+        geometry.width -= 2 * border;
+        geometry.height -= 2 * border;
+    }
 
     return geometry;
 }

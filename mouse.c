@@ -140,8 +140,6 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
                         &globalconf.screens[c->screen].padding);
 
     geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
-    geometry.width += 2 * c->border;
-    geometry.height += 2 * c->border;
 
     geometry =
         mouse_snapclienttogeometry_inside(geometry, screen_geometry, snap);
@@ -153,8 +151,6 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
         if(snapper != c && client_isvisible(snapper, c->screen))
         {
             snapper_geometry = snapper->geometry;
-            snapper_geometry.width += 2 * snapper->border;
-            snapper_geometry.height += 2 * snapper->border;
             snapper_geometry = titlebar_geometry_add(snapper->titlebar, snapper->border, snapper_geometry);
             geometry =
                 mouse_snapclienttogeometry_outside(geometry,
@@ -162,8 +158,6 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
                                                    snap);
         }
 
-    geometry.width -= 2 * c->border;
-    geometry.height -= 2 * c->border;
     return titlebar_geometry_remove(c->titlebar, c->border, geometry);
 }
 
