@@ -71,6 +71,7 @@ widget.tasklist.label = {}
 client.urgent = {}
 client.urgent.stack = {}
 client.urgent.stack.data = {}
+placement = {}
 
 --- Strip alpha part of color.
 -- @param color The color.
@@ -1603,6 +1604,15 @@ function widget.button(args)
     function w.mouse_leave(s) w.text = img_release end
     function w.mouse_enter(s) if capi.mouse.coords().buttons[1] then w.text = img_press end end
     return w
+end
+
+--- Place the client under the mouse.
+-- @param c The client.
+function placement.under_mouse(c)
+    local c_coords = c:coords()
+    local m_coords = capi.mouse.coords()
+    c:coords({ x = m_coords.x - c_coords.width / 2,
+               y = m_coords.y - c_coords.height / 2 })
 end
 
 -- Register standards hooks
