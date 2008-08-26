@@ -1276,7 +1276,7 @@ area_array_remove(area_array_t *areas, area_t elem)
                     .x = r.x,
                     .y = r.y,
                     .width = r.width,
-                    .height = AREA_TOP(inter) - AREA_LEFT(r),
+                    .height = AREA_TOP(inter) - AREA_TOP(r),
                 };
                 area_array_append(areas, extra);
             }
