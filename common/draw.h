@@ -78,28 +78,6 @@ DO_ARRAY(area_t, area, DO_NOTHING)
 #define AREA_RIGHT(a)   ((a).x + (a).width)
 #define AREA_BOTTOM(a)    ((a).y + (a).height)
 
-static inline bool
-area_intersect_area(area_t a, area_t b)
-{
-    return (b.x < a.x + a.width
-            && b.x + b.width > a.x
-            && b.y < a.y + a.height
-            && b.y + b.height > a.y);
-}
-
-static inline area_t
-area_get_intersect_area(area_t a, area_t b)
-{
-    area_t g;
-
-    g.x = MAX(a.x, b.x);
-    g.y = MAX(a.y, b.y);
-    g.width = MIN(a.x + a.width, b.x + b.width) - g.x;
-    g.height = MIN(a.y + a.height, b.y + b.height) - g.y;
-
-    return g;
-}
-
 typedef struct
 {
     PangoFontDescription *desc;
@@ -241,8 +219,6 @@ xcolor_init_request_t xcolor_init_unchecked(xcb_connection_t *, xcolor_t *, int,
                                             const char *, ssize_t);
 
 bool xcolor_init_reply(xcb_connection_t *, xcolor_init_request_t);
-
-void area_array_remove(area_array_t *, area_t);
 
 static inline void
 draw_parser_data_init(draw_parser_data_t *pdata)

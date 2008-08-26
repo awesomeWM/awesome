@@ -51,7 +51,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/layout.c
     ${SOURCE_DIR}/lua.c
     ${SOURCE_DIR}/mouse.c
-    ${SOURCE_DIR}/placement.c
     ${SOURCE_DIR}/screen.c
     ${SOURCE_DIR}/stack.c
     ${SOURCE_DIR}/statusbar.c

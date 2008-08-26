@@ -632,7 +632,6 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
 {
     client_t *c;
     xembed_window_t *emwin;
-    xcb_size_hints_t size_hints;
 
     if(ev->state == XCB_PROPERTY_DELETE)
         return 0; /* ignore */
@@ -654,7 +653,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
             }
         }
         else if (ev->atom == WM_NORMAL_HINTS)
-            client_updatesizehints(c, &size_hints);
+            client_updatesizehints(c);
         else if (ev->atom == WM_HINTS)
             client_updatewmhints(c);
         else if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)

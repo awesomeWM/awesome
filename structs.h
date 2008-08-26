@@ -64,7 +64,6 @@ typedef struct titlebar_t titlebar_t;
 typedef struct client_node_t client_node_t;
 typedef struct _tag_t tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
-typedef area_t (floating_placement_t)(client_t *);
 typedef widget_t *(widget_constructor_t)(alignment_t);
 typedef void (widget_destructor_t)(widget_t *);
 typedef struct awesome_t awesome_t;
@@ -314,8 +313,6 @@ struct client_t
     titlebar_t *titlebar;
     /** Button bindings */
     button_array_t buttons;
-    /** Floating window placement algo */
-    floating_placement_t *floating_placement;
     /** Icon */
     netwm_icon_t *icon;
     /** Next and previous clients */

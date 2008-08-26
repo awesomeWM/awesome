@@ -40,7 +40,6 @@
 #include "common/atoms.h"
 
 extern awesome_t globalconf;
-extern const name_func_link_t FloatingPlacementList[];
 
 /** Create a new client userdata.
  * \param L The Lua VM state.
@@ -389,8 +388,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c, *t = NULL;
     xcb_window_t trans;
-    bool rettrans, retloadprops, is_size_hints;
-    xcb_size_hints_t size_hints;
+    bool rettrans, retloadprops;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -428,7 +426,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->icon = ewmh_window_icon_get_reply(ewmh_icon_cookie);
 
     /* update hints */
-    is_size_hints = client_updatesizehints(c, &size_hints);
+    client_updatesizehints(c);
     client_updatewmhints(c);
 
     /* Try to load props if any */
@@ -470,18 +468,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1, 0);
-
-    if(c->floating_placement
-       && !retloadprops
-       && is_size_hints
-       && !(size_hints.flags & (XCB_SIZE_HINT_US_POSITION
-                                | XCB_SIZE_HINT_P_POSITION)))
-    {
-        if(c->isfloating)
-            client_resize(c, c->floating_placement(c), false);
-        else
-            c->f_geometry = c->floating_placement(c);
-    }
 }
 
 /** Compute client geometry with respect to its geometry hints.
@@ -891,63 +877,65 @@ client_updatewmhints(client_t *c)
  * \param c The client.
  * \return A pointer to a xcb_size_hints_t.
  */
-bool
-client_updatesizehints(client_t *c, xcb_size_hints_t *size_hints)
+void
+client_updatesizehints(client_t *c)
 {
+    xcb_size_hints_t size_hints;
+
     if(!xcb_get_wm_normal_hints_reply(globalconf.connection,
                                       xcb_get_wm_normal_hints_unchecked(globalconf.connection,
                                                                         c->win),
-                                      size_hints, NULL))
-        return false;
+                                      &size_hints, NULL))
+        return;
 
-    if((size_hints->flags & XCB_SIZE_HINT_P_SIZE))
+    if((size_hints.flags & XCB_SIZE_HINT_P_SIZE))
     {
-        c->basew = size_hints->base_width;
-        c->baseh = size_hints->base_height;
+        c->basew = size_hints.base_width;
+        c->baseh = size_hints.base_height;
     }
-    else if((size_hints->flags & XCB_SIZE_HINT_P_MIN_SIZE))
+    else if((size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
     {
-        c->basew = size_hints->min_width;
-        c->baseh = size_hints->min_height;
+        c->basew = size_hints.min_width;
+        c->baseh = size_hints.min_height;
     }
     else
         c->basew = c->baseh = 0;
 
-    if((size_hints->flags & XCB_SIZE_HINT_P_RESIZE_INC))
+    if((size_hints.flags & XCB_SIZE_HINT_P_RESIZE_INC))
     {
-        c->incw = size_hints->width_inc;
-        c->inch = size_hints->height_inc;
+        c->incw = size_hints.width_inc;
+        c->inch = size_hints.height_inc;
     }
     else
         c->incw = c->inch = 0;
 
-    if((size_hints->flags & XCB_SIZE_HINT_P_MAX_SIZE))
+    if((size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE))
     {
-        c->maxw = size_hints->max_width;
-        c->maxh = size_hints->max_height;
+        c->maxw = size_hints.max_width;
+        c->maxh = size_hints.max_height;
     }
     else
         c->maxw = c->maxh = 0;
 
-    if((size_hints->flags & XCB_SIZE_HINT_P_MIN_SIZE))
+    if((size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
     {
-        c->minw = size_hints->min_width;
-        c->minh = size_hints->min_height;
+        c->minw = size_hints.min_width;
+        c->minh = size_hints.min_height;
     }
-    else if((size_hints->flags & XCB_SIZE_HINT_BASE_SIZE))
+    else if((size_hints.flags & XCB_SIZE_HINT_BASE_SIZE))
     {
-        c->minw = size_hints->base_width;
-        c->minh = size_hints->base_height;
+        c->minw = size_hints.base_width;
+        c->minh = size_hints.base_height;
     }
     else
         c->minw = c->minh = 0;
 
-    if((size_hints->flags & XCB_SIZE_HINT_P_ASPECT))
+    if((size_hints.flags & XCB_SIZE_HINT_P_ASPECT))
     {
-        c->minax = size_hints->min_aspect_num;
-        c->minay = size_hints->min_aspect_den;
-        c->maxax = size_hints->max_aspect_num;
-        c->maxay = size_hints->max_aspect_den;
+        c->minax = size_hints.min_aspect_num;
+        c->minay = size_hints.min_aspect_den;
+        c->maxax = size_hints.max_aspect_num;
+        c->maxay = size_hints.max_aspect_den;
     }
     else
         c->minax = c->maxax = c->minay = c->maxay = 0;
@@ -959,7 +947,6 @@ client_updatesizehints(client_t *c, xcb_size_hints_t *size_hints)
     c->hassizehints = !(!c->basew && !c->baseh && !c->incw && !c->inch
                         && !c->maxw && !c->maxh && !c->minw && !c->minh
                         && !c->minax && !c->maxax && !c->minax && !c->minay);
-    return true;
 }
 
 /** Kill a client via a WM_DELETE_WINDOW request or XKillClient if not
@@ -1324,10 +1311,6 @@ luaA_client_newindex(lua_State *L)
         a_iso2utf8(&(*c)->name, buf, len);
         widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
         break;
-      case A_TK_FLOATING_PLACEMENT:
-        (*c)->floating_placement = name_func_lookup(luaL_checkstring(L, 3),
-                                                    FloatingPlacementList);
-        break;
       case A_TK_SCREEN:
         if(globalconf.screens_info->xinerama_is_active)
         {
@@ -1434,7 +1417,6 @@ luaA_client_newindex(lua_State *L)
  * \lfield role The window role, if available.
  * \lfield machine The machine client is running on.
  * \lfield icon_name The client name when iconified.
- * \lfield floating_placement The floating placement used for this client.
  * \lfield screen Client screen number.
  * \lfield hide Define if the client must be hidden, i.e. never mapped.
  * \lfield icon_path Path to the icon used to identify.
@@ -1524,10 +1506,6 @@ luaA_client_index(lua_State *L)
                 return 0;
         lua_pushlstring(L, value, slen);
         p_delete(&value);
-        break;
-      case A_TK_FLOATING_PLACEMENT:
-        lua_pushstring(L, name_func_rlookup((*c)->floating_placement,
-                                            FloatingPlacementList));
         break;
       case A_TK_SCREEN:
         lua_pushnumber(L, 1 + (*c)->screen);

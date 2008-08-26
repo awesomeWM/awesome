@@ -366,8 +366,6 @@ end)
 
 -- Hook function to execute when a new client appears.
 awful.hooks.manage.register(function (c)
-    -- Set floating placement to be smart!
-    c.floating_placement = "smart"
     if use_titlebar then
         -- Add a titlebar
         awful.titlebar.add(c, { modkey = modkey })
