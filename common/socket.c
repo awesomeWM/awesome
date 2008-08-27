@@ -25,6 +25,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <xcb/xcb.h>
+
 #include "common/socket.h"
 #include "common/util.h"
 
@@ -38,77 +40,27 @@
 struct sockaddr_un *
 socket_getaddr(const char *display)
 {
-    char *homedir, *tmp, *dot;
-    char *hostname = NULL, *screen = NULL;
-    ssize_t path_len, hostname_len, screen_len;
+    char *homedir, *host = NULL;
+    int screenp, displayp;
+    ssize_t path_len;
     struct sockaddr_un *addr;
 
     addr = p_new(struct sockaddr_un, 1);
     homedir = getenv("HOME");
-
-    if(a_strlen(display))
-    {
-        /* find hostname */
-        if((tmp = strchr(display, ':')))
-        {
-            /* if display starts with : */
-            if(tmp == display)
-            {
-                hostname = a_strdup("localhost");
-                hostname_len = 9;
-            }
-            else
-            {
-                hostname_len = tmp - display;
-                hostname = a_strndup(display, hostname_len);
-            }
-
-            tmp++;
-            if((dot = strchr(tmp, '.')))
-            {
-                screen_len = dot - tmp;
-                screen = a_strndup(tmp, screen_len); 
-            }
-            else
-            {
-                screen = a_strdup(tmp);
-                screen_len = a_strlen(screen);
-            }
-        }
-        else
-        {
-            hostname = a_strdup("unknown");
-            hostname_len = 7;
-            screen = a_strdup("0");
-            screen_len = 1;
-        }
-    }
-    else
-    {
-        hostname = a_strdup("localhost");
-        hostname_len = 9;
-        screen = a_strdup("0");
-        screen_len = 1;
-    }
+    
+    xcb_parse_display(NULL, &host, &displayp, &screenp);
 
     /* + 2 for / and . and \0 */
-    path_len = a_strlen(homedir) + sizeof(CONTROL_UNIX_SOCKET_PATH) - 1
-               + screen_len + hostname_len + 3;
+    path_len = snprintf(addr->sun_path, sizeof(addr->sun_path),
+                        "%s/" CONTROL_UNIX_SOCKET_PATH "%s%s%d",
+                        homedir, host, a_strlen(host) ? "." : "",
+                        displayp);
 
     if(path_len >= ssizeof(addr->sun_path))
     {
         fprintf(stderr, "error: path of control UNIX domain socket is too long");
         return NULL;
     }
-    a_strcpy(addr->sun_path, path_len, homedir);
-    a_strcat(addr->sun_path, path_len, "/");
-    a_strcat(addr->sun_path, path_len, CONTROL_UNIX_SOCKET_PATH);
-    a_strcat(addr->sun_path, path_len, hostname);
-    a_strcat(addr->sun_path, path_len, "|");
-    a_strcat(addr->sun_path, path_len, screen);
-
-    p_delete(&hostname);
-    p_delete(&screen);
 
     addr->sun_family = AF_UNIX;
 

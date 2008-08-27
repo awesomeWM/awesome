@@ -18,6 +18,7 @@ include_directories(
     ${SOURCE_DIR}
     ${BUILD_DIR}
     ${BUILD_DIR}/common
+    ${AWESOME_COMMON_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
@@ -107,10 +108,12 @@ set_target_properties(${PROJECT_AWE_NAME}
     LINK_FLAGS -export-dynamic)
 
 target_link_libraries(${PROJECT_AWE_NAME}
+    ${AWESOME_COMMON_REQUIRED_LIBRARIES}
     ${AWESOME_REQUIRED_LIBRARIES}
     ${AWESOME_OPTIONAL_LIBRARIES})
 
 target_link_libraries(${PROJECT_AWECLIENT_NAME}
+    ${AWESOME_COMMON_REQUIRED_LIBRARIES}
     ${AWESOMECLIENT_LIBRARIES})
 
 # {{{ Generated sources

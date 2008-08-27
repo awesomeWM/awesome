@@ -483,9 +483,9 @@ static int
 luaA_spawn(lua_State *L)
 {
     static const char *shell = NULL;
-    char display[128], *tmp, newdisplay[128];
+    char *host, newdisplay[128];
     const char *cmd;
-    int screen = 0;
+    int screen = 0, screenp, displayp;
 
     if(!shell && !(shell = getenv("SHELL")))
         shell = "/bin/sh";
@@ -498,14 +498,12 @@ luaA_spawn(lua_State *L)
 
     cmd = luaL_checkstring(L, 1);
 
-    if(!globalconf.screens_info->xinerama_is_active
-       && (tmp = getenv("DISPLAY")))
+    if(!globalconf.screens_info->xinerama_is_active)
     {
-        a_strcpy(display, sizeof(display) - 1, tmp);
-        if((tmp = strrchr(display, '.')))
-            *tmp = '\0';
-        snprintf(newdisplay, sizeof(newdisplay) - 1, "%s.%d", display, screen);
+        xcb_parse_display(NULL, &host, &displayp, &screenp);
+        snprintf(newdisplay, sizeof(newdisplay), "%s:%d.%d", host, displayp, screen);
         setenv("DISPLAY", newdisplay, 1);
+        p_delete(&host);
     }
 
     /* The double-fork construct avoids zombie processes and keeps the code
