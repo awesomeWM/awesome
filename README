@@ -8,7 +8,6 @@ In order to build awesome itself, you need header files and libs of:
   - cmake
   - Xlib, xcb and xcb-util (>= 0.2.1)
   - Lua 5.1
-  - LuaFileSystem
   - cairo
   - pango and pangocairo
   - libev
