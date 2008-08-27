@@ -24,6 +24,8 @@
 
 #include <ev.h>
 #include <dbus/dbus.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "dbus.h"
 #include "widget.h"
@@ -162,6 +164,8 @@ a_dbus_init(void)
         a_dbus_cleanup();
         return false;
     }
+
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
 
     ev_io_init(&dbusio, a_dbus_process_requests, fd, EV_READ);
     ev_io_start(EV_DEFAULT_UC_ &dbusio);

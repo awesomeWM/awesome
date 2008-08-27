@@ -438,5 +438,5 @@ awful.hooks.unmarked.register(hook_unmarked)
 awful.hooks.manage.register(hook_manage)
 awful.hooks.mouseover.register(hook_mouseover)
 awful.hooks.arrange.register(hook_arrange)
-awful.hooks.timer.register(1, hook_timer)
+ -- awful.hooks.timer.register(1, hook_timer)
 -- }}}

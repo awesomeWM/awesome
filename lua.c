@@ -26,6 +26,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include <ev.h>
 
@@ -765,8 +767,9 @@ luaA_cs_init(void)
 {
     int csfd = socket_getclient();
 
-    if (csfd < 0)
+    if (csfd < 0 || fcntl(csfd, F_SETFD, FD_CLOEXEC) == -1)
         return;
+
     addr = socket_getaddr(getenv("DISPLAY"));
 
     if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
