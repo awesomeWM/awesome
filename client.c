@@ -1026,20 +1026,6 @@ luaA_client_visible_get(lua_State *L)
     return 1;
 }
 
-/** Get the currently focused client (DEPRECATED).
- * \param L The Lua VM state.
- * \luastack
- * \lreturn The currently focused client.
- */
-static int
-luaA_client_focus_get(lua_State *L)
-{
-    deprecate();
-    if(globalconf.screen_focus->client_focus)
-        return luaA_client_userdata_new(L, globalconf.screen_focus->client_focus);
-    return 0;
-}
-
 /** Set client border width.
  * \param c The client.
  * \param width The border width.
@@ -1138,21 +1124,6 @@ luaA_client_tags(lua_State *L)
         }
 
     return 1;
-}
-
-/** Focus a client (DEPRECATED).
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A client.
- */
-static int
-luaA_client_focus_set(lua_State *L)
-{
-    client_t **c = luaA_checkudata(L, 1, "client");
-    client_focus(*c);
-    deprecate();
-    return 0;
 }
 
 /** Raise a client on top of others which are on the same layer.
@@ -1629,7 +1600,6 @@ luaA_client_module_newindex(lua_State *L)
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },
-    { "focus_get", luaA_client_focus_get },
     { "visible_get", luaA_client_visible_get },
     { "__index", luaA_client_module_index },
     { "__newindex", luaA_client_module_newindex },
@@ -1643,7 +1613,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
-    { "focus_set", luaA_client_focus_set },
     { "raise", luaA_client_raise },
     { "redraw", luaA_client_redraw },
     { "mouse_resize", luaA_client_mouse_resize },
