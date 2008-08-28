@@ -50,7 +50,7 @@ function display(tabindex, cl)
         cl.hide = false
         cl:swap(p)
         p.hide = true
-        cl:focus_set()
+        capi.client.focus = cl
 
         tabbed[tabindex][1] = cl
 
@@ -64,7 +64,7 @@ end
 -- @param cl The client
 -- @return The key.
 function tabindex_check(tabindex, cl)
-    local c = cl or capi.client.focus_get()
+    local c = cl or capi.client.focus
     return findkey(tabbed[tabindex], c)
 end
 
@@ -72,7 +72,7 @@ end
 -- @param cl The client to search.
 -- @return The tab index.
 function tabindex_get(cl)
-    local c = cl or capi.client.focus_get()
+    local c = cl or capi.client.focus
 
     for tabindex, tabdisplay in pairs(tabbed) do
         -- Loop through all tab displays
@@ -155,7 +155,7 @@ end
 -- @param cl The client to remove.
 -- @return True if the client has been untabbed.
 function untab(cl)
-    local c = cl or capi.client.focus_get()
+    local c = cl or capi.client.focus
     local tabindex = tabindex_get(c)
 
     if tabindex == nil then return false end
@@ -194,7 +194,7 @@ end
 -- @param cl The client to set into the tab, focused one otherwise.
 -- @return The created tab index.
 function tab_create(cl)
-    local c = cl or capi.client.focus_get()
+    local c = cl or capi.client.focus
 
     if not c then return end
 
@@ -211,7 +211,7 @@ end
 -- @param tabindex The tab index.
 -- @param cl The client to add, or the focused one otherwise.
 function tab(tabindex, cl)
-    local c = cl or capi.client.focus_get()
+    local c = cl or capi.client.focus
 
     if tabbed[tabindex] ~= nil then
         local x = tabindex_get(c)
@@ -241,7 +241,7 @@ end
 -- client is tabbed.
 function autotab_start()
     awful.hooks.manage.register(function (c)
-        local sel = capi.client.focus_get()
+        local sel = capi.client.focus
         local index = tabindex_get(sel)
 
         if index ~= nil then
@@ -252,9 +252,9 @@ function autotab_start()
     end)
 end
 
---- Update the tabbing when current tags changes, by unactivating
--- all tabs that are not in the current tag (and activating the good one).
-local function update_tabbing()
+--- update the tabbing when current tags changes, by unactivating
+-- all tabs that are not in the current tag (and activating the good one)
+function update_tabbing()
     -- do nothing if nothing changed
     if active_tag == awful.tag.selected().name then return end
 
@@ -289,7 +289,7 @@ local function update_tabbing()
     end
 end
 
--- Update the tabbing when the tags changes
+-- update the tabbing when the tags changes
 awful.hooks.arrange.register(update_tabbing)
 
 -- Set up hook so we don't leave lost hidden clients
