@@ -56,6 +56,8 @@ socket_getaddr(const char *display)
                         homedir, host, a_strlen(host) ? "." : "",
                         displayp);
 
+    p_delete(&host);
+
     if(path_len >= ssizeof(addr->sun_path))
     {
         fprintf(stderr, "error: path of control UNIX domain socket is too long");
