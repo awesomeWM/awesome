@@ -248,7 +248,16 @@ keybinding({ modkey, "Ctrl" }, "i", function ()
                                         if mypromptbox.text then
                                             mypromptbox.text = nil
                                         else
-                                            mypromptbox.text = "Class: " .. client.focus.class .. " Instance: ".. client.focus.instance
+                                            mypromptbox.text = nil
+                                            if client.focus.class then
+                                                mypromptbox.text = "Class: " .. client.focus.class .. " "
+                                            end
+                                            if client.focus.instance then
+                                                mypromptbox.text = mypromptbox.text .. "Instance: ".. client.focus.instance .. " "
+                                            end
+                                            if client.focus.role then
+                                                mypromptbox.text = mypromptbox.text .. "Role: ".. client.focus.role
+                                            end
                                         end
                                     end):add()
 

@@ -1257,6 +1257,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield class The client class.
  * \lfield instance The client instance.
  * \lfield pid The client PID, if available.
+ * \lfield role The window role, if available.
  * \lfield machine The machine client is running on.
  * \lfield icon_name The client name when iconified.
  * \lfield floating_placement The floating placement used for this client.
@@ -1306,6 +1307,13 @@ luaA_client_index(lua_State *L)
         if(!xutil_class_hint_get(globalconf.connection, (*c)->win, &hint))
             return 0;
         lua_pushstring(L, hint.res_name);
+        break;
+      case A_TK_ROLE:
+        if(!xutil_text_prop_get(globalconf.connection, (*c)->win,
+                                WM_WINDOW_ROLE, &value, &slen))
+            return 0;
+        lua_pushlstring(L, value, slen);
+        p_delete(&value);
         break;
       case A_TK_PID:
         prop_c = xcb_get_property_unchecked(globalconf.connection, false, (*c)->win, _NET_WM_PID, CARDINAL, 0L, 1L);

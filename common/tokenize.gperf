@@ -45,6 +45,7 @@ plot_properties_set
 position
 resize
 right
+role
 screen
 selected
 shadow
