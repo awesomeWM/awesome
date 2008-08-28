@@ -198,9 +198,6 @@ typedef struct
     } border;
 } draw_parser_data_t;
 
-void draw_parser_data_init(draw_parser_data_t *);
-void draw_parser_data_wipe(draw_parser_data_t *);
-
 bool draw_text_markup_expand(draw_parser_data_t *, const char *, ssize_t);
 
 void draw_text(draw_context_t *, font_t *, area_t, const char *, ssize_t len, draw_parser_data_t *);
@@ -242,6 +239,20 @@ xcolor_init_request_t xcolor_init_unchecked(xcb_connection_t *, xcolor_t *, int,
 bool xcolor_init_reply(xcb_connection_t *, xcolor_init_request_t);
 
 void area_array_remove(area_array_t *, area_t);
+
+static inline void
+draw_parser_data_init(draw_parser_data_t *pdata)
+{
+    p_clear(pdata, 1);
+}
+
+static inline void
+draw_parser_data_wipe(draw_parser_data_t *pdata)
+{
+    p_delete(&pdata->text);
+    if(pdata)
+        draw_image_delete(&pdata->bg_image);
+}
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

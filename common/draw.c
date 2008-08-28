@@ -43,19 +43,6 @@
 #include "common/markup.h"
 #include "common/xutil.h"
 
-void
-draw_parser_data_init(draw_parser_data_t *pdata)
-{
-    p_clear(pdata, 1);
-}
-
-void
-draw_parser_data_wipe(draw_parser_data_t *pdata)
-{
-    if(pdata)
-        draw_image_delete(&pdata->bg_image);
-}
-
 static iconv_t iso2utf8 = (iconv_t) -1;
 
 /** Convert text from any charset to UTF-8 using iconv.
