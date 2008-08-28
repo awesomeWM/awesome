@@ -100,6 +100,13 @@ typedef struct
     char *res_class;
 } xutil_class_hint_t;
 
+static inline void
+xutil_class_hint_wipe(xutil_class_hint_t *c)
+{
+    p_delete(&c->res_name);
+    p_delete(&c->res_class);
+}
+
 bool xutil_class_hint_get(xcb_connection_t *, xcb_window_t, xutil_class_hint_t *);
 
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);

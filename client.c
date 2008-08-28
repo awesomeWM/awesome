@@ -1302,11 +1302,13 @@ luaA_client_index(lua_State *L)
         if(!xutil_class_hint_get(globalconf.connection, (*c)->win, &hint))
              return 0;
         lua_pushstring(L, hint.res_class);
+        xutil_class_hint_wipe(&hint);
         break;
       case A_TK_INSTANCE:
         if(!xutil_class_hint_get(globalconf.connection, (*c)->win, &hint))
             return 0;
         lua_pushstring(L, hint.res_name);
+        xutil_class_hint_wipe(&hint);
         break;
       case A_TK_ROLE:
         if(!xutil_text_prop_get(globalconf.connection, (*c)->win,
