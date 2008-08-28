@@ -14,7 +14,10 @@ local awful = require('awful')
 --- tabulous: fabulous tabs for awesome
 module("tabulous")
 
-local tabbed = {}
+local tabbed_tags = {} -- all tab tables, indexed by tab
+local tabbed = {}      -- the current tag tab table
+
+local active_tag
 
 -- Hook creation
 awful.hooks.user.create('tabbed')
@@ -249,7 +252,48 @@ function autotab_start()
     end)
 end
 
+--- Update the tabbing when current tags changes, by unactivating
+-- all tabs that are not in the current tag (and activating the good one).
+local function update_tabbing()
+    -- do nothing if nothing changed
+    if active_tag == awful.tag.selected().name then return end
+
+    -- needed for initialisation
+    active_tag = active_tag or awful.tag.selected().name
+
+    -- save the tabbed list for the old active tag
+    tabbed_tags[active_tag] = tabbed
+
+    -- update the active tag and switch to the new tabbed list
+    active_tag = awful.tag.selected().name
+    tabbed = tabbed_tags[active_tag] or {}
+
+    -- update show/hide on the clients
+    for tag,tabs in pairs(tabbed_tags) do
+        if tag == active_tag then
+            -- hide all clients that are not tab masters
+            for i,tab in pairs(tabs) do
+                for i,c in pairs(tab[2]) do
+                    c.hide = true
+                end
+                tab[1].hide = false
+            end
+        else
+            -- unhide all clients
+            for i,tab in pairs(tabs) do
+                for i,c in pairs(tab[2]) do
+                    c.hide = false
+                end
+            end
+        end
+    end
+end
+
+-- Update the tabbing when the tags changes
+awful.hooks.arrange.register(update_tabbing)
+
 -- Set up hook so we don't leave lost hidden clients
 awful.hooks.unmanage.register(untab)
+
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
