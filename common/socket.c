@@ -41,8 +41,8 @@ struct sockaddr_un *
 socket_getaddr(const char *display)
 {
     char *homedir, *host = NULL;
-    int screenp, displayp;
-    ssize_t path_len;
+    int screenp = 0, displayp = 0;
+    ssize_t path_len, len;
     struct sockaddr_un *addr;
 
     addr = p_new(struct sockaddr_un, 1);
@@ -50,10 +50,12 @@ socket_getaddr(const char *display)
     
     xcb_parse_display(NULL, &host, &displayp, &screenp);
 
+    len = a_strlen(host);
+
     /* + 2 for / and . and \0 */
     path_len = snprintf(addr->sun_path, sizeof(addr->sun_path),
                         "%s/" CONTROL_UNIX_SOCKET_PATH "%s%s%d",
-                        homedir, host, a_strlen(host) ? "." : "",
+                        homedir, len ? host : "", len ? "." : "",
                         displayp);
 
     p_delete(&host);
