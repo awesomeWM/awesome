@@ -672,4 +672,11 @@ progressbar_new(alignment_t align)
     return w;
 }
 
+/* This is used for building documentation. */
+static const struct luaL_reg awesome_progressbar_meta[] __attribute__ ((unused)) =
+{
+    { "bar_properties_set", luaA_progressbar_bar_properties_set },
+    { "bar_data_add", luaA_progressbar_bar_data_add },
+};
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
