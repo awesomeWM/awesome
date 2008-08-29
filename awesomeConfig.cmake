@@ -319,22 +319,4 @@ foreach(file ${AWESOME_CONFIGURE_FILES})
 endforeach()
 #}}}
 
-# {{{ CPack configuration
-SET(CPACK_SET_DESTDIR                  TRUE)
-set(CPACK_PACKAGE_NAME                 "${PROJECT_AWE_NAME}")
-set(CPACK_GENERATOR                    "TBZ2")
-set(CPACK_SOURCE_GENERATOR             "TBZ2")
-set(CPACK_SOURCE_IGNORE_FILES
-    ".git;.*.swp$;.*~;.*patch;.gitignore;${BUILD_DIR}")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY  "A dynamic floating and tiling window manager")
-set(CPACK_PACKAGE_VENDOR               "awesome development team")
-set(CPACK_PACKAGE_DESCRIPTION_FILE     "${SOURCE_DIR}/README")
-set(CPACK_RESOURCE_FILE_LICENSE        "${SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_VERSION_MAJOR        "${VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR        "${VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH        "${VERSION_PATCH}")
-
-include(CPack)
-#}}}
-
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
