@@ -528,6 +528,17 @@ luaA_progressbar_bar_data_add(lua_State *L)
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on the stack.
+ * \luastack
+ * \lfield bar_properties_set Set the properties of a bar.
+ * \lfield bar_data_add Add data to a bar.
+ * \lfield gap Gap betweens bars.
+ * \lfield ticks_gap Gap between ticks.
+ * \lfield ticks_count Number of ticks.
+ * \lfield border_padding Border padding.
+ * \lfield border_width Border width.
+ * \lfield width Bars width.
+ * \lfield height Bars height.
+ * \lfield vertical True: draw bar vertically, false: horizontally.
  */
 static int
 luaA_progressbar_index(lua_State *L, awesome_token_t token)
@@ -565,7 +576,7 @@ luaA_progressbar_index(lua_State *L, awesome_token_t token)
         lua_pushnumber(L, d->height);
         break;
       case A_TK_VERTICAL:
-        lua_pushnumber(L, d->vertical);
+        lua_pushboolean(L, d->vertical);
         break;
       default:
         return 0;
