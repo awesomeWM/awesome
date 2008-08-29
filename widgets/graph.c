@@ -430,6 +430,13 @@ luaA_graph_plot_data_add(lua_State *L)
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield plot_properties_set A function to set plot properties.
+ * \lfield plot_add_add A function to add data to a plot.
+ * \lfield height Graph height.
+ * \lfield widget Graph width.
+ * \lfield bg Background color.
+ * \lfield grow Direction to grow: left or right.
  */
 static int
 luaA_graph_index(lua_State *L, awesome_token_t token)
