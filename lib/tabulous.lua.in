@@ -47,13 +47,12 @@ end
 function display(tabindex, cl)
     local p = tabbed[tabindex][1]
     if cl and p ~= cl then
+        tabbed[tabindex][1] = cl
+
         cl.hide = false
         cl:swap(p)
         p.hide = true
         capi.client.focus = cl
-
-        tabbed[tabindex][1] = cl
-
         awful.hooks.user.call('tabhide', p)
         awful.hooks.user.call('tabdisplay', cl)
     end
@@ -65,7 +64,7 @@ end
 -- @return The key.
 function tabindex_check(tabindex, cl)
     local c = cl or capi.client.focus
-    return findkey(tabbed[tabindex], c)
+    return findkey(tabbed[tabindex][2], c)
 end
 
 --- Find the tab index or return nil if not tabbed.
@@ -252,7 +251,7 @@ function autotab_start()
     end)
 end
 
---- update the tabbing when current tags changes, by unactivating
+--- Update the tabbing when current tags changes, by unactivating
 -- all tabs that are not in the current tag (and activating the good one)
 function update_tabbing()
     -- do nothing if nothing changed
@@ -289,6 +288,18 @@ function update_tabbing()
     end
 end
 
+--- Keep tabulous in sync when a client is focused but was hidden in a tab
+--  (show the client and hide the previous one)
+function hook_focus(cl)
+    local c = cl or awful.client.focus
+    local i = tabindex_get(c)
+    if i and  tabbed[i][1] ~= c then
+        display(i, c)
+    end
+end
+
+-- Keep tabulous in sync when focus change
+awful.hooks.focus.register(hook_focus)
 -- update the tabbing when the tags changes
 awful.hooks.arrange.register(update_tabbing)
 
