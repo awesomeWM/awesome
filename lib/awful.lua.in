@@ -881,7 +881,7 @@ local function prompt_history_save(id)
         local f = io.open(id, "w")
         if not f then
             local i = 0
-            for d in id:gfind(".-/") do
+            for d in id:gmatch(".-/") do
                 i = i + #d
             end
             mkdir(id:sub(1, i - 1))
