@@ -108,7 +108,8 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
         taglist_drawn_area_list_push(&data->drawn_area, tda);
     }
 
-    tda->areas.len = 0;
+    area_array_wipe(&tda->areas);
+    area_array_init(&tda->areas);
 
     /* First compute text and widget width */
     for(int i = 0; i < tags->len; i++)
