@@ -382,7 +382,7 @@ main(int argc, char **argv)
     }
 
     /* Need to xcb_flush to validate error handler */
-    xcb_flush(globalconf.connection);
+    xcb_aux_sync(globalconf.connection);
 
     /* Process all errors in the queue if any */
     xcb_poll_for_event_loop(globalconf.evenths);
@@ -474,7 +474,7 @@ main(int argc, char **argv)
         systray_init(screen_nbr);
     }
 
-    xcb_flush(globalconf.connection);
+    xcb_aux_sync(globalconf.connection);
 
     luaA_cs_init();
     a_dbus_init();
