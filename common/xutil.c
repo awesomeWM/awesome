@@ -71,6 +71,11 @@ xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
         (*text)[prop_r->value_len] = '\0';
         *len = prop_r->value_len;
     }
+    else
+    {
+        *text = NULL;
+        *len = 0;
+    }
 
     p_delete(&prop_r);
     return true;
