@@ -163,15 +163,11 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 
     while((ev = xcb_poll_for_event(globalconf.connection)))
     {
-        do
-        {
-            xcb_handle_event(globalconf.evenths, ev);
-            p_delete(&ev);
-        }
-        while((ev = xcb_poll_for_event(globalconf.connection)));
-
-        awesome_refresh(globalconf.connection);
+        xcb_handle_event(globalconf.evenths, ev);
+        p_delete(&ev);
     }
+
+    awesome_refresh(globalconf.connection);
 }
 
 static void
