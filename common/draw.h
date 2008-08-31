@@ -249,9 +249,12 @@ draw_parser_data_init(draw_parser_data_t *pdata)
 static inline void
 draw_parser_data_wipe(draw_parser_data_t *pdata)
 {
-    p_delete(&pdata->text);
     if(pdata)
+    {
+        pango_attr_list_unref(pdata->attr_list);
+        p_delete(&pdata->text);
         draw_image_delete(&pdata->bg_image);
+    }
 }
 
 #endif
