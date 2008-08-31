@@ -59,22 +59,25 @@ xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
         return false;
     }
 
-    /* Check whether the returned property value is just an ascii
-     * string or utf8 string.  At the moment it doesn't handle
-     * COMPOUND_TEXT and multibyte but it's not needed...  */
-    if(text && (prop_r->type == STRING || prop_r->type == UTF8_STRING))
+    if(text && len)
     {
-        void *prop_val = xcb_get_property_value(prop_r);
-        *text = p_new(char, prop_r->value_len + 1);
-        /* use memcpy() because prop_val may not be \0 terminated */
-        memcpy(*text, prop_val, prop_r->value_len);
-        (*text)[prop_r->value_len] = '\0';
-        *len = prop_r->value_len;
-    }
-    else
-    {
-        *text = NULL;
-        *len = 0;
+        /* Check whether the returned property value is just an ascii
+         * string or utf8 string.  At the moment it doesn't handle
+         * COMPOUND_TEXT and multibyte but it's not needed...  */
+        if(prop_r->type == STRING || prop_r->type == UTF8_STRING)
+        {
+            void *prop_val = xcb_get_property_value(prop_r);
+            *text = p_new(char, prop_r->value_len + 1);
+            /* use memcpy() because prop_val may not be \0 terminated */
+            memcpy(*text, prop_val, prop_r->value_len);
+            (*text)[prop_r->value_len] = '\0';
+            *len = prop_r->value_len;
+        }
+        else
+        {
+            *text = NULL;
+            *len = 0;
+        }
     }
 
     p_delete(&prop_r);
