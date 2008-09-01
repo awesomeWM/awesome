@@ -136,7 +136,7 @@ end
 mystatusbar = {}
 for s = 1, screen.count() do
     mystatusbar[s] = statusbar({ position = "top", name = "mystatusbar" .. s,
-                                   fg = beautiful.fg_normal, bg = beautiful.bg_normal })
+                                 fg = beautiful.fg_normal, bg = beautiful.bg_normal })
     -- Add widgets to the statusbar - order matters
     mystatusbar[s]:widgets({
         mytaglist,
@@ -145,7 +145,7 @@ for s = 1, screen.count() do
         mypromptbox,
         mytextbox,
         mylayoutbox[s],
-        s == screen.count() and mysystray or nil
+        s == 1 and mysystray or nil
     })
     mystatusbar[s].screen = s
 end

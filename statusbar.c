@@ -39,15 +39,13 @@ DO_LUA_EQ(statusbar_t, statusbar, "statusbar")
 static void
 statusbar_systray_kickout(int phys_screen)
 {
-    xembed_window_t *em;
-    uint32_t config_win_vals_off[2] = { -512, -512 };
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
 
-    for(em = globalconf.embedded; em; em = em->next)
-        if(em->phys_screen == phys_screen)
-            xcb_configure_window(globalconf.connection, em->win,
-                                 XCB_CONFIG_WINDOW_X
-                                 | XCB_CONFIG_WINDOW_Y,
-                                 config_win_vals_off);
+    xcb_reparent_window(globalconf.connection,
+                        globalconf.screens[phys_screen].systray.window,
+                        s->root, -512, -512);
+
+    globalconf.screens[phys_screen].systray.parent = s->root;
 }
 
 static void
@@ -61,35 +59,77 @@ statusbar_systray_refresh(statusbar_t *statusbar)
     for(systray = statusbar->widgets; systray; systray = systray->next)
         if(systray->widget->type == systray_new)
         {
-            uint32_t config_back[] = { globalconf.colors.bg.pixel };
+            uint32_t config_back[] = { statusbar->colors.bg.pixel };
             uint32_t config_win_vals[4];
             uint32_t config_win_vals_off[2] = { -512, -512 };
             xembed_window_t *em;
             position_t pos;
 
             if(statusbar->position
-               && systray->widget->isvisible)
+               && systray->widget->isvisible
+               && systray->area.width)
             {
                 pos = statusbar->position;
-                /* width */
-                config_win_vals[2] = systray->area.height;
-                /* height */
-                config_win_vals[3] = systray->area.height;
+
+                /* Set background of the systray window. */
+                xcb_change_window_attributes(globalconf.connection,
+                                             globalconf.screens[statusbar->phys_screen].systray.window,
+                                             XCB_CW_BACK_PIXEL, config_back);
+                /* Map it. */
+                xcb_map_window(globalconf.connection, globalconf.screens[statusbar->phys_screen].systray.window);
+                /* Move it. */
+                switch(statusbar->position)
+                {
+                  case Left:
+                    config_win_vals[0] = systray->area.y;
+                    config_win_vals[1] = statusbar->sw->geometry.height - systray->area.x - systray->area.width;
+                    config_win_vals[2] = systray->area.height;
+                    config_win_vals[3] = systray->area.width;
+                    break;
+                  case Right:
+                    config_win_vals[0] = systray->area.y;
+                    config_win_vals[1] = systray->area.x;
+                    config_win_vals[2] = systray->area.height;
+                    config_win_vals[3] = systray->area.width;
+                    break;
+                  default:
+                    config_win_vals[0] = systray->area.x;
+                    config_win_vals[1] = systray->area.y;
+                    config_win_vals[2] = systray->area.width;
+                    config_win_vals[3] = systray->area.height;
+                    break;
+                }
+                /* reparent */
+                if(globalconf.screens[statusbar->phys_screen].systray.parent != statusbar->sw->window)
+                {
+                    xcb_reparent_window(globalconf.connection,
+                                        globalconf.screens[statusbar->phys_screen].systray.window,
+                                        statusbar->sw->window,
+                                        config_win_vals[0], config_win_vals[1]);
+                    globalconf.screens[statusbar->phys_screen].systray.parent = statusbar->sw->window;
+                }
+                xcb_configure_window(globalconf.connection,
+                                     globalconf.screens[statusbar->phys_screen].systray.window,
+                                     XCB_CONFIG_WINDOW_X
+                                     | XCB_CONFIG_WINDOW_Y
+                                     | XCB_CONFIG_WINDOW_WIDTH
+                                     | XCB_CONFIG_WINDOW_HEIGHT,
+                                     config_win_vals);
+                /* width = height = systray height */
+                config_win_vals[2] = config_win_vals[3] = systray->area.height;
+                config_win_vals[0] = 0;
             }
             else
+            {
+                xcb_unmap_window(globalconf.connection, globalconf.screens[statusbar->phys_screen].systray.window);
                 /* hide */
                 pos = Off;
-
-            for(em = globalconf.embedded; em; em = em->next)
-                if(em->phys_screen == statusbar->phys_screen)
-                    xcb_change_window_attributes(globalconf.connection, em->win, XCB_CW_BACK_PIXEL, config_back);
+            }
 
             switch(pos)
             {
               case Left:
-                config_win_vals[0] = statusbar->sw->geometry.x + systray->area.y;
-                config_win_vals[1] = statusbar->sw->geometry.y + statusbar->sw->geometry.height
-                    - systray->area.x - config_win_vals[3];
+                config_win_vals[1] = systray->area.width - config_win_vals[3];
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == statusbar->phys_screen)
                     {
@@ -110,11 +150,9 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                                                  | XCB_CONFIG_WINDOW_Y,
                                                  config_win_vals_off);
                     }
-                client_stack();
                 break;
               case Right:
-                config_win_vals[0] = statusbar->sw->geometry.x - systray->area.y;
-                config_win_vals[1] = statusbar->sw->geometry.y + systray->area.x;
+                config_win_vals[1] = 0;
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == statusbar->phys_screen)
                     {
@@ -135,12 +173,10 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                                                  | XCB_CONFIG_WINDOW_Y,
                                                  config_win_vals_off);
                     }
-                client_stack();
                 break;
               case Top:
               case Bottom:
-                config_win_vals[0] = statusbar->sw->geometry.x + systray->area.x;
-                config_win_vals[1] = statusbar->sw->geometry.y + systray->area.y;
+                config_win_vals[1] = 0;
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == statusbar->phys_screen)
                     {
@@ -162,7 +198,6 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                                                  | XCB_CONFIG_WINDOW_Y,
                                                  config_win_vals_off);
                     }
-                client_stack();
                 break;
               default:
                 statusbar_systray_kickout(statusbar->phys_screen);
@@ -221,6 +256,11 @@ statusbar_position_update(statusbar_t *statusbar)
     bool ignore = false;
 
     globalconf.screens[statusbar->screen].need_arrange = true;
+
+    /* Who! Check that we're not deleting a statusbar with a systray, because it
+     * may be its parent. If so, we reparent to root before, otherwise it will
+     * hurt very much. */
+    statusbar_systray_kickout(statusbar->phys_screen);
 
     simplewindow_delete(&statusbar->sw);
     draw_context_delete(&statusbar->ctx);

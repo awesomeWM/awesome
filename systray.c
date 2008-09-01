@@ -111,6 +111,10 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
                                  select_input_val);
     window_state_set(embed_win, XCB_WM_WITHDRAWN_STATE);
 
+    xcb_reparent_window(globalconf.connection, embed_win,
+                        globalconf.screens[phys_screen].systray.window,
+                        0, 0);
+
     em = p_new(xembed_window_t, 1);
     em->win = embed_win;
     em->phys_screen = phys_screen;

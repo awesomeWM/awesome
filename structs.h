@@ -384,6 +384,8 @@ typedef struct
     struct
     {
         xcb_window_t window;
+        /** Systray window parent */
+        xcb_window_t parent;
     } systray;
     /** Focused client */
     client_t *client_focus;

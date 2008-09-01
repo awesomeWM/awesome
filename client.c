@@ -274,7 +274,6 @@ client_stack(void)
     layer_t layer;
     statusbar_t *sb;
     int screen;
-    xembed_window_t *emwin;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_BELOW;
@@ -299,16 +298,6 @@ client_stack(void)
                                      config_win_vals);
                 config_win_vals[0] = node->client->win;
             }
-
-    /* then stack systray windows */
-    for(emwin = globalconf.embedded; emwin; emwin = emwin->next)
-    {
-        xcb_configure_window(globalconf.connection,
-                             emwin->win,
-                             XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                             config_win_vals);
-        config_win_vals[0] = emwin->win;
-    }
 
     /* then stack statusbar window */
     for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
