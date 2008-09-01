@@ -1466,9 +1466,9 @@ function titlebar.add(c, args)
         })
     end
 
-    titlebar.update(c)
-
     c.titlebar = tb
+
+    titlebar.update(c)
 end
 
 --- Update a titlebar. This should be called in some hooks.
