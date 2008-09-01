@@ -1279,7 +1279,7 @@ function widget.taglist.label.all(t, args)
         if not taglist_squares or taglist_squares == "true" then
             background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
         end
-    elseif bg_urgent and fg_urgent then
+    elseif bg_urgent or fg_urgent then
         for k, c in pairs(t:clients()) do
             if not taglist_squares or taglist_squares == "true" then
                 background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarew.png\""
