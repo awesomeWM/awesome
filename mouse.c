@@ -418,9 +418,7 @@ mouse_track_mouse_drag(int *x, int *y)
     xcb_button_release_event_t *ev_button;
 
     while(true)
-    {
         while((ev = xcb_wait_for_event(globalconf.connection)))
-        {
             switch((ev->response_type & 0x7F))
             {
 
@@ -443,9 +441,6 @@ mouse_track_mouse_drag(int *x, int *y)
                     p_delete(&ev);
                     break;
             }
-
-        }
-    }
 }
 
 /** Get the client that contains the pointer.
