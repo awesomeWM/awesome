@@ -37,6 +37,7 @@
 
 #include <xcb/xcb.h>
 
+#include "awesome.h"
 #include "awesome-version-internal.h"
 #include "ewmh.h"
 #include "config.h"
@@ -108,14 +109,9 @@ luaA_quit(lua_State *L __attribute__ ((unused)))
 static int
 luaA_exec(lua_State *L)
 {
-    client_t *c;
     const char *cmd = luaL_checkstring(L, 1);
 
-    for(c = globalconf.clients; c; c = c->next)
-        client_unban(c);
-
-    xcb_flush(globalconf.connection);
-    xcb_disconnect(globalconf.connection);
+    awesome_atexit();
 
     a_exec(cmd);
     return 0;
@@ -126,7 +122,7 @@ luaA_exec(lua_State *L)
 static int
 luaA_restart(lua_State *L __attribute__ ((unused)))
 {
-    ewmh_restart();
+    awesome_restart();
     return 0;
 }
 

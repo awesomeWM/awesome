@@ -29,6 +29,7 @@
 
 #include <ev.h>
 
+#include "awesome.h"
 #include "client.h"
 #include "event.h"
 #include "window.h"
@@ -47,6 +48,33 @@ typedef struct
     xcb_window_t id;
     xcb_query_tree_cookie_t tree_cookie;
 } root_win_t;
+
+/** Call before exiting.
+ */
+void
+awesome_atexit(void)
+{
+    client_t *c;
+    xembed_window_t *em;
+
+    a_dbus_cleanup();
+    luaA_cs_cleanup();
+
+    /* reparent systray windows, otherwise they may die with their master */
+    for(em = globalconf.embedded; em; em = em->next)
+    {
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, em->phys_screen);
+        xcb_reparent_window(globalconf.connection, em->win, s->root, 0, 0);
+    }
+
+    /* remap all clients since some WM won't handle them otherwise */
+    for(c = globalconf.clients; c; c = c->next)
+        client_unban(c);
+
+    xcb_flush(globalconf.connection);
+
+    xcb_disconnect(globalconf.connection);
+}
 
 /** Scan X to find windows to manage.
  */
@@ -199,13 +227,20 @@ exit_on_signal(EV_P_ ev_signal *w, int revents)
     ev_unloop(EV_A_ 1);
 }
 
+void
+awesome_restart(void)
+{
+    awesome_atexit();
+    a_exec(globalconf.argv);
+}
+
 /** Function to restart aweome on some signals.
  * \param sig the signam received, unused
  */
 static void
 restart_on_signal(EV_P_ ev_signal *w, int revents)
 {
-    ewmh_restart();
+    awesome_restart();
 }
 
 /** \brief awesome xerror function.
@@ -280,7 +315,6 @@ main(int argc, char **argv)
     xcolor_init_request_t colors_reqs[2];
     xcb_get_modifier_mapping_cookie_t xmapping_cookie;
     ssize_t cmdlen = 1;
-    client_t *c;
     static struct option long_options[] =
     {
         {"help",    0, NULL, 'h'},
@@ -486,16 +520,8 @@ main(int argc, char **argv)
     ev_check_stop(globalconf.loop, &xcheck);
     ev_ref(globalconf.loop);
     ev_io_stop(globalconf.loop, &xio);
-    a_dbus_cleanup();
-    luaA_cs_cleanup();
 
-    /* remap all clients since some WM won't handle them otherwise */
-    for(c = globalconf.clients; c; c = c->next)
-        client_unban(c);
-
-    xcb_flush(globalconf.connection);
-
-    xcb_disconnect(globalconf.connection);
+    awesome_atexit();
 
     return EXIT_SUCCESS;
 }

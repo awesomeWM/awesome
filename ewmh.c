@@ -572,21 +572,4 @@ ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
     return icon;
 }
 
-/**
- * Restart awesome.
- */
-void
-ewmh_restart(void)
-{
-    client_t *c;
-
-    for(c = globalconf.clients; c; c = c->next)
-        client_unban(c);
-
-    xcb_flush(globalconf.connection);
-    xcb_disconnect(globalconf.connection);
-
-    a_exec(globalconf.argv);
-}
-
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

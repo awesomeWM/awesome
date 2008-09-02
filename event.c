@@ -24,6 +24,7 @@
 #include <xcb/randr.h>
 #include <xcb/xcb_icccm.h>
 
+#include "awesome.h"
 #include "event.h"
 #include "tag.h"
 #include "window.h"
@@ -285,7 +286,7 @@ event_handle_configurenotify(void *data __attribute__ ((unused)),
            && (ev->width != screen->width_in_pixels
                || ev->height != screen->height_in_pixels))
             /* it's not that we panic, but restart */
-            ewmh_restart();
+            awesome_restart();
 
     return 0;
 }
@@ -615,7 +616,7 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
      * XRenderSetSubpixelOrder(dpy, snum, scevent->subpixel_order);
      */
 
-    ewmh_restart();
+    awesome_restart();
 
     return 0;
 }
