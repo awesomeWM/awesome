@@ -537,55 +537,38 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 {
     xcb_keysym_t ksym = 0;
     char buf[MAX(MB_LEN_MAX, 32)];
-    int i = 1;
 
     if (!key_press_lookup_string(e, buf, countof(buf), &ksym))
         return false;
 
     lua_newtable(L);
 
-    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_CONTROL)
-    {
-        lua_pushliteral(L, "Control");
-        lua_rawseti(L, -2, i++);
-    }
-    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_LOCK)
-    {
-        lua_pushliteral(L, "Lock");
-        lua_rawseti(L, -2, i++);
-    }
-    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_SHIFT)
-    {
-        lua_pushliteral(L, "Shift");
-        lua_rawseti(L, -2, i++);
-    }
-    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_1)
-    {
-        lua_pushliteral(L, "Mod1");
-        lua_rawseti(L, -2, i++);
-    }
-    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_2)
-    {
-        lua_pushliteral(L, "Mod2");
-        lua_rawseti(L, -2, i++);
-    }
-    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_3)
-    {
-        lua_pushliteral(L, "Mod3");
-        lua_rawseti(L, -2, i++);
-    }
-    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_4)
-    {
-        lua_pushliteral(L, "Mod4");
-        lua_rawseti(L, -2, i++);
-    }
-    if(XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_5)
-    {
-        lua_pushliteral(L, "Mod5");
-        lua_rawseti(L, -2, i++);
-    }
+    lua_pushboolean(L, XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_CONTROL);
+    lua_setfield(L, -2, "Control");
+
+    lua_pushboolean(L, XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_LOCK);
+    lua_setfield(L, -2, "Lock");
+
+    lua_pushboolean(L, XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_SHIFT);
+    lua_setfield(L, -2, "Shift");
+
+    lua_pushboolean(L, XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_1);
+    lua_setfield(L, -2, "Mod1");
+
+    lua_pushboolean(L, XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_2);
+    lua_setfield(L, -2, "Mod2");
+
+    lua_pushboolean(L, XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_3);
+    lua_setfield(L, -2, "Mod3");
+
+    lua_pushboolean(L, XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_4);
+    lua_setfield(L, -2, "Mod4");
+
+    lua_pushboolean(L, XUTIL_MASK_CLEAN(e->state) & XCB_MOD_MASK_5);
+    lua_setfield(L, -2, "Mod5");
 
     lua_pushstring(L, buf);
+
     return true;
 }
 

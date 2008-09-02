@@ -1102,15 +1102,8 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
     textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos)
     capi.keygrabber.run(
     function (mod, key)
-        local has_ctrl = false
-
-        -- Compute modifiers keys
-        for k, v in ipairs(mod) do
-            if v == "Control" then has_ctrl = true end
-        end
-
         -- Get out cases
-        if has_ctrl then
+        if mod.Control then
             if key == "c" or key == "g" then
                 textbox.text = ""
                 if done_callback then done_callback() end
@@ -1136,7 +1129,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
         end
 
         -- Control cases
-        if has_ctrl then
+        if mod.Control then
             if key == "a" then
                 cur_pos = 1
             elseif key == "b" then
