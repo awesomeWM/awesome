@@ -350,7 +350,7 @@ luaA_keybinding_new(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lvalue A keybinding.
+ * \lparam A keybinding.
  */
 static int
 luaA_keybinding_add(lua_State *L)
@@ -364,7 +364,7 @@ luaA_keybinding_add(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lvalue A keybinding.
+ * \lparam A keybinding.
  */
 static int
 luaA_keybinding_remove(lua_State *L)
@@ -392,10 +392,10 @@ const struct luaL_reg awesome_keybinding_methods[] =
 };
 const struct luaL_reg awesome_keybinding_meta[] =
 {
-    {"add", luaA_keybinding_add },
-    {"remove", luaA_keybinding_remove },
-    {"__tostring", luaA_keybinding_tostring },
-    {"__gc", luaA_keybinding_gc },
+    { "add", luaA_keybinding_add },
+    { "remove", luaA_keybinding_remove },
+    { "__tostring", luaA_keybinding_tostring },
+    { "__gc", luaA_keybinding_gc },
     { NULL, NULL },
 };
 
