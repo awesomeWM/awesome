@@ -146,6 +146,8 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         {
             /* delete */
             draw_parser_data_wipe(&d->pdata);
+            /* reinit since we are giving it as arg to draw_text unconditionally */
+            draw_parser_data_init(&d->pdata);
             p_delete(&d->text);
 
             /* re-init */
@@ -153,7 +155,6 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
             if(buf)
             {
                 a_iso2utf8(&d->text, buf, len);
-                draw_parser_data_init(&d->pdata);
                 d->extents = draw_text_extents(globalconf.connection, globalconf.default_screen,
                                                globalconf.font, d->text, d->len, &d->pdata).width;
             }
