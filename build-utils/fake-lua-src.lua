@@ -13,13 +13,14 @@ function string.comment_translate(s)
     local lua_comment = "";
     nparam = 0;
     for line in s:gmatch("[^\r\n]+") do
+        if not line:match("\\lvalue") then
             line = line:gsub("/%*%*", "---")
             line = line:gsub("^.*%*", "--")
-            line = line:gsub("\\lvalue", "")
             line = line:gsub("\\(lparam)", string.replace_param)
             line = line:gsub("\\lreturn", "@return")
             line = line:gsub("\\lfield", "@field")
             lua_comment = lua_comment .. line .. "\n"
+        end
     end
     -- remove last \n
     lua_comment = lua_comment:sub(1, #lua_comment - 1)

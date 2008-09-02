@@ -350,7 +350,7 @@ luaA_keybinding_new(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A keybinding.
+ * \lvalue A keybinding.
  */
 static int
 luaA_keybinding_add(lua_State *L)
@@ -364,7 +364,7 @@ luaA_keybinding_add(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A keybinding.
+ * \lvalue A keybinding.
  */
 static int
 luaA_keybinding_remove(lua_State *L)
