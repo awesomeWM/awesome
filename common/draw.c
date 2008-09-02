@@ -308,7 +308,6 @@ draw_text_markup_expand(draw_parser_data_t *data,
         .priv       = data,
         .on_element = &draw_markup_on_element,
     };
-    char *text = NULL;
     GError *error = NULL;
     bool ret = false;
 
@@ -317,7 +316,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
     if(!markup_parse(&p, str, slen))
         goto bailout;
 
-    if(!pango_parse_markup(p.text.s, p.text.len, 0, &data->attr_list, &text, NULL, &error))
+    if(!pango_parse_markup(p.text.s, p.text.len, 0, &data->attr_list, &data->text, NULL, &error))
     {
         warn("cannot parse pango markup: %s", error ? error->message : "unknown error");
         if(error)
@@ -325,9 +324,7 @@ draw_text_markup_expand(draw_parser_data_t *data,
         goto bailout;
     }
 
-    /* stole text */
-    data->text = text;
-    data->len = a_strlen(text);
+    data->len = a_strlen(data->text);
     ret = true;
 
   bailout:
@@ -1032,11 +1029,9 @@ draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
 
     parser_data->connection = conn;
     parser_data->phys_screen = phys_screen;
-    if(draw_text_markup_expand(parser_data, text, len))
-    {
-        text = parser_data->text;
-        len  = parser_data->len;
-    }
+
+    if(!draw_text_markup_expand(parser_data, text, len))
+        return geom;
 
     surface = cairo_xcb_surface_create(conn, phys_screen,
                                        draw_screen_default_visual(s),
