@@ -119,8 +119,10 @@ mytextbox = widget({ type = "textbox", name = "mytextbox", align = "right" })
 mytextbox.text = "<b><small> awesome " .. AWESOME_VERSION .. " </small></b>"
 mypromptbox = widget({ type = "textbox", name = "mypromptbox", align = "left" })
 
--- Create an iconbox widget
-myiconbox = awful.widget.button({ name = "myiconbox", image = "@AWESOME_ICON_PATH@/awesome16.png" })
+-- Create a laucher widget
+mylauncher = awful.widget.launcher({ name = "mylauncher",
+                                     image = "@AWESOME_ICON_PATH@/awesome16.png",
+                                     command = terminal .. " -e man awesome"})
 
 -- Create a systray
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
@@ -148,7 +150,7 @@ for s = 1, screen.count() do
     mystatusbar[s]:widgets({
         mytaglist,
         mytasklist,
-        myiconbox,
+        mylauncher,
         mypromptbox,
         mytextbox,
         mylayoutbox[s],
