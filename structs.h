@@ -306,6 +306,8 @@ struct client_t
     bool isontop;
     /** true if the client must be skipped from task bar client list */
     bool skiptb;
+    /** True if the client cannot have focus */
+    bool nofocus;
     /** The window type */
     window_type_t type;
     /** Window of the client */

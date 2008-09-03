@@ -252,7 +252,7 @@ client_ban(client_t *c)
 static void
 client_focus(client_t *c)
 {
-    if(!client_maybevisible(c, c->screen))
+    if(!client_maybevisible(c, c->screen) || c->nofocus)
         return;
 
     /* unfocus current selected client */
@@ -855,6 +855,8 @@ client_updatewmhints(client_t *c)
         if((wmh.flags & XCB_WM_HINT_STATE) &&
            wmh.initial_state == XCB_WM_STATE_WITHDRAWN)
             client_setborder(c, 0);
+
+        c->nofocus = !wmh.input;
     }
 }
 
