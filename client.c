@@ -34,6 +34,7 @@
 #include "lua.h"
 #include "mouse.h"
 #include "systray.h"
+#include "statusbar.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
 #include "common/atoms.h"
@@ -457,6 +458,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     /* update window title */
     client_updatetitle(c);
 
+    /* update strut */
+    ewmh_client_strut_update(c);
+
     ewmh_update_net_client_list(c->phys_screen);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 
@@ -668,9 +672,7 @@ client_setfullscreen(client_t *c, bool s)
                 xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
                 c->titlebar->position = Off;
             }
-            geometry = screen_area_get(&globalconf.screens[c->screen].geometry,
-                                       NULL,
-                                       &globalconf.screens[c->screen].padding);
+            geometry = screen_area_get(c->screen, NULL, &globalconf.screens[c->screen].padding, false);
             c->m_geometry = c->geometry;
             c->oldborder = c->border;
             client_setborder(c, 0);
@@ -825,6 +827,12 @@ client_unmanage(client_t *c)
     /* delete properties */
     xcb_delete_property(globalconf.connection, c->win, _AWESOME_TAGS);
     xcb_delete_property(globalconf.connection, c->win, _AWESOME_FLOATING);
+
+    if(client_hasstrut(c))
+        /* All the statusbars (may) need to be repositioned */
+        for(int screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+            for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
+                statusbar_position_update(s);
 
     /* set client as invalid */
     c->invalid = true;

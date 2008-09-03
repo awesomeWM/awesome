@@ -36,13 +36,16 @@ extern awesome_t globalconf;
  * \param screen Screen number.
  * \param statusbar Statusbar list to remove.
  * \param padding Padding.
+ * \param strut Honor windows strut.
  * \return The screen area.
  */
 area_t
-screen_area_get(area_t *geometry, statusbar_t *statusbar, padding_t *padding)
+screen_area_get(int screen, statusbar_t *statusbar,
+                padding_t *padding, bool strut)
 {
-    area_t area = *geometry;
+    area_t area = globalconf.screens[screen].geometry;
     statusbar_t *sb;
+    uint16_t top = 0, bottom = 0, left = 0, right = 0;
 
     /* make padding corrections */
     if(padding)
@@ -53,22 +56,67 @@ screen_area_get(area_t *geometry, statusbar_t *statusbar, padding_t *padding)
         area.height -= padding->top + padding->bottom;
     }
 
+    if(strut)
+    {
+        client_t *c;
+        for(c = globalconf.clients; c; c = c->next)
+            if(client_isvisible(c, screen))
+            {
+                if(c->strut.top_start_x || c->strut.top_end_x)
+                {
+                    if(c->strut.top)
+                        top = MAX(top, c->strut.top);
+                    else
+                        top = MAX(top, (c->geometry.y - area.y) + c->geometry.height);
+                }
+                if(c->strut.bottom_start_x || c->strut.bottom_end_x)
+                {
+                    if(c->strut.bottom)
+                        bottom = MAX(bottom, c->strut.bottom);
+                    else
+                        bottom = MAX(bottom, (area.y + area.height) - c->geometry.y);
+                }
+                if(c->strut.left_start_y || c->strut.left_end_y)
+                {
+                    if(c->strut.left)
+                        left = MAX(left, c->strut.left);
+                    else
+                        left = MAX(left, (c->geometry.x - area.x) + c->geometry.width);
+                }
+                if(c->strut.right_start_y || c->strut.right_end_y)
+                {
+                    if(c->strut.right)
+                        right = MAX(right, c->strut.right);
+                    else
+                        right = MAX(right, (area.x + area.width) - c->geometry.x);
+                }
+            }
+    }
+
+
     for(sb = statusbar; sb; sb = sb->next)
         switch(sb->position)
         {
           case Top:
-            area.y += sb->height;
+            top = MAX(top, (uint16_t) (sb->sw->geometry.y - area.y) + sb->sw->geometry.height);
+            break;
           case Bottom:
-            area.height -= sb->height;
+            bottom = MAX(bottom, (uint16_t) (area.y + area.height) - sb->sw->geometry.y);
             break;
           case Left:
-            area.x += sb->height;
+            left = MAX(left, (uint16_t) (sb->sw->geometry.x - area.x) + sb->sw->geometry.width);
+            break;
           case Right:
-            area.width -= sb->height;
+            right = MAX(right, (uint16_t) (area.x + area.width) - sb->sw->geometry.x);
             break;
           default:
             break;
         }
+
+    area.x += left;
+    area.y += top;
+    area.width -= left + right;
+    area.height -= top + bottom;
 
     return area;
 }
@@ -151,10 +199,10 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
         area_t new_geometry, new_f_geometry;
         new_f_geometry = c->f_geometry;
 
-        to = screen_area_get(&globalconf.screens[c->screen].geometry,
-                             NULL, NULL);
-        from = screen_area_get(&globalconf.screens[old_screen].geometry,
-                               NULL, NULL);
+        to = screen_area_get(c->screen,
+                             NULL, NULL, false);
+        from = screen_area_get(old_screen,
+                               NULL, NULL, false);
 
         /* compute new coords in new screen */
         new_f_geometry.x = (c->f_geometry.x - from.x) + to.x;
@@ -331,7 +379,7 @@ luaA_screen_index(lua_State *L)
         lua_setfield(L, -2, "height");
         break;
       case A_TK_WORKAREA:
-        g = screen_area_get(&s->geometry, s->statusbar, &s->padding);
+        g = screen_area_get(s->index, s->statusbar, &s->padding, true);
         lua_newtable(L);
         lua_pushnumber(L, g.x);
         lua_setfield(L, -2, "x");

@@ -130,14 +130,16 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
     client_t *snapper;
     area_t snapper_geometry;
     area_t screen_geometry =
-        screen_area_get(&globalconf.screens[c->screen].geometry,
+        screen_area_get(c->screen,
                         globalconf.screens[c->screen].statusbar,
-                        &globalconf.screens[c->screen].padding);
+                        &globalconf.screens[c->screen].padding,
+                        false);
 
     area_t screen_geometry_barless =
-        screen_area_get(&globalconf.screens[c->screen].geometry,
+        screen_area_get(c->screen,
                         NULL,
-                        &globalconf.screens[c->screen].padding);
+                        &globalconf.screens[c->screen].padding,
+                        false);
 
     geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
 
@@ -745,9 +747,10 @@ mouse_client_resize_tiled(client_t *c)
     tag = tags_get_current(c->screen)[0];
     layout = tag->layout;
 
-    area = screen_area_get(&globalconf.screens[tag->screen].geometry,
+    area = screen_area_get(tag->screen,
                            globalconf.screens[tag->screen].statusbar,
-                           &globalconf.screens[tag->screen].padding);
+                           &globalconf.screens[tag->screen].padding,
+                           true);
 
     mouse_query_pointer(screen->root, &mouse_x, &mouse_y, NULL);
 
@@ -848,9 +851,10 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
     root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
 
-    area = screen_area_get(&globalconf.screens[tag->screen].geometry,
+    area = screen_area_get(tag->screen,
                            globalconf.screens[tag->screen].statusbar,
-                           &globalconf.screens[tag->screen].padding);
+                           &globalconf.screens[tag->screen].padding,
+                           true);
 
     center_x = area.x + (round(area.width / 2.));
     center_y = area.y + (round(area.height / 2.));

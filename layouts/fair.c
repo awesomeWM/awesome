@@ -41,9 +41,10 @@ layout_fair(int screen, const orientation_t orientation)
     client_t *c;
     area_t geometry, area;
 
-    area = screen_area_get(&globalconf.screens[screen].geometry,
+    area = screen_area_get(screen,
                            globalconf.screens[screen].statusbar,
-                           &globalconf.screens[screen].padding);
+                           &globalconf.screens[screen].padding,
+                           true);
 
     for(c = globalconf.clients ; c; c = c->next)
         if(IS_TILED(c, screen))

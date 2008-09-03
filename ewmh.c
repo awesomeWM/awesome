@@ -32,6 +32,7 @@
 #include "widget.h"
 #include "cnode.h"
 #include "titlebar.h"
+#include "statusbar.h"
 #include "common/atoms.h"
 
 extern awesome_t globalconf;
@@ -58,6 +59,7 @@ ewmh_init(int phys_screen)
         _NET_WORKAREA,
         _NET_CLOSE_WINDOW,
         _NET_WM_NAME,
+        _NET_WM_STRUT_PARTIAL,
         _NET_WM_ICON_NAME,
         _NET_WM_VISIBLE_ICON_NAME,
         _NET_WM_DESKTOP,
@@ -213,9 +215,10 @@ ewmh_update_workarea(int phys_screen)
 {
     tag_array_t *tags = &globalconf.screens[phys_screen].tags;
     uint32_t *area = p_alloca(uint32_t, tags->len * 4);
-    area_t geom = screen_area_get(&globalconf.screens[phys_screen].geometry,
+    area_t geom = screen_area_get(phys_screen,
                                   globalconf.screens[phys_screen].statusbar,
-                                  &globalconf.screens[phys_screen].padding);
+                                  &globalconf.screens[phys_screen].padding,
+                                  true);
 
 
     for(int i = 0; i < tags->len; i++)
@@ -434,6 +437,64 @@ ewmh_check_client_hints(client_t *c)
 
     p_delete(&reply);
 }
+
+/** Update the WM strut of a client.
+ * \param c The client.
+ */
+void
+ewmh_client_strut_update(client_t *c)
+{
+    void *data;
+    xcb_get_property_cookie_t strut_q;
+    xcb_get_property_reply_t *strut_r;
+
+    strut_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+                                         _NET_WM_STRUT_PARTIAL, CARDINAL, 0, 12);
+
+    strut_r = xcb_get_property_reply(globalconf.connection, strut_q, NULL);
+
+    if(strut_r
+       && strut_r->value_len
+       && (data = xcb_get_property_value(strut_r)))
+    {
+        uint32_t *strut = data;
+
+        if(c->strut.left != strut[0]
+           || c->strut.right != strut[1]
+           || c->strut.top != strut[2]
+           || c->strut.bottom != strut[3]
+           || c->strut.left_start_y != strut[4]
+           || c->strut.left_end_y != strut[5]
+           || c->strut.right_start_y != strut[6]
+           || c->strut.right_end_y != strut[7]
+           || c->strut.top_start_x != strut[8]
+           || c->strut.top_end_x != strut[9]
+           || c->strut.bottom_start_x != strut[10]
+           || c->strut.bottom_end_x != strut[11])
+        {
+            c->strut.left = strut[0];
+            c->strut.right = strut[1];
+            c->strut.top = strut[2];
+            c->strut.bottom = strut[3];
+            c->strut.left_start_y = strut[4];
+            c->strut.left_end_y = strut[5];
+            c->strut.right_start_y = strut[6];
+            c->strut.right_end_y = strut[7];
+            c->strut.top_start_x = strut[8];
+            c->strut.top_end_x = strut[9];
+            c->strut.bottom_start_x = strut[10];
+            c->strut.bottom_end_x = strut[11];
+
+            client_need_arrange(c);
+            /* All the statusbars (may) need to be repositioned */
+            for(int screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+                for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
+                    statusbar_position_update(s);
+        }
+    }
+    p_delete(&strut_r);
+}
+
 
 /** Send request to get NET_WM_ICON (EWMH)
  * \param w The window.

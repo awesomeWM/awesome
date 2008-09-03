@@ -261,6 +261,16 @@ typedef struct
     unsigned char *image;
 } netwm_icon_t;
 
+/* Strut */
+typedef struct
+{
+    uint16_t left, right, top, bottom;
+    uint16_t left_start_y, left_end_y;
+    uint16_t right_start_y, right_end_y;
+    uint16_t top_start_x, top_end_x;
+    uint16_t bottom_start_x, bottom_end_x;
+} strut_t;
+
 /** client_t type */
 struct client_t
 {
@@ -280,6 +290,8 @@ struct client_t
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
     bool hassizehints;
+    /** Strut */
+    strut_t strut;
     /** Respect resize hints */
     bool honorsizehints;
     int border, oldborder;

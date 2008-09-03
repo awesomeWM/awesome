@@ -283,9 +283,8 @@ statusbar_position_update(statusbar_t *statusbar)
     if(statusbar->position == Off)
         return;
 
-    area = screen_area_get(&globalconf.screens[statusbar->screen].geometry,
-                           NULL,
-                           &globalconf.screens[statusbar->screen].padding);
+    area = screen_area_get(statusbar->screen, NULL,
+                           &globalconf.screens[statusbar->screen].padding, true);
 
     /* Top and Bottom statusbar_t have prio */
     for(sb = globalconf.screens[statusbar->screen].statusbar; sb; sb = sb->next)

@@ -26,7 +26,7 @@
 
 #define SCREEN_UNDEF    (-1)
 
-area_t screen_area_get(area_t *, statusbar_t *, padding_t *);
+area_t screen_area_get(int, statusbar_t *, padding_t *, bool);
 area_t display_area_get(int, statusbar_t *, padding_t *);
 int screen_virttophys(int);
 void screen_client_moveto(client_t *, int, bool);

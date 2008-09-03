@@ -34,9 +34,10 @@ layout_magnifier(int screen)
     int n = 0;
     client_t *c, *focus;
     tag_t **curtags = tags_get_current(screen);
-    area_t geometry, area = screen_area_get(&globalconf.screens[screen].geometry,
+    area_t geometry, area = screen_area_get(screen,
                                             globalconf.screens[screen].statusbar,
-                                            &globalconf.screens[screen].padding);
+                                            &globalconf.screens[screen].padding,
+                                            true);
 
     focus = globalconf.screens[screen].client_focus;
 

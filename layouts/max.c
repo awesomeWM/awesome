@@ -30,9 +30,10 @@ void
 layout_max(int screen)
 {
     client_t *c;
-    area_t area = screen_area_get(&globalconf.screens[screen].geometry,
+    area_t area = screen_area_get(screen,
                                   globalconf.screens[screen].statusbar,
-                                  &globalconf.screens[screen].padding);
+                                  &globalconf.screens[screen].padding,
+                                  true);
 
     for(c = globalconf.clients; c; c = c->next)
         if(IS_TILED(c, screen))

@@ -217,6 +217,11 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             {
                 client_resize(c, geometry, false);
                 titlebar_draw(c);
+                if(client_hasstrut(c))
+                    /* All the statusbars (may) need to be repositioned */
+                    for(int screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+                        for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
+                            statusbar_position_update(s);
             }
             else
             {
@@ -658,6 +663,8 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
             client_updatewmhints(c);
         else if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)
             client_updatetitle(c);
+        else if(ev->atom == _NET_WM_STRUT_PARTIAL)
+            ewmh_client_strut_update(c);
         else if(ev->atom == _NET_WM_ICON)
         {
             xcb_get_property_cookie_t icon_q = ewmh_window_icon_get_unchecked(c->win);
