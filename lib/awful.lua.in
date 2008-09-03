@@ -1600,6 +1600,19 @@ function widget.button(args)
     return w
 end
 
+--- Create a button widget which will launch a command.
+-- @param args Standard widget table arguments, plus image for the image path
+-- and command for the command to run on click.
+-- @return A launcher widget.
+function widget.launcher(args)
+    if not args.command then return end
+    local w = widget.button(args)
+    local b = w:buttons()
+    b[#b + 1] = capi.button({}, 1, nil, function () spawn(args.command) end)
+    w:buttons(b)
+    return w
+end
+
 --- Check if an area intersect another area.
 -- @param a The area.
 -- @param b The other area.
