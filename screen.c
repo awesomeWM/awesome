@@ -205,7 +205,7 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
             client_resize(c, new_geometry, false);
         }
         /* if floating, move to this new coords */
-        else if(c->isfloating)
+        else if(client_isfloating(c))
             client_resize(c, new_f_geometry, false);
         /* otherwise just register them */
         else

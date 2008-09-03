@@ -496,15 +496,19 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     mouse_query_pointer(root, &last_x, &last_y, NULL);
 
     /* grab pointer */
-    if(c->isfullscreen || !mouse_grab_pointer(root, CurMove))
+    if(c->isfullscreen
+       || c->type == WINDOW_TYPE_DESKTOP
+       || c->type == WINDOW_TYPE_SPLASH
+       || c->type == WINDOW_TYPE_DOCK
+       || !mouse_grab_pointer(root, CurMove))
         return;
 
-    if(infobox && (c->isfloating || layout == layout_floating))
+    if(infobox && (client_isfloating(c) || layout == layout_floating))
         sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
-        if(c->isfloating || layout == layout_floating)
+        if(client_isfloating(c) || layout == layout_floating)
         {
             area_t geometry;
 
@@ -517,6 +521,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             geometry = mouse_snapclient(c, geometry, snap);
             c->ismoving = true;
             client_resize(c, geometry, false);
+            xcb_flush(globalconf.connection);
             c->ismoving = false;
 
             /* draw the infobox */
@@ -943,7 +948,10 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
     layout_t *layout;
     xcb_screen_t *s;
 
-    if(c->isfullscreen)
+    if(c->isfullscreen
+       || c->type == WINDOW_TYPE_DESKTOP
+       || c->type == WINDOW_TYPE_SPLASH
+       || c->type == WINDOW_TYPE_DOCK)
         return;
 
     curtags = tags_get_current(c->screen);
@@ -951,15 +959,8 @@ mouse_client_resize(client_t *c, corner_t corner, bool infobox)
     s = xutil_screen_get(globalconf.connection, c->phys_screen);
 
     /* only handle floating, tiled and magnifier layouts */
-    if(layout == layout_floating || c->isfloating)
-    {
-        if(c->isfixed)
-            goto bailout;
-
-        client_setfullscreen(c, false);
-
+    if(layout == layout_floating || client_isfloating(c))
         mouse_client_resize_floating(c, corner, infobox);
-    }
     else if(layout == layout_tile || layout == layout_tileleft
             || layout == layout_tilebottom || layout == layout_tiletop)
     {

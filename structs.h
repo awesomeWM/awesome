@@ -49,6 +49,16 @@ typedef enum
     LAYER_OUTOFSPACE
 } layer_t;
 
+/** Windows type */
+typedef enum
+{
+    WINDOW_TYPE_NORMAL = 0,
+    WINDOW_TYPE_DESKTOP,
+    WINDOW_TYPE_DOCK,
+    WINDOW_TYPE_SPLASH,
+    WINDOW_TYPE_DIALOG,
+} window_type_t;
+
 /** Cursors */
 enum
 {
@@ -274,16 +284,12 @@ struct client_t
     bool honorsizehints;
     int border, oldborder;
     xcolor_t border_color;
-    /** True if the client does not want any border */
-    bool noborder;
     /** True if the client is sticky */
     bool issticky;
     /** Has urgency hint */
     bool isurgent;
     /** true if the window is floating */
     bool isfloating;
-    /** true if the window is fixed */
-    bool isfixed;
     /** true if the client is moving */
     bool ismoving;
     /** True if the client is hidden */
@@ -300,14 +306,14 @@ struct client_t
     bool isontop;
     /** true if the client must be skipped from task bar client list */
     bool skiptb;
+    /** The window type */
+    window_type_t type;
     /** Window of the client */
     xcb_window_t win;
     /** Client logical screen */
     int screen;
     /** Client physical screen */
     int phys_screen;
-    /** Layer in the stacking order */
-    layer_t layer;
     /** Path to an icon */
     char *icon_path;
     /** Titlebar */

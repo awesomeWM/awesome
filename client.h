@@ -37,7 +37,6 @@
 bool client_maybevisible(client_t *, int);
 bool client_isvisible(client_t *, int);
 client_t * client_getbywin(xcb_window_t);
-void client_setlayer(client_t *, layer_t);
 void client_stack(void);
 void client_ban(client_t *);
 void client_unban(client_t *);
@@ -76,6 +75,30 @@ client_raise(client_t *c)
     client_stack();
 }
 
+/** Check if a client has fixed size.
+ * \param c A client.
+ * \return A boolean value, true if the client has a fixed size.
+ */
+static inline bool
+client_isfixed(client_t *c)
+{
+    return (c->maxw && c->minw && c->maxh && c->minh
+            && c->maxw == c->minw && c->maxh == c->minh);
+
+}
+
+/** Check if a client is floating.
+ * \param c A client.
+ * \return A boolean value, true if the client is floating.
+ */
+static inline bool
+client_isfloating(client_t *c)
+{
+    return (c->type != WINDOW_TYPE_NORMAL
+            || c->isfloating
+            || c->isfullscreen
+            || client_isfixed(c));
+}
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

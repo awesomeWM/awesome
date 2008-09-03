@@ -146,7 +146,7 @@ client_maybevisible(client_t *c, int screen)
 {
     if(c->screen == screen)
     {
-        if(c->issticky)
+        if(c->issticky || c->type == WINDOW_TYPE_DESKTOP)
             return true;
 
         tag_array_t *tags = &globalconf.screens[screen].tags;
@@ -332,7 +332,19 @@ client_layer_translator(client_t *c)
         return LAYER_ABOVE;
     else if(c->isfloating)
         return LAYER_FLOAT;
-    return c->layer;
+
+    switch(c->type)
+    {
+      case WINDOW_TYPE_DOCK:
+        return LAYER_DESKTOP;
+      case WINDOW_TYPE_SPLASH:
+      case WINDOW_TYPE_DIALOG:
+        return LAYER_ABOVE;
+      case WINDOW_TYPE_DESKTOP:
+        return LAYER_DESKTOP;
+      default:
+        return LAYER_TILE;
+    }
 }
 
 /** Restack clients.
@@ -385,9 +397,8 @@ void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
-    client_t *c, *t = NULL;
-    xcb_window_t trans;
-    bool rettrans, retloadprops;
+    client_t *c;
+    bool retloadprops;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -420,7 +431,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->geometry.y = c->f_geometry.y = c->m_geometry.y = wgeom->y;
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wgeom->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
-    c->layer = LAYER_TILE;
     client_setborder(c, wgeom->border_width);
     c->icon = ewmh_window_icon_get_reply(ewmh_icon_cookie);
 
@@ -434,23 +444,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     /* Then check clients hints */
     ewmh_check_client_hints(c);
-
-    /* check for transient and set tags like its parent */
-    if((rettrans = xcb_get_wm_transient_for_reply(globalconf.connection,
-                                                  xcb_get_wm_transient_for_unchecked(globalconf.connection,
-                                                                                     w),
-                                                  &trans, NULL))
-       && (t = client_getbywin(trans)))
-    {
-        tag_array_t *tags = &globalconf.screens[c->screen].tags;
-        for(int i = 0; i < tags->len; i++)
-            if(is_client_tagged(t, tags->tab[i]))
-                tag_client(c, tags->tab[i]);
-    }
-
-    /* should be floating if transsient or fixed */
-    if(rettrans || c->isfixed)
-        client_setfloating(c, true);
 
     /* Push client in client list */
     client_list_push(&globalconf.clients, c);
@@ -533,12 +526,12 @@ client_resize(client_t *c, area_t geometry, bool hints)
     int new_screen;
     area_t area;
     layout_t *layout = layout_get_current(c->screen);
-    bool resized = false;
+    bool resized = false, fixed;
     /* Values to configure a window is an array where values are
      * stored according to 'value_mask' */
     uint32_t values[5];
 
-    if(c->titlebar && !c->ismoving && !c->isfloating && !c->isfullscreen && layout != layout_floating)
+    if(c->titlebar && !c->ismoving && !client_isfloating(c) && layout != layout_floating)
         geometry = titlebar_geometry_remove(c->titlebar, c->border, geometry);
 
     if(hints)
@@ -551,6 +544,8 @@ client_resize(client_t *c, area_t geometry, bool hints)
     area = display_area_get(c->phys_screen, NULL,
                             &globalconf.screens[c->screen].padding);
 
+    fixed = client_isfixed(c);
+
     if(geometry.x > area.width)
         geometry.x = area.width - geometry.width - 2 * c->border;
     if(geometry.y > area.height)
@@ -560,8 +555,12 @@ client_resize(client_t *c, area_t geometry, bool hints)
     if(geometry.y + geometry.height + 2 * c->border < 0)
         geometry.y = 0;
 
-    if(c->geometry.x != geometry.x || c->geometry.y != geometry.y
-       || c->geometry.width != geometry.width || c->geometry.height != geometry.height)
+    /* fixed windows can only change their x,y */
+    if((fixed && (c->geometry.x != geometry.x || c->geometry.y != geometry.y))
+       || (!fixed && (c->geometry.x != geometry.x
+                      || c->geometry.y != geometry.y
+                      || c->geometry.width != geometry.width
+                      || c->geometry.height != geometry.height)))
     {
         new_screen =
             screen_get_bycoord(globalconf.screens_info, c->screen, geometry.x, geometry.y);
@@ -574,7 +573,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
         /* save the floating geometry if the window is floating but not
          * maximized */
-        if(c->ismoving || c->isfloating
+        if(c->ismoving || client_isfloating(c)
            || layout_get_current(new_screen) == layout_floating)
         {
             titlebar_update_geometry_floating(c);
@@ -597,21 +596,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
     /* call it again like it was floating,
      * we want it to be sticked to the window */
-    if(!c->ismoving && !c->isfloating && layout != layout_floating)
+    if(!c->ismoving && !client_isfloating(c) && layout != layout_floating)
         titlebar_update_geometry_floating(c);
 
     return resized;
-}
-
-/* Set the client layer.
- * \param c The client.
- * \param layer The layer.
- */
-void
-client_setlayer(client_t *c, layer_t layer)
-{
-    c->layer = layer;
-    client_raise(c);
 }
 
 /** Set a clinet floating.
@@ -683,7 +671,6 @@ client_setfullscreen(client_t *c, bool s)
             c->m_geometry = c->geometry;
             c->oldborder = c->border;
             client_setborder(c, 0);
-            c->noborder = true;
         }
         else
         {
@@ -691,7 +678,6 @@ client_setfullscreen(client_t *c, bool s)
             if(c->titlebar && c->titlebar->sw && (c->titlebar->position = c->titlebar->oldposition))
                 xcb_map_window(globalconf.connection, c->titlebar->sw->window);
             geometry = c->m_geometry;
-            c->noborder = false;
             client_setborder(c, c->oldborder);
             client_resize(c, c->m_geometry, false);
         }
@@ -936,10 +922,6 @@ client_updatesizehints(client_t *c)
     else
         c->minax = c->maxax = c->minay = c->maxay = 0;
 
-    if(c->maxw && c->minw && c->maxh && c->minh
-       && c->maxw == c->minw && c->maxh == c->minh)
-        c->isfixed = true;
-
     c->hassizehints = !(!c->basew && !c->baseh && !c->incw && !c->inch
                         && !c->maxw && !c->maxh && !c->minw && !c->minh
                         && !c->minax && !c->maxax && !c->minax && !c->minay);
@@ -1031,7 +1013,13 @@ client_setborder(client_t *c, int width)
 {
     uint32_t w = width;
 
-    if((c->noborder && width > 0) || width == c->border || width < 0)
+    if(width > 0 && (c->type == WINDOW_TYPE_DOCK
+                     || c->type == WINDOW_TYPE_SPLASH
+                     || c->type == WINDOW_TYPE_DESKTOP
+                     || c->isfullscreen))
+        return;
+
+    if(width == c->border || width < 0)
         return;
 
     c->border = width;
@@ -1040,7 +1028,7 @@ client_setborder(client_t *c, int width)
 
     if(client_isvisible(c, c->screen))
     {
-        if(c->isfloating || layout_get_current(c->screen) == layout_floating)
+        if(client_isfloating(c) || layout_get_current(c->screen) == layout_floating)
             titlebar_update_geometry_floating(c);
         else
             globalconf.screens[c->screen].need_arrange = true;

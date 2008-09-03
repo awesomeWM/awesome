@@ -213,7 +213,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
-            if(c->isfloating || c->isfullscreen || layout_get_current(c->screen) == layout_floating)
+            if(client_isfloating(c) || layout_get_current(c->screen) == layout_floating)
             {
                 client_resize(c, geometry, false);
                 titlebar_draw(c);
@@ -641,7 +641,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
     {
         if(ev->atom == WM_TRANSIENT_FOR)
         {
-            if(!c->isfloating && !c->isfullscreen)
+            if(!client_isfloating(c))
             {
                 xcb_window_t trans;
                 xcb_get_wm_transient_for_reply(connection,

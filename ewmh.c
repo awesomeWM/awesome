@@ -319,43 +319,6 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     }
 }
 
-static void
-ewmh_process_window_type_atom(client_t *c, xcb_atom_t state)
-{
-    if(state == _NET_WM_WINDOW_TYPE_NORMAL)
-    {
-        /* do nothing. this is REALLY IMPORTANT */
-    }
-    else if(state == _NET_WM_WINDOW_TYPE_DOCK
-            || state == _NET_WM_WINDOW_TYPE_SPLASH)
-    {
-        c->isfixed = true;
-        if(c->titlebar && c->titlebar->position && c->titlebar->sw)
-        {
-            xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
-            c->titlebar->position = Off;
-        }
-        client_setborder(c, 0);
-        c->noborder = true;
-        client_setlayer(c, LAYER_ABOVE);
-        client_setfloating(c, true);
-    }
-    else if(state == _NET_WM_WINDOW_TYPE_DIALOG)
-    {
-        client_setlayer(c, LAYER_MODAL);
-        client_setfloating(c, true);
-    }
-    else if(state == _NET_WM_WINDOW_TYPE_DESKTOP)
-    {
-        tag_array_t *tags = &globalconf.screens[c->screen].tags;
-        c->noborder = true;
-        c->isfixed = true;
-        client_setlayer(c, LAYER_DESKTOP);
-        for(int i = 0; i < tags->len; i++)
-            tag_client(c, tags->tab[i]);
-    }
-}
-
 int
 ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
@@ -457,7 +420,16 @@ ewmh_check_client_hints(client_t *c)
     {
         state = (xcb_atom_t *) data;
         for(int i = 0; i < xcb_get_property_value_length(reply); i++)
-            ewmh_process_window_type_atom(c, state[i]);
+            if(state[i] == _NET_WM_WINDOW_TYPE_DESKTOP)
+                c->type = WINDOW_TYPE_DESKTOP;
+            else if(state[i] == _NET_WM_WINDOW_TYPE_DIALOG)
+                c->type = WINDOW_TYPE_DIALOG;
+            else if(state[i] == _NET_WM_WINDOW_TYPE_SPLASH)
+                c->type = WINDOW_TYPE_SPLASH;
+            else if(state[i] == _NET_WM_WINDOW_TYPE_DOCK)
+                c->type = WINDOW_TYPE_DOCK;
+            else
+                c->type = WINDOW_TYPE_NORMAL;
     }
 
     p_delete(&reply);
