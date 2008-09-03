@@ -32,6 +32,30 @@
 
 extern awesome_t globalconf;
 
+/** Return the Xinerama screen number where the coordinates belongs to.
+ * \param screen The logical screen number.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \return Screen number or screen param if no match or no multi-head.
+ */
+int
+screen_getbycoord(int screen, int x, int y)
+{
+    int i;
+    screens_info_t *si = globalconf.screens_info;
+
+    /* don't waste our time */
+    if(!si->xinerama_is_active)
+        return screen;
+
+    for(i = 0; i < si->nscreen; i++)
+        if((x < 0 || (x >= si->geometry[i].x && x < si->geometry[i].x + si->geometry[i].width))
+           && (y < 0 || (y >= si->geometry[i].y && y < si->geometry[i].y + si->geometry[i].height)))
+            return i;
+
+    return screen;
+}
+
 /** Get screens info.
  * \param screen Screen number.
  * \param statusbar Statusbar list to remove.

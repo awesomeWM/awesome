@@ -540,8 +540,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             client_t *target;
 
             /* client moved to another screen? */
-            newscreen = screen_get_bycoord(globalconf.screens_info, c->screen,
-                                           mouse_x, mouse_y);
+            newscreen = screen_getbycoord(c->screen, mouse_x, mouse_y);
             if(newscreen != c->screen)
             {
                 screen_client_moveto(c, newscreen, true);
@@ -1188,7 +1187,7 @@ luaA_mouse_index(lua_State *L)
         if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL))
             return 0;
 
-        i = screen_get_bycoord(globalconf.screens_info, screen, mouse_x, mouse_y);
+        i = screen_getbycoord(screen, mouse_x, mouse_y);
 
         lua_pushnumber(L, i + 1);
         break;

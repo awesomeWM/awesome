@@ -420,7 +420,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     c = p_new(client_t, 1);
 
-    c->screen = screen_get_bycoord(globalconf.screens_info, screen, wgeom->x, wgeom->y);
+    c->screen = screen_getbycoord(screen, wgeom->x, wgeom->y);
 
     c->phys_screen = phys_screen;
 
@@ -567,8 +567,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
                       || c->geometry.width != geometry.width
                       || c->geometry.height != geometry.height)))
     {
-        new_screen =
-            screen_get_bycoord(globalconf.screens_info, c->screen, geometry.x, geometry.y);
+        new_screen = screen_getbycoord(c->screen, geometry.x, geometry.y);
 
         c->geometry.x = values[0] = geometry.x;
         c->geometry.width = values[2] = geometry.width;

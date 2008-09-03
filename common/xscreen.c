@@ -25,30 +25,6 @@
 #include "common/xscreen.h"
 #include "common/xutil.h"
 
-/** Return the Xinerama screen number where the coordinates belongs to.
- * \param si The screens infos structure.
- * \param screen The logical screen number.
- * \param x X coordinate
- * \param y Y coordinate
- * \return Screen number or screen param if no match or no multi-head.
- */
-int
-screen_get_bycoord(screens_info_t *si, int screen, int x, int y)
-{
-    int i;
-
-    /* don't waste our time */
-    if(!si->xinerama_is_active)
-        return screen;
-
-    for(i = 0; i < si->nscreen; i++)
-        if((x < 0 || (x >= si->geometry[i].x && x < si->geometry[i].x + si->geometry[i].width))
-           && (y < 0 || (y >= si->geometry[i].y && y < si->geometry[i].y + si->geometry[i].height)))
-            return i;
-
-    return screen;
-}
-
 static inline area_t
 screen_xsitoarea(xcb_xinerama_screen_info_t si)
 {

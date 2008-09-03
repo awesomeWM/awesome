@@ -38,6 +38,7 @@
 #include "dbus.h"
 #include "systray.h"
 #include "event.h"
+#include "screen.h"
 #include "common/version.h"
 #include "common/atoms.h"
 #include "config.h"
@@ -170,8 +171,7 @@ scan(void)
                                                                   *(geom_wins[i]), NULL)))
                 continue;
 
-            screen = screen_get_bycoord(globalconf.screens_info, phys_screen,
-                                        geom_r->x, geom_r->y);
+            screen = screen_getbycoord(phys_screen, geom_r->x, geom_r->y);
 
             client_manage(wins[i], geom_r, phys_screen, screen);
 

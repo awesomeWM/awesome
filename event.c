@@ -38,6 +38,7 @@
 #include "lua.h"
 #include "systray.h"
 #include "statusbar.h"
+#include "screen.h"
 #include "layouts/floating.h"
 #include "common/atoms.h"
 
@@ -610,8 +611,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
 
         if(globalconf.screens_info->xinerama_is_active
            && (qp_r = xcb_query_pointer_reply(connection, qp_c, NULL)))
-            screen = screen_get_bycoord(globalconf.screens_info, screen,
-                                        qp_r->root_x, qp_r->root_y);
+            screen = screen_getbycoord(screen, qp_r->root_x, qp_r->root_y);
         else
             screen = phys_screen;
 

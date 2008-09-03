@@ -31,7 +31,6 @@ typedef struct
     area_t *geometry;
 } screens_info_t;
 
-int screen_get_bycoord(screens_info_t *, int, int, int);
 void screensinfo_delete(screens_info_t **);
 screens_info_t * screensinfo_new(xcb_connection_t *);
 
