@@ -1366,6 +1366,7 @@ luaA_client_newindex(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield name The client title.
+ * \lfield type The window type (desktop, normal, dock, …).
  * \lfield class The client class.
  * \lfield instance The client instance.
  * \lfield pid The client PID, if available.
@@ -1410,6 +1411,26 @@ luaA_client_index(lua_State *L)
     {
       case A_TK_NAME:
         lua_pushstring(L, (*c)->name);
+        break;
+      case A_TK_TYPE:
+        switch((*c)->type)
+        {
+          case WINDOW_TYPE_DESKTOP:
+            lua_pushliteral(L, "desktop");
+            break;
+          case WINDOW_TYPE_DOCK:
+            lua_pushliteral(L, "dock");
+            break;
+          case WINDOW_TYPE_SPLASH:
+            lua_pushliteral(L, "splash");
+            break;
+          case WINDOW_TYPE_DIALOG:
+            lua_pushliteral(L, "dialog");
+            break;
+          default:
+            lua_pushliteral(L, "normal");
+            break;
+        }
         break;
       case A_TK_CLASS:
         if(!xcb_get_wm_class_reply(globalconf.connection,
