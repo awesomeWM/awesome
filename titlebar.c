@@ -406,6 +406,7 @@ luaA_titlebar_newindex(lua_State *L)
                 client_need_arrange(c);
             }
         }
+        client_stack();
         break;
       case A_TK_ALIGN:
         if((buf = luaL_checklstring(L, 3, &len)))

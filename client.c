@@ -1353,6 +1353,7 @@ luaA_client_newindex(lua_State *L)
             titlebar_ref(t);
             titlebar_init(*c);
         }
+        client_stack();
         break;
       default:
         return 0;
