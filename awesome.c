@@ -56,6 +56,7 @@ awesome_atexit(void)
 {
     client_t *c;
     xembed_window_t *em;
+    int screen_nbr;
 
     a_dbus_cleanup();
     luaA_cs_cleanup();
@@ -64,8 +65,14 @@ awesome_atexit(void)
     for(em = globalconf.embedded; em; em = em->next)
     {
         xcb_screen_t *s = xutil_screen_get(globalconf.connection, em->phys_screen);
-        xcb_reparent_window(globalconf.connection, em->win, s->root, 0, 0);
+        xembed_window_unembed(globalconf.connection, em->win, s->root);
     }
+
+    /* do this only for real screen */
+    for(screen_nbr = 0;
+        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+        screen_nbr++)
+        systray_cleanup(screen_nbr);
 
     /* remap all clients since some WM won't handle them otherwise */
     for(c = globalconf.clients; c; c = c->next)

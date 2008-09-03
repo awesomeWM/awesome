@@ -145,5 +145,27 @@ xembed_embedded_notify(xcb_connection_t *c,
     xembed_message_send(c, client, XEMBED_EMBEDDED_NOTIFY, 0, embedder, version);
 }
 
+/** Have the embedder end XEMBED protocol communication with a child.
+ * \param connection The X connection.
+ * \param child The window to unembed.
+ * \param root The root window to reparent to.
+ */
+static inline void
+xembed_window_unembed(xcb_connection_t *connection, xcb_window_t child, xcb_window_t root)
+{
+    xcb_reparent_window(connection, child, root, 0, 0);
+}
+
+/** Indicate to an embedded window that it has lost focus.
+ * \param c The X connection.
+ * \param client The client to send message to.
+ */
+static inline void
+xembed_focus_out(xcb_connection_t *c, xcb_window_t client)
+{
+    xembed_message_send(c, client, XEMBED_FOCUS_OUT, 0, 0, 0);
+}
+
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

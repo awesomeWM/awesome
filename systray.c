@@ -32,6 +32,9 @@
 
 extern awesome_t globalconf;
 
+/** Initialize systray information in X.
+ * \param phys_screen Physical screen.
+ */
 void
 systray_init(int phys_screen)
 {
@@ -80,6 +83,34 @@ systray_init(int phys_screen)
                             XCB_CURRENT_TIME);
 
     xcb_send_event(globalconf.connection, false, xscreen->root, 0xFFFFFF, (char *) &ev);
+}
+
+/** Remove systray information in X.
+ * \param phys_screen Physical screen.
+ */
+void
+systray_cleanup(int phys_screen)
+{
+    xcb_intern_atom_cookie_t atom_systray_q;
+    xcb_intern_atom_reply_t *atom_systray_r;
+    ssize_t len;
+    char atom_name[22];
+
+    len = snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
+    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false, len, atom_name);
+
+    if(!(atom_systray_r = xcb_intern_atom_reply(globalconf.connection, atom_systray_q, NULL)))
+    {
+        warn("error getting systray atom");
+        return;
+    }
+
+    xcb_set_selection_owner(globalconf.connection,
+                            XCB_NONE,
+                            atom_systray_r->atom,
+                            XCB_CURRENT_TIME);
+
+    p_delete(&atom_systray_r);
 }
 
 /** Handle a systray request.
