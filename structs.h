@@ -23,6 +23,7 @@
 #define AWESOME_STRUCTS_H
 
 #include <xcb/xcb_event.h>
+#include <xcb/xcb_icccm.h>
 #include <ev.h>
 
 #include "lua.h"
@@ -315,6 +316,8 @@ struct client_t
     button_array_t buttons;
     /** Icon */
     netwm_icon_t *icon;
+    /** Size hints */
+    xcb_size_hints_t size_hints;
     /** Next and previous clients */
     client_t *prev, *next;
 };

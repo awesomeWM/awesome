@@ -23,7 +23,6 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-#include <xcb/xcb_icccm.h>
 
 #include "client.h"
 #include "tag.h"
@@ -875,67 +874,64 @@ client_updatewmhints(client_t *c)
 
 /** Update the size hints of a client.
  * \param c The client.
- * \return A pointer to a xcb_size_hints_t.
  */
 void
 client_updatesizehints(client_t *c)
 {
-    xcb_size_hints_t size_hints;
-
     if(!xcb_get_wm_normal_hints_reply(globalconf.connection,
                                       xcb_get_wm_normal_hints_unchecked(globalconf.connection,
                                                                         c->win),
-                                      &size_hints, NULL))
+                                      &c->size_hints, NULL))
         return;
 
-    if((size_hints.flags & XCB_SIZE_HINT_P_SIZE))
+    if((c->size_hints.flags & XCB_SIZE_HINT_P_SIZE))
     {
-        c->basew = size_hints.base_width;
-        c->baseh = size_hints.base_height;
+        c->basew = c->size_hints.base_width;
+        c->baseh = c->size_hints.base_height;
     }
-    else if((size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
+    else if((c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
     {
-        c->basew = size_hints.min_width;
-        c->baseh = size_hints.min_height;
+        c->basew = c->size_hints.min_width;
+        c->baseh = c->size_hints.min_height;
     }
     else
         c->basew = c->baseh = 0;
 
-    if((size_hints.flags & XCB_SIZE_HINT_P_RESIZE_INC))
+    if((c->size_hints.flags & XCB_SIZE_HINT_P_RESIZE_INC))
     {
-        c->incw = size_hints.width_inc;
-        c->inch = size_hints.height_inc;
+        c->incw = c->size_hints.width_inc;
+        c->inch = c->size_hints.height_inc;
     }
     else
         c->incw = c->inch = 0;
 
-    if((size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE))
+    if((c->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE))
     {
-        c->maxw = size_hints.max_width;
-        c->maxh = size_hints.max_height;
+        c->maxw = c->size_hints.max_width;
+        c->maxh = c->size_hints.max_height;
     }
     else
         c->maxw = c->maxh = 0;
 
-    if((size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
+    if((c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
     {
-        c->minw = size_hints.min_width;
-        c->minh = size_hints.min_height;
+        c->minw = c->size_hints.min_width;
+        c->minh = c->size_hints.min_height;
     }
-    else if((size_hints.flags & XCB_SIZE_HINT_BASE_SIZE))
+    else if((c->size_hints.flags & XCB_SIZE_HINT_BASE_SIZE))
     {
-        c->minw = size_hints.base_width;
-        c->minh = size_hints.base_height;
+        c->minw = c->size_hints.base_width;
+        c->minh = c->size_hints.base_height;
     }
     else
         c->minw = c->minh = 0;
 
-    if((size_hints.flags & XCB_SIZE_HINT_P_ASPECT))
+    if((c->size_hints.flags & XCB_SIZE_HINT_P_ASPECT))
     {
-        c->minax = size_hints.min_aspect_num;
-        c->minay = size_hints.min_aspect_den;
-        c->maxax = size_hints.max_aspect_num;
-        c->maxay = size_hints.max_aspect_den;
+        c->minax = c->size_hints.min_aspect_num;
+        c->minay = c->size_hints.min_aspect_den;
+        c->maxax = c->size_hints.max_aspect_num;
+        c->maxay = c->size_hints.max_aspect_den;
     }
     else
         c->minax = c->maxax = c->minay = c->maxay = 0;
