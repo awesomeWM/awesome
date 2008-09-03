@@ -392,10 +392,11 @@ client_stack(void)
 /** Manage a new client.
  * \param w The window.
  * \param wgeom Window geometry.
+ * \param phys_screen Physical screen number.
  * \param screen Virtual screen number where to manage client.
  */
 void
-client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, int screen)
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c;
@@ -413,7 +414,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     if(systray_iskdedockapp(w))
     {
-        systray_request_handle(w, screen_virttophys(screen), NULL);
+        systray_request_handle(w, phys_screen, NULL);
         return;
     }
 
@@ -421,10 +422,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     c->screen = screen_get_bycoord(globalconf.screens_info, screen, wgeom->x, wgeom->y);
 
-    if(globalconf.screens_info->xinerama_is_active)
-        c->phys_screen = globalconf.default_screen;
-    else
-        c->phys_screen = c->screen;
+    c->phys_screen = phys_screen;
 
     /* Initial values */
     c->win = w;

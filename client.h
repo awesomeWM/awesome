@@ -40,7 +40,7 @@ client_t * client_getbywin(xcb_window_t);
 void client_stack(void);
 void client_ban(client_t *);
 void client_unban(client_t *);
-void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int);
+void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int, int);
 area_t client_geometry_hints(client_t *, area_t);
 bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *);

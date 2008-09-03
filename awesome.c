@@ -89,7 +89,7 @@ awesome_atexit(void)
 static void
 scan(void)
 {
-    int i, screen, real_screen, tree_c_len;
+    int i, screen, phys_screen, tree_c_len;
     const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
     root_win_t root_wins[screen_max];
     xcb_query_tree_reply_t *tree_r;
@@ -98,20 +98,20 @@ scan(void)
     xcb_get_geometry_reply_t *geom_r;
     long state;
 
-    for(screen = 0; screen < screen_max; screen++)
+    for(phys_screen = 0; phys_screen < screen_max; phys_screen++)
     {
         /* Get the root window ID associated to this screen */
-        root_wins[screen].id = xutil_screen_get(globalconf.connection, screen)->root;
+        root_wins[phys_screen].id = xutil_screen_get(globalconf.connection, phys_screen)->root;
 
         /* Get the window tree associated to this screen */
-        root_wins[screen].tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
-                                                                 root_wins[screen].id);
+        root_wins[phys_screen].tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
+                                                                      root_wins[phys_screen].id);
     }
 
-    for(screen = 0; screen < screen_max; screen++)
+    for(phys_screen = 0; phys_screen < screen_max; phys_screen++)
     {
         tree_r = xcb_query_tree_reply(globalconf.connection,
-                                      root_wins[screen].tree_cookie,
+                                      root_wins[phys_screen].tree_cookie,
                                       NULL);
 
         if(!tree_r)
@@ -170,10 +170,10 @@ scan(void)
                                                                   *(geom_wins[i]), NULL)))
                 continue;
 
-            real_screen = screen_get_bycoord(globalconf.screens_info, screen,
-                                             geom_r->x, geom_r->y);
+            screen = screen_get_bycoord(globalconf.screens_info, phys_screen,
+                                        geom_r->x, geom_r->y);
 
-            client_manage(wins[i], geom_r, real_screen);
+            client_manage(wins[i], geom_r, phys_screen, screen);
 
             p_delete(&geom_r);
         }

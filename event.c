@@ -553,7 +553,7 @@ static int
 event_handle_maprequest(void *data __attribute__ ((unused)),
                         xcb_connection_t *connection, xcb_map_request_event_t *ev)
 {
-    int screen_nbr = 0, ret = 0;
+    int phys_screen, screen = 0, ret = 0;
     client_t *c;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
@@ -592,36 +592,35 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         geom_c = xcb_get_geometry_unchecked(connection, ev->window);
 
         if(globalconf.screens_info->xinerama_is_active)
-            qp_c = xcb_query_pointer_unchecked(connection, xutil_screen_get(globalconf.connection,
-                                                                            screen_nbr)->root);
+            qp_c = xcb_query_pointer_unchecked(connection,
+                                               xutil_screen_get(globalconf.connection,
+                                                                globalconf.default_screen)->root);
 
         if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
         {
             if(globalconf.screens_info->xinerama_is_active)
-            {
                 qp_r = xcb_query_pointer_reply(connection, qp_c, NULL);
-                p_delete(&qp_r);
-            }
             ret = -1;
             goto bailout;
         }
 
+
+        for(iter = xcb_setup_roots_iterator(xcb_get_setup(connection)), phys_screen = 0;
+            iter.rem && iter.data->root != geom_r->root; xcb_screen_next(&iter), ++phys_screen);
+
         if(globalconf.screens_info->xinerama_is_active
            && (qp_r = xcb_query_pointer_reply(connection, qp_c, NULL)))
-        {
-            screen_nbr = screen_get_bycoord(globalconf.screens_info, screen_nbr,
-                                            qp_r->root_x, qp_r->root_y);
-            p_delete(&qp_r);
-        }
+            screen = screen_get_bycoord(globalconf.screens_info, screen,
+                                        qp_r->root_x, qp_r->root_y);
         else
-            for(iter = xcb_setup_roots_iterator(xcb_get_setup(connection)), screen_nbr = 0;
-                iter.rem && iter.data->root != geom_r->root; xcb_screen_next (&iter), ++screen_nbr);
+            screen = phys_screen;
 
-        client_manage(ev->window, geom_r, screen_nbr);
+        client_manage(ev->window, geom_r, phys_screen, screen);
         p_delete(&geom_r);
     }
 
 bailout:
+    p_delete(&qp_r);
     p_delete(&wa_r);
     return ret;
 }
