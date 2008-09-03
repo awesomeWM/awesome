@@ -580,6 +580,8 @@ function client.toggletag(target, c)
     if sel and sel.screen == target.screen then
         local tags = sel:tags()
         if tags[target] then
+            -- If it's the only tag for the window, stop.
+            if #tags == 1 then return end
             tags[tags[target]] = nil
         else
             tags[target] = target
