@@ -1477,6 +1477,7 @@ end
 -- fg_focus: the foreground color for focused window.
 -- fg_focus: the background color for focused window.
 function titlebar.add(c, args)
+    if not c or c.type ~= "normal" then return end
     if not args then args = {} end
     -- Store colors
     titlebar.data[c] = {}
