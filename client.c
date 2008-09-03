@@ -434,6 +434,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     client_setborder(c, wgeom->border_width);
     c->icon = ewmh_window_icon_get_reply(ewmh_icon_cookie);
 
+    /* we honor size hints by default */
+    c->honorsizehints = true;
+
     /* update hints */
     client_updatesizehints(c);
     client_updatewmhints(c);

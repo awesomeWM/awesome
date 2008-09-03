@@ -407,8 +407,8 @@ awful.hooks.manage.register(function (c)
     -- i.e. put it at the end of others instead of setting it master.
     -- awful.client.setslave(c)
 
-    -- Honor size hints
-    c.honorsizehints = true
+    -- Honor size hints: if you want to drop the gaps between windows, set this to false.
+    -- c.honorsizehints = false
 end)
 
 -- Hook function to execute when arranging the screen
