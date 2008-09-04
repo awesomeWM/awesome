@@ -159,18 +159,6 @@ client_maybevisible(client_t *c, int screen)
     return false;
 }
 
-/** Returns true if a client is tagged
- * with one of the tags of the specified screen and is not hidden.
- * \param c The client to check.
- * \param screen Virtual screen number.
- * \return true if the client is visible, false otherwise.
- */
-bool
-client_isvisible(client_t *c, int screen)
-{
-    return (!c->ishidden && client_maybevisible(c, screen));
-}
-
 /** Get a client by its window.
  * \param w The client window to find.
  * \return A client pointer if found, NULL otherwise.

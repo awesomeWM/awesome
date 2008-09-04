@@ -35,7 +35,6 @@
     } while(0)
 
 bool client_maybevisible(client_t *, int);
-bool client_isvisible(client_t *, int);
 client_t * client_getbywin(xcb_window_t);
 void client_stack(void);
 void client_ban(client_t *);
@@ -98,6 +97,18 @@ client_isfloating(client_t *c)
             || c->isfloating
             || c->isfullscreen
             || client_isfixed(c));
+}
+
+/** Returns true if a client is tagged
+ * with one of the tags of the specified screen and is not hidden.
+ * \param c The client to check.
+ * \param screen Virtual screen number.
+ * \return true if the client is visible, false otherwise.
+ */
+static inline bool
+client_isvisible(client_t *c, int screen)
+{
+    return (!c->ishidden && client_maybevisible(c, screen));
 }
 
 /** Check if a client has strut information.
