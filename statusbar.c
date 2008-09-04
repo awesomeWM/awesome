@@ -257,6 +257,18 @@ statusbar_refresh(void)
                 statusbar_draw(statusbar);
 }
 
+static void
+statusbar_clean(statusbar_t *statusbar)
+{
+    /* Who! Check that we're not deleting a statusbar with a systray, because it
+     * may be its parent. If so, we reparent to root before, otherwise it will
+     * hurt very much. */
+    statusbar_systray_kickout(statusbar->phys_screen);
+
+    simplewindow_delete(&statusbar->sw);
+    draw_context_delete(&statusbar->ctx);
+}
+
 /** Update the statusbar position. It deletes every statusbar resources and
  * create them back.
  * \param statusbar The statusbar.
@@ -265,23 +277,13 @@ void
 statusbar_position_update(statusbar_t *statusbar)
 {
     statusbar_t *sb;
-    area_t area;
+    area_t area, wingeometry;
     xcb_pixmap_t dw;
     xcb_screen_t *s = NULL;
     bool ignore = false;
 
-    globalconf.screens[statusbar->screen].need_arrange = true;
-
-    /* Who! Check that we're not deleting a statusbar with a systray, because it
-     * may be its parent. If so, we reparent to root before, otherwise it will
-     * hurt very much. */
-    statusbar_systray_kickout(statusbar->phys_screen);
-
-    simplewindow_delete(&statusbar->sw);
-    draw_context_delete(&statusbar->ctx);
-
     if(statusbar->position == Off)
-        return;
+        return statusbar_clean(statusbar);
 
     area = screen_area_get(statusbar->screen, NULL,
                            &globalconf.screens[statusbar->screen].padding, true);
@@ -356,115 +358,145 @@ statusbar_position_update(statusbar_t *statusbar)
     switch(statusbar->position)
     {
       case Right:
-      case Left:
-        if(!statusbar->width_user)
-            statusbar->width = area.height;
-        statusbar->sw =
-            simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
-                             statusbar->height, statusbar->width, 0);
-        s = xutil_screen_get(globalconf.connection, statusbar->phys_screen);
-        /* we need a new pixmap this way [     ] to render */
-        dw = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection,
-                          s->root_depth, dw, s->root,
-                          statusbar->width, statusbar->height);
-        statusbar->ctx = draw_context_new(globalconf.connection,
-                                          statusbar->phys_screen,
-                                          statusbar->width,
-                                          statusbar->height,
-                                          dw,
-                                          &statusbar->colors.fg,
-                                          &statusbar->colors.bg);
-        break;
-      default:
-        if(!statusbar->width_user)
-            statusbar->width = area.width;
-        statusbar->sw =
-            simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
-                             statusbar->width, statusbar->height, 0);
-        statusbar->ctx = draw_context_new(globalconf.connection,
-                                          statusbar->phys_screen,
-                                          statusbar->width,
-                                          statusbar->height,
-                                          statusbar->sw->pixmap,
-                                          &statusbar->colors.fg,
-                                          &statusbar->colors.bg);
-        break;
-    }
-
-    switch(statusbar->position)
-    {
-      default:
+        if(statusbar->width_user)
+            wingeometry.height = statusbar->width;
+        else
+            wingeometry.height = area.height;
+        wingeometry.width = statusbar->height;
         switch(statusbar->align)
         {
           default:
-            simplewindow_move(statusbar->sw, area.x, area.y);
+            wingeometry.x = area.x + area.width - wingeometry.width;
+            wingeometry.y = area.y;
             break;
           case AlignRight:
-            simplewindow_move(statusbar->sw,
-                              area.x + area.width - statusbar->width, area.y);
+            wingeometry.x = area.x + area.width - wingeometry.width;
+            wingeometry.y = area.y + area.height - wingeometry.height;
             break;
           case AlignCenter:
-            simplewindow_move(statusbar->sw,
-                              area.x + (area.width - statusbar->width) / 2, area.y);
+            wingeometry.x = area.x + area.width - wingeometry.width;
+            wingeometry.y = (area.y + area.height - wingeometry.height) / 2;
             break;
+        }
+        break;
+      case Left:
+        if(statusbar->width_user)
+            wingeometry.height = statusbar->width;
+        else
+            wingeometry.height = area.height;
+        wingeometry.width = statusbar->height;
+        switch(statusbar->align)
+        {
+          default:
+            wingeometry.x = area.x;
+            wingeometry.y = (area.y + area.height) - wingeometry.height;
+            break;
+          case AlignRight:
+            wingeometry.x = area.x;
+            wingeometry.y = area.y;
+            break;
+          case AlignCenter:
+            wingeometry.x = area.x;
+            wingeometry.y = (area.y + area.height - wingeometry.height) / 2;
         }
         break;
       case Bottom:
+        if(statusbar->width_user)
+            wingeometry.width = statusbar->width;
+        else
+            wingeometry.width = area.width;
+        wingeometry.height = statusbar->height;
         switch(statusbar->align)
         {
           default:
-            simplewindow_move(statusbar->sw,
-                              area.x, (area.y + area.height) - statusbar->height);
+            wingeometry.x = area.x;
+            wingeometry.y = (area.y + area.height) - wingeometry.height;
             break;
           case AlignRight:
-            simplewindow_move(statusbar->sw,
-                              area.x + area.width - statusbar->width,
-                              (area.y + area.height) - statusbar->height);
+            wingeometry.x = area.x + area.width - wingeometry.width;
+            wingeometry.y = (area.y + area.height) - wingeometry.height;
             break;
           case AlignCenter:
-            simplewindow_move(statusbar->sw,
-                              area.x + (area.width - statusbar->width) / 2,
-                              (area.y + area.height) - statusbar->height);
+            wingeometry.x = area.x + (area.width - wingeometry.width) / 2;
+            wingeometry.y = (area.y + area.height) - wingeometry.height;
             break;
         }
         break;
-      case Left:
+      default:
+        if(statusbar->width_user)
+            wingeometry.width = statusbar->width;
+        else
+            wingeometry.width = area.width;
+        wingeometry.height = statusbar->height;
         switch(statusbar->align)
         {
           default:
-            simplewindow_move(statusbar->sw, area.x,
-                              (area.y + area.height) - statusbar->sw->geometry.height);
+            wingeometry.x = area.x;
+            wingeometry.y = area.y;
             break;
           case AlignRight:
-            simplewindow_move(statusbar->sw, area.x, area.y);
+            wingeometry.x = area.x + area.width - wingeometry.width;
+            wingeometry.y = area.y;
             break;
           case AlignCenter:
-            simplewindow_move(statusbar->sw, area.x, (area.y + area.height - statusbar->width) / 2);
-        }
-        break;
-      case Right:
-        switch(statusbar->align)
-        {
-          default:
-            simplewindow_move(statusbar->sw, area.x + area.width - statusbar->height, area.y);
-            break;
-          case AlignRight:
-            simplewindow_move(statusbar->sw, area.x + area.width - statusbar->height,
-                              area.y + area.height - statusbar->width);
-            break;
-          case AlignCenter:
-            simplewindow_move(statusbar->sw, area.x + area.width - statusbar->height,
-                              (area.y + area.height - statusbar->width) / 2);
+            wingeometry.x = area.x + (area.width - wingeometry.width) / 2;
+            wingeometry.y = area.y;
             break;
         }
         break;
     }
 
-    xcb_map_window(globalconf.connection, statusbar->sw->window);
+    /* same window size and position ? */
+    if(!statusbar->sw
+       || wingeometry.width != statusbar->sw->geometry.width
+       || wingeometry.height != statusbar->sw->geometry.height)
+    {
+        statusbar_clean(statusbar);
+
+        statusbar->sw =
+            simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
+                             wingeometry.width, wingeometry.height, 0);
+
+        switch(statusbar->position)
+        {
+          case Right:
+          case Left:
+            statusbar->width = wingeometry.height;
+            s = xutil_screen_get(globalconf.connection, statusbar->phys_screen);
+            /* we need a new pixmap this way [     ] to render */
+            dw = xcb_generate_id(globalconf.connection);
+            xcb_create_pixmap(globalconf.connection,
+                              s->root_depth, dw, s->root,
+                              statusbar->width, statusbar->height);
+            statusbar->ctx = draw_context_new(globalconf.connection,
+                                              statusbar->phys_screen,
+                                              statusbar->width,
+                                              statusbar->height,
+                                              dw,
+                                              &statusbar->colors.fg,
+                                              &statusbar->colors.bg);
+            break;
+          default:
+            statusbar->width = wingeometry.width;
+            statusbar->ctx = draw_context_new(globalconf.connection,
+                                              statusbar->phys_screen,
+                                              statusbar->width,
+                                              statusbar->height,
+                                              statusbar->sw->pixmap,
+                                              &statusbar->colors.fg,
+                                              &statusbar->colors.bg);
+            break;
+        }
+        simplewindow_move(statusbar->sw, wingeometry.x, wingeometry.y);
+        xcb_map_window(globalconf.connection, statusbar->sw->window);
+        statusbar->need_update = true;
+    }
+    else if(wingeometry.x != statusbar->sw->geometry.x
+            || wingeometry.y != statusbar->sw->geometry.y)
+        simplewindow_move(statusbar->sw, wingeometry.x, wingeometry.y);
 
     /* Set need update */
-    statusbar->need_update = true;
+    globalconf.screens[statusbar->screen].need_arrange = true;
 }
 
 /** Convert a statusbar to a printable string.
