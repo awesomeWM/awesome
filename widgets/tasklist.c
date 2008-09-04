@@ -215,7 +215,10 @@ tasklist_draw(draw_context_t *ctx, int screen,
     client_label_array_init(&odata->client_labels);
 
     for(c = globalconf.clients; c; c = c->next)
-        if(!c->skiptb)
+        if(!c->skiptb
+           && c->type != WINDOW_TYPE_SPLASH
+           && c->type != WINDOW_TYPE_DOCK
+           && c->type != WINDOW_TYPE_DESKTOP)
         {
             /* push client */
             luaA_client_userdata_new(globalconf.L, c);
