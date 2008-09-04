@@ -844,6 +844,18 @@ function spawn(cmd, screen)
     end
 end
 
+-- Read a program output and returns its output as a string.
+-- @param cmd The command to run.
+-- @return A string with the program output.
+function pread(cmd)
+    if cmd and cmd ~= "" then
+        local f = io.popen(cmd, 'r')
+        local s = f:read("*all")
+        f:close()
+        return s
+    end
+end
+
 --- Eval Lua code.
 -- @return The return value of Lua code.
 function eval(s)
