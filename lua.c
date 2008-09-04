@@ -616,6 +616,10 @@ luaA_init(void)
     lua_pushstring(L, AWESOME_VERSION);
     lua_settable(L, LUA_GLOBALSINDEX);
 
+    lua_pushliteral(L, "AWESOME_RELEASE");
+    lua_pushstring(L, AWESOME_RELEASE);
+    lua_settable(L, LUA_GLOBALSINDEX);
+
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?/init.lua\"");
 
