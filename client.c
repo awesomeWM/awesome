@@ -1164,9 +1164,8 @@ luaA_client_newindex(lua_State *L)
         b = luaA_checkboolean(L, 3);
         if(b != (*c)->ishidden)
         {
-            client_need_arrange(*c);
             (*c)->ishidden = b;
-            if(client_isvisible(*c, (*c)->screen))
+            if(client_maybevisible(*c, (*c)->screen))
                 globalconf.screens[(*c)->screen].need_arrange = true;
         }
         break;
