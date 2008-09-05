@@ -121,7 +121,7 @@ ewmh_update_net_client_list(int phys_screen)
     for(c = globalconf.clients; c; c = c->next)
         n++;
 
-    wins = p_new(xcb_window_t, n);
+    wins = p_alloca(xcb_window_t, n);
 
     for(n = 0, c = globalconf.clients; c; c = c->next, n++)
         if(c->phys_screen == phys_screen)
@@ -130,8 +130,6 @@ ewmh_update_net_client_list(int phys_screen)
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
 			_NET_CLIENT_LIST, WINDOW, 32, n, wins);
-
-    p_delete(&wins);
 }
 
 /** Set the client list in stacking order, bottom to top.
@@ -147,7 +145,7 @@ ewmh_update_net_client_list_stacking(int phys_screen)
     for(c = globalconf.stack; c; c = c->next)
         n++;
 
-    wins = p_new(xcb_window_t, n);
+    wins = p_alloca(xcb_window_t, n);
 
     for(n = 0, c = *client_node_list_last(&globalconf.stack); c; c = c->prev, n++)
         if(c->client->phys_screen == phys_screen)
@@ -156,8 +154,6 @@ ewmh_update_net_client_list_stacking(int phys_screen)
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
 			_NET_CLIENT_LIST_STACKING, WINDOW, 32, n, wins);
-
-    p_delete(&wins);
 }
 
 void
