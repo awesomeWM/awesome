@@ -388,7 +388,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c;
-    bool retloadprops;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -429,11 +428,32 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     client_updatewmhints(c);
 
     /* Try to load props if any */
-    if(!(retloadprops = client_loadprops(c, &globalconf.screens[screen])))
-        screen_client_moveto(c, screen, true);
+    client_loadprops(c, &globalconf.screens[screen]);
+
+    /* move client to screen, but do not tag it for now */
+    screen_client_moveto(c, screen, false, true);
 
     /* Then check clients hints */
     ewmh_check_client_hints(c);
+
+    /* Check if client has been tagged by loading props, or maybe with its
+     * hints.
+     * If not, we tag it with current selected ones.
+     * This could be done on Lua side, but it's a sane behaviour. */
+    if(!c->issticky)
+    {
+        int i;
+        tag_array_t *tags = &globalconf.screens[screen].tags;
+        for(i = 0; i < tags->len; i++)
+            if(is_client_tagged(c, tags->tab[i]))
+                break;
+
+        /* if no tag, set current selected */
+        if(i == tags->len)
+            for(i = 0; i < tags->len; i++)
+                if(tags->tab[i]->selected)
+                    tag_client(c, tags->tab[i]);
+    }
 
     /* Push client in client list */
     client_list_push(&globalconf.clients, c);
@@ -581,7 +601,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         window_configure(c->win, geometry, c->border);
 
         if(c->screen != new_screen)
-            screen_client_moveto(c, new_screen, false);
+            screen_client_moveto(c, new_screen, true, false);
 
         resized = true;
     }
@@ -1270,7 +1290,7 @@ luaA_client_newindex(lua_State *L)
             i = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(i);
             if(i != (*c)->screen)
-                screen_client_moveto(*c, i, true);
+                screen_client_moveto(*c, i, true, true);
         }
         break;
       case A_TK_HIDE:

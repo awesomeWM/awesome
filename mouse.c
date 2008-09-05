@@ -543,7 +543,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             newscreen = screen_getbycoord(c->screen, mouse_x, mouse_y);
             if(newscreen != c->screen)
             {
-                screen_client_moveto(c, newscreen, true);
+                screen_client_moveto(c, newscreen, true, true);
                 globalconf.screens[c->screen].need_arrange = true;
                 globalconf.screens[newscreen].need_arrange = true;
                 layout_refresh();

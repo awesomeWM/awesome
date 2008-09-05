@@ -194,11 +194,12 @@ screen_virttophys(int screen)
 /** Move a client to a virtual screen.
  * \param c The client to move.
  * \param new_screen The destinatiuon screen number.
+ * \param dotag Set to true if we also change tags.
  * \param doresize Set to true if we also move the client to the new x and
  *        y of the new screen.
  */
 void
-screen_client_moveto(client_t *c, int new_screen, bool doresize)
+screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
 {
     int i, old_screen = c->screen;
     tag_array_t *old_tags = &globalconf.screens[old_screen].tags,
@@ -208,14 +209,17 @@ screen_client_moveto(client_t *c, int new_screen, bool doresize)
 
     c->screen = new_screen;
 
-    /* remove old tags */
-    for(i = 0; i < old_tags->len; i++)
-        untag_client(c, old_tags->tab[i]);
+    if(dotag && !c->issticky)
+    {
+        /* remove old tags */
+        for(i = 0; i < old_tags->len; i++)
+            untag_client(c, old_tags->tab[i]);
 
-    /* add new tags */
-    for(i = 0; i < new_tags->len; i++)
-        if(new_tags->tab[i]->selected)
-            tag_client(c, new_tags->tab[i]);
+        /* add new tags */
+        for(i = 0; i < new_tags->len; i++)
+            if(new_tags->tab[i]->selected)
+                tag_client(c, new_tags->tab[i]);
+    }
 
     /* resize the windows if it's floating */
     if(doresize && old_screen != c->screen)
