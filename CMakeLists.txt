@@ -305,27 +305,6 @@ if(GENERATE_LUADOC)
 endif()
 # }}}
 
-# {{{ Compile Lua libs
-if(LUAC_EXECUTABLE)
-    foreach(luafile ${AWE_LUA_FILES})
-        string(REGEX REPLACE ".lua\$" ".luac" luacfile ${luafile})
-
-        add_custom_command(
-            COMMAND ${LUAC_EXECUTABLE} -o ${luacfile} ${luafile}
-            OUTPUT ${luacfile}
-            DEPENDS ${luafile})
-
-        set(AWE_LUAC_FILES ${AWE_LUAC_FILES} ${luacfile})
-    endforeach()
-
-    if(NOT EXISTS ${BUILD_DIR}/lib)
-        FILE(MAKE_DIRECTORY ${BUILD_DIR}/lib)
-    endif()
-
-    add_custom_target(compile_lua ALL DEPENDS ${AWE_LUAC_FILES})
-endif()
-# }}}
-
 # {{{ Dist tarball
 if(BUILD_FROM_GIT)
     add_custom_target(dist
@@ -337,7 +316,7 @@ endif()
 # {{{ Installation
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
 install(FILES "utils/awsetbg" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-install(FILES ${AWE_LUA_FILES} ${AWE_LUAC_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
+install(FILES ${AWE_LUA_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
 install(FILES ${AWE_CONF_FILE_DEFAULT} DESTINATION ${AWESOME_SYSCONFDIR}
         RENAME ${AWE_CONF_FILE})
 if(GENERATE_MANPAGES)
