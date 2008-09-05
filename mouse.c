@@ -27,6 +27,7 @@
 #include "tag.h"
 #include "client.h"
 #include "titlebar.h"
+#include "statusbar.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
 #include "layouts/magnifier.h"
@@ -530,6 +531,8 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             if(sw)
                 mouse_infobox_draw(ctx, sw, c->geometry, c->border);
 
+            statusbar_refresh();
+
             /* keep track */
             last_x = mouse_x;
             last_y = mouse_y;
@@ -548,6 +551,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
                 globalconf.screens[newscreen].need_arrange = true;
                 layout_refresh();
                 titlebar_refresh();
+                statusbar_refresh();
             }
 
             /* find client to swap with */
