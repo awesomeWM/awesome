@@ -28,6 +28,7 @@
 #include "tag.h"
 #include "client.h"
 #include "statusbar.h"
+#include "widget.h"
 #include "layouts/tile.h"
 
 extern awesome_t globalconf;
@@ -208,6 +209,9 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
     bool wasvisible = client_isvisible(c, c->screen);
 
     c->screen = new_screen;
+
+    widget_invalidate_cache(old_screen, WIDGET_CACHE_CLIENTS);
+    widget_invalidate_cache(new_screen, WIDGET_CACHE_CLIENTS);
 
     if(dotag && !c->issticky)
     {
