@@ -251,6 +251,7 @@ client_focus(client_t *c)
 
     /* stop hiding c */
     c->ishidden = false;
+    c->isminimized = false;
 
     /* unban the client before focusing or it will fail */
     client_unban(c);
@@ -1302,6 +1303,15 @@ luaA_client_newindex(lua_State *L)
             client_need_arrange(*c);
         }
         break;
+      case A_TK_MINIMIZE:
+        b = luaA_checkboolean(L, 3);
+        if(b != (*c)->isminimized)
+        {
+            client_need_arrange(*c);
+            (*c)->isminimized = b;
+            client_need_arrange(*c);
+        }
+        break;
       case A_TK_FULLSCREEN:
         client_setfullscreen(*c, luaA_checkboolean(L, 3));
         break;
@@ -1393,7 +1403,11 @@ luaA_client_newindex(lua_State *L)
  * \lfield machine The machine client is running on.
  * \lfield icon_name The client name when iconified.
  * \lfield screen Client screen number.
- * \lfield hide Define if the client must be hidden, i.e. never mapped.
+ * \lfield hide Define if the client must be hidden, i.e. never mapped, not
+ * visible in taskbar.
+ * invisible in taskbar.
+ * \lfield minimize Define it the client must be iconify, i.e. only visible in
+ * taskbar.
  * \lfield icon_path Path to the icon used to identify.
  * \lfield floating True always floating.
  * \lfield honorsizehints Honor size hints, i.e. respect size ratio.
@@ -1507,6 +1521,9 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_HIDE:
         lua_pushboolean(L, (*c)->ishidden);
+        break;
+      case A_TK_MINIMIZE:
+        lua_pushboolean(L, (*c)->isminimized);
         break;
       case A_TK_FULLSCREEN:
         lua_pushboolean(L, (*c)->isfullscreen);

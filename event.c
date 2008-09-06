@@ -579,9 +579,10 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     }
     else if((c = client_getbywin(ev->window)))
     {
-        if(client_maybevisible(c, c->screen))
+        /* Check that it may be visible, but not asked to be hidden */
+        if(client_maybevisible(c, c->screen) && !c->ishidden)
         {
-            c->ishidden = false;
+            c->isminimized = false;
             globalconf.screens[c->screen].need_arrange = true;
             xcb_map_window(globalconf.connection, ev->window);
             /* it will be raised, so just update ourself */
@@ -760,7 +761,7 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
            && ev->data.data32[0] == XCB_WM_STATE_ICONIC)
         {
             client_need_arrange(c);
-            c->ishidden = true;
+            c->isminimized = true;
         }
     }
     else if(ev->type == _XEMBED)

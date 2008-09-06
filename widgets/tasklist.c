@@ -216,6 +216,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
     for(c = globalconf.clients; c; c = c->next)
         if(!c->skiptb
+           && !c->ishidden
            && c->type != WINDOW_TYPE_SPLASH
            && c->type != WINDOW_TYPE_DOCK
            && c->type != WINDOW_TYPE_DESKTOP)

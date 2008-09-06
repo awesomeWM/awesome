@@ -306,6 +306,8 @@ struct client_t
     bool ismoving;
     /** True if the client is hidden */
     bool ishidden;
+    /** True if the client is minimized */
+    bool isminimized;
     /** True if the client is fullscreen */
     bool isfullscreen;
     /** True if the client is above others */

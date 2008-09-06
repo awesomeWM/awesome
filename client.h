@@ -108,7 +108,7 @@ client_isfloating(client_t *c)
 static inline bool
 client_isvisible(client_t *c, int screen)
 {
-    return (!c->ishidden && client_maybevisible(c, screen));
+    return (!c->ishidden && !c->isminimized && client_maybevisible(c, screen));
 }
 
 /** Check if a client has strut information.

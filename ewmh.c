@@ -296,12 +296,14 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         if(set == _NET_WM_STATE_REMOVE)
         {
             client_need_arrange(c);
-            c->ishidden = false;
+            c->isminimized = false;
+            client_need_arrange(c);
         }
         else if(set == _NET_WM_STATE_ADD)
         {
             client_need_arrange(c);
-            c->ishidden = true;
+            c->isminimized = true;
+            client_need_arrange(c);
         }
     }
     else if(state == _NET_WM_STATE_DEMANDS_ATTENTION)
