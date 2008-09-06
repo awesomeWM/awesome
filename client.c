@@ -196,7 +196,7 @@ client_updatetitle(client_t *c)
 static void
 client_unfocus(client_t *c)
 {
-    globalconf.screens[c->screen].client_focus = NULL;
+    globalconf.screens[c->phys_screen].client_focus = NULL;
 
     /* Call hook */
     luaA_client_userdata_new(globalconf.L, c);
@@ -244,7 +244,7 @@ client_focus(client_t *c)
     /* unban the client before focusing or it will fail */
     client_unban(c);
 
-    globalconf.screen_focus = &globalconf.screens[c->screen];
+    globalconf.screen_focus = &globalconf.screens[c->phys_screen];
     globalconf.screen_focus->client_focus = c;
 
     xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
@@ -666,7 +666,7 @@ client_unmanage(client_t *c)
 {
     tag_array_t *tags = &globalconf.screens[c->screen].tags;
 
-    if(globalconf.screens[c->screen].client_focus == c)
+    if(globalconf.screens[c->phys_screen].client_focus == c)
         client_unfocus(c);
 
     /* call hook */
