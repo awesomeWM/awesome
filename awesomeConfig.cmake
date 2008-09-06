@@ -135,13 +135,13 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     cairo
     pango
     pangocairo
-    xcb-event
     xcb-randr
     xcb-xinerama
-    xcb-aux
-    xcb-atom
-    xcb-keysyms
-    xcb-icccm
+    xcb-event>=0.2.1
+    xcb-aux>=0.2.1
+    xcb-atom>=0.2.1
+    xcb-keysyms>=0.2.1
+    xcb-icccm>=0.2.1
     cairo-xcb)
 
 if(NOT AWESOME_REQUIRED_FOUND OR NOT AWESOME_COMMON_REQUIRED_FOUND)
