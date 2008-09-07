@@ -803,6 +803,19 @@ event_handle_mappingnotify(void *data,
     return 0;
 }
 
+static int
+event_handle_reparentnotify(void *data,
+                           xcb_connection_t *connection,
+                           xcb_reparent_notify_event_t *ev)
+{
+    client_t *c;
+
+    if((c = client_getbywin(ev->window)))
+        client_unmanage(c);
+
+    return 0;
+}
+
 void a_xcb_set_event_handlers(void)
 {
     const xcb_query_extension_reply_t *randr_query;
@@ -822,6 +835,7 @@ void a_xcb_set_event_handlers(void)
     xcb_event_set_unmap_notify_handler(&globalconf.evenths, event_handle_unmapnotify, NULL);
     xcb_event_set_client_message_handler(&globalconf.evenths, event_handle_clientmessage, NULL);
     xcb_event_set_mapping_notify_handler(&globalconf.evenths, event_handle_mappingnotify, NULL);
+    xcb_event_set_reparent_notify_handler(&globalconf.evenths, event_handle_reparentnotify, NULL);
 
     /* check for randr extension */
     randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
