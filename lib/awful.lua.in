@@ -1373,7 +1373,11 @@ local function widget_tasklist_label_common(c, args)
         name = escape(c.name) or ""
     end
     if capi.client.focus == c then
-        text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..name.."</span> "
+        if bg_focus and fg_focus then
+            text = text .. " <bg color='"..bg_focus.."'/><span color='"..fg_focus.."'>"..name.."</span> "
+        else
+            text = text .. " "..name.." "
+        end
     elseif c.urgent and bg_urgent and fg_urgent then
         text = text .. " <bg color='"..bg_urgent.."'/><span color='"..fg_urgent.."'>"..name.."</span> "
     else
