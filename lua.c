@@ -478,13 +478,9 @@ luaA_otable_newindex(lua_State *L)
 static int
 luaA_spawn(lua_State *L)
 {
-    static const char *shell = NULL;
     char *host, newdisplay[128];
     const char *cmd;
     int screen = 0, screenp, displayp;
-
-    if(!shell && !(shell = getenv("SHELL")))
-        shell = "/bin/sh";
 
     if(lua_gettop(L) == 2)
     {
@@ -511,8 +507,8 @@ luaA_spawn(lua_State *L)
             if(globalconf.connection)
                 xcb_disconnect(globalconf.connection);
             setsid();
-            execl(shell, shell, "-c", cmd, NULL);
-            warn("execl '%s -c %s' failed: %s\n", shell, cmd, strerror(errno));
+            a_exec(cmd);
+            warn("execl '%s' failed: %s\n", cmd, strerror(errno));
         }
         exit(EXIT_SUCCESS);
     }

@@ -194,21 +194,12 @@ a_strcpy(char *dst, ssize_t n, const char *src)
 void
 a_exec(const char *cmd)
 {
-    char *args, *path;
+    static const char *shell = NULL;
 
-    /* Ignore the leading spaces if any */
-    while(cmd[0] && cmd[0] == ' ') cmd++;
+    if(!shell && !(shell = getenv("SHELL")))
+        shell = "/bin/sh";
 
-    /* Get the beginning of the arguments */
-    args = strchr(cmd, ' ');
-    if(args)
-        path = a_strndup(cmd, args - cmd);
-    else
-        path = a_strndup(cmd, a_strlen(cmd));
-
-    execlp(path, cmd, NULL);
-
-    p_delete(&path);
+    execl(shell, shell, "-c", cmd, NULL);
 }
 
 /** Split a string in substring.
