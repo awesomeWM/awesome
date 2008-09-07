@@ -623,7 +623,8 @@ client_resize(client_t *c, area_t geometry, bool hints)
 void
 client_setfloating(client_t *c, bool floating)
 {
-    if(c->isfloating != floating)
+    if(c->isfloating != floating
+       && (c->type == WINDOW_TYPE_NORMAL))
     {
         if((c->isfloating = floating))
         {
