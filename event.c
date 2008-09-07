@@ -650,6 +650,38 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
     return ewmh_process_client_message(ev);
 }
 
+/** The keymap change notify event handler.
+ * \param data Unused data.
+ * \param connection The connection to the X server.
+ * \param ev The event.
+ * \return Status code, 0 if everything's fine.
+ */
+static int
+event_handle_mappingnotify(void *data,
+                           xcb_connection_t *connection,
+                           xcb_mapping_notify_event_t *ev)
+{
+    xcb_get_modifier_mapping_cookie_t xmapping_cookie;
+
+    if(ev->request == XCB_MAPPING_MODIFIER
+       || ev->request == XCB_MAPPING_KEYBOARD)
+    {
+        /* Send the request to get the NumLock, ShiftLock and CapsLock masks */
+        xmapping_cookie = xcb_get_modifier_mapping_unchecked(globalconf.connection);
+
+        /* Free and then allocate the key symbols */
+        xcb_key_symbols_free(globalconf.keysyms);
+        globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
+
+        /* Process the reply of previously sent mapping request */
+        xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
+                            globalconf.keysyms, &globalconf.numlockmask,
+                            &globalconf.shiftlockmask, &globalconf.capslockmask);
+    }
+
+    return 0;
+}
+
 void a_xcb_set_event_handlers(void)
 {
     const xcb_query_extension_reply_t *randr_query;
@@ -665,6 +697,7 @@ void a_xcb_set_event_handlers(void)
     set_property_notify_event_handler(globalconf.evenths, event_handle_propertynotify, NULL);
     set_unmap_notify_event_handler(globalconf.evenths, event_handle_unmapnotify, NULL);
     set_client_message_event_handler(globalconf.evenths, event_handle_clientmessage, NULL);
+    set_mapping_notify_event_handler(globalconf.evenths, event_handle_mappingnotify, NULL);
 
     /* check for randr extension */
     randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
