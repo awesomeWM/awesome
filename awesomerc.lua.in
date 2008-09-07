@@ -359,7 +359,8 @@ end)
 -- Hook function to execute when the mouse is over a client.
 awful.hooks.mouse_over.register(function (c)
     -- Sloppy focus, but disabled for magnifier layout
-    if awful.layout.get(c.screen) ~= "magnifier" then
+    if awful.layout.get(c.screen) ~= "magnifier"
+        and awful.client.focus.filter(c) then
         client.focus = c
     end
 end)
@@ -422,7 +423,8 @@ awful.hooks.arrange.register(function (screen)
             mylayoutbox[screen].text = "No layout."
     end
 
-    -- If no window has focus, give focus to the latest in history
+    -- Give focus to the latest client in history if no window has focus
+    -- or if the current window is a desktop or a dock one.
     if not client.focus then
         local c = awful.client.focus.history.get(screen, 0)
         if c then client.focus = c end

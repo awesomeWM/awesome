@@ -161,13 +161,29 @@ function client.focus.history.delete(c)
     end
 end
 
+--- Filter out window that we do not want handled by focus.
+-- This usually means that desktop, dock and splash windows are
+-- not registered and cannot get focus.
+-- @param c A client.
+-- @return The same client if it's ok, nil otherwise.
+function client.focus.filter(c)
+    if c.type == "desktop"
+        or c.type == "dock"
+        or c.type == "splash" then
+        return nil
+    end
+    return c
+end
+
 --- Update client focus history.
 -- @param c The client that has been focused.
 function client.focus.history.add(c)
-    -- Remove the client if its in stack
-    client.focus.history.delete(c)
-    -- Record the client has latest focused
-    table.insert(client.focus.history.data, 1, c)
+    if client.focus.filter(c) then
+        -- Remove the client if its in stack
+        client.focus.history.delete(c)
+        -- Record the client has latest focused
+        table.insert(client.focus.history.data, 1, c)
+    end
 end
 
 --- Get the latest focused client for a screen in history.
@@ -223,11 +239,17 @@ function client.next(i, c)
     if sel then
         -- Get all visible clients
         local cls = capi.client.visible_get(sel.screen)
+        -- Remove all no-normal clients
+        for idx, c in ipairs(cls) do
+            if not client.focus.filter(c) then
+                table.remove(cls, idx)
+            end
+        end
         -- Loop upon each client
         for idx, c in ipairs(cls) do
             if c == sel then
                 -- Cycle
-                return cls[cycle(#cls, idx +i)]
+                return cls[cycle(#cls, idx + i)]
             end
         end
     end
