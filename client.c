@@ -326,7 +326,7 @@ client_layer_translator(client_t *c)
     switch(c->type)
     {
       case WINDOW_TYPE_DOCK:
-        return LAYER_DESKTOP;
+        return LAYER_ABOVE;
       case WINDOW_TYPE_SPLASH:
       case WINDOW_TYPE_DIALOG:
         return LAYER_ABOVE;
