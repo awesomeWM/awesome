@@ -94,21 +94,6 @@
 /* Server is defective */
 #define XUTIL_BAD_IMPLEMENTATION 17
 
-typedef struct
-{
-    char *res_name;
-    char *res_class;
-} xutil_class_hint_t;
-
-static inline void
-xutil_class_hint_wipe(xutil_class_hint_t *c)
-{
-    p_delete(&c->res_name);
-    p_delete(&c->res_class);
-}
-
-bool xutil_class_hint_get(xcb_connection_t *, xcb_window_t, xutil_class_hint_t *);
-
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 
 void xutil_lock_mask_get(xcb_connection_t *, xcb_get_modifier_mapping_cookie_t,

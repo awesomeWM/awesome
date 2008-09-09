@@ -103,16 +103,19 @@ client_loadprops(client_t * c, screen_t *screen)
 static bool
 window_isprotodel(xcb_window_t win)
 {
-    uint32_t i, n;
-    xcb_atom_t *protocols;
+    uint32_t i;
+    xcb_get_wm_protocols_reply_t protocols;
     bool ret = false;
 
-    if(xcb_get_wm_protocols(globalconf.connection, win, &n, &protocols))
+    if(xcb_get_wm_protocols_reply(globalconf.connection,
+                                  xcb_get_wm_protocols_unchecked(globalconf.connection,
+                                                                 win, WM_PROTOCOLS),
+                                  &protocols, NULL))
     {
-        for(i = 0; !ret && i < n; i++)
-            if(protocols[i] == WM_DELETE_WINDOW)
+        for(i = 0; !ret && i < protocols.atoms_len; i++)
+            if(protocols.atoms[i] == WM_DELETE_WINDOW)
                 ret = true;
-        p_delete(&protocols);
+        xcb_get_wm_protocols_reply_wipe(&protocols);
     }
     return ret;
 }
@@ -216,9 +219,9 @@ client_ban(client_t *c)
         client_unfocus(c);
     xcb_unmap_window(globalconf.connection, c->win);
     if(c->ishidden)
-        window_state_set(c->win, XCB_WM_ICONIC_STATE);
+        window_state_set(c->win, XCB_WM_STATE_ICONIC);
     else
-        window_state_set(c->win, XCB_WM_WITHDRAWN_STATE);
+        window_state_set(c->win, XCB_WM_STATE_WITHDRAWN);
     if(c->titlebar && c->titlebar->position && c->titlebar->sw)
         xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
 }
@@ -355,8 +358,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c, *t = NULL;
     xcb_window_t trans;
-    bool rettrans, retloadprops;
-    xcb_size_hints_t *u_size_hints;
+    bool rettrans, retloadprops, is_size_hints;
+    xcb_size_hints_t size_hints;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -394,7 +397,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     c->icon = ewmh_window_icon_get_reply(ewmh_icon_cookie);
 
     /* update hints */
-    u_size_hints = client_updatesizehints(c);
+    is_size_hints = client_updatesizehints(c, &size_hints);
     client_updatewmhints(c);
 
     /* Try to load props if any */
@@ -405,7 +408,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
     ewmh_check_client_hints(c);
 
     /* check for transient and set tags like its parent */
-    if((rettrans = xcb_get_wm_transient_for(globalconf.connection, w, &trans))
+    if((rettrans = xcb_get_wm_transient_for_reply(globalconf.connection,
+                                                  xcb_get_wm_transient_for_unchecked(globalconf.connection,
+                                                                                     w),
+                                                  &trans, NULL))
        && (t = client_getbywin(trans)))
     {
         tag_array_t *tags = &globalconf.screens[c->screen].tags;
@@ -436,18 +442,15 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int screen)
 
     if(c->floating_placement
        && !retloadprops
-       && u_size_hints
-       && !(xcb_size_hints_get_flags(u_size_hints) & (XCB_SIZE_US_POSITION_HINT
-                                                      | XCB_SIZE_P_POSITION_HINT)))
+       && is_size_hints
+       && !(size_hints.flags & (XCB_SIZE_HINT_US_POSITION
+                                | XCB_SIZE_HINT_P_POSITION)))
     {
         if(c->isfloating)
             client_resize(c, c->floating_placement(c), false);
         else
             c->f_geometry = c->floating_placement(c);
     }
-
-    if(u_size_hints)
-        xcb_free_size_hints(u_size_hints);
 }
 
 /** Compute client geometry with respect to its geometry hints.
@@ -653,7 +656,7 @@ void
 client_unban(client_t *c)
 {
     xcb_map_window(globalconf.connection, c->win);
-    window_state_set(c->win, XCB_WM_NORMAL_STATE);
+    window_state_set(c->win, XCB_WM_STATE_NORMAL);
     if(c->titlebar && c->titlebar->sw && c->titlebar->position)
         xcb_map_window(globalconf.connection, c->titlebar->sw->window);
 }
@@ -682,7 +685,7 @@ client_unmanage(client_t *c)
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win,
                       XCB_BUTTON_MASK_ANY);
-    window_state_set(c->win, XCB_WM_WITHDRAWN_STATE);
+    window_state_set(c->win, XCB_WM_STATE_WITHDRAWN);
 
     xcb_flush(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);
@@ -717,14 +720,13 @@ client_unmanage(client_t *c)
 void
 client_updatewmhints(client_t *c)
 {
-    xcb_wm_hints_t *wmh;
-    uint32_t wm_hints_flags;
+    xcb_wm_hints_t wmh;
 
-    if((wmh = xcb_get_wm_hints(globalconf.connection, c->win)))
+    if(xcb_get_wm_hints_reply(globalconf.connection,
+                              xcb_get_wm_hints_unchecked(globalconf.connection, c->win),
+                              &wmh, NULL))
     {
-        bool isurgent;
-        wm_hints_flags = xcb_wm_hints_get_flags(wmh);
-        isurgent = xcb_wm_hints_get_urgency(wmh);
+        bool isurgent = xcb_wm_hints_get_urgency(&wmh);
         if(isurgent != c->isurgent)
         {
             c->isurgent = isurgent;
@@ -735,13 +737,12 @@ client_updatewmhints(client_t *c)
 
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         }
-        if((wm_hints_flags & XCB_WM_STATE_HINT) &&
-           (xcb_wm_hints_get_initial_state(wmh) == XCB_WM_WITHDRAWN_STATE))
+        if((wmh.flags & XCB_WM_HINT_STATE) &&
+           wmh.initial_state == XCB_WM_STATE_WITHDRAWN)
         {
             client_setborder(c, 0);
             c->skip = true;
         }
-        xcb_free_wm_hints(wmh);
     }
 }
 
@@ -749,45 +750,63 @@ client_updatewmhints(client_t *c)
  * \param c The client.
  * \return A pointer to a xcb_size_hints_t.
  */
-xcb_size_hints_t *
-client_updatesizehints(client_t *c)
+bool
+client_updatesizehints(client_t *c, xcb_size_hints_t *size_hints)
 {
-    long msize;
-    xcb_size_hints_t *size;
-    uint32_t size_flags;
+    if(!xcb_get_wm_normal_hints_reply(globalconf.connection,
+                                      xcb_get_wm_normal_hints_unchecked(globalconf.connection,
+                                                                        c->win),
+                                      size_hints, NULL))
+        return false;
 
-    if(!(size = xcb_get_wm_normal_hints(globalconf.connection, c->win, &msize)))
-        return NULL;
-
-    size_flags = xcb_size_hints_get_flags(size);
-
-    if((size_flags & XCB_SIZE_P_SIZE_HINT))
-        xcb_size_hints_get_base_size(size, &c->basew, &c->baseh);
-    else if((size_flags & XCB_SIZE_P_MIN_SIZE_HINT))
-        xcb_size_hints_get_min_size(size, &c->basew, &c->baseh);
+    if((size_hints->flags & XCB_SIZE_HINT_P_SIZE))
+    {
+        c->basew = size_hints->base_width;
+        c->baseh = size_hints->base_height;
+    }
+    else if((size_hints->flags & XCB_SIZE_HINT_P_MIN_SIZE))
+    {
+        c->basew = size_hints->min_width;
+        c->baseh = size_hints->min_height;
+    }
     else
         c->basew = c->baseh = 0;
-    if((size_flags & XCB_SIZE_P_RESIZE_INC_HINT))
-        xcb_size_hints_get_increase(size, &c->incw, &c->inch);
+
+    if((size_hints->flags & XCB_SIZE_HINT_P_RESIZE_INC))
+    {
+        c->incw = size_hints->width_inc;
+        c->inch = size_hints->height_inc;
+    }
     else
         c->incw = c->inch = 0;
 
-    if((size_flags & XCB_SIZE_P_MAX_SIZE_HINT))
-        xcb_size_hints_get_max_size(size, &c->maxw, &c->maxh);
+    if((size_hints->flags & XCB_SIZE_HINT_P_MAX_SIZE))
+    {
+        c->maxw = size_hints->max_width;
+        c->maxh = size_hints->max_height;
+    }
     else
         c->maxw = c->maxh = 0;
 
-    if((size_flags & XCB_SIZE_P_MIN_SIZE_HINT))
-        xcb_size_hints_get_min_size(size, &c->minw, &c->minh);
-    else if((size_flags & XCB_SIZE_BASE_SIZE_HINT))
-        xcb_size_hints_get_base_size(size, &c->minw, &c->minh);
+    if((size_hints->flags & XCB_SIZE_HINT_P_MIN_SIZE))
+    {
+        c->minw = size_hints->min_width;
+        c->minh = size_hints->min_height;
+    }
+    else if((size_hints->flags & XCB_SIZE_HINT_BASE_SIZE))
+    {
+        c->minw = size_hints->base_width;
+        c->minh = size_hints->base_height;
+    }
     else
         c->minw = c->minh = 0;
 
-    if((size_flags & XCB_SIZE_P_ASPECT_HINT))
+    if((size_hints->flags & XCB_SIZE_HINT_P_ASPECT))
     {
-        xcb_size_hints_get_min_aspect(size, &c->minax, &c->minay);
-        xcb_size_hints_get_max_aspect(size, &c->maxax, &c->maxay);
+        c->minax = size_hints->min_aspect_num;
+        c->minay = size_hints->min_aspect_den;
+        c->maxax = size_hints->max_aspect_num;
+        c->maxay = size_hints->max_aspect_den;
     }
     else
         c->minax = c->maxax = c->minay = c->maxay = 0;
@@ -799,7 +818,7 @@ client_updatesizehints(client_t *c)
     c->hassizehints = !(!c->basew && !c->baseh && !c->incw && !c->inch
                         && !c->maxw && !c->maxh && !c->minw && !c->minh
                         && !c->minax && !c->maxax && !c->minax && !c->minay);
-    return size;
+    return true;
 }
 
 /** Kill a client via a WM_DELETE_WINDOW request or XKillClient if not
@@ -1275,7 +1294,7 @@ luaA_client_index(lua_State *L)
     const char *buf = luaL_checklstring(L, 2, &len);
     char *value;
     void *data;
-    xutil_class_hint_t hint;
+    xcb_get_wm_class_reply_t hint;
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r = NULL;
     double d;
@@ -1292,16 +1311,20 @@ luaA_client_index(lua_State *L)
         lua_pushstring(L, (*c)->name);
         break;
       case A_TK_CLASS:
-        if(!xutil_class_hint_get(globalconf.connection, (*c)->win, &hint))
+        if(!xcb_get_wm_class_reply(globalconf.connection,
+                                   xcb_get_wm_class_unchecked(globalconf.connection, (*c)->win),
+                                   &hint, NULL))
              return 0;
-        lua_pushstring(L, hint.res_class);
-        xutil_class_hint_wipe(&hint);
+        lua_pushstring(L, hint.class);
+        xcb_get_wm_class_reply_wipe(&hint);
         break;
       case A_TK_INSTANCE:
-        if(!xutil_class_hint_get(globalconf.connection, (*c)->win, &hint))
+        if(!xcb_get_wm_class_reply(globalconf.connection,
+                                   xcb_get_wm_class_unchecked(globalconf.connection, (*c)->win),
+                                   &hint, NULL))
             return 0;
-        lua_pushstring(L, hint.res_name);
-        xutil_class_hint_wipe(&hint);
+        lua_pushstring(L, hint.name);
+        xcb_get_wm_class_reply_wipe(&hint);
         break;
       case A_TK_ROLE:
         if(!xutil_text_prop_get(globalconf.connection, (*c)->win,

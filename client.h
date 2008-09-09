@@ -39,7 +39,7 @@ area_t client_geometry_hints(client_t *, area_t);
 bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *);
 void client_updatewmhints(client_t *);
-xcb_size_hints_t *client_updatesizehints(client_t *);
+bool client_updatesizehints(client_t *, xcb_size_hints_t *);
 bool client_updatetitle(client_t *);
 void client_saveprops(client_t *);
 void client_kill(client_t *);

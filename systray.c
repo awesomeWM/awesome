@@ -140,7 +140,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 
     xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_EVENT_MASK,
                                  select_input_val);
-    window_state_set(embed_win, XCB_WM_WITHDRAWN_STATE);
+    window_state_set(embed_win, XCB_WM_STATE_WITHDRAWN);
 
     xcb_reparent_window(globalconf.connection, embed_win,
                         globalconf.screens[phys_screen].systray.window,

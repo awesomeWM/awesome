@@ -149,7 +149,7 @@ scan(void)
 
             if(!attr_r || attr_r->override_redirect
                || (attr_r->map_state != XCB_MAP_STATE_VIEWABLE && !has_awesome_prop)
-               || (state == XCB_WM_WITHDRAWN_STATE && !has_awesome_prop))
+               || (state == XCB_WM_STATE_WITHDRAWN && !has_awesome_prop))
             {
                 geom_wins[i] = NULL;
                 p_delete(&attr_r);

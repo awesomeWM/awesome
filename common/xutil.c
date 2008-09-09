@@ -26,6 +26,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
+#include <xcb/xcb_icccm.h>
 
 #include "common/util.h"
 #include "common/xutil.h"
@@ -43,19 +44,14 @@ bool
 xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
                     char **text, ssize_t *len)
 {
-    xcb_get_property_cookie_t prop_c;
-    xcb_get_property_reply_t *prop_r;
-
-    prop_c = xcb_get_property_unchecked(conn, false,
-                                        w, atom,
-                                        XCB_GET_PROPERTY_TYPE_ANY,
-                                        0L, 1000000L);
-
-    prop_r = xcb_get_property_reply(conn, prop_c, NULL);
-
-    if(!prop_r || !prop_r->value_len || prop_r->format != 8)
+    xcb_get_text_property_reply_t reply;
+    if(!xcb_get_text_property_reply(conn,
+                                    xcb_get_text_property_unchecked(conn, w,
+                                                                    atom),
+                                    &reply, NULL) ||
+       !reply.name_len || reply.format != 8)
     {
-        p_delete(&prop_r);
+        xcb_get_text_property_reply_wipe(&reply);
         return false;
     }
 
@@ -64,14 +60,14 @@ xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
         /* Check whether the returned property value is just an ascii
          * string or utf8 string.  At the moment it doesn't handle
          * COMPOUND_TEXT and multibyte but it's not needed...  */
-        if(prop_r->type == STRING || prop_r->type == UTF8_STRING)
+        if(reply.encoding == STRING || reply.encoding == UTF8_STRING)
         {
-            void *prop_val = xcb_get_property_value(prop_r);
-            *text = p_new(char, prop_r->value_len + 1);
-            /* use memcpy() because prop_val may not be \0 terminated */
-            memcpy(*text, prop_val, prop_r->value_len);
-            (*text)[prop_r->value_len] = '\0';
-            *len = prop_r->value_len;
+            *text = p_new(char, reply.name_len + 1);
+            /* Use memcpy() because the property name is not be \0
+             * terminated */
+            memcpy(*text, reply.name, reply.name_len);
+            (*text)[reply.name_len] = '\0';
+            *len = reply.name_len;
         }
         else
         {
@@ -80,7 +76,7 @@ xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
         }
     }
 
-    p_delete(&prop_r);
+    xcb_get_text_property_reply_wipe(&reply);
     return true;
 }
 
@@ -126,41 +122,6 @@ xutil_lock_mask_get(xcb_connection_t *connection,
         }
 
     p_delete(&modmap_r);
-}
-
-bool
-xutil_class_hint_get(xcb_connection_t *conn, xcb_window_t win,
-                     xutil_class_hint_t *ch)
-{
-    xcb_get_property_reply_t *class_hint_r;
-    xcb_get_property_cookie_t class_hint_c;
-    char *data;
-    int len_name, len_class;
-
-    class_hint_c = xcb_get_property_unchecked(conn, false, win, WM_CLASS,
-                                              STRING, 0L, 2048L);
-
-    class_hint_r = xcb_get_property_reply(conn, class_hint_c, NULL);
-
-    if(!class_hint_r
-       || class_hint_r->type != STRING
-       || class_hint_r->format != 8)
-    {
-        p_delete(&class_hint_r);
-	return false;
-    }
-
-    data = xcb_get_property_value(class_hint_r);
-
-    len_name = a_strlen(data);
-    len_class = a_strlen(data + len_name + 1);
-
-    ch->res_name = a_strndup(data, len_name);
-    ch->res_class = a_strndup(data + len_name + 1, len_class);
-
-    p_delete(&class_hint_r);
-
-    return true;
 }
 
 /* Number of different errors */

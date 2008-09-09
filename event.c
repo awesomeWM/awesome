@@ -519,6 +519,7 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
     client_t *c;
     xcb_window_t trans;
     xembed_window_t *emwin;
+    xcb_size_hints_t size_hints;
 
     if(ev->state == XCB_PROPERTY_DELETE)
         return 0; /* ignore */
@@ -528,13 +529,16 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
     {
         if(ev->atom == WM_TRANSIENT_FOR)
         {
-            xcb_get_wm_transient_for(connection, c->win, &trans);
+            xcb_get_wm_transient_for_reply(connection,
+                                           xcb_get_wm_transient_for_unchecked(connection,
+                                                                              c->win),
+                                           &trans, NULL);
             if(!c->isfloating
                && (c->isfloating = (client_getbywin(trans) != NULL)))
                 globalconf.screens[c->screen].need_arrange = true;
         }
         else if (ev->atom == WM_NORMAL_HINTS)
-            xcb_free_size_hints(client_updatesizehints(c));
+            client_updatesizehints(c, &size_hints);
         else if (ev->atom == WM_HINTS)
             client_updatewmhints(c);
         else if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)
@@ -573,7 +577,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     {
         if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
            && send_event
-           && window_state_get_reply(window_state_get_unchecked(c->win)) == XCB_WM_NORMAL_STATE)
+           && window_state_get_reply(window_state_get_unchecked(c->win)) == XCB_WM_STATE_NORMAL)
             client_unmanage(c);
     }
     else if((em = xembed_getbywin(globalconf.embedded, ev->window)))
@@ -637,7 +641,7 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
     {
         if((c = client_getbywin(ev->window))
            && ev->format == 32
-           && ev->data.data32[0] == XCB_WM_ICONIC_STATE)
+           && ev->data.data32[0] == XCB_WM_STATE_ICONIC)
         {
             c->ishidden = true;
             globalconf.screens[c->screen].need_arrange = true;
