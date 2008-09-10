@@ -384,6 +384,9 @@ main(int argc, char **argv)
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display");
 
+    /* Grab server */
+    xcb_grab_server(globalconf.connection);
+
     /* Get the file descriptor corresponding to the X connection */
     xfd = xcb_get_file_descriptor(globalconf.connection);
     ev_io_init(&xio, &a_xcb_io_cb, xfd, EV_READ);
@@ -508,6 +511,9 @@ main(int argc, char **argv)
 
     /* refresh everything before waiting events */
     awesome_refresh(globalconf.connection);
+
+    /* Grab server */
+    xcb_ungrab_server(globalconf.connection);
 
     /* main event loop */
     ev_loop(globalconf.loop, 0);
