@@ -267,8 +267,8 @@ keybinding_find(const xcb_key_press_event_t *ev)
     int l, r, mod = XUTIL_MASK_CLEAN(ev->state);
     xcb_keysym_t keysym;
 
-    /* get keysym ignoring shift */
-    keysym = key_getkeysym(ev->detail, ev->state & ~XCB_MOD_MASK_SHIFT);
+    /* get keysym ignoring shift and mod5 */
+    keysym = key_getkeysym(ev->detail, ev->state & ~(XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_5));
 
   again:
     l = 0;
