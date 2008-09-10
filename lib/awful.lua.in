@@ -331,6 +331,16 @@ function client.master(screen)
     return capi.client.visible_get(s)[1]
 end
 
+-- Set the client as slave: put it at the end of other windows.
+-- @param c The window to set as slave.
+-- @return 
+function client.setslave(c)
+    local cls = capi.client.visible_get(c.screen)
+    for k, v in pairs(cls) do
+        c:swap(v)
+    end
+end
+
 --- Move/resize a client relative to current coordinates.
 -- @param x The relative x coordinate.
 -- @param y The relative y coordinate.
