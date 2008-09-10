@@ -26,6 +26,8 @@ layouts =
     "tileleft",
     "tilebottom",
     "tiletop",
+    "fairh",
+    "fairv",
     "magnifier",
     "max",
     "spiral",

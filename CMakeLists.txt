@@ -74,6 +74,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/layouts/fibonacci.c
     ${SOURCE_DIR}/layouts/floating.c
     ${SOURCE_DIR}/layouts/magnifier.c
+    ${SOURCE_DIR}/layouts/fair.c
     ${SOURCE_DIR}/layouts/max.c
     ${SOURCE_DIR}/layouts/tile.c
     ${SOURCE_DIR}/widgets/graph.c

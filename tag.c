@@ -25,12 +25,6 @@
 #include "ewmh.h"
 #include "widget.h"
 
-#include "layouts/magnifier.h"
-#include "layouts/tile.h"
-#include "layouts/max.h"
-#include "layouts/floating.h"
-#include "layouts/fibonacci.h"
-
 #include "layoutgen.h"
 
 extern awesome_t globalconf;
