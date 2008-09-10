@@ -72,11 +72,11 @@ function init(path)
                         awful.spawn(value, s)
                     end
                 elseif key == "font" then
-                    capi.awesome.font_set(value)
+                    capi.awesome.font(value)
                 elseif key == "fg_normal" then
-                    capi.awesome.colors_set({ fg = value })
+                    capi.awesome.colors({ fg = value })
                 elseif key == "bg_normal" then
-                    capi.awesome.colors_set({ bg = value })
+                    capi.awesome.colors({ bg = value })
                 end
                 -- Store.
                 theme[key] = value

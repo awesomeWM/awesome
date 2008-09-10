@@ -257,7 +257,7 @@ luaA_hooks_timer(lua_State *L)
     return 0;
 }
 
-/** Set default font.
+/** Set default font. (DEPRECATED)
  * \param L The Lua VM state.
  *
  * \luastack
@@ -266,6 +266,7 @@ luaA_hooks_timer(lua_State *L)
 static int
 luaA_font_set(lua_State *L)
 {
+    deprecate();
     const char *font = luaL_checkstring(L, 1);
     draw_font_delete(&globalconf.font);
     globalconf.font = draw_font_new(globalconf.connection,
@@ -273,7 +274,34 @@ luaA_font_set(lua_State *L)
     return 0;
 }
 
-/** Set default colors.
+/** Set or get default font. (DEPRECATED)
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam An optional string with a font name in Pango format.
+ * \lreturn The font used, in Pango format.
+ */
+static int
+luaA_font(lua_State *L)
+{
+    char *font;
+
+    if(lua_gettop(L) == 1)
+    {
+        const char *newfont = luaL_checkstring(L, 1);
+        draw_font_delete(&globalconf.font);
+        globalconf.font = draw_font_new(globalconf.connection,
+                                        globalconf.default_screen, newfont);
+    }
+
+    font = pango_font_description_to_string(globalconf.font->desc);
+    lua_pushstring(L, font);
+    g_free(font);
+
+    return 1;
+}
+
+/** Set default colors. (DEPRECATED)
  * \param L The Lua VM state.
  *
  * \luastack
@@ -282,6 +310,7 @@ luaA_font_set(lua_State *L)
 static int
 luaA_colors_set(lua_State *L)
 {
+    deprecate();
     const char *buf;
     size_t len;
     int8_t colors_nbr = -1, i;
@@ -305,6 +334,43 @@ luaA_colors_set(lua_State *L)
        xcolor_init_reply(globalconf.connection, reqs[i]);
 
     return 0;
+}
+
+static int
+luaA_colors(lua_State *L)
+{
+    if(lua_gettop(L) == 1)
+    {
+        const char *buf;
+        size_t len;
+        int8_t colors_nbr = -1, i;
+        xcolor_init_request_t reqs[2];
+
+        luaA_checktable(L, 1);
+
+        if((buf = luaA_getopt_lstring(L, 1, "fg", NULL, &len)))
+           reqs[++colors_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                      &globalconf.colors.fg,
+                                                      globalconf.default_screen,
+                                                      buf, len);
+
+        if((buf = luaA_getopt_lstring(L, 1, "bg", NULL, &len)))
+           reqs[++colors_nbr] = xcolor_init_unchecked(globalconf.connection,
+                                                      &globalconf.colors.bg,
+                                                      globalconf.default_screen,
+                                                      buf, len);
+
+        for(i = 0; i <= colors_nbr; i++)
+           xcolor_init_reply(globalconf.connection, reqs[i]);
+    }
+
+    lua_newtable(L);
+    luaA_pushcolor(L, &globalconf.colors.fg);
+    lua_setfield(L, -2, "fg");
+    luaA_pushcolor(L, &globalconf.colors.bg);
+    lua_setfield(L, -2, "bg");
+
+    return 1;
 }
 
 /** Push a pointer onto the stack according to its type.
@@ -431,7 +497,7 @@ luaA_otable_index(lua_State *L)
         }
         return 0;
     }
-    
+
     lua_rawget(L, 1);
     return 1;
 }
@@ -467,7 +533,7 @@ luaA_otable_newindex(lua_State *L)
             lua_pop(L, 1);
         }
     }
-    
+
     lua_rawset(L, 1);
 
     return 0;
@@ -551,6 +617,8 @@ luaA_init(void)
         { "buttons", luaA_buttons },
         { "font_set", luaA_font_set },
         { "colors_set", luaA_colors_set },
+        { "font", luaA_font },
+        { "colors", luaA_colors },
         { NULL, NULL }
     };
     static const struct luaL_reg awesome_hooks_lib[] =

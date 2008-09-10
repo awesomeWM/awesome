@@ -39,9 +39,9 @@ typedef enum
 /** Type for Lua function */
 typedef int luaA_ref;
 
-#define deprecate(string, ...) _warn(__LINE__, \
-                                     __FUNCTION__, \
-                                     "This function is deprecated and will be removed.")                                    
+#define deprecate() _warn(__LINE__, \
+                          __FUNCTION__, \
+                          "This function is deprecated and will be removed.")
 
 #define DO_LUA_NEW(decl, type, prefix, lua_type, type_ref) \
     decl int \
