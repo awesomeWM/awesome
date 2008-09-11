@@ -121,8 +121,6 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
       default:
         return 0;
     }
-
-    widget_invalidate_bywidget(*widget);
 }
 
 /** The __newindex method for a textbox object.
