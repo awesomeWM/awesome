@@ -386,6 +386,7 @@ main(int argc, char **argv)
 
     /* Grab server */
     xcb_grab_server(globalconf.connection);
+    xcb_flush(globalconf.connection);
 
     /* Get the file descriptor corresponding to the X connection */
     xfd = xcb_get_file_descriptor(globalconf.connection);
@@ -504,6 +505,9 @@ main(int argc, char **argv)
         systray_init(screen_nbr);
     }
 
+    /* Grab server */
+    xcb_ungrab_server(globalconf.connection);
+
     xcb_aux_sync(globalconf.connection);
 
     luaA_cs_init();
@@ -511,9 +515,6 @@ main(int argc, char **argv)
 
     /* refresh everything before waiting events */
     awesome_refresh(globalconf.connection);
-
-    /* Grab server */
-    xcb_ungrab_server(globalconf.connection);
 
     /* main event loop */
     ev_loop(globalconf.loop, 0);
