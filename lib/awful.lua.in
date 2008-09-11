@@ -1522,6 +1522,9 @@ function titlebar.add(c, args)
     }
     title:buttons(bts)
 
+    local appicon = capi.widget({ type = "imagebox", name = "appicon", align = "left" })
+    appicon.image = c.icon
+
     if theme.titlebar_close_button == "true" then
         local closef = widget.button({ name = "closef", align = "right",
                                        image = theme.titlebar_close_button_focus
@@ -1543,13 +1546,13 @@ function titlebar.add(c, args)
         close:buttons(bts)
 
         tb:widgets({
-            capi.widget({ type = "appicon", name = "appicon", align = "left" }),
+            appicon,
             title,
             closef, close
         })
     else
         tb:widgets({
-            capi.widget({ type = "appicon", name = "appicon", align = "left" }),
+            appicon,
             title
         })
     end

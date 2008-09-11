@@ -45,7 +45,7 @@ widget_constructor_t progressbar_new;
 widget_constructor_t graph_new;
 widget_constructor_t tasklist_new;
 widget_constructor_t systray_new;
-widget_constructor_t appicon_new;
+widget_constructor_t imagebox_new;
 
 #endif
 

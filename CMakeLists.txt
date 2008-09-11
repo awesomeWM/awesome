@@ -83,7 +83,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/widgets/tasklist.c
     ${SOURCE_DIR}/widgets/textbox.c
     ${SOURCE_DIR}/widgets/systray.c
-    ${SOURCE_DIR}/widgets/appicon.c)
+    ${SOURCE_DIR}/widgets/imagebox.c)
 
 set(AWE_CLIENT_SRCS
     ${SOURCE_DIR}/awesome-client.c

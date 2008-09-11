@@ -131,14 +131,14 @@ mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
 -- We need one layoutbox per screen.
 mylayoutbox = {}
 for s = 1, screen.count() do
-    mylayoutbox[s] = widget({ type = "textbox", name = "mylayoutbox", align = "right" })
+    mylayoutbox[s] = widget({ type = "imagebox", name = "mylayoutbox", align = "right" })
     mylayoutbox[s]:buttons({
         button({ }, 1, function () awful.layout.inc(layouts, 1) end),
         button({ }, 3, function () awful.layout.inc(layouts, -1) end),
         button({ }, 4, function () awful.layout.inc(layouts, 1) end),
         button({ }, 5, function () awful.layout.inc(layouts, -1) end)
     })
-    mylayoutbox[s].text = "<bg image=\"@AWESOME_ICON_PATH@/layouts/tilew.png\" resize=\"true\"/>"
+    mylayoutbox[s].image = image("@AWESOME_ICON_PATH@/layouts/tilew.png")
 end
 
 -- Create a statusbar for each screen and add it
@@ -417,10 +417,9 @@ end)
 awful.hooks.arrange.register(function (screen)
     local layout = awful.layout.get(screen)
     if layout then
-        mylayoutbox[screen].text =
-            "<bg image=\"@AWESOME_ICON_PATH@/layouts/" .. awful.layout.get(screen) .. "w.png\" resize=\"true\"/>"
-        else
-            mylayoutbox[screen].text = "No layout."
+        mylayoutbox[screen].image = image("@AWESOME_ICON_PATH@/layouts/" .. layout .. "w.png")
+    else
+        mylayoutbox[screen].image = nil
     end
 
     -- Give focus to the latest client in history if no window has focus
