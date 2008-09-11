@@ -22,7 +22,10 @@
 #ifndef AWESOME_IMAGE_H
 #define AWESOME_IMAGE_H
 
+#include <lua.h>
+
 #include "draw.h"
+#include "common/refcount.h"
 
 typedef struct
 {
@@ -42,6 +45,20 @@ image_delete(image_t **i)
 }
 
 DO_RCNT(image_t, image, image_delete)
+
+int luaA_image_userdata_new(lua_State *, image_t *);
+
+/** Create a new image from a draw_image_t object.
+ * \param i The image data.
+ * \return A image_t object.
+ */
+static inline image_t *
+image_new(draw_image_t *i)
+{
+    image_t *image = p_new(image_t, 1);
+    image->image = i;
+    return image;
+}
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

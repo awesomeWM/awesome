@@ -24,8 +24,8 @@ grow
 height
 hide
 honorsizehints
+icon
 icon_name
-icon_path
 image
 instance
 invert

@@ -30,10 +30,10 @@
 #include "layout.h"
 #include "swindow.h"
 #include "xscreen.h"
+#include "image.h"
 #include "common/xutil.h"
 #include "common/xembed.h"
 #include "common/refcount.h"
-#include "draw.h"
 
 /** Stacking layout layers */
 typedef enum
@@ -329,7 +329,7 @@ struct client_t
     /** Button bindings */
     button_array_t buttons;
     /** Icon */
-    draw_image_t *icon;
+    image_t *icon;
     /** Size hints */
     xcb_size_hints_t size_hints;
     /** Next and previous clients */

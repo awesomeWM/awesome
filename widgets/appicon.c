@@ -56,11 +56,9 @@ appicon_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
 
     if(c)
     {
-        if(!(image = draw_image_new(c->icon_path)))
-            image = c->icon;
-
-        if(image)
+        if(c->icon)
         {
+            image = c->icon->image;
             w->area.width = ((double) ctx->height / (double) image->height) * image->width;
             w->area.x = widget_calculate_offset(ctx->width,
                                                 w->area.width,
@@ -68,8 +66,6 @@ appicon_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
                                                 w->widget->align);
             draw_image(ctx, w->area.x,
                        w->area.y, ctx->height, image);
-            if(image != c->icon)
-                draw_image_delete(&image);
         }
     }
     else

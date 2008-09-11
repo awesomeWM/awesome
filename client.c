@@ -24,6 +24,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
+#include "image.h"
 #include "client.h"
 #include "tag.h"
 #include "window.h"
@@ -389,6 +390,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c;
+    draw_image_t *icon;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -419,7 +421,11 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     c->geometry.width = c->f_geometry.width = c->m_geometry.width = wgeom->width;
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
     client_setborder(c, wgeom->border_width);
-    c->icon = ewmh_window_icon_get_reply(ewmh_icon_cookie);
+    if((icon = ewmh_window_icon_get_reply(ewmh_icon_cookie)))
+    {
+        c->icon = image_new(icon);
+        image_ref(&c->icon);
+    }
 
     /* we honor size hints by default */
     c->honorsizehints = true;
@@ -1017,7 +1023,7 @@ luaA_client_visible_get(lua_State *L)
     for(c = globalconf.clients; c; c = c->next)
         if(client_isvisible(c, screen))
         {
-            luaA_client_userdata_new(globalconf.L, c);
+            luaA_client_userdata_new(L, c);
             lua_rawseti(L, -2, i++);
         }
 
@@ -1274,6 +1280,7 @@ luaA_client_newindex(lua_State *L)
     double d;
     int i;
     titlebar_t **t = NULL;
+    image_t **image;
 
     if((*c)->invalid)
         luaL_error(L, "client is invalid\n");
@@ -1316,10 +1323,11 @@ luaA_client_newindex(lua_State *L)
       case A_TK_FULLSCREEN:
         client_setfullscreen(*c, luaA_checkboolean(L, 3));
         break;
-      case A_TK_ICON_PATH:
-        buf = luaL_checkstring(L, 3);
-        p_delete(&(*c)->icon_path);
-        (*c)->icon_path = a_strdup(buf);
+      case A_TK_ICON:
+        image = luaA_checkudata(L, 3, "image");
+        image_unref(&(*c)->icon);
+        image_ref(image);
+        (*c)->icon = *image;
         widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
         break;
       case A_TK_OPACITY:
@@ -1525,8 +1533,11 @@ luaA_client_index(lua_State *L)
       case A_TK_FULLSCREEN:
         lua_pushboolean(L, (*c)->isfullscreen);
         break;
-      case A_TK_ICON_PATH:
-        lua_pushstring(L, (*c)->icon_path);
+      case A_TK_ICON:
+        if((*c)->icon)
+            luaA_image_userdata_new(L, (*c)->icon);
+        else
+            return 0;
         break;
       case A_TK_OPACITY:
         if((d = window_opacity_get((*c)->win)) >= 0)
@@ -1554,7 +1565,7 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_TITLEBAR:
         if((*c)->titlebar)
-            return luaA_titlebar_userdata_new(globalconf.L, (*c)->titlebar);
+            return luaA_titlebar_userdata_new(L, (*c)->titlebar);
         return 0;
       case A_TK_URGENT:
         lua_pushboolean(L, (*c)->isurgent);

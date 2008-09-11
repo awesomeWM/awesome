@@ -24,7 +24,7 @@
 
 extern awesome_t globalconf;
 
-DO_LUA_NEW(static, image_t, image, "image", image_ref)
+DO_LUA_NEW(extern, image_t, image, "image", image_ref)
 DO_LUA_GC(image_t, image, "image", image_unref)
 DO_LUA_EQ(image_t, image, "image")
 

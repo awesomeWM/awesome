@@ -142,20 +142,12 @@ tasklist_draw_item(draw_context_t *ctx,
         else
             parser_data = NULL;
 
-        /* use image from icon_path, otherwise netwm icon */
-        if(!(image = draw_image_new(odata->client_labels.tab[i].client->icon_path)))
-            image = odata->client_labels.tab[i].client->icon;
-
-        if(image)
+        if(odata->client_labels.tab[i].client->icon)
         {
-
+            image = odata->client_labels.tab[i].client->icon->image;
             icon_width = ((double) ctx->height / (double) image->height) * image->width;
             draw_image(ctx, w->area.x + odata->box_width * i,
                        w->area.y, ctx->height, image);
-
-            /* a bit hackish */
-            if(image != odata->client_labels.tab[i].client->icon)
-                draw_image_delete(&image);
         }
     }
     else

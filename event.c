@@ -668,9 +668,16 @@ event_handle_propertynotify(void *data __attribute__ ((unused)),
         else if(ev->atom == _NET_WM_ICON)
         {
             xcb_get_property_cookie_t icon_q = ewmh_window_icon_get_unchecked(c->win);
-            draw_image_delete(&c->icon);
+            draw_image_t *icon;
+            image_unref(&c->icon);
             widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-            c->icon = ewmh_window_icon_get_reply(icon_q);
+            if((icon = ewmh_window_icon_get_reply(icon_q)))
+            {
+                c->icon = image_new(icon);
+                image_ref(&c->icon);
+            }
+            else
+                c->icon = NULL;
         }
     }
 
