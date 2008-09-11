@@ -29,8 +29,6 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #endif
 
-#include <xcb/xcb.h>
-
 #include <langinfo.h>
 #include <iconv.h>
 #include <errno.h>
@@ -38,10 +36,12 @@
 #include <ctype.h>
 #include <math.h>
 
+#include "structs.h"
+
 #include "common/tokenize.h"
-#include "common/draw.h"
 #include "common/markup.h"
-#include "common/xutil.h"
+
+extern awesome_t globalconf;
 
 static iconv_t iso2utf8 = (iconv_t) -1;
 
@@ -109,7 +109,6 @@ draw_screen_default_visual(xcb_screen_t *s)
 }
 
 /** Create a new draw context.
- * \param conn Connection ref.
  * \param phys_screen Physical screen id.
  * \param width Width.
  * \param height Height.
@@ -119,21 +118,20 @@ draw_screen_default_visual(xcb_screen_t *s)
  * \return A draw context pointer.
  */
 draw_context_t *
-draw_context_new(xcb_connection_t *conn, int phys_screen,
+draw_context_new(int phys_screen,
                  int width, int height, xcb_pixmap_t px,
                  const xcolor_t *fg, const xcolor_t *bg)
 {
     draw_context_t *d = p_new(draw_context_t, 1);
-    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
 
-    d->connection = conn;
     d->phys_screen = phys_screen;
     d->width = width;
     d->height = height;
     d->depth = s->root_depth;
     d->visual = draw_screen_default_visual(s);
     d->pixmap = px;
-    d->surface = cairo_xcb_surface_create(conn, px, d->visual, width, height);
+    d->surface = cairo_xcb_surface_create(globalconf.connection, px, d->visual, width, height);
     d->cr = cairo_create(d->surface);
     d->layout = pango_cairo_create_layout(d->cr);
     d->fg = *fg;
@@ -143,23 +141,22 @@ draw_context_new(xcb_connection_t *conn, int phys_screen,
 };
 
 /** Create a new Pango font
- * \param conn Connection ref
  * \param phys_screen The physical screen number.
  * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE])
  * \return a new font
  */
 font_t *
-draw_font_new(xcb_connection_t *conn, int phys_screen, const char *fontname)
+draw_font_new(int phys_screen, const char *fontname)
 {
     cairo_surface_t *surface;
-    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
     cairo_t *cr;
     PangoLayout *layout;
     font_t *font = p_new(font_t, 1);
 
     /* Create a dummy cairo surface, cairo context and pango layout in
      * order to get font informations */
-    surface = cairo_xcb_surface_create(conn,
+    surface = cairo_xcb_surface_create(globalconf.connection,
                                        phys_screen,
                                        draw_screen_default_visual(s),
                                        s->width_in_pixels,
@@ -226,11 +223,9 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                     switch(a_tokenize(*names, -1))
                     {
                       case A_TK_COLOR:
-                        reqs[++reqs_nbr] = xcolor_init_unchecked(data->connection,
-                                                                &data->bg_color,
-                                                                data->phys_screen,
-                                                                *values,
-                                                                a_strlen(*values));
+                        reqs[++reqs_nbr] = xcolor_init_unchecked(&data->bg_color,
+                                                                 *values,
+                                                                 a_strlen(*values));
 
                         bg_color_nbr = reqs_nbr;
                         break;
@@ -254,11 +249,9 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 switch(a_tokenize(*names, -1))
                 {
                   case A_TK_COLOR:
-                    reqs[++reqs_nbr] = xcolor_init_unchecked(data->connection,
-                                                            &data->border.color,
-                                                            data->phys_screen,
-                                                            *values,
-                                                            a_strlen(*values));
+                    reqs[++reqs_nbr] = xcolor_init_unchecked(&data->border.color,
+                                                             *values,
+                                                             a_strlen(*values));
                     break;
                   case A_TK_WIDTH:
                     data->border.width = atoi(*values);
@@ -275,11 +268,9 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 data->align = draw_align_fromstr(*values, -1);
                 break;
               case A_TK_SHADOW:
-                reqs[++reqs_nbr] = xcolor_init_unchecked(data->connection,
-                                                        &data->shadow.color,
-                                                        data->phys_screen,
-                                                        *values,
-                                                        a_strlen(*values));
+                reqs[++reqs_nbr] = xcolor_init_unchecked(&data->shadow.color,
+                                                         *values,
+                                                         a_strlen(*values));
                 break;
               case A_TK_SHADOW_OFFSET:
                 data->shadow.offset = atoi(*values);
@@ -308,9 +299,9 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
 
     for(i = 0; i <= reqs_nbr; i++)
         if(i == bg_color_nbr)
-            data->has_bg_color = xcolor_init_reply(data->connection, reqs[i]);
+            data->has_bg_color = xcolor_init_reply(reqs[i]);
         else
-            xcolor_init_reply(data->connection, reqs[i]);
+            xcolor_init_reply(reqs[i]);
 }
 
 bool
@@ -367,8 +358,6 @@ draw_text(draw_context_t *ctx, font_t *font,
     if(!pdata)
     {
         draw_parser_data_init(&parser_data);
-        parser_data.connection = ctx->connection;
-        parser_data.phys_screen = ctx->phys_screen;
         if(draw_text_markup_expand(&parser_data, text, len))
         {
             text = parser_data.text;
@@ -754,7 +743,7 @@ draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
  * \param wanted_h Wanted height: if > 0, image will be resized.
  * \param data The image pixels array.
  */
-void
+static void
 draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
                           int wanted_h, unsigned char *data)
 {
@@ -1006,9 +995,9 @@ draw_rotate(draw_context_t *ctx,
     cairo_surface_t *surface, *source;
     cairo_t *cr;
 
-    surface = cairo_xcb_surface_create(ctx->connection, dest,
+    surface = cairo_xcb_surface_create(globalconf.connection, dest,
                                        ctx->visual, dest_w, dest_h);
-    source = cairo_xcb_surface_create(ctx->connection, src,
+    source = cairo_xcb_surface_create(globalconf.connection, src,
                                       ctx->visual, src_w, src_h);
     cr = cairo_create (surface);
 
@@ -1024,7 +1013,6 @@ draw_rotate(draw_context_t *ctx,
 }
 
 /** Return the width and height of a text in pixel.
- * \param conn Connection ref.
  * \param phys_screen Physical screen number.
  * \param font Font to use.
  * \param text The text.
@@ -1033,26 +1021,23 @@ draw_rotate(draw_context_t *ctx,
  * \return Text height and width.
  */
 area_t
-draw_text_extents(xcb_connection_t *conn, int phys_screen, font_t *font,
+draw_text_extents(int phys_screen, font_t *font,
                   const char *text, ssize_t len, draw_parser_data_t *parser_data)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
     PangoLayout *layout;
     PangoRectangle ext;
-    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
     area_t geom = { 0, 0, 0, 0 };
 
     if(!len)
         return geom;
 
-    parser_data->connection = conn;
-    parser_data->phys_screen = phys_screen;
-
     if(!draw_text_markup_expand(parser_data, text, len))
         return geom;
 
-    surface = cairo_xcb_surface_create(conn, phys_screen,
+    surface = cairo_xcb_surface_create(globalconf.connection, phys_screen,
                                        draw_screen_default_visual(s),
                                        s->width_in_pixels,
                                        s->height_in_pixels);
@@ -1114,17 +1099,14 @@ draw_align_tostr(alignment_t a)
 #define RGB_COLOR_8_TO_16(i) (65535 * ((i) & 0xff) / 255)
 
 /** Send a request to initialize a X color.
- * \param conn Connection ref.
  * \param color xcolor_t struct to store color into.
- * \param phys_screen Physical screen number.
  * \param colstr Color specification.
  * \return request informations.
  */
 xcolor_init_request_t
-xcolor_init_unchecked(xcb_connection_t *conn, xcolor_t *color, int phys_screen,
-                      const char *colstr, ssize_t len)
+xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
 {
-    xcb_screen_t *s = xutil_screen_get(conn, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     xcolor_init_request_t req;
     unsigned long colnum;
     uint16_t red, green, blue;
@@ -1173,13 +1155,15 @@ xcolor_init_unchecked(xcb_connection_t *conn, xcolor_t *color, int phys_screen,
         blue  = RGB_COLOR_8_TO_16(colnum);
 
         req.is_hexa = true;
-        req.cookie_hexa = xcb_alloc_color_unchecked(conn, s->default_colormap,
-                                                        red, green, blue);
+        req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
+                                                    s->default_colormap,
+                                                    red, green, blue);
     }
     else
     {
         req.is_hexa = false;
-        req.cookie_named = xcb_alloc_named_color_unchecked(conn, s->default_colormap, len,
+        req.cookie_named = xcb_alloc_named_color_unchecked(globalconf.connection,
+                                                           s->default_colormap, len,
                                                                colstr);
     }
 
@@ -1190,13 +1174,11 @@ xcolor_init_unchecked(xcb_connection_t *conn, xcolor_t *color, int phys_screen,
 }
 
 /** Initialize a X color.
- * \param conn Connection ref.
  * \param req xcolor_init request.
  * \return True if color allocation was successfull.
  */
 bool
-xcolor_init_reply(xcb_connection_t *conn,
-                  xcolor_init_request_t req)
+xcolor_init_reply(xcolor_init_request_t req)
 {
     if(req.has_error)
         return false;
@@ -1205,7 +1187,8 @@ xcolor_init_reply(xcb_connection_t *conn,
     {
         xcb_alloc_color_reply_t *hexa_color;
 
-        if((hexa_color = xcb_alloc_color_reply(conn, req.cookie_hexa, NULL)))
+        if((hexa_color = xcb_alloc_color_reply(globalconf.connection,
+                                               req.cookie_hexa, NULL)))
         {
             req.color->pixel = hexa_color->pixel;
             req.color->red   = hexa_color->red;
@@ -1221,7 +1204,8 @@ xcolor_init_reply(xcb_connection_t *conn,
     {
         xcb_alloc_named_color_reply_t *named_color;
 
-        if((named_color = xcb_alloc_named_color_reply(conn, req.cookie_named, NULL)))
+        if((named_color = xcb_alloc_named_color_reply(globalconf.connection,
+                                                      req.cookie_named, NULL)))
         {
             req.color->pixel = named_color->pixel;
             req.color->red   = named_color->visual_red;

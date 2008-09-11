@@ -426,7 +426,7 @@ main(int argc, char **argv)
     atoms_init(globalconf.connection);
 
     /* init screens struct */
-    globalconf.screens_info = screensinfo_new(globalconf.connection);
+    globalconf.screens_info = screensinfo_new();
     globalconf.screen_focus = globalconf.screens = p_new(screen_t, globalconf.screens_info->nscreen);
     /* \todo stop duplicating this */
     for(screen_nbr = 0; screen_nbr < globalconf.screens_info->nscreen; screen_nbr++)
@@ -436,15 +436,13 @@ main(int argc, char **argv)
     }
 
     /* init default font and colors */
-    colors_reqs[0] = xcolor_init_unchecked(globalconf.connection, &globalconf.colors.fg,
-                                           globalconf.default_screen, "black",
-                                           sizeof("black")-1);
+    colors_reqs[0] = xcolor_init_unchecked(&globalconf.colors.fg,
+                                           "black", sizeof("black") - 1);
 
-    colors_reqs[1] = xcolor_init_unchecked(globalconf.connection, &globalconf.colors.bg,
-                                           globalconf.default_screen, "white",
-                                           sizeof("white")-1);
+    colors_reqs[1] = xcolor_init_unchecked(&globalconf.colors.bg,
+                                           "white", sizeof("white") - 1);
 
-    globalconf.font = draw_font_new(globalconf.connection, globalconf.default_screen, "sans 8");
+    globalconf.font = draw_font_new(globalconf.default_screen, "sans 8");
 
     /* init cursors */
     globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_LEFT_PTR);
@@ -458,7 +456,7 @@ main(int argc, char **argv)
     globalconf.cursor[CurBotLeft] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_BOTTOM_LEFT_CORNER);
 
     for(colors_nbr = 0; colors_nbr < 2; colors_nbr++)
-        xcolor_init_reply(globalconf.connection, colors_reqs[colors_nbr]);
+        xcolor_init_reply(colors_reqs[colors_nbr]);
 
     /* Process the reply of previously sent mapping request */
     xutil_lock_mask_get(globalconf.connection, xmapping_cookie,

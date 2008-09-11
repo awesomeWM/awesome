@@ -22,7 +22,7 @@
 #ifndef AWESOME_COMMON_XSCREEN_H
 #define AWESOME_COMMON_XSCREEN_H
 
-#include "common/draw.h"
+#include "draw.h"
 
 typedef struct
 {
@@ -32,7 +32,7 @@ typedef struct
 } screens_info_t;
 
 void screensinfo_delete(screens_info_t **);
-screens_info_t * screensinfo_new(xcb_connection_t *);
+screens_info_t * screensinfo_new(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

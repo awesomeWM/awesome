@@ -153,7 +153,7 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
             if(buf)
             {
                 a_iso2utf8(&d->text, buf, len);
-                d->extents = draw_text_extents(globalconf.connection, globalconf.default_screen,
+                d->extents = draw_text_extents(globalconf.default_screen,
                                                globalconf.font, d->text, d->len, &d->pdata).width;
             }
             else

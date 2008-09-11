@@ -93,7 +93,7 @@ titlebar_draw(client_t *c)
                           s->root,
                           c->titlebar->sw->geometry.height,
                           c->titlebar->sw->geometry.width);
-        ctx = draw_context_new(globalconf.connection, c->titlebar->sw->phys_screen,
+        ctx = draw_context_new(c->titlebar->sw->phys_screen,
                                c->titlebar->sw->geometry.height,
                                c->titlebar->sw->geometry.width,
                                dw,
@@ -101,7 +101,7 @@ titlebar_draw(client_t *c)
                                &c->titlebar->colors.bg);
         break;
       default:
-        ctx = draw_context_new(globalconf.connection, c->titlebar->sw->phys_screen,
+        ctx = draw_context_new(c->titlebar->sw->phys_screen,
                                c->titlebar->sw->geometry.width,
                                c->titlebar->sw->geometry.height,
                                c->titlebar->sw->pixmap,
@@ -283,7 +283,7 @@ titlebar_init(client_t *c)
 
     titlebar_geometry_compute(c, c->geometry, &geom);
 
-    c->titlebar->sw = simplewindow_new(globalconf.connection, c->phys_screen, geom.x, geom.y,
+    c->titlebar->sw = simplewindow_new(c->phys_screen, geom.x, geom.y,
                                        geom.width, geom.height, c->titlebar->border.width);
 
     if(c->titlebar->border.width)
@@ -331,29 +331,20 @@ luaA_titlebar_new(lua_State *L)
 
     tb->colors.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &tb->colors.fg,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&tb->colors.fg, buf, len);
 
     tb->colors.bg = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &tb->colors.bg,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&tb->colors.bg, buf, len);
 
     tb->border.color = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "border_color", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &tb->border.color,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&tb->border.color, buf, len);
 
     tb->border.width = luaA_getopt_number(L, 2, "border_width", 0);
 
     for(i = 0; i <= reqs_nbr; i++)
-        xcolor_init_reply(globalconf.connection, reqs[i]);
+        xcolor_init_reply(reqs[i]);
 
     return luaA_titlebar_userdata_new(globalconf.L, tb);
 }
@@ -422,30 +413,19 @@ luaA_titlebar_newindex(lua_State *L)
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(globalconf.connection,
-                                 xcolor_init_unchecked(globalconf.connection,
-                                                       &(*titlebar)->border.color,
-                                                       globalconf.default_screen, buf, len)))
+            if(xcolor_init_reply(xcolor_init_unchecked(&(*titlebar)->border.color, buf, len)))
                 if((*titlebar)->sw)
                     xcb_change_window_attributes(globalconf.connection, (*titlebar)->sw->window,
                                                  XCB_CW_BORDER_PIXEL, &(*titlebar)->border.color.pixel);
         return 0;
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(globalconf.connection,
-                                 xcolor_init_unchecked(globalconf.connection,
-                                                       &(*titlebar)->colors.fg,
-                                                       globalconf.default_screen,
-                                                       buf, len)))
+            if(xcolor_init_reply(xcolor_init_unchecked(&(*titlebar)->colors.fg, buf, len)))
                 (*titlebar)->need_update = true;
         return 0;
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(globalconf.connection,
-                                 xcolor_init_unchecked(globalconf.connection,
-                                                       &(*titlebar)->colors.bg,
-                                                       globalconf.default_screen,
-                                                       buf, len)))
+            if(xcolor_init_reply(xcolor_init_unchecked(&(*titlebar)->colors.bg, buf, len)))
                 (*titlebar)->need_update = true;
         break;
       case A_TK_POSITION:

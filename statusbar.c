@@ -454,7 +454,7 @@ statusbar_position_update(statusbar_t *statusbar)
         statusbar_clean(statusbar);
 
         statusbar->sw =
-            simplewindow_new(globalconf.connection, statusbar->phys_screen, 0, 0,
+            simplewindow_new(statusbar->phys_screen, 0, 0,
                              wingeometry.width, wingeometry.height, 0);
 
         switch(statusbar->position)
@@ -468,8 +468,7 @@ statusbar_position_update(statusbar_t *statusbar)
             xcb_create_pixmap(globalconf.connection,
                               s->root_depth, dw, s->root,
                               statusbar->width, statusbar->height);
-            statusbar->ctx = draw_context_new(globalconf.connection,
-                                              statusbar->phys_screen,
+            statusbar->ctx = draw_context_new(statusbar->phys_screen,
                                               statusbar->width,
                                               statusbar->height,
                                               dw,
@@ -478,8 +477,7 @@ statusbar_position_update(statusbar_t *statusbar)
             break;
           default:
             statusbar->width = wingeometry.width;
-            statusbar->ctx = draw_context_new(globalconf.connection,
-                                              statusbar->phys_screen,
+            statusbar->ctx = draw_context_new(statusbar->phys_screen,
                                               statusbar->width,
                                               statusbar->height,
                                               statusbar->sw->pixmap,
@@ -541,17 +539,11 @@ luaA_statusbar_new(lua_State *L)
 
     sb->colors.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &sb->colors.fg,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&sb->colors.fg, buf, len);
 
     sb->colors.bg = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &sb->colors.bg,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&sb->colors.bg, buf, len);
 
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     sb->align = draw_align_fromstr(buf, len);
@@ -570,7 +562,7 @@ luaA_statusbar_new(lua_State *L)
     sb->screen = SCREEN_UNDEF;
 
     for(i = 0; i <= reqs_nbr; i++)
-        xcolor_init_reply(globalconf.connection, reqs[i]);
+        xcolor_init_reply(reqs[i]);
 
     return luaA_statusbar_userdata_new(L, sb);
 }
@@ -725,11 +717,7 @@ luaA_statusbar_newindex(lua_State *L)
         break;
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(globalconf.connection,
-                                 xcolor_init_unchecked(globalconf.connection,
-                                                       &(*statusbar)->colors.fg,
-                                                       globalconf.default_screen,
-                                                       buf, len)))
+            if(xcolor_init_reply(xcolor_init_unchecked(&(*statusbar)->colors.fg, buf, len)))
             {
                 if((*statusbar)->ctx)
                     (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
@@ -738,10 +726,7 @@ luaA_statusbar_newindex(lua_State *L)
         break;
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(globalconf.connection,
-                                 xcolor_init_unchecked(globalconf.connection,
-                                                       &(*statusbar)->colors.bg,
-                                                       globalconf.default_screen, buf, len)))
+            if(xcolor_init_reply(xcolor_init_unchecked(&(*statusbar)->colors.bg, buf, len)))
             {
                 if((*statusbar)->ctx)
                     (*statusbar)->ctx->bg = (*statusbar)->colors.bg;

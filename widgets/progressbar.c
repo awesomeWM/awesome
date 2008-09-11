@@ -431,40 +431,22 @@ luaA_progressbar_bar_properties_set(lua_State *L)
         bar = progressbar_bar_add(d, title);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &bar->fg,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&bar->fg, buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_off", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &bar->fg_off,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&bar->fg_off, buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "bg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &bar->bg, 
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&bar->bg, buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "border_color", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &bar->border_color, 
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&bar->border_color, buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_center", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &bar->fg_center,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&bar->fg_center, buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_end", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                 &bar->fg_end,
-                                                 globalconf.default_screen,
-                                                 buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&bar->fg_end, buf, len);
 
     bar->min_value = luaA_getopt_number(L, 3, "min_value", bar->min_value);
     /* hack to prevent max_value beeing less than min_value
@@ -484,7 +466,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     bar->reverse = luaA_getopt_boolean(L, 3, "reverse", bar->reverse);
 
     for(i = 0; i <= reqs_nbr; i++)
-        xcolor_init_reply(globalconf.connection, reqs[i]);
+        xcolor_init_reply(reqs[i]);
 
     widget_invalidate_bywidget(*widget);
 

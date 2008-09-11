@@ -28,12 +28,12 @@
 
 #include "lua.h"
 #include "layout.h"
+#include "swindow.h"
+#include "xscreen.h"
 #include "common/xutil.h"
-#include "common/draw.h"
-#include "common/swindow.h"
-#include "common/xscreen.h"
 #include "common/xembed.h"
 #include "common/refcount.h"
+#include "draw.h"
 
 /** Stacking layout layers */
 typedef enum

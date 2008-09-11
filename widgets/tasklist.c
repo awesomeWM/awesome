@@ -122,9 +122,6 @@ tasklist_draw_item(draw_context_t *ctx,
     {
         draw_parser_data_init(&pdata);
 
-        pdata.connection = ctx->connection;
-        pdata.phys_screen = ctx->phys_screen;
-
         /* Actually look for the proper background color, since
          * otherwise the background statusbar color is used instead */
         if(draw_text_markup_expand(&pdata,

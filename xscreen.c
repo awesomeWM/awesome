@@ -1,5 +1,5 @@
 /*
- * common/xscreen.c - common X screen management
+ * xscreen.c - common X screen management
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -22,8 +22,10 @@
 #include <xcb/xcb.h>
 #include <xcb/xinerama.h>
 
-#include "common/xscreen.h"
-#include "common/xutil.h"
+#include "xscreen.h"
+#include "structs.h"
+
+extern awesome_t globalconf;
 
 static inline area_t
 screen_xsitoarea(xcb_xinerama_screen_info_t si)
@@ -46,11 +48,10 @@ screensinfo_delete(screens_info_t **si)
 }
 
 /** Get screens informations.
- * \param conn X connection.
  * \return A pointer to complete screens_info_t structure.
  */
 screens_info_t *
-screensinfo_new(xcb_connection_t *conn)
+screensinfo_new(void)
 {
     screens_info_t *si;
     xcb_xinerama_query_screens_reply_t *xsq;
@@ -63,17 +64,17 @@ screensinfo_new(xcb_connection_t *conn)
     si = p_new(screens_info_t, 1);
 
     /* Check for extension before checking for Xinerama */
-    if(xcb_get_extension_data(conn, &xcb_xinerama_id)->present)
+    if(xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id)->present)
     {
-        xia = xcb_xinerama_is_active_reply(conn, xcb_xinerama_is_active(conn), NULL);
+        xia = xcb_xinerama_is_active_reply(globalconf.connection, xcb_xinerama_is_active(globalconf.connection), NULL);
         si->xinerama_is_active = xia->state;
         p_delete(&xia);
     }
 
     if(si->xinerama_is_active)
     {
-        xsq = xcb_xinerama_query_screens_reply(conn,
-                                               xcb_xinerama_query_screens_unchecked(conn),
+        xsq = xcb_xinerama_query_screens_reply(globalconf.connection,
+                                               xcb_xinerama_query_screens_unchecked(globalconf.connection),
                                                NULL);
 
         xsi = xcb_xinerama_query_screens_screen_info(xsq);
@@ -115,11 +116,11 @@ screensinfo_new(xcb_connection_t *conn)
     }
     else
     {
-        si->nscreen = xcb_setup_roots_length(xcb_get_setup(conn));
+        si->nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
         si->geometry = p_new(area_t, si->nscreen);
         for(screen = 0; screen < si->nscreen; screen++)
         {
-            s = xutil_screen_get(conn, screen);
+            s = xutil_screen_get(globalconf.connection, screen);
             si->geometry[screen].x = 0;
             si->geometry[screen].y = 0;
             si->geometry[screen].width = s->width_in_pixels;

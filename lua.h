@@ -26,8 +26,8 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "draw.h"
 #include "common/util.h"
-#include "common/draw.h"
 
 /** Object types */
 typedef enum

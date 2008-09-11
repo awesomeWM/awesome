@@ -23,8 +23,8 @@
 #define AWESOME_STATUSBAR_H
 
 #include "structs.h"
+#include "swindow.h"
 #include "common/refcount.h"
-#include "common/swindow.h"
 
 static inline void
 statusbar_delete(statusbar_t **statusbar)

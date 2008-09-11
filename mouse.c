@@ -278,8 +278,7 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
 
     draw_parser_data_init(&pdata);
 
-    geom = draw_text_extents(globalconf.connection,
-                             globalconf.default_screen,
+    geom = draw_text_extents(globalconf.default_screen,
                              globalconf.font,
                              MOUSE_INFOBOX_STRING_DEFAULT,
                              sizeof(MOUSE_INFOBOX_STRING_DEFAULT)-1,
@@ -287,11 +286,11 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
     geom.x = geometry.x + ((2 * border + geometry.width) - geom.width) / 2;
     geom.y = geometry.y + ((2 * border + geometry.height) - geom.height) / 2;
 
-    sw = simplewindow_new(globalconf.connection, phys_screen,
+    sw = simplewindow_new(phys_screen,
                           geom.x, geom.y,
                           geom.width, geom.height, 0);
 
-    *ctx = draw_context_new(globalconf.connection, sw->phys_screen,
+    *ctx = draw_context_new(sw->phys_screen,
                             sw->geometry.width, sw->geometry.height,
                             sw->pixmap,
                             &globalconf.colors.fg,

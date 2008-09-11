@@ -269,8 +269,7 @@ luaA_font_set(lua_State *L)
     deprecate();
     const char *font = luaL_checkstring(L, 1);
     draw_font_delete(&globalconf.font);
-    globalconf.font = draw_font_new(globalconf.connection,
-                                    globalconf.default_screen, font);
+    globalconf.font = draw_font_new(globalconf.default_screen, font);
     return 0;
 }
 
@@ -290,8 +289,7 @@ luaA_font(lua_State *L)
     {
         const char *newfont = luaL_checkstring(L, 1);
         draw_font_delete(&globalconf.font);
-        globalconf.font = draw_font_new(globalconf.connection,
-                                        globalconf.default_screen, newfont);
+        globalconf.font = draw_font_new(globalconf.default_screen, newfont);
     }
 
     font = pango_font_description_to_string(globalconf.font->desc);
@@ -319,19 +317,13 @@ luaA_colors_set(lua_State *L)
     luaA_checktable(L, 1);
 
     if((buf = luaA_getopt_lstring(L, 1, "fg", NULL, &len)))
-       reqs[++colors_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                  &globalconf.colors.fg,
-                                                  globalconf.default_screen,
-                                                  buf, len);
+       reqs[++colors_nbr] = xcolor_init_unchecked(&globalconf.colors.fg, buf, len);
 
     if((buf = luaA_getopt_lstring(L, 1, "bg", NULL, &len)))
-       reqs[++colors_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                  &globalconf.colors.bg,
-                                                  globalconf.default_screen,
-                                                  buf, len);
+       reqs[++colors_nbr] = xcolor_init_unchecked(&globalconf.colors.bg, buf, len);
 
     for(i = 0; i <= colors_nbr; i++)
-       xcolor_init_reply(globalconf.connection, reqs[i]);
+       xcolor_init_reply(reqs[i]);
 
     return 0;
 }
@@ -349,19 +341,13 @@ luaA_colors(lua_State *L)
         luaA_checktable(L, 1);
 
         if((buf = luaA_getopt_lstring(L, 1, "fg", NULL, &len)))
-           reqs[++colors_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                      &globalconf.colors.fg,
-                                                      globalconf.default_screen,
-                                                      buf, len);
+           reqs[++colors_nbr] = xcolor_init_unchecked(&globalconf.colors.fg, buf, len);
 
         if((buf = luaA_getopt_lstring(L, 1, "bg", NULL, &len)))
-           reqs[++colors_nbr] = xcolor_init_unchecked(globalconf.connection,
-                                                      &globalconf.colors.bg,
-                                                      globalconf.default_screen,
-                                                      buf, len);
+           reqs[++colors_nbr] = xcolor_init_unchecked(&globalconf.colors.bg, buf, len);
 
         for(i = 0; i <= colors_nbr; i++)
-           xcolor_init_reply(globalconf.connection, reqs[i]);
+           xcolor_init_reply(reqs[i]);
     }
 
     lua_newtable(L);

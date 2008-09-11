@@ -59,16 +59,16 @@ set(AWE_SRCS
     ${SOURCE_DIR}/titlebar.c
     ${SOURCE_DIR}/widget.c
     ${SOURCE_DIR}/window.c
+    ${SOURCE_DIR}/draw.c
+    ${SOURCE_DIR}/swindow.c
+    ${SOURCE_DIR}/xscreen.c
     ${SOURCE_DIR}/common/buffer.c
     ${SOURCE_DIR}/common/atoms.c
-    ${SOURCE_DIR}/common/draw.c
     ${SOURCE_DIR}/common/markup.c
     ${SOURCE_DIR}/common/socket.c
-    ${SOURCE_DIR}/common/swindow.c
     ${SOURCE_DIR}/common/util.c
     ${SOURCE_DIR}/common/version.c
     ${SOURCE_DIR}/common/xembed.c
-    ${SOURCE_DIR}/common/xscreen.c
     ${SOURCE_DIR}/common/xutil.c
     ${SOURCE_DIR}/layouts/fibonacci.c
     ${SOURCE_DIR}/layouts/floating.c
