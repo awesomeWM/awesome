@@ -722,9 +722,13 @@ client_updatewmhints(client_t *c)
 
     if((wmh = xcb_get_wm_hints(globalconf.connection, c->win)))
     {
+        bool isurgent;
         wm_hints_flags = xcb_wm_hints_get_flags(wmh);
-        if((c->isurgent = xcb_wm_hints_get_urgency(wmh)))
+        isurgent = xcb_wm_hints_get_urgency(wmh);
+        if(isurgent != c->isurgent)
         {
+            c->isurgent = isurgent;
+
             /* execute hook */
             luaA_client_userdata_new(globalconf.L, c);
             luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1, 0);
