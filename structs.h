@@ -253,14 +253,6 @@ struct statusbar_t
     statusbar_t *prev, *next;
 };
 
-/** Netwm icon */
-typedef struct
-{
-    int height;
-    int width;
-    unsigned char *image;
-} netwm_icon_t;
-
 /* Strut */
 typedef struct
 {
@@ -337,7 +329,7 @@ struct client_t
     /** Button bindings */
     button_array_t buttons;
     /** Icon */
-    netwm_icon_t *icon;
+    draw_image_t *icon;
     /** Size hints */
     xcb_size_hints_t size_hints;
     /** Next and previous clients */

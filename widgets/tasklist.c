@@ -142,24 +142,20 @@ tasklist_draw_item(draw_context_t *ctx,
         else
             parser_data = NULL;
 
-        if((image = draw_image_new(odata->client_labels.tab[i].client->icon_path)))
-        {
-            icon_width = ((double) ctx->height / (double) image->height) * image->width;
-            draw_image(ctx, w->area.x + pos,
-                       w->area.y, ctx->height, image);
-            draw_image_delete(&image);
-        }
+        /* use image from icon_path, otherwise netwm icon */
+        if(!(image = draw_image_new(odata->client_labels.tab[i].client->icon_path)))
+            image = odata->client_labels.tab[i].client->icon;
 
-        if(!icon_width && odata->client_labels.tab[i].client->icon)
+        if(image)
         {
-            netwm_icon_t *icon = odata->client_labels.tab[i].client->icon;
-            icon_width = ((double) ctx->height / (double) icon->height)
-                * icon->width;
-            draw_image_from_argb_data(ctx,
-                                      w->area.x + pos,
-                                      w->area.y,
-                                      icon->width, icon->height,
-                                      ctx->height, icon->image);
+
+            icon_width = ((double) ctx->height / (double) image->height) * image->width;
+            draw_image(ctx, w->area.x + odata->box_width * i,
+                       w->area.y, ctx->height, image);
+
+            /* a bit hackish */
+            if(image != odata->client_labels.tab[i].client->icon)
+                draw_image_delete(&image);
         }
     }
     else

@@ -507,13 +507,13 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
 
 /** Get NET_WM_ICON.
  * \param cookie The cookie.
- * \return A netwm_icon_t structure which must be deleted after usage.
+ * \return A draw_image_t structure which must be deleted after usage.
  */
-netwm_icon_t *
+draw_image_t *
 ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
 {
     double alpha;
-    netwm_icon_t *icon;
+    draw_image_t *icon;
     int size, i;
     uint32_t *data;
     unsigned char *imgdata;
@@ -527,7 +527,7 @@ ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
         return NULL;
     }
 
-    icon = p_new(netwm_icon_t, 1);
+    icon = p_new(draw_image_t, 1);
 
     icon->width = data[0];
     icon->height = data[1];
@@ -540,8 +540,8 @@ ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
         return NULL;
     }
 
-    icon->image = p_new(unsigned char, size * 4);
-    for(imgdata = icon->image, i = 2; i < size + 2; i++, imgdata += 4)
+    icon->data = p_new(unsigned char, size * 4);
+    for(imgdata = icon->data, i = 2; i < size + 2; i++, imgdata += 4)
     {
         imgdata[3] = (data[i] >> 24) & 0xff;           /* A */
         alpha = imgdata[3] / 255.0;

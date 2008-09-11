@@ -24,16 +24,6 @@
 
 #include "structs.h"
 
-static inline void
-netwm_icon_delete(netwm_icon_t **i)
-{
-    if(*i)
-    {
-        p_delete(&(*i)->image);
-        p_delete(i);
-    }
-}
-
 void ewmh_init(int);
 void ewmh_update_net_client_list(int);
 void ewmh_update_net_numbers_of_desktop(int);
@@ -46,7 +36,7 @@ void ewmh_check_client_hints(client_t *);
 void ewmh_update_workarea(int);
 void ewmh_client_strut_update(client_t *);
 xcb_get_property_cookie_t ewmh_window_icon_get_unchecked(xcb_window_t);
-netwm_icon_t *ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
+draw_image_t *ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
