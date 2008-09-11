@@ -56,6 +56,8 @@ extern awesome_t globalconf;
 extern const struct luaL_reg awesome_keygrabber_lib[];
 extern const struct luaL_reg awesome_button_methods[];
 extern const struct luaL_reg awesome_button_meta[];
+extern const struct luaL_reg awesome_image_methods[];
+extern const struct luaL_reg awesome_image_meta[];
 extern const struct luaL_reg awesome_mouse_methods[];
 extern const struct luaL_reg awesome_mouse_meta[];
 extern const struct luaL_reg awesome_screen_methods[];
@@ -647,6 +649,9 @@ luaA_init(void)
 
     /* Export button */
     luaA_openlib(L, "button", awesome_button_methods, awesome_button_meta);
+
+    /* Export image */
+    luaA_openlib(L, "image", awesome_image_methods, awesome_image_meta);
 
     /* Export tag */
     luaA_openlib(L, "tag", awesome_tag_methods, awesome_tag_meta);

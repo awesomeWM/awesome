@@ -59,6 +59,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/titlebar.c
     ${SOURCE_DIR}/widget.c
     ${SOURCE_DIR}/window.c
+    ${SOURCE_DIR}/image.c
     ${SOURCE_DIR}/draw.c
     ${SOURCE_DIR}/swindow.c
     ${SOURCE_DIR}/xscreen.c
