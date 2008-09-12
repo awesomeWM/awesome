@@ -571,7 +571,7 @@ end
 
 --- Move a client to a tag.
 -- @param target The tag to move the client to.
--- @para c Optional client to move, otherwise the focused one is used.
+-- @param c Optional client to move, otherwise the focused one is used.
 function client.movetotag(target, c)
     local sel = c or capi.client.focus
     if sel then
@@ -969,7 +969,7 @@ end
 --- Use bash completion system to complete command and filename.
 -- @param command The command line.
 -- @param cur_pos The cursor position.
--- @paran ncomp The element number to complete.
+-- @param ncomp The element number to complete.
 -- @return The new command and the new cursor position.
 function completion.bash(command, cur_pos, ncomp)
     local wstart = 1
