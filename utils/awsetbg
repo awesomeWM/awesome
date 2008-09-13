@@ -49,7 +49,7 @@ if [ -z "$XDG_CACHE_HOME" ]
 then
     CONFIG_DIR="${HOME}/.cache/awesome"
 else
-    CONDIG_DIR="${XDG_CACHE_HOME}/awesome"
+    CONFIG_DIR="${XDG_CACHE_HOME}/awesome"
 fi
 
 # The wallpapersetter is selected in this order
