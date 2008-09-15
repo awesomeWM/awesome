@@ -79,6 +79,7 @@ typedef struct
     bool show_icons;
     luaA_ref label;
     tasklist_object_data_t *objects_data;
+    bool invert;
 } tasklist_data_t;
 
 /** Get an object data by its object.
@@ -96,6 +97,87 @@ tasklist_object_data_getbyobj(tasklist_object_data_t *od, void *p)
             return o;
 
     return NULL;
+}
+
+/** Draw an item in a tasklist widget.
+ * \param ctx The draw context, must be the same used to draw the tasklist
+ * \param w Tasklist widget node
+ * \param odata Tasklist object data
+ * \param width_mod Width modification of the item
+ * \param pos Position to draw the item at
+ * \param i Item to draw
+ */
+static void
+tasklist_draw_item(draw_context_t *ctx,
+                   widget_node_t *w,
+                   tasklist_object_data_t *odata,
+                   int width_mod, int pos, int i) {
+    draw_parser_data_t pdata, *parser_data;
+    draw_image_t *image;
+    area_t area;
+    tasklist_data_t *d = w->widget->data;
+    int icon_width = 0;
+
+    if(d->show_icons)
+    {
+        draw_parser_data_init(&pdata);
+
+        pdata.connection = ctx->connection;
+        pdata.phys_screen = ctx->phys_screen;
+
+        /* Actually look for the proper background color, since
+         * otherwise the background statusbar color is used instead */
+        if(draw_text_markup_expand(&pdata,
+                                   odata->client_labels.tab[i].label,
+                                   odata->client_labels.tab[i].label_len))
+        {
+            parser_data = &pdata;
+            if(pdata.has_bg_color)
+            {
+                /* draw a background for icons */
+                area.x = w->area.x + pos;
+                area.y = w->area.y;
+                area.height = ctx->height;
+                area.width = odata->box_width;
+                draw_rectangle(ctx, area, 1.0, true, &pdata.bg_color);
+            }
+        }
+        else
+            parser_data = NULL;
+
+        if((image = draw_image_new(odata->client_labels.tab[i].client->icon_path)))
+        {
+            icon_width = ((double) ctx->height / (double) image->height) * image->width;
+            draw_image(ctx, w->area.x + pos,
+                       w->area.y, ctx->height, image);
+            draw_image_delete(&image);
+        }
+
+        if(!icon_width && odata->client_labels.tab[i].client->icon)
+        {
+            netwm_icon_t *icon = odata->client_labels.tab[i].client->icon;
+            icon_width = ((double) ctx->height / (double) icon->height)
+                * icon->width;
+            draw_image_from_argb_data(ctx,
+                                      w->area.x + pos,
+                                      w->area.y,
+                                      icon->width, icon->height,
+                                      ctx->height, icon->image);
+        }
+    }
+    else
+        parser_data = NULL;
+
+    area.x = w->area.x + icon_width + pos;
+    area.y = w->area.y;
+    area.width = odata->box_width - icon_width + width_mod;
+    area.height = ctx->height;
+
+    draw_text(ctx, globalconf.font, area,
+              odata->client_labels.tab[i].label,
+              odata->client_labels.tab[i].label_len,
+              parser_data);
+    draw_parser_data_wipe(parser_data);
 }
 
 /** Draw a tasklist widget.
@@ -116,10 +198,7 @@ tasklist_draw(draw_context_t *ctx, int screen,
 {
     client_t *c;
     tasklist_data_t *d = w->widget->data;
-    area_t area;
-    int i = 0, icon_width = 0, box_width_rest = 0;
-    draw_image_t *image;
-    draw_parser_data_t pdata, *parser_data;
+    int i = 0, box_width_rest = 0, pos = 0;
     tasklist_object_data_t *odata;
 
     if(used >= ctx->width)
@@ -173,75 +252,26 @@ tasklist_draw(draw_context_t *ctx, int screen,
 
     w->area.y = 0;
 
-    for(i = 0; i < odata->client_labels.len; i++)
-    {
-        icon_width = 0;
-
-        if(d->show_icons)
+    if(d->invert)
+        for(i = odata->client_labels.len - 1; i >= 0; i--)
         {
-            draw_parser_data_init(&pdata);
-
-            pdata.connection = ctx->connection;
-            pdata.phys_screen = ctx->phys_screen;
-
-            /* Actually look for the proper background color, since
-             * otherwise the background statusbar color is used instead */
-            if(draw_text_markup_expand(&pdata,
-                                       odata->client_labels.tab[i].label,
-                                       odata->client_labels.tab[i].label_len))
-            {
-                parser_data = &pdata;
-                if(pdata.has_bg_color)
-                {
-                    /* draw a background for icons */
-                    area.x = w->area.x + odata->box_width * i;
-                    area.y = w->area.y;
-                    area.height = ctx->height;
-                    area.width = odata->box_width;
-                    draw_rectangle(ctx, area, 1.0, true, &pdata.bg_color);
-                }
-            }
+            /* if we're on last elem, it has the last pixels left. */
+            if (i == 0)
+                tasklist_draw_item(ctx, w, odata, 0, pos, i);
             else
-                parser_data = NULL;
-
-            if((image = draw_image_new(odata->client_labels.tab[i].client->icon_path)))
-            {
-                icon_width = ((double) ctx->height / (double) image->height) * image->width;
-                draw_image(ctx, w->area.x + odata->box_width * i,
-                           w->area.y, ctx->height, image);
-                draw_image_delete(&image);
-            }
-
-            if(!icon_width && odata->client_labels.tab[i].client->icon)
-            {
-                netwm_icon_t *icon = odata->client_labels.tab[i].client->icon;
-                icon_width = ((double) ctx->height / (double) icon->height)
-                    * icon->width;
-                draw_image_from_argb_data(ctx,
-                                          w->area.x + odata->box_width * i,
-                                          w->area.y,
-                                          icon->width, icon->height,
-                                          ctx->height, icon->image);
-            }
+                tasklist_draw_item(ctx, w, odata, box_width_rest, pos, i);
+            pos += odata->box_width;
         }
-        else
-            parser_data = NULL;
-
-        area.x = w->area.x + icon_width + odata->box_width * i;
-        area.y = w->area.y;
-        area.width = odata->box_width - icon_width;
-        area.height = ctx->height;
-
-        /* if we're on last elem, it has the last pixels left */
-        if(i == odata->client_labels.len - 1)
-            area.width += box_width_rest;
-
-        draw_text(ctx, globalconf.font, area,
-                  odata->client_labels.tab[i].label,
-                  odata->client_labels.tab[i].label_len,
-                  parser_data);
-        draw_parser_data_wipe(parser_data);
-    }
+    else
+        for(i = 0; i < odata->client_labels.len; i++)
+        {
+            /* if we're on last elem, it has the last pixels left. */
+            if(i != odata->client_labels.len - 1)
+                tasklist_draw_item(ctx, w, odata, 0, pos , i);
+            else
+                tasklist_draw_item(ctx, w, odata, box_width_rest, pos, i);
+            pos += odata->box_width;
+        }
 
     w->area.width = ctx->width - used;
     w->area.height = ctx->height;
@@ -273,7 +303,10 @@ tasklist_button_press(widget_node_t *w,
     if(!odata || !odata->client_labels.len)
         return;
 
-    ci = (ev->event_x - w->area.x) / odata->box_width;
+    if (!d->invert)
+        ci = (ev->event_x - w->area.x) / odata->box_width;
+    else
+        ci = odata->client_labels.len - 1 - (ev->event_x - w->area.x) / odata->box_width;
 
     for(b = w->widget->buttons; b; b = b->next)
         if(ev->detail == b->button && XUTIL_MASK_CLEAN(ev->state) == b->mod && b->fct)
@@ -307,6 +340,9 @@ luaA_tasklist_index(lua_State *L, awesome_token_t token)
       case A_TK_LABEL:
         lua_rawgeti(L, LUA_REGISTRYINDEX, d->label);
         return 1;
+      case A_TK_INVERT:
+        lua_pushboolean(L, d->invert);
+        return 1;
       default:
         return 0;
     }
@@ -330,6 +366,9 @@ luaA_tasklist_newindex(lua_State *L, awesome_token_t token)
         break;
       case A_TK_LABEL:
         luaA_registerfct(L, &d->label);
+        break;
+      case A_TK_INVERT:
+        d->invert = luaA_checkboolean(L, 3);
         break;
       default:
         return 0;
@@ -391,6 +430,7 @@ tasklist_new(alignment_t align __attribute__ ((unused)))
 
     d->show_icons = true;
     d->label = LUA_REFNIL;
+    d->invert = false;
 
     /* Set cache property */
     w->cache_flags = WIDGET_CACHE_CLIENTS | WIDGET_CACHE_TAGS;

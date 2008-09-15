@@ -28,6 +28,7 @@ icon_name
 icon_path
 image
 instance
+invert
 label
 layout
 left
