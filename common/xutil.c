@@ -45,6 +45,9 @@ xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
                     char **text, ssize_t *len)
 {
     xcb_get_text_property_reply_t reply;
+
+    p_clear(&reply, 1);
+
     if(!xcb_get_text_property_reply(conn,
                                     xcb_get_text_property_unchecked(conn, w,
                                                                     atom),
