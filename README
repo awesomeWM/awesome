@@ -6,7 +6,7 @@ Requirements
 ------------
 In order to build awesome itself, you need header files and libs of:
   - cmake 2.6
-  - Xlib, xcb and xcb-util (>= 0.2.1)
+  - Xlib, xcb and xcb-util (>= 0.3.0)
   - Lua 5.1
   - cairo
   - pango and pangocairo
