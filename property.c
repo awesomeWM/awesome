@@ -49,7 +49,8 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
             return;
     }
 
-    client_setfloating(c, true);
+    c->type = WINDOW_TYPE_DIALOG;
+    c->transient_for = client_getbywin(trans);
 }
 
 static int

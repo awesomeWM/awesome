@@ -333,6 +333,8 @@ struct client_t
     image_t *icon;
     /** Size hints */
     xcb_size_hints_t size_hints;
+    /** Window it is transient for */
+    client_t *transient_for;
     /** Next and previous clients */
     client_t *prev, *next;
 };

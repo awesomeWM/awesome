@@ -404,6 +404,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* update hints */
     property_update_wm_normal_hints(c, NULL);
     property_update_wm_hints(c, NULL);
+    property_update_wm_transient_for(c, NULL);
+
+    if(c->transient_for)
+        screen = c->transient_for->screen;
 
     /* Try to load props if any */
     client_loadprops(c, &globalconf.screens[screen]);
@@ -432,10 +436,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
                 if(tags->tab[i]->selected)
                     tag_client(c, tags->tab[i]);
     }
-
-    /* Check if it's a transient window, and manually set it floating. */
-    if(!client_isfloating(c))
-        property_update_wm_transient_for(c, NULL);
 
     /* Push client in client list */
     client_list_push(&globalconf.clients, c);
