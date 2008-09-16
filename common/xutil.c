@@ -332,14 +332,6 @@ xutil_error_get(const xcb_generic_error_t *e)
     return err;
 }
 
-void
-xutil_error_delete(xutil_error_t *err)
-{
-    p_delete(&err->error_label);
-    p_delete(&err->request_label);
-    p_delete(&err);
-}
-
 /** Link a name to a key symbol */
 typedef struct
 {
