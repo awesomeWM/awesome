@@ -445,7 +445,7 @@ mouse_track_mouse_drag(int *x, int *y)
                     return false;
 
                 default:
-                    xcb_handle_event(globalconf.evenths, ev);
+                    xcb_event_handle(&globalconf.evenths, ev);
                     p_delete(&ev);
                     break;
             }

@@ -397,7 +397,7 @@ struct awesome_t
     /** Connection ref */
     xcb_connection_t *connection;
     /** Event and error handlers */
-    xcb_event_handlers_t *evenths;
+    xcb_event_handlers_t evenths;
     /** Default screen number */
     int default_screen;
     /** Keys symbol table */

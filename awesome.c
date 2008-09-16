@@ -29,9 +29,10 @@
 
 #include <ev.h>
 
+#include <xcb/xcb_event.h>
+
 #include "awesome.h"
 #include "client.h"
-#include "event.h"
 #include "window.h"
 #include "ewmh.h"
 #include "dbus.h"
@@ -184,14 +185,7 @@ scan(void)
 static void
 a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 {
-    xcb_generic_event_t *ev;
-
-    while((ev = xcb_poll_for_event(globalconf.connection)))
-    {
-        xcb_handle_event(globalconf.evenths, ev);
-        p_delete(&ev);
-    }
-
+    xcb_event_poll_for_event_loop(&globalconf.evenths);
     awesome_refresh(globalconf.connection);
 }
 
@@ -397,8 +391,8 @@ main(int argc, char **argv)
     ev_unref(globalconf.loop);
 
     /* Allocate a handler which will holds all errors and events */
-    globalconf.evenths = xcb_alloc_event_handlers(globalconf.connection);
-    xutil_error_handler_catch_all_set(globalconf.evenths, xerrorstart, NULL);
+    xcb_event_handlers_init(globalconf.connection, &globalconf.evenths);
+    xutil_error_handler_catch_all_set(&globalconf.evenths, xerrorstart, NULL);
 
     for(screen_nbr = 0;
         screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
@@ -416,10 +410,10 @@ main(int argc, char **argv)
     xcb_aux_sync(globalconf.connection);
 
     /* Process all errors in the queue if any */
-    xcb_poll_for_event_loop(globalconf.evenths);
+    xcb_event_poll_for_event_loop(&globalconf.evenths);
 
     /* Set the default xerror handler */
-    xutil_error_handler_catch_all_set(globalconf.evenths, xerror, NULL);
+    xutil_error_handler_catch_all_set(&globalconf.evenths, xerror, NULL);
 
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
@@ -480,7 +474,7 @@ main(int argc, char **argv)
     scan();
 
     /* process all errors in the queue if any */
-    xcb_poll_for_event_loop(globalconf.evenths);
+    xcb_event_poll_for_event_loop(&globalconf.evenths);
     a_xcb_set_event_handlers();
 
     /* do this only for real screen */

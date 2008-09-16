@@ -140,7 +140,7 @@ xutil_error_handler_catch_all_set(xcb_event_handlers_t *evenths,
 {
     int err_num;
     for(err_num = 0; err_num < ERRORS_NBR; err_num++)
-	xcb_set_error_handler(evenths, err_num, handler, data);
+	xcb_event_set_error_handler(evenths, err_num, handler, data);
 }
 
 const char *

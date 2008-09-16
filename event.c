@@ -20,9 +20,10 @@
  */
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_atom.h>
 #include <xcb/randr.h>
+#include <xcb/xcb_atom.h>
 #include <xcb/xcb_icccm.h>
+#include <xcb/xcb_event.h>
 
 #include "awesome.h"
 #include "event.h"
@@ -568,15 +569,10 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     xembed_window_t *em;
     int i;
 
-    /* event->send_event (Xlib)  is quivalent to  (ev->response_type &
-     * 0x80)  in XCB  because the  SendEvent bit  is available  in the
-     * response_type field */
-    bool send_event = ((ev->response_type & 0x80) >> 7);
-
     if((c = client_getbywin(ev->window)))
     {
         if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
-           && send_event
+           && XCB_EVENT_SENT(ev)
            && window_state_get_reply(window_state_get_unchecked(c->win)) == XCB_WM_STATE_NORMAL)
             client_unmanage(c);
     }
@@ -690,24 +686,24 @@ void a_xcb_set_event_handlers(void)
 {
     const xcb_query_extension_reply_t *randr_query;
 
-    set_button_press_event_handler(globalconf.evenths, event_handle_buttonpress, NULL);
-    set_configure_request_event_handler(globalconf.evenths, event_handle_configurerequest, NULL);
-    set_configure_notify_event_handler(globalconf.evenths, event_handle_configurenotify, NULL);
-    set_destroy_notify_event_handler(globalconf.evenths, event_handle_destroynotify, NULL);
-    set_enter_notify_event_handler(globalconf.evenths, event_handle_enternotify, NULL);
-    set_expose_event_handler(globalconf.evenths, event_handle_expose, NULL);
-    set_key_press_event_handler(globalconf.evenths, event_handle_keypress, NULL);
-    set_map_request_event_handler(globalconf.evenths, event_handle_maprequest, NULL);
-    set_property_notify_event_handler(globalconf.evenths, event_handle_propertynotify, NULL);
-    set_unmap_notify_event_handler(globalconf.evenths, event_handle_unmapnotify, NULL);
-    set_client_message_event_handler(globalconf.evenths, event_handle_clientmessage, NULL);
-    set_mapping_notify_event_handler(globalconf.evenths, event_handle_mappingnotify, NULL);
+    xcb_event_set_button_press_handler(&globalconf.evenths, event_handle_buttonpress, NULL);
+    xcb_event_set_configure_request_handler(&globalconf.evenths, event_handle_configurerequest, NULL);
+    xcb_event_set_configure_notify_handler(&globalconf.evenths, event_handle_configurenotify, NULL);
+    xcb_event_set_destroy_notify_handler(&globalconf.evenths, event_handle_destroynotify, NULL);
+    xcb_event_set_enter_notify_handler(&globalconf.evenths, event_handle_enternotify, NULL);
+    xcb_event_set_expose_handler(&globalconf.evenths, event_handle_expose, NULL);
+    xcb_event_set_key_press_handler(&globalconf.evenths, event_handle_keypress, NULL);
+    xcb_event_set_map_request_handler(&globalconf.evenths, event_handle_maprequest, NULL);
+    xcb_event_set_property_notify_handler(&globalconf.evenths, event_handle_propertynotify, NULL);
+    xcb_event_set_unmap_notify_handler(&globalconf.evenths, event_handle_unmapnotify, NULL);
+    xcb_event_set_client_message_handler(&globalconf.evenths, event_handle_clientmessage, NULL);
+    xcb_event_set_mapping_notify_handler(&globalconf.evenths, event_handle_mappingnotify, NULL);
 
     /* check for randr extension */
     randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
     if((globalconf.have_randr = randr_query->present))
-        xcb_set_event_handler(globalconf.evenths,
-                              (randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY),
+        xcb_event_set_handler(&globalconf.evenths,
+                              randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY,
                               (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,
                               NULL);
 
