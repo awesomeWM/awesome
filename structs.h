@@ -24,6 +24,7 @@
 
 #include <xcb/xcb_event.h>
 #include <xcb/xcb_icccm.h>
+#include <xcb/xcb_property.h>
 #include <ev.h>
 
 #include "lua.h"
@@ -425,6 +426,8 @@ struct awesome_t
     xcb_connection_t *connection;
     /** Event and error handlers */
     xcb_event_handlers_t evenths;
+    /** Property change handler */
+    xcb_property_handlers_t prophs;
     /** Default screen number */
     int default_screen;
     /** Keys symbol table */

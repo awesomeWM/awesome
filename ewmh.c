@@ -440,16 +440,17 @@ ewmh_check_client_hints(client_t *c)
  * \param c The client.
  */
 void
-ewmh_client_strut_update(client_t *c)
+ewmh_client_strut_update(client_t *c, xcb_get_property_reply_t *strut_r)
 {
     void *data;
-    xcb_get_property_cookie_t strut_q;
-    xcb_get_property_reply_t *strut_r;
+    xcb_get_property_reply_t *mstrut_r = NULL;
 
-    strut_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
-                                         _NET_WM_STRUT_PARTIAL, CARDINAL, 0, 12);
-
-    strut_r = xcb_get_property_reply(globalconf.connection, strut_q, NULL);
+    if(!strut_r)
+    {
+        xcb_get_property_cookie_t strut_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+                                                                       _NET_WM_STRUT_PARTIAL, CARDINAL, 0, 12);
+        strut_r = mstrut_r = xcb_get_property_reply(globalconf.connection, strut_q, NULL);
+    }
 
     if(strut_r
        && strut_r->value_len
@@ -490,7 +491,8 @@ ewmh_client_strut_update(client_t *c)
                     statusbar_position_update(s);
         }
     }
-    p_delete(&strut_r);
+
+    p_delete(&mstrut_r);
 }
 
 
@@ -505,27 +507,18 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
                                     _NET_WM_ICON, CARDINAL, 0, UINT32_MAX);
 }
 
-/** Get NET_WM_ICON.
- * \param cookie The cookie.
- * \return A draw_image_t structure which must be deleted after usage.
- */
 draw_image_t *
-ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
+ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
     double alpha;
     draw_image_t *icon;
     int size, i;
     uint32_t *data;
     unsigned char *imgdata;
-    xcb_get_property_reply_t *r;
 
-    r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
     if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 ||
        !(data = (uint32_t *) xcb_get_property_value(r)))
-    {
-        p_delete(&r);
         return NULL;
-    }
 
     icon = p_new(draw_image_t, 1);
 
@@ -550,8 +543,19 @@ ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
         imgdata[0] = (data[i]         & 0xff) * alpha; /* B */
     }
 
-    p_delete(&r);
+    return icon;
+}
 
+/** Get NET_WM_ICON.
+ * \param cookie The cookie.
+ * \return A draw_image_t structure which must be deleted after usage.
+ */
+draw_image_t *
+ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
+{
+    xcb_get_property_reply_t *r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
+    draw_image_t *icon = ewmh_window_icon_from_reply(r);
+    p_delete(&r);
     return icon;
 }
 

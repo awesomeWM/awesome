@@ -1,7 +1,7 @@
 /*
- * ewmh.h - EWMH header
+ * property.h - property handlers header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,25 +19,16 @@
  *
  */
 
-#ifndef AWESOME_EWMH_H
-#define AWESOME_EWMH_H
+#ifndef AWESOME_PROPERTY_H
+#define AWESOME_PROPERTY_H
 
 #include "structs.h"
 
-void ewmh_init(int);
-void ewmh_update_net_client_list(int);
-void ewmh_update_net_numbers_of_desktop(int);
-void ewmh_update_net_current_desktop(int);
-void ewmh_update_net_desktop_names(int);
-void ewmh_update_net_active_window(int);
-int ewmh_process_client_message(xcb_client_message_event_t *);
-void ewmh_update_net_client_list_stacking(int);
-void ewmh_check_client_hints(client_t *);
-void ewmh_update_workarea(int);
-void ewmh_client_strut_update(client_t *, xcb_get_property_reply_t *);
-xcb_get_property_cookie_t ewmh_window_icon_get_unchecked(xcb_window_t);
-draw_image_t *ewmh_window_icon_from_reply(xcb_get_property_reply_t *);
-draw_image_t *ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
+void property_update_wm_transient_for(client_t *, xcb_get_property_reply_t *);
+void property_update_wm_normal_hints(client_t *, xcb_get_property_reply_t *);
+void property_update_wm_hints(client_t *, xcb_get_property_reply_t *);
+void property_update_wm_name(client_t *);
+void a_xcb_set_property_handlers(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

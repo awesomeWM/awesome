@@ -38,6 +38,7 @@
 #include "dbus.h"
 #include "systray.h"
 #include "event.h"
+#include "property.h"
 #include "screen.h"
 #include "common/version.h"
 #include "common/atoms.h"
@@ -474,6 +475,7 @@ main(int argc, char **argv)
     /* process all errors in the queue if any */
     xcb_event_poll_for_event_loop(&globalconf.evenths);
     a_xcb_set_event_handlers();
+    a_xcb_set_property_handlers();
 
     /* do this only for real screen */
     for(screen_nbr = 0;

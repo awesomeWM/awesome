@@ -64,6 +64,23 @@ xembed_info_get_unchecked(xcb_connection_t *connection, xcb_window_t win)
                                       XCB_GET_PROPERTY_TYPE_ANY, 0L, 2);
 }
 
+static bool
+xembed_info_from_reply(xembed_info_t *info, xcb_get_property_reply_t *prop_r)
+{
+    uint32_t *data;
+
+    if(!prop_r || !prop_r->value_len)
+        return false;
+
+    if(!(data = (uint32_t *) xcb_get_property_value(prop_r)))
+        return false;
+
+    info->version = data[0];
+    info->flags = data[1] & XEMBED_INFO_FLAGS_ALL;
+
+    return true;
+}
+
 /** Get the XEMBED info for a window.
  * \param connection The X connection.
  * \param cookie The cookie of the request.
@@ -74,23 +91,8 @@ xembed_info_get_reply(xcb_connection_t *connection,
                       xcb_get_property_cookie_t cookie,
                       xembed_info_t *info)
 {
-    xcb_get_property_reply_t *prop_r;
-    uint32_t *data;
-    bool ret = false;
-
-    prop_r = xcb_get_property_reply(connection, cookie, NULL);
-
-    if(!prop_r || !prop_r->value_len)
-        goto bailout;
-
-    if(!(data = (uint32_t *) xcb_get_property_value(prop_r)))
-        goto bailout;
-
-    info->version = data[0];
-    info->flags = data[1] & XEMBED_INFO_FLAGS_ALL;
-    ret = true;
-
-bailout:
+    xcb_get_property_reply_t *prop_r = xcb_get_property_reply(connection, cookie, NULL);
+    bool ret = xembed_info_from_reply(info, prop_r);
     p_delete(&prop_r);
     return ret;
 }
@@ -114,15 +116,13 @@ xembed_getbywin(xembed_window_t *list, xcb_window_t win)
  * \param emwin The embedded window.
  */
 void
-xembed_property_update(xcb_connection_t *connection, xembed_window_t *emwin)
+xembed_property_update(xcb_connection_t *connection, xembed_window_t *emwin,
+                       xcb_get_property_reply_t *reply)
 {
     int flags_changed;
     xembed_info_t info = { 0, 0 };
 
-    xembed_info_get_reply(connection,
-                          xembed_info_get_unchecked(connection,
-                                                    emwin->win), 
-                          &info);
+    xembed_info_from_reply(&info, reply);
 
     /* test if it changed */
     if(!(flags_changed = info.flags ^ emwin->info.flags))

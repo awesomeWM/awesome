@@ -36,6 +36,7 @@
 #include "mouse.h"
 #include "systray.h"
 #include "statusbar.h"
+#include "property.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
 #include "common/atoms.h"
@@ -170,36 +171,6 @@ client_getbywin(xcb_window_t w)
     client_t *c;
     for(c = globalconf.clients; c && c->win != w; c = c->next);
     return c;
-}
-
-/** Update client name attribute with its new title.
- * \param c The client.
- * \param Return true if it has been updated.
- */
-bool
-client_updatetitle(client_t *c)
-{
-    char *name, *utf8;
-    ssize_t len;
-
-    if(!xutil_text_prop_get(globalconf.connection, c->win, _NET_WM_NAME, &name, &len))
-        if(!xutil_text_prop_get(globalconf.connection, c->win, WM_NAME, &name, &len))
-            return false;
-
-    p_delete(&c->name);
-
-    if((utf8 = draw_iso2utf8(name, len)))
-        c->name = utf8;
-    else
-        c->name = name;
-
-    /* call hook */
-    luaA_client_userdata_new(globalconf.L, c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.titleupdate, 1, 0);
-
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-
-    return true;
 }
 
 /** Unfocus a client.
@@ -431,8 +402,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     c->honorsizehints = true;
 
     /* update hints */
-    client_updatesizehints(c);
-    client_updatewmhints(c);
+    property_update_wm_normal_hints(c, NULL);
+    property_update_wm_hints(c, NULL);
 
     /* Try to load props if any */
     client_loadprops(c, &globalconf.screens[screen]);
@@ -462,6 +433,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
                     tag_client(c, tags->tab[i]);
     }
 
+    /* Check if it's a transient window, and manually set it floating. */
+    if(!client_isfloating(c))
+        property_update_wm_transient_for(c, NULL);
+
     /* Push client in client list */
     client_list_push(&globalconf.clients, c);
     client_ref(&c);
@@ -469,10 +444,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     client_raise(c);
 
     /* update window title */
-    client_updatetitle(c);
+    property_update_wm_name(c);
 
     /* update strut */
-    ewmh_client_strut_update(c);
+    ewmh_client_strut_update(c, NULL);
 
     ewmh_update_net_client_list(c->phys_screen);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
@@ -851,106 +826,6 @@ client_unmanage(client_t *c)
     c->invalid = true;
 
     client_unref(&c);
-}
-
-/** Update the WM hints of a client.
- * \param c The client.
- */
-void
-client_updatewmhints(client_t *c)
-{
-    xcb_wm_hints_t wmh;
-
-    if(xcb_get_wm_hints_reply(globalconf.connection,
-                              xcb_get_wm_hints_unchecked(globalconf.connection, c->win),
-                              &wmh, NULL))
-    {
-        bool isurgent = xcb_wm_hints_get_urgency(&wmh);
-        if(isurgent != c->isurgent)
-        {
-            c->isurgent = isurgent;
-
-            /* execute hook */
-            luaA_client_userdata_new(globalconf.L, c);
-            luaA_dofunction(globalconf.L, globalconf.hooks.urgent, 1, 0);
-
-            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-        }
-        if((wmh.flags & XCB_WM_HINT_STATE) &&
-           wmh.initial_state == XCB_WM_STATE_WITHDRAWN)
-            client_setborder(c, 0);
-
-        c->nofocus = !wmh.input;
-    }
-}
-
-/** Update the size hints of a client.
- * \param c The client.
- */
-void
-client_updatesizehints(client_t *c)
-{
-    if(!xcb_get_wm_normal_hints_reply(globalconf.connection,
-                                      xcb_get_wm_normal_hints_unchecked(globalconf.connection,
-                                                                        c->win),
-                                      &c->size_hints, NULL))
-        return;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_SIZE))
-    {
-        c->basew = c->size_hints.base_width;
-        c->baseh = c->size_hints.base_height;
-    }
-    else if((c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
-    {
-        c->basew = c->size_hints.min_width;
-        c->baseh = c->size_hints.min_height;
-    }
-    else
-        c->basew = c->baseh = 0;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_RESIZE_INC))
-    {
-        c->incw = c->size_hints.width_inc;
-        c->inch = c->size_hints.height_inc;
-    }
-    else
-        c->incw = c->inch = 0;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE))
-    {
-        c->maxw = c->size_hints.max_width;
-        c->maxh = c->size_hints.max_height;
-    }
-    else
-        c->maxw = c->maxh = 0;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
-    {
-        c->minw = c->size_hints.min_width;
-        c->minh = c->size_hints.min_height;
-    }
-    else if((c->size_hints.flags & XCB_SIZE_HINT_BASE_SIZE))
-    {
-        c->minw = c->size_hints.base_width;
-        c->minh = c->size_hints.base_height;
-    }
-    else
-        c->minw = c->minh = 0;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_ASPECT))
-    {
-        c->minax = c->size_hints.min_aspect_num;
-        c->minay = c->size_hints.min_aspect_den;
-        c->maxax = c->size_hints.max_aspect_num;
-        c->maxay = c->size_hints.max_aspect_den;
-    }
-    else
-        c->minax = c->maxax = c->minay = c->maxay = 0;
-
-    c->hassizehints = !(!c->basew && !c->baseh && !c->incw && !c->inch
-                        && !c->maxw && !c->maxh && !c->minw && !c->minh
-                        && !c->minax && !c->maxax && !c->minax && !c->minay);
 }
 
 /** Kill a client via a WM_DELETE_WINDOW request or XKillClient if not

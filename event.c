@@ -626,64 +626,6 @@ bailout:
     return ret;
 }
 
-/** The property notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
- * \param ev The event.
- */
-static int
-event_handle_propertynotify(void *data __attribute__ ((unused)),
-                            xcb_connection_t *connection, xcb_property_notify_event_t *ev)
-{
-    client_t *c;
-    xembed_window_t *emwin;
-
-    if(ev->state == XCB_PROPERTY_DELETE)
-        return 0; /* ignore */
-    else if((emwin = xembed_getbywin(globalconf.embedded, ev->window)))
-        xembed_property_update(connection, emwin);
-    else if((c = client_getbywin(ev->window)))
-    {
-        if(ev->atom == WM_TRANSIENT_FOR)
-        {
-            if(!client_isfloating(c))
-            {
-                xcb_window_t trans;
-                xcb_get_wm_transient_for_reply(connection,
-                                               xcb_get_wm_transient_for_unchecked(connection,
-                                                                                  c->win),
-                                               &trans, NULL);
-                if(client_getbywin(trans))
-                    client_setfloating(c, true);
-            }
-        }
-        else if (ev->atom == WM_NORMAL_HINTS)
-            client_updatesizehints(c);
-        else if (ev->atom == WM_HINTS)
-            client_updatewmhints(c);
-        else if(ev->atom == WM_NAME || ev->atom == _NET_WM_NAME)
-            client_updatetitle(c);
-        else if(ev->atom == _NET_WM_STRUT_PARTIAL)
-            ewmh_client_strut_update(c);
-        else if(ev->atom == _NET_WM_ICON)
-        {
-            xcb_get_property_cookie_t icon_q = ewmh_window_icon_get_unchecked(c->win);
-            draw_image_t *icon;
-            image_unref(&c->icon);
-            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-            if((icon = ewmh_window_icon_get_reply(icon_q)))
-            {
-                c->icon = image_new(icon);
-                image_ref(&c->icon);
-            }
-            else
-                c->icon = NULL;
-        }
-    }
-
-    return 0;
-}
-
 /** The unmap notify event handler.
  * \param data currently unused.
  * \param connection The connection to the X server.
@@ -838,7 +780,6 @@ void a_xcb_set_event_handlers(void)
     xcb_event_set_expose_handler(&globalconf.evenths, event_handle_expose, NULL);
     xcb_event_set_key_press_handler(&globalconf.evenths, event_handle_keypress, NULL);
     xcb_event_set_map_request_handler(&globalconf.evenths, event_handle_maprequest, NULL);
-    xcb_event_set_property_notify_handler(&globalconf.evenths, event_handle_propertynotify, NULL);
     xcb_event_set_unmap_notify_handler(&globalconf.evenths, event_handle_unmapnotify, NULL);
     xcb_event_set_client_message_handler(&globalconf.evenths, event_handle_clientmessage, NULL);
     xcb_event_set_mapping_notify_handler(&globalconf.evenths, event_handle_mappingnotify, NULL);
