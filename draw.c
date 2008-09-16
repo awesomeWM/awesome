@@ -38,8 +38,6 @@
 
 extern awesome_t globalconf;
 
-static iconv_t iso2utf8 = (iconv_t) -1;
-
 /** Convert text from any charset to UTF-8 using iconv.
  * \param iso The ISO string to convert.
  * \param len The string size.
@@ -50,6 +48,7 @@ draw_iso2utf8(const char *iso, size_t len)
 {
     size_t utf8len;
     char *utf8, *utf8p;
+    static iconv_t iso2utf8 = (iconv_t) -1;
 
     if(!len)
         return NULL;
