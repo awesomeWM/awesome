@@ -26,10 +26,6 @@
 #include "common/version.h"
 #include "awesome-version-internal.h"
 
-#ifndef WITH_IMLIB2
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#endif
-
 /** \brief Print version message and quit program.
  * \param executable program name
  */
@@ -51,12 +47,6 @@ eprint_version(const char *const executable)
 	   __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #endif
     printf(" (%s@%s)\n", AWESOME_COMPILE_BY, AWESOME_COMPILE_HOSTNAME);
-    printf(" • Image drawing engine: ");
-#ifdef WITH_IMLIB2
-    printf("Imlib2\n");
-#else
-    printf("GdkPixBuf " GDK_PIXBUF_VERSION "\n");
-#endif
     printf(" • D-Bus support: ");
 #ifdef WITH_DBUS
     printf("✔\n");

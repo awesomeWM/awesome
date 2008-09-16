@@ -22,12 +22,7 @@
 #include <cairo-xcb.h>
 
 #include "config.h"
-#ifdef WITH_IMLIB2
 #include <Imlib2.h>
-#else
-#include <gdk/gdkcairo.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#endif
 
 #include <langinfo.h>
 #include <iconv.h>
@@ -773,81 +768,6 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
-#ifndef WITH_IMLIB2
-
-/** Load an image from filename.
- * \param filename The image file to load.
- * \return A new image.
- */
-draw_image_t *
-draw_image_new(const char *filename)
-{
-    draw_image_t *image = NULL;
-    GdkPixbuf *pixbuf;
-    GError *error = NULL;
-
-    if(filename)
-    {
-        if(!(pixbuf = gdk_pixbuf_new_from_file(filename,&error)))
-        {
-            warn("cannot load image %s: %s", filename, error ? error->message : "unknown error");
-            if(error)
-                g_error_free(error);
-        }
-        else
-        {
-            image = p_new(draw_image_t, 1);
-            image->data = pixbuf;
-            image->width = gdk_pixbuf_get_width(pixbuf);
-            image->height = gdk_pixbuf_get_height(pixbuf);
-        }
-    }
-
-    return image;
-}
-
-/** Delete an image.
- * \param image The image to delete.
- */
-void
-draw_image_delete(draw_image_t **image)
-{
-    if(*image)
-    {
-        gdk_pixbuf_unref((*image)->data);
-        p_delete(image);
-    }
-}
-
-/** Draw an image to a draw context.
- * \param ctx Draw context to draw to.
- * \param x x coordinate.
- * \param y y coordinate.
- * \param wanted_h Wanted height: if > 0, image will be resized.
- * \param image The image to draw.
- */
-void
-draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
-{
-    cairo_t *cr;
-
-    cr = cairo_create(ctx->surface);
-    if(wanted_h > 0 && image->height > 0)
-    {
-        double ratio = (double) wanted_h / (double) image->height;
-        cairo_scale(cr, ratio, ratio);
-        gdk_cairo_set_source_pixbuf(cr, image->data, x / ratio, y / ratio);
-    }
-    else
-        gdk_cairo_set_source_pixbuf(cr, image->data, x, y);
-
-    cairo_paint(cr);
-
-    cairo_destroy(cr);
-}
-
-#else /* WITH_IMLIB2 */
-
 static const char *
 draw_imlib_load_strerror(Imlib_Load_Error e)
 {
@@ -970,8 +890,6 @@ draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
 {
     draw_image_from_argb_data(ctx, x, y, image->width, image->height, wanted_h, image->data);
 }
-
-#endif /* WITH_IMLIB2 */
 
 /** Rotate a pixmap.
  * \param ctx Draw context to draw with.
