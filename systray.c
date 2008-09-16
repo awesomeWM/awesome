@@ -40,15 +40,22 @@ systray_init(int phys_screen)
 {
     xcb_client_message_event_t ev;
     xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
-    char atom_name[22];
+    char *atom_name;
     xcb_intern_atom_cookie_t atom_systray_q;
     xcb_intern_atom_reply_t *atom_systray_r;
     xcb_atom_t atom_systray;
-    ssize_t len;
 
     /* Send requests */
-    len = snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
-    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false, len, atom_name);
+    if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", phys_screen)))
+    {
+        warn("error getting systray atom");
+        return;
+    }
+
+    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false,
+                                               strlen(atom_name), atom_name);
+
+    p_delete(&atom_name);
 
     globalconf.screens[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
@@ -91,19 +98,23 @@ systray_init(int phys_screen)
 void
 systray_cleanup(int phys_screen)
 {
-    xcb_intern_atom_cookie_t atom_systray_q;
     xcb_intern_atom_reply_t *atom_systray_r;
-    ssize_t len;
-    char atom_name[22];
+    char *atom_name;
 
-    len = snprintf(atom_name, sizeof(atom_name), "_NET_SYSTEM_TRAY_S%d", phys_screen);
-    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false, len, atom_name);
-
-    if(!(atom_systray_r = xcb_intern_atom_reply(globalconf.connection, atom_systray_q, NULL)))
+    if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", phys_screen))
+       || !(atom_systray_r = xcb_intern_atom_reply(globalconf.connection,
+                                                   xcb_intern_atom_unchecked(globalconf.connection,
+                                                                             false,
+                                                                             strlen(atom_name),
+                                                                             atom_name),
+                                                   NULL)))
     {
         warn("error getting systray atom");
+        p_delete(&atom_name);
         return;
     }
+
+    p_delete(&atom_name);
 
     xcb_set_selection_owner(globalconf.connection,
                             XCB_NONE,
