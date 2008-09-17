@@ -32,7 +32,7 @@
 #include "widget.h"
 #include "screen.h"
 #include "titlebar.h"
-#include "lua.h"
+#include "luaa.h"
 #include "mouse.h"
 #include "systray.h"
 #include "statusbar.h"
@@ -361,7 +361,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c;
-    draw_image_t *icon;
+    image_t *icon;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -393,10 +393,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
     client_setborder(c, wgeom->border_width);
     if((icon = ewmh_window_icon_get_reply(ewmh_icon_cookie)))
-    {
-        c->icon = image_new(icon);
-        image_ref(&c->icon);
-    }
+        c->icon = image_ref(&icon);
 
     /* we honor size hints by default */
     c->honorsizehints = true;

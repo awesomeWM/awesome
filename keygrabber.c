@@ -21,9 +21,9 @@
 
 #include <unistd.h>
 
+#include "structs.h"
 #include "keygrabber.h"
 #include "keybinding.h"
-#include "structs.h"
 
 extern awesome_t globalconf;
 

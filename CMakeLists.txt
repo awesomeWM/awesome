@@ -50,7 +50,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/keybinding.c
     ${SOURCE_DIR}/keygrabber.c
     ${SOURCE_DIR}/layout.c
-    ${SOURCE_DIR}/lua.c
+    ${SOURCE_DIR}/luaa.c
     ${SOURCE_DIR}/mouse.c
     ${SOURCE_DIR}/screen.c
     ${SOURCE_DIR}/stack.c

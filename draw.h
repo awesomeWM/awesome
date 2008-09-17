@@ -27,6 +27,7 @@
 
 #include <xcb/xcb.h>
 
+#include "image.h"
 #include "common/array.h"
 #include "common/list.h"
 #include "common/buffer.h"
@@ -99,13 +100,6 @@ typedef struct
     xcolor_t bg;
 } draw_context_t;
 
-typedef struct
-{
-    void   *data;
-    size_t width;
-    size_t height;
-} draw_image_t;
-
 draw_context_t *
 draw_context_new(int, int, int, xcb_drawable_t,
                  const xcolor_t *, const xcolor_t*);
@@ -162,7 +156,7 @@ typedef struct
     } bg_margin;
     bool has_bg_color;
     xcolor_t bg_color;
-    draw_image_t *bg_image;
+    image_t *bg_image;
     alignment_t bg_align;
     bool bg_resize;
     struct
@@ -189,9 +183,7 @@ void draw_graph(draw_context_t *, area_t, int *, int *, int, position_t, vector_
                 const xcolor_t *, const xcolor_t *, const xcolor_t *);
 void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, vector_t,
                      const xcolor_t *, const xcolor_t *, const xcolor_t *);
-draw_image_t *draw_image_new(const char *);
-void draw_image_delete(draw_image_t **);
-void draw_image(draw_context_t *, int, int, int, draw_image_t *);
+void draw_image(draw_context_t *, int, int, int, image_t *);
 void draw_rotate(draw_context_t *, xcb_drawable_t, xcb_drawable_t, int, int, int, int, double, int, int);
 area_t draw_text_extents(int, font_t *, const char *, ssize_t, draw_parser_data_t *);
 alignment_t draw_align_fromstr(const char *, ssize_t);
@@ -227,7 +219,7 @@ draw_parser_data_wipe(draw_parser_data_t *pdata)
     {
         pango_attr_list_unref(pdata->attr_list);
         p_delete(&pdata->text);
-        draw_image_delete(&pdata->bg_image);
+        image_unref(&pdata->bg_image);
     }
 }
 

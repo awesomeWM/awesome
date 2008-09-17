@@ -507,11 +507,11 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
                                     _NET_WM_ICON, CARDINAL, 0, UINT32_MAX);
 }
 
-draw_image_t *
+image_t *
 ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
     double alpha;
-    draw_image_t *icon;
+    image_t *icon;
     int size, i;
     uint32_t *data;
     unsigned char *imgdata;
@@ -520,7 +520,7 @@ ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
        !(data = (uint32_t *) xcb_get_property_value(r)))
         return NULL;
 
-    icon = p_new(draw_image_t, 1);
+    icon = p_new(image_t, 1);
 
     icon->width = data[0];
     icon->height = data[1];
@@ -550,11 +550,11 @@ ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
  * \param cookie The cookie.
  * \return A draw_image_t structure which must be deleted after usage.
  */
-draw_image_t *
+image_t *
 ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
 {
     xcb_get_property_reply_t *r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
-    draw_image_t *icon = ewmh_window_icon_from_reply(r);
+    image_t *icon = ewmh_window_icon_from_reply(r);
     p_delete(&r);
     return icon;
 }

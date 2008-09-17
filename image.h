@@ -24,14 +24,19 @@
 
 #include <lua.h>
 
-#include "draw.h"
+#include "common/util.h"
 #include "common/refcount.h"
 
 typedef struct
 {
     /** Reference counter */
     int refcount;
-    draw_image_t *image;
+    /** Image width */
+    int width;
+    /** Image height */
+    int height;
+    /** Image data */
+    void *data;
 } image_t;
 
 static inline void
@@ -39,26 +44,16 @@ image_delete(image_t **i)
 {
     if(*i)
     {
-        draw_image_delete(&(*i)->image);
+        p_delete(&(*i)->data);
         p_delete(i);
     }
 }
 
 DO_RCNT(image_t, image, image_delete)
 
-int luaA_image_userdata_new(lua_State *, image_t *);
+image_t * image_new_from_file(const char *);
 
-/** Create a new image from a draw_image_t object.
- * \param i The image data.
- * \return A image_t object.
- */
-static inline image_t *
-image_new(draw_image_t *i)
-{
-    image_t *image = p_new(image_t, 1);
-    image->image = i;
-    return image;
-}
+int luaA_image_userdata_new(lua_State *, image_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

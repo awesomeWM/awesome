@@ -22,7 +22,6 @@
 #include <cairo-xcb.h>
 
 #include "config.h"
-#include <Imlib2.h>
 
 #include <langinfo.h>
 #include <iconv.h>
@@ -225,8 +224,8 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                         break;
                       case A_TK_IMAGE:
                         if(data->bg_image)
-                            draw_image_delete(&data->bg_image);
-                        data->bg_image = draw_image_new(*values);
+                            image_delete(&data->bg_image);
+                        data->bg_image = image_new_from_file(*values);
                         break;
                       case A_TK_ALIGN:
                         data->bg_align = draw_align_fromstr(*values, -1);
@@ -767,116 +766,6 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
     cairo_surface_destroy(source);
 }
 
-static const char *
-draw_imlib_load_strerror(Imlib_Load_Error e)
-{
-    switch(e)
-    {
-      case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST:
-        return "no such file or directory";
-      case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY:
-        return "file is a directory";
-      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ:
-        return "read permission denied";
-      case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:
-        return "no loader for file format";
-      case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
-        return "path too long";
-      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
-        return "path component non existant";
-      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
-        return "path compoment not a directory";
-      case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
-        return "path points oustide address space";
-      case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
-        return "too many symbolic links";
-      case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:
-        return "out of memory";
-      case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:
-        return "out of file descriptors";
-      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:
-        return "write permission denied";
-      case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE:
-        return "out of disk space";
-      case IMLIB_LOAD_ERROR_UNKNOWN:
-        return "unknown error, that's really bad";
-      case IMLIB_LOAD_ERROR_NONE:
-        return "no error, oops";
-    }
-
-    return "unknown error";
-}
-
-
-/** Load an image from filename.
- * \param filename The image file to load.
- * \return A new image.
- */
-draw_image_t *
-draw_image_new(const char *filename)
-{
-    int w, h, size, i;
-    DATA32 *data;
-    double alpha;
-    unsigned char *dataimg, *rdataimg;
-    Imlib_Image imimage;
-    Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
-    draw_image_t *image;
-
-    if(!filename)
-        return NULL;
-
-    if(!(imimage = imlib_load_image_with_error_return(filename, &e)))
-    {
-        warn("cannot load image %s: %s", filename, draw_imlib_load_strerror(e));
-        return NULL;
-    }
-
-    imlib_context_set_image(imimage);
-
-    w = imlib_image_get_width();
-    h = imlib_image_get_height();
-
-    size = w * h;
-
-    data = imlib_image_get_data_for_reading_only();
-
-    rdataimg = dataimg = p_new(unsigned char, size * 4);
-
-    for(i = 0; i < size; i++, dataimg += 4)
-    {
-        dataimg[3] = (data[i] >> 24) & 0xff;           /* A */
-        /* cairo wants pre-multiplied alpha */
-        alpha = dataimg[3] / 255.0;
-        dataimg[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
-        dataimg[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
-        dataimg[0] = (data[i]         & 0xff) * alpha; /* B */
-    }
-
-    image = p_new(draw_image_t, 1);
-
-    image->data = rdataimg;
-    image->width = w;
-    image->height = h;
-
-    imlib_free_image();
-
-    return image;
-}
-
-/** Delete an image.
- * \param image The image to delete.
- */
-void
-draw_image_delete(draw_image_t **image)
-{
-    if (*image)
-    {
-        p_delete(&(*image)->data);
-        p_delete(image);
-    }
-}
-
 /** Draw an image to a draw context.
  * \param ctx Draw context to draw to.
  * \param x X coordinate.
@@ -885,7 +774,7 @@ draw_image_delete(draw_image_t **image)
  * \param image The image to draw.
  */
 void
-draw_image(draw_context_t *ctx, int x, int y, int wanted_h, draw_image_t *image)
+draw_image(draw_context_t *ctx, int x, int y, int wanted_h, image_t *image)
 {
     draw_image_from_argb_data(ctx, x, y, image->width, image->height, wanted_h, image->data);
 }

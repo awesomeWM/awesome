@@ -23,7 +23,7 @@
 #define AWESOME_KEYBINDING_H
 
 #include <xcb/xcb.h>
-#include "lua.h"
+#include "luaa.h"
 
 typedef struct keybinding_t
 {

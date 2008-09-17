@@ -22,7 +22,7 @@
 #include "client.h"
 #include "widget.h"
 #include "tag.h"
-#include "lua.h"
+#include "luaa.h"
 #include "common/tokenize.h"
 
 extern awesome_t globalconf;

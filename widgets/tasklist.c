@@ -113,7 +113,7 @@ tasklist_draw_item(draw_context_t *ctx,
                    tasklist_object_data_t *odata,
                    int width_mod, int pos, int i) {
     draw_parser_data_t pdata, *parser_data;
-    draw_image_t *image;
+    image_t *image;
     area_t area;
     tasklist_data_t *d = w->widget->data;
     int icon_width = 0;
@@ -144,7 +144,7 @@ tasklist_draw_item(draw_context_t *ctx,
 
         if(odata->client_labels.tab[i].client->icon)
         {
-            image = odata->client_labels.tab[i].client->icon->image;
+            image = odata->client_labels.tab[i].client->icon;
             icon_width = ((double) ctx->height / (double) image->height) * image->width;
             draw_image(ctx, w->area.x + odata->box_width * i,
                        w->area.y, ctx->height, image);

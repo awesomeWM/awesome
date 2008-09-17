@@ -41,7 +41,7 @@
 #include "awesome-version-internal.h"
 #include "ewmh.h"
 #include "config.h"
-#include "lua.h"
+#include "luaa.h"
 #include "tag.h"
 #include "client.h"
 #include "screen.h"

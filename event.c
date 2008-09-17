@@ -35,7 +35,7 @@
 #include "titlebar.h"
 #include "keybinding.h"
 #include "keygrabber.h"
-#include "lua.h"
+#include "luaa.h"
 #include "systray.h"
 #include "statusbar.h"
 #include "screen.h"

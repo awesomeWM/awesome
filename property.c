@@ -289,16 +289,11 @@ property_handle_net_wm_icon(void *data,
 
     if(c)
     {
-        draw_image_t *icon;
+        image_t *icon;
         image_unref(&c->icon);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
-        if((icon = ewmh_window_icon_from_reply(reply)))
-        {
-            c->icon = image_new(icon);
-            image_ref(&c->icon);
-        }
-        else
-            c->icon = NULL;
+        icon = ewmh_window_icon_from_reply(reply);
+        c->icon = icon ? image_ref(&icon) : NULL;
     }
 
     return 0;

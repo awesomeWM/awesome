@@ -27,7 +27,7 @@
 #include <xcb/xcb_property.h>
 #include <ev.h>
 
-#include "lua.h"
+#include "luaa.h"
 #include "layout.h"
 #include "swindow.h"
 #include "xscreen.h"

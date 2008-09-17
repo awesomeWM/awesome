@@ -54,13 +54,13 @@ imagebox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
     if(d->image)
     {
         w->area.height = ctx->height;
-        w->area.width = ((double) ctx->height / (double) d->image->image->height) * d->image->image->width;
+        w->area.width = ((double) ctx->height / (double) d->image->height) * d->image->width;
         w->area.x = widget_calculate_offset(ctx->width,
                                             w->area.width,
                                             offset,
                                             w->widget->align);
 
-        draw_image(ctx, w->area.x, w->area.y, ctx->height, d->image->image);
+        draw_image(ctx, w->area.x, w->area.y, ctx->height, d->image);
     }
     else
     {
