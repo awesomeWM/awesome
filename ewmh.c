@@ -510,40 +510,16 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
 image_t *
 ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
-    double alpha;
-    image_t *icon;
-    int size, i;
     uint32_t *data;
-    unsigned char *imgdata;
 
     if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 ||
        !(data = (uint32_t *) xcb_get_property_value(r)))
         return NULL;
 
-    icon = p_new(image_t, 1);
+    if(data[0] && data[1])
+        return image_new_from_argb32(data[0], data[1], data + 2);
 
-    icon->width = data[0];
-    icon->height = data[1];
-    size = icon->width * icon->height;
-
-    if(!size)
-    {
-        p_delete(&icon);
-        p_delete(&r);
-        return NULL;
-    }
-
-    icon->data = p_new(unsigned char, size * 4);
-    for(imgdata = icon->data, i = 2; i < size + 2; i++, imgdata += 4)
-    {
-        imgdata[3] = (data[i] >> 24) & 0xff;           /* A */
-        alpha = imgdata[3] / 255.0;
-        imgdata[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
-        imgdata[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
-        imgdata[0] = (data[i]         & 0xff) * alpha; /* B */
-    }
-
-    return icon;
+    return NULL;
 }
 
 /** Get NET_WM_ICON.

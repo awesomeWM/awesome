@@ -19,10 +19,7 @@
  *
  */
 
-#include <Imlib2.h>
-
 #include "structs.h"
-#include "image.h"
 
 extern awesome_t globalconf;
 
@@ -70,6 +67,63 @@ image_imlib_load_strerror(Imlib_Load_Error e)
     return "unknown error";
 }
 
+/** Recompute the ARGB32 data from an image.
+ * \param image The image.
+ * \return Data.
+ */
+static void
+image_compute(image_t *image)
+{
+    int size, i;
+    uint32_t *data;
+    double alpha;
+    uint8_t *dataimg;
+
+    imlib_context_set_image(image->image);
+
+    data = imlib_image_get_data_for_reading_only();
+
+    image->width = imlib_image_get_width();
+    image->height = imlib_image_get_height();
+
+    size = image->width * image->height;
+
+    p_delete(&image->data);
+    image->data = dataimg = p_new(uint8_t, size * 4);
+
+    for(i = 0; i < size; i++, dataimg += 4)
+    {
+        dataimg[3] = (data[i] >> 24) & 0xff;           /* A */
+        /* cairo wants pre-multiplied alpha */
+        alpha = dataimg[3] / 255.0;
+        dataimg[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
+        dataimg[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
+        dataimg[0] = (data[i]         & 0xff) * alpha; /* B */
+    }
+}
+
+/** Create a new image from ARGB32 data.
+ * \param width The image width.
+ * \param height The image height.
+ * \param data The image data.
+ * \return A brand new image.
+ */
+image_t *
+image_new_from_argb32(int width, int height, uint32_t *data)
+{
+    Imlib_Image imimage;
+    image_t *image = NULL;
+
+    if((imimage = imlib_create_image_using_data(width, height, data)))
+    {
+        image = p_new(image_t, 1);
+        image->image = imimage;
+        image_compute(image);
+    }
+
+    return image;
+}
+
 /** Load an image from filename.
  * \param filename The image file to load.
  * \return A new image.
@@ -77,10 +131,6 @@ image_imlib_load_strerror(Imlib_Load_Error e)
 image_t *
 image_new_from_file(const char *filename)
 {
-    int w, h, size, i;
-    uint32_t *data;
-    double alpha;
-    unsigned char *dataimg, *rdataimg;
     Imlib_Image imimage;
     Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
     image_t *image;
@@ -94,34 +144,10 @@ image_new_from_file(const char *filename)
         return NULL;
     }
 
-    imlib_context_set_image(imimage);
-
-    w = imlib_image_get_width();
-    h = imlib_image_get_height();
-
-    size = w * h;
-
-    data = imlib_image_get_data_for_reading_only();
-
-    rdataimg = dataimg = p_new(unsigned char, size * 4);
-
-    for(i = 0; i < size; i++, dataimg += 4)
-    {
-        dataimg[3] = (data[i] >> 24) & 0xff;           /* A */
-        /* cairo wants pre-multiplied alpha */
-        alpha = dataimg[3] / 255.0;
-        dataimg[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
-        dataimg[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
-        dataimg[0] = (data[i]         & 0xff) * alpha; /* B */
-    }
-
     image = p_new(image_t, 1);
+    image->image = imimage;
 
-    image->data = rdataimg;
-    image->width = w;
-    image->height = h;
-
-    imlib_free_image();
+    image_compute(image);
 
     return image;
 }
