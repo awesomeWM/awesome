@@ -171,6 +171,59 @@ luaA_image_new(lua_State *L)
     return 0;
 }
 
+/** Rotate an image with specified angle radians and return a new image.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue An image.
+ * \lparam The angle in radians.
+ * \lreturn A rotated image.
+ */
+static int
+luaA_image_rotate(lua_State *L)
+{
+    image_t **image = luaA_checkudata(L, 1, "image"), *new;
+    double angle = luaL_checknumber(L, 2);
+
+    new = p_new(image_t, 1);
+
+    imlib_context_set_image((*image)->image);
+    new->image = imlib_create_rotated_image(angle);
+
+    image_compute(new);
+
+    return luaA_image_userdata_new(L, new);
+}
+
+/** Crop an image to the given rectangle.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue An image.
+ * \lparam The top left x coordinate of the rectangle.
+ * \lparam The top left y coordinate of the rectangle.
+ * \lparam The width of the rectangle.
+ * \lparam The height of the rectangle.
+ * \lreturn A cropped image.
+ */
+static int
+luaA_image_crop(lua_State *L)
+{
+    image_t **image = luaA_checkudata(L, 1, "image"), *new;
+    int x = luaL_checkint(L, 2);
+    int y = luaL_checkint(L, 3);
+    int w = luaL_checkint(L, 4);
+    int h = luaL_checkint(L, 5);
+
+    new = p_new(image_t, 1);
+
+    imlib_context_set_image((*image)->image);
+    new->image = imlib_create_cropped_image(x, y, w, h);
+
+    image_compute(new);
+
+    return luaA_image_userdata_new(L, new);
+}
+
 /** Return a formated string for an image.
  * \param L The Lua VM state.
  * \luastack
@@ -193,6 +246,8 @@ const struct luaL_reg awesome_image_methods[] =
 };
 const struct luaL_reg awesome_image_meta[] =
 {
+    { "rotate", luaA_image_rotate },
+    { "crop", luaA_image_crop },
     { "__gc", luaA_image_gc },
     { "__eq", luaA_image_eq },
     { "__tostring", luaA_image_tostring },
