@@ -223,7 +223,7 @@ client_focus(client_t *c)
 
     /* stop hiding c */
     c->ishidden = false;
-    c->isminimized = false;
+    client_setminimized(c, false);
 
     /* unban the client before focusing or it will fail */
     client_unban(c);
@@ -413,7 +413,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     screen_client_moveto(c, screen, false, true);
 
     /* Then check clients hints */
-    ewmh_check_client_hints(c);
+    ewmh_client_check_hints(c);
 
     /* Check if client has been tagged by loading props, or maybe with its
      * hints.
@@ -622,6 +622,22 @@ client_setfloating(client_t *c, bool floating)
     }
 }
 
+/** Set a client minimized, or not.
+ * \param c The client.
+ * \param s Set or not the client minimized.
+ */
+void
+client_setminimized(client_t *c, bool s)
+{
+    if(c->isminimized != s)
+    {
+        client_need_arrange(c);
+        c->isminimized = s;
+        client_need_arrange(c);
+        ewmh_client_update_hints(c);
+    }
+}
+
 /** Set a client sticky, or not.
  * \param c The client.
  * \param s Set or not the client sticky.
@@ -634,6 +650,7 @@ client_setsticky(client_t *c, bool s)
         client_need_arrange(c);
         c->issticky = s;
         client_need_arrange(c);
+        ewmh_client_update_hints(c);
     }
 }
 
@@ -678,6 +695,7 @@ client_setfullscreen(client_t *c, bool s)
                             XCB_PROP_MODE_REPLACE,
                             c->win, _AWESOME_FULLSCREEN, CARDINAL, 8, 1,
                             &c->isfullscreen);
+        ewmh_client_update_hints(c);
     }
 }
 
@@ -692,6 +710,7 @@ client_setabove(client_t *c, bool s)
     {
         c->isabove = s;
         client_stack();
+        ewmh_client_update_hints(c);
     }
 }
 
@@ -706,6 +725,7 @@ client_setbelow(client_t *c, bool s)
     {
         c->isbelow = s;
         client_stack();
+        ewmh_client_update_hints(c);
     }
 }
 
@@ -720,6 +740,7 @@ client_setmodal(client_t *c, bool s)
     {
         c->ismodal = s;
         client_stack();
+        ewmh_client_update_hints(c);
     }
 }
 
@@ -1184,13 +1205,7 @@ luaA_client_newindex(lua_State *L)
         }
         break;
       case A_TK_MINIMIZE:
-        b = luaA_checkboolean(L, 3);
-        if(b != (*c)->isminimized)
-        {
-            client_need_arrange(*c);
-            (*c)->isminimized = b;
-            client_need_arrange(*c);
-        }
+        client_setminimized(*c, luaA_checkboolean(L, 3));
         break;
       case A_TK_FULLSCREEN:
         client_setfullscreen(*c, luaA_checkboolean(L, 3));

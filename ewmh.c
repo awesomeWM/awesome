@@ -261,11 +261,20 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == _NET_WM_STATE_SKIP_TASKBAR)
     {
         if(set == _NET_WM_STATE_REMOVE)
+        {
             c->skiptb = false;
+            ewmh_client_update_hints(c);
+        }
         else if(set == _NET_WM_STATE_ADD)
+        {
             c->skiptb = true;
+            ewmh_client_update_hints(c);
+        }
         else if(set == _NET_WM_STATE_TOGGLE)
+        {
             c->skiptb = !c->skiptb;
+            ewmh_client_update_hints(c);
+        }
     }
     else if(state == _NET_WM_STATE_FULLSCREEN)
     {
@@ -306,23 +315,11 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == _NET_WM_STATE_HIDDEN)
     {
         if(set == _NET_WM_STATE_REMOVE)
-        {
-            client_need_arrange(c);
-            c->isminimized = false;
-            client_need_arrange(c);
-        }
+            client_setminimized(c, false);
         else if(set == _NET_WM_STATE_ADD)
-        {
-            client_need_arrange(c);
-            c->isminimized = true;
-            client_need_arrange(c);
-        }
+            client_setminimized(c, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-        {
-            client_need_arrange(c);
-            c->isminimized = !c->isminimized;
-            client_need_arrange(c);
-        }
+            client_setminimized(c, !c->isminimized);
     }
     else if(state == _NET_WM_STATE_DEMANDS_ATTENTION)
     {
@@ -389,8 +386,38 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     return 0;
 }
 
+/** Update client EWMH hints.
+ * \param c The client.
+ */
 void
-ewmh_check_client_hints(client_t *c)
+ewmh_client_update_hints(client_t *c)
+{
+    xcb_atom_t state[8]; /* number of defined state atoms */
+    int i = 0;
+
+    if(c->ismodal)
+        state[i++] = _NET_WM_STATE_MODAL;
+    if(c->isfullscreen)
+        state[i++] = _NET_WM_STATE_FULLSCREEN;
+    if(c->issticky)
+        state[i++] = _NET_WM_STATE_STICKY;
+    if(c->skiptb)
+        state[i++] = _NET_WM_STATE_SKIP_TASKBAR;
+    if(c->isabove)
+        state[i++] = _NET_WM_STATE_ABOVE;
+    if(c->isbelow)
+        state[i++] = _NET_WM_STATE_BELOW;
+    if(c->isminimized)
+        state[i++] = _NET_WM_STATE_HIDDEN;
+    if(c->isurgent)
+        state[i++] = _NET_WM_STATE_DEMANDS_ATTENTION;
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        c->win, _NET_WM_STATE, ATOM, 32, i, state);
+}
+
+void
+ewmh_client_check_hints(client_t *c)
 {
     xcb_atom_t *state;
     void *data = NULL;
@@ -514,7 +541,6 @@ ewmh_client_strut_update(client_t *c, xcb_get_property_reply_t *strut_r)
 
     p_delete(&mstrut_r);
 }
-
 
 /** Send request to get NET_WM_ICON (EWMH)
  * \param w The window.

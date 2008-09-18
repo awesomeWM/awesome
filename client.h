@@ -52,6 +52,7 @@ void client_setbelow(client_t *, bool);
 void client_setmodal(client_t *, bool);
 void client_setontop(client_t *, bool);
 void client_setfullscreen(client_t *, bool);
+void client_setminimized(client_t *, bool);
 void client_setborder(client_t *, int);
 
 int luaA_client_newindex(lua_State *);
