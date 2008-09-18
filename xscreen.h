@@ -31,7 +31,6 @@ typedef struct
     area_t *geometry;
 } screens_info_t;
 
-void screensinfo_delete(screens_info_t **);
 screens_info_t * screensinfo_new(void);
 
 #endif

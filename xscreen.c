@@ -40,13 +40,6 @@ screen_xsitoarea(xcb_xinerama_screen_info_t si)
     return a;
 }
 
-void
-screensinfo_delete(screens_info_t **si)
-{
-    p_delete(&(*si)->geometry);
-    p_delete(si);
-}
-
 /** Get screens informations.
  * \return A pointer to complete screens_info_t structure.
  */
