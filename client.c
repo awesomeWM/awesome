@@ -896,7 +896,7 @@ luaA_client_get(lua_State *L)
     return 1;
 }
 
-/** Get only visible clients for a screen.
+/** Get only visible clients for a screen (DEPRECATED).
  * \param L The Lua VM state.
  * \luastack
  * \lparam A screen number.
@@ -910,6 +910,8 @@ luaA_client_visible_get(lua_State *L)
     int screen = luaL_checknumber(L, 1) - 1;
 
     luaA_checkscreen(screen);
+
+    deprecate();
 
     lua_newtable(L);
 
