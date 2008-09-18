@@ -194,7 +194,7 @@ end
 function client.focus.history.get(screen, idx)
     -- When this counter is equal to idx, we return the client
     local counter = 0
-    local vc = capi.client.visible_get(screen)
+    local vc = client.visible(screen)
     for k, c in ipairs(client.focus.history.data) do
         if c.screen == screen then
             for j, vcc in ipairs(vc) do
@@ -228,6 +228,20 @@ function client.focus.history.previous()
     if c then capi.client.focus = c end
 end
 
+--- Get visible clients from a screen.
+-- @param The screen number, or nil for all screen.
+-- @return A table with all visible clients.
+function client.visible(screen)
+    local cls = capi.client.get(screen)
+    local vcls = {}
+    for k, c in pairs(cls) do
+        if c:isvisible() then
+            table.insert(vcls, c)
+        end
+    end
+    return vcls
+end
+
 --- Get a client by its relative index to the focused window.
 -- @usage Set i to 1 to get next, -1 to get previous.
 -- @param i The index.
@@ -238,7 +252,7 @@ function client.next(i, c)
     local sel = c or capi.client.focus
     if sel then
         -- Get all visible clients
-        local cls = capi.client.visible_get(sel.screen)
+        local cls = client.visible(sel.screen)
         -- Remove all no-normal clients
         for idx, c in ipairs(cls) do
             if not client.focus.filter(c) then
@@ -311,7 +325,7 @@ function client.focusbydirection(dir, c)
         local coords = sel:coords()
         local dist, dist_min
         local target = nil
-        local cls = capi.client.visible_get(sel.screen)
+        local cls = client.visible(sel.screen)
 
         -- We check each client.
         for i, c in ipairs(cls) do
@@ -362,14 +376,14 @@ end
 -- @return The master window.
 function client.master(screen)
     local s = screen or capi.mouse.screen
-    return capi.client.visible_get(s)[1]
+    return client.visible(s)[1]
 end
 
 -- Set the client as slave: put it at the end of other windows.
 -- @param c The window to set as slave.
 -- @return 
 function client.setslave(c)
-    local cls = capi.client.visible_get(c.screen)
+    local cls = client.visible(c.screen)
     for k, v in pairs(cls) do
         c:swap(v)
     end
@@ -1741,7 +1755,7 @@ end
 --- Place the client where there's place available with minimum overlap.
 -- @param c The client.
 function placement.no_overlap(c)
-    local cls = capi.client.visible_get(c.screen)
+    local cls = client.visible(c.screen)
     local layout = layout.get()
     local areas = { capi.screen[c.screen].workarea }
     local coords = c:coords()
