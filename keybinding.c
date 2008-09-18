@@ -304,10 +304,13 @@ luaA_keystore(keybinding_t *key, const char *str, ssize_t len)
         if(*str != '#')
         {
             key->keysym = XStringToKeysym(str);
-            if (!key->keysym && len == 1)
-                key->keysym = *str;
-            else
-                warn("there's no keysym named \"%s\"", str);
+            if (!key->keysym)
+            {
+                if (len == 1)
+                    key->keysym = *str;
+                else
+                    warn("there's no keysym named \"%s\"", str);
+            }
         }
         else
             key->keycode = atoi(str + 1);
