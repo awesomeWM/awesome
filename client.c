@@ -876,6 +876,7 @@ client_kill(client_t *c)
 
 /** Get all clients into a table.
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lreturn A table with all clients.
  */
@@ -898,6 +899,7 @@ luaA_client_get(lua_State *L)
 
 /** Get only visible clients for a screen (DEPRECATED).
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A screen number.
  * \lreturn A table with all visible clients for this screen.
@@ -922,6 +924,21 @@ luaA_client_visible_get(lua_State *L)
             lua_rawseti(L, -2, i++);
         }
 
+    return 1;
+}
+
+/** Check if a client is visible on its screen.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue A client.
+ * \lreturn A boolean value, true if the client is visible, false otherwise.
+ */
+static int
+luaA_client_isvisible(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    lua_pushboolean(L, client_isvisible(*c, (*c)->screen));
     return 1;
 }
 
@@ -1545,6 +1562,7 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
+    { "isvisible", luaA_client_isvisible },
     { "coords", luaA_client_coords },
     { "fullcoords", luaA_client_fullcoords },
     { "buttons", luaA_client_buttons },
