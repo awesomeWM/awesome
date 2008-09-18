@@ -878,20 +878,34 @@ client_kill(client_t *c)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lparam An optional screen nunmber.
  * \lreturn A table with all clients.
  */
 static int
 luaA_client_get(lua_State *L)
 {
-    int i = 1;
+    int i = 1, screen;
     client_t *c;
+
+    screen = luaL_optnumber(L, 1, 0) - 1;
 
     lua_newtable(L);
 
-    for(c = globalconf.clients; c; c = c->next)
+    if(screen == SCREEN_UNDEF)
+        for(c = globalconf.clients; c; c = c->next)
+        {
+            luaA_client_userdata_new(globalconf.L, c);
+            lua_rawseti(L, -2, i++);
+        }
+    else
     {
-        luaA_client_userdata_new(globalconf.L, c);
-        lua_rawseti(L, -2, i++);
+        luaA_checkscreen(screen);
+        for(c = globalconf.clients; c; c = c->next)
+            if(c->screen == screen)
+            {
+                luaA_client_userdata_new(globalconf.L, c);
+                lua_rawseti(L, -2, i++);
+            }
     }
 
     return 1;
