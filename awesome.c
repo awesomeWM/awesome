@@ -249,21 +249,19 @@ xerror(void *data __attribute__ ((unused)),
        xcb_connection_t *c __attribute__ ((unused)),
        xcb_generic_error_t *e)
 {
-    xutil_error_t *err = xutil_error_get(e);
-    if(!err)
+    xutil_error_t err;
+
+    if(!xutil_error_init(e, &err))
         return 0;
 
+    /* ignore this */
     if(e->error_code == XUTIL_BAD_WINDOW
-       || (e->error_code == XUTIL_BAD_MATCH && err->request_code == XCB_SET_INPUT_FOCUS)
-       || (e->error_code == XUTIL_BAD_VALUE && err->request_code == XCB_KILL_CLIENT)
-       || (err->request_code == XCB_CONFIGURE_WINDOW && e->error_code == XUTIL_BAD_MATCH))
-    {
-        xutil_error_delete(err);
-        return 0;
-    }
+       || (e->error_code == XUTIL_BAD_MATCH && err.request_code == XCB_SET_INPUT_FOCUS)
+       || (e->error_code == XUTIL_BAD_VALUE && err.request_code == XCB_KILL_CLIENT)
+       || (err.request_code == XCB_CONFIGURE_WINDOW && e->error_code == XUTIL_BAD_MATCH))
+        goto bailout;
 
-    warn("fatal error: request=%s, error=%s", err->request_label, err->error_label);
-    xutil_error_delete(err);
+    warn("X error: request=%s, error=%s", err.request_label, err.error_label);
 
     /*
      * Xlib code was using default X error handler, namely
@@ -274,8 +272,10 @@ xerror(void *data __attribute__ ((unused)),
      * \todo display more informations about the error (like the Xlib default error handler)
      */
     if(e->error_code == XUTIL_BAD_IMPLEMENTATION)
-        exit(EXIT_FAILURE);
+       fatal("X error: request=%s, error=%s", err.request_label, err.error_label);
 
+  bailout:
+    xutil_error_wipe(&err);
     return 0;
 }
 

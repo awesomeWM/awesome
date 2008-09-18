@@ -299,14 +299,12 @@ xutil_label_request[] =
     "NoOperation",
 };
 
-xutil_error_t *
-xutil_error_get(const xcb_generic_error_t *e)
+bool
+xutil_error_init(const xcb_generic_error_t *e, xutil_error_t *err)
 {
     if(e->response_type != 0)
         /* This is not an error, this _should_ not happen */
-        return NULL;
-
-    xutil_error_t *err = p_new(xutil_error_t, 1);
+        return false;
 
     /*
      * Get the request code,  taken from 'xcb-util/wm'. I can't figure
@@ -329,7 +327,7 @@ xutil_error_get(const xcb_generic_error_t *e)
     else
         err->error_label = a_strdup(xutil_label_error[e->error_code]);
 
-    return err;
+    return true;
 }
 
 /** Link a name to a key symbol */

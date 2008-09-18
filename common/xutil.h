@@ -111,17 +111,16 @@ typedef struct
     char *error_label;
 } xutil_error_t;
 
-xutil_error_t *xutil_error_get(const xcb_generic_error_t *);
+bool xutil_error_init(const xcb_generic_error_t *, xutil_error_t *);
 xcb_keysym_t xutil_key_mask_fromstr(const char *);
 unsigned int xutil_button_fromint(int);
 xcb_cursor_t xutil_cursor_new(xcb_connection_t *, unsigned int);
 
 static inline void
-xutil_error_delete(xutil_error_t *err)
+xutil_error_wipe(xutil_error_t *err)
 {
     p_delete(&err->error_label);
     p_delete(&err->request_label);
-    p_delete(&err);
 }
 
 /* Get the informations about the screen.
