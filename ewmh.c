@@ -255,6 +255,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_setsticky(c, false);
         else if(set == _NET_WM_STATE_ADD)
             client_setsticky(c, true);
+        else if(set == _NET_WM_STATE_TOGGLE)
+            client_setsticky(c, !c->issticky);
     }
     else if(state == _NET_WM_STATE_SKIP_TASKBAR)
     {
@@ -262,6 +264,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->skiptb = false;
         else if(set == _NET_WM_STATE_ADD)
             c->skiptb = true;
+        else if(set == _NET_WM_STATE_TOGGLE)
+            c->skiptb = !c->skiptb;
     }
     else if(state == _NET_WM_STATE_FULLSCREEN)
     {
@@ -269,6 +273,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_setfullscreen(c, false);
         else if(set == _NET_WM_STATE_ADD)
             client_setfullscreen(c, true);
+        else if(set == _NET_WM_STATE_TOGGLE)
+            client_setfullscreen(c, !c->isfullscreen);
     }
     else if(state == _NET_WM_STATE_ABOVE)
     {
@@ -276,6 +282,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_setabove(c, false);
         else if(set == _NET_WM_STATE_ADD)
             client_setabove(c, true);
+        else if(set == _NET_WM_STATE_TOGGLE)
+            client_setabove(c, !c->isabove);
     }
     else if(state == _NET_WM_STATE_BELOW)
     {
@@ -283,6 +291,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_setbelow(c, false);
         else if(set == _NET_WM_STATE_ADD)
             client_setbelow(c, true);
+        else if(set == _NET_WM_STATE_TOGGLE)
+            client_setbelow(c, !c->isbelow);
     }
     else if(state == _NET_WM_STATE_MODAL)
     {
@@ -290,6 +300,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_setmodal(c, false);
         else if(set == _NET_WM_STATE_ADD)
             client_setmodal(c, true);
+        else if(set == _NET_WM_STATE_TOGGLE)
+            client_setmodal(c, !c->ismodal);
     }
     else if(state == _NET_WM_STATE_HIDDEN)
     {
@@ -305,6 +317,12 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->isminimized = true;
             client_need_arrange(c);
         }
+        else if(set == _NET_WM_STATE_TOGGLE)
+        {
+            client_need_arrange(c);
+            c->isminimized = !c->isminimized;
+            client_need_arrange(c);
+        }
     }
     else if(state == _NET_WM_STATE_DEMANDS_ATTENTION)
     {
@@ -312,6 +330,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->isurgent = false;
         else if(set == _NET_WM_STATE_ADD)
             c->isurgent = true;
+        else if(set == _NET_WM_STATE_TOGGLE)
+            c->isurgent = !c->isurgent;
 
         /* execute hook */
         luaA_client_userdata_new(globalconf.L, c);
