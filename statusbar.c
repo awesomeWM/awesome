@@ -236,7 +236,7 @@ statusbar_t *
 statusbar_getbywin(xcb_window_t w)
 {
     statusbar_t *s;
-    for(int i = 0; i < globalconf.screens_info->nscreen; i++)
+    for(int i = 0; i < globalconf.nscreen; i++)
         for(s = globalconf.screens[i].statusbar; s; s = s->next)
             if(s->sw->window == w)
                 return s;
@@ -251,7 +251,7 @@ statusbar_refresh(void)
     int screen;
     statusbar_t *statusbar;
 
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             if(statusbar->need_update)
                 statusbar_draw(statusbar);

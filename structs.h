@@ -30,7 +30,6 @@
 #include "luaa.h"
 #include "layout.h"
 #include "swindow.h"
-#include "xscreen.h"
 #include "image.h"
 #include "common/xutil.h"
 #include "common/xembed.h"
@@ -436,8 +435,10 @@ struct awesome_t
     xcb_key_symbols_t *keysyms;
     /** Logical screens */
     screen_t *screens;
-    /** Screens info */
-    screens_info_t *screens_info;
+    /** Number of screens */
+    int nscreen;
+    /** True if xinerama is active */
+    bool xinerama_is_active;
     /** Mouse bindings list */
     button_array_t buttons;
     /** Numlock mask */

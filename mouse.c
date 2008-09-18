@@ -1224,8 +1224,8 @@ luaA_mouse_newindex(lua_State *L)
         phys_screen = screen_virttophys(screen);
         root = xutil_screen_get(globalconf.connection, phys_screen)->root;
 
-        x = globalconf.screens_info->geometry[screen].x;
-        y = globalconf.screens_info->geometry[screen].y;
+        x = globalconf.screens[screen].geometry.x;
+        y = globalconf.screens[screen].geometry.y;
 
         mouse_warp_pointer(root, x, y);
         break;

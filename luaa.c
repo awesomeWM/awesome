@@ -551,7 +551,7 @@ luaA_spawn(lua_State *L)
 
     cmd = luaL_checkstring(L, 1);
 
-    if(!globalconf.screens_info->xinerama_is_active)
+    if(!globalconf.xinerama_is_active)
     {
         xcb_parse_display(NULL, &host, &displayp, &screenp);
         snprintf(newdisplay, sizeof(newdisplay), "%s:%d.%d", host, displayp, screen);
@@ -777,7 +777,7 @@ luaA_parserc(const char *confpatharg)
 
   bailout:
     /* Assure there's at least one tag */
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         if(!globalconf.screens[screen].tags.len)
             tag_append_to_screen(tag_new("default", sizeof("default")-1, layout_tile, 0.5, 1, 0),
                                  &globalconf.screens[screen]);

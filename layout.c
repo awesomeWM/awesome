@@ -84,7 +84,7 @@ layout_refresh(void)
 {
     int screen;
 
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         if(globalconf.screens[screen].need_arrange)
             arrange(screen);
 }

@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include <xcb/xcb.h>
+#include <xcb/xinerama.h>
 
 #include "screen.h"
 #include "ewmh.h"
@@ -33,6 +34,100 @@
 
 extern awesome_t globalconf;
 
+static inline area_t
+screen_xsitoarea(xcb_xinerama_screen_info_t si)
+{
+    area_t a =
+    {
+        .x = si.x_org,
+        .y = si.y_org,
+        .width = si.width,
+        .height = si.height
+    };
+    return a;
+}
+
+/** Get screens informations and fill global configuration.
+ */
+void
+screen_scan(void)
+{
+    /* Check for extension before checking for Xinerama */
+    if(xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id)->present)
+    {
+        xcb_xinerama_is_active_reply_t *xia;
+        xia = xcb_xinerama_is_active_reply(globalconf.connection, xcb_xinerama_is_active(globalconf.connection), NULL);
+        globalconf.xinerama_is_active = xia->state;
+        p_delete(&xia);
+    }
+
+    if(globalconf.xinerama_is_active)
+    {
+        xcb_xinerama_query_screens_reply_t *xsq;
+        xcb_xinerama_screen_info_t *xsi;
+        int xinerama_screen_number;
+
+        xsq = xcb_xinerama_query_screens_reply(globalconf.connection,
+                                               xcb_xinerama_query_screens_unchecked(globalconf.connection),
+                                               NULL);
+
+        xsi = xcb_xinerama_query_screens_screen_info(xsq);
+        xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
+
+        globalconf.screens = p_new(screen_t, xinerama_screen_number);
+
+        /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
+        for(int screen = 0; screen < xinerama_screen_number; screen++)
+        {
+            bool drop = false;
+            for(int screen_to_test = 0; screen_to_test < globalconf.nscreen; screen_to_test++)
+                if(xsi[screen].x_org == globalconf.screens[screen_to_test].geometry.x
+                   && xsi[screen].y_org == globalconf.screens[screen_to_test].geometry.y)
+                    {
+                        /* we already have a screen for this area, just check if
+                         * it's not bigger and drop it */
+                        drop = true;
+                        globalconf.screens[screen_to_test].geometry.width =
+                            MAX(xsi[screen].width, xsi[screen_to_test].width);
+                        globalconf.screens[screen_to_test].geometry.height =
+                            MAX(xsi[screen].height, xsi[screen_to_test].height);
+                    }
+            if(!drop)
+            {
+                globalconf.screens[globalconf.nscreen].index = screen;
+                globalconf.screens[globalconf.nscreen++].geometry = screen_xsitoarea(xsi[screen]);
+            }
+        }
+
+        /* realloc smaller if xinerama_screen_number != screen registered */
+        if(xinerama_screen_number != globalconf.nscreen)
+        {
+            screen_t *new = p_new(screen_t, globalconf.nscreen);
+            memcpy(new, globalconf.screens, globalconf.nscreen * sizeof(screen_t));
+            p_delete(&globalconf.screens);
+            globalconf.screens = new;
+        }
+
+        p_delete(&xsq);
+    }
+    else
+    {
+        globalconf.nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+        globalconf.screens = p_new(screen_t, globalconf.nscreen);
+        for(int screen = 0; screen < globalconf.nscreen; screen++)
+        {
+            xcb_screen_t *s = xutil_screen_get(globalconf.connection, screen);
+            globalconf.screens[screen].index = screen;
+            globalconf.screens[screen].geometry.x = 0;
+            globalconf.screens[screen].geometry.y = 0;
+            globalconf.screens[screen].geometry.width = s->width_in_pixels;
+            globalconf.screens[screen].geometry.height = s->height_in_pixels;
+        }
+    }
+
+    globalconf.screen_focus = globalconf.screens;
+}
+
 /** Return the Xinerama screen number where the coordinates belongs to.
  * \param screen The logical screen number.
  * \param x X coordinate
@@ -43,16 +138,18 @@ int
 screen_getbycoord(int screen, int x, int y)
 {
     int i;
-    screens_info_t *si = globalconf.screens_info;
 
     /* don't waste our time */
-    if(!si->xinerama_is_active)
+    if(!globalconf.xinerama_is_active)
         return screen;
 
-    for(i = 0; i < si->nscreen; i++)
-        if((x < 0 || (x >= si->geometry[i].x && x < si->geometry[i].x + si->geometry[i].width))
-           && (y < 0 || (y >= si->geometry[i].y && y < si->geometry[i].y + si->geometry[i].height)))
+    for(i = 0; i < globalconf.nscreen; i++)
+    {
+        screen_t *s = &globalconf.screens[i];
+        if((x < 0 || (x >= s->geometry.x && x < s->geometry.x + s->geometry.width))
+           && (y < 0 || (y >= s->geometry.y && y < s->geometry.y + s->geometry.height)))
             return i;
+    }
 
     return screen;
 }
@@ -187,7 +284,7 @@ display_area_get(int phys_screen, statusbar_t *statusbar, padding_t *padding)
 int
 screen_virttophys(int screen)
 {
-    if(globalconf.screens_info->xinerama_is_active)
+    if(globalconf.xinerama_is_active)
         return globalconf.default_screen;
     return screen;
 }
@@ -490,7 +587,7 @@ luaA_screen_padding(lua_State *L)
 static int
 luaA_screen_count(lua_State *L)
 {
-    lua_pushnumber(L, globalconf.screens_info->nscreen);
+    lua_pushnumber(L, globalconf.nscreen);
     return 1;
 }
 

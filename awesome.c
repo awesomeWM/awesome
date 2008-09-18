@@ -426,15 +426,8 @@ main(int argc, char **argv)
     /* init atom cache */
     atoms_init(globalconf.connection);
 
-    /* init screens struct */
-    globalconf.screens_info = screensinfo_new();
-    globalconf.screen_focus = globalconf.screens = p_new(screen_t, globalconf.screens_info->nscreen);
-    /* \todo stop duplicating this */
-    for(screen_nbr = 0; screen_nbr < globalconf.screens_info->nscreen; screen_nbr++)
-    {
-        globalconf.screens[screen_nbr].index = screen_nbr;
-        globalconf.screens[screen_nbr].geometry = globalconf.screens_info->geometry[screen_nbr];
-    }
+    /* init screens information */
+    screen_scan();
 
     /* init default font and colors */
     colors_reqs[0] = xcolor_init_unchecked(&globalconf.colors.fg,

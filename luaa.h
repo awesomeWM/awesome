@@ -95,7 +95,7 @@ typedef int luaA_ref;
 
 #define luaA_checkscreen(screen) \
     do { \
-        if(screen < 0 || screen >= globalconf.screens_info->nscreen) \
+        if(screen < 0 || screen >= globalconf.nscreen) \
             luaL_error(L, "invalid screen number: %d", screen + 1); \
     } while(0)
 

@@ -533,7 +533,7 @@ ewmh_client_strut_update(client_t *c, xcb_get_property_reply_t *strut_r)
 
             client_need_arrange(c);
             /* All the statusbars (may) need to be repositioned */
-            for(int screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+            for(int screen = 0; screen < globalconf.nscreen; screen++)
                 for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
                     statusbar_position_update(s);
         }

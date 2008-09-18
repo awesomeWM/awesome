@@ -236,7 +236,7 @@ widget_invalidate_bywidget(widget_t *widget)
     widget_node_t *witer;
     client_t *c;
 
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar;
             statusbar;
             statusbar = statusbar->next)

@@ -138,7 +138,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
      * drop them */
     ev->state &= 0x00ff;
 
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
             if(statusbar->sw
                && (statusbar->sw->window == ev->event || statusbar->sw->window == ev->child))
@@ -220,7 +220,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
                 titlebar_draw(c);
                 if(client_hasstrut(c))
                     /* All the statusbars (may) need to be repositioned */
-                    for(int screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+                    for(int screen = 0; screen < globalconf.nscreen; screen++)
                         for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
                             statusbar_position_update(s);
             }
@@ -329,7 +329,7 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
     {
         xembed_window_list_detach(&globalconf.embedded, emwin);
-        for(i = 0; i < globalconf.screens_info->nscreen; i++)
+        for(i = 0; i < globalconf.nscreen; i++)
             widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
     }
 
@@ -494,7 +494,7 @@ event_handle_expose(void *data __attribute__ ((unused)),
 
     if(!ev->count)
     {
-        for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+        for(screen = 0; screen < globalconf.nscreen; screen++)
             for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
                 if(statusbar->sw
                    && statusbar->sw->window == ev->window)
@@ -591,14 +591,14 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     {
         geom_c = xcb_get_geometry_unchecked(connection, ev->window);
 
-        if(globalconf.screens_info->xinerama_is_active)
+        if(globalconf.xinerama_is_active)
             qp_c = xcb_query_pointer_unchecked(connection,
                                                xutil_screen_get(globalconf.connection,
                                                                 globalconf.default_screen)->root);
 
         if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
         {
-            if(globalconf.screens_info->xinerama_is_active)
+            if(globalconf.xinerama_is_active)
                 qp_r = xcb_query_pointer_reply(connection, qp_c, NULL);
             ret = -1;
             goto bailout;
@@ -608,7 +608,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         for(iter = xcb_setup_roots_iterator(xcb_get_setup(connection)), phys_screen = 0;
             iter.rem && iter.data->root != geom_r->root; xcb_screen_next(&iter), ++phys_screen);
 
-        if(globalconf.screens_info->xinerama_is_active
+        if(globalconf.xinerama_is_active
            && (qp_r = xcb_query_pointer_reply(connection, qp_c, NULL)))
             screen = screen_getbycoord(screen, qp_r->root_x, qp_r->root_y);
         else
@@ -647,7 +647,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     else if((em = xembed_getbywin(globalconf.embedded, ev->window)))
     {
         xembed_window_list_detach(&globalconf.embedded, em);
-        for(i = 0; i < globalconf.screens_info->nscreen; i++)
+        for(i = 0; i < globalconf.nscreen; i++)
             widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
     }
 

@@ -332,7 +332,7 @@ client_stack(void)
                 config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
 
     /* then stack statusbar window */
-    for(screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+    for(screen = 0; screen < globalconf.nscreen; screen++)
         for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
             if(sb->sw)
             {
@@ -836,7 +836,7 @@ client_unmanage(client_t *c)
 
     if(client_hasstrut(c))
         /* All the statusbars (may) need to be repositioned */
-        for(int screen = 0; screen < globalconf.screens_info->nscreen; screen++)
+        for(int screen = 0; screen < globalconf.nscreen; screen++)
             for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
                 statusbar_position_update(s);
 
@@ -1220,7 +1220,7 @@ luaA_client_newindex(lua_State *L)
         widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
         break;
       case A_TK_SCREEN:
-        if(globalconf.screens_info->xinerama_is_active)
+        if(globalconf.xinerama_is_active)
         {
             i = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(i);

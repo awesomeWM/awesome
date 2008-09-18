@@ -26,6 +26,7 @@
 
 #define SCREEN_UNDEF    (-1)
 
+void screen_scan(void);
 int screen_getbycoord(int, int, int);
 area_t screen_area_get(int, statusbar_t *, padding_t *, bool);
 area_t display_area_get(int, statusbar_t *, padding_t *);

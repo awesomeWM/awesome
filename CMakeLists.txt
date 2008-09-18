@@ -63,7 +63,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/image.c
     ${SOURCE_DIR}/draw.c
     ${SOURCE_DIR}/swindow.c
-    ${SOURCE_DIR}/xscreen.c
     ${SOURCE_DIR}/common/buffer.c
     ${SOURCE_DIR}/common/atoms.c
     ${SOURCE_DIR}/common/markup.c
