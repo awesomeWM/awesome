@@ -297,12 +297,18 @@ keybinding_find(const xcb_key_press_event_t *ev)
 }
 
 static void
-__luaA_keystore(keybinding_t *key, const char *str)
+luaA_keystore(keybinding_t *key, const char *str, ssize_t len)
 {
-    if(a_strlen(str))
+    if(len)
     {
         if(*str != '#')
+        {
             key->keysym = XStringToKeysym(str);
+            if (!key->keysym && len == 1)
+                key->keysym = *str;
+            else
+                warn("there's no keysym named \"%s\"", str);
+        }
         else
             key->keycode = atoi(str + 1);
     }
@@ -327,13 +333,13 @@ luaA_keybinding_new(lua_State *L)
     /* arg 2 is key mod table */
     luaA_checktable(L, 2);
     /* arg 3 is key */
-    key = luaL_checkstring(L, 3);
+    key = luaL_checklstring(L, 3, &len);
     /* arg 4 is cmd to run */
     luaA_checkfunction(L, 4);
 
     /* get the last arg as function */
     k = p_new(keybinding_t, 1);
-    __luaA_keystore(k, key);
+    luaA_keystore(k, key, len);
     luaA_registerfct(L, &k->fct);
 
     len = lua_objlen(L, 2);
