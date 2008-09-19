@@ -3,3 +3,5 @@
 .*.sw?
 build
 .build*
+/awesome
+/awesome-client
