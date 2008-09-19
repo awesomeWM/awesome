@@ -41,6 +41,32 @@
 #define MSG_NOSIGNAL 0
 #endif
 
+struct sockaddr_un *addr;
+int csfd;
+
+/** Initialize the client and server socket connections.
+ * If something goes wrong, preserves errno.
+ * \return 0 if everything worked, 1 otherwise.
+ */
+static int
+sockets_init(void)
+{
+    return (csfd = socket_getclient()) < 0 ||
+      !(addr = socket_getaddr(getenv("DISPLAY"))) ||
+      connect(csfd, addr, sizeof(struct sockaddr_un)) == -1;
+}
+
+
+/** Close the client and server socket connections.
+ */
+static void
+sockets_close(void)
+{
+    close(csfd);
+    p_delete(&addr);
+}
+
+
 /** Send a message to awesome.
  * \param msg The message.
  * \param msg_len The message length.
@@ -49,32 +75,42 @@
 static int
 send_msg(const char *msg, ssize_t msg_len)
 {
-    struct sockaddr_un *addr;
-    int csfd, ret_value = EXIT_SUCCESS;
-    csfd = socket_getclient();
-    addr = socket_getaddr(getenv("DISPLAY"));
-
-    if(!addr || csfd < 0)
-        return EXIT_FAILURE;
-
-    if(sendto(csfd, msg, msg_len, MSG_NOSIGNAL,
-              (const struct sockaddr *) addr, sizeof(struct sockaddr_un)) == -1)
+    if(send(csfd, msg, msg_len, MSG_NOSIGNAL | MSG_EOR) == -1)
     {
         switch (errno)
         {
           case ENOENT:
-              warn("can't write to %s", addr->sun_path);
-              break;
+            warn("can't write to %s", addr->sun_path);
+            break;
           default:
-              warn("error sending datagram: %s", strerror(errno));
-         }
-         ret_value = errno;
+            warn("error sending packet: %s", strerror(errno));
+        }
+        return errno;
     }
 
-    close(csfd);
+    return EXIT_SUCCESS;
+}
 
-    p_delete(&addr);
-    return ret_value;
+
+/** Recieve a message from awesome.
+ */
+static void
+recv_msg(void)
+{
+    ssize_t r;
+    char buf[1024];
+
+    r = recv(csfd, buf, sizeof(buf) - 1, MSG_TRUNC);
+    if (r < 0)
+    {
+        warn("error recieving from UNIX domain socket: %s", strerror(errno));
+        return;
+    }
+    else if(r > 0)
+    {
+        buf[r] = '\0';
+        puts(buf);
+    }
 }
 
 
@@ -114,6 +150,12 @@ main(int argc, char **argv)
     else if(argc > 2)
         exit_help(EXIT_SUCCESS);
 
+    if (sockets_init())
+    {
+        warn("can't connect to UNIX domain socket: %s", strerror(errno));
+        return EXIT_FAILURE;
+    }
+
     if(isatty(STDIN_FILENO))
     {
         char *display = getenv("DISPLAY");
@@ -126,6 +168,7 @@ main(int argc, char **argv)
                 msg[msg_len] = '\n';
                 msg[msg_len + 1] = '\0';
                 send_msg(msg, msg_len + 2);
+                recv_msg();
             }
     }
     else
@@ -155,6 +198,7 @@ main(int argc, char **argv)
         p_delete(&msg);
     }
 
+    sockets_close();
     return ret_value;
 }
 

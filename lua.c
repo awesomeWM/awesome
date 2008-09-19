@@ -48,6 +48,7 @@
 #include "event.h"
 #include "layouts/tile.h"
 #include "common/socket.h"
+#include "common/buffer.h"
 
 extern awesome_t globalconf;
 
@@ -71,6 +72,7 @@ extern const struct luaL_reg awesome_keybinding_meta[];
 
 static struct sockaddr_un *addr;
 static ev_io csio = { .fd = -1 };
+struct ev_io csio2 = { .fd = -1 };
 
 /** Add a global mouse binding. This binding will be available when you'll
  * click on root window.
@@ -714,42 +716,128 @@ luaA_parserc(const char *confpatharg)
 
 /** Parse a command.
  * \param cmd The buffer to parse.
- * \return true on succes, false on failure.
+ * \return the number of elements pushed on the stack by the last statement in cmd.
+ * If there's an error, the message is pushed onto the stack and this returns 1.
  */
-static void
+static int
 luaA_docmd(const char *cmd)
 {
     char *p;
+    int newtop, oldtop = lua_gettop(globalconf.L);
 
     while((p = strchr(cmd, '\n')))
     {
+        newtop = lua_gettop(globalconf.L);
+        lua_pop(globalconf.L, newtop - oldtop);
+        oldtop = newtop;
+
         *p = '\0';
-        luaA_dostring(globalconf.L, cmd);
+        if (luaL_dostring(globalconf.L, cmd))
+        {
+            warn("error executing Lua code: %s", lua_tostring(globalconf.L, -1));
+            return 1;
+        }
         cmd = p + 1;
     }
+    return lua_gettop(globalconf.L) - oldtop;
+}
+
+/** Pushes a Lua array containing the top n elements of the stack.
+ * \param n The number of elements to put in the array.
+ */
+static void
+luaA_array(int n)
+{
+    int i;
+    lua_createtable(globalconf.L, n, 0);
+    lua_insert(globalconf.L, -n - 1);
+
+    for (i = n; i > 0; i--)
+        lua_rawseti(globalconf.L, -i - 1, i);
+}
+
+/** Maps the top n elements of the stack to the result of
+ * applying a function to that element.
+ * \param n The number of elements to map.
+ * \luastack
+ * \lparam The function to map the elements by. This should be
+ * at position -(n + 1).
+ */
+static void
+luaA_map(int n)
+{
+    int i;
+    for (i = 0; i < n; i++)
+    {
+        lua_pushvalue(globalconf.L, -n - 1); /* copy of the function */
+        lua_pushvalue(globalconf.L, -n - 1); /* value to map */
+        lua_pcall(globalconf.L, 1, 1, 0);    /* call function */
+        lua_remove(globalconf.L, -n - 1);    /* remove old value */
+    }
+    lua_remove(globalconf.L, -n - 1); /* remove function */
+}
+
+static void luaA_conn_cleanup(EV_P_ ev_io *w)
+{
+    ev_ref(EV_DEFAULT_UC);
+    ev_io_stop(EV_DEFAULT_UC_ w);
+    if (close(w->fd))
+        warn("error closing UNIX domain socket: %s", strerror(errno));
+    p_delete(&w);
 }
 
 static void
 luaA_cb(EV_P_ ev_io *w, int revents)
 {
     char buf[1024];
-    int r;
+    int r, els;
+    const char *s;
+    size_t len;
 
     switch(r = recv(w->fd, buf, sizeof(buf)-1, MSG_TRUNC))
     {
       case -1:
         warn("error reading UNIX domain socket: %s", strerror(errno));
-        luaA_cs_cleanup();
-        break;
-      case 0:
+      case 0: /* 0 bytes are only transferred when the connection is closed */
+        luaA_conn_cleanup(EV_DEFAULT_UC_ w);
         break;
       default:
         if(r >= ssizeof(buf))
             break;
         buf[r] = '\0';
-        luaA_docmd(buf);
+        lua_getglobal(globalconf.L, "table");
+        lua_getfield(globalconf.L, -1, "concat");
+        lua_remove(globalconf.L, -2); /* remove table */
+
+        lua_getglobal(globalconf.L, "tostring");
+        els = luaA_docmd(buf);
+        luaA_map(els); /* map results to strings */
+        luaA_array(els); /* put strings in an array */
+
+        lua_pushstring(globalconf.L, "\t");
+        lua_pcall(globalconf.L, 2, 1, 0); /* concatenate results with tabs */
+
+        s = lua_tolstring(globalconf.L, -1, &len);
+
+        /* ignore ENOENT because the client doesn't create a socket for non-tty */
+        if (send(w->fd, s, len, 0) == -1 && errno != ENOENT)
+            warn("can't connect to client UNIX domain socket: %s", strerror(errno));
+
+        lua_pop(globalconf.L, 1); /* pop the string */
     }
     awesome_refresh(globalconf.connection);
+}
+
+
+static void
+luaA_conn_cb(EV_P_ ev_io *w, int revents)
+{
+    ev_io *csio_conn = p_new(ev_io, 1);
+    int csfd = accept(w->fd, NULL, NULL);
+
+    ev_io_init(csio_conn, &luaA_cb, csfd, EV_READ);
+    ev_io_start(EV_DEFAULT_UC_ csio_conn);
+    ev_unref(EV_DEFAULT_UC);
 }
 
 void
@@ -774,7 +862,9 @@ luaA_cs_init(void)
         else
             warn("error binding UNIX domain socket: %s", strerror(errno));
     }
-    ev_io_init(&csio, &luaA_cb, csfd, EV_READ);
+    listen(csfd, 10);
+
+    ev_io_init(&csio, &luaA_conn_cb, csfd, EV_READ);
     ev_io_start(EV_DEFAULT_UC_ &csio);
     ev_unref(EV_DEFAULT_UC);
 }

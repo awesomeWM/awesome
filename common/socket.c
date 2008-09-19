@@ -79,7 +79,7 @@ socket_getclient(void)
 {
     int csfd;
 
-    csfd = socket(AF_UNIX, SOCK_DGRAM, 0);
+    csfd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
 
     if(csfd < 0)
         warn("error opening UNIX domain socket: %s", strerror(errno));
