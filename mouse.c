@@ -260,15 +260,15 @@ mouse_infobox_draw(simple_window_t *sw,
 #define MOUSE_INFOBOX_STRING_DEFAULT "0000x0000+0000+0000"
 
 /** Initialize the infobox window.
+ * \param sw The simple window to init.
  * \param phys_screen Physical screen number.
  * \param border Border size of the client.
  * \param geometry Client geometry.
  * \return The simple window.
  */
-static simple_window_t *
-mouse_infobox_new(int phys_screen, int border, area_t geometry)
+static void
+mouse_infobox_new(simple_window_t *sw, int phys_screen, int border, area_t geometry)
 {
-    simple_window_t *sw;
     area_t geom;
     draw_parser_data_t pdata;
 
@@ -282,17 +282,15 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry)
     geom.x = geometry.x + ((2 * border + geometry.width) - geom.width) / 2;
     geom.y = geometry.y + ((2 * border + geometry.height) - geom.height) / 2;
 
-    sw = simplewindow_new(phys_screen,
-                          geom.x, geom.y,
-                          geom.width, geom.height, 0,
-                          Top, &globalconf.colors.fg, &globalconf.colors.bg);
+    simplewindow_init(sw, phys_screen,
+                      geom.x, geom.y,
+                      geom.width, geom.height, 0,
+                      Top, &globalconf.colors.fg, &globalconf.colors.bg);
 
     xcb_map_window(globalconf.connection, sw->window);
     mouse_infobox_draw(sw, geometry, border);
 
     draw_parser_data_wipe(&pdata);
-
-    return sw;
 }
 
 /** Get the pointer position.
@@ -477,7 +475,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     /* current layout */
     layout_t *layout;
     /* the infobox */
-    simple_window_t *sw = NULL;
+    simple_window_t sw;
     /* the root window */
     xcb_window_t root;
 
@@ -496,7 +494,9 @@ mouse_client_move(client_t *c, int snap, bool infobox)
         return;
 
     if(infobox && (client_isfloating(c) || layout == layout_floating))
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry);
+        mouse_infobox_new(&sw, c->phys_screen, c->border, c->geometry);
+    else
+        infobox = false;
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -517,8 +517,8 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             c->ismoving = false;
 
             /* draw the infobox */
-            if(sw)
-                mouse_infobox_draw(sw, c->geometry, c->border);
+            if(infobox)
+                mouse_infobox_draw(&sw, c->geometry, c->border);
 
             statusbar_refresh();
 
@@ -560,8 +560,8 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
 
     /* free the infobox */
-    if(sw)
-        simplewindow_delete(&sw);
+    if(infobox)
+        simplewindow_wipe(&sw);
 }
 
 
@@ -579,7 +579,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     /* the other is moved with the mouse */
     int mouse_x = 0, mouse_y = 0;
     /* the infobox */
-    simple_window_t *sw = NULL;
+    simple_window_t sw;
     size_t cursor = CurResize;
     int top, bottom, left, right;
 
@@ -626,7 +626,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
     /* create the infobox */
     if(infobox)
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry);
+        mouse_infobox_new(&sw, c->phys_screen, c->border, c->geometry);
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -699,16 +699,16 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
         titlebar_draw(c);
 
         /* draw the infobox */
-        if(sw)
-            mouse_infobox_draw(sw, c->geometry, c->border);
+        if(infobox)
+            mouse_infobox_draw(&sw, c->geometry, c->border);
     }
 
     /* relase pointer */
     mouse_ungrab_pointer();
 
     /* free the infobox */
-    if(sw)
-        simplewindow_delete(&sw);
+    if(infobox)
+        simplewindow_wipe(&sw);
 }
 
 /** Resize the master column/row of a tiled layout
@@ -828,7 +828,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     /* current tag */
     tag_t *tag;
     /* the infobox */
-    simple_window_t *sw = NULL;
+    simple_window_t sw;
     xcb_window_t root;
 
     tag = tags_get_current(c->screen)[0];
@@ -879,7 +879,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
     /* create the infobox */
     if(infobox)
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry);
+        mouse_infobox_new(&sw, c->phys_screen, c->border, c->geometry);
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -908,16 +908,16 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
         }
 
         /* draw the infobox */
-        if(sw)
-            mouse_infobox_draw(sw, c->geometry, c->border);
+        if(infobox)
+            mouse_infobox_draw(&sw, c->geometry, c->border);
     }
 
     /* ungrab pointer */
     mouse_ungrab_pointer();
 
     /* free the infobox */
-    if(sw)
-        simplewindow_delete(&sw);
+    if(infobox)
+        simplewindow_wipe(&sw);
 }
 
 /** Resize a client with the mouse.

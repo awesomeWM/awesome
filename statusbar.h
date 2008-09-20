@@ -29,7 +29,7 @@
 static inline void
 statusbar_delete(statusbar_t **statusbar)
 {
-    simplewindow_delete(&(*statusbar)->sw);
+    simplewindow_wipe(&(*statusbar)->sw);
     widget_node_list_wipe(&(*statusbar)->widgets);
     p_delete(&(*statusbar)->name);
     p_delete(statusbar);

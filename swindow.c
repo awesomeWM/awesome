@@ -30,7 +30,8 @@
 
 extern awesome_t globalconf;
 
-/** Create a simple window.
+/** Initialize a simple window.
+ * \param sw The simple window to initialize.
  * \param phys_screen Physical screen number.
  * \param x x coordinate.
  * \param y y coordinate.
@@ -40,29 +41,25 @@ extern awesome_t globalconf;
  * \param position The rendering position.
  * \param bg Default foreground color.
  * \param bg Default background color.
- * \return A pointer to a newly allocated simple window, which must be deleted
- *         with simplewindow_delete().
  */
-simple_window_t *
-simplewindow_new(int phys_screen, int x, int y,
-                 unsigned int w, unsigned int h,
-                 unsigned int border_width,
-                 position_t position,
-                 const xcolor_t *fg, const xcolor_t *bg)
+void
+simplewindow_init(simple_window_t *sw,
+                  int phys_screen,
+                  int x, int y,
+                  unsigned int w, unsigned int h,
+                  unsigned int border_width,
+                  position_t position,
+                  const xcolor_t *fg, const xcolor_t *bg)
 {
-    simple_window_t *sw;
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
     uint32_t create_win_val[3];
     const uint32_t gc_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
     const uint32_t gc_values[2] = { s->black_pixel, s->white_pixel };
 
-    sw = p_new(simple_window_t, 1);
-
     sw->geometry.x = x;
     sw->geometry.y = y;
     sw->geometry.width = w;
     sw->geometry.height = h;
-    sw->phys_screen = phys_screen;
 
     create_win_val[0] = XCB_BACK_PIXMAP_PARENT_RELATIVE;
     create_win_val[1] = 1;
@@ -104,26 +101,20 @@ simplewindow_new(int phys_screen, int x, int y,
     sw->gc = xcb_generate_id(globalconf.connection);
     xcb_create_gc(globalconf.connection, sw->gc, s->root, gc_mask, gc_values);
 
-    sw->border_width = border_width;
+    sw->border.width = border_width;
     sw->position = position;
-
-    return sw;
 }
 
-/** Destroy a simple window and all its resources.
- * \param sw The simple_window_t to delete.
+/** Destroy all resources of a simple window.
+ * \param sw The simple_window_t to wipe.
  */
 void
-simplewindow_delete(simple_window_t **sw)
+simplewindow_wipe(simple_window_t *sw)
 {
-    if(*sw)
-    {
-        xcb_destroy_window(globalconf.connection, (*sw)->window);
-        xcb_free_pixmap(globalconf.connection, (*sw)->pixmap);
-        xcb_free_gc(globalconf.connection, (*sw)->gc);
-        draw_context_wipe(&(*sw)->ctx);
-        p_delete(sw);
-    }
+    xcb_destroy_window(globalconf.connection, sw->window);
+    xcb_free_pixmap(globalconf.connection, sw->pixmap);
+    xcb_free_gc(globalconf.connection, sw->gc);
+    draw_context_wipe(&sw->ctx);
 }
 
 /** Move a simple window.
@@ -147,6 +138,7 @@ static void
 simplewindow_draw_context_update(simple_window_t *sw, xcb_screen_t *s)
 {
     xcolor_t fg = sw->ctx.fg, bg = sw->ctx.bg;
+    int phys_screen = sw->ctx.phys_screen;
 
     draw_context_wipe(&sw->ctx);
 
@@ -161,12 +153,12 @@ simplewindow_draw_context_update(simple_window_t *sw, xcb_screen_t *s)
                           s->root_depth,
                           sw->ctx.pixmap, s->root,
                           sw->geometry.height, sw->geometry.width);
-        draw_context_init(&sw->ctx, sw->phys_screen,
+        draw_context_init(&sw->ctx, phys_screen,
                           sw->geometry.height, sw->geometry.width,
                           sw->ctx.pixmap, &fg, &bg);
         break;
       default:
-        draw_context_init(&sw->ctx, sw->phys_screen,
+        draw_context_init(&sw->ctx, phys_screen,
                           sw->geometry.width, sw->geometry.height,
                           sw->pixmap, &fg, &bg);
         break;
@@ -183,7 +175,7 @@ simplewindow_resize(simple_window_t *sw, int w, int h)
 {
     if(w > 0 && h > 0 && (sw->geometry.width != w || sw->geometry.height != h))
     {
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->phys_screen);
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->ctx.phys_screen);
         uint32_t resize_win_vals[2];
 
         sw->geometry.width = resize_win_vals[0] = w;
@@ -209,7 +201,7 @@ void
 simplewindow_moveresize(simple_window_t *sw, int x, int y, int w, int h)
 {
     uint32_t moveresize_win_vals[4], mask_vals = 0;
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->ctx.phys_screen);
 
     if(sw->geometry.x != x || sw->geometry.y != y)
     {
@@ -261,7 +253,7 @@ simplewindow_border_width_set(simple_window_t *sw, uint32_t border_width)
 {
     xcb_configure_window(globalconf.connection, sw->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
                          &border_width);
-    sw->border_width = border_width;
+    sw->border.width = border_width;
 }
 
 /** Set a simple window border color.
@@ -273,6 +265,7 @@ simplewindow_border_color_set(simple_window_t *sw, const xcolor_t *color)
 {
     xcb_change_window_attributes(globalconf.connection, sw->window,
                                  XCB_CW_BORDER_PIXEL, &color->pixel);
+    sw->border.color = *color;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

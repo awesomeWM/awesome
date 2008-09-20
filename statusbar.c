@@ -41,6 +41,9 @@ statusbar_systray_kickout(int phys_screen)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
 
+    /* Who! Check that we're not deleting a statusbar with a systray, because it
+     * may be its parent. If so, we reparent to root before, otherwise it will
+     * hurt very much. */
     xcb_reparent_window(globalconf.connection,
                         globalconf.screens[phys_screen].systray.window,
                         s->root, -512, -512);
@@ -64,7 +67,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
             uint32_t config_win_vals_off[2] = { -512, -512 };
             xembed_window_t *em;
             position_t pos;
-            int phys_screen = statusbar->sw->phys_screen;
+            int phys_screen = statusbar->sw.ctx.phys_screen;
 
             if(statusbar->position
                && systray->widget->isvisible
@@ -83,7 +86,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                 {
                   case Left:
                     config_win_vals[0] = systray->area.y;
-                    config_win_vals[1] = statusbar->sw->geometry.height - systray->area.x - systray->area.width;
+                    config_win_vals[1] = statusbar->sw.geometry.height - systray->area.x - systray->area.width;
                     config_win_vals[2] = systray->area.height;
                     config_win_vals[3] = systray->area.width;
                     break;
@@ -101,13 +104,13 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                     break;
                 }
                 /* reparent */
-                if(globalconf.screens[phys_screen].systray.parent != statusbar->sw->window)
+                if(globalconf.screens[phys_screen].systray.parent != statusbar->sw.window)
                 {
                     xcb_reparent_window(globalconf.connection,
                                         globalconf.screens[phys_screen].systray.window,
-                                        statusbar->sw->window,
+                                        statusbar->sw.window,
                                         config_win_vals[0], config_win_vals[1]);
-                    globalconf.screens[phys_screen].systray.parent = statusbar->sw->window;
+                    globalconf.screens[phys_screen].systray.parent = statusbar->sw.window;
                 }
                 xcb_configure_window(globalconf.connection,
                                      globalconf.screens[phys_screen].systray.window,
@@ -134,7 +137,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == phys_screen)
                     {
-                        if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) statusbar->sw->geometry.y)
+                        if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) statusbar->sw.geometry.y)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -157,7 +160,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == phys_screen)
                     {
-                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) statusbar->sw->geometry.y + statusbar->sw->geometry.width)
+                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) statusbar->sw.geometry.y + statusbar->sw.geometry.width)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -182,7 +185,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                     if(em->phys_screen == phys_screen)
                     {
                         /* if(x + width < systray.x + systray.width) */
-                        if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->area) + statusbar->sw->geometry.x)
+                        if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->area) + statusbar->sw.geometry.x)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -218,12 +221,12 @@ statusbar_draw(statusbar_t *statusbar)
 
     if(statusbar->position)
     {
-        widget_render(statusbar->widgets, &statusbar->sw->ctx, statusbar->sw->gc,
-                      statusbar->sw->pixmap,
+        widget_render(statusbar->widgets, &statusbar->sw.ctx, statusbar->sw.gc,
+                      statusbar->sw.pixmap,
                       statusbar->screen, statusbar->position,
-                      statusbar->sw->geometry.x, statusbar->sw->geometry.y,
+                      statusbar->sw.geometry.x, statusbar->sw.geometry.y,
                       statusbar, AWESOME_TYPE_STATUSBAR);
-        simplewindow_refresh_pixmap(statusbar->sw);
+        simplewindow_refresh_pixmap(&statusbar->sw);
     }
 
     statusbar_systray_refresh(statusbar);
@@ -240,7 +243,7 @@ statusbar_getbywin(xcb_window_t w)
         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
         {
             statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
-            if(s->sw->window == w)
+            if(s->sw.window == w)
                 return s;
         }
     return NULL;
@@ -260,18 +263,6 @@ statusbar_refresh(void)
         }
 }
 
-static void
-statusbar_clean(statusbar_t *statusbar)
-{
-    /* Who! Check that we're not deleting a statusbar with a systray, because it
-     * may be its parent. If so, we reparent to root before, otherwise it will
-     * hurt very much. */
-    if(statusbar->sw)
-        statusbar_systray_kickout(statusbar->sw->phys_screen);
-
-    simplewindow_delete(&statusbar->sw);
-}
-
 /** Update the statusbar position. It deletes every statusbar resources and
  * create them back.
  * \param statusbar The statusbar.
@@ -283,7 +274,12 @@ statusbar_position_update(statusbar_t *statusbar)
     bool ignore = false;
 
     if(statusbar->position == Off)
-        return statusbar_clean(statusbar);
+    {
+        xcb_unmap_window(globalconf.connection, statusbar->sw.window);
+        /* kick out systray if needed */
+        statusbar_systray_refresh(statusbar);
+        return;
+    }
 
     area = screen_area_get(statusbar->screen, NULL,
                            &globalconf.screens[statusbar->screen].padding, true);
@@ -447,28 +443,31 @@ statusbar_position_update(statusbar_t *statusbar)
         break;
     }
 
-    /* same window size and position ? */
-    if(!statusbar->sw
-       || wingeometry.width != statusbar->sw->geometry.width
-       || wingeometry.height != statusbar->sw->geometry.height)
+    if(!statusbar->sw.window)
     {
         int phys_screen = screen_virttophys(statusbar->screen);
 
-        statusbar_clean(statusbar);
-
-        statusbar->sw =
-            simplewindow_new(phys_screen, 0, 0,
-                             wingeometry.width, wingeometry.height, 0,
-                             statusbar->position,
-                             &statusbar->colors.fg, &statusbar->colors.bg);
-
-        simplewindow_move(statusbar->sw, wingeometry.x, wingeometry.y);
-        xcb_map_window(globalconf.connection, statusbar->sw->window);
-        statusbar->need_update = true;
+        simplewindow_init(&statusbar->sw, phys_screen,
+                          wingeometry.x, wingeometry.y,
+                          wingeometry.width, wingeometry.height,
+                          0, statusbar->position,
+                          &statusbar->colors.fg, &statusbar->colors.bg);
+        xcb_map_window(globalconf.connection, statusbar->sw.window);
     }
-    else if(wingeometry.x != statusbar->sw->geometry.x
-            || wingeometry.y != statusbar->sw->geometry.y)
-        simplewindow_move(statusbar->sw, wingeometry.x, wingeometry.y);
+    /* same window size and position ? */
+    else
+    {
+        if(wingeometry.width != statusbar->sw.geometry.width
+           || wingeometry.height != statusbar->sw.geometry.height)
+        {
+            simplewindow_resize(&statusbar->sw, wingeometry.width, wingeometry.height);
+            statusbar->need_update = true;
+        }
+
+        if(wingeometry.x != statusbar->sw.geometry.x
+            || wingeometry.y != statusbar->sw.geometry.y)
+            simplewindow_move(&statusbar->sw, wingeometry.x, wingeometry.y);
+    }
 
     /* Set need update */
     globalconf.screens[statusbar->screen].need_arrange = true;
@@ -620,14 +619,16 @@ statusbar_remove(statusbar_t *statusbar)
     {
         position_t p;
 
-        statusbar_systray_kickout(screen_virttophys(statusbar->screen));
-
         /* save position */
         p = statusbar->position;
         statusbar->position = Off;
         statusbar_position_update(statusbar);
         /* restore position */
         statusbar->position = p;
+
+        simplewindow_wipe(&statusbar->sw);
+        /* sw.window is used to now if the window has been init or not */
+        statusbar->sw.window = 0;
 
         for(int i = 0; i < globalconf.screens[statusbar->screen].statusbars.len; i++)
             if(globalconf.screens[statusbar->screen].statusbars.tab[i] == statusbar)
@@ -704,8 +705,7 @@ luaA_statusbar_newindex(lua_State *L)
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&(*statusbar)->colors.fg, buf, len)))
             {
-                if((*statusbar)->sw)
-                    (*statusbar)->sw->ctx.fg = (*statusbar)->colors.fg;
+                (*statusbar)->sw.ctx.fg = (*statusbar)->colors.fg;
                 (*statusbar)->need_update = true;
             }
         break;
@@ -713,8 +713,7 @@ luaA_statusbar_newindex(lua_State *L)
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&(*statusbar)->colors.bg, buf, len)))
             {
-                if((*statusbar)->sw)
-                    (*statusbar)->sw->ctx.bg = (*statusbar)->colors.bg;
+                (*statusbar)->sw.ctx.bg = (*statusbar)->colors.bg;
                 (*statusbar)->need_update = true;
             }
         break;
@@ -724,6 +723,8 @@ luaA_statusbar_newindex(lua_State *L)
         if(p != (*statusbar)->position)
         {
             (*statusbar)->position = p;
+            simplewindow_wipe(&(*statusbar)->sw);
+            (*statusbar)->sw.window = 0;
             if((*statusbar)->screen != SCREEN_UNDEF)
             {
                 for(int i = 0; i < globalconf.screens[(*statusbar)->screen].statusbars.len; i++)

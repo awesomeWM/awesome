@@ -185,7 +185,7 @@ struct titlebar_t
     /** Width and height */
     int width, height;
     /** Titlebar window */
-    simple_window_t *sw;
+    simple_window_t sw;
     /** Default colors */
     struct
     {
@@ -219,7 +219,7 @@ struct statusbar_t
     /** Ref count */
     int refcount;
     /** Window */
-    simple_window_t *sw;
+    simple_window_t sw;
     /** statusbar_t name */
     char *name;
     /** Bar width */

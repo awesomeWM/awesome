@@ -42,25 +42,25 @@ int luaA_titlebar_userdata_new(lua_State *, titlebar_t *);
 static inline area_t
 titlebar_geometry_add(titlebar_t *t, int border, area_t geometry)
 {
-    if(t && t->sw)
+    if(t)
         switch(t->position)
         {
           case Top:
-            geometry.y -= t->sw->geometry.height + 2 * t->border.width - border;
-            geometry.height += t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.y -= t->sw.geometry.height + 2 * t->sw.border.width - border;
+            geometry.height += t->sw.geometry.height + 2 * t->sw.border.width - border;
             geometry.width += 2 * border;
             break;
           case Bottom:
-            geometry.height += t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.height += t->sw.geometry.height + 2 * t->sw.border.width - border;
             geometry.width += 2 * border;
             break;
           case Left:
-            geometry.x -= t->sw->geometry.width + 2 * t->border.width - border;
-            geometry.width += t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.x -= t->sw.geometry.width + 2 * t->sw.border.width - border;
+            geometry.width += t->sw.geometry.width + 2 * t->sw.border.width - border;
             geometry.height += 2 * border;
             break;
           case Right:
-            geometry.width += t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.width += t->sw.geometry.width + 2 * t->sw.border.width - border;
             geometry.height += 2 * border;
             break;
           default:
@@ -84,25 +84,25 @@ titlebar_geometry_add(titlebar_t *t, int border, area_t geometry)
 static inline area_t
 titlebar_geometry_remove(titlebar_t *t, int border, area_t geometry)
 {
-    if(t && t->sw)
+    if(t)
         switch(t->position)
         {
           case Top:
-            geometry.y += t->sw->geometry.height + 2 * t->border.width - border;
-            geometry.height -= t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.y += t->sw.geometry.height + 2 * t->sw.border.width - border;
+            geometry.height -= t->sw.geometry.height + 2 * t->sw.border.width - border;
             geometry.width -= 2 * border;
             break;
           case Bottom:
-            geometry.height -= t->sw->geometry.height + 2 * t->border.width - border;
+            geometry.height -= t->sw.geometry.height + 2 * t->sw.border.width - border;
             geometry.width -= 2 * border;
             break;
           case Left:
-            geometry.x += t->sw->geometry.width + 2 * t->border.width - border;
-            geometry.width -= t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.x += t->sw.geometry.width + 2 * t->sw.border.width - border;
+            geometry.width -= t->sw.geometry.width + 2 * t->sw.border.width - border;
             geometry.height -= 2 * border;
             break;
           case Right:
-            geometry.width -= t->sw->geometry.width + 2 * t->border.width - border;
+            geometry.width -= t->sw.geometry.width + 2 * t->sw.border.width - border;
             geometry.height -= 2 * border;
             break;
           default:
@@ -125,11 +125,11 @@ titlebar_update_geometry_floating(client_t *c)
 {
     area_t geom;
 
-    if(!c->titlebar || !c->titlebar->sw)
+    if(!c->titlebar)
         return;
 
     titlebar_geometry_compute(c, c->geometry, &geom);
-    simplewindow_moveresize(c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
+    simplewindow_moveresize(&c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
     c->titlebar->need_update = true;
 }
 
@@ -142,11 +142,11 @@ titlebar_update_geometry_tiled(client_t *c, area_t geometry)
 {
     area_t geom;
 
-    if(!c->titlebar || !c->titlebar->sw)
+    if(!c->titlebar)
         return;
 
     titlebar_geometry_compute(c, geometry, &geom);
-    simplewindow_moveresize(c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
+    simplewindow_moveresize(&c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
     c->titlebar->need_update = true;
 }
 

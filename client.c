@@ -202,8 +202,8 @@ client_ban(client_t *c)
         window_state_set(c->win, XCB_WM_STATE_ICONIC);
     else
         window_state_set(c->win, XCB_WM_STATE_WITHDRAWN);
-    if(c->titlebar && c->titlebar->position && c->titlebar->sw)
-        xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
+    if(c->titlebar && c->titlebar->position)
+        xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
 }
 
 /** Give focus to client, or to first client if client is NULL.
@@ -260,14 +260,13 @@ client_stack_below(client_t *c, xcb_window_t previous)
     config_win_vals[1] = XCB_STACK_MODE_BELOW;
 
     if(c->titlebar
-       && c->titlebar->sw
        && c->titlebar->position)
     {
         xcb_configure_window(globalconf.connection,
-                             c->titlebar->sw->window,
+                             c->titlebar->sw.window,
                              XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                              config_win_vals);
-        config_win_vals[0] = c->titlebar->sw->window;
+        config_win_vals[0] = c->titlebar->sw.window;
     }
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
@@ -335,14 +334,11 @@ client_stack(void)
         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
         {
             statusbar_t *sb = globalconf.screens[screen].statusbars.tab[i];
-            if(sb->sw)
-            {
-                xcb_configure_window(globalconf.connection,
-                                     sb->sw->window,
-                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[0] = sb->sw->window;
-            }
+            xcb_configure_window(globalconf.connection,
+                                 sb->sw.window,
+                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                 config_win_vals);
+            config_win_vals[0] = sb->sw.window;
         }
 
     /* finally stack everything else */
@@ -775,12 +771,12 @@ client_unban(client_t *c)
 {
     xcb_map_window(globalconf.connection, c->win);
     window_state_set(c->win, XCB_WM_STATE_NORMAL);
-    if(c->titlebar && c->titlebar->sw && c->titlebar->position)
+    if(c->titlebar && c->titlebar->position)
     {
         if(c->isfullscreen)
-            xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
+            xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
         else
-            xcb_map_window(globalconf.connection, c->titlebar->sw->window);
+            xcb_map_window(globalconf.connection, c->titlebar->sw.window);
     }
 }
 
@@ -821,7 +817,7 @@ client_unmanage(client_t *c)
 
     if(c->titlebar)
     {
-        simplewindow_delete(&c->titlebar->sw);
+        xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
         titlebar_unref(&c->titlebar);
         c->titlebar = NULL;
     }
@@ -1294,7 +1290,7 @@ luaA_client_newindex(lua_State *L)
         /* If client had a titlebar, unref it */
         if((*c)->titlebar)
         {
-            simplewindow_delete(&(*c)->titlebar->sw);
+            xcb_unmap_window(globalconf.connection, (*c)->titlebar->sw.window);
             titlebar_unref(&(*c)->titlebar);
             (*c)->titlebar = NULL;
             client_need_arrange(*c);
@@ -1303,8 +1299,7 @@ luaA_client_newindex(lua_State *L)
         if(t)
         {
             /* Attach titlebar to client */
-            (*c)->titlebar = *t;
-            titlebar_ref(t);
+            (*c)->titlebar = titlebar_ref(t);
             titlebar_init(*c);
         }
         client_stack();

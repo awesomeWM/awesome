@@ -81,14 +81,14 @@ event_handle_mouse_button(client_t *c,
 /** Get a widget node from a statusbar by coords.
  * \param Container position.
  * \param widgets The widget list.
- * \param height The container height.
  * \param width The container width.
+ * \param height The container height.
  * \param x X coordinate of the widget.
  * \param y Y coordinate of the widget.
  * \return A widget node.
  */
 static widget_node_t *
-widget_getbycoords(position_t position, widget_node_t *widgets, int height, int width, int x, int y)
+widget_getbycoords(position_t position, widget_node_t *widgets, int width, int height, int x, int y)
 {
     int tmp;
     widget_node_t *w;
@@ -98,13 +98,13 @@ widget_getbycoords(position_t position, widget_node_t *widgets, int height, int 
     {
       case Right:
         tmp = y;
-        y = height - x;
+        y = width - x;
         x = tmp;
         break;
       case Left:
         tmp = y;
         y = x;
-        x = width - tmp;
+        x = height - tmp;
         break;
       default:
         break;
@@ -141,18 +141,18 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
         {
             statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
-            if(statusbar->sw
-               && (statusbar->sw->window == ev->event || statusbar->sw->window == ev->child))
+            if(statusbar->sw.window == ev->event || statusbar->sw.window == ev->child)
             {
                 /* If the statusbar is child, then x,y are
                  * relative to root window */
-                if(statusbar->sw->window == ev->child)
+                if(statusbar->sw.window == ev->child)
                 {
-                    ev->event_x -= statusbar->sw->geometry.x;
-                    ev->event_y -= statusbar->sw->geometry.y;
+                    ev->event_x -= statusbar->sw.geometry.x;
+                    ev->event_y -= statusbar->sw.geometry.y;
                 }
                 if((w = widget_getbycoords(statusbar->position, statusbar->widgets,
-                                           statusbar->width, statusbar->height,
+                                           statusbar->sw.geometry.width,
+                                           statusbar->sw.geometry.height,
                                            ev->event_x, ev->event_y)))
                     w->widget->button(w, ev, statusbar->screen, statusbar, AWESOME_TYPE_STATUSBAR);
                 /* return even if no widget match */
@@ -388,7 +388,8 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
     if(statusbar)
     {
         w = widget_getbycoords(statusbar->position, statusbar->widgets,
-                               statusbar->width, statusbar->height,
+                               statusbar->sw.geometry.width,
+                               statusbar->sw.geometry.height,
                                ev->event_x, ev->event_y);
         event_handle_widget_motionnotify(statusbar,
                                          AWESOME_TYPE_STATUSBAR,
@@ -397,7 +398,8 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
     else if((c = client_getbytitlebarwin(ev->event)))
     {
         w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
-                               c->titlebar->width, c->titlebar->height,
+                               c->titlebar->sw.geometry.width,
+                               c->titlebar->sw.geometry.height,
                                ev->event_x, ev->event_y);
         event_handle_widget_motionnotify(c->titlebar,
                                          AWESOME_TYPE_TITLEBAR,
@@ -502,16 +504,15 @@ event_handle_expose(void *data __attribute__ ((unused)),
             for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
             {
                 statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
-                if(statusbar->sw
-                   && statusbar->sw->window == ev->window)
+                if(statusbar->sw.window == ev->window)
                 {
-                    simplewindow_refresh_pixmap(statusbar->sw);
+                    simplewindow_refresh_pixmap(&statusbar->sw);
                     return 0;
                 }
             }
 
         if((c = client_getbytitlebarwin(ev->window)))
-           simplewindow_refresh_pixmap(c->titlebar->sw);
+           simplewindow_refresh_pixmap(&c->titlebar->sw);
     }
 
     return 0;

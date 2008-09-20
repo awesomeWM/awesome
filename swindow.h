@@ -28,10 +28,6 @@
 /** A simple window. */
 typedef struct simple_window_t
 {
-    /** Orientation */
-
-    /** The physical screen number the window is on. */
-    int phys_screen;
     /** The window object. */
     xcb_window_t window;
     /** The pixmap copied to the window object. */
@@ -40,17 +36,25 @@ typedef struct simple_window_t
     xcb_gcontext_t gc;
     /** The window geometry. */
     area_t geometry;
-    /** The window border width */
-    int border_width;
+    /** The window border */
+    struct
+    {
+        /** The window border width */
+        int width;
+        /** The window border color */
+        xcolor_t color;
+    } border;
     /** Draw context */
     draw_context_t ctx;
     /** Position */
     position_t position;
 } simple_window_t;
 
-simple_window_t * simplewindow_new(int, int, int, unsigned int, unsigned int, unsigned int,
-                                   position_t, const xcolor_t *, const xcolor_t *);
-void simplewindow_delete(simple_window_t **);
+void simplewindow_init(simple_window_t *s,
+                       int, int, int, unsigned int, unsigned int, unsigned int,
+                       position_t, const xcolor_t *, const xcolor_t *);
+
+void simplewindow_wipe(simple_window_t *);
 
 void simplewindow_move(simple_window_t *, int, int);
 void simplewindow_resize(simple_window_t *, int, int);
