@@ -668,12 +668,6 @@ client_setfullscreen(client_t *c, bool s)
         /* become fullscreen! */
         if((c->isfullscreen = s))
         {
-            /* disable titlebar and borders */
-            if(c->titlebar && c->titlebar->sw && (c->titlebar->oldposition = c->titlebar->position))
-            {
-                xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
-                c->titlebar->position = Off;
-            }
             geometry = screen_area_get(c->screen, NULL, &globalconf.screens[c->screen].padding, false);
             c->m_geometry = c->geometry;
             c->oldborder = c->border;
@@ -681,9 +675,6 @@ client_setfullscreen(client_t *c, bool s)
         }
         else
         {
-            /* restore borders and titlebar */
-            if(c->titlebar && c->titlebar->sw && (c->titlebar->position = c->titlebar->oldposition))
-                xcb_map_window(globalconf.connection, c->titlebar->sw->window);
             geometry = c->m_geometry;
             client_setborder(c, c->oldborder);
             client_resize(c, c->m_geometry, false);
@@ -783,7 +774,12 @@ client_unban(client_t *c)
     xcb_map_window(globalconf.connection, c->win);
     window_state_set(c->win, XCB_WM_STATE_NORMAL);
     if(c->titlebar && c->titlebar->sw && c->titlebar->position)
-        xcb_map_window(globalconf.connection, c->titlebar->sw->window);
+    {
+        if(c->isfullscreen)
+            xcb_unmap_window(globalconf.connection, c->titlebar->sw->window);
+        else
+            xcb_map_window(globalconf.connection, c->titlebar->sw->window);
+    }
 }
 
 /** Unmanage a client.

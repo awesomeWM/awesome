@@ -175,7 +175,7 @@ struct titlebar_t
     /** Ref count */
     int refcount;
     /** Position */
-    position_t position, oldposition;
+    position_t position;
     /** Alignment on window */
     alignment_t align;
     /** Widgets */
