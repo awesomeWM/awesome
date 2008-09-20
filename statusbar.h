@@ -42,7 +42,7 @@ void statusbar_position_update(statusbar_t *);
 int luaA_statusbar_userdata_new(lua_State *, statusbar_t *);
 
 DO_RCNT(statusbar_t, statusbar, statusbar_delete)
-DO_SLIST(statusbar_t, statusbar, statusbar_delete)
+ARRAY_FUNCS(statusbar_t *, statusbar, statusbar_unref)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

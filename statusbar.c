@@ -236,11 +236,13 @@ statusbar_draw(statusbar_t *statusbar)
 statusbar_t *
 statusbar_getbywin(xcb_window_t w)
 {
-    statusbar_t *s;
-    for(int i = 0; i < globalconf.nscreen; i++)
-        for(s = globalconf.screens[i].statusbar; s; s = s->next)
+    for(int screen = 0; screen < globalconf.nscreen; screen++)
+        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        {
+            statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
             if(s->sw->window == w)
                 return s;
+        }
     return NULL;
 }
 
@@ -249,13 +251,13 @@ statusbar_getbywin(xcb_window_t w)
 void
 statusbar_refresh(void)
 {
-    int screen;
-    statusbar_t *statusbar;
-
-    for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
-            if(statusbar->need_update)
-                statusbar_draw(statusbar);
+    for(int screen = 0; screen < globalconf.nscreen; screen++)
+        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        {
+            statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
+            if(s->need_update)
+                statusbar_draw(s);
+        }
 }
 
 static void
@@ -278,7 +280,6 @@ statusbar_clean(statusbar_t *statusbar)
 void
 statusbar_position_update(statusbar_t *statusbar)
 {
-    statusbar_t *sb;
     area_t area, wingeometry;
     xcb_pixmap_t dw;
     xcb_screen_t *s = NULL;
@@ -291,8 +292,9 @@ statusbar_position_update(statusbar_t *statusbar)
                            &globalconf.screens[statusbar->screen].padding, true);
 
     /* Top and Bottom statusbar_t have prio */
-    for(sb = globalconf.screens[statusbar->screen].statusbar; sb; sb = sb->next)
+    for(int i = 0; i < globalconf.screens[statusbar->screen].statusbars.len; i++)
     {
+        statusbar_t *sb = globalconf.screens[statusbar->screen].statusbars.tab[i];
         /* Ignore every statusbar after me that is in the same position */
         if(statusbar == sb)
         {
@@ -656,7 +658,12 @@ statusbar_remove(statusbar_t *statusbar)
         /* restore position */
         statusbar->position = p;
 
-        statusbar_list_detach(&globalconf.screens[statusbar->screen].statusbar, statusbar);
+        for(int i = 0; i < globalconf.screens[statusbar->screen].statusbars.len; i++)
+            if(globalconf.screens[statusbar->screen].statusbars.tab[i] == statusbar)
+            {
+                statusbar_array_take(&globalconf.screens[statusbar->screen].statusbars, i);
+                break;
+            }
         globalconf.screens[statusbar->screen].need_arrange = true;
         statusbar->screen = SCREEN_UNDEF;
         statusbar_unref(&statusbar);
@@ -671,7 +678,7 @@ static int
 luaA_statusbar_newindex(lua_State *L)
 {
     size_t len;
-    statusbar_t *s, **statusbar = luaA_checkudata(L, 1, "statusbar");
+    statusbar_t **statusbar = luaA_checkudata(L, 1, "statusbar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     position_t p;
     int screen;
@@ -692,21 +699,27 @@ luaA_statusbar_newindex(lua_State *L)
                            (*statusbar)->screen + 1);
 
             /* Check for uniq name and id. */
-            for(s = globalconf.screens[screen].statusbar; s; s = s->next)
+            for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+            {
+                statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
                 if(!a_strcmp(s->name, (*statusbar)->name))
                     luaL_error(L, "a statusbar with that name is already on screen %d\n",
                                screen + 1);
+            }
 
             statusbar_remove(*statusbar);
 
             (*statusbar)->screen = screen;
 
-            statusbar_list_append(&globalconf.screens[screen].statusbar, *statusbar);
+            statusbar_array_append(&globalconf.screens[screen].statusbars, *statusbar);
             statusbar_ref(statusbar);
 
             /* All the other statusbar and ourselves need to be repositioned */
-            for(s = globalconf.screens[screen].statusbar; s; s = s->next)
+            for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+            {
+                statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
                 statusbar_position_update(s);
+            }
 
             ewmh_update_workarea(screen_virttophys(screen));
         }
@@ -743,8 +756,11 @@ luaA_statusbar_newindex(lua_State *L)
             (*statusbar)->position = p;
             if((*statusbar)->screen != SCREEN_UNDEF)
             {
-                for(s = globalconf.screens[(*statusbar)->screen].statusbar; s; s = s->next)
+                for(int i = 0; i < globalconf.screens[(*statusbar)->screen].statusbars.len; i++)
+                {
+                    statusbar_t *s = globalconf.screens[(*statusbar)->screen].statusbars.tab[i];
                     statusbar_position_update(s);
+                }
                 ewmh_update_workarea(screen_virttophys((*statusbar)->screen));
             }
         }

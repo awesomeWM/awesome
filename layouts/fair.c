@@ -42,7 +42,7 @@ layout_fair(int screen, const orientation_t orientation)
     area_t geometry, area;
 
     area = screen_area_get(screen,
-                           globalconf.screens[screen].statusbar,
+                           &globalconf.screens[screen].statusbars,
                            &globalconf.screens[screen].padding,
                            true);
 

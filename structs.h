@@ -245,9 +245,8 @@ struct statusbar_t
     } colors;
     /** Widget the mouse is over */
     widget_node_t *mouse_over;
-    /** Next and previous statusbars */
-    statusbar_t *prev, *next;
 };
+ARRAY_TYPE(statusbar_t *, statusbar)
 
 /* Strut */
 typedef struct
@@ -401,8 +400,8 @@ typedef struct
     bool need_arrange;
     /** Tag list */
     tag_array_t tags;
-    /** Status bar */
-    statusbar_t *statusbar;
+    /** Statusbars */
+    statusbar_array_t statusbars;
     /** Padding */
     padding_t padding;
     /** Window that contains the systray */

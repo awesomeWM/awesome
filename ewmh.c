@@ -212,7 +212,7 @@ ewmh_update_workarea(int phys_screen)
     tag_array_t *tags = &globalconf.screens[phys_screen].tags;
     uint32_t *area = p_alloca(uint32_t, tags->len * 4);
     area_t geom = screen_area_get(phys_screen,
-                                  globalconf.screens[phys_screen].statusbar,
+                                  &globalconf.screens[phys_screen].statusbars,
                                   &globalconf.screens[phys_screen].padding,
                                   true);
 
@@ -534,8 +534,11 @@ ewmh_client_strut_update(client_t *c, xcb_get_property_reply_t *strut_r)
             client_need_arrange(c);
             /* All the statusbars (may) need to be repositioned */
             for(int screen = 0; screen < globalconf.nscreen; screen++)
-                for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
+                for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+                {
+                    statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
                     statusbar_position_update(s);
+                }
         }
     }
 

@@ -319,7 +319,6 @@ client_stack(void)
     uint32_t config_win_vals[2];
     client_node_t *node;
     layer_t layer;
-    statusbar_t *sb;
     int screen;
 
     config_win_vals[0] = XCB_NONE;
@@ -333,7 +332,9 @@ client_stack(void)
 
     /* then stack statusbar window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(sb = globalconf.screens[screen].statusbar; sb; sb = sb->next)
+        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        {
+            statusbar_t *sb = globalconf.screens[screen].statusbars.tab[i];
             if(sb->sw)
             {
                 xcb_configure_window(globalconf.connection,
@@ -342,6 +343,7 @@ client_stack(void)
                                      config_win_vals);
                 config_win_vals[0] = sb->sw->window;
             }
+        }
 
     /* finally stack everything else */
     for(layer = LAYER_FULLSCREEN - 1; layer >= LAYER_DESKTOP; layer--)
@@ -833,8 +835,11 @@ client_unmanage(client_t *c)
     if(client_hasstrut(c))
         /* All the statusbars (may) need to be repositioned */
         for(int screen = 0; screen < globalconf.nscreen; screen++)
-            for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
+            for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+            {
+                statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
                 statusbar_position_update(s);
+            }
 
     /* set client as invalid */
     c->invalid = true;

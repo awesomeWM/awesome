@@ -156,17 +156,16 @@ screen_getbycoord(int screen, int x, int y)
 
 /** Get screens info.
  * \param screen Screen number.
- * \param statusbar Statusbar list to remove.
+ * \param statusbars Statusbar list to remove.
  * \param padding Padding.
  * \param strut Honor windows strut.
  * \return The screen area.
  */
 area_t
-screen_area_get(int screen, statusbar_t *statusbar,
+screen_area_get(int screen, statusbar_array_t *statusbars,
                 padding_t *padding, bool strut)
 {
     area_t area = globalconf.screens[screen].geometry;
-    statusbar_t *sb;
     uint16_t top = 0, bottom = 0, left = 0, right = 0;
 
     /* make padding corrections */
@@ -216,23 +215,27 @@ screen_area_get(int screen, statusbar_t *statusbar,
     }
 
 
-    for(sb = statusbar; sb; sb = sb->next)
-        switch(sb->position)
+    if(statusbars)
+        for(int i = 0; i < statusbars->len; i++)
         {
-          case Top:
-            top = MAX(top, (uint16_t) (sb->sw->geometry.y - area.y) + sb->sw->geometry.height);
-            break;
-          case Bottom:
-            bottom = MAX(bottom, (uint16_t) (area.y + area.height) - sb->sw->geometry.y);
-            break;
-          case Left:
-            left = MAX(left, (uint16_t) (sb->sw->geometry.x - area.x) + sb->sw->geometry.width);
-            break;
-          case Right:
-            right = MAX(right, (uint16_t) (area.x + area.width) - sb->sw->geometry.x);
-            break;
-          default:
-            break;
+            statusbar_t *sb = statusbars->tab[i];
+            switch(sb->position)
+            {
+              case Top:
+                top = MAX(top, (uint16_t) (sb->sw->geometry.y - area.y) + sb->sw->geometry.height);
+                break;
+              case Bottom:
+                bottom = MAX(bottom, (uint16_t) (area.y + area.height) - sb->sw->geometry.y);
+                break;
+              case Left:
+                left = MAX(left, (uint16_t) (sb->sw->geometry.x - area.x) + sb->sw->geometry.width);
+                break;
+              case Right:
+                right = MAX(right, (uint16_t) (area.x + area.width) - sb->sw->geometry.x);
+                break;
+              default:
+                break;
+            }
         }
 
     area.x += left;
@@ -245,25 +248,26 @@ screen_area_get(int screen, statusbar_t *statusbar,
 
 /** Get display info.
  * \param phys_screen Physical screen number.
- * \param statusbar The statusbars.
+ * \param statusbars The statusbars.
  * \param padding Padding.
  * \return The display area.
  */
 area_t
-display_area_get(int phys_screen, statusbar_t *statusbar, padding_t *padding)
+display_area_get(int phys_screen, statusbar_array_t *statusbars, padding_t *padding)
 {
-    area_t area = { 0, 0, 0, 0 };
-    statusbar_t *sb;
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+    area_t area = { .x = 0,
+                    .y = 0,
+                    .width = s->width_in_pixels,
+                    .height = s->height_in_pixels };
 
-    area.width = s->width_in_pixels;
-    area.height = s->height_in_pixels;
-
-    for(sb = statusbar; sb; sb = sb->next)
-    {
-        area.y += sb->position == Top ? sb->height : 0;
-        area.height -= (sb->position == Top || sb->position == Bottom) ? sb->height : 0;
-    }
+    if(statusbars)
+        for(int i = 0; i < statusbars->len; i++)
+        {
+            statusbar_t *sb = statusbars->tab[i];
+            area.y += sb->position == Top ? sb->height : 0;
+            area.height -= (sb->position == Top || sb->position == Bottom) ? sb->height : 0;
+        }
 
     /* make padding corrections */
     if(padding)
@@ -508,7 +512,7 @@ luaA_screen_index(lua_State *L)
         lua_setfield(L, -2, "height");
         break;
       case A_TK_WORKAREA:
-        g = screen_area_get(s->index, s->statusbar, &s->padding, true);
+        g = screen_area_get(s->index, &s->statusbars, &s->padding, true);
         lua_newtable(L);
         lua_pushnumber(L, g.x);
         lua_setfield(L, -2, "x");
@@ -544,8 +548,6 @@ luaA_screen_padding(lua_State *L)
 
     if(lua_gettop(L) == 2)
     {
-        statusbar_t *sb;
-
         luaA_checktable(L, 2);
 
         s->padding.right = luaA_getopt_number(L, 2, "right", 0);
@@ -556,8 +558,8 @@ luaA_screen_padding(lua_State *L)
         s->need_arrange = true;
 
         /* All the statusbar repositioned */
-        for(sb = s->statusbar; sb; sb = sb->next)
-            statusbar_position_update(sb);
+        for(int i = 0; i < s->statusbars.len; i++)
+            statusbar_position_update(s->statusbars.tab[i]);
 
         ewmh_update_workarea(screen_virttophys(s->index));
     }

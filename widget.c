@@ -210,18 +210,18 @@ widget_common_new(widget_t *widget)
 void
 widget_invalidate_cache(int screen, int flags)
 {
-    statusbar_t *statusbar;
-    widget_node_t *widget;
+    for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+    {
+        statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
+        widget_node_t *widget;
 
-    for(statusbar = globalconf.screens[screen].statusbar;
-        statusbar;
-        statusbar = statusbar->next)
         for(widget = statusbar->widgets; widget; widget = widget->next)
             if(widget->widget->cache_flags & flags)
             {
                 statusbar->need_update = true;
                 break;
             }
+    }
 }
 
 /** Set a statusbar needs update because it has widget, or redraw a titlebar.
@@ -232,14 +232,14 @@ void
 widget_invalidate_bywidget(widget_t *widget)
 {
     int screen;
-    statusbar_t *statusbar;
     widget_node_t *witer;
     client_t *c;
 
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(statusbar = globalconf.screens[screen].statusbar;
-            statusbar;
-            statusbar = statusbar->next)
+        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        {
+            statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
+
             if(!statusbar->need_update)
                 for(witer = statusbar->widgets; witer; witer = witer->next)
                     if(witer->widget == widget)
@@ -247,6 +247,7 @@ widget_invalidate_bywidget(widget_t *widget)
                         statusbar->need_update = true;
                         break;
                     }
+        }
 
     for(c = globalconf.clients; c; c = c->next)
         if(c->titlebar && !c->titlebar->need_update)

@@ -130,7 +130,6 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
     client_t *c;
     widget_node_t *w;
-    statusbar_t *statusbar;
 
     /* ev->state is
      * button status (8 bits) + modifiers status (8 bits)
@@ -139,7 +138,9 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     ev->state &= 0x00ff;
 
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        {
+            statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
             if(statusbar->sw
                && (statusbar->sw->window == ev->event || statusbar->sw->window == ev->child))
             {
@@ -157,6 +158,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                 /* return even if no widget match */
                 return 0;
             }
+        }
 
     if((c = client_getbytitlebarwin(ev->event)))
     {
@@ -221,8 +223,11 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
                 if(client_hasstrut(c))
                     /* All the statusbars (may) need to be repositioned */
                     for(int screen = 0; screen < globalconf.nscreen; screen++)
-                        for(statusbar_t *s = globalconf.screens[screen].statusbar; s; s = s->next)
+                        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+                        {
+                            statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
                             statusbar_position_update(s);
+                        }
             }
             else
             {
@@ -488,20 +493,22 @@ event_handle_expose(void *data __attribute__ ((unused)),
                     xcb_connection_t *connection __attribute__ ((unused)),
                     xcb_expose_event_t *ev)
 {
-    int screen;
-    statusbar_t *statusbar;
-    client_t *c;
-
     if(!ev->count)
     {
+        int screen;
+        client_t *c;
+
         for(screen = 0; screen < globalconf.nscreen; screen++)
-            for(statusbar = globalconf.screens[screen].statusbar; statusbar; statusbar = statusbar->next)
+            for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+            {
+                statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
                 if(statusbar->sw
                    && statusbar->sw->window == ev->window)
                 {
                     simplewindow_refresh_pixmap(statusbar->sw);
                     return 0;
                 }
+            }
 
         if((c = client_getbytitlebarwin(ev->window)))
            simplewindow_refresh_pixmap(c->titlebar->sw);
