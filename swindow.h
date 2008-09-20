@@ -59,9 +59,19 @@ void simplewindow_wipe(simple_window_t *);
 void simplewindow_move(simple_window_t *, int, int);
 void simplewindow_resize(simple_window_t *, int, int);
 void simplewindow_moveresize(simple_window_t *, int, int, int, int);
-void simplewindow_refresh_pixmap(simple_window_t *);
+void simplewindow_refresh_pixmap_partial(simple_window_t *, int16_t, int16_t, uint16_t, uint16_t);
 void simplewindow_border_width_set(simple_window_t *, uint32_t);
 void simplewindow_border_color_set(simple_window_t *, const xcolor_t *);
+
+/** Refresh the window content by copying its pixmap data to its window.
+ * \param sw The simple window to refresh.
+ */
+static inline void
+simplewindow_refresh_pixmap(simple_window_t *sw)
+{
+    simplewindow_refresh_pixmap_partial(sw, 0, 0, sw->geometry.width, sw->geometry.height);
+}
+
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -236,12 +236,13 @@ simplewindow_moveresize(simple_window_t *sw, int x, int y, int w, int h)
  * \param sw The simple window to refresh.
  */
 void
-simplewindow_refresh_pixmap(simple_window_t *sw)
+simplewindow_refresh_pixmap_partial(simple_window_t *sw,
+                                    int16_t x, int16_t y,
+                                    uint16_t w, uint16_t h)
 {
     xcb_copy_area(globalconf.connection, sw->pixmap,
-                  sw->window, sw->gc, 0, 0, 0, 0,
-                  sw->geometry.width,
-                  sw->geometry.height);
+                  sw->window, sw->gc, x, y, x, y,
+                  w, h);
 }
 
 /** Set a simple window border width.

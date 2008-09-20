@@ -495,25 +495,25 @@ event_handle_expose(void *data __attribute__ ((unused)),
                     xcb_connection_t *connection __attribute__ ((unused)),
                     xcb_expose_event_t *ev)
 {
-    if(!ev->count)
-    {
-        int screen;
-        client_t *c;
+    client_t *c;
 
-        for(screen = 0; screen < globalconf.nscreen; screen++)
-            for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+    for(int screen = 0; screen < globalconf.nscreen; screen++)
+        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        {
+            statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
+            if(statusbar->sw.window == ev->window)
             {
-                statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
-                if(statusbar->sw.window == ev->window)
-                {
-                    simplewindow_refresh_pixmap(&statusbar->sw);
-                    return 0;
-                }
+                simplewindow_refresh_pixmap_partial(&statusbar->sw,
+                                                    ev->x, ev->y,
+                                                    ev->width, ev->height);
+                return 0;
             }
+        }
 
-        if((c = client_getbytitlebarwin(ev->window)))
-           simplewindow_refresh_pixmap(&c->titlebar->sw);
-    }
+    if((c = client_getbytitlebarwin(ev->window)))
+       simplewindow_refresh_pixmap_partial(&c->titlebar->sw,
+                                           ev->x, ev->y,
+                                           ev->width, ev->height);
 
     return 0;
 }
