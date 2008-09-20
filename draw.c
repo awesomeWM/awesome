@@ -101,38 +101,6 @@ draw_screen_default_visual(xcb_screen_t *s)
     return NULL;
 }
 
-/** Create a new draw context.
- * \param phys_screen Physical screen id.
- * \param width Width.
- * \param height Height.
- * \param px Pixmap object to store.
- * \param fg Foreground color.
- * \param bg Background color.
- * \return A draw context pointer.
- */
-draw_context_t *
-draw_context_new(int phys_screen,
-                 int width, int height, xcb_pixmap_t px,
-                 const xcolor_t *fg, const xcolor_t *bg)
-{
-    draw_context_t *d = p_new(draw_context_t, 1);
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
-
-    d->phys_screen = phys_screen;
-    d->width = width;
-    d->height = height;
-    d->depth = s->root_depth;
-    d->visual = draw_screen_default_visual(s);
-    d->pixmap = px;
-    d->surface = cairo_xcb_surface_create(globalconf.connection, px, d->visual, width, height);
-    d->cr = cairo_create(d->surface);
-    d->layout = pango_cairo_create_layout(d->cr);
-    d->fg = *fg;
-    d->bg = *bg;
-
-    return d;
-};
-
 /** Create a new Pango font
  * \param phys_screen The physical screen number.
  * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE])
@@ -331,6 +299,35 @@ draw_text_markup_expand(draw_parser_data_t *data,
     markup_parser_data_wipe(&p);
     return ret;
 }
+
+/** Initialize a new draw context.
+ * \param d The draw context to initialize.
+ * \param phys_screen Physical screen id.
+ * \param width Width.
+ * \param height Height.
+ * \param px Pixmap object to store.
+ * \param fg Foreground color.
+ * \param bg Background color.
+ */
+void
+draw_context_init(draw_context_t *d, int phys_screen,
+                  int width, int height, xcb_pixmap_t px,
+                  const xcolor_t *fg, const xcolor_t *bg)
+{
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+
+    d->phys_screen = phys_screen;
+    d->width = width;
+    d->height = height;
+    d->depth = s->root_depth;
+    d->visual = draw_screen_default_visual(s);
+    d->pixmap = px;
+    d->surface = cairo_xcb_surface_create(globalconf.connection, px, d->visual, width, height);
+    d->cr = cairo_create(d->surface);
+    d->layout = pango_cairo_create_layout(d->cr);
+    d->fg = *fg;
+    d->bg = *bg;
+};
 
 /** Draw text into a draw context.
  * \param ctx Draw context  to draw to.

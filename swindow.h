@@ -19,14 +19,17 @@
  *
  */
 
-#ifndef AWESOME_COMMON_SWINDOW_H
-#define AWESOME_COMMON_SWINDOW_H
+#ifndef AWESOME_SWINDOW_H
+#define AWESOME_SWINDOW_H
 
 #include "draw.h"
+#include "common/util.h"
 
 /** A simple window. */
 typedef struct simple_window_t
 {
+    /** Orientation */
+
     /** The physical screen number the window is on. */
     int phys_screen;
     /** The window object. */
@@ -39,9 +42,14 @@ typedef struct simple_window_t
     area_t geometry;
     /** The window border width */
     int border_width;
+    /** Draw context */
+    draw_context_t ctx;
+    /** Position */
+    position_t position;
 } simple_window_t;
 
-simple_window_t * simplewindow_new(int, int, int, unsigned int, unsigned int, unsigned int);
+simple_window_t * simplewindow_new(int, int, int, unsigned int, unsigned int, unsigned int,
+                                   position_t, const xcolor_t *, const xcolor_t *);
 void simplewindow_delete(simple_window_t **);
 
 void simplewindow_move(simple_window_t *, int, int);

@@ -19,10 +19,13 @@
  *
  */
 
+#include <math.h>
+
 #include <xcb/xcb.h>
 
 #include "structs.h"
 #include "swindow.h"
+#include "draw.h"
 #include "common/xutil.h"
 
 extern awesome_t globalconf;
@@ -34,13 +37,18 @@ extern awesome_t globalconf;
  * \param w Width.
  * \param h Height.
  * \param border_width Window border width.
+ * \param position The rendering position.
+ * \param bg Default foreground color.
+ * \param bg Default background color.
  * \return A pointer to a newly allocated simple window, which must be deleted
  *         with simplewindow_delete().
  */
 simple_window_t *
 simplewindow_new(int phys_screen, int x, int y,
                  unsigned int w, unsigned int h,
-                 unsigned int border_width)
+                 unsigned int border_width,
+                 position_t position,
+                 const xcolor_t *fg, const xcolor_t *bg)
 {
     simple_window_t *sw;
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
@@ -73,14 +81,31 @@ simplewindow_new(int phys_screen, int x, int y,
     sw->pixmap = xcb_generate_id(globalconf.connection);
     xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root, w, h);
 
-    /* The default GC is just a newly created associated to the root
-     * bal
-     * gg
-     * window */
+    switch(position)
+    {
+        xcb_pixmap_t pixmap;
+      case Left:
+      case Right:
+        /* we need a new pixmap this way [     ] to render */
+        pixmap = xcb_generate_id(globalconf.connection);
+        xcb_create_pixmap(globalconf.connection,
+                          s->root_depth,
+                          pixmap, s->root, h, w);
+        draw_context_init(&sw->ctx, phys_screen,
+                          h, w, pixmap, fg, bg);
+        break;
+      default:
+        draw_context_init(&sw->ctx, phys_screen,
+                          w, h, sw->pixmap, fg, bg);
+        break;
+    }
+
+    /* The default GC is just a newly created associated to the root window */
     sw->gc = xcb_generate_id(globalconf.connection);
     xcb_create_gc(globalconf.connection, sw->gc, s->root, gc_mask, gc_values);
 
     sw->border_width = border_width;
+    sw->position = position;
 
     return sw;
 }
@@ -96,6 +121,7 @@ simplewindow_delete(simple_window_t **sw)
         xcb_destroy_window(globalconf.connection, (*sw)->window);
         xcb_free_pixmap(globalconf.connection, (*sw)->pixmap);
         xcb_free_gc(globalconf.connection, (*sw)->gc);
+        draw_context_wipe(&(*sw)->ctx);
         p_delete(sw);
     }
 }
@@ -117,6 +143,36 @@ simplewindow_move(simple_window_t *sw, int x, int y)
                          move_win_vals);
 }
 
+static void
+simplewindow_draw_context_update(simple_window_t *sw, xcb_screen_t *s)
+{
+    xcolor_t fg = sw->ctx.fg, bg = sw->ctx.bg;
+
+    draw_context_wipe(&sw->ctx);
+
+    /* update draw context */
+    switch(sw->position)
+    {
+      case Left:
+      case Right:
+        /* we need a new pixmap this way [     ] to render */
+        sw->ctx.pixmap = xcb_generate_id(globalconf.connection);
+        xcb_create_pixmap(globalconf.connection,
+                          s->root_depth,
+                          sw->ctx.pixmap, s->root,
+                          sw->geometry.height, sw->geometry.width);
+        draw_context_init(&sw->ctx, sw->phys_screen,
+                          sw->geometry.height, sw->geometry.width,
+                          sw->ctx.pixmap, &fg, &bg);
+        break;
+      default:
+        draw_context_init(&sw->ctx, sw->phys_screen,
+                          sw->geometry.width, sw->geometry.height,
+                          sw->pixmap, &fg, &bg);
+        break;
+    }
+}
+
 /** Resize a simple window.
  * \param sw The simple_window_t to resize.
  * \param w New width.
@@ -125,21 +181,20 @@ simplewindow_move(simple_window_t *sw, int x, int y)
 void
 simplewindow_resize(simple_window_t *sw, int w, int h)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->phys_screen);
-    uint32_t resize_win_vals[2];
-    xcb_pixmap_t d;
-
     if(w > 0 && h > 0 && (sw->geometry.width != w || sw->geometry.height != h))
     {
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->phys_screen);
+        uint32_t resize_win_vals[2];
+
         sw->geometry.width = resize_win_vals[0] = w;
         sw->geometry.height = resize_win_vals[1] = h;
-        d = sw->pixmap;
+        xcb_free_pixmap(globalconf.connection, sw->pixmap);
         sw->pixmap = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root, w, h);
         xcb_configure_window(globalconf.connection, sw->window,
                              XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                              resize_win_vals);
-        xcb_free_pixmap(globalconf.connection, d);
+        simplewindow_draw_context_update(sw, s);
     }
 }
 
@@ -154,7 +209,6 @@ void
 simplewindow_moveresize(simple_window_t *sw, int x, int y, int w, int h)
 {
     uint32_t moveresize_win_vals[4], mask_vals = 0;
-    xcb_pixmap_t d;
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->phys_screen);
 
     if(sw->geometry.x != x || sw->geometry.y != y)
@@ -177,10 +231,10 @@ simplewindow_moveresize(simple_window_t *sw, int x, int y, int w, int h)
             sw->geometry.height = moveresize_win_vals[1] = h;
         }
         mask_vals |= XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
-        d = sw->pixmap;
+        xcb_free_pixmap(globalconf.connection, sw->pixmap);
         sw->pixmap = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root, w, h);
-        xcb_free_pixmap(globalconf.connection, d);
+        simplewindow_draw_context_update(sw, s);
     }
 
     xcb_configure_window(globalconf.connection, sw->window, mask_vals, moveresize_win_vals);

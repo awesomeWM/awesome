@@ -31,6 +31,7 @@
 #include "common/array.h"
 #include "common/list.h"
 #include "common/buffer.h"
+#include "common/xutil.h"
 
 typedef struct
 {
@@ -100,26 +101,18 @@ typedef struct
     xcolor_t bg;
 } draw_context_t;
 
-draw_context_t *
-draw_context_new(int, int, int, xcb_drawable_t,
-                 const xcolor_t *, const xcolor_t*);
+void draw_context_init(draw_context_t *, int, int, int,
+                       xcb_pixmap_t, const xcolor_t *, const xcolor_t *);
 
-/** Delete a draw context.
- * \param ctx The draw_context_t to delete.
+/** Wipe a draw context.
+ * \param ctx The draw_context_t to wipe.
  */
 static inline void
-draw_context_delete(draw_context_t **ctx)
+draw_context_wipe(draw_context_t *ctx)
 {
-    if(*ctx)
-    {
-        if((*ctx)->layout)
-            g_object_unref((*ctx)->layout);
-        if((*ctx)->surface)
-            cairo_surface_destroy((*ctx)->surface);
-        if((*ctx)->cr)
-            cairo_destroy((*ctx)->cr);
-        p_delete(ctx);
-    }
+    g_object_unref(ctx->layout);
+    cairo_surface_destroy(ctx->surface);
+    cairo_destroy(ctx->cr);
 }
 
 font_t *draw_font_new(int, const char *);

@@ -234,24 +234,22 @@ mouse_snap_to_corner(area_t a, int *x, int *y, corner_t corner)
 }
 
 /** Redraw the infobox.
- * \param ctx Draw context.
  * \param sw The simple window.
  * \param geometry The geometry to use for the box.
  * \param border The client border size.
  */
 static void
-mouse_infobox_draw(draw_context_t *ctx,
-                   simple_window_t *sw,
+mouse_infobox_draw(simple_window_t *sw,
                    area_t geometry, int border)
 {
-    area_t draw_geometry = { 0, 0, ctx->width, ctx->height };
+    area_t draw_geometry = { 0, 0, sw->ctx.width, sw->ctx.height };
     char size[64];
     size_t len;
 
     len = snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
                    geometry.width, geometry.height, geometry.x, geometry.y);
-    draw_rectangle(ctx, draw_geometry, 1.0, true, &globalconf.colors.bg);
-    draw_text(ctx, globalconf.font, draw_geometry, size, len, NULL);
+    draw_rectangle(&sw->ctx, draw_geometry, 1.0, true, &globalconf.colors.bg);
+    draw_text(&sw->ctx, globalconf.font, draw_geometry, size, len, NULL);
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
                       geometry.y + ((2 * border + geometry.height) - sw->geometry.height) / 2);
@@ -265,12 +263,10 @@ mouse_infobox_draw(draw_context_t *ctx,
  * \param phys_screen Physical screen number.
  * \param border Border size of the client.
  * \param geometry Client geometry.
- * \param ctx Draw context to create.
  * \return The simple window.
  */
 static simple_window_t *
-mouse_infobox_new(int phys_screen, int border, area_t geometry,
-                  draw_context_t **ctx)
+mouse_infobox_new(int phys_screen, int border, area_t geometry)
 {
     simple_window_t *sw;
     area_t geom;
@@ -288,16 +284,11 @@ mouse_infobox_new(int phys_screen, int border, area_t geometry,
 
     sw = simplewindow_new(phys_screen,
                           geom.x, geom.y,
-                          geom.width, geom.height, 0);
-
-    *ctx = draw_context_new(sw->phys_screen,
-                            sw->geometry.width, sw->geometry.height,
-                            sw->pixmap,
-                            &globalconf.colors.fg,
-                            &globalconf.colors.bg);
+                          geom.width, geom.height, 0,
+                          Top, &globalconf.colors.fg, &globalconf.colors.bg);
 
     xcb_map_window(globalconf.connection, sw->window);
-    mouse_infobox_draw(*ctx, sw, geometry, border);
+    mouse_infobox_draw(sw, geometry, border);
 
     draw_parser_data_wipe(&pdata);
 
@@ -487,7 +478,6 @@ mouse_client_move(client_t *c, int snap, bool infobox)
     layout_t *layout;
     /* the infobox */
     simple_window_t *sw = NULL;
-    draw_context_t *ctx;
     /* the root window */
     xcb_window_t root;
 
@@ -506,7 +496,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
         return;
 
     if(infobox && (client_isfloating(c) || layout == layout_floating))
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry);
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -528,7 +518,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
 
             /* draw the infobox */
             if(sw)
-                mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+                mouse_infobox_draw(sw, c->geometry, c->border);
 
             statusbar_refresh();
 
@@ -571,10 +561,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
 
     /* free the infobox */
     if(sw)
-    {
-        draw_context_delete(&ctx);
         simplewindow_delete(&sw);
-    }
 }
 
 
@@ -593,7 +580,6 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     int mouse_x = 0, mouse_y = 0;
     /* the infobox */
     simple_window_t *sw = NULL;
-    draw_context_t  *ctx;
     size_t cursor = CurResize;
     int top, bottom, left, right;
 
@@ -640,7 +626,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
     /* create the infobox */
     if(infobox)
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry);
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -714,7 +700,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
         /* draw the infobox */
         if(sw)
-            mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+            mouse_infobox_draw(sw, c->geometry, c->border);
     }
 
     /* relase pointer */
@@ -722,10 +708,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
     /* free the infobox */
     if(sw)
-    {
-        draw_context_delete(&ctx);
         simplewindow_delete(&sw);
-    }
 }
 
 /** Resize the master column/row of a tiled layout
@@ -846,7 +829,6 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     tag_t *tag;
     /* the infobox */
     simple_window_t *sw = NULL;
-    draw_context_t  *ctx;
     xcb_window_t root;
 
     tag = tags_get_current(c->screen)[0];
@@ -897,7 +879,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
     /* create the infobox */
     if(infobox)
-        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry, &ctx);
+        sw = mouse_infobox_new(c->phys_screen, c->border, c->geometry);
 
     /* for each motion event */
     while(mouse_track_mouse_drag(&mouse_x, &mouse_y))
@@ -927,7 +909,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
         /* draw the infobox */
         if(sw)
-            mouse_infobox_draw(ctx, sw, c->geometry, c->border);
+            mouse_infobox_draw(sw, c->geometry, c->border);
     }
 
     /* ungrab pointer */
@@ -935,10 +917,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
 
     /* free the infobox */
     if(sw)
-    {
-        draw_context_delete(&ctx);
         simplewindow_delete(&sw);
-    }
 }
 
 /** Resize a client with the mouse.

@@ -21,8 +21,6 @@
 
 #include <xcb/xcb.h>
 
-#include <math.h>
-
 #include "titlebar.h"
 #include "client.h"
 #include "widget.h"
@@ -71,72 +69,16 @@ client_getbytitlebarwin(xcb_window_t win)
 void
 titlebar_draw(client_t *c)
 {
-    xcb_drawable_t dw = 0;
-    draw_context_t *ctx;
-    xcb_screen_t *s;
-
     if(!c || !c->titlebar || !c->titlebar->sw || !c->titlebar->position)
         return;
 
-    s = xutil_screen_get(globalconf.connection,
-                           c->titlebar->sw->phys_screen);
-
-    switch(c->titlebar->position)
-    {
-      case Off:
-        return;
-      case Right:
-      case Left:
-        dw = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection, s->root_depth,
-                          dw,
-                          s->root,
-                          c->titlebar->sw->geometry.height,
-                          c->titlebar->sw->geometry.width);
-        ctx = draw_context_new(c->titlebar->sw->phys_screen,
-                               c->titlebar->sw->geometry.height,
-                               c->titlebar->sw->geometry.width,
-                               dw,
-                               &c->titlebar->colors.fg,
-                               &c->titlebar->colors.bg);
-        break;
-      default:
-        ctx = draw_context_new(c->titlebar->sw->phys_screen,
-                               c->titlebar->sw->geometry.width,
-                               c->titlebar->sw->geometry.height,
-                               c->titlebar->sw->pixmap,
-                               &c->titlebar->colors.fg,
-                               &c->titlebar->colors.bg);
-        break;
-    }
-
-    widget_render(c->titlebar->widgets, ctx, c->titlebar->sw->gc, c->titlebar->sw->pixmap,
+    widget_render(c->titlebar->widgets, &c->titlebar->sw->ctx,
+                  c->titlebar->sw->gc, c->titlebar->sw->pixmap,
                   c->screen, c->titlebar->position,
                   c->titlebar->sw->geometry.x, c->titlebar->sw->geometry.y,
                   c->titlebar, AWESOME_TYPE_TITLEBAR);
 
-    switch(c->titlebar->position)
-    {
-      case Left:
-        draw_rotate(ctx, ctx->pixmap, c->titlebar->sw->pixmap,
-                    ctx->width, ctx->height,
-                    ctx->height, ctx->width,
-                    - M_PI_2, 0, c->titlebar->sw->geometry.height);
-        xcb_free_pixmap(globalconf.connection, dw);
-        break;
-      case Right:
-        draw_rotate(ctx, ctx->pixmap, c->titlebar->sw->pixmap,
-                    ctx->width, ctx->height,
-                    ctx->height, ctx->width,
-                    M_PI_2, c->titlebar->sw->geometry.width, 0);
-        xcb_free_pixmap(globalconf.connection, dw);
-      default:
-        break;
-    }
-
     simplewindow_refresh_pixmap(c->titlebar->sw);
-
-    draw_context_delete(&ctx);
 
     c->titlebar->need_update = false;
 }
@@ -284,11 +226,12 @@ titlebar_init(client_t *c)
     titlebar_geometry_compute(c, c->geometry, &geom);
 
     c->titlebar->sw = simplewindow_new(c->phys_screen, geom.x, geom.y,
-                                       geom.width, geom.height, c->titlebar->border.width);
+                                       geom.width, geom.height,
+                                       c->titlebar->border.width,
+                                       c->titlebar->position,
+                                       &c->titlebar->colors.fg, &c->titlebar->colors.bg);
 
-    if(c->titlebar->border.width)
-        xcb_change_window_attributes(globalconf.connection, c->titlebar->sw->window,
-                                     XCB_CW_BORDER_PIXEL, &c->titlebar->border.color.pixel);
+    simplewindow_border_color_set(c->titlebar->sw, &c->titlebar->border.color);
 
     client_need_arrange(c);
 
@@ -421,12 +364,20 @@ luaA_titlebar_newindex(lua_State *L)
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&(*titlebar)->colors.fg, buf, len)))
+            {
+                if((*titlebar)->sw)
+                    (*titlebar)->sw->ctx.fg = (*titlebar)->colors.fg;
                 (*titlebar)->need_update = true;
+            }
         return 0;
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&(*titlebar)->colors.bg, buf, len)))
+            {
+                if((*titlebar)->sw)
+                    (*titlebar)->sw->ctx.bg = (*titlebar)->colors.bg;
                 (*titlebar)->need_update = true;
+            }
         break;
       case A_TK_POSITION:
         buf = luaL_checklstring(L, 3, &len);

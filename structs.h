@@ -234,8 +234,6 @@ struct statusbar_t
     int screen;
     /** Widget list */
     widget_node_t *widgets;
-    /** Draw context */
-    draw_context_t *ctx;
     /** Need update */
     bool need_update;
     /** Default colors */

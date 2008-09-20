@@ -157,7 +157,7 @@ statusbar_systray_refresh(statusbar_t *statusbar)
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == phys_screen)
                     {
-                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) statusbar->sw->geometry.y + statusbar->ctx->width)
+                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) statusbar->sw->geometry.y + statusbar->sw->geometry.width)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -218,7 +218,7 @@ statusbar_draw(statusbar_t *statusbar)
 
     if(statusbar->position)
     {
-        widget_render(statusbar->widgets, statusbar->ctx, statusbar->sw->gc,
+        widget_render(statusbar->widgets, &statusbar->sw->ctx, statusbar->sw->gc,
                       statusbar->sw->pixmap,
                       statusbar->screen, statusbar->position,
                       statusbar->sw->geometry.x, statusbar->sw->geometry.y,
@@ -270,7 +270,6 @@ statusbar_clean(statusbar_t *statusbar)
         statusbar_systray_kickout(statusbar->sw->phys_screen);
 
     simplewindow_delete(&statusbar->sw);
-    draw_context_delete(&statusbar->ctx);
 }
 
 /** Update the statusbar position. It deletes every statusbar resources and
@@ -281,8 +280,6 @@ void
 statusbar_position_update(statusbar_t *statusbar)
 {
     area_t area, wingeometry;
-    xcb_pixmap_t dw;
-    xcb_screen_t *s = NULL;
     bool ignore = false;
 
     if(statusbar->position == Off)
@@ -461,36 +458,10 @@ statusbar_position_update(statusbar_t *statusbar)
 
         statusbar->sw =
             simplewindow_new(phys_screen, 0, 0,
-                             wingeometry.width, wingeometry.height, 0);
+                             wingeometry.width, wingeometry.height, 0,
+                             statusbar->position,
+                             &statusbar->colors.fg, &statusbar->colors.bg);
 
-        switch(statusbar->position)
-        {
-          case Right:
-          case Left:
-            statusbar->width = wingeometry.height;
-            s = xutil_screen_get(globalconf.connection, phys_screen);
-            /* we need a new pixmap this way [     ] to render */
-            dw = xcb_generate_id(globalconf.connection);
-            xcb_create_pixmap(globalconf.connection,
-                              s->root_depth, dw, s->root,
-                              statusbar->width, statusbar->height);
-            statusbar->ctx = draw_context_new(phys_screen,
-                                              statusbar->width,
-                                              statusbar->height,
-                                              dw,
-                                              &statusbar->colors.fg,
-                                              &statusbar->colors.bg);
-            break;
-          default:
-            statusbar->width = wingeometry.width;
-            statusbar->ctx = draw_context_new(phys_screen,
-                                              statusbar->width,
-                                              statusbar->height,
-                                              statusbar->sw->pixmap,
-                                              &statusbar->colors.fg,
-                                              &statusbar->colors.bg);
-            break;
-        }
         simplewindow_move(statusbar->sw, wingeometry.x, wingeometry.y);
         xcb_map_window(globalconf.connection, statusbar->sw->window);
         statusbar->need_update = true;
@@ -733,8 +704,8 @@ luaA_statusbar_newindex(lua_State *L)
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&(*statusbar)->colors.fg, buf, len)))
             {
-                if((*statusbar)->ctx)
-                    (*statusbar)->ctx->fg = (*statusbar)->colors.fg;
+                if((*statusbar)->sw)
+                    (*statusbar)->sw->ctx.fg = (*statusbar)->colors.fg;
                 (*statusbar)->need_update = true;
             }
         break;
@@ -742,9 +713,8 @@ luaA_statusbar_newindex(lua_State *L)
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&(*statusbar)->colors.bg, buf, len)))
             {
-                if((*statusbar)->ctx)
-                    (*statusbar)->ctx->bg = (*statusbar)->colors.bg;
-
+                if((*statusbar)->sw)
+                    (*statusbar)->sw->ctx.bg = (*statusbar)->colors.bg;
                 (*statusbar)->need_update = true;
             }
         break;
