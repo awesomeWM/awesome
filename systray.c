@@ -53,7 +53,7 @@ systray_init(int phys_screen)
     }
 
     atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false,
-                                               strlen(atom_name), atom_name);
+                                               a_strlen(atom_name), atom_name);
 
     p_delete(&atom_name);
 
@@ -105,7 +105,7 @@ systray_cleanup(int phys_screen)
        || !(atom_systray_r = xcb_intern_atom_reply(globalconf.connection,
                                                    xcb_intern_atom_unchecked(globalconf.connection,
                                                                              false,
-                                                                             strlen(atom_name),
+                                                                             a_strlen(atom_name),
                                                                              atom_name),
                                                    NULL)))
     {
