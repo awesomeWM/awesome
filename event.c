@@ -88,7 +88,7 @@ event_handle_mouse_button(client_t *c,
  * \return A widget node.
  */
 static widget_node_t *
-widget_getbycoords(position_t position, widget_node_t *widgets, int width, int height, int x, int y)
+widget_getbycoords(position_t position, widget_node_t *widgets, int width, int height, int16_t *x, int16_t *y)
 {
     int tmp;
     widget_node_t *w;
@@ -97,22 +97,22 @@ widget_getbycoords(position_t position, widget_node_t *widgets, int width, int h
     switch(position)
     {
       case Right:
-        tmp = y;
-        y = width - x;
-        x = tmp;
+        tmp = *y;
+        *y = width - *x;
+        *x = tmp;
         break;
       case Left:
-        tmp = y;
-        y = x;
-        x = height - tmp;
+        tmp = *y;
+        *y = *x;
+        *x = height - tmp;
         break;
       default:
         break;
     }
 
     for(w = widgets; w; w = w->next)
-        if(x >= w->area.x && x < w->area.x + w->area.width
-           && y >= w->area.y && y < w->area.y + w->area.height)
+        if(*x >= w->area.x && *x < w->area.x + w->area.width
+           && *y >= w->area.y && *y < w->area.y + w->area.height)
             return w;
 
     return NULL;
@@ -153,7 +153,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                 if((w = widget_getbycoords(statusbar->position, statusbar->widgets,
                                            statusbar->sw.geometry.width,
                                            statusbar->sw.geometry.height,
-                                           ev->event_x, ev->event_y)))
+                                           &ev->event_x, &ev->event_y)))
                     w->widget->button(w, ev, statusbar->screen, statusbar, AWESOME_TYPE_STATUSBAR);
                 /* return even if no widget match */
                 return 0;
@@ -164,7 +164,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     {
         if((w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
                                    c->titlebar->width, c->titlebar->height,
-                                   ev->event_x, ev->event_y)))
+                                   &ev->event_x, &ev->event_y)))
                 w->widget->button(w, ev, c->screen, c->titlebar, AWESOME_TYPE_TITLEBAR);
         /* return even if no widget match */
         return 0;
@@ -390,7 +390,7 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
         w = widget_getbycoords(statusbar->position, statusbar->widgets,
                                statusbar->sw.geometry.width,
                                statusbar->sw.geometry.height,
-                               ev->event_x, ev->event_y);
+                               &ev->event_x, &ev->event_y);
         event_handle_widget_motionnotify(statusbar,
                                          AWESOME_TYPE_STATUSBAR,
                                          &statusbar->mouse_over, w);
@@ -400,7 +400,7 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
         w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
                                c->titlebar->sw.geometry.width,
                                c->titlebar->sw.geometry.height,
-                               ev->event_x, ev->event_y);
+                               &ev->event_x, &ev->event_y);
         event_handle_widget_motionnotify(c->titlebar,
                                          AWESOME_TYPE_TITLEBAR,
                                          &c->titlebar->mouse_over, w);
