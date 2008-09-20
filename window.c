@@ -172,7 +172,6 @@ window_opacity_get(xcb_window_t win)
     if(prop_r->value_len)
     {
         unsigned int *data = xcb_get_property_value(prop_r);
-        printf("result %d\n", *data);
         return (double) *data / (double) 0xffffffff;
     }
 
