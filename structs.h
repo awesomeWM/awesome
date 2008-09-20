@@ -232,8 +232,6 @@ struct statusbar_t
     alignment_t align;
     /** Screen */
     int screen;
-    /** Physical screen id */
-    int phys_screen;
     /** Widget list */
     widget_node_t *widgets;
     /** Draw context */

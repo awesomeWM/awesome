@@ -54,7 +54,7 @@ systray_draw(draw_context_t *ctx,
         int i = 0;
         xembed_window_t *em;
         for(em = globalconf.embedded; em; em = em->next)
-            if(em->phys_screen == sb->phys_screen)
+            if(em->phys_screen == sb->sw->phys_screen)
                 i++;
         /** \todo use clas hints */
         w->area.width = MIN(i * ctx->height, ctx->width - used);
@@ -82,7 +82,7 @@ systray_draw(draw_context_t *ctx,
     /* set statusbar orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        globalconf.screens[sb->phys_screen].systray.window,
+                        globalconf.screens[sb->sw->phys_screen].systray.window,
                         _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
 
     return w->area.width;
