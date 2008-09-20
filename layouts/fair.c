@@ -27,12 +27,6 @@
 
 extern awesome_t globalconf;
 
-typedef enum
-{
-    HORIZONTAL,
-    VERTICAL
-} orientation_t;
-
 static void
 layout_fair(int screen, const orientation_t orientation)
 {
@@ -60,7 +54,7 @@ layout_fair(int screen, const orientation_t orientation)
         for(c = globalconf.clients; c; c = c->next)
             if(IS_TILED(c, screen))
             {
-                if (orientation == HORIZONTAL)
+                if (orientation == Horizontal)
                 {
                     geometry.width = area.width / u_divisions;
                     geometry.height = area.height / v_divisions;
@@ -92,13 +86,13 @@ layout_fair(int screen, const orientation_t orientation)
 void
 layout_fairh(int screen)
 {
-    layout_fair(screen, HORIZONTAL);
+    layout_fair(screen, Horizontal);
 }
 
 void
 layout_fairv(int screen)
 {
-    layout_fair(screen, VERTICAL);
+    layout_fair(screen, Vertical);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

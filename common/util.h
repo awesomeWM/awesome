@@ -35,6 +35,12 @@
 
 #include "tokenize.h"
 
+typedef enum
+{
+    Horizontal,
+    Vertical
+} orientation_t;
+
 /** A list of possible position, not sex related */
 typedef enum
 {
