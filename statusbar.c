@@ -358,7 +358,7 @@ statusbar_position_update(statusbar_t *statusbar)
     switch(statusbar->position)
     {
       case Right:
-        if(statusbar->width_user)
+        if(statusbar->width > 0)
             wingeometry.height = statusbar->width;
         else
             wingeometry.height = area.height;
@@ -380,7 +380,7 @@ statusbar_position_update(statusbar_t *statusbar)
         }
         break;
       case Left:
-        if(statusbar->width_user)
+        if(statusbar->width > 0)
             wingeometry.height = statusbar->width;
         else
             wingeometry.height = area.height;
@@ -401,7 +401,7 @@ statusbar_position_update(statusbar_t *statusbar)
         }
         break;
       case Bottom:
-        if(statusbar->width_user)
+        if(statusbar->width > 0)
             wingeometry.width = statusbar->width;
         else
             wingeometry.width = area.width;
@@ -423,7 +423,7 @@ statusbar_position_update(statusbar_t *statusbar)
         }
         break;
       default:
-        if(statusbar->width_user)
+        if(statusbar->width > 0)
             wingeometry.width = statusbar->width;
         else
             wingeometry.width = area.width;
@@ -549,8 +549,6 @@ luaA_statusbar_new(lua_State *L)
     sb->align = draw_align_fromstr(buf, len);
 
     sb->width = luaA_getopt_number(L, 2, "width", 0);
-    if(sb->width > 0)
-        sb->width_user = true;
     sb->height = luaA_getopt_number(L, 2, "height", 0);
     if(sb->height <= 0)
         /* 1.5 as default factor, it fits nice but no one knows why */
