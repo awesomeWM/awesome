@@ -24,16 +24,14 @@
 
 #include <xcb/xcb.h>
 
-#include "statusbar.h"
-#include "titlebar.h"
+#include "wibox.h"
 #include "layout.h"
 
 static inline int
 awesome_refresh(xcb_connection_t *c)
 {
     layout_refresh();
-    statusbar_refresh();
-    titlebar_refresh();
+    wibox_refresh();
     return xcb_flush(c);
 }
 

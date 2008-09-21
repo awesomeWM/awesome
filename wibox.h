@@ -28,6 +28,8 @@
 #include "common/refcount.h"
 #include "common/array.h"
 
+void wibox_refresh(void);
+
 static inline void
 wibox_delete(wibox_t **wibox)
 {
