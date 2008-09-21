@@ -37,12 +37,10 @@ systray_draw(draw_context_t *ctx,
              int screen __attribute__ ((unused)),
              widget_node_t *w,
              int offset, int used __attribute__ ((unused)),
-             void *p,
+             wibox_t *p,
              awesome_type_t type)
 {
     uint32_t orient;
-    /* p is always a statusbar, titlebars are forbidden */
-    statusbar_t *sb = (statusbar_t *) p;
 
     /* we are on a statusbar */
     assert(type == AWESOME_TYPE_STATUSBAR);
@@ -54,7 +52,7 @@ systray_draw(draw_context_t *ctx,
         int i = 0;
         xembed_window_t *em;
         for(em = globalconf.embedded; em; em = em->next)
-            if(em->phys_screen == sb->sw.ctx.phys_screen)
+            if(em->phys_screen == p->sw.ctx.phys_screen)
                 i++;
         /** \todo use clas hints */
         w->area.width = MIN(i * ctx->height, ctx->width - used);
@@ -68,7 +66,7 @@ systray_draw(draw_context_t *ctx,
                                         w->widget->align);
     w->area.y = 0;
 
-    switch(sb->position)
+    switch(p->position)
     {
       case Right:
       case Left:
@@ -82,7 +80,7 @@ systray_draw(draw_context_t *ctx,
     /* set statusbar orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        globalconf.screens[sb->sw.ctx.phys_screen].systray.window,
+                        globalconf.screens[p->sw.ctx.phys_screen].systray.window,
                         _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
 
     return w->area.width;

@@ -55,7 +55,7 @@ typedef struct tasklist_object_data_t tasklist_object_data_t;
 struct tasklist_object_data_t
 {
     /** The object */
-    void *object;
+    wibox_t *object;
     /** The box width for each client */
     int box_width;
     /** The client label array for the object */
@@ -88,7 +88,7 @@ typedef struct
  * \return A object data or NULL if not found.
  */
 static tasklist_object_data_t *
-tasklist_object_data_getbyobj(tasklist_object_data_t *od, void *p)
+tasklist_object_data_getbyobj(tasklist_object_data_t *od, wibox_t *p)
 {
     tasklist_object_data_t *o;
 
@@ -178,7 +178,7 @@ tasklist_draw_item(draw_context_t *ctx,
 static int
 tasklist_draw(draw_context_t *ctx, int screen,
               widget_node_t *w,
-              int offset, int used, void *p,
+              int offset, int used, wibox_t *p,
               awesome_type_t type)
 {
     client_t *c;
@@ -279,7 +279,7 @@ static void
 tasklist_button(widget_node_t *w,
                 xcb_button_press_event_t *ev,
                 int screen,
-                void *object,
+                wibox_t *object,
                 awesome_type_t type)
 {
     tasklist_data_t *d = w->widget->data;
@@ -388,7 +388,7 @@ tasklist_destructor(widget_t *widget)
  * \param object The object we are leaving.
  */
 static void
-tasklist_detach(widget_t *widget, void *object)
+tasklist_detach(widget_t *widget, wibox_t *object)
 {
     tasklist_data_t *d = widget->data;
     tasklist_object_data_t *od;

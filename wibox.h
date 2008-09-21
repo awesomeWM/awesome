@@ -1,5 +1,5 @@
 /*
- * screen.h - screen management header
+ * statusbar.h - statusbar functions header
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -19,19 +19,26 @@
  *
  */
 
-#ifndef AWESOME_SCREEN_H
-#define AWESOME_SCREEN_H
+#ifndef AWESOME_STATUSBAR_H
+#define AWESOME_STATUSBAR_H
 
-#include "structs.h"
+#include "widget.h"
+#include "swindow.h"
+#include "common/util.h"
+#include "common/refcount.h"
+#include "common/array.h"
 
-#define SCREEN_UNDEF    (-1)
+static inline void
+wibox_delete(wibox_t **wibox)
+{
+    simplewindow_wipe(&(*wibox)->sw);
+    widget_node_list_wipe(&(*wibox)->widgets);
+    p_delete(&(*wibox)->name);
+    p_delete(wibox);
+}
 
-void screen_scan(void);
-int screen_getbycoord(int, int, int);
-area_t screen_area_get(int, wibox_array_t *, padding_t *, bool);
-area_t display_area_get(int, wibox_array_t *, padding_t *);
-int screen_virttophys(int);
-void screen_client_moveto(client_t *, int, bool, bool);
+DO_RCNT(wibox_t, wibox, wibox_delete)
+ARRAY_FUNCS(wibox_t *, wibox, wibox_unref)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

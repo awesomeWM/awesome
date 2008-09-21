@@ -536,7 +536,7 @@ ewmh_client_strut_update(client_t *c, xcb_get_property_reply_t *strut_r)
             for(int screen = 0; screen < globalconf.nscreen; screen++)
                 for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
                 {
-                    statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
+                    wibox_t *s = globalconf.screens[screen].statusbars.tab[i];
                     statusbar_position_update(s);
                 }
         }

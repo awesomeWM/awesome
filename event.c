@@ -140,7 +140,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     for(screen = 0; screen < globalconf.nscreen; screen++)
         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
         {
-            statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
+            wibox_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
             if(statusbar->sw.window == ev->event || statusbar->sw.window == ev->child)
             {
                 /* If the statusbar is child, then x,y are
@@ -225,7 +225,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
                     for(int screen = 0; screen < globalconf.nscreen; screen++)
                         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
                         {
-                            statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
+                            wibox_t *s = globalconf.screens[screen].statusbars.tab[i];
                             statusbar_position_update(s);
                         }
             }
@@ -381,7 +381,7 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                           xcb_connection_t *connection,
                           xcb_motion_notify_event_t *ev)
 {
-    statusbar_t *statusbar = statusbar_getbywin(ev->event);
+    wibox_t *statusbar = statusbar_getbywin(ev->event);
     client_t *c;
     widget_node_t *w;
 
@@ -419,7 +419,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection,
                          xcb_leave_notify_event_t *ev)
 {
-    statusbar_t *statusbar = statusbar_getbywin(ev->event);
+    wibox_t *statusbar = statusbar_getbywin(ev->event);
     client_t *c;
 
     if(statusbar)
@@ -500,7 +500,7 @@ event_handle_expose(void *data __attribute__ ((unused)),
     for(int screen = 0; screen < globalconf.nscreen; screen++)
         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
         {
-            statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
+            wibox_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
             if(statusbar->sw.window == ev->window)
             {
                 simplewindow_refresh_pixmap_partial(&statusbar->sw,

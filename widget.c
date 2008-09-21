@@ -67,7 +67,7 @@ static void
 widget_common_button(widget_node_t *w,
                      xcb_button_press_event_t *ev,
                      int screen __attribute__ ((unused)),
-                     void *p,
+                     wibox_t *p,
                      awesome_type_t type)
 {
     button_array_t *b = &w->widget->buttons;
@@ -212,7 +212,7 @@ widget_invalidate_cache(int screen, int flags)
 {
     for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
     {
-        statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
+        wibox_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
         widget_node_t *widget;
 
         for(widget = statusbar->widgets; widget; widget = widget->next)
@@ -238,7 +238,7 @@ widget_invalidate_bywidget(widget_t *widget)
     for(screen = 0; screen < globalconf.nscreen; screen++)
         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
         {
-            statusbar_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
+            wibox_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
 
             if(!statusbar->need_update)
                 for(witer = statusbar->widgets; witer; witer = witer->next)

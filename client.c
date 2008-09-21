@@ -36,6 +36,7 @@
 #include "mouse.h"
 #include "systray.h"
 #include "statusbar.h"
+#include "wibox.h"
 #include "property.h"
 #include "layouts/floating.h"
 #include "common/markup.h"
@@ -333,7 +334,7 @@ client_stack(void)
     for(screen = 0; screen < globalconf.nscreen; screen++)
         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
         {
-            statusbar_t *sb = globalconf.screens[screen].statusbars.tab[i];
+            wibox_t *sb = globalconf.screens[screen].statusbars.tab[i];
             xcb_configure_window(globalconf.connection,
                                  sb->sw.window,
                                  XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
@@ -818,7 +819,7 @@ client_unmanage(client_t *c)
     if(c->titlebar)
     {
         xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
-        titlebar_unref(&c->titlebar);
+        wibox_unref(&c->titlebar);
         c->titlebar = NULL;
     }
 
@@ -833,7 +834,7 @@ client_unmanage(client_t *c)
         for(int screen = 0; screen < globalconf.nscreen; screen++)
             for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
             {
-                statusbar_t *s = globalconf.screens[screen].statusbars.tab[i];
+                wibox_t *s = globalconf.screens[screen].statusbars.tab[i];
                 statusbar_position_update(s);
             }
 
@@ -1202,7 +1203,7 @@ luaA_client_newindex(lua_State *L)
     bool b;
     double d;
     int i;
-    titlebar_t **t = NULL;
+    wibox_t **t = NULL;
     image_t **image;
 
     if((*c)->invalid)
@@ -1291,7 +1292,7 @@ luaA_client_newindex(lua_State *L)
         if((*c)->titlebar)
         {
             xcb_unmap_window(globalconf.connection, (*c)->titlebar->sw.window);
-            titlebar_unref(&(*c)->titlebar);
+            wibox_unref(&(*c)->titlebar);
             (*c)->titlebar = NULL;
             client_need_arrange(*c);
         }
@@ -1299,7 +1300,7 @@ luaA_client_newindex(lua_State *L)
         if(t)
         {
             /* Attach titlebar to client */
-            (*c)->titlebar = titlebar_ref(t);
+            (*c)->titlebar = wibox_ref(t);
             titlebar_init(*c);
         }
         client_stack();

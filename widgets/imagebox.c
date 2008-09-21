@@ -45,7 +45,7 @@ static int
 imagebox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
               widget_node_t *w,
               int offset, int used,
-              void *p, awesome_type_t type)
+              wibox_t *p, awesome_type_t type)
 {
     imagebox_data_t *d = w->widget->data;
 

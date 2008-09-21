@@ -145,7 +145,7 @@ graph_draw(draw_context_t *ctx,
            widget_node_t *w,
            int offset,
            int used __attribute__ ((unused)),
-           void *p __attribute__ ((unused)),
+           wibox_t *p __attribute__ ((unused)),
            awesome_type_t type)
 {
     int margin_top, y;

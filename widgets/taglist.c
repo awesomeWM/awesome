@@ -33,7 +33,7 @@ extern awesome_t globalconf;
 typedef struct taglist_drawn_area_t taglist_drawn_area_t;
 struct taglist_drawn_area_t
 {
-    void *object;
+    wibox_t *object;
     area_array_t areas;
     taglist_drawn_area_t *next, *prev;
 };
@@ -58,7 +58,7 @@ typedef struct
 } taglist_data_t;
 
 static taglist_drawn_area_t *
-taglist_drawn_area_getbyobj(taglist_drawn_area_t *list, void *p)
+taglist_drawn_area_getbyobj(taglist_drawn_area_t *list, wibox_t *p)
 {
     taglist_drawn_area_t *t;
     
@@ -83,7 +83,7 @@ static int
 taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
              int offset,
              int used __attribute__ ((unused)),
-             void *object,
+             wibox_t *object,
              awesome_type_t type)
 {
     taglist_data_t *data = w->widget->data;
@@ -168,7 +168,7 @@ static void
 taglist_button(widget_node_t *w,
                xcb_button_press_event_t *ev,
                int screen,
-               void *object,
+               wibox_t *object,
                awesome_type_t type)
 {
     tag_array_t *tags = &globalconf.screens[screen].tags;
@@ -265,7 +265,7 @@ taglist_destructor(widget_t *widget)
  * \param object The object we are leaving.
  */
 static void
-taglist_detach(widget_t *widget, void *object)
+taglist_detach(widget_t *widget, wibox_t *object)
 {
     taglist_data_t *d = widget->data;
     taglist_drawn_area_t *tda;

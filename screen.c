@@ -162,7 +162,7 @@ screen_getbycoord(int screen, int x, int y)
  * \return The screen area.
  */
 area_t
-screen_area_get(int screen, statusbar_array_t *statusbars,
+screen_area_get(int screen, wibox_array_t *statusbars,
                 padding_t *padding, bool strut)
 {
     area_t area = globalconf.screens[screen].geometry;
@@ -218,7 +218,7 @@ screen_area_get(int screen, statusbar_array_t *statusbars,
     if(statusbars)
         for(int i = 0; i < statusbars->len; i++)
         {
-            statusbar_t *sb = statusbars->tab[i];
+            wibox_t *sb = statusbars->tab[i];
             switch(sb->position)
             {
               case Top:
@@ -253,7 +253,7 @@ screen_area_get(int screen, statusbar_array_t *statusbars,
  * \return The display area.
  */
 area_t
-display_area_get(int phys_screen, statusbar_array_t *statusbars, padding_t *padding)
+display_area_get(int phys_screen, wibox_array_t *statusbars, padding_t *padding)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
     area_t area = { .x = 0,
@@ -264,7 +264,7 @@ display_area_get(int phys_screen, statusbar_array_t *statusbars, padding_t *padd
     if(statusbars)
         for(int i = 0; i < statusbars->len; i++)
         {
-            statusbar_t *sb = statusbars->tab[i];
+            wibox_t *sb = statusbars->tab[i];
             area.y += sb->position == Top ? sb->height : 0;
             area.height -= (sb->position == Top || sb->position == Bottom) ? sb->height : 0;
         }

@@ -69,15 +69,49 @@ enum
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
 typedef struct widget_node_t widget_node_t;
-typedef struct statusbar_t statusbar_t;
 typedef struct client_t client_t;
-typedef struct titlebar_t titlebar_t;
 typedef struct client_node_t client_node_t;
 typedef struct _tag_t tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
 typedef widget_t *(widget_constructor_t)(alignment_t);
 typedef void (widget_destructor_t)(widget_t *);
 typedef struct awesome_t awesome_t;
+
+/** Wibox type */
+typedef struct
+{
+    /** Ref count */
+    int refcount;
+    /** Window */
+    simple_window_t sw;
+    /** Wibox name */
+    char *name;
+    /** Box width and height */
+    int width, height;
+    /** Box position */
+    position_t position;
+    /** Alignment */
+    alignment_t align;
+    /** Screen */
+    int screen;
+    /** Widget list */
+    widget_node_t *widgets;
+    /** Widget the mouse is over */
+    widget_node_t *mouse_over;
+    /** Need update */
+    bool need_update;
+    /** Default colors */
+    struct
+    {
+        xcolor_t fg, bg;
+    } colors;
+    struct
+    {
+        xcolor_t color;
+        uint16_t width;
+    } border;
+} wibox_t;
+ARRAY_TYPE(wibox_t *, wibox)
 
 /** Mouse buttons bindings */
 struct button_t
@@ -109,15 +143,15 @@ struct widget_t
     /** Widget destructor */
     widget_destructor_t *destructor;
     /** Widget detach function */
-    void (*detach)(widget_t *, void *);
+    void (*detach)(widget_t *, wibox_t *);
     /** Draw function */
-    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, void *, awesome_type_t);
+    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, wibox_t *, awesome_type_t);
     /** Index function */
     int (*index)(lua_State *, awesome_token_t);
     /** Newindex function */
     int (*newindex)(lua_State *, awesome_token_t);
     /** Button event handler */
-    void (*button)(widget_node_t *, xcb_button_press_event_t *, int, void *, awesome_type_t);
+    void (*button)(widget_node_t *, xcb_button_press_event_t *, int, wibox_t *, awesome_type_t);
     /** Mouse over event handler */
     luaA_ref mouse_enter, mouse_leave;
     /** Alignement */
@@ -168,83 +202,6 @@ widget_node_delete(widget_node_t **node)
 }
 
 DO_SLIST(widget_node_t, widget_node, widget_node_delete)
-
-/** Titlebar template structure */
-struct titlebar_t
-{
-    /** Ref count */
-    int refcount;
-    /** Position */
-    position_t position;
-    /** Alignment on window */
-    alignment_t align;
-    /** Widgets */
-    widget_node_t *widgets;
-    /** Widget the mouse is over */
-    widget_node_t *mouse_over;
-    /** Width and height */
-    int width, height;
-    /** Titlebar window */
-    simple_window_t sw;
-    /** Default colors */
-    struct
-    {
-        xcolor_t fg, bg;
-    } colors;
-    /** Border */
-    struct
-    {
-        xcolor_t color;
-        int width;
-    } border;
-    /** Need update */
-    bool need_update;
-};
-
-/** Delete a titlebar structure.
- * \param t The titlebar to destroy.
- */
-static inline void
-titlebar_delete(titlebar_t **t)
-{
-    widget_node_list_wipe(&(*t)->widgets);
-    p_delete(t);
-}
-
-DO_RCNT(titlebar_t, titlebar, titlebar_delete)
-
-/** Status bar */
-struct statusbar_t
-{
-    /** Ref count */
-    int refcount;
-    /** Window */
-    simple_window_t sw;
-    /** statusbar_t name */
-    char *name;
-    /** Bar width */
-    int width;
-    /** Bar height */
-    int height;
-    /** Bar position */
-    position_t position;
-    /** Alignment */
-    alignment_t align;
-    /** Screen */
-    int screen;
-    /** Widget list */
-    widget_node_t *widgets;
-    /** Need update */
-    bool need_update;
-    /** Default colors */
-    struct
-    {
-        xcolor_t fg, bg;
-    } colors;
-    /** Widget the mouse is over */
-    widget_node_t *mouse_over;
-};
-ARRAY_TYPE(statusbar_t *, statusbar)
 
 /* Strut */
 typedef struct
@@ -318,7 +275,7 @@ struct client_t
     /** Path to an icon */
     char *icon_path;
     /** Titlebar */
-    titlebar_t *titlebar;
+    wibox_t *titlebar;
     /** Button bindings */
     button_array_t buttons;
     /** Icon */
@@ -399,7 +356,7 @@ typedef struct
     /** Tag list */
     tag_array_t tags;
     /** Statusbars */
-    statusbar_array_t statusbars;
+    wibox_array_t statusbars;
     /** Padding */
     padding_t padding;
     /** Window that contains the systray */

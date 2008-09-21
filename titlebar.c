@@ -24,19 +24,20 @@
 #include "titlebar.h"
 #include "client.h"
 #include "widget.h"
+#include "wibox.h"
 
 extern awesome_t globalconf;
 
-DO_LUA_NEW(extern, titlebar_t, titlebar, "titlebar", titlebar_ref)
-DO_LUA_GC(titlebar_t, titlebar, "titlebar", titlebar_unref)
-DO_LUA_EQ(titlebar_t, titlebar, "titlebar")
+DO_LUA_NEW(extern, wibox_t, titlebar, "titlebar", wibox_ref)
+DO_LUA_GC(wibox_t, titlebar, "titlebar", wibox_unref)
+DO_LUA_EQ(wibox_t, titlebar, "titlebar")
 
 /** Get a client by its titlebar.
  * \param titlebar The titlebar.
  * \return A client.
  */
 client_t *
-client_getbytitlebar(titlebar_t *titlebar)
+client_getbytitlebar(wibox_t *titlebar)
 {
     client_t *c;
 
@@ -253,7 +254,7 @@ titlebar_init(client_t *c)
 static int
 luaA_titlebar_new(lua_State *L)
 {
-    titlebar_t *tb;
+    wibox_t *tb;
     const char *buf;
     size_t len;
     xcolor_init_request_t reqs[3];
@@ -261,7 +262,7 @@ luaA_titlebar_new(lua_State *L)
 
     luaA_checktable(L, 2);
 
-    tb = p_new(titlebar_t, 1);
+    tb = p_new(wibox_t, 1);
 
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     tb->align = draw_align_fromstr(buf, len);
@@ -303,7 +304,7 @@ static int
 luaA_titlebar_newindex(lua_State *L)
 {
     size_t len;
-    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
+    wibox_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     client_t *c = NULL;
     int i;
@@ -318,11 +319,10 @@ luaA_titlebar_newindex(lua_State *L)
             if((*newc)->titlebar)
             {
                 xcb_unmap_window(globalconf.connection, (*newc)->titlebar->sw.window);
-                titlebar_unref(&(*newc)->titlebar);
+                wibox_unref(&(*newc)->titlebar);
             }
             /* Attach titlebar to client */
-            (*newc)->titlebar = *titlebar;
-            titlebar_ref(titlebar);
+            (*newc)->titlebar = wibox_ref(titlebar);
             titlebar_init(*newc);
             c = *newc;
         }
@@ -330,7 +330,7 @@ luaA_titlebar_newindex(lua_State *L)
         {
             xcb_unmap_window(globalconf.connection, (*titlebar)->sw.window);
             /* unref and NULL the ref */
-            titlebar_unref(&c->titlebar);
+            wibox_unref(&c->titlebar);
             c->titlebar = NULL;
             client_need_arrange(c);
         }
@@ -405,7 +405,7 @@ static int
 luaA_titlebar_index(lua_State *L)
 {
     size_t len;
-    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
+    wibox_t **titlebar = luaA_checkudata(L, 1, "titlebar");
     const char *attr = luaL_checklstring(L, 2, &len);
     client_t *c;
 
@@ -447,7 +447,7 @@ luaA_titlebar_index(lua_State *L)
 static int
 luaA_titlebar_widgets(lua_State *L)
 {
-    titlebar_t **titlebar = luaA_checkudata(L, 1, "titlebar");
+    wibox_t **titlebar = luaA_checkudata(L, 1, "titlebar");
 
     if(lua_gettop(L) == 2)
     {
@@ -469,7 +469,7 @@ luaA_titlebar_widgets(lua_State *L)
 static int
 luaA_titlebar_tostring(lua_State *L)
 {
-    titlebar_t **p = luaA_checkudata(L, 1, "titlebar");
+    wibox_t **p = luaA_checkudata(L, 1, "titlebar");
     lua_pushfstring(L, "[titlebar udata(%p)]", *p);
     return 1;
 }

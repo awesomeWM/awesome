@@ -24,14 +24,14 @@
 
 #include "structs.h"
 
-client_t * client_getbytitlebar(titlebar_t *);
+client_t * client_getbytitlebar(wibox_t *);
 client_t * client_getbytitlebarwin(xcb_window_t);
 void titlebar_geometry_compute(client_t *, area_t, area_t *);
 void titlebar_draw(client_t *);
 void titlebar_init(client_t *);
 void titlebar_refresh(void);
 
-int luaA_titlebar_userdata_new(lua_State *, titlebar_t *);
+int luaA_titlebar_userdata_new(lua_State *, wibox_t *);
 
 /** Add the titlebar geometry and border to a geometry.
  * \param t The titlebar
@@ -40,7 +40,7 @@ int luaA_titlebar_userdata_new(lua_State *, titlebar_t *);
  * \return A new geometry bigger if the titlebar is visible.
  */
 static inline area_t
-titlebar_geometry_add(titlebar_t *t, int border, area_t geometry)
+titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
 {
     if(t)
         switch(t->position)
@@ -82,7 +82,7 @@ titlebar_geometry_add(titlebar_t *t, int border, area_t geometry)
  * \return A new geometry smaller if the titlebar is visible.
  */
 static inline area_t
-titlebar_geometry_remove(titlebar_t *t, int border, area_t geometry)
+titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
 {
     if(t)
         switch(t->position)

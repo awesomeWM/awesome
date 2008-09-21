@@ -1,5 +1,5 @@
 /*
- * statusbar.h - statusbar functions header
+ * wibox.h - wibox functions header
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -19,30 +19,18 @@
  *
  */
 
-#ifndef AWESOME_STATUSBAR_H
-#define AWESOME_STATUSBAR_H
+#ifndef AWESOME_WIBOX_H
+#define AWESOME_WIBOX_H
 
 #include "structs.h"
 #include "swindow.h"
 #include "common/refcount.h"
 
-static inline void
-statusbar_delete(statusbar_t **statusbar)
-{
-    simplewindow_wipe(&(*statusbar)->sw);
-    widget_node_list_wipe(&(*statusbar)->widgets);
-    p_delete(&(*statusbar)->name);
-    p_delete(statusbar);
-}
-
-statusbar_t * statusbar_getbywin(xcb_window_t);
+wibox_t * statusbar_getbywin(xcb_window_t);
 void statusbar_refresh(void);
-void statusbar_position_update(statusbar_t *);
+void statusbar_position_update(wibox_t *);
 
-int luaA_statusbar_userdata_new(lua_State *, statusbar_t *);
-
-DO_RCNT(statusbar_t, statusbar, statusbar_delete)
-ARRAY_FUNCS(statusbar_t *, statusbar, statusbar_unref)
+int luaA_statusbar_userdata_new(lua_State *, wibox_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
