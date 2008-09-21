@@ -21,8 +21,8 @@
 
 #include "client.h"
 #include "widget.h"
-#include "ewmh.h"
 #include "tag.h"
+#include "wibox.h"
 #include "common/markup.h"
 #include "common/tokenize.h"
 
@@ -172,14 +172,12 @@ tasklist_draw_item(draw_context_t *ctx,
  * \param offset The offset to draw at.
  * \param used The already used width.
  * \param p A pointer to the object we're drawing onto.
- * \param type The object type.
  * \return The widget width.
  */
 static int
 tasklist_draw(draw_context_t *ctx, int screen,
               widget_node_t *w,
-              int offset, int used, wibox_t *p,
-              awesome_type_t type)
+              int offset, int used, wibox_t *p)
 {
     client_t *c;
     tasklist_data_t *d = w->widget->data;
@@ -273,14 +271,12 @@ tasklist_draw(draw_context_t *ctx, int screen,
  * \param ev The button press event.
  * \param screen The screen where the click was.
  * \param object The object we're onto.
- * \param type The type object.
  */
 static void
 tasklist_button(widget_node_t *w,
                 xcb_button_press_event_t *ev,
                 int screen,
-                wibox_t *object,
-                awesome_type_t type)
+                wibox_t *object)
 {
     tasklist_data_t *d = w->widget->data;
     int ci = 0;
@@ -301,7 +297,7 @@ tasklist_button(widget_node_t *w,
         if(ev->detail == barr->tab[i]->button
            && XUTIL_MASK_CLEAN(ev->state) == barr->tab[i]->mod)
         {
-            luaA_pushpointer(globalconf.L, object, type);
+            luaA_wibox_userdata_new(globalconf.L, object);
             luaA_client_userdata_new(globalconf.L, odata->client_labels.tab[ci].client);
             luaA_dofunction(globalconf.L,
                             ev->response_type == XCB_BUTTON_PRESS ?

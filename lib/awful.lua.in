@@ -24,7 +24,7 @@ local capi =
     client = client,
     mouse = mouse,
     button = button,
-    titlebar = titlebar,
+    wibox = wibox,
     widget = widget,
     hooks = hooks,
     keygrabber = keygrabber
@@ -1526,7 +1526,7 @@ function titlebar.add(c, args)
     local targs = {}
     if args.fg then targs.fg = args.fg end
     if args.bg then targs.bg = args.bg end
-    local tb = capi.titlebar(targs)
+    local tb = capi.wibox(targs)
 
     local title = capi.widget({ type = "textbox", name = "title", align = "flex" })
     local bts =

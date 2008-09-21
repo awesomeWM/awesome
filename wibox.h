@@ -30,6 +30,9 @@
 
 void wibox_refresh(void);
 
+int luaA_wibox_new(lua_State *);
+int luaA_wibox_userdata_new(lua_State *, wibox_t *);
+
 static inline void
 wibox_delete(wibox_t **wibox)
 {

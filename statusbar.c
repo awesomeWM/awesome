@@ -30,10 +30,6 @@
 
 extern awesome_t globalconf;
 
-DO_LUA_NEW(extern, wibox_t, statusbar, "statusbar", wibox_ref)
-DO_LUA_GC(wibox_t, statusbar, "statusbar", wibox_unref)
-DO_LUA_EQ(wibox_t, statusbar, "statusbar")
-
 /** Kick out systray windows.
  * \param phys_screen Physical screen number.
  */
@@ -226,7 +222,7 @@ statusbar_draw(wibox_t *statusbar)
                       statusbar->sw.pixmap,
                       statusbar->screen, statusbar->position,
                       statusbar->sw.geometry.x, statusbar->sw.geometry.y,
-                      statusbar, AWESOME_TYPE_STATUSBAR);
+                      statusbar);
         simplewindow_refresh_pixmap(&statusbar->sw);
     }
 
@@ -453,6 +449,7 @@ statusbar_position_update(wibox_t *statusbar)
                           wingeometry.width, wingeometry.height,
                           0, statusbar->position,
                           &statusbar->colors.fg, &statusbar->colors.bg);
+        statusbar->need_update = true;
         xcb_map_window(globalconf.connection, statusbar->sw.window);
     }
     /* same window size and position ? */
@@ -474,21 +471,7 @@ statusbar_position_update(wibox_t *statusbar)
     globalconf.screens[statusbar->screen].need_arrange = true;
 }
 
-/** Convert a statusbar to a printable string.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A statusbar.
- */
-static int
-luaA_statusbar_tostring(lua_State *L)
-{
-    wibox_t **p = luaA_checkudata(L, 1, "statusbar");
-    lua_pushfstring(L, "[statusbar udata(%p)]", *p);
-    return 1;
-}
-
-/** Create a new statusbar.
+/** Create a new statusbar (DEPRECATED).
  * \param L The Lua VM state.
  *
  * \luastack
@@ -499,117 +482,16 @@ luaA_statusbar_tostring(lua_State *L)
 static int
 luaA_statusbar_new(lua_State *L)
 {
-    wibox_t *sb;
-    const char *buf;
-    size_t len;
-    xcolor_init_request_t reqs[2];
-    int8_t i, reqs_nbr = -1;
+    deprecate();
 
-    luaA_checktable(L, 2);
-
-    sb = p_new(wibox_t, 1);
-
-    sb->colors.fg = globalconf.colors.fg;
-    if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(&sb->colors.fg, buf, len);
-
-    sb->colors.bg = globalconf.colors.bg;
-    if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(&sb->colors.bg, buf, len);
-
-    buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
-    sb->align = draw_align_fromstr(buf, len);
-
-    sb->width = luaA_getopt_number(L, 2, "width", 0);
-    sb->height = luaA_getopt_number(L, 2, "height", 0);
-    if(sb->height <= 0)
-        /* 1.5 as default factor, it fits nice but no one knows why */
-        sb->height = 1.5 * globalconf.font->height;
-
-    buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
-    sb->position = position_fromstr(buf, len);
-
-    sb->screen = SCREEN_UNDEF;
-
-    for(i = 0; i <= reqs_nbr; i++)
-        xcolor_init_reply(reqs[i]);
-
-    return luaA_statusbar_userdata_new(L, sb);
-}
-
-/** Statusbar object.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lfield screen Screen number.
- * \lfield align The alignment.
- * \lfield fg Foreground color.
- * \lfield bg Background color.
- * \lfield position The position.
- */
-static int
-luaA_statusbar_index(lua_State *L)
-{
-    size_t len;
-    wibox_t **statusbar = luaA_checkudata(L, 1, "statusbar");
-    const char *attr = luaL_checklstring(L, 2, &len);
-
-    if(luaA_usemetatable(L, 1, 2))
-        return 1;
-
-    switch(a_tokenize(attr, len))
-    {
-      case A_TK_SCREEN:
-        if((*statusbar)->screen == SCREEN_UNDEF)
-            return 0;
-        lua_pushnumber(L, (*statusbar)->screen + 1);
-        break;
-      case A_TK_ALIGN:
-        lua_pushstring(L, draw_align_tostr((*statusbar)->align));
-        break;
-      case A_TK_FG:
-        luaA_pushcolor(L, &(*statusbar)->colors.fg);
-        break;
-      case A_TK_BG:
-        luaA_pushcolor(L, &(*statusbar)->colors.bg);
-        break;
-      case A_TK_POSITION:
-        lua_pushstring(L, position_tostr((*statusbar)->position));
-        break;
-      default:
-        return 0;
-    }
-
-    return 1;
-}
-
-/** Get or set the statusbar widgets.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam None, or a table of widgets to set.
- * \lreturn The current statusbar widgets.
-*/
-static int
-luaA_statusbar_widgets(lua_State *L)
-{
-    wibox_t **statusbar = luaA_checkudata(L, 1, "statusbar");
-
-    if(lua_gettop(L) == 2)
-    {
-        luaA_widget_set(L, 2, *statusbar, &(*statusbar)->widgets);
-        (*statusbar)->need_update = true;
-        (*statusbar)->mouse_over = NULL;
-        return 1;
-    }
-    return luaA_widget_get(L, (*statusbar)->widgets);
+    return luaA_wibox_new(L);
 }
 
 /** Remove a statubar from a screen.
  * \param statusbar Statusbar to detach from screen.
  */
-static void
-statusbar_remove(wibox_t *statusbar)
+void
+statusbar_detach(wibox_t *statusbar)
 {
     if(statusbar->screen != SCREEN_UNDEF)
     {
@@ -623,8 +505,6 @@ statusbar_remove(wibox_t *statusbar)
         statusbar->position = p;
 
         simplewindow_wipe(&statusbar->sw);
-        /* sw.window is used to now if the window has been init or not */
-        statusbar->sw.window = 0;
 
         for(int i = 0; i < globalconf.screens[statusbar->screen].statusbars.len; i++)
             if(globalconf.screens[statusbar->screen].statusbars.tab[i] == statusbar)
@@ -634,91 +514,69 @@ statusbar_remove(wibox_t *statusbar)
             }
         globalconf.screens[statusbar->screen].need_arrange = true;
         statusbar->screen = SCREEN_UNDEF;
+        statusbar->type = WIBOX_TYPE_NONE;
         wibox_unref(&statusbar);
     }
 }
 
+/** Attach a statusbar.
+ * \param statusbar The statusbar to attach.
+ * \param s The screen to attach the statusbar to.
+ */
+void
+statusbar_attach(wibox_t *statusbar, screen_t *s)
+{
+    statusbar_detach(statusbar);
+
+    statusbar->screen = s->index;
+
+    wibox_array_append(&s->statusbars, wibox_ref(&statusbar));
+
+    statusbar->type = WIBOX_TYPE_STATUSBAR;
+
+    /* All the other statusbar and ourselves need to be repositioned */
+    for(int i = 0; i < s->statusbars.len; i++)
+        statusbar_position_update(s->statusbars.tab[i]);
+
+    ewmh_update_workarea(screen_virttophys(s->index));
+}
+
 /** Statusbar newindex.
  * \param L The Lua VM state.
+ * \param statusbar The wibox statusbar.
+ * \param tok The token for property.
  * \return The number of elements pushed on stack.
  */
-static int
-luaA_statusbar_newindex(lua_State *L)
+int
+luaA_statusbar_newindex(lua_State *L, wibox_t *statusbar, awesome_token_t tok)
 {
     size_t len;
-    wibox_t **statusbar = luaA_checkudata(L, 1, "statusbar");
-    const char *buf, *attr = luaL_checklstring(L, 2, &len);
+    const char *buf;
     position_t p;
-    int screen;
 
-    switch(a_tokenize(attr, len))
+    switch(tok)
     {
-      case A_TK_SCREEN:
-        if(lua_isnil(L, 3))
-            statusbar_remove(*statusbar);
-        else
-        {
-            screen = luaL_checknumber(L, 3) - 1;
-
-            luaA_checkscreen(screen);
-
-            if((*statusbar)->screen == screen)
-                luaL_error(L, "this statusbar is already on screen %d",
-                           (*statusbar)->screen + 1);
-
-            statusbar_remove(*statusbar);
-
-            (*statusbar)->screen = screen;
-
-            wibox_array_append(&globalconf.screens[screen].statusbars, wibox_ref(statusbar));
-
-            /* All the other statusbar and ourselves need to be repositioned */
-            for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
-            {
-                wibox_t *s = globalconf.screens[screen].statusbars.tab[i];
-                statusbar_position_update(s);
-            }
-
-            ewmh_update_workarea(screen_virttophys(screen));
-        }
-        break;
       case A_TK_ALIGN:
         buf = luaL_checklstring(L, 3, &len);
-        (*statusbar)->align = draw_align_fromstr(buf, len);
-        statusbar_position_update(*statusbar);
-        break;
-      case A_TK_FG:
-        if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&(*statusbar)->colors.fg, buf, len)))
-            {
-                (*statusbar)->sw.ctx.fg = (*statusbar)->colors.fg;
-                (*statusbar)->need_update = true;
-            }
-        break;
-      case A_TK_BG:
-        if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&(*statusbar)->colors.bg, buf, len)))
-            {
-                (*statusbar)->sw.ctx.bg = (*statusbar)->colors.bg;
-                (*statusbar)->need_update = true;
-            }
+        statusbar->align = draw_align_fromstr(buf, len);
+        statusbar_position_update(statusbar);
         break;
       case A_TK_POSITION:
         buf = luaL_checklstring(L, 3, &len);
         p = position_fromstr(buf, len);
-        if(p != (*statusbar)->position)
+        if(p != statusbar->position)
         {
-            (*statusbar)->position = p;
-            simplewindow_wipe(&(*statusbar)->sw);
-            (*statusbar)->sw.window = 0;
-            if((*statusbar)->screen != SCREEN_UNDEF)
+            statusbar->position = p;
+            simplewindow_wipe(&statusbar->sw);
+            statusbar->sw.window = 0;
+            if(statusbar->screen != SCREEN_UNDEF)
             {
-                for(int i = 0; i < globalconf.screens[(*statusbar)->screen].statusbars.len; i++)
+                for(int i = 0; i < globalconf.screens[statusbar->screen].statusbars.len; i++)
                 {
-                    wibox_t *s = globalconf.screens[(*statusbar)->screen].statusbars.tab[i];
+                    wibox_t *s = globalconf.screens[statusbar->screen].statusbars.tab[i];
                     statusbar_position_update(s);
                 }
-                ewmh_update_workarea(screen_virttophys((*statusbar)->screen));
+                ewmh_update_workarea(screen_virttophys(statusbar->screen));
             }
         }
         break;
@@ -736,12 +594,6 @@ const struct luaL_reg awesome_statusbar_methods[] =
 };
 const struct luaL_reg awesome_statusbar_meta[] =
 {
-    { "widgets", luaA_statusbar_widgets },
-    { "__index", luaA_statusbar_index },
-    { "__newindex", luaA_statusbar_newindex },
-    { "__gc", luaA_statusbar_gc },
-    { "__eq", luaA_statusbar_eq },
-    { "__tostring", luaA_statusbar_tostring },
     { NULL, NULL },
 };
 

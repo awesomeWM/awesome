@@ -46,15 +46,13 @@ typedef struct
  * \param offset Offset to draw at.
  * \param used The size used on the element.
  * \param p A pointer to the object we're draw onto.
- * \param type The object type.
  * \return The width used.
  */
 static int
 textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
              widget_node_t *w,
              int offset, int used,
-             wibox_t *p __attribute__ ((unused)),
-             awesome_type_t type)
+             wibox_t *p __attribute__ ((unused)))
 {
     textbox_data_t *d = w->widget->data;
 

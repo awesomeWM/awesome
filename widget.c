@@ -26,7 +26,7 @@
 
 #include "mouse.h"
 #include "widget.h"
-#include "titlebar.h"
+#include "wibox.h"
 #include "common/atoms.h"
 
 extern awesome_t globalconf;
@@ -61,14 +61,12 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
  * \param ev The button press event the widget received.
  * \param screen The screen number.
  * \param p The object where user clicked.
- * \param type The object type.
  */
 static void
 widget_common_button(widget_node_t *w,
                      xcb_button_press_event_t *ev,
                      int screen __attribute__ ((unused)),
-                     wibox_t *p,
-                     awesome_type_t type)
+                     wibox_t *p)
 {
     button_array_t *b = &w->widget->buttons;
 
@@ -76,7 +74,7 @@ widget_common_button(widget_node_t *w,
         if(ev->detail == b->tab[i]->button
            && XUTIL_MASK_CLEAN(ev->state) == b->tab[i]->mod)
         {
-            luaA_pushpointer(globalconf.L, p, type);
+            luaA_wibox_userdata_new(globalconf.L, p);
             luaA_dofunction(globalconf.L,
                             ev->response_type == XCB_BUTTON_PRESS ?
                             b->tab[i]->press : b->tab[i]->release,
@@ -93,14 +91,13 @@ widget_common_button(widget_node_t *w,
  * \param x The x coordinates of the object.
  * \param y The y coordinates of the object.
  * pixmap when the object position is right or left.
- * \param object The object pointer.
- * \param type The object type.
+ * \param object The wibox.
  * \todo Remove GC.
  */
 void
 widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_pixmap_t rotate_px,
               int screen, position_t position,
-              int x, int y, void *object, awesome_type_t type)
+              int x, int y, wibox_t *object)
 {
     xcb_pixmap_t rootpix;
     xcb_screen_t *s;
@@ -160,16 +157,16 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
 
     for(w = wnode; w; w = w->next)
         if(w->widget->align == AlignLeft && w->widget->isvisible)
-                left += w->widget->draw(ctx, screen, w, left, (left + right), object, type);
+                left += w->widget->draw(ctx, screen, w, left, (left + right), object);
 
     /* renders right widget from last to first */
     for(w = *widget_node_list_last(&wnode); w; w = w->prev)
         if(w->widget->align == AlignRight && w->widget->isvisible)
-                right += w->widget->draw(ctx, screen, w, right, (left + right), object, type);
+                right += w->widget->draw(ctx, screen, w, right, (left + right), object);
 
     for(w = wnode; w; w = w->next)
         if(w->widget->align == AlignFlex && w->widget->isvisible)
-                left += w->widget->draw(ctx, screen, w, left, (left + right), object, type);
+                left += w->widget->draw(ctx, screen, w, left, (left + right), object);
 
     switch(position)
     {
@@ -415,7 +412,7 @@ luaA_widget_newindex(lua_State *L)
  * \return The number of elements pushed on stack.
  */
 void
-luaA_widget_set(lua_State *L, int idx, void *object, widget_node_t **widgets)
+luaA_widget_set(lua_State *L, int idx, wibox_t *object, widget_node_t **widgets)
 {
     widget_node_t *witer;
 

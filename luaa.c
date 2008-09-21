@@ -74,6 +74,8 @@ extern const struct luaL_reg awesome_widget_methods[];
 extern const struct luaL_reg awesome_widget_meta[];
 extern const struct luaL_reg awesome_statusbar_methods[];
 extern const struct luaL_reg awesome_statusbar_meta[];
+extern const struct luaL_reg awesome_wibox_methods[];
+extern const struct luaL_reg awesome_wibox_meta[];
 extern const struct luaL_reg awesome_keybinding_methods[];
 extern const struct luaL_reg awesome_keybinding_meta[];
 
@@ -363,24 +365,6 @@ luaA_colors(lua_State *L)
     return 1;
 }
 
-/** Push a pointer onto the stack according to its type.
- * \param p The pointer.
- * \param type Its type.
- */
-void
-luaA_pushpointer(lua_State *L, void *p, awesome_type_t type)
-{
-    switch(type)
-    {
-      case AWESOME_TYPE_STATUSBAR:
-        luaA_statusbar_userdata_new(L, p);
-        break;
-      case AWESOME_TYPE_TITLEBAR:
-        luaA_titlebar_userdata_new(L, p);
-        break;
-    }
-}
-
 static void
 luaA_openlib(lua_State *L, const char *name,
              const struct luaL_reg methods[],
@@ -660,6 +644,9 @@ luaA_init(void)
 
     /* Export statusbar */
     luaA_openlib(L, "statusbar", awesome_statusbar_methods, awesome_statusbar_meta);
+
+    /* Export wibox */
+    luaA_openlib(L, "wibox", awesome_wibox_methods, awesome_wibox_meta);
 
     /* Export widget */
     luaA_openlib(L, "widget", awesome_widget_methods, awesome_widget_meta);

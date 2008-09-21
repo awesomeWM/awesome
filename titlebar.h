@@ -30,8 +30,10 @@ void titlebar_geometry_compute(client_t *, area_t, area_t *);
 void titlebar_draw(client_t *);
 void titlebar_init(client_t *);
 void titlebar_refresh(void);
+void titlebar_client_detach(client_t *);
+void titlebar_client_attach(client_t *, wibox_t *);
 
-int luaA_titlebar_userdata_new(lua_State *, wibox_t *);
+int luaA_titlebar_newindex(lua_State *, wibox_t *, awesome_token_t);
 
 /** Add the titlebar geometry and border to a geometry.
  * \param t The titlebar

@@ -22,7 +22,7 @@
 #include "client.h"
 #include "widget.h"
 #include "tag.h"
-#include "luaa.h"
+#include "wibox.h"
 #include "common/tokenize.h"
 
 extern awesome_t globalconf;
@@ -76,15 +76,13 @@ taglist_drawn_area_getbyobj(taglist_drawn_area_t *list, wibox_t *p)
  * \param offset Offset to draw at.
  * \param used Space already used.
  * \param object The object pointer we're drawing onto.
- * \param type The object type.
  * \return The width used.
  */
 static int
 taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
              int offset,
              int used __attribute__ ((unused)),
-             wibox_t *object,
-             awesome_type_t type)
+             wibox_t *object)
 {
     taglist_data_t *data = w->widget->data;
     area_t area;
@@ -162,14 +160,12 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
  * \param btype The button press event type.
  * \param screen The screen where the click was.
  * \param object The object we're onto.
- * \param type The type object.
  */
 static void
 taglist_button(widget_node_t *w,
                xcb_button_press_event_t *ev,
                int screen,
-               wibox_t *object,
-               awesome_type_t type)
+               wibox_t *object)
 {
     tag_array_t *tags = &globalconf.screens[screen].tags;
     taglist_data_t *data = w->widget->data;
@@ -188,7 +184,7 @@ taglist_button(widget_node_t *w,
                     if(ev->event_x >= AREA_LEFT(*area)
                        && ev->event_x < AREA_RIGHT(*area))
                     {
-                        luaA_pushpointer(globalconf.L, object, type);
+                        luaA_wibox_userdata_new(globalconf.L, object);
                         luaA_tag_userdata_new(globalconf.L, tag);
                         luaA_dofunction(globalconf.L,
                                         ev->response_type == XCB_BUTTON_PRESS ?

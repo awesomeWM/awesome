@@ -112,8 +112,11 @@ void
 simplewindow_wipe(simple_window_t *sw)
 {
     xcb_destroy_window(globalconf.connection, sw->window);
+    sw->window = XCB_NONE;
     xcb_free_pixmap(globalconf.connection, sw->pixmap);
+    sw->pixmap = XCB_NONE;
     xcb_free_gc(globalconf.connection, sw->gc);
+    sw->gc = XCB_NONE;
     draw_context_wipe(&sw->ctx);
 }
 

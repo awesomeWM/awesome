@@ -29,8 +29,10 @@
 wibox_t * statusbar_getbywin(xcb_window_t);
 void statusbar_refresh(void);
 void statusbar_position_update(wibox_t *);
+void statusbar_detach(wibox_t *);
+void statusbar_attach(wibox_t *, screen_t *);
 
-int luaA_statusbar_userdata_new(lua_State *, wibox_t *);
+int luaA_statusbar_newindex(lua_State *, wibox_t *, awesome_token_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

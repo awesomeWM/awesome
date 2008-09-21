@@ -154,7 +154,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                                            statusbar->sw.geometry.width,
                                            statusbar->sw.geometry.height,
                                            &ev->event_x, &ev->event_y)))
-                    w->widget->button(w, ev, statusbar->screen, statusbar, AWESOME_TYPE_STATUSBAR);
+                    w->widget->button(w, ev, statusbar->screen, statusbar);
                 /* return even if no widget match */
                 return 0;
             }
@@ -165,7 +165,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         if((w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
                                    c->titlebar->width, c->titlebar->height,
                                    &ev->event_x, &ev->event_y)))
-                w->widget->button(w, ev, c->screen, c->titlebar, AWESOME_TYPE_TITLEBAR);
+                w->widget->button(w, ev, c->screen, c->titlebar);
         /* return even if no widget match */
         return 0;
     }
@@ -343,13 +343,11 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
 
 /** Handle a motion notify over widgets.
  * \param object The object.
- * \param type The object type.
  * \param mouse_over The pointer to the registered mouse over widget.
  * \param w The new widget the mouse is over.
  */
 static void
 event_handle_widget_motionnotify(void *object,
-                                 awesome_type_t type,
                                  widget_node_t **mouse_over,
                                  widget_node_t *w)
 {
@@ -358,14 +356,14 @@ event_handle_widget_motionnotify(void *object,
         if(*mouse_over)
         {
             /* call mouse leave function on old widget */
-            luaA_pushpointer(globalconf.L, object, type);
+            luaA_wibox_userdata_new(globalconf.L, object);
             luaA_dofunction(globalconf.L, (*mouse_over)->widget->mouse_leave, 1, 0);
         }
         if(w)
         {
             /* call mouse enter function on new widget and register it */
             *mouse_over = w;
-            luaA_pushpointer(globalconf.L, object, type);
+            luaA_wibox_userdata_new(globalconf.L, object);
             luaA_dofunction(globalconf.L, w->widget->mouse_enter, 1, 0);
         }
     }
@@ -392,7 +390,6 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                                statusbar->sw.geometry.height,
                                &ev->event_x, &ev->event_y);
         event_handle_widget_motionnotify(statusbar,
-                                         AWESOME_TYPE_STATUSBAR,
                                          &statusbar->mouse_over, w);
     }
     else if((c = client_getbytitlebarwin(ev->event)))
@@ -402,7 +399,6 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                                c->titlebar->sw.geometry.height,
                                &ev->event_x, &ev->event_y);
         event_handle_widget_motionnotify(c->titlebar,
-                                         AWESOME_TYPE_TITLEBAR,
                                          &c->titlebar->mouse_over, w);
     }
 
@@ -427,7 +423,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
         if(statusbar->mouse_over)
         {
             /* call mouse leave function on widget the mouse was over */
-            luaA_statusbar_userdata_new(globalconf.L, statusbar);
+            luaA_wibox_userdata_new(globalconf.L, statusbar);
             luaA_dofunction(globalconf.L, statusbar->mouse_over->widget->mouse_leave, 1, 0);
         }
     }
@@ -436,7 +432,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
         if(c->titlebar->mouse_over)
         {
             /* call mouse leave function on widget the mouse was over */
-            luaA_titlebar_userdata_new(globalconf.L, c->titlebar);
+            luaA_wibox_userdata_new(globalconf.L, c->titlebar);
             luaA_dofunction(globalconf.L, c->titlebar->mouse_over->widget->mouse_leave, 1, 0);
         }
     }

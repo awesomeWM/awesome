@@ -37,13 +37,9 @@ systray_draw(draw_context_t *ctx,
              int screen __attribute__ ((unused)),
              widget_node_t *w,
              int offset, int used __attribute__ ((unused)),
-             wibox_t *p,
-             awesome_type_t type)
+             wibox_t *p)
 {
     uint32_t orient;
-
-    /* we are on a statusbar */
-    assert(type == AWESOME_TYPE_STATUSBAR);
 
     w->area.height = ctx->height;
 

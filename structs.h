@@ -59,6 +59,14 @@ typedef enum
     WINDOW_TYPE_DIALOG,
 } window_type_t;
 
+/** Wibox types */
+typedef enum
+{
+    WIBOX_TYPE_NONE = 0,
+    WIBOX_TYPE_STATUSBAR,
+    WIBOX_TYPE_TITLEBAR
+} wibox_type_t;
+
 /** Cursors */
 enum
 {
@@ -82,6 +90,8 @@ typedef struct
 {
     /** Ref count */
     int refcount;
+    /** Wibox type */
+    wibox_type_t type;
     /** Window */
     simple_window_t sw;
     /** Box width and height */
@@ -143,13 +153,13 @@ struct widget_t
     /** Widget detach function */
     void (*detach)(widget_t *, wibox_t *);
     /** Draw function */
-    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, wibox_t *, awesome_type_t);
+    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, wibox_t *);
     /** Index function */
     int (*index)(lua_State *, awesome_token_t);
     /** Newindex function */
     int (*newindex)(lua_State *, awesome_token_t);
     /** Button event handler */
-    void (*button)(widget_node_t *, xcb_button_press_event_t *, int, wibox_t *, awesome_type_t);
+    void (*button)(widget_node_t *, xcb_button_press_event_t *, int, wibox_t *);
     /** Mouse over event handler */
     luaA_ref mouse_enter, mouse_leave;
     /** Alignement */

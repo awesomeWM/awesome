@@ -29,13 +29,6 @@
 #include "draw.h"
 #include "common/util.h"
 
-/** Object types */
-typedef enum
-{
-    AWESOME_TYPE_STATUSBAR = 1,
-    AWESOME_TYPE_TITLEBAR
-} awesome_type_t;
-
 /** Type for Lua function */
 typedef int luaA_ref;
 
@@ -263,7 +256,6 @@ luaA_otable_new(lua_State *L)
 
 void luaA_init(void);
 void luaA_parserc(const char *);
-void luaA_pushpointer(lua_State *, void *, awesome_type_t);
 void luaA_cs_init(void);
 void luaA_cs_cleanup(void);
 void luaA_on_timer(EV_P_ ev_timer *w, int revents);

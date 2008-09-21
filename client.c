@@ -1281,29 +1281,13 @@ luaA_client_newindex(lua_State *L)
                                          XCB_CW_BORDER_PIXEL, &(*c)->border_color.pixel);
         break;
       case A_TK_TITLEBAR:
-        if(!lua_isnil(L, 3))
+        if(lua_isnil(L, 3))
+            titlebar_client_detach(*c);
+        else
         {
-            t = luaA_checkudata(L, 3, "titlebar");
-            if(client_getbytitlebar(*t))
-                luaL_error(L, "titlebar is already used by another client");
+            t = luaA_checkudata(L, 3, "wibox");
+            titlebar_client_attach(*c, *t);
         }
-
-        /* If client had a titlebar, unref it */
-        if((*c)->titlebar)
-        {
-            xcb_unmap_window(globalconf.connection, (*c)->titlebar->sw.window);
-            wibox_unref(&(*c)->titlebar);
-            (*c)->titlebar = NULL;
-            client_need_arrange(*c);
-        }
-
-        if(t)
-        {
-            /* Attach titlebar to client */
-            (*c)->titlebar = wibox_ref(t);
-            titlebar_init(*c);
-        }
-        client_stack();
         break;
       default:
         return 0;
@@ -1482,7 +1466,7 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_TITLEBAR:
         if((*c)->titlebar)
-            return luaA_titlebar_userdata_new(L, (*c)->titlebar);
+            return luaA_wibox_userdata_new(L, (*c)->titlebar);
         return 0;
       case A_TK_URGENT:
         lua_pushboolean(L, (*c)->isurgent);
