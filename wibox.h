@@ -33,7 +33,6 @@ wibox_delete(wibox_t **wibox)
 {
     simplewindow_wipe(&(*wibox)->sw);
     widget_node_list_wipe(&(*wibox)->widgets);
-    p_delete(&(*wibox)->name);
     p_delete(wibox);
 }
 

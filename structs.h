@@ -84,8 +84,6 @@ typedef struct
     int refcount;
     /** Window */
     simple_window_t sw;
-    /** Wibox name */
-    char *name;
     /** Box width and height */
     uint16_t width, height;
     /** Box position */

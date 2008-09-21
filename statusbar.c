@@ -484,7 +484,7 @@ static int
 luaA_statusbar_tostring(lua_State *L)
 {
     wibox_t **p = luaA_checkudata(L, 1, "statusbar");
-    lua_pushfstring(L, "[statusbar udata(%p) name(%s)]", *p, (*p)->name);
+    lua_pushfstring(L, "[statusbar udata(%p)]", *p);
     return 1;
 }
 
@@ -492,7 +492,7 @@ luaA_statusbar_tostring(lua_State *L)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A table with at least a name attribute. Optionaly defined values are:
+ * \lparam A table with optionaly defined values:
  * position, align, fg, bg, width and height.
  * \lreturn A brand new statusbar.
  */
@@ -507,12 +507,7 @@ luaA_statusbar_new(lua_State *L)
 
     luaA_checktable(L, 2);
 
-    if(!(buf = luaA_getopt_string(L, 2, "name", NULL)))
-        luaL_error(L, "object statusbar must have a name");
-
     sb = p_new(wibox_t, 1);
-
-    sb->name = a_strdup(buf);
 
     sb->colors.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
@@ -670,15 +665,6 @@ luaA_statusbar_newindex(lua_State *L)
             if((*statusbar)->screen == screen)
                 luaL_error(L, "this statusbar is already on screen %d",
                            (*statusbar)->screen + 1);
-
-            /* Check for uniq name and id. */
-            for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
-            {
-                wibox_t *s = globalconf.screens[screen].statusbars.tab[i];
-                if(!a_strcmp(s->name, (*statusbar)->name))
-                    luaL_error(L, "a statusbar with that name is already on screen %d\n",
-                               screen + 1);
-            }
 
             statusbar_remove(*statusbar);
 
