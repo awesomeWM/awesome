@@ -45,9 +45,9 @@ extern awesome_t globalconf;
 void
 simplewindow_init(simple_window_t *sw,
                   int phys_screen,
-                  int x, int y,
-                  unsigned int w, unsigned int h,
-                  unsigned int border_width,
+                  int16_t x, int16_t y,
+                  uint16_t w, uint16_t h,
+                  uint16_t border_width,
                   position_t position,
                   const xcolor_t *fg, const xcolor_t *bg)
 {

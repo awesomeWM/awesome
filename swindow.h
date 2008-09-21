@@ -40,7 +40,7 @@ typedef struct simple_window_t
     struct
     {
         /** The window border width */
-        int width;
+        uint16_t width;
         /** The window border color */
         xcolor_t color;
     } border;
@@ -51,7 +51,7 @@ typedef struct simple_window_t
 } simple_window_t;
 
 void simplewindow_init(simple_window_t *s,
-                       int, int, int, unsigned int, unsigned int, unsigned int,
+                       int, int16_t, int16_t, uint16_t, uint16_t, uint16_t,
                        position_t, const xcolor_t *, const xcolor_t *);
 
 void simplewindow_wipe(simple_window_t *);

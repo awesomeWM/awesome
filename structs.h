@@ -87,7 +87,7 @@ typedef struct
     /** Wibox name */
     char *name;
     /** Box width and height */
-    int width, height;
+    uint16_t width, height;
     /** Box position */
     position_t position;
     /** Alignment */
