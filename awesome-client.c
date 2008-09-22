@@ -195,7 +195,10 @@ main(int argc, char **argv)
             }
         }
         if(msg_len > 1)
+        {
             ret_value = send_msg(msg, msg_len);
+            recv_msg();
+        }
         p_delete(&msg);
     }
 

@@ -819,9 +819,9 @@ luaA_cb(EV_P_ ev_io *w, int revents)
 
         s = lua_tolstring(globalconf.L, -1, &len);
 
-        /* ignore ENOENT because the client doesn't create a socket for non-tty */
-        if (send(w->fd, s, len, 0) == -1 && errno != ENOENT)
-            warn("can't connect to client UNIX domain socket: %s", strerror(errno));
+        /* ignore ENOENT because the client may not read */
+        if (send(w->fd, s, len, 0) == -1) && errno != ENOENT)
+            warn("can't send back to client via domain socket: %s", strerror(errno));
 
         lua_pop(globalconf.L, 1); /* pop the string */
     }
