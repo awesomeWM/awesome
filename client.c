@@ -330,20 +330,44 @@ client_stack(void)
             if(client_layer_translator(node->client) == layer)
                 config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
 
-    /* then stack statusbar window */
+    /* then stack ontop statusbar window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
         for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
         {
             wibox_t *sb = globalconf.screens[screen].statusbars.tab[i];
-            xcb_configure_window(globalconf.connection,
-                                 sb->sw.window,
-                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                 config_win_vals);
-            config_win_vals[0] = sb->sw.window;
+            if(sb->ontop)
+            {
+                xcb_configure_window(globalconf.connection,
+                                     sb->sw.window,
+                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                     config_win_vals);
+                config_win_vals[0] = sb->sw.window;
+            }
         }
 
     /* finally stack everything else */
-    for(layer = LAYER_FULLSCREEN - 1; layer >= LAYER_DESKTOP; layer--)
+    for(layer = LAYER_FULLSCREEN - 1; layer >= LAYER_TILE; layer--)
+        for(node = globalconf.stack; node; node = node->next)
+            if(client_layer_translator(node->client) == layer)
+                config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
+
+    /* then stack not ontop statusbar window */
+    for(screen = 0; screen < globalconf.nscreen; screen++)
+        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        {
+            wibox_t *sb = globalconf.screens[screen].statusbars.tab[i];
+            if(!sb->ontop)
+            {
+                xcb_configure_window(globalconf.connection,
+                                     sb->sw.window,
+                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                     config_win_vals);
+                config_win_vals[0] = sb->sw.window;
+            }
+        }
+
+    /* finally stack everything else */
+    for(layer = LAYER_TILE - 1; layer >= LAYER_DESKTOP; layer--)
         for(node = globalconf.stack; node; node = node->next)
             if(client_layer_translator(node->client) == layer)
                 config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);

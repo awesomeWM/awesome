@@ -120,6 +120,7 @@ luaA_wibox_new(lua_State *L)
  * \lfield fg Foreground color.
  * \lfield bg Background color.
  * \lfield position The position.
+ * \lfield ontop On top of other windows.
  */
 static int
 luaA_wibox_index(lua_State *L)
@@ -166,6 +167,9 @@ luaA_wibox_index(lua_State *L)
       case A_TK_POSITION:
         lua_pushstring(L, position_tostr((*wibox)->position));
         break;
+      case A_TK_ONTOP:
+        lua_pushboolean(L, (*wibox)->ontop);
+        break;
       default:
         return 0;
     }
@@ -209,6 +213,8 @@ luaA_wibox_newindex(lua_State *L)
 
     switch((tok = a_tokenize(attr, len)))
     {
+        bool b;
+
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&(*wibox)->colors.fg, buf, len)))
@@ -274,6 +280,14 @@ luaA_wibox_newindex(lua_State *L)
             int screen = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(screen);
             statusbar_attach(*wibox, &globalconf.screens[screen]);
+        }
+        break;
+      case A_TK_ONTOP:
+        b = luaA_checkboolean(L, 3);
+        if(b != (*wibox)->ontop)
+        {
+            (*wibox)->ontop = b;
+            client_stack();
         }
         break;
       default:

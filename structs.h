@@ -90,6 +90,8 @@ typedef struct
 {
     /** Ref count */
     int refcount;
+    /** Ontop */
+    bool ontop;
     /** Wibox type */
     wibox_type_t type;
     /** Window */
