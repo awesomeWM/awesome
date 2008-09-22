@@ -267,7 +267,7 @@ statusbar_refresh(void)
 void
 statusbar_position_update(wibox_t *statusbar)
 {
-    area_t area, wingeometry;
+    area_t area;
     bool ignore = false;
 
     if(statusbar->position == Off)
@@ -299,7 +299,7 @@ statusbar_position_update(wibox_t *statusbar)
             switch(statusbar->position)
             {
               case Left:
-                area.x += statusbar->height;
+                area.x += statusbar->geometry.height;
                 break;
               default:
                 break;
@@ -309,7 +309,7 @@ statusbar_position_update(wibox_t *statusbar)
             switch(statusbar->position)
             {
               case Right:
-                area.x -= statusbar->height;
+                area.x -= statusbar->geometry.height;
                 break;
               default:
                 break;
@@ -319,12 +319,12 @@ statusbar_position_update(wibox_t *statusbar)
             switch(statusbar->position)
             {
               case Top:
-                area.y += sb->height;
+                area.y += sb->geometry.height;
                 break;
               case Left:
               case Right:
-                area.height -= sb->height;
-                area.y += sb->height;
+                area.height -= sb->geometry.height;
+                area.y += sb->geometry.height;
                 break;
               default:
                 break;
@@ -334,11 +334,11 @@ statusbar_position_update(wibox_t *statusbar)
             switch(statusbar->position)
             {
               case Bottom:
-                area.y -= sb->height;
+                area.y -= sb->geometry.height;
                 break;
               case Left:
               case Right:
-                area.height -= sb->height;
+                area.height -= sb->geometry.height;
                 break;
               default:
                 break;
@@ -352,89 +352,77 @@ statusbar_position_update(wibox_t *statusbar)
     switch(statusbar->position)
     {
       case Right:
-        if(statusbar->width > 0)
-            wingeometry.height = statusbar->width;
-        else
-            wingeometry.height = area.height;
-        wingeometry.width = statusbar->height;
+        statusbar->geometry.height = area.height;
+        statusbar->geometry.width = 1.5 * globalconf.font->height;
         switch(statusbar->align)
         {
           default:
-            wingeometry.x = area.x + area.width - wingeometry.width;
-            wingeometry.y = area.y;
+            statusbar->geometry.x = area.x + area.width - statusbar->geometry.width;
+            statusbar->geometry.y = area.y;
             break;
           case AlignRight:
-            wingeometry.x = area.x + area.width - wingeometry.width;
-            wingeometry.y = area.y + area.height - wingeometry.height;
+            statusbar->geometry.x = area.x + area.width - statusbar->geometry.width;
+            statusbar->geometry.y = area.y + area.height - statusbar->geometry.height;
             break;
           case AlignCenter:
-            wingeometry.x = area.x + area.width - wingeometry.width;
-            wingeometry.y = (area.y + area.height - wingeometry.height) / 2;
+            statusbar->geometry.x = area.x + area.width - statusbar->geometry.width;
+            statusbar->geometry.y = (area.y + area.height - statusbar->geometry.height) / 2;
             break;
         }
         break;
       case Left:
-        if(statusbar->width > 0)
-            wingeometry.height = statusbar->width;
-        else
-            wingeometry.height = area.height;
-        wingeometry.width = statusbar->height;
+        statusbar->geometry.height = area.height;
+        statusbar->geometry.width = 1.5 * globalconf.font->height;
         switch(statusbar->align)
         {
           default:
-            wingeometry.x = area.x;
-            wingeometry.y = (area.y + area.height) - wingeometry.height;
+            statusbar->geometry.x = area.x;
+            statusbar->geometry.y = (area.y + area.height) - statusbar->geometry.height;
             break;
           case AlignRight:
-            wingeometry.x = area.x;
-            wingeometry.y = area.y;
+            statusbar->geometry.x = area.x;
+            statusbar->geometry.y = area.y;
             break;
           case AlignCenter:
-            wingeometry.x = area.x;
-            wingeometry.y = (area.y + area.height - wingeometry.height) / 2;
+            statusbar->geometry.x = area.x;
+            statusbar->geometry.y = (area.y + area.height - statusbar->geometry.height) / 2;
         }
         break;
       case Bottom:
-        if(statusbar->width > 0)
-            wingeometry.width = statusbar->width;
-        else
-            wingeometry.width = area.width;
-        wingeometry.height = statusbar->height;
+        statusbar->geometry.width = area.width;
+        statusbar->geometry.height = 1.5 * globalconf.font->height;
         switch(statusbar->align)
         {
           default:
-            wingeometry.x = area.x;
-            wingeometry.y = (area.y + area.height) - wingeometry.height;
+            statusbar->geometry.x = area.x;
+            statusbar->geometry.y = (area.y + area.height) - statusbar->geometry.height;
             break;
           case AlignRight:
-            wingeometry.x = area.x + area.width - wingeometry.width;
-            wingeometry.y = (area.y + area.height) - wingeometry.height;
+            statusbar->geometry.x = area.x + area.width - statusbar->geometry.width;
+            statusbar->geometry.y = (area.y + area.height) - statusbar->geometry.height;
             break;
           case AlignCenter:
-            wingeometry.x = area.x + (area.width - wingeometry.width) / 2;
-            wingeometry.y = (area.y + area.height) - wingeometry.height;
+            statusbar->geometry.x = area.x + (area.width - statusbar->geometry.width) / 2;
+            statusbar->geometry.y = (area.y + area.height) - statusbar->geometry.height;
             break;
         }
         break;
       default:
-        if(statusbar->width > 0)
-            wingeometry.width = statusbar->width;
-        else
-            wingeometry.width = area.width;
-        wingeometry.height = statusbar->height;
+        statusbar->geometry.width = area.width;
+        statusbar->geometry.height = 1.5 * globalconf.font->height;
         switch(statusbar->align)
         {
           default:
-            wingeometry.x = area.x;
-            wingeometry.y = area.y;
+            statusbar->geometry.x = area.x;
+            statusbar->geometry.y = area.y;
             break;
           case AlignRight:
-            wingeometry.x = area.x + area.width - wingeometry.width;
-            wingeometry.y = area.y;
+            statusbar->geometry.x = area.x + area.width - statusbar->geometry.width;
+            statusbar->geometry.y = area.y;
             break;
           case AlignCenter:
-            wingeometry.x = area.x + (area.width - wingeometry.width) / 2;
-            wingeometry.y = area.y;
+            statusbar->geometry.x = area.x + (area.width - statusbar->geometry.width) / 2;
+            statusbar->geometry.y = area.y;
             break;
         }
         break;
@@ -445,8 +433,8 @@ statusbar_position_update(wibox_t *statusbar)
         int phys_screen = screen_virttophys(statusbar->screen);
 
         simplewindow_init(&statusbar->sw, phys_screen,
-                          wingeometry.x, wingeometry.y,
-                          wingeometry.width, wingeometry.height,
+                          statusbar->geometry.x, statusbar->geometry.y,
+                          statusbar->geometry.width, statusbar->geometry.height,
                           0, statusbar->position,
                           &statusbar->colors.fg, &statusbar->colors.bg);
         statusbar->need_update = true;
@@ -455,16 +443,16 @@ statusbar_position_update(wibox_t *statusbar)
     /* same window size and position ? */
     else
     {
-        if(wingeometry.width != statusbar->sw.geometry.width
-           || wingeometry.height != statusbar->sw.geometry.height)
+        if(statusbar->geometry.width != statusbar->sw.geometry.width
+           || statusbar->geometry.height != statusbar->sw.geometry.height)
         {
-            simplewindow_resize(&statusbar->sw, wingeometry.width, wingeometry.height);
+            simplewindow_resize(&statusbar->sw, statusbar->geometry.width, statusbar->geometry.height);
             statusbar->need_update = true;
         }
 
-        if(wingeometry.x != statusbar->sw.geometry.x
-            || wingeometry.y != statusbar->sw.geometry.y)
-            simplewindow_move(&statusbar->sw, wingeometry.x, wingeometry.y);
+        if(statusbar->geometry.x != statusbar->sw.geometry.x
+            || statusbar->geometry.y != statusbar->sw.geometry.y)
+            simplewindow_move(&statusbar->sw, statusbar->geometry.x, statusbar->geometry.y);
     }
 
     /* Set need update */

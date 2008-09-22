@@ -90,11 +90,11 @@ luaA_wibox_new(lua_State *L)
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     w->align = draw_align_fromstr(buf, len);
 
-    w->width = luaA_getopt_number(L, 2, "width", 0);
-    w->height = luaA_getopt_number(L, 2, "height", 0);
-    if(w->height <= 0)
+    w->geometry.width = luaA_getopt_number(L, 2, "width", 0);
+    w->geometry.height = luaA_getopt_number(L, 2, "height", 0);
+    if(w->geometry.height <= 0)
         /* 1.5 as default factor, it fits nice but no one knows why */
-        w->height = 1.5 * globalconf.font->height;
+        w->geometry.height = 1.5 * globalconf.font->height;
 
     buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
     w->position = position_fromstr(buf, len);
@@ -111,6 +111,7 @@ luaA_wibox_new(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lfield geometry Geometry table.
  * \lfield screen Screen number.
  * \lfield client The client attached to this titlebar.
  * \lfield border_width Border width.
@@ -134,6 +135,9 @@ luaA_wibox_index(lua_State *L)
     {
         client_t *c;
 
+      case A_TK_GEOMETRY:
+        luaA_pusharea(L, (*wibox)->geometry);
+        break;
       case A_TK_CLIENT:
         if((c = client_getbytitlebar(*wibox)))
             return luaA_client_userdata_new(L, c);
@@ -161,12 +165,6 @@ luaA_wibox_index(lua_State *L)
         break;
       case A_TK_POSITION:
         lua_pushstring(L, position_tostr((*wibox)->position));
-        break;
-      case A_TK_WIDTH:
-        lua_pushnumber(L, (*wibox)->width);
-        break;
-      case A_TK_HEIGHT:
-        lua_pushnumber(L, (*wibox)->height);
         break;
       default:
         return 0;

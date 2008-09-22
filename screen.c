@@ -265,8 +265,8 @@ display_area_get(int phys_screen, wibox_array_t *statusbars, padding_t *padding)
         for(int i = 0; i < statusbars->len; i++)
         {
             wibox_t *sb = statusbars->tab[i];
-            area.y += sb->position == Top ? sb->height : 0;
-            area.height -= (sb->position == Top || sb->position == Bottom) ? sb->height : 0;
+            area.y += sb->position == Top ? sb->geometry.height : 0;
+            area.height -= (sb->position == Top || sb->position == Bottom) ? sb->geometry.height : 0;
         }
 
     /* make padding corrections */
@@ -489,7 +489,6 @@ luaA_screen_index(lua_State *L)
     size_t len;
     const char *buf;
     screen_t *s;
-    area_t g;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
@@ -500,28 +499,10 @@ luaA_screen_index(lua_State *L)
     switch(a_tokenize(buf, len))
     {
       case A_TK_COORDS:
-        /* \todo lua_pushgeometry() ? */
-        lua_newtable(L);
-        lua_pushnumber(L, s->geometry.x);
-        lua_setfield(L, -2, "x");
-        lua_pushnumber(L, s->geometry.y);
-        lua_setfield(L, -2, "y");
-        lua_pushnumber(L, s->geometry.width);
-        lua_setfield(L, -2, "width");
-        lua_pushnumber(L, s->geometry.height);
-        lua_setfield(L, -2, "height");
+        luaA_pusharea(L, s->geometry);
         break;
       case A_TK_WORKAREA:
-        g = screen_area_get(s->index, &s->statusbars, &s->padding, true);
-        lua_newtable(L);
-        lua_pushnumber(L, g.x);
-        lua_setfield(L, -2, "x");
-        lua_pushnumber(L, g.y);
-        lua_setfield(L, -2, "y");
-        lua_pushnumber(L, g.width);
-        lua_setfield(L, -2, "width");
-        lua_pushnumber(L, g.height);
-        lua_setfield(L, -2, "height");
+        luaA_pusharea(L, screen_area_get(s->index, &s->statusbars, &s->padding, true));
         break;
       default:
         return 0;

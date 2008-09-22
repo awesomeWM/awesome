@@ -94,8 +94,8 @@ typedef struct
     wibox_type_t type;
     /** Window */
     simple_window_t sw;
-    /** Box width and height */
-    uint16_t width, height;
+    /** Box geometry */
+    area_t geometry;
     /** Box position */
     position_t position;
     /** Alignment */

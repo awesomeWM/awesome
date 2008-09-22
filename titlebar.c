@@ -102,8 +102,8 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
       default:
         return;
       case Top:
-        if(c->titlebar->width)
-            width = MAX(1, MIN(c->titlebar->width, geometry.width - 2 * c->titlebar->sw.border.width));
+        if(c->titlebar->geometry.width)
+            width = MAX(1, MIN(c->titlebar->geometry.width, geometry.width - 2 * c->titlebar->sw.border.width));
         else
             width = MAX(1, geometry.width + 2 * c->border - 2 * c->titlebar->sw.border.width);
         switch(c->titlebar->align)
@@ -118,13 +118,13 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             break;
         }
         res->x = geometry.x + x_offset;
-        res->y = geometry.y - c->titlebar->height - 2 * c->titlebar->sw.border.width + c->border;
+        res->y = geometry.y - c->titlebar->geometry.height - 2 * c->titlebar->sw.border.width + c->border;
         res->width = width;
-        res->height = c->titlebar->height;
+        res->height = c->titlebar->geometry.height;
         break;
       case Bottom:
-        if(c->titlebar->width)
-            width = MAX(1, MIN(c->titlebar->width, geometry.width - 2 * c->titlebar->sw.border.width));
+        if(c->titlebar->geometry.width)
+            width = MAX(1, MIN(c->titlebar->geometry.width, geometry.width - 2 * c->titlebar->sw.border.width));
         else
             width = MAX(1, geometry.width + 2 * c->border - 2 * c->titlebar->sw.border.width);
         switch(c->titlebar->align)
@@ -141,11 +141,11 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
         res->x = geometry.x + x_offset;
         res->y = geometry.y + geometry.height + c->border;
         res->width = width;
-        res->height = c->titlebar->height;
+        res->height = c->titlebar->geometry.height;
         break;
       case Left:
-        if(c->titlebar->width)
-            width = MAX(1, MIN(c->titlebar->width, geometry.height - 2 * c->titlebar->sw.border.width));
+        if(c->titlebar->geometry.width)
+            width = MAX(1, MIN(c->titlebar->geometry.width, geometry.height - 2 * c->titlebar->sw.border.width));
         else
             width = MAX(1, geometry.height + 2 * c->border - 2 * c->titlebar->sw.border.width);
         switch(c->titlebar->align)
@@ -159,14 +159,14 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             y_offset = (geometry.height - width) / 2;
             break;
         }
-        res->x = geometry.x - c->titlebar->height + c->border;
+        res->x = geometry.x - c->titlebar->geometry.height + c->border;
         res->y = geometry.y + y_offset;
-        res->width = c->titlebar->height;
+        res->width = c->titlebar->geometry.height;
         res->height = width;
         break;
       case Right:
-        if(c->titlebar->width)
-            width = MAX(1, MIN(c->titlebar->width, geometry.height - 2 * c->titlebar->sw.border.width));
+        if(c->titlebar->geometry.width)
+            width = MAX(1, MIN(c->titlebar->geometry.width, geometry.height - 2 * c->titlebar->sw.border.width));
         else
             width = MAX(1, geometry.height + 2 * c->border - 2 * c->titlebar->sw.border.width);
         switch(c->titlebar->align)
@@ -182,7 +182,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
         }
         res->x = geometry.x + geometry.width + c->border;
         res->y = geometry.y + y_offset;
-        res->width = c->titlebar->height;
+        res->width = c->titlebar->geometry.height;
         res->height = width;
         break;
     }
@@ -208,19 +208,19 @@ titlebar_init(client_t *c)
         return;
       case Top:
       case Bottom:
-        if(c->titlebar->width)
-            width = MIN(c->titlebar->width, c->geometry.width - 2 * c->titlebar->sw.border.width);
+        if(c->titlebar->geometry.width)
+            width = MIN(c->titlebar->geometry.width, c->geometry.width - 2 * c->titlebar->sw.border.width);
         else
             width = c->geometry.width + 2 * c->border - 2 * c->titlebar->sw.border.width;
-        height = c->titlebar->height;
+        height = c->titlebar->geometry.height;
         break;
       case Left:
       case Right:
-        if(c->titlebar->width)
-            height = MIN(c->titlebar->width, c->geometry.height - 2 * c->titlebar->sw.border.width);
+        if(c->titlebar->geometry.width)
+            height = MIN(c->titlebar->geometry.width, c->geometry.height - 2 * c->titlebar->sw.border.width);
         else
             height = c->geometry.height + 2 * c->border - 2 * c->titlebar->sw.border.width;
-        width = c->titlebar->height;
+        width = c->titlebar->geometry.height;
         break;
     }
 

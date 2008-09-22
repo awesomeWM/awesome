@@ -163,7 +163,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     if((c = client_getbytitlebarwin(ev->event)))
     {
         if((w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
-                                   c->titlebar->width, c->titlebar->height,
+                                   c->titlebar->geometry.width, c->titlebar->geometry.height,
                                    &ev->event_x, &ev->event_y)))
                 w->widget->button(w, ev, c->screen, c->titlebar);
         /* return even if no widget match */

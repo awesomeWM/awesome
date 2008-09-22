@@ -20,6 +20,7 @@ floating
 focus
 fullscreen
 gap
+geometry
 grow
 height
 hide
