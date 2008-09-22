@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <fcntl.h>
 
 #include <stdio.h>
 #include <readline/readline.h>
@@ -43,19 +44,26 @@
 
 struct sockaddr_un *addr;
 int csfd;
+char *display;
 
 /** Initialize the client and server socket connections.
  * If something goes wrong, preserves errno.
  * \return 0 if everything worked, 1 otherwise.
  */
-static int
+static bool
 sockets_init(void)
 {
-    return (csfd = socket_getclient()) < 0 ||
-      !(addr = socket_getaddr(getenv("DISPLAY"))) ||
-      connect(csfd, addr, sizeof(struct sockaddr_un)) == -1;
-}
+    if((csfd = socket_getclient()) < 0)
+        return false;
 
+    if(!(addr = socket_getaddr(display)))
+        return false;
+
+    if(connect(csfd, addr, sizeof(struct sockaddr_un)) == -1)
+        return false;
+
+    return true;
+}
 
 /** Close the client and server socket connections.
  */
@@ -66,6 +74,15 @@ sockets_close(void)
     p_delete(&addr);
 }
 
+/** Reconnect sockets.
+ */
+static void
+sockets_reconnect(void)
+{
+    warn("connection lost, reconnecting…");
+    sockets_close();
+    sockets_init();
+}
 
 /** Send a message to awesome.
  * \param msg The message.
@@ -82,6 +99,9 @@ send_msg(const char *msg, ssize_t msg_len)
           case ENOENT:
             warn("can't write to %s", addr->sun_path);
             break;
+          case EPIPE:
+            sockets_reconnect();
+            return send_msg(msg, msg_len);
           default:
             warn("error sending packet: %s", strerror(errno));
         }
@@ -99,13 +119,24 @@ recv_msg(void)
 {
     ssize_t r;
     char buf[1024];
+    int try = 10;
 
-    r = recv(csfd, buf, sizeof(buf) - 1, MSG_TRUNC);
-    if (r < 0)
+    while(try)
     {
-        warn("error recieving from UNIX domain socket: %s", strerror(errno));
-        return;
+        r = recv(csfd, buf, sizeof(buf) - 1, MSG_TRUNC | MSG_DONTWAIT);
+        if (r < 0)
+        {
+            if(errno != EAGAIN)
+                return warn("error recieving from UNIX domain socket: %s", strerror(errno));
+            try--;
+        }
+        else
+            break;
+        usleep(100000);
     }
+
+    if(!try)
+        sockets_reconnect();
     else if(r > 0)
     {
         buf[r] = '\0';
@@ -150,7 +181,9 @@ main(int argc, char **argv)
     else if(argc > 2)
         exit_help(EXIT_SUCCESS);
 
-    if (sockets_init())
+    display = getenv("DISPLAY");
+
+    if (!sockets_init())
     {
         warn("can't connect to UNIX domain socket: %s", strerror(errno));
         return EXIT_FAILURE;
@@ -158,7 +191,6 @@ main(int argc, char **argv)
 
     if(isatty(STDIN_FILENO))
     {
-        char *display = getenv("DISPLAY");
         asprintf(&prompt, "awesome@%s%% ", display ? display : "unknown");
         while((msg = readline(prompt)))
             if((msg_len = a_strlen(msg)))
@@ -167,8 +199,8 @@ main(int argc, char **argv)
                 p_realloc(&msg, msg_len + 2);
                 msg[msg_len] = '\n';
                 msg[msg_len + 1] = '\0';
-                send_msg(msg, msg_len + 2);
-                recv_msg();
+                if(send_msg(msg, msg_len + 2) == EXIT_SUCCESS)
+                    recv_msg();
                 p_delete(&msg);
             }
     }
@@ -196,8 +228,8 @@ main(int argc, char **argv)
         }
         if(msg_len > 1)
         {
-            ret_value = send_msg(msg, msg_len);
-            recv_msg();
+            if((ret_value = send_msg(msg, msg_len)) == EXIT_SUCCESS)
+                recv_msg();
         }
         p_delete(&msg);
     }
