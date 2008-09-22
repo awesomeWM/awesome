@@ -509,15 +509,14 @@ client_geometry_hints(client_t *c, area_t geometry)
  * \param c Client to resize.
  * \param geometry New window geometry.
  * \param hints Use size hints.
- * \return True if the client has been resized.
  */
-bool
+void
 client_resize(client_t *c, area_t geometry, bool hints)
 {
     int new_screen;
     area_t area;
     layout_t *layout = layout_get_current(c->screen);
-    bool resized = false, fixed;
+    bool fixed;
     /* Values to configure a window is an array where values are
      * stored according to 'value_mask' */
     uint32_t values[5];
@@ -529,7 +528,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         geometry = client_geometry_hints(c, geometry);
 
     if(geometry.width <= 0 || geometry.height <= 0)
-        return false;
+        return;
 
     /* offscreen appearance fixes */
     area = display_area_get(c->phys_screen, NULL,
@@ -580,16 +579,12 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
         if(c->screen != new_screen)
             screen_client_moveto(c, new_screen, true, false);
-
-        resized = true;
     }
 
     /* call it again like it was floating,
      * we want it to be sticked to the window */
     if(!c->ismoving && !client_isfloating(c) && layout != layout_floating)
         titlebar_update_geometry_floating(c);
-
-    return resized;
 }
 
 /** Set a clinet floating.
