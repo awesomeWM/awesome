@@ -199,9 +199,23 @@ luaA_hooks_unmanage(lua_State *L)
  * \lparam A function to call each time a client gets mouse over it.
  */
 static int
+luaA_hooks_mouse_enter(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &globalconf.hooks.mouse_enter);
+}
+
+/** Set the function called each time the mouse enter a new window. This
+ * function is called with the client object as argument. (DEPRECATED)
+ * \param L The Lua VM state.
+ *
+ * \luastack
+ * \lparam A function to call each time a client gets mouse over it.
+ */
+static int
 luaA_hooks_mouse_over(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.mouse_over);
+    deprecate();
+    return luaA_hooks_mouse_enter(L);
 }
 
 /** Set the function called on each screen arrange. This function is called
@@ -217,30 +231,18 @@ luaA_hooks_arrange(lua_State *L)
     return luaA_registerfct(L, 1, &globalconf.hooks.arrange);
 }
 
-/** Set the function called on each title update. This function is called with
- * the client object as argument.
+/** Set the function called on each client's property change.
+ * This function is called with the client object as argument and the
+ * property name.
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A function to call on each title update of each client.
+ * \lparam A function to call on each client property update.
  */
 static int
-luaA_hooks_titleupdate(lua_State *L)
+luaA_hooks_property(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.titleupdate);
-}
-
-/** Set the function called when a client get urgency flag. This function is called with
- * the client object as argument.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lparam A function to call when a client get the urgent flag.
- */
-static int
-luaA_hooks_urgent(lua_State *L)
-{
-    return luaA_registerfct(L, 1, &globalconf.hooks.urgent);
+    return luaA_registerfct(L, 1, &globalconf.hooks.property);
 }
 
 /** Set the function to be called every N seconds.
@@ -600,11 +602,12 @@ luaA_init(void)
         { "unfocus", luaA_hooks_unfocus },
         { "manage", luaA_hooks_manage },
         { "unmanage", luaA_hooks_unmanage },
-        { "mouse_over", luaA_hooks_mouse_over },
+        { "mouse_enter", luaA_hooks_mouse_enter },
+        { "property", luaA_hooks_property },
         { "arrange", luaA_hooks_arrange },
-        { "titleupdate", luaA_hooks_titleupdate },
-        { "urgent", luaA_hooks_urgent },
         { "timer", luaA_hooks_timer },
+        /* deprecated */
+        { "mouse_over", luaA_hooks_mouse_over },
         { NULL, NULL }
     };
 
@@ -675,10 +678,9 @@ luaA_init(void)
     globalconf.hooks.unmanage = LUA_REFNIL;
     globalconf.hooks.focus = LUA_REFNIL;
     globalconf.hooks.unfocus = LUA_REFNIL;
-    globalconf.hooks.mouse_over = LUA_REFNIL;
+    globalconf.hooks.mouse_enter = LUA_REFNIL;
     globalconf.hooks.arrange = LUA_REFNIL;
-    globalconf.hooks.titleupdate = LUA_REFNIL;
-    globalconf.hooks.urgent = LUA_REFNIL;
+    globalconf.hooks.property = LUA_REFNIL;
     globalconf.hooks.timer = LUA_REFNIL;
 }
 

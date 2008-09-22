@@ -577,6 +577,9 @@ client_resize(client_t *c, area_t geometry, bool hints)
                              values);
         window_configure(c->win, geometry, c->border);
 
+        /* execute hook */
+        hooks_property(c, "geometry");
+
         if(c->screen != new_screen)
             screen_client_moveto(c, new_screen, true, false);
     }
@@ -613,6 +616,8 @@ client_setfloating(client_t *c, bool floating)
                             XCB_PROP_MODE_REPLACE,
                             c->win, _AWESOME_FLOATING, CARDINAL, 8, 1,
                             &c->isfloating);
+        /* execute hook */
+        hooks_property(c, "floating");
     }
 }
 
@@ -629,6 +634,8 @@ client_setminimized(client_t *c, bool s)
         c->isminimized = s;
         client_need_arrange(c);
         ewmh_client_update_hints(c);
+        /* execute hook */
+        hooks_property(c, "minimized");
     }
 }
 
@@ -645,6 +652,7 @@ client_setsticky(client_t *c, bool s)
         c->issticky = s;
         client_need_arrange(c);
         ewmh_client_update_hints(c);
+        hooks_property(c, "sticky");
     }
 }
 
@@ -681,6 +689,7 @@ client_setfullscreen(client_t *c, bool s)
                             c->win, _AWESOME_FULLSCREEN, CARDINAL, 8, 1,
                             &c->isfullscreen);
         ewmh_client_update_hints(c);
+        hooks_property(c, "fullscreen");
     }
 }
 
@@ -696,6 +705,8 @@ client_setabove(client_t *c, bool s)
         c->isabove = s;
         client_stack();
         ewmh_client_update_hints(c);
+        /* execute hook */
+        hooks_property(c, "above");
     }
 }
 
@@ -711,6 +722,8 @@ client_setbelow(client_t *c, bool s)
         c->isbelow = s;
         client_stack();
         ewmh_client_update_hints(c);
+        /* execute hook */
+        hooks_property(c, "below");
     }
 }
 
@@ -726,6 +739,8 @@ client_setmodal(client_t *c, bool s)
         c->ismodal = s;
         client_stack();
         ewmh_client_update_hints(c);
+        /* execute hook */
+        hooks_property(c, "modal");
     }
 }
 
@@ -740,6 +755,8 @@ client_setontop(client_t *c, bool s)
     {
         c->isontop = s;
         client_stack();
+        /* execute hook */
+        hooks_property(c, "ontop");
     }
 }
 
@@ -978,6 +995,8 @@ client_setborder(client_t *c, int width)
         else
             globalconf.screens[c->screen].need_arrange = true;
     }
+
+    hooks_property(c, "border_width");
 }
 
 /** Kill a client.

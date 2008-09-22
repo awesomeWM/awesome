@@ -440,14 +440,12 @@ struct awesome_t
         luaA_ref focus;
         /** Command to execute when removing focus to a client */
         luaA_ref unfocus;
-        /** Command to run when mouse is over */
-        luaA_ref mouse_over;
+        /** Command to run when mouse enter a client */
+        luaA_ref mouse_enter;
         /** Command to run on arrange */
         luaA_ref arrange;
-        /** Command to run on title change */
-        luaA_ref titleupdate;
-        /** Command to run on urgent flag */
-        luaA_ref urgent;
+        /** Command to run on property change */
+        luaA_ref property;
         /** Command to run on time */
         luaA_ref timer;
     } hooks;

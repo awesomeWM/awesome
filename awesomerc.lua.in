@@ -357,7 +357,7 @@ awful.hooks.unmarked.register(function (c)
 end)
 
 -- Hook function to execute when the mouse is over a client.
-awful.hooks.mouse_over.register(function (c)
+awful.hooks.mouse_enter.register(function (c)
     -- Sloppy focus, but disabled for magnifier layout
     if awful.layout.get(c.screen) ~= "magnifier"
         and awful.client.focus.filter(c) then

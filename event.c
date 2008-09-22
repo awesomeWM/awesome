@@ -469,7 +469,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         globalconf.pointer_y = ev->root_y;
 
         luaA_client_userdata_new(globalconf.L, c);
-        luaA_dofunction(globalconf.L, globalconf.hooks.mouse_over, 1, 0);
+        luaA_dofunction(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
     }
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
         xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,

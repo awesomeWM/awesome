@@ -270,5 +270,12 @@ luaA_generic_pairs(lua_State *L)
     return 3;
 }
 
+#define hooks_property(c, prop) \
+    do { \
+        luaA_client_userdata_new(globalconf.L, c); \
+        lua_pushliteral(globalconf.L, prop); \
+        luaA_dofunction(globalconf.L, globalconf.hooks.property, 2, 0); \
+    } while(0);
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

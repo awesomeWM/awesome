@@ -134,13 +134,16 @@ function client.urgent.jumpto()
 end
 
 --- Adds client to urgent stack.
--- @param The client object.
-function client.urgent.stack.add(c)
-    table.insert(client.urgent.stack.data, c)
+-- @param c The client object.
+-- @param prop The property which is updated.
+function client.urgent.stack.add(c, prop)
+    if prop == "urgent" then
+        table.insert(client.urgent.stack.data, c)
+    end
 end
 
 --- Remove client from urgent stack.
--- @param The client object.
+-- @param c The client object.
 function client.urgent.stack.delete(c)
     for k, cl in ipairs(client.urgent.stack.data) do
         if c == cl then
@@ -1529,6 +1532,7 @@ function titlebar.add(c, args)
     local tb = capi.wibox(targs)
 
     local title = capi.widget({ type = "textbox", name = "title", align = "flex" })
+    title.text = " " .. escape(c.name) .. " "
     local bts =
     {
         capi.button({ }, 1, function (t) t.client:mouse_move() end),
@@ -1578,18 +1582,26 @@ end
 
 --- Update a titlebar. This should be called in some hooks.
 -- @param c The client to update.
-function titlebar.update(c)
+-- @param prop The property name which has changed.
+function titlebar.update(c, prop)
     if c.titlebar and titlebar.data[c] then
         local widgets = c.titlebar:widgets()
         local title, close, closef
         for k, v in ipairs(widgets) do
-            if v.name == "title" then title = v end
-            if v.name == "close" then close = v end
-            if v.name == "closef" then closef = v end
-            if title and close and closef then break end
+            if v.name == "title" then title = v
+            elseif v.name == "close" then close = v
+            elseif v.name == "closef" then closef = v
+            elseif v.name == "appicon" then appicon = v end
+            if title and close and closef and appicon then break end
         end
-        if title then
-            title.text = " " .. escape(c.name) .. " "
+        if prop == "name" then
+            if title then
+                title.text = " " .. escape(c.name) .. " "
+            end
+        elseif prop == "icon" then
+            if appicon then
+                appicon.image = c.icon
+            end
         end
         if capi.client.focus == c then
             c.titlebar.fg = titlebar.data[c].fg_focus
@@ -1813,10 +1825,10 @@ hooks.unmanage.register(client_maximize_clean)
 
 hooks.focus.register(titlebar.update)
 hooks.unfocus.register(titlebar.update)
-hooks.titleupdate.register(titlebar.update)
+hooks.property.register(titlebar.update)
 hooks.unmanage.register(titlebar.remove)
 
-hooks.urgent.register(client.urgent.stack.add)
+hooks.property.register(client.urgent.stack.add)
 hooks.focus.register(client.urgent.stack.delete)
 hooks.unmanage.register(client.urgent.stack.delete)
 
