@@ -169,6 +169,7 @@ main(int argc, char **argv)
                 msg[msg_len + 1] = '\0';
                 send_msg(msg, msg_len + 2);
                 recv_msg();
+                p_delete(&msg);
             }
     }
     else
