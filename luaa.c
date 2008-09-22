@@ -81,7 +81,6 @@ extern const struct luaL_reg awesome_keybinding_meta[];
 
 static struct sockaddr_un *addr;
 static ev_io csio = { .fd = -1 };
-struct ev_io csio2 = { .fd = -1 };
 
 /** Get or set global mouse bindings.
  * This binding will be available when you'll click on root window.
