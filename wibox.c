@@ -100,6 +100,7 @@ luaA_wibox_new(lua_State *L)
     w->position = position_fromstr(buf, len);
 
     w->screen = SCREEN_UNDEF;
+    w->isvisible = true;
 
     for(i = 0; i <= reqs_nbr; i++)
         xcolor_init_reply(reqs[i]);
@@ -138,6 +139,9 @@ luaA_wibox_index(lua_State *L)
 
       case A_TK_GEOMETRY:
         luaA_pusharea(L, (*wibox)->geometry);
+        break;
+      case A_TK_VISIBLE:
+        lua_pushboolean(L, (*wibox)->isvisible);
         break;
       case A_TK_CLIENT:
         if((c = client_getbytitlebar(*wibox)))
@@ -288,6 +292,22 @@ luaA_wibox_newindex(lua_State *L)
         {
             (*wibox)->ontop = b;
             client_stack();
+        }
+        break;
+      case A_TK_VISIBLE:
+        b = luaA_checkboolean(L, 3);
+        if(b != (*wibox)->isvisible)
+        {
+            (*wibox)->isvisible = b;
+            switch((*wibox)->type)
+            {
+              case WIBOX_TYPE_STATUSBAR:
+                statusbar_position_update(*wibox);
+                break;
+              case WIBOX_TYPE_NONE:
+              case WIBOX_TYPE_TITLEBAR:
+                break;
+            }
         }
         break;
       default:

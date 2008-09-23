@@ -66,7 +66,7 @@ statusbar_systray_refresh(wibox_t *statusbar)
             position_t pos;
             int phys_screen = statusbar->sw.ctx.phys_screen;
 
-            if(statusbar->position
+            if(statusbar->isvisible
                && systray->widget->isvisible
                && systray->area.width)
             {
@@ -123,8 +123,8 @@ statusbar_systray_refresh(wibox_t *statusbar)
             else
             {
                 xcb_unmap_window(globalconf.connection, globalconf.screens[phys_screen].systray.window);
-                /* hide */
-                pos = Off;
+                statusbar_systray_kickout(phys_screen);
+                break;
             }
 
             switch(pos)
@@ -200,9 +200,6 @@ statusbar_systray_refresh(wibox_t *statusbar)
                                                  config_win_vals_off);
                     }
                 break;
-              default:
-                statusbar_systray_kickout(phys_screen);
-                break;
             }
             break;
         }
@@ -216,7 +213,7 @@ statusbar_draw(wibox_t *statusbar)
 {
     statusbar->need_update = false;
 
-    if(statusbar->position)
+    if(statusbar->isvisible)
     {
         widget_render(statusbar->widgets, &statusbar->sw.ctx, statusbar->sw.gc,
                       statusbar->sw.pixmap,
@@ -270,7 +267,9 @@ statusbar_position_update(wibox_t *statusbar)
     area_t area;
     bool ignore = false;
 
-    if(statusbar->position == Off)
+    globalconf.screens[statusbar->screen].need_arrange = true;
+
+    if(!statusbar->isvisible)
     {
         xcb_unmap_window(globalconf.connection, statusbar->sw.window);
         /* kick out systray if needed */
@@ -343,8 +342,6 @@ statusbar_position_update(wibox_t *statusbar)
               default:
                 break;
             }
-            break;
-          default:
             break;
         }
     }
@@ -438,7 +435,6 @@ statusbar_position_update(wibox_t *statusbar)
                           0, statusbar->position,
                           &statusbar->colors.fg, &statusbar->colors.bg);
         statusbar->need_update = true;
-        xcb_map_window(globalconf.connection, statusbar->sw.window);
     }
     /* same window size and position ? */
     else
@@ -455,8 +451,7 @@ statusbar_position_update(wibox_t *statusbar)
             simplewindow_move(&statusbar->sw, statusbar->geometry.x, statusbar->geometry.y);
     }
 
-    /* Set need update */
-    globalconf.screens[statusbar->screen].need_arrange = true;
+    xcb_map_window(globalconf.connection, statusbar->sw.window);
 }
 
 /** Create a new statusbar (DEPRECATED).
@@ -483,14 +478,14 @@ statusbar_detach(wibox_t *statusbar)
 {
     if(statusbar->screen != SCREEN_UNDEF)
     {
-        position_t p;
+        bool v;
 
-        /* save position */
-        p = statusbar->position;
-        statusbar->position = Off;
+        /* save visible state */
+        v = statusbar->isvisible;
+        statusbar->isvisible = false;
         statusbar_position_update(statusbar);
         /* restore position */
-        statusbar->position = p;
+        statusbar->isvisible = v;
 
         simplewindow_wipe(&statusbar->sw);
 

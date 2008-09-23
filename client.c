@@ -808,9 +808,9 @@ client_unban(client_t *c)
 {
     xcb_map_window(globalconf.connection, c->win);
     window_state_set(c->win, XCB_WM_STATE_NORMAL);
-    if(c->titlebar && c->titlebar->position)
+    if(c->titlebar)
     {
-        if(c->isfullscreen)
+        if(c->isfullscreen || !c->titlebar->isvisible)
             xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
         else
             xcb_map_window(globalconf.connection, c->titlebar->sw.window);

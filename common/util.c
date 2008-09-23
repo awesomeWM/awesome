@@ -105,7 +105,7 @@ position_fromstr(const char *pos, ssize_t len)
 {
     switch(a_tokenize(pos, len))
     {
-      case A_TK_TOP:
+      default:
         return Top;
       case A_TK_BOTTOM:
         return Bottom;
@@ -113,8 +113,6 @@ position_fromstr(const char *pos, ssize_t len)
         return Right;
       case A_TK_LEFT:
         return Left;
-      default:
-        return Off;
     }
 }
 
@@ -131,7 +129,7 @@ position_tostr(position_t p)
       case Bottom: return "bottom";
       case Right:  return "right";
       case Left:   return "left";
-      default:     return "off";
+      default:     return NULL;
     }
 }
 

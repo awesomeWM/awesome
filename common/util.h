@@ -44,7 +44,6 @@ typedef enum
 /** A list of possible position, not sex related */
 typedef enum
 {
-    Off = 0,
     Top,
     Bottom,
     Right,

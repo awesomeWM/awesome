@@ -92,6 +92,8 @@ typedef struct
     int refcount;
     /** Ontop */
     bool ontop;
+    /** Visible */
+    bool isvisible;
     /** Wibox type */
     wibox_type_t type;
     /** Window */

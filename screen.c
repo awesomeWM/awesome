@@ -219,23 +219,24 @@ screen_area_get(int screen, wibox_array_t *statusbars,
         for(int i = 0; i < statusbars->len; i++)
         {
             wibox_t *sb = statusbars->tab[i];
-            switch(sb->position)
-            {
-              case Top:
-                top = MAX(top, (uint16_t) (sb->sw.geometry.y - area.y) + sb->sw.geometry.height);
-                break;
-              case Bottom:
-                bottom = MAX(bottom, (uint16_t) (area.y + area.height) - sb->sw.geometry.y);
-                break;
-              case Left:
-                left = MAX(left, (uint16_t) (sb->sw.geometry.x - area.x) + sb->sw.geometry.width);
-                break;
-              case Right:
-                right = MAX(right, (uint16_t) (area.x + area.width) - sb->sw.geometry.x);
-                break;
-              default:
-                break;
-            }
+            if(sb->isvisible)
+                switch(sb->position)
+                {
+                  case Top:
+                    top = MAX(top, (uint16_t) (sb->sw.geometry.y - area.y) + sb->sw.geometry.height);
+                    break;
+                  case Bottom:
+                    bottom = MAX(bottom, (uint16_t) (area.y + area.height) - sb->sw.geometry.y);
+                    break;
+                  case Left:
+                    left = MAX(left, (uint16_t) (sb->sw.geometry.x - area.x) + sb->sw.geometry.width);
+                    break;
+                  case Right:
+                    right = MAX(right, (uint16_t) (area.x + area.width) - sb->sw.geometry.x);
+                    break;
+                  default:
+                    break;
+                }
         }
 
     area.x += left;

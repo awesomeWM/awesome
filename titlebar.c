@@ -66,7 +66,7 @@ client_getbytitlebarwin(xcb_window_t win)
 void
 titlebar_draw(client_t *c)
 {
-    if(!c || !c->titlebar || !c->titlebar->position)
+    if(!c || !c->titlebar || !c->titlebar->isvisible)
         return;
 
     widget_render(c->titlebar->widgets, &c->titlebar->sw.ctx,
@@ -203,9 +203,6 @@ titlebar_init(client_t *c)
 
     switch(c->titlebar->position)
     {
-      default:
-        c->titlebar->position = Off;
-        return;
       case Top:
       case Bottom:
         if(c->titlebar->geometry.width)
