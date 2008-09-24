@@ -23,13 +23,12 @@
 #define AWESOME_TITLEBAR_H
 
 #include "structs.h"
+#include "wibox.h"
 
 client_t * client_getbytitlebar(wibox_t *);
 client_t * client_getbytitlebarwin(xcb_window_t);
 void titlebar_geometry_compute(client_t *, area_t, area_t *);
-void titlebar_draw(client_t *);
 void titlebar_init(client_t *);
-void titlebar_refresh(void);
 void titlebar_client_detach(client_t *);
 void titlebar_client_attach(client_t *, wibox_t *);
 
@@ -119,22 +118,6 @@ titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
     return geometry;
 }
 
-/** Update the titlebar geometry for a floating client.
- * \param c The client.
- */
-static inline void
-titlebar_update_geometry_floating(client_t *c)
-{
-    area_t geom;
-
-    if(!c->titlebar)
-        return;
-
-    titlebar_geometry_compute(c, c->geometry, &geom);
-    simplewindow_moveresize(&c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
-    c->titlebar->need_update = true;
-}
-
 /** Update the titlebar geometry for a tiled client.
  * \param c The client.
  * \param geometry The geometry the client will receive.
@@ -148,8 +131,16 @@ titlebar_update_geometry_tiled(client_t *c, area_t geometry)
         return;
 
     titlebar_geometry_compute(c, geometry, &geom);
-    simplewindow_moveresize(&c->titlebar->sw, geom.x, geom.y, geom.width, geom.height);
-    c->titlebar->need_update = true;
+    wibox_moveresize(c->titlebar, geom);
+}
+
+/** Update the titlebar geometry for a floating client.
+ * \param c The client.
+ */
+static inline void
+titlebar_update_geometry_floating(client_t *c)
+{
+    return titlebar_update_geometry_tiled(c, c->geometry);
 }
 
 #endif

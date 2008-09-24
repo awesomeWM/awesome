@@ -110,9 +110,21 @@ void draw_context_init(draw_context_t *, int, int, int,
 static inline void
 draw_context_wipe(draw_context_t *ctx)
 {
-    g_object_unref(ctx->layout);
-    cairo_surface_destroy(ctx->surface);
-    cairo_destroy(ctx->cr);
+    if(ctx->layout)
+    {
+        g_object_unref(ctx->layout);
+        ctx->layout = NULL;
+    }
+    if(ctx->surface)
+    {
+        cairo_surface_destroy(ctx->surface);
+        ctx->surface = NULL;
+    }
+    if(ctx->cr)
+    {
+        cairo_destroy(ctx->cr);
+        ctx->cr = NULL;
+    }
 }
 
 font_t *draw_font_new(int, const char *);

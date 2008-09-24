@@ -73,7 +73,7 @@ systray_draw(draw_context_t *ctx,
         break;
     }
 
-    /* set statusbar orientation */
+    /* set wibox orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         globalconf.screens[p->sw.ctx.phys_screen].systray.window,

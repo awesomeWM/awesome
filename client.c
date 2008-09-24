@@ -35,7 +35,6 @@
 #include "luaa.h"
 #include "mouse.h"
 #include "systray.h"
-#include "statusbar.h"
 #include "wibox.h"
 #include "property.h"
 #include "layouts/floating.h"
@@ -203,7 +202,7 @@ client_ban(client_t *c)
         window_state_set(c->win, XCB_WM_STATE_ICONIC);
     else
         window_state_set(c->win, XCB_WM_STATE_WITHDRAWN);
-    if(c->titlebar && c->titlebar->position)
+    if(c->titlebar)
         xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
 }
 
@@ -260,8 +259,7 @@ client_stack_below(client_t *c, xcb_window_t previous)
     config_win_vals[0] = previous;
     config_win_vals[1] = XCB_STACK_MODE_BELOW;
 
-    if(c->titlebar
-       && c->titlebar->position)
+    if(c->titlebar)
     {
         xcb_configure_window(globalconf.connection,
                              c->titlebar->sw.window,
@@ -314,7 +312,7 @@ client_layer_translator(client_t *c)
  * relatively to the first matching in the list.
  */
 void
-client_stack(void)
+client_stack()
 {
     uint32_t config_win_vals[2];
     client_node_t *node;
@@ -330,11 +328,11 @@ client_stack(void)
             if(client_layer_translator(node->client) == layer)
                 config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
 
-    /* then stack ontop statusbar window */
+    /* then stack ontop wibox window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
         {
-            wibox_t *sb = globalconf.screens[screen].statusbars.tab[i];
+            wibox_t *sb = globalconf.screens[screen].wiboxes.tab[i];
             if(sb->ontop)
             {
                 xcb_configure_window(globalconf.connection,
@@ -351,11 +349,11 @@ client_stack(void)
             if(client_layer_translator(node->client) == layer)
                 config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
 
-    /* then stack not ontop statusbar window */
+    /* then stack not ontop wibox window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
         {
-            wibox_t *sb = globalconf.screens[screen].statusbars.tab[i];
+            wibox_t *sb = globalconf.screens[screen].wiboxes.tab[i];
             if(!sb->ontop)
             {
                 xcb_configure_window(globalconf.connection,
@@ -588,11 +586,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
          * maximized */
         if(c->ismoving || client_isfloating(c)
            || layout_get_current(new_screen) == layout_floating)
-        {
-            titlebar_update_geometry_floating(c);
             if(!c->isfullscreen)
                 c->f_geometry = geometry;
-        }
+
+        titlebar_update_geometry_floating(c);
 
         xcb_configure_window(globalconf.connection, c->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y |
@@ -601,17 +598,12 @@ client_resize(client_t *c, area_t geometry, bool hints)
                              values);
         window_configure(c->win, geometry, c->border);
 
-        /* execute hook */
-        hooks_property(c, "geometry");
-
         if(c->screen != new_screen)
             screen_client_moveto(c, new_screen, true, false);
-    }
 
-    /* call it again like it was floating,
-     * we want it to be sticked to the window */
-    if(!c->ismoving && !client_isfloating(c) && layout != layout_floating)
-        titlebar_update_geometry_floating(c);
+        /* execute hook */
+        hooks_property(c, "geometry");
+    }
 }
 
 /** Set a clinet floating.
@@ -626,13 +618,8 @@ client_setfloating(client_t *c, bool floating)
        && (c->type == WINDOW_TYPE_NORMAL))
     {
         if((c->isfloating = floating))
-        {
             if(!c->isfullscreen)
-            {
                 client_resize(c, c->f_geometry, false);
-                titlebar_update_geometry_floating(c);
-            }
-        }
         client_need_arrange(c);
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_stack();
@@ -852,12 +839,7 @@ client_unmanage(client_t *c)
     for(int i = 0; i < tags->len; i++)
         untag_client(c, tags->tab[i]);
 
-    if(c->titlebar)
-    {
-        xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
-        wibox_unref(&c->titlebar);
-        c->titlebar = NULL;
-    }
+    titlebar_client_detach(c);
 
     ewmh_update_net_client_list(c->phys_screen);
 
@@ -866,12 +848,12 @@ client_unmanage(client_t *c)
     xcb_delete_property(globalconf.connection, c->win, _AWESOME_FLOATING);
 
     if(client_hasstrut(c))
-        /* All the statusbars (may) need to be repositioned */
+        /* All the wiboxes (may) need to be repositioned */
         for(int screen = 0; screen < globalconf.nscreen; screen++)
-            for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+            for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
             {
-                wibox_t *s = globalconf.screens[screen].statusbars.tab[i];
-                statusbar_position_update(s);
+                wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
+                wibox_position_update(s);
             }
 
     /* set client as invalid */

@@ -31,7 +31,7 @@ layout_max(int screen)
 {
     client_t *c;
     area_t area = screen_area_get(screen,
-                                  &globalconf.screens[screen].statusbars,
+                                  &globalconf.screens[screen].wiboxes,
                                   &globalconf.screens[screen].padding,
                                   true);
 

@@ -27,7 +27,7 @@
 #include "tag.h"
 #include "client.h"
 #include "titlebar.h"
-#include "statusbar.h"
+#include "wibox.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
 #include "layouts/magnifier.h"
@@ -132,7 +132,7 @@ mouse_snapclient(client_t *c, area_t geometry, int snap)
     area_t snapper_geometry;
     area_t screen_geometry =
         screen_area_get(c->screen,
-                        &globalconf.screens[c->screen].statusbars,
+                        &globalconf.screens[c->screen].wiboxes,
                         &globalconf.screens[c->screen].padding,
                         false);
 
@@ -239,8 +239,7 @@ mouse_snap_to_corner(area_t a, int *x, int *y, corner_t corner)
  * \param border The client border size.
  */
 static void
-mouse_infobox_draw(simple_window_t *sw,
-                   area_t geometry, int border)
+mouse_infobox_draw(simple_window_t *sw, area_t geometry, int border)
 {
     area_t draw_geometry = { 0, 0, sw->ctx.width, sw->ctx.height };
     char size[64];
@@ -282,10 +281,9 @@ mouse_infobox_new(simple_window_t *sw, int phys_screen, int border, area_t geome
     geom.x = geometry.x + ((2 * border + geometry.width) - geom.width) / 2;
     geom.y = geometry.y + ((2 * border + geometry.height) - geom.height) / 2;
 
-    simplewindow_init(sw, phys_screen,
-                      geom.x, geom.y,
-                      geom.width, geom.height, 0,
-                      Top, &globalconf.colors.fg, &globalconf.colors.bg);
+    p_clear(sw, 1);
+    simplewindow_init(sw, phys_screen, geom, 0, East,
+                      &globalconf.colors.fg, &globalconf.colors.bg);
 
     xcb_map_window(globalconf.connection, sw->window);
     mouse_infobox_draw(sw, geometry, border);
@@ -520,7 +518,9 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             if(infobox)
                 mouse_infobox_draw(&sw, c->geometry, c->border);
 
-            statusbar_refresh();
+            /* refresh live */
+            wibox_refresh();
+            xcb_flush(globalconf.connection);
 
             /* keep track */
             last_x = mouse_x;
@@ -539,8 +539,8 @@ mouse_client_move(client_t *c, int snap, bool infobox)
                 globalconf.screens[c->screen].need_arrange = true;
                 globalconf.screens[newscreen].need_arrange = true;
                 layout_refresh();
-                titlebar_refresh();
-                statusbar_refresh();
+                wibox_refresh();
+                xcb_flush(globalconf.connection);
             }
 
             /* find client to swap with */
@@ -552,7 +552,8 @@ mouse_client_move(client_t *c, int snap, bool infobox)
                 client_list_swap(&globalconf.clients, c, target);
                 globalconf.screens[c->screen].need_arrange = true;
                 layout_refresh();
-                titlebar_refresh();
+                wibox_refresh();
+                xcb_flush(globalconf.connection);
             }
         }
 
@@ -695,8 +696,10 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
         /* resize the client */
         client_resize(c, geo, false);
-        /* redaw titlebar live */
-        titlebar_draw(c);
+
+        /* refresh live */
+        wibox_refresh();
+        xcb_flush(globalconf.connection);
 
         /* draw the infobox */
         if(infobox)
@@ -718,7 +721,7 @@ static void
 mouse_client_resize_tiled(client_t *c)
 {
     xcb_screen_t *screen;
-    /* screen area modulo statusbar */
+    /* screen area modulo wibox */
     area_t area;
     /* current tag */
     tag_t *tag;
@@ -733,7 +736,7 @@ mouse_client_resize_tiled(client_t *c)
     layout = tag->layout;
 
     area = screen_area_get(tag->screen,
-                           &globalconf.screens[tag->screen].statusbars,
+                           &globalconf.screens[tag->screen].wiboxes,
                            &globalconf.screens[tag->screen].padding,
                            true);
 
@@ -799,7 +802,8 @@ mouse_client_resize_tiled(client_t *c)
             tag->mwfact = mwfact;
             globalconf.screens[tag->screen].need_arrange = true;
             layout_refresh();
-            titlebar_refresh();
+            wibox_refresh();
+            xcb_flush(globalconf.connection);
         }
     }
 
@@ -814,7 +818,7 @@ mouse_client_resize_tiled(client_t *c)
 static void
 mouse_client_resize_magnified(client_t *c, bool infobox)
 {
-    /* screen area modulo statusbar */
+    /* screen area modulo wibox */
     area_t area;
     /* center of area */
     int center_x, center_y;
@@ -836,7 +840,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     root = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
 
     area = screen_area_get(tag->screen,
-                           &globalconf.screens[tag->screen].statusbars,
+                           &globalconf.screens[tag->screen].wiboxes,
                            &globalconf.screens[tag->screen].padding,
                            true);
 
@@ -904,7 +908,8 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
             tag->mwfact = mwfact;
             globalconf.screens[tag->screen].need_arrange = true;
             layout_refresh();
-            titlebar_refresh();
+            wibox_refresh();
+            xcb_flush(globalconf.connection);
         }
 
         /* draw the infobox */

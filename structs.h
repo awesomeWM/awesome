@@ -62,8 +62,7 @@ typedef enum
 /** Wibox types */
 typedef enum
 {
-    WIBOX_TYPE_NONE = 0,
-    WIBOX_TYPE_STATUSBAR,
+    WIBOX_TYPE_NORMAL = 0,
     WIBOX_TYPE_TITLEBAR
 } wibox_type_t;
 
@@ -94,14 +93,12 @@ typedef struct
     bool ontop;
     /** Visible */
     bool isvisible;
+    /** Position */
+    position_t position;
     /** Wibox type */
     wibox_type_t type;
     /** Window */
     simple_window_t sw;
-    /** Box geometry */
-    area_t geometry;
-    /** Box position */
-    position_t position;
     /** Alignment */
     alignment_t align;
     /** Screen */
@@ -112,16 +109,6 @@ typedef struct
     widget_node_t *mouse_over;
     /** Need update */
     bool need_update;
-    /** Default colors */
-    struct
-    {
-        xcolor_t fg, bg;
-    } colors;
-    struct
-    {
-        xcolor_t color;
-        uint16_t width;
-    } border;
 } wibox_t;
 ARRAY_TYPE(wibox_t *, wibox)
 
@@ -367,8 +354,8 @@ typedef struct
     bool need_arrange;
     /** Tag list */
     tag_array_t tags;
-    /** Statusbars */
-    wibox_array_t statusbars;
+    /** Wiboxes */
+    wibox_array_t wiboxes;
     /** Padding */
     padding_t padding;
     /** Window that contains the systray */

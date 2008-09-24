@@ -29,7 +29,7 @@ former or as a rectangular fractal for the later.
 Windows are grouped by tags. Each window can be tagged with one or multiple
 tags. Selecting certain tags displays all windows with these tags.
 
-*awesome* can contain small statusbars which can display anything you want:
+*awesome* can contain small wiboxes which can display anything you want:
 all available tags, the layout, the title of the visible windows, a text, etc.
 
 OPTIONS

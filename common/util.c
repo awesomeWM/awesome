@@ -113,6 +113,8 @@ position_fromstr(const char *pos, ssize_t len)
         return Right;
       case A_TK_LEFT:
         return Left;
+      case A_TK_FLOATING:
+        return Floating;
     }
 }
 
@@ -125,11 +127,47 @@ position_tostr(position_t p)
 {
     switch(p)
     {
-      case Top:    return "top";
-      case Bottom: return "bottom";
-      case Right:  return "right";
-      case Left:   return "left";
-      default:     return NULL;
+      case Top:      return "top";
+      case Bottom:   return "bottom";
+      case Right:    return "right";
+      case Left:     return "left";
+      case Floating: return "floating";
+      default:       return NULL;
+    }
+}
+
+/** Get a orientation type from a string.
+ * \param pos The orientation.
+ * \param len The string length, -1 if unknown.
+ * \return A orientation.
+ */
+orientation_t
+orientation_fromstr(const char *pos, ssize_t len)
+{
+    switch(a_tokenize(pos, len))
+    {
+      default:
+        return North;
+      case A_TK_SOUTH:
+        return South;
+      case A_TK_EAST:
+        return East;
+    }
+}
+
+/** Convert a orientation type to a string.
+ * \param p The orientation.
+ * \return A orientation string.
+ */
+const char *
+orientation_tostr(orientation_t p)
+{
+    switch(p)
+    {
+      case North: return "north";
+      case South: return "south";
+      case East:  return "east";
+      default:    return NULL;
     }
 }
 

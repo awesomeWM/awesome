@@ -1,5 +1,5 @@
 /*
- * statusbar.h - statusbar functions header
+ * wibox.h - wibox functions header
  *
  * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
  *
@@ -32,6 +32,10 @@ void wibox_refresh(void);
 
 int luaA_wibox_new(lua_State *);
 int luaA_wibox_userdata_new(lua_State *, wibox_t *);
+void wibox_position_update(wibox_t *);
+wibox_t * wibox_getbywin(xcb_window_t);
+void wibox_detach(wibox_t *);
+void wibox_attach(wibox_t *, screen_t *);
 
 static inline void
 wibox_delete(wibox_t **wibox)
@@ -39,6 +43,16 @@ wibox_delete(wibox_t **wibox)
     simplewindow_wipe(&(*wibox)->sw);
     widget_node_list_wipe(&(*wibox)->widgets);
     p_delete(wibox);
+}
+
+static inline void
+wibox_moveresize(wibox_t *wibox, area_t geometry)
+{
+    if(wibox->sw.window)
+        simplewindow_moveresize(&wibox->sw, geometry);
+    else
+        wibox->sw.geometry = geometry;
+    wibox->need_update = true;
 }
 
 DO_RCNT(wibox_t, wibox, wibox_delete)

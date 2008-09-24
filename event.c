@@ -37,7 +37,6 @@
 #include "keygrabber.h"
 #include "luaa.h"
 #include "systray.h"
-#include "statusbar.h"
 #include "screen.h"
 #include "layouts/floating.h"
 #include "common/atoms.h"
@@ -78,7 +77,7 @@ event_handle_mouse_button(client_t *c,
         }
 }
 
-/** Get a widget node from a statusbar by coords.
+/** Get a widget node from a wibox by coords.
  * \param Container position.
  * \param widgets The widget list.
  * \param width The container width.
@@ -130,6 +129,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
     client_t *c;
     widget_node_t *w;
+    wibox_t *wibox;
 
     /* ev->state is
      * button status (8 bits) + modifiers status (8 bits)
@@ -137,35 +137,21 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
      * drop them */
     ev->state &= 0x00ff;
 
-    for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
-        {
-            wibox_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
-            if(statusbar->sw.window == ev->event || statusbar->sw.window == ev->child)
-            {
-                /* If the statusbar is child, then x,y are
-                 * relative to root window */
-                if(statusbar->sw.window == ev->child)
-                {
-                    ev->event_x -= statusbar->sw.geometry.x;
-                    ev->event_y -= statusbar->sw.geometry.y;
-                }
-                if((w = widget_getbycoords(statusbar->position, statusbar->widgets,
-                                           statusbar->sw.geometry.width,
-                                           statusbar->sw.geometry.height,
-                                           &ev->event_x, &ev->event_y)))
-                    w->widget->button(w, ev, statusbar->screen, statusbar);
-                /* return even if no widget match */
-                return 0;
-            }
-        }
-
-    if((c = client_getbytitlebarwin(ev->event)))
+    if((wibox = wibox_getbywin(ev->event))
+       || (wibox = wibox_getbywin(ev->child)))
     {
-        if((w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
-                                   c->titlebar->geometry.width, c->titlebar->geometry.height,
+        /* If the wibox is child, then x,y are
+         * relative to root window */
+        if(wibox->sw.window == ev->child)
+        {
+            ev->event_x -= wibox->sw.geometry.x;
+            ev->event_y -= wibox->sw.geometry.y;
+        }
+        if((w = widget_getbycoords(wibox->position, wibox->widgets,
+                                   wibox->sw.geometry.width,
+                                   wibox->sw.geometry.height,
                                    &ev->event_x, &ev->event_y)))
-                w->widget->button(w, ev, c->screen, c->titlebar);
+            w->widget->button(w, ev, wibox->screen, wibox);
         /* return even if no widget match */
         return 0;
     }
@@ -219,14 +205,13 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             if(client_isfloating(c) || layout_get_current(c->screen) == layout_floating)
             {
                 client_resize(c, geometry, false);
-                titlebar_draw(c);
                 if(client_hasstrut(c))
-                    /* All the statusbars (may) need to be repositioned */
+                    /* All the wiboxes (may) need to be repositioned */
                     for(int screen = 0; screen < globalconf.nscreen; screen++)
-                        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+                        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
                         {
-                            wibox_t *s = globalconf.screens[screen].statusbars.tab[i];
-                            statusbar_position_update(s);
+                            wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
+                            wibox_position_update(s);
                         }
             }
             else
@@ -239,10 +224,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             }
         }
         else
-        {
-            titlebar_update_geometry_floating(c);
             window_configure(c->win, geometry, c->border);
-        }
     }
     else
     {
@@ -379,27 +361,16 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                           xcb_connection_t *connection,
                           xcb_motion_notify_event_t *ev)
 {
-    wibox_t *statusbar = statusbar_getbywin(ev->event);
-    client_t *c;
+    wibox_t *wibox = wibox_getbywin(ev->event);
     widget_node_t *w;
 
-    if(statusbar)
+    if(wibox)
     {
-        w = widget_getbycoords(statusbar->position, statusbar->widgets,
-                               statusbar->sw.geometry.width,
-                               statusbar->sw.geometry.height,
+        w = widget_getbycoords(wibox->position, wibox->widgets,
+                               wibox->sw.geometry.width,
+                               wibox->sw.geometry.height,
                                &ev->event_x, &ev->event_y);
-        event_handle_widget_motionnotify(statusbar,
-                                         &statusbar->mouse_over, w);
-    }
-    else if((c = client_getbytitlebarwin(ev->event)))
-    {
-        w = widget_getbycoords(c->titlebar->position, c->titlebar->widgets,
-                               c->titlebar->sw.geometry.width,
-                               c->titlebar->sw.geometry.height,
-                               &ev->event_x, &ev->event_y);
-        event_handle_widget_motionnotify(c->titlebar,
-                                         &c->titlebar->mouse_over, w);
+        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
     }
 
     return 0;
@@ -415,26 +386,13 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection,
                          xcb_leave_notify_event_t *ev)
 {
-    wibox_t *statusbar = statusbar_getbywin(ev->event);
-    client_t *c;
+    wibox_t *wibox = wibox_getbywin(ev->event);
 
-    if(statusbar)
+    if(wibox && wibox->mouse_over)
     {
-        if(statusbar->mouse_over)
-        {
-            /* call mouse leave function on widget the mouse was over */
-            luaA_wibox_userdata_new(globalconf.L, statusbar);
-            luaA_dofunction(globalconf.L, statusbar->mouse_over->widget->mouse_leave, 1, 0);
-        }
-    }
-    else if((c = client_getbytitlebarwin(ev->event)))
-    {
-        if(c->titlebar->mouse_over)
-        {
-            /* call mouse leave function on widget the mouse was over */
-            luaA_wibox_userdata_new(globalconf.L, c->titlebar);
-            luaA_dofunction(globalconf.L, c->titlebar->mouse_over->widget->mouse_leave, 1, 0);
-        }
+        /* call mouse leave function on widget the mouse was over */
+        luaA_wibox_userdata_new(globalconf.L, wibox);
+        luaA_dofunction(globalconf.L, wibox->mouse_over->widget->mouse_leave, 1, 0);
     }
 
     return 0;
@@ -491,25 +449,12 @@ event_handle_expose(void *data __attribute__ ((unused)),
                     xcb_connection_t *connection __attribute__ ((unused)),
                     xcb_expose_event_t *ev)
 {
-    client_t *c;
+    wibox_t *wibox = wibox_getbywin(ev->window);
 
-    for(int screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
-        {
-            wibox_t *statusbar = globalconf.screens[screen].statusbars.tab[i];
-            if(statusbar->sw.window == ev->window)
-            {
-                simplewindow_refresh_pixmap_partial(&statusbar->sw,
-                                                    ev->x, ev->y,
-                                                    ev->width, ev->height);
-                return 0;
-            }
-        }
-
-    if((c = client_getbytitlebarwin(ev->window)))
-       simplewindow_refresh_pixmap_partial(&c->titlebar->sw,
-                                           ev->x, ev->y,
-                                           ev->width, ev->height);
+    if(wibox)
+        simplewindow_refresh_pixmap_partial(&wibox->sw,
+                                            ev->x, ev->y,
+                                            ev->width, ev->height);
 
     return 0;
 }

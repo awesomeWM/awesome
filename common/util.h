@@ -37,8 +37,9 @@
 
 typedef enum
 {
-    Horizontal,
-    Vertical
+    East,
+    South,
+    North,
 } orientation_t;
 
 /** A list of possible position, not sex related */
@@ -47,7 +48,8 @@ typedef enum
     Top,
     Bottom,
     Right,
-    Left
+    Left,
+    Floating
 } position_t;
 
 /** Link a name to a function */
@@ -338,6 +340,8 @@ void _warn(int, const char *, const char *, ...)
 
 position_t position_fromstr(const char *, ssize_t);
 const char * position_tostr(position_t);
+orientation_t orientation_fromstr(const char *, ssize_t);
+const char * orientation_tostr(orientation_t);
 void *name_func_lookup(const char *, const name_func_link_t *);
 const char * name_func_rlookup(void *, const name_func_link_t *);
 void a_exec(const char *);

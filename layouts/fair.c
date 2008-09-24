@@ -36,7 +36,7 @@ layout_fair(int screen, const orientation_t orientation)
     area_t geometry, area;
 
     area = screen_area_get(screen,
-                           &globalconf.screens[screen].statusbars,
+                           &globalconf.screens[screen].wiboxes,
                            &globalconf.screens[screen].padding,
                            true);
 
@@ -54,7 +54,7 @@ layout_fair(int screen, const orientation_t orientation)
         for(c = globalconf.clients; c; c = c->next)
             if(IS_TILED(c, screen))
             {
-                if (orientation == Horizontal)
+                if (orientation == East)
                 {
                     geometry.width = area.width / u_divisions;
                     geometry.height = area.height / v_divisions;
@@ -86,13 +86,13 @@ layout_fair(int screen, const orientation_t orientation)
 void
 layout_fairh(int screen)
 {
-    layout_fair(screen, Horizontal);
+    layout_fair(screen, East);
 }
 
 void
 layout_fairv(int screen)
 {
-    layout_fair(screen, Vertical);
+    layout_fair(screen, South);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

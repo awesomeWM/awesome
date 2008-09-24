@@ -123,7 +123,7 @@ tasklist_draw_item(draw_context_t *ctx,
         draw_parser_data_init(&pdata);
 
         /* Actually look for the proper background color, since
-         * otherwise the background statusbar color is used instead */
+         * otherwise the background wibox color is used instead */
         if(draw_text_markup_expand(&pdata,
                                    odata->client_labels.tab[i].label,
                                    odata->client_labels.tab[i].label_len))

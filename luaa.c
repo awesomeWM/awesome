@@ -46,7 +46,6 @@
 #include "client.h"
 #include "screen.h"
 #include "event.h"
-#include "statusbar.h"
 #include "titlebar.h"
 #include "mouse.h"
 #include "layouts/tile.h"

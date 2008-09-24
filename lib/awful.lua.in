@@ -1515,6 +1515,7 @@ end
 -- bg: the background color.
 -- fg_focus: the foreground color for focused window.
 -- fg_focus: the background color for focused window.
+-- width: the titlebar width
 function titlebar.add(c, args)
     if not c or c.type ~= "normal" then return end
     if not args then args = {} end
@@ -1524,6 +1525,7 @@ function titlebar.add(c, args)
     titlebar.data[c].bg = args.bg or theme.titlebar_bg_normal or theme.bg_normal
     titlebar.data[c].fg_focus = args.fg_focus or theme.titlebar_fg_focus or theme.fg_focus
     titlebar.data[c].bg_focus = args.bg_focus or theme.titlebar_bg_focus or theme.bg_focus
+    titlebar.data[c].width = args.width
 
     -- Built args
     local targs = {}
@@ -1578,6 +1580,7 @@ function titlebar.add(c, args)
     c.titlebar = tb
 
     titlebar.update(c)
+    titlebar.update(c, "geometry")
 end
 
 --- Update a titlebar. This should be called in some hooks.
@@ -1601,6 +1604,17 @@ function titlebar.update(c, prop)
         elseif prop == "icon" then
             if appicon then
                 appicon.image = c.icon
+            end
+        elseif prop == "geometry" then
+            if titlebar.data[c].width then
+                if c.titlebar.position == "top"
+                    or c.titlebar.position == "bottom" then
+                    local w = math.min(titlebar.data[c].width, c:coords().width + 2 * c.border_width)
+                    c.titlebar:geometry({ width = w })
+                else
+                    local w = math.min(titlebar.data[c].width, c:coords().height + 2 * c.border_width)
+                    c.titlebar:geometry({ height = w })
+                end
             end
         end
         if capi.client.focus == c then

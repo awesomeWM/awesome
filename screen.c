@@ -28,8 +28,8 @@
 #include "ewmh.h"
 #include "tag.h"
 #include "client.h"
-#include "statusbar.h"
 #include "widget.h"
+#include "wibox.h"
 #include "layouts/tile.h"
 
 extern awesome_t globalconf;
@@ -156,13 +156,13 @@ screen_getbycoord(int screen, int x, int y)
 
 /** Get screens info.
  * \param screen Screen number.
- * \param statusbars Statusbar list to remove.
+ * \param wiboxes Wiboxes list to remove.
  * \param padding Padding.
  * \param strut Honor windows strut.
  * \return The screen area.
  */
 area_t
-screen_area_get(int screen, wibox_array_t *statusbars,
+screen_area_get(int screen, wibox_array_t *wiboxes,
                 padding_t *padding, bool strut)
 {
     area_t area = globalconf.screens[screen].geometry;
@@ -215,24 +215,24 @@ screen_area_get(int screen, wibox_array_t *statusbars,
     }
 
 
-    if(statusbars)
-        for(int i = 0; i < statusbars->len; i++)
+    if(wiboxes)
+        for(int i = 0; i < wiboxes->len; i++)
         {
-            wibox_t *sb = statusbars->tab[i];
-            if(sb->isvisible)
-                switch(sb->position)
+            wibox_t *w = wiboxes->tab[i];
+            if(w->isvisible)
+                switch(w->position)
                 {
                   case Top:
-                    top = MAX(top, (uint16_t) (sb->sw.geometry.y - area.y) + sb->sw.geometry.height);
+                    top = MAX(top, (uint16_t) (w->sw.geometry.y - area.y) + w->sw.geometry.height);
                     break;
                   case Bottom:
-                    bottom = MAX(bottom, (uint16_t) (area.y + area.height) - sb->sw.geometry.y);
+                    bottom = MAX(bottom, (uint16_t) (area.y + area.height) - w->sw.geometry.y);
                     break;
                   case Left:
-                    left = MAX(left, (uint16_t) (sb->sw.geometry.x - area.x) + sb->sw.geometry.width);
+                    left = MAX(left, (uint16_t) (w->sw.geometry.x - area.x) + w->sw.geometry.width);
                     break;
                   case Right:
-                    right = MAX(right, (uint16_t) (area.x + area.width) - sb->sw.geometry.x);
+                    right = MAX(right, (uint16_t) (area.x + area.width) - w->sw.geometry.x);
                     break;
                   default:
                     break;
@@ -249,12 +249,12 @@ screen_area_get(int screen, wibox_array_t *statusbars,
 
 /** Get display info.
  * \param phys_screen Physical screen number.
- * \param statusbars The statusbars.
+ * \param wiboxes The wiboxes.
  * \param padding Padding.
  * \return The display area.
  */
 area_t
-display_area_get(int phys_screen, wibox_array_t *statusbars, padding_t *padding)
+display_area_get(int phys_screen, wibox_array_t *wiboxes, padding_t *padding)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
     area_t area = { .x = 0,
@@ -262,12 +262,12 @@ display_area_get(int phys_screen, wibox_array_t *statusbars, padding_t *padding)
                     .width = s->width_in_pixels,
                     .height = s->height_in_pixels };
 
-    if(statusbars)
-        for(int i = 0; i < statusbars->len; i++)
+    if(wiboxes)
+        for(int i = 0; i < wiboxes->len; i++)
         {
-            wibox_t *sb = statusbars->tab[i];
-            area.y += sb->position == Top ? sb->geometry.height : 0;
-            area.height -= (sb->position == Top || sb->position == Bottom) ? sb->geometry.height : 0;
+            wibox_t *w = wiboxes->tab[i];
+            area.y += w->position == Top ? w->sw.geometry.height : 0;
+            area.height -= (w->position == Top || w->position == Bottom) ? w->sw.geometry.height : 0;
         }
 
     /* make padding corrections */
@@ -311,6 +311,9 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
     bool wasvisible = client_isvisible(c, c->screen);
 
     c->screen = new_screen;
+
+    if(c->titlebar)
+        c->titlebar->screen = new_screen;
 
     widget_invalidate_cache(old_screen, WIDGET_CACHE_CLIENTS);
     widget_invalidate_cache(new_screen, WIDGET_CACHE_CLIENTS);
@@ -482,7 +485,7 @@ luaA_screen_tags(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield coords The screen coordinates. Immutable.
- * \lfield workarea The screen workarea, i.e. without statusbar.
+ * \lfield workarea The screen workarea, i.e. without wiboxes.
  */
 static int
 luaA_screen_index(lua_State *L)
@@ -503,7 +506,7 @@ luaA_screen_index(lua_State *L)
         luaA_pusharea(L, s->geometry);
         break;
       case A_TK_WORKAREA:
-        luaA_pusharea(L, screen_area_get(s->index, &s->statusbars, &s->padding, true));
+        luaA_pusharea(L, screen_area_get(s->index, &s->wiboxes, &s->padding, true));
         break;
       default:
         return 0;
@@ -539,9 +542,9 @@ luaA_screen_padding(lua_State *L)
 
         s->need_arrange = true;
 
-        /* All the statusbar repositioned */
-        for(int i = 0; i < s->statusbars.len; i++)
-            statusbar_position_update(s->statusbars.tab[i]);
+        /* All the wiboxes repositioned */
+        for(int i = 0; i < s->wiboxes.len; i++)
+            wibox_position_update(s->wiboxes.tab[i]);
 
         ewmh_update_workarea(screen_virttophys(s->index));
     }

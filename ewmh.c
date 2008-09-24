@@ -31,8 +31,7 @@
 #include "client.h"
 #include "widget.h"
 #include "cnode.h"
-#include "titlebar.h"
-#include "statusbar.h"
+#include "wibox.h"
 #include "common/atoms.h"
 
 extern awesome_t globalconf;
@@ -212,7 +211,7 @@ ewmh_update_workarea(int phys_screen)
     tag_array_t *tags = &globalconf.screens[phys_screen].tags;
     uint32_t *area = p_alloca(uint32_t, tags->len * 4);
     area_t geom = screen_area_get(phys_screen,
-                                  &globalconf.screens[phys_screen].statusbars,
+                                  &globalconf.screens[phys_screen].wiboxes,
                                   &globalconf.screens[phys_screen].padding,
                                   true);
 
@@ -533,12 +532,12 @@ ewmh_client_strut_update(client_t *c, xcb_get_property_reply_t *strut_r)
             c->strut.bottom_end_x = strut[11];
 
             client_need_arrange(c);
-            /* All the statusbars (may) need to be repositioned */
+            /* All the wiboxes (may) need to be repositioned */
             for(int screen = 0; screen < globalconf.nscreen; screen++)
-                for(int i = 0; i < globalconf.screens[screen].statusbars.len; i++)
+                for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
                 {
-                    wibox_t *s = globalconf.screens[screen].statusbars.tab[i];
-                    statusbar_position_update(s);
+                    wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
+                    wibox_position_update(s);
                 }
         }
     }

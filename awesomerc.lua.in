@@ -91,7 +91,7 @@ for s = 1, screen.count() do
 end
 -- }}}
 
--- {{{ Statusbar
+-- {{{ Wibox
 -- Create a taglist widget
 mytaglist = widget({ type = "taglist", name = "mytaglist" })
 mytaglist:buttons({
@@ -141,13 +141,13 @@ for s = 1, screen.count() do
     mylayoutbox[s].image = image("@AWESOME_ICON_PATH@/layouts/tilew.png")
 end
 
--- Create a statusbar for each screen and add it
-mystatusbar = {}
+-- Create a wibox for each screen and add it
+mywibox = {}
 for s = 1, screen.count() do
-    mystatusbar[s] = wibox({ position = "top", name = "mystatusbar" .. s,
+    mywibox[s] = wibox({ position = "top", name = "mywibox" .. s,
                              fg = beautiful.fg_normal, bg = beautiful.bg_normal })
-    -- Add widgets to the statusbar - order matters
-    mystatusbar[s]:widgets({
+    -- Add widgets to the wibox - order matters
+    mywibox[s]:widgets({
         mytaglist,
         mytasklist,
         mylauncher,
@@ -156,7 +156,7 @@ for s = 1, screen.count() do
         mylayoutbox[s],
         s == 1 and mysystray or nil
     })
-    mystatusbar[s].screen = s
+    mywibox[s].screen = s
 end
 -- }}}
 
