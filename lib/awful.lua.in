@@ -1216,8 +1216,17 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
         else
             if completion_callback then
                 -- That's tab
-                if key:byte() == 9 then
-                    if ncomp == 1 then
+                if key:byte() == 9 or key == "ISO_Left_Tab" then
+                    if key == "ISO_Left_Tab" then
+                        if ncomp == 1 then return true end
+                        if ncomp == 2 then
+                            command = command_before_comp
+                            textbox.text = prettyprompt .. prompt_text_with_cursor(command_before_comp, inv_col, cur_col, cur_pos)
+                            return true
+                        end
+
+                        ncomp = ncomp - 2
+                    elseif ncomp == 1 then
                         command_before_comp = command
                         cur_pos_before_comp = cur_pos
                     end
