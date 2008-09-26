@@ -100,6 +100,8 @@ send_msg(const char *msg, ssize_t msg_len)
             warn("can't write to %s", addr->sun_path);
             break;
           case EPIPE:
+          case ENOTCONN:
+          case ECONNRESET:
             sockets_reconnect();
             return send_msg(msg, msg_len);
           default:
