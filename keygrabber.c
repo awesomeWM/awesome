@@ -348,7 +348,6 @@ static int8_t const __utf32_clz_to_len[32] = {
 };
 #define utf8clen(c) __utf32_clz_to_len[__builtin_clz((uint32_t)(c) | 1)]
 
-
 static bool
 keysym_to_utf8(char *buf, int len, const xcb_keysym_t ksym)
 {
@@ -457,7 +456,6 @@ keysym_to_str(char *buf, int len, const xcb_keysym_t ksym)
         CASE(F19); CASE(F20); CASE(F21); CASE(F22); CASE(F23); CASE(F24);
         CASE(F25); CASE(F26); CASE(F27); CASE(F28); CASE(F29); CASE(F30);
         CASE(F31); CASE(F32); CASE(F33); CASE(F34); CASE(F35);
-#undef CASE
       case XK_KP_Space:
         /* Patch encoding botch */
         buf[0] = XK_space & 0x7F;
@@ -476,6 +474,128 @@ keysym_to_str(char *buf, int len, const xcb_keysym_t ksym)
 }
 
 static bool
+keysym_to_xkb(char *buf, int len, const xcb_keysym_t ksym)
+{
+    switch(ksym)
+    {    
+        CASE(ISO_Lock);
+        CASE(ISO_Level2_Latch);
+        CASE(ISO_Level3_Shift);
+        CASE(ISO_Level3_Latch);
+        CASE(ISO_Level3_Lock);
+        CASE(ISO_Level5_Shift);
+        CASE(ISO_Level5_Latch);
+        CASE(ISO_Level5_Lock);
+        CASE(ISO_Group_Shift);
+        CASE(ISO_Group_Latch);
+        CASE(ISO_Group_Lock);
+        CASE(ISO_Next_Group);
+        CASE(ISO_Next_Group_Lock);
+        CASE(ISO_Prev_Group);
+        CASE(ISO_Prev_Group_Lock);
+        CASE(ISO_First_Group);
+        CASE(ISO_First_Group_Lock);
+        CASE(ISO_Last_Group);
+        CASE(ISO_Last_Group_Lock);
+        CASE(ISO_Left_Tab);
+        CASE(ISO_Move_Line_Up);
+        CASE(ISO_Move_Line_Down);
+        CASE(ISO_Partial_Line_Up);
+        CASE(ISO_Partial_Line_Down);
+        CASE(ISO_Partial_Space_Left);
+        CASE(ISO_Partial_Space_Right);
+        CASE(ISO_Set_Margin_Left);
+        CASE(ISO_Set_Margin_Right);
+        CASE(ISO_Release_Margin_Left);
+        CASE(ISO_Release_Margin_Right);
+        CASE(ISO_Release_Both_Margins);
+        CASE(ISO_Fast_Cursor_Left);
+        CASE(ISO_Fast_Cursor_Right);
+        CASE(ISO_Fast_Cursor_Up);
+        CASE(ISO_Fast_Cursor_Down);
+        CASE(ISO_Continuous_Underline);
+        CASE(ISO_Discontinuous_Underline);
+        CASE(ISO_Emphasize);
+        CASE(ISO_Center_Object);
+        CASE(ISO_Enter);
+        CASE(dead_grave);
+        CASE(dead_acute);
+        CASE(dead_circumflex);
+        CASE(dead_tilde);
+        CASE(dead_macron);
+        CASE(dead_breve);
+        CASE(dead_abovedot);
+        CASE(dead_diaeresis);
+        CASE(dead_abovering);
+        CASE(dead_doubleacute);
+        CASE(dead_caron);
+        CASE(dead_cedilla);
+        CASE(dead_ogonek);
+        CASE(dead_iota);
+        CASE(dead_voiced_sound);
+        CASE(dead_semivoiced_sound);
+        CASE(dead_belowdot);
+        CASE(dead_hook);
+        CASE(dead_horn);
+        CASE(dead_stroke);
+        CASE(dead_abovecomma);
+        CASE(dead_abovereversedcomma);
+        CASE(dead_dasia);
+        CASE(First_Virtual_Screen);
+        CASE(Prev_Virtual_Screen);
+        CASE(Next_Virtual_Screen);
+        CASE(Last_Virtual_Screen);
+        CASE(Terminate_Server);
+        CASE(AccessX_Enable);
+        CASE(AccessX_Feedback_Enable);
+        CASE(RepeatKeys_Enable);
+        CASE(SlowKeys_Enable);
+        CASE(BounceKeys_Enable);
+        CASE(StickyKeys_Enable);
+        CASE(MouseKeys_Enable);
+        CASE(MouseKeys_Accel_Enable);
+        CASE(Overlay1_Enable);
+        CASE(Overlay2_Enable);
+        CASE(AudibleBell_Enable);
+        CASE(Pointer_Left);
+        CASE(Pointer_Right);
+        CASE(Pointer_Up);
+        CASE(Pointer_Down);
+        CASE(Pointer_UpLeft);
+        CASE(Pointer_UpRight);
+        CASE(Pointer_DownLeft);
+        CASE(Pointer_DownRight);
+        CASE(Pointer_Button_Dflt);
+        CASE(Pointer_Button1);
+        CASE(Pointer_Button2);
+        CASE(Pointer_Button3);
+        CASE(Pointer_Button4);
+        CASE(Pointer_Button5);
+        CASE(Pointer_DblClick_Dflt);
+        CASE(Pointer_DblClick1);
+        CASE(Pointer_DblClick2);
+        CASE(Pointer_DblClick3);
+        CASE(Pointer_DblClick4);
+        CASE(Pointer_DblClick5);
+        CASE(Pointer_Drag_Dflt);
+        CASE(Pointer_Drag1);
+        CASE(Pointer_Drag2);
+        CASE(Pointer_Drag3);
+        CASE(Pointer_Drag4);
+        CASE(Pointer_Drag5);
+        CASE(Pointer_EnableKeys);
+        CASE(Pointer_Accelerate);
+        CASE(Pointer_DfltBtnNext);
+        CASE(Pointer_DfltBtnPrev);
+      default:
+        return false;
+    }
+
+    return true;
+}
+#undef CASE
+
+static bool
 key_press_lookup_string(xcb_key_press_event_t *e,
                         char *buf, int buf_len,
                         xcb_keysym_t *ksym)
@@ -485,6 +605,8 @@ key_press_lookup_string(xcb_key_press_event_t *e,
     /* Handle special KeySym (Tab, Newline...) */
     if((*ksym & 0xffffff00) == 0xff00)
         return keysym_to_str(buf, buf_len, *ksym);
+    else if((*ksym & 0xfffffe00) == 0xfe00)
+        return keysym_to_xkb(buf, buf_len, *ksym);
 
     /* Handle other KeySym (like unicode...) */
     return keysym_to_utf8(buf, buf_len, *ksym);
