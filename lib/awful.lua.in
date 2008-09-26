@@ -1433,7 +1433,7 @@ local function widget_tasklist_label_common(c, args)
     if c.floating then
         text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
     end
-    if c.hidden then
+    if c.minimized then
         name = escape(c.icon_name) or ""
     else
         name = escape(c.name) or ""
