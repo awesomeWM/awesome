@@ -433,7 +433,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
                           xutil_screen_get(connection, emwin->phys_screen)->root,
                           XCB_BUTTON_MASK_ANY);
-    else
+    else if(ev->event == ev->root)
         window_root_buttons_grab(ev->root);
 
     return 0;
