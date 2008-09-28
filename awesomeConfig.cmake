@@ -143,7 +143,8 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-keysyms>=0.3.0
     xcb-icccm>=0.3.0
     cairo-xcb
-    xproto>=7.0.11)
+    xproto>=7.0.11
+    imlib2)
 
 if(NOT AWESOME_REQUIRED_FOUND OR NOT AWESOME_COMMON_REQUIRED_FOUND)
     message(FATAL_ERROR)
@@ -201,17 +202,6 @@ if(WITH_DBUS)
     else()
         set(WITH_DBUS OFF)
         message(STATUS "DBUS not found. Disabled.")
-    endif()
-endif()
-
-if(WITH_IMLIB2)
-    pkg_check_modules(IMLIB2 imlib2)
-    if(IMLIB2_FOUND)
-        set(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES} ${IMLIB2_LIBRARIES})
-        set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${IMLIB2_INCLUDE_DIRS})
-    else()
-        set(WITH_IMLIB2 OFF)
-        message(STATUS "Imlib2 not found. Disabled.")
     endif()
 endif()
 # }}}
