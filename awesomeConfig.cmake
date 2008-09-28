@@ -143,7 +143,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-keysyms>=0.3.0
     xcb-icccm>=0.3.0
     cairo-xcb
-    xproto>=7.0.11
+    xproto>=7.0.10
     imlib2)
 
 if(NOT AWESOME_REQUIRED_FOUND OR NOT AWESOME_COMMON_REQUIRED_FOUND)
