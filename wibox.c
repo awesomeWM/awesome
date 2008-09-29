@@ -561,7 +561,7 @@ wibox_detach(wibox_t *wibox)
 void
 wibox_attach(wibox_t *wibox, screen_t *s)
 {
-    int phys_screen = screen_virttophys(wibox->screen);
+    int phys_screen = screen_virttophys(s->index);
 
     wibox_detach(wibox);
 
