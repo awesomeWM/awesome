@@ -268,7 +268,7 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&titlebar->sw.border.color, buf, len)))
-                simplewindow_border_color_set(&c->titlebar->sw, &c->titlebar->sw.border.color);
+                simplewindow_border_color_set(&titlebar->sw, &titlebar->sw.border.color);
         return 0;
       case A_TK_POSITION:
         buf = luaL_checklstring(L, 3, &len);
