@@ -22,13 +22,6 @@ local capi =
 --- Client module for awful
 module("awful.client")
 
--- Local variable handling theme
-local theme = {}
-
--- mapping of command/completion function
-local bashcomp_funcs = {}
-local bashcomp_src = "/etc/bash_completion"
-
 -- Private data
 local data = {}
 data.maximize = otable()
