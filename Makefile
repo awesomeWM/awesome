@@ -16,7 +16,7 @@ $(TARGETS): cmake-build
 	ln -s -f ${builddir}/$@ $@
 
 $(BUILDLN):
-	ln -s -f ${builddir} $(BUILDLN)
+	test -e $(BUILDLN) || ln -s -f ${builddir} $(BUILDLN)
 
 cmake ${builddir}/CMakeCache.txt:
 	mkdir -p ${builddir}
