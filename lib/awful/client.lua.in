@@ -1,0 +1,529 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local hooks = require("awful.hooks")
+local util = require("awful.util")
+local pairs = pairs
+local ipairs = ipairs
+local table = table
+local math = math
+local otable = otable
+local capi =
+{
+    client = client,
+    mouse = mouse,
+    screen = screen,
+}
+
+--- Client module for awful
+module("awful.client")
+
+-- Local variable handling theme
+local theme = {}
+
+-- mapping of command/completion function
+local bashcomp_funcs = {}
+local bashcomp_src = "/etc/bash_completion"
+
+-- Private data
+local data = {}
+data.maximize = otable()
+data.focus = {}
+data.urgent = {}
+data.marked = {}
+
+-- Urgent functions
+urgent = {}
+focus = {}
+focus.history = {}
+
+-- User hooks
+hooks.user.create('marked')
+hooks.user.create('unmarked')
+
+--- Get the first client that got the urgent hint.
+-- @return The first urgent client.
+function urgent.get()
+    if #data.urgent > 0 then
+        return #data.urgent[1]
+    else
+        -- fallback behaviour: iterate through clients and get the first urgent
+        local clients = capi.client.get()
+        for k, cl in pairs(clients) do
+            if cl.urgent then
+                return cl
+            end
+        end
+    end
+end
+
+--- Jump to the client that received the urgent hint first.
+function urgent.jumpto()
+    local c = urgent.get()
+    if c then
+        local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
+        -- focus the screen
+        if s ~= c.screen then
+            capi.mouse.screen = c.screen
+        end
+        -- focus the tag
+        tag.viewonly(c:tags()[1])
+        -- focus the client
+        capi.client.focus = c
+        c:raise()
+    end
+end
+
+--- Adds client to urgent stack.
+-- @param c The client object.
+-- @param prop The property which is updated.
+function urgent.add(c, prop)
+    if prop == "urgent" and c.urgent then
+        table.insert(data.urgent, c)
+    end
+end
+
+--- Remove client from urgent stack.
+-- @param c The client object.
+function urgent.delete(c)
+    for k, cl in ipairs(data.urgent) do
+        if c == cl then
+            table.remove(data.urgent, k)
+            break
+        end
+    end
+end
+
+--- Remove a client from the focus history
+-- @param c The client that must be removed.
+function focus.history.delete(c)
+    for k, v in ipairs(data.focus) do
+        if v == c then
+            table.remove(data.focus, k)
+            break
+        end
+    end
+end
+
+--- Filter out window that we do not want handled by focus.
+-- This usually means that desktop, dock and splash windows are
+-- not registered and cannot get focus.
+-- @param c A client.
+-- @return The same client if it's ok, nil otherwise.
+function focus.filter(c)
+    if c.type == "desktop"
+        or c.type == "dock"
+        or c.type == "splash" then
+        return nil
+    end
+    return c
+end
+
+--- Update client focus history.
+-- @param c The client that has been focused.
+function focus.history.add(c)
+    if focus.filter(c) then
+        -- Remove the client if its in stack
+        focus.history.delete(c)
+        -- Record the client has latest focused
+        table.insert(data.focus, 1, c)
+    end
+end
+
+--- Get the latest focused client for a screen in history.
+-- @param screen The screen number to look for.
+-- @param idx The index: 0 will return first candidate,
+-- 1 will return second, etc.
+-- @return A client.
+function focus.history.get(screen, idx)
+    -- When this counter is equal to idx, we return the client
+    local counter = 0
+    local vc = visible(screen)
+    for k, c in ipairs(data.focus) do
+        if c.screen == screen then
+            for j, vcc in ipairs(vc) do
+                if vcc == c then
+                    if counter == idx then
+                        return c
+                    end
+                    -- We found one, increment the counter only.
+                    counter = counter + 1
+                    break
+                end
+            end
+        end
+    end
+    -- Argh nobody found in history, give the first one visible if there is one
+    if counter == 0 then
+        return vc[1]
+    end
+end
+
+--- Focus the previous client in history.
+function focus.history.previous()
+    local sel = capi.client.focus
+    local s
+    if sel then
+        s = sel.screen
+    else
+        s = capi.mouse.screen
+    end
+    local c = focus.history.get(s, 1)
+    if c then capi.client.focus = c end
+end
+
+--- Get visible clients from a screen.
+-- @param The screen number, or nil for all screen.
+-- @return A table with all visible clients.
+function visible(screen)
+    local cls = capi.client.get(screen)
+    local vcls = {}
+    for k, c in pairs(cls) do
+        if c:isvisible() then
+            table.insert(vcls, c)
+        end
+    end
+    return vcls
+end
+
+--- Get a client by its relative index to the focused window.
+-- @usage Set i to 1 to get next, -1 to get previous.
+-- @param i The index.
+-- @param c Optional client.
+-- @return A client, or nil if no client is available.
+function next(i, c)
+    -- Get currently focused client
+    local sel = c or capi.client.focus
+    if sel then
+        -- Get all visible clients
+        local cls = visible(sel.screen)
+        -- Remove all no-normal clients
+        for idx, c in ipairs(cls) do
+            if not focus.filter(c) then
+                table.remove(cls, idx)
+            end
+        end
+        -- Loop upon each client
+        for idx, c in ipairs(cls) do
+            if c == sel then
+                -- Cycle
+                return cls[util.cycle(#cls, idx + i)]
+            end
+        end
+    end
+end
+
+--- Return true whether client B is in the right direction
+-- compared to client A.
+-- @param dir The direction.
+-- @param cA The first client.
+-- @param cB The second client.
+-- @return True if B is in the direction of A.
+local function is_in_direction(dir, cA, cB)
+    if dir == "up" then
+        return cA['y'] > cB['y']
+    elseif dir == "down" then
+        return cA['y'] < cB['y']
+    elseif dir == "left" then
+        return cA['x'] > cB['x']
+    elseif dir == "right" then
+        return cA['x'] < cB['x']
+    end
+    return false
+end
+
+--- Calculate distance between two points.
+-- i.e: if we want to move to the right, we will take the right border
+-- of the currently focused client and the left side of the checked client.
+-- This avoid the focus of an upper client when you move to the right in a
+-- tilebottom layout with nmaster=2 and 5 clients open, for instance.
+-- @param dir The direction.
+-- @param cA The first client.
+-- @param cB The second client.
+-- @return The distance between the clients.
+local function calculate_distance(dir, cA, cB)
+    local xA = cA['x']
+    local xB = cB['x']
+    local yA = cA['y']
+    local yB = cB['y']
+
+    if dir == "up" then
+        yB = yB + cB['height']
+    elseif dir == "down" then
+        yA = yA + cA['height']
+    elseif dir == "left" then
+        xB = xB + cB['width']
+    elseif dir == "right" then
+        xA = xA + cA['width']
+    end
+
+    return math.sqrt(math.pow(xB - xA, 2) + math.pow(yB - yA, 2))
+end
+
+--- Focus a client by the given direction.
+-- @param dir The direction, can be either "up", "down", "left" or "right".
+-- @param c Optional client.
+function focus.bydirection(dir, c)
+    local sel = c or capi.client.focus
+    if sel then
+        local coords = sel:coords()
+        local dist, dist_min
+        local target = nil
+        local cls = visible(sel.screen)
+
+        -- We check each client.
+        for i, c in ipairs(cls) do
+            -- Check coords to see if client is located in the right direction.
+            if is_in_direction(dir, coords, c:coords()) then
+
+                -- Calculate distance between focused client and checked client.
+                dist = calculate_distance(dir, coords, c:coords())
+
+                -- If distance is shorter then keep the client.
+                if not target or dist < dist_min then
+                    target = c
+                    dist_min = dist
+                end
+            end
+        end
+
+        -- If we found a client to focus, then do it.
+        if target then
+            capi.client.focus = target
+        end
+    end
+end
+
+function focusbyidx(i, c)
+    util.deprecate()
+    return focus.byidx(i, c)
+end
+
+--- Focus a client by its relative index.
+-- @param i The index.
+-- @param c Optional client.
+function focus.byidx(i, c)
+    local target = next(i, c)
+    if target then
+        capi.client.focus = target
+    end
+end
+
+--- Swap a client by its relative index.
+-- @param i The index.
+-- @param c Optional client, otherwise focused one is used.
+function swap(i, c)
+    local sel = c or capi.client.focus
+    local target = next(i, sel)
+    if target then
+        target:swap(sel)
+    end
+end
+
+--- Get the master window.
+-- @param screen Optional screen number, otherwise screen mouse is used.
+-- @return The master window.
+function master(screen)
+    local s = screen or capi.mouse.screen
+    return visible(s)[1]
+end
+
+-- Set the client as slave: put it at the end of other windows.
+-- @param c The window to set as slave.
+-- @return 
+function setslave(c)
+    local cls = visible(c.screen)
+    for k, v in pairs(cls) do
+        c:swap(v)
+    end
+end
+
+--- Move/resize a client relative to current coordinates.
+-- @param x The relative x coordinate.
+-- @param y The relative y coordinate.
+-- @param w The relative width.
+-- @param h The relative height.
+-- @param c The optional client, otherwise focused one is used.
+function moveresize(x, y, w, h, c)
+    local sel = c or capi.client.focus
+    local coords = sel:coords()
+    coords['x'] = coords['x'] + x
+    coords['y'] = coords['y'] + y
+    coords['width'] = coords['width'] + w
+    coords['height'] = coords['height'] + h
+    sel:coords(coords)
+end
+
+--- Maximize a client to use the full workarea.
+-- @param c A client, or the focused one if nil.
+function maximize(c)
+    local sel = c or capi.client.focus
+    if sel then
+        local ws = capi.screen[sel.screen].workarea
+        ws.width = ws.width - 2 * sel.border_width
+        ws.height = ws.height - 2 * sel.border_width
+        if sel.floating and client.data.maximize[sel] then
+            sel.floating = client.data.maximize[sel].floating
+            if sel.floating then
+                sel:coords(client.data.maximize[sel].coords)
+            end
+            data.maximize[sel] = nil
+        else
+            data.maximize[sel] = { coords = sel:coords(), floating = sel.floating }
+            sel.floating = true
+            sel:coords(ws)
+        end
+    end
+end
+
+
+--- Erase eventual client data in maximize.
+-- @param c The client.
+local function maximize_clean(c)
+    data.maximize[c] = nil
+end
+
+--- Move a client to a tag.
+-- @param target The tag to move the client to.
+-- @param c Optional client to move, otherwise the focused one is used.
+function movetotag(target, c)
+    local sel = c or capi.client.focus
+    if sel then
+        -- Check that tag and client screen are identical
+        if sel.screen ~= target.screen then return end
+        sel:tags({ target })
+    end
+end
+
+--- Toggle a tag on a client.
+-- @param target The tag to toggle.
+-- @param c Optional client to toggle, otherwise the focused one is used.
+function toggletag(target, c)
+    local sel = c or capi.client.focus
+    -- Check that tag and client screen are identical
+    if sel and sel.screen == target.screen then
+        local tags = sel:tags()
+        if tags[target] then
+            -- If it's the only tag for the window, stop.
+            if #tags == 1 then return end
+            tags[tags[target]] = nil
+        else
+            tags[target] = target
+        end
+        sel:tags(tags)
+    end
+end
+
+--- Toggle the floating status of a client.
+-- @param c Optional client, the focused on if not set.
+function togglefloating(c)
+    local sel = c or capi.client.focus
+    if sel then
+        sel.floating = not sel.floating
+    end
+end
+
+--- Move a client to a screen. Default is next screen, cycling.
+-- @param c The client to move.
+-- @param s The screen number, default to current + 1.
+function movetoscreen(c, s)
+    local sel = c or capi.client.focus
+    if sel then
+        local sc = capi.screen.count()
+        if not s then
+            s = sel.screen + 1
+        end
+        if s > sc then s = 1 elseif s < 1 then s = sc end
+        sel.screen = s
+        capi.mouse.coords(capi.screen[s].coords)
+        capi.client.focus = sel
+    end
+end
+
+--- Mark a client, and then call 'marked' hook.
+-- @param c The client to mark, the focused one if not specified.
+-- @return True if the client has been marked. False if the client was already marked.
+function mark(c)
+    local cl = c or capi.client.focus
+    if cl then
+        for k, v in pairs(data.marked) do
+            if cl == v then
+                return false
+            end
+        end
+
+        table.insert(data.marked, cl)
+
+        -- Call callback
+        hooks.user.call('marked', cl)
+        return true
+    end
+end
+
+--- Unmark a client and then call 'unmarked' hook.
+-- @param c The client to unmark, or the focused one if not specified.
+-- @return True if the client has been unmarked. False if the client was not marked.
+function unmark(c)
+    local cl = c or capi.client.focus
+
+    for k, v in pairs(data.marked) do
+        if cl == v then
+            table.remove(data.marked, k)
+            hooks.user.call('unmarked', cl)
+            return true
+        end
+    end
+
+    return false
+end
+
+--- Check if a client is marked.
+-- @param c The client to check, or the focused one otherwise.
+function ismarked(c)
+    local cl = c or capi.client.focus
+    if cl then
+        for k, v in pairs(data.marked) do
+            if cl == v then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+--- Toggle a client as marked.
+-- @param c The client to toggle mark.
+function togglemarked(c)
+    local cl = c or capi.client.focus
+
+    if not client.mark(c) then
+        client.unmark(c)
+    end
+end
+
+--- Return the marked clients and empty the marked table.
+-- @return A table with all marked clients.
+function getmarked()
+    for k, v in pairs(data.marked) do
+        hooks.user.call('unmarked', v)
+    end
+
+    t = data.marked
+    data.marked = {}
+    return t
+end
+
+-- Register standards hooks
+hooks.focus.register(focus.history.add)
+hooks.unmanage.register(focus.history.delete)
+hooks.unmanage.register(maximize_clean)
+
+hooks.property.register(urgent.add)
+hooks.focus.register(urgent.delete)
+hooks.unmanage.register(urgent.delete)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -22,10 +22,7 @@ include_directories(
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
-set(AWE_LUA_FILES
-    ${BUILD_DIR}/lib/tabulous.lua
-    ${BUILD_DIR}/lib/beautiful.lua
-    ${BUILD_DIR}/lib/awful.lua)
+file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua)
 
 set(AWE_CONF_FILE_DEFAULT ${BUILD_DIR}/awesomerc.lua)
 set(AWE_CONF_FILE rc.lua)
@@ -294,9 +291,10 @@ if(GENERATE_LUADOC)
         VERBATIM)
     # }}}
 
-    # dont include full path names in documentation
-    foreach(filename ${AWE_LUA_FILES} ${capi_lua})
-        get_filename_component(filename ${filename} NAME)
+    # Generate documentation of lib//0lua
+    file(GLOB_RECURSE lua_lib_files ${BUILD_DIR}/lib/*.lua)
+    foreach(filename ${lua_lib_files})
+        file(RELATIVE_PATH filename ${BUILD_DIR}/lib ${filename})
         set(luadoc_srcs ${luadoc_srcs} ${filename})
     endforeach()
 
@@ -318,7 +316,7 @@ endif()
 # {{{ Installation
 install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
 install(FILES "utils/awsetbg" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-install(FILES ${AWE_LUA_FILES} DESTINATION ${AWESOME_LUA_LIB_PATH})
+install(DIRECTORY ${BUILD_DIR}/lib DESTINATION ${AWESOME_DATA_PATH})
 install(FILES ${AWE_CONF_FILE_DEFAULT} DESTINATION ${AWESOME_SYSCONFDIR}
         RENAME ${AWE_CONF_FILE})
 if(GENERATE_MANPAGES)

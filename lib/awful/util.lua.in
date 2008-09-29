@@ -1,0 +1,112 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local os = os
+local io = io
+local assert = assert
+local loadstring = loadstring
+local debug = debug
+local print = print
+local capi =
+{
+    awesome = awesome,
+    mouse = mouse
+}
+
+--- Utility module for awful
+module("awful.util")
+
+function deprecate()
+    print("W: awful: function is deprecated")
+    print(debug.traceback())
+end
+
+--- Strip alpha part of color.
+-- @param color The color.
+-- @return The color without alpha channel.
+function color_strip_alpha(color)
+    if color:len() == 9 then
+        color = color:sub(1, 7)
+    end
+    return color
+end
+
+--- Make i cycle.
+-- @param t A length.
+-- @param i An absolute index to fit into #t.
+-- @return The object at new index.
+function cycle(t, i)
+    while i > t do i = i - t end
+    while i < 1 do i = i + t end
+    return i
+end
+
+--- Create a directory
+-- @param dir The directory.
+-- @return mkdir return code
+function mkdir(dir)
+    return os.execute("mkdir -p " .. dir)
+end
+
+--- Spawn a program.
+-- @param cmd The command.
+-- @param screen The screen where to spawn window.
+-- @return The awesome.spawn return value.
+function spawn(cmd, screen)
+    if cmd and cmd ~= "" then
+        return capi.awesome.spawn(cmd .. "&", screen or capi.mouse.screen)
+    end
+end
+
+-- Read a program output and returns its output as a string.
+-- @param cmd The command to run.
+-- @return A string with the program output.
+function pread(cmd)
+    if cmd and cmd ~= "" then
+        local f = io.popen(cmd, 'r')
+        local s = f:read("*all")
+        f:close()
+        return s
+    end
+end
+
+--- Eval Lua code.
+-- @return The return value of Lua code.
+function eval(s)
+    return assert(loadstring("return " .. s))()
+end
+
+--- Escape a string from XML char.
+-- Useful to set raw text in textbox.
+-- @param text Text to escape.
+-- @return Escape text.
+function escape(text)
+    if text then
+        text = text:gsub("&", "&amp;")
+        text = text:gsub("<", "&lt;")
+        text = text:gsub(">", "&gt;")
+        text = text:gsub("'", "&apos;")
+        text = text:gsub("\"", "&quot;")
+    end
+    return text
+end
+
+--- Unescape a string from entities.
+-- @param text Text to unescape.
+-- @return Unescaped text.
+function unescape(text)
+    if text then
+        text = text:gsub("&amp;", "&")
+        text = text:gsub("&lt;", "<")
+        text = text:gsub("&gt;", ">")
+        text = text:gsub("&apos;", "'")
+        text = text:gsub("&quot;", "\"")
+    end
+    return text
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

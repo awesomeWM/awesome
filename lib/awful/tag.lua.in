@@ -1,0 +1,206 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local hooks = require("awful.hooks")
+local util = require("awful.util")
+local pairs = pairs
+local ipairs = ipairs
+local capi =
+{
+    screen = screen,
+    mouse = mouse
+}
+
+--- Tag module for awful
+module("awful.tag")
+
+-- Private data
+local data = {}
+data.history = {}
+data.history.past = {}
+data.history.current = {}
+
+-- History functions
+history = {}
+
+--- Compare 2 tables of tags.
+-- @param a The first table.
+-- @param b The second table of tags.
+-- @return True if the tables are identical, false otherwise.
+local function compare_select(a, b)
+    if not a or not b then
+        return false
+    end
+    -- Quick size comparison
+    if #a ~= #b then
+        return false
+    end
+    for ka, va in pairs(a) do
+        if b[ka] ~= va.selected then
+            return false
+        end
+    end
+    for kb, vb in pairs(b) do
+        if a[kb].selected ~= vb then
+            return false
+        end
+    end
+    return true
+end
+
+--- Update the tag history.
+-- @param screen The screen number.
+function history.update(screen)
+    local curtags = capi.screen[screen]:tags()
+    if not compare_select(curtags, data.history.current[screen]) then
+        data.history.past[screen] = data.history.current[screen]
+        data.history.current[screen] = {}
+        for k, v in ipairs(curtags) do
+            data.history.current[screen][k] = v.selected
+        end
+    end
+end
+
+-- Revert tag history.
+-- @param screen The screen number.
+function history.restore(screen)
+    local s = screen or capi.mouse.screen
+    local tags = capi.screen[s]:tags()
+    for k, t in pairs(tags) do
+        t.selected = data.history.past[s][k]
+    end
+end
+
+--- Return a table with all visible tags
+-- @param s Screen number.
+-- @return A table with all selected tags.
+function selectedlist(s)
+    local screen = s or capi.mouse.screen
+    local tags = capi.screen[screen]:tags()
+    local vtags = {}
+    for i, t in pairs(tags) do
+        if t.selected then
+            vtags[#vtags + 1] = t
+        end
+    end
+    return vtags
+end
+
+--- Return only the first visible tag.
+-- @param s Screen number.
+function selected(s)
+    return selectedlist(s)[1]
+end
+
+--- Set master width factor.
+-- @param mwfact Master width factor.
+function setmwfact(mwfact)
+    local t = selected()
+    if t then
+        t.mwfact = mwfact
+    end
+end
+
+--- Increase master width factor.
+-- @param add Value to add to master width factor.
+function incmwfact(add)
+    local t = selected()
+    if t then
+        t.mwfact = t.mwfact + add
+    end
+end
+
+--- Set the number of master windows.
+-- @param nmaster The number of master windows.
+function setnmaster(nmaster)
+    local t = selected()
+    if t then
+        t.nmaster = nmaster
+    end
+end
+
+--- Increase the number of master windows.
+-- @param add Value to add to number of master windows.
+function incnmaster(add)
+    local t = selected()
+    if t then
+        t.nmaster = t.nmaster + add
+    end
+end
+
+--- Set number of column windows.
+-- @param ncol The number of column.
+function setncol(ncol)
+    local t = selected()
+    if t then
+        t.ncol = ncol
+    end
+end
+
+--- Increase number of column windows.
+-- @param add Value to add to number of column windows.
+function incncol(add)
+    local t = selected()
+    if t then
+        t.ncol = t.ncol + add
+    end
+end
+
+--- View no tag.
+-- @param Optional screen number.
+function viewnone(screen)
+    local tags = capi.screen[screen or capi.mouse.screen]:tags()
+    for i, t in pairs(tags) do
+        t.selected = false
+    end
+end
+
+--- View a tag by its index.
+-- @param i The relative index to see.
+-- @param screen Optional screen number.
+function viewidx(i, screen)
+    local tags = capi.screen[screen or capi.mouse.screen]:tags()
+    local sel = selected()
+    viewnone()
+    for k, t in ipairs(tags) do
+        if t == sel then
+            tags[util.cycle(#tags, k + i)].selected = true
+        end
+    end
+end
+
+--- View next tag. This is the same as tag.viewidx(1).
+function viewnext()
+    return viewidx(1)
+end
+
+--- View previous tag. This is the same a tag.viewidx(-1).
+function viewprev()
+    return viewidx(-1)
+end
+
+--- View only a tag.
+-- @param t The tag object.
+function viewonly(t)
+    viewnone(t.screen)
+    t.selected = true
+end
+
+--- View only a set of tags.
+-- @param tags A table with tags to view only.
+-- @param screen Optional screen number of the tags.
+function viewmore(tags, screen)
+    viewnone(screen)
+    for i, t in pairs(tags) do
+        t.selected = true
+    end
+end
+
+-- Register standards hooks
+hooks.arrange.register(history.update)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

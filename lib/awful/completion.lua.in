@@ -1,0 +1,112 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local io = io
+local table = table
+
+--- Completion module for awful
+module("awful.completion")
+
+-- mapping of command/completion function
+local bashcomp_funcs = {}
+local bashcomp_src = "/etc/bash_completion"
+
+--- Enable programmable bash completion in awful.completion.bash at the price of
+--  a slight overhead
+--  @param src The bash completion source file, /etc/bash_completion by default.
+function bashcomp_load(src)
+    if src then bashcomp_src = src end
+    local c = io.popen("/usr/bin/env bash -c 'source " .. bashcomp_src .. "; complete -p'")
+    while true do
+        local line = c:read("*line")
+        if not line then break end
+        -- if a bash function is used for completion, register it
+        if line:match(".* -F .*") then
+            bashcomp_funcs[line:gsub(".* (%S+)$","%1")] = line:gsub(".*-F +(%S+) .*$", "%1")
+        end
+    end
+    c:close()
+end
+
+--- Use bash completion system to complete command and filename.
+-- @param command The command line.
+-- @param cur_pos The cursor position.
+-- @param ncomp The element number to complete.
+-- @return The new command and the new cursor position.
+function bash(command, cur_pos, ncomp)
+    local wstart = 1
+    local wend = 1
+    local words = {}
+    local cword_index = 0
+    local cword_start = 0
+    local cword_end = 0
+    local i = 1
+    local comptype = "file"
+
+    -- do nothing if we are on a letter, i.e. not at len + 1 or on a space
+    if cur_pos ~= #command + 1 and command:sub(cur_pos, cur_pos) ~= " " then
+        return command, cur_pos
+    elseif #command == 0 then
+        return command, cur_pos
+    end
+
+    while wend <= #command do
+        wend = command:find(" ", wstart)
+        if not wend then wend = #command + 1 end
+        table.insert(words, command:sub(wstart, wend - 1))
+        if cur_pos >= wstart and cur_pos <= wend + 1 then
+            cword_start = wstart
+            cword_end = wend
+            cword_index = i
+        end
+        wstart = wend + 1
+        i = i + 1
+    end
+
+    if cword_index == 1 then
+        comptype = "command"
+    end
+
+    local bash_cmd
+    if bashcomp_funcs[words[1]] then
+        -- fairly complex command with inline bash script to get the possible completions
+        bash_cmd = "/usr/bin/env bash -c 'source " .. bashcomp_src .. "; " ..
+                   "__print_completions() { for ((i=0;i<${#COMPREPLY[*]};i++)); do echo ${COMPREPLY[i]}; done }; " ..
+                   "COMP_WORDS=(" ..  command .."); COMP_LINE=\"" .. command .. "\"; " ..
+                   "COMP_COUNT=" .. cur_pos ..  "; COMP_CWORD=" .. cword_index-1 .. "; " ..
+                   bashcomp_funcs[words[1]] .. "; __print_completions | sort -u'"
+    else
+        bash_cmd = "/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'"
+    end
+    local c = io.popen(bash_cmd)
+    local output = {}
+    i = 0
+    while true do
+        local line = c:read("*line")
+        if not line then break end
+        table.insert(output, line)
+    end
+
+    c:close()
+
+    -- no completion, return
+    if #output == 0 then
+        return command, cur_pos
+    end
+
+    -- cycle
+    while ncomp > #output do
+        ncomp = ncomp - #output
+    end
+
+    local str = command:sub(1, cword_start - 1) .. output[ncomp] .. command:sub(cword_end)
+    cur_pos = cword_end + #output[ncomp] + 1
+
+    return str, cur_pos
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

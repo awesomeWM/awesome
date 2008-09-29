@@ -1,0 +1,305 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local assert = assert
+local io = io
+local table = table
+local capi =
+{
+    keygrabber = keygrabber
+}
+local util = require("awful.util")
+local beautiful = require("awful.beautiful")
+
+--- Prompt module for awful
+module("awful.prompt")
+
+--- Private data
+local data = {}
+data.history = {}
+
+--- Load history file in history table
+-- @param id The data.history identifier which is the path to the filename
+-- @param max Optional parameter, the maximum number of entries in file
+local function history_check_load(id, max)
+    if id and id ~= ""
+        and not data.history[id] then
+	data.history[id] = { max = 50, table = {} }
+
+	if max then
+            data.history[id].max = max
+	end
+
+	local f = io.open(id, "r")
+
+	-- Read history file
+	if f then
+            for line in f:lines() do
+                table.insert(data.history[id].table, line)
+                if #data.history[id].table >= data.history[id].max then
+                   break
+		end
+            end
+	end
+    end
+end
+
+--- Save history table in history file
+-- @param id The data.history identifier
+local function history_save(id)
+    if data.history[id] then
+        local f = io.open(id, "w")
+        if not f then
+            local i = 0
+            for d in id:gmatch(".-/") do
+                i = i + #d
+            end
+            util.mkdir(id:sub(1, i - 1))
+            f = assert(io.open(id, "w"))
+        end
+	for i = 1, math.min(#data.history[id].table, data.history[id].max) do
+            f:write(data.history[id].table[i] .. "\n")
+        end
+       f:close()
+    end
+end
+
+--- Return the number of items in history table regarding the id
+-- @param id The data.history identifier
+-- @return the number of items in history table, -1 if history is disabled
+local function history_items(id)
+    if data.history[id] then
+        return #data.history[id].table
+    else
+        return -1
+    end
+end
+
+--- Add an entry to the history file
+-- @param id The data.history identifier
+-- @param command The command to add
+local function history_add(id, command)
+    if data.history[id] then
+        if command ~= ""
+            and command ~= data.history[id].table[#data.history[id].table] then
+            table.insert(data.history[id].table, command)
+
+            -- Do not exceed our max_cmd
+            if #data.history[id].table > data.history[id].max then
+                table.remove(data.history[id].table, 1)
+            end
+
+            history_save(id)
+        end
+    end
+end
+
+
+--- Draw the prompt text with a cursor.
+-- @param text The text.
+-- @param text_color The text color.
+-- @param cursor_color The cursor color.
+-- @param cursor_pos The cursor position.
+local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_pos)
+    local char
+    if not text then text = "" end
+    if #text < cursor_pos then
+        char = " "
+    else
+        char = util.escape(text:sub(cursor_pos, cursor_pos))
+    end
+    local text_start = util.escape(text:sub(1, cursor_pos - 1))
+    local text_end = util.escape(text:sub(cursor_pos + 1))
+    return text_start .. "<span background=\"" .. util.color_strip_alpha(cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(text_color) .. "\">" .. char .. "</span>" .. text_end
+end
+
+--- Run a prompt in a box.
+-- @param args A table with optional arguments: fg_cursor, bg_cursor, prompt.
+-- @param textbox The textbox to use for the prompt.
+-- @param exe_callback The callback function to call with command as argument when finished.
+-- @param completion_callback The callback function to call to get completion.
+-- @param history_path Optional parameter: file path where the history should be saved, set nil to disable history
+-- @param history_max Optional parameter: set the maximum entries in history file, 50 by default
+-- @param done_callback Optional parameter: the callback function to always call without arguments, regardless of whether the prompt was cancelled.
+function run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback)
+    local theme = beautiful.get()
+    if not args then args = {} end
+    local command = ""
+    local command_before_comp
+    local cur_pos_before_comp
+    local prettyprompt = args.prompt or ""
+    local inv_col = args.fg_cursor or theme.fg_focus or "black"
+    local cur_col = args.bg_cursor or theme.bg_focus or "white"
+
+    history_check_load(history_path, history_max)
+    local history_index = history_items(history_path) + 1
+    -- The cursor position
+    local cur_pos = 1
+    -- The completion element to use on completion request.
+    local ncomp = 1
+    if not textbox or not exe_callback then
+        return
+    end
+    textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos)
+    capi.keygrabber.run(
+    function (mod, key)
+        -- Get out cases
+        if mod.Control then
+            if key == "c" or key == "g" then
+                textbox.text = ""
+                if done_callback then done_callback() end
+                return false
+            elseif key == "j" or key == "m" then
+                textbox.text = ""
+                exec_callback(command)
+                if done_callback then done_callback() end
+                return false
+            end
+        else
+            if key == "Return" then
+                textbox.text = ""
+                data.history_add(history_path, command)
+                exe_callback(command)
+                if done_callback then done_callback() end
+                return false
+            elseif key == "Escape" then
+                textbox.text = ""
+                if done_callback then done_callback() end
+                return false
+            end
+        end
+
+        -- Control cases
+        if mod.Control then
+            if key == "a" then
+                cur_pos = 1
+            elseif key == "b" then
+                if cur_pos > 1 then
+                    cur_pos = cur_pos - 1
+                end
+            elseif key == "d" then
+                if cur_pos <= #command then
+                    command = command:sub(1, cur_pos - 1) .. command:sub(cur_pos + 1)
+                end
+            elseif key == "e" then
+                cur_pos = #command + 1
+            elseif key == "f" then
+                if cur_pos <= #command then
+                    cur_pos = cur_pos + 1
+                end
+            elseif key == "h" then
+                if cur_pos > 1 then
+                    command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
+                    cur_pos = cur_pos - 1
+                end
+            elseif key == "k" then
+                command = command:sub(1, cur_pos - 1)
+            elseif key == "u" then
+                command = command:sub(cur_pos, #command)
+                cur_pos = 1
+            elseif key == "w" then
+                local wstart = 1
+                local wend = 1
+                local cword_start = 1
+                local cword_end = 1
+                while wend < cur_pos do
+                    wend = command:find(" ", wstart)
+                    if not wend then wend = #command + 1 end
+                    if cur_pos >= wstart and cur_pos <= wend + 1 then
+                        cword_start = wstart
+                        cword_end = cur_pos - 1
+                        break
+                    end
+                    wstart = wend + 1
+                end
+                command = command:sub(1, cword_start - 1) .. command:sub(cword_end + 1)
+                cur_pos = cword_start
+            end
+        else
+            if completion_callback then
+                -- That's tab
+                if key:byte() == 9 or key == "ISO_Left_Tab" then
+                    if key == "ISO_Left_Tab" then
+                        if ncomp == 1 then return true end
+                        if ncomp == 2 then
+                            command = command_before_comp
+                            textbox.text = prettyprompt .. prompt_text_with_cursor(command_before_comp, inv_col, cur_col, cur_pos)
+                            return true
+                        end
+
+                        ncomp = ncomp - 2
+                    elseif ncomp == 1 then
+                        command_before_comp = command
+                        cur_pos_before_comp = cur_pos
+                    end
+                    command, cur_pos = completion_callback(command_before_comp, cur_pos_before_comp, ncomp)
+                    ncomp = ncomp + 1
+                    key = ""
+                else
+                    ncomp = 1
+                end
+            end
+
+            -- Typin cases
+            if key == "Home" then
+                cur_pos = 1
+            elseif key == "End" then
+                cur_pos = #command + 1
+            elseif key == "BackSpace" then
+                if cur_pos > 1 then
+                    command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
+                    cur_pos = cur_pos - 1
+                end
+            -- That's DEL
+            elseif key:byte() == 127 then
+                command = command:sub(1, cur_pos - 1) .. command:sub(cur_pos + 1)
+            elseif key == "Left" then
+                cur_pos = cur_pos - 1
+            elseif key == "Right" then
+                cur_pos = cur_pos + 1
+            elseif key == "Up" then
+                if history_index > 1 then
+                    history_index = history_index - 1
+
+                    command = data.history[history_path].table[history_index]
+                    cur_pos = #command + 2
+                end
+            elseif key == "Down" then
+               if history_index < history_items(history_path) then
+                    history_index = history_index + 1
+
+                    command = data.history[history_path].table[history_index]
+                    cur_pos = #command + 2
+                elseif history_index == history_items(history_path) then
+                    history_index = history_index + 1
+
+                    command = ""
+                    cur_pos = 1
+                end
+            else
+                -- len() is UTF-8 aware but #key is not,
+                -- so check that we have one UTF-8 char but advance the cursor of # position
+                if key:len() == 1 then
+                    command = command:sub(1, cur_pos - 1) .. key .. command:sub(cur_pos)
+                    cur_pos = cur_pos + #key
+                end
+            end
+            if cur_pos < 1 then
+                cur_pos = 1
+            elseif cur_pos > #command + 1 then
+                cur_pos = #command + 1
+            end
+        end
+
+        -- Update textbox
+        textbox.text = prettyprompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos)
+
+        return true
+    end)
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

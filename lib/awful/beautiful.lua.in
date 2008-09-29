@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+local package = package
+
+--- Beautiful module for awful
+module("awful.beautiful")
+
+-- Exported variable handling theme
+theme = {}
+
+--- Set the beautiful theme if any.
+-- @param The beautiful theme.
+function register(btheme)
+    if btheme then
+        theme = btheme
+    else
+        theme = {}
+    end
+end
+
+--- Get the current registerde them.
+-- @return The current theme table.
+function get()
+    return package.loaded.awful.beautiful.theme
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

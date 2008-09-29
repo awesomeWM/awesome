@@ -1,0 +1,175 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local ipairs = ipairs
+local pairs = pairs
+local math = math
+local table = table
+local capi =
+{
+    screen = screen,
+    mouse = mouse,
+}
+local client = require("awful.client")
+local layout = require("awful.layout")
+
+--- Placement module for awful
+module("awful.placement")
+
+--- Check if an area intersect another area.
+-- @param a The area.
+-- @param b The other area.
+-- @return True if they intersect, false otherwise.
+local function area_intersect_area(a, b)
+    return (b.x < a.x + a.width
+            and b.x + b.width > a.x
+            and b.y < a.y + a.height
+            and b.y + b.height > a.y)
+end
+
+--- Get the intersect area between a and b.
+-- @param a The area.
+-- @param b The other area.
+-- @return The intersect area.
+local function area_intersect_area_get(a, b)
+    local g = {}
+    g.x = math.max(a.x, b.x)
+    g.y = math.max(a.y, b.y)
+    g.width = math.min(a.x + a.width, b.x + b.width) - g.x
+    g.height = math.min(a.y + a.height, b.y + b.height) - g.y
+    return g
+end
+
+--- Remove an area from a list, splitting the space between several area that
+-- can overlap.
+-- @param areas Table of areas.
+-- @param elem Area to remove.
+-- @return The new area list.
+local function area_remove(areas, elem)
+    local newareas = areas
+    for i, r in ipairs(areas) do
+        -- Check if the 'elem' intersect
+        if area_intersect_area(r, elem) then
+            -- It does? remove it
+            table.remove(areas, i)
+            local inter = area_intersect_area_get(r, elem)
+
+            if inter.x > r.x then
+                table.insert(newareas, {
+                    x = r.x,
+                    y = r.y,
+                    width = inter.x - r.x,
+                    height = r.height
+                })
+            end
+
+            if inter.y > r.y then
+                table.insert(newareas, {
+                    x = r.x,
+                    y = r.y,
+                    width = r.width,
+                    height = inter.y - r.y
+                })
+            end
+
+            if inter.x + inter.width < r.x + r.width then
+                table.insert(newareas, {
+                    x = inter.x + inter.width,
+                    y = r.y,
+                    width = (r.x + r.width) - (inter.x + inter.width),
+                    height = r.height
+                })
+            end
+
+            if inter.y + inter.height < r.y + r.height then
+                table.insert(newareas, {
+                    x = r.x,
+                    y = inter.y + inter.height,
+                    width = r.width,
+                    height = (r.y + r.height) - (inter.y + inter.height)
+                })
+            end
+        end
+    end
+
+    return newareas
+end
+
+--- Place the client without it being outside the screen.
+-- @param c The client.
+function no_offscreen(c)
+    local geometry = c:fullcoords()
+    local screen_geometry = capi.screen[c.screen].workarea
+
+    if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
+        geometry.x = screen_geometry.x + screen_geometry.width - geometry.width
+    elseif geometry.x < screen_geometry.x then
+        geometry.x = screen_geometry.x
+    end
+
+    if geometry.y + geometry.height > screen_geometry.y + screen_geometry.height then
+        geometry.y = screen_geometry.y + screen_geometry.height - geometry.height
+    elseif geometry.y < screen_geometry.y then
+        geometry.y = screen_geometry.y
+    end
+
+    c:fullcoords(geometry)
+end
+
+--- Place the client where there's place available with minimum overlap.
+-- @param c The client.
+function no_overlap(c)
+    local cls = client.visible(c.screen)
+    local layout = layout.get()
+    local areas = { capi.screen[c.screen].workarea }
+    local coords = c:coords()
+    local fullcoords = c:fullcoords()
+    for i, cl in pairs(cls) do
+        if cl ~= c and (cl.floating or layout == "floating") then
+            areas = area_remove(areas, cl:fullcoords())
+        end
+    end
+
+    -- Look for available space
+    local found = false
+    local new = { x = coords.x, y = coords.y, width = 0, height = 0 }
+    for i, r in ipairs(areas) do
+        if r.width >= fullcoords.width
+           and r.height >= fullcoords.height
+           and r.width * r.height > new.width * new.height then
+            found = true
+            new = r
+        end
+    end
+
+    -- We did not foudn an area with enough space for our size:
+    -- just take the biggest available one and go in
+    if not found then
+        for i, r in ipairs(areas) do
+            if r.width * r.height > new.width * new.height then
+                new = r
+            end
+        end
+    end
+
+    -- Restore height and width
+    new.width = coords.width
+    new.height = coords.height
+
+    c:coords(new)
+end
+
+--- Place the client under the mouse.
+-- @param c The client.
+function under_mouse(c)
+    local c_coords = c:coords()
+    local m_coords = capi.mouse.coords()
+    c:coords({ x = m_coords.x - c_coords.width / 2,
+               y = m_coords.y - c_coords.height / 2 })
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

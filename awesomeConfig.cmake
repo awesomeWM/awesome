@@ -266,13 +266,12 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
 # {{{ Configure files
-set(AWESOME_CONFIGURE_FILES
+file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/lib/*.lua.in)
+set(AWESOME_CONFIGURE_FILES 
+    ${awesome_lua_configure_files}
     config.h.in
     awesomerc.lua.in
     themes/default.in
-    lib/awful.lua.in
-    lib/beautiful.lua.in
-    lib/tabulous.lua.in
     awesome-version-internal.h.in
     awesome.doxygen.in)
 

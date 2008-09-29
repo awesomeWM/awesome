@@ -1,0 +1,125 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local pairs = pairs
+local table = table
+local ipairs = ipairs
+local type = type
+local math = math
+local capi =
+{
+    hooks = hooks
+}
+
+--- Hooks module for awful
+module("awful.hooks")
+
+-- User hook functions
+user = {}
+
+--- Create a new userhook (for external libs).
+-- @param name Hook name.
+function user.create(name)
+    _M[name] = {}
+    _M[name].callbacks = {}
+    _M[name].register = function (f)
+        table.insert(_M[name].callbacks, f)
+    end
+    _M[name].unregister = function (f)
+        for k, h in ipairs(_M[name].callbacks) do
+            if h == f then
+                table.remove(_M[name].callbacks, k)
+                break
+            end
+        end
+    end
+end
+
+--- Call a created userhook (for external libs).
+-- @param name Hook name.
+function user.call(name, ...)
+    for name, callback in pairs(_M[name].callbacks) do
+        callback(...)
+    end
+end
+
+-- Autodeclare awful.hooks.* functions
+-- mapped to awesome hooks.* functions
+for name, hook in pairs(capi.hooks) do
+    if name ~= 'timer' then
+        _M[name] = {}
+        _M[name].register = function (f)
+            if not _M[name].callbacks then
+                _M[name].callbacks = {}
+                hook(function (...)
+                    for i, callback in ipairs(_M[name].callbacks) do
+                       callback(...)
+                    end
+                end)
+            end
+
+            table.insert(_M[name].callbacks, f)
+        end
+        _M[name].unregister = function (f)
+            if _M[name].callbacks then
+                for k, h in ipairs(_M[name].callbacks) do
+                    if h == f then
+                        table.remove(_M[name].callbacks, k)
+                        break
+                    end
+                end
+            end
+        end
+    else
+        _M[name] = {}
+        _M[name].register = function (time, f, runnow)
+            if type(time) ~= 'number' or type(f) ~= 'function' or time <= 0 then
+                return
+            end
+            local new_timer
+            if _M[name].timer then
+                -- Take the smallest between current and new
+                new_timer = math.min(time, _M[name].timer)
+            else
+                new_timer = time
+            end
+            if not _M[name].callbacks then
+                _M[name].callbacks = {}
+            end
+            if _M[name].timer ~= new_timer then
+                _M[name].timer = new_timer
+                hook(_M[name].timer, function (...)
+                    for i, callback in ipairs(_M[name].callbacks) do
+                        callback['counter'] = callback['counter'] + _M[name].timer
+                        if callback['counter'] >= callback['timer'] then
+                            callback['callback'](...)
+                            callback['counter'] = 0
+                        end
+                    end
+                end)
+            end
+
+            if runnow then
+                table.insert(_M[name].callbacks, { callback = f, timer = time, counter = time })
+            else
+                table.insert(_M[name].callbacks, { callback = f, timer = time, counter = 0 })
+            end
+        end
+        _M[name].unregister = function (f)
+            if _M[name].callbacks then
+                for k, h in ipairs(_M[name].callbacks) do
+                    if h.callback == f then
+                        table.remove(_M[name].callbacks, k)
+                        break
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

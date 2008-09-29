@@ -9,7 +9,7 @@
 local io = io
 local print = print
 local setmetatable = setmetatable
-local awful = require("awful")
+local util = require("awful.util")
 local package = package
 local capi =
 {
@@ -69,7 +69,7 @@ function init(path)
             if key then
                 if key == "wallpaper_cmd" then
                     for s = 1, capi.screen.count() do
-                        awful.spawn(value, s)
+                        util.spawn(value, s)
                     end
                 elseif key == "font" then
                     capi.awesome.font(value)

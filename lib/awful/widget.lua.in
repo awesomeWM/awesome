@@ -1,0 +1,255 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local ipairs = ipairs
+local pairs = pairs
+local capi =
+{
+    screen = screen,
+    client = client,
+    button = button,
+    widget = widget,
+    mouse = mouse
+}
+local util = require("awful.util")
+local beautiful = require("awful.beautiful")
+
+--- Widget module for awful
+module("awful.widget")
+
+-- Various public structures
+taglist = {}
+taglist.label = {}
+tasklist = {}
+tasklist.label = {}
+
+--- Return labels for a taglist widget with all tag from screen.
+-- It returns the tag name and set a special
+-- foreground and background color for selected tags.
+-- @param t The tag.
+-- @param args The arguments table.
+-- bg_focus The background color for selected tag.
+-- fg_focus The foreground color for selected tag.
+-- bg_urgent The background color for urgent tags.
+-- fg_urgent The foreground color for urgent tags.
+-- taglist_squares Optional: set "true" or nil to display the taglist squares.
+-- taglist_squares_sel Optional: an user provided image for selected squares.
+-- taglist_squares_unsel Optional: an user provided image for unselected squares.
+-- @return A string to print.
+function taglist.label.all(t, args)
+    if not args then args = {} end
+    local theme = beautiful.get()
+    local fg_focus = args.fg_focus or theme.taglist_fg_focus or theme.fg_focus
+    local bg_focus = args.bg_focus or theme.taglist_bg_focus or theme.bg_focus
+    local fg_urgent = args.fg_urgent or theme.taglist_fg_urgent or theme.fg_urgent
+    local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
+    local taglist_squares = args.taglist_squares or theme.taglist_squares
+    local taglist_squares_sel = args.squares_sel or theme.squares_sel
+    local taglist_squares_unsel = args.squares_unsel or theme.squares_unsel
+    local text
+    local background = ""
+    local sel = capi.client.focus
+    local bg_color = nil
+    local fg_color = nil
+    if t.selected then
+        bg_color = bg_focus
+        fg_color = fg_focus
+    end
+    if sel and sel:tags()[t] then
+        if not taglist_squares or taglist_squares == "true" then
+            if taglist_squares_sel then
+                background = "resize=\"true\" image=\"" .. taglist_squares_sel .. "\""
+            else
+                background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
+            end
+        end
+    elseif bg_urgent or fg_urgent then
+        for k, c in pairs(t:clients()) do
+            if not taglist_squares or taglist_squares == "true" then
+                if taglist_squares_unsel then
+                    background = "resize=\"true\" image=\"" .. taglist_squares_unsel .. "\""
+                else
+                    background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarew.png\""
+                end
+            end
+            if c.urgent then
+                bg_color = bg_urgent
+                fg_color = fg_urgent
+                break
+            end
+        end
+    end
+    if bg_color and fg_color then
+        text = "<bg "..background.." color='"..bg_color.."'/> <span color='"..util.color_strip_alpha(fg_color).."'>"..util.escape(t.name).."</span> "
+    else
+        text = " <bg "..background.." />"..util.escape(t.name).." "
+    end
+    return text
+end
+
+--- Return labels for a taglist widget with all *non empty* tags from screen.
+-- It returns the tag name and set a special
+-- foreground and background color for selected tags.
+-- @param t The tag.
+-- @param args The arguments table.
+-- bg_focus The background color for selected tag.
+-- fg_focus The foreground color for selected tag.
+-- bg_urgent The background color for urgent tags.
+-- fg_urgent The foreground color for urgent tags.
+-- @return A string to print.
+function taglist.label.noempty(t, args)
+    if #t:clients() > 0 or t.selected then
+        if not args then args = {} end
+        local theme = beautiful.get()
+        local fg_focus = args.fg_focus or theme.taglist_fg_focus or theme.fg_focus
+        local bg_focus = args.bg_focus or theme.taglist_bg_focus or theme.bg_focus
+        local fg_urgent = args.fg_urgent or theme.taglist_fg_urgent or theme.fg_urgent
+        local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
+        local bg_color = nil
+        local fg_color = nil
+        local text
+
+        if t.selected then
+            bg_color = bg_focus
+            fg_color = fg_focus
+        end
+        if bg_urgent and fg_urgent then
+            for k, c in pairs(t:clients()) do
+                if c.urgent then
+                    bg_color = bg_urgent
+                    fg_color = fg_urgent
+                    break
+                end
+            end
+        end
+        if fg_color and bg_color then
+            text = "<bg color='" .. bg_color .. "'/> <span color='" .. util.color_strip_alpha(fg_color) .. "'>" .. util.escape(t.name) .. "</span> "
+        else
+            text = " " .. util.escape(t.name) .. " "
+        end
+        return text
+    end
+end
+
+local function widget_tasklist_label_common(c, args)
+    if not args then args = {} end
+    local theme = beautiful.get()
+    local fg_focus = args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus
+    local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
+    local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
+    local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
+    local text = ""
+    local name
+    if c.floating then
+        text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
+    end
+    if c.minimized then
+        name = util.escape(c.icon_name) or ""
+    else
+        name = util.escape(c.name) or ""
+    end
+    if capi.client.focus == c then
+        if bg_focus and fg_focus then
+            text = text .. " <bg color='"..bg_focus.."'/><span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span> "
+        else
+            text = text .. " "..name.." "
+        end
+    elseif c.urgent and bg_urgent and fg_urgent then
+        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span> "
+    else
+        text = text .. " "..name.." "
+    end
+    return text
+end
+
+--- Return labels for a tasklist widget with clients from all tags and screen.
+-- It returns the client name and set a special
+-- foreground and background color for focused client.
+-- It also puts a special icon for floating windows.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @param args The arguments table.
+-- bg_focus The background color for focused client.
+-- fg_focus The foreground color for focused client.
+-- bg_urgent The background color for urgent clients.
+-- fg_urgent The foreground color for urgent clients.
+-- @return A string to print.
+function tasklist.label.allscreen(c, screen, args)
+    return widget_tasklist_label_common(c, args)
+end
+
+--- Return labels for a tasklist widget with clients from all tags.
+-- It returns the client name and set a special
+-- foreground and background color for focused client.
+-- It also puts a special icon for floating windows.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @param args The arguments table.
+-- bg_focus The background color for focused client.
+-- fg_focus The foreground color for focused client.
+-- bg_urgent The background color for urgent clients.
+-- fg_urgent The foreground color for urgent clients.
+-- @return A string to print.
+function tasklist.label.alltags(c, screen, args)
+    -- Only print client on the same screen as this widget
+    if c.screen ~= screen then return end
+    return widget_tasklist_label_common(c, args)
+end
+
+--- Return labels for a tasklist widget with clients from currently selected tags.
+-- It returns the client name and set a special
+-- foreground and background color for focused client.
+-- It also puts a special icon for floating windows.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @param args The arguments table.
+-- bg_focus The background color for focused client.
+-- fg_focus The foreground color for focused client.
+-- bg_urgent The background color for urgent clients.
+-- fg_urgent The foreground color for urgent clients.
+-- @return A string to print.
+function tasklist.label.currenttags(c, screen, args)
+    -- Only print client on the same screen as this widget
+    if c.screen ~= screen then return end
+    for k, t in ipairs(capi.screen[screen]:tags()) do
+        if t.selected and c:tags()[t] then
+            return widget_tasklist_label_common(c, args)
+        end
+    end
+end
+
+--- Create a button widget. When clicked, the image is deplaced to make it like
+-- a real button.
+-- @param args Standard widget table arguments, plus image for the image path.
+-- @return A textbox widget configured as a button.
+function button(args)
+    if not args then return end
+    args.type = "textbox"
+    local w = capi.widget(args)
+    local img_release = "<bg image=\"" .. args.image .. "\" resize=\"true\"/>"
+    local img_press = "<bg_margin top=\"2\" left=\"2\"/><bg image=\"" .. args.image .. "\" resize=\"true\"/>"
+    w.text = img_release
+    w:buttons({ capi.button({}, 1, function () w.text = img_press end, function () w.text = img_release end) })
+    function w.mouse_leave(s) w.text = img_release end
+    function w.mouse_enter(s) if capi.mouse.coords().buttons[1] then w.text = img_press end end
+    return w
+end
+
+--- Create a button widget which will launch a command.
+-- @param args Standard widget table arguments, plus image for the image path
+-- and command for the command to run on click.
+-- @return A launcher widget.
+function launcher(args)
+    if not args.command then return end
+    local w = button(args)
+    local b = w:buttons()
+    b[#b + 1] = capi.button({}, 1, nil, function () util.spawn(args.command) end)
+    w:buttons(b)
+    return w
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
