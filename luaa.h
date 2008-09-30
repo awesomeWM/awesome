@@ -255,7 +255,7 @@ luaA_otable_new(lua_State *L)
 }
 
 void luaA_init(void);
-void luaA_parserc(const char *);
+bool luaA_parserc(const char *, bool);
 void luaA_cs_init(void);
 void luaA_cs_cleanup(void);
 void luaA_on_timer(EV_P_ ev_timer *w, int revents);

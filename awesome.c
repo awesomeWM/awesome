@@ -290,7 +290,8 @@ exit_help(int exit_code)
 "Usage: awesome [OPTION]\n\
   -h, --help             show help\n\
   -v, --version          show version\n\
-  -c, --config FILE      configuration file to use\n");
+  -c, --config FILE      configuration file to use\n\
+  -k, --check            check configuration file syntax\n");
     exit(exit_code);
 }
 
@@ -309,10 +310,11 @@ main(int argc, char **argv)
     ssize_t cmdlen = 1;
     static struct option long_options[] =
     {
-        {"help",    0, NULL, 'h'},
-        {"version", 0, NULL, 'v'},
-        {"config",  1, NULL, 'c'},
-        {NULL,      0, NULL, 0}
+        { "help",    0, NULL, 'h' },
+        { "version", 0, NULL, 'v' },
+        { "config",  1, NULL, 'c' },
+        { "check",   0, NULL, 'k' },
+        { NULL,      0, NULL, 0 }
     };
 
     /* event loop watchers */
@@ -339,8 +341,14 @@ main(int argc, char **argv)
         a_strcat(globalconf.argv, cmdlen, argv[i]);
     }
 
+    /* Text won't be printed correctly otherwise */
+    setlocale(LC_CTYPE, "");
+
+    /* init lua */
+    luaA_init();
+
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhc:",
+    while((opt = getopt_long(argc, argv, "vhkc:",
                              long_options, NULL)) != -1)
         switch(opt)
         {
@@ -350,6 +358,17 @@ main(int argc, char **argv)
           case 'h':
             exit_help(EXIT_SUCCESS);
             break;
+          case 'k':
+            if(!luaA_parserc(confpath, false))
+            {
+                fprintf(stderr, "✘ Configuration file error.\n");
+                return EXIT_FAILURE;
+            }
+            else
+            {
+                fprintf(stderr, "✔ Configuration file OK.\n");
+                return EXIT_SUCCESS;
+            }
           case 'c':
             if(a_strlen(optarg))
                 confpath = a_strdup(optarg);
@@ -358,8 +377,6 @@ main(int argc, char **argv)
             break;
         }
 
-    /* Text won't be printed correctly otherwise */
-    setlocale(LC_CTYPE, "");
     globalconf.loop = ev_default_loop(0);
     ev_timer_init(&globalconf.timer, &luaA_on_timer, 0., 0.);
 
@@ -457,10 +474,8 @@ main(int argc, char **argv)
                         globalconf.keysyms, &globalconf.numlockmask,
                         &globalconf.shiftlockmask, &globalconf.capslockmask);
 
-    /* init lua */
-    luaA_init();
-
-    luaA_parserc(confpath);
+    /* Parse and run configuration file */
+    luaA_parserc(confpath, true);
 
     /* scan existing windows */
     scan();

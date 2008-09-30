@@ -702,27 +702,47 @@ luaA_init(void)
 
 #define AWESOME_CONFIG_FILE "/awesome/rc.lua"
 
+static bool
+luaA_loadrc(const char *confpath, bool run)
+{
+    if(confpath)
+    {
+        if(!luaL_loadfile(globalconf.L, confpath))
+        {
+            if(run)
+            {
+                if(lua_pcall(globalconf.L, 0, LUA_MULTRET, 0))
+                    fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
+                else
+                {
+                    globalconf.conffile = a_strdup(confpath);
+                    return true;
+                }
+            }
+            else
+                lua_pop(globalconf.L, 1);
+            return true;
+        }
+        else
+            fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
+    }
+    return false;
+}
+
 /** Load a configuration file.
- * \param rcfile The configuration file to load.
+ * \param confpatharg The configuration file to load.
+ * \param run Run the configuration file.
  */
-void
-luaA_parserc(const char *confpatharg)
+bool
+luaA_parserc(const char *confpatharg, bool run)
 {
     int screen;
     const char *confdir, *xdg_config_dirs;
     char *confpath = NULL, **xdg_files, **buf, path[1024];
     ssize_t len;
+    bool ret;
 
-    if(confpatharg)
-    {
-        if(luaL_dofile(globalconf.L, confpatharg))
-            fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
-        else
-        {
-            globalconf.conffile = a_strdup(confpatharg);
-            goto bailout;
-        }
-    }
+    ret = luaA_loadrc(confpatharg, run);
 
     confdir = getenv("XDG_CONFIG_HOME");
 
@@ -748,13 +768,8 @@ luaA_parserc(const char *confpatharg)
     }
     a_strcat(confpath, len, AWESOME_CONFIG_FILE);
 
-    if(luaL_dofile(globalconf.L, confpath))
-        fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
-    else
-    {
-        globalconf.conffile = a_strdup(confpath);
-        goto bailout;
-    }
+    if(!ret)
+        ret = luaA_loadrc(confpath, run);
 
     xdg_config_dirs = getenv("XDG_CONFIG_DIRS");
 
@@ -775,20 +790,14 @@ luaA_parserc(const char *confpatharg)
         a_strcat(confpath, len, AWESOME_CONFIG_FILE);
         snprintf(path, sizeof(path), "package.path = package.path .. \";%s/awesome/?.lua\"", *buf);
         luaA_dostring(globalconf.L, path);
-        if(luaL_dofile(globalconf.L, confpath))
-            fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
-        else
-        {
-            globalconf.conffile = a_strdup(confpath);
-            break;
-        }
+        if(!ret)
+            ret = luaA_loadrc(confpath, run);
     }
 
     for(buf = xdg_files; *buf; buf++)
         p_delete(buf);
     p_delete(&xdg_files);
 
-  bailout:
     /* Assure there's at least one tag */
     for(screen = 0; screen < globalconf.nscreen; screen++)
         if(!globalconf.screens[screen].tags.len)
@@ -796,6 +805,8 @@ luaA_parserc(const char *confpatharg)
                                  &globalconf.screens[screen]);
 
     p_delete(&confpath);
+
+    return ret;
 }
 
 /** Parse a command.

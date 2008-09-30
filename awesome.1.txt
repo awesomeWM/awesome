@@ -9,7 +9,7 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE']
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*]
 
 DESCRIPTION
 -----------
@@ -40,6 +40,8 @@ OPTIONS
     Print help information, then exit.
 *-c*, *--config* 'FILE'::
     Use an alternate configuration file instead of '$XDG_CONFIG_HOME/awesome/rc.lua'.
+*-k*, *--check*::
+    Check configuration file syntax.
 
 DEFAULT MOUSE BINDINGS
 -----------------------
