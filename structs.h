@@ -405,7 +405,7 @@ struct awesome_t
     /** Embedded windows */
     xembed_window_t *embedded;
     /** Path to config file */
-    char *configpath;
+    char *conffile;
     /** Stack client history */
     client_node_t *stack;
     /** Command line passed to awesome */

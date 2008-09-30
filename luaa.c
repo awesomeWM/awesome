@@ -305,8 +305,22 @@ luaA_font(lua_State *L)
     return 1;
 }
 
+/** Get configuration file path used by awesome.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lreturn The awesome configuration file path.
+ */
+static int
+luaA_conffile(lua_State *L)
+{
+    lua_pushstring(L, globalconf.conffile);
+    return 1;
+}
+
 /** Set default colors. (DEPRECATED)
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  *
  * \luastack
  * \lparam A table with `fg' and `bg' elements, containing colors.
@@ -593,6 +607,7 @@ luaA_init(void)
         { "colors_set", luaA_colors_set },
         { "font", luaA_font },
         { "colors", luaA_colors },
+        { "conffile", luaA_conffile },
         { NULL, NULL }
     };
     static const struct luaL_reg awesome_hooks_lib[] =
@@ -703,7 +718,10 @@ luaA_parserc(const char *confpatharg)
         if(luaL_dofile(globalconf.L, confpatharg))
             fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
         else
+        {
+            globalconf.conffile = a_strdup(confpatharg);
             goto bailout;
+        }
     }
 
     confdir = getenv("XDG_CONFIG_HOME");
@@ -733,7 +751,10 @@ luaA_parserc(const char *confpatharg)
     if(luaL_dofile(globalconf.L, confpath))
         fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
     else
+    {
+        globalconf.conffile = a_strdup(confpath);
         goto bailout;
+    }
 
     xdg_config_dirs = getenv("XDG_CONFIG_DIRS");
 
@@ -757,7 +778,10 @@ luaA_parserc(const char *confpatharg)
         if(luaL_dofile(globalconf.L, confpath))
             fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
         else
+        {
+            globalconf.conffile = a_strdup(confpath);
             break;
+        }
     }
 
     for(buf = xdg_files; *buf; buf++)
