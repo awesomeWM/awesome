@@ -1491,6 +1491,17 @@ luaA_client_index(lua_State *L)
       case A_TK_URGENT:
         lua_pushboolean(L, (*c)->isurgent);
         break;
+      case A_TK_SIZEHINTS:
+        lua_newtable(L);
+        lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_US_POSITION);
+        lua_setfield(L, -2, "user_position");
+        lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_US_SIZE);
+        lua_setfield(L, -2, "user_size");
+        lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_P_POSITION);
+        lua_setfield(L, -2, "program_position");
+        lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_P_SIZE);
+        lua_setfield(L, -2, "program_size");
+        break;
       default:
         return 0;
     }
