@@ -217,7 +217,10 @@ keybinding({ modkey }, "Escape", awful.tag.history.restore):add()
 -- Standard program
 keybinding({ modkey }, "Return", function () awful.util.spawn(terminal) end):add()
 
-keybinding({ modkey, "Control" }, "r", awesome.restart):add()
+keybinding({ modkey, "Control" }, "r", function ()
+                                           mypromptbox.text =
+                                               awful.util.escape(awful.util.restart())
+                                        end):add()
 keybinding({ modkey, "Shift" }, "q", awesome.quit):add()
 
 -- Client manipulation

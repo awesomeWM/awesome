@@ -11,6 +11,7 @@ local assert = assert
 local loadstring = loadstring
 local debug = debug
 local print = print
+local type = type
 local capi =
 {
     awesome = awesome,
@@ -107,6 +108,43 @@ function unescape(text)
         text = text:gsub("&quot;", "\"")
     end
     return text
+end
+
+--- Check if a file is a Lua valid file.
+-- This is done by loading the content and compiling it with loadstring().
+-- @param path The file path.
+-- @return A function if everything is alright, a string with the error
+-- otherwise.
+function checkfile(path)
+    if not path then return "E: no file given" end
+    local f = io.open(path)
+
+    if not f then
+        return "E: unable to open file " .. path
+    end
+
+    local s = f:read("*all")
+
+    f:close()
+
+    local f, e = loadstring(s)
+    -- Return function if function, otherwise return error.
+    if f then return f end
+    return e
+end
+
+--- Try to restart awesome.
+-- It checks if the configuration file is valid, and then restart if it's ok.
+-- If it's not ok, the error will be returned.
+-- @return Never return if awesome restart, or return a string error.
+function restart()
+    local c = checkfile(capi.awesome.conffile())
+
+    if type(c) ~= "function" then
+        return c
+    end
+
+    capi.awesome.restart()
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
