@@ -9,6 +9,7 @@ local os = os
 local io = io
 local assert = assert
 local loadstring = loadstring
+local loadfile = loadfile
 local debug = debug
 local print = print
 local type = type
@@ -111,23 +112,12 @@ function unescape(text)
 end
 
 --- Check if a file is a Lua valid file.
--- This is done by loading the content and compiling it with loadstring().
+-- This is done by loading the content and compiling it with loadfile().
 -- @param path The file path.
 -- @return A function if everything is alright, a string with the error
 -- otherwise.
 function checkfile(path)
-    if not path then return "E: no file given" end
-    local f = io.open(path)
-
-    if not f then
-        return "E: unable to open file " .. path
-    end
-
-    local s = f:read("*all")
-
-    f:close()
-
-    local f, e = loadstring(s)
+    local f, e = loadfile(s)
     -- Return function if function, otherwise return error.
     if f then return f end
     return e
