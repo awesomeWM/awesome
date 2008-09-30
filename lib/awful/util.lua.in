@@ -117,7 +117,7 @@ end
 -- @return A function if everything is alright, a string with the error
 -- otherwise.
 function checkfile(path)
-    local f, e = loadfile(s)
+    local f, e = loadfile(path)
     -- Return function if function, otherwise return error.
     if f then return f end
     return e
