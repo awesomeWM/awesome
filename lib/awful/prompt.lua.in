@@ -162,7 +162,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         else
             if key == "Return" then
                 textbox.text = ""
-                data.history_add(history_path, command)
+                history_add(history_path, command)
                 exe_callback(command)
                 if done_callback then done_callback() end
                 return false
