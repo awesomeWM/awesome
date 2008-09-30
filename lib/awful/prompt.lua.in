@@ -8,6 +8,7 @@
 local assert = assert
 local io = io
 local table = table
+local math = math
 local capi =
 {
     keygrabber = keygrabber
