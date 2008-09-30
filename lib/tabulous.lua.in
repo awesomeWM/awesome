@@ -10,12 +10,13 @@ local capi = { client = client }
 local table = table
 local pairs = pairs
 local awful = require('awful')
+local otable = otable
 
 --- tabulous: fabulous tabs for awesome
 module("tabulous")
 
-local tabbed_tags = {} -- all tab tables, indexed by tab
-local tabbed = {}      -- the current tag tab table
+local tabbed_tags = otable() -- all tab tables, indexed by tab
+local tabbed = {}            -- the current tag tab table
 
 local active_tag
 
@@ -255,16 +256,16 @@ end
 -- all tabs that are not in the current tag (and activating the good one)
 function update_tabbing()
     -- do nothing if nothing changed
-    if active_tag == awful.tag.selected().name then return end
+    if active_tag == awful.tag.selected() then return end
 
     -- needed for initialisation
-    active_tag = active_tag or awful.tag.selected().name
+    active_tag = active_tag or awful.tag.selected()
 
     -- save the tabbed list for the old active tag
     tabbed_tags[active_tag] = tabbed
 
     -- update the active tag and switch to the new tabbed list
-    active_tag = awful.tag.selected().name
+    active_tag = awful.tag.selected()
     tabbed = tabbed_tags[active_tag] or {}
 
     -- update show/hide on the clients
