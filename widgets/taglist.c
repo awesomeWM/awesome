@@ -126,6 +126,7 @@ taglist_draw(draw_context_t *ctx, int screen, widget_node_t *w,
             draw_parser_data_init(&pdata[i]);
             area = draw_text_extents(ctx->phys_screen,
                                      globalconf.font, text[i], len[i], &pdata[i]);
+            area.height = ctx->height;
 
             if(pdata[i].bg_image)
                 area.width = MAX(area.width,
