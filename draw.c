@@ -393,7 +393,9 @@ draw_text(draw_context_t *ctx, font_t *font,
                            pango_units_from_double(area.width
                                                    - (pdata->margin.left
                                                       + pdata->margin.right)));
+    pango_layout_set_height(ctx->layout, pango_units_from_double(area.height));
     pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
+    pango_layout_set_wrap(ctx->layout, PANGO_WRAP_WORD_CHAR);
     pango_layout_set_attributes(ctx->layout, pdata->attr_list);
     pango_layout_set_font_description(ctx->layout, font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
@@ -402,7 +404,7 @@ draw_text(draw_context_t *ctx, font_t *font,
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
      * the text 1px lower than too high which usually results in a better type
      * face */
-    y = area.y + (ctx->height - font->height + 1) / 2 + pdata->margin.top;
+    y = area.y + (ctx->height - ext.height + 1) / 2 + pdata->margin.top;
 
     switch(pdata->align)
     {
