@@ -152,7 +152,7 @@ fi
 
 # create directory and last wallpaper file 
 if [ ! -d  "${CONFIG_DIR}" ]; then
-	mkdir "${CONFIG_DIR}"
+        mkdir -p "${CONFIG_DIR}"
     touch ${lastwallpaper}
 fi
 
