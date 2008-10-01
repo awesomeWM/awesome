@@ -102,6 +102,8 @@ luaA_buttons(lua_State *L)
 }
 
 /** Quit awesome.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  */
 static int
 luaA_quit(lua_State *L __attribute__ ((unused)))
@@ -113,7 +115,7 @@ luaA_quit(lua_State *L __attribute__ ((unused)))
 /** Execute another application, probably a window manager, to replace
  * awesome.
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam The command line to execute.
  */
@@ -141,7 +143,6 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
  * called with the client object as argument.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- *
  * \luastack
  * \lparam A function to call each time a client gets focus.
  */
@@ -154,7 +155,7 @@ luaA_hooks_focus(lua_State *L)
 /** Set the function called each time a client loses focus. This function is
  * called with the client object as argument.
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A function to call each time a client loses focus.
  */
@@ -167,7 +168,7 @@ luaA_hooks_unfocus(lua_State *L)
 /** Set the function called each time a new client appears. This function is
  * called with the client object as argument.
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A function to call on each new client.
  */
@@ -180,7 +181,7 @@ luaA_hooks_manage(lua_State *L)
 /** Set the function called each time a client goes away. This function is
  * called with the client object as argument.
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A function to call when a client goes away.
  */
@@ -193,7 +194,7 @@ luaA_hooks_unmanage(lua_State *L)
 /** Set the function called each time the mouse enter a new window. This
  * function is called with the client object as argument.
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A function to call each time a client gets mouse over it.
  */
@@ -206,7 +207,7 @@ luaA_hooks_mouse_enter(lua_State *L)
 /** Set the function called each time the mouse enter a new window. This
  * function is called with the client object as argument. (DEPRECATED)
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A function to call each time a client gets mouse over it.
  */
@@ -220,7 +221,7 @@ luaA_hooks_mouse_over(lua_State *L)
 /** Set the function called on each screen arrange. This function is called
  * with the screen number as argument.
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A function to call on each screen arrange.
  */
@@ -234,7 +235,7 @@ luaA_hooks_arrange(lua_State *L)
  * This function is called with the client object as argument and the
  * property name.
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A function to call on each client property update.
  */
@@ -246,7 +247,7 @@ luaA_hooks_property(lua_State *L)
 
 /** Set the function to be called every N seconds.
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam The number of seconds to run function every. Set 0 to disable.
  * \lparam A function to call every N seconds (optional).
@@ -263,25 +264,9 @@ luaA_hooks_timer(lua_State *L)
     return 0;
 }
 
-/** Set default font. (DEPRECATED)
- * \param L The Lua VM state.
- *
- * \luastack
- * \lparam A string with a font name in Pango format.
- */
-static int
-luaA_font_set(lua_State *L)
-{
-    deprecate();
-    const char *font = luaL_checkstring(L, 1);
-    draw_font_delete(&globalconf.font);
-    globalconf.font = draw_font_new(globalconf.default_screen, font);
-    return 0;
-}
-
 /** Set or get default font. (DEPRECATED)
  * \param L The Lua VM state.
- *
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam An optional string with a font name in Pango format.
  * \lreturn The font used, in Pango format.
@@ -305,6 +290,19 @@ luaA_font(lua_State *L)
     return 1;
 }
 
+/** Set default font. (DEPRECATED)
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with a font name in Pango format.
+ */
+static int
+luaA_font_set(lua_State *L)
+{
+    deprecate();
+    return luaA_font(L);
+}
+
 /** Get configuration file path used by awesome.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -318,36 +316,13 @@ luaA_conffile(lua_State *L)
     return 1;
 }
 
-/** Set default colors. (DEPRECATED)
+/** Set default colors.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- *
  * \luastack
  * \lparam A table with `fg' and `bg' elements, containing colors.
+ * \lreturn A table with `fg' and `bg' elements, containing colors.
  */
-static int
-luaA_colors_set(lua_State *L)
-{
-    deprecate();
-    const char *buf;
-    size_t len;
-    int8_t colors_nbr = -1, i;
-    xcolor_init_request_t reqs[2];
-
-    luaA_checktable(L, 1);
-
-    if((buf = luaA_getopt_lstring(L, 1, "fg", NULL, &len)))
-       reqs[++colors_nbr] = xcolor_init_unchecked(&globalconf.colors.fg, buf, len);
-
-    if((buf = luaA_getopt_lstring(L, 1, "bg", NULL, &len)))
-       reqs[++colors_nbr] = xcolor_init_unchecked(&globalconf.colors.bg, buf, len);
-
-    for(i = 0; i <= colors_nbr; i++)
-       xcolor_init_reply(reqs[i]);
-
-    return 0;
-}
-
 static int
 luaA_colors(lua_State *L)
 {
@@ -377,6 +352,20 @@ luaA_colors(lua_State *L)
     lua_setfield(L, -2, "bg");
 
     return 1;
+}
+
+/** Set default colors. (DEPRECATED)
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ *
+ * \luastack
+ * \lparam A table with `fg' and `bg' elements, containing colors.
+ */
+static int
+luaA_colors_set(lua_State *L)
+{
+    deprecate();
+    return luaA_colors(L);
 }
 
 static void
@@ -435,6 +424,9 @@ luaA_pairs(lua_State *L)
     return luaA_generic_pairs(L);
 }
 
+/** Replace various standards Lua functions with our own.
+ * \param L The Lua VM state.
+ */
 static void
 luaA_fixups(lua_State *L)
 {
