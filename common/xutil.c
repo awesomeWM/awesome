@@ -28,6 +28,9 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_icccm.h>
 
+/* CURSORFONT */
+#include <X11/Xlibint.h>
+
 #include "common/util.h"
 #include "common/xutil.h"
 #include "common/atoms.h"
@@ -422,12 +425,15 @@ xutil_button_fromint(int button)
 xcb_cursor_t
 xutil_cursor_new(xcb_connection_t *conn, unsigned int cursor_font)
 {
-    xcb_font_t font;
+    static xcb_font_t font = XCB_NONE;
     xcb_cursor_t cursor;
 
-    /* Get the font for the cursor*/
-    font = xcb_generate_id(conn);
-    xcb_open_font(conn, font, sizeof("cursor")-1, "cursor");
+    /* Get the font for the cursor */
+    if(!font)
+    {
+        font = xcb_generate_id(conn);
+        xcb_open_font(conn, font, sizeof(CURSORFONT) - 1, CURSORFONT);
+    }
 
     cursor = xcb_generate_id(conn);
     xcb_create_glyph_cursor(conn, cursor, font, font,
