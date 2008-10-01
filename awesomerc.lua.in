@@ -255,7 +255,7 @@ keybinding({ modkey }, "F1", function ()
                                  awful.prompt.run({ prompt = "Run: " }, mypromptbox, awful.util.spawn, awful.completion.bash,
 os.getenv("HOME") .. "/.cache/awesome/history") end):add()
 keybinding({ modkey }, "F4", function ()
-                                 awful.prompt.run({ prompt = "Run Lua code: " }, mypromptbox, awful.eval, awful.prompt.bash,
+                                 awful.prompt.run({ prompt = "Run Lua code: " }, mypromptbox, awful.util.eval, awful.prompt.bash,
 os.getenv("HOME") .. "/.cache/awesome/history_eval") end):add()
 keybinding({ modkey, "Ctrl" }, "i", function ()
                                         if mypromptbox.text then
