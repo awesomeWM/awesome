@@ -338,10 +338,10 @@ case $WPSETTER in
         debugstory=$standardok
         ;;
     display)
-        full="`xwininfo -root 2> /dev/null|grep geom` -window root"
+        full="-sample `xwininfo -root 2> /dev/null|awk '/geom/{print $2}'` -window root"
         tile='-window root'
         center='-backdrop -window root'
-        aspect=$full
+        aspect="`xwininfo -root 2> /dev/null|grep geom` -window root"
         debugstory=$standardrant
         ;;
     Esetroot)
