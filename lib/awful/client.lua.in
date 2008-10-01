@@ -7,6 +7,7 @@
 -- Grab environment we need
 local hooks = require("awful.hooks")
 local util = require("awful.util")
+local layout = require("awful.layout")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -356,18 +357,19 @@ end
 function maximize(c)
     local sel = c or capi.client.focus
     if sel then
+        local curlay = layout.get()
         local ws = capi.screen[sel.screen].workarea
         ws.width = ws.width - 2 * sel.border_width
         ws.height = ws.height - 2 * sel.border_width
-        if sel.floating and data.maximize[sel] then
+        if (sel.floating or curlay == "floating") and data.maximize[sel] then
+            sel:coords(data.maximize[sel].coords)
             sel.floating = data.maximize[sel].floating
-            if sel.floating then
-                sel:coords(data.maximize[sel].coords)
-            end
             data.maximize[sel] = nil
         else
             data.maximize[sel] = { coords = sel:coords(), floating = sel.floating }
-            sel.floating = true
+            if curlay ~= "floating" then
+                sel.floating = true
+            end
             sel:coords(ws)
         end
     end
