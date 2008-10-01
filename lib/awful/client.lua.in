@@ -359,10 +359,10 @@ function maximize(c)
         local ws = capi.screen[sel.screen].workarea
         ws.width = ws.width - 2 * sel.border_width
         ws.height = ws.height - 2 * sel.border_width
-        if sel.floating and client.data.maximize[sel] then
-            sel.floating = client.data.maximize[sel].floating
+        if sel.floating and data.maximize[sel] then
+            sel.floating = data.maximize[sel].floating
             if sel.floating then
-                sel:coords(client.data.maximize[sel].coords)
+                sel:coords(data.maximize[sel].coords)
             end
             data.maximize[sel] = nil
         else
