@@ -13,7 +13,9 @@ center
 class
 client
 color
+Control
 coords
+Ctrl
 east
 fg
 flex
@@ -35,8 +37,14 @@ label
 layout
 left
 line
+Lock
 machine
 minimize
+Mod1
+Mod2
+Mod3
+Mod4
+Mod5
 mouse_enter
 mouse_leave
 mwfact
@@ -58,6 +66,7 @@ screen
 selected
 shadow
 shadow_offset
+Shift
 show_icons
 sizehints
 south

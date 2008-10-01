@@ -333,39 +333,22 @@ xutil_error_init(const xcb_generic_error_t *e, xutil_error_t *err)
     return true;
 }
 
-/** Link a name to a key symbol */
-typedef struct
-{
-    const char *name;
-    xcb_keysym_t keysym;
-} keymod_t;
-
 xcb_keysym_t
-xutil_key_mask_fromstr(const char *keyname)
+xutil_key_mask_fromstr(const char *keyname, size_t len)
 {
-    /** List of keyname and corresponding X11 mask codes */
-    static const keymod_t KeyModList[] =
+    switch(a_tokenize(keyname, len))
     {
-        { "Shift", XCB_MOD_MASK_SHIFT },
-        { "Lock", XCB_MOD_MASK_LOCK },
-        { "Control", XCB_MOD_MASK_CONTROL },
-        { "Ctrl", XCB_MOD_MASK_CONTROL },
-        { "Mod1", XCB_MOD_MASK_1 },
-        { "Mod2", XCB_MOD_MASK_2 },
-        { "Mod3", XCB_MOD_MASK_3 },
-        { "Mod4", XCB_MOD_MASK_4 },
-        { "Mod5", XCB_MOD_MASK_5 },
-        { NULL, XCB_NO_SYMBOL }
-    };
-    int i;
-
-    if(keyname)
-        for(i = 0; KeyModList[i].name; i++)
-            if(!a_strcmp(keyname, KeyModList[i].name))
-                 return KeyModList[i].keysym;
-
-    return XCB_NO_SYMBOL;
-
+      case A_TK_SHIFT:   return XCB_MOD_MASK_SHIFT;
+      case A_TK_LOCK:    return XCB_MOD_MASK_LOCK;
+      case A_TK_CTRL:
+      case A_TK_CONTROL: return XCB_MOD_MASK_CONTROL;
+      case A_TK_MOD1:    return XCB_MOD_MASK_1;
+      case A_TK_MOD2:    return XCB_MOD_MASK_2;
+      case A_TK_MOD3:    return XCB_MOD_MASK_3;
+      case A_TK_MOD4:    return XCB_MOD_MASK_4;
+      case A_TK_MOD5:    return XCB_MOD_MASK_5;
+      default:           return XCB_NO_SYMBOL;
+    }
 }
 
 /** Permit to use mouse with many more buttons */

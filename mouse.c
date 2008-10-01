@@ -1078,8 +1078,11 @@ luaA_button_new(lua_State *L)
     len = lua_objlen(L, 2);
     for(i = 1; i <= len; i++)
     {
+        size_t blen;
+        const char *buf;
         lua_rawgeti(L, 2, i);
-        button->mod |= xutil_key_mask_fromstr(luaL_checkstring(L, -1));
+        buf = luaL_checklstring(L, -1, &blen);
+        button->mod |= xutil_key_mask_fromstr(buf, blen);
     }
 
     return luaA_button_userdata_new(L, button);

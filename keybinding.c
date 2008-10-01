@@ -348,8 +348,10 @@ luaA_keybinding_new(lua_State *L)
     len = lua_objlen(L, 2);
     for(i = 1; i <= len; i++)
     {
+        size_t blen;
         lua_rawgeti(L, 2, i);
-        k->mod |= xutil_key_mask_fromstr(luaL_checkstring(L, -1));
+        key = luaL_checklstring(L, -1, &blen);
+        k->mod |= xutil_key_mask_fromstr(key, blen);
     }
 
     return luaA_keybinding_userdata_new(L, k);
