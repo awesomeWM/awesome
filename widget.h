@@ -32,8 +32,6 @@ void widget_invalidate_cache(int, int);
 int widget_calculate_offset(int, int, int, int);
 void widget_common_new(widget_t *);
 void widget_render(widget_node_t *, draw_context_t *, xcb_gcontext_t, xcb_drawable_t, int, orientation_t, int, int, wibox_t *);
-void luaA_widget_set(lua_State *, int, wibox_t *, widget_node_t **);
-int luaA_widget_get(lua_State *, widget_node_t *);
 
 int luaA_widget_userdata_new(lua_State *, widget_t *);
 
