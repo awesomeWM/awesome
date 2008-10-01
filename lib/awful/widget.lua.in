@@ -142,10 +142,10 @@ local function widget_tasklist_label_common(c, args)
     local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
-    local text = ""
+    local text = "<margin left=\"2\" right=\"2\"/>"
     local name
     if c.floating then
-        text = "<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
+        text = text.."<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
     end
     if c.minimized then
         name = util.escape(c.icon_name) or ""
@@ -154,14 +154,14 @@ local function widget_tasklist_label_common(c, args)
     end
     if capi.client.focus == c then
         if bg_focus and fg_focus then
-            text = text .. " <bg color='"..bg_focus.."'/><span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span> "
+            text = text .. "<bg color='"..bg_focus.."'/><span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span>"
         else
-            text = text .. " "..name.." "
+            text = text .. name
         end
     elseif c.urgent and bg_urgent and fg_urgent then
-        text = text .. " <bg color='"..bg_urgent.."'/><span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span> "
+        text = text .. "<bg color='"..bg_urgent.."'/><span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
     else
-        text = text .. " "..name.." "
+        text = text .. name
     end
     return text
 end
