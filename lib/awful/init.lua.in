@@ -17,7 +17,29 @@ local titlebar = require("awful.titlebar")
 local util = require("awful.util")
 local widget = require("awful.widget")
 
+local ipairs = ipairs
+local unpack = unpack
+
 --- awful: AWesome Functions very UsefuL
 module("awful")
+
+local deprecated_functions =
+{
+    "color_strip_alpha",
+    "cycle",
+    "mkdir",
+    "spawn",
+    "pread",
+    "eval",
+    "escape",
+    "unescape"
+}
+
+for k, v in ipairs(deprecated_functions) do
+    _M[v] = function (...)
+        util.deprecate()
+        util[v](unpack(arg))
+    end
+end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
