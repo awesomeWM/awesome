@@ -474,17 +474,6 @@ main(int argc, char **argv)
                         globalconf.keysyms, &globalconf.numlockmask,
                         &globalconf.shiftlockmask, &globalconf.capslockmask);
 
-    /* Parse and run configuration file */
-    luaA_parserc(confpath, true);
-
-    /* scan existing windows */
-    scan();
-
-    /* process all errors in the queue if any */
-    xcb_event_poll_for_event_loop(&globalconf.evenths);
-    a_xcb_set_event_handlers();
-    a_xcb_set_property_handlers();
-
     /* do this only for real screen */
     for(screen_nbr = 0;
         screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
@@ -506,6 +495,17 @@ main(int argc, char **argv)
         ewmh_init(screen_nbr);
         systray_init(screen_nbr);
     }
+
+    /* Parse and run configuration file */
+    luaA_parserc(confpath, true);
+
+    /* scan existing windows */
+    scan();
+
+    /* process all errors in the queue if any */
+    xcb_event_poll_for_event_loop(&globalconf.evenths);
+    a_xcb_set_event_handlers();
+    a_xcb_set_property_handlers();
 
     /* Grab server */
     xcb_ungrab_server(globalconf.connection);
