@@ -50,16 +50,15 @@ end
 -- @param elem Area to remove.
 -- @return The new area list.
 local function area_remove(areas, elem)
-    local newareas = areas
-    for i, r in ipairs(areas) do
+    for i = #areas, 1, -1 do
         -- Check if the 'elem' intersect
-        if area_intersect_area(r, elem) then
+        if area_intersect_area(areas[i], elem) then
             -- It does? remove it
-            table.remove(areas, i)
+            local r = table.remove(areas, i)
             local inter = area_intersect_area_get(r, elem)
 
             if inter.x > r.x then
-                table.insert(newareas, {
+                table.insert(areas, {
                     x = r.x,
                     y = r.y,
                     width = inter.x - r.x,
@@ -68,7 +67,7 @@ local function area_remove(areas, elem)
             end
 
             if inter.y > r.y then
-                table.insert(newareas, {
+                table.insert(areas, {
                     x = r.x,
                     y = r.y,
                     width = r.width,
@@ -77,7 +76,7 @@ local function area_remove(areas, elem)
             end
 
             if inter.x + inter.width < r.x + r.width then
-                table.insert(newareas, {
+                table.insert(areas, {
                     x = inter.x + inter.width,
                     y = r.y,
                     width = (r.x + r.width) - (inter.x + inter.width),
@@ -86,7 +85,7 @@ local function area_remove(areas, elem)
             end
 
             if inter.y + inter.height < r.y + r.height then
-                table.insert(newareas, {
+                table.insert(areas, {
                     x = r.x,
                     y = inter.y + inter.height,
                     width = r.width,
@@ -96,7 +95,7 @@ local function area_remove(areas, elem)
         end
     end
 
-    return newareas
+    return areas
 end
 
 --- Place the client without it being outside the screen.
