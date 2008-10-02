@@ -469,15 +469,13 @@ ewmh_client_check_hints(client_t *c)
         state = (xcb_atom_t *) data;
         for(int i = 0; i < xcb_get_property_value_length(reply); i++)
             if(state[i] == _NET_WM_WINDOW_TYPE_DESKTOP)
-                c->type = WINDOW_TYPE_DESKTOP;
+                c->type = MAX(c->type, WINDOW_TYPE_DESKTOP);
             else if(state[i] == _NET_WM_WINDOW_TYPE_DIALOG)
-                c->type = WINDOW_TYPE_DIALOG;
+                c->type = MAX(c->type, WINDOW_TYPE_DIALOG);
             else if(state[i] == _NET_WM_WINDOW_TYPE_SPLASH)
-                c->type = WINDOW_TYPE_SPLASH;
+                c->type = MAX(c->type, WINDOW_TYPE_SPLASH);
             else if(state[i] == _NET_WM_WINDOW_TYPE_DOCK)
-                c->type = WINDOW_TYPE_DOCK;
-            else
-                c->type = WINDOW_TYPE_NORMAL;
+                c->type = MAX(c->type, WINDOW_TYPE_DOCK);
     }
 
     p_delete(&reply);
