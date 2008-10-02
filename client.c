@@ -299,7 +299,7 @@ client_layer_translator(client_t *c)
         return LAYER_ABOVE;
       case WINDOW_TYPE_SPLASH:
       case WINDOW_TYPE_DIALOG:
-        return LAYER_ABOVE;
+        return LAYER_MODAL;
       case WINDOW_TYPE_DESKTOP:
         return LAYER_DESKTOP;
       default:
