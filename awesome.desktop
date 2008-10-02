@@ -1,6 +1,6 @@
 [Desktop Entry] 
 Encoding=UTF-8
 Name=awesome
-Comment=Floating and tiling window manager
+Comment=Highly configurable framework window manager
 TryExec=awesome
 Exec=awesome
