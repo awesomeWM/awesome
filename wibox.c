@@ -641,11 +641,28 @@ luaA_wibox_new(lua_State *L)
 
     w->sw.border.width = luaA_getopt_number(L, 2, "border_width", 0);
 
+    buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
+
+    switch((w->position = position_fromstr(buf, len)))
+    {
+      case Bottom:
+      case Top:
+      case Floating:
+        simplewindow_orientation_set(&w->sw, East);
+        break;
+      case Left:
+        simplewindow_orientation_set(&w->sw, North);
+        break;
+      case Right:
+        simplewindow_orientation_set(&w->sw, South);
+        break;
+    }
+
+    /* recompute position */
+    wibox_position_update(w);
+
     w->sw.geometry.width = luaA_getopt_number(L, 2, "width", 0);
     w->sw.geometry.height = luaA_getopt_number(L, 2, "height", 0);
-
-    buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
-    wibox_setposition(w, position_fromstr(buf, len));
 
     w->screen = SCREEN_UNDEF;
     w->isvisible = true;
