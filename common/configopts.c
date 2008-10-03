@@ -633,6 +633,8 @@ cfg_opt_t menu_opts[] =
     CFG_INT((char *) "y", 0xffffffff, CFGF_NONE),
     /** String matching mode (true to complete string) */
     CFG_BOOL((char *) "match_string", cfg_false, CFGF_NONE),
+    /** Autocompletion (true or false) */
+    CFG_BOOL((char *) "autocomplete", cfg_true, CFGF_NONE),
     /** Styles to use for this menu. */
     CFG_SEC((char *) "styles", styles_opts, CFGF_NONE),
     CFG_AWESOME_END()

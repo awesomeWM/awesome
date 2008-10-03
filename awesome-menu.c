@@ -124,6 +124,8 @@ typedef struct
     char *prompt;
     /** String match mode */
     Bool match_string;
+    /** Autocompletion mode */
+    Bool autocomplete;
 } AwesomeMenuConf;
 
 static AwesomeMenuConf globalconf;
@@ -199,6 +201,7 @@ config_parse(int screen, const char *confpatharg,
         if((i = cfg_getint(cfg_menu, "height")) > 0)
            geometry->height = i;
         globalconf.match_string = cfg_getbool(cfg_menu, "match_string");
+        globalconf.autocomplete = cfg_getbool(cfg_menu, "autocomplete");
     }
 
     if(cfg_screen
@@ -552,7 +555,7 @@ handle_kpress(XKeyEvent *e)
                 while(i >= 0 && globalconf.text[i] != ' ')
                     globalconf.text[i--] = '\0';
                 matches = compute_match(get_last_word(globalconf.text));
-                if (matches == 1)
+                if (globalconf.autocomplete && matches == 1)
                     complete(False);
                 redraw();
             }
@@ -592,7 +595,7 @@ handle_kpress(XKeyEvent *e)
                 a_strncat(globalconf.text, globalconf.text_size, buf, num);
             }
             matches = compute_match(get_last_word(globalconf.text));
-            if (matches == 1)
+            if (globalconf.autocomplete && matches == 1)
                 complete(False);
             redraw();
         }
@@ -602,8 +605,6 @@ handle_kpress(XKeyEvent *e)
         {
             globalconf.text[--len] = '\0';
             matches = compute_match(get_last_word(globalconf.text));
-            if (matches == 1)
-                complete(False);
             redraw();
         }
         break;
@@ -820,7 +821,7 @@ main(int argc, char **argv)
     }
 
     matches = compute_match(NULL);
-    if (matches == 1)
+    if (globalconf.autocomplete && matches == 1)
         complete(False);
 
     redraw();
