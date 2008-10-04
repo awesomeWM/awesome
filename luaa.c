@@ -944,10 +944,10 @@ luaA_cs_init(void)
             if(unlink(addr->sun_path))
                 warn("error unlinking existing file: %s", strerror(errno));
             if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
-                warn("error binding UNIX domain socket: %s", strerror(errno));
+                return warn("error binding UNIX domain socket: %s", strerror(errno));
         }
         else
-            warn("error binding UNIX domain socket: %s", strerror(errno));
+            return warn("error binding UNIX domain socket: %s", strerror(errno));
     }
     listen(csfd, 10);
 
