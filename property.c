@@ -321,6 +321,32 @@ property_handle_xembed_info(void *data __attribute__ ((unused)),
     return 0;
 }
 
+static int
+property_handle_xrootpmap_id(void *data __attribute__ ((unused)),
+                             xcb_connection_t *connection,
+                             uint8_t state,
+                             xcb_window_t window,
+                             xcb_atom_t name,
+                             xcb_get_property_reply_t *reply)
+{
+    if(globalconf.xinerama_is_active)
+        for(int screen = 0; screen < globalconf.nscreen; screen++)
+        {
+            wibox_array_t *w = &globalconf.screens[screen].wiboxes;
+            for(int i = 0; i < w->len; i++)
+                w->tab[i]->need_update = true;
+        }
+    else
+    {
+        int screen = xutil_root2screen(connection, window);
+        wibox_array_t *w = &globalconf.screens[screen].wiboxes;
+        for(int i = 0; i < w->len; i++)
+            w->tab[i]->need_update = true;
+    }
+
+    return 0;
+}
+
 void a_xcb_set_property_handlers(void)
 {
     /* init */
@@ -347,6 +373,10 @@ void a_xcb_set_property_handlers(void)
                              property_handle_net_wm_strut_partial, NULL);
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON, UINT_MAX,
                              property_handle_net_wm_icon, NULL);
+
+    /* background change */
+    xcb_property_set_handler(&globalconf.prophs, _XROOTPMAP_ID, 1,
+                             property_handle_xrootpmap_id, NULL);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

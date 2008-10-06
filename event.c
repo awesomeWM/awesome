@@ -511,7 +511,6 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     xcb_query_pointer_reply_t *qp_r = NULL;
     xcb_get_geometry_cookie_t geom_c;
     xcb_get_geometry_reply_t *geom_r;
-    xcb_screen_iterator_t iter;
 
     wa_c = xcb_get_window_attributes_unchecked(connection, ev->window);
 
@@ -554,8 +553,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         }
 
 
-        for(iter = xcb_setup_roots_iterator(xcb_get_setup(connection)), phys_screen = 0;
-            iter.rem && iter.data->root != geom_r->root; xcb_screen_next(&iter), ++phys_screen);
+        phys_screen = xutil_root2screen(connection, geom_r->root);
 
         if(globalconf.xinerama_is_active
            && (qp_r = xcb_query_pointer_reply(connection, qp_c, NULL)))
