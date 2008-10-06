@@ -258,10 +258,10 @@ local function calculate_distance(dir, cA, cB)
     return math.sqrt(math.pow(xB - xA, 2) + math.pow(yB - yA, 2))
 end
 
---- Focus a client by the given direction.
+--- Get the nearest client in the given direction
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @param c Optional client.
-function focus.bydirection(dir, c)
+-- @param c Optional client to get a client relative to. Else focussed is used.
+local function get_client_in_direction(dir, c)
     local sel = c or capi.client.focus
     if sel then
         local coords = sel:coords()
@@ -285,6 +285,18 @@ function focus.bydirection(dir, c)
             end
         end
 
+        return target
+    end
+end
+
+--- Focus a client by the given direction.
+-- @param dir The direction, can be either "up", "down", "left" or "right".
+-- @param c Optional client.
+function focusbydirection(dir, c)
+    local sel = c or capi.client.focus
+    if sel then
+        local target = get_client_in_direction(dir, sel)
+
         -- If we found a client to focus, then do it.
         if target then
             capi.client.focus = target
@@ -304,6 +316,21 @@ function focus.byidx(i, c)
     local target = next(i, c)
     if target then
         capi.client.focus = target
+    end
+end
+
+--- Swap a client with another client in the given direction
+-- @param dir The direction, can be either "up", "down", "left" or "right".
+-- @param c Optional client.
+function swapbydirection(dir, c)
+    local sel = c or capi.client.focus
+    if sel then
+        local target = get_client_in_direction(dir, sel)
+
+        -- If we found a client to swap with, then go for it
+        if target then
+            target:swap(sel)
+        end
     end
 end
 
