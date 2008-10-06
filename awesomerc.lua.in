@@ -30,6 +30,7 @@ layouts =
     "fairv",
     "magnifier",
     "max",
+    "fullscreen",
     "spiral",
     "dwindle",
     "floating"

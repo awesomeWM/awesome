@@ -26,12 +26,12 @@
 
 extern awesome_t globalconf;
 
-void
-layout_max(int screen)
+static void
+layout_fmax(int screen, bool fs)
 {
     client_t *c;
     area_t area = screen_area_get(screen,
-                                  &globalconf.screens[screen].wiboxes,
+                                  fs ? NULL : &globalconf.screens[screen].wiboxes,
                                   &globalconf.screens[screen].padding,
                                   true);
 
@@ -48,4 +48,17 @@ layout_max(int screen)
     if(IS_TILED(globalconf.screens[screen].client_focus, screen))
         client_raise(globalconf.screens[screen].client_focus);
 }
+
+void
+layout_max(int screen)
+{
+    return layout_fmax(screen, false);
+}
+
+void
+layout_fullscreen(int screen)
+{
+    return layout_fmax(screen, true);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
