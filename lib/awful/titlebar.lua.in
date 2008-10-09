@@ -15,8 +15,10 @@ local capi =
     button = button,
     client = client,
 }
+local beautiful = require("awful.beautiful")
 local hooks = require("awful.hooks")
 local util = require("awful.util")
+local widget = require("awful.widget")
 
 --- Titlebar module for awful
 module("awful.titlebar")
@@ -35,6 +37,7 @@ local data = otable()
 function add(c, args)
     if not c or c.type ~= "normal" then return end
     if not args then args = {} end
+    local theme = beautiful.get()
     -- Store colors
     data[c] = {}
     data[c].fg = args.fg or theme.titlebar_fg_normal or theme.fg_normal
