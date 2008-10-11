@@ -255,7 +255,7 @@ a_strsplit(const char *str, ssize_t len, char delim)
         if(str[i] == delim)
             n++;
 
-    retval = p_new(char *, n);
+    retval = p_new(char *, n + 1);
 
     for(i = 0, comp = 0; comp < n; comp++)
     {
