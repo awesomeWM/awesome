@@ -193,11 +193,12 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
 
         widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
-    if((wmh.flags & XCB_WM_HINT_STATE) &&
+    if(wmh.flags & XCB_WM_HINT_STATE &&
        wmh.initial_state == XCB_WM_STATE_WITHDRAWN)
         client_setborder(c, 0);
 
-    c->nofocus = !wmh.input;
+    if(wmh.flags & XCB_WM_HINT_INPUT)
+        c->nofocus = !wmh.input;
 }
 
 static int
