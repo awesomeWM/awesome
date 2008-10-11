@@ -114,12 +114,12 @@ client_loadprops(client_t * c, screen_t *screen)
     return true;
 }
 
-/** Check if client supports protocol WM_DELETE_WINDOW.
+/** Check if client supports protocol a protocole in WM_PROTOCOL.
  * \param win The window.
- * \return True if client has WM_DELETE_WINDOW, false otherwise.
+ * \return True if client has the atom in protocol, false otherwise.
  */
 static bool
-window_isprotodel(xcb_window_t win)
+window_hasproto(xcb_window_t win, xcb_atom_t atom)
 {
     uint32_t i;
     xcb_get_wm_protocols_reply_t protocols;
@@ -131,7 +131,7 @@ window_isprotodel(xcb_window_t win)
                                   &protocols, NULL))
     {
         for(i = 0; !ret && i < protocols.atoms_len; i++)
-            if(protocols.atoms[i] == WM_DELETE_WINDOW)
+            if(protocols.atoms[i] == atom)
                 ret = true;
         xcb_get_wm_protocols_reply_wipe(&protocols);
     }
@@ -862,17 +862,17 @@ client_unmanage(client_t *c)
     client_unref(&c);
 }
 
-/** Kill a client via a WM_DELETE_WINDOW request or XKillClient if not
+/** Kill a client via a WM_DELETE_WINDOW request or KillClient if not
  * supported.
  * \param c The client to kill.
  */
 void
 client_kill(client_t *c)
 {
-    xcb_client_message_event_t ev;
-
-    if(window_isprotodel(c->win))
+    if(window_hasproto(c->win, WM_DELETE_WINDOW))
     {
+        xcb_client_message_event_t ev;
+
         /* Initialize all of event's fields first */
         p_clear(&ev, 1);
 
