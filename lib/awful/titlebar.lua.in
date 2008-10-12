@@ -46,11 +46,7 @@ function add(c, args)
     data[c].bg_focus = args.bg_focus or theme.titlebar_bg_focus or theme.bg_focus
     data[c].width = args.width
 
-    -- Built args
-    local targs = {}
-    if args.fg then targs.fg = args.fg end
-    if args.bg then targs.bg = args.bg end
-    local tb = capi.wibox(targs)
+    local tb = capi.wibox(args)
 
     local title = capi.widget({ type = "textbox", name = "title", align = "flex" })
     title.text = " " .. util.escape(c.name) .. " "
