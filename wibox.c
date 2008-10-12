@@ -954,6 +954,10 @@ luaA_wibox_newindex(lua_State *L)
             (*wibox)->need_update = true;
         }
         break;
+      case A_TK_BORDER_COLOR:
+        if((buf = luaL_checklstring(L, 3, &len)))
+            xcolor_init_reply(xcolor_init_unchecked(&(*wibox)->sw.border.color, buf, len));
+        break;
       case A_TK_VISIBLE:
         b = luaA_checkboolean(L, 3);
         if(b != (*wibox)->isvisible)
