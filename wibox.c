@@ -899,7 +899,15 @@ luaA_wibox_newindex(lua_State *L)
       case A_TK_ALIGN:
         buf = luaL_checklstring(L, 3, &len);
         (*wibox)->align = draw_align_fromstr(buf, len);
-        wibox_position_update(*wibox);
+        switch((*wibox)->type)
+        {
+          case WIBOX_TYPE_NORMAL:
+            wibox_position_update(*wibox);
+            break;
+          case WIBOX_TYPE_TITLEBAR:
+            titlebar_update_geometry_floating(client_getbytitlebar(*wibox));
+            break;
+        }
         break;
       case A_TK_POSITION:
         switch((*wibox)->type)
@@ -971,8 +979,6 @@ luaA_wibox_newindex(lua_State *L)
                 globalconf.screens[(*wibox)->screen].need_arrange = true;
                 break;
             }
-        break;
-      case A_TK_GEOMETRY:
         break;
       default:
         switch((*wibox)->type)
