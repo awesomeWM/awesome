@@ -134,6 +134,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     cairo
     pango
     pangocairo
+    x11-xcb
     xcb-randr
     xcb-xinerama
     xcb-event>=0.3.0
