@@ -224,6 +224,42 @@ luaA_image_crop(lua_State *L)
     return luaA_image_userdata_new(L, new);
 }
 
+/** Crop the image to the given rectangle and scales it.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue An image.
+ * \lparam The top left x coordinate of the source rectangle.
+ * \lparam The top left y coordinate of the source rectangle.
+ * \lparam The width of the source rectangle.
+ * \lparam The height of the source rectangle.
+ * \lparam The width of the destination rectangle.
+ * \lparam The height of the destination rectangle.
+ * \lreturn A cropped image.
+ */
+static int
+luaA_image_crop_and_scale(lua_State *L)
+{
+    image_t **image = luaA_checkudata(L, 1, "image"), *new;
+    int source_x = luaL_checkint(L, 2);
+    int source_y = luaL_checkint(L, 3);
+    int w = luaL_checkint(L, 4);
+    int h = luaL_checkint(L, 5);
+    int dest_w = luaL_checkint(L, 6);
+    int dest_h = luaL_checkint(L, 7);
+
+    new = p_new(image_t, 1);
+
+    imlib_context_set_image((*image)->image);
+    new->image = imlib_create_cropped_scaled_image(source_x,
+                                                   source_y,
+                                                   w, h,
+                                                   dest_w, dest_h);
+
+    image_compute(new);
+
+    return luaA_image_userdata_new(L, new);
+}
+
 /** Return a formated string for an image.
  * \param L The Lua VM state.
  * \luastack
@@ -248,6 +284,7 @@ const struct luaL_reg awesome_image_meta[] =
 {
     { "rotate", luaA_image_rotate },
     { "crop", luaA_image_crop },
+    { "crop_and_scale", luaA_image_crop_and_scale },
     { "__gc", luaA_image_gc },
     { "__eq", luaA_image_eq },
     { "__tostring", luaA_image_tostring },
