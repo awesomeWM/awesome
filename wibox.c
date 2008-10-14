@@ -573,8 +573,12 @@ wibox_attach(wibox_t *wibox, screen_t *s)
     wibox_position_update(wibox);
 
     simplewindow_init(&wibox->sw, phys_screen,
-                      wibox->sw.geometry, 0, wibox->sw.orientation,
+                      wibox->sw.geometry,
+                      wibox->sw.border.width,
+                      wibox->sw.orientation,
                       &wibox->sw.ctx.fg, &wibox->sw.ctx.bg);
+
+    simplewindow_border_color_set(&wibox->sw, &wibox->sw.border.color);
 
     wibox->need_update = true;
 
