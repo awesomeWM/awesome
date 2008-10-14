@@ -1,0 +1,500 @@
+----------------------------------------------------------------------------
+-- @author Gregor "farhaven" Best
+-- @copyright 2008 Gregor "farhaven" Best
+-- @release @AWESOME_VERSION@
+----------------------------------------------------------------------------
+
+--{{{ Space Invaders for awesome 3 GIT by Gregor "farhaven" Best
+-- The ultra-cool retro graphics are done by Garoth.
+--
+-- Use Left and Right to control motion, Space to fire, q quits the game,
+-- s creates a screenshot in ~/.cache/awesome (needs ImageMagick).
+--
+-- Maybe there are some huge memory leaks here and there, if you notice one,
+-- message me.
+--
+-- Anyway, have fun :)
+--
+-- Start this by adding
+-- require("invaders")
+-- to the top of your rc.lua and adding
+-- invaders.run()
+-- to the bottom of rc.lua or as a keybinding
+--}}}
+
+local wibox = wibox
+local widget = widget
+local awful = require("awful")
+local keygrabber = keygrabber
+local image = image
+
+local tonumber = tonumber
+local table = table
+local math = math
+local os = os
+local io = io
+
+--- Space invaders game
+module("invaders")
+
+local gamedata = { }
+gamedata.field = { }
+gamedata.field.x = 100
+gamedata.field.y = 100
+gamedata.field.h = 600
+gamedata.field.w = 800
+gamedata.running = false
+gamedata.shots = { }
+gamedata.highscore = { }
+gamedata.enemies = { }
+
+local player = { }
+local game = { }
+local shots = { }
+local enemies = { }
+
+function player.new ()
+    local p = { }
+
+    p.base = wibox({ position = "floating", bg = "#00000000" })
+    p.base:geometry({ width = 24,
+                      height = 16,
+                      x = gamedata.field.x + (gamedata.field.w / 2),
+                      y = gamedata.field.y + gamedata.field.h - (16 + 5) })
+    p.base.screen = gamedata.screen
+
+    local w = widget({ type = "imagebox", name = "player", align = "right" })
+    w.image = image("@AWESOME_ICON_PATH@/invaders/player.png")
+    p.base:widgets({ w })
+
+    return p
+end
+
+function player.move(x)
+    local gb = gamedata.player.base:geometry()
+
+    if x < 0 and gb.x > gamedata.field.x then
+        gb.x = gb.x + x
+    elseif x > 0 and gb.x < gamedata.field.x + gamedata.field.w - 30 then
+        gb.x = gb.x + x
+    end
+
+    gamedata.player.base:geometry(gb)
+end
+
+function player.fire()
+    if gamedata.ammo > 0 then
+        gamedata.ammo = gamedata.ammo - 1
+        gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
+        local gb = gamedata.player.base:geometry()
+        shots.fire(gb.x + 9, gb.y - 10, "#00FF00")
+    end
+end
+
+function shots.fire (x, y, color)
+    local s = wibox({ position = "floating", bg = color })
+    s:geometry({ width = 4, height = 10, x = x, y = y })
+    s.screen = 1
+
+    for i = 1, gamedata.ammo_max do
+        if not gamedata.shots[i] or gamedata.shots[i].screen == nil then
+            gamedata.shots[i] = s
+            break
+        end
+    end
+end
+
+function shots.fire_enemy (x, y, color)
+    if gamedata.enemies.shots.fired < gamedata.enemies.shots.max then
+        gamedata.enemies.shots.fired = gamedata.enemies.shots.fired + 1
+        local s = wibox({ position = "floating", bg = color })
+        s:geometry({ width = 4, height = 10, x = x, y = y })
+        s.screen = 1
+        for i = 1, gamedata.enemies.shots.max do
+            if not gamedata.enemies.shots[i] or gamedata.enemies.shots[i].screen == nil then
+                gamedata.enemies.shots[i] = s
+                break
+            end
+        end
+    end
+end
+
+function shots.handle()
+    if not gamedata.running then return false end
+    if gamedata.ammo == gamedata.ammo_max then return false end
+
+    gamedata.ammo = gamedata.ammo_max
+
+    for i = 1, gamedata.ammo_max do
+        local s = gamedata.shots[i]
+        if s and s.screen then
+            gamedata.ammo = gamedata.ammo - 1
+            local g = s:geometry()
+            if g.y < gamedata.field.y + 15 then
+                s.screen = nil
+                gamedata.ammo = gamedata.ammo + 1
+            else
+                g.y = g.y - 3
+                s:geometry(g)
+            end
+        end
+    end
+    gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
+end
+
+
+function shots.handle_enemy ()
+    if not gamedata.running then return false end
+    if gamedata.enemies.shots.fired == 0 then return false end
+
+    for i = 1, gamedata.enemies.shots.max do
+        local s = gamedata.enemies.shots[i]
+        if s and s.screen then
+            local g = s:geometry()
+            if g.y > gamedata.field.y + gamedata.field.h - 15 then
+                s.screen = nil
+                gamedata.enemies.shots.fired = gamedata.enemies.shots.fired - 1
+            else
+                g.y = g.y + 3
+                s:geometry(g)
+            end
+            if game.collide(gamedata.player.base, s) then
+                game.over()
+            end
+        end
+    end
+end
+
+function enemies.new (t)
+    e = wibox({ position = "floating", bg = "#12345600" })
+    e:geometry({ height = gamedata.enemies.h, width = gamedata.enemies.w,
+                 x = gamedata.field.x,
+                 y = gamedata.field.y })
+    e.screen = 1
+    w = widget({ type = "imagebox", name = "enemy"..t })
+    w.image = image("@AWESOME_ICON_PATH@/invaders/enemy_"..t..".png")
+    e:widgets({ w })
+    return e
+end
+
+function enemies.setup()
+    gamedata.enemies.data = { }
+    gamedata.enemies.h = 10
+    gamedata.enemies.w = 20
+    gamedata.enemies.rows = 4
+    gamedata.enemies.x = 10
+    gamedata.enemies.y = 5
+    gamedata.enemies.dir = 1
+    gamedata.enemies.count = gamedata.enemies.rows * 8
+    if not gamedata.enemies.shots then gamedata.enemies.shots = { } end
+    gamedata.enemies.shots.max = 10
+    gamedata.enemies.shots.fired = 0
+
+    gamedata.enemies.speed_count = 0
+
+    for y = 1, gamedata.enemies.rows do
+        gamedata.enemies.data[y] = { }
+        for x = 1, math.ceil((gamedata.enemies.count / gamedata.enemies.rows) + 1) do
+            gamedata.enemies.data[y][x] = enemies.new( math.random(1, 3) )
+        end
+    end
+
+    for i = 1, gamedata.ammo_max do
+        if gamedata.shots[i] then
+            gamedata.shots[i].screen = nil
+        end
+    end
+
+    for i = 1, gamedata.enemies.shots.max do
+        if gamedata.enemies.shots[i] then
+            gamedata.enemies.shots[i].screen = nil
+        end
+    end
+end
+
+function enemies.handle ()
+    if not gamedata.running then return false end
+
+    gamedata.enemies.number = 0
+
+    for y = 1, #gamedata.enemies.data do
+        for x = 1, #gamedata.enemies.data[y] do
+            local e = gamedata.enemies.data[y][x]
+            if e.screen then
+                local g = e:geometry()
+                gamedata.enemies.number = gamedata.enemies.number + 1
+                if gamedata.enemies.speed_count == (gamedata.enemies.speed - 1) then
+                    g.y = math.floor(gamedata.field.y + gamedata.enemies.y + ((y - 1) * gamedata.enemies.h * 2))
+                    g.x = math.floor(gamedata.field.x + gamedata.enemies.x + ((x - 1) * gamedata.enemies.w * 2))
+                    e:geometry(g)
+                    if game.collide(gamedata.player.base, e) or g.y > gamedata.field.y + gamedata.field.h - 20 then
+                        game.over()
+                    end
+                end
+                if gamedata.ammo < gamedata.ammo_max then
+                    for i = 1, #gamedata.shots do
+                        local s = gamedata.shots[i]
+                        if s and s.screen and game.collide(e, s) then
+                            gamedata.enemies.number = gamedata.enemies.number - 1
+                            e.screen = nil
+                            s.screen = nil
+
+                            gamedata.score = gamedata.score + 10
+                            gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo.."  "
+                            break
+                        end
+                    end
+                end
+            end
+        end
+
+        local x = math.random(1, gamedata.enemies.count / gamedata.enemies.rows)
+        if gamedata.enemies.speed_count == (gamedata.enemies.speed - 1)
+            and math.random(0, 150) <= 1
+            and gamedata.enemies.data[y][x].screen then
+            shots.fire_enemy(math.floor(gamedata.field.x + gamedata.enemies.x + ((x - 1) * gamedata.enemies.w)),
+                             gamedata.field.y + gamedata.enemies.y + gamedata.enemies.h,
+                             "#FF0000")
+        end
+    end
+
+    if gamedata.enemies.number == 0 then
+        enemies.setup()
+        if gamedata.enemies.speed > 0 then gamedata.enemies.speed = gamedata.enemies.speed - 1 end
+        return false
+    end
+
+    gamedata.enemies.speed_count = gamedata.enemies.speed_count + 1
+    if gamedata.enemies.speed_count < gamedata.enemies.speed then return false end
+    gamedata.enemies.speed_count = 0
+    gamedata.enemies.x = gamedata.enemies.x + math.floor((gamedata.enemies.w * gamedata.enemies.dir) / 4)
+    if gamedata.enemies.x > gamedata.field.w - (2 * gamedata.enemies.w * (gamedata.enemies.count / gamedata.enemies.rows + 1)) - 10
+        or gamedata.enemies.x <= 10 then
+        gamedata.enemies.y = gamedata.enemies.y + gamedata.enemies.h
+        gamedata.enemies.dir = gamedata.enemies.dir * (-1)
+    end
+end
+
+function keyhandler(mod, key)
+    if gamedata.highscore.getkeys then
+        if key:len() == 1 and gamedata.name:len() < 20 then
+            gamedata.name = gamedata.name .. key
+        elseif key == "BackSpace" then
+            gamedata.name = gamedata.name:sub(1, gamedata.name:len() - 1)
+        elseif key == "Return" then
+            gamedata.highscore.window.screen = nil
+            game.highscore_add(gamedata.score, gamedata.name)
+            game.highscore_show()
+            gamedata.highscore.getkeys = false
+        end
+        gamedata.namebox.text = " Name: " .. gamedata.name .. "|"
+    else
+        if key == "Left" then
+            player.move(-10)
+        elseif key == "Right" then
+            player.move(10)
+        elseif key == "q" then
+            game.quit()
+            return false
+        elseif key == " " then
+            player.fire()
+        elseif key == "s" then
+            awful.util.spawn("import -window root ~/.cache/awesome/invaders-"..os.time()..".png")
+        end
+    end
+    return true
+end
+
+function game.collide(o1, o2)
+    g1 = o1:geometry()
+    g2 = o2:geometry()
+
+    --check if o2 is inside o1
+    if g2.x >= g1.x and g2.x <= g1.x + g1.width
+        and g2.y >= g1.y and g2.y <= g1.y + g1.height then
+        return true
+    end
+
+    return false
+end
+
+function game.over ()
+    gamedata.running = false
+    game.highscore(gamedata.score)
+end
+
+function game.quit()
+    gamedata.running = false
+
+    if gamedata.highscore.window then
+        gamedata.highscore.window.screen = nil
+        gamedata.highscore.window:widgets({ })
+    end
+
+    gamedata.player.base.screen = nil
+    gamedata.player.base:widgets({ })
+    gamedata.player.base = nil
+
+    gamedata.field.north.screen = nil
+    gamedata.field.north = nil
+
+    gamedata.field.south.screen = nil
+    gamedata.field.south = nil
+
+    gamedata.field.west.screen = nil
+    gamedata.field.west = nil
+
+    gamedata.field.east.screen = nil
+    gamedata.field.east = nil
+
+    for y = 1, #gamedata.enemies.data do
+        for x = 1, #gamedata.enemies.data[y] do
+            gamedata.enemies.data[y][x].screen = nil
+            gamedata.enemies.data[y][x]:widgets({ })
+        end
+    end
+
+    for i = 1, gamedata.ammo_max do
+        if gamedata.shots[i] then gamedata.shots[i].screen = nil end
+    end
+
+    for i = 1, gamedata.enemies.shots.max do
+        if gamedata.enemies.shots[i] then gamedata.enemies.shots[i].screen = nil end
+    end
+end
+
+function game.highscore_show ()
+    gamedata.highscore.window:geometry({ height = 140, width = 200,
+                                         x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 100,
+                                         y = gamedata.field.y + math.floor(gamedata.field.h / 2) - 55 })
+    gamedata.highscore.window.screen = 1
+
+    gamedata.highscore.table = widget({ type = "textbox", name = "highscore" })
+    gamedata.highscore.window:widgets({ gamedata.highscore.table })
+
+    gamedata.highscore.table.text = " Highscores:\n"
+
+    for i = 1, 5 do
+        gamedata.highscore.table.text = gamedata.highscore.table.text .. "\n\t" .. gamedata.highscore[i]
+    end
+
+    gamedata.highscore.table.text = gamedata.highscore.table.text .. "\n\n Press Q to quit"
+
+    local fh = io.open(os.getenv("HOME") .. "/.cache/awesome/highscore_invaders","w")
+    if not fh then
+        return false
+    end
+
+    for i = 1, 5 do
+        fh:write(gamedata.highscore[i].."\n")
+    end
+
+    fh:close()
+end
+
+function game.highscore_add (score, name)
+    local t = gamedata.highscore
+
+    for i = 5, 1, -1 do
+        if tonumber(t[i]:match("(%d+) ")) <= score then
+            if t[i+1] then t[i+1] = t[i] end
+            t[i] = score .. " " .. name
+        end
+    end
+
+    gamedata.highscore = t
+end
+
+function game.highscore (score)
+    local fh = io.open(os.getenv("HOME").."/.cache/awesome/highscore_invaders", "r")
+    if fh then
+        for i = 1, 5 do
+        gamedata.highscore[i] = fh:read("*line")
+        end
+        fh:close()
+    else
+        for i = 1, 5 do
+            gamedata.highscore[i] = ((6-i)*20).." foo"
+        end
+    end
+
+    local newentry = false
+    for i = 1, 5 do
+        local s = tonumber(gamedata.highscore[i]:match("(%d+) .*"))
+        if s <= score then newentry = true end
+    end
+
+    gamedata.highscore.window = wibox({ position = "floating" })
+    gamedata.highscore.window:geometry({ height = 20, width = 300,
+                                         x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 150,
+                                         y = gamedata.field.y + math.floor(gamedata.field.h / 2) })
+    gamedata.highscore.window.screen = 1
+
+    gamedata.namebox = widget({ type = "textbox", name = "foobar" })
+    gamedata.namebox.text = " Name: |"
+    gamedata.highscore.window:widgets({ gamedata.namebox })
+
+    if newentry then
+        gamedata.name = ""
+        gamedata.highscore.getkeys = true
+    else
+        game.highscore_show()
+    end
+end
+
+function run()
+    gamedata.running = true
+    gamedata.screen = 1
+    gamedata.ammo_max = 10
+    gamedata.score = 0
+    gamedata.name = ""
+    gamedata.ammo = gamedata.ammo_max
+
+    gamedata.player = player.new()
+
+
+    gamedata.field.north = wibox({ position = "floating", bg = "#333333" })
+    gamedata.field.north:geometry({ width = gamedata.field.w + 10,
+    height = 15,
+    x = gamedata.field.x - 5,
+    y = gamedata.field.y - 15 })
+    gamedata.field.north.screen = gamedata.screen
+
+    gamedata.field.status = widget({ type = "textbox", name = "status", align = "right" })
+    gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
+
+    gamedata.field.caption = widget({ type = "textbox", name = "caption", align = "left" })
+    gamedata.field.caption.text = "  SpaceInvaders for Awesome 3"
+
+    gamedata.field.north:widgets({ gamedata.field.caption, gamedata.field.status })
+
+    gamedata.field.south = wibox({ position = "floating", bg = "#333333" })
+    gamedata.field.south:geometry({ width = gamedata.field.w, height = 5,
+                                    x = gamedata.field.x,
+                                    y = gamedata.field.y + gamedata.field.h - 5 })
+    gamedata.field.south.screen = gamedata.screen
+
+    gamedata.field.west = wibox({ position = "floating", bg = "#333333" })
+    gamedata.field.west:geometry({  width = 5,
+    height = gamedata.field.h,
+    x = gamedata.field.x - 5,
+    y = gamedata.field.y })
+    gamedata.field.west.screen = gamedata.screen
+
+    gamedata.field.east = wibox({ position = "floating", bg = "#333333" })
+    gamedata.field.east:geometry({ width = 5,
+                                   height = gamedata.field.h,
+                                   x = gamedata.field.x + gamedata.field.w,
+                                   y = gamedata.field.y })
+    gamedata.field.east.screen = gamedata.screen
+
+    gamedata.enemies.speed = 5
+
+    enemies.setup()
+
+    keygrabber.run(keyhandler)
+end
+
+awful.hooks.timer.register(0.03, shots.handle)
+awful.hooks.timer.register(0.03, shots.handle_enemy)
+awful.hooks.timer.register(0.01, enemies.handle)
