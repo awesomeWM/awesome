@@ -54,7 +54,8 @@ layout_fair(int screen, const orientation_t orientation)
         for(c = globalconf.clients; c; c = c->next)
             if(IS_TILED(c, screen))
             {
-                if (orientation == East)
+                if (((orientation == East) && (n > 2))
+                    || ((orientation == South) && (n <= 2)))
                 {
                     geometry.width = area.width / u_divisions;
                     geometry.height = area.height / v_divisions;
