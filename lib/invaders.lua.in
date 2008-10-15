@@ -25,7 +25,7 @@
 local wibox = wibox
 local widget = widget
 local awful = require("awful")
-local beautiful = awful.beautiful.get()
+local beautiful = require("awful.beautiful")
 local keygrabber = keygrabber
 local image = image
 
@@ -261,7 +261,7 @@ function enemies.handle ()
 
     if gamedata.enemies.number == 0 then
         enemies.setup()
-        if gamedata.enemies.speed > 0 then gamedata.enemies.speed = gamedata.enemies.speed - 1 end
+        if gamedata.enemies.speed > 1 then gamedata.enemies.speed = gamedata.enemies.speed - 1 end
         return false
     end
 
@@ -426,8 +426,8 @@ function game.highscore (score)
     end
 
     gamedata.highscore.window = wibox({ position = "floating",
-    					bg = beautiful.bg_focus or "#333333",
-					fg = beautiful.fg_focus or "#FFFFFF" })
+                                        bg = gamedata.btheme.bg_focus or "#333333",
+				        fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.highscore.window:geometry({ height = 20, width = 300,
                                          x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 150,
                                          y = gamedata.field.y + math.floor(gamedata.field.h / 2) })
@@ -452,13 +452,13 @@ function run()
     gamedata.score = 0
     gamedata.name = ""
     gamedata.ammo = gamedata.ammo_max
-
+    gamedata.btheme = beautiful.get()
     gamedata.player = player.new()
 
 
     gamedata.field.north = wibox({ position = "floating", 
-    				   bg = beautiful.bg_focus or "#333333",
-				   fg = beautiful.fg_focus or "#FFFFFF" })
+    				   bg = gamedata.btheme.bg_focus or "#333333",
+				   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.north:geometry({ width = gamedata.field.w + 10,
     				    height = 15,
     				    x = gamedata.field.x - 5,
@@ -474,16 +474,16 @@ function run()
     gamedata.field.north:widgets({ gamedata.field.caption, gamedata.field.status })
 
     gamedata.field.south = wibox({ position = "floating",
-    				   bg = beautiful.bg_focus or "#333333",
-				   fg = beautiful.fg_focus or "#FFFFFF" })
+    				   bg = gamedata.btheme.bg_focus or "#333333",
+				   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.south:geometry({ width = gamedata.field.w, height = 5,
                                     x = gamedata.field.x,
                                     y = gamedata.field.y + gamedata.field.h - 5 })
     gamedata.field.south.screen = gamedata.screen
 
     gamedata.field.west = wibox({ position = "floating", 
-    				  bg = beautiful.bg_focus or "#333333",
-			  	  fg = beautiful.fg_focus or "#FFFFFF" })
+    				   bg = gamedata.btheme.bg_focus or "#333333",
+				   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.west:geometry({ width = 5,
     				   height = gamedata.field.h,
     				   x = gamedata.field.x - 5,
@@ -491,8 +491,8 @@ function run()
     gamedata.field.west.screen = gamedata.screen
 
     gamedata.field.east = wibox({ position = "floating", 
-    				  bg = beautiful.bg_focus or "#333333",
-			  	  fg = beautiful.fg_focus or "#FFFFFF" })
+    				   bg = gamedata.btheme.bg_focus or "#333333",
+				   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.east:geometry({ width = 5,
                                    height = gamedata.field.h,
                                    x = gamedata.field.x + gamedata.field.w,
