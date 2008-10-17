@@ -4,7 +4,7 @@
 -- @release @AWESOME_VERSION@
 ----------------------------------------------------------------------------
 
---{{{ Space Invaders for awesome 3 GIT by Gregor "farhaven" Best
+--{{{ Awesome Invaders by Gregor "farhaven" Best
 -- The ultra-cool retro graphics are done by Andrei "Garoth" Thorp.
 --
 -- Use Left and Right to control motion, Space to fire, q quits the game,
@@ -28,6 +28,7 @@ local awful = require("awful")
 local beautiful = require("awful.beautiful")
 local keygrabber = keygrabber
 local image = image
+local capi = { screen = screen, mouse = mouse }
 
 local tonumber = tonumber
 local table = table
@@ -35,7 +36,7 @@ local math = math
 local os = os
 local io = io
 
---- Space invaders game
+--- Space Invaders look-alike
 module("invaders")
 
 local gamedata = { }
@@ -55,24 +56,22 @@ local shots = { }
 local enemies = { }
 
 function player.new ()
-    local p = { }
-
-    p.base = wibox({ position = "floating", bg = "#12345600" })
-    p.base:geometry({ width = 24,
+    p = wibox({ position = "floating", bg = gamedata.solidbg or "#12345600" })
+    p:geometry({ width = 24,
                       height = 16,
                       x = gamedata.field.x + (gamedata.field.w / 2),
                       y = gamedata.field.y + gamedata.field.h - (16 + 5) })
-    p.base.screen = gamedata.screen
+    p.screen = 1
 
-    local w = widget({ type = "imagebox", name = "player", align = "right" })
+    w = widget({ type = "imagebox", name = "player" })
     w.image = image("@AWESOME_ICON_PATH@/invaders/player.png")
-    p.base:widgets({ w })
+    p:widgets({ w })
 
     return p
 end
 
 function player.move(x)
-    local gb = gamedata.player.base:geometry()
+    local gb = gamedata.player:geometry()
 
     if x < 0 and gb.x > gamedata.field.x then
         gb.x = gb.x + x
@@ -80,14 +79,14 @@ function player.move(x)
         gb.x = gb.x + x
     end
 
-    gamedata.player.base:geometry(gb)
+    gamedata.player:geometry(gb)
 end
 
 function player.fire()
     if gamedata.ammo > 0 then
         gamedata.ammo = gamedata.ammo - 1
         gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
-        local gb = gamedata.player.base:geometry()
+        local gb = gamedata.player:geometry()
         shots.fire(gb.x + 9, gb.y - 10, "#00FF00")
     end
 end
@@ -159,7 +158,7 @@ function shots.handle_enemy ()
                 g.y = g.y + 3
                 s:geometry(g)
             end
-            if game.collide(gamedata.player.base, s) then
+            if game.collide(gamedata.player, s) then
                 game.over()
             end
         end
@@ -167,7 +166,7 @@ function shots.handle_enemy ()
 end
 
 function enemies.new (t)
-    e = wibox({ position = "floating", bg = "#12345600" })
+    e = wibox({ position = "floating", bg = gamedata.solidbg or "#12345600" })
     e:geometry({ height = gamedata.enemies.h, width = gamedata.enemies.w,
                  x = gamedata.field.x,
                  y = gamedata.field.y })
@@ -228,12 +227,12 @@ function enemies.handle ()
                     g.y = math.floor(gamedata.field.y + gamedata.enemies.y + ((y - 1) * gamedata.enemies.h * 2))
                     g.x = math.floor(gamedata.field.x + gamedata.enemies.x + ((x - 1) * gamedata.enemies.w * 2))
                     e:geometry(g)
-                    if game.collide(gamedata.player.base, e) or g.y > gamedata.field.y + gamedata.field.h - 20 then
+                    if game.collide(gamedata.player, e) or g.y > gamedata.field.y + gamedata.field.h - 20 then
                         game.over()
                     end
                 end
                 if gamedata.ammo < gamedata.ammo_max then
-                    for i = 1, #gamedata.shots do
+                    for i = 1, gamedata.ammo_max do
                         local s = gamedata.shots[i]
                         if s and s.screen and game.collide(e, s) then
                             gamedata.enemies.number = gamedata.enemies.number - 1
@@ -300,7 +299,7 @@ function keyhandler(mod, key)
         elseif key == " " then
             player.fire()
         elseif key == "s" then
-            awful.util.spawn("import -window root ~/.cache/awesome/invaders-"..os.time()..".png")
+            awful.util.spawn("import -window root "..gamedata.cachedir.."/awesome/invaders-"..os.time()..".png")
         end
     end
     return true
@@ -332,9 +331,13 @@ function game.quit()
         gamedata.highscore.window:widgets({ })
     end
 
-    gamedata.player.base.screen = nil
-    gamedata.player.base:widgets({ })
-    gamedata.player.base = nil
+    if gamedata.field.background then
+    	gamedata.field.background.screen = nil
+    end
+
+    gamedata.player.screen = nil
+    gamedata.player:widgets({ })
+    gamedata.player = nil
 
     gamedata.field.north.screen = nil
     gamedata.field.north = nil
@@ -381,7 +384,8 @@ function game.highscore_show ()
 
     gamedata.highscore.table.text = gamedata.highscore.table.text .. "\n\n Press Q to quit"
 
-    local fh = io.open(os.getenv("HOME") .. "/.cache/awesome/highscore_invaders","w")
+    local fh = io.open(gamedata.cachedir.."/highscore_invaders", "w")
+
     if not fh then
         return false
     end
@@ -407,7 +411,8 @@ function game.highscore_add (score, name)
 end
 
 function game.highscore (score)
-    local fh = io.open(os.getenv("HOME").."/.cache/awesome/highscore_invaders", "r")
+    local fh = io.open(gamedata.cachedir.."/highscore_invaders", "r")
+
     if fh then
         for i = 1, 5 do
         gamedata.highscore[i] = fh:read("*line")
@@ -445,16 +450,34 @@ function game.highscore (score)
     end
 end
 
-function run()
-    gamedata.running = true
-    gamedata.screen = 1
+function run(args)
+    gamedata.screen = capi.screen[capi.mouse.screen]
+    gamedata.field.x = gamedata.screen.coords.x + math.floor((gamedata.screen.coords.width - gamedata.field.w) / 2)
+    gamedata.field.y = gamedata.screen.coords.y + math.floor((gamedata.screen.coords.height - gamedata.field.h) / 2)
+    
+    if args then
+    	if args['x'] then gamedata.field.x = args['x'] end
+    	if args['y'] then gamedata.field.y = args['y'] end
+    	if args['solidbg'] then gamedata.solidbg = args['solidbg'] end
+    end
+
     gamedata.ammo_max = 10
     gamedata.score = 0
     gamedata.name = ""
     gamedata.ammo = gamedata.ammo_max
     gamedata.btheme = beautiful.get()
-    gamedata.player = player.new()
 
+    gamedata.cachedir = awful.util.getdir("cache")
+
+    if gamedata.solidbg then
+	    gamedata.field.background = wibox({ position = "floating",
+	    					bg = gamedata.solidbg })
+	    gamedata.field.background:geometry({ x = gamedata.field.x,
+	    					 y = gamedata.field.y,
+						 height = gamedata.field.h,
+						 width = gamedata.field.w })
+	    gamedata.field.background.screen = 1
+    end
 
     gamedata.field.north = wibox({ position = "floating", 
     				   bg = gamedata.btheme.bg_focus or "#333333",
@@ -463,13 +486,13 @@ function run()
     				    height = 15,
     				    x = gamedata.field.x - 5,
     				    y = gamedata.field.y - 15 })
-    gamedata.field.north.screen = gamedata.screen
+    gamedata.field.north.screen = 1 
 
     gamedata.field.status = widget({ type = "textbox", name = "status", align = "right" })
     gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
 
     gamedata.field.caption = widget({ type = "textbox", name = "caption", align = "left" })
-    gamedata.field.caption.text = "  SpaceInvaders for Awesome 3"
+    gamedata.field.caption.text = "  Awesome Invaders"
 
     gamedata.field.north:widgets({ gamedata.field.caption, gamedata.field.status })
 
@@ -479,7 +502,7 @@ function run()
     gamedata.field.south:geometry({ width = gamedata.field.w, height = 5,
                                     x = gamedata.field.x,
                                     y = gamedata.field.y + gamedata.field.h - 5 })
-    gamedata.field.south.screen = gamedata.screen
+    gamedata.field.south.screen = 1 
 
     gamedata.field.west = wibox({ position = "floating", 
     				   bg = gamedata.btheme.bg_focus or "#333333",
@@ -488,7 +511,7 @@ function run()
     				   height = gamedata.field.h,
     				   x = gamedata.field.x - 5,
     				   y = gamedata.field.y })
-    gamedata.field.west.screen = gamedata.screen
+    gamedata.field.west.screen = 1 
 
     gamedata.field.east = wibox({ position = "floating", 
     				   bg = gamedata.btheme.bg_focus or "#333333",
@@ -497,13 +520,14 @@ function run()
                                    height = gamedata.field.h,
                                    x = gamedata.field.x + gamedata.field.w,
                                    y = gamedata.field.y })
-    gamedata.field.east.screen = gamedata.screen
+    gamedata.field.east.screen = 1 
 
     gamedata.enemies.speed = 5
-
     enemies.setup()
 
+    gamedata.player = player.new()
     keygrabber.run(keyhandler)
+    gamedata.running = true
 end
 
 awful.hooks.timer.register(0.03, shots.handle)

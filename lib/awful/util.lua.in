@@ -137,4 +137,12 @@ function restart()
     capi.awesome.restart()
 end
 
+function getdir(d)
+    if d == "cache" then
+        if os.getenv("XDG_CACHE_HOME") then
+            return os.getenv("XDG_CACHE_HOME").."/awesome"
+        end
+        return os.getenv("HOME").."/.cache/awesome"
+    end
+end
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
