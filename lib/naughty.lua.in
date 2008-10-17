@@ -1,0 +1,225 @@
+----------------------------------------------------------------------------
+-- @author koniu &lt;gkusnierz@gmail.com&gt;
+-- @copyright 2008 koniu
+-- @release @AWESOME_VERSION@
+----------------------------------------------------------------------------
+--
+-- Usage:
+--
+--  require("naughty")
+--  naughty.notify({ text = "notification",
+--                   title = "title",
+--                   position = "top_left"|"top_right"|"bottom_left"|"bottom_right",
+--                   timeout = 5,
+--                   icon="/path/to/image",
+--                   fg="#ffggcc",
+--                   bg="#bbggcc",
+--                   screen = 1 })
+
+-- Package environment
+local pairs = pairs
+local table = table
+local wibox = wibox
+local image = image
+local hooks = require("awful.hooks")
+local string = string
+local widget = widget
+local button = button
+local capi = { screen = screen }
+local bt = require("awful.beautiful")
+local beautiful = bt.get()
+
+--- Notification library
+module("naughty")
+
+--- Naughty configuration - a table containing common/default popup settings.
+-- You can override some of these for individual popups using args to notify().
+-- @name config
+-- @field timeout Number of seconds after which popups disappear.
+--   Set to 0 for no timeout. Default: 5
+-- @field screen Screen on which the popups will appear number. Default: 1
+-- @field position Corner of the workarea the popups will appear.
+--   Valid values: 'top_right', 'top_left', 'bottom_right', 'bottom_left'.
+--   Default: 'top_right'
+-- @field margin Space between popups and edge of the workarea. Default: 4
+-- @field height Height of a single-line popup. Default: 16
+-- @field width Width of a popup. Default: 300
+-- @field gap Spacing between popups. Default: 1
+-- @field ontop Boolean forcing popups to display on top. Default: true
+-- @field font Popup font. Default: beautiful.font or "Verdana 8"
+-- @field icon Popup icon. Default: nil
+-- @field fg Foreground color. Default: beautiful.fg_focus or '#ffffff'
+-- @field bg Background color. Default: beautiful.bg_focus or '#535d6c'
+-- @field border_color Border color.
+--   Default:  beautiful.border_focus or '#535d6c'
+-- @field border_width Border width. Default: 1
+-- @class table
+
+config = {}
+config.timeout = 5
+config.screen = 1
+config.position = "top_right"
+config.margin = 4
+config.height = 16
+config.width = 300
+config.gap = 1
+config.ontop = true
+config.font = beautiful.font or "Verdana 8"
+config.icon = nil
+config.fg = beautiful.fg_focus or '#ffffff'
+config.bg = beautiful.bg_focus or '#535d6c'
+config.border_color = beautiful.border_focus or '#535d6c'
+config.border_width = 1
+
+--- Index of notifications. See config table for valid 'position' values.
+-- Each element is a table consisting of:
+-- @field box Wibox object containing the popup
+-- @field lines Number of lines in title..text
+-- @field timer Function to be executed on timeout
+-- @name notifications[position]
+-- @class table
+
+notifications = {
+    top_left = {},
+    top_right = {},
+    bottom_left = {},
+    bottom_right = {},
+}
+
+local ws = capi.screen[config.screen].workarea
+local ss = capi.screen[config.screen].coords
+
+--- Evaluate desired position of the notification by index - internal
+-- @param idx Index of the notification
+-- @param position top_right | top_left | bottom_right | bottom_left
+-- @param lines Number of text lines in the notification
+-- @return Absolute position in {x, y} dictionary
+
+local function get_offset(idx, position, lines)
+    local v = {}
+
+    -- calculate x
+    if position:match("left") then
+        v.x = ws.x + config.margin
+    else
+        v.x = ws.x + ws.width - (config.width + config.border_width*2 + config.margin)
+    end
+
+    -- calculate existing popups' height
+    local existing = 0
+    for i = 1, idx-1, 1 do
+         existing = existing + config.height*notifications[position][i].lines + config.gap + config.border_width*2
+    end
+
+    -- calculate y
+    if position:match("top") then
+        v.y = ws.y + config.margin + existing
+    else
+        v.y = ws.y + ws.height - (config.margin + config.border_width + config.height*lines + existing)
+    end
+
+    return v
+end
+
+--- Re-arrange notifications according to their position and index - internal
+-- @return None
+local function arrange()
+    for p,pos in pairs(notifications) do
+        for i,notification in pairs(notifications[p]) do
+            notification.box:geometry({ y = get_offset(i, p, notification.lines).y })
+            for w,widget in pairs(notification.box:widgets()) do
+                widget:buttons({ button({ }, 1, function () destroy(i,p) end), })
+            end
+        end
+    end
+end
+
+--- Destroy notification by index
+-- @param idx Index of the notification
+-- @param position One of 4 keys in notification dictionary: top_right, top_left, bottom_right, bottom_left
+-- @return True if the popup was successfully destroyed, nil otherwise
+function destroy(idx, position)
+    if notifications[position][idx] then
+        notifications[position][idx].box.screen = nil
+        hooks.timer.unregister(notifications[position][idx].timer)
+        table.remove(notifications[position], idx)
+        arrange()
+        return true
+    end
+end
+
+--- Create notification. args is a dictionary of optional arguments. For more information and defaults see respective fields in config table.
+-- @param text Text of the notification
+-- @param timeout Time in seconds after which popup expires
+-- @param title Title of the notification
+-- @param position Corner of the workarea the popups will appear
+-- @param icon Path to icon
+-- @param fg Foreground color
+-- @param bg Background color
+-- @param screen Target screen for the notification
+-- @param ontop Target screen for the notification
+-- @usage naughty.notify({ title = 'Achtung!', text = 'You\'re idling', timeout = 0 })
+function notify(args)
+    -- gather settings together
+    local timeout = args.timeout or config.timeout
+    local position = args.position or config.position
+    local icon = args.icon or config.icon
+    local text = args.text or ""
+    local screen = args.screen or config.screen
+    local ontop = args.ontop or config.ontop
+
+    local title = ""
+    if args.title then
+        title = "  " .. args.title .. "\n"
+    end
+
+    local lines = 1
+    for i in string.gmatch(title..text, "\n") do
+        lines = lines + 1
+    end
+
+    -- create the container wibox
+    local idx = #notifications[position] + 1
+    local box = wibox({ name = "not" .. idx,
+                        position = "floating",
+                        fg = args.fg or config.fg,
+                        bg = args.bg or config.bg,
+                        border_color = config.border_color,
+                        border_width = config.border_width })
+
+    -- position the wibox
+    local offset = get_offset(idx, position, lines)
+    box:geometry({ width = config.width,
+                   height = config.height * lines,
+                   x = offset.x,
+                   y = offset.y })
+
+    box.ontop = ontop
+    box.screen = screen
+
+    -- populate the wibox with widgets
+    local textbox = widget({ type = "textbox", name = "text", align = "flex" })
+    textbox:buttons({ button({ }, 1, function () destroy(idx, position) end) })
+    textbox.text = string.format('<span font_desc="%s"><b>%s</b>  %s</span>',
+                                 config.font, title, text)
+
+    local iconbox = nil
+    if icon then
+        iconbox = widget({ type = "imagebox", name = "icon", align = "left" })
+        iconbox:buttons({ button({ }, 1, function () destroy(idx, position) end) })
+        iconbox.image = image(icon)
+        iconbox.width = 20
+    end
+
+    box:widgets({ iconbox, textbox })
+
+    local timer = function () destroy(idx, position) end
+    hooks.timer.register(timeout, timer)
+
+    -- insert the notification to the table
+    table.insert(notifications[position], { box = box,
+                                            lines = lines,
+                                            timer = timer })
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
