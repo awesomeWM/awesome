@@ -1231,12 +1231,6 @@ luaA_client_newindex(lua_State *L)
 
     switch(a_tokenize(buf, len))
     {
-      case A_TK_NAME:
-        buf = luaL_checklstring(L, 3, &len);
-        p_delete(&(*c)->name);
-        a_iso2utf8(&(*c)->name, buf, len);
-        widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
-        break;
       case A_TK_SCREEN:
         if(globalconf.xinerama_is_active)
         {
