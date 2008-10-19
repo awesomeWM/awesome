@@ -126,10 +126,9 @@ end
 local function arrange()
     for p,pos in pairs(notifications) do
         for i,notification in pairs(notifications[p]) do
-            notification.box:geometry({ y = get_offset(i, p, notification.lines).y })
-            for w,widget in pairs(notification.box:widgets()) do
-                widget:buttons({ button({ }, 1, function () destroy(i,p) end), })
-            end
+            local offset = get_offset(i, p, notification.lines)
+            notification.box:geometry({ x = offset.x, y = offset.y, width = config.width, height = notification.lines * config.height })
+            notification.idx = i
         end
     end
 end
@@ -138,11 +137,11 @@ end
 -- @param idx Index of the notification
 -- @param position One of 4 keys in notification dictionary: top_right, top_left, bottom_right, bottom_left
 -- @return True if the popup was successfully destroyed, nil otherwise
-function destroy(idx, position)
-    if notifications[position][idx] then
-        notifications[position][idx].box.screen = nil
-        hooks.timer.unregister(notifications[position][idx].timer)
-        table.remove(notifications[position], idx)
+function destroy(notification)
+    if notification then
+        notification.box.screen = nil
+        hooks.timer.unregister(notification.timer)
+        table.remove(notifications[notification.position], notification.idx)
         arrange()
         return true
     end
@@ -197,29 +196,35 @@ function notify(args)
     box.ontop = ontop
     box.screen = screen
 
+    local notification = {
+        box = box,
+        lines = lines,
+        position = position,
+        idx = idx
+    }
+
     -- populate the wibox with widgets
     local textbox = widget({ type = "textbox", name = "text", align = "flex" })
-    textbox:buttons({ button({ }, 1, function () destroy(idx, position) end) })
+    textbox:buttons({ button({ }, 1, function () destroy(notification) end) })
     textbox.text = string.format('<span font_desc="%s"><b>%s</b>  %s</span>',
                                  config.font, title, text)
 
     local iconbox = nil
     if icon then
         iconbox = widget({ type = "imagebox", name = "icon", align = "left" })
-        iconbox:buttons({ button({ }, 1, function () destroy(idx, position) end) })
+        iconbox:buttons({ button({ }, 1, function () destroy(notification) end) })
         iconbox.image = image(icon)
         iconbox.width = 20
     end
 
     box:widgets({ iconbox, textbox })
 
-    local timer = function () destroy(idx, position) end
+    local timer = function () destroy(notification) end
     hooks.timer.register(timeout, timer)
+    notification.timer = timer
 
     -- insert the notification to the table
-    table.insert(notifications[position], { box = box,
-                                            lines = lines,
-                                            timer = timer })
+    table.insert(notifications[position],notification)
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
