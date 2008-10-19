@@ -217,7 +217,7 @@ function notify(args)
         iconbox.width = 20
     end
 
-    box:widgets({ iconbox, textbox })
+    box.widgets = { iconbox, textbox }
 
     local timer = function () destroy(notification) end
     hooks.timer.register(timeout, timer)

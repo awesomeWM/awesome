@@ -42,7 +42,6 @@ tag_view(tag_t *tag, bool view)
 {
     tag->selected = view;
     ewmh_update_net_current_desktop(screen_virttophys(tag->screen));
-    widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
     globalconf.screens[tag->screen].need_arrange = true;
 }
 
@@ -94,7 +93,9 @@ tag_append_to_screen(tag_t *tag, screen_t *s)
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
-    widget_invalidate_cache(s->index, WIDGET_CACHE_TAGS);
+    /* call hook */
+    lua_pushnumber(globalconf.L, s->index+ 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
 }
 
 /** Remove a tag from screen. Tag must be on a screen and have no clients.
@@ -103,6 +104,7 @@ tag_append_to_screen(tag_t *tag, screen_t *s)
 static void
 tag_remove_from_screen(tag_t *tag)
 {
+    int screen = tag->screen;
     int phys_screen = screen_virttophys(tag->screen);
     tag_array_t *tags = &globalconf.screens[tag->screen].tags;
 
@@ -115,9 +117,11 @@ tag_remove_from_screen(tag_t *tag)
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
-    widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
     tag->screen = SCREEN_UNDEF;
     tag_unref(&tag);
+    /* call hook */
+    lua_pushnumber(globalconf.L, screen + 1);
+    luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
 }
 
 /** Tag a client with specified tag.
@@ -134,8 +138,10 @@ tag_client(client_t *c, tag_t *t)
     tag_ref(&t);
     client_array_append(&t->clients, c);
     client_saveprops_tags(c);
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     client_need_arrange(c);
+    /* call hook */
+    luaA_client_userdata_new(globalconf.L, c);
+    luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 1, 0);
 }
 
 /** Untag a client with specified tag.
@@ -152,7 +158,10 @@ untag_client(client_t *c, tag_t *t)
             client_array_take(&t->clients, i);
             tag_unref(&t);
             client_saveprops_tags(c);
-            widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+            /* call hook */
+            luaA_client_userdata_new(globalconf.L, c);
+            luaA_tag_userdata_new(globalconf.L, t);
+            luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
             return;
         }
 }
@@ -404,12 +413,9 @@ luaA_tag_newindex(lua_State *L)
       case A_TK_NAME:
         buf = luaL_checklstring(L, 3, &len);
         if((*tag)->screen != SCREEN_UNDEF)
-        {
             if(tag_getbyname((*tag)->screen, (*tag)->name) != *tag)
                 luaL_error(L, "a tag with the name `%s' is already on screen %d",
                            buf, (*tag)->screen);
-            widget_invalidate_cache((*tag)->screen, WIDGET_CACHE_TAGS);
-        }
         p_delete(&(*tag)->name);
         a_iso2utf8(&(*tag)->name, buf, len);
         break;

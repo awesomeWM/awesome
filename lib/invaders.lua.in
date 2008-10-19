@@ -69,7 +69,7 @@ function player.new ()
 
     w = widget({ type = "imagebox", name = "player" })
     w.image = image("@AWESOME_ICON_PATH@/invaders/player.png")
-    p:widgets({ w })
+    p.widgets = w
 
     return p
 end
@@ -177,7 +177,7 @@ function enemies.new (t)
     e.screen = 1
     w = widget({ type = "imagebox", name = "enemy"..t })
     w.image = image("@AWESOME_ICON_PATH@/invaders/enemy_"..t..".png")
-    e:widgets({ w })
+    e.widgets = w
     return e
 end
 
@@ -328,7 +328,7 @@ function game.quit()
 
     if gamedata.highscore.window then
         gamedata.highscore.window.screen = nil
-        gamedata.highscore.window:widgets({ })
+        gamedata.highscore.window.widgets = nil
     end
 
     if gamedata.field.background then
@@ -336,7 +336,7 @@ function game.quit()
     end
 
     gamedata.player.screen = nil
-    gamedata.player:widgets({ })
+    gamedata.player.widgets = nil
     gamedata.player = nil
 
     gamedata.field.north.screen = nil
@@ -354,7 +354,7 @@ function game.quit()
     for y = 1, #gamedata.enemies.data do
         for x = 1, #gamedata.enemies.data[y] do
             gamedata.enemies.data[y][x].screen = nil
-            gamedata.enemies.data[y][x]:widgets({ })
+            gamedata.enemies.data[y][x].widgets = nil
         end
     end
 
@@ -374,7 +374,7 @@ function game.highscore_show ()
     gamedata.highscore.window.screen = 1
 
     gamedata.highscore.table = widget({ type = "textbox", name = "highscore" })
-    gamedata.highscore.window:widgets({ gamedata.highscore.table })
+    gamedata.highscore.window.widgets =  gamedata.highscore.table
 
     gamedata.highscore.table.text = " Highscores:\n"
 
@@ -440,7 +440,7 @@ function game.highscore (score)
 
     gamedata.namebox = widget({ type = "textbox", name = "foobar" })
     gamedata.namebox.text = " Name: |"
-    gamedata.highscore.window:widgets({ gamedata.namebox })
+    gamedata.highscore.window.widgets = gamedata.namebox
 
     if newentry then
         gamedata.name = ""
@@ -493,7 +493,7 @@ function run(args)
     gamedata.field.caption = widget({ type = "textbox", name = "caption", align = "left" })
     gamedata.field.caption.text = "  Awesome Invaders"
 
-    gamedata.field.north:widgets({ gamedata.field.caption, gamedata.field.status })
+    gamedata.field.north.widgets = { gamedata.field.caption, gamedata.field.status }
 
     gamedata.field.south = wibox({ position = "floating",
     				   bg = gamedata.btheme.bg_focus or "#333333",

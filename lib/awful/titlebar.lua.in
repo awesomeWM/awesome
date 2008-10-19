@@ -80,16 +80,9 @@ function add(c, args)
         bts[#bts + 1] = b
         close:buttons(bts)
 
-        tb:widgets({
-            appicon,
-            title,
-            closef, close
-        })
+        tb.widgets = { appicon, title, closef, close }
     else
-        tb:widgets({
-            appicon,
-            title
-        })
+        tbx.widgets = { appicon, title }
     end
 
     c.titlebar = tb
@@ -103,7 +96,7 @@ end
 -- @param prop The property name which has changed.
 function update(c, prop)
     if c.titlebar and data[c] then
-        local widgets = c.titlebar:widgets()
+        local widgets = c.titlebar.widgets
         local title, close, closef
         for k, v in ipairs(widgets) do
             if v.name == "title" then title = v

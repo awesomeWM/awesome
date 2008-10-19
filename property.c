@@ -187,11 +187,8 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
     if(isurgent != c->isurgent)
     {
         c->isurgent = isurgent;
-
         /* execute hook */
         hooks_property(c, "urgent");
-
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
     if(wmh.flags & XCB_WM_HINT_STATE &&
        wmh.initial_state == XCB_WM_STATE_WITHDRAWN)
@@ -240,8 +237,6 @@ property_update_wm_name(client_t *c)
 
     /* call hook */
     hooks_property(c, "name");
-
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 static int
@@ -290,7 +285,6 @@ property_handle_net_wm_icon(void *data,
     {
         image_t *icon;
         image_unref(&c->icon);
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         icon = ewmh_window_icon_from_reply(reply);
         c->icon = icon ? image_ref(&icon) : NULL;
 

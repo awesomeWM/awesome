@@ -231,6 +231,32 @@ luaA_hooks_clients(lua_State *L)
     return luaA_registerfct(L, 1, &globalconf.hooks.clients);
 }
 
+/** Set the function called on each screen tag list change.
+ * This function is called with a screen number as argument.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A function to call on each tag list change.
+ */
+static int
+luaA_hooks_tags(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &globalconf.hooks.tags);
+}
+
+/** Set the function called on each client's tags change.
+ * This function is called with the client and the tag as argument.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A function to call on each client's tags change.
+ */
+static int
+luaA_hooks_tagged(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &globalconf.hooks.tagged);
+}
+
 /** Set the function called on each screen arrange. This function is called
  * with the screen number as argument.
  * \param L The Lua VM state.
@@ -397,6 +423,10 @@ luaA_openlib(lua_State *L, const char *name,
     lua_pop(L, 2);
 }
 
+/** UTF-8 aware string length computing.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
 static int
 luaA_mbstrlen(lua_State *L)
 {
@@ -405,8 +435,12 @@ luaA_mbstrlen(lua_State *L)
     return 1;
 }
 
+/** Overload standard Lua next function to use __next key on metatable.
+ * \param L The Lua VM state.
+ * \param The number of elements pushed on stack.
+ */
 static int
-luaA_next(lua_State *L)
+luaAe_next(lua_State *L)
 {
     if(luaL_getmetafield(L, 1, "__next"))
     {
@@ -423,8 +457,56 @@ luaA_next(lua_State *L)
     return 1;
 }
 
+/** Overload lua_next() function by using __next metatable field
+ * to get next elements.
+ * \param L The Lua VM stack.
+ * \param idx The index number of elements in stack.
+ * \return 1 if more elements to come, 0 otherwise.
+ */
+int
+luaA_next(lua_State *L, int idx)
+{
+    if(luaL_getmetafield(L, idx, "__next"))
+    {
+        /* if idx is relative, reduce it since we got __next */
+        if(idx < 0) idx--;
+        /* copy table and then move key */
+        lua_pushvalue(L, idx);
+        lua_pushvalue(L, -3);
+        lua_remove(L, -4);
+        lua_pcall(L, 2, 2, 0);
+        /* next returned nil, it's the end */
+        if(lua_isnil(L, -1))
+        {
+            /* remove nil */
+            lua_pop(L, 2);
+            return 0;
+        }
+        return 1;
+    }
+
+    return lua_next(L, idx);
+}
+
+/** Generic pairs function.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
 static int
-luaA_pairs(lua_State *L)
+luaA_generic_pairs(lua_State *L)
+{
+    lua_pushvalue(L, lua_upvalueindex(1));  /* return generator, */
+    lua_pushvalue(L, 1);  /* state, */
+    lua_pushnil(L);  /* and initial value */
+    return 3;
+}
+
+/** Overload standard pairs function to use __pairs field of metatables.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaAe_pairs(lua_State *L)
 {
     if(luaL_getmetafield(L, 1, "__pairs"))
     {
@@ -448,12 +530,168 @@ luaA_fixups(lua_State *L)
     lua_setfield(L, -2, "len");
     lua_pop(L, 1);
     lua_pushliteral(L, "next");
-    lua_pushcfunction(L, luaA_next);
+    lua_pushcfunction(L, luaAe_next);
     lua_settable(L, LUA_GLOBALSINDEX);
     lua_pushliteral(L, "pairs");
-    lua_pushcfunction(L, luaA_next);
-    lua_pushcclosure(L, luaA_pairs, 1); /* pairs get next as upvalue */
+    lua_pushcfunction(L, luaAe_next);
+    lua_pushcclosure(L, luaAe_pairs, 1); /* pairs get next as upvalue */
     lua_settable(L, LUA_GLOBALSINDEX);
+}
+
+/** __next function for wtable objects.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_wtable_next(lua_State *L)
+{
+    /* upvalue 1 is content table */
+    if(lua_next(L, lua_upvalueindex(1)))
+        return 2;
+    lua_pushnil(L);
+    return 1;
+}
+
+/** Index function of wtable objects.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_wtable_index(lua_State *L)
+{
+    size_t len;
+    const char *buf;
+
+    lua_pushvalue(L, 2);
+    /* check for size, waiting lua 5.2 and __len on tables */
+    if((buf = lua_tolstring(L, -1, &len)))
+        if(a_tokenize(buf, len) == A_TK_LEN)
+        {
+            lua_pushnumber(L, lua_objlen(L, lua_upvalueindex(1)));
+            return 1;
+        }
+    lua_pop(L, 1);
+
+    /* upvalue 1 is content table */
+    lua_rawget(L, lua_upvalueindex(1));
+    return 1;
+}
+
+/** Newndex function of wtable objects.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_wtable_newindex(lua_State *L)
+{
+    bool invalid = false;
+
+    /* push key on top */
+    lua_pushvalue(L, 2);
+    /* get current key value in content table */
+    lua_rawget(L, lua_upvalueindex(1));
+    /* if value is a widget, notify change */
+    if(lua_istable(L, -1) || luaA_toudata(L, -1, "widget"))
+        invalid = true;
+
+    lua_pop(L, 1); /* remove value */
+
+    /* if new value is a widget or a table */
+    if(lua_istable(L, 3))
+    {
+        luaA_table2wtable(L);
+        invalid = true;
+    }
+    else if(!invalid && luaA_toudata(L, 3, "widget"))
+        invalid = true;
+
+    /* upvalue 1 is content table */
+    lua_rawset(L, lua_upvalueindex(1));
+
+    if(invalid)
+        luaA_wibox_invalidate_byitem(L, lua_topointer(L, 1));
+
+    return 0;
+}
+
+/** Convert the top element of the stack to a proxied wtable.
+ * \param L The Lua VM state.
+ */
+void
+luaA_table2wtable(lua_State *L)
+{
+    if(!lua_istable(L, -1))
+        return;
+
+    lua_newtable(L); /* create *real* content table */
+    lua_newtable(L); /* metatable */
+    lua_pushvalue(L, -2); /* copy content table */
+    lua_pushcclosure(L, luaA_wtable_next, 1); /* __next has the content table as upvalue */
+    lua_pushvalue(L, -3); /* copy content table */
+    lua_pushcclosure(L, luaA_wtable_index, 1); /* __index has the content table as upvalue */
+    lua_pushvalue(L, -4); /* copy content table */
+    lua_pushcclosure(L, luaA_wtable_newindex, 1); /* __newindex has the content table as upvalue */
+    /* set metatable field with just pushed closure */
+    lua_setfield(L, -4, "__newindex");
+    lua_setfield(L, -3, "__index");
+    lua_setfield(L, -2, "__next");
+    /* set metatable impossible to touch */
+    lua_pushliteral(L, "wtable");
+    lua_setfield(L, -2, "__metatable");
+    /* set new metatable on original table */
+    lua_setmetatable(L, -3);
+
+    /* initial key */
+    lua_pushnil(L);
+    /* go through original table */
+    while(lua_next(L, -3))
+    {
+        /* if convert value to wtable */
+        luaA_table2wtable(L);
+        /* copy key */
+        lua_pushvalue(L, -2);
+        /* move key before value */
+        lua_insert(L, -2);
+        /* set same value in content table */
+        lua_rawset(L, -4);
+        /* copy key */
+        lua_pushvalue(L, -1);
+        /* push the new value :-> */
+        lua_pushnil(L);
+        /* set orig[k] = nil */
+        lua_rawset(L, -5);
+    }
+    /* remove content table */
+    lua_pop(L, 1);
+}
+
+/** Look for an item: table, function, etc.
+ * \param L The Lua VM state.
+ * \param item The pointer item.
+ */
+bool
+luaA_hasitem(lua_State *L, const void *item)
+{
+    lua_pushnil(L);
+    while(luaA_next(L, -2))
+    {
+        if(lua_topointer(L, -1) == item)
+        {
+            /* remove value and key */
+            lua_pop(L, 2);
+            return true;
+        }
+        if(lua_istable(L, -1))
+            if(luaA_hasitem(L, item))
+            {
+                /* remove key and value */
+                lua_pop(L, 2);
+                return true;
+            }
+        /* remove value */
+        lua_pop(L, 1);
+    }
+    return false;
 }
 
 /** Object table.
@@ -625,6 +863,8 @@ luaA_init(void)
         { "property", luaA_hooks_property },
         { "arrange", luaA_hooks_arrange },
         { "clients", luaA_hooks_clients },
+        { "tags", luaA_hooks_tags },
+        { "tagged", luaA_hooks_tagged },
         { "timer", luaA_hooks_timer },
         /* deprecated */
         { "mouse_over", luaA_hooks_mouse_over },
@@ -701,6 +941,8 @@ luaA_init(void)
     globalconf.hooks.mouse_enter = LUA_REFNIL;
     globalconf.hooks.arrange = LUA_REFNIL;
     globalconf.hooks.clients = LUA_REFNIL;
+    globalconf.hooks.tags = LUA_REFNIL;
+    globalconf.hooks.tagged = LUA_REFNIL;
     globalconf.hooks.property = LUA_REFNIL;
     globalconf.hooks.timer = LUA_REFNIL;
 }
@@ -1001,7 +1243,12 @@ luaA_on_timer(EV_P_ ev_timer *w, int revents)
     awesome_refresh(globalconf.connection);
 }
 
-void
+/** Push a color as a string onto the stack
+ * \param L The Lua VM state.
+ * \param c The color to push.
+ * \return The number of elements pushed on stack.
+ */
+int
 luaA_pushcolor(lua_State *L, const xcolor_t *c)
 {
     uint8_t r = (unsigned)c->red   * 0xff / 0xffff;
@@ -1015,4 +1262,5 @@ luaA_pushcolor(lua_State *L, const xcolor_t *c)
     else
         snprintf(s, sizeof(s), "#%02x%02x%02x%02x", r, g, b, a);
     lua_pushlstring(L, s, sizeof(s));
+    return 1;
 }

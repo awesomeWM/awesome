@@ -333,7 +333,6 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         luaA_client_userdata_new(globalconf.L, c);
         lua_pushliteral(globalconf.L, "urgent");
         luaA_dofunction(globalconf.L, globalconf.hooks.property, 2, 0);
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     }
 }
 

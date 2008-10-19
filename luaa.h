@@ -333,17 +333,11 @@ void luaA_init(void);
 bool luaA_parserc(const char *, bool);
 void luaA_cs_init(void);
 void luaA_cs_cleanup(void);
-void luaA_on_timer(EV_P_ ev_timer *w, int revents);
-void luaA_pushcolor(lua_State *, const xcolor_t *);
-
-static inline int
-luaA_generic_pairs(lua_State *L)
-{
-    lua_pushvalue(L, lua_upvalueindex(1));  /* return generator, */
-    lua_pushvalue(L, 1);  /* state, */
-    lua_pushnil(L);  /* and initial value */
-    return 3;
-}
+void luaA_on_timer(EV_P_ ev_timer *, int);
+int luaA_pushcolor(lua_State *, const xcolor_t *);
+bool luaA_hasitem(lua_State *, const void *);
+void luaA_table2wtable(lua_State *);
+int luaA_next(lua_State *, int);
 
 #define hooks_property(c, prop) \
     do { \

@@ -77,8 +77,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/layouts/tile.c
     ${SOURCE_DIR}/widgets/graph.c
     ${SOURCE_DIR}/widgets/progressbar.c
-    ${SOURCE_DIR}/widgets/taglist.c
-    ${SOURCE_DIR}/widgets/tasklist.c
     ${SOURCE_DIR}/widgets/textbox.c
     ${SOURCE_DIR}/widgets/systray.c
     ${SOURCE_DIR}/widgets/imagebox.c)

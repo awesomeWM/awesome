@@ -93,27 +93,6 @@ end
 -- }}}
 
 -- {{{ Wibox
--- Create a taglist widget
-mytaglist = widget({ type = "taglist", name = "mytaglist" })
-mytaglist:buttons({
-    button({ }, 1, function (object, tag) awful.tag.viewonly(tag) end),
-    button({ modkey }, 1, function (object, tag) awful.client.movetotag(tag) end),
-    button({ }, 3, function (object, tag) tag.selected = not tag.selected end),
-    button({ modkey }, 3, function (object, tag) awful.client.toggletag(tag) end),
-    button({ }, 4, awful.tag.viewnext),
-    button({ }, 5, awful.tag.viewprev)
-})
-mytaglist.label = awful.widget.taglist.label.all
-
--- Create a tasklist widget
-mytasklist = widget({ type = "tasklist", name = "mytasklist" })
-mytasklist:buttons({
-    button({ }, 1, function (object, c) client.focus = c; c:raise() end),
-    button({ }, 4, function () awful.client.focus.byidx(1) end),
-    button({ }, 5, function () awful.client.focus.byidx(-1) end)
-})
-mytasklist.label = awful.widget.tasklist.label.currenttags
-
 -- Create a textbox widget
 mytextbox = widget({ type = "textbox", name = "mytextbox", align = "right" })
 -- Set the default text in textbox
@@ -127,37 +106,52 @@ mylauncher = awful.widget.launcher({ name = "mylauncher",
 -- Create a systray
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
 
--- Create an iconbox widget which will contains an icon indicating which layout we're using.
--- We need one layoutbox per screen.
-mylayoutbox = {}
-for s = 1, screen.count() do
-    mylayoutbox[s] = widget({ type = "imagebox", name = "mylayoutbox", align = "right" })
-    mylayoutbox[s]:buttons({
-        button({ }, 1, function () awful.layout.inc(layouts, 1) end),
-        button({ }, 3, function () awful.layout.inc(layouts, -1) end),
-        button({ }, 4, function () awful.layout.inc(layouts, 1) end),
-        button({ }, 5, function () awful.layout.inc(layouts, -1) end)
-    })
-    mylayoutbox[s].image = image("@AWESOME_ICON_PATH@/layouts/tilew.png")
-end
 
 -- Create a wibox for each screen and add it
 mywibox = {}
 mypromptbox = {}
+mylayoutbox = {}
+mytaglist = {}
+mytaglist.buttons = { button({ }, 1, awful.tag.viewonly),
+                      button({ modkey }, 1, awful.client.movetotag),
+                      button({ }, 3, function (tag) tag.selected = not tag.selected end),
+                      button({ modkey }, 3, awful.client.toggletag),
+                      button({ }, 4, awful.tag.viewnext),
+                      button({ }, 5, awful.tag.viewprev) }
+mytasklist = {}
+mytasklist.buttons = { button({ }, 1, function (c) client.focus = c; c:raise() end),
+                       button({ }, 4, function () awful.client.focus.byidx(1) end),
+                       button({ }, 5, function () awful.client.focus.byidx(-1) end) }
+
 for s = 1, screen.count() do
-    mywibox[s] = wibox({ position = "top", name = "mywibox" .. s,
-                             fg = beautiful.fg_normal, bg = beautiful.bg_normal })
+    -- Create a promptbox for each screen
     mypromptbox[s] = widget({ type = "textbox", name = "mypromptbox" .. s, align = "left" })
+    -- Create an imagebox widget which will contains an icon indicating which layout we're using.
+    -- We need one layoutbox per screen.
+    mylayoutbox[s] = widget({ type = "imagebox", name = "mylayoutbox", align = "right" })
+    mylayoutbox[s]:buttons({ button({ }, 1, function () awful.layout.inc(layouts, 1) end),
+                             button({ }, 3, function () awful.layout.inc(layouts, -1) end),
+                             button({ }, 4, function () awful.layout.inc(layouts, 1) end),
+                             button({ }, 5, function () awful.layout.inc(layouts, -1) end) })
+    -- Create a taglist widget
+    mytaglist[s] = awful.widget.taglist.new(s, awful.widget.taglist.label.all, mytaglist.buttons)
+
+    -- Create a tasklist widget
+    mytasklist[s] = awful.widget.tasklist.new(function(c)
+                                                  return awful.widget.tasklist.label.currenttags(c, s)
+                                              end, mytasklist.buttons)
+
+    -- Create the wibox
+    mywibox[s] = wibox({ position = "top", name = "mywibox" .. s,
+                         fg = beautiful.fg_normal, bg = beautiful.bg_normal })
     -- Add widgets to the wibox - order matters
-    mywibox[s]:widgets({
-        mytaglist,
-        mytasklist,
-        mylauncher,
-        mypromptbox[s],
-        mytextbox,
-        mylayoutbox[s],
-        s == 1 and mysystray or nil
-    })
+    mywibox[s].widgets = { mytaglist[s],
+                           mylauncher,
+                           mytasklist[s],
+                           mypromptbox[s],
+                           mytextbox,
+                           mylayoutbox[s],
+                           s == 1 and mysystray or nil }
     mywibox[s].screen = s
 end
 -- }}}

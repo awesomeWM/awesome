@@ -82,6 +82,34 @@ widget_common_button(widget_node_t *w,
         }
 }
 
+/** Convert a Lua table to a list of widget nodet.
+ * \param L The Lua VM state.
+ * \param widgets The linked list of widget node.
+ */
+void
+luaA_table2widgets(lua_State *L, widget_node_t **widgets)
+{
+    if(lua_istable(L, -1))
+    {
+        lua_pushnil(L);
+        while(luaA_next(L, -2))
+        {
+            luaA_table2widgets(L, widgets);
+            lua_pop(L, 1); /* remove value */
+        }
+    }
+    else
+    {
+        widget_t **widget = luaA_toudata(L, -1, "widget");
+        if(widget)
+        {
+            widget_node_t *w = p_new(widget_node_t, 1);
+            w->widget = widget_ref(widget);
+            widget_node_list_append(widgets, w);
+        }
+    }
+}
+
 /** Render a list of widgets.
  * \param wnode The list of widgets.
  * \param ctx The draw context where to render.
@@ -91,13 +119,13 @@ widget_common_button(widget_node_t *w,
  * \param orientation The object orientation.
  * \param x The x coordinates of the object.
  * \param y The y coordinates of the object.
- * \param object The wibox.
+ * \param wibox The wibox.
  * \todo Remove GC.
  */
 void
 widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_pixmap_t rotate_px,
               int screen, orientation_t orientation,
-              int x, int y, wibox_t *object)
+              int x, int y, wibox_t *wibox)
 {
     xcb_pixmap_t rootpix;
     xcb_screen_t *s;
@@ -157,16 +185,27 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
 
     for(w = wnode; w; w = w->next)
         if(w->widget->align == AlignLeft && w->widget->isvisible)
-                left += w->widget->draw(ctx, screen, w, left, (left + right), object);
+                left += w->widget->draw(ctx, screen, w, left, (left + right), wibox);
 
     /* renders right widget from last to first */
     for(w = *widget_node_list_last(&wnode); w; w = w->prev)
         if(w->widget->align == AlignRight && w->widget->isvisible)
-                right += w->widget->draw(ctx, screen, w, right, (left + right), object);
+                right += w->widget->draw(ctx, screen, w, right, (left + right), wibox);
 
+    /* \todo rewrite this */
+    int flex = 0;
     for(w = wnode; w; w = w->next)
         if(w->widget->align == AlignFlex && w->widget->isvisible)
-                left += w->widget->draw(ctx, screen, w, left, (left + right), object);
+            flex++;
+
+    if(flex)
+    {
+        int length = (ctx->width - (left + right)) / flex;
+
+        for(w = wnode; w; w = w->next)
+            if(w->widget->align == AlignFlex && w->widget->isvisible)
+                    left += w->widget->draw(ctx, screen, w, left, (left + right) + length * --flex , wibox);
+    }
 
     switch(orientation)
     {
@@ -228,29 +267,27 @@ widget_invalidate_cache(int screen, int flags)
 void
 widget_invalidate_bywidget(widget_t *widget)
 {
-    int screen;
-    widget_node_t *witer;
-    client_t *c;
-
-    for(screen = 0; screen < globalconf.nscreen; screen++)
+    for(int screen = 0; screen < globalconf.nscreen; screen++)
         for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
         {
             wibox_t *wibox = globalconf.screens[screen].wiboxes.tab[i];
-
             if(!wibox->need_update)
-                for(witer = wibox->widgets; witer; witer = witer->next)
+                for(widget_node_t *witer = wibox->widgets; witer; witer = witer->next)
                     if(witer->widget == widget)
                     {
                         wibox->need_update = true;
                         break;
                     }
-        }
+         }
 
-    for(c = globalconf.clients; c; c = c->next)
+    for(client_t *c = globalconf.clients; c; c = c->next)
         if(c->titlebar && !c->titlebar->need_update)
-            for(witer = c->titlebar->widgets; witer; witer = witer->next)
+            for(widget_node_t *witer = c->titlebar->widgets; witer; witer = witer->next)
                 if(witer->widget == widget)
+                {
                     c->titlebar->need_update = true;
+                    break;
+                }
 }
 
 /** Create a new widget.

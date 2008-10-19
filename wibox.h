@@ -32,18 +32,13 @@ void wibox_refresh(void);
 
 int luaA_wibox_new(lua_State *);
 int luaA_wibox_userdata_new(lua_State *, wibox_t *);
+void luaA_wibox_invalidate_byitem(lua_State *, const void *);
+
 void wibox_position_update(wibox_t *);
 wibox_t * wibox_getbywin(xcb_window_t);
 void wibox_detach(wibox_t *);
 void wibox_attach(wibox_t *, screen_t *);
-
-static inline void
-wibox_delete(wibox_t **wibox)
-{
-    simplewindow_wipe(&(*wibox)->sw);
-    widget_node_list_wipe(&(*wibox)->widgets);
-    p_delete(wibox);
-}
+void wibox_delete(wibox_t **);
 
 static inline void
 wibox_moveresize(wibox_t *wibox, area_t geometry)

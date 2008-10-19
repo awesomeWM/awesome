@@ -439,6 +439,18 @@ wibox_position_update(wibox_t *wibox)
         wibox_move(wibox, wingeom.x, wingeom.y);
 }
 
+/** Delete a wibox.
+ * \param wibox wibox to delete.
+ */
+void
+wibox_delete(wibox_t **wibox)
+{
+    simplewindow_wipe(&(*wibox)->sw);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
+    widget_node_list_wipe(&(*wibox)->widgets);
+    p_delete(wibox);
+}
+
 /** Get a wibox by its window.
  * \param w The window id.
  * \return A wibox if found, NULL otherwise.
@@ -627,6 +639,7 @@ luaA_wibox_new(lua_State *L)
     luaA_checktable(L, 2);
 
     w = p_new(wibox_t, 1);
+    w->widgets_table = LUA_REFNIL;
 
     w->sw.ctx.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
@@ -676,6 +689,64 @@ luaA_wibox_new(lua_State *L)
 
     return luaA_wibox_userdata_new(L, w);
 }
+
+/** Rebuild wibox widgets list.
+ * \param L The Lua VM state.
+ * \param wibox The wibox.
+ */
+static void
+wibox_widgets_table_build(lua_State *L, wibox_t *wibox)
+{
+    widget_node_list_wipe(&wibox->widgets);
+    luaA_table2widgets(L, &wibox->widgets);
+    wibox->mouse_over = NULL;
+    wibox->need_update = true;
+}
+
+/** Check if a wibox widget table has an item.
+ * \param L The Lua VM state.
+ * \param wibox The wibox.
+ * \param item The item to look for.
+ */
+static bool
+luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
+{
+    bool ret = false;
+    lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
+    if(lua_topointer(L, -1) == item || luaA_hasitem(L, item))
+        ret = true;
+    return ret;
+}
+
+/** Invalidate a wibox by a Lua object (table, etc).
+ * \param L The Lua VM state.
+ * \param item The object identifier.
+ */
+void
+luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
+{
+    for(int screen = 0; screen < globalconf.nscreen; screen++)
+        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
+        {
+            wibox_t *wibox = globalconf.screens[screen].wiboxes.tab[i];
+            if(luaA_wibox_hasitem(L, wibox, item))
+            {
+                /* recompute widget node list */
+                wibox_widgets_table_build(L, wibox);
+                lua_pop(L, 1); /* remove widgets table */
+            }
+
+        }
+
+    for(client_t *c = globalconf.clients; c; c = c->next)
+        if(c->titlebar && luaA_wibox_hasitem(L, c->titlebar, item))
+        {
+            /* recompute widget node list */
+            wibox_widgets_table_build(L, c->titlebar);
+            lua_pop(L, 1); /* remove widgets table */
+        }
+}
+
 
 /** Wibox object.
  * \param L The Lua VM state.
@@ -742,93 +813,14 @@ luaA_wibox_index(lua_State *L)
       case A_TK_ORIENTATION:
         lua_pushstring(L, orientation_tostr((*wibox)->sw.orientation));
         break;
+      case A_TK_WIDGETS:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
+         break;
       default:
         return 0;
     }
 
     return 1;
-}
-
-/** Generic widget set.
- * \param L The Lua VM state.
- * \param idx The table of widgets index.
- * \param object The object the widget will be attached to.
- * \param widgets The widgets to fill.
- * \return The number of elements pushed on stack.
- */
-static void
-luaA_widget_set(lua_State *L, int idx, wibox_t *object, widget_node_t **widgets)
-{
-    widget_node_t *witer;
-
-    luaA_checktable(L, idx);
-
-    /* remove all widgets */
-    for(witer = *widgets; witer; witer = *widgets)
-    {
-        if(witer->widget->detach)
-            witer->widget->detach(witer->widget, object);
-        widget_unref(&witer->widget);
-        widget_node_list_detach(widgets, witer);
-        p_delete(&witer);
-    }
-
-    /* now read all widgets and add them */
-    lua_pushnil(L);
-    while(lua_next(L, idx))
-    {
-        widget_t **widget = luaA_checkudata(L, -1, "widget");
-        widget_node_t *w = p_new(widget_node_t, 1);
-        w->widget = *widget;
-        widget_node_list_append(widgets, w);
-        widget_ref(widget);
-        lua_pop(L, 1);
-    }
-}
-
-/** Generic widget get.
- * \param L The Lua VM state.
- * \param widget The widget list.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_widget_get(lua_State *L, widget_node_t *widgets)
-{
-    widget_node_t *witer;
-    int i = 0;
-
-    lua_newtable(L);
-
-    for(witer = widgets; witer; witer = witer->next)
-    {
-        luaA_widget_userdata_new(L, witer->widget);
-        lua_rawseti(L, -2, ++i);
-    }
-
-    return 1;
-}
-
-
-/** Get or set the wibox widgets.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam None, or a table of widgets to set.
- * \lreturn The current wibox widgets.
-*/
-static int
-luaA_wibox_widgets(lua_State *L)
-{
-    wibox_t **wibox = luaA_checkudata(L, 1, "wibox");
-
-    if(lua_gettop(L) == 2)
-    {
-        luaA_widget_set(L, 2, *wibox, &(*wibox)->widgets);
-        (*wibox)->need_update = true;
-        (*wibox)->mouse_over = NULL;
-        return 1;
-    }
-    return luaA_widget_get(L, (*wibox)->widgets);
 }
 
 /* Set or get the wibox geometry.
@@ -986,6 +978,12 @@ luaA_wibox_newindex(lua_State *L)
                 break;
             }
         break;
+      case A_TK_WIDGETS:
+        luaA_register(L, 3, &(*wibox)->widgets_table);
+        /* recompute widget node list */
+        wibox_widgets_table_build(L, *wibox);
+        luaA_table2wtable(L);
+        break;
       default:
         switch((*wibox)->type)
         {
@@ -1006,7 +1004,6 @@ const struct luaL_reg awesome_wibox_methods[] =
 };
 const struct luaL_reg awesome_wibox_meta[] =
 {
-    { "widgets", luaA_wibox_widgets },
     { "geometry", luaA_wibox_geometry },
     { "__index", luaA_wibox_index },
     { "__newindex", luaA_wibox_newindex },

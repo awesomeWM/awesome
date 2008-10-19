@@ -185,7 +185,6 @@ client_unfocus(client_t *c)
     luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
 
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
     ewmh_update_net_active_window(c->phys_screen);
 }
 
@@ -243,7 +242,6 @@ client_focus(client_t *c)
     luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
 
     ewmh_update_net_active_window(c->phys_screen);
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 }
 
 /** Stack a window below.
@@ -468,7 +466,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     ewmh_client_strut_update(c, NULL);
 
     ewmh_update_net_client_list(c->phys_screen);
-    widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
 
     /* Call hook to notify list change */
     luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
@@ -624,7 +621,6 @@ client_setfloating(client_t *c, bool floating)
             if(!c->isfullscreen)
                 client_resize(c, c->f_geometry, false);
         client_need_arrange(c);
-        widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
         client_stack();
         xcb_change_property(globalconf.connection,
                             XCB_PROP_MODE_REPLACE,
@@ -1039,8 +1035,6 @@ luaA_client_swap(lua_State *L)
     client_list_swap(&globalconf.clients, *swap, *c);
     client_need_arrange(*c);
     client_need_arrange(*swap);
-    widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
-    widget_invalidate_cache((*swap)->screen, WIDGET_CACHE_CLIENTS);
 
     /* Call hook to notify list change */
     luaA_dofunction(L, globalconf.hooks.clients, 0, 0);
@@ -1270,7 +1264,8 @@ luaA_client_newindex(lua_State *L)
         image_unref(&(*c)->icon);
         image_ref(image);
         (*c)->icon = *image;
-        widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
+        /* execute hook */
+        hooks_property(*c, "icon");
         break;
       case A_TK_OPACITY:
         if(lua_isnil(L, 3))

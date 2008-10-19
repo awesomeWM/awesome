@@ -105,6 +105,7 @@ typedef struct
     int screen;
     /** Widget list */
     widget_node_t *widgets;
+    luaA_ref widgets_table;
     /** Widget the mouse is over */
     widget_node_t *mouse_over;
     /** Need update */
@@ -141,8 +142,6 @@ struct widget_t
     widget_constructor_t *type;
     /** Widget destructor */
     widget_destructor_t *destructor;
-    /** Widget detach function */
-    void (*detach)(widget_t *, wibox_t *);
     /** Draw function */
     int (*draw)(draw_context_t *, int, widget_node_t *, int, int, wibox_t *);
     /** Index function */
@@ -437,6 +436,10 @@ struct awesome_t
         luaA_ref arrange;
         /** Command to run when client list changes */
         luaA_ref clients;
+        /** Command to run on numbers of tag changes */
+        luaA_ref tags;
+        /** Command to run when client gets (un)tagged */
+        luaA_ref tagged;
         /** Command to run on property change */
         luaA_ref property;
         /** Command to run on time */

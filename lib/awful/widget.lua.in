@@ -7,6 +7,7 @@
 -- Grab environment we need
 local ipairs = ipairs
 local pairs = pairs
+local table = table
 local capi =
 {
     screen = screen,
@@ -16,6 +17,7 @@ local capi =
     mouse = mouse
 }
 local util = require("awful.util")
+local hooks = require("awful.hooks")
 local beautiful = require("awful.beautiful")
 
 --- Widget module for awful
@@ -26,6 +28,60 @@ taglist = {}
 taglist.label = {}
 tasklist = {}
 tasklist.label = {}
+
+--- Create a new taglist widget.
+-- @param screen The screen to draw tag list.
+-- @param label Label function to use.
+-- @param buttons A table with buttons binding to set.
+function taglist.new(scr, label, buttons)
+    local w = {}
+    local function taglist_update (screen)
+        -- Return right now if we do not care about this screen
+        if scr ~= screen then return end
+        local tags = capi.screen[screen]:tags()
+        -- Hack: if it has been registered as a widget in a wibox,
+        -- it's w.len since __len meta does not work on table until Lua 5.2.
+        -- Otherwise it's standard #w.
+        local len = w.len or #w
+        -- Add more widgets
+        if len < #tags then
+            for i = len + 1, #tags do
+                w[i] = capi.widget({ type = "textbox", name = "taglist" .. i })
+            end
+        -- Remove widgets
+        elseif len > #tags then
+            for i = #tags, len do
+                w[i] = nil
+            end
+        end
+        -- Update widgets text
+        for k, tag in ipairs(tags) do
+            w[k].text = label(tag)
+            if buttons then
+                -- Replace press function by a new one calling with tags as
+                -- argument.
+                -- This is done here because order of tags can change
+                local mbuttons = {}
+                for kb, b in ipairs(buttons) do
+                    -- Copy object
+                    mbuttons[kb] = capi.button(b)
+                    mbuttons[kb].press = function () b.press(tag) end
+                end
+                w[k]:buttons(mbuttons)
+            end
+        end
+    end
+    hooks.arrange.register(taglist_update)
+    hooks.tags.register(taglist_update)
+    hooks.tagged.register(function (c, tag) taglist_update(c.screen) end)
+    hooks.property.register(function (c, prop)
+        if c.screen == scr and prop == "urgent" then
+            taglist_update(c.screen)
+        end
+    end)
+    taglist_update(scr)
+    return w
+end
 
 --- Return labels for a taglist widget with all tag from screen.
 -- It returns the tag name and set a special
@@ -135,6 +191,76 @@ function taglist.label.noempty(t, args)
     end
 end
 
+--- Create a new tasklist widget.
+-- @param label Label function to use.
+-- @param buttons A table with buttons binding to set.
+function tasklist.new(label, buttons)
+    local w = {}
+    local function tasklist_update ()
+        local clients = capi.client.get()
+        for k, c in ipairs(clients) do
+            if c.skip_taskbar or c.hide
+                or c.type == "splash" or c.type == "dock" or c.type == "desktop" then
+                table.remove(clients, k)
+            end
+        end
+        -- Hack: if it has been registered as a widget in a wibox,
+        -- it's w.len since __len meta does not work on table until Lua 5.2.
+        -- Otherwise it's standard #w.
+        local len = (w.len or #w) / 2
+        -- Add more widgets
+        if len < #clients then
+            for i = len * 2 + 1, #clients * 2, 2 do
+                w[i] = capi.widget({ type = "imagebox", name = "tasklist_icon" .. i, align = "flex" })
+                w[i + 1] = capi.widget({ type = "textbox", name = "tasklist_text" .. i, align = "flex" })
+            end
+        -- Remove widgets
+        elseif len > #clients then
+            for i = #clients * 2 + 1, len * 2, 2 do
+                w[i] = nil
+                w[i + 1] = nil
+            end
+        end
+        -- Update widgets text
+        for k = 1, #clients * 2, 2 do
+            if buttons then
+                -- Replace press function by a new one calling with tags as
+                -- argument
+                local mbuttons = {}
+                for kb, b in ipairs(buttons) do
+                    -- Copy object
+                    mbuttons[kb] = capi.button(b)
+                    mbuttons[kb].press = function () b.press(clients[(k + 1) / 2]) end
+                end
+                w[k]:buttons(mbuttons)
+                w[k + 1]:buttons(mbuttons)
+            end
+            w[k + 1].text, w[k].bg = label(clients[(k + 1) / 2])
+            if w[k + 1].text  then
+                w[k].visible = true
+                w[k + 1].visible = true
+                w[k].image = clients[(k + 1) / 2].icon
+            else
+                w[k].visible = false
+                w[k + 1].visible = false
+            end
+        end
+    end
+    hooks.clients.register(tasklist_update)
+    hooks.tagged.register(tasklist_update)
+    hooks.focus.register(tasklist_update)
+    hooks.unfocus.register(tasklist_update)
+    hooks.property.register(function (c, prop)
+        if prop == "urgent"
+            or prop == "floating"
+            or prop == "icon" then
+            tasklist_update()
+        end
+    end)
+    tasklist_update()
+    return w
+end
+
 local function widget_tasklist_label_common(c, args)
     if not args then args = {} end
     local theme = beautiful.get()
@@ -142,6 +268,7 @@ local function widget_tasklist_label_common(c, args)
     local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
+    local bg = nil
     local text = "<margin left=\"2\" right=\"2\"/>"
     local name
     if c.floating then
@@ -154,16 +281,18 @@ local function widget_tasklist_label_common(c, args)
     end
     if capi.client.focus == c then
         if bg_focus and fg_focus then
+            bg = bg_focus
             text = text .. "<bg color='"..bg_focus.."'/><span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span>"
         else
             text = text .. name
         end
     elseif c.urgent and bg_urgent and fg_urgent then
+        local bg = bg_urgent
         text = text .. "<bg color='"..bg_urgent.."'/><span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
     else
         text = text .. name
     end
-    return text
+    return text, bg
 end
 
 --- Return labels for a tasklist widget with clients from all tags and screen.

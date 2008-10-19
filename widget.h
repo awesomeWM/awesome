@@ -24,8 +24,6 @@
 
 #include "structs.h"
 
-#define WIDGET_CACHE_CLIENTS        (1<<0)
-#define WIDGET_CACHE_TAGS           (1<<2)
 #define WIDGET_CACHE_EMBEDDED       (1<<3)
 
 void widget_invalidate_cache(int, int);
@@ -34,14 +32,13 @@ void widget_common_new(widget_t *);
 void widget_render(widget_node_t *, draw_context_t *, xcb_gcontext_t, xcb_drawable_t, int, orientation_t, int, int, wibox_t *);
 
 int luaA_widget_userdata_new(lua_State *, widget_t *);
+void luaA_table2widgets(lua_State *, widget_node_t **);
 
 void widget_invalidate_bywidget(widget_t *);
 
-widget_constructor_t taglist_new;
 widget_constructor_t textbox_new;
 widget_constructor_t progressbar_new;
 widget_constructor_t graph_new;
-widget_constructor_t tasklist_new;
 widget_constructor_t systray_new;
 widget_constructor_t imagebox_new;
 
