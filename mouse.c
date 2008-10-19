@@ -1041,7 +1041,7 @@ luaA_client_mouse_move(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \lparam A table with modifiers keys.
+ * \lparam A table with modifiers keys, or a button to clone.
  * \lparam A mouse button number.
  * \lparam A function to execute on click events.
  * \lparam A function to execute on release events.
@@ -1051,7 +1051,29 @@ static int
 luaA_button_new(lua_State *L)
 {
     int i, len;
-    button_t *button;
+    button_t *button, **orig;
+
+    if((orig = luaA_toudata(L, 2, "button")))
+    {
+        button_t *copy = p_new(button_t, 1);
+        copy->mod = (*orig)->mod;
+        copy->button = (*orig)->button;
+        if((*orig)->press != LUA_REFNIL)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*orig)->press);
+            luaA_registerfct(L, -1, &copy->press);
+        }
+        else
+            copy->press = LUA_REFNIL;
+        if((*orig)->release != LUA_REFNIL)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*orig)->release);
+            luaA_registerfct(L, -1, &copy->release);
+        }
+        else
+            copy->release = LUA_REFNIL;
+        return luaA_button_userdata_new(L, copy);
+    }
 
     luaA_checktable(L, 2);
     /* arg 3 is mouse button */
@@ -1143,6 +1165,75 @@ luaA_button_array_get(lua_State *L, button_array_t *buttons)
     return 1;
 }
 
+/** Button object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield press The function called when button press event is received.
+ * \lfield release The function called when button release event is received.
+ */
+static int
+luaA_button_index(lua_State *L)
+{
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    size_t len;
+    button_t **button = luaA_checkudata(L, 1, "button");
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_PRESS:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, (*button)->press);
+        break;
+      case A_TK_RELEASE:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, (*button)->release);
+        break;
+      case A_TK_BUTTON:
+        /* works fine, but not *really* neat */
+        lua_pushnumber(L, (*button)->button);
+        break;
+      default:
+        break;
+    }
+
+    return 1;
+}
+
+/** Button object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ */
+static int
+luaA_button_newindex(lua_State *L)
+{
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    size_t len;
+    button_t **button = luaA_checkudata(L, 1, "button");
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_PRESS:
+        luaA_registerfct(L, 3, &(*button)->press);
+        break;
+      case A_TK_RELEASE:
+        luaA_registerfct(L, 3, &(*button)->release);
+        break;
+      case A_TK_BUTTON:
+        (*button)->button = xutil_button_fromint(luaL_checknumber(L, 3));
+        break;
+      default:
+        break;
+    }
+
+    return 0;
+}
+
 const struct luaL_reg awesome_button_methods[] =
 {
     { "__call", luaA_button_new },
@@ -1150,6 +1241,8 @@ const struct luaL_reg awesome_button_methods[] =
 };
 const struct luaL_reg awesome_button_meta[] =
 {
+    { "__index", luaA_button_index },
+    { "__newindex", luaA_button_newindex },
     { "__gc", luaA_button_gc },
     { "__eq", luaA_button_eq },
     { "__tostring", luaA_button_tostring },

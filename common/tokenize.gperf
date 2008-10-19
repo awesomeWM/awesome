@@ -9,6 +9,7 @@ border_width
 bottom
 bottomleft
 bottomright
+button
 center
 class
 client
@@ -59,6 +60,8 @@ pid
 plot_data_add
 plot_properties_set
 position
+press
+release
 resize
 right
 role
