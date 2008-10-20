@@ -218,6 +218,19 @@ luaA_hooks_mouse_over(lua_State *L)
     return luaA_hooks_mouse_enter(L);
 }
 
+/** Set the function called on each client list change.
+ * This function is called without any argument.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A function to call on each client list change.
+ */
+static int
+luaA_hooks_clients(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &globalconf.hooks.clients);
+}
+
 /** Set the function called on each screen arrange. This function is called
  * with the screen number as argument.
  * \param L The Lua VM state.
@@ -611,6 +624,7 @@ luaA_init(void)
         { "mouse_enter", luaA_hooks_mouse_enter },
         { "property", luaA_hooks_property },
         { "arrange", luaA_hooks_arrange },
+        { "clients", luaA_hooks_clients },
         { "timer", luaA_hooks_timer },
         /* deprecated */
         { "mouse_over", luaA_hooks_mouse_over },
@@ -686,6 +700,7 @@ luaA_init(void)
     globalconf.hooks.unfocus = LUA_REFNIL;
     globalconf.hooks.mouse_enter = LUA_REFNIL;
     globalconf.hooks.arrange = LUA_REFNIL;
+    globalconf.hooks.clients = LUA_REFNIL;
     globalconf.hooks.property = LUA_REFNIL;
     globalconf.hooks.timer = LUA_REFNIL;
 }

@@ -435,6 +435,8 @@ struct awesome_t
         luaA_ref mouse_enter;
         /** Command to run on arrange */
         luaA_ref arrange;
+        /** Command to run when client list changes */
+        luaA_ref clients;
         /** Command to run on property change */
         luaA_ref property;
         /** Command to run on time */

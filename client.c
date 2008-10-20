@@ -456,8 +456,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     }
 
     /* Push client in client list */
-    client_list_push(&globalconf.clients, c);
-    client_ref(&c);
+    client_list_push(&globalconf.clients, client_ref(&c));
+
     /* Push client in stack */
     client_raise(c);
 
@@ -469,6 +469,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     ewmh_update_net_client_list(c->phys_screen);
     widget_invalidate_cache(c->screen, WIDGET_CACHE_CLIENTS);
+
+    /* Call hook to notify list change */
+    luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
 
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
@@ -815,9 +818,18 @@ client_unmanage(client_t *c)
     if(globalconf.screens[c->phys_screen].client_focus == c)
         client_unfocus(c);
 
+    /* remove client everywhere */
+    client_list_detach(&globalconf.clients, c);
+    stack_client_delete(c);
+    for(int i = 0; i < tags->len; i++)
+        untag_client(c, tags->tab[i]);
+
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
     luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1, 0);
+
+    /* Call hook to notify list change */
+    luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
 
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
@@ -832,12 +844,6 @@ client_unmanage(client_t *c)
 
     xcb_flush(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);
-
-    /* remove client everywhere */
-    client_list_detach(&globalconf.clients, c);
-    stack_client_delete(c);
-    for(int i = 0; i < tags->len; i++)
-        untag_client(c, tags->tab[i]);
 
     titlebar_client_detach(c);
 
@@ -1035,6 +1041,10 @@ luaA_client_swap(lua_State *L)
     client_need_arrange(*swap);
     widget_invalidate_cache((*c)->screen, WIDGET_CACHE_CLIENTS);
     widget_invalidate_cache((*swap)->screen, WIDGET_CACHE_CLIENTS);
+
+    /* Call hook to notify list change */
+    luaA_dofunction(L, globalconf.hooks.clients, 0, 0);
+
     return 0;
 }
 

@@ -551,6 +551,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
             {
                 client_list_swap(&globalconf.clients, c, target);
                 globalconf.screens[c->screen].need_arrange = true;
+                luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
                 layout_refresh();
                 wibox_refresh();
                 xcb_flush(globalconf.connection);
