@@ -48,6 +48,7 @@ module("naughty")
 -- @field ontop Boolean forcing popups to display on top. Default: true
 -- @field font Popup font. Default: beautiful.font or "Verdana 8"
 -- @field icon Popup icon. Default: nil
+-- @field icon_size Size of the icon in pixels. Default: 16
 -- @field fg Foreground color. Default: beautiful.fg_focus or '#ffffff'
 -- @field bg Background color. Default: beautiful.bg_focus or '#535d6c'
 -- @field border_color Border color.
@@ -66,6 +67,7 @@ config.gap = 1
 config.ontop = true
 config.font = beautiful.font or "Verdana 8"
 config.icon = nil
+config.icon_size = 16
 config.fg = beautiful.fg_focus or '#ffffff'
 config.bg = beautiful.bg_focus or '#535d6c'
 config.border_color = beautiful.border_focus or '#535d6c'
@@ -153,6 +155,7 @@ end
 -- @param title Title of the notification
 -- @param position Corner of the workarea the popups will appear
 -- @param icon Path to icon
+-- @param icon_size Desired icon size in px
 -- @param fg Foreground color
 -- @param bg Background color
 -- @param screen Target screen for the notification
@@ -163,6 +166,7 @@ function notify(args)
     local timeout = args.timeout or config.timeout
     local position = args.position or config.position
     local icon = args.icon or config.icon
+    local icon_size = args.icon_size or config.icon_size
     local text = args.text or ""
     local screen = args.screen or config.screen
     local ontop = args.ontop or config.ontop
@@ -213,8 +217,9 @@ function notify(args)
     if icon then
         iconbox = widget({ type = "imagebox", name = "icon", align = "left" })
         iconbox:buttons({ button({ }, 1, function () destroy(notification) end) })
-        iconbox.image = image(icon)
-        iconbox.width = 20
+        local img = image(icon)
+        if icon_size then img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size) end
+        iconbox.image = img
     end
 
     box.widgets = { iconbox, textbox }
