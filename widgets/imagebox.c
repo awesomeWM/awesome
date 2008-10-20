@@ -29,6 +29,7 @@ typedef struct
 {
     /** Imagebox image */
     image_t *image;
+    xcolor_t bg;
 } imagebox_data_t;
 
 /** Draw an image.
@@ -59,6 +60,8 @@ imagebox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
                                             offset,
                                             w->widget->align);
 
+        if(d->bg.initialized)
+            draw_rectangle(ctx, w->area, 1.0, true, &d->bg);
         draw_image(ctx, w->area.x, w->area.y, ctx->height, d->image);
     }
     else
@@ -100,6 +103,9 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
       case A_TK_IMAGE:
         if(d->image)
             return luaA_image_userdata_new(L, d->image);
+      case A_TK_BG:
+        luaA_pushcolor(L, &d->bg);
+        break;
       default:
         break;
     }
@@ -120,6 +126,9 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+        const char *buf;
+        size_t len;
+
       case A_TK_IMAGE:
         if(lua_isnil(L, 3)
            || (image = luaA_checkudata(L, 3, "image")))
@@ -131,6 +140,12 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
             else
                 d->image = NULL;
         }
+        break;
+      case A_TK_BG:
+        if(lua_isnil(L, 3))
+            p_clear(&d->bg, 1);
+        else if((buf = luaL_checklstring(L, 3, &len)))
+            xcolor_init_reply(xcolor_init_unchecked(&d->bg, buf, len));
         break;
       default:
         return 0;
