@@ -148,6 +148,11 @@ xrealloc(void **ptr, ssize_t newsize)
     }
 }
 
+/** Duplicate a memory zone.
+ * \param src The source.
+ * \param size The source size.
+ * \return The memory address of the copy.
+ */
 static inline void *xmemdup(const void *src, ssize_t size)
 {
     return memcpy(xmalloc(size), src, size);
