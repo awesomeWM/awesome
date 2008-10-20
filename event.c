@@ -110,7 +110,8 @@ widget_getbycoords(position_t position, widget_node_t *widgets, int width, int h
     }
 
     for(w = widgets; w; w = w->next)
-        if(*x >= w->area.x && *x < w->area.x + w->area.width
+        if(w->widget->isvisible &&
+           *x >= w->area.x && *x < w->area.x + w->area.width
            && *y >= w->area.y && *y < w->area.y + w->area.height)
             return w;
 
