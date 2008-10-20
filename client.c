@@ -1325,6 +1325,7 @@ luaA_client_newindex(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield name The client title.
+ * \lfield skip_taskbar True if the client does not want to be in taskbar.
  * \lfield type The window type (desktop, normal, dock, …).
  * \lfield class The client class.
  * \lfield instance The client instance.
@@ -1333,8 +1334,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield machine The machine client is running on.
  * \lfield icon_name The client name when iconified.
  * \lfield screen Client screen number.
- * \lfield hide Define if the client must be hidden, i.e. never mapped, not
- * visible in taskbar.
+ * \lfield hide Define if the client must be hidden, i.e. never mapped,
  * invisible in taskbar.
  * \lfield minimize Define it the client must be iconify, i.e. only visible in
  * taskbar.
@@ -1374,6 +1374,9 @@ luaA_client_index(lua_State *L)
     {
       case A_TK_NAME:
         lua_pushstring(L, (*c)->name);
+        break;
+      case A_TK_SKIP_TASKBAR:
+        lua_pushboolean(L, (*c)->skiptb);
         break;
       case A_TK_TYPE:
         switch((*c)->type)
