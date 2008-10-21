@@ -225,6 +225,7 @@ luaA_image_crop(lua_State *L)
 }
 
 /** Crop the image to the given rectangle and scales it.
+ * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
  * \lvalue An image.
@@ -260,6 +261,41 @@ luaA_image_crop_and_scale(lua_State *L)
     return luaA_image_userdata_new(L, new);
 }
 
+/** Image object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue An image
+ * \lfield width The image width.
+ * \lfield height The image height.
+ */
+static int
+luaA_image_index(lua_State *L)
+{
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    image_t **image = luaA_checkudata(L, 1, "image");
+    size_t len;
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_WIDTH:
+        imlib_context_set_image((*image)->image);
+        lua_pushnumber(L, imlib_image_get_width());
+        break;
+      case A_TK_HEIGHT:
+        imlib_context_set_image((*image)->image);
+        lua_pushnumber(L, imlib_image_get_height());
+        break;
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
 /** Return a formated string for an image.
  * \param L The Lua VM state.
  * \luastack
@@ -282,6 +318,7 @@ const struct luaL_reg awesome_image_methods[] =
 };
 const struct luaL_reg awesome_image_meta[] =
 {
+    { "__index", luaA_image_index },
     { "rotate", luaA_image_rotate },
     { "crop", luaA_image_crop },
     { "crop_and_scale", luaA_image_crop_and_scale },
