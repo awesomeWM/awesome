@@ -53,6 +53,9 @@ gamedata.enemies.h = 10
 gamedata.enemies.w = 20
 gamedata.enemies.rows = 5
 gamedata.enemies.count = gamedata.enemies.rows * 6
+gamedata.enemies[1] = image("@AWESOME_ICON_PATH@/invaders/enemy_1.png")
+gamedata.enemies[2] = image("@AWESOME_ICON_PATH@/invaders/enemy_2.png")
+gamedata.enemies[3] = image("@AWESOME_ICON_PATH@/invaders/enemy_3.png")
 
 local player = { }
 local game = { }
@@ -176,7 +179,8 @@ function enemies.new (t)
                  y = gamedata.field.y })
     e.screen = 1
     w = widget({ type = "imagebox", name = "enemy"..t })
-    w.image = image("@AWESOME_ICON_PATH@/invaders/enemy_"..t..".png")
+    w.image = gamedata.enemies[t]
+
     e.widgets = w
     return e
 end
