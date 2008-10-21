@@ -101,7 +101,7 @@ end
 --- Place the client without it being outside the screen.
 -- @param c The client.
 function no_offscreen(c)
-    local geometry = c:fullcoords()
+    local geometry = c:fullgeometry()
     local screen_geometry = capi.screen[c.screen].workarea
 
     if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
@@ -116,7 +116,7 @@ function no_offscreen(c)
         geometry.y = screen_geometry.y
     end
 
-    c:fullcoords(geometry)
+    c:fullgeometry(geometry)
 end
 
 --- Place the client where there's place available with minimum overlap.
@@ -125,20 +125,20 @@ function no_overlap(c)
     local cls = client.visible(c.screen)
     local layout = layout.get()
     local areas = { capi.screen[c.screen].workarea }
-    local coords = c:coords()
-    local fullcoords = c:fullcoords()
+    local geometry = c:geometry()
+    local fullgeometry = c:fullgeometry()
     for i, cl in pairs(cls) do
         if cl ~= c and (cl.floating or layout == "floating") then
-            areas = area_remove(areas, cl:fullcoords())
+            areas = area_remove(areas, cl:fullgeometry())
         end
     end
 
     -- Look for available space
     local found = false
-    local new = { x = coords.x, y = coords.y, width = 0, height = 0 }
+    local new = { x = geometry.x, y = geometry.y, width = 0, height = 0 }
     for i, r in ipairs(areas) do
-        if r.width >= fullcoords.width
-           and r.height >= fullcoords.height
+        if r.width >= fullgeometry.width
+           and r.height >= fullgeometry.height
            and r.width * r.height > new.width * new.height then
             found = true
             new = r
@@ -156,19 +156,19 @@ function no_overlap(c)
     end
 
     -- Restore height and width
-    new.width = coords.width
-    new.height = coords.height
+    new.width = geometry.width
+    new.height = geometry.height
 
-    c:coords(new)
+    c:geometry(new)
 end
 
 --- Place the client under the mouse.
 -- @param c The client.
 function under_mouse(c)
-    local c_coords = c:coords()
+    local c_geometry = c:geometry()
     local m_coords = capi.mouse.coords()
-    c:coords({ x = m_coords.x - c_coords.width / 2,
-               y = m_coords.y - c_coords.height / 2 })
+    c:geometry({ x = m_coords.x - c_geometry.width / 2,
+                 y = m_coords.y - c_geometry.height / 2 })
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

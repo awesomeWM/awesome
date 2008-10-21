@@ -264,18 +264,18 @@ end
 local function get_client_in_direction(dir, c)
     local sel = c or capi.client.focus
     if sel then
-        local coords = sel:coords()
+        local geometry = sel:geometry()
         local dist, dist_min
         local target = nil
         local cls = visible(sel.screen)
 
         -- We check each client.
         for i, c in ipairs(cls) do
-            -- Check coords to see if client is located in the right direction.
-            if is_in_direction(dir, coords, c:coords()) then
+            -- Check geometry to see if client is located in the right direction.
+            if is_in_direction(dir, geometry, c:geometry()) then
 
                 -- Calculate distance between focused client and checked client.
-                dist = calculate_distance(dir, coords, c:coords())
+                dist = calculate_distance(dir, geometry, c:geometry())
 
                 -- If distance is shorter then keep the client.
                 if not target or dist < dist_min then
@@ -371,12 +371,12 @@ end
 -- @param c The optional client, otherwise focused one is used.
 function moveresize(x, y, w, h, c)
     local sel = c or capi.client.focus
-    local coords = sel:coords()
-    coords['x'] = coords['x'] + x
-    coords['y'] = coords['y'] + y
-    coords['width'] = coords['width'] + w
-    coords['height'] = coords['height'] + h
-    sel:coords(coords)
+    local geometry = sel:geometry()
+    geometry['x'] = geometry['x'] + x
+    geometry['y'] = geometry['y'] + y
+    geometry['width'] = geometry['width'] + w
+    geometry['height'] = geometry['height'] + h
+    sel:geometry(geometry)
 end
 
 --- Maximize a client to use the full workarea.
@@ -389,15 +389,15 @@ function maximize(c)
         ws.width = ws.width - 2 * sel.border_width
         ws.height = ws.height - 2 * sel.border_width
         if (sel.floating or curlay == "floating") and data.maximize[sel] then
-            sel:coords(data.maximize[sel].coords)
+            sel:geometry(data.maximize[sel].geometry)
             sel.floating = data.maximize[sel].floating
             data.maximize[sel] = nil
         else
-            data.maximize[sel] = { coords = sel:coords(), floating = sel.floating }
+            data.maximize[sel] = { geometry = sel:geometry(), floating = sel.floating }
             if curlay ~= "floating" then
                 sel.floating = true
             end
-            sel:coords(ws)
+            sel:geometry(ws)
         end
     end
 end
@@ -461,7 +461,7 @@ function movetoscreen(c, s)
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel.screen = s
-        capi.mouse.coords(capi.screen[s].coords)
+        capi.mouse.coords(capi.screen[s].geometry)
         capi.client.focus = sel
     end
 end

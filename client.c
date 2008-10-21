@@ -1151,7 +1151,7 @@ luaA_client_unmanage(lua_State *L)
     return 0;
 }
 
-/** Return client coordinates.
+/** Return client geometry.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
@@ -1159,7 +1159,7 @@ luaA_client_unmanage(lua_State *L)
  * \lreturn A table with client coordinates.
  */
 static int
-luaA_client_coords(lua_State *L)
+luaA_client_geometry(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
 
@@ -1181,7 +1181,14 @@ luaA_client_coords(lua_State *L)
     return luaA_pusharea(L, (*c)->geometry);
 }
 
-/** Return client coordinates, using also titlebar and border width.
+static int
+luaA_client_coords(lua_State *L)
+{
+    deprecate();
+    return luaA_client_geometry(L);
+}
+
+/** Return client geometry, using also titlebar and border width.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
@@ -1189,7 +1196,7 @@ luaA_client_coords(lua_State *L)
  * \lreturn A table with client coordinates.
  */
 static int
-luaA_client_fullcoords(lua_State *L)
+luaA_client_fullgeometry(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     area_t geometry;
@@ -1213,6 +1220,13 @@ luaA_client_fullcoords(lua_State *L)
     return luaA_pusharea(L, titlebar_geometry_add((*c)->titlebar,
                                                   (*c)->border,
                                                   (*c)->geometry));
+}
+
+static int
+luaA_client_fullcoords(lua_State *L)
+{
+    deprecate();
+    return luaA_client_fullgeometry(L);
 }
 
 /** Client newindex.
@@ -1586,8 +1600,8 @@ const struct luaL_reg awesome_client_methods[] =
 const struct luaL_reg awesome_client_meta[] =
 {
     { "isvisible", luaA_client_isvisible },
-    { "coords", luaA_client_coords },
-    { "fullcoords", luaA_client_fullcoords },
+    { "geometry", luaA_client_geometry },
+    { "fullgeometry", luaA_client_fullgeometry },
     { "buttons", luaA_client_buttons },
     { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },
@@ -1602,6 +1616,9 @@ const struct luaL_reg awesome_client_meta[] =
     { "__eq", luaA_client_eq },
     { "__gc", luaA_client_gc },
     { "__tostring", luaA_client_tostring },
+    /* deprecated */
+    { "coords", luaA_client_coords },
+    { "fullcoords", luaA_client_fullcoords },
     { NULL, NULL }
 };
 
