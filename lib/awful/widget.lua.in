@@ -253,7 +253,8 @@ function tasklist.new(label, buttons)
     hooks.property.register(function (c, prop)
         if prop == "urgent"
             or prop == "floating"
-            or prop == "icon" then
+            or prop == "icon"
+            or prop == "name" then
             tasklist_update()
         end
     end)
