@@ -452,8 +452,8 @@ end
 
 function run(args)
     gamedata.screen = capi.screen[capi.mouse.screen]
-    gamedata.field.x = gamedata.screen.coords.x + math.floor((gamedata.screen.coords.width - gamedata.field.w) / 2)
-    gamedata.field.y = gamedata.screen.coords.y + math.floor((gamedata.screen.coords.height - gamedata.field.h) / 2)
+    gamedata.field.x = gamedata.screen.geometry.x + math.floor((gamedata.screen.geometry.width - gamedata.field.w) / 2)
+    gamedata.field.y = gamedata.screen.geometry.y + math.floor((gamedata.screen.geometry.height - gamedata.field.h) / 2)
 
     if args then
     	if args['x'] then gamedata.field.x = args['x'] end

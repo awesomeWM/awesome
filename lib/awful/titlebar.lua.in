@@ -117,10 +117,10 @@ function update(c, prop)
             if data[c].width then
                 if c.titlebar.position == "top"
                     or c.titlebar.position == "bottom" then
-                    local w = math.min(data[c].width, c:coords().width + 2 * c.border_width)
+                    local w = math.min(data[c].width, c:geometry().width + 2 * c.border_width)
                     c.titlebar:geometry({ width = w })
                 else
-                    local w = math.min(data[c].width, c:coords().height + 2 * c.border_width)
+                    local w = math.min(data[c].width, c:geometry().height + 2 * c.border_width)
                     c.titlebar:geometry({ height = w })
                 end
             end

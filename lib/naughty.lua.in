@@ -87,7 +87,7 @@ notifications = {
 }
 
 local ws = capi.screen[config.screen].workarea
-local ss = capi.screen[config.screen].coords
+local ss = capi.screen[config.screen].geometry
 
 --- Evaluate desired position of the notification by index - internal
 -- @param idx Index of the notification
