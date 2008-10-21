@@ -219,7 +219,7 @@ struct client_t
     /** Valid, or not ? */
     bool invalid;
     /** Client name */
-    char *name;
+    char *name, *icon_name;
     /** Window geometry */
     area_t geometry;
     /** Floating window geometry */

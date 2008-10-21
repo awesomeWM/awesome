@@ -461,6 +461,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     /* update window title */
     property_update_wm_name(c);
+    property_update_wm_icon_name(c);
 
     /* update strut */
     ewmh_client_strut_update(c, NULL);
@@ -1436,13 +1437,7 @@ luaA_client_index(lua_State *L)
         p_delete(&value);
         break;
       case A_TK_ICON_NAME:
-        if(!xutil_text_prop_get(globalconf.connection, (*c)->win,
-                                _NET_WM_ICON_NAME, &value, &slen))
-            if(!xutil_text_prop_get(globalconf.connection, (*c)->win,
-                                    WM_ICON_NAME, &value, &slen))
-                return 0;
-        lua_pushlstring(L, value, slen);
-        p_delete(&value);
+        lua_pushstring(L, (*c)->icon_name);
         break;
       case A_TK_SCREEN:
         lua_pushnumber(L, 1 + (*c)->screen);

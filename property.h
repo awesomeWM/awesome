@@ -28,6 +28,7 @@ void property_update_wm_transient_for(client_t *, xcb_get_property_reply_t *);
 void property_update_wm_normal_hints(client_t *, xcb_get_property_reply_t *);
 void property_update_wm_hints(client_t *, xcb_get_property_reply_t *);
 void property_update_wm_name(client_t *);
+void property_update_wm_icon_name(client_t *);
 void a_xcb_set_property_handlers(void);
 
 #endif

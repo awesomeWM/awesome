@@ -239,6 +239,31 @@ property_update_wm_name(client_t *c)
     hooks_property(c, "name");
 }
 
+/** Update client icon name attribute with its new title.
+ * \param c The client.
+ * \param Return true if it has been updated.
+ */
+void
+property_update_wm_icon_name(client_t *c)
+{
+    char *name, *utf8;
+    ssize_t len;
+
+    if(!xutil_text_prop_get(globalconf.connection, c->win, _NET_WM_ICON_NAME, &name, &len))
+        if(!xutil_text_prop_get(globalconf.connection, c->win, WM_ICON_NAME, &name, &len))
+            return;
+
+    p_delete(&c->icon_name);
+
+    if((utf8 = draw_iso2utf8(name, len)))
+        c->icon_name = utf8;
+    else
+        c->icon_name = name;
+
+    /* call hook */
+    hooks_property(c, "icon_name");
+}
+
 static int
 property_handle_wm_name(void *data,
                         xcb_connection_t *connection,
@@ -251,6 +276,22 @@ property_handle_wm_name(void *data,
 
     if(c)
         property_update_wm_name(c);
+
+    return 0;
+}
+
+static int
+property_handle_wm_icon_name(void *data,
+                             xcb_connection_t *connection,
+                             uint8_t state,
+                             xcb_window_t window,
+                             xcb_atom_t name,
+                             xcb_get_property_reply_t *reply)
+{
+    client_t *c = client_getbywin(window);
+
+    if(c)
+        property_update_wm_icon_name(c);
 
     return 0;
 }
@@ -360,10 +401,14 @@ void a_xcb_set_property_handlers(void)
                              property_handle_wm_hints, NULL);
     xcb_property_set_handler(&globalconf.prophs, WM_NAME, UINT_MAX,
                              property_handle_wm_name, NULL);
+    xcb_property_set_handler(&globalconf.prophs, WM_ICON_NAME, UINT_MAX,
+                             property_handle_wm_icon_name, NULL);
 
     /* EWMH stuff */
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_NAME, UINT_MAX,
                              property_handle_wm_name, NULL);
+    xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON_NAME, UINT_MAX,
+                             property_handle_wm_icon_name, NULL);
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_STRUT_PARTIAL, UINT_MAX,
                              property_handle_net_wm_strut_partial, NULL);
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON, UINT_MAX,

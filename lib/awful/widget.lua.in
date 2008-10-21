@@ -254,7 +254,8 @@ function tasklist.new(label, buttons)
         if prop == "urgent"
             or prop == "floating"
             or prop == "icon"
-            or prop == "name" then
+            or prop == "name"
+            or prop == "icon_name" then
             tasklist_update()
         end
     end)
