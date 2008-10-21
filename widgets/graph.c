@@ -112,6 +112,8 @@ graph_plot_add(graph_data_t *d, const char *title)
 {
     plot_t plot;
 
+    p_clear(&plot, 1);
+
     plot.title = a_strdup(title);
     plot.values = p_new(float, d->size);
     plot.lines = p_new(int, d->size);

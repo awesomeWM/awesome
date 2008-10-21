@@ -95,6 +95,8 @@ progressbar_bar_add(progressbar_data_t *d, const char *title)
 {
     bar_t bar;
 
+    p_clear(&bar, 1);
+
     bar.title = a_strdup(title);
     bar.fg = globalconf.colors.fg;
     bar.fg_off = globalconf.colors.bg;
