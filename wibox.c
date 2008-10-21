@@ -712,9 +712,12 @@ static bool
 luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
 {
     bool ret = false;
-    lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
-    if(lua_topointer(L, -1) == item || luaA_hasitem(L, item))
-        ret = true;
+    if(wibox->widgets_table != LUA_REFNIL)
+    {
+        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
+        if(lua_topointer(L, -1) == item || luaA_hasitem(L, item))
+            ret = true;
+    }
     return ret;
 }
 
@@ -814,8 +817,11 @@ luaA_wibox_index(lua_State *L)
         lua_pushstring(L, orientation_tostr((*wibox)->sw.orientation));
         break;
       case A_TK_WIDGETS:
-        lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
-         break;
+        if((*wibox)->widgets_table != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
+        else
+            lua_pushnil(L);
+        break;
       default:
         return 0;
     }

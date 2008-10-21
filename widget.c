@@ -397,10 +397,16 @@ luaA_widget_index(lua_State *L)
         lua_pushstring(L, (*widget)->name);
         return 1;
       case A_TK_MOUSE_ENTER:
-        lua_rawgeti(L, LUA_REGISTRYINDEX, (*widget)->mouse_enter);
+        if((*widget)->mouse_enter != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*widget)->mouse_enter);
+        else
+            return 0;
         return 1;
       case A_TK_MOUSE_LEAVE:
-        lua_rawgeti(L, LUA_REGISTRYINDEX, (*widget)->mouse_leave);
+        if((*widget)->mouse_leave != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*widget)->mouse_leave);
+        else
+            return 0;
         return 1;
       default:
         break;

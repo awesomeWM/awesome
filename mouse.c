@@ -1186,10 +1186,16 @@ luaA_button_index(lua_State *L)
     switch(a_tokenize(attr, len))
     {
       case A_TK_PRESS:
-        lua_rawgeti(L, LUA_REGISTRYINDEX, (*button)->press);
+        if((*button)->press != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*button)->press);
+        else
+            lua_pushnil(L);
         break;
       case A_TK_RELEASE:
-        lua_rawgeti(L, LUA_REGISTRYINDEX, (*button)->release);
+        if((*button)->release != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*button)->release);
+        else
+            lua_pushnil(L);
         break;
       case A_TK_BUTTON:
         /* works fine, but not *really* neat */
