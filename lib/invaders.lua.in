@@ -450,6 +450,12 @@ function game.highscore (score)
     end
 end
 
+--- Run Awesome Invaders
+-- @param args A table with parameters.
+-- x the X coordinate of the playing field.
+-- y the Y coordinate of the playing field.
+-- if either of these is left out, the game is placed in the center of the focused screen.
+-- solidbg the background color of the playing field. If none is given, the playing field is transparent.
 function run(args)
     gamedata.screen = capi.screen[capi.mouse.screen]
     gamedata.field.x = gamedata.screen.geometry.x + math.floor((gamedata.screen.geometry.width - gamedata.field.w) / 2)
