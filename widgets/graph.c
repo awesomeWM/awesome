@@ -34,10 +34,8 @@ typedef enum
     Line_Style
 } plot_style_t;
 
-typedef struct plot_t plot_t;
-
 /** The plot data structure. */
-struct plot_t
+typedef struct
 {
     /** Grapht title of the plot sections */
     char *title;
@@ -67,20 +65,17 @@ struct plot_t
     xcolor_t pcolor_end;
     /** Create a vertical color gradient */
     bool vertical_gradient;
-    /** Next and previous graph */
-    plot_t *next, *prev;
-};
+} plot_t;
 
 static void
-plot_delete(plot_t **g)
+plot_delete(plot_t *g)
 {
-    p_delete(&(*g)->title);
-    p_delete(&(*g)->lines);
-    p_delete(&(*g)->values);
-    p_delete(g);
+    p_delete(&g->title);
+    p_delete(&g->lines);
+    p_delete(&g->values);
 }
 
-DO_SLIST(plot_t, plot, plot_delete)
+DO_ARRAY(plot_t, plot, plot_delete)
 
 /** The private graph data structure */
 typedef struct
@@ -104,7 +99,7 @@ typedef struct
     /** Preparation/tmp array for draw_graph(); */
     int *draw_to;
     /** Graph list */
-    plot_t *plots;
+    plot_array_t plots;
 } graph_data_t;
 
 /** Add a plot to a graph.
@@ -115,18 +110,17 @@ typedef struct
 static plot_t *
 graph_plot_add(graph_data_t *d, const char *title)
 {
-    plot_t *plot = p_new(plot_t, 1);
+    plot_t plot;
 
-    plot->title = a_strdup(title);
-    plot->values = p_new(float, d->size);
-    plot->lines = p_new(int, d->size);
-    plot->max_value = 100.0;
-    plot->color_start = globalconf.colors.fg;
-    plot->vertical_gradient = true;
+    plot.title = a_strdup(title);
+    plot.values = p_new(float, d->size);
+    plot.lines = p_new(int, d->size);
+    plot.max_value = 100.0;
+    plot.color_start = globalconf.colors.fg;
+    plot.vertical_gradient = true;
 
-    plot_list_append(&d->plots, plot);
-
-    return plot;
+    plot_array_append(&d->plots, plot);
+    return &d->plots.tab[d->plots.len - 1];
 }
 
 /** Draw a graph widget.
@@ -150,9 +144,8 @@ graph_draw(draw_context_t *ctx,
     graph_data_t *d = w->widget->data;
     area_t rectangle;
     vector_t color_gradient;
-    plot_t *plot;
 
-    if(!d->plots)
+    if(!d->plots.len)
         return 0;
 
     w->area.x = widget_calculate_offset(ctx->width,
@@ -185,7 +178,10 @@ graph_draw(draw_context_t *ctx,
     else
         color_gradient.x = rectangle.x;
 
-    for(plot = d->plots; plot; plot = plot->next)
+    for(int i = 0; i < d->plots.len; i++)
+    {
+        plot_t *plot = &d->plots.tab[i];
+
         switch(plot->draw_style)
         {
             case Top_Style:
@@ -255,6 +251,7 @@ graph_draw(draw_context_t *ctx,
                               &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
         }
+    }
 
     /* draw border (after line-drawing, what paints 0-values to the border) */
     rectangle.x = w->area.x;
@@ -284,16 +281,20 @@ luaA_graph_plot_properties_set(lua_State *L)
     float max_value;
     const char *title, *buf;
     size_t len;
-    plot_t *plot;
+    plot_t *plot = NULL;
     xcolor_init_request_t reqs[3];
     int8_t i, reqs_nbr = -1;
 
     title = luaL_checkstring(L, 2);
     luaA_checktable(L, 3);
 
-    for(plot = d->plots; plot; plot = plot->next)
+    for(int j = 0; j < d->plots.len; j++)
+    {
+        plot = &d->plots.tab[j];
         if(!a_strcmp(title, plot->title))
             break;
+    }
+
     /* no plot found -> create one */
     if(!plot)
         plot = graph_plot_add(d, title);
@@ -351,14 +352,17 @@ luaA_graph_plot_data_add(lua_State *L)
 {
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     graph_data_t *d = (*widget)->data;
-    plot_t *plot;
+    plot_t *plot = NULL;
     const char *title = luaL_checkstring(L, 2);
     float value;
     int i;
 
-    for(plot = d->plots; plot; plot = plot->next)
+    for(int j = 0; j < d->plots.len; j++)
+    {
+        plot = &d->plots.tab[j];
         if(!a_strcmp(title, plot->title))
             break;
+    }
 
     /* no plot found -> create one */
     if(!plot)
@@ -485,7 +489,6 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
     graph_data_t *d = (*widget)->data;
     const char *buf;
     int width;
-    plot_t *plot;
     position_t pos;
     xcolor_t color;
 
@@ -500,8 +503,9 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
         {
             d->width = width;
             d->size = d->width - 2;
-            for(plot = d->plots; plot; plot = plot->next)
+            for(int i = 0; i < d->plots.len; i++)
             {
+                plot_t *plot = &d->plots.tab[i];
                 p_realloc(&plot->values, d->size);
                 p_realloc(&plot->lines, d->size);
                 p_clear(plot->values, d->size);
@@ -561,7 +565,7 @@ graph_destructor(widget_t *widget)
 {
     graph_data_t *d = widget->data;
 
-    plot_list_wipe(&d->plots);
+    plot_array_wipe(&d->plots);
     p_delete(&d->draw_from);
     p_delete(&d->draw_to);
     p_delete(&d);
