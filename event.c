@@ -394,6 +394,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
         /* call mouse leave function on widget the mouse was over */
         luaA_wibox_userdata_new(globalconf.L, wibox);
         luaA_dofunction(globalconf.L, wibox->mouse_over->mouse_leave, 1, 0);
+        wibox->mouse_over = NULL;
     }
 
     return 0;
