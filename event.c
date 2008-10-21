@@ -411,13 +411,22 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
 {
     client_t *c;
     xembed_window_t *emwin;
+    wibox_t *wibox;
+    widget_node_t *w;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
        || (ev->root_x == globalconf.pointer_x
            && ev->root_y == globalconf.pointer_y))
         return 0;
 
-    if((c = client_getbytitlebarwin(ev->event))
+
+    if((wibox = wibox_getbywin(ev->event))
+       && (w = widget_getbycoords(wibox->position, &wibox->widgets,
+                                  wibox->sw.geometry.width,
+                                  wibox->sw.geometry.height,
+                                  &ev->event_x, &ev->event_y)))
+        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+    else if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
     {
         window_buttons_grab(c->win, ev->root, &c->buttons);
