@@ -26,6 +26,29 @@
 
 #define WIDGET_CACHE_EMBEDDED       (1<<3)
 
+struct widget_node_t
+{
+    /** The widget */
+    widget_t *widget;
+    /** The area where the widget was drawn */
+    area_t area;
+};
+
+/** Delete a widget structure.
+ * \param widget The widget to destroy.
+ */
+static inline void
+widget_delete(widget_t **widget)
+{
+    if((*widget)->destructor)
+        (*widget)->destructor(*widget);
+    button_array_wipe(&(*widget)->buttons);
+    p_delete(&(*widget)->name);
+    p_delete(widget);
+}
+
+DO_RCNT(widget_t, widget, widget_delete)
+
 void widget_invalidate_cache(int, int);
 int widget_calculate_offset(int, int, int, int);
 void widget_common_new(widget_t *);

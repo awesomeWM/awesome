@@ -27,6 +27,18 @@
 #include "structs.h"
 #include "stack.h"
 
+static void
+client_delete(client_t **c)
+{
+    button_array_wipe(&(*c)->buttons);
+    p_delete(&(*c)->icon_path);
+    p_delete(&(*c)->name);
+    p_delete(c);
+}
+
+ARRAY_FUNCS(client_t *, client, DO_NOTHING)
+DO_RCNT(client_t, client, client_delete)
+
 #define client_need_arrange(c) \
     do { \
         if(!globalconf.screens[(c)->screen].need_arrange \

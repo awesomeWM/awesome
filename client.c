@@ -273,6 +273,20 @@ client_stack_below(client_t *c, xcb_window_t previous)
     return c->win;
 }
 
+/** Stacking layout layers */
+typedef enum
+{
+    LAYER_DESKTOP = 1,
+    LAYER_BELOW,
+    LAYER_TILE,
+    LAYER_FLOAT,
+    LAYER_ABOVE,
+    LAYER_FULLSCREEN,
+    LAYER_MODAL,
+    LAYER_ONTOP,
+    LAYER_OUTOFSPACE
+} layer_t;
+
 /** Get the real layer of a client according to its attribute (fullscreen, …)
  * \param c The client.
  * \return The real layer.

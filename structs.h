@@ -35,20 +35,6 @@
 #include "common/xembed.h"
 #include "common/refcount.h"
 
-/** Stacking layout layers */
-typedef enum
-{
-    LAYER_DESKTOP = 1,
-    LAYER_BELOW,
-    LAYER_TILE,
-    LAYER_FLOAT,
-    LAYER_ABOVE,
-    LAYER_FULLSCREEN,
-    LAYER_MODAL,
-    LAYER_ONTOP,
-    LAYER_OUTOFSPACE
-} layer_t;
-
 /** Windows type */
 typedef enum
 {
@@ -78,7 +64,7 @@ typedef struct widget_t widget_t;
 typedef struct widget_node_t widget_node_t;
 typedef struct client_t client_t;
 typedef struct client_node_t client_node_t;
-typedef struct _tag_t tag_t;
+typedef struct tag tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
 typedef widget_t *(widget_constructor_t)(alignment_t);
 typedef void (widget_destructor_t)(widget_t *);
@@ -129,7 +115,6 @@ struct button_t
     /** Lua function to execute on release. */
     luaA_ref release;
 };
-
 DO_RCNT(button_t, button, p_delete)
 DO_ARRAY(button_t *, button, button_unref)
 
@@ -164,29 +149,6 @@ struct widget_t
     int cache_flags;
     /** True if the widget is visible */
     bool isvisible;
-};
-
-/** Delete a widget structure.
- * \param widget The widget to destroy.
- */
-static inline void
-widget_delete(widget_t **widget)
-{
-    if((*widget)->destructor)
-        (*widget)->destructor(*widget);
-    button_array_wipe(&(*widget)->buttons);
-    p_delete(&(*widget)->name);
-    p_delete(widget);
-}
-
-DO_RCNT(widget_t, widget, widget_delete)
-
-struct widget_node_t
-{
-    /** The widget */
-    widget_t *widget;
-    /** The area where the widget was drawn */
-    area_t area;
 };
 
 /* Strut */
@@ -273,18 +235,7 @@ struct client_t
     /** Next and previous clients */
     client_t *prev, *next;
 };
-
-static void
-client_delete(client_t **c)
-{
-    button_array_wipe(&(*c)->buttons);
-    p_delete(&(*c)->icon_path);
-    p_delete(&(*c)->name);
-    p_delete(c);
-}
-
-DO_ARRAY(client_t *, client, DO_NOTHING)
-DO_RCNT(client_t, client, client_delete)
+ARRAY_TYPE(client_t *, client)
 
 struct client_node_t
 {
@@ -295,7 +246,7 @@ struct client_node_t
 };
 
 /** Tag type */
-struct _tag_t
+struct tag
 {
     /** Ref count */
     int refcount;

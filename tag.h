@@ -23,6 +23,7 @@
 #define AWESOME_TAG_H
 
 #include "structs.h"
+#include "client.h"
 #include "common/refcount.h"
 
 /** Check if a client is tiled */
