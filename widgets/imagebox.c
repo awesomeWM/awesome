@@ -90,7 +90,7 @@ imagebox_destructor(widget_t *w)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield image The image to display.
- * \lfield width The width of the imagebox. Set to 0 for auto.
+ * \lfield bg The background color to use.
  */
 static int
 luaA_imagebox_index(lua_State *L, awesome_token_t token)
