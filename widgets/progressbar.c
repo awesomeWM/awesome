@@ -25,10 +25,8 @@
 
 extern awesome_t globalconf;
 
-typedef struct bar_t bar_t;
-
 /** Progressbar bar data structure */
-struct bar_t
+typedef struct
 {
     /** Title of the data/bar */
     char *title;
@@ -52,21 +50,18 @@ struct bar_t
     xcolor_t bg;
     /** Border color */
     xcolor_t border_color;
-    /** The next and previous bar in the list */
-    bar_t *next, *prev;
-};
+} bar_t;
 
 /** Delete a bar.
  * \param bar The bar to annihilate.
  */
 static void
-bar_delete(bar_t **bar)
+bar_delete(bar_t *bar)
 {
-    p_delete(&(*bar)->title);
-    p_delete(bar);
+    p_delete(&bar->title);
 }
 
-DO_SLIST(bar_t, bar, bar_delete)
+DO_ARRAY(bar_t, bar, bar_delete)
 
 /** Progressbar private data structure */
 typedef struct
@@ -88,7 +83,7 @@ typedef struct
     /** Height 0-1, where 1.0 is height of bar */
     float height;
     /** The bars */
-    bar_t *bars;
+    bar_array_t bars;
 } progressbar_data_t;
 
 /** Add a new bar to the progressbar private data structure.
@@ -98,19 +93,19 @@ typedef struct
 static bar_t *
 progressbar_bar_add(progressbar_data_t *d, const char *title)
 {
-    bar_t *bar = p_new(bar_t, 1);
+    bar_t bar;
 
-    bar->title = a_strdup(title);
-    bar->fg = globalconf.colors.fg;
-    bar->fg_off = globalconf.colors.bg;
-    bar->bg = globalconf.colors.bg;
-    bar->border_color = globalconf.colors.fg;
-    bar->max_value = 100.0;
+    bar.title = a_strdup(title);
+    bar.fg = globalconf.colors.fg;
+    bar.fg_off = globalconf.colors.bg;
+    bar.bg = globalconf.colors.bg;
+    bar.border_color = globalconf.colors.fg;
+    bar.max_value = 100.0;
 
     /* append the bar in the list */
-    bar_list_append(&d->bars, bar);
+    bar_array_append(&d->bars, bar);
 
-    return bar;
+    return &d->bars.tab[d->bars.len - 1];
 }
 
 /** Draw a progressbar.
@@ -132,24 +127,19 @@ progressbar_draw(draw_context_t *ctx,
 {
     /* pb_.. values points to the widget inside a potential border */
     int values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
-    int unit = 0, nbbars = 0; /* tick + gap */
+    int unit = 0; /* tick + gap */
     area_t rectangle;
     vector_t color_gradient;
     progressbar_data_t *d = w->widget->data;
-    bar_t *bar;
 
-    if(!d->bars)
+    if(!d->bars.len)
         return 0;
-
-    for(bar = d->bars; bar; bar = bar->next)
-        nbbars++;
 
     if(d->vertical)
     {
-        pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * nbbars
-                   - d->gap * (nbbars - 1)) / nbbars);
-        w->area.width = nbbars
-                        * (pb_width + 2 * (d->border_width + d->border_padding)
+        pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->bars.len
+                   - d->gap * (d->bars.len - 1)) / d->bars.len);
+        w->area.width = d->bars.len * (pb_width + 2 * (d->border_width + d->border_padding)
                         + d->gap) - d->gap;
     }
     else
@@ -199,8 +189,9 @@ progressbar_draw(draw_context_t *ctx,
         pb_y = w->area.y + ((int) (ctx->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
-        for(bar = d->bars; bar; bar = bar->next)
+        for(int i = 0; i < d->bars.len; i++)
         {
+            bar_t *bar = &d->bars.tab[i];
             if(d->ticks_count && d->ticks_gap)
             {
                 values_ticks = (int)(d->ticks_count * (bar->value - bar->min_value)
@@ -297,13 +288,14 @@ progressbar_draw(draw_context_t *ctx,
     else /* a horizontal progressbar */
     {
         pb_height = (int) ((ctx->height * d->height
-                            - nbbars * 2 * (d->border_width + d->border_padding)
-                            - (d->gap * (nbbars - 1))) / nbbars + 0.5);
+                            - d->bars.len * 2 * (d->border_width + d->border_padding)
+                            - (d->gap * (d->bars.len - 1))) / d->bars.len + 0.5);
         pb_y = w->area.y + ((int) (ctx->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
-        for(bar = d->bars; bar; bar = bar->next)
+        for(int i = 0; i < d->bars.len; i++)
         {
+            bar_t *bar = &d->bars.tab[i];
             if(d->ticks_count && d->ticks_gap)
             {
                 /* +0.5 rounds up ticks -> turn on a tick when half of it is reached */
@@ -412,7 +404,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *buf, *title = luaL_checkstring(L, 2);
-    bar_t *bar;
+    bar_t *bar = NULL;
     progressbar_data_t *d = (*widget)->data;
     xcolor_init_request_t reqs[6];
     int8_t i, reqs_nbr = -1;
@@ -420,9 +412,12 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     luaA_checktable(L, 3);
 
     /* check if this section is defined already */
-    for(bar = d->bars; bar; bar = bar->next)
+    for(int j = 0; j < d->bars.len; j++)
+    {
+        bar = &d->bars.tab[j];
         if(!a_strcmp(title, bar->title))
             break;
+    }
 
     /* no bar found -> create one */
     if(!bar)
@@ -485,12 +480,15 @@ luaA_progressbar_bar_data_add(lua_State *L)
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *title = luaL_checkstring(L, 2);
     progressbar_data_t *d = (*widget)->data;
-    bar_t *bar;
+    bar_t *bar = NULL;
 
     /* check if this section is defined already */
-    for(bar = d->bars; bar; bar = bar->next)
+    for(int j = 0; j < d->bars.len; j++)
+    {
+        bar = &d->bars.tab[j];
         if(!a_strcmp(title, bar->title))
             break;
+    }
 
     /* no bar found -> create one */
     if(!bar)
@@ -619,7 +617,7 @@ progressbar_destructor(widget_t *widget)
 {
     progressbar_data_t *d = widget->data;
 
-    bar_list_wipe(&d->bars);
+    bar_array_wipe(&d->bars);
     p_delete(&d);
 }
 
