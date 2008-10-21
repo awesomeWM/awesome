@@ -188,7 +188,7 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
             left += widgets->tab[i].widget->draw(ctx, screen, &widgets->tab[i], left, (left + right), wibox);
 
     /* renders right widget from last to first */
-    for(int i = widgets->len - 1; i; i--)
+    for(int i = widgets->len - 1; i >= 0; i--)
         if(widgets->tab[i].widget->align == AlignRight && widgets->tab[i].widget->isvisible)
             right += widgets->tab[i].widget->draw(ctx, screen, &widgets->tab[i], right, (left + right), wibox);
 
