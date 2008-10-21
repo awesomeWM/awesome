@@ -243,7 +243,14 @@ function enemies.handle ()
                             e.screen = nil
                             s.screen = nil
 
-                            gamedata.score = gamedata.score + 10
+                            if (y % 3) == 0 then
+                                gamedata.score = gamedata.score + 15
+                            elseif (y % 3) == 1 then
+                                gamedata.score = gamedata.score + 10
+                            else
+                                gamedata.score = gamedata.score + 5
+                            end
+
                             gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo.."  "
                             break
                         end
