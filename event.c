@@ -87,10 +87,9 @@ event_handle_mouse_button(client_t *c,
  * \return A widget node.
  */
 static widget_node_t *
-widget_getbycoords(position_t position, widget_node_t *widgets, int width, int height, int16_t *x, int16_t *y)
+widget_getbycoords(position_t position, widget_node_array_t *widgets, int width, int height, int16_t *x, int16_t *y)
 {
     int tmp;
-    widget_node_t *w;
 
     /* Need to transform coordinates like it was top/bottom */
     switch(position)
@@ -109,11 +108,14 @@ widget_getbycoords(position_t position, widget_node_t *widgets, int width, int h
         break;
     }
 
-    for(w = widgets; w; w = w->next)
+    for(int i = 0; i < widgets->len; i++)
+    {
+        widget_node_t *w = &widgets->tab[i];
         if(w->widget->isvisible &&
            *x >= w->area.x && *x < w->area.x + w->area.width
            && *y >= w->area.y && *y < w->area.y + w->area.height)
             return w;
+    }
 
     return NULL;
 }
@@ -148,7 +150,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
             ev->event_x -= wibox->sw.geometry.x;
             ev->event_y -= wibox->sw.geometry.y;
         }
-        if((w = widget_getbycoords(wibox->position, wibox->widgets,
+        if((w = widget_getbycoords(wibox->position, &wibox->widgets,
                                    wibox->sw.geometry.width,
                                    wibox->sw.geometry.height,
                                    &ev->event_x, &ev->event_y)))
@@ -331,21 +333,21 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
  */
 static void
 event_handle_widget_motionnotify(void *object,
-                                 widget_node_t **mouse_over,
+                                 widget_t **mouse_over,
                                  widget_node_t *w)
 {
-    if(w != *mouse_over)
+    if(w->widget != *mouse_over)
     {
         if(*mouse_over)
         {
             /* call mouse leave function on old widget */
             luaA_wibox_userdata_new(globalconf.L, object);
-            luaA_dofunction(globalconf.L, (*mouse_over)->widget->mouse_leave, 1, 0);
+            luaA_dofunction(globalconf.L, (*mouse_over)->mouse_leave, 1, 0);
         }
         if(w)
         {
             /* call mouse enter function on new widget and register it */
-            *mouse_over = w;
+            *mouse_over = w->widget;
             luaA_wibox_userdata_new(globalconf.L, object);
             luaA_dofunction(globalconf.L, w->widget->mouse_enter, 1, 0);
         }
@@ -365,14 +367,12 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
     wibox_t *wibox = wibox_getbywin(ev->event);
     widget_node_t *w;
 
-    if(wibox)
-    {
-        w = widget_getbycoords(wibox->position, wibox->widgets,
-                               wibox->sw.geometry.width,
-                               wibox->sw.geometry.height,
-                               &ev->event_x, &ev->event_y);
+    if(wibox
+       && (w = widget_getbycoords(wibox->position, &wibox->widgets,
+                                  wibox->sw.geometry.width,
+                                  wibox->sw.geometry.height,
+                                  &ev->event_x, &ev->event_y)))
         event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
-    }
 
     return 0;
 }
@@ -393,7 +393,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
     {
         /* call mouse leave function on widget the mouse was over */
         luaA_wibox_userdata_new(globalconf.L, wibox);
-        luaA_dofunction(globalconf.L, wibox->mouse_over->widget->mouse_leave, 1, 0);
+        luaA_dofunction(globalconf.L, wibox->mouse_over->mouse_leave, 1, 0);
     }
 
     return 0;

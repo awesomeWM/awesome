@@ -84,6 +84,8 @@ typedef widget_t *(widget_constructor_t)(alignment_t);
 typedef void (widget_destructor_t)(widget_t *);
 typedef struct awesome_t awesome_t;
 
+ARRAY_TYPE(widget_node_t, widget_node)
+
 /** Wibox type */
 typedef struct
 {
@@ -104,10 +106,10 @@ typedef struct
     /** Screen */
     int screen;
     /** Widget list */
-    widget_node_t *widgets;
+    widget_node_array_t widgets;
     luaA_ref widgets_table;
     /** Widget the mouse is over */
-    widget_node_t *mouse_over;
+    widget_t *mouse_over;
     /** Need update */
     bool need_update;
 } wibox_t;
@@ -185,21 +187,7 @@ struct widget_node_t
     widget_t *widget;
     /** The area where the widget was drawn */
     area_t area;
-    /** Next and previous widget in the list */
-    widget_node_t *prev, *next;
 };
-
-/** Delete a widget node structure.
- * \param node The node to destroy.
- */
-static inline void
-widget_node_delete(widget_node_t **node)
-{
-    widget_unref(&(*node)->widget);
-    p_delete(node);
-}
-
-DO_SLIST(widget_node_t, widget_node, widget_node_delete)
 
 /* Strut */
 typedef struct

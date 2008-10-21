@@ -114,12 +114,12 @@ wibox_systray_kickout(int phys_screen)
 static void
 wibox_systray_refresh(wibox_t *wibox)
 {
-    widget_node_t *systray;
-
     if(wibox->screen == SCREEN_UNDEF)
         return;
 
-    for(systray = wibox->widgets; systray; systray = systray->next)
+    for(int i = 0; i < wibox->widgets.len; i++)
+    {
+        widget_node_t *systray = &wibox->widgets.tab[i];
         if(systray->widget->type == systray_new)
         {
             uint32_t config_back[] = { wibox->sw.ctx.bg.pixel };
@@ -263,6 +263,7 @@ wibox_systray_refresh(wibox_t *wibox)
             }
             break;
         }
+    }
 }
 
 /** Update the wibox position. It deletes every wibox resources and
@@ -447,7 +448,7 @@ wibox_delete(wibox_t **wibox)
 {
     simplewindow_wipe(&(*wibox)->sw);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
-    widget_node_list_wipe(&(*wibox)->widgets);
+    widget_node_array_wipe(&(*wibox)->widgets);
     p_delete(wibox);
 }
 
@@ -481,7 +482,7 @@ wibox_draw(wibox_t *wibox)
 {
     if(wibox->isvisible)
     {
-        widget_render(wibox->widgets, &wibox->sw.ctx, wibox->sw.gc,
+        widget_render(&wibox->widgets, &wibox->sw.ctx, wibox->sw.gc,
                       wibox->sw.pixmap,
                       wibox->screen, wibox->sw.orientation,
                       wibox->sw.geometry.x, wibox->sw.geometry.y,
@@ -697,7 +698,8 @@ luaA_wibox_new(lua_State *L)
 static void
 wibox_widgets_table_build(lua_State *L, wibox_t *wibox)
 {
-    widget_node_list_wipe(&wibox->widgets);
+    widget_node_array_wipe(&wibox->widgets);
+    widget_node_array_init(&wibox->widgets);
     luaA_table2widgets(L, &wibox->widgets);
     wibox->mouse_over = NULL;
     wibox->need_update = true;

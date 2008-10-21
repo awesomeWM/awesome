@@ -87,7 +87,7 @@ widget_common_button(widget_node_t *w,
  * \param widgets The linked list of widget node.
  */
 void
-luaA_table2widgets(lua_State *L, widget_node_t **widgets)
+luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
 {
     if(lua_istable(L, -1))
     {
@@ -103,9 +103,10 @@ luaA_table2widgets(lua_State *L, widget_node_t **widgets)
         widget_t **widget = luaA_toudata(L, -1, "widget");
         if(widget)
         {
-            widget_node_t *w = p_new(widget_node_t, 1);
-            w->widget = widget_ref(widget);
-            widget_node_list_append(widgets, w);
+            widget_node_t w;
+            p_clear(&w, 1);
+            w.widget = widget_ref(widget);
+            widget_node_array_append(widgets, w);
         }
     }
 }
@@ -123,13 +124,12 @@ luaA_table2widgets(lua_State *L, widget_node_t **widgets)
  * \todo Remove GC.
  */
 void
-widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_pixmap_t rotate_px,
+widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t gc, xcb_pixmap_t rotate_px,
               int screen, orientation_t orientation,
               int x, int y, wibox_t *wibox)
 {
     xcb_pixmap_t rootpix;
     xcb_screen_t *s;
-    widget_node_t *w;
     int left = 0, right = 0;
     char *data;
     xcb_get_property_reply_t *prop_r;
@@ -183,28 +183,28 @@ widget_render(widget_node_t *wnode, draw_context_t *ctx, xcb_gcontext_t gc, xcb_
 
     draw_rectangle(ctx, rectangle, 1.0, true, &ctx->bg);
 
-    for(w = wnode; w; w = w->next)
-        if(w->widget->align == AlignLeft && w->widget->isvisible)
-                left += w->widget->draw(ctx, screen, w, left, (left + right), wibox);
+    for(int i = 0; i < widgets->len; i++)
+        if(widgets->tab[i].widget->align == AlignLeft && widgets->tab[i].widget->isvisible)
+            left += widgets->tab[i].widget->draw(ctx, screen, &widgets->tab[i], left, (left + right), wibox);
 
     /* renders right widget from last to first */
-    for(w = *widget_node_list_last(&wnode); w; w = w->prev)
-        if(w->widget->align == AlignRight && w->widget->isvisible)
-                right += w->widget->draw(ctx, screen, w, right, (left + right), wibox);
+    for(int i = widgets->len - 1; i; i--)
+        if(widgets->tab[i].widget->align == AlignRight && widgets->tab[i].widget->isvisible)
+            right += widgets->tab[i].widget->draw(ctx, screen, &widgets->tab[i], right, (left + right), wibox);
 
     /* \todo rewrite this */
     int flex = 0;
-    for(w = wnode; w; w = w->next)
-        if(w->widget->align == AlignFlex && w->widget->isvisible)
+    for(int i = 0; i < widgets->len; i++)
+        if(widgets->tab[i].widget->align == AlignFlex && widgets->tab[i].widget->isvisible)
             flex++;
 
     if(flex)
     {
         int length = (ctx->width - (left + right)) / flex;
 
-        for(w = wnode; w; w = w->next)
-            if(w->widget->align == AlignFlex && w->widget->isvisible)
-                    left += w->widget->draw(ctx, screen, w, left, (left + right) + length * --flex , wibox);
+        for(int i = 0; i < widgets->len; i++)
+            if(widgets->tab[i].widget->align == AlignFlex && widgets->tab[i].widget->isvisible)
+                    left += widgets->tab[i].widget->draw(ctx, screen, &widgets->tab[i], left, (left + right) + length * --flex , wibox);
     }
 
     switch(orientation)
@@ -249,10 +249,9 @@ widget_invalidate_cache(int screen, int flags)
     for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
     {
         wibox_t *wibox = globalconf.screens[screen].wiboxes.tab[i];
-        widget_node_t *widget;
 
-        for(widget = wibox->widgets; widget; widget = widget->next)
-            if(widget->widget->cache_flags & flags)
+        for(int j = 0; j < wibox->widgets.len; j++)
+            if(wibox->widgets.tab[j].widget->cache_flags & flags)
             {
                 wibox->need_update = true;
                 break;
@@ -272,8 +271,8 @@ widget_invalidate_bywidget(widget_t *widget)
         {
             wibox_t *wibox = globalconf.screens[screen].wiboxes.tab[i];
             if(!wibox->need_update)
-                for(widget_node_t *witer = wibox->widgets; witer; witer = witer->next)
-                    if(witer->widget == widget)
+                for(int j = 0; j < wibox->widgets.len; j++)
+                    if(wibox->widgets.tab[j].widget == widget)
                     {
                         wibox->need_update = true;
                         break;
@@ -282,8 +281,8 @@ widget_invalidate_bywidget(widget_t *widget)
 
     for(client_t *c = globalconf.clients; c; c = c->next)
         if(c->titlebar && !c->titlebar->need_update)
-            for(widget_node_t *witer = c->titlebar->widgets; witer; witer = witer->next)
-                if(witer->widget == widget)
+            for(int j = 0; j < c->titlebar->widgets.len; j++)
+                if(c->titlebar->widgets.tab[j].widget == widget)
                 {
                     c->titlebar->need_update = true;
                     break;
