@@ -16,6 +16,7 @@ local tag = require("awful.tag")
 local titlebar = require("awful.titlebar")
 local util = require("awful.util")
 local widget = require("awful.widget")
+local menu = require("awful.menu")
 
 local ipairs = ipairs
 local unpack = unpack

@@ -1,0 +1,208 @@
+---------------------------------------------------------------------------
+-- @author Damien Leone &lt;damien.leone@gmail.com&gt;
+-- @copyright 2008 Damien Leone
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local table = table
+local type = type
+local wibox = wibox
+local image = image
+local string = string
+local widget = widget
+local button = button
+local capi = { screen = screen, mouse = mouse }
+local util = require("awful.util")
+local awbeautiful = require("awful.beautiful")
+
+--- Menu module for awful
+module("awful.menu")
+
+-- Table containing all currently opened menus
+local menus = {}
+
+-- Theme table
+local theme
+
+local function load_theme()
+    local beautiful
+    beautiful = awbeautiful.get()
+
+    theme = {}
+    theme.fg_focus = beautiful.menu_fg_focus or beautiful.fg_focus
+    theme.bg_focus = beautiful.menu_bg_focus or beautiful.bg_focus
+    theme.fg_normal = beautiful.menu_fg_normal or beautiful.fg_normal
+    theme.bg_normal = beautiful.menu_bg_normal or beautiful.bg_normal
+
+    theme.submenu_icon = beautiful.menu_submenu_icon or "@AWESOME_ICON_PATH@/submenu.png"
+
+    theme.menu_height = beautiful.menu_height or 15
+    theme.menu_width = beautiful.menu_width or 100
+
+    theme.border = beautiful.menu_border_color or beautiful.border_normal
+    theme.border_width = beautiful.menu_border_width or beautiful.border_width
+end
+
+local function mouse_enter(w)
+    w.fg = theme.fg_focus
+    w.bg = theme.bg_focus
+end
+
+local function mouse_leave(w)
+    w.fg = theme.fg_normal
+    w.bg = theme.bg_normal
+end
+
+local function destroy(data)
+    if data then
+        -- Remove items from screen
+        for i = 1, #data.items do
+            data.items[i].screen = nil
+        end
+
+        -- Clean memory, dirty but I'm lazy
+        for i = 1, #data.items do
+            table.remove(data.items)
+        end
+
+        destroy(data.child)
+
+        -- Remove menu from menus table
+        menus[data.id] = nil
+    end
+end
+
+local function get_parents(data)
+    local p_data = data
+
+    -- Get the elder parent so when you kill
+    -- it he will destroy the whole family
+    while p_data.parent do
+        p_data = p_data.parent
+    end
+
+    return p_data
+end
+
+local function exec(data, action, num)
+    if type(action[2]) == "table" then
+        destroy(data.child)
+        data.child = new(action[1], action[2], data, num)
+    elseif type(action[2]) == "string" then
+        destroy(get_parents(data))
+        util.spawn(action[2])
+    end
+end
+
+local function add_item(data, num, item_info)
+    local item = wibox({
+        name = data.id .. "item" .. num,
+        position = "floating",
+        fg = theme.fg_normal,
+        bg = theme.bg_normal,
+        border_color = theme.border,
+        border_width = theme.border_width
+    })
+
+    -- Create bindings
+    local bindings = {
+        button({}, 1, function () exec(data, item_info, num) end),
+        button({}, 3, function () destroy(data) end)
+    }
+
+    -- Create the item icon widget
+    local icon = nil
+    if item_info[3]  then
+        icon = widget({ type = "imagebox",  name = "icon", align = "left" })
+        icon.image = image(item_info[3])
+        icon:buttons(bindings)
+
+        function icon.mouse_enter() mouse_enter(item) end
+        function icon.mouse_leave() mouse_leave(item) end
+    end
+
+    -- Create the item label widget
+    local label = widget({
+        type = "textbox",
+        name = data.id .. "label" .. num,
+        align = "flex"
+    })
+    label.text = string.format(" %s", item_info[1])
+    label:buttons(bindings)
+
+    function label.mouse_enter() mouse_enter(item) end
+    function label.mouse_leave() mouse_leave(item) end
+
+    -- Create the submenu icon widget
+    local submenu = nil
+    if type(item_info[2]) == "table" then
+        submenu = widget({ type = "imagebox", name = "submenu", align = "right" })
+        submenu.image = image(theme.submenu_icon)
+        submenu:buttons(bindings)
+
+        function submenu.mouse_enter() mouse_enter(item) end
+        function submenu.mouse_leave() mouse_leave(item) end
+    end
+
+    -- Add widgets to the wibox
+    item.widgets = {icon, label, submenu}
+
+    item:geometry({
+        width = theme.menu_width,
+        height = theme.menu_height,
+        x = data.x,
+        y = data.y + theme.menu_height*(num - 1)
+    })
+
+    item.ontop = true
+    item.screen = data.screen
+
+    return item
+end
+
+--- Open a menu popup
+-- @param id Menu id, string naming your menu, only one menu with the same id can be displayed on screen at the same time
+-- @param items Table containing the displayed items, each element is a tab containing: item name, tiggered action or submenu table, item icon (optional)
+-- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user
+-- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user
+function new(id, items, parent, num)
+    -- Load config only one time
+    if not theme then
+        load_theme()
+    end
+
+    -- Close the menu if it was already opened
+    if menus[id] then
+        destroy(menus[id])
+    end
+
+    -- Create a table to store our menu informations
+    local data = {}
+    data.id = id
+    data.screen = capi.mouse.screen
+    data.nb_items = #items
+    data.items = {}
+    data.child = nil
+
+    if parent then
+        data.x = parent.x + theme.menu_width + theme.border_width
+        data.y = parent.y + theme.menu_height*(num - 1)
+        data.parent = parent
+    else
+        local m_coords = capi.mouse.coords()
+        data.x = m_coords.x
+        data.y = m_coords.y
+        data.parent = nil
+    end
+
+    -- Create items
+    for i = 1, data.nb_items do
+        table.insert(data.items, add_item(data, i, items[i]))
+    end
+
+    -- Add menu to menus table
+    menus[id] = data
+
+    return data
+end

@@ -19,6 +19,7 @@ local capi =
 local util = require("awful.util")
 local hooks = require("awful.hooks")
 local beautiful = require("awful.beautiful")
+local menu = require("awful.menu")
 
 --- Widget module for awful
 module("awful.widget")
@@ -372,13 +373,19 @@ end
 
 --- Create a button widget which will launch a command.
 -- @param args Standard widget table arguments, plus image for the image path
--- and command for the command to run on click.
+-- and command for the command to run on click, or either menu to create menu.
 -- @return A launcher widget.
 function launcher(args)
-    if not args.command then return end
+    if not args.command and not args.menu then return end
     local w = button(args)
     local b = w:buttons()
-    b[#b + 1] = capi.button({}, 1, nil, function () util.spawn(args.command) end)
+
+    if args.command then
+       b[#b + 1] = capi.button({}, 1, nil, function () util.spawn(args.command) end)
+    elseif args.menu then
+       b[#b + 1] = capi.button({}, 1, nil, function () menu.new(args.menu[1], args.menu[2]) end)
+    end
+
     w:buttons(b)
     return w
 end

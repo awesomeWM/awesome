@@ -25,6 +25,13 @@ border_marked = #91231c
 # Example:
 #taglist_bg_focus = #ff0000
 
+# Variables set for theming menu
+# menu_[bg|fg]_[normal|focus]
+# menu_[border_color|border_width]
+# menu_submenu_icon = @AWESOME_ICONS_PATH@/submenu.png
+menu_height   = 15
+menu_width    = 100
+
 # Display the taglist squares
 taglist_squares = true
 
