@@ -171,6 +171,33 @@ luaA_image_new(lua_State *L)
     return 0;
 }
 
+/** Create a new image object from ARGB32 data.
+ * \param L The Lua stack.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam The image width.
+ * \lparam The image height.
+ * \lparam The image data as a string in ARGB32 format.
+ * \lreturn An image object.
+ */
+static int
+luaA_image_argb32_new(lua_State *L)
+{
+    size_t len;
+    image_t *image;
+    unsigned int width = luaL_checknumber(L, 1);
+    unsigned int height = luaL_checknumber(L, 2);
+    const char *data = luaL_checklstring(L, 3, &len);
+
+    if(width * height * 4 != len)
+        luaL_error(L, "string size does not match image size");
+
+    if((image = image_new_from_argb32(width, height, (uint32_t *) data)))
+        return luaA_image_userdata_new(L, image);
+
+    return 0;
+}
+
 /** Rotate an image with specified angle radians and return a new image.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -314,6 +341,7 @@ luaA_image_tostring(lua_State *L)
 const struct luaL_reg awesome_image_methods[] =
 {
     { "__call", luaA_image_new },
+    { "argb32", luaA_image_argb32_new },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_image_meta[] =
