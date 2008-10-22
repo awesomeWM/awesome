@@ -138,9 +138,16 @@ function restart()
 end
 
 function getdir(d)
-    if d == "cache" then
-        if os.getenv("XDG_CACHE_HOME") then
-            return os.getenv("XDG_CACHE_HOME").."/awesome"
+    if d == "config" then
+        local dir = os.getenv("XDG_CONFIG_HOME")
+        if dir then
+            return dir .. "/awesome"
+        end
+        return os.getenv("HOME") .. "/.config/awesome"
+    elseif d == "cache" then
+        local dir = os.getenv("XDG_CACHE_HOME")
+        if dir then
+            return dir .. "/awesome"
         end
         return os.getenv("HOME").."/.cache/awesome"
     end
