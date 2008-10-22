@@ -129,8 +129,10 @@ struct widget_t
     widget_constructor_t *type;
     /** Widget destructor */
     widget_destructor_t *destructor;
+    /** Geometry function */
+    area_t (*geometry)(widget_t *, int, int, int);
     /** Draw function */
-    int (*draw)(draw_context_t *, int, widget_node_t *, int, int, wibox_t *);
+    void (*draw)(widget_t *, draw_context_t *, area_t, int, wibox_t *);
     /** Index function */
     int (*index)(lua_State *, awesome_token_t);
     /** Newindex function */

@@ -32,35 +32,29 @@
 
 extern awesome_t globalconf;
 
-static int
-systray_draw(draw_context_t *ctx,
-             int screen __attribute__ ((unused)),
-             widget_node_t *w,
-             int offset, int used __attribute__ ((unused)),
-             wibox_t *p)
+static area_t
+systray_geometry(widget_t *widget, int screen, int height, int width)
+{
+    area_t geometry;
+    int phys_screen = screen_virttophys(screen), i = 0;
+
+    geometry.height = height;
+
+    for(xembed_window_t *em = globalconf.embedded; em; em = em->next)
+        if(em->phys_screen == phys_screen)
+            i++;
+
+    /** \todo use class hints */
+    geometry.width = MIN(i * height, width);
+
+    return geometry;
+}
+
+static void
+systray_draw(widget_t *widget, draw_context_t *ctx,
+             area_t geometry, int screen, wibox_t *p)
 {
     uint32_t orient;
-
-    w->area.height = ctx->height;
-
-    if(ctx->width - used > 0)
-    {
-        int i = 0;
-        xembed_window_t *em;
-        for(em = globalconf.embedded; em; em = em->next)
-            if(em->phys_screen == p->sw.ctx.phys_screen)
-                i++;
-        /** \todo use clas hints */
-        w->area.width = MIN(i * ctx->height, ctx->width - used);
-    }
-    else
-        w->area.width = 0;
-
-    w->area.x = widget_calculate_offset(ctx->width,
-                                        w->area.width,
-                                        offset,
-                                        w->widget->align);
-    w->area.y = 0;
 
     switch(p->position)
     {
@@ -78,8 +72,6 @@ systray_draw(draw_context_t *ctx,
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         globalconf.screens[p->sw.ctx.phys_screen].systray.window,
                         _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
-
-    return w->area.width;
 }
 
 widget_t *
@@ -91,6 +83,7 @@ systray_new(alignment_t align)
     widget_common_new(w);
     w->align = align;
     w->draw = systray_draw;
+    w->geometry = systray_geometry;
     w->cache_flags = WIDGET_CACHE_EMBEDDED;
 
     return w;

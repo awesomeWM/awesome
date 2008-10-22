@@ -112,8 +112,8 @@ widget_getbycoords(position_t position, widget_node_array_t *widgets, int width,
     {
         widget_node_t *w = &widgets->tab[i];
         if(w->widget->isvisible &&
-           *x >= w->area.x && *x < w->area.x + w->area.width
-           && *y >= w->area.y && *y < w->area.y + w->area.height)
+           *x >= w->geometry.x && *x < w->geometry.x + w->geometry.width
+           && *y >= w->geometry.y && *y < w->geometry.y + w->geometry.height)
             return w;
     }
 

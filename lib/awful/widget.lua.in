@@ -238,9 +238,14 @@ function tasklist.new(label, buttons)
             end
             w[k + 1].text, w[k].bg = label(clients[(k + 1) / 2])
             if w[k + 1].text  then
-                w[k].visible = true
-                w[k + 1].visible = true
+                -- Set icon
                 w[k].image = clients[(k + 1) / 2].icon
+                if w[k].image then
+                    w[k].visible = true
+                else
+                    w[k].visible = false
+                end
+                w[k + 1].visible = true
             else
                 w[k].visible = false
                 w[k + 1].visible = false

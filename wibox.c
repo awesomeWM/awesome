@@ -131,7 +131,7 @@ wibox_systray_refresh(wibox_t *wibox)
 
             if(wibox->isvisible
                && systray->widget->isvisible
-               && systray->area.width)
+               && systray->geometry.width)
             {
                 pos = wibox->position;
 
@@ -145,22 +145,22 @@ wibox_systray_refresh(wibox_t *wibox)
                 switch(wibox->position)
                 {
                   case Left:
-                    config_win_vals[0] = systray->area.y;
-                    config_win_vals[1] = wibox->sw.geometry.height - systray->area.x - systray->area.width;
-                    config_win_vals[2] = systray->area.height;
-                    config_win_vals[3] = systray->area.width;
+                    config_win_vals[0] = systray->geometry.y;
+                    config_win_vals[1] = wibox->sw.geometry.height - systray->geometry.x - systray->geometry.width;
+                    config_win_vals[2] = systray->geometry.height;
+                    config_win_vals[3] = systray->geometry.width;
                     break;
                   case Right:
-                    config_win_vals[0] = systray->area.y;
-                    config_win_vals[1] = systray->area.x;
-                    config_win_vals[2] = systray->area.height;
-                    config_win_vals[3] = systray->area.width;
+                    config_win_vals[0] = systray->geometry.y;
+                    config_win_vals[1] = systray->geometry.x;
+                    config_win_vals[2] = systray->geometry.height;
+                    config_win_vals[3] = systray->geometry.width;
                     break;
                   default:
-                    config_win_vals[0] = systray->area.x;
-                    config_win_vals[1] = systray->area.y;
-                    config_win_vals[2] = systray->area.width;
-                    config_win_vals[3] = systray->area.height;
+                    config_win_vals[0] = systray->geometry.x;
+                    config_win_vals[1] = systray->geometry.y;
+                    config_win_vals[2] = systray->geometry.width;
+                    config_win_vals[3] = systray->geometry.height;
                     break;
                 }
                 /* reparent */
@@ -180,7 +180,7 @@ wibox_systray_refresh(wibox_t *wibox)
                                      | XCB_CONFIG_WINDOW_HEIGHT,
                                      config_win_vals);
                 /* width = height = systray height */
-                config_win_vals[2] = config_win_vals[3] = systray->area.height;
+                config_win_vals[2] = config_win_vals[3] = systray->geometry.height;
                 config_win_vals[0] = 0;
             }
             else
@@ -189,7 +189,7 @@ wibox_systray_refresh(wibox_t *wibox)
             switch(pos)
             {
               case Left:
-                config_win_vals[1] = systray->area.width - config_win_vals[3];
+                config_win_vals[1] = systray->geometry.width - config_win_vals[3];
                 for(em = globalconf.embedded; em; em = em->next)
                     if(em->phys_screen == phys_screen)
                     {
@@ -242,7 +242,7 @@ wibox_systray_refresh(wibox_t *wibox)
                     if(em->phys_screen == phys_screen)
                     {
                         /* if(x + width < systray.x + systray.width) */
-                        if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->area) + wibox->sw.geometry.x)
+                        if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->geometry) + wibox->sw.geometry.x)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,

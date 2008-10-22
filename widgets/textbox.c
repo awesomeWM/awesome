@@ -39,47 +39,42 @@ typedef struct
     draw_parser_data_t pdata;
 } textbox_data_t;
 
-/** Draw a textbox widget.
- * \param ctx The draw context.
- * \param screen The screen.
- * \param w The widget node we are linked from.
- * \param offset Offset to draw at.
- * \param used The size used on the element.
- * \param p A pointer to the object we're draw onto.
- * \return The width used.
- */
-static int
-textbox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
-             widget_node_t *w,
-             int offset, int used,
-             wibox_t *p __attribute__ ((unused)))
+static area_t
+textbox_geometry(widget_t *widget, int screen, int height, int width)
 {
-    textbox_data_t *d = w->widget->data;
+    area_t geometry;
+    textbox_data_t *d = widget->data;
 
-    w->area.height = ctx->height;
+    geometry.height = height;
 
     if(d->width)
-        w->area.width = d->width;
-    else if(w->widget->align == AlignFlex)
-        w->area.width = ctx->width - used;
+        geometry.width = d->width;
+    else if(widget->align == AlignFlex)
+        geometry.width = width;
     else
     {
-        w->area.width = MIN(d->extents, ctx->width - used);
+        geometry.width = MIN(d->extents, width);
 
         if(d->pdata.bg_image)
-            w->area.width = MAX(w->area.width,
-                                d->pdata.bg_resize ? ((double) d->pdata.bg_image->width / (double) d->pdata.bg_image->height) * w->area.height : d->pdata.bg_image->width);
+            geometry.width = MAX(geometry.width,
+                                 d->pdata.bg_resize ? ((double) d->pdata.bg_image->width / (double) d->pdata.bg_image->height) * geometry.height : d->pdata.bg_image->width);
     }
 
-    w->area.x = widget_calculate_offset(ctx->width,
-                                        w->area.width,
-                                        offset,
-                                        w->widget->align);
-    w->area.y = 0;
+    return geometry;
+}
 
-    draw_text(ctx, globalconf.font, w->area, d->text, d->len, &d->pdata);
-
-    return w->area.width;
+/** Draw a textbox widget.
+ * \param widget The widget.
+ * \param ctx The draw context.
+ * \param screen The screen.
+ * \param p A pointer to the object we're draw onto.
+ */
+static void
+textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
+             int screen, wibox_t *p)
+{
+    textbox_data_t *d = widget->data;
+    draw_text(ctx, globalconf.font, geometry, d->text, d->len, &d->pdata);
 }
 
 /** Delete a textbox widget.
@@ -187,6 +182,7 @@ textbox_new(alignment_t align)
     w->index = luaA_textbox_index;
     w->newindex = luaA_textbox_newindex;
     w->destructor = textbox_destructor;
+    w->geometry = textbox_geometry;
     w->data = d = p_new(textbox_data_t, 1);
 
     return w;

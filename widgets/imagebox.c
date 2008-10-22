@@ -32,45 +32,45 @@ typedef struct
     xcolor_t bg;
 } imagebox_data_t;
 
-/** Draw an image.
- * \param ctx The draw context.
- * \param screen The screen.
- * \param w The widget node we are linked from.
- * \param offset Offset to draw at.
- * \param used The size used on the element.
- * \param p A pointer to the object we're draw onto.
- * \return The width used.
- */
-static int
-imagebox_draw(draw_context_t *ctx, int screen __attribute__ ((unused)),
-              widget_node_t *w,
-              int offset, int used,
-              wibox_t *p)
+static area_t
+imagebox_geometry(widget_t *widget, int screen, int height, int width)
 {
-    imagebox_data_t *d = w->widget->data;
-
-    w->area.y = 0;
+    area_t geometry;
+    imagebox_data_t *d = widget->data;
 
     if(d->image)
     {
-        w->area.height = ctx->height;
-        w->area.width = ((double) ctx->height / (double) d->image->height) * d->image->width;
-        w->area.x = widget_calculate_offset(ctx->width,
-                                            w->area.width,
-                                            offset,
-                                            w->widget->align);
-
-        if(d->bg.initialized)
-            draw_rectangle(ctx, w->area, 1.0, true, &d->bg);
-        draw_image(ctx, w->area.x, w->area.y, ctx->height, d->image);
+        geometry.height = height;
+        geometry.width = ((double) height / (double) d->image->height) * d->image->width;
     }
     else
     {
-        w->area.width = 0;
-        w->area.height = 0;
+        geometry.width = 0;
+        geometry.height = 0;
     }
 
-    return w->area.width;
+    return geometry;
+}
+
+/** Draw an image.
+ * \param widget The widget.
+ * \param ctx The draw context.
+ * \param geometry The geometry we draw in.
+ * \param screen The screen.
+ * \param p A pointer to the object we're draw onto.
+ */
+static void
+imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
+              int screen, wibox_t *p)
+{
+    imagebox_data_t *d = widget->data;
+
+    if(d->image)
+    {
+        if(d->bg.initialized)
+            draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
+        draw_image(ctx, geometry.x, geometry.y, ctx->height, d->image);
+    }
 }
 
 /** Delete a imagebox widget.
@@ -171,6 +171,7 @@ imagebox_new(alignment_t align)
     w->index = luaA_imagebox_index;
     w->newindex = luaA_imagebox_newindex;
     w->destructor = imagebox_destructor;
+    w->geometry = imagebox_geometry;
     w->data = p_new(imagebox_data_t, 1);
 
     return w;

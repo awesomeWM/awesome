@@ -30,8 +30,8 @@ struct widget_node_t
 {
     /** The widget */
     widget_t *widget;
-    /** The area where the widget was drawn */
-    area_t area;
+    /** The geometry where the widget was drawn */
+    area_t geometry;
 };
 
 /** Delete a widget structure.

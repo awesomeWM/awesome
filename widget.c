@@ -128,12 +128,7 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
               int screen, orientation_t orientation,
               int x, int y, wibox_t *wibox)
 {
-    xcb_pixmap_t rootpix;
-    xcb_screen_t *s;
     int left = 0, right = 0;
-    char *data;
-    xcb_get_property_reply_t *prop_r;
-    xcb_get_property_cookie_t prop_c;
     area_t rectangle = { 0, 0, 0, 0 };
 
     rectangle.width = ctx->width;
@@ -141,7 +136,11 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
 
     if(ctx->bg.alpha != 0xffff)
     {
-        s = xutil_screen_get(globalconf.connection, ctx->phys_screen);
+        xcb_get_property_reply_t *prop_r;
+        char *data;
+        xcb_pixmap_t rootpix;
+        xcb_get_property_cookie_t prop_c;
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, ctx->phys_screen);
         prop_c = xcb_get_property_unchecked(globalconf.connection, false, s->root, _XROOTPMAP_ID,
                                             PIXMAP, 0, 1);
         if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))
@@ -181,18 +180,27 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
         }
     }
 
-    draw_rectangle(ctx, rectangle, 1.0, true, &ctx->bg);
-
+    /* compute geometry */
     for(int i = 0; i < widgets->len; i++)
         if(widgets->tab[i].widget->align == AlignLeft && widgets->tab[i].widget->isvisible)
-            left += widgets->tab[i].widget->draw(ctx, screen, &widgets->tab[i], left, (left + right), wibox);
+        {
+            widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
+                                                                        screen, ctx->height,
+                                                                        ctx->width - (left + right));
+            widgets->tab[i].geometry.x = left;
+            left += widgets->tab[i].geometry.width;
+        }
 
-    /* renders right widget from last to first */
     for(int i = widgets->len - 1; i >= 0; i--)
         if(widgets->tab[i].widget->align == AlignRight && widgets->tab[i].widget->isvisible)
-            right += widgets->tab[i].widget->draw(ctx, screen, &widgets->tab[i], right, (left + right), wibox);
+        {
+            widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
+                                                                        screen, ctx->height,
+                                                                        ctx->width - (left + right));
+            right += widgets->tab[i].geometry.width;
+            widgets->tab[i].geometry.x = ctx->width - right;
+        }
 
-    /* \todo rewrite this */
     int flex = 0;
     for(int i = 0; i < widgets->len; i++)
         if(widgets->tab[i].widget->align == AlignFlex && widgets->tab[i].widget->isvisible)
@@ -204,8 +212,26 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
 
         for(int i = 0; i < widgets->len; i++)
             if(widgets->tab[i].widget->align == AlignFlex && widgets->tab[i].widget->isvisible)
-                    left += widgets->tab[i].widget->draw(ctx, screen, &widgets->tab[i], left, (left + right) + length * --flex , wibox);
+            {
+                widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
+                                                                            screen, ctx->height,
+                                                                            length);
+                widgets->tab[i].geometry.x = left;
+                left += widgets->tab[i].geometry.width;
+            }
     }
+
+    /* draw everything! */
+    draw_rectangle(ctx, rectangle, 1.0, true, &ctx->bg);
+
+    for(int i = 0; i < widgets->len; i++)
+        if(widgets->tab[i].widget->isvisible)
+        {
+            widgets->tab[i].geometry.y = 0;
+            widgets->tab[i].widget->draw(widgets->tab[i].widget,
+                                         ctx, widgets->tab[i].geometry,
+                                         screen, wibox);
+        }
 
     switch(orientation)
     {

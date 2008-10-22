@@ -133,6 +133,35 @@ progressbar_bar_get(bar_array_t *bars, const char *title)
     return progressbar_bar_add(bars, title);
 }
 
+static area_t
+progressbar_geometry(widget_t *widget, int screen, int height, int width)
+{
+    area_t geometry;
+    progressbar_data_t *d = widget->data;
+
+    geometry.height = height;
+
+    if(d->vertical)
+    {
+        int pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->bars.len
+                       - d->gap * (d->bars.len - 1)) / d->bars.len);
+        geometry.width = d->bars.len * (pb_width + 2 * (d->border_width + d->border_padding)
+                         + d->gap) - d->gap;
+    }
+    else
+    {
+        int pb_width = d->width - 2 * (d->border_width + d->border_padding);
+        if(d->ticks_count && d->ticks_gap)
+        {
+            int unit = (pb_width + d->ticks_gap) / d->ticks_count;
+            pb_width = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
+        }
+        geometry.width = pb_width + 2 * (d->border_width + d->border_padding);
+    }
+
+    return geometry;
+}
+
 /** Draw a progressbar.
  * \param ctx The draw context.
  * \param screen The screen we're drawing for.
@@ -142,47 +171,19 @@ progressbar_bar_get(bar_array_t *bars, const char *title)
  * \param object The object pointer we're drawing onto.
  * \return The width used.
  */
-static int
-progressbar_draw(draw_context_t *ctx,
-                 int screen __attribute__ ((unused)),
-                 widget_node_t *w,
-                 int offset,
-                 int used __attribute__ ((unused)),
-                 wibox_t *p __attribute__ ((unused)))
+static void
+progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
+                 int screen, wibox_t *p)
 {
     /* pb_.. values points to the widget inside a potential border */
     int values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;
     int unit = 0; /* tick + gap */
     area_t rectangle;
     vector_t color_gradient;
-    progressbar_data_t *d = w->widget->data;
+    progressbar_data_t *d = widget->data;
 
     if(!d->bars.len)
-        return 0;
-
-    if(d->vertical)
-    {
-        pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->bars.len
-                   - d->gap * (d->bars.len - 1)) / d->bars.len);
-        w->area.width = d->bars.len * (pb_width + 2 * (d->border_width + d->border_padding)
-                        + d->gap) - d->gap;
-    }
-    else
-    {
-        pb_width = d->width - 2 * (d->border_width + d->border_padding);
-        if(d->ticks_count && d->ticks_gap)
-        {
-            unit = (pb_width + d->ticks_gap) / d->ticks_count;
-            pb_width = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
-        }
-        w->area.width = pb_width + 2 * (d->border_width + d->border_padding);
-    }
-
-    w->area.x = widget_calculate_offset(ctx->width,
-                                        w->area.width,
-                                        offset,
-                                        w->widget->align);
-    w->area.y = 0;
+        return;
 
     /* for a 'reversed' progressbar:
      * basic progressbar:
@@ -195,11 +196,14 @@ progressbar_draw(draw_context_t *ctx,
      * 2. finally draw the gaps
      */
 
-    pb_x = w->area.x + d->border_width + d->border_padding;
+    pb_x = geometry.x + d->border_width + d->border_padding;
     pb_offset = 0;
 
     if(d->vertical)
     {
+        pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->bars.len
+                   - d->gap * (d->bars.len - 1)) / d->bars.len);
+
         /** \todo maybe prevent to calculate that stuff below over and over again
          * (->use static-values) */
         pb_height = (int) (ctx->height * d->height + 0.5)
@@ -211,7 +215,7 @@ progressbar_draw(draw_context_t *ctx,
             pb_height = unit * d->ticks_count - d->ticks_gap;
         }
 
-        pb_y = w->area.y + ((int) (ctx->height * (1 - d->height)) / 2)
+        pb_y = geometry.y + ((int) (ctx->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
         for(int i = 0; i < d->bars.len; i++)
@@ -312,10 +316,18 @@ progressbar_draw(draw_context_t *ctx,
     }
     else /* a horizontal progressbar */
     {
+        pb_width = d->width - 2 * (d->border_width + d->border_padding);
+
+        if(d->ticks_count && d->ticks_gap)
+        {
+            unit = (pb_width + d->ticks_gap) / d->ticks_count;
+            pb_width = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
+        }
+
         pb_height = (int) ((ctx->height * d->height
                             - d->bars.len * 2 * (d->border_width + d->border_padding)
                             - (d->gap * (d->bars.len - 1))) / d->bars.len + 0.5);
-        pb_y = w->area.y + ((int) (ctx->height * (1 - d->height)) / 2)
+        pb_y = geometry.y + ((int) (ctx->height * (1 - d->height)) / 2)
                + d->border_width + d->border_padding;
 
         for(int i = 0; i < d->bars.len; i++)
@@ -410,9 +422,6 @@ progressbar_draw(draw_context_t *ctx,
             pb_offset += pb_height + d->gap + 2 * (d->border_width + d->border_padding);
         }
     }
-
-    w->area.height = ctx->height;
-    return w->area.width;
 }
 
 /** Set various progressbar bars properties:
@@ -643,6 +652,7 @@ progressbar_new(alignment_t align)
     w->index = luaA_progressbar_index;
     w->newindex = luaA_progressbar_newindex;
     w->destructor = progressbar_destructor;
+    w->geometry = progressbar_geometry;
     d = w->data = p_new(progressbar_data_t, 1);
 
     d->height = 0.80;

@@ -148,6 +148,18 @@ graph_plot_get(graph_data_t *d, const char *title)
     return graph_plot_add(d, title);
 }
 
+static area_t
+graph_geometry(widget_t *widget, int screen, int height, int width)
+{
+    area_t geometry;
+    graph_data_t *d = widget->data;
+
+    geometry.height = height;
+    geometry.width = d->width;
+
+    return geometry;
+}
+
 /** Draw a graph widget.
  * \param ctx The draw context.
  * \param screen The screen number.
@@ -157,35 +169,26 @@ graph_plot_get(graph_data_t *d, const char *title)
  * \param p A pointer to the object we're drawing onto.
  * \return The widget width.
  */
-static int
-graph_draw(draw_context_t *ctx,
-           int screen __attribute__ ((unused)),
-           widget_node_t *w,
-           int offset,
-           int used __attribute__ ((unused)),
-           wibox_t *p __attribute__ ((unused)))
+static void
+graph_draw(widget_t *widget, draw_context_t *ctx,
+           area_t geometry, int screen, wibox_t *p)
 {
     int margin_top, y;
-    graph_data_t *d = w->widget->data;
+    graph_data_t *d = widget->data;
     area_t rectangle;
     vector_t color_gradient;
 
     if(!d->plots.len)
-        return 0;
-
-    w->area.x = widget_calculate_offset(ctx->width,
-                                        d->width, offset,
-                                        w->widget->align);
-    w->area.y = 0;
+        return;
 
     /* box = the plot inside the rectangle */
     if(!d->box_height)
         d->box_height = round(ctx->height * d->height) - 2;
 
-    margin_top = round((ctx->height - (d->box_height + 2)) / 2) + w->area.y;
+    margin_top = round((ctx->height - (d->box_height + 2)) / 2) + geometry.y;
 
     /* draw background */
-    rectangle.x = w->area.x + 1;
+    rectangle.x = geometry.x + 1;
     rectangle.y = margin_top + 1;
     rectangle.width = d->size;
     rectangle.height = d->box_height;
@@ -279,15 +282,11 @@ graph_draw(draw_context_t *ctx,
     }
 
     /* draw border (after line-drawing, what paints 0-values to the border) */
-    rectangle.x = w->area.x;
+    rectangle.x = geometry.x;
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
     draw_rectangle(ctx, rectangle, 1.0, false, &d->border_color);
-
-    w->area.width = d->width;
-    w->area.height = ctx->height;
-    return w->area.width;
 }
 
 /** Set various plot graph properties.
@@ -596,6 +595,7 @@ graph_new(alignment_t align)
     w->newindex = luaA_graph_newindex;
     w->destructor = graph_destructor;
     w->align = align;
+    w->geometry = graph_geometry;
     d = w->data = p_new(graph_data_t, 1);
 
     d->width = 80;
