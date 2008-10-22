@@ -92,6 +92,8 @@ local function exec(data, action, num)
     elseif type(action[2]) == "string" then
         destroy(get_parents(data))
         util.spawn(action[2])
+    elseif type(action[2]) == "function" then
+        action[2]()
     end
 end
 

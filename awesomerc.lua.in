@@ -100,21 +100,20 @@ mytextbox.text = "<b><small> " .. AWESOME_RELEASE .. " </small></b>"
 
 -- Create a laucher widget and a main menu
 myawesomemenu = {
-   {"manual", terminal .. " -e man awesome"},
-   {"edit config", terminal .. " -e nano ~/.config/awesome/rc.lua"},
-   {"restart", "echo \"awesome.restart()\" | awesome-client"},
-   {"quit", "echo \"awesome.quit()\" | awesome-client"}
+   {"manual", terminal .. " -e man awesome" },
+   {"edit config", terminal .. " -e " .. os.getenv("EDITOR") .. " ~/.config/awesome/rc.lua" },
+   {"restart", awesome.restart },
+   {"quit", awesome.quit }
 }
 
 mymainmenu = {
    {"awesome", myawesomemenu, "@AWESOME_ICON_PATH@/awesome16.png" },
-   {"open terminal", terminal}
+   {"open terminal", terminal }
 }
 
 mylauncher = awful.widget.launcher({ name = "mylauncher",
                                      image = "@AWESOME_ICON_PATH@/awesome16.png",
-                                     menu = {"mymainmenu", mymainmenu}
-                                  })
+                                     menu = { "mymainmenu", mymainmenu } })
 
 -- Create a systray
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
