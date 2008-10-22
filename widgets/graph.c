@@ -122,7 +122,30 @@ graph_plot_add(graph_data_t *d, const char *title)
     plot.vertical_gradient = true;
 
     plot_array_append(&d->plots, plot);
+
     return &d->plots.tab[d->plots.len - 1];
+}
+
+/** Get the plot, and create one if it does not exist.
+ * \param d The graph private data.
+ * \param title The plot title.
+ * \return A maybe new plot.
+ */
+static plot_t *
+graph_plot_get(graph_data_t *d, const char *title)
+{
+    plot_t *plot;
+
+    /* check if this section is defined already */
+    for(int j = 0; j < d->plots.len; j++)
+    {
+        plot = &d->plots.tab[j];
+        if(!a_strcmp(title, plot->title))
+            return plot;
+    }
+
+    /* no plot found -> create one */
+    return graph_plot_add(d, title);
 }
 
 /** Draw a graph widget.
@@ -290,16 +313,7 @@ luaA_graph_plot_properties_set(lua_State *L)
     title = luaL_checkstring(L, 2);
     luaA_checktable(L, 3);
 
-    for(int j = 0; j < d->plots.len; j++)
-    {
-        plot = &d->plots.tab[j];
-        if(!a_strcmp(title, plot->title))
-            break;
-    }
-
-    /* no plot found -> create one */
-    if(!plot)
-        plot = graph_plot_add(d, title);
+    plot = graph_plot_get(d, title);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg", NULL, &len)))
         reqs[++reqs_nbr] = xcolor_init_unchecked(&plot->color_start, buf, len);
@@ -359,16 +373,7 @@ luaA_graph_plot_data_add(lua_State *L)
     float value;
     int i;
 
-    for(int j = 0; j < d->plots.len; j++)
-    {
-        plot = &d->plots.tab[j];
-        if(!a_strcmp(title, plot->title))
-            break;
-    }
-
-    /* no plot found -> create one */
-    if(!plot)
-        plot = graph_plot_add(d, title);
+    plot = graph_plot_get(d, title);
 
     /* assign incoming value */
     value = MAX(luaL_checknumber(L, 3), 0);
@@ -426,7 +431,7 @@ luaA_graph_plot_data_add(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield plot_properties_set A function to set plot properties.
- * \lfield plot_add_add A function to add data to a plot.
+ * \lfield plot_data_add A function to add data to a plot.
  * \lfield height Graph height.
  * \lfield widget Graph width.
  * \lfield bg Background color.

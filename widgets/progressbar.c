@@ -87,11 +87,12 @@ typedef struct
 } progressbar_data_t;
 
 /** Add a new bar to the progressbar private data structure.
- * \param d The private data structure.
- * \param title The graph title.
+ * \param bars The bar array.
+ * \param title The bar title.
+ * \return The new bar.
  */
 static bar_t *
-progressbar_bar_add(progressbar_data_t *d, const char *title)
+progressbar_bar_add(bar_array_t *bars, const char *title)
 {
     bar_t bar;
 
@@ -105,9 +106,31 @@ progressbar_bar_add(progressbar_data_t *d, const char *title)
     bar.max_value = 100.0;
 
     /* append the bar in the list */
-    bar_array_append(&d->bars, bar);
+    bar_array_append(bars, bar);
 
-    return &d->bars.tab[d->bars.len - 1];
+    return &bars->tab[bars->len - 1];
+}
+
+/** Get the bar, and create one if it does not exist.
+ * \param bars The bar array.
+ * \param title The bar title.
+ * \return A maybe new bar.
+ */
+static bar_t *
+progressbar_bar_get(bar_array_t *bars, const char *title)
+{
+    bar_t *bar;
+
+    /* check if this section is defined already */
+    for(int j = 0; j < bars->len; j++)
+    {
+        bar = &bars->tab[j];
+        if(!a_strcmp(title, bar->title))
+            return bar;
+    }
+
+    /* no bar found -> create one */
+    return progressbar_bar_add(bars, title);
 }
 
 /** Draw a progressbar.
@@ -406,24 +429,14 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     size_t len;
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *buf, *title = luaL_checkstring(L, 2);
-    bar_t *bar = NULL;
+    bar_t *bar;
     progressbar_data_t *d = (*widget)->data;
     xcolor_init_request_t reqs[6];
     int8_t i, reqs_nbr = -1;
 
     luaA_checktable(L, 3);
 
-    /* check if this section is defined already */
-    for(int j = 0; j < d->bars.len; j++)
-    {
-        bar = &d->bars.tab[j];
-        if(!a_strcmp(title, bar->title))
-            break;
-    }
-
-    /* no bar found -> create one */
-    if(!bar)
-        bar = progressbar_bar_add(d, title);
+    bar = progressbar_bar_get(&d->bars, title);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg", NULL, &len)))
         reqs[++reqs_nbr] = xcolor_init_unchecked(&bar->fg, buf, len);
@@ -482,19 +495,9 @@ luaA_progressbar_bar_data_add(lua_State *L)
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *title = luaL_checkstring(L, 2);
     progressbar_data_t *d = (*widget)->data;
-    bar_t *bar = NULL;
+    bar_t *bar;
 
-    /* check if this section is defined already */
-    for(int j = 0; j < d->bars.len; j++)
-    {
-        bar = &d->bars.tab[j];
-        if(!a_strcmp(title, bar->title))
-            break;
-    }
-
-    /* no bar found -> create one */
-    if(!bar)
-        bar = progressbar_bar_add(d, title);
+    bar = progressbar_bar_get(&d->bars, title);
 
     bar->value = luaL_checknumber(L, 3);
     bar->value = MAX(bar->min_value, MIN(bar->max_value, bar->value));
