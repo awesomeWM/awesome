@@ -116,11 +116,15 @@ local function add_item(data, num, item_info)
     if item_info[3]  then
         icon = widget({ type = "imagebox",  name = "icon", align = "left" })
         icon.image = image(item_info[3])
-        icon:buttons(bindings)
-
-        function icon.mouse_enter() mouse_enter(item) end
-        function icon.mouse_leave() mouse_leave(item) end
+    else
+        icon = widget({ type = "textbox", name = "icon", align = "left" })
+        icon.width = theme.menu_height
     end
+
+    icon:buttons(bindings)
+
+    function icon.mouse_enter() mouse_enter(item) end
+    function icon.mouse_leave() mouse_leave(item) end
 
     -- Create the item label widget
     local label = widget({
