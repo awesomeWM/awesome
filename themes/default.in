@@ -28,7 +28,7 @@ border_marked = #91231c
 # Variables set for theming menu
 # menu_[bg|fg]_[normal|focus]
 # menu_[border_color|border_width]
-# menu_submenu_icon = @AWESOME_ICONS_PATH@/submenu.png
+# menu_submenu_icon = @AWESOME_ICON_PATH@/submenu.png
 menu_height   = 15
 menu_width    = 100
 
@@ -45,8 +45,8 @@ titlebar_close_button = true
 
 # Define the image to load
 @ (if titlebar_close_button_[normal|focus] these values are ignored)
-#titlebar_close_button_img_normal = @AWESOME_ICONS_PATH@/titlebar/closea.png
-#titlebar_close_button_img_focus = @AWESOME_ICONS_PATH@/titlebar/closera.png
+#titlebar_close_button_img_normal = @AWESOME_ICON_PATH@/titlebar/closea.png
+#titlebar_close_button_img_focus = @AWESOME_ICON_PATH@/titlebar/closera.png
 # Or create your own close button
 #titlebar_close_button_normal = <span>...</span>
 #titlebar_close_button_focus = <span>...</span>
