@@ -101,7 +101,7 @@ mytextbox.text = "<b><small> " .. AWESOME_RELEASE .. " </small></b>"
 -- Create a laucher widget and a main menu
 myawesomemenu = {
    {"manual", terminal .. " -e man awesome" },
-   {"edit config", terminal .. " -e " .. os.getenv("EDITOR") .. " ~/.config/awesome/rc.lua" },
+   {"edit config", terminal .. " -e " .. os.getenv("EDITOR") .. " " .. awful.util.getdir("config") .. "/rc.lua" },
    {"restart", awesome.restart },
    {"quit", awesome.quit }
 }
@@ -261,10 +261,10 @@ keybinding({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -
 -- Prompt
 keybinding({ modkey }, "F1", function ()
                                  awful.prompt.run({ prompt = "Run: " }, mypromptbox[mouse.screen], awful.util.spawn, awful.completion.bash,
-os.getenv("HOME") .. "/.cache/awesome/history") end):add()
+awful.util.getdir("cache") .. "/history") end):add()
 keybinding({ modkey }, "F4", function ()
                                  awful.prompt.run({ prompt = "Run Lua code: " }, mypromptbox[mouse.screen], awful.util.eval, awful.prompt.bash,
-os.getenv("HOME") .. "/.cache/awesome/history_eval") end):add()
+awful.util.getdir("cache") .. "/history_eval") end):add()
 keybinding({ modkey, "Ctrl" }, "i", function ()
                                         local s = mouse.screen
                                         if mypromptbox[s].text then
