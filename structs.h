@@ -143,6 +143,8 @@ struct widget_t
     luaA_ref mouse_enter, mouse_leave;
     /** Alignement */
     alignment_t align;
+    /** Supported alignment */
+    alignment_t align_supported;
     /** Misc private data */
     void *data;
     /** Button bindings */

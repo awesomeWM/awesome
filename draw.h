@@ -45,10 +45,10 @@ typedef struct
 
 typedef enum
 {
-    AlignLeft = 0,
-    AlignRight,
-    AlignCenter,
-    AlignFlex,
+    AlignLeft   = (0),
+    AlignRight  = (1),
+    AlignCenter = (1 << 1),
+    AlignFlex   = (1 << 2),
 } alignment_t;
 
 typedef struct vector_t vector_t;

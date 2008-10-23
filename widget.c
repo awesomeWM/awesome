@@ -201,25 +201,47 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
             widgets->tab[i].geometry.x = ctx->width - right;
         }
 
+    /* save left value */
+    int fake_left = left;
+
+    /* compute width of flex aligned widgets that does not support it */
     int flex = 0;
     for(int i = 0; i < widgets->len; i++)
-        if(widgets->tab[i].widget->align == AlignFlex && widgets->tab[i].widget->isvisible)
-            flex++;
+        if(widgets->tab[i].widget->align == AlignFlex
+          && widgets->tab[i].widget->isvisible)
+        {
+            if(widgets->tab[i].widget->align_supported & AlignFlex)
+                flex++;
+            else
+                fake_left += widgets->tab[i].widget->geometry(widgets->tab[i].widget,
+                                                              screen, ctx->height,
+                                                              ctx->width - (fake_left + right)).width;
+        }
 
-    if(flex)
-    {
-        int length = (ctx->width - (left + right)) / flex;
-
-        for(int i = 0; i < widgets->len; i++)
-            if(widgets->tab[i].widget->align == AlignFlex && widgets->tab[i].widget->isvisible)
+    /* now compute everybody together! */
+    int flex_rendered = 0;
+    for(int i = 0; i < widgets->len; i++)
+        if(widgets->tab[i].widget->align == AlignFlex
+          && widgets->tab[i].widget->isvisible)
+        {
+            if(widgets->tab[i].widget->align_supported & AlignFlex)
             {
+                int width = (ctx->width - (right + fake_left)) / flex;
+                /* give last pixels to last flex to be rendered */
+                if(flex_rendered == flex - 1)
+                    width += (ctx->width - (right + fake_left)) % flex;
                 widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
                                                                             screen, ctx->height,
-                                                                            length);
-                widgets->tab[i].geometry.x = left;
-                left += widgets->tab[i].geometry.width;
+                                                                            width);
+                flex_rendered++;
             }
-    }
+            else
+                widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
+                                                                            screen, ctx->height,
+                                                                            ctx->width - (left + right)); 
+            widgets->tab[i].geometry.x = left;
+            left += widgets->tab[i].geometry.width;
+        }
 
     /* draw everything! */
     draw_rectangle(ctx, rectangle, 1.0, true, &ctx->bg);
@@ -259,8 +281,8 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
 void
 widget_common_new(widget_t *widget)
 {
-    widget->align = AlignLeft;
     widget->button = widget_common_button;
+    widget->align_supported = AlignLeft | AlignRight;
 }
 
 /** Invalidate widgets which should be refresh upon

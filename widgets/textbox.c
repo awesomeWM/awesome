@@ -178,6 +178,7 @@ textbox_new(alignment_t align)
     w = p_new(widget_t, 1);
     widget_common_new(w);
     w->align = align;
+    w->align_supported |= AlignFlex;
     w->draw = textbox_draw;
     w->index = luaA_textbox_index;
     w->newindex = luaA_textbox_newindex;
