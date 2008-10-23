@@ -120,6 +120,13 @@ local function get_offset(idx, position, lines)
         v.y = ws.y + ws.height - (config.margin + config.border_width + config.height*lines + existing)
     end
 
+    -- if positioned outside workarea, destroy oldest popup and recalculate
+    if v.y + config.height*lines > ws.y + ws.height or v.y < ws.y then
+        idx = idx - 1
+        destroy(notifications[position][1])
+        v = get_offset(idx, position, lines)
+    end
+
     return v
 end
 
