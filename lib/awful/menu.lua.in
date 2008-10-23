@@ -5,6 +5,7 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
+local pairs = pairs
 local table = table
 local type = type
 local wibox = wibox
@@ -12,8 +13,9 @@ local image = image
 local string = string
 local widget = widget
 local button = button
-local capi = { screen = screen, mouse = mouse }
+local capi = { screen = screen, mouse = mouse, client = client }
 local util = require("awful.util")
+local tags = require("awful.tag")
 local awbeautiful = require("awful.beautiful")
 
 --- Menu module for awful
@@ -93,6 +95,7 @@ local function exec(data, action, num)
         destroy(get_parents(data))
         util.spawn(action[2])
     elseif type(action[2]) == "function" then
+        destroy(get_parents(data))
         action[2]()
     end
 end
@@ -117,7 +120,11 @@ local function add_item(data, num, item_info)
     local icon = nil
     if item_info[3]  then
         icon = widget({ type = "imagebox",  name = "icon", align = "left" })
-        icon.image = image(item_info[3])
+        if type(item_info[3]) == "string" then
+            icon.image = image(item_info[3])
+        else
+            icon.image = item_info[3]
+        end
     else
         icon = widget({ type = "textbox", name = "icon", align = "left" })
         icon.width = theme.menu_height
@@ -152,7 +159,7 @@ local function add_item(data, num, item_info)
     end
 
     -- Add widgets to the wibox
-    item.widgets = {icon, label, submenu}
+    item.widgets = { icon, label, submenu }
 
     item:geometry({
         width = theme.menu_width,
@@ -167,11 +174,28 @@ local function add_item(data, num, item_info)
     return item
 end
 
---- Open a menu popup
--- @param id Menu id, string naming your menu, only one menu with the same id can be displayed on screen at the same time
--- @param items Table containing the displayed items, each element is a tab containing: item name, tiggered action or submenu table, item icon (optional)
--- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user
--- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user
+--- Open a popup menu with running clients.
+function clients()
+    local cls = capi.client.get()
+    local cls_t = {}
+    for k, c in pairs(cls) do
+        cls_t[#cls_t + 1] = { c.name,
+                              function ()
+                                  if not c:isvisible() then
+                                      tags.viewmore(c:tags(), c.screen)
+                                  end
+                                  capi.client.focus = c
+                              end,
+                              c.icon }
+    end
+    return new("Clients", cls_t)
+end
+
+--- Open a menu popup.
+-- @param id Menu id, string naming your menu, only one menu with the same id can be displayed on screen at the same time.
+-- @param items Table containing the displayed items, each element is a tab containing: item name, tiggered action or submenu table, item icon (optional).
+-- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
+-- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user.
 function new(id, items, parent, num)
     -- Load config only one time
     if not theme then
@@ -187,7 +211,6 @@ function new(id, items, parent, num)
     local data = {}
     data.id = id
     data.screen = capi.mouse.screen
-    data.nb_items = #items
     data.items = {}
     data.child = nil
 
@@ -203,8 +226,8 @@ function new(id, items, parent, num)
     end
 
     -- Create items
-    for i = 1, data.nb_items do
-        table.insert(data.items, add_item(data, i, items[i]))
+    for k, v in pairs(items) do
+        table.insert(data.items, add_item(data, k, v))
     end
 
     -- Add menu to menus table
