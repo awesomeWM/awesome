@@ -49,7 +49,6 @@ typedef enum
     AlignRight,
     AlignCenter,
     AlignFlex,
-    AlignAuto
 } alignment_t;
 
 typedef struct vector_t vector_t;

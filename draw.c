@@ -864,8 +864,8 @@ draw_text_extents(int phys_screen, font_t *font,
 }
 
 /** Transform a string to a alignment_t type.
- * Recognized string are left, center or right. Everything else will be
- * recognized as AlignAuto.
+ * Recognized string are flex, left, center or right. Everything else will be
+ * recognized as AlignLeft.
  * \param align Atring with align text.
  * \param len The string length.
  * \return An alignment_t type.
@@ -875,11 +875,10 @@ draw_align_fromstr(const char *align, ssize_t len)
 {
     switch (a_tokenize(align, len))
     {
-      case A_TK_LEFT:   return AlignLeft;
       case A_TK_CENTER: return AlignCenter;
       case A_TK_RIGHT:  return AlignRight;
       case A_TK_FLEX:   return AlignFlex;
-      default:          return AlignAuto;
+      default:          return AlignLeft;
     }
 }
 
@@ -896,7 +895,6 @@ draw_align_tostr(alignment_t a)
       case AlignCenter: return "center";
       case AlignRight:  return "right";
       case AlignFlex:   return "flex";
-      case AlignAuto:   return "auto";
       default:          return NULL;
     }
 }
