@@ -115,7 +115,7 @@ mymainmenu = {
 
 mylauncher = awful.widget.launcher({ name = "mylauncher",
                                      image = "@AWESOME_ICON_PATH@/awesome16.png",
-                                     menu = { "mymainmenu", mymainmenu } })
+                                     menu = { id="mymainmenu", items=mymainmenu } })
 
 -- Create a systray
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
@@ -172,7 +172,7 @@ end
 
 -- {{{ Mouse bindings
 awesome.buttons({
-    button({ }, 3, function () awful.menu.new("mymainmenu", mymainmenu) end),
+    button({ }, 3, function () awful.menu.new({ id="mymainmenu", items=mymainmenu }) end),
     button({ }, 4, awful.tag.viewnext),
     button({ }, 5, awful.tag.viewprev)
 })

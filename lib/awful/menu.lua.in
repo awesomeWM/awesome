@@ -90,7 +90,7 @@ end
 local function exec(data, action, num)
     if type(action[2]) == "table" then
         destroy(data.child)
-        data.child = new(action[1], action[2], data, num)
+        data.child = new({ id=action[1], items=action[2] }, data, num)
     elseif type(action[2]) == "string" then
         destroy(get_parents(data))
         util.spawn(action[2])
@@ -127,7 +127,7 @@ local function add_item(data, num, item_info)
         end
     else
         icon = widget({ type = "textbox", name = "icon", align = "left" })
-        icon.width = theme.menu_height
+        icon.width = data.h
     end
 
     icon:buttons(bindings)
@@ -162,10 +162,10 @@ local function add_item(data, num, item_info)
     item.widgets = { icon, label, submenu }
 
     item:geometry({
-        width = theme.menu_width,
-        height = theme.menu_height,
+        width = data.w,
+        height = data.h,
         x = data.x,
-        y = data.y + theme.menu_height*(num - 1)
+        y = data.y + data.h*(num - 1)
     })
 
     item.ontop = true
@@ -188,37 +188,42 @@ function clients()
                               end,
                               c.icon }
     end
-    return new("Clients", cls_t)
+    return new({ id="Clients", items=cls_t })
 end
 
 --- Open a menu popup.
--- @param id Menu id, string naming your menu, only one menu with the same id can be displayed on screen at the same time.
--- @param items Table containing the displayed items, each element is a tab containing: item name, tiggered action or submenu table, item icon (optional).
+-- @param menu Table containing the menu informations. Element id: string naming your menu, only one menu with the same id can be displayed on screen at the same time. Element items: Table containing the displayed items, each element is a tab containing: item name, tiggered action or submenu table, item icon (optional). Elements width and height: force the geometry of your menu, if one (or both) of these elements is not specified, the default values will be used.
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user.
-function new(id, items, parent, num)
+function new(menu, parent, num)
     -- Load config only one time
     if not theme then
         load_theme()
     end
 
     -- Close the menu if it was already opened
-    if menus[id] then
-        destroy(menus[id])
+    if menus[menu.id] then
+        destroy(menus[menu.id])
     end
 
     -- Create a table to store our menu informations
     local data = {}
-    data.id = id
+    data.id = menu.id
     data.screen = capi.mouse.screen
     data.items = {}
     data.child = nil
 
     if parent then
-        data.x = parent.x + theme.menu_width + theme.border_width
-        data.y = parent.y + theme.menu_height*(num - 1)
+        data.h = parent.h
+        data.w = parent.w
+
+        data.x = parent.x + data.w + theme.border_width
+        data.y = parent.y + data.h*(num - 1)
         data.parent = parent
     else
+        data.h = menu.height and menu.height or theme.menu_height
+        data.w = menu.width and menu.width or theme.menu_width
+
         local m_coords = capi.mouse.coords()
         data.x = m_coords.x
         data.y = m_coords.y
@@ -226,12 +231,12 @@ function new(id, items, parent, num)
     end
 
     -- Create items
-    for k, v in pairs(items) do
+    for k, v in pairs(menu.items) do
         table.insert(data.items, add_item(data, k, v))
     end
 
     -- Add menu to menus table
-    menus[id] = data
+    menus[menu.id] = data
 
     return data
 end

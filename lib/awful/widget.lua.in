@@ -388,7 +388,7 @@ function launcher(args)
     if args.command then
        b[#b + 1] = capi.button({}, 1, nil, function () util.spawn(args.command) end)
     elseif args.menu then
-       b[#b + 1] = capi.button({}, 1, nil, function () menu.new(args.menu[1], args.menu[2]) end)
+       b[#b + 1] = capi.button({}, 1, nil, function () menu.new(args.menu) end)
     end
 
     w:buttons(b)
