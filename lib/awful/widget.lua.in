@@ -104,9 +104,9 @@ function taglist.label.all(t, args)
     local bg_focus = args.bg_focus or theme.taglist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.taglist_fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
-    local taglist_squares = args.taglist_squares or theme.taglist_squares
-    local taglist_squares_sel = args.squares_sel or theme.squares_sel
-    local taglist_squares_unsel = args.squares_unsel or theme.squares_unsel
+    local taglist_squares = args.taglist_squares or theme.taglist_squares or "true"
+    local taglist_squares_sel = args.squares_sel or theme.squares_sel or "@AWESOME_ICON_PATH@/taglist/squarefw.png"
+    local taglist_squares_unsel = args.squares_unsel or theme.squares_unsel or "@AWESOME_ICON_PATH@/taglist/squarew.png"
     local text
     local background = ""
     local sel = capi.client.focus
@@ -117,25 +117,18 @@ function taglist.label.all(t, args)
         fg_color = fg_focus
     end
     if sel and sel:tags()[t] then
-        if not taglist_squares or taglist_squares == "true" then
-            if taglist_squares_sel then
-                background = "resize=\"true\" image=\"" .. taglist_squares_sel .. "\""
-            else
-                background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarefw.png\""
-            end
+        if taglist_squares == "true" then
+            background = "resize=\"true\" image=\"" .. taglist_squares_sel .. "\""
         end
-    elseif bg_urgent or fg_urgent then
-        for k, c in pairs(t:clients()) do
-            if not taglist_squares or taglist_squares == "true" then
-                if taglist_squares_unsel then
-                    background = "resize=\"true\" image=\"" .. taglist_squares_unsel .. "\""
-                else
-                    background = "resize=\"true\" image=\"@AWESOME_ICON_PATH@/taglist/squarew.png\""
-                end
-            end
+    else
+        local cls = t:clients()
+        if #cls > 0 and taglist_squares == "true" then
+            background = "resize=\"true\" image=\"" .. taglist_squares_unsel .. "\""
+        end
+        for k, c in pairs(cls) do
             if c.urgent then
-                bg_color = bg_urgent
-                fg_color = fg_urgent
+                if bg_urgent then bg_color = bg_urgent end
+                if fg_urgent then fg_color = fg_urgent end
                 break
             end
         end
