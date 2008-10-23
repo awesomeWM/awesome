@@ -6,7 +6,7 @@
 
 -- Grab environment we need
 local math = math
-local ipairs = ipairs
+local pairs = pairs
 local otable = otable
 local capi =
 {
@@ -98,7 +98,7 @@ function update(c, prop)
     if c.titlebar and data[c] then
         local widgets = c.titlebar.widgets
         local title, close, closef
-        for k, v in ipairs(widgets) do
+        for k, v in pairs(widgets) do
             if v.name == "title" then title = v
             elseif v.name == "close" then close = v
             elseif v.name == "closef" then closef = v
