@@ -191,6 +191,31 @@ function clients()
     return new({ id="Clients", items=cls_t })
 end
 
+local function set_coords(data)
+    local m_coords = capi.mouse.coords()
+    local s_geometry = capi.screen[data.screen].workarea
+
+    if data.parent then
+        local t, t2
+
+        data.w = data.parent.w
+        data.h = data.parent.h
+
+        t = data.w + theme.border_width
+        data.x = data.parent.x + data.w*2 + theme.border_width > s_geometry.width and data.parent.x - t or data.parent.x + t
+
+        t = data.h*(data.num - 1)
+        t2 = data.h*(data.nb_items - 1)
+        data.y = data.parent.y + t + t2 > s_geometry.height and s_geometry.height - t2 or data.parent.y + t
+    else
+        data.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
+        data.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
+
+        data.y = data.y + data.h > s_geometry.height and s_geometry.height - data.h or data.y
+        data.x = data.x + data.w > s_geometry.width and s_geometry.width - data.w or data.x
+    end
+end
+
 --- Open a menu popup.
 -- @param menu Table containing the menu informations. Element id: string naming your menu, only one menu with the same id can be displayed on screen at the same time. Element items: Table containing the displayed items, each element is a tab containing: item name, tiggered action or submenu table, item icon (optional). Elements width and height: force the geometry of your menu, if one (or both) of these elements is not specified, the default values will be used.
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
@@ -212,23 +237,13 @@ function new(menu, parent, num)
     data.screen = capi.mouse.screen
     data.items = {}
     data.child = nil
+    data.nb_items = #menu.items
+    data.num = num and num or 1
+    data.parent = parent and parent or nil
+    data.h = parent and parent.h or (menu.height and menu.height or theme.menu_height)
+    data.w = parent and parent.w or (menu.width and menu.width or theme.menu_width)
 
-    if parent then
-        data.h = parent.h
-        data.w = parent.w
-
-        data.x = parent.x + data.w + theme.border_width
-        data.y = parent.y + data.h*(num - 1)
-        data.parent = parent
-    else
-        data.h = menu.height and menu.height or theme.menu_height
-        data.w = menu.width and menu.width or theme.menu_width
-
-        local m_coords = capi.mouse.coords()
-        data.x = m_coords.x
-        data.y = m_coords.y
-        data.parent = nil
-    end
+    set_coords(data)
 
     -- Create items
     for k, v in pairs(menu.items) do
