@@ -396,7 +396,10 @@ luaA_widget_buttons(lua_State *L)
     button_array_t *buttons = &(*widget)->buttons;
 
     if(lua_gettop(L) == 2)
+    {
         luaA_button_array_set(L, 2, buttons);
+        return 1;
+    }
 
     return luaA_button_array_get(L, buttons);
 }

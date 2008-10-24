@@ -1146,7 +1146,6 @@ luaA_button_array_set(lua_State *L, int idx, button_array_t *buttons)
         button_ref(b);
         lua_pop(L, 1);
     }
-    lua_pop(L, 1);
 }
 
 /** Push an array of button as an Lua table onto the stack.
