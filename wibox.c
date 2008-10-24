@@ -352,77 +352,73 @@ wibox_position_update(wibox_t *wibox)
     switch(wibox->position)
     {
       case Right:
-        wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : area.height;
+        wingeom.height = wibox->sw.geometry.height > 0 ?
+            wibox->sw.geometry.height : area.height - 2 * wibox->sw.border.width;
         wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : 1.5 * globalconf.font->height;
+        wingeom.x = area.x + area.width - wingeom.width - 2 * wibox->sw.border.width;
         switch(wibox->align)
         {
           default:
-            wingeom.x = area.x + area.width - wingeom.width;
             wingeom.y = area.y;
             break;
           case AlignRight:
-            wingeom.x = area.x + area.width - wingeom.width;
             wingeom.y = area.y + area.height - wingeom.height;
             break;
           case AlignCenter:
-            wingeom.x = area.x + area.width - wingeom.width;
             wingeom.y = (area.y + area.height - wingeom.height) / 2;
             break;
         }
         break;
       case Left:
-        wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : area.height;
+        wingeom.height = wibox->sw.geometry.height > 0 ?
+            wibox->sw.geometry.height : area.height - 2 * wibox->sw.border.width;
         wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : 1.5 * globalconf.font->height;
+        wingeom.x = area.x;
         switch(wibox->align)
         {
           default:
-            wingeom.x = area.x;
-            wingeom.y = (area.y + area.height) - wingeom.height;
+            wingeom.y = (area.y + area.height) - wingeom.height - 2 * wibox->sw.border.width;
             break;
           case AlignRight:
-            wingeom.x = area.x;
             wingeom.y = area.y;
             break;
           case AlignCenter:
-            wingeom.x = area.x;
             wingeom.y = (area.y + area.height - wingeom.height) / 2;
         }
         break;
       case Bottom:
         wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : 1.5 * globalconf.font->height;
-        wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : area.width;
+        wingeom.width = wibox->sw.geometry.width > 0 ?
+            wibox->sw.geometry.width : area.width - 2 * wibox->sw.border.width;
+        wingeom.y = (area.y + area.height) - wingeom.height - 2 * wibox->sw.border.width;
+        wingeom.x = area.x;
         switch(wibox->align)
         {
           default:
-            wingeom.x = area.x;
-            wingeom.y = (area.y + area.height) - wingeom.height;
             break;
           case AlignRight:
-            wingeom.x = area.x + area.width - wingeom.width;
-            wingeom.y = (area.y + area.height) - wingeom.height;
+            wingeom.x += area.width - wingeom.width;
             break;
           case AlignCenter:
-            wingeom.x = area.x + (area.width - wingeom.width) / 2;
-            wingeom.y = (area.y + area.height) - wingeom.height;
+            wingeom.x += (area.width - wingeom.width) / 2;
             break;
         }
         break;
       case Top:
         wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : 1.5 * globalconf.font->height;
-        wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : area.width;
+        wingeom.width = wibox->sw.geometry.width > 0 ?
+            wibox->sw.geometry.width : area.width - 2 * wibox->sw.border.width;
+        wingeom.x = area.x;
+        wingeom.y = area.y;
         switch(wibox->align)
         {
           default:
-            wingeom.x = area.x;
-            wingeom.y = area.y;
             break;
           case AlignRight:
-            wingeom.x = area.x + area.width - wingeom.width;
-            wingeom.y = area.y;
+            wingeom.x += area.width - wingeom.width;
             break;
           case AlignCenter:
-            wingeom.x = area.x + (area.width - wingeom.width) / 2;
-            wingeom.y = area.y;
+            wingeom.x += (area.width - wingeom.width) / 2;
             break;
         }
         break;

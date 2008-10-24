@@ -223,13 +223,13 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
                 switch(w->position)
                 {
                   case Top:
-                    top = MAX(top, (uint16_t) (w->sw.geometry.y - area.y) + w->sw.geometry.height);
+                    top = MAX(top, (uint16_t) (w->sw.geometry.y - area.y) + w->sw.geometry.height + 2 * w->sw.border.width);
                     break;
                   case Bottom:
                     bottom = MAX(bottom, (uint16_t) (area.y + area.height) - w->sw.geometry.y);
                     break;
                   case Left:
-                    left = MAX(left, (uint16_t) (w->sw.geometry.x - area.x) + w->sw.geometry.width);
+                    left = MAX(left, (uint16_t) (w->sw.geometry.x - area.x) + w->sw.geometry.width + 2 * w->sw.border.width);
                     break;
                   case Right:
                     right = MAX(right, (uint16_t) (area.x + area.width) - w->sw.geometry.x);
