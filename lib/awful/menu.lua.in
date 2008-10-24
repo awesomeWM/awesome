@@ -24,34 +24,34 @@ module("awful.menu")
 -- Table containing all currently opened menus
 local menus = {}
 
--- Theme table
-local theme
-
-local function load_theme()
+local function load_theme(custom)
+    local theme = {}
     local beautiful
+
     beautiful = awbeautiful.get()
 
-    theme = {}
-    theme.fg_focus = beautiful.menu_fg_focus or beautiful.fg_focus
-    theme.bg_focus = beautiful.menu_bg_focus or beautiful.bg_focus
-    theme.fg_normal = beautiful.menu_fg_normal or beautiful.fg_normal
-    theme.bg_normal = beautiful.menu_bg_normal or beautiful.bg_normal
+    theme.fg_focus = custom.fg_focus or beautiful.menu_fg_focus or beautiful.fg_focus
+    theme.bg_focus = custom.bg_focus or beautiful.menu_bg_focus or beautiful.bg_focus
+    theme.fg_normal = custom.fg_normal or beautiful.menu_fg_normal or beautiful.fg_normal
+    theme.bg_normal = custom.bg_normal or beautiful.menu_bg_normal or beautiful.bg_normal
 
-    theme.submenu_icon = beautiful.menu_submenu_icon or "@AWESOME_ICON_PATH@/submenu.png"
+    theme.submenu_icon = custom.submenu_icon or beautiful.menu_submenu_icon or "@AWESOME_ICON_PATH@/submenu.png"
 
-    theme.menu_height = beautiful.menu_height or 15
-    theme.menu_width = beautiful.menu_width or 100
+    theme.menu_height = custom.height or beautiful.menu_height or 15
+    theme.menu_width = custom.width or beautiful.menu_width or 100
 
-    theme.border = beautiful.menu_border_color or beautiful.border_normal
-    theme.border_width = beautiful.menu_border_width or beautiful.border_width
+    theme.border = custom.border_color or beautiful.menu_border_color or beautiful.border_normal
+    theme.border_width = custom.border_width or beautiful.menu_border_width or beautiful.border_width
+
+    return theme
 end
 
-local function mouse_enter(w)
+local function mouse_enter(w, theme)
     w.fg = theme.fg_focus
     w.bg = theme.bg_focus
 end
 
-local function mouse_leave(w)
+local function mouse_leave(w, theme)
     w.fg = theme.fg_normal
     w.bg = theme.bg_normal
 end
@@ -104,10 +104,10 @@ local function add_item(data, num, item_info)
     local item = wibox({
         name = data.id .. "item" .. num,
         position = "floating",
-        fg = theme.fg_normal,
-        bg = theme.bg_normal,
-        border_color = theme.border,
-        border_width = theme.border_width
+        fg = data.theme.fg_normal,
+        bg = data.theme.bg_normal,
+        border_color = data.theme.border,
+        border_width = data.theme.border_width
     })
 
     -- Create bindings
@@ -132,8 +132,8 @@ local function add_item(data, num, item_info)
 
     icon:buttons(bindings)
 
-    function icon.mouse_enter() mouse_enter(item) end
-    function icon.mouse_leave() mouse_leave(item) end
+    function icon.mouse_enter() mouse_enter(item, data.theme) end
+    function icon.mouse_leave() mouse_leave(item, data.theme) end
 
     -- Create the item label widget
     local label = widget({
@@ -144,18 +144,18 @@ local function add_item(data, num, item_info)
     label.text = string.format(" %s", item_info[1])
     label:buttons(bindings)
 
-    function label.mouse_enter() mouse_enter(item) end
-    function label.mouse_leave() mouse_leave(item) end
+    function label.mouse_enter() mouse_enter(item, data.theme) end
+    function label.mouse_leave() mouse_leave(item, data.theme) end
 
     -- Create the submenu icon widget
     local submenu = nil
     if type(item_info[2]) == "table" then
         submenu = widget({ type = "imagebox", name = "submenu", align = "right" })
-        submenu.image = image(theme.submenu_icon)
+        submenu.image = image(data.theme.submenu_icon)
         submenu:buttons(bindings)
 
-        function submenu.mouse_enter() mouse_enter(item) end
-        function submenu.mouse_leave() mouse_leave(item) end
+        function submenu.mouse_enter() mouse_enter(item, data.theme) end
+        function submenu.mouse_leave() mouse_leave(item, data.theme) end
     end
 
     -- Add widgets to the wibox
@@ -165,7 +165,7 @@ local function add_item(data, num, item_info)
         width = data.w,
         height = data.h,
         x = data.x,
-        y = data.y + data.h*(num - 1)
+        y = data.y + (num - 1)*(data.h + data.theme.border_width)
     })
 
     item.ontop = true
@@ -175,7 +175,8 @@ local function add_item(data, num, item_info)
 end
 
 --- Open a popup menu with running clients.
-function clients()
+-- @param menu Menu table, see new() function for more informations
+function clients(menu)
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
@@ -188,7 +189,15 @@ function clients()
                               end,
                               c.icon }
     end
-    return new({ id="Clients", items=cls_t })
+
+    if not menu then
+        menu = {}
+    end
+
+    menu.id="Clients"
+    menu.items=cls_t
+
+    return new(menu)
 end
 
 local function set_coords(data)
@@ -196,39 +205,33 @@ local function set_coords(data)
     local s_geometry = capi.screen[data.screen].workarea
 
     local screen_w = s_geometry.x + s_geometry.width
-    local screen_h = s_geometry.height
+    local screen_h = s_geometry.y + s_geometry.height
 
     if data.parent then
-        local t, t2
-
         data.w = data.parent.w
         data.h = data.parent.h
 
-        t = data.w + theme.border_width
-        data.x = data.parent.x + data.w*2 + theme.border_width > screen_w and data.parent.x - t or data.parent.x + t
-
-        t = data.h*(data.num - 1)
-        t2 = data.h*(data.nb_items - 1)
-        data.y = data.parent.y + t + t2 > screen_h and screen_h - t2 or data.parent.y + t
+        local p_w = data.h*(data.num - 1)
+        local m_h = data.theme.border_width + (data.h + data.theme.border_width)*data.nb_items
+        local m_w = data.w + data.theme.border_width
+        data.y = data.parent.y + p_w + m_h > screen_h and screen_h - m_h or data.parent.y + p_w
+        data.x = data.parent.x + data.w*2 + data.theme.border_width > screen_w and data.parent.x - m_w or data.parent.x + m_w
     else
         data.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
         data.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
 
-        data.y = data.y + data.h > screen_h and screen_h - data.h or data.y
-        data.x = data.x + data.w > screen_w and screen_w - data.w or data.x
+        local m_h = data.theme.border_width + (data.h + data.theme.border_width)*data.nb_items
+        local m_w = data.w + data.theme.border_width*2
+        data.y = data.y + m_h > screen_h and screen_h - m_h or data.y
+        data.x = data.x + m_w > screen_w and screen_w - m_w or data.x
     end
 end
 
 --- Open a menu popup.
--- @param menu Table containing the menu informations. Element id: string naming your menu, only one menu with the same id can be displayed on screen at the same time. Element items: Table containing the displayed items, each element is a tab containing: item name, tiggered action or submenu table, item icon (optional). Elements width and height: force the geometry of your menu, if one (or both) of these elements is not specified, the default values will be used.
+-- @param menu Table containing the menu informations. Element id: string naming your menu, only one menu with the same id can be displayed on screen at the same time. Element items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Elements [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user.
 function new(menu, parent, num)
-    -- Load config only one time
-    if not theme then
-        load_theme()
-    end
-
     -- Close the menu if it was already opened
     if menus[menu.id] then
         destroy(menus[menu.id])
@@ -242,9 +245,10 @@ function new(menu, parent, num)
     data.child = nil
     data.nb_items = #menu.items
     data.num = num and num or 1
+    data.theme = parent and parent.theme or load_theme(menu)
     data.parent = parent and parent or nil
-    data.h = parent and parent.h or (menu.height and menu.height or theme.menu_height)
-    data.w = parent and parent.w or (menu.width and menu.width or theme.menu_width)
+    data.h = parent and parent.h or data.theme.menu_height
+    data.w = parent and parent.w or data.theme.menu_width
 
     set_coords(data)
 
