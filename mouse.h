@@ -24,6 +24,26 @@
 
 #include "structs.h"
 
+/** Mouse buttons bindings */
+struct button_t
+{
+    /** Ref count */
+    int refcount;
+    /** Key modifiers */
+    unsigned long mod;
+    /** Mouse button number */
+    unsigned int button;
+    /** Lua function to execute on press. */
+    luaA_ref press;
+    /** Lua function to execute on release. */
+    luaA_ref release;
+};
+
+void button_delete(button_t **);
+
+DO_RCNT(button_t, button, button_delete)
+ARRAY_FUNCS(button_t *, button, button_unref)
+
 int luaA_client_mouse_resize(lua_State *);
 int luaA_client_mouse_move(lua_State *);
 

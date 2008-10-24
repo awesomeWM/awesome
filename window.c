@@ -23,6 +23,7 @@
 #include <xcb/xcb_atom.h>
 
 #include "window.h"
+#include "mouse.h"
 #include "common/atoms.h"
 
 extern awesome_t globalconf;

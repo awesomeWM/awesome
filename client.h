@@ -25,6 +25,7 @@
 #include <xcb/xcb_icccm.h>
 
 #include "structs.h"
+#include "mouse.h"
 #include "stack.h"
 
 static void

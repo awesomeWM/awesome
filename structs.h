@@ -71,6 +71,7 @@ typedef void (widget_destructor_t)(widget_t *);
 typedef struct awesome_t awesome_t;
 
 ARRAY_TYPE(widget_node_t, widget_node)
+ARRAY_TYPE(button_t *, button)
 
 /** Wibox type */
 typedef struct
@@ -100,26 +101,6 @@ typedef struct
     bool need_update;
 } wibox_t;
 ARRAY_TYPE(wibox_t *, wibox)
-
-/** Mouse buttons bindings */
-struct button_t
-{
-    /** Ref count */
-    int refcount;
-    /** Key modifiers */
-    unsigned long mod;
-    /** Mouse button number */
-    unsigned int button;
-    /** Lua function to execute on press. */
-    luaA_ref press;
-    /** Lua function to execute on release. */
-    luaA_ref release;
-};
-
-void button_delete(button_t **button);
-
-DO_RCNT(button_t, button, button_delete)
-DO_ARRAY(button_t *, button, button_unref)
 
 /** Widget */
 struct widget_t

@@ -22,7 +22,7 @@
 #ifndef AWESOME_WIDGET_H
 #define AWESOME_WIDGET_H
 
-#include "structs.h"
+#include "mouse.h"
 
 #define WIDGET_CACHE_EMBEDDED       (1<<3)
 
