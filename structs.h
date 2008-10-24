@@ -63,7 +63,7 @@ typedef struct button_t button_t;
 typedef struct widget_t widget_t;
 typedef struct widget_node_t widget_node_t;
 typedef struct client_t client_t;
-typedef struct client_node_t client_node_t;
+typedef struct client_node client_node_t;
 typedef struct tag tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
 typedef widget_t *(widget_constructor_t)(alignment_t);
@@ -224,14 +224,6 @@ struct client_t
     client_t *prev, *next;
 };
 ARRAY_TYPE(client_t *, client)
-
-struct client_node_t
-{
-    /** The client */
-    client_t *client;
-    /** Next and previous client_nodes */
-    client_node_t *prev, *next;
-};
 
 /** Tag type */
 struct tag

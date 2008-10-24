@@ -24,6 +24,14 @@
 
 #include "client.h"
 
+struct client_node
+{
+    /** The client */
+    client_t *client;
+    /** Next and previous client_nodes */
+    client_node_t *prev, *next;
+};
+
 client_node_t * client_node_client_getby(client_node_t *, client_t *);
 client_node_t * client_node_client_add(client_node_t **, client_t *);
 

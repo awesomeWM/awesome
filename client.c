@@ -24,6 +24,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
+#include "cnode.h"
 #include "image.h"
 #include "client.h"
 #include "tag.h"
