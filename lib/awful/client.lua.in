@@ -34,6 +34,7 @@ data.marked = {}
 urgent = {}
 focus = {}
 focus.history = {}
+swap = {}
 
 -- User hooks
 hooks.user.create('marked')
@@ -292,7 +293,7 @@ end
 --- Focus a client by the given direction.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param c Optional client.
-function focusbydirection(dir, c)
+function focus.bydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
         local target = get_client_in_direction(dir, sel)
@@ -302,6 +303,11 @@ function focusbydirection(dir, c)
             capi.client.focus = target
         end
     end
+end
+
+function focusbydirection(dir, c)
+    util.deprecate()
+    return focus.bydirection(dir, c)
 end
 
 function focusbyidx(i, c)
@@ -322,7 +328,7 @@ end
 --- Swap a client with another client in the given direction
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param c Optional client.
-function swapbydirection(dir, c)
+function swap.bydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
         local target = get_client_in_direction(dir, sel)
