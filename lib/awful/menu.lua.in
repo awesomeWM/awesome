@@ -195,6 +195,9 @@ local function set_coords(data)
     local m_coords = capi.mouse.coords()
     local s_geometry = capi.screen[data.screen].workarea
 
+    local screen_w = s_geometry.x + s_geometry.width
+    local screen_h = s_geometry.height
+
     if data.parent then
         local t, t2
 
@@ -202,17 +205,17 @@ local function set_coords(data)
         data.h = data.parent.h
 
         t = data.w + theme.border_width
-        data.x = data.parent.x + data.w*2 + theme.border_width > s_geometry.width and data.parent.x - t or data.parent.x + t
+        data.x = data.parent.x + data.w*2 + theme.border_width > screen_w and data.parent.x - t or data.parent.x + t
 
         t = data.h*(data.num - 1)
         t2 = data.h*(data.nb_items - 1)
-        data.y = data.parent.y + t + t2 > s_geometry.height and s_geometry.height - t2 or data.parent.y + t
+        data.y = data.parent.y + t + t2 > screen_h and screen_h - t2 or data.parent.y + t
     else
         data.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
         data.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
 
-        data.y = data.y + data.h > s_geometry.height and s_geometry.height - data.h or data.y
-        data.x = data.x + data.w > s_geometry.width and s_geometry.width - data.w or data.x
+        data.y = data.y + data.h > screen_h and screen_h - data.h or data.y
+        data.x = data.x + data.w > screen_w and screen_w - data.w or data.x
     end
 end
 
