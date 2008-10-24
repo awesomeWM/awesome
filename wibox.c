@@ -593,16 +593,20 @@ wibox_attach(wibox_t *wibox, screen_t *s)
 
     simplewindow_border_color_set(&wibox->sw, &wibox->sw.border.color);
 
-    wibox->need_update = true;
-
-    if(wibox->isvisible)
-        xcb_map_window(globalconf.connection, wibox->sw.window);
-
     /* All the other wibox and ourselves need to be repositioned */
     for(int i = 0; i < s->wiboxes.len; i++)
         wibox_position_update(s->wiboxes.tab[i]);
 
     ewmh_update_workarea(screen_virttophys(s->index));
+
+    if(wibox->isvisible)
+    {
+        /* draw it right now once to avoid garbage shown */
+        wibox_draw(wibox);
+        xcb_map_window(globalconf.connection, wibox->sw.window);
+    }
+    else
+        wibox->need_update = true;
 }
 
 
