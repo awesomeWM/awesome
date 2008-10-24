@@ -22,15 +22,12 @@
 #ifndef AWESOME_STRUCTS_H
 #define AWESOME_STRUCTS_H
 
-#include <xcb/xcb_event.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_property.h>
-#include <ev.h>
 
 #include "luaa.h"
 #include "layout.h"
 #include "swindow.h"
-#include "image.h"
 #include "common/xutil.h"
 #include "common/xembed.h"
 #include "common/refcount.h"

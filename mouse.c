@@ -22,12 +22,9 @@
 #include <math.h>
 
 #include "common/tokenize.h"
-#include "mouse.h"
 #include "screen.h"
 #include "tag.h"
-#include "client.h"
 #include "titlebar.h"
-#include "wibox.h"
 #include "layouts/floating.h"
 #include "layouts/tile.h"
 #include "layouts/magnifier.h"

@@ -22,7 +22,6 @@
 #ifndef AWESOME_TITLEBAR_H
 #define AWESOME_TITLEBAR_H
 
-#include "structs.h"
 #include "wibox.h"
 
 client_t * client_getbytitlebar(wibox_t *);

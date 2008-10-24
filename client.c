@@ -19,24 +19,15 @@
  *
  */
 
-#include <stdio.h>
-
-#include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
 #include "cnode.h"
-#include "image.h"
-#include "client.h"
 #include "tag.h"
 #include "window.h"
 #include "ewmh.h"
-#include "widget.h"
 #include "screen.h"
 #include "titlebar.h"
-#include "luaa.h"
-#include "mouse.h"
 #include "systray.h"
-#include "wibox.h"
 #include "property.h"
 #include "layouts/floating.h"
 #include "common/markup.h"

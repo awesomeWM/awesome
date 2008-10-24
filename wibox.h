@@ -24,9 +24,6 @@
 
 #include "widget.h"
 #include "swindow.h"
-#include "common/util.h"
-#include "common/refcount.h"
-#include "common/array.h"
 
 void wibox_refresh(void);
 

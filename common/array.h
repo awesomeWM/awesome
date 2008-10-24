@@ -22,7 +22,6 @@
 #ifndef AWESOME_COMMON_ARRAY_H
 #define AWESOME_COMMON_ARRAY_H
 
-#include <assert.h>
 #include "common/util.h"
 
 #define ARRAY_TYPE(type_t, pfx)                                             \

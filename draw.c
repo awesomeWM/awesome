@@ -26,7 +26,6 @@
 #include <langinfo.h>
 #include <iconv.h>
 #include <errno.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
 

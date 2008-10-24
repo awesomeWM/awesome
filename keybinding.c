@@ -24,8 +24,6 @@
 #include <X11/Xlib.h>
 
 #include "structs.h"
-#include "common/refcount.h"
-#include "common/array.h"
 #include "keybinding.h"
 
 ARRAY_TYPE(keybinding_t *, keybinding)

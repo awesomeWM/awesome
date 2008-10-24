@@ -22,8 +22,6 @@
 #ifndef AWESOME_COMMON_XUTIL_H
 #define AWESOME_COMMON_XUTIL_H
 
-#include <stdbool.h>
-
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
 #include <xcb/xcb_aux.h>
