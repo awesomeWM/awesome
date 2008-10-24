@@ -115,7 +115,10 @@ struct button_t
     /** Lua function to execute on release. */
     luaA_ref release;
 };
-DO_RCNT(button_t, button, p_delete)
+
+void button_delete(button_t **button);
+
+DO_RCNT(button_t, button, button_delete)
 DO_ARRAY(button_t *, button, button_unref)
 
 /** Widget */

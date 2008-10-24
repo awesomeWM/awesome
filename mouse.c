@@ -70,6 +70,17 @@ a_strtocorner(const char *str, size_t len)
     }
 }
 
+/** Delete a button.
+ * \param button The button to destroy.
+ */
+void
+button_delete(button_t **button)
+{
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*button)->press);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*button)->release);
+    p_delete(button);
+}
+
 /** Snap an area to the outside of an area.
  * \param geometry geometry of the area to snap
  * \param snap_geometry geometry of snapping area
