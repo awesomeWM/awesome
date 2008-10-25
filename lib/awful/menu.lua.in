@@ -180,7 +180,7 @@ function clients(menu)
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
-        cls_t[#cls_t + 1] = { c.name,
+        cls_t[#cls_t + 1] = { util.escape(c.name),
                               function ()
                                   if not c:isvisible() then
                                       tags.viewmore(c:tags(), c.screen)
