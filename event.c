@@ -372,7 +372,11 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                                   wibox->sw.geometry.width,
                                   wibox->sw.geometry.height,
                                   &ev->event_x, &ev->event_y)))
+    {
+        globalconf.pointer_x = ev->root_x;
+        globalconf.pointer_y = ev->root_y;
         event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+    }
 
     return 0;
 }
@@ -426,7 +430,11 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                                   wibox->sw.geometry.width,
                                   wibox->sw.geometry.height,
                                   &ev->event_x, &ev->event_y)))
+    {
+        globalconf.pointer_x = ev->root_x;
+        globalconf.pointer_y = ev->root_y;
         event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+    }
     else if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
     {
