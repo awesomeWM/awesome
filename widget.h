@@ -34,18 +34,7 @@ struct widget_node_t
     area_t geometry;
 };
 
-/** Delete a widget structure.
- * \param widget The widget to destroy.
- */
-static inline void
-widget_delete(widget_t **widget)
-{
-    if((*widget)->destructor)
-        (*widget)->destructor(*widget);
-    button_array_wipe(&(*widget)->buttons);
-    p_delete(&(*widget)->name);
-    p_delete(widget);
-}
+void widget_delete(widget_t **);
 
 DO_RCNT(widget_t, widget, widget_delete)
 

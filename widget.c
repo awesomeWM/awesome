@@ -37,6 +37,21 @@ DO_LUA_EQ(widget_t, widget, "widget")
 
 #include "widgetgen.h"
 
+/** Delete a widget structure.
+ * \param widget The widget to destroy.
+ */
+void
+widget_delete(widget_t **widget)
+{
+    if((*widget)->destructor)
+        (*widget)->destructor(*widget);
+    button_array_wipe(&(*widget)->buttons);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*widget)->mouse_enter);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*widget)->mouse_leave);
+    p_delete(&(*widget)->name);
+    p_delete(widget);
+}
+
 /** Compute offset for drawing the first pixel of a widget.
  * \param barwidth The wibox width.
  * \param widgetwidth The widget width.
@@ -273,7 +288,6 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
           break;
     }
 }
-
 
 /** Common function for creating a widget.
  * \param widget The allocated widget.
