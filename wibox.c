@@ -605,21 +605,6 @@ wibox_attach(wibox_t *wibox, screen_t *s)
         wibox->need_update = true;
 }
 
-
-/** Convert a wibox to a printable string.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A wibox.
- */
-static int
-luaA_wibox_tostring(lua_State *L)
-{
-    wibox_t **p = luaA_checkudata(L, 1, "wibox");
-    lua_pushfstring(L, "[wibox udata(%p)]", *p);
-    return 1;
-}
-
 /** Create a new wibox.
  * \param L The Lua VM state.
  *

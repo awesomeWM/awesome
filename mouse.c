@@ -1119,20 +1119,6 @@ luaA_button_new(lua_State *L)
     return luaA_button_userdata_new(L, button);
 }
 
-/** Return a formated string for a button.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue  A button.
- * \lreturn A string.
- */
-static int
-luaA_button_tostring(lua_State *L)
-{
-    button_t **p = luaA_checkudata(L, 1, "button");
-    lua_pushfstring(L, "[button udata(%p)]", *p);
-    return 1;
-}
-
 /** Set a button array with a Lua table.
  * \param L The Lua VM state.
  * \param idx The index of the Lua table.

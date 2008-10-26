@@ -35,20 +35,7 @@
 
 extern awesome_t globalconf;
 
-/** Create a new client userdata.
- * \param L The Lua VM state.
- * \param p A client pointer.
- * \param The number of elements pushed on the stack.
- */
-int
-luaA_client_userdata_new(lua_State *L, client_t *p)
-{
-    client_t **pp = lua_newuserdata(L, sizeof(client_t *));
-    *pp = p;
-    client_ref(pp);
-    return luaA_settype(L, "client");
-}
-
+DO_LUA_NEW(extern, client_t, client, "client", client_ref)
 DO_LUA_EQ(client_t, client, "client")
 DO_LUA_GC(client_t, client, "client", client_unref)
 
@@ -1127,20 +1114,6 @@ luaA_client_redraw(lua_State *L)
                             (*c)->win, XCB_CURRENT_TIME);
 
     return 0;
-}
-
-/** Return a formated string for a client.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue  A client.
- * \lreturn A string.
- */
-static int
-luaA_client_tostring(lua_State *L)
-{
-    client_t **p = luaA_checkudata(L, 1, "client");
-    lua_pushfstring(L, "[client udata(%p) name(%s)]", *p, (*p)->name);
-    return 1;
 }
 
 /** Stop managing a client.

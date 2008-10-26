@@ -383,17 +383,6 @@ luaA_keybinding_remove(lua_State *L)
     return 0;
 }
 
-/** Convert a keybinding to a printable string.
- * \return A string.
- */
-static int
-luaA_keybinding_tostring(lua_State *L)
-{
-    keybinding_t **p = luaA_checkudata(L, 1, "keybinding");
-    lua_pushfstring(L, "[keybinding udata(%p)]", *p);
-    return 1;
-}
-
 const struct luaL_reg awesome_keybinding_methods[] =
 {
     { "__call", luaA_keybinding_new },

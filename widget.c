@@ -418,20 +418,6 @@ luaA_widget_buttons(lua_State *L)
     return luaA_button_array_get(L, buttons);
 }
 
-/** Convert a widget into a printable string.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- */
-static int
-luaA_widget_tostring(lua_State *L)
-{
-    widget_t **p = luaA_checkudata(L, 1, "widget");
-    lua_pushfstring(L, "[widget udata(%p) name(%s)]", *p, (*p)->name);
-    return 1;
-}
-
 /** Generic widget.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.

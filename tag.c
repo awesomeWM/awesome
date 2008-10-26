@@ -230,21 +230,6 @@ tag_view_only_byindex(int screen, int dindex)
     tag_view_only(tags->tab[dindex]);
 }
 
-/** Convert a tag to a printable string.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A tag.
- * \lreturn A string.
- */
-static int
-luaA_tag_tostring(lua_State *L)
-{
-    tag_t **p = luaA_checkudata(L, 1, "tag");
-    lua_pushfstring(L, "[tag udata(%p) name(%s)]", *p, (*p)->name);
-    return 1;
-}
-
 /** Create a new tag.
  * \param L The Lua VM state.
  *

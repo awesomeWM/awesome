@@ -323,21 +323,6 @@ luaA_image_index(lua_State *L)
     return 1;
 }
 
-/** Return a formated string for an image.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue  An image.
- * \lreturn A string.
- */
-static int
-luaA_image_tostring(lua_State *L)
-{
-    image_t **p = luaA_checkudata(L, 1, "image");
-    lua_pushfstring(L, "[image udata(%p) width(%d) height(%d)]", *p,
-                    (*p)->width, (*p)->height);
-    return 1;
-}
-
 const struct luaL_reg awesome_image_methods[] =
 {
     { "__call", luaA_image_new },

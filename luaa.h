@@ -47,6 +47,13 @@ typedef int luaA_ref;
         *pp = p; \
         type_ref(pp); \
         return luaA_settype(L, lua_type); \
+    } \
+    static int \
+    luaA_##prefix##_tostring(lua_State *L) \
+    { \
+        type **p = luaA_checkudata(L, 1, lua_type); \
+        lua_pushfstring(L, lua_type ": %p", *p); \
+        return 1; \
     }
 
 #define DO_LUA_GC(type, prefix, lua_type, type_unref) \
