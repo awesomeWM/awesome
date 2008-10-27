@@ -531,6 +531,39 @@ luaA_hasitem(lua_State *L, const void *item)
     return false;
 }
 
+/** Check if a table is a loop. When using table as direct acyclic digram,
+ * this is useful.
+ * \param L The Lua VM state.
+ * \param idx The index of the table in the stack
+ * \return True if the table loops.
+ */
+bool
+luaA_isloop(lua_State *L, int idx)
+{
+    if(lua_istable(L, idx))
+    {
+        lua_pushvalue(L, idx); /* push table on top */
+        if(luaA_hasitem(L, lua_topointer(L, -1)))
+        {
+            lua_pop(L, 1); /* remove pushed table */
+            return true;
+        }
+        lua_pushnil(L);
+        while(luaA_next(L, -2))
+        {
+            /* check for recursivity */
+            if(luaA_isloop(L, -1))
+            {
+                lua_pop(L, 2); /* remove key and value */
+                return true;
+            }
+            lua_pop(L, 1); /* remove value */
+        }
+        lua_pop(L, 1); /* remove pushed table */
+    }
+    return false;
+}
+
 /** Object table.
  * This table can use safely object as key.
  * \param L The Lua VM state.

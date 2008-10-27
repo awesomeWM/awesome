@@ -345,6 +345,7 @@ int luaA_pushcolor(lua_State *, const xcolor_t *);
 bool luaA_hasitem(lua_State *, const void *);
 void luaA_table2wtable(lua_State *);
 int luaA_next(lua_State *, int);
+bool luaA_isloop(lua_State *, int);
 
 #define hooks_property(c, prop) \
     do { \
