@@ -63,11 +63,12 @@ local shots = { }
 local enemies = { }
 
 function player.new ()
-    p = wibox({ position = "floating", bg = gamedata.solidbg or "#12345600" })
+    p = wibox({ position = "floating",
+                bg = gamedata.solidbg or "#12345600" })
     p:geometry({ width = 24,
-                      height = 16,
-                      x = gamedata.field.x + (gamedata.field.w / 2),
-                      y = gamedata.field.y + gamedata.field.h - (16 + 5) })
+                 height = 16,
+                 x = gamedata.field.x + (gamedata.field.w / 2),
+                 y = gamedata.field.y + gamedata.field.h - (16 + 5) })
     p.screen = 1
 
     w = widget({ type = "imagebox", name = "player" })
@@ -99,8 +100,12 @@ function player.fire()
 end
 
 function shots.fire (x, y, color)
-    local s = wibox({ position = "floating", bg = color })
-    s:geometry({ width = 4, height = 10, x = x, y = y })
+    local s = wibox({ position = "floating",
+                      bg = color })
+    s:geometry({ width = 4,
+                 height = 10,
+                 x = x,
+                 y = y })
     s.screen = 1
 
     for i = 1, gamedata.ammo_max do
@@ -114,8 +119,12 @@ end
 function shots.fire_enemy (x, y, color)
     if gamedata.enemies.shots.fired < gamedata.enemies.shots.max then
         gamedata.enemies.shots.fired = gamedata.enemies.shots.fired + 1
-        local s = wibox({ position = "floating", bg = color })
-        s:geometry({ width = 4, height = 10, x = x, y = y })
+        local s = wibox({ position = "floating",
+                          bg = color })
+        s:geometry({ width = 4,
+                     height = 10,
+                     x = x,
+                     y = y })
         s.screen = 1
         for i = 1, gamedata.enemies.shots.max do
             if not gamedata.enemies.shots[i] or gamedata.enemies.shots[i].screen == nil then
@@ -173,12 +182,15 @@ function shots.handle_enemy ()
 end
 
 function enemies.new (t)
-    e = wibox({ position = "floating", bg = gamedata.solidbg or "#12345600" })
-    e:geometry({ height = gamedata.enemies.h, width = gamedata.enemies.w,
+    e = wibox({ position = "floating",
+                bg = gamedata.solidbg or "#12345600" })
+    e:geometry({ height = gamedata.enemies.h,
+                 width = gamedata.enemies.w,
                  x = gamedata.field.x,
                  y = gamedata.field.y })
     e.screen = 1
-    w = widget({ type = "imagebox", name = "enemy"..t })
+    w = widget({ type = "imagebox",
+                 name = "enemy"..t })
     w.image = gamedata.enemies[t]
 
     e.widgets = w
@@ -343,7 +355,7 @@ function game.quit()
     end
 
     if gamedata.field.background then
-    	gamedata.field.background.screen = nil
+       gamedata.field.background.screen = nil
     end
 
     gamedata.player.screen = nil
@@ -379,12 +391,14 @@ function game.quit()
 end
 
 function game.highscore_show ()
-    gamedata.highscore.window:geometry({ height = 140, width = 200,
+    gamedata.highscore.window:geometry({ height = 140,
+                                         width = 200,
                                          x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 100,
                                          y = gamedata.field.y + math.floor(gamedata.field.h / 2) - 55 })
     gamedata.highscore.window.screen = 1
 
-    gamedata.highscore.table = widget({ type = "textbox", name = "highscore" })
+    gamedata.highscore.table = widget({ type = "textbox",
+                                        name = "highscore" })
     gamedata.highscore.window.widgets =  gamedata.highscore.table
 
     gamedata.highscore.table.text = " Highscores:\n"
@@ -443,13 +457,15 @@ function game.highscore (score)
 
     gamedata.highscore.window = wibox({ position = "floating",
                                         bg = gamedata.btheme.bg_focus or "#333333",
-				        fg = gamedata.btheme.fg_focus or "#FFFFFF" })
-    gamedata.highscore.window:geometry({ height = 20, width = 300,
+                                        fg = gamedata.btheme.fg_focus or "#FFFFFF" })
+    gamedata.highscore.window:geometry({ height = 20,
+                                         width = 300,
                                          x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 150,
                                          y = gamedata.field.y + math.floor(gamedata.field.h / 2) })
     gamedata.highscore.window.screen = 1
 
-    gamedata.namebox = widget({ type = "textbox", name = "foobar" })
+    gamedata.namebox = widget({ type = "textbox",
+                                name = "foobar" })
     gamedata.namebox.text = " Name: |"
     gamedata.highscore.window.widgets = gamedata.namebox
 
@@ -473,9 +489,9 @@ function run(args)
     gamedata.field.y = gamedata.screen.geometry.y + math.floor((gamedata.screen.geometry.height - gamedata.field.h) / 2)
 
     if args then
-    	if args['x'] then gamedata.field.x = args['x'] end
-    	if args['y'] then gamedata.field.y = args['y'] end
-    	if args['solidbg'] then gamedata.solidbg = args['solidbg'] end
+       if args['x'] then gamedata.field.x = args['x'] end
+       if args['y'] then gamedata.field.y = args['y'] end
+       if args['solidbg'] then gamedata.solidbg = args['solidbg'] end
     end
 
     gamedata.score = 0
@@ -486,52 +502,57 @@ function run(args)
     gamedata.cachedir = awful.util.getdir("cache")
 
     if gamedata.solidbg then
-	    gamedata.field.background = wibox({ position = "floating",
-	    					bg = gamedata.solidbg })
-	    gamedata.field.background:geometry({ x = gamedata.field.x,
-	    					 y = gamedata.field.y,
-						 height = gamedata.field.h,
-						 width = gamedata.field.w })
-	    gamedata.field.background.screen = 1
+       gamedata.field.background = wibox({ position = "floating",
+                                           bg = gamedata.solidbg })
+       gamedata.field.background:geometry({ x = gamedata.field.x,
+                                            y = gamedata.field.y,
+                                            height = gamedata.field.h,
+                                            width = gamedata.field.w })
+       gamedata.field.background.screen = 1
     end
 
     gamedata.field.north = wibox({ position = "floating",
-    				   bg = gamedata.btheme.bg_focus or "#333333",
-				   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
+                                   bg = gamedata.btheme.bg_focus or "#333333",
+                                   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.north:geometry({ width = gamedata.field.w + 10,
-    				    height = 15,
-    				    x = gamedata.field.x - 5,
-    				    y = gamedata.field.y - 15 })
+                                    height = 15,
+                                    x = gamedata.field.x - 5,
+                                    y = gamedata.field.y - 15 })
     gamedata.field.north.screen = 1
 
-    gamedata.field.status = widget({ type = "textbox", name = "status", align = "right" })
+    gamedata.field.status = widget({ type = "textbox",
+                                     name = "status",
+                                     align = "right" })
     gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
 
-    gamedata.field.caption = widget({ type = "textbox", name = "caption", align = "left" })
+    gamedata.field.caption = widget({ type = "textbox",
+                                      name = "caption",
+                                      align = "left" })
     gamedata.field.caption.text = "  Awesome Invaders"
 
     gamedata.field.north.widgets = { gamedata.field.caption, gamedata.field.status }
 
     gamedata.field.south = wibox({ position = "floating",
-    				   bg = gamedata.btheme.bg_focus or "#333333",
-				   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
-    gamedata.field.south:geometry({ width = gamedata.field.w, height = 5,
+                                   bg = gamedata.btheme.bg_focus or "#333333",
+                                   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
+    gamedata.field.south:geometry({ width = gamedata.field.w,
+                                    height = 5,
                                     x = gamedata.field.x,
                                     y = gamedata.field.y + gamedata.field.h - 5 })
     gamedata.field.south.screen = 1
 
     gamedata.field.west = wibox({ position = "floating",
-    				   bg = gamedata.btheme.bg_focus or "#333333",
-				   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
+                                  bg = gamedata.btheme.bg_focus or "#333333",
+                                  fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.west:geometry({ width = 5,
-    				   height = gamedata.field.h,
-    				   x = gamedata.field.x - 5,
-    				   y = gamedata.field.y })
+                                   height = gamedata.field.h,
+                                   x = gamedata.field.x - 5,
+                                   y = gamedata.field.y })
     gamedata.field.west.screen = 1
 
     gamedata.field.east = wibox({ position = "floating",
-    				   bg = gamedata.btheme.bg_focus or "#333333",
-				   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
+                                  bg = gamedata.btheme.bg_focus or "#333333",
+                                  fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.east:geometry({ width = 5,
                                    height = gamedata.field.h,
                                    x = gamedata.field.x + gamedata.field.w,
