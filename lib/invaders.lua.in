@@ -46,7 +46,6 @@ gamedata.field.h = 400
 gamedata.field.w = 600
 gamedata.running = false
 gamedata.ammo_max = 1
-gamedata.shots = { }
 gamedata.highscore = { }
 gamedata.enemies = { }
 gamedata.enemies.h = 10
@@ -108,11 +107,8 @@ function shots.fire (x, y, color)
                  y = y })
     s.screen = 1
 
-    for i = 1, gamedata.ammo_max do
-        if not gamedata.shots[i] or gamedata.shots[i].screen == nil then
-            gamedata.shots[i] = s
-            break
-        end
+    if not gamedata.shot or gamedata.shot.screen == nil then
+            gamedata.shot = s
     end
 end
 
@@ -141,18 +137,16 @@ function shots.handle()
 
     gamedata.ammo = gamedata.ammo_max
 
-    for i = 1, gamedata.ammo_max do
-        local s = gamedata.shots[i]
-        if s and s.screen then
-            gamedata.ammo = gamedata.ammo - 1
-            local g = s:geometry()
-            if g.y < gamedata.field.y + 15 then
-                s.screen = nil
-                gamedata.ammo = gamedata.ammo + 1
-            else
-                g.y = g.y - 6
-                s:geometry(g)
-            end
+    local s = gamedata.shot
+    if s and s.screen then
+        gamedata.ammo = gamedata.ammo - 1
+        local g = s:geometry()
+        if g.y < gamedata.field.y + 15 then
+            s.screen = nil
+            gamedata.ammo = gamedata.ammo + 1
+        else
+            g.y = g.y - 6
+            s:geometry(g)
         end
     end
     gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
@@ -215,10 +209,8 @@ function enemies.setup()
         end
     end
 
-    for i = 1, gamedata.ammo_max do
-        if gamedata.shots[i] then
-            gamedata.shots[i].screen = nil
-        end
+    if gamedata.shot then
+        gamedata.shot.screen = nil
     end
 
     for i = 1, gamedata.enemies.shots.max do
@@ -247,25 +239,23 @@ function enemies.handle ()
                         game.over()
                     end
                 end
-                if gamedata.ammo < gamedata.ammo_max then
-                    for i = 1, gamedata.ammo_max do
-                        local s = gamedata.shots[i]
+                if gamedata.ammo == 0 then
+                        local s = gamedata.shot
                         if s and s.screen and game.collide(e, s) then
-                            gamedata.enemies.number = gamedata.enemies.number - 1
-                            e.screen = nil
-                            s.screen = nil
+                        gamedata.enemies.number = gamedata.enemies.number - 1
+                        e.screen = nil
+                        s.screen = nil
 
-                            if (y % 3) == 0 then
-                                gamedata.score = gamedata.score + 15
-                            elseif (y % 3) == 1 then
-                                gamedata.score = gamedata.score + 10
-                            else
-                                gamedata.score = gamedata.score + 5
-                            end
-
-                            gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo.."  "
-                            break
+                        if (y % 3) == 0 then
+                            gamedata.score = gamedata.score + 15
+                        elseif (y % 3) == 1 then
+                            gamedata.score = gamedata.score + 10
+                        else
+                            gamedata.score = gamedata.score + 5
                         end
+
+                        gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo.."  "
+                        break
                     end
                 end
             end
@@ -381,9 +371,7 @@ function game.quit()
         end
     end
 
-    for i = 1, gamedata.ammo_max do
-        if gamedata.shots[i] then gamedata.shots[i].screen = nil end
-    end
+    if gamedata.shot then gamedata.shot.screen = nil end
 
     for i = 1, gamedata.enemies.shots.max do
         if gamedata.enemies.shots[i] then gamedata.enemies.shots[i].screen = nil end
