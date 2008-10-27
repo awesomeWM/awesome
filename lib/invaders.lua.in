@@ -45,7 +45,6 @@ gamedata.field.y = 100
 gamedata.field.h = 400
 gamedata.field.w = 600
 gamedata.running = false
-gamedata.ammo_max = 1
 gamedata.highscore = { }
 gamedata.enemies = { }
 gamedata.enemies.h = 10
@@ -90,8 +89,8 @@ function player.move(x)
 end
 
 function player.fire()
-    if gamedata.ammo > 0 then
-        gamedata.ammo = gamedata.ammo - 1
+    if gamedata.ammo == 1 then
+        gamedata.ammo = 0
         gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
         local gb = gamedata.player:geometry()
         shots.fire(gb.x + 9, gb.y - 10, "#00FF00")
@@ -133,17 +132,15 @@ end
 
 function shots.handle()
     if not gamedata.running then return false end
-    if gamedata.ammo == gamedata.ammo_max then return false end
-
-    gamedata.ammo = gamedata.ammo_max
+    if gamedata.ammo == 1 then return false end
 
     local s = gamedata.shot
     if s and s.screen then
-        gamedata.ammo = gamedata.ammo - 1
+        gamedata.ammo = 0
         local g = s:geometry()
         if g.y < gamedata.field.y + 15 then
             s.screen = nil
-            gamedata.ammo = gamedata.ammo + 1
+            gamedata.ammo = 1
         else
             g.y = g.y - 6
             s:geometry(g)
@@ -243,6 +240,7 @@ function enemies.handle ()
                         local s = gamedata.shot
                         if s and s.screen and game.collide(e, s) then
                         gamedata.enemies.number = gamedata.enemies.number - 1
+                        gamedata.ammo = 1
                         e.screen = nil
                         s.screen = nil
 
@@ -484,7 +482,7 @@ function run(args)
 
     gamedata.score = 0
     gamedata.name = ""
-    gamedata.ammo = gamedata.ammo_max
+    gamedata.ammo = 1
     gamedata.btheme = beautiful.get()
 
     gamedata.cachedir = awful.util.getdir("cache")
