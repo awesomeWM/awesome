@@ -91,7 +91,6 @@ end
 function player.fire()
     if gamedata.ammo == 1 then
         gamedata.ammo = 0
-        gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
         local gb = gamedata.player:geometry()
         shots.fire(gb.x + 9, gb.y - 10, "#00FF00")
     end
@@ -146,7 +145,6 @@ function shots.handle()
             s:geometry(g)
         end
     end
-    gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
 end
 
 
@@ -251,9 +249,7 @@ function enemies.handle ()
                         else
                             gamedata.score = gamedata.score + 5
                         end
-
-                        gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo.."  "
-                        break
+                        gamedata.field.status.text = gamedata.score.." | "..gamedata.round.."  "
                     end
                 end
             end
@@ -271,6 +267,8 @@ function enemies.handle ()
 
     if gamedata.enemies.number == 0 then
         enemies.setup()
+        gamedata.round = gamedata.round + 1
+        gamedata.field.status.text = gamedata.score.." | "..gamedata.round.."  "
         if gamedata.enemies.speed > 1 then gamedata.enemies.speed = gamedata.enemies.speed - 1 end
         return false
     end
@@ -483,6 +481,7 @@ function run(args)
     gamedata.score = 0
     gamedata.name = ""
     gamedata.ammo = 1
+    gamedata.round = 1
     gamedata.btheme = beautiful.get()
 
     gamedata.cachedir = awful.util.getdir("cache")
@@ -509,7 +508,7 @@ function run(args)
     gamedata.field.status = widget({ type = "textbox",
                                      name = "status",
                                      align = "right" })
-    gamedata.field.status.text = gamedata.score.." | "..gamedata.ammo .. "  "
+    gamedata.field.status.text = gamedata.score.." | "..gamedata.round .. "  "
 
     gamedata.field.caption = widget({ type = "textbox",
                                       name = "caption",
