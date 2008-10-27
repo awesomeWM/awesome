@@ -78,15 +78,15 @@ function player.new ()
 end
 
 function player.move(x)
-    local gb = gamedata.player:geometry()
+    local g = gamedata.player:geometry()
 
-    if x < 0 and gb.x > gamedata.field.x then
-        gb.x = gb.x + x
-    elseif x > 0 and gb.x < gamedata.field.x + gamedata.field.w - 30 then
-        gb.x = gb.x + x
+    if x < 0 and g.x > gamedata.field.x then
+        g.x = g.x + x
+    elseif x > 0 and g.x < gamedata.field.x + gamedata.field.w - 30 then
+        g.x = g.x + x
     end
 
-    gamedata.player:geometry(gb)
+    gamedata.player:geometry(g)
 end
 
 function player.fire()
