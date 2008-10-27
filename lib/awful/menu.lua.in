@@ -180,7 +180,7 @@ function clients(menu)
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
-        cls_t[#cls_t + 1] = { util.escape(c.name),
+        cls_t[#cls_t + 1] = { util.escape(c.name) or "",
                               function ()
                                   if not c:isvisible() then
                                       tags.viewmore(c:tags(), c.screen)
@@ -211,7 +211,7 @@ local function set_coords(data)
         data.w = data.parent.w
         data.h = data.parent.h
 
-        local p_w = data.h*(data.num - 1)
+        local p_w = (data.h + data.theme.border_width) * (data.num - 1)
         local m_h = data.theme.border_width + (data.h + data.theme.border_width)*data.nb_items
         local m_w = data.w + data.theme.border_width
         data.y = data.parent.y + p_w + m_h > screen_h and screen_h - m_h or data.parent.y + p_w
@@ -261,4 +261,10 @@ function new(menu, parent, num)
     menus[menu.id] = data
 
     return data
+end
+
+--- Close a menu popup.
+-- @param id The name of the menu to close
+function close(id)
+    destroy(menus[id])
 end
