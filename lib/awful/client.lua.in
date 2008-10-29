@@ -528,8 +528,8 @@ end
 function togglemarked(c)
     local cl = c or capi.client.focus
 
-    if not client.mark(c) then
-        client.unmark(c)
+    if not mark(c) then
+        unmark(c)
     end
 end
 
