@@ -89,7 +89,9 @@ end
 
 local function exec(data, action, num)
     if type(action[2]) == "table" then
-        destroy(data.child)
+        if data.child and data.child.id ~= action[1] then
+            destroy(data.child)
+        end
         data.child = new({ id=action[1], items=action[2] }, data, num)
     elseif type(action[2]) == "string" then
         destroy(get_parents(data))
@@ -228,18 +230,23 @@ local function set_coords(data)
 end
 
 --- Open a menu popup.
--- @param menu Table containing the menu informations. Element id: string naming your menu, only one menu with the same id can be displayed on screen at the same time. Element items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Elements [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional
+-- @param menu Table containing the menu informations. Key id: string naming your menu, only one menu with the same id can be displayed on screen at the same time. Key items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Key menu_toggle (optional, false by default): boolean setting wether the menu should be re-opened or toggle its opened/closed state when mouse button 1 is pressed. Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user.
 function new(menu, parent, num)
-    -- Close the menu if it was already opened
-    if menus[menu.id] then
-        destroy(menus[menu.id])
-    end
-
     -- Create a table to store our menu informations
     local data = {}
     data.id = menu.id
+    data.menu_toggle = (parent and parent.menu_toggle) or menu.menu_toggle or false
+
+    -- Close the menu if it was already opened
+    if menus[data.id] then
+        destroy(menus[data.id])
+        if data.menu_toggle then
+            return
+        end
+    end
+
     data.screen = capi.mouse.screen
     data.items = {}
     data.child = nil
@@ -258,7 +265,7 @@ function new(menu, parent, num)
     end
 
     -- Add menu to menus table
-    menus[menu.id] = data
+    menus[data.id] = data
 
     return data
 end
