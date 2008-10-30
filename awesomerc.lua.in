@@ -111,7 +111,7 @@ mymainmenu = {
 
 mylauncher = awful.widget.launcher({ name = "mylauncher",
                                      image = "@AWESOME_ICON_PATH@/awesome16.png",
-                                     menu = { id="mymainmenu", items=mymainmenu } })
+                                     menu = { id="mymainmenu", items=mymainmenu, menu_toggle=true } })
 
 -- Create a systray
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
