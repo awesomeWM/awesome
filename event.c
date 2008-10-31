@@ -697,6 +697,9 @@ event_handle_mappingnotify(void *data,
     if(ev->request == XCB_MAPPING_MODIFIER
        || ev->request == XCB_MAPPING_KEYBOARD)
     {
+        int nscreen = xcb_setup_roots_length(xcb_get_setup(connection));
+        int phys_screen = 0;
+
         /* Send the request to get the NumLock, ShiftLock and CapsLock masks */
         xmapping_cookie = xcb_get_modifier_mapping_unchecked(globalconf.connection);
 
@@ -708,6 +711,24 @@ event_handle_mappingnotify(void *data,
         xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
                             globalconf.keysyms, &globalconf.numlockmask,
                             &globalconf.shiftlockmask, &globalconf.capslockmask);
+
+        do
+        {
+            xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+            /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look
+             * weird */
+            xcb_ungrab_key(connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+            phys_screen++;
+        } while(phys_screen < nscreen);
+
+        /* regrab everything */
+        keybinding_array_t *arr = &globalconf.keys.by_sym;
+        for(int i = 0; i < arr->len; i++)
+            window_root_grabkey(arr->tab[i]);
+
+        arr = &globalconf.keys.by_code;
+        for(int i = 0; i < arr->len; i++)
+            window_root_grabkey(arr->tab[i]);
     }
 
     return 0;

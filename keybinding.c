@@ -70,7 +70,7 @@ keybinding_cmp(const keybinding_t *k1, const keybinding_t *k2)
 /** Grab key on the root windows.
  * \param k The keybinding.
  */
-static void
+void
 window_root_grabkey(keybinding_t *k)
 {
     int phys_screen = 0;

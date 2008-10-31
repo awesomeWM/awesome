@@ -44,5 +44,6 @@ ARRAY_TYPE(keybinding_t *, keybinding)
 
 keybinding_t *keybinding_find(const xcb_key_press_event_t *);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);
+void window_root_grabkey(keybinding_t *);
 
 #endif
