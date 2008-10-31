@@ -24,6 +24,7 @@
 
 #include <xcb/xcb.h>
 #include "luaa.h"
+#include "common/array.h"
 
 typedef struct keybinding_t
 {
@@ -38,6 +39,8 @@ typedef struct keybinding_t
     /** Lua function to execute. */
     luaA_ref fct;
 } keybinding_t;
+
+ARRAY_TYPE(keybinding_t *, keybinding)
 
 keybinding_t *keybinding_find(const xcb_key_press_event_t *);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);

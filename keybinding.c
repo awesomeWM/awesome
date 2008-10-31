@@ -24,16 +24,8 @@
 #include <X11/Xlib.h>
 
 #include "structs.h"
-#include "keybinding.h"
-
-ARRAY_TYPE(keybinding_t *, keybinding)
 
 extern awesome_t globalconf;
-
-static struct {
-    keybinding_array_t by_code;
-    keybinding_array_t by_sym;
-} keys_g;
 
 static void
 keybinding_delete(keybinding_t **kbp)
@@ -136,7 +128,7 @@ window_root_ungrabkey(keybinding_t *k)
 static void
 keybinding_register_root(keybinding_t *k)
 {
-    keybinding_array_t *arr = k->keysym ? &keys_g.by_sym : &keys_g.by_code;
+    keybinding_array_t *arr = k->keysym ? &globalconf.keys.by_sym : &globalconf.keys.by_code;
     int l = 0, r = arr->len;
 
     keybinding_ref(&k);
@@ -164,7 +156,7 @@ keybinding_register_root(keybinding_t *k)
 static void
 keybinding_unregister_root(keybinding_t **k)
 {
-    keybinding_array_t *arr = (*k)->keysym ? &keys_g.by_sym : &keys_g.by_code;
+    keybinding_array_t *arr = (*k)->keysym ? &globalconf.keys.by_sym : &globalconf.keys.by_code;
     int l = 0, r = arr->len;
 
     while (l < r) {
@@ -261,7 +253,7 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
 keybinding_t *
 keybinding_find(const xcb_key_press_event_t *ev)
 {
-    const keybinding_array_t *arr = &keys_g.by_sym;
+    const keybinding_array_t *arr = &globalconf.keys.by_sym;
     int l, r, mod = XUTIL_MASK_CLEAN(ev->state);
     xcb_keysym_t keysym;
 
@@ -286,9 +278,9 @@ keybinding_find(const xcb_key_press_event_t *ev)
             break;
         }
     }
-    if (arr != &keys_g.by_code)
+    if (arr != &globalconf.keys.by_code)
     {
-        arr = &keys_g.by_code;
+        arr = &globalconf.keys.by_code;
         goto again;
     }
     return NULL;

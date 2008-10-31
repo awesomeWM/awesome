@@ -28,6 +28,7 @@
 #include "luaa.h"
 #include "layout.h"
 #include "swindow.h"
+#include "keybinding.h"
 #include "common/xutil.h"
 #include "common/xembed.h"
 #include "common/refcount.h"
@@ -303,6 +304,12 @@ struct awesome_t
     int nscreen;
     /** True if xinerama is active */
     bool xinerama_is_active;
+    /** Key bindings */
+    struct
+    {
+        keybinding_array_t by_code;
+        keybinding_array_t by_sym;
+    } keys;
     /** Mouse bindings list */
     button_array_t buttons;
     /** Numlock mask */
