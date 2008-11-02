@@ -66,10 +66,13 @@ layout_magnifier(int screen)
     {
        /* No other clients. */
         geometry = area;
-        goto bailout;
     }
     client_resize(focus, geometry, focus->honorsizehints);
     client_raise(focus);
+
+    /* bailout when there is only one window */
+    if (!n)
+	goto bailout;
 
     geometry.x = area.x;
     geometry.y = area.y;
