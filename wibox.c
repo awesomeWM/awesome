@@ -282,72 +282,73 @@ wibox_position_update(wibox_t *wibox)
                            &globalconf.screens[wibox->screen].padding, true);
 
     /* Top and Bottom wibox_t have prio */
-    for(int i = 0; i < globalconf.screens[wibox->screen].wiboxes.len; i++)
-    {
-        wibox_t *w = globalconf.screens[wibox->screen].wiboxes.tab[i];
-        /* Ignore every wibox after me that is in the same position */
-        if(wibox == w)
+    if(wibox->position != Floating)
+        for(int i = 0; i < globalconf.screens[wibox->screen].wiboxes.len; i++)
         {
-            ignore = true;
-            continue;
-        }
-        else if((ignore && wibox->position == w->position) || !w->isvisible)
-            continue;
-        switch(w->position)
-        {
-          case Floating:
-            break;
-          case Left:
-            switch(wibox->position)
+            wibox_t *w = globalconf.screens[wibox->screen].wiboxes.tab[i];
+            /* Ignore every wibox after me that is in the same position */
+            if(wibox == w)
             {
+                ignore = true;
+                continue;
+            }
+            else if((ignore && wibox->position == w->position) || !w->isvisible)
+                continue;
+            switch(w->position)
+            {
+              case Floating:
+                break;
               case Left:
-                area.x += wibox->sw.geometry.height;
+                switch(wibox->position)
+                {
+                  case Left:
+                    area.x += wibox->sw.geometry.height;
+                    break;
+                  default:
+                    break;
+                }
                 break;
-              default:
-                break;
-            }
-            break;
-          case Right:
-            switch(wibox->position)
-            {
               case Right:
-                area.x -= wibox->sw.geometry.height;
+                switch(wibox->position)
+                {
+                  case Right:
+                    area.x -= wibox->sw.geometry.height;
+                    break;
+                  default:
+                    break;
+                }
                 break;
-              default:
-                break;
-            }
-            break;
-          case Top:
-            switch(wibox->position)
-            {
               case Top:
-                area.y += w->sw.geometry.height;
+                switch(wibox->position)
+                {
+                  case Top:
+                    area.y += w->sw.geometry.height;
+                    break;
+                  case Left:
+                  case Right:
+                    area.height -= w->sw.geometry.height;
+                    area.y += w->sw.geometry.height;
+                    break;
+                  default:
+                    break;
+                }
                 break;
-              case Left:
-              case Right:
-                area.height -= w->sw.geometry.height;
-                area.y += w->sw.geometry.height;
-                break;
-              default:
-                break;
-            }
-            break;
-          case Bottom:
-            switch(wibox->position)
-            {
               case Bottom:
-                area.y -= w->sw.geometry.height;
-                break;
-              case Left:
-              case Right:
-                area.height -= w->sw.geometry.height;
-                break;
-              default:
+                switch(wibox->position)
+                {
+                  case Bottom:
+                    area.y -= w->sw.geometry.height;
+                    break;
+                  case Left:
+                  case Right:
+                    area.height -= w->sw.geometry.height;
+                    break;
+                  default:
+                    break;
+                }
                 break;
             }
-            break;
         }
-    }
 
     switch(wibox->position)
     {
@@ -423,6 +424,8 @@ wibox_position_update(wibox_t *wibox)
         }
         break;
       case Floating:
+        wingeom.width = MAX(1, wibox->sw.geometry.width);
+        wingeom.height = MAX(1, wibox->sw.geometry.height);
         break;
     }
 
