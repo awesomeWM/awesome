@@ -252,10 +252,12 @@ mouse_infobox_draw(simple_window_t *sw, area_t geometry, int border)
     area_t draw_geometry = { 0, 0, sw->ctx.width, sw->ctx.height };
     char size[64];
     size_t len;
+    xcolor_t color_without_alpha = globalconf.colors.bg;
+    color_without_alpha.alpha = 0xffff;
 
     len = snprintf(size, sizeof(size), "<text align=\"center\"/>%dx%d+%d+%d",
                    geometry.width, geometry.height, geometry.x, geometry.y);
-    draw_rectangle(&sw->ctx, draw_geometry, 1.0, true, &globalconf.colors.bg);
+    draw_rectangle(&sw->ctx, draw_geometry, 1.0, true, &color_without_alpha);
     draw_text(&sw->ctx, globalconf.font, draw_geometry, size, len, NULL);
     simplewindow_move(sw,
                       geometry.x + ((2 * border + geometry.width) - sw->geometry.width) / 2,
