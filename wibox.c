@@ -519,9 +519,14 @@ wibox_setvisible(wibox_t *wibox, bool v)
     if(v != wibox->isvisible)
     {
         if((wibox->isvisible = v))
+        {
             xcb_map_window(globalconf.connection, wibox->sw.window);
+            /* stack correctly the wibox */
+            client_stack();
+        }
         else
             xcb_unmap_window(globalconf.connection, wibox->sw.window);
+
         /* kick out systray if needed */
         wibox_systray_refresh(wibox);
 
@@ -600,6 +605,8 @@ wibox_attach(wibox_t *wibox, screen_t *s)
         /* draw it right now once to avoid garbage shown */
         wibox_draw(wibox);
         xcb_map_window(globalconf.connection, wibox->sw.window);
+        /* stack correctly the wibox */
+        client_stack();
     }
     else
         wibox->need_update = true;
