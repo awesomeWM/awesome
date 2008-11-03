@@ -335,7 +335,7 @@ client_stack()
 
     /* then stack ontop wibox window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = globalconf.screens[screen].wiboxes.len - 1; i > 0; i--)
+        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
         {
             wibox_t *sb = globalconf.screens[screen].wiboxes.tab[i];
             if(sb->ontop)
