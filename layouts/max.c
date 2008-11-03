@@ -32,7 +32,7 @@ layout_fmax(int screen, bool fs)
     client_t *c;
     area_t area = screen_area_get(screen,
                                   fs ? NULL : &globalconf.screens[screen].wiboxes,
-                                  &globalconf.screens[screen].padding,
+                                  fs ? NULL : &globalconf.screens[screen].padding,
                                   true);
 
     for(c = globalconf.clients; c; c = c->next)

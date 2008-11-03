@@ -677,7 +677,7 @@ client_setfullscreen(client_t *c, bool s)
         /* become fullscreen! */
         if((c->isfullscreen = s))
         {
-            geometry = screen_area_get(c->screen, NULL, &globalconf.screens[c->screen].padding, false);
+            geometry = screen_area_get(c->screen, NULL, NULL, false);
             c->m_geometry = c->geometry;
             c->oldborder = c->border;
             client_setborder(c, 0);
