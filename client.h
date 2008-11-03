@@ -78,6 +78,8 @@ static inline void
 client_raise(client_t *c)
 {
     /* Push c on top of the stack. */
+    if(c->transient_for)
+        stack_client_push(c->transient_for);
     stack_client_push(c);
     client_stack();
 }

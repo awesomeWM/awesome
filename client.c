@@ -225,16 +225,17 @@ client_focus(client_t *c)
 
 /** Stack a window below.
  * \param c The client.
+ * \param mode The mode.
  * \param previous The previous window on the stack.
  * \param return The next-previous!
  */
 static xcb_window_t
-client_stack_below(client_t *c, xcb_window_t previous)
+client_stack_position(client_t *c, xcb_stack_mode_t mode, xcb_window_t previous)
 {
     uint32_t config_win_vals[2];
 
     config_win_vals[0] = previous;
-    config_win_vals[1] = XCB_STACK_MODE_BELOW;
+    config_win_vals[1] = mode;
 
     if(c->titlebar)
     {
@@ -247,21 +248,20 @@ client_stack_below(client_t *c, xcb_window_t previous)
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                          config_win_vals);
-    config_win_vals[0] = c->win;
-
     return c->win;
 }
 
 /** Stacking layout layers */
 typedef enum
 {
-    LAYER_DESKTOP = 1,
+    /** This one is a special layer */
+    LAYER_TRANSIENT_FOR,
+    LAYER_DESKTOP,
     LAYER_BELOW,
     LAYER_TILE,
     LAYER_FLOAT,
     LAYER_ABOVE,
     LAYER_FULLSCREEN,
-    LAYER_MODAL,
     LAYER_ONTOP,
     LAYER_OUTOFSPACE
 } layer_t;
@@ -275,22 +275,19 @@ client_layer_translator(client_t *c)
 {
     if(c->isontop)
         return LAYER_ONTOP;
-    else if(c->ismodal)
-        return LAYER_MODAL;
     else if(c->isfullscreen)
         return LAYER_FULLSCREEN;
     else if(c->isabove)
         return LAYER_ABOVE;
     else if(c->isfloating)
         return LAYER_FLOAT;
+    else if(c->transient_for)
+        return LAYER_TRANSIENT_FOR;
 
     switch(c->type)
     {
       case WINDOW_TYPE_DOCK:
         return LAYER_ABOVE;
-      case WINDOW_TYPE_SPLASH:
-      case WINDOW_TYPE_DIALOG:
-        return LAYER_MODAL;
       case WINDOW_TYPE_DESKTOP:
         return LAYER_DESKTOP;
       default:
@@ -306,41 +303,14 @@ void
 client_stack()
 {
     uint32_t config_win_vals[2];
-    client_node_t *node;
+    client_node_t *node, *last = *client_node_list_last(&globalconf.stack);
     layer_t layer;
     int screen;
 
     config_win_vals[0] = XCB_NONE;
-    config_win_vals[1] = XCB_STACK_MODE_BELOW;
+    config_win_vals[1] = XCB_STACK_MODE_ABOVE;
 
-    /* first stack modal and fullscreen windows */
-    for(layer = LAYER_OUTOFSPACE - 1; layer >= LAYER_FULLSCREEN; layer--)
-        for(node = globalconf.stack; node; node = node->next)
-            if(client_layer_translator(node->client) == layer)
-                config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
-
-    /* then stack ontop wibox window */
-    for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-        {
-            wibox_t *sb = globalconf.screens[screen].wiboxes.tab[i];
-            if(sb->ontop)
-            {
-                xcb_configure_window(globalconf.connection,
-                                     sb->sw.window,
-                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[0] = sb->sw.window;
-            }
-        }
-
-    /* finally stack everything else */
-    for(layer = LAYER_FULLSCREEN - 1; layer >= LAYER_TILE; layer--)
-        for(node = globalconf.stack; node; node = node->next)
-            if(client_layer_translator(node->client) == layer)
-                config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
-
-    /* then stack not ontop wibox window */
+    /* first stack not ontop wibox window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
         for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
         {
@@ -355,11 +325,44 @@ client_stack()
             }
         }
 
-    /* finally stack everything else */
-    for(layer = LAYER_TILE - 1; layer >= LAYER_DESKTOP; layer--)
-        for(node = globalconf.stack; node; node = node->next)
+    /* stack bottom layers */
+    for(layer = LAYER_DESKTOP; layer < LAYER_FULLSCREEN; layer++)
+        for(node = last; node; node = node->prev)
             if(client_layer_translator(node->client) == layer)
-                config_win_vals[0] = client_stack_below(node->client, config_win_vals[0]);
+                config_win_vals[0] = client_stack_position(node->client,
+                                                           XCB_STACK_MODE_ABOVE,
+                                                           config_win_vals[0]);
+
+    /* then stack ontop wibox window */
+    for(screen = 0; screen < globalconf.nscreen; screen++)
+        for(int i = globalconf.screens[screen].wiboxes.len - 1; i > 0; i--)
+        {
+            wibox_t *sb = globalconf.screens[screen].wiboxes.tab[i];
+            if(sb->ontop)
+            {
+                xcb_configure_window(globalconf.connection,
+                                     sb->sw.window,
+                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                     config_win_vals);
+                config_win_vals[0] = sb->sw.window;
+            }
+        }
+
+    /* finally stack ontop and fullscreen windows */
+    for(layer = LAYER_FULLSCREEN; layer < LAYER_OUTOFSPACE; layer++)
+        for(node = last; node; node = node->prev)
+            if(client_layer_translator(node->client) == layer)
+                config_win_vals[0] = client_stack_position(node->client,
+                                                           XCB_STACK_MODE_ABOVE,
+                                                           config_win_vals[0]);
+
+    /* stack transient window on top of their parents */
+    for(node = last; node; node = node->prev)
+        if(client_layer_translator(node->client) == LAYER_TRANSIENT_FOR)
+            client_stack_position(node->client,
+                                  XCB_STACK_MODE_ABOVE,
+                                  node->client->transient_for->win);
+
 }
 
 /** Manage a new client.
