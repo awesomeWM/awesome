@@ -524,6 +524,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
         if((wibox->isvisible = v))
         {
             xcb_map_window(globalconf.connection, wibox->sw.window);
+            simplewindow_refresh_pixmap(&wibox->sw);
             /* stack correctly the wibox */
             client_stack();
         }
@@ -608,6 +609,7 @@ wibox_attach(wibox_t *wibox, screen_t *s)
         /* draw it right now once to avoid garbage shown */
         wibox_draw(wibox);
         xcb_map_window(globalconf.connection, wibox->sw.window);
+        simplewindow_refresh_pixmap(&wibox->sw);
         /* stack correctly the wibox */
         client_stack();
     }
