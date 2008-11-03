@@ -13,6 +13,7 @@ local ipairs = ipairs
 local table = table
 local math = math
 local otable = otable
+local setmetatable = setmetatable
 local capi =
 {
     client = client,
@@ -343,13 +344,20 @@ end
 --- Swap a client by its relative index.
 -- @param i The index.
 -- @param c Optional client, otherwise focused one is used.
-function swap(i, c)
+function swap.byidx(i, c)
     local sel = c or capi.client.focus
     local target = next(i, sel)
     if target then
         target:swap(sel)
     end
 end
+
+-- Compatibility
+local function __swap(self, i, c)
+    util.deprecate()
+    swap.byidx(i, c)
+end
+setmetatable(swap, { __call = __swap })
 
 --- Get the master window.
 -- @param screen Optional screen number, otherwise screen mouse is used.
