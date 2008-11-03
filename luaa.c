@@ -1109,11 +1109,12 @@ luaA_pushcolor(lua_State *L, const xcolor_t *c)
     uint8_t b = (unsigned)c->blue  * 0xff / 0xffff;
     uint8_t a = (unsigned)c->alpha * 0xff / 0xffff;
     char s[10];
+    int len;
     /* do not print alpha if it's full */
     if(a == 0xff)
-        snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
+        len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
     else
-        snprintf(s, sizeof(s), "#%02x%02x%02x%02x", r, g, b, a);
-    lua_pushlstring(L, s, sizeof(s));
+        len = snprintf(s, sizeof(s), "#%02x%02x%02x%02x", r, g, b, a);
+    lua_pushlstring(L, s, len);
     return 1;
 }
