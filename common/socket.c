@@ -78,8 +78,11 @@ int
 socket_getclient(void)
 {
     int csfd;
-
+    #ifndef __FreeBSD__
     csfd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    #else
+    csfd = socket(PF_UNIX, SOCK_STREAM, 0);
+    #endif
 
     if(csfd < 0)
         warn("error opening UNIX domain socket: %s", strerror(errno));

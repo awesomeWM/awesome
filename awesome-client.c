@@ -92,7 +92,11 @@ sockets_reconnect(void)
 static int
 send_msg(const char *msg, ssize_t msg_len)
 {
+    #ifndef __FreeBSD__
     if(send(csfd, msg, msg_len, MSG_NOSIGNAL | MSG_EOR) == -1)
+    #else
+    if(send(csfd, msg, msg_len, MSG_NOSIGNAL | MSG_EOF) == -1)
+    #endif
     {
         switch (errno)
         {
