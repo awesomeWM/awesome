@@ -30,6 +30,7 @@ typedef struct
     /** Imagebox image */
     image_t *image;
     xcolor_t bg;
+    alignment_t valign;
     bool resize;
 } imagebox_data_t;
 
@@ -74,7 +75,21 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
     {
         if(d->bg.initialized)
             draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
-        draw_image(ctx, geometry.x, geometry.y, d->resize ? ctx->height : 0, d->image);
+
+        int y = geometry.y;
+        switch(d->valign)
+        {
+          case AlignBottom:
+            y += geometry.height - d->image->height;
+            break;
+          case AlignCenter:
+            y += (geometry.height - d->image->height) / 2;
+            break;
+          default:
+            break;
+        }
+
+        draw_image(ctx, geometry.x, y, d->resize ? ctx->height : 0, d->image);
     }
 }
 
@@ -93,6 +108,7 @@ imagebox_destructor(widget_t *w)
  * \param L The Lua VM state.
  * \param token The key token.
  * \param resize Resize image.
+ * \param valign Vertical alignment, top, bottom or center.
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield image The image to display.
@@ -116,6 +132,9 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
         break;
       case A_TK_RESIZE:
         lua_pushboolean(L, d->resize);
+        break;
+      case A_TK_VALIGN:
+        lua_pushstring(L, draw_align_tostr(d->valign));
         break;
       default:
         return 0;
@@ -162,6 +181,10 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
       case A_TK_RESIZE:
         d->resize = luaA_checkboolean(L, 3);
         break;
+      case A_TK_VALIGN:
+        if((buf = luaL_checklstring(L, 3, &len)))
+            d->valign = draw_align_fromstr(buf, len);
+        break;
       default:
         return 0;
     }
@@ -190,6 +213,7 @@ imagebox_new(alignment_t align)
     w->geometry = imagebox_geometry;
     w->data = d = p_new(imagebox_data_t, 1);
     d->resize = true;
+    d->valign = AlignTop;
 
     return w;
 }
