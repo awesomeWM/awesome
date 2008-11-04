@@ -48,7 +48,9 @@ typedef enum
     AlignLeft   = (0),
     AlignRight  = (1),
     AlignCenter = (1 << 1),
-    AlignFlex   = (1 << 2),
+    AlignTop    = (1 << 2),
+    AlignBottom = (1 << 3),
+    AlignFlex   = (1 << 4),
 } alignment_t;
 
 typedef struct vector_t vector_t;
