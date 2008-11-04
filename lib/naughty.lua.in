@@ -238,7 +238,10 @@ function notify(args)
         iconbox = widget({ type = "imagebox", name = "icon", align = "left" })
         iconbox:buttons({ button({ }, 1, function () destroy(notification) end) })
         local img = image(icon)
-        if icon_size then img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size) end
+        if icon_size then
+            img = img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size)
+            iconbox.resize = false
+        end
         iconbox.image = img
         if config.hover_timeout then iconbox.mouse_enter = hover_destroy end
     end
