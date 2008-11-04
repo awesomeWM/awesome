@@ -283,8 +283,7 @@ mouse_infobox_new(simple_window_t *sw, int phys_screen, int border, area_t geome
 
     draw_parser_data_init(&pdata);
 
-    geom = draw_text_extents(globalconf.default_screen,
-                             globalconf.font,
+    geom = draw_text_extents(globalconf.font,
                              MOUSE_INFOBOX_STRING_DEFAULT,
                              sizeof(MOUSE_INFOBOX_STRING_DEFAULT)-1,
                              &pdata);

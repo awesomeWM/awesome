@@ -100,16 +100,15 @@ draw_screen_default_visual(xcb_screen_t *s)
     return NULL;
 }
 
-/** Create a new Pango font
- * \param phys_screen The physical screen number.
- * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE])
- * \return a new font
+/** Create a new Pango font.
+ * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE]).
+ * \return A new font.
  */
 font_t *
-draw_font_new(int phys_screen, const char *fontname)
+draw_font_new(const char *fontname)
 {
     cairo_surface_t *surface;
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     cairo_t *cr;
     PangoLayout *layout;
     font_t *font = p_new(font_t, 1);
@@ -117,7 +116,7 @@ draw_font_new(int phys_screen, const char *fontname)
     /* Create a dummy cairo surface, cairo context and pango layout in
      * order to get font informations */
     surface = cairo_xcb_surface_create(globalconf.connection,
-                                       phys_screen,
+                                       globalconf.default_screen,
                                        draw_screen_default_visual(s),
                                        s->width_in_pixels,
                                        s->height_in_pixels);
@@ -817,7 +816,6 @@ draw_rotate(draw_context_t *ctx,
 }
 
 /** Return the width and height of a text in pixel.
- * \param phys_screen Physical screen number.
  * \param font Font to use.
  * \param text The text.
  * \param len The text length.
@@ -825,14 +823,13 @@ draw_rotate(draw_context_t *ctx,
  * \return Text height and width.
  */
 area_t
-draw_text_extents(int phys_screen, font_t *font,
-                  const char *text, ssize_t len, draw_parser_data_t *parser_data)
+draw_text_extents(font_t *font, const char *text, ssize_t len, draw_parser_data_t *parser_data)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
     PangoLayout *layout;
     PangoRectangle ext;
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     area_t geom = { 0, 0, 0, 0 };
 
     if(!len)
@@ -841,7 +838,8 @@ draw_text_extents(int phys_screen, font_t *font,
     if(!draw_text_markup_expand(parser_data, text, len))
         return geom;
 
-    surface = cairo_xcb_surface_create(globalconf.connection, phys_screen,
+    surface = cairo_xcb_surface_create(globalconf.connection,
+                                       globalconf.default_screen,
                                        draw_screen_default_visual(s),
                                        s->width_in_pixels,
                                        s->height_in_pixels);

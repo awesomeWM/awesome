@@ -156,7 +156,7 @@ luaA_font(lua_State *L)
     {
         const char *newfont = luaL_checkstring(L, 1);
         draw_font_delete(&globalconf.font);
-        globalconf.font = draw_font_new(globalconf.default_screen, newfont);
+        globalconf.font = draw_font_new(newfont);
     }
 
     font = pango_font_description_to_string(globalconf.font->desc);

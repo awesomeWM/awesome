@@ -128,7 +128,7 @@ draw_context_wipe(draw_context_t *ctx)
     }
 }
 
-font_t *draw_font_new(int, const char *);
+font_t *draw_font_new(const char *);
 void draw_font_delete(font_t **);
 
 char * draw_iso2utf8(const char *, size_t);
@@ -191,7 +191,7 @@ void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, vector_t,
                      const xcolor_t *, const xcolor_t *, const xcolor_t *);
 void draw_image(draw_context_t *, int, int, int, image_t *);
 void draw_rotate(draw_context_t *, xcb_drawable_t, xcb_drawable_t, int, int, int, int, double, int, int);
-area_t draw_text_extents(int, font_t *, const char *, ssize_t, draw_parser_data_t *);
+area_t draw_text_extents(font_t *, const char *, ssize_t, draw_parser_data_t *);
 alignment_t draw_align_fromstr(const char *, ssize_t);
 const char *draw_align_tostr(alignment_t);
 

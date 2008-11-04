@@ -453,7 +453,7 @@ main(int argc, char **argv)
     colors_reqs[1] = xcolor_init_unchecked(&globalconf.colors.bg,
                                            "white", sizeof("white") - 1);
 
-    globalconf.font = draw_font_new(globalconf.default_screen, "sans 8");
+    globalconf.font = draw_font_new("sans 8");
 
     /* init cursors */
     globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_LEFT_PTR);
