@@ -18,7 +18,7 @@ local client = require("awful.client")
 module("awful.screen")
 
 --- Give the focus to a screen, and move pointer.
--- @param i Screen number.
+-- @param i Relative screen number.
 function focus(i)
     local s = util.cycle(capi.screen.count(), capi.mouse.screen + i)
     local c = client.focus.history.get(s, 0)
