@@ -54,6 +54,8 @@ module("naughty")
 -- @field border_color Border color.
 --   Default:  beautiful.border_focus or '#535d6c'
 -- @field border_width Border width. Default: 1
+-- @field hover_timeout Delay in seconds after which hovered popup disappears.
+--   Default: nil
 -- @class table
 
 config = {}
@@ -72,6 +74,7 @@ config.fg = beautiful.fg_focus or '#ffffff'
 config.bg = beautiful.bg_focus or '#535d6c'
 config.border_color = beautiful.border_focus or '#535d6c'
 config.border_width = 1
+config.hover_timeout = nil
 
 --- Index of notifications. See config table for valid 'position' values.
 -- Each element is a table consisting of:
@@ -214,11 +217,21 @@ function notify(args)
         idx = idx
     }
 
+    local timer = function () destroy(notification) end
+    hooks.timer.register(timeout, timer)
+    notification.timer = timer
+
+    local hover_destroy = function ()
+        if config.hover_timeout == 0 then destroy(notification)
+          else hooks.timer.register(config.hover_timeout, timer) end
+    end
+
     -- populate the wibox with widgets
     local textbox = widget({ type = "textbox", name = "text", align = "flex" })
     textbox:buttons({ button({ }, 1, function () destroy(notification) end) })
     textbox.text = string.format('<span font_desc="%s"><b>%s</b>  %s</span>',
                                  config.font, title, text)
+    if config.hover_timeout then textbox.mouse_enter = hover_destroy end
 
     local iconbox = nil
     if icon then
@@ -227,13 +240,10 @@ function notify(args)
         local img = image(icon)
         if icon_size then img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size) end
         iconbox.image = img
+        if config.hover_timeout then iconbox.mouse_enter = hover_destroy end
     end
 
     box.widgets = { iconbox, textbox }
-
-    local timer = function () destroy(notification) end
-    hooks.timer.register(timeout, timer)
-    notification.timer = timer
 
     -- insert the notification to the table
     table.insert(notifications[position],notification)
