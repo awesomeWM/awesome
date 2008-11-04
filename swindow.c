@@ -111,6 +111,7 @@ simplewindow_init(simple_window_t *sw,
     xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root,
                       geometry.width, geometry.height);
 
+    sw->ctx.phys_screen = phys_screen;
     simplewindow_draw_context_update(sw, s);
 
     /* The default GC is just a newly created associated to the root window */
