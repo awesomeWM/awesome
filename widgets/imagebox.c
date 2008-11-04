@@ -30,6 +30,7 @@ typedef struct
     /** Imagebox image */
     image_t *image;
     xcolor_t bg;
+    bool resize;
 } imagebox_data_t;
 
 static area_t
@@ -40,8 +41,12 @@ imagebox_geometry(widget_t *widget, int screen, int height, int width)
 
     if(d->image)
     {
+        if(d->resize)
+            geometry.width = ((double) height / (double) d->image->height) * d->image->width;
+        else
+            geometry.width = d->image->width;
+
         geometry.height = height;
-        geometry.width = ((double) height / (double) d->image->height) * d->image->width;
     }
     else
     {
@@ -69,7 +74,7 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
     {
         if(d->bg.initialized)
             draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
-        draw_image(ctx, geometry.x, geometry.y, ctx->height, d->image);
+        draw_image(ctx, geometry.x, geometry.y, d->resize ? ctx->height : 0, d->image);
     }
 }
 
@@ -87,6 +92,7 @@ imagebox_destructor(widget_t *w)
 /** Imagebox widget.
  * \param L The Lua VM state.
  * \param token The key token.
+ * \param resize Resize image.
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield image The image to display.
@@ -107,6 +113,9 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
             return 0;
       case A_TK_BG:
         luaA_pushcolor(L, &d->bg);
+        break;
+      case A_TK_RESIZE:
+        lua_pushboolean(L, d->resize);
         break;
       default:
         return 0;
@@ -150,6 +159,9 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
         else if((buf = luaL_checklstring(L, 3, &len)))
             xcolor_init_reply(xcolor_init_unchecked(&d->bg, buf, len));
         break;
+      case A_TK_RESIZE:
+        d->resize = luaA_checkboolean(L, 3);
+        break;
       default:
         return 0;
     }
@@ -168,6 +180,7 @@ widget_t *
 imagebox_new(alignment_t align)
 {
     widget_t *w = p_new(widget_t, 1);
+    imagebox_data_t *d;
     widget_common_new(w);
     w->align = align;
     w->draw = imagebox_draw;
@@ -175,7 +188,8 @@ imagebox_new(alignment_t align)
     w->newindex = luaA_imagebox_newindex;
     w->destructor = imagebox_destructor;
     w->geometry = imagebox_geometry;
-    w->data = p_new(imagebox_data_t, 1);
+    w->data = d = p_new(imagebox_data_t, 1);
+    d->resize = true;
 
     return w;
 }
