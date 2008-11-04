@@ -103,13 +103,16 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
       case A_TK_IMAGE:
         if(d->image)
             return luaA_image_userdata_new(L, d->image);
+        else
+            return 0;
       case A_TK_BG:
         luaA_pushcolor(L, &d->bg);
         break;
       default:
-        break;
+        return 0;
     }
-    return 0;
+
+    return 1;
 }
 
 /** The __newindex method for a imagebox object.
