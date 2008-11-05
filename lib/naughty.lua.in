@@ -170,6 +170,7 @@ end
 -- @param bg Background color
 -- @param screen Target screen for the notification
 -- @param ontop Target screen for the notification
+-- @param run Function to run on left click
 -- @usage naughty.notify({ title = 'Achtung!', text = 'You\'re idling', timeout = 0 })
 function notify(args)
     -- gather settings together
@@ -221,6 +222,8 @@ function notify(args)
     hooks.timer.register(timeout, timer)
     notification.timer = timer
 
+    local run = args.run or function () destroy(notification) end
+
     local hover_destroy = function ()
         if config.hover_timeout == 0 then destroy(notification)
           else hooks.timer.register(config.hover_timeout, timer) end
@@ -228,7 +231,8 @@ function notify(args)
 
     -- populate the wibox with widgets
     local textbox = widget({ type = "textbox", name = "text", align = "flex" })
-    textbox:buttons({ button({ }, 1, function () destroy(notification) end) })
+    textbox:buttons({ button({ }, 1, run),
+                      button({ }, 3, function () destroy(notification) end) })
     textbox.text = string.format('<span font_desc="%s"><b>%s</b>  %s</span>',
                                  config.font, title, text)
     if config.hover_timeout then textbox.mouse_enter = hover_destroy end
@@ -236,7 +240,8 @@ function notify(args)
     local iconbox = nil
     if icon then
         iconbox = widget({ type = "imagebox", name = "icon", align = "left" })
-        iconbox:buttons({ button({ }, 1, function () destroy(notification) end) })
+        iconbox:buttons({ button({ }, 1, run),
+                          button({ }, 3, function () destroy(notification) end) })
         local img = image(icon)
         if icon_size then
             img = img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size)
