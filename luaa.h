@@ -321,6 +321,25 @@ luaA_dofunction(lua_State *L, luaA_ref f, int nargs, int nret)
     return false;
 }
 
+/** Print a warning about some Lua code.
+ * This is less mean than luaL_error() which setjmp via lua_error() and kills
+ * everything. This only warn, it's up to you to then do what's should be done.
+ * \param L The Lua VM state.
+ * \param fmt The warning message.
+ */
+static inline void __attribute__ ((format(printf, 2, 3)))
+luaA_warn(lua_State *L, const char *fmt, ...)
+{
+    va_list ap;
+    luaL_where(L, 1);
+    fprintf(stderr, "%sW: ", lua_tostring(L, -1));
+    lua_pop(L, 1);
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    fprintf(stderr, "\n");
+}
+
 int luaA_otable_index(lua_State *);
 
 /** Create a new object table with a metatable.
