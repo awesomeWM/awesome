@@ -380,7 +380,10 @@ luaA_widget_new(lua_State *L)
     if((wc = name_func_lookup(type, WidgetList)))
         w = wc(align);
     else
-        luaL_error(L, "unkown widget type: %s", type);
+    {
+        luaA_warn(L, "unkown widget type: %s", type);
+        return 0;
+    }
 
     w->type = wc;
 
