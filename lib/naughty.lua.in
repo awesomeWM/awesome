@@ -218,21 +218,21 @@ function notify(args)
         idx = idx
     }
 
-    local timer = function () destroy(notification) end
-    hooks.timer.register(timeout, timer)
-    notification.timer = timer
+    local die = function () destroy(notification) end
+    hooks.timer.register(timeout, die)
+    notification.die = die
 
-    local run = args.run or function () destroy(notification) end
+    local run = args.run or die
 
     local hover_destroy = function ()
-        if config.hover_timeout == 0 then destroy(notification)
-          else hooks.timer.register(config.hover_timeout, timer) end
+        if config.hover_timeout == 0 then die()
+          else hooks.timer.register(config.hover_timeout, die) end
     end
 
     -- populate the wibox with widgets
     local textbox = widget({ type = "textbox", name = "text", align = "flex" })
     textbox:buttons({ button({ }, 1, run),
-                      button({ }, 3, function () destroy(notification) end) })
+                      button({ }, 3, die) })
     textbox.text = string.format('<span font_desc="%s"><b>%s</b>  %s</span>',
                                  config.font, title, text)
     if config.hover_timeout then textbox.mouse_enter = hover_destroy end
@@ -241,7 +241,7 @@ function notify(args)
     if icon then
         iconbox = widget({ type = "imagebox", name = "icon", align = "left" })
         iconbox:buttons({ button({ }, 1, run),
-                          button({ }, 3, function () destroy(notification) end) })
+                          button({ }, 3, die) })
         local img = image(icon)
         if icon_size then
             img = img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size)
