@@ -351,6 +351,17 @@ widget_invalidate_bywidget(widget_t *widget)
                 }
 }
 
+/** Deprecated function to add mouse bindings.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_widget_mouse_add(lua_State *L)
+{
+    deprecate();
+    return 0;
+}
+
 /** Create a new widget.
  * \param L The Lua VM state.
  *
@@ -384,6 +395,8 @@ luaA_widget_new(lua_State *L)
         deprecate();
         luaA_warn(L, "requesting old widgets, return a table to allow smooth execution\n");
         lua_newtable(L);
+        lua_pushcfunction(L, luaA_widget_mouse_add);
+        lua_setfield(L, -2, "mouse_add");
         return 1;
     }
     else if((wc = name_func_lookup(type, WidgetList)))
@@ -519,6 +532,7 @@ const struct luaL_reg awesome_widget_methods[] =
 const struct luaL_reg awesome_widget_meta[] =
 {
     { "buttons", luaA_widget_buttons },
+    { "mouse_add", luaA_widget_mouse_add },
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },
     { "__gc", luaA_widget_gc },
