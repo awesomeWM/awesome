@@ -50,15 +50,23 @@ function add(c, args)
 
     local title = capi.widget({ type = "textbox", name = "title", align = "flex" })
     title.text = " " .. util.escape(c.name) .. " "
+
+    -- Redirect relevant events to the client the titlebar belongs to
     local bts =
     {
-        capi.button({ }, 1, function (t) t.client:mouse_move() end),
+        capi.button({ }, 1, function (t) capi.client.focus = t.client t.client:raise() t.client:mouse_move() end),
+        capi.button({ args.modkey }, 1, function (t) t.client:mouse_move() end),
         capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
     }
     title:buttons(bts)
+    function title.mouse_enter(s) hooks.user.call('mouse_enter', c) end
 
     local appicon = capi.widget({ type = "imagebox", name = "appicon", align = "left" })
     appicon.image = c.icon
+
+    -- Also redirect events for appicon (So the entire titlebar behaves consistently)
+    appicon:buttons(bts)
+    function appicon.mouse_enter(s) hooks.user.call('mouse_enter', c) end
 
     if theme.titlebar_close_button == "true" then
         local closef = widget.button({ name = "closef", align = "right",
@@ -70,15 +78,18 @@ function add(c, args)
                                               or theme.titlebar_close_button_img_normal
                                               or "@AWESOME_ICON_PATH@/titlebar/close.png" })
 
-        -- Bind kill button
-        local b = capi.button({ }, 1, nil, function (t) t.client:kill() end)
-        local bts = closef:buttons()
-        bts[#bts + 1] = b
-        closef:buttons(bts)
-
-        bts = close:buttons()
-        bts[#bts + 1] = b
+        -- Bind kill button, also allow moving and resizing on this widget
+        local bts =
+        {
+                capi.button({ }, 1, nil, function (t) t.client:kill() end),
+                capi.button({ args.modkey }, 1, function (t) t.client:mouse_move() end),
+                capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
+        }
         close:buttons(bts)
+        closef:buttons(bts)
+        -- Needed for sloppy focus beheaviour
+        function close.mouse_enter(s) hooks.user.call('mouse_enter', c) end
+        function closef.mouse_enter(s) hooks.user.call('mouse_enter', c) end
 
         tb.widgets = { appicon, title, closef, close }
     else
