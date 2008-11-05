@@ -96,7 +96,7 @@ luaA_hooks_mouse_enter(lua_State *L)
  * \lparam A function to call each time a client gets mouse over it.
  */
 static int
-luaA_hooks_mouse_over(lua_State *L)
+luaA_hooks_mouseover(lua_State *L)
 {
     deprecate(L);
     return luaA_hooks_mouse_enter(L);
@@ -201,6 +201,6 @@ const struct luaL_reg awesome_hooks_lib[] =
     { "tagged", luaA_hooks_tagged },
     { "timer", luaA_hooks_timer },
     /* deprecated */
-    { "mouse_over", luaA_hooks_mouse_over },
+    { "mouseover", luaA_hooks_mouseover },
     { NULL, NULL }
 };
