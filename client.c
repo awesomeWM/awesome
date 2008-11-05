@@ -424,11 +424,12 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* Try to load props if any */
     client_loadprops(c, &globalconf.screens[screen]);
 
-    /* move client to screen, but do not tag it for now */
-    screen_client_moveto(c, screen, false, true);
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
+
+    /* move client to screen, but do not tag it for now */
+    screen_client_moveto(c, screen, false, true);
 
     /* Check if client has been tagged by loading props, or maybe with its
      * hints.
