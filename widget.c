@@ -373,8 +373,7 @@ luaA_widget_new(lua_State *L)
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     align = draw_align_fromstr(buf, len);
 
-    if(!(buf = luaA_getopt_string(L, 2, "name", NULL)))
-        luaL_error(L, "object widget must have a name");
+    buf = luaA_getopt_string(L, 2, "name", NULL);
 
     type = luaA_getopt_string(L, 2, "type", NULL);
 
@@ -444,7 +443,10 @@ luaA_widget_index(lua_State *L)
         lua_pushboolean(L, (*widget)->isvisible);
         return 1;
       case A_TK_NAME:
-        lua_pushstring(L, (*widget)->name);
+        if((*widget)->name)
+            lua_pushstring(L, (*widget)->name);
+        else
+            lua_pushnil(L);
         return 1;
       case A_TK_MOUSE_ENTER:
         if((*widget)->mouse_enter != LUA_REFNIL)
