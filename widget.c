@@ -377,7 +377,16 @@ luaA_widget_new(lua_State *L)
 
     type = luaA_getopt_string(L, 2, "type", NULL);
 
-    if((wc = name_func_lookup(type, WidgetList)))
+    /* deprecated, compatibility code */
+    if(!a_strcmp(type, "tasklist")
+       || !a_strcmp(type, "taglist"))
+    {
+        deprecate();
+        luaA_warn(L, "requesting old widgets, return a table to allow smooth execution\n");
+        lua_newtable(L);
+        return 1;
+    }
+    else if((wc = name_func_lookup(type, WidgetList)))
         w = wc(align);
     else
     {
