@@ -156,17 +156,32 @@ image_new_from_file(const char *filename)
  * \param L The Lua stack.
  * \return The number of elements pushed on stack.
  * \luastack
- * \lparam The image path.
+ * \lparam The image path, or nil to create an empty image.
+ * \lparam The image width if nil was set as first arg.
+ * \lparam The image height if nil was set as first arg.
  * \lreturn An image object.
  */
 static int
 luaA_image_new(lua_State *L)
 {
-    const char *filename = luaL_checkstring(L, 2);
-    image_t *image;
+    const char *filename;
 
-    if((image = image_new_from_file(filename)))
+    if((filename = lua_tostring(L, 2)))
+    {
+        image_t *image;
+        if((image = image_new_from_file(filename)))
+            return luaA_image_userdata_new(L, image);
+    }
+    else if(lua_isnil(L, 2))
+    {
+        int width = luaL_checknumber(L, 3);
+        int height = luaL_checknumber(L, 4);
+        Imlib_Image imimage = imlib_create_image(width, height);
+        image_t *image = p_new(image_t, 1);
+        image->image = imimage;
+        image_compute(image);
         return luaA_image_userdata_new(L, image);
+    }
 
     return 0;
 }
