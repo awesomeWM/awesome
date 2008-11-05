@@ -943,7 +943,7 @@ luaA_client_visible_get(lua_State *L)
 
     luaA_checkscreen(screen);
 
-    deprecate();
+    deprecate(L);
 
     lua_newtable(L);
 
@@ -1167,7 +1167,7 @@ luaA_client_geometry(lua_State *L)
 static int
 luaA_client_coords(lua_State *L)
 {
-    deprecate();
+    deprecate(L);
     return luaA_client_geometry(L);
 }
 
@@ -1208,7 +1208,7 @@ luaA_client_fullgeometry(lua_State *L)
 static int
 luaA_client_fullcoords(lua_State *L)
 {
-    deprecate();
+    deprecate(L);
     return luaA_client_fullgeometry(L);
 }
 

@@ -175,7 +175,7 @@ luaA_font(lua_State *L)
 static int
 luaA_font_set(lua_State *L)
 {
-    deprecate();
+    deprecate(L);
     return luaA_font(L);
 }
 
@@ -240,7 +240,7 @@ luaA_colors(lua_State *L)
 static int
 luaA_colors_set(lua_State *L)
 {
-    deprecate();
+    deprecate(L);
     return luaA_colors(L);
 }
 

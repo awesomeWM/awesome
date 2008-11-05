@@ -1374,7 +1374,7 @@ luaA_mouse_coords(lua_State *L)
 static int
 luaA_mouse_new(lua_State *L)
 {
-    deprecate();
+    deprecate(L);
     return luaA_button_new(L);
 }
 

@@ -157,7 +157,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
 static int
 luaA_titlebar_new(lua_State *L)
 {
-    deprecate();
+    deprecate(L);
 
     return luaA_wibox_new(L);
 }
