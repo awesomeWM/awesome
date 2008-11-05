@@ -691,6 +691,15 @@ luaA_spawn(lua_State *L)
     return 0;
 }
 
+/** Deprecated function, does nothing.
+ */
+static int
+luaA_mouse_add(lua_State *L)
+{
+    deprecate(L);
+    return 0;
+}
+
 /** Initialize the Lua VM
  */
 void
@@ -721,6 +730,8 @@ luaA_init(void)
         { "font", luaA_font },
         { "colors", luaA_colors },
         { "conffile", luaA_conffile },
+        /* deprecated */
+        { "mouse_add", luaA_mouse_add },
         { NULL, NULL }
     };
 
