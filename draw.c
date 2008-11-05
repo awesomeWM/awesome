@@ -263,7 +263,7 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
             xcolor_init_reply(reqs[i]);
 }
 
-bool
+static bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
