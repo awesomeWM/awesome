@@ -308,7 +308,7 @@ function keyhandler(mod, key)
         elseif key == " " then
             player.fire()
         elseif key == "s" then
-            awful.util.spawn("import -window root "..gamedata.cachedir.."/awesome/invaders-"..os.time()..".png")
+            awful.util.spawn("import -window root "..gamedata.cachedir.."/invaders-"..os.time()..".png")
         end
     end
     return true
