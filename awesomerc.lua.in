@@ -151,8 +151,8 @@ for s = 1, screen.count() do
     -- Create the wibox
     mywibox[s] = wibox({ position = "top", fg = beautiful.fg_normal, bg = beautiful.bg_normal })
     -- Add widgets to the wibox - order matters
-    mywibox[s].widgets = { mytaglist[s],
-                           mylauncher,
+    mywibox[s].widgets = { mylauncher,
+                           mytaglist[s],
                            mytasklist[s],
                            mypromptbox[s],
                            mytextbox,
