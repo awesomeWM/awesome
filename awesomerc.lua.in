@@ -92,7 +92,7 @@ end
 
 -- {{{ Wibox
 -- Create a textbox widget
-mytextbox = widget({ type = "textbox", name = "mytextbox", align = "right" })
+mytextbox = widget({ type = "textbox", align = "right" })
 -- Set the default text in textbox
 mytextbox.text = "<b><small> " .. AWESOME_RELEASE .. " </small></b>"
 
@@ -109,12 +109,11 @@ mymainmenu = {
    {"open terminal", terminal }
 }
 
-mylauncher = awful.widget.launcher({ name = "mylauncher",
-                                     image = "@AWESOME_ICON_PATH@/awesome16.png",
+mylauncher = awful.widget.launcher({ image = "@AWESOME_ICON_PATH@/awesome16.png",
                                      menu = { id="mymainmenu", items=mymainmenu, menu_toggle=true } })
 
 -- Create a systray
-mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
+mysystray = widget({ type = "systray", align = "right" })
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -135,10 +134,10 @@ mytasklist.buttons = { button({ }, 1, function (c) client.focus = c; c:raise() e
 
 for s = 1, screen.count() do
     -- Create a promptbox for each screen
-    mypromptbox[s] = widget({ type = "textbox", name = "mypromptbox" .. s, align = "left" })
+    mypromptbox[s] = widget({ type = "textbox", align = "left" })
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
-    mylayoutbox[s] = widget({ type = "imagebox", name = "mylayoutbox", align = "right" })
+    mylayoutbox[s] = widget({ type = "imagebox", align = "right" })
     mylayoutbox[s]:buttons({ button({ }, 1, function () awful.layout.inc(layouts, 1) end),
                              button({ }, 3, function () awful.layout.inc(layouts, -1) end),
                              button({ }, 4, function () awful.layout.inc(layouts, 1) end),
