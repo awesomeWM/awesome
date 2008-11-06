@@ -279,7 +279,7 @@ client_layer_translator(client_t *c)
         return LAYER_FULLSCREEN;
     else if(c->isabove)
         return LAYER_ABOVE;
-    else if(c->isfloating)
+    else if(c->isfloating || client_isfixed(c))
         return LAYER_FLOAT;
     else if(c->transient_for)
         return LAYER_TRANSIENT_FOR;
@@ -290,6 +290,8 @@ client_layer_translator(client_t *c)
         return LAYER_ABOVE;
       case WINDOW_TYPE_DESKTOP:
         return LAYER_DESKTOP;
+      case WINDOW_TYPE_DIALOG:
+        return LAYER_FLOAT;
       default:
         return LAYER_TILE;
     }
@@ -362,7 +364,6 @@ client_stack()
             client_stack_position(node->client,
                                   XCB_STACK_MODE_ABOVE,
                                   node->client->transient_for->win);
-
 }
 
 /** Manage a new client.
