@@ -30,6 +30,7 @@ static void
 layout_fmax(int screen, bool fs)
 {
     client_t *c;
+    int phys_screen = screen_virttophys(screen);
     area_t area = screen_area_get(screen,
                                   fs ? NULL : &globalconf.screens[screen].wiboxes,
                                   fs ? NULL : &globalconf.screens[screen].padding,
@@ -45,8 +46,8 @@ layout_fmax(int screen, bool fs)
             area.height += 2 * c->border;
         }
 
-    if(IS_TILED(globalconf.screens[screen].client_focus, screen))
-        client_raise(globalconf.screens[screen].client_focus);
+    if(IS_TILED(globalconf.screens[phys_screen].client_focus, screen))
+        client_raise(globalconf.screens[phys_screen].client_focus);
 }
 
 void
