@@ -356,22 +356,61 @@ luaAe_pairs(lua_State *L)
     return luaA_generic_pairs(L);
 }
 
+static int
+luaA_ipairs_aux(lua_State *L)
+{
+    int i = luaL_checkint(L, 2) + 1;
+    luaL_checktype(L, 1, LUA_TTABLE);
+    lua_pushinteger(L, i);
+    lua_rawgeti(L, 1, i);
+    return (lua_isnil(L, -1)) ? 0 : 2;
+}
+
+/** Overload standard ipairs function to use __ipairs field of metatables.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaAe_ipairs(lua_State *L)
+{
+    if(luaL_getmetafield(L, 1, "__ipairs"))
+    {
+        lua_insert(L, 1);
+        lua_call(L, lua_gettop(L) - 1, LUA_MULTRET);
+        return lua_gettop(L);
+    }
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_pushvalue(L, 1);
+    lua_pushinteger(L, 0);  /* and initial value */
+    return 3;
+}
+
 /** Replace various standards Lua functions with our own.
  * \param L The Lua VM state.
  */
 static void
 luaA_fixups(lua_State *L)
 {
+    /* replace string.len */
     lua_getglobal(L, "string");
     lua_pushcfunction(L, luaA_mbstrlen);
     lua_setfield(L, -2, "len");
     lua_pop(L, 1);
+    /* replace next */
     lua_pushliteral(L, "next");
     lua_pushcfunction(L, luaAe_next);
     lua_settable(L, LUA_GLOBALSINDEX);
+    /* replace pairs */
     lua_pushliteral(L, "pairs");
     lua_pushcfunction(L, luaAe_next);
     lua_pushcclosure(L, luaAe_pairs, 1); /* pairs get next as upvalue */
+    lua_settable(L, LUA_GLOBALSINDEX);
+    /* replace ipairs */
+    lua_pushliteral(L, "ipairs");
+    lua_pushcfunction(L, luaA_ipairs_aux);
+    lua_pushcclosure(L, luaAe_ipairs, 1);
     lua_settable(L, LUA_GLOBALSINDEX);
 }
 
@@ -387,6 +426,21 @@ luaA_wtable_next(lua_State *L)
         return 2;
     lua_pushnil(L);
     return 1;
+}
+
+/** __ipairs function for wtable objects.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_wtable_ipairs(lua_State *L)
+{
+    /* push ipairs_aux */
+    lua_pushvalue(L, lua_upvalueindex(2));
+    /* push content table */
+    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_pushinteger(L, 0);  /* and initial value */
+    return 3;
 }
 
 /** Index function of wtable objects.
@@ -463,15 +517,19 @@ luaA_table2wtable(lua_State *L)
     lua_newtable(L); /* create *real* content table */
     lua_newtable(L); /* metatable */
     lua_pushvalue(L, -2); /* copy content table */
-    lua_pushcclosure(L, luaA_wtable_next, 1); /* __next has the content table as upvalue */
+    lua_pushcfunction(L, luaA_ipairs_aux); /* push ipairs aux */
+    lua_pushcclosure(L, luaA_wtable_ipairs, 2);
     lua_pushvalue(L, -3); /* copy content table */
-    lua_pushcclosure(L, luaA_wtable_index, 1); /* __index has the content table as upvalue */
+    lua_pushcclosure(L, luaA_wtable_next, 1); /* __next has the content table as upvalue */
     lua_pushvalue(L, -4); /* copy content table */
+    lua_pushcclosure(L, luaA_wtable_index, 1); /* __index has the content table as upvalue */
+    lua_pushvalue(L, -5); /* copy content table */
     lua_pushcclosure(L, luaA_wtable_newindex, 1); /* __newindex has the content table as upvalue */
     /* set metatable field with just pushed closure */
-    lua_setfield(L, -4, "__newindex");
-    lua_setfield(L, -3, "__index");
-    lua_setfield(L, -2, "__next");
+    lua_setfield(L, -5, "__newindex");
+    lua_setfield(L, -4, "__index");
+    lua_setfield(L, -3, "__next");
+    lua_setfield(L, -2, "__ipairs");
     /* set metatable impossible to touch */
     lua_pushliteral(L, "wtable");
     lua_setfield(L, -2, "__metatable");
