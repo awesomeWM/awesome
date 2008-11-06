@@ -1,6 +1,4 @@
--- awesome 3 configuration file
-
--- Include awesome library, with lots of useful function!
+-- Include awesome libraries, with lots of useful function!
 require("awful")
 require("beautiful")
 
