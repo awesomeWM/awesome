@@ -96,15 +96,15 @@ mytextbox.text = "<b><small> " .. AWESOME_RELEASE .. " </small></b>"
 
 -- Create a laucher widget and a main menu
 myawesomemenu = {
-   {"manual", terminal .. " -e man awesome" },
-   {"edit config", editor_cmd .. " " .. awful.util.getdir("config") .. "/rc.lua" },
-   {"restart", awesome.restart },
-   {"quit", awesome.quit }
+   { "manual", terminal .. " -e man awesome" },
+   { "edit config", editor_cmd .. " " .. awful.util.getdir("config") .. "/rc.lua" },
+   { "restart", awesome.restart },
+   { "quit", awesome.quit }
 }
 
 mymainmenu = {
-   {"awesome", myawesomemenu, "@AWESOME_ICON_PATH@/awesome16.png" },
-   {"open terminal", terminal }
+   { "awesome", myawesomemenu, "@AWESOME_ICON_PATH@/awesome16.png" },
+   { "open terminal", terminal }
 }
 
 mylauncher = awful.widget.launcher({ image = "@AWESOME_ICON_PATH@/awesome16.png",
