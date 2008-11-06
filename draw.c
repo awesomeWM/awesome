@@ -330,13 +330,15 @@ draw_context_init(draw_context_t *d, int phys_screen,
 /** Draw text into a draw context.
  * \param ctx Draw context  to draw to.
  * \param font The font to use.
+ * \param elip Ellipsize mode.
+ * \param wrap Wrap mode.
  * \param area Area to draw to.
  * \param text Text to draw.
  * \param len Text to draw length.
  * \param data Optional parser data.
  */
 void
-draw_text(draw_context_t *ctx, font_t *font,
+draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrapMode wrap,
           area_t area, const char *text, ssize_t len, draw_parser_data_t *pdata)
 {
     int x, y;
@@ -392,8 +394,8 @@ draw_text(draw_context_t *ctx, font_t *font,
                                                    - (pdata->margin.left
                                                       + pdata->margin.right)));
     pango_layout_set_height(ctx->layout, pango_units_from_double(area.height));
-    pango_layout_set_ellipsize(ctx->layout, PANGO_ELLIPSIZE_END);
-    pango_layout_set_wrap(ctx->layout, PANGO_WRAP_WORD_CHAR);
+    pango_layout_set_ellipsize(ctx->layout, ellip);
+    pango_layout_set_wrap(ctx->layout, wrap);
     pango_layout_set_attributes(ctx->layout, pdata->attr_list);
     pango_layout_set_font_description(ctx->layout, font->desc);
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);

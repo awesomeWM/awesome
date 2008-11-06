@@ -11,6 +11,7 @@ bottomleft
 bottomright
 button
 center
+char
 class
 client
 color
@@ -18,6 +19,8 @@ Control
 coords
 Ctrl
 east
+ellipsize
+end
 fg
 flex
 floating
@@ -41,6 +44,7 @@ len
 line
 Lock
 machine
+middle
 minimize
 Mod1
 Mod2
@@ -50,9 +54,9 @@ Mod5
 mouse_enter
 mouse_leave
 mwfact
+name
 ncol
 nmaster
-name
 on
 ontop
 opacity
@@ -75,6 +79,7 @@ show_icons
 sizehints
 skip_taskbar
 south
+start
 sticky
 text
 ticks_count
@@ -91,5 +96,8 @@ visible
 vertical
 widgets
 width
+word
+word_char
 workarea
+wrap
 yes

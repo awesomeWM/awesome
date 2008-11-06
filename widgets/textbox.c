@@ -35,6 +35,8 @@ typedef struct
     int width;
     /** Extents */
     int extents;
+    PangoEllipsizeMode ellip;
+    PangoWrapMode wrap;
     /** Draw parser data */
     draw_parser_data_t pdata;
 } textbox_data_t;
@@ -74,7 +76,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
              int screen, wibox_t *p)
 {
     textbox_data_t *d = widget->data;
-    draw_text(ctx, globalconf.font, geometry, d->text, d->len, &d->pdata);
+    draw_text(ctx, globalconf.font, d->ellip, d->wrap, geometry, d->text, d->len, &d->pdata);
 }
 
 /** Delete a textbox widget.
@@ -110,6 +112,34 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
         return 1;
       case A_TK_WIDTH:
         lua_pushnumber(L, d->width);
+        return 1;
+      case A_TK_WRAP:
+        switch(d->wrap)
+        {
+          default:
+            lua_pushliteral(L, "word");
+            break;
+          case A_TK_CHAR:
+            lua_pushliteral(L, "char");
+            break;
+          case A_TK_WORD_CHAR:
+            lua_pushliteral(L, "word_char");
+            break;
+        }
+        return 1;
+      case A_TK_ELLIPSIZE:
+        switch(d->ellip)
+        {
+          case A_TK_START:
+            lua_pushliteral(L, "start");
+            break;
+          case A_TK_MIDDLE:
+            lua_pushliteral(L, "middle");
+            break;
+          default:
+            lua_pushliteral(L, "end");
+            break;
+        }
         return 1;
       default:
         return 0;
@@ -155,6 +185,40 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
       case A_TK_WIDTH:
         d->width = luaL_checknumber(L, 3);
         break;
+      case A_TK_WRAP:
+        if((buf = luaL_checklstring(L, 3, &len)))
+            switch(a_tokenize(buf, len))
+            {
+              case A_TK_WORD:
+                d->wrap = PANGO_WRAP_WORD;
+                break;
+              case A_TK_CHAR:
+                d->wrap = PANGO_WRAP_CHAR;
+                break;
+              case A_TK_WORD_CHAR:
+                d->wrap = PANGO_WRAP_WORD_CHAR;
+                break;
+              default:
+                break;
+            }
+        break;
+      case A_TK_ELLIPSIZE:
+        if((buf = luaL_checklstring(L, 3, &len)))
+            switch(a_tokenize(buf, len))
+            {
+              case A_TK_START:
+                d->ellip = PANGO_ELLIPSIZE_START;
+                break;
+              case A_TK_MIDDLE:
+                d->ellip = PANGO_ELLIPSIZE_MIDDLE;
+                break;
+              case A_TK_END:
+                d->ellip = PANGO_ELLIPSIZE_END;
+                break;
+              default:
+                break;
+            }
+        break;
       default:
         return 0;
     }
@@ -184,6 +248,7 @@ textbox_new(alignment_t align)
     w->destructor = textbox_destructor;
     w->geometry = textbox_geometry;
     w->data = d = p_new(textbox_data_t, 1);
+    d->ellip = PANGO_ELLIPSIZE_END;
 
     return w;
 }
