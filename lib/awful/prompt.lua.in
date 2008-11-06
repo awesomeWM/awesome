@@ -105,7 +105,8 @@ end
 -- @param text_color The text color.
 -- @param cursor_color The cursor color.
 -- @param cursor_pos The cursor position.
-local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_pos)
+-- @param cursor_pos The cursor underline style.
+local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_pos, cursor_ul)
     local char
     if not text then text = "" end
     if #text < cursor_pos then
@@ -113,13 +114,14 @@ local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_po
     else
         char = util.escape(text:sub(cursor_pos, cursor_pos))
     end
+    local underline = cursor_ul or "none"
     local text_start = util.escape(text:sub(1, cursor_pos - 1))
     local text_end = util.escape(text:sub(cursor_pos + 1))
-    return text_start .. "<span background=\"" .. util.color_strip_alpha(cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(text_color) .. "\">" .. char .. "</span>" .. text_end
+    return text_start .. "<span background=\"" .. util.color_strip_alpha(cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end
 end
 
 --- Run a prompt in a box.
--- @param args A table with optional arguments: fg_cursor, bg_cursor, prompt.
+-- @param args A table with optional arguments: fg_cursor, bg_cursor, ul_cursor, prompt.
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument when finished.
 -- @param completion_callback The callback function to call to get completion.
@@ -135,6 +137,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     local prettyprompt = args.prompt or ""
     local inv_col = args.fg_cursor or theme.fg_focus or "black"
     local cur_col = args.bg_cursor or theme.bg_focus or "white"
+    local cur_ul = args.ul_cursor
 
     history_check_load(history_path, history_max)
     local history_index = history_items(history_path) + 1
@@ -145,7 +148,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     if not textbox or not exe_callback then
         return
     end
-    textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos)
+    textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos, cur_ul)
     capi.keygrabber.run(
     function (mod, key)
         -- Get out cases
@@ -297,7 +300,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         end
 
         -- Update textbox
-        textbox.text = prettyprompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos)
+        textbox.text = prettyprompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos, cur_ul)
 
         return true
     end)
