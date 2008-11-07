@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Damien Leone &lt;damien.leone@gmail.com&gt;
--- @copyright 2008 Damien Leone
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Damien Leone, Julien Danjou
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
@@ -10,7 +11,6 @@ local table = table
 local type = type
 local wibox = wibox
 local image = image
-local string = string
 local widget = widget
 local button = button
 local capi = { screen = screen, mouse = mouse, client = client }
@@ -20,9 +20,6 @@ local awbeautiful = require("awful.beautiful")
 
 --- Menu module for awful
 module("awful.menu")
-
--- Table containing all currently opened menus
-local menus = {}
 
 local function load_theme(custom)
     local theme = {}
@@ -56,55 +53,48 @@ local function mouse_leave(w, theme)
     w.bg = theme.bg_normal
 end
 
-local function destroy(data)
-    if data then
+--- Hide a menu popup.
+-- @param menu The menu to hide.
+function hide(menu)
+    if menu then
         -- Remove items from screen
-        for i = 1, #data.items do
-            data.items[i].screen = nil
+        for i = 1, #menu.items do
+            -- Call mouse_leave to clear menu entry
+            for k, w in pairs(menu.items[i].widgets) do
+                w.mouse_leave()
+            end
+            menu.items[i].screen = nil
         end
-
-        -- Clean memory, dirty but I'm lazy
-        for i = 1, #data.items do
-            table.remove(data.items)
-        end
-
-        destroy(data.child)
-
-        -- Remove menu from menus table
-        menus[data.id] = nil
+        hide(menu.child)
     end
 end
 
+--- Get the elder parent so for example when you kill
+-- it, it will destroy the whole family.
 local function get_parents(data)
-    local p_data = data
-
-    -- Get the elder parent so when you kill
-    -- it he will destroy the whole family
-    while p_data.parent do
-        p_data = p_data.parent
+    if data.parent then
+        return get_parents(data.parent)
     end
-
-    return p_data
+    return data
 end
 
 local function exec(data, action, num)
     if type(action[2]) == "table" then
-        if data.child and data.child.id ~= action[1] then
-            destroy(data.child)
+        if not data.child then
+            data.child = new({ items=action[2] }, data, num)
         end
-        data.child = new({ id=action[1], items=action[2] }, data, num)
+        data.child:show()
     elseif type(action[2]) == "string" then
-        destroy(get_parents(data))
+        hide(get_parents(data))
         util.spawn(action[2])
     elseif type(action[2]) == "function" then
-        destroy(get_parents(data))
+        hide(get_parents(data))
         action[2]()
     end
 end
 
 local function add_item(data, num, item_info)
     local item = wibox({
-        name = data.id .. "item" .. num,
         position = "floating",
         fg = data.theme.fg_normal,
         bg = data.theme.bg_normal,
@@ -115,21 +105,17 @@ local function add_item(data, num, item_info)
     -- Create bindings
     local bindings = {
         button({}, 1, function () exec(data, item_info, num) end),
-        button({}, 3, function () destroy(data) end)
+        button({}, 3, function () hide(data) end)
     }
 
     -- Create the item icon widget
-    local icon = nil
-    if item_info[3]  then
-        icon = widget({ type = "imagebox",  name = "icon", align = "left" })
+    local icon = widget({ type = "imagebox",  align = "left" })
+    if item_info[3] then
         if type(item_info[3]) == "string" then
             icon.image = image(item_info[3])
         else
             icon.image = item_info[3]
         end
-    else
-        icon = widget({ type = "textbox", name = "icon", align = "left" })
-        icon.width = data.h
     end
 
     icon:buttons(bindings)
@@ -140,19 +126,18 @@ local function add_item(data, num, item_info)
     -- Create the item label widget
     local label = widget({
         type = "textbox",
-        name = data.id .. "label" .. num,
         align = "flex"
     })
-    label.text = string.format(" %s", item_info[1])
+    label.text = " " .. item_info[1]
     label:buttons(bindings)
 
     function label.mouse_enter() mouse_enter(item, data.theme) end
     function label.mouse_leave() mouse_leave(item, data.theme) end
 
     -- Create the submenu icon widget
-    local submenu = nil
+    local submenu
     if type(item_info[2]) == "table" then
-        submenu = widget({ type = "imagebox", name = "submenu", align = "right" })
+        submenu = widget({ type = "imagebox", align = "right" })
         submenu.image = image(data.theme.submenu_icon)
         submenu:buttons(bindings)
 
@@ -163,21 +148,14 @@ local function add_item(data, num, item_info)
     -- Add widgets to the wibox
     item.widgets = { icon, label, submenu }
 
-    item:geometry({
-        width = data.w,
-        height = data.h,
-        x = data.x,
-        y = data.y + (num - 1)*(data.h + data.theme.border_width)
-    })
-
     item.ontop = true
-    item.screen = data.screen
 
     return item
 end
 
---- Open a popup menu with running clients.
+--- Build a popup menu with running clients and shows it.
 -- @param menu Menu table, see new() function for more informations
+-- @return The menu.
 function clients(menu)
     local cls = capi.client.get()
     local cls_t = {}
@@ -196,82 +174,90 @@ function clients(menu)
         menu = {}
     end
 
-    menu.id="Clients"
-    menu.items=cls_t
+    menu.items = cls_t
 
-    return new(menu)
+    m = new(menu)
+    m:show()
+    return m
 end
 
-local function set_coords(data)
-    local m_coords = capi.mouse.coords()
-    local s_geometry = capi.screen[data.screen].workarea
-
+local function set_coords(menu, screen_idx)
+    local s_geometry = capi.screen[screen_idx].workarea
     local screen_w = s_geometry.x + s_geometry.width
     local screen_h = s_geometry.y + s_geometry.height
 
-    if data.parent then
-        data.w = data.parent.w
-        data.h = data.parent.h
+    if menu.parent then
+        menu.w = menu.parent.w
+        menu.h = menu.parent.h
 
-        local p_w = (data.h + data.theme.border_width) * (data.num - 1)
-        local m_h = data.theme.border_width + (data.h + data.theme.border_width)*data.nb_items
-        local m_w = data.w + data.theme.border_width
-        data.y = data.parent.y + p_w + m_h > screen_h and screen_h - m_h or data.parent.y + p_w
-        data.x = data.parent.x + data.w*2 + data.theme.border_width > screen_w and data.parent.x - m_w or data.parent.x + m_w
+        local p_w = (menu.h + menu.theme.border_width) * (menu.num - 1)
+        local m_h = menu.theme.border_width + (menu.h + menu.theme.border_width) * #menu.items
+        local m_w = menu.w + menu.theme.border_width
+        menu.y = menu.parent.y + p_w + m_h > screen_h and screen_h - m_h or menu.parent.y + p_w
+        menu.x = menu.parent.x + menu.w*2 + menu.theme.border_width > screen_w and menu.parent.x - m_w or menu.parent.x + m_w
     else
-        data.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
-        data.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
+        local m_coords = capi.mouse.coords()
 
-        local m_h = data.theme.border_width + (data.h + data.theme.border_width)*data.nb_items
-        local m_w = data.w + data.theme.border_width*2
-        data.y = data.y + m_h > screen_h and screen_h - m_h or data.y
-        data.x = data.x + m_w > screen_w and screen_w - m_w or data.x
+        menu.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
+        menu.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
+
+        local m_h = menu.theme.border_width + (menu.h + menu.theme.border_width) * #menu.items
+        local m_w = menu.w + menu.theme.border_width*2
+        menu.y = menu.y + m_h > screen_h and screen_h - m_h or menu.y
+        menu.x = menu.x + m_w > screen_w and screen_w - m_w or menu.x
+    end
+end
+
+--- Show a menu.
+-- @param menu The menu to show.
+function show(menu)
+    local screen_index = capi.mouse.screen
+    set_coords(menu, screen_index)
+    for num, item in pairs(menu.items) do
+        item:geometry({
+            width = menu.w,
+            height = menu.h,
+            x = menu.x,
+            y = menu.y + (num - 1) * (menu.h + menu.theme.border_width)
+        })
+        item.screen = screen_index
+    end
+end
+
+--- Toggle menu visibility.
+-- @param menu The menu to show if it's hidden, or to hide if it's shown.
+function toggle(menu)
+    if menu.items[1].screen then
+        hide(menu)
+    else
+        show(menu)
     end
 end
 
 --- Open a menu popup.
--- @param menu Table containing the menu informations. Key id: string naming your menu, only one menu with the same id can be displayed on screen at the same time. Key items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Key menu_toggle (optional, false by default): boolean setting wether the menu should be re-opened or toggle its opened/closed state when mouse button 1 is pressed. Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional
+-- @param menu Table containing the menu informations. Key items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional.
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user.
 function new(menu, parent, num)
     -- Create a table to store our menu informations
     local data = {}
-    data.id = menu.id
-    data.menu_toggle = (parent and parent.menu_toggle) or menu.menu_toggle or false
 
-    -- Close the menu if it was already opened
-    if menus[data.id] then
-        destroy(menus[data.id])
-        if data.menu_toggle then
-            return
-        end
-    end
-
-    data.screen = capi.mouse.screen
     data.items = {}
-    data.child = nil
-    data.nb_items = #menu.items
-    data.num = num and num or 1
+    data.num = num or 1
     data.theme = parent and parent.theme or load_theme(menu)
-    data.parent = parent and parent or nil
+    data.parent = parent
     data.h = parent and parent.h or data.theme.menu_height
     data.w = parent and parent.w or data.theme.menu_width
-
-    set_coords(data)
 
     -- Create items
     for k, v in pairs(menu.items) do
         table.insert(data.items, add_item(data, k, v))
     end
 
-    -- Add menu to menus table
-    menus[data.id] = data
+    -- Set methods
+    data.hide = hide
+    data.show = show
+    data.toggle = toggle
 
     return data
-end
-
---- Close a menu popup.
--- @param id The name of the menu to close
-function close(id)
-    destroy(menus[id])
 end

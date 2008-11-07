@@ -102,13 +102,13 @@ myawesomemenu = {
    { "quit", awesome.quit }
 }
 
-mymainmenu = {
-   { "awesome", myawesomemenu, "@AWESOME_ICON_PATH@/awesome16.png" },
-   { "open terminal", terminal }
-}
+mymainmenu = awful.menu.new({ items = { { "awesome", myawesomemenu, "@AWESOME_ICON_PATH@/awesome16.png" },
+                                        { "open terminal", terminal }
+                                      }
+                            })
 
 mylauncher = awful.widget.launcher({ image = "@AWESOME_ICON_PATH@/awesome16.png",
-                                     menu = { id="mymainmenu", items=mymainmenu, menu_toggle=true } })
+                                     menu = mymainmenu })
 
 -- Create a systray
 mysystray = widget({ type = "systray", align = "right" })
@@ -164,7 +164,7 @@ end
 
 -- {{{ Mouse bindings
 awesome.buttons({
-    button({ }, 3, function () awful.menu.new({ id="mymainmenu", items=mymainmenu }) end),
+    button({ }, 3, function () mymainmenu:toggle() end),
     button({ }, 4, awful.tag.viewnext),
     button({ }, 5, awful.tag.viewprev)
 })
