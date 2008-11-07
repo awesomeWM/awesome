@@ -362,9 +362,15 @@ setmetatable(swap, { __call = __swap })
 --- Get the master window.
 -- @param screen Optional screen number, otherwise screen mouse is used.
 -- @return The master window.
-function master(screen)
+function getmaster(screen)
     local s = screen or capi.mouse.screen
     return visible(s)[1]
+end
+
+--- Get the master window, deprecated, see getmaster().
+function master(screen)
+    util.deprecate()
+    getmaster(screen)
 end
 
 -- Set the client as slave: put it at the end of other windows.
@@ -454,7 +460,7 @@ function toggletag(target, c)
 end
 
 --- Toggle the floating status of a client.
--- @param c Optional client, the focused on if not set.
+-- @param c Optional client, the focused one if not set.
 function togglefloating(c)
     local sel = c or capi.client.focus
     if sel then
