@@ -363,22 +363,6 @@ luaA_tag_index(lua_State *L)
     return 1;
 }
 
-/** Get a screen by its name.
- * \param screen The screen to look into.
- * \param name The name.
- */
-static tag_t *
-tag_getbyname(int screen, const char *name)
-{
-    int i;
-    tag_array_t *tags = &globalconf.screens[screen].tags;
-
-    for(i = 0; i < tags->len; i++)
-        if(!a_strcmp(name, tags->tab[i]->name))
-            return tags->tab[i];
-    return NULL;
-}
-
 /** Tag newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -397,10 +381,6 @@ luaA_tag_newindex(lua_State *L)
     {
       case A_TK_NAME:
         buf = luaL_checklstring(L, 3, &len);
-        if((*tag)->screen != SCREEN_UNDEF)
-            if(tag_getbyname((*tag)->screen, (*tag)->name) != *tag)
-                luaL_error(L, "a tag with the name `%s' is already on screen %d",
-                           buf, (*tag)->screen);
         p_delete(&(*tag)->name);
         a_iso2utf8(&(*tag)->name, buf, len);
         break;
@@ -417,13 +397,7 @@ luaA_tag_newindex(lua_State *L)
             tag_remove_from_screen(*tag);
 
         if(screen != SCREEN_UNDEF)
-        {
-            if(tag_getbyname(screen, (*tag)->name))
-                luaL_error(L, "a tag with the name `%s' is already on screen %d",
-                           (*tag)->name, screen);
-
             tag_append_to_screen(*tag, &globalconf.screens[screen]);
-        }
         break;
       case A_TK_LAYOUT:
         buf = luaL_checkstring(L, 3);
@@ -431,7 +405,7 @@ luaA_tag_newindex(lua_State *L)
         if(l)
             (*tag)->layout = l;
         else
-            luaL_error(L, "unknown layout: %s", buf);
+            luaA_warn(L, "unknown layout: %s", buf);
         break;
       case A_TK_SELECTED:
         if((*tag)->screen != SCREEN_UNDEF)
@@ -442,21 +416,21 @@ luaA_tag_newindex(lua_State *L)
         if(d > 0 && d < 1)
             (*tag)->mwfact = d;
         else
-            luaL_error(L, "bad value, must be between 0 and 1");
+            luaA_warn(L, "bad value, must be between 0 and 1");
         break;
       case A_TK_NMASTER:
         i = luaL_checknumber(L, 3);
         if(i >= 0)
             (*tag)->nmaster = i;
         else
-            luaL_error(L, "bad value, must be greater than 0");
+            luaA_warn(L, "bad value, must be greater than 0");
         break;
       case A_TK_NCOL:
         i = luaL_checknumber(L, 3);
         if(i >= 1)
             (*tag)->ncol = i;
         else
-            luaL_error(L, "bad value, must be greater than 1");
+            luaA_warn(L, "bad value, must be greater than 1");
         break;
       default:
         return 0;
