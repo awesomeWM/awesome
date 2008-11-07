@@ -21,7 +21,7 @@ local menu = require("awful.menu")
 local ipairs = ipairs
 local unpack = unpack
 
---- awful: AWesome Functions very UsefuL
+--- AWesome Functions very UsefuL
 module("awful")
 
 local deprecated_functions =

@@ -12,7 +12,7 @@ local pairs = pairs
 local awful = require('awful')
 local otable = otable
 
---- tabulous: fabulous tabs for awesome
+--- Fabulous tabs
 module("tabulous")
 
 local tabbed_tags = otable() -- all tab tables, indexed by tab
