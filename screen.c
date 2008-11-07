@@ -460,8 +460,10 @@ luaA_screen_tags(lua_State *L)
         /* check there's at least one tag! */
         if(!s->tags.len)
         {
+            luaA_warn(L, "screen %d has no tag, taking last resort action and adding default tag\n",
+                      s->index);
             tag_append_to_screen(tag_new("default", sizeof("default") - 1, layout_tile, 0.5, 1, 0), s);
-            luaL_error(L, "no tag were added on screen %d, taking last resort action and adding default tag\n", s->index);
+            return 1;
         }
     }
     else
