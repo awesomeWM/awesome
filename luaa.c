@@ -913,6 +913,11 @@ luaA_parserc(const char *confpatharg, bool run)
     ssize_t len;
     bool ret;
 
+    /* add XDG_CONFIG_DIR (/etc/xdg/awesome by default) as include path */
+    snprintf(path, sizeof(path),
+             "package.path = package.path .. \";" XDG_CONFIG_DIR "/awesome/?.lua;" XDG_CONFIG_DIR "/awesome/?/init.lua\"");
+    luaA_dostring(globalconf.L, path);
+
     ret = luaA_loadrc(confpatharg, run);
 
     confdir = getenv("XDG_CONFIG_HOME");
@@ -948,14 +953,6 @@ luaA_parserc(const char *confpatharg, bool run)
     {
         xdg_config_dirs = XDG_CONFIG_DIR;
         len = sizeof(XDG_CONFIG_DIR) - 1;
-    }
-    else
-    {
-        /* add XDG_CONFIG_DIR (/etc/xdg/awesome by default) as include path */
-        snprintf(path, sizeof(path),
-                 "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"",
-                 XDG_CONFIG_DIR, XDG_CONFIG_DIR);
-        luaA_dostring(globalconf.L, path);
     }
 
     xdg_files = a_strsplit(xdg_config_dirs, len, ':');
