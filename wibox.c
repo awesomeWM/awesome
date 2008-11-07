@@ -985,7 +985,10 @@ luaA_wibox_newindex(lua_State *L)
         break;
       case A_TK_WIDGETS:
         if(luaA_isloop(L, 3))
-            luaL_error(L, "table is looping, cannot use this as widget table");
+        {
+            luaA_warn(L, "table is looping, cannot use this as widget table");
+            return 0;
+        }
         luaA_register(L, 3, &(*wibox)->widgets_table);
         /* recompute widget node list */
         wibox_widgets_table_build(L, *wibox);
