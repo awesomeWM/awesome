@@ -98,6 +98,8 @@ textbox_destructor(widget_t *w)
  * \luastack
  * \lfield text The text to display.
  * \lfield width The width of the textbox. Set to 0 for auto.
+ * \lfield wrap The wrap mode: word, char, word_char.
+ * \lfield ellipsize The ellipsize mode: start, middle or end.
  */
 static int
 luaA_textbox_index(lua_State *L, awesome_token_t token)
