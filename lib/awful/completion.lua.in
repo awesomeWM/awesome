@@ -16,8 +16,8 @@ local bashcomp_funcs = {}
 local bashcomp_src = "/etc/bash_completion"
 
 --- Enable programmable bash completion in awful.completion.bash at the price of
---  a slight overhead
---  @param src The bash completion source file, /etc/bash_completion by default.
+-- a slight overhead
+-- @param src The bash completion source file, /etc/bash_completion by default.
 function bashcomp_load(src)
     if src then bashcomp_src = src end
     local c = io.popen("/usr/bin/env bash -c 'source " .. bashcomp_src .. "; complete -p'")
