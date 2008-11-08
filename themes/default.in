@@ -66,3 +66,5 @@ layout_tilebottom = @AWESOME_ICON_PATH@/layouts/tilebottom.png
 layout_tileleft = @AWESOME_ICON_PATH@/layouts/tileleft.png
 layout_tile = @AWESOME_ICON_PATH@/layouts/tile.png
 layout_tiletop = @AWESOME_ICON_PATH@/layouts/tiletop.png
+
+awesome_icon = @AWESOME_ICON_PATH@/awesome16.png

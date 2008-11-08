@@ -102,12 +102,12 @@ myawesomemenu = {
    { "quit", awesome.quit }
 }
 
-mymainmenu = awful.menu.new({ items = { { "awesome", myawesomemenu, "@AWESOME_ICON_PATH@/awesome16.png" },
+mymainmenu = awful.menu.new({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
                                         { "open terminal", terminal }
                                       }
                             })
 
-mylauncher = awful.widget.launcher({ image = "@AWESOME_ICON_PATH@/awesome16.png",
+mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
 
 -- Create a systray
