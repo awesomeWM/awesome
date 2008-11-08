@@ -77,10 +77,9 @@ typedef int luaA_ref;
 
 #define luaA_dostring(L, cmd) \
     do { \
-        if(a_strlen(cmd)) \
-            if(luaL_dostring(L, cmd)) \
-                warn("error executing Lua code: %s", \
-                     lua_tostring(L, -1)); \
+        if(luaL_dostring(L, cmd)) \
+            warn("error executing Lua code: %s", \
+                 lua_tostring(L, -1)); \
     } while(0)
 
 #define luaA_checktable(L, n) \
