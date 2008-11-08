@@ -424,6 +424,7 @@ function game.highscore_add (score, name)
 end
 
 function game.highscore (score)
+    if gamedata.highscore.window and gamedata.highscore.window.screen then return false end
     local fh = io.open(gamedata.cachedir.."/highscore_invaders", "r")
 
     if fh then
