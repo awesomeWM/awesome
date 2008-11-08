@@ -53,3 +53,16 @@ titlebar_close_button = true
 
 # You can use your own command to set your wallpaper
 wallpaper_cmd = awsetbg @AWESOME_THEMES_PATH@/default-background.png
+
+# You can use your own layout icons like this:
+layout_dwindle = @AWESOME_ICON_PATH@/layouts/dwindle.png
+layout_fairh = @AWESOME_ICON_PATH@/layouts/fairh.png
+layout_fairv = @AWESOME_ICON_PATH@/layouts/fairv.png
+layout_floating = @AWESOME_ICON_PATH@/layouts/floating.png
+layout_magnifier = @AWESOME_ICON_PATH@/layouts/magnifier.png
+layout_max = @AWESOME_ICON_PATH@/layouts/max.png
+layout_spiral = @AWESOME_ICON_PATH@/layouts/spiral.png
+layout_tilebottom = @AWESOME_ICON_PATH@/layouts/tilebottom.png
+layout_tileleft = @AWESOME_ICON_PATH@/layouts/tileleft.png
+layout_tile = @AWESOME_ICON_PATH@/layouts/tile.png
+layout_tiletop = @AWESOME_ICON_PATH@/layouts/tiletop.png
