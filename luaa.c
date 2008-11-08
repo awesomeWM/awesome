@@ -852,8 +852,13 @@ luaA_init(void)
     lua_pushstring(L, AWESOME_RELEASE);
     lua_settable(L, LUA_GLOBALSINDEX);
 
+    /* add Lua lib path (/usr/share/awesome/lib by default) */
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?/init.lua\"");
+
+    /* add XDG_CONFIG_DIR (/etc/xdg/awesome by default) as include path */
+    luaA_dostring(L, "package.path = package.path .. \";" XDG_CONFIG_DIR "/awesome/?.lua\"");
+    luaA_dostring(L, "package.path = package.path .. \";" XDG_CONFIG_DIR "/awesome/?/init.lua\"");
 
     /* init hooks */
     globalconf.hooks.manage = LUA_REFNIL;
@@ -912,11 +917,6 @@ luaA_parserc(const char *confpatharg, bool run)
     char *confpath = NULL, **xdg_files, **buf, path[1024];
     ssize_t len;
     bool ret;
-
-    /* add XDG_CONFIG_DIR (/etc/xdg/awesome by default) as include path */
-    snprintf(path, sizeof(path),
-             "package.path = package.path .. \";" XDG_CONFIG_DIR "/awesome/?.lua;" XDG_CONFIG_DIR "/awesome/?/init.lua\"");
-    luaA_dostring(globalconf.L, path);
 
     ret = luaA_loadrc(confpatharg, run);
 
