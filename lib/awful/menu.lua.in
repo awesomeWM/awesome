@@ -109,13 +109,17 @@ local function add_item(data, num, item_info)
     }
 
     -- Create the item icon widget
-    local icon = widget({ type = "imagebox",  align = "left" })
+    local icon
     if item_info[3] then
+        icon = widget({ type = "imagebox",  align = "left" })
         if type(item_info[3]) == "string" then
             icon.image = image(item_info[3])
         else
             icon.image = item_info[3]
         end
+    else
+        icon = widget({type = "textbox", align = "left" })
+        icon.width = data.h
     end
 
     icon:buttons(bindings)
