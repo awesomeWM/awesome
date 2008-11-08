@@ -77,6 +77,7 @@ function player.new ()
 end
 
 function player.move(x)
+    if not gamedata.running then return false end
     local g = gamedata.player:geometry()
 
     if x < 0 and g.x > gamedata.field.x then
@@ -89,6 +90,7 @@ function player.move(x)
 end
 
 function player.fire()
+    if not gamedata.running then return false end
     if gamedata.ammo == 1 then
         gamedata.ammo = 0
         local gb = gamedata.player:geometry()
@@ -309,6 +311,8 @@ function keyhandler(mod, key)
             player.fire()
         elseif key == "s" then
             awful.util.spawn("import -window root "..gamedata.cachedir.."/invaders-"..os.time()..".png")
+        elseif key == "p" then
+            gamedata.running = not gamedata.running
         end
     end
     return true
