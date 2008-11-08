@@ -382,7 +382,7 @@ end)
 awful.hooks.arrange.register(function (screen)
     local layout = awful.layout.get(screen)
     if layout then
-        mylayoutbox[screen].image = image("@AWESOME_ICON_PATH@/layouts/" .. layout .. "w.png")
+        mylayoutbox[screen].image = awful.beautiful.get_image("layout_"..layout)
     else
         mylayoutbox[screen].image = nil
     end
