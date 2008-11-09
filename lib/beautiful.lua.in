@@ -14,7 +14,8 @@ local package = package
 local capi =
 {
     screen = screen,
-    awesome = awesome
+    awesome = awesome,
+    image = image
 }
 
 local module_name = "beautiful"
@@ -83,6 +84,17 @@ function init(path)
             end
         end
         f:close()
+    end
+end
+
+--- Return an image from the theme.
+-- @param imgspec Name of the image key.
+-- @return The image.
+function getimage(imgspec)
+    if theme[imgspec] then
+        return capi.image(theme[imgspec])
+    else
+        return nil
     end
 end
 

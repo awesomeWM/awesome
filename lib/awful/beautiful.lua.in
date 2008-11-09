@@ -5,7 +5,6 @@
 ---------------------------------------------------------------------------
 
 local package = package
-local image = image
 
 --- Beautiful module for awful
 module("awful.beautiful")
@@ -31,14 +30,4 @@ function get()
     return package.loaded.awful.beautiful.theme
 end
 
---- Return an image from the theme
--- @param imgspec name of the image key
--- @return the image
-function get_image(imgspec)
-    if theme[imgspec] then
-        return image(theme[imgspec])
-    else
-        return nil
-    end
-end
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
