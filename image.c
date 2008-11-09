@@ -176,6 +176,10 @@ luaA_image_new(lua_State *L)
     {
         int width = luaL_checknumber(L, 3);
         int height = luaL_checknumber(L, 4);
+
+        if(width <= 0 || height <= 0)
+            luaL_error(L, "request image has invalid size");
+
         Imlib_Image imimage = imlib_create_image(width, height);
         image_t *image = p_new(image_t, 1);
         image->image = imimage;
