@@ -51,7 +51,7 @@ function taglist.new(scr, label, buttons)
             end
         -- Remove widgets
         elseif len > #tags then
-            for i = #tags, len do
+            for i = #tags + 1, len do
                 w[i] = nil
             end
         end
