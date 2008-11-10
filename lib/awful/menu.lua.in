@@ -56,16 +56,17 @@ end
 --- Hide a menu popup.
 -- @param menu The menu to hide.
 function hide(menu)
-    if menu then
-        -- Remove items from screen
-        for i = 1, #menu.items do
-            -- Call mouse_leave to clear menu entry
-            for k, w in pairs(menu.items[i].widgets) do
-                w.mouse_leave()
-            end
-            menu.items[i].screen = nil
+    -- Remove items from screen
+    for i = 1, #menu.items do
+        -- Call mouse_leave to clear menu entry
+        for k, w in pairs(menu.items[i].widgets) do
+            w.mouse_leave()
         end
-        hide(menu.child)
+        menu.items[i].screen = nil
+    end
+    if menu.active_child then
+        menu.active_child:hide()
+        active_child = nil
     end
 end
 
@@ -80,15 +81,19 @@ end
 
 local function exec(data, action, num)
     if type(action[2]) == "table" then
-        if not data.child then
-            data.child = new({ items=action[2] }, data, num)
+        if not data.child[num] then
+            data.child[num] = new({ items = action[2] }, data, num)
         end
-        data.child:show()
+        if data.active_child then
+            data.active_child:hide()
+        end
+        data.active_child = data.child[num]
+        data.active_child:show()
     elseif type(action[2]) == "string" then
-        hide(get_parents(data))
+        get_parents(data):hide()
         util.spawn(action[2])
     elseif type(action[2]) == "function" then
-        hide(get_parents(data))
+        get_parents(data):hide()
         action[2]()
     end
 end
@@ -250,6 +255,7 @@ function new(menu, parent, num)
     data.num = num or 1
     data.theme = parent and parent.theme or load_theme(menu)
     data.parent = parent
+    data.child = {}
     data.h = parent and parent.h or data.theme.menu_height
     data.w = parent and parent.w or data.theme.menu_width
 
