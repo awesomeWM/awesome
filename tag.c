@@ -93,8 +93,14 @@ tag_append_to_screen(tag_t *tag, screen_t *s)
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
+
+    /* resave tag prop of all clients so the number of tag will be the
+     * same */
+    for(client_t *c = globalconf.clients; c; c = c->next)
+        client_saveprops_tags(c);
+
     /* call hook */
-    lua_pushnumber(globalconf.L, s->index+ 1);
+    lua_pushnumber(globalconf.L, s->index + 1);
     luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
 }
 
@@ -119,6 +125,12 @@ tag_remove_from_screen(tag_t *tag)
     ewmh_update_workarea(phys_screen);
     tag->screen = SCREEN_UNDEF;
     tag_unref(&tag);
+
+    /* resave tag prop of all clients so the number of tag will be the
+     * same */
+    for(client_t *c = globalconf.clients; c; c = c->next)
+        client_saveprops_tags(c);
+
     /* call hook */
     lua_pushnumber(globalconf.L, screen + 1);
     luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
