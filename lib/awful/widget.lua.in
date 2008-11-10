@@ -357,7 +357,7 @@ end
 -- @param args Standard widget table arguments, plus image for the image path.
 -- @return A textbox widget configured as a button.
 function button(args)
-    if not args then return end
+    if not args or not args.image then return end
     args.type = "textbox"
     local w = capi.widget(args)
     local img_release = "<bg image=\"" .. args.image .. "\" resize=\"true\"/>"
@@ -376,6 +376,7 @@ end
 function launcher(args)
     if not args.command and not args.menu then return end
     local w = button(args)
+    if not w then return end
     local b = w:buttons()
 
     if args.command then
