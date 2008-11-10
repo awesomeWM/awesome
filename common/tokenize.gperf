@@ -88,6 +88,7 @@ titlebar
 top
 topleft
 topright
+transient_for
 true
 type
 urgent

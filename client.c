@@ -1349,6 +1349,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield opacity The client opacity between 0 and 1.
  * \lfield ontop The client is on top of every other windows.
  * \lfield fullscreen The client is fullscreen or not.
+ * \lfield transient_for Return the client the window is transient for.
  */
 static int
 luaA_client_index(lua_State *L)
@@ -1375,6 +1376,9 @@ luaA_client_index(lua_State *L)
       case A_TK_NAME:
         lua_pushstring(L, (*c)->name);
         break;
+      case A_TK_TRANSIENT_FOR:
+        if((*c)->transient_for)
+            return luaA_client_userdata_new(L, (*c)->transient_for);
       case A_TK_SKIP_TASKBAR:
         lua_pushboolean(L, (*c)->skiptb);
         break;
