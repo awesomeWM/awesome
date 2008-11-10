@@ -370,7 +370,7 @@ end
 --- Get the master window, deprecated, see getmaster().
 function master(screen)
     util.deprecate()
-    getmaster(screen)
+    return getmaster(screen)
 end
 
 -- Set the client as slave: put it at the end of other windows.
