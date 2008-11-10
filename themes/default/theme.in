@@ -48,14 +48,14 @@ titlebar_close_button = true
 
 # Define the image to load
 @ (if titlebar_close_button_[normal|focus] these values are ignored)
-#titlebar_close_button_img_normal = @AWESOME_THEMES_PATH@/titlebar/closea.png
-#titlebar_close_button_img_focus = @AWESOME_THEMES_PATH@/titlebar/closera.png
+#titlebar_close_button_img_normal = @AWESOME_THEMES_PATH@/default/titlebar/closea.png
+#titlebar_close_button_img_focus = @AWESOME_THEMES_PATH@/default/titlebar/closera.png
 # Or create your own close button
 #titlebar_close_button_normal = <span>...</span>
 #titlebar_close_button_focus = <span>...</span>
 
 # You can use your own command to set your wallpaper
-wallpaper_cmd = awsetbg @AWESOME_THEMES_PATH@/theme/background.png
+wallpaper_cmd = awsetbg @AWESOME_THEMES_PATH@/default/background.png
 
 # You can use your own layout icons like this:
 layout_dwindle = @AWESOME_THEMES_PATH@/default/layouts/dwindlew.png
