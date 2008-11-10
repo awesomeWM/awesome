@@ -93,7 +93,6 @@ end
 -- fg_focus The foreground color for selected tag.
 -- bg_urgent The background color for urgent tags.
 -- fg_urgent The foreground color for urgent tags.
--- taglist_squares Optional: set "true" or nil to display the taglist squares.
 -- taglist_squares_sel Optional: an user provided image for selected squares.
 -- taglist_squares_unsel Optional: an user provided image for unselected squares.
 -- @return A string to print.
@@ -104,9 +103,8 @@ function taglist.label.all(t, args)
     local bg_focus = args.bg_focus or theme.taglist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.taglist_fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
-    local taglist_squares = args.taglist_squares or theme.taglist_squares or "true"
-    local taglist_squares_sel = args.squares_sel or theme.squares_sel or "@AWESOME_ICON_PATH@/taglist/squarefw.png"
-    local taglist_squares_unsel = args.squares_unsel or theme.squares_unsel or "@AWESOME_ICON_PATH@/taglist/squarew.png"
+    local taglist_squares_sel = args.squares_sel or theme.taglist_squares_sel
+    local taglist_squares_unsel = args.squares_unsel or theme.taglist_squares_unsel
     local text
     local background = ""
     local sel = capi.client.focus
@@ -117,12 +115,12 @@ function taglist.label.all(t, args)
         fg_color = fg_focus
     end
     if sel and sel:tags()[t] then
-        if taglist_squares == "true" then
+        if taglist_squares_sel then
             background = "resize=\"true\" image=\"" .. taglist_squares_sel .. "\""
         end
     else
         local cls = t:clients()
-        if #cls > 0 and taglist_squares == "true" then
+        if #cls > 0 and taglist_squares_unsel then
             background = "resize=\"true\" image=\"" .. taglist_squares_unsel .. "\""
         end
         for k, c in pairs(cls) do
@@ -269,11 +267,12 @@ local function widget_tasklist_label_common(c, args)
     local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
+    local floating_icon = args.floating_icon or theme.tasklist_floating_icon
     local bg = nil
     local text = "<margin left=\"2\" right=\"2\"/>"
     local name
-    if c.floating then
-        text = text.."<bg image=\"@AWESOME_ICON_PATH@/tasklist/floatingw.png\" align=\"right\"/>"
+    if c.floating and floating_icon then
+        text = text.."<bg image=\"" .. floating_icon .. "\" align=\"right\"/>"
     end
     if c.minimized then
         name = util.escape(c.icon_name) or ""

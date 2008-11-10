@@ -272,7 +272,7 @@ set(AWESOME_CONFIGURE_FILES
     ${awesome_lua_configure_files}
     config.h.in
     awesomerc.lua.in
-    themes/default.in
+    themes/default/theme.in
     awesome-version-internal.h.in
     awesome.doxygen.in)
 

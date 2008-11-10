@@ -181,6 +181,8 @@ add_custom_target(generated_sources
             ${BUILD_DIR}/common/tokenize.c
             ${BUILD_DIR}/common/tokenize.h)
 
+# Default theme directory
+file(MAKE_DIRECTORY ${BUILD_DIR}/themes/default)
 add_dependencies(${PROJECT_AWE_NAME} generated_sources)
 add_dependencies(${PROJECT_AWECLIENT_NAME} generated_sources)
 # }}}
@@ -323,7 +325,9 @@ if(GENERATE_MANPAGES)
     install(FILES ${AWE_MAN5_FILES} DESTINATION ${AWESOME_MAN_PATH}/man5)
 endif()
 install(DIRECTORY ${AWE_ICON_DIR} DESTINATION ${AWESOME_DATA_PATH})
-install(FILES ${AWE_THEMES_DIR}/default-background.png ${BUILD_DIR}/themes/default DESTINATION ${AWESOME_THEMES_PATH})
+install(DIRECTORY ${BUILD_DIR}/themes DESTINATION ${AWESOME_DATA_PATH})
+install(DIRECTORY ${SOURCE_DIR}/themes DESTINATION ${AWESOME_DATA_PATH}
+    PATTERN "*.in" EXCLUDE)
 install(FILES ${AWE_DOC_FILES} DESTINATION ${AWESOME_DOC_PATH})
 install(FILES "awesome.desktop" DESTINATION ${AWESOME_XSESSION_PATH})
 if(GENERATE_LUADOC)

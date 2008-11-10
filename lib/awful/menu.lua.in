@@ -32,7 +32,7 @@ local function load_theme(custom)
     theme.fg_normal = custom.fg_normal or beautiful.menu_fg_normal or beautiful.fg_normal
     theme.bg_normal = custom.bg_normal or beautiful.menu_bg_normal or beautiful.bg_normal
 
-    theme.submenu_icon = custom.submenu_icon or beautiful.menu_submenu_icon or "@AWESOME_ICON_PATH@/submenu.png"
+    theme.submenu_icon = custom.submenu_icon or beautiful.menu_submenu_icon
 
     theme.menu_height = custom.height or beautiful.menu_height or 15
     theme.menu_width = custom.width or beautiful.menu_width or 100
@@ -142,7 +142,7 @@ local function add_item(data, num, item_info)
     local submenu
     if type(item_info[2]) == "table" then
         submenu = widget({ type = "imagebox", align = "right" })
-        submenu.image = image(data.theme.submenu_icon)
+        submenu.image = data.theme.submenu_icon and image(data.theme.submenu_icon)
         submenu:buttons(bindings)
 
         function submenu.mouse_enter() mouse_enter(item, data.theme) end

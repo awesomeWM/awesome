@@ -4,7 +4,7 @@ require("beautiful")
 
 -- {{{ Variable definitions
 -- This is a file path to a theme file which will defines colors.
-theme_path = "@AWESOME_THEMES_PATH@/default"
+theme_path = "@AWESOME_THEMES_PATH@/default/theme"
 
 -- This is used later as the default terminal and editor to run.
 terminal = "xterm"
