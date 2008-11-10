@@ -19,11 +19,9 @@
  *
  */
 
-/* asprintf */
-#define _GNU_SOURCE
+#include "common/util.h"
 
 #include <errno.h>
-#include <stdio.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -31,7 +29,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <stdio.h>
 
 #include <ev.h>
 
@@ -884,16 +881,16 @@ luaA_init(void)
     if((dir = getenv("XDG_CONFIG_HOME")))
     {
         char *path;
-        asprintf(&path, "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"", dir, dir);
+        a_asprintf(&path, "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"", dir, dir);
         luaA_dostring(globalconf.L, path);
         p_delete(&path);
     }
     else
     {
         char *path, *homedir = getenv("HOME");
-        asprintf(&path,
-                 "package.path = package.path .. \";%s" XDG_CONFIG_HOME_DEFAULT "/awesome/?.lua;%s" XDG_CONFIG_HOME_DEFAULT "/awesome/?/init.lua\"",
-                 homedir, homedir);
+        a_asprintf(&path,
+                   "package.path = package.path .. \";%s" XDG_CONFIG_HOME_DEFAULT "/awesome/?.lua;%s" XDG_CONFIG_HOME_DEFAULT "/awesome/?/init.lua\"",
+                   homedir, homedir);
         luaA_dostring(globalconf.L, path);
         p_delete(&path);
     }
@@ -909,8 +906,8 @@ luaA_init(void)
         for(buf = xdg_files; *buf; buf++)
         {
             char *confpath;
-            asprintf(&confpath, "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"",
-                     *buf, *buf);
+            a_asprintf(&confpath, "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"",
+                       *buf, *buf);
             luaA_dostring(globalconf.L, confpath);
             p_delete(&confpath);
         }
@@ -971,9 +968,9 @@ luaA_parserc(const char *confpatharg, bool run)
     }
 
     if((confdir = getenv("XDG_CONFIG_HOME")))
-        asprintf(&confpath, "%s" AWESOME_CONFIG_FILE, confdir);
+        a_asprintf(&confpath, "%s" AWESOME_CONFIG_FILE, confdir);
     else
-        asprintf(&confpath, "%s" XDG_CONFIG_HOME_DEFAULT AWESOME_CONFIG_FILE, getenv("HOME"));
+        a_asprintf(&confpath, "%s" XDG_CONFIG_HOME_DEFAULT AWESOME_CONFIG_FILE, getenv("HOME"));
 
     /* try to run XDG_CONFIG_HOME/awesome/rc.lua */
     if(luaA_loadrc(confpath, run))
@@ -996,7 +993,7 @@ luaA_parserc(const char *confpatharg, bool run)
 
     for(buf = xdg_files; *buf && !ret; buf++)
     {
-        asprintf(&confpath, "%s" AWESOME_CONFIG_FILE, *buf);
+        a_asprintf(&confpath, "%s" AWESOME_CONFIG_FILE, *buf);
         if(luaA_loadrc(confpath, run))
         {
             ret = true;

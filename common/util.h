@@ -23,11 +23,15 @@
 #ifndef AWESOME_COMMON_UTIL_H
 #define AWESOME_COMMON_UTIL_H
 
+/* asprintf */
+#define _GNU_SOURCE
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <stdio.h>
 
 #if !(defined (__FreeBSD__) || defined(__OpenBSD__))
 #include <alloca.h>
@@ -351,6 +355,12 @@ void *name_func_lookup(const char *, const name_func_link_t *);
 const char * name_func_rlookup(void *, const name_func_link_t *);
 void a_exec(const char *);
 char ** a_strsplit(const char *, ssize_t, char);
+
+#define a_asprintf(strp, fmt, ...) \
+    do { \
+        if(asprintf(strp, fmt, ## __VA_ARGS__) < 0) \
+            abort(); \
+    } while(0)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

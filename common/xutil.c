@@ -19,10 +19,7 @@
  *
  */
 
-/* asprintf() */
-#define _GNU_SOURCE
-
-#include <stdio.h>
+#include "common/util.h"
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
@@ -31,7 +28,6 @@
 /* CURSORFONT */
 #include <X11/Xlibint.h>
 
-#include "common/util.h"
 #include "common/xutil.h"
 #include "common/atoms.h"
 
@@ -319,14 +315,14 @@ xutil_error_init(const xcb_generic_error_t *e, xutil_error_t *err)
     /* Extensions  generally provide  their  own requests  so we  just
      * store the request code */
     if(err->request_code >= (sizeof(xutil_label_request) / sizeof(char *)))
-        asprintf(&err->request_label, "%d", err->request_code);
+        a_asprintf(&err->request_label, "%d", err->request_code);
     else
         err->request_label = a_strdup(xutil_label_request[err->request_code]);
 
     /* Extensions may also define their  own errors, so just store the
      * error_code */
     if(e->error_code >= (sizeof(xutil_label_error) / sizeof(char *)))
-        asprintf(&err->error_label, "%d", e->error_code);
+        a_asprintf(&err->error_label, "%d", e->error_code);
     else
         err->error_label = a_strdup(xutil_label_error[e->error_code]);
 
