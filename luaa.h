@@ -262,7 +262,7 @@ luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
 /** Register an Lua object.
  * \param L The Lua stack.
  * \param idx Index of the object in the stack.
- * \param fct A luaA_ref address: it will be filled with the luaA_ref
+ * \param ref A luaA_ref address: it will be filled with the luaA_ref
  * registered. If the adresse point to an already registered object, it will
  * be unregistered.
  * \return Always 0.
@@ -275,6 +275,17 @@ luaA_register(lua_State *L, int idx, luaA_ref *ref)
         luaL_unref(L, LUA_REGISTRYINDEX, *ref);
     *ref = luaL_ref(L, LUA_REGISTRYINDEX);
     return 0;
+}
+
+/** Unregister a Lua object.
+ * \param L The Lua stack.
+ * \param ref A reference to an Lua object.
+ */
+static inline void
+luaA_unregister(lua_State *L, luaA_ref *ref)
+{
+    luaL_unref(L, LUA_REGISTRYINDEX, *ref);
+    *ref = LUA_REFNIL;
 }
 
 /** Register a function.
