@@ -496,10 +496,10 @@ event_handle_keypress(void *data __attribute__ ((unused)),
             if(lua_pcall(globalconf.L, 2, 1, 0))
             {
                 warn("error running function: %s", lua_tostring(globalconf.L, -1));
-                keygrabber_ungrab();
+                luaA_keygrabber_stop(globalconf.L);
             }
             else if(!lua_isboolean(globalconf.L, -1) || !lua_toboolean(globalconf.L, -1))
-                keygrabber_ungrab();
+                luaA_keygrabber_stop(globalconf.L);
         }
         lua_pop(globalconf.L, 1);  /* pop returned value or function if not called */
     }

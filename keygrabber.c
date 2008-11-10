@@ -639,16 +639,6 @@ keygrabber_grab(void)
     return false;
 }
 
-/** Ungrab the keyboard.
- */
-void
-keygrabber_ungrab(void)
-{
-    xcb_ungrab_keyboard(globalconf.connection, XCB_CURRENT_TIME);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);
-    globalconf.keygrabber = LUA_REFNIL;
-}
-
 /** Handle keypress event.
  * \param L Lua stack to push the key pressed.
  * \param e Received XKeyEvent.
@@ -701,6 +691,7 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
  * a table containing modifiers keys and a string, the key pressed.
  *
  * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
  *
  * \luastack
  *
@@ -712,18 +703,32 @@ luaA_keygrabber_run(lua_State *L)
     if(globalconf.keygrabber != LUA_REFNIL)
         luaL_error(L, "keygrabber already running");
 
-    luaA_checkfunction(L, 1);
-
-    globalconf.keygrabber = luaL_ref(L, LUA_REGISTRYINDEX);
+    luaA_registerfct(L, 1, &globalconf.keygrabber);
 
     if(!keygrabber_grab())
+    {
+        luaA_unregister(L, &globalconf.keygrabber);
         luaL_error(L, "unable to grab keyboard");
+    }
 
+    return 0;
+}
+
+/** Stop grabbing the keyboard.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_keygrabber_stop(lua_State *L)
+{
+    xcb_ungrab_keyboard(globalconf.connection, XCB_CURRENT_TIME);
+    luaA_unregister(L, &globalconf.keygrabber);
     return 0;
 }
 
 const struct luaL_reg awesome_keygrabber_lib[] =
 {
-    {"run", luaA_keygrabber_run },
+    { "run", luaA_keygrabber_run },
+    { "stop", luaA_keygrabber_stop },
     { NULL, NULL }
 };
