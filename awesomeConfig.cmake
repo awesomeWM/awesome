@@ -273,6 +273,7 @@ set(AWESOME_CONFIGURE_FILES
     config.h.in
     awesomerc.lua.in
     themes/default/theme.in
+    themes/sky/theme.in
     awesome-version-internal.h.in
     awesome.doxygen.in)
 

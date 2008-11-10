@@ -183,6 +183,7 @@ add_custom_target(generated_sources
 
 # Default theme directory
 file(MAKE_DIRECTORY ${BUILD_DIR}/themes/default)
+file(MAKE_DIRECTORY ${BUILD_DIR}/themes/sky)
 add_dependencies(${PROJECT_AWE_NAME} generated_sources)
 add_dependencies(${PROJECT_AWECLIENT_NAME} generated_sources)
 # }}}

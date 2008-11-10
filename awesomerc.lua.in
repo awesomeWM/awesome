@@ -3,8 +3,11 @@ require("awful")
 require("beautiful")
 
 -- {{{ Variable definitions
--- This is a file path to a theme file which will defines colors.
+-- Themes define colours, icons, and wallpapers
+-- The default is a dark theme
 theme_path = "@AWESOME_THEMES_PATH@/default/theme"
+-- Uncommment this for a lighter theme
+-- theme_path = "@AWESOME_THEMES_PATH@/sky/theme"
 
 -- This is used later as the default terminal and editor to run.
 terminal = "xterm"
