@@ -405,7 +405,10 @@ luaA_tag_newindex(lua_State *L)
         if(l)
             (*tag)->layout = l;
         else
+        {
             luaA_warn(L, "unknown layout: %s", buf);
+            return 0;
+        }
         break;
       case A_TK_SELECTED:
         if((*tag)->screen != SCREEN_UNDEF)
@@ -416,21 +419,30 @@ luaA_tag_newindex(lua_State *L)
         if(d > 0 && d < 1)
             (*tag)->mwfact = d;
         else
+        {
             luaA_warn(L, "bad value, must be between 0 and 1");
+            return 0;
+        }
         break;
       case A_TK_NMASTER:
         i = luaL_checknumber(L, 3);
         if(i >= 0)
             (*tag)->nmaster = i;
         else
+        {
             luaA_warn(L, "bad value, must be greater than 0");
+            return 0;
+        }
         break;
       case A_TK_NCOL:
         i = luaL_checknumber(L, 3);
         if(i >= 1)
             (*tag)->ncol = i;
         else
+        {
             luaA_warn(L, "bad value, must be greater than 1");
+            return 0;
+        }
         break;
       default:
         return 0;
