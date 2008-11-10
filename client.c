@@ -960,36 +960,6 @@ luaA_client_get(lua_State *L)
     return 1;
 }
 
-/** Get only visible clients for a screen (DEPRECATED).
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A screen number.
- * \lreturn A table with all visible clients for this screen.
- */
-static int
-luaA_client_visible_get(lua_State *L)
-{
-    int i = 1;
-    client_t *c;
-    int screen = luaL_checknumber(L, 1) - 1;
-
-    luaA_checkscreen(screen);
-
-    deprecate(L, "awful.client.visible()");
-
-    lua_newtable(L);
-
-    for(c = globalconf.clients; c; c = c->next)
-        if(client_isvisible(c, screen))
-        {
-            luaA_client_userdata_new(L, c);
-            lua_rawseti(L, -2, i++);
-        }
-
-    return 1;
-}
-
 /** Check if a client is visible on its screen.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1237,13 +1207,6 @@ luaA_client_geometry(lua_State *L)
     return luaA_client_handlegeom(L, false);
 }
 
-static int
-luaA_client_coords(lua_State *L)
-{
-    deprecate(L, "client:geometry()");
-    return luaA_client_geometry(L);
-}
-
 /** Return client geometry, using also titlebar and border width.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1255,13 +1218,6 @@ static int
 luaA_client_fullgeometry(lua_State *L)
 {
     return luaA_client_handlegeom(L, true);
-}
-
-static int
-luaA_client_fullcoords(lua_State *L)
-{
-    deprecate(L, "client:fullgeometry()");
-    return luaA_client_fullgeometry(L);
 }
 
 /** Client newindex.
@@ -1634,7 +1590,6 @@ luaA_client_module_newindex(lua_State *L)
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },
-    { "visible_get", luaA_client_visible_get },
     { "__index", luaA_client_module_index },
     { "__newindex", luaA_client_module_newindex },
     { NULL, NULL }
@@ -1659,9 +1614,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "__eq", luaA_client_eq },
     { "__gc", luaA_client_gc },
     { "__tostring", luaA_client_tostring },
-    /* deprecated */
-    { "coords", luaA_client_coords },
-    { "fullcoords", luaA_client_fullcoords },
     { NULL, NULL }
 };
 

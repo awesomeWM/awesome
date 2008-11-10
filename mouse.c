@@ -1372,21 +1372,8 @@ luaA_mouse_coords(lua_State *L)
     return 1;
 }
 
-/** Deprecated
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_mouse_new(lua_State *L)
-{
-    deprecate(L, "button()");
-    return luaA_button_new(L);
-}
-
 const struct luaL_reg awesome_mouse_methods[] =
 {
-    /* deprecated */
-    { "__call", luaA_mouse_new },
     { "__index", luaA_mouse_index },
     { "__newindex", luaA_mouse_newindex },
     { "coords", luaA_mouse_coords },

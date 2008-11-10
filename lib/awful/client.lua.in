@@ -309,16 +309,6 @@ function focus.bydirection(dir, c)
     end
 end
 
-function focusbydirection(dir, c)
-    util.deprecate("focus.bydirection()")
-    return focus.bydirection(dir, c)
-end
-
-function focusbyidx(i, c)
-    util.deprecate("focus.byidx()")
-    return focus.byidx(i, c)
-end
-
 --- Focus a client by its relative index.
 -- @param i The index.
 -- @param c Optional client.
@@ -355,25 +345,12 @@ function swap.byidx(i, c)
     end
 end
 
--- Compatibility
-local function __swap(self, i, c)
-    util.deprecate("swap.byidx()")
-    swap.byidx(i, c)
-end
-setmetatable(swap, { __call = __swap })
-
 --- Get the master window.
 -- @param screen Optional screen number, otherwise screen mouse is used.
 -- @return The master window.
 function getmaster(screen)
     local s = screen or capi.mouse.screen
     return visible(s)[1]
-end
-
---- Get the master window, deprecated, see getmaster().
-function master(screen)
-    util.deprecate("getmaster()")
-    return getmaster(screen)
 end
 
 --- Set the client as slave: put it at the end of other windows.

@@ -52,7 +52,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/mouse.c
     ${SOURCE_DIR}/screen.c
     ${SOURCE_DIR}/stack.c
-    ${SOURCE_DIR}/statusbar.c
     ${SOURCE_DIR}/wibox.c
     ${SOURCE_DIR}/systray.c
     ${SOURCE_DIR}/tag.c

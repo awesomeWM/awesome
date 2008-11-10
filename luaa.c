@@ -47,7 +47,6 @@
 #include "client.h"
 #include "screen.h"
 #include "event.h"
-#include "titlebar.h"
 #include "mouse.h"
 #include "layouts/tile.h"
 #include "common/socket.h"
@@ -67,14 +66,10 @@ extern const struct luaL_reg awesome_screen_methods[];
 extern const struct luaL_reg awesome_screen_meta[];
 extern const struct luaL_reg awesome_client_methods[];
 extern const struct luaL_reg awesome_client_meta[];
-extern const struct luaL_reg awesome_titlebar_methods[];
-extern const struct luaL_reg awesome_titlebar_meta[];
 extern const struct luaL_reg awesome_tag_methods[];
 extern const struct luaL_reg awesome_tag_meta[];
 extern const struct luaL_reg awesome_widget_methods[];
 extern const struct luaL_reg awesome_widget_meta[];
-extern const struct luaL_reg awesome_statusbar_methods[];
-extern const struct luaL_reg awesome_statusbar_meta[];
 extern const struct luaL_reg awesome_wibox_methods[];
 extern const struct luaL_reg awesome_wibox_meta[];
 extern const struct luaL_reg awesome_keybinding_methods[];
@@ -141,81 +136,6 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
 {
     awesome_restart();
     return 0;
-}
-
-/** Set default font. (DEPRECATED)
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string with a font name in Pango format.
- */
-static int
-luaA_font_set(lua_State *L)
-{
-    deprecate(L, "awesome.font attribute");
-    if(lua_gettop(L) == 1)
-    {
-        const char *newfont = luaL_checkstring(L, 1);
-        draw_font_delete(&globalconf.font);
-        globalconf.font = draw_font_new(newfont);
-    }
-
-    char *font = pango_font_description_to_string(globalconf.font->desc);
-    lua_pushstring(L, font);
-    g_free(font);
-    return 0;
-}
-
-/** Set default colors (DEPRECATED).
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A table with `fg' and `bg' elements, containing colors.
- * \lreturn A table with `fg' and `bg' elements, containing colors.
- */
-static int
-luaA_colors(lua_State *L)
-{
-    deprecate(L, "awesome.fg and awesome.bg attributes");
-    if(lua_gettop(L) == 1)
-    {
-        const char *buf;
-        size_t len;
-        int8_t colors_nbr = -1, i;
-        xcolor_init_request_t reqs[2];
-
-        luaA_checktable(L, 1);
-
-        if((buf = luaA_getopt_lstring(L, 1, "fg", NULL, &len)))
-           reqs[++colors_nbr] = xcolor_init_unchecked(&globalconf.colors.fg, buf, len);
-
-        if((buf = luaA_getopt_lstring(L, 1, "bg", NULL, &len)))
-           reqs[++colors_nbr] = xcolor_init_unchecked(&globalconf.colors.bg, buf, len);
-
-        for(i = 0; i <= colors_nbr; i++)
-           xcolor_init_reply(reqs[i]);
-    }
-
-    lua_newtable(L);
-    luaA_pushcolor(L, &globalconf.colors.fg);
-    lua_setfield(L, -2, "fg");
-    luaA_pushcolor(L, &globalconf.colors.bg);
-    lua_setfield(L, -2, "bg");
-
-    return 1;
-}
-
-/** Set default colors. (DEPRECATED)
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- *
- * \luastack
- * \lparam A table with `fg' and `bg' elements, containing colors.
- */
-static int
-luaA_colors_set(lua_State *L)
-{
-    return luaA_colors(L);
 }
 
 static void
@@ -726,15 +646,6 @@ luaA_spawn(lua_State *L)
     return 0;
 }
 
-/** Deprecated function, does nothing.
- */
-static int
-luaA_mouse_add(lua_State *L)
-{
-    deprecate(L, "awesome.buttons()");
-    return 0;
-}
-
 /** awesome global table.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -838,13 +749,8 @@ luaA_init(void)
         { "spawn", luaA_spawn },
         { "restart", luaA_restart },
         { "buttons", luaA_buttons },
-        { "font_set", luaA_font_set },
-        { "colors_set", luaA_colors_set },
-        { "colors", luaA_colors },
         { "__index", luaA_awesome_index },
         { "__newindex", luaA_awesome_newindex },
-        /* deprecated */
-        { "mouse_add", luaA_mouse_add },
         { NULL, NULL }
     };
 
@@ -881,9 +787,6 @@ luaA_init(void)
     /* Export tag */
     luaA_openlib(L, "tag", awesome_tag_methods, awesome_tag_meta);
 
-    /* Export statusbar */
-    luaA_openlib(L, "statusbar", awesome_statusbar_methods, awesome_statusbar_meta);
-
     /* Export wibox */
     luaA_openlib(L, "wibox", awesome_wibox_methods, awesome_wibox_meta);
 
@@ -892,9 +795,6 @@ luaA_init(void)
 
     /* Export client */
     luaA_openlib(L, "client", awesome_client_methods, awesome_client_meta);
-
-    /* Export titlebar */
-    luaA_openlib(L, "titlebar", awesome_titlebar_methods, awesome_titlebar_meta);
 
     /* Export keys */
     luaA_openlib(L, "keybinding", awesome_keybinding_methods, awesome_keybinding_meta);

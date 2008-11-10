@@ -145,23 +145,6 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
     }
 }
 
-/** Create a new titlebar (DEPRECATED).
- * \param L The Lua VM state.
- * \return The number of value pushed.
- *
- * \luastack
- * \lparam A table with values: align, position, fg, bg, border_width,
- * border_color, width and height.
- * \lreturn A brand new titlebar.
- */
-static int
-luaA_titlebar_new(lua_State *L)
-{
-    deprecate(L, "wibox");
-
-    return luaA_wibox_new(L);
-}
-
 /** Detach a wibox titlebar from its client.
  * \param c The client.
  */
@@ -350,15 +333,5 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
 
     return 0;
 }
-
-const struct luaL_reg awesome_titlebar_methods[] =
-{
-    { "__call", luaA_titlebar_new },
-    { NULL, NULL }
-};
-const struct luaL_reg awesome_titlebar_meta[] =
-{
-    { NULL, NULL }
-};
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

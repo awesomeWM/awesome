@@ -88,20 +88,6 @@ luaA_hooks_mouse_enter(lua_State *L)
     return luaA_registerfct(L, 1, &globalconf.hooks.mouse_enter);
 }
 
-/** Set the function called each time the mouse enter a new window. This
- * function is called with the client object as argument. (DEPRECATED)
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A function to call each time a client gets mouse over it.
- */
-static int
-luaA_hooks_mouseover(lua_State *L)
-{
-    deprecate(L, "mouse_enter hook");
-    return luaA_hooks_mouse_enter(L);
-}
-
 /** Set the function called on each client list change.
  * This function is called without any argument.
  * \param L The Lua VM state.
@@ -201,7 +187,5 @@ const struct luaL_reg awesome_hooks_lib[] =
     { "tags", luaA_hooks_tags },
     { "tagged", luaA_hooks_tagged },
     { "timer", luaA_hooks_timer },
-    /* deprecated */
-    { "mouseover", luaA_hooks_mouseover },
     { NULL, NULL }
 };

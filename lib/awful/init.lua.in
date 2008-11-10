@@ -4,42 +4,20 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-local client = require("awful.client")
-local completion = require("awful.completion")
-local hooks = require("awful.hooks")
-local layout = require("awful.layout")
-local placement = require("awful.placement")
-local prompt = require("awful.prompt")
-local screen = require("awful.screen")
-local tag = require("awful.tag")
-local titlebar = require("awful.titlebar")
-local util = require("awful.util")
-local widget = require("awful.widget")
-local menu = require("awful.menu")
-
-local ipairs = ipairs
-local unpack = unpack
+require("awful.client")
+require("awful.completion")
+require("awful.hooks")
+require("awful.layout")
+require("awful.placement")
+require("awful.prompt")
+require("awful.screen")
+require("awful.tag")
+require("awful.titlebar")
+require("awful.util")
+require("awful.widget")
+require("awful.menu")
 
 --- AWesome Functions very UsefuL
 module("awful")
-
-local deprecated_functions =
-{
-    "color_strip_alpha",
-    "cycle",
-    "mkdir",
-    "spawn",
-    "pread",
-    "eval",
-    "escape",
-    "unescape"
-}
-
-for k, v in ipairs(deprecated_functions) do
-    _M[v] = function (...)
-        util.deprecate("awful.util functions")
-        util[v](unpack(arg))
-    end
-end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
