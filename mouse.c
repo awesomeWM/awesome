@@ -594,6 +594,10 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     size_t cursor = CurResize;
     int top, bottom, left, right;
 
+    /* do not resize fixed client */
+    if(client_isfixed(c))
+        return;
+
     screen = xutil_screen_get(globalconf.connection, c->phys_screen);
 
     /* get current mouse position */

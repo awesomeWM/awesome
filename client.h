@@ -93,7 +93,6 @@ client_isfixed(client_t *c)
 {
     return (c->maxw && c->minw && c->maxh && c->minh
             && c->maxw == c->minw && c->maxh == c->minh);
-
 }
 
 /** Check if a client is floating.

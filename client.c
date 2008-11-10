@@ -537,7 +537,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
     int new_screen;
     area_t area;
     layout_t *layout = layout_get_current(c->screen);
-    bool fixed;
     /* Values to configure a window is an array where values are
      * stored according to 'value_mask' */
     uint32_t values[5];
@@ -555,8 +554,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
     area = display_area_get(c->phys_screen, NULL,
                             &globalconf.screens[c->screen].padding);
 
-    fixed = client_isfixed(c);
-
     if(geometry.x > area.width)
         geometry.x = area.width - geometry.width - 2 * c->border;
     if(geometry.y > area.height)
@@ -566,12 +563,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
     if(geometry.y + geometry.height + 2 * c->border < 0)
         geometry.y = 0;
 
-    /* fixed windows can only change their x,y */
-    if((fixed && (c->geometry.x != geometry.x || c->geometry.y != geometry.y))
-       || (!fixed && (c->geometry.x != geometry.x
-                      || c->geometry.y != geometry.y
-                      || c->geometry.width != geometry.width
-                      || c->geometry.height != geometry.height)))
+    if(c->geometry.x != geometry.x
+       || c->geometry.y != geometry.y
+       || c->geometry.width != geometry.width
+       || c->geometry.height != geometry.height)
     {
         new_screen = screen_getbycoord(c->screen, geometry.x, geometry.y);
 
@@ -1148,19 +1143,26 @@ luaA_client_geometry(lua_State *L)
     client_t **c = luaA_checkudata(L, 1, "client");
 
     if(lua_gettop(L) == 2)
-    {
-        if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
+        if(client_isfloating(*c)
+           || layout_get_current((*c)->screen) == layout_floating)
         {
             area_t geometry;
 
             luaA_checktable(L, 2);
             geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
             geometry.y = luaA_getopt_number(L, 2, "y", (*c)->geometry.y);
-            geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
-            geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
+            if(client_isfixed(*c))
+            {
+                geometry.width = (*c)->geometry.width;
+                geometry.height = (*c)->geometry.height;
+            }
+            else
+            {
+                geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
+                geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
+            }
             client_resize(*c, geometry, false);
         }
-    }
 
     return luaA_pusharea(L, (*c)->geometry);
 }
