@@ -43,11 +43,25 @@ imagebox_geometry(widget_t *widget, int screen, int height, int width)
     if(d->image)
     {
         if(d->resize)
+        {
             geometry.width = ((double) height / (double) d->image->height) * d->image->width;
-        else
+            geometry.height = height;
+            if(geometry.width > width)
+            {
+                geometry.width = 0;
+                geometry.height = 0;
+            }
+        }
+        else if(d->image->width <= width)
+        {
             geometry.width = d->image->width;
-
-        geometry.height = height;
+            geometry.height = height;
+        }
+        else
+        {
+            geometry.width = 0;
+            geometry.height = 0;
+        }
     }
     else
     {
@@ -71,7 +85,7 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
 {
     imagebox_data_t *d = widget->data;
 
-    if(d->image)
+    if(d->image && geometry.width && geometry.height)
     {
         if(d->bg.initialized)
             draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
