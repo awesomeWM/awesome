@@ -23,8 +23,8 @@ local capi =
 module("awful.util")
 
 function deprecate()
-    print("W: awful: function is deprecated")
-    print(debug.traceback())
+    io.stderr:write("W: awful: function is deprecated")
+    io.stderr:write(debug.traceback())
 end
 
 --- Strip alpha part of color.
