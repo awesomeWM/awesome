@@ -43,16 +43,9 @@ menu_width    = 100
 # beautiful.variable in your rc.lua
 #bg_widget    = #cc0000
 
-# Display close button inside titlebar
-titlebar_close_button = true
-
 # Define the image to load
-@ (if titlebar_close_button_[normal|focus] these values are ignored)
-#titlebar_close_button_img_normal = @AWESOME_THEMES_PATH@/default/titlebar/closea.png
-#titlebar_close_button_img_focus = @AWESOME_THEMES_PATH@/default/titlebar/closera.png
-# Or create your own close button
-#titlebar_close_button_normal = <span>...</span>
-#titlebar_close_button_focus = <span>...</span>
+titlebar_close_button_normal = @AWESOME_THEMES_PATH@/default/titlebar/close.png
+titlebar_close_button_focus = @AWESOME_THEMES_PATH@/default/titlebar/closer.png
 
 # You can use your own command to set your wallpaper
 wallpaper_cmd = awsetbg @AWESOME_THEMES_PATH@/default/background.png

@@ -68,16 +68,19 @@ function add(c, args)
     appicon:buttons(bts)
     function appicon.mouse_enter(s) hooks.user.call('mouse_enter', c) end
 
-    if theme.titlebar_close_button == "true" then
-        local closef = widget.button({ name = "closef", align = "right",
-                                       image = theme.titlebar_close_button_focus
-                                               or theme.titlebar_close_button_img_focus
-                                               or "@AWESOME_ICON_PATH@/titlebar/closer.png" })
-        local close = widget.button({ name = "close", align = "right",
-                                      image = theme.titlebar_close_button_normal
-                                              or theme.titlebar_close_button_img_normal
-                                              or "@AWESOME_ICON_PATH@/titlebar/close.png" })
+    local closef
+    if theme.titlebar_close_button_focus then
+        closef = widget.button({ name = "closef", align = "right",
+                                 image = theme.titlebar_close_button_focus })
+    end
 
+    local close
+    if theme.titlebar_close_button_normal then
+        close = widget.button({ name = "close", align = "right",
+                                image = theme.titlebar_close_button_normal })
+    end
+
+    if close or closef then
         -- Bind kill button, also allow moving and resizing on this widget
         local bts =
         {
@@ -85,16 +88,18 @@ function add(c, args)
                 capi.button({ args.modkey }, 1, function (t) t.client:mouse_move() end),
                 capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
         }
-        close:buttons(bts)
-        closef:buttons(bts)
-        -- Needed for sloppy focus beheaviour
-        function close.mouse_enter(s) hooks.user.call('mouse_enter', c) end
-        function closef.mouse_enter(s) hooks.user.call('mouse_enter', c) end
-
-        tb.widgets = { appicon, title, closef, close }
-    else
-        tbx.widgets = { appicon, title }
+        if close then
+            close:buttons(bts)
+            function close.mouse_enter(s) hooks.user.call('mouse_enter', c) end
+        end
+        if closef then
+            closef:buttons(bts)
+            -- Needed for sloppy focus beheaviour
+            function closef.mouse_enter(s) hooks.user.call('mouse_enter', c) end
+        end
     end
+
+    tb.widgets = { appicon, title, closef, close }
 
     c.titlebar = tb
 
