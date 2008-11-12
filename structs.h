@@ -129,8 +129,6 @@ struct widget_t
     void *data;
     /** Button bindings */
     button_array_t buttons;
-    /** Cache flags */
-    int cache_flags;
     /** True if the widget is visible */
     bool isvisible;
 };

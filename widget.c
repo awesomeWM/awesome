@@ -308,21 +308,19 @@ widget_common_new(widget_t *widget)
     widget->align_supported = AlignLeft | AlignRight;
 }
 
-/** Invalidate widgets which should be refresh upon
- * external modifications. widget_t who watch flags will
- * be set to be refreshed.
+/** Invalidate widgets which should be refresh depending on their types.
  * \param screen Virtual screen number.
- * \param flags Cache flags to invalidate.
+ * \param type Widget type to invalidate.
  */
 void
-widget_invalidate_cache(int screen, int flags)
+widget_invalidate_bytype(int screen, widget_constructor_t *type)
 {
     for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
     {
         wibox_t *wibox = globalconf.screens[screen].wiboxes.tab[i];
 
         for(int j = 0; j < wibox->widgets.len; j++)
-            if(wibox->widgets.tab[j].widget->cache_flags & flags)
+            if(wibox->widgets.tab[j].widget->type == type)
             {
                 wibox->need_update = true;
                 break;

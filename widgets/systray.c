@@ -84,7 +84,6 @@ systray_new(alignment_t align)
     w->align = align;
     w->draw = systray_draw;
     w->geometry = systray_geometry;
-    w->cache_flags = WIDGET_CACHE_EMBEDDED;
 
     return w;
 }

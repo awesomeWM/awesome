@@ -324,15 +324,14 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
 {
     client_t *c;
     xembed_window_t *emwin;
-    int i;
 
     if((c = client_getbywin(ev->window)))
         client_unmanage(c);
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
     {
         xembed_window_list_detach(&globalconf.embedded, emwin);
-        for(i = 0; i < globalconf.nscreen; i++)
-            widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
+        for(int i = 0; i < globalconf.nscreen; i++)
+            widget_invalidate_bytype(i, systray_new);
     }
 
     return 0;
@@ -625,7 +624,6 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
 {
     client_t *c;
     xembed_window_t *em;
-    int i;
 
     if((c = client_getbywin(ev->window)))
     {
@@ -637,8 +635,8 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     else if((em = xembed_getbywin(globalconf.embedded, ev->window)))
     {
         xembed_window_list_detach(&globalconf.embedded, em);
-        for(i = 0; i < globalconf.nscreen; i++)
-            widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
+        for(int i = 0; i < globalconf.nscreen; i++)
+            widget_invalidate_bytype(i, systray_new);
     }
 
     return 0;

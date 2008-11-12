@@ -173,7 +173,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
                            MIN(XEMBED_VERSION, em->info.version));
 
     for(i = 0; i < globalconf.nscreen; i++)
-        widget_invalidate_cache(i, WIDGET_CACHE_EMBEDDED);
+        widget_invalidate_bytype(i, systray_new);
 
     return 0;
 }
