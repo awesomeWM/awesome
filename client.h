@@ -71,7 +71,7 @@ int luaA_client_userdata_new(lua_State *, client_t *);
 
 DO_SLIST(client_t, client, client_unref)
 
-/** Put client on top of the stack
+/** Put client on top of the stack.
  * \param c The client to raise.
  */
 static inline void
@@ -81,6 +81,18 @@ client_raise(client_t *c)
     if(c->transient_for)
         stack_client_push(c->transient_for);
     stack_client_push(c);
+    client_stack();
+}
+
+/** Put client on the end of the stack.
+ * \param c The client to lower.
+ */
+static inline void
+client_lower(client_t *c)
+{
+    stack_client_append(c);
+    if(c->transient_for)
+        stack_client_append(c->transient_for);
     client_stack();
 }
 
