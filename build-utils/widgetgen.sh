@@ -10,9 +10,9 @@ do
     grep '^widget_constructor_t ' "$file" | cut -d' ' -f2 | cut -d\; -f1 | while read widget
     do
         shortname=`echo $widget | cut -d_ -f2`
-        echo "    {\"$shortname\", $widget},"
+        echo "    {\"$shortname\", sizeof(\"$shortname\") - 1, $widget},"
     done
 done
 
-echo "    {NULL, NULL}"
+echo "    {NULL, 0, NULL}"
 echo "};"

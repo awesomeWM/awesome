@@ -271,7 +271,7 @@ tag_view_only_byindex(int screen, int dindex)
 static int
 luaA_tag_new(lua_State *L)
 {
-    size_t len;
+    size_t len, laylen;
     tag_t *tag;
     int ncol, nmaster;
     const char *name, *lay;
@@ -286,9 +286,9 @@ luaA_tag_new(lua_State *L)
     mwfact = luaA_getopt_number(L, 2, "mwfact", 0.5);
     ncol = luaA_getopt_number(L, 2, "ncol", 1);
     nmaster = luaA_getopt_number(L, 2, "nmaster", 1);
-    lay = luaA_getopt_string(L, 2, "layout", "tile");
+    lay = luaA_getopt_lstring(L, 2, "layout", "tile", &laylen);
 
-    layout = name_func_lookup(lay, LayoutList);
+    layout = name_func_lookup(lay, laylen, LayoutList);
 
     tag = tag_new(name, len,
                   layout,
@@ -430,8 +430,8 @@ luaA_tag_newindex(lua_State *L)
             tag_append_to_screen(*tag, &globalconf.screens[screen]);
         break;
       case A_TK_LAYOUT:
-        buf = luaL_checkstring(L, 3);
-        l = name_func_lookup(buf, LayoutList);
+        buf = luaL_checklstring(L, 3, &len);
+        l = name_func_lookup(buf, len, LayoutList);
         if(l)
             (*tag)->layout = l;
         else

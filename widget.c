@@ -329,10 +329,9 @@ luaA_widget_new(lua_State *L)
 
     luaA_checktable(L, 2);
 
-    align = luaA_getopt_lstring(L, 2, "align", "left", &len);
-    type = luaA_getopt_string(L, 2, "type", NULL);
+    type = luaA_getopt_lstring(L, 2, "type", NULL, &len);
 
-    if((wc = name_func_lookup(type, WidgetList)))
+    if((wc = name_func_lookup(type, len, WidgetList)))
     {
         w = p_new(widget_t, 1);
         wc(w);
@@ -344,6 +343,8 @@ luaA_widget_new(lua_State *L)
     }
 
     w->type = wc;
+
+    align = luaA_getopt_lstring(L, 2, "align", "left", &len);
     w->align_supported |= AlignLeft | AlignRight;
     w->align = draw_align_fromstr(align, len);
 

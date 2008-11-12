@@ -59,17 +59,18 @@ _warn(int line, const char *fct, const char *fmt, ...)
 /** Lookup for a function pointer from its name
  * in the given name_func_link_t list.
  * \param funcname Function name.
+ * \param len The function name length.
  * \param list Function and name link list.
  * \return Function pointer.
  */
 void *
-name_func_lookup(const char *funcname, const name_func_link_t *list)
+name_func_lookup(const char *funcname, size_t len, const name_func_link_t *list)
 {
     int i;
 
     if(funcname && list)
         for(i = 0; list[i].name; i++)
-            if(!a_strcmp(funcname, list[i].name))
+            if(len == list[i].len && !a_strcmp(funcname, list[i].name))
                 return list[i].func;
 
     return NULL;

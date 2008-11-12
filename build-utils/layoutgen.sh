@@ -16,9 +16,9 @@ do
     grep '^layout_t layout_' $file | cut -d' ' -f2 | cut -d\; -f1 | while read layout
     do
         shortname=`echo $layout | cut -d _ -f2-`
-        echo "    {\"$shortname\", $layout},"
+        echo "    {\"$shortname\", sizeof(\"$shortname\") - 1, $layout},"
     done
 done
 
-echo "    {NULL, NULL}"
+echo "    {NULL, 0, NULL}"
 echo "};"
