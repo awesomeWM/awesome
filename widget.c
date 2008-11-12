@@ -48,7 +48,6 @@ widget_delete(widget_t **widget)
     button_array_wipe(&(*widget)->buttons);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*widget)->mouse_enter);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*widget)->mouse_leave);
-    p_delete(&(*widget)->name);
     p_delete(widget);
 }
 
@@ -365,7 +364,7 @@ widget_invalidate_bywidget(widget_t *widget)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A table with at least a name and a type value. Optional attributes
+ * \lparam A table with at least a type value. Optional attributes
  * are: align.
  * \lreturn A brand new widget.
  */
@@ -383,8 +382,6 @@ luaA_widget_new(lua_State *L)
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     align = draw_align_fromstr(buf, len);
 
-    buf = luaA_getopt_string(L, 2, "name", NULL);
-
     type = luaA_getopt_string(L, 2, "type", NULL);
 
     if((wc = name_func_lookup(type, WidgetList)))
@@ -401,8 +398,6 @@ luaA_widget_new(lua_State *L)
     w->isvisible = true;
 
     w->mouse_enter = w->mouse_leave = LUA_REFNIL;
-
-    w->name = a_strdup(buf);
 
     return luaA_widget_userdata_new(L, w);
 }
@@ -435,7 +430,6 @@ luaA_widget_buttons(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield visible The widget visibility.
- * \lfield name The widget name.
  * \lfield mouse_enter A function to execute when the mouse enter the widget.
  * \lfield mouse_leave A function to execute when the mouse leave the widget.
  */
@@ -454,12 +448,6 @@ luaA_widget_index(lua_State *L)
     {
       case A_TK_VISIBLE:
         lua_pushboolean(L, (*widget)->isvisible);
-        return 1;
-      case A_TK_NAME:
-        if((*widget)->name)
-            lua_pushstring(L, (*widget)->name);
-        else
-            lua_pushnil(L);
         return 1;
       case A_TK_MOUSE_ENTER:
         if((*widget)->mouse_enter != LUA_REFNIL)

@@ -69,7 +69,7 @@ function player.new ()
                  y = gamedata.field.y + gamedata.field.h - (16 + 5) })
     p.screen = 1
 
-    w = widget({ type = "imagebox", name = "player" })
+    w = widget({ type = "imagebox" })
     w.image = image("@AWESOME_ICON_PATH@/invaders/player.png")
     p.widgets = w
 
@@ -180,8 +180,7 @@ function enemies.new (t)
                  x = gamedata.field.x,
                  y = gamedata.field.y })
     e.screen = 1
-    w = widget({ type = "imagebox",
-                 name = "enemy"..t })
+    w = widget({ type = "imagebox" })
     w.image = gamedata.enemies[t]
 
     e.widgets = w
@@ -385,8 +384,7 @@ function game.highscore_show ()
                                          y = gamedata.field.y + math.floor(gamedata.field.h / 2) - 55 })
     gamedata.highscore.window.screen = 1
 
-    gamedata.highscore.table = widget({ type = "textbox",
-                                        name = "highscore" })
+    gamedata.highscore.table = widget({ type = "textbox" })
     gamedata.highscore.window.widgets =  gamedata.highscore.table
 
     gamedata.highscore.table.text = " Highscores:\n"
@@ -453,8 +451,7 @@ function game.highscore (score)
                                          y = gamedata.field.y + math.floor(gamedata.field.h / 2) })
     gamedata.highscore.window.screen = 1
 
-    gamedata.namebox = widget({ type = "textbox",
-                                name = "foobar" })
+    gamedata.namebox = widget({ type = "textbox" })
     gamedata.namebox.text = " Name: |"
     gamedata.highscore.window.widgets = gamedata.namebox
 
@@ -511,12 +508,10 @@ function run(args)
     gamedata.field.north.screen = 1
 
     gamedata.field.status = widget({ type = "textbox",
-                                     name = "status",
                                      align = "right" })
     gamedata.field.status.text = gamedata.score.." | "..gamedata.round .. "  "
 
     gamedata.field.caption = widget({ type = "textbox",
-                                      name = "caption",
                                       align = "left" })
     gamedata.field.caption.text = "  Awesome Invaders"
 

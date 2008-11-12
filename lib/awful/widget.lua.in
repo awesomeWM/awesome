@@ -40,7 +40,7 @@ local function taglist_update (screen, w, label, buttons, data)
     -- Add more widgets
     if len < #tags then
         for i = len + 1, #tags do
-            w[i] = capi.widget({ type = "textbox", name = "taglist" .. i })
+            w[i] = capi.widget({ type = "textbox" })
         end
     -- Remove widgets
     elseif len > #tags then
@@ -189,8 +189,8 @@ local function tasklist_update(w, buttons, label, data)
     -- Add more widgets
     if len < #clients then
         for i = len * 2 + 1, #clients * 2, 2 do
-            w[i] = capi.widget({ type = "imagebox", name = "tasklist_icon" .. i, align = "flex" })
-            w[i + 1] = capi.widget({ type = "textbox", name = "tasklist_text" .. i, align = "flex" })
+            w[i] = capi.widget({ type = "imagebox", align = "flex" })
+            w[i + 1] = capi.widget({ type = "textbox", align = "flex" })
         end
     -- Remove widgets
     elseif len > #clients then

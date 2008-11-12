@@ -48,7 +48,7 @@ function add(c, args)
 
     local tb = capi.wibox(args)
 
-    local title = capi.widget({ type = "textbox", name = "title", align = "flex" })
+    local title = capi.widget({ type = "textbox", align = "flex" })
     title.text = " " .. util.escape(c.name) .. " "
 
     -- Redirect relevant events to the client the titlebar belongs to
@@ -61,7 +61,7 @@ function add(c, args)
     title:buttons(bts)
     function title.mouse_enter(s) hooks.user.call('mouse_enter', c) end
 
-    local appicon = capi.widget({ type = "imagebox", name = "appicon", align = "left" })
+    local appicon = capi.widget({ type = "imagebox", align = "left" })
     appicon.image = c.icon
 
     -- Also redirect events for appicon (So the entire titlebar behaves consistently)
@@ -70,13 +70,13 @@ function add(c, args)
 
     local closef
     if theme.titlebar_close_button_focus then
-        closef = widget.button({ name = "closef", align = "right",
+        closef = widget.button({ align = "right",
                                  image = theme.titlebar_close_button_focus })
     end
 
     local close
     if theme.titlebar_close_button_normal then
-        close = widget.button({ name = "close", align = "right",
+        close = widget.button({ align = "right",
                                 image = theme.titlebar_close_button_normal })
     end
 
@@ -107,7 +107,8 @@ function add(c, args)
         end
     end
 
-    tb.widgets = { appicon, title, closef, close }
+    tb.widgets = { appicon = appicon, title = title,
+                   closef = closef, close = close }
 
     c.titlebar = tb
 
@@ -121,21 +122,13 @@ end
 function update(c, prop)
     if c.titlebar and data[c] then
         local widgets = c.titlebar.widgets
-        local title, close, closef
-        for k, v in pairs(widgets) do
-            if v.name == "title" then title = v
-            elseif v.name == "close" then close = v
-            elseif v.name == "closef" then closef = v
-            elseif v.name == "appicon" then appicon = v end
-            if title and close and closef and appicon then break end
-        end
         if prop == "name" then
-            if title then
-                title.text = " " .. util.escape(c.name) .. " "
+            if widgets.title then
+                widgets.title.text = " " .. util.escape(c.name) .. " "
             end
         elseif prop == "icon" then
-            if appicon then
-                appicon.image = c.icon
+            if widgets.appicon then
+                widgets.appicon.image = c.icon
             end
         elseif prop == "geometry" then
             if data[c].width then
@@ -152,13 +145,13 @@ function update(c, prop)
         if capi.client.focus == c then
             c.titlebar.fg = data[c].fg_focus
             c.titlebar.bg = data[c].bg_focus
-            if closef then closef.visible = true end
-            if close then close.visible = false end
+            if widgets.closef then widgets.closef.visible = true end
+            if widgets.close then widgets.close.visible = false end
         else
             c.titlebar.fg = data[c].fg
             c.titlebar.bg = data[c].bg
-            if closef then closef.visible = false end
-            if close then close.visible = true end
+            if widgets.closef then widgets.closef.visible = false end
+            if widgets.close then widgets.close.visible = true end
         end
     end
 end

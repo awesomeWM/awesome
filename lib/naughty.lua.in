@@ -200,7 +200,7 @@ function notify(args)
     end
 
     -- create textbox
-    local textbox = widget({ type = "textbox", name = "text", align = "flex" })
+    local textbox = widget({ type = "textbox", align = "flex" })
     textbox:buttons({ button({ }, 1, run),
                       button({ }, 3, die) })
     textbox.text = string.format('<margin right="'..config.margin..'" left="'..config.margin..'"/><span font_desc="%s"><b>%s</b>%s</span>', font, title, text)
@@ -209,7 +209,7 @@ function notify(args)
     -- create iconbox
     local iconbox = nil
     if icon then
-        iconbox = widget({ type = "imagebox", name = "icon", align = "left" })
+        iconbox = widget({ type = "imagebox", align = "left" })
         iconbox:buttons({ button({ }, 1, run),
                           button({ }, 3, die) })
         local img = image(icon)
@@ -222,8 +222,7 @@ function notify(args)
     end
 
     -- create container wibox
-    notification.box = wibox({ name = "not" .. notification.idx,
-                               position = "floating",
+    notification.box = wibox({ position = "floating",
                                fg = fg,
                                bg = bg,
                                border_color = config.border_color,

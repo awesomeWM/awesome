@@ -105,8 +105,6 @@ struct widget_t
 {
     /** Ref count */
     int refcount;
-    /** widget_t name */
-    char *name;
     /** Widget type is constructor */
     widget_constructor_t *type;
     /** Widget destructor */
