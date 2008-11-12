@@ -25,6 +25,7 @@
 #include "structs.h"
 
 void stack_client_push(client_t *);
+void stack_client_append(client_t *);
 void stack_client_delete(client_t *);
 
 #endif

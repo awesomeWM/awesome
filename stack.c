@@ -25,7 +25,7 @@
 
 extern awesome_t globalconf;
 
-/** Push the client at the beginning of the client stack history stack.
+/** Push the client at the beginning of the client stack.
  * \param c The client to push.
  */
 void
@@ -33,6 +33,17 @@ stack_client_push(client_t *c)
 {
     client_node_t *node = client_node_client_add(&globalconf.stack, c);
     client_node_list_push(&globalconf.stack, node);
+    ewmh_update_net_client_list_stacking(c->phys_screen);
+}
+
+/** Push the client at the end of the client stack.
+ * \param c The client to push.
+ */
+void
+stack_client_append(client_t *c)
+{
+    client_node_t *node = client_node_client_add(&globalconf.stack, c);
+    client_node_list_append(&globalconf.stack, node);
     ewmh_update_net_client_list_stacking(c->phys_screen);
 }
 
