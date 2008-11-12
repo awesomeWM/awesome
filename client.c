@@ -1084,7 +1084,6 @@ luaA_client_tags(lua_State *L)
 
 /** Raise a client on top of others which are on the same layer.
  * \param L The Lua VM state.
- *
  * \luastack
  * \lvalue A client.
  */
@@ -1093,6 +1092,19 @@ luaA_client_raise(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     client_raise(*c);
+    return 0;
+}
+
+/** Lower a client on bottom of others which are on the same layer.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lvalue A client.
+ */
+static int
+luaA_client_lower(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    client_lower(*c);
     return 0;
 }
 
@@ -1601,6 +1613,7 @@ const struct luaL_reg awesome_client_meta[] =
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
     { "raise", luaA_client_raise },
+    { "lower", luaA_client_lower },
     { "redraw", luaA_client_redraw },
     { "mouse_resize", luaA_client_mouse_resize },
     { "mouse_move", luaA_client_mouse_move },
