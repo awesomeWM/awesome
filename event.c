@@ -363,14 +363,14 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
 /** Handle a motion notify over widgets.
  * \param object The object.
  * \param mouse_over The pointer to the registered mouse over widget.
- * \param w The new widget the mouse is over.
+ * \param widget The new widget the mouse is over.
  */
 static void
 event_handle_widget_motionnotify(void *object,
                                  widget_t **mouse_over,
-                                 widget_node_t *w)
+                                 widget_t *widget)
 {
-    if(w->widget != *mouse_over)
+    if(widget != *mouse_over)
     {
         if(*mouse_over)
         {
@@ -381,14 +381,14 @@ event_handle_widget_motionnotify(void *object,
                 luaA_dofunction(globalconf.L, (*mouse_over)->mouse_leave, 1, 0);
             }
         }
-        if(w)
+        if(widget)
         {
             /* call mouse enter function on new widget and register it */
-            *mouse_over = w->widget;
-            if(w->widget->mouse_enter != LUA_REFNIL)
+            *mouse_over = widget;
+            if(widget->mouse_enter != LUA_REFNIL)
             {
                 luaA_wibox_userdata_new(globalconf.L, object);
-                luaA_dofunction(globalconf.L, w->widget->mouse_enter, 1, 0);
+                luaA_dofunction(globalconf.L, widget->mouse_enter, 1, 0);
             }
         }
     }
@@ -415,7 +415,7 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
     {
         globalconf.pointer_x = ev->root_x;
         globalconf.pointer_y = ev->root_y;
-        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w->widget);
     }
 
     return 0;
@@ -476,7 +476,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     {
         globalconf.pointer_x = ev->root_x;
         globalconf.pointer_y = ev->root_y;
-        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w->widget);
     }
     else if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
