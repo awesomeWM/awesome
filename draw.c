@@ -47,11 +47,12 @@ draw_iso2utf8(const char *iso, size_t len)
     size_t utf8len;
     char *utf8, *utf8p;
     static iconv_t iso2utf8 = (iconv_t) -1;
+    static int8_t dont_need_convert = -1;
 
-    if(!len)
-        return NULL;
+    if(dont_need_convert == -1)
+        dont_need_convert = !a_strcmp(nl_langinfo(CODESET), "UTF-8");
 
-    if(!a_strcmp(nl_langinfo(CODESET), "UTF-8"))
+    if(!len || dont_need_convert)
         return NULL;
 
     if(iso2utf8 == (iconv_t) -1)
