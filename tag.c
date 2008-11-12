@@ -262,13 +262,13 @@ luaA_tag_new(lua_State *L)
 
     luaA_checktable(L, 2);
 
-    if(!(name = luaA_getopt_string(L, 2, "name", NULL)))
+    if(!(name = luaA_getopt_lstring(L, 2, "name", NULL, &len)))
         luaL_error(L, "object tag must have a name");
 
     mwfact = luaA_getopt_number(L, 2, "mwfact", 0.5);
     ncol = luaA_getopt_number(L, 2, "ncol", 1);
     nmaster = luaA_getopt_number(L, 2, "nmaster", 1);
-    lay = luaA_getopt_lstring(L, 2, "layout", "tile", &len);
+    lay = luaA_getopt_string(L, 2, "layout", "tile");
 
     layout = name_func_lookup(lay, LayoutList);
 
