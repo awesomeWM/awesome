@@ -402,7 +402,7 @@ xutil_button_fromint(int button)
  * \return Allocated cursor font.
  */
 xcb_cursor_t
-xutil_cursor_new(xcb_connection_t *conn, unsigned int cursor_font)
+xutil_cursor_new(xcb_connection_t *conn, uint16_t cursor_font)
 {
     static xcb_font_t font = XCB_NONE;
     xcb_cursor_t cursor;

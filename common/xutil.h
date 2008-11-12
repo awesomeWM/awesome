@@ -112,7 +112,7 @@ typedef struct
 bool xutil_error_init(const xcb_generic_error_t *, xutil_error_t *);
 xcb_keysym_t xutil_key_mask_fromstr(const char *, size_t);
 unsigned int xutil_button_fromint(int);
-xcb_cursor_t xutil_cursor_new(xcb_connection_t *, unsigned int);
+xcb_cursor_t xutil_cursor_new(xcb_connection_t *, uint16_t);
 
 static inline void
 xutil_error_wipe(xutil_error_t *err)
