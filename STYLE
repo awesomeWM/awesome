@@ -3,7 +3,7 @@ following guidelines.
 
 Imitate the existing code style. For concrete rules:
 
- - Use 4 spaces indentation, do not use tabulator characters
+ - Use 4 spaces indentation, do not use tabulator characters;
 
  - Place braces alone on new lines, and do not place braces for single
    line statement where it is not needed, i.e no:
