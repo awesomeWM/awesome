@@ -117,8 +117,6 @@ struct widget_t
     int (*index)(lua_State *, awesome_token_t);
     /** Newindex function */
     int (*newindex)(lua_State *, awesome_token_t);
-    /** Button event handler */
-    void (*button)(widget_node_t *, xcb_button_press_event_t *, int, wibox_t *);
     /** Mouse over event handler */
     luaA_ref mouse_enter, mouse_leave;
     /** Alignement */

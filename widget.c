@@ -69,43 +69,6 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
     return barwidth - offset - widgetwidth;
 }
 
-/** Common function for button press event on widget.
- * It will look into configuration to find the callback function to call.
- * \param w The widget node.
- * \param ev The button press event the widget received.
- * \param screen The screen number.
- * \param p The object where user clicked.
- */
-static void
-widget_common_button(widget_node_t *w,
-                     xcb_button_press_event_t *ev,
-                     int screen __attribute__ ((unused)),
-                     wibox_t *p)
-{
-    button_array_t *b = &w->widget->buttons;
-
-    for(int i = 0; i < b->len; i++)
-        if(ev->detail == b->tab[i]->button
-           && XUTIL_MASK_CLEAN(ev->state) == b->tab[i]->mod)
-            switch(ev->response_type)
-            {
-              case XCB_BUTTON_PRESS:
-                if(b->tab[i]->press != LUA_REFNIL)
-                {
-                    luaA_wibox_userdata_new(globalconf.L, p);
-                    luaA_dofunction(globalconf.L, b->tab[i]->press, 1, 0);
-                }
-                break;
-              case XCB_BUTTON_RELEASE:
-                if(b->tab[i]->release != LUA_REFNIL)
-                {
-                    luaA_wibox_userdata_new(globalconf.L, p);
-                    luaA_dofunction(globalconf.L, b->tab[i]->release, 1, 0);
-                }
-                break;
-            }
-}
-
 /** Convert a Lua table to a list of widget nodet.
  * \param L The Lua VM state.
  * \param widgets The linked list of widget node.
@@ -304,7 +267,6 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
 void
 widget_common_new(widget_t *widget)
 {
-    widget->button = widget_common_button;
     widget->align_supported = AlignLeft | AlignRight;
 }
 
