@@ -76,7 +76,7 @@ shadow
 shadow_offset
 Shift
 show_icons
-sizehints
+size_hints
 skip_taskbar
 south
 start

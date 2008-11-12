@@ -1362,6 +1362,8 @@ luaA_client_newindex(lua_State *L)
  * \lfield ontop The client is on top of every other windows.
  * \lfield fullscreen The client is fullscreen or not.
  * \lfield transient_for Return the client the window is transient for.
+ * \lfield size_hints A table with size hints of the client: user_position,
+ *         user_size, program_position and program_size.
  */
 static int
 luaA_client_index(lua_State *L)
@@ -1508,7 +1510,7 @@ luaA_client_index(lua_State *L)
       case A_TK_URGENT:
         lua_pushboolean(L, (*c)->isurgent);
         break;
-      case A_TK_SIZEHINTS:
+      case A_TK_SIZE_HINTS:
         lua_newtable(L);
         lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_US_POSITION);
         lua_setfield(L, -2, "user_position");
