@@ -241,7 +241,6 @@ textbox_new(alignment_t align)
     textbox_data_t *d;
 
     w = p_new(widget_t, 1);
-    widget_common_new(w);
     w->align = align;
     w->align_supported |= AlignFlex;
     w->draw = textbox_draw;

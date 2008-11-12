@@ -80,7 +80,6 @@ systray_new(alignment_t align)
     widget_t *w;
 
     w = p_new(widget_t, 1);
-    widget_common_new(w);
     w->align = align;
     w->draw = systray_draw;
     w->geometry = systray_geometry;

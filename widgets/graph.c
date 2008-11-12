@@ -588,7 +588,6 @@ graph_new(alignment_t align)
     graph_data_t *d;
 
     w = p_new(widget_t, 1);
-    widget_common_new(w);
 
     w->draw = graph_draw;
     w->index = luaA_graph_index;

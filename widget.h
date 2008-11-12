@@ -37,7 +37,6 @@ void widget_delete(widget_t **);
 DO_RCNT(widget_t, widget, widget_delete)
 
 int widget_calculate_offset(int, int, int, int);
-void widget_common_new(widget_t *);
 void widget_render(widget_node_array_t *, draw_context_t *, xcb_gcontext_t, xcb_drawable_t, int, orientation_t, int, int, wibox_t *);
 
 int luaA_widget_userdata_new(lua_State *, widget_t *);

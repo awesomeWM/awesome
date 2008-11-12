@@ -261,15 +261,6 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
     }
 }
 
-/** Common function for creating a widget.
- * \param widget The allocated widget.
- */
-void
-widget_common_new(widget_t *widget)
-{
-    widget->align_supported = AlignLeft | AlignRight;
-}
-
 /** Invalidate widgets which should be refresh depending on their types.
  * \param screen Virtual screen number.
  * \param type Widget type to invalidate.
@@ -353,6 +344,8 @@ luaA_widget_new(lua_State *L)
     }
 
     w->type = wc;
+
+    w->align_supported |= AlignLeft | AlignRight;
 
     /* Set visible by default. */
     w->isvisible = true;

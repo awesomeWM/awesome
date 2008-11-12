@@ -218,7 +218,6 @@ imagebox_new(alignment_t align)
 {
     widget_t *w = p_new(widget_t, 1);
     imagebox_data_t *d;
-    widget_common_new(w);
     w->align = align;
     w->draw = imagebox_draw;
     w->index = luaA_imagebox_index;
