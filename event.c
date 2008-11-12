@@ -96,10 +96,11 @@ event_handle_mouse_button(client_t *c,
  * \param height The container height.
  * \param x X coordinate of the widget.
  * \param y Y coordinate of the widget.
- * \return A widget node.
+ * \return A widget.
  */
-static widget_node_t *
-widget_getbycoords(position_t position, widget_node_array_t *widgets, int width, int height, int16_t *x, int16_t *y)
+static widget_t *
+widget_getbycoords(position_t position, widget_node_array_t *widgets,
+                   int width, int height, int16_t *x, int16_t *y)
 {
     int tmp;
 
@@ -126,7 +127,7 @@ widget_getbycoords(position_t position, widget_node_array_t *widgets, int width,
         if(w->widget->isvisible &&
            *x >= w->geometry.x && *x < w->geometry.x + w->geometry.width
            && *y >= w->geometry.y && *y < w->geometry.y + w->geometry.height)
-            return w;
+            return w->widget;
     }
 
     return NULL;
@@ -143,7 +144,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     int screen;
     const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
     client_t *c;
-    widget_node_t *w;
+    widget_t *w;
     wibox_t *wibox;
 
     /* ev->state is
@@ -167,7 +168,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                                    wibox->sw.geometry.height,
                                    &ev->event_x, &ev->event_y)))
         {
-            button_array_t *b = &w->widget->buttons;
+            button_array_t *b = &w->buttons;
 
             for(int i = 0; i < b->len; i++)
                 if(ev->detail == b->tab[i]->button
@@ -405,7 +406,7 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                           xcb_motion_notify_event_t *ev)
 {
     wibox_t *wibox = wibox_getbywin(ev->event);
-    widget_node_t *w;
+    widget_t *w;
 
     if(wibox
        && (w = widget_getbycoords(wibox->position, &wibox->widgets,
@@ -415,7 +416,7 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
     {
         globalconf.pointer_x = ev->root_x;
         globalconf.pointer_y = ev->root_y;
-        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w->widget);
+        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
     }
 
     return 0;
@@ -460,7 +461,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     client_t *c;
     xembed_window_t *emwin;
     wibox_t *wibox;
-    widget_node_t *w;
+    widget_t *w;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
        || (ev->root_x == globalconf.pointer_x
@@ -476,7 +477,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     {
         globalconf.pointer_x = ev->root_x;
         globalconf.pointer_y = ev->root_y;
-        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w->widget);
+        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
     }
     else if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
