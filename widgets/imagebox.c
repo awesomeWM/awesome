@@ -210,15 +210,13 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
 
 
 /** Create a new imagebox widget.
- * \param align Widget alignment.
+ * \param w The widget to initialize.
  * \return A brand new widget.
  */
 widget_t *
-imagebox_new(alignment_t align)
+widget_imagebox(widget_t *w)
 {
-    widget_t *w = p_new(widget_t, 1);
     imagebox_data_t *d;
-    w->align = align;
     w->draw = imagebox_draw;
     w->index = luaA_imagebox_index;
     w->newindex = luaA_imagebox_newindex;

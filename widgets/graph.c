@@ -578,24 +578,19 @@ graph_destructor(widget_t *widget)
 }
 
 /** Create a brand new graph.
- * \param align The widget alignment.
- * \return A graph widget.
+ * \param w The widget to initialize.
+ * \return The same widget.
  */
 widget_t *
-graph_new(alignment_t align)
+widget_graph(widget_t *w)
 {
-    widget_t *w;
-    graph_data_t *d;
-
-    w = p_new(widget_t, 1);
-
     w->draw = graph_draw;
     w->index = luaA_graph_index;
     w->newindex = luaA_graph_newindex;
     w->destructor = graph_destructor;
-    w->align = align;
     w->geometry = graph_geometry;
-    d = w->data = p_new(graph_data_t, 1);
+
+    graph_data_t *d = w->data = p_new(graph_data_t, 1);
 
     d->width = 80;
     d->height = 0.80;

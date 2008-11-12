@@ -120,7 +120,7 @@ wibox_systray_refresh(wibox_t *wibox)
     for(int i = 0; i < wibox->widgets.len; i++)
     {
         widget_node_t *systray = &wibox->widgets.tab[i];
-        if(systray->widget->type == systray_new)
+        if(systray->widget->type == widget_systray)
         {
             uint32_t config_back[] = { wibox->sw.ctx.bg.pixel };
             uint32_t config_win_vals[4];

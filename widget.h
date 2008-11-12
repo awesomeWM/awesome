@@ -45,11 +45,11 @@ void luaA_table2widgets(lua_State *, widget_node_array_t *);
 void widget_invalidate_bywidget(widget_t *);
 void widget_invalidate_bytype(int, widget_constructor_t *);
 
-widget_constructor_t textbox_new;
-widget_constructor_t progressbar_new;
-widget_constructor_t graph_new;
-widget_constructor_t systray_new;
-widget_constructor_t imagebox_new;
+widget_constructor_t widget_textbox;
+widget_constructor_t widget_progressbar;
+widget_constructor_t widget_graph;
+widget_constructor_t widget_systray;
+widget_constructor_t widget_imagebox;
 
 /** Delete a widget node structure.
  * \param node The node to destroy.

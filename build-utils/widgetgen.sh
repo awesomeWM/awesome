@@ -9,7 +9,7 @@ do
     echo "    /* $file */"
     grep '^widget_constructor_t ' "$file" | cut -d' ' -f2 | cut -d\; -f1 | while read widget
     do
-        shortname=`echo $widget | cut -d_ -f1`
+        shortname=`echo $widget | cut -d_ -f2`
         echo "    {\"$shortname\", $widget},"
     done
 done

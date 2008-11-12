@@ -74,13 +74,13 @@ systray_draw(widget_t *widget, draw_context_t *ctx,
                         _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
 }
 
+/** Initialize a systray widget.
+ * \param w The widget to initialize.
+ * \return The same widget.
+ */
 widget_t *
-systray_new(alignment_t align)
+widget_systray(widget_t *w)
 {
-    widget_t *w;
-
-    w = p_new(widget_t, 1);
-    w->align = align;
     w->draw = systray_draw;
     w->geometry = systray_geometry;
 

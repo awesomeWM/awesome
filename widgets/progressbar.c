@@ -636,23 +636,19 @@ progressbar_destructor(widget_t *widget)
 }
 
 /** Create a new progressbar.
- * \param align Alignment of the widget.
+ * \param w The widget to initialize.
  * \return A brand new progressbar.
  */
 widget_t *
-progressbar_new(alignment_t align)
+widget_progressbar(widget_t *w)
 {
-    widget_t *w;
-    progressbar_data_t *d;
-
-    w = p_new(widget_t, 1);
-    w->align = align;
     w->draw = progressbar_draw;
     w->index = luaA_progressbar_index;
     w->newindex = luaA_progressbar_newindex;
     w->destructor = progressbar_destructor;
     w->geometry = progressbar_geometry;
-    d = w->data = p_new(progressbar_data_t, 1);
+
+    progressbar_data_t *d = w->data = p_new(progressbar_data_t, 1);
 
     d->height = 0.80;
     d->width = 80;

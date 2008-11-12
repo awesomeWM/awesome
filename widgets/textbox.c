@@ -231,24 +231,20 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
 }
 
 /** Create a new textbox widget.
- * \param align Widget alignment.
+ * \param w The widget to initialize.
  * \return A brand new widget.
  */
 widget_t *
-textbox_new(alignment_t align)
+widget_textbox(widget_t *w)
 {
-    widget_t *w;
-    textbox_data_t *d;
-
-    w = p_new(widget_t, 1);
-    w->align = align;
     w->align_supported |= AlignFlex;
     w->draw = textbox_draw;
     w->index = luaA_textbox_index;
     w->newindex = luaA_textbox_newindex;
     w->destructor = textbox_destructor;
     w->geometry = textbox_geometry;
-    w->data = d = p_new(textbox_data_t, 1);
+
+    textbox_data_t *d = w->data = p_new(textbox_data_t, 1);
     d->ellip = PANGO_ELLIPSIZE_END;
 
     return w;

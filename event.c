@@ -355,7 +355,7 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
     {
         xembed_window_list_detach(&globalconf.embedded, emwin);
         for(int i = 0; i < globalconf.nscreen; i++)
-            widget_invalidate_bytype(i, systray_new);
+            widget_invalidate_bytype(i, widget_systray);
     }
 
     return 0;
@@ -660,7 +660,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     {
         xembed_window_list_detach(&globalconf.embedded, em);
         for(int i = 0; i < globalconf.nscreen; i++)
-            widget_invalidate_bytype(i, systray_new);
+            widget_invalidate_bytype(i, widget_systray);
     }
 
     return 0;

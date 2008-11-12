@@ -322,21 +322,21 @@ widget_invalidate_bywidget(widget_t *widget)
 static int
 luaA_widget_new(lua_State *L)
 {
-    const char *buf, *type;
-    widget_t *w = NULL;
+    const char *align, *type;
+    widget_t *w;
     widget_constructor_t *wc;
-    alignment_t align;
     size_t len;
 
     luaA_checktable(L, 2);
 
-    buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
-    align = draw_align_fromstr(buf, len);
-
+    align = luaA_getopt_lstring(L, 2, "align", "left", &len);
     type = luaA_getopt_string(L, 2, "type", NULL);
 
     if((wc = name_func_lookup(type, WidgetList)))
-        w = wc(align);
+    {
+        w = p_new(widget_t, 1);
+        wc(w);
+    }
     else
     {
         luaA_warn(L, "unkown widget type: %s", type);
@@ -344,8 +344,8 @@ luaA_widget_new(lua_State *L)
     }
 
     w->type = wc;
-
     w->align_supported |= AlignLeft | AlignRight;
+    w->align = draw_align_fromstr(align, len);
 
     /* Set visible by default. */
     w->isvisible = true;
