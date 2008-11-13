@@ -151,35 +151,7 @@ end
 -- @return A string to print.
 function taglist.label.noempty(t, args)
     if #t:clients() > 0 or t.selected then
-        if not args then args = {} end
-        local theme = beautiful.get()
-        local fg_focus = args.fg_focus or theme.taglist_fg_focus or theme.fg_focus
-        local bg_focus = args.bg_focus or theme.taglist_bg_focus or theme.bg_focus
-        local fg_urgent = args.fg_urgent or theme.taglist_fg_urgent or theme.fg_urgent
-        local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
-        local bg_color = nil
-        local fg_color = nil
-        local text
-
-        if t.selected then
-            bg_color = bg_focus
-            fg_color = fg_focus
-        end
-        if bg_urgent and fg_urgent then
-            for k, c in pairs(t:clients()) do
-                if c.urgent then
-                    bg_color = bg_urgent
-                    fg_color = fg_urgent
-                    break
-                end
-            end
-        end
-        if fg_color and bg_color then
-            text = "<bg color='" .. bg_color .. "'/> <span color='" .. util.color_strip_alpha(fg_color) .. "'>" .. util.escape(t.name) .. "</span> "
-        else
-            text = " " .. util.escape(t.name) .. " "
-        end
-        return text
+        return taglist.label.all(t, args)
     end
 end
 
