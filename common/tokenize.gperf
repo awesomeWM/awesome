@@ -17,6 +17,7 @@ client
 color
 Control
 coords
+conffile
 Ctrl
 east
 ellipsize

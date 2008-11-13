@@ -166,19 +166,6 @@ luaA_font_set(lua_State *L)
     return 0;
 }
 
-/** Get configuration file path used by awesome.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn The awesome configuration file path.
- */
-static int
-luaA_conffile(lua_State *L)
-{
-    lua_pushstring(L, globalconf.conffile);
-    return 1;
-}
-
 /** Set default colors.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -748,6 +735,9 @@ luaA_mouse_add(lua_State *L)
 /** awesome global table.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield font The default font.
+ * \lfield conffile The configuration file which has been loaded.
  */
 static int
 luaA_awesome_index(lua_State *L)
@@ -766,6 +756,9 @@ luaA_awesome_index(lua_State *L)
             lua_pushstring(L, font);
             g_free(font);
         }
+        break;
+      case A_TK_CONFFILE:
+        lua_pushstring(L, globalconf.conffile);
         break;
       default:
         return 0;
@@ -831,7 +824,6 @@ luaA_init(void)
         { "font_set", luaA_font_set },
         { "colors_set", luaA_colors_set },
         { "colors", luaA_colors },
-        { "conffile", luaA_conffile },
         { "__index", luaA_awesome_index },
         { "__newindex", luaA_awesome_newindex },
         /* deprecated */

@@ -128,7 +128,7 @@ end
 -- If it's not ok, the error will be returned.
 -- @return Never return if awesome restart, or return a string error.
 function restart()
-    local c = checkfile(capi.awesome.conffile())
+    local c = checkfile(capi.awesome.conffile)
 
     if type(c) ~= "function" then
         return c
