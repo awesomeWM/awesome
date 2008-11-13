@@ -1387,11 +1387,46 @@ luaA_mouse_coords(lua_State *L)
     return luaA_mouse_pushstatus(L, mouse_x, mouse_y, mask);
 }
 
+/** Get the client which is under the pointer.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lreturn A client or nil.
+ */
+static int
+luaA_mouse_client_under_pointer(lua_State *L)
+{
+    for(int screen = 0;
+        screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+        screen++)
+    {
+        xcb_window_t root = xutil_screen_get(globalconf.connection, screen)->root;
+        xcb_query_pointer_reply_t *query_ptr_r;
+        xcb_query_pointer_cookie_t query_ptr_c = xcb_query_pointer_unchecked(globalconf.connection, root);
+        query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
+
+        if(query_ptr_r)
+        {
+            client_t *c = client_getbywin(query_ptr_r->child);
+            p_delete(&query_ptr_r);
+            if(c)
+               return luaA_client_userdata_new(L, c);
+            else
+            {
+                lua_pushnil(L);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 const struct luaL_reg awesome_mouse_methods[] =
 {
     { "__index", luaA_mouse_index },
     { "__newindex", luaA_mouse_newindex },
     { "coords", luaA_mouse_coords },
+    { "client_under_pointer", luaA_mouse_client_under_pointer },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_mouse_meta[] =
