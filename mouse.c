@@ -308,7 +308,7 @@ mouse_infobox_new(simple_window_t *sw, int phys_screen, int border, area_t geome
  * \param mask will be set to the current buttons state
  * \return true on success, false if an error occured
  **/
-static bool
+bool
 mouse_query_pointer(xcb_window_t window, int *x, int *y, uint16_t *mask)
 {
     xcb_query_pointer_cookie_t query_ptr_c;

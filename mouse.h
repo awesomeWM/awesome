@@ -41,6 +41,8 @@ struct button_t
 
 void button_delete(button_t **);
 
+bool mouse_query_pointer(xcb_window_t, int *, int *, uint16_t *);
+
 DO_RCNT(button_t, button, button_delete)
 ARRAY_FUNCS(button_t *, button, button_unref)
 
