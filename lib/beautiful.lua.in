@@ -20,7 +20,7 @@ local capi =
 
 local module_name = "beautiful"
 
---- beautiful: theme library
+--- Theme library
 module("beautiful")
 
 -- Local data
