@@ -127,7 +127,7 @@ execute_process(
 
 # Use pkgconfig to get most of the libraries
 pkg_check_modules(AWESOME_COMMON_REQUIRED REQUIRED
-    xcb>=1.1.0)
+    xcb>=1.1)
 
 pkg_check_modules(AWESOME_REQUIRED REQUIRED
     glib-2.0
