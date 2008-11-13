@@ -90,6 +90,8 @@ typedef struct
     widget_t *mouse_over;
     /** Need update */
     bool need_update;
+    /** Cursor */
+    char *cursor;
 } wibox_t;
 ARRAY_TYPE(wibox_t *, wibox)
 

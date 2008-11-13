@@ -24,6 +24,7 @@
 #include "titlebar.h"
 #include "client.h"
 #include "ewmh.h"
+#include "common/xcursor.h"
 
 extern awesome_t globalconf;
 
@@ -604,6 +605,9 @@ wibox_attach(wibox_t *wibox, screen_t *s)
 
     simplewindow_border_color_set(&wibox->sw, &wibox->sw.border.color);
 
+    simplewindow_cursor_set(&wibox->sw,
+                            xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
+
     /* All the other wibox and ourselves need to be repositioned */
     for(int i = 0; i < s->wiboxes.len; i++)
         wibox_position_update(s->wiboxes.tab[i]);
@@ -687,6 +691,7 @@ luaA_wibox_new(lua_State *L)
 
     w->screen = SCREEN_UNDEF;
     w->isvisible = true;
+    w->cursor = a_strdup("left_ptr");
 
     for(i = 0; i <= reqs_nbr; i++)
         xcolor_init_reply(reqs[i]);
@@ -767,6 +772,7 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
  * \lfield bg Background color.
  * \lfield position The position.
  * \lfield ontop On top of other windows.
+ * \lfield cursor The mouse cursor.
  */
 static int
 luaA_wibox_index(lua_State *L)
@@ -824,6 +830,9 @@ luaA_wibox_index(lua_State *L)
             lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
         else
             lua_pushnil(L);
+        break;
+      case A_TK_CURSOR:
+        lua_pushstring(L, (*wibox)->cursor);
         break;
       default:
         return 0;
@@ -933,6 +942,19 @@ luaA_wibox_newindex(lua_State *L)
         {
             client_t **c = luaA_checkudata(L, 3, "client");
             titlebar_client_attach(*c, *wibox);
+        }
+        break;
+      case A_TK_CURSOR:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            uint16_t cursor_font = xcursor_font_fromstr(buf);
+            if(cursor_font)
+            {
+                xcb_cursor_t cursor = xcursor_new(globalconf.connection, cursor_font);
+                p_delete(&(*wibox)->cursor);
+                (*wibox)->cursor = a_strdup(buf);
+                simplewindow_cursor_set(&(*wibox)->sw, cursor);
+            }
         }
         break;
       case A_TK_SCREEN:
