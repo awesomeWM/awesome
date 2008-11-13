@@ -166,7 +166,7 @@ luaA_font_set(lua_State *L)
     return 0;
 }
 
-/** Set default colors.
+/** Set default colors (DEPRECATED).
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
@@ -176,6 +176,7 @@ luaA_font_set(lua_State *L)
 static int
 luaA_colors(lua_State *L)
 {
+    deprecate(L);
     if(lua_gettop(L) == 1)
     {
         const char *buf;
@@ -214,7 +215,6 @@ luaA_colors(lua_State *L)
 static int
 luaA_colors_set(lua_State *L)
 {
-    deprecate(L);
     return luaA_colors(L);
 }
 
@@ -760,6 +760,12 @@ luaA_awesome_index(lua_State *L)
       case A_TK_CONFFILE:
         lua_pushstring(L, globalconf.conffile);
         break;
+      case A_TK_FG:
+        luaA_pushcolor(L, &globalconf.colors.fg);
+        break;
+      case A_TK_BG:
+        luaA_pushcolor(L, &globalconf.colors.bg);
+        break;
       default:
         return 0;
     }
@@ -788,6 +794,14 @@ luaA_awesome_newindex(lua_State *L)
             draw_font_delete(&globalconf.font);
             globalconf.font = draw_font_new(newfont);
         }
+        break;
+      case A_TK_FG:
+        if((buf = luaL_checklstring(L, 3, &len)))
+           xcolor_init_reply(xcolor_init_unchecked(&globalconf.colors.fg, buf, len));
+        break;
+      case A_TK_BG:
+        if((buf = luaL_checklstring(L, 3, &len)))
+           xcolor_init_reply(xcolor_init_unchecked(&globalconf.colors.bg, buf, len));
         break;
       default:
         return 0;

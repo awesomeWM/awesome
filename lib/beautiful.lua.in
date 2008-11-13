@@ -75,9 +75,9 @@ function init(path)
                 elseif key == "font" then
                     capi.awesome.font = value
                 elseif key == "fg_normal" then
-                    capi.awesome.colors({ fg = value })
+                    capi.awesome.fg = value
                 elseif key == "bg_normal" then
-                    capi.awesome.colors({ bg = value })
+                    capi.awesome.bg = value
                 end
                 -- Store.
                 theme[key] = value
