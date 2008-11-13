@@ -38,6 +38,7 @@ _tile(int screen, const position_t position)
     unsigned int mw = 0, mh = 0;
     int n, i, masterwin = 0, otherwin = 0;
     int real_ncol = 1, win_by_col = 1, current_col = 0;
+    int small_ncol, adj_win_by_col;
     area_t area, geometry = { 0, 0, 0, 0 };
     client_t *c;
     tag_t **curtags = tags_get_current(screen);
@@ -114,30 +115,38 @@ _tile(int screen, const position_t position)
         }
         else
         {
-            if(real_ncol)
-                win_by_col = otherwin / real_ncol;
+            win_by_col = otherwin / real_ncol;
+            small_ncol = (win_by_col + 1) * real_ncol - otherwin;
+            adj_win_by_col = current_col < small_ncol ? 0 : 1;
 
-            if((i - curtags[0]->nmaster)
-               && (i - curtags[0]->nmaster) % win_by_col == 0
-               && current_col < real_ncol - 1)
+            if((i - curtags[0]->nmaster) &&
+               (i - curtags[0]->nmaster + small_ncol * adj_win_by_col)
+                 % (win_by_col + adj_win_by_col) == 0 &&
+               current_col < real_ncol - 1)
                 current_col++;
 
-            if(current_col == real_ncol - 1)
-                win_by_col += otherwin % real_ncol;
+            adj_win_by_col = current_col < small_ncol ? 0 : 1;
 
             if(position == Right || position == Left)
             {
                 if(otherwin <= real_ncol)
                     geometry.height = wah - 2 * c->border;
                 else
-                    geometry.height = (wah / win_by_col) - 2 * c->border;
+                    geometry.height = (wah / (win_by_col + adj_win_by_col)) -
+                                      2 * c->border;
 
                 geometry.width = (waw - mw) / real_ncol - 2 * c->border;
 
-                if(i == curtags[0]->nmaster || otherwin <= real_ncol || (i - curtags[0]->nmaster) % win_by_col == 0)
+                if(otherwin <= real_ncol ||
+                   (i - curtags[0]->nmaster + small_ncol * adj_win_by_col)
+                     % (win_by_col + adj_win_by_col) == 0)
                     geometry.y = way;
                 else
-                    geometry.y = way + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.height + 2 * c->border);
+                    geometry.y = way +
+                                 ((i - curtags[0]->nmaster +
+                                   small_ncol * adj_win_by_col) %
+                                  (win_by_col + adj_win_by_col)) *
+                                 (geometry.height + 2 * c->border);
 
                 geometry.x = wax + current_col * (geometry.width + 2 * c->border);
 
@@ -149,14 +158,21 @@ _tile(int screen, const position_t position)
                 if(otherwin <= real_ncol)
                     geometry.width = waw - 2 * c->border;
                 else
-                    geometry.width = (waw / win_by_col) - 2 * c->border;
+                    geometry.width = (waw / (win_by_col + adj_win_by_col)) -
+                                     2 * c->border;
 
                 geometry.height = (wah - mh) / real_ncol - 2 * c->border;
 
-                if(i == curtags[0]->nmaster || otherwin <= real_ncol || (i - curtags[0]->nmaster) % win_by_col == 0)
+                if(otherwin <= real_ncol ||
+                   (i - curtags[0]->nmaster + small_ncol * adj_win_by_col)
+                     % (win_by_col + adj_win_by_col) == 0)
                     geometry.x = wax;
                 else
-                    geometry.x = wax + ((i - curtags[0]->nmaster) % win_by_col) * (geometry.width + 2 * c->border);
+                    geometry.x = wax +
+                                 ((i - curtags[0]->nmaster +
+                                   small_ncol * adj_win_by_col) %
+                                  (win_by_col + adj_win_by_col)) *
+                                 (geometry.width + 2 * c->border);
 
                 geometry.y = way + current_col * (geometry.height + 2 * c->border);
 
