@@ -152,30 +152,18 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     capi.keygrabber.run(
     function (mod, key)
         -- Get out cases
-        if mod.Control then
-            if key == "c" or key == "g" then
-                textbox.text = ""
-                if done_callback then done_callback() end
-                return false
-            elseif key == "j" or key == "m" then
-                textbox.text = ""
-                history_add(history_path, command)
-                exe_callback(command)
-                if done_callback then done_callback() end
-                return false
-            end
-        else
-            if key == "Return" then
-                textbox.text = ""
-                history_add(history_path, command)
-                exe_callback(command)
-                if done_callback then done_callback() end
-                return false
-            elseif key == "Escape" then
-                textbox.text = ""
-                if done_callback then done_callback() end
-                return false
-            end
+        if (mod.Control and (key == "c" or key == "g"))
+            or (not mod.Control and key == "Escape") then
+            textbox.text = ""
+            if done_callback then done_callback() end
+            return false
+        elseif (mod.Control and (key == "j" or key == "m"))
+            or (not mod.Control and key == "Return") then
+            textbox.text = ""
+            history_add(history_path, command)
+            exe_callback(command)
+            if done_callback then done_callback() end
+            return false
         end
 
         -- Control cases
