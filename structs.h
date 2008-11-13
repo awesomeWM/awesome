@@ -50,13 +50,6 @@ typedef enum
     WIBOX_TYPE_TITLEBAR
 } wibox_type_t;
 
-/** Cursors */
-enum
-{
-    CurNormal, CurResize, CurResizeH, CurResizeV, CurMove,
-    CurTopLeft, CurTopRight, CurBotLeft, CurBotRight, CurLast
-};
-
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
 typedef struct widget_node_t widget_node_t;
@@ -314,8 +307,6 @@ struct awesome_t
     unsigned int capslockmask;
     /** Check for XRandR extension */
     bool have_randr;
-    /** Cursors */
-    xcb_cursor_t cursor[CurLast];
     /** Clients list */
     client_t *clients;
     /** Embedded windows */

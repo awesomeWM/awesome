@@ -25,9 +25,6 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_icccm.h>
 
-/* CURSORFONT */
-#include <X11/Xlibint.h>
-
 #include "common/xutil.h"
 #include "common/atoms.h"
 
@@ -393,34 +390,6 @@ xutil_button_fromint(int button)
         return mouse_button_list[button - 1].button;
 
     return 0;
-}
-
-/** Equivalent to 'XCreateFontCursor()', error are handled by the
- * default current error handler.
- * \param conn The connection to the X server.
- * \param cursor_font Type of cursor to use.
- * \return Allocated cursor font.
- */
-xcb_cursor_t
-xutil_cursor_new(xcb_connection_t *conn, uint16_t cursor_font)
-{
-    static xcb_font_t font = XCB_NONE;
-    xcb_cursor_t cursor;
-
-    /* Get the font for the cursor */
-    if(!font)
-    {
-        font = xcb_generate_id(conn);
-        xcb_open_font(conn, font, sizeof(CURSORFONT) - 1, CURSORFONT);
-    }
-
-    cursor = xcb_generate_id(conn);
-    xcb_create_glyph_cursor(conn, cursor, font, font,
-                            cursor_font, cursor_font + 1,
-                            0, 0, 0,
-                            65535, 65535, 65535);
-
-    return cursor;
 }
 
 /** Convert a root window a physical screen ID.

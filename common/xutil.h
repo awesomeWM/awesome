@@ -34,17 +34,6 @@
 
 #define XUTIL_MASK_CLEAN(mask) (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
 
-/* See http://tronche.com/gui/x/xlib/appendix/b/ for values */
-#define XUTIL_CURSOR_FLEUR 52
-#define XUTIL_CURSOR_LEFT_PTR 68
-#define XUTIL_CURSOR_SIZING 120
-#define XUTIL_CURSOR_BOTTOM_LEFT_CORNER 12
-#define XUTIL_CURSOR_BOTTOM_RIGHT_CORNER 14
-#define XUTIL_CURSOR_TOP_LEFT_CORNER 134
-#define XUTIL_CURSOR_TOP_RIGHT_CORNER 136
-#define XUTIL_CURSOR_DOUBLE_ARROW_HORIZ 108
-#define XUTIL_CURSOR_DOUBLE_ARROW_VERT 116
-
 /* X error codes */
 
 /* Everything's okay */
@@ -112,7 +101,6 @@ typedef struct
 bool xutil_error_init(const xcb_generic_error_t *, xutil_error_t *);
 xcb_keysym_t xutil_key_mask_fromstr(const char *, size_t);
 unsigned int xutil_button_fromint(int);
-xcb_cursor_t xutil_cursor_new(xcb_connection_t *, uint16_t);
 
 static inline void
 xutil_error_wipe(xutil_error_t *err)

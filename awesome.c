@@ -41,6 +41,7 @@
 #include "screen.h"
 #include "common/version.h"
 #include "common/atoms.h"
+#include "common/xcursor.h"
 #include "config.h"
 
 awesome_t globalconf;
@@ -454,17 +455,6 @@ main(int argc, char **argv)
 
     globalconf.font = draw_font_new("sans 8");
 
-    /* init cursors */
-    globalconf.cursor[CurNormal] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_LEFT_PTR);
-    globalconf.cursor[CurResize] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_SIZING);
-    globalconf.cursor[CurResizeH] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_DOUBLE_ARROW_HORIZ);
-    globalconf.cursor[CurResizeV] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_DOUBLE_ARROW_VERT);
-    globalconf.cursor[CurMove] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_FLEUR);
-    globalconf.cursor[CurTopRight] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_TOP_RIGHT_CORNER);
-    globalconf.cursor[CurTopLeft] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_TOP_LEFT_CORNER);
-    globalconf.cursor[CurBotRight] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_BOTTOM_RIGHT_CORNER);
-    globalconf.cursor[CurBotLeft] = xutil_cursor_new(globalconf.connection, XUTIL_CURSOR_BOTTOM_LEFT_CORNER);
-
     for(colors_nbr = 0; colors_nbr < 2; colors_nbr++)
         xcolor_init_reply(colors_reqs[colors_nbr]);
 
@@ -485,7 +475,7 @@ main(int argc, char **argv)
                 | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW
                 | XCB_EVENT_MASK_STRUCTURE_NOTIFY
                 | XCB_EVENT_MASK_PROPERTY_CHANGE,
-            globalconf.cursor[CurNormal]
+            xcursor_new(globalconf.connection, XC_left_ptr)
         };
 
         xcb_change_window_attributes(globalconf.connection,

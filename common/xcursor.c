@@ -19,12 +19,13 @@
  *
  */
 
-#include <X11/cursorfont.h>
+/* CURSORFONT */
+#include <X11/Xlibint.h>
 
 #include "common/xcursor.h"
 #include "common/util.h"
 
-static char const * const xcursor[] =
+static char const * const xcursor_font[] =
 {
     [XC_X_cursor] = "X_cursor",
     [XC_arrow] = "arrow",
@@ -109,11 +110,12 @@ static char const * const xcursor[] =
  * \param s The string.
  */
 uint16_t
-xcursor_fromstr(const char *s)
+xcursor_font_fromstr(const char *s)
 {
-    for(int i = 0; i < ssizeof(xcursor); i++)
-        if(!a_strcmp(s, xcursor[i]))
-            return i;
+    if(s)
+        for(int i = 0; i < countof(xcursor_font); i++)
+            if(xcursor_font[i] && !a_strcmp(s, xcursor_font[i]))
+                return i;
     return 0;
 }
 
@@ -121,11 +123,43 @@ xcursor_fromstr(const char *s)
  * \param c The cursor.
  */
 const char *
-xcursor_tostr(uint16_t c)
+xcursor_font_tostr(uint16_t c)
 {
-    if(c < ssizeof(xcursor))
-        return xcursor[c];
+    if(c < countof(xcursor_font))
+        return xcursor_font[c];
     return NULL;
 }
+
+/** Equivalent to 'XCreateFontCursor()', error are handled by the
+ * default current error handler.
+ * \param conn The connection to the X server.
+ * \param cursor_font Type of cursor to use.
+ * \return Allocated cursor font.
+ */
+xcb_cursor_t
+xcursor_new(xcb_connection_t *conn, uint16_t cursor_font)
+{
+    static xcb_font_t font = XCB_NONE;
+    static xcb_cursor_t xcursor[countof(xcursor_font)];
+
+    /* Get the font for the cursor */
+    if(!font)
+    {
+        font = xcb_generate_id(conn);
+        xcb_open_font(conn, font, sizeof(CURSORFONT) - 1, CURSORFONT);
+    }
+
+    if(!xcursor[cursor_font])
+    {
+        xcursor[cursor_font] = xcb_generate_id(conn);
+        xcb_create_glyph_cursor(conn, xcursor[cursor_font], font, font,
+                                cursor_font, cursor_font + 1,
+                                0, 0, 0,
+                                65535, 65535, 65535);
+    }
+
+    return xcursor[cursor_font];
+}
+
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

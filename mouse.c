@@ -28,6 +28,7 @@
 #include "layouts/floating.h"
 #include "layouts/tile.h"
 #include "layouts/magnifier.h"
+#include "common/xcursor.h"
 
 #define MOUSEMASK      (XCB_EVENT_MASK_BUTTON_PRESS \
                         | XCB_EVENT_MASK_BUTTON_RELEASE \
@@ -356,21 +357,18 @@ mouse_query_pointer_root(int *s, int *x, int *y, uint16_t *mask)
 
 /** Grab the Pointer.
  * \param window The window grabbed.
- * \param cursor The cursor to display (see struct.h CurNormal, CurResize, etc).
+ * \param cursor The cursor to display.
  * \return True on success, false if an error occured.
  */
 static bool
-mouse_grab_pointer(xcb_window_t window, size_t cursor)
+mouse_grab_pointer(xcb_window_t window, xcb_cursor_t cursor)
 {
     xcb_grab_pointer_cookie_t grab_ptr_c;
     xcb_grab_pointer_reply_t *grab_ptr_r;
 
-    if(cursor >= CurLast)
-        cursor = CurNormal;
-
     grab_ptr_c = xcb_grab_pointer_unchecked(globalconf.connection, false, window,
                                             MOUSEMASK, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-                                            window, globalconf.cursor[cursor], XCB_CURRENT_TIME);
+                                            window, cursor, XCB_CURRENT_TIME);
     grab_ptr_r = xcb_grab_pointer_reply(globalconf.connection, grab_ptr_c, NULL);
 
     if(!grab_ptr_r)
@@ -497,7 +495,7 @@ mouse_client_move(client_t *c, int snap, bool infobox)
        || c->type == WINDOW_TYPE_DESKTOP
        || c->type == WINDOW_TYPE_SPLASH
        || c->type == WINDOW_TYPE_DOCK
-       || !mouse_grab_pointer(root, CurMove))
+       || !mouse_grab_pointer(root, xcursor_new(globalconf.connection, XC_fleur)))
         return;
 
     if(infobox && (client_isfloating(c) || layout == layout_floating))
@@ -592,7 +590,7 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     int mouse_x = 0, mouse_y = 0;
     /* the infobox */
     simple_window_t sw;
-    size_t cursor = CurResize;
+    xcb_cursor_t cursor;
     int top, bottom, left, right;
 
     /* do not resize fixed client */
@@ -620,17 +618,17 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
     switch(corner)
     {
       default:
-          cursor = CurTopLeft;
-          break;
-        case TopRightCorner:
-          cursor = CurTopRight;
-          break;
-        case BottomLeftCorner:
-          cursor = CurBotLeft;
-          break;
-        case BottomRightCorner:
-          cursor = CurBotRight;
-          break;
+        cursor = xcursor_new(globalconf.connection, XC_top_left_corner);
+        break;
+      case TopRightCorner:
+        cursor = xcursor_new(globalconf.connection, XC_top_right_corner);
+        break;
+      case BottomLeftCorner:
+        cursor = xcursor_new(globalconf.connection, XC_bottom_left_corner);
+        break;
+      case BottomRightCorner:
+        cursor = xcursor_new(globalconf.connection, XC_bottom_right_corner);
+        break;
     }
 
     /* grab the pointer */
@@ -667,13 +665,13 @@ mouse_client_resize_floating(client_t *c, corner_t corner, bool infobox)
 
             switch(corner)
             {
-                default: cursor = CurTopLeft; break;
-                case TopRightCorner: cursor = CurTopRight; break;
-                case BottomLeftCorner: cursor = CurBotLeft; break;
-                case BottomRightCorner: cursor = CurBotRight; break;
+                default: cursor = xcursor_new(globalconf.connection, XC_top_left_corner); break;
+                case TopRightCorner: cursor = xcursor_new(globalconf.connection, XC_top_right_corner); break;
+                case BottomLeftCorner: cursor = xcursor_new(globalconf.connection, XC_bottom_left_corner); break;
+                case BottomRightCorner: cursor = xcursor_new(globalconf.connection, XC_bottom_right_corner); break;
             }
 
-            xcb_change_active_pointer_grab(globalconf.connection, globalconf.cursor[cursor],
+            xcb_change_active_pointer_grab(globalconf.connection, cursor,
                                            XCB_CURRENT_TIME, MOUSEMASK);
         }
 
@@ -744,7 +742,7 @@ mouse_client_resize_tiled(client_t *c)
     layout_t *layout;
 
     int mouse_x = 0, mouse_y = 0;
-    size_t cursor = CurResize;
+    xcb_cursor_t cursor;
 
     screen = xutil_screen_get(globalconf.connection, c->phys_screen);
     tag = tags_get_current(c->screen)[0];
@@ -761,22 +759,22 @@ mouse_client_resize_tiled(client_t *c)
     if(layout == layout_tile)
     {
         mouse_x = area.x + area.width * tag->mwfact;
-        cursor = CurResizeH;
+        cursor = xcursor_new(globalconf.connection, XC_bottom_right_corner);
     }
     else if(layout == layout_tileleft)
     {
         mouse_x = area.x + area.width * (1. - tag->mwfact);
-        cursor = CurResizeH;
+        cursor = xcursor_new(globalconf.connection, XC_sb_h_double_arrow);
     }
     else if(layout == layout_tilebottom)
     {
         mouse_y = area.y + area.height * tag->mwfact;
-        cursor = CurResizeV;
+        cursor = xcursor_new(globalconf.connection, XC_sb_v_double_arrow);
     }
     else if(layout == layout_tiletop)
     {
         mouse_y = area.y + area.height * (1. - tag->mwfact);
-        cursor = CurResizeV;
+        cursor = xcursor_new(globalconf.connection, XC_sb_v_double_arrow);
     }
     else
         return;
@@ -842,7 +840,7 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     /* mouse position */
     int mouse_x = 0, mouse_y = 0;
     /* cursor while grabbing */
-    size_t cursor = CurResize;
+    xcb_cursor_t cursor;
     corner_t corner = AutoCorner;
     /* current tag */
     tag_t *tag;
@@ -876,17 +874,17 @@ mouse_client_resize_magnified(client_t *c, bool infobox)
     switch(corner)
     {
       default:
-          cursor = CurTopLeft;
-          break;
-        case TopRightCorner:
-          cursor = CurTopRight;
-          break;
-        case BottomLeftCorner:
-          cursor = CurBotLeft;
-          break;
-        case BottomRightCorner:
-          cursor = CurBotRight;
-          break;
+        cursor = xcursor_new(globalconf.connection, XC_top_left_corner);
+        break;
+      case TopRightCorner:
+        cursor = xcursor_new(globalconf.connection, XC_top_right_corner);
+        break;
+      case BottomLeftCorner:
+        cursor = xcursor_new(globalconf.connection, XC_bottom_left_corner);
+        break;
+      case BottomRightCorner:
+        cursor = xcursor_new(globalconf.connection, XC_bottom_right_corner);
+        break;
     }
 
     /* grab pointer */
