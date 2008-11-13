@@ -1320,6 +1320,37 @@ luaA_mouse_newindex(lua_State *L)
     return 0;
 }
 
+/** Push a table with mouse status.
+ * \param L The Lua VM state.
+ * \param x The x coordinate.
+ * \param y The y coordinate.
+ * \param mask The button mask.
+ */
+int
+luaA_mouse_pushstatus(lua_State *L, int x, int y, uint16_t mask)
+{
+    lua_newtable(L);
+    lua_pushnumber(L, x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, y);
+    lua_setfield(L, -2, "y");
+
+    lua_newtable(L);
+
+    int i = 1;
+
+    for(uint16_t maski = XCB_BUTTON_MASK_1; maski <= XCB_BUTTON_MASK_5; maski <<= 1)
+    {
+        if(mask & maski)
+            lua_pushboolean(L, true);
+        else
+            lua_pushboolean(L, false);
+        lua_rawseti(L, -2, i++);
+    }
+    lua_setfield(L, -2, "buttons");
+    return 1;
+}
+
 /** Get or set the mouse coords.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1330,8 +1361,8 @@ luaA_mouse_newindex(lua_State *L)
 static int
 luaA_mouse_coords(lua_State *L)
 {
-    uint16_t mask, maski;
-    int screen, x, y, mouse_x, mouse_y, i = 1;
+    uint16_t mask;
+    int screen, x, y, mouse_x, mouse_y;
 
     if(lua_gettop(L) == 1)
     {
@@ -1353,21 +1384,7 @@ luaA_mouse_coords(lua_State *L)
     if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
         return 0;
 
-    lua_newtable(L);
-    lua_pushnumber(L, mouse_x);
-    lua_setfield(L, -2, "x");
-    lua_pushnumber(L, mouse_y);
-    lua_setfield(L, -2, "y");
-    lua_newtable(L);
-    for(maski = XCB_BUTTON_MASK_1; i <= XCB_BUTTON_MASK_5; maski <<= 1, i++)
-        if(mask & maski)
-        {
-            lua_pushboolean(L, true);
-            lua_rawseti(L, -2, i);
-        }
-    lua_setfield(L, -2, "buttons");
-
-    return 1;
+    return luaA_mouse_pushstatus(L, mouse_x, mouse_y, mask);
 }
 
 const struct luaL_reg awesome_mouse_methods[] =

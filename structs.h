@@ -361,6 +361,8 @@ struct awesome_t
     struct ev_timer timer;
     /** The key grabber function */
     luaA_ref keygrabber;
+    /** The mouse pointer grabber function */
+    luaA_ref mousegrabber;
     /** Focused screen */
     screen_t *screen_focus;
 };

@@ -46,6 +46,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/ewmh.c
     ${SOURCE_DIR}/keybinding.c
     ${SOURCE_DIR}/keygrabber.c
+    ${SOURCE_DIR}/mousegrabber.c
     ${SOURCE_DIR}/layout.c
     ${SOURCE_DIR}/luaa.c
     ${SOURCE_DIR}/hooks.c

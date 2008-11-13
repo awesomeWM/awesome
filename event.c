@@ -35,6 +35,7 @@
 #include "titlebar.h"
 #include "keybinding.h"
 #include "keygrabber.h"
+#include "mousegrabber.h"
 #include "luaa.h"
 #include "systray.h"
 #include "screen.h"
@@ -133,6 +134,29 @@ widget_getbycoords(position_t position, widget_node_array_t *widgets,
     return NULL;
 }
 
+/** Handle an event with mouse grabber if needed
+ * \param x The x coordinate.
+ * \param y The y coordinate.
+ * \param mask The mask buttons.
+ */
+static void
+event_handle_mousegrabber(int x, int y, uint16_t mask)
+{
+    if(globalconf.mousegrabber != LUA_REFNIL)
+    {
+        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.mousegrabber);
+        mousegrabber_handleevent(globalconf.L, x, y, mask);
+        if(lua_pcall(globalconf.L, 1, 1, 0))
+        {
+            warn("error running function: %s", lua_tostring(globalconf.L, -1));
+            luaA_mousegrabber_stop(globalconf.L);
+        }
+        else if(!lua_isboolean(globalconf.L, -1) || !lua_toboolean(globalconf.L, -1))
+            luaA_mousegrabber_stop(globalconf.L);
+        lua_pop(globalconf.L, 1);  /* pop returned value */
+    }
+}
+
 /** The button press event handler.
  * \param data The type of mouse event.
  * \param connection The connection to the X server.
@@ -152,6 +176,8 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
      * we don't care for button status that we get, especially on release, so
      * drop them */
     ev->state &= 0x00ff;
+
+    event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state);
 
     if((wibox = wibox_getbywin(ev->event))
        || (wibox = wibox_getbywin(ev->child)))
@@ -407,6 +433,8 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
 {
     wibox_t *wibox = wibox_getbywin(ev->event);
     widget_t *w;
+
+    event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state);
 
     if(wibox
        && (w = widget_getbycoords(wibox->position, &wibox->widgets,

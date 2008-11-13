@@ -56,6 +56,7 @@ extern awesome_t globalconf;
 
 extern const struct luaL_reg awesome_hooks_lib[];
 extern const struct luaL_reg awesome_keygrabber_lib[];
+extern const struct luaL_reg awesome_mousegrabber_lib[];
 extern const struct luaL_reg awesome_button_methods[];
 extern const struct luaL_reg awesome_button_meta[];
 extern const struct luaL_reg awesome_image_methods[];
@@ -768,6 +769,9 @@ luaA_init(void)
 
     /* Export keygrabber lib */
     luaL_register(L, "keygrabber", awesome_keygrabber_lib);
+
+    /* Export mousegrabber lib */
+    luaL_register(L, "mousegrabber", awesome_mousegrabber_lib);
 
     /* Export otable lib */
     luaA_openlib(L, "otable", otable_methods, otable_meta);
