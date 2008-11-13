@@ -159,7 +159,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                 return false
             elseif key == "j" or key == "m" then
                 textbox.text = ""
-                exec_callback(command)
+                exe_callback(command)
                 if done_callback then done_callback() end
                 return false
             end
