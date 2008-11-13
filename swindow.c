@@ -288,4 +288,18 @@ simplewindow_orientation_set(simple_window_t *sw, orientation_t o)
     }
 }
 
+/** Set simple window cursor.
+ * \param sw The simple window.
+ * \param c The cursor.
+ */
+void
+simplewindow_cursor_set(simple_window_t *sw, xcb_cursor_t c)
+{
+    if(sw->window)
+    {
+        const uint32_t change_win_vals[] = { c };
+        xcb_change_window_attributes(globalconf.connection, sw->window, XCB_CW_CURSOR, change_win_vals);
+    }
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

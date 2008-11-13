@@ -63,6 +63,7 @@ void simplewindow_refresh_pixmap_partial(simple_window_t *, int16_t, int16_t, ui
 void simplewindow_border_width_set(simple_window_t *, uint32_t);
 void simplewindow_border_color_set(simple_window_t *, const xcolor_t *);
 void simplewindow_orientation_set(simple_window_t *, orientation_t);
+void simplewindow_cursor_set(simple_window_t *, xcb_cursor_t);
 
 /** Refresh the window content by copying its pixmap data to its window.
  * \param sw The simple window to refresh.
