@@ -73,7 +73,7 @@ function init(path)
                         util.spawn(value, s)
                     end
                 elseif key == "font" then
-                    capi.awesome.font(value)
+                    capi.awesome.font = value
                 elseif key == "fg_normal" then
                     capi.awesome.colors({ fg = value })
                 elseif key == "bg_normal" then

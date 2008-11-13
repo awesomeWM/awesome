@@ -143,32 +143,6 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
     return 0;
 }
 
-/** Set or get default font. (DEPRECATED)
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam An optional string with a font name in Pango format.
- * \lreturn The font used, in Pango format.
- */
-static int
-luaA_font(lua_State *L)
-{
-    char *font;
-
-    if(lua_gettop(L) == 1)
-    {
-        const char *newfont = luaL_checkstring(L, 1);
-        draw_font_delete(&globalconf.font);
-        globalconf.font = draw_font_new(newfont);
-    }
-
-    font = pango_font_description_to_string(globalconf.font->desc);
-    lua_pushstring(L, font);
-    g_free(font);
-
-    return 1;
-}
-
 /** Set default font. (DEPRECATED)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -179,7 +153,17 @@ static int
 luaA_font_set(lua_State *L)
 {
     deprecate(L);
-    return luaA_font(L);
+    if(lua_gettop(L) == 1)
+    {
+        const char *newfont = luaL_checkstring(L, 1);
+        draw_font_delete(&globalconf.font);
+        globalconf.font = draw_font_new(newfont);
+    }
+
+    char *font = pango_font_description_to_string(globalconf.font->desc);
+    lua_pushstring(L, font);
+    g_free(font);
+    return 0;
 }
 
 /** Get configuration file path used by awesome.
@@ -761,6 +745,64 @@ luaA_mouse_add(lua_State *L)
     return 0;
 }
 
+/** awesome global table.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_awesome_index(lua_State *L)
+{
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    size_t len;
+    const char *buf = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_FONT:
+        {
+            char *font = pango_font_description_to_string(globalconf.font->desc);
+            lua_pushstring(L, font);
+            g_free(font);
+        }
+        break;
+      default:
+        return 0;
+    }
+
+    return 1;
+}
+
+/** Newindex function for the awesome global table.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_awesome_newindex(lua_State *L)
+{
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    size_t len;
+    const char *buf = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(buf, len))
+    {
+      case A_TK_FONT:
+        {
+            const char *newfont = luaL_checkstring(L, 3);
+            draw_font_delete(&globalconf.font);
+            globalconf.font = draw_font_new(newfont);
+        }
+        break;
+      default:
+        return 0;
+    }
+
+    return 0;
+}
+
 /** Initialize the Lua VM
  */
 void
@@ -788,9 +830,10 @@ luaA_init(void)
         { "buttons", luaA_buttons },
         { "font_set", luaA_font_set },
         { "colors_set", luaA_colors_set },
-        { "font", luaA_font },
         { "colors", luaA_colors },
         { "conffile", luaA_conffile },
+        { "__index", luaA_awesome_index },
+        { "__newindex", luaA_awesome_newindex },
         /* deprecated */
         { "mouse_add", luaA_mouse_add },
         { NULL, NULL }
@@ -803,7 +846,7 @@ luaA_init(void)
     luaA_fixups(L);
 
     /* Export awesome lib */
-    luaL_register(L, "awesome", awesome_lib);
+    luaA_openlib(L, "awesome", awesome_lib, awesome_lib);
 
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);
