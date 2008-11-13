@@ -161,6 +161,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             or (not mod.Control and key == "Return") then
             textbox.text = ""
             history_add(history_path, command)
+            capi.keygrabber.stop()
             exe_callback(command)
             if done_callback then done_callback() end
             return false
