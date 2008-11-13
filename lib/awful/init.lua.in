@@ -4,7 +4,6 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-local beautiful = require("awful.beautiful")
 local client = require("awful.client")
 local completion = require("awful.completion")
 local hooks = require("awful.hooks")

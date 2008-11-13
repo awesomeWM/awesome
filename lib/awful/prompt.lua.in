@@ -14,7 +14,7 @@ local capi =
     keygrabber = keygrabber
 }
 local util = require("awful.util")
-local beautiful = require("awful.beautiful")
+local beautiful = require("beautiful")
 
 --- Prompt module for awful
 module("awful.prompt")

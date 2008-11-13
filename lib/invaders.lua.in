@@ -25,7 +25,7 @@
 local wibox = wibox
 local widget = widget
 local awful = require("awful")
-local beautiful = require("awful.beautiful")
+local beautiful = require("beautiful")
 local image = image
 local capi = { screen = screen, mouse = mouse, keygrabber = keygrabber }
 

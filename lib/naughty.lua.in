@@ -26,7 +26,7 @@ local string = string
 local widget = widget
 local button = button
 local capi = { screen = screen }
-local bt = require("awful.beautiful")
+local bt = require("beautiful")
 local beautiful = bt.get()
 
 --- Notification library

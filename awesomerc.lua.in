@@ -9,6 +9,9 @@ theme_path = "@AWESOME_THEMES_PATH@/default/theme"
 -- Uncommment this for a lighter theme
 -- theme_path = "@AWESOME_THEMES_PATH@/sky/theme"
 
+-- Actually load theme
+beautiful.init(theme_path)
+
 -- This is used later as the default terminal and editor to run.
 terminal = "xterm"
 editor = os.getenv("EDITOR") or "nano"
@@ -62,16 +65,6 @@ apptags =
 
 -- Define if we want to use titlebar on all applications.
 use_titlebar = false
--- }}}
-
--- {{{ Initialization
--- Initialize theme (colors).
-beautiful.init(theme_path)
-
--- Register theme in awful.
--- This allows to not pass plenty of arguments to each function
--- to inform it about colors we want it to draw.
-awful.beautiful.register(beautiful)
 -- }}}
 
 -- {{{ Tags

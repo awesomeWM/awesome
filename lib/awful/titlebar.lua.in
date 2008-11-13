@@ -15,7 +15,7 @@ local capi =
     button = button,
     client = client,
 }
-local beautiful = require("awful.beautiful")
+local beautiful = require("beautiful")
 local hooks = require("awful.hooks")
 local util = require("awful.util")
 local widget = require("awful.widget")

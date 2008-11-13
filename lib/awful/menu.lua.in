@@ -16,7 +16,7 @@ local button = button
 local capi = { screen = screen, mouse = mouse, client = client }
 local util = require("awful.util")
 local tags = require("awful.tag")
-local awbeautiful = require("awful.beautiful")
+local awbeautiful = require("beautiful")
 
 --- Menu module for awful
 module("awful.menu")

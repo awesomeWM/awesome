@@ -18,7 +18,7 @@ local capi =
 }
 local util = require("awful.util")
 local hooks = require("awful.hooks")
-local beautiful = require("awful.beautiful")
+local beautiful = require("beautiful")
 local menu = require("awful.menu")
 
 --- Widget module for awful
