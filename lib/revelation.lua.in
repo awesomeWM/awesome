@@ -84,6 +84,9 @@ function keyboardhandler (restore)
                 elseif key == "Return" then
                     selectfn(restore)(capi.client.focus)
                     return false
+                elseif key == "Left" or key == "Right" or
+                    key == "Up" or key == "Down" then
+                    awful.client.focus.bydirection(key:lower())
                 end
                 return true
            end
