@@ -1033,13 +1033,17 @@ luaA_client_swap(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
     client_t **swap = luaA_checkudata(L, 2, "client");
-    client_list_swap(&globalconf.clients, *swap, *c);
-    client_need_arrange(*c);
-    client_need_arrange(*swap);
 
-    /* Call hook to notify list change */
-    if(globalconf.hooks.clients != LUA_REFNIL)
-        luaA_dofunction(L, globalconf.hooks.clients, 0, 0);
+    if(*c != *swap)
+    {
+        client_list_swap(&globalconf.clients, *swap, *c);
+        client_need_arrange(*c);
+        client_need_arrange(*swap);
+
+        /* Call hook to notify list change */
+        if(globalconf.hooks.clients != LUA_REFNIL)
+            luaA_dofunction(L, globalconf.hooks.clients, 0, 0);
+    }
 
     return 0;
 }
