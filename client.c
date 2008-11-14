@@ -1148,13 +1148,11 @@ luaA_client_unmanage(lua_State *L)
 
 /** Return client geometry.
  * \param L The Lua VM state.
+ * \param full Use titlebar also.
  * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A table with new coordinates, or none.
- * \lreturn A table with client coordinates.
  */
 static int
-luaA_client_geometry(lua_State *L)
+luaA_client_handlegeom(lua_State *L, bool full)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
 
@@ -1177,10 +1175,32 @@ luaA_client_geometry(lua_State *L)
                 geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
                 geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
             }
+            if(full)
+                geometry = titlebar_geometry_remove((*c)->titlebar,
+                                                    (*c)->border,
+                                                    geometry);
             client_resize(*c, geometry, false);
         }
 
+    if(full)
+        return luaA_pusharea(L, titlebar_geometry_add((*c)->titlebar,
+                                                      (*c)->border,
+                                                      (*c)->geometry));
+
     return luaA_pusharea(L, (*c)->geometry);
+}
+
+/** Return client geometry.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A table with new coordinates, or none.
+ * \lreturn A table with client coordinates.
+ */
+static int
+luaA_client_geometry(lua_State *L)
+{
+    return luaA_client_handlegeom(L, false);
 }
 
 static int
@@ -1200,28 +1220,7 @@ luaA_client_coords(lua_State *L)
 static int
 luaA_client_fullgeometry(lua_State *L)
 {
-    client_t **c = luaA_checkudata(L, 1, "client");
-    area_t geometry;
-
-    if(lua_gettop(L) == 2)
-    {
-        if((*c)->isfloating || layout_get_current((*c)->screen) == layout_floating)
-        {
-            luaA_checktable(L, 2);
-            geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
-            geometry.y = luaA_getopt_number(L, 2, "y", (*c)->geometry.y);
-            geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
-            geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
-            geometry = titlebar_geometry_remove((*c)->titlebar,
-                                                (*c)->border,
-                                                geometry);
-            client_resize(*c, geometry, false);
-        }
-    }
-
-    return luaA_pusharea(L, titlebar_geometry_add((*c)->titlebar,
-                                                  (*c)->border,
-                                                  (*c)->geometry));
+    return luaA_client_handlegeom(L, true);
 }
 
 static int
