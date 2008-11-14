@@ -171,10 +171,10 @@ titlebar_client_detach(client_t *c)
     /* If client has a titlebar, kick it out. */
     if(c && c->titlebar)
     {
-        wibox_unref(&c->titlebar);
         simplewindow_wipe(&c->titlebar->sw);
         c->titlebar->type = WIBOX_TYPE_NORMAL;
         c->titlebar->screen = SCREEN_UNDEF;
+        wibox_unref(&c->titlebar);
         c->titlebar = NULL;
         client_need_arrange(c);
         client_stack();
