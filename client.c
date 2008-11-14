@@ -1486,7 +1486,7 @@ luaA_client_index(lua_State *L)
             return 0;
         break;
       case A_TK_FLOATING:
-        lua_pushboolean(L, (*c)->isfloating);
+        lua_pushboolean(L, client_isfloating(*c));
         break;
       case A_TK_ONTOP:
         lua_pushboolean(L, (*c)->isontop);
