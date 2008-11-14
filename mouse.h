@@ -48,7 +48,6 @@ DO_RCNT(button_t, button, button_delete)
 ARRAY_FUNCS(button_t *, button, button_unref)
 
 int luaA_client_mouse_resize(lua_State *);
-int luaA_client_mouse_move(lua_State *);
 
 int luaA_button_userdata_new(lua_State *, button_t *);
 

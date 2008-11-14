@@ -572,7 +572,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     area_t area;
     layout_t *layout = layout_get_current(c->screen);
 
-    if(c->titlebar && !c->ismoving && c->titlebar->isvisible && !client_isfloating(c) && layout != layout_floating)
+    if(c->titlebar && c->titlebar->isvisible && !client_isfloating(c) && layout != layout_floating)
         geometry = titlebar_geometry_remove(c->titlebar, c->border, geometry);
 
     if(hints)
@@ -612,7 +612,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
         /* save the floating geometry if the window is floating but not
          * maximized */
-        if(c->ismoving || client_isfloating(c)
+        if(client_isfloating(c)
            || layout_get_current(new_screen) == layout_floating
            || layout_get_current(c->screen) == layout_floating)
             if(!c->isfullscreen)
@@ -1588,6 +1588,16 @@ luaA_client_module_newindex(lua_State *L)
         break;
     }
 
+    return 0;
+}
+
+/** Move a client with mouse (DEPRECATED).
+ * \param L The Lua VM state.
+ */
+static int
+luaA_client_mouse_move(lua_State *L)
+{
+    luaA_deprecate(L, "awful.mouse.client.move()");
     return 0;
 }
 

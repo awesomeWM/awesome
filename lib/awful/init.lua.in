@@ -16,6 +16,7 @@ require("awful.titlebar")
 require("awful.util")
 require("awful.widget")
 require("awful.menu")
+require("awful.mouse")
 
 --- AWesome Functions very UsefuL
 module("awful")

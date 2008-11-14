@@ -335,7 +335,7 @@ awful.hooks.manage.register(function (c)
     -- Add mouse bindings
     c:buttons({
         button({ }, 1, function (c) client.focus = c; c:raise() end),
-        button({ modkey }, 1, function (c) c:mouse_move() end),
+        button({ modkey }, 1, awful.mouse.client.move),
         button({ modkey }, 3, function (c) c:mouse_resize() end)
     })
     -- New client may not receive focus

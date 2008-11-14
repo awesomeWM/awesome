@@ -1,0 +1,138 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local layout = require("awful.layout")
+local hooks = require("awful.hooks")
+local aclient = require("awful.client")
+local math = math
+local ipairs = ipairs
+local capi =
+{
+    mouse = mouse,
+    screen = screen,
+    client = client,
+    mousegrabber = mousegrabber,
+}
+
+--- Mouse module for awful
+module("awful.mouse")
+
+client = {}
+
+local function snap_outside(g, sg, snap)
+    if g.x < snap + sg.x + sg.width and g.x > sg.x + sg.width then
+        g.x = sg.x + sg.width
+    elseif g.x + g.width < sg.x and g.x + g.width > sg.x - snap then
+        g.x = sg.x - g.width
+    end
+    if g.y < snap + sg.y + sg.height and g.y > sg.y + sg.height then
+        g.y = sg.y + sg.height
+    elseif g.y + g.height < sg.y and g.y + g.height > sg.y - snap then
+        g.y = sg.y - g.height
+    end
+    return g
+end
+
+local function snap_inside(g, sg, snap)
+    if math.abs(g.x) < snap + sg.x and g.x > sg.x then
+        g.x = sg.x
+    elseif math.abs((sg.x + sg.width) - (g.x + g.width)) < snap then
+        g.x = sg.x + sg.width - g.width
+    end
+    if math.abs(g.y) < snap + sg.y and g.y > sg.y then
+        g.y = sg.y
+    elseif math.abs((sg.y + sg.height) - (g.y + g.height)) < snap then
+        g.y = sg.y + sg.height - g.height
+    end
+    return g
+end
+
+--- Snap a client to the closest client or screen edge.
+-- @param c The client to snap.
+-- @param snap The pixel to snap clients.
+-- @param x The client x coordinate.
+-- @param y The client y coordinate.
+function client.snap(c, snap, x, y)
+    local snap = snap or 8
+    local c = c or client.focus
+    local geom = c:fullgeometry()
+    geom.x = x or geom.x
+    geom.y = y or geom.y
+
+    geom = snap_inside(geom, capi.screen[c.screen].geometry, snap)
+    geom = snap_inside(geom, capi.screen[c.screen].workarea, snap)
+
+    for k, snapper in ipairs(aclient.visible(c.screen)) do
+        if snapper ~= c then
+            geom = snap_outside(geom, snapper:fullgeometry(), snap)
+        end
+    end
+    return geom
+end
+
+--- Move a client.
+-- @param c The client to move, or the focused one if nil.
+-- @param snap The pixel to snap clients.
+function client.move(c, snap)
+    local c = c or capi.client.focus
+
+    if not c then return end
+
+    if c.fullscreen
+        or c.type == "desktop"
+        or c.type == "splash"
+        or c.type == "dock" then
+        return
+    end
+
+    c:raise()
+
+    local orig = c:fullgeometry()
+    local m_c = capi.mouse.coords()
+    local dist_x = m_c.x - orig.x
+    local dist_y = m_c.y - orig.y
+
+    local function ug(c, prop)
+        if prop == "geometry" then
+            local g = c:fullgeometry()
+            capi.mouse.coords({ x = g.x + dist_x, y = g.y + dist_y })
+        end
+    end
+
+    capi.mousegrabber.run(function (mouse)
+                              hooks.property.unregister(ug)
+                              for k, v in ipairs(mouse.buttons) do
+                                  if v then
+                                      local lay = layout.get(c.screen)
+                                      if lay == "floating" or c.floating then
+                                          local x = mouse.x - dist_x
+                                          local y = mouse.y - dist_y
+                                          c:fullgeometry(client.snap(c, snap, x, y))
+                                          if layout.get(c.screen) ~= "floating" and not c.floating then
+                                              hooks.property.register(ug)
+                                          end
+                                      elseif lay ~= "magnifier" then
+                                          c.screen = capi.mouse.screen
+                                          if layout.get(c.screen) ~= "floating" then
+                                              local c_u_m = capi.mouse.client_under_pointer()
+                                              if c_u_m and not c_u_m.floating then
+                                                  if c_u_m ~= c then
+                                                      c:swap(c_u_m)
+                                                  end
+                                              end
+                                          else
+                                              hooks.property.register(ug)
+                                          end
+                                      end
+                                      return true
+                                  end
+                              end
+                              return false
+                          end, "fleur")
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

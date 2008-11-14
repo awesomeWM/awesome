@@ -167,8 +167,6 @@ struct client_t
     bool isurgent;
     /** true if the window is floating */
     bool isfloating;
-    /** true if the client is moving */
-    bool ismoving;
     /** True if the client is hidden */
     bool ishidden;
     /** True if the client is minimized */
