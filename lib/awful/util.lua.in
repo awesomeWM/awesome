@@ -22,8 +22,12 @@ local capi =
 --- Utility module for awful
 module("awful.util")
 
-function deprecate()
+function deprecate(see)
     io.stderr:write("W: awful: function is deprecated")
+    if see then
+        io.stderr:write(", see " .. see)
+    end
+    io.stderr:write("\n")
     io.stderr:write(debug.traceback())
 end
 

@@ -152,7 +152,7 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
 static int
 luaA_font_set(lua_State *L)
 {
-    deprecate(L);
+    deprecate(L, "awesome.font attribute");
     if(lua_gettop(L) == 1)
     {
         const char *newfont = luaL_checkstring(L, 1);
@@ -176,7 +176,7 @@ luaA_font_set(lua_State *L)
 static int
 luaA_colors(lua_State *L)
 {
-    deprecate(L);
+    deprecate(L, "awesome.fg and awesome.bg attributes");
     if(lua_gettop(L) == 1)
     {
         const char *buf;
@@ -728,7 +728,7 @@ luaA_spawn(lua_State *L)
 static int
 luaA_mouse_add(lua_State *L)
 {
-    deprecate(L);
+    deprecate(L, "awesome.buttons()");
     return 0;
 }
 

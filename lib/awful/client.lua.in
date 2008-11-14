@@ -307,12 +307,12 @@ function focus.bydirection(dir, c)
 end
 
 function focusbydirection(dir, c)
-    util.deprecate()
+    util.deprecate("focus.bydirection()")
     return focus.bydirection(dir, c)
 end
 
 function focusbyidx(i, c)
-    util.deprecate()
+    util.deprecate("focus.byidx()")
     return focus.byidx(i, c)
 end
 
@@ -354,7 +354,7 @@ end
 
 -- Compatibility
 local function __swap(self, i, c)
-    util.deprecate()
+    util.deprecate("swap.byidx()")
     swap.byidx(i, c)
 end
 setmetatable(swap, { __call = __swap })
@@ -369,7 +369,7 @@ end
 
 --- Get the master window, deprecated, see getmaster().
 function master(screen)
-    util.deprecate()
+    util.deprecate("getmaster()")
     return getmaster(screen)
 end
 

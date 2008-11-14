@@ -98,7 +98,7 @@ luaA_hooks_mouse_enter(lua_State *L)
 static int
 luaA_hooks_mouseover(lua_State *L)
 {
-    deprecate(L);
+    deprecate(L, "mouse_enter hook");
     return luaA_hooks_mouse_enter(L);
 }
 

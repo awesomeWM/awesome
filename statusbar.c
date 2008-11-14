@@ -33,7 +33,7 @@
 static int
 luaA_statusbar_new(lua_State *L)
 {
-    deprecate(L);
+    deprecate(L, "wibox");
 
     return luaA_wibox_new(L);
 }

@@ -37,7 +37,7 @@ local deprecated_functions =
 
 for k, v in ipairs(deprecated_functions) do
     _M[v] = function (...)
-        util.deprecate()
+        util.deprecate("awful.util functions")
         util[v](unpack(arg))
     end
 end

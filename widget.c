@@ -358,7 +358,7 @@ widget_invalidate_bywidget(widget_t *widget)
 static int
 luaA_widget_mouse_add(lua_State *L)
 {
-    deprecate(L);
+    deprecate(L, "widget:buttons()");
     return 0;
 }
 
@@ -392,7 +392,7 @@ luaA_widget_new(lua_State *L)
     if(!a_strcmp(type, "tasklist")
        || !a_strcmp(type, "taglist"))
     {
-        deprecate(L);
+        deprecate(L, "awful.widget.tasklist and awful.widget.taglist");
         luaA_warn(L, "requesting old widgets, return a table to allow smooth execution.\n");
         lua_newtable(L);
         lua_pushcfunction(L, luaA_widget_mouse_add);

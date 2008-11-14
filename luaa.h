@@ -35,8 +35,9 @@
 /** Type for Lua function */
 typedef int luaA_ref;
 
-#define deprecate(L) luaA_warn(L, "%s: This function is deprecated and will be removed.", \
-                               __FUNCTION__)
+#define deprecate(L, repl) \
+    luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \
+              __FUNCTION__, repl)
 
 #define DO_LUA_NEW(decl, type, prefix, lua_type, type_ref) \
     decl int \

@@ -502,7 +502,7 @@ luaA_screen_index(lua_State *L)
     switch(a_tokenize(buf, len))
     {
       case A_TK_COORDS:
-        deprecate(L);
+        deprecate(L, "geometry attribute");
       case A_TK_GEOMETRY:
         luaA_pusharea(L, s->geometry);
         break;
