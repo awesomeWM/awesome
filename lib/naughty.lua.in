@@ -172,7 +172,7 @@ function notify(args)
     notification.idx = #notifications[notification.position] + 1
 
     local title = ""
-    if args.title then title = "  " .. args.title .. "\n"  end
+    if args.title then title = args.title .. "\n"  end
 
     -- hook destroy
     local die = function () destroy(notification) end
@@ -188,9 +188,10 @@ function notify(args)
 
     -- create textbox
     local textbox = widget({ type = "textbox", name = "text", align = "flex" })
+    textbox.margin = 20
     textbox:buttons({ button({ }, 1, run),
                       button({ }, 3, die) })
-    textbox.text = string.format('<span font_desc="%s"><b>%s</b>  %s</span>',
+    textbox.text = string.format('<margin left="10"/><span font_desc="%s"><b>%s</b>%s</span>',
                                  config.font, title, text)
     if config.hover_timeout then textbox.mouse_enter = hover_destroy end
 
